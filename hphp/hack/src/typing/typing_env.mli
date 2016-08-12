@@ -18,18 +18,24 @@ type fake_members = {
 }
 type expression_id = Ident.t
 type local = locl ty list * locl ty * expression_id
-type local_env = fake_members * local Local_id.Map.t
 type tpenv
 type tparam_bounds = locl ty list
-type env = {
-  pos : Pos.t;
-  tenv : locl ty IMap.t;
-  subst : int IMap.t;
+
+(* Local environment incldues types of locals and bounds on type parameters. *)
+type local_env = {
+  fake_members  : fake_members;
+  local_types   : local Local_id.Map.t;
   (* Type parameter environment, assigning lower and upper bounds to type
    * parameters.  Contraasting with tenv and subst, bounds are
    * *assumptions* for type inference, not conclusions.
    *)
-  tpenv : tpenv;
+  tpenv         : tpenv;
+}
+
+type env = {
+  pos : Pos.t;
+  tenv : locl ty IMap.t;
+  subst : int IMap.t;
   lenv : local_env;
   genv : genv;
   decl_env : Decl_env.env;
@@ -56,7 +62,7 @@ val debugl : ISet.t -> env -> locl ty list -> unit
 val debug : env -> locl ty -> unit
 val debug_tpenv : env -> unit
 val empty_fake_members : fake_members
-val empty_local : local_env
+val empty_local : tpenv -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->
   droot: Typing_deps.Dep.variant option -> env
 val is_typedef : Typedefs.key -> bool
@@ -133,5 +139,6 @@ val add_lower_bound : env -> string -> locl ty -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
 val freeze_local_env : env -> env
+val env_with_locals : env -> local Local_id.Map.t -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
 val in_loop : env -> (env -> env) -> env

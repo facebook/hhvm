@@ -30,7 +30,6 @@ type fake_members = {
  *)
 type expression_id = Ident.t
 type local = locl ty list * locl ty * expression_id
-type local_env = fake_members * local Local_id.Map.t
 type tparam_bounds = locl ty list
 type tparam_info = {
   lower_bounds : tparam_bounds;
@@ -38,15 +37,21 @@ type tparam_info = {
 }
 type tpenv = tparam_info SMap.t
 
-type env = {
-  pos     : Pos.t      ;
-  tenv    : locl ty IMap.t ;
-  subst   : int IMap.t ;
+(* Local environment incldues types of locals and bounds on type parameters. *)
+type local_env = {
+  fake_members  : fake_members;
+  local_types   : local Local_id.Map.t;
   (* Lower and upper bounds on generic type parameters and abstract types
    * For constraints of the form Tu <: Tv where both Tu and Tv are type
    * parameters, we store an upper bound for Tu and a lower bound for Tv
    *)
-  tpenv   : tpenv      ;
+  tpenv         : tpenv;
+}
+
+type env = {
+  pos     : Pos.t      ;
+  tenv    : locl ty IMap.t ;
+  subst   : int IMap.t ;
   lenv    : local_env  ;
   genv    : genv       ;
   decl_env: Decl_env.env;
@@ -158,52 +163,57 @@ let empty_bounds = []
 let singleton_bound ty = [ty]
 
 let get_lower_bounds env name =
-  match SMap.get name env.tpenv with
+  match SMap.get name env.lenv.tpenv with
   | None -> empty_bounds
   | Some {lower_bounds; _} -> lower_bounds
 
 let get_upper_bounds env name =
-  match SMap.get name env.tpenv with
+  match SMap.get name env.lenv.tpenv with
   | None -> empty_bounds
   | Some {upper_bounds; _} -> upper_bounds
 
-let add_upper_bound_ env name ty =
-  match SMap.get name env.tpenv with
-  | None -> { env with tpenv =
-                SMap.add name {lower_bounds = empty_bounds;
-                               upper_bounds = singleton_bound ty} env.tpenv }
+(* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
+let add_upper_bound_ tpenv name ty =
+  match SMap.get name tpenv with
+  | None ->
+    SMap.add name
+      {lower_bounds = empty_bounds; upper_bounds = singleton_bound ty} tpenv
   | Some {lower_bounds; upper_bounds} ->
-    { env with tpenv =
-        SMap.add name {lower_bounds = lower_bounds;
-                       upper_bounds = ty::upper_bounds} env.tpenv }
+    SMap.add name
+      {lower_bounds; upper_bounds = ty::upper_bounds} tpenv
 
-let add_lower_bound_ env name ty =
-  match SMap.get name env.tpenv with
-  | None -> { env with tpenv =
-                SMap.add name {lower_bounds = singleton_bound ty;
-                               upper_bounds = empty_bounds} env.tpenv }
+(* Add a single new lower bound [ty] to generic parameter [name] in [tpenv] *)
+let add_lower_bound_ tpenv name ty =
+  match SMap.get name tpenv with
+  | None ->
+    SMap.add name
+      {lower_bounds = singleton_bound ty; upper_bounds = empty_bounds} tpenv
   | Some {lower_bounds; upper_bounds} ->
-    { env with tpenv =
-        SMap.add name {lower_bounds = ty::lower_bounds;
-                       upper_bounds = upper_bounds} env.tpenv }
+    SMap.add name
+      {lower_bounds = ty::lower_bounds; upper_bounds} tpenv
+
+let env_with_tpenv env tpenv =
+  { env with lenv = { env.lenv with tpenv = tpenv } }
 
 let add_upper_bound env name ty =
-  match ty with
-  | (r, Tabstract (AKgeneric formal_super, _)) ->
-    let env = add_lower_bound_ env formal_super
-                (r, Tabstract (AKgeneric name, None)) in
-    add_upper_bound_ env name ty
-  | _ ->
-    add_upper_bound_ env name ty
+  let tpenv =
+    begin match ty with
+    | (r, Tabstract (AKgeneric formal_super, _)) ->
+      add_lower_bound_ env.lenv.tpenv formal_super
+        (r, Tabstract (AKgeneric name, None))
+    | _ -> env.lenv.tpenv
+    end in
+  env_with_tpenv env (add_upper_bound_ tpenv name ty)
 
 let add_lower_bound env name ty =
-  match ty with
-  | (r, Tabstract (AKgeneric formal_sub, _)) ->
-    let env = add_upper_bound_ env formal_sub
-                (r, Tabstract (AKgeneric name, None)) in
-    add_lower_bound_ env name ty
-  | _ ->
-    add_lower_bound_ env name ty
+  let tpenv =
+    begin match ty with
+    | (r, Tabstract (AKgeneric formal_sub, _)) ->
+      add_upper_bound_ env.lenv.tpenv formal_sub
+        (r, Tabstract (AKgeneric name, None))
+    | _ -> env.lenv.tpenv
+    end in
+  env_with_tpenv env (add_lower_bound_ tpenv name ty)
 
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
@@ -211,11 +221,11 @@ let add_generic_parameters env tparaml =
   let add_empty_bounds tpenv (_, (_, name), _) =
     SMap.add name {lower_bounds = empty_bounds;
                    upper_bounds = empty_bounds} tpenv in
-  { env with tpenv =
-               List.fold_left tparaml ~f:add_empty_bounds ~init:env.tpenv }
+  env_with_tpenv env
+    (List.fold_left tparaml ~f:add_empty_bounds ~init:env.lenv.tpenv)
 
 let is_generic_parameter env name =
-  SMap.mem name env.tpenv
+  SMap.mem name env.lenv.tpenv
 
 (* When printing out types (by hh_show()), TVars are printed with an
  * associated identifier. We reindex them (in the order of appearance) to be
@@ -344,7 +354,7 @@ and debugl stack env x =
  * are shown inline *)
 and debug_tpenv env =
   SMap.iter (fun x {lower_bounds; upper_bounds} ->
-    debug_constraint env x lower_bounds upper_bounds) env.tpenv
+    debug_constraint env x lower_bounds upper_bounds) env.lenv.tpenv
 
 and debug_constraint env name lower_bounds upper_bounds =
   let o = print_string in
@@ -362,8 +372,15 @@ let debug env ty =
   debug ISet.empty env ty;
   SMap.iter (fun x {lower_bounds; upper_bounds} ->
     if SSet.mem x (!printable_tparams)
-    then debug_constraint env x lower_bounds upper_bounds) env.tpenv;
+    then debug_constraint env x lower_bounds upper_bounds) env.lenv.tpenv;
   print_newline()
+
+(* Replace types for locals with empty environment *)
+let env_with_locals env locals =
+  { env with lenv = {
+      env.lenv with local_types = locals;
+    }
+  }
 
 let empty_fake_members = {
   last_call = None;
@@ -371,14 +388,17 @@ let empty_fake_members = {
   valid     = SSet.empty;
 }
 
-let empty_local = empty_fake_members, Local_id.Map.empty
+let empty_local tpenv = {
+  tpenv = tpenv;
+  fake_members = empty_fake_members;
+  local_types = Local_id.Map.empty;
+}
 
 let empty tcopt file ~droot = {
   pos     = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
-  tpenv   = SMap.empty;
-  lenv    = empty_local;
+  lenv    = empty_local SMap.empty;
   todo    = [];
   in_loop = false;
   grow_super = true;
@@ -433,8 +453,12 @@ let add_wclass env x =
 
 (* When we want to type something with a fresh typing environment *)
 let fresh_tenv env f =
-  let genv = env.genv in
-  f { env with todo = []; tenv = IMap.empty; genv = genv; in_loop = false }
+  f { env with
+      todo = [];
+      lenv = empty_local env.lenv.tpenv;
+      tenv = IMap.empty;
+      in_loop = false
+    }
 
 let get_enum env x =
   match TLazyHeap.get_class env.genv.tcopt x with
@@ -654,7 +678,7 @@ let debug_env env =
 (*****************************************************************************)
 
 let get_last_call env =
-  match (fst env.lenv).last_call with
+  match (env.lenv.fake_members).last_call with
   | None -> assert false
   | Some pos -> pos
 
@@ -678,7 +702,7 @@ let rec lost_info fake_name env ty =
       env, (info r, ty)
 
 let forget_members env call_pos =
-  let fake_members, locals = env.lenv in
+  let {fake_members; local_types; tpenv} = env.lenv in
   let old_invalid = fake_members.invalid in
   let new_invalid = fake_members.valid in
   let new_invalid = SSet.union new_invalid old_invalid in
@@ -687,7 +711,7 @@ let forget_members env call_pos =
     invalid = new_invalid;
     valid = SSet.empty;
   } in
-  { env with lenv = fake_members, locals }
+  { env with lenv = {fake_members; local_types; tpenv } }
 
 module FakeMembers = struct
 
@@ -709,7 +733,7 @@ module FakeMembers = struct
     | _, This
     | _, Lvar _ ->
         let id = make_id obj member_name in
-        if SSet.mem id (fst env.lenv).valid
+        if SSet.mem id env.lenv.fake_members.valid
         then Some (Hashtbl.hash id)
         else None
     | _ -> None
@@ -718,23 +742,23 @@ module FakeMembers = struct
     match obj with
     | _, This
     | _, Lvar _ ->
-        SSet.mem (make_id obj member_name) (fst env.lenv).invalid
+        SSet.mem (make_id obj member_name) env.lenv.fake_members.invalid
     | _ -> false
 
   let get_static env cid member_name =
     let name = make_static_id cid member_name in
-    if SSet.mem name (fst env.lenv).valid
+    if SSet.mem name env.lenv.fake_members.valid
     then Some (Hashtbl.hash name)
     else None
 
   let is_static_invalid env cid member_name =
-    SSet.mem (make_static_id cid member_name) (fst env.lenv).invalid
+    SSet.mem (make_static_id cid member_name) env.lenv.fake_members.invalid
 
   let add_member env fake_id =
-    let fake_members, locals = env.lenv in
+    let {fake_members; local_types; tpenv} = env.lenv in
     let valid = SSet.add fake_id fake_members.valid in
     let fake_members = { fake_members with valid = valid } in
-    { env with lenv = fake_members, locals }
+    { env with lenv = {fake_members; local_types; tpenv } }
 
   let make _ env obj_name member_name =
     let my_fake_local_id = make_id obj_name member_name in
@@ -778,10 +802,10 @@ let unbind = unbind []
  * the last assignment to this local.
  *)
 let set_local env x new_type =
-  let fake_members, locals = env.lenv in
+  let {fake_members; local_types; tpenv} = env.lenv in
   let env, new_type = unbind env new_type in
   let all_types, expr_id =
-    match Local_id.Map.get x locals with
+    match Local_id.Map.get x local_types with
     | None -> [], Ident.tmp()
     | Some (x, _, y) -> x, y
   in
@@ -791,28 +815,28 @@ let set_local env x new_type =
     else new_type :: all_types
   in
   let local = all_types, new_type, expr_id in
-  let locals = Local_id.Map.add x local locals in
-  let env = { env with lenv = fake_members, locals } in
+  let local_types = Local_id.Map.add x local local_types in
+  let env = { env with lenv = {fake_members; local_types; tpenv} } in
   env
 
 let get_local env x =
-  let lcl = Local_id.Map.get x (snd env.lenv) in
+  let lcl = Local_id.Map.get x env.lenv.local_types in
   match lcl with
   | None -> env, (Reason.Rnone, Tany)
   | Some (_, x, _) -> env, x
 
 let set_local_expr_id env x new_eid =
-  let fake_members, locals = env.lenv in
-  match Local_id.Map.get x locals with
+  let {fake_members; local_types; tpenv} = env.lenv in
+  match Local_id.Map.get x local_types with
   | Some (all_types, type_, eid) when eid <> new_eid ->
       let local = all_types, type_, new_eid in
-      let locals = Local_id.Map.add x local locals in
-      let env = { env with lenv = fake_members, locals } in
+      let local_types = Local_id.Map.add x local local_types in
+      let env = { env with lenv = {fake_members; local_types; tpenv} } in
       env
   | _ -> env
 
 let get_local_expr_id env x =
-  let lcl = Local_id.Map.get x (snd env.lenv) in
+  let lcl = Local_id.Map.get x env.lenv.local_types in
   Option.map lcl ~f:(fun (_, _, x) -> x)
 
 (*****************************************************************************)
@@ -846,12 +870,10 @@ let get_local_expr_id env x =
 (*****************************************************************************)
 
 let freeze_local_env env =
-  let (members, locals) = env.lenv in
-  let locals = Local_id.Map.map begin fun (_, type_, eid) ->
+  let local_types = Local_id.Map.map begin fun (_, type_, eid) ->
     [type_], type_, eid
-  end locals in
-  let lenv = members, locals in
-  { env with lenv = lenv }
+  end env.lenv.local_types in
+  env_with_locals env local_types
 
 (*****************************************************************************)
 (* Sets up/cleans up the environment when typing an anonymous function. *)

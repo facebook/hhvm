@@ -318,8 +318,7 @@ and fun_def tcopt f =
   (* Fresh type environment is actually unnecessary, but I prefer to
    * have a guarantee that we are using a clean typing environment. *)
   Env.fresh_tenv env (
-    fun env_up ->
-      let env = { env_up with Env.lenv = Env.empty_local } in
+    fun env ->
       let env = Env.set_mode env f.f_mode in
       let env = Phase.localize_generic_parameters_with_bounds env f.f_tparams
                   ~ety_env:(Phase.env_with_self env) in
@@ -776,7 +775,8 @@ and lvalue env e =
 and eif env ~coalesce ~in_cond p c e1 e2 =
   let env, tyc = raw_expr in_cond env c in
   Async.enforce_not_awaitable env (fst c) tyc;
-  let _, parent_locals as lenv = env.Env.lenv in
+  let parent_lenv = env.Env.lenv in
+  let parent_locals = parent_lenv.Env.local_types in
   let c = if coalesce then (p, Binop (Ast.Diff2, c, (p, Null))) else c in
   let env = condition env true c in
   let env, ty1 = match e1 with
@@ -785,15 +785,21 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
     | Some e1 ->
         expr env e1
     in
-  let fake1, _locals1 = env.Env.lenv in
-  let env = { env with Env.lenv = lenv } in
+  let lenv1 = env.Env.lenv in
+  let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false c in
   let env, ty2 = expr env e2 in
-  let fake2, _locals2 = env.Env.lenv in
-  let fake_members = LEnv.intersect_fake fake1 fake2 in
+  let lenv2 = env.Env.lenv in
+  let fake_members =
+    LEnv.intersect_fake lenv1.Env.fake_members lenv2.Env.fake_members in
   (* we restore the locals to their parent state so as not to leak the
    * effects of the `condition` calls above *)
-  let env = { env with Env.lenv = fake_members, parent_locals } in
+  let env = { env with Env.lenv =
+                         { Env.fake_members = fake_members;
+                           Env.local_types = parent_locals;
+                           Env.tpenv = parent_lenv.Env.tpenv
+                         }
+            } in
   (* This is a shortened form of what we do in Typing_lenv.intersect. The
    * latter takes local environments as arguments, but our types here
    * aren't assigned to local variables in an environment *)
@@ -1739,8 +1745,8 @@ and assign p env e1 ty2 =
       )
   | _, Class_get _
   | _, Obj_get _ ->
-      let _, locals as lenv = env.Env.lenv in
-      let no_fakes = Env.empty_fake_members, locals in
+      let lenv = env.Env.lenv in
+      let no_fakes = LEnv.env_with_empty_fakes env in
       (* In this section, we check that the assignment is compatible with
        * the real type of a member. Remember that members can change
        * type (cf fake_members). But when we assign a value to $this->x,
@@ -1750,7 +1756,7 @@ and assign p env e1 ty2 =
        * check that the assignment is compatible with the type of
        * the member.
        *)
-      let env, real_type = lvalue { env with Env.lenv = no_fakes } e1 in
+      let env, real_type = lvalue no_fakes e1 in
       let env, exp_real_type = Env.expand_type env real_type in
       let env = { env with Env.lenv = lenv } in
       let env, ety2 = Env.expand_type env ty2 in
@@ -3900,7 +3906,7 @@ and class_def_ env c tc =
     (Decl_hint.hint env.Env.decl_env) in
   TI.check_tparams_instantiable env (fst c.c_tparams);
   let env = Phase.localize_generic_parameters_with_bounds env (fst c.c_tparams)
-              ~ety_env:(Phase.env_with_self env) in
+      ~ety_env:(Phase.env_with_self env) in
   Typing_variance.class_ (Env.get_options env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
 
@@ -4060,7 +4066,7 @@ and method_def env m =
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
   Typing_hooks.dispatch_enter_method_def_hook m;
-  let env = { env with Env.lenv = Env.empty_local } in
+  let env = Env.env_with_locals env Local_id.Map.empty in
   let env = Phase.localize_generic_parameters_with_bounds env m.m_tparams
     ~ety_env:({ (Phase.env_with_self env) with from_class = Some CIstatic; }) in
   TI.check_tparams_instantiable env m.m_tparams;

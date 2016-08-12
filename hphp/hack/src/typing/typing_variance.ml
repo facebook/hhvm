@@ -39,8 +39,8 @@ type position_descr =
   | Rmember                       (* Instance variable  *)
   | Rtype_parameter               (* The declaration site of a type-parameter
                                    *)
-  | Rfun_parameter
-  | Rfun_return
+  | Rfun_parameter of [`Static | `Instance]
+  | Rfun_return of [`Static | `Instance]
   | Rtype_argument of string      (* The argument of a parametric class or
                                    * typedef:
                                    * A<T1, ..>, T1 is (Rtype_argument "A")
@@ -130,10 +130,14 @@ let reason_to_string ~sign (_, descr, variance) =
       "A non private class member is always invariant"
   | Rtype_parameter ->
       "The type parameter was declared as "^variance_to_string variance
-  | Rfun_parameter ->
+  | Rfun_parameter `Instance ->
       "Function parameters are contravariant"
-  | Rfun_return ->
+  | Rfun_parameter `Static ->
+      "Function parameters in non-final static functions are contravariant"
+  | Rfun_return `Instance ->
       "Function return types are covariant"
+  | Rfun_return `Static ->
+      "Function return types in non-final static functions are covariant"
   | Rtype_argument name ->
       Printf.sprintf
         "This type parameter was declared as %s (cf '%s')"
@@ -345,7 +349,14 @@ let rec class_ tcopt class_name class_type impl =
   let env = SMap.empty in
   let env = List.fold_left impl ~f:(type_ tcopt root Vboth) ~init:env in
   let env = SMap.fold (class_member tcopt root) class_type.tc_props env in
-  let env = SMap.fold (class_method tcopt root) class_type.tc_methods env in
+  let env =
+    SMap.fold (class_method tcopt root `Instance) class_type.tc_methods env in
+  (* We need to apply the same restrictions to non-final static members because
+     they can be invoked through classname instances *)
+  let env =
+    if class_type.tc_final
+    then env
+    else SMap.fold (class_method tcopt root `Static) class_type.tc_smethods env in
   List.iter tparams (check_variance env)
 
 (*****************************************************************************)
@@ -372,36 +383,41 @@ and class_member tcopt root _member_name member env =
       let variance = make_variance Rmember pos Ast.Invariant in
       type_ tcopt root variance env ty
 
-and class_method tcopt root _method_name method_ env =
+and class_method tcopt root static _method_name method_ env =
   match method_.ce_visibility with
   | Vprivate _ -> env
   | _ ->
+    (* Final methods can't be overridden, so it's ok to use covariant
+       and contravariant type parameters in any position in the type *)
+    if method_.ce_final && static = `Static
+    then env
+    else
       match method_.ce_type with
       | lazy (_, Tfun { ft_tparams; ft_params; ft_ret; _ }) ->
           let env = List.fold_left ft_tparams
             ~f:begin fun env (_, (_, tparam_name), _) ->
               SMap.remove tparam_name env
             end ~init:env in
-          let env =
-            List.fold_left ~f:(fun_param tcopt root) ~init:env ft_params in
-          let env =
-            List.fold_left ~f:(fun_tparam tcopt root) ~init:env ft_tparams in
-          let env = fun_ret tcopt root env ft_ret in
+          let env = List.fold_left
+            ~f:(fun_param tcopt root static) ~init:env ft_params in
+          let env = List.fold_left
+            ~f:(fun_tparam tcopt root) ~init:env ft_tparams in
+          let env = fun_ret tcopt root static env ft_ret in
           env
       | _ -> assert false
 
-and fun_param tcopt root env (_, (reason, _ as ty)) =
+and fun_param tcopt root static env (_, (reason, _ as ty)) =
   let pos = Reason.to_pos reason in
-  let reason_contravariant = pos, Rfun_parameter, Pcontravariant in
+  let reason_contravariant = pos, Rfun_parameter static, Pcontravariant in
   let variance = Vcontravariant [reason_contravariant] in
   type_ tcopt root variance env ty
 
 and fun_tparam tcopt root env (_, _, cstrl) =
   List.fold_left ~f:(constraint_ tcopt root) ~init:env cstrl
 
-and fun_ret tcopt root env (reason, _ as ty) =
+and fun_ret tcopt root static env (reason, _ as ty) =
   let pos = Reason.to_pos reason in
-  let reason_covariant = pos, Rfun_return, Pcovariant in
+  let reason_covariant = pos, Rfun_return static, Pcovariant in
   let variance = Vcovariant [reason_covariant] in
   type_ tcopt root variance env ty
 
@@ -450,13 +466,13 @@ and type_ tcopt root variance env (reason, ty) =
   | Tfun ft ->
       let env = List.fold_left ~f:begin fun env (_, (r, _ as ty)) ->
         let pos = Reason.to_pos r in
-        let reason = pos, Rfun_parameter, Pcontravariant in
+        let reason = pos, Rfun_parameter `Instance, Pcontravariant in
         let variance = flip reason variance in
         type_ tcopt root variance env ty
       end ~init:env ft.ft_params
       in
       let ret_pos = Reason.to_pos (fst ft.ft_ret) in
-      let ret_variance = ret_pos, Rfun_return, Pcovariant in
+      let ret_variance = ret_pos, Rfun_return `Instance, Pcovariant in
       let variance =
         match variance with
         | Vcovariant stack -> Vcovariant (ret_variance :: stack)

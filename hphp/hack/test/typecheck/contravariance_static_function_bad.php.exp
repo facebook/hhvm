@@ -1,0 +1,6 @@
+File "contravariance_static_function_bad.php", line 3, characters 40-40:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "contravariance_static_function_bad.php", line 2, characters 15-15:
+This is where the parameter was declared as contravariant (-)
+File "contravariance_static_function_bad.php", line 3, characters 40-40:
+Function return types in non-final static functions are covariant

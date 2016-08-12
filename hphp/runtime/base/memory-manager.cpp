@@ -69,8 +69,6 @@ uint32_t getRequestHeapFlags() {
  return mmapFlags;
 }
 
-static auto s_mmapFlags = getRequestHeapFlags();
-
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
 size_t MemoryManager::s_cactiveLimitCeiling = 0;

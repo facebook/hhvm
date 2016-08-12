@@ -347,6 +347,8 @@ Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d) {
 }
 
 Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
+  static_assert(ActRec::kHasClassBit == 1,
+                "Fix the decq if you change kHasClassBit");
   v << decq{src, dst, v.makeReg()};
   return dst;
 }

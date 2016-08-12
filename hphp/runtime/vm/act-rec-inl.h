@@ -127,7 +127,7 @@ inline ObjectData* ActRec::decodeThis(void* p) {
 
 inline Class* ActRec::decodeClass(void* p) {
   return (reinterpret_cast<uintptr_t>(p) & kHasClassBit)
-    ? (Class*)(reinterpret_cast<uintptr_t>(p) & ~kHasClassBit)
+    ? (Class*)(reinterpret_cast<uintptr_t>(p) - kHasClassBit)
     : nullptr;
 }
 
@@ -160,7 +160,7 @@ inline ObjectData* ActRec::getThis() const {
 inline Class* ActRec::getClass() const {
   assert(hasClass());
   return reinterpret_cast<Class*>(
-    reinterpret_cast<uintptr_t>(m_cls) & ~kHasClassBit);
+    reinterpret_cast<uintptr_t>(m_cls) - kHasClassBit);
 }
 
 inline void ActRec::setThis(ObjectData* val) {
@@ -202,7 +202,7 @@ inline VarEnv* ActRec::getVarEnv() const {
 inline ExtraArgs* ActRec::getExtraArgs() const {
   if (!hasExtraArgs()) return nullptr;
   return reinterpret_cast<ExtraArgs*>(
-    reinterpret_cast<uintptr_t>(m_extraArgs) & ~kExtraArgsBit);
+    reinterpret_cast<uintptr_t>(m_extraArgs) - kExtraArgsBit);
 }
 
 inline StringData* ActRec::getInvName() const {

@@ -76,7 +76,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     } else {
       auto const cls = srcLoc(env, inst, 2).reg();
       auto const cctx = v.makeReg();
-      v << orqi{1, cls, cctx, v.makeReg()};
+      v << orqi{ActRec::kHasClassBit, cls, cctx, v.makeReg()};
       v << store{cctx, ar + AROFF(m_this)};
     }
   } else if (ctxTmp->isA(TCtx)) {

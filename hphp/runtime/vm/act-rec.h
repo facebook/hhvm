@@ -145,8 +145,8 @@ struct ActRec {
    * that we can distinguish at runtime which field is valid.  We define
    * accessors (below) to encapsulate this logic.
    */
-  static constexpr uintptr_t kHasClassBit  = 0x1;  // unset for m_this
-  static constexpr uintptr_t kExtraArgsBit = 0x1;  // unset for m_varEnv
+  static auto constexpr      kHasClassBit  = 0x1;  // unset for m_this
+  static auto constexpr      kExtraArgsBit = 0x1;  // unset for m_varEnv
 
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
 

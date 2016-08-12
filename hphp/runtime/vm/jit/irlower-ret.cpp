@@ -283,8 +283,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
     }
 
     auto const sf = v.makeReg();
-    v << testqim{safe_cast<int32_t>(ActRec::kExtraArgsBit),
-                 fp[AROFF(m_varEnv)], sf};
+    v << testqim{ActRec::kExtraArgsBit, fp[AROFF(m_varEnv)], sf};
 
     unlikelyIfThenElse(v, vc, CC_NZ, sf,
       [&] (Vout& v) {

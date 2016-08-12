@@ -43,7 +43,7 @@ void cgLdClsCtx(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  v << testqi{1, ctx, sf};
+  v << testqi{ActRec::kHasClassBit, ctx, sf};
 
   cond(v, CC_NZ, sf, dst,
     [&] (Vout& v) { return emitLdClsCctx(v, ctx, v.makeReg()); }, // Cctx
@@ -61,7 +61,7 @@ void cgConvClsToCctx(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  v << orqi{1, cls, dst, v.makeReg()};
+  v << orqi{ActRec::kHasClassBit, cls, dst, v.makeReg()};
 }
 
 void cgCastCtxThis(IRLS& env, const IRInstruction* inst) {
@@ -81,7 +81,7 @@ void cgCheckCtxThis(IRLS& env, const IRInstruction* inst) {
   }
 
   auto const sf = v.makeReg();
-  v << testqi{1, ctx, sf};
+  v << testqi{ActRec::kHasClassBit, ctx, sf};
   v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

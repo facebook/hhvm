@@ -83,7 +83,7 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   auto const sf = v.makeReg();
   auto cond = CC_NLE;
   if (ty <= TCtx) {
-    v << testqi{1, loc.reg(0), sf};
+    v << testqi{ActRec::kHasClassBit, loc.reg(0), sf};
     cond = CC_E;
   } else {
     assert(ty <= TStkElem);
@@ -137,7 +137,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
   if (ty.maybe(TCctx)) {
     always_assert(ty <= TCtx && ty.maybe(TObj));
     auto const sf = v.makeReg();
-    v << testqi{0x1, loc.reg(), sf};
+    v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
     ifThen(v, CC_Z, sf, [&] (Vout& v) { emitIncRef(v, loc.reg()); });
     return;
   }
@@ -416,7 +416,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     always_assert(ty <= TCtx && ty.maybe(TObj));
     auto const loc = srcLoc(env, inst, 0);
     auto const sf = v.makeReg();
-    v << testqi{0x1, loc.reg(), sf};
+    v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
     ifThen(v, CC_Z, sf, [&] (Vout& v) {
         impl(v, TObj);
       });
@@ -463,7 +463,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
     if (ty.maybe(TObj)) {
       auto const loc = srcLoc(env, inst, 0);
       auto const sf = v.makeReg();
-      v << testqi{0x1, loc.reg(), sf};
+      v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
       ifThen(v, CC_Z, sf, [&] (Vout& v) { emitDecRef(v, loc.reg()); });
     }
     return;

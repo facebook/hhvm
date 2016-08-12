@@ -343,7 +343,7 @@ void implGetCtxFwdCall(IRLS& env, const IRInstruction* inst,
   } else {
     // If we don't know whether we have a $this, we need to check dynamically.
     auto const sf = v.makeReg();
-    v << testqi{1, srcCtx, sf};
+    v << testqi{ActRec::kHasClassBit, srcCtx, sf};
     cond(v, CC_Z, sf, dstCtx,
       [&] (Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); },
       [&] (Vout& v) { return srcCtx; }
@@ -361,7 +361,7 @@ void cgGetCtxFwdCall(IRLS& env, const IRInstruction* inst) {
       // Load (this->m_cls | 0x1) into `dst'.
       auto const cls = v.makeReg();
       emitLdObjClass(v, rthis, cls);
-      v << orqi{1, cls, dst, v.makeReg()};
+      v << orqi{ActRec::kHasClassBit, cls, dst, v.makeReg()};
     } else {
       // Just incref $this.
       emitIncRef(v, rthis);
@@ -387,11 +387,11 @@ void cgGetCtxFwdCallDyn(IRLS& env, const IRInstruction* inst) {
 
     return cond(v, CC_E, sf, dst,
       [&] (Vout& v) {
-        // Load (this->m_cls | 0x1) into `dst'.
+        // Load (this->m_cls | kHasClassBit) into `dst'.
         auto cls = v.makeReg();
         auto tmp = v.makeReg();
         emitLdObjClass(v, rthis, cls);
-        v << orqi{1, cls, tmp, v.makeReg()};
+        v << orqi{ActRec::kHasClassBit, cls, tmp, v.makeReg()};
         return tmp;
       },
       [&] (Vout& v) {

@@ -478,10 +478,6 @@ inline bool Func::isNoInjection() const {
   return m_attrs & AttrNoInjection;
 }
 
-inline bool Func::isAllowOverride() const {
-  return m_attrs & AttrAllowOverride;
-}
-
 inline bool Func::isSkipFrame() const {
   return m_attrs & AttrSkipFrame;
 }

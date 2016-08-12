@@ -975,8 +975,7 @@ public:
   void postponeCinit(InterfaceStatementPtr m, FuncEmitter* fe, NonScalarVec* v);
   void emitPostponedMeths();
   void bindUserAttributes(MethodStatementPtr meth,
-                          FuncEmitter *fe,
-                          bool &allowOverride);
+                          FuncEmitter *fe);
   void bindNativeFunc(MethodStatementPtr meth, FuncEmitter *fe);
   int32_t emitNativeOpCodeImpl(MethodStatementPtr meth,
                                const char* funcName,
@@ -7732,14 +7731,10 @@ static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
 }
 
 static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
-                             bool top, bool allowOverride) {
+                             bool top) {
   FunctionScopePtr funcScope = meth->getFunctionScope();
   ModifierExpressionPtr mod(meth->getModifiers());
   Attr attrs = buildAttrs(mod, meth->isRef());
-
-  if (allowOverride) {
-    attrs = attrs | AttrAllowOverride;
-  }
 
   // if hasCallToGetArgs() or if mayUseVV
   if (meth->hasCallToGetArgs() || funcScope->mayUseVV()) {
@@ -7989,14 +7984,9 @@ void EmitterVisitor::emitPostponedMeths() {
 }
 
 void EmitterVisitor::bindUserAttributes(MethodStatementPtr meth,
-                                        FuncEmitter *fe,
-                                        bool &allowOverride) {
+                                        FuncEmitter *fe) {
   auto const& userAttrs = meth->getFunctionScope()->userAttributes();
   for (auto& attr : userAttrs) {
-    if (attr.first == "__Overridable") {
-      allowOverride = true;
-      continue;
-    }
     const StringData* uaName = makeStaticString(attr.first);
     ExpressionPtr uaValue = attr.second;
     assert(uaValue);
@@ -8020,8 +8010,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   }
 
   auto modifiers = meth->getModifiers();
-  bool allowOverride = false;
-  bindUserAttributes(meth, fe, allowOverride);
+  bindUserAttributes(meth, fe);
 
   Attr attributes = AttrBuiltin | AttrNative | AttrUnique | AttrPersistent;
   if (meth->isRef()) {
@@ -8043,10 +8032,6 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     } else {
       attributes = attributes | (modifiers->isProtected()
                               ? AttrProtected : AttrPublic);
-    }
-  } else {
-    if (allowOverride) {
-      attributes = attributes | AttrAllowOverride;
     }
   }
   parseUserAttributes(fe, attributes);
@@ -8118,8 +8103,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
                                         ClosureUseVarVec* useVars,
                                         bool top) {
   FuncEmitter* fe = m_curFunc;
-  bool allowOverride = false;
-  bindUserAttributes(meth, fe, allowOverride);
+  bindUserAttributes(meth, fe);
 
   // assign ids to parameters (all methods)
   int numParam = meth->getParams() ? meth->getParams()->getCount() : 0;
@@ -8190,7 +8174,7 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
   fe->init(meth->line0(),
            meth->line1(),
            m_ue.bcPos(),
-           buildMethodAttrs(meth, fe, top, allowOverride),
+           buildMethodAttrs(meth, fe, top),
            top,
            methDoc);
 
@@ -9097,16 +9081,6 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
         (!fcallBuiltin->hasVariadicCaptureParam() ||
          numParams != fcallBuiltin->numParams())) {
       fcallBuiltin = nullptr;
-    }
-    if (fcallBuiltin && (fcallBuiltin->attrs() & AttrAllowOverride)) {
-      if (!Option::WholeProgram ||
-          (node->getFuncScope() && node->getFuncScope()->isUserFunction())) {
-        // In non-WholeProgram mode, we can't tell whether the function
-        // will be overridden, so never use FCallBuiltin.
-        // In WholeProgram mode, don't use FCallBuiltin if it *has* been
-        // overridden.
-        fcallBuiltin = nullptr;
-      }
     }
     StringData* nsName = nullptr;
     if (!node->hadBackslash() && !nameOverride) {

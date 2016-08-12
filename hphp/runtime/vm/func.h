@@ -848,11 +848,6 @@ struct Func final {
   bool isNoInjection() const;
 
   /*
-   * Whether this builtin may be replaced by user-defined functions.
-   */
-  bool isAllowOverride() const;
-
-  /*
    * Whether this function's frame should be skipped when searching for context
    * (e.g., array_map evaluates its callback in the context of its caller).
    */

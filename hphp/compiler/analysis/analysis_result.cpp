@@ -194,7 +194,7 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
 FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
   auto bit = m_functions.find(funcName);
-  if (bit != m_functions.end() && !bit->second->allowOverride()) {
+  if (bit != m_functions.end()) {
     return bit->second;
   }
   auto iter = m_functionDecs.find(funcName);
@@ -284,12 +284,10 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
   // System functions override
   auto it = m_functions.find(funcScope->getScopeName());
   if (it != m_functions.end()) {
-    if (!it->second->allowOverride()) {
-      // we need someone to hold on to a reference to it
-      // even though we're not going to do anything with it
-      this->lock()->m_ignoredScopes.push_back(funcScope);
-      return false;
-    }
+    // we need someone to hold on to a reference to it
+    // even though we're not going to do anything with it
+    this->lock()->m_ignoredScopes.push_back(funcScope);
+    return false;
   }
 
   return true;
@@ -470,21 +468,16 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
     if (!func->inPseudoMain()) {
       FunctionScopePtr &funcDec = m_functionDecs[iter.first];
       if (funcDec) {
-        if (funcDec->isSystem()) {
-          assert(funcDec->allowOverride());
-          funcDec = func;
-        } else if (func->isSystem()) {
-          assert(func->allowOverride());
-        } else {
-          auto& funcVec = m_functionReDecs[iter.first];
-          int sz = funcVec.size();
-          if (!sz) {
-            funcDec->setRedeclaring(sz++);
-            funcVec.push_back(funcDec);
-          }
-          func->setRedeclaring(sz++);
-          funcVec.push_back(func);
+        assert(!funcDec->isSystem());
+        assert(!func->isSystem());
+        auto& funcVec = m_functionReDecs[iter.first];
+        int sz = funcVec.size();
+        if (!sz) {
+          funcDec->setRedeclaring(sz++);
+          funcVec.push_back(funcDec);
         }
+        func->setRedeclaring(sz++);
+        funcVec.push_back(func);
       } else {
         funcDec = func;
       }

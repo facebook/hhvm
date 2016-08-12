@@ -137,9 +137,6 @@ enum Attr {
   // <<__Memoize> caches).  Reuses the AttrBuiltin bit.
   AttrNoSerialize          = (1 << 20), //       |    X     |         //
                                         //       |          |         //
-  // Set on builtin functions that can be replaced by user implementations.
-  AttrAllowOverride        = (1 << 21), //       |          |    X    //
-                                        //       |          |         //
   // Indicates that the frame should be ignored when searching for context
   // (e.g., array_map evalutates its callback in the context of the caller).
   AttrSkipFrame            = (1 << 22), //       |          |    X    //

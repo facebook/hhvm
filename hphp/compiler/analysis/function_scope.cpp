@@ -81,12 +81,6 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     m_userAttributes[attrs[i]->getName()] = attrs[i]->getExp();
   }
 
-  // Support for systemlib functions implemented in PHP
-  if (!m_method &&
-      m_userAttributes.find("__Overridable") != m_userAttributes.end()) {
-    setAllowOverride();
-  }
-
   // Try to find if the function have __Native("VariadicByRef")
   auto params = getUserAttributeParams("__native");
   for (auto &param : params) {
@@ -299,10 +293,6 @@ bool FunctionScope::usesVariableArgumentFunc() const {
   return m_attribute & FileScope::VariableArgument;
 }
 
-bool FunctionScope::allowOverride() const {
-  return m_attribute & FileScope::AllowOverride;
-}
-
 bool FunctionScope::isReferenceVariableArgument() const {
   bool res = m_attribute & FileScope::ReferenceVariableArgument;
   // If this method returns true, then usesVariableArgumentFunc() must also
@@ -335,10 +325,6 @@ void FunctionScope::setVariableArgument(int reference) {
   if (reference) {
     m_attribute |= FileScope::ReferenceVariableArgument;
   }
-}
-
-void FunctionScope::setAllowOverride() {
-  m_attribute |= FileScope::AllowOverride;
 }
 
 bool FunctionScope::hasEffect() const {

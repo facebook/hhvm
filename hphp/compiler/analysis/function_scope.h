@@ -207,12 +207,6 @@ struct FunctionScope : BlockScope,
   bool noFCallBuiltin() const;
   void setNoFCallBuiltin();
 
-  /*
-   * If this is a builtin (C++ or PHP) and can be redefined
-   */
-  bool allowOverride() const;
-  void setAllowOverride();
-
   bool needsFinallyLocals() const;
 
   /**

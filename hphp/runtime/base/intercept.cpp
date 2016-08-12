@@ -228,12 +228,7 @@ void rename_function(const String& old_name, const String& new_name) {
 
   auto const fnew = Unit::lookupFunc(newNe);
   if (fnew && fnew != func) {
-    // To match hphpc, we silently ignore functions defined in user code that
-    // have the same name as a function defined in a separable extension
-    if (!fnew->isAllowOverride()) {
-      raise_error("Function already defined: %s", n3w->data());
-    }
-    return;
+    raise_error("Function already defined: %s", n3w->data());
   }
 
   always_assert(!rds::isPersistentHandle(oldNe->getFuncHandle()));

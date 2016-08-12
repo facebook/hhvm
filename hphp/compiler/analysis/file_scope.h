@@ -64,7 +64,6 @@ struct FileScope : BlockScope, FunctionContainer,
     ContainsGetDefinedVars   = 0x0400, // need VariableTable with getDefinedVars
     IsFoldable               = 0x01000,// function can be constant folded
     NoFCallBuiltin           = 0x02000,// function should not use FCallBuiltin
-    AllowOverride            = 0x04000,// allow override of systemlib or builtin
     NeedsFinallyLocals       = 0x08000,
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
     ContainsAssert           = 0x20000,// contains call to assert()

@@ -94,7 +94,7 @@ struct ProfCounters {
   ProfCounters& operator=(const ProfCounters&) = delete;
 
   T get(uint32_t id) const {
-    return id / kCountersPerChunk > m_chunks.size()
+    return id / kCountersPerChunk >= m_chunks.size()
       ? m_initVal
       : m_chunks[id / kCountersPerChunk][id % kCountersPerChunk];
   }

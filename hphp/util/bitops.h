@@ -27,8 +27,8 @@ namespace HPHP {
 // anyway, fix ffs's wacky offset-by-one historical implementation. These
 // guys return success/failure (failure for input of all zeros) and the
 // unoffset bit position in their reference param.
-template<typename I64>
-inline bool ffs64(I64 input, I64 &out) {
+template<typename I64, typename J64>
+inline bool ffs64(I64 input, J64 &out) {
   bool retval = false;
 #if defined(__x86_64__)
   asm volatile (
@@ -70,8 +70,8 @@ inline bool ffs64(I64 input, I64 &out) {
   return retval;
 }
 
-template<typename I64>
-inline bool fls64(I64 input, I64 &out) {
+template<typename I64, typename J64>
+inline bool fls64(I64 input, J64 &out) {
   bool retval;
 #if defined(__x86_64__)
   asm volatile (

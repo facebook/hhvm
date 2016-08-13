@@ -54,6 +54,12 @@ struct Lease {
   int64_t hintKept()    const { return m_hintKept; }
   int64_t hintGrabbed() const { return m_hintGrabbed; }
 
+  /*
+   * Returns true iff the current thread would be able to acquire the lease now
+   * (or already owns it).
+   */
+  bool couldBeOwner() const;
+
   static void mayLock(bool f);
   static void mayLockConcurrent(bool f);
 
@@ -101,6 +107,12 @@ struct LeaseHolder {
    * holding the global write lease and it can't be acquired, return false.
    */
   bool checkKind(TransKind kind);
+
+  /*
+   * Returns whether the combination of RuntimeOption::EvalJitConcurrently and
+   * kind require holding the global write lease.
+   */
+  static bool NeedGlobal(TransKind kind);
 
  private:
   void dropLocks();

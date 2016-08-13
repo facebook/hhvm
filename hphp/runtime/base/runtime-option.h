@@ -582,6 +582,7 @@ struct RuntimeOption {
   F(bool, EnableGCTypeScan,            false)                           \
   F(uint32_t, GCSampleRate,                1)                           \
   F(uint32_t, JitSampleRate,               0)                           \
+  F(uint32_t, JitFilterLease,              1)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
   F(uint32_t, InitialStaticStringTableSize,                             \

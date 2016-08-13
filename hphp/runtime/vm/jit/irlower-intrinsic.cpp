@@ -178,6 +178,10 @@ void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
 }
 
+bool skipAttemptGlobal() {
+  return !Translator::WriteLease().couldBeOwner();
+}
+
 void cgCheckCold(IRLS& env, const IRInstruction* inst) {
   auto const transID = inst->extra<CheckCold>()->transId;
   auto const counterAddr = profData()->transCounterAddr(transID);
@@ -185,7 +189,20 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = v.makeReg();
   v << decqmlock{v.cns(counterAddr)[0], sf};
-  v << jcc{CC_LE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+  if (RuntimeOption::EvalJitFilterLease &&
+      LeaseHolder::NeedGlobal(TransKind::Optimize)) {
+    auto filter = v.makeBlock();
+    v << jcc{CC_LE, sf, {label(env, inst->next()), filter}};
+    v = filter;
+    auto const res = v.makeReg();
+    cgCallHelper(v, env, CallSpec::direct(skipAttemptGlobal), callDest(res),
+                 SyncOptions::None, argGroup(env, inst));
+    auto const sf2 = v.makeReg();
+    v << testb{res, res, sf2};
+    v << jcc{CC_Z, sf2, {label(env, inst->next()), label(env, inst->taken())}};
+  } else {
+    v << jcc{CC_LE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

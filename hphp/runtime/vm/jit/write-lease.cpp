@@ -21,6 +21,7 @@
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/process.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 #include <folly/portability/SysMman.h>
@@ -121,6 +122,15 @@ void Lease::drop(int64_t hintExpireDelay) {
   pthread_mutex_unlock(&m_lock);
 }
 
+bool Lease::couldBeOwner() const {
+  auto self = pthread_self();
+  if (m_held.load(std::memory_order_acquire)) {
+    return m_owner == self;
+  } else {
+    return m_owner == self || Timer::GetCurrentTimeMicros() > m_hintExpire;
+  }
+}
+
 static bool concurrentlyJitKind(TransKind k) {
   if (RuntimeOption::EvalJitConcurrently == 0) return false;
 
@@ -143,11 +153,15 @@ static bool concurrentlyJitKind(TransKind k) {
   not_reached();
 }
 
+bool LeaseHolder::NeedGlobal(TransKind kind) {
+  return !concurrentlyJitKind(kind);
+}
+
 LeaseHolder::LeaseHolder(Lease& l, const Func* func, TransKind kind)
   : m_lease(l)
   , m_func{RuntimeOption::EvalJitConcurrently > 0 ? func : nullptr}
 {
-  auto const need_global = m_func == nullptr || !concurrentlyJitKind(kind);
+  auto const need_global = m_func == nullptr || NeedGlobal(kind);
 
   if (!need_global && !threadCanAcquireConcurrent) return;
 
@@ -223,7 +237,7 @@ bool LeaseHolder::checkKind(TransKind kind) {
 
   return m_canTranslate =
     m_lease.amOwner() ||
-    concurrentlyJitKind(kind) ||
+    !NeedGlobal(kind) ||
     (m_acquired = m_lease.acquire());
 }
 

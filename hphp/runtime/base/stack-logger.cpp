@@ -28,7 +28,6 @@ void log_native_stack(const char* msg) {}
 
 #else // FACEBOOK
 
-#include <folly/experimental/symbolizer/Elf.h>
 #include <folly/experimental/symbolizer/StackTrace.h>
 #include <folly/experimental/symbolizer/Symbolizer.h>
 
@@ -38,47 +37,6 @@ namespace HPHP {
 
 using namespace folly::symbolizer;
 
-/*
- * Symbolize frames under the assumption that they are defined in
- * /proc/self/exe without relocation.  Needed because folly::symbolizer assumes
- * it can find files via /proc/self/maps, but that's not true when we remap the
- * text section with huge pages.  Code mostly swiped from folly, but with
- * significant modifications.
- */
-static void symbolize_huge_text(const uintptr_t* addresses,
-                                SymbolizedFrame* frames,
-                                size_t addressCount) {
-  auto elfFile = std::make_shared<ElfFile>("/proc/self/exe");
-  if (!elfFile) {
-    return;
-  }
-
-  // See if any addresses are here
-  auto base = elfFile->getBaseAddress();
-  auto textSection = elfFile->getSectionByName(".text");
-  auto from = textSection->sh_addr;
-  auto to = from + textSection->sh_size;
-
-  for (size_t i = 0; i < addressCount; ++i) {
-    auto& frame = frames[i];
-    if (frame.found) {
-      continue;
-    }
-
-    uintptr_t address = addresses[i];
-
-    if (from > address || address >= to) {
-      continue;
-    }
-
-    // Found
-    frame.found = true;
-
-    // Undo relocation
-    frame.set(elfFile, address - base);
-  }
-}
-
 void log_native_stack(const char* msg) {
   constexpr size_t kMaxFrames = 128;
 
@@ -87,7 +45,6 @@ void log_native_stack(const char* msg) {
 
   Symbolizer symbolizer;
   std::vector<SymbolizedFrame> frames(nframes);
-  symbolize_huge_text(addresses, frames.data(), nframes);
   symbolizer.symbolize(addresses, frames.data(), nframes);
 
   StringSymbolizePrinter printer;

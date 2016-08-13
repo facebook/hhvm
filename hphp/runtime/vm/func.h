@@ -649,17 +649,6 @@ struct Func final {
   bool isCPPBuiltin() const;
 
   /*
-   * Is this an HNI function?
-   *
-   * Note that "Native" here refers to a different concept than nativeFuncPtr.
-   * In fact, the only functions that may not have nativeFuncPtr's are Native
-   * (i.e., HNI) functions declared with NeedsActRec.
-   *
-   * FIXME(#4497824): This naming is pretty bad.
-   */
-  bool isNative() const;
-
-  /*
    * The builtinFuncPtr takes an ActRec*, unpacks it, and usually dispatches to
    * a nativeFuncPtr.
    *

@@ -316,6 +316,11 @@ struct Func {
   bool isPairGenerator : 1;
 
   /*
+   * This is an HNI function
+   */
+  bool isNative : 1;
+
+  /*
    * All owning pointers to blocks are in this vector, which has the
    * blocks in an unspecified order.  Blocks have borrowed pointers to
    * each other to represent control flow arcs.

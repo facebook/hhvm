@@ -734,6 +734,8 @@ void emit_finish_func(const php::Func& func,
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
+  fe.isNative = func.isNative;
+
   if (func.nativeInfo) {
     fe.returnType = func.nativeInfo->returnType;
   }

@@ -256,10 +256,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   // Add the this_ or self_ argument for HNI builtins.
   if (callee->isMethod()) {
     if (callee->isStatic()) {
-      if (callee->isNative()) {
-        args.ssa(srcNum);
-        ++srcNum;
-      }
+      args.ssa(srcNum);
+      ++srcNum;
     } else {
       // Note that we don't support objects with vtables here (if they may need
       // a $this pointer adjustment).  This should be filtered out during irgen

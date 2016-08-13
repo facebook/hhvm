@@ -55,14 +55,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , maxStackCells(0)
   , returnType(folly::none)
   , retUserType(nullptr)
-  , isClosureBody(false)
-  , isAsync(false)
-  , isGenerator(false)
-  , isPairGenerator(false)
-  , isMemoizeImpl(false)
-  , isMemoizeWrapper(false)
-  , hasMemoizeSharedProp(false)
-  , containsCalls(false)
   , docComment(nullptr)
   , originalFilename(nullptr)
   , memoizePropName(nullptr)
@@ -72,8 +64,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
-  , m_builtinFuncPtr(nullptr)
-  , m_nativeFuncPtr(nullptr)
   , m_ehTabSorted(false)
 {}
 
@@ -88,14 +78,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , maxStackCells(0)
   , returnType(folly::none)
   , retUserType(nullptr)
-  , isClosureBody(false)
-  , isAsync(false)
-  , isGenerator(false)
-  , isPairGenerator(false)
-  , isMemoizeImpl(false)
-  , isMemoizeWrapper(false)
-  , hasMemoizeSharedProp(false)
-  , containsCalls(false)
   , docComment(nullptr)
   , originalFilename(nullptr)
   , memoizePropName(nullptr)
@@ -105,8 +87,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
-  , m_builtinFuncPtr(nullptr)
-  , m_nativeFuncPtr(nullptr)
   , m_ehTabSorted(false)
 {}
 
@@ -208,9 +188,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->m_isPreFunc = !!preClass;
 
   bool const needsExtendedSharedData =
-    m_builtinFuncPtr ||
-    m_nativeFuncPtr ||
-    (attrs & AttrNative) ||
+    isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
     past - base >= Func::kSmallDeltaLimit;
 
@@ -226,8 +204,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (auto const ex = f->extShared()) {
     ex->m_hasExtendedSharedData = true;
-    ex->m_builtinFuncPtr = m_builtinFuncPtr;
-    ex->m_nativeFuncPtr = m_nativeFuncPtr;
+    ex->m_builtinFuncPtr = nullptr;
+    ex->m_nativeFuncPtr = nullptr;
     ex->m_line2 = line2;
     ex->m_past = past;
     ex->m_returnByValue = false;
@@ -260,7 +238,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_originalFilename = originalFilename;
   f->shared()->m_isGenerated = isGenerated;
 
-  if (attrs & AttrNative) {
+  if (isNative) {
     auto const ex = f->extShared();
 
     auto const& info = Native::GetBuiltinFunction(
@@ -327,6 +305,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (isGenerator)
     (isPairGenerator)
     (containsCalls)
+    (isNative)
 
     (params)
     (m_localNames)
@@ -550,11 +529,8 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   return ret;
 }
 
-void FuncEmitter::setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
-                                 Attr attrs_, Offset base_) {
-  assert(bif);
-  m_builtinFuncPtr = bif;
-  m_nativeFuncPtr = nif;
+void FuncEmitter::setBuiltinFunc(Attr attrs_, Offset base_) {
+  isNative = true;
   base = base_;
   top = true;
   // TODO: Task #1137917: See if we can avoid marking most builtins with

@@ -1375,7 +1375,7 @@ static bool checkTypeConstraint(const PreClass* implCls, const Class* iface,
 void checkDeclarationCompat(const PreClass* preClass,
                             const Func* func, const Func* imeth) {
   bool relaxedCheck = !RuntimeOption::EnableHipHopSyntax
-                        && func->isNative()
+                        && func->isCPPBuiltin()
                         && !imeth->unit()->isHHFile();
 
   const Func::ParamInfoVec& params = func->params();

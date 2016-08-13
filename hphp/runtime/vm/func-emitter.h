@@ -226,8 +226,6 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Complex setters.
   //
-  // XXX: Some of these should be moved to the emitter (esp. the
-  // setBuiltinFunc() methods).
 
   /*
    * Shorthand for setting `line1' and `line2' because typing is hard.
@@ -245,8 +243,7 @@ public:
   /*
    * Set some fields for builtin functions.
    */
-  void setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
-                      Attr attrs_, Offset base_);
+  void setBuiltinFunc(Attr attrs_, Offset base_);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -285,14 +282,15 @@ public:
   EHEntVec ehtab;
   FPIEntVec fpitab;
 
-  bool isClosureBody;
-  bool isAsync;
-  bool isGenerator;
-  bool isPairGenerator;
-  bool isMemoizeImpl;
-  bool isMemoizeWrapper;
-  bool hasMemoizeSharedProp;
-  bool containsCalls;
+  bool isClosureBody{false};
+  bool isAsync{false};
+  bool isGenerator{false};
+  bool isPairGenerator{false};
+  bool isMemoizeImpl{false};
+  bool isMemoizeWrapper{false};
+  bool hasMemoizeSharedProp{false};
+  bool containsCalls{false};
+  bool isNative{false};
 
   LowStringPtr docComment;
   LowStringPtr originalFilename;
@@ -312,10 +310,6 @@ private:
   int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
-
-  BuiltinFunction m_builtinFuncPtr;
-  BuiltinFunction m_nativeFuncPtr;
-
   bool m_ehTabSorted;
 };
 

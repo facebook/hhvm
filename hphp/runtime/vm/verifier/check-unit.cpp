@@ -206,7 +206,7 @@ bool UnitChecker::checkFuncs() {
       pseudo = func;
     }
 
-    if (func->attrs() & AttrNative) {
+    if (func->isCPPBuiltin()) {
       ok &= checkNativeFunc(func, m_verbose);
     }
 

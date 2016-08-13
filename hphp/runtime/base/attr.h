@@ -141,9 +141,6 @@ enum Attr {
   // (e.g., array_map evalutates its callback in the context of the caller).
   AttrSkipFrame            = (1 << 22), //       |          |    X    //
                                         //       |          |         //
-  // Is this an HNI builtin?            //       |          |         //
-  AttrNative               = (1 << 23), //       |          |    X    //
-                                        //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
   // all constant arguments.            //       |          |         //
   AttrIsFoldable           = (1 << 26), //       |          |    X    //

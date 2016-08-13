@@ -8012,7 +8012,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   auto modifiers = meth->getModifiers();
   bindUserAttributes(meth, fe);
 
-  Attr attributes = AttrBuiltin | AttrNative | AttrUnique | AttrPersistent;
+  Attr attributes = AttrBuiltin | AttrUnique | AttrPersistent;
   if (meth->isRef()) {
     attributes = attributes | AttrReference;
   }
@@ -8089,7 +8089,7 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     emitDeprecationWarning(e, meth);
   }
 
-  fe->setBuiltinFunc(bif, nif, attributes, base);
+  fe->setBuiltinFunc(attributes, base);
   fillFuncEmitterParams(fe, meth->getParams(), true);
   if (nativeAttrs & Native::AttrOpCodeImpl) {
     ff.setStackPad(emitNativeOpCodeImpl(meth, funcname, classname, fe));
@@ -8991,13 +8991,6 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
 
   if ((f->returnType() == KindOfDouble) &&
        !Native::allowFCallBuiltinDoubles()) return nullptr;
-
-  if (!(f->attrs() & AttrNative)) {
-    // HNI only enables Variable args via ActRec which in turn
-    // is captured by the f->nativeFuncPtr() == nullptr,
-    // so there's nothing additional to check in the HNI case
-    return nullptr;
-  }
 
   bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
   auto concrete_params = f->numParams();
@@ -10659,7 +10652,7 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    bool isAsync) {
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
-
+  fe->isNative = false;
   if (!isAsync && RuntimeOption::AutoprimeGenerators) {
     // Create a dummy Emitter, so it's possible to emit jump instructions
     EmitterVisitor ev(ue);

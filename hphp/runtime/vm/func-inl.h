@@ -360,10 +360,6 @@ inline bool Func::isCPPBuiltin() const {
   return UNLIKELY(!!ex) && ex->m_builtinFuncPtr;
 }
 
-inline bool Func::isNative() const {
-  return m_attrs & AttrNative;
-}
-
 inline BuiltinFunction Func::builtinFuncPtr() const {
   if (auto const ex = extShared()) {
     return ex->m_builtinFuncPtr;

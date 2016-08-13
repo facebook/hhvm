@@ -70,6 +70,7 @@
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -193,6 +194,10 @@ Unit::Unit()
 {}
 
 Unit::~Unit() {
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::deregister(this);
+  }
+
   s_extendedLineInfo.erase(this);
   s_lineTables.erase(this);
   s_lineInfo.erase(this);
@@ -766,17 +771,10 @@ Class* Unit::defClass(const PreClass* preClass,
       [&] { nameList->pushClass(newClass.get()); }
     );
 
-    if (RuntimeOption::EvalPerfDataMap) {
-      Debug::DebugInfo::recordDataMap(
-        newClass.get(), newClass.get() + 1,
-        folly::format("Class-{}", preClass->name()).str());
-      rds::recordRds(
-        nameList->m_cachedClass.handle(),
-        sizeof(void*),
-        "Class",
-        preClass->name()->toCppString()
-      );
+    if (RuntimeOption::EvalEnableReverseDataMap) {
+      data_map::register_start(newClass.get());
     }
+
     /*
      * call setCached after adding to the class list, otherwise the
      * target-cache short circuit at the top could return a class
@@ -1169,10 +1167,10 @@ void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
   if (m_mergeState != MergeState::Unmerged) return;
 
-  if (RuntimeOption::EvalPerfDataMap) {
-    Debug::DebugInfo::recordDataMap(
-      this, this + 1, folly::format("Unit-{}", m_filepath.get()).str());
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::register_start(this);
   }
+
   int state = 0;
   bool needsCompact = false;
   m_mergeState = MergeState::Merging;

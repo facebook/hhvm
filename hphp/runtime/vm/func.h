@@ -185,6 +185,11 @@ struct Func final {
   static void destroy(Func* func);
 
   /*
+   * Address of the end of the Func's variable-length memory allocation.
+   */
+  const void* mallocEnd() const;
+
+  /*
    * Duplicate this function.
    *
    * Funcs are cloned for a number of reasons---most notably, methods on

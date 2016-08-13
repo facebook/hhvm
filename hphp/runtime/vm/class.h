@@ -402,6 +402,11 @@ public:
   void* mallocPtr() const;
 
   /*
+   * Address of the end of the Class's variable-length memory allocation.
+   */
+  const void* mallocEnd() const;
+
+  /*
    * Pointer to the array of Class pointers, allocated immediately after
    * `this', which contain this class's inheritance hierarchy (including `this'
    * as the last element).

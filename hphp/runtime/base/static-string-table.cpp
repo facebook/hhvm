@@ -17,7 +17,10 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/reverse-data-map.h"
+
 #include "hphp/runtime/server/memory-stats.h"
+
 #include "hphp/util/low-ptr.h"
 
 #include <folly/AtomicHashMap.h>
@@ -156,6 +159,9 @@ StringData* insertStaticString(StringData* sd) {
   } else {
     MemoryStats::GetInstance()->LogStaticStringAlloc(sd->size()
         + sizeof(StringData));
+    if (RuntimeOption::EvalEnableReverseDataMap) {
+      data_map::register_start(sd);
+    }
   }
   assert(to_sdata(pair.first->first) != nullptr);
 

@@ -69,6 +69,12 @@ inline void* Class::mallocPtr() const {
   );
 }
 
+inline const void* Class::mallocEnd() const {
+  return reinterpret_cast<const char*>(this)
+         + Class::classVecOff()
+         + classVecLen() * sizeof(*classVec());
+}
+
 inline const LowPtr<Class>* Class::classVec() const {
   return m_classVec;
 }

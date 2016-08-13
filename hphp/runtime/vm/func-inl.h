@@ -68,6 +68,12 @@ inline bool Func::ParamInfo::isVariadic() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Func.
 
+inline const void* Func::mallocEnd() const {
+  return reinterpret_cast<const char*>(this)
+         + Func::prologueTableOff()
+         + numPrologues() * sizeof(m_prologueTable[0]);
+}
+
 inline void Func::validate() const {
 #ifdef DEBUG
   assert(m_magic == kMagic);

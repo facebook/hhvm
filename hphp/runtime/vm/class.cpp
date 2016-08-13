@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -385,6 +386,10 @@ void Class::destroy() {
 void Class::atomicRelease() {
   assert(!m_cachedClass.bound());
   assert(!getCount());
+
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::deregister(this);
+  }
   this->~Class();
   low_free_data(mallocPtr());
 }

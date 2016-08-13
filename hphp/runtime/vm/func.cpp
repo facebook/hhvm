@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
@@ -124,6 +125,9 @@ void Func::destroy(Func* func) {
       Treadmill::enqueue([func](){ destroy(func); });
       return;
     }
+  }
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::deregister(func);
   }
   func->~Func();
   low_free_data(func);
@@ -259,24 +263,11 @@ void Func::setFullName(int numParams) {
       setNamedEntity(NamedEntity::get(m_name));
     }
   }
-  if (RuntimeOption::EvalPerfDataMap) {
-    int maxNumPrologues = Func::getMaxNumPrologues(numParams);
-    int numPrologues = maxNumPrologues > kNumFixedPrologues
-      ? maxNumPrologues
-      : kNumFixedPrologues;
 
-    char* from = (char*)this;
-    char* to = (char*)(m_prologueTable + numPrologues);
-
-    Debug::DebugInfo::recordDataMap(
-      from,
-      to,
-      folly::format(
-        "Func-{}",
-        isPseudoMain() ? m_unit->filepath() : m_fullName.get()
-      ).str()
-    );
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::register_start(this);
   }
+
   if (RuntimeOption::DynamicInvokeFunctions.size()) {
     if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
         RuntimeOption::DynamicInvokeFunctions.end()) {

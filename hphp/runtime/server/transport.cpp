@@ -1074,7 +1074,8 @@ void Transport::sendRawInternal(const void *data, int size,
 
   // HTTP header handling
   if (!m_headerSent) {
-    prepareHeaders(compressed, chunked, response, response);
+    prepareHeaders(compressed, chunked, response,
+                   StringHolder(static_cast<const char*>(data), size));
     m_headerSent = true;
   }
 

@@ -61,8 +61,8 @@ bool traceRefusal(const Func* caller, const Func* callee, const char* why) {
 
 std::atomic<bool> hasCalledDisableInliningIntrinsic;
 hphp_hash_set<const StringData*,
-                    string_data_hash,
-                    string_data_isame> forbiddenInlinees;
+              string_data_hash,
+              string_data_isame> forbiddenInlinees;
 SimpleMutex forbiddenInlineesLock;
 
 bool inliningIsForbiddenFor(const Func* callee) {
@@ -173,13 +173,14 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
   if (auto cls = callee->implCls()) {
     if (!classHasPersistentRDS(cls)) {
       if (callee->isClosureBody()) {
-        return callee->unit() == callSK.unit();
-      }
-      // if the callee's class is not persistent, its still ok
-      // to use it if we're jitting into a method of a subclass
-      auto ctx = callSK.func()->cls();
-      if (!ctx || !ctx->classof(cls)) {
-        return false;
+        if (callee->unit() != callSK.unit()) return false;
+      } else {
+        // if the callee's class is not persistent, its still ok
+        // to use it if we're jitting into a method of a subclass
+        auto ctx = callSK.func()->cls();
+        if (!ctx || !ctx->classof(cls)) {
+          return false;
+        }
       }
     }
   } else {

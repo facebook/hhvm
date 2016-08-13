@@ -101,7 +101,7 @@ void ProcessInit() {
   }
 
   LitstrTable::init();
-  LitstrTable::get().setWriting();
+  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
   Repo::get().loadGlobalData();
 
   // Save this in case the debugger needs it. Once we know if this

@@ -169,6 +169,7 @@ static int getNextTokenType(int t) {
     case T_DICT:
     case T_VEC:
     case T_KEYSET:
+    case T_WHERE:
       return NextTokenType::TypeListMaybe;
     case T_SUPER:
     case T_XHP_ATTRIBUTE:
@@ -484,6 +485,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
+<ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
 <ST_IN_SCRIPTING>"vec"                { HH_ONLY_KEYWORD(T_VEC);}
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {

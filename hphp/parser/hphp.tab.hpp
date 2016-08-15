@@ -215,6 +215,7 @@
      YYTOKEN(426, T_LAMBDA_OP)
      YYTOKEN(427, T_LAMBDA_CP)
      YYTOKEN(428, T_UNRESOLVED_OP)
+     YYTOKEN(429, T_WHERE)
    };
 #endif
 
@@ -248,5 +249,5 @@ typedef struct YYLTYPE
 #endif
 
 #ifndef YYTOKEN_MAX
-#define YYTOKEN_MAX 428
+#define YYTOKEN_MAX 429
 #endif

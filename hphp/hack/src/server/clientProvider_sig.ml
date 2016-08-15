@@ -3,6 +3,7 @@ module type S = sig
   type client
 
   val provider_from_file_descriptor : Unix.file_descr -> t
+  val provider_for_test : unit -> t
   val client_from_channel_pair:  Timeout.in_channel * out_channel -> client
 
   val sleep_and_check : t -> Unix.file_descr option -> bool * bool

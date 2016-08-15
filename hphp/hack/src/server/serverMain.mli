@@ -15,3 +15,15 @@
 val entry: (ServerGlobalState.t * SharedMem.handle * ServerArgs.options, unit, unit) Daemon.entry
 
 val run_once: ServerArgs.options -> SharedMem.handle -> 'a
+
+(* Things exposed for tests *)
+type main_loop_stats
+
+val empty_stats: unit -> main_loop_stats
+
+val serve_one_iteration:
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  ClientProvider.t ->
+  main_loop_stats ->
+  ServerEnv.env

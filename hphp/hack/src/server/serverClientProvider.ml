@@ -5,6 +5,8 @@ type t = Unix.file_descr
 type client = Timeout.in_channel * out_channel
 
 let provider_from_file_descriptor x = x
+let provider_for_test () = failwith "for use in tests only"
+
 let client_from_channel_pair x = x
 
 let sleep_and_check in_fd per_in_fd =

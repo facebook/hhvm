@@ -2,6 +2,7 @@ type t = unit
 type client = unit
 
 let provider_from_file_descriptor _ = ()
+let provider_for_test _ = ()
 let client_from_channel_pair _ = ()
 
 let sleep_and_check _ _ = false, false

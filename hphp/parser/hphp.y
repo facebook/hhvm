@@ -1,4 +1,13 @@
 %{
+
+/* By default this grammar is set up to be used by HPHP's compile parser.
+ * However, it can be used to make parsers for different purposes by
+ * making a Parser implementation with the same interface as
+ * HPHP::Compiler::Parser in a header file specified by
+ * PARSER_DEFINITIONS_HEADER, and specifying an alternate namespace with
+ * HPHP_PARSER_NS.
+ */
+
 // macros for bison
 #define YYSTYPE HPHP::HPHP_PARSER_NS::Token
 #define YYSTYPE_IS_TRIVIAL false
@@ -8,7 +17,11 @@
 #define YYINITDEPTH 500
 #define YYLEX_PARAM _p
 
+#ifdef PARSER_DEFINITIONS_HEADER
+#include PARSER_DEFINITIONS_HEADER
+#else
 #include "hphp/compiler/parser/parser.h"
+#endif
 
 #include <folly/Conv.h>
 #include <folly/String.h>

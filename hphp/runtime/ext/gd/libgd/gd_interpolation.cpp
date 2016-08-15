@@ -824,6 +824,9 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
 
     windows_size = 2 * (int)ceil(width_d) + 1;
     res = _gdContributionsAlloc(line_size, windows_size);
+    if (res == NULL) {
+      return NULL;
+    }
 
     for (u = 0; u < line_size; u++) {
         const double dCenter = (double)u / scale_d;
@@ -947,7 +950,10 @@ static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_w
 	}
 
 	contrib = _gdContributionsCalc(dst_height, src_height, (double)(dst_height) / (double)(src_height), pSrc->interpolation);
-	/* scale each column */
+	if (contrib == NULL) {
+		return;
+	}
+  /* scale each column */
 	for (u = 0; u < dst_width - 1; u++) {
 		_gdScaleCol(pSrc, src_width, pDst, dst_width, dst_height, u, contrib);
 	}

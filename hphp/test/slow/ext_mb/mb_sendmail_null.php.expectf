@@ -1,0 +1,5 @@
+
+Warning: Unsupported transfer encoding "" - will be regarded as 8bit in %s/test/slow/ext_mb/mb_sendmail_null.php on line 4
+
+Warning: Empty message body in %s/test/slow/ext_mb/mb_sendmail_null.php on line 4
+bool(true)

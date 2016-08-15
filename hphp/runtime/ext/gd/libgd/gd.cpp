@@ -113,6 +113,10 @@ gdImagePtr gdImageCreate (int sx, int sy)
 		return NULL;
 	}
 
+	if (overflow2(sizeof(int), sx)) {
+		return NULL;
+	}
+
 	// Check for OOM before doing a potentially large allocation.
 	auto allocsz = sizeof(gdImage)
 		+ 2 * sy * sizeof(unsigned char *)

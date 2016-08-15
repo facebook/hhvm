@@ -627,6 +627,7 @@ struct MemoryManager {
   /*
    * Heap iterator methods.  `fn' takes a Header* argument.
    *
+   * initFree(): prepare to iterate by initializing free block headers.
    * iterate(): Raw iterator loop over the headers of everything in the heap.
    *            Skips BigObj because it's just a detail of which sub-heap we
    *            used to allocate something based on its size, and it can prefix
@@ -636,6 +637,7 @@ struct MemoryManager {
    * forEachObject(): Iterate just the ObjectDatas, including the kinds with
    *                  prefixes (NativeData and ResumableFrame).
    */
+  void initFree();
   template<class Fn> void iterate(Fn fn);
   template<class Fn> void forEachHeader(Fn fn);
   template<class Fn> void forEachObject(Fn fn);
@@ -898,7 +900,6 @@ private:
 
   void initHole(void* ptr, uint32_t size);
   void initHole();
-  void initFree();
 
   void dropRootMaps();
   void deleteRootMaps();

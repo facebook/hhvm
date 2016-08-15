@@ -92,8 +92,6 @@ struct Timer {
     }
   };
 
-  static int64_t getCPUTimeNanos();
-
   explicit Timer(Name name);
   ~Timer();
 

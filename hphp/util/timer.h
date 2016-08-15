@@ -59,6 +59,7 @@ public:
   static void GetMonotonicTime(timespec &sp);
   static int64_t GetCurrentTimeMicros();
   static int64_t GetRusageMicros(Type t, Who who);
+  static int64_t GetThreadCPUTimeNanos();
   const char *getName() const;
   int64_t getMicroSeconds() const;
   void report() const;

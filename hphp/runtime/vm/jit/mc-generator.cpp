@@ -1740,7 +1740,7 @@ void reportJitMaturity(const CodeCache& code) {
 
 // send stats about this translation to StructuredLog
 void logTranslation(const TransEnv& env) {
-  auto nanos = Timer::getCPUTimeNanos() - env.unit->startNanos();
+  auto nanos = HPHP::Timer::GetThreadCPUTimeNanos() - env.unit->startNanos();
   StructuredLogEntry cols;
   auto& context = env.unit->context();
   auto kind = show(context.kind);

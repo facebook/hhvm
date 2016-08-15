@@ -150,6 +150,19 @@ int64_t Timer::GetRusageMicros(Type t, Who who) {
   }
 }
 
+int64_t Timer::GetThreadCPUTimeNanos() {
+#ifdef CLOCK_THREAD_CPUTIME_ID
+  auto const ns = vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
+  if (ns != -1) return ns;
+#endif
+
+#ifdef RUSAGE_THREAD
+  return GetRusageMicros(TotalCPU, Thread) * 1000;
+#else
+  return -1;
+#endif
+}
+
 int64_t Timer::measure() const {
   if (m_type == WallTime) {
     return GetCurrentTimeMicros();

@@ -180,7 +180,7 @@ private:
 public:
   Counter allocd_, marked_, ambig_, freed_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
-  size_t init_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
+  size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
 private:
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
@@ -408,18 +408,16 @@ Marker::operator()(const void* start, size_t len) {
 }
 
 inline int64_t cpu_micros() {
-#ifdef RUSAGE_THREAD
-  return Timer::GetRusageMicros(Timer::TotalCPU, Timer::Thread);
-#else
-  return 0;
-#endif
+  return HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
 }
 
 // initially parse the heap to find valid objects and initialize metadata.
 NEVER_INLINE void Marker::init() {
   auto const t0 = cpu_micros();
   SCOPE_EXIT { init_us_ = cpu_micros() - t0; };
-  MM().forEachHeader([&](Header* h) {
+  MM().initFree();
+  initfree_us_ = cpu_micros() - t0;
+  MM().iterate([&](Header* h) {
     if (h->kind() == HeaderKind::Free) return;
     h->hdr_.marks = GCBits::Unmarked;
     allocd_ += h->size();
@@ -785,6 +783,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("gc_num", t_gc_num);
   // timers of gc-sub phases
   sample.setInt("init_micros", mkr.init_us_);
+  sample.setInt("initfree_micros", mkr.initfree_us_);
   sample.setInt("roots_micros", mkr.roots_us_);
   sample.setInt("mark_micros", mkr.mark_us_); // includes unknown
   sample.setInt("unknown_micros", mkr.unknown_us_);

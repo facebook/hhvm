@@ -1,0 +1,6 @@
+File "enum_exh_default_with_extra.php", line 22, characters 10-13:
+Typing error (Typing[4110])
+File "enum_exh_default_with_extra.php", line 12, characters 10-12:
+This is a value of enum E
+File "enum_exh_default_with_extra.php", line 17, characters 23-30:
+It is incompatible with an array key (int/string)

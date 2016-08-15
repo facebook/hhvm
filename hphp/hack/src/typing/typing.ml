@@ -587,16 +587,30 @@ and stmt env = function
   | Break _ -> env
 
 and check_exhaustiveness env pos ty caselist =
+  check_exhaustiveness_ env pos ty caselist false
+
+and check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   (* Right now we only do exhaustiveness checking for enums. *)
+  (* This function has a built in hack where if Tunresolved has an enum
+     inside then it tells the enum exhaustiveness checker to
+     not punish for extra default *)
   let env, (_, ty) = Env.expand_type env ty in
   match ty with
     | Tunresolved tyl ->
+      let new_enum = enum_coming_from_unresolved ||
+        (List.length tyl> 1 && List.exists tyl ~f:begin fun cur_ty ->
+        let _, (_, cur_ty) = Env.expand_type env cur_ty in
+        match cur_ty with
+          | Tabstract (AKenum _, _) -> true
+          | _ -> false
+      end) in
       List.fold_left tyl ~init:env ~f:begin fun env ty ->
-        check_exhaustiveness env pos ty caselist
+        check_exhaustiveness_ env pos ty caselist new_enum
       end
     | Tabstract (AKenum id, _) ->
       let tc = unsafe_opt @@ Env.get_enum env id in
-      Typing_enum.check_enum_exhaustiveness pos tc caselist;
+      Typing_enum.check_enum_exhaustiveness pos tc
+        caselist enum_coming_from_unresolved;
       env
     | Tany | Tmixed | Tarraykind _ | Tclass _ | Toption _ | Tprim _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)

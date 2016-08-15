@@ -143,12 +143,14 @@ let get_constant tc (seen, has_default) = function
     Errors.enum_switch_not_const pos;
     (seen, has_default)
 
-let check_enum_exhaustiveness pos tc caselist =
+let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
+  (* If this check comes from an enum inside a Tunresolved, then
+     don't punish for having an extra default case *)
   let (seen, has_default) =
     List.fold_left ~f:(get_constant tc) ~init:(SMap.empty, false) caselist in
   let consts = SMap.remove SN.Members.mClass tc.tc_consts in
   let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
-  match (all_cases_handled, has_default) with
+  match (all_cases_handled, has_default && not coming_from_unresolved) with
     | false, false ->
       let const_list = SMap.keys consts in
       let unhandled =

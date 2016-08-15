@@ -148,54 +148,35 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           )
       end)
 
-let say_hello oc =
-  let fd = Unix.descr_of_out_channel oc in
-  Marshal_tools.to_fd_with_preamble fd "Hello"
-
-let read_client_msg ic =
-  Timeout.with_timeout
-    ~timeout:1
-    ~on_timeout: (fun _ -> raise Read_command_timeout)
-    ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
-
-let read_connection_type ic =
-  Timeout.with_timeout
-    ~timeout:1
-    ~on_timeout: (fun _ -> raise Read_command_timeout)
-    ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
-
 let get_persistent_fds env =
   match env.persistent_client_fd with
   | Some fd -> fd
   | None ->
     failwith ("Persistent channel not found!")
 
-let is_persistent env fd =
-  match env.persistent_client_fd with
-  | Some p_fd -> fd = p_fd
-  | None -> false
-
 let send_response_to_client fd response =
   Marshal_tools.to_fd_with_preamble fd response
 
-let handle genv env (ic, oc) =
-  let fd = Unix.descr_of_out_channel oc in
-  let msg = read_client_msg ic in
+let handle genv env client =
+  let msg = ClientProvider.read_client_msg client in
   match msg with
   | Rpc cmd ->
       let t = Unix.gettimeofday () in
       let new_env, response = ServerRpc.handle genv env cmd in
       let cmd_string = ServerRpc.to_string cmd in
       HackEventLogger.handled_command cmd_string t;
-      send_response_to_client fd response;
-      if cmd = ServerRpc.DISCONNECT || not @@ is_persistent env fd
-        then ServerUtils.shutdown_client (ic, oc);
+      ClientProvider.send_response_to_client client response;
+      if cmd = ServerRpc.DISCONNECT ||
+          not @@ (ClientProvider.is_persistent client env)
+        then ClientProvider.shutdown_client client;
       if cmd = ServerRpc.KILL then ServerUtils.die_nicely ();
       new_env
   | Stream cmd ->
+      let ic, oc = ClientProvider.get_channels client in
       stream_response genv env (ic, oc) ~cmd;
       env
   | Debug ->
+      let ic, oc = ClientProvider.get_channels client in
       genv.ServerEnv.debug_channels <- Some (ic, oc);
       ServerDebug.say_hello genv;
       env

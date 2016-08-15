@@ -10,7 +10,6 @@
 
 open Core
 open ServerEnv
-open ServerUtils
 open Reordered_argument_collections
 open String_utils
 
@@ -120,53 +119,42 @@ module Program =
 (* The main loop *)
 (*****************************************************************************)
 
-let sleep_and_check in_fd per_in_fd =
-  let l = match per_in_fd with
-  | Some fd -> [in_fd ; fd]
-  | None -> [in_fd] in
-  let ready_fd_l, _, _ = Unix.select l [] [] (0.5) in
-  match ready_fd_l with
-  | [_; _] -> true, true
-  | [fd] -> if (fd <> in_fd) then false, true else true, false
-  | _ -> false, false
-
-let handle_connection_ genv env ic oc =
+let handle_connection_ genv env client =
   let open ServerCommandTypes in
   try
-    ServerCommand.say_hello oc;
-    match ServerCommand.read_connection_type ic with
+    match ClientProvider.read_connection_type client with
     | Persistent ->
-      let fd = Unix.descr_of_out_channel oc in
       (match env.persistent_client_fd with
       | Some _ ->
-        ServerCommand.send_response_to_client fd
+        ClientProvider.send_response_to_client client
           Persistent_client_alredy_exists;
         env
       | None ->
-        ServerCommand.send_response_to_client fd
+        ClientProvider.send_response_to_client client
           Persistent_client_connected;
+        let ic, _ = ClientProvider.get_channels client in
         { env with persistent_client_fd =
           Some (Timeout.descr_of_in_channel ic)})
     | Non_persistent ->
-      ServerCommand.handle genv env (ic, oc)
+      ServerCommand.handle genv env client
   with
   | Sys_error("Broken pipe") | Read_command_timeout ->
-    shutdown_client (ic, oc);
+    ClientProvider.shutdown_client client;
     env
   | e ->
     let msg = Printexc.to_string e in
     EventLogger.master_exception msg;
     Printf.fprintf stderr "Error: %s\n%!" msg;
     Printexc.print_backtrace stderr;
-    shutdown_client (ic, oc);
+    ClientProvider.shutdown_client client;
     env
 
-let handle_persistent_connection_ genv env ic oc =
+let handle_persistent_connection_ genv env client =
    try
-     ServerCommand.handle genv env (ic, oc)
+     ServerCommand.handle genv env client
    with
    | Sys_error("Broken pipe") | ServerCommandTypes.Read_command_timeout ->
-     shutdown_client (ic, oc);
+     ClientProvider.shutdown_client client;
      {env with
      persistent_client_fd = None;
      edited_files = SMap.empty;
@@ -177,18 +165,18 @@ let handle_persistent_connection_ genv env ic oc =
      EventLogger.master_exception msg;
      Printf.fprintf stderr "Error: %s\n%!" msg;
      Printexc.print_backtrace stderr;
-     shutdown_client (ic, oc);
+     ClientProvider.shutdown_client client;
      {env with
      persistent_client_fd = None;
      edited_files = SMap.empty;
      diag_subscribe = Diagnostic_subscription.empty;
      symbols_cache = SMap.empty}
 
-let handle_connection genv env ic oc is_persistent =
+let handle_connection genv env client is_persistent =
   ServerIdle.stamp_connection ();
   try match is_persistent with
-    | true -> handle_persistent_connection_ genv env ic oc
-    | false -> handle_connection_ genv env ic oc
+    | true -> handle_persistent_connection_ genv env client
+    | false -> handle_connection_ genv env client
   with
   | Unix.Unix_error (e, _, _) ->
      Printf.fprintf stderr "Unix error: %s\n" (Unix.error_message e);
@@ -258,19 +246,16 @@ let rec recheck_loop acc genv env =
 
 let recheck_loop = recheck_loop empty_recheck_loop_stats
 
-(** Retrieve channels to client from monitor process. *)
-let get_client_channels parent_in_fd =
-  let socket = Libancillary.ancil_recv_fd parent_in_fd in
-  (Timeout.in_channel_of_descr socket), (Unix.out_channel_of_descr socket)
-
 let serve genv env in_fd _ =
+  let client_provider = ClientProvider.provider_from_file_descriptor in_fd in
   let env = ref env in
   let last_stats = ref empty_recheck_loop_stats in
   let recheck_id = ref (Random_id.short_string ()) in
   while true do
     ServerMonitorUtils.exit_if_parent_dead ();
     let per_fd = !env.persistent_client_fd in
-    let has_client, has_persistent = sleep_and_check in_fd per_fd in
+    let has_client, has_persistent =
+      ClientProvider.sleep_and_check client_provider per_fd in
     let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
     if not has_persistent && not has_client && not has_parsing_hook
     then begin
@@ -300,10 +285,10 @@ let serve genv env in_fd _ =
     last_stats := stats;
     if has_client then
       (try
-        let ic, oc = get_client_channels in_fd in
+        let client = ClientProvider.accept_client client_provider in
         HackEventLogger.got_client_channels start_t;
         (try
-          env := handle_connection genv !env ic oc false;
+          env := handle_connection genv !env client false;
           HackEventLogger.handled_connection start_t;
         with
         | e ->
@@ -318,9 +303,10 @@ let serve genv env in_fd _ =
       let fd = ServerCommand.get_persistent_fds !env in
       let ic, oc =
         Timeout.in_channel_of_descr fd, Unix.out_channel_of_descr fd in
+      let client = ClientProvider.client_from_channel_pair (ic, oc) in
       HackEventLogger.got_persistent_client_channels start_t;
       (try
-        env := handle_connection genv !env ic oc true;
+        env := handle_connection genv !env client true;
         HackEventLogger.handled_persistent_connection start_t;
       with
       | e ->

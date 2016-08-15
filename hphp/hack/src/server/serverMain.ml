@@ -131,25 +131,26 @@ let sleep_and_check in_fd per_in_fd =
   | _ -> false, false
 
 let handle_connection_ genv env ic oc =
+  let open ServerCommandTypes in
   try
     ServerCommand.say_hello oc;
     match ServerCommand.read_connection_type ic with
-    | ServerCommand.Persistent ->
+    | Persistent ->
       let fd = Unix.descr_of_out_channel oc in
       (match env.persistent_client_fd with
       | Some _ ->
         ServerCommand.send_response_to_client fd
-          ServerCommand.Persistent_client_alredy_exists;
+          Persistent_client_alredy_exists;
         env
       | None ->
         ServerCommand.send_response_to_client fd
-          ServerCommand.Persistent_client_connected;
+          Persistent_client_connected;
         { env with persistent_client_fd =
           Some (Timeout.descr_of_in_channel ic)})
-    | ServerCommand.Non_persistent ->
+    | Non_persistent ->
       ServerCommand.handle genv env (ic, oc)
   with
-  | Sys_error("Broken pipe") | ServerCommand.Read_command_timeout ->
+  | Sys_error("Broken pipe") | Read_command_timeout ->
     shutdown_client (ic, oc);
     env
   | e ->
@@ -164,7 +165,7 @@ let handle_persistent_connection_ genv env ic oc =
    try
      ServerCommand.handle genv env (ic, oc)
    with
-   | Sys_error("Broken pipe") | ServerCommand.Read_command_timeout ->
+   | Sys_error("Broken pipe") | ServerCommandTypes.Read_command_timeout ->
      shutdown_client (ic, oc);
      {env with
      persistent_client_fd = None;

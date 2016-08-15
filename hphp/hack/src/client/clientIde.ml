@@ -55,7 +55,7 @@ let connect_persistent env ~retries =
   try
     let (ic, oc) = connect_persistent env retries start_time in
     HackEventLogger.client_established_connection start_time;
-    Cmd.send_connection_type oc Cmd.Persistent;
+    Cmd.send_connection_type oc ServerCommandTypes.Persistent;
     (ic, oc)
   with
   | e ->
@@ -71,9 +71,9 @@ let read_server_message fd : response_type =
 let read_connection_response fd =
   let res = Marshal_tools.from_fd_with_preamble fd in
   match res with
-  | Cmd.Persistent_client_alredy_exists ->
+  | ServerCommandTypes.Persistent_client_alredy_exists ->
     raise Exit_status.(Exit_with IDE_persistent_client_already_exists)
-  | Cmd.Persistent_client_connected -> ()
+  | ServerCommandTypes.Persistent_client_connected -> ()
 
 let server_disconnected () =
   raise Exit_status.(Exit_with No_error)

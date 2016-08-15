@@ -262,7 +262,7 @@ let connect env =
       connect ~first_attempt:true env env.retries start_time tail_env in
     Tail.close_env tail_env;
     HackEventLogger.client_established_connection start_time;
-    ServerCommand.send_connection_type oc ServerCommand.Non_persistent;
+    ServerCommand.send_connection_type oc ServerCommandTypes.Non_persistent;
     (ic, oc)
   with
   | e ->

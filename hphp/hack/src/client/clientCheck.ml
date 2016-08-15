@@ -18,7 +18,7 @@ module Rpc = ServerRpc
 
 let get_list_files conn (args:client_check_env): string list =
   let ic, oc = conn in
-  Cmd.(stream_request oc LIST_FILES);
+  Cmd.stream_request oc ServerCommandTypes.LIST_FILES;
   let res = ref [] in
   try
     while true do
@@ -91,7 +91,7 @@ let main args =
       Exit_status.No_error
     | MODE_LIST_MODES ->
       let ic, oc = connect args in
-      Cmd.(stream_request oc LIST_MODES);
+      Cmd.stream_request oc ServerCommandTypes.LIST_MODES;
       begin try
         while true do print_endline (Timeout.input_line ic) done;
       with End_of_file -> () end;
@@ -260,7 +260,7 @@ let main args =
       if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_SHOW classname ->
       let ic, oc = connect args in
-      Cmd.(stream_request oc (SHOW classname));
+      Cmd.stream_request oc (ServerCommandTypes.SHOW classname);
       print_all ic;
       Exit_status.No_error
     | MODE_SEARCH (query, type_) ->

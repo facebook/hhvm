@@ -1041,6 +1041,12 @@ void gdImageAABlend (gdImagePtr im)
 	int p_color, p_red, p_green, p_blue;
 	int px, py;
 
+        if (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im)) {
+          color = gdImageColorsTotal(im) - 1;
+        }
+        if (color < 0) {
+          color = 0;
+        }
 	color_red = gdImageRed(im, color);
 	color_green = gdImageGreen(im, color);
 	color_blue = gdImageBlue(im, color);
@@ -1314,6 +1320,8 @@ inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color
  **/
 void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 {
+  if (!gdImageTrueColor(im)) return;
+
 	/* keep them as 32bits */
 	long x, y, inc;
 	long dx, dy,tmp;

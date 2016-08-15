@@ -3802,9 +3802,8 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
   gdImagePtr im = cast<Image>(image)->get();
   if (!im) return false;
 #if HAVE_LIBGD20
-  if ((index >= 0 && gdImageTrueColor(im)) ||
-      (!gdImageTrueColor(im) && index >= 0 &&
-       index < gdImageColorsTotal(im))) {
+  if (index >= 0 &&
+      (gdImageTrueColor(im) || index < gdImageColorsTotal(im))) {
     return make_map_array(
       s_red,  gdImageRed(im,index),
       s_green, gdImageGreen(im,index),

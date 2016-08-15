@@ -68,6 +68,9 @@
     newlen = (d)->len + (n);                  \
     if (newlen >= (d)->a) {                    \
       (d)->a = newlen + SMART_STR_PREALLOC;          \
+      if (UNEXPECTED((d)->a >= INT_MAX)) {       \
+        HPHP::raise_error("String size overflow");     \
+      }                                          \
       SMART_STR_DO_REALLOC(d, what);              \
     }                              \
   }                                \

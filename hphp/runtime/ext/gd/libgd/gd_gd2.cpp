@@ -666,10 +666,12 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 
 	/* Force fmt to a valid value since we don't return anything. */
 	if ((fmt != GD2_FMT_RAW) && (fmt != GD2_FMT_COMPRESSED)) {
-		fmt = im->trueColor ? GD2_FMT_TRUECOLOR_COMPRESSED : GD2_FMT_COMPRESSED;
+		fmt = GD2_FMT_COMPRESSED;
 	}
 	if (im->trueColor) {
 		fmt += 2;
+                assert(fmt == GD2_FMT_TRUECOLOR_RAW ||
+                       fmt == GD2_FMT_TRUECOLOR_COMPRESSED);
 	}
 	/* Make sure chunk size is valid. These are arbitrary values; 64 because it seems
 	 * a little silly to expect performance improvements on a 64x64 bit scale, and

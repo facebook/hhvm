@@ -59,7 +59,7 @@ int DwarfBuf::size() {
 }
 
 uint8_t *DwarfBuf::getBuf() {
-  return &m_buf[0];
+  return m_buf.data();
 }
 
 void DwarfBuf::print() {

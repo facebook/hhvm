@@ -555,11 +555,18 @@ static int php_mb_parse_encoding_list(const char *value, int value_length,
     /* copy the value string for work */
     if (value[0]=='"' && value[value_length-1]=='"' && value_length>2) {
       tmpstr = req::strndup(value + 1, value_length - 2);
-      value_length -= 2;
     } else {
       tmpstr = req::strndup(value, value_length);
     }
-    if (tmpstr == nullptr) {
+    value_length = tmpstr ? strlen(tmpstr) : 0;
+    if (!value_length) {
+      req::free(tmpstr);
+      if (return_list) {
+        *return_list = nullptr;
+      }
+      if (return_size) {
+        *return_size = 0;
+      }
       return 0;
     }
     /* count the number of listed encoding names */
@@ -4248,31 +4255,26 @@ bool HHVM_FUNCTION(mb_send_mail,
   /* To: */
   char *to_r = nullptr;
   int err = 0;
-  if (!to.empty()) {
-    int to_len = to.size();
-    if (to_len > 0) {
-      to_r = req::strndup(to.data(), to_len);
-      for (; to_len; to_len--) {
-        if (!isspace((unsigned char)to_r[to_len - 1])) {
-          break;
-        }
-        to_r[to_len - 1] = '\0';
+  if (auto to_len = strlen(to.data())) { // not to.size()
+    to_r = req::strndup(to.data(), to_len);
+    for (; to_len; to_len--) {
+      if (!isspace((unsigned char)to_r[to_len - 1])) {
+        break;
       }
-      for (int i = 0; to_r[i]; i++) {
-        if (iscntrl((unsigned char)to_r[i])) {
-          /**
-           * According to RFC 822, section 3.1.1 long headers may be
-           * separated into parts using CRLF followed at least one
-           * linear-white-space character ('\t' or ' ').
-           * To prevent these separators from being replaced with a space,
-           * we use the SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
-           */
-          SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
-          to_r[i] = ' ';
-        }
+      to_r[to_len - 1] = '\0';
+    }
+    for (int i = 0; to_r[i]; i++) {
+      if (iscntrl((unsigned char)to_r[i])) {
+        /**
+         * According to RFC 822, section 3.1.1 long headers may be
+         * separated into parts using CRLF followed at least one
+         * linear-white-space character ('\t' or ' ').
+         * To prevent these separators from being replaced with a space,
+         * we use the SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
+         */
+        SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
+        to_r[i] = ' ';
       }
-    } else {
-      to_r = (char*)to.data();
     }
   } else {
     raise_warning("Missing To: field");
@@ -4398,9 +4400,7 @@ bool HHVM_FUNCTION(mb_send_mail,
                                encoded_message.data(),
                                all_headers, cmd.data()));
   mbfl_memory_device_clear(&device);
-  if (to_r != to.data()) {
-    req::free(to_r);
-  }
+  req::free(to_r);
   return ret;
 }
 

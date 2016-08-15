@@ -1818,6 +1818,10 @@ static void gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int color
     {
       colorsWanted = maxColors;
     }
+  if (colorsWanted <= 0) {
+    colorsWanted = 1;
+  }
+
   if (!cimP) {
     nim->pixels = (unsigned char **) gdCalloc (sizeof (unsigned char *), oim->sy);
     if (!nim->pixels)

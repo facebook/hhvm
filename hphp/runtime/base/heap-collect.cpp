@@ -813,16 +813,20 @@ void collectImpl(const char* phase) {
   } else {
     TRACE(2, "normal gc %s at %p\n", phase, vmpc());
   }
-  t_pre_stats = MM().getStats();
+  if (t_gc_num == 0) {
+    t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+  }
+  if (t_enable_samples) {
+    t_pre_stats = MM().getStatsCopy(); // don't check or trigger OOM
+  }
   Marker mkr;
   mkr.init();
   mkr.traceRoots();
   mkr.trace();
   mkr.sweep();
-  if (t_gc_num == 0) {
-    t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+  if (t_enable_samples) {
+    logCollection(phase, mkr);
   }
-  if (t_enable_samples) logCollection(phase, mkr);
   ++t_gc_num;
 }
 

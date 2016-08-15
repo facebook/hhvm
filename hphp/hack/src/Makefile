@@ -72,6 +72,7 @@ MODULES=\
   typing\
   utils\
   utils/collections\
+  utils/disk\
   utils/hh_json\
   monitor\
   watchman\

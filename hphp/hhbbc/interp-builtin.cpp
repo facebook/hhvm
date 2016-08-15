@@ -108,7 +108,7 @@ folly::Optional<Type> const_fold(ISS& env,
     auto const func = Unit::lookupFunc(name.get());
     always_assert_flog(func, "func not found for builtin {}\n", name.get());
     g_context->invokeFuncFew(&retVal, func, nullptr, nullptr,
-      args.size(), &args[0], !env.ctx.unit->useStrictTypes);
+      args.size(), args.data(), !env.ctx.unit->useStrictTypes);
 
     // If we got here, we didn't throw, so we can pop the inputs.
     for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);

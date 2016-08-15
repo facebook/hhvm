@@ -305,8 +305,6 @@ void consume_events(PerfEvent kind, perf_event_handle& pe,
   auto cur = begin;
 
   while (cur != end) {
-    assertx(cur < end);
-
     auto header = reinterpret_cast<struct perf_event_header*>(cur);
 
     if (cur + header->size > base + buffer_sz()) {

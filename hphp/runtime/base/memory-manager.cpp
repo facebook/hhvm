@@ -204,8 +204,8 @@ MemoryManager::~MemoryManager() {
   if (debug) {
     // Check that every allocation in heap has been freed before destruction.
     forEachHeader([&](Header* h) {
-        assert(h->kind() == HeaderKind::Free);
-      });
+      assert(h->kind() == HeaderKind::Free);
+    });
   }
   // ~BigHeap releases its slabs/bigs.
 }
@@ -1251,8 +1251,8 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
 Header* BigHeap::find(const void* p) {
   std::sort(std::begin(m_slabs), std::end(m_slabs),
     [] (const MemBlock& l, const MemBlock& r) {
-      assertx(static_cast<char*>(l.ptr) + l.size < r.ptr ||
-              static_cast<char*>(r.ptr) + r.size < l.ptr);
+      assertx(static_cast<char*>(l.ptr) + l.size <= r.ptr ||
+              static_cast<char*>(r.ptr) + r.size <= l.ptr);
       return l.ptr < r.ptr;
     }
   );

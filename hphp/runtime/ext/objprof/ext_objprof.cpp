@@ -76,7 +76,6 @@ struct ObjprofClassReferral {
 
 
 struct ObjprofMetrics {
-public:
   uint64_t instances{0};
   uint64_t bytes{0};
   double bytes_rel{0};
@@ -87,18 +86,17 @@ using PathsToClass = std::unordered_map<
   Class*, std::unordered_map<std::string, ObjprofClassReferral>>;
 
 struct ObjprofStringAgg {
-public:
-  uint64_t dups;
-  uint64_t refs;
-  uint64_t srefs;
+  uint64_t dups{0};
+  uint64_t refs{0};
+  uint64_t srefs{0};
   String path;
 };
 
 using ObjprofStrings = std::unordered_map<
-  StringData*,
+  String,
   ObjprofStringAgg,
-  string_data_hash,
-  string_data_same
+  hphp_string_hash,
+  hphp_string_same
 >;
 using ObjprofStack = std::vector<std::string>;
 
@@ -491,14 +489,8 @@ void tvGetStrings(
       StringData* str = tv->m_data.pstr;
 
       // Obtain aggregation object
-      auto metrics_it = metrics->find(str);
-      ObjprofStringAgg str_agg;
-      if (metrics_it != metrics->end()) {
-        str_agg = metrics_it->second;
-      } else {
-        str_agg.dups = 0;
-        str_agg.refs = 0;
-        str_agg.srefs = 0;
+      auto &str_agg = (*metrics)[StrNR(str)];
+      if (!str_agg.path.get()) {
         str_agg.path = pathString(path, ":");
       }
 
@@ -512,7 +504,6 @@ void tvGetStrings(
         str_agg.srefs++;
       }
 
-      (*metrics)[str] = str_agg;
       FTRACE(3, " String: {} = {} \n",
         pathString(path, ":").get()->data(),
         str->data()

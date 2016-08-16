@@ -500,7 +500,15 @@ NEVER_INLINE void Marker::init() {
 NEVER_INLINE void Marker::traceRoots() {
   auto const t0 = cpu_micros();
   SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
-  scanRoots(*this);
+  if (RuntimeOption::EvalEnableGCTypeScan) {
+    scanRoots(*this, &type_scanner_);
+    type_scanner_.finish(
+      [this](const void* p){ checkedEnqueue(p, GCBits::Mark); },
+      [this](const void* p, std::size_t size){ (*this)(p, size); }
+    );
+  } else {
+    scanRoots(*this);
+  }
   cscanned_roots_ = cscanned_;
 }
 

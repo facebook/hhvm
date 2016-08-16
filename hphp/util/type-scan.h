@@ -142,12 +142,29 @@ template <typename T> struct WithSuffix {};
 // usually easiest to have the type T derive from MarkCountable<T>.
 template <typename T> struct MarkCountable {};
 
-// Obtain a type index for the given type T and an optional action.
+// Normally countable types are never scanned, even if explicitly
+// requested. However, you may want to scan a countable type in certain contexts
+// (for example, a countable type which can be both allocated in memory and the
+// stack). In that case, use this marker instead.
+template <typename T> struct MarkScannableCountable {};
+
+// Obtain a type index for the given type T and an optional action. Asserts that
+// this index will be used to scan T, and that T is being allocated here.
 template <typename T, typename Action = Action::Auto>
 inline Index getIndexForMalloc() {
   // Why do this instead of detail::Indexer<>::s_index ? Because otherwise Clang
   // decides not to emit all the debug information related to the Indexer.
   detail::Indexer<typename std::remove_cv<T>::type, Action> temp;
+  return temp.s_index;
+}
+
+// Obtain a type index for the given type T. Asserts that this index will be
+// used only to scan the T, and that T is *not* being allocated here.
+template <typename T>
+inline Index getIndexForScan() {
+  // Why do this instead of detail::Indexer<>::s_index ? Because otherwise Clang
+  // decides not to emit all the debug information related to the Indexer.
+  detail::Indexer<typename std::remove_cv<T>::type, detail::ScanAction> temp;
   return temp.s_index;
 }
 
@@ -252,7 +269,7 @@ struct Scanner {
     static_assert(!detail::UnboundedArray<T>::value,
                   "Trying to scan unbounded array");
     assert(size % sizeof(T) == 0);
-    scanByIndex(detail::getIndexForScan<T>(), &val, size);
+    scanByIndex(getIndexForScan<T>(), &val, size);
   }
 
   // Report a range to be conservative scanned. Meant to be called from a type

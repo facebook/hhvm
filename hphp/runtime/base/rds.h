@@ -25,6 +25,8 @@
 
 #include "hphp/runtime/base/types.h"
 
+#include "hphp/util/type-scan.h"
+
 namespace HPHP {
   struct Array;
   struct StringData;
@@ -132,6 +134,11 @@ size_t usedPersistentBytes();
 folly::Range<const char*> normalSection();
 folly::Range<const char*> localSection();
 folly::Range<const char*> persistentSection();
+
+// Invoke F on each initialized allocation in the normal section. F is invoked
+// with a void* pointer to the data, the size of the data, and the stored
+// type-index.
+template <typename F> void forEachNormalAlloc(F);
 
 /*
  * The thread-local pointer to the base of RDS.
@@ -335,10 +342,10 @@ private:
  *
  * Mode indicates whether the memory should be placed in the persistent region
  * or not, Align indicates the alignment requirements, and extraSize allows for
- * allocating additional space beyond sizeof(T), for variable-length
- * structures.  All three arguments are ignored if there is already an
- * allocation for the Symbol---they only affect the first caller for the given
- * Symbol.
+ * allocating additional space beyond sizeof(T), for variable-length structures
+ * (not allowed for normal mode).  All three arguments are ignored if there is
+ * already an allocation for the Symbol---they only affect the first caller for
+ * the given Symbol.
  *
  * N indicates that the binding for `key' will always be in the "normal" RDS
  * region; it is allowed to be true only if `key' is only ever bound with

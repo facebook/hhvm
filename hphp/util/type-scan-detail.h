@@ -26,11 +26,11 @@
  * - All "countable" types (basically ones with explicitly managed ref-counts)
  *   have MarkCountable<> instantiations.
  *
- * - Any call to getIndexForMalloc<T> or Scanner::scan<T> present in the source
- *   results in an Indexer<> instantiation, which provides a static storage
- *   location for the type index. The type index is assigned "kIndexUnknown" at
- *   start-up (conveniently this has value 0, so they can be stored in the
- *   .bss).
+ * - Any call to getIndexForMalloc<T> or getIndexForScan<T> present in the
+ *   source results in an Indexer<> instantiation, which provides a static
+ *   storage location for the type index. The type index is assigned
+ *   "kIndexUnknown" at start-up (conveniently this has value 0, so they can be
+ *   stored in the .bss).
  *
  * - The type annotation macros spit out various static fields and member
  *   functions with special names. These static fields may have special types
@@ -269,15 +269,6 @@ struct Metadata {
 };
 extern const Metadata* g_metadata_table;
 extern std::size_t g_metadata_table_size;
-
-// Internal helper function to obtain a type index for just scanning.
-template <typename T> inline Index getIndexForScan() {
-  // Why do this instead of detail::Indexer<>::s_index ? Because otherwise Clang
-  // decides not to emit all the debug information related to the Indexer.
-  using Adjusted = typename std::remove_cv<T>::type;
-  detail::Indexer<Adjusted, ScanAction> temp;
-  return temp.s_index;
-}
 
 // Check if a type with the given name is on the list of explicitly ignored
 // types. Certain types might give the scanner generator problems, but we can't

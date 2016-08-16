@@ -31,8 +31,11 @@
 #include <folly/Bits.h>
 #include <folly/portability/SysMman.h>
 
-#include "hphp/util/maphuge.h"
+#include <tbb/concurrent_hash_map.h>
+
 #include "hphp/util/logger.h"
+#include "hphp/util/maphuge.h"
+#include "hphp/util/type-scan.h"
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -168,11 +171,11 @@ struct HashCompare {
   }
 };
 
-typedef tbb::concurrent_hash_map<
+using LinkTable = tbb::concurrent_hash_map<
   Symbol,
   Handle,
   HashCompare
-> LinkTable;
+>;
 
 LinkTable s_linkTable;
 
@@ -206,6 +209,8 @@ size_t s_persistent_frontier = 0;
 size_t s_local_frontier = 0;
 
 Link<GenNumber> g_current_gen_link{kInvalidHandle};
+
+AllocDescriptorList s_normal_alloc_descs;
 
 /*
  * Round base up to align, which must be a power of two.
@@ -256,19 +261,23 @@ folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
   return folly::none;
 }
 
-Handle alloc(Mode mode, size_t numBytes, size_t align) {
+Handle alloc(Mode mode, size_t numBytes,
+             size_t align, type_scan::Index tyIndex) {
   switch (mode) {
     case Mode::Normal: {
       align = folly::nextPowTwo(std::max(align, alignof(GenNumber)));
       auto const prefix = roundUp(sizeof(GenNumber), align);
-      numBytes += prefix;
-      always_assert(align <= numBytes);
+      auto const adjustedBytes = numBytes + prefix;
+      always_assert(align <= adjustedBytes);
 
-      if (auto free = findFreeBlock(s_normal_free_lists, numBytes, align)) {
+      if (auto free = findFreeBlock(s_normal_free_lists, adjustedBytes, align)) {
         auto const begin = *free;
         addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
         auto const handle = begin + prefix;
         uninitHandle(handle);
+        s_normal_alloc_descs.push_back(
+          AllocDescriptor{Handle(handle), numBytes, tyIndex}
+        );
         return handle;
       }
 
@@ -277,7 +286,7 @@ Handle alloc(Mode mode, size_t numBytes, size_t align) {
 
       addFreeBlock(s_normal_free_lists, oldFrontier,
                   s_normal_frontier - oldFrontier);
-      s_normal_frontier += numBytes;
+      s_normal_frontier += adjustedBytes;
       if (debug) {
         memset(
           (char*)(tl_base) + oldFrontier,
@@ -290,11 +299,15 @@ Handle alloc(Mode mode, size_t numBytes, size_t align) {
         "Ran out of RDS space (mode=Normal)"
       );
 
-      auto const begin = s_normal_frontier - numBytes;
+      auto const begin = s_normal_frontier - adjustedBytes;
       addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
 
       auto const handle = begin + prefix;
       uninitHandle(handle);
+
+      s_normal_alloc_descs.push_back(
+        AllocDescriptor{Handle(handle), numBytes, tyIndex}
+      );
       return handle;
     }
     case Mode::Persistent: {
@@ -341,19 +354,21 @@ Handle alloc(Mode mode, size_t numBytes, size_t align) {
   not_reached();
 }
 
-Handle allocUnlocked(Mode mode, size_t numBytes, size_t align) {
+Handle allocUnlocked(Mode mode, size_t numBytes,
+                     size_t align, type_scan::Index tyIndex) {
   Guard g(s_allocMutex);
-  return alloc(mode, numBytes, align);
+  return alloc(mode, numBytes, align, tyIndex);
 }
 
-Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align) {
+Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
+                size_t align, type_scan::Index tyIndex) {
   LinkTable::const_accessor acc;
   if (s_linkTable.find(acc, key)) return acc->second;
 
   Guard g(s_allocMutex);
   if (s_linkTable.find(acc, key)) return acc->second;
 
-  auto const retval = alloc(mode, sizeBytes, align);
+  auto const retval = alloc(mode, sizeBytes, align, tyIndex);
 
   recordRds(retval, sizeBytes, key);
   if (!s_linkTable.insert(LinkTable::value_type(key, retval))) {
@@ -371,10 +386,12 @@ Handle attachImpl(Symbol key) {
 void bindOnLinkImpl(std::atomic<Handle>& handle,
                     Mode mode,
                     size_t sizeBytes,
-                    size_t align) {
+                    size_t align,
+                    type_scan::Index tyIndex) {
   Guard g(s_allocMutex);
   if (handle.load(std::memory_order_relaxed) == kInvalidHandle) {
-    handle.store(alloc(mode, sizeBytes, align), std::memory_order_relaxed);
+    handle.store(alloc(mode, sizeBytes, align, tyIndex),
+                 std::memory_order_relaxed);
   }
 }
 
@@ -530,7 +547,8 @@ size_t allocBit() {
     auto const handle = detail::alloc(
       Mode::Normal,
       kAllocBitNumBytes,
-      kAllocBitNumBytes
+      kAllocBitNumBytes,
+      type_scan::getIndexForScan<unsigned char[kAllocBitNumBytes]>()
     );
     s_next_bit = handle * CHAR_BIT;
     s_bits_to_go = kAllocBitNumBytes * CHAR_BIT;

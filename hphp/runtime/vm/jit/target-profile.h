@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/util/type-scan.h"
+
 #include <folly/Optional.h>
 
 namespace HPHP {
@@ -328,6 +330,9 @@ struct TypeProfile {
   static void reduce(TypeProfile& a, const TypeProfile& b) {
     a.type |= b.type;
   }
+
+  // In RDS but can't contain pointers to request-allocated data
+  TYPE_SCAN_IGNORE_ALL;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -349,6 +354,9 @@ struct SwitchProfile {
       a.cases[i] += b.cases[i];
     }
   }
+
+  // In RDS but can't contain pointers to request-allocated data
+  TYPE_SCAN_IGNORE_ALL;
 };
 
 struct SwitchCaseCount {

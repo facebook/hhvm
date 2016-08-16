@@ -50,7 +50,7 @@ struct Variant;
  * For more info on the PHP extension compatibility layer, check out
  * the documentation at "doc/php.extension.compat.layer".
  */
-struct RefData final : type_scan::MarkCountable<RefData> {
+struct RefData final : type_scan::MarkScannableCountable<RefData> {
   /*
    * Some RefData's (static locals) are allocated in RDS, and
    * live until the end of the request.  In this case, we start with a
@@ -279,6 +279,8 @@ private:
       HeaderWord<Flags> m_hdr;
     };
   };
+
+  TYPE_SCAN_CUSTOM() { scanner.scan(m_tv); }
 };
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {

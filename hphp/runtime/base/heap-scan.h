@@ -225,17 +225,36 @@ template<class F> void req::root_handle::scan(F& mark) const {
 //  * rds threadlocal part: conservative scan until we teach the
 //    jit to tell us where the pointers live.
 //  * rds shared part: should not contain heap pointers!
-template<class F> void scanRds(F& mark, rds::Header* rds) {
+template<class F> void scanRds(F& mark, rds::Header* rds,
+                               type_scan::Scanner* scanner = nullptr) {
   // rds sections
+
   auto markSection = [&](folly::Range<const char*> r) {
     mark(r.begin(), r.size());
   };
-  mark.where(RootKind::RdsNormal);
-  markSection(rds::normalSection());
-  mark.where(RootKind::RdsLocal);
-  markSection(rds::localSection());
-  // RDS Persistent section should not contain pointers to any request
-  // allocated memory.
+
+  if (scanner) {
+    scanner->scan(*rds::header());
+
+    rds::forEachNormalAlloc(
+      [&](const void* p, std::size_t size, type_scan::Index index) {
+        scanner->scanByIndex(index, p, size);
+      }
+    );
+
+    // Class stores pointers to request allocated memory in the local
+    // section. Depending on circumstances, this may or may not be valid data,
+    // so scan it conservatively for now. TODO #12203436
+    mark.where(RootKind::RdsLocal);
+    markSection(rds::localSection());
+
+    // Persistent shouldn't contain pointers to any request allocated memory.
+  } else {
+    mark.where(RootKind::RdsNormal);
+    markSection(rds::normalSection());
+    mark.where(RootKind::RdsLocal);
+    markSection(rds::localSection());
+  }
 
   // php stack TODO #6509338 exactly scan the php stack.
   mark.where(RootKind::PhpStack);
@@ -292,10 +311,11 @@ void ThreadLocalManager::scan(F& mark) const {
 }
 
 // Scan request-local roots
-template<class F> void scanRoots(F& mark) {
+template<class F> void scanRoots(F& mark,
+                                 type_scan::Scanner* scanner = nullptr) {
   // rds, including php stack
   if (auto rds = rds::header()) {
-    scanRds(mark, rds);
+    scanRds(mark, rds, scanner);
   }
   // ExecutionContext
   if (!g_context.isNull()) {

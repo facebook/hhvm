@@ -16,18 +16,24 @@
 #ifndef incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 #define incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 
+#include <tbb/concurrent_vector.h>
+
 namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 
 namespace detail {
 
-Handle alloc(Mode mode, size_t numBytes, size_t align);
-Handle allocUnlocked(Mode mode, size_t numBytes, size_t align);
-Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes, size_t align);
+Handle alloc(Mode mode, size_t numBytes, size_t align,
+             type_scan::Index tyIndex);
+Handle allocUnlocked(Mode mode, size_t numBytes, size_t align,
+                     type_scan::Index tyIndex);
+Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
+                size_t align, type_scan::Index tyIndex);
 Handle attachImpl(Symbol key);
 void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
-  size_t sizeBytes, size_t align);
+                    size_t sizeBytes, size_t align,
+                    type_scan::Index tyIndex);
 
 extern size_t s_normal_frontier;
 extern size_t s_persistent_base;
@@ -35,6 +41,16 @@ extern size_t s_persistent_frontier;
 extern size_t s_local_frontier;
 
 extern Link<GenNumber> g_current_gen_link;
+
+struct AllocDescriptor {
+  Handle handle;
+  size_t size;
+  type_scan::Index index;
+};
+
+using AllocDescriptorList = tbb::concurrent_vector<AllocDescriptor>;
+
+extern AllocDescriptorList s_normal_alloc_descs;
 
 }
 
@@ -149,7 +165,10 @@ template<size_t Align>
 void Link<T,N>::bind(Mode mode) {
   assertx(IMPLIES(N, mode == Mode::Normal));
   if (LIKELY(bound())) return;
-  detail::bindOnLinkImpl(m_handle, mode, sizeof(T), Align);
+  detail::bindOnLinkImpl(
+    m_handle, mode, sizeof(T),
+    Align, type_scan::getIndexForScan<T>()
+  );
   recordRds(m_handle, sizeof(T), "Unknown", __PRETTY_FUNCTION__);
 }
 
@@ -158,7 +177,13 @@ void Link<T,N>::bind(Mode mode) {
 template<class T, bool N, size_t Align>
 Link<T,N> bind(Symbol key, Mode mode, size_t extraSize) {
   assertx(IMPLIES(N, mode == Mode::Normal));
-  return Link<T,N>(detail::bindImpl(key, mode, sizeof(T) + extraSize, Align));
+  assertx(IMPLIES(extraSize > 0, mode != Mode::Normal));
+  return Link<T,N>(
+    detail::bindImpl(
+      key, mode, sizeof(T) + extraSize,
+      Align, type_scan::getIndexForScan<T>()
+    )
+  );
 }
 
 template<class T>
@@ -169,7 +194,12 @@ Link<T> attach(Symbol key) {
 template<class T, size_t Align, bool N>
 Link<T,N> alloc(Mode mode) {
   assertx(IMPLIES(N, mode == Mode::Normal));
-  return Link<T,N>(detail::allocUnlocked(mode, sizeof(T), Align));
+  return Link<T,N>(
+    detail::allocUnlocked(
+      mode, sizeof(T), Align,
+      type_scan::getIndexForScan<T>()
+    )
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -252,6 +282,15 @@ inline void uninitHandle(Handle handle) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename F> inline void forEachNormalAlloc(F f) {
+  for (const auto& desc : detail::s_normal_alloc_descs) {
+    if (!isHandleInit(desc.handle, NormalTag{})) continue;
+    f(static_cast<char*>(tl_base) + desc.handle, desc.size, desc.index);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

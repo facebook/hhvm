@@ -57,6 +57,15 @@ struct VMRegs {
    * one active call to handleResume() in each VM nesting level, which is why
    * this is just a single pointer. */
   ActRec* jitCalledFrame;
+
+  TYPE_SCAN_CUSTOM() {
+    // ActRecs are always interior pointers so the type-scanner won't
+    // automatically enqueue them.
+    scanner.scan(fp);
+    scanner.scan(mInstrState);
+    scanner.scan(firstAR);
+    scanner.scan(jitCalledFrame);
+  };
 };
 
 namespace rds {

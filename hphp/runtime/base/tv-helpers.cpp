@@ -52,10 +52,12 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfPersistentString:
         assertPtr(cell.m_data.pstr);
+        assert(cell.m_data.pstr->kindIsValid());
         assert(!cell.m_data.pstr->isRefCounted());
         return;
       case KindOfString:
         assertPtr(cell.m_data.pstr);
+        assert(cell.m_data.pstr->kindIsValid());
         assert(cell.m_data.pstr->checkCount());
         return;
       case KindOfPersistentVec:
@@ -90,20 +92,24 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->kindIsValid());
         assert(!cell.m_data.parr->isRefCounted());
         assert(cell.m_data.parr->isPHPArray());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->kindIsValid());
         assert(cell.m_data.parr->checkCount());
         assert(cell.m_data.parr->isPHPArray());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
+        assert(cell.m_data.pobj->kindIsValid());
         assert(cell.m_data.pobj->checkCount());
         return;
       case KindOfResource:
         assertPtr(cell.m_data.pres);
+        assert(cell.m_data.pres->kindIsValid());
         assert(cell.m_data.pres->checkCount());
         return;
       case KindOfRef:
@@ -123,6 +129,7 @@ bool tvIsPlausible(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     assert(tv.m_data.pref);
     assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
+    assert(tv.m_data.pref->kindIsValid());
     assert(tv.m_data.pref->checkCount());
     tv = *tv.m_data.pref->tv();
   }

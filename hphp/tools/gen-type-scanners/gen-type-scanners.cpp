@@ -48,12 +48,14 @@
  *    other potentially interesting types, as well as address ranges that should
  *    be conservatively scanned.
  *
- * - "Countable". A type is countable if MarkCountable<> is instantiated on
- *   it. Type-scanners are never generated for countable types, it is assumed
- *   their scanners will be hand-written. The point of the type-scanners is to
- *   determine how to find pointers to countable types from other
- *   types. Countable types correspond to the set of types in HHVM which are
- *   explicitly managed by the GC.
+ * - "Countable". A type is countable if MarkCountable<> or
+ *   MarkScannableCountable<> is instantiated on it. Type-scanners are never
+ *   generated for countable types, it is assumed their scanners will be
+ *   hand-written. The exception is if MarkScannableCountable<> is used, in
+ *   which case they'll be scanned if explicitly requested. The point of the
+ *   type-scanners is to determine how to find pointers to countable types from
+ *   other types. Countable types correspond to the set of types in HHVM which
+ *   are explicitly managed by the GC.
  *
  * - "Indexed". An indexed type is a combination of a type and an action. These
  *   occur from an instantiation of Indexer<>. Any particular type can be part
@@ -224,6 +226,7 @@ struct Generator {
                              const std::string& name);
 
   static bool isMarkCountableName(const std::string&);
+  static bool isMarkScannableCountableName(const std::string&);
   static bool isIndexerName(const std::string&);
   static bool isConservativeActionName(const std::string&);
   static bool isWithSuffixActionName(const std::string&);
@@ -356,6 +359,7 @@ struct Generator {
   // discovered (it must grow monotonically, never removing anything).
   std::unordered_set<const Object*> m_ptr_followable;
   std::unordered_set<const Object*> m_countable;
+  std::unordered_set<const Object*> m_scannable_countable;
 
   // List of all layouts. Once computed, the indexed types will have an index
   // into this table for its associated layout.
@@ -366,6 +370,8 @@ struct Generator {
   // sync with the types in type-scan.h.
   static constexpr const char* const s_mark_countable_name =
     "HPHP::type_scan::MarkCountable";
+  static constexpr const char* const s_mark_scannable_countable_name =
+    "HPHP::type_scan::MarkScannableCountable";
   static constexpr const char* const s_indexer_name =
     "HPHP::type_scan::detail::Indexer";
   static constexpr const char* const s_auto_action_name =
@@ -603,6 +609,7 @@ Generator::Generator(const std::string& filename)
 
   std::vector<ObjectType> indexer_types;
   std::vector<ObjectType> countable_markers;
+  std::vector<ObjectType> scannable_countable_markers;
 
   // Iterate through all the objects the debug info parser found, storing the
   // MarkCountable<> markers, and the Indexer<> instances. For everything, store
@@ -613,6 +620,9 @@ Generator::Generator(const std::string& filename)
       indexer_types.emplace_back(type);
     } else if (isMarkCountableName(type.name.name)) {
       countable_markers.emplace_back(type);
+    } else if (isMarkScannableCountableName(type.name.name)) {
+      countable_markers.emplace_back(type);
+      scannable_countable_markers.emplace_back(type);
     }
 
     // Incomplete types are useless for our purposes, so just ignore them.
@@ -635,11 +645,15 @@ Generator::Generator(const std::string& filename)
     };
   }
 
-  // Extract all the types that MarkCountable<> was instantiated on to obtain
-  // all the types which are countable. Since all countable types are
+  // Extract all the types that Mark[Scannable]Countable<> was instantiated on
+  // to obtain all the types which are countable. Since all countable types are
   // automatically pointer followable, mark them as such.
   m_countable = extractFromMarkers<decltype(m_countable)>(
     countable_markers,
+    [&](const Object& o) { return &getMarkedCountable(o); }
+  );
+  m_scannable_countable = extractFromMarkers<decltype(m_scannable_countable)>(
+    scannable_countable_markers,
     [&](const Object& o) { return &getMarkedCountable(o); }
   );
   for (const auto* obj : m_countable) {
@@ -709,6 +723,9 @@ bool Generator::isTemplateName(const std::string& candidate,
 
 bool Generator::isMarkCountableName(const std::string& name) {
   return isTemplateName(name, s_mark_countable_name);
+}
+bool Generator::isMarkScannableCountableName(const std::string& name) {
+  return isTemplateName(name, s_mark_scannable_countable_name);
 }
 bool Generator::isIndexerName(const std::string& name) {
   return isTemplateName(name, s_indexer_name);
@@ -1041,8 +1058,9 @@ void Generator::sanityCheckTemplateParams(const Object& object) {
   }
 }
 
-// Given a MarkCountable<> marker instantiation, extract the object-type its
-// marking. Actually very simple, but do a lot of sanity checking on the result.
+// Given a Mark[Scannable]Countable<> marker instantiation, extract the
+// object-type its marking. Actually very simple, but do a lot of sanity
+// checking on the result.
 const Object& Generator::getMarkedCountable(const Object& mark) const {
   if (mark.incomplete) {
     throw Exception{
@@ -2212,8 +2230,12 @@ void Generator::genLayout(const Object& object,
                           Layout& layout,
                           size_t offset,
                           bool do_forbidden_check) const {
-  // Never generate layout for countable types.
-  if (m_countable.count(&object) > 0) return;
+  // Never generate layout for countable types, unless it was marked as
+  // scannable.
+  if (m_countable.count(&object) > 0 &&
+      !m_scannable_countable.count(&object)) {
+    return;
+  }
 
   const auto& action = getAction(object);
 

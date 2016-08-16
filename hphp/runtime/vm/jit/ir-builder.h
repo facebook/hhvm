@@ -383,6 +383,9 @@ struct BlockPusher {
 
 bool typeMightRelax(const SSATmp* tmp);
 
+bool dictElemMightRelax(const IRInstruction* inst);
+bool keysetElemMightRelax(const IRInstruction* inst);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

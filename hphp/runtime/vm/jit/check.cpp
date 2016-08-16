@@ -510,8 +510,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DBoxPtr
 #define DAllocObj
 #define DArrElem
+#define DVecElem
+#define DDictElem
+#define DKeysetElem
 #define DArrPacked
-#define DArrVec
 #define DCol
 #define DThis
 #define DCtx
@@ -550,7 +552,9 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
-#undef DArrVec
+#undef DVecElem
+#undef DDictElem
+#undef DKeysetElem
 #undef DArrPacked
 #undef DCol
 #undef DThis

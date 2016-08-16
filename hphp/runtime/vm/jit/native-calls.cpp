@@ -244,6 +244,11 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddNewElem,         addNewElemHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
+    {DictAddElemStrKey,  dictAddElemStringKeyHelper, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
+    {DictAddElemIntKey,  dictAddElemIntKeyHelper, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
+
     {ArrayAdd,           arrayAdd, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {Box,                boxValue, DSSA, SNone, {{TV, 0}}},
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
@@ -477,6 +482,7 @@ static CallMap s_callMap {
                  {{SSA, 0}, {TV, 1}, extra(&IncDecData::op)}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
+    {SetNewElemVec, setNewElemVec, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {BindNewElem, MInstrHelpers::bindNewElem, DNone, SSync,
                   {{SSA, 0}, {SSA, 1}}},
     {StringGet, MInstrHelpers::stringGetI, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
@@ -488,7 +494,11 @@ static CallMap s_callMap {
                  {{SSA, 0}, {TV, 1}, {SSA, 2}}},
     {SetWithRefElem, MInstrHelpers::setWithRefElem, DNone, SSync,
                  {{SSA, 0}, {TV, 1}, {TV, 2}}},
-    {ThrowOutOfBounds, collections::throwOOB, DNone, SSync, {{SSA, 0}}},
+    {ElemVecD, MInstrHelpers::elemVecID, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {ElemVecU, MInstrHelpers::elemVecIU, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {ThrowOutOfBounds, throwOOBException, DNone, SSync, {{TV, 0}, {TV, 1}}},
+    {ThrowInvalidArrayKey, invalidArrayKeyHelper, DNone, SSync,
+                 {{SSA, 0}, {TV, 1}}},
 
     /* instanceof checks */
     {InstanceOf, &Class::classof, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},

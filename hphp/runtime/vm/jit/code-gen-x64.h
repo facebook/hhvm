@@ -80,6 +80,8 @@ private:
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,
                   SSATmp* src1, Vloc loc1, Vreg& sf);
 
+  Vptr emitPackedLayoutAddr(SSATmp* idx, Vloc idxLoc, Vloc arrLoc);
+
 private:
   Vreg selectScratchReg(IRInstruction* inst);
   RegSet findFreeRegs(IRInstruction* inst);

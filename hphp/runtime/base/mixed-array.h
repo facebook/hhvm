@@ -136,6 +136,10 @@ struct MixedArray final : private ArrayData,
     return offsetof(MixedArray, m_used);
   }
 
+  static constexpr ptrdiff_t elmOff(uint32_t pos) {
+    return dataOff() + pos * sizeof(Elm);
+  }
+
   struct ElmKey {
     ElmKey() {}
     ElmKey(strhash_t hash, StringData* key)
@@ -468,8 +472,9 @@ public:
 
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;
-  static constexpr auto LvalSilentIntKeyset = &LvalSilentInt;
-  static constexpr auto LvalSilentStrKeyset = &LvalSilentStr;
+
+  static ArrayData* AddToKeyset(ArrayData*, int64_t, bool);
+  static ArrayData* AddToKeyset(ArrayData*, StringData*, bool);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -517,6 +522,8 @@ public:
   void getArrayElm(ssize_t pos, TypedValue* out) const;
   void dupArrayElmWithRef(ssize_t pos, TypedValue* valOut,
     TypedValue* keyOut) const;
+
+  const TypedValue& getArrayElmRef(ssize_t pos) const;
 
   bool isTombstone(ssize_t pos) const;
 

@@ -27,6 +27,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const StaticString s_InvalidKeysetOperationMsg;
+
 namespace {
 inline bool isIntKey(const Cell* cell) {
   return isIntKeyType(cell->m_type);

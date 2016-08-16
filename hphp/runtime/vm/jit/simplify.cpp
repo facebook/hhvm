@@ -25,7 +25,10 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -2382,9 +2385,7 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TInt));
-  assertx(!arr->arrVal()->isDict());
-  assertx(!arr->arrVal()->isVecArray());
-  assertx(!arr->arrVal()->isKeyset());
+  assertx(arr->arrVal()->isPHPArray());
   auto const value = arr->arrVal()->nvGet(idx->intVal());
   return value ? cns(env, *value) : nullptr;
 }
@@ -2394,9 +2395,7 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TStr));
-  assertx(!arr->arrVal()->isDict());
-  assertx(!arr->arrVal()->isVecArray());
-  assertx(!arr->arrVal()->isKeyset());
+  assertx(arr->arrVal()->isPHPArray());
   auto const value = [&] {
     int64_t val;
     if (arr->arrVal()->convertKey(idx->strVal(), val)) {
@@ -2407,26 +2406,8 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   return value ? cns(env, *value) : nullptr;
 }
 
-SSATmp* hackArrayGetImpl(State& env, const ArrayData* arr, SSATmp* key) {
-  assertx(key->hasConstVal(TStr) || key->hasConstVal(TInt));
-  assertx(arr->isDict() || arr->isVecArray() || arr->isKeyset());
-  if (key->type() <= TInt) {
-    auto r = arr->nvGet(key->intVal());
-    return r ? cns(env, *r) : nullptr;
-  }
-  if (key->type() <= TStr) {
-    auto r = arr->nvGet(key->strVal());
-    return r ? cns(env, *r) : nullptr;
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const arr = inst->src(0)->arrVal();
-    if (arr->isDict() || arr->isVecArray() || arr->isKeyset()) {
-      return hackArrayGetImpl(env, arr, inst->src(1));
-    }
     if (inst->src(1)->type() <= TInt) {
       if (auto result = arrIntKeyImpl(env, inst)) {
         return result;
@@ -2445,17 +2426,19 @@ SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyMixedArrayGetK(State& env, const IRInstruction* inst) {
+SSATmp* simplifyArrayIsset(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
     if (inst->src(1)->type() <= TInt) {
       if (auto result = arrIntKeyImpl(env, inst)) {
-        return result;
+        return cns(env, !result->isA(TInitNull));
       }
+      return cns(env, false);
     }
     if (inst->src(1)->type() <= TStr) {
       if (auto result = arrStrKeyImpl(env, inst)) {
-        return result;
+        return cns(env, !result->isA(TInitNull));
       }
+      return cns(env, false);
     }
   }
   return nullptr;
@@ -2463,11 +2446,6 @@ SSATmp* simplifyMixedArrayGetK(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const arr = inst->src(0)->arrVal();
-    if (arr->isDict() || arr->isVecArray() || arr->isKeyset()) {
-      auto r = hackArrayGetImpl(env, arr, inst->src(1));
-      return r ? r : inst->src(2);
-    }
     if (inst->src(1)->isA(TInt)) {
       if (auto result = arrIntKeyImpl(env, inst)) {
         return result;
@@ -2486,10 +2464,6 @@ SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const arr = inst->src(0)->arrVal();
-    if (arr->isDict() || arr->isVecArray() || arr->isKeyset()) {
-      return cns(env, hackArrayGetImpl(env, arr, inst->src(1)) != nullptr);
-    }
     if (inst->src(1)->isA(TInt)) {
       if (arrIntKeyImpl(env, inst)) {
         return cns(env, true);
@@ -2504,6 +2478,155 @@ SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+namespace {
+
+template <typename G>
+SSATmp* arrGetKImpl(State& env, const IRInstruction* inst, G get) {
+  auto const arr = inst->src(0);
+  auto const& extra = inst->extra<IndexData>();
+
+  if (!arr->hasConstVal()) return nullptr;
+  auto const mixed = MixedArray::asMixed(get(arr));
+  auto const& tv = mixed->getArrayElmRef(extra->index);
+  assertx(!MixedArray::isTombstone(tv.m_type));
+  assertx(tvIsPlausible(tv));
+  return cns(env, tv);
+}
+
+template <typename I, typename S, typename F>
+SSATmp* hackArrQueryImpl(State& env, const IRInstruction* inst,
+                         I getInt, S getStr, F finish) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+
+  if (!arr->hasConstVal()) return nullptr;
+  if (!key->hasConstVal(TInt) && !key->hasConstVal(TStr)) return nullptr;
+
+  auto const value = key->hasConstVal(TInt)
+    ? getInt(arr, key->intVal())
+    : getStr(arr, key->strVal());
+  return finish(value);
+}
+
+template <typename I, typename S>
+SSATmp* hackArrGetImpl(State& env, const IRInstruction* inst,
+                       I getInt, S getStr) {
+  return hackArrQueryImpl(
+    env, inst,
+    getInt, getStr,
+    [&](const TypedValue* tv) {
+      if (tv) return cns(env, *tv);
+      gen(env, ThrowOutOfBounds, inst->taken(), inst->src(0), inst->src(1));
+      return cns(env, TBottom);
+    }
+  );
+}
+
+template <typename I, typename S>
+SSATmp* hackArrGetQuietImpl(State& env, const IRInstruction* inst,
+                            I getInt, S getStr) {
+  return hackArrQueryImpl(
+    env, inst,
+    getInt, getStr,
+    [&](const TypedValue* tv) {
+      return tv ? cns(env, *tv) : cns(env, TInitNull);
+    }
+  );
+}
+
+template <typename I, typename S>
+SSATmp* hackArrIssetImpl(State& env, const IRInstruction* inst,
+                         I getInt, S getStr) {
+  return hackArrQueryImpl(
+    env, inst,
+    getInt, getStr,
+    [&](const TypedValue* tv) { return cns(env, tv && !cellIsNull(tv)); }
+  );
+}
+
+template <typename I, typename S>
+SSATmp* hackArrEmptyElemImpl(State& env, const IRInstruction* inst,
+                             I getInt, S getStr) {
+  return hackArrQueryImpl(
+    env, inst,
+    getInt, getStr,
+    [&](const TypedValue* tv) { return cns(env, !tv || !cellToBool(*tv)); }
+  );
+}
+
+template <typename I, typename S>
+SSATmp* hackArrIdxImpl(State& env, const IRInstruction* inst,
+                       I getInt, S getStr) {
+  return hackArrQueryImpl(
+    env, inst,
+    getInt, getStr,
+    [&](const TypedValue* tv) { return tv ? cns(env, *tv) : inst->src(2); }
+  );
+}
+
+template <typename I, typename S>
+SSATmp* hackArrAKExistsImpl(State& env, const IRInstruction* inst,
+                            I getInt, S getStr) {
+  return hackArrQueryImpl(
+    env, inst,
+    getInt, getStr,
+    [&](const TypedValue* tv) { return cns(env, !!tv); }
+  );
+}
+
+}
+
+#define X(Name, Action, Ty, Get)                                      \
+SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
+  return hackArr##Action##Impl(                                       \
+    env, inst,                                                        \
+    [](SSATmp* a, int64_t k) {                                        \
+      return MixedArray::NvGetInt##Ty(a->Get(), k);                   \
+    },                                                                \
+    [](SSATmp* a, const StringData* k) {                              \
+      return MixedArray::NvGetStr##Ty(a->Get(), k);                   \
+    }                                                                 \
+  );                                                                  \
+}
+
+X(DictGet, Get, Dict, dictVal)
+X(KeysetGet, Get, Keyset, keysetVal)
+
+X(DictGetQuiet, GetQuiet, Dict, dictVal)
+X(KeysetGetQuiet, GetQuiet, Keyset, keysetVal)
+
+X(DictIsset, Isset, Dict, dictVal)
+X(KeysetIsset, Isset, Keyset, keysetVal)
+
+X(DictEmptyElem, EmptyElem, Dict, dictVal)
+X(KeysetEmptyElem, EmptyElem, Keyset, keysetVal)
+
+X(DictIdx, Idx, Dict, dictVal)
+X(KeysetIdx, Idx, Keyset, keysetVal)
+
+X(AKExistsDict, AKExists, Dict, dictVal)
+X(AKExistsKeyset, AKExists, Keyset, keysetVal)
+
+#undef X
+
+SSATmp* simplifyMixedArrayGetK(State& env, const IRInstruction* inst) {
+  return arrGetKImpl(env, inst, [](SSATmp* a) { return a->arrVal(); });
+}
+
+SSATmp* simplifyDictGetK(State& env, const IRInstruction* inst) {
+  return arrGetKImpl(env, inst, [](SSATmp* a) { return a->dictVal(); });
+}
+
+SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
+  return arrGetKImpl(env, inst, [](SSATmp* a) { return a->keysetVal(); });
+}
+
+SSATmp* simplifyCheckArrayCOW(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  if (arr->isA(TPersistentArrLike)) return gen(env, Jmp, inst->taken());
+  return nullptr;
+}
+
 SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   auto const val = inst->src(0);
   auto const ty = val->type();
@@ -2514,6 +2637,7 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   if (ty <= oneTy) return cns(env, 1);
 
   if (ty <= TArr) return gen(env, CountArray, val);
+  if (ty <= TVec) return gen(env, CountVec, val);
 
   if (ty < TObj) {
     auto const cls = ty.clsSpec().cls();
@@ -2557,6 +2681,11 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
     return nullptr;
 }
 
+SSATmp* simplifyCountVec(State& env, const IRInstruction* inst) {
+  auto const vec = inst->src(0);
+  return vec->hasConstVal(TVec) ? cns(env, vec->vecVal()->size()) : nullptr;
+}
+
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) : nullptr;
@@ -2573,6 +2702,21 @@ SSATmp* simplifyLookupClsRDS(State& env, const IRInstruction* inst) {
 SSATmp* simplifyLdStrLen(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal(TStr) ? cns(env, src->strVal()->size()) : nullptr;
+}
+
+SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
+  auto const src0 = inst->src(0);
+  auto const src1 = inst->src(1);
+  if (src0->hasConstVal(TVec) && src1->hasConstVal(TInt)) {
+    auto const vec = src0->vecVal();
+    auto const idx = src1->intVal();
+    assertx(vec->isVecArray());
+    if (idx >= 0) {
+      auto const tv = PackedArray::NvGetIntVec(vec, idx);
+      return tv ? cns(env, *tv) : nullptr;
+    }
+  }
+  return nullptr;
 }
 
 template <class F>
@@ -2802,6 +2946,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Count)
   X(CountArray)
   X(CountArrayFast)
+  X(CountVec)
   X(DecRef)
   X(DecRefNZ)
   X(DefLabel)
@@ -2825,6 +2970,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LookupClsRDS)
   X(LdClsMethod)
   X(LdStrLen)
+  X(LdVecElem)
   X(MethodExists)
   X(CheckCtxThis)
   X(CastCtxThis)
@@ -2918,8 +3064,24 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(EqCls)
   X(ArrayGet)
   X(MixedArrayGetK)
+  X(DictGet)
+  X(DictGetQuiet)
+  X(DictGetK)
+  X(KeysetGet)
+  X(KeysetGetQuiet)
+  X(KeysetGetK)
+  X(CheckArrayCOW)
+  X(ArrayIsset)
+  X(DictIsset)
+  X(KeysetIsset)
+  X(DictEmptyElem)
+  X(KeysetEmptyElem)
   X(ArrayIdx)
   X(AKExistsArr)
+  X(DictIdx)
+  X(AKExistsDict)
+  X(KeysetIdx)
+  X(AKExistsKeyset)
   X(OrdStr)
   X(LdLoc)
   X(LdStk)
@@ -3157,6 +3319,8 @@ void copyProp(IRInstruction* inst) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
   if (idxVal < 0 || idxVal > PackedArray::MaxSize) return PackedBounds::Out;
 
@@ -3183,6 +3347,8 @@ PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
   }
   return PackedBounds::Unknown;
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 Type packedArrayElemType(SSATmp* arr, SSATmp* idx, const Class* ctx) {
   assertx(arr->isA(TArr) &&
@@ -3222,6 +3388,132 @@ Type packedArrayElemType(SSATmp* arr, SSATmp* idx, const Class* ctx) {
       return typeFromRAT(at->elemType(), ctx) & t;
   }
   not_reached();
+}
+
+Type vecElemType(SSATmp* arr, SSATmp* idx) {
+  assertx(arr->isA(TVec));
+  assertx(!idx || idx->isA(TInt));
+
+  if (arr->hasConstVal()) {
+    // If both the array and idx are known statically, we can resolve it to the
+    // precise type.
+    if (idx && idx->hasConstVal()) {
+      auto const idxVal = idx->intVal();
+      if (idxVal >= 0 && idxVal < arr->vecVal()->size()) {
+        auto const val = PackedArray::NvGetIntVec(arr->vecVal(), idxVal);
+        return val ? Type(val->m_type) : TBottom;
+      }
+      return TBottom;
+    }
+
+    // Otherwise we can constrain the type according to the union of all the
+    // types present in the vec.
+    Type type{TBottom};
+    PackedArray::IterateV(
+      arr->vecVal(),
+      [&](const TypedValue* v) { type |= Type(v->m_type); }
+    );
+    return type;
+  }
+
+  // Vecs always contain initialized cells
+  return arr->isA(TPersistentVec) ? TUncountedInit : TInitCell;
+}
+
+Type dictElemType(SSATmp* arr, SSATmp* idx) {
+  assertx(arr->isA(TDict));
+  assertx(!idx || idx->isA(TInt | TStr));
+
+  if (arr->hasConstVal()) {
+    // If both the array and idx are known statically, we can resolve it to the
+    // precise type.
+    if (idx && idx->hasConstVal(TInt)) {
+      auto const idxVal = idx->intVal();
+      auto const val = MixedArray::NvGetIntDict(arr->dictVal(), idxVal);
+      return val ? Type(val->m_type) : TBottom;
+    }
+
+    if (idx && idx->hasConstVal(TStr)) {
+      auto const idxVal = idx->strVal();
+      auto const val = MixedArray::NvGetStrDict(arr->dictVal(), idxVal);
+      return val ? Type(val->m_type) : TBottom;
+    }
+
+    // Otherwise we can constrain the type according to the union of all the
+    // types present in the dict.
+    Type type{TBottom};
+    MixedArray::IterateKV(
+      MixedArray::asMixed(arr->dictVal()),
+      [&](const TypedValue* k, const TypedValue* v) {
+        // Ignore values which can't correspond to the key's type
+        if (isIntType(k->m_type)) {
+          if (!idx || idx->type().maybe(TInt)) type |= Type(v->m_type);
+        } else if (isStringType(k->m_type)) {
+          if (!idx || idx->type().maybe(TStr)) type |= Type(v->m_type);
+        }
+      }
+    );
+    return type;
+  }
+
+  // Dicts always contain initialized cells
+  return arr->isA(TPersistentDict) ? TUncountedInit : TInitCell;
+}
+
+Type keysetElemType(SSATmp* arr, SSATmp* idx) {
+  assertx(arr->isA(TKeyset));
+  assertx(!idx || idx->isA(TInt | TStr));
+
+  if (arr->hasConstVal()) {
+    // If both the array and idx are known statically, we can resolve it to the
+    // precise type.
+    if (idx && idx->hasConstVal(TInt)) {
+      auto const idxVal = idx->intVal();
+      auto const val = MixedArray::NvGetIntKeyset(arr->keysetVal(), idxVal);
+      return val ? Type(val->m_type) : TBottom;
+    }
+
+    if (idx && idx->hasConstVal(TStr)) {
+      auto const idxVal = idx->strVal();
+      auto const val = MixedArray::NvGetStrKeyset(arr->keysetVal(), idxVal);
+      return val ? Type(val->m_type) : TBottom;
+    }
+
+    // Otherwise we can constrain the type according to the union of all the
+    // types present in the keyset.
+    Type type{TBottom};
+    MixedArray::IterateKV(
+      MixedArray::asMixed(arr->keysetVal()),
+      [&](const TypedValue* k, const TypedValue* v) {
+        // Ignore values which can't correspond to the key's type
+        if (isIntType(k->m_type)) {
+          assertx(isIntType(v->m_type));
+          if (!idx || idx->type().maybe(TInt)) type |= Type(v->m_type);
+        } else if (isStringType(k->m_type)) {
+          assertx(isStringType(v->m_type));
+          if (!idx || idx->type().maybe(TStr)) type |= Type(v->m_type);
+        }
+      }
+    );
+
+    // The key is always the value, so, for instance, if there's nothing but
+    // strings in the keyset, we know an int idx can't access a valid value.
+    if (idx) {
+      if (idx->isA(TInt)) type &= TInt;
+      if (idx->isA(TStr)) type &= TStr;
+    }
+    return type;
+  }
+
+  // Keysets always contain strings or integers. We can further constrain this
+  // if we know the idx type, as the key is always the value.
+  auto type = TStr | TInt;
+  if (idx) {
+    if (idx->isA(TInt)) type &= TInt;
+    if (idx->isA(TStr)) type &= TStr;
+  }
+  if (arr->isA(TPersistentKeyset)) type &= TUncountedInit;
+  return type;
 }
 
 //////////////////////////////////////////////////////////////////////

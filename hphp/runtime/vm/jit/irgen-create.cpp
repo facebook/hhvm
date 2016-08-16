@@ -364,17 +364,31 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
 }
 
 void emitAddElemC(IRGS& env) {
-  // This is just to peek at the type; it'll be consumed for real down below and
-  // we don't want to constrain it if we're just going to InterpOne.
+  // This is just to peek at the types; they'll be consumed for real down below
+  // and we don't want to constrain it if we're just going to InterpOne.
   auto const kt = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
+  auto const at = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
   Opcode op;
-  if (kt <= TInt) {
-    op = AddElemIntKey;
-  } else if (kt <= TStr) {
-    op = AddElemStrKey;
+  if (at <= TArr) {
+    if (kt <= TInt) {
+      op = AddElemIntKey;
+    } else if (kt <= TStr) {
+      op = AddElemStrKey;
+    } else {
+      interpOne(env, TArr, 3);
+      return;
+    }
+  } else if (at <= TDict) {
+    if (kt <= TInt) {
+      op = DictAddElemIntKey;
+    } else if (kt <= TStr) {
+      op = DictAddElemStrKey;
+    } else {
+      interpOne(env, TDict, 3);
+      return;
+    }
   } else {
-    interpOne(env, TArr, 3);
-    return;
+    PUNT(AddElemC-BadArr);
   }
 
   // val is teleported from the stack to the array, so we don't have to do any

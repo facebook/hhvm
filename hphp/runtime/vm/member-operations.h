@@ -645,6 +645,40 @@ inline TypedValue* ElemDDict(TypedValue* base, key_type<keyType> key) {
 }
 
 /**
+ * ElemD when base is a Keyset
+ */
+template <bool reffy>
+[[noreturn]]
+inline TypedValue* ElemDKeysetPre(TypedValue* base, int64_t key) {
+  if (reffy) throwRefInvalidArrayValueException(base->m_data.parr);
+  throwInvalidKeysetOperation();
+}
+
+template <bool reffy>
+[[noreturn]]
+inline TypedValue* ElemDKeysetPre(TypedValue* base, StringData* key) {
+  if (reffy) throwRefInvalidArrayValueException(base->m_data.parr);
+  throwInvalidKeysetOperation();
+}
+
+template <bool reffy>
+[[noreturn]]
+inline TypedValue* ElemDKeysetPre(TypedValue* base, TypedValue key) {
+  auto const dt = key.m_type;
+  if (isIntType(dt))    ElemDKeysetPre<reffy>(base, key.m_data.num);
+  if (isStringType(dt)) ElemDKeysetPre<reffy>(base, key.m_data.pstr);
+  throwInvalidArrayKeyException(&key, base->m_data.parr);
+}
+
+template <bool reffy, KeyType keyType>
+[[noreturn]]
+inline TypedValue* ElemDKeyset(TypedValue* base, key_type<keyType> key) {
+  assertx(tvIsKeyset(base));
+  assertx(tvIsPlausible(*base));
+  ElemDKeysetPre<reffy>(base, key);
+}
+
+/**
  * ElemD when base is Null
  */
 template <MOpFlags flags, KeyType keyType>
@@ -757,7 +791,7 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
       return ElemDDict<reffy, keyType>(base, key);
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      throwInvalidKeysetOperation();
+      return ElemDKeyset<reffy, keyType>(base, key);
     case KindOfPersistentArray:
     case KindOfArray:
       return ElemDArray<flags, reffy, keyType>(base, key);
@@ -899,56 +933,30 @@ inline TypedValue* ElemUDict(TypedValue* base, key_type<keyType> key) {
 /**
  * ElemU when base is a Keyset
  */
+[[noreturn]]
 inline TypedValue* ElemUKeysetPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
-  ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    MixedArray::LvalSilentIntKeyset(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
-  }
-  if (newArr != oldArr) {
-    base->m_type = KindOfKeyset;
-    base->m_data.parr = newArr;
-    assertx(cellIsPlausible(*base));
-    decRefArr(oldArr);
-  }
-  return ret->asTypedValue();
+  throwInvalidKeysetOperation();
 }
 
+[[noreturn]]
 inline TypedValue* ElemUKeysetPre(TypedValue* base, StringData* key) {
-  Variant* ret = nullptr;
-  ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    MixedArray::LvalSilentStrKeyset(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
-  }
-  if (newArr != oldArr) {
-    base->m_type = KindOfKeyset;
-    base->m_data.parr = newArr;
-    assertx(cellIsPlausible(*base));
-    decRefArr(oldArr);
-  }
-  return ret->asTypedValue();
+  throwInvalidKeysetOperation();
 }
 
+[[noreturn]]
 inline TypedValue* ElemUKeysetPre(TypedValue* base, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return ElemUKeysetPre(base, key.m_data.num);
-  if (isStringType(dt)) return ElemUKeysetPre(base, key.m_data.pstr);
+  if (isIntType(dt))    ElemUKeysetPre(base, key.m_data.num);
+  if (isStringType(dt)) ElemUKeysetPre(base, key.m_data.pstr);
   throwInvalidArrayKeyException(&key, base->m_data.parr);
 }
 
 template <KeyType keyType>
+[[noreturn]]
 inline TypedValue* ElemUKeyset(TypedValue* base, key_type<keyType> key) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(*base));
-  auto* result = ElemUKeysetPre(base, key);
-  assertx(tvIsKeyset(base));
-  assertx(tvIsPlausible(*base));
-  assertx(isIntType(result->m_type) || isStringType(result->m_type));
-  return result;
+  ElemUKeysetPre(base, key);
 }
 
 /**

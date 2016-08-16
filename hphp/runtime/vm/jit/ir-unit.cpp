@@ -120,6 +120,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case JmpSwitchDest:
     case RaiseError:
     case ThrowOutOfBounds:
+    case ThrowInvalidArrayKey:
     case ThrowInvalidOperation:
     case ThrowArithmeticError:
     case ThrowDivisionByZeroError:

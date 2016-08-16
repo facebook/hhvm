@@ -2089,6 +2089,7 @@ MixedArray::AppendWithRefDict(ArrayData* adIn, const Variant& v, bool copy) {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* MixedArray::AppendKeyset(ArrayData* ad, Cell v, bool copy) {
+  assert(ad->isKeyset());
   if (isIntType(v.m_type)) {
     return SetInt(ad, v.m_data.num, v, copy);
   } else if (isStringType(v.m_type)) {
@@ -2096,6 +2097,16 @@ ArrayData* MixedArray::AppendKeyset(ArrayData* ad, Cell v, bool copy) {
   } else {
     throwInvalidArrayKeyException(&v, ad);
   }
+}
+
+ArrayData* MixedArray::AddToKeyset(ArrayData* ad, int64_t i, bool copy) {
+  assert(ad->isKeyset());
+  return SetInt(ad, i, make_tv<KindOfInt64>(i), copy);
+}
+
+ArrayData* MixedArray::AddToKeyset(ArrayData* ad, StringData* s, bool copy) {
+  assert(ad->isKeyset());
+  return SetStr(ad, s, make_tv<KindOfString>(s), copy);
 }
 
 ArrayData*

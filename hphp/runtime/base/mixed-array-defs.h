@@ -225,6 +225,13 @@ void MixedArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
 }
 
 ALWAYS_INLINE
+const TypedValue& MixedArray::getArrayElmRef(ssize_t pos) const {
+  assert(size_t(pos) < m_used);
+  auto& elm = data()[pos];
+  return elm.data;
+}
+
+ALWAYS_INLINE
 void MixedArray::dupArrayElmWithRef(ssize_t pos,
                                    TypedValue* valOut,
                                    TypedValue* keyOut) const {

@@ -73,12 +73,19 @@ void getBaseType(Opcode rawOp, bool predict,
   }
 
   if ((op == SetElem || op == UnsetElem || op == SetWithRefElem) &&
-      baseType.maybe(TArr | TStr)) {
+      baseType.maybe(TArrLike | TStr)) {
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
     baseValChanged = true;
     if (baseType.maybe(TArr)) baseType |= TCountedArr;
+    if (baseType.maybe(TVec)) {
+      baseType |= TCountedVec;
+      /* Unsetting a vec element can turn it into a dict */
+      if (op == UnsetElem) baseType |= TCountedDict;
+    }
+    if (baseType.maybe(TDict)) baseType |= TCountedDict;
+    if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
     if (baseType.maybe(TStr)) baseType |= TCountedStr;
   }
 }

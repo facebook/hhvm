@@ -84,8 +84,12 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
+ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
+ArrayData* dictAddElemStringKeyHelper(ArrayData* ad, StringData* key,
+                                      TypedValue val);
 void setNewElem(TypedValue* base, Cell val);
 void setNewElemArray(TypedValue* base, Cell val);
+void setNewElemVec(TypedValue* base, Cell val);
 RefData* boxValue(TypedValue tv);
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
 /* Helper functions for conversion instructions that are too
@@ -158,6 +162,12 @@ TypedValue arrayIdxIc(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
+TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
+
+TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
+
 TypedValue mapIdx(ObjectData*, StringData*, TypedValue);
 
 TypedValue getMemoKeyHelper(TypedValue tv);
@@ -216,6 +226,9 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func);
  */
 [[noreturn]] void throwSwitchMode();
 
+[[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
+[[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
+
 namespace MInstrHelpers {
 TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);
@@ -225,6 +238,8 @@ void bindElemC(TypedValue*, TypedValue, RefData*);
 void setWithRefElem(TypedValue*, TypedValue, TypedValue);
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
 void bindNewElem(TypedValue* base, RefData* val);
+TypedValue* elemVecID(TypedValue* base, int64_t key);
+TypedValue* elemVecIU(TypedValue* base, int64_t key);
 }
 
 /*

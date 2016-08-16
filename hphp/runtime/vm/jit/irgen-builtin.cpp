@@ -1528,6 +1528,77 @@ void implMapIdx(IRGS& env) {
   finish(pelem);
 }
 
+void implVecIdx(IRGS& env) {
+  auto const def = popC(env);
+  auto const key = popC(env);
+  auto const vec = popC(env);
+
+  assertx(vec->isA(TVec));
+
+  auto const finish = [&](SSATmp* elem) {
+    pushIncRef(env, elem);
+    decRef(env, def);
+    decRef(env, key);
+    decRef(env, vec);
+  };
+
+  if (key->isA(TNull | TStr)) return finish(def);
+
+  if (!key->isA(TInt)) {
+    gen(env, ThrowInvalidArrayKey, vec, key);
+    return;
+  }
+
+  auto const elem = cond(
+    env,
+    [&] (Block* taken) {
+      auto const length = gen(env, CountVec, vec);
+      auto const cmp = gen(env, CheckRange, key, length);
+      gen(env, JmpZero, taken, cmp);
+    },
+    [&] { return gen(env, LdVecElem, vec, key); },
+    [&] { return def; }
+  );
+
+  auto const pelem = profiledType(env, elem, [&] { finish(elem); } );
+  finish(pelem);
+}
+
+void implDictKeysetIdx(IRGS& env, bool is_dict) {
+  auto const def = popC(env);
+  auto const key = popC(env);
+  auto const base = popC(env);
+
+  assertx(base->isA(is_dict ? TDict : TKeyset));
+
+  auto const finish = [&](SSATmp* elem) {
+    pushIncRef(env, elem);
+    decRef(env, def);
+    decRef(env, key);
+    decRef(env, base);
+  };
+
+  if (key->isA(TNull)) return finish(def);
+
+  if (!key->isA(TInt) && !key->isA(TStr)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return;
+  }
+
+  auto const elem = profiledArrayAccess(env, base, key,
+    [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
+      return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
+                 base, key);
+    },
+    [&] (SSATmp* key) {
+      return gen(env, is_dict ? DictIdx : KeysetIdx, base, key, def);
+    }
+  );
+
+  auto const pelem = profiledType(env, elem, [&] { finish(elem); });
+  finish(pelem);
+}
+
 const StaticString s_idx("hh\\idx");
 
 void implGenericIdx(IRGS& env) {
@@ -1591,6 +1662,10 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
 
 void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
+  if (arrType <= TVec) return implVecIdx(env);
+  if (arrType <= TDict) return implDictKeysetIdx(env, true);
+  if (arrType <= TKeyset) return implDictKeysetIdx(env, false);
+
   if (!(arrType <= TArr)) {
     // raise fatal
     interpOne(env, TCell, 3);
@@ -1605,6 +1680,10 @@ void emitIdx(IRGS& env) {
   auto const base     = topC(env, BCSPRelOffset{2}, DataTypeGeneric);
   auto const keyType  = key->type();
   auto const baseType = base->type();
+
+  if (baseType <= TVec) return implVecIdx(env);
+  if (baseType <= TDict) return implDictKeysetIdx(env, true);
+  if (baseType <= TKeyset) return implDictKeysetIdx(env, false);
 
   if (keyType <= TNull || !baseType.maybe(TArr | TObj | TStr)) {
     auto const def = popC(env, DataTypeGeneric);
@@ -1650,6 +1729,46 @@ void emitIdx(IRGS& env) {
 void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
   auto key = popC(env);
+
+  if (arr->isA(TVec)) {
+    if (key->isA(TNull | TStr)) {
+      push(env, cns(env, false));
+      decRef(env, arr);
+      decRef(env, key);
+      return;
+    }
+    if (!key->isA(TInt)) {
+      gen(env, ThrowInvalidArrayKey, arr, key);
+      return;
+    }
+    auto const length = gen(env, CountVec, arr);
+    push(env, gen(env, CheckRange, key, length));
+    decRef(env, arr);
+    return;
+  }
+
+  if (arr->isA(TDict) || arr->isA(TKeyset)) {
+    if (key->isA(TNull)) {
+      push(env, cns(env, false));
+      decRef(env, arr);
+      decRef(env, key);
+      return;
+    }
+    if (!key->isA(TInt) && !key->isA(TStr)) {
+      gen(env, ThrowInvalidArrayKey, arr, key);
+      return;
+    }
+    auto const val = gen(
+      env,
+      arr->isA(TDict) ? AKExistsDict : AKExistsKeyset,
+      arr,
+      key
+    );
+    push(env, val);
+    decRef(env, arr);
+    decRef(env, key);
+    return;
+  }
 
   if (!arr->isA(TArr) && !arr->isA(TObj)) PUNT(AKExists_badArray);
 

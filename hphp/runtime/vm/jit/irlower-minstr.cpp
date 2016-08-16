@@ -326,10 +326,6 @@ void cgEmptyElem(IRLS& env, const IRInstruction* i) {
 
 namespace {
 
-ptrdiff_t elmOff(uint32_t pos) {
-  return sizeof(MixedArray) + pos * sizeof(MixedArray::Elm);
-}
-
 /*
  * Make an ArgGroup for array elem instructions that takes:
  *    1/ the ArrayData* (or pointer to a KindOfArray TV)
@@ -378,6 +374,111 @@ void implArraySet(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
+void implVecSet(IRLS& env, const IRInstruction* inst) {
+  bool const setRef  = inst->op() == VecSetRef;
+  BUILD_OPTAB(VECSET_HELPER_TABLE, setRef);
+
+  auto args = argGroup(env, inst).
+    ssa(0).
+    ssa(1).
+    typedValue(2);
+  if (setRef) args.ssa(3);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implDictSet(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  bool const setRef  = inst->op() == DictSetRef;
+  BUILD_OPTAB(DICTSET_HELPER_TABLE, getKeyType(key), setRef);
+
+  auto args = argGroup(env, inst).
+    ssa(0).
+    ssa(1).
+    typedValue(2);
+  if (setRef) args.ssa(3);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implElemDict(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags = inst->op() == ElemDictW ? MOpFlags::Warn : MOpFlags::None;
+  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implDictGet(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags =
+    (inst->op() == DictGetQuiet) ? MOpFlags::None : MOpFlags::Warn;
+  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implDictIsset(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  auto const empty   = inst->op() == DictEmptyElem;
+  BUILD_OPTAB(DICT_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implKeysetGet(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags =
+    (inst->op() == KeysetGetQuiet) ? MOpFlags::None : MOpFlags::Warn;
+  BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implElemKeyset(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags = inst->op() == ElemKeysetW ? MOpFlags::Warn : MOpFlags::None;
+  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implKeysetIsset(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  auto const empty   = inst->op() == KeysetEmptyElem;
+  BUILD_OPTAB(KEYSET_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -413,10 +514,10 @@ void cgCheckMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
   }
   { // Fail if the Elm key value doesn't match.
     auto const sf = v.makeReg();
-    v << cmpqm{key, arr[elmOff(pos) + MixedArray::Elm::keyOff()], sf};
+    v << cmpqm{key, arr[MixedArray::elmOff(pos) + MixedArray::Elm::keyOff()], sf};
     ifThen(v, CC_NE, sf, branch);
   }
-  auto const dataOff = elmOff(pos) + MixedArray::Elm::dataOff();
+  auto const dataOff = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
 
   { // Fail if the Elm key type doesn't match.
     auto const sf = v.makeReg();
@@ -452,6 +553,116 @@ void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgProfileDictOffset(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+
+  BUILD_OPTAB(PROFILE_DICT_OFFSET_HELPER_TABLE, getKeyType(key));
+  auto& v = vmain(env);
+
+  auto const rprof = v.makeReg();
+  v << lea{rvmtl()[inst->extra<ProfileDictOffset>()->handle], rprof};
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1).reg(rprof);
+
+  cgCallHelper(v, env, CallSpec::direct(opFunc), kVoidDest, SyncOptions::Sync,
+               args);
+}
+
+void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
+  auto const dict = srcLoc(env, inst, 0).reg();
+  auto const key = srcLoc(env, inst, 1).reg();
+  auto const branch = label(env, inst->taken());
+  auto const pos = inst->extra<CheckDictOffset>()->index;
+  auto& v = vmain(env);
+
+  { // Also fail if our predicted position exceeds bounds.
+    auto const sf = v.makeReg();
+    v << cmplim{safe_cast<int32_t>(pos), dict[MixedArray::usedOff()], sf};
+    ifThen(v, CC_LE, sf, branch);
+  }
+  { // Fail if the Elm key value doesn't match.
+    auto const sf = v.makeReg();
+    v << cmpqm{key, dict[MixedArray::elmOff(pos) + MixedArray::Elm::keyOff()], sf};
+    ifThen(v, CC_NE, sf, branch);
+  }
+  auto const dataOff = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+
+  { // Fail if the Elm key type doesn't match.
+    auto const sf = v.makeReg();
+    v << cmplim{0, dict[dataOff + TVOFF(m_aux)], sf};
+
+    auto const key_type = getKeyType(inst->src(1));
+    assertx(key_type != KeyType::Any);
+
+    // Note that if `key' actually is an integer-ish string, we'd fail this
+    // check (and most likely would have failed the previous check also), but
+    // this false negative is allowed.
+    auto const is_str_key = key_type == KeyType::Str;
+    ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
+  }
+  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
+    auto const sf = v.makeReg();
+    v << cmpbim{KindOfUninit, dict[dataOff + TVOFF(m_type)], sf};
+    ifThen(v, CC_L, sf, branch);
+  }
+}
+
+void cgProfileKeysetOffset(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+
+  BUILD_OPTAB(PROFILE_KEYSET_OFFSET_HELPER_TABLE, getKeyType(key));
+  auto& v = vmain(env);
+
+  auto const rprof = v.makeReg();
+  v << lea{rvmtl()[inst->extra<ProfileKeysetOffset>()->handle], rprof};
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1).reg(rprof);
+
+  cgCallHelper(v, env, CallSpec::direct(opFunc), kVoidDest, SyncOptions::Sync,
+               args);
+}
+
+void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
+  auto const keyset = srcLoc(env, inst, 0).reg();
+  auto const key = srcLoc(env, inst, 1).reg();
+  auto const branch = label(env, inst->taken());
+  auto const pos = inst->extra<CheckKeysetOffset>()->index;
+  auto& v = vmain(env);
+
+  { // Also fail if our predicted position exceeds bounds.
+    auto const sf = v.makeReg();
+    v << cmplim{safe_cast<int32_t>(pos), keyset[MixedArray::usedOff()], sf};
+    ifThen(v, CC_LE, sf, branch);
+  }
+  { // Fail if the Elm key value doesn't match.
+    auto const sf = v.makeReg();
+    v << cmpqm{key, keyset[MixedArray::elmOff(pos) + MixedArray::Elm::keyOff()], sf};
+    ifThen(v, CC_NE, sf, branch);
+  }
+  auto const dataOff = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+
+  { // Fail if the Elm key type doesn't match.
+    auto const sf = v.makeReg();
+    v << cmplim{0, keyset[dataOff + TVOFF(m_aux)], sf};
+
+    auto const key_type = getKeyType(inst->src(1));
+    assertx(key_type != KeyType::Any);
+
+    // Note that if `key' actually is an integer-ish string, we'd fail this
+    // check (and most likely would have failed the previous check also), but
+    // this false negative is allowed.
+    auto const is_str_key = key_type == KeyType::Str;
+    ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
+  }
+  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
+    auto const sf = v.makeReg();
+    v << cmpbim{KindOfUninit, keyset[dataOff + TVOFF(m_type)], sf};
+    ifThen(v, CC_L, sf, branch);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgElemArray(IRLS& env, const IRInstruction* i)  { implElemArray(env, i); }
 void cgElemArrayW(IRLS& env, const IRInstruction* i) { implElemArray(env, i); }
 
@@ -479,7 +690,7 @@ void cgElemMixedArrayK(IRLS& env, const IRInstruction* inst) {
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0);
   auto const pos = inst->extra<ElemMixedArrayK>()->index;
-  auto const off = elmOff(pos) + MixedArray::Elm::dataOff();
+  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
 
   auto& v = vmain(env);
 
@@ -501,7 +712,7 @@ void cgArrayGet(IRLS& env, const IRInstruction* inst) {
 void cgMixedArrayGetK(IRLS& env, const IRInstruction* inst) {
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const pos = inst->extra<MixedArrayGetK>()->index;
-  auto const off = elmOff(pos) + MixedArray::Elm::dataOff();
+  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
 
   auto& v = vmain(env);
   loadTV(v, inst->dst(0), dstLoc(env, inst, 0), arr[off]);
@@ -539,6 +750,160 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync,
                arrArgs(env, inst, keyInfo).typedValue(2));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+void cgVecSet(IRLS& env, const IRInstruction* i)    { implVecSet(env, i); }
+void cgVecSetRef(IRLS& env, const IRInstruction* i) { implVecSet(env, i); }
+
+//////////////////////////////////////////////////////////////////////////////
+
+void cgElemDict(IRLS& env, const IRInstruction* i)  { implElemDict(env, i); }
+void cgElemDictW(IRLS& env, const IRInstruction* i) { implElemDict(env, i); }
+
+void cgElemDictD(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  BUILD_OPTAB(ELEM_DICT_D_HELPER_TABLE, getKeyType(key));
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void cgElemDictU(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  BUILD_OPTAB(ELEM_DICT_U_HELPER_TABLE, getKeyType(key));
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void cgElemDictK(IRLS& env, const IRInstruction* inst) {
+  auto const dict = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0);
+  auto const pos = inst->extra<ElemDictK>()->index;
+  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+
+  auto& v = vmain(env);
+
+  assertx(dst.numAllocated() == 1);
+  v << lea{dict[off], dst.reg()};
+}
+
+void cgDictGet(IRLS& env, const IRInstruction* inst) {
+  implDictGet(env, inst);
+}
+void cgDictGetQuiet(IRLS& env, const IRInstruction* inst) {
+  implDictGet(env, inst);
+}
+
+void cgDictGetK(IRLS& env, const IRInstruction* inst) {
+  auto const dict = srcLoc(env, inst, 0).reg();
+  auto const pos = inst->extra<DictGetK>()->index;
+  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+
+  auto& v = vmain(env);
+  loadTV(v, inst->dst(0), dstLoc(env, inst, 0), dict[off]);
+}
+
+void cgDictSet(IRLS& env, const IRInstruction* i)    { implDictSet(env, i); }
+void cgDictSetRef(IRLS& env, const IRInstruction* i) { implDictSet(env, i); }
+
+void cgDictIsset(IRLS& env, const IRInstruction* inst) {
+  implDictIsset(env, inst);
+}
+void cgDictEmptyElem(IRLS& env, const IRInstruction* inst) {
+  implDictIsset(env, inst);
+}
+
+void cgDictIdx(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  auto const target  = getKeyType(key) == KeyType::Int
+    ? CallSpec::direct(dictIdxI)
+    : CallSpec::direct(dictIdxS);
+  auto args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDestTV(env, inst),
+               SyncOptions::Sync, args);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void cgElemKeyset(IRLS& env, const IRInstruction* i)  { implElemKeyset(env, i); }
+void cgElemKeysetW(IRLS& env, const IRInstruction* i) { implElemKeyset(env, i); }
+
+void cgElemKeysetU(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  BUILD_OPTAB(ELEM_KEYSET_U_HELPER_TABLE, getKeyType(key));
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void cgElemKeysetK(IRLS& env, const IRInstruction* inst) {
+  auto const keyset = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0);
+  auto const pos = inst->extra<ElemKeysetK>()->index;
+  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+
+  auto& v = vmain(env);
+
+  assertx(dst.numAllocated() == 1);
+  v << lea{keyset[off], dst.reg()};
+}
+
+void cgKeysetGet(IRLS& env, const IRInstruction* inst) {
+  implKeysetGet(env, inst);
+}
+void cgKeysetGetQuiet(IRLS& env, const IRInstruction* inst) {
+  implKeysetGet(env, inst);
+}
+
+void cgKeysetGetK(IRLS& env, const IRInstruction* inst) {
+  auto const keyset = srcLoc(env, inst, 0).reg();
+  auto const pos = inst->extra<KeysetGetK>()->index;
+  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+
+  auto& v = vmain(env);
+  loadTV(v, inst->dst(0), dstLoc(env, inst, 0), keyset[off]);
+}
+
+void cgSetNewElemKeyset(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  BUILD_OPTAB(KEYSET_SETNEWELEM_HELPER_TABLE, getKeyType(key));
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void cgKeysetIsset(IRLS& env, const IRInstruction* inst) {
+  implKeysetIsset(env, inst);
+}
+void cgKeysetEmptyElem(IRLS& env, const IRInstruction* inst) {
+  implKeysetIsset(env, inst);
+}
+
+void cgKeysetIdx(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  auto const target  = getKeyType(key) == KeyType::Int
+    ? CallSpec::direct(keysetIdxI)
+    : CallSpec::direct(keysetIdxS);
+  auto args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDestTV(env, inst),
+               SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

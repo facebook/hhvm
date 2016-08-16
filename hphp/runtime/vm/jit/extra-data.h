@@ -1,4 +1,4 @@
-  /*
+/*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -1236,10 +1236,18 @@ X(NewKeysetArray,               NewKeysetArrayData);
 X(InitPackedLayoutArrayLoop,    InitPackedArrayLoopData);
 X(InitPackedLayoutArray,        IndexData);
 X(CheckMixedArrayOffset,        IndexData);
+X(CheckDictOffset,              IndexData);
+X(CheckKeysetOffset,            IndexData);
 X(ElemMixedArrayK,              IndexData);
 X(MixedArrayGetK,               IndexData);
+X(DictGetK,                     IndexData);
+X(KeysetGetK,                   IndexData);
+X(ElemDictK,                    IndexData);
+X(ElemKeysetK,                  IndexData);
 X(ProfileArrayKind,             RDSHandleData);
 X(ProfileMixedArrayOffset,      RDSHandleData);
+X(ProfileDictOffset,            RDSHandleData);
+X(ProfileKeysetOffset,          RDSHandleData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileMethod,                ProfileMethodData);
 X(LdRDSAddr,                    RDSHandleData);

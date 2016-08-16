@@ -89,7 +89,8 @@ IMPL_OPCODE_CALL(RaiseUninitLoc)
 IMPL_OPCODE_CALL(RaiseWarning)
 IMPL_OPCODE_CALL(ThrowArithmeticError)
 IMPL_OPCODE_CALL(ThrowDivisionByZeroError)
-IMPL_OPCODE_CALL(ThrowInvalidOperation);
+IMPL_OPCODE_CALL(ThrowInvalidArrayKey)
+IMPL_OPCODE_CALL(ThrowInvalidOperation)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
 
 ///////////////////////////////////////////////////////////////////////////////

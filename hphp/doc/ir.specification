@@ -1741,13 +1741,16 @@ To string conversions:
 
 | CountArrayFast,  D(Int), S(Arr), NF
 
+| CountVec, D(Int), S(Vec), NF
+
 | CountCollection, D(Int), S(Obj), NF
 
   Computes the number of elements in S0 using the same definition as Count, but
   with a restriction on the input type.
 
   CountArray expects any array. CountArrayFast expects an array whose kind is
-  not kGlobalsKind or kProxyKind. CountCollection expects a collection object.
+  not kGlobalsKind or kProxyKind. CountVec expects a vec. CountCollection
+  expects a collection object.
 
 | Nop, ND, NA, NF
 
@@ -1892,11 +1895,27 @@ To string conversions:
   IR because many eval stack slots are not entirely typed wrt initness right
   now.)
 
+| DictAddElemStrKey, D(Dict), S(Dict) S(Str) S(Cell), Er|CRc|PRc
+
+  Add S2 to the dict S0 for the key S1, and return the resulting dict.
+
+| DictAddElemIntKey, D(Dict), S(Dict) S(Int) S(Cell), Er|CRc|PRc
+
+  Add S2 to the dict S0 for the key S1, and return the resulting dict.
+
 | ArrayAdd, D(Arr), S(Arr) S(Arr), Er|CRc|PRc
 
   Has the effects of the php + operator on the two source arrays.
 
 | AKExistsArr, D(Bool), S(Arr) S(Int,Str), NF
+
+  Has the effects of array_key_exists(S0, S1).
+
+| AKExistsDict, D(Bool), S(Dict) S(Int,Str), NF
+
+  Has the effects of array_key_exists(S0, S1).
+
+| AKExistsKeyset, D(Bool), S(Keyset) S(Int,Str), NF
 
   Has the effects of array_key_exists(S0, S1).
 
@@ -1914,6 +1933,16 @@ To string conversions:
 | ArrayIdx, D(Gen), S(Arr) S(Int,Str) S(Cell), NF
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
+  S2 is returned.
+
+| DictIdx, DDictElem, S(Dict) S(Int,Str) S(Cell), NF
+
+  Checks if S0 contains the key S1 and returns the result if found. Otherwise
+  S2 is returned.
+
+| KeysetIdx, DKeysetElem, S(Keyset) S(Int,Str) S(Cell), NF
+
+  Checks if S0 contains the key S1 and returns the result if found. Otherwise
   S2 is returned.
 
 | MapIdx, D(Gen), S(Obj) S(Str) S(Cell), NF
@@ -2460,9 +2489,29 @@ fields of that struct for holding intermediate values.
   fail, branch to B.  This check is allowed to have false negatives, in the
   case of int-like strings.
 
-| CheckArrayCOW, ND, S(Arr), B
+| CheckArrayCOW, ND, S(ArrLike), B
 
   Check that S0 has a refcount of exactly 1; if not, branch to B.
+
+| ProfileDictOffset, ND, S(Dict) S(Int,Str), NF
+
+  Profile the offset of the element keyed by S1 in S0.
+
+| CheckDictOffset<pos>, ND, S(Dict) S(Int,Str), B
+
+  Check that `pos' is within the usage bounds of S0 (including tombstones), and
+  that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
+  fail, branch to B.  This check is allowed to have false negatives.
+
+| ProfileKeysetOffset, ND, S(Keyset) S(Int,Str), NF
+
+  Profile the offset of the element keyed by S1 in S0.
+
+| CheckKeysetOffset<pos>, ND, S(Keyset) S(Int,Str), B
+
+  Check that `pos' is within the usage bounds of S0 (including tombstones), and
+  that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
+  fail, branch to B.  This check is allowed to have false negatives.
 
 | ElemArray,  D(PtrToMembGen), S(Arr) S(Int,Str), Er
 
@@ -2479,9 +2528,55 @@ fields of that struct for holding intermediate values.
   ElemArray{D,U} both take a PtrToGen for the base operand, but expect it to be
   a PtrToArr or PtrToBoxedArr.  T is the type of the base array.
 
-| ElemMixedArrayK<pos>, D(PtrToMembGen), AK(Mixed) S(Int,Str), NF
+| ElemMixedArrayK<pos>, D(PtrToElemGen), AK(Mixed) S(Int,Str), NF
 
   Like ElemArray, but the element for S1 is at a known position `pos' in S0.
+
+| ElemVecD<T>, D(PtrToElemCell), S(PtrToGen) S(Int), MElem|Er
+
+| ElemVecU<T>, D(PtrToMembCell), S(PtrToGen) S(Int), MElem|Er
+
+  Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
+  is for Define member instrs and ElemVecU is for Unset. (Other variations can
+  be implemented without special IR instructions).
+
+  ElemVec{D,U} both take a PtrToGen for the base operand, but expect it to be a
+  PtrToVec or PtrToBoxedVec. T is the type of the base vec.
+
+| ElemDict,  D(PtrToMembCell), S(Dict) S(Int,Str), Er
+
+| ElemDictW, D(PtrToMembCell), S(Dict) S(Int,Str), Er
+
+| ElemDictD<T>, D(PtrToElemCell), S(PtrToGen) S(Int,Str), MElem|Er
+
+| ElemDictU<T>, D(PtrToMembCell), S(PtrToGen) S(Int,Str), MElem|Er
+
+  Similar to ElemX, but the base S0 is a dict and the key S1 is an int/str.
+  ElemDictW is for Warn member instrs, ElemDictD is for Define member instrs,
+  and ElemDictU is for Unset.
+
+  ElemDict{D,U} both take a PtrToGen for the base operand, but expect it to be
+  a PtrToDict or PtrToBoxedDict.  T is the type of the base array.
+
+| ElemDictK<pos>, D(PtrToElemCell), S(Dict) S(Int,Str), NF
+
+  Like ElemDict, but the element for S1 is at a known position `pos' in S0.
+
+| ElemKeyset,  D(PtrToMembCell), S(Keyset) S(Int,Str), Er
+
+| ElemKeysetW, D(PtrToMembCell), S(Keyset) S(Int,Str), Er
+
+| ElemKeysetU<T>, D(PtrToMembCell), S(PtrToGen) S(Int,Str), MElem|Er
+
+  Similar to ElemX, but the base S0 is a keyset and the key S1 is an int/str.
+  ElemKeysetW is for Warn member instrs and ElemKeysetU is for Unset.
+
+  ElemKeysetU both take a PtrToGen for the base operand, but expect it to be
+  a PtrToKeyset or PtrToBoxedKeyset.  T is the type of the base array.
+
+| ElemKeysetK<pos>, D(PtrToElemCell), S(Keyset) S(Int,Str), NF
+
+  Like ElemKeyset, but the element for S1 is at a known position `pos' in S0.
 
 | ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 
@@ -2500,6 +2595,32 @@ fields of that struct for holding intermediate values.
 | MixedArrayGetK<pos>, DArrElem, AK(Mixed) S(Int,Str), NF
 
   Like ArrayGet, but the element for S1 is at a known position `pos' in S0.
+
+| DictGet, DDictElem, S(Dict) S(Int,Str), Er
+
+  Get element with key S1 from base S0, throwing if the element is not present.
+
+| DictGetQuiet, DDictElem, S(Dict) S(Int,Str), NF
+
+  Get element with key S1 from base S0, returning null if the element is not
+  present.
+
+| DictGetK<pos>, DDictElem, S(Dict) S(Int,Str), NF
+
+  Like DictGet, but the element for S1 is at a known position `pos' in S0.
+
+| KeysetGet, DKeysetElem, S(Keyset) S(Int,Str), Er
+
+  Get element with key S1 from base S0, throwing if the element is not present.
+
+| KeysetGetQuiet, DKeysetElem, S(Keyset) S(Int,Str), NF
+
+  Get element with key S1 from base S0, returning null if the element is not
+  present.
+
+| KeysetGetK<pos>, DKeysetElem, S(Keyset) S(Int,Str), NF
+
+  Like KeysetGet, but the element for S1 is at a known position `pos' in S0.
 
 | StringGet, D(StaticStr), S(Str) S(Int), PRc|Er
 
@@ -2532,6 +2653,28 @@ fields of that struct for holding intermediate values.
   Like ArraySet, but for binding operations on the array. S3 must point to a
   RefData with an array type when this instruction is executed, and it must be
   the same array that is in S0.
+
+| VecSet, D(Vec), S(Vec) S(Int) S(Cell), PRc|CRc|Er
+
+  Set element with key S1 in S0 to S2. The dest will be a new Vec that should
+  replace S0.
+
+| VecSetRef, ND, S(Vec) S(Int) S(Cell) S(BoxedCell), CRc|Er
+
+  Like VecSet, but for binding operations on the vec. S3 must point to a
+  RefData with a vec type when this instruction is executed, and it must be the
+  same vec that is in S0.
+
+| DictSet, D(Dict), S(Dict) S(Int,Str) S(Cell), PRc|CRc|Er
+
+  Set element with key S1 in S0 to S2. The dest will be a new Dict that should
+  replace S0.
+
+| DictSetRef, ND, S(Dict) S(Int,Str) S(Cell) S(BoxedCell), CRc|Er
+
+  Like DictSet, but for binding operations on the dict. S3 must point to a
+  RefData with a vec type when this instruction is executed, and it must be the
+  same dict that is in S0.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(Cell), Er
 
@@ -2572,13 +2715,29 @@ fields of that struct for holding intermediate values.
 
 | SetNewElemArray, ND, S(PtrToGen) S(Cell), MElem|Er
 
-  Append the value in S1 to S0, where S0 must be a pointer to an array.
+  Append the value in S1 to S0, where S0 must be a pointer to a array.
+
+| SetNewElemVec, ND, S(PtrToGen) S(Cell), MElem|Er
+
+  Append the value in S1 to S0, where S0 must be a pointer to a vec.
+
+| SetNewElemKeyset, ND, S(PtrToGen) S(Int,Str), MElem|Er
+
+  Append the value in S1 to S0, where S0 must be a pointer to a keyset.
 
 | BindNewElem, ND, S(PtrToGen) S(BoxedCell), MElem|Er
 
   Append the reference in S1 to S0.
 
-| ArrayIsset, D(Bool), S(Arr) S(Int,Str), Er
+| ArrayIsset, D(Bool), S(Arr) S(Int,Str), NF
+
+  Returns true iff the element at key S1 in the base S0 is set.
+
+| DictIsset, D(Bool), S(Dict) S(Int,Str), NF
+
+  Returns true iff the element at key S1 in the base S0 is set.
+
+| KeysetIsset, D(Bool), S(Keyset) S(Int,Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 
@@ -2607,13 +2766,27 @@ fields of that struct for holding intermediate values.
   Returns true iff the element at key S1 in S0 is set and not equal (as defined
   by the hhbc Eq instruction) to false.
 
+| DictEmptyElem, D(Bool), S(Dict) S(Int,Str), NF
+
+  Like EmptyElem, but specialized for dicts.
+
+| KeysetEmptyElem, D(Bool), S(Keyset) S(Int,Str), NF
+
+  Like EmptyElem, but specialized for dicts.
+
 | CheckRange, D(Bool), S(Int) S(Int), NF
 
   Returns true iff S0 is in the range [0, S1).
 
-| ThrowOutOfBounds, ND, S(Int), Er|T
+| ThrowOutOfBounds, ND, S(ArrLike|Obj) S(Gen), Er|T
 
-  Throws an OutOfBoundsException with a message indicating S0.
+  Throws an OutOfBoundsException corresponding to an access of S0 with the key
+  S1.
+
+| ThrowInvalidArrayKey, ND, S(ArrLike) S(Gen), Er|T
+
+  Throws an InvalidArgumentException corresponding to an access of S0 with the
+  key S1, which has a type invalid for that array.
 
 | ThrowInvalidOperation, ND, S(Str), Er|T
 
@@ -2648,9 +2821,21 @@ fields of that struct for holding intermediate values.
 
   Load the address of the element at index S1 of the packed array in S0.
 
+| LdVecElem, DVecElem, S(Vec) S(Int), NF
+
+  Loads the element of the vec array in S0 at offset S1. This instruction
+  assumes that the vec actually contains an element at that offset (IE, the vec
+  has the proper length).
+
+| LdVecElemAddr<T>, DParamPtr(Elem), S(Vec) S(Int), NF
+
+  Loads the address of the element at index S1 of the vec array in S0. This
+  instruction assumes the vec actually contains an element at that offset (IE,
+  the vec has the proper length).
+
 | LdVectorSize, D(Int), S(Obj), NF
 
-  Returns the size of the given Vector in S0.
+  Returns the size of the given Vector collection in S0.
 
 | VectorDoCow, ND, S(Obj), NF
 

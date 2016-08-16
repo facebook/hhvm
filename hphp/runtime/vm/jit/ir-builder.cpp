@@ -80,9 +80,12 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 #define DBoxPtr        return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
-#define DArrVec        return false; // fixed type
 #define DArrElem       assertx(inst->is(ArrayGet));           \
                          return typeMightRelax(inst->src(0));
+#define DVecElem       assertx(inst->is(LdVecElem)); \
+                         return false;
+#define DDictElem      return dictElemMightRelax(inst);
+#define DKeysetElem    return keysetElemMightRelax(inst);
 #define DCol           return false; // fixed in bytecode
 #define DThis          return false; // fixed type from ctx class
 #define DCtx           return false;
@@ -107,6 +110,18 @@ bool typeMightRelax(const SSATmp* tmp) {
   }
 
   return true;
+}
+
+bool keysetElemMightRelax(const IRInstruction* inst) {
+  assertx(inst->is(KeysetGet, KeysetGetK, KeysetGetQuiet, KeysetIdx));
+  if (inst->is(KeysetIdx)) return typeMightRelax(inst->src(2));
+  return false;
+}
+
+bool dictElemMightRelax(const IRInstruction* inst) {
+  assertx(inst->is(DictGet, DictGetK, DictGetQuiet, DictIdx));
+  if (inst->is(DictIdx)) return typeMightRelax(inst->src(2));
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

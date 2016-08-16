@@ -51,6 +51,8 @@ using ArrayDataMap = tbb::concurrent_hash_map<ArrayData::ScalarArrayKey,
                                               ArrayData::ScalarHash>;
 static ArrayDataMap s_arrayDataMap;
 
+const StaticString s_InvalidKeysetOperationMsg("Invalid operation on keyset");
+
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
                                                        size_t sz) {
   return MD5(string_md5(folly::StringPiece{str, sz}));
@@ -1189,9 +1191,7 @@ void throwRefInvalidArrayValueException(const Array& arr) {
 }
 
 void throwInvalidKeysetOperation() {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid operation on keyset"
-  );
+  SystemLib::throwInvalidOperationExceptionObject(s_InvalidKeysetOperationMsg);
 }
 
 void throwInvalidAdditionException(const ArrayData* ad) {

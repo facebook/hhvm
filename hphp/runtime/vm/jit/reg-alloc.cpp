@@ -58,11 +58,25 @@ bool loadsCell(Opcode op) {
   case CGetProp:
   case VGetProp:
   case ArrayGet:
+  case DictGet:
+  case DictGetQuiet:
+  case DictGetK:
+  case KeysetGet:
+  case KeysetGetQuiet:
+  case KeysetGetK:
   case MapGet:
   case CGetElem:
   case VGetElem:
   case ArrayIdx:
-    return true;
+  case DictIdx:
+  case KeysetIdx:
+  case LdVecElem:
+    switch (arch()) {
+    case Arch::X64: return true;
+    case Arch::ARM: return true;
+    case Arch::PPC64: not_implemented(); break;
+    }
+    not_reached();
 
   default:
     return false;

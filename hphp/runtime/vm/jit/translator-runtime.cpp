@@ -138,6 +138,37 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
+ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
+                                   int64_t key,
+                                   TypedValue value) {
+  assertx(ad->isDict());
+  // set will decRef any old value that may have been overwritten
+  // if appropriate
+  ArrayData* retval =
+    MixedArray::SetIntDict(ad, key, *tvAssertCell(&value), ad->cowCheck());
+  // TODO Task #1970153: It would be great if there were set()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
+  tvRefcountedDecRef(&value);
+  return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
+}
+
+ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
+                                      StringData* key,
+                                      TypedValue value) {
+  assertx(ad->isDict());
+  // set will decRef any old value that may have been overwritten
+  // if appropriate
+  ArrayData* retval =
+    MixedArray::SetStrDict(ad, key, *tvAssertCell(&value), ad->cowCheck());
+  // TODO Task #1970153: It would be great if there were set()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
+  decRefStr(key);
+  tvRefcountedDecRef(&value);
+  return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
+}
+
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   assertx(a1->isPHPArray());
   assertx(a2->isPHPArray());
@@ -168,6 +199,10 @@ void setNewElem(TypedValue* base, Cell val) {
 
 void setNewElemArray(TypedValue* base, Cell val) {
   HPHP::SetNewElemArray(base, &val);
+}
+
+void setNewElemVec(TypedValue* base, Cell val) {
+  HPHP::SetNewElemVec(base, &val);
 }
 
 RefData* boxValue(TypedValue tv) {
@@ -717,6 +752,26 @@ TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
   return arrayIdxI(a, key, def);
 }
 
+TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isDict());
+  return getDefaultIfNullCell(MixedArray::NvGetIntDict(a, key), def);
+}
+
+TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isDict());
+  return getDefaultIfNullCell(MixedArray::NvGetStrDict(a, key), def);
+}
+
+TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isKeyset());
+  return getDefaultIfNullCell(MixedArray::NvGetIntKeyset(a, key), def);
+}
+
+TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isKeyset());
+  return getDefaultIfNullCell(MixedArray::NvGetStrKeyset(a, key), def);
+}
+
 TypedValue mapIdx(ObjectData* mapOD, StringData* key, TypedValue def) {
   assert(collections::isType(mapOD->getVMClass(), CollectionType::Map) ||
          collections::isType(mapOD->getVMClass(), CollectionType::ImmMap));
@@ -1236,6 +1291,20 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
   return true;
 }
 
+void throwOOBException(TypedValue base, TypedValue key) {
+  if (isArrayLikeType(base.m_type)) {
+    throwOOBArrayKeyException(key, base.m_data.parr);
+  } else if (base.m_type == KindOfObject) {
+    assertx(isIntType(key.m_type));
+    collections::throwOOB(key.m_data.num);
+  }
+  not_reached();
+}
+
+void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
+  throwInvalidArrayKeyException(&key, ad);
+}
+
 namespace MInstrHelpers {
 
 TypedValue setOpElem(TypedValue* base, TypedValue key,
@@ -1313,6 +1382,18 @@ void bindNewElem(TypedValue* base, RefData* val) {
   }
 
   tvBindRef(val, elem);
+}
+
+TypedValue* elemVecID(TypedValue* base, int64_t key) {
+  auto cbase = tvToCell(base);
+  assertx(isVecType(cbase->m_type));
+  return ElemDVec<false, KeyType::Int>(cbase, key);
+}
+
+TypedValue* elemVecIU(TypedValue* base, int64_t key) {
+  auto cbase = tvToCell(base);
+  assertx(isVecType(cbase->m_type));
+  return ElemUVec<KeyType::Int>(cbase, key);
 }
 
 }

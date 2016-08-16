@@ -748,8 +748,14 @@ struct KeysetInit {
   /*
    * Add a new element to the keyset.
    */
-  KeysetInit& add(int64_t v) { return add(Variant{v}); }
-  KeysetInit& add(StringData* v) { return add(Variant{v}); }
+  KeysetInit& add(int64_t v) {
+    performOp([&]{ return MixedArray::AddToKeyset(m_keyset, v, false); });
+    return *this;
+  }
+  KeysetInit& add(StringData* v) {
+    performOp([&]{ return MixedArray::AddToKeyset(m_keyset, v, false); });
+    return *this;
+  }
   KeysetInit& add(const Variant& v) {
     performOp([&]{
       return MixedArray::AppendKeyset(m_keyset, v.asInitCellTmp(), false);
@@ -843,11 +849,17 @@ namespace make_array_detail {
     map_impl(init, std::forward<KVPairs>(kvpairs)...);
   }
 
+  inline String keyset_init_key(const char* s) { return String(s); }
+  inline int64_t keyset_init_key(int k) { return k; }
+  inline int64_t keyset_init_key(int64_t k) { return k; }
+  inline StringData* keyset_init_key(const String& k) { return k.get(); }
+  inline StringData* keyset_init_key(StringData* k) { return k; }
+
   inline void keyset_impl(KeysetInit&) {}
 
   template<class Val, class... Vals>
   void keyset_impl(KeysetInit& init, Val&& val, Vals&&... vals) {
-    init.add(Variant(std::forward<Val>(val)));
+    init.add(keyset_init_key(std::forward<Val>(val)));
     keyset_impl(init, std::forward<Vals>(vals)...);
   }
 

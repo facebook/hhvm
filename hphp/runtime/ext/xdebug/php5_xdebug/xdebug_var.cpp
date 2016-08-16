@@ -240,7 +240,11 @@ static void object_instance_property_export_xml_node(xdebug_xml_node& parent,
 
   auto const make_full_name = [&] (const char* name) -> const char* {
     if (parentName == nullptr) return nullptr;
-    auto const format_str = obj->isCollection() ? "%s[%s]" : "%s->%s";
+    auto const format_str = [&] {
+      if (!obj->isCollection()) return "%s->%s";
+      if (key.isInteger()) return "%s[%s]";
+      return "%s['%s']";
+    }();
     return xdebug_sprintf(format_str, parentName, name);
   };
 

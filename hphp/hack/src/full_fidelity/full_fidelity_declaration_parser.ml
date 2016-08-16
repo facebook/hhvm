@@ -281,12 +281,21 @@ module WithExpressionAndStatementParser
     (* SPEC
       namespace-use-declaration:
         use  namespace-use-clauses  ;
+        use  const  namespace-use-clauses  ;
+        use  function  namespace-use-clauses  ;
     *)
     let (parser, use_token) = assert_token parser Use in
+    (* const, function case *)
+    let (parser1, keyword_token) = next_token parser in
+    let (parser, keyword_token) =
+      match Token.kind keyword_token with
+        | Function
+        | Const -> (parser1, make_token keyword_token)
+        | _ -> (parser, make_missing()) in
     let (parser, clauses) = parse_comma_list
       parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_namespace_use use_token clauses semi in
+    let result = make_namespace_use use_token keyword_token clauses semi in
     (parser, result)
 
   and parse_classish_declaration parser attribute_spec =

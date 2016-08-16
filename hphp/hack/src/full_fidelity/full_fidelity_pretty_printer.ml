@@ -345,9 +345,10 @@ let rec get_doc node =
     indent_block_no_space left body right indt |> add_break
   | NamespaceUseDeclaration x ->
     let u = get_doc x.namespace_use in
+    let k = get_doc x.namespace_use_keywordopt in
     let c = get_doc x.namespace_use_clauses in
     let s = get_doc x.namespace_use_semicolon in
-    u ^| c ^^^ s
+    u ^| k ^| c ^^^ s
   | NamespaceUseClause x ->
     let n = get_doc x.namespace_use_name in
     let a = get_doc x.namespace_use_as in

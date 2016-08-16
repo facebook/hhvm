@@ -138,6 +138,7 @@ module WithToken(Token: TokenType) = struct
     }
     and namespace_use_declaration = {
       namespace_use : t;
+      namespace_use_keywordopt : t;
       namespace_use_clauses : t;
       namespace_use_semicolon : t
     }
@@ -1065,8 +1066,14 @@ module WithToken(Token: TokenType) = struct
         [ namespace_left_brace; namespace_declarations;
           namespace_right_brace ]
       | NamespaceUseDeclaration
-        { namespace_use; namespace_use_clauses; namespace_use_semicolon } ->
-        [ namespace_use; namespace_use_clauses; namespace_use_semicolon ]
+        { namespace_use;
+          namespace_use_keywordopt;
+          namespace_use_clauses;
+          namespace_use_semicolon } ->
+          [ namespace_use;
+            namespace_use_keywordopt;
+            namespace_use_clauses;
+            namespace_use_semicolon ]
       | NamespaceUseClause
         { namespace_use_name; namespace_use_as; namespace_use_alias } ->
         [ namespace_use_name; namespace_use_as; namespace_use_alias ]
@@ -1445,8 +1452,14 @@ module WithToken(Token: TokenType) = struct
         [ "namespace_left_brace"; "namespace_declarations";
           "namespace_right_brace" ]
       | NamespaceUseDeclaration
-        { namespace_use; namespace_use_clauses; namespace_use_semicolon } ->
-        [ "namespace_use"; "namespace_use_clauses"; "namespace_use_semicolon" ]
+        { namespace_use;
+          namespace_use_keywordopt;
+          namespace_use_clauses;
+          namespace_use_semicolon } ->
+            [ "namespace_use";
+              "namespace_use_keywordopt";
+              "namespace_use_clauses";
+              "namespace_use_semicolon" ]
       | NamespaceUseClause
         { namespace_use_name; namespace_use_as; namespace_use_alias } ->
         [ "namespace_use_name"; "namespace_use_as"; "namespace_use_alias" ]
@@ -2106,9 +2119,15 @@ module WithToken(Token: TokenType) = struct
         { namespace_left_brace; namespace_declarations;
           namespace_right_brace }
       | (SyntaxKind.NamespaceUseDeclaration,
-        [ namespace_use; namespace_use_clauses; namespace_use_semicolon ]) ->
+        [ namespace_use;
+          namespace_use_keywordopt;
+          namespace_use_clauses;
+          namespace_use_semicolon ]) ->
         NamespaceUseDeclaration
-        { namespace_use; namespace_use_clauses; namespace_use_semicolon }
+        { namespace_use;
+          namespace_use_keywordopt;
+          namespace_use_clauses;
+          namespace_use_semicolon }
       | (SyntaxKind.NamespaceUseClause,
         [ namespace_use_name; namespace_use_as; namespace_use_alias ]) ->
         NamespaceUseClause
@@ -2652,9 +2671,9 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.NamespaceBody
           [ left; decls; right ]
 
-      let make_namespace_use use clauses semi =
+      let make_namespace_use use keyword_opt clauses semi =
         from_children SyntaxKind.NamespaceUseDeclaration
-          [ use; clauses; semi ]
+          [ use; keyword_opt; clauses; semi ]
 
       let make_namespace_use_clause name as_token alias =
         from_children SyntaxKind.NamespaceUseClause [ name; as_token; alias ]

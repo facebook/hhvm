@@ -175,13 +175,63 @@ ArrayData* asArray(ObjectData* obj) {
 // Deep Copy
 
 ArrayData* deepCopyArray(ArrayData* arr) {
+  assert(arr->isPHPArray());
   ArrayInit ai(arr->size(), ArrayInit::Mixed{});
-  for (ArrayIter iter(arr); iter; ++iter) {
-    Variant v = iter.secondRef();
-    deepCopy(v.asTypedValue());
-    ai.setValidKey(iter.first(), std::move(v));
-  }
-  return ai.toArray().detach();
+  IterateKV(
+    arr,
+    [&](const TypedValue* k, const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.setValidKey(tvAsCVarRef(k), value);
+      return false;
+    }
+  );
+  return ai.create();
+}
+
+ArrayData* deepCopyVecArray(ArrayData* arr) {
+  assert(arr->isVecArray());
+  VecArrayInit ai{arr->size()};
+  PackedArray::IterateV(
+    arr,
+    [&](const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.append(value);
+      return false;
+    }
+  );
+  return ai.create();
+}
+
+ArrayData* deepCopyDict(ArrayData* arr) {
+  assert(arr->isDict());
+  DictInit ai{arr->size()};
+  MixedArray::IterateKV(
+    MixedArray::asMixed(arr),
+    [&](const TypedValue* k, const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.setValidKey(tvAsCVarRef(k), value);
+      return false;
+    }
+  );
+  return ai.create();
+}
+
+ArrayData* deepCopyKeyset(ArrayData* arr) {
+  assert(arr->isKeyset());
+  KeysetInit ai{arr->size()};
+  MixedArray::IterateV(
+    MixedArray::asMixed(arr),
+    [&](const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.add(value);
+      return false;
+    }
+  );
+  return ai.create();
 }
 
 ObjectData* deepCopySet(c_Set* st) {
@@ -201,9 +251,27 @@ void deepCopy(TypedValue* tv) {
     case KindOfClass:
       return;
 
-    case KindOfVec:
-    case KindOfDict:
-    case KindOfKeyset:
+    case KindOfVec: {
+      auto arr = deepCopyVecArray(tv->m_data.parr);
+      decRefArr(tv->m_data.parr);
+      tv->m_data.parr = arr;
+      return;
+    }
+
+    case KindOfDict: {
+      auto arr = deepCopyDict(tv->m_data.parr);
+      decRefArr(tv->m_data.parr);
+      tv->m_data.parr = arr;
+      return;
+    }
+
+    case KindOfKeyset: {
+      auto arr = deepCopyKeyset(tv->m_data.parr);
+      decRefArr(tv->m_data.parr);
+      tv->m_data.parr = arr;
+      return;
+    }
+
     case KindOfArray: {
       auto arr = deepCopyArray(tv->m_data.parr);
       decRefArr(tv->m_data.parr);

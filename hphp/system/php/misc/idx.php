@@ -56,7 +56,7 @@ namespace HH {
  *                   if not.
  */
 function idx($arr, $idx, $default=null) {
-  if (\is_array($arr)) {
+  if (\is_array($arr) || \is_vec($arr) || \is_dict($arr) || \is_keyset($arr)) {
     return \hphp_array_idx($arr, $idx, $default);
   }
 

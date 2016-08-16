@@ -545,14 +545,26 @@ private:
 
 public:
   // Safe downcast helpers
-  static MixedArray* asMixed(ArrayData* ad);
-  static const MixedArray* asMixed(const ArrayData* ad);
+  static MixedArray* asMixed(ArrayData* ad) {
+    assert(ad->isMixedLayout());
+    auto a = static_cast<MixedArray*>(ad);
+    assert(a->checkInvariants());
+    return a;
+  }
+  static const MixedArray* asMixed(const ArrayData* ad) {
+    assert(ad->isMixedLayout());
+    auto a = static_cast<const MixedArray*>(ad);
+    assert(a->checkInvariants());
+    return a;
+  }
+
   // Fast iteration
   template <class F, bool inc = true>
-  static void IterateV(MixedArray* arr, F fn) {
+  static void IterateV(const MixedArray* arr, F fn) {
+    assert(arr->isMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
-    SCOPE_EXIT { if (inc) decRefArr(arr); };
+    SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
         if (ArrayData::call_helper(fn, &elm->data)) break;
@@ -560,10 +572,11 @@ public:
     }
   }
   template <class F, bool inc = true>
-  static void IterateKV(MixedArray* arr, F fn) {
+  static void IterateKV(const MixedArray* arr, F fn) {
+    assert(arr->isMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
-    SCOPE_EXIT { if (inc) decRefArr(arr); };
+    SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
     for (auto i = arr->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
         TypedValue key;

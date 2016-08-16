@@ -2071,11 +2071,11 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
         case KindOfPersistentString:
         case KindOfString:       return TStr;
         case KindOfPersistentVec:
-        case KindOfVec:          return TArr;
+        case KindOfVec:          return TVec;
         case KindOfPersistentDict:
-        case KindOfDict:         return TArr;
+        case KindOfDict:         return TDict;
         case KindOfPersistentKeyset:
-        case KindOfKeyset:       return TArr;
+        case KindOfKeyset:       return TKeyset;
         case KindOfPersistentArray:
         case KindOfArray:        return TArr;
         case KindOfResource:     return TRes;
@@ -2161,11 +2161,11 @@ Type Index::satisfies_constraint_helper(Context ctx,
         case KindOfPersistentString:
         case KindOfString:       return TStr;
         case KindOfPersistentVec:
-        case KindOfVec:          return TArr;
+        case KindOfVec:          return TVec;
         case KindOfPersistentDict:
-        case KindOfDict:         return TArr;
+        case KindOfDict:         return TDict;
         case KindOfPersistentKeyset:
-        case KindOfKeyset:       return TArr;
+        case KindOfKeyset:       return TKeyset;
         case KindOfPersistentArray:
         case KindOfArray:        return TArr;
         case KindOfResource:     return TRes;

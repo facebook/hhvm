@@ -234,9 +234,9 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
 
   // Fast iteration
   template <class F, bool inc = true>
-  static void IterateV(ArrayData* arr, F fn);
+  static void IterateV(const ArrayData* arr, F fn);
   template <class F, bool inc = true>
-  static void IterateKV(ArrayData* arr, F fn);
+  static void IterateKV(const ArrayData* arr, F fn);
 
 private:
   static ArrayData* Grow(ArrayData*);

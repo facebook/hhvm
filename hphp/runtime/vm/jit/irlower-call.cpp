@@ -218,7 +218,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
 
   // Whether `t' is passed in/out of C++ as String&/Array&/Object&.
   auto const isReqPtrRef = [] (MaybeDataType t) {
-    return isStringType(t) || isArrayType(t) ||
+    return isStringType(t) || isArrayLikeType(t) ||
            t == KindOfObject || t == KindOfResource;
   };
 

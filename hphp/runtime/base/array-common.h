@@ -64,7 +64,7 @@ struct ArrayCommon {
     Fail, // Referenced ref
     Collapse // Non-referenced ref
   };
-  static RefCheckResult CheckForRefs(ArrayData*);
+  static RefCheckResult CheckForRefs(const ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/util/compact-tagged-ptrs.h"
 
 namespace HPHP {
 
@@ -29,6 +30,8 @@ enum class UnserializeMode {
   Key = 1,
   ColValue = 2,
   ColKey = 3,
+  VecValue = 4,
+  DictValue = 5,
 };
 
 struct VariableUnserializer {
@@ -143,11 +146,25 @@ private:
    */
   struct RefInfo {
     explicit RefInfo(Variant* v);
-    static RefInfo makeNonRefable(Variant* v);
+    static RefInfo makeColValue(Variant* v);
+    static RefInfo makeVecValue(Variant* v);
+    static RefInfo makeDictValue(Variant* v);
+
     Variant* var() const;
+
     bool canBeReferenced() const;
+    bool isColValue() const;
+    bool isVecValue() const;
+    bool isDictValue() const;
   private:
-    uintptr_t m_data;
+    enum class Type {
+      Value,
+      ColValue,
+      VecValue,
+      DictValue
+    };
+    RefInfo(Variant*, Type);
+    CompactTaggedPtr<Variant, Type> m_data;
   };
 
   Array m_overwrittenList;

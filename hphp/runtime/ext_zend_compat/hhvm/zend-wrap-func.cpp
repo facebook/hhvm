@@ -31,6 +31,7 @@ void zBoxAndProxy(TypedValue* arg) {
     tvBox(arg);
   }
   auto inner = arg->m_data.pref->tv();
+  assert(!isHackArrayType(inner->m_type));
   if (isArrayType(inner->m_type) && !inner->m_data.parr->isProxyArray()) {
     ArrayData * inner_arr = inner->m_data.parr;
     if (inner_arr->cowCheck()) {

@@ -687,6 +687,25 @@ private:
  * There are overloads that take 4 and 3 arguments respectively, that pass
  * false for the trailing arguments as a convenience.
  */
+
+// Overload for the case where we already know we have an array
+template <typename ArrFn, bool IncRef = true>
+bool IterateV(const ArrayData* adata, ArrFn arrFn) {
+  if (adata->empty()) return true;
+  if (adata->isPackedLayout()) {
+    PackedArray::IterateV<ArrFn, IncRef>(adata, arrFn);
+  } else if (adata->isMixedLayout()) {
+    MixedArray::IterateV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
+  } else {
+    for (ArrayIter iter(adata); iter; ++iter) {
+      if (ArrayData::call_helper(arrFn, iter.secondRef().asTypedValue())) {
+        break;
+      }
+    }
+  }
+  return true;
+}
+
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
 bool IterateV(const TypedValue& it,
               PreArrFn preArrFn,
@@ -701,19 +720,7 @@ bool IterateV(const TypedValue& it,
     adata->incRefCount();
     SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
-    if (adata->empty()) return true;
-    if (adata->isPackedLayout()) {
-      PackedArray::IterateV<ArrFn, false>(adata, arrFn);
-    } else if (adata->isMixedLayout()) {
-      MixedArray::IterateV<ArrFn, false>(MixedArray::asMixed(adata), arrFn);
-    } else {
-      for (ArrayIter iter(adata); iter; ++iter) {
-        if (ArrayData::call_helper(arrFn, iter.secondRef().asTypedValue())) {
-          break;
-        }
-      }
-    }
-    return true;
+    return IterateV<ArrFn, false>(adata, arrFn);
   }
   if (std::is_same<PreCollFn, bool>::value) {
     return ArrayData::call_helper(preCollFn, nullptr);
@@ -765,6 +772,27 @@ bool IterateV(const TypedValue& it,
  * The behavior is identical to that of IterateV, except the ArrFn and ObjFn
  * callbacks are called with both a key and a value.
  */
+
+// Overload for the case where we already know we have an array
+template <typename ArrFn, bool IncRef = true>
+bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
+  if (adata->empty()) return true;
+  if (adata->isMixedLayout()) {
+    MixedArray::IterateKV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
+  } else if (adata->isPackedLayout()) {
+    PackedArray::IterateKV<ArrFn, IncRef>(adata, arrFn);
+  } else {
+    for (ArrayIter iter(adata); iter; ++iter) {
+      if (ArrayData::call_helper(arrFn,
+                                 iter.first().asTypedValue(),
+                                 iter.secondRef().asTypedValue())) {
+        break;
+      }
+    }
+  }
+  return true;
+}
+
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
 bool IterateKV(const TypedValue& it,
                PreArrFn preArrFn,
@@ -779,21 +807,7 @@ bool IterateKV(const TypedValue& it,
     adata->incRefCount();
     SCOPE_EXIT { decRefArr(adata); };
     if (preArrFn(adata)) return true;
-    if (adata->empty()) return true;
-    if (adata->isMixedLayout()) {
-      MixedArray::IterateKV<ArrFn, false>(MixedArray::asMixed(adata), arrFn);
-    } else if (adata->isPackedLayout()) {
-      PackedArray::IterateKV<ArrFn, false>(adata, arrFn);
-    } else {
-      for (ArrayIter iter(adata); iter; ++iter) {
-        if (ArrayData::call_helper(arrFn,
-                                   iter.first().asTypedValue(),
-                                   iter.secondRef().asTypedValue())) {
-          break;
-        }
-      }
-    }
-    return true;
+    return IterateKV<ArrFn, false>(adata, arrFn);
   }
   if (std::is_same<PreCollFn, bool>::value) {
     return ArrayData::call_helper(preCollFn, nullptr);

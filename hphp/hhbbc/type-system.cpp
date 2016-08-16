@@ -2084,10 +2084,13 @@ folly::Optional<Cell> tv(Type t) {
   case BSArrE:       return make_tv<KindOfPersistentArray>(staticEmptyArray());
   case BCVecE:
   case BSVecE:
-    return make_tv<KindOfPersistentArray>(staticEmptyVecArray());
+    return make_tv<KindOfPersistentVec>(staticEmptyVecArray());
   case BCDictE:
   case BSDictE:
-    return make_tv<KindOfPersistentArray>(staticEmptyDictArray());
+    return make_tv<KindOfPersistentDict>(staticEmptyDictArray());
+  case BCKeysetE:
+  case BSKeysetE:
+    return make_tv<KindOfPersistentKeyset>(staticEmptyKeysetArray());
   default:
     if (is_opt(t)) {
       break;
@@ -2100,11 +2103,20 @@ folly::Optional<Cell> tv(Type t) {
     case DataTag::DictVal:
     case DataTag::KeysetVal:
     case DataTag::ArrVal:
-      if ((t.m_bits & BArrN) == t.m_bits ||
-          (t.m_bits & BVecN) == t.m_bits ||
-          (t.m_bits & BDictN) == t.m_bits ||
-          (t.m_bits & BKeysetN) == t.m_bits) {
+      if ((t.m_bits & BArrN) == t.m_bits) {
         return make_tv<KindOfPersistentArray>(
+          const_cast<ArrayData*>(t.m_data.aval)
+        );
+      } else if ((t.m_bits & BVecN) == t.m_bits) {
+        return make_tv<KindOfPersistentVec>(
+          const_cast<ArrayData*>(t.m_data.aval)
+        );
+      } else if ((t.m_bits & BDictN) == t.m_bits) {
+        return make_tv<KindOfPersistentDict>(
+          const_cast<ArrayData*>(t.m_data.aval)
+        );
+      } else if ((t.m_bits & BKeysetN) == t.m_bits) {
+        return make_tv<KindOfPersistentKeyset>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }

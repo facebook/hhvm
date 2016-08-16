@@ -3830,7 +3830,7 @@ OPTBLD_INLINE void iopIdx() {
   TypedValue* arr = vmStack().indTV(2);
 
   TypedValue result;
-  if (isArrayType(arr->m_type)) {
+  if (isArrayLikeType(arr->m_type)) {
     result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
                                      tvAsCVarRef(key),
                                      tvAsCVarRef(def));
@@ -4896,7 +4896,7 @@ iopWIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 
 inline bool initIteratorM(Iter* it, Ref* r1, TypedValue *val, TypedValue *key) {
   TypedValue* rtv = r1->m_data.pref->tv();
-  if (isArrayType(rtv->m_type)) {
+  if (isArrayLikeType(rtv->m_type)) {
     return new_miter_array_key(it, r1->m_data.pref, val, key);
   }
   if (rtv->m_type == KindOfObject)  {

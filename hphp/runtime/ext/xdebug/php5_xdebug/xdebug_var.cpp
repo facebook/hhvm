@@ -1070,7 +1070,7 @@ void xdebug_var_export_fancy(
     not_reached();
   }
 
-  if (!isArrayType(v.getType()) && v.getType() != KindOfObject) {
+  if (!isArrayLikeType(v.getType()) && v.getType() != KindOfObject) {
     sb.append('\n');
   }
 }

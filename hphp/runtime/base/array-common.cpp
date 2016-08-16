@@ -71,8 +71,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   if (!size) return staticEmptyVecArray();
   VecArrayInit init{size};
   IterateV(
-    make_array_like_tv(a),
-    [&](const ArrayData*) { return false; },
+    a,
     [&](const TypedValue* v) {
       if (UNLIKELY(v->m_type == KindOfRef)) {
         if (v->m_data.pref->isReferenced()) {
@@ -90,8 +89,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   if (!size) return staticEmptyDictArray();
   DictInit init{size};
   IterateKV(
-    make_array_like_tv(a),
-    [&](const ArrayData*) { return false; },
+    a,
     [&](const TypedValue* k, const TypedValue* v) {
       if (UNLIKELY(v->m_type == KindOfRef)) {
         if (v->m_data.pref->isReferenced()) {
@@ -109,10 +107,9 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   if (!size) return staticEmptyKeysetArray();
   KeysetInit init{size};
   IterateKV(
-    make_array_like_tv(a),
-    [&](const ArrayData*) { return false; },
+    a,
     [&](const TypedValue* k, const TypedValue*) {
-      assert(k->m_type != KindOfRef);
+      assert(isIntType(k->m_type) || isStringType(k->m_type));
       init.add(tvAsCVarRef(k));
     }
   );
@@ -120,11 +117,10 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
 }
 
 ArrayCommon::RefCheckResult
-ArrayCommon::CheckForRefs(ArrayData* ad) {
+ArrayCommon::CheckForRefs(const ArrayData* ad) {
   auto result = RefCheckResult::Pass;
   IterateV(
-    make_array_like_tv(ad),
-    [&](const ArrayData*) { return false; },
+    ad,
     [&](const TypedValue* v) {
       if (UNLIKELY(v->m_type == KindOfRef)) {
         auto const ref = v->m_data.pref;

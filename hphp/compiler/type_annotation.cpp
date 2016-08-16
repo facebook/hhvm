@@ -103,9 +103,9 @@ MaybeDataType TypeAnnotation::dataType() const {
   if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\dict"))     return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\vec"))      return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\keyset"))   return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\dict"))     return KindOfDict;
+  if (!strcasecmp(m_name.c_str(), "HH\\vec"))      return KindOfVec;
+  if (!strcasecmp(m_name.c_str(), "HH\\keyset"))   return KindOfKeyset;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
 

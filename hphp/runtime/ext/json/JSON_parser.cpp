@@ -411,7 +411,7 @@ static Variant to_double(StringBuffer &buf) {
 
 static void json_create_zval(Variant &z, StringBuffer &buf, int type,
                              int64_t options) {
-  switch (type) {
+  switch (DataType(type)) {
     case KindOfBoolean:
       z = (buf.data() && (*buf.data() == 't'));
       return;
@@ -466,7 +466,14 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
     case KindOfUninit:
     case KindOfNull:
     case KindOfPersistentString:
+    case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:

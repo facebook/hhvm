@@ -64,20 +64,22 @@ void PackedArray::scan(const ArrayData* a, Marker& mark) {
 }
 
 template <class F, bool inc>
-void PackedArray::IterateV(ArrayData* arr, F fn) {
+void PackedArray::IterateV(const ArrayData* arr, F fn) {
+  assert(arr->isPackedLayout());
   auto elm = packedData(arr);
   if (inc) arr->incRefCount();
-  SCOPE_EXIT { if (inc) decRefArr(arr); };
+  SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
   for (auto i = arr->m_size; i--; elm++) {
     if (ArrayData::call_helper(fn, elm)) break;
   }
 }
 
 template <class F, bool inc>
-void PackedArray::IterateKV(ArrayData* arr, F fn) {
+void PackedArray::IterateKV(const ArrayData* arr, F fn) {
+  assert(arr->isPackedLayout());
   auto elm = packedData(arr);
   if (inc) arr->incRefCount();
-  SCOPE_EXIT { if (inc) decRefArr(arr); };
+  SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
   TypedValue key;
   key.m_data.num = 0;
   key.m_type = KindOfInt64;

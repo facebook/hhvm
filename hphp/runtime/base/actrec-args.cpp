@@ -145,6 +145,9 @@ bool parseArgs(ActRec *ar, const char *format, ...) {
       PARSE_ARG_VAL('d', KindOfDouble);
       PARSE_ARG_PTR('r', KindOfResource);
       PARSE_ARG_PTR('a', KindOfArray);
+      PARSE_ARG_PTR('i', KindOfDict);
+      PARSE_ARG_PTR('e', KindOfVec);
+      PARSE_ARG_PTR('k', KindOfKeyset);
       PARSE_ARG_PTR('o', KindOfObject);
 
       case 's': { // KindOfString

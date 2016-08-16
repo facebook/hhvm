@@ -790,7 +790,7 @@ struct Variant : private TypedValue {
   }
 
   Array toArray() const {
-    if (isArrayLikeType(m_type)) return Array(m_data.parr);
+    if (isArrayType(m_type)) return Array(m_data.parr);
     return toArrayHelper();
   }
   Object toObject() const {
@@ -831,7 +831,7 @@ struct Variant : private TypedValue {
    * Whether or not calling toKey() will throw a bad type exception
    */
   bool canBeValidKey() const {
-    return !isArrayLikeType(getType()) && getType() != KindOfObject;
+    return !isArrayType(getType()) && getType() != KindOfObject;
   }
 
   /*

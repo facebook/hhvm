@@ -51,7 +51,8 @@ enum class ArrayKind { PHP, Dict, Vec, Keyset };
 
 void unserializeVariant(Variant&, VariableUnserializer* unserializer,
                         UnserializeMode mode = UnserializeMode::Value);
-Array unserializeArray(VariableUnserializer*, ArrayKind);
+Array unserializeArray(VariableUnserializer*);
+Array unserializeDict(VariableUnserializer*);
 Array unserializeVec(VariableUnserializer*);
 Array unserializeKeyset(VariableUnserializer*);
 String unserializeString(VariableUnserializer*, char delimiter0 = '"',
@@ -216,23 +217,39 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-VariableUnserializer::RefInfo::RefInfo(Variant* v)
-    : m_data(reinterpret_cast<uintptr_t>(v))
-{}
-
-VariableUnserializer::RefInfo
-VariableUnserializer::RefInfo::makeNonRefable(Variant* v) {
-  RefInfo r(v);
-  r.m_data |= 1;
-  return r;
+VariableUnserializer::RefInfo::RefInfo(Variant* v) : RefInfo(v, Type::Value) {}
+VariableUnserializer::RefInfo::RefInfo(Variant* v, Type t) {
+  m_data.set(t, v);
 }
 
-Variant* VariableUnserializer::RefInfo::var() const  {
-  return reinterpret_cast<Variant*>(m_data & ~1);
+VariableUnserializer::RefInfo
+VariableUnserializer::RefInfo::makeColValue(Variant* v) {
+  return RefInfo{v, Type::ColValue};
+}
+VariableUnserializer::RefInfo
+VariableUnserializer::RefInfo::makeVecValue(Variant* v) {
+  return RefInfo{v, Type::VecValue};
+}
+VariableUnserializer::RefInfo
+VariableUnserializer::RefInfo::makeDictValue(Variant* v) {
+  return RefInfo{v, Type::DictValue};
+}
+
+Variant* VariableUnserializer::RefInfo::var() const {
+  return const_cast<Variant*>(m_data.ptr());
 }
 
 bool VariableUnserializer::RefInfo::canBeReferenced() const {
-  return !(m_data & 1);
+  return m_data.tag() == Type::Value;
+}
+bool VariableUnserializer::RefInfo::isVecValue() const {
+  return m_data.tag() == Type::VecValue;
+}
+bool VariableUnserializer::RefInfo::isDictValue() const {
+  return m_data.tag() == Type::DictValue;
+}
+bool VariableUnserializer::RefInfo::isColValue() const {
+  return m_data.tag() == Type::ColValue;
 }
 
 VariableUnserializer::VariableUnserializer(
@@ -293,8 +310,12 @@ void VariableUnserializer::add(Variant* v, UnserializeMode mode) {
     m_refs.emplace_back(RefInfo(v));
   } else if (mode == UnserializeMode::Key) {
     // do nothing
+  } else if (mode == UnserializeMode::VecValue) {
+    m_refs.emplace_back(RefInfo::makeVecValue(v));
+  } else if (mode == UnserializeMode::DictValue) {
+    m_refs.emplace_back(RefInfo::makeDictValue(v));
   } else if (mode == UnserializeMode::ColValue) {
-    m_refs.emplace_back(RefInfo::makeNonRefable(v));
+    m_refs.emplace_back(RefInfo::makeColValue(v));
   } else {
     assert(mode == UnserializeMode::ColKey);
     // We don't currently support using the 'r' encoding to refer
@@ -314,10 +335,18 @@ Variant* VariableUnserializer::getByVal(int id) {
 
 Variant* VariableUnserializer::getByRef(int id) {
   if (id <= 0 || id > (int)m_refs.size()) return nullptr;
-  if (!m_refs[id-1].canBeReferenced()) {
-    throwColRefValue();
+  auto const& info = m_refs[id-1];
+  if (UNLIKELY(!info.canBeReferenced())) {
+    if (info.isColValue()) {
+      throwColRefValue();
+    } else if (info.isVecValue()) {
+      throwVecRefValue();
+    } else {
+      assert(info.isDictValue());
+      throwDictRefValue();
+    }
   }
-  Variant* ret = m_refs[id-1].var();
+  Variant* ret = info.var();
   if (!ret) throwColRefKey();
   return ret;
 }
@@ -687,6 +716,11 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
     break;
   case 'R':
     {
+      if (UNLIKELY(mode == UnserializeMode::VecValue)) {
+        throwVecRefValue();
+      } else if (UNLIKELY(mode == UnserializeMode::DictValue)) {
+        throwDictRefValue();
+      }
       int64_t id = uns->readInt();
       Variant *v = uns->getByRef(id);
       if (!v) throwOutOfRange(id);
@@ -758,15 +792,15 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       throwUnknownType(type);
     }
     break;
-  case 'D':
   case 'a':
+  case 'D':
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
-      auto const kind = (type == 'D') ?
-        ArrayKind::Dict : ArrayKind::PHP;
-      auto a = unserializeArray(uns, kind);
-      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+      // It seems silly to check this here, but GCC actually generates much
+      // better code this way.
+      auto a = (type == 'a') ? unserializeArray(uns) : unserializeDict(uns);
+      tvMove(make_array_like_tv(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'v':
@@ -774,7 +808,7 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeVec(uns);
-      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+      tvMove(make_tv<KindOfVec>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'k':
@@ -782,7 +816,7 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeKeyset(uns);
-      tvMove(make_tv<KindOfArray>(a.detach()), *self.asTypedValue());
+      tvMove(make_tv<KindOfKeyset>(a.detach()), *self.asTypedValue());
     }
     return; // array has '}' terminating
   case 'L':
@@ -1010,20 +1044,13 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
   uns->expectChar(';');
 }
 
-Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
-  assert(kind != ArrayKind::Vec);
-
+Array unserializeArray(VariableUnserializer* uns) {
   int64_t size = uns->readInt();
   uns->expectChar(':');
   uns->expectChar('{');
   if (size == 0) {
     uns->expectChar('}');
-    switch (kind) {
-    case ArrayKind::Dict: return DictInit(0).toArray();
-    case ArrayKind::PHP:  return Array::Create(); // static empty array
-    case ArrayKind::Keyset:
-    case ArrayKind::Vec: not_reached();
-    }
+    return Array::Create();
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1038,25 +1065,14 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
 
   // Pre-allocate an ArrayData of the given size, to avoid escalation in the
   // middle, which breaks references.
-  Array arr = [&] {
-    switch (kind) {
-    case ArrayKind::Dict: return DictInit(size).toArray();
-    case ArrayKind::PHP:  return ArrayInit(size, ArrayInit::Mixed{}).toArray();
-    case ArrayKind::Keyset:
-    case ArrayKind::Vec: not_reached();
-    }
-    not_reached();
-  }();
-
+  Array arr = ArrayInit(size, ArrayInit::Mixed{}).toArray();
   for (int64_t i = 0; i < size; i++) {
     Variant key;
     unserializeVariant(key, uns, UnserializeMode::Key);
     if (!key.isString() && !key.isInteger()) {
       throwInvalidKey();
     }
-    if (UNLIKELY(kind == ArrayKind::Dict && uns->peek() == 'R')) {
-      throwDictRefValue();
-    }
+
     // for apc, we know the key can't exist, but ignore that optimization
     assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
@@ -1066,6 +1082,63 @@ Array unserializeArray(VariableUnserializer* uns, ArrayKind kind) {
       uns->putInOverwrittenList(value);
     }
     unserializeVariant(value, uns);
+
+    if (i < (size - 1)) {
+      auto lastChar = uns->peekBack();
+      if ((lastChar != ';' && lastChar != '}')) {
+        throwUnterminatedElement();
+      }
+    }
+  }
+
+  check_request_surprise_unlikely();
+  uns->expectChar('}');
+  return arr;
+}
+
+Array unserializeDict(VariableUnserializer* uns) {
+  int64_t size = uns->readInt();
+  uns->expectChar(':');
+  uns->expectChar('{');
+  if (size == 0) {
+    uns->expectChar('}');
+    return Array::CreateDict();
+  }
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+  auto const scale = computeScaleFromSize(size);
+  auto const allocsz = computeAllocBytes(scale);
+
+  // For large arrays, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+
+  Array arr = DictInit(size).toArray();
+  for (int64_t i = 0; i < size; i++) {
+    Variant key;
+    unserializeVariant(key, uns, UnserializeMode::Key);
+    auto const rawType = key.getRawType();
+    if (UNLIKELY(!isIntType(rawType) && !isStringType(rawType))) {
+      throwInvalidKey();
+    }
+
+    // for apc, we know the key can't exist, but ignore that optimization
+    assert(uns->type() != VariableUnserializer::Type::APCSerialize ||
+           !arr.exists(key, true));
+
+    Variant* value;
+    DEBUG_ONLY auto const ret = key.isInteger()
+      ? MixedArray::LvalIntDict(arr.get(), key.asInt64Val(), value, false)
+      : MixedArray::LvalStrDict(arr.get(), key.asCStrRef().get(), value, false);
+    assertx(ret == arr.get());
+
+    if (UNLIKELY(isRefcountedType(value->getRawType()))) {
+      uns->putInOverwrittenList(*value);
+    }
+    unserializeVariant(*value, uns, UnserializeMode::DictValue);
+    assertx(value->getRawType() != KindOfRef);
 
     if (i < (size - 1)) {
       auto lastChar = uns->peekBack();
@@ -1099,16 +1172,13 @@ Array unserializeVec(VariableUnserializer* uns) {
     check_request_surprise_unlikely();
   }
 
-  // Pre-allocate an ArrayData of the given size, to avoid escalation in the
-  // middle, which breaks references.
-  auto arr = VecArrayInit(size).toArray();
+  Array arr = VecArrayInit(size).toArray();
   for (int64_t i = 0; i < size; i++) {
-    if (UNLIKELY(uns->peek() == 'R')) {
-      throwVecRefValue();
-    }
-
-    Variant& value = arr.lvalAt();
-    unserializeVariant(value, uns);
+    Variant* value;
+    DEBUG_ONLY auto const ret = PackedArray::LvalNewVec(arr.get(), value, false);
+    assertx(ret == arr.get());
+    unserializeVariant(*value, uns, UnserializeMode::VecValue);
+    assertx(value->getRawType() != KindOfRef);
 
     if (i < (size - 1)) {
       auto lastChar = uns->peekBack();
@@ -1141,17 +1211,20 @@ Array unserializeKeyset(VariableUnserializer* uns) {
     check_request_surprise_unlikely();
   }
 
-  // Pre-allocate an ArrayData of the given size, to avoid escalation in the
-  // middle, which breaks references.
-  auto ad = MixedArray::MakeReserveKeyset(size);
+  KeysetInit init(size);
   for (int64_t i = 0; i < size; i++) {
-    Variant value;
-    unserializeVariant(value, uns);
-    auto const type = value.getRawType();
+    Variant key;
+    // Use key mode to stop the unserializer from keeping a pointer to this
+    // variant (since its stack-allocated).
+    unserializeVariant(key, uns, UnserializeMode::Key);
+
+    auto const type = key.getRawType();
     if (UNLIKELY(!isStringType(type) && !isIntType(type))) {
       throwKeysetValue();
     }
-    ad->append(*value.asCell(), false);
+
+    init.add(key);
+
     if (i < (size - 1)) {
       auto lastChar = uns->peekBack();
       if ((lastChar != ';' && lastChar != '}')) {
@@ -1161,7 +1234,7 @@ Array unserializeKeyset(VariableUnserializer* uns) {
   }
   check_request_surprise_unlikely();
   uns->expectChar('}');
-  return Array::attach(ad);
+  return init.toArray();
 }
 
 String unserializeString(VariableUnserializer* uns, char delimiter0 /* = '"' */,
@@ -1457,8 +1530,9 @@ void reserialize(VariableUnserializer* uns, StringBuffer& buf) {
     }
     break;
   case 'a':
+  case 'D':
     {
-      buf.append("a:");
+      buf.append(type == 'a' ? "a:" : "D:");
       int64_t size = uns->readInt();
       char sep2 = uns->readChar();
       buf.append(size);
@@ -1474,6 +1548,23 @@ void reserialize(VariableUnserializer* uns, StringBuffer& buf) {
       return;
     }
     break;
+  case 'v':
+  case 'k':
+    {
+      buf.append(type == 'v' ? "v:" : "k:");
+      int64_t size = uns->readInt();
+      char sep2 = uns->readChar();
+      buf.append(size);
+      buf.append(sep2);
+      sep2 = uns->readChar();
+      buf.append(sep2);
+      for (int64_t i = 0; i < size; ++i) {
+        reserialize(uns, buf);
+      }
+      sep2 = uns->readChar(); // '}'
+      buf.append(sep2);
+      return;
+    }
   case 'o':
   case 'O':
   case 'V':

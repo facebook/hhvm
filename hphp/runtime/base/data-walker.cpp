@@ -49,7 +49,7 @@ void DataWalker::traverseData(ArrayData* data,
     if (type == KindOfObject) {
       features.hasObjectOrResource = true;
       traverseData(var.getObjectData(), features, visited);
-    } else if (isArrayType(type)) {
+    } else if (isArrayLikeType(type)) {
       traverseData(var.getArrayData(), features, visited);
     } else if (type == KindOfResource) {
       features.hasObjectOrResource = true;

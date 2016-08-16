@@ -25,6 +25,9 @@
 #include <cmath>
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
@@ -54,6 +57,7 @@ static VariableSerializer::ArrayKind getKind(const ArrayData* arr) {
   if (arr->isDict()) return VariableSerializer::ArrayKind::Dict;
   if (arr->isVecArray()) return VariableSerializer::ArrayKind::Vec;
   if (arr->isKeyset()) return VariableSerializer::ArrayKind::Keyset;
+  assert(arr->isPHPArray());
   return VariableSerializer::ArrayKind::PHP;
 }
 
@@ -1376,13 +1380,29 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
 
     case KindOfPersistentVec:
     case KindOfVec:
+      assert(!isArrayKey);
+      assert(tv->m_data.parr->isVecArray());
+      serializeArray(tv->m_data.parr, serializer, skipNestCheck);
+      return;
+
     case KindOfPersistentDict:
     case KindOfDict:
+      assert(!isArrayKey);
+      assert(tv->m_data.parr->isDict());
+      serializeArray(tv->m_data.parr, serializer, skipNestCheck);
+      return;
+
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      assert(!isArrayKey);
+      assert(tv->m_data.parr->isKeyset());
+      serializeArray(tv->m_data.parr, serializer, skipNestCheck);
+      return;
+
     case KindOfPersistentArray:
     case KindOfArray:
       assert(!isArrayKey);
+      assert(tv->m_data.parr->isPHPArray());
       serializeArray(tv->m_data.parr, serializer, skipNestCheck);
       return;
 
@@ -1438,15 +1458,32 @@ static void serializeArrayImpl(const ArrayData* arr,
     arr->isVectorData(),
     getKind(arr)
   );
-  if (arr->isVecArray() || arr->isKeyset()) {
-    for (ArrayIter iter(arr); iter; ++iter) {
-      serializer->writeArrayValue(iter.secondRef());
-    }
+
+  if (arr->isVecArray()) {
+    PackedArray::IterateV(
+      arr,
+      [&](const TypedValue* v) {
+        serializer->writeArrayValue(tvAsCVarRef(v));
+        return false;
+      }
+    );
+  } else if (arr->isKeyset()) {
+    MixedArray::IterateV(
+      MixedArray::asMixed(arr),
+      [&](const TypedValue* v) {
+        serializer->writeArrayValue(tvAsCVarRef(v));
+        return false;
+      }
+    );
   } else {
-    for (ArrayIter iter(arr); iter; ++iter) {
-      serializer->writeArrayKey(iter.first());
-      serializer->writeArrayValue(iter.secondRef());
-    }
+    IterateKV(
+      arr,
+      [&](const TypedValue* k, const TypedValue* v) {
+        serializer->writeArrayKey(tvAsCVarRef(k));
+        serializer->writeArrayValue(tvAsCVarRef(v));
+        return false;
+      }
+    );
   }
   serializer->writeArrayFooter();
 }

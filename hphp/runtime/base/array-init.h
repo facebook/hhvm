@@ -643,7 +643,7 @@ struct VecArrayInit {
     auto const cell = LIKELY(v.getType() != KindOfUninit)
       ? *v.asCell()
       : make_tv<KindOfNull>();
-    performOp([&]{ return PackedArray::Append(m_vec, cell, false); });
+    performOp([&]{ return PackedArray::AppendVec(m_vec, cell, false); });
     return *this;
   }
 

@@ -90,6 +90,8 @@ namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
+  assertx(a->isPHPArray());
+
   auto r = a->append(*tvAssertCell(&value), a->hasMultipleRefs());
   if (UNLIKELY(r != a)) {
     decRefArr(a);
@@ -101,6 +103,8 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
                                TypedValue value) {
+  assertx(ad->isPHPArray());
+  assertx(cellIsPlausible(value));
   // this does not re-enter
   // set will decRef any old value that may have been overwritten
   // if appropriate
@@ -116,6 +120,8 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
+  assertx(ad->isPHPArray());
+  assertx(cellIsPlausible(value));
   // this does not re-enter
   bool copy = ad->cowCheck();
   // set will decRef any old value that may have been overwritten
@@ -133,6 +139,9 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
 }
 
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
+  assertx(a1->isPHPArray());
+  assertx(a2->isPHPArray());
+
   if (!a2->empty()) {
     if (a1->empty()) {
       // We consume refs on a2 and also produce references, so there's
@@ -276,7 +285,7 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   tvCoerceIfStrict(tv, argNum, func);
 
   DataType type = tv.m_type;
-  if (isArrayType(type) || type == KindOfObject || type == KindOfResource) {
+  if (isArrayLikeType(type) || type == KindOfObject || type == KindOfResource) {
     coerceCellFail(KindOfBoolean, type, argNum, func);
     not_reached();
   }
@@ -568,10 +577,12 @@ TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
   int64_t i;
   return UNLIKELY(a->convertKey(key, i)) ?
          getDefaultIfNullCell(a->nvGet(i), def) :
@@ -579,10 +590,12 @@ TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
 }
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isPHPArray());
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
 TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isPHPArray());
   return arrayIdxI(a, key, def);
 }
 
@@ -1167,6 +1180,10 @@ TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
 }
 
 void bindNewElem(TypedValue* base, RefData* val) {
+  if (UNLIKELY(isHackArrayType(base->m_type))) {
+    throwRefInvalidArrayValueException(base->m_data.parr);
+  }
+
   TypedValue localTvRef;
   auto elem = HPHP::NewElem<true>(localTvRef, base);
 

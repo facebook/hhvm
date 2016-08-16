@@ -57,5 +57,11 @@ Warning: HH\idx() expects at least 2 parameters, 0 given%S
 
 Notice: Undefined variable: arr%S
 
+Notice: Undefined variable: arr%S
+
+Notice: Undefined variable: arr%S
+
+Notice: Undefined variable: arr%S
+
 Notice: Undefined variable: idx%S
 NULL

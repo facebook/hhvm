@@ -69,7 +69,41 @@ folly::Optional<Type> eval_cell(Pred p) {
           c = make_tv<KindOfPersistentArray>(sarr);
         }
         break;
-      default:
+      case KindOfVec:
+        {
+          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
+          tvDecRef(&c);
+          c = make_tv<KindOfPersistentVec>(sarr);
+        }
+        break;
+      case KindOfDict:
+        {
+          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
+          tvDecRef(&c);
+          c = make_tv<KindOfPersistentDict>(sarr);
+        }
+        break;
+      case KindOfKeyset:
+        {
+          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
+          tvDecRef(&c);
+          c = make_tv<KindOfPersistentKeyset>(sarr);
+        }
+        break;
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfInt64:
+      case KindOfBoolean:
+      case KindOfDouble:
+      case KindOfPersistentString:
+      case KindOfPersistentArray:
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+      case KindOfClass:
         always_assert(0 && "Impossible constant evaluation occurred");
       }
     }

@@ -523,7 +523,7 @@ Array HHVM_FUNCTION(type_structure,
     }
   }
 
-  assert(isArrayType(typeCns.m_type));
+  assert(isArrayLikeType(typeCns.m_type));
   assert(typeCns.m_data.parr->isStatic());
   return Array::attach(typeCns.m_data.parr);
 }
@@ -1633,7 +1633,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     return String(cns->val.m_data.pstr);
   }
 
-  if (isArrayType(cns->val.m_type)) {
+  if (isArrayLikeType(cns->val.m_type)) {
     auto const cls = cns->cls;
     // go to the preclass to find the unresolved TypeStructure to get
     // the original assigned type text
@@ -1641,7 +1641,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     auto typeCns = preCls->lookupConstant(cns->name);
     assert(typeCns->isType());
     assert(!typeCns->isAbstract());
-    assert(isArrayType(typeCns->val().m_type));
+    assert(isArrayLikeType(typeCns->val().m_type));
     return TypeStructure::toString(Array::attach(typeCns->val().m_data.parr));
   }
 

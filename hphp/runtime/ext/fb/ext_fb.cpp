@@ -426,20 +426,43 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
       return 0;
 
     case KindOfPersistentVec:
-    case KindOfVec:
+    case KindOfVec: {
+      Array arr = var.toArray();
+      assert(arr->isVecArray());
+      fb_compact_serialize_array_as_list_map(
+        sb, std::move(arr), arr.size(), depth, behavior
+      );
+      return 0;
+    }
+
     case KindOfPersistentDict:
-    case KindOfDict:
+    case KindOfDict: {
+      Array arr = var.toArray();
+      assert(arr->isDict());
+      fb_compact_serialize_array_as_map(sb, std::move(arr), depth, behavior);
+      return 0;
+    }
+
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
+    case KindOfKeyset: {
+      Array arr = var.toArray();
+      assert(arr->isKeyset());
+      fb_compact_serialize_array_as_list_map(
+        sb, std::move(arr), arr.size(), depth, behavior
+      );
+      return 0;
+    }
+
     case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = var.toArray();
+      assert(arr->isPHPArray());
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
-        fb_compact_serialize_array_as_list_map(sb, arr, index_limit, depth,
-                                               behavior);
+        fb_compact_serialize_array_as_list_map(sb, std::move(arr), index_limit,
+                                               depth, behavior);
       } else {
-        fb_compact_serialize_array_as_map(sb, arr, depth, behavior);
+        fb_compact_serialize_array_as_map(sb, std::move(arr), depth, behavior);
       }
       return 0;
     }
@@ -662,8 +685,6 @@ int fb_compact_unserialize_from_buffer(
     case FB_CS_LIST_MAP:
     case FB_CS_VECTOR:
     {
-      // There's no concept of vector in PHP (yet),
-      // so return an array in both cases
       Array arr = Array::Create();
       int64_t i = 0;
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {

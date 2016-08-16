@@ -244,20 +244,6 @@ MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
   return data()[i];
 }
 
-inline MixedArray* MixedArray::asMixed(ArrayData* ad) {
-  assert(ad->isMixedLayout());
-  auto a = static_cast<MixedArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
-inline const MixedArray* MixedArray::asMixed(const ArrayData* ad) {
-  assert(ad->isMixedLayout());
-  auto a = static_cast<const MixedArray*>(ad);
-  assert(a->checkInvariants());
-  return a;
-}
-
 inline size_t MixedArray::hashSize() const {
   return HashSize(m_scale);
 }

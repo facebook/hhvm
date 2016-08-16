@@ -238,10 +238,19 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
 
       case KindOfPersistentVec:
       case KindOfVec:
+        compat = !strcasecmp(hint, "HH\\vec");
+        return;
+
       case KindOfPersistentDict:
       case KindOfDict:
+        compat = !strcasecmp(hint, "HH\\dict");
+        return;
+
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+        compat = !strcasecmp(hint, "HH\\keyset");
+        return;
+
       case KindOfPersistentArray:
       case KindOfArray:
         compat = (!strcasecmp(hint, "array") ||

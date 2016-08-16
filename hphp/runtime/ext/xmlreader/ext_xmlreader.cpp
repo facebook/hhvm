@@ -635,7 +635,7 @@ Variant HHVM_METHOD(XMLReader, __get,
     }
   }
 
-  switch (propertyMap->return_type) {
+  switch (DataType(propertyMap->return_type)) {
     case KindOfBoolean:
       return retint ? true : false;
     case KindOfInt64:
@@ -651,6 +651,13 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfArray:
+    case KindOfPersistentArray:
+    case KindOfVec:
+    case KindOfPersistentVec:
+    case KindOfDict:
+    case KindOfPersistentDict:
+    case KindOfKeyset:
+    case KindOfPersistentKeyset:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:

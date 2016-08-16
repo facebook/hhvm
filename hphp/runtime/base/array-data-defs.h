@@ -383,16 +383,16 @@ inline ArrayData* ArrayData::prepend(Cell v, bool copy) {
   return g_array_funcs.prepend[kind()](this, v, copy);
 }
 
-inline ArrayData* ArrayData::toDict() {
-  return g_array_funcs.toDict[kind()](this);
+inline ArrayData* ArrayData::toDict(bool copy) {
+  return g_array_funcs.toDict[kind()](this, copy);
 }
 
-inline ArrayData* ArrayData::toVec() const {
-  return g_array_funcs.toVec[kind()](this);
+inline ArrayData* ArrayData::toVec(bool copy) {
+  return g_array_funcs.toVec[kind()](this, copy);
 }
 
-inline ArrayData* ArrayData::toKeyset() {
-  return g_array_funcs.toKeyset[kind()](this);
+inline ArrayData* ArrayData::toKeyset(bool copy) {
+  return g_array_funcs.toKeyset[kind()](this, copy);
 }
 
 inline void ArrayData::renumber() {

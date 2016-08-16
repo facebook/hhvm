@@ -55,7 +55,16 @@ struct ArrayCommon {
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
 
-  static ArrayData* ToVec(const ArrayData*);
+  static ArrayData* ToVec(ArrayData*, bool);
+  static ArrayData* ToDict(ArrayData*, bool);
+  static ArrayData* ToKeyset(ArrayData*, bool);
+
+  enum class RefCheckResult {
+    Pass, // No refs
+    Fail, // Referenced ref
+    Collapse // Non-referenced ref
+  };
+  static RefCheckResult CheckForRefs(ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////

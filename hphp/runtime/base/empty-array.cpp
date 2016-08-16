@@ -324,15 +324,15 @@ ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
   return EmptyArray::MakePacked(v).first;
 }
 
-ArrayData* EmptyArray::ToDict(ArrayData*) {
+ArrayData* EmptyArray::ToDict(ArrayData*, bool) {
   return staticEmptyDictArray();
 }
 
-ArrayData* EmptyArray::ToVec(const ArrayData*) {
+ArrayData* EmptyArray::ToVec(ArrayData*, bool) {
   return staticEmptyVecArray();
 }
 
-ArrayData* EmptyArray::ToKeyset(ArrayData*) {
+ArrayData* EmptyArray::ToKeyset(ArrayData*, bool) {
   return staticEmptyKeysetArray();
 }
 

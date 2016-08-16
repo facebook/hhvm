@@ -412,11 +412,11 @@ public:
   ArrayData* prepend(Cell v, bool copy);
 
   /**
-   * Convert array to hack array types.
+   * Convert array to Hack arrays.
    */
-  ArrayData* toDict();
-  ArrayData* toVec() const;
-  ArrayData* toKeyset();
+  ArrayData* toDict(bool copy);
+  ArrayData* toVec(bool copy);
+  ArrayData* toKeyset(bool copy);
 
   /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
@@ -641,9 +641,9 @@ struct ArrayFunctions {
   ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
-  ArrayData* (*toDict[NK])(ArrayData*);
-  ArrayData* (*toVec[NK])(const ArrayData*);
-  ArrayData* (*toKeyset[NK])(ArrayData*);
+  ArrayData* (*toDict[NK])(ArrayData*, bool);
+  ArrayData* (*toVec[NK])(ArrayData*, bool);
+  ArrayData* (*toKeyset[NK])(ArrayData*, bool);
 };
 
 extern const ArrayFunctions g_array_funcs;

@@ -73,6 +73,7 @@ MixedArray::Initializer MixedArray::s_initializer;
 
 //////////////////////////////////////////////////////////////////////
 
+ALWAYS_INLINE
 ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
   assert(hk == HeaderKind::Mixed ||
          hk == HeaderKind::Dict ||
@@ -102,23 +103,41 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
   return ad;
 }
 
+ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
+  auto ad = MakeReserveImpl(size, HeaderKind::Mixed);
+  assert(ad->isMixed());
+  return ad;
+}
+
+ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
+  auto ad = MakeReserveImpl(size, HeaderKind::Dict);
+  assert(ad->isDict());
+  return ad;
+}
+
+ArrayData* MixedArray::MakeReserveKeyset(uint32_t size) {
+  auto ad = MakeReserveImpl(size, HeaderKind::Keyset);
+  assert(ad->isKeyset());
+  return ad;
+}
+
 ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  if (other->kind() == kPackedKind) {
+  if (other->isPacked()) {
     return PackedArray::MakeReserve(capacity);
   }
 
-  if (other->kind() == kVecKind) {
+  if (other->isVecArray()) {
     return PackedArray::MakeReserveVec(capacity);
   }
 
-  if (other->kind() == kDictKind) {
+  if (other->isDict()) {
     return MixedArray::MakeReserveDict(capacity);
   }
 
-  if (other->kind() == kKeysetKind) {
+  if (other->isKeyset()) {
     return MixedArray::MakeReserveKeyset(capacity);
   }
 
@@ -171,17 +190,21 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
 ArrayData* MixedArray::MakeKeyset(uint32_t size, const TypedValue* values) {
   auto a = asMixed(MixedArray::MakeReserveKeyset(size));
   for (auto i = uint32_t{0}; i < size; ++i) {
-    auto& tv = values[i];
-    if (!isIntType(tv.m_type) && !isStringType(tv.m_type)) {
-      throwInvalidArrayKeyException(&tv, a);
-    }
-  }
-  for (auto i = uint32_t{0}; i < size; ++i) {
+    // Access the values backwards since they're from the stack.
     auto& tv = values[size - i - 1];
     if (isIntType(tv.m_type)) {
       a->updateMove(tv.m_data.num, *tvAssertCell(&tv));
-    } else {
+    } else if (isStringType(tv.m_type)) {
       a->updateMove(tv.m_data.pstr, *tvAssertCell(&tv));
+    } else {
+      SCOPE_EXIT {
+        // Since we're moving values off of the stack, its safe to release the
+        // array without releasing any of its elements.
+        a->m_used = 0;
+        a->m_size = 0;
+        a->decRefAndRelease();
+      };
+      throwInvalidArrayKeyException(&tv, a);
     }
   }
   return a;
@@ -225,6 +248,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
         continue;
       } else if (dest_hk == HeaderKind::Dict) {
         ad->m_used = i;
+        ad->m_size = i;
         SCOPE_EXIT {
           if (ad->isRefCounted()) Release(ad);
           else if (ad->isUncounted()) ReleaseUncounted(ad);
@@ -400,16 +424,16 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
 }
 
 ArrayData* MixedArray::MakeFromDict(ArrayData* adIn, bool copy) {
-  assert(adIn->isDict());
   assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_hdr.kind = HeaderKind::Mixed;
   return ad;
 }
 
 ArrayData* MixedArray::MakeFromKeyset(ArrayData* adIn, bool copy) {
-  assert(adIn->isKeyset());
   assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isKeyset());
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_hdr.kind = HeaderKind::Mixed;
   return ad;
@@ -584,6 +608,7 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
+  assert(isMixedLayout());
   assert(checkCount());
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(MixedArray::HashSize(m_scale) ==
@@ -1256,7 +1281,7 @@ ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
 }
 
 ArrayData* MixedArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                              bool copy) {
+                               bool copy) {
   auto a = asMixed(ad);
   if (copy) {
     a = a->copyMixedAndResizeIfNeeded();
@@ -1337,6 +1362,7 @@ MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
 ArrayData*
 MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->updateRef(k, v);
@@ -1345,6 +1371,7 @@ MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
 ArrayData*
 MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->updateRef(k, v);
@@ -1495,6 +1522,8 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
 #endif
 
 const TypedValue* MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t ki) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isDict());
   auto const tv = MixedArray::NvGetInt(ad, ki);
   if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
   return tv;
@@ -1502,6 +1531,8 @@ const TypedValue* MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t ki) {
 
 const TypedValue* MixedArray::NvTryGetStrDict(const ArrayData* ad,
                                               const StringData* k) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isDict());
   auto const tv = MixedArray::NvGetStr(ad, k);
   if (UNLIKELY(!tv)) throwOOBArrayKeyException(k, ad);
   return tv;
@@ -1529,6 +1560,8 @@ ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
 
 ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
+
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
@@ -1547,6 +1580,7 @@ ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
 ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
                                      bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->nextInsertWithRef(v);
@@ -1556,7 +1590,9 @@ ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
  * For Dicts and Keysets, we want to append the value only if it is not
  * observably referenced.
  */
-template <class AppendFunc> ArrayData*
+template <class AppendFunc>
+ALWAYS_INLINE
+ArrayData*
 MixedArray::AppendWithRefNoRef(ArrayData* adIn, const Variant& v, bool copy,
                                AppendFunc append) {
   if (v.isReferenced()) throwRefInvalidArrayValueException(adIn);
@@ -1688,9 +1724,10 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
 
 // Note: the logic relating to how to grow in this function is coupled
 // to PackedArray::PlusEq.
-inline ArrayData* MixedArray::ArrayPlusEqImpl(ArrayData* ad,
-                                              const ArrayData* elems,
-                                              bool is_keyset) {
+ALWAYS_INLINE
+ArrayData* MixedArray::ArrayPlusEqImpl(ArrayData* ad,
+                                       const ArrayData* elems,
+                                       bool is_keyset) {
   auto const neededSize = ad->size() + elems->size();
 
   auto ret =
@@ -1702,9 +1739,6 @@ inline ArrayData* MixedArray::ArrayPlusEqImpl(ArrayData* ad,
   }
 
   auto const rhs = asMixed(elems);
-  if (ad->isDict() && !rhs->isDict()) {
-    CheckRefsForDict(rhs);
-  }
 
   auto srcElem = rhs->data();
   auto const srcStop = rhs->data() + rhs->m_used;
@@ -1781,10 +1815,6 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     auto srcElem = rhs->data();
     auto const srcStop = rhs->data() + rhs->m_used;
 
-    if (ad->isDict() && !rhs->isDict()) {
-      CheckRefsForDict(rhs);
-    }
-
     for (; srcElem != srcStop; ++srcElem) {
       if (isTombstone(srcElem->data.m_type)) continue;
 
@@ -1806,11 +1836,6 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   assert(PackedArray::checkInvariants(elems));
   auto src           = packedData(elems);
   auto const srcStop = src + elems->m_size;
-  if (ad->isDict() && !elems->isVecArray()) {
-    for (auto i = src; i != srcStop; ++i) {
-      if (i->m_type == KindOfRef) throwRefInvalidArrayValueException(ad);
-    }
-  }
   for (; src != srcStop; ++src) {
     ret->nextInsertWithRef(tvAsCVarRef(src));
   }
@@ -1894,33 +1919,38 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v, bool copy) {
   return a;
 }
 
-void MixedArray::CheckRefsForDict(const MixedArray* ma) {
-  auto const elms = ma->data();
-  for (uint32_t i = 0, limit = ma->m_used; i < limit; ++i) {
-    auto& e = elms[i];
-    if (UNLIKELY(e.isTombstone())) continue;
-    if (UNLIKELY(e.data.m_type == KindOfRef)) {
-      throwRefInvalidArrayValueException(ma);
+MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
+  auto a = asMixed(ad);
+  assert(a->isMixed());
+  assert(!a->cowCheck());
+  a->m_hdr.kind = HeaderKind::Dict;
+  return a;
+}
+
+ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
+  auto a = asMixed(ad);
+  assert(a->isMixed());
+
+  if (copy) {
+    return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
+  } else {
+    auto const result = ArrayCommon::CheckForRefs(a);
+    if (LIKELY(result == ArrayCommon::RefCheckResult::Pass)) {
+      return ToDictInPlace(a);
+    } else if (result == ArrayCommon::RefCheckResult::Collapse) {
+      // Remove unreferenced refs
+      return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
+    } else {
+      throwRefInvalidArrayValueException(staticEmptyDictArray());
     }
   }
 }
 
-MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
-  auto a = asMixed(ad);
-  assert(!a->cowCheck());
-  a->m_hdr.init(HeaderKind::Dict, 1);
-  CheckRefsForDict(a);
-  return a;
-}
-
-ArrayData* MixedArray::ToDict(ArrayData* ad) {
-  auto a = asMixed(ad);
-  return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
-}
-
 MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
   assert(!a->cowCheck());
+
   auto elms = a->data();
   for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
     auto& e = elms[i];
@@ -1939,14 +1969,26 @@ MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
       tvRefcountedDecRefHelper(oldType, oldDatum);
     }
   }
-  a->m_hdr.init(HeaderKind::Keyset, 1);
+  a->m_hdr.kind = HeaderKind::Keyset;
   return a;
 }
 
-ArrayData* MixedArray::ToKeyset(ArrayData* ad) {
+ArrayData* MixedArray::ToKeyset(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
-  auto mixed = CopyMixed(*a, AllocMode::Request, HeaderKind::Keyset);
-  return ToKeysetInPlace(mixed);
+  assert(a->isMixed());
+  auto keyset = copy ?
+    CopyMixed(*a, AllocMode::Request, HeaderKind::Mixed) : a;
+  return ToKeysetInPlace(keyset);
+}
+
+ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
+  assert(ad->isDict());
+  return ad;
+}
+
+ArrayData* MixedArray::ToKeysetKeyset(ArrayData* ad, bool) {
+  assert(ad->isKeyset());
+  return ad;
 }
 
 void MixedArray::Renumber(ArrayData* ad) {
@@ -1993,28 +2035,40 @@ bool MixedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 
 ArrayData*
 MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, Variant*&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
 MixedArray::LvalStrRefDict(ArrayData* adIn, StringData*, Variant*&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData* MixedArray::LvalNewRefDict(ArrayData* adIn, Variant*&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData* MixedArray::SetRefIntDict(ArrayData* adIn, int64_t, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
 MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 

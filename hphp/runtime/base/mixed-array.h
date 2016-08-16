@@ -166,17 +166,9 @@ struct MixedArray final : private ArrayData,
    *
    * The returned array is already incref'd.
    */
-  static ArrayData* MakeReserveMixed(uint32_t size) {
-    return MakeReserveImpl(size, HeaderKind::Mixed);
-  }
-
-  static ArrayData* MakeReserveDict(uint32_t size) {
-    return MakeReserveImpl(size, HeaderKind::Dict);
-  }
-
-  static ArrayData* MakeReserveKeyset(uint32_t size) {
-    return MakeReserveImpl(size, HeaderKind::Keyset);
-  }
+  static ArrayData* MakeReserveMixed(uint32_t size);
+  static ArrayData* MakeReserveDict(uint32_t size);
+  static ArrayData* MakeReserveKeyset(uint32_t size);
 
   static MixedArray* ToDictInPlace(ArrayData*);
   static MixedArray* ToKeysetInPlace(ArrayData*);
@@ -306,17 +298,15 @@ public:
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
-  template <class AppendFunc>
-  static ArrayData* AppendWithRefNoRef(ArrayData*, const Variant& v, bool copy,
-                                       AppendFunc append);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static ArrayData* ToDict(ArrayData*);
-  static ArrayData* ToKeyset(ArrayData*);
+  static ArrayData* ToKeyset(ArrayData*, bool);
+  static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
+
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
@@ -382,6 +372,7 @@ public:
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
   static constexpr auto EscalateDict = &Escalate;
   static constexpr auto ToVecDict = ToVec;
+  static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToKeysetDict = &ToKeyset;
 
   static ArrayData* LvalIntRefDict(ArrayData*, int64_t, Variant*&, bool);
@@ -430,6 +421,7 @@ public:
   static constexpr auto EscalateKeyset = &Escalate;
   static constexpr auto ToVecKeyset = ToVec;
   static constexpr auto ToDictKeyset = &ToDict;
+  static ArrayData* ToKeysetKeyset(ArrayData*, bool);
 
   static constexpr auto LvalIntRefKeyset = &LvalIntRefDict;
   static constexpr auto LvalStrRefKeyset = &LvalStrRefDict;
@@ -471,7 +463,6 @@ private:
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
   static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
-  static void CheckRefsForDict(const MixedArray*);
 
 public:
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -597,6 +588,10 @@ private:
     MixedArray*, const ArrayData*, size_t, bool);
   static ArrayData* ArrayPlusEqImpl(ArrayData*, const ArrayData*, bool);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
+
+  template <class AppendFunc>
+  static ArrayData* AppendWithRefNoRef(ArrayData*, const Variant&,
+                                       bool, AppendFunc);
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);

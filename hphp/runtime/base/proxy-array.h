@@ -175,9 +175,9 @@ public:
   static ArrayData* Pop(ArrayData*, Variant &value);
   static ArrayData* Dequeue(ArrayData*, Variant &value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static ArrayData* ToDict(ArrayData*);
-  static ArrayData* ToVec(const ArrayData*);
-  static ArrayData* ToKeyset(ArrayData*);
+  static ArrayData* ToDict(ArrayData*, bool);
+  static ArrayData* ToVec(ArrayData*, bool);
+  static ArrayData* ToKeyset(ArrayData*, bool);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);

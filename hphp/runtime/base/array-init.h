@@ -413,6 +413,17 @@ struct DictInit {
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
+  ArrayData* create() {
+    assert(m_data->hasExactlyOneRef());
+    assert(m_data->isDict());
+    auto ptr = m_data;
+    m_data = nullptr;
+#ifndef NDEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return ptr;
+  }
+
   Variant toVariant() {
     assert(m_data->hasExactlyOneRef());
     assert(m_data->isDict());
@@ -555,7 +566,7 @@ struct PackedArrayInit {
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
-  ArrayData *create() {
+  ArrayData* create() {
     assert(m_vec->hasExactlyOneRef());
     assert(m_vec->isPHPArray());
     auto ptr = m_vec;
@@ -676,7 +687,7 @@ struct VecArrayInit {
     return Array(ptr, Array::ArrayInitCtor::Tag);
   }
 
-  ArrayData *create() {
+  ArrayData* create() {
     assert(m_vec->hasExactlyOneRef());
     assert(m_vec->isVecArray());
     auto ptr = m_vec;

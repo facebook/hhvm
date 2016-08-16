@@ -19,8 +19,9 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
@@ -65,18 +66,77 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
   return a;
 }
 
-ArrayData* ArrayCommon::ToVec(const ArrayData* a) {
+ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyVecArray();
   VecArrayInit init{size};
-  for (ArrayIter it{a}; it; ++it) {
-    auto const& value = it.secondRef();
-    if (UNLIKELY(value.isReferenced())) {
-      throwRefInvalidArrayValueException(init.toArray());
+  IterateV(
+    make_array_like_tv(a),
+    [&](const ArrayData*) { return false; },
+    [&](const TypedValue* v) {
+      if (UNLIKELY(v->m_type == KindOfRef)) {
+        if (v->m_data.pref->isReferenced()) {
+          throwRefInvalidArrayValueException(init.toArray());
+        }
+      }
+      init.append(tvAsCVarRef(v));
     }
-    init.append(value);
-  }
+  );
   return init.create();
+}
+
+ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
+  auto const size = a->size();
+  if (!size) return staticEmptyDictArray();
+  DictInit init{size};
+  IterateKV(
+    make_array_like_tv(a),
+    [&](const ArrayData*) { return false; },
+    [&](const TypedValue* k, const TypedValue* v) {
+      if (UNLIKELY(v->m_type == KindOfRef)) {
+        if (v->m_data.pref->isReferenced()) {
+          throwRefInvalidArrayValueException(init.toArray());
+        }
+      }
+      init.setValidKey(tvAsCVarRef(k), tvAsCVarRef(v));
+    }
+  );
+  return init.create();
+}
+
+ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
+  auto const size = a->size();
+  if (!size) return staticEmptyKeysetArray();
+  auto keyset = Array::CreateKeyset();
+  IterateKV(
+    make_array_like_tv(a),
+    [&](const ArrayData*) { return false; },
+    [&](const TypedValue* k, const TypedValue*) {
+      keyset.append(tvAsCVarRef(k));
+    }
+  );
+  return keyset.detach();
+}
+
+ArrayCommon::RefCheckResult
+ArrayCommon::CheckForRefs(ArrayData* ad) {
+  auto result = RefCheckResult::Pass;
+  IterateV(
+    make_array_like_tv(ad),
+    [&](const ArrayData*) { return false; },
+    [&](const TypedValue* v) {
+      if (UNLIKELY(v->m_type == KindOfRef)) {
+        auto const ref = v->m_data.pref;
+        if (ref->isReferenced() || ref->tv()->m_data.parr == ad) {
+          result = RefCheckResult::Fail;
+          return true;
+        }
+        result = RefCheckResult::Collapse;
+      }
+      return false;
+    }
+  );
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////

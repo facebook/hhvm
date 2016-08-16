@@ -112,25 +112,6 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
   raise_fatal_error("Unimplemented ArrayData::ZAppend");
 }
 
-const StaticString
-  s_failConvertToDict("Unsupported conversion to Dict array"),
-  s_failConvertToKeyset("Unsupported conversion to Keyset array");
-
-static ArrayData* ToDictThrow(ArrayData*) {
-  SystemLib::throwExceptionObject(s_failConvertToDict);
-}
-
-static ArrayData* ToKeysetThrow(ArrayData*) {
-  SystemLib::throwExceptionObject(s_failConvertToKeyset);
-}
-
-static ArrayData* ToDictNoop(ArrayData* ad) {
-  ad->incRefCount();
-  return ad;
-}
-
-static constexpr auto ToKeysetNoop = &ToDictNoop;
-
 //////////////////////////////////////////////////////////////////////
 
 static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
@@ -686,38 +667,36 @@ const ArrayFunctions g_array_funcs = {
     &ZAppendThrow,
   },
 
-  {
-    PackedArray::ToDict,
-    MixedArray::ToDict,
-    EmptyArray::ToDict,
-    ToDictThrow,
-    ToDictThrow,
-    ProxyArray::ToDict,
-    ToDictNoop,
-    PackedArray::ToDictVec,
-    MixedArray::ToDictKeyset,
-  },
+   /*
+   * ArrayData* ToDict(ArrayData*, bool)
+   *
+   *   Convert array to a dict. If the dict is already a dict, it will be
+   *   returned unchange (without copying). If copy is false, array may be
+   *   converted in place. If the input array contains references, an exception
+   *   will be thrown.
+   */
+  DISPATCH(ToDict)
 
   /*
-   * ArrayData* ToVec(ArrayData*)
+   * ArrayData* ToVec(ArrayData*, bool)
    *
-   *   Convert array to a new vector array. Keys will be discarded and the
-   *   vector array will contain the values in iteration order. If the array is
-   *   already a vector array, it will be returned unchanged (without copying).
+   *   Convert array to a new vec. Keys will be discarded and the vec will
+   *   contain the values in iteration order. If the array is already a vec, it
+   *   will be returned unchanged (without copying). If copy is false, array may
+   *   be converted in place. If the input array contains references, an
+   *   exception will be thrown.
    */
   DISPATCH(ToVec)
 
-  {
-    PackedArray::ToKeyset,
-    MixedArray::ToKeyset,
-    EmptyArray::ToKeyset,
-    ToKeysetThrow,
-    ToKeysetThrow,
-    ProxyArray::ToKeyset,
-    MixedArray::ToKeysetDict,
-    PackedArray::ToKeysetVec,
-    ToKeysetNoop,
-  }
+   /*
+   * ArrayData* ToKeyset(ArrayData*, bool)
+   *
+   *   Convert array to a keyset. If the dict is already a keyset, it will be
+   *   returned unchange (without copying). If copy is false, array may be
+   *   converted in place. If the input array contains references, an exception
+   *   will be thrown.
+   */
+  DISPATCH(ToKeyset)
 };
 
 #undef DISPATCH
@@ -1089,6 +1068,7 @@ void throwOOBArrayKeyException(const StringData* key, const ArrayData* ad) {
 }
 
 void throwRefInvalidArrayValueException(const ArrayData* ad) {
+  assert(ad->isHackArray());
   SystemLib::throwInvalidArgumentExceptionObject(
     folly::sformat("{} cannot contain references",
       ad->isVecArray() ? "Vecs" : ad->isDict() ? "Dicts" : "Keysets"

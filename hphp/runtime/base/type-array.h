@@ -136,19 +136,19 @@ public:
 
   Array toVec() const {
     if (!m_arr) return CreateVec();
-    auto new_arr = m_arr->toVec();
+    auto new_arr = m_arr->toVec(true);
     return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
   }
 
   Array toDict() const {
     if (!m_arr) return CreateDict();
-    auto new_arr = m_arr->toDict();
+    auto new_arr = m_arr->toDict(true);
     return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
   }
 
   Array toKeyset() const {
     if (!m_arr) return CreateKeyset();
-    auto new_arr = m_arr->toKeyset();
+    auto new_arr = m_arr->toKeyset(true);
     return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
   }
 

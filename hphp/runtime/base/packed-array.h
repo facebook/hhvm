@@ -110,9 +110,9 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static ArrayData* ToDict(ArrayData*);
-  static ArrayData* ToVec(const ArrayData*);
-  static ArrayData* ToKeyset(ArrayData*);
+  static ArrayData* ToDict(ArrayData*, bool);
+  static ArrayData* ToVec(ArrayData*, bool);
+  static ArrayData* ToKeyset(ArrayData*, bool);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad) {
@@ -135,9 +135,8 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* AppendWithRefVec(ArrayData*, const Variant&, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* MergeVec(ArrayData*, const ArrayData*);
-  static ArrayData* ToVecVec(const ArrayData* ad) {
-    return const_cast<ArrayData*>(ad);
-  }
+  static ArrayData* ToDictVec(ArrayData*, bool);
+  static ArrayData* ToVecVec(ArrayData*, bool);
 
   static constexpr auto ReleaseVec = &Release;
   static constexpr auto NvGetIntVec = &NvGetInt;
@@ -174,7 +173,6 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr auto RenumberVec = &Renumber;
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto EscalateVec = &Escalate;
-  static constexpr auto ToDictVec = &ToDict;
   static constexpr auto ToKeysetVec = &ToKeyset;
 
   //////////////////////////////////////////////////////////////////////
@@ -223,6 +221,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* MakeFromVec(ArrayData* adIn, bool copy);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc);
+
   // Fast iteration
   template <class F, bool inc = true>
   static void IterateV(ArrayData* arr, F fn);

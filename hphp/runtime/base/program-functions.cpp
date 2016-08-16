@@ -1993,7 +1993,7 @@ static void update_constants_and_options() {
 void hphp_thread_init() {
   ServerStats::GetLogger();
   zend_get_bigint_data();
-  zend_get_rand_data();
+  zend_rand_init();
   get_server_note();
   MemoryManager::TlsWrapper::getCheck();
 

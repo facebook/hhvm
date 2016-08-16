@@ -98,36 +98,39 @@ namespace HPHP {
 #define twist(m,u,v) \
   (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
+namespace {
+////////////////////////////////////////////////////////////////////////////////
+
 struct RandData {
-  RandData()
-    : seeded(false), left(0), next(nullptr),
-      lcg_seeded(false), lcg_s1(0), lcg_s2(0) {
-    memset(state, 0, sizeof(state));
+  RandData() {
+    memset(this, 0, sizeof(*this));
   }
 
-  bool seeded;
   int left;
   uint32_t state[N];
-  uint32_t *next;
+  uint32_t* next;
 
+  bool seeded;
   bool lcg_seeded;
   int32_t lcg_s1;
   int32_t lcg_s2;
 };
-static IMPLEMENT_THREAD_LOCAL_NO_CHECK(RandData, s_rand_data);
 
-void zend_get_rand_data() {
-  s_rand_data.getCheck();
-}
+/*
+ * Use a ThreadLocalNoCheck to hold RandData instead of directly using __thread.
+ * RandData is large, and we don't want our non-PHP threads to be needlessly
+ * holding it in TLS.
+ */
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(RandData, s_data);
 
-static inline void php_mt_initialize(uint32_t seed, uint32_t *state) {
+void php_mt_initialize(uint32_t seed, uint32_t* state) {
   /* Initialize generator state with seed
      See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
      In previous versions, most significant bits (MSBs) of the seed affect
      only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-  register uint32_t *s = state;
-  register uint32_t *r = state;
+  register uint32_t* s = state;
+  register uint32_t* r = state;
   register int i = 1;
 
   *s++ = seed & 0xffffffffU;
@@ -137,13 +140,12 @@ static inline void php_mt_initialize(uint32_t seed, uint32_t *state) {
   }
 }
 
-static inline void php_mt_reload() {
+void php_mt_reload() {
   /* Generate N new values in state
      Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-  RandData *data = s_rand_data.getNoCheck();
-  register uint32_t *state = data->state;
-  register uint32_t *p = state;
+  register uint32_t* state = s_data->state;
+  register uint32_t* p = state;
   register int i;
 
   for (i = N - M; i--; ++p)
@@ -151,43 +153,64 @@ static inline void php_mt_reload() {
   for (i = M; --i; ++p)
     *p = twist(p[M-N], p[0], p[1]);
   *p = twist(p[M-N], p[0], state[0]);
-  data->left = N;
-  data->next = state;
+  s_data->left = N;
+  s_data->next = state;
 }
 
-void math_mt_srand(uint32_t seed) {
-  RandData *data = s_rand_data.getNoCheck();
-
-  /* Seed the generator with a simple uint32 */
-  php_mt_initialize(seed, data->state);
-  php_mt_reload();
-
-  /* Seed only once */
-  data->seeded = true;
-}
-
-static inline uint32_t php_mt_rand() {
+uint32_t php_mt_rand() {
   // Pull a 32-bit integer from the generator state
   // Every other access function simply transforms the numbers extracted here
 
   register uint32_t s1;
 
-  RandData *data = s_rand_data.getNoCheck();
-  if (data->left == 0) {
+  if (s_data->left == 0) {
     php_mt_reload();
   }
-  --data->left;
+  --s_data->left;
 
-  s1 = *data->next++;
+  s1 = *s_data->next++;
   s1 ^= (s1 >> 11);
   s1 ^= (s1 <<  7) & 0x9d2c5680U;
   s1 ^= (s1 << 15) & 0xefc60000U;
-  return ( s1 ^ (s1 >> 18) );
+  return s1 ^ (s1 >> 18);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if (s<0)s+=m
+
+void lcg_seed() {
+  timeval tv;
+
+  s_data->lcg_s1 = gettimeofday(&tv, nullptr) == 0
+    ? tv.tv_sec ^ (tv.tv_usec << 11)
+    : 1;
+
+  s_data->lcg_s2 = (long)getpid();
+
+  /* Add entropy to s2 by calling gettimeofday() again */
+  if (gettimeofday(&tv, nullptr) == 0) {
+    s_data->lcg_s2 ^= (tv.tv_usec << 11);
+  }
+
+  s_data->lcg_seeded = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+}
+
+void math_mt_srand(uint32_t seed) {
+  /* Seed the generator with a simple uint32 */
+  php_mt_initialize(seed, s_data->state);
+  php_mt_reload();
+
+  /* Seed only once */
+  s_data->seeded = true;
 }
 
 // Returns a random number from Mersenne Twister
 int64_t math_mt_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
-  if (!s_rand_data->seeded) {
+  if (!s_data->seeded) {
     math_mt_srand(math_generate_seed());
   }
 
@@ -208,46 +231,24 @@ int64_t math_mt_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+
 /*
- * combinedLCG() returns a pseudo random number in the range of (0, 1).
- * The function combines two CGs with periods of
- * 2^31 - 85 and 2^31 - 249. The period of this function
- * is equal to the product of both primes.
+ * math_combined_lcg() returns a pseudo random number in the range of (0, 1).
+ * The function combines two CGs with periods of 2^31 - 85 and 2^31 - 249. The
+ * period of this function is equal to the product of both primes.
  */
-
-#define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if (s<0)s+=m
-
-static void lcg_seed() {
-  RandData *data = s_rand_data.getNoCheck();
-  struct timeval tv;
-  if (gettimeofday(&tv, nullptr) == 0) {
-    data->lcg_s1 = tv.tv_sec ^ (tv.tv_usec<<11);
-  } else {
-    data->lcg_s1 = 1;
-  }
-  data->lcg_s2 = (long)getpid();
-
-  /* Add entropy to s2 by calling gettimeofday() again */
-  if (gettimeofday(&tv, nullptr) == 0) {
-    data->lcg_s2 ^= (tv.tv_usec<<11);
-  }
-
-  data->lcg_seeded = true;
-}
-
 double math_combined_lcg() {
   int32_t q;
   int32_t z;
 
-  RandData *data = s_rand_data.getNoCheck();
-  if (!data->lcg_seeded) {
+  if (!s_data->lcg_seeded) {
     lcg_seed();
   }
 
-  MODMULT(53668, 40014, 12211, 2147483563L, data->lcg_s1);
-  MODMULT(52774, 40692, 3791, 2147483399L, data->lcg_s2);
+  MODMULT(53668, 40014, 12211, 2147483563L, s_data->lcg_s1);
+  MODMULT(52774, 40692, 3791, 2147483399L, s_data->lcg_s2);
 
-  z = data->lcg_s1 - data->lcg_s2;
+  z = s_data->lcg_s1 - s_data->lcg_s2;
   if (z < 1) {
     z += 2147483562;
   }
@@ -257,15 +258,25 @@ double math_combined_lcg() {
 
 int64_t math_generate_seed() {
 #ifdef VALGRIND
-  // valgrind treats memory from RAND_bytes as uninitialized
+  // Valgrind treats memory from RAND_bytes as uninitialized.
   return GENERATE_SEED();
 #endif
   int64_t value;
-  if (RAND_bytes((unsigned char *)&value, sizeof(value)) < 1) {
+  if (RAND_bytes((unsigned char*)&value, sizeof(value)) < 1) {
     return GENERATE_SEED();
-  } else {
-    return value;
   }
+  return value;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void zend_rand_init() {
+  s_data.getCheck();
+}
+
+void zend_rand_unseed() {
+  s_data->seeded = false;
+  s_data->lcg_seeded = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

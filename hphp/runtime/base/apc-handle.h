@@ -172,6 +172,7 @@ struct APCHandle {
     assert(savedKind == m_kind);
     return savedKind == APCKind::UncountedArray ?
       Variant{getUncountedArray(),
+              KindOfPersistentArray,
               Variant::PersistentArrInit{}} :
       toLocal();
   }

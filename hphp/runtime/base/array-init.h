@@ -66,6 +66,7 @@ struct ArrayInit {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
+    assert(!m_data || m_data->isPHPArray());
     other.m_data = nullptr;
 #ifndef NDEBUG
     other.m_expectedCount = 0;
@@ -78,7 +79,7 @@ struct ArrayInit {
   ~ArrayInit() {
     // Use non-specialized release call so array instrumentation can track
     // its destruction XXX rfc: keep this? what was it before?
-    assert(!m_data || m_data->hasExactlyOneRef());
+    assert(!m_data || (m_data->hasExactlyOneRef() && m_data->isPHPArray()));
     if (m_data) m_data->release();
   }
 
@@ -251,6 +252,7 @@ struct ArrayInit {
   // compiler can't prove m_data hasn't changed.
   ArrayData* create() {
     assert(m_data->hasExactlyOneRef());
+    assert(m_data->isPHPArray());
     auto const ret = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
@@ -261,6 +263,7 @@ struct ArrayInit {
 
   Array toArray() {
     assert(m_data->hasExactlyOneRef());
+    assert(m_data->isPHPArray());
     auto ptr = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
@@ -271,12 +274,13 @@ struct ArrayInit {
 
   Variant toVariant() {
     assert(m_data->hasExactlyOneRef());
+    assert(m_data->isPHPArray());
     auto ptr = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
-    return Variant(ptr, Variant::ArrayInitCtor{});
+    return Variant(ptr, KindOfArray, Variant::ArrayInitCtor{});
   }
 
 private:
@@ -313,6 +317,7 @@ struct DictInit {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
+    assert(!m_data || m_data->isDict());
     other.m_data = nullptr;
 #ifndef NDEBUG
     other.m_expectedCount = 0;
@@ -325,7 +330,7 @@ struct DictInit {
   ~DictInit() {
     // Use non-specialized release call so array instrumentation can track
     // its destruction XXX rfc: keep this? what was it before?
-    assert(!m_data || m_data->hasExactlyOneRef());
+    assert(!m_data || (m_data->hasExactlyOneRef() && m_data->isDict()));
     if (m_data) m_data->release();
   }
 
@@ -399,6 +404,7 @@ struct DictInit {
 
   Array toArray() {
     assert(m_data->hasExactlyOneRef());
+    assert(m_data->isDict());
     auto ptr = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
@@ -409,12 +415,13 @@ struct DictInit {
 
   Variant toVariant() {
     assert(m_data->hasExactlyOneRef());
+    assert(m_data->isDict());
     auto ptr = m_data;
     m_data = nullptr;
 #ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
-    return Variant(ptr, Variant::ArrayInitCtor{});
+    return Variant(ptr, KindOfDict, Variant::ArrayInitCtor{});
   }
 
 private:
@@ -477,6 +484,7 @@ struct PackedArrayInit {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
+    assert(!m_vec || m_vec->isPHPArray());
     other.m_vec = nullptr;
 #ifndef NDEBUG
     other.m_expectedCount = 0;
@@ -488,7 +496,7 @@ struct PackedArrayInit {
 
   ~PackedArrayInit() {
     // In case an exception interrupts the initialization.
-    assert(!m_vec || m_vec->hasExactlyOneRef());
+    assert(!m_vec || (m_vec->hasExactlyOneRef() && m_vec->isPHPArray()));
     if (m_vec) m_vec->release();
   }
 
@@ -527,16 +535,18 @@ struct PackedArrayInit {
 
   Variant toVariant() {
     assert(m_vec->hasExactlyOneRef());
+    assert(m_vec->isPHPArray());
     auto ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
-    return Variant(ptr, Variant::ArrayInitCtor{});
+    return Variant(ptr, KindOfArray, Variant::ArrayInitCtor{});
   }
 
   Array toArray() {
     assert(m_vec->hasExactlyOneRef());
+    assert(m_vec->isPHPArray());
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG
@@ -547,6 +557,7 @@ struct PackedArrayInit {
 
   ArrayData *create() {
     assert(m_vec->hasExactlyOneRef());
+    assert(m_vec->isPHPArray());
     auto ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG
@@ -616,6 +627,7 @@ struct VecArrayInit {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
+    assert(!m_vec || m_vec->isVecArray());
     other.m_vec = nullptr;
 #ifndef NDEBUG
     other.m_expectedCount = 0;
@@ -627,7 +639,7 @@ struct VecArrayInit {
 
   ~VecArrayInit() {
     // In case an exception interrupts the initialization.
-    assert(!m_vec || m_vec->hasExactlyOneRef());
+    assert(!m_vec || (m_vec->hasExactlyOneRef() && m_vec->isVecArray()));
     if (m_vec) m_vec->release();
   }
 
@@ -644,16 +656,18 @@ struct VecArrayInit {
 
   Variant toVariant() {
     assert(m_vec->hasExactlyOneRef());
+    assert(m_vec->isVecArray());
     auto ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
-    return Variant(ptr, Variant::ArrayInitCtor{});
+    return Variant(ptr, KindOfVec, Variant::ArrayInitCtor{});
   }
 
   Array toArray() {
     assert(m_vec->hasExactlyOneRef());
+    assert(m_vec->isVecArray());
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG
@@ -664,6 +678,7 @@ struct VecArrayInit {
 
   ArrayData *create() {
     assert(m_vec->hasExactlyOneRef());
+    assert(m_vec->isVecArray());
     auto ptr = m_vec;
     m_vec = nullptr;
 #ifndef NDEBUG

@@ -1492,6 +1492,24 @@ TypedValue HHVM_FUNCTION(strlen,
     case KindOfString:
       return make_tv<KindOfInt64>(cell->m_data.pstr->size());
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+      raise_warning("strlen() expects parameter 1 to be string, "
+                    "vec given");
+      return make_tv<KindOfNull>();
+
+    case KindOfPersistentDict:
+    case KindOfDict:
+      raise_warning("strlen() expects parameter 1 to be string, "
+                    "dict given");
+      return make_tv<KindOfNull>();
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      raise_warning("strlen() expects parameter 1 to be string, "
+                    "keyset given");
+      return make_tv<KindOfNull>();
+
     case KindOfPersistentArray:
     case KindOfArray:
       raise_warning("strlen() expects parameter 1 to be string, "

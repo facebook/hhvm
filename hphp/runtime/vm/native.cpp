@@ -229,6 +229,12 @@ void callFunc(const Func* func, void *ctx,
 
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -333,9 +339,16 @@ bool coerceFCallArgs(TypedValue* args,
         break;
       }
 
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
+
       case KindOfUninit:
       case KindOfNull:
       case KindOfPersistentString:
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
       case KindOfPersistentArray:
       case KindOfRef:
       case KindOfClass:
@@ -557,6 +570,12 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfObject:       return ty == T::Object   || ty == T::ObjectArg;
     case KindOfPersistentString:
     case KindOfString:       return ty == T::String   || ty == T::StringArg;
+    case KindOfPersistentVec:
+    case KindOfVec:          return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfPersistentDict:
+    case KindOfDict:         return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:       return ty == T::Array    || ty == T::ArrayArg;
     case KindOfPersistentArray:
     case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;

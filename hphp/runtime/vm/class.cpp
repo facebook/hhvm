@@ -2184,6 +2184,12 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
       return same(tvAsVariant(&tv1), tvAsVariant(&tv2));
 
     case KindOfUninit:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:

@@ -309,6 +309,9 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
       return source.getDouble();
     case KindOfPersistentString:
       return Variant{source.getStringData(), Variant::PersistentStrInit{}};
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
     case KindOfPersistentArray:
       return Variant{source.getArrayData()};
 
@@ -324,14 +327,31 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
                      Variant::PersistentStrInit{}};
     }
 
+    case KindOfVec: {
+      auto const ad = source.getArrayData();
+      assert(ad->isVecArray());
+      if (ad->empty()) return Variant{staticEmptyVecArray()};
+      return Variant{PackedArray::MakeUncounted(ad)};
+    }
+
+    case KindOfDict: {
+      auto const ad = source.getArrayData();
+      assert(ad->isDict());
+      if (ad->empty()) return Variant{staticEmptyDictArray()};
+      return Variant{MixedArray::MakeUncounted(ad)};
+    }
+
+    case KindOfKeyset: {
+      auto const ad = source.getArrayData();
+      assert(ad->isKeyset());
+      if (ad->empty()) return Variant{staticEmptyKeysetArray()};
+      return Variant{MixedArray::MakeUncounted(ad)};
+    }
+
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      if (ad->empty()) {
-        return
-          ad->isVecArray() ? Variant{staticEmptyVecArray()} :
-          ad->isDict() ? Variant{staticEmptyDictArray()} :
-          Variant{staticEmptyArray()};
-      }
+      assert(ad->isPHPArray());
+      if (ad->empty()) return Variant{staticEmptyArray()};
       if (ad->isPackedLayout()) return Variant{PackedArray::MakeUncounted(ad)};
       return Variant{MixedArray::MakeUncounted(ad)};
     }
@@ -380,6 +400,14 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
 
 ArrayData* MixedArray::MakeFromDict(ArrayData* adIn, bool copy) {
   assert(adIn->isDict());
+  assert(asMixed(adIn)->checkInvariants());
+  ArrayData* ad = copy ? Copy(adIn) : adIn;
+  ad->m_hdr.kind = HeaderKind::Mixed;
+  return ad;
+}
+
+ArrayData* MixedArray::MakeFromKeyset(ArrayData* adIn, bool copy) {
+  assert(adIn->isKeyset());
   assert(asMixed(adIn)->checkInvariants());
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_hdr.kind = HeaderKind::Mixed;

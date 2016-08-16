@@ -315,6 +315,9 @@ void Marker::operator()(const NameValueTable& p) { p.scan(*this); }
 void Marker::operator()(const TypedValue& tv) {
   switch (tv.m_type) {
     case KindOfString:    return (*this)(tv.m_data.pstr);
+    case KindOfVec:       return (*this)(tv.m_data.parr);
+    case KindOfDict:      return (*this)(tv.m_data.parr);
+    case KindOfKeyset:    return (*this)(tv.m_data.parr);
     case KindOfArray:     return (*this)(tv.m_data.parr);
     case KindOfObject:    return (*this)(tv.m_data.pobj);
     case KindOfResource:  return (*this)(tv.m_data.pres);
@@ -325,6 +328,9 @@ void Marker::operator()(const TypedValue& tv) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfPersistentString:
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
     case KindOfPersistentArray:
     case KindOfClass: // only in eval stack
       return;

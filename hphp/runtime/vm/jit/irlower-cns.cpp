@@ -91,8 +91,14 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
         break;
       case KindOfInt64:
       case KindOfPersistentString:
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
       case KindOfPersistentArray:
       case KindOfString:
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:

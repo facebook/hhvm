@@ -451,6 +451,9 @@ const StaticString
   s_double("double"),
   s_string("string"),
   s_array("array"),
+  s_vec("vec"),
+  s_dict("dict"),
+  s_keyset("keyset"),
   s_object("object"),
   s_resource("resource"),
   s_ref("reference");
@@ -464,6 +467,12 @@ StaticString getDataTypeString(DataType t) {
     case KindOfDouble:     return s_double;
     case KindOfPersistentString:
     case KindOfString:     return s_string;
+    case KindOfPersistentVec:
+    case KindOfVec:        return s_vec;
+    case KindOfPersistentDict:
+    case KindOfDict:       return s_dict;
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:     return s_keyset;
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;

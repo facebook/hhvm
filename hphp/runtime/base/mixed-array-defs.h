@@ -465,11 +465,48 @@ void ConvertTvToUncounted(TypedValue* source) {
       else str = StringData::MakeUncounted(str->slice());
       break;
     }
+    case KindOfVec:
+      source->m_type = KindOfPersistentVec;
+      // Fall-through.
+    case KindOfPersistentVec: {
+      auto& ad = source->m_data.parr;
+      assert(ad->isVecArray());
+      if (ad->isStatic()) break;
+      else if (ad->empty()) ad = staticEmptyVecArray();
+      else ad = PackedArray::MakeUncounted(ad);
+      break;
+    }
+
+    case KindOfDict:
+      source->m_type = KindOfPersistentDict;
+      // Fall-through.
+    case KindOfPersistentDict: {
+      auto& ad = source->m_data.parr;
+      assert(ad->isDict());
+      if (ad->isStatic()) break;
+      else if (ad->empty()) ad = staticEmptyDictArray();
+      else ad = MixedArray::MakeUncounted(ad);
+      break;
+    }
+
+    case KindOfKeyset:
+      source->m_type = KindOfPersistentKeyset;
+      // Fall-through.
+    case KindOfPersistentKeyset: {
+      auto& ad = source->m_data.parr;
+      assert(ad->isKeyset());
+      if (ad->isStatic()) break;
+      else if (ad->empty()) ad = staticEmptyKeysetArray();
+      else ad = MixedArray::MakeUncounted(ad);
+      break;
+    }
+
     case KindOfArray:
       source->m_type = KindOfPersistentArray;
       // Fall-through.
     case KindOfPersistentArray: {
       auto& ad = source->m_data.parr;
+      assert(ad->isPHPArray());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyArray();
       else if (ad->isPackedLayout()) ad = PackedArray::MakeUncounted(ad);

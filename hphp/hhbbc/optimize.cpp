@@ -338,6 +338,9 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case KindOfPersistentString:
       gen(bc::String { v->m_data.pstr });
       break;
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
     case KindOfPersistentArray:
       gen(bc::Array { v->m_data.parr });
       break;
@@ -345,6 +348,9 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case KindOfRef:
     case KindOfResource:
     case KindOfString:
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfKeyset:
     case KindOfArray:
     case KindOfObject:
     case KindOfClass:

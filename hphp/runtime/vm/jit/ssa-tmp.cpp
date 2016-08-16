@@ -82,6 +82,12 @@ Variant SSATmp::variantVal() const {
     case KindOfPersistentString:
     case KindOfString:
       return Variant(const_cast<StringData*>(strVal()));
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return Variant{const_cast<ArrayData*>(arrVal())};

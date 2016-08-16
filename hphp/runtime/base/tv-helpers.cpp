@@ -58,13 +58,45 @@ bool cellIsPlausible(const Cell cell) {
         assertPtr(cell.m_data.pstr);
         assert(cell.m_data.pstr->checkCount());
         return;
+      case KindOfPersistentVec:
+        assertPtr(cell.m_data.parr);
+        assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isVecArray());
+        return;
+      case KindOfVec:
+        assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isVecArray());
+        return;
+      case KindOfPersistentDict:
+        assertPtr(cell.m_data.parr);
+        assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isDict());
+        return;
+      case KindOfDict:
+        assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isDict());
+        return;
+      case KindOfPersistentKeyset:
+        assertPtr(cell.m_data.parr);
+        assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isKeyset());
+        return;
+      case KindOfKeyset:
+        assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isKeyset());
+        return;
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isPHPArray());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
         assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isPHPArray());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
@@ -144,10 +176,16 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
       case KindOfPersistentArray:
         b = !tv->m_data.parr->empty();
         continue;
 
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
         b = !tv->m_data.parr->empty();
         tvDecRefArr(tv);
@@ -205,10 +243,16 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
       case KindOfPersistentArray:
         d = tv->m_data.parr->empty() ? 0 : 1;
         continue;
 
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
         d = tv->m_data.parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
@@ -265,10 +309,16 @@ void cellCastToInt64InPlace(Cell* cell) {
         tvDecRefStr(cell);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
       case KindOfPersistentArray:
         i = cell->m_data.parr->empty() ? 0 : 1;
         continue;
 
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
         i = cell->m_data.parr->empty() ? 0 : 1;
         tvDecRefArr(cell);
@@ -325,6 +375,12 @@ double tvCastToDouble(TypedValue* tv) {
     case KindOfString:
       return tv->m_data.pstr->toDouble();
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return tv->m_data.parr->empty() ? 0.0 : 1.0;
@@ -378,6 +434,24 @@ void tvCastToStringInPlace(TypedValue* tv) {
     case KindOfString:
       return;
 
+    case KindOfVec:
+    case KindOfPersistentVec:
+      raise_notice("Vec to string conversion");
+      if (tv->m_type == KindOfVec) tvDecRefArr(tv);
+      return persistentString(vec_string.get());
+
+    case KindOfDict:
+    case KindOfPersistentDict:
+      raise_notice("Dict to string conversion");
+      if (tv->m_type == KindOfDict) tvDecRefArr(tv);
+      return persistentString(dict_string.get());
+
+    case KindOfKeyset:
+    case KindOfPersistentKeyset:
+      raise_notice("Keyset to string conversion");
+      if (tv->m_type == KindOfKeyset) tvDecRefArr(tv);
+      return persistentString(keyset_string.get());
+
     case KindOfArray:
     case KindOfPersistentArray:
       raise_notice("Array to string conversion");
@@ -430,6 +504,21 @@ StringData* tvCastToString(const TypedValue* tv) {
       return s;
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+      raise_notice("Vec to string conversion");
+      return vec_string.get();
+
+    case KindOfPersistentDict:
+    case KindOfDict:
+      raise_notice("Dict to string conversion");
+      return dict_string.get();
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      raise_notice("Keyset to string conversion");
+      return keyset_string.get();
+
     case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
@@ -472,18 +561,37 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
-      case KindOfPersistentArray:
-      case KindOfArray: {
-        ArrayData* adIn = tv->m_data.parr;
-        if (adIn->isVecArray()) {
-          tv->m_data.parr = PackedArray::MakeFromVec(adIn, adIn->cowCheck());
-          tv->m_type = KindOfArray;
-        } else if (adIn->isDict()) {
-          tv->m_data.parr = MixedArray::MakeFromDict(adIn, adIn->cowCheck());
-          tv->m_type = KindOfArray;
-        }
+      case KindOfPersistentVec:
+      case KindOfVec: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isVecArray());
+        tv->m_data.parr = PackedArray::MakeFromVec(adIn, adIn->cowCheck());
+        tv->m_type = KindOfArray;
         return;
       }
+
+      case KindOfPersistentDict:
+      case KindOfDict: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isDict());
+        tv->m_data.parr = MixedArray::MakeFromDict(adIn, adIn->cowCheck());
+        tv->m_type = KindOfArray;
+        return;
+      }
+
+      case KindOfPersistentKeyset:
+      case KindOfKeyset: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isKeyset());
+        tv->m_data.parr = MixedArray::MakeFromKeyset(adIn, adIn->cowCheck());
+        tv->m_type = KindOfArray;
+        return;
+      }
+
+      case KindOfPersistentArray:
+      case KindOfArray:
+        assert(tv->m_data.parr->isPHPArray());
+        return;
 
       case KindOfObject:
         // For objects, we fall back on the Variant machinery
@@ -535,6 +643,12 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
         // For arrays, we fall back on the Variant machinery
@@ -578,6 +692,9 @@ void tvCastToResourceInPlace(TypedValue* tv) {
       DT_UNCOUNTED_CASE:
         continue;
       case KindOfString:
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
       case KindOfObject:
         tvDecRef(tv);
@@ -615,6 +732,12 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
       tvCastToBooleanInPlace(tv);
       return true;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -659,6 +782,12 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
       return okay;
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -718,6 +847,12 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
       tvCastToStringInPlace(tv);
       return true;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return false;
@@ -753,6 +888,12 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
     case KindOfString:
       return false;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return true;

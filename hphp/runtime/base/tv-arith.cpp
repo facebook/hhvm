@@ -60,6 +60,12 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfPersistentString:
       return stringToNumeric(cell.m_data.pstr);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       throw_bad_array_operand();
@@ -428,6 +434,12 @@ void cellIncDecOp(Op op, Cell& cell) {
       return;
 
     case KindOfBoolean:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -717,6 +729,12 @@ void cellBitNot(Cell& cell) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:

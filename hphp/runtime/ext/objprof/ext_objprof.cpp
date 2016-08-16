@@ -481,6 +481,12 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData* arr = tv->m_data.parr;
@@ -613,6 +619,9 @@ void tvGetStrings(
       // This is a shallow size function, not a recursive one
       break;
     }
+    case HPHP::KindOfVec:
+    case HPHP::KindOfDict:
+    case HPHP::KindOfKeyset:
     case HPHP::KindOfArray: {
       ArrayData* arr = tv->m_data.parr;
       stringsOfArray(arr, metrics, path, pointers);

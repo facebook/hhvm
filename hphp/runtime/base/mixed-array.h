@@ -213,6 +213,7 @@ struct MixedArray final : private ArrayData,
   static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
 
   static ArrayData* MakeFromDict(ArrayData* adIn, bool copy);
+  static ArrayData* MakeFromKeyset(ArrayData* adIn, bool copy);
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.

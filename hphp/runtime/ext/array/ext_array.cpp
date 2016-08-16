@@ -304,6 +304,12 @@ bool HHVM_FUNCTION(array_key_exists,
 
     case KindOfBoolean:
     case KindOfDouble:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -735,6 +741,12 @@ TypedValue HHVM_FUNCTION(array_product,
         }
       }
 
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -758,6 +770,9 @@ DOUBLE:
       case KindOfRef:
         d *= entry.toDouble();
 
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -1003,6 +1018,12 @@ TypedValue HHVM_FUNCTION(array_sum,
         }
       }
 
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -1026,6 +1047,9 @@ DOUBLE:
       case KindOfRef:
         d += entry.toDouble();
 
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
@@ -1310,6 +1334,12 @@ int64_t HHVM_FUNCTION(count,
     case KindOfResource:
       return 1;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       if ((CountMode)mode == CountMode::RECURSIVE) {

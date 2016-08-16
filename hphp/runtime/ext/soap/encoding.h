@@ -266,6 +266,12 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfDouble:  return SOAP_ENC_DOUBLE_DT;
     case KindOfPersistentString:
     case KindOfString:  return XSD_STRING;
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:   return SOAP_ENC_ARRAY_DT;
     case KindOfObject:  return SOAP_ENC_OBJECT;

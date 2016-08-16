@@ -224,7 +224,7 @@ struct HotCache {
   static bool rawValueToLocal(HotValueRaw vraw, Variant& value) {
     HotValue v = HotValue::fromOpaque(vraw);
     if (ArrayData* ad = v.right()) {
-      value = Variant{ad, Variant::PersistentArrInit{}};
+      value = Variant{ad, KindOfPersistentArray, Variant::PersistentArrInit{}};
       return true;
     }
     if (APCHandle* h = v.left()) {

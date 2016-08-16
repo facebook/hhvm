@@ -425,6 +425,12 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
       fb_compact_serialize_string(sb, var.toString());
       return 0;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray: {
       Array arr = var.toArray();

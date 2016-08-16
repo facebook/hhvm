@@ -55,6 +55,9 @@ enum class AnnotType : uint16_t {
   Array    = (uint8_t)KindOfArray    | (uint16_t)AnnotMetaType::Precise << 8,
   Object   = (uint8_t)KindOfObject   | (uint16_t)AnnotMetaType::Precise << 8,
   Resource = (uint8_t)KindOfResource | (uint16_t)AnnotMetaType::Precise << 8,
+  Dict     = (uint8_t)KindOfDict     | (uint16_t)AnnotMetaType::Precise << 8,
+  Vec      = (uint8_t)KindOfVec      | (uint16_t)AnnotMetaType::Precise << 8,
+  Keyset   = (uint8_t)KindOfKeyset   | (uint16_t)AnnotMetaType::Precise << 8,
   // Precise is intentionally excluded
   Mixed    = (uint16_t)AnnotMetaType::Mixed << 8    | (uint8_t)KindOfUninit,
   Self     = (uint16_t)AnnotMetaType::Self << 8     | (uint8_t)KindOfUninit,
@@ -62,9 +65,6 @@ enum class AnnotType : uint16_t {
   Callable = (uint16_t)AnnotMetaType::Callable << 8 | (uint8_t)KindOfUninit,
   Number   = (uint16_t)AnnotMetaType::Number << 8   | (uint8_t)KindOfUninit,
   ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8 | (uint8_t)KindOfUninit,
-  Dict     = (uint16_t)AnnotMetaType::Dict << 8     | (uint8_t)KindOfUninit,
-  Vec      = (uint16_t)AnnotMetaType::Vec << 8      | (uint8_t)KindOfUninit,
-  Keyset   = (uint16_t)AnnotMetaType::Keyset << 8   | (uint8_t)KindOfUninit,
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -211,6 +211,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfString:
         return interface_supports_string(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
         return interface_supports_array(annotClsName)

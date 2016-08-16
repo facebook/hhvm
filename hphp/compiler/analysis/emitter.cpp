@@ -5920,6 +5920,12 @@ bool EmitterVisitor::emitScalarValue(Emitter& e, const Variant& v) {
       e.String(makeStaticString(v.getStringData()));
       return true;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       e.Array(ArrayData::GetScalarArray(v.getArrayData()));
@@ -6835,6 +6841,12 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
           switch (*t) {
             case KindOfPersistentString:
             case KindOfString:
+            case KindOfPersistentVec:
+            case KindOfVec:
+            case KindOfPersistentDict:
+            case KindOfDict:
+            case KindOfPersistentKeyset:
+            case KindOfKeyset:
             case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
@@ -6880,6 +6892,12 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
       return;
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       e.Array(v.getArrayData());

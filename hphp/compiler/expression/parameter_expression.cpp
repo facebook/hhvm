@@ -236,6 +236,12 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
                   (m_hhType && interface_supports_string(hint)));
         return;
 
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
         compat = (!strcasecmp(hint, "array") ||

@@ -35,6 +35,12 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfDouble:        return cns(env, tv->m_data.dbl);
     case KindOfPersistentString:
     case KindOfString:        return cns(env, tv->m_data.pstr);
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:         return cns(env, tv->m_data.parr);
 

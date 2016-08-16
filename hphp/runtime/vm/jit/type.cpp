@@ -256,18 +256,24 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
   assertx(inner == KindOfUninit || outer == KindOfRef);
 
   switch (outer) {
-    case KindOfUninit        : return kUninit;
-    case KindOfNull          : return kInitNull;
-    case KindOfBoolean       : return kBool;
-    case KindOfInt64         : return kInt;
-    case KindOfDouble        : return kDbl;
+    case KindOfUninit           : return kUninit;
+    case KindOfNull             : return kInitNull;
+    case KindOfBoolean          : return kBool;
+    case KindOfInt64            : return kInt;
+    case KindOfDouble           : return kDbl;
     case KindOfPersistentString : return kPersistentStr;
-    case KindOfString        : return kStr;
-    case KindOfPersistentArray : return kPersistentArr;
-    case KindOfArray         : return kArr;
-    case KindOfResource      : return kRes;
-    case KindOfObject        : return kObj;
-    case KindOfClass         : return kCls;
+    case KindOfString           : return kStr;
+    case KindOfPersistentVec    :
+    case KindOfPersistentDict   :
+    case KindOfPersistentKeyset :
+    case KindOfPersistentArray  : return kPersistentArr;
+    case KindOfVec              :
+    case KindOfDict             :
+    case KindOfKeyset           :
+    case KindOfArray            : return kArr;
+    case KindOfResource         : return kRes;
+    case KindOfObject           : return kObj;
+    case KindOfClass            : return kCls;
     case KindOfRef:
       assertx(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;

@@ -47,6 +47,12 @@ static const char *argTypeName(DataType dt) {
     case KindOfDouble:        return "double";
     case KindOfPersistentString:
     case KindOfString:        return "string";
+    case KindOfPersistentVec:
+    case KindOfVec:           return "vec";
+    case KindOfPersistentDict:
+    case KindOfDict:          return "dict";
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:        return "keyset";
     case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfObject:        return "object";

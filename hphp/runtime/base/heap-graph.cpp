@@ -86,6 +86,9 @@ struct PtrFilter: F {
       case KindOfString: // never null, sometimes counted
         if (tv.m_data.pstr->isRefCounted()) F::counted(tv.m_data.pstr);
         break;
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray: // never null, sometimes counted
         if (tv.m_data.parr->isRefCounted()) F::counted(tv.m_data.parr);
         break;
@@ -100,6 +103,9 @@ struct PtrFilter: F {
       case KindOfInt64:
       case KindOfDouble:
       case KindOfPersistentString:
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
       case KindOfPersistentArray:
       case KindOfClass: // only in eval stack
         return;

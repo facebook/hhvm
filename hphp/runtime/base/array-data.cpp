@@ -983,13 +983,14 @@ const char* describeKeyType(const TypedValue* tv) {
   case KindOfDouble:           return "double";
   case KindOfPersistentString:
   case KindOfString:           return "string";
+  case KindOfPersistentVec:
+  case KindOfVec:              return "vec";
+  case KindOfPersistentDict:
+  case KindOfDict:             return "dict";
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:           return "keyset";
   case KindOfPersistentArray:
-  case KindOfArray: {
-    if (tv->m_data.parr->isVecArray()) return "vec";
-    if (tv->m_data.parr->isDict()) return "dict";
-    if (tv->m_data.parr->isKeyset()) return "keyset";
-    return "array";
-  }
+  case KindOfArray:            return "array";
   case KindOfResource:
     return tv->m_data.pres->data()->o_getClassName().c_str();
 
@@ -1018,6 +1019,12 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfNull:
   case KindOfBoolean:
   case KindOfDouble:
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfResource:

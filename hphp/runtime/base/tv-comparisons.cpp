@@ -77,6 +77,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
              op(0, val);
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
@@ -122,6 +128,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
              op(0, val);
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
@@ -170,6 +182,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
     case KindOfString:
       return op(cell.m_data.pstr, val);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
@@ -218,6 +236,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
     case KindOfString:
       return op(false, true);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return op(cell.m_data.parr, ad);
@@ -270,6 +294,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
       return op(false, true);
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
         return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
@@ -311,6 +341,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
       return op(str->toDouble(), rd->o_toDouble());
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return op(true, false);
@@ -349,6 +385,12 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfDouble:       return cellRelOp(op, c1, c2.m_data.dbl);
   case KindOfPersistentString:
   case KindOfString:       return cellRelOp(op, c1, c2.m_data.pstr);
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
   case KindOfPersistentArray:
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
@@ -554,6 +596,12 @@ bool cellSame(Cell c1, Cell c2) {
       if (!isStringType(c2.m_type)) return false;
       return c1.m_data.pstr->same(c2.m_data.pstr);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       if (!isArrayType(c2.m_type)) return false;

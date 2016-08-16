@@ -254,6 +254,12 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfString:
         return type_detail::for_const(tv.m_data.pstr);
 
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
         return type_detail::for_const(tv.m_data.parr);

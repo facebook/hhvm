@@ -664,6 +664,7 @@ void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
   else if (ad->isDict()) out << "dict(";
   else if (ad->isKeyset()) out << "keyset(";
   else out << "array(";
+
   if (!ad->empty()) {
     bool comma = false;
     for (ArrayIter it(ad); !it.end(); it.next()) {
@@ -674,19 +675,21 @@ void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
       }
       Variant key = it.first();
 
-      // Key.
-      if (isIntType(key.getType())) {
-        out << *key.getInt64Data();
-      } else if (isStringType(key.getType())) {
-        out << "\""
-            << escapeStringForCPP(key.getStringData()->data(),
-                                  key.getStringData()->size())
-            << "\"";
-      } else {
-        assert(false);
-      }
+      if (!ad->isVecArray() && !ad->isKeyset()) {
+        // Key.
+        if (isIntType(key.getType())) {
+          out << *key.getInt64Data();
+        } else if (isStringType(key.getType())) {
+          out << "\""
+              << escapeStringForCPP(key.getStringData()->data(),
+                                    key.getStringData()->size())
+              << "\"";
+        } else {
+          assert(false);
+        }
 
-      out << "=>";
+        out << "=>";
+      }
 
       Variant val = it.second();
 
@@ -713,6 +716,12 @@ void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
                                       val.getStringData()->size())
                 << "\"";
             return;
+          case KindOfPersistentVec:
+          case KindOfVec:
+          case KindOfPersistentDict:
+          case KindOfDict:
+          case KindOfPersistentKeyset:
+          case KindOfKeyset:
           case KindOfPersistentArray:
           case KindOfArray:
             staticArrayStreamer(val.getArrayData(), out);
@@ -748,6 +757,12 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
     case KindOfString:
       out << "\"" << tv->m_data.pstr->data() << "\"";
       return;
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       staticArrayStreamer(tv->m_data.parr, out);

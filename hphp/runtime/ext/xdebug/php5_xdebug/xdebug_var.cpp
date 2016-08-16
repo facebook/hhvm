@@ -674,12 +674,26 @@ void xdebug_var_export_text_ansi(
     );
     break;
   }
+
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
   case KindOfPersistentArray:
-    /* fallthrough */
   case KindOfArray: {
     auto const& arr = v.toCArrRef();
 
-    sb.printf("%sarray%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
+    const char* type_str = [&] {
+      if (v.isVecArray()) return "vec";
+      if (v.isDict()) return "dict";
+      if (v.isKeyset()) return "keyset";
+      assert(v.isArray());
+      return "array";
+    }();
+
+    sb.printf("%s%s%s", ANSI_COLOR_BOLD, type_str, ANSI_COLOR_BOLD_OFF);
 
     Tracker track(exporter, arr.get());
     if (track.seen) {
@@ -807,8 +821,8 @@ void xdebug_var_export_text_ansi(
     sb.printf("%*s}", (exporter.level * 2) - 2, "");
     break;
   }
-  default:
-    not_reached();
+  case KindOfRef:
+  case KindOfClass: not_reached();
   }
 
   sb.append('\n');
@@ -900,19 +914,33 @@ void xdebug_var_export_fancy(
     sb.printf(" <i>(length=%d)</i>", str.size());
     break;
   }
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
   case KindOfPersistentArray:
   case KindOfArray: {
     auto const& arr = v.toCArrRef();
 
     sb.printf("\n%*s", (exporter.level - 1) * 4, "");
 
+    const char* type_str = [&] {
+      if (v.isVecArray()) return "vec";
+      if (v.isDict()) return "dict";
+      if (v.isKeyset()) return "keyset";
+      assert(v.isArray());
+      return "array";
+    }();
+
     Tracker track(exporter, arr.get());
     if (track.seen) {
-      sb.append("<i>&</i><b>array</b>\n");
+      sb.printf("<i>&</i><b>%s</b>\n", type_str);
       break;
     }
 
-    sb.printf("<b>array</b> <i>(size=%zd)</i>\n", arr.size());
+    sb.printf("<b>%s</b> <i>(size=%zd)</i>\n", type_str, arr.size());
 
     if (exporter.level > exporter.max_depth) {
       sb.printf("%*s...\n", (exporter.level * 4) - 2, "");

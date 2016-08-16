@@ -318,6 +318,12 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -366,6 +372,12 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -395,6 +407,15 @@ StringData* convCellToStrHelper(TypedValue tv) {
                               /* fallthrough */
     case KindOfPersistentString:
                               return tv.m_data.pstr;
+    case KindOfPersistentVec:
+    case KindOfVec:           raise_notice("Vec to string conversion");
+                              return vec_string.get();
+    case KindOfPersistentDict:
+    case KindOfDict:          raise_notice("Dict to string conversion");
+                              return dict_string.get();
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:        raise_notice("Keyset to string conversion");
+                              return keyset_string.get();
     case KindOfPersistentArray:
     case KindOfArray:         raise_notice("Array to string conversion");
                               return array_string.get();
@@ -642,6 +663,12 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfBoolean:
       case KindOfPersistentString:
       case KindOfString:
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:

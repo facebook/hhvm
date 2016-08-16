@@ -95,7 +95,7 @@ Type typeAdd(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellAdd))           return *t;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
   if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TDict;
+  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
   if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
   if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
   return TInitCell;
@@ -106,7 +106,7 @@ Type typeAddO(Type t1, Type t2) {
   if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
   if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TDict;
+  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
   if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
   if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
   return TInitCell;

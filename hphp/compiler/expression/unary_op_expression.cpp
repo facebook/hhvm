@@ -247,12 +247,17 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
   }
 
   if (m_op == T_DICT) {
-    value = DictInit(0).toArray();
+    value = Array::CreateDict();
     return true;
   }
 
   if (m_op == T_VEC) {
     value = Array::CreateVec();
+    return true;
+  }
+
+  if (m_op == T_KEYSET) {
+    value = Array::CreateKeyset();
     return true;
   }
 
@@ -395,6 +400,9 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
       return replaceValue(makeScalarExpression(ar, result));
     }
   } else if (m_op != T_ARRAY &&
+             m_op != T_VEC &&
+             m_op != T_DICT &&
+             m_op != T_KEYSET &&
              m_exp &&
              m_exp->isScalar() &&
              m_exp->getScalarValue(value) &&

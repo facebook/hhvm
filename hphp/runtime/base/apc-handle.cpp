@@ -82,6 +82,12 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       return APCString::MakeSharedString(s);
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray: {
       auto ad = source.getArrayData();
@@ -138,6 +144,7 @@ Variant APCHandle::toLocal() const {
     case APCKind::StaticArray:
     case APCKind::UncountedArray:
       return Variant{APCTypedValue::fromHandle(this)->getArrayData(),
+                     KindOfPersistentArray,
                      Variant::PersistentArrInit{}};
     case APCKind::SerializedArray: {
       auto const serArr = APCString::fromHandle(this)->getStringData();

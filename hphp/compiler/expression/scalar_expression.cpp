@@ -91,6 +91,12 @@ ScalarExpression::ScalarExpression
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:

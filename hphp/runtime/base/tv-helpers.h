@@ -57,6 +57,12 @@ struct Variant;
     switch (tv.m_type) {                                        \
       case HPHP::KindOfPersistentString:                        \
       case HPHP::KindOfString: return tv.m_data.pstr->func();   \
+      case HPHP::KindOfPersistentVec:                           \
+      case HPHP::KindOfVec:                                     \
+      case HPHP::KindOfPersistentDict:                          \
+      case HPHP::KindOfDict:                                    \
+      case HPHP::KindOfPersistentKeyset:                        \
+      case HPHP::KindOfKeyset:                                  \
       case HPHP::KindOfPersistentArray:                         \
       case HPHP::KindOfArray: return tv.m_data.parr->func();    \
       case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
@@ -72,14 +78,6 @@ struct Variant;
 #else
 #define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_FAST(exp, func)
 #endif
-
-/*
- * Assertions on Cells and TypedValues.  Should usually only happen
- * inside an assert().
- */
-bool tvIsPlausible(TypedValue);
-bool cellIsPlausible(Cell);
-bool refIsPlausible(Ref);
 
 /*
  * In a debug build, write garbage into a memory slot for a TypedValue
@@ -134,7 +132,10 @@ ALWAYS_INLINE void tvDecRefStr(TypedValue* tv) {
 }
 
 ALWAYS_INLINE void tvDecRefArr(TypedValue* tv) {
-  assert(tv->m_type == KindOfArray);
+  assert(tv->m_type == KindOfArray ||
+         tv->m_type == KindOfVec ||
+         tv->m_type == KindOfDict ||
+         tv->m_type == KindOfKeyset);
   decRefArr(tv->m_data.parr);
 }
 
@@ -164,6 +165,7 @@ ALWAYS_INLINE void tvDecRefRef(TypedValue* tv) {
 // Assumes 'isRefcountedType(type)'
 ALWAYS_INLINE void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
   assert(type == KindOfString || type == KindOfArray ||
+         type == KindOfVec || type == KindOfDict || type == KindOfKeyset ||
          type == KindOfObject || type == KindOfResource ||
          type == KindOfRef);
   TypedValue tmp;
@@ -670,6 +672,22 @@ ALWAYS_INLINE bool tvIsString(const TypedValue* tv) {
   return (tv->m_type & KindOfStringBit) != 0;
 }
 
+ALWAYS_INLINE bool tvIsArray(const TypedValue* tv) {
+  return isArrayType(tv->m_type);
+}
+
+ALWAYS_INLINE bool tvIsVecArray(const TypedValue* tv) {
+  return isVecType(tv->m_type);
+}
+
+ALWAYS_INLINE bool tvIsDict(const TypedValue* tv) {
+  return isDictType(tv->m_type);
+}
+
+ALWAYS_INLINE bool tvIsKeyset(const TypedValue* tv) {
+  return isKeysetType(tv->m_type);
+}
+
 ALWAYS_INLINE void tvUnboxIfNeeded(TypedValue* tv) {
   if (tv->m_type == KindOfRef) tvUnbox(tv);
 }
@@ -689,6 +707,15 @@ ALWAYS_INLINE void setVal(TypedValue& tv, Cell src) {
     src.m_type = KindOfNull;
   }
   cellSet(src, *dst);
+}
+
+// Like make_tv, but determine the appropriate datatype from the ArrayData.
+ALWAYS_INLINE TypedValue make_array_like_tv(ArrayData* a) {
+  TypedValue ret;
+  ret.m_data.parr = a;
+  ret.m_type = a->toDataType();
+  assert(cellIsPlausible(ret));
+  return ret;
 }
 
 /*

@@ -48,7 +48,7 @@ union Value {
   int64_t       num;    // KindOfInt64, KindOfBool (must be zero-extended)
   double        dbl;    // KindOfDouble
   StringData*   pstr;   // KindOfString, KindOfPersistentString
-  ArrayData*    parr;   // KindOfArray
+  ArrayData*    parr;   // KindOfArray, KindOfVec, KindOfDict, KindOfKeyset
   ObjectData*   pobj;   // KindOfObject
   ResourceHdr*  pres;   // KindOfResource
   Class*        pcls;   // only in vm stack, no type tag.
@@ -112,6 +112,9 @@ struct TypedValue {
       case KindOfObject: scanner.enqueue(m_data.pobj); break;
       case KindOfResource: scanner.enqueue(m_data.pres); break;
       case KindOfString: scanner.enqueue(m_data.pstr); break;
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray: scanner.enqueue(m_data.parr); break;
       case KindOfRef: scanner.enqueue(m_data.pref); break;
       case KindOfUninit:
@@ -121,6 +124,9 @@ struct TypedValue {
       case KindOfDouble:
       case KindOfPersistentString:
       case KindOfPersistentArray:
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
       case KindOfClass:
         break;
     }
@@ -189,6 +195,16 @@ typedef TypedValue TypedNum;
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Assertions on Cells and TypedValues.  Should usually only happen
+ * inside an assert().
+ */
+bool tvIsPlausible(TypedValue);
+bool cellIsPlausible(Cell);
+bool refIsPlausible(Ref);
+
+/////////////////////////////////////////////////////////////////////
+
 template<DataType> struct DataTypeCPPType;
 #define X(dt, cpp) \
 template<> struct DataTypeCPPType<dt> { typedef cpp type; }
@@ -200,6 +216,12 @@ X(KindOfInt64,        int64_t);
 X(KindOfDouble,       double);
 X(KindOfArray,        ArrayData*);
 X(KindOfPersistentArray,  const ArrayData*);
+X(KindOfVec,          ArrayData*);
+X(KindOfPersistentVec, const ArrayData*);
+X(KindOfDict,         ArrayData*);
+X(KindOfPersistentDict, const ArrayData*);
+X(KindOfKeyset,       ArrayData*);
+X(KindOfPersistentKeyset, const ArrayData*);
 X(KindOfObject,       ObjectData*);
 X(KindOfResource,     ResourceHdr*);
 X(KindOfRef,          RefData*);
@@ -245,6 +267,7 @@ typename std::enable_if<
   TypedValue ret;
   ret.m_data = make_value(val);
   ret.m_type = DType;
+  assert(tvIsPlausible(ret));
   return ret;
 }
 
@@ -255,6 +278,7 @@ typename std::enable_if<
 >::type make_tv() {
   TypedValue ret;
   ret.m_type = DType;
+  assert(tvIsPlausible(ret));
   return ret;
 }
 
@@ -269,6 +293,7 @@ typename std::enable_if<
   double
 >::type unpack_tv(TypedValue *tv) {
   assert(DType == tv->m_type);
+  assert(tvIsPlausible(*tv));
   return tv->m_data.dbl;
 }
 
@@ -278,6 +303,7 @@ typename std::enable_if<
   typename DataTypeCPPType<DType>::type
 >::type unpack_tv(TypedValue *tv) {
   assert(DType == tv->m_type);
+  assert(tvIsPlausible(*tv));
   return tv->m_data.num;
 }
 
@@ -288,7 +314,11 @@ typename std::enable_if<
 >::type unpack_tv(TypedValue *tv) {
   assert((DType == tv->m_type) ||
          (isStringType(DType) && isStringType(tv->m_type)) ||
-         (isArrayType(DType) && isArrayType(tv->m_type)));
+         (isArrayType(DType) && isArrayType(tv->m_type)) ||
+         (isVecType(DType) && isVecType(tv->m_type)) ||
+         (isDictType(DType) && isDictType(tv->m_type)) ||
+         (isKeysetType(DType) && isKeysetType(tv->m_type)));
+  assert(tvIsPlausible(*tv));
   return reinterpret_cast<typename DataTypeCPPType<DType>::type>
            (tv->m_data.pstr);
 }

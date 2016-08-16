@@ -201,6 +201,9 @@ void deepCopy(TypedValue* tv) {
     case KindOfClass:
       return;
 
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfKeyset:
     case KindOfArray: {
       auto arr = deepCopyArray(tv->m_data.parr);
       decRefArr(tv->m_data.parr);

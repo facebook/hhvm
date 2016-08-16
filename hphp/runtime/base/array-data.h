@@ -132,9 +132,7 @@ public:
    * Should int-like string keys be implicitly converted to integers before they
    * are inserted?
    */
-  bool useWeakKeys() const {
-    return !isDict() && !isVecArray() && !isKeyset();
-  }
+  bool useWeakKeys() const { return isPHPArray(); }
 
   bool convertKey(const StringData* key, int64_t& i) const;
 
@@ -188,8 +186,27 @@ public:
   bool isKeyset() const { return kind() == kKeysetKind; }
 
   bool isPackedLayout() const { return isPacked() || isVecArray(); }
-
   bool isMixedLayout() const { return isMixed() || isDict() || isKeyset(); }
+
+  bool isPHPArray() const { return kind() < kDictKind; }
+  bool isHackArray() const { return kind() >= kDictKind; }
+
+  DataType toDataType() const {
+    auto const k = kind();
+    if (k < kDictKind) return KindOfArray;
+    if (k == kVecKind) return KindOfVec;
+    if (k == kDictKind) return KindOfDict;
+    assert(k == kKeysetKind);
+    return KindOfKeyset;
+  }
+  DataType toPersistentDataType() const {
+    auto const k = kind();
+    if (k < kDictKind) return KindOfPersistentArray;
+    if (k == kVecKind) return KindOfPersistentVec;
+    if (k == kDictKind) return KindOfPersistentDict;
+    assert(k == kKeysetKind);
+    return KindOfPersistentKeyset;
+  }
 
   /*
    * Returns whether or not this array contains "vector-like" data.

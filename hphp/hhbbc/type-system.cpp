@@ -2172,15 +2172,29 @@ Type from_cell(Cell cell) {
     always_assert(cell.m_data.pstr->isStatic());
     return sval(cell.m_data.pstr);
 
+  case KindOfPersistentVec:
+  case KindOfVec:
+    always_assert(cell.m_data.parr->isStatic());
+    always_assert(cell.m_data.parr->isVecArray());
+    return vec_val(cell.m_data.parr);
+
+  case KindOfPersistentDict:
+  case KindOfDict:
+    always_assert(cell.m_data.parr->isStatic());
+    always_assert(cell.m_data.parr->isDict());
+    return dict_val(cell.m_data.parr);
+
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
+    always_assert(cell.m_data.parr->isStatic());
+    always_assert(cell.m_data.parr->isKeyset());
+    return keyset_val(cell.m_data.parr);
+
   case KindOfPersistentArray:
   case KindOfArray:
     always_assert(cell.m_data.parr->isStatic());
-    switch (cell.m_data.parr->kind()) {
-    case ArrayData::kDictKind:   return dict_val(cell.m_data.parr);
-    case ArrayData::kVecKind:    return vec_val(cell.m_data.parr);
-    case ArrayData::kKeysetKind: return keyset_val(cell.m_data.parr);
-    default:                     return aval(cell.m_data.parr);
-    }
+    always_assert(cell.m_data.parr->isPHPArray());
+    return aval(cell.m_data.parr);
 
   case KindOfClass:
   case KindOfRef:
@@ -2200,6 +2214,12 @@ Type from_DataType(DataType dt) {
   case KindOfDouble:   return TDbl;
   case KindOfPersistentString:
   case KindOfString:   return TStr;
+  case KindOfPersistentVec:
+  case KindOfVec:      return TArr;
+  case KindOfPersistentDict:
+  case KindOfDict:     return TArr;
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:   return TArr;
   case KindOfPersistentArray:
   case KindOfArray:    return TArr;
   case KindOfRef:      return TRef;

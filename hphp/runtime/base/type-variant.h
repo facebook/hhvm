@@ -134,10 +134,10 @@ struct Variant : private TypedValue {
     if (v) {
       m_data.parr = v;
       if (v->isRefCounted()) {
-        m_type = KindOfArray;
+        m_type = v->toDataType();
         v->rawIncRefCount();
       } else {
-        m_type = KindOfPersistentArray;
+        m_type = v->toPersistentDataType();
       }
     } else {
       m_type = KindOfNull;
@@ -172,16 +172,18 @@ struct Variant : private TypedValue {
    * Creation constructor from ArrayInit that avoids a null check and an
    * inc-ref.
    */
-  explicit Variant(ArrayData* ad, ArrayInitCtor) noexcept {
-    m_type = KindOfArray;
+  explicit Variant(ArrayData* ad, DataType dt, ArrayInitCtor) noexcept {
+    assert(ad->toDataType() == dt);
+    m_type = dt;
     m_data.parr = ad;
   }
 
   enum class PersistentArrInit {};
-  Variant(ArrayData* ad, PersistentArrInit) noexcept {
+  Variant(ArrayData* ad, DataType dt, PersistentArrInit) noexcept {
+    assert(ad->toPersistentDataType() == dt);
     assert(!ad->isRefCounted());
     m_data.parr = ad;
-    m_type = KindOfPersistentArray;
+    m_type = dt;
   }
 
   // for persistent strings only
@@ -271,7 +273,7 @@ struct Variant : private TypedValue {
     ArrayData *a = v.get();
     if (LIKELY(a != nullptr)) {
       m_data.parr = a;
-      m_type = a->isRefCounted() ? KindOfArray : KindOfPersistentArray;
+      m_type = a->isRefCounted() ? a->toDataType() : a->toPersistentDataType();
       v.detach();
     } else {
       m_type = KindOfNull;
@@ -583,6 +585,15 @@ struct Variant : private TypedValue {
   bool isArray() const {
     return isArrayType(getType());
   }
+  bool isVecArray() const {
+    return isVecType(getType());
+  }
+  bool isDict() const {
+    return isDictType(getType());
+  }
+  bool isKeyset() const {
+    return isKeysetType(getType());
+  }
   bool isObject() const {
     return getType() == KindOfObject;
   }
@@ -606,6 +617,12 @@ struct Variant : private TypedValue {
       case KindOfDouble:
       case KindOfPersistentString:
       case KindOfString:
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
         return false;
@@ -1028,7 +1045,8 @@ struct Variant : private TypedValue {
   }
   Variant(ArrayData* var, Attach) noexcept {
     if (var) {
-      m_type = var->isRefCounted() ? KindOfArray : KindOfPersistentArray;
+      m_type =
+        var->isRefCounted() ? var->toDataType() : var->toPersistentDataType();
       m_data.parr = var;
     } else {
       m_type = KindOfNull;
@@ -1396,6 +1414,9 @@ private:
       case KindOfString:
         assert(m_data.pstr->checkCount());
         return;
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
         assert(m_data.parr->checkCount());
         return;
@@ -1547,6 +1568,12 @@ inline VarNR Variant::toKey(const ArrayData* ad) const {
   case KindOfResource:
     return VarNR(toInt64());
 
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:

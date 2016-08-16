@@ -710,6 +710,12 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfDouble:
   case KindOfPersistentString:
   case KindOfString:
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:
@@ -751,8 +757,33 @@ static std::string toStringElm(const TypedValue* tv) {
            << "\"" << (truncated ? "..." : "");
       }
       continue;
+    case KindOfPersistentVec:
+    case KindOfVec:
+      assert(tv->m_data.parr->isVecArray());
+      assert(tv->m_data.parr->checkCount());
+      os << tv->m_data.parr;
+      print_count();
+      os << ":Vec";
+      continue;
+    case KindOfPersistentDict:
+    case KindOfDict:
+      assert(tv->m_data.parr->isDict());
+      assert(tv->m_data.parr->checkCount());
+      os << tv->m_data.parr;
+      print_count();
+      os << ":Dict";
+      continue;
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      assert(tv->m_data.parr->isKeyset());
+      assert(tv->m_data.parr->checkCount());
+      os << tv->m_data.parr;
+      print_count();
+      os << ":Keyset";
+      continue;
     case KindOfPersistentArray:
     case KindOfArray:
+      assert(tv->m_data.parr->isPHPArray());
       assert(tv->m_data.parr->checkCount());
       os << tv->m_data.parr;
       print_count();
@@ -2322,6 +2353,12 @@ OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
       cls = Unit::lookupClass(ne);
       return cls && interface_supports_string(cls->name());
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       cls = Unit::lookupClass(ne);
@@ -2571,6 +2608,12 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
             case KindOfBoolean:
             case KindOfPersistentString:
             case KindOfString:
+            case KindOfPersistentVec:
+            case KindOfVec:
+            case KindOfPersistentDict:
+            case KindOfDict:
+            case KindOfPersistentKeyset:
+            case KindOfKeyset:
             case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
@@ -2582,6 +2625,24 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
           tvRefcountedDecRef(val);
           return;
         }
+
+        case KindOfVec:
+          tvDecRef(val);
+        case KindOfPersistentVec:
+          match = SwitchMatch::DEFAULT;
+          return;
+
+        case KindOfDict:
+          tvDecRef(val);
+        case KindOfPersistentDict:
+          match = SwitchMatch::DEFAULT;
+          return;
+
+        case KindOfKeyset:
+          tvDecRef(val);
+        case KindOfPersistentKeyset:
+          match = SwitchMatch::DEFAULT;
+          return;
 
         case KindOfArray:
           tvDecRef(val);

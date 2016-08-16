@@ -318,6 +318,12 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
     case KindOfPersistentString:
     case KindOfString:
       return ElemString<flags, keyType>(tvRef, base, key);
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return ElemArray<flags, keyType>(base->m_data.parr, key);
@@ -498,6 +504,12 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfPersistentString:
     case KindOfString:
       return ElemDString<flags, keyType>(base, key);
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return ElemDArray<flags, keyType>(base, key);
@@ -574,6 +586,12 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfString:
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
       return nullptr;
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return ElemUArray<keyType>(base, key);
@@ -668,6 +686,12 @@ inline TypedValue* NewElem(TypedValue& tvRef,
     case KindOfPersistentString:
     case KindOfString:
       return NewElemString(tvRef, base);
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return NewElemArray<reffy>(base);
@@ -972,6 +996,12 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
     case KindOfPersistentString:
     case KindOfString:
       return SetElemString<setResult, keyType>(base, key, value);
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       SetElemArray<setResult, keyType>(base, key, value);
@@ -1093,6 +1123,12 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     case KindOfPersistentString:
     case KindOfString:
       return SetNewElemString(base, value);
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return SetNewElemArray(base, value);
@@ -1164,6 +1200,12 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
       }
       return SetOpElemEmptyish(op, base, key, rhs);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result;
@@ -1235,6 +1277,12 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
       }
       return SetOpNewElemEmptyish(op, base, rhs);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result;
@@ -1374,6 +1422,12 @@ inline void IncDecElem(
       }
       return IncDecElemEmptyish(op, base, key, dest);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray: {
       auto constexpr flags = MoreWarnings ? MOpFlags::Warn : MOpFlags::None;
@@ -1452,6 +1506,12 @@ inline void IncDecNewElem(
       }
       return IncDecNewElemEmptyish(op, base, dest);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray: {
       TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
@@ -1551,6 +1611,12 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
       raise_error(Strings::CANT_UNSET_STRING);
       return;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       UnsetElemArray<keyType>(base, key);
@@ -1681,6 +1747,12 @@ NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
     case KindOfString:
       return IssetEmptyElemString<useEmpty, keyType>(base, key);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return IssetEmptyElemArray<useEmpty, keyType>(base, key);
@@ -1762,6 +1834,12 @@ TypedValue* propPre(TypedValue& tvRef, TypedValue* base) {
       }
       return propPreStdclass<flags>(tvRef, base);
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       return propPreNull<flags>(tvRef);
@@ -1792,6 +1870,12 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
     case KindOfResource:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       tvWriteNull(&tvRef);
@@ -1930,6 +2014,12 @@ inline void SetProp(Class* ctx, TypedValue* base, key_type<keyType> key,
 
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
@@ -2009,6 +2099,12 @@ inline TypedValue* SetOpProp(TypedValue& tvRef,
 
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
@@ -2091,6 +2187,12 @@ inline void IncDecProp(
 
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:

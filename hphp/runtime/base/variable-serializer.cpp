@@ -1374,6 +1374,12 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
                         tv->m_data.pstr->size(), isArrayKey, noQuotes);
       return;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
       assert(!isArrayKey);

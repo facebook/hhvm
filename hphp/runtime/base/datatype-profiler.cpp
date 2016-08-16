@@ -29,6 +29,12 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_string(name + "=KindOfString")
   , m_persistent_array(name + "=KindOfPersistentArray")
   , m_array(name + "=KindOfArray")
+  , m_persistent_vec(name + "=KindOfPersistentVec")
+  , m_vec(name + "=KindOfVec")
+  , m_persistent_dict(name + "=KindOfPersistentDict")
+  , m_dict(name + "=KindOfDict")
+  , m_persistent_keyset(name + "=KindOfPersistentKeyset")
+  , m_keyset(name + "=KindOfKeyset")
   , m_object(name + "=KindOfObject")
   , m_resource(name + "=KindOfResource")
   , m_ref(name + "=KindOfRef")
@@ -43,7 +49,13 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfDouble:        m_double.count(); break;
     case KindOfPersistentString:  m_persistent_string.count(); break;
     case KindOfString:        m_string.count(); break;
-    case KindOfPersistentArray:   m_persistent_array.count(); break;
+    case KindOfPersistentVec:   m_persistent_vec.count(); break;
+    case KindOfVec:           m_vec.count(); break;
+    case KindOfPersistentDict:   m_persistent_dict.count(); break;
+    case KindOfDict:          m_dict.count(); break;
+    case KindOfPersistentKeyset: m_persistent_keyset.count(); break;
+    case KindOfKeyset:        m_keyset.count(); break;
+    case KindOfPersistentArray:  m_persistent_array.count(); break;
     case KindOfArray:         m_array.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
@@ -62,6 +74,12 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_double.hits() +
                m_persistent_string.hits() +
                m_string.hits() +
+               m_persistent_vec.hits() +
+               m_vec.hits() +
+               m_persistent_dict.hits() +
+               m_dict.hits() +
+               m_persistent_keyset.hits() +
+               m_keyset.hits() +
                m_persistent_array.hits() +
                m_array.hits() +
                m_object.hits() +
@@ -77,6 +95,12 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfString=%.1f%% "
                   "KindOfPersistentArray=%.1f%% "
                   "KindOfArray=%.1f%% "
+                  "KindOfPersistentVec=%.1f%% "
+                  "KindOfVec=%.1f%% "
+                  "KindOfPersistentDict=%.1f%% "
+                  "KindOfDict=%.1f%% "
+                  "KindOfPersistentKeyset=%.1f%% "
+                  "KindOfKeyset=%.1f%% "
                   "KindOfObject=%.1f%% "
                   "KindOfResource=%.1f%% "
                   "KindOfRef=%.1f%%\n",
@@ -90,6 +114,12 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_string.hits() / total,
           100.0 * m_persistent_array.hits() / total,
           100.0 * m_array.hits() / total,
+          100.0 * m_persistent_vec.hits() / total,
+          100.0 * m_vec.hits() / total,
+          100.0 * m_persistent_dict.hits() / total,
+          100.0 * m_dict.hits() / total,
+          100.0 * m_persistent_keyset.hits() / total,
+          100.0 * m_keyset.hits() / total,
           100.0 * m_object.hits() / total,
           100.0 * m_resource.hits() / total,
           100.0 * m_ref.hits() / total);

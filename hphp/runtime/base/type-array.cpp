@@ -46,6 +46,9 @@ namespace HPHP {
 const Array null_array{};
 const Array empty_array_ref{staticEmptyArray()};
 const StaticString array_string("Array");
+const StaticString vec_string("Vec");
+const StaticString dict_string("Dict");
+const StaticString keyset_string("Keyset");
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
@@ -513,6 +516,12 @@ const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
       }
       return m_arr->get(key.asCStrRef(), any(flags & AccessFlags::Error));
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:

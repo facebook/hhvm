@@ -32,6 +32,7 @@
 #include <fcntl.h>
 
 #include <folly/Conv.h>
+#include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
@@ -359,6 +360,29 @@ void demangle(int fd, const char* mangled) {
 }
 
 /*
+ * Writes a file path to a file while folding any consecutive forward slashes.
+ */
+void write_path(int fd, folly::StringPiece path) {
+  while (!path.empty()) {
+    auto const pos = path.find('/');
+    if (pos == std::string::npos) {
+      folly::writeNoInt(fd, path.data(), path.size());
+      break;
+    }
+
+    auto const left = path.subpiece(0, pos + 1);
+    folly::writeNoInt(fd, left.data(), left.size());
+
+    auto right = path.subpiece(pos);
+    while (!right.empty() && right[0] == '/') {
+      right = right.subpiece(1);
+    }
+
+    path = right;
+  }
+}
+
+/*
  * Variant of translate() used by StackTraceNoHeap.
  */
 bool translate(int fd, void* frame_addr, int frame_num, NamedBfdRange bfds) {
@@ -385,7 +409,9 @@ bool translate(int fd, void* frame_addr, int frame_num, NamedBfdRange bfds) {
 
   dprintf(fd, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
   demangle(fd, funcname);
-  dprintf(fd, " at %s:%u\n", filename, frame.lineno);
+  dprintf(fd, " at ");
+  write_path(fd, filename);
+  dprintf(fd, ":%u\n", frame.lineno);
 
   return true;
 }

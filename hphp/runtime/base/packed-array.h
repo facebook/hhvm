@@ -222,6 +222,16 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc);
 
+  static bool VecEqual(const ArrayData* ad1, const ArrayData* ad2);
+  static bool VecNotEqual(const ArrayData* ad1, const ArrayData* ad2);
+  static bool VecSame(const ArrayData* ad1, const ArrayData* ad2);
+  static bool VecNotSame(const ArrayData* ad1, const ArrayData* ad2);
+  static bool VecLt(const ArrayData* ad1, const ArrayData* ad2);
+  static bool VecLte(const ArrayData* ad1, const ArrayData* ad2);
+  static bool VecGt(const ArrayData* ad1, const ArrayData* ad2);
+  static bool VecGte(const ArrayData* ad1, const ArrayData* ad2);
+  static int64_t VecCmp(const ArrayData* ad1, const ArrayData* ad2);
+
   // Fast iteration
   template <class F, bool inc = true>
   static void IterateV(ArrayData* arr, F fn);
@@ -248,6 +258,9 @@ private:
   static ArrayData* MakeUninitializedImpl(uint32_t, HeaderKind);
 
   static ArrayData* CopyStaticHelper(const ArrayData*);
+
+  static bool VecEqualHelper(const ArrayData*, const ArrayData*, bool);
+  static int64_t VecCmpHelper(const ArrayData*, const ArrayData*);
 
   struct VecInitializer;
   static VecInitializer s_initializer;

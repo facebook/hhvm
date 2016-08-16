@@ -769,60 +769,149 @@ ArrayData *ArrayData::CreateRef(const Variant& name, Variant& value) {
 ///////////////////////////////////////////////////////////////////////////////
 // reads
 
-int ArrayData::compare(const ArrayData *v2) const {
-  assert(v2);
+ALWAYS_INLINE
+bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
+                            bool strict) {
+  assert(ad1->isPHPArray());
+  assert(ad2->isPHPArray());
 
-  auto const count1 = size();
-  auto const count2 = v2->size();
-  if (count1 < count2) return -1;
-  if (count1 > count2) return 1;
-  if (count1 == 0) return 0;
-
-  // Prevent circular referenced objects/arrays or deep ones.
-  check_recursion_error();
-
-  for (ArrayIter iter(this); iter; ++iter) {
-    auto key = iter.first();
-    if (!v2->exists(key)) return 1;
-    auto value1 = iter.second();
-    auto value2 = v2->get(key);
-    auto cmp = HPHP::compare(value1, value2);
-    if (cmp != 0) return cmp;
-  }
-
-  return 0;
-}
-
-bool ArrayData::equal(const ArrayData *v2, bool strict) const {
-  assert(v2);
-
-  if (this == v2) return true;
-  auto const count1 = size();
-  auto const count2 = v2->size();
-  if (count1 != count2) return false;
-  if (count1 == 0) return true;
+  if (ad1 == ad2) return true;
+  if (ad1->size() != ad2->size()) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.
   check_recursion_error();
 
   if (strict) {
-    for (ArrayIter iter1(this), iter2(v2); iter1; ++iter1, ++iter2) {
+    for (ArrayIter iter1{ad1}, iter2{ad2}; iter1; ++iter1, ++iter2) {
       assert(iter2);
       if (!same(iter1.first(), iter2.first())
           || !same(iter1.second(), iter2.secondRef())) return false;
     }
   } else {
-    for (ArrayIter iter(this); iter; ++iter) {
-      Variant key(iter.first());
-      if (!v2->exists(key)) return false;
+    for (ArrayIter iter{ad1}; iter; ++iter) {
+      Variant key{iter.first()};
+      if (!ad2->exists(key)) return false;
       if (!tvEqual(*iter.second().asTypedValue(),
-                   *v2->get(key).asTypedValue())) {
+                   *ad2->get(key).asTypedValue())) {
         return false;
       }
     }
   }
 
   return true;
+}
+
+ALWAYS_INLINE
+int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
+  assert(ad1->isPHPArray());
+  assert(ad2->isPHPArray());
+
+  auto const size1 = ad1->size();
+  auto const size2 = ad2->size();
+  if (size1 < size2) return -1;
+  if (size1 > size2) return 1;
+
+  // Prevent circular referenced objects/arrays or deep ones.
+  check_recursion_error();
+
+  for (ArrayIter iter{ad1}; iter; ++iter) {
+    auto key = iter.first();
+    if (!ad2->exists(key)) return 1;
+    auto value1 = iter.second();
+    auto value2 = ad2->get(key);
+    auto cmp = HPHP::compare(value1, value2);
+    if (cmp != 0) return cmp;
+  }
+  return 0;
+}
+
+bool ArrayData::Equal(const ArrayData* ad1, const ArrayData* ad2) {
+  return EqualHelper(ad1, ad2, false);
+}
+
+bool ArrayData::NotEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return !EqualHelper(ad1, ad2, false);
+}
+
+bool ArrayData::Same(const ArrayData* ad1, const ArrayData* ad2) {
+  return EqualHelper(ad1, ad2, true);
+}
+
+bool ArrayData::NotSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return !EqualHelper(ad1, ad2, true);
+}
+
+bool ArrayData::Lt(const ArrayData* ad1, const ArrayData* ad2) {
+  return CompareHelper(ad1, ad2) < 0;
+}
+
+bool ArrayData::Lte(const ArrayData* ad1, const ArrayData* ad2) {
+  return CompareHelper(ad1, ad2) <= 0;
+}
+
+bool ArrayData::Gt(const ArrayData* ad1, const ArrayData* ad2) {
+  return 0 > CompareHelper(ad2, ad1); // Not symmetric; Order matters here.
+}
+
+bool ArrayData::Gte(const ArrayData* ad1, const ArrayData* ad2) {
+  return 0 >= CompareHelper(ad2, ad1); // Not symmetric; Order matters here.
+}
+
+int64_t ArrayData::Compare(const ArrayData* ad1, const ArrayData* ad2) {
+  return CompareHelper(ad1, ad2);
+}
+
+int ArrayData::compare(const ArrayData* v2) const {
+  assert(v2);
+
+  if (isPHPArray()) {
+    if (UNLIKELY(!v2->isPHPArray())) {
+      if (v2->isVecArray()) throw_vec_compare_exception();
+      if (v2->isDict()) throw_dict_compare_exception();
+      if (v2->isKeyset()) throw_keyset_compare_exception();
+      not_reached();
+    }
+    return Compare(this, v2);
+  }
+
+  if (isVecArray()) {
+    if (UNLIKELY(!v2->isVecArray())) throw_vec_compare_exception();
+    return PackedArray::VecCmp(this, v2);
+  }
+
+  if (isDict()) throw_dict_compare_exception();
+  if (isKeyset()) throw_keyset_compare_exception();
+
+  not_reached();
+}
+
+bool ArrayData::equal(const ArrayData* v2, bool strict) const {
+  assert(v2);
+
+  if (isPHPArray()) {
+    if (UNLIKELY(!v2->isPHPArray())) return false;
+    return strict ? Same(this, v2) : Equal(this, v2);
+  }
+
+  if (isVecArray()) {
+    if (UNLIKELY(!v2->isVecArray())) return false;
+    return strict
+      ? PackedArray::VecSame(this, v2) : PackedArray::VecEqual(this, v2);
+  }
+
+  if (isDict()) {
+    if (UNLIKELY(!v2->isDict())) return false;
+    return strict
+      ? MixedArray::DictSame(this, v2) : MixedArray::DictEqual(this, v2);
+  }
+
+  if (isKeyset()) {
+    if (UNLIKELY(!v2->isKeyset())) return false;
+    return strict
+      ? MixedArray::KeysetSame(this, v2) : MixedArray::KeysetEqual(this, v2);
+  }
+
+  not_reached();
 }
 
 Variant ArrayData::reset() {

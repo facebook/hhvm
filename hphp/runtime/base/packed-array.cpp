@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-helpers.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -1361,6 +1363,102 @@ ArrayData* PackedArray::MakeUncountedHelper(ArrayData* array, size_t extra) {
   assert(ad->m_pos == array->m_pos);
   assert(ad->isUncounted());
   return ad;
+}
+
+ALWAYS_INLINE
+bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
+                                 bool strict) {
+  assert(checkInvariants(ad1));
+  assert(checkInvariants(ad2));
+  assert(ad1->isVecArray());
+  assert(ad2->isVecArray());
+
+  if (ad1->m_size != ad2->m_size) return false;
+
+  // Prevent circular referenced objects/arrays or deep ones.
+  check_recursion_error();
+
+  auto data1 = packedData(ad1);
+  auto data2 = packedData(ad2);
+  auto const size = ad1->m_size;
+  for (uint32_t i = 0; i < size; ++i) {
+    if (strict) {
+      if (!cellSame(*tvAssertCell(data1 + i),
+                    *tvAssertCell(data2 + i))) {
+        return false;
+      }
+    } else {
+      if (!cellEqual(*tvAssertCell(data1 + i),
+                     *tvAssertCell(data2 + i))) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+ALWAYS_INLINE
+int64_t PackedArray::VecCmpHelper(const ArrayData* ad1, const ArrayData* ad2) {
+  assert(checkInvariants(ad1));
+  assert(checkInvariants(ad2));
+  assert(ad1->isVecArray());
+  assert(ad2->isVecArray());
+
+  auto const size1 = ad1->m_size;
+  auto const size2 = ad2->m_size;
+
+  if (size1 < size2) return -1;
+  if (size1 > size2) return 1;
+
+  // Prevent circular referenced objects/arrays or deep ones.
+  check_recursion_error();
+
+  auto data1 = packedData(ad1);
+  auto data2 = packedData(ad2);
+  for (uint32_t i = 0; i < size1; ++i) {
+    auto const cmp = cellCompare(*tvAssertCell(data1 + i),
+                                 *tvAssertCell(data2 + i));
+    if (cmp != 0) return cmp;
+  }
+
+  return 0;
+}
+
+bool PackedArray::VecEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return VecEqualHelper(ad1, ad2, false);
+}
+
+bool PackedArray::VecNotEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return !VecEqualHelper(ad1, ad2, false);
+}
+
+bool PackedArray::VecSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return VecEqualHelper(ad1, ad2, true);
+}
+
+bool PackedArray::VecNotSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return !VecEqualHelper(ad1, ad2, true);
+}
+
+bool PackedArray::VecLt(const ArrayData* ad1, const ArrayData* ad2) {
+  return VecCmpHelper(ad1, ad2) < 0;
+}
+
+bool PackedArray::VecLte(const ArrayData* ad1, const ArrayData* ad2) {
+  return VecCmpHelper(ad1, ad2) <= 0;
+}
+
+bool PackedArray::VecGt(const ArrayData* ad1, const ArrayData* ad2) {
+  return VecCmpHelper(ad1, ad2) > 0;
+}
+
+bool PackedArray::VecGte(const ArrayData* ad1, const ArrayData* ad2) {
+  return VecCmpHelper(ad1, ad2) >= 0;
+}
+
+int64_t PackedArray::VecCmp(const ArrayData* ad1, const ArrayData* ad2) {
+  return VecCmpHelper(ad1, ad2);
 }
 
 //////////////////////////////////////////////////////////////////////

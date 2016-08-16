@@ -174,7 +174,10 @@ inline bool equal(bool v1, double  v2) { return v1 == (v2 != 0.0); }
 inline bool equal(bool v1, const StringData *v2) { return v1 == toBoolean(v2); }
 inline bool equal(bool v1, const String& v2) { return v1 == v2.toBoolean(); }
 inline bool equal(bool v1, const char* v2) = delete;
-inline bool equal(bool v1, const Array& v2) { return v1 == v2.toBoolean(); }
+inline bool equal(bool v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return v1 == v2.toBoolean();
+  return false;
+}
 inline bool equal(bool v1, const Object& v2) { return v1 == v2.toBoolean(); }
 inline bool equal(bool v1, const Resource& v2) { return v1 == v2.toBoolean(); }
 inline bool equal(bool v1, const Variant& v2) { return equal(v2, v1); }
@@ -188,7 +191,13 @@ inline bool less(bool v1, const StringData *v2) {
 }
 inline bool less(bool v1, const String& v2) { return less(v1,v2.toBoolean()); }
 inline bool less(bool v1, const char* v2) = delete;
-inline bool less(bool v1, const Array& v2) { return less(v1,v2.toBoolean()); }
+inline bool less(bool v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return less(v1, v2.toBoolean());
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+ }
 inline bool less(bool v1, const Object& v2) { return less(v1,v2.toBoolean()); }
 inline bool less(bool v1, const Resource& v2) {
   return less(v1,v2.toBoolean());
@@ -204,7 +213,13 @@ inline bool more(bool v1, const StringData *v2) {
 }
 inline bool more(bool v1, const String& v2) { return more(v1,v2.toBoolean()); }
 inline bool more(bool v1, const char* v2)  = delete;
-inline bool more(bool v1, const Array& v2) { return more(v1,v2.toBoolean()); }
+inline bool more(bool v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return more(v1, v2.toBoolean());
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool more(bool v1, const Object& v2) { return more(v1,v2.toBoolean()); }
 inline bool more(bool v1, const Resource& v2) {
   return more(v1,v2.toBoolean());
@@ -251,7 +266,13 @@ inline bool less(int v1, double  v2) { return v1 < v2; }
 bool less(int v1, const StringData *v2);
 inline bool less(int v1, const String& v2) { return less(v1, v2.get()); }
 inline bool less(int v1, const char* v2)  = delete;
-inline bool less(int v1, const Array& v2) { return true; }
+inline bool less(int v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return true;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool less(int v1, const Object& v2) {
   return less(v1, v2.toInt64ForCompare());
 }
@@ -265,7 +286,13 @@ inline bool more(int v1, double  v2) { return v1 > v2; }
 bool more(int v1, const StringData *v2);
 inline bool more(int v1, const String& v2) { return more(v1, v2.get()); }
 inline bool more(int v1, const char* v2)  = delete;
-inline bool more(int v1, const Array& v2) { return false; }
+inline bool more(int v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return false;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool more(int v1, const Object& v2) {
   return more(v1, v2.toInt64ForCompare());
 }
@@ -320,12 +347,19 @@ inline bool less(int64_t v1, double  v2) { return v1 < v2; }
 bool less(int64_t v1, const StringData *v2);
 inline bool less(int64_t v1, const String& v2) { return less(v1, v2.get()); }
 inline bool less(int64_t v1, const char* v2)  = delete;
-inline bool less(int64_t v1, const Array& v2) { return true; }
+inline bool less(int64_t v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return true;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool less(int64_t v1, const Object& v2) {
   return less(v1, v2.toInt64ForCompare());
 }
 inline bool less(int64_t v1, const Resource& v2) {
-  return less(v1, v2.toInt64()); }
+  return less(v1, v2.toInt64());
+}
 inline bool less(int64_t v1, const Variant& v2) {
   return more(v2, v1);
 }
@@ -339,7 +373,13 @@ inline bool more(int64_t v1, double  v2) { return v1 > v2; }
 bool more(int64_t v1, const StringData *v2);
 inline bool more(int64_t v1, const String& v2) { return more(v1, v2.get()); }
 inline bool more(int64_t v1, const char* v2)  = delete;
-inline bool more(int64_t v1, const Array& v2) { return false; }
+inline bool more(int64_t v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return false;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool more(int64_t v1, const Object& v2) {
   return more(v1, v2.toInt64ForCompare());
 }
@@ -399,7 +439,13 @@ inline bool less(double v1, const StringData *v2) {
 }
 inline bool less(double v1, const String& v2) { return less(v1,v2.toDouble()); }
 inline bool less(double v1, const char* v2)  = delete;
-inline bool less(double v1, const Array& v2) { return true; }
+inline bool less(double v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return true;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool less(double v1, const Object& v2) {
   return less(v1, v2.toDoubleForCompare());
 }
@@ -419,7 +465,13 @@ inline bool more(double v1, const StringData *v2) {
 }
 inline bool more(double v1, const String& v2) { return more(v1,v2.toDouble()); }
 inline bool more(double v1, const char* v2)  = delete;
-inline bool more(double v1, const Array& v2) { return false; }
+inline bool more(double v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return false;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool more(double v1, const Object& v2) {
   return more(v1, v2.toDoubleForCompare());
 }
@@ -476,8 +528,10 @@ inline bool equal(const StringData *v1, const String& v2) {
 }
 inline bool equal(const StringData *v1, const char* v2) = delete;
 inline bool equal(const StringData *v1, const Array& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
-    return equal(toBoolean(v1), v2.toBoolean());
+  if (LIKELY(v2.isPHPArray())) {
+    if (v1 == nullptr || v2.get() == nullptr) {
+      return equal(toBoolean(v1), v2.toBoolean());
+    }
   }
   return false;
 }
@@ -521,10 +575,16 @@ inline bool less(const StringData *v1, const String& v2) {
 }
 inline bool less(const StringData *v1, const char* v2) = delete;
 inline bool less(const StringData *v1, const Array& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
-    return less(toBoolean(v1), v2.toBoolean());
+  if (LIKELY(v2.isPHPArray())) {
+    if (v1 == nullptr || v2.get() == nullptr) {
+      return less(toBoolean(v1), v2.toBoolean());
+    }
+    return true;
   }
-  return true;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
 }
 inline bool less(const StringData *v1, const Object& v2) {
   if (v1 == nullptr || v2.get() == nullptr) {
@@ -567,10 +627,16 @@ inline bool more(const StringData *v1, const String& v2) {
 }
 inline bool more(const StringData *v1, const char* v2) = delete;
 inline bool more(const StringData *v1, const Array& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
-    return more(toBoolean(v1), v2.toBoolean());
+  if (LIKELY(v2.isPHPArray())) {
+    if (v1 == nullptr || v2.get() == nullptr) {
+      return more(toBoolean(v1), v2.toBoolean());
+    }
+    return false;
   }
-  return false;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
 }
 inline bool more(const StringData *v1, const Object& v2) {
   if (v1 == nullptr || v2.get() == nullptr) {
@@ -794,50 +860,6 @@ inline bool more(const Array& v1, const Resource& v2) { return true; }
 inline bool more(const Array& v1, const Variant& v2) { return v1.more(v2); }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ArrayData*
-
-inline bool same(const ArrayData* v1, const ArrayData* v2) {
-  assert(v1);
-  return v1->equal(v2, true);
-}
-
-inline bool nsame(const ArrayData* v1, const ArrayData* v2) {
-  return !same(v1, v2);
-}
-
-inline bool equal(const ArrayData* v1, const ArrayData* v2) {
-  assert(v1);
-  return v1->equal(v2, false);
-}
-
-inline bool nequal(const ArrayData* v1, const ArrayData* v2) {
-  return !equal(v1, v2);
-}
-
-inline bool less(const ArrayData* v1, const ArrayData* v2) {
-  assert(v1);
-  return v1->compare(v2) < 0;
-}
-
-inline bool lessEqual(const ArrayData* v1, const ArrayData* v2) {
-  return less(v1, v2) || equal(v1, v2);
-}
-
-inline bool more(const ArrayData* v1, const ArrayData* v2) {
-  assert(v2);
-  return v2->compare(v1) < 0;
-}
-
-inline bool moreEqual(const ArrayData* v1, const ArrayData* v2) {
-  return more(v1, v2) || equal(v1, v2);
-}
-
-inline int64_t compare(const ArrayData* v1, const ArrayData* v2) {
-  assert(v1);
-  return v1->compare(v2);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Object
 
 inline bool same(const Object& v1, bool    v2) { return same(v2, v1); }
@@ -987,7 +1009,13 @@ inline bool less(const Resource& v1, const StringData *v2) {
 }
 inline bool less(const Resource& v1, const String& v2) { return more(v2, v1); }
 inline bool less(const Resource& v1, const char* v2)  = delete;
-inline bool less(const Resource& v1, const Array& v2) { return true; }
+inline bool less(const Resource& v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return true;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool less(const Resource& v1, const Object& v2) { return false; }
 inline bool less(const Resource& v1, const Resource& v2) { return v1.less(v2); }
 inline bool less(const Resource& v1, const Variant& v2) { return more(v2, v1); }
@@ -1001,7 +1029,13 @@ inline bool more(const Resource& v1, const StringData *v2) {
 }
 inline bool more(const Resource& v1, const String& v2) { return less(v2, v1); }
 inline bool more(const Resource& v1, const char*  v2)  = delete;
-inline bool more(const Resource& v1, const Array& v2) { return false; }
+inline bool more(const Resource& v1, const Array& v2) {
+  if (LIKELY(v2.isPHPArray())) return false;
+  if (v2.isVecArray()) throw_vec_compare_exception();
+  if (v2.isDict()) throw_dict_compare_exception();
+  assert(v2.isKeyset());
+  throw_keyset_compare_exception();
+}
 inline bool more(const Resource& v1, const Object& v2) { return false; }
 inline bool more(const Resource& v1, const Resource& v2) { return v1.more(v2); }
 inline bool more(const Resource& v1, const Variant& v2) { return less(v2, v1); }

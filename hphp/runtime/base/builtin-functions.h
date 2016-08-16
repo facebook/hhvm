@@ -32,6 +32,9 @@ extern const StaticString s_parent;
 extern const StaticString s_static;
 
 extern const StaticString s_cmpWithCollection;
+extern const StaticString s_cmpWithVec;
+extern const StaticString s_cmpWithDict;
+extern const StaticString s_cmpWithKeyset;
 
 ///////////////////////////////////////////////////////////////////////////////
 // operators
@@ -139,6 +142,9 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_collection_modified();
 [[noreturn]] void throw_collection_property_exception();
 [[noreturn]] void throw_collection_compare_exception();
+[[noreturn]] void throw_vec_compare_exception();
+[[noreturn]] void throw_dict_compare_exception();
+[[noreturn]] void throw_keyset_compare_exception();
 [[noreturn]] void throw_param_is_not_container();
 [[noreturn]]
 void throw_cannot_modify_immutable_object(const char* className);

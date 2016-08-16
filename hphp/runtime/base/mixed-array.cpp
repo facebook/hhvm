@@ -20,11 +20,13 @@
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/member-operations.h"
@@ -2132,6 +2134,105 @@ ArrayData* MixedArray::LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool) {
 
 ArrayData* MixedArray::LvalNewKeyset(ArrayData*, Variant*&, bool) {
   throwInvalidKeysetOperation();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE
+bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
+                                 bool strict) {
+  assert(asMixed(ad1)->checkInvariants());
+  assert(asMixed(ad2)->checkInvariants());
+  assert(ad1->isDict());
+  assert(ad2->isDict());
+
+  if (strict && ad1 == ad2) return true;
+  if (ad1->size() != ad2->size()) return false;
+
+  // Prevent circular referenced objects/arrays or deep ones.
+  check_recursion_error();
+
+  auto const arr1 = asMixed(ad1);
+  auto elm = arr1->data();
+  for (auto i = arr1->m_used; i--; elm++) {
+    if (UNLIKELY(elm->isTombstone())) continue;
+    const TypedValue* other;
+    if (elm->hasIntKey()) {
+      other = NvGetIntDict(ad2, elm->ikey);
+    } else {
+      assert(elm->hasStrKey());
+      other = NvGetStrDict(ad2, elm->skey);
+    }
+    if (!other) return false;
+    if (strict) {
+      if (!cellSame(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+        return false;
+      }
+    } else {
+      if (!cellEqual(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool MixedArray::DictEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return DictEqualHelper(ad1, ad2, false);
+}
+
+bool MixedArray::DictNotEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return !DictEqualHelper(ad1, ad2, false);
+}
+
+bool MixedArray::DictSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return DictEqualHelper(ad1, ad2, true);
+}
+
+bool MixedArray::DictNotSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return !DictEqualHelper(ad1, ad2, true);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE
+bool MixedArray::KeysetEqualHelper(const ArrayData* ad1, const ArrayData* ad2) {
+  assert(asMixed(ad1)->checkInvariants());
+  assert(asMixed(ad2)->checkInvariants());
+  assert(ad1->isKeyset());
+  assert(ad2->isKeyset());
+
+  if (ad1 == ad2) return true;
+  if (ad1->size() != ad2->size()) return false;
+
+  auto const arr1 = asMixed(ad1);
+  auto elm = arr1->data();
+  for (auto i = arr1->m_used; i--; elm++) {
+    if (UNLIKELY(elm->isTombstone())) continue;
+    if (elm->hasIntKey()) {
+      auto const other = NvGetIntKeyset(ad2, elm->ikey);
+      if (!other) return false;
+      assert(isIntType(other->m_type));
+      assert(elm->ikey == other->m_data.num);
+    } else {
+      assert(elm->hasStrKey());
+      auto const other = NvGetStrKeyset(ad2, elm->skey);
+      if (!other) return false;
+      assert(isStringType(other->m_type));
+      assert(elm->skey->same(other->m_data.pstr));
+    }
+  }
+
+  return true;
+}
+
+bool MixedArray::KeysetEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return KeysetEqualHelper(ad1, ad2);
+}
+
+bool MixedArray::KeysetNotEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return !KeysetEqualHelper(ad1, ad2);
 }
 
 //////////////////////////////////////////////////////////////////////

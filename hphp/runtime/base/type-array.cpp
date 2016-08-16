@@ -331,11 +331,24 @@ Array &Array::mergeImpl(ArrayData *data) {
 // comparisons
 
 bool Array::same(const Array& v2) const {
-  if (m_arr == nullptr && v2.get() == nullptr) return true;
-  if (m_arr && v2.get()) {
-    return m_arr->equal(v2.get(), true);
+  if (!m_arr) return !v2.get();
+  if (m_arr->isPHPArray()) {
+    if (UNLIKELY(!v2.isPHPArray())) return false;
+    return ArrayData::Same(m_arr.get(), v2.get());
   }
-  return false;
+  if (m_arr->isVecArray()) {
+    if (UNLIKELY(!v2.isVecArray())) return false;
+    return PackedArray::VecSame(m_arr.get(), v2.get());
+  }
+  if (m_arr->isDict()) {
+    if (UNLIKELY(!v2.isDict())) return false;
+    return MixedArray::DictSame(m_arr.get(), v2.get());
+  }
+  if (m_arr->isKeyset()) {
+    if (UNLIKELY(!v2.isKeyset())) return false;
+    return MixedArray::KeysetSame(m_arr.get(), v2.get());
+  }
+  not_reached();
 }
 
 bool Array::same(const Object& v2) const {
@@ -343,81 +356,159 @@ bool Array::same(const Object& v2) const {
 }
 
 bool Array::equal(const Array& v2) const {
-  if (m_arr == nullptr || v2.get() == nullptr) {
-    return HPHP::equal(toBoolean(), v2.toBoolean());
+  if (isPHPArray()) {
+    if (UNLIKELY(!v2.isPHPArray())) return false;
+    if (m_arr == nullptr || v2.get() == nullptr) {
+      return HPHP::equal(toBoolean(), v2.toBoolean());
+    }
+    return ArrayData::Equal(m_arr.get(), v2.get());
   }
-  return m_arr->equal(v2.get(), false);
+  if (m_arr->isVecArray()) {
+    if (UNLIKELY(!v2.isVecArray())) return false;
+    return PackedArray::VecEqual(m_arr.get(), v2.get());
+  }
+  if (m_arr->isDict()) {
+    if (UNLIKELY(!v2.isDict())) return false;
+    return MixedArray::DictEqual(m_arr.get(), v2.get());
+  }
+  if (m_arr->isKeyset()) {
+    if (UNLIKELY(!v2.isKeyset())) return false;
+    return MixedArray::KeysetEqual(m_arr.get(), v2.get());
+  }
+  not_reached();
 }
 
 bool Array::equal(const Object& v2) const {
-  if (m_arr == nullptr || v2.get() == nullptr) {
-    return HPHP::equal(toBoolean(), v2.toBoolean());
+  if (LIKELY(isPHPArray())) {
+    if (m_arr == nullptr || v2.get() == nullptr) {
+      return HPHP::equal(toBoolean(), v2.toBoolean());
+    }
   }
   return false;
 }
 
 bool Array::less(const Array& v2, bool flip /* = false */) const {
-  if (m_arr == nullptr || v2.get() == nullptr) {
-    return HPHP::less(toBoolean(), v2.toBoolean());
+  if (isPHPArray()) {
+    if (UNLIKELY(!v2.isPHPArray())) {
+      if (v2.isVecArray()) throw_vec_compare_exception();
+      if (v2.isDict()) throw_dict_compare_exception();
+      if (v2.isKeyset()) throw_keyset_compare_exception();
+      not_reached();
+    }
+    if (m_arr == nullptr || v2.get() == nullptr) {
+      return HPHP::less(toBoolean(), v2.toBoolean());
+    }
+    return flip
+      ? ArrayData::Gt(v2.get(), m_arr.get())
+      : ArrayData::Lt(m_arr.get(), v2.get());
   }
-  if (flip) {
-    return v2.get()->compare(get()) > 0;
+  if (m_arr->isVecArray()) {
+    if (UNLIKELY(!v2.isVecArray())) throw_vec_compare_exception();
+    return flip
+      ? PackedArray::VecGt(v2.get(), m_arr.get())
+      : PackedArray::VecLt(m_arr.get(), v2.get());
   }
-  return m_arr->compare(v2.get()) < 0;
+  if (m_arr->isDict()) throw_dict_compare_exception();
+  if (m_arr->isKeyset()) throw_keyset_compare_exception();
+  not_reached();
 }
 
 bool Array::less(const Object& v2) const {
-  if (m_arr == nullptr || v2.get() == nullptr) {
-    return HPHP::less(toBoolean(), v2.toBoolean());
+  if (LIKELY(isPHPArray())) {
+    if (m_arr == nullptr || v2.get() == nullptr) {
+      return HPHP::less(toBoolean(), v2.toBoolean());
+    }
+    check_collection_compare(v2.get());
+    return true;
   }
-  check_collection_compare(v2.get());
-  return true;
+  if (m_arr->isVecArray()) throw_vec_compare_exception();
+  if (m_arr->isDict()) throw_dict_compare_exception();
+  if (m_arr->isKeyset()) throw_keyset_compare_exception();
+  not_reached();
 }
 
 bool Array::less(const Variant& v2) const {
-  if (m_arr == nullptr || v2.isNull()) {
-    return HPHP::less(toBoolean(), v2.toBoolean());
-  }
-  if (isArrayType(v2.getType())) {
-    return m_arr->compare(v2.toArray().get()) < 0;
+  if (isPHPArray()) {
+    if (m_arr == nullptr || v2.isNull()) {
+      return HPHP::less(toBoolean(), v2.toBoolean());
+    }
   }
   return HPHP::more(v2, *this);
 }
 
 bool Array::more(const Array& v2, bool flip /* = true */) const {
-  if (m_arr == nullptr || v2.get() == nullptr) {
-    return HPHP::more(toBoolean(), v2.toBoolean());
+  if (isPHPArray()) {
+    if (UNLIKELY(!v2.isPHPArray())) {
+      if (v2.isVecArray()) throw_vec_compare_exception();
+      if (v2.isDict()) throw_dict_compare_exception();
+      if (v2.isKeyset()) throw_keyset_compare_exception();
+      not_reached();
+    }
+    if (m_arr == nullptr || v2.get() == nullptr) {
+      return HPHP::more(toBoolean(), v2.toBoolean());
+    }
+    return flip
+      ? ArrayData::Lt(v2.get(), m_arr.get())
+      : ArrayData::Gt(m_arr.get(), v2.get());
   }
-  if (flip) {
-    return v2.get()->compare(get()) < 0;
+  if (m_arr->isVecArray()) {
+    if (UNLIKELY(!v2.isVecArray())) throw_vec_compare_exception();
+    return flip
+      ? PackedArray::VecGt(v2.get(), m_arr.get())
+      : PackedArray::VecLt(m_arr.get(), v2.get());
   }
-  return m_arr->compare(v2.get()) > 0;
+  if (m_arr->isDict()) throw_dict_compare_exception();
+  if (m_arr->isKeyset()) throw_keyset_compare_exception();
+  not_reached();
 }
 
 bool Array::more(const Object& v2) const {
-  if (m_arr == nullptr || v2.get() == nullptr) {
-    return HPHP::more(toBoolean(), v2.toBoolean());
+  if (LIKELY(isPHPArray())) {
+    if (m_arr == nullptr || v2.get() == nullptr) {
+      return HPHP::more(toBoolean(), v2.toBoolean());
+    }
+    check_collection_compare(v2.get());
+    return false;
   }
-  check_collection_compare(v2.get());
-  return false;
+  if (isVecArray()) throw_vec_compare_exception();
+  if (isDict()) throw_dict_compare_exception();
+  if (isKeyset()) throw_keyset_compare_exception();
+  not_reached();
 }
 
 bool Array::more(const Variant& v2) const {
-  if (m_arr == nullptr || v2.isNull()) {
-    return HPHP::more(toBoolean(), v2.toBoolean());
-  }
-  if (isArrayType(v2.getType())) {
-    return v2.toArray().get()->compare(get()) < 0;
+  if (isPHPArray()) {
+    if (m_arr == nullptr || v2.isNull()) {
+      return HPHP::more(toBoolean(), v2.toBoolean());
+    }
   }
   return HPHP::less(v2, *this);
 }
 
 int Array::compare(const Array& v2, bool flip /* = false */) const {
-  if (m_arr == nullptr || v2.get() == nullptr) {
-    return HPHP::compare(toBoolean(), v2.toBoolean());
+  if (isPHPArray()) {
+    if (UNLIKELY(!v2.isPHPArray())) {
+      if (v2.isVecArray()) throw_vec_compare_exception();
+      if (v2.isDict()) throw_dict_compare_exception();
+      if (v2.isKeyset()) throw_keyset_compare_exception();
+      not_reached();
+    }
+    if (m_arr == nullptr || v2.get() == nullptr) {
+      return HPHP::compare(toBoolean(), v2.toBoolean());
+    }
+    return flip
+      ? -ArrayData::Compare(v2.get(), m_arr.get())
+      : ArrayData::Compare(m_arr.get(), v2.get());
   }
-  if (flip) return -v2.get()->compare(get());
-  return m_arr->compare(v2.get());
+  if (m_arr->isVecArray()) {
+    if (UNLIKELY(!v2.isVecArray())) throw_vec_compare_exception();
+    return flip
+      ? -PackedArray::VecCmp(v2.get(), m_arr.get())
+      : PackedArray::VecCmp(m_arr.get(), v2.get());
+  }
+  if (m_arr->isDict()) throw_dict_compare_exception();
+  if (m_arr->isKeyset()) throw_keyset_compare_exception();
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

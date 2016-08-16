@@ -60,8 +60,7 @@ bool same(const Variant& v1, const Array& v2) {
   if (null1 && null2) return true;
   if (null1 || null2) return false;
   if (!v1.isArray()) return false;
-  auto const ad = v1.getArrayData();
-  return v2->equal(ad, true);
+  return v1.asCArrRef().same(v2);
 }
 
 bool same(const Variant& v1, const Object& v2) {

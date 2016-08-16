@@ -80,7 +80,6 @@ using StrIntCmpFn = bool (*)(const StringData*, int64_t);
 
 using StrCmpFnInt = int64_t (*)(const StringData*, const StringData*);
 using ObjCmpFnInt = int64_t (*)(const ObjectData*, const ObjectData*);
-using ArrCmpFnInt = int64_t (*)(const ArrayData*, const ArrayData*);
 using ResCmpFnInt = int64_t (*)(const ResourceHdr*, const ResourceHdr*);
 using StrIntCmpFnInt = int64_t (*)(const StringData*, int64_t);
 
@@ -335,23 +334,23 @@ static CallMap s_callMap {
                           {{SSA, 0}, {SSA, 1}}},
     {CmpObj,             static_cast<ObjCmpFnInt>(compare), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {GtArr,              static_cast<ArrCmpFn>(more), DSSA, SSync,
+    {GtArr,              ArrayData::Gt, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {GteArr,             static_cast<ArrCmpFn>(moreEqual), DSSA, SSync,
+    {GteArr,             ArrayData::Gte, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {LtArr,              static_cast<ArrCmpFn>(less), DSSA, SSync,
+    {LtArr,              ArrayData::Lt, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {LteArr,             static_cast<ArrCmpFn>(lessEqual), DSSA, SSync,
+    {LteArr,             ArrayData::Lte, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {EqArr,              static_cast<ArrCmpFn>(equal), DSSA, SSync,
+    {EqArr,              ArrayData::Equal, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {NeqArr,             static_cast<ArrCmpFn>(nequal), DSSA, SSync,
+    {NeqArr,             ArrayData::NotEqual, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {SameArr,            static_cast<ArrCmpFn>(same), DSSA, SSync,
+    {SameArr,            ArrayData::Same, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {NSameArr,           static_cast<ArrCmpFn>(nsame), DSSA, SSync,
+    {NSameArr,           ArrayData::NotSame, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {CmpArr,             static_cast<ArrCmpFnInt>(compare), DSSA, SSync,
+    {CmpArr,             ArrayData::Compare, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GtRes,              static_cast<ResCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},

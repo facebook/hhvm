@@ -67,8 +67,20 @@ const StaticString
   s_static("static");
 
 const StaticString s_cmpWithCollection(
-  "Cannot use relational comparison operators (<, <=, >, >=) to compare "
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a collection with an integer, double, string, array, or object"
+);
+const StaticString s_cmpWithVec(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a vec with a non-vec"
+);
+const StaticString s_cmpWithDict(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "dicts"
+);
+const StaticString s_cmpWithKeyset(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "keysets"
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -572,6 +584,18 @@ void throw_division_by_zero_error(StringData *str) {
 
 void throw_collection_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithCollection);
+}
+
+void throw_vec_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithVec);
+}
+
+void throw_dict_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithDict);
+}
+
+void throw_keyset_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithKeyset);
 }
 
 void throw_param_is_not_container() {

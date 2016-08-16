@@ -431,6 +431,16 @@ public:
   int compare(const ArrayData *v2) const;
   bool equal(const ArrayData *v2, bool strict) const;
 
+  static bool Equal(const ArrayData*, const ArrayData*);
+  static bool NotEqual(const ArrayData*, const ArrayData*);
+  static bool Same(const ArrayData*, const ArrayData*);
+  static bool NotSame(const ArrayData*, const ArrayData*);
+  static bool Lt(const ArrayData*, const ArrayData*);
+  static bool Lte(const ArrayData*, const ArrayData*);
+  static bool Gt(const ArrayData*, const ArrayData*);
+  static bool Gte(const ArrayData*, const ArrayData*);
+  static int64_t Compare(const ArrayData*, const ArrayData*);
+
   void setPosition(int32_t p) {
     assert(m_pos == p || !isStatic());
     m_pos = p;
@@ -495,6 +505,9 @@ private:
   static void compileTimeAssertions() {
     static_assert(offsetof(ArrayData, m_hdr) == HeaderOffset, "");
   }
+
+  static bool EqualHelper(const ArrayData*, const ArrayData*, bool);
+  static int64_t CompareHelper(const ArrayData*, const ArrayData*);
 
 protected:
   // error-handling helpers

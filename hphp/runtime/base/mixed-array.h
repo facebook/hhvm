@@ -222,6 +222,16 @@ struct MixedArray final : private ArrayData,
     return nextElm(data(), 0);
   }
 
+  static bool DictEqual(const ArrayData*, const ArrayData*);
+  static bool DictNotEqual(const ArrayData*, const ArrayData*);
+  static bool DictSame(const ArrayData*, const ArrayData*);
+  static bool DictNotSame(const ArrayData*, const ArrayData*);
+
+  static bool KeysetEqual(const ArrayData*, const ArrayData*);
+  static bool KeysetNotEqual(const ArrayData*, const ArrayData*);
+  static constexpr auto KeysetSame = &KeysetEqual;
+  static constexpr auto KeysetNotSame = &KeysetNotEqual;
+
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;
@@ -463,6 +473,9 @@ private:
   MixedArray* copyMixedAndResizeIfNeeded() const;
   MixedArray* copyMixedAndResizeIfNeededSlow() const;
   static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
+
+  static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
+  static bool KeysetEqualHelper(const ArrayData*, const ArrayData*);
 
 public:
   // Elm's data.m_type == kInvalidDataType for deleted slots.

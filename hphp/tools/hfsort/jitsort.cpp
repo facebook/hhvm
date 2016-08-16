@@ -33,20 +33,13 @@
 
 namespace HPHP { namespace hfsort {
 
+constexpr uint32_t kPageSize = 2 << 20;
+
 typedef std::map<uint32_t,std::vector<TargetId>> Group2BaseMap;
 
 void error(const char* msg) {
   Logger::Error("JitSort: %s\n", msg);
   throw std::exception();
-}
-
-void trace(const char* fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  std::string msg;
-  string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-  Logger::Info("JitSort-Trace: %s", msg.c_str());
 }
 
 static bool readLine(std::string& out, FILE* file) {

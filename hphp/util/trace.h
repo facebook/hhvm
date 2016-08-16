@@ -106,6 +106,7 @@ namespace Trace {
       TM(gc)            \
       TM(heapgraph)     \
       TM(heapreport)    \
+      TM(hfsort)        \
       TM(hhas)          \
       TM(hhbbc)         \
       TM(hhbbc_dce)     \

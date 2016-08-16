@@ -29,17 +29,12 @@
 
 namespace HPHP { namespace hfsort {
 
+constexpr uint32_t BUFLEN = 1000;
+constexpr uint32_t kPageSize = 2 << 20;
+
 void error(const char* msg) {
   printf("ERROR: %s\n", msg);
   exit(1);
-}
-
-void trace(const char* fmt, ...) {
-  va_list args;
-
-  va_start(args, fmt);
-  vfprintf(stderr, fmt, args);
-  va_end(args);
 }
 
 void readSymbols(CallGraph& cg, FILE* file) {
@@ -224,14 +219,15 @@ void print(CallGraph& cg, const char* filename,
           if (d < 2 << 20) totalCalls2MB += w;
           HFTRACE(
             2,
-            "arc: %u [@%u+%.1lf] -> %u [@%u]: weight = %.0lf, callDist = %u\n",
+            "arc: %u [@%lu+%.1lf] -> %u [@%lu]: weight = %.0lf, "
+            "callDist = %f\n",
             arc.src, newAddr[arc.src], arc.avgCallOffset,
             arc.dst, newAddr[arc.dst], arc.weight, d);
           dist += arc.weight * d;
         }
         totalCalls += calls;
         totalDistance += dist;
-        HFTRACE(1, "start = %6u : avgCallDist = %u : %s\n",
+        HFTRACE(1, "start = %6u : avgCallDist = %lu : %s\n",
                 totalSize,
                 calls ? dist / calls : 0,
                 cg.toString(fid).c_str());

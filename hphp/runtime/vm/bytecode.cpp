@@ -2403,10 +2403,19 @@ OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
 
     case KindOfPersistentVec:
     case KindOfVec:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_vec(cls->name());
+
     case KindOfPersistentDict:
     case KindOfDict:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_dict(cls->name());
+
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      cls = Unit::lookupClass(ne);
+      return cls && interface_supports_keyset(cls->name());
+
     case KindOfPersistentArray:
     case KindOfArray:
       cls = Unit::lookupClass(ne);

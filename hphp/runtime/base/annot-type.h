@@ -40,9 +40,6 @@ enum class AnnotMetaType : uint8_t {
   Callable = 4,
   Number = 5,
   ArrayKey = 6,
-  Dict = 7,
-  Vec = 8,
-  Keyset = 9,
 };
 
 enum class AnnotType : uint16_t {
@@ -79,6 +76,7 @@ inline DataType getAnnotDataType(AnnotType at) {
 inline AnnotType dataTypeToAnnotType(DataType dt) {
   assert(dt == KindOfUninit || dt == KindOfBoolean || dt == KindOfInt64 ||
          dt == KindOfDouble || dt == KindOfString || dt == KindOfArray ||
+         dt == KindOfVec || dt == KindOfDict || dt == KindOfKeyset ||
          dt == KindOfObject || dt == KindOfResource);
   return (AnnotType)((uint8_t)dt | (uint16_t)AnnotMetaType::Precise << 8);
 }
@@ -98,20 +96,23 @@ bool interface_supports_int(const StringData* s);
 bool interface_supports_double(const StringData* s);
 bool interface_supports_string(const StringData* s);
 bool interface_supports_array(const StringData* s);
+bool interface_supports_vec(const StringData* s);
+bool interface_supports_dict(const StringData* s);
+bool interface_supports_keyset(const StringData* s);
 
 bool interface_supports_int(std::string const&);
 bool interface_supports_double(std::string const&);
 bool interface_supports_string(std::string const&);
 bool interface_supports_array(std::string const&);
+bool interface_supports_vec(std::string const&);
+bool interface_supports_dict(std::string const&);
+bool interface_supports_keyset(std::string const&);
 
 enum class AnnotAction {
   Pass,
   Fail,
   ObjectCheck,
   CallableCheck,
-  DictCheck,
-  VecCheck,
-  KeysetCheck
 };
 
 /*
@@ -174,15 +175,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       return (isStringType(dt) || isArrayType(dt) ||
               dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
-    case AnnotMetaType::Dict:
-      // Requires an array specialization check
-      return isArrayType(dt) ? AnnotAction::DictCheck : AnnotAction::Fail;
-    case AnnotMetaType::Vec:
-      // Requires an array specialization check
-      return isArrayType(dt) ? AnnotAction::VecCheck : AnnotAction::Fail;
-    case AnnotMetaType::Keyset:
-      // Requires an array specialization check
-      return isArrayType(dt) ? AnnotAction::KeysetCheck : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       break;
   }
@@ -211,15 +203,21 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfString:
         return interface_supports_string(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
-      case KindOfPersistentVec:
-      case KindOfVec:
-      case KindOfPersistentDict:
-      case KindOfDict:
-      case KindOfPersistentKeyset:
-      case KindOfKeyset:
       case KindOfPersistentArray:
       case KindOfArray:
         return interface_supports_array(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentVec:
+      case KindOfVec:
+        return interface_supports_vec(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentDict:
+      case KindOfDict:
+        return interface_supports_dict(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        return interface_supports_keyset(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfUninit:
       case KindOfNull:

@@ -1297,6 +1297,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NInstanceOfBitmask:
   case InstanceOfIface:
   case InterfaceSupportsArr:
+  case InterfaceSupportsVec:
+  case InterfaceSupportsDict:
+  case InterfaceSupportsKeyset:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
   case InterfaceSupportsStr:

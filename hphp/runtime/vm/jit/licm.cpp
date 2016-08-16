@@ -79,6 +79,9 @@ bool is_pure_licmable(const IRInstruction* inst) {
   case EqDbl:
   case NeqDbl:
   case InterfaceSupportsArr:
+  case InterfaceSupportsVec:
+  case InterfaceSupportsDict:
+  case InterfaceSupportsKeyset:
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:

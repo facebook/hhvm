@@ -710,6 +710,12 @@ To string conversions:
 
 | InterfaceSupportsArr,        D(Bool), S(Str), NF
 
+| InterfaceSupportsVec,        D(Bool), S(Str), NF
+
+| InterfaceSupportsDict,       D(Bool), S(Str), NF
+
+| InterfaceSupportsKeyset,     D(Bool), S(Str), NF
+
 | InterfaceSupportsStr,        D(Bool), S(Str), NF
 
 | InterfaceSupportsInt,        D(Bool), S(Str), NF

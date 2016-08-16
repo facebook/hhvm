@@ -216,6 +216,9 @@ void cgNInstanceOfBitmask(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(InterfaceSupportsArr)
+IMPL_OPCODE_CALL(InterfaceSupportsVec)
+IMPL_OPCODE_CALL(InterfaceSupportsDict)
+IMPL_OPCODE_CALL(InterfaceSupportsKeyset)
 IMPL_OPCODE_CALL(InterfaceSupportsStr)
 IMPL_OPCODE_CALL(InterfaceSupportsInt)
 IMPL_OPCODE_CALL(InterfaceSupportsDbl)

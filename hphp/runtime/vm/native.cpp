@@ -308,15 +308,10 @@ bool coerceFCallArgs(TypedValue* args,
       targetType = tc.underlyingDataType();
     }
 
-    // Skip tvCoerceParamTo*() call if we're already the right type
-    if (args[-i].m_type == targetType ||
-        (isStringType(args[-i].m_type) && isStringType(targetType)) ||
-        (isArrayType(args[-i].m_type) && isArrayType(targetType))) {
-      continue;
-    }
+    // Skip tvCoerceParamTo*() call if we're already the right type, or if its a
+    // Variant.
+    if (!targetType || equivDataTypes(args[-i].m_type, *targetType)) continue;
 
-    // No coercion or cast for Variants.
-    if (!targetType) continue;
     if (RuntimeOption::PHP7_ScalarTypes && useStrictTypes) {
       tc.verifyParam(&args[-i], func, i, true);
       return true;
@@ -327,6 +322,9 @@ bool coerceFCallArgs(TypedValue* args,
       CASE(Int64)
       CASE(Double)
       CASE(String)
+      CASE(Vec)
+      CASE(Dict)
+      CASE(Keyset)
       CASE(Array)
       CASE(Resource)
 
@@ -338,10 +336,6 @@ bool coerceFCallArgs(TypedValue* args,
         }
         break;
       }
-
-      case KindOfVec:
-      case KindOfDict:
-      case KindOfKeyset:
 
       case KindOfUninit:
       case KindOfNull:

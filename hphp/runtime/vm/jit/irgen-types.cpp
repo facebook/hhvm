@@ -185,28 +185,6 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     }
   };
 
-  auto checkSpecializedArray = [&] (const Type arrTy) {
-    if (valType <= arrTy) {
-      env.irb->constrainValue(
-        val,
-        TypeConstraint(DataTypeSpecialized).setWantArrayKind()
-      );
-    } else if (valType.maybe(arrTy)) {
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          gen(env, CheckType, arrTy, taken, val);
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          genFail();
-        }
-      );
-    } else {
-      genFail();
-    }
-  };
-
   auto result = annotCompat(valType.toDataType(), tc.type(), tc.typeName());
   switch (result) {
     case AnnotAction::Pass: return;
@@ -218,18 +196,6 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
         gen(env, VerifyParamCallable, val, cns(env, id));
       }
       return;
-    case AnnotAction::DictCheck: {
-      checkSpecializedArray(Type::Array(ArrayData::kDictKind));
-      return;
-    }
-    case AnnotAction::VecCheck: {
-      checkSpecializedArray(Type::Array(ArrayData::kVecKind));
-      return;
-    }
-    case AnnotAction::KeysetCheck: {
-      checkSpecializedArray(Type::Array(ArrayData::kKeysetKind));
-      return;
-    }
     case AnnotAction::ObjectCheck:
       break;
   }

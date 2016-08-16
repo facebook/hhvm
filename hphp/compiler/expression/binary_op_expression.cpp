@@ -478,6 +478,21 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               result = true;
               break;
             }
+            if (v1.isVecArray() &&
+                interface_supports_vec(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isDict() &&
+                interface_supports_dict(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isKeyset() &&
+                interface_supports_keyset(v2.getStringData())) {
+              result = true;
+              break;
+            }
             if (v1.isString() &&
                 interface_supports_string(v2.getStringData())) {
               result = true;

@@ -1208,14 +1208,14 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
-      return false;
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      return false;
+
     case KindOfPersistentArray:
     case KindOfArray:
       return true;

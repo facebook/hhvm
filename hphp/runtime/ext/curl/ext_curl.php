@@ -457,13 +457,15 @@ namespace HH\Asio {
  *
  * @param $urlOrHandle - An existing cURL handle or a URL as a `string`. String
  *                       URLs will create a default cURL GET handle.
+ * @param $closeHandleIfHandle - Close cURL handle inside wrapper
  * @return Awaitable<string> - An `Awaitable` representing the `string` result
  *                             of the cURL request.
  *
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
-async function curl_exec(mixed $urlOrHandle): Awaitable<string> {
+async function curl_exec(mixed $urlOrHandle,
+                         bool $closeHandleIfHandle = false): Awaitable<string> {
   if (is_string($urlOrHandle)) {
     $ch = curl_init($urlOrHandle);
   } else if (is_resource($urlOrHandle) &&
@@ -499,6 +501,12 @@ async function curl_exec(mixed $urlOrHandle): Awaitable<string> {
   } while ($status === CURLM_OK);
   $content = (string)curl_multi_getcontent($ch);
   curl_multi_remove_handle($mh, $ch);
+
+  /* close handle if string was passed or argument */
+  if (is_string($urlOrHandle) || ($closeHandleIfHandle === true)) {
+    curl_close($ch);
+  }
+
   curl_multi_close($mh);
   return $content;
 }

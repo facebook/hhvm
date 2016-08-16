@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -787,18 +788,22 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       if (!same(iter1.first(), iter2.first())
           || !same(iter1.second(), iter2.secondRef())) return false;
     }
+    return true;
   } else {
-    for (ArrayIter iter{ad1}; iter; ++iter) {
-      Variant key{iter.first()};
-      if (!ad2->exists(key)) return false;
-      if (!tvEqual(*iter.second().asTypedValue(),
-                   *ad2->get(key).asTypedValue())) {
+    bool equal = true;
+    IterateKV(
+      ad1,
+      [&](const TypedValue* k, const TypedValue* v) {
+        if (!ad2->exists(tvAsCVarRef(k)) ||
+            !tvEqual(*v, *ad2->get(tvAsCVarRef(k)).asTypedValue())) {
+          equal = false;
+          return true;
+        }
         return false;
       }
-    }
+    );
+    return equal;
   }
-
-  return true;
 }
 
 ALWAYS_INLINE
@@ -814,15 +819,24 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
   // Prevent circular referenced objects/arrays or deep ones.
   check_recursion_error();
 
-  for (ArrayIter iter{ad1}; iter; ++iter) {
-    auto key = iter.first();
-    if (!ad2->exists(key)) return 1;
-    auto value1 = iter.second();
-    auto value2 = ad2->get(key);
-    auto cmp = HPHP::compare(value1, value2);
-    if (cmp != 0) return cmp;
-  }
-  return 0;
+  int result = 0;
+  IterateKV(
+    ad1,
+    [&](const TypedValue* k, const TypedValue* v) {
+      if (!ad2->exists(tvAsCVarRef(k))) {
+        result = 1;
+        return true;
+      }
+      auto const cmp = tvCompare(*v, *ad2->get(tvAsCVarRef(k)).asTypedValue());
+      if (cmp != 0) {
+        result = cmp;
+        return true;
+      }
+      return false;
+    }
+  );
+
+  return result;
 }
 
 bool ArrayData::Equal(const ArrayData* ad1, const ArrayData* ad2) {

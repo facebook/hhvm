@@ -49,8 +49,20 @@ void implCmp(IRLS& env, const IRInstruction* inst, ConditionCode cc) {
   auto& v = vmain(env);
   auto const sf = v.makeReg();
 
-  // Vasm uses AT&T syntax, so this will set flags after doing `s0 - s1`.
-  v << cmpq{s1, s0, sf};
+  auto const ty0 = inst->src(0)->type();
+  auto const ty1 = inst->src(1)->type();
+
+  if (cc == CC_E || cc == CC_NE) {
+    if (ty0.hasConstVal() && !ty0.rawVal()) {
+      v << testq{s1, s1, sf};
+    } else if (ty1.hasConstVal() && !ty1.rawVal()) {
+      v << testq{s0, s0, sf};
+    } else {
+      v << cmpq{s1, s0, sf};
+    }
+  } else {
+    v << cmpq{s1, s0, sf};
+  }
   v << setcc{cc, sf, d};
 }
 
@@ -306,6 +318,24 @@ IMPL_OPCODE_CALL(NeqArr);
 IMPL_OPCODE_CALL(SameArr);
 IMPL_OPCODE_CALL(NSameArr);
 IMPL_OPCODE_CALL(CmpArr);
+
+IMPL_OPCODE_CALL(GtVec);
+IMPL_OPCODE_CALL(GteVec);
+IMPL_OPCODE_CALL(LtVec);
+IMPL_OPCODE_CALL(LteVec);
+IMPL_OPCODE_CALL(EqVec);
+IMPL_OPCODE_CALL(NeqVec);
+IMPL_OPCODE_CALL(SameVec);
+IMPL_OPCODE_CALL(NSameVec);
+IMPL_OPCODE_CALL(CmpVec);
+
+IMPL_OPCODE_CALL(EqDict);
+IMPL_OPCODE_CALL(NeqDict);
+IMPL_OPCODE_CALL(SameDict);
+IMPL_OPCODE_CALL(NSameDict);
+
+IMPL_OPCODE_CALL(EqKeyset);
+IMPL_OPCODE_CALL(NeqKeyset);
 
 IMPL_OPCODE_CALL(GtRes);
 IMPL_OPCODE_CALL(GteRes);

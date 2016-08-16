@@ -125,6 +125,12 @@ bool canDCE(IRInstruction* inst) {
   case NSameObj:
   case SameArr:
   case NSameArr:
+  case SameVec:
+  case NSameVec:
+  case SameDict:
+  case NSameDict:
+  case EqKeyset:
+  case NeqKeyset:
   case GtRes:
   case GteRes:
   case LtRes:
@@ -295,6 +301,15 @@ bool canDCE(IRInstruction* inst) {
   case EqArr:
   case NeqArr:
   case CmpArr:
+  case GtVec:
+  case GteVec:
+  case LtVec:
+  case LteVec:
+  case EqVec:
+  case NeqVec:
+  case CmpVec:
+  case EqDict:
+  case NeqDict:
   case JmpZero:
   case JmpNZero:
   case JmpSSwitchDest:

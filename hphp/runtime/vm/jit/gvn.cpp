@@ -293,6 +293,12 @@ bool supportsGVN(const IRInstruction* inst) {
   case NSameObj:
   case SameArr:
   case NSameArr:
+  case SameVec:
+  case NSameVec:
+  case SameDict:
+  case NSameDict:
+  case EqKeyset:
+  case NeqKeyset:
   case GtRes:
   case GteRes:
   case LtRes:

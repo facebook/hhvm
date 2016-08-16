@@ -651,6 +651,48 @@ To string conversions:
   SameArr and NSameArr may re-enter the VM and therefore may throw
   exceptions. SameArr and NSameArr never re-enter or throw.
 
+| GtVec,                       D(Bool), S(Vec) S(Vec),                    Er
+
+| GteVec,                      D(Bool), S(Vec) S(Vec),                    Er
+
+| LtVec,                       D(Bool), S(Vec) S(Vec),                    Er
+
+| LteVec,                      D(Bool), S(Vec) S(Vec),                    Er
+
+| EqVec,                       D(Bool), S(Vec) S(Vec),                    Er
+
+| NeqVec,                      D(Bool), S(Vec) S(Vec),                    Er
+
+| SameVec,                     D(Bool), S(Vec) S(Vec),                    NF
+
+| NSameVec,                    D(Bool), S(Vec) S(Vec),                    NF
+
+| CmpVec,                      D(Int),  S(Vec) S(Vec),                    Er
+
+  Perform comparison of vecs. All versions except for SameVec and NSameVec may
+  re-enter the VM and therefore may throw exceptions. SameVec and NSameVec
+  never re-enter or throw.
+
+| EqDict,                      D(Bool), S(Dict) S(Dict),                  Er
+
+| NeqDict,                     D(Bool), S(Dict) S(Dict),                  Er
+
+| SameDict,                    D(Bool), S(Dict) S(Dict),                  NF
+
+| NSameDict,                   D(Bool), S(Dict) S(Dict),                  NF
+
+  Perform comparison of dicts. EqDict and NeqDict may re-enter the VM and
+  therefore may throw exceptions. SameDict and NSameDict never re-enter or
+  throw. Relational comparisons for dicts are not supported.
+
+| EqKeyset,                    D(Bool), S(Keyset) S(Keyset),              NF
+
+| NeqKeyset,                   D(Bool), S(Keyset) S(Keyset),              NF
+
+  Perform comparison of keysets. As keysets can only contain ints and strings,
+  comparisons never re-enter or throw. Relational comparisons for keysets are
+  not supported.
+
 | GtRes,                       D(Bool), S(Res) S(Res),                    NF
 
 | GteRes,                      D(Bool), S(Res) S(Res),                    NF

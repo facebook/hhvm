@@ -939,6 +939,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case GtStrInt:
   case GtObj:
   case GtArr:
+  case GtVec:
   case GtRes: return a > b;
   case GteBool:
   case GteInt:
@@ -946,6 +947,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case GteStrInt:
   case GteObj:
   case GteArr:
+  case GteVec:
   case GteRes: return a >= b;
   case LtBool:
   case LtInt:
@@ -953,6 +955,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case LtStrInt:
   case LtObj:
   case LtArr:
+  case LtVec:
   case LtRes: return a < b;
   case LteBool:
   case LteInt:
@@ -960,26 +963,37 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case LteStrInt:
   case LteObj:
   case LteArr:
+  case LteVec:
   case LteRes: return a <= b;
   case SameStr:
   case SameObj:
   case SameArr:
+  case SameVec:
+  case SameDict:
   case EqBool:
   case EqInt:
   case EqStr:
   case EqStrInt:
   case EqObj:
   case EqArr:
+  case EqVec:
+  case EqDict:
+  case EqKeyset:
   case EqRes: return a == b;
   case NSameStr:
   case NSameObj:
   case NSameArr:
+  case NSameVec:
+  case NSameDict:
   case NeqBool:
   case NeqInt:
   case NeqStr:
   case NeqStrInt:
   case NeqObj:
   case NeqArr:
+  case NeqVec:
+  case NeqDict:
+  case NeqKeyset:
   case NeqRes: return a != b;
   default:
     always_assert(false);
@@ -1258,6 +1272,69 @@ SSATmp* cmpArrImpl(State& env,
   return nullptr;
 }
 
+SSATmp* cmpVecImpl(State& env,
+                   Opcode opc,
+                   const IRInstruction* const inst,
+                   SSATmp* left,
+                   SSATmp* right) {
+  assertx(left->type() <= TVec);
+  assertx(right->type() <= TVec);
+
+  // Identity optimization. Vec comparisons can produce arbitrary side-effects,
+  // so we can only eliminate the comparison if its checking for sameness.
+  if ((opc == SameVec || opc == NSameVec) && left == right) {
+    return cns(env, cmpOp(opc, true, true));
+  }
+
+  return nullptr;
+}
+
+SSATmp* cmpDictImpl(State& env,
+                    Opcode opc,
+                    const IRInstruction* const inst,
+                    SSATmp* left,
+                    SSATmp* right) {
+  assertx(left->type() <= TDict);
+  assertx(right->type() <= TDict);
+
+  // Identity optimization. Dict comparisons can produce arbitrary side-effects,
+  // so we can only eliminate the comparison if its checking for sameness.
+  if ((opc == SameDict || opc == NSameDict) && left == right) {
+    return cns(env, cmpOp(opc, true, true));
+  }
+
+  return nullptr;
+}
+
+SSATmp* cmpKeysetImpl(State& env,
+                      Opcode opc,
+                      const IRInstruction* const inst,
+                      SSATmp* left,
+                      SSATmp* right) {
+  assertx(left->type() <= TKeyset);
+  assertx(right->type() <= TKeyset);
+
+  // Unlike other array types, keyset comparisons can never throw or re-enter
+  // (because they can only store integers and strings). Therefore we can fully
+  // simplify the comparison if both arrays are constants.
+  if (left->hasConstVal() && right->hasConstVal()) {
+    auto const leftVal = left->keysetVal();
+    auto const rightVal = right->keysetVal();
+    switch (opc) {
+      case EqKeyset:
+        return cns(env, MixedArray::KeysetEqual(leftVal, rightVal));
+      case NeqKeyset:
+        return cns(env, MixedArray::KeysetNotEqual(leftVal, rightVal));
+      default:
+        break;
+    }
+  }
+
+  // Even if not a constant, we can apply an identity simplification.
+  if (left == right) return cns(env, cmpOp(opc, true, true));
+
+  return nullptr;
+}
 
 SSATmp* cmpResImpl(State& env,
                    Opcode opc,
@@ -1327,6 +1404,23 @@ X(EqArr, Arr)
 X(NeqArr, Arr)
 X(SameArr, Arr)
 X(NSameArr, Arr)
+
+X(GtVec, Vec)
+X(GteVec, Vec)
+X(LtVec, Vec)
+X(LteVec, Vec)
+X(EqVec, Vec)
+X(NeqVec, Vec)
+X(SameVec, Vec)
+X(NSameVec, Vec)
+
+X(EqDict, Dict)
+X(NeqDict, Dict)
+X(SameDict, Dict)
+X(NSameDict, Dict)
+
+X(EqKeyset, Keyset)
+X(NeqKeyset, Keyset)
 
 X(GtRes, Res)
 X(GteRes, Res)
@@ -2702,6 +2796,20 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqArr)
   X(SameArr)
   X(NSameArr)
+  X(GtVec)
+  X(GteVec)
+  X(LtVec)
+  X(LteVec)
+  X(EqVec)
+  X(NeqVec)
+  X(SameVec)
+  X(NSameVec)
+  X(EqDict)
+  X(NeqDict)
+  X(SameDict)
+  X(NSameDict)
+  X(EqKeyset)
+  X(NeqKeyset)
   X(GtRes)
   X(GteRes)
   X(LtRes)

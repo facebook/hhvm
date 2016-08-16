@@ -131,7 +131,7 @@ void binaryBitOp(IRGS& env, Op op) {
   auto const type2 = topC(env, BCSPRelOffset{0})->type();
   auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
-    PUNT(BunaryBitOp-Unsupported);
+    PUNT(BinaryBitOp-Unsupported);
     return;
   }
 
@@ -268,6 +268,41 @@ Opcode toArrCmpOpcode(Op op) {
   }
 }
 
+Opcode toVecCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtVec;
+    case Op::Gte:   return GteVec;
+    case Op::Lt:    return LtVec;
+    case Op::Lte:   return LteVec;
+    case Op::Eq:    return EqVec;
+    case Op::Same:  return SameVec;
+    case Op::Neq:   return NeqVec;
+    case Op::NSame: return NSameVec;
+    case Op::Cmp:   return CmpVec;
+    default: always_assert(false);
+  }
+}
+
+Opcode toDictCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Eq:    return EqDict;
+    case Op::Same:  return SameDict;
+    case Op::Neq:   return NeqDict;
+    case Op::NSame: return NSameDict;
+    default: always_assert(false);
+  }
+}
+
+Opcode toKeysetCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Eq:
+    case Op::Same:  return EqKeyset;
+    case Op::Neq:
+    case Op::NSame: return NeqKeyset;
+    default: always_assert(false);
+  }
+}
+
 Opcode toResCmpOpcode(Op op) {
   switch (op) {
     case Op::Gt:    return GtRes;
@@ -388,6 +423,75 @@ SSATmp* emitConstCmp(IRGS& env, Op op, bool left, bool right) {
   return gen(env, toBoolCmpOpcode(op), cns(env, left), cns(env, right));
 }
 
+// Relational comparisons of vecs with non-vecs isn't allowed and will always
+// throw. Equality comparisons always act as if they are not equal.
+SSATmp* emitMixedVecCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithVec.get())
+      );
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq: return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
+// Relational comparisons of dicts with non-dicts isn't allowed and will always
+// throw. Equality comparisons always act as if they are not equal.
+SSATmp* emitMixedDictCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithDict.get())
+      );
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq: return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
+// Relational comparisons of keysets with non-keysets isn't allowed and will
+// always throw. Equality comparisons always act as if they are not equal.
+SSATmp* emitMixedKeysetCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithKeyset.get())
+      );
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq: return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
 void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assert(left->type() <= TNull);
   auto const rightTy = right->type();
@@ -407,6 +511,12 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     // in certain cases, which we do not want here. Also note that no collection
     // check is done.
     push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Otherwise, convert both sides to booleans (with null becoming false).
     push(env,
@@ -419,13 +529,23 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 
 void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assert(left->type() <= TBool);
-  // Convert whatever is on the right to a boolean and compare. The conversion
-  // may be a no-op if the right operand is already a bool.
-  push(env,
-       gen(env,
-           toBoolCmpOpcode(op),
-           left,
-           gen(env, ConvCellToBool, right)));
+  auto const rightTy = right->type();
+
+  if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
+  } else {
+    // Convert whatever is on the right to a boolean and compare. The conversion
+    // may be a no-op if the right operand is already a bool.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             left,
+             gen(env, ConvCellToBool, right)));
+  }
 }
 
 void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
@@ -462,6 +582,12 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TArr) {
     // All ints are implicity less than arrays.
     push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TObj) {
     // If compared against an object, emit a collection check before performing
     // the comparison.
@@ -508,6 +634,12 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TArr) {
     // All doubles are implicitly less than arrays.
     push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TObj) {
     // If compared against an object, emit a collection check before performing
     // the comparison.
@@ -565,9 +697,73 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         [&]{ return emitConstCmp(env, op, false, true); }
       )
     );
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Array is always greater than everything else.
     push(env, emitConstCmp(env, op, true, false));
+  }
+}
+
+void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TVec);
+  auto const rightTy = right->type();
+
+  // Left operand is a vec.
+  if (rightTy <= TVec) {
+    push(env, gen(env, toVecCmpOpcode(op), left, right));
+  } else {
+    push(env, emitMixedVecCmp(env, op));
+  }
+}
+
+void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TDict);
+  auto const rightTy = right->type();
+
+  // Left operand is a dict.
+  if (rightTy <= TDict) {
+    // Dicts can't use relational comparisons.
+    if (op == Op::Eq || op == Op::Neq ||
+        op == Op::Same || op == Op::NSame) {
+      push(env, gen(env, toDictCmpOpcode(op), left, right));
+    } else {
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithDict.get())
+      );
+      push(env, cns(env, false));
+    }
+  } else {
+    push(env, emitMixedDictCmp(env, op));
+  }
+}
+
+void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TKeyset);
+  auto const rightTy = right->type();
+
+  // Left operand is a keyset.
+  if (rightTy <= TKeyset) {
+    // Keysets can't use relational comparisons.
+    if (op == Op::Eq || op == Op::Neq ||
+        op == Op::Same || op == Op::NSame) {
+      push(env, gen(env, toKeysetCmpOpcode(op), left, right));
+    } else {
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithKeyset.get())
+      );
+      push(env, cns(env, false));
+    }
+  } else {
+    push(env, emitMixedKeysetCmp(env, op));
   }
 }
 
@@ -637,6 +833,12 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         }
       )
     );
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Strings are less than anything else (usually arrays).
     push(env, emitConstCmp(env, op, false, true));
@@ -721,6 +923,12 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         [&]{ return emitConstCmp(env, op, true, false); }
       )
     );
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // For anything else, the object is always greater.
     push(env, emitConstCmp(env, op, true, false));
@@ -768,6 +976,12 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              toDblCmpOpcode(op),
              gen(env, ConvResToDbl, left),
              gen(env, ConvStrToDbl, right)));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Resources are always less than anything else.
     push(env, emitConstCmp(env, op, false, true));
@@ -804,6 +1018,9 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TInt) implIntCmp(env, op, left, right);
   else if (leftTy <= TDbl) implDblCmp(env, op, left, right);
   else if (leftTy <= TArr) implArrCmp(env, op, left, right);
+  else if (leftTy <= TVec) implVecCmp(env, op, left, right);
+  else if (leftTy <= TDict) implDictCmp(env, op, left, right);
+  else if (leftTy <= TKeyset) implKeysetCmp(env, op, left, right);
   else if (leftTy <= TStr) implStrCmp(env, op, left, right);
   else if (leftTy <= TObj) implObjCmp(env, op, left, right);
   else if (leftTy <= TRes) implResCmp(env, op, left, right);

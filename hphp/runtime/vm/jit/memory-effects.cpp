@@ -950,6 +950,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MixedArrayGetK:
     return may_load_store(AElemAny, AEmpty);
 
+  case SameVec:
+  case NSameVec:
+  case SameDict:
+  case NSameDict:
+  case EqKeyset:
+  case NeqKeyset:
+    return may_load_store(AElemAny, AEmpty);
+
   case ArrayIdx:
     return may_load_store(AElemAny | ARefAny, AEmpty);
   case MapIdx:
@@ -1510,6 +1518,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqArr:
   case NeqArr:
   case CmpArr:
+  case GtVec:
+  case GteVec:
+  case LtVec:
+  case LteVec:
+  case EqVec:
+  case NeqVec:
+  case CmpVec:
+  case EqDict:
+  case NeqDict:
   case DecodeCufIter:
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src

@@ -92,6 +92,24 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
  * complicated to inline
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
+ArrayData* convVecToArrHelper(ArrayData* a);
+ArrayData* convDictToArrHelper(ArrayData* a);
+ArrayData* convKeysetToArrHelper(ArrayData* a);
+ArrayData* convArrToVecHelper(ArrayData* a);
+ArrayData* convDictToVecHelper(ArrayData* a);
+ArrayData* convKeysetToVecHelper(ArrayData* a);
+ArrayData* convObjToVecHelper(ObjectData* o);
+ArrayData* convCellToVecHelper(TypedValue tv);
+ArrayData* convArrToDictHelper(ArrayData* a);
+ArrayData* convVecToDictHelper(ArrayData* a);
+ArrayData* convKeysetToDictHelper(ArrayData* a);
+ArrayData* convObjToDictHelper(ObjectData* o);
+ArrayData* convCellToDictHelper(TypedValue tv);
+ArrayData* convArrToKeysetHelper(ArrayData* a);
+ArrayData* convVecToKeysetHelper(ArrayData* a);
+ArrayData* convDictToKeysetHelper(ArrayData* a);
+ArrayData* convObjToKeysetHelper(ObjectData* o);
+ArrayData* convCellToKeysetHelper(TypedValue tv);
 int64_t convObjToDblHelper(const ObjectData* o);
 int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);

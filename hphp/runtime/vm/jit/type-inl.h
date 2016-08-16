@@ -348,6 +348,9 @@ IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
 // Specialized type creation.
 
 inline Type Type::Array(ArrayData::ArrayKind kind) {
+  assertx(kind != ArrayData::kVecKind &&
+          kind != ArrayData::kDictKind &&
+          kind != ArrayData::kKeysetKind);
   return Type(TArr, ArraySpec(kind));
 }
 

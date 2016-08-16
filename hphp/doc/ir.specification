@@ -425,11 +425,46 @@ To array conversions:
 
 | ConvStrToArr,                 D(Arr), S(Str),                      PRc|CRc
 
-| ConvVecToArr,                 D(Arr), S(Arr),                      PRc|CRc
+| ConvVecToArr,                 D(Arr), S(Vec),                      PRc|CRc
 
-| ConvDictToArr,                D(Arr), S(Arr),                      PRc|CRc
+| ConvDictToArr,                D(Arr), S(Dict),                     PRc|CRc
+
+| ConvKeysetToArr,              D(Arr), S(Keyset),                   PRc|CRc
 
 | ConvCellToArr,                D(Arr), S(Cell),                  Er|PRc|CRc
+
+
+To vec conversions:
+
+| ConvArrToVec,                 D(Vec), S(Arr),                   Er|PRc|CRc
+
+| ConvDictToVec,                D(Vec), S(Dict),                     PRc|CRc
+
+| ConvKeysetToVec,              D(Vec), S(Keyset),                   PRc|CRc
+
+| ConvObjToVec,                 D(Vec), S(Obj),                   Er|PRc|CRc
+
+
+To dict conversions:
+
+| ConvArrToDict,                D(Dict), S(Arr),                  Er|PRc|CRc
+
+| ConvVecToDict,                D(Dict), S(Vec),                     PRc|CRc
+
+| ConvKeysetToDict,             D(Dict), S(Keyset),                  PRc|CRc
+
+| ConvObjToDict,                D(Dict), S(Obj),                  Er|PRc|CRc
+
+
+To keyset conversions:
+
+| ConvArrToKeyset,              D(Keyset), S(Arr),                   PRc|CRc
+
+| ConvVecToKeyset,              D(Keyset), S(Vec),                   PRc|CRc
+
+| ConvDictToKeyset,             D(Keyset), S(Dict),                  PRc|CRc
+
+| ConvObjToKeyset,              D(Keyset), S(Obj),                Er|PRc|CRc
 
 
 To bool conversions:

@@ -110,6 +110,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
@@ -135,6 +136,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* AppendWithRefVec(ArrayData*, const Variant&, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* MergeVec(ArrayData*, const ArrayData*);
+  static ArrayData* ToPHPArrayVec(ArrayData*, bool);
   static ArrayData* ToDictVec(ArrayData*, bool);
   static ArrayData* ToVecVec(ArrayData*, bool);
 
@@ -217,8 +219,6 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
 
   static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
   static ArrayData* MakeUncountedHelper(ArrayData* array, size_t extra);
-
-  static ArrayData* MakeFromVec(ArrayData* adIn, bool copy);
 
   static ArrayData* MakeVecFromAPC(const APCArray* apc);
 

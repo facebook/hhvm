@@ -154,7 +154,23 @@ CALL_OPCODE(ConvObjToArr);
 CALL_OPCODE(ConvStrToArr);
 CALL_OPCODE(ConvVecToArr);
 CALL_OPCODE(ConvDictToArr);
+CALL_OPCODE(ConvKeysetToArr);
 CALL_OPCODE(ConvCellToArr);
+
+CALL_OPCODE(ConvArrToVec);
+CALL_OPCODE(ConvDictToVec);
+CALL_OPCODE(ConvKeysetToVec);
+CALL_OPCODE(ConvObjToVec);
+
+CALL_OPCODE(ConvArrToDict);
+CALL_OPCODE(ConvVecToDict);
+CALL_OPCODE(ConvKeysetToDict);
+CALL_OPCODE(ConvObjToDict);
+
+CALL_OPCODE(ConvArrToKeyset);
+CALL_OPCODE(ConvVecToKeyset);
+CALL_OPCODE(ConvDictToKeyset);
+CALL_OPCODE(ConvObjToKeyset);
 
 CALL_OPCODE(ConvCellToBool);
 

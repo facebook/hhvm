@@ -100,6 +100,9 @@ struct APCLocalArray final : private ArrayData,
   static bool Uksort(ArrayData*, const Variant&);
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
+  static ArrayData* ToPHPArray(ArrayData* ad, bool) {
+    return ad;
+  }
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;

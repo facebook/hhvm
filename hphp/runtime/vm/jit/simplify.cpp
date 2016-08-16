@@ -48,6 +48,9 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Array("Array");
+const StaticString s_Vec("Vec");
+const StaticString s_Dict("Dict");
+const StaticString s_Keyset("Keyset");
 const StaticString s_isEmpty("isEmpty");
 const StaticString s_count("count");
 const StaticString s_1("1");
@@ -124,6 +127,7 @@ bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
     case ArrayData::kVecKind:
     case ArrayData::kApcKind:
     case ArrayData::kDictKind:
+    case ArrayData::kKeysetKind:
       return false;
     default:
       return true;
@@ -1549,6 +1553,9 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   // the distinction matters to you here, be careful.
   assertx(IMPLIES(type <= TStr, type == TStr));
   assertx(IMPLIES(type <= TArr, type == TArr));
+  assertx(IMPLIES(type <= TVec, type == TVec));
+  assertx(IMPLIES(type <= TDict, type == TDict));
+  assertx(IMPLIES(type <= TKeyset, type == TKeyset));
 
   // Specially handle checking if an uninit var's type is null. The Type class
   // doesn't fully correctly handle the fact that the earlier stages of the
@@ -1698,7 +1705,54 @@ SSATmp* simplifyConcatStrStr(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* convToArrImpl(State& env, const IRInstruction* inst) {
+namespace {
+
+template <typename G, typename C>
+SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst,
+                          G get, C convert) {
+  auto const src = inst->src(0);
+  if (!src->hasConstVal()) return nullptr;
+  auto const before = get(src);
+  auto const converted = convert(const_cast<ArrayData*>(before));
+  auto const scalar = ArrayData::GetScalarArray(converted);
+  decRefArr(converted);
+  return cns(env, scalar);
+}
+
+template <typename G>
+SSATmp* convToArrImpl(State& env, const IRInstruction* inst, G get) {
+  return arrayLikeConvImpl(
+    env, inst, get,
+    [&](ArrayData* a) { return a->toPHPArray(true); }
+  );
+}
+
+template <typename G>
+SSATmp* convToVecImpl(State& env, const IRInstruction* inst, G get) {
+  return arrayLikeConvImpl(
+    env, inst, get,
+    [&](ArrayData* a) { return a->toVec(true); }
+  );
+}
+
+template <typename G>
+SSATmp* convToDictImpl(State& env, const IRInstruction* inst, G get) {
+  return arrayLikeConvImpl(
+    env, inst, get,
+    [&](ArrayData* a) { return a->toDict(true); }
+  );
+}
+
+template <typename G>
+SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst, G get) {
+  return arrayLikeConvImpl(
+    env, inst, get,
+    [&](ArrayData* a) { return a->toKeyset(true); }
+  );
+}
+
+
+SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     Array arr = Array::Create(src->variantVal());
@@ -1707,46 +1761,64 @@ SSATmp* convToArrImpl(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+}
+
+#define X(FromTy, FromTy2, ToTy)                                          \
+SSATmp*                                                                   \
+simplifyConv##FromTy##To##ToTy(State& env, const IRInstruction* inst) {   \
+  return convTo##ToTy##Impl(                                              \
+    env, inst,                                                            \
+    [&](const SSATmp* s) { return s->FromTy2(); });                       \
+}
+
+X(Vec, vecVal, Arr)
+X(Dict, dictVal, Arr)
+X(Keyset, keysetVal, Arr)
+
+X(Arr, arrVal, Vec)
+X(Dict, dictVal, Vec)
+X(Keyset, keysetVal, Vec)
+
+X(Arr, arrVal, Dict)
+X(Vec, vecVal, Dict)
+X(Keyset, keysetVal, Dict)
+
+X(Arr, arrVal, Keyset)
+X(Vec, vecVal, Keyset)
+X(Dict, dictVal, Keyset)
+
+#undef X
+
+
+SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->isA(TArr))    return src;
+  if (src->isA(TVec))    return gen(env, ConvVecToArr, src);
+  if (src->isA(TDict))   return gen(env, ConvDictToArr, src);
+  if (src->isA(TKeyset)) return gen(env, ConvKeysetToArr, src);
+  if (src->isA(TNull))   return cns(env, staticEmptyArray());
+  if (src->isA(TBool))   return gen(env, ConvBoolToArr, src);
+  if (src->isA(TDbl))    return gen(env, ConvDblToArr, src);
+  if (src->isA(TInt))    return gen(env, ConvIntToArr, src);
+  if (src->isA(TStr))    return gen(env, ConvStrToArr, src);
+  if (src->isA(TObj))    return gen(env, ConvObjToArr, inst->taken(), src);
+  return nullptr;
+}
+
 SSATmp* simplifyConvBoolToArr(State& env, const IRInstruction* inst) {
-  return convToArrImpl(env, inst);
+  return convNonArrToArrImpl(env, inst);
 }
 
 SSATmp* simplifyConvIntToArr(State& env, const IRInstruction* inst) {
-  return convToArrImpl(env, inst);
+  return convNonArrToArrImpl(env, inst);
 }
 
 SSATmp* simplifyConvDblToArr(State& env, const IRInstruction* inst) {
-  return convToArrImpl(env, inst);
+  return convNonArrToArrImpl(env, inst);
 }
 
 SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
-  return convToArrImpl(env, inst);
-}
-
-SSATmp* simplifyConvVecToArr(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (!src->hasConstVal()) return nullptr;
-  auto const* array = src->arrVal();
-  assertx(array->isVecArray());
-  return cns(
-    env,
-    ArrayData::GetScalarArray(
-      PackedArray::MakeFromVec(const_cast<ArrayData*>(array), true)
-    )
-  );
-}
-
-SSATmp* simplifyConvDictToArr(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (!src->hasConstVal()) return nullptr;
-  auto const* array = src->arrVal();
-  assertx(array->isDict());
-  return cns(
-    env,
-    ArrayData::GetScalarArray(
-      MixedArray::MakeFromDict(const_cast<ArrayData*>(array), true)
-    )
-  );
+  return convNonArrToArrImpl(env, inst);
 }
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
@@ -1919,6 +1991,21 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
     gen(env, RaiseNotice, catchTrace,
         cns(env, makeStaticString("Array to string conversion")));
     return cns(env, s_Array.get());
+  }
+  if (srcType <= TVec) {
+    gen(env, RaiseNotice, catchTrace,
+        cns(env, makeStaticString("Vec to string conversion")));
+    return cns(env, s_Vec.get());
+  }
+  if (srcType <= TDict) {
+    gen(env, RaiseNotice, catchTrace,
+        cns(env, makeStaticString("Dict to string conversion")));
+    return cns(env, s_Dict.get());
+  }
+  if (srcType <= TKeyset) {
+    gen(env, RaiseNotice, catchTrace,
+        cns(env, makeStaticString("Keyset to string conversion")));
+    return cns(env, s_Keyset.get());
   }
   if (srcType <= TDbl)    return gen(env, ConvDblToStr, src);
   if (srcType <= TInt)    return gen(env, ConvIntToStr, src);
@@ -2685,6 +2772,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvCellToInt)
   X(ConvCellToObj)
   X(ConvCellToStr)
+  X(ConvCellToArr)
   X(ConvClsToCctx)
   X(ConvDblToArr)
   X(ConvDblToBool)
@@ -2698,9 +2786,19 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvStrToArr)
   X(ConvVecToArr)
   X(ConvDictToArr)
+  X(ConvKeysetToArr)
   X(ConvStrToBool)
   X(ConvStrToDbl)
   X(ConvStrToInt)
+  X(ConvArrToVec)
+  X(ConvDictToVec)
+  X(ConvKeysetToVec)
+  X(ConvArrToDict)
+  X(ConvVecToDict)
+  X(ConvKeysetToDict)
+  X(ConvArrToKeyset)
+  X(ConvVecToKeyset)
+  X(ConvDictToKeyset)
   X(Count)
   X(CountArray)
   X(CountArrayFast)

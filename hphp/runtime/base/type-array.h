@@ -134,6 +134,12 @@ public:
       Array{new_arr, NoIncRef{}} : Array{*this};
   }
 
+  Array toPHPArray() const {
+    if (!m_arr) return Create();
+    auto new_arr = m_arr->toPHPArray(true);
+    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
+  }
+
   Array toVec() const {
     if (!m_arr) return CreateVec();
     auto new_arr = m_arr->toVec(true);

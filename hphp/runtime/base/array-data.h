@@ -412,8 +412,9 @@ public:
   ArrayData* prepend(Cell v, bool copy);
 
   /**
-   * Convert array to Hack arrays.
+   * Convert array to Hack arrays and vice-versa.
    */
+  ArrayData* toPHPArray(bool copy);
   ArrayData* toDict(bool copy);
   ArrayData* toVec(bool copy);
   ArrayData* toKeyset(bool copy);
@@ -654,6 +655,7 @@ struct ArrayFunctions {
   ArrayData* (*zSetInt[NK])(ArrayData*, int64_t k, RefData* v);
   ArrayData* (*zSetStr[NK])(ArrayData*, StringData* k, RefData* v);
   ArrayData* (*zAppend[NK])(ArrayData*, RefData* v, int64_t* key_ptr);
+  ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);
   ArrayData* (*toKeyset[NK])(ArrayData*, bool);

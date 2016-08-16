@@ -383,6 +383,10 @@ inline ArrayData* ArrayData::prepend(Cell v, bool copy) {
   return g_array_funcs.prepend[kind()](this, v, copy);
 }
 
+inline ArrayData* ArrayData::toPHPArray(bool copy) {
+  return g_array_funcs.toPHPArray[kind()](this, copy);
+}
+
 inline ArrayData* ArrayData::toDict(bool copy) {
   return g_array_funcs.toDict[kind()](this, copy);
 }

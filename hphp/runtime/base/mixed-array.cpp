@@ -425,22 +425,6 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
   return ad;
 }
 
-ArrayData* MixedArray::MakeFromDict(ArrayData* adIn, bool copy) {
-  assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isDict());
-  ArrayData* ad = copy ? Copy(adIn) : adIn;
-  ad->m_hdr.kind = HeaderKind::Mixed;
-  return ad;
-}
-
-ArrayData* MixedArray::MakeFromKeyset(ArrayData* adIn, bool copy) {
-  assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isKeyset());
-  ArrayData* ad = copy ? Copy(adIn) : adIn;
-  ad->m_hdr.kind = HeaderKind::Mixed;
-  return ad;
-}
-
 ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
   assert(apc->isDict());
   const uint32_t apcSize = apc->size();
@@ -1905,6 +1889,28 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v, bool copy) {
   return a;
 }
 
+ArrayData* MixedArray::ToPHPArray(ArrayData* ad, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isPHPArray());
+  return ad;
+}
+
+ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  ArrayData* ad = copy ? Copy(adIn) : adIn;
+  ad->m_hdr.kind = HeaderKind::Mixed;
+  return ad;
+}
+
+ArrayData* MixedArray::ToPHPArrayKeyset(ArrayData* adIn, bool copy) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isKeyset());
+  ArrayData* ad = copy ? Copy(adIn) : adIn;
+  ad->m_hdr.kind = HeaderKind::Mixed;
+  return ad;
+}
+
 MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
   auto a = asMixed(ad);
   assert(a->isMixed());
@@ -1932,9 +1938,16 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   }
 }
 
+ArrayData* MixedArray::ToDictKeyset(ArrayData* ad, bool copy) {
+  auto a = asMixed(ad);
+  assert(a->isKeyset());
+  return copy
+    ? CopyMixed(*a, AllocMode::Request, HeaderKind::Dict)
+    : ToDictInPlace(a);
+}
+
 MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
   auto a = asMixed(ad);
-  assert(a->isMixed());
   assert(!a->cowCheck());
 
   auto elms = a->data();
@@ -1962,7 +1975,6 @@ MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
 
 ArrayData* MixedArray::ToKeyset(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
-  assert(a->isMixed());
 
   if (copy) {
     KeysetInit ai{a->size()};

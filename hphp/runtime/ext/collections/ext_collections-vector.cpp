@@ -325,6 +325,7 @@ void BaseVector::addAllImpl(const Variant& t) {
       if (adata->empty()) return true;
       if (!m_size) {
 
+        // Not isPackedLayout(), we don't want to take ownership of Hack arrays.
         if (adata->isPacked()) {
           // Collections can't contains refs, so we need to check for their
           // presence before taking ownership of this array.

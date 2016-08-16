@@ -380,47 +380,110 @@ void emitNameA(IRGS& env) {
 
 void emitCastArray(IRGS& env) {
   auto const src = popC(env);
+  push(env, gen(env, ConvCellToArr, src));
+}
+
+void emitCastVec(IRGS& env) {
+  auto const src = popC(env);
+
+  auto const raise = [&](const char* type) {
+    gen(
+      env,
+      RaiseWarning,
+      cns(
+        env,
+        makeStaticString(folly::sformat("{} to vec conversion", type))
+      )
+    );
+    decRef(env, src);
+    return cns(env, staticEmptyVecArray());
+  };
+
   push(
     env,
     [&] {
-      if (src->isA(TArr)) {
-        return cond(
-          env,
-          [&](Block* taken) {
-            return gen(
-              env,
-              CheckType,
-              Type::Array(ArrayData::kVecKind),
-              taken,
-              src
-            );
-          },
-          [&](SSATmp* vec) { return gen(env, ConvVecToArr, vec); },
-          [&] {
-            return cond(
-              env,
-              [&](Block* taken) {
-                return gen(
-                  env,
-                  CheckType,
-                  Type::Array(ArrayData::kDictKind),
-                  taken,
-                  src
-                );
-              },
-              [&](SSATmp* dict) { return gen(env, ConvDictToArr, dict); },
-              [&] { return src; }
-            );
-          }
-        );
-      }
-      if (src->isA(TNull)) return cns(env, staticEmptyArray());
-      if (src->isA(TBool)) return gen(env, ConvBoolToArr, src);
-      if (src->isA(TDbl))  return gen(env, ConvDblToArr, src);
-      if (src->isA(TInt))  return gen(env, ConvIntToArr, src);
-      if (src->isA(TStr))  return gen(env, ConvStrToArr, src);
-      if (src->isA(TObj))  return gen(env, ConvObjToArr, src);
-      return gen(env, ConvCellToArr, src);
+      if (src->isA(TVec))    return src;
+      if (src->isA(TArr))    return gen(env, ConvArrToVec, src);
+      if (src->isA(TDict))   return gen(env, ConvDictToVec, src);
+      if (src->isA(TKeyset)) return gen(env, ConvKeysetToVec, src);
+      if (src->isA(TObj))    return gen(env, ConvObjToVec, src);
+      if (src->isA(TNull))   return raise("Null");
+      if (src->isA(TBool))   return raise("Bool");
+      if (src->isA(TInt))    return raise("Int");
+      if (src->isA(TDbl))    return raise("Double");
+      if (src->isA(TStr))    return raise("String");
+      if (src->isA(TRes))    return raise("Resource");
+      not_reached();
+    }()
+  );
+}
+
+void emitCastDict(IRGS& env) {
+  auto const src = popC(env);
+
+  auto const raise = [&](const char* type) {
+    gen(
+      env,
+      RaiseWarning,
+      cns(
+        env,
+        makeStaticString(folly::sformat("{} to dict conversion", type))
+      )
+    );
+    decRef(env, src);
+    return cns(env, staticEmptyDictArray());
+  };
+
+  push(
+    env,
+    [&] {
+      if (src->isA(TDict))    return src;
+      if (src->isA(TArr))     return gen(env, ConvArrToDict, src);
+      if (src->isA(TVec))     return gen(env, ConvVecToDict, src);
+      if (src->isA(TKeyset))  return gen(env, ConvKeysetToDict, src);
+      if (src->isA(TObj))     return gen(env, ConvObjToDict, src);
+      if (src->isA(TNull))    return raise("Null");
+      if (src->isA(TBool))    return raise("Bool");
+      if (src->isA(TInt))     return raise("Int");
+      if (src->isA(TDbl))     return raise("Double");
+      if (src->isA(TStr))     return raise("String");
+      if (src->isA(TRes))     return raise("Resource");
+      not_reached();
+    }()
+  );
+}
+
+void emitCastKeyset(IRGS& env) {
+  auto const src = popC(env);
+
+  auto const raise = [&](const char* type) {
+    gen(
+      env,
+      RaiseWarning,
+      cns(
+        env,
+        makeStaticString(folly::sformat("{} to keyset conversion", type))
+      )
+    );
+    decRef(env, src);
+    return cns(env, staticEmptyKeysetArray());
+  };
+
+  push(
+    env,
+    [&] {
+      if (src->isA(TKeyset))  return src;
+      if (src->isA(TArr))     return gen(env, ConvArrToKeyset, src);
+      if (src->isA(TVec))     return gen(env, ConvVecToKeyset, src);
+      if (src->isA(TDict))    return gen(env, ConvDictToKeyset, src);
+      if (src->isA(TObj))     return gen(env, ConvObjToKeyset, src);
+      if (src->isA(TNull))    return raise("Null");
+      if (src->isA(TBool))    return raise("Bool");
+      if (src->isA(TInt))     return raise("Int");
+      if (src->isA(TDbl))     return raise("Double");
+      if (src->isA(TStr))     return raise("String");
+      if (src->isA(TRes))     return raise("Resource");
+      not_reached();
     }()
   );
 }

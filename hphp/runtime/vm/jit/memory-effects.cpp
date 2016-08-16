@@ -260,6 +260,9 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(DecRef,
+            ConvArrToKeyset,
+            ConvVecToKeyset,
+            ConvDictToKeyset,
             ReleaseVVAndSkip,
             CIterFree,
             MIterFree,
@@ -925,7 +928,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         extra->offset + static_cast<int32_t>(extra->size) - 1,
         static_cast<int32_t>(extra->size)
       };
-      return may_reenter(inst, may_load_store_move(stack_in, AEmpty, stack_in));
+      return may_raise(inst, may_load_store_move(stack_in, AEmpty, stack_in));
     }
 
   case NewStructArray:
@@ -948,6 +951,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case ElemMixedArrayK:
   case MixedArrayGetK:
+  case AKExistsArr:
     return may_load_store(AElemAny, AEmpty);
 
   case SameVec:
@@ -962,8 +966,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AElemAny | ARefAny, AEmpty);
   case MapIdx:
     return may_load_store(AHeapAny, AEmpty);
-  case AKExistsArr:
-    return may_load_store(AElemAny, AEmpty);
   case AKExistsObj:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
@@ -1364,8 +1366,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvStrToBool:
   case ConvStrToDbl:
   case ConvResToDbl:
-  case ConvVecToArr:
-  case ConvDictToArr:
   case EagerSyncVMRegs:
   case ExtendsClass:
   case LdUnwinderValue:
@@ -1581,12 +1581,32 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConcatStr3:
   case ConcatStr4:
   case ConvCellToDbl:
+  case ConvArrToVec:
+  case ConvArrToDict:
+  case ConvObjToVec:
+  case ConvObjToDict:
+  case ConvObjToKeyset:
   case ThrowOutOfBounds:
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
   case SetOpCell:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+
+  case ConvArrToKeyset: // Decrefs input values
+  case ConvVecToKeyset:
+  case ConvDictToKeyset:
+    return may_reenter(inst,
+                       may_load_store(AElemAny, AEmpty));
+
+  case ConvVecToArr:
+  case ConvDictToArr:
+  case ConvKeysetToArr:
+  case ConvDictToVec:
+  case ConvKeysetToVec:
+  case ConvVecToDict:
+  case ConvKeysetToDict:
+    return may_load_store(AElemAny, AEmpty);
 
   case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals
     return may_reenter(inst,

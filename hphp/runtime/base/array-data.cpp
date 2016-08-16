@@ -669,33 +669,41 @@ const ArrayFunctions g_array_funcs = {
   },
 
    /*
+   * ArrayData* ToPHPArray(ArrayData*, bool)
+   *
+   *   Convert to a PHP array. If already a PHP array, it will be returned
+   *   unchange (without copying). If copy is false, it may be converted in
+   *   place.
+   */
+  DISPATCH(ToPHPArray)
+
+   /*
    * ArrayData* ToDict(ArrayData*, bool)
    *
-   *   Convert array to a dict. If the dict is already a dict, it will be
-   *   returned unchange (without copying). If copy is false, array may be
-   *   converted in place. If the input array contains references, an exception
-   *   will be thrown.
+   *   Convert to a dict. If already a dict, it will be returned unchange
+   *   (without copying). If copy is false, it may be converted in place. If the
+   *   input array contains references, an exception will be thrown.
    */
   DISPATCH(ToDict)
 
   /*
    * ArrayData* ToVec(ArrayData*, bool)
    *
-   *   Convert array to a new vec. Keys will be discarded and the vec will
-   *   contain the values in iteration order. If the array is already a vec, it
-   *   will be returned unchanged (without copying). If copy is false, array may
-   *   be converted in place. If the input array contains references, an
-   *   exception will be thrown.
+   *   Convert to a vec. Keys will be discarded and the vec will contain the
+   *   values in iteration order. If already a vec, it will be returned
+   *   unchanged (without copying). If copy is false, it may be converted in
+   *   place. If the input array contains references, an exception will be
+   *   thrown.
    */
   DISPATCH(ToVec)
 
    /*
    * ArrayData* ToKeyset(ArrayData*, bool)
    *
-   *   Convert array to a keyset. If the dict is already a keyset, it will be
-   *   returned unchange (without copying). If copy is false, array may be
-   *   converted in place. If the input array contains references, an exception
-   *   will be thrown.
+   *   Convert to a keyset. Values will be discarded and the keyset will contain
+   *   just the keys. If already a keyset, it will be returned unchange (without
+   *   copying). If copy is false, it may be converted in place. If the input
+   *   array contains references, an exception will be thrown.
    */
   DISPATCH(ToKeyset)
 };

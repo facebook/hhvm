@@ -175,6 +175,9 @@ public:
   static ArrayData* Pop(ArrayData*, Variant &value);
   static ArrayData* Dequeue(ArrayData*, Variant &value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* ToPHPArray(ArrayData* ad, bool) {
+    return ad;
+  }
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);

@@ -207,6 +207,124 @@ ArrayData* convCellToArrHelper(TypedValue tv) {
   return tv.m_data.parr;
 }
 
+ArrayData* convVecToArrHelper(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convDictToArrHelper(ArrayData* adIn) {
+  assertx(adIn->isDict());
+  auto a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
+  assertx(adIn->isKeyset());
+  auto a = MixedArray::ToPHPArrayKeyset(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convArrToVecHelper(ArrayData* adIn) {
+  assert(adIn->isPHPArray());
+  auto a = adIn->toVec(adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convDictToVecHelper(ArrayData* adIn) {
+  assert(adIn->isDict());
+  auto a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
+  assert(adIn->isKeyset());
+  auto a = MixedArray::ToVecKeyset(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convObjToVecHelper(ObjectData* obj) {
+  if (!obj->isCollection()) {
+    raise_warning("Non-collection object conversion to vec");
+    return staticEmptyVecArray();
+  }
+  auto a = collections::toArray(obj).toVec();
+  decRefObj(obj);
+  return a.detach();
+}
+
+ArrayData* convArrToDictHelper(ArrayData* adIn) {
+  assert(adIn->isPHPArray());
+  auto a = adIn->toDict(adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convVecToDictHelper(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
+  assertx(adIn->isKeyset());
+  auto a = MixedArray::ToDictKeyset(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convObjToDictHelper(ObjectData* obj) {
+  if (!obj->isCollection()) {
+    raise_warning("Non-collection object conversion to dict");
+    return staticEmptyDictArray();
+  }
+  auto a = collections::toArray(obj).toDict();
+  decRefObj(obj);
+  return a.detach();
+}
+
+ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
+  assert(adIn->isPHPArray());
+  auto a = adIn->toKeyset(adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
+  assert(adIn->isDict());
+  auto a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convObjToKeysetHelper(ObjectData* obj) {
+  if (!obj->isCollection()) {
+    raise_warning("Non-collection object conversion to keyset");
+    return staticEmptyKeysetArray();
+  }
+  auto a = collections::toArray(obj).toKeyset();
+  decRefObj(obj);
+  return a.detach();
+}
+
 int64_t convObjToDblHelper(const ObjectData* o) {
   return reinterpretDblAsInt(o->toDouble());
 }

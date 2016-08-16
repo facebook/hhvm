@@ -131,6 +131,9 @@ struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* ToPHPArray(ArrayData* ad, bool) {
+    return ad;
+  }
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);

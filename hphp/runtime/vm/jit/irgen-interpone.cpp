@@ -464,10 +464,6 @@ void emitContUnsetDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitHighInvalid(IRGS& env)               { std::abort(); }
 
-void emitCastVec(IRGS& env)                   { INTERP } // Temporary
-void emitCastDict(IRGS& env)                  { INTERP }
-void emitCastKeyset(IRGS& env)                { INTERP }
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

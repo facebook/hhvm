@@ -142,6 +142,7 @@ static void freeDynPropArray(ObjectData* inst) {
   auto& table = g_context->dynPropTable;
   auto it = table.find(inst);
   assert(it != end(table));
+  assert(it->second.arr().isPHPArray());
   it->second.destroy();
   table.erase(it);
 }
@@ -282,6 +283,7 @@ Object ObjectData::iterableObject(bool& isIterable,
 Array& ObjectData::dynPropArray() const {
   assert(getAttribute(HasDynPropArr));
   assert(g_context->dynPropTable.count(this));
+  assert(g_context->dynPropTable[this].arr().isPHPArray());
   return g_context->dynPropTable[this].arr();
 }
 
@@ -297,8 +299,10 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
 Array& ObjectData::setDynPropArray(const Array& newArr) {
   assert(!g_context->dynPropTable.count(this));
   assert(!getAttribute(HasDynPropArr));
+  assert(newArr.isPHPArray());
 
   auto& arr = g_context->dynPropTable[this].arr();
+  assert(arr.isPHPArray());
   arr = newArr;
   setAttribute(HasDynPropArr);
   return arr;
@@ -944,6 +948,7 @@ ObjectData::~ObjectData() {
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
+  assert(properties->isPHPArray());
   Object retval{SystemLib::s_stdclassClass};
   retval->setAttribute(HasDynPropArr);
   g_context->dynPropTable.emplace(retval.get(), properties);

@@ -65,6 +65,12 @@ void implCast(IRLS& env, const IRInstruction* inst, Vreg base, int offset) {
       return tvCastToDoubleInPlace;
     } else if (type <= TArr) {
       return tvCastToArrayInPlace;
+    } else if (type <= TVec) {
+      return tvCastToVecInPlace;
+    } else if (type <= TDict) {
+      return tvCastToDictInPlace;
+    } else if (type <= TKeyset) {
+      return tvCastToKeysetInPlace;
     } else if (type <= TStr) {
       return tvCastToStringInPlace;
     } else if (type <= TObj) {
@@ -100,6 +106,12 @@ void implCoerce(IRLS& env, const IRInstruction* inst,
       return tvCoerceParamToDoubleOrThrow;
     } else if (type <= TArr) {
       return tvCoerceParamToArrayOrThrow;
+    } else if (type <= TVec) {
+      return tvCoerceParamToVecOrThrow;
+    } else if (type <= TDict) {
+      return tvCoerceParamToDictOrThrow;
+    } else if (type <= TKeyset) {
+      return tvCoerceParamToKeysetOrThrow;
     } else if (type <= TStr) {
       return tvCoerceParamToStringOrThrow;
     } else if (type <= TObj) {

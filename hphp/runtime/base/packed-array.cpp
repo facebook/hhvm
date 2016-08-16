@@ -606,14 +606,6 @@ ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
   return ad;
 }
 
-ArrayData* PackedArray::MakeFromVec(ArrayData* adIn, bool copy) {
-  assert(checkInvariants(adIn));
-  assert(adIn->isVecArray());
-  ArrayData* ad = copy ? Copy(adIn) : adIn;
-  ad->m_hdr.kind = HeaderKind::Packed;
-  return ad;
-}
-
 ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
   assert(apc->isVec());
   const uint32_t apcSize = apc->size();
@@ -1223,6 +1215,20 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v, bool copy) {
   return ad;
 }
 
+ArrayData* PackedArray::ToPHPArray(ArrayData* ad, bool) {
+  assert(checkInvariants(ad));
+  assert(ad->isPHPArray());
+  return ad;
+}
+
+ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
+  assert(checkInvariants(adIn));
+  assert(adIn->isVecArray());
+  ArrayData* ad = copy ? Copy(adIn) : adIn;
+  ad->m_hdr.kind = HeaderKind::Packed;
+  return ad;
+}
+
 ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   assert(checkInvariants(ad));
   assert(ad->isPacked());
@@ -1296,6 +1302,7 @@ ArrayData* PackedArray::ToKeyset(ArrayData* ad, bool copy) {
 }
 
 ArrayData* PackedArray::ToVecVec(ArrayData* ad, bool) {
+  assert(checkInvariants(ad));
   assert(ad->isVecArray());
   return ad;
 }

@@ -210,9 +210,6 @@ struct MixedArray final : private ArrayData,
    */
   static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
 
-  static ArrayData* MakeFromDict(ArrayData* adIn, bool copy);
-  static ArrayData* MakeFromKeyset(ArrayData* adIn, bool copy);
-
   static ArrayData* MakeDictFromAPC(const APCArray* apc);
   static ArrayData* MakeKeysetFromAPC(const APCArray* apc);
 
@@ -318,6 +315,7 @@ public:
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
@@ -386,6 +384,7 @@ public:
   static constexpr auto RenumberDict = &Renumber;
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
   static constexpr auto EscalateDict = &Escalate;
+  static ArrayData* ToPHPArrayDict(ArrayData*, bool);
   static constexpr auto ToVecDict = ToVec;
   static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToKeysetDict = &ToKeyset;
@@ -436,8 +435,9 @@ public:
   static constexpr auto PrependKeyset = &Prepend;
   static constexpr auto OnSetEvalScalarKeyset = &OnSetEvalScalar;
   static constexpr auto EscalateKeyset = &Escalate;
+  static ArrayData* ToPHPArrayKeyset(ArrayData*, bool);
   static constexpr auto ToVecKeyset = ToVec;
-  static constexpr auto ToDictKeyset = &ToDict;
+  static ArrayData* ToDictKeyset(ArrayData*, bool);
   static ArrayData* ToKeysetKeyset(ArrayData*, bool);
 
   static constexpr auto LvalIntRefKeyset = &LvalIntRefDict;

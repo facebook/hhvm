@@ -355,6 +355,10 @@ let get_build_targets env =
 
 (* entry point *)
 let init ?load_mini_script genv =
+  (* Log lazy declarations *)
+  let lazy_decl = genv.local_config.SLC.lazy_decl
+    && Option.is_none (ServerArgs.ai_mode genv.options) in
+  HackEventLogger.set_lazy_decl lazy_decl;
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
 
@@ -382,9 +386,7 @@ let init ?load_mini_script genv =
   let fast = Relative_path.Set.fold env.failed_parsing
     ~f:Relative_path.Map.remove ~init:fast in
   let env, t =
-    if genv.local_config.SLC.lazy_decl
-      && Option.is_none (ServerArgs.ai_mode genv.options)
-    then env, t
+    if lazy_decl then env, t
     else type_decl genv env fast t in
 
   let state = state_future >>= fun f ->

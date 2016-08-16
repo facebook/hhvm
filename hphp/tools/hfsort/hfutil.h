@@ -21,7 +21,10 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
+
+#include "hphp/util/hash.h"
 
 namespace HPHP { namespace hfsort {
 
@@ -60,18 +63,28 @@ constexpr int32_t InvalidId = -1;
 constexpr uint64_t InvalidAddr = std::numeric_limits<uint64_t>::max();
 
 struct Arc {
-  Arc(FuncId s, FuncId d, double w)
+  Arc(FuncId s, FuncId d, double w = 0)
       : src(s)
       , dst(d)
       , weight(w)
   {}
   Arc(const Arc&) = delete;
 
+  friend bool operator==(const Arc& lhs, const Arc& rhs) {
+    return lhs.src == rhs.src && lhs.dst == rhs.dst;
+  }
+
   const FuncId src;
   const FuncId dst;
-  double weight;
-  double normalizedWeight{0};
-  double avgCallOffset{0};
+  mutable double weight;
+  mutable double normalizedWeight{0};
+  mutable double avgCallOffset{0};
+};
+
+struct ArcHash {
+  int64_t operator()(const Arc& arc) const {
+    return hash_int64_pair(int64_t(arc.src), int64_t(arc.dst));
+  }
 };
 
 struct Func {
@@ -92,19 +105,21 @@ struct Func {
   uint32_t size;
   uint32_t samples{0};
   std::vector<std::string> mangledNames;
-  std::vector<Arc*> inArcs;
-  std::vector<Arc*> outArcs;
+
+  // preds and succs contain no duplicate elements and self arcs are not allowed
+  std::vector<FuncId> preds;
+  std::vector<FuncId> succs;
 };
 
 struct CallGraph {
   bool addFunc(Func f);
-  Arc* incArcWeight(FuncId src, FuncId dst, double w = 1.0);
+  const Arc& incArcWeight(FuncId src, FuncId dst, double w = 1.0);
   FuncId addrToFuncId(uint64_t addr) const;
   void printDot(char *fileName) const;
 
   std::vector<Func> funcs;
   std::map<uint64_t,FuncId> addr2FuncId;
-  std::vector<std::unique_ptr<Arc>> arcs;
+  std::unordered_set<Arc, ArcHash> arcs;
 };
 
 struct Cluster {

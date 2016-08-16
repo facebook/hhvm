@@ -121,15 +121,17 @@ static void readPerfHits(CallGraph& cg, Group2BaseMap& f2b, FILE* file) {
   // Normalize incoming arc weights for each node.
   for (auto& func : cg.funcs) {
     double inWeight = 0;
-    for (auto arc : func.inArcs) {
-      auto& pred = cg.funcs[arc->src];
-      inWeight += arc->weight * pred.samples / pred.outArcs.size();
+    for (auto src : func.preds) {
+      auto& arc = *cg.arcs.find(Arc(src, func.id));
+      auto& pred = cg.funcs[src];
+      inWeight += arc.weight * pred.samples / pred.succs.size();
     }
     if (!inWeight) inWeight = 1;
-    for (auto arc : func.inArcs) {
-      auto& pred = cg.funcs[arc->src];
-      arc->normalizedWeight =
-        arc->weight * pred.samples / (inWeight * pred.outArcs.size());
+    for (auto src : func.preds) {
+      auto& arc = *cg.arcs.find(Arc(src, func.id));
+      auto& pred = cg.funcs[src];
+      arc.normalizedWeight =
+        arc.weight * pred.samples / (inWeight * pred.succs.size());
     }
   }
 }

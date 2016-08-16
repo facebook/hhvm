@@ -99,9 +99,9 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
     auto addrCaller = getAddr(line);
     FuncId idCaller = getFuncId(cg, addrCaller);
     if (idCaller != InvalidId) {
-      auto arc = cg.incArcWeight(idCaller, idTop, computeArcWeight ? 1 : 0);
+      auto& arc = cg.incArcWeight(idCaller, idTop, computeArcWeight ? 1 : 0);
       if (computeArcWeight) {
-        arc->avgCallOffset += addrCaller - cg.funcs[idCaller].addr;
+        arc.avgCallOffset += addrCaller - cg.funcs[idCaller].addr;
       }
       HFTRACE(2, "readPerfData: idCaller: %u %s\n", idCaller,
               cg.funcs[idCaller].mangledNames[0].c_str());
@@ -112,29 +112,32 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
 
   // Normalize incoming arc weights and compute avgCallOffset for each node.
   for (auto& func : cg.funcs) {
-    for (auto arc : func.inArcs) {
-      arc->normalizedWeight = arc->weight / func.samples;
-      arc->avgCallOffset = arc->avgCallOffset / arc->weight;
+    for (auto src : func.preds) {
+      auto& arc = *cg.arcs.find(Arc(src, func.id));
+      arc.normalizedWeight = arc.weight / func.samples;
+      arc.avgCallOffset = arc.avgCallOffset / arc.weight;
     }
   }
 }
 
 void readEdgcntData(CallGraph& cg, FILE* file) {
   char     line[BUFLEN];
-  uint64_t src;
-  uint64_t dst;
+  uint64_t srcAddr;
+  uint64_t dstAddr;
   char     kind;
   uint32_t count;
 
   HFTRACE(1, "=== use edgcnt profile to build callgraph\n\n");
 
   while (fgets(line, BUFLEN, file)) {
-    if (sscanf(line, "%lx %lx %c %u %*x", &src, &dst, &kind, &count) == 4) {
+    auto const res =
+    sscanf(line, "%lx %lx %c %u %*x", &srcAddr, &dstAddr, &kind, &count);
+    if (res == 4) {
       if (kind != 'C') continue;
 
       // process one sample
-      FuncId caller = cg.addrToFuncId(src);
-      FuncId callee = cg.addrToFuncId(dst);
+      FuncId caller = cg.addrToFuncId(srcAddr);
+      FuncId callee = cg.addrToFuncId(dstAddr);
       if (caller != InvalidId && callee != InvalidId) {
         cg.incArcWeight(caller, callee, count);
       }
@@ -142,12 +145,10 @@ void readEdgcntData(CallGraph& cg, FILE* file) {
   }
 
   // Normalize incoming arc weights for each node.
-  for (size_t f = 0; f < cg.funcs.size(); f++) {
-    Func& func = cg.funcs[f];
-    auto& inArcs = func.inArcs;
-    for (size_t a = 0; a < inArcs.size(); a++) {
-      Arc* arc = inArcs[a];
-      arc->normalizedWeight = arc->weight / func.samples;
+  for (auto func : cg.funcs) {
+    for (auto src : func.preds) {
+      auto& arc = *cg.arcs.find(Arc(src, func.id));
+      arc.normalizedWeight = arc.weight / func.samples;
     }
   }
 }
@@ -210,10 +211,11 @@ void print(CallGraph& cg, const char* filename,
         }
         uint64_t dist = 0;
         uint64_t calls = 0;
-        for (auto arc : cg.funcs[fid].outArcs) {
-          auto d = std::abs(newAddr[arc->dst] -
-                            (newAddr[fid] + arc->avgCallOffset));
-          auto w = arc->weight;
+        for (auto dst : cg.funcs[fid].succs) {
+          auto& arc = *cg.arcs.find(Arc(fid, dst));
+          auto d = std::abs(newAddr[arc.dst] -
+                            (newAddr[fid] + arc.avgCallOffset));
+          auto w = arc.weight;
           calls += w;
           if (d < 64)      totalCalls64B += w;
           if (d < 4096)    totalCalls4KB += w;
@@ -221,9 +223,9 @@ void print(CallGraph& cg, const char* filename,
           HFTRACE(
             2,
             "arc: %u [@%u+%.1lf] -> %u [@%u]: weight = %.0lf, callDist = %u\n",
-            arc->src, newAddr[arc->src], arc->avgCallOffset,
-            arc->dst, newAddr[arc->dst], arc->weight, d);
-          dist += arc->weight * d;
+            arc.src, newAddr[arc.src], arc.avgCallOffset,
+            arc.dst, newAddr[arc.dst], arc.weight, d);
+          dist += arc.weight * d;
         }
         totalCalls += calls;
         totalDistance += dist;

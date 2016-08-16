@@ -26,8 +26,6 @@
 #include <folly/Format.h>
 #include <folly/Memory.h>
 
-#include "hphp/util/hash.h"
-
 namespace HPHP { namespace hfsort {
 
 bool CallGraph::addFunc(Func f) {
@@ -52,19 +50,15 @@ bool CallGraph::addFunc(Func f) {
   return true;
 }
 
-Arc* CallGraph::incArcWeight(FuncId src, FuncId dst, double w) {
-  for (auto arc : funcs[src].outArcs) {
-    if (arc->dst == dst) {
-      arc->weight += w;
-      return arc;
-    }
+const Arc& CallGraph::incArcWeight(FuncId src, FuncId dst, double w) {
+  auto res = arcs.emplace(src, dst, w);
+  if (!res.second) {
+    res.first->weight += w;
+    return *res.first;
   }
-
-  arcs.emplace_back(folly::make_unique<Arc>(src, dst, w));
-  auto arc = arcs.back().get();
-  funcs[src].outArcs.push_back(arc);
-  funcs[dst].inArcs.push_back(arc);
-  return arc;
+  funcs[src].succs.push_back(dst);
+  funcs[dst].preds.push_back(src);
+  return *res.first;
 }
 
 FuncId CallGraph::addrToFuncId(uint64_t addr) const {
@@ -92,16 +86,16 @@ void CallGraph::printDot(char* fileName) const {
   }
   for (size_t f = 0; f < funcs.size(); f++) {
     if (funcs[f].samples == 0) continue;
-    for (size_t i = 0; i < funcs[f].outArcs.size(); i++) {
-      auto arc = funcs[f].outArcs[i];
+    for (auto dst : funcs[f].succs) {
+      auto& arc = *arcs.find(Arc(f, dst));
       fprintf(
         file,
         "f%lu -> f%u [label=normWgt=%.3lf,weight=%.0lf,callOffset=%.1lf]\n",
         f,
-        arc->dst,
-        arc->normalizedWeight,
-        arc->weight,
-        arc->avgCallOffset);
+        dst,
+        arc.normalizedWeight,
+        arc.weight,
+        arc.avgCallOffset);
     }
   }
   fprintf(file, "}\n");
@@ -206,10 +200,11 @@ std::vector<Cluster> clusterize(const CallGraph& cg) {
     FuncId bestPred = InvalidId;
     double bestProb = 0;
 
-    for (auto arc : cg.funcs[fid].inArcs) {
-      if (bestPred == InvalidId || arc->normalizedWeight > bestProb) {
-        bestPred = arc->src;
-        bestProb = arc->normalizedWeight;
+    for (auto src : cg.funcs[fid].preds) {
+      auto& arc = *cg.arcs.find(Arc(src, fid));
+      if (bestPred == InvalidId || arc.normalizedWeight > bestProb) {
+        bestPred = arc.src;
+        bestProb = arc.normalizedWeight;
       }
     }
 
@@ -305,18 +300,18 @@ void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
   double c1tailc2tail = 0;
 
   for (auto& arc : cg.arcs) {
-    if ((arc->src == c1head && arc->dst == c2head) ||
-        (arc->dst == c1head && arc->src == c2head)) {
-      c1headc2head += arc->weight;
-    } else if ((arc->src == c1head && arc->dst == c2tail) ||
-               (arc->dst == c1head && arc->src == c2tail)) {
-      c1headc2tail += arc->weight;
-    } else if ((arc->src == c1tail && arc->dst == c2head) ||
-               (arc->dst == c1tail && arc->src == c2head)) {
-      c1tailc2head += arc->weight;
-    } else if ((arc->src == c1tail && arc->dst == c2tail) ||
-               (arc->dst == c1tail && arc->src == c2tail)) {
-      c1tailc2tail += arc->weight;
+    if ((arc.src == c1head && arc.dst == c2head) ||
+        (arc.dst == c1head && arc.src == c2head)) {
+      c1headc2head += arc.weight;
+    } else if ((arc.src == c1head && arc.dst == c2tail) ||
+               (arc.dst == c1head && arc.src == c2tail)) {
+      c1headc2tail += arc.weight;
+    } else if ((arc.src == c1tail && arc.dst == c2head) ||
+               (arc.dst == c1tail && arc.src == c2head)) {
+      c1tailc2head += arc.weight;
+    } else if ((arc.src == c1tail && arc.dst == c2tail) ||
+               (arc.dst == c1tail && arc.src == c2tail)) {
+      c1tailc2tail += arc.weight;
     }
   }
 
@@ -364,10 +359,10 @@ std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
   // Create a vector of cluster arcs
 
   for (auto& arc : cg.arcs) {
-    if (arc->weight == 0) continue;
+    if (arc.weight == 0) continue;
 
-    auto const s = funcCluster[arc->src];
-    auto const d = funcCluster[arc->dst];
+    auto const s = funcCluster[arc.src];
+    auto const d = funcCluster[arc.dst];
 
     // ignore if s or d is nullptr
 
@@ -377,7 +372,7 @@ std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
 
     if (s == d) continue;
 
-    insertOrInc(s, d, arc->weight);
+    insertOrInc(s, d, arc.weight);
   }
 
   // Find an arc with max weight and merge its nodes

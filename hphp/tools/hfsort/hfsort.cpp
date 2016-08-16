@@ -99,9 +99,8 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
     auto addrCaller = getAddr(line);
     FuncId idCaller = getFuncId(cg, addrCaller);
     if (idCaller != InvalidId) {
-      auto arc = cg.getArc(idCaller, idTop);
+      auto arc = cg.incArcWeight(idCaller, idTop, computeArcWeight ? 1 : 0);
       if (computeArcWeight) {
-        arc->weight++;
         arc->avgCallOffset += addrCaller - cg.funcs[idCaller].addr;
       }
       HFTRACE(2, "readPerfData: idCaller: %u %s\n", idCaller,
@@ -165,7 +164,7 @@ std::string getNameWithoutSuffix(std::string str) {
 }
 
 void print(CallGraph& cg, const char* filename,
-           const std::vector<Cluster*>& clusters, bool useWildcards) {
+           const std::vector<Cluster>& clusters, bool useWildcards) {
   FILE* outfile = fopen(filename, "wt");
   if (!outfile) {
     error(folly::sformat("opening output file {}", filename).c_str());
@@ -179,8 +178,8 @@ void print(CallGraph& cg, const char* filename,
   double totalCalls4KB = 0;
   double totalCalls2MB = 0;
   std::unordered_map<FuncId,uint64_t> newAddr;
-  for (auto cluster : clusters) {
-    for (FuncId fid : cluster->funcs) {
+  for (auto& cluster : clusters) {
+    for (auto fid : cluster.funcs) {
       if (cg.funcs[fid].samples > 0) {
         newAddr[fid] = totalSize;
         totalSize += cg.funcs[fid].size;
@@ -189,12 +188,12 @@ void print(CallGraph& cg, const char* filename,
   }
   totalSize = 0;
   HFTRACE(1, "============== page 0 ==============\n");
-  for (auto cluster : clusters) {
+  for (auto& cluster : clusters) {
     HFTRACE(1,
             "-------- density = %.3lf (%u / %u) arcWeight = %.1lf --------\n",
-            (double) cluster->samples / cluster->size,
-            cluster->samples, cluster->size, cluster->arcWeight);
-    for (auto fid : cluster->funcs) {
+            (double) cluster.samples / cluster.size,
+            cluster.samples, cluster.size, cluster.arcWeight);
+    for (auto fid : cluster.funcs) {
       if (cg.funcs[fid].samples > 0) {
         hotfuncs++;
         int space = 0;
@@ -336,7 +335,7 @@ int main(int argc, char* argv[]) {
   }
   cg.printDot("cg.dot");
 
-  std::vector<Cluster*> clusters;
+  std::vector<Cluster> clusters;
 
   const char* filename;
   if (algorithm == Algorithm::Hfsort) {

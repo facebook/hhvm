@@ -17,12 +17,11 @@
 #ifndef incl_HPHP_FACEBOOK_HFSORT_HFUTIL_H
 #define incl_HPHP_FACEBOOK_HFSORT_HFUTIL_H
 
-#include <folly/Format.h>
-
+#include <limits>
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <unordered_map>
-#include <map>
 
 namespace HPHP { namespace hfsort {
 
@@ -66,9 +65,10 @@ struct Arc {
       , dst(d)
       , weight(w)
   {}
+  Arc(const Arc&) = delete;
 
-  FuncId src;
-  FuncId dst;
+  const FuncId src;
+  const FuncId dst;
   double weight;
   double normalizedWeight{0};
   double avgCallOffset{0};
@@ -86,9 +86,9 @@ struct Func {
   bool valid() const { return mangledNames.size() > 0; }
   std::string toString() const;
 
-  FuncId id;
-  uint32_t group;
-  uint64_t addr;
+  const FuncId id;
+  const uint32_t group;
+  const uint64_t addr;
   uint32_t size;
   uint32_t samples{0};
   std::vector<std::string> mangledNames;
@@ -97,24 +97,19 @@ struct Func {
 };
 
 struct CallGraph {
-  ~CallGraph();
-
   bool addFunc(Func f);
-  Arc* findArc(FuncId src, FuncId dst) const;
-  Arc* getArc(FuncId src, FuncId dst);
   Arc* incArcWeight(FuncId src, FuncId dst, double w = 1.0);
   FuncId addrToFuncId(uint64_t addr) const;
   void printDot(char *fileName) const;
 
   std::vector<Func> funcs;
   std::map<uint64_t,FuncId> addr2FuncId;
-  std::vector<Arc*> arcs;
+  std::vector<std::unique_ptr<Arc>> arcs;
 };
 
 struct Cluster {
   explicit Cluster(const Func& f);
 
-  void merge(const Cluster& other, const double aw = 0);
   std::string toString() const;
 
   std::vector<FuncId> funcs;
@@ -124,15 +119,15 @@ struct Cluster {
   bool frozen; // not a candidate for merging
 };
 
-bool compareClustersDensity(const Cluster* c1, const Cluster* c2);
-std::vector<Cluster*> clusterize(const CallGraph& cg);
+bool compareClustersDensity(const Cluster& c1, const Cluster& c2);
+std::vector<Cluster> clusterize(const CallGraph& cg);
 
 /*
  * Pettis-Hansen code layout algorithm
  * reference: K. Pettis and R. C. Hansen, "Profile Guided Code Positioning",
  *            PLDI '90
  */
-std::vector<Cluster*> pettisAndHansen(const CallGraph& cg);
+std::vector<Cluster> pettisAndHansen(const CallGraph& cg);
 
 }}
 

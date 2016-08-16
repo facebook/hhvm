@@ -23,72 +23,45 @@
 #include <zlib.h>
 #include <ctype.h>
 
+#include <folly/Format.h>
+#include <folly/Memory.h>
+
 namespace HPHP { namespace hfsort {
 
-CallGraph::~CallGraph() {
-  for (auto* arc : arcs) {
-    delete arc;
-  }
-  arcs = std::vector<Arc*>();
-  funcs = std::vector<Func>();
-  addr2FuncId = std::map<uint64_t, FuncId>();
-}
-
 bool CallGraph::addFunc(Func f) {
-  if (f.valid()) {
-    auto it = addr2FuncId.find(f.addr);
-    if (it != addr2FuncId.end()) {
-      Func& base = funcs[it->second];
-      base.mangledNames.push_back(f.mangledNames[0]);
-      if (f.size > base.size) base.size = f.size;
-      HFTRACE(2, "Func: adding '%s' to (%u)\n",
-              f.mangledNames[0].c_str(),
-              base.id);
-    } else {
-      funcs.push_back(f);
-      addr2FuncId[f.addr] = f.id;
-      HFTRACE(2, "Func: adding (%u): %016lx %s %u\n",
-              f.id,
-              (long)f.addr,
-              f.mangledNames[0].c_str(),
-              f.size);
-      return true;
-    }
+  if (!f.valid()) return false;
+  auto it = addr2FuncId.find(f.addr);
+  if (it != addr2FuncId.end()) {
+    Func& base = funcs[it->second];
+    base.mangledNames.push_back(f.mangledNames[0]);
+    if (f.size > base.size) base.size = f.size;
+    HFTRACE(2, "Func: adding '%s' to (%u)\n",
+            f.mangledNames[0].c_str(),
+            base.id);
+    return true;
   }
-  return false;
-}
-
-Arc* CallGraph::findArc(FuncId src, FuncId dst) const {
-  const auto& outArcs = funcs[src].outArcs;
-  for (size_t i = 0; i < outArcs.size(); i++) {
-    Arc* arc = outArcs[i];
-    if (arc->dst == dst) return arc;
-  }
-  return nullptr;
-}
-
-Arc* CallGraph::getArc(FuncId src, FuncId dst) {
-  auto arc = findArc(src, dst);
-  if (arc) return arc;
-  arc = new Arc(src, dst, 0);
-  funcs[src].outArcs.push_back(arc);
-  funcs[dst].inArcs. push_back(arc);
-  arcs.push_back(arc);
-  return arc;
+  funcs.push_back(f);
+  addr2FuncId[f.addr] = f.id;
+  HFTRACE(2, "Func: adding (%u): %016lx %s %u\n",
+          f.id,
+          (long)f.addr,
+          f.mangledNames[0].c_str(),
+          f.size);
+  return true;
 }
 
 Arc* CallGraph::incArcWeight(FuncId src, FuncId dst, double w) {
-  for (size_t i = 0; i < funcs[src].outArcs.size(); i++) {
-    Arc* arc = funcs[src].outArcs[i];
+  for (auto arc : funcs[src].outArcs) {
     if (arc->dst == dst) {
       arc->weight += w;
       return arc;
     }
   }
-  Arc* arc = new Arc(src, dst, w);
+
+  arcs.emplace_back(folly::make_unique<Arc>(src, dst, w));
+  auto arc = arcs.back().get();
   funcs[src].outArcs.push_back(arc);
-  funcs[dst].inArcs. push_back(arc);
-  arcs.push_back(arc);
+  funcs[dst].inArcs.push_back(arc);
   return arc;
 }
 
@@ -107,6 +80,8 @@ FuncId CallGraph::addrToFuncId(uint64_t addr) const {
 void CallGraph::printDot(char* fileName) const {
   FILE* file = fopen(fileName, "wt");
   if (!file) return;
+  SCOPE_EXIT { fclose(file); };
+
   fprintf(file, "digraph g {\n");
   for (size_t f = 0; f < funcs.size(); f++) {
     if (funcs[f].samples == 0) continue;
@@ -128,7 +103,6 @@ void CallGraph::printDot(char* fileName) const {
     }
   }
   fprintf(file, "}\n");
-  fclose(file);
 }
 
 std::string Func::toString() const {
@@ -145,86 +119,92 @@ Cluster::Cluster(const Func& f) {
   HFTRACE(1, "new Cluster: %s: %s\n", toString().c_str(), f.toString().c_str());
 }
 
-void Cluster::merge(const Cluster& other, const double aw) {
-  for (size_t if2 = 0; if2 < other.funcs.size(); if2++) {
-    FuncId fid = other.funcs[if2];
-    funcs.push_back(fid);
-  }
-  size += other.size;
-  samples += other.samples;
-  arcWeight += (other.arcWeight + aw);
-}
-
 std::string Cluster::toString() const {
-  return folly::format("funcs = [{}]", folly::join(", ", funcs)).str();
+  return folly::sformat("funcs = [{}]", folly::join(", ", funcs));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool compareClustersDensity(const Cluster* c1, const Cluster* c2) {
-  return (double) c1->samples / c1->size > (double) c2->samples / c2->size;
+bool compareClustersDensity(const Cluster& c1, const Cluster& c2) {
+  return (double) c1.samples / c1.size > (double) c2.samples / c2.size;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
-void freezeClusters(const CallGraph& cg, std::vector<Cluster*>& clusters) {
+void freezeClusters(const CallGraph& cg, std::vector<Cluster>& clusters) {
   uint32_t totalSize = 0;
-  sort(clusters.begin(), clusters.end(), compareClustersDensity);
-  for (Cluster* cluster : clusters) {
-    uint32_t newSize = totalSize + cluster->size;
+  std::sort(clusters.begin(), clusters.end(), compareClustersDensity);
+  for (auto& cluster : clusters) {
+    uint32_t newSize = totalSize + cluster.size;
     if (newSize > kFrozenPages * kPageSize) break;
-    cluster->frozen = true;
+    cluster.frozen = true;
     totalSize = newSize;
-    FuncId fid = cluster->funcs[0];
+    auto fid = cluster.funcs[0];
     HFTRACE(1, "freezing cluster for func %d, size = %u, samples = %u, %s)\n",
             fid, cg.funcs[fid].size, cg.funcs[fid].samples,
             cg.funcs[fid].mangledNames[0].c_str());
   }
 }
+
+void mergeInto(Cluster& into, Cluster&& other, const double aw = 0) {
+  into.funcs.insert(into.funcs.end(), other.funcs.begin(), other.funcs.end());
+  into.size += other.size;
+  into.samples += other.samples;
+  into.arcWeight += (other.arcWeight + aw);
+
+  other.size = 0;
+  other.samples = 0;
+  other.arcWeight = 0;
+  other.funcs.clear();
+}
 }
 
-std::vector<Cluster*> clusterize(const CallGraph& cg) {
+std::vector<Cluster> clusterize(const CallGraph& cg) {
   std::vector<FuncId> sortedFuncs;
 
   // indexed by FuncId, keeps it's current cluster
-  std::vector<Cluster*> funcCluster;
-  std::vector<Cluster*> clusters;
+  std::vector<Cluster*> funcCluster(cg.funcs.size(), nullptr);
+  std::vector<Cluster> clusters;
+  clusters.reserve(cg.funcs.size());
 
   for (size_t f = 0; f < cg.funcs.size(); f++) {
-    if (cg.funcs[f].samples > 0) {
-      Cluster* cluster = new Cluster(cg.funcs[f]);
-      sortedFuncs.push_back(f);
-      funcCluster.push_back(cluster);
-      clusters.push_back(cluster);
-    } else {
-      funcCluster.push_back(nullptr);
-    }
+    if (cg.funcs[f].samples == 0) continue;
+    clusters.emplace_back(cg.funcs[f]);
+    sortedFuncs.push_back(f);
   }
 
   freezeClusters(cg, clusters);
 
-  sort(sortedFuncs.begin(), sortedFuncs.end(),
-       [&](FuncId f1, FuncId f2) {
-         auto& func1 = cg.funcs[f1];
-         auto& func2 = cg.funcs[f2];
-         return
-           (uint64_t)func1.samples * func2.size >
-           (uint64_t)func2.samples * func1.size;
-       });
+  // the size and order of clusters is fixed until we reshuffle it immediately
+  // before returning
+  for (auto& cluster : clusters) {
+    funcCluster[cluster.funcs.front()] = &cluster;
+  }
+
+  std::sort(
+    sortedFuncs.begin(),
+    sortedFuncs.end(),
+    [&] (FuncId f1, FuncId f2) {
+      auto& func1 = cg.funcs[f1];
+      auto& func2 = cg.funcs[f2];
+      return
+        (uint64_t)func1.samples * func2.size >
+        (uint64_t)func2.samples * func1.size;
+    }
+  );
 
   // Process each function, and consider merging its cluster with the
   // one containing its most likely predecessor.
-  for (FuncId fid : sortedFuncs) {
-
-    Cluster* cluster = funcCluster[fid];
+  for (auto fid : sortedFuncs) {
+    auto cluster = funcCluster[fid];
     if (cluster->frozen) continue;
 
     // Find best predecessor.
     FuncId bestPred = InvalidId;
     double bestProb = 0;
 
-    for (Arc* arc : cg.funcs[fid].inArcs) {
+    for (auto arc : cg.funcs[fid].inArcs) {
       if (bestPred == InvalidId || arc->normalizedWeight > bestProb) {
         bestPred = arc->src;
         bestProb = arc->normalizedWeight;
@@ -238,7 +218,7 @@ std::vector<Cluster*> clusterize(const CallGraph& cg) {
 
     assert(bestPred != InvalidId);
 
-    Cluster* predCluster = funcCluster[bestPred];
+    auto predCluster = funcCluster[bestPred];
 
     // Skip if no predCluster (predecessor w/ no samples), or if same
     // as cluster, of it's frozen.
@@ -263,24 +243,25 @@ std::vector<Cluster*> clusterize(const CallGraph& cg) {
     HFTRACE(1, "merging %s -> %s: %u\n", predCluster->toString().c_str(),
             cluster->toString().c_str(), cg.funcs[fid].samples);
 
-    for (FuncId f : cluster->funcs) {
+    for (auto f : cluster->funcs) {
       funcCluster[f] = predCluster;
     }
 
-    predCluster->merge(*cluster);
+    mergeInto(*predCluster, std::move(*cluster));
   }
 
   // Return the set of clusters that are left, which are the ones that
-  // didn't get merged (so their first func is it's original func).
-  clusters.clear();
-  for (FuncId fid : sortedFuncs) {
-    Cluster* c = funcCluster[fid];
-    if (c->funcs[0] == fid) {
-      clusters.push_back(c);
-    }
+  // didn't get merged (so their first func is its original func).
+  std::vector<Cluster> sortedClusters;
+  for (auto func : sortedFuncs) {
+    auto cluster = funcCluster[func];
+    if (!cluster || cluster->funcs.empty()) continue;
+    if (cluster->funcs[0] != func) continue;
+    sortedClusters.emplace_back(std::move(*cluster));
+    cluster->funcs.clear();
   }
 
-  return clusters;
+  return sortedClusters;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,20 +274,10 @@ struct ClusterArc {
     , weight(w)
   {}
 
-  friend bool operator==(const ClusterArc& carc1, const ClusterArc& carc2) {
-    return ((carc1.c1 == carc2.c1 && carc1.c2 == carc2.c2) ||
-            (carc1.c1 == carc2.c2 && carc1.c2 == carc2.c1));
-  }
-
-  friend bool operator!=(const ClusterArc& c1, const ClusterArc& c2) {
-    return !(c1 == c2);
-  }
-
   Cluster* c1;
   Cluster* c2;
   double weight;
 };
-
 
 void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
   FuncId c1head = c1->funcs[0];
@@ -319,7 +290,7 @@ void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
   double c1tailc2head = 0;
   double c1tailc2tail = 0;
 
-  for (auto arc : cg.arcs) {
+  for (auto& arc : cg.arcs) {
     if ((arc->src == c1head && arc->dst == c2head) ||
         (arc->dst == c1head && arc->src == c2head)) {
       c1headc2head += arc->weight;
@@ -352,32 +323,30 @@ void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
 }
 }
 
-std::vector<Cluster*> pettisAndHansen(const CallGraph& cg) {
+std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
   // indexed by FuncId, keeps its current cluster
-  std::vector<Cluster*> funcCluster;
-
-  std::vector<Cluster*> clusters;
+  std::vector<Cluster*> funcCluster(cg.funcs.size(), nullptr);
+  std::vector<Cluster> clusters;
   std::vector<FuncId> funcs;
 
+  clusters.reserve(cg.funcs.size());
+
   for (size_t f = 0; f < cg.funcs.size(); f++) {
-    if (cg.funcs[f].samples > 0) {
-      Cluster* cluster = new Cluster(cg.funcs[f]);
-      funcCluster.push_back(cluster);
-      funcs.push_back(f);
-    } else {
-      funcCluster.push_back(nullptr);
-    }
+    if (cg.funcs[f].samples == 0) continue;
+    clusters.emplace_back(cg.funcs[f]);
+    funcCluster[f] = &clusters.back();
+    funcs.push_back(f);
   }
 
-  std::vector<ClusterArc*> carcs;
+  std::vector<std::unique_ptr<ClusterArc>> carcs;
 
   // Create a vector of cluster arcs
 
-  for (auto arc : cg.arcs) {
+  for (auto& arc : cg.arcs) {
     if (arc->weight == 0) continue;
 
-    Cluster* s = funcCluster[arc->src];
-    Cluster* d = funcCluster[arc->dst];
+    auto const s = funcCluster[arc->src];
+    auto const d = funcCluster[arc->dst];
 
     // ignore if s or d is nullptr
 
@@ -387,34 +356,40 @@ std::vector<Cluster*> pettisAndHansen(const CallGraph& cg) {
 
     if (s == d) continue;
 
-    ClusterArc* newcarc = new ClusterArc(s, d, arc->weight);
+    bool insert = [&] {
+      for (auto& a : carcs) {
+        if ((a->c1 == s && a->c2 == d) || (a->c1 == d && a->c2 == s)) {
+          a->weight += arc->weight;
+          return false;
+        }
+      }
+      return true;
+    }();
 
-    for (ClusterArc* carc : carcs) {
-      if (*newcarc != *carc) continue;
-
-      carc->weight += newcarc->weight;
-
-      delete newcarc;
-      newcarc = nullptr;
-      break;
+    if (insert) {
+      carcs.emplace_back(
+        folly::make_unique<ClusterArc>(s, d, arc->weight)
+      );
     }
-
-    if (newcarc) carcs.push_back(newcarc);
   }
 
   // Find an arc with max weight and merge its nodes
 
   while (!carcs.empty()) {
-    auto maxpos = max_element(carcs.begin(), carcs.end(),
-        [&](ClusterArc* carc1, ClusterArc* carc2) {
-          return carc1->weight < carc2->weight;
-        });
+    auto maxpos = std::max_element(
+      carcs.begin(),
+      carcs.end(),
+      [&] (const std::unique_ptr<ClusterArc>& carc1,
+           const std::unique_ptr<ClusterArc>& carc2) {
+        return carc1->weight < carc2->weight;
+      }
+    );
 
-    ClusterArc* max = *maxpos;
+    auto max = std::move(*maxpos);
     carcs.erase(maxpos);
 
-    Cluster* c1 = max->c1;
-    Cluster* c2 = max->c2;
+    auto const c1 = max->c1;
+    auto const c2 = max->c2;
 
     if (c1->size + c2->size > kMaxClusterSize) continue;
 
@@ -427,53 +402,57 @@ std::vector<Cluster*> pettisAndHansen(const CallGraph& cg) {
     HFTRACE(1, "merging %s -> %s: %.1f\n", c2->toString().c_str(),
             c1->toString().c_str(), max->weight);
 
-    c1->merge(*c2, max->weight);
+    auto funcList = c2->funcs;
+    mergeInto(*c1, std::move(*c2), max->weight);
 
     // update carcs: merge c1arcs to c2arcs
 
     std::map<Cluster*, ClusterArc*> c1arcs;
-    std::vector<std::pair<Cluster*, ClusterArc*> > c2arcs;
+    std::vector<std::pair<Cluster*, ClusterArc*>> c2arcs;
 
-    for(ClusterArc* carc : carcs) {
-      if (carc->c1 == c1) c1arcs[carc->c2] = carc;
-      if (carc->c2 == c1) c1arcs[carc->c1] = carc;
-      if (carc->c1 == c2) c2arcs.push_back(std::make_pair(carc->c2, carc));
-      if (carc->c2 == c2) c2arcs.push_back(std::make_pair(carc->c1, carc));
+    for (auto& carc : carcs) {
+      auto carcp = carc.get();
+      if (carc->c1 == c1) c1arcs[carc->c2] = carcp;
+      if (carc->c2 == c1) c1arcs[carc->c1] = carcp;
+      if (carc->c1 == c2) c2arcs.push_back(std::make_pair(carc->c2, carcp));
+      if (carc->c2 == c2) c2arcs.push_back(std::make_pair(carc->c1, carcp));
     }
 
     for (auto it : c2arcs) {
-      Cluster*    c = it.first;
-      ClusterArc* c2arc = it.second;
-      auto        pos = c1arcs.find(c);
+      auto const c = it.first;
+      auto const c2arc = it.second;
+      auto const pos = c1arcs.find(c);
 
       if (pos != c1arcs.end()) {
         c1arcs[c]->weight += c2arc->weight;
       } else {
-        ClusterArc* newcarc = new ClusterArc(c, c1, c2arc->weight);
-        carcs.push_back(newcarc);
+        carcs.emplace_back(
+          folly::make_unique<ClusterArc>(c, c1, c2arc->weight)
+        );
       }
 
-      carcs.erase(std::find(carcs.begin(), carcs.end(), c2arc));
-
-      delete c2arc;
+      carcs.erase(std::find_if(
+        carcs.begin(),
+        carcs.end(),
+        [&] (const std::unique_ptr<ClusterArc>& a) { return a.get() == c2arc; }
+      ));
     }
 
     // update funcCluster
 
-    for (FuncId f : c2->funcs) funcCluster[f] = c1;
-
-    delete max;
+    for (auto f : funcList) funcCluster[f] = c1;
   }
 
   // Return the set of clusters that are left, which are the ones that
   // didn't get merged.
 
   std::set<Cluster*> liveClusters;
+  std::vector<Cluster> outClusters;
 
-  for (FuncId fid : funcs) liveClusters.insert(funcCluster[fid]);
-  for (Cluster* c : liveClusters) clusters.push_back(c);
+  for (auto fid : funcs) liveClusters.insert(funcCluster[fid]);
+  for (auto c : liveClusters) outClusters.push_back(std::move(*c));
 
-  return clusters;
+  return outClusters;
 }
 
 }}

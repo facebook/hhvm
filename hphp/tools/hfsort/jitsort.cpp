@@ -135,17 +135,17 @@ static void readPerfHits(CallGraph& cg, Group2BaseMap& f2b, FILE* file) {
 }
 
 static void print(CallGraph& cg, Group2BaseMap& f2b,
-                  const std::vector<Cluster*>& clusters, FILE* outfile) {
+                  const std::vector<Cluster>& clusters, FILE* outfile) {
   uint32_t totalSize = 0;
   uint32_t curPage   = 0;
   uint32_t hotfuncs  = 0;
   HFTRACE(1, "============== page 0 ==============\n");
-  for (auto cluster : clusters) {
-    if (!cluster->samples) continue;
+  for (auto& cluster : clusters) {
+    if (!cluster.samples) continue;
     HFTRACE(1, "------------ density = %.3lf (%u / %u) -----------\n",
-            (double) cluster->samples / cluster->size,
-            cluster->samples, cluster->size);
-    for (FuncId gid : cluster->funcs) {
+            (double) cluster.samples / cluster.size,
+            cluster.samples, cluster.size);
+    for (auto gid : cluster.funcs) {
       auto& gfunc = cg.funcs[gid];
       const auto& group = f2b[gfunc.group];
       assert(group[0] == gid);
@@ -207,13 +207,13 @@ int jitsort(int pid, int time, FILE* perfSymFile, FILE* relocResultsFile) {
   Group2BaseMap f2b;
   readPerfMap(cg, f2b, perfSymFile);
 
-  std::vector<Cluster*> clusters;
+  std::vector<Cluster> clusters;
 #ifndef _MSC_VER
   if (time < 0) {
 #endif
     for (auto& f : cg.funcs) {
       f.samples = 1;
-      clusters.push_back(new Cluster(f));
+      clusters.emplace_back(f);
     }
 #ifndef _MSC_VER
   } else {

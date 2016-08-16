@@ -58,12 +58,12 @@ void trace(const char* fmt, ...);
 #define HFTRACE(LEVEL, ...)                  \
   if (tracing >= LEVEL) { trace(__VA_ARGS__); }
 
-using FuncId = int32_t;
+using TargetId = int32_t;
 constexpr int32_t InvalidId = -1;
 constexpr uint64_t InvalidAddr = std::numeric_limits<uint64_t>::max();
 
 struct Arc {
-  Arc(FuncId s, FuncId d, double w = 0)
+  Arc(TargetId s, TargetId d, double w = 0)
       : src(s)
       , dst(d)
       , weight(w)
@@ -74,8 +74,8 @@ struct Arc {
     return lhs.src == rhs.src && lhs.dst == rhs.dst;
   }
 
-  const FuncId src;
-  const FuncId dst;
+  const TargetId src;
+  const TargetId dst;
   mutable double weight;
   mutable double normalizedWeight{0};
   mutable double avgCallOffset{0};
@@ -87,62 +87,73 @@ struct ArcHash {
   }
 };
 
-struct Func {
-  Func(FuncId id, std::string name, uint64_t a, uint32_t s, uint32_t g)
-      : id(id)
-      , group(g)
-      , addr(a)
-      , size(s) {
-    mangledNames.push_back(name);
-  }
+struct Target {
+  explicit Target(uint32_t size, uint32_t samples = 0)
+    : size(size)
+    , samples(samples)
+  {}
 
-  bool valid() const { return mangledNames.size() > 0; }
-  std::string toString() const;
-
-  const FuncId id;
-  const uint32_t group;
-  const uint64_t addr;
   uint32_t size;
-  uint32_t samples{0};
-  std::vector<std::string> mangledNames;
+  uint32_t samples;
 
   // preds and succs contain no duplicate elements and self arcs are not allowed
-  std::vector<FuncId> preds;
-  std::vector<FuncId> succs;
+  std::vector<TargetId> preds;
+  std::vector<TargetId> succs;
 };
 
-struct CallGraph {
-  bool addFunc(Func f);
-  const Arc& incArcWeight(FuncId src, FuncId dst, double w = 1.0);
-  FuncId addrToFuncId(uint64_t addr) const;
-  void printDot(char *fileName) const;
+struct TargetGraph {
+  TargetId addTarget(uint32_t size, uint32_t samples = 0);
+  const Arc& incArcWeight(TargetId src, TargetId dst, double w = 1.0);
 
-  std::vector<Func> funcs;
-  std::map<uint64_t,FuncId> addr2FuncId;
+  std::vector<Target> targets;
   std::unordered_set<Arc, ArcHash> arcs;
 };
 
 struct Cluster {
-  explicit Cluster(const Func& f);
+  Cluster(TargetId id, const Target& f);
 
   std::string toString() const;
 
-  std::vector<FuncId> funcs;
+  std::vector<TargetId> targets;
   uint32_t samples;
   double arcWeight; // intra-cluster callgraph arc weight
   uint32_t size;
   bool frozen; // not a candidate for merging
 };
 
+struct Func {
+  Func(std::string name, uint64_t a, uint32_t g)
+    : group(g)
+    , addr(a)
+    , mangledNames(1, name)
+  {}
+
+  bool valid() const { return mangledNames.size() > 0; }
+  const uint32_t group;
+  const uint64_t addr;
+  std::vector<std::string> mangledNames;
+};
+
+struct CallGraph : TargetGraph {
+  bool addFunc(std::string name, uint64_t addr, uint32_t size, uint32_t group);
+  TargetId addrToTargetId(uint64_t addr) const;
+  void printDot(char* fileName) const;
+
+  std::string toString(TargetId id) const;
+
+  std::vector<Func> funcs;
+  std::map<uint64_t,TargetId> addr2TargetId;
+};
+
 bool compareClustersDensity(const Cluster& c1, const Cluster& c2);
-std::vector<Cluster> clusterize(const CallGraph& cg);
+std::vector<Cluster> clusterize(const TargetGraph& cg);
 
 /*
  * Pettis-Hansen code layout algorithm
  * reference: K. Pettis and R. C. Hansen, "Profile Guided Code Positioning",
  *            PLDI '90
  */
-std::vector<Cluster> pettisAndHansen(const CallGraph& cg);
+std::vector<Cluster> pettisAndHansen(const TargetGraph& cg);
 
 }}
 

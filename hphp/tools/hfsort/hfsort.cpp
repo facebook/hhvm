@@ -62,7 +62,7 @@ void readSymbols(CallGraph& cg, FILE* file) {
           }
         }
       }
-      cg.addFunc(Func(cg.funcs.size(), name, addr, size, 0));
+      cg.addFunc(name, addr, size, 0);
     }
   }
 }
@@ -74,9 +74,9 @@ uint64_t getAddr(char* perfLine) {
   return addr;
 }
 
-FuncId getFuncId(const CallGraph& cg, uint64_t addr) {
+TargetId getTargetId(const CallGraph& cg, uint64_t addr) {
   if (addr == InvalidAddr) return InvalidId;
-  return cg.addrToFuncId(addr);
+  return cg.addrToTargetId(addr);
 }
 
 void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
@@ -90,14 +90,14 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
     // process one sample
     if (gzgets(file, line, BUFLEN) == Z_NULL) error("reading perf data");
     auto addrTop = getAddr(line);
-    FuncId idTop = getFuncId(cg, addrTop);
+    TargetId idTop = getTargetId(cg, addrTop);
     if (idTop == InvalidId) continue;
-    cg.funcs[idTop].samples++;
+    cg.targets[idTop].samples++;
     HFTRACE(2, "readPerfData: idTop: %u %s\n", idTop,
             cg.funcs[idTop].mangledNames[0].c_str());
     if (gzgets(file, line, BUFLEN) == Z_NULL) error("reading perf data");
     auto addrCaller = getAddr(line);
-    FuncId idCaller = getFuncId(cg, addrCaller);
+    TargetId idCaller = getTargetId(cg, addrCaller);
     if (idCaller != InvalidId) {
       auto& arc = cg.incArcWeight(idCaller, idTop, computeArcWeight ? 1 : 0);
       if (computeArcWeight) {
@@ -111,9 +111,10 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
   if (!computeArcWeight) return;
 
   // Normalize incoming arc weights and compute avgCallOffset for each node.
-  for (auto& func : cg.funcs) {
+  for (TargetId f = 0; f < cg.targets.size(); f++) {
+    auto& func = cg.targets[f];
     for (auto src : func.preds) {
-      auto& arc = *cg.arcs.find(Arc(src, func.id));
+      auto& arc = *cg.arcs.find(Arc(src, f));
       arc.normalizedWeight = arc.weight / func.samples;
       arc.avgCallOffset = arc.avgCallOffset / arc.weight;
     }
@@ -136,8 +137,8 @@ void readEdgcntData(CallGraph& cg, FILE* file) {
       if (kind != 'C') continue;
 
       // process one sample
-      FuncId caller = cg.addrToFuncId(srcAddr);
-      FuncId callee = cg.addrToFuncId(dstAddr);
+      TargetId caller = cg.addrToTargetId(srcAddr);
+      TargetId callee = cg.addrToTargetId(dstAddr);
       if (caller != InvalidId && callee != InvalidId) {
         cg.incArcWeight(caller, callee, count);
       }
@@ -145,9 +146,10 @@ void readEdgcntData(CallGraph& cg, FILE* file) {
   }
 
   // Normalize incoming arc weights for each node.
-  for (auto func : cg.funcs) {
+  for (TargetId f = 0; f < cg.targets.size(); f++) {
+    auto& func = cg.targets[f];
     for (auto src : func.preds) {
-      auto& arc = *cg.arcs.find(Arc(src, func.id));
+      auto& arc = *cg.arcs.find(Arc(src, f));
       arc.normalizedWeight = arc.weight / func.samples;
     }
   }
@@ -178,12 +180,12 @@ void print(CallGraph& cg, const char* filename,
   double totalCalls64B = 0;
   double totalCalls4KB = 0;
   double totalCalls2MB = 0;
-  std::unordered_map<FuncId,uint64_t> newAddr;
+  std::unordered_map<TargetId,uint64_t> newAddr;
   for (auto& cluster : clusters) {
-    for (auto fid : cluster.funcs) {
-      if (cg.funcs[fid].samples > 0) {
+    for (auto fid : cluster.targets) {
+      if (cg.targets[fid].samples > 0) {
         newAddr[fid] = totalSize;
-        totalSize += cg.funcs[fid].size;
+        totalSize += cg.targets[fid].size;
       }
     }
   }
@@ -194,8 +196,8 @@ void print(CallGraph& cg, const char* filename,
             "-------- density = %.3lf (%u / %u) arcWeight = %.1lf --------\n",
             (double) cluster.samples / cluster.size,
             cluster.samples, cluster.size, cluster.arcWeight);
-    for (auto fid : cluster.funcs) {
-      if (cg.funcs[fid].samples > 0) {
+    for (auto fid : cluster.targets) {
+      if (cg.targets[fid].samples > 0) {
         hotfuncs++;
         int space = 0;
         for (const auto& mangledName : cg.funcs[fid].mangledNames) {
@@ -211,7 +213,7 @@ void print(CallGraph& cg, const char* filename,
         }
         uint64_t dist = 0;
         uint64_t calls = 0;
-        for (auto dst : cg.funcs[fid].succs) {
+        for (auto dst : cg.targets[fid].succs) {
           auto& arc = *cg.arcs.find(Arc(fid, dst));
           auto d = std::abs(newAddr[arc.dst] -
                             (newAddr[fid] + arc.avgCallOffset));
@@ -232,8 +234,8 @@ void print(CallGraph& cg, const char* filename,
         HFTRACE(1, "start = %6u : avgCallDist = %u : %s\n",
                 totalSize,
                 calls ? dist / calls : 0,
-                cg.funcs[fid].toString().c_str());
-        totalSize += cg.funcs[fid].size;
+                cg.toString(fid).c_str());
+        totalSize += cg.targets[fid].size;
         uint32_t newPage = totalSize / kPageSize;
         if (newPage != curPage) {
           curPage = newPage;

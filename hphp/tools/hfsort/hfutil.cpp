@@ -28,46 +28,38 @@
 
 namespace HPHP { namespace hfsort {
 
-bool CallGraph::addFunc(Func f) {
-  if (!f.valid()) return false;
-  auto it = addr2FuncId.find(f.addr);
-  if (it != addr2FuncId.end()) {
-    Func& base = funcs[it->second];
-    base.mangledNames.push_back(f.mangledNames[0]);
-    if (f.size > base.size) base.size = f.size;
-    HFTRACE(2, "Func: adding '%s' to (%u)\n",
-            f.mangledNames[0].c_str(),
-            base.id);
+bool CallGraph::addFunc(
+  std::string name,
+  uint64_t addr,
+  uint32_t size,
+  uint32_t group
+) {
+  if (name.empty()) return false;
+  auto it = addr2TargetId.find(addr);
+  if (it != addr2TargetId.end()) {
+    auto& base = funcs[it->second];
+    auto& baseTarget = targets[it->second];
+    base.mangledNames.push_back(name);
+    if (size > baseTarget.size) baseTarget.size = size;
+    HFTRACE(2, "Func: adding '%s' to (%u)\n", name.c_str(), it->second);
     return true;
   }
-  funcs.push_back(f);
-  addr2FuncId[f.addr] = f.id;
-  HFTRACE(2, "Func: adding (%u): %016lx %s %u\n",
-          f.id,
-          (long)f.addr,
-          f.mangledNames[0].c_str(),
-          f.size);
+  auto id = addTarget(size);
+  funcs.emplace_back(name, addr, group);
+  addr2TargetId[addr] = id;
+  HFTRACE(2, "Func: adding (%u): %016lx %s %u\n", id, (long)addr, name.c_str(),
+          size);
   return true;
 }
 
-const Arc& CallGraph::incArcWeight(FuncId src, FuncId dst, double w) {
-  auto res = arcs.emplace(src, dst, w);
-  if (!res.second) {
-    res.first->weight += w;
-    return *res.first;
-  }
-  funcs[src].succs.push_back(dst);
-  funcs[dst].preds.push_back(src);
-  return *res.first;
-}
-
-FuncId CallGraph::addrToFuncId(uint64_t addr) const {
-  auto it = addr2FuncId.upper_bound(addr);
-  if (it == addr2FuncId.begin()) return InvalidId;
+TargetId CallGraph::addrToTargetId(uint64_t addr) const {
+  auto it = addr2TargetId.upper_bound(addr);
+  if (it == addr2TargetId.begin()) return InvalidId;
   --it;
   const auto &f = funcs[it->second];
+  const auto &fTarget = targets[it->second];
   assert(f.addr <= addr);
-  if (f.addr + f.size <= addr) {
+  if (f.addr + fTarget.size <= addr) {
     return InvalidId;
   }
   return it->second;
@@ -80,13 +72,13 @@ void CallGraph::printDot(char* fileName) const {
 
   fprintf(file, "digraph g {\n");
   for (size_t f = 0; f < funcs.size(); f++) {
-    if (funcs[f].samples == 0) continue;
+    if (targets[f].samples == 0) continue;
     fprintf(file, "f%lu [label=\"%s\\nsamples=%u\"]\n",
-            f, funcs[f].mangledNames[0].c_str(), funcs[f].samples);
+            f, funcs[f].mangledNames[0].c_str(), targets[f].samples);
   }
   for (size_t f = 0; f < funcs.size(); f++) {
-    if (funcs[f].samples == 0) continue;
-    for (auto dst : funcs[f].succs) {
+    if (targets[f].samples == 0) continue;
+    for (auto dst : targets[f].succs) {
       auto& arc = *arcs.find(Arc(f, dst));
       fprintf(
         file,
@@ -101,22 +93,40 @@ void CallGraph::printDot(char* fileName) const {
   fprintf(file, "}\n");
 }
 
-std::string Func::toString() const {
+std::string CallGraph::toString(TargetId id) const {
   return folly::sformat("func = {:5} : samples = {:6} : size = {:6} : {}\n",
-                        id, samples, size, mangledNames[0]);
+                        id, targets[id].samples, targets[id].size,
+                        funcs[id].mangledNames[0]);
 }
 
-Cluster::Cluster(const Func& f) {
-  funcs.push_back(f.id);
+TargetId TargetGraph::addTarget(uint32_t size, uint32_t samples) {
+  auto id = targets.size();
+  targets.emplace_back(size, samples);
+  return id;
+}
+
+const Arc& TargetGraph::incArcWeight(TargetId src, TargetId dst, double w) {
+  auto res = arcs.emplace(src, dst, w);
+  if (!res.second) {
+    res.first->weight += w;
+    return *res.first;
+  }
+  targets[src].succs.push_back(dst);
+  targets[dst].preds.push_back(src);
+  return *res.first;
+}
+
+Cluster::Cluster(TargetId id, const Target& f) {
+  targets.push_back(id);
   size = f.size;
   arcWeight = 0;
   samples = f.samples;
   frozen = false;
-  HFTRACE(1, "new Cluster: %s: %s\n", toString().c_str(), f.toString().c_str());
+  HFTRACE(1, "new Cluster: %s\n", toString().c_str());
 }
 
 std::string Cluster::toString() const {
-  return folly::sformat("funcs = [{}]", folly::join(", ", funcs));
+  return folly::sformat("funcs = [{}]", folly::join(", ", targets));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +138,7 @@ bool compareClustersDensity(const Cluster& c1, const Cluster& c2) {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
-void freezeClusters(const CallGraph& cg, std::vector<Cluster>& clusters) {
+void freezeClusters(const TargetGraph& cg, std::vector<Cluster>& clusters) {
   uint32_t totalSize = 0;
   std::sort(clusters.begin(), clusters.end(), compareClustersDensity);
   for (auto& cluster : clusters) {
@@ -136,15 +146,14 @@ void freezeClusters(const CallGraph& cg, std::vector<Cluster>& clusters) {
     if (newSize > kFrozenPages * kPageSize) break;
     cluster.frozen = true;
     totalSize = newSize;
-    auto fid = cluster.funcs[0];
-    HFTRACE(1, "freezing cluster for func %d, size = %u, samples = %u, %s)\n",
-            fid, cg.funcs[fid].size, cg.funcs[fid].samples,
-            cg.funcs[fid].mangledNames[0].c_str());
+    auto fid = cluster.targets[0];
+    HFTRACE(1, "freezing cluster for func %d, size = %u, samples = %u)\n",
+            fid, cg.targets[fid].size, cg.targets[fid].samples);
   }
 }
 
 void mergeInto(Cluster& into, Cluster&& other, const double aw = 0) {
-  into.funcs.insert(into.funcs.end(), other.funcs.begin(), other.funcs.end());
+  into.targets.insert(into.targets.end(), other.targets.begin(), other.targets.end());
   into.size += other.size;
   into.samples += other.samples;
   into.arcWeight += (other.arcWeight + aw);
@@ -152,21 +161,21 @@ void mergeInto(Cluster& into, Cluster&& other, const double aw = 0) {
   other.size = 0;
   other.samples = 0;
   other.arcWeight = 0;
-  other.funcs.clear();
+  other.targets.clear();
 }
 }
 
-std::vector<Cluster> clusterize(const CallGraph& cg) {
-  std::vector<FuncId> sortedFuncs;
+std::vector<Cluster> clusterize(const TargetGraph& cg) {
+  std::vector<TargetId> sortedFuncs;
 
-  // indexed by FuncId, keeps it's current cluster
-  std::vector<Cluster*> funcCluster(cg.funcs.size(), nullptr);
+  // indexed by TargetId, keeps it's current cluster
+  std::vector<Cluster*> funcCluster(cg.targets.size(), nullptr);
   std::vector<Cluster> clusters;
-  clusters.reserve(cg.funcs.size());
+  clusters.reserve(cg.targets.size());
 
-  for (size_t f = 0; f < cg.funcs.size(); f++) {
-    if (cg.funcs[f].samples == 0) continue;
-    clusters.emplace_back(cg.funcs[f]);
+  for (size_t f = 0; f < cg.targets.size(); f++) {
+    if (cg.targets[f].samples == 0) continue;
+    clusters.emplace_back(f, cg.targets[f]);
     sortedFuncs.push_back(f);
   }
 
@@ -175,15 +184,15 @@ std::vector<Cluster> clusterize(const CallGraph& cg) {
   // the size and order of clusters is fixed until we reshuffle it immediately
   // before returning
   for (auto& cluster : clusters) {
-    funcCluster[cluster.funcs.front()] = &cluster;
+    funcCluster[cluster.targets.front()] = &cluster;
   }
 
   std::sort(
     sortedFuncs.begin(),
     sortedFuncs.end(),
-    [&] (FuncId f1, FuncId f2) {
-      auto& func1 = cg.funcs[f1];
-      auto& func2 = cg.funcs[f2];
+    [&] (TargetId f1, TargetId f2) {
+      auto& func1 = cg.targets[f1];
+      auto& func2 = cg.targets[f2];
       return
         (uint64_t)func1.samples * func2.size >
         (uint64_t)func2.samples * func1.size;
@@ -197,10 +206,10 @@ std::vector<Cluster> clusterize(const CallGraph& cg) {
     if (cluster->frozen) continue;
 
     // Find best predecessor.
-    FuncId bestPred = InvalidId;
+    TargetId bestPred = InvalidId;
     double bestProb = 0;
 
-    for (auto src : cg.funcs[fid].preds) {
+    for (auto src : cg.targets[fid].preds) {
       auto& arc = *cg.arcs.find(Arc(src, fid));
       if (bestPred == InvalidId || arc.normalizedWeight > bestProb) {
         bestPred = arc.src;
@@ -238,9 +247,9 @@ std::vector<Cluster> clusterize(const CallGraph& cg) {
     }
 
     HFTRACE(1, "merging %s -> %s: %u\n", predCluster->toString().c_str(),
-            cluster->toString().c_str(), cg.funcs[fid].samples);
+            cluster->toString().c_str(), cg.targets[fid].samples);
 
-    for (auto f : cluster->funcs) {
+    for (auto f : cluster->targets) {
       funcCluster[f] = predCluster;
     }
 
@@ -252,10 +261,10 @@ std::vector<Cluster> clusterize(const CallGraph& cg) {
   std::vector<Cluster> sortedClusters;
   for (auto func : sortedFuncs) {
     auto cluster = funcCluster[func];
-    if (!cluster || cluster->funcs.empty()) continue;
-    if (cluster->funcs[0] != func) continue;
+    if (!cluster || cluster->targets.empty()) continue;
+    if (cluster->targets[0] != func) continue;
     sortedClusters.emplace_back(std::move(*cluster));
-    cluster->funcs.clear();
+    cluster->targets.clear();
   }
 
   return sortedClusters;
@@ -288,11 +297,11 @@ struct ClusterArcHash {
 
 using ClusterArcSet = std::unordered_set<ClusterArc, ClusterArcHash>;
 
-void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
-  FuncId c1head = c1->funcs[0];
-  FuncId c1tail = c1->funcs[c1->funcs.size() - 1];
-  FuncId c2head = c2->funcs[0];
-  FuncId c2tail = c2->funcs[c2->funcs.size() - 1];
+void orderFuncs(const TargetGraph& cg, Cluster* c1, Cluster* c2) {
+  TargetId c1head = c1->targets[0];
+  TargetId c1tail = c1->targets[c1->targets.size() - 1];
+  TargetId c2head = c2->targets[0];
+  TargetId c2tail = c2->targets[c2->targets.size() - 1];
 
   double c1headc2head = 0;
   double c1headc2tail = 0;
@@ -320,29 +329,29 @@ void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
 
   if (c1headc2head == max) {
     // flip c1
-    std::reverse(c1->funcs.begin(), c1->funcs.end());
+    std::reverse(c1->targets.begin(), c1->targets.end());
   } else if (c1headc2tail == max) {
     // flip c1 c2
-    std::reverse(c1->funcs.begin(), c1->funcs.end());
-    std::reverse(c2->funcs.begin(), c2->funcs.end());
+    std::reverse(c1->targets.begin(), c1->targets.end());
+    std::reverse(c2->targets.begin(), c2->targets.end());
   } else if (c1tailc2tail == max) {
     // flip c2
-    std::reverse(c2->funcs.begin(), c2->funcs.end());
+    std::reverse(c2->targets.begin(), c2->targets.end());
   }
 }
 }
 
-std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
-  // indexed by FuncId, keeps its current cluster
-  std::vector<Cluster*> funcCluster(cg.funcs.size(), nullptr);
+std::vector<Cluster> pettisAndHansen(const TargetGraph& cg) {
+  // indexed by TargetId, keeps its current cluster
+  std::vector<Cluster*> funcCluster(cg.targets.size(), nullptr);
   std::vector<Cluster> clusters;
-  std::vector<FuncId> funcs;
+  std::vector<TargetId> funcs;
 
-  clusters.reserve(cg.funcs.size());
+  clusters.reserve(cg.targets.size());
 
-  for (size_t f = 0; f < cg.funcs.size(); f++) {
-    if (cg.funcs[f].samples == 0) continue;
-    clusters.emplace_back(cg.funcs[f]);
+  for (size_t f = 0; f < cg.targets.size(); f++) {
+    if (cg.targets[f].samples == 0) continue;
+    clusters.emplace_back(f, cg.targets[f]);
     funcCluster[f] = &clusters.back();
     funcs.push_back(f);
   }
@@ -421,7 +430,7 @@ std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
 
     // update funcCluster
 
-    for (auto f : c2->funcs) funcCluster[f] = c1;
+    for (auto f : c2->targets) funcCluster[f] = c1;
     mergeInto(*c1, std::move(*c2), max.weight);
   }
 

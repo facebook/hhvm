@@ -1503,11 +1503,28 @@ void CodeGenerator::cgCountArray(IRInstruction* inst) {
   );
 }
 
+void CodeGenerator::arrayLikeCountImpl(IRInstruction* inst) {
+  static_assert(ArrayData::sizeofSize() == 4, "");
+  vmain() << loadzlq{
+    srcLoc(inst, 0).reg()[ArrayData::offsetofSize()],
+    dstLoc(inst, 0).reg()
+  };
+}
+
 void CodeGenerator::cgCountArrayFast(IRInstruction* inst) {
-  auto const baseReg = srcLoc(inst, 0).reg();
-  auto const dstReg  = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << loadzlq{baseReg[ArrayData::offsetofSize()], dstReg};
+  arrayLikeCountImpl(inst);
+}
+
+void CodeGenerator::cgCountVec(IRInstruction* inst) {
+  arrayLikeCountImpl(inst);
+}
+
+void CodeGenerator::cgCountDict(IRInstruction* inst) {
+  arrayLikeCountImpl(inst);
+}
+
+void CodeGenerator::cgCountKeyset(IRInstruction* inst) {
+  arrayLikeCountImpl(inst);
 }
 
 void CodeGenerator::cgCountCollection(IRInstruction* inst) {
@@ -1515,14 +1532,6 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
   auto const dstReg  = dstLoc(inst, 0).reg();
   auto& v = vmain();
   v << loadzlq{baseReg[collections::FAST_SIZE_OFFSET], dstReg};
-}
-
-void CodeGenerator::cgCountVec(IRInstruction* inst) {
-  static_assert(ArrayData::sizeofSize() == 4, "");
-  vmain() << loadzlq{
-    srcLoc(inst, 0).reg()[ArrayData::offsetofSize()],
-    dstLoc(inst, 0).reg()
-  };
 }
 
 void CodeGenerator::cgInitPackedLayoutArray(IRInstruction* inst) {

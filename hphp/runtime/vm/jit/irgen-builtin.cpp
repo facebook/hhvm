@@ -456,7 +456,7 @@ SSATmp* opt_abs(IRGS& env, uint32_t numArgs) {
   }
 
   if (value->type() <= TDbl) return gen(env, AbsDbl, value);
-  if (value->type() <= TArr) return cns(env, false);
+  if (value->type() <= TArrLike) return cns(env, false);
 
   return nullptr;
 }

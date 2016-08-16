@@ -289,8 +289,22 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 
 String Array::toString() const {
   if (m_arr == nullptr) return empty_string();
-  raise_notice("Array to string conversion");
-  return array_string;
+  if (m_arr->isPHPArray()) {
+    raise_notice("Array to string conversion");
+    return array_string;
+  }
+  assert(m_arr->isHackArray());
+  if (m_arr->isVecArray()) {
+    raise_notice("Vec to string conversion");
+    return vec_string;
+  }
+  if (m_arr->isDict()) {
+    raise_notice("Dict to string conversion");
+    return dict_string;
+  }
+  assert(m_arr->isKeyset());
+  raise_notice("Keyset to string conversion");
+  return keyset_string;
 }
 
 Array &Array::merge(const Array& arr) {

@@ -427,57 +427,20 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
 
 ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
   assert(apc->isDict());
-  const uint32_t apcSize = apc->size();
-  auto dict = asMixed(MakeReserveDict(apcSize));
-
-  try {
-    for (uint32_t i = 0; i < apcSize; ++i) {
-      auto key = apc->getKey(i);
-      auto const value = apc->getValue(i)->toLocal();
-      auto insertPos = [&] {
-        if (key.isInteger()) return dict->insert(key.asInt64Val());
-        if (key.isString()) return dict->insert(key.asCStrRef().get());
-        not_reached();
-      }();
-      assert(!insertPos.found);
-      cellDup(
-        *tvAssertCell(value.asTypedValue()),
-        insertPos.tv
-      );
-    }
-  } catch (...) {
-    MixedArray::Release(dict);
-    throw;
+  auto const apcSize = apc->size();
+  DictInit init{apcSize};
+  for (uint32_t i = 0; i < apcSize; ++i) {
+    init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
   }
-
-  return dict;
+  return init.create();
 }
 
 ArrayData* MixedArray::MakeKeysetFromAPC(const APCArray* apc) {
   assert(apc->isKeyset());
-  const uint32_t apcSize = apc->size();
-  auto keyset = asMixed(MakeReserveKeyset(apcSize));
-
-  try {
-    for (uint32_t i = 0; i < apcSize; ++i) {
-      auto const value = apc->getValue(i)->toLocal();
-      auto insertPos = [&] {
-        if (value.isInteger()) return keyset->insert(value.asInt64Val());
-        if (value.isString()) return keyset->insert(value.asCStrRef().get());
-        not_reached();
-      }();
-      assert(!insertPos.found);
-      cellDup(
-        *tvAssertCell(value.asTypedValue()),
-        insertPos.tv
-      );
-    }
-  } catch (...) {
-    MixedArray::Release(keyset);
-    throw;
-  }
-
-  return keyset;
+  auto const apcSize = apc->size();
+  KeysetInit init{apcSize};
+  for (uint32_t i = 0; i < apcSize; ++i) init.add(apc->getValue(i)->toLocal());
+  return init.create();
 }
 
 //=============================================================================
@@ -1507,23 +1470,6 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
 
 #endif
 
-const TypedValue* MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t ki) {
-  assert(asMixed(ad)->checkInvariants());
-  assert(ad->isDict());
-  auto const tv = MixedArray::NvGetInt(ad, ki);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
-  return tv;
-}
-
-const TypedValue* MixedArray::NvTryGetStrDict(const ArrayData* ad,
-                                              const StringData* k) {
-  assert(asMixed(ad)->checkInvariants());
-  assert(ad->isDict());
-  auto const tv = MixedArray::NvGetStr(ad, k);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(k, ad);
-  return tv;
-}
-
 void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
   auto a = asMixed(ad);
   assert(pos != a->m_used);
@@ -1581,6 +1527,7 @@ ALWAYS_INLINE
 ArrayData*
 MixedArray::AppendWithRefNoRef(ArrayData* adIn, const Variant& v, bool copy,
                                AppendFunc append) {
+  assert(adIn->isDict() || adIn->isKeyset());
   if (v.isReferenced()) throwRefInvalidArrayValueException(adIn);
   auto const cell = LIKELY(v.getType() != KindOfUninit)
     ? *v.asCell()
@@ -1991,11 +1938,13 @@ ArrayData* MixedArray::ToKeyset(ArrayData* ad, bool copy) {
 }
 
 ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
+  assert(asMixed(ad)->checkInvariants());
   assert(ad->isDict());
   return ad;
 }
 
 ArrayData* MixedArray::ToKeysetKeyset(ArrayData* ad, bool) {
+  assert(asMixed(ad)->checkInvariants());
   assert(ad->isKeyset());
   return ad;
 }
@@ -2042,107 +1991,146 @@ bool MixedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData*
-MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, Variant*&, bool) {
-  assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isDict());
-  throwRefInvalidArrayValueException(adIn);
+const TypedValue* MixedArray::NvTryGetIntHackArr(const ArrayData* ad,
+                                                 int64_t ki) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isDict() || ad->isKeyset());
+  auto const tv = MixedArray::NvGetInt(ad, ki);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
+  return tv;
+}
+
+const TypedValue* MixedArray::NvTryGetStrHackArr(const ArrayData* ad,
+                                                 const StringData* k) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isDict() || ad->isKeyset());
+  auto const tv = MixedArray::NvGetStr(ad, k);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(k, ad);
+  return tv;
 }
 
 ArrayData*
-MixedArray::LvalStrRefDict(ArrayData* adIn, StringData*, Variant*&, bool) {
+MixedArray::LvalIntRefHackArr(ArrayData* adIn, int64_t, Variant*&, bool) {
   assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isDict());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData* MixedArray::LvalNewRefDict(ArrayData* adIn, Variant*&, bool) {
-  assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isDict());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData* MixedArray::SetRefIntDict(ArrayData* adIn, int64_t, Variant&, bool) {
-  assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isDict());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData*
-MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, Variant&, bool) {
-  assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isDict());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, Variant&, bool) {
-  assert(asMixed(adIn)->checkInvariants());
-  assert(adIn->isDict());
+  assert(adIn->isDict() || adIn->isKeyset());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
-MixedArray::AppendWithRefDict(ArrayData* adIn, const Variant& v, bool copy) {
+MixedArray::LvalStrRefHackArr(ArrayData* adIn, StringData*, Variant*&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict() || adIn->isKeyset());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData* MixedArray::LvalNewRefHackArr(ArrayData* adIn, Variant*&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict() || adIn->isKeyset());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData* MixedArray::SetRefIntHackArr(ArrayData* adIn, int64_t,
+                                        Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict() || adIn->isKeyset());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData*
+MixedArray::SetRefStrHackArr(ArrayData* adIn, StringData*, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict() || adIn->isKeyset());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData* MixedArray::AppendRefHackArr(ArrayData* adIn, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict() || adIn->isKeyset());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData*
+MixedArray::AppendWithRefHackArr(ArrayData* adIn, const Variant& v, bool copy) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict() || adIn->isKeyset());
   return AppendWithRefNoRef(adIn, v, copy, Append);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* MixedArray::AppendKeyset(ArrayData* ad, Cell v, bool copy) {
+  assert(asMixed(ad)->checkInvariants());
   assert(ad->isKeyset());
-  if (isIntType(v.m_type)) {
-    return SetInt(ad, v.m_data.num, v, copy);
-  } else if (isStringType(v.m_type)) {
-    return SetStr(ad, v.m_data.pstr, v, copy);
-  } else {
-    throwInvalidArrayKeyException(&v, ad);
-  }
+  if (isIntType(v.m_type)) return SetInt(ad, v.m_data.num, v, copy);
+  if (isStringType(v.m_type)) return SetStr(ad, v.m_data.pstr, v, copy);
+  throwInvalidArrayKeyException(&v, ad);
 }
 
 ArrayData* MixedArray::AddToKeyset(ArrayData* ad, int64_t i, bool copy) {
+  assert(asMixed(ad)->checkInvariants());
   assert(ad->isKeyset());
   return SetInt(ad, i, make_tv<KindOfInt64>(i), copy);
 }
 
 ArrayData* MixedArray::AddToKeyset(ArrayData* ad, StringData* s, bool copy) {
+  assert(asMixed(ad)->checkInvariants());
   assert(ad->isKeyset());
   return SetStr(ad, s, make_tv<KindOfString>(s), copy);
 }
 
 ArrayData*
 MixedArray::AppendWithRefKeyset(ArrayData* adIn, const Variant& v, bool copy) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isKeyset());
   return AppendWithRefNoRef(adIn, v, copy, AppendKeyset);
 }
 
-void MixedArray::RenumberKeyset(ArrayData*) {
+void MixedArray::RenumberKeyset(ArrayData* ad) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 
-ArrayData* MixedArray::SetIntKeyset(ArrayData*, int64_t, Cell, bool) {
+ArrayData* MixedArray::SetIntKeyset(ArrayData* ad, int64_t, Cell, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 
-ArrayData* MixedArray::SetStrKeyset(ArrayData*, StringData*, Cell, bool) {
+ArrayData* MixedArray::SetStrKeyset(ArrayData* ad, StringData*, Cell, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 
-ArrayData* MixedArray::AddIntKeyset(ArrayData*, int64_t, Cell, bool) {
+ArrayData* MixedArray::AddIntKeyset(ArrayData* ad, int64_t, Cell, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 
-ArrayData* MixedArray::AddStrKeyset(ArrayData*, StringData*, Cell, bool) {
+ArrayData* MixedArray::AddStrKeyset(ArrayData* ad, StringData*, Cell, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 
-ArrayData* MixedArray::LvalIntKeyset(ArrayData*, int64_t, Variant*&, bool) {
+ArrayData* MixedArray::LvalIntKeyset(ArrayData* ad, int64_t, Variant*&, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 
-ArrayData* MixedArray::LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool) {
+ArrayData* MixedArray::LvalStrKeyset(ArrayData* ad, StringData*,
+                                     Variant*&, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 
-ArrayData* MixedArray::LvalNewKeyset(ArrayData*, Variant*&, bool) {
+ArrayData* MixedArray::LvalNewKeyset(ArrayData* ad, Variant*&, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isKeyset());
   throwInvalidKeysetOperation();
 }
 

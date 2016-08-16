@@ -33,7 +33,7 @@ inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
     return isInc(op) ? cns(env, 1) : src;
   }
 
-  if (src->type().subtypeOfAny(TBool, TArr, TObj, TRes)) {
+  if (src->type().subtypeOfAny(TBool, TArrLike, TObj, TRes)) {
     return src;
   }
 

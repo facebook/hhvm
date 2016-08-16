@@ -95,6 +95,8 @@ private:
   void cgArraySetImpl(IRInstruction*);
   void cgIssetEmptyElemImpl(IRInstruction*);
 
+  void arrayLikeCountImpl(IRInstruction*);
+
   Vlabel label(Block*);
   void emitFwdJcc(Vout& v, ConditionCode cc, Vreg sf, Block* target);
 

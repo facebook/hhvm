@@ -357,6 +357,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case CheckRange:
   case CountArrayFast:
   case CountVec:
+  case CountDict:
+  case CountKeyset:
     return true;
   default:
     return false;

@@ -269,6 +269,19 @@ private:
   using ArrayData::remove;
   using ArrayData::nvGet;
   using ArrayData::release;
+
+  static const TypedValue* NvTryGetIntHackArr(const ArrayData*, int64_t);
+  static const TypedValue* NvTryGetStrHackArr(const ArrayData*,
+                                              const StringData*);
+
+  static ArrayData* LvalIntRefHackArr(ArrayData*, int64_t, Variant*&, bool);
+  static ArrayData* LvalStrRefHackArr(ArrayData*, StringData*, Variant*&, bool);
+  static ArrayData* LvalNewRefHackArr(ArrayData*, Variant*&, bool);
+  static ArrayData* SetRefIntHackArr(ArrayData*, int64_t, Variant&, bool);
+  static ArrayData* SetRefStrHackArr(ArrayData*, StringData*, Variant&, bool);
+  static ArrayData* AppendRefHackArr(ArrayData*, Variant&, bool);
+  static ArrayData* AppendWithRefHackArr(ArrayData*, const Variant&, bool);
+
 public:
   static Variant CreateVarForUncountedArray(const Variant& source);
 
@@ -342,9 +355,9 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static const TypedValue* NvTryGetIntDict(const ArrayData*, int64_t ki);
+  static constexpr auto NvTryGetIntDict = &NvTryGetIntHackArr;
   static constexpr auto NvGetIntDict = &NvGetInt;
-  static const TypedValue* NvTryGetStrDict(const ArrayData*, const StringData*);
+  static constexpr auto NvTryGetStrDict = &NvTryGetStrHackArr;
   static constexpr auto NvGetStrDict = &NvGetStr;
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
@@ -380,6 +393,13 @@ public:
   static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
+  static constexpr auto LvalIntRefDict = &LvalIntRefHackArr;
+  static constexpr auto LvalStrRefDict = &LvalStrRefHackArr;
+  static constexpr auto LvalNewRefDict = &LvalNewRefHackArr;
+  static constexpr auto SetRefIntDict = &SetRefIntHackArr;
+  static constexpr auto SetRefStrDict = &SetRefStrHackArr;
+  static constexpr auto AppendRefDict = &AppendRefHackArr;
+  static constexpr auto AppendWithRefDict = &AppendWithRefHackArr;
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
@@ -393,17 +413,9 @@ public:
   static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToKeysetDict = &ToKeyset;
 
-  static ArrayData* LvalIntRefDict(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrRefDict(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNewRefDict(ArrayData*, Variant*&, bool);
-  static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
-  static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
-
-  static constexpr auto NvTryGetIntKeyset = &NvTryGetIntDict;
+  static constexpr auto NvTryGetIntKeyset = &NvTryGetIntHackArr;
   static constexpr auto NvGetIntKeyset = &NvGetInt;
-  static constexpr auto NvTryGetStrKeyset = &NvTryGetStrDict;
+  static constexpr auto NvTryGetStrKeyset = &NvTryGetStrHackArr;
   static constexpr auto NvGetStrKeyset = &NvGetStr;
   static constexpr auto ReleaseKeyset = &Release;
   static constexpr auto NvGetKeyKeyset = &NvGetKey;
@@ -432,6 +444,22 @@ public:
   static constexpr auto CopyWithStrongIteratorsKeyset =
     &CopyWithStrongIterators;
   static constexpr auto CopyStaticKeyset = &CopyStatic;
+  static constexpr auto LvalIntRefKeyset = &LvalIntRefHackArr;
+  static constexpr auto LvalStrRefKeyset = &LvalStrRefHackArr;
+  static constexpr auto LvalNewRefKeyset = &LvalNewRefHackArr;
+  static constexpr auto SetRefIntKeyset = &SetRefIntHackArr;
+  static constexpr auto SetRefStrKeyset = &SetRefStrHackArr;
+  static constexpr auto AppendRefKeyset = &AppendRefHackArr;
+  static ArrayData* AppendKeyset(ArrayData*, Cell v, bool);
+  static ArrayData* AppendWithRefKeyset(ArrayData*, const Variant&, bool);
+  static ArrayData* SetIntKeyset(ArrayData*, int64_t, Cell, bool);
+  static ArrayData* SetStrKeyset(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* AddIntKeyset(ArrayData*, int64_t, Cell, bool);
+  static ArrayData* AddStrKeyset(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* LvalIntKeyset(ArrayData*, int64_t, Variant*&, bool);
+  static ArrayData* LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool);
+  static ArrayData* LvalNewKeyset(ArrayData*, Variant*&, bool);
+  static void RenumberKeyset(ArrayData*);
   static constexpr auto PlusEqKeyset = &PlusEq;
   static constexpr auto MergeKeyset = &Merge;
   static constexpr auto PopKeyset = &Pop;
@@ -443,24 +471,6 @@ public:
   static constexpr auto ToVecKeyset = ToVec;
   static ArrayData* ToDictKeyset(ArrayData*, bool);
   static ArrayData* ToKeysetKeyset(ArrayData*, bool);
-
-  static constexpr auto LvalIntRefKeyset = &LvalIntRefDict;
-  static constexpr auto LvalStrRefKeyset = &LvalStrRefDict;
-  static constexpr auto LvalNewRefKeyset = &LvalNewRefDict;
-  static constexpr auto SetRefIntKeyset = &SetRefIntDict;
-  static constexpr auto SetRefStrKeyset = &SetRefStrDict;
-  static constexpr auto AppendRefKeyset = &AppendRefDict;
-
-  static ArrayData* AppendKeyset(ArrayData*, Cell v, bool);
-  static ArrayData* AppendWithRefKeyset(ArrayData*, const Variant&, bool);
-  static ArrayData* SetIntKeyset(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* SetStrKeyset(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* AddIntKeyset(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* AddStrKeyset(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* LvalIntKeyset(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNewKeyset(ArrayData*, Variant*&, bool);
-  static void RenumberKeyset(ArrayData*);
 
   //////////////////////////////////////////////////////////////////////
 

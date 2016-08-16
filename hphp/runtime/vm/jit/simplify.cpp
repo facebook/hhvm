@@ -1960,6 +1960,18 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   if (srcType <= TBool) return src;
   if (srcType <= TNull) return cns(env, false);
   if (srcType <= TArr)  return gen(env, ConvArrToBool, src);
+  if (srcType <= TVec) {
+    auto const length = gen(env, CountVec, src);
+    return gen(env, NeqInt, length, cns(env, 0));
+  }
+  if (srcType <= TDict) {
+    auto const length = gen(env, CountDict, src);
+    return gen(env, NeqInt, length, cns(env, 0));
+  }
+  if (srcType <= TKeyset) {
+    auto const length = gen(env, CountKeyset, src);
+    return gen(env, NeqInt, length, cns(env, 0));
+  }
   if (srcType <= TDbl)  return gen(env, ConvDblToBool, src);
   if (srcType <= TInt)  return gen(env, ConvIntToBool, src);
   if (srcType <= TStr)  return gen(env, ConvStrToBool, src);
@@ -2029,6 +2041,18 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TInt)  return src;
   if (srcType <= TNull) return cns(env, 0);
   if (srcType <= TArr)  return gen(env, ConvArrToInt, src);
+  if (srcType <= TVec) {
+    auto const length = gen(env, CountVec, src);
+    return gen(env, ConvBoolToInt, gen(env, ConvIntToBool, length));
+  }
+  if (srcType <= TDict) {
+    auto const length = gen(env, CountDict, src);
+    return gen(env, ConvBoolToInt, gen(env, ConvIntToBool, length));
+  }
+  if (srcType <= TKeyset) {
+    auto const length = gen(env, CountKeyset, src);
+    return gen(env, ConvBoolToInt, gen(env, ConvIntToBool, length));
+  }
   if (srcType <= TBool) return gen(env, ConvBoolToInt, src);
   if (srcType <= TDbl)  return gen(env, ConvDblToInt, src);
   if (srcType <= TStr)  return gen(env, ConvStrToInt, src);
@@ -2045,6 +2069,18 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TDbl)  return src;
   if (srcType <= TNull) return cns(env, 0.0);
   if (srcType <= TArr)  return gen(env, ConvArrToDbl, src);
+  if (srcType <= TVec) {
+    auto const length = gen(env, CountVec, src);
+    return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));
+  }
+  if (srcType <= TDict) {
+    auto const length = gen(env, CountDict, src);
+    return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));
+  }
+  if (srcType <= TKeyset) {
+    auto const length = gen(env, CountKeyset, src);
+    return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));
+  }
   if (srcType <= TBool) return gen(env, ConvBoolToDbl, src);
   if (srcType <= TInt)  return gen(env, ConvIntToDbl, src);
   if (srcType <= TStr)  return gen(env, ConvStrToDbl, src);
@@ -2638,6 +2674,8 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
 
   if (ty <= TArr) return gen(env, CountArray, val);
   if (ty <= TVec) return gen(env, CountVec, val);
+  if (ty <= TDict) return gen(env, CountDict, val);
+  if (ty <= TKeyset) return gen(env, CountKeyset, val);
 
   if (ty < TObj) {
     auto const cls = ty.clsSpec().cls();
@@ -2684,6 +2722,17 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCountVec(State& env, const IRInstruction* inst) {
   auto const vec = inst->src(0);
   return vec->hasConstVal(TVec) ? cns(env, vec->vecVal()->size()) : nullptr;
+}
+
+SSATmp* simplifyCountDict(State& env, const IRInstruction* inst) {
+  auto const dict = inst->src(0);
+  return dict->hasConstVal(TDict) ? cns(env, dict->dictVal()->size()) : nullptr;
+}
+
+SSATmp* simplifyCountKeyset(State& env, const IRInstruction* inst) {
+  auto const keyset = inst->src(0);
+  return keyset->hasConstVal(TKeyset)
+    ? cns(env, keyset->keysetVal()->size()) : nullptr;
 }
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
@@ -2947,6 +2996,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CountArray)
   X(CountArrayFast)
   X(CountVec)
+  X(CountDict)
+  X(CountKeyset)
   X(DecRef)
   X(DecRefNZ)
   X(DefLabel)

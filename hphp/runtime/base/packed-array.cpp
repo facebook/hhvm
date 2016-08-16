@@ -314,7 +314,7 @@ ALWAYS_INLINE
 void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
                                    RefCount initial_count, HeaderKind dest_hk) {
   // Copy everything from `adIn' to `ad', including refcount, etc.
-  assert(adIn->isPackedLayout());
+  assert(checkInvariants(adIn));
   auto const size = adIn->m_size;
   static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
   memcpy16_inline(ad, adIn, (size + 1) * 16);
@@ -608,24 +608,12 @@ ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
 
 ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
   assert(apc->isVec());
-  const uint32_t apcSize = apc->size();
-  auto vec = MakeReserveVec(apcSize);
-  auto data = packedData(vec);
-
-  try {
-    for (uint32_t i = 0; i < apcSize; ++i) {
-      auto const v = apc->getValue(i)->toLocal();
-      cellDup(
-        *tvAssertCell(v.asTypedValue()),
-        data[vec->m_size++]
-      );
-    }
-  } catch (...) {
-    PackedArray::Release(vec);
-    throw;
+  auto const apcSize = apc->size();
+  VecArrayInit init{apcSize};
+  for (uint32_t i = 0; i < apcSize; ++i) {
+    init.append(apc->getValue(i)->toLocal());
   }
-
-  return vec;
+  return init.create();
 }
 
 void PackedArray::Release(ArrayData* ad) {
@@ -666,6 +654,8 @@ void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
 
   std::free(reinterpret_cast<char*>(ad) - extra);
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   assert(checkInvariants(ad));
@@ -1217,7 +1207,7 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v, bool copy) {
 
 ArrayData* PackedArray::ToPHPArray(ArrayData* ad, bool) {
   assert(checkInvariants(ad));
-  assert(ad->isPHPArray());
+  assert(ad->isPacked());
   return ad;
 }
 
@@ -1294,6 +1284,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
 }
 
 ArrayData* PackedArray::ToKeyset(ArrayData* ad, bool copy) {
+  assert(checkInvariants(ad));
   if (ad->empty()) return staticEmptyKeysetArray();
   auto const size = ad->getSize();
   KeysetInit ai{size};

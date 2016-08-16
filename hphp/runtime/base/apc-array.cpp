@@ -131,15 +131,19 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
 
   try {
-    for (ArrayIter it(arr); !it.end(); it.next()) {
-      auto key = APCHandle::Create(it.first(), false, APCHandleLevel::Inner,
-                                   unserializeObj);
-      size += key.size;
-      auto val = APCHandle::Create(it.secondRef(), false,
-                                   APCHandleLevel::Inner, unserializeObj);
-      size += val.size;
-      ret->add(key.handle, val.handle);
-    }
+    IterateKV(
+      arr,
+      [&](const TypedValue* k, const TypedValue* v) {
+        auto key = APCHandle::Create(tvAsCVarRef(k), false,
+                                     APCHandleLevel::Inner, unserializeObj);
+        size += key.size;
+        auto val = APCHandle::Create(tvAsCVarRef(v), false,
+                                     APCHandleLevel::Inner, unserializeObj);
+        size += val.size;
+        ret->add(key.handle, val.handle);
+        return false;
+      }
+    );
   } catch (...) {
     delete ret;
     throw;
@@ -200,12 +204,17 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
 
   size_t i = 0;
   try {
-    for (ArrayIter it(arr); !it.end(); it.next()) {
-      auto val = APCHandle::Create(it.secondRef(), false,
-                                   APCHandleLevel::Inner, unserializeObj);
-      size += val.size;
-      ret->vals()[i++] = val.handle;
-    }
+    size_t i = 0;
+    IterateV(
+      arr,
+      [&](const TypedValue* v) {
+        auto val = APCHandle::Create(tvAsCVarRef(v), false,
+                                     APCHandleLevel::Inner, unserializeObj);
+        size += val.size;
+        ret->vals()[i++] = val.handle;
+        return false;
+      }
+    );
     assertx(i == num_elems);
   } catch (...) {
     ret->m_size = i;

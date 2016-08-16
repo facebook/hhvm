@@ -122,7 +122,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     gen(env, Jmp, getBlock(env, zeroOff));
     return;
   }
-  if (type <= TArr) {
+  if (type <= TArrLike) {
     decRef(env, switchVal);
     gen(env, Jmp, getBlock(env, defaultOff));
     return;

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-ptr.h"

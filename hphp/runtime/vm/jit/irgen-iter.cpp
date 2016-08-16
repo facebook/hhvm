@@ -43,7 +43,7 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
   auto const pred  = env.irb->predictedStackInnerType(bcSPOffset(env));
   auto const src   = topV(env);
 
-  if (!pred.subtypeOfAny(TArr, TObj)) {
+  if (!pred.subtypeOfAny(TArrLike, TObj)) {
     PUNT(MIterInit-unsupportedSrcType);
   }
 
@@ -66,7 +66,7 @@ void emitIterInit(IRGS& env,
                   int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(IterInit);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   auto const res = gen(
     env,
     IterInit,
@@ -85,7 +85,7 @@ void emitIterInitK(IRGS& env,
                    int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(IterInitK);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
   auto const res = gen(
     env,
     IterInitK,
@@ -136,7 +136,7 @@ void emitWIterInit(IRGS& env,
                    int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(WIterInit);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInit);
   auto const res = gen(
     env,
     WIterInit,
@@ -155,7 +155,7 @@ void emitWIterInitK(IRGS& env,
                     int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(WIterInitK);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInitK);
   auto const res = gen(
     env,
     WIterInitK,
@@ -289,7 +289,7 @@ void emitIterBreak(IRGS& env, Offset relOffset, const ImmVector& iv) {
 void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
   auto const src        = popC(env);
   auto const type       = src->type();
-  if (type.subtypeOfAny(TArr, TStr, TObj)) {
+  if (type.subtypeOfAny(TArrLike, TStr, TObj)) {
     auto const res = gen(
       env,
       DecodeCufIter,

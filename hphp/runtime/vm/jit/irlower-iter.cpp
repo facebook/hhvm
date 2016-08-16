@@ -66,7 +66,7 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     .addr(fp, iterOff)
     .ssa(0 /* src */);
 
-  if (src->isA(TArr)) {
+  if (src->isA(TArrLike)) {
     args.addr(fp, valOff);
     if (isInitK) {
       args.addr(fp, localOffset(extra->keyId));
@@ -124,7 +124,7 @@ void implMIterInit(IRLS& env, const IRInstruction* inst) {
   auto const innerType = inst->typeParam();
   assertx(innerType.isKnownDataType());
 
-  if (innerType <= TArr) {
+  if (innerType <= TArrLike) {
     args.addr(fp, valOff);
     if (inst->is(MIterInitK)) {
       args.addr(fp, localOffset(extra->keyId));

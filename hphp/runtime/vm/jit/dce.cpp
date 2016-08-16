@@ -220,6 +220,8 @@ bool canDCE(IRInstruction* inst) {
   case CountArray:
   case CountArrayFast:
   case CountVec:
+  case CountDict:
+  case CountKeyset:
   case CountCollection:
   case Nop:
   case AKExistsArr:

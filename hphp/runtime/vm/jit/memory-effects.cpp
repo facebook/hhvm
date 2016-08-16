@@ -1372,6 +1372,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountArray:
   case CountArrayFast:
   case CountVec:
+  case CountDict:
+  case CountKeyset:
   case StAsyncArResult:
   case StAsyncArResume:
   case StAsyncArSucceeded:

@@ -481,7 +481,6 @@ To bool conversions:
 
 | ConvCellToBool,              D(Bool), S(Cell),                          NF
 
-
 To double conversions:
 
 | ConvArrToDbl,                 D(Dbl), S(Arr),                           NF
@@ -1737,20 +1736,23 @@ To string conversions:
   computed by returning the value of their count method. Objects that do not
   implement Countable have a count of 1.
 
-| CountArray,      D(Int), S(Arr), NF
+| CountArray,      D(Int), S(Arr),    NF
 
-| CountArrayFast,  D(Int), S(Arr), NF
+| CountArrayFast,  D(Int), S(Arr),    NF
 
-| CountVec, D(Int), S(Vec), NF
+| CountVec,        D(Int), S(Vec),    NF
 
-| CountCollection, D(Int), S(Obj), NF
+| CountDict,       D(Int), S(Dict),   NF
+
+| CountKeyset,     D(Int), S(Keyset), NF
+
+| CountCollection, D(Int), S(Obj),    NF
 
   Computes the number of elements in S0 using the same definition as Count, but
   with a restriction on the input type.
 
   CountArray expects any array. CountArrayFast expects an array whose kind is
-  not kGlobalsKind or kProxyKind. CountVec expects a vec. CountCollection
-  expects a collection object.
+  not kGlobalsKind or kProxyKind. CountCollection expects a collection object.
 
 | Nop, ND, NA, NF
 
@@ -2254,13 +2256,13 @@ To string conversions:
 
 17. Iterators
 
-| IterInit<IterData>,   D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
+| IterInit<IterData>,   D(Bool), S(ArrLike,Obj) S(FramePtr), Er|CRc
 
-| IterInitK<IterData>,  D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
+| IterInitK<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), Er|CRc
 
-| WIterInit<IterData>,  D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
+| WIterInit<IterData>,  D(Bool), S(ArrLike,Obj) S(FramePtr), Er|CRc
 
-| WIterInitK<IterData>, D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
+| WIterInitK<IterData>, D(Bool), S(ArrLike,Obj) S(FramePtr), Er|CRc
 
 | MIterInit<T,IterData>,  D(Bool), S(BoxedCell) S(FramePtr), Er
 
@@ -2334,7 +2336,7 @@ To string conversions:
   Free the iterator variable whose index is given by S1 in the stack frame
   pointed to by S0.
 
-| DecodeCufIter<iterId>, D(Bool), S(Arr,Obj,Str)  S(FramePtr), Er
+| DecodeCufIter<iterId>, D(Bool), S(ArrLike,Obj,Str)  S(FramePtr), Er
 
   Decode S0 as a callable, and write the decoded values to the iterator
   specified by IterId. Returns true iff it successfully decoded the callable.

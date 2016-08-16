@@ -57,6 +57,7 @@ size_t PackedArray::heapSize(const ArrayData* ad) {
 
 template<class Marker>
 void PackedArray::scan(const ArrayData* a, Marker& mark) {
+  assert(checkInvariants(a));
   auto data = packedData(a);
   for (unsigned i = 0, n = a->getSize(); i < n; ++i) {
     mark(data[i]);
@@ -65,7 +66,7 @@ void PackedArray::scan(const ArrayData* a, Marker& mark) {
 
 template <class F, bool inc>
 void PackedArray::IterateV(const ArrayData* arr, F fn) {
-  assert(arr->isPackedLayout());
+  assert(checkInvariants(arr));
   auto elm = packedData(arr);
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
@@ -76,7 +77,7 @@ void PackedArray::IterateV(const ArrayData* arr, F fn) {
 
 template <class F, bool inc>
 void PackedArray::IterateKV(const ArrayData* arr, F fn) {
-  assert(arr->isPackedLayout());
+  assert(checkInvariants(arr));
   auto elm = packedData(arr);
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };

@@ -1928,24 +1928,11 @@ void iopNewLikeArrayL(local_var fr, intva_t capacity) {
   ArrayData* arr;
   if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
-    vmStack().pushArrayNoRc(arr);
-  } else if (isVecType(fr->m_type)) {
-    if (capacity == 0) capacity = PackedArray::SmallSize;
-    arr = PackedArray::MakeReserveVec(capacity);
-    vmStack().pushVecNoRc(arr);
-  } else if (isDictType(fr->m_type)) {
-    if (capacity == 0) capacity = MixedArray::SmallSize;
-    arr = MixedArray::MakeReserveDict(capacity);
-    vmStack().pushDictNoRc(arr);
-  } else if (isKeysetType(fr->m_type)) {
-    if (capacity == 0) capacity = MixedArray::SmallSize;
-    arr = MixedArray::MakeReserveKeyset(capacity);
-    vmStack().pushKeysetNoRc(arr);
-   } else {
+  } else {
     if (capacity == 0) capacity = PackedArray::SmallSize;
     arr = PackedArray::MakeReserve(capacity);
-    vmStack().pushArrayNoRc(arr);
   }
+  vmStack().pushArrayNoRc(arr);
 }
 
 OPTBLD_INLINE void iopNewPackedArray(intva_t n) {

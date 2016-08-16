@@ -118,6 +118,20 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Obj:
     return true;
 
+  case T::SVec:
+  case T::Vec:
+  case T::OptSVec:
+  case T::OptVec:
+  case T::SDict:
+  case T::Dict:
+  case T::OptSDict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::Keyset:
+  case T::OptSKeyset:
+  case T::OptKeyset:
+    return true;
+
   case T::OptSArr:
   case T::OptArr:
     // Can't currently have array() info.
@@ -162,6 +176,12 @@ folly::Optional<DataType> convertToDataType(RepoAuthType ty) {
   case T::OptInt:
   case T::OptSArr:
   case T::OptArr:
+  case T::OptSVec:
+  case T::OptVec:
+  case T::OptSDict:
+  case T::OptDict:
+  case T::OptSKeyset:
+  case T::OptKeyset:
   case T::OptSStr:
   case T::OptStr:
   case T::OptDbl:
@@ -193,6 +213,15 @@ folly::Optional<DataType> convertToDataType(RepoAuthType ty) {
 
   case T::SArr:
   case T::Arr:          return KindOfArray;
+
+  case T::SVec:
+  case T::Vec:          return KindOfVec;
+
+  case T::SDict:
+  case T::Dict:         return KindOfDict;
+
+  case T::SKeyset:
+  case T::Keyset:       return KindOfKeyset;
 
   case T::Obj:
   case T::SubObj:
@@ -260,6 +289,42 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       if (!tvMatchesArrayType(tv, arr)) return false;
     }
     return true;
+
+  case T::OptSVec:
+    if (initNull) return true;
+    // fallthrough
+  case T::SVec:
+    return isVecType(tv.m_type) && tv.m_data.parr->isStatic();
+
+  case T::OptVec:
+    if (initNull) return true;
+    // fallthrough
+  case T::Vec:
+    return isVecType(tv.m_type);
+
+  case T::OptSDict:
+    if (initNull) return true;
+    // fallthrough
+  case T::SDict:
+    return isDictType(tv.m_type) && tv.m_data.parr->isStatic();
+
+  case T::OptDict:
+    if (initNull) return true;
+    // fallthrough
+  case T::Dict:
+    return isDictType(tv.m_type);
+
+  case T::OptSKeyset:
+    if (initNull) return true;
+    // fallthrough
+  case T::SKeyset:
+    return isKeysetType(tv.m_type) && tv.m_data.parr->isStatic();
+
+  case T::OptKeyset:
+    if (initNull) return true;
+    // fallthrough
+  case T::Keyset:
+    return isKeysetType(tv.m_type);
 
   case T::Null:
     return initNull || tv.m_type == KindOfUninit;
@@ -359,6 +424,21 @@ std::string show(RepoAuthType rat) {
       return ret;
     }
     break;
+
+  case T::SVec:        return "SVec";
+  case T::Vec:         return "Vec";
+  case T::OptSVec:     return "?SVec";
+  case T::OptVec:      return "?Vec";
+
+  case T::SDict:       return "SDict";
+  case T::Dict:        return "Dict";
+  case T::OptSDict:    return "?SDict";
+  case T::OptDict:     return "?Dict";
+
+  case T::SKeyset:     return "SKeyset";
+  case T::Keyset:      return "Keyset";
+  case T::OptSKeyset:  return "?SKeyset";
+  case T::OptKeyset:   return "?Keyset";
 
   case T::OptSubObj:
   case T::OptExactObj:

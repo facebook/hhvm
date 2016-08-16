@@ -75,6 +75,24 @@ std::string Type::constValString() const {
     }
     return folly::format("Array({})", m_arrVal).str();
   }
+  if (*this <= TStaticVec) {
+    if (m_vecVal->empty()) {
+      return "vec()";
+    }
+    return folly::format("Vec({})", m_vecVal).str();
+  }
+  if (*this <= TStaticDict) {
+    if (m_dictVal->empty()) {
+      return "dict()";
+    }
+    return folly::format("Dict({})", m_dictVal).str();
+  }
+  if (*this <= TStaticKeyset) {
+    if (m_keysetVal->empty()) {
+      return "keyset()";
+    }
+    return folly::format("Keyset({})", m_keysetVal).str();
+  }
   if (*this <= TFunc) {
     return folly::format("Func({})", m_funcVal ? m_funcVal->fullName()->data()
                                                : "nullptr").str();
@@ -263,13 +281,13 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfDouble           : return kDbl;
     case KindOfPersistentString : return kPersistentStr;
     case KindOfString           : return kStr;
-    case KindOfPersistentVec    :
-    case KindOfPersistentDict   :
-    case KindOfPersistentKeyset :
+    case KindOfPersistentVec    : return kPersistentVec;
+    case KindOfPersistentDict   : return kPersistentDict;
+    case KindOfPersistentKeyset : return kPersistentKeyset;
     case KindOfPersistentArray  : return kPersistentArr;
-    case KindOfVec              :
-    case KindOfDict             :
-    case KindOfKeyset           :
+    case KindOfVec              : return kVec;
+    case KindOfDict             : return kDict;
+    case KindOfKeyset           : return kKeyset;
     case KindOfArray            : return kArr;
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
@@ -296,6 +314,12 @@ DataType Type::toDataType() const {
   if (*this <= TStr)         return KindOfString;
   if (*this <= TPersistentArr) return KindOfPersistentArray;
   if (*this <= TArr)         return KindOfArray;
+  if (*this <= TPersistentVec) return KindOfPersistentVec;
+  if (*this <= TVec)         return KindOfVec;
+  if (*this <= TPersistentDict) return KindOfPersistentDict;
+  if (*this <= TDict)        return KindOfDict;
+  if (*this <= TPersistentKeyset) return KindOfPersistentKeyset;
+  if (*this <= TKeyset)      return KindOfKeyset;
   if (*this <= TObj)         return KindOfObject;
   if (*this <= TRes)         return KindOfResource;
   if (*this <= TBoxedCell)   return KindOfRef;
@@ -328,6 +352,8 @@ Type Type::specialize(TypeSpec spec) const {
 
 // Return true if the array satisfies requirement on the ArraySpec.
 static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
+  assertx(arr->isPHPArray());
+
   if (spec == ArraySpec::Top) return true;
 
   if (auto const spec_kind = spec.kind()) {
@@ -540,18 +566,23 @@ Type typeFromTV(const TypedValue* tv, const Class* ctx) {
     return Type::ExactObj(cls);
   }
 
-  if (isArrayType(tv->m_type)) {
-    return Type::Array(tv->m_data.parr->kind());
-  }
+  if (tvIsArray(tv)) return Type::Array(tv->m_data.parr->kind());
 
   auto outer = tv->m_type;
   auto inner = KindOfUninit;
 
   if (outer == KindOfPersistentString) outer = KindOfString;
+  else if (outer == KindOfPersistentVec) outer = KindOfVec;
+  else if (outer == KindOfPersistentDict) outer = KindOfDict;
+  else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
+
   if (outer == KindOfRef) {
     inner = tv->m_data.pref->tv()->m_type;
     if (inner == KindOfPersistentString) inner = KindOfString;
     else if (inner == KindOfPersistentArray) inner = KindOfArray;
+    else if (inner == KindOfPersistentVec) inner = KindOfVec;
+    else if (inner == KindOfPersistentDict) inner = KindOfDict;
+    else if (inner == KindOfPersistentKeyset) inner = KindOfKeyset;
   }
   return Type(outer, inner);
 }
@@ -587,8 +618,14 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Gen:            return TGen;
 
     // TODO(#4205897): option specialized array types
-    case T::OptArr:         return TArr       | TInitNull;
-    case T::OptSArr:        return TStaticArr | TInitNull;
+    case T::OptArr:         return TArr          | TInitNull;
+    case T::OptSArr:        return TStaticArr    | TInitNull;
+    case T::OptVec:         return TVec          | TInitNull;
+    case T::OptSVec:        return TStaticVec    | TInitNull;
+    case T::OptDict:        return TDict         | TInitNull;
+    case T::OptSDict:       return TStaticDict   | TInitNull;
+    case T::OptKeyset:      return TKeyset       | TInitNull;
+    case T::OptSKeyset:     return TStaticKeyset | TInitNull;
 
     case T::SArr:
       if (auto const ar = ty.array()) return Type::StaticArray(ar);
@@ -596,6 +633,13 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Arr:
       if (auto const ar = ty.array()) return Type::Array(ar);
       return TArr;
+
+    case T::SVec:           return TStaticVec;
+    case T::Vec:            return TVec;
+    case T::SDict:          return TStaticDict;
+    case T::Dict:           return TDict;
+    case T::SKeyset:        return TStaticKeyset;
+    case T::Keyset:         return TKeyset;
 
     case T::SubObj:
     case T::ExactObj:
@@ -644,6 +688,9 @@ Type negativeCheckType(Type srcType, Type typeParam) {
   if (typeParam.maybe(TPersistent)) {
     if (tmp.maybe(TCountedStr)) tmp |= TStr;
     if (tmp.maybe(TCountedArr)) tmp |= TArr;
+    if (tmp.maybe(TCountedVec)) tmp |= TVec;
+    if (tmp.maybe(TCountedDict)) tmp |= TDict;
+    if (tmp.maybe(TCountedKeyset)) tmp |= TKeyset;
   }
   return tmp;
 }
@@ -659,6 +706,14 @@ Type boxType(Type t) {
     t = TStr;
   } else if (t <= TArr) {
     t = TArr;
+  } else if (t <= TVec) {
+    t = TVec;
+  } else if (t <= TDict) {
+    t = TDict;
+  } else if (t <= TKeyset) {
+    t = TKeyset;
+  } else if (t <= TArrLike) {
+    t = TArrLike;
   }
   // When boxing an Object, if the inner class does not have AttrNoOverride,
   // drop the class specialization.
@@ -713,6 +768,11 @@ Type relaxToGuardable(Type ty) {
   // ty is unspecialized and we don't support guarding on CountedArr or
   // StaticArr, so widen any subtypes of Arr to Arr.
   if (ty <= TArr) return TArr;
+  if (ty <= TVec) return TVec;
+  if (ty <= TDict) return TDict;
+  if (ty <= TKeyset) return TKeyset;
+
+  if (ty <= TArrLike) return TArrLike;
 
   // We can guard on StaticStr but not CountedStr.
   if (ty <= TCountedStr)     return TStr;

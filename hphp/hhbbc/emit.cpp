@@ -815,6 +815,18 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptArr:
   case T::SArr:
   case T::Arr:
+  case T::OptSVec:
+  case T::OptVec:
+  case T::SVec:
+  case T::Vec:
+  case T::OptSDict:
+  case T::OptDict:
+  case T::SDict:
+  case T::Dict:
+  case T::OptSKeyset:
+  case T::OptKeyset:
+  case T::SKeyset:
+  case T::Keyset:
     // We don't need to merge the litstrs in the array, because rats
     // in arrays in the array type table must be using global litstr
     // ids.  (As the array type table itself is not associated with

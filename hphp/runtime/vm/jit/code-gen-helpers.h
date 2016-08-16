@@ -71,17 +71,15 @@ Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg);
 // TypedValue manipulations.
 
 /*
- * Load the TV type at `mem' into `d'.
- */
-void emitLoadTVType(Vout& v, Vptr mem, Vreg8 d);
-
-/*
  * Test or compare `s0' against the live type `s1', setting the result in `sf'.
  */
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
 void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
 void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
+
+Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1);
+Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1);
 
 /*
  * Store `loc', the registers representing `src', to `dst'.

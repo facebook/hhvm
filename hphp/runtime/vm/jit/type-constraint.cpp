@@ -53,7 +53,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // Uncounted or left alone, so something like Arr|Obj isn't specific
       // enough.
       return !t.maybe(TCounted) ||
-             t.subtypeOfAny(TStr, TArr, TObj,
+             t.subtypeOfAny(TStr, TArr, TVec, TDict, TKeyset, TObj,
                             TRes, TBoxedCell);
 
     case DataTypeCountnessInit:

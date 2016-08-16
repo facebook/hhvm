@@ -194,52 +194,69 @@ constexpr bool ptrSubsetOf(Ptr a, Ptr b) {
   PTR_TYPES(IRTP_FROM_PTR, PTR_NO_R, Boxed##name)
 
 #define IRT_PHP(c)                                                      \
-  c(Uninit,       1ULL << 0)                                            \
-  c(InitNull,     1ULL << 1)                                            \
-  c(Bool,         1ULL << 2)                                            \
-  c(Int,          1ULL << 3)                                            \
-  c(Dbl,          1ULL << 4)                                            \
-  c(StaticStr,    1ULL << 5)                                            \
-  c(UncountedStr, 1ULL << 6)                                            \
-  c(CountedStr,   1ULL << 7)                                            \
-  c(StaticArr,    1ULL << 8)                                            \
-  c(UncountedArr, 1ULL << 9)                                            \
-  c(CountedArr,   1ULL << 10)                                           \
-  c(Obj,          1ULL << 11)                                           \
-  c(Res,          1ULL << 12)
-// Boxed*:        13-25
+  c(Uninit,          1ULL << 0)                                         \
+  c(InitNull,        1ULL << 1)                                         \
+  c(Bool,            1ULL << 2)                                         \
+  c(Int,             1ULL << 3)                                         \
+  c(Dbl,             1ULL << 4)                                         \
+  c(StaticStr,       1ULL << 5)                                         \
+  c(UncountedStr,    1ULL << 6)                                         \
+  c(CountedStr,      1ULL << 7)                                         \
+  c(StaticArr,       1ULL << 8)                                         \
+  c(UncountedArr,    1ULL << 9)                                         \
+  c(CountedArr,      1ULL << 10)                                        \
+  c(StaticVec,       1ULL << 11)                                        \
+  c(UncountedVec,    1ULL << 12)                                        \
+  c(CountedVec,      1ULL << 13)                                        \
+  c(StaticDict,      1ULL << 14)                                        \
+  c(UncountedDict,   1ULL << 15)                                        \
+  c(CountedDict,     1ULL << 16)                                        \
+  c(StaticKeyset,    1ULL << 17)                                        \
+  c(UncountedKeyset, 1ULL << 18)                                        \
+  c(CountedKeyset,   1ULL << 19)                                        \
+  c(Obj,             1ULL << 20)                                        \
+  c(Res,             1ULL << 21)
+// Boxed*:           22-44
 
 /*
  * This list should be in non-decreasing order of specificity.
  */
 #define IRT_PHP_UNIONS(c)                                               \
-  c(Null,          kUninit|kInitNull)                                   \
-  c(PersistentStr, kStaticStr|kUncountedStr)                            \
-  c(Str,           kPersistentStr|kCountedStr)                          \
-  c(PersistentArr, kStaticArr|kUncountedArr)                            \
-  c(Arr,           kPersistentArr|kCountedArr)                          \
-  c(NullableObj,   kObj|kInitNull|kUninit)                              \
-  c(Persistent,    kPersistentStr|kPersistentArr)                       \
-  c(UncountedInit, kInitNull|kBool|kInt|kDbl|kPersistent)               \
-  c(Uncounted,     kUninit|kUncountedInit)                              \
-  c(InitCell,      kUncountedInit|kStr|kArr|kObj|kRes)                  \
-  c(Cell,          kUninit|kInitCell)
+  c(Null,                kUninit|kInitNull)                             \
+  c(PersistentStr,       kStaticStr|kUncountedStr)                      \
+  c(Str,                 kPersistentStr|kCountedStr)                    \
+  c(PersistentArr,       kStaticArr|kUncountedArr)                      \
+  c(Arr,                 kPersistentArr|kCountedArr)                    \
+  c(PersistentVec,       kStaticVec|kUncountedVec)                      \
+  c(Vec,                 kPersistentVec|kCountedVec)                    \
+  c(PersistentDict,      kStaticDict|kUncountedDict)                    \
+  c(Dict,                kPersistentDict|kCountedDict)                  \
+  c(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)                \
+  c(Keyset,              kPersistentKeyset|kCountedKeyset)              \
+  c(PersistentArrLike,   kPersistentArr|kPersistentVec|kPersistentDict|kPersistentKeyset) \
+  c(ArrLike,             kArr|kVec|kDict|kKeyset)                       \
+  c(NullableObj,         kObj|kInitNull|kUninit)                        \
+  c(Persistent,          kPersistentStr|kPersistentArrLike)             \
+  c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent)         \
+  c(Uncounted,           kUninit|kUncountedInit)                        \
+  c(InitCell,            kUncountedInit|kStr|kArrLike|kObj|kRes)        \
+  c(Cell,                kUninit|kInitCell)
 
 #define IRT_RUNTIME                                                     \
-  IRT(Cls,         1ULL << 26)                                          \
-  IRT(Func,        1ULL << 27)                                          \
-  IRT(VarEnv,      1ULL << 28)                                          \
-  IRT(NamedEntity, 1ULL << 29)                                          \
-  IRT(Cctx,        1ULL << 30) /* Class* with the lowest bit set,  */   \
+  IRT(Cls,         1ULL << 45)                                          \
+  IRT(Func,        1ULL << 46)                                          \
+  IRT(VarEnv,      1ULL << 47)                                          \
+  IRT(NamedEntity, 1ULL << 48)                                          \
+  IRT(Cctx,        1ULL << 49) /* Class* with the lowest bit set,  */   \
                                /* as stored in ActRec.m_cls field  */   \
-  IRT(RetAddr,     1ULL << 31) /* Return address */                     \
-  IRT(StkPtr,      1ULL << 32) /* Stack pointer */                      \
-  IRT(FramePtr,    1ULL << 33) /* Frame pointer */                      \
-  IRT(TCA,         1ULL << 34)                                          \
-  IRT(ABC,         1ULL << 35) /* AsioBlockableChain */                 \
-  IRT(RDSHandle,   1ULL << 36) /* rds::Handle */                        \
-  IRT(Nullptr,     1ULL << 37)                                          \
-  /* bits 38-49 are padding, 50-62 are pointer kind, 63 is hasConstVal */
+  IRT(RetAddr,     1ULL << 50) /* Return address */                     \
+  IRT(StkPtr,      1ULL << 51) /* Stack pointer */                      \
+  IRT(FramePtr,    1ULL << 52) /* Frame pointer */                      \
+  IRT(TCA,         1ULL << 53)                                          \
+  IRT(ABC,         1ULL << 54) /* AsioBlockableChain */                 \
+  IRT(RDSHandle,   1ULL << 55) /* rds::Handle */                        \
+  IRT(Nullptr,     1ULL << 56)                                          \
+  /* bits 57-64 are unused */
 
 /*
  * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS
@@ -253,7 +270,11 @@ constexpr bool ptrSubsetOf(Ptr a, Ptr b) {
   IRT(Ctx,                   kObj|kCctx)                                \
   IRTP(AnyObj,       Top,    kAnyObj)                                   \
   IRTP(AnyArr,       Top,    kAnyArr)                                   \
-  IRT(Counted,               kCountedStr|kCountedArr|kObj|kRes|kBoxedCell) \
+  IRTP(AnyVec,       Top,    kAnyVec)                                   \
+  IRTP(AnyDict,      Top,    kAnyDict)                                  \
+  IRTP(AnyKeyset,    Top,    kAnyKeyset)                                \
+  IRTP(AnyArrLike,   Top,    kAnyArrLike)                               \
+  IRT(Counted,               kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell) \
   IRTP(PtrToCounted, Ptr,    kCounted)                                  \
   IRT(Gen,                   kCell|kBoxedCell)                          \
   IRT(InitGen,               kGen & ~kUninit)                           \
@@ -312,7 +333,7 @@ struct ConstCctx {
 struct Type {
 private:
   using bits_t = uint64_t;
-  static constexpr size_t kBoxShift = 13;
+  static constexpr size_t kBoxShift = 22;
 
 public:
   enum Bits : bits_t {
@@ -325,10 +346,14 @@ public:
 #undef IRT
 #undef IRTP
 
-    kAnyArr      = kArr | kBoxedArr,
-    kArrSpecBits = kAnyArr,
-    kAnyObj      = kObj | kBoxedObj,
-    kClsSpecBits = kAnyObj | kCls,
+    kAnyArr       = kArr | kBoxedArr,
+    kAnyVec       = kVec | kBoxedVec,
+    kAnyDict      = kDict | kBoxedDict,
+    kAnyKeyset    = kKeyset | kBoxedKeyset,
+    kAnyArrLike   = kAnyArr | kAnyVec | kAnyDict | kAnyKeyset,
+    kArrSpecBits  = kAnyArr,
+    kAnyObj       = kObj | kBoxedObj,
+    kClsSpecBits  = kAnyObj | kCls,
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -551,6 +576,9 @@ public:
   double dblVal() const;
   const StringData* strVal() const;
   const ArrayData* arrVal() const;
+  const ArrayData* vecVal() const;
+  const ArrayData* dictVal() const;
+  const ArrayData* keysetVal() const;
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
   ConstCctx cctxVal() const;
@@ -737,6 +765,9 @@ private:
     double m_dblVal;
     const StringData* m_strVal;
     const ArrayData* m_arrVal;
+    const ArrayData* m_vecVal;
+    const ArrayData* m_dictVal;
+    const ArrayData* m_keysetVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;
     ConstCctx m_cctxVal;

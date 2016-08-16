@@ -1009,6 +1009,20 @@ struct InitPackedArrayLoopData : IRExtraData {
   uint32_t size;
 };
 
+struct NewKeysetArrayData : IRExtraData {
+  explicit NewKeysetArrayData(IRSPRelOffset offset, uint32_t size)
+    : offset(offset)
+    , size(size)
+  {}
+
+  std::string show() const {
+    return folly::format("{},{}", offset.offset, size).str();
+  }
+
+  IRSPRelOffset offset;
+  uint32_t size;
+};
+
 struct MOpFlagsData : IRExtraData {
   explicit MOpFlagsData(MOpFlags flags) : flags{flags} {}
 
@@ -1218,8 +1232,9 @@ X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(AllocPackedArray,             PackedArrayData);
 X(AllocVecArray,                PackedArrayData);
-X(InitPackedArrayLoop,          InitPackedArrayLoopData);
-X(InitPackedArray,              IndexData);
+X(NewKeysetArray,               NewKeysetArrayData);
+X(InitPackedLayoutArrayLoop,    InitPackedArrayLoopData);
+X(InitPackedLayoutArray,        IndexData);
 X(CheckMixedArrayOffset,        IndexData);
 X(ElemMixedArrayK,              IndexData);
 X(MixedArrayGetK,               IndexData);

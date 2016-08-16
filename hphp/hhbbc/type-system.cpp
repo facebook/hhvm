@@ -3543,18 +3543,6 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     return make_repo_type_arr(arrTable, t);
   }
 
-  // TODO(#11221250): support separate runtime types for vec/dict/keyset
-#define X(p)                                               \
-  if (t.subtypeOf(T##p##Vec) || t.subtypeOf(T##p##Dict) || \
-      t.subtypeOf(T##p##Keyset)) {                         \
-    return RepoAuthType{T::p##Arr};                        \
-  }
-  X(S)
-  X()
-  X(OptS)
-  X(Opt)
-#undef X
-
 #define X(x) if (t.subtypeOf(T##x)) return RepoAuthType{T::x};
   X(Uninit)
   X(InitNull)
@@ -3575,6 +3563,18 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptSArr)
   X(Arr)
   X(OptArr)
+  X(SVec)
+  X(OptSVec)
+  X(Vec)
+  X(OptVec)
+  X(SDict)
+  X(OptSDict)
+  X(Dict)
+  X(OptDict)
+  X(SKeyset)
+  X(OptSKeyset)
+  X(Keyset)
+  X(OptKeyset)
   X(Obj)
   X(OptObj)
   X(InitUnc)

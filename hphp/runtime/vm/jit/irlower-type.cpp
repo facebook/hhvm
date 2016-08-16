@@ -129,7 +129,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
    */
   if (!typeParam.isSpecialized() &&
       typeParam <= TUncounted &&
-      src->type().subtypeOfAny(TStr, TArr) &&
+      src->type().subtypeOfAny(TStr, TArrLike) &&
       src->type().maybe(typeParam)) {
     assertx(src->type().maybe(TPersistent));
 

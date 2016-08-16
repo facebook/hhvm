@@ -346,6 +346,12 @@ folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
     case T::Obj:
     case T::SArr:
     case T::Arr:
+    case T::SVec:
+    case T::Vec:
+    case T::SDict:
+    case T::Dict:
+    case T::SKeyset:
+    case T::Keyset:
     case T::Cell:
     case T::Ref:
     case T::InitUnc:
@@ -379,6 +385,12 @@ folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
 
     case T::OptSArr:
     case T::OptArr:
+    case T::OptSVec:
+    case T::OptVec:
+    case T::OptSDict:
+    case T::OptDict:
+    case T::OptSKeyset:
+    case T::OptKeyset:
       // TODO(#4205897): optional array types.
       return folly::none;
   }
@@ -400,6 +412,9 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
   }
   if (!src->isA(TObj)) {
     bool res = ((src->isA(TArr) && interface_supports_array(className))) ||
+      (src->isA(TVec) && interface_supports_vec(className)) ||
+      (src->isA(TDict) && interface_supports_dict(className)) ||
+      (src->isA(TKeyset) && interface_supports_keyset(className)) ||
       (src->isA(TStr) && interface_supports_string(className)) ||
       (src->isA(TInt) && interface_supports_int(className)) ||
       (src->isA(TDbl) && interface_supports_double(className));
@@ -447,11 +462,15 @@ void emitInstanceOf(IRGS& env) {
   }
 
   auto const res = [&]() -> SSATmp* {
-    if (t2->isA(TArr)) return gen(env, InterfaceSupportsArr, t1);
-    if (t2->isA(TInt)) return gen(env, InterfaceSupportsInt, t1);
-    if (t2->isA(TStr)) return gen(env, InterfaceSupportsStr, t1);
-    if (t2->isA(TDbl)) return gen(env, InterfaceSupportsDbl, t1);
-    if (!t2->type().maybe(TObj|TArr|TInt|TStr|TDbl)) return cns(env, false);
+    if (t2->isA(TArr))    return gen(env, InterfaceSupportsArr, t1);
+    if (t2->isA(TVec))    return gen(env, InterfaceSupportsVec, t1);
+    if (t2->isA(TDict))   return gen(env, InterfaceSupportsDict, t1);
+    if (t2->isA(TKeyset)) return gen(env, InterfaceSupportsKeyset, t1);
+    if (t2->isA(TInt))    return gen(env, InterfaceSupportsInt, t1);
+    if (t2->isA(TStr))    return gen(env, InterfaceSupportsStr, t1);
+    if (t2->isA(TDbl))    return gen(env, InterfaceSupportsDbl, t1);
+    if (!t2->type().maybe(TObj|TArr|TVec|TDict|TKeyset|
+                          TInt|TStr|TDbl)) return cns(env, false);
     return nullptr;
   }();
 

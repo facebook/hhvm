@@ -166,10 +166,10 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case CreateAFWHNoVV:
       return srcNo == 4;
 
-    case InitPackedArray:
+    case InitPackedLayoutArray:
       return srcNo == 1;
 
-    case InitPackedArrayLoop:
+    case InitPackedLayoutArrayLoop:
       return srcNo > 0;
 
     default:

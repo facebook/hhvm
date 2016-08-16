@@ -78,6 +78,18 @@ struct RepoAuthType {
     TAG(OptSArr)                                  \
     TAG(Arr)                                      \
     TAG(OptArr)                                   \
+    TAG(SVec)                                     \
+    TAG(OptSVec)                                  \
+    TAG(Vec)                                      \
+    TAG(OptVec)                                   \
+    TAG(SDict)                                    \
+    TAG(OptSDict)                                 \
+    TAG(Dict)                                     \
+    TAG(OptDict)                                  \
+    TAG(SKeyset)                                  \
+    TAG(OptSKeyset)                               \
+    TAG(Keyset)                                   \
+    TAG(OptKeyset)                                \
     /* Types where clsName() will be non-null. */ \
     TAG(ExactObj)                                 \
     TAG(SubObj)                                   \

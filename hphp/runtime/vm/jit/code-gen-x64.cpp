@@ -1344,6 +1344,19 @@ void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   );
 }
 
+void CodeGenerator::cgNewKeysetArray(IRInstruction* inst) {
+  auto const data = inst->extra<NewKeysetArray>();
+  cgCallHelper(
+    vmain(),
+    CallSpec::direct(MixedArray::MakeKeyset),
+    callDest(inst),
+    SyncOptions::Sync,
+    argGroup(inst)
+      .imm(data->size)
+      .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
+  );
+}
+
 void CodeGenerator::cgCountArray(IRInstruction* inst) {
   auto const baseReg = srcLoc(inst, 0).reg();
   auto const dstReg  = dstLoc(inst, 0).reg();
@@ -1382,18 +1395,18 @@ void CodeGenerator::cgCountCollection(IRInstruction* inst) {
   v << loadzlq{baseReg[collections::FAST_SIZE_OFFSET], dstReg};
 }
 
-void CodeGenerator::cgInitPackedArray(IRInstruction* inst) {
+void CodeGenerator::cgInitPackedLayoutArray(IRInstruction* inst) {
   auto const arrReg = srcLoc(inst, 0).reg();
-  auto const index = inst->extra<InitPackedArray>()->index;
+  auto const index = inst->extra<InitPackedLayoutArray>()->index;
 
   auto slotOffset = PackedArray::entriesOffset() + index * sizeof(TypedValue);
   storeTV(vmain(), arrReg[slotOffset], srcLoc(inst, 1), inst->src(1));
 }
 
-void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
+void CodeGenerator::cgInitPackedLayoutArrayLoop(IRInstruction* inst) {
   auto const arrReg = srcLoc(inst, 0).reg();
-  int const count = inst->extra<InitPackedArrayLoop>()->size;
-  auto const offset = inst->extra<InitPackedArrayLoop>()->offset;
+  int const count = inst->extra<InitPackedLayoutArrayLoop>()->size;
+  auto const offset = inst->extra<InitPackedLayoutArrayLoop>()->offset;
   auto const spIn = srcLoc(inst, 1).reg();
 
   auto& v = vmain();

@@ -131,18 +131,19 @@ AliasClass pointee(
       auto base = sinst->src(0);
       auto key  = sinst->src(1);
 
-      always_assert(base->isA(TArr));
+      always_assert(base->isA(TArrLike));
 
       if (key->isA(TInt)) {
         if (key->hasConstVal()) return AElemI { base, key->intVal() };
         return AElemIAny;
       }
       if (key->hasConstVal(TStr)) {
+        assertx(!base->isA(TVec));
         int64_t n;
         auto const arrTy = base->type();
-        auto const dictTy = Type::Array(ArrayData::kDictKind);
-        if (!(arrTy <= dictTy) && key->strVal()->isStrictlyInteger(n)) {
-          if (arrTy.maybe(dictTy)) return AElemAny;
+        if (!arrTy.subtypeOfAny(TDict, TKeyset) &&
+            key->strVal()->isStrictlyInteger(n)) {
+          if (arrTy.maybe(TDict) || arrTy.maybe(TKeyset)) return AElemAny;
           return AElemI { base, n };
         }
         return AElemS { base, key->strVal() };
@@ -897,21 +898,34 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Array loads and stores
 
-  case InitPackedArray:
+  case InitPackedLayoutArray:
     return PureStore {
-      AElemI { inst.src(0), inst.extra<InitPackedArray>()->index },
+      AElemI { inst.src(0), inst.extra<InitPackedLayoutArray>()->index },
       inst.src(1)
     };
 
-  case InitPackedArrayLoop:
+  case InitPackedLayoutArrayLoop:
     {
-      auto const extra = inst.extra<InitPackedArrayLoop>();
+      auto const extra = inst.extra<InitPackedLayoutArrayLoop>();
       auto const stack_in = AStack {
         inst.src(1),
         extra->offset + static_cast<int32_t>(extra->size) - 1,
         static_cast<int32_t>(extra->size)
       };
       return may_load_store_move(stack_in, AElemIAny, stack_in);
+    }
+
+  case NewKeysetArray:
+    {
+      // NewKeysetArray is reading elements from the stack, but writes to a
+      // completely new array, so we can treat the store set as empty.
+      auto const extra = inst.extra<NewKeysetArray>();
+      auto const stack_in = AStack {
+        inst.src(0),
+        extra->offset + static_cast<int32_t>(extra->size) - 1,
+        static_cast<int32_t>(extra->size)
+      };
+      return may_reenter(inst, may_load_store_move(stack_in, AEmpty, stack_in));
     }
 
   case NewStructArray:
@@ -1420,8 +1434,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // Need to add maybeRef to the `store' set. See comments about
       // `GeneralEffects' in memory-effects.h.
       auto const effect = may_load_store(maybeRef, maybeRef);
-      if (inst.src(0)->type().maybe(TArr | TObj | TBoxedArr | TBoxedObj)) {
-        // Could re-enter to run a destructor.
+      if (src->type().maybe(TArr | TVec | TDict | TObj | TRes |
+                            TBoxedArr | TBoxedVec | TBoxedDict |
+                            TBoxedObj | TBoxedRes)) {
+        // Could re-enter to run a destructor. Keysets are exempt because they
+        // can only contain strings or integers.
         return may_reenter(inst, effect);
       }
       return effect;

@@ -352,8 +352,9 @@ bool canDCE(IRInstruction* inst) {
   case ConstructInstance:
   case AllocPackedArray:
   case AllocVecArray:
-  case InitPackedArray:
-  case InitPackedArrayLoop:
+  case InitPackedLayoutArray:
+  case InitPackedLayoutArrayLoop:
+  case NewKeysetArray:
   case NewStructArray:
   case Clone:
   case InlineReturn:

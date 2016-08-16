@@ -1279,9 +1279,15 @@ To string conversions:
 
   Allocate a new array in mixed mode with the expected capacity S0.
 
-| NewDictArray, D(Arr), C(Int), PRc
+| NewDictArray, D(Dict), C(Int), PRc
 
-  Allocate a new array in dict mode with the expected capacity S0.
+  Allocate a new dict with the expected capacity S0.
+
+| NewKeysetArray<offset,keys>, D(Keyset), S(StkPtr), PRc|CRc|Er
+
+  Allocate a new keyset containing N elements off the stack given by S0, at
+  `offset'. This instruction moves the elements off the stack without
+  manipulating their reference counts.
 
 | NewLikeArray, D(Arr), S(Arr) C(Int), PRc
 
@@ -1291,27 +1297,28 @@ To string conversions:
 | AllocPackedArray<size>, DArrPacked, NA, PRc
 
   Allocate a new uninitialized packed array with space for size elements in it.
-  The array will be initialized with values using either InitPackedArray or
-  InitPackedArrayLoop.
+  The array will be initialized with values using either InitPackedLayoutArray
+  or InitPackedLayoutArrayLoop.
 
-| AllocVecArray<size>, DArrVec, NA, PRc
+| AllocVecArray<size>, D(Vec), NA, PRc
 
   Allocate a new uninitialized vector array with space for size elements in it.
-  The array will be initialized with values using either InitPackedArray or
-  InitPackedArrayLoop.
+  The array will be initialized with values using either InitPackedLayoutArray
+  or InitPackedLayoutArrayLoop.
 
-| InitPackedArray<index>, ND, S(Arr) S(Gen), CRc
+| InitPackedLayoutArray<index>, ND, S(Arr,Vec) S(Cell), CRc
 
   Store the S1 into the slot at index in array S0. This instruction assumes
   that it doesn't have to incref the value being stored. Used to initialize an
-  array allocated with AllocPackedArray.
+  array allocated with AllocPackedArray or AllocVecArray.
 
-| InitPackedArrayLoop<offset,size>, ND, S(Arr) S(StkPtr), CRc
+| InitPackedLayoutArrayLoop<offset,size>, ND, S(Arr,Vec) S(StkPtr), CRc
 
   Move `size' elements from the stack given by S1, at `offset', into the array
   S0.  Assumes that the first element on the stack is the last element in the
-  array.  Used to initialize an array allocated with AllocPackedArray that was
-  too big to use a series of InitPackedArray instructions.
+  array.  Used to initialize an array allocated with AllocPackedArray or
+  AllocVecArray that was too big to use a series of InitPackedLayoutArray
+  instructions.
 
 | NewStructArray<offset,keys...>, D(Arr), S(StkPtr), PRc|CRc
 

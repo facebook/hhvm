@@ -36,22 +36,12 @@ ArrayKeyInfo checkStrictlyInteger(Type arr, Type key) {
   assertx(key <= TStr);
   ret.type = KeyType::Str;
 
-  auto const dictType = Type::Array(ArrayData::kDictKind);
-  auto const vecType = Type::Array(ArrayData::kVecKind);
-  if (arr <= dictType || arr <= vecType) {
-    return ret;
-  }
-
   if (key.hasConstVal()) {
     int64_t i;
     if (key.strVal()->isStrictlyInteger(i)) {
-      if (arr.maybe(dictType) || arr.maybe(vecType)) {
-        ret.checkForInt = true;
-      } else {
-        ret.converted    = true;
-        ret.type         = KeyType::Int;
-        ret.convertedInt = i;
-      }
+      ret.converted    = true;
+      ret.type         = KeyType::Int;
+      ret.convertedInt = i;
     }
   } else {
     ret.checkForInt = true;

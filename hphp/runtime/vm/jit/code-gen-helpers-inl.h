@@ -42,6 +42,18 @@ inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << cmpbi{s0, s1, sf};
 }
 
+inline Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1) {
+  auto const dst = v.makeReg();
+  v << andbi{s0, s1, dst, v.makeReg()};
+  return dst;
+}
+
+inline Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1) {
+  auto const reg = v.makeReg();
+  v << loadb{s1, reg};
+  return emitMaskTVType(v, s0, reg);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Destroy>

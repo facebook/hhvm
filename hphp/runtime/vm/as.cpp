@@ -971,6 +971,12 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
 
   X("Arr",      T::Arr);
   X("?Arr",     T::OptArr);
+  X("Vec",      T::Vec);
+  X("?Vec",     T::OptVec);
+  X("Dict",     T::Dict);
+  X("?Dict",    T::OptDict);
+  X("Keyset",   T::Keyset);
+  X("?Keyset",  T::OptKeyset);
   X("Bool",     T::Bool);
   X("?Bool",    T::OptBool);
   X("Cell",     T::Cell);
@@ -991,6 +997,12 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("Res",      T::Res);
   X("?SArr",    T::OptSArr);
   X("SArr",     T::SArr);
+  X("?SVec",    T::OptSVec);
+  X("SVec",     T::SVec);
+  X("?SDict",   T::OptSDict);
+  X("SDict",    T::SDict);
+  X("?SKeyset", T::OptSKeyset);
+  X("SKeyset",  T::SKeyset);
   X("?SStr",    T::OptSStr);
   X("SStr",     T::SStr);
   X("?Str",     T::OptStr);
@@ -1023,6 +1035,18 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptSArr:
   case T::Arr:
   case T::OptArr:
+  case T::SVec:
+  case T::OptSVec:
+  case T::Vec:
+  case T::OptVec:
+  case T::SDict:
+  case T::OptSDict:
+  case T::Dict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::OptSKeyset:
+  case T::Keyset:
+  case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
   case T::InitUnc:

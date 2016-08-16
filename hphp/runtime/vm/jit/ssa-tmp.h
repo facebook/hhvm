@@ -52,6 +52,9 @@ struct SSATmp {
   double             dblVal() const       { return type().dblVal(); }
   const StringData*  strVal() const       { return type().strVal(); }
   const ArrayData*   arrVal() const       { return type().arrVal(); }
+  const ArrayData*   vecVal() const       { return type().vecVal(); }
+  const ArrayData*   dictVal() const      { return type().dictVal(); }
+  const ArrayData*   keysetVal() const    { return type().keysetVal(); }
   const Func*        funcVal() const      { return type().funcVal(); }
   const Class*       clsVal() const       { return type().clsVal(); }
   ConstCctx          cctxVal() const      { return type().cctxVal(); }

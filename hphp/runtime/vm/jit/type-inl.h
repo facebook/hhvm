@@ -104,7 +104,11 @@ inline Type for_const(const StringData* sd) {
 }
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
-  return Type::StaticArray(ad->kind());
+  if (ad->isPHPArray()) return Type::StaticArray(ad->kind());
+  if (ad->isVecArray()) return TStaticVec;
+  if (ad->isDict()) return TStaticDict;
+  if (ad->isKeyset()) return TStaticKeyset;
+  not_reached();
 }
 inline Type for_const(double)        { return TDbl; }
 inline Type for_const(const Func*)   { return TFunc; }
@@ -189,7 +193,8 @@ inline bool Type::isKnownDataType() const {
   assertx(*this <= TStkElem);
 
   // Some unions correspond to single KindOfs.
-  return subtypeOfAny(TStr, TArr, TBoxedCell) || !isUnion();
+  return subtypeOfAny(TStr, TArr, TVec, TDict,
+                      TKeyset, TBoxedCell) || !isUnion();
 }
 
 inline bool Type::needsReg() const {
@@ -201,7 +206,7 @@ inline bool Type::isSimpleType() const {
 }
 
 inline bool Type::isReferenceType() const {
-  return subtypeOfAny(TStr, TArr, TObj, TRes);
+  return subtypeOfAny(TStr, TArrLike, TObj, TRes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -256,12 +261,22 @@ inline Type Type::cns(const TypedValue& tv) {
 
       case KindOfPersistentVec:
       case KindOfVec:
+        assertx(tv.m_data.parr->isVecArray());
+        return type_detail::for_const(tv.m_data.parr);
+
       case KindOfPersistentDict:
       case KindOfDict:
+        assertx(tv.m_data.parr->isDict());
+        return type_detail::for_const(tv.m_data.parr);
+
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+        assertx(tv.m_data.parr->isKeyset());
+        return type_detail::for_const(tv.m_data.parr);
+
       case KindOfPersistentArray:
       case KindOfArray:
+        assertx(tv.m_data.parr->isPHPArray());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfObject:
@@ -318,6 +333,9 @@ IMPLEMENT_CNS_VAL(TInt,        int,  int64_t)
 IMPLEMENT_CNS_VAL(TDbl,        dbl,  double)
 IMPLEMENT_CNS_VAL(TStaticStr,  str,  const StringData*)
 IMPLEMENT_CNS_VAL(TStaticArr,  arr,  const ArrayData*)
+IMPLEMENT_CNS_VAL(TStaticVec,  vec,  const ArrayData*)
+IMPLEMENT_CNS_VAL(TStaticDict, dict, const ArrayData*)
+IMPLEMENT_CNS_VAL(TStaticKeyset, keyset, const ArrayData*)
 IMPLEMENT_CNS_VAL(TFunc,       func, const HPHP::Func*)
 IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
 IMPLEMENT_CNS_VAL(TCctx,       cctx, ConstCctx)
@@ -338,6 +356,9 @@ inline Type Type::Array(const RepoAuthType::Array* rat) {
 }
 
 inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
+  assertx(kind != ArrayData::kVecKind &&
+          kind != ArrayData::kDictKind &&
+          kind != ArrayData::kKeysetKind);
   return Type(TStaticArr, ArraySpec(kind));
 }
 

@@ -90,6 +90,10 @@ let fresh () =
 let fresh_type () =
   Reason.none, Tvar (Ident.tmp())
 
+let fresh_abstract_type ?constr r =
+  let name = Printf.sprintf "Tfresh%d" (fresh ()) in
+  r, Tabstract (AKgeneric name, constr)
+
 let add_subst env x x' =
   if x <> x'
   then { env with subst = IMap.add x x' env.subst }

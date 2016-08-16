@@ -3650,9 +3650,18 @@ and condition env tparamet =
       let env = condition env false e1 in
       let env = condition env false e2 in
       env
-  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_array ->
-      is_array env lv
+      is_array env `PHPArray p f lv
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+    when tparamet && f = SN.StdlibFunctions.is_vec ->
+      is_array env `HackVec p f lv
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+    when tparamet && f = SN.StdlibFunctions.is_dict ->
+      is_array env `HackDict p f lv
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
+    when tparamet && f = SN.StdlibFunctions.is_keyset ->
+      is_array env `HackKeyset p f lv
   | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_int ->
       is_type env lv Tint
@@ -3792,15 +3801,29 @@ and is_type env e tprim =
       Env.set_local env x (Reason.Rwitness p, Tprim tprim)
     | _ -> env
 
-and is_array env = function
-  | p, Class_get (cname, (_, member_name)) ->
+and is_array env ty p pf (_, lv) =
+  let r = Reason.Rpredicated (p, pf) in
+  let tarrkey () = Env.fresh_abstract_type ~constr:(r, Tprim Tarraykey) r in
+  let tfresh () = Env.fresh_abstract_type r in
+  let ty =
+    match ty with
+    | `HackDict ->
+      Tclass ((Pos.none, SN.Collections.cDict), [tarrkey (); tfresh ()])
+    | `HackVec ->
+      Tclass ((Pos.none, SN.Collections.cVec), [tfresh ()])
+    | `HackKeyset ->
+      Tclass ((Pos.none, SN.Collections.cKeyset), [tarrkey ()])
+    | `PHPArray ->
+      Tarraykind AKany in
+  match lv with
+  | Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
-      Env.set_local env local (Reason.Rwitness p, Tarraykind AKany)
-  | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
+      Env.set_local env local (r, ty)
+  | Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
-      Env.set_local env local (Reason.Rwitness p, Tarraykind AKany)
-  | _, Lvar (p, x) ->
-      Env.set_local env x (Reason.Rwitness p, Tarraykind AKany)
+      Env.set_local env local (r, ty)
+  | Lvar (_, x) ->
+      Env.set_local env x (r, ty)
   | _ -> env
 
 and string2 env idl =

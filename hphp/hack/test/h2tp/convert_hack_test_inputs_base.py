@@ -410,6 +410,8 @@ OTHER_UNPARSEABLE_FILES = [
     'keyset/must_be_arraykey.php',
     'keyset/unset_on_alias.php',
     'keyset/unset.php',
+    'keyset/is_keyset.php',
+    'keyset/is_keyset_fail.php',
     'dynamic_new1.php',
     'dynamic_new3.php',
     'dynamic_new5.php',

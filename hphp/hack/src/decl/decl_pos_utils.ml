@@ -78,6 +78,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rtconst_no_cstr (p, s)   -> Rtconst_no_cstr (pos p, s)
     | Rused_as_map p           -> Rused_as_map (pos p)
     | Rused_as_shape p         -> Rused_as_shape (pos p)
+    | Rpredicated (p, f)       -> Rpredicated (pos p, f)
   let string_id (p, x) = pos p, x
 
   let rec ty (p, x) =

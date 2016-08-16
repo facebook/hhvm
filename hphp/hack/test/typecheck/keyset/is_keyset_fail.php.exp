@@ -1,0 +1,10 @@
+File "is_keyset_fail.php", line 5, characters 12-13:
+Invalid return type (Typing[4110])
+File "is_keyset_fail.php", line 5, characters 12-13:
+Some type constraint(s) here are violated
+File "is_keyset_fail.php", line 4, characters 7-15:
+'Tfresh194' is a constrained type
+File "is_keyset_fail.php", line 3, characters 30-35:
+This is a string
+File "is_keyset_fail.php", line 4, characters 7-15:
+It is incompatible with an array key (int/string) from the condition on the predicate \is_keyset

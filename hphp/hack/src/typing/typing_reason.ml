@@ -68,6 +68,7 @@ type t =
   | Rtconst_no_cstr  of Nast.sid
   | Rused_as_map     of Pos.t
   | Rused_as_shape   of Pos.t
+  | Rpredicated      of Pos.t * string
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -184,6 +185,8 @@ let rec to_string prefix r =
   | Rused_as_map _ -> [(p, prefix ^ " because it is used as map here")]
   | Rused_as_shape _ ->
       [(p, prefix ^ " because it is used as shape-like array here")]
+  | Rpredicated (p, f) ->
+      [(p, prefix ^ " from the condition on the predicate " ^ f)]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -239,6 +242,7 @@ and to_pos = function
   | Rtconst_no_cstr (p, _) -> p
   | Rused_as_map p -> p
   | Rused_as_shape p -> p
+  | Rpredicated (p, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users

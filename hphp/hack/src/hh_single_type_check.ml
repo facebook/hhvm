@@ -155,6 +155,9 @@ let builtins =
   "function is_string(mixed $x): bool {}\n"^
   "function is_null(mixed $x): bool {}\n"^
   "function is_array(mixed $x): bool {}\n"^
+  "function is_vec(mixed $x): bool {}\n"^
+  "function is_dict(mixed $x): bool {}\n"^
+  "function is_keyset(mixed $x): bool {}\n"^
   "function is_resource(mixed $x): bool {}\n"^
   "interface IMemoizeParam {\n"^
   "  public function getInstanceKey(): string;\n"^
@@ -194,7 +197,7 @@ let builtins =
   "interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}\n"^
   "abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}\n"^
   "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"^
-  "abstract final class keyset<T as arraykey> implements Indexish<T, T> {}\n"^
+  "abstract final class keyset<+T as arraykey> implements Indexish<T, T> {}\n"^
   "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"^
   "function meth_caller(string $cls_name, string $meth_name);\n"
 

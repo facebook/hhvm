@@ -244,16 +244,18 @@ struct ImmFolder {
 
 namespace arm {
 struct ImmFolder {
+  jit::vector<bool> used;
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
-  explicit ImmFolder(jit::vector<bool>&&) {}
+  explicit ImmFolder(jit::vector<bool>&& used_in)
+  : used(std::move(used_in)) { }
 
   bool arith_imm(Vreg r, int32_t& out) {
     if (!valid.test(r)) return false;
     auto imm64 = vals[r];
     if (!vixl::Assembler::IsImmArithmetic(imm64)) return false;
-    out = safe_cast<int32_t>(imm64);
+    out = imm64;
     return true;
   }
   bool logical_imm(Vreg r, int32_t& out) {
@@ -261,7 +263,7 @@ struct ImmFolder {
     auto imm64 = vals[r];
     if (!vixl::Assembler::IsImmLogical(imm64, vixl::kXRegSize)) return false;
     if (!deltaFits(imm64, sz::word)) return false;
-    out = safe_cast<int32_t>(imm64);
+    out = imm64;
     return true;
   }
   bool zero_imm(Vreg r) {

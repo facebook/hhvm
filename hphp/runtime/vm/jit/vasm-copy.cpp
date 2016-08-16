@@ -296,6 +296,17 @@ struct OptVisit {
     // lea'd off of other registers.
     if (ptr.seg != Vptr::DS) return;
     if_tracking_reg(env, state, ptr.base, [&] (const RegInfo& info) {
+#if defined(__aarch64__)
+      // After lowering, only [base, index lsl #scale] and [base, #imm]
+      // are allowed where the range of #imm is [-256 .. 255]
+      assert(ptr.base.isValid());
+      auto disp = ptr.disp + info.disp;
+      if (ptr.index.isValid()) {
+        if (disp != 0) return;
+      } else {
+        if (disp < -256 || disp > 255) return;
+      }
+#endif
       FTRACE(2, "      rewrite: {} => {}\n", show(ptr.base), show(info));
       ptr.base = info.base;
       ptr.disp += info.disp;

@@ -286,8 +286,7 @@ enum class SwitchKind : uint8_t {
   FLAG(None,             0)                        \
   FLAG(Warn,       (1 << 0))                       \
   FLAG(Define,     (1 << 1))                       \
-  FLAG(Unset,      (1 << 2))                       \
-  FLAG(DefineReffy,(Define | (1 << 3)))
+  FLAG(Unset,      (1 << 2))
 
 enum class MOpFlags : uint8_t {
 #define FLAG(name, val) name = val,
@@ -299,25 +298,11 @@ inline constexpr bool operator&(MOpFlags a, MOpFlags b) {
   return uint8_t(a) & uint8_t(b);
 }
 
-inline MOpFlags dropReffy(MOpFlags f) {
-  switch (f) {
-    case MOpFlags::None:
-    case MOpFlags::Warn:
-    case MOpFlags::Define:
-    case MOpFlags::Unset:
-      return f;
-    case MOpFlags::DefineReffy:
-      return MOpFlags::Define;
-  }
-  always_assert(false);
-}
-
 inline MOpFlags dropUnset(MOpFlags f) {
   switch (f) {
     case MOpFlags::None:
     case MOpFlags::Warn:
     case MOpFlags::Define:
-    case MOpFlags::DefineReffy:
       return f;
     case MOpFlags::Unset:
       return MOpFlags::None;

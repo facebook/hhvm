@@ -126,5 +126,16 @@ Caught exception: Cannot use [] with collections for reading in an lvalue contex
 Caught exception: Cannot use [] with collections for reading in an lvalue context
 Caught exception: Cannot use [] with collections for reading in an lvalue context
 
-
-Fatal error: Collection elements cannot be taken by reference in %s on line 174
+Caught exception: Cannot modify immutable object of type HH\Pair
+object(HH\Pair)#90 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}

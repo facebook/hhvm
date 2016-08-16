@@ -384,11 +384,10 @@ ElemDArrayPre<false, KeyType::Any>(Array& base, TypedValue key) {
 /**
  * ElemD when base is an Array
  */
-template <MOpFlags flags, KeyType keyType>
+template <MOpFlags flags, bool reffy, KeyType keyType>
 inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
   auto& baseArr = tvAsVariant(base).asArrRef();
   auto constexpr warn = flags & MOpFlags::Warn;
-  auto constexpr reffy = flags == MOpFlags::DefineReffy;
   auto const defined = !warn || baseArr.exists(keyAsValue(key));
 
   auto* result = ElemDArrayPre<reffy, keyType>(baseArr, key);
@@ -456,14 +455,14 @@ inline TypedValue* ElemDString(TypedValue* base, key_type<keyType> key) {
 /**
  * ElemD when base is an Object
  */
-template <MOpFlags flags, KeyType keyType>
+template <MOpFlags flags, bool reffy, KeyType keyType>
 inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                key_type<keyType> key) {
   auto scratchKey = initScratchKey(key);
   auto obj = base->m_data.pobj;
 
   if (LIKELY(obj->isCollection())) {
-    if (flags == MOpFlags::DefineReffy) {
+    if (reffy) {
       raise_error("Collection elements cannot be taken by reference");
       return nullptr;
     }
@@ -473,7 +472,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                    SystemLib::s_ArrayObjectClass->nameStr());
     // ArrayObject should have the 'storage' property...
     assert(storage != nullptr);
-    return ElemDArray<flags, keyType>(storage->asTypedValue(), key);
+    return ElemDArray<flags, reffy, keyType>(storage->asTypedValue(), key);
   }
 
 
@@ -486,7 +485,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
  *
  * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
-template <MOpFlags flags, KeyType keyType = KeyType::Any>
+template <MOpFlags flags, bool reffy, KeyType keyType = KeyType::Any>
 TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
   assertx(flags & MOpFlags::Define && !(flags & MOpFlags::Unset));
 
@@ -512,9 +511,9 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
-      return ElemDArray<flags, keyType>(base, key);
+      return ElemDArray<flags, reffy, keyType>(base, key);
     case KindOfObject:
-      return ElemDObject<flags, keyType>(tvRef, base, key);
+      return ElemDObject<flags, reffy, keyType>(tvRef, base, key);
     case KindOfRef:
     case KindOfClass:
       break;
@@ -1210,7 +1209,7 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
     case KindOfArray: {
       TypedValue* result;
       auto constexpr flags = MoreWarnings ? MOpFlags::Warn : MOpFlags::None;
-      result = ElemDArray<flags, KeyType::Any>(base, key);
+      result = ElemDArray<flags, false, KeyType::Any>(base, key);
       result = tvToCell(result);
       setopBody(result, op, rhs);
       return result;
@@ -1431,7 +1430,7 @@ inline void IncDecElem(
     case KindOfPersistentArray:
     case KindOfArray: {
       auto constexpr flags = MoreWarnings ? MOpFlags::Warn : MOpFlags::None;
-      auto result = ElemDArray<flags, KeyType::Any>(base, key);
+      auto result = ElemDArray<flags, false, KeyType::Any>(base, key);
       return IncDecBody(op, tvToCell(result), &dest);
     }
 

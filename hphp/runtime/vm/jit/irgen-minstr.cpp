@@ -870,7 +870,7 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
 void baseGImpl(IRGS& env, SSATmp* name, MOpFlags flags) {
   if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
 
-  auto const flagsData = MOpFlagsData{dropUnset(dropReffy(flags))};
+  auto const flagsData = MOpFlagsData{dropUnset(flags)};
   auto gblPtr = gen(env, BaseG, flagsData, name);
   gen(env, StMBase, gblPtr);
 }
@@ -916,7 +916,7 @@ SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
     return ptrToInitNull(env);
   }
 
-  auto const flagsData = MOpFlagsData{dropReffy(flags)};
+  auto const flagsData = MOpFlagsData{flags};
 
   auto const tvRef = propTvRefPtr(env, base, key);
   return nullsafe
@@ -1309,7 +1309,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 
 MOpFlags fpassFlags(IRGS& env, int32_t idx) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    return MOpFlags::DefineReffy;
+    return MOpFlags::Define;
   }
   return MOpFlags::Warn;
 }

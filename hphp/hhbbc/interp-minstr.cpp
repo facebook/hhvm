@@ -1420,7 +1420,7 @@ folly::Optional<MOpFlags> fpassFlags(ISS& env, int32_t arg) {
   switch (prepKind(env, arg)) {
     case PrepKind::Unknown: return folly::none;
     case PrepKind::Val:     return MOpFlags::Warn;
-    case PrepKind::Ref:     return MOpFlags::DefineReffy;
+    case PrepKind::Ref:     return MOpFlags::Define;
   }
   always_assert(false);
 }
@@ -1504,7 +1504,7 @@ static void fpassImpl(ISS& env, int32_t arg, BC op) {
     env,
     [&] { in(env, op); },
     [&] {
-      setMOpFlags(op, MOpFlags::DefineReffy);
+      setMOpFlags(op, MOpFlags::Define);
       in(env, op);
     }
   );

@@ -37,7 +37,7 @@
     FCall 1
     PopR
   # line 7
-    BaseL $ar DefineReffy
+    BaseL $ar Define
     VGetM 0 EI:0
     BindL $x
     PopV

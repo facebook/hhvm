@@ -404,7 +404,7 @@ TypedValue* elemImpl(TypedValue* base,
     return ElemU<keyType>(tvRef, base, key);
   }
   if (flags & MOpFlags::Define) {
-    return ElemD<flags, keyType>(tvRef, base, key);
+    return ElemD<flags, false, keyType>(tvRef, base, key);
   }
   // We won't really modify the TypedValue in the non-D case, so
   // this const_cast is safe.
@@ -415,17 +415,14 @@ TypedValue* elemImpl(TypedValue* base,
   /* name      keyType         attrs  */              \
   m(elemC,     KeyType::Any,   MOpFlags::None)        \
   m(elemCD,    KeyType::Any,   MOpFlags::Define)      \
-  m(elemCDR,   KeyType::Any,   MOpFlags::DefineReffy) \
   m(elemCU,    KeyType::Any,   MOpFlags::Unset)       \
   m(elemCW,    KeyType::Any,   MOpFlags::Warn)        \
   m(elemI,     KeyType::Int,   MOpFlags::None)        \
   m(elemID,    KeyType::Int,   MOpFlags::Define)      \
-  m(elemIDR,   KeyType::Int,   MOpFlags::DefineReffy) \
   m(elemIU,    KeyType::Int,   MOpFlags::Unset)       \
   m(elemIW,    KeyType::Int,   MOpFlags::Warn)        \
   m(elemS,     KeyType::Str,   MOpFlags::None)        \
   m(elemSD,    KeyType::Str,   MOpFlags::Define)      \
-  m(elemSDR,   KeyType::Str,   MOpFlags::DefineReffy) \
   m(elemSU,    KeyType::Str,   MOpFlags::Unset)       \
   m(elemSW,    KeyType::Str,   MOpFlags::Warn)        \
 
@@ -492,7 +489,7 @@ inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
 inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
   auto cbase = tvToCell(base);                                         \
   assertx(isArrayType(cbase->m_type));                                 \
-  return ElemDArray<MOpFlags::None, keyType>(cbase, key);              \
+  return ElemDArray<MOpFlags::None, false, keyType>(cbase, key);       \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X
@@ -583,7 +580,7 @@ CGETELEM_HELPER_TABLE(X)
 template <KeyType keyType>
 RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = ElemD<MOpFlags::DefineReffy, keyType>(localTvRef, base, key);
+  auto result = ElemD<MOpFlags::Define, true, keyType>(localTvRef, base, key);
   return vGetRefShuffle(localTvRef, result);
 }
 

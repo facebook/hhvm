@@ -6672,7 +6672,7 @@ bool EmitterVisitor::emitVGet(Emitter& e, bool skipCells) {
     }
   } else {
     auto const stackCount =
-      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::DefineReffy});
+      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define});
     e.VGetM(stackCount, symToMemberKey(e, iLast, true /* allowW */));
   }
   return false;
@@ -7213,7 +7213,7 @@ void EmitterVisitor::emitBind(Emitter& e) {
     }
   } else {
     auto const stackCount =
-      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::DefineReffy}.rhs());
+      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define}.rhs());
     e.BindM(stackCount, symToMemberKey(e, iLast, true /* allowW */));
   }
 }

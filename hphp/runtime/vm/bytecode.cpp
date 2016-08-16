@@ -244,7 +244,7 @@ static inline ActRec* arFromInstr(PC pc) {
 
 ALWAYS_INLINE MOpFlags fpass_flags(ActRec* ar, int paramId) {
   assert(paramId < ar->numArgs());
-  return ar->m_func->byRef(paramId) ? MOpFlags::DefineReffy : MOpFlags::Warn;
+  return ar->m_func->byRef(paramId) ? MOpFlags::Define : MOpFlags::Warn;
 }
 
 // wrapper for local variable LA operand
@@ -3240,8 +3240,6 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
         return Prop<MOpFlags::Warn>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Define:
         return Prop<MOpFlags::Define>(mstate.tvRef, ctx, mstate.base, key);
-      case MOpFlags::DefineReffy:
-        return Prop<MOpFlags::DefineReffy>(mstate.tvRef, ctx, mstate.base, key);
       case MOpFlags::Unset:
         return Prop<MOpFlags::Unset>(mstate.tvRef, ctx, mstate.base, key);
     }
@@ -3251,7 +3249,8 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
-static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
+static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key,
+                                        bool reffy) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
@@ -3263,10 +3262,8 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
       result = nullSafeProp(mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
       break;
 
-    case MOpFlags::DefineReffy:
-      raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
-
     case MOpFlags::Define:
+      if (reffy) raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
     case MOpFlags::Unset:
       always_assert(false);
   }
@@ -3274,7 +3271,7 @@ static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key) {
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
-static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
+static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key, bool reffy) {
   auto& mstate = vmMInstrState();
 
   auto result = [&] {
@@ -3290,9 +3287,9 @@ static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key) {
           Elem<MOpFlags::Warn>(mstate.tvRef, mstate.base, key)
         );
       case MOpFlags::Define:
-        return ElemD<MOpFlags::Define>(mstate.tvRef, mstate.base, key);
-      case MOpFlags::DefineReffy:
-        return ElemD<MOpFlags::DefineReffy>(mstate.tvRef, mstate.base, key);
+        return reffy
+          ? ElemD<MOpFlags::Define, true>(mstate.tvRef, mstate.base, key)
+          : ElemD<MOpFlags::Define, false>(mstate.tvRef, mstate.base, key);
       case MOpFlags::Unset:
         return ElemU(mstate.tvRef, mstate.base, key);
     }
@@ -3324,32 +3321,40 @@ static inline TypedValue key_tv(MemberKey key) {
   not_reached();
 }
 
-static OPTBLD_INLINE void dimDispatch(MOpFlags flags, MemberKey mk) {
+static OPTBLD_INLINE void dimDispatch(MOpFlags flags, MemberKey mk,
+                                      bool reffy) {
   auto const key = key_tv(mk);
   if (mk.mcode == MQT) {
-    propQDispatch(flags, key);
+    propQDispatch(flags, key, reffy);
   } else if (mcodeIsProp(mk.mcode)) {
     propDispatch(flags, key);
   } else if (mcodeIsElem(mk.mcode)) {
-    elemDispatch(flags, key);
+    elemDispatch(flags, key, reffy);
   } else {
     if (flags == MOpFlags::Warn) raise_error("Cannot use [] for reading");
 
     auto& mstate = vmMInstrState();
-    auto result = flags == MOpFlags::DefineReffy
-      ? NewElem<true>(mstate.tvRef, mstate.base)
-      : NewElem<false>(mstate.tvRef, mstate.base);
+
+    TypedValue* result;
+    if (reffy) {
+      if (UNLIKELY(isHackArrayType(mstate.base->m_type))) {
+        throwRefInvalidArrayValueException(mstate.base->m_data.parr);
+      }
+      result = NewElem<true>(mstate.tvRef, mstate.base);
+    } else {
+      result = NewElem<false>(mstate.tvRef, mstate.base);
+    }
     mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
   }
 }
 
 OPTBLD_INLINE void iopDim(MOpFlags flags, MemberKey mk) {
-  dimDispatch(flags, mk);
+  dimDispatch(flags, mk, false);
 }
 
 OPTBLD_INLINE void iopFPassDim(ActRec* ar, intva_t paramId, MemberKey mk) {
   auto const flags = fpass_flags(ar, paramId);
-  dimDispatch(flags, mk);
+  dimDispatch(flags, mk, false);
 }
 
 static OPTBLD_INLINE void mFinal(MInstrState& mstate,
@@ -3371,7 +3376,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
   switch (op) {
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
-      dimDispatch(getQueryMOpFlags(op), mk);
+      dimDispatch(getQueryMOpFlags(op), mk, false);
       tvDup(*tvToCell(mstate.base), result);
       break;
 
@@ -3401,7 +3406,7 @@ OPTBLD_INLINE void iopQueryM(intva_t nDiscard, QueryMOp subop, MemberKey mk) {
 static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
   auto& mstate = vmMInstrState();
   TypedValue result;
-  dimDispatch(MOpFlags::DefineReffy, mk);
+  dimDispatch(MOpFlags::Define, mk, true);
   if (mstate.base->m_type != KindOfRef) tvBox(mstate.base);
   refDup(*mstate.base, result);
   mFinal(mstate, nDiscard, result);
@@ -3417,7 +3422,6 @@ void iopFPassM(ActRec* ar, intva_t paramId, intva_t nDiscard, MemberKey mk) {
   if (flags == MOpFlags::Warn) {
     return queryMImpl(mk, nDiscard, QueryMOp::CGet);
   }
-  assert(flags == MOpFlags::DefineReffy);
   vGetMImpl(mk, nDiscard);
 }
 
@@ -3488,7 +3492,7 @@ OPTBLD_INLINE void iopBindM(intva_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const rhs = *vmStack().topV();
 
-  dimDispatch(MOpFlags::DefineReffy, mk);
+  dimDispatch(MOpFlags::Define, mk, true);
   tvBind(&rhs, mstate.base);
 
   vmStack().discard();
@@ -3512,8 +3516,8 @@ OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
 static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   auto& mstate = vmMInstrState();
   mstate.base = UNLIKELY(value->m_type == KindOfRef)
-    ? ElemD<MOpFlags::DefineReffy>(mstate.tvRef, mstate.base, key)
-    : ElemD<MOpFlags::Define>(mstate.tvRef, mstate.base, key);
+    ? ElemD<MOpFlags::Define, true>(mstate.tvRef, mstate.base, key)
+    : ElemD<MOpFlags::Define, false>(mstate.tvRef, mstate.base, key);
   tvAsVariant(mstate.base).setWithRef(tvAsVariant(value));
 
   mFinal(mstate, 0, folly::none);

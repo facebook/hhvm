@@ -52,7 +52,7 @@ start:          IsTypeL $arr Arr
                 FCall 1
                 UnboxR
                 JmpZ next_val
-                BaseL $res DefineReffy
+                BaseL $res Define
                 SetWithRefLML $k $v
     next_val:   WIterNextK 1 loop_val $v $k
                 Jmp endloop_a
@@ -63,7 +63,7 @@ start:          IsTypeL $arr Arr
                 FCall 2
                 UnboxR
                 JmpZ next_both
-                BaseL $res DefineReffy
+                BaseL $res Define
                 SetWithRefLML $k $v
     next_both:  WIterNextK 1 loop_both $v $k
                 Jmp endloop_a
@@ -73,7 +73,7 @@ start:          IsTypeL $arr Arr
                 FCall 1
                 UnboxR
                 JmpZ next_key
-                BaseL $res DefineReffy
+                BaseL $res Define
                 SetWithRefLML $k $v
     next_key:   WIterNextK 1 loop_key $v $k
   }
@@ -90,7 +90,7 @@ no_func:  NewLikeArrayL $arr 0
 .try_fault kill_iter_1_only 1 {
 loop_n:   CGetL $v
           JmpZ skip_n
-          BaseL $res DefineReffy
+          BaseL $res Define
           SetWithRefLML $k $v
 skip_n:   WIterNextK 1 loop_n $v $k
 }

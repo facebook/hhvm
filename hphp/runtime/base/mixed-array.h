@@ -451,6 +451,21 @@ public:
   static ArrayData* LvalNewKeyset(ArrayData*, Variant*&, bool);
   static void RenumberKeyset(ArrayData*);
 
+  //////////////////////////////////////////////////////////////////////
+
+  // Like Lval[Int,Str], but silently does nothing if the element does not
+  // exist. Not part of the ArrayData interface, but used for member operations.
+  static ArrayData* LvalSilentInt(ArrayData*, int64_t, Variant*&, bool);
+  static ArrayData* LvalSilentStr(ArrayData*, const StringData*,
+                                  Variant*&, bool);
+
+  static constexpr auto LvalSilentIntDict = &LvalSilentInt;
+  static constexpr auto LvalSilentStrDict = &LvalSilentStr;
+  static constexpr auto LvalSilentIntKeyset = &LvalSilentInt;
+  static constexpr auto LvalSilentStrKeyset = &LvalSilentStr;
+
+  //////////////////////////////////////////////////////////////////////
+
 private:
   MixedArray* copyMixed() const;
   MixedArray* copyMixedAndResizeIfNeeded() const;

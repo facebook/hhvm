@@ -181,9 +181,27 @@ void objOffsetUnset(ObjectData* base, TypedValue offset) {
 // like so: "$vector[] = 123;". However, collections do not support using []
 // without a key to implicitly create a new element without supplying assigning
 // an initial value (ex "$vector[]['a'] = 73;").
-void throw_cannot_use_newelem_for_lval_read() {
+void throw_cannot_use_newelem_for_lval_read_col() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Cannot use [] with collections for reading in an lvalue context");
+}
+
+void throw_cannot_use_newelem_for_lval_read_vec() {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Cannot use [] with vecs for reading in an lvalue context"
+  );
+}
+
+void throw_cannot_use_newelem_for_lval_read_dict() {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Cannot use [] with dicts for reading in an lvalue context"
+  );
+}
+
+void throw_cannot_use_newelem_for_lval_read_keyset() {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Cannot use [] with keysets for reading in an lvalue context"
+  );
 }
 
 void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to) {

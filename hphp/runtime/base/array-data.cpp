@@ -930,7 +930,7 @@ const Variant& ArrayData::getNotFound(const StringData* k) {
 
 const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
   if (error && !useWeakKeys()) {
-    throwOOBArrayKeyException(k);
+    throwOOBArrayKeyException(k, this);
   }
   return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
@@ -938,7 +938,7 @@ const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
 
 const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
   if (error && !useWeakKeys()) {
-    throwOOBArrayKeyException(k);
+    throwOOBArrayKeyException(k, this);
   }
   return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
@@ -1061,30 +1061,30 @@ void throwInvalidArrayKeyException(const StringData* key, const ArrayData* ad) {
   throwInvalidArrayKeyException(&tv, ad);
 }
 
-void throwOOBArrayKeyException(TypedValue key) {
+void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
+  const char* type = [&]{
+    if (ad->isVecArray()) return "vec";
+    if (ad->isDict()) return "dict";
+    if (ad->isKeyset()) return "keyset";
+    assert(ad->isPHPArray());
+    return "array";
+  }();
   SystemLib::throwOutOfBoundsExceptionObject(
     folly::sformat(
-      "Out of bounds array access: invalid index {}",
-      describeKeyValue(key)
+      "Out of bounds {} access: invalid index {}",
+      type, describeKeyValue(key)
     )
   );
 }
 
-void throwOOBArrayKeyException(int64_t key) {
-  SystemLib::throwOutOfBoundsExceptionObject(
-    folly::sformat(
-      "Out of bounds array access: invalid index {}",
-      folly::to<std::string>(key)
-    )
-  );
+void throwOOBArrayKeyException(int64_t key, const ArrayData* ad) {
+  throwOOBArrayKeyException(make_tv<KindOfInt64>(key), ad);
 }
 
-void throwOOBArrayKeyException(const StringData* key) {
-  SystemLib::throwOutOfBoundsExceptionObject(
-    folly::sformat(
-      "Out of bounds array access: invalid index \"{}\"",
-      key->data()
-    )
+void throwOOBArrayKeyException(const StringData* key, const ArrayData* ad) {
+  throwOOBArrayKeyException(
+    make_tv<KindOfString>(const_cast<StringData*>(key)),
+    ad
   );
 }
 
@@ -1098,6 +1098,12 @@ void throwRefInvalidArrayValueException(const ArrayData* ad) {
 
 void throwRefInvalidArrayValueException(const Array& arr) {
   throwRefInvalidArrayValueException(arr.get());
+}
+
+void throwInvalidKeysetOperation() {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Invalid operation on keyset"
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

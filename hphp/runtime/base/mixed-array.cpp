@@ -74,7 +74,8 @@ MixedArray::Initializer MixedArray::s_initializer;
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
-  assert(hk == HeaderKind::Mixed || hk == HeaderKind::Dict ||
+  assert(hk == HeaderKind::Mixed ||
+         hk == HeaderKind::Dict ||
          hk == HeaderKind::Keyset);
 
   auto const scale = computeScaleFromSize(size);
@@ -91,8 +92,6 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
-  assert(ad->kind() == kMixedKind || ad->kind() == kDictKind ||
-         ad->kind() == kKeysetKind);
   assert(ad->m_size == 0);
   assert(ad->m_pos == 0);
   assert(ad->hasExactlyOneRef());
@@ -192,11 +191,12 @@ ArrayData* MixedArray::MakeKeyset(uint32_t size, const TypedValue* values) {
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
                                   AllocMode mode, HeaderKind dest_hk) {
-  assert(dest_hk == HeaderKind::Mixed || dest_hk == HeaderKind::Dict ||
+  assert(dest_hk == HeaderKind::Mixed ||
+         dest_hk == HeaderKind::Dict ||
          dest_hk == HeaderKind::Keyset);
   auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Request ? reqAllocArray(scale)
-                                           : staticAllocArray(scale);
+                                             : staticAllocArray(scale);
 
   // Copy everything including tombstones.  We want to copy the elements and
   // the hash separately, because the array may not be very full.
@@ -1274,6 +1274,30 @@ ArrayData* MixedArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
   return a->addLvalImpl(key, ret);
 }
 
+ArrayData* MixedArray::LvalSilentInt(ArrayData* ad,
+                                     int64_t k,
+                                     Variant*& ret,
+                                     bool copy) {
+  auto a = asMixed(ad);
+  auto const pos = a->find(k, hashint(k));
+  if (UNLIKELY(!validPos(pos))) return a;
+  if (copy) a = a->copyMixed();
+  ret = &tvAsVariant(&a->data()[pos].data);
+  return a;
+}
+
+ArrayData* MixedArray::LvalSilentStr(ArrayData* ad,
+                                     const StringData* k,
+                                     Variant*& ret,
+                                     bool copy) {
+  auto a = asMixed(ad);
+  auto const pos = a->find(k, k->hash());
+  if (UNLIKELY(!validPos(pos))) return a;
+  if (copy) a = a->copyMixed();
+  ret = &tvAsVariant(&a->data()[pos].data);
+  return a;
+}
+
 ArrayData* MixedArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
@@ -1472,14 +1496,14 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
 
 const TypedValue* MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t ki) {
   auto const tv = MixedArray::NvGetInt(ad, ki);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
   return tv;
 }
 
 const TypedValue* MixedArray::NvTryGetStrDict(const ArrayData* ad,
                                               const StringData* k) {
   auto const tv = MixedArray::NvGetStr(ad, k);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(k);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(k, ad);
   return tv;
 }
 
@@ -2021,57 +2045,39 @@ ArrayData* MixedArray::PlusEqKeyset(ArrayData* ad, const ArrayData* elems) {
 }
 
 void MixedArray::RenumberKeyset(ArrayData*) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (renumbering)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::MergeKeyset(ArrayData*, const ArrayData*) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (merge)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::SetIntKeyset(ArrayData*, int64_t, Cell, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set int)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::SetStrKeyset(ArrayData*, StringData*, Cell, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set string)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::AddIntKeyset(ArrayData*, int64_t, Cell, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (add int)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::AddStrKeyset(ArrayData*, StringData*, Cell, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (add string)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::LvalIntKeyset(ArrayData*, int64_t, Variant*&, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval int)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval string)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* MixedArray::LvalNewKeyset(ArrayData*, Variant*&, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval new)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 //////////////////////////////////////////////////////////////////////

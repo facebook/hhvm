@@ -688,7 +688,7 @@ const TypedValue* PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t ki) {
   assert(checkInvariants(ad));
   auto const data = packedData(ad);
   if (LIKELY(size_t(ki) < ad->m_size)) return &data[ki];
-  throwOOBArrayKeyException(ki);
+  throwOOBArrayKeyException(ki, ad);
 }
 
 const TypedValue* PackedArray::NvTryGetStrVec(const ArrayData* ad,
@@ -752,7 +752,18 @@ ArrayData* PackedArray::LvalIntVec(ArrayData* adIn,
                                    Variant*& ret,
                                    bool copy) {
   assert(checkInvariants(adIn));
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k);
+  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
+  auto const ad = copy ? Copy(adIn) : adIn;
+  ret = &tvAsVariant(&packedData(ad)[k]);
+  return ad;
+}
+
+ArrayData* PackedArray::LvalSilentInt(ArrayData* adIn,
+                                      int64_t k,
+                                      Variant*& ret,
+                                      bool copy) {
+  assert(checkInvariants(adIn));
+  if (UNLIKELY(size_t(k) >= adIn->m_size)) return adIn;
   auto const ad = copy ? Copy(adIn) : adIn;
   ret = &tvAsVariant(&packedData(ad)[k]);
   return ad;
@@ -778,7 +789,7 @@ PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, Variant*&, bool) {
 ArrayData*
 PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, Variant*&, bool) {
   assert(checkInvariants(adIn));
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k);
+  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   throwRefInvalidArrayValueException(adIn);
 }
 
@@ -831,7 +842,7 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
 ArrayData*
 PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   assert(checkInvariants(adIn));
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k);
+  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   auto const ad = copy ? Copy(adIn) : adIn;
   // TODO(#3888164): we should restructure things so we don't have
   // to check KindOfUninit here.
@@ -873,7 +884,7 @@ ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, Variant& v,
 ArrayData*
 PackedArray::SetRefIntVec(ArrayData* adIn, int64_t k, Variant& v, bool copy) {
   assert(checkInvariants(adIn));
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k);
+  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   throwRefInvalidArrayValueException(adIn);
 }
 

@@ -179,6 +179,14 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
 
   //////////////////////////////////////////////////////////////////////
 
+  // Like LvalInt, but silently does nothing if the element doesn't exist. Not
+  // part of the ArrayData interface, but used in member operations.
+  static ArrayData* LvalSilentInt(ArrayData*, int64_t, Variant*&, bool);
+
+  static constexpr auto LvalSilentIntVec = &LvalSilentInt;
+
+  /////////////////////////////////////////////////////////////////////
+
   static bool checkInvariants(const ArrayData*);
 
   /*

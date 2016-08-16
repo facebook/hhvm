@@ -623,7 +623,8 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   const bool copy = a->cowCheck();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : a->set(key, value, copy);
-  return arrayRefShuffle<setRef>(a, ret, setRef ? ref->tv() : nullptr);
+  return arrayRefShuffle<setRef, KindOfArray>(a, ret,
+                                              setRef ? ref->tv() : nullptr);
 }
 
 #define ARRAYSET_HELPER_TABLE(m)                             \

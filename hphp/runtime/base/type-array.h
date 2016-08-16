@@ -195,6 +195,12 @@ public:
   }
   Array values() const;
 
+  bool isVecArray() const { return m_arr && m_arr->isVecArray(); }
+  bool isDict() const { return m_arr && m_arr->isDict(); }
+  bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
+  bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
+  bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
+
   bool useWeakKeys() const {
     // If array isn't set we may implicitly create a mixed array. We never
     // implicitly create a dict array or vec.

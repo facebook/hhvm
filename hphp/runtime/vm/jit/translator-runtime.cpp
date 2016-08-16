@@ -110,7 +110,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   tvRefcountedDecRef(&value);
-  return arrayRefShuffle<false>(ad, retval, nullptr);
+  return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
@@ -129,7 +129,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // have to decrement it here
   decRefStr(key);
   tvRefcountedDecRef(&value);
-  return arrayRefShuffle<false>(ad, retval, nullptr);
+  return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {

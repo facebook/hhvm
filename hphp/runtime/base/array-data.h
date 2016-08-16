@@ -657,11 +657,15 @@ void decRefArr(ArrayData* arr) {
                                                 const ArrayData* ad);
 [[noreturn]] void throwInvalidArrayKeyException(const StringData* key,
                                                 const ArrayData* ad);
-[[noreturn]] void throwOOBArrayKeyException(TypedValue key);
-[[noreturn]] void throwOOBArrayKeyException(int64_t key);
-[[noreturn]] void throwOOBArrayKeyException(const StringData* key);
+[[noreturn]] void throwOOBArrayKeyException(TypedValue key,
+                                            const ArrayData* ad);
+[[noreturn]] void throwOOBArrayKeyException(int64_t key,
+                                            const ArrayData* ad);
+[[noreturn]] void throwOOBArrayKeyException(const StringData* key,
+                                            const ArrayData* ad);
 [[noreturn]] void throwRefInvalidArrayValueException(const ArrayData* ad);
 [[noreturn]] void throwRefInvalidArrayValueException(const Array& arr);
+[[noreturn]] void throwInvalidKeysetOperation();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

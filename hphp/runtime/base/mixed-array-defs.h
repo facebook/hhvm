@@ -245,14 +245,14 @@ MixedArray::Elm& MixedArray::allocElm(int32_t* ei) {
 }
 
 inline MixedArray* MixedArray::asMixed(ArrayData* ad) {
-  assert(ad->isMixed() || ad->isDict() || ad->isKeyset());
+  assert(ad->isMixedLayout());
   auto a = static_cast<MixedArray*>(ad);
   assert(a->checkInvariants());
   return a;
 }
 
 inline const MixedArray* MixedArray::asMixed(const ArrayData* ad) {
-  assert(ad->isMixed() || ad->isDict() || ad->isKeyset());
+  assert(ad->isMixedLayout());
   auto a = static_cast<const MixedArray*>(ad);
   assert(a->checkInvariants());
   return a;

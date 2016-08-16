@@ -2125,8 +2125,7 @@ void ExecutionContext::clearLastError() {
 }
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
-  assert(handle->kind() == APCKind::UncountedString ||
-         handle->kind() == APCKind::UncountedArray);
+  assert(handle->isUncounted());
   m_apcHandles.push_back(handle);
   m_apcMemSize += size;
 }

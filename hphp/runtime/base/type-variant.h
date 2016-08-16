@@ -583,6 +583,9 @@ struct Variant : private TypedValue {
     return isStringType(getType());
   }
   bool isArray() const {
+    return isArrayLikeType(getType());
+  }
+  bool isPHPArray() const {
     return isArrayType(getType());
   }
   bool isVecArray() const {

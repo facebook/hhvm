@@ -21,9 +21,10 @@
 
 #include <folly/Likely.h>
 
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/tv-helpers.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
@@ -608,6 +609,28 @@ ArrayData* PackedArray::MakeFromVec(ArrayData* adIn, bool copy) {
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_hdr.kind = HeaderKind::Packed;
   return ad;
+}
+
+ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
+  assert(apc->isVec());
+  const uint32_t apcSize = apc->size();
+  auto vec = MakeReserveVec(apcSize);
+  auto data = packedData(vec);
+
+  try {
+    for (uint32_t i = 0; i < apcSize; ++i) {
+      auto const v = apc->getValue(i)->toLocal();
+      cellDup(
+        *tvAssertCell(v.asTypedValue()),
+        data[vec->m_size++]
+      );
+    }
+  } catch (...) {
+    PackedArray::Release(vec);
+    throw;
+  }
+
+  return vec;
 }
 
 void PackedArray::Release(ArrayData* ad) {

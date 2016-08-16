@@ -82,6 +82,9 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::Double:
     case APCKind::StaticString:
     case APCKind::StaticArray:
+    case APCKind::StaticVec:
+    case APCKind::StaticDict:
+    case APCKind::StaticKeyset:
       return EntryInfo::Type::Uncounted;
     case APCKind::UncountedString:
       return EntryInfo::Type::UncountedString;
@@ -89,8 +92,26 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::APCString;
     case APCKind::UncountedArray:
       return EntryInfo::Type::UncountedArray;
+    case APCKind::UncountedVec:
+      return EntryInfo::Type::UncountedVec;
+    case APCKind::UncountedDict:
+      return EntryInfo::Type::UncountedDict;
+    case APCKind::UncountedKeyset:
+      return EntryInfo::Type::UncountedKeyset;
     case APCKind::SerializedArray:
       return EntryInfo::Type::SerializedArray;
+    case APCKind::SerializedVec:
+      return EntryInfo::Type::SerializedVec;
+    case APCKind::SerializedDict:
+      return EntryInfo::Type::SerializedDict;
+    case APCKind::SerializedKeyset:
+      return EntryInfo::Type::SerializedKeyset;
+    case APCKind::SharedVec:
+      return EntryInfo::Type::APCVec;
+    case APCKind::SharedDict:
+      return EntryInfo::Type::APCDict;
+    case APCKind::SharedKeyset:
+      return EntryInfo::Type::APCKeyset;
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
       return EntryInfo::Type::APCArray;
@@ -215,16 +236,29 @@ struct HotCache {
 
   static HotValueRaw makeRawValue(APCHandle* h) {
     assert(h != nullptr && supportedKind(h));
-    HotValue v = (h->kind() == APCKind::UncountedArray) ?
-      HotValue(APCTypedValue::fromHandle(h)->getArrayData()) :
-      HotValue(h);
+    HotValue v = [&] {
+      switch (h->kind()) {
+        case APCKind::UncountedArray:
+          return HotValue{APCTypedValue::fromHandle(h)->getArrayData()};
+        case APCKind::UncountedVec:
+          return HotValue{APCTypedValue::fromHandle(h)->getVecData()};
+        case APCKind::UncountedDict:
+          return HotValue{APCTypedValue::fromHandle(h)->getDictData()};
+        case APCKind::UncountedKeyset:
+          return HotValue{APCTypedValue::fromHandle(h)->getKeysetData()};
+        default:
+          return HotValue{h};
+      }
+    }();
     return v.toOpaque();
   }
 
   static bool rawValueToLocal(HotValueRaw vraw, Variant& value) {
     HotValue v = HotValue::fromOpaque(vraw);
     if (ArrayData* ad = v.right()) {
-      value = Variant{ad, KindOfPersistentArray, Variant::PersistentArrInit{}};
+      value = Variant{
+        ad, ad->toPersistentDataType(), Variant::PersistentArrInit{}
+      };
       return true;
     }
     if (APCHandle* h = v.left()) {

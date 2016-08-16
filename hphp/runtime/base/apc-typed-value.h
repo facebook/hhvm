@@ -45,49 +45,105 @@ struct APCTypedValue {
   enum class StaticStr {};
   APCTypedValue(StaticStr, StringData* data)
     : m_handle(APCKind::StaticString, KindOfPersistentString) {
-    assert(data->isStatic());
+    assertx(data->isStatic());
     m_data.str = data;
-    assert(checkInvariants());
+    assertx(checkInvariants());
   }
 
   enum class UncountedStr {};
   APCTypedValue(UncountedStr, StringData* data)
     : m_handle(APCKind::UncountedString, KindOfPersistentString) {
-    assert(data->isUncounted());
+    assertx(data->isUncounted());
     m_data.str = data;
-    assert(checkInvariants());
+    assertx(checkInvariants());
   }
 
   enum class StaticArr {};
   APCTypedValue(StaticArr, ArrayData* data)
     : m_handle(APCKind::StaticArray, KindOfPersistentArray) {
-    assert(data->isStatic());
+    assertx(data->isPHPArray());
+    assertx(data->isStatic());
     m_data.arr = data;
-    assert(checkInvariants());
+    assertx(checkInvariants());
   }
 
   enum class UncountedArr {};
   APCTypedValue(UncountedArr, ArrayData* data)
     : m_handle(APCKind::UncountedArray, KindOfPersistentArray) {
-    assert(data->isUncounted());
+    assertx(data->isPHPArray());
+    assertx(data->isUncounted());
     m_data.arr = data;
-    assert(checkInvariants());
+    assertx(checkInvariants());
+  }
+
+  enum class StaticVec {};
+  APCTypedValue(StaticVec, ArrayData* data)
+    : m_handle(APCKind::StaticVec, KindOfPersistentVec) {
+    assertx(data->isVecArray());
+    assertx(data->isStatic());
+    m_data.vec = data;
+    assertx(checkInvariants());
+  }
+
+  enum class UncountedVec {};
+  APCTypedValue(UncountedVec, ArrayData* data)
+    : m_handle(APCKind::UncountedVec, KindOfPersistentVec) {
+    assertx(data->isVecArray());
+    assertx(data->isUncounted());
+    m_data.vec = data;
+    assertx(checkInvariants());
+  }
+
+  enum class StaticDict {};
+  APCTypedValue(StaticDict, ArrayData* data)
+    : m_handle(APCKind::StaticDict, KindOfPersistentDict) {
+    assertx(data->isDict());
+    assertx(data->isStatic());
+    m_data.dict = data;
+    assertx(checkInvariants());
+  }
+
+  enum class UncountedDict {};
+  APCTypedValue(UncountedDict, ArrayData* data)
+    : m_handle(APCKind::UncountedDict, KindOfPersistentDict) {
+    assertx(data->isDict());
+    assertx(data->isUncounted());
+    m_data.dict = data;
+    assertx(checkInvariants());
+  }
+
+  enum class StaticKeyset {};
+  APCTypedValue(StaticKeyset, ArrayData* data)
+    : m_handle(APCKind::StaticKeyset, KindOfPersistentKeyset) {
+    assertx(data->isKeyset());
+    assertx(data->isStatic());
+    m_data.keyset = data;
+    assertx(checkInvariants());
+  }
+
+  enum class UncountedKeyset {};
+  APCTypedValue(UncountedKeyset, ArrayData* data)
+    : m_handle(APCKind::UncountedKeyset, KindOfPersistentKeyset) {
+    assertx(data->isKeyset());
+    assertx(data->isUncounted());
+    m_data.keyset = data;
+    assertx(checkInvariants());
   }
 
   explicit APCTypedValue(DataType type)
     : m_handle(type == KindOfUninit ? APCKind::Uninit : APCKind::Null, type) {
-    assert(isNullType(type)); // Uninit or Null
+    assertx(isNullType(type)); // Uninit or Null
     m_data.num = 0;
   }
 
   static APCTypedValue* fromHandle(APCHandle* handle) {
-    assert(handle->checkInvariants() && !handle->isAtomicCounted());
+    assertx(handle->checkInvariants() && !handle->isAtomicCounted());
     static_assert(offsetof(APCTypedValue, m_handle) == sizeof(APCHandle), "");
     return reinterpret_cast<APCTypedValue*>(handle - 1);
   }
 
   static const APCTypedValue* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants() && !handle->isAtomicCounted());
+    assertx(handle->checkInvariants() && !handle->isAtomicCounted());
     static_assert(offsetof(APCTypedValue, m_handle) == sizeof(APCHandle), "");
     return reinterpret_cast<const APCTypedValue*>(handle - 1);
   }
@@ -97,32 +153,53 @@ struct APCTypedValue {
   }
 
   bool getBoolean() const {
-    assert(checkInvariants() && m_handle.kind() == APCKind::Bool);
+    assertx(checkInvariants() && m_handle.kind() == APCKind::Bool);
     return m_data.num != 0;
   }
 
   int64_t getInt64() const {
-    assert(checkInvariants() && m_handle.kind() == APCKind::Int);
+    assertx(checkInvariants() && m_handle.kind() == APCKind::Int);
     return m_data.num;
   }
 
   double getDouble() const {
-    assert(checkInvariants() && m_handle.kind() == APCKind::Double);
+    assertx(checkInvariants() && m_handle.kind() == APCKind::Double);
     return m_data.dbl;
   }
 
   StringData* getStringData() const {
-    assert(checkInvariants());
-    assert(m_handle.kind() == APCKind::StaticString ||
+    assertx(checkInvariants());
+    assertx(m_handle.kind() == APCKind::StaticString ||
            m_handle.kind() == APCKind::UncountedString);
     return m_data.str;
   }
 
   ArrayData* getArrayData() const {
-    assert(checkInvariants());
-    assert(m_handle.kind() == APCKind::StaticArray ||
+    assertx(checkInvariants());
+    assertx(m_handle.kind() == APCKind::StaticArray ||
            m_handle.kind() == APCKind::UncountedArray);
     return m_data.arr;
+  }
+
+  ArrayData* getVecData() const {
+    assertx(checkInvariants());
+    assertx(m_handle.kind() == APCKind::StaticVec ||
+           m_handle.kind() == APCKind::UncountedVec);
+    return m_data.vec;
+  }
+
+  ArrayData* getDictData() const {
+    assertx(checkInvariants());
+    assertx(m_handle.kind() == APCKind::StaticDict ||
+           m_handle.kind() == APCKind::UncountedDict);
+    return m_data.dict;
+  }
+
+  ArrayData* getKeysetData() const {
+    assertx(checkInvariants());
+    assertx(m_handle.kind() == APCKind::StaticKeyset ||
+           m_handle.kind() == APCKind::UncountedKeyset);
+    return m_data.keyset;
   }
 
   static APCTypedValue* tvUninit();
@@ -143,6 +220,9 @@ private:
     double dbl;
     StringData* str;
     ArrayData* arr;
+    ArrayData* vec;
+    ArrayData* dict;
+    ArrayData* keyset;
   } m_data;
   APCHandle m_handle;
 };

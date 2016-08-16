@@ -28,6 +28,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+struct APCArray;
 struct ArrayInit;
 struct MemoryProfile;
 
@@ -214,6 +215,9 @@ struct MixedArray final : private ArrayData,
 
   static ArrayData* MakeFromDict(ArrayData* adIn, bool copy);
   static ArrayData* MakeFromKeyset(ArrayData* adIn, bool copy);
+
+  static ArrayData* MakeDictFromAPC(const APCArray* apc);
+  static ArrayData* MakeKeysetFromAPC(const APCArray* apc);
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.

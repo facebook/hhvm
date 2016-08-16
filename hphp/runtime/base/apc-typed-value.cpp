@@ -51,15 +51,51 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::Double: break;
     case APCKind::StaticString: assert(m_data.str->isStatic()); break;
     case APCKind::UncountedString: assert(m_data.str->isUncounted()); break;
-    case APCKind::StaticArray: assert(m_data.arr->isStatic()); break;
-    case APCKind::UncountedArray: assert(m_data.arr->isUncounted()); break;
+    case APCKind::StaticArray:
+      assert(m_data.arr->isPHPArray());
+      assert(m_data.arr->isStatic());
+      break;
+    case APCKind::StaticVec:
+      assert(m_data.vec->isVecArray());
+      assert(m_data.vec->isStatic());
+      break;
+    case APCKind::StaticDict:
+      assert(m_data.dict->isDict());
+      assert(m_data.dict->isStatic());
+      break;
+    case APCKind::StaticKeyset:
+      assert(m_data.dict->isKeyset());
+      assert(m_data.dict->isStatic());
+      break;
+    case APCKind::UncountedArray:
+      assert(m_data.arr->isPHPArray());
+      assert(m_data.arr->isUncounted());
+      break;
+    case APCKind::UncountedVec:
+      assert(m_data.vec->isVecArray());
+      assert(m_data.vec->isUncounted());
+      break;
+    case APCKind::UncountedDict:
+      assert(m_data.dict->isDict());
+      assert(m_data.dict->isUncounted());
+      break;
+    case APCKind::UncountedKeyset:
+      assert(m_data.dict->isKeyset());
+      assert(m_data.dict->isUncounted());
+      break;
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
+    case APCKind::SharedVec:
+    case APCKind::SharedDict:
+    case APCKind::SharedKeyset:
     case APCKind::SerializedArray:
     case APCKind::SerializedObject:
+    case APCKind::SerializedVec:
+    case APCKind::SerializedDict:
+    case APCKind::SerializedKeyset:
       assert(false);
       break;
   }
@@ -71,10 +107,15 @@ bool APCTypedValue::checkInvariants() const {
 void APCTypedValue::deleteUncounted() {
   assert(m_handle.isUncounted());
   auto kind = m_handle.kind();
-  assert(kind == APCKind::UncountedString || kind == APCKind::UncountedArray);
+  assert(kind == APCKind::UncountedString ||
+         kind == APCKind::UncountedArray ||
+         kind == APCKind::UncountedVec ||
+         kind == APCKind::UncountedDict ||
+         kind == APCKind::UncountedKeyset);
   if (kind == APCKind::UncountedString) {
     m_data.str->destructUncounted();
   } else if (kind == APCKind::UncountedArray) {
+    assert(m_data.arr->isPHPArray());
     if (m_data.arr->isPackedLayout()) {
       auto arr = m_data.arr;
       this->~APCTypedValue();
@@ -86,7 +127,26 @@ void APCTypedValue::deleteUncounted() {
       MixedArray::ReleaseUncounted(arr, sizeof(APCTypedValue));
       return;  // Uncounted MixedArray frees the joint allocation.
     }
+  } else if (kind == APCKind::UncountedVec) {
+    auto vec = m_data.vec;
+    assert(vec->isVecArray());
+    this->~APCTypedValue();
+    PackedArray::ReleaseUncounted(vec, sizeof(APCTypedValue));
+    return;
+  } else if (kind == APCKind::UncountedDict) {
+    auto dict = m_data.dict;
+    assert(dict->isDict());
+    this->~APCTypedValue();
+    MixedArray::ReleaseUncounted(dict, sizeof(APCTypedValue));
+    return;
+  } else if (kind == APCKind::UncountedKeyset) {
+    auto keyset = m_data.keyset;
+    assert(keyset->isKeyset());
+    this->~APCTypedValue();
+    MixedArray::ReleaseUncounted(keyset, sizeof(APCTypedValue));
+    return;
   }
+
   delete this;
 }
 

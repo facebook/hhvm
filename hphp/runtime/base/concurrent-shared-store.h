@@ -137,6 +137,15 @@ struct EntryInfo {
     APCArray,
     APCObject,
     SerializedObject,
+    UncountedVec,
+    UncountedDict,
+    UncountedKeyset,
+    SerializedVec,
+    SerializedDict,
+    SerializedKeyset,
+    APCVec,
+    APCDict,
+    APCKeyset,
   };
 
   EntryInfo(const char* apckey,

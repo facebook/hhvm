@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/mixed-array.h"
 
+#include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -412,6 +413,61 @@ ArrayData* MixedArray::MakeFromKeyset(ArrayData* adIn, bool copy) {
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_hdr.kind = HeaderKind::Mixed;
   return ad;
+}
+
+ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
+  assert(apc->isDict());
+  const uint32_t apcSize = apc->size();
+  auto dict = asMixed(MakeReserveDict(apcSize));
+
+  try {
+    for (uint32_t i = 0; i < apcSize; ++i) {
+      auto key = apc->getKey(i);
+      auto const value = apc->getValue(i)->toLocal();
+      auto insertPos = [&] {
+        if (key.isInteger()) return dict->insert(key.asInt64Val());
+        if (key.isString()) return dict->insert(key.asCStrRef().get());
+        not_reached();
+      }();
+      assert(!insertPos.found);
+      cellDup(
+        *tvAssertCell(value.asTypedValue()),
+        insertPos.tv
+      );
+    }
+  } catch (...) {
+    MixedArray::Release(dict);
+    throw;
+  }
+
+  return dict;
+}
+
+ArrayData* MixedArray::MakeKeysetFromAPC(const APCArray* apc) {
+  assert(apc->isKeyset());
+  const uint32_t apcSize = apc->size();
+  auto keyset = asMixed(MakeReserveKeyset(apcSize));
+
+  try {
+    for (uint32_t i = 0; i < apcSize; ++i) {
+      auto const value = apc->getValue(i)->toLocal();
+      auto insertPos = [&] {
+        if (value.isInteger()) return keyset->insert(value.asInt64Val());
+        if (value.isString()) return keyset->insert(value.asCStrRef().get());
+        not_reached();
+      }();
+      assert(!insertPos.found);
+      cellDup(
+        *tvAssertCell(value.asTypedValue()),
+        insertPos.tv
+      );
+    }
+  } catch (...) {
+    MixedArray::Release(keyset);
+    throw;
+  }
+
+  return keyset;
 }
 
 //=============================================================================

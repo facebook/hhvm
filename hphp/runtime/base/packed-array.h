@@ -37,6 +37,7 @@ struct ArrayData;
 struct StringData;
 struct MArrayIter;
 struct MixedArray;
+struct APCArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -213,6 +214,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
 
   static ArrayData* MakeFromVec(ArrayData* adIn, bool copy);
 
+  static ArrayData* MakeVecFromAPC(const APCArray* apc);
   // Fast iteration
   template <class F, bool inc = true>
   static void IterateV(ArrayData* arr, F fn);

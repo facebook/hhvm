@@ -1,0 +1,26 @@
+dict(1) {
+  ["1"]=>
+  string(5) "green"
+}
+dict(1) {
+  ["1"]=>
+  string(3) "foo"
+}
+dict(1) {
+  [1]=>
+  string(5) "apple"
+}
+dict(2) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+}
+====================================================
+Dtor::__destruct
+dict(2) {
+  [1]=>
+  string(1) "a"
+  [3]=>
+  bool(false)
+}

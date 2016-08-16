@@ -1,0 +1,181 @@
+========== ref_param ===============================
+ref_param exception: "Dicts cannot contain references"
+ref_param exception: "Dicts cannot contain references"
+ref_param exception: "Dicts cannot contain references"
+ref_param exception: "Dicts cannot contain references"
+ref_param exception: "Invalid dict key: expected a key of type int or string, bool given"
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  ["key1"]=>
+  string(3) "abc"
+  [4]=>
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== elem_ref ================================
+elem_ref exception: "Dicts cannot contain references"
+elem_ref exception: "Dicts cannot contain references"
+elem_ref exception: "Dicts cannot contain references"
+elem_ref exception: "Dicts cannot contain references"
+elem_ref exception: "Invalid dict key: expected a key of type int or string, bool given"
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  ["key1"]=>
+  string(3) "abc"
+  [4]=>
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== append_ref ==============================
+append_ref exception: "Dicts cannot contain references"
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  ["key1"]=>
+  string(3) "abc"
+  [4]=>
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== set_ref =================================
+set_ref exception: "Dicts cannot contain references"
+set_ref exception: "Dicts cannot contain references"
+set_ref exception: "Dicts cannot contain references"
+set_ref exception: "Dicts cannot contain references"
+set_ref exception: "Invalid dict key: expected a key of type int or string, bool given"
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  ["key1"]=>
+  string(3) "abc"
+  [4]=>
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== ref_return ==============================
+ref_return exception: "Dicts cannot contain references"
+ref_return exception: "Dicts cannot contain references"
+ref_return exception: "Dicts cannot contain references"
+ref_return exception: "Dicts cannot contain references"
+ref_return exception: "Invalid dict key: expected a key of type int or string, bool given"
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  ["key1"]=>
+  string(3) "abc"
+  [4]=>
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== iterate_by_ref ==========================
+iterate_by_ref exception: "Dicts cannot contain references"
+iterate_by_ref (key) exception: "Dicts cannot contain references"
+========== convert_with_ref ========================
+convert_with_ref exception: "Dicts cannot contain references"
+========== ref_unserialize =========================
+
+Notice: Unable to unserialize: [D:2:{s:3:"foo";D:1:{s:1:"a";s:1:"b";}s:3:"bar";R:2;}]. Dicts cannot contain references. in %s on line %d
+bool(false)
+========== nested_refs =============================
+dict(6) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  ["key1"]=>
+  string(3) "abc"
+  [4]=>
+  array(4) {
+    [0]=>
+    int(5)
+    [1]=>
+    &int(6)
+    [2]=>
+    &int(100)
+    [3]=>
+    &int(100)
+  }
+}
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  array(3) {
+    [0]=>
+    &string(1) "c"
+    [1]=>
+    string(1) "d"
+    [2]=>
+    string(1) "e"
+  }
+}
+========== create_with_ref =========================
+create_with_ref exception: "Dicts cannot contain references"

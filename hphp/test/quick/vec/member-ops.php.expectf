@@ -1,0 +1,688 @@
+======= base_elem_warn =============================
+int(100)
+Exception: "Out of bounds vec access: invalid index 3"
+Exception: "Invalid vec key: expected a key of type int, string given"
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= base_elem ==================================
+int(100)
+string(7) "MISSING"
+string(7) "MISSING"
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= base_define ================================
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(200)
+  }
+  string(0) ""
+}
+Exception: "Out of bounds vec access: invalid index 3"
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+======= base_define_reffy ==========================
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    &string(3) "abc"
+  }
+  string(0) ""
+}
+Exception: "Out of bounds vec access: invalid index 3"
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+======= base_unset =================================
+vec(3) {
+  NULL
+  array(0) {
+  }
+  string(0) ""
+}
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+======= base_new_elem_set ==========================
+Exception: "Cannot use [] with vecs for reading in an lvalue context"
+======= base_str_to_arr ============================
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  array(1) {
+    [10]=>
+    int(123)
+  }
+}
+======= base_prop_get ==============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= base_prop_set ==============================
+vec(3) {
+  NULL
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  string(0) ""
+}
+======= dim_elem_warn ==============================
+int(100)
+Exception: "Out of bounds vec access: invalid index 3"
+Exception: "Invalid vec key: expected a key of type int, string given"
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= dim_elem ===================================
+int(100)
+string(7) "MISSING"
+string(7) "MISSING"
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= dim_define =================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(200)
+    }
+    string(0) ""
+  }
+}
+Exception: "Out of bounds vec access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+======= dim_define_reffy ===========================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      &string(3) "abc"
+    }
+    string(0) ""
+  }
+}
+Exception: "Out of bounds vec access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+======= dim_unset ==================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(0) {
+    }
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+======= dim_new_elem_set ===========================
+Exception: "Cannot use [] with vecs for reading in an lvalue context"
+======= dim_str_to_arr =============================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    array(1) {
+      [10]=>
+      int(123)
+    }
+  }
+}
+======= dim_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= dim_prop_set ===============================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    string(0) ""
+  }
+}
+======= fini_cget_warn =============================
+string(3) "abc"
+Exception: "Out of bounds vec access: invalid index 3"
+Exception: "Invalid vec key: expected a key of type int, string given"
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= fini_cget_warn =============================
+string(3) "abc"
+string(7) "MISSING"
+string(7) "MISSING"
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= fini_empty =================================
+bool(false)
+bool(true)
+bool(true)
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= fini_isset =================================
+bool(true)
+bool(false)
+bool(false)
+Exception: "Invalid vec key: expected a key of type int, bool given"
+======= fini_vget ==================================
+Exception: "Vecs cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Vecs cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+======= fini_vget_new_elem =========================
+Exception: "Vecs cannot contain references"
+======= fini_set ===================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    int(123)
+    string(0) ""
+  }
+}
+Exception: "Out of bounds vec access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+======= fini_set_new_elem ==========================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(4) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+    int(123)
+  }
+}
+======= fini_incdec ================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abd"
+    string(0) ""
+  }
+}
+Exception: "Out of bounds vec access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+======= fini_incdec_new_elem =======================
+Exception: "Cannot use [] with vecs for reading in an lvalue context"
+======= fini_setop =================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(11) "abcsome-str"
+    string(0) ""
+  }
+}
+Exception: "Out of bounds vec access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+======= fini_setop_new_elem =======================
+Exception: "Cannot use [] with vecs for reading in an lvalue context"
+======= fini_unset =================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(2) {
+    [0]=>
+    NULL
+    [2]=>
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+======= fini_bind ==================================
+Exception: "Vecs cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Vecs cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, string given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+Exception: "Invalid vec key: expected a key of type int, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}
+======= fini_bind_new_elem =========================
+Exception: "Vecs cannot contain references"
+======= fini_str_to_arr ============================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    array(1) {
+      [10]=>
+      int(123)
+    }
+  }
+}
+======= fini_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= fini_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s on line %d
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  vec(3) {
+    NULL
+    string(3) "abc"
+    string(0) ""
+  }
+}

@@ -1,4 +1,0 @@
-Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds array access: invalid index 1' in %s/dict-hhbbc-repo.php:5
-Stack trace:
-#0 %s/dict-hhbbc-repo.php(9): main()
-#1 {main}

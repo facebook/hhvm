@@ -1,0 +1,27 @@
+#
+# NewLikeArray on hack arrays should create a PHP array
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main {
+          Int 1
+          Int 2
+          Int 3
+          NewKeysetArray 3
+          SetL $ks
+          PopC
+          FPushFuncD 1 "var_dump"
+          NewLikeArrayL $ks 3
+          FPassC 0
+          FCall 1
+          PopR
+          True
+          RetC
+}

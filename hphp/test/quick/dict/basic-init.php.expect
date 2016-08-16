@@ -1,0 +1,166 @@
+dict(0) {
+}
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+dict(3) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+dict(3) {
+  [1]=>
+  string(1) "a"
+  ["b"]=>
+  int(2)
+  [3]=>
+  string(1) "c"
+}
+dict(1) {
+  [10]=>
+  string(3) "abc"
+}
+dict(1) {
+  ["abc"]=>
+  int(10)
+}
+dict(2) {
+  [123]=>
+  int(100)
+  ["123"]=>
+  int(200)
+}
+dict(8) {
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  float(1.23)
+  [4]=>
+  NULL
+  [5]=>
+  array(0) {
+  }
+  [6]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  [7]=>
+  dict(1) {
+    [1]=>
+    string(1) "a"
+  }
+  [8]=>
+  keyset(2) {
+    string(1) "a"
+    string(1) "b"
+  }
+}
+dict(1) {
+  ["abc"]=>
+  object(stdClass)#1 (0) {
+  }
+}
+dict(2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+}
+dict(2) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+}
+dict(2) {
+  [1]=>
+  string(1) "a"
+  ["b"]=>
+  int(2)
+}
+dict(1) {
+  [10]=>
+  string(3) "def"
+}
+dict(1) {
+  ["abc"]=>
+  int(20)
+}
+dict(2) {
+  ["123"]=>
+  int(456)
+  [123]=>
+  string(3) "456"
+}
+dict(2) {
+  [100]=>
+  bool(true)
+  [200]=>
+  bool(false)
+}
+dict(2) {
+  ["abc"]=>
+  object(stdClass)#1 (0) {
+  }
+  ["def"]=>
+  object(stdClass)#2 (0) {
+  }
+}
+dict(2) {
+  [100]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  [200]=>
+  vec(3) {
+    int(4)
+    int(5)
+    int(6)
+  }
+}
+dict(2) {
+  ["abc"]=>
+  NULL
+  ["def"]=>
+  float(4.56)
+}
+1 Noisy::__destruct()
+dict(1) {
+  ["abc"]=>
+  object(Noisy)#2 (1) {
+    ["id"]=>
+    int(2)
+  }
+}
+2 Noisy::__destruct()
+Exception: Invalid dict key: expected a key of type int or string, null given
+Exception: Invalid dict key: expected a key of type int or string, bool given
+Exception: Invalid dict key: expected a key of type int or string, double given
+Exception: Invalid dict key: expected a key of type int or string, array given
+Exception: Invalid dict key: expected a key of type int or string, vec given
+Exception: Invalid dict key: expected a key of type int or string, dict given
+Exception: Invalid dict key: expected a key of type int or string, keyset given
+Exception: Invalid dict key: expected a key of type int or string, stdClass given
+Exception: Invalid dict key: expected a key of type int or string, ToString given
+Exception: Invalid dict key: expected a key of type int or string, HH\Vector given
+Exception: Invalid dict key: expected a key of type int or string, bool given
+Exception: Invalid dict key: expected a key of type int or string, vec given
+4 Noisy::__destruct()
+3 Noisy::__destruct()
+Exception: Invalid dict key: expected a key of type int or string, array given
+5 Noisy::__destruct()
+Exception: Invalid dict key: expected a key of type int or string, bool given

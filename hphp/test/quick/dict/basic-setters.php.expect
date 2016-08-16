@@ -1,0 +1,770 @@
+Testing: dict(0) {
+}
+Testing append....
+dict(0) {
+}
+dict(11) {
+  [0]=>
+  int(0)
+  [1]=>
+  string(1) "a"
+  [2]=>
+  float(1.23)
+  [3]=>
+  bool(false)
+  [4]=>
+  NULL
+  [5]=>
+  object(stdClass)#1 (0) {
+  }
+  [6]=>
+  array(3) {
+    [0]=>
+    int(300)
+    [1]=>
+    int(200)
+    [2]=>
+    int(100)
+  }
+  [7]=>
+  dict(0) {
+  }
+  [8]=>
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  [9]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  [10]=>
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+}
+Testing set....
+Set to 0 key value succeeded
+Set to 3 key value succeeded
+Set to 999999999 key value succeeded
+Set to -1 key value succeeded
+Set to "key1" key value succeeded
+Set to "0" key value succeeded
+Set to "3" key value succeeded
+Set to "" key value succeeded
+Set to bool key value failed: "Invalid dict key: expected a key of type int or string, bool given"
+Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
+Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
+Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
+Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(0) {
+}
+dict(8) {
+  [0]=>
+  string(11) "0 key value"
+  [3]=>
+  string(11) "3 key value"
+  [999999999]=>
+  string(19) "999999999 key value"
+  [-1]=>
+  string(12) "-1 key value"
+  ["key1"]=>
+  string(16) ""key1" key value"
+  ["0"]=>
+  string(13) ""0" key value"
+  ["3"]=>
+  string(13) ""3" key value"
+  [""]=>
+  string(12) """ key value"
+}
+Test set-op....
+Set-Op to " + 0 key value" failed: "Out of bounds dict access: invalid index 0"
+Set-Op to " + 3 key value" failed: "Out of bounds dict access: invalid index 3"
+Set-Op to " + 999999999 key value" failed: "Out of bounds dict access: invalid index 999999999"
+Set-Op to " + -1 key value" failed: "Out of bounds dict access: invalid index -1"
+Set-Op to " + "key1" key value" failed: "Out of bounds dict access: invalid index "key1""
+Set-Op to " + "0" key value" failed: "Out of bounds dict access: invalid index "0""
+Set-Op to " + "3" key value" failed: "Out of bounds dict access: invalid index "3""
+Set-Op to " + "" key value" failed: "Out of bounds dict access: invalid index """
+Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type int or string, bool given"
+Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
+Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
+Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, array given"
+Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
+Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
+Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(0) {
+}
+dict(0) {
+}
+Test new set-op....
+New set-op with " + 0 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + 3 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + 999999999 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + -1 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "a" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+dict(0) {
+}
+dict(0) {
+}
+Test unset....
+Unset of 0 key value succeeded
+dict(0) {
+}
+dict(0) {
+}
+Unset of 3 key value succeeded
+dict(0) {
+}
+dict(0) {
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "3" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid dict key: expected a key of type int or string, bool given"
+Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
+Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
+Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
+Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(0) {
+}
+dict(0) {
+}
+Testing: dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+Testing append....
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(15) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(0)
+  [5]=>
+  string(1) "a"
+  [6]=>
+  float(1.23)
+  [7]=>
+  bool(false)
+  [8]=>
+  NULL
+  [9]=>
+  object(stdClass)#1 (0) {
+  }
+  [10]=>
+  array(3) {
+    [0]=>
+    int(300)
+    [1]=>
+    int(200)
+    [2]=>
+    int(100)
+  }
+  [11]=>
+  dict(0) {
+  }
+  [12]=>
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  [13]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  [14]=>
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+}
+Testing set....
+Set to 0 key value succeeded
+Set to 3 key value succeeded
+Set to 999999999 key value succeeded
+Set to -1 key value succeeded
+Set to "key1" key value succeeded
+Set to "0" key value succeeded
+Set to "3" key value succeeded
+Set to "" key value succeeded
+Set to bool key value failed: "Invalid dict key: expected a key of type int or string, bool given"
+Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
+Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
+Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
+Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(10) {
+  [0]=>
+  string(11) "0 key value"
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  string(11) "3 key value"
+  [999999999]=>
+  string(19) "999999999 key value"
+  [-1]=>
+  string(12) "-1 key value"
+  ["key1"]=>
+  string(16) ""key1" key value"
+  ["0"]=>
+  string(13) ""0" key value"
+  ["3"]=>
+  string(13) ""3" key value"
+  [""]=>
+  string(12) """ key value"
+}
+Test set-op....
+Set-Op to " + 0 key value" succeeded
+Set-Op to " + 3 key value" succeeded
+Set-Op to " + 999999999 key value" failed: "Out of bounds dict access: invalid index 999999999"
+Set-Op to " + -1 key value" failed: "Out of bounds dict access: invalid index -1"
+Set-Op to " + "key1" key value" failed: "Out of bounds dict access: invalid index "key1""
+Set-Op to " + "0" key value" failed: "Out of bounds dict access: invalid index "0""
+Set-Op to " + "3" key value" failed: "Out of bounds dict access: invalid index "3""
+Set-Op to " + "" key value" failed: "Out of bounds dict access: invalid index """
+Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type int or string, bool given"
+Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
+Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
+Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, array given"
+Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
+Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
+Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(4) {
+  [0]=>
+  string(15) "1 + 0 key value"
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  string(15) "4 + 3 key value"
+}
+Test new set-op....
+New set-op with " + 0 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + 3 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + 999999999 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + -1 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "a" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+Test unset....
+Unset of 0 key value succeeded
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(3) {
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+Unset of 3 key value succeeded
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "3" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid dict key: expected a key of type int or string, bool given"
+Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
+Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
+Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
+Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+dict(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+Testing: dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+Testing append....
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+dict(17) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+  [0]=>
+  int(0)
+  [1]=>
+  string(1) "a"
+  [2]=>
+  float(1.23)
+  [3]=>
+  bool(false)
+  [4]=>
+  NULL
+  [5]=>
+  object(stdClass)#1 (0) {
+  }
+  [6]=>
+  array(3) {
+    [0]=>
+    int(300)
+    [1]=>
+    int(200)
+    [2]=>
+    int(100)
+  }
+  [7]=>
+  dict(0) {
+  }
+  [8]=>
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  [9]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  [10]=>
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+}
+Testing set....
+Set to 0 key value succeeded
+Set to 3 key value succeeded
+Set to 999999999 key value succeeded
+Set to -1 key value succeeded
+Set to "key1" key value succeeded
+Set to "0" key value succeeded
+Set to "3" key value succeeded
+Set to "" key value succeeded
+Set to bool key value failed: "Invalid dict key: expected a key of type int or string, bool given"
+Set to null key value failed: "Invalid dict key: expected a key of type int or string, null given"
+Set to double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Set to object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Set to array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Set to vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
+Set to dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
+Set to keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+dict(12) {
+  ["0"]=>
+  string(13) ""0" key value"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(13) ""3" key value"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+  [0]=>
+  string(11) "0 key value"
+  [3]=>
+  string(11) "3 key value"
+  [999999999]=>
+  string(19) "999999999 key value"
+  [-1]=>
+  string(12) "-1 key value"
+  ["key1"]=>
+  string(16) ""key1" key value"
+  [""]=>
+  string(12) """ key value"
+}
+Test set-op....
+Set-Op to " + 0 key value" failed: "Out of bounds dict access: invalid index 0"
+Set-Op to " + 3 key value" failed: "Out of bounds dict access: invalid index 3"
+Set-Op to " + 999999999 key value" failed: "Out of bounds dict access: invalid index 999999999"
+Set-Op to " + -1 key value" failed: "Out of bounds dict access: invalid index -1"
+Set-Op to " + "key1" key value" failed: "Out of bounds dict access: invalid index "key1""
+Set-Op to " + "0" key value" succeeded
+Set-Op to " + "3" key value" succeeded
+Set-Op to " + "" key value" failed: "Out of bounds dict access: invalid index """
+Set-Op to " + bool key value" failed: "Invalid dict key: expected a key of type int or string, bool given"
+Set-Op to " + null key value" failed: "Invalid dict key: expected a key of type int or string, null given"
+Set-Op to " + double key value" failed: "Invalid dict key: expected a key of type int or string, double given"
+Set-Op to " + object key value" failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Set-Op to " + array key value" failed: "Invalid dict key: expected a key of type int or string, array given"
+Set-Op to " + vec key value" failed: "Invalid dict key: expected a key of type int or string, vec given"
+Set-Op to " + dict key value" failed: "Invalid dict key: expected a key of type int or string, dict given"
+Set-Op to " + keyset key value" failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+dict(6) {
+  ["0"]=>
+  string(17) "a + "0" key value"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(17) "d + "3" key value"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+Test new set-op....
+New set-op with " + 0 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + 3 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + 999999999 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + -1 value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "a" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with dicts for reading in an lvalue context"
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+Test unset....
+Unset of 0 key value succeeded
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+Unset of 3 key value succeeded
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "3" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid dict key: expected a key of type int or string, bool given"
+Unset of null key value failed: "Invalid dict key: expected a key of type int or string, null given"
+Unset of double key value failed: "Invalid dict key: expected a key of type int or string, double given"
+Unset of object key value failed: "Invalid dict key: expected a key of type int or string, stdClass given"
+Unset of array key value failed: "Invalid dict key: expected a key of type int or string, array given"
+Unset of vec key value failed: "Invalid dict key: expected a key of type int or string, vec given"
+Unset of dict key value failed: "Invalid dict key: expected a key of type int or string, dict given"
+Unset of keyset key value failed: "Invalid dict key: expected a key of type int or string, keyset given"
+dict(6) {
+  ["0"]=>
+  string(1) "a"
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["3"]=>
+  string(1) "d"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}
+dict(4) {
+  ["1"]=>
+  string(1) "b"
+  ["2"]=>
+  string(1) "c"
+  ["4"]=>
+  string(1) "e"
+  ["a"]=>
+  int(0)
+}

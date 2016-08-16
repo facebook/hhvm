@@ -1,0 +1,620 @@
+Testing: keyset(0) {
+}
+Testing append....
+Append of 0 integer succeeded
+Append of 2 integer succeeded
+Append of -5 integer succeeded
+Append of "a" string succeeded
+Append of "foobaz" string succeeded
+Append of 123 integer succeeded
+Append of "123" string succeeded
+Append of empty string succeeded
+Append of "2" integer succeeded
+Append of 0 integer (again) succeeded
+Append of double failed: "Invalid keyset key: expected a key of type int or string, double given"
+Append of bool failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Append of null failed: "Invalid keyset key: expected a key of type int or string, null given"
+Append of class failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Append of array failed: "Invalid keyset key: expected a key of type int or string, array given"
+Append of vec failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Append of dict failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Append of keyset failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(0) {
+}
+keyset(9) {
+  int(0)
+  int(2)
+  int(-5)
+  string(1) "a"
+  string(6) "foobaz"
+  int(123)
+  string(3) "123"
+  string(0) ""
+  string(1) "2"
+}
+Testing set....
+Set to 0 key value failed: "Invalid operation on keyset"
+Set to 3 key value failed: "Invalid operation on keyset"
+Set to 999999999 key value failed: "Invalid operation on keyset"
+Set to -1 key value failed: "Invalid operation on keyset"
+Set to "a" key value failed: "Invalid operation on keyset"
+Set to "key1" key value failed: "Invalid operation on keyset"
+Set to "0" key value failed: "Invalid operation on keyset"
+Set to "3" key value failed: "Invalid operation on keyset"
+Set to "" key value failed: "Invalid operation on keyset"
+Set to bool key value failed: "Invalid operation on keyset"
+Set to null key value failed: "Invalid operation on keyset"
+Set to double key value failed: "Invalid operation on keyset"
+Set to object key value failed: "Invalid operation on keyset"
+Set to array key value failed: "Invalid operation on keyset"
+Set to vec key value failed: "Invalid operation on keyset"
+Set to dict key value failed: "Invalid operation on keyset"
+Set to keyset key value failed: "Invalid operation on keyset"
+keyset(0) {
+}
+keyset(0) {
+}
+Test set-op....
+Set-Op with " + 0 key value" failed: "Invalid operation on keyset"
+Set-Op with " + 3 key value" failed: "Invalid operation on keyset"
+Set-Op with " + 999999999 key value" failed: "Invalid operation on keyset"
+Set-Op with " + -1 key value" failed: "Invalid operation on keyset"
+Set-Op with " + "a" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "key1" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "0" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "3" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "" key value" failed: "Invalid operation on keyset"
+Set-Op with " + bool key value" failed: "Invalid operation on keyset"
+Set-Op with " + null key value" failed: "Invalid operation on keyset"
+Set-Op with " + double key value" failed: "Invalid operation on keyset"
+Set-Op with " + object key value" failed: "Invalid operation on keyset"
+Set-Op with " + array key value" failed: "Invalid operation on keyset"
+Set-Op with " + vec key value" failed: "Invalid operation on keyset"
+Set-Op with " + dict key value" failed: "Invalid operation on keyset"
+Set-Op with " + keyset key value" failed: "Invalid operation on keyset"
+keyset(0) {
+}
+keyset(0) {
+}
+Test new set-op....
+New set-op with " + 0 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + 3 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + 999999999 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + -1 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "a" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+keyset(0) {
+}
+keyset(0) {
+}
+Test unset....
+Unset of 2 key value succeeded
+keyset(0) {
+}
+keyset(0) {
+}
+Unset of 3 key value succeeded
+keyset(0) {
+}
+keyset(0) {
+}
+Unset of "b" key value succeeded
+keyset(0) {
+}
+keyset(0) {
+}
+Unset of "3" value value succeeded
+keyset(0) {
+}
+keyset(0) {
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "1" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Unset of null key value failed: "Invalid keyset key: expected a key of type int or string, null given"
+Unset of double key value failed: "Invalid keyset key: expected a key of type int or string, double given"
+Unset of object key value failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Unset of array key value failed: "Invalid keyset key: expected a key of type int or string, array given"
+Unset of vec key value failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Unset of dict key value failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Unset of keyset key value failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(0) {
+}
+keyset(0) {
+}
+Testing: keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Testing append....
+Append of 0 integer succeeded
+Append of 2 integer succeeded
+Append of -5 integer succeeded
+Append of "a" string succeeded
+Append of "foobaz" string succeeded
+Append of 123 integer succeeded
+Append of "123" string succeeded
+Append of empty string succeeded
+Append of "2" integer succeeded
+Append of 0 integer (again) succeeded
+Append of double failed: "Invalid keyset key: expected a key of type int or string, double given"
+Append of bool failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Append of null failed: "Invalid keyset key: expected a key of type int or string, null given"
+Append of class failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Append of array failed: "Invalid keyset key: expected a key of type int or string, array given"
+Append of vec failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Append of dict failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Append of keyset failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(12) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(0)
+  int(-5)
+  string(1) "a"
+  string(6) "foobaz"
+  int(123)
+  string(3) "123"
+  string(0) ""
+  string(1) "2"
+}
+Testing set....
+Set to 0 key value failed: "Invalid operation on keyset"
+Set to 3 key value failed: "Invalid operation on keyset"
+Set to 999999999 key value failed: "Invalid operation on keyset"
+Set to -1 key value failed: "Invalid operation on keyset"
+Set to "a" key value failed: "Invalid operation on keyset"
+Set to "key1" key value failed: "Invalid operation on keyset"
+Set to "0" key value failed: "Invalid operation on keyset"
+Set to "3" key value failed: "Invalid operation on keyset"
+Set to "" key value failed: "Invalid operation on keyset"
+Set to bool key value failed: "Invalid operation on keyset"
+Set to null key value failed: "Invalid operation on keyset"
+Set to double key value failed: "Invalid operation on keyset"
+Set to object key value failed: "Invalid operation on keyset"
+Set to array key value failed: "Invalid operation on keyset"
+Set to vec key value failed: "Invalid operation on keyset"
+Set to dict key value failed: "Invalid operation on keyset"
+Set to keyset key value failed: "Invalid operation on keyset"
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Test set-op....
+Set-Op with " + 0 key value" failed: "Invalid operation on keyset"
+Set-Op with " + 3 key value" failed: "Invalid operation on keyset"
+Set-Op with " + 999999999 key value" failed: "Invalid operation on keyset"
+Set-Op with " + -1 key value" failed: "Invalid operation on keyset"
+Set-Op with " + "a" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "key1" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "0" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "3" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "" key value" failed: "Invalid operation on keyset"
+Set-Op with " + bool key value" failed: "Invalid operation on keyset"
+Set-Op with " + null key value" failed: "Invalid operation on keyset"
+Set-Op with " + double key value" failed: "Invalid operation on keyset"
+Set-Op with " + object key value" failed: "Invalid operation on keyset"
+Set-Op with " + array key value" failed: "Invalid operation on keyset"
+Set-Op with " + vec key value" failed: "Invalid operation on keyset"
+Set-Op with " + dict key value" failed: "Invalid operation on keyset"
+Set-Op with " + keyset key value" failed: "Invalid operation on keyset"
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Test new set-op....
+New set-op with " + 0 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + 3 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + 999999999 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + -1 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "a" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Test unset....
+Unset of 2 key value succeeded
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(3) {
+  int(1)
+  int(3)
+  int(4)
+}
+Unset of 3 key value succeeded
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(3) {
+  int(1)
+  int(2)
+  int(4)
+}
+Unset of "b" key value succeeded
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Unset of "3" value value succeeded
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "1" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Unset of null key value failed: "Invalid keyset key: expected a key of type int or string, null given"
+Unset of double key value failed: "Invalid keyset key: expected a key of type int or string, double given"
+Unset of object key value failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Unset of array key value failed: "Invalid keyset key: expected a key of type int or string, array given"
+Unset of vec key value failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Unset of dict key value failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Unset of keyset key value failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Testing: keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Testing append....
+Append of 0 integer succeeded
+Append of 2 integer succeeded
+Append of -5 integer succeeded
+Append of "a" string succeeded
+Append of "foobaz" string succeeded
+Append of 123 integer succeeded
+Append of "123" string succeeded
+Append of empty string succeeded
+Append of "2" integer succeeded
+Append of 0 integer (again) succeeded
+Append of double failed: "Invalid keyset key: expected a key of type int or string, double given"
+Append of bool failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Append of null failed: "Invalid keyset key: expected a key of type int or string, null given"
+Append of class failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Append of array failed: "Invalid keyset key: expected a key of type int or string, array given"
+Append of vec failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Append of dict failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Append of keyset failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(16) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  int(0)
+  int(2)
+  int(-5)
+  string(1) "a"
+  string(6) "foobaz"
+  int(123)
+  string(3) "123"
+  string(0) ""
+  string(1) "2"
+}
+Testing set....
+Set to 0 key value failed: "Invalid operation on keyset"
+Set to 3 key value failed: "Invalid operation on keyset"
+Set to 999999999 key value failed: "Invalid operation on keyset"
+Set to -1 key value failed: "Invalid operation on keyset"
+Set to "a" key value failed: "Invalid operation on keyset"
+Set to "key1" key value failed: "Invalid operation on keyset"
+Set to "0" key value failed: "Invalid operation on keyset"
+Set to "3" key value failed: "Invalid operation on keyset"
+Set to "" key value failed: "Invalid operation on keyset"
+Set to bool key value failed: "Invalid operation on keyset"
+Set to null key value failed: "Invalid operation on keyset"
+Set to double key value failed: "Invalid operation on keyset"
+Set to object key value failed: "Invalid operation on keyset"
+Set to array key value failed: "Invalid operation on keyset"
+Set to vec key value failed: "Invalid operation on keyset"
+Set to dict key value failed: "Invalid operation on keyset"
+Set to keyset key value failed: "Invalid operation on keyset"
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Test set-op....
+Set-Op with " + 0 key value" failed: "Invalid operation on keyset"
+Set-Op with " + 3 key value" failed: "Invalid operation on keyset"
+Set-Op with " + 999999999 key value" failed: "Invalid operation on keyset"
+Set-Op with " + -1 key value" failed: "Invalid operation on keyset"
+Set-Op with " + "a" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "key1" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "0" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "3" key value" failed: "Invalid operation on keyset"
+Set-Op with " + "" key value" failed: "Invalid operation on keyset"
+Set-Op with " + bool key value" failed: "Invalid operation on keyset"
+Set-Op with " + null key value" failed: "Invalid operation on keyset"
+Set-Op with " + double key value" failed: "Invalid operation on keyset"
+Set-Op with " + object key value" failed: "Invalid operation on keyset"
+Set-Op with " + array key value" failed: "Invalid operation on keyset"
+Set-Op with " + vec key value" failed: "Invalid operation on keyset"
+Set-Op with " + dict key value" failed: "Invalid operation on keyset"
+Set-Op with " + keyset key value" failed: "Invalid operation on keyset"
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Test new set-op....
+New set-op with " + 0 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + 3 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + 999999999 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + -1 value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "a" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with keysets for reading in an lvalue context"
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Test unset....
+Unset of 2 key value succeeded
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Unset of 3 key value succeeded
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(6) {
+  string(1) "b"
+  string(1) "3"
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Unset of "b" key value succeeded
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(6) {
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Unset of "3" value value succeeded
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(6) {
+  string(1) "b"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "1" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Unset of null key value failed: "Invalid keyset key: expected a key of type int or string, null given"
+Unset of double key value failed: "Invalid keyset key: expected a key of type int or string, double given"
+Unset of object key value failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Unset of array key value failed: "Invalid keyset key: expected a key of type int or string, array given"
+Unset of vec key value failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Unset of dict key value failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Unset of keyset key value failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}

@@ -1,0 +1,154 @@
+vec(3) {
+  object(Dtor)#1 (1) {
+    ["id"]=>
+    int(1)
+  }
+  object(Dtor)#2 (1) {
+    ["id"]=>
+    int(2)
+  }
+  object(Dtor)#3 (1) {
+    ["id"]=>
+    int(3)
+  }
+}
+Dtor::__destruct(1)
+Dtor::__destruct(2)
+Dtor::__destruct(3)
+====================================================
+dict(3) {
+  [0]=>
+  object(Dtor)#3 (1) {
+    ["id"]=>
+    int(4)
+  }
+  [1]=>
+  object(Dtor)#4 (1) {
+    ["id"]=>
+    int(5)
+  }
+  [2]=>
+  object(Dtor)#5 (1) {
+    ["id"]=>
+    int(6)
+  }
+}
+Dtor::__destruct(4)
+Dtor::__destruct(5)
+Dtor::__destruct(6)
+====================================================
+Dtor::__destruct(7)
+Dtor::__destruct(8)
+Dtor::__destruct(9)
+keyset(3) {
+  int(0)
+  int(1)
+  int(2)
+}
+====================================================
+array(3) {
+  [0]=>
+  object(Dtor)#7 (1) {
+    ["id"]=>
+    int(10)
+  }
+  [1]=>
+  object(Dtor)#8 (1) {
+    ["id"]=>
+    int(11)
+  }
+  [2]=>
+  object(Dtor)#9 (1) {
+    ["id"]=>
+    int(12)
+  }
+}
+Dtor::__destruct(10)
+Dtor::__destruct(11)
+Dtor::__destruct(12)
+====================================================
+Dtor::__destruct(13)
+Dtor::__destruct(14)
+Dtor::__destruct(15)
+bool(true)
+====================================================
+Dtor::__destruct(16)
+Dtor::__destruct(17)
+Dtor::__destruct(18)
+int(1)
+====================================================
+Dtor::__destruct(19)
+Dtor::__destruct(20)
+Dtor::__destruct(21)
+float(1)
+====================================================
+
+Notice: Vec to string conversion in %s on line %d
+Dtor::__destruct(22)
+Dtor::__destruct(23)
+Dtor::__destruct(24)
+string(3) "Vec"
+====================================================
+object(stdClass)#20 (3) {
+  [0]=>
+  object(Dtor)#17 (1) {
+    ["id"]=>
+    int(25)
+  }
+  [1]=>
+  object(Dtor)#18 (1) {
+    ["id"]=>
+    int(26)
+  }
+  [2]=>
+  object(Dtor)#19 (1) {
+    ["id"]=>
+    int(27)
+  }
+}
+Dtor::__destruct(25)
+Dtor::__destruct(26)
+Dtor::__destruct(27)
+====================================================
+object(HH\Vector)#20 (3) {
+  [0]=>
+  object(Dtor)#21 (1) {
+    ["id"]=>
+    int(28)
+  }
+  [1]=>
+  object(Dtor)#22 (1) {
+    ["id"]=>
+    int(29)
+  }
+  [2]=>
+  object(Dtor)#23 (1) {
+    ["id"]=>
+    int(30)
+  }
+}
+Dtor::__destruct(28)
+Dtor::__destruct(29)
+Dtor::__destruct(30)
+====================================================
+object(HH\Map)#23 (3) {
+  [0]=>
+  object(Dtor)#24 (1) {
+    ["id"]=>
+    int(31)
+  }
+  [1]=>
+  object(Dtor)#25 (1) {
+    ["id"]=>
+    int(32)
+  }
+  [2]=>
+  object(Dtor)#26 (1) {
+    ["id"]=>
+    int(33)
+  }
+}
+Dtor::__destruct(31)
+Dtor::__destruct(32)
+Dtor::__destruct(33)
+====================================================

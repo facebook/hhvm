@@ -1,0 +1,474 @@
+Comparing:
+keyset(0) {
+}
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(2) {
+  int(4)
+  int(5)
+}
+keyset(2) {
+  int(4)
+  int(6)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(2) {
+  int(4)
+  int(6)
+}
+keyset(2) {
+  int(4)
+  int(5)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+keyset(2) {
+  int(1)
+  int(2)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(2) {
+  int(1)
+  int(2)
+}
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+keyset(3) {
+  int(3)
+  int(2)
+  int(1)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(3) {
+  int(3)
+  int(2)
+  int(1)
+}
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+keyset(3) {
+  string(1) "c"
+  string(1) "b"
+  string(1) "a"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(3) {
+  string(1) "c"
+  string(1) "b"
+  string(1) "a"
+}
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(2) {
+  string(1) "a"
+  string(1) "b"
+}
+keyset(2) {
+  string(1) "a"
+  string(1) "b"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(1) {
+  int(12345)
+}
+keyset(1) {
+  string(5) "12345"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(1) {
+  string(5) "12345"
+}
+keyset(1) {
+  int(12345)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+NULL
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+NULL
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+bool(false)
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+bool(false)
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+int(123)
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+int(123)
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+float(1.2345)
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+float(1.2345)
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+string(3) "abc"
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+string(3) "abc"
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+object(stdClass)#93 (0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+object(stdClass)#93 (0) {
+}
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+array(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+array(0) {
+}
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+keyset(0) {
+}
+vec(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+vec(0) {
+}
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Comparing:
+keyset(0) {
+}
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+dict(0) {
+}
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts

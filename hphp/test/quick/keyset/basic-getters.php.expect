@@ -1,0 +1,483 @@
+empty:
+   $keyset[0] => <Exception: "Out of bounds keyset access: invalid index 0">
+   $keyset[3] => <Exception: "Out of bounds keyset access: invalid index 3">
+   $keyset[8] => <Exception: "Out of bounds keyset access: invalid index 8">
+   $keyset[999999999] => <Exception: "Out of bounds keyset access: invalid index 999999999">
+   $keyset[-1] => <Exception: "Out of bounds keyset access: invalid index -1">
+   $keyset["0"] => <Exception: "Out of bounds keyset access: invalid index "0"">
+   $keyset["3"] => <Exception: "Out of bounds keyset access: invalid index "3"">
+   $keyset["foobar"] => <Exception: "Out of bounds keyset access: invalid index "foobar"">
+   $keyset[""] => <Exception: "Out of bounds keyset access: invalid index """>
+   $keyset[0.0] => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   $keyset[0] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[3] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[8] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[999999999] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[-1] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["0"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["3"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["foobar"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[""] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[0.0] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   idx($keyset, 0, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 3, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 8, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 999999999, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, -1, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "0", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "3", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "foobar", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 0.0, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   idx($keyset, false, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   idx($keyset, object, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   idx($keyset, null, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, array, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   idx($keyset, vec, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   idx($keyset, dict, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   idx($keyset, keyset, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   idx($keyset, resource, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   isset($keyset[0]) => bool(false)
+   isset($keyset[3]) => bool(false)
+   isset($keyset[8]) => bool(false)
+   isset($keyset[999999999]) => bool(false)
+   isset($keyset[-1]) => bool(false)
+   isset($keyset["0"]) => bool(false)
+   isset($keyset["3"]) => bool(false)
+   isset($keyset["foobar"]) => bool(false)
+   isset($keyset[""]) => bool(false)
+   isset($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   isset($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   isset($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   isset($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   isset($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   isset($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   isset($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   isset($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   isset($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   array_key_exists($keyset, 0) => bool(false)
+   array_key_exists($keyset, 3) => bool(false)
+   array_key_exists($keyset, 8) => bool(false)
+   array_key_exists($keyset, 999999999) => bool(false)
+   array_key_exists($keyset, -1) => bool(false)
+   array_key_exists($keyset, "0") => bool(false)
+   array_key_exists($keyset, "3") => bool(false)
+   array_key_exists($keyset, "foobar") => bool(false)
+   array_key_exists($keyset, "") => bool(false)
+   array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   array_key_exists($keyset, keyset) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   array_key_exists($keyset, resource) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   empty($keyset[0]) => bool(true)
+   empty($keyset[3]) => bool(true)
+   empty($keyset[8]) => bool(true)
+   empty($keyset[999999999]) => bool(true)
+   empty($keyset[-1]) => bool(true)
+   empty($keyset["0"]) => bool(true)
+   empty($keyset["3"]) => bool(true)
+   empty($keyset["foobar"]) => bool(true)
+   empty($keyset[""]) => bool(true)
+   empty($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   empty($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   empty($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   empty($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   empty($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   empty($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   empty($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   empty($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   empty($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+foreach:
+foreach with key:
+4 ints:
+   $keyset[0] => int(0)
+   $keyset[3] => int(3)
+   $keyset[8] => <Exception: "Out of bounds keyset access: invalid index 8">
+   $keyset[999999999] => <Exception: "Out of bounds keyset access: invalid index 999999999">
+   $keyset[-1] => <Exception: "Out of bounds keyset access: invalid index -1">
+   $keyset["0"] => <Exception: "Out of bounds keyset access: invalid index "0"">
+   $keyset["3"] => <Exception: "Out of bounds keyset access: invalid index "3"">
+   $keyset["foobar"] => <Exception: "Out of bounds keyset access: invalid index "foobar"">
+   $keyset[""] => <Exception: "Out of bounds keyset access: invalid index """>
+   $keyset[0.0] => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   $keyset[0] ?? "NOT FOUND" => int(0)
+   $keyset[3] ?? "NOT FOUND" => int(3)
+   $keyset[8] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[999999999] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[-1] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["0"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["3"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["foobar"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[""] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[0.0] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   idx($keyset, 0, "NOT FOUND") => int(0)
+   idx($keyset, 3, "NOT FOUND") => int(3)
+   idx($keyset, 8, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 999999999, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, -1, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "0", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "3", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "foobar", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 0.0, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   idx($keyset, false, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   idx($keyset, object, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   idx($keyset, null, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, array, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   idx($keyset, vec, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   idx($keyset, dict, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   idx($keyset, keyset, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   idx($keyset, resource, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   isset($keyset[0]) => bool(true)
+   isset($keyset[3]) => bool(true)
+   isset($keyset[8]) => bool(false)
+   isset($keyset[999999999]) => bool(false)
+   isset($keyset[-1]) => bool(false)
+   isset($keyset["0"]) => bool(false)
+   isset($keyset["3"]) => bool(false)
+   isset($keyset["foobar"]) => bool(false)
+   isset($keyset[""]) => bool(false)
+   isset($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   isset($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   isset($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   isset($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   isset($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   isset($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   isset($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   isset($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   isset($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   array_key_exists($keyset, 0) => bool(true)
+   array_key_exists($keyset, 3) => bool(true)
+   array_key_exists($keyset, 8) => bool(false)
+   array_key_exists($keyset, 999999999) => bool(false)
+   array_key_exists($keyset, -1) => bool(false)
+   array_key_exists($keyset, "0") => bool(false)
+   array_key_exists($keyset, "3") => bool(false)
+   array_key_exists($keyset, "foobar") => bool(false)
+   array_key_exists($keyset, "") => bool(false)
+   array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   array_key_exists($keyset, keyset) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   array_key_exists($keyset, resource) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   empty($keyset[0]) => bool(true)
+   empty($keyset[3]) => bool(false)
+   empty($keyset[8]) => bool(true)
+   empty($keyset[999999999]) => bool(true)
+   empty($keyset[-1]) => bool(true)
+   empty($keyset["0"]) => bool(true)
+   empty($keyset["3"]) => bool(true)
+   empty($keyset["foobar"]) => bool(true)
+   empty($keyset[""]) => bool(true)
+   empty($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   empty($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   empty($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   empty($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   empty($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   empty($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   empty($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   empty($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   empty($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+foreach:
+	Val: int(0)
+	Val: int(100)
+	Val: int(3)
+	Val: int(400)
+foreach with key:
+	Key: int(0)
+	Val: int(0)
+	Key: int(100)
+	Val: int(100)
+	Key: int(3)
+	Val: int(3)
+	Key: int(400)
+	Val: int(400)
+5 strings:
+   $keyset[0] => <Exception: "Out of bounds keyset access: invalid index 0">
+   $keyset[3] => <Exception: "Out of bounds keyset access: invalid index 3">
+   $keyset[8] => <Exception: "Out of bounds keyset access: invalid index 8">
+   $keyset[999999999] => <Exception: "Out of bounds keyset access: invalid index 999999999">
+   $keyset[-1] => <Exception: "Out of bounds keyset access: invalid index -1">
+   $keyset["0"] => <Exception: "Out of bounds keyset access: invalid index "0"">
+   $keyset["3"] => string(1) "3"
+   $keyset["foobar"] => string(6) "foobar"
+   $keyset[""] => string(0) ""
+   $keyset[0.0] => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   $keyset[0] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[3] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[8] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[999999999] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[-1] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["0"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["3"] ?? "NOT FOUND" => string(1) "3"
+   $keyset["foobar"] ?? "NOT FOUND" => string(6) "foobar"
+   $keyset[""] ?? "NOT FOUND" => string(0) ""
+   $keyset[0.0] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   idx($keyset, 0, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 3, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 8, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 999999999, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, -1, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "0", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "3", "NOT FOUND") => string(1) "3"
+   idx($keyset, "foobar", "NOT FOUND") => string(6) "foobar"
+   idx($keyset, "", "NOT FOUND") => string(0) ""
+   idx($keyset, 0.0, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   idx($keyset, false, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   idx($keyset, object, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   idx($keyset, null, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, array, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   idx($keyset, vec, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   idx($keyset, dict, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   idx($keyset, keyset, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   idx($keyset, resource, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   isset($keyset[0]) => bool(false)
+   isset($keyset[3]) => bool(false)
+   isset($keyset[8]) => bool(false)
+   isset($keyset[999999999]) => bool(false)
+   isset($keyset[-1]) => bool(false)
+   isset($keyset["0"]) => bool(false)
+   isset($keyset["3"]) => bool(true)
+   isset($keyset["foobar"]) => bool(true)
+   isset($keyset[""]) => bool(true)
+   isset($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   isset($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   isset($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   isset($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   isset($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   isset($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   isset($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   isset($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   isset($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   array_key_exists($keyset, 0) => bool(false)
+   array_key_exists($keyset, 3) => bool(false)
+   array_key_exists($keyset, 8) => bool(false)
+   array_key_exists($keyset, 999999999) => bool(false)
+   array_key_exists($keyset, -1) => bool(false)
+   array_key_exists($keyset, "0") => bool(false)
+   array_key_exists($keyset, "3") => bool(true)
+   array_key_exists($keyset, "foobar") => bool(true)
+   array_key_exists($keyset, "") => bool(true)
+   array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   array_key_exists($keyset, keyset) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   array_key_exists($keyset, resource) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   empty($keyset[0]) => bool(true)
+   empty($keyset[3]) => bool(true)
+   empty($keyset[8]) => bool(true)
+   empty($keyset[999999999]) => bool(true)
+   empty($keyset[-1]) => bool(true)
+   empty($keyset["0"]) => bool(true)
+   empty($keyset["3"]) => bool(false)
+   empty($keyset["foobar"]) => bool(false)
+   empty($keyset[""]) => bool(true)
+   empty($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   empty($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   empty($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   empty($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   empty($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   empty($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   empty($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   empty($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   empty($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+foreach:
+	Val: string(6) "foobar"
+	Val: string(1) "A"
+	Val: string(1) "3"
+	Val: string(0) ""
+	Val: string(1) "B"
+foreach with key:
+	Key: string(6) "foobar"
+	Val: string(6) "foobar"
+	Key: string(1) "A"
+	Val: string(1) "A"
+	Key: string(1) "3"
+	Val: string(1) "3"
+	Key: string(0) ""
+	Val: string(0) ""
+	Key: string(1) "B"
+	Val: string(1) "B"
+2 ints, 2 strings:
+   $keyset[0] => int(0)
+   $keyset[3] => <Exception: "Out of bounds keyset access: invalid index 3">
+   $keyset[8] => <Exception: "Out of bounds keyset access: invalid index 8">
+   $keyset[999999999] => <Exception: "Out of bounds keyset access: invalid index 999999999">
+   $keyset[-1] => <Exception: "Out of bounds keyset access: invalid index -1">
+   $keyset["0"] => <Exception: "Out of bounds keyset access: invalid index "0"">
+   $keyset["3"] => <Exception: "Out of bounds keyset access: invalid index "3"">
+   $keyset["foobar"] => <Exception: "Out of bounds keyset access: invalid index "foobar"">
+   $keyset[""] => <Exception: "Out of bounds keyset access: invalid index """>
+   $keyset[0.0] => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   $keyset[0] ?? "NOT FOUND" => int(0)
+   $keyset[3] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[8] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[999999999] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[-1] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["0"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["3"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset["foobar"] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[""] ?? "NOT FOUND" => string(9) "NOT FOUND"
+   $keyset[0.0] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   $keyset[false] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   $keyset[object] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   $keyset[null] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   $keyset[array] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   $keyset[vec] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   $keyset[dict] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   $keyset[keyset] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   $keyset[resource] ?? "NOT FOUND" => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   idx($keyset, 0, "NOT FOUND") => int(0)
+   idx($keyset, 3, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 8, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 999999999, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, -1, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "0", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "3", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "foobar", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, "", "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, 0.0, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   idx($keyset, false, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   idx($keyset, object, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   idx($keyset, null, "NOT FOUND") => string(9) "NOT FOUND"
+   idx($keyset, array, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   idx($keyset, vec, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   idx($keyset, dict, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   idx($keyset, keyset, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   idx($keyset, resource, "NOT FOUND") => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   isset($keyset[0]) => bool(true)
+   isset($keyset[3]) => bool(false)
+   isset($keyset[8]) => bool(false)
+   isset($keyset[999999999]) => bool(false)
+   isset($keyset[-1]) => bool(false)
+   isset($keyset["0"]) => bool(false)
+   isset($keyset["3"]) => bool(false)
+   isset($keyset["foobar"]) => bool(false)
+   isset($keyset[""]) => bool(false)
+   isset($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   isset($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   isset($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   isset($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   isset($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   isset($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   isset($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   isset($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   isset($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   array_key_exists($keyset, 0) => bool(true)
+   array_key_exists($keyset, 3) => bool(false)
+   array_key_exists($keyset, 8) => bool(false)
+   array_key_exists($keyset, 999999999) => bool(false)
+   array_key_exists($keyset, -1) => bool(false)
+   array_key_exists($keyset, "0") => bool(false)
+   array_key_exists($keyset, "3") => bool(false)
+   array_key_exists($keyset, "foobar") => bool(false)
+   array_key_exists($keyset, "") => bool(false)
+   array_key_exists($keyset, 0.0) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   array_key_exists($keyset, false) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   array_key_exists($keyset, object) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   array_key_exists($keyset, null) => bool(false)
+   array_key_exists($keyset, array) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   array_key_exists($keyset, vec) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   array_key_exists($keyset, dict) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   array_key_exists($keyset, keyset) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   array_key_exists($keyset, resource) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+   empty($keyset[0]) => bool(true)
+   empty($keyset[3]) => bool(true)
+   empty($keyset[8]) => bool(true)
+   empty($keyset[999999999]) => bool(true)
+   empty($keyset[-1]) => bool(true)
+   empty($keyset["0"]) => bool(true)
+   empty($keyset["3"]) => bool(true)
+   empty($keyset["foobar"]) => bool(true)
+   empty($keyset[""]) => bool(true)
+   empty($keyset[0.0]) => <Exception: "Invalid keyset key: expected a key of type int or string, double given">
+   empty($keyset[false]) => <Exception: "Invalid keyset key: expected a key of type int or string, bool given">
+   empty($keyset[object]) => <Exception: "Invalid keyset key: expected a key of type int or string, ToStringObj given">
+   empty($keyset[null]) => <Exception: "Invalid keyset key: expected a key of type int or string, null given">
+   empty($keyset[array]) => <Exception: "Invalid keyset key: expected a key of type int or string, array given">
+   empty($keyset[vec]) => <Exception: "Invalid keyset key: expected a key of type int or string, vec given">
+   empty($keyset[dict]) => <Exception: "Invalid keyset key: expected a key of type int or string, dict given">
+   empty($keyset[keyset]) => <Exception: "Invalid keyset key: expected a key of type int or string, keyset given">
+   empty($keyset[resource]) => <Exception: "Invalid keyset key: expected a key of type int or string, gd given">
+foreach:
+	Val: int(0)
+	Val: string(1) "A"
+	Val: int(1)
+	Val: string(1) "B"
+foreach with key:
+	Key: int(0)
+	Val: int(0)
+	Key: string(1) "A"
+	Val: string(1) "A"
+	Key: int(1)
+	Val: int(1)
+	Key: string(1) "B"
+	Val: string(1) "B"

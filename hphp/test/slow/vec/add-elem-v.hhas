@@ -1,0 +1,29 @@
+#
+# Can only use AddElemV on PHP arrays or dicts
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main {
+          Int 1
+          Int 2
+          Int 3
+          NewVecArray 3
+          Int 100
+          Int 200
+          Box
+          AddElemV
+          SetL $v
+          PopC
+          String "Shouldn't get here...\n"
+          Print
+          PopC
+          True
+          RetC
+}

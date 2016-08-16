@@ -1,0 +1,1118 @@
+======= base_elem_warn =============================
+int(100)
+Exception: "Out of bounds dict access: invalid index 3"
+int(500)
+Exception: "Out of bounds dict access: invalid index "foo""
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= base_elem ==================================
+int(100)
+string(7) "MISSING"
+int(500)
+string(7) "MISSING"
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= base_define ================================
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(200)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+Exception: "Out of bounds dict access: invalid index 3"
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(200)
+  }
+}
+Exception: "Out of bounds dict access: invalid index "foo""
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+======= base_define_reffy ==========================
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    &string(3) "abc"
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+Exception: "Out of bounds dict access: invalid index 3"
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    &string(3) "abc"
+  }
+}
+Exception: "Out of bounds dict access: invalid index "foo""
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+======= base_unset =================================
+dict(3) {
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(0) {
+  }
+}
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+======= base_new_elem_set ==========================
+Exception: "Cannot use [] with dicts for reading in an lvalue context"
+======= base_str_to_arr ============================
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  array(1) {
+    [10]=>
+    int(123)
+  }
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+======= base_prop_get ==============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= base_prop_set ==============================
+dict(3) {
+  [1]=>
+  array(1) {
+    ["a"]=>
+    int(100)
+  }
+  [2]=>
+  string(0) ""
+  ["1"]=>
+  array(1) {
+    ["a"]=>
+    int(500)
+  }
+}
+======= dim_elem_warn ==============================
+int(100)
+Exception: "Out of bounds dict access: invalid index 3"
+int(500)
+Exception: "Out of bounds dict access: invalid index "foo""
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= dim_elem ===================================
+int(100)
+string(7) "MISSING"
+int(500)
+string(7) "MISSING"
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= dim_define =================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(200)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+Exception: "Out of bounds dict access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(200)
+    }
+  }
+}
+Exception: "Out of bounds dict access: invalid index "foo""
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+======= dim_define_reffy ===========================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      &string(3) "abc"
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+Exception: "Out of bounds dict access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      &string(3) "abc"
+    }
+  }
+}
+Exception: "Out of bounds dict access: invalid index "foo""
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+======= dim_unset ==================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(0) {
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(0) {
+    }
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+======= dim_new_elem_set ===========================
+Exception: "Cannot use [] with dicts for reading in an lvalue context"
+======= dim_str_to_arr =============================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    array(1) {
+      [10]=>
+      int(123)
+    }
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+======= dim_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= dim_prop_set ===============================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    array(1) {
+      ["a"]=>
+      int(100)
+    }
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    array(1) {
+      ["a"]=>
+      int(500)
+    }
+  }
+}
+======= fini_cget_warn =============================
+string(3) "abc"
+Exception: "Out of bounds dict access: invalid index 3"
+string(3) "def"
+Exception: "Out of bounds dict access: invalid index "foo""
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= fini_cget_warn =============================
+string(3) "abc"
+string(7) "MISSING"
+string(3) "def"
+string(7) "MISSING"
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= fini_empty =================================
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= fini_isset =================================
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+======= fini_vget ==================================
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+======= fini_vget_new_elem =========================
+Exception: "Dicts cannot contain references"
+======= fini_set ===================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    int(123)
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(4) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+    [3]=>
+    int(123)
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    int(123)
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(4) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+    ["foo"]=>
+    int(123)
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+======= fini_set_new_elem ==========================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(4) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+    [3]=>
+    int(123)
+  }
+}
+======= fini_incdec ================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abd"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Out of bounds dict access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "deg"
+  }
+}
+Exception: "Out of bounds dict access: invalid index "foo""
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+======= fini_incdec_new_elem =======================
+Exception: "Cannot use [] with dicts for reading in an lvalue context"
+======= fini_setop =================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(11) "abcsome-str"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Out of bounds dict access: invalid index 3"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(11) "defsome-str"
+  }
+}
+Exception: "Out of bounds dict access: invalid index "foo""
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+======= fini_setop_new_elem =======================
+Exception: "Cannot use [] with dicts for reading in an lvalue context"
+======= fini_unset =================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(2) {
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(2) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+======= fini_bind ==================================
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Dicts cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+Exception: "Invalid dict key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}
+======= fini_bind_new_elem =========================
+Exception: "Dicts cannot contain references"
+======= fini_str_to_arr ============================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    array(1) {
+      [10]=>
+      int(123)
+    }
+    ["1"]=>
+    string(3) "def"
+  }
+}
+======= fini_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= fini_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s on line %d
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(0) ""
+    ["1"]=>
+    string(3) "def"
+  }
+}

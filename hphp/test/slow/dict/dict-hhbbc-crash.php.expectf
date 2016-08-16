@@ -1,5 +1,0 @@
-
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Invalid dict key: expected a key of type int or string, bool given' in %s/dict-hhbbc-crash.php:4
-Stack trace:
-#0 %s/dict-hhbbc-crash.php(8): main()
-#1 {main}

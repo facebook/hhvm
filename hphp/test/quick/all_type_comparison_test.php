@@ -176,6 +176,47 @@ function test() {
   $arr21 = array('key1' => 1, 'key2' => 2, 'key3' => 3);
   $arr22 = array('key1' => 1, 'key2' => 2, 'key3' => 3);
   $arr23 = array('key1' => 1, 'key2-other' => 2, 'key3' => 3);
+  $arr24 = array('key2' => 2, 'key3' => 3, 'key1' => 1);
+  $arr25 = array('baz', 'foo');
+  $arr26 = array('baz', new ToStringThrower);
+
+  $vec1 = vec[];
+  $vec2 = vec[1, 2];
+  $vec3 = vec[1, 2, 3];
+  $vec4 = vec[1, 2, 4];
+  $vec5 = vec[new ToString('foo')];
+  $vec6 = vec[new ToStringThrower];
+  $vec7 = vec[new A];
+  $vec8 = vec[new A];
+  $vec9 = vec[4, 2, 1];
+  $vec10 = vec[1, 2, 'value'];
+  $vec11 = vec[1, 2, new ToStringThrower];
+
+  $dict1 = dict[];
+  $dict2 = dict['a' => 0, 'b' => 1];
+  $dict3 = dict['a' => 0, 'b' => 1, 'c' => 2];
+  $dict4 = dict['a' => 0, 'b' => 1, 'c' => 3];
+  $dict5 = dict['a' => 0, 'z' => 1, 'c' => 3];
+  $dict6 = dict[0 => new ToString('foo')];
+  $dict7 = dict[0 => new ToStringThrower];
+  $dict8 = dict[0 => new A];
+  $dict9 = dict[0 => new A];
+  $dict10 = dict['c' => 2, 'b' => 1, 'a' => 0];
+  $dict11 = dict[100 => new ToStringThrower];
+
+  $ks1 = keyset[];
+  $ks2 = keyset[1];
+  $ks3 = keyset[1];
+  $ks4 = keyset['a'];
+  $ks5 = keyset['a'];
+  $ks6 = keyset[1, 2, 3];
+  $ks7 = keyset[3, 2, 1];
+  $ks8 = keyset['a', 'b', 'c'];
+  $ks9 = keyset['c', 'b', 'a'];
+  $ks10 = keyset[1, 2, 4];
+  $ks11 = keyset['a', 'b', 'd'];
+  $ks12 = keyset[100, 2, 3];
+  $ks13 = keyset['z', 'b', 'c'];
 
   $f1 = imagecreate(10, 10);
   $f2 = imagecreate(10, 10);
@@ -207,7 +248,24 @@ function test() {
                'array arr17' => $arr17, 'array arr18' => $arr18,
                'array arr19' => $arr19, 'array arr20' => $arr20,
                'array arr21' => $arr21, 'array arr22' => $arr22,
-               'array arr23' => $arr23,
+               'array arr23' => $arr23, 'array arr24' => $arr24,
+               'array arr25' => $arr25, 'array arr26' => $arr26,
+
+               'vec vec1' => $vec1, 'vec vec2' => $vec2, 'vec vec3' => $vec3,
+               'vec vec4' => $vec4, 'vec vec5' => $vec5, 'vec vec6' => $vec6,
+               'vec vec7' => $vec7, 'vec vec8' => $vec8, 'vec vec9' => $vec9,
+               'vec vec10' => $vec10, 'vec vec11' => $vec11,
+
+               'dict dict1' => $dict1, 'dict dict2' => $dict2, 'dict dict3' => $dict3,
+               'dict dict4' => $dict4, 'dict dict5' => $dict5, 'dict dict6' => $dict6,
+               'dict dict7' => $dict7, 'dict dict8' => $dict8, 'dict dict9' => $dict9,
+               'dict dict10' => $dict10, 'dict dict11' => $dict11,
+
+               'keyset ks1' => $ks1, 'keyset ks2' => $ks2, 'keyset ks3' => $ks3,
+               'keyset ks4' => $ks4, 'keyset ks5' => $ks5, 'keyset ks6' => $ks6,
+               'keyset ks7' => $ks7, 'keyset ks8' => $ks8, 'keyset ks9' => $ks9,
+               'keyset ks10' => $ks10, 'keyset ks11' => $ks11, 'keyset ks12' => $ks12,
+               'keyset ks13' => $ks13,
 
                'object a1' => $a1, 'object a2' => $a2, 'object a3' => $a3,
                'object a4' => $a4, 'object a5' => $a5, 'object a6' => $a6,

@@ -1,0 +1,812 @@
+Comparing:
+dict(0) {
+}
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(4) {
+  [0]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  [3]=>
+  string(1) "c"
+  ["d"]=>
+  string(1) "e"
+}
+dict(4) {
+  [0]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  [3]=>
+  string(1) "c"
+  ["d"]=>
+  string(1) "e"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+}
+dict(2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(6)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(6)
+}
+dict(2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+}
+dict(2) {
+  [0]=>
+  int(4)
+  [2]=>
+  int(5)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  [0]=>
+  int(4)
+  [2]=>
+  int(5)
+}
+dict(2) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(5)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+dict(2) {
+  [0]=>
+  int(1)
+  ["key"]=>
+  string(5) "value"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  [0]=>
+  int(1)
+  ["key"]=>
+  string(5) "value"
+}
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  ["a"]=>
+  int(0)
+}
+dict(1) {
+  ["b"]=>
+  int(0)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  ["b"]=>
+  int(0)
+}
+dict(1) {
+  ["a"]=>
+  int(0)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+dict(3) {
+  [2]=>
+  string(1) "c"
+  [1]=>
+  string(1) "b"
+  [0]=>
+  string(1) "a"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(3) {
+  [2]=>
+  string(1) "c"
+  [1]=>
+  string(1) "b"
+  [0]=>
+  string(1) "a"
+}
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  [0]=>
+  string(1) "a"
+  [5]=>
+  string(1) "b"
+}
+dict(2) {
+  [0]=>
+  string(1) "a"
+  [5]=>
+  string(1) "b"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  ["a"]=>
+  int(12345)
+}
+dict(1) {
+  ["a"]=>
+  string(5) "12345"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  ["a"]=>
+  string(5) "12345"
+}
+dict(1) {
+  ["a"]=>
+  int(12345)
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  [0]=>
+  object(stdClass)#%d (0) {
+  }
+}
+dict(1) {
+  [0]=>
+  object(stdClass)#%d (0) {
+  }
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  [0]=>
+  object(ToString)#%d (1) {
+    ["str"]=>
+    string(6) "foobaz"
+  }
+}
+dict(1) {
+  [0]=>
+  string(6) "foobaz"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  [0]=>
+  string(6) "foobaz"
+}
+dict(1) {
+  [0]=>
+  object(ToString)#%d (1) {
+    ["str"]=>
+    string(6) "foobaz"
+  }
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  ["key"]=>
+  object(Thrower)#%d (0) {
+  }
+}
+dict(1) {
+  ["key"]=>
+  string(6) "foobaz"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : Error: Compare exception
+	!=  : Error: Compare exception
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  ["key"]=>
+  string(6) "foobaz"
+}
+dict(1) {
+  ["key"]=>
+  object(Thrower)#%d (0) {
+  }
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : Error: Compare exception
+	!=  : Error: Compare exception
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  [0]=>
+  object(Thrower)#%d (0) {
+  }
+}
+dict(1) {
+  [1]=>
+  string(6) "foobaz"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(1) {
+  [1]=>
+  string(6) "foobaz"
+}
+dict(1) {
+  [0]=>
+  object(Thrower)#%d (0) {
+  }
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  object(Thrower)#%d (0) {
+  }
+}
+dict(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  string(6) "foobaz"
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  string(6) "foobaz"
+}
+dict(2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  object(Thrower)#%d (0) {
+  }
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+NULL
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+NULL
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+bool(false)
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+bool(false)
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+int(123)
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+int(123)
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+float(1.2345)
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+float(1.2345)
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+string(3) "abc"
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+string(3) "abc"
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+object(stdClass)#%d (0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+object(stdClass)#%d (0) {
+}
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+array(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+array(0) {
+}
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+dict(0) {
+}
+vec(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+vec(0) {
+}
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Comparing:
+dict(0) {
+}
+keyset(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Comparing:
+keyset(0) {
+}
+dict(0) {
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+	==  : bool(false)
+	!=  : bool(true)
+	=== : bool(false)
+	!== : bool(true)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+Comparing:
+dict(1) {
+  [0]=>
+  keyset(0) {
+  }
+}
+dict(1) {
+  [0]=>
+  keyset(0) {
+  }
+}
+	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+	==  : bool(true)
+	!=  : bool(false)
+	=== : bool(true)
+	!== : bool(false)
+	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts

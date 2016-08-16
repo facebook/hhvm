@@ -1,0 +1,24 @@
+vec(6) {
+  int(1)
+  string(1) "1"
+  int(2)
+  string(1) "2"
+  string(5) "alpha"
+  string(4) "beta"
+}
+vec(4) {
+  string(5) "hello"
+  string(5) "world"
+  int(1)
+  int(2)
+}
+array(1) {
+  ["TestAttr"]=>
+  array(1) {
+    [0]=>
+    vec(2) {
+      int(1)
+      string(1) "1"
+    }
+  }
+}

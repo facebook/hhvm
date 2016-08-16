@@ -1,0 +1,20 @@
+dict(3) {
+  [1]=>
+  object(Dtor)#1 (1) {
+    ["id"]=>
+    int(1)
+  }
+  [2]=>
+  object(Dtor)#2 (1) {
+    ["id"]=>
+    int(2)
+  }
+  [3]=>
+  object(Dtor)#3 (1) {
+    ["id"]=>
+    int(3)
+  }
+}
+Dtor::__destruct(1)
+Dtor::__destruct(2)
+Dtor::__destruct(3)

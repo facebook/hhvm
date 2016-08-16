@@ -1,0 +1,4 @@
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds vec access: invalid index 1' in %s:%d
+Stack trace:
+#0 %s(%d): main()
+#1 {main}

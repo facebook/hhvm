@@ -849,6 +849,21 @@ namespace make_array_detail {
     map_impl(init, std::forward<KVPairs>(kvpairs)...);
   }
 
+  inline String dict_init_key(const char* s) { return String(s); }
+  inline int64_t dict_init_key(int k) { return k; }
+  inline int64_t dict_init_key(int64_t k) { return k; }
+  inline StringData* dict_init_key(const String& k) { return k.get(); }
+  inline StringData* dict_init_key(StringData* k) { return k; }
+
+  inline void dict_impl(DictInit&) {}
+
+  template<class Key, class Val, class... KVPairs>
+  void dict_impl(DictInit& init, Key&& key, Val&& val, KVPairs&&... kvpairs) {
+    init.set(dict_init_key(std::forward<Key>(key)),
+             Variant(std::forward<Val>(val)));
+    dict_impl(init, std::forward<KVPairs>(kvpairs)...);
+  }
+
   inline String keyset_init_key(const char* s) { return String(s); }
   inline int64_t keyset_init_key(int k) { return k; }
   inline int64_t keyset_init_key(int64_t k) { return k; }
@@ -916,6 +931,23 @@ Array make_map_array(KVPairs&&... kvpairs) {
     sizeof...(kvpairs) % 2 == 0, "make_map_array needs key value pairs");
   ArrayInit init(sizeof...(kvpairs) / 2, ArrayInit::Map{});
   make_array_detail::map_impl(init, std::forward<KVPairs>(kvpairs)...);
+  return init.toArray();
+}
+
+/*
+ * Helper for creating Hack dictionaries.
+ *
+ * Usage:
+ *
+ *   auto newArray = make_keyset_array(1, 2, 3, 4);
+ */
+template<class... KVPairs>
+Array make_dict_array(KVPairs&&... kvpairs) {
+  static_assert(sizeof...(kvpairs), "use Array::CreateDict() instead");
+  static_assert(
+    sizeof...(kvpairs) % 2 == 0, "make_dict_array needs key value pairs");
+  DictInit init(sizeof...(kvpairs) / 2);
+  make_array_detail::dict_impl(init, std::forward<KVPairs>(kvpairs)...);
   return init.toArray();
 }
 

@@ -1,0 +1,649 @@
+Testing: vec(0) {
+}
+Testing append....
+vec(0) {
+}
+vec(11) {
+  int(0)
+  string(1) "a"
+  float(1.23)
+  bool(false)
+  object(stdClass)#1 (0) {
+  }
+  NULL
+  array(3) {
+    [0]=>
+    int(300)
+    [1]=>
+    int(200)
+    [2]=>
+    int(100)
+  }
+  vec(0) {
+  }
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+}
+Testing set....
+Set to 0 key value failed: "Out of bounds vec access: invalid index 0"
+Set to 3 key value failed: "Out of bounds vec access: invalid index 3"
+Set to 999999999 key value failed: "Out of bounds vec access: invalid index 999999999"
+Set to -1 key value failed: "Out of bounds vec access: invalid index -1"
+Set to "key1" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "0" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "3" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to bool key value failed: "Invalid vec key: expected a key of type int, bool given"
+Set to null key value failed: "Invalid vec key: expected a key of type int, null given"
+Set to double key value failed: "Invalid vec key: expected a key of type int, double given"
+Set to object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
+Set to array key value failed: "Invalid vec key: expected a key of type int, array given"
+Set to vec key value failed: "Invalid vec key: expected a key of type int, vec given"
+Set to dict key value failed: "Invalid vec key: expected a key of type int, dict given"
+Set to keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(0) {
+}
+vec(0) {
+}
+Test set-op....
+Set-Op with " + 0 key value" failed: "Out of bounds vec access: invalid index 0"
+Set-Op with " + 3 key value" failed: "Out of bounds vec access: invalid index 3"
+Set-Op with " + 999999999 key value" failed: "Out of bounds vec access: invalid index 999999999"
+Set-Op with " + -1 key value" failed: "Out of bounds vec access: invalid index -1"
+Set-Op with " + "key1" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "0" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "3" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + bool key value" failed: "Invalid vec key: expected a key of type int, bool given"
+Set-Op with " + null key value" failed: "Invalid vec key: expected a key of type int, null given"
+Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, double given"
+Set-Op with " + object key value" failed: "Invalid vec key: expected a key of type int, stdClass given"
+Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, array given"
+Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, vec given"
+Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, dict given"
+Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(0) {
+}
+vec(0) {
+}
+Test new set-op....
+New set-op with "+ 0 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ 3 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ 999999999 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ -1 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ "a" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+vec(0) {
+}
+vec(0) {
+}
+Test unset....
+Unset of 0 key value succeeded
+vec(0) {
+}
+vec(0) {
+}
+Unset of 3 key value succeeded
+vec(0) {
+}
+vec(0) {
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "3" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid vec key: expected a key of type int, bool given"
+Unset of null key value failed: "Invalid vec key: expected a key of type int, null given"
+Unset of double key value failed: "Invalid vec key: expected a key of type int, double given"
+Unset of object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
+Unset of array key value failed: "Invalid vec key: expected a key of type int, array given"
+Unset of vec key value failed: "Invalid vec key: expected a key of type int, vec given"
+Unset of dict key value failed: "Invalid vec key: expected a key of type int, dict given"
+Unset of keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(0) {
+}
+vec(0) {
+}
+Testing: vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Testing append....
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(15) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(0)
+  string(1) "a"
+  float(1.23)
+  bool(false)
+  object(stdClass)#1 (0) {
+  }
+  NULL
+  array(3) {
+    [0]=>
+    int(300)
+    [1]=>
+    int(200)
+    [2]=>
+    int(100)
+  }
+  vec(0) {
+  }
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+}
+Testing set....
+Set to 0 key value succeeded
+Set to 3 key value succeeded
+Set to 999999999 key value failed: "Out of bounds vec access: invalid index 999999999"
+Set to -1 key value failed: "Out of bounds vec access: invalid index -1"
+Set to "key1" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "0" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "3" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to bool key value failed: "Invalid vec key: expected a key of type int, bool given"
+Set to null key value failed: "Invalid vec key: expected a key of type int, null given"
+Set to double key value failed: "Invalid vec key: expected a key of type int, double given"
+Set to object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
+Set to array key value failed: "Invalid vec key: expected a key of type int, array given"
+Set to vec key value failed: "Invalid vec key: expected a key of type int, vec given"
+Set to dict key value failed: "Invalid vec key: expected a key of type int, dict given"
+Set to keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(4) {
+  string(11) "0 key value"
+  int(2)
+  int(3)
+  string(11) "3 key value"
+}
+Test set-op....
+Set-Op with " + 0 key value" succeeded
+Set-Op with " + 3 key value" succeeded
+Set-Op with " + 999999999 key value" failed: "Out of bounds vec access: invalid index 999999999"
+Set-Op with " + -1 key value" failed: "Out of bounds vec access: invalid index -1"
+Set-Op with " + "key1" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "0" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "3" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + bool key value" failed: "Invalid vec key: expected a key of type int, bool given"
+Set-Op with " + null key value" failed: "Invalid vec key: expected a key of type int, null given"
+Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, double given"
+Set-Op with " + object key value" failed: "Invalid vec key: expected a key of type int, stdClass given"
+Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, array given"
+Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, vec given"
+Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, dict given"
+Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(4) {
+  string(15) "1 + 0 key value"
+  int(2)
+  int(3)
+  string(15) "4 + 3 key value"
+}
+Test new set-op....
+New set-op with "+ 0 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ 3 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ 999999999 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ -1 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ "a" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Test unset....
+Unset of 0 key value succeeded
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+dict(3) {
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+Unset of 3 key value succeeded
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "3" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid vec key: expected a key of type int, bool given"
+Unset of null key value failed: "Invalid vec key: expected a key of type int, null given"
+Unset of double key value failed: "Invalid vec key: expected a key of type int, double given"
+Unset of object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
+Unset of array key value failed: "Invalid vec key: expected a key of type int, array given"
+Unset of vec key value failed: "Invalid vec key: expected a key of type int, vec given"
+Unset of dict key value failed: "Invalid vec key: expected a key of type int, dict given"
+Unset of keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+Testing: vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+Testing append....
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+vec(22) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+  int(0)
+  string(1) "a"
+  float(1.23)
+  bool(false)
+  object(stdClass)#1 (0) {
+  }
+  NULL
+  array(3) {
+    [0]=>
+    int(300)
+    [1]=>
+    int(200)
+    [2]=>
+    int(100)
+  }
+  vec(0) {
+  }
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  keyset(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+}
+Testing set....
+Set to 0 key value succeeded
+Set to 3 key value succeeded
+Set to 999999999 key value failed: "Out of bounds vec access: invalid index 999999999"
+Set to -1 key value failed: "Out of bounds vec access: invalid index -1"
+Set to "key1" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "0" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "3" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to "" key value failed: "Invalid vec key: expected a key of type int, string given"
+Set to bool key value failed: "Invalid vec key: expected a key of type int, bool given"
+Set to null key value failed: "Invalid vec key: expected a key of type int, null given"
+Set to double key value failed: "Invalid vec key: expected a key of type int, double given"
+Set to object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
+Set to array key value failed: "Invalid vec key: expected a key of type int, array given"
+Set to vec key value failed: "Invalid vec key: expected a key of type int, vec given"
+Set to dict key value failed: "Invalid vec key: expected a key of type int, dict given"
+Set to keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+vec(11) {
+  string(11) "0 key value"
+  string(1) "b"
+  string(1) "c"
+  string(11) "3 key value"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+Test set-op....
+Set-Op with " + 0 key value" succeeded
+Set-Op with " + 3 key value" succeeded
+Set-Op with " + 999999999 key value" failed: "Out of bounds vec access: invalid index 999999999"
+Set-Op with " + -1 key value" failed: "Out of bounds vec access: invalid index -1"
+Set-Op with " + "key1" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "0" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "3" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + "" key value" failed: "Invalid vec key: expected a key of type int, string given"
+Set-Op with " + bool key value" failed: "Invalid vec key: expected a key of type int, bool given"
+Set-Op with " + null key value" failed: "Invalid vec key: expected a key of type int, null given"
+Set-Op with " + double key value" failed: "Invalid vec key: expected a key of type int, double given"
+Set-Op with " + object key value" failed: "Invalid vec key: expected a key of type int, stdClass given"
+Set-Op with " + array key value" failed: "Invalid vec key: expected a key of type int, array given"
+Set-Op with " + vec key value" failed: "Invalid vec key: expected a key of type int, vec given"
+Set-Op with " + dict key value" failed: "Invalid vec key: expected a key of type int, dict given"
+Set-Op with " + keyset key value" failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+vec(11) {
+  string(15) "a + 0 key value"
+  string(1) "b"
+  string(1) "c"
+  string(15) "d + 3 key value"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+Test new set-op....
+New set-op with "+ 0 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ 3 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ 999999999 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ -1 value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with "+ "a" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "key1" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "0" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "3" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + "" value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + bool value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + null value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + double value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + object value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + array value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + vec value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + dict value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+New set-op with " + keyset value" failed: "Cannot use [] with vecs for reading in an lvalue context"
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+Test unset....
+Unset of 0 key value succeeded
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+dict(10) {
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+  [4]=>
+  string(1) "e"
+  [5]=>
+  string(1) "f"
+  [6]=>
+  string(1) "g"
+  [7]=>
+  string(1) "h"
+  [8]=>
+  string(1) "i"
+  [9]=>
+  string(1) "j"
+  [10]=>
+  string(1) "k"
+}
+Unset of 3 key value succeeded
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+dict(10) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [4]=>
+  string(1) "e"
+  [5]=>
+  string(1) "f"
+  [6]=>
+  string(1) "g"
+  [7]=>
+  string(1) "h"
+  [8]=>
+  string(1) "i"
+  [9]=>
+  string(1) "j"
+  [10]=>
+  string(1) "k"
+}
+Unset of 999999999 key value succeeded
+Unset of -1 key value succeeded
+Unset of "key1" key value succeeded
+Unset of "0" key value succeeded
+Unset of "3" key value succeeded
+Unset of "" key value succeeded
+Unset of false key value failed: "Invalid vec key: expected a key of type int, bool given"
+Unset of null key value failed: "Invalid vec key: expected a key of type int, null given"
+Unset of double key value failed: "Invalid vec key: expected a key of type int, double given"
+Unset of object key value failed: "Invalid vec key: expected a key of type int, stdClass given"
+Unset of array key value failed: "Invalid vec key: expected a key of type int, array given"
+Unset of vec key value failed: "Invalid vec key: expected a key of type int, vec given"
+Unset of dict key value failed: "Invalid vec key: expected a key of type int, dict given"
+Unset of keyset key value failed: "Invalid vec key: expected a key of type int, keyset given"
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+}

@@ -34,7 +34,132 @@ CallGraph::~CallGraph() {
   arcs = std::vector<Arc*>();
   funcs = std::vector<Func>();
   addr2FuncId = std::map<uint64_t, FuncId>();
+}
 
+bool CallGraph::addFunc(Func f) {
+  if (f.valid()) {
+    auto it = addr2FuncId.find(f.addr);
+    if (it != addr2FuncId.end()) {
+      Func& base = funcs[it->second];
+      base.mangledNames.push_back(f.mangledNames[0]);
+      if (f.size > base.size) base.size = f.size;
+      HFTRACE(2, "Func: adding '%s' to (%u)\n",
+              f.mangledNames[0].c_str(),
+              base.id);
+    } else {
+      funcs.push_back(f);
+      addr2FuncId[f.addr] = f.id;
+      HFTRACE(2, "Func: adding (%u): %016lx %s %u\n",
+              f.id,
+              (long)f.addr,
+              f.mangledNames[0].c_str(),
+              f.size);
+      return true;
+    }
+  }
+  return false;
+}
+
+Arc* CallGraph::findArc(FuncId src, FuncId dst) const {
+  const auto& outArcs = funcs[src].outArcs;
+  for (size_t i = 0; i < outArcs.size(); i++) {
+    Arc* arc = outArcs[i];
+    if (arc->dst == dst) return arc;
+  }
+  return nullptr;
+}
+
+Arc* CallGraph::getArc(FuncId src, FuncId dst) {
+  auto arc = findArc(src, dst);
+  if (arc) return arc;
+  arc = new Arc(src, dst, 0);
+  funcs[src].outArcs.push_back(arc);
+  funcs[dst].inArcs. push_back(arc);
+  arcs.push_back(arc);
+  return arc;
+}
+
+Arc* CallGraph::incArcWeight(FuncId src, FuncId dst, double w) {
+  for (size_t i = 0; i < funcs[src].outArcs.size(); i++) {
+    Arc* arc = funcs[src].outArcs[i];
+    if (arc->dst == dst) {
+      arc->weight += w;
+      return arc;
+    }
+  }
+  Arc* arc = new Arc(src, dst, w);
+  funcs[src].outArcs.push_back(arc);
+  funcs[dst].inArcs. push_back(arc);
+  arcs.push_back(arc);
+  return arc;
+}
+
+FuncId CallGraph::addrToFuncId(uint64_t addr) const {
+  auto it = addr2FuncId.upper_bound(addr);
+  if (it == addr2FuncId.begin()) return InvalidId;
+  --it;
+  const auto &f = funcs[it->second];
+  assert(f.addr <= addr);
+  if (f.addr + f.size <= addr) {
+    return InvalidId;
+  }
+  return it->second;
+}
+
+void CallGraph::printDot(char* fileName) const {
+  FILE* file = fopen(fileName, "wt");
+  if (!file) return;
+  fprintf(file, "digraph g {\n");
+  for (size_t f = 0; f < funcs.size(); f++) {
+    if (funcs[f].samples == 0) continue;
+    fprintf(file, "f%lu [label=\"%s\\nsamples=%u\"]\n",
+            f, funcs[f].mangledNames[0].c_str(), funcs[f].samples);
+  }
+  for (size_t f = 0; f < funcs.size(); f++) {
+    if (funcs[f].samples == 0) continue;
+    for (size_t i = 0; i < funcs[f].outArcs.size(); i++) {
+      auto arc = funcs[f].outArcs[i];
+      fprintf(
+        file,
+        "f%lu -> f%u [label=normWgt=%.3lf,weight=%.0lf,callOffset=%.1lf]\n",
+        f,
+        arc->dst,
+        arc->normalizedWeight,
+        arc->weight,
+        arc->avgCallOffset);
+    }
+  }
+  fprintf(file, "}\n");
+  fclose(file);
+}
+
+std::string Func::toString() const {
+  return folly::sformat("func = {:5} : samples = {:6} : size = {:6} : {}\n",
+                        id, samples, size, mangledNames[0]);
+}
+
+Cluster::Cluster(FuncId fid) {
+  funcs.push_back(fid);
+  size    = cg.funcs[fid].size;
+  arcWeight = 0;
+  samples = cg.funcs[fid].samples;
+  frozen  = false;
+  HFTRACE(1, "new Cluster: %s: %s\n", toString().c_str(),
+          cg.funcs[fid].toString().c_str());
+}
+
+void Cluster::merge(const Cluster& other, const double aw) {
+  for (size_t if2 = 0; if2 < other.funcs.size(); if2++) {
+    FuncId fid = other.funcs[if2];
+    funcs.push_back(fid);
+  }
+  size += other.size;
+  samples += other.samples;
+  arcWeight += (other.arcWeight + aw);
+}
+
+std::string Cluster::toString() const {
+  return folly::format("funcs = [{}]", folly::join(", ", funcs)).str();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,6 +289,28 @@ std::vector<Cluster*> clusterize() {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
+struct ClusterArc {
+  ClusterArc(Cluster* c1, Cluster* c2, double w)
+    : c1(c1)
+    , c2(c2)
+    , weight(w)
+  {}
+
+  friend bool operator==(const ClusterArc& carc1, const ClusterArc& carc2) {
+    return ((carc1.c1 == carc2.c1 && carc1.c2 == carc2.c2) ||
+            (carc1.c1 == carc2.c2 && carc1.c2 == carc2.c1));
+  }
+
+  friend bool operator!=(const ClusterArc& c1, const ClusterArc& c2) {
+    return !(c1 == c2);
+  }
+
+  Cluster* c1;
+  Cluster* c2;
+  double weight;
+};
+
+
 void orderFuncs(Cluster* c1, Cluster* c2) {
   FuncId c1head = c1->funcs[0];
   FuncId c1tail = c1->funcs[c1->funcs.size() - 1];

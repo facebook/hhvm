@@ -164,9 +164,12 @@ std::string getNameWithoutSuffix(std::string str) {
   }
 }
 
-void print(const std::vector<Cluster*>& clusters, bool useWildcards) {
-  FILE* outfile = fopen("hotfuncs.txt", "wt");
-  if (!outfile) error("opening output file hotfuncs.txt");
+void print(const char* filename, const std::vector<Cluster*>& clusters,
+           bool useWildcards) {
+  FILE* outfile = fopen(filename, "wt");
+  if (!outfile) {
+    error(folly::sformat("opening output file {}", filename).c_str());
+  }
   uint32_t totalSize   = 0;
   uint32_t curPage     = 0;
   uint32_t hotfuncs    = 0;
@@ -334,17 +337,20 @@ int main(int argc, char* argv[]) {
 
   std::vector<Cluster*> clusters;
 
+  const char* filename;
   if (algorithm == Algorithm::Hfsort) {
     HFTRACE(1, "=== algorithm : hfsort\n\n");
     clusters = clusterize();
+    filename = "hotfuncs.txt";
   } else {
     HFTRACE(1, "=== algorithm : pettis-hansen\n\n");
     assert(algorithm == Algorithm::PettisHansen);
     clusters = pettisAndHansen();
+    filename = "hotfuncs-pettis.txt";
   }
 
   sort(clusters.begin(), clusters.end(), compareClustersDensity);
-  print(clusters, useWildcards);
+  print(filename, clusters, useWildcards);
 
   fclose(symbFile);
   gzclose(perfFile);

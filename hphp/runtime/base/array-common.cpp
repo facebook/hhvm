@@ -107,15 +107,16 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
 ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return staticEmptyKeysetArray();
-  auto keyset = Array::CreateKeyset();
+  KeysetInit init{size};
   IterateKV(
     make_array_like_tv(a),
     [&](const ArrayData*) { return false; },
     [&](const TypedValue* k, const TypedValue*) {
-      keyset.append(tvAsCVarRef(k));
+      assert(k->m_type != KindOfRef);
+      init.add(tvAsCVarRef(k));
     }
   );
-  return keyset.detach();
+  return init.create();
 }
 
 ArrayCommon::RefCheckResult

@@ -65,12 +65,12 @@ inline const Variant& ArrayData::get(const String& k, bool error) const {
 }
 
 inline const Variant& ArrayData::get(int64_t k, bool error) const {
-  auto tv = nvGet(k);
+  auto tv = error ? nvTryGet(k) : nvGet(k);
   return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 
 inline const Variant& ArrayData::get(const StringData* k, bool error) const {
-  auto tv = nvGet(k);
+  auto tv = error ? nvTryGet(k) : nvGet(k);
   return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 

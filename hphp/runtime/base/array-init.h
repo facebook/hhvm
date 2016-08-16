@@ -61,14 +61,14 @@ struct ArrayInit {
 
   ArrayInit(ArrayInit&& other) noexcept
     : m_data(other.m_data)
-#ifndef NDEBUG
+#ifdef DEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     assert(!m_data || m_data->isPHPArray());
     other.m_data = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -255,7 +255,7 @@ struct ArrayInit {
     assert(m_data->isPHPArray());
     auto const ret = m_data;
     m_data = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return ret;
@@ -266,7 +266,7 @@ struct ArrayInit {
     assert(m_data->isPHPArray());
     auto ptr = m_data;
     m_data = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
@@ -277,7 +277,7 @@ struct ArrayInit {
     assert(m_data->isPHPArray());
     auto ptr = m_data;
     m_data = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Variant(ptr, KindOfArray, Variant::ArrayInitCtor{});
@@ -296,7 +296,7 @@ private:
 
 private:
   ArrayData* m_data;
-#ifndef NDEBUG
+#ifdef DEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif
@@ -312,14 +312,14 @@ struct DictInit {
 
   DictInit(DictInit&& other) noexcept
     : m_data(other.m_data)
-#ifndef NDEBUG
+#ifdef DEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     assert(!m_data || m_data->isDict());
     other.m_data = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -328,23 +328,28 @@ struct DictInit {
   DictInit& operator=(const DictInit&) = delete;
 
   ~DictInit() {
-    // Use non-specialized release call so array instrumentation can track
-    // its destruction XXX rfc: keep this? what was it before?
     assert(!m_data || (m_data->hasExactlyOneRef() && m_data->isDict()));
-    if (m_data) m_data->release();
+    if (m_data) MixedArray::Release(m_data);
   }
 
   DictInit& append(const Variant& v) {
     auto const cell = LIKELY(v.getType() != KindOfUninit)
       ? *v.asCell()
       : make_tv<KindOfNull>();
-    performOp([&]{ return MixedArray::Append(m_data, cell, false); });
+    performOp([&]{ return MixedArray::AppendDict(m_data, cell, false); });
     return *this;
   }
 
   DictInit& set(int64_t name, const Variant& v) {
     performOp([&]{
-      return MixedArray::SetInt(m_data, name, v.asInitCellTmp(), false);
+      return MixedArray::SetIntDict(m_data, name, v.asInitCellTmp(), false);
+    });
+    return *this;
+  }
+
+  DictInit& set(StringData* name, const Variant& v) {
+    performOp([&]{
+      return MixedArray::SetStrDict(m_data, name, v.asInitCellTmp(), false);
     });
     return *this;
   }
@@ -357,7 +362,8 @@ struct DictInit {
 
   DictInit& set(const String& name, const Variant& v) {
     performOp([&]{
-      return MixedArray::SetStr(m_data, name.get(), v.asInitCellTmp(), false);
+      return MixedArray::SetStrDict(m_data, name.get(),
+                                    v.asInitCellTmp(), false);
     });
     return *this;
   }
@@ -365,41 +371,28 @@ struct DictInit {
   DictInit& set(const Variant& name, const Variant& v) = delete;
   DictInit& setValidKey(const Variant& name, const Variant& v) {
     assert(name.isInteger() || name.isString());
-    performOp([&]{ return m_data->set(name, v, false); });
+    performOp(
+      [&]{
+        auto const cell = name.asCell();
+        return isIntType(cell->m_type)
+          ? MixedArray::SetIntDict(m_data, cell->m_data.num,
+                                   v.asInitCellTmp(), false)
+          : MixedArray::SetStrDict(m_data, cell->m_data.pstr,
+                                   v.asInitCellTmp(), false);
+      }
+    );
     return *this;
   }
 
-  template<class T>
-  DictInit& set(const T& name, const Variant& v) {
-    performOp([&]{ return m_data->set(name, v, false); });
-    return *this;
-  }
-
-  DictInit& add(int64_t name, const Variant& v) {
-    performOp([&]{
-      return MixedArray::AddInt(m_data, name, v.asInitCellTmp(), false);
-    });
-    return *this;
-  }
-
-  DictInit& add(const String& name, const Variant& v) {
-    assert(!name.isNull());
-    performOp([&]{
-      return MixedArray::AddStr(m_data, name.get(), v.asInitCellTmp(), false);
-    });
-    return *this;
-  }
-
-  DictInit& add(const Variant& name, const Variant& v) {
-    assert(name.isString() || name.isInteger());
-    performOp([&]{ return m_data->add(name, v, false); });
-    return *this;
-  }
-
-  template<typename T>
-  DictInit& add(const T &name, const Variant& v) {
-    performOp([&]{ return m_data->add(name, v, false); });
-    return *this;
+  ArrayData* create() {
+    assert(m_data->hasExactlyOneRef());
+    assert(m_data->isDict());
+    auto const ret = m_data;
+    m_data = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return ret;
   }
 
   Array toArray() {
@@ -407,21 +400,10 @@ struct DictInit {
     assert(m_data->isDict());
     auto ptr = m_data;
     m_data = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
-  }
-
-  ArrayData* create() {
-    assert(m_data->hasExactlyOneRef());
-    assert(m_data->isDict());
-    auto ptr = m_data;
-    m_data = nullptr;
-#ifndef NDEBUG
-    m_expectedCount = 0; // reset; no more adds allowed
-#endif
-    return ptr;
   }
 
   Variant toVariant() {
@@ -429,7 +411,7 @@ struct DictInit {
     assert(m_data->isDict());
     auto ptr = m_data;
     m_data = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Variant(ptr, KindOfDict, Variant::ArrayInitCtor{});
@@ -448,7 +430,7 @@ private:
 
 private:
   ArrayData* m_data;
-#ifndef NDEBUG
+#ifdef DEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif
@@ -461,7 +443,7 @@ private:
 struct PackedArrayInit {
   explicit PackedArrayInit(size_t n)
     : m_vec(PackedArray::MakeReserve(n))
-#ifndef NDEBUG
+#ifdef DEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
@@ -480,7 +462,7 @@ struct PackedArrayInit {
       check_request_surprise_unlikely();
     }
     m_vec = PackedArray::MakeReserve(n);
-#ifndef NDEBUG
+#ifdef DEBUG
     m_addCount = 0;
     m_expectedCount = n;
 #endif
@@ -490,14 +472,14 @@ struct PackedArrayInit {
 
   PackedArrayInit(PackedArrayInit&& other) noexcept
     : m_vec(other.m_vec)
-#ifndef NDEBUG
+#ifdef DEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     assert(!m_vec || m_vec->isPHPArray());
     other.m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -549,7 +531,7 @@ struct PackedArrayInit {
     assert(m_vec->isPHPArray());
     auto ptr = m_vec;
     m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Variant(ptr, KindOfArray, Variant::ArrayInitCtor{});
@@ -560,7 +542,7 @@ struct PackedArrayInit {
     assert(m_vec->isPHPArray());
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
@@ -571,7 +553,7 @@ struct PackedArrayInit {
     assert(m_vec->isPHPArray());
     auto ptr = m_vec;
     m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return ptr;
@@ -590,7 +572,7 @@ private:
 
 private:
   ArrayData* m_vec;
-#ifndef NDEBUG
+#ifdef DEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif
@@ -604,7 +586,7 @@ private:
 struct VecArrayInit {
   explicit VecArrayInit(size_t n)
     : m_vec(PackedArray::MakeReserveVec(n))
-#ifndef NDEBUG
+#ifdef DEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
@@ -623,7 +605,7 @@ struct VecArrayInit {
       check_request_surprise_unlikely();
     }
     m_vec = PackedArray::MakeReserveVec(n);
-#ifndef NDEBUG
+#ifdef DEBUG
     m_addCount = 0;
     m_expectedCount = n;
 #endif
@@ -633,14 +615,14 @@ struct VecArrayInit {
 
   VecArrayInit(VecArrayInit&& other) noexcept
     : m_vec(other.m_vec)
-#ifndef NDEBUG
+#ifdef DEBUG
     , m_addCount(other.m_addCount)
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
     assert(!m_vec || m_vec->isVecArray());
     other.m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     other.m_expectedCount = 0;
 #endif
   }
@@ -651,7 +633,7 @@ struct VecArrayInit {
   ~VecArrayInit() {
     // In case an exception interrupts the initialization.
     assert(!m_vec || (m_vec->hasExactlyOneRef() && m_vec->isVecArray()));
-    if (m_vec) m_vec->release();
+    if (m_vec) PackedArray::Release(m_vec);
   }
 
   /*
@@ -670,7 +652,7 @@ struct VecArrayInit {
     assert(m_vec->isVecArray());
     auto ptr = m_vec;
     m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Variant(ptr, KindOfVec, Variant::ArrayInitCtor{});
@@ -681,7 +663,7 @@ struct VecArrayInit {
     assert(m_vec->isVecArray());
     ArrayData* ptr = m_vec;
     m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return Array(ptr, Array::ArrayInitCtor::Tag);
@@ -692,7 +674,7 @@ struct VecArrayInit {
     assert(m_vec->isVecArray());
     auto ptr = m_vec;
     m_vec = nullptr;
-#ifndef NDEBUG
+#ifdef DEBUG
     m_expectedCount = 0; // reset; no more adds allowed
 #endif
     return ptr;
@@ -711,7 +693,117 @@ private:
 
 private:
   ArrayData* m_vec;
-#ifndef NDEBUG
+#ifdef DEBUG
+  size_t m_addCount;
+  size_t m_expectedCount;
+#endif
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Initializer for a Hack keyset.
+ */
+struct KeysetInit {
+  explicit KeysetInit(size_t n)
+    : m_keyset(MixedArray::MakeReserveKeyset(n))
+#ifdef DEBUG
+    , m_addCount(0)
+    , m_expectedCount(n)
+#endif
+  {
+    assert(m_keyset->hasExactlyOneRef());
+  }
+
+  /*
+   * Before allocating, check if the allocation would cause the request to OOM.
+   *
+   * @throws RequestMemoryExceededException if allocating would OOM.
+   */
+  KeysetInit(size_t n, CheckAllocation);
+
+  KeysetInit(KeysetInit&& other) noexcept
+    : m_keyset(other.m_keyset)
+#ifdef DEBUG
+    , m_addCount(other.m_addCount)
+    , m_expectedCount(other.m_expectedCount)
+#endif
+  {
+    assert(!m_keyset || m_keyset->isKeyset());
+    other.m_keyset = nullptr;
+#ifdef DEBUG
+    other.m_expectedCount = 0;
+#endif
+  }
+
+  KeysetInit(const KeysetInit&) = delete;
+  KeysetInit& operator=(const KeysetInit&) = delete;
+
+  ~KeysetInit() {
+    // In case an exception interrupts the initialization.
+    assert(!m_keyset || (m_keyset->hasExactlyOneRef() && m_keyset->isKeyset()));
+    if (m_keyset) MixedArray::Release(m_keyset);
+  }
+
+  /*
+   * Add a new element to the keyset.
+   */
+  KeysetInit& add(int64_t v) { return add(Variant{v}); }
+  KeysetInit& add(StringData* v) { return add(Variant{v}); }
+  KeysetInit& add(const Variant& v) {
+    performOp([&]{
+      return MixedArray::AppendKeyset(m_keyset, v.asInitCellTmp(), false);
+    });
+    return *this;
+  }
+
+  Variant toVariant() {
+    assert(m_keyset->hasExactlyOneRef());
+    assert(m_keyset->isKeyset());
+    auto ptr = m_keyset;
+    m_keyset = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Variant(ptr, KindOfKeyset, Variant::ArrayInitCtor{});
+  }
+
+  Array toArray() {
+    assert(m_keyset->hasExactlyOneRef());
+    assert(m_keyset->isKeyset());
+    ArrayData* ptr = m_keyset;
+    m_keyset = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return Array(ptr, Array::ArrayInitCtor::Tag);
+  }
+
+  ArrayData* create() {
+    assert(m_keyset->hasExactlyOneRef());
+    assert(m_keyset->isKeyset());
+    auto ptr = m_keyset;
+    m_keyset = nullptr;
+#ifdef DEBUG
+    m_expectedCount = 0; // reset; no more adds allowed
+#endif
+    return ptr;
+  }
+
+private:
+  template<class Operation>
+  ALWAYS_INLINE void performOp(Operation oper) {
+    DEBUG_ONLY auto newp = oper();
+    // Array escalation must not happen during these reserved
+    // initializations.
+    assert(newp == m_keyset);
+    // You cannot add/set more times than you reserved with ArrayInit.
+    assert(++m_addCount <= m_expectedCount);
+  }
+
+private:
+  ArrayData* m_keyset;
+#ifdef DEBUG
   size_t m_addCount;
   size_t m_expectedCount;
 #endif
@@ -749,6 +841,14 @@ namespace make_array_detail {
   void map_impl(ArrayInit& init, Key&& key, Val&& val, KVPairs&&... kvpairs) {
     init.set(init_key(std::forward<Key>(key)), Variant(std::forward<Val>(val)));
     map_impl(init, std::forward<KVPairs>(kvpairs)...);
+  }
+
+  inline void keyset_impl(KeysetInit&) {}
+
+  template<class Val, class... Vals>
+  void keyset_impl(KeysetInit& init, Val&& val, Vals&&... vals) {
+    init.add(Variant(std::forward<Val>(val)));
+    keyset_impl(init, std::forward<Vals>(vals)...);
   }
 
 }
@@ -804,6 +904,21 @@ Array make_map_array(KVPairs&&... kvpairs) {
     sizeof...(kvpairs) % 2 == 0, "make_map_array needs key value pairs");
   ArrayInit init(sizeof...(kvpairs) / 2, ArrayInit::Map{});
   make_array_detail::map_impl(init, std::forward<KVPairs>(kvpairs)...);
+  return init.toArray();
+}
+
+/*
+ * Helper for creating Hack keysets.
+ *
+ * Usage:
+ *
+ *   auto newArray = make_keyset_array(1, 2, 3, 4);
+ */
+template<class... Vals>
+Array make_keyset_array(Vals&&... vals) {
+  static_assert(sizeof...(vals), "use Array::CreateKeyset() instead");
+  KeysetInit init(sizeof...(vals));
+  make_array_detail::keyset_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();
 }
 

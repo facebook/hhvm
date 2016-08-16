@@ -170,6 +170,11 @@ struct MixedArray final : private ArrayData,
   static ArrayData* MakeReserveDict(uint32_t size);
   static ArrayData* MakeReserveKeyset(uint32_t size);
 
+  /*
+   * Convert mixed-layout array to dict or keyset in-place. These functions
+   * don't check whether the input array contains references or not, so only use
+   * this when you already know that they do not.
+   */
   static MixedArray* ToDictInPlace(ArrayData*);
   static MixedArray* ToKeysetInPlace(ArrayData*);
 
@@ -424,6 +429,8 @@ public:
   static constexpr auto CopyWithStrongIteratorsKeyset =
     &CopyWithStrongIterators;
   static constexpr auto CopyStaticKeyset = &CopyStatic;
+  static constexpr auto PlusEqKeyset = &PlusEq;
+  static constexpr auto MergeKeyset = &Merge;
   static constexpr auto PopKeyset = &Pop;
   static constexpr auto DequeueKeyset = &Dequeue;
   static constexpr auto PrependKeyset = &Prepend;
@@ -441,8 +448,6 @@ public:
   static constexpr auto AppendRefKeyset = &AppendRefDict;
 
   static ArrayData* AppendKeyset(ArrayData*, Cell v, bool);
-  static ArrayData* PlusEqKeyset(ArrayData*, const ArrayData*);
-  static ArrayData* MergeKeyset(ArrayData*, const ArrayData*);
   static ArrayData* AppendWithRefKeyset(ArrayData*, const Variant&, bool);
   static ArrayData* SetIntKeyset(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStrKeyset(ArrayData*, StringData*, Cell, bool);
@@ -597,9 +602,9 @@ private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
-  static ArrayData* ArrayPlusEqGeneric(ArrayData*,
-    MixedArray*, const ArrayData*, size_t, bool);
-  static ArrayData* ArrayPlusEqImpl(ArrayData*, const ArrayData*, bool);
+
+  static ArrayData* ArrayPlusEqGeneric(ArrayData*, MixedArray*,
+                                       const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
 
   template <class AppendFunc>

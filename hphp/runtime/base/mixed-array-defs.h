@@ -540,7 +540,7 @@ void ReleaseUncountedTv(TypedValue& tv) {
     }
     return;
   }
-  if (isArrayType(tv.m_type)) {
+  if (isArrayLikeType(tv.m_type)) {
     auto arr = tv.m_data.parr;
     assert(!arr->isRefCounted());
     if (!arr->isStatic()) {

@@ -213,7 +213,7 @@ void ArrayIter::objInit(ObjectData* obj) {
 
 void ArrayIter::cellInit(const Cell c) {
   assert(cellIsPlausible(c));
-  if (LIKELY(isArrayType(c.m_type))) {
+  if (LIKELY(isArrayLikeType(c.m_type))) {
     arrInit(c.m_data.parr);
   } else if (LIKELY(c.m_type == KindOfObject)) {
     objInit<true>(c.m_data.pobj);
@@ -823,7 +823,7 @@ void MArrayIter::escalateCheck() {
     if (!data) return;
     auto const esc = data->escalate();
     if (data != esc) {
-      cellMove(make_tv<KindOfArray>(esc), *getRef()->tv());
+      cellMove(make_array_like_tv(esc), *getRef()->tv());
     }
     return;
   }
@@ -843,7 +843,7 @@ ArrayData* MArrayIter::cowCheck() {
     if (!data) return nullptr;
     if (data->cowCheck() && !data->noCopyOnWrite()) {
       data = data->copyWithStrongIterators();
-      cellMove(make_tv<KindOfArray>(data), *getRef()->tv());
+      cellMove(make_array_like_tv(data), *getRef()->tv());
     }
     return data;
   }
@@ -886,7 +886,7 @@ CufIter::~CufIter() {
 bool Iter::init(TypedValue* c1) {
   assert(c1->m_type != KindOfRef);
   bool hasElems = true;
-  if (isArrayType(c1->m_type)) {
+  if (isArrayLikeType(c1->m_type)) {
     if (!c1->m_data.parr->empty()) {
       (void) new (&arr()) ArrayIter(c1->m_data.parr);
       arr().setIterType(ArrayIter::TypeArray);
@@ -1590,6 +1590,10 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
 
   TypedValue* rtv = v1->tv();
   ArrayData* ad = rtv->m_data.parr;
+
+  if (UNLIKELY(ad->isHackArray())) {
+    throwRefInvalidArrayValueException(ad);
+  }
 
   if (UNLIKELY(ad->empty())) {
     return 0LL;

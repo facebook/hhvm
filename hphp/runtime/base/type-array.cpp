@@ -90,7 +90,7 @@ Array &Array::operator=(const Variant& var) {
 
 // Move assign
 Array& Array::operator=(Variant&& v) {
-  if (isArrayType(v.asTypedValue()->m_type)) {
+  if (isArrayLikeType(v.asTypedValue()->m_type)) {
     m_arr = req::ptr<ArrayData>::attach(v.asTypedValue()->m_data.parr);
     v.asTypedValue()->m_type = KindOfNull;
   } else {

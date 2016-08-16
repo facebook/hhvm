@@ -491,7 +491,7 @@ struct MArrayIter {
 private:
   ArrayData* getData() const {
     assert(hasRef());
-    return isArrayType(m_ref->tv()->m_type)
+    return isArrayLikeType(m_ref->tv()->m_type)
       ? m_ref->tv()->m_data.parr
       : nullptr;
   }
@@ -695,16 +695,16 @@ bool IterateV(const TypedValue& it,
               ObjFn objFn) {
   assert(it.m_type != KindOfRef);
   ArrayData* adata;
-  if (LIKELY(isArrayType(it.m_type))) {
+  if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;
    do_array:
     adata->incRefCount();
     SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
     if (adata->empty()) return true;
-    if (adata->isPacked()) {
+    if (adata->isPackedLayout()) {
       PackedArray::IterateV<ArrFn, false>(adata, arrFn);
-    } else if (adata->isMixed()) {
+    } else if (adata->isMixedLayout()) {
       MixedArray::IterateV<ArrFn, false>(MixedArray::asMixed(adata), arrFn);
     } else {
       for (ArrayIter iter(adata); iter; ++iter) {
@@ -773,16 +773,16 @@ bool IterateKV(const TypedValue& it,
                ObjFn objFn) {
   assert(it.m_type != KindOfRef);
   ArrayData* adata;
-  if (LIKELY(isArrayType(it.m_type))) {
+  if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;
    do_array:
     adata->incRefCount();
     SCOPE_EXIT { decRefArr(adata); };
     if (preArrFn(adata)) return true;
     if (adata->empty()) return true;
-    if (adata->isMixed()) {
+    if (adata->isMixedLayout()) {
       MixedArray::IterateKV<ArrFn, false>(MixedArray::asMixed(adata), arrFn);
-    } else if (adata->isPacked()) {
+    } else if (adata->isPackedLayout()) {
       PackedArray::IterateKV<ArrFn, false>(adata, arrFn);
     } else {
       for (ArrayIter iter(adata); iter; ++iter) {

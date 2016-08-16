@@ -1689,15 +1689,10 @@ NEVER_INLINE
 ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
                                           MixedArray* ret,
                                           const ArrayData* elems,
-                                          size_t neededSize,
-                                          bool is_keyset) {
-  if (ad->isDict() && !elems->isVecArray()) {
-    for (ArrayIter it(elems); !it.end(); it.next()) {
-      if (it.second().isReferenced()) {
-        throwRefInvalidArrayValueException(ad);
-      }
-    }
-  }
+                                          size_t neededSize) {
+  assert(ad->isPHPArray());
+  assert(elems->isPHPArray());
+  assert(ret->isMixed());
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
@@ -1713,11 +1708,7 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
       ? ret->insert(tv->m_data.num)
       : ret->insert(tv->m_data.pstr);
     if (!p.found) {
-      if (is_keyset) {
-        ret->initWithRef(p.tv, key);
-      } else {
-        ret->initWithRef(p.tv, value);
-      }
+      ret->initWithRef(p.tv, value);
     }
   }
 
@@ -1726,10 +1717,12 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
 
 // Note: the logic relating to how to grow in this function is coupled
 // to PackedArray::PlusEq.
-ALWAYS_INLINE
-ArrayData* MixedArray::ArrayPlusEqImpl(ArrayData* ad,
-                                       const ArrayData* elems,
-                                       bool is_keyset) {
+ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
+  assertx(asMixed(ad)->checkInvariants());
+
+  if (!ad->isPHPArray()) throwInvalidAdditionException(ad);
+  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
+
   auto const neededSize = ad->size() + elems->size();
 
   auto ret =
@@ -1737,7 +1730,7 @@ ArrayData* MixedArray::ArrayPlusEqImpl(ArrayData* ad,
     asMixed(ad);
 
   if (UNLIKELY(!elems->isMixedLayout())) {
-    return ArrayPlusEqGeneric(ad, ret, elems, neededSize, is_keyset);
+    return ArrayPlusEqGeneric(ad, ret, elems, neededSize);
   }
 
   auto const rhs = asMixed(elems);
@@ -1758,41 +1751,24 @@ ArrayData* MixedArray::ArrayPlusEqImpl(ArrayData* ad,
       if (validPos(*ei)) continue;
       auto& e = ret->allocElm(ei);
       e.setStrKey(srcElem->skey, hash);
-      if (is_keyset) {
-        ret->initWithRef(e.data, Variant(srcElem->skey));
-      } else {
-        ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
-      }
+      ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
     } else {
       auto const ei = ret->findForInsert(srcElem->ikey, hash);
       if (validPos(*ei)) continue;
       auto& e = ret->allocElm(ei);
       e.setIntKey(srcElem->ikey, hash);
-      if (is_keyset) {
-        ret->initWithRef(e.data, Variant(srcElem->ikey));
-      } else {
-        ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
-      }
+      ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
     }
   }
 
   return ret;
 }
 
-ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
-  return ArrayPlusEqImpl(ad, elems, false /* is_keyset */);
-}
-
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
-                                        const ArrayData* elems) {
-  if (ret->isDict()) {
-    for (ArrayIter it(elems); !it.end(); it.next()) {
-      if (it.second().isReferenced()) {
-        throwRefInvalidArrayValueException(ret);
-      }
-    }
-  }
+                                         const ArrayData* elems) {
+  assert((ret->isPHPArray() && elems->isPHPArray()) ||
+         (ret->isDict() && elems->isDict()));
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
@@ -1810,6 +1786,14 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
 }
 
 ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
+  assert(asMixed(ad)->checkInvariants());
+
+  if (ad->kind() != elems->kind()) {
+    if (ad->isDict() || ad->isKeyset()) throwInvalidMergeException(ad);
+    assertx(ad->isPHPArray());
+    if (!elems->isPHPArray()) throwInvalidMergeException(elems);
+  }
+
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
 
   if (elems->isMixedLayout()) {
@@ -1965,6 +1949,7 @@ MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
         e.data.m_type = e.skey->isUncounted() || e.skey->isStatic() ?
           KindOfPersistentString : KindOfString;
       } else {
+        assert(e.hasIntKey());
         e.data.m_data.num = e.ikey;
         e.data.m_type = KindOfInt64;
       }
@@ -1978,9 +1963,19 @@ MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
 ArrayData* MixedArray::ToKeyset(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
-  auto keyset = copy ?
-    CopyMixed(*a, AllocMode::Request, HeaderKind::Mixed) : a;
-  return ToKeysetInPlace(keyset);
+
+  if (copy) {
+    KeysetInit ai{a->size()};
+    MixedArray::IterateKV(
+      a,
+      [&](const TypedValue* k, const TypedValue*) {
+        ai.add(tvAsCVarRef(k));
+      }
+    );
+    return ai.create();
+  } else {
+    return ToKeysetInPlace(a);
+  }
 }
 
 ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
@@ -2096,15 +2091,7 @@ MixedArray::AppendWithRefKeyset(ArrayData* adIn, const Variant& v, bool copy) {
   return AppendWithRefNoRef(adIn, v, copy, AppendKeyset);
 }
 
-ArrayData* MixedArray::PlusEqKeyset(ArrayData* ad, const ArrayData* elems) {
-  return ArrayPlusEqImpl(ad, elems, true /* is_keyset */);
-}
-
 void MixedArray::RenumberKeyset(ArrayData*) {
-  throwInvalidKeysetOperation();
-}
-
-ArrayData* MixedArray::MergeKeyset(ArrayData*, const ArrayData*) {
   throwInvalidKeysetOperation();
 }
 

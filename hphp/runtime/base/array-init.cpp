@@ -79,6 +79,25 @@ DictInit::DictInit(size_t n, CheckAllocation)
   check_request_surprise_unlikely();
 }
 
+KeysetInit::KeysetInit(size_t n, CheckAllocation)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
+  if (n > std::numeric_limits<int>::max()) {
+    MM().forceOOM();
+    check_request_surprise_unlikely();
+  }
+  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_request_surprise_unlikely();
+  }
+  m_keyset = MixedArray::MakeReserveKeyset(n);
+  assert(m_keyset->hasExactlyOneRef());
+  check_request_surprise_unlikely();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

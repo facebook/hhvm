@@ -240,11 +240,13 @@ APCLocalArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
+  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
   auto escalated = Array::attach(Escalate(ad));
   return (escalated += const_cast<ArrayData*>(elems)).detach();
 }
 
 ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
+  if (!elems->isPHPArray()) throwInvalidMergeException(elems);
   auto escalated = Array::attach(Escalate(ad));
   return escalated->merge(elems);
 }

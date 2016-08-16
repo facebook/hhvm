@@ -483,28 +483,28 @@ struct Variant : private TypedValue {
 // array
 
   ALWAYS_INLINE const Array& asCArrRef() const {
-    assert(isArrayType(m_type) && m_data.parr);
+    assert(isArrayLikeType(m_type) && m_data.parr);
     return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
   ALWAYS_INLINE const Array& toCArrRef() const {
     assert(isArray());
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    return *reinterpret_cast<const Array*>(LIKELY(isArrayType(m_type)) ?
+    return *reinterpret_cast<const Array*>(LIKELY(isArrayLikeType(m_type)) ?
         &m_data.parr : &m_data.pref->tv()->m_data.parr);
   }
 
   ALWAYS_INLINE Array& asArrRef() {
-    assert(isArrayType(m_type) && m_data.parr);
-    m_type = KindOfArray;
+    assert(isArrayLikeType(m_type) && m_data.parr);
+    m_type = m_data.parr->toDataType();
     return *reinterpret_cast<Array*>(&m_data.parr);
   }
 
   ALWAYS_INLINE Array& toArrRef() {
     assert(isArray());
     assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    auto tv = LIKELY(isArrayType(m_type)) ? this : m_data.pref->tv();
-    tv->m_type = KindOfArray;
+    auto tv = LIKELY(isArrayLikeType(m_type)) ? this : m_data.pref->tv();
+    tv->m_type = tv->m_data.parr->toDataType();
     return *reinterpret_cast<Array*>(&tv->m_data.parr);
   }
 
@@ -790,7 +790,7 @@ struct Variant : private TypedValue {
   }
 
   Array toArray() const {
-    if (isArrayType(m_type)) return Array(m_data.parr);
+    if (isArrayLikeType(m_type)) return Array(m_data.parr);
     return toArrayHelper();
   }
   Object toObject() const {
@@ -831,7 +831,7 @@ struct Variant : private TypedValue {
    * Whether or not calling toKey() will throw a bad type exception
    */
   bool canBeValidKey() const {
-    return !isArrayType(getType()) && getType() != KindOfObject;
+    return !isArrayLikeType(getType()) && getType() != KindOfObject;
   }
 
   /*

@@ -22,6 +22,7 @@
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -798,7 +799,6 @@ ArrayData*
 PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, Variant*&, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   throwRefInvalidArrayValueException(adIn);
 }
 
@@ -901,7 +901,6 @@ ArrayData*
 PackedArray::SetRefIntVec(ArrayData* adIn, int64_t k, Variant& v, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   throwRefInvalidArrayValueException(adIn);
 }
 
@@ -921,6 +920,23 @@ PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k, Variant&, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(k, adIn);
+}
+
+static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
+  assert(ad->isPackedLayout());
+  for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
+    if (miEnt.array != ad) return;
+    auto const iter = miEnt.iter;
+    if (iter->getResetFlag()) return;
+    if (iter->m_pos == pos) {
+      if (pos <= 0) {
+        iter->m_pos = ad->getSize();
+        iter->setResetFlag(true);
+      } else {
+        iter->m_pos = pos - 1;
+      }
+    }
+  });
 }
 
 ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
@@ -943,10 +959,28 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
 ArrayData*
 PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
-  if (size_t(k) >= adIn->m_size) return adIn;
-  auto mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  auto dict = MixedArray::ToDictInPlace(mixed);
-  return MixedArray::RemoveIntDict(dict, k, dict->cowCheck());
+  assert(adIn->isVecArray());
+  if (UNLIKELY(size_t(k) >= adIn->m_size)) return adIn;
+  // To avoid re-keying, a vec becomes a dict when an element is removed. The
+  // exception is if the element is at the end.
+  if (size_t(k) + 1 == adIn->m_size) {
+    auto const ad = copy ? Copy(adIn) : adIn;
+    auto const oldSize = ad->m_size;
+    auto& tv = packedData(ad)[oldSize - 1];
+    if (UNLIKELY(strong_iterators_exist())) {
+      adjustMArrayIter(ad, oldSize - 1);
+    }
+    auto const oldType = tv.m_type;
+    auto const oldDatum = tv.m_data.num;
+    ad->m_size = oldSize - 1;
+    ad->m_pos = 0;
+    tvRefcountedDecRefHelper(oldType, oldDatum);
+    return ad;
+  }
+  auto dict = ToDictVec(adIn, copy);
+  auto result = MixedArray::RemoveIntDict(dict, k, dict->cowCheck());
+  if (result != dict) decRefArr(dict);
+  return result;
 }
 
 ArrayData*
@@ -1062,6 +1096,8 @@ ArrayData* PackedArray::AppendWithRefVec(ArrayData* adIn,
 
 ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
+  assert(adIn->isPacked());
+  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
   auto const neededSize = adIn->size() + elems->size();
   auto const mixed = ToMixedCopyReserve(adIn, neededSize);
   try {
@@ -1077,22 +1113,14 @@ ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {
 
 ArrayData* PackedArray::PlusEqVec(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
-  auto const neededSize = adIn->size() + elems->size();
-  auto const mixed = ToMixedCopyReserve(adIn, neededSize);
-  auto const dict = MixedArray::ToDictInPlace(mixed);
-  try {
-    auto const ret = MixedArray::PlusEqDict(dict, elems);
-    assert(ret == dict);
-    assert(dict->hasExactlyOneRef());
-    return ret;
-  } catch (...) {
-    MixedArray::Release(dict);
-    throw;
-  }
+  assert(adIn->isVecArray());
+  throwInvalidAdditionException(adIn);
 }
 
 ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
+  assert(adIn->isPacked());
+  if (!elems->isPHPArray()) throwInvalidMergeException(elems);
   auto const neededSize = adIn->m_size + elems->size();
   auto const ret = ToMixedCopyReserve(adIn, neededSize);
   return MixedArray::ArrayMergeGeneric(ret, elems);
@@ -1100,27 +1128,28 @@ ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
 
 ArrayData* PackedArray::MergeVec(ArrayData* adIn, const ArrayData* elems) {
   assert(checkInvariants(adIn));
-  auto const neededSize = adIn->m_size + elems->size();
-  auto const mixed = ToMixedCopyReserve(adIn, neededSize);
-  auto const dict = MixedArray::ToDictInPlace(mixed);
-  return MixedArray::ArrayMergeGeneric(dict, elems);
-}
+  assert(adIn->isVecArray());
 
-static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
-  assert(ad->isPackedLayout());
-  for_each_strong_iterator([&] (MIterTable::Ent& miEnt) {
-    if (miEnt.array != ad) return;
-    auto const iter = miEnt.iter;
-    if (iter->getResetFlag()) return;
-    if (iter->m_pos == pos) {
-      if (pos <= 0) {
-        iter->m_pos = ad->getSize();
-        iter->setResetFlag(true);
-      } else {
-        iter->m_pos = pos - 1;
-      }
-    }
-  });
+  if (!elems->isVecArray()) throwInvalidMergeException(adIn);
+
+  // Merging two arrays renumbers integer keys, and a vec has nothing but
+  // integer keys, so this just appends the two arrays together.
+  auto const outSize = adIn->m_size + elems->m_size;
+  auto const out = MakeReserveVec(outSize);
+  auto outData = packedData(out);
+
+  static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
+  memcpy16_inline(packedData(out), packedData(adIn), adIn->m_size * 16);
+  memcpy16_inline(packedData(out) + adIn->m_size, packedData(elems),
+                  elems->m_size * 16);
+
+  for (uint32_t i = 0; i < outSize; ++i) {
+    assert(outData[i].m_type != KindOfRef);
+    tvRefcountedIncRef(outData + i);
+  }
+  out->m_size = outSize;
+
+  return out;
 }
 
 ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
@@ -1259,8 +1288,11 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
 }
 
 ArrayData* PackedArray::ToKeyset(ArrayData* ad, bool copy) {
-  auto mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
-  return MixedArray::ToKeysetInPlace(mixed);
+  if (ad->empty()) return staticEmptyKeysetArray();
+  auto const size = ad->getSize();
+  KeysetInit ai{size};
+  for (uint32_t i = 0; i < size; ++i) ai.add(i);
+  return ai.create();
 }
 
 ArrayData* PackedArray::ToVecVec(ArrayData* ad, bool) {

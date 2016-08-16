@@ -142,15 +142,16 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   }
   if (ad->m_size <= 1) {
     if (ad->isVecArray()) {
-      auto ret = MixedArray::ToDictInPlace(ToMixedCopy(ad));
+      auto ret = PackedArray::ToDictVec(ad, ad->cowCheck());
       assert(ret->hasExactlyOneRef());
       return ret;
     }
     return ad;
   }
   assert(checkInvariants(ad));
-  auto ret = ToMixedCopy(ad);
-  if (ad->isVecArray()) ret = MixedArray::ToDictInPlace(ret);
+  auto ret = ad->isVecArray()
+    ? PackedArray::ToDictVec(ad, ad->cowCheck())
+    : ToMixedCopy(ad);
   assert(ret->hasExactlyOneRef());
   return ret;
 }

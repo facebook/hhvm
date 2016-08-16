@@ -997,17 +997,11 @@ const Variant& ArrayData::getNotFound(const StringData* k) {
 }
 
 const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
-  if (error && !useWeakKeys()) {
-    throwOOBArrayKeyException(k, this);
-  }
   return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 
 const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
-  if (error && !useWeakKeys()) {
-    throwOOBArrayKeyException(k, this);
-  }
   return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
@@ -1112,6 +1106,7 @@ void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
     if (ad->isVecArray()) return std::make_pair("vec", "int");
     if (ad->isDict()) return std::make_pair("dict", "int or string");
     if (ad->isKeyset()) return std::make_pair("keyset", "int or string");
+    assertx(ad->isPHPArray());
     return std::make_pair("array", "int or string");
   }();
   SystemLib::throwInvalidArgumentExceptionObject(
@@ -1123,9 +1118,7 @@ void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
 }
 
 void throwInvalidArrayKeyException(const StringData* key, const ArrayData* ad) {
-  auto const tv = key->isRefCounted() ?
-    make_tv<KindOfString>(const_cast<StringData*>(key)) :
-    make_tv<KindOfPersistentString>(key);
+  auto const tv = make_tv<KindOfString>(const_cast<StringData*>(key));
   throwInvalidArrayKeyException(&tv, ad);
 }
 
@@ -1134,7 +1127,7 @@ void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
     if (ad->isVecArray()) return "vec";
     if (ad->isDict()) return "dict";
     if (ad->isKeyset()) return "keyset";
-    assert(ad->isPHPArray());
+    assertx(ad->isPHPArray());
     return "array";
   }();
   SystemLib::throwOutOfBoundsExceptionObject(
@@ -1157,11 +1150,15 @@ void throwOOBArrayKeyException(const StringData* key, const ArrayData* ad) {
 }
 
 void throwRefInvalidArrayValueException(const ArrayData* ad) {
-  assert(ad->isHackArray());
+  assertx(ad->isHackArray());
+  const char* type = [&]{
+    if (ad->isVecArray()) return "Vecs";
+    if (ad->isDict()) return "Dicts";
+    if (ad->isKeyset()) return "Keysets";
+    not_reached();
+  }();
   SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat("{} cannot contain references",
-      ad->isVecArray() ? "Vecs" : ad->isDict() ? "Dicts" : "Keysets"
-    )
+    folly::sformat("{} cannot contain references", type)
   );
 }
 
@@ -1172,6 +1169,33 @@ void throwRefInvalidArrayValueException(const Array& arr) {
 void throwInvalidKeysetOperation() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid operation on keyset"
+  );
+}
+
+void throwInvalidAdditionException(const ArrayData* ad) {
+  assertx(ad->isHackArray());
+  const char* type = [&]{
+    if (ad->isVecArray()) return "Vecs";
+    if (ad->isDict()) return "Dicts";
+    if (ad->isKeyset()) return "Keysets";
+    not_reached();
+  }();
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("{} do not support the + operator", type)
+  );
+}
+
+void throwInvalidMergeException(const ArrayData* ad) {
+  assertx(ad->isHackArray());
+  std::pair<const char*, const char*> type_str = [&]{
+    if (ad->isVecArray()) return std::make_pair("Vecs", "vecs");
+    if (ad->isDict()) return std::make_pair("Dicts", "dicts");
+    if (ad->isKeyset()) return std::make_pair("Keysets", "keysets");
+    not_reached();
+  }();
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat("{} can only be merged with other {}",
+                   type_str.first, type_str.second)
   );
 }
 

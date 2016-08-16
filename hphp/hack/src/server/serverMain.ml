@@ -420,9 +420,13 @@ let daemon_main (state, handle, options) (ic, oc) =
   SharedMem.connect handle ~is_master:true;
   ServerGlobalState.restore state;
   try daemon_main_exn (handle, options) (ic, oc)
-  with SharedMem.Out_of_shared_memory ->
+  with
+  | SharedMem.Out_of_shared_memory ->
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
     Exit_status.(exit Out_of_shared_memory)
+  | SharedMem.Hash_table_full ->
+    Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
+    Exit_status.(exit Hash_table_full)
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

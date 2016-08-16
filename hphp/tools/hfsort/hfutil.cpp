@@ -25,8 +25,6 @@
 
 namespace HPHP { namespace hfsort {
 
-CallGraph cg;
-
 CallGraph::~CallGraph() {
   for (auto* arc : arcs) {
     delete arc;
@@ -138,14 +136,13 @@ std::string Func::toString() const {
                         id, samples, size, mangledNames[0]);
 }
 
-Cluster::Cluster(FuncId fid) {
-  funcs.push_back(fid);
-  size    = cg.funcs[fid].size;
+Cluster::Cluster(const Func& f) {
+  funcs.push_back(f.id);
+  size = f.size;
   arcWeight = 0;
-  samples = cg.funcs[fid].samples;
-  frozen  = false;
-  HFTRACE(1, "new Cluster: %s: %s\n", toString().c_str(),
-          cg.funcs[fid].toString().c_str());
+  samples = f.samples;
+  frozen = false;
+  HFTRACE(1, "new Cluster: %s: %s\n", toString().c_str(), f.toString().c_str());
 }
 
 void Cluster::merge(const Cluster& other, const double aw) {
@@ -171,7 +168,7 @@ bool compareClustersDensity(const Cluster* c1, const Cluster* c2) {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
-void freezeClusters(std::vector<Cluster*>& clusters) {
+void freezeClusters(const CallGraph& cg, std::vector<Cluster*>& clusters) {
   uint32_t totalSize = 0;
   sort(clusters.begin(), clusters.end(), compareClustersDensity);
   for (Cluster* cluster : clusters) {
@@ -187,7 +184,7 @@ void freezeClusters(std::vector<Cluster*>& clusters) {
 }
 }
 
-std::vector<Cluster*> clusterize() {
+std::vector<Cluster*> clusterize(const CallGraph& cg) {
   std::vector<FuncId> sortedFuncs;
 
   // indexed by FuncId, keeps it's current cluster
@@ -196,7 +193,7 @@ std::vector<Cluster*> clusterize() {
 
   for (size_t f = 0; f < cg.funcs.size(); f++) {
     if (cg.funcs[f].samples > 0) {
-      Cluster* cluster = new Cluster(cg.funcs[f].id);
+      Cluster* cluster = new Cluster(cg.funcs[f]);
       sortedFuncs.push_back(f);
       funcCluster.push_back(cluster);
       clusters.push_back(cluster);
@@ -205,7 +202,7 @@ std::vector<Cluster*> clusterize() {
     }
   }
 
-  freezeClusters(clusters);
+  freezeClusters(cg, clusters);
 
   sort(sortedFuncs.begin(), sortedFuncs.end(),
        [&](FuncId f1, FuncId f2) {
@@ -311,7 +308,7 @@ struct ClusterArc {
 };
 
 
-void orderFuncs(Cluster* c1, Cluster* c2) {
+void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
   FuncId c1head = c1->funcs[0];
   FuncId c1tail = c1->funcs[c1->funcs.size() - 1];
   FuncId c2head = c2->funcs[0];
@@ -322,7 +319,7 @@ void orderFuncs(Cluster* c1, Cluster* c2) {
   double c1tailc2head = 0;
   double c1tailc2tail = 0;
 
-  for (Arc* arc : cg.arcs) {
+  for (auto arc : cg.arcs) {
     if ((arc->src == c1head && arc->dst == c2head) ||
         (arc->dst == c1head && arc->src == c2head)) {
       c1headc2head += arc->weight;
@@ -355,7 +352,7 @@ void orderFuncs(Cluster* c1, Cluster* c2) {
 }
 }
 
-std::vector<Cluster*> pettisAndHansen() {
+std::vector<Cluster*> pettisAndHansen(const CallGraph& cg) {
   // indexed by FuncId, keeps its current cluster
   std::vector<Cluster*> funcCluster;
 
@@ -364,7 +361,7 @@ std::vector<Cluster*> pettisAndHansen() {
 
   for (size_t f = 0; f < cg.funcs.size(); f++) {
     if (cg.funcs[f].samples > 0) {
-      Cluster* cluster = new Cluster(cg.funcs[f].id);
+      Cluster* cluster = new Cluster(cg.funcs[f]);
       funcCluster.push_back(cluster);
       funcs.push_back(f);
     } else {
@@ -376,7 +373,7 @@ std::vector<Cluster*> pettisAndHansen() {
 
   // Create a vector of cluster arcs
 
-  for (Arc* arc : cg.arcs) {
+  for (auto arc : cg.arcs) {
     if (arc->weight == 0) continue;
 
     Cluster* s = funcCluster[arc->src];
@@ -425,7 +422,7 @@ std::vector<Cluster*> pettisAndHansen() {
 
     // order functions and merge cluster
 
-    orderFuncs(c1, c2);
+    orderFuncs(cg, c1, c2);
 
     HFTRACE(1, "merging %s -> %s: %.1f\n", c2->toString().c_str(),
             c1->toString().c_str(), max->weight);

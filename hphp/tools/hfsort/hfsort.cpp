@@ -42,7 +42,7 @@ void trace(const char* fmt, ...) {
   va_end(args);
 }
 
-void readSymbols(FILE *file) {
+void readSymbols(CallGraph& cg, FILE* file) {
   char     line[BUFLEN];
   char     name[BUFLEN];
   uint64_t addr;
@@ -74,12 +74,12 @@ uint64_t getAddr(char* perfLine) {
   return addr;
 }
 
-FuncId getFuncId(uint64_t addr) {
+FuncId getFuncId(const CallGraph& cg, uint64_t addr) {
   if (addr == InvalidAddr) return InvalidId;
   return cg.addrToFuncId(addr);
 }
 
-void readPerfData(gzFile file, bool computeArcWeight) {
+void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
   char line[BUFLEN];
 
   while (gzgets(file, line, BUFLEN) != Z_NULL) {
@@ -90,14 +90,14 @@ void readPerfData(gzFile file, bool computeArcWeight) {
     // process one sample
     if (gzgets(file, line, BUFLEN) == Z_NULL) error("reading perf data");
     auto addrTop = getAddr(line);
-    FuncId idTop = getFuncId(addrTop);
+    FuncId idTop = getFuncId(cg, addrTop);
     if (idTop == InvalidId) continue;
     cg.funcs[idTop].samples++;
     HFTRACE(2, "readPerfData: idTop: %u %s\n", idTop,
             cg.funcs[idTop].mangledNames[0].c_str());
     if (gzgets(file, line, BUFLEN) == Z_NULL) error("reading perf data");
     auto addrCaller = getAddr(line);
-    FuncId idCaller = getFuncId(addrCaller);
+    FuncId idCaller = getFuncId(cg, addrCaller);
     if (idCaller != InvalidId) {
       auto arc = cg.getArc(idCaller, idTop);
       if (computeArcWeight) {
@@ -120,7 +120,7 @@ void readPerfData(gzFile file, bool computeArcWeight) {
   }
 }
 
-void readEdgcntData(FILE* file) {
+void readEdgcntData(CallGraph& cg, FILE* file) {
   char     line[BUFLEN];
   uint64_t src;
   uint64_t dst;
@@ -164,8 +164,8 @@ std::string getNameWithoutSuffix(std::string str) {
   }
 }
 
-void print(const char* filename, const std::vector<Cluster*>& clusters,
-           bool useWildcards) {
+void print(CallGraph& cg, const char* filename,
+           const std::vector<Cluster*>& clusters, bool useWildcards) {
   FILE* outfile = fopen(filename, "wt");
   if (!outfile) {
     error(folly::sformat("opening output file {}", filename).c_str());
@@ -194,7 +194,7 @@ void print(const char* filename, const std::vector<Cluster*>& clusters,
             "-------- density = %.3lf (%u / %u) arcWeight = %.1lf --------\n",
             (double) cluster->samples / cluster->size,
             cluster->samples, cluster->size, cluster->arcWeight);
-    for (FuncId fid : cluster->funcs) {
+    for (auto fid : cluster->funcs) {
       if (cg.funcs[fid].samples > 0) {
         hotfuncs++;
         int space = 0;
@@ -268,11 +268,12 @@ Algorithm checkAlgorithm(const char* algorithm) {
   return Algorithm::Invalid;
 }
 
-} }
+}}
 
 int main(int argc, char* argv[]) {
   using namespace HPHP::hfsort;
 
+  CallGraph cg;
   char* symbFileName = nullptr;
   char* perfFileName = nullptr;
   char* edgcntFileName = nullptr;
@@ -327,10 +328,10 @@ int main(int argc, char* argv[]) {
     error("Error opening edge count file\n");
   }
 
-  readSymbols(symbFile);
-  readPerfData(perfFile, (edgcntFileName == nullptr));
+  readSymbols(cg, symbFile);
+  readPerfData(cg, perfFile, (edgcntFileName == nullptr));
   if (edgcntFileName != nullptr) {
-    readEdgcntData(edgcntFile);
+    readEdgcntData(cg, edgcntFile);
     fclose(edgcntFile);
   }
   cg.printDot("cg.dot");
@@ -340,17 +341,17 @@ int main(int argc, char* argv[]) {
   const char* filename;
   if (algorithm == Algorithm::Hfsort) {
     HFTRACE(1, "=== algorithm : hfsort\n\n");
-    clusters = clusterize();
+    clusters = clusterize(cg);
     filename = "hotfuncs.txt";
   } else {
     HFTRACE(1, "=== algorithm : pettis-hansen\n\n");
     assert(algorithm == Algorithm::PettisHansen);
-    clusters = pettisAndHansen();
+    clusters = pettisAndHansen(cg);
     filename = "hotfuncs-pettis.txt";
   }
 
   sort(clusters.begin(), clusters.end(), compareClustersDensity);
-  print(filename, clusters, useWildcards);
+  print(cg, filename, clusters, useWildcards);
 
   fclose(symbFile);
   gzclose(perfFile);

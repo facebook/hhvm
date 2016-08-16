@@ -60,10 +60,6 @@ using FuncId = int32_t;
 constexpr int32_t InvalidId = -1;
 constexpr uint64_t InvalidAddr = std::numeric_limits<uint64_t>::max();
 
-
-extern struct CallGraph cg;
-struct Cluster;
-
 struct Arc {
   Arc(FuncId s, FuncId d, double w)
       : src(s)
@@ -116,7 +112,7 @@ struct CallGraph {
 };
 
 struct Cluster {
-  explicit Cluster(FuncId fid);
+  explicit Cluster(const Func& f);
 
   void merge(const Cluster& other, const double aw = 0);
   std::string toString() const;
@@ -129,14 +125,14 @@ struct Cluster {
 };
 
 bool compareClustersDensity(const Cluster* c1, const Cluster* c2);
-std::vector<Cluster*> clusterize();
+std::vector<Cluster*> clusterize(const CallGraph& cg);
 
 /*
  * Pettis-Hansen code layout algorithm
  * reference: K. Pettis and R. C. Hansen, "Profile Guided Code Positioning",
  *            PLDI '90
  */
-std::vector<Cluster*> pettisAndHansen();
+std::vector<Cluster*> pettisAndHansen(const CallGraph& cg);
 
 }}
 

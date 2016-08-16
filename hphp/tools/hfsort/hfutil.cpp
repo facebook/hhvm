@@ -26,6 +26,8 @@
 #include <folly/Format.h>
 #include <folly/Memory.h>
 
+#include "hphp/util/hash.h"
+
 namespace HPHP { namespace hfsort {
 
 bool CallGraph::addFunc(Func f) {
@@ -268,16 +270,28 @@ std::vector<Cluster> clusterize(const CallGraph& cg) {
 
 namespace {
 struct ClusterArc {
-  ClusterArc(Cluster* c1, Cluster* c2, double w)
-    : c1(c1)
-    , c2(c2)
+  ClusterArc(Cluster* ca, Cluster* cb, double w = 0)
+    : c1(std::min(ca, cb))
+    , c2(std::max(ca, cb))
     , weight(w)
   {}
 
-  Cluster* c1;
-  Cluster* c2;
-  double weight;
+  friend bool operator==(const ClusterArc& lhs, const ClusterArc& rhs) {
+    return lhs.c1 == rhs.c1 && lhs.c2 == rhs.c2;
+  }
+
+  Cluster* const c1;
+  Cluster* const c2;
+  mutable double weight;
 };
+
+struct ClusterArcHash {
+  int64_t operator()(const ClusterArc& arc) const {
+    return hash_int64_pair(int64_t(arc.c1), int64_t(arc.c2));
+  }
+};
+
+using ClusterArcSet = std::unordered_set<ClusterArc, ClusterArcHash>;
 
 void orderFuncs(const CallGraph& cg, Cluster* c1, Cluster* c2) {
   FuncId c1head = c1->funcs[0];
@@ -338,7 +352,14 @@ std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
     funcs.push_back(f);
   }
 
-  std::vector<std::unique_ptr<ClusterArc>> carcs;
+  ClusterArcSet carcs;
+
+  auto insertOrInc = [&](Cluster* c1, Cluster* c2, double weight) {
+    auto res = carcs.emplace(c1, c2, weight);
+    if (!res.second) {
+      res.first->weight += weight;
+    }
+  };
 
   // Create a vector of cluster arcs
 
@@ -356,21 +377,7 @@ std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
 
     if (s == d) continue;
 
-    bool insert = [&] {
-      for (auto& a : carcs) {
-        if ((a->c1 == s && a->c2 == d) || (a->c1 == d && a->c2 == s)) {
-          a->weight += arc->weight;
-          return false;
-        }
-      }
-      return true;
-    }();
-
-    if (insert) {
-      carcs.emplace_back(
-        folly::make_unique<ClusterArc>(s, d, arc->weight)
-      );
-    }
+    insertOrInc(s, d, arc->weight);
   }
 
   // Find an arc with max weight and merge its nodes
@@ -379,17 +386,16 @@ std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
     auto maxpos = std::max_element(
       carcs.begin(),
       carcs.end(),
-      [&] (const std::unique_ptr<ClusterArc>& carc1,
-           const std::unique_ptr<ClusterArc>& carc2) {
-        return carc1->weight < carc2->weight;
+      [&] (const ClusterArc& carc1, const ClusterArc& carc2) {
+        return carc1.weight < carc2.weight;
       }
     );
 
-    auto max = std::move(*maxpos);
+    auto max = *maxpos;
     carcs.erase(maxpos);
 
-    auto const c1 = max->c1;
-    auto const c2 = max->c2;
+    auto const c1 = max.c1;
+    auto const c2 = max.c2;
 
     if (c1->size + c2->size > kMaxClusterSize) continue;
 
@@ -400,47 +406,28 @@ std::vector<Cluster> pettisAndHansen(const CallGraph& cg) {
     orderFuncs(cg, c1, c2);
 
     HFTRACE(1, "merging %s -> %s: %.1f\n", c2->toString().c_str(),
-            c1->toString().c_str(), max->weight);
-
-    auto funcList = c2->funcs;
-    mergeInto(*c1, std::move(*c2), max->weight);
+            c1->toString().c_str(), max.weight);
 
     // update carcs: merge c1arcs to c2arcs
 
-    std::map<Cluster*, ClusterArc*> c1arcs;
-    std::vector<std::pair<Cluster*, ClusterArc*>> c2arcs;
-
+    std::unordered_map<ClusterArc, Cluster*, ClusterArcHash> c2arcs;
     for (auto& carc : carcs) {
-      auto carcp = carc.get();
-      if (carc->c1 == c1) c1arcs[carc->c2] = carcp;
-      if (carc->c2 == c1) c1arcs[carc->c1] = carcp;
-      if (carc->c1 == c2) c2arcs.push_back(std::make_pair(carc->c2, carcp));
-      if (carc->c2 == c2) c2arcs.push_back(std::make_pair(carc->c1, carcp));
+      if (carc.c1 == c2) c2arcs.emplace(carc, carc.c2);
+      if (carc.c2 == c2) c2arcs.emplace(carc, carc.c1);
     }
 
     for (auto it : c2arcs) {
-      auto const c = it.first;
-      auto const c2arc = it.second;
-      auto const pos = c1arcs.find(c);
+      auto const c = it.second;
+      auto const c2arc = it.first;
 
-      if (pos != c1arcs.end()) {
-        c1arcs[c]->weight += c2arc->weight;
-      } else {
-        carcs.emplace_back(
-          folly::make_unique<ClusterArc>(c, c1, c2arc->weight)
-        );
-      }
-
-      carcs.erase(std::find_if(
-        carcs.begin(),
-        carcs.end(),
-        [&] (const std::unique_ptr<ClusterArc>& a) { return a.get() == c2arc; }
-      ));
+      insertOrInc(c, c1, c2arc.weight);
+      carcs.erase(c2arc);
     }
 
     // update funcCluster
 
-    for (auto f : funcList) funcCluster[f] = c1;
+    for (auto f : c2->funcs) funcCluster[f] = c1;
+    mergeInto(*c1, std::move(*c2), max.weight);
   }
 
   // Return the set of clusters that are left, which are the ones that

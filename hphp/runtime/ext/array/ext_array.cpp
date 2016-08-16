@@ -2874,13 +2874,51 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 }
 
 // HH\\dict
-Array HHVM_FUNCTION(HH_dict, const Array& arr) {
-  return arr.toDict();
+Array HHVM_FUNCTION(HH_dict, const Variant& input) {
+  auto const inputCell = input.asCell();
+  if (LIKELY(isArrayLikeType(inputCell->m_type))) {
+    return ArrNR{inputCell->m_data.parr}.asArray().toDict();
+  } else if (inputCell->m_type == KindOfObject &&
+             inputCell->m_data.pobj->isCollection()) {
+    return HHVM_FN(HH_dict)(toArray(inputCell->m_data.pobj));
+  } else {
+    raise_warning(
+      "Only arrays, vecs, keysets, and collections can be converted into dicts"
+    );
+    return Array::CreateDict();
+  }
+}
+
+// HH\\keyset
+Array HHVM_FUNCTION(HH_keyset, const Variant& input) {
+  auto const inputCell = input.asCell();
+  if (LIKELY(isArrayLikeType(inputCell->m_type))) {
+    return ArrNR{inputCell->m_data.parr}.asArray().toKeyset();
+  } else if (inputCell->m_type == KindOfObject &&
+             inputCell->m_data.pobj->isCollection()) {
+    return HHVM_FN(HH_keyset)(toArray(inputCell->m_data.pobj));
+  } else {
+    raise_warning(
+      "Only arrays, vecs, dicts, and collections can be converted into keysets"
+    );
+    return Array::CreateKeyset();
+  }
 }
 
 // HH\\vec
-Array HHVM_FUNCTION(HH_vec, const Array& arr) {
-  return arr.toVec();
+Array HHVM_FUNCTION(HH_vec, const Variant& input) {
+  auto const inputCell = input.asCell();
+  if (LIKELY(isArrayLikeType(inputCell->m_type))) {
+    return ArrNR{inputCell->m_data.parr}.asArray().toVec();
+  } else if (inputCell->m_type == KindOfObject &&
+             inputCell->m_data.pobj->isCollection()) {
+    return HHVM_FN(HH_vec)(toArray(inputCell->m_data.pobj));
+  } else {
+    raise_warning(
+      "Only arrays, dicts, keysets, and collections can be converted into vecs"
+    );
+    return Array::CreateVec();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

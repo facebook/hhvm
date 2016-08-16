@@ -174,12 +174,15 @@ bool hasObviousStackOutput(Op op) {
   case Op::Double:
   case Op::String:
   case Op::Array:
+  case Op::Dict:
+  case Op::Vec:
+  case Op::Keyset:
   case Op::NewArray:
+  case Op::NewDictArray:
   case Op::NewPackedArray:
   case Op::NewStructArray:
   case Op::NewVecArray:
-  case Op::AddElemC:
-  case Op::AddElemV:
+  case Op::NewKeysetArray:
   case Op::AddNewElemC:
   case Op::AddNewElemV:
   case Op::NameA:
@@ -205,6 +208,9 @@ bool hasObviousStackOutput(Op op) {
   case Op::CastString:
   case Op::CastArray:
   case Op::CastObject:
+  case Op::CastDict:
+  case Op::CastVec:
+  case Op::CastKeyset:
   case Op::InstanceOfD:
   case Op::InstanceOf:
   case Op::Print:
@@ -339,9 +345,19 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
       gen(bc::String { v->m_data.pstr });
       break;
     case KindOfPersistentVec:
+      assert(v->m_data.parr->isVecArray());
+      gen(bc::Vec { v->m_data.parr });
+      break;
     case KindOfPersistentDict:
+      assert(v->m_data.parr->isDict());
+      gen(bc::Dict { v->m_data.parr });
+      break;
     case KindOfPersistentKeyset:
+      assert(v->m_data.parr->isKeyset());
+      gen(bc::Keyset { v->m_data.parr });
+      break;
     case KindOfPersistentArray:
+      assert(v->m_data.parr->isPHPArray());
       gen(bc::Array { v->m_data.parr });
       break;
 

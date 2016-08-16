@@ -158,16 +158,27 @@ void in(ISS& env, const bc::String& op) {
 }
 
 void in(ISS& env, const bc::Array& op) {
+  assert(op.arr1->isPHPArray());
   nothrow(env);
-  auto ty = [&] {
-    switch (op.arr1->kind()) {
-    case ArrayData::kDictKind:   return dict_val(op.arr1);
-    case ArrayData::kVecKind:    return vec_val(op.arr1);
-    case ArrayData::kKeysetKind: return keyset_val(op.arr1);
-    default:                     return aval(op.arr1);
-    }
-  }();
-  push(env, ty);
+  push(env, aval(op.arr1));
+}
+
+void in(ISS& env, const bc::Vec& op) {
+  assert(op.arr1->isVecArray());
+  nothrow(env);
+  push(env, vec_val(op.arr1));
+}
+
+void in(ISS& env, const bc::Dict& op) {
+  assert(op.arr1->isDict());
+  nothrow(env);
+  push(env, dict_val(op.arr1));
+}
+
+void in(ISS& env, const bc::Keyset& op) {
+  assert(op.arr1->isKeyset());
+  nothrow(env);
+  push(env, keyset_val(op.arr1));
 }
 
 void in(ISS& env, const bc::NewArray& op) {
@@ -216,17 +227,34 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
   push(env, ckeyset_n(ty));
 }
 
-void in(ISS& env, const bc::NewLikeArrayL&) {
-  push(env, counted_aempty());
+void in(ISS& env, const bc::NewLikeArrayL& op) {
+  auto const ty = locAsCell(env, op.loc1);
+  auto const outTy =
+    ty.subtypeOf(TArr) ? counted_aempty()
+    : ty.subtypeOf(TVec) ? counted_vec_empty()
+    : ty.subtypeOf(TDict) ? counted_dict_empty()
+    : ty.subtypeOf(TKeyset) ? counted_keyset_empty()
+    : union_of(TArr, union_of(TVec, union_of(TDict, TKeyset)));
+  push(env, outTy);
 }
 
 void in(ISS& env, const bc::AddElemC& op) {
-  popC(env); popC(env); popC(env);
-  push(env, TArr);
+  popC(env); popC(env);
+  auto const ty = popC(env);
+  auto const outTy =
+    ty.subtypeOf(TArr) ? TArr
+    : ty.subtypeOf(TDict) ? TDict
+    : union_of(TArr, TDict);
+  push(env, outTy);
 }
 void in(ISS& env, const bc::AddElemV& op) {
-  popV(env); popC(env); popC(env);
-  push(env, TArr);
+  popV(env); popC(env);
+  auto const ty = popC(env);
+  auto const outTy =
+    ty.subtypeOf(TArr) ? TArr
+    : ty.subtypeOf(TDict) ? TDict
+    : union_of(TArr, TDict);
+  push(env, outTy);
 }
 
 void in(ISS& env, const bc::AddNewElemC&) {
@@ -502,6 +530,9 @@ void in(ISS& env, const bc::CastDouble&) { castImpl(env, TDbl); }
 void in(ISS& env, const bc::CastString&) { castImpl(env, TStr); }
 void in(ISS& env, const bc::CastArray&)  { castImpl(env, TArr); }
 void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj); }
+void in(ISS& env, const bc::CastDict&)   { castImpl(env, TDict); }
+void in(ISS& env, const bc::CastVec&)    { castImpl(env, TVec); }
+void in(ISS& env, const bc::CastKeyset&) { castImpl(env, TKeyset); }
 
 void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
 

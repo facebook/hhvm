@@ -5196,22 +5196,53 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         makeStaticString(call->getClassScope()->getScopeName());
       e.String(name);
       return true;
-    } else if (call->isCallToFunction("dict") &&
-               (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
-      emitFuncCall(e, call, "HH\\dict", params);
+    } else if (((call->isCallToFunction("dict") &&
+                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\dict")) &&
+               params && params->getCount() == 1) {
+      visit((*params)[0]);
+      emitConvertToCell(e);
+      e.CastDict();
       return true;
-    } else if (call->isCallToFunction("vec") &&
-               (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
-      emitFuncCall(e, call, "HH\\vec", params);
+    } else if (((call->isCallToFunction("vec") &&
+                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\vec")) &&
+               params && params->getCount() == 1) {
+      visit((*params)[0]);
+      emitConvertToCell(e);
+      e.CastVec();
       return true;
-    } else if (call->isCallToFunction("is_vec") &&
-               (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) {
-      emitFuncCall(e, call, "HH\\is_vec", params);
+    } else if (((call->isCallToFunction("keyset") &&
+                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\keyset")) &&
+               params && params->getCount() == 1) {
+      visit((*params)[0]);
+      emitConvertToCell(e);
+      e.CastKeyset();
       return true;
-    } else if (emitConstantFuncCall(e, call)) {
+    } else if (((call->isCallToFunction("is_vec") &&
+                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\is_vec")) &&
+               params && params->getCount() == 1) {
+      visit((*call->getParams())[0]);
+      emitIsType(e, IsTypeOp::Vec);
+      return true;
+    } else if (((call->isCallToFunction("is_dict") &&
+                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\is_dict")) &&
+               params && params->getCount() == 1) {
+      visit((*call->getParams())[0]);
+      emitIsType(e, IsTypeOp::Dict);
+      return true;
+    } else if (((call->isCallToFunction("is_keyset") &&
+                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\is_keyset")) &&
+               params && params->getCount() == 1) {
+      visit((*call->getParams())[0]);
+      emitIsType(e, IsTypeOp::Keyset);
       return true;
     }
-#define TYPE_CONVERT_INSTR(what, What)                             \
+  #define TYPE_CONVERT_INSTR(what, What)                             \
     else if (call->isCallToFunction(#what"val") &&                 \
              params && params->getCount() == 1) {                  \
       visit((*params)[0]);                                         \
@@ -5247,8 +5278,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   TYPE_CHECK_INSTR(float, Dbl)
   TYPE_CHECK_INSTR(scalar, Scalar)
 #undef TYPE_CHECK_INSTR
-    // fall through
+    else if (emitConstantFuncCall(e, call)) {
+      return true;
+    }
   }
+  // fall through
   case Construct::KindOfDynamicFunctionCall: {
     emitFuncCall(e, static_pointer_cast<FunctionCall>(node));
     return true;
@@ -5922,12 +5956,25 @@ bool EmitterVisitor::emitScalarValue(Emitter& e, const Variant& v) {
 
     case KindOfPersistentVec:
     case KindOfVec:
+      assert(v.isVecArray());
+      e.Vec(ArrayData::GetScalarArray(v.getArrayData()));
+      return true;
+
     case KindOfPersistentDict:
     case KindOfDict:
+      assert(v.isDict());
+      e.Dict(ArrayData::GetScalarArray(v.getArrayData()));
+      return true;
+
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      assert(v.isKeyset());
+      e.Keyset(ArrayData::GetScalarArray(v.getArrayData()));
+      return true;
+
     case KindOfPersistentArray:
     case KindOfArray:
+      assert(v.isPHPArray());
       e.Array(ArrayData::GetScalarArray(v.getArrayData()));
       return true;
 
@@ -6894,12 +6941,25 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
 
     case KindOfPersistentVec:
     case KindOfVec:
+      assert(v.isVecArray());
+      e.Vec(v.getArrayData());
+      return;
+
     case KindOfPersistentDict:
     case KindOfDict:
+      assert(v.isDict());
+      e.Dict(v.getArrayData());
+      return;
+
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      assert(v.isKeyset());
+      e.Keyset(v.getArrayData());
+      return;
+
     case KindOfPersistentArray:
     case KindOfArray:
+      assert(v.isPHPArray());
       e.Array(v.getArrayData());
       return;
 
@@ -10130,7 +10190,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
     }
     m_staticColType.push_back(k);
     visit(el);
-    tvVal = make_tv<KindOfPersistentArray>(
+    tvVal = make_array_like_tv(
       ArrayData::GetScalarArray(m_staticArrays.back().get())
     );
     m_staticArrays.pop_back();
@@ -10218,15 +10278,15 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
 
   if (el == nullptr) {
     if (isDict) {
-      e.Array(staticEmptyDictArray());
+      e.Dict(staticEmptyDictArray());
       return;
     }
     if (isVec) {
-      e.Array(staticEmptyVecArray());
+      e.Vec(staticEmptyVecArray());
       return;
     }
     if (isKeyset) {
-      e.Array(staticEmptyKeysetArray());
+      e.Keyset(staticEmptyKeysetArray());
       return;
     }
     e.Array(staticEmptyArray());
@@ -10241,6 +10301,22 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     TypedValue tv;
     tvWriteUninit(&tv);
     initScalar(tv, el, kind);
+    if (isDict) {
+      assert(tv.m_data.parr->isDict());
+      e.Dict(tv.m_data.parr);
+      return;
+    }
+    if (isVec) {
+      assert(tv.m_data.parr->isVecArray());
+      e.Vec(tv.m_data.parr);
+      return;
+    }
+    if (isKeyset) {
+      assert(tv.m_data.parr->isKeyset());
+      e.Keyset(tv.m_data.parr);
+      return;
+    }
+    assert(tv.m_data.parr->isPHPArray());
     e.Array(tv.m_data.parr);
     return;
   }

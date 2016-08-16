@@ -168,6 +168,9 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(Dbl)                               \
   ISTYPE_OP(Str)                               \
   ISTYPE_OP(Arr)                               \
+  ISTYPE_OP(Vec)                               \
+  ISTYPE_OP(Dict)                              \
+  ISTYPE_OP(Keyset)                            \
   ISTYPE_OP(Obj)                               \
   ISTYPE_OP(Scalar)
 
@@ -350,6 +353,9 @@ constexpr int32_t kMaxConcatN = 4;
   O(Double,          ONE(DA),          NOV,             ONE(CV),    NF) \
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
   O(Array,           ONE(AA),          NOV,             ONE(CV),    NF) \
+  O(Dict,            ONE(AA),          NOV,             ONE(CV),    NF) \
+  O(Keyset,          ONE(AA),          NOV,             ONE(CV),    NF) \
+  O(Vec,             ONE(AA),          NOV,             ONE(CV),    NF) \
   O(NewArray,        ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewMixedArray,   ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewDictArray,    ONE(IVA),         NOV,             ONE(CV),    NF) \
@@ -408,6 +414,9 @@ constexpr int32_t kMaxConcatN = 4;
   O(CastString,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastArray,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastObject,      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(CastDict,        NA,               ONE(CV),         ONE(CV),    NF) \
+  O(CastKeyset,      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(CastVec,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \

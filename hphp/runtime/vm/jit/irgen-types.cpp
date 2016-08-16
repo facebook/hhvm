@@ -324,13 +324,16 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
 
 DataType typeOpToDataType(IsTypeOp op) {
   switch (op) {
-  case IsTypeOp::Null:  return KindOfNull;
-  case IsTypeOp::Int:   return KindOfInt64;
-  case IsTypeOp::Dbl:   return KindOfDouble;
-  case IsTypeOp::Bool:  return KindOfBoolean;
-  case IsTypeOp::Str:   return KindOfString;
-  case IsTypeOp::Arr:   return KindOfArray;
-  case IsTypeOp::Obj:   return KindOfObject;
+  case IsTypeOp::Null:   return KindOfNull;
+  case IsTypeOp::Int:    return KindOfInt64;
+  case IsTypeOp::Dbl:    return KindOfDouble;
+  case IsTypeOp::Bool:   return KindOfBoolean;
+  case IsTypeOp::Str:    return KindOfString;
+  case IsTypeOp::Vec:    return KindOfVec;
+  case IsTypeOp::Dict:   return KindOfDict;
+  case IsTypeOp::Keyset: return KindOfKeyset;
+  case IsTypeOp::Arr:    return KindOfArray;
+  case IsTypeOp::Obj:    return KindOfObject;
   case IsTypeOp::Scalar: not_reached();
   }
   not_reached();

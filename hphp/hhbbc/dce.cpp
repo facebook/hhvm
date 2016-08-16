@@ -482,6 +482,9 @@ void dce(Env& env, const bc::PopA&)       { discard(env); }
 void dce(Env& env, const bc::Int&)        { pushRemovable(env); }
 void dce(Env& env, const bc::String&)     { pushRemovable(env); }
 void dce(Env& env, const bc::Array&)      { pushRemovable(env); }
+void dce(Env& env, const bc::Dict&)       { pushRemovable(env); }
+void dce(Env& env, const bc::Vec&)        { pushRemovable(env); }
+void dce(Env& env, const bc::Keyset&)     { pushRemovable(env); }
 void dce(Env& env, const bc::Double&)     { pushRemovable(env); }
 void dce(Env& env, const bc::True&)       { pushRemovable(env); }
 void dce(Env& env, const bc::False&)      { pushRemovable(env); }

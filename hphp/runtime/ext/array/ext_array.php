@@ -1391,8 +1391,11 @@ namespace __SystemLib {
 
 namespace HH {
   <<__Native>>
-  function dict(array $arr): dict;
+  function dict(mixed $arr): dict;
 
   <<__Native>>
-  function vec(array $arr): vec;
+  function vec(mixed $arr): vec;
+
+  <<__Native>>
+  function keyset(mixed $arr): keyset;
 }

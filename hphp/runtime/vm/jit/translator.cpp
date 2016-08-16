@@ -99,7 +99,7 @@ static const struct {
   { OpPopR,        {Stack1|
                     DontGuardStack1|
                     IgnoreInnerType,  None,         OutNone         }},
-  { OpDup,         {Stack1,           StackTop2,    OutSameAsInput  }},
+  { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
   { OpBox,         {Stack1,           Stack1,       OutVInput       }},
   { OpUnbox,       {Stack1,           Stack1,       OutCInput       }},
   { OpBoxR,        {Stack1,           Stack1,       OutVInput       }},
@@ -115,16 +115,19 @@ static const struct {
   { OpDouble,      {None,             Stack1,       OutDouble       }},
   { OpString,      {None,             Stack1,       OutStringImm    }},
   { OpArray,       {None,             Stack1,       OutArrayImm     }},
+  { OpDict,        {None,             Stack1,       OutDictImm      }},
+  { OpKeyset,      {None,             Stack1,       OutKeysetImm    }},
+  { OpVec,         {None,             Stack1,       OutVecImm       }},
   { OpNewArray,    {None,             Stack1,       OutArray        }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray        }},
-  { OpNewDictArray,   {None,          Stack1,       OutArray        }},
-  { OpNewKeysetArray, {StackN,        Stack1,       OutArray        }},
+  { OpNewDictArray,   {None,          Stack1,       OutDict         }},
   { OpNewLikeArrayL,  {Local,         Stack1,       OutArray        }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
-  { OpNewVecArray,    {StackN,        Stack1,       OutArray        }},
-  { OpAddElemC,    {StackTop3,        Stack1,       OutArray        }},
-  { OpAddElemV,    {StackTop3,        Stack1,       OutArray        }},
+  { OpNewVecArray,    {StackN,        Stack1,       OutVec          }},
+  { OpNewKeysetArray, {StackN,        Stack1,       OutKeyset       }},
+  { OpAddElemC,    {StackTop3,        Stack1,       OutSameAsInput3 }},
+  { OpAddElemV,    {StackTop3,        Stack1,       OutSameAsInput3 }},
   { OpAddNewElemC, {StackTop2,        Stack1,       OutArray        }},
   { OpAddNewElemV, {StackTop2,        Stack1,       OutArray        }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},
@@ -183,6 +186,9 @@ static const struct {
   { OpCastString,  {Stack1,           Stack1,       OutString       }},
   { OpCastArray,   {Stack1,           Stack1,       OutArray        }},
   { OpCastObject,  {Stack1,           Stack1,       OutObject       }},
+  { OpCastDict,    {Stack1,           Stack1,       OutDict         }},
+  { OpCastKeyset,  {Stack1,           Stack1,       OutKeyset       }},
+  { OpCastVec,     {Stack1,           Stack1,       OutVec          }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
@@ -256,10 +262,10 @@ static const struct {
 
   /*** 7. Mutator instructions ***/
 
-  { OpSetL,        {Stack1|Local,     Stack1|Local, OutSameAsInput  }},
-  { OpSetN,        {StackTop2,        Stack1|Local, OutSameAsInput  }},
-  { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput  }},
-  { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput  }},
+  { OpSetL,        {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
+  { OpSetN,        {StackTop2,        Stack1|Local, OutSameAsInput1  }},
+  { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput1  }},
+  { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput1  }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp        }},
   { OpSetOpN,      {StackTop2,        Stack1|Local, OutUnknown      }},
   { OpSetOpG,      {StackTop2,        Stack1,       OutUnknown      }},
@@ -269,10 +275,10 @@ static const struct {
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
   { OpIncDecS,     {StackTop2,        Stack1,       OutUnknown      }},
   { OpBindL,       {Stack1|Local|
-                    IgnoreInnerType,  Stack1|Local, OutSameAsInput  }},
-  { OpBindN,       {StackTop2,        Stack1|Local, OutSameAsInput  }},
-  { OpBindG,       {StackTop2,        Stack1,       OutSameAsInput  }},
-  { OpBindS,       {StackTop3,        Stack1,       OutSameAsInput  }},
+                    IgnoreInnerType,  Stack1|Local, OutSameAsInput1  }},
+  { OpBindN,       {StackTop2,        Stack1|Local, OutSameAsInput1  }},
+  { OpBindG,       {StackTop2,        Stack1,       OutSameAsInput1  }},
+  { OpBindS,       {StackTop3,        Stack1,       OutSameAsInput1  }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
   { OpUnsetN,      {Stack1,           Local,        OutNone         }},
   { OpUnsetG,      {Stack1,           None,         OutNone         }},
@@ -300,8 +306,8 @@ static const struct {
   { OpFPushCufSafe,{StackTop2|DontGuardAny,
                                       StackTop2|FStack,
                                                     OutFPushCufSafe }},
-  { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput  }},
-  { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput  }},
+  { OpFPassCW,     {FuncdRef,         None,         OutSameAsInput1  }},
+  { OpFPassCE,     {FuncdRef,         None,         OutSameAsInput1  }},
   { OpFPassV,      {Stack1|FuncdRef,  Stack1,       OutUnknown      }},
   { OpFPassR,      {Stack1|FuncdRef,  Stack1,       OutFInputR      }},
   { OpFPassL,      {Local|FuncdRef,   Stack1,       OutFInputL      }},
@@ -373,9 +379,9 @@ static const struct {
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown      }},
   { OpVerifyRetTypeV,
-                   {Stack1,           Stack1,       OutSameAsInput  }},
+                   {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyRetTypeC,
-                   {Stack1,           Stack1,       OutSameAsInput  }},
+                   {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpOODeclExists,
                    {StackTop2,        Stack1,       OutBoolean      }},
   { OpSelf,        {None,             Stack1,       OutClassRef     }},
@@ -456,7 +462,7 @@ static const struct {
   { OpSetOpM,      {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpBindM,       {Stack1|BStackN|MBase|MKey,
-                                      Stack1,       OutSameAsInput  }},
+                                      Stack1,       OutSameAsInput1  }},
   { OpUnsetM,      {BStackN|MBase|MKey,
                                       None,         OutNone         }},
   { OpSetWithRefLML,
@@ -851,6 +857,9 @@ bool dontGuardAnyInputs(Op op) {
   case Op::AddElemC:
   case Op::AddNewElemC:
   case Op::Array:
+  case Op::Dict:
+  case Op::Keyset:
+  case Op::Vec:
   case Op::ArrayIdx:
   case Op::BareThis:
   case Op::BindG:
@@ -869,6 +878,9 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CastInt:
   case Op::CastObject:
   case Op::CastString:
+  case Op::CastDict:
+  case Op::CastKeyset:
+  case Op::CastVec:
   case Op::CheckProp:
   case Op::CheckThis:
   case Op::Clone:

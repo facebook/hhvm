@@ -1880,7 +1880,23 @@ OPTBLD_INLINE void iopString(const StringData* s) {
 }
 
 OPTBLD_INLINE void iopArray(const ArrayData* a) {
+  assert(a->isPHPArray());
   vmStack().pushStaticArray(a);
+}
+
+OPTBLD_INLINE void iopDict(const ArrayData* a) {
+  assert(a->isDict());
+  vmStack().pushStaticDict(a);
+}
+
+OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
+  assert(a->isKeyset());
+  vmStack().pushStaticKeyset(a);
+}
+
+OPTBLD_INLINE void iopVec(const ArrayData* a) {
+  assert(a->isVecArray());
+  vmStack().pushStaticVec(a);
 }
 
 OPTBLD_INLINE void iopNewArray(intva_t capacity) {
@@ -1900,7 +1916,11 @@ OPTBLD_INLINE void iopNewMixedArray(intva_t capacity) {
 }
 
 OPTBLD_INLINE void iopNewDictArray(intva_t capacity) {
-  vmStack().pushArrayNoRc(MixedArray::MakeReserveDict(capacity));
+  if (capacity == 0) {
+    vmStack().pushDictNoRc(staticEmptyDictArray());
+  } else {
+    vmStack().pushDictNoRc(MixedArray::MakeReserveDict(capacity));
+  }
 }
 
 OPTBLD_INLINE
@@ -1908,11 +1928,24 @@ void iopNewLikeArrayL(local_var fr, intva_t capacity) {
   ArrayData* arr;
   if (LIKELY(isArrayType(fr->m_type))) {
     arr = MixedArray::MakeReserveLike(fr->m_data.parr, capacity);
-  } else {
+    vmStack().pushArrayNoRc(arr);
+  } else if (isVecType(fr->m_type)) {
+    if (capacity == 0) capacity = PackedArray::SmallSize;
+    arr = PackedArray::MakeReserveVec(capacity);
+    vmStack().pushVecNoRc(arr);
+  } else if (isDictType(fr->m_type)) {
+    if (capacity == 0) capacity = MixedArray::SmallSize;
+    arr = MixedArray::MakeReserveDict(capacity);
+    vmStack().pushDictNoRc(arr);
+  } else if (isKeysetType(fr->m_type)) {
+    if (capacity == 0) capacity = MixedArray::SmallSize;
+    arr = MixedArray::MakeReserveKeyset(capacity);
+    vmStack().pushKeysetNoRc(arr);
+   } else {
     if (capacity == 0) capacity = PackedArray::SmallSize;
     arr = PackedArray::MakeReserve(capacity);
+    vmStack().pushArrayNoRc(arr);
   }
-  vmStack().pushArrayNoRc(arr);
 }
 
 OPTBLD_INLINE void iopNewPackedArray(intva_t n) {
@@ -1946,22 +1979,22 @@ OPTBLD_INLINE void iopNewVecArray(intva_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = PackedArray::MakeVec(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(a);
+  vmStack().pushVecNoRc(a);
 }
 
 OPTBLD_INLINE void iopNewKeysetArray(intva_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto* a = MixedArray::MakeKeyset(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(a);
+  vmStack().pushKeysetNoRc(a);
 }
 
 OPTBLD_INLINE void iopAddElemC() {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (!isArrayType(c3->m_type)) {
-    raise_error("AddElemC: $3 must be an array");
+  if (!isArrayType(c3->m_type) && !isDictType(c3->m_type)) {
+    raise_error("AddElemC: $3 must be an array or dict");
   }
   if (c2->m_type == KindOfInt64) {
     cellAsVariant(*c3).asArrRef().set(c2->m_data.num, tvAsCVarRef(c1));
@@ -1976,8 +2009,8 @@ OPTBLD_INLINE void iopAddElemV() {
   Ref* r1 = vmStack().topV();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (!isArrayType(c3->m_type)) {
-    raise_error("AddElemV: $3 must be an array");
+  if (!isArrayType(c3->m_type) && !isDictType(c3->m_type)) {
+    raise_error("AddElemV: $3 must be an array or dict");
   }
   if (c2->m_type == KindOfInt64) {
     cellAsVariant(*c3).asArrRef().setRef(c2->m_data.num, tvAsVariant(r1));
@@ -2328,6 +2361,21 @@ OPTBLD_INLINE void iopCastArray() {
 OPTBLD_INLINE void iopCastObject() {
   Cell* c1 = vmStack().topC();
   tvCastToObjectInPlace(c1);
+}
+
+OPTBLD_INLINE void iopCastDict() {
+  Cell* c1 = vmStack().topC();
+  tvCastToDictInPlace(c1);
+}
+
+OPTBLD_INLINE void iopCastKeyset() {
+  Cell* c1 = vmStack().topC();
+  tvCastToKeysetInPlace(c1);
+}
+
+OPTBLD_INLINE void iopCastVec() {
+  Cell* c1 = vmStack().topC();
+  tvCastToVecInPlace(c1);
 }
 
 OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
@@ -3629,6 +3677,9 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   case IsTypeOp::Int:    return is_int(tvAsCVarRef(tv));
   case IsTypeOp::Dbl:    return is_double(tvAsCVarRef(tv));
   case IsTypeOp::Arr:    return is_array(tvAsCVarRef(tv));
+  case IsTypeOp::Vec:    return is_vec(tvAsCVarRef(tv));
+  case IsTypeOp::Dict:   return is_dict(tvAsCVarRef(tv));
+  case IsTypeOp::Keyset: return is_keyset(tvAsCVarRef(tv));
   case IsTypeOp::Obj:    return is_object(tvAsCVarRef(tv));
   case IsTypeOp::Str:    return is_string(tvAsCVarRef(tv));
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(tv));

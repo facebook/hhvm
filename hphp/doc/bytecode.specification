@@ -848,6 +848,9 @@ descriptions:
   Dbl - denotes the double-precision floating-point type
   Str - denotes the string type
   Arr - denotes the array type
+  Vec - denotes the vec type
+  Dict - denotes the dict type
+  Keyset - denotes the keyset type
   Obj - denotes the object type
 
 Multiple type annotations may be combined together using the "|" symbol. For
@@ -1011,6 +1014,9 @@ Int <signed 64-bit integer value>    []  ->  [C:Int]
 Double <double value>                []  ->  [C:Dbl]
 String <litstr id>                   []  ->  [C:Str]
 Array <scalar array id>              []  ->  [C:Arr]
+Vec <scalar vec id>                  []  ->  [C:Vec]
+Dict <scalar dict id>                []  ->  [C:Dict]
+Keyset <scalar keyset id>            []  ->  [C:Keyset]
 
   Push immediate. Pushes %1 onto the stack.
 
@@ -1026,9 +1032,9 @@ NewMixedArray <capacity hint>    []  ->  [C:Arr]
   it onto the stack. The implementation may make use of the hint in %1 to
   pre-size the array. The hint %1 must be greater than or equal to 0.
 
-NewDictArray <capacity hint>    []  ->  [C:Arr]
+NewDictArray <capacity hint>    []  ->  [C:Dict]
 
-  New array in dict mode, with a capacity hint. Creates a new array and pushes
+  New dict, with a capacity hint. Creates a new dict and pushes
   it onto the stack. The implementation may make use of the hint in %1 to
   pre-size the array. The hint %1 must be greater than or equal to 0.
 
@@ -1069,31 +1075,31 @@ NewStructArray <litstr id vector>    [C..C]  ->  [C]
 
     NewStructArray < "a" "b" >  [ 1 2 ]  ->  [ array("a"=>1, "b"=>2) ]
 
-NewVecArray <num elems>   [C..C]  ->  [C:Arr]
+NewVecArray <num elems>   [C..C]  ->  [C:Vec]
 
-  New vector array. Creates a new vector array from the top %1 cells on the
-  stack, pops those cells, then pushes the new array onto the stack. Elements
-  should be pushed on the stack in array insertion order.
+  New vec. Creates a new vec from the top %1 cells on the stack, pops those
+  cells, then pushes the new vec onto the stack. Elements are pushed on the
+  stack in vec insertion order.
 
-NewKeysetArray <num elems>    [C..C]  ->  [C:Arr]
+NewKeysetArray <num elems>    [C..C]  ->  [C:Keyset]
 
-  New array in keyset mode. Creates a new keyset array from the top %1 cells on
-  the stack, pops those cells, then pushes the new keyset onto the stack.
-  Elements should be pushed on the stack in insertion order.
+  New keyset. Creates a new keyset from the top %1 cells on the stack, pops
+  those cells, then pushes the new keyset onto the stack.  Elements are pushed
+  on the stack in keyset insertion order.
 
-AddElemC    [C C C]  ->  [C:Arr]
+AddElemC    [C C C]  ->  [C:Arr|Dict]
 
-  Add element. If $3 is an array, this instruction executes $3[$2] = $1 and
-  then pushes $3 onto the stack.
+  Add element. If $3 is an array or dict, this instruction executes $3[$2] = $1
+  and then pushes $3 onto the stack.
 
-  If $3 is not an array, this instruction throws a fatal error.
+  If $3 is not an array or dict, this instruction throws a fatal error.
 
-AddElemV    [C C V]  ->  [C:Arr]
+AddElemV    [C C V]  ->  [C:Arr|Dict]
 
-  Add element. If $3 is an array, this instruction executes $3[$2] = &$1 and
-  then pushes $3 onto the stack.
+  Add element. If $3 is an array or dict, this instruction executes $3[$2] =
+  &$1 and then pushes $3 onto the stack.
 
-  If $3 is not an array, this instruction throws a fatal error.
+  If $3 is not an array or dict, this instruction throws a fatal error.
 
 AddNewElemC    [C C]  ->  [C:Arr]
 
@@ -1386,6 +1392,18 @@ CastArray    [C]  ->  [C:Arr]
 CastObject    [C]  ->  [C:Obj]
 
   Cast to object ((object)). Pushes (object)$1 onto the stack.
+
+CastVec       [C]  ->  [C:Vec]
+
+  Cast to vec array. Pushes vec($1) onto the stack.
+
+CastDict      [C]  ->  [C:Dict]
+
+  Cast to dict. Pushes dict($1) onto the stack.
+
+CastKeyset    [C]  ->  [C:Keyset]
+
+  Cast to keyset. Pushes keyset($1) onto the stack.
 
 InstanceOf    [C C]  ->  [C:Bool]
 

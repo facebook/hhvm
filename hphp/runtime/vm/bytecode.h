@@ -589,13 +589,38 @@ public:
     *m_top = make_tv<KindOfPersistentString>(s);
   }
 
-  // This should only be called directly when the caller has
+  // These should only be called directly when the caller has
   // already adjusted the refcount appropriately
   ALWAYS_INLINE
   void pushArrayNoRc(ArrayData* a) {
+    assert(a->isPHPArray());
     assert(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfArray>(a);
+  }
+
+  ALWAYS_INLINE
+  void pushVecNoRc(ArrayData* a) {
+    assert(a->isVecArray());
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfVec>(a);
+  }
+
+  ALWAYS_INLINE
+  void pushDictNoRc(ArrayData* a) {
+    assert(a->isDict());
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfDict>(a);
+  }
+
+  ALWAYS_INLINE
+  void pushKeysetNoRc(ArrayData* a) {
+    assert(a->isKeyset());
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfKeyset>(a);
   }
 
   ALWAYS_INLINE
@@ -606,11 +631,60 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushVec(ArrayData* a) {
+    assert(a);
+    pushVecNoRc(a);
+    a->incRefCount();
+  }
+
+  ALWAYS_INLINE
+  void pushDict(ArrayData* a) {
+    assert(a);
+    pushDictNoRc(a);
+    a->incRefCount();
+  }
+
+  ALWAYS_INLINE
+  void pushKeyset(ArrayData* a) {
+    assert(a);
+    pushKeysetNoRc(a);
+    a->incRefCount();
+  }
+
+  ALWAYS_INLINE
   void pushStaticArray(const ArrayData* a) {
     assert(a->isStatic()); // No need to call a->incRefCount().
+    assert(a->isPHPArray());
     assert(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfPersistentArray>(a);
+  }
+
+  ALWAYS_INLINE
+  void pushStaticVec(const ArrayData* a) {
+    assert(a->isStatic()); // No need to call a->incRefCount().
+    assert(a->isVecArray());
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfPersistentVec>(a);
+  }
+
+  ALWAYS_INLINE
+  void pushStaticDict(const ArrayData* a) {
+    assert(a->isStatic()); // No need to call a->incRefCount().
+    assert(a->isDict());
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfPersistentDict>(a);
+  }
+
+  ALWAYS_INLINE
+  void pushStaticKeyset(const ArrayData* a) {
+    assert(a->isStatic()); // No need to call a->incRefCount().
+    assert(a->isKeyset());
+    assert(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfPersistentKeyset>(a);
   }
 
   // This should only be called directly when the caller has

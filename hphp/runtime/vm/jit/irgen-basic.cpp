@@ -473,7 +473,26 @@ void emitDup(IRGS& env) { pushIncRef(env, topC(env)); }
 
 //////////////////////////////////////////////////////////////////////
 
-void emitArray(IRGS& env, const ArrayData* x)   { push(env, cns(env, x)); }
+void emitArray(IRGS& env, const ArrayData* x) {
+  assertx(x->isPHPArray());
+  push(env, cns(env, x));
+}
+
+void emitVec(IRGS& env, const ArrayData* x) {
+  assertx(x->isVecArray());
+  push(env, cns(env, x));
+}
+
+void emitDict(IRGS& env, const ArrayData* x) {
+  assertx(x->isDict());
+  push(env, cns(env, x));
+}
+
+void emitKeyset(IRGS& env, const ArrayData* x) {
+  assertx(x->isKeyset());
+  push(env, cns(env, x));
+}
+
 void emitString(IRGS& env, const StringData* s) { push(env, cns(env, s)); }
 void emitInt(IRGS& env, int64_t val)            { push(env, cns(env, val)); }
 void emitDouble(IRGS& env, double val)          { push(env, cns(env, val)); }

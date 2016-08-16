@@ -391,6 +391,12 @@ enum OutTypeConstraints {
   OutInt64,
   OutArray,
   OutArrayImm,
+  OutVec,
+  OutVecImm,
+  OutDict,
+  OutDictImm,
+  OutKeyset,
+  OutKeysetImm,
   OutObject,
   OutResource,
   OutThisObject,        // Object from current environment
@@ -401,7 +407,9 @@ enum OutTypeConstraints {
   OutCns,               // Constant; may be known at compile-time
   OutVUnknown,          // type is V(unknown)
 
-  OutSameAsInput,       // type is the same as the first stack input
+  OutSameAsInput1,      // type is the same as the first stack input
+  OutSameAsInput2,      // type is the same as the second stack input
+  OutSameAsInput3,      // type is the same as the third stack input
   OutCInput,            // type is C(input)
   OutVInput,            // type is V(input)
   OutCInputL,           // type is C(type) of local input

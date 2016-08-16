@@ -2139,6 +2139,9 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dbl:    return TDbl;
   case IsTypeOp::Str:    return TStr;
   case IsTypeOp::Arr:    return TArr;
+  case IsTypeOp::Vec:    return TVec;
+  case IsTypeOp::Dict:   return TDict;
+  case IsTypeOp::Keyset: return TKeyset;
   case IsTypeOp::Obj:    return TObj;
   case IsTypeOp::Scalar: always_assert(0);
   }
@@ -2215,11 +2218,11 @@ Type from_DataType(DataType dt) {
   case KindOfPersistentString:
   case KindOfString:   return TStr;
   case KindOfPersistentVec:
-  case KindOfVec:      return TArr;
+  case KindOfVec:      return TVec;
   case KindOfPersistentDict:
-  case KindOfDict:     return TArr;
+  case KindOfDict:     return TDict;
   case KindOfPersistentKeyset:
-  case KindOfKeyset:   return TArr;
+  case KindOfKeyset:   return TKeyset;
   case KindOfPersistentArray:
   case KindOfArray:    return TArr;
   case KindOfRef:      return TRef;

@@ -123,7 +123,13 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutBooleanImm:  return TBool;
     case OutInt64:       return TInt;
     case OutArray:       return TArr;
-    case OutArrayImm:    return TArr; // Should be StaticArr: t2124292
+    case OutArrayImm:    return TArr; // Should be StaticArr/Vec/Dict: t2124292
+    case OutVec:         return TArr; // Temporary
+    case OutVecImm:      return TArr;
+    case OutDict:        return TArr;
+    case OutDictImm:     return TArr;
+    case OutKeyset:      return TArr;
+    case OutKeysetImm:   return TArr;
     case OutObject:
     case OutThisObject:  return TObj;
     case OutResource:    return TRes;
@@ -132,7 +138,9 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutCns:         return TCell;
     case OutVUnknown:    return TBoxedInitCell;
 
-    case OutSameAsInput: return topType(env, BCSPRelOffset{0});
+    case OutSameAsInput1: return topType(env, BCSPRelOffset{0});
+    case OutSameAsInput2: return topType(env, BCSPRelOffset{1});
+    case OutSameAsInput3: return topType(env, BCSPRelOffset{2});
     case OutVInput:      return boxed(topType(env, BCSPRelOffset{0}));
     case OutVInputL:     return boxed(localType());
     case OutFInputL:
@@ -453,6 +461,10 @@ void emitContUnsetDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitNewKeysetArray(IRGS& env, int32_t)   { INTERP }
 void emitHighInvalid(IRGS& env)               { std::abort(); }
+
+void emitCastVec(IRGS& env)                   { INTERP } // Temporary
+void emitCastDict(IRGS& env)                  { INTERP }
+void emitCastKeyset(IRGS& env)                { INTERP }
 
 //////////////////////////////////////////////////////////////////////
 

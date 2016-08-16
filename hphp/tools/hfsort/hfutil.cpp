@@ -25,31 +25,28 @@
 
 namespace HPHP { namespace hfsort {
 
-using std::string;
-using std::vector;
-using std::map;
-
 CallGraph cg;
 
-void CallGraph::clear() {
+CallGraph::~CallGraph() {
   for (auto* arc : arcs) {
     delete arc;
   }
-  arcs = vector<Arc*>();
-  for (auto* cluster : clusters) {
-    delete cluster;
-  }
-  clusters = vector<Cluster*>();
-  funcs = vector<Func>();
-  addr2FuncId = map<uint64_t, FuncId>();
+  arcs = std::vector<Arc*>();
+  funcs = std::vector<Func>();
+  addr2FuncId = std::map<uint64_t, FuncId>();
 
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 bool compareClustersDensity(const Cluster* c1, const Cluster* c2) {
   return (double) c1->samples / c1->size > (double) c2->samples / c2->size;
 }
 
-void freezeClusters(vector<Cluster*>& clusters) {
+////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+void freezeClusters(std::vector<Cluster*>& clusters) {
   uint32_t totalSize = 0;
   sort(clusters.begin(), clusters.end(), compareClustersDensity);
   for (Cluster* cluster : clusters) {
@@ -63,11 +60,14 @@ void freezeClusters(vector<Cluster*>& clusters) {
             cg.funcs[fid].mangledNames[0].c_str());
   }
 }
+}
 
-vector<Cluster*> clusterize() {
-  vector<FuncId>   sortedFuncs;
-  vector<Cluster*> funcCluster; // indexed by FuncId, keeps it's current cluster
-  vector<Cluster*> clusters;
+std::vector<Cluster*> clusterize() {
+  std::vector<FuncId> sortedFuncs;
+
+  // indexed by FuncId, keeps it's current cluster
+  std::vector<Cluster*> funcCluster;
+  std::vector<Cluster*> clusters;
 
   for (size_t f = 0; f < cg.funcs.size(); f++) {
     if (cg.funcs[f].samples > 0) {
@@ -161,6 +161,9 @@ vector<Cluster*> clusterize() {
   return clusters;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+namespace {
 void orderFuncs(Cluster* c1, Cluster* c2) {
   FuncId c1head = c1->funcs[0];
   FuncId c1tail = c1->funcs[c1->funcs.size() - 1];
@@ -203,17 +206,14 @@ void orderFuncs(Cluster* c1, Cluster* c2) {
     std::reverse(c2->funcs.begin(), c2->funcs.end());
   }
 }
-
-/*
- * Pettis-Hansen code layout algorithm
- * reference: K. Pettis and R. C. Hansen, "Profile Guided Code Positioning",
- *            PLDI '90
- */
+}
 
 std::vector<Cluster*> pettisAndHansen() {
-  vector<Cluster*> funcCluster; // indexed by FuncId, keeps it's current cluster
-  vector<Cluster*> clusters;
-  vector<FuncId>   funcs;
+  // indexed by FuncId, keeps its current cluster
+  std::vector<Cluster*> funcCluster;
+
+  std::vector<Cluster*> clusters;
+  std::vector<FuncId> funcs;
 
   for (size_t f = 0; f < cg.funcs.size(); f++) {
     if (cg.funcs[f].samples > 0) {
@@ -225,7 +225,7 @@ std::vector<Cluster*> pettisAndHansen() {
     }
   }
 
-  vector<ClusterArc*> carcs;
+  std::vector<ClusterArc*> carcs;
 
   // Create a vector of cluster arcs
 
@@ -287,8 +287,8 @@ std::vector<Cluster*> pettisAndHansen() {
 
     // update carcs: merge c1arcs to c2arcs
 
-    map<Cluster*, ClusterArc*> c1arcs;
-    vector<std::pair<Cluster*, ClusterArc*> > c2arcs;
+    std::map<Cluster*, ClusterArc*> c1arcs;
+    std::vector<std::pair<Cluster*, ClusterArc*> > c2arcs;
 
     for(ClusterArc* carc : carcs) {
       if (carc->c1 == c1) c1arcs[carc->c2] = carc;
@@ -332,4 +332,4 @@ std::vector<Cluster*> pettisAndHansen() {
   return clusters;
 }
 
-} }
+}}

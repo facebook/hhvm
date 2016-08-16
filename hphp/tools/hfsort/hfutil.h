@@ -50,15 +50,14 @@ constexpr uint32_t BUFLEN = 1000;
 constexpr uint8_t tracing = 1;
 
 // Supported code layout algorithms
-
 enum class Algorithm { Hfsort, PettisHansen, Invalid };
 
 void trace(const char* fmt, ...);
 #define HFTRACE(LEVEL, ...)                  \
   if (tracing >= LEVEL) { trace(__VA_ARGS__); }
 
-typedef   int32_t FuncId;
-constexpr int32_t  InvalidId   = -1;
+using FuncId = int32_t;
+constexpr int32_t InvalidId = -1;
 constexpr uint64_t InvalidAddr = std::numeric_limits<uint64_t>::max();
 
 
@@ -69,7 +68,9 @@ struct Arc {
   Arc(FuncId s, FuncId d, double w)
       : src(s)
       , dst(d)
-      , weight(w) {}
+      , weight(w)
+  {}
+
   FuncId src;
   FuncId dst;
   double weight;
@@ -82,8 +83,7 @@ struct Func {
       : id(id)
       , group(g)
       , addr(a)
-      , size(s)
-      , samples(0) {
+      , size(s) {
     mangledNames.push_back(name);
   }
 
@@ -92,23 +92,22 @@ struct Func {
   }
 
   std::string toString() const {
-    return folly::format("func = {:5} : samples = {:6} : size = {:6} : {}\n",
-                         id, samples, size, mangledNames[0]).str();
+    return folly::sformat("func = {:5} : samples = {:6} : size = {:6} : {}\n",
+                          id, samples, size, mangledNames[0]);
   }
 
-  FuncId         id;
-  uint32_t       group;
-  uint64_t       addr;
-  uint32_t       size;
-  uint32_t       samples;
+  FuncId id;
+  uint32_t group;
+  uint64_t addr;
+  uint32_t size;
+  uint32_t samples{0};
   std::vector<std::string> mangledNames;
-  std::vector<Arc*>   inArcs;
-  std::vector<Arc*>   outArcs;
+  std::vector<Arc*> inArcs;
+  std::vector<Arc*> outArcs;
 };
 
 struct CallGraph {
-  ~CallGraph() { clear(); }
-  void clear();
+  ~CallGraph();
 
   bool addFunc(Func f) {
     if (f.valid()) {
@@ -132,10 +131,6 @@ struct CallGraph {
       }
     }
     return false;
-  }
-
-  void addCluster(Cluster* c) {
-    clusters.push_back(c);
   }
 
   Arc* findArc(FuncId src, FuncId dst) const {
@@ -214,8 +209,6 @@ struct CallGraph {
   std::vector<Func> funcs;
   std::map<uint64_t,FuncId> addr2FuncId;
   std::vector<Arc*> arcs;
- private:
-  std::vector<Cluster*> clusters;
 };
 
 struct Cluster {
@@ -234,7 +227,7 @@ struct Cluster {
       FuncId fid = other.funcs[if2];
       funcs.push_back(fid);
     }
-    size    += other.size;
+    size += other.size;
     samples += other.samples;
     arcWeight += (other.arcWeight + aw);
   }
@@ -244,17 +237,18 @@ struct Cluster {
   }
 
   std::vector<FuncId> funcs;
-  uint32_t       samples;
-  double         arcWeight; // intra-cluster callgraph arc weight
-  uint32_t       size;
-  bool           frozen; // not a candidate for merging
+  uint32_t samples;
+  double arcWeight; // intra-cluster callgraph arc weight
+  uint32_t size;
+  bool frozen; // not a candidate for merging
 };
 
 struct ClusterArc {
   ClusterArc(Cluster* c1, Cluster* c2, double w)
     : c1(c1)
     , c2(c2)
-    , weight(w) {}
+    , weight(w)
+  {}
 
   friend bool operator==(const ClusterArc& carc1, const ClusterArc& carc2) {
     return ((carc1.c1 == carc2.c1 && carc1.c2 == carc2.c2) ||
@@ -267,14 +261,20 @@ struct ClusterArc {
 
   Cluster* c1;
   Cluster* c2;
-  double   weight;
+  double weight;
 };
 
 void error(const char*);
 bool compareClustersDensity(const Cluster* c1, const Cluster* c2);
 std::vector<Cluster*> clusterize();
+
+/*
+ * Pettis-Hansen code layout algorithm
+ * reference: K. Pettis and R. C. Hansen, "Profile Guided Code Positioning",
+ *            PLDI '90
+ */
 std::vector<Cluster*> pettisAndHansen();
 
-} }
+}}
 
 #endif

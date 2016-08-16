@@ -21,12 +21,6 @@ let canon_set names =
   |> List.map ~f:NamingGlobal.canon_key
   |> List.fold_left ~f:SSet.add ~init:SSet.empty
 
-let report_error exn =
-  let exn_str = Printexc.to_string exn in
-  Printf.printf "Could not auto-complete because of errors: %s\n" exn_str;
-  flush stdout;
-  ()
-
 let oldify_funs names =
   Naming_heap.FunPosHeap.oldify_batch names;
   Naming_heap.FunCanonHeap.oldify_batch @@ canon_set names;
@@ -98,7 +92,7 @@ let declare_and_check content ~f =
   let tcopt = TypecheckerOptions.permissive in
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
-  let file_info = try
+  let file_info =
     Errors.ignore_ begin fun () ->
       let {Parser_hack.file_mode = _; comments = _; ast} =
         Parser_hack.program path content
@@ -143,9 +137,6 @@ let declare_and_check content ~f =
       end;
       file_info
     end
-  with e ->
-    report_error e;
-    FileInfo.empty_t
   in
   let result = f path file_info in
   revive_file_info path file_info;

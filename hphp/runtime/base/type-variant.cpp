@@ -93,24 +93,47 @@ Variant::Variant(const Variant& v) noexcept {
  * ResourceHdr, and RefData classes.
  */
 
-static_assert(typeToDestrIdx(KindOfString) == 2, "String destruct index");
-static_assert(typeToDestrIdx(KindOfArray)  == 3,  "Array destruct index");
-static_assert(typeToDestrIdx(KindOfObject) == 4, "Object destruct index");
-static_assert(typeToDestrIdx(KindOfResource) == 5,
-              "Resource destruct index");
-static_assert(typeToDestrIdx(KindOfRef)    == 6,    "Ref destruct index");
+static_assert(typeToDestrIdx(KindOfObject)   == 16, "Object destruct index");
+static_assert(typeToDestrIdx(KindOfResource) == 20, "Resource destruct index");
+static_assert(typeToDestrIdx(KindOfString)   == 24, "String destruct index");
+static_assert(typeToDestrIdx(KindOfRef)      == 28, "Ref destruct index");
+static_assert(typeToDestrIdx(KindOfArray)    == 29, "Array destruct index");
 
-static_assert(kDestrTableSize == 7,
+static_assert(kDestrTableSize == 31,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
   nullptr,
   nullptr,
-  (RawDestructor)getMethodPtr(&StringData::release),
-  (RawDestructor)getMethodPtr(&ArrayData::release),
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
+  nullptr,
   (RawDestructor)getMethodPtr(&ObjectData::release), // may replace at runtime
+  nullptr,
+  nullptr,
+  nullptr,
   (RawDestructor)getMethodPtr(&ResourceHdr::release),
+  nullptr,
+  nullptr, // KindOfVec
+  nullptr,
+  (RawDestructor)getMethodPtr(&StringData::release),
+  nullptr,
+  nullptr, // KindOfDict
+  nullptr,
   (RawDestructor)getMethodPtr(&RefData::release),
+  (RawDestructor)getMethodPtr(&ArrayData::release),
+  nullptr, // KindOfKeyset
 };
 
 void tweak_variant_dtors() {
@@ -274,6 +297,28 @@ bool Variant::isScalar() const noexcept {
 
     case KindOfClass:
       break;
+  }
+  not_reached();
+}
+
+bool Variant::isAllowedAsConstantValue() const {
+  switch (m_type) {
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+      return true;
+
+    case KindOfUninit:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfPersistentArray:
+    case KindOfArray:
+    case KindOfRef:
+    case KindOfClass:
+      return false;
   }
   not_reached();
 }

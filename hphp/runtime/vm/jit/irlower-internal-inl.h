@@ -206,13 +206,12 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
     if (type == TNull)          return cmp(KindOfNull, CC_LE);
     if (type == TUncountedInit) return test(KindOfUncountedInitBit, CC_NZ);
     if (type == TUncounted)     return cmp(KindOfRefCountThreshold, CC_LE);
-    if (type == TCell)          return cmp(KindOfRef, CC_L);
+    if (type == TCell)          return cmp(KindOfRef, CC_NE);
 
     always_assert(type.isKnownDataType());
     always_assert(!(type < TBoxedInitCell));
 
     auto const dt = type.toDataType();
-    assertx(dt == KindOfRef || (dt >= KindOfUninit && dt <= KindOfResource));
     return cmp(dt, CC_E);
   }();
 

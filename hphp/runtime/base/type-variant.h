@@ -616,10 +616,9 @@ struct Variant : private TypedValue {
     }
     not_reached();
   }
+
   // Is "define('CONSTANT', <this value>)" legal?
-  bool isAllowedAsConstantValue() const {
-    return (m_type & kNotConstantValueTypeMask) == 0;
-  }
+  bool isAllowedAsConstantValue() const;
 
   /**
    * Whether or not there are at least two variables that are strongly bound.

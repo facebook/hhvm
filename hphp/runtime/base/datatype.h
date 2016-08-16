@@ -40,27 +40,34 @@ namespace HPHP {
  */
 enum DataType : int8_t {
   // Values below zero are not PHP values, but runtime-internal.
-  KindOfClass         = -8,   // 11111000
+  KindOfClass            = -16,      //  11110000
 
   // Any code that static_asserts about the value of KindOfNull may also depend
   // on there not being any values between KindOfUninit and KindOfNull.
 
-                                 //       array bit
-                                 //       |string bit
-                                 //       ||uncounted init bit
-                                 //       |||
-  KindOfUninit          = 0x00,  //  00000000
-  KindOfNull            = 0x01,  //  00000001
-  KindOfBoolean         = 0x09,  //  00001001
-  KindOfInt64           = 0x11,  //  00010001
-  KindOfDouble          = 0x19,  //  00011001
-  KindOfPersistentString = 0x1b, //  00011011
-  KindOfPersistentArray = 0x1d,  //  00011101
-  KindOfString          = 0x22,  //  00100010
-  KindOfArray           = 0x34,  //  00110100
-  KindOfObject          = 0x40,  //  01000000
-  KindOfResource        = 0x50,  //  01010000
-  KindOfRef             = 0x60,  //  01100000
+                                     //      Hack array bit
+                                     //      |PHP array bit
+                                     //      ||string bit
+                                     //      |||uncounted init bit
+                                     //      ||||
+  KindOfUninit           = 0x00,     //  00000000
+  KindOfNull             = 0x01,     //  00000001
+  KindOfInt64            = 0x11,     //  00010001
+//KindOfPersistentVec    = 0x19,     //  00011001
+  KindOfBoolean          = 0x21,     //  00100001
+  KindOfPersistentString = 0x23,     //  00100011
+//KindOfPersistentDict   = 0x29,     //  00101001
+  KindOfDouble           = 0x31,     //  00110001
+  KindOfPersistentArray  = 0x35,     //  00110101
+//KindOfPersistentKeyset = 0x39,     //  00111001
+  KindOfObject           = 0x40,     //  01000000
+  KindOfResource         = 0x50,     //  01010000
+//KindOfVec              = 0x58,     //  01011000
+  KindOfString           = 0x62,     //  01100010
+//KindOfDict             = 0x68,     //  01101000
+  KindOfRef              = 0x70,     //  01110000
+  KindOfArray            = 0x74,     //  01110100
+//KindOfKeyset           = 0x78,     //  01111000
 };
 
 /*
@@ -107,7 +114,7 @@ constexpr unsigned kDataTypeMask = 0x7f;
  * DataType limits.
  */
 constexpr int8_t kMinDataType  = KindOfClass;
-constexpr int8_t kMaxDataType  = KindOfRef;
+constexpr int8_t kMaxDataType  = KindOfArray;
 
 /*
  * KindOfStringBit must be set in KindOfPersistentString and KindOfString,
@@ -128,11 +135,20 @@ constexpr int KindOfArrayBit = 0x04;
 constexpr int KindOfUncountedInitBit = 0x01;
 
 /*
- * For a given DataType dt >= 0, this mask can be used to test if dt is
- * KindOfPersistentArray, KindOfArray, KindOfObject, KindOfResource, or
- * KindOfRef.
+ * One of KindOfHashPersistentBits must be set for KindOfString,
+ * KindOfPersistentString, KindOfArray, or KindOfPersistentArray. It signifies
+ * the type has both persistent and non-persistent variants.
  */
-constexpr unsigned kNotConstantValueTypeMask = 0x44;
+constexpr int KindOfHasPersistentBits = KindOfStringBit | KindOfArrayBit;
+
+/*
+ * The result of ANDing kDataTypeEquivalentMask against KindOf[Persistent]Array,
+ * KindOf[Persistent]String, or KindOfNull/KindOfUninit yields some unspecified
+ * value which is the same for each persistent/non-persistent pair, and
+ * different for all else. Used to check for equivalency between persistent and
+ * non-persistent DataTypes.
+ */
+constexpr int kDataTypeEquivalentMask = 0x3e;
 
 /*
  * All DataTypes greater than this value are refcounted.
@@ -160,71 +176,6 @@ enum class DataTypeCategory : uint8_t {
 #define DT(name) auto constexpr DataType##name = DataTypeCategory::name;
 DT_CATEGORIES(DT)
 #undef DT
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Static asserts.
-
-static_assert(KindOfString        & KindOfStringBit, "");
-static_assert(KindOfPersistentString  & KindOfStringBit, "");
-static_assert(!(KindOfUninit      & KindOfStringBit), "");
-static_assert(!(KindOfNull        & KindOfStringBit), "");
-static_assert(!(KindOfBoolean     & KindOfStringBit), "");
-static_assert(!(KindOfInt64       & KindOfStringBit), "");
-static_assert(!(KindOfDouble      & KindOfStringBit), "");
-static_assert(!(KindOfPersistentArray & KindOfStringBit), "");
-static_assert(!(KindOfArray       & KindOfStringBit), "");
-static_assert(!(KindOfObject      & KindOfStringBit), "");
-static_assert(!(KindOfResource    & KindOfStringBit), "");
-static_assert(!(KindOfRef         & KindOfStringBit), "");
-static_assert(!(KindOfClass       & KindOfStringBit), "");
-
-static_assert(KindOfArray          & KindOfArrayBit, "");
-static_assert(KindOfPersistentArray    & KindOfArrayBit, "");
-static_assert(!(KindOfUninit       & KindOfArrayBit), "");
-static_assert(!(KindOfNull         & KindOfArrayBit), "");
-static_assert(!(KindOfBoolean      & KindOfArrayBit), "");
-static_assert(!(KindOfInt64        & KindOfArrayBit), "");
-static_assert(!(KindOfDouble       & KindOfArrayBit), "");
-static_assert(!(KindOfPersistentString & KindOfArrayBit), "");
-static_assert(!(KindOfString       & KindOfArrayBit), "");
-static_assert(!(KindOfObject       & KindOfArrayBit), "");
-static_assert(!(KindOfResource     & KindOfArrayBit), "");
-static_assert(!(KindOfRef          & KindOfArrayBit), "");
-static_assert(!(KindOfClass        & KindOfArrayBit), "");
-
-static_assert(KindOfNull         & KindOfUncountedInitBit, "");
-static_assert(KindOfBoolean      & KindOfUncountedInitBit, "");
-static_assert(KindOfInt64        & KindOfUncountedInitBit, "");
-static_assert(KindOfDouble       & KindOfUncountedInitBit, "");
-static_assert(KindOfPersistentString & KindOfUncountedInitBit, "");
-static_assert(KindOfPersistentArray  & KindOfUncountedInitBit, "");
-static_assert(!(KindOfUninit     & KindOfUncountedInitBit), "");
-static_assert(!(KindOfString     & KindOfUncountedInitBit), "");
-static_assert(!(KindOfArray      & KindOfUncountedInitBit), "");
-static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
-static_assert(!(KindOfResource   & KindOfUncountedInitBit), "");
-static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
-static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
-
-static_assert(KindOfUninit == 0,
-              "Several things assume this tag is 0, especially RDS");
-
-static_assert(kMaxDataType <= kDataTypeMask, "");
-
-static_assert((kNotConstantValueTypeMask & KindOfPersistentArray) != 0  &&
-              (kNotConstantValueTypeMask & KindOfArray) != 0  &&
-              (kNotConstantValueTypeMask & KindOfObject) != 0 &&
-              (kNotConstantValueTypeMask & KindOfResource) != 0 &&
-              (kNotConstantValueTypeMask & KindOfRef) != 0,
-              "DataType & kNotConstantValueTypeMask must be non-zero for "
-              "Array, Object and Ref types");
-static_assert(!(kNotConstantValueTypeMask &
-                (KindOfNull|KindOfBoolean|KindOfInt64|KindOfDouble|
-                 KindOfPersistentString|KindOfString)),
-              "DataType & kNotConstantValueTypeMask must be zero for "
-              "null, bool, int, double and string types");
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Names.
@@ -271,8 +222,8 @@ inline std::string typeCategoryName(DataTypeCategory c) {
 /*
  * These are used in type-variant.cpp and mc-generator.cpp.
  */
-constexpr int kShiftDataTypeToDestrIndex = 4;
-constexpr int kDestrTableSize = 7;
+constexpr int kShiftDataTypeToDestrIndex = 2;
+constexpr int kDestrTableSize = 31;
 
 constexpr unsigned typeToDestrIdx(DataType t) {
   // t must be a refcounted type, but we can't actually assert that and still
@@ -357,8 +308,8 @@ constexpr bool isIntKeyType(DataType t) {
 constexpr bool equivDataTypes(DataType t1, DataType t2) {
   return
     (t1 == t2) ||
-    (isStringType(t1) && isStringType(t2)) ||
-    (isArrayType(t1) && isArrayType(t2)) ||
+    ((t1 & t2 & KindOfHasPersistentBits) &&
+     ((t1 & kDataTypeEquivalentMask) == (t2 & kDataTypeEquivalentMask))) ||
     (isNullType(t1) && isNullType(t2));
 }
 
@@ -377,6 +328,123 @@ constexpr bool equivDataTypes(DataType t1, DataType t2) {
   case KindOfDouble:        \
   case KindOfPersistentString:  \
   case KindOfPersistentArray
+
+///////////////////////////////////////////////////////////////////////////////
+// Static asserts.
+
+static_assert(isStringType(KindOfString),           "");
+static_assert(isStringType(KindOfPersistentString), "");
+static_assert(!isStringType(KindOfUninit),          "");
+static_assert(!isStringType(KindOfNull),            "");
+static_assert(!isStringType(KindOfBoolean),         "");
+static_assert(!isStringType(KindOfInt64),           "");
+static_assert(!isStringType(KindOfDouble),          "");
+static_assert(!isStringType(KindOfPersistentArray), "");
+static_assert(!isStringType(KindOfArray),           "");
+static_assert(!isStringType(KindOfObject),          "");
+static_assert(!isStringType(KindOfResource),        "");
+static_assert(!isStringType(KindOfRef),             "");
+static_assert(!isStringType(KindOfClass),           "");
+
+static_assert(isArrayType(KindOfArray),             "");
+static_assert(isArrayType(KindOfPersistentArray),   "");
+static_assert(!isArrayType(KindOfUninit),           "");
+static_assert(!isArrayType(KindOfNull),             "");
+static_assert(!isArrayType(KindOfBoolean),          "");
+static_assert(!isArrayType(KindOfInt64),            "");
+static_assert(!isArrayType(KindOfDouble),           "");
+static_assert(!isArrayType(KindOfPersistentString), "");
+static_assert(!isArrayType(KindOfString),           "");
+static_assert(!isArrayType(KindOfObject),           "");
+static_assert(!isArrayType(KindOfResource),         "");
+static_assert(!isArrayType(KindOfRef),              "");
+static_assert(!isArrayType(KindOfClass),            "");
+
+static_assert(isNullType(KindOfUninit),            "");
+static_assert(isNullType(KindOfNull),              "");
+static_assert(!isNullType(KindOfArray),            "");
+static_assert(!isNullType(KindOfPersistentArray),  "");
+static_assert(!isNullType(KindOfBoolean),          "");
+static_assert(!isNullType(KindOfInt64),            "");
+static_assert(!isNullType(KindOfDouble),           "");
+static_assert(!isNullType(KindOfPersistentString), "");
+static_assert(!isNullType(KindOfString),           "");
+static_assert(!isNullType(KindOfObject),           "");
+static_assert(!isNullType(KindOfResource),         "");
+static_assert(!isNullType(KindOfRef),              "");
+static_assert(!isNullType(KindOfClass),            "");
+
+static_assert(isRefcountedType(KindOfString),            "");
+static_assert(isRefcountedType(KindOfObject),            "");
+static_assert(isRefcountedType(KindOfResource),          "");
+static_assert(isRefcountedType(KindOfRef),               "");
+static_assert(isRefcountedType(KindOfArray),             "");
+static_assert(!isRefcountedType(KindOfUninit),           "");
+static_assert(!isRefcountedType(KindOfNull),             "");
+static_assert(!isRefcountedType(KindOfBoolean),          "");
+static_assert(!isRefcountedType(KindOfInt64),            "");
+static_assert(!isRefcountedType(KindOfDouble),           "");
+static_assert(!isRefcountedType(KindOfPersistentString), "");
+static_assert(!isRefcountedType(KindOfPersistentArray),  "");
+static_assert(!isRefcountedType(KindOfClass),            "");
+
+static_assert(isIntKeyType(KindOfUninit),            "");
+static_assert(isIntKeyType(KindOfNull),              "");
+static_assert(isIntKeyType(KindOfInt64),             "");
+static_assert(!isIntKeyType(KindOfString),           "");
+static_assert(!isIntKeyType(KindOfObject),           "");
+static_assert(!isIntKeyType(KindOfResource),         "");
+static_assert(!isIntKeyType(KindOfRef),              "");
+static_assert(!isIntKeyType(KindOfArray),            "");
+static_assert(!isIntKeyType(KindOfBoolean),          "");
+static_assert(!isIntKeyType(KindOfDouble),           "");
+static_assert(!isIntKeyType(KindOfPersistentString), "");
+static_assert(!isIntKeyType(KindOfPersistentArray),  "");
+
+static_assert(equivDataTypes(KindOfNull, KindOfUninit),             "");
+static_assert(equivDataTypes(KindOfArray, KindOfPersistentArray),   "");
+static_assert(equivDataTypes(KindOfString, KindOfPersistentString), "");
+static_assert(!equivDataTypes(KindOfNull, KindOfString),            "");
+static_assert(!equivDataTypes(KindOfNull, KindOfInt64),             "");
+static_assert(!equivDataTypes(KindOfBoolean, KindOfInt64),          "");
+static_assert(!equivDataTypes(KindOfUninit, KindOfArray),           "");
+static_assert(!equivDataTypes(KindOfObject, KindOfResource),        "");
+static_assert(!equivDataTypes(KindOfArray, KindOfString),           "");
+static_assert(!equivDataTypes(KindOfArray, KindOfPersistentString), "");
+static_assert(!equivDataTypes(KindOfArray, KindOfObject),           "");
+
+static_assert(KindOfNull         & KindOfUncountedInitBit, "");
+static_assert(KindOfBoolean      & KindOfUncountedInitBit, "");
+static_assert(KindOfInt64        & KindOfUncountedInitBit, "");
+static_assert(KindOfDouble       & KindOfUncountedInitBit, "");
+static_assert(KindOfPersistentString & KindOfUncountedInitBit, "");
+static_assert(KindOfPersistentArray  & KindOfUncountedInitBit, "");
+static_assert(!(KindOfUninit     & KindOfUncountedInitBit), "");
+static_assert(!(KindOfString     & KindOfUncountedInitBit), "");
+static_assert(!(KindOfArray      & KindOfUncountedInitBit), "");
+static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
+static_assert(!(KindOfResource   & KindOfUncountedInitBit), "");
+static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
+static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
+
+static_assert(KindOfString       & KindOfHasPersistentBits, "");
+static_assert(KindOfArray        & KindOfHasPersistentBits, "");
+static_assert(KindOfPersistentString & KindOfHasPersistentBits, "");
+static_assert(KindOfPersistentArray  & KindOfHasPersistentBits, "");
+static_assert(!(KindOfNull       & KindOfHasPersistentBits), "");
+static_assert(!(KindOfBoolean    & KindOfHasPersistentBits), "");
+static_assert(!(KindOfInt64      & KindOfHasPersistentBits), "");
+static_assert(!(KindOfDouble     & KindOfHasPersistentBits), "");
+static_assert(!(KindOfUninit     & KindOfHasPersistentBits), "");
+static_assert(!(KindOfObject     & KindOfHasPersistentBits), "");
+static_assert(!(KindOfResource   & KindOfHasPersistentBits), "");
+static_assert(!(KindOfRef        & KindOfHasPersistentBits), "");
+static_assert(!(KindOfClass      & KindOfHasPersistentBits), "");
+
+static_assert(KindOfUninit == 0,
+              "Several things assume this tag is 0, especially RDS");
+
+static_assert(kMaxDataType <= kDataTypeMask, "");
 
 ///////////////////////////////////////////////////////////////////////////////
 

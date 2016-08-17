@@ -13,10 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/util/struct-log.h"
+
 #include <folly/Random.h>
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
 
 StructuredLogImpl StructuredLog::s_impl = nullptr;
 
@@ -39,6 +43,8 @@ void StructuredLog::log(const std::string& tableName,
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 StructuredLogEntry::StructuredLogEntry()
   : ints(folly::dynamic::object()), strs(folly::dynamic::object())
 {}
@@ -56,5 +62,13 @@ void StructuredLogEntry::clear() {
   ints = folly::dynamic::object();
   strs = folly::dynamic::object();
 }
+
+std::string show(const StructuredLogEntry& cols) {
+  folly::dynamic out = cols.strs;
+  out["ints"] = cols.ints;
+  return folly::toJson(out);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 }

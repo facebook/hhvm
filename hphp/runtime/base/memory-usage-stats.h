@@ -36,7 +36,7 @@ struct MemoryUsageStats {
   int64_t auxUsage;   // adjustment for allocations via jemalloc
 
   int64_t capacity;   // sum of slabs & big objects (MM's capacity)
-  int64_t maxUsage;   // the max bytes allowed for a request before it is
+  int64_t limit;      // the max bytes allowed for a request before it is
                       // terminated for exceeding the memory limit
   int64_t mallocDebt; // how many bytes of malloced memory have not
                       // been processed by MemoryManager::refreshStats

@@ -758,7 +758,7 @@ StructuredLogEntry logCommon() {
   sample.setInt("pid", (int64_t)getpid());
   sample.setInt("req_num", t_req_num);
   // MemoryUsageStats
-  sample.setInt("max_usage", t_pre_stats.maxUsage);
+  sample.setInt("memory_limit", t_pre_stats.limit);
   sample.setInt("usage", t_pre_stats.usage());
   sample.setInt("mm_usage", t_pre_stats.mmUsage);
   sample.setInt("aux_usage", t_pre_stats.auxUsage);
@@ -778,7 +778,7 @@ void logCollection(const char* phase, const Marker& mkr) {
       "cscan-root %.1fM cscan-heap %.1fM\n",
       t_pre_stats.mmUsage/1024/1024,
       t_trigger/1024/1024,
-      t_pre_stats.maxUsage/1024/1024,
+      t_pre_stats.limit/1024/1024,
       mkr.init_us_/1000,
       mkr.mark_us_/1000,
       mkr.allocd_.bytes/1024/1024,
@@ -874,7 +874,7 @@ void MemoryManager::requestGC() {
 }
 
 void MemoryManager::updateNextGc() {
-  m_nextGc = m_stats.usage() + (m_stats.maxUsage - m_stats.usage()) / 2;
+  m_nextGc = m_stats.usage() + (m_stats.limit - m_stats.usage()) / 2;
 }
 
 void MemoryManager::collect(const char* phase) {
@@ -885,7 +885,7 @@ void MemoryManager::collect(const char* phase) {
 }
 
 void MemoryManager::setMemoryLimit(size_t limit) {
-  m_stats.maxUsage = limit;
+  m_stats.limit = limit;
   updateNextGc();
 }
 

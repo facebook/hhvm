@@ -50,15 +50,11 @@ let read_client_msg (ic, _) =
 
 let get_channels x = x
 
-let get_persistent_fds env =
-  match env.persistent_client_fd with
-  | Some fd -> fd
-  | None ->
-    failwith ("Persistent channel not found!")
-
 let is_persistent (_, oc) env =
   let fd = Unix.descr_of_out_channel oc in
-  fd = get_persistent_fds env
+  match env.persistent_client_fd with
+   | Some p_fd -> fd = p_fd
+   | None -> false
 
 let shutdown_client x =
   ServerUtils.shutdown_client x

@@ -86,7 +86,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
   m_socketConfig.bindAddress = sock_addr;
   m_socketConfig.acceptBacklog = RuntimeOption::ServerBacklog;
   std::chrono::seconds timeout;
-  if (RuntimeOption::ConnectionTimeoutSeconds > 0) {
+  if (RuntimeOption::ConnectionTimeoutSeconds >= 0) {
     timeout = std::chrono::seconds(RuntimeOption::ConnectionTimeoutSeconds);
   } else {
     // default to 2 minutes

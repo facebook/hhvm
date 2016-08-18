@@ -49,20 +49,7 @@ void implCmp(IRLS& env, const IRInstruction* inst, ConditionCode cc) {
   auto& v = vmain(env);
   auto const sf = v.makeReg();
 
-  auto const ty0 = inst->src(0)->type();
-  auto const ty1 = inst->src(1)->type();
-
-  if (cc == CC_E || cc == CC_NE) {
-    if (ty0.hasConstVal() && !ty0.rawVal()) {
-      v << testq{s1, s1, sf};
-    } else if (ty1.hasConstVal() && !ty1.rawVal()) {
-      v << testq{s0, s0, sf};
-    } else {
-      v << cmpq{s1, s0, sf};
-    }
-  } else {
-    v << cmpq{s1, s0, sf};
-  }
+  v << cmpq{s1, s0, sf};
   v << setcc{cc, sf, d};
 }
 
@@ -70,28 +57,13 @@ void implCmpBool(IRLS& env, const IRInstruction* inst, ConditionCode cc) {
   auto const s0 = srcLoc(env, inst, 0).reg();
   auto const s1 = srcLoc(env, inst, 1).reg();
   auto const d  = dstLoc(env, inst, 0).reg();
-
   auto& v = vmain(env);
   auto const sf = v.makeReg();
 
-  assert(inst->src(0)->type() <= TBool);
-  assert(inst->src(1)->type() <= TBool);
+  assertx(inst->src(0)->type() <= TBool);
+  assertx(inst->src(1)->type() <= TBool);
 
-  auto const ty1 = inst->src(1)->type();
-
-  if (ty1.hasConstVal()) {
-    // Emit testb when possible to enable more optimizations later on.
-    if (cc == CC_E || cc == CC_NE) {
-      if (ty1.boolVal()) {
-        cc = ccNegate(cc);
-      }
-      v << testb{s0, s0, sf};
-    } else {
-      v << cmpbi{ty1.boolVal(), s0, sf};
-    }
-  } else {
-    v << cmpb{s1, s0, sf};
-  }
+  v << cmpb{s1, s0, sf};
   v << setcc{cc, sf, d};
 }
 

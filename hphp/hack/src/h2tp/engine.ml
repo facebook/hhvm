@@ -117,7 +117,7 @@ let go src dest =
   if not (Sys.is_directory src) then raise (CE.InputError (
     "The source \"" ^ src ^ "\" is not a directory. This tool works over " ^
     "directories"));
-  Sys.mkdir_p (Filename.dirname dest);
+  Sys_utils.mkdir_p (Filename.dirname dest);
   let exns = ref [] in
   List.iter ~f:begin fun (s, d) ->
     try

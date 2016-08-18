@@ -801,6 +801,52 @@ void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void lower(Vunit& unit, popp& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    if (inst.d0.isValid()) {
+      v << pop{inst.d0};
+    } else {
+      lea{reg::rsp[8], reg::rsp};
+    }
+    if (inst.d1.isValid()) {
+      v << pop{inst.d1};
+    } else {
+      lea{reg::rsp[8], reg::rsp};
+    }
+  });
+}
+
+void lower(Vunit& unit, poppm& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << popm{inst.d0};
+    v << popm{inst.d1};
+  });
+}
+
+void lower(Vunit& unit, pushp& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    if (inst.s1.isValid()) {
+      v << push{inst.s1};
+    } else {
+      lea{reg::rsp[-8], reg::rsp};
+    }
+    if (inst.s0.isValid()) {
+      v << push{inst.s0};
+    } else {
+      lea{reg::rsp[-8], reg::rsp};
+    }
+  });
+}
+
+void lower(Vunit& unit, pushpm& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << pushm{inst.s1};
+    v << pushm{inst.s0};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   if (inst.saveframe) {
     unit.blocks[b].code[i] = push{rvmfp()};

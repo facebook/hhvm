@@ -267,9 +267,11 @@ struct Vgen {
   void emit(const orq& i);
   void emit(const orqi& i);
   void emit(const pop& i);
+  void emit(const popp& i);
   void emit(const psllq& i);
   void emit(const psrlq& i);
   void emit(const push& i);
+  void emit(const pushp& i);
   void emit(const roundsd& i);
   void emit(const sar& i);
   void emit(const setcc& i) { a->Cset(W(i.d), C(i.cc)); }
@@ -321,8 +323,6 @@ struct Vgen {
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
   void emit(const orsw& i);
   void emit(const orswi& i);
-  void emit(const popp& i);
-  void emit(const pushp& i);
   void emit(const subsb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), SetFlags); }
   void emit(const uxth& i) { a->Uxth(W(i.d), W(i.s)); }
 
@@ -1017,11 +1017,15 @@ Y(lslxis, X, xzr, 64)
 #undef Y
 
 void Vgen::emit(const popp& i) {
-  a->Ldp(X(i.d0), X(i.d1), MemOperand(sp, 16, PostIndex));
+  Register r0 = i.d0.isValid() ? X(i.d0) : vixl::xzr;
+  Register r1 = i.d1.isValid() ? X(i.d1) : vixl::xzr;
+  a->Ldp(r0, r1, MemOperand(sp, 16, PostIndex));
 }
 
 void Vgen::emit(const pushp& i) {
-  a->Stp(X(i.s0), X(i.s1), MemOperand(sp, -16, PreIndex));
+  Register r0 = i.s0.isValid() ? X(i.s0) : vixl::xzr;
+  Register r1 = i.s1.isValid() ? X(i.s1) : vixl::xzr;
+  a->Stp(r0, r1, MemOperand(sp, -16, PreIndex));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1384,12 +1388,36 @@ void lower(Vunit& u, popm& i, Vlabel b, size_t z) {
   });
 }
 
+void lower(Vunit& u, poppm& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto r0 = v.makeReg();
+    auto r1 = v.makeReg();
+    v << popp{r0, r1};
+    lowerVptr(i.d0, v);
+    lowerVptr(i.d1, v);
+    v << store{r0, i.d0};
+    v << store{r1, i.d1};
+  });
+}
+
 void lower(Vunit& u, pushm& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
     auto r = v.makeReg();
     lowerVptr(i.s, v);
     v << load{i.s, r};
     v << push{r};
+  });
+}
+
+void lower(Vunit& u, pushpm& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto r0 = v.makeReg();
+    auto r1 = v.makeReg();
+    lowerVptr(i.s0, v);
+    lowerVptr(i.s1, v);
+    v << load{i.s0, r0};
+    v << load{i.s1, r1};
+    v << pushp{r0, r1};
   });
 }
 

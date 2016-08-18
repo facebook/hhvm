@@ -652,10 +652,16 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp,
     case Vinstr::pushf:
     case Vinstr::pushm:
       return -8;
+    case Vinstr::pushp:
+    case Vinstr::pushpm:
+      return -16;
     case Vinstr::pop:
     case Vinstr::popf:
     case Vinstr::popm:
       return 8;
+    case Vinstr::popp:
+    case Vinstr::poppm:
+      return 16;
     case Vinstr::lea: {
       auto& i = inst.lea_;
       if (i.d == Vreg64(sp)) {

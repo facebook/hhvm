@@ -228,14 +228,8 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
 }
 
 void in(ISS& env, const bc::NewLikeArrayL& op) {
-  auto const ty = locAsCell(env, op.loc1);
-  auto const outTy =
-    ty.subtypeOf(TArr) ? counted_aempty()
-    : ty.subtypeOf(TVec) ? counted_vec_empty()
-    : ty.subtypeOf(TDict) ? counted_dict_empty()
-    : ty.subtypeOf(TKeyset) ? counted_keyset_empty()
-    : union_of(TArr, union_of(TVec, union_of(TDict, TKeyset)));
-  push(env, outTy);
+  locAsCell(env, op.loc1);
+  push(env, counted_aempty());
 }
 
 void in(ISS& env, const bc::AddElemC& op) {

@@ -1109,6 +1109,15 @@ memcached_return_t doVersionCallback(const memcached_st *ptr,
   uint8_t minorVersion = LMCD_SERVER_MINOR_VERSION(server);
   uint8_t microVersion = LMCD_SERVER_MICRO_VERSION(server);
 
+// libmemcached starting with 0.46 use UINT8_MAX as the default version, not 0
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX <= 0x00045000
+  if (majorVersion == 0 && minorVersion == 0 && microVersion == 0) {
+    majorVersion = UINT8_MAX; 
+    minorVersion = UINT8_MAX;
+    microVersion = UINT8_MAX;
+  }
+#endif
+
   snprintf(key, sizeof(key), "%s:%d", hostname, port);
   snprintf(version, sizeof(version), "%" PRIu8 ".%" PRIu8 ".%" PRIu8,
            majorVersion, minorVersion, microVersion);

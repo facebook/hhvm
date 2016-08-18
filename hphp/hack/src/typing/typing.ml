@@ -3980,6 +3980,7 @@ and class_def_ env c tc =
       Errors.internal_error pc "The parser should not parse final on enums"
     | Ast.Cnormal -> ()
   end;
+  SMap.iter (check_static_method tc.tc_methods) tc.tc_smethods;
   List.iter impl (class_implements_type env c);
   List.iter c.c_vars (class_var_def env ~is_static:false c);
   List.iter c.c_methods (method_def env);
@@ -3991,6 +3992,19 @@ and class_def_ env c tc =
   List.iter c.c_static_vars (class_var_def env ~is_static:true c);
   List.iter c.c_static_methods (method_def env);
   Typing_hooks.dispatch_exit_class_def_hook c tc
+
+and check_static_method obj method_name static_method =
+  if SMap.mem method_name obj
+  then begin
+    let lazy (static_method_reason, _) = static_method.ce_type in
+    let dyn_method = SMap.find_unsafe method_name obj in
+    let lazy (dyn_method_reason, _) = dyn_method.ce_type in
+    Errors.static_dynamic
+      (Reason.to_pos static_method_reason)
+      (Reason.to_pos dyn_method_reason)
+      method_name
+  end
+  else ()
 
 and check_extend_abstract_meth ~is_final p smap =
   SMap.iter begin fun x ce ->

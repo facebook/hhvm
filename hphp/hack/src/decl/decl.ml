@@ -327,7 +327,6 @@ and class_decl tcopt c =
   let sm = List.fold_left c.c_static_methods
       ~f:(method_decl_acc ~is_static:true env c)
       ~init:sm in
-  SMap.iter (check_static_method m) sm;
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl env parent_cstr c in
   let has_concrete_cstr = match (fst cstr) with
@@ -444,17 +443,6 @@ and trait_exists env acc trait =
         | Some _class -> acc
       )
     | _ -> false
-
-and check_static_method obj method_name { elt_origin = cls; _ } =
-  if SMap.mem method_name obj
-  then begin
-    let static_method_pos = method_pos ~is_static:true cls method_name in
-    let dyn_method = SMap.find_unsafe method_name obj in
-    let dyn_method_pos =
-      method_pos ~is_static:false dyn_method.elt_origin method_name in
-    Errors.static_dynamic static_method_pos dyn_method_pos method_name
-  end
-  else ()
 
 and constructor_decl env (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)

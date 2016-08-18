@@ -291,7 +291,8 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckPackedArrayBounds,
                    CheckClosureStaticLocInit,
                    CheckRefInner,
-                   CheckCtxThis));
+                   CheckCtxThis,
+                   CheckFuncStatic));
   if (inst->next() != nullptr && inst->next() == inst->taken()) {
     return gen(env, Jmp, inst->next());
   }
@@ -306,6 +307,28 @@ SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
     return gen(env, Jmp, inst->taken());
   }
   return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyCheckFuncStatic(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  if (funcTmp->hasConstVal()) {
+    if (funcTmp->funcVal()->isStatic()) {
+      return gen(env, Jmp, inst->taken());
+    }
+    return gen(env, Nop);
+  }
+
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  if (funcTmp->hasConstVal()) {
+    if (!needs_missing_this_check(funcTmp->funcVal())) {
+      return gen(env, Nop);
+    }
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
@@ -376,17 +399,14 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   return meth == nullptr ? nullptr : cns(env, meth);
 }
 
-SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {
+SSATmp* simplifyFwdCtxStaticCall(State& env, const IRInstruction* inst) {
   auto const srcCtx = inst->src(0);
-  if (srcCtx->isA(TCctx)) return srcCtx;
-  if (srcCtx->isA(TObj)) {
-    auto const callee = inst->src(1)->funcVal();
-    if (callee->isStatic()) {
-      auto const cls = gen(env, LdObjClass, srcCtx);
-      return gen(env, ConvClsToCctx, cls);
-    }
-    gen(env, IncRef, srcCtx);
+  if (srcCtx->isA(TCctx)) {
     return srcCtx;
+  }
+  if (srcCtx->isA(TObj)) {
+    auto const cls = gen(env, LdObjClass, srcCtx);
+    return gen(env, ConvClsToCctx, cls);
   }
   return nullptr;
 }
@@ -3005,7 +3025,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(DivInt)
   X(ExtendsClass)
   X(Floor)
-  X(GetCtxFwdCall)
+  X(FwdCtxStaticCall)
   X(IncRef)
   X(InitObjProps)
   X(InstanceOf)
@@ -3025,6 +3045,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(MethodExists)
   X(CheckCtxThis)
   X(CastCtxThis)
+  X(CheckFuncStatic)
+  X(RaiseMissingThis)
   X(LdObjClass)
   X(LdObjInvoke)
   X(Mov)

@@ -342,6 +342,11 @@ inline bool Func::isStatic() const {
   return m_attrs & AttrStatic;
 }
 
+inline bool Func::isStaticInProlog() const {
+  return
+    (m_attrs & (AttrStatic | AttrRequiresThis)) == AttrStatic;
+}
+
 inline bool Func::isAbstract() const {
   return m_attrs & AttrAbstract;
 }

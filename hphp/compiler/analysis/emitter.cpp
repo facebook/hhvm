@@ -7794,12 +7794,19 @@ static Attr buildAttrs(ModifierExpressionPtr mod, bool isRef = false) {
  */
 const StaticString
   s_IsFoldable("__IsFoldable"),
+  s_AllowStatic("__AllowStatic"),
   s_ParamCoerceModeNull("__ParamCoerceModeNull"),
   s_ParamCoerceModeFalse("__ParamCoerceModeFalse");
 
 static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
   if (fe->userAttributes.count(s_IsFoldable.get())) {
     attrs = attrs | AttrIsFoldable;
+  }
+  if (!SystemLib::s_inited &&
+      fe->pce() &&
+      !(attrs & AttrStatic) &&
+      !fe->userAttributes.count(s_AllowStatic.get())) {
+    attrs |= AttrRequiresThis;
   }
   if (fe->userAttributes.count(s_ParamCoerceModeNull.get())) {
     attrs = attrs | AttrParamCoerceModeNull;

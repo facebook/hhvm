@@ -397,7 +397,7 @@ struct RuntimeOption {
   static bool AutoprimeGenerators;
 
   // ENABLED (1) selects PHP7 behavior.
-  static bool PHP7_DeprecateOldStyleCtors;
+  static bool PHP7_DeprecationWarnings;
   static bool PHP7_IntSemantics;
   static bool PHP7_LTR_assign;
   static bool PHP7_NoHexNumerics;
@@ -580,6 +580,7 @@ struct RuntimeOption {
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  false)                           \
   F(bool, EnableGCTypeScan,            false)                           \
+  F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(uint32_t, GCSampleRate,                1)                           \
   F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, JitFilterLease,              1)                           \

@@ -4131,7 +4131,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
 
     vmStack().discard();
     ActRec* ar = fPushFuncImpl(func, numArgs);
-    if (func->attrs() & AttrStatic && !func->isClosureBody()) {
+    if (func->isStaticInProlog()) {
       ar->setClass(origObj->getVMClass());
       decRefObj(origObj);
     } else {
@@ -4161,7 +4161,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
       thiz,
       cls,
       invName,
-      /* warn */ false
+      DecodeFlags::NoWarn
     );
     if (func == nullptr) {
       if (isArrayType(origCell.m_type)) {
@@ -4331,6 +4331,9 @@ void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
                                      arGetContextClass(vmfp()), true);
   if (res == LookupResult::MethodFoundNoThis ||
       res == LookupResult::MagicCallStaticFound) {
+    if (!f->isStaticInProlog()) {
+      raise_missing_this(f);
+    }
     obj = nullptr;
   } else {
     assert(obj);
@@ -4479,7 +4482,7 @@ void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
   const Func* f = vm_decode_function(tvAsVariant(func),
                                      ar, false,
                                      obj, cls, invName,
-                                     false);
+                                     DecodeFlags::NoWarn);
 
   if (f == nullptr) {
     pc = takenpc;
@@ -4522,10 +4525,9 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
 
-  const Func* f = vm_decode_function(tvAsVariant(&func), vmfp(),
-                                     forward,
-                                     obj, cls, invName,
-                                     !safe);
+  const Func* f = vm_decode_function(
+    tvAsVariant(&func), vmfp(), forward, obj, cls, invName,
+    safe ? DecodeFlags::NoWarn : DecodeFlags::Warn);
 
   if (safe) vmStack().topTV()[1] = vmStack().topTV()[0];
   vmStack().ndiscard(1);

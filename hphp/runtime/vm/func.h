@@ -616,6 +616,7 @@ struct Func final {
    */
   bool isPublic() const;
   bool isStatic() const;
+  bool isStaticInProlog() const;
   bool isAbstract() const;
 
   /*

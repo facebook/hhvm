@@ -1212,7 +1212,6 @@ X(LdClsMethodCacheFunc,         ClsMethodData);
 X(LdClsMethodCacheCls,          ClsMethodData);
 X(LdClsMethodFCacheFunc,        ClsMethodData);
 X(LookupClsMethodFCache,        ClsMethodData);
-X(GetCtxFwdCallDyn,             ClsMethodData);
 X(LdIfaceMethod,                IfaceMethodData);
 X(LdStaticLoc,                  StaticLocName);
 X(InitStaticLoc,                StaticLocName);

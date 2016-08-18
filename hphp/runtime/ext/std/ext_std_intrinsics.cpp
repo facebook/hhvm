@@ -29,7 +29,8 @@ void HHVM_FUNCTION(disable_inlining, const Variant& function) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   const HPHP::Func* f = vm_decode_function(function, GetCallerFrame(),
-                                           false, obj, cls, invName, false);
+                                           false, obj, cls, invName,
+                                           DecodeFlags::LookupOnly);
   if (f == nullptr || f->isAbstract()) {
     raise_warning("disable_inlining(): undefined function");
     return;

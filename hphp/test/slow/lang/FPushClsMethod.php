@@ -33,10 +33,34 @@ class I extends F {
   function __construct() {
     print "In I::__construct()\n";
   }
+  function test() {
+    C::__construct();
+    $X = "C";
+    $m = "__construct"; C::$m(); $X::$m();
+    F::__construct();
+    I::__construct();
+    $X = "F";
+    $m = "__construct"; F::$m(); $X::$m();
+    $X = "I";
+    $m = "__construct"; I::$m(); $X::$m();
+  }
 }
 class J extends G {
   function J() {
     print "In J::J()\n";
+  }
+  function test() {
+    D::D();
+    $X = "D";
+    $m = "D"; D::$m(); $X::$m(); $X::$m();
+    G::D();
+    J::D();
+    J::J();
+    $X = "G";
+    $m = "D"; G::$m(); $X::$m();
+    $X = "J";
+    $m = "D"; J::$m(); $X::$m();
+    $m = "J"; J::$m(); $X::$m();
   }
 }
 class K extends H {
@@ -46,45 +70,29 @@ class K extends H {
   function __construct() {
     print "In K::__construct()\n";
   }
+  function test() {
+    E::E();
+    E::__construct();
+    $X = "E";
+    $m = "E"; E::$m(); $X::$m();
+    $m = "__construct"; E::$m(); $X::$m();
+    H::E();
+    H::__construct();
+    K::E();
+    K::K();
+    K::__construct();
+    $X = "H";
+    $m = "E"; H::$m(); $X::$m();
+    $m = "__construct"; H::$m(); $X::$m();
+    $X = "K";
+    $m = "E"; K::$m(); $X::$m();
+    $m = "K"; K::$m(); $X::$m();
+    $m = "__construct"; K::$m(); $X::$m();
+  }
 }
 
-C::__construct();
-D::D();
-E::E();
-E::__construct();
-F::__construct();
-G::D();
-H::E();
-H::__construct();
-I::__construct();
-J::D();
-J::J();
-K::E();
-K::K();
-K::__construct();
-
-$X = "C";
-  $m = "__construct"; C::$m(); $X::$m();
-$X = "D";
-  $m = "D"; D::$m(); $X::$m(); $X::$m();
-$X = "E";
-  $m = "E"; E::$m(); $X::$m();
-  $m = "__construct"; E::$m(); $X::$m();
-$X = "F";
-  $m = "__construct"; F::$m(); $X::$m();
-$X = "G";
-  $m = "D"; G::$m(); $X::$m();
-$X = "H";
-  $m = "E"; H::$m(); $X::$m();
-  $m = "__construct"; H::$m(); $X::$m();
-$X = "I";
-  $m = "__construct"; I::$m(); $X::$m();
-$X = "J";
-  $m = "D"; J::$m(); $X::$m();
-  $m = "J"; J::$m(); $X::$m();
-$X = "K";
-  $m = "E"; K::$m(); $X::$m();
-  $m = "K"; K::$m(); $X::$m();
-  $m = "__construct"; K::$m(); $X::$m();
+(new I)->test();
+(new J)->test();
+(new K)->test();
 
 print "Test end\n";

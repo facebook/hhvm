@@ -110,7 +110,7 @@ bool is_callable(const Variant& v) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
-                                           invName, false);
+                                           invName, DecodeFlags::LookupOnly);
   if (invName != nullptr) {
     decRefStr(invName);
   }
@@ -185,7 +185,7 @@ vm_decode_function(const Variant& function,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
-                   bool warn /* = true */) {
+                   DecodeFlags flags /* = DecodeFlags::Warn */) {
   invName = nullptr;
   if (function.isString() || function.isArray()) {
     HPHP::Class* ctx = nullptr;
@@ -212,7 +212,7 @@ vm_decode_function(const Variant& function,
       assert(function.isArray());
       Array arr = function.toArray();
       if (!array_is_valid_callback(arr)) {
-        if (warn) {
+        if (flags == DecodeFlags::Warn) {
           throw_invalid_argument("function: not a valid callback array");
         }
         return nullptr;
@@ -248,7 +248,7 @@ vm_decode_function(const Variant& function,
             }
           }
         } else {
-          if (warn && nameContainsClass) {
+          if (flags == DecodeFlags::Warn && nameContainsClass) {
             String nameClass = name.substr(0, pos);
             if (nameClass.get()->isame(s_self.get())   ||
                 nameClass.get()->isame(s_static.get())) {
@@ -259,7 +259,7 @@ vm_decode_function(const Variant& function,
           cls = Unit::loadClass(sclass.get());
         }
         if (!cls) {
-          if (warn) {
+          if (flags == DecodeFlags::Warn) {
             throw_invalid_argument("function: class not found");
           }
           return nullptr;
@@ -305,14 +305,14 @@ vm_decode_function(const Variant& function,
         cc = Unit::loadClass(c.get());
       }
       if (!cc) {
-        if (warn) {
+        if (flags == DecodeFlags::Warn) {
           throw_invalid_argument("function: class not found");
         }
         return nullptr;
       }
       if (cls) {
         if (!cls->classof(cc)) {
-          if (warn) {
+          if (flags == DecodeFlags::Warn) {
             raise_warning("call_user_func expects parameter 1 to be a valid "
                           "callback, class '%s' is not a subclass of '%s'",
                           cls->preClass()->name()->data(),
@@ -329,7 +329,7 @@ vm_decode_function(const Variant& function,
     if (!cls) {
       HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
       if (!f) {
-        if (warn) {
+        if (flags == DecodeFlags::Warn) {
           throw_invalid_argument("function: method '%s' not found",
                                  name.data());
         }
@@ -374,7 +374,7 @@ vm_decode_function(const Variant& function,
           invName->incRefCount();
         } else {
           // Bail out if we couldn't find the method or __call
-          if (warn) {
+          if (flags == DecodeFlags::Warn) {
             throw_invalid_argument("function: method '%s' not found",
                                    name.data());
           }
@@ -383,11 +383,11 @@ vm_decode_function(const Variant& function,
       }
     }
 
-    if (f->isClosureBody() && !this_) {
-      if (warn) {
-        raise_warning("cannot invoke closure body without closure object");
+    if (!this_ && !f->isStaticInProlog()) {
+      if (flags == DecodeFlags::Warn) raise_missing_this(f);
+      if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
+        return nullptr;
       }
-      return nullptr;
     }
 
     assert(f && f->preClass());
@@ -416,20 +416,19 @@ vm_decode_function(const Variant& function,
     this_ = function.asCObjRef().get();
     cls = nullptr;
     const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());
-    if (f != nullptr &&
-        ((f->attrs() & AttrStatic) && !f->isClosureBody())) {
+    if (f != nullptr && f->isStaticInProlog()) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;
     }
-    if (warn && f == nullptr) {
+    if (flags == DecodeFlags::Warn && f == nullptr) {
       raise_warning("call_user_func() expects parameter 1 to be a valid "
                     "callback, object of class %s given (no __invoke "
                     "method found)", this_->getVMClass()->name()->data());
     }
     return f;
   }
-  if (warn) {
+  if (flags == DecodeFlags::Warn) {
     throw_invalid_argument("function: not string, closure, or array");
   }
   return nullptr;
@@ -527,6 +526,48 @@ Variant o_invoke_failed(const char *cls, const char *meth,
     raise_warning("call_user_func to non-existent method %s::%s", cls, meth);
     return false;
   }
+}
+
+template<class EF, class NF>
+void missing_this_check_helper(const Func* f, EF ef, NF nf) {
+  if (f->attrs() & AttrRequiresThis) {
+    ef();
+    return;
+  }
+
+  if (RuntimeOption::EvalRaiseMissingThis && !f->isStatic()) {
+    nf();
+    return;
+  }
+}
+
+void raise_missing_this(const Func* f) {
+  missing_this_check_helper(
+    f,
+    [&] {
+      raise_error("Non-static method %s() cannot be called statically",
+                  f->fullName()->data());
+    },
+    [&] {
+      auto constexpr msg =
+        "Non-static method %s() should not be called statically";
+
+      if (RuntimeOption::PHP7_DeprecationWarnings) {
+        raise_deprecated(msg, f->fullName()->data());
+      } else {
+        raise_strict_warning(msg, f->fullName()->data());
+      }
+    });
+}
+
+bool needs_missing_this_check(const Func* f) {
+  bool ret = false;
+  missing_this_check_helper(
+    f,
+    [&] { ret = true; },
+    [&] { ret = true; }
+  );
+  return ret;
 }
 
 void NEVER_INLINE raise_null_object_prop() {

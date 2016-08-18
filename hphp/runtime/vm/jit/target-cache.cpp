@@ -112,7 +112,7 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
         this_,
         self_,
         inv,
-        false /* warn */);
+        DecodeFlags::NoWarn);
       if (!func) {
         raise_error("Call to undefined function %s()", sd->data());
       }
@@ -234,12 +234,12 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
     return;
   }
 
-  bool const isStatic = func->attrs() & AttrStatic;
+  bool const isStatic = func->isStaticInProlog();
   mce->m_key   = reinterpret_cast<uintptr_t>(cls) | uintptr_t{isStatic} << 1;
   mce->m_value = func;
   ar->m_func   = func;
 
-  if (UNLIKELY(isStatic && !func->isClosureBody())) {
+  if (UNLIKELY(isStatic)) {
     auto const obj = ar->getThis();
     if (debug) ar->setThis(nullptr); // suppress assert
     ar->setClass(cls);
@@ -271,12 +271,10 @@ void readMagicOrStatic(Entry* mce,
   }
 
   assertx(mceKey & 0x2u);
-  if (LIKELY(!mceValue->isClosureBody())) {
-    auto const obj = ar->getThis();
-    if (debug) ar->setThis(nullptr); // suppress assert in setClass
-    ar->setClass(cls);
-    decRefObj(obj);
-  }
+  auto const obj = ar->getThis();
+  if (debug) ar->setThis(nullptr); // suppress assert in setClass
+  ar->setClass(cls);
+  decRefObj(obj);
 }
 
 template<bool fatal>
@@ -286,12 +284,10 @@ void readPublicStatic(Entry* mce,
                       Class* cls,
                       const Func* cand) {
   mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
-  if (LIKELY(!cand->isClosureBody())) {
-    auto const obj = ar->getThis();
-    if (debug) ar->setThis(nullptr); // suppress assert in setClass
-    ar->setClass(cls);
-    decRefObj(obj);
-  }
+  auto const obj = ar->getThis();
+  if (debug) ar->setThis(nullptr); // suppress assert in setClass
+  ar->setClass(cls);
+  decRefObj(obj);
 }
 
 template<bool fatal>
@@ -349,7 +345,7 @@ void handleSlowPath(rds::Handle mce_handle,
     }
     mceValue = mce->m_value;
   }
-  assertx(!(mceValue->attrs() & AttrStatic));
+  assertx(!mceValue->isStaticInProlog());
 
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
@@ -415,7 +411,7 @@ void handleSlowPath(rds::Handle mce_handle,
       // Bummer.
       ar->m_func   = cand;
       mce->m_value = cand;
-      if (UNLIKELY(cand->attrs() & AttrStatic)) {
+      if (UNLIKELY(cand->isStaticInProlog())) {
         return readPublicStatic<fatal>(mce, ar, cls, cand);
       }
       mce->m_key = reinterpret_cast<uintptr_t>(cls);
@@ -432,7 +428,7 @@ void handleSlowPath(rds::Handle mce_handle,
     // call the new implementation too.  We also know the new function
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == mceValue->baseCls())) {
-      assertx(!(cand->attrs() & AttrStatic));
+      assertx(!cand->isStaticInProlog());
       ar->m_func   = cand;
       mce->m_value = cand;
       mce->m_key   = reinterpret_cast<uintptr_t>(cls);

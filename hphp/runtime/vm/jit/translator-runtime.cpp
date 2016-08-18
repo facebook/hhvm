@@ -936,7 +936,7 @@ void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
     inst,
     cls,
     invName,
-    FailBehavior == OnFail::Warn
+    FailBehavior == OnFail::Warn ? DecodeFlags::Warn : DecodeFlags::NoWarn
   );
   if (UNLIKELY(func == nullptr)) {
     if (FailBehavior == OnFail::Fatal) {
@@ -1276,7 +1276,7 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
   auto const f = vm_decode_function(tvAsVariant(&func),
                                     ar, false,
                                     obj, cls, invName,
-                                    false);
+                                    DecodeFlags::NoWarn);
   if (UNLIKELY(!f)) return false;
 
   auto& cit = it->cuf();

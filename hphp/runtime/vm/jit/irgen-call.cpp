@@ -204,7 +204,7 @@ void fpushObjMethodExactFunc(
    */
   SSATmp* objOrCls = obj;
   emitIncStat(env, Stats::ObjMethod_known, 1);
-  if (func->isStatic() && !func->isClosureBody()) {
+  if (func->isStaticInProlog()) {
     objOrCls = exactClass ? cns(env, exactClass) : gen(env, LdObjClass, obj);
     decRef(env, obj);
   }
@@ -266,7 +266,7 @@ void fpushObjMethodNonExactFunc(
     cns(env, -(func->methodSlot() + 1))
   );
   SSATmp* objOrCls = obj;
-  if (func->attrs() & AttrStatic && !func->isClosureBody()) {
+  if (func->isStaticInProlog()) {
     decRef(env, obj);
     objOrCls = clsTmp;
   }
@@ -323,12 +323,22 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
 
   assertx(callCtx->isA(TCls));
 
-  if (callee->isStatic() || curFunc(env)->isStatic() || !curClass(env)) {
+  auto gen_missing_this = [&] {
+    if (needs_missing_this_check(callee)) {
+      gen(env, RaiseMissingThis, cns(env, callee));
+    }
     return callCtx;
+  };
+
+  if (callee->isStatic()) return callCtx;
+  if (curFunc(env)->isStatic() || !curClass(env)) {
+    return gen_missing_this();
   }
 
   auto const canUseThis = curClass(env)->classof(cls);
-  if (!canUseThis && !cls->classof(curClass(env))) return callCtx;
+  if (!canUseThis && !cls->classof(curClass(env))) {
+    return gen_missing_this();
+  }
 
   auto const ctx = gen(env, LdCtx, fp(env));
 
@@ -351,6 +361,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
+      gen_missing_this();
       return gen(env, ConvClsToCctx, callCtx);
     });
 }
@@ -410,8 +421,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
     auto const slot = cns(env, uniqueMeth->methodSlot());
     auto const negSlot = cns(env, -1 - uniqueMeth->methodSlot());
     auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
-    auto const cls = objOrCls->type() <= TCls ?
-      objOrCls : gen(env, LdObjClass, objOrCls);
+    auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
     auto const len = gen(env, LdFuncVecLen, cls);
     auto const cmp = gen(env, LteInt, len, slot);
     gen(env, JmpNZero, sideExit, cmp);
@@ -431,8 +441,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
     // check for an instance of the class, and then use the method
     // from the right slot.
     auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
-    auto const cls = objOrCls->type() <= TCls ?
-      objOrCls : gen(env, LdObjClass, objOrCls);
+    auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
     auto flag = gen(env, ExtendsClass,
                     ExtendsClassData{baseMeth->cls(), true}, cls);
     gen(env, JmpZero, sideExit, flag);
@@ -448,8 +457,7 @@ bool optimizeProfiledPushMethod(IRGS& env,
     }
     // The method was defined in a common interface
     auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
-    auto const cls = objOrCls->type() <= TCls ?
-      objOrCls : gen(env, LdObjClass, objOrCls);
+    auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
     auto flag = gen(env, InstanceOfIfaceVtable,
                     ClassData{intfMeth->cls()}, cls);
     gen(env, JmpZero, sideExit, flag);
@@ -473,6 +481,7 @@ void fpushObjMethod(IRGS& env,
                     Block* sideExit) {
   emitIncStat(env, Stats::ObjMethod_total, 1);
 
+  assertx(obj->type() <= TObj);
   if (auto cls = obj->type().clsSpec().cls()) {
     if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard any further,
@@ -579,6 +588,58 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
   decRef(env, callable);
 }
 
+SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
+  assertx(ctx->type() <= TCtx);
+  assertx(funcTmp->type() <= TFunc);
+
+  auto forwardStaticCallee = [&] {
+    return gen(env, FwdCtxStaticCall, ctx);
+  };
+
+  auto forwardDynamicCallee = [&] {
+    // CheckCtxThis will assert if used in a context that doesn't
+    // support $this. This check is broader - but we might as well
+    // catch as much as possible.
+    if (!ctx->type().maybe(TObj)) {
+      gen(env, RaiseMissingThis, funcTmp);
+      return ctx;
+    }
+
+    // We don't have control flow opts yet, so nothing will
+    // reduce CheckCtxThis/IncRef back to a plain IncRef,
+    // so we need this upfront optimization. We don't
+    // really need to check for TObj - the simplifier would
+    // deal with it, but again, since we need the optimization
+    // we might as well make it as broad as possible.
+    if (ctx->isA(TObj) ||
+        (funcTmp->hasConstVal() &&
+         !needs_missing_this_check(funcTmp->funcVal()))) {
+      gen(env, IncRef, ctx);
+      return ctx;
+    }
+
+    ifThenElse(env,
+               [&] (Block* taken) {
+                 gen(env, CheckCtxThis, taken, ctx);
+               },
+               [&] {
+                 auto const obj = gen(env, CastCtxThis, ctx);
+                 gen(env, IncRef, obj);
+               },
+               [&] {
+                 gen(env, RaiseMissingThis, funcTmp);
+               });
+    return ctx;
+  };
+
+  return cond(env,
+              [&](Block* target) {
+                gen(env, CheckFuncStatic, target, funcTmp);
+              },
+              forwardDynamicCallee,
+              forwardStaticCallee);
+}
+
 void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   const bool safe = op == OpFPushCufSafe;
   bool forward = op == OpFPushCufF;
@@ -596,7 +657,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   auto func = cns(env, callee);
   if (cls) {
     auto const exitSlow = makeExitSlow(env);
-    if (!classHasPersistentRDS(cls)) {
+    if (!classIsPersistentOrCtxParent(env, cls)) {
       // The miss path is complicated and rare.  Punt for now.  This must be
       // checked before we IncRef the context below, because the slow exit will
       // want to do that same IncRef via InterpOne.
@@ -604,11 +665,9 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
     }
 
     if (forward) {
-      ctx = ldCtx(env);
-      ctx = gen(env, GetCtxFwdCall, ctx, cns(env, callee));
+      ctx = forwardCtx(env, ldCtx(env), cns(env, callee));
     } else {
-      ctx = ldCtxForClsMethod(env, callee,
-                              ldCls(env, cns(env, cls->name())), cls);
+      ctx = ldCtxForClsMethod(env, callee, cns(env, cls), cls);
     }
   } else {
     ctx = cns(env, TNullptr);
@@ -1009,7 +1068,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
   auto const curCtxTmp = ldCtx(env);
   if (vmfunc) {
     auto const funcTmp = cns(env, vmfunc);
-    auto const newCtxTmp = gen(env, GetCtxFwdCall, curCtxTmp, funcTmp);
+    auto const newCtxTmp = forwardCtx(env, curCtxTmp, funcTmp);
     fpushActRec(env, funcTmp, newCtxTmp, numParams,
                 magicCall ? methName : nullptr);
     return;
@@ -1037,7 +1096,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
     }
   );
 
-  auto const ctx = gen(env, GetCtxFwdCallDyn, data, curCtxTmp);
+  auto const ctx = forwardCtx(env, curCtxTmp, funcTmp);
   fpushActRec(env,
               funcTmp,
               ctx,

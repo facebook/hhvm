@@ -198,7 +198,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
       return ldctx;
     }
     if (func->isStatic()) {
-      return gen(env, ConvClsToCctx, gen(env, LdClsCtx, ldctx));
+      return gen(env, FwdCtxStaticCall, ldctx);
     }
     gen(env, IncRef, ldctx);
     return ldctx;

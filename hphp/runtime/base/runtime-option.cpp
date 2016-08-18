@@ -399,7 +399,7 @@ bool RuntimeOption::AutoTypecheck = true;
 // granular options instead. (It can't be a local since Config::Bind will take
 // and store a pointer to it.)
 static bool s_PHP7_master = false;
-bool RuntimeOption::PHP7_DeprecateOldStyleCtors = false;
+bool RuntimeOption::PHP7_DeprecationWarnings = false;
 bool RuntimeOption::PHP7_EngineExceptions = false;
 bool RuntimeOption::PHP7_IntSemantics = false;
 bool RuntimeOption::PHP7_LTR_assign = false;
@@ -1236,8 +1236,8 @@ void RuntimeOption::Load(
     // get-go, but threading that through turns out to be kind of annoying and
     // of questionable value, so just doing this for now.
     Config::Bind(s_PHP7_master, ini, config, "PHP7.all", false);
-    Config::Bind(PHP7_DeprecateOldStyleCtors, ini, config,
-                 "PHP7.DeprecateOldStyleCtors", s_PHP7_master);
+    Config::Bind(PHP7_DeprecationWarnings, ini, config,
+                 "PHP7.DeprecationWarnings", s_PHP7_master);
     Config::Bind(PHP7_EngineExceptions, ini, config, "PHP7.EngineExceptions",
                  s_PHP7_master);
     Config::Bind(PHP7_IntSemantics, ini, config, "PHP7.IntSemantics",

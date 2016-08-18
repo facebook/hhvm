@@ -49,6 +49,8 @@ String concat4(const String& s1, const String& s2, const String& s3,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void NEVER_INLINE raise_missing_this(const Func* f);
+bool NEVER_INLINE needs_missing_this_check(const Func* f);
 void NEVER_INLINE throw_invalid_property_name(const String& name);
 void NEVER_INLINE throw_null_get_object_prop();
 void NEVER_INLINE raise_null_object_prop();
@@ -97,6 +99,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name);
 bool is_callable(const Variant& v);
 bool array_is_valid_callback(const Array& arr);
 
+enum class DecodeFlags { Warn, NoWarn, LookupOnly };
 const HPHP::Func*
 vm_decode_function(const Variant& function,
                    ActRec* ar,
@@ -104,16 +107,16 @@ vm_decode_function(const Variant& function,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
-                   bool warn = true);
+                   DecodeFlags flags = DecodeFlags::Warn);
 
 inline void
 vm_decode_function(const Variant& function,
                    ActRec* ar,
                    bool forwarding,
                    CallCtx& ctx,
-                   bool warn = true) {
+                   DecodeFlags flags = DecodeFlags::Warn) {
   ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
-                                ctx.invName, warn);
+                                ctx.invName, flags);
 }
 
 Variant vm_call_user_func(const Variant& function, const Variant& params,

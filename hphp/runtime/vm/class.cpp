@@ -598,7 +598,7 @@ const Func* Class::getDeclaredCtor() const {
 }
 
 const Func* Class::getCachedInvoke() const {
-  assert(IMPLIES(m_invoke, !m_invoke->isStatic() || m_invoke->isClosureBody()));
+  assert(IMPLIES(m_invoke, !m_invoke->isStaticInProlog()));
   return m_invoke;
 }
 
@@ -1253,11 +1253,25 @@ const StaticString
   s_unset("__unset"),
   s_call("__call"),
   s_callStatic("__callStatic"),
+  s_debugInfo("__debugInfo"),
   s_clone("__clone");
 
+static Func* markNonStatic(Func* meth) {
+  // Do not use isStaticInProlog here, since that uses the
+  // AttrRequiresThis flag.
+  if (meth && (!meth->isStatic() || meth->isClosureBody())) {
+    meth->setAttrs(meth->attrs() | AttrRequiresThis);
+  }
+  return meth;
+}
+
+static Func* markNonStatic(const Class* thiz, const String& meth) {
+  return markNonStatic(thiz->lookupMethod(meth.get()));
+}
+
 void Class::setSpecial() {
-  m_toString = lookupMethod(s_toString.get());
-  m_dtor = lookupMethod(s_destruct.get());
+  m_toString = markNonStatic(this, s_toString);
+  m_dtor = markNonStatic(this, s_destruct);
 
   /*
    * The invoke method is only cached in the Class for a fast path JIT
@@ -1271,8 +1285,8 @@ void Class::setSpecial() {
    * here.  (The closure prologue uninstalls the $this and installs
    * the appropriate static context.)
    */
-  m_invoke = lookupMethod(s_invoke.get());
-  if (m_invoke && m_invoke->isStatic() && !m_invoke->isClosureBody()) {
+  m_invoke = markNonStatic(this, s_invoke);
+  if (m_invoke && m_invoke->isStaticInProlog()) {
     m_invoke = nullptr;
   }
 
@@ -1314,7 +1328,7 @@ void Class::setSpecial() {
       //      same name as the class as just normal methods, not a constructor)
       // then we give the deprecation warning.
       if (
-        RuntimeOption::PHP7_DeprecateOldStyleCtors && // In PHP 7 mode
+        RuntimeOption::PHP7_DeprecationWarnings && // In PHP 7 mode
         !this->instanceCtor() && // No explicit __construct
         this->name()->toCppString().find("\\") == std::string::npos // no NS
       ) {
@@ -1338,8 +1352,9 @@ void Class::setSpecial() {
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, s_86ctor.get());
   assert(m_ctor && "class had no user-defined constructor or 86ctor");
-  assert((m_ctor->attrs() & ~(AttrBuiltin|AttrAbstract|AttrHot|
-                              AttrInterceptable|AttrMayUseVV)) ==
+  assert((m_ctor->attrs() & ~(AttrBuiltin | AttrAbstract |
+                              AttrHot | AttrInterceptable |
+                              AttrMayUseVV | AttrRequiresThis)) ==
          (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
 
@@ -1702,12 +1717,15 @@ void Class::setMethods() {
 void Class::setODAttributes() {
   m_ODAttrs = 0;
   if (lookupMethod(s_sleep.get()     )) { m_ODAttrs |= ObjectData::HasSleep; }
-  if (lookupMethod(s_get.get()       )) { m_ODAttrs |= ObjectData::UseGet;   }
-  if (lookupMethod(s_set.get()       )) { m_ODAttrs |= ObjectData::UseSet;   }
-  if (lookupMethod(s_isset.get()     )) { m_ODAttrs |= ObjectData::UseIsset; }
-  if (lookupMethod(s_unset.get()     )) { m_ODAttrs |= ObjectData::UseUnset; }
-  if (lookupMethod(s_call.get()      )) { m_ODAttrs |= ObjectData::HasCall;  }
-  if (lookupMethod(s_clone.get()     )) { m_ODAttrs |= ObjectData::HasClone; }
+  if (markNonStatic(this, s_get      )) { m_ODAttrs |= ObjectData::UseGet;   }
+  if (markNonStatic(this, s_set      )) { m_ODAttrs |= ObjectData::UseSet;   }
+  if (markNonStatic(this, s_isset    )) { m_ODAttrs |= ObjectData::UseIsset; }
+  if (markNonStatic(this, s_unset    )) { m_ODAttrs |= ObjectData::UseUnset; }
+  if (markNonStatic(this, s_call     )) { m_ODAttrs |= ObjectData::HasCall;  }
+  if (markNonStatic(this, s_clone    )) { m_ODAttrs |= ObjectData::HasClone; }
+
+  markNonStatic(this, s_debugInfo);
+  markNonStatic(m_ctor);
 
   if (m_dtor == nullptr) m_ODAttrs |= ObjectData::NoDestructor;
 

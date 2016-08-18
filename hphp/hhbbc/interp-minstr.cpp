@@ -491,7 +491,8 @@ void handleBaseElemU(ISS& env) {
     ty = union_of(ty, TArr);
   }
   if (ty.couldBe(TVec)) {
-    ty = ty.subtypeOf(TVec) ? TDict : union_of(ty, TDict);
+    // Unset on a vec might turn it into a dict.
+    ty = union_of(ty, union_of(TVec, TDict));
   }
   if (ty.couldBe(TDict)) {
     ty = union_of(ty, TDict);

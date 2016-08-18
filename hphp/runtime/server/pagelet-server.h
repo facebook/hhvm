@@ -118,6 +118,7 @@ struct PageletTransport final : Transport, Synchronizable {
 
   bool getResults(
     Array &results,
+    int &code,
     PageletServerTaskEvent* next_event
   );
 
@@ -177,8 +178,9 @@ protected:
     // Create an event for the next results that might be used.
     PageletServerTaskEvent *event = new PageletServerTaskEvent();
 
+    int code = 0;
     // Fetch all results from the transport that are currently available.
-    bool done = m_job->getResults(responses, event);
+    bool done = m_job->getResults(responses, code, event);
 
     // Returned tuple/array.
     Array ret = Array::Create();
@@ -192,6 +194,7 @@ protected:
       // The event was added to the job to be triggered next.
       ret.append(Variant{event->getWaitHandle()});
     }
+    ret.append(Variant{code});
 
     cellDup(*(Variant(ret)).asCell(), result);
   }

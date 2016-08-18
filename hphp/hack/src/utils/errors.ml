@@ -120,16 +120,6 @@ module NonTracingErrors: Errors_modes = struct
   let in_lazy_decl = ref false
   let has_lazy_decl_error = ref false
 
-  let add_error error =
-    if !accumulate_errors then
-      begin
-        error_list := error :: !error_list;
-        has_lazy_decl_error := !has_lazy_decl_error || !in_lazy_decl
-      end
-    else
-      (* We have an error, but haven't handled it in any way *)
-      assert_false_log_backtrace ()
-
   let try_with_result f1 f2 =
     Common.try_with_result f1 f2 error_list accumulate_errors
 
@@ -184,6 +174,17 @@ module NonTracingErrors: Errors_modes = struct
       Pos.compare (get_pos x) (get_pos y)
     end err
 
+  let add_error error =
+    if !accumulate_errors then
+      begin
+        error_list := error :: !error_list;
+        has_lazy_decl_error := !has_lazy_decl_error || !in_lazy_decl
+      end
+    else
+      (* We have an error, but haven't handled it in any way *)
+      let msg = error |> to_absolute |> to_string in
+      assert_false_log_backtrace (Some msg)
+
 end
 
 (** Errors with backtraces embedded. They are revealed with to_string. *)
@@ -199,16 +200,6 @@ module TracingErrors: Errors_modes = struct
   let accumulate_errors = ref false
   let in_lazy_decl = ref false
   let has_lazy_decl_error = ref false
-
-  let add_error error =
-    if !accumulate_errors then
-      begin
-        error_list := error :: !error_list;
-        has_lazy_decl_error := !has_lazy_decl_error || !in_lazy_decl
-      end
-    else
-    (* We have an error, but haven't handled it in any way *)
-      assert_false_log_backtrace ()
 
   let try_with_result f1 f2 =
     Common.try_with_result f1 f2 error_list accumulate_errors
@@ -265,6 +256,17 @@ module TracingErrors: Errors_modes = struct
         end
     );
     Buffer.contents buf
+
+  let add_error error =
+    if !accumulate_errors then
+      begin
+        error_list := error :: !error_list;
+        has_lazy_decl_error := !has_lazy_decl_error || !in_lazy_decl
+      end
+    else
+    (* We have an error, but haven't handled it in any way *)
+      let msg = error |> to_absolute |> to_string in
+      assert_false_log_backtrace (Some msg)
 
   let get_sorted_error_list (err,_) =
     List.sort ~cmp:begin fun x y ->

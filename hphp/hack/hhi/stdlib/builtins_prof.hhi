@@ -9,6 +9,10 @@
  *
  */
 
+const int OBJPROF_FLAGS_DEFAULT = 1;
+const int OBJPROF_FLAGS_USER_TYPES_ONLY = 2;
+const int OBJPROF_FLAGS_PER_PROPERTY = 4;
+
 /**
  * Gather all of the stack traces this request thread has captured by now.
  * Does not clear the stored stacks.
@@ -27,9 +31,9 @@ function thread_memory_stats(): array<string, int>; // auto-imported from HH nam
 
 function objprof_start(): void; // auto-imported from HH namespace
 
-function objprof_get_data(): array<string, array>; // auto-imported from HH namespace
+function objprof_get_data(int $flags = OBJPROF_FLAGS_DEFAULT, array $exclude_list = array()): array<string, array>; // auto-imported from HH namespace
 
-function objprof_get_paths(): array<string, array>; // auto-imported from HH namespace
+function objprof_get_paths(int $flags = OBJPROF_FLAGS_DEFAULT, array $exclude_list = array()): array<string, array>; // auto-imported from HH namespace
 
 function objprof_get_strings(int $min_dup): array<string, array>; // auto-imported from HH namespace
 

@@ -18,6 +18,7 @@ open Typing_defs
 open Typing_ops
 
 module Env = Typing_env
+module Dep = Typing_deps.Dep
 module TUtils = Typing_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
@@ -64,7 +65,8 @@ let check_visibility parent_class_elt class_elt =
     Errors.visibility_extends vis pos parent_pos parent_vis
 
 (* Check that all the required members are implemented *)
-let check_members_implemented check_private parent_reason reason parent_members members =
+let check_members_implemented check_private parent_reason reason
+    (parent_members, members, _) =
   SMap.iter begin fun member_name class_elt ->
     match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
@@ -153,6 +155,7 @@ let check_override env ?(ignore_fun_return = false)
   if check_params then
     match parent_class_elt.ce_type, class_elt.ce_type with
     | lazy (r_parent, Tfun ft_parent), lazy (r_child, Tfun ft_child) ->
+      (* Add deps here when we override *)
       let subtype_funs = SubType.subtype_method ~check_return:(
           (not ignore_fun_return) &&
           (class_known || check_partially_known_method_returns)
@@ -179,12 +182,19 @@ let filter_privates members =
     else SMap.add name class_elt acc
   end members SMap.empty
 
-let check_members check_private env parent_class class_ parent_members members =
+let check_members check_private env (parent_class, psubst) (class_, subst)
+    (parent_members, members, dep) =
   let parent_members = if check_private then parent_members
     else filter_privates parent_members in
   SMap.iter begin fun member_name parent_class_elt ->
     match SMap.get member_name members with
-    | Some class_elt  ->
+    | Some class_elt ->
+      let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
+      let class_elt = Inst.instantiate_ce subst class_elt in
+      if parent_class_elt.ce_origin <> class_elt.ce_origin then
+        Typing_deps.add_idep
+          (Dep.Class class_.tc_name)
+          (dep parent_class_elt.ce_origin member_name);
       check_override env parent_class class_ parent_class_elt class_elt
     | None -> ()
   end parent_members
@@ -196,17 +206,18 @@ let check_members check_private env parent_class class_ parent_members members =
 (*****************************************************************************)
 
 (* Instantiation basically applies the substitution *)
-let instantiate_members subst members =
-  SMap.map (Inst.instantiate_ce subst) members
-
 let instantiate_consts subst consts =
   SMap.map (Inst.instantiate_cc subst) consts
 
-let make_all_members class_ = [
-  class_.tc_props;
-  class_.tc_sprops;
-  class_.tc_methods;
-  class_.tc_smethods;
+let make_all_members ~child_class ~parent_class = [
+  parent_class.tc_props, child_class.tc_props,
+  (fun x y -> Dep.Prop (x, y));
+  parent_class.tc_sprops, child_class.tc_sprops,
+  (fun x y -> Dep.SProp (x, y));
+  parent_class.tc_methods, child_class.tc_methods,
+  (fun x y -> Dep.Method (x, y));
+  parent_class.tc_smethods, child_class.tc_smethods,
+  (fun x y -> Dep.SMethod (x, y));
 ]
 
 (* The phantom class element that represents the default constructor:
@@ -249,11 +260,19 @@ let check_constructors env parent_class class_ psubst subst =
       | Some parent_cstr, Some cstr ->
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
         let cstr = Inst.instantiate_ce subst cstr in
+        if parent_cstr.ce_origin <> cstr.ce_origin then
+          Typing_deps.add_idep
+            (Dep.Class class_.tc_name)
+            (Dep.Cstr parent_cstr.ce_origin);
         check_override env ~ignore_fun_return:true parent_class class_ parent_cstr cstr
       | None, Some cstr when explicit_consistency ->
         let parent_cstr = default_constructor_ce parent_class in
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
         let cstr = Inst.instantiate_ce subst cstr in
+        if parent_cstr.ce_origin <> cstr.ce_origin then
+          Typing_deps.add_idep
+            (Dep.Class class_.tc_name)
+            (Dep.Cstr parent_cstr.ce_origin);
         check_override env ~ignore_fun_return:true parent_class class_ parent_cstr cstr
       | None, _ -> ()
   ) else ()
@@ -356,17 +375,14 @@ let check_class_implements env parent_class class_ =
   let psubst = Inst.make_subst parent_class.tc_tparams parent_tparaml in
   let subst = Inst.make_subst class_.tc_tparams tparaml in
   check_consts env parent_class class_ psubst subst;
-  let pmemberl = make_all_members parent_class in
-  let memberl = make_all_members class_ in
+  let memberl = make_all_members ~parent_class ~child_class:class_ in
   check_constructors env parent_class class_ psubst subst;
-  let pmemberl = List.map pmemberl (instantiate_members psubst) in
-  let memberl = List.map memberl (instantiate_members subst) in
   let check_privates:bool = (parent_class.tc_kind = Ast.Ctrait) in
   if not fully_known then () else
-    List.iter2_exn pmemberl memberl
+    List.iter memberl
       (check_members_implemented check_privates parent_pos pos);
-  List.iter2_exn pmemberl memberl
-    (check_members check_privates env parent_class class_);
+  List.iter memberl
+    (check_members check_privates env (parent_class, psubst) (class_, subst));
   ()
 
 (*****************************************************************************)

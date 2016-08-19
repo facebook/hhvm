@@ -44,7 +44,8 @@ module WithExpressionParser
     | Default -> parse_default_label_statement parser
     | Case -> parse_case_label_statement parser
     | LeftBrace -> parse_compound_statement parser
-    | Static -> parse_function_static_declaration parser
+    | Static ->
+      parse_function_static_declaration_or_expression_statement parser
     | Echo -> parse_echo_statement parser
     | _ -> parse_expression_statement parser
 
@@ -345,6 +346,15 @@ module WithExpressionParser
       if peek_token_kind parser = RightBrace then (parser, make_missing())
       else parse_statement parser in
     (parser, make_case_statement case_token expr colon_token stmt)
+
+  and parse_function_static_declaration_or_expression_statement parser =
+    (* Determine if the current token is a late-bound static scope to be
+     * resolved by the '::' operator. (E.g., "static::foo".)
+     *)
+    if Token.kind (peek_token ~lookahead:1 parser) == TokenKind.ColonColon then
+      parse_expression_statement parser
+    else
+      parse_function_static_declaration parser
 
   and parse_function_static_declaration parser =
     (* SPEC

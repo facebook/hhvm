@@ -60,6 +60,12 @@ let search_member class_name member include_defs genv env =
   in
   search target include_defs files genv env
 
+let search_gconst cst_name include_defs genv env =
+  let cst_name = add_ns cst_name in
+  let files = FindRefsService.get_dependent_files_gconst
+    env.tcopt genv.ServerEnv.workers cst_name in
+  search (FindRefsService.IGConst cst_name) include_defs files genv env
+
 let search_class class_name include_defs genv env =
   let class_name = add_ns class_name in
   let files = FindRefsService.get_dependent_files env.tcopt
@@ -74,6 +80,8 @@ let get_refs action include_defs genv env =
       search_function function_name include_defs genv env
   | FindRefsService.Class class_name ->
       search_class class_name include_defs genv env
+  | FindRefsService.GConst cst_name ->
+      search_gconst cst_name include_defs genv env
 
 let get_refs_with_defs action genv env =
   get_refs action true genv env
@@ -103,6 +111,7 @@ let go_from_file (content, line, char) genv env =
       | SymbolOccurrence.Typeconst (class_name, tconst_name) ->
           Some (FindRefsService.Member
             (class_name, FindRefsService.Typeconst tconst_name))
+      | SymbolOccurrence.GConst -> Some (FindRefsService.GConst name)
       | _ -> None
     end >>= fun action ->
     Some (go action genv env)

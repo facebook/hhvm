@@ -61,6 +61,7 @@ module ServerFindRefs = struct
     | Class of string
     | Member of string * member
     | Function of string
+    | GConst of string
 
   let go _  _ _ = []
 end
@@ -76,6 +77,7 @@ module TraceService = struct
     | Class of string
     | Member of string * member
     | Function of string
+    | GConst of string
 
   let go _ _ _ _ = ""
 end

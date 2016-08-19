@@ -31,6 +31,7 @@ let get_target symbol =
   | SymbolOccurrence.Typeconst  (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
         FindRefsService.Typeconst member_name))
+  | SymbolOccurrence.GConst -> Some (IGConst symbol.name)
   | _ -> None
 
 let highlight_symbol tcopt (line, char) path file_info symbol =

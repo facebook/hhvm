@@ -22,6 +22,7 @@ type action = Ai.ServerFindRefs.action =
   | Class of string
   | Member of string * member
   | Function of string
+  | GConst of string
 
 (* The class containing the member can be specified in two ways:
  * - Class_set - as an explicit, pre-computed set of names, which are then
@@ -37,6 +38,7 @@ type action_internal  =
   | IClass of string
   | IMember of member_class * member
   | IFunction of string
+  | IGConst of string
 
 type result = (string * Pos.absolute) list
 
@@ -105,6 +107,10 @@ let process_taccess tcopt results_acc target_classes target_typeconst
   results_acc :=
     Pos.Map.add p (class_name ^ "::" ^ tconst_name) !results_acc
 
+let process_gconst_id results_acc target_gconst id =
+  if target_gconst = (snd id)
+  then results_acc := Pos.Map.add (fst id) (snd id) !results_acc
+
 let attach_hooks tcopt results_acc = function
   | IMember (classes, ((Method _ | Property _ | Class_const _) as member)) ->
     let process_member_id =
@@ -121,6 +127,9 @@ let attach_hooks tcopt results_acc = function
   | IClass c ->
     let classes = SSet.singleton c in
     Decl_hooks.attach_class_id_hook (process_class_id results_acc classes)
+  | IGConst cst_name ->
+    Typing_hooks.attach_global_const_hook
+      (process_gconst_id results_acc cst_name)
 
 let detach_hooks () =
   Decl_hooks.remove_all_hooks ();
@@ -182,6 +191,17 @@ let get_deps_set_function tcopt f_name =
   | None ->
     Relative_path.Set.empty
 
+let get_deps_set_gconst tcopt cst_name =
+  match Typing_lazy_heap.get_gconst tcopt cst_name with
+  | Some cst_ ->
+    let fn = Pos.filename @@ Typing_reason.to_pos @@ fst cst_ in
+    let dep = Typing_deps.Dep.GConst cst_name in
+    let bazooka = Typing_deps.get_bazooka dep in
+    let files = Typing_deps.get_files bazooka in
+    Relative_path.Set.add files fn
+  | None ->
+    Relative_path.Set.empty
+
 let find_refs tcopt target acc fileinfo_l =
   let results_acc = ref Pos.Map.empty in
   attach_hooks tcopt results_acc target;
@@ -226,6 +246,7 @@ let get_definitions tcopt = function
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end
+  | IGConst _
   | IMember (Subclasses_of _, _)
   | IMember (_, (Property _ | Class_const _ | Typeconst _)) ->
     (* this code path is used only in ServerRefactor, we can update it at some
@@ -254,6 +275,10 @@ let find_references tcopt workers target include_defs
 let get_dependent_files_function tcopt _workers f_name =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set_function tcopt f_name
+
+let get_dependent_files_gconst tcopt _workers cst_name =
+  (* This is performant enough to not need to go parallel for now *)
+  get_deps_set_gconst tcopt cst_name
 
 let get_dependent_files tcopt _workers input_set =
   (* This is performant enough to not need to go parallel for now *)

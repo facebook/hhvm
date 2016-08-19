@@ -41,6 +41,10 @@ let oldify_typedefs names =
   Naming_heap.TypeCanonHeap.oldify_batch @@ canon_set names;
   Decl_heap.Typedefs.oldify_batch names
 
+let oldify_consts names =
+  Naming_heap.ConstPosHeap.oldify_batch names;
+  Decl_heap.GConsts.oldify_batch names
+
 let oldify_file name =
   Parser_heap.ParserHeap.oldify_batch @@
     Parser_heap.ParserHeap.KeySet.singleton name
@@ -48,13 +52,14 @@ let oldify_file name =
 let oldify_file_info path file_info =
   oldify_file path;
   let {
-    FileInfo.n_funs; n_classes; n_types; n_consts = _
+    FileInfo.n_funs; n_classes; n_types; n_consts
   } = FileInfo.simplify file_info in
   oldify_funs n_funs;
   oldify_classes n_classes;
-  oldify_typedefs n_types
+  oldify_typedefs n_types;
+  oldify_consts n_consts
 
-let revive funs classes typedefs file_name =
+let revive funs classes typedefs consts file_name =
   Decl_heap.Funs.revive_batch funs;
   Naming_heap.FunPosHeap.revive_batch funs;
   Naming_heap.FunCanonHeap.revive_batch @@ canon_set funs;
@@ -70,14 +75,17 @@ let revive funs classes typedefs file_name =
   Naming_heap.TypeCanonHeap.revive_batch @@ canon_set typedefs;
   Decl_heap.Typedefs.revive_batch typedefs;
 
+  Naming_heap.ConstPosHeap.revive_batch consts;
+  Decl_heap.GConsts.revive_batch consts;
+
   Parser_heap.ParserHeap.revive_batch @@
     Parser_heap.ParserHeap.KeySet.singleton file_name
 
 let revive_file_info path file_info =
   let {
-    FileInfo.n_funs; n_classes; n_types; n_consts = _
+    FileInfo.n_funs; n_classes; n_types; n_consts
   } = FileInfo.simplify file_info in
-  revive n_funs n_classes n_types path
+  revive n_funs n_classes n_types n_consts path
 
 let path = Relative_path.default
 (* This will parse, declare and check all functions and classes in content
@@ -97,33 +105,34 @@ let declare_and_check content ~f =
       let {Parser_hack.file_mode = _; comments = _; ast} =
         Parser_hack.program path content
       in
-      let funs, classes, typedefs =
-        List.fold_left ast ~f:begin fun (funs, classes, typedefs) def ->
+      let funs, classes, typedefs, consts =
+        List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
         match def with
           | Ast.Fun { Ast.f_name; _ } ->
-            f_name::funs, classes, typedefs
+            f_name::funs, classes, typedefs, consts
           | Ast.Class { Ast.c_name; _ } ->
-            funs, c_name::classes, typedefs
+            funs, c_name::classes, typedefs, consts
           | Ast.Typedef { Ast.t_id; _ } ->
-            funs, classes, t_id::typedefs
-          | _ -> funs, classes, typedefs
-      end ~init:([], [], []) in
+            funs, classes, t_id::typedefs, consts
+          | Ast.Constant { Ast.cst_name; _ } ->
+            funs, classes, typedefs, cst_name::consts
+          | _ -> funs, classes, typedefs, consts
+      end ~init:([], [], [], []) in
 
       let file_info = { FileInfo.empty_t with
-        FileInfo.funs; classes; typedefs;
+        FileInfo.funs; classes; typedefs; consts;
       } in
 
       oldify_file_info path file_info;
 
       Parser_heap.ParserHeap.add path ast;
-      NamingGlobal.make_env ~funs ~classes ~typedefs ~consts:[];
+      NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
       let nast = Naming.program tcopt ast in
       List.iter nast begin function
         | Nast.Fun f -> Decl.fun_decl f
         | Nast.Class c -> Decl.class_decl tcopt c
         | Nast.Typedef t -> Decl.typedef_decl t
-        (* XXX should probably declare consts here too *)
-        | _ -> ()
+        | Nast.Constant cst -> Decl.const_decl cst
       end;
       (* We must run all the declaration steps first to ensure that the
        * typechecking below sees all the new declarations. Lazy decl
@@ -132,8 +141,8 @@ let declare_and_check content ~f =
       List.iter nast begin function
         | Nast.Fun f -> Typing.fun_def tcopt f;
         | Nast.Class c -> Typing.class_def tcopt c;
-        | Nast.Typedef t -> Typing.typedef_def t
-        | _ -> ()
+        | Nast.Typedef t -> Typing.typedef_def t;
+        | Nast.Constant cst -> Typing.gconst_def cst;
       end;
       file_info
     end

@@ -4197,6 +4197,24 @@ and typedef_def typedef =
     ignore (check_shape_keys_validity env pos (ShapeMap.keys fdm))
   | _ -> ()
 
+and gconst_def cst =
+  Typing_hooks.dispatch_global_const_hook cst.cst_name;
+  match cst.cst_value with
+  | None -> ()
+  | Some value ->
+    let filename = Pos.filename (fst cst.cst_name) in
+    let dep = Typing_deps.Dep.GConst (snd cst.cst_name) in
+    let env =
+      Typing_env.empty TypecheckerOptions.default filename (Some dep) in
+    let env = Typing_env.set_mode env cst.cst_mode in
+    let env, value_type = expr env value in
+    match cst.cst_type with
+    | Some hint ->
+      let ty = TI.instantiable_hint env hint in
+      let env, dty = Phase.localize_with_self env ty in
+      ignore @@ Typing_utils.sub_type env value_type dty
+    | None -> ()
+
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
 and overload_function p env class_id method_id el uel f =

@@ -810,9 +810,8 @@ and type_typedef_naming_and_decl tcopt tdef =
 (* Global constants *)
 (*****************************************************************************)
 
-let iconst_decl tcopt cst =
+let const_decl cst =
   let open Option.Monad_infix in
-  let cst = Naming.global_const tcopt cst in
   let cst_pos, cst_name = cst.cst_name in
   let dep = Dep.GConst (snd cst.cst_name) in
   let env = {Decl_env.mode = cst.cst_mode; droot = Some dep} in
@@ -829,6 +828,11 @@ let iconst_decl tcopt cst =
         Reason.Rwitness cst_pos, Tany
   in
   Decl_heap.GConsts.add cst_name hint_ty;
+  ()
+
+let iconst_decl tcopt cst =
+  let cst = Naming.global_const tcopt cst in
+  const_decl cst;
   ()
 
 (*****************************************************************************)

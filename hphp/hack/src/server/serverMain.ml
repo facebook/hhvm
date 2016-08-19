@@ -422,9 +422,11 @@ let daemon_main (state, handle, options) (ic, oc) =
   try daemon_main_exn (handle, options) (ic, oc)
   with
   | SharedMem.Out_of_shared_memory ->
+    ServerInit.print_hash_stats ();
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
     Exit_status.(exit Out_of_shared_memory)
   | SharedMem.Hash_table_full ->
+    ServerInit.print_hash_stats ();
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit_status.(exit Hash_table_full)
 

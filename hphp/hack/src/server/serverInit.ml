@@ -337,15 +337,15 @@ let ai_check genv files_info env t =
   | None -> env, t
 
 let print_hash_stats () =
-  let {SharedMem.used_slots; slots} = SharedMem.dep_stats () in
+  let {SharedMem.used_slots; slots; nonempty_slots = _} = SharedMem.dep_stats () in
   let load_factor = float_of_int used_slots /. float_of_int slots in
   Hh_logger.log "Dependency table load factor: %d / %d (%.02f)"
     used_slots slots load_factor;
 
-  let {SharedMem.used_slots; slots} = SharedMem.hash_stats () in
+  let {SharedMem.used_slots; slots; nonempty_slots} = SharedMem.hash_stats () in
   let load_factor = float_of_int used_slots /. float_of_int slots in
-  Hh_logger.log "Hashtable load factor: %d / %d (%.02f)"
-    used_slots slots load_factor;
+  Hh_logger.log "Hashtable load factor: %d / %d (%.02f) with %d nonempty sluts"
+    used_slots slots load_factor nonempty_slots;
   ()
 
 let get_build_targets env =

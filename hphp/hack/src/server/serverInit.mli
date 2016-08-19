@@ -16,3 +16,5 @@ val save_state: ServerEnv.env -> string -> unit
  *)
 val init: ?load_mini_script:Path.t -> ServerEnv.genv
   -> ServerEnv.env * bool (* whether the script succeeded *)
+
+val print_hash_stats: unit -> unit

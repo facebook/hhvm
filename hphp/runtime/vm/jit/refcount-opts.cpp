@@ -2385,10 +2385,12 @@ void node_skip_over(Env& env, Node* pred, Node* middle, Node* last) {
     (middle->next == nullptr || to_sig(middle)->taken == nullptr));
 
   // Unlink middle node.
-  if (last->type == NT::Phi) {
-    rm_phi_pred(to_phi(last), middle);
-  } else {
-    if (debug) last->prev = nullptr;
+  if (last) {
+    if (last->type == NT::Phi) {
+      rm_phi_pred(to_phi(last), middle);
+    } else {
+      if (debug) last->prev = nullptr;
+    }
   }
   if (middle->type == NT::Phi) {
     rm_phi_pred(to_phi(middle), pred);
@@ -2401,10 +2403,12 @@ void node_skip_over(Env& env, Node* pred, Node* middle, Node* last) {
   rechain_forward(pred, middle, last);
 
   // Set backward pointers from last to pred.
-  if (last->type == NT::Phi) {
-    add_phi_pred(env, to_phi(last), pred);
-  } else {
-    last->prev = pred;
+  if (last) {
+    if (last->type == NT::Phi) {
+      add_phi_pred(env, to_phi(last), pred);
+    } else {
+      last->prev = pred;
+    }
   }
 }
 

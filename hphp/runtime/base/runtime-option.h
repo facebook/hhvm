@@ -663,6 +663,7 @@ public:
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
   static int DebuggerSignalTimeout;
+  static std::string DebuggerAuthTokenScript;
 
   // Mail options
   static std::string SendmailPath;

@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
@@ -759,6 +760,7 @@ void DebuggerClient::run() {
   } else {
     hphp_invoke_simple(m_options.extension, false);
   }
+
   while (true) {
     bool reconnect = false;
     try {
@@ -1102,8 +1104,9 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
         Logger::Error("Unable to communicate with server. Server's down?");
         throw DebuggerServerLostException();
       }
-      if (cmd->is(DebuggerCommand::KindOfSignal)) {
-        // Respond to signal polling from the server.
+      if (cmd->is(DebuggerCommand::KindOfSignal) ||
+          cmd->is(DebuggerCommand::KindOfAuth)) {
+        // Respond to polling from the server.
         cmd->onClient(*this);
         continue;
       }

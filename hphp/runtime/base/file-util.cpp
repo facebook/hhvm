@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/file-util.h"
 
+#include <algorithm>
 #include <vector>
 #include <fstream>
 
@@ -34,6 +35,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/network.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -573,6 +575,25 @@ String FileUtil::canonicalize(const char *addpath, size_t addlen,
 #endif
   ret.setSize(pathlen);
   return ret;
+}
+
+std::string FileUtil::expandUser(const std::string& path,
+                                 const std::string& sysUser) {
+  if (path.front() != '~') {
+    return path;
+  }
+
+  auto pos = std::min(path.find('/'), path.size());
+  auto user = (pos > 1) ? path.substr(1, pos - 1) : sysUser;
+
+  auto defaultUser = user.empty() || user == Process::GetCurrentUser();
+  auto home = defaultUser ? Process::GetHomeDirectory() : "/home/" + user + "/";
+
+  if (pos + 1 < path.size()) {
+    return home + path.substr(pos + 1);
+  } else {
+    return home;
+  }
 }
 
 std::string FileUtil::normalizeDir(const std::string &dirname) {

@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,20 +14,32 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_DEBUGGER_H_
-#define incl_HPHP_EXT_DEBUGGER_H_
+#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_AUTH_H_
+#define incl_HPHP_EVAL_DEBUGGER_CMD_AUTH_H_
 
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/debugger/debugger_command.h"
+#include <string>
 
-namespace HPHP {
+namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-String HHVM_FUNCTION(hphpd_auth_token);
-void HHVM_FUNCTION(hphpd_break, bool condition = true);
-bool HHVM_FUNCTION(hphp_debugger_attached);
-Array HHVM_FUNCTION(debugger_get_info);
+struct CmdAuth : DebuggerCommand {
+  explicit CmdAuth() : DebuggerCommand(KindOfAuth) {}
+
+  const std::string& getToken() const { return m_token; }
+
+  bool onServer(DebuggerProxy&) override;
+  void onClient(DebuggerClient&) override;
+
+protected:
+  void sendImpl(DebuggerThriftBuffer&) override;
+  void recvImpl(DebuggerThriftBuffer&) override;
+
+private:
+  std::string m_token;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+}}
 
-#endif // incl_HPHP_EXT_DEBUGGER_H_
+#endif // incl_HPHP_EVAL_DEBUGGER_CMD_AUTH_H_

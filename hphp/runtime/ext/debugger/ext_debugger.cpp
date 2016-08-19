@@ -32,6 +32,7 @@ struct DebuggerExtension final : Extension {
   DebuggerExtension() : Extension("debugger", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_NAMED_FE(__SystemLib\\debugger_get_info, HHVM_FN(debugger_get_info));
+    HHVM_FE(hphpd_auth_token);
     HHVM_FE(hphpd_break);
     HHVM_FE(hphp_debugger_attached);
     loadSystemlib();
@@ -39,6 +40,15 @@ struct DebuggerExtension final : Extension {
 } s_debugger_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+String HHVM_FUNCTION(hphpd_auth_token) {
+  TRACE(5, "in f_hphpd_auth_token()\n");
+  if (auto proxy = Debugger::GetProxy()) {
+    return String(proxy->requestAuthToken());
+  }
+
+  return String();
+}
 
 void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");

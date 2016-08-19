@@ -90,6 +90,7 @@ struct DebuggerCommand {
     // DebuggerProxy -> DebuggerClient
     KindOfInterrupt           = 10000,
     KindOfSignal              = 10001,
+    KindOfAuth                = 10002,
 
     // Internal testing only
     KindOfInternalTesting     = 20000, // The real test command

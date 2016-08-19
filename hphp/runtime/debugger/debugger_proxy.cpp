@@ -22,6 +22,7 @@
 
 #include <folly/Conv.h>
 
+#include "hphp/runtime/debugger/cmd/cmd_auth.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
@@ -801,6 +802,36 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   }
   output = sb.detach();
   return ret;
+}
+
+std::string DebuggerProxy::requestAuthToken() {
+  TRACE_RB(2, "DebuggerProxy::requestauthToken: sending auth request\n");
+  CmdAuth cmd;
+  if (!cmd.onServer(*this)) {
+    TRACE_RB(2, "DebuggerProxy::requestAuthToken: "
+             "Failed to send CmdAuth to client\n");
+    return "";
+  }
+
+  DebuggerCommandPtr res;
+  while (!DebuggerCommand::Receive(m_thrift, res,
+                                   "DebuggerProxy::requestAuthToken()")) {
+    checkStop();
+  }
+  if (!res) {
+    TRACE_RB(2, "DebuggerProxy::requestAuthToken: "
+             "Failed to get CmdAuth back from client\n");
+    return "";
+  }
+
+  auto token = std::dynamic_pointer_cast<CmdAuth>(res);
+  if (!token) {
+    TRACE_RB(2, "DebuggerProxy::requestAuthToken: "
+             "bad response from token request: %d", res->getType());
+    return "";
+  }
+
+  return token->getToken();
 }
 
 int DebuggerProxy::getRealStackDepth() {

@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_
 #define incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_
 
+#include "hphp/runtime/debugger/cmd/cmd_auth.h"
 #include "hphp/runtime/debugger/cmd/cmd_eval.h"
 #include "hphp/runtime/debugger/cmd/cmd_abort.h"
 #include "hphp/runtime/debugger/cmd/cmd_break.h"

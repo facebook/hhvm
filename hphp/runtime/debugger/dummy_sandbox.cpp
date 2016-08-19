@@ -24,9 +24,9 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/file-util.h"
 
 #include "hphp/util/logger.h"
-#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -177,27 +177,7 @@ std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
       path += '/';
     }
     path += m_startupFile;
-
-    // resolving home directory
-    if (path[0] == '~') {
-      std::string user, home;
-      size_t pos = path.find('/');
-      if (pos == std::string::npos) pos = path.size();
-      if (pos > 1) {
-        user = path.substr(1, pos - 1);
-      }
-      if (user.empty()) user = sandbox.m_user;
-      if (user.empty() || user == Process::GetCurrentUser()) {
-        home = Process::GetHomeDirectory();
-      } else {
-        home = "/home/" + user + "/";
-      }
-      if (pos + 1 < path.size()) {
-        path = home + path.substr(pos + 1);
-      } else {
-        path = home;
-      }
-    }
+    path = FileUtil::expandUser(path, sandbox.m_user);
   }
   return path;
 }

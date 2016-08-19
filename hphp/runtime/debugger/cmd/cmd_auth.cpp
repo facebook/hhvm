@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,20 +14,42 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_DEBUGGER_H_
-#define incl_HPHP_EXT_DEBUGGER_H_
+#include "hphp/runtime/debugger/cmd/cmd_auth.h"
 
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/debugger/debugger_client.h"
+#include "hphp/util/process-exec.h"
+#include <string>
 
-namespace HPHP {
+namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-String HHVM_FUNCTION(hphpd_auth_token);
-void HHVM_FUNCTION(hphpd_break, bool condition = true);
-bool HHVM_FUNCTION(hphp_debugger_attached);
-Array HHVM_FUNCTION(debugger_get_info);
+TRACE_SET_MOD(debugger);
 
-///////////////////////////////////////////////////////////////////////////////
+void CmdAuth::sendImpl(DebuggerThriftBuffer& thrift) {
+  DebuggerCommand::sendImpl(thrift);
+  thrift.write(m_token);
 }
 
-#endif // incl_HPHP_EXT_DEBUGGER_H_
+void CmdAuth::recvImpl(DebuggerThriftBuffer& thrift) {
+  DebuggerCommand::recvImpl(thrift);
+  thrift.read(m_token);
+}
+
+void CmdAuth::onClient(DebuggerClient& client) {
+  auto path = FileUtil::expandUser(RuntimeOption::DebuggerAuthTokenScript);
+  const char *argv[] = { "", path.data(), nullptr };
+  // We *should* be invoking the file in the same process.
+  if (path.empty() || !proc::exec("php", argv, nullptr, m_token, nullptr)) {
+    m_token.clear();
+  }
+
+  client.sendToServer(this);
+}
+
+bool CmdAuth::onServer(DebuggerProxy& proxy) {
+  return proxy.sendToClient(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}}

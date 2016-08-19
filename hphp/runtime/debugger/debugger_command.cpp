@@ -148,6 +148,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
     case KindOfEval     : cmd = std::make_shared<CmdEval>(); break;
     case KindOfInterrupt: cmd = std::make_shared<CmdInterrupt>(); break;
     case KindOfSignal   : cmd = std::make_shared<CmdSignal>(); break;
+    case KindOfAuth     : cmd = std::make_shared<CmdAuth>(); break;
     case KindOfShell    : cmd = std::make_shared<CmdShell>(); break;
     case KindOfInternalTesting :
       cmd = std::make_shared<CmdInternalTesting>();

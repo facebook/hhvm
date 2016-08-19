@@ -82,6 +82,8 @@ String canonicalize(const std::string& path);
 String canonicalize(const char* path, size_t len,
                     bool collapse_slashes = true);
 
+std::string expandUser(const std::string& path,
+                       const std::string& sysUser = "");
 /**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".
  */

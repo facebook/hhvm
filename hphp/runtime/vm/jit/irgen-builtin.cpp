@@ -476,7 +476,7 @@ SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      uint32_t numArgs,
                      uint32_t numNonDefaultArgs) {
-  auto const constAsCell = [&] (SSATmp *tmp) {
+  auto const constAsCell = [] (SSATmp *tmp) {
     switch (tmp->type().toDataType()) {
       case KindOfUninit:
         return make_tv<KindOfUninit>();
@@ -492,73 +492,76 @@ SSATmp* opt_foldable(IRGS& env,
         return make_tv<KindOfPersistentString>(tmp->strVal());
       case KindOfPersistentArray:
         return make_tv<KindOfPersistentArray>(tmp->arrVal());
-      default:
-        // unexpected const type
-        assert(false);
-        return make_tv<KindOfInt64>(tmp->intVal());
+      case KindOfClass:
+      case KindOfString:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+        break;
     }
+    // Other Kinds are not expected to be ConstVal
+    not_reached();
   };
 
-  if (func->isFoldable()) {
-    // Don't pop the args yet---if the builtin throws at compile time (because
-    // it would raise a warning or something at runtime) we're going to leave
-    // the call alone.
-    int32_t numNonVariadicArgs = func->numNonVariadicParams();
-    Array arr;
-    for (int32_t i = 0; i < numNonDefaultArgs; i++) {
-      Type t = topType(env, BCSPRelOffset{(int32_t)(numArgs - i - 1)});
-      if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
-        return nullptr;
-      }
-      else {
-        Cell tmp = constAsCell(topC(env,
-          BCSPRelOffset{(int32_t)(numArgs - i - 1)}));
-        arr.set(i, (Variant&)tmp);
-      }
-    }
-    if (numArgs != numNonVariadicArgs) {
-      if (!topType(env, BCSPRelOffset{0}).hasConstVal()) {
-        return nullptr;
-      }
-      Cell tmp = constAsCell(topC(env, BCSPRelOffset{0}));
-      ArrayData *variadicArgs = tmp.m_data.parr;
-      uint32_t numVariadicArgs = variadicArgs->size();
-      for (int i = 0; i < numVariadicArgs; i++) {
-        Variant arg = variadicArgs->get(i);
-        arr.set(numNonVariadicArgs + i, arg);
-      }
-    }
+  if (!func->isFoldable()) return nullptr;
 
-    try {
-      Cell retVal;
-      // We don't know if notices would be enabled or not when this
-      // function would normally get called, so be safe and don't
-      // optimize any calls that COULD generate notices.
-      ThrowAllErrorsSetter taes;
+  // Don't pop the args yet---if the builtin throws at compile time (because
+  // it would raise a warning or something at runtime) we're going to leave
+  // the call alone.
+  int32_t numNonVariadicArgs = func->numNonVariadicParams();
+  Array arr;
+  for (int32_t i = 0; i < numNonDefaultArgs; i++) {
+    Type t = topType(env, BCSPRelOffset{(int32_t)(numArgs - i - 1)});
+    if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
+      return nullptr;
+    }
+    else {
+      Cell tmp = constAsCell(topC(env,
+        BCSPRelOffset{(int32_t)(numArgs - i - 1)}));
+      arr.set(i, cellAsVariant(tmp));
+    }
+  }
+  if (numArgs != numNonVariadicArgs) {
+    if (!topType(env).hasConstVal()) {
+      return nullptr;
+    }
+    Cell tmp = constAsCell(topC(env));
+    auto const variadicArgs = tmp.m_data.parr;
+    uint32_t numVariadicArgs = variadicArgs->size();
+    for (int i = 0; i < numVariadicArgs; i++) {
+      Variant arg = variadicArgs->get(i);
+      arr.set(numNonVariadicArgs + i, arg);
+    }
+  }
+
+  try {
+    Cell retVal;
+    // We don't know if notices would be enabled or not when this
+    // function would normally get called, so be safe and don't
+    // optimize any calls that COULD generate notices.
+    ThrowAllErrorsSetter taes;
 
 #ifdef DEBUG
-      const Func* stackFunc = vmfp()->m_func;
-      auto savedPC = vmpc();
-      // ensure that vmpc is valid for later asserts within the invoke
-      vmpc() = stackFunc->getEntry();
+    auto savedPC = vmpc();
+    // ensure that vmpc is valid for later asserts within the invoke
+    vmpc() = vmfp()->m_func->getEntry();
+    SCOPE_EXIT{ vmpc() = savedPC; };
 #endif
-      Variant v = invoke(func->name()->data(), arr, -1, true, true,
-                         !func->unit()->useStrictTypes());
-      retVal = (Cell&)v;
-#ifdef DEBUG
-      vmpc() = savedPC;
-#endif
+    Variant v = invoke(func->name()->data(), arr, -1, true, true,
+                       !func->unit()->useStrictTypes());
+    retVal = *v.asCell();
 
-      if (retVal.m_type == KindOfString)
-        return cns(env, makeStaticString(retVal.m_data.pstr));
-      else if (retVal.m_type == KindOfArray)
-        return cns(env, make_tv<KindOfPersistentArray>(
-                       ArrayData::GetScalarArray(retVal.m_data.parr)));
-      else
-        return cns(env, retVal);
-    } catch(...) {
-      // If an exception or notice occurred, don't optimize
+    if (retVal.m_type == KindOfString) {
+      return cns(env, makeStaticString(retVal.m_data.pstr));
+    } else if (retVal.m_type == KindOfArray) {
+      return cns(env, make_tv<KindOfPersistentArray>(
+                     ArrayData::GetScalarArray(retVal.m_data.parr)));
+    } else {
+      return cns(env, retVal);
     }
+  } catch (...) {
+    // If an exception or notice occurred, don't optimize
   }
   return nullptr;
 }

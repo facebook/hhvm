@@ -415,7 +415,7 @@ inline SSATmp* pushIncRef(IRGS& env,
 }
 
 inline Type topType(IRGS& env,
-                    BCSPRelOffset idx,
+                    BCSPRelOffset idx = BCSPRelOffset{0},
                     TypeConstraint constraint = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
   return env.irb->stack(offsetFromIRSP(env, idx), constraint).type;

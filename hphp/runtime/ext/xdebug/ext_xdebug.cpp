@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 #include "hphp/runtime/ext/xdebug/server.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"

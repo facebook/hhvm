@@ -17,12 +17,12 @@
 
 #include "hphp/runtime/ext/xdebug/util.h"
 
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

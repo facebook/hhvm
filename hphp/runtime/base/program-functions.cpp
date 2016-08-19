@@ -2370,8 +2370,6 @@ void hphp_session_exit() {
     ServerStatsHelper ssh("rollback");
 
     hphp_memory_cleanup();
-    // Do any post-sweep cleanup necessary for global variables
-    free_global_variables_after_sweep();
   }
 
   assert(MM().empty());

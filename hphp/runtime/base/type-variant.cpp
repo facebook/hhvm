@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
-#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-arith.h"
@@ -54,6 +54,13 @@ const VarNR NEGINF_varNR(std::numeric_limits<double>::infinity());
 const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
 const Variant empty_string_variant_ref(staticEmptyString(),
                                        Variant::PersistentStrInit{});
+
+using BlackHoleStorage = std::aligned_storage<
+  sizeof(req::root<Variant>),
+  alignof(req::root<Variant>)
+>::type;
+
+static __thread BlackHoleStorage bhStorage;
 
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
@@ -591,10 +598,24 @@ Resource Variant::toResourceHelper() const {
   not_reached();
 }
 
+req::root<Variant>* blackHolePtr() {
+  void* p = &bhStorage;
+  return reinterpret_cast<req::root<Variant>*>(p);
+}
+
+void initBlackHole() {
+  new (blackHolePtr()) req::root<Variant>();
+}
+
+void clearBlackHole() {
+  using req::root;
+  blackHolePtr()->~root<Variant>();
+}
+
 Variant& lvalBlackHole() {
-  auto& bh = get_env_constants()->lvalProxy;
-  bh = uninit_null();
-  return bh;
+  blackHolePtr()->unset();
+  blackHolePtr()->setNull();
+  return *blackHolePtr();
 }
 
 void Variant::setEvalScalar() {

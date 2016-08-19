@@ -28,7 +28,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-injection-data.h"
@@ -43,6 +42,7 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 

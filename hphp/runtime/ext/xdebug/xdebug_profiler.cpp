@@ -19,9 +19,9 @@
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/util.h"
 
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/timer.h"
 

@@ -155,6 +155,11 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Gets our request-local global variables array.
+ */
+GlobalsArray* get_global_variables();
+
 }
 
 #endif

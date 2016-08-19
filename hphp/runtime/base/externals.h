@@ -26,7 +26,6 @@
  */
 
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,43 +42,9 @@ extern "C++" {
 Variant invoke(const char *function, const Variant& params, strhash_t hash = -1,
     bool tryInterp = true, bool fatal = true, bool useWeakTypes = false);
 
-/**
- * Getting a static property
- */
-extern Variant get_static_property(const String& s, const char *prop);
-
-/**
- * Getting the init value of a class variable
- */
-extern Variant get_class_var_init(const String& s, const char *var);
-
 } // extern C++
-
-/**
- * Returns a thread local global variable class pointer.
- */
-typedef GlobalsArray GlobalVariables;
-extern GlobalVariables *get_global_variables();
-extern void free_global_variables();
-extern void free_global_variables_after_sweep();
-
-/**
- * These are things that look like constants to PHP, but their values aren't
- * known at compile time and are instead determined per request at startup time.
- * lvalProxy is not that (it's a "black hole" for certain types of assignments)
- * but there isn't really an obviously better place for it to live.
- *
- * The standalone k_ constants are similarly dynamic but invariant per process.
- */
-struct EnvConstants {
-  static void requestInit(EnvConstants* gt);
-  static void requestExit();
-  Variant lvalProxy;
-  Variant stgv_Variant[1];
-};
-extern EnvConstants* get_env_constants();
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_CPP_BASE_HPHP_H_
+#endif

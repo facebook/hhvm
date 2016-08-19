@@ -2,13 +2,13 @@
 #include "zend_globals.h"
 #include "zend_exceptions.h"
 
-#include "hphp/runtime/base/externals.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/vm/globals-array.h"
 
 ZEND_API zend_compiler_globals compiler_globals;
 

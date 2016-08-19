@@ -456,9 +456,6 @@ private:
 #pragma pack(pop)
 #endif
 
-struct GlobalsArray;
-typedef GlobalsArray GlobalVariables;
-
 struct CountableHelper {
   explicit CountableHelper(ObjectData* object) : m_object(object) {
     object->incRefCount();

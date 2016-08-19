@@ -1584,7 +1584,7 @@ StaticString
 void ExecutionContext::requestInit() {
   assert(SystemLib::s_unit);
 
-  EnvConstants::requestInit(req::make_raw<EnvConstants>());
+  initBlackHole();
   VarEnv::createGlobal();
   vmStack().requestInit();
   ObjectData::resetMaxId();
@@ -1649,8 +1649,8 @@ void ExecutionContext::requestExit() {
   vmStack().requestExit();
   profileRequestEnd();
   EventHook::Disable();
-  EnvConstants::requestExit();
   zend_rand_unseed();
+  clearBlackHole();
   tl_miter_table.clear();
 
   if (m_globalVarEnv) {

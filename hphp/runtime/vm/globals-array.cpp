@@ -16,13 +16,44 @@
 #include "hphp/runtime/vm/globals-array.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+static __thread GlobalsArray* g_variables;
+
+GlobalsArray* get_global_variables() {
+  assertx(g_variables != nullptr);
+  return g_variables;
+}
+
+GlobalsArray::GlobalsArray(NameValueTable* tab)
+  : ArrayData(kGlobalsKind)
+  , m_tab(tab)
+{
+  Variant arr(staticEmptyArray());
+#define X(s,v) tab->set(makeStaticString(#s), v.asTypedValue());
+
+  X(argc,                 init_null_variant);
+  X(argv,                 init_null_variant);
+  X(_SERVER,              arr);
+  X(_GET,                 arr);
+  X(_POST,                arr);
+  X(_COOKIE,              arr);
+  X(_FILES,               arr);
+  X(_ENV,                 arr);
+  X(_REQUEST,             arr);
+  X(_SESSION,             arr);
+  X(HTTP_RAW_POST_DATA,   init_null_variant);
+#undef X
+
+  g_variables = this;
+  assert(hasExactlyOneRef());
+}
 
 inline GlobalsArray* GlobalsArray::asGlobals(ArrayData* ad) {
   assert(ad->kind() == kGlobalsKind);

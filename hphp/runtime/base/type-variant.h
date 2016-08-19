@@ -1446,6 +1446,12 @@ private:
  */
 Variant& lvalBlackHole();
 
+/*
+ * The lvalBlackHole has request lifetime.
+ */
+void initBlackHole();
+void clearBlackHole();
+
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies
 

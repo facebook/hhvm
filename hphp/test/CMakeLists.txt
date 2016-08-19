@@ -9,8 +9,6 @@ endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 
 list(APPEND CXX_SOURCES ${files})
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/process-init.cpp")
-list(APPEND CXX_SOURCES
-     "${CMAKE_CURRENT_SOURCE_DIR}/../hhvm/global-variables.cpp")
 
 if(NOT HAVE_CUSTOM_LIBEVENT)
   list(REMOVE_ITEM CXX_SOURCES

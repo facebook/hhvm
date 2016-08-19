@@ -23,6 +23,8 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 
+#include "hphp/util/conv-10.h"
+
 #include <algorithm>
 
 namespace HPHP {

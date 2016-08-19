@@ -22,16 +22,13 @@
 #include <execinfo.h>
 #endif
 
-#ifdef HAVE_LIBBFD
-#include <bfd.h>
-#endif
-
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
 #include <folly/Conv.h>
+#include <folly/Demangle.h>
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
@@ -39,13 +36,319 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/conv-10.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
 #include "hphp/util/thread-local.h"
 
+#if defined USE_FOLLY_SYMBOLIZER
+
+#include <folly/experimental/symbolizer/Symbolizer.h>
+
+#elif defined HAVE_LIBBFD
+
+#include <bfd.h>
+
+#endif
+
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
+
+const char* const s_defaultBlacklist[] = {
+  "_ZN4HPHP16StackTraceNoHeap",
+  "_ZN5folly10symbolizer17getStackTraceSafeEPmm",
+};
+
+bool StackTraceBase::Enabled = true;
+
+const char* const* StackTraceBase::FunctionBlacklist = s_defaultBlacklist;
+unsigned StackTraceBase::FunctionBlacklistCount = 2;
+
+namespace {
+
+void printStr(int fd, folly::StringPiece s) {
+  write(fd, s.begin(), s.size());
+}
+
+void printInt(int fd, int64_t val) {
+  char buf[24];
+  printStr(fd, conv_10(val, buf + sizeof buf));
+}
+
+void printFrameHdr(int fd, int fr) {
+  printStr(fd, "# ");
+  printInt(fd, fr);
+  printStr(fd, (fr < 10 ? "  " : " "));
+}
+
+void printPair(int fd,
+               folly::StringPiece first,
+               folly::StringPiece second) {
+  printStr(fd, first);
+  write(fd, ": ", 2);
+  printStr(fd, second);
+  write(fd, "\n", 1);
+}
+
+void printPair(int fd,
+               folly::StringPiece first,
+               int64_t second) {
+  char buf[24];
+  printPair(fd, first, conv_10(second, buf + sizeof buf));
+}
+
+/*
+ * Writes a file path to a file while folding any consecutive forward slashes.
+ */
+void write_path(int fd, folly::StringPiece path) {
+  while (!path.empty()) {
+    auto const pos = path.find('/');
+    if (pos == std::string::npos) {
+      folly::writeNoInt(fd, path.data(), path.size());
+      break;
+    }
+
+    auto const left = path.subpiece(0, pos + 1);
+    folly::writeNoInt(fd, left.data(), left.size());
+
+    auto right = path.subpiece(pos);
+    while (!right.empty() && right[0] == '/') {
+      right = right.subpiece(1);
+    }
+
+    path = right;
+  }
+}
+
+bool isBlacklisted(const char* funcname) {
+  for (int i = 0; i < StackTraceBase::FunctionBlacklistCount; i++) {
+    auto ignoreFunc = StackTraceBase::FunctionBlacklist[i];
+    if (strncmp(funcname, ignoreFunc, strlen(ignoreFunc)) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Demangle a function name and return it as a string.
+ */
+std::string demangle(const char* mangled) {
+  auto const skip_first =
+    static_cast<int>(mangled[0] == '.' || mangled[0] == '$');
+
+  auto const result = folly::demangle(mangled + skip_first);
+  auto const ret = std::string(result.data(), result.size());
+  if (mangled[0] == '.') {
+    return "." + ret;
+  }
+
+  return ret;
+}
+
+/*
+ * Demangle a function name and write it to a file.
+ */
+void demangle(int fd, const char* mangled) {
+  if (mangled == nullptr || mangled[0] == '\0') {
+    write(fd, "??", 2);
+    return;
+  }
+
+  auto const skip_first =
+    static_cast<int>(mangled[0] == '.' || mangled[0] == '$');
+
+  char buf[2048];
+  auto sz = folly::demangle(mangled + skip_first, buf, sizeof buf);
+  if (sz > sizeof buf) {
+    write(fd, mangled, strlen(mangled));
+    return;
+  }
+
+  if (mangled[0] == '.') write(fd, ".", 1);
+  write(fd, buf, sz);
+}
+
+std::mutex s_perfMapCacheMutex;
+StackTrace::PerfMap s_perfMapCache;
+std::set<void*> s_perfMapNegCache;
+
+void translateFromPerfMap(StackFrameExtra* frame) {
+  std::lock_guard<std::mutex> lock(s_perfMapCacheMutex);
+
+  if (s_perfMapCache.translate(frame)) {
+    if (s_perfMapNegCache.count(frame->addr)) {
+      // A prior failed lookup of frame already triggered a rebuild.
+      return;
+    }
+    // Rebuild the cache, then search again.
+    s_perfMapCache.rebuild();
+    if (s_perfMapCache.translate(frame)) {
+      s_perfMapNegCache.insert(frame->addr);
+    }
+  }
+}
+
+struct StackTraceLog {
+  hphp_string_map<std::string> data;
+
+  static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
+};
+IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
+
+template <bool safe>
+int ALWAYS_INLINE get_backtrace(void** frame, int max) {
+  int ret = 0;
+#if defined USE_FOLLY_SYMBOLIZER
+  if (safe) {
+    ret = folly::symbolizer::getStackTraceSafe((uintptr_t*)frame, max);
+  } else {
+    ret = folly::symbolizer::getStackTrace((uintptr_t*)frame, max);
+  }
+#elif defined __GLIBC__
+  ret = backtrace(frame, max);
+#endif
+  if (ret < 0 || ret > max) {
+    return 0;
+  }
+  return ret;
+}
+
+} // namespace
+
+StackTraceBase::StackTraceBase() {
+#ifdef HAVE_LIBBFD
+  bfd_init();
+#endif
+}
+
+StackTrace::StackTrace(bool trace) {
+  if (trace && Enabled) {
+    create();
+  }
+}
+
+StackTrace::StackTrace(folly::StringPiece hexEncoded) {
+  initFromHex(hexEncoded);
+}
+
+void StackTrace::create() {
+  m_frames.resize(kMaxFrame);
+  m_frames.resize(get_backtrace<false>(m_frames.data(), kMaxFrame));
+}
+
+void StackTrace::initFromHex(folly::StringPiece hexEncoded) {
+  // Can't split into StringPieces, strtoll() expects a null terminated string.
+  std::vector<std::string> frames;
+  folly::split(':', hexEncoded, frames);
+  for (auto const& frame : frames) {
+    m_frames.push_back((void*)strtoll(frame.c_str(), nullptr, 16));
+  }
+}
+
+void StackTrace::get(std::vector<std::shared_ptr<StackFrameExtra>>&
+                     frames) const {
+  frames.clear();
+  for (auto const frame_ptr : m_frames) {
+    frames.push_back(Translate(frame_ptr));
+  }
+}
+
+std::string StackTrace::hexEncode(int minLevel /* = 0 */,
+                                  int maxLevel /* = 999 */) const {
+  std::string bts;
+  for (int i = minLevel; i < (int)m_frames.size() && i < maxLevel; i++) {
+    if (i > minLevel) bts += ':';
+    char buf[20];
+    snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)m_frames[i]);
+    bts.append(buf);
+  }
+  return bts;
+}
+
+const std::string& StackTrace::toString(int skip, int limit) const {
+  auto usable = skip == 0 && limit == -1;
+  if (!usable || !m_trace_usable) {
+    m_trace.clear();
+  }
+
+  if (!m_trace.empty()) return m_trace;
+
+  size_t frame = 0;
+  for (auto const frame_ptr : m_frames) {
+    auto const framename = Translate(frame_ptr)->toString();
+    // Ignore frames in the StackTrace class.
+    if (framename.find("StackTrace::") != std::string::npos) {
+      continue;
+    }
+    if (skip-- > 0) continue;
+    m_trace += "# ";
+    m_trace += folly::to<std::string>(frame);
+    if (frame < 10) m_trace += " ";
+
+    m_trace += " ";
+    m_trace += framename;
+    m_trace += "\n";
+    ++frame;
+    if ((int)frame == limit) break;
+  }
+
+  m_trace_usable = usable;
+  return m_trace;
+}
+
+void StackTrace::PerfMap::rebuild() {
+  m_map.clear();
+
+  char perfMapName[64];
+  snprintf(perfMapName, sizeof(perfMapName), "/tmp/perf-%d.map", getpid());
+  auto perfMap = fopen(perfMapName, "r");
+  if (!perfMap) {
+    return;
+  }
+  SCOPE_EXIT { fclose(perfMap); };
+  uintptr_t addr;
+  uint32_t size;
+  char name[1024];
+  while (fscanf(perfMap, "%lx %x %1023s", &addr, &size, name) == 3) {
+    uintptr_t past = addr + size;
+    PerfMap::Range range = {addr, past};
+    m_map[range] = name;
+  }
+  m_built = true;
+}
+
+bool StackTrace::PerfMap::translate(StackFrameExtra* frame) const {
+  if (!m_built) {
+    const_cast<StackTrace::PerfMap*>(this)->rebuild();
+  }
+
+  // Use a key with non-zero span, because otherwise a key right at the base of
+  // a range will be treated as before the range (bad) rather than within it
+  // (good).
+  PerfMap::Range key{uintptr_t(frame->addr), uintptr_t(frame->addr)+1};
+  auto const& it = m_map.find(key);
+  if (it == m_map.end()) {
+    // Not found.
+    frame->filename = "?";
+    frame->funcname = "TC?"; // Note HHProf::HandlePProfSymbol() dependency.
+    return true;
+  }
+  // Found.
+  auto const& filefunc = it->second;
+  auto endPhp = filefunc.find("::");
+  if (endPhp == std::string::npos) {
+    frame->funcname = filefunc;
+    return false;
+  }
+  // Skip the ::
+  endPhp += 2;
+  auto const endFile = filefunc.find("::", endPhp);
+  frame->filename = std::string(filefunc, endPhp, endFile - endPhp);
+  frame->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
+  return false;
+}
 
 std::string StackFrameExtra::toString() const {
   constexpr folly::StringPiece qq{"??"};
@@ -57,9 +360,111 @@ std::string StackFrameExtra::toString() const {
   );
 }
 
+StackTraceNoHeap::StackTraceNoHeap(bool trace) {
+  if (trace && Enabled) {
+    create();
+  }
+}
+
+void StackTraceNoHeap::create() {
+  m_frame_count = get_backtrace<true>(m_frames, kMaxFrame);
+}
+
+void StackTraceNoHeap::AddExtraLogging(const char* name,
+                                       const std::string& value) {
+  assertx(name != nullptr && name[0] != '\0');
+  StackTraceLog::s_logData->data[name] = value;
+}
+
+void StackTraceNoHeap::ClearAllExtraLogging() {
+  StackTraceLog::s_logData->data.clear();
+}
+
+void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
+                           int debuggerCount) const {
+  assert(fd >= 0);
+
+  printPair(fd, "Host", Process::GetHostName().c_str());
+  printPair(fd, "ProcessID", (int64_t)getpid());
+  printPair(fd, "ThreadID", (int64_t)Process::GetThreadId());
+  printPair(fd, "ThreadPID", Process::GetThreadPid());
+  printPair(fd, "Name", Process::GetAppName().c_str());
+  printPair(fd, "Type", errorType ? errorType : "(unknown error)");
+  printPair(fd, "Runtime", "hhvm");
+  printPair(fd, "Version", buildId);
+  printPair(fd, "DebuggerCount", debuggerCount);
+  write(fd, "\n", 1);
+
+  for (auto const& pair : StackTraceLog::s_logData->data) {
+    printPair(fd, pair.first.c_str(), pair.second.c_str());
+  }
+  write(fd, "\n", 1);
+
+  printStackTrace(fd);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HAVE_LIBBFD
+#if defined USE_FOLLY_SYMBOLIZER
+
+void StackTraceNoHeap::printStackTrace(int fd) const {
+  folly::symbolizer::Symbolizer symbolizer;
+  folly::symbolizer::SymbolizedFrame frames[kMaxFrame];
+  symbolizer.symbolize((uintptr_t*)m_frames, frames, m_frame_count);
+  for (int i = 0, fr = 0; i < m_frame_count; i++) {
+    auto const& frame = frames[i];
+    if (!frame.name ||
+        !frame.name[0] ||
+        isBlacklisted(frame.name)) {
+      continue;
+    }
+    printFrameHdr(fd, fr);
+    demangle(fd, frame.name);
+    if (frame.location.hasFileAndLine) {
+      char fileBuf[PATH_MAX];
+      fileBuf[0] = '\0';
+      frame.location.file.toBuffer(fileBuf, sizeof(fileBuf));
+      printStr(fd, " at ");
+      write_path(fd, fileBuf);
+      printStr(fd, ":");
+      printInt(fd, frame.location.line);
+    }
+    printStr(fd, "\n");
+    fr++;
+  }
+}
+
+std::shared_ptr<StackFrameExtra> StackTrace::Translate(void* frame_addr,
+                                                       PerfMap* pm) {
+  folly::symbolizer::Symbolizer symbolizer;
+  folly::symbolizer::SymbolizedFrame sf;
+  symbolizer.symbolize((uintptr_t*)&frame_addr, &sf, 1);
+
+  auto frame = std::make_shared<StackFrameExtra>(frame_addr);
+  if (!sf.found ||
+      !sf.name ||
+      !sf.name[0]) {
+    // Lookup failed, so this is probably a PHP symbol.  Let's
+    // check the perf map.
+    if (pm != nullptr) {
+      pm->translate(frame.get());
+    } else {
+      translateFromPerfMap(frame.get());
+    }
+    return frame;
+  }
+
+  if (sf.location.hasFileAndLine) {
+    frame->filename = sf.location.file.toString();
+    frame->lineno = sf.location.line;
+  }
+
+  frame->funcname = sf.name ? demangle(sf.name) : "";
+
+  return frame;
+}
+
+#elif defined HAVE_LIBBFD
 
 namespace {
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,10 +511,6 @@ using BfdMap = hphp_hash_map<
  */
 std::mutex s_bfdMutex;
 BfdMap s_bfds;
-
-std::mutex s_perfMapCacheMutex;
-StackTrace::PerfMap s_perfMapCache;
-std::set<void*> s_perfMapNegCache;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -307,81 +708,6 @@ bool translate(StackFrame* frame, Dl_info& dlInfo, Addr2lineData* data,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/* Copied and re-factored from demangle/c++filt. */
-
-#define DMGL_PARAMS   (1 << 0)  /* Include function args */
-#define DMGL_ANSI     (1 << 1)  /* Include const, volatile, etc */
-#define DMGL_VERBOSE  (1 << 3)  /* Include implementation details. */
-
-extern "C" char* cplus_demangle(const char* mangled, int options);
-
-auto constexpr demangle_opt = DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE;
-
-/*
- * Demangle a function name and return it as a string.
- */
-std::string demangle(const char* mangled) {
-  if (mangled == nullptr || mangled[0] == '\0') {
-    return "";
-  }
-
-  size_t skip_first = 0;
-  if (mangled[0] == '.' || mangled[0] == '$') ++skip_first;
-
-  auto result = cplus_demangle(mangled + skip_first, demangle_opt);
-  if (result == nullptr) return mangled;
-  SCOPE_EXIT { free(result); };
-
-  std::string ret;
-  if (mangled[0] == '.') ret += '.';
-  ret += result;
-  return ret;
-}
-
-/*
- * Demangle a function name and write it to a file.
- */
-void demangle(int fd, const char* mangled) {
-  if (mangled == nullptr || mangled[0] == '\0') {
-    dprintf(fd, "??");
-    return;
-  }
-
-  size_t skip_first = 0;
-  if (mangled[0] == '.' || mangled[0] == '$') ++skip_first;
-
-  auto result = cplus_demangle(mangled + skip_first, demangle_opt);
-  SCOPE_EXIT { free(result); };
-
-  if (result == nullptr) {
-    dprintf(fd, "%s", mangled);
-    return;
-  }
-  dprintf(fd, "%s%s", mangled[0] == '.' ? "." : "", result);
-}
-
-/*
- * Writes a file path to a file while folding any consecutive forward slashes.
- */
-void write_path(int fd, folly::StringPiece path) {
-  while (!path.empty()) {
-    auto const pos = path.find('/');
-    if (pos == std::string::npos) {
-      folly::writeNoInt(fd, path.data(), path.size());
-      break;
-    }
-
-    auto const left = path.subpiece(0, pos + 1);
-    folly::writeNoInt(fd, left.data(), left.size());
-
-    auto right = path.subpiece(pos);
-    while (!right.empty() && right[0] == '/') {
-      right = right.subpiece(1);
-    }
-
-    path = right;
-  }
-}
 
 /*
  * Variant of translate() used by StackTraceNoHeap.
@@ -401,18 +727,15 @@ bool translate(int fd, void* frame_addr, int frame_num, NamedBfdRange bfds) {
   if (funcname == nullptr) funcname = "??";
 
   // Ignore some frames that are always present.
-  for (int i = 0; i < StackTraceBase::FunctionBlacklistCount; i++) {
-    auto ignoreFunc = StackTraceBase::FunctionBlacklist[i];
-    if (strncmp(funcname, ignoreFunc, strlen(ignoreFunc)) == 0) {
-      return false;
-    }
-  }
+  if (isBlacklisted(funcname)) return false;
 
-  dprintf(fd, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
+  printFrameHdr(fd, frame_num);
   demangle(fd, funcname);
-  dprintf(fd, " at ");
+  printStr(fd, " at ");
   write_path(fd, filename);
-  dprintf(fd, ":%u\n", frame.lineno);
+  printStr(fd, ":");
+  printInt(fd, frame.lineno);
+  printStr(fd, "\n");
 
   return true;
 }
@@ -420,96 +743,37 @@ bool translate(int fd, void* frame_addr, int frame_num, NamedBfdRange bfds) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-const char* s_defaultBlacklist[] = {"_ZN4HPHP16StackTraceNoHeap"};
+std::shared_ptr<StackFrameExtra> StackTrace::Translate(void* frame_addr,
+                                                       PerfMap* pm) {
+  Dl_info dlInfo;
+  Addr2lineData adata;
 
-bool StackTraceBase::Enabled = true;
-
-const char** StackTraceBase::FunctionBlacklist = s_defaultBlacklist;
-unsigned StackTraceBase::FunctionBlacklistCount = 1;
-
-////////////////////////////////////////////////////////////////////////////////
-
-StackTraceBase::StackTraceBase() {
-  bfd_init();
-}
-
-StackTrace::StackTrace(bool trace) {
-  if (trace && Enabled) {
-    create();
-  }
-}
-
-StackTraceNoHeap::StackTraceNoHeap(bool trace) {
-  if (trace && Enabled) {
-    create();
-  }
-}
-
-void StackTrace::initFromHex(folly::StringPiece hexEncoded) {
-  // Can't split into StringPieces, strtoll() expects a null terminated string.
-  std::vector<std::string> frames;
-  folly::split(':', hexEncoded, frames);
-  for (auto const& frame : frames) {
-    m_frames.push_back((void*)strtoll(frame.c_str(), nullptr, 16));
-  }
-}
-
-StackTrace::StackTrace(folly::StringPiece hexEncoded) {
-  initFromHex(hexEncoded);
-}
-
-void StackTrace::create() {
-  void* frames[kMaxFrame];
-  auto const framecount = backtrace(frames, kMaxFrame);
-  if (framecount <= 0 || framecount > (int)kMaxFrame) {
-    m_frames.clear();
-    return;
-  }
-  m_frames.resize(framecount);
-  for (int i = 0; i < framecount; ++i) {
-    m_frames[i] = frames[i];
-  }
-}
-
-void StackTraceNoHeap::create() {
-  // backtrace() actually does use the heap.  Whoops.
-  auto const framecount = backtrace(m_frames, kMaxFrame);
-  if (framecount <= 0 || framecount > (int)kMaxFrame) {
-    m_frame_count = 0;
-    return;
-  }
-  m_frame_count = framecount;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-const std::string& StackTrace::toString(int skip, int limit) const {
-  if (skip != 0 || limit != -1) {
-    m_trace.clear();
-  }
-
-  if (!m_trace.empty()) return m_trace;
-
-  size_t frame = 0;
-  for (auto const frame_ptr : m_frames) {
-    auto const framename = Translate(frame_ptr)->toString();
-    // Ignore frames in the StackTrace class.
-    if (framename.find("StackTrace::") != std::string::npos) {
-      continue;
+  auto frame = std::make_shared<StackFrameExtra>(frame_addr);
+  if (!translate(frame.get(), dlInfo, &adata)) {
+    // Lookup using dladdr() failed, so this is probably a PHP symbol.  Let's
+    // check the perf map.
+    if (pm != nullptr) {
+      pm->translate(frame.get());
+    } else {
+      translateFromPerfMap(frame.get());
     }
-    if (skip-- > 0) continue;
-    m_trace += "# ";
-    m_trace += folly::to<std::string>(frame);
-    if (frame < 10) m_trace += " ";
-
-    m_trace += " ";
-    m_trace += framename;
-    m_trace += "\n";
-    ++frame;
-    if ((int)frame == limit) break;
+    return frame;
   }
 
-  return m_trace;
+  if (adata.filename) {
+    frame->filename = adata.filename;
+  }
+  if (adata.functionname) {
+    frame->funcname = demangle(adata.functionname);
+  }
+  if (frame->filename.empty() && dlInfo.dli_fname) {
+    frame->filename = dlInfo.dli_fname;
+  }
+  if (frame->funcname.empty() && dlInfo.dli_sname) {
+    frame->funcname = demangle(dlInfo.dli_sname);
+  }
+
+  return frame;
 }
 
 void StackTraceNoHeap::printStackTrace(int fd) const {
@@ -533,217 +797,42 @@ void StackTraceNoHeap::printStackTrace(int fd) const {
   // ~bfds[i].bc here (unlike the heap case).
 }
 
-void StackTrace::get(std::vector<void*>& frames) const {
-  frames = m_frames;
-}
-
-void StackTrace::get(
-  std::vector<std::shared_ptr<StackFrameExtra>>& frames
-) const {
-  frames.clear();
-  for (auto const frame_ptr : m_frames) {
-    frames.push_back(Translate(frame_ptr));
-  }
-}
-
-std::string StackTrace::hexEncode(int minLevel /* = 0 */,
-                                  int maxLevel /* = 999 */) const {
-  std::string bts;
-  for (int i = minLevel; i < (int)m_frames.size() && i < maxLevel; i++) {
-    if (i > minLevel) bts += ':';
-    char buf[20];
-    snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)m_frames[i]);
-    bts.append(buf);
-  }
-  return bts;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
-struct StackTraceLog {
-  hphp_string_map<std::string> data;
+#else // No libbfd or folly::Symbolizer
 
-  static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
-};
-IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
+namespace {
 
-void StackTraceNoHeap::AddExtraLogging(const char* name,
-                                       const std::string& value) {
-  assertx(name != nullptr && name[0] != '\0');
-  StackTraceLog::s_logData->data[name] = value;
+void printHex(int fd, uint64_t val) {
+  char buf[16];
+  auto ptr = buf + sizeof buf;
+
+  while (ptr > buf) {
+    auto ch = val & 0xf;
+    *--ptr = ch + (ch >= 10 ? 'a' - 10 : '0');
+    val >>= 4;
+  }
+
+  printStr(fd, folly::StringPiece(buf, sizeof buf));
 }
 
-void StackTraceNoHeap::ClearAllExtraLogging() {
-  StackTraceLog::s_logData->data.clear();
 }
-
-void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
-                           int debuggerCount) const {
-  assert(fd >= 0);
-
-  dprintf(fd, "Host: %s\n",Process::GetHostName().c_str());
-  dprintf(fd, "ProcessID: %" PRId64 "\n", (int64_t)getpid());
-  dprintf(fd, "ThreadID: %" PRIx64"\n", (int64_t)Process::GetThreadId());
-  dprintf(fd, "ThreadPID: %u\n", Process::GetThreadPid());
-  dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
-  dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");
-  dprintf(fd, "Runtime: hhvm\n");
-  dprintf(fd, "Version: %s\n", buildId);
-  dprintf(fd, "DebuggerCount: %d\n", debuggerCount);
-  dprintf(fd, "\n");
-
-  for (auto const& pair : StackTraceLog::s_logData->data) {
-    dprintf(fd, "%s: %s\n", pair.first.c_str(), pair.second.c_str());
-  }
-  dprintf(fd, "\n");
-
-  printStackTrace(fd);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void StackTrace::PerfMap::rebuild() {
-  m_map.clear();
-
-  char perfMapName[64];
-  snprintf(perfMapName, sizeof(perfMapName), "/tmp/perf-%d.map", getpid());
-  auto perfMap = fopen(perfMapName, "r");
-  if (!perfMap) {
-    return;
-  }
-  SCOPE_EXIT { fclose(perfMap); };
-  uintptr_t addr;
-  uint32_t size;
-  char name[1024];
-  while (fscanf(perfMap, "%lx %x %1023s", &addr, &size, name) == 3) {
-    uintptr_t past = addr + size;
-    PerfMap::Range range = {addr, past};
-    m_map[range] = name;
-  }
-  m_built = true;
-}
-
-bool StackTrace::PerfMap::translate(StackFrameExtra* frame) const {
-  if (!m_built) {
-    const_cast<StackTrace::PerfMap*>(this)->rebuild();
-  }
-
-  // Use a key with non-zero span, because otherwise a key right at the base of
-  // a range will be treated as before the range (bad) rather than within it
-  // (good).
-  PerfMap::Range key{uintptr_t(frame->addr), uintptr_t(frame->addr)+1};
-  auto const& it = m_map.find(key);
-  if (it == m_map.end()) {
-    // Not found.
-    frame->filename = "?";
-    frame->funcname = "TC?"; // Note HHProf::HandlePProfSymbol() dependency.
-    return true;
-  }
-  // Found.
-  auto const& filefunc = it->second;
-  auto endPhp = filefunc.find("::");
-  if (endPhp == std::string::npos) {
-    frame->funcname = filefunc;
-    return false;
-  }
-  // Skip the ::
-  endPhp += 2;
-  auto const endFile = filefunc.find("::", endPhp);
-  frame->filename = std::string(filefunc, endPhp, endFile - endPhp);
-  frame->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
-  return false;
-}
-
-std::shared_ptr<StackFrameExtra> StackTrace::Translate(void* frame_addr,
-                                                       PerfMap* pm) {
-  Dl_info dlInfo;
-  Addr2lineData adata;
-
-  auto frame = std::make_shared<StackFrameExtra>(frame_addr);
-  if (!translate(frame.get(), dlInfo, &adata)) {
-    // Lookup using dladdr() failed, so this is probably a PHP symbol.  Let's
-    // check the perf map.
-    if (pm != nullptr) {
-      pm->translate(frame.get());
-    } else {
-      TranslateFromPerfMap(frame.get());
-    }
-    return frame;
-  }
-
-  if (adata.filename) {
-    frame->filename = adata.filename;
-  }
-  if (adata.functionname) {
-    frame->funcname = demangle(adata.functionname);
-  }
-  if (frame->filename.empty() && dlInfo.dli_fname) {
-    frame->filename = dlInfo.dli_fname;
-  }
-  if (frame->funcname.empty() && dlInfo.dli_sname) {
-    frame->funcname = demangle(dlInfo.dli_sname);
-  }
-
-  return frame;
-}
-
-void StackTrace::TranslateFromPerfMap(StackFrameExtra* frame) {
-  std::lock_guard<std::mutex> lock(s_perfMapCacheMutex);
-
-  if (s_perfMapCache.translate(frame)) {
-    if (s_perfMapNegCache.find(frame->addr) != s_perfMapNegCache.end()) {
-      // A prior failed lookup of frame already triggered a rebuild.
-      return;
-    }
-    // Rebuild the cache, then search again.
-    s_perfMapCache.rebuild();
-    if (s_perfMapCache.translate(frame)) {
-      s_perfMapNegCache.insert(frame->addr);
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-#else // HAVE_LIBBFD
-
-/* Basically everything in here requires libbfd.  So, stub city it is. */
-
-bool StackTraceBase::Enabled = false;
-const char** StackTraceBase::FunctionBlacklist = {};
-unsigned StackTraceBase::FunctionBlacklistCount = 0;
-
-StackTraceBase::StackTraceBase() {}
-
-StackTrace::StackTrace(bool) {}
 
 std::shared_ptr<StackFrameExtra> StackTrace::Translate(void* bt, PerfMap* pm) {
   return std::make_shared<StackFrameExtra>(bt);
 }
 
-void StackTrace::TranslateFromPerfMap(StackFrameExtra*) {}
-
-StackTrace::StackTrace(folly::StringPiece) {}
-
-const std::string& StackTrace::toString(int, int) const {
-  return m_trace;
+void StackTraceNoHeap::printStackTrace(int fd) const {
+  for (int i = 0; i < m_frame_count; i++) {
+    printStr(fd, "# ");
+    printInt(fd, i);
+    printStr(fd, (i < 10 ? "  " : " "));
+    printHex(fd, (uintptr_t)m_frames[i]);
+    printStr(fd, "\n");
+  }
 }
 
-void StackTrace::get(std::vector<std::shared_ptr<StackFrameExtra>>&) const {}
-
-std::string StackTrace::hexEncode(int, int) const {
-  return "";
-}
-
-StackTraceNoHeap::StackTraceNoHeap(bool) {}
-
-void StackTraceNoHeap::log(const char*, int, const char*, int) const {}
-
-void StackTraceNoHeap::AddExtraLogging(const char*, const std::string&) {}
-
-void StackTraceNoHeap::ClearAllExtraLogging() {}
-
-#endif // HAVE_LIBBFD
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 }

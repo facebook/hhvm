@@ -67,7 +67,7 @@ struct StackTraceBase {
   static constexpr unsigned kMaxFrame = 175;
 
   static bool Enabled;
-  static const char** FunctionBlacklist;
+  static const char* const* FunctionBlacklist;
   static unsigned FunctionBlacklistCount;
 
  protected:
@@ -105,29 +105,28 @@ struct StackTrace : StackTraceBase {
                                                     PerfMap* pm = nullptr);
 
   /*
-   * Translate the frame pointer of a PHP function using the perf map.
-   */
-  static void TranslateFromPerfMap(StackFrameExtra*);
-
-  /*
    * Constructing from hexEncode() results.
    */
   explicit StackTrace(folly::StringPiece);
 
   /*
-   * Generate an output of the written stack trace.
+   * Encode the stacktrace addresses in a string.
+   * Skip minLevel frames, and end after the maxLevel'th at the most.
+   */
+  std::string hexEncode(int minLevel = 0, int maxLevel = 999) const;
+
+  /*
+   * Generate a string representation of the stack trace.
    */
   const std::string& toString(int skip = 0, int limit = -1) const;
 
   /*
-   * Get frames in raw pointers or translated frames.
+   * Get translated frames.
    */
-  void get(std::vector<void*>&) const;
   void get(std::vector<std::shared_ptr<StackFrameExtra>>&) const;
 
-  std::string hexEncode(int minLevel = 0, int maxLevel = 999) const;
-
 private:
+
   /* Record frame pointers. */
   void create();
 
@@ -138,6 +137,7 @@ private:
 
   /* Cached backtrace string. */
   mutable std::string m_trace;
+  mutable bool m_trace_usable{false};
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -18,12 +18,12 @@
 
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Array;
+struct StackTrace;
 
 struct ExtendedLogger : Logger {
   static bool EnabledByDefault;

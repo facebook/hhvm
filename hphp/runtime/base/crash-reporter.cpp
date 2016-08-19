@@ -41,6 +41,13 @@ namespace HPHP {
 
 bool IsCrashing = false;
 
+static const char* s_newBlacklist[] = {
+  "_ZN4HPHP16StackTraceNoHeap",
+  "_ZN5folly10symbolizer17getStackTraceSafe",
+  "_ZN4HPHPL10bt_handlerEi",
+  "killpg"
+};
+
 static void bt_handler(int sig) {
   if (IsCrashing) {
     // If we re-enter bt_handler while already crashing, just abort. This
@@ -94,8 +101,6 @@ static void bt_handler(int sig) {
 
   // Turn on stack traces for coredumps
   StackTrace::Enabled = true;
-  static const char* s_newBlacklist[] =
-    {"_ZN4HPHP16StackTraceNoHeap", "_ZN4HPHPL10bt_handlerEi", "killpg"};
   StackTrace::FunctionBlacklist = s_newBlacklist;
   StackTrace::FunctionBlacklistCount = 3;
   StackTraceNoHeap st;

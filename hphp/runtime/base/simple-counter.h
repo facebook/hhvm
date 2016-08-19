@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/util/stack-trace.h"
 
 // #define ENABLE_SIMPLE_COUNTER 1
 

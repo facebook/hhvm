@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/conv-10.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

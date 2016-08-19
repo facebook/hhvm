@@ -344,7 +344,7 @@ let print_hash_stats () =
 
   let {SharedMem.used_slots; slots; nonempty_slots} = SharedMem.hash_stats () in
   let load_factor = float_of_int used_slots /. float_of_int slots in
-  Hh_logger.log "Hashtable load factor: %d / %d (%.02f) with %d nonempty sluts"
+  Hh_logger.log "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"
     used_slots slots load_factor nonempty_slots;
   ()
 

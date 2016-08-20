@@ -27,17 +27,6 @@ TRACE_SET_MOD(vasm);
 namespace HPHP { namespace jit {
 
 namespace {
-struct DefVisitor {
-  Vreg flags;
-  template<class T> void imm(T&) {}
-  template<class T> void use(T&) {}
-  template<class T> void across(T&) {}
-  template<class T, class H> void useHint(T&, H&) {}
-  template<class T> void def(T&) {}
-  template<class T, class H> void defHint(T&, H&) {}
-  template<class H> void defHint(VregSF f, H&) { flags = f; }
-  void def(VregSF f) { flags = f; }
-};
 
 // if inst is testb{r,r,d}, return true,d
 bool match_testb(Vinstr& inst, Vreg r) {
@@ -51,7 +40,7 @@ bool match_jcc(Vinstr& inst, Vreg flags) {
          (inst.jcc_.cc == CC_E || inst.jcc_.cc == CC_NE);
 }
 
-bool sets_flags(Vinstr& inst) {
+bool sets_flags(const Vunit& unit, const Vinstr& inst) {
   // Some special cases that also clobber flags:
   switch (inst.op) {
   case Vinstr::vcall:
@@ -70,9 +59,11 @@ bool sets_flags(Vinstr& inst) {
     break;
   }
 
-  DefVisitor dv;
-  visitOperands(inst, dv);
-  return dv.flags.isValid();
+  Vreg flags;
+  visitDefs(unit, inst, [&] (Vreg r, Width w) {
+    if (w == Width::Flags) flags = r;
+  });
+  return flags.isValid();
 }
 }
 
@@ -107,9 +98,7 @@ void fuseBranches(Vunit& unit) {
   jit::vector<unsigned> uses(unit.next_vr);
   for (auto b : blocks) {
     for (auto& inst : unit.blocks[b].code) {
-      visitUses(unit, inst, [&](Vreg r) {
-        uses[r]++;
-      });
+      visitUses(unit, inst, [&] (Vreg r) { uses[r]++; });
     }
   }
   bool should_print = false;
@@ -140,7 +129,7 @@ void fuseBranches(Vunit& unit) {
         should_print = true;
         continue;
       }
-      if (setcc_flags.isValid() && sets_flags(code[i])) {
+      if (setcc_flags.isValid() && sets_flags(unit, code[i])) {
         setcc_flags = testb_flags = Vreg{};
       }
     }

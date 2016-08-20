@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/arena.h"
+#include "hphp/util/type-traits.h"
 
 #include <type_traits>
 
@@ -856,18 +857,15 @@ public:
  * perform the requested visitation independent of modifications to
  * the VM stack or frame pointer.
  */
-template<class MaybeConstTVPtr, class ARFun, class TVFun>
-typename std::enable_if<
-  std::is_same<MaybeConstTVPtr,const TypedValue*>::value ||
-  std::is_same<MaybeConstTVPtr,      TypedValue*>::value
->::type
+template<class TV, class ARFun, class TVFun>
+typename maybe_const<TV, TypedValue>::type
 visitStackElems(const ActRec* const fp,
-                MaybeConstTVPtr const stackTop,
+                TV* const stackTop,
                 Offset const bcOffset,
                 ARFun arFun,
                 TVFun tvFun) {
   const TypedValue* const base = Stack::anyFrameStackBase(fp);
-  MaybeConstTVPtr cursor = stackTop;
+  auto cursor = stackTop;
   assert(cursor <= base);
 
   if (auto fe = fp->m_func->findFPI(bcOffset)) {

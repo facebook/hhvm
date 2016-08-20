@@ -622,7 +622,7 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
     auto& code = unit.blocks[b].code;
 
     bool front_uses{false};
-    visitUses(unit, code.front(), [&](Vreg r) {
+    visitUses(unit, code.front(), [&] (Vreg r) {
       front_uses = true;
     });
     if (front_uses) {
@@ -661,7 +661,9 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp) {
       return 0;
     }
     default:
-      if (debug) visitDefs(unit, inst, [&](Vreg r) { assertx(r != sp); });
+      if (debug) {
+        visitDefs(unit, inst, [&] (Vreg r) { assertx(r != sp); });
+      }
       return 0;
   }
 }
@@ -694,64 +696,6 @@ jit::vector<int> analyzeSP(const Vunit& unit,
   }
   return spill_offsets;
 }
-
-/*
- * Visitor for Defs and Uses used to compute liveness information.
- */
-struct LiveDefVisitor {
-  LiveDefVisitor(const Vunit& unit, LiveSet& live)
-    : m_tuples(unit.tuples)
-    , m_live(live)
-  {}
-  template<class F>          void imm(const F&) {}
-  template<class R>          void across(R) {}
-  template<class R>          void use(R) {}
-  template<class S, class H> void useHint(S, H) {}
-
-  void def(Vreg r)      { m_live.reset(r); }
-  void def(RegSet rs)   { rs.forEach([&](Vreg r) { def(r); }); }
-  void def(Vtuple defs) { for (auto r : m_tuples[defs]) def(r); }
-  void def(VregSF r) {
-    r = RegSF{0}; // eagerly rename all SFs
-    m_live.reset(r);
-  }
-  template<class D, class H> void defHint(D dst, H hint) { def(dst); }
-
- private:
-  const jit::vector<VregList>& m_tuples;
-  LiveSet& m_live;
-};
-
-struct LiveUseVisitor {
-  LiveUseVisitor(const Vunit& unit, LiveSet& live)
-    : m_tuples(unit.tuples)
-    , m_live(live)
-  {}
-  template<class F>          void imm(const F&) {}
-  template<class R>          void def(R) {}
-  template<class D, class H> void defHint(D, H) {}
-
-  template<class R>          void across(R r) { use(r); }
-  void across(VregSF) = delete;
-
-  void use(Vreg r)         { m_live.set(r); }
-  void use(Vtuple uses)    { for (auto r : m_tuples[uses]) use(r); }
-  void use(VcallArgsId id) { always_assert(0 && "vcall unsupported in vxls"); }
-  void use(RegSet regs)    { regs.forEach([&](Vreg r) { use(r); }); }
-  void use(Vptr m) {
-    if (m.base.isValid()) use(m.base);
-    if (m.index.isValid()) use(m.index);
-  }
-  void use(VregSF r) {
-    r = RegSF{0}; // eagerly rename all SFs
-    m_live.set(r);
-  }
-  template<class S, class H> void useHint(S src, H hint) { use(src); }
-
- private:
-  const jit::vector<VregList>& m_tuples;
-  LiveSet& m_live;
-};
 
 /*
  * Compute livein set for each block.
@@ -799,20 +743,24 @@ jit::vector<LiveSet> computeLiveness(const Vunit& unit,
     }
 
     // and now go through the instructions in the block in reverse order
-    for (auto i = block.code.end(); i != block.code.begin();) {
-      auto& inst = *--i;
-
+    for (auto const& inst : boost::adaptors::reverse(block.code)) {
       RegSet implicit_uses, implicit_across, implicit_defs;
       getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
 
-      LiveDefVisitor dv(unit, live);
-      visitOperands(inst, dv);
-      dv.def(implicit_defs);
+      auto const vsf = Vreg{RegSF{0}};
 
-      LiveUseVisitor uv(unit, live);
-      visitOperands(inst, uv);
-      uv.use(implicit_uses);
-      uv.across(implicit_across);
+      auto const dvisit = [&] (Vreg r, Width w) {
+        live.reset(w == Width::Flags ? vsf : r);
+      };
+      auto const uvisit = [&] (Vreg r, Width w) {
+        live.set(w == Width::Flags ? vsf : r);
+      };
+
+      visitDefs(unit, inst, dvisit);
+      visit(unit, implicit_defs, dvisit);
+
+      visitUses(unit, inst, uvisit);
+      visit(unit, implicit_uses, uvisit);
     }
 
     if (live != livein[b]) {
@@ -2755,10 +2703,10 @@ bool instrNeedsSpill(const Vunit& unit, const Vinstr& inst, PhysReg sp) {
   if (inst.op == Vinstr::push || inst.op == Vinstr::pop) return true;
 
   auto foundSp = false;
-  visitDefs(unit, inst, [&](Vreg r) { if (r == sp) foundSp = true; });
+  visitDefs(unit, inst, [&] (Vreg r) { if (r == sp) foundSp = true; });
   if (foundSp) return true;
 
-  visitUses(unit, inst, [&](Vreg r) { if (r == sp) foundSp = true; });
+  visitUses(unit, inst, [&] (Vreg r) { if (r == sp) foundSp = true; });
   return foundSp;
 }
 

@@ -24,40 +24,67 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
+#include "hphp/util/type-traits.h"
+
 #include <boost/dynamic_bitset.hpp>
 
-#include <type_traits>
+#include <utility>
 
 namespace HPHP { namespace jit {
+
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class F>
-void visit(const Vunit&, Vreg v, F f) {
-  f(v);
+namespace detail {
+
+template<class F, class A1, class A2>
+auto invoke(F&& f, A1&& a1, A2&& a2)
+  -> decltype(std::forward<F>(f)(std::forward<A1>(a1))) {
+  return std::forward<F>(f)(std::forward<A1>(a1));
+}
+
+template<class F, class A1, class A2>
+auto invoke(F&& f, A1&& a1, A2&& a2)
+  -> decltype(std::forward<F>(f)(std::forward<A1>(a1), std::forward<A2>(a2))) {
+  return std::forward<F>(f)(std::forward<A1>(a1), std::forward<A2>(a2));
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<class R, class F>
+typename std::enable_if<
+  is_any<
+    R,
+    Vreg, VregSF, Vreg8, Vreg16, Vreg32, Vreg64, Vreg128, VregDbl, PhysReg
+  >::value
+>::type
+visit(const Vunit&, R v, F f) {
+  detail::invoke(f, v, width(v));
 }
 
 template<class F>
 void visit(const Vunit&, Vptr p, F f) {
-  if (p.base.isValid()) f(p.base);
-  if (p.index.isValid()) f(p.index);
+  if (p.base.isValid()) detail::invoke(f, p.base, width(p.base));
+  if (p.index.isValid()) detail::invoke(f, p.index, width(p.index));
 }
 
 template<class F>
 void visit(const Vunit& unit, Vtuple t, F f) {
-  for (auto r : unit.tuples[t]) f(r);
+  for (auto r : unit.tuples[t]) detail::invoke(f, r, width(r));
 }
 
 template<class F>
 void visit(const Vunit& unit, VcallArgsId a, F f) {
   auto& args = unit.vcallArgs[a];
-  for (auto r : args.args) f(r);
-  for (auto r : args.simdArgs) f(r);
-  for (auto r : args.stkArgs) f(r);
+  for (auto r : args.args) detail::invoke(f, r, width(r));
+  for (auto r : args.simdArgs) detail::invoke(f, r, width(r));
+  for (auto r : args.stkArgs) detail::invoke(f, r, width(r));
 }
 
 template<class F>
 void visit(const Vunit& unit, RegSet regs, F f) {
-  regs.forEach([&](Vreg r) { f(r); });
+  regs.forEach([&](Vreg r) { detail::invoke(f, r, width(r)); });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,12 +140,9 @@ void visitDefs(const Vunit& unit, const Vinstr& inst, Def def) {
  * Vinstr& as well as callers with a Vinstr& that wish to mutate the
  * instruction in the visitor.
  */
-template<class MaybeConstVinstr, class Visitor>
-typename std::enable_if<
-  std::is_same<MaybeConstVinstr, Vinstr>::value ||
-  std::is_same<MaybeConstVinstr, const Vinstr>::value
->::type
-visitOperands(MaybeConstVinstr& inst, Visitor& visitor) {
+template<class Tinstr, class Visitor>
+typename maybe_const<Tinstr, Vinstr>::type
+visitOperands(Tinstr& inst, Visitor& visitor) {
   switch (inst.op) {
 #define O(name, imms, uses, defs) \
     case Vinstr::name: { \
@@ -206,6 +230,7 @@ using PredVector = jit::vector<jit::vector<Vlabel>>;
 PredVector computePreds(const Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

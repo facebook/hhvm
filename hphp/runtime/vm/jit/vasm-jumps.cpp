@@ -42,34 +42,6 @@ struct WidthAnalysis {
     return m_def_widths[r] & m_use_widths[r];
   }
 
-  template<class T> void imm(const T&) {}
-  template<class T> void across(T r) { use(r); }
-  template<class T, class H> void defHint(T r, H) { def(r); }
-  template<class T, class H> void useHint(T r, H) { use(r); }
-
-  template<class T> void def(T r) { m_def_widths[r] &= width(r); }
-
-  void def(Vptr) = delete;
-  void def(VcallArgsId) = delete;
-
-  void def(const RegSet& s) { s.forEach([this](Vreg r){ def(r); }); }
-  void def(Vtuple t) { for (auto r : m_unit.tuples[t]) def(r); }
-
-  template<class T> void use(T r) { m_use_widths[r] &= width(r); }
-
-  void use(Vptr m) {
-    if (m.base.isValid())  use(m.base);
-    if (m.index.isValid()) use(m.index);
-  }
-  void use(const RegSet& s) { s.forEach([this](Vreg r){ use(r); }); }
-  void use(Vtuple t) { for (auto r : m_unit.tuples[t]) use(r); }
-  void use(VcallArgsId a) {
-    const auto& args = m_unit.vcallArgs[a];
-    for (auto r : args.args) use(r);
-    for (auto r : args.simdArgs) use(r);
-    for (auto r : args.stkArgs) use(r);
-  }
-
 private:
   Vunit& m_unit;
   jit::vector<Width> m_def_widths;
@@ -141,7 +113,12 @@ WidthAnalysis::WidthAnalysis(Vunit& unit)
           copies.emplace_back(copy{uses[i], defs[i]});
         }
       } else {
-        visitOperands(inst, *this);
+        visitUses(m_unit, inst, [&] (Vreg r, Width w) {
+          m_use_widths[r] &= w;
+        });
+        visitDefs(m_unit, inst, [&] (Vreg r, Width w) {
+          m_def_widths[r] &= w;
+        });
       }
     }
   }

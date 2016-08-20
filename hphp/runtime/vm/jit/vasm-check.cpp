@@ -260,61 +260,9 @@ DEBUG_ONLY bool compatible(Width w1, Width w2) {
   return (w1 & w2) != Width::None;
 }
 
-struct WidthChecker {
-  explicit WidthChecker(const Vunit& unit,
-                        jit::vector<Width>& widths)
-    : m_unit(unit)
-    , m_widths(widths)
-  {}
-
-  template<class T> void imm(const T&) {}
-  template<class T> void across(T r) { use(r); }
-  template<class T, class H> void defHint(T r, H) { def(r); }
-  template<class T, class H> void useHint(T r, H) { use(r); }
-
-  template<class T> void def(T r) {
-    if (r.isPhys()) return;
-    m_widths[r] = width(r);
-  }
-
-  void def(Vptr) = delete;
-  void def(VcallArgsId) = delete;
-  void def(const RegSet& s) { s.forEach([this](Vreg r){ def(r); }); }
-  void def(Vtuple t) { for (auto r : m_unit.tuples[t]) def(r); }
-
-  template<class T> void use(T r) {
-    if (r.isPhys()) return;
-
-    DEBUG_ONLY auto const dw = m_widths[r];
-    DEBUG_ONLY auto const uw = width(r);
-
-    assert_flog(compatible(dw, uw),
-                "width mismatch for %{}: def {}, use {}\n{}",
-                size_t(r), show(dw), show(uw), show(m_unit));
-  }
-
-  void use(Vptr m) {
-    if (m.base.isValid())  use(m.base);
-    if (m.index.isValid()) use(m.index);
-  }
-  void use(const RegSet& s) { s.forEach([this](Vreg r){ use(r); }); }
-  void use(Vtuple t) { for (auto r : m_unit.tuples[t]) use(r); }
-  void use(VcallArgsId a) {
-    const auto& args = m_unit.vcallArgs[a];
-    for (auto r : args.args) use(r);
-    for (auto r : args.simdArgs) use(r);
-    for (auto r : args.stkArgs) use(r);
-  }
-
-private:
-  DEBUG_ONLY const Vunit& m_unit;
-  jit::vector<Width>& m_widths;
-};
-
 DEBUG_ONLY bool
 checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
   auto widths = jit::vector<Width>(unit.next_vr, Width::Any);
-  WidthChecker wc(unit, widths);
 
   for (auto const& pair : unit.constToReg) {
     auto const& cns = pair.first;
@@ -361,7 +309,18 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
           }
         }
       } else {
-        visitOperands(inst, wc);
+        visitDefs(unit, inst, [&] (Vreg r, Width w) {
+          if (r.isPhys()) return;
+          widths[r] = w;
+        });
+        visitUses(unit, inst, [&] (Vreg r, Width uw) {
+          if (r.isPhys()) return;
+
+          DEBUG_ONLY auto const dw = widths[r];
+          assert_flog(compatible(dw, uw),
+                      "width mismatch for %{}: def {}, use {}\n{}",
+                      size_t(r), show(dw), show(uw), show(unit));
+        });
       }
     }
   }

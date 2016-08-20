@@ -247,6 +247,7 @@ bool canDCE(IRInstruction* inst) {
   case LdUnwinderValue:
   case LdColArray:
   case OrdStr:
+  case ChrInt:
   case CheckRange:
   case LdARInvName:
   case PackMagicArgs:

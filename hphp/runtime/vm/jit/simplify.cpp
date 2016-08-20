@@ -2901,6 +2901,15 @@ SSATmp* simplifyHasToString(State& env, const IRInstruction* inst) {
     });
 }
 
+SSATmp* simplifyChrInt(State& env, const IRInstruction* inst) {
+  const auto src = inst->src(0);
+  if (src->hasConstVal(TInt)) {
+    auto str = makeStaticString(char(src->intVal() & 255));
+    return cns(env, str);
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyOrdStr(State& env, const IRInstruction* inst) {
   const auto src = inst->src(0);
   if (!mightRelax(env, src) &&
@@ -2908,6 +2917,9 @@ SSATmp* simplifyOrdStr(State& env, const IRInstruction* inst) {
     // a static string is passed in, resolve with a constant.
     unsigned char first = src->strVal()->data()[0];
     return cns(env, int64_t{first});
+  }
+  if (src->inst()->is(ChrInt)) {
+    return gen(env, AndInt, src->inst()->src(0), cns(env, 255));
   }
   return nullptr;
 }
@@ -3172,6 +3184,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(KeysetIdx)
   X(AKExistsKeyset)
   X(OrdStr)
+  X(ChrInt)
   X(JmpSwitchDest)
   X(CheckRange)
   X(SpillFrame)

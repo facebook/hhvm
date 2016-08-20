@@ -145,8 +145,6 @@ StringData** precompute_chars() {
   return raw;
 }
 
-StringData** precomputed_chars = precompute_chars();
-
 StringData* insertStaticString(StringData* sd) {
   assert(sd->isStatic());
   auto pair = s_stringDataMap->insert(
@@ -187,6 +185,8 @@ void create_string_data_map() {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+StringData** precomputed_chars = precompute_chars();
 
 size_t makeStaticStringCount() {
   if (!s_stringDataMap) return 0;

@@ -354,6 +354,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdPackedArrayElemAddr:
   case LdVecElemAddr:
   case OrdStr:
+  case ChrInt:
   case CheckRange:
   case CountArrayFast:
   case CountVec:

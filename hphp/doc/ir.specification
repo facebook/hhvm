@@ -554,6 +554,11 @@ To string conversions:
   integer.  Raises a notice if the position is out of bounds.
   Intended as an optimization for ord($str[$idx]).
 
+| ChrInt,                      D(StaticStr), S(Int),                      NF
+
+  Convert the integer S0 to a the one character string with ascii code
+  S0 & 255.
+
 4. Boolean predicates
 
 | GtInt,                       D(Bool), S(Int) S(Int),                    NF

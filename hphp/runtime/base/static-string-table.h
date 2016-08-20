@@ -55,6 +55,8 @@ struct String;
 
 //////////////////////////////////////////////////////////////////////
 
+extern StringData** precomputed_chars;
+
 /*
  * Attempt to lookup a string (specified in various ways) in the
  * static string table.  If it's not there, create a new static string

@@ -1339,6 +1339,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvStrToInt:
   case ConvResToInt:
   case OrdStr:
+  case ChrInt:
   case CreateSSWH:
   case NewLikeArray:
   case CheckRefs:

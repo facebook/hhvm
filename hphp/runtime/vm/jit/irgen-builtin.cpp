@@ -60,6 +60,7 @@ const StaticString
   s_floor("floor"),
   s_abs("abs"),
   s_ord("ord"),
+  s_chr("chr"),
   s_func_num_args("__SystemLib\\func_num_arg_"),
   s_one("1"),
   s_empty("");
@@ -187,6 +188,18 @@ SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
   if (arg->hasConstVal(TDbl)) {
     const auto conv = folly::to<std::string>(arg_type.dblVal());
     return cns(env, int64_t{conv[0]});
+  }
+
+  return nullptr;
+}
+
+SSATmp* opt_chr(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 1) return nullptr;
+
+  auto const arg = topC(env, BCSPRelOffset{0});
+  auto const arg_type = arg->type();
+  if (arg_type <= TInt) {
+    return gen(env, ChrInt, arg);
   }
 
   return nullptr;
@@ -502,6 +515,7 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(floor)
     X(abs)
     X(ord)
+    X(chr)
     X(func_num_args)
     X(max2)
     X(min2)

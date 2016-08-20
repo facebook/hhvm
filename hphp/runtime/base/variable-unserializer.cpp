@@ -1000,7 +1000,7 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
         uns->addSleepingObject(obj);
       }
 
-      check_request_surprise_unlikely();
+      check_non_safepoint_surprise();
     }
     return; // object has '}' terminating
   case 'C':
@@ -1060,7 +1060,7 @@ Array unserializeArray(VariableUnserializer* uns) {
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
 
   // Pre-allocate an ArrayData of the given size, to avoid escalation in the
@@ -1091,7 +1091,7 @@ Array unserializeArray(VariableUnserializer* uns) {
     }
   }
 
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
   uns->expectChar('}');
   return arr;
 }
@@ -1112,7 +1112,7 @@ Array unserializeDict(VariableUnserializer* uns) {
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
 
   Array arr = DictInit(size).toArray();
@@ -1148,7 +1148,7 @@ Array unserializeDict(VariableUnserializer* uns) {
     }
   }
 
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
   uns->expectChar('}');
   return arr;
 }
@@ -1169,7 +1169,7 @@ Array unserializeVec(VariableUnserializer* uns) {
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
 
   Array arr = VecArrayInit(size).toArray();
@@ -1187,7 +1187,7 @@ Array unserializeVec(VariableUnserializer* uns) {
       }
     }
   }
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
   uns->expectChar('}');
   return arr;
 }
@@ -1208,7 +1208,7 @@ Array unserializeKeyset(VariableUnserializer* uns) {
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
 
   KeysetInit init(size);
@@ -1232,7 +1232,7 @@ Array unserializeKeyset(VariableUnserializer* uns) {
       }
     }
   }
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
   uns->expectChar('}');
   return init.toArray();
 }

@@ -24,6 +24,13 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Mask of the bits in stackLimitAndSurprise that actually store surprise
+ * flags, and the bits that store the stack base pointer.
+ */
+auto constexpr kSurpriseFlagMask      = 0xffff000000000000ull;
+auto constexpr kSurpriseFlagStackMask = 0x0000ffffffffffffull;
+
+/*
  * Surprise flags are stored in the upper 16-bits of the stackLimitAndSurprise
  * in the rds header, so they must be above 2^48.
  */
@@ -72,14 +79,15 @@ enum SurpriseFlag : size_t {
     IntervalTimerFlag |
     MemThresholdFlag |
     ResourceFlags,
-};
 
-/*
- * Mask of the bits in stackLimitAndSurprise that actually store surprise
- * flags, and the bits that store the stack base pointer.
- */
-auto constexpr kSurpriseFlagMask      = 0xffff000000000000ull;
-auto constexpr kSurpriseFlagStackMask = 0x0000ffffffffffffull;
+  /*
+   * Flags that should only be checked at MemoryManager safe points.
+   */
+  SafepointFlags =
+    PendingGCFlag,
+
+  NonSafepointFlags = ~SafepointFlags & kSurpriseFlagMask,
+};
 
 //////////////////////////////////////////////////////////////////////
 

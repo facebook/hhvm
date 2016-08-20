@@ -39,15 +39,15 @@ ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
 {
   if (n > std::numeric_limits<int>::max()) {
     MM().forceOOM();
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   m_data = MixedArray::MakeReserveMixed(n);
   assert(m_data->hasExactlyOneRef());
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
 }
 
 DictInit::DictInit(size_t n)
@@ -68,15 +68,15 @@ DictInit::DictInit(size_t n, CheckAllocation)
 {
   if (n > std::numeric_limits<int>::max()) {
     MM().forceOOM();
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   m_data = MixedArray::MakeReserveDict(n);
   assert(m_data->hasExactlyOneRef());
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
 }
 
 KeysetInit::KeysetInit(size_t n, CheckAllocation)
@@ -87,15 +87,15 @@ KeysetInit::KeysetInit(size_t n, CheckAllocation)
 {
   if (n > std::numeric_limits<int>::max()) {
     MM().forceOOM();
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   m_keyset = MixedArray::MakeReserveKeyset(n);
   assert(m_keyset->hasExactlyOneRef());
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
 }
 
 //////////////////////////////////////////////////////////////////////

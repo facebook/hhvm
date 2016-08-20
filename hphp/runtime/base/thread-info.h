@@ -147,10 +147,20 @@ inline void check_recursion_throw() {
   throw Exception("Maximum stack size reached");
 }
 
-size_t handle_request_surprise(c_WaitableWaitHandle* wh = nullptr);
+size_t handle_request_surprise(c_WaitableWaitHandle* wh = nullptr,
+                               size_t mask = kSurpriseFlagMask);
 
-inline void check_request_surprise_unlikely() {
-  if (UNLIKELY(checkSurpriseFlags())) handle_request_surprise();
+/*
+ * Check and handle non-safepoint surprise conditions.
+ *
+ * The intended use case for this helper is for instrumenting resource exceeded
+ * checks within an unbounded operation implemented in C++, like array
+ * unserialization or JSON decoding.
+ */
+inline void check_non_safepoint_surprise() {
+  if (UNLIKELY(getSurpriseFlag(NonSafepointFlags))) {
+    handle_request_surprise(nullptr, NonSafepointFlags);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

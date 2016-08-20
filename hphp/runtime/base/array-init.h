@@ -459,7 +459,7 @@ struct PackedArrayInit {
   PackedArrayInit(size_t n, CheckAllocation) {
     auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
     if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-      check_request_surprise_unlikely();
+      check_non_safepoint_surprise();
     }
     m_vec = PackedArray::MakeReserve(n);
 #ifdef DEBUG
@@ -467,7 +467,7 @@ struct PackedArrayInit {
     m_expectedCount = n;
 #endif
     assert(m_vec->hasExactlyOneRef());
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
 
   PackedArrayInit(PackedArrayInit&& other) noexcept
@@ -602,7 +602,7 @@ struct VecArrayInit {
   VecArrayInit(size_t n, CheckAllocation) {
     auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
     if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-      check_request_surprise_unlikely();
+      check_non_safepoint_surprise();
     }
     m_vec = PackedArray::MakeReserveVec(n);
 #ifdef DEBUG
@@ -610,7 +610,7 @@ struct VecArrayInit {
     m_expectedCount = n;
 #endif
     assert(m_vec->hasExactlyOneRef());
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
 
   VecArrayInit(VecArrayInit&& other) noexcept

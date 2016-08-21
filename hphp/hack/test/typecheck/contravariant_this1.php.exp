@@ -1,0 +1,2 @@
+File "contravariant_this1.php", line 5, characters 33-36:
+The "this" type cannot be used in this contravariant position because its enclosing class "C" is final and has a variant type parameter "T" (Typing[4158])

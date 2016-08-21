@@ -208,11 +208,12 @@ and unify_ env r1 ty1 r2 ty2 =
       Some (_, Tclass ((_, x) as id, _) as ty)), _ ->
     let class_ = Env.get_class env x in
       (* For final class C, there is no difference between abstract<X> and X.
-       * The one exception is for new types, because it is considered a distinct
-       * type from X.
+       * Two exceptions are for new types, because they are considered a
+       * distinct type from X, and for variant classes, since we can't
+       * statically guarantee their runtime type.
        *)
       (match class_ with
-      | Some {tc_final = true; _} ->
+       | Some(class_ty) when TUtils.class_is_final_and_invariant class_ty ->
           let env, ty = unify env ty (r2, ty2) in
           env, snd ty
       | _ ->

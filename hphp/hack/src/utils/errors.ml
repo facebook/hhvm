@@ -629,6 +629,7 @@ module Typing                               = struct
   let unification_cycle                     = 4155 (* DONT MODIFY!!!! *)
   let keyset_set                            = 4156 (* DONT MODIFY!!!! *)
   let eq_incompatible_types                 = 4157 (* DONT MODIFY!!!! *)
+  let contravariant_this                    = 4158 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1907,6 +1908,12 @@ let declared_contravariant pos1 pos2 emsg =
    pos1, "This is where the parameter was declared as contravariant (-)"
  ] @ emsg
  )
+
+let contravariant_this pos class_name tp =
+  add Typing.contravariant_this pos (
+    "The \"this\" type cannot be used in this " ^
+    "contravariant position because its enclosing class \"" ^ class_name ^
+    "\" " ^ "is final and has a variant type parameter \"" ^ tp ^ "\"")
 
 let cyclic_typeconst pos sl =
   let sl = List.map sl strip_ns in

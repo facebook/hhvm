@@ -310,6 +310,23 @@ let check_variance env tparam =
       let emsg = detailed_message "covariant (+)" pos2 stack2 in
       Errors.declared_contravariant pos1 pos2 emsg
 
+(******************************************************************************)
+(* Checks that a 'this' type is correctly used at a given contravariant       *)
+(* position in a final class.                                                 *)
+(******************************************************************************)
+let check_final_this_pos_variance env_variance rpos class_ty =
+  if class_ty.tc_final then
+    List.iter class_ty.tc_tparams
+      begin fun (typar_variance, id, _) ->
+        match env_variance, typar_variance with
+        | Vcontravariant(_), (Ast.Covariant | Ast.Contravariant)  ->
+           (Errors.contravariant_this
+             rpos
+             (Utils.strip_ns class_ty.tc_name)
+             (snd id))
+        | _ -> ()
+      end
+
 (*****************************************************************************)
 (* Returns the list of type parameter variance for a given class.
  * Performing that operation adds a dependency on the class, because if
@@ -325,7 +342,7 @@ let get_class_variance tcopt root (pos, class_name) =
       [Vcovariant [pos, Rtype_argument (Utils.strip_ns name), Pcovariant]]
   | _ ->
       let dep = Typing_deps.Dep.Class class_name in
-      Typing_deps.add_idep root dep;
+      Typing_deps.add_idep (fst root) dep;
       let tparams =
         if Env.is_typedef class_name
         then
@@ -344,7 +361,7 @@ let get_class_variance tcopt root (pos, class_name) =
 (*****************************************************************************)
 
 let rec class_ tcopt class_name class_type impl =
-  let root = Typing_deps.Dep.Class class_name in
+  let root = (Typing_deps.Dep.Class class_name, Some(class_type)) in
   let tparams = class_type.tc_tparams in
   let env = SMap.empty in
   let env = List.fold_left impl ~f:(type_ tcopt root Vboth) ~init:env in
@@ -366,7 +383,7 @@ let rec class_ tcopt class_name class_type impl =
 and typedef tcopt type_name =
   match TLazyHeap.get_typedef tcopt type_name with
   | Some {td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _}  ->
-      let root = Typing_deps.Dep.Class type_name in
+     let root = (Typing_deps.Dep.Class type_name, None) in
       let env = SMap.empty in
       let pos = Reason.to_pos (fst td_type) in
       let reason_covariant = [pos, Rtypedef, Pcovariant] in
@@ -437,11 +454,32 @@ and type_ tcopt root variance env (reason, ty) =
     let env = type_option tcopt root variance env ty2 in
     env
   | Tthis ->
-      (* `this` constraints are bivariant (otherwise any class that used the
-       * `this` type would not be able to use covariant type params) *)
-      env
-  | Tgeneric (name, _) ->
-      let pos = Reason.to_pos reason in
+    (* Check that 'this' isn't being improperly referenced in a contravariant
+     * position.
+     *)
+    Option.value_map
+      (snd root)
+      ~default:()
+      ~f:(check_final_this_pos_variance variance (Reason.to_pos reason)) ;
+    (* With the exception of the above check, `this` constraints are bivariant
+     * (otherwise any class that used the `this` type would not be able to use
+     * covariant type params).
+     *)
+    env
+  | Tgeneric (name, constraints) ->
+     let pos = Reason.to_pos reason in
+     (* As above for 'Tthis', if 'this' appears in any constraints on the type,
+      * check that it's being referenced in a proper position.
+      *)
+     List.iter constraints begin fun (_, (r, _ as ty))  ->
+        match ty with
+        | (_, Tthis) ->
+           Option.value_map
+             (snd root)
+             ~default:()
+             ~f: (check_final_this_pos_variance variance (Reason.to_pos r))
+        | _ -> ()
+      end ;
       (* This section makes the position more precise.
        * Say we find a return type that is a tuple (int, int, T).
        * The whole tuple is in covariant position, and so the position
@@ -458,8 +496,7 @@ and type_ tcopt root variance env (reason, ty) =
             Vcontravariant ((pos, x, y) :: rest)
         | x -> x
       in
-      let env = add_variance env name variance in
-      env
+      add_variance env name variance
   | Toption ty ->
       type_ tcopt root variance env ty
   | Tprim _ -> env

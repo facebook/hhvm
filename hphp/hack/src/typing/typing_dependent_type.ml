@@ -14,6 +14,7 @@ open Typing_defs
 module ExprDepTy = struct
   module N = Nast
   module Env = Typing_env
+  module TUtils = Typing_utils
 
   let to_string dt = AbstractKind.to_string (AKdependent dt)
 
@@ -111,9 +112,13 @@ module ExprDepTy = struct
         List.exists tyl (should_apply env)
     | Tclass ((_, x), _) ->
         let class_ = Env.get_class env x in
+        (* If a class is both final and variant, we must treat it as non-final
+         * since we can't statically guarantee what the runtime type
+         * will be.
+         *)
         Option.value_map class_
           ~default:false
-          ~f:(fun {tc_final; _} -> not tc_final)
+          ~f:(fun class_ty -> not (TUtils.class_is_final_and_invariant class_ty))
     | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
     | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany ->
         false

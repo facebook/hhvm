@@ -27,10 +27,12 @@ namespace HPHP {
 
 struct StructuredLogEntry {
   StructuredLogEntry();
+
   // Any previous value for the same key is silently overwritten.
   void setInt(folly::StringPiece key, int64_t value);
   void setStr(folly::StringPiece key, folly::StringPiece value);
   void clear();
+
   folly::dynamic ints, strs;
 };
 
@@ -42,14 +44,11 @@ using StructuredLogImpl = void (*)(const std::string&,
 /*
  * Interface for recording structured data for relatively infrequent events.
  */
-struct StructuredLog {
-  static void enable(StructuredLogImpl impl);
-  static bool enabled();
-  static void log(const std::string& tableName, const StructuredLogEntry&);
-  static bool coinflip(uint32_t rate);
-
- private:
-  static StructuredLogImpl s_impl;
+namespace StructuredLog {
+bool enabled();
+bool coinflip(uint32_t rate);
+void enable(StructuredLogImpl impl);
+void log(const std::string& tableName, const StructuredLogEntry&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -600,6 +600,7 @@ struct RuntimeOption {
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   F(uint32_t, ReusableTCPadding, 128)                                   \
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
+  F(int64_t, PerfWarningSampleRate, 1)                                  \
   /* Profiling flags */                                                 \
   F(bool, EnableReverseDataMap, false)                                  \
   /* */

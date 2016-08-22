@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/type-profile.h"
 
@@ -857,9 +858,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     std::stringstream out;
     bool first = true;
     out << "{" << endl;
-    auto appendStat = [&](const std::string& name, int64_t value) {
-       out << folly::format("{} \"{}\":{}\n",
-                            first ? "" : ",", name, value);
+    auto appendStat = [&](folly::StringPiece name, int64_t value) {
+       out << folly::format("{} \"{}\":{}\n", first ? "" : ",", name, value);
        first = false;
     };
     HPHP::Server* server = HttpServer::Server->getPageServer();
@@ -880,6 +880,8 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("fixups", mcg->fixupMap().size());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
+    appendStat("named-entities", NamedEntity::tableSize());
+    appendStat("static-strings", makeStaticStringCount());
     appendStat("request-count", requestCount());
     appendStat("single-jit-requests", singleJitRequestCount());
 

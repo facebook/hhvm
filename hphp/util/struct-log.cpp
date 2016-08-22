@@ -20,34 +20,11 @@
 
 namespace HPHP {
 
-///////////////////////////////////////////////////////////////////////////////
-
-StructuredLogImpl StructuredLog::s_impl = nullptr;
-
-bool StructuredLog::enabled() {
-  return s_impl != nullptr;
-}
-
-bool StructuredLog::coinflip(uint32_t rate) {
-  return enabled() && rate > 0 && folly::Random::rand32(rate) == 0;
-}
-
-void StructuredLog::enable(StructuredLogImpl impl) {
-  s_impl = impl;
-}
-
-void StructuredLog::log(const std::string& tableName,
-                        const StructuredLogEntry& cols) {
-  if (enabled()) {
-    s_impl(tableName, cols);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 StructuredLogEntry::StructuredLogEntry()
-  : ints(folly::dynamic::object()), strs(folly::dynamic::object())
-{}
+  : ints(folly::dynamic::object())
+  , strs(folly::dynamic::object())
+{
+}
 
 void StructuredLogEntry::setInt(folly::StringPiece key, int64_t value) {
   ints[key] = value;
@@ -63,12 +40,34 @@ void StructuredLogEntry::clear() {
   strs = folly::dynamic::object();
 }
 
+namespace StructuredLog {
+namespace {
+StructuredLogImpl s_impl = nullptr;
+}
+
+bool enabled() {
+  return s_impl != nullptr;
+}
+
+bool coinflip(uint32_t rate) {
+  return enabled() && rate > 0 && folly::Random::rand32(rate) == 0;
+}
+
+void enable(StructuredLogImpl impl) {
+  s_impl = impl;
+}
+
+void log(const std::string& tableName, const StructuredLogEntry& cols) {
+  if (enabled()) {
+    s_impl(tableName, cols);
+  }
+}
+}
+
 std::string show(const StructuredLogEntry& cols) {
   folly::dynamic out = cols.strs;
   out["ints"] = cols.ints;
   return folly::toJson(out);
 }
-
-///////////////////////////////////////////////////////////////////////////////
 
 }

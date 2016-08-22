@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower.h"
 
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -139,6 +140,14 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
     optimize(*vunit, kind, regAlloc);
   } catch (const FailedTraceGen& e) {
     // vasm-xls can fail if it tries to allocate too many spill slots.
+    logLowPriPerfWarning(
+      "vasm-optimize punt",
+      250,
+      [&](StructuredLogEntry& cols) {
+        cols.setStr("punt_type", e.what());
+        cols.setStr("vasm_unit", show(*vunit));
+      }
+    );
     FTRACE(1, "vasm-optimize failed with {}\n", e.what());
     return nullptr;
   }

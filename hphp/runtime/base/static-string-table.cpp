@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/static-string-table.h"
+
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -155,11 +157,14 @@ StringData* insertStaticString(StringData* sd) {
   if (!pair.second) {
     sd->destructStatic();
   } else {
-    MemoryStats::GetInstance()->LogStaticStringAlloc(sd->size()
-        + sizeof(StringData));
+    MemoryStats::GetInstance()->LogStaticStringAlloc(
+      sd->size() + sizeof(StringData)
+    );
     if (RuntimeOption::EvalEnableReverseDataMap) {
       data_map::register_start(sd);
     }
+    static std::atomic<bool> signaled{false};
+    checkAHMSubMaps(*s_stringDataMap, "static string table", signaled);
   }
   assert(to_sdata(pair.first->first) != nullptr);
 
@@ -360,7 +365,7 @@ size_t countStaticStringConstants() {
 void refineStaticStringTableSize() {
   if (RuntimeOption::EvalInitialStaticStringTableSize ==
       kDefaultInitialStaticStringTableSize ||
-     !s_stringDataMap) {
+      !s_stringDataMap) {
     return;
   }
 

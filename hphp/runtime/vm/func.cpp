@@ -62,8 +62,11 @@ std::atomic<bool>     Func::s_treadmill;
 /*
  * FuncId high water mark and FuncId -> Func* table.
  */
-static std::atomic<FuncId> s_nextFuncId(0);
-static AtomicVector<const Func*> s_funcVec(kFuncCountHint, nullptr);
+static std::atomic<FuncId> s_nextFuncId{0};
+static AtomicVector<const Func*> s_funcVec{0, nullptr};
+static AtomicVectorInit s_funcVecInit{
+  s_funcVec, RuntimeOption::EvalFuncCountHint
+};
 
 const AtomicVector<const Func*>& Func::getFuncVec() {
   return s_funcVec;

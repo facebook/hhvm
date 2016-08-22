@@ -94,7 +94,10 @@ void setRelocateRequests(int32_t n) {
 }
 
 namespace {
-AtomicVector<uint32_t> s_func_counters{kFuncCountHint, 0};
+AtomicVector<uint32_t> s_func_counters{0, 0};
+AtomicVectorInit s_func_counters_init{
+  s_func_counters, RuntimeOption::EvalFuncCountHint
+};
 }
 
 void profileWarmupStart() {

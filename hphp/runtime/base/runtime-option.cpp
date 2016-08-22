@@ -29,6 +29,7 @@
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
+#include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"
@@ -1767,6 +1768,11 @@ void RuntimeOption::Load(
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
   refineStaticStringTableSize();
+
+  // Reconstruct AtomicVectors keyed by FuncId, making sure we haven't created
+  // any Funcs yet.
+  always_assert(Func::nextFuncId() == 0);
+  AtomicVectorInit::runAll();
 
 
   // **************************************************************************

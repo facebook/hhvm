@@ -61,17 +61,30 @@ ProfTransRec::~ProfTransRec() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template<typename Map>
+typename Map::Config makeAHMConfig() {
+  typename Map::Config config;
+  config.growthFactor = 1;
+  config.entryCountThreadCacheSize = 10;
+  return config;
+}
+
 ProfData::ProfData()
   : m_counters(RuntimeOption::ServerExecutionMode()
                  ? std::numeric_limits<int64_t>::max()
                  : RuntimeOption::EvalJitPGOThreshold)
-  , m_profilingFuncs(kFuncCountHint, false)
-  , m_optimizedFuncs(kFuncCountHint, false)
-  , m_optimizedSKs(kFuncCountHint)
-  , m_proflogueDB(kFuncCountHint)
-  , m_dvFuncletDB(kFuncCountHint)
-  , m_jmpToTransID(kFuncCountHint)
-  , m_blockEndOffsets(kFuncCountHint)
+  , m_profilingFuncs(RuntimeOption::EvalFuncCountHint, false)
+  , m_optimizedFuncs(RuntimeOption::EvalFuncCountHint, false)
+  , m_optimizedSKs(RuntimeOption::EvalPGOFuncCountHint,
+                   makeAHMConfig<decltype(m_optimizedSKs)>())
+  , m_proflogueDB(RuntimeOption::EvalPGOFuncCountHint * 2,
+                  makeAHMConfig<decltype(m_proflogueDB)>())
+  , m_dvFuncletDB(RuntimeOption::EvalPGOFuncCountHint * 2,
+                  makeAHMConfig<decltype(m_dvFuncletDB)>())
+  , m_jmpToTransID(RuntimeOption::EvalPGOFuncCountHint * 10,
+                   makeAHMConfig<decltype(m_jmpToTransID)>())
+  , m_blockEndOffsets(RuntimeOption::EvalPGOFuncCountHint,
+                      makeAHMConfig<decltype(m_blockEndOffsets)>())
 {}
 
 TransID ProfData::allocTransID() {

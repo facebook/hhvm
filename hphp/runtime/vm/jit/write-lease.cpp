@@ -33,8 +33,10 @@ namespace {
 __thread bool threadCanAcquire = true;
 __thread bool threadCanAcquireConcurrent = true;
 
-AtomicVector<int64_t> s_funcOwners{kFuncCountHint,
-                                   Treadmill::kInvalidThreadIdx};
+AtomicVector<int64_t> s_funcOwners{0, Treadmill::kInvalidThreadIdx};
+AtomicVectorInit s_funcOwnersInit{
+  s_funcOwners, RuntimeOption::EvalFuncCountHint
+};
 std::atomic<int> s_jittingThreads{0};
 }
 

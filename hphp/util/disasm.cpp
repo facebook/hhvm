@@ -56,7 +56,6 @@ Disasm::Disasm(const Disasm::Options& opts)
   xed_state_init(&m_xedState, XED_MACHINE_MODE_LONG_64,
                  XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
   xed_tables_init();
-  xed_register_disassembly_callback(addressToSymbol);
 #endif // HAVE_LIBXED
 }
 
@@ -98,7 +97,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     auto const syntax = m_opts.m_forceAttSyntax ? XED_SYNTAX_ATT
                                                 : s_xed_syntax;
     if (!xed_format_context(syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, ip, nullptr)) {
+                            MAX_INSTR_ASM_LEN, ip, nullptr, addressToSymbol)) {
       out << folly::format("xed_format_context failed at address {}\n",
                            frontier);
       return;

@@ -241,7 +241,7 @@ void OfflineX86Code::disasm(FILE* file,
 
     // Get disassembled instruction in codeStr
     if (!xed_format_context(xed_syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr)) {
+                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr, 0)) {
       error("disasm error: xed_format_context failed");
     }
 

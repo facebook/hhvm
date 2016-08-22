@@ -241,7 +241,11 @@ void OfflineX86Code::disasm(FILE* file,
 
     // Get disassembled instruction in codeStr
     if (!xed_format_context(xed_syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr)) {
+                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr
+#if XED_ENCODE_ORDER_MAX_ENTRIES != 28 // Newer version of XED library
+                            , 0
+#endif
+                           )) {
       error("disasm error: xed_format_context failed");
     }
 

@@ -156,7 +156,6 @@ function iterate_by_ref($ks) {
 
 function convert_with_ref() {
   echo "========== convert_with_ref ========================\n";
-  // This should succeed because keyset discards values
   $arr = ['a', 'b', 'c', 'd', 'e'];
   $ref = &$arr[3];
   try {

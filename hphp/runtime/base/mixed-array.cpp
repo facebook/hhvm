@@ -1893,50 +1893,6 @@ ArrayData* MixedArray::ToDictKeyset(ArrayData* ad, bool copy) {
     : ToDictInPlace(a);
 }
 
-MixedArray* MixedArray::ToKeysetInPlace(ArrayData* ad) {
-  auto a = asMixed(ad);
-  assert(!a->cowCheck());
-
-  auto elms = a->data();
-  for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
-    auto& e = elms[i];
-    if (!isTombstone(e.data.m_type)) {
-      auto const oldType = e.data.m_type;
-      auto const oldDatum = e.data.m_data.num;
-      if (e.hasStrKey()) {
-        e.skey->incRefCount();
-        e.data.m_data.pstr = e.skey;
-        e.data.m_type = e.skey->isUncounted() || e.skey->isStatic() ?
-          KindOfPersistentString : KindOfString;
-      } else {
-        assert(e.hasIntKey());
-        e.data.m_data.num = e.ikey;
-        e.data.m_type = KindOfInt64;
-      }
-      tvRefcountedDecRefHelper(oldType, oldDatum);
-    }
-  }
-  a->m_hdr.kind = HeaderKind::Keyset;
-  return a;
-}
-
-ArrayData* MixedArray::ToKeyset(ArrayData* ad, bool copy) {
-  auto a = asMixed(ad);
-
-  if (copy) {
-    KeysetInit ai{a->size()};
-    MixedArray::IterateKV(
-      a,
-      [&](const TypedValue* k, const TypedValue*) {
-        ai.add(tvAsCVarRef(k));
-      }
-    );
-    return ai.create();
-  } else {
-    return ToKeysetInPlace(a);
-  }
-}
-
 ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
   assert(asMixed(ad)->checkInvariants());
   assert(ad->isDict());

@@ -1283,15 +1283,6 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::ToKeyset(ArrayData* ad, bool copy) {
-  assert(checkInvariants(ad));
-  if (ad->empty()) return staticEmptyKeysetArray();
-  auto const size = ad->getSize();
-  KeysetInit ai{size};
-  for (uint32_t i = 0; i < size; ++i) ai.add(i);
-  return ai.create();
-}
-
 ArrayData* PackedArray::ToVecVec(ArrayData* ad, bool) {
   assert(checkInvariants(ad));
   assert(ad->isVecArray());

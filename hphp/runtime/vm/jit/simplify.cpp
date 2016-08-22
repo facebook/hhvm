@@ -1762,6 +1762,7 @@ SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst,
   if (!src->hasConstVal()) return nullptr;
   auto const before = get(src);
   auto const converted = convert(const_cast<ArrayData*>(before));
+  if (!converted) return nullptr;
   auto const scalar = ArrayData::GetScalarArray(converted);
   decRefArr(converted);
   return cns(env, scalar);
@@ -1795,10 +1796,25 @@ template <typename G>
 SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst, G get) {
   return arrayLikeConvImpl(
     env, inst, get,
-    [&](ArrayData* a) { return a->toKeyset(true); }
+    [&](ArrayData* a) {
+      // We need to check if the array contains values suitable for keyset
+      // before attempting the conversion. Otherwise, toKeyset() might re-enter
+      // which we can't do from the simplifier.
+      bool keylike = true;
+      IterateV(
+        a,
+        [&](const TypedValue* v) {
+          if (!isIntType(v->m_type) && !isStringType(v->m_type)) {
+            keylike = false;
+            return true;
+          }
+          return false;
+        }
+      );
+      return keylike ? a->toKeyset(true) : nullptr;
+    }
   );
 }
-
 
 SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);

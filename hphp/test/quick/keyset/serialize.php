@@ -52,6 +52,11 @@ function main() {
   try_unserialize("k:3:{i:123;s:3:\"abc\";i:456;}");
   try_unserialize("k:2:{i:123;s:3:\"123\";}");
 
+  // Invalid values
+  try_unserialize("k:1:{b:0;}");
+  try_unserialize("k:1:{d:1.23;}");
+  try_unserialize("k:1:{N;}");
+
   // "Weak" references
   try_unserialize("k:2:{i:123;r:1;}");
   try_unserialize("a:3:{i:123;s:3:\"abc\";i:456;i:101;i:456;k:2:{r:2;r:3;}}");

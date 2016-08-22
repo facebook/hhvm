@@ -7,7 +7,13 @@ function convert_from($v) {
   echo "----------------------------------------------------\n";
   var_dump((array)$v);
   var_dump(dict($v));
-  var_dump(keyset($v));
+
+  try {
+    var_dump(keyset($v));
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
+
   var_dump((bool)$v);
   var_dump((int)$v);
   var_dump((float)$v);
@@ -67,6 +73,9 @@ function main() {
   convert_from(vec['z', 'y', 'x']);
   convert_from(vec[1, 'a', 2, 'b']);
   convert_from(vec[vec[1, 2], vec[3, 4, 5]]);
+  convert_from(vec[1, 2, false, 'a', 'b']);
+  convert_from(vec[1, '1']);
+  convert_from(vec['abc', 123, 123, 'abc']);
 }
 
 main();

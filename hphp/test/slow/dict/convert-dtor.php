@@ -25,9 +25,13 @@ function main() {
   echo "====================================================\n";
 
   $i += 3;
-  var_dump(keyset(dict[$i => new Dtor($i),
-                       $i+1 => new Dtor($i+1),
-                       $i+2 => new Dtor($i+2)]));
+  try {
+    var_dump(keyset(dict[$i => new Dtor($i),
+                         $i+1 => new Dtor($i+1),
+                         $i+2 => new Dtor($i+2)]));
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
   echo "====================================================\n";
 
   $i += 3;

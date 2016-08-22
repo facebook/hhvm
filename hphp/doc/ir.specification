@@ -458,11 +458,11 @@ To dict conversions:
 
 To keyset conversions:
 
-| ConvArrToKeyset,              D(Keyset), S(Arr),                   PRc|CRc
+| ConvArrToKeyset,              D(Keyset), S(Arr),                Er|PRc|CRc
 
-| ConvVecToKeyset,              D(Keyset), S(Vec),                   PRc|CRc
+| ConvVecToKeyset,              D(Keyset), S(Vec),                Er|PRc|CRc
 
-| ConvDictToKeyset,             D(Keyset), S(Dict),                  PRc|CRc
+| ConvDictToKeyset,             D(Keyset), S(Dict),               Er|PRc|CRc
 
 | ConvObjToKeyset,              D(Keyset), S(Obj),                Er|PRc|CRc
 

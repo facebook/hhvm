@@ -333,10 +333,10 @@ dict(4) {
   int(4)
 }
 keyset(4) {
-  int(0)
   int(1)
   int(2)
   int(3)
+  int(4)
 }
 bool(true)
 int(1)
@@ -405,9 +405,9 @@ dict(3) {
   string(1) "x"
 }
 keyset(3) {
-  int(0)
-  int(1)
-  int(2)
+  string(1) "z"
+  string(1) "y"
+  string(1) "x"
 }
 bool(true)
 int(1)
@@ -474,10 +474,10 @@ dict(4) {
   string(1) "b"
 }
 keyset(4) {
-  int(0)
   int(1)
+  string(1) "a"
   int(2)
-  int(3)
+  string(1) "b"
 }
 bool(true)
 int(1)
@@ -561,10 +561,7 @@ dict(2) {
     int(5)
   }
 }
-keyset(2) {
-  int(0)
-  int(1)
-}
+Exception: "Invalid keyset key: expected a key of type int or string, vec given"
 bool(true)
 int(1)
 float(1)
@@ -611,4 +608,206 @@ object(HH\Map)#%d (2) {
   }
 }
 Exception: "Only integer values and string values may be used with Sets"
+====================================================
+====================================================
+vec(5) {
+  int(1)
+  int(2)
+  bool(false)
+  string(1) "a"
+  string(1) "b"
+}
+----------------------------------------------------
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  bool(false)
+  [3]=>
+  string(1) "a"
+  [4]=>
+  string(1) "b"
+}
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  bool(false)
+  [3]=>
+  string(1) "a"
+  [4]=>
+  string(1) "b"
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+bool(true)
+int(1)
+float(1)
+
+Notice: Vec to string conversion in %s on line %d
+string(3) "Vec"
+object(stdClass)#%d (5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  bool(false)
+  [3]=>
+  string(1) "a"
+  [4]=>
+  string(1) "b"
+}
+object(HH\Vector)#%d (5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  bool(false)
+  [3]=>
+  string(1) "a"
+  [4]=>
+  string(1) "b"
+}
+object(HH\Map)#%d (5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  bool(false)
+  [3]=>
+  string(1) "a"
+  [4]=>
+  string(1) "b"
+}
+Exception: "Only integer values and string values may be used with Sets"
+====================================================
+====================================================
+vec(2) {
+  int(1)
+  string(1) "1"
+}
+----------------------------------------------------
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(1) "1"
+}
+dict(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(1) "1"
+}
+keyset(2) {
+  int(1)
+  string(1) "1"
+}
+bool(true)
+int(1)
+float(1)
+
+Notice: Vec to string conversion in %s on line %d
+string(3) "Vec"
+object(stdClass)#%d (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(1) "1"
+}
+object(HH\Vector)#%d (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(1) "1"
+}
+object(HH\Map)#%d (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(1) "1"
+}
+object(HH\Set)#%d (2) {
+  int(1)
+  string(1) "1"
+}
+====================================================
+====================================================
+vec(4) {
+  string(3) "abc"
+  int(123)
+  int(123)
+  string(3) "abc"
+}
+----------------------------------------------------
+array(4) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  int(123)
+  [2]=>
+  int(123)
+  [3]=>
+  string(3) "abc"
+}
+dict(4) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  int(123)
+  [2]=>
+  int(123)
+  [3]=>
+  string(3) "abc"
+}
+keyset(2) {
+  string(3) "abc"
+  int(123)
+}
+bool(true)
+int(1)
+float(1)
+
+Notice: Vec to string conversion in %s on line %d
+string(3) "Vec"
+object(stdClass)#%d (4) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  int(123)
+  [2]=>
+  int(123)
+  [3]=>
+  string(3) "abc"
+}
+object(HH\Vector)#%d (4) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  int(123)
+  [2]=>
+  int(123)
+  [3]=>
+  string(3) "abc"
+}
+object(HH\Map)#%d (4) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  int(123)
+  [2]=>
+  int(123)
+  [3]=>
+  string(3) "abc"
+}
+object(HH\Set)#%d (2) {
+  string(3) "abc"
+  int(123)
+}
 ====================================================

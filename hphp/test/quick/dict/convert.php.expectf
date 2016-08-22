@@ -211,6 +211,19 @@ dict(5) {
 }
 ====================================================
 ====================================================
+keyset(2) {
+  int(1)
+  string(1) "1"
+}
+----------------------------------------------------
+dict(2) {
+  [1]=>
+  int(1)
+  ["1"]=>
+  string(1) "1"
+}
+====================================================
+====================================================
 bool(false)
 ----------------------------------------------------
 
@@ -386,12 +399,7 @@ vec(4) {
   array(0) {
   }
 }
-keyset(4) {
-  int(1)
-  int(2)
-  int(3)
-  int(4)
-}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
 bool(true)
 int(1)
 float(1)
@@ -457,9 +465,9 @@ vec(3) {
   string(4) "val3"
 }
 keyset(3) {
-  string(4) "key1"
-  string(4) "key2"
-  string(4) "key3"
+  string(4) "val1"
+  string(4) "val2"
+  string(4) "val3"
 }
 bool(true)
 int(1)
@@ -526,10 +534,10 @@ vec(4) {
   string(4) "val2"
 }
 keyset(4) {
-  string(4) "key1"
-  string(4) "key2"
-  int(200)
-  int(400)
+  int(100)
+  string(4) "val1"
+  int(300)
+  string(4) "val2"
 }
 bool(true)
 int(1)
@@ -593,8 +601,8 @@ vec(2) {
   int(200)
 }
 keyset(2) {
-  string(5) "12345"
-  int(12345)
+  int(100)
+  int(200)
 }
 bool(true)
 int(1)
@@ -620,7 +628,7 @@ object(HH\Map)#%d (2) {
   [12345]=>
   int(200)
 }
-object(HH\Set)#3 (2) {
+object(HH\Set)#%d (2) {
   int(100)
   int(200)
 }
@@ -661,10 +669,7 @@ vec(2) {
     string(1) "c"
   }
 }
-keyset(2) {
-  int(1)
-  string(1) "a"
-}
+Exception: "Invalid keyset key: expected a key of type int or string, dict given"
 bool(true)
 int(1)
 float(1)

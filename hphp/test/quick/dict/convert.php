@@ -7,7 +7,13 @@ function convert_from($d) {
   echo "----------------------------------------------------\n";
   var_dump((array)$d);
   var_dump(vec($d));
-  var_dump(keyset($d));
+
+  try {
+    var_dump(keyset($d));
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
+
   var_dump((bool)$d);
   var_dump((int)$d);
   var_dump((float)$d);
@@ -50,6 +56,7 @@ function main() {
 
   convert_to(keyset[]);
   convert_to(keyset[101, 202, 'val1', 'val2', 303]);
+  convert_to(keyset[1, '1']);
 
   convert_to(false);
   convert_to(null);

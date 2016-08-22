@@ -58,13 +58,7 @@ keyset(4) {
 iterate_by_ref exception: "Keysets cannot contain references"
 iterate_by_ref (key) exception: "Keysets cannot contain references"
 ========== convert_with_ref ========================
-keyset(5) {
-  int(0)
-  int(1)
-  int(2)
-  int(3)
-  int(4)
-}
+convert_with_ref exception: "Keysets cannot contain references"
 ========== ref_unserialize =========================
 
 Notice: Unable to unserialize: [a:2:{i:123;s:3:"abc";i:456;k:1:{R:2;}}]. Keysets can only contain integers and strings. in %s on line %d

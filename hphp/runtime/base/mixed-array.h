@@ -175,12 +175,11 @@ struct MixedArray final : private ArrayData,
   static ArrayData* MakeReserveKeyset(uint32_t size);
 
   /*
-   * Convert mixed-layout array to dict or keyset in-place. These functions
-   * don't check whether the input array contains references or not, so only use
-   * this when you already know that they do not.
+   * Convert mixed-layout array to dict in-place. This function doesn't check
+   * whether the input array contains references or not, so only use this when
+   * you already know that they do not.
    */
   static MixedArray* ToDictInPlace(ArrayData*);
-  static MixedArray* ToKeysetInPlace(ArrayData*);
 
   static ArrayData* MakeKeyset(uint32_t size, const TypedValue* values);
 
@@ -333,9 +332,9 @@ public:
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* ToPHPArray(ArrayData*, bool);
-  static ArrayData* ToKeyset(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
+  static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
 
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
@@ -411,7 +410,7 @@ public:
   static ArrayData* ToPHPArrayDict(ArrayData*, bool);
   static constexpr auto ToVecDict = ToVec;
   static ArrayData* ToDictDict(ArrayData*, bool);
-  static constexpr auto ToKeysetDict = &ToKeyset;
+  static constexpr auto ToKeysetDict = ToKeyset;
 
   static constexpr auto NvTryGetIntKeyset = &NvTryGetIntHackArr;
   static constexpr auto NvGetIntKeyset = &NvGetInt;

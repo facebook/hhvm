@@ -84,6 +84,21 @@ keyset(2) {
   string(3) "123"
 }
 ====================================================
+string(10) "k:1:{b:0;}"
+
+Notice: Unable to unserialize: [k:1:{b:0;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(13) "k:1:{d:1.23;}"
+
+Notice: Unable to unserialize: [k:1:{d:1.23;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(8) "k:1:{N;}"
+
+Notice: Unable to unserialize: [k:1:{N;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
 string(16) "k:2:{i:123;r:1;}"
 
 Notice: Unable to unserialize: [k:2:{i:123;r:1;}]. Keysets can only contain integers and strings. in %s on line %d

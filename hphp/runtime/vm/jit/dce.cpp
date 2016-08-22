@@ -87,9 +87,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvKeysetToVec:
   case ConvVecToDict:
   case ConvKeysetToDict:
-  case ConvArrToKeyset:
-  case ConvVecToKeyset:
-  case ConvDictToKeyset:
   case ConvClsToCctx:
   case NewColFromArray:
   case GtInt:
@@ -318,6 +315,9 @@ bool canDCE(IRInstruction* inst) {
   case ConvArrToDict:
   case ConvObjToVec:
   case ConvObjToDict:
+  case ConvArrToKeyset:
+  case ConvVecToKeyset:
+  case ConvDictToKeyset:
   case ConvObjToKeyset:
   case GtObj:
   case GteObj:

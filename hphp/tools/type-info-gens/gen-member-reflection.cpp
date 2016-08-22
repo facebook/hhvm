@@ -39,6 +39,13 @@ using namespace debug_parser;
 const std::string kProgramDescription =
   "Generate member reflection helpers from debug-info";
 
+constexpr bool actually_run =
+#if !defined(DEBUG) || defined(HHVM_ENABLE_MEMBER_REFLECTION)
+  true;
+#else
+  false;
+#endif
+
 std::size_t size_of(const Type& type,
                     const std::unique_ptr<TypeParser>& parser) {
   return type.match<std::size_t>(
@@ -124,32 +131,32 @@ void generate(const std::string& source_executable, std::ostream& o) {
        "  >\n"
        "{\n";
 
-#if !defined(DEBUG) || defined(HHVM_ENABLE_MEMBER_REFLECTION)
-  auto reflectables = std::unordered_set<std::string> {
+  if (actually_run) {
+    auto reflectables = std::unordered_set<std::string> {
 #define X(name) "HPHP::"#name,
-    HPHP_REFLECTABLES
+      HPHP_REFLECTABLES
 #undef X
-  };
+    };
 
-  auto const parser = TypeParser::make(source_executable);
-  auto first = true;
+    auto const parser = TypeParser::make(source_executable);
+    auto first = true;
 
-  for (auto const& type : parser->getAllObjects()) {
-    if (type.incomplete) continue;
-    if (type.name.linkage != ObjectTypeName::Linkage::external) continue;
+    for (auto const& type : parser->getAllObjects()) {
+      if (type.incomplete) continue;
+      if (type.name.linkage != ObjectTypeName::Linkage::external) continue;
 
-    // Assume the first, complete, external definition is the canonical one.
-    if (!reflectables.count(type.name.name)) continue;
-    reflectables.erase(type.name.name);
+      // Assume the first, complete, external definition is the canonical one.
+      if (!reflectables.count(type.name.name)) continue;
+      reflectables.erase(type.name.name);
 
-    if (first) {
-      first = false;
-    } else {
-      o << ",\n";
+      if (first) {
+        first = false;
+      } else {
+        o << ",\n";
+      }
+      generate_entry(parser->getObject(type.key), o, parser);
     }
-    generate_entry(parser->getObject(type.key), o, parser);
   }
-#endif
 
   o << "\n};\n\n";
   o << "}";

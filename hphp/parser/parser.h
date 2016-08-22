@@ -188,10 +188,10 @@ protected:
                                // inside a regular class or an XHP class
 
   struct LabelStmtInfo {
-    int scopeId;
     TStatementPtr stmt;
-    bool inTryCatchBlock;
+    int scopeId;
     Location::Range loc;
+    bool inTryCatchBlock;
   };
   typedef std::map<std::string, LabelStmtInfo> LabelMap;
     // name => LabelStmtInfo

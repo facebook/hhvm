@@ -18,8 +18,9 @@
 #define incl_HPHP_APC_FILE_STORAGE_H_
 
 #include <atomic>
-#include <vector>
+#include <string>
 #include <mutex>
+#include <vector>
 
 #include "hphp/util/hash.h"
 

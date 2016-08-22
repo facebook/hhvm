@@ -502,7 +502,7 @@ void ConvertTvToUncounted(TypedValue* source) {
       assert(ad->isPHPArray());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyArray();
-      else if (ad->isPackedLayout()) ad = PackedArray::MakeUncounted(ad);
+      else if (ad->hasPackedLayout()) ad = PackedArray::MakeUncounted(ad);
       else ad = MixedArray::MakeUncounted(ad);
       break;
     }
@@ -537,7 +537,7 @@ void ReleaseUncountedTv(TypedValue& tv) {
     auto arr = tv.m_data.parr;
     assert(!arr->isRefCounted());
     if (!arr->isStatic()) {
-      if (arr->isPackedLayout()) PackedArray::ReleaseUncounted(arr);
+      if (arr->hasPackedLayout()) PackedArray::ReleaseUncounted(arr);
       else MixedArray::ReleaseUncounted(arr);
     }
     return;

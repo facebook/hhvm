@@ -379,7 +379,7 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
       auto const ad = source.getArrayData();
       assert(ad->isPHPArray());
       if (ad->empty()) return Variant{staticEmptyArray()};
-      if (ad->isPackedLayout()) return Variant{PackedArray::MakeUncounted(ad)};
+      if (ad->hasPackedLayout()) return Variant{PackedArray::MakeUncounted(ad)};
       return Variant{MixedArray::MakeUncounted(ad)};
     }
 
@@ -557,7 +557,7 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
-  assert(isMixedLayout());
+  assert(hasMixedLayout());
   assert(checkCount());
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(MixedArray::HashSize(m_scale) ==
@@ -1660,7 +1660,7 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
     ad->cowCheck() ? CopyReserve(asMixed(ad), neededSize) :
     asMixed(ad);
 
-  if (UNLIKELY(!elems->isMixedLayout())) {
+  if (UNLIKELY(!elems->hasMixedLayout())) {
     return ArrayPlusEqGeneric(ad, ret, elems, neededSize);
   }
 
@@ -1727,7 +1727,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
 
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
 
-  if (elems->isMixedLayout()) {
+  if (elems->hasMixedLayout()) {
     auto const rhs = asMixed(elems);
     auto srcElem = rhs->data();
     auto const srcStop = rhs->data() + rhs->m_used;
@@ -1746,7 +1746,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ret;
   }
 
-  if (UNLIKELY(!elems->isPackedLayout())) {
+  if (UNLIKELY(!elems->hasPackedLayout())) {
     return ArrayMergeGeneric(ret, elems);
   }
 

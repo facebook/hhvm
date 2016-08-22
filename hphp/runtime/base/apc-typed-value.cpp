@@ -116,7 +116,7 @@ void APCTypedValue::deleteUncounted() {
     m_data.str->destructUncounted();
   } else if (kind == APCKind::UncountedArray) {
     assert(m_data.arr->isPHPArray());
-    if (m_data.arr->isPackedLayout()) {
+    if (m_data.arr->hasPackedLayout()) {
       auto arr = m_data.arr;
       this->~APCTypedValue();
       PackedArray::ReleaseUncounted(arr, sizeof(APCTypedValue));

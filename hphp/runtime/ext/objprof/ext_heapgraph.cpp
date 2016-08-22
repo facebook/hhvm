@@ -172,7 +172,7 @@ std::string getObjectConnectionName(
   }
 
   auto arr = obj->toArray();
-  bool is_packed = arr->isPackedLayout();
+  bool is_packed = arr->hasPackedLayout();
   for (ArrayIter iter(arr); iter; ++iter) {
     auto first = iter.first();
     auto key = first.toString();

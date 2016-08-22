@@ -321,9 +321,9 @@ private:
     m_data = ad;
     m_nextHelperIdx = IterNextIndex::ArrayMixed;
     if (ad != nullptr) {
-      if (ad->isPackedLayout()) {
+      if (ad->hasPackedLayout()) {
         m_nextHelperIdx = IterNextIndex::ArrayPacked;
-      } else if (!ad->isMixedLayout()) {
+      } else if (!ad->hasMixedLayout()) {
         m_nextHelperIdx = IterNextIndex::Array;
       }
     }
@@ -693,9 +693,9 @@ private:
 template <typename ArrFn, bool IncRef = true>
 bool IterateV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return true;
-  if (adata->isPackedLayout()) {
+  if (adata->hasPackedLayout()) {
     PackedArray::IterateV<ArrFn, IncRef>(adata, arrFn);
-  } else if (adata->isMixedLayout()) {
+  } else if (adata->hasMixedLayout()) {
     MixedArray::IterateV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
@@ -778,9 +778,9 @@ bool IterateV(const TypedValue& it,
 template <typename ArrFn, bool IncRef = true>
 bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
   if (adata->empty()) return true;
-  if (adata->isMixedLayout()) {
+  if (adata->hasMixedLayout()) {
     MixedArray::IterateKV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
-  } else if (adata->isPackedLayout()) {
+  } else if (adata->hasPackedLayout()) {
     PackedArray::IterateKV<ArrFn, IncRef>(adata, arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {

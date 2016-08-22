@@ -35,7 +35,7 @@ ssize_t ArrayCommon::ReturnInvalidIndex(const ArrayData*) {
 bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   assert(fp.getContainer() == ad);
   if (fp.getResetFlag()) return false;
-  if (ad->isPackedLayout()) {
+  if (ad->hasPackedLayout()) {
     assert(PackedArray::checkInvariants(ad));
     return fp.m_pos != ad->getSize();
   }

@@ -88,7 +88,7 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
     ArrayData* ad;
-    if (arr->isVectorData() && !arr->isPackedLayout() && !arr->isDict() &&
+    if (arr->isVectorData() && !arr->hasPackedLayout() && !arr->isDict() &&
         !arr->isKeyset()) {
       ad = PackedArray::ConvertStatic(arr);
     } else {

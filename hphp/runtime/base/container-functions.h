@@ -70,7 +70,7 @@ inline size_t getContainerSize(const Variant& v) {
 inline bool isPackedContainer(const Cell c) {
   assert(isContainer(c));
   if (isArrayLikeType(c.m_type)) {
-    return c.m_data.parr->isPackedLayout();
+    return c.m_data.parr->hasPackedLayout();
   }
 
   return isVectorCollection(c.m_data.pobj->collectionType());

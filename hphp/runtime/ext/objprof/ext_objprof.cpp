@@ -317,7 +317,7 @@ std::pair<int, double> sizeOfArray(
       iter = MixedArray::IterAdvance(props, iter);
       if (stack) stack->pop_back();
     }
-  } else if (props->isPackedLayout()) {
+  } else if (props->hasPackedLayout()) {
     FTRACE(2, "Iterating packed array\n");
     while (iter != pos_limit) {
       if (stack) stack->push_back("ArrayIndex");
@@ -385,7 +385,7 @@ void stringsOfArray(
       path->pop_back();
       iter = MixedArray::IterAdvance(props, iter);
     }
-  } else if (props->isPackedLayout()) {
+  } else if (props->hasPackedLayout()) {
     path->push_back(std::string("[]"));
     while (iter != pos_limit) {
       handle_dense_array_item();
@@ -744,7 +744,7 @@ std::pair<int, double> getObjSize(
 
   // We're increasing ref count by calling toArray, need to adjust it later
   auto arr = obj->toArray();
-  bool is_packed = arr->isPackedLayout();
+  bool is_packed = arr->hasPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {
     TypedValue key_tv = *iter.first().asTypedValue();
@@ -858,7 +858,7 @@ void getObjStrings(
 
   path->push_back(std::string(cls->name()->data()));
   auto arr = obj->toArray();
-  bool is_packed = arr->isPackedLayout();
+  bool is_packed = arr->hasPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {
     auto first = iter.first();

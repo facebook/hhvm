@@ -168,7 +168,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   );
   if (variadic && numArgs > numParams) {
     auto arr = local - numParams;
-    if (isArrayType(arr->m_type) && arr->m_data.parr->isPackedLayout()) {
+    if (isArrayType(arr->m_type) && arr->m_data.parr->hasPackedLayout()) {
       numArgs = numParams + arr->m_data.parr->size();
     } else {
       numArgs = numParams;

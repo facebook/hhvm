@@ -300,7 +300,7 @@ ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
   if (!elems->isPHPArray()) throwInvalidMergeException(elems);
 
   // Packed arrays don't need renumbering, so don't make a copy.
-  if (elems->isPackedLayout()) {
+  if (elems->hasPackedLayout()) {
     elems->incRefCount();
     return const_cast<ArrayData*>(elems);
   }

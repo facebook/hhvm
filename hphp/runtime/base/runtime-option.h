@@ -583,6 +583,7 @@ struct RuntimeOption {
   F(bool, Quarantine,                  false)                           \
   F(bool, EnableGCTypeScan,            false)                           \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
+  F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(uint32_t, GCSampleRate,                1)                           \
   F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, JitFilterLease,              1)                           \

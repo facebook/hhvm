@@ -1054,9 +1054,10 @@ String HHVM_FUNCTION(escapeshellarg,
                      const String& arg) {
   if (!arg.empty()) {
     return string_escape_shell_arg(arg.c_str());
-  } else {
+  } else if (RuntimeOption::EvalQuoteEmptyShellArg) {
     return String(s_twosinglequotes);
   }
+  return arg;
 }
 
 String HHVM_FUNCTION(escapeshellcmd,

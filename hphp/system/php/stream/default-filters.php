@@ -72,7 +72,7 @@ namespace __SystemLib {
         case 'base64-encode':
         case 'base64-decode':
         case 'quoted-printable-encode':
-        case 'quoted-printable-encode':
+        case 'quoted-printable-decode':
           $this->filterFunction = str_replace('-', '_', $filterName);
           break;
         default:

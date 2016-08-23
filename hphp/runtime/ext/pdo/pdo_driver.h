@@ -263,7 +263,6 @@ private:
  * A connection to a database.
  */
 struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
-
   enum SupportedMethod {
     MethodCloser,
     MethodPreparer,
@@ -279,14 +278,12 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
     MethodCheckLiveness
   };
 
-
   /////////////////////////////////////////////////////////////////////////////
 
   PDOConnection() : m_bits{0} {}
 
   virtual ~PDOConnection() {}
   virtual bool create(const Array& options) = 0;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Virtual DB methods.
@@ -363,11 +360,9 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
    */
   virtual bool checkLiveness();
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
-public:
   // Credentials.
   std::string username;
   std::string password;
@@ -423,6 +418,22 @@ public:
   std::string def_stmt_clsname;
 
   PDOFetchType default_fetch_type{PDO_FETCH_USE_DEFAULT};
+
+protected:
+  /* For the convenience of drivers, this function will parse a data source
+   * string, of the form "name=value; name2=value2" and populate variables
+   * according to the data you pass in and array of pdo_data_src_parser
+   * structures */
+  struct pdo_data_src_parser {
+    const char *optname;
+    char *optval;
+    int freeme;
+  };
+
+  int parseDataSource(const char *data_source,
+                      int data_source_len,
+                      struct pdo_data_src_parser *parsed,
+                      int nparams);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

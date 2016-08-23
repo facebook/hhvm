@@ -892,6 +892,31 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     if (${addPaths})
       link_libraries(${MYSQL_CLIENT_LIBS})
     endif()
+  elseif (${libraryName} STREQUAL "pgsql")
+    FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h
+      PATHS
+        /usr/include
+        /usr/include/postgresql
+        /usr/include/pgsql
+        /usr/local/include
+        /usr/local/include/postgresql
+        /usr/local/include/pgsql
+      )
+    FIND_LIBRARY(PGSQL_LIBRARY NAMES pq
+      PATHS
+        /lib
+        /usr/lib
+        /usr/local/lib
+    )
+    IF (PGSQL_INCLUDE_DIR AND PGSQL_LIBRARY)
+      if(${addPaths})
+        include_directories(${PGSQL_INCLUDE_DIR})
+        link_libraries(${PGSQL_LIBRARY})
+      endif()
+    else()
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
   elseif (${libraryName} STREQUAL "png")
     find_package(LibPng ${requiredVersion})
     if (NOT LIBPNG_INCLUDE_DIRS OR NOT LIBPNG_LIBRARIES)

@@ -9,7 +9,7 @@
  *)
 
 let set_use_watchman _ = ()
-let bad_exit _ _ ~is_oom:_ = ()
+let bad_exit _ _ _ ~is_oom:_ = ()
 let init _ _ = ()
 let init_monitor _ _ = ()
 let init_end _ = ()

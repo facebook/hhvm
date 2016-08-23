@@ -10,12 +10,14 @@
 #include <folly/Memory.h>
 #include <folly/Range.h>
 
-#include "mcrouter/config.h" // @nolint
-#include "mcrouter/lib/network/gen-cpp2/mc_caret_protocol_types.h" // @nolint
-#include "mcrouter/lib/network/TypedThriftMessage.h" // @nolint
-#include "mcrouter/options.h" // @nolint
 #include "mcrouter/McrouterClient.h" // @nolint
 #include "mcrouter/McrouterInstance.h" // @nolint
+#include "mcrouter/config.h" // @nolint
+#include "mcrouter/lib/McOperation.h" // @nolint
+#include "mcrouter/lib/McResUtil.h" // @nolint
+#include "mcrouter/lib/network/CarbonMessageList.h" // @nolint
+#include "mcrouter/lib/network/gen/MemcacheCarbon.h" // @nolint
+#include "mcrouter/options.h" // @nolint
 
 namespace mc  = facebook::memcache;
 namespace mcr = facebook::memcache::mcrouter;
@@ -94,23 +96,25 @@ namespace {
 template <class Reply>
 uint64_t getDelta(const Reply& reply) {
   mcr_throwException(
-      "getDelta expected arithmetic reply type", Reply::OpType::mc_op);
+      "getDelta expected arithmetic reply type",
+      mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);
 }
-uint64_t getDelta(const mc::TypedThriftReply<mc::cpp2::McIncrReply>& reply) {
-  return reply->get_delta() ? *reply->get_delta() : 0;
+uint64_t getDelta(const mc::McIncrReply& reply) {
+  return reply.delta();
 }
-uint64_t getDelta(const mc::TypedThriftReply<mc::cpp2::McDecrReply>& reply) {
-  return reply->get_delta() ? *reply->get_delta() : 0;
+uint64_t getDelta(const mc::McDecrReply& reply) {
+  return reply.delta();
 }
 
 // Helpers for retrieving 'casToken' field
 template <class Reply>
 uint64_t getCasToken(const Reply& reply) {
   mcr_throwException(
-      "getCasToken expected reply type McGetsReply", Reply::OpType::mc_op);
+      "getCasToken expected reply type McGetsReply",
+      mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);
 }
-uint64_t getCasToken(const mc::TypedThriftReply<mc::cpp2::McGetsReply>& reply) {
-  return reply->get_casToken() ? *reply->get_casToken() : 0;
+uint64_t getCasToken(const mc::McGetsReply& reply) {
+  return reply.casToken();
 }
 
 } // anonymous
@@ -227,17 +231,19 @@ struct MCRouterResult : AsioExternalThreadEvent {
    */
   template <class Request>
   void result(const Request& request, mc::ReplyT<Request>&& reply) {
-    if (reply.isError()) {
+    if (mc::isErrorResult(reply.result())) {
       setResultException(request, reply);
     } else {
-      switch (Request::OpType::mc_op) {
+      const auto mc_op = mc::McOperation<
+          mc::OpFromType<Request, mc::RequestOpMapping>::value>::mc_op;
+      switch (mc_op) {
         case mc_op_add:
         case mc_op_cas:
         case mc_op_set:
         case mc_op_replace:
         case mc_op_prepend:
         case mc_op_append:
-          if (!reply.isStored()) {
+          if (!mc::isStoredResult(reply.result())) {
             setResultException(request, reply);
             break;
           }
@@ -259,7 +265,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
 
         case mc_op_incr:
         case mc_op_decr:
-          if (!reply.isStored()) {
+          if (!mc::isStoredResult(reply.result())) {
             setResultException(request, reply);
             break;
           }
@@ -272,18 +278,17 @@ struct MCRouterResult : AsioExternalThreadEvent {
           /* fallthrough */
         case mc_op_get:
           m_flags = reply.flags();
-          if (reply.isMiss()) {
+          if (mc::isMissResult(reply.result())) {
             setResultException(request, reply);
             break;
           }
           /* fallthrough */
         case mc_op_version:
-          m_result.m_type =
-            (Request::OpType::mc_op == mc_op_gets) ? KindOfArray : KindOfString;
+          m_result.m_type = mc_op == mc_op_gets ? KindOfArray : KindOfString;
           m_result.m_data.pstr = nullptr;
           // We're in the wrong thread for making a StringData
           // so stash it in a std::string until we get to unserialize
-          m_stringResult = reply.valueRangeSlow().str();
+          m_stringResult = carbon::valueRangeSlow(reply).str();
           break;
 
         default:
@@ -300,16 +305,17 @@ struct MCRouterResult : AsioExternalThreadEvent {
   template <class Request>
   void setResultException(const Request& request,
                           const mc::ReplyT<Request>& reply) {
-    m_op = Request::OpType::mc_op;
+    m_op = mc::McOperation<
+        mc::OpFromType<Request, mc::RequestOpMapping>::value>::mc_op;
     m_replyCode = reply.result();
     m_exception  = mc_op_to_string(m_op);
     m_exception += " failed with result ";
     m_exception += mc_res_to_string(m_replyCode);
-    if (reply->get_message() && !reply->get_message()->empty()) {
+    if (!reply.message().empty()) {
       m_exception += ": ";
-      m_exception += *reply->get_message();
+      m_exception += reply.message();
     }
-    m_key = request.fullKey().str();
+    m_key = request.key().fullKey().str();
   }
 
   Cell m_result;
@@ -364,63 +370,56 @@ static void HHVM_METHOD(MCRouter, __construct,
 template <class M>
 static Object mcr_str(ObjectData* this_, const String& key) {
   return Native::data<MCRouter>(this_)->issue(
-      folly::make_unique<const mc::TypedThriftRequest<M>>(
-        folly::StringPiece(key.c_str(), key.size())));
+      folly::make_unique<const M>(folly::StringPiece(key.c_str(), key.size())));
 }
 
-template <class M>
+template <class Request>
 static Object mcr_set(ObjectData* this_,
                       const String& key, const String& val,
                       int64_t flags, int64_t expiration) {
-  using Request = mc::TypedThriftRequest<M>;
-
-  auto request = folly::make_unique<Request>(
-      folly::StringPiece(key.c_str(), key.size()));
-  request->setValue(folly::StringPiece(val.c_str(), val.size()));
-  request->setFlags(flags);
-  request->setExptime(expiration);
+  auto request =
+      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+  request->value() = folly::IOBuf(
+      folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
+  request->flags() = flags;
+  request->exptime() = expiration;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
 
-template <class M>
+template <class Request>
 static Object mcr_aprepend(ObjectData* this_,
                            const String& key, const String& val) {
-  using Request = mc::TypedThriftRequest<M>;
-
-  auto request = folly::make_unique<Request>(
-      folly::StringPiece(key.c_str(), key.size()));
-  request->setValue(folly::StringPiece(val.c_str(), val.size()));
+  auto request =
+      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+  request->value() = folly::IOBuf(
+      folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
 
-template <class M>
+template <class Request>
 static Object mcr_str_delta(ObjectData* this_,
                             const String& key, int64_t val) {
-  using Request = mc::TypedThriftRequest<M>;
-
-  auto request = folly::make_unique<Request>(
-      folly::StringPiece(key.c_str(), key.size()));
-  (*request)->set_delta(val);
+  auto request =
+      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+  request->delta() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
 
 static Object mcr_flushall(ObjectData* this_, int64_t val) {
-  using Request = mc::TypedThriftRequest<mc::cpp2::McFlushAllRequest>;
+  using Request = mc::McFlushAllRequest;
 
   auto request = folly::make_unique<Request>("unused");
-  (*request)->set_delay(val);
+  request->delay() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
 
 static Object mcr_version(ObjectData* this_) {
   return Native::data<MCRouter>(this_)->issue(
-      folly::make_unique<
-        const mc::TypedThriftRequest<mc::cpp2::McVersionRequest>>(
-          "unused"));
+      folly::make_unique<const mc::McVersionRequest>("unused"));
 }
 
 static Object HHVM_METHOD(MCRouter, cas,
@@ -428,13 +427,14 @@ static Object HHVM_METHOD(MCRouter, cas,
                           const String& key,
                           const String& val,
                           int64_t expiration /*=0*/) {
-  using Request = mc::TypedThriftRequest<mc::cpp2::McCasRequest>;
+  using Request = mc::McCasRequest;
 
   auto request = folly::make_unique<Request>(
       folly::StringPiece(key.c_str(), key.size()));
-  request->setValue(folly::StringPiece(val.c_str(), val.size()));
-  request->setExptime(expiration);
-  (*request)->set_casToken(cas);
+  request->value() = folly::IOBuf(
+      folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
+  request->exptime() = expiration;
+  request->casToken() = cas;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
@@ -469,19 +469,19 @@ struct MCRouterExtension : Extension {
   void moduleInit() override {
     HHVM_ME(MCRouter, __construct);
 
-    HHVM_NAMED_ME(MCRouter, get,  mcr_str<mc::cpp2::McGetRequest>);
-    HHVM_NAMED_ME(MCRouter, gets, mcr_str<mc::cpp2::McGetsRequest>);
+    HHVM_NAMED_ME(MCRouter, get,  mcr_str<mc::McGetRequest>);
+    HHVM_NAMED_ME(MCRouter, gets, mcr_str<mc::McGetsRequest>);
 
-    HHVM_NAMED_ME(MCRouter, add, mcr_set<mc::cpp2::McAddRequest>);
-    HHVM_NAMED_ME(MCRouter, set, mcr_set<mc::cpp2::McSetRequest>);
-    HHVM_NAMED_ME(MCRouter, replace, mcr_set<mc::cpp2::McReplaceRequest>);
-    HHVM_NAMED_ME(MCRouter, prepend, mcr_aprepend<mc::cpp2::McPrependRequest>);
-    HHVM_NAMED_ME(MCRouter, append, mcr_aprepend<mc::cpp2::McAppendRequest>);
+    HHVM_NAMED_ME(MCRouter, add, mcr_set<mc::McAddRequest>);
+    HHVM_NAMED_ME(MCRouter, set, mcr_set<mc::McSetRequest>);
+    HHVM_NAMED_ME(MCRouter, replace, mcr_set<mc::McReplaceRequest>);
+    HHVM_NAMED_ME(MCRouter, prepend, mcr_aprepend<mc::McPrependRequest>);
+    HHVM_NAMED_ME(MCRouter, append, mcr_aprepend<mc::McAppendRequest>);
 
-    HHVM_NAMED_ME(MCRouter, incr, mcr_str_delta<mc::cpp2::McIncrRequest>);
-    HHVM_NAMED_ME(MCRouter, decr, mcr_str_delta<mc::cpp2::McDecrRequest>);
+    HHVM_NAMED_ME(MCRouter, incr, mcr_str_delta<mc::McIncrRequest>);
+    HHVM_NAMED_ME(MCRouter, decr, mcr_str_delta<mc::McDecrRequest>);
 
-    HHVM_NAMED_ME(MCRouter, del, mcr_str<mc::cpp2::McDeleteRequest>);
+    HHVM_NAMED_ME(MCRouter, del, mcr_str<mc::McDeleteRequest>);
     HHVM_NAMED_ME(MCRouter, flushAll, mcr_flushall);
 
     HHVM_NAMED_ME(MCRouter, version, mcr_version);

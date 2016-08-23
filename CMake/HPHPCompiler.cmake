@@ -31,6 +31,13 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     "attributes"
     "maybe-uninitialized"
   )
+  
+  # Warnings to disable by name when building C code.
+  set(DISABLED_C_NAMED_WARNINGS)
+  list(APPEND DISABLED_C_NAMED_WARNINGS
+    "missing-field-initializers"
+    "sign-compare"
+  )
 
   # General options to pass to both C & C++ compilers
   set(GENERAL_OPTIONS)
@@ -104,6 +111,9 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "unused-local-typedefs"
       "deprecated-declarations"
       "unused-function"
+    )
+    list(APPEND DISABLED_C_NAMED_WARNINGS
+      "old-style-declaration"
     )
     list(APPEND GENERAL_CXX_OPTIONS
       "ffunction-sections"
@@ -201,10 +211,15 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
-  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration -Wno-missing-field-initializers -Wno-sign-compare -Wno-old-style-declaration")
+  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration")
+  
 
   foreach(opt ${DISABLED_NAMED_WARNINGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${opt}")
+  endforeach()
+  
+  foreach(opt ${DISABLED_C_NAMED_WARNINGS})
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-${opt}")
   endforeach()
 
   foreach(opt ${GENERAL_OPTIONS})

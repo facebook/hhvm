@@ -6,3 +6,4 @@ val run_loop_once:
 
 val fail: string -> unit
 val assertEqual: string -> string -> unit
+val assertSingleError: string -> Errors.error list -> unit

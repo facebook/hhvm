@@ -44,3 +44,10 @@ let fail x =
 let assertEqual expected got =
   if expected <> got then fail
     (Printf.sprintf "Expected:\n%s\nGot:\n%s\n" expected got)
+
+let assertSingleError expected err_list =
+  match err_list with
+  | [x] ->
+      let error_string = Errors.(to_string (to_absolute x)) in
+      assertEqual expected error_string
+  | _ -> fail "Expected to have exactly one error"

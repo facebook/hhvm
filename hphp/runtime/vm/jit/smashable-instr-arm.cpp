@@ -58,6 +58,8 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
   a.    dc64 (imm);
   a.    bind (&after_data);
 
+  __builtin___clear_cache(reinterpret_cast<char*>(start),
+                          reinterpret_cast<char*>(cb.frontier()));
   return start;
 }
 
@@ -88,6 +90,8 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
   a.    Ldr  (rAsm, &target_data);
   a.    Blr  (rAsm);
 
+  __builtin___clear_cache(reinterpret_cast<char*>(start),
+                          reinterpret_cast<char*>(cb.frontier()));
   return start;
 }
 
@@ -104,6 +108,8 @@ TCA emitSmashableJmpImpl(CodeBlock& cb, TCA target) {
   a.    bind (&target_data);
   a.    dc64 (target);
 
+  __builtin___clear_cache(reinterpret_cast<char*>(start),
+                          reinterpret_cast<char*>(cb.frontier()));
   return start;
 }
 
@@ -130,6 +136,8 @@ TCA emitSmashableJccImpl(CodeBlock& cb, TCA target, ConditionCode cc) {
   emitSmashableJmpImpl(cb, target);
   a.    bind (&after_data);
 
+  __builtin___clear_cache(reinterpret_cast<char*>(start),
+                          reinterpret_cast<char*>(cb.frontier()));
   return start;
 }
 
@@ -144,8 +152,8 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
 template<typename T>
 static void smashInstr(TCA inst, T target, size_t sz) {
   *reinterpret_cast<T*>(inst + sz - 8) = target;
-  auto begin = reinterpret_cast<char*>(inst + sz - 8);
-  auto end = reinterpret_cast<char*>(inst + sz);
+  auto const end = reinterpret_cast<char*>(inst + sz);
+  auto const begin = end - 8;
   __builtin___clear_cache(begin, end);
 }
 
@@ -160,8 +168,8 @@ void smashCmpq(TCA inst, uint32_t target) {
 void smashCall(TCA inst, TCA target) {
   // Skip over the initial branch instruction
   *reinterpret_cast<TCA*>(inst + 4) = target;
-  auto begin = reinterpret_cast<char*>(inst + 4);
-  auto end = reinterpret_cast<char*>(inst + 4 + 8);
+  auto const begin = reinterpret_cast<char*>(inst + 4);
+  auto const end = begin + 8;
   __builtin___clear_cache(begin, end);
 }
 
@@ -175,8 +183,8 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
     CodeBlock cb;
     cb.init(inst, smashableJccLen(), "smashJcc");
     emitSmashableJccImpl(cb, target, cc);
-    auto begin = reinterpret_cast<char*>(cb.frontier());
-    auto end = reinterpret_cast<char*>(cb.frontier() + smashableJccLen());
+    auto const begin = reinterpret_cast<char*>(cb.frontier());
+    auto const end = begin + smashableJccLen();
     __builtin___clear_cache(begin, end);
   } else {
     // Update the target address

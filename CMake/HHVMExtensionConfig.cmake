@@ -908,14 +908,14 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
         /usr/lib
         /usr/local/lib
     )
-    IF (PGSQL_INCLUDE_DIR AND PGSQL_LIBRARY)
-      if(${addPaths})
-        include_directories(${PGSQL_INCLUDE_DIR})
-        link_libraries(${PGSQL_LIBRARY})
-      endif()
-    else()
+    IF (NOT PGSQL_INCLUDE_DIR OR NOT PGSQL_LIBRARY)
       HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
       return()
+    endif()
+    
+    if(${addPaths})
+      include_directories(${PGSQL_INCLUDE_DIR})
+      link_libraries(${PGSQL_LIBRARY})
     endif()
   elseif (${libraryName} STREQUAL "png")
     find_package(LibPng ${requiredVersion})

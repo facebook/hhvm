@@ -60,6 +60,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
   vixl::Label target_data;
+  auto start = cb.frontier();
 
   assertx(arm::abi(CodeKind::CrossTrace).gpUnreserved.contains(vixl::x0));
 
@@ -74,6 +75,8 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   a.  bind  (&target_data);
   a.  dc64  (mcg->ustubs().funcPrologueRedispatch);
   a.  bind  (&after_data);
+
+  __builtin___clear_cache(start, cb.frontier());
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* func) {

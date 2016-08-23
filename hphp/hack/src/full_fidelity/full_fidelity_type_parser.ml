@@ -201,7 +201,16 @@ and parse_generic_type_argument_list_opt parser =
     (parser, make_missing())
 
 and parse_type_list parser close_kind =
-  parse_comma_list parser close_kind SyntaxError.error1007 parse_type_specifier
+  (* SPEC:
+    type-specifier-list:
+      type-specifiers  ,opt
+
+    type-specifiers:
+      type-specifier
+      type-specifiers  ,  type-specifier
+  *)
+  parse_comma_list_allow_trailing parser close_kind SyntaxError.error1007
+    parse_type_specifier
 
 and parse_type_or_ellipsis_list parser close_kind =
   parse_comma_list parser close_kind SyntaxError.error1007
@@ -214,6 +223,14 @@ and parse_type_or_ellipsis parser =
   | _ -> parse_type_specifier parser
 
 and parse_generic_type_argument_list parser =
+  (* SPEC:
+    generic-type-argument-list:
+      <  generic-type-arguments  ,opt  >
+
+    generic-type-arguments:
+      generic-type-argument
+      generic-type-arguments  ,  generic-type-argument
+  *)
   let (parser, open_angle) = next_token parser in
   let open_angle = make_token open_angle in
   let (parser, args) = parse_type_list parser GreaterThan in
@@ -304,6 +321,10 @@ and parse_tuple_type_specifier parser =
       tuple-type-specifier:
         ( type-specifier  ,  type-specifier-list  )
   *)
+
+  (* TODO: Here we parse a type list with one or more items, but the grammar
+     actually requires a type list with two or more items. Give an error in
+     a later pass if there is only one item here. *)
 
   let (parser, left_paren) = next_token parser in
   let left_paren = make_token left_paren in

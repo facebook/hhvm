@@ -12,6 +12,8 @@ open Integration_test_base_types
 
 val setup_server: unit -> ServerEnv.env
 
+val setup_disk: ServerEnv.env -> disk_changes_type -> ServerEnv.env
+
 val default_loop_input: ('a, 'b) loop_inputs
 
 val run_loop_once: ServerEnv.env -> ('a, 'b) loop_inputs ->

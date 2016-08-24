@@ -77,6 +77,14 @@ let assertEqual expected got =
   if expected <> got then fail
     (Printf.sprintf "Expected:\n%s\nGot:\n%s\n" expected got)
 
+let setup_disk env disk_changes =
+  let env, loop_output = run_loop_once env { default_loop_input with
+    disk_changes
+  } in
+  if not loop_output.did_read_disk_changes then
+    fail "Expected the server to process disk updates";
+  env
+
 let assertSingleError expected err_list =
   match err_list with
   | [x] ->

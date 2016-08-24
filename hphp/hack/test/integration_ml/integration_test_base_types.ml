@@ -12,8 +12,10 @@ type 'a new_client_type =
   | RequestResponse of 'a ServerCommandTypes.t
   | ConnectPersistent
 
+type disk_changes_type = (string * string) list
+
 type ('a, 'b) loop_inputs = {
-  disk_changes : (string * string) list;
+  disk_changes : disk_changes_type;
   new_client : 'a new_client_type option;
   persistent_client_request : 'b ServerCommandTypes.t option;
 }

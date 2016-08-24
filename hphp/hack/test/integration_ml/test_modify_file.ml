@@ -17,11 +17,11 @@ let foo_changes = "<?hh
 
 let () =
   let env = Test.setup_server () in
-  let env, loop_output = Test.run_loop_once env {
+  let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
       "foo.php", foo_contents;
     ]
-  } in
+  }) in
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   begin
@@ -29,11 +29,11 @@ let () =
       | [] -> ()
       | _ -> Test.fail "Expected no errors"
   end;
-  let env, loop_output = Test.run_loop_once env {
+  let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
       "foo.php", foo_changes;
     ]
-  } in
+  }) in
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
 

@@ -1,5 +1,16 @@
+(**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the "hack" directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ *)
+ 
 open Core
 open Integration_test_base_types
+open ServerCommandTypes
 
 let root = "/"
 let stats = ServerMain.empty_stats ()
@@ -12,7 +23,24 @@ let setup_server () =
   let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
   ServerEnvBuild.make_env !genv.ServerEnv.config
 
+let default_loop_input = {
+  disk_changes = [];
+  new_client = None;
+  persistent_client_request = None;
+}
+
 let run_loop_once env inputs =
+  TestClientProvider.clear();
+  Option.iter inputs.new_client (function
+  | RequestResponse x ->
+    TestClientProvider.mock_new_client_type Non_persistent;
+    TestClientProvider.mock_client_request x
+  | ConnectPersistent ->
+    TestClientProvider.mock_new_client_type Persistent);
+
+  Option.iter inputs.persistent_client_request
+    TestClientProvider.mock_persistent_client_request;
+
   let client_provider = ClientProvider.provider_for_test () in
 
   let disk_changes =
@@ -34,7 +62,11 @@ let run_loop_once env inputs =
 
   let env = ServerMain.serve_one_iteration genv env client_provider stats in
   env, {
-    did_read_disk_changes = !did_read_disk_changes_ref
+    did_read_disk_changes = !did_read_disk_changes_ref;
+    new_client_response =
+      TestClientProvider.get_client_response Non_persistent;
+    persistent_client_response =
+      TestClientProvider.get_client_response Persistent;
   }
 
 let fail x =

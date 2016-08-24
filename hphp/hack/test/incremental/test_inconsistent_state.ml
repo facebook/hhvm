@@ -60,16 +60,16 @@ let errors_to_string errors =
 let () =
   let env = Test.setup_server () in
 
-  let env, _ = Test.run_loop_once env {
+  let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = init_disk_changes;
-  } in
+  }) in
   let errors = Errors.get_sorted_error_list env.errorl in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors);
 
-  let env, _ = Test.run_loop_once env {
+  let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = next_disk_changes;
-  } in
+  }) in
   let errors = Errors.get_sorted_error_list env.errorl in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors)

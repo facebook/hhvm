@@ -50,33 +50,33 @@ let () =
   let env = Test.setup_server () in
 
   (* Initially we expect no errors *)
-  let env, _ = Test.run_loop_once env {
+  let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = make_disk_changes init_base_content;
-  } in
+  }) in
   let errors = Errors.get_sorted_error_list env.errorl in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors);
 
   (* We expect errors when we change base.php to err_base_content *)
-  let env, _ = Test.run_loop_once env {
+  let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = make_disk_changes err_base_content;
-  } in
+  }) in
   let expected_errors = Errors.get_sorted_error_list env.errorl in
   if expected_errors = [] then
     Test.fail "Expected there to be errors!";
 
   (* We reset the disk changes to the initial state. Should be no errors *)
-  let env, _ = Test.run_loop_once env {
+  let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = make_disk_changes init_base_content;
-  } in
+  }) in
   let errors = Errors.get_sorted_error_list env.errorl in
   if errors <> [] then
     Test.fail ("Expected no errors. Got:\n" ^ errors_to_string errors);
 
   (* We now change only base.php. We expect the same errors as before *)
-  let env, _ = Test.run_loop_once env {
+  let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = ["base.php", err_base_content];
-  } in
+  }) in
   let incremental_errors = Errors.get_sorted_error_list env.errorl in
   if incremental_errors <> expected_errors then
     Test.fail (

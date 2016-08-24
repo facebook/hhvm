@@ -20,7 +20,7 @@ module Env = Typing_env
 module SN = Naming_special_names
 
 let insert_resolved_result fn acc result =
-  let pl = try Relative_path.Map.find_unsafe fn acc with Not_found -> [] in
+  let pl = try Relative_path.Map.find_unsafe acc fn with Not_found -> [] in
   let pl = result :: pl in
   Relative_path.Map.add acc ~key:fn ~data:pl
 
@@ -182,7 +182,7 @@ let collate_types fast all_types =
     (* Discard patches from files we aren't concerned about. This can happen if
      * a file we do care about calls a function in a file we don't, causing us
      * to infer a parameter type in the target file. *)
-    if Relative_path.Map.mem fn fast
+    if Relative_path.Map.mem fast fn
     then Hashtbl.add tbl (fn, line, k) (env, ty);
   end;
   tbl

@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Reordered_argument_collections
 open ServerEnv
 open File_content
 open ServerCommandTypes
@@ -83,34 +84,34 @@ let handle : type a. genv -> env -> a t -> env * a =
         let content =
           try Sys_utils.cat path with _ -> "" in
         let fc = of_content ~content in
-        let edited_files_ = (SMap.add path fc env.edited_files) in
-        let files_to_check_ = (SSet.add path env.files_to_check) in
+        let edited_files_ = (SMap.add env.edited_files path fc) in
+        let files_to_check_ = (SSet.add env.files_to_check path) in
         let new_env = {env with edited_files = edited_files_;
           files_to_check = files_to_check_} in
         new_env, ()
     | CLOSE_FILE path ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
-        let edited_files_ = SMap.remove path env.edited_files in
-        let files_to_check_ = (SSet.remove path env.files_to_check) in
+        let edited_files_ = SMap.remove env.edited_files path in
+        let files_to_check_ = SSet.remove env.files_to_check path in
         let new_env = {env with edited_files = edited_files_;
           files_to_check = files_to_check_} in
         new_env, ()
     | EDIT_FILE (path, edits) ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
-        let fc = try SMap.find_unsafe path env.edited_files
+        let fc = try SMap.find_unsafe env.edited_files path
         with Not_found ->
           let content = try Sys_utils.cat path with _ -> "" in
           of_content ~content in
         let edited_fc = edit_file fc edits in
-        let edited_files_ = (SMap.add path edited_fc env.edited_files) in
-        let files_to_check_ = (SSet.add path env.files_to_check) in
+        let edited_files_ = (SMap.add env.edited_files path edited_fc) in
+        let files_to_check_ = (SSet.add env.files_to_check path) in
         let new_env = {env with edited_files = edited_files_;
           files_to_check = files_to_check_} in
         new_env, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
         let fc = try
-        SMap.find_unsafe path env.edited_files
+        SMap.find_unsafe env.edited_files path
         with Not_found ->
         let content = try Sys_utils.cat path with _ -> "" in
         of_content content in
@@ -120,16 +121,16 @@ let handle : type a. genv -> env -> a t -> env * a =
         env, ServerAutoComplete.auto_complete env.tcopt content
     | IDE_HIGHLIGHT_REF (path, {line; column}) ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
-        begin match SMap.exists (fun p _ -> p = path) env.edited_files with
+        begin match SMap.exists env.edited_files (fun p _ -> p = path) with
         | true ->
-          begin match SMap.exists (fun p _ -> p = path) env.symbols_cache with
+          begin match SMap.exists env.symbols_cache (fun p _ -> p = path) with
           | true ->
             env, ServerHighlightRefs.go_from_file (path, line, column) env
           | false ->
-            let content = File_content.get_content @@ SMap.find_unsafe path
-              env.edited_files in
+            let content = File_content.get_content @@
+              SMap.find_unsafe env.edited_files path in
             let res = ServerIdentifyFunction.get_full_occurrence_pair content in
-            let symbols_cache_ = SMap.add path res env.symbols_cache in
+            let symbols_cache_ = SMap.add env.symbols_cache path res in
             let env = {env with symbols_cache = symbols_cache_} in
             env, ServerHighlightRefs.go_from_file (path, line, column) env
           end
@@ -139,16 +140,16 @@ let handle : type a. genv -> env -> a t -> env * a =
         end
     | IDE_IDENTIFY_FUNCTION (path, {line; column}) ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
-        begin match SMap.exists (fun p _ -> p = path) env.edited_files with
+        begin match SMap.exists env.edited_files (fun p _ -> p = path) with
         | true ->
-          begin match SMap.exists (fun p _ -> p = path) env.symbols_cache with
+          begin match SMap.exists env.symbols_cache (fun p _ -> p = path) with
           | true ->
             env, ServerIdentifyFunction.go_from_file (path, line, column) env
           | false ->
-            let content = File_content.get_content @@ SMap.find_unsafe path
-              env.edited_files in
+            let content = File_content.get_content @@
+              SMap.find_unsafe env.edited_files path in
             let res = ServerIdentifyFunction.get_full_occurrence_pair content in
-            let symbols_cache_ = SMap.add path res env.symbols_cache in
+            let symbols_cache_ = SMap.add env.symbols_cache path res in
             let env = {env with symbols_cache = symbols_cache_} in
             env, ServerIdentifyFunction.go_from_file (path, line, column) env
           end

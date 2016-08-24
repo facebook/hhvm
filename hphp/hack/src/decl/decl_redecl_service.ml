@@ -139,7 +139,7 @@ let otf_decl_files tcopt filel =
 
 let compute_deps fast filel =
   let infol =
-    List.map filel (fun fn -> Relative_path.Map.find_unsafe fn fast) in
+    List.map filel (fun fn -> Relative_path.Map.find_unsafe fast fn) in
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names in
   let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in

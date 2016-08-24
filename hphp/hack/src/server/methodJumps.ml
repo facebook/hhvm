@@ -59,7 +59,7 @@ let check_if_extends_class_and_find_methods tcopt target_class_name mthds
   match class_ with
   | None -> acc
   | Some c
-      when SMap.mem target_class_name c.Typing_defs.tc_ancestors ->
+      when SMap.mem c.Typing_defs.tc_ancestors target_class_name ->
         let acc = get_overridden_methods tcopt
                       target_class_name mthds
                       class_name
@@ -90,7 +90,7 @@ let find_extended_classes_in_files tcopt target_class_name mthds
 let find_extended_classes_in_files_parallel tcopt workers target_class_name
       mthds target_class_pos files_info files =
   let classes = Relative_path.Set.fold files ~init:[] ~f:begin fun fn acc ->
-    let { FileInfo.classes; _ } = Relative_path.Map.find_unsafe fn files_info in
+    let { FileInfo.classes; _ } = Relative_path.Map.find_unsafe files_info fn in
     classes :: acc
   end in
 

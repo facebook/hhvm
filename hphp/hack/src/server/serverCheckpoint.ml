@@ -37,6 +37,6 @@ let retrieve_checkpoint x =
 let delete_checkpoint x =
   match SMap.get !checkpoints x with
   | Some _ ->
-      checkpoints := SMap.remove x !checkpoints;
+      checkpoints := SMap.remove !checkpoints x;
       true
   | None -> false

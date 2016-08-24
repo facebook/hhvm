@@ -108,7 +108,7 @@ let add_old_decls old_files_info fast =
 let reparse_infos files_info fast =
   Relative_path.Map.fold fast ~f:begin fun x _y acc ->
     try
-      let info = Relative_path.Map.find_unsafe x files_info in
+      let info = Relative_path.Map.find_unsafe files_info x in
       if info.FileInfo.consider_names_just_for_autoload then acc else
       Relative_path.Map.add acc ~key:x ~data:info
     with Not_found -> acc
@@ -144,7 +144,8 @@ let remove_decls env fast_parsed =
 (*****************************************************************************)
 
 let remove_failed fast failed =
-  Relative_path.Set.fold failed ~init:fast ~f:Relative_path.Map.remove
+  Relative_path.Set.fold failed ~init:fast
+    ~f:(fun x m -> Relative_path.Map.remove m x)
 
 (*****************************************************************************)
 (* Parses the set of modified files *)
@@ -153,8 +154,8 @@ let remove_failed fast failed =
 let parsing genv env =
   let files_map = SSet.fold env.files_to_check ~init:SMap.empty
     ~f:(fun path map ->
-      let content = File_content.get_content @@ SMap.find_unsafe path
-        env.edited_files in
+      let content = File_content.get_content @@
+        SMap.find_unsafe env.edited_files path in
       SMap.add map path content) in
   let to_check = SSet.fold env.files_to_check ~init:env.failed_parsing
     ~f:(fun path set ->
@@ -214,12 +215,12 @@ let type_check genv env =
   (* PREPARE FOR PARSING *)
   let failed_parsing_ide, failed_parsing_ = Relative_path.Set.partition
     (fun fn -> let path = Relative_path.to_absolute fn in
-      SMap.exists (fun p _ -> p = path) env.edited_files) env.failed_parsing in
+      SMap.exists env.edited_files (fun p _ -> p = path)) env.failed_parsing in
   let files_to_check_ = Relative_path.Set.fold failed_parsing_ide
     ~init:SSet.empty ~f:(fun fn set ->
       SSet.add set (Relative_path.to_absolute fn)) in
   let check_now = SSet.filter files_to_check_ (fun s -> not @@
-      File_content.being_edited @@ SMap.find_unsafe s env.edited_files) in
+      File_content.being_edited @@ SMap.find_unsafe env.edited_files s) in
   let env = {env with failed_parsing = failed_parsing_;
     files_to_check = check_now} in
   let reparse_count = Relative_path.Set.cardinal env.failed_parsing +
@@ -229,7 +230,7 @@ let type_check genv env =
 
   (* RESET HIGHLIGHTS CACHE FOR RECHECKED IDE FILES *)
   let symbols_cache = SSet.fold env.files_to_check ~init:env.symbols_cache
-    ~f:(fun path map -> SMap.remove path map) in
+    ~f:(fun path map -> SMap.remove map path) in
 
   (* PARSING *)
   let start_t = Unix.gettimeofday () in

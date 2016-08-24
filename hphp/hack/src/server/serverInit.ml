@@ -384,7 +384,7 @@ let init ?load_mini_script genv =
   let env, t = naming env t in
   let fast = FileInfo.simplify_fast env.files_info in
   let fast = Relative_path.Set.fold env.failed_parsing
-    ~f:Relative_path.Map.remove ~init:fast in
+    ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
   let env, t =
     if lazy_decl then env, t
     else type_decl genv env fast t in

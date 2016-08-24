@@ -224,7 +224,7 @@ let rec recheck_loop acc genv env =
   let check_later, raw_updates = match acc.rechecked_batches with
   | 0 ->
     let check_later, check_now = SSet.partition (fun s ->
-      File_content.being_edited @@ SMap.find_unsafe s env.edited_files)
+      File_content.being_edited @@ SMap.find_unsafe env.edited_files s)
       env.files_to_check in
     check_later, SSet.union raw_updates check_now
   | _ -> acc.check_later, raw_updates in

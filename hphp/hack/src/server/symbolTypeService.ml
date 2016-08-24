@@ -91,7 +91,7 @@ let generate_types lvar_map type_map =
     let ident = Pos.Map.find_unsafe lvar_pos lvar_map in
     let types_in_line = SymbolUtils.LineMap.get key line_map in
     let lvar_rekey_map = Relative_path.Map.find_unsafe
-      (Pos.filename lvar_pos) file_lvar_rekeying_map in
+      file_lvar_rekeying_map (Pos.filename lvar_pos) in
     let lvar_type = match types_in_line with
     | Some types_list ->
         find_match_pos_in_list lvar_pos types_list

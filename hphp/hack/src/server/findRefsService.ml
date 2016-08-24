@@ -50,7 +50,7 @@ let check_if_extends_class tcopt target_class_name class_name =
   let class_ = Typing_lazy_heap.get_class tcopt class_name in
   match class_ with
   | Some { Typing_defs.tc_ancestors = imps; _ }
-      when SMap.mem target_class_name imps -> true
+      when SMap.mem imps target_class_name -> true
   | _ -> false
 
 let is_target_class tcopt target_classes class_name =
@@ -144,7 +144,7 @@ let find_child_classes tcopt target_class_name files_info files =
   Relative_path.Set.fold files ~init:SSet.empty ~f:begin fun fn acc ->
     (try
       let { FileInfo.classes; _ } =
-        Relative_path.Map.find_unsafe fn files_info in
+        Relative_path.Map.find_unsafe files_info fn in
       List.fold_left classes ~init:acc ~f:begin fun acc cid ->
         add_if_extends_class tcopt target_class_name (snd cid) acc
       end

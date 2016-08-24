@@ -20,6 +20,7 @@ let setup_server () =
   Printexc.record_backtrace true;
   EventLogger.init (Daemon.devnull ()) 0.0;
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
+  HackSearchService.attach_hooks ();
   let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
   ServerEnvBuild.make_env !genv.ServerEnv.config
 
@@ -84,6 +85,14 @@ let setup_disk env disk_changes =
   if not loop_output.did_read_disk_changes then
     fail "Expected the server to process disk updates";
   env
+
+let connect_persistent_client env =
+  let env, _ = run_loop_once env { default_loop_input with
+    new_client = Some ConnectPersistent
+  } in
+  match env.ServerEnv.persistent_client with
+  | Some _ -> env
+  | None -> fail "Expected persistent client to be connected"
 
 let assertSingleError expected err_list =
   match err_list with

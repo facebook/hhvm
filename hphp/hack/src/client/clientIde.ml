@@ -10,7 +10,7 @@
 open IdeJson
 
 module Cmd = ServerCommand
-module Rpc = ServerRpc
+module Rpc = ServerCommandTypes
 module SMUtils = ServerMonitorUtils
 
 type env = {

@@ -143,7 +143,8 @@ let go conn args mode before after =
     | _ ->
         failwith "Unexpected Mode" in
 
-    let patches = ServerCommand.rpc conn @@ ServerRpc.REFACTOR command in
+    let patches =
+      ServerCommand.rpc conn @@ ServerCommandTypes.REFACTOR command in
     let file_map = List.fold_left patches
       ~f:map_patches_to_filename ~init:SMap.empty in
     if args.output_json

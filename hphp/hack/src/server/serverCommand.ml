@@ -17,7 +17,7 @@ module TLazyHeap = Typing_lazy_heap
 (****************************************************************************)
 (* Called by the client *)
 (****************************************************************************)
-let rpc : type a. Timeout.in_channel * out_channel -> a ServerRpc.t -> a
+let rpc : type a. Timeout.in_channel * out_channel -> a t -> a
 = fun (_, oc) cmd ->
   Marshal.to_channel oc (Rpc cmd) [];
   flush oc;
@@ -166,10 +166,10 @@ let handle genv env client =
       let cmd_string = ServerRpc.to_string cmd in
       HackEventLogger.handled_command cmd_string t;
       ClientProvider.send_response_to_client client response;
-      if cmd = ServerRpc.DISCONNECT ||
+      if cmd = ServerCommandTypes.DISCONNECT ||
           not @@ (ClientProvider.is_persistent client env)
         then ClientProvider.shutdown_client client;
-      if cmd = ServerRpc.KILL then ServerUtils.die_nicely ();
+      if cmd = ServerCommandTypes.KILL then ServerUtils.die_nicely ();
       new_env
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in

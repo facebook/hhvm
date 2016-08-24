@@ -14,7 +14,7 @@ open Utils
 open ClientRefactor
 
 module Cmd = ServerCommand
-module Rpc = ServerRpc
+module Rpc = ServerCommandTypes
 
 let get_list_files conn (args:client_check_env): string list =
   let ic, oc = conn in
@@ -307,7 +307,7 @@ let main args =
     | MODE_REMOVE_DEAD_FIXMES codes ->
       let conn = connect args in
       let patches = ServerCommand.rpc conn @@
-        ServerRpc.REMOVE_DEAD_FIXMES codes in
+        Rpc.REMOVE_DEAD_FIXMES codes in
       let file_map = List.fold_left patches
         ~f:map_patches_to_filename ~init:SMap.empty in
       if args.output_json

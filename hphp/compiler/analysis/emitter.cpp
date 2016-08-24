@@ -11212,7 +11212,7 @@ extern "C" {
  */
 
 Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
-                          const char* filename) {
+                          const char* filename, Unit** releaseUnit) {
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
     Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
@@ -11234,6 +11234,10 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   }
 
   SCOPE_ASSERT_DETAIL("hphp_compiler_parse") { return filename; };
+  std::unique_ptr<Unit> unit;
+  SCOPE_EXIT {
+    if (unit && releaseUnit) *releaseUnit = unit.release();
+  };
 
   try {
     UnitOrigin unitOrigin = UnitOrigin::File;
@@ -11290,7 +11294,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // NOTE: Repo errors are ignored!
     Repo::get().commitUnit(ue.get(), unitOrigin);
 
-    auto unit = ue->create();
+    unit = ue->create();
     ue.reset();
 
     if (unit->sn() == -1) {

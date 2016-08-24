@@ -197,9 +197,12 @@ frame_free_args(TypedValue* args, int count) {
   }
 }
 
-Unit*
-compile_file(const char* s, size_t sz, const MD5& md5, const char* fname);
-Unit* compile_string(const char* s, size_t sz, const char* fname = nullptr);
+// If set, releaseUnit will contain a pointer to any extraneous unit created due
+// to race-conditions while compiling
+Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
+                   Unit** releaseUnit = nullptr);
+Unit* compile_string(const char* s, size_t sz, const char* fname = nullptr,
+                     Unit** releaseUnit = nullptr);
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname);
 Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
                                  ssize_t numBuiltinFuncs);
@@ -235,7 +238,8 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
  * be set up before you use those parts of the runtime.
  */
 
-typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
+typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*,
+                                 Unit**);
 typedef Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
 typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
 

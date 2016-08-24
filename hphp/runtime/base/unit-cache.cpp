@@ -203,13 +203,15 @@ folly::Optional<String> readFileAsString(const StringData* path) {
 }
 
 CachedUnit createUnitFromString(const char* path,
-                                const String& contents) {
+                                const String& contents,
+                                Unit** releaseUnit) {
   auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()))};
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, md5)) {
     return CachedUnit { unit.release(), rds::allocBit() };
   }
-  auto const unit = compile_file(contents.data(), contents.size(), md5, path);
+  auto const unit = compile_file(contents.data(), contents.size(), md5, path,
+                                 releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
 }
 
@@ -220,12 +222,13 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
   if (!f) return CachedUnit{};
   StringBuffer sb;
   sb.read(f.get());
-  return createUnitFromString(requestedPath->data(), sb.detach());
+  return createUnitFromString(requestedPath->data(), sb.detach(), nullptr);
 }
 
-CachedUnit createUnitFromFile(const StringData* const path) {
+CachedUnit createUnitFromFile(const StringData* const path,
+                              Unit** releaseUnit) {
   auto const contents = readFileAsString(path);
-  return contents ? createUnitFromString(path->data(), *contents)
+  return contents ? createUnitFromString(path->data(), *contents, releaseUnit)
                   : CachedUnit{};
 }
 
@@ -262,6 +265,12 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     return path;
   }();
 
+  // Freeing a unit while holding the tbb lock would cause a rank violation when
+  // recycle-tc is enabled as reclaiming dead functions requires that the code
+  // and metadata locks be acquired.
+  Unit* releaseUnit = nullptr;
+  SCOPE_EXIT { if (releaseUnit) delete releaseUnit; };
+
   auto const cuptr = [&] () -> std::shared_ptr<CachedUnitWithFree> {
     NonRepoUnitCache::accessor rpathAcc;
 
@@ -281,7 +290,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
      * expected to be low contention).
      */
 
-    auto const cu = createUnitFromFile(rpath);
+    auto const cu = createUnitFromFile(rpath, &releaseUnit);
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
 #ifdef _MSC_VER
     rpathAcc->second.mtime      = statInfo.st_mtime;

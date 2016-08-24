@@ -151,8 +151,8 @@ StringData* concat_s4(StringData* v1, StringData* v2,
 }
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
-                   const char* fname) {
-  return g_hphp_compiler_parse(s, sz, md5, fname);
+                   const char* fname, Unit** releaseUnit) {
+  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
 }
 
 std::string mangleSystemMd5(const std::string& fileMd5) {
@@ -167,7 +167,8 @@ std::string mangleSystemMd5(const std::string& fileMd5) {
 
 Unit* compile_string(const char* s,
                      size_t sz,
-                     const char* fname /* = nullptr */) {
+                     const char* fname,
+                     Unit** releaseUnit) {
   auto const md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s, sz}))};
   if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
     return u;
@@ -175,7 +176,7 @@ Unit* compile_string(const char* s,
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
-  return g_hphp_compiler_parse(s, sz, md5, fname);
+  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
 }
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {

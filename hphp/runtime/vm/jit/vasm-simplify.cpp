@@ -282,10 +282,9 @@ bool cmp_zero_impl(Env& env, const In& inst, Reg r, Vlabel b, size_t i) {
   if (env.use_counts[inst.sf] != 1) return false;
 
   auto const suitable_use = [&]{
-    // This "cmp zero -> test" simplification is architecture specific. On
-    // PPC64, test vasms are lowered so this simplification (which is
-    // post-vasm-lower) is not desirable.
-    if (arch() == Arch::PPC64) return false;
+    // "cmp zero -> test" simplification is arch specific so it's considered an
+    // opt-in optimization.
+    if (arch() != Arch::X64) return false;
 
     auto const& code = env.unit.blocks[b].code;
     if (i + 1 >= code.size()) return false;

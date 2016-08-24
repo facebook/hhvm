@@ -48,7 +48,7 @@ type env = {
     failed_parsing : Relative_path.Set.t;
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;
-    persistent_client_fd : Unix.file_descr option;
+    persistent_client : ClientProvider.client option;
     (* The map from full path to synchronized file contents *)
     edited_files   : File_content.t SMap.t;
     (* The list of full path of synchronized files need to be type checked *)

@@ -109,8 +109,8 @@ module Program =
           let id = Diagnostic_subscription.get_id new_env.diag_subscribe in
           let errors_json = ServerError.get_errorl_json_array new_env.errorl in
           let res = IdeJson.Diagnostic_response (id, errors_json) in
-          let fd = ServerCommand.get_persistent_fds new_env in
-          ServerCommand.send_response_to_client fd res;
+          let client = Utils.unsafe_opt new_env.persistent_client in
+          ClientProvider.send_response_to_client client res;
         end;
         new_env, total_rechecked
       end
@@ -126,7 +126,7 @@ let handle_connection_ genv env client =
   try
     match ClientProvider.read_connection_type client with
     | Persistent ->
-      (match env.persistent_client_fd with
+      (match env.persistent_client with
       | Some _ ->
         ClientProvider.send_response_to_client client
           Persistent_client_alredy_exists;
@@ -134,9 +134,8 @@ let handle_connection_ genv env client =
       | None ->
         ClientProvider.send_response_to_client client
           Persistent_client_connected;
-        let ic, _ = ClientProvider.get_channels client in
-        { env with persistent_client_fd =
-          Some (Timeout.descr_of_in_channel ic)})
+        { env with persistent_client =
+            Some (ClientProvider.make_persistent client)})
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
@@ -158,7 +157,7 @@ let handle_persistent_connection_ genv env client =
    | Sys_error("Broken pipe") | ServerCommandTypes.Read_command_timeout ->
      ClientProvider.shutdown_client client;
      {env with
-     persistent_client_fd = None;
+     persistent_client = None;
      edited_files = SMap.empty;
      diag_subscribe = Diagnostic_subscription.empty;
      symbols_cache = SMap.empty}
@@ -169,7 +168,7 @@ let handle_persistent_connection_ genv env client =
      Printexc.print_backtrace stderr;
      ClientProvider.shutdown_client client;
      {env with
-     persistent_client_fd = None;
+     persistent_client = None;
      edited_files = SMap.empty;
      diag_subscribe = Diagnostic_subscription.empty;
      symbols_cache = SMap.empty}
@@ -251,9 +250,8 @@ let recheck_loop = recheck_loop empty_recheck_loop_stats
 let serve_one_iteration genv env client_provider stats_refs =
   let last_stats, recheck_id = stats_refs in
   ServerMonitorUtils.exit_if_parent_dead ();
-  let per_fd = env.persistent_client_fd in
   let has_client, has_persistent =
-    ClientProvider.sleep_and_check client_provider per_fd in
+    ClientProvider.sleep_and_check client_provider env.persistent_client in
   let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
   if not has_persistent && not has_client && not has_parsing_hook
   then begin
@@ -301,10 +299,7 @@ let serve_one_iteration genv env client_provider stats_refs =
       env)
   else env in
   if has_persistent then
-    let fd = ServerCommand.get_persistent_fds env in
-    let ic, oc =
-      Timeout.in_channel_of_descr fd, Unix.out_channel_of_descr fd in
-    let client = ClientProvider.client_from_channel_pair (ic, oc) in
+    let client = Utils.unsafe_opt env.persistent_client in
     HackEventLogger.got_persistent_client_channels start_t;
     (try
       let env = handle_connection genv env client true in

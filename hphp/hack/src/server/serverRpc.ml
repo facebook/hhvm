@@ -158,7 +158,7 @@ let handle : type a. genv -> env -> a t -> env * a =
         end
     | DISCONNECT ->
         let new_env = {env with
-        persistent_client_fd = None;
+        persistent_client = None;
         edited_files = SMap.empty;
         diag_subscribe = Diagnostic_subscription.empty;
         symbols_cache = SMap.empty} in

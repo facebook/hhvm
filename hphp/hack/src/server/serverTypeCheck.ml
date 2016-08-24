@@ -152,19 +152,14 @@ let remove_failed fast failed =
 (*****************************************************************************)
 
 let parsing genv env =
-  let files_map = SSet.fold env.files_to_check ~init:SMap.empty
-    ~f:(fun path map ->
-      let content = File_content.get_content @@
-        SMap.find_unsafe env.edited_files path in
-      SMap.add map path content) in
+  let files_map = Relative_path.Map.filter env.edited_files
+    (fun path _ -> Relative_path.Set.mem env.files_to_check path) in
 
-  let to_check = SSet.fold env.files_to_check ~init:env.failed_parsing
-    ~f:(fun path set ->
-      let fn = Relative_path.create Relative_path.Root path in
-      Relative_path.Set.add set fn) in
+  let to_check =
+    Relative_path.Set.union env.files_to_check env.failed_parsing in
 
   let disk_files = Relative_path.Set.filter env.failed_parsing
-    (fun x -> not @@ SMap.mem env.edited_files (Relative_path.to_absolute x)) in
+    (fun x -> not @@ Relative_path.Map.mem env.edited_files x) in
 
   Parser_heap.ParserHeap.remove_batch disk_files;
   Fixmes.HH_FIXMES.remove_batch to_check;
@@ -222,8 +217,9 @@ let type_check genv env =
   Hh_logger.log "Files to recompute: %d" reparse_count;
 
   (* RESET HIGHLIGHTS CACHE FOR RECHECKED IDE FILES *)
-  let symbols_cache = SSet.fold env.files_to_check ~init:env.symbols_cache
-    ~f:(fun path map -> SMap.remove map path) in
+  let symbols_cache = Relative_path.Set.fold env.files_to_check
+    ~init:env.symbols_cache
+    ~f:(fun path map -> SMap.remove map (Relative_path.to_absolute path)) in
 
   (* PARSING *)
   let start_t = Unix.gettimeofday () in
@@ -332,7 +328,7 @@ let type_check genv env =
     persistent_client = old_env.persistent_client;
     last_command_time = old_env.last_command_time;
     edited_files = old_env.edited_files;
-    files_to_check = SSet.empty;
+    files_to_check = Relative_path.Set.empty;
     diag_subscribe = old_env.diag_subscribe;
     symbols_cache;
   } in

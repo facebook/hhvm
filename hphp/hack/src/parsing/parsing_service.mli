@@ -11,7 +11,7 @@ val empty_file_info: FileInfo.t
 
 val go:
   Worker.t list option ->
-  string Reordered_argument_collections.SMap.t ->
+  File_content.t Relative_path.Map.t ->
   get_next:(unit -> Relative_path.t list) ->
   FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t
 

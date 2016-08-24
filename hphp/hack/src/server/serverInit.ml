@@ -200,7 +200,7 @@ let indexing genv =
 
 let parsing genv env ~get_next t =
   let files_info, errorl, failed =
-    Parsing_service.go genv.workers SMap.empty ~get_next in
+    Parsing_service.go genv.workers Relative_path.Map.empty ~get_next in
   let files_info = Relative_path.Map.union files_info env.files_info in
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;

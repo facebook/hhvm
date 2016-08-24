@@ -52,9 +52,9 @@ type env = {
     (* Timestamp of last IDE file synchronization command *)
     last_command_time : float;
     (* The map from full path to synchronized file contents *)
-    edited_files   : File_content.t SMap.t;
+    edited_files   : File_content.t Relative_path.Map.t;
     (* The list of full path of synchronized files need to be type checked *)
-    files_to_check : SSet.t;
+    files_to_check : Relative_path.Set.t;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t;
     (* Highlight information cached for ide related commands *)

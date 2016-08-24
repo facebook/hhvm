@@ -100,8 +100,8 @@ let make_env config =
     failed_check   = Relative_path.Set.empty;
     persistent_client = None;
     last_command_time = 0.0;
-    edited_files   = SMap.empty;
-    files_to_check = SSet.empty;
+    edited_files   = Relative_path.Map.empty;
+    files_to_check = Relative_path.Set.empty;
     diag_subscribe = Diagnostic_subscription.empty;
     symbols_cache  = SMap.empty;
   }

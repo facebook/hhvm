@@ -156,7 +156,7 @@ let handle_persistent_connection_ genv env client =
      ClientProvider.shutdown_client client;
      {env with
      persistent_client = None;
-     edited_files = SMap.empty;
+     edited_files = Relative_path.Map.empty;
      diag_subscribe = Diagnostic_subscription.empty;
      symbols_cache = SMap.empty}
    | e ->
@@ -167,7 +167,7 @@ let handle_persistent_connection_ genv env client =
      ClientProvider.shutdown_client client;
      {env with
      persistent_client = None;
-     edited_files = SMap.empty;
+     edited_files = Relative_path.Map.empty;
      diag_subscribe = Diagnostic_subscription.empty;
      symbols_cache = SMap.empty}
 
@@ -223,13 +223,14 @@ let rec recheck_loop acc genv env =
   let is_idle = t -. env.last_command_time > 0.5 in
 
   let disk_recheck = not (SSet.is_empty raw_updates) in
-  let ide_recheck = (not @@ SSet.is_empty env.files_to_check) && is_idle in
+  let ide_recheck =
+    (not @@ Relative_path.Set.is_empty env.files_to_check) && is_idle in
   if (not disk_recheck) && (not ide_recheck) then
     acc, env
   else begin
     HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
-    let raw_updates = SSet.union raw_updates env.files_to_check in
     let updates = Program.process_updates genv env raw_updates in
+    let updates = Relative_path.Set.union updates env.files_to_check in
     let env, rechecked, total_rechecked = recheck genv env updates in
     let acc = {
       rechecked_batches = acc.rechecked_batches + 1;

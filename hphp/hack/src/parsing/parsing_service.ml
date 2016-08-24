@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Reordered_argument_collections
 
 (*****************************************************************************)
 (* Helpers *)
@@ -114,8 +113,7 @@ let parse_parallel workers get_next =
       ~next:get_next
 
 (* sequentially parse IDE files opened by persistent connection *)
-let parse_sequential path content (acc, errorl, error_files) =
-  let fn = Relative_path.create Relative_path.Root path in
+let parse_sequential fn content (acc, errorl, error_files) =
   let errorl', {Parser_hack.file_mode; comments; ast}, _ =
     Errors.do_ begin fun () ->
       Parser_hack.program fn content
@@ -160,11 +158,11 @@ let parse_sequential path content (acc, errorl, error_files) =
 let go workers files_map ~get_next =
   let acc = parse_parallel workers get_next in
   let fast, errorl, failed_parsing =
-    SMap.fold files_map ~init:acc ~f:(
-      fun path content (acc, errorl, error_files) ->
-        let fn = Relative_path.create Relative_path.Root path in
+    Relative_path.Map.fold files_map ~init:acc ~f:(
+      fun fn content (acc, errorl, error_files) ->
         if FindUtils.is_php (Relative_path.suffix fn) then
-          parse_sequential path content (acc, errorl, error_files)
+          let content = File_content.get_content content in
+          parse_sequential fn content (acc, errorl, error_files)
         else
           let info = empty_file_info in
           let acc = Relative_path.Map.add acc ~key:fn ~data:info in

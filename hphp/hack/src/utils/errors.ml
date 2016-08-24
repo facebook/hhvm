@@ -2104,7 +2104,7 @@ let invalid_classname p =
 
 let illegal_type_structure pos errmsg =
   let msg =
-    "The two arguments to typc_structure() must be:"
+    "The two arguments to type_structure() must be:"
     ^"\n - first: ValidClassname::class or an object of that class"
     ^"\n - second: a single-quoted string literal containing the name"
     ^" of a type constant of that class"

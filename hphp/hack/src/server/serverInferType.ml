@@ -8,8 +8,6 @@
  *
  *)
 
-type result = Pos.absolute option * string option
-
 let go (env:ServerEnv.env) (fn, line, char) =
   let get_result = InferAtPosService.attach_hooks line char in
   ignore @@ ServerIdeUtils.check_file_input

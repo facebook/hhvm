@@ -18,8 +18,6 @@ module FileInfoStore = GlobalStorage.Make(struct
   type t = FileInfo.t Relative_path.Map.t
 end)
 
-type result = level_stats SMap.t trie option
-
 (* Count the number of expressions of each kind of Coverage_level. *)
 let count_exprs fn type_acc =
   let level_of_type = level_of_type_mapper fn in

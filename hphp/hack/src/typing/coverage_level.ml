@@ -26,6 +26,8 @@ type level =
                  concrete type parameters *)
   | Checked   (* Completely checked code *)
 
+type result = ((int * int) * level) list
+
 let string_of_level = function
   | Checked   -> "checked"
   | Partial   -> "partial"

@@ -11,8 +11,6 @@
 open Core
 open Coverage_level
 
-type result = ((int * int) * Coverage_level.level) list
-
 let to_json input =
   let entries = List.map input begin fun (clr, text) ->
     let color_string = match clr with

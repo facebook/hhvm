@@ -21,9 +21,9 @@ let compare_pos pos1 pos2 =
   else 0
 
 let get_pos = function
-  | ServerRefactor.Insert patch
-  | ServerRefactor.Replace patch -> patch.ServerRefactor.pos
-  | ServerRefactor.Remove p -> p
+  | ServerRefactorTypes.Insert patch
+  | ServerRefactorTypes.Replace patch -> patch.ServerRefactorTypes.pos
+  | ServerRefactorTypes.Remove p -> p
 
 let compare_result res1 res2 =
   compare_pos (get_pos res1) (get_pos res2)
@@ -56,12 +56,12 @@ let write_patches_to_buffer buf original_content patch_list =
     let char_start, char_end = Pos.info_raw pos in
     add_original_content (char_start - 1);
     match res with
-      | ServerRefactor.Insert patch ->
-          Buffer.add_string buf patch.ServerRefactor.text
-      | ServerRefactor.Replace patch ->
-          Buffer.add_string buf patch.ServerRefactor.text;
+      | ServerRefactorTypes.Insert patch ->
+          Buffer.add_string buf patch.ServerRefactorTypes.text
+      | ServerRefactorTypes.Replace patch ->
+          Buffer.add_string buf patch.ServerRefactorTypes.text;
           i := char_end
-      | ServerRefactor.Remove _ ->
+      | ServerRefactorTypes.Remove _ ->
           i := char_end
   end;
   add_original_content (String.length original_content - 1)
@@ -86,11 +86,11 @@ let apply_patches file_map =
 
 let patch_to_json res =
   let type_, replacement = match res with
-    | ServerRefactor.Insert patch ->
-        "insert", patch.ServerRefactor.text
-    | ServerRefactor.Replace patch ->
-        "replace", patch.ServerRefactor.text
-    | ServerRefactor.Remove _ ->
+    | ServerRefactorTypes.Insert patch ->
+        "insert", patch.ServerRefactorTypes.text
+    | ServerRefactorTypes.Replace patch ->
+        "replace", patch.ServerRefactorTypes.text
+    | ServerRefactorTypes.Remove _ ->
         "remove", ""
   in
   let pos = get_pos res in
@@ -117,8 +117,8 @@ let print_patches_json file_map =
 
 let go conn args mode before after =
     let command = match mode with
-    | "Class" -> ServerRefactor.ClassRename (before, after)
-    | "Function" -> ServerRefactor.FunctionRename (before, after)
+    | "Class" -> ServerRefactorTypes.ClassRename (before, after)
+    | "Function" -> ServerRefactorTypes.FunctionRename (before, after)
     | "Method" ->
       let befores = Str.split (Str.regexp "::") before in
       if (List.length befores) <> 2
@@ -138,7 +138,8 @@ let go conn args mode before after =
         failwith "Before and After classname must match"
       end
       else
-        ServerRefactor.MethodRename (before_class, before_method, after_method)
+        ServerRefactorTypes.MethodRename
+          (before_class, before_method, after_method)
     | _ ->
         failwith "Unexpected Mode" in
 

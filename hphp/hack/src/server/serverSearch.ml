@@ -12,9 +12,6 @@ open Core
 module SS = HackSearchService
 module SUtils = SearchUtils
 
-type result =
-  (Pos.absolute, HackSearchService.search_result_type) SearchUtils.term list
-
 let scope_string_from_type result_type =
   match result_type with
   | SS.Method (_, scope)

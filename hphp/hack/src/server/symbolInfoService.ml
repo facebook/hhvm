@@ -9,13 +9,9 @@
  *)
 
 open Core
+open SymbolInfoServiceTypes
 
 (* This module dumps all the symbol info(like fun-calls) in input files *)
-
-type result = {
-  fun_calls: SymbolFunCallService.result list;
-  symbol_types: SymbolTypeService.result list;
-}
 
 let recheck_naming filename_l =
   List.iter filename_l begin fun file ->

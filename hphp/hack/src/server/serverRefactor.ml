@@ -10,22 +10,7 @@
 
 open Core
 open ServerEnv
-
-type patch =
-  | Insert of insert_patch
-  | Remove of Pos.absolute
-  | Replace of insert_patch
-
-and insert_patch = {
-  pos: Pos.absolute;
-  text: string;
-}
-
-type action =
-  | ClassRename of string * string (* old_name * new_name *)
-  | MethodRename of string * string * string
-    (* class_name * old_name * new_name*)
-  | FunctionRename of string * string (* old_name * new_name *)
+open ServerRefactorTypes
 
 let get_fixme_patches codes (env: env) =
   let fixmelist = Errors.get_applied_fixmes env.errorl in

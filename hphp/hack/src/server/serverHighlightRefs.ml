@@ -11,8 +11,6 @@
 open Core
 open ServerEnv
 
-type result = Pos.absolute list
-
 let get_target symbol =
   let open SymbolOccurrence in
   let open FindRefsService in

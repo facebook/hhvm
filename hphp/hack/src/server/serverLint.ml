@@ -14,8 +14,6 @@ open Utils
 
 module RP = Relative_path
 
-type result = string Lint.t list
-
 let output_json oc el =
   let errors_json = List.map el Lint.to_json in
   let res =

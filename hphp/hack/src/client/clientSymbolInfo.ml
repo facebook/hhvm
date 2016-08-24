@@ -37,9 +37,10 @@ let symbol_type_to_json symbol_type_results =
   end
 
 let to_json result =
-  let fun_call_json = fun_call_to_json result.SymbolInfoService.fun_calls in
+  let fun_call_json =
+    fun_call_to_json result.SymbolInfoServiceTypes.fun_calls in
   let symbol_type_json =
-    symbol_type_to_json result.SymbolInfoService.symbol_types in
+    symbol_type_to_json result.SymbolInfoServiceTypes.symbol_types in
   JSON_Object [
     "function_calls",   JSON_Array fun_call_json;
     "symbol_types",     JSON_Array symbol_type_json;

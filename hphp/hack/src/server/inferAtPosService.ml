@@ -8,6 +8,8 @@
  *
  *)
 
+type result = Pos.absolute option * string option
+
 (* Remember (when we care) the type found at a position *)
 let save_infer result_ty result_pos target_line target_column ty pos env =
   if Pos.inside pos target_line target_column && !result_ty = None

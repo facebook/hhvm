@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2015, Facebook, Inc.
+ * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,8 +8,4 @@
  *
  *)
 
-val go_from_file: (string * int * int) -> ServerEnv.env ->
-  ServerHighlightRefsTypes.result
-
-val go: (string * int * int) -> TypecheckerOptions.t ->
-  ServerHighlightRefsTypes.result
+ type result = string Lint.t list

@@ -12,6 +12,9 @@ open Core
 open SymbolOccurrence
 open Typing_defs
 
+type result =
+  ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) list
+
 type cache = (Relative_path.t * FileInfo.t * Ast.def list *
   Relative_path.t SymbolOccurrence.t list) SMap.t
 

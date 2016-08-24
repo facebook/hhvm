@@ -11,9 +11,6 @@
 open Core
 open ServerEnv
 
-type result =
-  ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) list
-
 (* Identifying a symbol can be a first step to another operation. For example,
  * you can identify symbol and then highlight other "equal" symbols.
  * get_occurrence_and_map is useful for such application, because ~f function

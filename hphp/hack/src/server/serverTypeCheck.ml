@@ -157,16 +157,21 @@ let parsing genv env =
       let content = File_content.get_content @@
         SMap.find_unsafe env.edited_files path in
       SMap.add map path content) in
+
   let to_check = SSet.fold env.files_to_check ~init:env.failed_parsing
     ~f:(fun path set ->
       let fn = Relative_path.create Relative_path.Root path in
       Relative_path.Set.add set fn) in
-  Parser_heap.ParserHeap.remove_batch env.failed_parsing;
+
+  let disk_files = Relative_path.Set.filter env.failed_parsing
+    (fun x -> not @@ SMap.mem env.edited_files (Relative_path.to_absolute x)) in
+
+  Parser_heap.ParserHeap.remove_batch disk_files;
   Fixmes.HH_FIXMES.remove_batch to_check;
   HackSearchService.MasterApi.clear_shared_memory to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
-   genv.workers (Relative_path.Set.elements env.failed_parsing) in
+    genv.workers (Relative_path.Set.elements disk_files) in
   Parsing_service.go genv.workers files_map ~get_next
 
 (*****************************************************************************)
@@ -212,19 +217,7 @@ let hook_after_parsing = ref None
 
 let type_check genv env =
 
-  (* PREPARE FOR PARSING *)
-  let failed_parsing_ide, failed_parsing_ = Relative_path.Set.partition
-    (fun fn -> let path = Relative_path.to_absolute fn in
-      SMap.exists env.edited_files (fun p _ -> p = path)) env.failed_parsing in
-  let files_to_check_ = Relative_path.Set.fold failed_parsing_ide
-    ~init:SSet.empty ~f:(fun fn set ->
-      SSet.add set (Relative_path.to_absolute fn)) in
-  let check_now = SSet.filter files_to_check_ (fun s -> not @@
-      File_content.being_edited @@ SMap.find_unsafe env.edited_files s) in
-  let env = {env with failed_parsing = failed_parsing_;
-    files_to_check = check_now} in
-  let reparse_count = Relative_path.Set.cardinal env.failed_parsing +
-  SSet.cardinal env.files_to_check in
+  let reparse_count = Relative_path.Set.cardinal env.failed_parsing in
   Printf.eprintf "******************************************\n";
   Hh_logger.log "Files to recompute: %d" reparse_count;
 
@@ -337,6 +330,7 @@ let type_check genv env =
     failed_decl = Relative_path.Set.union failed_decl lazy_decl_failed;
     failed_check = failed_check;
     persistent_client = old_env.persistent_client;
+    last_command_time = old_env.last_command_time;
     edited_files = old_env.edited_files;
     files_to_check = SSet.empty;
     diag_subscribe = old_env.diag_subscribe;

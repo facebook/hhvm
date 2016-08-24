@@ -19,7 +19,6 @@ type recheck_loop_stats = {
   (* includes dependencies *)
   total_rechecked_count : int;
   reparsed_files : Relative_path.Set.t;
-  check_later : SSet.t;
 }
 
 type main_loop_stats = recheck_loop_stats ref * string ref
@@ -29,7 +28,6 @@ let empty_recheck_loop_stats = {
   rechecked_count = 0;
   total_rechecked_count = 0;
   reparsed_files = Relative_path.Set.empty;
-  check_later = SSet.empty;
 }
 
 (*****************************************************************************)
@@ -221,17 +219,16 @@ let recheck genv old_env updates =
 let rec recheck_loop acc genv env =
   let t = Unix.gettimeofday () in
   let raw_updates = genv.notifier () in
-  let check_later, raw_updates = match acc.rechecked_batches with
-  | 0 ->
-    let check_later, check_now = SSet.partition (fun s ->
-      File_content.being_edited @@ SMap.find_unsafe env.edited_files s)
-      env.files_to_check in
-    check_later, SSet.union raw_updates check_now
-  | _ -> acc.check_later, raw_updates in
-  if SSet.is_empty raw_updates then
-    acc, { env with files_to_check = check_later }
+
+  let is_idle = t -. env.last_command_time > 0.5 in
+
+  let disk_recheck = not (SSet.is_empty raw_updates) in
+  let ide_recheck = (not @@ SSet.is_empty env.files_to_check) && is_idle in
+  if (not disk_recheck) && (not ide_recheck) then
+    acc, env
   else begin
     HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
+    let raw_updates = SSet.union raw_updates env.files_to_check in
     let updates = Program.process_updates genv env raw_updates in
     let env, rechecked, total_rechecked = recheck genv env updates in
     let acc = {
@@ -240,7 +237,6 @@ let rec recheck_loop acc genv env =
         acc.rechecked_count + Relative_path.Set.cardinal rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
       reparsed_files = Relative_path.Set.union updates acc.reparsed_files;
-      check_later;
     } in
     recheck_loop acc genv env
   end

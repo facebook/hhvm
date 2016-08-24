@@ -49,6 +49,8 @@ type env = {
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;
     persistent_client : ClientProvider.client option;
+    (* Timestamp of last IDE file synchronization command *)
+    last_command_time : float;
     (* The map from full path to synchronized file contents *)
     edited_files   : File_content.t SMap.t;
     (* The list of full path of synchronized files need to be type checked *)

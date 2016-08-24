@@ -86,15 +86,17 @@ let handle : type a. genv -> env -> a t -> env * a =
         let fc = of_content ~content in
         let edited_files_ = (SMap.add env.edited_files path fc) in
         let files_to_check_ = (SSet.add env.files_to_check path) in
+        let last_command_time = Unix.gettimeofday () in
         let new_env = {env with edited_files = edited_files_;
-          files_to_check = files_to_check_} in
+          files_to_check = files_to_check_; last_command_time} in
         new_env, ()
     | CLOSE_FILE path ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
         let edited_files_ = SMap.remove env.edited_files path in
         let files_to_check_ = SSet.remove env.files_to_check path in
+        let last_command_time = Unix.gettimeofday () in
         let new_env = {env with edited_files = edited_files_;
-          files_to_check = files_to_check_} in
+          files_to_check = files_to_check_; last_command_time} in
         new_env, ()
     | EDIT_FILE (path, edits) ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
@@ -105,8 +107,9 @@ let handle : type a. genv -> env -> a t -> env * a =
         let edited_fc = edit_file fc edits in
         let edited_files_ = (SMap.add env.edited_files path edited_fc) in
         let files_to_check_ = (SSet.add env.files_to_check path) in
+        let last_command_time = Unix.gettimeofday () in
         let new_env = {env with edited_files = edited_files_;
-          files_to_check = files_to_check_} in
+          files_to_check = files_to_check_; last_command_time} in
         new_env, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
         let path = Relative_path.path_of_prefix Relative_path.Root ^ path in

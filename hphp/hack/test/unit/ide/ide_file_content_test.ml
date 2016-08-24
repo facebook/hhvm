@@ -19,14 +19,6 @@ let test_create () =
   let fc = of_content ~content in
   expect_has_content fc content
 
-let test_being_edited () =
-  let content = "for test\n" in
-  let fc = of_content ~content in
-  let before = being_edited fc in
-  Unix.sleep 1;
-  let after = being_edited fc in
-  before && not after
-
 let test_basic_edit () =
   let content = "for test\n" in
   let fc = of_content ~content in
@@ -48,20 +40,6 @@ let test_basic_edit2 () =
     text = "ree"} in
   let edited_fc = edit_file fc [edit] in
   expect_has_content edited_fc "free test\n"
-
-let test_being_edited2 () =
-  let content = "for test\n" in
-  let fc = of_content ~content in
-  Unix.sleep 1;
-  let before = being_edited fc in
-  let edit = {
-    range = Some {
-      st = {line = 1; column = 1};
-      ed = {line = 1; column = 1}};
-    text = "just "} in
-  let edited_fc = edit_file fc [edit] in
-  let after = being_edited edited_fc in
-  not before && after
 
 let test_multi_line_edit () =
   let content = "aaaa\ncccc\n" in
@@ -125,10 +103,8 @@ let test_invalid_edit () =
 
 let tests = [
   "test_create", test_create;
-  "test_being_edited", test_being_edited;
   "test_basic_edit", test_basic_edit;
   "test_basic_edit2", test_basic_edit2;
-  "test_being_edited2", test_being_edited2;
   "test_multi_line_edit", test_multi_line_edit;
   "test_multi_line_edit2", test_multi_line_edit2;
   "test_special_edit", test_special_edit;

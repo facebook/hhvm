@@ -99,6 +99,7 @@ let make_env config =
     failed_decl    = Relative_path.Set.empty;
     failed_check   = Relative_path.Set.empty;
     persistent_client = None;
+    last_command_time = 0.0;
     edited_files   = SMap.empty;
     files_to_check = SSet.empty;
     diag_subscribe = Diagnostic_subscription.empty;

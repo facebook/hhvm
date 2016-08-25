@@ -89,6 +89,11 @@ void NamedEntity::pushClass(Class* cls) {
 void NamedEntity::removeClass(Class* goner) {
   Class* head = m_clsList;
   if (!head) return;
+
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::deregister(this);
+  }
+
   if (head == goner) {
     m_clsList = head->m_nextClass;
     return;

@@ -226,7 +226,7 @@ using OptDecRefProfile = folly::Optional<TargetProfile<DecRefProfile>>;
  * Returns the frequency that the DecRef results in destruction.
  */
 float decRefDestroyRate(Vout& v, IRLS& env, const IRInstruction* inst,
-                        OptDecRefProfile& profile, Type type) {
+                        OptDecRefProfile& profile) {
   auto const kind = env.unit.context().kind;
 
   // Without profiling data, we assume destroy is unlikely.
@@ -236,7 +236,6 @@ float decRefDestroyRate(Vout& v, IRLS& env, const IRInstruction* inst,
   auto const profileKey = makeStaticString(folly::to<std::string>(
     "DecRefProfile-",
     opcodeName(inst->op()), '-',
-    type.toString(), '-',
     inst->extra<DecRef>()->locId
   ));
   profile.emplace(env.unit.context(), inst->marker(), profileKey);
@@ -404,7 +403,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 
   emitDecRefTypeStat(v, env, inst);
 
-  auto const destroyRate = decRefDestroyRate(v, env, inst, profile, ty);
+  auto const destroyRate = decRefDestroyRate(v, env, inst, profile);
   FTRACE(3, "irlower-inc-dec: destroyPercent {:.2%} for {}\n",
          destroyRate, *inst);
 

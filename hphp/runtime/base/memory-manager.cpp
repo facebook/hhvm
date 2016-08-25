@@ -1286,18 +1286,21 @@ Header* BigHeap::find(const void* p) {
   auto const big = std::lower_bound(
     std::begin(m_bigs), std::end(m_bigs), p,
     [] (const MallocNode* big, const void* p) {
-      auto const h = reinterpret_cast<const Header*>(big + 1);
-      return reinterpret_cast<const char*>(big) + h->size() <= p;
+      return reinterpret_cast<const char*>(big) + big->nbytes <= p;
     }
   );
 
   if (big != std::end(m_bigs) && *big <= p) {
-    if (p < *big + 1) {
+    auto const hdr = reinterpret_cast<Header*>(*big);
+    if (hdr->kind() != HeaderKind::BigObj) {
       // `p' is part of the MallocNode.
-      return reinterpret_cast<Header*>(*big);
+      return hdr;
     } else {
-      // `p' is part of the allocated object.
-      return reinterpret_cast<Header*>(*big + 1);
+      auto const sub = reinterpret_cast<Header*>(*big + 1);
+      auto const start = reinterpret_cast<const char*>(sub);
+      return start <= p && p < start + sub->size()
+        ? sub   // `p' is part of the allocated object.
+        : hdr;  // `p' is part of the MallocNode.
     }
   }
   return nullptr;

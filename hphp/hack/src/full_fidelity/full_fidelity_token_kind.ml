@@ -48,6 +48,8 @@ type t =
 | Function
 | If
 | Implements
+| Include
+| Include_once
 | Instanceof
 | Insteadof
 | Int
@@ -205,6 +207,8 @@ let from_string keyword =
   | "function" -> Some Function
   | "if" -> Some If
   | "implements" -> Some Implements
+  | "include" -> Some Include
+  | "include_once" -> Some Include_once
   | "instanceof" -> Some Instanceof
   | "insteadof" -> Some Insteadof
   | "int" -> Some Int
@@ -282,6 +286,8 @@ let to_string kind =
   | Function -> "function"
   | If -> "if"
   | Implements -> "implements"
+  | Include -> "include"
+  | Include_once -> "include_once"
   | Instanceof -> "instanceof"
   | Insteadof -> "insteadof"
   | Int -> "int"

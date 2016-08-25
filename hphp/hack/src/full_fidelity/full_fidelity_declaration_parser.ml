@@ -100,6 +100,8 @@ module WithExpressionAndStatementParser
     require-once-directive:
       require_once  (  include-filename  )  ;
       require_once  include-filename  ;
+    TODO The php spec says that include and include_once is followed by
+      expression, we need to know what kind of expression is allowed.
     *)
 
     let (parser, require) = next_token parser in
@@ -964,6 +966,8 @@ module WithExpressionAndStatementParser
   and parse_declaration parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
+    | Include
+    | Include_once
     | Require
     | Require_once -> parse_inclusion_directive parser
     | Type

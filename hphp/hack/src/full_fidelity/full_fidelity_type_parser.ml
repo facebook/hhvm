@@ -231,9 +231,20 @@ and parse_generic_type_argument_list parser =
       generic-type-argument
       generic-type-arguments  ,  generic-type-argument
   *)
+  (* TODO: SPEC ISSUE
+    The specification indicates that "noreturn" is only syntactically valid
+    as a return type hint, but this is plainly wrong because
+    Awaitable<noreturn> is a legal type. Likely the correct rule will be to
+    allow noreturn as a type argument, and then a later semantic analysis
+    pass can determine when it is being used incorrectly.
+
+    For now, we extend the specification to allow return types, not just
+    ordinary types.
+  *)
   let (parser, open_angle) = next_token parser in
   let open_angle = make_token open_angle in
-  let (parser, args) = parse_type_list parser GreaterThan in
+  let (parser, args) = parse_comma_list_allow_trailing parser GreaterThan
+    SyntaxError.error1007 parse_return_type in
   let (parser1, close_angle) = next_token parser in
   if (Token.kind close_angle) = GreaterThan then
     let result = make_type_arguments open_angle args (make_token close_angle) in
@@ -430,7 +441,7 @@ and parse_type_constraint_opt parser =
   else
     (parser, (make_missing()))
 
-let parse_return_type parser =
+and parse_return_type parser =
   let (parser1, token) = next_token parser in
   if (Token.kind token) = Noreturn then
     (parser1, make_token token)

@@ -476,7 +476,7 @@ SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      uint32_t numArgs,
                      uint32_t numNonDefaultArgs) {
-  auto const constAsCell = [] (SSATmp *tmp) {
+  auto const constAsCell = [] (SSATmp* tmp) {
     switch (tmp->type().toDataType()) {
       case KindOfUninit:
         return make_tv<KindOfUninit>();
@@ -492,6 +492,16 @@ SSATmp* opt_foldable(IRGS& env,
         return make_tv<KindOfPersistentString>(tmp->strVal());
       case KindOfPersistentArray:
         return make_tv<KindOfPersistentArray>(tmp->arrVal());
+      case KindOfPersistentVec:
+        return make_tv<KindOfPersistentVec>(tmp->arrVal());
+      case KindOfPersistentDict:
+        return make_tv<KindOfPersistentDict>(tmp->arrVal());
+      case KindOfPersistentKeyset:
+        return make_tv<KindOfPersistentKeyset>(tmp->arrVal());
+
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfClass:
       case KindOfString:
       case KindOfArray:
@@ -509,54 +519,52 @@ SSATmp* opt_foldable(IRGS& env,
   // Don't pop the args yet---if the builtin throws at compile time (because
   // it would raise a warning or something at runtime) we're going to leave
   // the call alone.
-  int32_t numNonVariadicArgs = func->numNonVariadicParams();
-  Array arr;
-  for (int32_t i = 0; i < numNonDefaultArgs; i++) {
-    Type t = topType(env, BCSPRelOffset{(int32_t)(numArgs - i - 1)});
+  auto const numNonVariadicArgs = (int32_t)func->numNonVariadicParams();
+  PackedArrayInit args(numArgs);
+  for (auto bcOff = BCSPRelOffset{(int32_t)numArgs - 1};
+       bcOff > BCSPRelOffset{(int32_t)(numArgs - numNonDefaultArgs - 1)};
+       bcOff--) {
+    auto const t = topType(env, bcOff);
     if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
       return nullptr;
-    }
-    else {
-      Cell tmp = constAsCell(topC(env,
-        BCSPRelOffset{(int32_t)(numArgs - i - 1)}));
-      arr.set(i, cellAsVariant(tmp));
+    } else {
+      args.append(cellAsCVarRef(constAsCell(topC(env, bcOff))));
     }
   }
   if (numArgs != numNonVariadicArgs) {
-    if (!topType(env).hasConstVal()) {
-      return nullptr;
-    }
-    Cell tmp = constAsCell(topC(env));
-    auto const variadicArgs = tmp.m_data.parr;
-    uint32_t numVariadicArgs = variadicArgs->size();
-    for (int i = 0; i < numVariadicArgs; i++) {
-      Variant arg = variadicArgs->get(i);
-      arr.set(numNonVariadicArgs + i, arg);
+    if (!topType(env).hasConstVal()) return nullptr;
+
+    auto const variadicArgs = constAsCell(topC(env)).m_data.parr;
+    auto const numVariadicArgs = variadicArgs->size();
+    for (auto i = 0; i < numVariadicArgs; i++) {
+      args.append(variadicArgs->get(i));
     }
   }
 
   try {
-    Cell retVal;
     // We don't know if notices would be enabled or not when this
     // function would normally get called, so be safe and don't
     // optimize any calls that COULD generate notices.
     ThrowAllErrorsSetter taes;
 
 #ifdef DEBUG
-    auto savedPC = vmpc();
+    auto const savedPC = vmpc();
     // ensure that vmpc is valid for later asserts within the invoke
     vmpc() = vmfp()->m_func->getEntry();
     SCOPE_EXIT{ vmpc() = savedPC; };
 #endif
-    Variant v = invoke(func->name()->data(), arr, -1, true, true,
+    Variant v = invoke(func->name()->data(), args.toArray(), -1, true, true,
                        !func->unit()->useStrictTypes());
-    retVal = *v.asCell();
+    auto const retVal = *v.asCell();
 
-    if (retVal.m_type == KindOfString) {
+    if (isStringType(retVal.m_type)) {
       return cns(env, makeStaticString(retVal.m_data.pstr));
-    } else if (retVal.m_type == KindOfArray) {
+    } else if (isArrayLikeType(retVal.m_type)) {
       return cns(env, make_tv<KindOfPersistentArray>(
                      ArrayData::GetScalarArray(retVal.m_data.parr)));
+    } else if (retVal.m_type == KindOfObject ||
+               retVal.m_type == KindOfResource) {
+      return nullptr;
     } else {
       return cns(env, retVal);
     }
@@ -576,7 +584,7 @@ bool optimizedFCallBuiltin(IRGS& env,
 
     auto const fname = func->name();
 
-    SSATmp *retVal = opt_foldable(env, func, numArgs, numNonDefault);
+    SSATmp* retVal = opt_foldable(env, func, numArgs, numNonDefault);
     if (retVal) return retVal;
 #define X(x) \
     if (fname->isame(s_##x.get())) return opt_##x(env, numArgs);

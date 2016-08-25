@@ -133,8 +133,6 @@ struct ThrowAllErrorsSetter {
   ~ThrowAllErrorsSetter();
 
   private:
-  int64_t m_noticeFreq;
-  int64_t m_warningFreq;
   bool m_throwAllErrors;
 };
 

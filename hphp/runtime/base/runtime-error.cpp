@@ -128,8 +128,9 @@ void raise_recoverable_error(const char *fmt, ...) {
 static int64_t g_notice_counter = 0;
 
 static bool notice_freq_check(ErrorMode mode) {
-  if (RuntimeOption::NoticeFrequency <= 0 ||
-      g_notice_counter++ % RuntimeOption::NoticeFrequency != 0) {
+  if (!g_context->getThrowAllErrors() &&
+      (RuntimeOption::NoticeFrequency <= 0 ||
+       g_notice_counter++ % RuntimeOption::NoticeFrequency != 0)) {
     return false;
   }
   return g_context->errorNeedsHandling(
@@ -185,8 +186,9 @@ void raise_strict_warning(const char *fmt, ...) {
 static int64_t g_warning_counter = 0;
 
 bool warning_freq_check() {
-  if (RuntimeOption::WarningFrequency <= 0 ||
-      g_warning_counter++ % RuntimeOption::WarningFrequency != 0) {
+  if (!g_context->getThrowAllErrors() &&
+      (RuntimeOption::WarningFrequency <= 0 ||
+       g_warning_counter++ % RuntimeOption::WarningFrequency != 0)) {
     return false;
   }
   return g_context->errorNeedsHandling(

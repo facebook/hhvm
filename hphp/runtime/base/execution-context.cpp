@@ -2410,17 +2410,11 @@ void ExecutionContext::exitDebuggerDummyEnv() {
 }
 
 ThrowAllErrorsSetter::ThrowAllErrorsSetter() {
-  m_noticeFreq = RuntimeOption::NoticeFrequency;
-  m_warningFreq = RuntimeOption::WarningFrequency;
   m_throwAllErrors = g_context->getThrowAllErrors();
-  RuntimeOption::NoticeFrequency = 1;
-  RuntimeOption::WarningFrequency = 1;
   g_context->setThrowAllErrors(true);
 }
 
 ThrowAllErrorsSetter::~ThrowAllErrorsSetter() {
-  RuntimeOption::NoticeFrequency = m_noticeFreq;
-  RuntimeOption::WarningFrequency = m_warningFreq;
   g_context->setThrowAllErrors(m_throwAllErrors);
 }
 

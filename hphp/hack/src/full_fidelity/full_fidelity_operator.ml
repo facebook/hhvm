@@ -86,6 +86,7 @@ let precedence operator =
   (* TODO: variable operator $ *)
   match operator with
 
+  | AwaitOperator -> 1
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
   | DivisionAssignmentOperator | ExponentiationAssignmentOperator
@@ -93,35 +94,35 @@ let precedence operator =
   | AndAssignmentOperator
   | OrAssignmentOperator | ExclusiveOrAssignmentOperator
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-    -> 1
-  | PipeOperator -> 2
-  | ConditionalQuestionOperator | ConditionalColonOperator -> 3
-  | CoalesceOperator -> 4
-  | LogicalOrOperator -> 5
-  | LogicalAndOperator -> 6
-  | OrOperator -> 7
-  | ExclusiveOrOperator -> 8
-  | AndOperator -> 9
+    -> 2
+  | PipeOperator -> 3
+  | ConditionalQuestionOperator | ConditionalColonOperator -> 4
+  | CoalesceOperator -> 5
+  | LogicalOrOperator -> 6
+  | LogicalAndOperator -> 7
+  | OrOperator -> 8
+  | ExclusiveOrOperator -> 9
+  | AndOperator -> 10
   | EqualOperator | StrictEqualOperator
-  | NotEqualOperator | StrictNotEqualOperator -> 10
+  | NotEqualOperator | StrictNotEqualOperator -> 11
   | LessThanOperator | LessThanOrEqualOperator
-  | GreaterThanOperator | GreaterThanOrEqualOperator -> 11
-  | LeftShiftOperator | RightShiftOperator -> 12
-  | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 13
-  | MultiplicationOperator | DivisionOperator | RemainderOperator -> 14
-  | InstanceofOperator -> 15
-  | AwaitOperator| CastOperator
+  | GreaterThanOperator | GreaterThanOrEqualOperator -> 12
+  | LeftShiftOperator | RightShiftOperator -> 13
+  | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 14
+  | MultiplicationOperator | DivisionOperator | RemainderOperator -> 15
+  | InstanceofOperator -> 16
+  | CastOperator
   | ReferenceOperator | ErrorControlOperator
   | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
-  | UnaryPlusOperator | UnaryMinusOperator -> 16
+  | UnaryPlusOperator | UnaryMinusOperator -> 17
   | NewOperator | CloneOperator
   | ExponentOperator
   | FunctionCallOperator
   | MemberSelectionOperator | NullSafeMemberSelectionOperator
   | PostfixIncrementOperator | PostfixDecrementOperator
   | IndexingOperator
-  | ScopeResolutionOperator -> 17
+  | ScopeResolutionOperator -> 18
 
 let associativity operator =
   match operator with

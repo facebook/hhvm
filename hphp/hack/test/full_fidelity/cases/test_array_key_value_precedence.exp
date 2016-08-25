@@ -10,7 +10,7 @@
 prefix_unary_operator((whitespace)
 (await)(whitespace))
 (binary_operator(variable((variable)(whitespace)))
-((->)(whitespace))
+((.)(whitespace))
 (array_intrinsic_expression(
 (array)(whitespace))
 ((lparen))

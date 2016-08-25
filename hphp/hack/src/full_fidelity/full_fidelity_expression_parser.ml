@@ -466,6 +466,12 @@ module WithStatementAndDeclParser
 
   and parse_prefix_unary_expression parser =
     (* TODO: Operand to ++ and -- must be an lvalue. *)
+    (* TODO: Add a later pass to detect violations of this rule:
+    await-expression can only be used in the following contexts:
+      As an expression-statement
+      As the assignment-expression in a simple-assignment-expression
+      As expression in a return-statement
+    *)
     let (parser1, token) = next_token parser in
     let operator = Operator.prefix_unary_from_token (Token.kind token) in
     let precedence = Operator.precedence operator in

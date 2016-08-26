@@ -112,7 +112,9 @@ let monitor_daemon_main (options: ServerArgs.options) =
     ServerMonitor.start_monitoring ~waiting_client ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;
       lock_file = ServerFiles.lock_file www_root;
-      log_file = ServerFiles.log_link www_root;
+      server_log_file = ServerFiles.log_link www_root;
+      monitor_log_file = ServerFiles.monitor_log_link www_root;
+      load_script_log_file = ServerFiles.load_log www_root;
     }) hh_server_monitor_starter
 
 let daemon_entry =

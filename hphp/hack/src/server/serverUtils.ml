@@ -24,7 +24,9 @@ type file_input =
 let hh_monitor_config root = ServerMonitorUtils.({
   lock_file = ServerFiles.lock_file root;
   socket_file = ServerFiles.socket_file root;
-  log_file = ServerFiles.log_link root;
+  server_log_file = ServerFiles.log_link root;
+  monitor_log_file = ServerFiles.monitor_log_link root;
+  load_script_log_file = ServerFiles.load_log root;
 })
 
 let shut_down_server root =

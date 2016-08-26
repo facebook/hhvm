@@ -47,15 +47,15 @@ void print_string(StringData* s) {
 }
 
 void print_int(int64_t i) {
-  char buf[256];
-  snprintf(buf, 256, "%" PRId64, i);
-  g_context->write(buf);
-  TRACE(1, "t-x64 output(int): %" PRId64 "\n", i);
+  char intbuf[21];
+  auto const s = conv_10(i, intbuf + sizeof(intbuf));
+
+  g_context->write(s.data(), s.size());
 }
 
 void print_boolean(bool val) {
   if (val) {
-    g_context->write("1");
+    g_context->write("1", 1);
   }
 }
 

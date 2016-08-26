@@ -361,12 +361,12 @@ let unwrap_class_type = function
 
 let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 
-let class_is_final_and_invariant class_ty =
+let class_is_final_and_not_contravariant class_ty =
   class_ty.tc_final &&
     List.for_all
       class_ty.tc_tparams
       ~f:(begin function
-          Ast.Invariant, _, _ -> true
+          (Ast.Invariant | Ast.Covariant), _, _ -> true
           | _, _, _ -> false
           end)
 

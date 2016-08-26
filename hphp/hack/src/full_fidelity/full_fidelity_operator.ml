@@ -116,13 +116,13 @@ let precedence operator =
   | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
   | UnaryPlusOperator | UnaryMinusOperator -> 17
-  | NewOperator | CloneOperator
-  | ExponentOperator
-  | FunctionCallOperator
-  | MemberSelectionOperator | NullSafeMemberSelectionOperator
-  | PostfixIncrementOperator | PostfixDecrementOperator
-  | IndexingOperator
-  | ScopeResolutionOperator -> 18
+  | ExponentOperator -> 18
+  | PostfixIncrementOperator | PostfixDecrementOperator -> 19
+  | FunctionCallOperator -> 20
+  | NewOperator | CloneOperator -> 21
+  | IndexingOperator -> 22
+  | MemberSelectionOperator | NullSafeMemberSelectionOperator -> 23
+  | ScopeResolutionOperator -> 24
 
 let associativity operator =
   match operator with

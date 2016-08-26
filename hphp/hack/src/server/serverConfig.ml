@@ -126,7 +126,7 @@ let load config_filename options =
     gc_control = make_gc_control config;
     sharedmem_config = make_sharedmem_config config options local_config;
     tc_options = tcopts;
-  }
+  }, local_config
 
 (* useful in testing code *)
 let default_config = {

@@ -90,7 +90,11 @@ let monitor_daemon_main (options: ServerArgs.options) =
 
   Relative_path.set_path_prefix Relative_path.Root www_root;
 
-  let config = ServerConfig.(sharedmem_config (load filename options)) in
+  let config, local_config  =
+    ServerConfig.(load filename options) in
+  let config = ServerConfig.(sharedmem_config config) in
+  HackEventLogger.set_lazy_decl
+    local_config.ServerLocalConfig.lazy_decl;
   let handle = SharedMem.init config in
   let first_init = ref true in
 

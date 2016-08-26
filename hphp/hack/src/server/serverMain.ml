@@ -196,7 +196,7 @@ let recheck genv old_env updates =
   let config_in_updates =
     Relative_path.Set.mem updates ServerConfig.filename in
   if config_in_updates then begin
-    let new_config = ServerConfig.(load filename genv.options) in
+    let new_config, _ = ServerConfig.(load filename genv.options) in
     if not (ServerConfig.is_compatible genv.config new_config) then begin
       Hh_logger.log
         "%s changed in an incompatible way; please restart %s.\n"
@@ -353,16 +353,17 @@ let setup_server options handle =
    * overhead *)
   let gc_control = Gc.get () in
   Gc.set {gc_control with Gc.max_overhead = 200};
-  let config = ServerConfig.(load filename options) in
+  let config, local_config = ServerConfig.(load filename options) in
   let {ServerLocalConfig.
     cpu_priority;
     io_priority;
     enable_on_nfs;
+    lazy_decl;
     _
-  } as local_config = ServerLocalConfig.load () in
+  } as local_config = local_config in
   if Sys_utils.is_test_mode ()
   then EventLogger.init (Daemon.devnull ()) 0.0
-  else HackEventLogger.init root (Unix.gettimeofday ());
+  else HackEventLogger.init root (Unix.gettimeofday ()) lazy_decl;
   let root_s = Path.to_string root in
   if Sys_utils.is_nfs root_s && not enable_on_nfs then begin
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;

@@ -358,7 +358,6 @@ let init ?load_mini_script genv =
   (* Log lazy declarations *)
   let lazy_decl = genv.local_config.SLC.lazy_decl
     && Option.is_none (ServerArgs.ai_mode genv.options) in
-  HackEventLogger.set_lazy_decl lazy_decl;
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
 

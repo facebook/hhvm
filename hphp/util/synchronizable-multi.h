@@ -74,7 +74,7 @@ struct SynchronizableMulti {
       return &m_cond;
     }
     void unlink() {
-      m_listHook.unlink();
+      if (m_listHook.is_linked()) m_listHook.unlink();
     }
   };
 
@@ -98,12 +98,15 @@ struct SynchronizableMulti {
     }
 
     void push_front(CondVarNode& c) {
+      c.unlink();
       m_highPriList.push_front(c);
     }
     void push_middle(CondVarNode& c) {
+      c.unlink();
       m_midLowPriList.push_front(c);
     }
     void push_back(CondVarNode& c) {
+      c.unlink();
       m_midLowPriList.push_back(c);
     }
 

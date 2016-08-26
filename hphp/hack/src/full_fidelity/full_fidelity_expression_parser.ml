@@ -153,9 +153,17 @@ module WithStatementAndDeclParser
       (* TODO: Error, expected expression *)
       (parser1, make_token token)
 
+  and next_is_lower_precedence parser =
+    let kind = peek_token_kind parser in
+    if not (Operator.is_trailing_operator_token kind) then
+      true (* No trailing operator; terminate the expression. *)
+    else
+      let operator = Operator.trailing_from_token kind in
+      (Operator.precedence operator) < parser.precedence
+
   and parse_remaining_expression parser term =
-    let (parser1, token) = next_token parser in
-    match (Token.kind token) with
+    if next_is_lower_precedence parser then (parser, term)
+    else match peek_token_kind parser with
     (* Binary operators *)
     | Plus
     | Minus
@@ -206,7 +214,9 @@ module WithStatementAndDeclParser
     | LeftParen -> parse_function_call parser term
     | LeftBracket
     | LeftBrace -> parse_subscript parser term
-    | Question -> parse_conditional_expression parser1 term (make_token token)
+    | Question ->
+      let (parser, token) = assert_token parser Question in
+      parse_conditional_expression parser term token
     | _ -> (parser, term)
 
   and parse_subscript parser term =
@@ -297,7 +307,7 @@ module WithStatementAndDeclParser
 
     let result = make_object_creation_expression (make_token new_token)
       designator left args right in
-    (parser, result)
+  (parser, result)
 
   and parse_function_call parser receiver =
     (* SPEC
@@ -466,12 +476,6 @@ module WithStatementAndDeclParser
 
   and parse_prefix_unary_expression parser =
     (* TODO: Operand to ++ and -- must be an lvalue. *)
-    (* TODO: Add a later pass to detect violations of this rule:
-    await-expression can only be used in the following contexts:
-      As an expression-statement
-      As the assignment-expression in a simple-assignment-expression
-      As expression in a return-statement
-    *)
     let (parser1, token) = next_token parser in
     let operator = Operator.prefix_unary_from_token (Token.kind token) in
     let precedence = Operator.precedence operator in
@@ -483,7 +487,9 @@ module WithStatementAndDeclParser
 
   and parse_remaining_binary_operator parser left_term =
     (* We have a left term. If we get here then we know that
-     * we have a binary operator to its right.
+     * we have a binary operator to its right, and that furthermore,
+     * the binary operator is of equal or higher precedence than the
+     * whatever is going on in the left term.
      *
      * Here's how this works.  Suppose we have something like
      *
@@ -505,9 +511,9 @@ module WithStatementAndDeclParser
      *
      * How are we going to figure this out?
      *
-     * We have the term A in hand; the precedence is zero.
+     * We have the term A in hand; the precedence is low.
      * We see that x follows A.
-     * We obtain the precedence of x. It is greater than zero,
+     * We obtain the precedence of x. It is higher than the precedence of A,
      * so we obtain B, and then we call a helper method that
      * collects together everything to the right of B that is
      * of higher precedence than x. (Or equal, and right-associative.)
@@ -518,19 +524,15 @@ module WithStatementAndDeclParser
      * will simply return B, we'll construct (A x B) and recurse with that
      * as the left term.
      *)
-
+      assert (not (next_is_lower_precedence parser));
       let (parser1, token) = next_token parser in
       let operator = Operator.trailing_from_token (Token.kind token) in
       let precedence = Operator.precedence operator in
-      if precedence < parser.precedence then
-        (parser, left_term)
-      else
-        let (parser2, right_term) = parse_term parser1 in
-        let (parser2, right_term) = parse_remaining_binary_operator_helper
-          parser2 right_term precedence in
-        let term =
-          make_binary_operator left_term (make_token token) right_term in
-        parse_remaining_expression parser2 term
+      let (parser2, right_term) = parse_term parser1 in
+      let (parser2, right_term) = parse_remaining_binary_operator_helper
+        parser2 right_term precedence in
+      let term = make_binary_operator left_term (make_token token) right_term in
+      parse_remaining_expression parser2 term
 
   and parse_remaining_binary_operator_helper
       parser right_term left_precedence =
@@ -889,6 +891,7 @@ module WithStatementAndDeclParser
 
   and parse_braced_expression parser =
     let (parser, left_brace) = next_token parser in
+    (* TODO: Rewrite this to use helper methods. *)
     let precedence = parser.precedence in
     let parser = with_precedence parser 0 in
     let (parser, expression) = parse_expression parser in

@@ -58,29 +58,29 @@ struct Header {
   }
 
   const Resumable* resumable() const {
-    assert(kind() == HeaderKind::ResumableFrame);
+    assert(kind() == HeaderKind::AsyncFuncFrame);
     return reinterpret_cast<const Resumable*>(
       (char*)this + sizeof(ResumableNode) + resumable_.framesize
     );
   }
   Resumable* resumable() {
-    assert(kind() == HeaderKind::ResumableFrame);
+    assert(kind() == HeaderKind::AsyncFuncFrame);
     return reinterpret_cast<Resumable*>(
       (char*)this + sizeof(ResumableNode) + resumable_.framesize
     );
   }
-  const ObjectData* resumableObj() const {
+  const ObjectData* asyncFuncWH() const {
     DEBUG_ONLY auto const func = resumable()->actRec()->func();
     assert(func->isAsyncFunction());
     auto obj = reinterpret_cast<const ObjectData*>(resumable() + 1);
-    assert(obj->headerKind() == HeaderKind::ResumableObj);
+    assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
     return obj;
   }
-  ObjectData* resumableObj() {
+  ObjectData* asyncFuncWH() {
     DEBUG_ONLY auto const func = resumable()->actRec()->func();
     assert(func->isAsyncFunction());
     auto obj = reinterpret_cast<ObjectData*>(resumable() + 1);
-    assert(obj->headerKind() == HeaderKind::ResumableObj);
+    assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
     return obj;
   }
   const ObjectData* nativeObj() const {
@@ -100,7 +100,7 @@ struct Header {
   // return the (possibly inner ptr) ObjectData*
   const ObjectData* obj() const {
     return isObjectKind(kind()) ? &obj_ :
-           kind() == HeaderKind::ResumableFrame ? resumableObj() :
+           kind() == HeaderKind::AsyncFuncFrame ? asyncFuncWH() :
            kind() == HeaderKind::NativeData ? nativeObj() :
            nullptr;
   }
@@ -151,7 +151,7 @@ inline size_t Header::size() const {
     case HeaderKind::String:
       return str_.heapSize();
     case HeaderKind::Object:
-    case HeaderKind::ResumableObj:
+    case HeaderKind::AsyncFuncWH:
       // [ObjectData][subclass][props]
       return obj_.heapSize();
     case HeaderKind::Vector:
@@ -178,9 +178,8 @@ inline size_t Header::size() const {
     case HeaderKind::BigMalloc:   // [MallocNode][bytes...]
     case HeaderKind::BigObj:      // [MallocNode][Header...]
       return malloc_.nbytes;
-    case HeaderKind::ResumableFrame:
-      // Async functions -
-      // [ResumableNode][locals][Resumable][ObjectData<WaitHandle>]
+    case HeaderKind::AsyncFuncFrame:
+      // [ResumableNode][locals][Resumable][c_AsyncFunctionWaitHandle]
       return resumable()->size();
     case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
@@ -268,7 +267,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
     switch (h->kind()) {
       case HeaderKind::Object:
       case HeaderKind::WaitHandle:
-      case HeaderKind::ResumableObj:
+      case HeaderKind::AsyncFuncWH:
       case HeaderKind::AwaitAllWH:
       case HeaderKind::Vector:
       case HeaderKind::Map:
@@ -279,8 +278,8 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::ImmSet:
         ptrs.push_back(&h->obj_);
         break;
-      case HeaderKind::ResumableFrame:
-        ptrs.push_back(h->resumableObj());
+      case HeaderKind::AsyncFuncFrame:
+        ptrs.push_back(h->asyncFuncWH());
         break;
       case HeaderKind::NativeData:
         ptrs.push_back(h->nativeObj());

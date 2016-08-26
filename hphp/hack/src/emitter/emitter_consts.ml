@@ -18,9 +18,9 @@ open Utils
  * keep this synced eventually *)
 let header_kinds = [
   "Packed"; "Struct"; "Mixed"; "Empty"; "Apc"; "Globals"; "Proxy"; "String";
-  "Resource"; "Ref"; "Object"; "WaitHandle"; "ResumableObj"; "AwaitAllWH";
+  "Resource"; "Ref"; "Object"; "WaitHandle"; "AsyncFuncWH"; "AwaitAllWH";
   "Vector"; "Map"; "Set"; "Pair"; "ImmVector"; "ImmMap"; "ImmSet";
-  "ResumableFrame"; "NativeData";
+  "AsyncFuncFrame"; "NativeData";
   "SmallMalloc"; "BigMalloc"; "BigObj"; "Free"; "Hole"
 ]
 let header_kind_values = List.foldi

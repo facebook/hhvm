@@ -59,7 +59,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       break;
     case HeaderKind::Object:
     case HeaderKind::WaitHandle:
-    case HeaderKind::ResumableObj:
+    case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
       out << ":" << h->obj_.classname_cstr();
       break;
@@ -78,7 +78,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::SmallMalloc:
       out << "[" << h->malloc_.nbytes << "]";
       break;
-    case HeaderKind::ResumableFrame:
+    case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
       break;
     case HeaderKind::Free:

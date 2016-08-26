@@ -28,10 +28,11 @@ enum class HeaderKind : uint8_t {
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
-  Object, WaitHandle, ResumableObj, AwaitAllWH,
+  Object, WaitHandle, AsyncFuncWH, AwaitAllWH,
   // Collections
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
-  ResumableFrame, // ResumableNode followed by Frame, Resumable, ObjectData
+  // other kinds, not used for countable objects.
+  AsyncFuncFrame, // ResumableNode followed by Frame, Resumable, ObjectData
   NativeData, // a NativeData header preceding an HNI ObjectData
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block
@@ -43,7 +44,7 @@ const unsigned NumHeaderKinds = unsigned(HeaderKind::Hole) + 1;
 extern const char* header_names[];
 
 inline bool haveCount(HeaderKind k) {
-  return uint8_t(k) < uint8_t(HeaderKind::ResumableFrame);
+  return uint8_t(k) < uint8_t(HeaderKind::AsyncFuncFrame);
 }
 
 /*

@@ -585,9 +585,9 @@ void MemoryManager::flush() {
 const char* header_names[] = {
   "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
   "GlobalsArray", "ProxyArray", "DictArray", "VecArray", "KeysetArray",
-  "String", "Resource", "Ref", "Object", "WaitHandle", "ResumableObj",
+  "String", "Resource", "Ref", "Object", "WaitHandle", "AsyncFuncWH",
   "AwaitAllWH", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
-  "ResumableFrame", "NativeData", "SmallMalloc", "BigMalloc", "BigObj",
+  "AsyncFuncFrame", "NativeData", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
@@ -672,7 +672,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Proxy:
       case HeaderKind::Object:
       case HeaderKind::WaitHandle:
-      case HeaderKind::ResumableObj:
+      case HeaderKind::AsyncFuncWH:
       case HeaderKind::AwaitAllWH:
       case HeaderKind::Vector:
       case HeaderKind::Map:
@@ -683,7 +683,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::ImmSet:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
-      case HeaderKind::ResumableFrame:
+      case HeaderKind::AsyncFuncFrame:
       case HeaderKind::NativeData:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:

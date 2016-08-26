@@ -635,7 +635,7 @@ struct MemoryManager {
    *            call this directly to avoid unnecessary initFree()s.
    * forEachHeader(): Like iterate(), but with an eager initFree().
    * forEachObject(): Iterate just the ObjectDatas, including the kinds with
-   *                  prefixes (NativeData and ResumableFrame).
+   *                  prefixes (NativeData and AsyncFuncFrame).
    */
   void initFree();
   template<class Fn> void iterate(Fn fn);

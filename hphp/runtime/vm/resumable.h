@@ -92,7 +92,7 @@ struct alignas(16) Resumable {
     auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
 
     node->framesize = frameSize;
-    node->hdr.kind = HeaderKind::ResumableFrame;
+    node->hdr.kind = HeaderKind::AsyncFuncFrame;
 
     return resumable;
   }

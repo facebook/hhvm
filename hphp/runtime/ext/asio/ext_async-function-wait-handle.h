@@ -61,7 +61,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
 
   explicit c_AsyncFunctionWaitHandle(Class* cls =
       c_AsyncFunctionWaitHandle::classof()) noexcept
-    : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj) {}
+    : c_ResumableWaitHandle(cls, HeaderKind::AsyncFuncWH) {}
   ~c_AsyncFunctionWaitHandle();
 
  public:

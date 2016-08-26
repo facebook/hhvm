@@ -288,7 +288,7 @@ HeapGraph makeHeapGraph(bool include_free) {
   PtrMap blocks;
 
   // parse the heap once to create a PtrMap for pointer filtering. Create
-  // one node for every parsed block, including NativeData and ResumableFrame
+  // one node for every parsed block, including NativeData and AsyncFuncFrame
   // blocks. Only include free blocks if requested.
   MM().forEachHeader([&](Header* h) {
     if (h->kind() != HeaderKind::Free || include_free) {

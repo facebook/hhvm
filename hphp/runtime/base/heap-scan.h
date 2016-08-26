@@ -76,7 +76,7 @@ template<class F> void scanHeader(const Header* h,
       return h->globals_.scan(mark);
     case HeaderKind::Object:
     case HeaderKind::WaitHandle:
-    case HeaderKind::ResumableObj:
+    case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
       return h->obj_.scan(mark);
     case HeaderKind::Pair:
@@ -113,8 +113,8 @@ template<class F> void scanHeader(const Header* h,
       return mark((&h->malloc_)+1, h->malloc_.nbytes - sizeof(MallocNode));
     case HeaderKind::NativeData:
       return h->nativeObj()->scan(mark);
-    case HeaderKind::ResumableFrame:
-      return h->resumableObj()->scan(mark);
+    case HeaderKind::AsyncFuncFrame:
+      return h->asyncFuncWH()->scan(mark);
     case HeaderKind::String:
     case HeaderKind::Free:
       // these don't have pointers. some clients might generically
@@ -129,7 +129,7 @@ template<class F> void scanHeader(const Header* h,
 }
 
 template<class F> void ObjectData::scan(F& mark) const {
-  if (m_hdr.kind == HeaderKind::ResumableObj) {
+  if (m_hdr.kind == HeaderKind::AsyncFuncWH) {
     // scan the frame locals, iterators, and Resumable
     auto r = Resumable::FromObj(this);
     auto frame = reinterpret_cast<const TypedValue*>(r) -

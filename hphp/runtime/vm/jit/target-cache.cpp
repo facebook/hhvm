@@ -202,6 +202,9 @@ void nullFunc(ActRec* ar, StringData* name) {
     raise_warning("Invalid argument: function: method '%s' not found",
                   name->data());
     ar->m_func = SystemLib::s_nullFunc;
+    auto const obj = ar->getThis();
+    ar->setThisOrClassAllowNull(nullptr);
+    decRefObj(obj);
   } catch (...) {
     auto const obj = ar->getThis();
     *arPreliveOverwriteCells(ar) = make_tv<KindOfObject>(obj);

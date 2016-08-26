@@ -1261,30 +1261,29 @@ Y(incwm, incw, loadw, storew, m)
 
 void lower(Vunit& unit, cvttsd2siq& i, Vlabel b, size_t idx) {
   lower_impl(unit, b, idx, [&] (Vout& v) {
-  auto fpsr = v.makeReg();
-  auto res = v.makeReg();
-  auto const sf = v.makeReg();
-  auto err = v.makeReg();
-  auto tmp1 = v.makeReg();
-  auto tmp2 = v.makeReg();
+    // Clear FPSR IOC flag.
+    auto const tmp1 = v.makeReg();
+    auto const tmp2 = v.makeReg();
+    v << mrs{FPSR, tmp1};
+    v << andqi{~0x01, tmp1, tmp2, v.makeReg()};
+    v << msr{tmp2, FPSR};
 
-  // Clear FPSR IOC flag
-  v << mrs{FPSR, tmp1};
-  v << andqi{~0x01, tmp1, tmp2, sf};
-  v << msr{tmp2, FPSR};
+    // Load error value
+    auto const err = v.makeReg();
+    v << ldimmq{0x8000000000000000, err};
 
-  // Load error value
-  v << ldimmq{0x8000000000000000, err};
+    // Do ARM64's double to signed int64 conversion.
+    auto const res = v.makeReg();
+    v << fcvtzs{i.s, res};
 
-  // Do ARM64's double to signed int64 conversion.
-  v << fcvtzs{i.s, res};
+    // Check if there was a conversion error.
+    auto const fpsr = v.makeReg();
+    auto const sf = v.makeReg();
+    v << mrs{FPSR, fpsr};
+    v << testqi{1, fpsr, sf};
 
-  // Check if there was a conversion error
-  v << mrs{FPSR, fpsr};
-  v << testqi{1, fpsr, sf};
-
-  // Move converted value or error
-  v << cmovq{CC_NZ, sf, res, err, i.d};
+    // Move converted value or error.
+    v << cmovq{CC_NZ, sf, res, err, i.d};
   });
 }
 

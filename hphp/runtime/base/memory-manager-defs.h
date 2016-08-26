@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/proxy-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -114,6 +115,7 @@ public:
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;
+    SetArray set_;
     APCLocalArray apc_;
     ProxyArray proxy_;
     GlobalsArray globals_;
@@ -138,8 +140,9 @@ inline size_t Header::size() const {
       return PackedArray::heapSize(&arr_);
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::Keyset:
       return mixed_.heapSize();
+    case HeaderKind::Keyset:
+      return set_.heapSize();
     case HeaderKind::Empty:
       return sizeof(ArrayData);
     case HeaderKind::Apc:

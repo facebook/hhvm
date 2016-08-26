@@ -3054,6 +3054,7 @@ struct ArrayExtension final : Extension {
     HHVM_FE(array_multisort);
     HHVM_FALIAS(HH\\dict, HH_dict);
     HHVM_FALIAS(HH\\vec, HH_vec);
+    HHVM_FALIAS(HH\\keyset, HH_keyset);
 
     loadSystemlib();
   }

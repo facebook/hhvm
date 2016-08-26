@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -668,8 +669,9 @@ private:
  * can do any necessary setup, and as with preCollFn can return true to bypass
  * any further work. Otherwise...
  *
- * The array is iterated efficiently (without ArrayIter for MixedArray and
- * PackedArray), and ArrFn is called for each element. Otherwise...
+ * The array is iterated efficiently (without ArrayIter for MixedArray,
+ * PackedArray, and SetArray), and ArrFn is called for each element.
+ * Otherwise...
  *
  * If its an iterable object, the object is iterated using ArrayIter, and
  * objFn is called on each element. Otherwise...
@@ -697,6 +699,8 @@ bool IterateV(const ArrayData* adata, ArrFn arrFn) {
     PackedArray::IterateV<ArrFn, IncRef>(adata, arrFn);
   } else if (adata->hasMixedLayout()) {
     MixedArray::IterateV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
+  } else if (adata->isKeyset()) {
+    SetArray::Iterate<ArrFn, IncRef>(SetArray::asSet(adata), arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
       if (ArrayData::call_helper(arrFn, iter.secondRef().asTypedValue())) {
@@ -782,6 +786,9 @@ bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
     MixedArray::IterateKV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
   } else if (adata->hasPackedLayout()) {
     PackedArray::IterateKV<ArrFn, IncRef>(adata, arrFn);
+  } else if (adata->isKeyset()) {
+    auto fun = [&] (const TypedValue* v) { return arrFn(v, v); };
+    SetArray::Iterate<decltype(fun), IncRef>(SetArray::asSet(adata), fun);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
       if (ArrayData::call_helper(arrFn,

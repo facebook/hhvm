@@ -18,6 +18,9 @@
 #define incl_HPHP_APC_ARRAY_H_
 
 #include "hphp/runtime/base/apc-handle-defs.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
@@ -80,7 +83,7 @@ struct APCArray {
 
   ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }
   ArrayData* toLocalDict() const { return MixedArray::MakeDictFromAPC(this); }
-  ArrayData* toLocalKeyset() const { return MixedArray::MakeKeysetFromAPC(this); }
+  ArrayData* toLocalKeyset() const { return SetArray::MakeSetFromAPC(this); }
 
   //
   // Array API

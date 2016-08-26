@@ -176,7 +176,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr auto RenumberVec = &Renumber;
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto EscalateVec = &Escalate;
-  static constexpr auto ToKeysetVec = ToKeyset;
+  static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
 
   //////////////////////////////////////////////////////////////////////
 

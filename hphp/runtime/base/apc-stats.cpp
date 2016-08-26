@@ -165,7 +165,6 @@ size_t getMemSize(const ArrayData* arr) {
     return size;
   }
   case ArrayData::ArrayKind::kDictKind:
-  case ArrayData::ArrayKind::kKeysetKind:
   case ArrayData::ArrayKind::kMixedKind: {
     auto const mixed = MixedArray::asMixed(arr);
     auto size = sizeof(MixedArray) +
@@ -179,6 +178,22 @@ size_t getMemSize(const ArrayData* arr) {
       }
       size += ptr->hasStrKey() ? getMemSize(ptr->skey) : sizeof(int64_t);
       size += getMemSize(&ptr->data);
+    }
+    return size;
+  }
+  case ArrayData::ArrayKind::kKeysetKind: {
+    auto const set = SetArray::asSet(arr);
+    auto size = sizeof(SetArray) +
+                sizeof(SetArray::Elm) + (set->capacity() - set->m_used);
+    auto const elms = set->data();
+    auto const used = set->m_used;
+    for (uint32_t i = 0; i < used; ++i) {
+      auto const& elm = elms[i];
+      if (elm.isTombstone()) {
+        size += sizeof(SetArray::Elm);
+      } else {
+        size += elm.hasStrKey() ? getMemSize(elm.strKey()) : sizeof(int64_t);
+      }
     }
     return size;
   }

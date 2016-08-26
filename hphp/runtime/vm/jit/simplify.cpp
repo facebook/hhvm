@@ -1374,9 +1374,9 @@ SSATmp* cmpKeysetImpl(State& env,
     auto const rightVal = right->keysetVal();
     switch (opc) {
       case EqKeyset:
-        return cns(env, MixedArray::KeysetEqual(leftVal, rightVal));
+        return cns(env, SetArray::Equal(leftVal, rightVal));
       case NeqKeyset:
-        return cns(env, MixedArray::KeysetNotEqual(leftVal, rightVal));
+        return cns(env, SetArray::NotEqual(leftVal, rightVal));
       default:
         break;
     }
@@ -2673,36 +2673,47 @@ SSATmp* hackArrAKExistsImpl(State& env, const IRInstruction* inst,
 
 }
 
-#define X(Name, Action, Ty, Get)                                      \
+#define X(Name, Action, Get)                                          \
 SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return MixedArray::NvGetInt##Ty(a->Get(), k);                   \
+      return MixedArray::NvGetIntDict(a->Get(), k);                   \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return MixedArray::NvGetStr##Ty(a->Get(), k);                   \
+      return MixedArray::NvGetStrDict(a->Get(), k);                   \
     }                                                                 \
   );                                                                  \
 }
 
-X(DictGet, Get, Dict, dictVal)
-X(KeysetGet, Get, Keyset, keysetVal)
+X(DictGet, Get, dictVal)
+X(DictGetQuiet, GetQuiet, dictVal)
+X(DictIsset, Isset, dictVal)
+X(DictEmptyElem, EmptyElem, dictVal)
+X(DictIdx, Idx, dictVal)
+X(AKExistsDict, AKExists, dictVal)
 
-X(DictGetQuiet, GetQuiet, Dict, dictVal)
-X(KeysetGetQuiet, GetQuiet, Keyset, keysetVal)
+#undef X
 
-X(DictIsset, Isset, Dict, dictVal)
-X(KeysetIsset, Isset, Keyset, keysetVal)
+#define X(Name, Action, Get)                                          \
+SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
+  return hackArr##Action##Impl(                                       \
+    env, inst,                                                        \
+    [](SSATmp* a, int64_t k) {                                        \
+      return SetArray::NvGetInt(a->Get(), k);                         \
+    },                                                                \
+    [](SSATmp* a, const StringData* k) {                              \
+      return SetArray::NvGetStr(a->Get(), k);                         \
+    }                                                                 \
+  );                                                                  \
+}
 
-X(DictEmptyElem, EmptyElem, Dict, dictVal)
-X(KeysetEmptyElem, EmptyElem, Keyset, keysetVal)
-
-X(DictIdx, Idx, Dict, dictVal)
-X(KeysetIdx, Idx, Keyset, keysetVal)
-
-X(AKExistsDict, AKExists, Dict, dictVal)
-X(AKExistsKeyset, AKExists, Keyset, keysetVal)
+X(KeysetGet, Get, keysetVal)
+X(KeysetGetQuiet, GetQuiet, keysetVal)
+X(KeysetIsset, Isset, keysetVal)
+X(KeysetEmptyElem, EmptyElem, keysetVal)
+X(KeysetIdx, Idx, keysetVal)
+X(AKExistsKeyset, AKExists, keysetVal)
 
 #undef X
 
@@ -2715,7 +2726,15 @@ SSATmp* simplifyDictGetK(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
-  return arrGetKImpl(env, inst, [](SSATmp* a) { return a->keysetVal(); });
+  auto const arr = inst->src(0);
+  auto const& extra = inst->extra<IndexData>();
+
+  if (!arr->hasConstVal()) return nullptr;
+  auto const set = SetArray::asSet(arr->keysetVal());
+  auto const& tv = *set->tvOfPos(extra->index);
+  assertx(tv.m_type == KindOfString || tv.m_type == KindOfInt64);
+  assertx(tvIsPlausible(tv));
+  return cns(env, tv);
 }
 
 SSATmp* simplifyCheckArrayCOW(State& env, const IRInstruction* inst) {
@@ -3585,29 +3604,28 @@ Type keysetElemType(SSATmp* arr, SSATmp* idx) {
     // precise type.
     if (idx && idx->hasConstVal(TInt)) {
       auto const idxVal = idx->intVal();
-      auto const val = MixedArray::NvGetIntKeyset(arr->keysetVal(), idxVal);
+      auto const val = SetArray::NvGetInt(arr->keysetVal(), idxVal);
       return val ? Type(val->m_type) : TBottom;
     }
 
     if (idx && idx->hasConstVal(TStr)) {
       auto const idxVal = idx->strVal();
-      auto const val = MixedArray::NvGetStrKeyset(arr->keysetVal(), idxVal);
+      auto const val = SetArray::NvGetStr(arr->keysetVal(), idxVal);
       return val ? Type(val->m_type) : TBottom;
     }
 
     // Otherwise we can constrain the type according to the union of all the
     // types present in the keyset.
     Type type{TBottom};
-    MixedArray::IterateKV(
-      MixedArray::asMixed(arr->keysetVal()),
-      [&](const TypedValue* k, const TypedValue* v) {
+    SetArray::Iterate(
+      SetArray::asSet(arr->keysetVal()),
+      [&](const TypedValue* k) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k->m_type)) {
-          assertx(isIntType(v->m_type));
-          if (!idx || idx->type().maybe(TInt)) type |= Type(v->m_type);
-        } else if (isStringType(k->m_type)) {
-          assertx(isStringType(v->m_type));
-          if (!idx || idx->type().maybe(TStr)) type |= Type(v->m_type);
+          if (!idx || idx->type().maybe(TInt)) type |= Type(k->m_type);
+        } else {
+          assertx(isStringType(k->m_type));
+          if (!idx || idx->type().maybe(TStr)) type |= Type(k->m_type);
         }
       }
     );

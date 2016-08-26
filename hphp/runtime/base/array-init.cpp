@@ -93,7 +93,7 @@ KeysetInit::KeysetInit(size_t n, CheckAllocation)
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
-  m_keyset = MixedArray::MakeReserveKeyset(n);
+  m_keyset = SetArray::MakeReserveSet(n);
   assert(m_keyset->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }

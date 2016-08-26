@@ -29,6 +29,9 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -129,21 +132,22 @@ RawDestructor g_destructors[] = {
   nullptr,
   nullptr,
   nullptr,
-  (RawDestructor)getMethodPtr(&ObjectData::release), // may replace at runtime
+  (RawDestructor)getMethodPtr(&ObjectData::release),  // may replace at runtime
+                                                      // KindOfObject
   nullptr,
   nullptr,
   nullptr,
-  (RawDestructor)getMethodPtr(&ResourceHdr::release),
+  (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
   nullptr,
-  (RawDestructor)&PackedArray::Release,
+  (RawDestructor)&PackedArray::Release,               // KindOfVec
   nullptr,
-  (RawDestructor)getMethodPtr(&StringData::release),
+  (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
   nullptr,
-  (RawDestructor)&MixedArray::Release,
+  (RawDestructor)&MixedArray::Release,                // KindOfDict
   nullptr,
-  (RawDestructor)getMethodPtr(&RefData::release),
-  (RawDestructor)getMethodPtr(&ArrayData::release),
-  (RawDestructor)&MixedArray::Release,
+  (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
+  (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfArray
+  (RawDestructor)&SetArray::Release,                  // KindOfKeyset
 };
 
 void tweak_variant_dtors() {

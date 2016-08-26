@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/jit/code-gen-internal.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
-#include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-offset-profile.h"
 
 #include "hphp/util/trace.h"
 
@@ -628,22 +628,21 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   auto const branch = label(env, inst->taken());
   auto const pos = inst->extra<CheckKeysetOffset>()->index;
   auto& v = vmain(env);
+  auto const tvOff = SetArray::tvOff(pos);
 
-  { // Also fail if our predicted position exceeds bounds.
+  { // Fail if our predicted position exceeds bounds.
     auto const sf = v.makeReg();
-    v << cmplim{safe_cast<int32_t>(pos), keyset[MixedArray::usedOff()], sf};
+    v << cmplim{safe_cast<int32_t>(pos), keyset[SetArray::usedOff()], sf};
     ifThen(v, CC_LE, sf, branch);
   }
   { // Fail if the Elm key value doesn't match.
     auto const sf = v.makeReg();
-    v << cmpqm{key, keyset[MixedArray::elmOff(pos) + MixedArray::Elm::keyOff()], sf};
+    v << cmpqm{key, keyset[tvOff + TVOFF(m_data)], sf};
     ifThen(v, CC_NE, sf, branch);
   }
-  auto const dataOff = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
-
   { // Fail if the Elm key type doesn't match.
     auto const sf = v.makeReg();
-    v << cmplim{0, keyset[dataOff + TVOFF(m_aux)], sf};
+    v << cmplim{0, keyset[tvOff + TVOFF(m_aux)], sf};
 
     auto const key_type = getKeyType(inst->src(1));
     assertx(key_type != KeyType::Any);
@@ -654,9 +653,9 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
     auto const is_str_key = key_type == KeyType::Str;
     ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
   }
-  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
+  { // Fail if the Elm is a tombstone.  See SetArray::isTombstone().
     auto const sf = v.makeReg();
-    v << cmpbim{KindOfUninit, keyset[dataOff + TVOFF(m_type)], sf};
+    v << cmpbim{KindOfUninit, keyset[tvOff + TVOFF(m_type)], sf};
     ifThen(v, CC_L, sf, branch);
   }
 }
@@ -853,10 +852,9 @@ void cgElemKeysetK(IRLS& env, const IRInstruction* inst) {
   auto const keyset = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0);
   auto const pos = inst->extra<ElemKeysetK>()->index;
-  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+  auto const off = SetArray::tvOff(pos);
 
   auto& v = vmain(env);
-
   assertx(dst.numAllocated() == 1);
   v << lea{keyset[off], dst.reg()};
 }
@@ -871,7 +869,7 @@ void cgKeysetGetQuiet(IRLS& env, const IRInstruction* inst) {
 void cgKeysetGetK(IRLS& env, const IRInstruction* inst) {
   auto const keyset = srcLoc(env, inst, 0).reg();
   auto const pos = inst->extra<KeysetGetK>()->index;
-  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
+  auto const off = SetArray::tvOff(pos);
 
   auto& v = vmain(env);
   loadTV(v, inst->dst(0), dstLoc(env, inst, 0), keyset[off]);

@@ -143,9 +143,6 @@ constexpr size_t alignTypedValue(size_t sz) {
 
 /*
  * This TypedValue subclass exposes a 32-bit "aux" field somewhere inside it.
- * For now, access the m_aux field declared in TypedValue, but once we
- * rearrange TypedValue, the aux field can move down to this struct.
- * TODO: t1100154 phase this out completely.
  */
 struct TypedValueAux : TypedValue {
   static constexpr size_t auxOffset = offsetof(TypedValue, m_aux);

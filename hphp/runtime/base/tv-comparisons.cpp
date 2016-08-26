@@ -20,6 +20,9 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 namespace HPHP {
@@ -557,7 +560,7 @@ struct Eq {
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
     assert(ad1->isKeyset());
     assert(ad2->isKeyset());
-    return MixedArray::KeysetEqual(ad1, ad2);
+    return SetArray::Equal(ad1, ad2);
   }
 
   bool vecVsNonVec() const { return false; }
@@ -798,7 +801,7 @@ bool cellSame(Cell c1, Cell c2) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       if (!isKeysetType(c2.m_type)) return false;
-      return MixedArray::KeysetSame(c1.m_data.parr, c2.m_data.parr);
+      return SetArray::Same(c1.m_data.parr, c2.m_data.parr);
 
     case KindOfPersistentArray:
     case KindOfArray:

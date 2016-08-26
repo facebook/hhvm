@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/stacktrace-profiler.h"
@@ -143,18 +144,6 @@ MixedArray::copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
 }
 
 extern int32_t* warnUnbalanced(MixedArray*, size_t n, int32_t* ei);
-
-// int64->int32 hash function to use for MixedArrays
-ALWAYS_INLINE inthash_t hashint(int64_t k) {
-  static_assert(sizeof(inthash_t) == sizeof(strhash_t), "");
-#if defined(USE_SSECRC) && (defined(FACEBOOK) || defined(__SSE4_2__))
-  int64_t h = 0;
-  __asm("crc32 %1, %0\n" : "+r"(h) : "r"(k));
-  return h;
-#else
-  return hash_int64(k);
-#endif
-}
 
 ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
@@ -490,7 +479,7 @@ void ConvertTvToUncounted(TypedValue* source) {
       assert(ad->isKeyset());
       if (ad->isStatic()) break;
       else if (ad->empty()) ad = staticEmptyKeysetArray();
-      else ad = MixedArray::MakeUncounted(ad);
+      else ad = SetArray::MakeUncounted(ad);
       break;
     }
 

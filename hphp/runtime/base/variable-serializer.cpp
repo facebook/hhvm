@@ -1468,8 +1468,8 @@ static void serializeArrayImpl(const ArrayData* arr,
       }
     );
   } else if (arr->isKeyset()) {
-    MixedArray::IterateV(
-      MixedArray::asMixed(arr),
+    SetArray::Iterate(
+      SetArray::asSet(arr),
       [&](const TypedValue* v) {
         serializer->writeArrayValue(tvAsCVarRef(v));
         return false;

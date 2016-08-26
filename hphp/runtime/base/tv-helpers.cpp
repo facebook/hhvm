@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -603,7 +604,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfPersistentKeyset: {
         auto* adIn = tv->m_data.parr;
         assert(adIn->isKeyset());
-        a = MixedArray::ToPHPArrayKeyset(adIn, true);
+        a = SetArray::ToPHPArray(adIn, true);
         assert(a != adIn);
         continue;
       }
@@ -611,7 +612,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
         assert(adIn->isKeyset());
-        a = MixedArray::ToPHPArrayKeyset(adIn, adIn->cowCheck());
+        a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
         if (a != adIn) tvDecRefArr(tv);
         continue;
       }
@@ -700,7 +701,7 @@ void tvCastToVecInPlace(TypedValue* tv) {
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
         assert(adIn->isKeyset());
-        a = MixedArray::ToVecKeyset(adIn, adIn->cowCheck());
+        a = SetArray::ToVec(adIn, adIn->cowCheck());
         assert(a != adIn);
         decRefArr(adIn);
         continue;
@@ -802,7 +803,7 @@ void tvCastToDictInPlace(TypedValue* tv) {
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
         assert(adIn->isKeyset());
-        a = MixedArray::ToDictKeyset(adIn, adIn->cowCheck());
+        a = SetArray::ToDict(adIn, adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
         continue;
       }

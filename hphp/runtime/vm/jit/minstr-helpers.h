@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 
-#include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -371,12 +371,12 @@ ISSET_EMPTY_PROP_HELPER_TABLE(X)
 
 template<bool checkForInt>
 void profileMixedArrayOffsetHelper(const ArrayData* ad, int64_t i,
-                                   MixedArrayOffsetProfile* prof) {
+                                   ArrayOffsetProfile* prof) {
   prof->update(ad, i);
 }
 template<bool checkForInt>
 void profileMixedArrayOffsetHelper(const ArrayData* ad, const StringData* sd,
-                                   MixedArrayOffsetProfile* prof) {
+                                   ArrayOffsetProfile* prof) {
   prof->update(ad, sd, checkForInt);
 }
 
@@ -388,7 +388,7 @@ void profileMixedArrayOffsetHelper(const ArrayData* ad, const StringData* sd,
 
 #define X(nm, keyType, checkForInt)                     \
 inline void nm(const ArrayData* a, key_type<keyType> k, \
-               MixedArrayOffsetProfile* p) {            \
+               ArrayOffsetProfile* p) {                 \
   profileMixedArrayOffsetHelper<checkForInt>(a, k, p);  \
 }
 PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(X)
@@ -397,11 +397,11 @@ PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline void profileDictOffsetHelper(const ArrayData* ad, int64_t i,
-                                    MixedArrayOffsetProfile* prof) {
+                                    ArrayOffsetProfile* prof) {
   prof->update(ad, i);
 }
 inline void profileDictOffsetHelper(const ArrayData* ad, const StringData* sd,
-                                    MixedArrayOffsetProfile* prof) {
+                                    ArrayOffsetProfile* prof) {
   prof->update(ad, sd, false);
 }
 
@@ -412,7 +412,7 @@ inline void profileDictOffsetHelper(const ArrayData* ad, const StringData* sd,
 
 #define X(nm, keyType)                                      \
 inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               MixedArrayOffsetProfile* p) {                \
+               ArrayOffsetProfile* p) {                     \
   profileDictOffsetHelper(a, k, p);                         \
 }
 PROFILE_DICT_OFFSET_HELPER_TABLE(X)
@@ -421,11 +421,11 @@ PROFILE_DICT_OFFSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline void profileKeysetOffsetHelper(const ArrayData* ad, int64_t i,
-                                      MixedArrayOffsetProfile* prof) {
+                                      ArrayOffsetProfile* prof) {
   prof->update(ad, i);
 }
 inline void profileKeysetOffsetHelper(const ArrayData* ad, const StringData* sd,
-                                      MixedArrayOffsetProfile* prof) {
+                                      ArrayOffsetProfile* prof) {
   prof->update(ad, sd, false);
 }
 
@@ -436,7 +436,7 @@ inline void profileKeysetOffsetHelper(const ArrayData* ad, const StringData* sd,
 
 #define X(nm, keyType)                                      \
 inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               MixedArrayOffsetProfile* p) {                \
+               ArrayOffsetProfile* p) {                     \
   profileKeysetOffsetHelper(a, k, p);                       \
 }
 PROFILE_KEYSET_OFFSET_HELPER_TABLE(X)
@@ -862,11 +862,11 @@ DICTSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, int64_t i) {
-  return MixedArray::AddToKeyset(a, i, a->cowCheck());
+  return SetArray::AddToSet(a, i, a->cowCheck());
 }
 
 inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
-  return MixedArray::AddToKeyset(a, s, a->cowCheck());
+  return SetArray::AddToSet(a, s, a->cowCheck());
 }
 
 template<KeyType keyType>

@@ -51,6 +51,7 @@
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
@@ -1971,7 +1972,7 @@ OPTBLD_INLINE void iopNewVecArray(intva_t n) {
 
 OPTBLD_INLINE void iopNewKeysetArray(intva_t n) {
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = MixedArray::MakeKeyset(n, vmStack().topC());
+  auto* a = SetArray::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushKeysetNoRc(a);
 }

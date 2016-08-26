@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MIXED_ARRAY_OFFSET_PROFILE_H_
-#define incl_HPHP_JIT_MIXED_ARRAY_OFFSET_PROFILE_H_
+#ifndef incl_HPHP_JIT_ARRAY_OFFSET_PROFILE_H_
+#define incl_HPHP_JIT_ARRAY_OFFSET_PROFILE_H_
 
 #include <folly/Optional.h>
 
@@ -31,11 +31,11 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Target profile for known MixedArray access offsets.
+ * Target profile for known MixedArray or SetArray access offsets.
  */
-struct MixedArrayOffsetProfile {
+struct ArrayOffsetProfile {
   /*
-   * Choose the "hot position" for the profiled MixedArray access using
+   * Choose the "hot position" for the profiled array access using
    * questionable heuristics.
    */
   folly::Optional<uint32_t> choose() const;
@@ -51,8 +51,8 @@ struct MixedArrayOffsetProfile {
    * Combine `l' and `r', retaining the kNumTrackedSamples with the highest
    * counts.
    */
-  static void reduce(MixedArrayOffsetProfile& l,
-                     const MixedArrayOffsetProfile& r);
+  static void reduce(ArrayOffsetProfile& l,
+                     const ArrayOffsetProfile& r);
 
   std::string toString() const;
 private:

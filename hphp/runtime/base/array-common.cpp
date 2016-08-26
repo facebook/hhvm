@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
@@ -38,9 +39,12 @@ bool ArrayCommon::ValidMArrayIter(const ArrayData* ad, const MArrayIter& fp) {
   if (ad->hasPackedLayout()) {
     assert(PackedArray::checkInvariants(ad));
     return fp.m_pos != ad->getSize();
+  } else if (ad->isKeyset()) {
+    return false;
+  } else {
+    assert(MixedArray::asMixed(ad));
+    return fp.m_pos != MixedArray::asMixed(ad)->iterLimit();
   }
-  assert(MixedArray::asMixed(ad));
-  return fp.m_pos != MixedArray::asMixed(ad)->iterLimit();
 }
 
 ArrayData* ArrayCommon::Pop(ArrayData* a, Variant &value) {

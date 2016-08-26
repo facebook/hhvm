@@ -365,7 +365,7 @@ ArrayData* ProxyArray::ToVec(ArrayData* ad, bool copy) {
 ArrayData* ProxyArray::ToKeyset(ArrayData* ad, bool copy) {
   auto r = innerArr(ad)->toKeyset(innerArr(ad)->cowCheck());
   reseatable(ad, r);
-  return ad;
+  return const_cast<ArrayData*>(ad);
 }
 
 void ProxyArray::Renumber(ArrayData* ad) {

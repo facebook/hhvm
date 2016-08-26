@@ -64,6 +64,18 @@ inline long long hash_int64_pair(long long k1, long long k2) {
   return (hash_int64(k1) << 1) ^ hash_int64(k2);
 }
 
+// int64->int32 hash function to use for MixedArrays
+ALWAYS_INLINE inthash_t hashint(int64_t k) {
+  static_assert(sizeof(inthash_t) == sizeof(strhash_t), "");
+#if defined(USE_SSECRC) && (defined(FACEBOOK) || defined(__SSE4_2__))
+  int64_t h = 0;
+  __asm("crc32 %1, %0\n" : "+r"(h) : "r"(k));
+  return h;
+#else
+  return hash_int64(k);
+#endif
+}
+
 namespace MurmurHash3 {
 ///////////////////////////////////////////////////////////////////////////////
 // The following code is based on MurmurHash3:

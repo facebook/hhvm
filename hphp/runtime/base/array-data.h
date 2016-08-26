@@ -186,7 +186,7 @@ public:
   bool isKeyset() const { return kind() == kKeysetKind; }
 
   bool hasPackedLayout() const { return isPacked() || isVecArray(); }
-  bool hasMixedLayout() const { return isMixed() || isDict() || isKeyset(); }
+  bool hasMixedLayout() const { return isMixed() || isDict(); }
 
   bool isPHPArray() const { return kind() < kDictKind; }
   bool isHackArray() const { return kind() >= kDictKind; }

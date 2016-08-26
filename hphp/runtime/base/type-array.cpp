@@ -360,7 +360,7 @@ bool Array::same(const Array& v2) const {
   }
   if (m_arr->isKeyset()) {
     if (UNLIKELY(!v2.isKeyset())) return false;
-    return MixedArray::KeysetSame(m_arr.get(), v2.get());
+    return SetArray::Same(m_arr.get(), v2.get());
   }
   not_reached();
 }
@@ -387,7 +387,7 @@ bool Array::equal(const Array& v2) const {
   }
   if (m_arr->isKeyset()) {
     if (UNLIKELY(!v2.isKeyset())) return false;
-    return MixedArray::KeysetEqual(m_arr.get(), v2.get());
+    return SetArray::Equal(m_arr.get(), v2.get());
   }
   not_reached();
 }

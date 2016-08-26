@@ -272,7 +272,7 @@ CallSpec getDtorCallSpec(DataType type) {
     case KindOfDict:
       return CallSpec::direct(MixedArray::Release);
     case KindOfKeyset:
-      return CallSpec::direct(MixedArray::Release);
+      return CallSpec::direct(SetArray::Release);
     case KindOfObject:
       return CallSpec::method(
         RuntimeOption::EnableObjDestructCall

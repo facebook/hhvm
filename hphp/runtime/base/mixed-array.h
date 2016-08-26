@@ -172,7 +172,6 @@ struct MixedArray final : private ArrayData,
    */
   static ArrayData* MakeReserveMixed(uint32_t size);
   static ArrayData* MakeReserveDict(uint32_t size);
-  static ArrayData* MakeReserveKeyset(uint32_t size);
 
   /*
    * Convert mixed-layout array to dict in-place. This function doesn't check
@@ -180,8 +179,6 @@ struct MixedArray final : private ArrayData,
    * you already know that they do not.
    */
   static MixedArray* ToDictInPlace(ArrayData*);
-
-  static ArrayData* MakeKeyset(uint32_t size, const TypedValue* values);
 
   /*
    * Allocate a new, empty, request-local array with the same mode as
@@ -214,7 +211,6 @@ struct MixedArray final : private ArrayData,
   static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc);
-  static ArrayData* MakeKeysetFromAPC(const APCArray* apc);
 
   // This behaves the same as iter_begin except that it assumes
   // this array is not empty and its not virtual.
@@ -231,11 +227,6 @@ struct MixedArray final : private ArrayData,
   static bool DictNotEqual(const ArrayData*, const ArrayData*);
   static bool DictSame(const ArrayData*, const ArrayData*);
   static bool DictNotSame(const ArrayData*, const ArrayData*);
-
-  static bool KeysetEqual(const ArrayData*, const ArrayData*);
-  static bool KeysetNotEqual(const ArrayData*, const ArrayData*);
-  static constexpr auto KeysetSame = &KeysetEqual;
-  static constexpr auto KeysetNotSame = &KeysetNotEqual;
 
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
@@ -408,68 +399,9 @@ public:
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
   static constexpr auto EscalateDict = &Escalate;
   static ArrayData* ToPHPArrayDict(ArrayData*, bool);
-  static constexpr auto ToVecDict = ToVec;
   static ArrayData* ToDictDict(ArrayData*, bool);
-  static constexpr auto ToKeysetDict = ToKeyset;
-
-  static constexpr auto NvTryGetIntKeyset = &NvTryGetIntHackArr;
-  static constexpr auto NvGetIntKeyset = &NvGetInt;
-  static constexpr auto NvTryGetStrKeyset = &NvTryGetStrHackArr;
-  static constexpr auto NvGetStrKeyset = &NvGetStr;
-  static constexpr auto ReleaseKeyset = &Release;
-  static constexpr auto NvGetKeyKeyset = &NvGetKey;
-  static constexpr auto VsizeKeyset = &Vsize;
-  static constexpr auto GetValueRefKeyset = &GetValueRef;
-  static constexpr auto IsVectorDataKeyset = &IsVectorData;
-  static constexpr auto ExistsIntKeyset = &ExistsInt;
-  static constexpr auto ExistsStrKeyset = &ExistsStr;
-  static constexpr auto RemoveIntKeyset = &RemoveInt;
-  static constexpr auto RemoveStrKeyset = &RemoveStr;
-  static constexpr auto IterBeginKeyset = &IterBegin;
-  static constexpr auto IterLastKeyset = &IterLast;
-  static constexpr auto IterEndKeyset = &IterEnd;
-  static constexpr auto IterAdvanceKeyset = &IterAdvance;
-  static constexpr auto IterRewindKeyset = &IterRewind;
-  static constexpr auto ValidMArrayIterKeyset = ValidMArrayIter;
-  static constexpr auto AdvanceMArrayIterKeyset = &AdvanceMArrayIter;
-  static constexpr auto EscalateForSortKeyset = &EscalateForSort;
-  static constexpr auto KsortKeyset = &Ksort;
-  static constexpr auto SortKeyset = &Sort;
-  static constexpr auto AsortKeyset = &Asort;
-  static constexpr auto UksortKeyset = &Uksort;
-  static constexpr auto UsortKeyset = &Usort;
-  static constexpr auto UasortKeyset = &Uasort;
-  static constexpr auto CopyKeyset = &Copy;
-  static constexpr auto CopyWithStrongIteratorsKeyset =
-    &CopyWithStrongIterators;
-  static constexpr auto CopyStaticKeyset = &CopyStatic;
-  static constexpr auto LvalIntRefKeyset = &LvalIntRefHackArr;
-  static constexpr auto LvalStrRefKeyset = &LvalStrRefHackArr;
-  static constexpr auto LvalNewRefKeyset = &LvalNewRefHackArr;
-  static constexpr auto SetRefIntKeyset = &SetRefIntHackArr;
-  static constexpr auto SetRefStrKeyset = &SetRefStrHackArr;
-  static constexpr auto AppendRefKeyset = &AppendRefHackArr;
-  static ArrayData* AppendKeyset(ArrayData*, Cell v, bool);
-  static ArrayData* AppendWithRefKeyset(ArrayData*, const Variant&, bool);
-  static ArrayData* SetIntKeyset(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* SetStrKeyset(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* AddIntKeyset(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* AddStrKeyset(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* LvalIntKeyset(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrKeyset(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNewKeyset(ArrayData*, Variant*&, bool);
-  static void RenumberKeyset(ArrayData*);
-  static constexpr auto PlusEqKeyset = &PlusEq;
-  static constexpr auto MergeKeyset = &Merge;
-  static constexpr auto PopKeyset = &Pop;
-  static constexpr auto DequeueKeyset = &Dequeue;
-  static constexpr auto PrependKeyset = &Prepend;
-  static constexpr auto OnSetEvalScalarKeyset = &OnSetEvalScalar;
-  static constexpr auto EscalateKeyset = &Escalate;
-  static ArrayData* ToPHPArrayKeyset(ArrayData*, bool);
-  static constexpr auto ToVecKeyset = ToVec;
-  static ArrayData* ToDictKeyset(ArrayData*, bool);
-  static ArrayData* ToKeysetKeyset(ArrayData*, bool);
+  static constexpr auto ToVecDict = &ArrayCommon::ToVec;
+  static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -482,9 +414,6 @@ public:
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;
 
-  static ArrayData* AddToKeyset(ArrayData*, int64_t, bool);
-  static ArrayData* AddToKeyset(ArrayData*, StringData*, bool);
-
   //////////////////////////////////////////////////////////////////////
 
 private:
@@ -494,7 +423,6 @@ private:
   static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
-  static bool KeysetEqualHelper(const ArrayData*, const ArrayData*);
 
 public:
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -711,7 +639,6 @@ private:
   template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
-  template <class K> ArrayData* updateMove(K k, Cell data);
 
   template <class K> ArrayData* zSetImpl(K k, RefData* data);
   ArrayData* zAppendImpl(RefData* data, int64_t* key_ptr);
@@ -729,11 +656,6 @@ private:
   MixedArray* copyImpl(MixedArray* target) const;
 
   bool isFull() const;
-  bool isFullPacked() const;
-
-  // Pre: !isFullPacked()
-  TypedValue& allocNextElm(uint32_t i);
-
   Elm& allocElm(int32_t* ei);
 
   MixedArray* getLval(TypedValue& tv, Variant*& ret);
@@ -835,15 +757,10 @@ ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
 extern std::aligned_storage<
   computeAllocBytes(1),
   folly::constexpr_max(alignof(MixedArray), size_t(16))
->::type s_theEmptyDictArray, s_theEmptyKeysetArray;
+>::type s_theEmptyDictArray;
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
   void* vp = &s_theEmptyDictArray;
-  return static_cast<ArrayData*>(vp);
-}
-
-ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
-  void* vp = &s_theEmptyKeysetArray;
   return static_cast<ArrayData*>(vp);
 }
 

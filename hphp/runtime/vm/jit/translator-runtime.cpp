@@ -22,7 +22,9 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-helpers.h"
@@ -258,7 +260,7 @@ ArrayData* convDictToArrHelper(ArrayData* adIn) {
 
 ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
-  auto a = MixedArray::ToPHPArrayKeyset(adIn, adIn->cowCheck());
+  auto a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -280,7 +282,7 @@ ArrayData* convDictToVecHelper(ArrayData* adIn) {
 
 ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
   assert(adIn->isKeyset());
-  auto a = MixedArray::ToVecKeyset(adIn, adIn->cowCheck());
+  auto a = SetArray::ToVec(adIn, adIn->cowCheck());
   assert(a != adIn);
   decRefArr(adIn);
   return a;
@@ -313,7 +315,7 @@ ArrayData* convVecToDictHelper(ArrayData* adIn) {
 
 ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
   assertx(adIn->isKeyset());
-  auto a = MixedArray::ToDictKeyset(adIn, adIn->cowCheck());
+  auto a = SetArray::ToDict(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -764,12 +766,12 @@ TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isKeyset());
-  return getDefaultIfNullCell(MixedArray::NvGetIntKeyset(a, key), def);
+  return getDefaultIfNullCell(SetArray::NvGetInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isKeyset());
-  return getDefaultIfNullCell(MixedArray::NvGetStrKeyset(a, key), def);
+  return getDefaultIfNullCell(SetArray::NvGetStr(a, key), def);
 }
 
 TypedValue mapIdx(ObjectData* mapOD, StringData* key, TypedValue def) {

@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
-#include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
@@ -34,7 +34,7 @@ namespace HPHP { namespace jit { namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Use profiling data from a MixedArrayOffsetProfile to conditionally optimize
+ * Use profiling data from an ArrayOffsetProfile to conditionally optimize
  * the array access represented by `generic' as `direct'.
  *
  * For profiling translations, this generates the profiling instructions, then
@@ -59,13 +59,13 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
   // optimize it away completely.
   if (arr->hasConstVal() && key->hasConstVal()) return generic(key);
 
-  auto const profile = TargetProfile<MixedArrayOffsetProfile> {
+  auto const profile = TargetProfile<ArrayOffsetProfile> {
     env.context,
     env.irb->curMarker(),
     makeStaticString(
       is_dict ? "DictOffset" :
-      is_keyset ? "KeysetOffset" :
-      "MixedArrayOffset"
+        is_keyset ? "KeysetOffset" :
+        "MixedArrayOffset"
     )
   };
 
@@ -83,7 +83,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
   }
 
   if (profile.optimizing()) {
-    auto const data = profile.data(MixedArrayOffsetProfile::reduce);
+    auto const data = profile.data(ArrayOffsetProfile::reduce);
 
     if (auto const pos = data.choose()) {
       return cond(

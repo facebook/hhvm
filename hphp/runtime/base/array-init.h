@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/type-variant.h"
 
@@ -706,7 +707,7 @@ private:
  */
 struct KeysetInit {
   explicit KeysetInit(size_t n)
-    : m_keyset(MixedArray::MakeReserveKeyset(n))
+    : m_keyset(SetArray::MakeReserveSet(n))
 #ifdef DEBUG
     , m_addCount(0)
     , m_expectedCount(n)
@@ -742,23 +743,23 @@ struct KeysetInit {
   ~KeysetInit() {
     // In case an exception interrupts the initialization.
     assert(!m_keyset || (m_keyset->hasExactlyOneRef() && m_keyset->isKeyset()));
-    if (m_keyset) MixedArray::Release(m_keyset);
+    if (m_keyset) SetArray::Release(m_keyset);
   }
 
   /*
    * Add a new element to the keyset.
    */
   KeysetInit& add(int64_t v) {
-    performOp([&]{ return MixedArray::AddToKeyset(m_keyset, v, false); });
+    performOp([&]{ return SetArray::AddToSet(m_keyset, v, false); });
     return *this;
   }
   KeysetInit& add(StringData* v) {
-    performOp([&]{ return MixedArray::AddToKeyset(m_keyset, v, false); });
+    performOp([&]{ return SetArray::AddToSet(m_keyset, v, false); });
     return *this;
   }
   KeysetInit& add(const Variant& v) {
     performOp([&]{
-      return MixedArray::AppendKeyset(m_keyset, v.asInitCellTmp(), false);
+      return SetArray::Append(m_keyset, v.asInitCellTmp(), false);
     });
     return *this;
   }

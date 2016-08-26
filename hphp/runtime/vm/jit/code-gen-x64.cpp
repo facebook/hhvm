@@ -1394,8 +1394,8 @@ void CodeGenerator::cgAKExistsKeyset(IRInstruction* inst) {
   auto& v = vmain();
 
   auto const target = (keyTy <= TInt)
-    ? CallSpec::direct(MixedArray::ExistsIntKeyset)
-    : CallSpec::direct(MixedArray::ExistsStrKeyset);
+    ? CallSpec::direct(SetArray::ExistsInt)
+    : CallSpec::direct(SetArray::ExistsStr);
 
   cgCallHelper(
     v,
@@ -1472,7 +1472,7 @@ void CodeGenerator::cgNewKeysetArray(IRInstruction* inst) {
   auto const data = inst->extra<NewKeysetArray>();
   cgCallHelper(
     vmain(),
-    CallSpec::direct(MixedArray::MakeKeyset),
+    CallSpec::direct(SetArray::MakeSet),
     callDest(inst),
     SyncOptions::Sync,
     argGroup(inst)

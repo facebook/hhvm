@@ -161,6 +161,7 @@ APCHandle* APCArray::MakeUncountedArray(ArrayData* array) {
     auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
     value = new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
   } else {
+    assert(array->isMixed());
     ArrayData* data = MixedArray::MakeUncounted(array, sizeof(APCTypedValue));
     auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
     value = new(mem) APCTypedValue(APCTypedValue::UncountedArr{}, data);
@@ -189,7 +190,7 @@ APCHandle* APCArray::MakeUncountedDict(ArrayData* dict) {
 APCHandle* APCArray::MakeUncountedKeyset(ArrayData* keyset) {
   assertx(apcExtension::UseUncounted);
   assertx(keyset->isKeyset());
-  auto data = MixedArray::MakeUncounted(keyset, sizeof(APCTypedValue));
+  auto data = SetArray::MakeUncounted(keyset, sizeof(APCTypedValue));
   auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
   auto value = new(mem) APCTypedValue(APCTypedValue::UncountedKeyset{}, data);
   return value->getHandle();

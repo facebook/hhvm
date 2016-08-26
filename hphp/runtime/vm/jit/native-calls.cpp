@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -414,9 +415,9 @@ static CallMap s_callMap {
                           {{SSA, 0}, {SSA, 1}}},
     {NSameDict,          MixedArray::DictNotSame, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {EqKeyset,           MixedArray::KeysetEqual, DSSA, SSync,
+    {EqKeyset,           SetArray::Equal, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
-    {NeqKeyset,          MixedArray::KeysetNotEqual, DSSA, SSync,
+    {NeqKeyset,          SetArray::NotEqual, DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},
     {GtRes,              static_cast<ResCmpFn>(more), DSSA, SSync,
                           {{SSA, 0}, {SSA, 1}}},

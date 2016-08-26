@@ -14,11 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/mixed-array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-offset-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -34,7 +35,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string MixedArrayOffsetProfile::toString() const {
+std::string ArrayOffsetProfile::toString() const {
   if (!m_init) return std::string("uninitialized");
   std::ostringstream out;
   for (auto const& line : m_hits) {
@@ -45,7 +46,7 @@ std::string MixedArrayOffsetProfile::toString() const {
 }
 
 folly::Optional<uint32_t>
-MixedArrayOffsetProfile::choose() const {
+ArrayOffsetProfile::choose() const {
   Line hottest;
   uint32_t total = 0;
 
@@ -66,7 +67,7 @@ MixedArrayOffsetProfile::choose() const {
     : folly::none;
 }
 
-bool MixedArrayOffsetProfile::update(int32_t pos, uint32_t count) {
+bool ArrayOffsetProfile::update(int32_t pos, uint32_t count) {
   if (!m_init) init();
 
   if (!validPos(pos)) {
@@ -92,30 +93,36 @@ bool MixedArrayOffsetProfile::update(int32_t pos, uint32_t count) {
   return false;
 }
 
-void MixedArrayOffsetProfile::update(const ArrayData* ad, int64_t i) {
-  auto const pos = ad->hasMixedLayout()
-    ? MixedArray::asMixed(ad)->find(i, hashint(i))
-    : -1;
+void ArrayOffsetProfile::update(const ArrayData* ad, int64_t i) {
+  auto const pos =
+    ad->hasMixedLayout() ? MixedArray::asMixed(ad)->find(i, hashint(i)) :
+    ad->isKeyset() ? SetArray::asSet(ad)->find(i, hashint(i)) :
+    -1;
   update(pos, 1);
 }
 
-void MixedArrayOffsetProfile::update(const ArrayData* ad,
-                                     const StringData* sd,
-                                     bool checkForInt) {
+void ArrayOffsetProfile::update(const ArrayData* ad,
+                                const StringData* sd,
+                                bool checkForInt) {
   auto const pos = [&]() -> int32_t {
-    if (!ad->hasMixedLayout()) return -1;
-    auto const a = MixedArray::asMixed(ad);
+    if (ad->hasMixedLayout()) {
+      auto const a = MixedArray::asMixed(ad);
 
-    int64_t i;
-    return checkForInt && ad->convertKey(sd, i)
-      ? a->find(i, hashint(i))
-      : a->find(sd, sd->hash());
+      int64_t i;
+      return checkForInt && ad->convertKey(sd, i)
+        ? a->find(i, hashint(i))
+        : a->find(sd, sd->hash());
+    } else if (ad->isKeyset()) {
+      return SetArray::asSet(ad)->find(sd, sd->hash());
+    } else {
+      return -1;
+    }
   }();
   update(pos, 1);
 }
 
-void MixedArrayOffsetProfile::reduce(MixedArrayOffsetProfile& l,
-                                     const MixedArrayOffsetProfile& r) {
+void ArrayOffsetProfile::reduce(ArrayOffsetProfile& l,
+                                const ArrayOffsetProfile& r) {
   if (!r.m_init) return;
 
   Line scratch[2 * kNumTrackedSamples];
@@ -151,7 +158,7 @@ void MixedArrayOffsetProfile::reduce(MixedArrayOffsetProfile& l,
   }
 }
 
-void MixedArrayOffsetProfile::init() {
+void ArrayOffsetProfile::init() {
   assertx(!m_init);
   for (auto i = 0; i < kNumTrackedSamples; ++i) {
     m_hits[i] = Line{};

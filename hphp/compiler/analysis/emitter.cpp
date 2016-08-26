@@ -117,6 +117,7 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -10191,7 +10192,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
     } else if (k == HeaderKind::VecArray) {
       m_staticArrays.push_back(Array::attach(PackedArray::MakeReserveVec(0)));
     } else if (k == HeaderKind::Keyset) {
-      m_staticArrays.push_back(Array::attach(MixedArray::MakeReserveKeyset(0)));
+      m_staticArrays.push_back(Array::attach(SetArray::MakeReserveSet(0)));
     } else {
       m_staticArrays.push_back(Array::attach(PackedArray::MakeReserve(0)));
     }

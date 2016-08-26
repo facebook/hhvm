@@ -27,6 +27,9 @@
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
@@ -287,15 +290,15 @@ inline const TypedValue* ElemDict(ArrayData* base, key_type<keyType> key) {
 template <MOpFlags flags>
 inline const TypedValue* ElemKeysetPre(ArrayData* base, int64_t key) {
   return (flags & MOpFlags::Warn)
-    ? MixedArray::NvTryGetIntKeyset(base, key)
-    : MixedArray::NvGetIntKeyset(base, key);
+    ? SetArray::NvTryGetInt(base, key)
+    : SetArray::NvGetInt(base, key);
 }
 
 template <MOpFlags flags>
 inline const TypedValue* ElemKeysetPre(ArrayData* base, StringData* key) {
   return (flags & MOpFlags::Warn)
-    ? MixedArray::NvTryGetStrKeyset(base, key)
-    : MixedArray::NvGetStrKeyset(base, key);
+    ? SetArray::NvTryGetStr(base, key)
+    : SetArray::NvGetStr(base, key);
 }
 
 template <MOpFlags flags>
@@ -1677,7 +1680,7 @@ inline void SetNewElemKeyset(TypedValue* base, Cell* value) {
   auto a = base->m_data.parr;
   auto const copy = a->cowCheck() ||
     (tvIsKeyset(value) && value->m_data.parr == a);
-  auto a2 = MixedArray::AppendKeyset(a, *value, copy);
+  auto a2 = SetArray::Append(a, *value, copy);
   if (a2 != a) {
     base->m_type = KindOfKeyset;
     base->m_data.parr = a2;
@@ -2313,12 +2316,12 @@ inline void UnsetElemDict(TypedValue* base, key_type<keyType> key) {
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, int64_t key,
                                      bool copy) {
-  return MixedArray::RemoveIntKeyset(a, key, copy);
+  return SetArray::RemoveInt(a, key, copy);
 }
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, StringData* key,
                                      bool copy) {
-  return MixedArray::RemoveStrKeyset(a, key, copy);
+  return SetArray::RemoveStr(a, key, copy);
 }
 
 inline ArrayData* UnsetElemKeysetPre(ArrayData* a, TypedValue key,

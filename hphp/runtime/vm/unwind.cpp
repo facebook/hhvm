@@ -202,6 +202,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   // already been destructed and/or overwritten due to sharing space with
   // fp->m_r.
   if (curOp != OpRetC &&
+      !fp->localsDecRefd() &&
       fp->hasThis() &&
       fp->getThis()->getVMClass()->getCtor() == func &&
       fp->getThis()->getVMClass()->getDtor()) {
@@ -244,10 +245,6 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
      */
     if (!fp->localsDecRefd()) {
       try {
-        // Note that we must convert locals and the $this to
-        // uninit/zero during unwind.  This is because a backtrace
-        // from another destructing object during this unwind may try
-        // to read them.
         frame_free_locals_unwind(fp, func->numLocals(), phpException);
       } catch (...) {}
     }

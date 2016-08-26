@@ -141,6 +141,7 @@ inline void ActRec::setThisOrClassAllowNull(void* objOrCls) {
 }
 
 inline bool ActRec::hasThis() const {
+  assertx(reinterpret_cast<uintptr_t>(m_this) != kTrashedThisSlot);
   return m_this && !(reinterpret_cast<uintptr_t>(m_this) & kHasClassBit);
 }
 
@@ -170,6 +171,10 @@ inline void ActRec::setThis(ObjectData* val) {
 inline void ActRec::setClass(Class* val) {
   m_cls = reinterpret_cast<Class*>(
     reinterpret_cast<uintptr_t>(val) | kHasClassBit);
+}
+
+inline void ActRec::trashThis() {
+  if (debug) m_this = reinterpret_cast<ObjectData*>(kTrashedThisSlot);
 }
 
 /////////////////////////////////////////////////////////////////////////////

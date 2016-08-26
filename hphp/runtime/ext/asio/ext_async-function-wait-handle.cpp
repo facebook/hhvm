@@ -38,7 +38,7 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   }
 
   assert(!isRunning());
-  frame_free_locals_inl_no_hook<false>(actRec(), actRec()->func()->numLocals());
+  frame_free_locals_inl_no_hook(actRec(), actRec()->func()->numLocals());
   decRefObj(m_children[0].getChild());
 }
 
@@ -208,8 +208,9 @@ String c_AsyncFunctionWaitHandle::getName() {
     case STATE_READY:
     case STATE_RUNNING: {
       auto func = actRec()->func();
-      if (!actRec()->getThisOrClass() ||
-          func->cls()->attrs() & AttrNoOverride) {
+      if (!func->cls() ||
+          func->cls()->attrs() & AttrNoOverride ||
+          actRec()->localsDecRefd()) {
         auto name = func->fullName();
         if (func->isClosureBody()) {
           const char* p = strchr(name->data(), ':');
@@ -224,21 +225,20 @@ String c_AsyncFunctionWaitHandle::getName() {
         return String{const_cast<StringData*>(name)};
       }
       String funcName;
-      if (actRec()->func()->isClosureBody()) {
+      if (func->isClosureBody()) {
         // Can we do better than this?
         funcName = s__closure_;
       } else {
-        funcName = const_cast<StringData*>(actRec()->func()->name());
+        funcName = const_cast<StringData*>(func->name());
       }
 
       String clsName;
       if (actRec()->hasThis()) {
         clsName = const_cast<StringData*>(actRec()->getThis()->
                                           getVMClass()->name());
-      } else if (actRec()->hasClass()) {
-        clsName = const_cast<StringData*>(actRec()->getClass()->name());
       } else {
-        return funcName;
+        assertx(actRec()->hasClass());
+        clsName = const_cast<StringData*>(actRec()->getClass()->name());
       }
 
       return concat3(clsName, "::", funcName);

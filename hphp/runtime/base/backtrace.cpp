@@ -255,7 +255,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->func()->isClosureBody()) {
         frame.set(s_class, Variant{const_cast<StringData*>(ctx->name())});
-        if (fp->hasThis() && !isReturning) {
+        if (!isReturning && fp->hasThis()) {
           if (btArgs.m_withThis) {
             frame.set(s_object, Object(fp->getThis()));
           }

@@ -173,7 +173,7 @@ Class* arGetContextClassImpl<true>(const ActRec* ar) {
 }
 
 void frame_free_locals_no_hook(ActRec* fp) {
-  frame_free_locals_inl_no_hook<false>(fp, fp->func()->numLocals());
+  frame_free_locals_inl_no_hook(fp, fp->func()->numLocals());
 }
 
 const StaticString s_call_user_func("call_user_func");

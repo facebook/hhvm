@@ -149,6 +149,7 @@ struct ActRec {
   static auto constexpr      kExtraArgsBit = 0x1;  // unset for m_varEnv
 
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
+  static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -280,6 +281,11 @@ struct ActRec {
    */
   void setThis(ObjectData* val);
   void setClass(Class* val);
+
+  /*
+   * Write garbage to the m_this/m_cls union (in debug mode only).
+   */
+  void trashThis();
 
   /////////////////////////////////////////////////////////////////////////////
   // VarEnv / ExtraArgs.

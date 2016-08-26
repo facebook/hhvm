@@ -2399,7 +2399,8 @@ void ExecutionContext::exitDebuggerDummyEnv() {
   // Teardown the frame we erected by enterDebuggerDummyEnv()
   const Func* func = vmfp()->m_func;
   try {
-    frame_free_locals_inl_no_hook<true>(vmfp(), func->numLocals());
+    vmfp()->setLocalsDecRefd();
+    frame_free_locals_no_hook(vmfp());
   } catch (...) {}
   vmStack().ndiscard(func->numSlotsInFrame());
   vmStack().discardAR();

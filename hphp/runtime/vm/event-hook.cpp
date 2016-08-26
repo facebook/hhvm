@@ -296,7 +296,8 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     Offset pcOff;
     ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
 
-    frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
+    ar->setLocalsDecRefd();
+    frame_free_locals_no_hook(ar);
     Stack& stack = vmStack();
     stack.top() = (Cell*)(ar + 1);
     cellDup(*ret.asCell(), *stack.allocTV());
@@ -518,9 +519,9 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
   // teleported the ActRec from suspending over to resumableAR, so we need to
   // make sure the unwinder knows not to touch the locals, $this, or
   // VarEnv/ExtraArgs.
-  suspending->setThisOrClassAllowNull(nullptr);
   suspending->setLocalsDecRefd();
-  suspending->setVarEnv(nullptr);
+  suspending->trashThis();
+  suspending->trashVarEnv();
 
   try {
     auto const flags = handle_request_surprise();
@@ -551,10 +552,10 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
-  // The locals are already gone. Null out everything.
-  ar->setThisOrClassAllowNull(nullptr);
+  // The locals are already gone. Tell everyone
   ar->setLocalsDecRefd();
-  ar->setVarEnv(nullptr);
+  ar->trashThis();
+  ar->trashVarEnv();
 
   try {
     auto const flags = handle_request_surprise();
@@ -581,10 +582,10 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
 }
 
 void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
-  // The locals are already gone. Null out everything.
-  ar->setThisOrClassAllowNull(nullptr);
+  // The locals are already gone. Tell everyone
   ar->setLocalsDecRefd();
-  ar->setVarEnv(nullptr);
+  ar->trashThis();
+  ar->trashVarEnv();
 
   // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault

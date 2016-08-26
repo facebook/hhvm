@@ -7,8 +7,8 @@ function blah() {
 class something {
   public function __destruct() {
     echo "~something\n";
-    $k = debug_backtrace()[1]['object'];
-    var_dump($k);
+    $k = debug_backtrace();#[1]['object'];
+    var_dump($k[1]['class'], isset($k[1]['object']));
   }
   public function yo() {
     blah();
@@ -29,4 +29,3 @@ function main() {
 }
 
 main();
-

@@ -50,7 +50,7 @@ Generator::~Generator() {
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
   ActRec* ar = actRec();
-  frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
+  frame_free_locals_inl_no_hook(ar, ar->func()->numLocals());
 }
 
 Generator& Generator::operator=(const Generator& other) {

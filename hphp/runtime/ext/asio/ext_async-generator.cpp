@@ -45,7 +45,7 @@ AsyncGenerator::~AsyncGenerator() {
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
   ActRec* ar = actRec();
-  frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
+  frame_free_locals_inl_no_hook(ar, ar->m_func->numLocals());
 }
 
 ObjectData*

@@ -194,7 +194,6 @@ static Variant HHVM_METHOD(Closure, bindto,
 
   auto cloneObj = this_->clone();
   auto clone = c_Closure::fromObject(cloneObj);
-  clone->setClass(nullptr);
 
   Attr curattrs = invoke->attrs();
   Attr newattrs = static_cast<Attr>(curattrs & ~AttrHasForeignThis);
@@ -213,6 +212,8 @@ static Variant HHVM_METHOD(Closure, bindto,
     // the function static.
     newattrs |= AttrStatic;
     clone->setClass(newscope);
+  } else {
+    clone->setThis(nullptr);
   }
 
   // If we are changing either the scope or the attributes of the closure, we

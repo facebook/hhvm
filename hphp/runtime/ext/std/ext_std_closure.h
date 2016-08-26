@@ -116,11 +116,12 @@ struct c_Closure : ObjectData {
     }
   }
   void setClass(Class* cls) {
+    assertx(cls);
     m_ctx = reinterpret_cast<void*>(
       reinterpret_cast<uintptr_t>(cls) | kClassBit
     );
   }
-  bool hasClass() const { return m_ctx && ctxIsClass(); }
+  bool hasClass() const { return ctxIsClass(); }
 
   ObjectData* clone();
 

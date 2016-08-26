@@ -1,0 +1,1 @@
+Warning: get_called_class() called from outside a class in %s/test/slow/closure/bind-null.php on line 5

@@ -565,6 +565,17 @@ let rec get_doc node =
     let start_block = indent_block_no_space left_part expr right indt in
     handle_switch start_block x
     (* group_doc (start_block ^| statement) *)
+  | ScopeResolutionExpression x ->
+    let q = get_doc x.scope_resolution_qualifier in
+    let o = get_doc x.scope_resolution_operator in
+    let n = get_doc x.scope_resolution_name in
+    group_doc (q ^^^ o ^^^ n)
+  | MemberSelectionExpression x
+  | SafeMemberSelectionExpression x ->
+    let ob = get_doc x.member_object in
+    let op = get_doc x.member_operator in
+    let nm = get_doc x.member_name in
+    group_doc (ob ^^^ op ^^^ nm)
   | YieldExpression x ->
     let y = get_doc x.yield_token in
     let o = get_doc x.yield_operand in

@@ -425,6 +425,16 @@ module WithToken(Token: TokenType) = struct
       cast_right_paren : t;
       cast_operand : t
     }
+    and scope_resolution_expression = {
+      scope_resolution_qualifier : t;
+      scope_resolution_operator : t;
+      scope_resolution_name : t
+    }
+    and member_selection_expression = {
+      member_object : t;
+      member_operator : t;
+      member_name : t
+    }
     and yield_expression = {
       yield_token : t;
       yield_operand : t
@@ -669,6 +679,9 @@ module WithToken(Token: TokenType) = struct
     | StaticDeclarator of static_declarator
     | EchoStatement of echo_statement
 
+    | MemberSelectionExpression of member_selection_expression
+    | SafeMemberSelectionExpression of member_selection_expression
+    | ScopeResolutionExpression of scope_resolution_expression
     | YieldExpression of yield_expression
     | PrintExpression of print_expression
     | CastExpression of cast_expression
@@ -732,6 +745,10 @@ module WithToken(Token: TokenType) = struct
       match syntax with
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
+      | MemberSelectionExpression _ -> SyntaxKind.MemberSelectionExpression
+      | SafeMemberSelectionExpression _ ->
+        SyntaxKind.SafeMemberSelectionExpression
+      | ScopeResolutionExpression _ -> SyntaxKind.ScopeResolutionExpression
       | YieldExpression _ -> SyntaxKind.YieldExpression
       | PrintExpression _ -> SyntaxKind.PrintExpression
       | CastExpression _ -> SyntaxKind.CastExpression
@@ -836,6 +853,12 @@ module WithToken(Token: TokenType) = struct
 
     let is_missing node = kind node = SyntaxKind.Missing
     let is_token node = kind node = SyntaxKind.Token
+    let is_scope_resolution_expression node =
+      kind node = SyntaxKind.ScopeResolutionExpression
+    let is_member_selection_expression node =
+      kind node = SyntaxKind.MemberSelectionExpression
+    let is_safe_member_selection_expression node =
+      kind node = SyntaxKind.SafeMemberSelectionExpression
     let is_yield_expression node = kind node = SyntaxKind.YieldExpression
     let is_print_expression node = kind node = SyntaxKind.PrintExpression
     let is_cast_expression node = kind node = SyntaxKind.CastExpression
@@ -998,6 +1021,17 @@ module WithToken(Token: TokenType) = struct
       | PipeVariableExpression x -> [x]
       | Error x -> x
       | SyntaxList x -> x
+      | ScopeResolutionExpression
+        { scope_resolution_qualifier; scope_resolution_operator;
+          scope_resolution_name } ->
+        [ scope_resolution_qualifier; scope_resolution_operator;
+          scope_resolution_name ]
+      | MemberSelectionExpression
+        { member_object; member_operator; member_name } ->
+        [ member_object; member_operator; member_name ]
+      | SafeMemberSelectionExpression
+        { member_object; member_operator; member_name } ->
+        [ member_object; member_operator; member_name ]
       | YieldExpression
         { yield_token; yield_operand } ->
         [ yield_token; yield_operand ]
@@ -1384,6 +1418,17 @@ module WithToken(Token: TokenType) = struct
       | PipeVariableExpression _ -> ["pipe_variable_expression"]
       | Error _ -> []
       | SyntaxList _ -> []
+      | MemberSelectionExpression
+        { member_object; member_operator; member_name } ->
+        [ "member_object"; "member_operator"; "member_name" ]
+      | SafeMemberSelectionExpression
+        { member_object; member_operator; member_name } ->
+        [ "member_object"; "member_operator"; "member_name" ]
+      | ScopeResolutionExpression
+        { scope_resolution_qualifier; scope_resolution_operator;
+          scope_resolution_name } ->
+        [ "scope_resolution_qualifier"; "scope_resolution_operator";
+          "scope_resolution_name" ]
       | YieldExpression
         { yield_token; yield_operand } ->
         [ "yield_token"; "yield_operand" ]
@@ -2034,6 +2079,20 @@ module WithToken(Token: TokenType) = struct
       match kind, ts with
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, x) -> SyntaxList x
+      | (SyntaxKind.MemberSelectionExpression,
+        [ member_object; member_operator; member_name ]) ->
+        MemberSelectionExpression
+        { member_object; member_operator; member_name }
+      | (SyntaxKind.SafeMemberSelectionExpression,
+        [ member_object; member_operator; member_name ]) ->
+        SafeMemberSelectionExpression
+        { member_object; member_operator; member_name }
+      | (SyntaxKind.ScopeResolutionExpression,
+        [ scope_resolution_qualifier; scope_resolution_operator;
+          scope_resolution_name ]) ->
+        ScopeResolutionExpression
+        { scope_resolution_qualifier; scope_resolution_operator;
+          scope_resolution_name }
       | (SyntaxKind.YieldExpression,
         [ yield_token; yield_operand ]) ->
         YieldExpression
@@ -2515,6 +2574,16 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.FunctionCallExpression
           [ function_call_receiver; function_call_lparen;
             function_call_arguments; function_call_rparen ]
+
+      let make_member_selection_expression ob op name =
+        from_children SyntaxKind.MemberSelectionExpression [ ob; op; name ]
+
+      let make_safe_member_selection_expression ob op name =
+        from_children SyntaxKind.SafeMemberSelectionExpression [ ob; op; name ]
+
+      let make_scope_resolution_expression qualifier op name =
+        from_children SyntaxKind.ScopeResolutionExpression
+          [ qualifier; op; name ]
 
       let make_yield_expression token operand =
         from_children SyntaxKind.YieldExpression [ token; operand ]

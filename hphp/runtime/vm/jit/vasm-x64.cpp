@@ -124,7 +124,7 @@ struct Vgen {
   void emit(andl i) { commuteSF(i); a.andl(i.s0, i.d); }
   void emit(andli i) { binary(i); a.andl(i.s0, i.d); }
   void emit(andq i) { commuteSF(i); a.andq(i.s0, i.d); }
-  void emit(andqi i) { binary(i); a.andq(i.s0, i.d); }
+  void emit(andqi i);
   void emit(addli i) { binary(i); a.addl(i.s0, i.d); }
   void emit(const addlm& i) { a.addl(i.s0, i.m); }
   void emit(const addlim& i);
@@ -243,7 +243,7 @@ struct Vgen {
   void emit(const testbim& i) { a.testb(i.s0, i.s1); }
   void emit(const testwim& i);
   void emit(const testl& i) { a.testl(i.s0, i.s1); }
-  void emit(const testli& i) { a.testl(i.s0, i.s1); }
+  void emit(const testli& i);
   void emit(const testlim& i);
   void emit(const testq& i) { a.testq(i.s0, i.s1); }
   void emit(const testqi& i);
@@ -611,6 +611,16 @@ void Vgen::emit(const unwind& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Vgen::emit(andqi i) {
+  if (magFits(i.s0.q(), sz::dword)) {
+    emit(andli{int32_t(i.s0.q()), Reg32(i.s1), Reg32(i.d), i.sf});
+    return;
+  }
+
+  binary(i);
+  a.andq(i.s0, i.d);
+}
+
 void Vgen::emit(const addlim& i) {
   prefix(a, i.m).addl(i.s0, i.m.mr());
 }
@@ -709,43 +719,60 @@ void Vgen::emit(const storeqi& i) {
   prefix(a, i.m).storeq(i.s, i.m.mr());
 }
 
-void Vgen::emit(const testwim& i) {
+template<typename Inst>
+bool testimHelper(Vgen& env, const Inst& i, uint64_t mask) {
   // If there's only 1 byte of meaningful bits in the mask, we can adjust the
   // pointer offset and use testbim instead.
   int off = 0;
-  uint16_t newMask = i.s0.w();
-  while (newMask > 0xff && !(newMask & 0xff)) {
+  while (mask > 0xff && !(mask & 0xff)) {
     off++;
-    newMask >>= 8;
+    mask >>= 8;
   }
 
-  if (newMask > 0xff) {
-    a.testw(i.s0, i.s1);
-  } else {
-    emit(testbim{int8_t(newMask), i.s1 + off, i.sf});
-  }
+  if (mask > 0xff) return false;
+
+  env.emit(testbim{int8_t(mask), i.s1 + off, i.sf});
+  return true;
+}
+
+void Vgen::emit(const testwim& i) {
+  if (testimHelper(*this, i, i.s0.w())) return;
+  a.testw(i.s0, i.s1);
 }
 
 void Vgen::emit(const testlim& i) {
+  if (testimHelper(*this, i, i.s0.l())) return;
+  a.testl(i.s0, i.s1);
+}
+
+void Vgen::emit(const testli& i) {
+  if (i.s0.l() == -1) {
+    return emit(testl{i.s1, i.s1, i.sf});
+  }
   a.testl(i.s0, i.s1);
 }
 
 void Vgen::emit(const testqi& i) {
   auto const imm = i.s0.q();
   if (magFits(imm, sz::byte)) {
-    a.testb(i.s0, rbyte(i.s1));
+    a.testb(int8_t(imm), rbyte(i.s1));
+  } else if (magFits(imm, sz::dword)) {
+    emit(testli{int32_t(imm), Reg32(i.s1), i.sf});
+  } else if (imm == -1) {
+    emit(testq{i.s1, i.s1, i.sf});
   } else {
     a.testq(i.s0, i.s1);
   }
 }
 
 void Vgen::emit(const testqim& i) {
-  // The immediate is 32 bits, sign-extended to 64. If the sign bit isn't set,
-  // we can get the same results by emitting a testlim.
-  if (i.s0.l() < 0) {
-    a.testq(i.s0, i.s1);
+  if (testimHelper(*this, i, i.s0.q())) return;
+  if (magFits(i.s0.q(), sz::dword)) {
+    // For an unsigned 32 bit immediate, we can get the same results
+    // by emitting a testlim.
+    emit(testlim{int32_t(i.s0.q()), i.s1, i.sf});
   } else {
-    emit(testlim{i.s0, i.s1, i.sf});
+    a.testq(i.s0, i.s1);
   }
 }
 

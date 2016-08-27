@@ -66,6 +66,13 @@ struct ImmFolder {
     val = imm64;
     return true;
   }
+  bool match_uint(Vreg r, int& val) {
+    if (!valid.test(r)) return false;
+    auto imm64 = vals[r];
+    if (!magFits(imm64, sz::dword)) return false;
+    val = imm64;
+    return true;
+  }
   // folders
   template<class Inst> void fold(Inst&, Vinstr& out) {}
   void fold(addq& in, Vinstr& out) {
@@ -90,13 +97,31 @@ struct ImmFolder {
   }
   void fold(andq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
-    else if (match_int(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
+    if (match_int(in.s0, val)) {
+      out = andqi{val, in.s1, in.d, in.sf};
+    } else if (match_int(in.s1, val)) {
+      out = andqi{val, in.s0, in.d, in.sf};
+    } else {
+      auto rep = [&](Vreg64 s) {
+        if (val == -1 && !used[in.sf]) {
+          out = movzlq{Reg32(s), in.d};
+        } else {
+          out = andli{val, Reg32(s), Reg32(in.d), in.sf};
+        }
+      };
+      if (match_uint(in.s0, val)) {
+        rep(in.s1);
+      } else if (match_uint(in.s1, val)) {
+        rep(in.s0);
+      }
+    }
   }
   void fold(testq& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = testqi{val, in.s1, in.sf}; }
-    else if (match_int(in.s1, val)) { out = testqi{val, in.s0, in.sf}; }
+    if (match_int(in.s0, val)) {out = testqi{val, in.s1, in.sf};}
+    else if (match_int(in.s1, val)) {out = testqi{val, in.s0, in.sf};}
+    else if (match_uint(in.s0, val)) {out = testli{val, Reg32(in.s1), in.sf};}
+    else if (match_uint(in.s1, val)) {out = testli{val, Reg32(in.s0), in.sf};}
   }
   void fold(cmpb& in, Vinstr& out) {
     int val;

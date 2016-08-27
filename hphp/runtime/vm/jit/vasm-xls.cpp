@@ -2406,6 +2406,14 @@ void optimize(Vunit& unit, lea& inst, Vlabel b, size_t i, F sf_live) {
   }
 }
 
+template <typename F>
+void optimize(Vunit& unit, andqi& inst, Vlabel b, size_t i, F sf_live) {
+  if (!sf_live() && inst.s0.q() == 0xff) {
+    Vreg8 src = Reg8(inst.s1);
+    unit.blocks[b].code[i] = movzbq{src, inst.d};
+  }
+}
+
 /*
  * Perform optimizations on instructions in `unit' at which no flags registers
  * are live.
@@ -2426,10 +2434,19 @@ void optimizeSFLiveness(Vunit& unit, const VxlsContext& ctx,
     for (size_t i = 0; i < code.size(); ++i) {
       auto& inst = code[i];
 
+      /*
+       * An instruction that defines sf, where sf is not subsequently
+       * read, will have a live range going from inst.pos to inst.pos
+       * + 1. Its ok to replace such an instruction with one that
+       * doesn't modify the flags (or that modifies them in different
+       * ways), so check for a range that covers pos-1 or pos+1 to
+       * determine true liveness.
+       */
       auto const sf_live = [&] {
         return sf_ivl &&
           !sf_ivl->ranges.empty() &&
-          sf_ivl->covers(inst.pos);
+          ((inst.pos && sf_ivl->covers(inst.pos - 1)) ||
+           sf_ivl->covers(inst.pos + 1));
       };
 
       switch (inst.op) {

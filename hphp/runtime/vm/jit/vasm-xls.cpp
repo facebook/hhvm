@@ -649,8 +649,10 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
 int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp) {
   switch (inst.op) {
     case Vinstr::push:
+    case Vinstr::pushm:
       return -8;
     case Vinstr::pop:
+    case Vinstr::popm:
       return 8;
     case Vinstr::lea: {
       auto& i = inst.lea_;

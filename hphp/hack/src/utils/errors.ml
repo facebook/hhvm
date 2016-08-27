@@ -58,6 +58,22 @@ module Common = struct
   let get_lazy_decl_flag err_flags =
     err_flags.lazy_decl_err
 
+  (* Log important data if lazy_decl triggers a crash *)
+  let lazy_decl_error_logging error error_list to_absolute to_string =
+    (* Print the current error list, which should be empty *)
+    Printf.eprintf "%s" "Error list(should be empty):\n";
+    List.iter !error_list ~f:(fun err ->
+        let msg = err |> to_absolute |> to_string in Printf.eprintf "%s\n" msg);
+    Printf.eprintf "%s" "Offending error:\n";
+    Printf.eprintf "%s" error;
+
+    (* Print out a larger stack trace *)
+    Printf.eprintf "%s" "Callstack:\n";
+    Printf.eprintf "%s" (Printexc.raw_backtrace_to_string
+      (Printexc.get_callstack 500));
+    (* Exit with special error code so we can see the log after *)
+    Exit_status.exit Exit_status.Lazy_decl_bug
+
   (*****************************************************************************)
   (* Error code printing. *)
   (*****************************************************************************)
@@ -183,7 +199,9 @@ module NonTracingErrors: Errors_modes = struct
     else
       (* We have an error, but haven't handled it in any way *)
       let msg = error |> to_absolute |> to_string in
-      assert_false_log_backtrace (Some msg)
+      if !in_lazy_decl then
+        Common.lazy_decl_error_logging msg error_list to_absolute to_string
+      else assert_false_log_backtrace (Some msg)
 
 end
 
@@ -266,7 +284,9 @@ module TracingErrors: Errors_modes = struct
     else
     (* We have an error, but haven't handled it in any way *)
       let msg = error |> to_absolute |> to_string in
-      assert_false_log_backtrace (Some msg)
+      if !in_lazy_decl then
+        Common.lazy_decl_error_logging msg error_list to_absolute to_string
+      else assert_false_log_backtrace (Some msg)
 
   let get_sorted_error_list (err,_) =
     List.sort ~cmp:begin fun x y ->

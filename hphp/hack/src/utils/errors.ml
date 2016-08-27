@@ -454,6 +454,7 @@ module Naming                               = struct
   let invalid_instanceof                    = 2067 (* DONT MODIFY!!!! *)
   let name_is_reserved                      = 2068 (* DONT MODIFY!!!! *)
   let dollardollar_unused                   = 2069 (* DONT MODIFY!!!! *)
+  let illegal_member_variable_class         = 2070 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -924,6 +925,12 @@ let illegal_fun pos =
   let msg = "The argument to fun() must be a single-quoted, constant "^
     "literal string representing a valid function name." in
   add Naming.illegal_fun pos msg
+
+let illegal_member_variable_class pos =
+  let msg = "Cannot declare a constant named 'class'. \
+             The name 'class' is reserved for the class \
+             constant that represents the name of the class" in
+  add Naming.illegal_member_variable_class pos msg
 
 let illegal_meth_fun pos =
   let msg = "String argument to fun() contains ':';"^

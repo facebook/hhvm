@@ -514,8 +514,9 @@ end = struct
     with Not_found ->
       Hashtbl.replace tbl x p
 
-  let bind_class_const (genv, _env) x =
-    bind_class_member genv.class_consts x
+  let bind_class_const (genv, _env) (p, x) =
+    if String.lowercase x = "class" then Errors.illegal_member_variable_class p;
+    bind_class_member genv.class_consts (p, x)
 
   let bind_prop (genv, _env) x =
     bind_class_member genv.class_props x

@@ -21,9 +21,67 @@
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo.h"
 
+#include "hphp/util/logger.h"
+
 namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
+
+//==============================================================================
+// Debugging
+
+// Try to look at a SQL statement and figure out which repoId it's targeting.
+static int debugComputeRepoIdFromSQL(Repo& repo, const std::string& stmt) {
+  for (int i = 0; i < RepoIdCount; ++i) {
+    auto name = repo.dbName(i);
+    if (stmt.find(folly::format(" {}.", name).str()) != std::string::npos) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+
+static void reportDbCorruption(Repo& repo, int repoId,
+                               const std::string& where) {
+
+  std::string report = folly::sformat("{} returned SQLITE_CORRUPT.\n", where);
+
+  auto repoPath = sqlite3_db_filename(repo.dbc(), repo.dbName(repoId));
+  if (repoPath) {
+    report += folly::sformat("Path: '{}'\n", repoPath);
+
+    struct stat repoStat;
+    if (stat(repoPath, &repoStat) == 0) {
+      time_t now = time(nullptr);
+      report += folly::sformat("{} bytes, c_age: {}, m_age: {}\n",
+                               repoStat.st_size,
+                               now - repoStat.st_ctime,
+                               now - repoStat.st_mtime);
+    } else {
+      report += "stat() failed\n";
+    }
+  } else {
+    report += "sqlite3_db_filename() returned nullptr\n";
+  }
+
+  // Use raw SQLite here because we just want to hit the raw DB itself.
+  sqlite3_exec(repo.dbc(),
+               folly::sformat(
+                 "PRAGMA {}.integrity_check(4);", repo.dbName(repoId)).c_str(),
+               [](void* _report, int columns, char** text, char** names) {
+                 std::string& report = *reinterpret_cast<std::string*>(_report);
+                 for (int column = 0; column < columns; ++column) {
+                   report += folly::sformat("Integrity Check ({}): {}\n",
+                                            column, text[column]);
+                 }
+                 return 0;
+               },
+               &report,
+               nullptr);
+
+  Logger::Error(report);
+}
 
 //==============================================================================
 // RepoStmt.
@@ -50,9 +108,14 @@ void RepoStmt::prepare(const std::string& sql) {
   int rc = sqlite3_prepare_v2(m_repo.dbc(), sql.c_str(), sql.size(), &m_stmt,
                               nullptr);
   if (rc != SQLITE_OK) {
+    std::string errmsg = sqlite3_errmsg(m_repo.dbc());
+    if (rc == SQLITE_CORRUPT) {
+      auto repoId = debugComputeRepoIdFromSQL(repo(), sql);
+      reportDbCorruption(m_repo, repoId, "sqlite3_prepare_v2()");
+    }
     throw RepoExc("RepoStmt::%s(repo=%p) error: '%s' --> (%d) %s\n",
                   __func__, &m_repo, sql.c_str(), rc,
-                  sqlite3_errmsg(m_repo.dbc()));
+                  errmsg.c_str());
   }
 }
 
@@ -263,9 +326,14 @@ void RepoQuery::step() {
   default:
     m_row = false;
     m_done = true;
+    std::string errmsg = sqlite3_errmsg(m_stmt.repo().dbc());
+    if (rc == SQLITE_CORRUPT) {
+      auto repoId = debugComputeRepoIdFromSQL(m_stmt.repo(), m_stmt.sql());
+      reportDbCorruption(m_stmt.repo(), repoId, "sqlite3_step()");
+    }
     throw RepoExc("RepoQuery::%s(repo=%p) error: '%s' --> (%d) %s",
                   __func__, &m_stmt.repo(), m_stmt.sql().c_str(), rc,
-                  sqlite3_errmsg(m_stmt.repo().dbc()));
+                  errmsg.c_str());
   }
 }
 

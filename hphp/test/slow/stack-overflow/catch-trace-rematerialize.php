@@ -26,6 +26,10 @@ function baz($a, $b) {
   return quux($b, $a);
 }
 
+function chwrap($x) {
+  return choose($x);
+}
+
 function choose($a) {
   $arr = array('banana', $a, 'apple');
   $dict = array(
@@ -57,13 +61,13 @@ function quux($b, $a) {
 
   $out = array_map(
     function ($val) {
-      return choose($val) ? $val : strrev($val);
+      return chwrap($val) ? $val : strrev($val);
     },
     $arr
   );
 
   foreach ($out as &$thing) {
-    $thing = choose($thing) ? foo($thing) : bar($thing);
+    $thing = chwrap($thing) ? foo($thing) : bar($thing);
   }
   return $out;
 }

@@ -82,12 +82,11 @@ struct VMSwitchMode : std::exception {
 };
 
 /*
- * Thrown for stack overflow thrown from a prolog while
- * re-entering
+ * Thrown for stack overflow in a jitted prolog.
  */
-struct VMReenterStackOverflow : std::exception {
+struct VMStackOverflow : std::exception {
   const char* what() const noexcept override {
-    return "VMReenterStackOverflow";
+    return "VMStackOverflow";
   }
 };
 

@@ -53,56 +53,40 @@ void handleStackOverflow(ActRec* calleeAR) {
   /*
    * First synchronize registers.
    *
-   * We're called in two situations: either this is the first frame after a
-   * re-entry, in which case calleeAR->m_sfp is enterTCHelper's native stack,
-   * or we're called in the middle of one VM entry (from a func prologue).  We
-   * want to raise the exception from the caller's FCall instruction in the
-   * second case, and in the first case we have to raise in a special way
-   * inside this re-entry.
+   * We can't finish setting up the prolog here, so there is no
+   * "correct" vm state. However, we need to mark the registers clean
+   * because sync_regstate in unwind-itanium.cpp doesn't know how to
+   * clean them.
    *
-   * Either way the stack depth is below the calleeAR by numArgs, because we
-   * haven't run func prologue duties yet.
+   * So the best we can do is to set vmfp() to the ActRec of the
+   * function that was just called, vmpc() to the start of the
+   * function, and vmsp() to the last parameter pushed(), and then
+   * throw a special exception so the unwinder knows what to do.
+   *
+   * Since we want to raise the exception as if it were raised in the
+   * caller, its tempting to set things up to calleeAR->sfp(), but
+   * there are two problems: this could be the first frame in a VM
+   * re-entry, and our caller might be inlined.
+   *
+   * In the first case, setting vmfp() to a frame in a prior vm
+   * invocation will confuse things, and in the latter, our caller's
+   * frame might not be linked into the call chain until we run the
+   * catch trace corresponding to this call.
+   *
+   * We can solve both problems by throwing a special exception here,
+   * and dealing with it after unwinding the whole vm entry.
    */
   auto& unsafeRegs = vmRegsUnsafe();
-  auto const isReentry = calleeAR == vmFirstAR();
-  auto const arToSync = isReentry ? calleeAR : calleeAR->m_sfp;
-  unsafeRegs.fp = arToSync;
+  unsafeRegs.fp = calleeAR;
   unsafeRegs.stack.top() =
     reinterpret_cast<Cell*>(calleeAR) - calleeAR->numArgs();
-  auto const func_base = arToSync->func()->base();
-  // calleeAR m_soff is 0 in the re-entry case, so we'll set pc to the func
-  // base.  But it also doesn't matter because we're going to throw a special
-  // VMReenterStackOverflow in that case so the unwinder won't worry about it.
-  unsafeRegs.pc = arToSync->func()->unit()->at(func_base + calleeAR->m_soff);
+  auto const func_base = calleeAR->func()->base();
+  // this isn't really true, but VMStackOverflow will fix it for us.
+  unsafeRegs.pc = calleeAR->func()->unit()->at(func_base);
   tl_regState = VMRegState::CLEAN;
 
-  if (!isReentry) {
-    /*
-     * The normal case - we were called via FCall, or FCallArray.  We need to
-     * construct the pc of the fcall from the return address (which will be
-     * after the fcall). Because fcall is a variable length instruction, and
-     * because we sometimes delete instructions from the instruction stream, we
-     * need to use fpi regions to find the fcall.
-     */
-    const FPIEnt* fe = liveFunc()->findPrecedingFPI(
-      liveUnit()->offsetOf(vmpc()));
-    vmpc() = liveUnit()->at(fe->m_fcallOff);
-    assertx(isFCallStar(peek_op(vmpc())));
-    raise_error("Stack overflow");
-  } else {
-    /*
-     * We were called via re-entry.  Leak the params and the ActRec, and tell
-     * the unwinder that there's nothing left to do in this "entry".
-     *
-     * Also, the caller hasn't set up the m_invName area on the ActRec (unless
-     * it was a magic call), since it's the prologue's responsibility if it's a
-     * non-magic call.  We can just null it out since we're fatalling.
-     */
-    vmsp() = reinterpret_cast<Cell*>(calleeAR + 1);
-    calleeAR->setVarEnv(nullptr);
-    throw VMReenterStackOverflow();
-  }
-  not_reached();
+  calleeAR->setVarEnv(nullptr);
+  throw VMStackOverflow{};
 }
 
 void handlePossibleStackOverflow(ActRec* calleeAR) {

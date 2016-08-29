@@ -214,10 +214,23 @@ void MixedArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
 }
 
 ALWAYS_INLINE
-const TypedValue& MixedArray::getArrayElmRef(ssize_t pos) const {
-  assert(size_t(pos) < m_used);
+const TypedValue* MixedArray::getArrayElmPtr(ssize_t pos) const {
+  assert(validPos(pos));
+  if (size_t(pos) >= m_used) return nullptr;
   auto& elm = data()[pos];
-  return elm.data;
+  return !isTombstone(elm.data.m_type) ? &elm.data : nullptr;
+}
+
+ALWAYS_INLINE
+TypedValue MixedArray::getArrayElmKey(ssize_t pos) const {
+  assert(validPos(pos));
+  TypedValue keyOut;
+  tvWriteUninit(&keyOut);
+  if (size_t(pos) >= m_used) return keyOut;
+  auto& elm = data()[pos];
+  if (isTombstone(elm.data.m_type)) return keyOut;
+  getElmKey(elm, &keyOut);
+  return keyOut;
 }
 
 ALWAYS_INLINE

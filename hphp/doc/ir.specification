@@ -757,6 +757,11 @@ To string conversions:
 
   Checks if two Func values are equal.
 
+| EqStrPtr,                    D(Bool), S(Str) S(Str),                    NF
+
+  Checks if two string values represent the same underlying string. That is,
+  that they point at the same underlying storage.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait

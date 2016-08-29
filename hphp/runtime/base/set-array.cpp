@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/apc-array.h"
@@ -53,19 +54,19 @@ SetArray::Initializer SetArray::s_initializer;
 
 namespace {
 
-inline uint32_t computeScaleFromSize(uint32_t n) {
+inline uint32_t keysetComputeScaleFromSize(uint32_t n) {
   assert(n <= 0x7fffffffU);
   auto scale = SetArray::SmallScale;
   while (SetArray::Capacity(scale) < n) scale *= 2;
   return scale;
 }
 
-SetArray* reqAllocSet(uint32_t scale) {
+SetArray* keysetReqAllocSet(uint32_t scale) {
   auto const allocBytes = SetArray::ComputeAllocBytes(scale);
   return static_cast<SetArray*>(MM().objMalloc(allocBytes));
 }
 
-SetArray* staticAllocSet(uint32_t scale) {
+SetArray* keysetStaticAllocSet(uint32_t scale) {
   auto const allocBytes = SetArray::ComputeAllocBytes(scale);
   return static_cast<SetArray*>(std::malloc(allocBytes));
 }
@@ -113,8 +114,8 @@ bool SetArray::isFull() const {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* SetArray::MakeReserveSet(uint32_t size) {
-  auto const scale = computeScaleFromSize(size);
-  auto const ad    = reqAllocSet(scale);
+  auto const scale = keysetComputeScaleFromSize(size);
+  auto const ad    = keysetReqAllocSet(scale);
 
   auto const hash = SetHashTab(ad, scale);
   assert(ClearElms(SetData(ad), Capacity(scale)));
@@ -198,8 +199,8 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   auto const scale = other.m_scale;
   auto const used = other.m_used;
   auto const ad = mode == AllocMode::Request
-    ? reqAllocSet(scale)
-    : staticAllocSet(scale);
+    ? keysetReqAllocSet(scale)
+    : keysetStaticAllocSet(scale);
 
   assert(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
@@ -540,7 +541,7 @@ SetArray* SetArray::grow(uint32_t newScale) {
   assert(Capacity(newScale) >= m_size);
   assert(newScale >= SmallScale && (newScale & (newScale - 1)) == 0);
 
-  auto ad            = reqAllocSet(newScale);
+  auto ad            = keysetReqAllocSet(newScale);
   auto const oldData = data();
   auto const oldUsed = m_used;
   ad->m_sizeAndPos   = m_sizeAndPos;
@@ -724,10 +725,11 @@ bool SetArray::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////
 
-const TypedValue* SetArray::tvOfPos(uint32_t ei) const {
-  assert(0 <= ei && ei < m_used);
-  auto& elm = data()[ei];
-  return &elm.tv;
+const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
+  assertx(validPos(ssize_t(pos)));
+  if (size_t(pos) >= m_used) return nullptr;
+  auto& elm = data()[pos];
+  return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
 const TypedValue* SetArray::NvGetInt(const ArrayData* ad, int64_t ki) {
@@ -777,7 +779,7 @@ size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
 
 const Variant& SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
-  assert(0 <= pos  && pos < a->m_used);
+  assert(0 <= pos && pos < a->m_used);
   return tvAsCVarRef(a->tvOfPos(pos));
 }
 
@@ -1113,8 +1115,8 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
 }
 
 ArrayData* SetArray::ToKeyset(ArrayData* ad, bool copy) {
-  auto const a = asSet(ad);
-  return copy ? a->copyAndResizeIfNeeded() : const_cast<SetArray*>(a);
+  assertx(asSet(ad)->checkInvariants());
+  return ad;
 }
 
 bool SetArray::Equal(const ArrayData* ad1, const ArrayData* ad2) {

@@ -1223,6 +1223,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqBool:
   case EqCls:
   case EqFunc:
+  case EqStrPtr:
   case EqDbl:
   case EqInt:
   case GteBool:

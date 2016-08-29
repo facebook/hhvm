@@ -308,6 +308,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case CmpRes:
   case EqCls:
   case EqFunc:
+  case EqStrPtr:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:

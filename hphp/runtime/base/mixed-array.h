@@ -460,7 +460,8 @@ public:
   void dupArrayElmWithRef(ssize_t pos, TypedValue* valOut,
     TypedValue* keyOut) const;
 
-  const TypedValue& getArrayElmRef(ssize_t pos) const;
+  const TypedValue* getArrayElmPtr(ssize_t pos) const;
+  TypedValue getArrayElmKey(ssize_t pos) const;
 
   bool isTombstone(ssize_t pos) const;
 

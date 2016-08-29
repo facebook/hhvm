@@ -358,4 +358,12 @@ void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgEqStrPtr(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->src(0)->type() <= TStr);
+  assertx(inst->src(1)->type() <= TStr);
+  implCmp(env, inst, CC_E);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

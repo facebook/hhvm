@@ -298,6 +298,9 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckInitProps,
                    CheckInitSProps,
                    CheckPackedArrayBounds,
+                   CheckMixedArrayOffset,
+                   CheckDictOffset,
+                   CheckKeysetOffset,
                    CheckClosureStaticLocInit,
                    CheckRefInner,
                    CheckCtxThis,
@@ -1492,6 +1495,16 @@ SSATmp* simplifyEqCls(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyEqStrPtr(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  if (left == right) return cns(env, true);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    return cns(env, left->strVal() == right->strVal());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCmpBool(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
@@ -2582,12 +2595,55 @@ SSATmp* arrGetKImpl(State& env, const IRInstruction* inst, G get) {
   auto const arr = inst->src(0);
   auto const& extra = inst->extra<IndexData>();
 
+  assertx(validPos(ssize_t(extra->index)));
   if (!arr->hasConstVal()) return nullptr;
+
   auto const mixed = MixedArray::asMixed(get(arr));
-  auto const& tv = mixed->getArrayElmRef(extra->index);
-  assertx(!MixedArray::isTombstone(tv.m_type));
-  assertx(tvIsPlausible(tv));
-  return cns(env, tv);
+  auto const tv = mixed->getArrayElmPtr(extra->index);
+
+  // The array doesn't contain a valid element at that offset. Since this
+  // instruction should be guarded by a check, this (should be) unreachable. We
+  // should emit a Halt here, but this instruction might be in the middle of a
+  // block and the simplifier can't currently handle that.
+  if (!tv) return cns(env, TBottom);
+
+  assertx(tvIsPlausible(*tv));
+  return cns(env, *tv);
+}
+
+template <typename G>
+SSATmp* checkOffsetImpl(State& env, const IRInstruction* inst, G get) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const& extra = inst->extra<IndexData>();
+
+  assertx(validPos(ssize_t(extra->index)));
+  if (!arr->hasConstVal()) return mergeBranchDests(env, inst);
+
+  auto const mixed = MixedArray::asMixed(get(arr));
+
+  auto const dataTV = mixed->getArrayElmPtr(extra->index);
+  if (!dataTV) return gen(env, Jmp, inst->taken());
+  assertx(tvIsPlausible(*dataTV));
+
+  auto const keyTV = mixed->getArrayElmKey(extra->index);
+  assertx(isIntType(keyTV.m_type) || isStringType(keyTV.m_type));
+
+  if (key->isA(TInt)) {
+    if (isIntType(keyTV.m_type)) {
+      auto const cmp = gen(env, EqInt, key, cns(env, keyTV));
+      return gen(env, JmpZero, inst->taken(), cmp);
+    }
+    return gen(env, Jmp, inst->taken());
+  } else if (key->isA(TStr)) {
+    if (isStringType(keyTV.m_type)) {
+      auto const cmp = gen(env, EqStrPtr, key, cns(env, keyTV));
+      return gen(env, JmpZero, inst->taken(), cmp);
+    }
+    return gen(env, Jmp, inst->taken());
+  }
+
+  return mergeBranchDests(env, inst);
 }
 
 template <typename I, typename S, typename F>
@@ -2729,12 +2785,60 @@ SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const& extra = inst->extra<IndexData>();
 
+  assertx(validPos(ssize_t(extra->index)));
   if (!arr->hasConstVal()) return nullptr;
+
   auto const set = SetArray::asSet(arr->keysetVal());
-  auto const& tv = *set->tvOfPos(extra->index);
-  assertx(tv.m_type == KindOfString || tv.m_type == KindOfInt64);
-  assertx(tvIsPlausible(tv));
-  return cns(env, tv);
+  auto const tv = set->tvOfPos(extra->index);
+
+  // The array doesn't contain a valid element at that offset. Since this
+  // instruction should be guarded by a check, this (should be) unreachable. We
+  // should emit a Halt here, but this instruction might be in the middle of a
+  // block and the simplifier can't currently handle that.
+  if (!tv) return cns(env, TBottom);
+
+  assertx(tvIsPlausible(*tv));
+  assertx(isStringType(tv->m_type) || isIntType(tv->m_type));
+  return cns(env, *tv);
+}
+
+SSATmp* simplifyCheckMixedArrayOffset(State& env, const IRInstruction* inst) {
+  return checkOffsetImpl(env, inst, [](SSATmp* a) { return a->arrVal(); });
+}
+
+SSATmp* simplifyCheckDictOffset(State& env, const IRInstruction* inst) {
+  return checkOffsetImpl(env, inst, [](SSATmp* a) { return a->dictVal(); });
+}
+
+SSATmp* simplifyCheckKeysetOffset(State& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const& extra = inst->extra<IndexData>();
+
+  assertx(validPos(ssize_t(extra->index)));
+  if (!arr->hasConstVal()) return mergeBranchDests(env, inst);
+
+  auto const set = SetArray::asSet(arr->keysetVal());
+  auto const tv = set->tvOfPos(extra->index);
+  if (!tv) return gen(env, Jmp, inst->taken());
+  assertx(tvIsPlausible(*tv));
+  assertx(isStringType(tv->m_type) || isIntType(tv->m_type));
+
+  if (key->isA(TInt)) {
+    if (isIntType(tv->m_type)) {
+      auto const cmp = gen(env, EqInt, key, cns(env, *tv));
+      return gen(env, JmpZero, inst->taken(), cmp);
+    }
+    return gen(env, Jmp, inst->taken());
+  } else if (key->isA(TStr)) {
+    if (isStringType(tv->m_type)) {
+      auto const cmp = gen(env, EqStrPtr, key, cns(env, *tv));
+      return gen(env, JmpZero, inst->taken(), cmp);
+    }
+    return gen(env, Jmp, inst->taken());
+  }
+
+  return mergeBranchDests(env, inst);
 }
 
 SSATmp* simplifyCheckArrayCOW(State& env, const IRInstruction* inst) {
@@ -3198,6 +3302,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqRes)
   X(CmpRes)
   X(EqCls)
+  X(EqStrPtr)
   X(ArrayGet)
   X(MixedArrayGetK)
   X(DictGet)
@@ -3206,6 +3311,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(KeysetGet)
   X(KeysetGetQuiet)
   X(KeysetGetK)
+  X(CheckMixedArrayOffset)
+  X(CheckDictOffset)
+  X(CheckKeysetOffset)
   X(CheckArrayCOW)
   X(ArrayIsset)
   X(DictIsset)

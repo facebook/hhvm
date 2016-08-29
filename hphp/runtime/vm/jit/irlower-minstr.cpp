@@ -647,9 +647,6 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
     auto const key_type = getKeyType(inst->src(1));
     assertx(key_type != KeyType::Any);
 
-    // Note that if `key' actually is an integer-ish string, we'd fail this
-    // check (and most likely would have failed the previous check also), but
-    // this false negative is allowed.
     auto const is_str_key = key_type == KeyType::Str;
     ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
   }

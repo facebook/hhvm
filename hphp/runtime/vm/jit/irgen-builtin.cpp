@@ -560,7 +560,7 @@ SSATmp* opt_foldable(IRGS& env,
     if (isStringType(retVal.m_type)) {
       return cns(env, makeStaticString(retVal.m_data.pstr));
     } else if (isArrayLikeType(retVal.m_type)) {
-      return cns(env, make_tv<KindOfPersistentArray>(
+      return cns(env, make_array_like_tv(
                      ArrayData::GetScalarArray(retVal.m_data.parr)));
     } else if (retVal.m_type == KindOfObject ||
                retVal.m_type == KindOfResource) {

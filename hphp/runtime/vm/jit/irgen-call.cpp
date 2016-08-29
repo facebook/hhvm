@@ -580,8 +580,7 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto const opcode = callable->isA(TArr) ? LdArrFPushCuf
-                                               : LdStrFPushCuf;
+  auto const opcode = callable->isA(TArr) ? LdArrFPushCuf : LdStrFPushCuf;
   gen(env, opcode,
       IRSPRelOffsetData { bcSPOffset(env) },
       callable, sp(env), fp(env));
@@ -845,10 +844,19 @@ void emitFPushFunc(IRGS& env, int32_t numParams) {
 
   auto const funcName = popC(env);
   fpushActRec(env,
-              gen(env, LdFunc, funcName),
+              cns(env, TNullptr),
               cns(env, TNullptr),
               numParams,
               nullptr);
+
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  gen(env, LdFunc,
+      IRSPRelOffsetData { bcSPOffset(env) },
+      funcName, sp(env), fp(env));
+
+  decRef(env, funcName);
 }
 
 void emitFPushObjMethodD(IRGS& env,

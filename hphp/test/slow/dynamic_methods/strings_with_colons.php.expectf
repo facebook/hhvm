@@ -1,0 +1,66 @@
+string(1) "X"
+string(1) "X"
+string(1) "X"
+string(1) "X"
+----
+string(1) "X"
+string(1) "X"
+string(1) "Y"
+string(1) "Y"
+----
+string(1) "X"
+string(1) "X"
+string(1) "Y"
+string(1) "Y"
+----
+string(1) "X"
+string(1) "X"
+string(1) "Y"
+string(1) "Y"
+====
+string(1) "X"
+NULL
+string(1) "X"
+object(X)#1 (0) {
+}
+string(1) "X"
+NULL
+string(1) "Y"
+object(Y)#1 (0) {
+}
+----
+string(1) "X"
+NULL
+string(1) "X"
+object(X)#1 (0) {
+}
+string(1) "Y"
+NULL
+string(1) "Y"
+object(Y)#1 (0) {
+}
+----
+string(1) "X"
+NULL
+string(1) "X"
+object(X)#1 (0) {
+}
+string(1) "Y"
+NULL
+string(1) "Y"
+object(Y)#1 (0) {
+}
+----
+string(1) "X"
+NULL
+string(1) "X"
+object(X)#1 (0) {
+}
+string(1) "Y"
+NULL
+string(1) "Y"
+object(Y)#1 (0) {
+}
+====
+
+Fatal error: Call to undefined function W::non() in %s/test/slow/dynamic_methods/strings_with_colons.php on line 15

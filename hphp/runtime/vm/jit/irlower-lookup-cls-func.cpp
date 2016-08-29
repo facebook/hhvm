@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -66,13 +67,20 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
   rds::recordRds(ch, sizeof(TargetCache), is_func ? "FuncCache" : "ClassCache",
                  inst->marker().func()->fullName()->data());
 
+  auto args = argGroup(env, inst).imm(ch).ssa(0 /* name */);
+  if (is_func) {
+    args
+      .addr(srcLoc(env, inst, 1).reg(),
+            cellsToBytes(inst->extra<LdFunc>()->offset.offset))
+      .ssa(2);
+  }
   cgCallHelper(
     vmain(env),
     env,
     CallSpec::direct(TargetCache::lookup),
-    callDest(dstLoc(env, inst, 0).reg()),
+    callDest(env, inst),
     SyncOptions::Sync,
-    argGroup(env, inst).imm(ch).ssa(0 /* name */)
+    args
   );
 }
 

@@ -1206,6 +1206,7 @@ X(AsyncSwitchFast,              RetCtrlData);
 X(LdArrFuncCtx,                 IRSPRelOffsetData);
 X(LdArrFPushCuf,                IRSPRelOffsetData);
 X(LdStrFPushCuf,                IRSPRelOffsetData);
+X(LdFunc,                       IRSPRelOffsetData);
 X(LookupClsMethod,              IRSPRelOffsetData);
 X(LookupClsMethodCache,         ClsMethodData);
 X(LdClsMethodCacheFunc,         ClsMethodData);

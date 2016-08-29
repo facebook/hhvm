@@ -85,8 +85,10 @@ rds::Handle FuncCache::alloc() {
   return link.handle();
 }
 
-const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
-  const Func* func;
+void FuncCache::lookup(rds::Handle handle,
+                       StringData* sd,
+                       ActRec* ar,
+                       ActRec* fp) {
   auto const thiz = handleToPtr<FuncCache>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < FuncCache::kNumLines; ++i) {
@@ -99,33 +101,48 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, sd)) {
     // Miss. Does it actually exist?
-    func = Unit::lookupFunc(sd);
+    auto const* func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
-      VMRegAnchor _;
       ObjectData *this_ = nullptr;
       Class* self_ = nullptr;
       StringData* inv = nullptr;
-      func = vm_decode_function(
-        String(sd),
-        vmfp(),
-        false /* forward */,
-        this_,
-        self_,
-        inv,
-        DecodeFlags::NoWarn);
-      if (!func) {
-        raise_error("Call to undefined function %s()", sd->data());
+      try {
+        func = vm_decode_function(
+          String(sd),
+          fp,
+          false /* forward */,
+          this_,
+          self_,
+          inv,
+          DecodeFlags::NoWarn);
+        if (!func) {
+          raise_error("Call to undefined function %s()", sd->data());
+        }
+      } catch (...) {
+        *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);
+        throw;
+      }
+
+      if (this_) {
+        ar->m_func = func;
+        ar->setThis(this_);
+        this_->incRefCount();
+        return;
+      }
+      if (self_) {
+        ar->m_func = func;
+        ar->setClass(self_);
+        return;
       }
     }
+    assertx(!func->implCls());
     func->validate();
     pair->m_key = const_cast<StringData*>(func->name()); // use a static name
     pair->m_value = func;
   }
-  // DecRef the string here; more compact than doing so in callers.
-  decRefStr(sd);
+  ar->m_func = pair->m_value;
   assertx(stringMatches(pair->m_key, pair->m_value->name()));
   pair->m_value->validate();
-  return pair->m_value;
 }
 
 void invalidateForRenameFunction(const StringData* name) {

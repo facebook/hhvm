@@ -291,6 +291,7 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
 ArrayData* convObjToVecHelper(ObjectData* obj) {
   if (!obj->isCollection()) {
     raise_warning("Non-collection object conversion to vec");
+    decRefObj(obj);
     return staticEmptyVecArray();
   }
   auto a = collections::toArray(obj).toVec();
@@ -323,6 +324,7 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 ArrayData* convObjToDictHelper(ObjectData* obj) {
   if (!obj->isCollection()) {
     raise_warning("Non-collection object conversion to dict");
+    decRefObj(obj);
     return staticEmptyDictArray();
   }
   auto a = collections::toArray(obj).toDict();
@@ -355,6 +357,7 @@ ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
 ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   if (!obj->isCollection()) {
     raise_warning("Non-collection object conversion to keyset");
+    decRefObj(obj);
     return staticEmptyKeysetArray();
   }
   auto a = collections::toArray(obj).toKeyset();

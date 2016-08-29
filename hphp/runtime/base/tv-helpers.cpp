@@ -727,10 +727,9 @@ void tvCastToVecInPlace(TypedValue* tv) {
           raise_warning("Non-collection object conversion to vec");
           a = staticEmptyVecArray();
         } else {
-          auto vec = collections::toArray(obj).toVec();
-          decRefObj(obj);
-          a = vec.detach();
+          a = collections::toArray(obj).toVec().detach();
         }
+        decRefObj(obj);
         continue;
       }
 
@@ -828,10 +827,9 @@ void tvCastToDictInPlace(TypedValue* tv) {
           raise_warning("Non-collection object conversion to dict");
           a = staticEmptyDictArray();
         } else {
-          auto dict = collections::toArray(obj).toDict();
-          decRefObj(obj);
-          a = dict.detach();
+          a = collections::toArray(obj).toDict().detach();
         }
+        decRefObj(obj);
         continue;
       }
 
@@ -929,10 +927,9 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
           raise_warning("Non-collection object conversion to keyset");
           a = staticEmptyKeysetArray();
         } else {
-          auto keyset = collections::toArray(obj).toKeyset();
-          decRefObj(obj);
-          a = keyset.detach();
+          a = collections::toArray(obj).toKeyset().detach();
         }
+        decRefObj(obj);
         continue;
       }
 

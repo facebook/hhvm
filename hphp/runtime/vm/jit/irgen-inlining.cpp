@@ -47,20 +47,6 @@ bool beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
-  SSATmp** params = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
-  for (unsigned i = 0; i < numParams; ++i) {
-    params[numParams - i - 1] = popF(env);
-  }
-
-  auto const prevSP    = fpiStack.back().returnSP;
-  auto const prevSPOff = fpiStack.back().returnSPOff;
-  auto const calleeSP  = sp(env);
-
-  always_assert_flog(
-    prevSP == calleeSP,
-    "FPI stack pointer and callee stack pointer didn't match in beginInlining"
-  );
-
   auto const& info = fpiStack.back();
   if (info.func && info.func != target) {
     // Its possible that we have an "FCallD T2 meth" guarded by eg an
@@ -73,6 +59,27 @@ bool beginInlining(IRGS& env,
   }
 
   always_assert(!isFPushCuf(info.fpushOpc) && !info.interp);
+
+  SSATmp** params = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
+  for (unsigned i = 0; i < numParams; ++i) {
+    params[numParams - i - 1] = popF(env);
+  }
+
+  /*
+    NB: Now that we've pushed the callee's arguments off the stack and thus
+    modified the caller's frame state, we're committed to inlining. If we bail
+    out from now on, the caller's frame state will be as if the arguments don't
+    exist on the stack (even though they do).
+   */
+
+  auto const prevSP    = fpiStack.back().returnSP;
+  auto const prevSPOff = fpiStack.back().returnSPOff;
+  auto const calleeSP  = sp(env);
+
+  always_assert_flog(
+    prevSP == calleeSP,
+    "FPI stack pointer and callee stack pointer didn't match in beginInlining"
+  );
 
   // NB: the arguments were just popped from the VM stack above, so the VM
   // stack-pointer is conceptually pointing to the callee's ActRec at this

@@ -216,7 +216,7 @@ bool merge_into(FrameState& dst, const FrameState& src) {
                         dst.stackModified || src.stackModified);
 
   // Eval stack depth should be the same at merge points.
-  assertx(dst.bcSPOff == src.bcSPOff);
+  always_assert(dst.bcSPOff == src.bcSPOff);
 
   for (auto const& srcPair : src.predictedTypes) {
     auto dstIt = dst.predictedTypes.find(srcPair.first);

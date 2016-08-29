@@ -1,0 +1,136 @@
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+
+  String "DONE\n"
+  Print
+  RetC
+}
+
+.class [unique final persistent] Cls1 {
+  .default_ctor;
+  .method [public unique] foobaz($a, $b, $c, $d, $e) {
+    CGetL $c
+    RetC
+  }
+}
+
+.class [unique final persistent] Cls2 {
+  .default_ctor;
+  .method [public unique] foobaz($a, $b, $c, $d, $e) {
+    CGetL $b
+    RetC
+  }
+}
+
+.function test($obj, $type, $x) {
+  CGetL $type
+  JmpZ cls2
+
+  CGetL $obj
+  AssertRATStk 0 Obj=Cls1
+  FPushObjMethodD 5 "foobaz" NullThrows
+  FPassL 0 $x
+  FPassL 1 $x
+  FPassL 2 $x
+  FPassL 3 $x
+  FPassL 4 $x
+  FCallD 5 "Cls1" "foobaz"
+  UnboxRNop
+  Jmp end
+
+cls2:
+  CGetL $obj
+  AssertRATStk 0 Obj=Cls2
+  FPushObjMethodD 5 "foobaz" NullThrows
+  FPassL 0 $x
+  FPassL 1 $x
+  FPassL 2 $x
+  FPassL 3 $x
+  FPassL 4 $x
+  FCallD 5 "Cls2" "foobaz"
+  UnboxRNop
+  Jmp end
+
+end:
+  RetC
+}
+
+.function [mayusevv] test_outer($type, $x) {
+  CGetL $type
+  JmpZ cls2
+
+  FPushCtorD 0 "Cls1"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+  FPushFuncD 3 "test"
+  FPassL 0 $obj
+  FPassL 1 $type
+  FPassL 2 $x
+  FCall 3
+  UnboxRNop
+  RetC
+
+cls2:
+  FPushCtorD 0 "Cls2"
+  FCall 0
+  PopR
+  SetL $obj
+  PopC
+  FPushFuncD 3 "test"
+  FPassL 0 $obj
+  FPassL 1 $type
+  FPassL 2 $x
+  FCall 3
+  UnboxRNop
+  RetC
+}
+
+.function [mayusevv] loop($type, $total) {
+  Int 0
+  SetL $count
+  PopC
+
+header:
+  CGetL $count
+  CGetL $total
+  Lt
+  JmpZ end
+
+  FPushFuncD 2 "test_outer"
+  FPassL 0 $type
+  Int 1
+  FPassC 1
+  FCall 2
+  PopR
+
+  IncDecL $count PreInc
+  PopC
+  Jmp header
+
+end:
+  True
+  RetC
+}
+
+.function main() {
+  FPushFuncD 2 "loop"
+  False
+  FPassC 0
+  Int 40
+  FPassC 1
+  FCall 2
+  PopR
+
+  FPushFuncD 2 "loop"
+  True
+  FPassC 0
+  Int 100
+  FPassC 1
+  FCall 2
+  UnboxRNop
+  RetC
+}

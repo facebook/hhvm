@@ -39,6 +39,13 @@ module WithParser(Parser : ParserType) = struct
     in
       lex_ahead (Parser.lexer parser) lookahead
 
+  let next_token_as_name parser =
+    (* TODO: This isn't right.  Pass flags to the lexer. *)
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_token_as_name lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token)
+
   let peek_token_kind parser =
     Token.kind (peek_token parser)
 
@@ -66,11 +73,13 @@ module WithParser(Parser : ParserType) = struct
       (with_error parser error, (Syntax.make_missing()))
 
   let expect_name parser =
+    (* TODO: What if the name is a keyword? *)
     expect_token parser TokenKind.Name SyntaxError.error1004
 
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)
   let expect_qualified_name parser =
+    (* TODO: What if the name is a keyword? *)
     let (parser1, name) = next_token parser in
     match Token.kind name with
     | TokenKind.QualifiedName
@@ -132,6 +141,23 @@ module WithParser(Parser : ParserType) = struct
   let expect_while parser =
     expect_token parser TokenKind.While SyntaxError.error1018
 
+  let expect_coloncolon parser =
+    expect_token parser TokenKind.ColonColon SyntaxError.error1047
+
+  let expect_name_variable_or_class parser =
+    let (parser1, token) = next_token parser in
+    if Token.kind token = TokenKind.Class then
+      (parser1, Syntax.make_token token)
+    else
+      let (parser1, token) = next_token_as_name parser in
+      match Token.kind token with
+      | TokenKind.Name
+      | TokenKind.Variable -> (parser1, Syntax.make_token token)
+      | _ ->
+        (* ERROR RECOVERY: Create a missing token for the expected token,
+           and continue on from the current token. Don't skip it. *)
+        (with_error parser SyntaxError.error1048, (Syntax.make_missing()))
+
   let optional_token parser kind =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then
@@ -143,13 +169,6 @@ module WithParser(Parser : ParserType) = struct
     let (parser, token) = next_token parser in
     assert ((Token.kind token) = kind);
     (parser, Syntax.make_token token)
-
-  let next_token_as_name parser =
-    (* TODO: This isn't right.  Pass flags to the lexer. *)
-    let lexer = Parser.lexer parser in
-    let (lexer, token) = Parser.Lexer.next_token_as_name lexer in
-    let parser = Parser.with_lexer parser lexer in
-    (parser, token)
 
   (* This helper method parses a list of the form
 

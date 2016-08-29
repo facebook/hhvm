@@ -106,6 +106,9 @@ module WithStatementAndDeclParser
     | Name
     | QualifiedName ->
         parse_name_or_collection_literal_expression parser1 token
+    | Self
+    | Parent
+    | Static -> parse_scope_resolution_expression parser1 (make_token token)
     | Yield -> parse_yield_expression parser
     | Print -> parse_print_expression parser
     | Exclamation
@@ -206,12 +209,12 @@ module WithStatementAndDeclParser
     | BarGreaterThan
     | MinusGreaterThan
     | QuestionMinusGreaterThan
-    | ColonColon
     | QuestionQuestion
     | Instanceof ->
     (* TODO: "and" "or" "xor" *)
       parse_remaining_binary_operator parser term
-
+    | ColonColon ->
+      parse_scope_resolution_expression parser term
     | PlusPlus
     | MinusMinus -> parse_postfix_unary parser term
     | LeftParen -> parse_function_call parser term
@@ -1020,4 +1023,29 @@ module WithStatementAndDeclParser
       missing, give a missing node for the left side, and parse the
       remainder as the right side. We'll go for the former for now. *)
       (with_error parser SyntaxError.error1015, (make_token token))
+
+  and parse_scope_resolution_expression parser qualifier =
+    (* SPEC
+      scope-resolution-expression:
+        scope-resolution-qualifier  ::  name
+        scope-resolution-qualifier  ::  class
+
+      scope-resolution-qualifier:
+        qualified-name
+        variable-name
+        self
+        parent
+        static
+    *)
+    (* TODO: The left hand side can in fact be any expression in this parser;
+    we need to add a later error pass to detect that the left hand side is
+    a valid qualifier. *)
+    (* TODO: The right hand side, if a name or a variable, is treated as a
+    name or variable *token* and not a name or variable *expression*. Is
+    that the desired tree topology? Give this more thought; it might impact
+    rename refactoring semantics. *)
+    let (parser, op) = expect_coloncolon parser in
+    let (parser, name) = expect_name_variable_or_class parser in
+    let result = make_scope_resolution_expression qualifier op name in
+    parse_remaining_expression parser result
 end

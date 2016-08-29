@@ -241,7 +241,7 @@ void print(CallGraph& cg, const char* filename,
     }
   }
   fclose(outfile);
-  printf("Output saved in hotfuncs.txt\n");
+  printf("Output saved in file %s\n", filename);
   printf("  Number of hot functions: %u\n  Number of clusters: %lu\n",
          hotfuncs, clusters.size());
   printf("  Final average call distance = %.1lf (%.0lf / %.0lf)\n",

@@ -1,0 +1,14 @@
+HHVM_DEFINE_EXTENSION("scrypt"
+  SOURCES
+    ext_scrypt.cpp
+    crypto/crypto_scrypt-sse.cpp
+    crypto/crypto_scrypt-nosse.cpp
+    crypto/sha256.cpp
+    crypto/params.cpp
+  HEADERS
+    crypto/crypto_scrypt.h
+    crypto/params.h
+    crypto/sha256.h
+  SYSTEMLIB
+    ext_scrypt.php
+)

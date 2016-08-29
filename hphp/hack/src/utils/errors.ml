@@ -1993,7 +1993,7 @@ let should_be_override pos class_id id =
 let override_per_trait class_name id m_pos =
     let c_pos, c_name = class_name in
     let err_msg =
-      ("Method "^(Utils.strip_ns c_name)^"::"^id^" is should be an override \
+      ("Method "^(Utils.strip_ns c_name)^"::"^id^" should be an override \
         per the declaring trait; no non-private parent definition found \
         or overridden parent is defined in non-<?hh code")
     in add_list Typing.override_per_trait [

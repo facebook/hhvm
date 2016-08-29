@@ -672,6 +672,16 @@ void relocateTranslation(
     rel.recordRange(frozen_start, frozen.frontier(),
                     frozen_start, frozen.frontier());
   }
+
+  // Add reused stubs to the list, if not already there, as it may be used by
+  // service-request's emit_ephemeral and it would not be tracked for
+  // adjustment.
+  for (auto& stub : meta.reusedStubs) {
+    if (nullptr == rel.adjustedAddressAfter(stub)) {
+      auto const stub_end = stub + svcreq::stub_size();
+      rel.recordRange(stub, stub_end, stub, stub_end);
+    }
+  }
   x64::adjustForRelocation(rel);
   x64::adjustMetaDataForRelocation(rel, ai, meta);
   x64::adjustCodeForRelocation(rel, meta);

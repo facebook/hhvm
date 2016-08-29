@@ -62,6 +62,9 @@ module WithStatementAndDeclParser
   and parse_expression_with_reset_precedence parser =
     with_reset_precedence parser parse_expression
 
+  and parse_expression_with_operator_precedence parser operator =
+    with_operator_precedence parser operator parse_expression
+
   (* try to parse an expression. If parser cannot make progress, return None *)
   and parse_expression_optional parser ~reset_prec =
     let module Lexer = PrecedenceParser.Lexer in
@@ -270,44 +273,43 @@ module WithStatementAndDeclParser
       parser, make_decorated_expression dots expr
     | _ -> parse_expression parser
 
+  and parse_designator parser =
+    (* SPEC:
+        class-type-designator:
+          parent
+          self
+          static
+          member-selection-expression
+          null-safe-member-selection-expression
+          qualified-name
+          scope-resolution-expression
+          subscript-expression
+          variable-name
+    *)
+    let (parser1, token) = next_token parser in
+    let kind = peek_token_kind parser1 in
+    match Token.kind token with
+    | Parent
+    | Self
+    | Static when kind = LeftParen ->
+      (parser1, make_token token)
+    | _ ->
+        parse_expression_with_operator_precedence parser Operator.NewOperator
+        (* TODO: We need to verify in a later pass that the expression is a
+        scope resolution (that does not end in class!), a member selection,
+        a name, a variable, a property, or an array subscript expression. *)
+
   and parse_object_creation_expression parser =
     (* SPEC
       object-creation-expression:
-        new  class-type-designator  (  argument-expression-listopt  )
-
-      class-type-designator:
-        static
-        qualified-name
-        variable-name
+        new  class-type-designator  (  argument-expression-list-opt  )
     *)
-    let (parser, new_token) = next_token parser in
-    let (parser1, token) = next_token parser in
-    (* TODO: handle error reporting:
-      not all types of expressions are allowed
-      dynamic calls are not allowed in strict mode
-    *)
-    let (parser, designator, left, args, right) = match Token.kind token with
-    | Static ->
-        let (parser, designator) = parser1, (make_token token) in
-        let (parser, left, args, right) = parse_expression_list_opt parser in
-        (parser, designator, left, args, right)
-    | _ ->
-      let (parser, expr) = parse_expression parser in
-      match syntax expr with
-        | FunctionCallExpression fce -> (
-            parser,
-            fce.function_call_receiver,
-            fce.function_call_lparen,
-            fce.function_call_arguments,
-            fce.function_call_rparen
-          )
-        | _ ->
-          (parser, expr, make_missing(), make_missing(), make_missing())
-    in
-
-    let result = make_object_creation_expression (make_token new_token)
-      designator left args right in
-  (parser, result)
+    let (parser, new_token) = assert_token parser New in
+    let (parser, designator) = parse_designator parser in
+    let (parser, left, args, right) = parse_expression_list_opt parser in
+    let result =
+      make_object_creation_expression new_token designator left args right in
+    (parser, result)
 
   and parse_function_call parser receiver =
     (* SPEC

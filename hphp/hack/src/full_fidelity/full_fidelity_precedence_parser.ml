@@ -10,6 +10,7 @@
 
 module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_lexer
+module Operator = Full_fidelity_operator
 
 type t = {
   lexer : Lexer.t;
@@ -35,12 +36,19 @@ let lexer parser =
 let with_precedence parser precedence =
   { parser with precedence }
 
-let with_reset_precedence parser parse_function =
+let with_numeric_precedence parser new_precedence parse_function =
   let old_precedence = parser.precedence in
-  let parser = with_precedence parser 0 in
+  let parser = with_precedence parser new_precedence in
   let (parser, result) = parse_function parser in
   let parser = with_precedence parser old_precedence in
   (parser, result)
+
+let with_operator_precedence parser operator parse_function =
+  let new_precedence = Operator.precedence operator in
+  with_numeric_precedence parser new_precedence parse_function
+
+let with_reset_precedence parser parse_function =
+  with_numeric_precedence parser 0 parse_function
 
 let next_xhp_element_token parser =
   let (lexer, token, text) = Lexer.next_xhp_element_token parser.lexer in

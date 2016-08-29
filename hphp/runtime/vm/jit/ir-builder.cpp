@@ -554,23 +554,24 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
     return inst->dst(0);
   };
 
-  // Since some of these optimizations inspect tracked state, we don't
-  // perform any of them on non-main traces.
-  if (m_savedBlocks.size() > 0) return cloneAndAppendOriginal();
-
-  // copy propagation on inst source operands
+  // copy and const propagation on inst source operands
   copyProp(inst);
+  constProp(m_unit, inst, shouldConstrainGuards());
 
-  // First pass of IRBuilder optimizations try to replace an
-  // instruction based on tracked state before we do anything else.
-  // May mutate the IRInstruction in place (and return nullptr) or
-  // return an SSATmp*.
-  if (auto const preOpt = preOptimize(inst)) {
-    FTRACE(1, "  {}preOptimize returned: {}\n",
-           indent(), preOpt->inst()->toString());
-    return preOpt;
+  // Since preOptimize can inspect tracked state, we don't
+  // perform it on non-main traces.
+  if (m_savedBlocks.size() == 0) {
+    // First pass of IRBuilder optimizations try to replace an
+    // instruction based on tracked state before we do anything else.
+    // May mutate the IRInstruction in place (and return nullptr) or
+    // return an SSATmp*.
+    if (auto const preOpt = preOptimize(inst)) {
+      FTRACE(1, "  {}preOptimize returned: {}\n",
+             indent(), preOpt->inst()->toString());
+      return preOpt;
+    }
+    if (inst->op() == Nop) return cloneAndAppendOriginal();
   }
-  if (inst->op() == Nop) return cloneAndAppendOriginal();
 
   if (!m_enableSimplification) {
     return cloneAndAppendOriginal();

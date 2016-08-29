@@ -197,16 +197,20 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
 int init_closure(ActRec* ar, TypedValue* sp) {
   auto closure = c_Closure::fromObject(ar->getThis());
 
-  // Swap in the $this or late bound class or null if it is ony from a plain
-  // function or pseudomain
-  ar->setThisOrClassAllowNull(closure->getThisOrClass());
-
-  if (ar->hasThis()) {
-    ar->getThis()->incRefCount();
-  }
-
   // Put in the correct context
   ar->m_func = closure->getInvokeFunc();
+
+  if (ar->func()->cls()) {
+    // Swap in the $this or late bound class or null if it is ony from a plain
+    // function or pseudomain
+    ar->setThisOrClass(closure->getThisOrClass());
+
+    if (ar->hasThis()) {
+      ar->getThis()->incRefCount();
+    }
+  } else {
+    ar->trashThis();
+  }
 
   // The closure is the first local.
   // Similar to tvWriteObject() but we don't incref because it used to be $this

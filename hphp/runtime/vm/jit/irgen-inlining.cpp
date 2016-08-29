@@ -105,7 +105,7 @@ bool beginInlining(IRGS& env,
       return nullptr;
     }
     if (info.ctxType <= TObj) {
-      constexpr int32_t adjust = AROFF(m_this) / sizeof(Cell);
+      constexpr int32_t adjust = AROFF(m_thisUnsafe) / sizeof(Cell);
       IRSPRelOffset ctxOff = calleeAROff + adjust;
       return gen(env, LdStk, info.ctxType, IRSPRelOffsetData{ctxOff}, sp(env));
     }

@@ -468,7 +468,7 @@ public:
   void popAR() {
     assert(m_top != m_base);
     ActRec* ar = (ActRec*)m_top;
-    if (ar->hasThis()) decRefObj(ar->getThis());
+    if (ar->func()->cls() && ar->hasThis()) decRefObj(ar->getThis());
     if (ar->magicDispatch()) {
       decRefStr(ar->getInvName());
     }

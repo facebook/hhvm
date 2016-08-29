@@ -72,21 +72,25 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   if (ctxTmp->isA(TCls)) {
     // Store the Class* as a Cctx.
     if (ctxTmp->hasConstVal()) {
-      emitImmStoreq(v, uintptr_t(ctxTmp->clsVal()) | 1, ar + AROFF(m_this));
+      emitImmStoreq(v,
+                    uintptr_t(ctxTmp->clsVal()) | ActRec::kHasClassBit,
+                    ar + AROFF(m_thisUnsafe));
     } else {
       auto const cls = srcLoc(env, inst, 2).reg();
       auto const cctx = v.makeReg();
       v << orqi{ActRec::kHasClassBit, cls, cctx, v.makeReg()};
-      v << store{cctx, ar + AROFF(m_this)};
+      v << store{cctx, ar + AROFF(m_thisUnsafe)};
     }
   } else if (ctxTmp->isA(TCtx)) {
     // We don't have to incref here;
     auto const ctx = srcLoc(env, inst, 2).reg();
-    v << store{ctx, ar + AROFF(m_this)};
+    v << store{ctx, ar + AROFF(m_thisUnsafe)};
   } else {
     always_assert(ctxTmp->isA(TNullptr));
     // No $this or class; this happens in FPushFunc.
-    v << storeqi{0, ar + AROFF(m_this)};
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
+    }
   }
 
   // Set m_invName.
@@ -132,7 +136,7 @@ void cgCufIterSpillFrame(IRLS& env, const IRInstruction* inst) {
 
   auto const ctx = v.makeReg();
   v << load{fp[iterOff + CufIter::ctxOff()], ctx};
-  v << store{ctx, ar + AROFF(m_this)};
+  v << store{ctx, ar + AROFF(m_thisUnsafe)};
 
   { // Incref m_this, if it's indeed a $this (rather than a class context).
     auto const sf = v.makeReg();
@@ -243,9 +247,10 @@ void cgCheckARMagicFlag(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLdCtx(IRLS& env, const IRInstruction* inst) {
+  assertx(!inst->func() || inst->ctx());
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << load{fp[AROFF(m_this)], dst};
+  vmain(env) << load{fp[AROFF(m_thisUnsafe)], dst};
 }
 
 void cgLdCctx(IRLS& env, const IRInstruction* inst) {
@@ -253,9 +258,10 @@ void cgLdCctx(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgInitCtx(IRLS& env, const IRInstruction* inst) {
+  assertx(!inst->func() || inst->func()->isClosureBody());
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const ctx = srcLoc(env, inst, 1).reg();
-  vmain(env) << store{ctx, fp[AROFF(m_this)]};
+  vmain(env) << store{ctx, fp[AROFF(m_thisUnsafe)]};
 }
 
 void cgLdARInvName(IRLS& env, const IRInstruction* inst) {

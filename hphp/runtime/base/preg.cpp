@@ -1419,17 +1419,29 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
             prefixedCode += "<?php return ";
             prefixedCode += folly::StringPiece{data, full_len - result_len};
             prefixedCode += ";";
-            Unit* unit = g_context->compileEvalString(prefixedCode.get());
+            auto const unit = g_context->compileEvalString(prefixedCode.get());
             Variant v;
             auto const ar = GetCallerFrame();
-            auto const thiz = ar->hasThis() ? ar->getThis() : nullptr;
-            auto const cls = thiz ? thiz->getVMClass() :
-              ar->hasClass() ? ar->getClass() : nullptr;
-            Func* func = unit->getMain(ar->func()->cls());
+            auto const ctx = ar->func()->cls();
+            auto const func = unit->getMain(ctx);
+            ObjectData* thiz;
+            Class* cls;
+            if (ctx) {
+              if (ar->hasThis()) {
+                thiz = ar->getThis();
+                cls = thiz->getVMClass();
+              } else {
+                thiz = nullptr;
+                cls = ar->getClass();
+              }
+            } else {
+              thiz = nullptr;
+              cls = nullptr;
+            }
             g_context->invokeFunc(v.asTypedValue(), func, init_null_variant,
                                   thiz, cls, nullptr, nullptr,
                                   ExecutionContext::InvokePseudoMain);
-            eval_result = std::move(v).toString();
+            eval_result = v.toString();
 
             result.resize(result_len);
             result.append(eval_result.data(), eval_result.size());

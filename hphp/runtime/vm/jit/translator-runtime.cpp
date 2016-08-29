@@ -948,14 +948,18 @@ void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
       raise_error("Invalid callable (array)");
     }
     func = SystemLib::s_nullFunc;
+    inst = nullptr;
+    cls = nullptr;
   }
 
   preLiveAR->m_func = func;
   if (inst) {
     inst->incRefCount();
     preLiveAR->setThis(inst);
-  } else {
+  } else if (cls) {
     preLiveAR->setClass(cls);
+  } else {
+    preLiveAR->trashThis();
   }
   if (UNLIKELY(invName != nullptr)) {
     preLiveAR->setMagicDispatch(invName);
@@ -1017,7 +1021,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       fp->m_func->cls(),
       CallType::ObjMethod
     );
-    if (UNLIKELY(!func || (func->attrs() & AttrStatic))) {
+    if (UNLIKELY(!func || func->isStaticInProlog())) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 

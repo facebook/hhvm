@@ -223,11 +223,11 @@ struct MethProfile {
   }
 
   void reportMeth(const ActRec* ar, const Class* cls) {
-    if (!cls) {
+    auto const meth = ar->func();
+    if (!cls && meth->cls()) {
       cls = ar->hasThis() ?
         ar->getThis()->getVMClass() : ar->getClass();
     }
-    auto const meth = ar->func();
     reportMethHelper(cls, meth);
   }
 

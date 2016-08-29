@@ -90,18 +90,17 @@ const StaticString s_uuinvoke("__invoke");
 
 void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   auto const cls = getVMClass();
-  auto const invokeFunc = cls->lookupMethod(s_uuinvoke.get());
+  auto const invokeFunc = getInvokeFunc();
 
-  if (ar->hasThis()) {
+  if (invokeFunc->cls()) {
+    setThisOrClass(ar->getThisOrClass());
     if (invokeFunc->isStatic()) {
-      // Only set the class for static closures.
-      setClass(ar->getThis()->getVMClass());
-    } else {
-      setThis(ar->m_this);
-      ar->getThis()->incRefCount();
+      if (!hasClass()) {
+        setClass(getThisUnchecked()->getVMClass());
+      }
+    } else if (!hasClass()) {
+      getThisUnchecked()->incRefCount();
     }
-  } else if (ar->hasClass()) {
-    setClass(ar->getClass());
   } else {
     m_ctx = nullptr;
   }

@@ -203,6 +203,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   // fp->m_r.
   if (curOp != OpRetC &&
       !fp->localsDecRefd() &&
+      fp->m_func->cls() &&
       fp->hasThis() &&
       fp->getThis()->getVMClass()->getCtor() == func &&
       fp->getThis()->getVMClass()->getDtor()) {
@@ -244,6 +245,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
      *   - When that happens, exit hook sets localsDecRefd flag.
      */
     if (!fp->localsDecRefd()) {
+      fp->setLocalsDecRefd();
       try {
         frame_free_locals_unwind(fp, func->numLocals(), phpException);
       } catch (...) {}

@@ -293,13 +293,11 @@ ALWAYS_INLINE intva_t decode_intva(PC& pc) {
 // Miscellaneous helpers.
 
 static inline Class* frameStaticClass(ActRec* fp) {
+  if (!fp->func()->cls()) return nullptr;
   if (fp->hasThis()) {
     return fp->getThis()->getVMClass();
-  } else if (fp->hasClass()) {
-    return fp->getClass();
-  } else {
-    return nullptr;
   }
+  return fp->getClass();
 }
 
 //=============================================================================
@@ -879,7 +877,8 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   std::string funcName(func->fullName()->data());
   os << "{func:" << funcName
      << ",soff:" << fp->m_soff
-     << ",this:0x" << std::hex << (fp->hasThis() ? fp->getThis() : nullptr)
+     << ",this:0x"
+     << std::hex << (func->cls() && fp->hasThis() ? fp->getThis() : nullptr)
      << std::dec << "}";
   TypedValue* tv = (TypedValue*)fp;
   tv--;
@@ -4182,7 +4181,7 @@ OPTBLD_INLINE void iopFPushFunc(intva_t numArgs) {
     } else if (cls) {
       ar->setClass(cls);
     } else {
-      ar->setThis(nullptr);
+      ar->trashThis();
     }
 
     if (UNLIKELY(invName != nullptr)) {
@@ -4208,7 +4207,7 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(intva_t numArgs, Id id) {
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
   ActRec* ar = fPushFuncImpl(func, numArgs);
-  ar->setThis(nullptr);
+  ar->trashThis();
 }
 
 OPTBLD_INLINE void iopFPushFuncU(intva_t numArgs, Id nsFunc, Id globalFunc) {
@@ -4224,13 +4223,13 @@ OPTBLD_INLINE void iopFPushFuncU(intva_t numArgs, Id nsFunc, Id globalFunc) {
     }
   }
   ActRec* ar = fPushFuncImpl(func, numArgs);
-  ar->setThis(nullptr);
+  ar->trashThis();
 }
 
-void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
-                        int numArgs) {
+void fPushObjMethodImpl(StringData* name, ObjectData* obj, int numArgs) {
   const Func* f;
   LookupResult res;
+  auto cls = obj->getVMClass();
   try {
     res = g_context->lookupObjMethod(
       f, cls, name, arGetContextClass(vmfp()), true);
@@ -4264,7 +4263,7 @@ void fPushNullObjMethod(int numArgs) {
   assert(SystemLib::s_nullFunc);
   ActRec* ar = vmStack().allocA();
   ar->m_func = SystemLib::s_nullFunc;
-  ar->setThis(nullptr);
+  ar->trashThis();
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
 }
@@ -4298,11 +4297,10 @@ OPTBLD_INLINE void iopFPushObjMethod(intva_t numArgs, ObjMethodOp op) {
     return;
   }
   ObjectData* obj = c2->m_data.pobj;
-  Class* cls = obj->getVMClass();
   StringData* name = c1->m_data.pstr;
   // We handle decReffing obj and name in fPushObjMethodImpl
   vmStack().ndiscard(2);
-  fPushObjMethodImpl(cls, name, obj, numArgs);
+  fPushObjMethodImpl(name, obj, numArgs);
 }
 
 OPTBLD_INLINE void
@@ -4318,18 +4316,17 @@ iopFPushObjMethodD(intva_t numArgs, const StringData* name, ObjMethodOp op) {
     return;
   }
   ObjectData* obj = c1->m_data.pobj;
-  Class* cls = obj->getVMClass();
   // We handle decReffing obj in fPushObjMethodImpl
   vmStack().discard();
-  fPushObjMethodImpl(cls, const_cast<StringData*>(name), obj, numArgs);
+  fPushObjMethodImpl(const_cast<StringData*>(name), obj, numArgs);
 }
 
 template<bool forwarding>
-void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
-                       int numArgs) {
+void pushClsMethodImpl(Class* cls, StringData* name, int numArgs) {
+  auto const ctx = liveClass();
+  auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
-  LookupResult res = g_context->lookupClsMethod(f, cls, name, obj,
-                                     arGetContextClass(vmfp()), true);
+  auto const res = g_context->lookupClsMethod(f, cls, name, obj, ctx, true);
   if (res == LookupResult::MethodFoundNoThis ||
       res == LookupResult::MagicCallStaticFound) {
     if (!f->isStaticInProlog()) {
@@ -4342,24 +4339,22 @@ void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
            res == LookupResult::MagicCallFound);
     obj->incRefCount();
   }
-  assert(f);
+  assertx(f);
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
   if (obj) {
     ar->setThis(obj);
   } else {
-    if (!forwarding) {
-      ar->setClass(cls);
-    } else {
+    if (forwarding && ctx) {
       /* Propagate the current late bound class if there is one, */
       /* otherwise use the class given by this instruction's input */
       if (vmfp()->hasThis()) {
         cls = vmfp()->getThis()->getVMClass();
-      } else if (vmfp()->hasClass()) {
+      } else {
         cls = vmfp()->getClass();
       }
-      ar->setClass(cls);
     }
+    ar->setClass(cls);
   }
   ar->initNumArgs(numArgs);
   if (res == LookupResult::MagicCallFound ||
@@ -4384,8 +4379,7 @@ OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs) {
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(2);
   assert(cls && name);
-  ObjectData* obj = vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
-  pushClsMethodImpl<false>(cls, name, obj, numArgs);
+  pushClsMethodImpl<false>(cls, name, numArgs);
 }
 
 OPTBLD_INLINE
@@ -4396,8 +4390,7 @@ void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  ObjectData* obj = vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
-  pushClsMethodImpl<false>(cls, const_cast<StringData*>(name), obj, numArgs);
+  pushClsMethodImpl<false>(cls, const_cast<StringData*>(name), numArgs);
 }
 
 OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs) {
@@ -4412,8 +4405,7 @@ OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs) {
   StringData* name = c1->m_data.pstr;
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(2);
-  ObjectData* obj = vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
-  pushClsMethodImpl<true>(cls, name, obj, numArgs);
+  pushClsMethodImpl<true>(cls, name, numArgs);
 }
 
 OPTBLD_INLINE void iopFPushCtor(intva_t numArgs) {
@@ -4507,8 +4499,13 @@ OPTBLD_INLINE void iopFPushCufIter(intva_t numArgs, Iter* it) {
 
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
-  ar->m_this = (ObjectData*)o;
-  if (o && !(uintptr_t(o) & 1)) ar->m_this->incRefCount();
+  assertx((f->implCls() != nullptr) == (o != nullptr));
+  if (o) {
+    ar->setThisOrClass(o);
+    if (ActRec::checkThis(o)) ar->getThis()->incRefCount();
+  } else {
+    ar->trashThis();
+  }
   ar->initNumArgs(numArgs);
   if (n) {
     ar->setMagicDispatch(n);
@@ -4534,6 +4531,8 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
   vmStack().ndiscard(1);
   if (f == nullptr) {
     f = SystemLib::s_nullFunc;
+    obj = nullptr;
+    cls = nullptr;
     if (safe) {
       vmStack().pushBool(false);
     }
@@ -4549,7 +4548,7 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
   } else if (cls) {
     ar->setClass(cls);
   } else {
-    ar->setThis(nullptr);
+    ar->trashThis();
   }
   ar->initNumArgs(numArgs);
   if (invName) {
@@ -5123,11 +5122,11 @@ OPTBLD_INLINE void iopDefClsNop(intva_t cid) {
 }
 
 OPTBLD_INLINE void iopDefTypeAlias(intva_t tid) {
-  vmfp()->m_func->unit()->defTypeAlias(tid);
+  vmfp()->func()->unit()->defTypeAlias(tid);
 }
 
 static inline void checkThis(ActRec* fp) {
-  if (!fp->hasThis()) {
+  if (!fp->func()->cls() || !fp->hasThis()) {
     raise_error(Strings::FATAL_NULL_THIS);
   }
 }
@@ -5139,7 +5138,7 @@ OPTBLD_INLINE void iopThis() {
 }
 
 OPTBLD_INLINE void iopBareThis(BareThisOp bto) {
-  if (vmfp()->hasThis()) {
+  if (vmfp()->func()->cls() && vmfp()->hasThis()) {
     ObjectData* this_ = vmfp()->getThis();
     vmStack().pushObject(this_);
   } else {
@@ -5160,7 +5159,7 @@ OPTBLD_INLINE void iopCheckThis() {
 
 OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
   tvRefcountedDecRef(thisLoc.ptr);
-  if (vmfp()->hasThis()) {
+  if (vmfp()->func()->cls() && vmfp()->hasThis()) {
     thisLoc->m_data.pobj = vmfp()->getThis();
     thisLoc->m_type = KindOfObject;
     tvIncRef(thisLoc.ptr);

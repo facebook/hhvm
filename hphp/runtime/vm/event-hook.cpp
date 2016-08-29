@@ -145,7 +145,8 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
   }
 
   if (isEnter) {
-    auto this_ptr = ar->hasThis() ? intptr_t(ar->getThis()) : 0;
+    auto this_ptr = ar->func()->cls() && ar->hasThis() ?
+      intptr_t(ar->getThis()) : 0;
     frameinfo.set(s_this_ptr, Variant(this_ptr));
   }
 
@@ -272,16 +273,17 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   PC savePc = vmpc();
 
   Variant doneFlag = true;
-  Variant called_on;
+  Variant called_on = [&] {
+    if (func->cls()) {
+      if (ar->hasThis()) {
+        return Variant(ar->getThis());
+      }
+      // For static methods, give handler the name of called class
+      return Variant{ar->getClass()->name(), Variant::PersistentStrInit{}};
+    }
+    return init_null();
+  }();
 
-  if (ar->hasThis()) {
-    called_on = Variant(ar->getThis());
-  } else if (ar->hasClass()) {
-    // For static methods, give handler the name of called class
-    called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
-  } else {
-    called_on = init_null();
-  }
   Variant intArgs =
     PackedArrayInit(5)
       .append(VarNR(ar->func()->fullName()))

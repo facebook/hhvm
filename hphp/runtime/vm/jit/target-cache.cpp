@@ -141,6 +141,7 @@ void FuncCache::lookup(rds::Handle handle,
     pair->m_value = func;
   }
   ar->m_func = pair->m_value;
+  ar->trashThis();
   assertx(stringMatches(pair->m_key, pair->m_value->name()));
   pair->m_value->validate();
 }
@@ -207,7 +208,9 @@ void raiseFatal(ActRec* ar, Class* cls, StringData* name, Class* ctx) {
     );
     not_reached();
   } catch (...) {
-    auto const obj = ar->getThis();
+    // The jit stored an ObjectData in the ActRec, but we didn't set
+    // a func yet.
+    auto const obj = ar->getThisUnsafe();
     *arPreliveOverwriteCells(ar) = make_tv<KindOfObject>(obj);
     throw;
   }
@@ -219,11 +222,13 @@ void nullFunc(ActRec* ar, StringData* name) {
     raise_warning("Invalid argument: function: method '%s' not found",
                   name->data());
     ar->m_func = SystemLib::s_nullFunc;
-    auto const obj = ar->getThis();
-    ar->setThisOrClassAllowNull(nullptr);
+    auto const obj = ar->getThisUnsafe();
+    ar->trashThis();
     decRefObj(obj);
   } catch (...) {
-    auto const obj = ar->getThis();
+    // The jit stored an ObjectData in the ActRec, but we didn't set
+    // a func yet.
+    auto const obj = ar->getThisUnsafe();
     *arPreliveOverwriteCells(ar) = make_tv<KindOfObject>(obj);
     throw;
   }
@@ -254,14 +259,13 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
     return;
   }
 
-  bool const isStatic = func->isStaticInProlog();
+  auto const isStatic = func->isStaticInProlog();
   mce->m_key   = reinterpret_cast<uintptr_t>(cls) | uintptr_t{isStatic} << 1;
   mce->m_value = func;
   ar->m_func   = func;
 
   if (UNLIKELY(isStatic)) {
     auto const obj = ar->getThis();
-    if (debug) ar->setThis(nullptr); // suppress assert
     ar->setClass(cls);
     decRefObj(obj);
   }
@@ -292,7 +296,6 @@ void readMagicOrStatic(Entry* mce,
 
   assertx(mceKey & 0x2u);
   auto const obj = ar->getThis();
-  if (debug) ar->setThis(nullptr); // suppress assert in setClass
   ar->setClass(cls);
   decRefObj(obj);
 }
@@ -305,7 +308,6 @@ void readPublicStatic(Entry* mce,
                       const Func* cand) {
   mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
   auto const obj = ar->getThis();
-  if (debug) ar->setThis(nullptr); // suppress assert in setClass
   ar->setClass(cls);
   decRefObj(obj);
 }
@@ -317,8 +319,8 @@ void handleSlowPath(rds::Handle mce_handle,
                     Class* cls,
                     Class* ctx,
                     uintptr_t mcePrime) {
-  assertx(ar->hasThis());
-  assertx(ar->getThis()->getVMClass() == cls);
+  assertx(ActRec::checkThis(ar->getThisUnsafe()));
+  assertx(ar->getThisUnsafe()->getVMClass() == cls);
   assertx(name->isStatic());
 
   auto const mce = &rds::handleToRef<Entry>(mce_handle);

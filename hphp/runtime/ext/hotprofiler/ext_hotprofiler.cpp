@@ -1148,7 +1148,7 @@ struct MemoProfiler : Profiler {
     VMRegAnchor _;
     ActRec *ar = vmfp();
     Frame f(symbol);
-    if (ar->hasThis()) {
+    if (ar->func()->cls() && ar->hasThis()) {
       auto& memo = m_memos[symbol];
       if (!memo.m_ignore) {
         auto args = hhvm_get_frame_args(ar, 0);
@@ -1201,7 +1201,7 @@ struct MemoProfiler : Profiler {
       return;
     }
     if (sdata.length() < 3) return;
-    if (ar->hasThis()) {
+    if (ar->func()->cls() && ar->hasThis()) {
       memo.m_has_this = true;
       auto& member_memo = memo.m_member_memos[f.m_args.data()];
       ++member_memo.m_count;

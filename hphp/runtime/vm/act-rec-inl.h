@@ -16,6 +16,10 @@
 
 #include "hphp/util/compilation-flags.h"
 
+#ifndef NDEBUG
+#include "hphp/runtime/vm/func.h"
+#endif
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,62 +123,77 @@ inline void* ActRec::encodeClass(const Class* cls) {
     : nullptr;
 }
 
+inline bool ActRec::checkThis(void* p) {
+  assertx(p);
+  return !(reinterpret_cast<uintptr_t>(p) & kHasClassBit);
+}
+
+inline bool ActRec::checkThisOrNull(void* p) {
+  return !(reinterpret_cast<uintptr_t>(p) & kHasClassBit);
+}
+
 inline ObjectData* ActRec::decodeThis(void* p) {
-  return (reinterpret_cast<uintptr_t>(p) & kHasClassBit)
-    ? nullptr
-    : (ObjectData*)p;
+  return checkThisOrNull(p) ? (ObjectData*)p : nullptr;
 }
 
 inline Class* ActRec::decodeClass(void* p) {
-  return (reinterpret_cast<uintptr_t>(p) & kHasClassBit)
-    ? (Class*)(reinterpret_cast<uintptr_t>(p) - kHasClassBit)
-    : nullptr;
+  return checkThisOrNull(p) ? nullptr :
+    (Class*)(reinterpret_cast<uintptr_t>(p) - kHasClassBit);
 }
 
 inline void ActRec::setThisOrClass(void* objOrCls) {
+  assertx(m_func->implCls());
   setThisOrClassAllowNull(objOrCls);
-  assert(hasThis() || hasClass());
 }
 
 inline void ActRec::setThisOrClassAllowNull(void* objOrCls) {
-  m_this = (ObjectData*)objOrCls;
+  m_thisUnsafe = (ObjectData*)objOrCls;
 }
 
 inline bool ActRec::hasThis() const {
-  assertx(reinterpret_cast<uintptr_t>(m_this) != kTrashedThisSlot);
-  return m_this && !(reinterpret_cast<uintptr_t>(m_this) & kHasClassBit);
+  assertx(m_func->implCls());
+  assertx(reinterpret_cast<uintptr_t>(m_thisUnsafe) != kTrashedThisSlot);
+  return checkThis(m_thisUnsafe);
 }
 
 inline bool ActRec::hasClass() const {
-  return reinterpret_cast<uintptr_t>(m_cls) & kHasClassBit;
+  assertx(m_func->implCls());
+  return !checkThis(m_thisUnsafe);
 }
 
 inline void* ActRec::getThisOrClass() const {
-  return m_this;
+  assertx(m_func->implCls());
+  return m_thisUnsafe;
+}
+
+inline ObjectData* ActRec::getThisUnsafe() const {
+  return m_thisUnsafe;
 }
 
 inline ObjectData* ActRec::getThis() const {
   assert(hasThis());
-  return m_this;
+  return m_thisUnsafe;
 }
 
 inline Class* ActRec::getClass() const {
   assert(hasClass());
   return reinterpret_cast<Class*>(
-    reinterpret_cast<uintptr_t>(m_cls) - kHasClassBit);
+    reinterpret_cast<uintptr_t>(m_clsUnsafe) - kHasClassBit);
 }
 
 inline void ActRec::setThis(ObjectData* val) {
-  m_this = val;
+  assertx(m_func->implCls() && !m_func->isStaticInProlog());
+  m_thisUnsafe = val;
 }
 
 inline void ActRec::setClass(Class* val) {
-  m_cls = reinterpret_cast<Class*>(
+  assertx(val && m_func->implCls() && !(m_func->attrs() & AttrRequiresThis));
+  m_clsUnsafe = reinterpret_cast<Class*>(
     reinterpret_cast<uintptr_t>(val) | kHasClassBit);
 }
 
 inline void ActRec::trashThis() {
-  if (debug) m_this = reinterpret_cast<ObjectData*>(kTrashedThisSlot);
+  if (debug) m_thisUnsafe = reinterpret_cast<ObjectData*>(kTrashedThisSlot);
 }
 
 /////////////////////////////////////////////////////////////////////////////

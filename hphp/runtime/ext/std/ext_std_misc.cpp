@@ -343,10 +343,10 @@ static Class* getClassByName(const char* name, int len) {
     }
   } else if (len == 6 && !memcmp(name, "static", 6)) {
     auto const ar = GetCallerFrame();
-    if (ar) {
+    if (ar && ar->func()->cls()) {
       if (ar->hasThis()) {
         cls = ar->getThis()->getVMClass();
-      } else if (ar->hasClass()) {
+      } else {
         cls = ar->getClass();
       }
     }

@@ -126,7 +126,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
 void ALWAYS_INLINE
 frame_free_locals_inl_no_hook(ActRec* fp, int numLocals) {
   frame_free_locals_helper_inl(fp, numLocals);
-  if (fp->hasThis()) {
+  if (fp->func()->cls() && fp->hasThis()) {
     decRefObj(fp->getThis());
   }
 }

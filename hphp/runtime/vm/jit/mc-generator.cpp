@@ -526,11 +526,12 @@ static void populateLiveContext(RegionContext& ctx) {
     fp, sp, ctx.bcOffset,
     [&] (const ActRec* ar, Offset) {
       auto const objOrCls =
-        ar->hasThis()  ? Type::SubObj(ar->getThis()->getVMClass()) :
-        ar->hasClass() ? Type::SubCls(ar->getClass())
-                       : TNullptr;
+        !ar->func()->cls() ? TNullptr :
+        (ar->hasThis()  ?
+         Type::SubObj(ar->getThis()->getVMClass()) :
+         Type::SubCls(ar->getClass()));
 
-      ctx.preLiveARs.push_back({ stackOff, ar->m_func, objOrCls });
+      ctx.preLiveARs.push_back({ stackOff, ar->func(), objOrCls });
       FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
       stackOff += kNumActRecCells;
     },

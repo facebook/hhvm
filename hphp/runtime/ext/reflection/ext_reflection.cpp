@@ -971,7 +971,7 @@ static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
   if (!closure->instanceof(c_Closure::classof())) {
     SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
   }
-  auto clos = c_Closure::fromObject(closure.get());
+  auto const clos = c_Closure::fromObject(closure.get());
   if (clos->hasThis()) {
     return Object{clos->getThis()};
   }

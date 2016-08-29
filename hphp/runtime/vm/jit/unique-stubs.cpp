@@ -462,7 +462,7 @@ void loadGenFrame(Vout& v, Vreg d) {
 
   // We have to get the Generator object from the current frame's $this, then
   // load the embedded frame.
-  v << load{rvmfp()[AROFF(m_this)], gen};
+  v << load{rvmfp()[AROFF(m_thisUnsafe)], gen};
   v << lea{gen[arOff], d};
 }
 

@@ -75,13 +75,13 @@ Generator& Generator::operator=(const Generator& other) {
 void Generator::copyVars(const ActRec* srcFp) {
   const auto dstFp = actRec();
   const auto func = dstFp->func();
-  assert(srcFp->func() == dstFp->func());
+  assertx(srcFp->func() == dstFp->func());
 
   for (Id i = 0; i < func->numLocals(); ++i) {
     tvDupFlattenVars(frame_local(srcFp, i), frame_local(dstFp, i));
   }
 
-  if (dstFp->hasThis()) {
+  if (func->cls() && dstFp->hasThis()) {
     dstFp->getThis()->incRefCount();
   }
 
@@ -149,19 +149,17 @@ String HHVM_METHOD(Generator, getOrigFuncName) {
 }
 
 String HHVM_METHOD(Generator, getCalledClass) {
-  Generator* gen = Native::data<Generator>(this_);
-  String called_class;
+  auto const gen = Native::data<Generator>(this_);
+  auto const ar = gen->actRec();
 
-  if (gen->actRec()->hasThis()) {
-    called_class =
-      gen->actRec()->getThis()->getVMClass()->name()->data();
-  } else if (gen->actRec()->hasClass()) {
-    called_class = gen->actRec()->getClass()->name()->data();
-  } else {
-    called_class = empty_string();
+  if (ar->func()->cls()) {
+    auto const cls = ar->hasThis() ?
+      ar->getThis()->getVMClass() : ar->getClass();
+
+    return cls->nameStr();
   }
 
-  return called_class;
+  return empty_string();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

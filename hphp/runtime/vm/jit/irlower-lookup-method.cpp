@@ -141,9 +141,11 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
                            ActRec* ar, ActRec* fp) {
   try {
     const Func* f;
-    auto const obj = fp->hasThis() ? fp->getThis() : nullptr;
     auto const ctx = fp->m_func->cls();
+    auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
     auto const res = g_context->lookupClsMethod(f, cls, meth, obj, ctx, true);
+
+    ar->m_func = f;
 
     if (res == LookupResult::MethodFoundNoThis ||
         res == LookupResult::MagicCallStaticFound) {
@@ -158,8 +160,6 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
       obj->incRefCount();
       ar->setThis(obj);
     }
-
-    ar->m_func = f;
 
     if (res == LookupResult::MagicCallFound ||
         res == LookupResult::MagicCallStaticFound) {

@@ -1315,7 +1315,7 @@ ObjectData* ExecutionContext::getThis() {
     fp = getPrevVMState(fp);
     if (!fp) return nullptr;
   }
-  if (fp->hasThis()) {
+  if (fp->func()->cls() && fp->hasThis()) {
     return fp->getThis();
   }
   return nullptr;
@@ -1711,7 +1711,7 @@ void ExecutionContext::invokeFuncImpl(TypedValue* retptr, const Func* f,
   } else if (cls) {
     ar->setClass(cls);
   } else {
-    ar->setThis(nullptr);
+    ar->trashThis();
   }
   ar->initNumArgs(argc);
 
@@ -2043,20 +2043,17 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   Stats::inc(Stats::PseudoMain_Executed);
 
   ActRec* ar = vmStack().allocA();
-  assert((uintptr_t)&ar->m_func < (uintptr_t)&ar->m_r);
-  Class* cls = liveClass();
-  if (vmfp()->hasThis()) {
-    ObjectData *this_ = vmfp()->getThis();
-    this_->incRefCount();
-    ar->setThis(this_);
-  } else if (vmfp()->hasClass()) {
-    ar->setClass(vmfp()->getClass());
-  } else {
-    ar->setThis(nullptr);
-  }
-  Func* func = unit->getMain(cls);
+  assertx(AROFF(m_func) < AROFF(m_r));
+  auto const cls = vmfp()->func()->cls();
+  auto const func = unit->getMain(cls);
   assert(!func->isCPPBuiltin());
   ar->m_func = func;
+  if (cls) {
+    ar->setThisOrClass(vmfp()->getThisOrClass());
+    if (ar->hasThis()) ar->getThis()->incRefCount();
+  } else {
+    ar->trashThis();
+  }
   ar->initNumArgs(0);
   assert(vmfp());
   ar->setReturn(vmfp(), pc, jit::mcg->ustubs().retHelper);
@@ -2302,12 +2299,14 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
   Class *frameClass = nullptr;
   Class *functionClass = nullptr;
   if (fp) {
-    if (fp->hasThis()) {
-      this_ = fp->getThis();
-    } else if (fp->hasClass()) {
-      frameClass = fp->getClass();
-    }
     functionClass = fp->m_func->cls();
+    if (functionClass) {
+      if (fp->hasThis()) {
+        this_ = fp->getThis();
+      } else if (fp->hasClass()) {
+        frameClass = fp->getClass();
+      }
+    }
     phpDebuggerEvalHook(fp->m_func);
   }
 
@@ -2377,7 +2376,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   ActRec* ar = vmStack().allocA();
   ar->m_func = s_debuggerDummy->getMain(nullptr);
   ar->initNumArgs(0);
-  ar->setThis(nullptr);
+  ar->trashThis();
   ar->setReturnVMExit();
   vmfp() = ar;
   vmpc() = s_debuggerDummy->entry();

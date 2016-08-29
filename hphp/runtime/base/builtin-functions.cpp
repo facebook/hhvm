@@ -240,10 +240,10 @@ vm_decode_function(const Variant& function,
             forwarding = true;
           }
         } else if (sclass.get()->isame(s_static.get())) {
-          if (ar) {
+          if (ar && ar->func()->cls()) {
             if (ar->hasThis()) {
               cls = ar->getThis()->getVMClass();
-            } else if (ar->hasClass()) {
+            } else {
               cls = ar->getClass();
             }
           }
@@ -294,10 +294,10 @@ vm_decode_function(const Variant& function,
           forwarding = true;
         }
       } else if (c.get()->isame(s_static.get())) {
-        if (ar) {
+        if (ar && ar->func()->cls()) {
           if (ar->hasThis()) {
             cc = ar->getThis()->getVMClass();
-          } else if (ar->hasClass()) {
+          } else {
             cc = ar->getClass();
           }
         }
@@ -346,11 +346,11 @@ vm_decode_function(const Variant& function,
       // If we found a method and its static, null out this_
       this_ = nullptr;
     } else {
-      if (!this_ && ar) {
+      if (!this_ && ar && ar->func()->cls() && ar->hasThis()) {
         // If we did not find a static method AND this_ is null AND there is a
         // frame ar, check if the current instance from ar is compatible
-        ObjectData* obj = ar->hasThis() ? ar->getThis() : nullptr;
-        if (obj && obj->instanceof(cls)) {
+        auto const obj = ar->getThis();
+        if (obj->instanceof(cls)) {
           this_ = obj;
           cls = obj->getVMClass();
         }
@@ -396,17 +396,13 @@ vm_decode_function(const Variant& function,
     assert(!this_ || this_->getVMClass() == cls);
     // If we are doing a forwarding call and this_ is null, set cls
     // appropriately to propagate the current late bound class.
-    if (!this_ && forwarding && ar) {
-      HPHP::Class* fwdCls = nullptr;
-      ObjectData* obj = ar->hasThis() ? ar->getThis() : nullptr;
-      if (obj) {
-        fwdCls = obj->getVMClass();
-      } else if (ar->hasClass()) {
-        fwdCls = ar->getClass();
-      }
+    if (!this_ && forwarding && ar && ar->func()->cls()) {
+      auto const fwdCls = ar->hasThis() ?
+        ar->getThis()->getVMClass() : ar->getClass();
+
       // Only forward the current late bound class if it is the same or
       // a descendent of cls
-      if (fwdCls && fwdCls->classof(cls)) {
+      if (fwdCls->classof(cls)) {
         cls = fwdCls;
       }
     }

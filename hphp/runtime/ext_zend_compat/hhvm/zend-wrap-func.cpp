@@ -74,7 +74,7 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   auto const this_ptr = this_ptr_var.asTypedValue();
   tvBox(this_ptr);
 
-  if (ar->hasThis()) {
+  if (ar->func()->cls() && ar->hasThis()) {
     tvWriteObject(
       ar->getThis(),
       this_ptr->m_data.pref->tv()

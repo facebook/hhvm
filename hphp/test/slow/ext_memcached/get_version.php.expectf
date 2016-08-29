@@ -1,0 +1,6 @@
+array(2) {
+  ["localhost:11211"]=>
+  string(%d) "1.%d.%d"
+  ["localhost:22222"]=>
+  string(11) "255.255.255"
+}

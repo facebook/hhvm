@@ -201,66 +201,53 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
   if (object.isNull()) {
     // No arg passed.
-    String ret;
     auto cls = arGetContextClassImpl<true>(GetCallerFrame());
     if (cls) {
-      ret = String(cls->nameStr());
+      return Variant{cls->name(), Variant::PersistentStrInit{}};
     }
 
-    if (ret.empty()) {
-      raise_warning("get_class() called without object from outside a class");
-      return false;
-    }
-    return ret;
+    raise_warning("get_class() called without object from outside a class");
+    return false;
   }
   if (!object.isObject()) return false;
-  return VarNR(object.toObject()->getClassName());
+  return Variant{object.toCObjRef()->getVMClass()->name(),
+                 Variant::PersistentStrInit{}};
 }
 
 Variant HHVM_FUNCTION(get_called_class) {
   EagerCallerFrame cf;
   ActRec* ar = cf();
-  if (ar) {
-    if (ar->hasThis()) {
-      return Variant(ar->getThis()->getClassName());
-    }
-    if (ar->hasClass()) {
-      return Variant(ar->getClass()->preClass()->name(),
-        Variant::PersistentStrInit{});
-    }
+  if (ar && ar->func()->cls()) {
+    auto const cls = ar->hasThis() ?
+      ar->getThis()->getVMClass() : ar->getClass();
+
+    return Variant{cls->name(), Variant::PersistentStrInit{}};
   }
 
   raise_warning("get_called_class() called from outside a class");
-  return Variant(false);
+  return false;
 }
 
 Variant HHVM_FUNCTION(get_parent_class,
                       const Variant& object /* = null_variant */) {
+  const Class* cls;
   if (object.isNull()) {
-    Class* cls = arGetContextClass(GetCallerFrame());
-    if (cls && cls->parent()) {
-      return String(cls->parentStr());
-    }
-    return false;
-  }
-
-  Variant class_name;
-  if (object.isObject()) {
-    class_name = HHVM_FN(get_class)(object);
-  } else if (object.isString()) {
-    class_name = object;
+    cls = arGetContextClass(GetCallerFrame());
+    if (!cls) return false;
   } else {
-    return false;
-  }
-
-  const Class* cls = Unit::loadClass(class_name.toString().get());
-  if (cls) {
-    auto parentClass = cls->parentStr();
-    if (!parentClass.empty()) {
-      return VarNR(parentClass);
+    if (object.isObject()) {
+      cls = object.toCObjRef()->getVMClass();
+    } else if (object.isString()) {
+      cls = Unit::loadClass(object.toCStrRef().get());
+      if (!cls) return false;
+    } else {
+      return false;
     }
   }
-  return false;
+
+  if (!cls->parent()) return false;
+
+  return Variant{cls->parentStr().get(), Variant::PersistentStrInit{}};
 }
 
 static bool is_a_impl(const Variant& class_or_object, const String& class_name,

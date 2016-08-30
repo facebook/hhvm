@@ -2355,6 +2355,35 @@ SSATmp* simplifyCheckClosureStaticLocInit(State& env,
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyCheckRefs(State& env, const IRInstruction* inst) {
+  if (!constSrc(env, inst->src(0)) ||
+      !constSrc(env, inst->src(2)) ||
+      !constSrc(env, inst->src(3)) ||
+      !constSrc(env, inst->src(4))) {
+    return nullptr;
+  }
+
+  auto const func = inst->src(0)->funcVal();
+  auto i = inst->src(2)->intVal();
+  uint64_t m = inst->src(3)->intVal();
+  uint64_t v = inst->src(4)->intVal();
+  while (m) {
+    if (m & 1) {
+      if (func->byRef(i) != (v & 1)) {
+        // This shouldn't happen - the mask/value are predictions
+        // based on previously seen Funcs; but we're now claiming its
+        // always this Func. But unreachable code mumble mumble.
+        return gen(env, Jmp, inst->taken());
+      }
+    }
+    m >>= 1;
+    v >>= 1;
+    i++;
+  }
+
+  return gen(env, Nop);
+}
+
 SSATmp* simplifyCheckRefInner(State& env, const IRInstruction* inst) {
   // Ref inner cells are at worst InitCell, so don't bother checking for that.
   if (TInitCell <= inst->typeParam()) {
@@ -3129,6 +3158,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckInitProps)
   X(CheckInitSProps)
   X(CheckLoc)
+  X(CheckRefs)
   X(CheckRefInner)
   X(CheckStk)
   X(CheckClosureStaticLocInit)

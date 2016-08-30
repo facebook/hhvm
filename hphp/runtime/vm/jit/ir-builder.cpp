@@ -370,6 +370,23 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   return preOptimizeAssertLocation(inst, stk(inst->extra<AssertStk>()->offset));
 }
 
+SSATmp* IRBuilder::preOptimizeLdARFuncPtr(IRInstruction* inst) {
+  auto const& fpiStack = fs().fpiStack();
+  auto const arOff = inst->extra<LdARFuncPtr>()->offset;
+  auto const invOff = arOff.to<FPInvOffset>(fs().irSPOff()) - kNumActRecCells;
+
+  for (auto i = fpiStack.size(); i--; ) {
+    auto const& info = fpiStack[i];
+    if (info.returnSP == inst->src(0) &&
+        info.returnSPOff == invOff) {
+      if (info.func) return m_unit.cns(info.func);
+      return nullptr;
+    }
+  }
+
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
   auto const func = inst->marker().func();
   if (!func->mayHaveThis()) {
@@ -515,6 +532,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdStk)
   X(CastStk)
   X(CoerceStk)
+  X(LdARFuncPtr)
   X(CheckCtxThis)
   X(LdCtx)
   X(LdCctx)

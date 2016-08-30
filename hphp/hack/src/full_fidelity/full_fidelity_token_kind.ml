@@ -164,6 +164,7 @@ type t =
 | NullLiteral
 (* XHP *)
 | XHPElementName
+| XHPClassName
 | XHPStringLiteral
 | XHPBody
 | XHPComment
@@ -404,6 +405,7 @@ let to_string kind =
   | BooleanLiteral -> "boolean_literal"
   | NullLiteral -> "null_literal"
   | XHPElementName -> "XHP_element_name"
+  | XHPClassName -> "XHP_class_name"
   | XHPStringLiteral -> "XHP_string_literal"
   | XHPBody -> "XHP_body"
   | XHPComment -> "XHP_comment"

@@ -305,7 +305,7 @@ module WithExpressionAndStatementParser
       parse_classish_modifiers parser in
     let (parser, token) =
       parse_classish_token parser in
-    let (parser, name) = expect_name parser in
+    let (parser, name) = expect_class_name parser in
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
     let (parser, classish_extends, classish_extends_list) =

@@ -15,4 +15,5 @@ module type Lexer_S = sig
   val next_token : t -> t * Full_fidelity_minimal_token.t
   val next_token_as_name : t -> t * Full_fidelity_minimal_token.t
   val errors : t -> Full_fidelity_syntax_error.t list
+  val next_xhp_class_name : t -> t * Full_fidelity_minimal_token.t
 end

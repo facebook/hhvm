@@ -477,6 +477,18 @@ let rec scan_xhp_element_name lexer =
   else
     (lexer, TokenKind.XHPElementName)
 
+let scan_xhp_class_name lexer =
+  (* An XHP class name is a colon followed by an xhp name. *)
+  if peek_char lexer 0 = ':' then
+    let (lexer, token) = scan_xhp_element_name (advance lexer 1) in
+    if token = TokenKind.XHPElementName then
+      (lexer, TokenKind.XHPClassName)
+    else
+      (lexer, token)
+  else
+    let lexer = with_error lexer SyntaxError.error0008 in
+    (advance lexer 1, TokenKind.Error)
+
 let scan_xhp_string_literal lexer =
   (* XHP string literals are just straight up "find the closing quote"
      strings.  TODO: What about newlines embedded? *)
@@ -855,3 +867,6 @@ let next_xhp_body_token lexer =
     let w = width lexer in
     (lexer, Token.make kind w [] []) in
   scan_assert_progress scanner lexer
+
+let next_xhp_class_name lexer =
+  scan_token_and_trivia scan_xhp_class_name false lexer

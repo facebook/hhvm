@@ -76,6 +76,15 @@ module WithParser(Parser : ParserType) = struct
     (* TODO: What if the name is a keyword? *)
     expect_token parser TokenKind.Name SyntaxError.error1004
 
+  let expect_class_name parser =
+    if peek_token_kind parser = TokenKind.Colon then
+      let lexer = Parser.lexer parser in
+      let (lexer, token) = Parser.Lexer.next_xhp_class_name lexer in
+      let parser = Parser.with_lexer parser lexer in
+      (parser, (Syntax.make_token token))
+    else
+      expect_name parser
+
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)
   let expect_qualified_name parser =

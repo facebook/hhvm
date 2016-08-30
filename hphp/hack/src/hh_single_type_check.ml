@@ -13,6 +13,8 @@ open Coverage_level
 open String_utils
 open Sys_utils
 
+module TNBody       = Typing_naming_body
+
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
@@ -24,6 +26,7 @@ type mode =
   | Coverage
   | Dump_symbol_info
   | Dump_inheritance
+  | Dump_tast
   | Errors
   | Lint
   | Suggest
@@ -243,6 +246,9 @@ let parse_options () =
     "--dump-symbol-info",
       Arg.Unit (set_mode Dump_symbol_info),
       "Dump all symbol information";
+    "--dump-tast",
+      Arg.Unit (set_mode Dump_tast),
+      "Check for errors then dump the Typed AST";
     "--lint",
       Arg.Unit (set_mode Lint),
       "Produce lint errors";
@@ -415,6 +421,38 @@ let print_symbol (symbol, definition) =
       ~f:(fun x -> Pos.multiline_string_no_file x.SymbolDefinition.span)
       ~default:"None")
 
+let check_errors tcopt errors files_info =
+  Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->
+    errors @ Errors.get_error_list
+        (Typing_check_utils.check_defs tcopt fn fileinfo)
+  end ~init:errors
+
+let with_named_body tcopt n_fun =
+  (** In the naming heap, the function bodies aren't actually named yet, so
+   * we need to invoke naming here.
+   * See also docs in Naming.Make. *)
+  let n_f_body = TNBody.func_body tcopt n_fun in
+  { n_fun with Nast.f_body = Nast.NamedBody n_f_body }
+
+let n_fun_fold tcopt fn acc (_, fun_name) =
+  match Parser_heap.find_fun_in_file fn fun_name with
+  | None -> acc
+  | Some f ->
+    let n_fun = Naming.fun_ tcopt f in
+    (with_named_body tcopt n_fun) :: acc
+
+let n_class_fold _tcopt _fn acc _class_name = acc
+let n_type_fold _tcopt _fn acc _type_name = acc
+let n_const_fold _tcopt _fn acc _const_name = acc
+
+(** Load the Nast for the file from the Nast heaps. *)
+let nast_for_file tcopt fn
+{ FileInfo.funs; classes; typedefs; consts; _} =
+  List.fold_left funs ~init:[] ~f:(n_fun_fold tcopt fn),
+  List.fold_left classes ~init:[] ~f:(n_class_fold tcopt fn),
+  List.fold_left typedefs ~init:[] ~f:(n_type_fold tcopt fn),
+  List.fold_left consts ~init:[] ~f:(n_const_fold tcopt fn)
+
 let handle_mode mode filename tcopt files_contents files_info errors =
   match mode with
   | Ai _ -> ()
@@ -536,16 +574,33 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     ClientHighlightRefs.go results ~output_json:false;
   | Suggest
   | Errors ->
-      let errors =
-        Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->
-          errors @ Errors.get_error_list
-              (Typing_check_utils.check_defs tcopt fn fileinfo)
-        end ~init:errors in
+      let errors = check_errors tcopt errors files_info in
       if mode = Suggest
       then Relative_path.Map.iter files_info suggest_and_print;
       if errors <> []
       then (error (List.hd_exn errors); exit 2)
       else Printf.printf "No errors\n"
+  | Dump_tast ->
+      let pos_ty_map = ref Pos.Map.empty in
+      Typing_hooks.attach_infer_ty_hook (Typed_ast.save_ty pos_ty_map);
+      let errors = check_errors tcopt errors files_info in
+      Typing_hooks.remove_all_hooks ();
+      let nasts = Relative_path.Map.fold files_info
+        ~f:begin fun fn fileinfo nasts ->
+          Relative_path.Map.add nasts ~key:fn
+          ~data:(nast_for_file tcopt fn fileinfo)
+        end ~init:Relative_path.Map.empty
+      in
+      if errors <> []
+      then (error (List.hd_exn errors); exit 2);
+      Relative_path.Map.iter nasts ~f:begin fun fn nast ->
+        if (Relative_path.S.compare fn builtins_filename) = 0 then ()
+        else begin
+          Printf.eprintf "%s:\n%s\n"
+            (Relative_path.S.to_string fn)
+            (Typed_ast_printer.print_string !pos_ty_map nast)
+        end
+      end
 
 (*****************************************************************************)
 (* Main entry point *)

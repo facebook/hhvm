@@ -1,0 +1,21 @@
+|prim_unresolved.php:
+(fun
+ (name: \foo)
+ (body:
+  (stmt(If
+    ((Tbool TPrim) expr binop((Tint TPrim) expr Lvar -187650736)((Tint TPrim) expr Int))
+    (stmt
+     ((Tint TPrim) expr binop(TAny expr Lvar 4)((Tint TPrim) expr Int)))
+    
+    (stmt
+     ((Tstring TPrim) expr binop(TAny expr Lvar 4)((Tstring TPrim) expr other)))
+    ))
+  (stmt
+   ((Tvoid TPrim) expr Call(TAny expr Id \g)((TUnion(Tint TPrim)(Tstring TPrim)) expr Lvar 4)))
+  ))
+(fun
+ (name: \g)
+ (body:
+  (stmt other stmt)
+  ))
+

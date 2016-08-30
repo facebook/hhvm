@@ -69,6 +69,7 @@ MODULES=\
   stubs\
   third-party/avl\
   third-party/core\
+  typed_ast\
   typing\
   utils\
   utils/collections\

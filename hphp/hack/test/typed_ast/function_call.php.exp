@@ -1,0 +1,13 @@
+|function_call.php:
+(fun
+ (name: \bar)
+ (body:
+  (stmt
+   ((Tvoid TPrim) expr Call(TAny expr Id \foo)((Tint TPrim) expr binop((Tint TPrim) expr Int)((Tint TPrim) expr Int))))
+  ))
+(fun
+ (name: \foo)
+ (body:
+  (stmt other stmt)
+  ))
+

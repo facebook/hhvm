@@ -1,0 +1,22 @@
+|loop_analysis_aliasing.php:
+(fun
+ (name: \loop)
+ (body:
+  (stmt
+   ((Tint TPrim) expr binop(TAny expr Lvar 5)((Tint TPrim) expr Int)))
+  (stmt(While
+    ((Tbool TPrim) expr binop((TUnion(Tint TPrim)) expr other)((Tint TPrim) expr Int))
+    (stmt
+     ((TUnion(Tstring TPrim)(Tint TPrim)) expr binop(TAny expr Lvar 6)((TUnion(Tstring TPrim)(Tint TPrim)) expr Lvar 5)))
+    (stmt(If
+      ((Tbool TPrim) expr binop((TUnion(Tint TPrim)) expr Lvar -25481132)((Tint TPrim) expr Int))
+      (stmt
+       ((Tstring TPrim) expr binop(TAny expr Lvar 5)((Tstring TPrim) expr other)))
+      
+      (stmt other stmt)
+      ))
+    (stmt
+     ((TUnion(Tstring TPrim)(Tint TPrim)) expr Lvar 6))
+    ))
+  ))
+

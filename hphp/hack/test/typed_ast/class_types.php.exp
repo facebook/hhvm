@@ -1,0 +1,13 @@
+|class_types.php:
+(fun
+ (name: \foo)
+ (body:
+  (stmt
+   ((Tvoid TPrim) expr Call(TAny expr Id \bar)((TClass \A < >) expr Lvar -943623712)((TClass \B <(TClass \A < >) >) expr Lvar -1047294126)))
+  ))
+(fun
+ (name: \bar)
+ (body:
+  (stmt other stmt)
+  ))
+

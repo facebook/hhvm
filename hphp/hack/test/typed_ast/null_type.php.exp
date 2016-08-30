@@ -1,0 +1,19 @@
+|null_type.php:
+(fun
+ (name: \foo)
+ (body:
+  (stmt
+   (TNull expr binop(TAny expr Lvar 4)(TNull expr other)))
+  (stmt
+   ((Tvoid TPrim) expr Call(TAny expr Id \bar)(TNull expr Lvar 4)))
+  (stmt
+   (TNotImpl expr binop(TAny expr Lvar 4)(TNotImpl expr other)))
+  (stmt
+   ((Tvoid TPrim) expr Call(TAny expr Id \bar)(TNotImpl expr Lvar 4)))
+  ))
+(fun
+ (name: \bar)
+ (body:
+  (stmt other stmt)
+  ))
+

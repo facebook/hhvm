@@ -85,7 +85,7 @@ bool mightRelax(State& env, const SSATmp* tmp) {
   return irgen::typeMightRelax(tmp);
 }
 
-SSATmp* constSrc(State& env, SSATmp* src, Type t = TBottom) {
+SSATmp* constSrc(State& env, SSATmp* src, Type t = TTop) {
   if ((env.typesMightRelax &&
        !src->inst()->is(DefConst)) ||
       !src->hasConstVal(t)) {

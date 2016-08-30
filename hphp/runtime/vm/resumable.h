@@ -30,35 +30,33 @@ namespace HPHP {
 /**
  * Header of the resumable frame used by async functions:
  *
- *         Header*     -> +-------------------------+ low address
- *                        | ResumableNode           |
- *                        +-------------------------+
- *                        | Function locals and     |
- *                        | iterators               |
- *         Resumable*  -> +-------------------------+
- *                        | ActRec in Resumable     |
- *                        +-------------------------+
- *                        | Rest of Resumable       |
- *         ObjectData* -> +-------------------------+
- *                        | Parent object           |
- *                        +-------------------------+ high address
+ *     Header*     -> +--------------------------------+ low address
+ *                    | NativeNode kind=AsyncFuncFrame |
+ *                    +--------------------------------+
+ *                    | Function locals and iterators  |
+ *     Resumable*  -> +--------------------------------+
+ *                    | ActRec in Resumable            |
+ *                    +--------------------------------+
+ *                    | Rest of Resumable              |
+ *     ObjectData* -> +--------------------------------+
+ *                    | c_AsyncFuncWaitHandle          |
+ *                    +--------------------------------+ high address
  *
  * Header of the native frame used by generators:
  *
- *         Header*     -> +-------------------------+ low address
- *                        | NativeNode              |
- *                        +-------------------------+
- *                        | Function locals and     |
- *                        | iterators               |
- *     BaseGenerator*  -> +-------------------------+
- *     < NativeData >     | ActRec in Resumable     |
- *                        +-------------------------+
- *                        | Rest of Resumable       |
- *                        +-------------------------+
- *                        | Rest of Generator Data  |
- *         ObjectData* -> +-------------------------+
- *                        | Parent object           |
- *                        +-------------------------+ high address
+ *     Header*     -> +--------------------------------+ low address
+ *                    | NativeNode NativeData          |
+ *                    +--------------------------------+
+ *                    | Function locals and iterators  |
+ * BaseGenerator*  -> +--------------------------------+
+ * < NativeData >     | ActRec in Resumable            |
+ *                    +--------------------------------+
+ *                    | Rest of Resumable              |
+ *                    +--------------------------------+
+ *                    | Rest of [Async]Generator       |
+ *     ObjectData* -> +--------------------------------+
+ *                    | Parent object                  |
+ *                    +--------------------------------+ high address
  */
 struct alignas(16) Resumable {
   // This function is used only by AFWH, temporary till AFWH is converted to HNI
@@ -87,13 +85,11 @@ struct alignas(16) Resumable {
   // This function is temporary till we move AFWH to HNI
   static Resumable* Create(size_t frameSize, size_t totalSize) {
     // Allocate memory.
-    auto node = reinterpret_cast<ResumableNode*>(MM().objMalloc(totalSize));
+    auto node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
     auto frame = reinterpret_cast<char*>(node + 1);
     auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
-
-    node->framesize = frameSize;
+    node->obj_offset = sizeof(NativeNode) + frameSize + sizeof(Resumable);
     node->hdr.kind = HeaderKind::AsyncFuncFrame;
-
     return resumable;
   }
 

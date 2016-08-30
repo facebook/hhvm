@@ -28,6 +28,7 @@
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
@@ -61,26 +62,28 @@ struct Header {
   const Resumable* resumable() const {
     assert(kind() == HeaderKind::AsyncFuncFrame);
     return reinterpret_cast<const Resumable*>(
-      (char*)this + sizeof(ResumableNode) + resumable_.framesize
+      (const char*)this + native_.obj_offset - sizeof(Resumable)
     );
   }
   Resumable* resumable() {
     assert(kind() == HeaderKind::AsyncFuncFrame);
     return reinterpret_cast<Resumable*>(
-      (char*)this + sizeof(ResumableNode) + resumable_.framesize
+      (char*)this + native_.obj_offset - sizeof(Resumable)
     );
   }
   const ObjectData* asyncFuncWH() const {
-    DEBUG_ONLY auto const func = resumable()->actRec()->func();
-    assert(func->isAsyncFunction());
-    auto obj = reinterpret_cast<const ObjectData*>(resumable() + 1);
+    assert(resumable()->actRec()->func()->isAsyncFunction());
+    auto obj = reinterpret_cast<const ObjectData*>(
+      (const char*)this + native_.obj_offset
+    );
     assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
     return obj;
   }
   ObjectData* asyncFuncWH() {
-    DEBUG_ONLY auto const func = resumable()->actRec()->func();
-    assert(func->isAsyncFunction());
-    auto obj = reinterpret_cast<ObjectData*>(resumable() + 1);
+    assert(resumable()->actRec()->func()->isAsyncFunction());
+    auto obj = reinterpret_cast<ObjectData*>(
+      (char*)this + native_.obj_offset
+    );
     assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
     return obj;
   }
@@ -127,7 +130,6 @@ public:
     RefData ref_;
     MallocNode malloc_;
     FreeNode free_;
-    ResumableNode resumable_;
     NativeNode native_;
     c_AwaitAllWaitHandle awaitall_;
   };
@@ -182,8 +184,8 @@ inline size_t Header::size() const {
     case HeaderKind::BigObj:      // [MallocNode][Header...]
       return malloc_.nbytes;
     case HeaderKind::AsyncFuncFrame:
-      // [ResumableNode][locals][Resumable][c_AsyncFunctionWaitHandle]
-      return resumable()->size();
+      // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
+      return native_.obj_offset + sizeof(c_AsyncFunctionWaitHandle);
     case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       // Generators -

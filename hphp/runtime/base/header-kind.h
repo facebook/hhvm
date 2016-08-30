@@ -32,7 +32,7 @@ enum class HeaderKind : uint8_t {
   // Collections
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
   // other kinds, not used for countable objects.
-  AsyncFuncFrame, // ResumableNode followed by Frame, Resumable, ObjectData
+  AsyncFuncFrame, // NativeNode followed by Frame, Resumable, AFWH
   NativeData, // a NativeData header preceding an HNI ObjectData
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block

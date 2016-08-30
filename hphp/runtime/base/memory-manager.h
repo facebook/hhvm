@@ -372,12 +372,6 @@ struct NativeNode {
   HeaderWord<> hdr;
 };
 
-// header for Resumable objects. See layout comment in resumable.h
-struct ResumableNode {
-  size_t framesize;
-  HeaderWord<> hdr;
-};
-
 // POD type for tracking arbitrary memory ranges
 struct MemBlock {
   void* ptr;

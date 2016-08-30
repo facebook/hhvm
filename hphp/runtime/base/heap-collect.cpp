@@ -210,13 +210,11 @@ void Marker::operator()(const ObjectData* p) {
   assert(isObjectKind(p->headerKind()));
   auto kind = p->headerKind();
   if (kind == HeaderKind::AsyncFuncWH) {
-    // c_AsyncFunctionWaitHandle, prefixed by a ResumableNode header,
-    // which is what we need to mark.
-    // [ResumableNode][locals][Resumable][c_AsyncFunctionWaitHandle]
+    // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
     auto r = Resumable::FromObj(p);
     auto frame = reinterpret_cast<const TypedValue*>(r) -
                  r->actRec()->func()->numSlotsInFrame();
-    auto node = reinterpret_cast<const ResumableNode*>(frame) - 1;
+    auto node = reinterpret_cast<const NativeNode*>(frame) - 1;
     assert(node->hdr.kind == HeaderKind::AsyncFuncFrame);
     if (mark(node)) {
       // mark the AsyncFuncFrame prefix, but enqueue the ObjectData* to scan

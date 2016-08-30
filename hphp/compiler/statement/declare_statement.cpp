@@ -29,13 +29,36 @@ StatementPtr DeclareStatement::clone() {
 
 //////////////////////////////////////////////////////////////////////
 
-ConstructPtr DeclareStatement::getNthKid(int n) const { always_assert(0); }
-int DeclareStatement::getKidCount() const { return 0; }
-void DeclareStatement::setNthKid(int n, ConstructPtr cp) { always_assert(0); }
+ConstructPtr DeclareStatement::getNthKid(int n) const {
+  switch (n) {
+    case 0:
+      return m_block;
+    default:
+      assert(false);
+      break;
+  }
+  return ConstructPtr();
+}
+
+int DeclareStatement::getKidCount() const { return 1; }
+
+void DeclareStatement::setNthKid(int n, ConstructPtr cp) {
+  switch (n) {
+    case 0:
+      m_block = dynamic_pointer_cast<BlockStatement>(cp);
+      break;
+    default:
+      assert(false);
+      break;
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 
-void DeclareStatement::analyzeProgram(AnalysisResultPtr) {}
+void DeclareStatement::analyzeProgram(AnalysisResultPtr ar) {
+  if (m_block) m_block->analyzeProgram(ar);
+}
+
 void DeclareStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr ar) {
   if (m_block) m_block->outputPHP(cg, ar);
 }

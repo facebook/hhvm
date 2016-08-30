@@ -104,6 +104,7 @@ let error1045 = "An 'extends' or 'implements' keyword is expected here."
 let error1046 = "A lambda arrow ('==>') is expected here."
 let error1047 = "A scope resolution operator ('::') is expected here."
 let error1048 = "A name, variable name or 'class' is expected here."
+let error1050 = "A name or variable name is expected here."
 
 let error2001 = "A type annotation is required in strict mode."
 let error2002 = "An XHP attribute name may not contain '-' or ':'."

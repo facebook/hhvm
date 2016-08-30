@@ -13,10 +13,10 @@ qualified_name((whitespace)(name)))
 ((lparen))(variable((variable)))((rparen)))
 ((;)(end_of_line)))
 (expression_statement(
-binary_operator(
+member_selection_expression(
 function_call_expression(
 qualified_name((whitespace)(name)))((lparen))(missing)((rparen)(whitespace)))
-((->)(whitespace))(qualified_name((name))))
+((->)(whitespace))((name)))
 ((;)(end_of_line)))
 (expression_statement(binary_operator(
 function_call_expression(

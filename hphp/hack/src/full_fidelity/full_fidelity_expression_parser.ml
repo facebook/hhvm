@@ -207,12 +207,12 @@ module WithStatementAndDeclParser
     | GreaterThanGreaterThan
     | Carat
     | BarGreaterThan
-    | MinusGreaterThan
-    | QuestionMinusGreaterThan
     | QuestionQuestion
     | Instanceof ->
     (* TODO: "and" "or" "xor" *)
       parse_remaining_binary_operator parser term
+    | QuestionMinusGreaterThan
+    | MinusGreaterThan -> parse_member_selection_expression parser term
     | ColonColon ->
       parse_scope_resolution_expression parser term
     | PlusPlus
@@ -224,6 +224,27 @@ module WithStatementAndDeclParser
       let (parser, token) = assert_token parser Question in
       parse_conditional_expression parser term token
     | _ -> (parser, term)
+
+  and parse_member_selection_expression parser term =
+    (* SPEC:
+    member-selection-expression:
+      postfix-expression  ->  name
+      postfix-expression  ->  variable-name
+
+    null-safe-member-selection-expression:
+      postfix-expression  ->  name
+      postfix-expression  ->  variable-name
+    *)
+    let (parser, token) = next_token parser in
+    let op = make_token token in
+    (* TODO: We are putting the name / variable into the tree as a token
+    leaf, rather than as a name or variable expression. Is that right? *)
+    let (parser, name) = expect_name_or_variable parser in
+    let result = if (Token.kind token) = MinusGreaterThan then
+      make_member_selection_expression term op name
+    else
+      make_safe_member_selection_expression term op name in
+    parse_remaining_expression parser result
 
   and parse_subscript parser term =
     (* SPEC

@@ -144,6 +144,16 @@ module WithParser(Parser : ParserType) = struct
   let expect_coloncolon parser =
     expect_token parser TokenKind.ColonColon SyntaxError.error1047
 
+  let expect_name_or_variable parser =
+    let (parser1, token) = next_token_as_name parser in
+    match Token.kind token with
+    | TokenKind.Name
+    | TokenKind.Variable -> (parser1, Syntax.make_token token)
+    | _ ->
+      (* ERROR RECOVERY: Create a missing token for the expected token,
+         and continue on from the current token. Don't skip it. *)
+      (with_error parser SyntaxError.error1050, (Syntax.make_missing()))
+
   let expect_name_variable_or_class parser =
     let (parser1, token) = next_token parser in
     if Token.kind token = TokenKind.Class then

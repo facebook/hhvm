@@ -873,18 +873,26 @@ and p_postfix_expression = "PostfixExpression", fun () -> [
   [NonTerm p_subscript_expression];
   [NonTerm p_function_call_expression];
   [NonTerm p_postfix_expression; minus_greater_than; name];
-  [NonTerm p_postfix_expression; minus_greater_than; NonTerm p_expression];
+  [NonTerm p_postfix_expression; minus_greater_than; NonTerm p_variable_name];
   [NonTerm p_postfix_expression; question_minus_greater_than; name];
+  [NonTerm p_postfix_expression; question_minus_greater_than;
+    NonTerm p_variable_name];
   [NonTerm p_unary_expression; plus_plus];
   [NonTerm p_unary_expression; minus_minus];
-  (* [NonTerm p_scope_resolution_quantifier; colon_colon; name]; *)
-  (* [NonTerm p_scope_resolution_quantifier; colon_colon; term_class]; *)
+  [NonTerm p_scope_resolution_quantifier; colon_colon; name];
+  [NonTerm p_scope_resolution_quantifier; colon_colon; term_class];
   [NonTerm p_expression; star_star; NonTerm p_expression]]
 
 and p_unary_operator = "UnaryOperator", fun () ->
   [[plus]; [minus]; [exclamation]; [tilde]]
 
 and p_object_creation_expression = "ObjectCreationExpression", fun () -> [
+  [term_new; parent; left_paren; NonTerm p_argument_expression_list;
+    right_paren];
+  [term_new; parent; left_paren; right_paren];
+  [term_new; self; left_paren; NonTerm p_argument_expression_list;
+    right_paren];
+  [term_new; self; left_paren; right_paren];
   [term_new; static; left_paren; NonTerm p_argument_expression_list;
     right_paren];
   [term_new; static; left_paren; right_paren];

@@ -72,6 +72,7 @@ else()
   add_definitions(-DFOLLY_HAVE_BITS_FUNCTEXCEPT_H=0)
 endif()
 
+include(CheckIncludeFile)
 check_include_file(linux/membarrier.h FOLLY_HAVE_LINUX_MEMBARRIER_H)
 if (FOLLY_HAVE_LINUX_MEMBARRIER_H)
   add_definitions(-DFOLLY_HAVE_LINUX_MEMBARRIER_H=1)

@@ -134,27 +134,27 @@ const StaticString AsyncMysqlClientStats::s_className("AsyncMysqlClientStats");
 
 IMPLEMENT_GET_CLASS(AsyncMysqlClientStats)
 
-double HHVM_METHOD(AsyncMysqlClientStats, ioEventLoopMicrosAvg) {
+static double HHVM_METHOD(AsyncMysqlClientStats, ioEventLoopMicrosAvg) {
   auto* data = Native::data<AsyncMysqlClientStats>(this_);
   return data->m_values.ioEventLoopMicrosAvg;
 }
 
-double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
+static double HHVM_METHOD(AsyncMysqlClientStats, callbackDelayMicrosAvg) {
   auto* data = Native::data<AsyncMysqlClientStats>(this_);
   return data->m_values.callbackDelayMicrosAvg;
 }
 
-double HHVM_METHOD(AsyncMysqlClientStats, ioThreadBusyMicrosAvg) {
+static double HHVM_METHOD(AsyncMysqlClientStats, ioThreadBusyMicrosAvg) {
   auto* data = Native::data<AsyncMysqlClientStats>(this_);
   return data->m_values.ioThreadBusyTime;
 }
 
-double HHVM_METHOD(AsyncMysqlClientStats, ioThreadIdleMicrosAvg) {
+static double HHVM_METHOD(AsyncMysqlClientStats, ioThreadIdleMicrosAvg) {
   auto* data = Native::data<AsyncMysqlClientStats>(this_);
   return data->m_values.ioThreadIdleTime;
 }
 
-int64_t HHVM_METHOD(AsyncMysqlClientStats, notificationQueueSize) {
+static int64_t HHVM_METHOD(AsyncMysqlClientStats, notificationQueueSize) {
   auto* data = Native::data<AsyncMysqlClientStats>(this_);
   return data->m_values.notificationQueueSize;
 }
@@ -182,7 +182,7 @@ void MySSLContextProvider::setSSLProvider(
   m_provider = std::move(ssl_provider);
 }
 
-bool HHVM_METHOD(MySSLContextProvider, isValid) {
+static bool HHVM_METHOD(MySSLContextProvider, isValid) {
   auto* data = Native::data<MySSLContextProvider>(this_);
   return data->m_provider != nullptr;
 }
@@ -192,27 +192,126 @@ const StaticString MySSLContextProvider::s_className("MySSLContextProvider");
 IMPLEMENT_GET_CLASS(MySSLContextProvider)
 
 //////////////////////////////////////////////////////////////////////////////
+// AsyncMysqlConnectionOptions
+
+AsyncMysqlConnectionOptions::AsyncMysqlConnectionOptions() {
+  // set default timeout
+  auto default_timeout = mysqlExtension::ConnectTimeout * 1000;
+  m_conn_opts.setTotalTimeout(am::Duration(default_timeout));
+}
+
+const am::ConnectionOptions&
+AsyncMysqlConnectionOptions::getConnectionOptions() {
+  return m_conn_opts;
+}
+
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectTimeout, int64_t timeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.setTimeout(am::Duration(timeout));
+}
+
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectAttempts, int32_t attempts) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.setConnectAttempts(attempts);
+}
+
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, setTotalTimeout, int64_t timeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.setTotalTimeout(am::Duration(timeout));
+}
+
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, setQueryTimeout, int64_t timeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.setQueryTimeout(am::Duration(timeout));
+}
+
+static void HHVM_METHOD(
+    AsyncMysqlConnectionOptions,
+    setConnectionAttributes,
+    const Array& attrs) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+
+  IterateKV(attrs.get(), [&](const TypedValue* k, const TypedValue* v) {
+    data->m_conn_opts.setConnectionAttribute(
+        tvCastToString(k)->toCppString(), tvCastToString(v)->toCppString());
+  });
+}
+
+static void HHVM_METHOD(
+    AsyncMysqlConnectionOptions,
+    setSSLOptionsProvider,
+    const Variant& sslContextProvider /* = null */) {
+  if (sslContextProvider.isNull()) {
+    return;
+  }
+  if (!sslContextProvider.isObject() ||
+          !sslContextProvider.toObject()->instanceof
+      (MySSLContextProvider::getClass())) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Wrong type: expected MySSLContextProvider argument");
+    return;
+  }
+  auto* sslProvider =
+      Native::data<MySSLContextProvider>(sslContextProvider.toObject());
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  data->m_conn_opts.setSSLOptionsProvider(sslProvider->getSSLProvider());
+}
+
+Class* AsyncMysqlConnectionOptions::s_class = nullptr;
+const StaticString AsyncMysqlConnectionOptions::s_className(
+    "AsyncMysqlConnectionOptions");
+IMPLEMENT_GET_CLASS(AsyncMysqlConnectionOptions)
+
+//////////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClient
-void HHVM_STATIC_METHOD(AsyncMysqlClient,
-                        setPoolsConnectionLimit,
-                        int64_t limit) {
+void HHVM_STATIC_METHOD(
+    AsyncMysqlClient,
+    setPoolsConnectionLimit,
+    int64_t limit) {
   getClient()->setPoolsConnectionLimit(limit);
 }
 
-Object HHVM_STATIC_METHOD(AsyncMysqlClient,
-                          connect,
-                          const String& host,
-                          int port,
-                          const String& dbname,
-                          const String& user,
-                          const String& password,
-                          int64_t timeout_micros /* = -1 */,
-                          const Variant& sslContextProvider /* = null */) {
-  am::ConnectionKey key(static_cast<std::string>(host),
-                        port,
-                        static_cast<std::string>(dbname),
-                        static_cast<std::string>(user),
-                        static_cast<std::string>(password));
+static Object newAsyncMysqlConnectEvent(
+    std::shared_ptr<am::ConnectOperation> op,
+    std::shared_ptr<am::AsyncMysqlClient> clientPtr) {
+  auto event = new AsyncMysqlConnectEvent(op);
+  try {
+    op->setCallback([event, clientPtr](am::ConnectOperation& op) {
+      // Get current stats
+      event->setClientStats(clientPtr->collectPerfStats());
+
+      event->opFinished();
+    });
+    op->run();
+
+    return Object{event->getWaitHandle()};
+  } catch (...) {
+    assert(false);
+    event->abandon();
+    return Object{};
+  }
+}
+
+Object HHVM_STATIC_METHOD(
+    AsyncMysqlClient,
+    connect,
+    const String& host,
+    int port,
+    const String& dbname,
+    const String& user,
+    const String& password,
+    int64_t timeout_micros /* = -1 */,
+    const Variant& sslContextProvider /* = null */) {
+  am::ConnectionKey key(
+      static_cast<std::string>(host),
+      port,
+      static_cast<std::string>(dbname),
+      static_cast<std::string>(user),
+      static_cast<std::string>(password));
   auto op = getClient()->beginConnection(key);
   if (!sslContextProvider.isNull()) {
     auto* mysslContextProvider =
@@ -227,28 +326,37 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient,
     op->setTimeout(am::Duration(timeout_micros));
   }
 
-  auto event = new AsyncMysqlConnectEvent(op);
-  try {
-    op->setCallback(
-        [ event, clientPtr = getClient() ](am::ConnectOperation & op) {
-          // Get current stats
-          event->setClientStats(clientPtr->collectPerfStats());
-
-          event->opFinished();
-        });
-    op->run();
-
-    return Object{event->getWaitHandle()};
-  }
-  catch (...) {
-    assert(false);
-    event->abandon();
-    return Object{};
-  }
+  return newAsyncMysqlConnectEvent(std::move(op), getClient());
 }
 
-Object HHVM_STATIC_METHOD(AsyncMysqlClient, adoptConnection,
-                          const Variant& connection) {
+Object HHVM_STATIC_METHOD(
+    AsyncMysqlClient,
+    connectWithOpts,
+    const String& host,
+    int port,
+    const String& dbname,
+    const String& user,
+    const String& password,
+    const Object& asyncMysqlConnOpts) {
+  am::ConnectionKey key(
+      static_cast<std::string>(host),
+      port,
+      static_cast<std::string>(dbname),
+      static_cast<std::string>(user),
+      static_cast<std::string>(password));
+  auto op = getClient()->beginConnection(key);
+
+  auto* obj = Native::data<AsyncMysqlConnectionOptions>(asyncMysqlConnOpts);
+  const auto& connOpts = obj->getConnectionOptions();
+  op->setConnectionOptions(connOpts);
+
+  return newAsyncMysqlConnectEvent(std::move(op), getClient());
+}
+
+Object HHVM_STATIC_METHOD(
+    AsyncMysqlClient,
+    adoptConnection,
+    const Variant& connection) {
   auto conn = cast<MySQLResource>(connection)->mysql();
   // mysql connection from ext/mysql/mysql_common.h
   auto raw_conn = conn->eject_mysql();
@@ -287,9 +395,8 @@ const StaticString s_per_key_connection_limit("per_key_connection_limit"),
     s_age_timeout_micros("age_timeout_micros"),
     s_expiration_policy("expiration_policy");
 
-void HHVM_METHOD(AsyncMysqlConnectionPool, __construct,
-                 const Array& options) {
-
+static void
+HHVM_METHOD(AsyncMysqlConnectionPool, __construct, const Array& options) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   am::PoolOptions pool_options;
   if (options.exists(s_per_key_connection_limit)) {
@@ -332,38 +439,41 @@ const StaticString s_created_pool_connections("created_pool_connections"),
     s_connections_requested("connections_requested"), s_pool_hits("pool_hits"),
     s_pool_misses("pool_misses");
 
-Array HHVM_METHOD(AsyncMysqlConnectionPool, getPoolStats) {
+static Array HHVM_METHOD(AsyncMysqlConnectionPool, getPoolStats) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   auto* pool_stats = data->m_async_pool->stats();
-  Array ret = make_map_array(s_created_pool_connections,
-                             pool_stats->numCreatedPoolConnections(),
-                             s_destroyed_pool_connections,
-                             pool_stats->numDestroyedPoolConnections(),
-                             s_connections_requested,
-                             pool_stats->numConnectionsRequested(),
-                             s_pool_hits,
-                             pool_stats->numPoolHits(),
-                             s_pool_misses,
-                             pool_stats->numPoolMisses());
+  Array ret = make_map_array(
+      s_created_pool_connections,
+      pool_stats->numCreatedPoolConnections(),
+      s_destroyed_pool_connections,
+      pool_stats->numDestroyedPoolConnections(),
+      s_connections_requested,
+      pool_stats->numConnectionsRequested(),
+      s_pool_hits,
+      pool_stats->numPoolHits(),
+      s_pool_misses,
+      pool_stats->numPoolMisses());
   return ret;
 }
 
-Object HHVM_METHOD(AsyncMysqlConnectionPool, connect,
-                   const String& host,
-                   int port,
-                   const String& dbname,
-                   const String& user,
-                   const String& password,
-                   int64_t timeout_micros,
-                   const String& extra_key) {
-
+static Object HHVM_METHOD(
+    AsyncMysqlConnectionPool,
+    connect,
+    const String& host,
+    int port,
+    const String& dbname,
+    const String& user,
+    const String& password,
+    int64_t timeout_micros,
+    const String& extra_key) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
-  auto op = data->m_async_pool->beginConnection(static_cast<std::string>(host),
-                                          port,
-                                          static_cast<std::string>(dbname),
-                                          static_cast<std::string>(user),
-                                          static_cast<std::string>(password),
-                                          static_cast<std::string>(extra_key));
+  auto op = data->m_async_pool->beginConnection(
+      static_cast<std::string>(host),
+      port,
+      static_cast<std::string>(dbname),
+      static_cast<std::string>(user),
+      static_cast<std::string>(password),
+      static_cast<std::string>(extra_key));
   if (timeout_micros < 0) {
     timeout_micros = mysqlExtension::ConnectTimeout * 1000;
   }
@@ -371,24 +481,35 @@ Object HHVM_METHOD(AsyncMysqlConnectionPool, connect,
     op->setTimeout(am::Duration(timeout_micros));
   }
 
-  auto event = new AsyncMysqlConnectEvent(op);
-  try {
-    op->setCallback(
-        [ event, clientPtr = data->m_async_pool->getMysqlClient() ](
-            am::ConnectOperation & op) {
-          event->setClientStats(clientPtr->collectPerfStats());
-          event->opFinished();
-        });
-    op->run();
+  return newAsyncMysqlConnectEvent(
+      std::move(op), data->m_async_pool->getMysqlClient());
+}
 
-    return Object{event->getWaitHandle()};
-  }
-  catch (...) {
-    LOG(ERROR) << "Unexpected exception while beginning ConnectPoolOperation";
-    assert(false);
-    event->abandon();
-    return Object{};
-  }
+static Object HHVM_METHOD(
+    AsyncMysqlConnectionPool,
+    connectWithOpts,
+    const String& host,
+    int port,
+    const String& dbname,
+    const String& user,
+    const String& password,
+    const Object& asyncMysqlConnOpts,
+    const String& extra_key) {
+  auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
+  auto op = data->m_async_pool->beginConnection(
+      static_cast<std::string>(host),
+      port,
+      static_cast<std::string>(dbname),
+      static_cast<std::string>(user),
+      static_cast<std::string>(password),
+      static_cast<std::string>(extra_key));
+
+  auto* obj = Native::data<AsyncMysqlConnectionOptions>(asyncMysqlConnOpts);
+  const auto& connOpts = obj->getConnectionOptions();
+  op->setConnectionOptions(connOpts);
+
+  return newAsyncMysqlConnectEvent(
+      std::move(op), data->m_async_pool->getMysqlClient());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -497,20 +618,24 @@ Object AsyncMysqlConnection::query(
   }
 }
 
-Object HHVM_METHOD(AsyncMysqlConnection, query,
-                   const String& query,
-                   int64_t timeout_micros /* = -1 */) {
+static Object HHVM_METHOD(
+    AsyncMysqlConnection,
+    query,
+    const String& query,
+    int64_t timeout_micros /* = -1 */) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   return data->query(
-    this_,
-    am::Query::unsafe(static_cast<std::string>(query)),
-    timeout_micros);
+      this_,
+      am::Query::unsafe(static_cast<std::string>(query)),
+      timeout_micros);
 }
 
-Object HHVM_METHOD(AsyncMysqlConnection, queryf,
-                   const String& pattern,
-                   const Array& args) {
+static Object HHVM_METHOD(
+    AsyncMysqlConnection,
+    queryf,
+    const String& pattern,
+    const Array& args) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   // Not directly calling argsv.toFollyDynamic() as that creates a folly
@@ -573,13 +698,14 @@ Object HHVM_METHOD(AsyncMysqlConnection, queryf,
   }
 
   return data->query(
-    this_,
-    am::Query(static_cast<std::string>(pattern), query_args));
+      this_, am::Query(static_cast<std::string>(pattern), query_args));
 }
 
-Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
-                   const Array& queries,
-                   int64_t timeout_micros /* = -1 */) {
+static Object HHVM_METHOD(
+    AsyncMysqlConnection,
+    multiQuery,
+    const Array& queries,
+    int64_t timeout_micros /* = -1 */) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   data->verifyValidConnection();
@@ -628,12 +754,13 @@ Object HHVM_METHOD(AsyncMysqlConnection, multiQuery,
   }
 }
 
-bool HHVM_METHOD(AsyncMysqlConnection, isValid) {
+static bool HHVM_METHOD(AsyncMysqlConnection, isValid) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
   return data->isValidConnection();
 }
 
-String HHVM_METHOD(AsyncMysqlConnection, escapeString, const String& input) {
+static String
+HHVM_METHOD(AsyncMysqlConnection, escapeString, const String& input) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   data->verifyValidConnection();
@@ -641,7 +768,7 @@ String HHVM_METHOD(AsyncMysqlConnection, escapeString, const String& input) {
   return ret;
 }
 
-String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
+static String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   String ret = "";
@@ -653,7 +780,7 @@ String HHVM_METHOD(AsyncMysqlConnection, serverInfo) {
   return ret;
 }
 
-bool HHVM_METHOD(AsyncMysqlConnection, sslSessionReused) {
+static bool HHVM_METHOD(AsyncMysqlConnection, sslSessionReused) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   // Will throw PHP catchable Exception in case the connection isn't valid.
@@ -661,7 +788,7 @@ bool HHVM_METHOD(AsyncMysqlConnection, sslSessionReused) {
   return data->m_conn->sslSessionReused();
 }
 
-bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
+static bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   // Will throw PHP catchable Exception in case the connection isn't valid.
@@ -669,7 +796,7 @@ bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
   return data->m_conn->isSSL();
 }
 
-int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
+static int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   int count = 0;
@@ -681,18 +808,17 @@ int HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   return count;
 }
 
-String HHVM_METHOD(AsyncMysqlConnection, host) {
+static String HHVM_METHOD(AsyncMysqlConnection, host) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
   return data->m_host;
 }
 
-int HHVM_METHOD(AsyncMysqlConnection, port) {
+static int HHVM_METHOD(AsyncMysqlConnection, port) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
   return data->m_port;
 }
 
-void HHVM_METHOD(AsyncMysqlConnection, setReusable,
-                 bool reusable) {
+static void HHVM_METHOD(AsyncMysqlConnection, setReusable, bool reusable) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   if (data->m_conn) {
@@ -702,7 +828,7 @@ void HHVM_METHOD(AsyncMysqlConnection, setReusable,
   }
 }
 
-bool HHVM_METHOD(AsyncMysqlConnection, isReusable) {
+static bool HHVM_METHOD(AsyncMysqlConnection, isReusable) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   if (data->m_conn) {
@@ -713,7 +839,7 @@ bool HHVM_METHOD(AsyncMysqlConnection, isReusable) {
   return false;
 }
 
-Variant HHVM_METHOD(AsyncMysqlConnection, connectResult) {
+static Variant HHVM_METHOD(AsyncMysqlConnection, connectResult) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   if (data->m_op) {
@@ -726,7 +852,7 @@ Variant HHVM_METHOD(AsyncMysqlConnection, connectResult) {
   return false;
 }
 
-double HHVM_METHOD(AsyncMysqlConnection, lastActivityTime) {
+static double HHVM_METHOD(AsyncMysqlConnection, lastActivityTime) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   if (data->m_conn) {
@@ -739,14 +865,14 @@ double HHVM_METHOD(AsyncMysqlConnection, lastActivityTime) {
   return false;
 }
 
-void HHVM_METHOD(AsyncMysqlConnection, close) {
+static void HHVM_METHOD(AsyncMysqlConnection, close) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
   data->m_conn.reset();
   data->m_closed = true;
 }
 
-Variant HHVM_METHOD(AsyncMysqlConnection, releaseConnection) {
+static Variant HHVM_METHOD(AsyncMysqlConnection, releaseConnection) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
   data->verifyValidConnection();
 
@@ -846,22 +972,22 @@ Object AsyncMysqlErrorResult::newInstance(std::shared_ptr<am::Operation> op,
 
 EXTENDS_ASYNC_MYSQL_RESULT(AsyncMysqlErrorResult)
 
-int HHVM_METHOD(AsyncMysqlErrorResult, mysql_errno) {
+static int HHVM_METHOD(AsyncMysqlErrorResult, mysql_errno) {
   auto* data = Native::data<AsyncMysqlErrorResult>(this_);
   return data->m_op->mysql_errno();
 }
 
-String HHVM_METHOD(AsyncMysqlErrorResult, mysql_error) {
+static String HHVM_METHOD(AsyncMysqlErrorResult, mysql_error) {
   auto* data = Native::data<AsyncMysqlErrorResult>(this_);
   return data->m_op->mysql_error();
 }
 
-String HHVM_METHOD(AsyncMysqlErrorResult, mysql_normalize_error) {
+static String HHVM_METHOD(AsyncMysqlErrorResult, mysql_normalize_error) {
   auto* data = Native::data<AsyncMysqlErrorResult>(this_);
   return data->m_op->mysql_normalize_error();
 }
 
-String HHVM_METHOD(AsyncMysqlErrorResult, failureType) {
+static String HHVM_METHOD(AsyncMysqlErrorResult, failureType) {
   auto* data = Native::data<AsyncMysqlErrorResult>(this_);
   return data->m_op->resultString().toString();
 }
@@ -902,13 +1028,13 @@ void AsyncMysqlQueryErrorResult::create(std::shared_ptr<am::Operation> op,
   m_query_results = results;
 }
 
-int HHVM_METHOD(AsyncMysqlQueryErrorResult, numSuccessfulQueries) {
+static int HHVM_METHOD(AsyncMysqlQueryErrorResult, numSuccessfulQueries) {
   auto* data = Native::data<AsyncMysqlQueryErrorResult>(this_);
   return std::dynamic_pointer_cast<am::FetchOperation>(data->m_parent.m_op)
       ->numQueriesExecuted();
 }
 
-Object HHVM_METHOD(AsyncMysqlQueryErrorResult, getSuccessfulResults) {
+static Object HHVM_METHOD(AsyncMysqlQueryErrorResult, getSuccessfulResults) {
   auto* data = Native::data<AsyncMysqlQueryErrorResult>(this_);
   return Object(data->m_query_results);
 }
@@ -945,41 +1071,41 @@ void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
 
 EXTENDS_ASYNC_MYSQL_RESULT(AsyncMysqlQueryResult)
 
-int64_t HHVM_METHOD(AsyncMysqlQueryResult, lastInsertId) {
+static int64_t HHVM_METHOD(AsyncMysqlQueryResult, lastInsertId) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->m_query_result->lastInsertId();
 }
 
-int64_t HHVM_METHOD(AsyncMysqlQueryResult, numRowsAffected) {
+static int64_t HHVM_METHOD(AsyncMysqlQueryResult, numRowsAffected) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->m_query_result->numRowsAffected();
 }
 
-int64_t HHVM_METHOD(AsyncMysqlQueryResult, numRows) {
+static int64_t HHVM_METHOD(AsyncMysqlQueryResult, numRows) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->m_query_result->numRows();
 }
-Object HHVM_METHOD(AsyncMysqlQueryResult, vectorRows) {
+static Object HHVM_METHOD(AsyncMysqlQueryResult, vectorRows) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->buildRows(false /* as_maps */, false /* typed */);
 }
 
-Object HHVM_METHOD(AsyncMysqlQueryResult, mapRows) {
+static Object HHVM_METHOD(AsyncMysqlQueryResult, mapRows) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->buildRows(true /* as_maps */, false /* typed */);
 }
 
-Object HHVM_METHOD(AsyncMysqlQueryResult, vectorRowsTyped) {
+static Object HHVM_METHOD(AsyncMysqlQueryResult, vectorRowsTyped) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->buildRows(false /* as_maps */, true /* typed */);
 }
 
-Object HHVM_METHOD(AsyncMysqlQueryResult, mapRowsTyped) {
+static Object HHVM_METHOD(AsyncMysqlQueryResult, mapRowsTyped) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->buildRows(true /* as_maps */, true /* typed */);
 }
 
-Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
+static Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   auto ret = req::make<c_Vector>();
   auto row_blocks = data->m_query_result->stealRows();
@@ -1223,35 +1349,40 @@ FieldType AsyncMysqlRowBlock::getFieldAs(int64_t row, const Variant& field) {
   }
 }
 
-Variant HHVM_METHOD(AsyncMysqlRowBlock, at, int64_t row, const Variant& field) {
+static Variant
+HHVM_METHOD(AsyncMysqlRowBlock, at, int64_t row, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   auto col_index = data->getIndexFromVariant(field);
-  return buildTypedValue(data->m_row_block->getRowFields(),
-                         data->m_row_block->getRow(row),
-                         col_index,
-                         true);
+  return buildTypedValue(
+      data->m_row_block->getRowFields(),
+      data->m_row_block->getRow(row),
+      col_index,
+      true);
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRowBlock,
-                    getFieldAsInt,
-                    int64_t row,
-                    const Variant& field) {
+static int64_t HHVM_METHOD(
+    AsyncMysqlRowBlock,
+    getFieldAsInt,
+    int64_t row,
+    const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->getFieldAs<int64_t>(row, field);
 }
 
-double HHVM_METHOD(AsyncMysqlRowBlock,
-                   getFieldAsDouble,
-                   int64_t row,
-                   const Variant& field) {
+static double HHVM_METHOD(
+    AsyncMysqlRowBlock,
+    getFieldAsDouble,
+    int64_t row,
+    const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->getFieldAs<double>(row, field);
 }
 
-String HHVM_METHOD(AsyncMysqlRowBlock,
-                   getFieldAsString,
-                   int64_t row,
-                   const Variant& field) {
+static String HHVM_METHOD(
+    AsyncMysqlRowBlock,
+    getFieldAsString,
+    int64_t row,
+    const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   auto val = data->getFieldAs<StringPiece>(row, field);
   // Cannot use the String constructor directly, as it has subtle different
@@ -1260,52 +1391,49 @@ String HHVM_METHOD(AsyncMysqlRowBlock,
   return String::attach(StringData::Make(val.data(), val.size(), CopyString));
 }
 
-bool HHVM_METHOD(AsyncMysqlRowBlock, isNull,
-                 int64_t row,
-                 const Variant& field) {
+static bool
+HHVM_METHOD(AsyncMysqlRowBlock, isNull, int64_t row, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->m_row_block->isNull(row, data->getIndexFromVariant(field));
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRowBlock, fieldType,
-                    const Variant& field) {
+static int64_t
+HHVM_METHOD(AsyncMysqlRowBlock, fieldType, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->m_row_block->getFieldType(data->getIndexFromVariant(field));
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRowBlock, fieldFlags,
-                    const Variant& field) {
+static int64_t
+HHVM_METHOD(AsyncMysqlRowBlock, fieldFlags, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->m_row_block->getFieldFlags(data->getIndexFromVariant(field));
 }
 
-String HHVM_METHOD(AsyncMysqlRowBlock, fieldName,
-                   int64_t field_id) {
+static String HHVM_METHOD(AsyncMysqlRowBlock, fieldName, int64_t field_id) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->m_field_index->getFieldString(field_id);
 }
 
-bool HHVM_METHOD(AsyncMysqlRowBlock, isEmpty) {
+static bool HHVM_METHOD(AsyncMysqlRowBlock, isEmpty) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->m_row_block->empty();
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRowBlock, fieldsCount) {
+static int64_t HHVM_METHOD(AsyncMysqlRowBlock, fieldsCount) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->m_row_block->numFields();
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRowBlock, count) {
+static int64_t HHVM_METHOD(AsyncMysqlRowBlock, count) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   return data->m_row_block->numRows();
 }
 
-Object HHVM_METHOD(AsyncMysqlRowBlock, getRow,
-                   int64_t row_no) {
+static Object HHVM_METHOD(AsyncMysqlRowBlock, getRow, int64_t row_no) {
   return AsyncMysqlRow::newInstance(Object{this_}, row_no);
 }
 
-Object HHVM_METHOD(AsyncMysqlRowBlock, getIterator) {
+static Object HHVM_METHOD(AsyncMysqlRowBlock, getIterator) {
   return AsyncMysqlRowBlockIterator::newInstance(Object{this_}, 0);
 }
 
@@ -1327,37 +1455,37 @@ Object AsyncMysqlRowBlockIterator::newInstance(Object row_block,
   return ret;
 }
 
-void HHVM_METHOD(AsyncMysqlRowBlockIterator, next) {
+static void HHVM_METHOD(AsyncMysqlRowBlockIterator, next) {
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(this_);
   data->m_row_number++;
 }
 
-bool HHVM_METHOD(AsyncMysqlRowBlockIterator, valid) {
+static bool HHVM_METHOD(AsyncMysqlRowBlockIterator, valid) {
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(this_);
 
-  static_assert(std::is_unsigned<decltype(data->m_row_number)>::value,
-                "m_row_number should be unsigned");
-  int64_t count = HHVM_MN(AsyncMysqlRowBlock, count)(
-    data->m_row_block.get());
+  static_assert(
+      std::is_unsigned<decltype(data->m_row_number)>::value,
+      "m_row_number should be unsigned");
+  int64_t count = HHVM_MN(AsyncMysqlRowBlock, count)(data->m_row_block.get());
   return data->m_row_number < count;
 }
 
-Object HHVM_METHOD(AsyncMysqlRowBlockIterator, current) {
+static Object HHVM_METHOD(AsyncMysqlRowBlockIterator, current) {
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(this_);
 
   if (!HHVM_MN(AsyncMysqlRowBlockIterator, valid)(this_)) {
     throw_iterator_not_valid();
   }
-  return HHVM_MN(AsyncMysqlRowBlock, getRow)(data->m_row_block.get(),
-                                             data->m_row_number);
+  return HHVM_MN(AsyncMysqlRowBlock, getRow)(
+      data->m_row_block.get(), data->m_row_number);
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRowBlockIterator, key) {
+static int64_t HHVM_METHOD(AsyncMysqlRowBlockIterator, key) {
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(this_);
   return data->m_row_number;
 }
 
-void HHVM_METHOD(AsyncMysqlRowBlockIterator, rewind) {
+static void HHVM_METHOD(AsyncMysqlRowBlockIterator, rewind) {
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(this_);
   data->m_row_number = 0;
 }
@@ -1378,51 +1506,47 @@ Object AsyncMysqlRow::newInstance(Object row_block, size_t row_number) {
   return ret;
 }
 
-#define ROW_BLOCK(method, ...) HHVM_MN(AsyncMysqlRowBlock, method)(            \
-  data->m_row_block.get(), __VA_ARGS__)                                        \
+#define ROW_BLOCK(method, ...) \
+  HHVM_MN(AsyncMysqlRowBlock, method)(data->m_row_block.get(), __VA_ARGS__)
 
-Variant HHVM_METHOD(AsyncMysqlRow, at,
-                    const Variant& field) {
+static Variant HHVM_METHOD(AsyncMysqlRow, at, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRow>(this_);
   return ROW_BLOCK(at, data->m_row_number, field);
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRow, getFieldAsInt,
-                    const Variant& field) {
+static int64_t HHVM_METHOD(AsyncMysqlRow, getFieldAsInt, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRow>(this_);
   return ROW_BLOCK(getFieldAsInt, data->m_row_number, field);
 }
 
-double HHVM_METHOD(AsyncMysqlRow, getFieldAsDouble,
-                   const Variant& field) {
+static double
+HHVM_METHOD(AsyncMysqlRow, getFieldAsDouble, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRow>(this_);
   return ROW_BLOCK(getFieldAsDouble, data->m_row_number, field);
 }
 
-String HHVM_METHOD(AsyncMysqlRow, getFieldAsString,
-                   const Variant& field) {
+static String
+HHVM_METHOD(AsyncMysqlRow, getFieldAsString, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRow>(this_);
   return ROW_BLOCK(getFieldAsString, data->m_row_number, field);
 }
 
-bool HHVM_METHOD(AsyncMysqlRow, isNull,
-                 const Variant& field) {
+static bool HHVM_METHOD(AsyncMysqlRow, isNull, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRow>(this_);
   return ROW_BLOCK(isNull, data->m_row_number, field);
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRow, fieldType,
-                    const Variant& field) {
+static int64_t HHVM_METHOD(AsyncMysqlRow, fieldType, const Variant& field) {
   auto* data = Native::data<AsyncMysqlRow>(this_);
   return ROW_BLOCK(fieldType, field);
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRow, count) {
+static int64_t HHVM_METHOD(AsyncMysqlRow, count) {
   auto* data = Native::data<AsyncMysqlRow>(this_);
   return HHVM_MN(AsyncMysqlRowBlock, fieldsCount)(data->m_row_block.get());
 }
 
-Object HHVM_METHOD(AsyncMysqlRow, getIterator) {
+static Object HHVM_METHOD(AsyncMysqlRow, getIterator) {
   return AsyncMysqlRowIterator::newInstance(Object{this_}, 0);
 }
 
@@ -1445,35 +1569,34 @@ Object AsyncMysqlRowIterator::newInstance(Object row,
   return ret;
 }
 
-void HHVM_METHOD(AsyncMysqlRowIterator, next) {
+static void HHVM_METHOD(AsyncMysqlRowIterator, next) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
   data->m_field_number++;
 }
 
-bool HHVM_METHOD(AsyncMysqlRowIterator, valid) {
+static bool HHVM_METHOD(AsyncMysqlRowIterator, valid) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
 
-  static_assert(std::is_unsigned<decltype(data->m_field_number)>::value,
-                "m_field_number should be unsigned");
+  static_assert(
+      std::is_unsigned<decltype(data->m_field_number)>::value,
+      "m_field_number should be unsigned");
   int64_t count = HHVM_MN(AsyncMysqlRow, count)(data->m_row.get());
   return data->m_field_number < count;
 }
 
 /*?? return as string? */
-String HHVM_METHOD(AsyncMysqlRowIterator, current) {
+static String HHVM_METHOD(AsyncMysqlRowIterator, current) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
   return HHVM_MN(AsyncMysqlRow, getFieldAsString)(
-    data->m_row.get(),
-    (uint64_t)data->m_field_number
-  );
+      data->m_row.get(), (uint64_t)data->m_field_number);
 }
 
-int64_t HHVM_METHOD(AsyncMysqlRowIterator, key) {
+static int64_t HHVM_METHOD(AsyncMysqlRowIterator, key) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
   return data->m_field_number;
 }
 
-void HHVM_METHOD(AsyncMysqlRowIterator, rewind) {
+static void HHVM_METHOD(AsyncMysqlRowIterator, rewind) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
   data->m_field_number = 0;
 }
@@ -1529,11 +1652,13 @@ static struct AsyncMysqlExtension final : Extension {
 
     HHVM_STATIC_ME(AsyncMysqlClient, setPoolsConnectionLimit);
     HHVM_STATIC_ME(AsyncMysqlClient, connect);
+    HHVM_STATIC_ME(AsyncMysqlClient, connectWithOpts);
     HHVM_STATIC_ME(AsyncMysqlClient, adoptConnection);
 
     HHVM_ME(AsyncMysqlConnectionPool, __construct);
     HHVM_ME(AsyncMysqlConnectionPool, getPoolStats);
     HHVM_ME(AsyncMysqlConnectionPool, connect);
+    HHVM_ME(AsyncMysqlConnectionPool, connectWithOpts);
     Native::registerNativeDataInfo<AsyncMysqlConnectionPool>(
         AsyncMysqlConnectionPool::s_className.get(), DISABLE_COPY_AND_SWEEP);
 
@@ -1652,7 +1777,16 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlRowIterator, key);
     HHVM_ME(AsyncMysqlRowIterator, rewind);
     Native::registerNativeDataInfo<AsyncMysqlRowIterator>(
-      AsyncMysqlRowIterator::s_className.get(), DISABLE_COPY_AND_SWEEP);
+        AsyncMysqlRowIterator::s_className.get(), DISABLE_COPY_AND_SWEEP);
+
+    HHVM_ME(AsyncMysqlConnectionOptions, setConnectTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, setConnectAttempts);
+    HHVM_ME(AsyncMysqlConnectionOptions, setTotalTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, setQueryTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, setConnectionAttributes);
+    HHVM_ME(AsyncMysqlConnectionOptions, setSSLOptionsProvider);
+    Native::registerNativeDataInfo<AsyncMysqlConnectionOptions>(
+        AsyncMysqlConnectionOptions::s_className.get());
 
     loadSystemlib("mysqlrow");
     loadSystemlib("async_mysql_exceptions");

@@ -101,6 +101,38 @@ final class AsyncMysqlClient {
                                 ): Awaitable<AsyncMysqlConnection>;
 
   /**
+   * Begin an async connection to a MySQL instance.
+   *
+   * Use this to asynchronously connect to a MySQL instance.
+   *
+   * Normally you would use this to make one asynchronous connection to the
+   * MySQL client.
+   *
+   * If you want to be able to pool up a bunch of connections, you would call
+   * `setPoolsConnectionLimit()`, create a default pool of connections with
+   * `AsyncMysqlConnectionPool()::__construct()`, which now
+   * has that limit set, and then call `AsyncMysqlConnectionPool()::connect()`.
+   *
+   * @param $host - The hostname to connect to.
+   * @param $port - The port to connect to.
+   * @param $dbname - The initial database to use when connecting.
+   * @param $user - The user to connect as.
+   * @param $password - The password to connect with.
+   * @param $connection_options - A set of options used for connection.
+   *
+   * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
+   * or `join` this result to obtain the actual connection.
+   */
+  <<__HipHopSpecific, __Native>>
+  public static function connectWithOpts(string $host,
+                                        int $port,
+                                        string $dbname,
+                                        string $user,
+                                        string $password,
+                                        AsyncMysqlConnectionOptions $conn_opts,
+                                        ): Awaitable<AsyncMysqlConnection>;
+
+  /**
    * Create a new async connection from a synchronous MySQL instance.
    *
    * This is a synchronous function. You will block until the connection has
@@ -228,6 +260,16 @@ class AsyncMysqlConnectionPool {
                           string $password,
                           int $timeout_micros = -1,
                           string $extra_key = ""
+                         ): Awaitable<AsyncMysqlConnection>;
+
+  <<__HipHopSpecific, __Native>>
+  public function connectWithOpts(string $host,
+                          int $port,
+                          string $dbname,
+                          string $user,
+                          string $password,
+                          AsyncMysqlConnectionOptions $conn_options,
+                          string $extra_key = "",
                          ): Awaitable<AsyncMysqlConnection>;
 }
 
@@ -515,7 +557,7 @@ class MySSLContextProvider {
   /**
    * @internal
    */
-  private function __contruct(): void {
+  private function __construct(): void {
     throw new InvalidOperationException(
       __CLASS__ . " objects cannot be directly created");
   }
@@ -529,6 +571,44 @@ class MySSLContextProvider {
   public function isValid(): bool;
 }
 
+/**
+ * This class holds the Connection Options that MySQL client will use to
+ * establish a connection.
+ *
+ * The `AsyncMysqlConnectionOptions` will be passed to
+ * `AsyncMysqlClient::connectWithOpts()`.
+ *
+ * @guide /hack/async/introduction
+ * @guide /hack/async/extensions
+ */
+<<__NativeData("AsyncMysqlConnectionOptions")>>
+class AsyncMysqlConnectionOptions {
+
+  // Sets the Connect Timeout for each connection attempt
+  <<__HipHopSpecific, __Native>>
+  public function setConnectTimeout(int $timeout): void;
+
+  // Sets the number of attempts this operation will retry connecting
+  <<__HipHopSpecific, __Native>>
+  public function setConnectAttempts(int $attempts): void;
+
+  // Sets the total timeout that the connect will use
+  <<__HipHopSpecific, __Native>>
+  public function setTotalTimeout(int $timeout): void;
+
+  // Sets the maximum time for a running query
+  <<__HipHopSpecific, __Native>>
+  public function setQueryTimeout(int $timeout): void;
+
+  // Sets a map of connection attributes that will be sent to Mysql in the
+  // Connection Attributes Handshake field
+  <<__HipHopSpecific, __Native>>
+  public function setConnectionAttributes(array<string,string> $attrs): void;
+
+  // SSL Configuration if SSL is to be used for connection
+  <<__HipHopSpecific, __Native>>
+  public function setSSLOptionsProvider(?MySSLContextProvider $ssl_opts): void;
+}
 /**
  * Provides timing statistics about the MySQL client.
  *

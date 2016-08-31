@@ -148,6 +148,20 @@ struct MySSLContextProvider {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class AsyncMysqlConnectionOptions
+
+struct AsyncMysqlConnectionOptions {
+  AsyncMysqlConnectionOptions();
+  static Class* getClass();
+  const am::ConnectionOptions& getConnectionOptions();
+
+  static Class* s_class;
+  static const StaticString s_className;
+
+  am::ConnectionOptions m_conn_opts;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlResult
 
 struct AsyncMysqlResult {

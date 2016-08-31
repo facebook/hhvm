@@ -525,6 +525,11 @@ module WithToken(Token: TokenType) = struct
       xhp_attr_list : t;
       xhp_attr_semicolon : t
     }
+    and xhp_class_attribute = {
+      xhp_attr_decl_type : t;
+      xhp_attr_decl_name : t;
+      xhp_attr_decl_init : t
+    }
     and xhp_attribute = {
       xhp_attr_name : t;
       xhp_attr_equal : t;
@@ -646,6 +651,7 @@ module WithToken(Token: TokenType) = struct
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
     | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
+    | XHPClassAttribute of xhp_class_attribute
     | TraitUse of trait_use
     | RequireClause of require_clause
     | ConstDeclaration of const_declaration
@@ -787,6 +793,7 @@ module WithToken(Token: TokenType) = struct
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | XHPClassAttributeDeclaration _ ->
         SyntaxKind.XHPClassAttributeDeclaration
+      | XHPClassAttribute _ -> SyntaxKind.XHPClassAttribute
       | TraitUse _ -> SyntaxKind.TraitUse
       | RequireClause _ -> SyntaxKind.RequireClause
       | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
@@ -1152,6 +1159,9 @@ module WithToken(Token: TokenType) = struct
       | XHPClassAttributeDeclaration
         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
         [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]
+      | XHPClassAttribute
+        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init } ->
+        [ xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init ]
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]
@@ -1553,6 +1563,9 @@ module WithToken(Token: TokenType) = struct
       | XHPClassAttributeDeclaration
         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
         [ "xhp_attr_token"; "xhp_attr_list"; "xhp_attr_semicolon" ]
+      | XHPClassAttribute
+        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init } ->
+        [ "xhp_attr_decl_type"; "xhp_attr_decl_name"; "xhp_attr_decl_init" ]
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ "trait_use_token"; "trait_use_name_list"; "trait_use_semicolon"; ]
@@ -2242,7 +2255,11 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.XHPClassAttributeDeclaration,
         [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]) ->
         XHPClassAttributeDeclaration
-         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon }
+        { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon }
+      | (SyntaxKind.XHPClassAttribute,
+        [ xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init ]) ->
+        XHPClassAttribute
+        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init }
       | (SyntaxKind.TraitUse,
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]) ->
         TraitUse { trait_use_token; trait_use_name_list; trait_use_semicolon; }
@@ -2805,6 +2822,10 @@ module WithToken(Token: TokenType) = struct
       let make_xhp_class_attribute_declaration attr attrs semi =
         from_children SyntaxKind.XHPClassAttributeDeclaration
           [ attr; attrs; semi ]
+
+      let make_xhp_class_attribute attr_type name init =
+        from_children SyntaxKind.XHPClassAttribute
+          [ attr_type; name; init ]
 
       let make_trait_use trait_use_token trait_use_name_list
         trait_use_semicolon =

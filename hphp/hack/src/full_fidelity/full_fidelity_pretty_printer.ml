@@ -265,6 +265,11 @@ let rec get_doc node =
     let attrs = get_doc x.xhp_attr_list in
     let semi = get_doc x.xhp_attr_semicolon in
     group_doc (attr ^| attrs ^^^ semi)
+  | XHPClassAttribute x ->
+    let t = get_doc x.xhp_attr_decl_type in
+    let n = get_doc x.xhp_attr_decl_name in
+    let i = get_doc x.xhp_attr_decl_init in
+    group_doc (t ^| n ^| i)
   | TraitUse x ->
     let use = get_doc (trait_use_token x) in
     let name_list = get_doc (trait_use_name_list x) in

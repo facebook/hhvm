@@ -168,6 +168,7 @@ private:
            h->kind() != HeaderKind::AsyncFuncFrame &&
            h->kind() != HeaderKind::NativeData);
     work_.push_back(h);
+    max_worklist_ = std::max(max_worklist_, work_.size());
   }
 
   // Whether the object with the given type-index should be recorded as an
@@ -181,6 +182,7 @@ public:
   Counter allocd_, marked_, ambig_, freed_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
+  size_t max_worklist_{0}; // max size of work_
 private:
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
@@ -810,6 +812,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("cscanned_roots", mkr.cscanned_roots_.bytes);
   sample.setInt("cscanned_heap",
                 mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes);
+  sample.setInt("max_worklist", mkr.max_worklist_);
   StructuredLog::log("hhvm_gc", sample);
 }
 

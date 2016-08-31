@@ -294,8 +294,7 @@ struct Vptr {
     , scale(s)
     , disp(d)
   {
-    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
-           "Invalid index register scaling (must be 1,2,4 or 8).");
+    validate();
   }
 
   /* implicit */ Vptr(MemoryRef m, Segment s = DS)
@@ -304,7 +303,9 @@ struct Vptr {
     , scale(m.r.scale)
     , seg(s)
     , disp(m.r.disp)
-  {}
+  {
+    validate();
+  }
 
   Vptr(const Vptr& o) = default;
   Vptr& operator=(const Vptr& o) = default;
@@ -314,6 +315,11 @@ struct Vptr {
 
   bool operator==(const Vptr&) const;
   bool operator!=(const Vptr&) const;
+
+  void validate() {
+    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
+           "Invalid index register scaling (must be 1,2,4 or 8).");
+  }
 
   Vreg64 base;      // optional, for baseless mode
   Vreg64 index;     // optional

@@ -59,6 +59,13 @@ struct ImmFolder {
     val = imm64;
     return true;
   }
+  bool match_word(Vreg r, int& val) {
+    if (!valid.test(r)) return false;
+    auto imm64 = vals[r];
+    if (!deltaFits(imm64, sz::word)) return false;
+    val = imm64;
+    return true;
+  }
   bool match_int(Vreg r, int& val) {
     if (!valid.test(r)) return false;
     auto imm64 = vals[r];
@@ -157,18 +164,30 @@ struct ImmFolder {
     else if (match_int(in.s1, val)) { out = orqi{val, in.s0, in.d, in.sf}; }
   }
   void fold(storeb& in, Vinstr& out) {
-    int val;
+    foldVptr(in.m);
     if (out.origin && out.origin->marker().sk().prologue()) return;
+    int val;
     if (match_byte(in.s, val)) { out = storebi{val, in.m}; }
   }
+  void fold(storebi& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storew& in, Vinstr& out) {
+    foldVptr(in.m);
+    int val;
+    if (match_word(in.s, val)) { out = storewi{val, in.m}; }
+  }
+  void fold(storewi& in, Vinstr& out) { foldVptr(in.m); }
   void fold(storel& in, Vinstr& out) {
+    foldVptr(in.m);
     int val;
     if (match_int(in.s, val)) { out = storeli{val, in.m}; }
   }
+  void fold(storeli& in, Vinstr& out) { foldVptr(in.m); }
   void fold(store& in, Vinstr& out) {
+    foldVptr(in.d);
     int val;
     if (match_int(in.s, val)) { out = storeqi{val, in.d}; }
   }
+  void fold(storeqi& in, Vinstr& out) { foldVptr(in.m); }
   void fold(subq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) {
@@ -255,15 +274,33 @@ struct ImmFolder {
       vals[in.d] = vals[in.s];
     }
   }
-  void fold(load& in, Vinstr& out) {
+  void foldVptr(Vptr& mem) {
     int val;
-    if (in.s.index.isValid() && in.s.scale == 1 && match_int(in.s.index, val) &&
-        deltaFits(int64_t(in.s.disp) + val, sz::dword)) {
-      // index is const: [base+disp+index*1] => [base+(disp+index)]
-      in.s.index = Vreg{};
-      in.s.disp += val;
+    if (mem.index.isValid() && match_int(mem.index, val)) {
+      mem.validate();
+      if (deltaFits(mem.disp + int64_t(val) * mem.scale, sz::dword)) {
+        // index is const: [base+disp+index*scale] => [base+(disp+index)]
+        mem.index = Vreg{};
+        mem.disp += int64_t(val) * mem.scale;
+      }
+    }
+    if (mem.base.isValid() && match_int(mem.base, val)) {
+      mem.validate();
+      if (deltaFits(mem.disp + int64_t(val), sz::dword)) {
+        mem.base = Vreg{};
+        mem.disp += val;
+      }
     }
   }
+  void fold(load& in    , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadb& in   , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadw& in   , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadl& in   , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadups& in , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadsd& in  , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadzbl& in , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadzlq& in , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadtqb& in , Vinstr& out) { foldVptr(in.s); }
 };
 } // namespace x64
 

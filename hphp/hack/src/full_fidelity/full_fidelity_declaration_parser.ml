@@ -605,15 +605,9 @@ module WithExpressionAndStatementParser
         =  expression
     *)
     let (parser, name) = expect_variable parser in
-    let (parser, equal) = optional_token parser Equal in
-    if is_missing equal then
-      let result = make_property_declarator name (make_missing()) in
-      (parser, result)
-    else
-      let (parser, initial_value) = parse_expression parser in
-      let simple_init = make_simple_initializer equal initial_value in
-      let result = make_property_declarator name simple_init in
-      (parser, result)
+    let (parser, simple_init) = parse_simple_initializer_opt parser in
+    let result = make_property_declarator name simple_init in
+    (parser, result)
 
   (* SPEC:
     const-declaration:
@@ -646,9 +640,8 @@ module WithExpressionAndStatementParser
 
   and parse_constant_declarator parser =
     let (parser, const_name) = expect_name parser in
-    let (parser, initializer_) = parse_simple_initializer parser in
+    let (parser, initializer_) = parse_simple_initializer_opt parser in
     (parser, make_constant_declarator const_name initializer_)
-
 
   (* SPEC:
     type-constant-declaration:
@@ -835,7 +828,7 @@ module WithExpressionAndStatementParser
         | Variable | DotDotDot | Ampersand -> (parser, make_missing())
         | _ -> parse_type_specifier parser in
     let (parser, name) = parse_decorated_variable_opt parser in
-    let (parser, default) = parse_simple_initializer parser in
+    let (parser, default) = parse_simple_initializer_opt parser in
     let syntax =
       make_parameter_declaration attrs visibility type_specifier name default in
     (parser, syntax)
@@ -865,7 +858,7 @@ module WithExpressionAndStatementParser
     constant-initializer:
       =  const-expression
   *)
-  and parse_simple_initializer parser =
+  and parse_simple_initializer_opt parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
     | Equal ->

@@ -384,6 +384,7 @@ module WithExpressionAndStatementParser
     (parser, syntax)
 
   and parse_classish_element_list_opt parser =
+    (* TODO: Refactor this method so that it uses list parsing helpers. *)
     (* We need to identify an element of a class, trait, etc. Possibilities
        are:
 
@@ -425,6 +426,9 @@ module WithExpressionAndStatementParser
       require  extends  qualified-name
       require  implements  qualified-name
 
+      // XHP class attribute declaration
+      attribute ... ;
+
     *)
     let rec aux parser acc =
       let token = peek_token parser in
@@ -464,6 +468,9 @@ module WithExpressionAndStatementParser
              in a later pass. *)
          let (parser, require) = parse_require_clause parser in
          aux parser (require :: acc)
+      | TokenKind.Attribute -> let (parser, attr) =
+        parse_xhp_class_attribute_declaration parser in
+        aux parser (attr :: acc)
       | _ ->
           (* TODO *)
         let (parser, token) = next_token parser in
@@ -473,6 +480,32 @@ module WithExpressionAndStatementParser
     let (parser, classish_elements) = aux parser [] in
     let classish_elements = List.rev classish_elements in
     (parser, make_list classish_elements)
+
+  and parse_xhp_class_attribute parser =
+    (* SPEC (Draft)
+    xhp-attribute-declaration:
+      xhp-class-name
+      TODO: enum { xhp-attribute-enum-list-opt } name
+      TODO: type-specifier name initializer-opt
+    *)
+    (* TODO: This isn't quite right; this parses either a name or an
+    xhp class name, but we only want the latter. Fix this up when we
+    support the full syntax here. *)
+    expect_class_name parser
+
+  and parse_xhp_class_attribute_declaration parser =
+    (* SPEC: (Draft)
+    xhp-class-attribute-declaration :
+      attribute xhp-attribute-declaration-list ;
+    *)
+    let (parser, attr_token) = assert_token parser TokenKind.Attribute in
+    (* TODO: Can this list be terminated with a trailing comma? *)
+    (* TODO: Better error message. *)
+    let (parser, attrs) = parse_comma_list parser Semicolon
+      SyntaxError.error1004 parse_xhp_class_attribute in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_xhp_class_attribute_declaration attr_token attrs semi in
+    (parser, result)
 
   and parse_qualified_name_type parser =
     (* Here we're parsing a name followed by an optional generic type

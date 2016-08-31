@@ -20,6 +20,7 @@ type t =
 | Arraykey
 | As
 | Async
+| Attribute
 | Await
 | Bool
 | Break
@@ -179,6 +180,7 @@ let from_string keyword =
   | "arraykey" -> Some Arraykey
   | "as" -> Some As
   | "async" -> Some Async
+  | "attribute" -> Some Attribute
   | "await" -> Some Await
   | "bool" -> Some Bool
   | "break" -> Some Break
@@ -259,6 +261,7 @@ let to_string kind =
   | Arraykey -> "arraykey"
   | As -> "as"
   | Async -> "async"
+  | Attribute -> "attribute"
   | Await -> "await"
   | Bool -> "bool"
   | Break -> "break"

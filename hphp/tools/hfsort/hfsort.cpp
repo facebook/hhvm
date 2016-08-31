@@ -112,6 +112,7 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
       auto& arc = *cg.arcs.find(Arc(src, f));
       arc.normalizedWeight = arc.weight / func.samples;
       arc.avgCallOffset = arc.avgCallOffset / arc.weight;
+      assert(arc.avgCallOffset < cg.targets[src].size);
     }
   }
 }

@@ -139,7 +139,12 @@ struct Vgen {
   }
 
   static void patch(Venv& env);
-  static void pad(CodeBlock& cb) {}
+
+  static void pad(CodeBlock& cb) {
+    vixl::MacroAssembler a { cb };
+    while (cb.available() >= 4) a.Brk(1);
+    assertx(cb.available() == 0);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
 

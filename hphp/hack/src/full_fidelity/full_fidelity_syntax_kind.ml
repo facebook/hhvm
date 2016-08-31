@@ -104,6 +104,7 @@ type t =
 | XHPOpen
 | XHPAttribute
 | XHPClose
+| XHPClassAttributeDeclaration
 
 (* Types *)
 | SimpleTypeSpecifier
@@ -226,3 +227,4 @@ let to_string kind =
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"
   | XHPClose -> "xhp_close"
+  | XHPClassAttributeDeclaration -> "xhp_class_attribute_declaration"

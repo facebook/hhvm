@@ -520,6 +520,11 @@ module WithToken(Token: TokenType) = struct
       awaitable_async : t;
       awaitable_compound_statement : t;
     }
+    and xhp_class_attribute_declaration = {
+      xhp_attr_token : t;
+      xhp_attr_list : t;
+      xhp_attr_semicolon : t
+    }
     and xhp_attribute = {
       xhp_attr_name : t;
       xhp_attr_equal : t;
@@ -640,6 +645,7 @@ module WithToken(Token: TokenType) = struct
     | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
+    | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
     | TraitUse of trait_use
     | RequireClause of require_clause
     | ConstDeclaration of const_declaration
@@ -779,6 +785,8 @@ module WithToken(Token: TokenType) = struct
       | MethodishDeclaration _ -> SyntaxKind.MethodishDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
+      | XHPClassAttributeDeclaration _ ->
+        SyntaxKind.XHPClassAttributeDeclaration
       | TraitUse _ -> SyntaxKind.TraitUse
       | RequireClause _ -> SyntaxKind.RequireClause
       | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
@@ -1141,6 +1149,9 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ classish_body_left_brace; classish_body_elements;
           classish_body_right_brace ]
+      | XHPClassAttributeDeclaration
+        { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
+        [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]
@@ -1539,6 +1550,9 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ "classish_body_left_brace"; "classish_body_elements";
           "classish_body_right_brace" ]
+      | XHPClassAttributeDeclaration
+        { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
+        [ "xhp_attr_token"; "xhp_attr_list"; "xhp_attr_semicolon" ]
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ "trait_use_token"; "trait_use_name_list"; "trait_use_semicolon"; ]
@@ -2225,6 +2239,10 @@ module WithToken(Token: TokenType) = struct
         ClassishBody {
           classish_body_left_brace; classish_body_elements;
           classish_body_right_brace }
+      | (SyntaxKind.XHPClassAttributeDeclaration,
+        [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]) ->
+        XHPClassAttributeDeclaration
+         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon }
       | (SyntaxKind.TraitUse,
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]) ->
         TraitUse { trait_use_token; trait_use_name_list; trait_use_semicolon; }
@@ -2783,6 +2801,10 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.ClassishBody [
           classish_body_left_brace; classish_body_elements;
           classish_body_right_brace ]
+
+      let make_xhp_class_attribute_declaration attr attrs semi =
+        from_children SyntaxKind.XHPClassAttributeDeclaration
+          [ attr; attrs; semi ]
 
       let make_trait_use trait_use_token trait_use_name_list
         trait_use_semicolon =

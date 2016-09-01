@@ -809,8 +809,7 @@ bool ObjectData::equal(const ObjectData& other) const {
   }
   if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::getTimestamp(this) ==
-      DateTimeData::getTimestamp(&other);
+    return DateTimeData::compare(this, &other) == 0;
   }
   if (getVMClass() != other.getVMClass()) return false;
   if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
@@ -835,8 +834,7 @@ bool ObjectData::less(const ObjectData& other) const {
   if (this == &other) return false;
   if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::getTimestamp(this) <
-      DateTimeData::getTimestamp(&other);
+    return DateTimeData::compare(this, &other) == -1;
   }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different
@@ -853,8 +851,7 @@ bool ObjectData::more(const ObjectData& other) const {
   if (this == &other) return false;
   if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::getTimestamp(this) >
-      DateTimeData::getTimestamp(&other);
+    return DateTimeData::compare(this, &other) == 1;
   }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different

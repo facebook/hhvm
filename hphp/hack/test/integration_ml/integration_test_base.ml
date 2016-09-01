@@ -64,6 +64,7 @@ let run_loop_once env inputs =
   let env = ServerMain.serve_one_iteration genv env client_provider stats in
   env, {
     did_read_disk_changes = !did_read_disk_changes_ref;
+    rechecked_count = ServerMain.get_rechecked_count stats;
     new_client_response =
       TestClientProvider.get_client_response Non_persistent;
     persistent_client_response =

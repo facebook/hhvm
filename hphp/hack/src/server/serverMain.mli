@@ -20,6 +20,7 @@ val run_once: ServerArgs.options -> SharedMem.handle -> 'a
 type main_loop_stats
 
 val empty_stats: unit -> main_loop_stats
+val get_rechecked_count: main_loop_stats -> int
 
 val serve_one_iteration:
   ServerEnv.genv ->

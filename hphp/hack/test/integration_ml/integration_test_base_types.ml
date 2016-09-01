@@ -22,6 +22,7 @@ type ('a, 'b) loop_inputs = {
 
 type ('a, 'b) loop_outputs = {
   did_read_disk_changes : bool;
+  rechecked_count : int;
   new_client_response : 'a option;
   persistent_client_response : 'b option;
   push_message : ServerCommandTypes.push option;

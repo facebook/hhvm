@@ -18,7 +18,6 @@ type recheck_loop_stats = {
   rechecked_count : int;
   (* includes dependencies *)
   total_rechecked_count : int;
-  reparsed_files : Relative_path.Set.t;
 }
 
 type main_loop_stats = recheck_loop_stats ref * string ref
@@ -27,8 +26,9 @@ let empty_recheck_loop_stats = {
   rechecked_batches = 0;
   rechecked_count = 0;
   total_rechecked_count = 0;
-  reparsed_files = Relative_path.Set.empty;
 }
+
+let get_rechecked_count (stats_ref, _) = !stats_ref.rechecked_count
 
 (*****************************************************************************)
 (* Main initialization *)
@@ -238,7 +238,6 @@ let rec recheck_loop acc genv env =
       rechecked_count =
         acc.rechecked_count + Relative_path.Set.cardinal rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
-      reparsed_files = Relative_path.Set.union updates acc.reparsed_files;
     } in
     recheck_loop acc genv env
   end

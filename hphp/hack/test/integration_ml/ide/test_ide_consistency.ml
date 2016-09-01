@@ -51,7 +51,7 @@ let run_and_check_autocomplete env =
   (match loop_output.persistent_client_response with
   | Some [x] when x.AutocompleteService.res_name = "foo" -> ()
   | _ -> Test.fail "Unexpected or missing autocomplete response");
-  env
+  env, loop_output
 
 let () =
 
@@ -78,7 +78,9 @@ let () =
 
   (* Check that autocompletions in one file are aware of definitions in
    * another one*)
-  let env = run_and_check_autocomplete env in
+  let env, loop_output = run_and_check_autocomplete env in
+  if loop_output.rechecked_count != 2 then
+    Test.fail "Expected 2 files to be rechecked";
 
   let env, _ = Test.(run_loop_once env { default_loop_input with
     persistent_client_request = Some (EDIT_FILE
@@ -88,5 +90,6 @@ let () =
   }) in
   (* If C had parse errors, we'll not update it's declarations, so
    * the result will not change *)
-  let _ = run_and_check_autocomplete env in
-  ()
+  let _, loop_output = run_and_check_autocomplete env in
+  if loop_output.rechecked_count != 1 then
+    Test.fail "Expected 1 file to be rechecked";

@@ -49,7 +49,7 @@ let accumulate_types fn defs =
   type_acc
 
 let combine v1 v2 =
-  SMap.merge (fun _ cs1 cs2 -> Option.merge cs1 cs2 merge_and_sum) v1 v2
+  SMap.merge ~f:(fun _ cs1 cs2 -> Option.merge cs1 cs2 merge_and_sum) v1 v2
 
 (* Create a trie for a single key. More complicated tries can then be built from
  * path tries using merge_trie* functions *)
@@ -64,7 +64,7 @@ let rec merge_trie x y = match x, y with
   | Node (x, c), Node (y, d) -> Node (combine x y, merge_trie_children c d)
 
 and merge_trie_children x y =
-    SMap.merge (fun _ x y -> merge_trie_opt x y) x y
+    SMap.merge ~f:(fun _ x y -> merge_trie_opt x y) x y
 
 and merge_trie_opt x y = Option.merge x y (merge_trie)
 

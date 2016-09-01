@@ -290,10 +290,6 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   { // Return the cached clone if we have one.
     ReadLock l(s_scope_cache_mutex);
 
-    // This assertion only holds under lock, since setting m_scoped and
-    // m_invoke->cls() are independent atomic operations.
-    assert(template_cls->m_scoped == (invoke->cls() != template_cls));
-
     // If this succeeds, someone raced us to scoping the template.  We may have
     // unnecessarily allocated an ExtraData, but whatever.
     if (auto cls = try_template()) return cls;

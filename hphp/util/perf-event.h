@@ -45,8 +45,8 @@ using perf_event_consume_fn_t = void (*)(PerfEvent, const perf_event_sample*);
  * loads and stores sampled separately).  On each sampled event, `signal_fn'
  * will be invoked in the context of the calling thread, via signal handler.
  *
- * Behavior is undefined if the SIGIO handler is reset after calling this
- * function.
+ * Behavior is undefined if the SIGIO handler is reset, or if SIGIO is masked,
+ * after calling this function.
  *
  * Returns true if sampling was successfully enabled, else false (both if
  * sampling has already been enabled, or if an error occurs).

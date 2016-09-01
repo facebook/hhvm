@@ -177,6 +177,77 @@ void signal_event(int sig, siginfo_t* info, void* context) {
 }
 
 /*
+ * Install `signal_event' to notify the user of new perf_event samples.
+ *
+ * Returns true if the handler was successfully installed, else false.  If a
+ * handler for SIGIO was already installed, this will fail.  Otherwise, if we
+ * install `signal_event' successfully, SIGIO will be unconditionally unblocked
+ * for the calling thread.
+ */
+bool install_sigio_handler() {
+  struct sigaction old_action;
+
+  if (sigaction(SIGIO, nullptr, &old_action) < 0) {
+    Logger::Warning("perf_event: could not install SIGIO handler: %s",
+                    folly::errnoStr(errno).c_str());
+    return false;
+  }
+
+  // Fail if a competing SIGIO handler is found.
+  if (old_action.sa_handler != SIG_DFL &&
+      old_action.sa_handler != SIG_IGN &&
+      old_action.sa_sigaction != signal_event) {
+    Logger::Warning("perf_event: could not install SIGIO handler: "
+                    "found existing handler");
+    return false;
+  }
+
+  // Install our signal handler for SIGIO.
+  struct sigaction action = {};
+  action.sa_sigaction = signal_event;
+  action.sa_flags = SA_SIGINFO;
+
+  if (sigaction(SIGIO, &action, nullptr) < 0) {
+    Logger::Warning("perf_event: could not install SIGIO handler: %s",
+                    folly::errnoStr(errno).c_str());
+    return false;
+  }
+
+  // Ensure that SIGIO is unblocked.
+  sigset_t sigs;
+  sigemptyset(&sigs);
+  sigaddset(&sigs, SIGIO);
+  if (pthread_sigmask(SIG_UNBLOCK, &sigs, nullptr) < 0) {
+    Logger::Warning("perf_event: could not unblock SIGIO: %s",
+                    folly::errnoStr(errno).c_str());
+    return false;
+  }
+
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Logically delete all events that are currently buffered for `pe'.
+ */
+void clear_events(const perf_event_handle& pe) {
+  auto const data_head = pe.meta->data_head;
+  __sync_synchronize(); // smp_mb()
+  pe.meta->data_tail = data_head;
+}
+
+/*
+ * Disable and close a perf event.
+ */
+void close_event(const perf_event_handle& pe) {
+  clear_events(pe);
+  ioctl(pe.fd, PERF_EVENT_IOC_DISABLE, 0);
+  munmap(pe.meta, mmap_sz());
+  close(pe.fd);
+}
+
+/*
  * Open a file descriptor for perf events with `event_name', mmap it, and set
  * things up so that the calling thread receives SIGIO signals from it.
  *
@@ -220,30 +291,48 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
   auto const fd = safe_cast<int>(ret);
 
   // Recent versions of Linux have a CLOEXEC flag for perf_event_open(), but
-  // use fcntl() for portability.
+  // use fcntl() for portability.  Note that since we do this after we open the
+  // event, this could in theory race with an exec() from another thread---but
+  // that shouldn't be happening anyway.
   fcntl(fd, F_SETFD, O_CLOEXEC);
 
   // Make sure that any SIGIO sent from `fd' is handled by the calling thread.
   f_owner_ex owner;
   owner.type = F_OWNER_TID;
   owner.pid = syscall(__NR_gettid);
-  fcntl(fd, F_SETOWN_EX, &owner);
 
-  // Install our signal handler for SIGIO.
-  struct sigaction action = {};
-  action.sa_sigaction = signal_event;
-  action.sa_flags = SA_SIGINFO;
-
-  if (sigaction(SIGIO, &action, nullptr) < 0) {
-    Logger::Warning("perf_event: could not install SIGIO handler: %s",
+  // Set up `fd' to send SIGIO with sigaction info.
+  if (fcntl(fd, F_SETFL, O_ASYNC) < 0 ||
+      fcntl(fd, F_SETSIG, SIGIO) < 0 ||
+      fcntl(fd, F_SETOWN_EX, &owner) < 0) {
+    Logger::Warning("perf_event: failed to set up asynchronous I/O: %s",
                     folly::errnoStr(errno).c_str());
     close(fd);
     return folly::none;
   }
 
-  // Set up `fd' to send SIGIO with sigaction info.
-  fcntl(fd, F_SETSIG, SIGIO);
-  fcntl(fd, F_SETFL, O_ASYNC);
+  // Map the ring buffer for our samples.
+  auto const base = mmap(nullptr, mmap_sz(), PROT_READ | PROT_WRITE,
+                         MAP_SHARED, fd, 0);
+  if (base == MAP_FAILED) {
+    Logger::Warning("perf_event: failed to mmap perf_event: %s",
+                    folly::errnoStr(errno).c_str());
+    close(fd);
+    return folly::none;
+  }
+  auto const meta = reinterpret_cast<struct perf_event_mmap_page*>(base);
+
+  auto const pe = perf_event_handle { fd, meta };
+
+  // Reset the event.  This seems to be present in most examples, but it's
+  // unclear if it's necessary or just good hygeine.  (It's possible that it's
+  // necessary on successive opens.)
+  if (ioctl(fd, PERF_EVENT_IOC_RESET, 0) < 0) {
+    Logger::Warning("perf_event: failed to reset perf_event: %s",
+                    folly::errnoStr(errno).c_str());
+    close_event(pe);
+    return folly::none;
+  }
 
   // Enable the event.  The man page and other examples of usage all suggest
   // that the right thing to do is to start with the event disabled and then
@@ -252,31 +341,11 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
   if (ioctl(fd, PERF_EVENT_IOC_ENABLE, 0) < 0) {
     Logger::Warning("perf_event: failed to enable perf_event: %s",
                     folly::errnoStr(errno).c_str());
-    close(fd);
+    close_event(pe);
     return folly::none;
   }
 
-  auto const base = mmap(nullptr, mmap_sz(), PROT_READ | PROT_WRITE,
-                         MAP_SHARED, fd, 0);
-  if (base == MAP_FAILED) {
-    Logger::Warning("perf_event: failed to mmap perf_event: %s",
-                    folly::errnoStr(errno).c_str());
-    ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
-    close(fd);
-    return folly::none;
-  }
-  auto const meta = reinterpret_cast<struct perf_event_mmap_page*>(base);
-
-  return perf_event_handle { fd, meta };
-}
-
-/*
- * Disable and close a perf event.
- */
-void close_event(const perf_event_handle& pe) {
-  ioctl(pe.fd, PERF_EVENT_IOC_DISABLE, 0);
-  munmap(pe.meta, mmap_sz());
-  close(pe.fd);
+  return pe;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -350,6 +419,8 @@ bool perf_event_enable(uint64_t sample_freq, perf_event_signal_fn_t signal_fn) {
 
   // If `tl_perf_event' has already been initialized, we're done.
   if (tl_perf_event.signal != nullptr) return true;
+
+  if (!install_sigio_handler()) return false;
 
   auto const ld_pe = enable_event(s_mem_loads, sample_freq);
   if (!ld_pe) return false;

@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
- 
+
 open Core
 open Integration_test_base_types
 open ServerCommandTypes
@@ -68,6 +68,7 @@ let run_loop_once env inputs =
       TestClientProvider.get_client_response Non_persistent;
     persistent_client_response =
       TestClientProvider.get_client_response Persistent;
+    push_message = TestClientProvider.get_push_message ();
   }
 
 let fail x =

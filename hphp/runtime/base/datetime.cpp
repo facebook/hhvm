@@ -934,6 +934,10 @@ DateTime::diff(req::ptr<DateTime> datetime2, bool absolute) {
   return req::make<DateInterval>(rel);
 }
 
+int DateTime::compare(req::ptr<DateTime> datetime2) {
+  return timelib_time_compare(m_time.get(), datetime2.get()->m_time.get());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 

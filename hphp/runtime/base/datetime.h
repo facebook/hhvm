@@ -285,6 +285,7 @@ public:
   // comparison
   req::ptr<DateInterval> diff(req::ptr<DateTime> datetime2,
                               bool absolute = false);
+  int compare(req::ptr<DateTime> datetime2);
 
   // cloning
   req::ptr<DateTime> cloneDateTime() const;

@@ -342,6 +342,29 @@ int64_t DateTimeData::getTimestamp(const ObjectData* od) {
   return getTimestamp(Object(const_cast<ObjectData*>(od)));
 }
 
+int DateTimeData::compare(const Object& left, const Object &right) {
+  if (LIKELY(left.instanceof(getClass()) && right.instanceof(getClass()))) {
+    auto leftData = Native::data<DateTimeData>(left);
+    auto rightData = Native::data<DateTimeData>(right);
+    return leftData->m_dt->compare(rightData->m_dt);
+  } else {
+    auto leftTime = getTimestamp(left);
+    auto rightTime = getTimestamp(right);
+    if (leftTime < rightTime) {
+      return -1;
+    } else if (leftTime > rightTime) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+}
+
+int DateTimeData::compare(const ObjectData* left, const ObjectData* right) {
+  return compare(Object(const_cast<ObjectData*>(left)),
+                 Object(const_cast<ObjectData*>(right)));
+}
+
 Object DateTimeData::wrap(req::ptr<DateTime> dt) {
   Object obj{getClass()};
   DateTimeData* data = Native::data<DateTimeData>(obj);

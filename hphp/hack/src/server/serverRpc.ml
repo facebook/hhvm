@@ -174,16 +174,20 @@ let handle : type a. genv -> env -> a t -> env * a =
         let new_env = {env with
         persistent_client = None;
         edited_files = Relative_path.Map.empty;
-        diag_subscribe = Diagnostic_subscription.empty;
+        diag_subscribe = None;
         symbols_cache = SMap.empty} in
         new_env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->
-        let new_env =
-          {env with diag_subscribe = Diagnostic_subscription.of_id id} in
+        let new_env = { env with
+          diag_subscribe = Some (Diagnostic_subscription.of_id id)
+        } in
         new_env, ()
     | UNSUBSCRIBE_DIAGNOSTIC id ->
-        let new_env = {env with diag_subscribe =
-            Diagnostic_subscription.unsubscribe env.diag_subscribe id} in
+        let diag_subscribe = match env.diag_subscribe with
+          | Some x when Diagnostic_subscription.get_id x = id -> None
+          | x -> x
+        in
+        let new_env = { env with diag_subscribe } in
         new_env, ()
 
 let to_string : type a. a t -> _ = function

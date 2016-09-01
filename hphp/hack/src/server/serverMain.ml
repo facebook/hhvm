@@ -102,9 +102,8 @@ module Program =
         let new_env, total_rechecked = ServerTypeCheck.check genv check_env in
         ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
                                        (Errors.get_error_list new_env.errorl);
-        if not @@ Diagnostic_subscription.is_empty new_env.diag_subscribe
-        then begin
-          let id = Diagnostic_subscription.get_id new_env.diag_subscribe in
+        Option.iter new_env.diag_subscribe ~f:begin fun sub ->
+          let id = Diagnostic_subscription.get_id sub in
           let errors = Errors.get_error_list new_env.errorl in
           let errors = List.map ~f:Errors.to_absolute errors in
           let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
@@ -158,7 +157,7 @@ let handle_persistent_connection_ genv env client =
      {env with
      persistent_client = None;
      edited_files = Relative_path.Map.empty;
-     diag_subscribe = Diagnostic_subscription.empty;
+     diag_subscribe = None;
      symbols_cache = SMap.empty}
    | e ->
      let msg = Printexc.to_string e in
@@ -169,7 +168,7 @@ let handle_persistent_connection_ genv env client =
      {env with
      persistent_client = None;
      edited_files = Relative_path.Map.empty;
-     diag_subscribe = Diagnostic_subscription.empty;
+     diag_subscribe = None;
      symbols_cache = SMap.empty}
 
 let handle_connection genv env client is_persistent =

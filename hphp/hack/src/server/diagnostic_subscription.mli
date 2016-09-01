@@ -10,12 +10,6 @@
 
 type t
 
-val empty : t
-
 val of_id : id:int -> t
 
-val is_empty : t -> bool
-
 val get_id : t -> int
-
-val unsubscribe : t -> int -> t

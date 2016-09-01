@@ -8,29 +8,12 @@
  *
  *)
 
- type t = {
-   id : int option;
- }
-
-let empty = {
-  id = None;
+type t = {
+  id : int;
 }
 
 let of_id ~id = {
-  id = Some id;
+  id;
 }
 
-let is_empty ds =
-  match ds.id with
-  | Some _ -> false
-  | None -> true
-
-let get_id ds =
-  match ds.id with
-  | Some x -> x
-  | None -> 0
-
-let unsubscribe ds id =
-  match ds.id with
-  | Some x when x = id -> empty
-  | _ -> ds
+let get_id ds = ds.id

@@ -413,15 +413,10 @@ SSATmp* simplifyLdObjClass(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
-  auto const src = constSrc(env, inst->src(0));
+  auto const src = constSrc(env, inst->src(0), TCls);
   if (!src) return nullptr;
 
-  auto const cls = src->clsVal();
-  if (!classHasPersistentRDS(cls)) {
-    return nullptr;
-  }
-
-  auto const meth = cls->getCachedInvoke();
+  auto const meth = src->clsVal()->getCachedInvoke();
   return meth == nullptr ? nullptr : cns(env, meth);
 }
 

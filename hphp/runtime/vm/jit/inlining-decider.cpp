@@ -163,40 +163,13 @@ void InliningDecider::forbidInliningOf(const Func* callee) {
 }
 
 bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
-  if (!callee ||
+  if (m_disabled ||
+      !callee ||
       !RuntimeOption::EvalHHIREnableGenTimeInlining ||
       RuntimeOption::EvalJitEnableRenameFunction ||
       callee->attrs() & AttrInterceptable) {
     return false;
   }
-
-  if (auto cls = callee->implCls()) {
-    if (!classHasPersistentRDS(cls)) {
-      if (callee->isClosureBody()) {
-        if (callee->unit() != callSK.unit()) return false;
-      } else {
-        // if the callee's class is not persistent, its still ok
-        // to use it if we're jitting into a method of a subclass
-        auto ctx = callSK.func()->cls();
-        if (!ctx || !ctx->classof(cls)) {
-          return false;
-        }
-      }
-    }
-  } else {
-    auto const handle = callee->funcHandle();
-    if (handle == rds::kInvalidHandle || !rds::isPersistentHandle(handle)) {
-      // if the callee isn't persistent, its still ok to
-      // use it if its defined at the top level in the same
-      // unit as the caller
-      if (callee->unit() != callSK.unit() || !callee->top()) {
-        return false;
-      }
-    }
-  }
-
-  // If inlining was disabled... don't inline.
-  if (m_disabled) return false;
 
   // TODO(#3331014): We have this hack until more ARM codegen is working.
   if (arch() == Arch::ARM) return false;

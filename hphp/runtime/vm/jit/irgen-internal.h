@@ -530,8 +530,12 @@ inline bool classIsUniqueOrCtxParent(IRGS& env, const Class* cls) {
 inline SSATmp* ldCls(IRGS& env, SSATmp* className) {
   assertx(className->isA(TStr));
   if (className->hasConstVal()) {
-    if (auto const cls = Unit::lookupClass(className->strVal())) {
-      if (classIsPersistentOrCtxParent(env, cls)) return cns(env, cls);
+    if (auto const cls =
+        Unit::lookupUniqueClassInContext(className->strVal(), curClass(env))) {
+      if (!classIsPersistentOrCtxParent(env, cls)) {
+        gen(env, LdClsCached, className);
+      }
+      return cns(env, cls);
     }
     return gen(env, LdClsCached, className);
   }

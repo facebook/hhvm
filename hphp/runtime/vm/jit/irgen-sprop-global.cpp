@@ -71,7 +71,6 @@ SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
 
     if (!ssaCls->hasConstVal()) return false;
     auto const cls = ssaCls->clsVal();
-    if (!classIsPersistentOrCtxParent(env, cls)) return false;
 
     auto const lookup = cls->findSProp(curClass(env), propName);
     return lookup.prop != kInvalidSlot && lookup.accessible;

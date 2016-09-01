@@ -798,7 +798,7 @@ void emitFPushCtorD(IRGS& env,
                     int32_t numParams,
                     const StringData* className) {
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
-  bool const persistentCls = classHasPersistentRDS(cls);
+  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
   bool const canInstantiate = canInstantiateClass(cls);
   bool const fastAlloc =
     persistentCls &&

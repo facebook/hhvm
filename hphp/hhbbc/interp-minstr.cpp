@@ -205,7 +205,10 @@ typename std::enable_if<
   // }
   if (res.second) nothrow(env);
   if (res.first != TBottom) return res.first;
-  return base.subtypeOf(TVec) ? TVec : TDict;
+  return
+    base.subtypeOf(TVec) ? TVec :
+    base.subtypeOf(TDict) ? TDict :
+    TKeyset;
 }
 template<typename R, typename B, typename... T>
 typename std::enable_if<
@@ -1123,10 +1126,10 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
                         !isvec &&
                         !isdict &&
                         !iskeyset);
-  auto makeNotWeird = [&] (Type key) {
-    if (isvec) return key.couldBe(TInt) ? TInt : TBottom;
-    if (!key.couldBe(TInt)) return key.couldBe(TStr) ? TStr : TBottom;
-    return key.couldBe(TStr) ? TInitCell : TInt;
+  auto isSuitableHackKey = [&](Type key) {
+    if (isvec) return key.couldBe(TInt);
+    if (isdict) return key.couldBe(TInt) || key.couldBe(TStr);
+    return false;
   };
 
   if (mustBeInFrame(env.state.base)) {
@@ -1140,10 +1143,11 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       assert(ty);
       env.state.base.type = *ty;
       // Vec, Dict, and Keysets throw on weird keys
-      auto pushTy = isWeird ? makeNotWeird(t1) : t1;
-      if (pushTy == TBottom) unreachable(env);
-      push(env, pushTy);
-      return;
+      if (!isSuitableHackKey(key)) {
+        unreachable(env);
+        return push(env, TBottom);
+      }
+      return push(env, t1);
     }
   }
   if (env.state.base.loc == BaseLoc::LocalArrChain) {
@@ -1156,7 +1160,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
     if (isvec || isdict || iskeyset) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       env.state.base.type = t1;
-      push(env, isWeird ? makeNotWeird(t1) : t1);
+      push(env, t1);
       return;
     }
   }
@@ -1314,6 +1318,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
     if (auto ty = hack_array_do(env, newelem, t1)) {
       env.state.base.type = *ty;
       push(env, t1);
+      return;
     }
   }
 

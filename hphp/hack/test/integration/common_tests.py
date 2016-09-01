@@ -966,38 +966,6 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         self.assertEqual(exit_code, 0, msg="Test normal exit status failed")
         self.check_cmd(['No errors!'])
 
-    def test_ide_diagnostic_subscription(self):
-        """
-        Test diagnostic subscription of ide connection
-        """
-
-        self.write_load_config()
-        self.check_cmd(['No errors!'])
-        ide_con = self.connect_ide()
-        cmd = (ide_con.subscribe_diagnostic('233') +
-                ide_con.open('foo_5.php') +
-                ide_con.edit('foo_5.php', '4', '51', '4', '51',
-                             'this will cause err') +
-                ide_con.sleep() +
-                ide_con.sleep() +
-                ide_con.disconnect())
-        ide_con.write_cmd(cmd)
-        (stdout, _, exit_code) = ide_con.get_return()
-        self.assertEqualString(
-            stdout,
-            '{{"protocol":"service_framework3_rpc","type":"next","id":233,"er' +
-            'rors":[{{"message":[{{"descr":"Expected modifier","path":"{root}' +
-            'foo_5.php","line":4,"start":51,"end":54,"code":1002}}]}}]}}\n',
-            msg="Diagnostics response does not match"
-        )
-        self.assertEqual(
-            exit_code,
-            0,
-            msg="Exit status does not match"
-        )
-        self.check_cmd([
-            '{root}foo_5.php:4:51,54: Expected modifier (Parsing[1002])'])
-
     def test_ide_highlight_ref(self):
         """
         Test highlight reference for ide files

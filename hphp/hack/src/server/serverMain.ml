@@ -105,10 +105,11 @@ module Program =
         if not @@ Diagnostic_subscription.is_empty new_env.diag_subscribe
         then begin
           let id = Diagnostic_subscription.get_id new_env.diag_subscribe in
-          let errors_json = ServerError.get_errorl_json_array new_env.errorl in
-          let res = IdeJson.Diagnostic_response (id, errors_json) in
+          let errors = Errors.get_error_list new_env.errorl in
+          let errors = List.map ~f:Errors.to_absolute errors in
+          let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
           let client = Utils.unsafe_opt new_env.persistent_client in
-          ClientProvider.send_response_to_client client res;
+          ClientProvider.send_push_message_to_client client res;
         end;
         new_env, total_rechecked
       end

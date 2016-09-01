@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
 *)
+open Core
 open IdeJson
 
 module Cmd = ServerCommand
@@ -65,7 +66,7 @@ let connect_persistent env ~retries =
 let malformed_input () =
   raise Exit_status.(Exit_with IDE_malformed_request)
 
-let read_server_message fd : response_type =
+let read_server_message fd : ServerCommandTypes.push =
   Marshal_tools.from_fd_with_preamble fd
 
 let read_connection_response fd =
@@ -90,7 +91,7 @@ let get_ready_channel server_in_fd =
   let stdin_fd = Unix.descr_of_in_channel stdin in
   let readable, _, _ = Unix.select [server_in_fd; stdin_fd] [] [] 1.0 in
   if readable = [] then `None
-  else if List.mem server_in_fd readable then `Server
+  else if List.mem readable server_in_fd then `Server
   else `Stdin
 
 let handle conn id call =
@@ -99,7 +100,7 @@ match call with
   let raw_result =
     Cmd.rpc conn (Rpc.IDE_AUTOCOMPLETE (path, pos)) in
   let result =
-    List.map AutocompleteService.autocomplete_result_to_json raw_result in
+    List.map raw_result AutocompleteService.autocomplete_result_to_json in
   let result_field = (Hh_json.JSON_Array result) in
   print_endline @@ IdeJsonUtils.json_string_of_response id
     (Auto_complete_response result_field)
@@ -155,6 +156,10 @@ let main env =
         | Marshal_tools.Reading_Preamble_Exception
         | Unix.Unix_error _ -> server_disconnected ()
       in
-      write_response @@ IdeJsonUtils.json_string_of_response 0 res;
+      match res with
+      | ServerCommandTypes.DIAGNOSTIC (id, errors) ->
+        let errors_json = List.map ~f:Errors.to_json errors in
+        write_response @@ IdeJsonUtils.json_string_of_response 0
+          (Diagnostic_response (id, Hh_json.JSON_Array errors_json));
   done;
   Exit_status.exit Exit_status.No_error

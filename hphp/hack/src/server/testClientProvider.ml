@@ -105,6 +105,8 @@ let read_connection_type _ = Utils.unsafe_opt (get_mocked_new_client_type ())
 
 let send_response_to_client c x = record_client_response x c
 
+let send_push_message_to_client _ _ = not_implemented ()
+
 let read_client_msg c = Rpc (Utils.unsafe_opt (get_mocked_client_request c))
 
 let get_channels _ = not_implemented ()

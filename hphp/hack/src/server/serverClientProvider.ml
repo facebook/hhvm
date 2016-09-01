@@ -69,6 +69,8 @@ let send_response_to_client client response =
   | Persistent_client fd ->
     Marshal_tools.to_fd_with_preamble fd response
 
+let send_push_message_to_client = send_response_to_client
+
 let read_client_msg ic =
   Timeout.with_timeout
     ~timeout:1

@@ -422,7 +422,6 @@ let parse_build_args () =
   let clean = ref false in
   (* todo: for now better to default to true here, but this is temporary! *)
   let clean_before_build = ref true in
-  let incremental = ref false in
   let run_scripts = ref true in
   let wait = ref false in
   let options = [
@@ -452,8 +451,6 @@ let parse_build_args () =
     " erase previously generated files before building (default)";
     "--no-clean-before-build", Arg.Clear clean_before_build,
     " do not erase previously generated files before building";
-    (* Don't document --incremental option for now *)
-    "--incremental", Arg.Set incremental, "";
     "--wait", Arg.Set wait,
     " wait forever for hh_server intialization (default: false)";
     "--verbose", Arg.Set verbose,
@@ -480,7 +477,6 @@ let parse_build_args () =
       clean = !clean;
       clean_before_build = !clean_before_build;
       check = !check;
-      incremental = !incremental;
       user = Sys_utils.logname ();
       verbose = !verbose;
       id = Random_id.short_string ();

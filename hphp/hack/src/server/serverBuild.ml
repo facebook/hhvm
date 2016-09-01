@@ -25,7 +25,6 @@ type build_opts = {
   clean_before_build: bool; (* when true, do a clean build *)
   clean: bool; (* when true just clean all generated files *)
   is_push: bool; (* for push builds *)
-  incremental: bool; (* for incremental build *)
   (* user the client is running as; if the server is running as a different user
    * we will probably have hard-to-debug permissions issues, so error out *)
   user: string;
@@ -39,12 +38,10 @@ type build_progress =
   | BUILD_FINISHED
 
 let build_type_of build_opts =
-  let {steps; no_steps; is_push; incremental; _} = build_opts in
+  let {steps; no_steps; is_push; _} = build_opts in
   if steps <> None || no_steps <> None then
     `Steps
   else if is_push then
     `Push
-  else if incremental then
-    `Incremental
   else
     `Full

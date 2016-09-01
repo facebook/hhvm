@@ -127,7 +127,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       | None -> ServerUtils.shutdown_client (ic, oc)
       | Some build_hook -> begin
         ServerTypeCheck.hook_after_parsing :=
-          Some (fun genv old_env env updates ->
+          Some (fun genv env ->
             (* subtle: an exception there (such as writing on a closed pipe)
              * will not be caught by handle_connection() because
              * we have already returned from handle_connection(), hence
@@ -137,7 +137,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
               with_context
                 ~enter:(fun () -> ())
                 ~exit:(fun () -> ServerUtils.shutdown_client (ic, oc))
-                ~do_:(fun () -> build_hook genv old_env env updates);
+                ~do_:(fun () -> build_hook genv env);
             with exn ->
               let msg = Printexc.to_string exn in
               Printf.printf "Exn in build_hook: %s" msg;

@@ -232,14 +232,13 @@ let type_check genv env =
 
   (* UPDATE FILE INFO *)
   let old_env = env in
-  let updates = old_env.failed_parsing in
   let files_info = update_file_info env fast_parsed in
   HackEventLogger.updating_deps_end t;
   let t = Hh_logger.log_duration "Updating deps" t in
 
   (* BUILDING AUTOLOADMAP *)
   Option.iter !hook_after_parsing begin fun f ->
-    f genv old_env { env with files_info } updates
+    f genv { env with files_info }
   end;
   HackEventLogger.parsing_hook_end t;
   let t = Hh_logger.log_duration "Parsing Hook" t in

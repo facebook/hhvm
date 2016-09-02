@@ -2570,8 +2570,7 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(TypeStructure),
     HH_ONLY_TYPE(dict),
     HH_ONLY_TYPE(vec),
-    // TODO: see task 12287758
-    // HH_ONLY_TYPE(keyset),
+    HH_ONLY_TYPE(keyset),
 
     HH_ONLY_TYPE(Awaitable),
     HH_ONLY_TYPE(AsyncGenerator),

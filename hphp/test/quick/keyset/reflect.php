@@ -1,13 +1,13 @@
 <?hh
 
 class Foo {
-  const type Tkeyset = HH\keyset<int>;
-  function bar(HH\keyset<int> $a, int $b, Foo::Tkeyset $c): HH\keyset {
+  const type Tkeyset = keyset<int>;
+  function bar(keyset<int> $a, int $b, Foo::Tkeyset $c): keyset {
     return keyset[];
   }
 }
 
-function foobar(HH\keyset<string> $x, HH\keyset<arraykey> $y): HH\keyset<int> {
+function foobar(keyset<string> $x, keyset<arraykey> $y): keyset<int> {
   return keyset[];
 }
 

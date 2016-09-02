@@ -36,7 +36,7 @@ function takes_keyed_traversable(KeyedTraversable $t): KeyedTraversable {
 function takes_vec(vec $v): vec {
   return $v;
 }
-function takes_keyset(HH\keyset $ks): HH\keyset {
+function takes_keyset(keyset $ks): keyset {
   return $ks;
 }
 function takes_array1(array $arr): array {

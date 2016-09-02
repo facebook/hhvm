@@ -3,16 +3,16 @@
 
 class Foo {}
 
-function takes_keyset1(HH\keyset $ks): HH\keyset {
+function takes_keyset1(keyset $ks): keyset {
   return $ks;
 }
-function takes_keyset2(HH\keyset<int> $ks): HH\keyset<int> {
+function takes_keyset2(keyset<int> $ks): keyset<int> {
   return $ks;
 }
-function takes_keyset3(HH\keyset<string> $ks): HH\keyset<string> {
+function takes_keyset3(keyset<string> $ks): keyset<string> {
   return $ks;
 }
-function takes_keyset4(?HH\keyset $ks): ?HH\keyset {
+function takes_keyset4(?keyset $ks): ?keyset {
   return $ks;
 }
 function takes_container1(Container<Foo> $c): Container<Foo> {

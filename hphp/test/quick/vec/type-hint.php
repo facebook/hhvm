@@ -30,7 +30,7 @@ function takes_keyed_traversable(KeyedTraversable $t): KeyedTraversable {
 function takes_dict(dict $d): dict {
   return $d;
 }
-function takes_keyset(HH\keyset $ks): HH\keyset {
+function takes_keyset(keyset $ks): keyset {
   return $ks;
 }
 function takes_bool(bool $b): bool {

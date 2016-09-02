@@ -68,6 +68,17 @@ can be used to control repo behavior:
   in the local repo, but are written in the central repo if the local repo isn't
   writeable. If unspecified, or unusable, will fall back first to
   $HHVM_REPO_CENTRAL_PATH, and then to ~user/.hhvm.hhbc
+* Repo.Central.FileMode
+  Repo.Central.FileUser
+  Repo.Central.FileGroup
+  Set the desired mode (as a bitmask), user, and/or group (as a user/group
+  name) for the file containing the central repo. Note that this is at the
+  filesystem level, as opposed to the Repo.Local.Mode setting, which is at the
+  sqlite level.
+
+  The desired options, if set, will be applied immediately after successfully
+  opening the central repo. Success depends on the permissions of the hhvm
+  process and the current mode/owner of the repo file.
 * Repo.Eval.Mode: local, central, or readonly(*)
   local: Write eval units to the local repo if it is writeable; otherwise write
          to the central repo.

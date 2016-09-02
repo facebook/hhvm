@@ -633,11 +633,12 @@ std::string Repo::insertSchema(const char* path) {
   return result;
 }
 
+namespace {
 /*
  * Convert the permission bits from the given stat struct to an ls-style
  * rwxrwxrwx format.
  */
-static std::string showPermissions(const struct stat& s) {
+std::string showPermissions(const struct stat& s) {
   static const std::pair<int, char> bits[] = {
     {S_IRUSR, 'r'}, {S_IWUSR, 'w'}, {S_IXUSR, 'x'},
     {S_IRGRP, 'r'}, {S_IWGRP, 'w'}, {S_IXGRP, 'x'},
@@ -652,18 +653,28 @@ static std::string showPermissions(const struct stat& s) {
   return ret;
 }
 
+struct PasswdBuffer {
+  explicit PasswdBuffer(int name)
+    : size{sysconf(name)}
+  {
+    if (size == -1) size = 1024;
+    data = folly::make_unique<char[]>(size);
+  }
+
+  long size;
+  std::unique_ptr<char[]> data;
+};
+
 /*
  * Return the name of the user with the given id.
  */
-static std::string uidName(uid_t uid) {
+std::string uidToName(uid_t uid) {
 #ifndef _WIN32
-  auto bufLen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  if (bufLen == -1) bufLen = 1024;
-  auto buf = folly::make_unique<char[]>(bufLen);
+  auto buffer = PasswdBuffer{_SC_GETPW_R_SIZE_MAX};
   passwd pw;
   passwd* result;
 
-  auto err = getpwuid_r(uid, &pw, buf.get(), bufLen, &result);
+  auto err = getpwuid_r(uid, &pw, buffer.data.get(), buffer.size, &result);
   if (err != 0) return folly::errnoStr(errno).toStdString();
   if (result == nullptr) return "user does not exist";
   return pw.pw_name;
@@ -673,23 +684,79 @@ static std::string uidName(uid_t uid) {
 }
 
 /*
+ * Return the uid of the user with the given name.
+ */
+uid_t nameToUid(const std::string& name) {
+#ifndef _WIN32
+  auto buffer = PasswdBuffer{_SC_GETPW_R_SIZE_MAX};
+  passwd pw;
+  passwd* result;
+
+  auto err = getpwnam_r(
+    name.c_str(), &pw, buffer.data.get(), buffer.size, &result
+  );
+  if (err != 0 || result == nullptr) return -1;
+  return pw.pw_uid;
+#else
+  return -1;
+#endif
+}
+
+/*
  * Return the name of the group with the given id.
  */
-static std::string gidName(gid_t gid) {
+std::string gidToName(gid_t gid) {
 #ifndef _WIN32
-  auto bufLen = sysconf(_SC_GETGR_R_SIZE_MAX);
-  if (bufLen == -1) bufLen = 1024;
-  auto buf = folly::make_unique<char[]>(bufLen);
+  auto buffer = PasswdBuffer{_SC_GETGR_R_SIZE_MAX};
   group grp;
   group* result;
 
-  auto err = getgrgid_r(gid, &grp, buf.get(), bufLen, &result);
+  auto err = getgrgid_r(gid, &grp, buffer.data.get(), buffer.size, &result);
   if (err != 0) return folly::errnoStr(errno).toStdString();
   if (result == nullptr) return "group does not exist";
   return grp.gr_name;
 #else
   return "<unsupported>";
 #endif
+}
+
+/*
+ * Return the gid of the group with the given name.
+ */
+gid_t nameToGid(const std::string& name) {
+#ifndef _WIN32
+  auto buffer = PasswdBuffer{_SC_GETGR_R_SIZE_MAX};
+  group grp;
+  group* result;
+
+  auto err = getgrnam_r(
+    name.c_str(), &grp, buffer.data.get(), buffer.size, &result
+  );
+  if (err != 0 || result == nullptr) return -1;
+  return grp.gr_gid;
+#else
+  return -1;
+#endif
+}
+
+void setCentralRepoFileMode(const std::string& path) {
+  // These runtime options are all best-effort, so we don't care if any of the
+  // operations fail.
+
+  if (auto const mode = RuntimeOption::RepoCentralFileMode) {
+    chmod(path.c_str(), mode);
+  }
+
+  if (!RuntimeOption::RepoCentralFileUser.empty()) {
+    auto const uid = nameToUid(RuntimeOption::RepoCentralFileUser);
+    chown(path.c_str(), uid, -1);
+  }
+
+  if (!RuntimeOption::RepoCentralFileGroup.empty()) {
+    auto const gid = nameToGid(RuntimeOption::RepoCentralFileGroup);
+    chown(path.c_str(), -1, gid);
+  }
+}
 }
 
 RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
@@ -737,8 +804,8 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
     if (stat(repoPath.c_str(), &repoStat) == 0) {
       statStr = folly::sformat("{} {}:{}",
                                showPermissions(repoStat),
-                               uidName(repoStat.st_uid),
-                               gidName(repoStat.st_gid));
+                               uidToName(repoStat.st_uid),
+                               gidToName(repoStat.st_gid));
     } else {
       statStr = folly::errnoStr(errno).toStdString();
     }
@@ -747,6 +814,7 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
     return RepoStatus::error;
   }
   m_centralRepo = repoPath;
+  setCentralRepoFileMode(repoPath);
   TRACE(1, "Central repo: '%s'\n", m_centralRepo.c_str());
   return RepoStatus::success;
 }

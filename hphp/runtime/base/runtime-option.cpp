@@ -518,6 +518,9 @@ std::string RuntimeOption::CodeCoverageOutputFile;
 std::string RuntimeOption::RepoLocalMode;
 std::string RuntimeOption::RepoLocalPath;
 std::string RuntimeOption::RepoCentralPath;
+int32_t RuntimeOption::RepoCentralFileMode;
+std::string RuntimeOption::RepoCentralFileUser;
+std::string RuntimeOption::RepoCentralFileGroup;
 std::string RuntimeOption::RepoEvalMode;
 std::string RuntimeOption::RepoJournal = "delete";
 bool RuntimeOption::RepoCommit = true;
@@ -1014,6 +1017,9 @@ void RuntimeOption::Load(
           RepoLocalPath = HHVM_REPO_LOCAL_PATH;
         }
       }
+      Config::Bind(RepoCentralFileMode, ini, config, "Repo.Central.FileMode");
+      Config::Bind(RepoCentralFileUser, ini, config, "Repo.Central.FileUser");
+      Config::Bind(RepoCentralFileGroup, ini, config, "Repo.Central.FileGroup");
     }
     {
       // Central Repo

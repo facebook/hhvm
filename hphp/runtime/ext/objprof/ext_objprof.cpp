@@ -743,7 +743,7 @@ std::pair<int, double> getObjSize(
   }
 
   // We're increasing ref count by calling toArray, need to adjust it later
-  auto arr = obj->toArray();
+  auto arr = obj->toArray(); // TODO t12985984 avoid toArray.
   bool is_packed = arr->hasPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {
@@ -857,7 +857,7 @@ void getObjStrings(
   }
 
   path->push_back(std::string(cls->name()->data()));
-  auto arr = obj->toArray();
+  auto arr = obj->toArray(); // TODO t12985984 avoid toArray.
   bool is_packed = arr->hasPackedLayout();
 
   for (ArrayIter iter(arr); iter; ++iter) {

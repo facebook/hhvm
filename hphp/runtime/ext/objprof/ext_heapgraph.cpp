@@ -81,22 +81,22 @@ const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 // CONTEXT OBJECTS
 
+// Extra information about a HeapGraph::Node.
 struct CapturedNode {
   HeaderKind kind;
-  size_t size;
+  uint32_t size;
   const char* classname;
 };
-struct CapturedPtr : HeapGraph::Ptr {
+
+// Extra information about a HeapGraph::Ptr
+struct CapturedPtr {
   std::string edgename;
 };
 
 struct HeapGraphContext : SweepableResourceData {
-  explicit HeapGraphContext(const HeapGraph& hg_)
-    : hg(hg_) {
-  }
-
-  ~HeapGraphContext() {
-  }
+  explicit HeapGraphContext(const HeapGraph& hg) : hg(hg) {}
+  explicit HeapGraphContext(HeapGraph&& hg) : hg(std::move(hg)) {}
+  ~HeapGraphContext() {}
 
   bool isInvalid() const override {
     return false;
@@ -171,7 +171,7 @@ std::string getObjectConnectionName(
     return "";
   }
 
-  auto arr = obj->toArray();
+  auto arr = obj->toArray(); // TODO t12985984 avoid toArray.
   bool is_packed = arr->hasPackedLayout();
   for (ArrayIter iter(arr); iter; ++iter) {
     auto first = iter.first();
@@ -237,9 +237,6 @@ std::string getNodesConnectionName(
   if (from != -1 && to != -1 && g.ptrs[ptr].ptr_kind != HeapGraph::Ambiguous) {
     auto h = g.nodes[from].h;
     auto th = g.nodes[to].h;
-    const void* target_ptr = &th->obj_;
-    ObjectData* obj;
-    std::string conn_name;
 
     switch (h->kind()) {
       // Known generalized cases that don't really need pointer kind
@@ -269,15 +266,16 @@ std::string getNodesConnectionName(
 
       case HeaderKind::Map:
       case HeaderKind::ImmMap:
-      case HeaderKind::Object:
-        obj = const_cast<ObjectData*>(&h->obj_);
-        //auto obj_tv = make_tv<KindOfObject>(obj);
-        conn_name = getObjectConnectionName(obj, target_ptr);
+      case HeaderKind::Object: {
+        std::string conn_name = getObjectConnectionName(
+            const_cast<ObjectData*>(&h->obj_), &th->obj_
+        );
         if (!conn_name.empty()) {
           return conn_name;
         }
         // Fallback to pointer kind
         break;
+      }
 
       // Unknown drilldown cases that need pointer type
       case HeaderKind::Empty:
@@ -317,13 +315,13 @@ void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
   vm_call_user_func(callback, params);
 }
 
-Array createPhpNode(HeapGraphContextPtr hgptr , int index) {
-  auto cnode = hgptr->cnodes[index];
+Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
+  const auto& cnode = hgptr->cnodes[index];
 
   auto node_arr = make_map_array(
     s_index, Variant(index),
     s_kind, Variant(header_names[int(cnode.kind)]),
-    s_size, Variant(cnode.size)
+    s_size, Variant(int64_t(cnode.size))
   );
 
   if (cnode.classname != nullptr) {
@@ -334,8 +332,8 @@ Array createPhpNode(HeapGraphContextPtr hgptr , int index) {
 }
 
 Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
-  auto ptr = hgptr->hg.ptrs[index];
-  auto cptr = hgptr->cptrs[index];
+  const auto& ptr = hgptr->hg.ptrs[index];
+  const auto& cptr = hgptr->cptrs[index];
 
   auto ptr_arr = make_map_array(
     s_index, Variant(index),
@@ -351,6 +349,7 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
 
 std::vector<int> toBoundIntVector(const Array& arr, int64_t max) {
   std::vector<int> result;
+  result.reserve(arr.size());
   for (ArrayIter iter(arr); iter; ++iter) {
     auto index = iter.second().toInt64();
     if (index < 0 || index >= max) {
@@ -372,38 +371,34 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
 
   // Copy edges into captured edges
   // Capturing edges first because after capturing nodes we nullify the header
+  cptrs.reserve(hg.ptrs.size());
   for (int i = 0; i < hg.ptrs.size(); ++i) {
-    auto src_ptr = hg.ptrs[i];
-    CapturedPtr new_ptr;
-    new_ptr.edgename = getNodesConnectionName(
-      hg,
-      i,
-      src_ptr.from,
-      src_ptr.to
-    );
+    const auto& src_ptr = hg.ptrs[i];
+    auto new_ptr = CapturedPtr{
+      /* edgename */ getNodesConnectionName(hg, i, src_ptr.from, src_ptr.to)
+    };
     cptrs.push_back(new_ptr);
   }
 
   // Copy nodes into captured nodes
+  cnodes.reserve(hg.nodes.size());
   for (int i = 0; i < hg.nodes.size(); ++i) {
-    auto src_node = hg.nodes[i];
-    CapturedNode new_node;
-    new_node.kind = src_node.h->kind();
-    new_node.size = src_node.h->size();
-    if (src_node.h->kind() == HeaderKind::Object) {
-      new_node.classname = src_node.h->obj_.classname_cstr();
-    } else {
-      new_node.classname = nullptr;
-    }
+    const auto& src_node = hg.nodes[i];
+    auto new_node = CapturedNode{
+      /* kind */      src_node.h->kind(),
+      /* size */      uint32_t(src_node.h->size()),
+      /* classname */ src_node.h->kind() == HeaderKind::Object ?
+        src_node.h->obj_.classname_cstr() : nullptr
+    };
     cnodes.push_back(new_node);
 
     // Nullify the pointers to be safe since this is a captured heap
     hg.nodes[i].h = nullptr;
   }
 
-  auto hgcontext = req::make<HeapGraphContext>(hg);
-  hgcontext->cnodes = cnodes;
-  hgcontext->cptrs = cptrs;
+  auto hgcontext = req::make<HeapGraphContext>(std::move(hg));
+  std::swap(hgcontext->cnodes, cnodes);
+  std::swap(hgcontext->cptrs, cptrs);
   return Resource(hgcontext);
 }
 
@@ -481,14 +476,14 @@ void HHVM_FUNCTION(heapgraph_dfs_edges,
 Array HHVM_FUNCTION(heapgraph_edge, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.ptrs.size())) return empty_array();
+  if (size_t(index) >= hgptr->hg.ptrs.size()) return empty_array();
   return createPhpEdge(hgptr, index);
 }
 
 Array HHVM_FUNCTION(heapgraph_node, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
   return createPhpNode(hgptr, index);
 }
 
@@ -498,7 +493,7 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
   Array result;
   hgptr->hg.eachOutPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
@@ -512,7 +507,7 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
   Array result;
   hgptr->hg.eachInPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));

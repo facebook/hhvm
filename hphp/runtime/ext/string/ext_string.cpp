@@ -46,7 +46,6 @@
 #include "hphp/zend/html-table.h"
 
 #include <folly/Unicode.h>
-#include <bitset>
 #include <locale.h>
 
 namespace HPHP {
@@ -448,18 +447,15 @@ String HHVM_FUNCTION(ucwords,
 
   if (!delimiters.length()) return strcopy;
 
-  std::bitset<256> delimiters_set;
-  int delimiters_len = delimiters.length();
-  for (int i = 0; i < delimiters_len; i++) {
-    delimiters_set.set(static_cast<uint8_t>(delimiters[i]));
-  }
+  char mask[256];
+  string_charmask(delimiters.c_str(), delimiters.size(), mask);
 
-  uint8_t last = ' ';
-  return stringForEach<true>(strcopy.size(), strcopy, [&] (char c) {
-    char ret = delimiters_set.test(last) ? toupper(c) : c;
-    last = c;
-    return ret;
-  });
+  for (char* end = string + strcopy.size(); string < end; ) {
+    if (mask[(unsigned char)*string++]) {
+      *string = toupper(*string);
+    }
+  }
+  return strcopy;
 }
 
 String HHVM_FUNCTION(strip_tags,

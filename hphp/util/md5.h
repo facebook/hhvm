@@ -58,6 +58,10 @@ struct MD5 : private boost::totally_ordered<MD5> {
     q[1] = ntohq(((const uint64_t*)blob)[1]);
   }
 
+  explicit MD5(uint64_t x) {
+    q[0] = 0; q[1] = x;
+  }
+
   // Copy out in network byte order.
   void nbo(void* blob) const {
     ((uint64_t*)blob)[0] = htonq(q[0]);

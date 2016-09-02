@@ -17,6 +17,7 @@
 #include "hphp/compiler/analysis/emitter.h"
 
 #include <algorithm>
+#include <atomic>
 #include <deque>
 #include <exception>
 #include <fstream>
@@ -10873,8 +10874,16 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
     "OpCodeImpl attribute is not applicable to %s", funcName);
 }
 
+namespace {
+
+std::atomic<uint64_t> lastHHBCUnitIndex;
+
+}
+
 static UnitEmitter* emitHHBCVisitor(AnalysisResultPtr ar, FileScopeRawPtr fsp) {
-  auto md5 = fsp->getMd5();
+  // If we're in whole program mode, we can just assign each Unit an increasing
+  // counter, guaranteeing uniqueness.
+  auto md5 = Option::WholeProgram ? MD5{++lastHHBCUnitIndex} : fsp->getMd5();
 
   if (!Option::WholeProgram) {
     // The passed-in ar is only useful in whole-program mode, so create a

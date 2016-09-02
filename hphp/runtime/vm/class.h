@@ -962,6 +962,7 @@ public:
    */
   void setInstanceBits();
   void setInstanceBitsAndParents();
+  bool checkInstanceBit(unsigned int bit) const;
 
   /*
    * Get the underlying enum base type if this is an enum.

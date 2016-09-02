@@ -1698,10 +1698,46 @@ SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
 SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const cls2 = inst->extra<ExtendsClassData>()->cls;
-
   assertx(cls2 && isNormalClass(cls2));
+  if (mightRelax(env, src1)) return nullptr;
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
   return instanceOfImpl(env, src1->type().clsSpec(), spec2);
+}
+
+SSATmp* simplifyInstanceOfBitmask(State& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0);
+  auto const name = constSrc(env, inst->src(1), TStr);
+
+  if (!name || mightRelax(env, cls)) return nullptr;
+
+  auto const bit = InstanceBits::lookup(name->strVal());
+  always_assert(bit && "cgInstanceOfBitmask had no bitmask");
+
+  if (cls->type().clsSpec() &&
+      cls->type().clsSpec().cls()->checkInstanceBit(bit)) {
+    return cns(env, true);
+  }
+
+  if (!cls->hasConstVal(TCls)) return nullptr;
+  return cns(env, false);
+}
+
+SSATmp* simplifyNInstanceOfBitmask(State& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0);
+  auto const name = constSrc(env, inst->src(1), TStr);
+
+  if (!name || mightRelax(env, cls)) return nullptr;
+
+  auto const bit = InstanceBits::lookup(name->strVal());
+  always_assert(bit && "cgNInstanceOfBitmask had no bitmask");
+
+  if (cls->type().clsSpec() &&
+      cls->type().clsSpec().cls()->checkInstanceBit(bit)) {
+    return cns(env, false);
+  }
+
+  if (!cls->hasConstVal(TCls)) return nullptr;
+  return cns(env, true);
 }
 
 SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
@@ -3216,6 +3252,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(DivDbl)
   X(DivInt)
   X(ExtendsClass)
+  X(InstanceOfBitmask)
+  X(NInstanceOfBitmask)
   X(Floor)
   X(FwdCtxStaticCall)
   X(IncRef)

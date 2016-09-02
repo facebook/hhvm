@@ -348,6 +348,14 @@ inline const Class::RequirementMap& Class::allRequirements() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Instance bits.
+
+inline bool Class::checkInstanceBit(unsigned int bit) const {
+  assertx(bit > 0);
+  return m_instanceBits[bit];
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Throwable initialization.
 
 inline bool Class::needsInitThrowable() const {

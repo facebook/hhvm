@@ -96,7 +96,16 @@ struct StackTrace : StackTraceBase {
 
   //////////////////////////////////////////////////////////////////////////////
 
+  /*
+   * Construct the curent stacktrace if `trace' is true, else an empty
+   * stacktrace.
+   */
   explicit StackTrace(bool trace = true);
+
+  /*
+   * Constructing from hexEncode() results.
+   */
+  explicit StackTrace(folly::StringPiece);
 
   /*
    * Translate a frame pointer to file name and line number pair.
@@ -105,12 +114,8 @@ struct StackTrace : StackTraceBase {
                                                     PerfMap* pm = nullptr);
 
   /*
-   * Constructing from hexEncode() results.
-   */
-  explicit StackTrace(folly::StringPiece);
-
-  /*
    * Encode the stacktrace addresses in a string.
+   *
    * Skip minLevel frames, and end after the maxLevel'th at the most.
    */
   std::string hexEncode(int minLevel = 0, int maxLevel = 999) const;
@@ -125,17 +130,12 @@ struct StackTrace : StackTraceBase {
    */
   void get(std::vector<std::shared_ptr<StackFrameExtra>>&) const;
 
+  //////////////////////////////////////////////////////////////////////////////
+
 private:
-
-  /* Record frame pointers. */
-  void create();
-
-  /* Init by hex string. */
-  void initFromHex(folly::StringPiece);
-
   std::vector<void*> m_frames;
 
-  /* Cached backtrace string. */
+  // Cached backtrace string.
   mutable std::string m_trace;
   mutable bool m_trace_usable{false};
 };
@@ -148,8 +148,8 @@ private:
  */
 struct StackTraceNoHeap : StackTraceBase {
   /*
-   * Constructor, and this will save current stack trace if trace is true.  It
-   * can be false for an empty stacktrace.
+   * Construct the curent stacktrace if `trace' is true, else an empty
+   * stacktrace.
    */
   explicit StackTraceNoHeap(bool trace = true);
 
@@ -173,14 +173,9 @@ struct StackTraceNoHeap : StackTraceBase {
   };
 
 private:
-  /* Generate an output of the written stack trace. */
   void printStackTrace(int fd) const;
 
-  /* Record bt pointers. */
-  void create();
-
-  //////////////////////////////////////////////////////////////////////////////
-
+private:
   void* m_frames[kMaxFrame];
   unsigned m_frame_count;
 };

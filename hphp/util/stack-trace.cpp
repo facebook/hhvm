@@ -65,6 +65,8 @@ bool StackTraceBase::Enabled = true;
 const char* const* StackTraceBase::FunctionBlacklist = s_defaultBlacklist;
 unsigned StackTraceBase::FunctionBlacklistCount = 2;
 
+////////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
 void printStr(int fd, folly::StringPiece s) {
@@ -215,7 +217,9 @@ int ALWAYS_INLINE get_backtrace(void** frame, int max) {
   return ret;
 }
 
-} // namespace
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 StackTraceBase::StackTraceBase() {
 #ifdef HAVE_LIBBFD
@@ -225,20 +229,12 @@ StackTraceBase::StackTraceBase() {
 
 StackTrace::StackTrace(bool trace) {
   if (trace && Enabled) {
-    create();
+    m_frames.resize(kMaxFrame);
+    m_frames.resize(get_backtrace<false>(m_frames.data(), kMaxFrame));
   }
 }
 
 StackTrace::StackTrace(folly::StringPiece hexEncoded) {
-  initFromHex(hexEncoded);
-}
-
-void StackTrace::create() {
-  m_frames.resize(kMaxFrame);
-  m_frames.resize(get_backtrace<false>(m_frames.data(), kMaxFrame));
-}
-
-void StackTrace::initFromHex(folly::StringPiece hexEncoded) {
   // Can't split into StringPieces, strtoll() expects a null terminated string.
   std::vector<std::string> frames;
   folly::split(':', hexEncoded, frames);
@@ -350,6 +346,8 @@ bool StackTrace::PerfMap::translate(StackFrameExtra* frame) const {
   return false;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 std::string StackFrameExtra::toString() const {
   constexpr folly::StringPiece qq{"??"};
   return folly::sformat(
@@ -360,14 +358,12 @@ std::string StackFrameExtra::toString() const {
   );
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 StackTraceNoHeap::StackTraceNoHeap(bool trace) {
   if (trace && Enabled) {
-    create();
+    m_frame_count = get_backtrace<true>(m_frames, kMaxFrame);
   }
-}
-
-void StackTraceNoHeap::create() {
-  m_frame_count = get_backtrace<true>(m_frames, kMaxFrame);
 }
 
 void StackTraceNoHeap::AddExtraLogging(const char* name,
@@ -707,7 +703,6 @@ bool translate(StackFrame* frame, Dl_info& dlInfo, Addr2lineData* data,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
 
 /*
  * Variant of translate() used by StackTraceNoHeap.

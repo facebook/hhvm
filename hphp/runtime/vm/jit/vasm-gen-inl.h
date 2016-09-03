@@ -26,7 +26,7 @@ namespace HPHP { namespace jit {
 inline Vout& Vout::operator=(const Vout& v) {
   assertx(&v.m_unit == &m_unit);
   m_block = v.m_block;
-  m_origin = v.m_origin;
+  m_irctx = v.m_irctx;
   return *this;
 }
 

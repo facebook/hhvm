@@ -68,7 +68,7 @@ void forwardJmp(Vunit& unit, jit::flat_set<size_t>& catch_blocks,
   auto& dest = unit.blocks[destLabel];
 
   auto& headInst = dest.code.front();
-  auto origin = headInst.origin;
+  auto irctx = headInst.irctx();
   if (headInst.op == Vinstr::phidef) {
     // We need to preserve any phidefs in the forwarding block if they're
     // present in the original destination block.
@@ -79,10 +79,8 @@ void forwardJmp(Vunit& unit, jit::flat_set<size_t>& catch_blocks,
       regs[i] = unit.makeReg();
     }
     auto newTuple = unit.makeTuple(regs);
-    middle.code.emplace_back(phidef{newTuple});
-    middle.code.back().origin = origin;
-    middle.code.emplace_back(phijmp{destLabel, newTuple});
-    middle.code.back().origin = origin;
+    middle.code.emplace_back(phidef{newTuple}, irctx);
+    middle.code.emplace_back(phijmp{destLabel, newTuple}, irctx);
     return;
   } else if (headInst.op == Vinstr::landingpad) {
     // If the dest started with a landingpad, copy it to middle. The dest's
@@ -92,8 +90,7 @@ void forwardJmp(Vunit& unit, jit::flat_set<size_t>& catch_blocks,
     middle.code.emplace_back(headInst);
   }
 
-  middle.code.emplace_back(jmp{destLabel});
-  middle.code.back().origin = origin;
+  middle.code.emplace_back(jmp{destLabel}, irctx);
 }
 
 }

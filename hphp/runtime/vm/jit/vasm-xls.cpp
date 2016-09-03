@@ -595,11 +595,11 @@ Vlabel blockFor(const VxlsContext& ctx, unsigned pos) {
  */
 void insertCodeAt(jit::vector<Vinstr>& dst, unsigned& j,
                   const jit::vector<Vinstr>& src, unsigned pos) {
-  auto const origin = dst[j].origin;
+  auto const irctx = dst[j].irctx();
   dst.insert(dst.begin() + j, src.size(), ud2{});
   for (auto const& inst : src) {
     dst[j] = inst;
-    dst[j].origin = origin;
+    dst[j].set_irctx(irctx);
     dst[j++].pos = pos;
   }
 }
@@ -626,9 +626,8 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
       front_uses = true;
     });
     if (front_uses) {
-      auto origin = code.front().origin;
-      code.insert(code.begin(), nop{});
-      code.front().origin = origin;
+      auto irctx = code.front().irctx();
+      code.emplace(code.begin(), nop{}, irctx);
     }
     auto const start = pos;
 
@@ -2815,7 +2814,7 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     code = &unit.blocks[label].code;
 
     auto& targetCode = unit.blocks[target].code;
-    free.origin = inst.origin;
+    free.set_irctx(inst.irctx());
     ConditionCode cc;
     Vreg sf;
     if (inst.op == Vinstr::fallbackcc) {
@@ -2839,7 +2838,7 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
       cc = jcc_i.cc;
       sf = jcc_i.sf;
     }
-    targetCode.back().origin = inst.origin;
+    targetCode.back().set_irctx(inst.irctx());
 
     // Next is set to an invalid block that will be fixed up once we're done
     // iterating through the original block.
@@ -2968,7 +2967,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
         state = instrInState(unit, *it, state, ctx.sp);
         if (state == NeedSpill) {
           FTRACE(3, "alloc spill before {}: {}\n", label, show(unit, *it));
-          alloc.origin = it->origin;
+          alloc.set_irctx(it->irctx());
           block.code.insert(it, alloc);
           break;
         }
@@ -2983,7 +2982,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
         if (states[s].in == NeedSpill) {
           FTRACE(3, "alloc spill on edge from {} -> {}\n", label, s);
           auto it = std::prev(block.code.end());
-          alloc.origin = it->origin;
+          alloc.set_irctx(it->irctx());
           block.code.insert(it, alloc);
         }
       }
@@ -2996,7 +2995,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
         block.code.back().op != Vinstr::ud2) {
       auto it = std::prev(block.code.end());
       FTRACE(3, "free spill before {}: {}\n", label, show(unit, (*it)));
-      free.origin = it->origin;
+      free.set_irctx(it->irctx());
       block.code.insert(it, free);
     }
 

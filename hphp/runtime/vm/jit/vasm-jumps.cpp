@@ -200,7 +200,7 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
   // the registers (based on where they're used and defined).
   WidthAnalysis analysis{unit};
 
-  auto const origin = code.back().origin;
+  auto const irctx = code.back().irctx();
   auto const cc = jcc_i.cc;
   auto const sf = jcc_i.sf;
 
@@ -216,19 +216,19 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
     switch (analysis.getAppropriate(r1) &
             analysis.getAppropriate(r2)) {
       case Width::Byte:
-        moves.emplace_back(cmovb{cc, sf, r1, r2, d});
+        moves.emplace_back(cmovb{cc, sf, r1, r2, d}, irctx);
         break;
       case Width::Word:
       case Width::WordN:
-        moves.emplace_back(cmovw{cc, sf, r1, r2, d});
+        moves.emplace_back(cmovw{cc, sf, r1, r2, d}, irctx);
         break;
       case Width::Long:
       case Width::LongN:
-        moves.emplace_back(cmovl{cc, sf, r1, r2, d});
+        moves.emplace_back(cmovl{cc, sf, r1, r2, d}, irctx);
         break;
       case Width::Quad:
       case Width::QuadN:
-        moves.emplace_back(cmovq{cc, sf, r1, r2, d});
+        moves.emplace_back(cmovq{cc, sf, r1, r2, d}, irctx);
         break;
       case Width::Octa:
       case Width::Dbl:
@@ -240,7 +240,6 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
       case Width::None:
         return false;
     }
-    moves.back().origin = origin;
     new_dests.emplace_back(d);
   }
 
@@ -262,10 +261,7 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
   // Insert the cmovs and the phijmp.
   code.pop_back();
   code.insert(code.end(), moves.begin(), moves.end());
-  code.emplace_back(
-    phijmp{join, unit.makeTuple(std::move(new_dests))}
-  );
-  code.back().origin = origin;
+  code.emplace_back(phijmp{join, unit.makeTuple(std::move(new_dests))}, irctx);
 
   return true;
 }
@@ -314,15 +310,14 @@ void optimizeJmps(Vunit& unit) {
             // replace jcc with fallbackcc and jmp
             const auto& fb_i = unit.blocks[jcc_i.targets[1]].code[0].fallback_;
             const auto t0 = jcc_i.targets[0];
-            const auto jcc_origin = code.back().origin;
+            const auto jcc_irctx = code.back().irctx();
             code.pop_back();
             code.emplace_back(
               fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.target,
-                         fb_i.spOff, fb_i.trflags, fb_i.args}
+                         fb_i.spOff, fb_i.trflags, fb_i.args},
+              jcc_irctx
             );
-            code.back().origin = jcc_origin;
-            code.emplace_back(jmp{t0});
-            code.back().origin = jcc_origin;
+            code.emplace_back(jmp{t0}, jcc_irctx);
             changed = true;
           }
 
@@ -353,12 +348,10 @@ void optimizeJmps(Vunit& unit) {
           auto const& defs = unit.blocks[target].code[0].phidef_.defs;
           assertx(unit.tuples[uses].size() == unit.tuples[defs].size());
 
-          auto const origin = code.back().origin;
+          auto const irctx = code.back().irctx();
           code.pop_back();
-          code.emplace_back(copyargs{uses, defs});
-          code.back().origin = origin;
-          code.emplace_back(jmp{target});
-          code.back().origin = origin;
+          code.emplace_back(copyargs{uses, defs}, irctx);
+          code.emplace_back(jmp{target}, irctx);
 
           unit.blocks[target].code[0] = nop{};
 

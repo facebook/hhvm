@@ -96,7 +96,7 @@ bool vmodify(Vunit& unit, Vlabel b, size_t i, Modify modify) {
 
   auto const scratch = unit.makeScratchBlock();
   SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, vinstr.origin);
+  Vout v(unit, scratch, vinstr.irctx());
 
   auto const nremove = modify(v);
   if (nremove == 0 && v.empty()) return false;

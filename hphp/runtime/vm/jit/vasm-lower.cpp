@@ -57,7 +57,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
   auto const scratch = unit.makeScratchBlock();
   SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, vinstr.origin);
+  Vout v(unit, scratch, vinstr.irctx());
 
   int32_t const adjust = (vargs.stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
   if (adjust) v << lea{rsp()[-adjust], rsp()};
@@ -122,8 +122,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       assertx(taken.front().op == Vinstr::landingpad ||
               taken.front().op == Vinstr::jmp);
 
-      Vinstr vi { lea{rsp()[rspOffset], rsp()} };
-      vi.origin = taken.front().origin;
+      Vinstr vi { lea{rsp()[rspOffset], rsp()}, taken.front().irctx() };
 
       if (taken.front().op == Vinstr::jmp) {
         taken.insert(taken.begin(), vi);

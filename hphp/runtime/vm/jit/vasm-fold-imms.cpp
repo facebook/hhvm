@@ -415,12 +415,12 @@ void foldImms(Vunit& unit) {
   for (auto b : blocks) {
     for (auto& inst : unit.blocks[b].code) {
       switch (inst.op) {
-#define O(name, imms, uses, defs)\
-        case Vinstr::name: {\
-          auto origin = inst.origin;\
-          folder.fold(inst.name##_, inst);\
-          inst.origin = origin;\
-          break;\
+#define O(name, imms, uses, defs)           \
+        case Vinstr::name: {                \
+          auto const irctx = inst.irctx();  \
+          folder.fold(inst.name##_, inst);  \
+          inst.set_irctx(irctx);            \
+          break;                            \
         }
         VASM_OPCODES
 #undef O

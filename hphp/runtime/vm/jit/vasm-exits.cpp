@@ -116,12 +116,11 @@ void optimizeExits(Vunit& unit) {
 
     auto fold_exit = [&](ConditionCode cc, Vlabel exit, Vlabel next) {
       const auto& bj = unit.blocks[exit].code.back().bindjmp_;
-      auto origin = code.back().origin;
+      auto const irctx = code.back().irctx();
       hoist_sync(exit);
       code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.spOff,
                             bj.trflags, bj.args};
-      code.emplace_back(jmp{next});
-      code.back().origin = origin;
+      code.emplace_back(jmp{next}, irctx);
     };
 
     // Try to replace jcc to normal exit with bindexit followed by jmp,

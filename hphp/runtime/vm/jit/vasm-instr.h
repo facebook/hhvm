@@ -36,6 +36,7 @@
 #include "hphp/util/immed.h"
 
 namespace HPHP { namespace jit {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct IRInstruction;
@@ -1173,15 +1174,30 @@ struct Vinstr {
   enum Opcode : uint8_t { VASM_OPCODES };
 #undef O
 
+  /*
+   * Helper struct for transferring the IR context of a Vinstr during
+   * optimization passes.
+   */
+  struct ir_context {
+    const IRInstruction* origin;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+
   Vinstr() : op(ud2) {}
 
-#define O(name, imms, uses, defs)               \
-  /* implicit */ Vinstr(jit::name i) : op(name), name##_(i) {}
+#define O(name, imms, uses, defs) \
+  /* implicit */ Vinstr(jit::name i, ir_context ctx = ir_context{}) \
+    : op(name)                    \
+    , origin(ctx.origin)          \
+    , name##_(i)                  \
+  {}
   VASM_OPCODES
 #undef O
 
   /*
-   * Define an operator= for all instructions to preserve origin and pos.
+   * Define an assignment operator that preserves origin and pos for each
+   * instruction.
    */
 #define O(name, ...)                            \
   Vinstr& operator=(const jit::name& i) {       \
@@ -1213,6 +1229,16 @@ struct Vinstr {
   template<Opcode op>
   const typename op_matcher<op>::type& get() const {
     return op_matcher<op>::get(*this);
+  }
+
+  /*
+   * Get and set the IR "context" members.
+   */
+  ir_context irctx() const {
+    return ir_context { origin };
+  }
+  void set_irctx(ir_context ctx) {
+    origin = ctx.origin;
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1290,6 +1316,7 @@ bool isBlockEnd(const Vinstr& inst);
 Width width(Vinstr::Opcode op);
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

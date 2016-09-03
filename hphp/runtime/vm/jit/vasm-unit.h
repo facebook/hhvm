@@ -208,6 +208,7 @@ struct Vunit {
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
   jit::vector<VdataBlock> dataBlocks;
+  uint8_t cur_voff{0};  // current instruction index managed by Vout
   bool padding{false};
   folly::Optional<TransContext> context;
 };

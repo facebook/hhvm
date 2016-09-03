@@ -65,6 +65,7 @@ void genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
   CodeGenerator cg(env);
 
   for (auto& inst : block) {
+    v.unit().cur_voff = 0;
     v.setOrigin(&inst);
     vc.setOrigin(&inst);
     cg.cgInst(&inst);

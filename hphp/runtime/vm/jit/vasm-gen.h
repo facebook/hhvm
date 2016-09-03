@@ -41,10 +41,12 @@ struct Vreg;
  * Writer stream for adding instructions to a Vblock.
  */
 struct Vout {
-  Vout(Vunit& u, Vlabel b, Vinstr::ir_context irctx = Vinstr::ir_context{})
+  Vout(Vunit& u, Vlabel b,
+       folly::Optional<Vinstr::ir_context> irctx = folly::none)
     : m_unit(u)
     , m_block(b)
-    , m_irctx(irctx)
+    , m_irctx ( irctx ? *irctx
+                      : Vinstr::ir_context { nullptr, Vinstr::kInvalidVoff } )
   {}
 
   Vout(Vout&&) = default;

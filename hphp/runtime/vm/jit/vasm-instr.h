@@ -35,6 +35,8 @@
 #include "hphp/util/data-block.h"
 #include "hphp/util/immed.h"
 
+#include <limits>
+
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1180,7 +1182,10 @@ struct Vinstr {
    */
   struct ir_context {
     const IRInstruction* origin;
+    uint8_t voff;
   };
+
+  static constexpr auto kInvalidVoff = std::numeric_limits<uint8_t>::max();
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -1189,6 +1194,7 @@ struct Vinstr {
 #define O(name, imms, uses, defs) \
   /* implicit */ Vinstr(jit::name i, ir_context ctx = ir_context{}) \
     : op(name)                    \
+    , voff(ctx.voff)              \
     , origin(ctx.origin)          \
     , name##_(i)                  \
   {}
@@ -1196,8 +1202,8 @@ struct Vinstr {
 #undef O
 
   /*
-   * Define an assignment operator that preserves origin and pos for each
-   * instruction.
+   * Define an assignment operator for all instructions that preserves origin,
+   * voff, and pos.
    */
 #define O(name, ...)                            \
   Vinstr& operator=(const jit::name& i) {       \
@@ -1235,16 +1241,24 @@ struct Vinstr {
    * Get and set the IR "context" members.
    */
   ir_context irctx() const {
-    return ir_context { origin };
+    return ir_context { origin, voff };
   }
   void set_irctx(ir_context ctx) {
     origin = ctx.origin;
+    voff = ctx.voff;
   }
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
   Opcode op;
+
+  /*
+   * The index of this instruction within the code for `origin'.
+   */
+  uint8_t voff;
+
+  // 2-byte hole here.
 
   /*
    * Instruction position, currently used only in vasm-xls.

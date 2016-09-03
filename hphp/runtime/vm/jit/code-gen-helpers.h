@@ -151,6 +151,11 @@ void emitAssertRefCount(Vout& v, Vreg data);
 ///////////////////////////////////////////////////////////////////////////////
 // Calls.
 
+/*
+ * Emit a non-PHP function call.
+ *
+ * @see: call{} and similar
+ */
 void emitCall(Vout& v, CallSpec call, RegSet args);
 
 /*

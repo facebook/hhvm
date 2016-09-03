@@ -191,7 +191,7 @@ struct Vunit;
   O(cmpbim, I(s0), U(s1), D(sf))\
   O(cmpbm, Inone, U(s0) U(s1), D(sf))\
   O(cmpwim, I(s0), U(s1), D(sf))\
-  O(cmpwm, Inone, U(s0) U(s1), D(sf))           \
+  O(cmpwm, Inone, U(s0) U(s1), D(sf))\
   O(cmpl, Inone, U(s0) U(s1), D(sf))\
   O(cmpli, I(s0), U(s1), D(sf))\
   O(cmplm, Inone, U(s0) U(s1), D(sf))\

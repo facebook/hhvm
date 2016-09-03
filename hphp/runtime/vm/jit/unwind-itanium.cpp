@@ -259,10 +259,6 @@ tc_unwind_personality(int version,
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
       return _URC_CONTINUE_UNWIND;
     }
-    if (ip == stubs.functionEnterHelperReturn) {
-      FTRACE(1, "rip == functionEnterHelperReturn, continuing unwind\n");
-      return _URC_CONTINUE_UNWIND;
-    }
 
     FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
     g_unwind_rds->exn = ue;
@@ -278,43 +274,53 @@ tc_unwind_personality(int version,
 
 TCUnwindInfo tc_unwind_resume(ActRec* fp) {
   while (true) {
-    auto const newFp = fp->m_sfp;
+    auto const sfp = fp->m_sfp;
+
     ITRACE(1, "tc_unwind_resume: fp {}, saved rip {:#x}, saved fp {}\n",
-           fp, fp->m_savedRip, newFp);
+           fp, fp->m_savedRip, sfp);
     Trace::Indent indent;
+
+    // We should only ever be unwinding VM or unique stub frames.
     always_assert_flog(isVMFrame(fp),
                        "Unwinder got non-VM frame {} with saved rip {:#x}\n",
                        fp, fp->m_savedRip);
+    auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
+
+    if (savedRip == mcg->ustubs().callToExit) {
+      // If we're the top VM frame, there's nothing we need to do; we can just
+      // let the native C++ unwinder take over.
+      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
+      return {nullptr, sfp};
+    }
 
     // When we're unwinding through a TC frame (as opposed to stopping at a
-    // handler frame), we need to make sure that if we later return from this
-    // VM frame in translated code, we don't resume after the PHP call that may
-    // be expecting things to still live in its spill space. If the return
-    // address is in functionEnterHelper or callToExit, rvmfp() won't contain a
-    // real VM frame, so we skip those.
-    auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
-    if (savedRip == mcg->ustubs().callToExit) {
-      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
-      return {nullptr, newFp};
-    }
+    // handler frame, or unwinding through a stub frame), we need to make sure
+    // that if we later return from this VM frame in translated code, we don't
+    // resume after the PHP call that may be expecting things to still live in
+    // its spill space.
+    //
+    // (Note that we can't do this if we're in the top VM frame, since it's not
+    // actually an ActRec, so it's actually required that we skip it above).
+    unwindPreventReturnToTC(fp);
 
     assert(g_unwind_rds.isInit());
     auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
+
     if (isDebuggerReturnHelper(savedRip)) {
       // If this frame had its return address smashed by the debugger, the real
       // catch trace is saved in a side table.
       assertx(catchTrace == nullptr);
       catchTrace = unstashDebuggerCatch(fp);
     }
-    unwindPreventReturnToTC(fp);
+
     if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {
       ITRACE(1, "Smashed m_savedRip of fp {} from {} to {:#x}\n",
              fp, savedRip, fp->m_savedRip);
     }
 
-    fp = newFp;
+    fp = sfp;
 
-    // If there's a catch trace for this block, return it. Otherwise, keep
+    // If there's a catch trace for this block, return it.  Otherwise, keep
     // going up the VM stack for this nesting level.
     if (catchTrace) {
       ITRACE(1, "tc_unwind_resume returning catch trace {} with fp: {}\n",

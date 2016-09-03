@@ -280,16 +280,18 @@ void emitDecRefWorkObj(Vout& v, Vreg obj) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitCall(Vout& v, CallSpec target, RegSet args) {
+  using K = CallSpec::Kind;
+
   switch (target.kind()) {
-    case CallSpec::Kind::Direct:
+    case K::Direct:
       v << call{static_cast<TCA>(target.address()), args};
       return;
 
-    case CallSpec::Kind::Smashable:
+    case K::Smashable:
       v << calls{static_cast<TCA>(target.address()), args};
       return;
 
-    case CallSpec::Kind::ArrayVirt: {
+    case K::ArrayVirt: {
       auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
 
       auto const arrkind = v.makeReg();
@@ -305,12 +307,12 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       static_assert(sizeof(HeaderKind) == 1, "");
     } return;
 
-    case CallSpec::Kind::Destructor: {
+    case K::Destructor: {
       auto dtor = lookupDestructor(v, target.reg());
       v << callm{dtor, args};
     } return;
 
-    case CallSpec::Kind::Stub:
+    case K::Stub:
       v << callstub{target.stubAddr(), args};
       return;
   }

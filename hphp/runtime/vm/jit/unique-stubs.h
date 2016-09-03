@@ -155,18 +155,14 @@ struct UniqueStubs {
   TCA funcBodyHelperThunk;
 
   /*
-   * Call EventHook::onFunctionEnter() and handle the case where it requests
+   * Call EventHook::onFunctionCall() and handle the case where it requests
    * that we skip the function.
-   *
-   * functionEnterHelperReturn is only used by unwinder code to detect calls
-   * made from this stub.
    *
    * @reached:  vinvoke from func prologue
    *            jmp from functionSurprisedOrStackOverflow
    * @context:  stub
    */
   TCA functionEnterHelper;
-  TCA functionEnterHelperReturn;
 
   /*
    * Handle either a surprise condition or a stack overflow.

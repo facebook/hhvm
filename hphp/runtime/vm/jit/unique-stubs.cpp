@@ -152,8 +152,8 @@ template<class GenFn>
 void emitStubCatch(Vout& v, const UniqueStubs& us, GenFn gen) {
   always_assert(us.endCatchHelper);
   v << landingpad{};
-  v << stubunwind{};
   gen(v);
+  v << stubunwind{};
   v << jmpi{us.endCatchHelper};
 }
 
@@ -382,11 +382,32 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
 
     v << copy2{ar, v.cns(EventHook::NormalFunc), rarg(0), rarg(1)};
 
+    auto const done = v.makeBlock();
+    auto const ctch = vc.makeBlock();
+    auto const should_continue = v.makeReg();
     bool (*hook)(const ActRec*, int) = &EventHook::onFunctionCall;
-    v << call{TCA(hook), arg_regs(0), &us.functionEnterHelperReturn};
+
+    v << vinvoke{
+      CallSpec::direct(hook),
+      v.makeVcallArgs({{ar, v.cns(EventHook::NormalFunc)}}),
+      v.makeTuple({should_continue}),
+      {done, ctch},
+      Fixup{},
+      DestType::SSA
+    };
+
+    vc = ctch;
+    emitStubCatch(vc, us, [] (Vout& v) {
+      // Skip past the stuff we saved for the intercept case.
+      v << lea{rsp()[16], rsp()};
+      // Undo our stub frame, so that rvmfp() points to the parent VM frame.
+      v << load{rsp()[AROFF(m_sfp)], rvmfp()};
+    });
+
+    v = done;
 
     auto const sf = v.makeReg();
-    v << testb{rret(), rret(), sf};
+    v << testb{should_continue, should_continue, sf};
 
     unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
       auto const saved_rip = v.makeReg();
@@ -435,7 +456,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
     v << stublogue{};
 
     auto const done = v.makeBlock();
-    auto const ctch = v.makeBlock();
+    auto const ctch = vc.makeBlock();
 
     v << vinvoke{CallSpec::direct(handlePossibleStackOverflow),
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
@@ -886,7 +907,7 @@ TCA emitFCallArrayHelper(CodeBlock& main, CodeBlock& cold,
     v << loadstubret{retAddr};
 
     auto const done = v.makeBlock();
-    auto const ctch = v.makeBlock();
+    auto const ctch = vc.makeBlock();
     auto const should_continue = v.makeReg();
     bool (*helper)(PC, int32_t, void*) = &doFCallArrayTC;
 
@@ -899,7 +920,7 @@ TCA emitFCallArrayHelper(CodeBlock& main, CodeBlock& cold,
       DestType::SSA
     };
     vc = ctch;
-    emitStubCatch(vc, us, [] (Vout& vc) { loadVMRegs(vc); });
+    emitStubCatch(vc, us, [] (Vout& v) { loadVMRegs(v); });
 
     v = done;
 
@@ -1297,7 +1318,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // the catch trace (or null) in the first return register, and the new vmfp
     // in the second.
     v << copy{rvmfp(), rarg(0)};
-    v << call{TCA(tc_unwind_resume)};
+    v << call{TCA(tc_unwind_resume), arg_regs(1)};
     v << copy{rret(1), rvmfp()};
 
     auto const done2 = v.makeBlock();

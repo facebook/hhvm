@@ -103,6 +103,11 @@ struct StackTrace : StackTraceBase {
   explicit StackTrace(bool trace = true);
 
   /*
+   * Construct a stacktrace from a list of instruction pointers.
+   */
+  StackTrace(void* const* ips, size_t count);
+
+  /*
    * Constructing from hexEncode() results.
    */
   explicit StackTrace(folly::StringPiece);

@@ -234,6 +234,11 @@ StackTrace::StackTrace(bool trace) {
   }
 }
 
+StackTrace::StackTrace(void* const* ips, size_t count) {
+  m_frames.resize(count);
+  m_frames.assign(ips, ips + count);
+}
+
 StackTrace::StackTrace(folly::StringPiece hexEncoded) {
   // Can't split into StringPieces, strtoll() expects a null terminated string.
   std::vector<std::string> frames;

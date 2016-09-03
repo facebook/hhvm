@@ -1053,10 +1053,8 @@ void FrameStateMgr::clearForUnprocessedPred() {
   FTRACE(1, "clearForUnprocessedPred\n");
 
   // Forget any information about stack values in memory.
-  for (auto& state : m_stack) {
-    for (auto& stk : state.stack) {
-      stk = StackState{};
-    }
+  for (auto& state : cur().stack) {
+    state = StackState{};
   }
 
   // These values must go toward their conservative state.

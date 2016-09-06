@@ -334,6 +334,9 @@ Type thisReturn(const IRInstruction* inst) {
 Type ctxReturn(const IRInstruction* inst) {
   auto const func = inst->func();
   if (!func) return TCtx;
+  if (func->requiresThisInBody()) {
+    return thisReturn(inst);
+  }
   if (func->hasForeignThis()) {
     return func->isStatic() ? TCctx : TCtx;
   }

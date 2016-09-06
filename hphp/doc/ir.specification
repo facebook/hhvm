@@ -1853,6 +1853,10 @@ To string conversions:
   called with null $this. In most cases its a notice, but for
   builtins and special class methods its a fatal.
 
+| FatalMissingThis, ND, S(Func), T|Er
+
+  Similar to RaiseMissingThis, but for cases where we know it will fatal.
+
 | InitClosureStaticLoc, ND, S(BoxedCell) S(Cell), NF
 
   Assuming S0 is an uninitialized closure static local, initialize it by

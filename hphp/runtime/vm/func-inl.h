@@ -347,6 +347,10 @@ inline bool Func::isStaticInProlog() const {
     (m_attrs & (AttrStatic | AttrRequiresThis)) == AttrStatic;
 }
 
+inline bool Func::requiresThisInBody() const {
+  return (m_attrs & AttrRequiresThis) && !isClosureBody();
+}
+
 inline bool Func::isAbstract() const {
   return m_attrs & AttrAbstract;
 }

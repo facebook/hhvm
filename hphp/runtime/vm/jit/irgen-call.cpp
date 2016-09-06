@@ -626,6 +626,7 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
                  gen(env, IncRef, obj);
                },
                [&] {
+                 hint(env, Block::Hint::Unlikely);
                  gen(env, RaiseMissingThis, funcTmp);
                });
     return ctx;

@@ -314,7 +314,9 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
   auto const func = inst->marker().func();
   auto const srcTy = inst->src(0)->type();
-  if (srcTy <= TObj) return gen(env, Nop);
+  if (srcTy <= TObj || func->requiresThisInBody()) {
+    return gen(env, Nop);
+  }
   if (!func->mayHaveThis() || !srcTy.maybe(TObj)) {
     return gen(env, Jmp, inst->taken());
   }
@@ -336,7 +338,13 @@ SSATmp* simplifyCheckFuncStatic(State& env, const IRInstruction* inst) {
 SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   if (funcTmp->hasConstVal()) {
-    if (!needs_missing_this_check(funcTmp->funcVal())) {
+    auto const func = funcTmp->funcVal();
+    // Not requiresThisInBody, since this is done in the callee
+    // at FPush* time.
+    if (func->attrs() & AttrRequiresThis) {
+      return gen(env, FatalMissingThis, inst->taken(), funcTmp);
+    }
+    if (!needs_missing_this_check(func)) {
       return gen(env, Nop);
     }
   }

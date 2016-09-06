@@ -616,7 +616,20 @@ struct Func final {
    */
   bool isPublic() const;
   bool isStatic() const;
+  /*
+   * Whether a function is called non-statically. Generally this means
+   * isStatic(), but eg static closures are still called with a valid
+   * this pointer.
+   */
   bool isStaticInProlog() const;
+  /*
+   * Whether a method is guaranteed to have a valid this in the body.
+   * A method with AttrRequiresThis is guaranteed to be called with a
+   * valid this, but closures swap out the closure object for the
+   * closure context in the prolog, so may not have a this in the
+   * body.
+   */
+  bool requiresThisInBody() const;
   bool isAbstract() const;
 
   /*

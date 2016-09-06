@@ -444,6 +444,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseError:
   case RaiseWarning:
   case RaiseMissingThis:
+  case FatalMissingThis:
   case RaiseNotice:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:

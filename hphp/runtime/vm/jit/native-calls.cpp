@@ -298,6 +298,8 @@ static CallMap s_callMap {
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
     {RaiseMissingThis,   raise_missing_this, DNone,
                            SSync, {{SSA, 0}}},
+    {FatalMissingThis,   raise_missing_this, DNone,
+                           SSync, {{SSA, 0}}},
     {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
     {RaiseArrayIndexNotice,
                          raiseArrayIndexNotice, DNone, SSync, {{SSA, 0}}},

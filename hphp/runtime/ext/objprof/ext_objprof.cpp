@@ -29,7 +29,7 @@
  * Call objprof_get_data to trigger the scan.
  */
 
-#include <set>
+#include <unordered_set>
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
@@ -119,7 +119,7 @@ std::pair<int, double> tvGetSize(
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
-  std::set<std::string>* exclude_classes,
+  const std::unordered_set<std::string>& exclude_classes,
   ObjprofFlags flags,
   int depth_allowed
 );
@@ -127,7 +127,7 @@ void tvGetStrings(
   const TypedValue* tv,
   ObjprofStrings* metrics,
   ObjprofStack* path,
-  std::set<void*>* pointers);
+  std::unordered_set<void*>* pointers);
 
 std::pair<int, double> getObjSize(
   ObjectData* obj,
@@ -135,7 +135,7 @@ std::pair<int, double> getObjSize(
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
-  std::set<std::string>* exclude_classes,
+  const std::unordered_set<std::string>& exclude_classes,
   std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
   ObjprofFlags flags
 );
@@ -158,12 +158,12 @@ String pathString(ObjprofStack* stack, const char* sep) {
 bool isObjprofRoot(
   const ObjectData* obj,
   ObjprofFlags flags,
-  std::set<std::string>* exclude_classes
+  const std::unordered_set<std::string>& exclude_classes
 ) {
   Class* cls = obj->getVMClass();
   auto cls_name = cls->name()->toCppString();
   // Classes in exclude_classes not considered root
-  if (exclude_classes->find(cls_name) != exclude_classes->end()) return false;
+  if (exclude_classes.find(cls_name) != exclude_classes.end()) return false;
   // In USER_TYPES_ONLY mode, Classes with "HH\\" prefix not considered root
   if ((flags & ObjprofFlags::USER_TYPES_ONLY) != 0) {
     if (cls_name.compare(0, 3, "HH\\") == 0) return false;
@@ -187,7 +187,7 @@ std::pair<int, double> sizeOfArray(
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
-  std::set<std::string>* exclude_classes,
+  const std::unordered_set<std::string>& exclude_classes,
   ObjprofFlags flags
 ) {
   auto arrKind = props->kind();
@@ -339,7 +339,7 @@ void stringsOfArray(
   const ArrayData* props,
   ObjprofStrings* metrics,
   ObjprofStack* path,
-  std::set<void*>* pointers
+  std::unordered_set<void*>* pointers
 ) {
   ssize_t iter = props->iter_begin();
   auto pos_limit = props->iter_end();
@@ -414,7 +414,7 @@ std::pair<int, double> tvGetSize(
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
-  std::set<std::string>* exclude_classes,
+  const std::unordered_set<std::string>& exclude_classes,
   ObjprofFlags flags,
   int depth_allowed
 ) {
@@ -603,7 +603,7 @@ void tvGetStrings(
   const TypedValue* tv,
   ObjprofStrings* metrics,
   ObjprofStack* path,
-  std::set<void*>* pointers
+  std::unordered_set<void*>* pointers
 ) {
   switch (tv->m_type) {
     case HPHP::KindOfUninit:
@@ -702,7 +702,7 @@ std::pair<int, double> getObjSize(
   ObjprofStack* stack,
   PathsToObject* paths,
   ObjprofValuePtrStack* val_stack,
-  std::set<std::string>* exclude_classes,
+  const std::unordered_set<std::string>& exclude_classes,
   std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
   ObjprofFlags flags
 ) {
@@ -844,7 +844,7 @@ void getObjStrings(
   ObjectData* obj,
   ObjprofStrings* metrics,
   ObjprofStack* path,
-  std::set<void*>* pointers
+  std::unordered_set<void*>* pointers
 ) {
   Class* cls = obj->getVMClass();
   FTRACE(1, "Getting strings for type {} at {}\n",
@@ -908,7 +908,7 @@ void getObjStrings(
 Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
   ObjprofStrings metrics;
 
-  std::set<void*> pointers;
+  std::unordered_set<void*> pointers;
   MM().forEachObject([&](ObjectData* obj) {
     ObjprofStack path;
     getObjStrings(obj, &metrics, &path, &pointers);
@@ -946,13 +946,13 @@ Array HHVM_FUNCTION(objprof_get_data,
   // Create a set of std::strings from the exclude_list provided. This de-dups
   // the exclude_list, and also provides for fast lookup when determining
   // whether a given class is in the exclude_list
-  std::set<std::string> exclude_classes;
+  std::unordered_set<std::string> exclude_classes;
   for (ArrayIter iter(exclude_list); iter; ++iter) {
     exclude_classes.insert(iter.second().toString().data());
   }
 
   MM().forEachObject([&](ObjectData* obj) {
-    if (!isObjprofRoot(obj, (ObjprofFlags)flags, &exclude_classes)) return;
+    if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
     std::vector<const void*> val_stack;
     auto cls = obj->getVMClass();
     auto objsizePair = getObjSize(
@@ -961,7 +961,7 @@ Array HHVM_FUNCTION(objprof_get_data,
       nullptr, /* stack */
       nullptr, /* paths */
       &val_stack,
-      &exclude_classes,
+      exclude_classes,
       objprof_props_mode ? &histogram : nullptr,
       (ObjprofFlags)flags
     );
@@ -1016,13 +1016,13 @@ Array HHVM_FUNCTION(objprof_get_paths,
   // Create a set of std::strings from the exclude_list provided. This de-dups
   // the exclude_list, and also provides for fast lookup when determining
   // whether a given class is in the exclude_list
-  std::set<std::string> exclude_classes;
+  std::unordered_set<std::string> exclude_classes;
   for (ArrayIter iter(exclude_list); iter; ++iter) {
     exclude_classes.insert(iter.second().toString().data());
   }
 
   MM().forEachObject([&](ObjectData* obj) {
-      if (!isObjprofRoot(obj, (ObjprofFlags)flags, &exclude_classes)) return;
+      if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
       auto cls = obj->getVMClass();
       auto& metrics = histogram[std::make_pair(cls, "")];
       ObjprofStack stack;
@@ -1034,7 +1034,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
         &stack,
         &pathsToObject,
         &val_stack,
-        &exclude_classes,
+        exclude_classes,
         nullptr, /* histogram */
         (ObjprofFlags)flags
       );
@@ -1103,7 +1103,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
         &stack,
         &pathsToObject,
         &val_stack,
-        &exclude_classes,
+        exclude_classes,
         (ObjprofFlags)flags,
         0 /* depth_allowed */
       );

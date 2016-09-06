@@ -302,16 +302,13 @@ std::string getNodesConnectionName(
 
 void heapgraphCallback(Array fields, const Variant& callback) {
   VMRegAnchor _;
-  Array params;
-  params.append(fields);
+  auto params = make_packed_array(fields);
   vm_call_user_func(callback, params);
 }
 
 void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
   VMRegAnchor _;
-  Array params;
-  params.append(fields);
-  params.append(fields2);
+  auto params = make_packed_array(fields, fields2);
   vm_call_user_func(callback, params);
 }
 
@@ -351,7 +348,7 @@ std::vector<int> toBoundIntVector(const Array& arr, int64_t max) {
   std::vector<int> result;
   result.reserve(arr.size());
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto index = iter.second().toInt64();
+    auto index = iter.second().toInt64(); // Cannot re-enter.
     if (index < 0 || index >= max) {
       continue;
     }
@@ -494,11 +491,13 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
   if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
-  Array result;
+  size_t num_edges{0};
+  hgptr->hg.eachOutPtr(index, [&](int) { num_edges++; });
+  PackedArrayInit result(num_edges);
   hgptr->hg.eachOutPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
-  return result;
+  return result.toArray();
 }
 
 Array HHVM_FUNCTION(heapgraph_node_in_edges,
@@ -508,11 +507,13 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
   if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
-  Array result;
+  size_t num_edges{0};
+  hgptr->hg.eachInPtr(index, [&](int) { num_edges++; });
+  PackedArrayInit result(num_edges);
   hgptr->hg.eachInPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
-  return result;
+  return result.toArray();
 }
 
 Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {

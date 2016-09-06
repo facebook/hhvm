@@ -987,17 +987,6 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
     if (auto clsSpec = clsVal->type().clsSpec()) {
       cls = clsSpec.cls();
       exact = clsSpec.exact();
-    } else if (clsVal->inst()->is(LdClsCtx, LdClsCctx)) {
-      /*
-       * Optimize FPushClsMethod when the method is a known static
-       * string and the input class is the context.  The common bytecode
-       * pattern here is LateBoundCls ; FPushClsMethod.
-       *
-       * This logic feels like it belongs in the simplifier, but the
-       * generated code for this case is pretty different, since we
-       * don't need the pre-live ActRec trick.
-       */
-      cls = curClass(env);
     }
 
     if (cls) {

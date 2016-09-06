@@ -89,6 +89,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 #define DCol           return false; // fixed in bytecode
 #define DThis          return false; // fixed type from ctx class
 #define DCtx           return false;
+#define DCtxCls        return false;
 #define DMulti         return true;  // DefLabel; value could be anything
 #define DSetElem       return false; // fixed type
 #define DBuiltin       return false; // from immutable typeParam

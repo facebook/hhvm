@@ -517,6 +517,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DCol
 #define DThis
 #define DCtx
+#define DCtxCls
 #define DCns
 
 #define O(opcode, dstinfo, srcinfo, flags) \
@@ -559,6 +560,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DCol
 #undef DThis
 #undef DCtx
+#undef DCtxCls
 #undef DCns
 
   return true;

@@ -62,6 +62,7 @@ TRACE_SET_MOD(hhir);
 #define DCol           HasDest
 #define DThis          HasDest
 #define DCtx           HasDest
+#define DCtxCls        HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
 #define DPtrToParam    HasDest
@@ -123,6 +124,7 @@ OpInfo g_opInfo[] = {
 #undef DAllocObj
 #undef DThis
 #undef DCtx
+#undef DCtxCls
 #undef DMulti
 #undef DSetElem
 #undef DPtrToParam

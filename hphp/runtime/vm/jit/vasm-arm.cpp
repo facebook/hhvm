@@ -608,7 +608,7 @@ void Vgen::emit(const cloadq& i) {
  *   ZF, AF, PF are undefined
  *
  * In the following implementation,
- *   N, Z, v are updated according to result
+ *   N, Z, V are updated according to result
  *   C is cleared (FIXME)
  *   PF, AF are not available
  */
@@ -621,9 +621,9 @@ void Vgen::emit(const imul& i) {
   vixl::Label posResult;
   vixl::Label noOverflow;
 
-  // Do the multiplication for the upper 64 bits of a 128 bit result
+  // Do the multiplication for the upper 64 bits of a 128 bit result.
   // If the result is all zeroes or all ones, and the sign did not
-  // change, then no overflow
+  // change, then there is no overflow.
   a->smulh(rAsm, X(i.s0), X(i.s1));
 
   a->Tst(X(i.d), 0);
@@ -636,8 +636,7 @@ void Vgen::emit(const imul& i) {
   a->Cmp(rAsm, 0);
   a->B(&noOverflow, vixl::eq);
 
-  // Overflow, so conditioally set N and Z bits
-  // and then or in V bit
+  // Overflow, so conditionally set N and Z bits and then or in V bit.
   a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
   a->Mrs(rAsm, NZCV);
   a->Lsr(rAsm, rAsm, 28);

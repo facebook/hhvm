@@ -36,7 +36,7 @@ template <> struct WorkerInfo<IFJob> {
 
 struct InitFiniNode {
   enum class When {
-    RequestInit,
+    RequestStart,            // before executing PHP code in a request
       RequestFini,
       ThreadInit,
       ThreadFini,
@@ -65,7 +65,7 @@ struct InitFiniNode {
     n = this;
   }
 
-  static void RequestInit()    { iterate(When::RequestInit);    }
+  static void RequestStart()   { iterate(When::RequestStart);   }
   static void RequestFini()    { iterate(When::RequestFini);    }
   static void ThreadInit()     { iterate(When::ThreadInit);     }
   static void ThreadFini()     { iterate(When::ThreadFini);     }

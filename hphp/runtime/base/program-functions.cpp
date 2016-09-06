@@ -2188,7 +2188,6 @@ void hphp_session_init() {
   assert(!s_sessionInitialized);
   g_context.getCheck();
   AsioSession::Init();
-  InitFiniNode::RequestInit();
   Socket::clearLastError();
   TI().onSessionInit();
   MM().resetExternalStats();

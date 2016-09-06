@@ -119,6 +119,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
   m_context->setTransport(transport);
   transport->enableCompression();
+  InitFiniNode::RequestStart();
 
   ServerStatsHelper ssh("all", ServerStatsHelper::TRACK_MEMORY);
   Logger::Verbose("receiving %s", transport->getCommand().c_str());

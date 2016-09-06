@@ -435,6 +435,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     }
   }
   context->setTransport(transport);
+  InitFiniNode::RequestStart();
 
   string file = reqURI.absolutePath().c_str();
   {

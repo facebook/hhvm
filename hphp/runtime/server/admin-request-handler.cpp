@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -152,6 +153,62 @@ void WarnIfNotOK(Transport* transport) {
   }
 }
 
+#ifdef HPHP_TRACE
+namespace {
+/*
+ * Task to trace a total of 'count' requests whose URL contain 'url', using the
+ * module:level,... specificaion 'spec' (see HPHP::Trace).
+ *
+ * To ensure an unbroken trace output stream, the task is held locally by the
+ * thread currently tracing its request. If filtering on URL, threads may pass
+ * the task around to find matches faster. Concurrent tasks are not supported.
+ */
+struct TraceTask {
+  const std::string spec;
+  const std::string url;
+  int64_t count;
+};
+std::atomic<TraceTask*> s_traceTask{nullptr}; // Task up for grabs.
+__thread TraceTask* tl_traceTask{nullptr};
+
+InitFiniNode s_traceRequestStart([]() {
+  if (!tl_traceTask && !s_traceTask.load(std::memory_order_acquire)) return;
+  if (!tl_traceTask) {
+    // Try grab the task.
+    tl_traceTask = s_traceTask.exchange(nullptr, std::memory_order_acq_rel);
+  }
+  if (!tl_traceTask) return; // We lost the race; nothing to do.
+  if (tl_traceTask->count == 0) {
+    // Task already complete.
+    Trace::trace("Trace complete at %d\n", (int)time(nullptr));
+    Trace::setTraceThread("");
+    delete tl_traceTask;
+    tl_traceTask = nullptr;
+    return;
+  }
+  const string url = g_context->getRequestUrl();
+  if (url.find(tl_traceTask->url) == string::npos) {
+    // URL mismatch; hand task back (and discard any unlikely colliding task).
+    delete s_traceTask.exchange(tl_traceTask, std::memory_order_acq_rel);
+    tl_traceTask = nullptr;
+    Trace::setTraceThread("");
+  } else {
+    // Work on task.
+    --tl_traceTask->count;
+    const auto spec = tl_traceTask->spec;
+    Trace::setTraceThread(spec);
+    Trace::trace("Trace for %s at %d using spec %s\n",
+                 url.c_str(), (int)time(nullptr), spec.c_str());
+  }
+}, InitFiniNode::When::RequestStart, "trace");
+
+std::string getTraceOutputFile() {
+  return folly::sformat("{}/hphp.{}.log",
+                        RuntimeOption::RemoteTraceOutputDir, (int64_t)getpid());
+}
+} // namespace
+#endif // HPHP_TRACE
+
 void AdminRequestHandler::logToAccessLog(Transport* transport) {
   GetAccessLog().onNewRequest();
   GetAccessLog().log(transport, nullptr);
@@ -262,7 +319,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    random        optional, default false, relocate random subset\n"
         "       all        optional, default false, relocate all translations\n"
         "      time        optional, default 20 (seconds)\n"
-
+#ifdef HPHP_TRACE
+        "/trace-request:   write trace for next request(s) to "
+        + getTraceOutputFile() + "\n"
+        "    spec          module:level,... spec; see hphp/util/trace.h\n"
+        "    count         optional, total requests to trace (default: 1)\n"
+        "    url           optional, trace only if URL contains \'url\'\n"
+#endif
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
         "/prof-cpu-off:    turn off CPU profiler\n"
@@ -435,6 +498,19 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       transport->sendString(result);
       break;
     }
+#ifdef HPHP_TRACE
+    if (cmd == "trace-request") {
+      Trace::ensureInit(getTraceOutputFile());
+      // Just discard any existing task.
+      delete s_traceTask.exchange(
+        new TraceTask{transport->getParam("spec"),
+                      transport->getParam("url"),
+                      std::max(transport->getInt64Param("count"), 1ll)},
+        std::memory_order_acq_rel);
+      transport->sendString("OK\n");
+      break;
+    }
+#endif
     if (cmd == "build-id") {
       transport->sendString(RuntimeOption::BuildId, 200);
       break;

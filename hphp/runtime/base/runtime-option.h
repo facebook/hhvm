@@ -331,6 +331,7 @@ struct RuntimeOption {
   static std::string CoreDumpReportDirectory;
   static std::string StackTraceFilename;
   static int StackTraceTimeout;
+  static std::string RemoteTraceOutputDir;
 
   static bool EnableStats;
   static bool EnableAPCStats;

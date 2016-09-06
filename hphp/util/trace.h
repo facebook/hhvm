@@ -375,6 +375,12 @@ void vtrace(ATTRIBUTE_PRINTF_STRING const char *fmt, va_list args)
   ATTRIBUTE_PRINTF(1,0);
 void dumpRingbuffer();
 
+// Ensure a tracing output file has been opened.
+void ensureInit(std::string outFile);
+// Set tracing levels for this thread using a module:level,... specification.
+// If traceSpec is empty, all levels for this thread are zeroed.
+void setTraceThread(const std::string& traceSpec);
+
 //////////////////////////////////////////////////////////////////////
 
 #else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
@@ -417,6 +423,8 @@ inline void trace(const std::string&)    { }
 inline void vtrace(const char*, va_list) { }
 inline bool moduleEnabled(Module t, int level = 1) { return false; }
 inline int moduleLevel(Module tm) { return 0; }
+inline void ensureInit(std::string outFile) { }
+inline void setTraceThread(const std::string& traceSpec) { }
 
 //////////////////////////////////////////////////////////////////////
 

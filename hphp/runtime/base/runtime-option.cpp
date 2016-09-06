@@ -335,6 +335,7 @@ std::string RuntimeOption::CoreDumpReportDirectory =
 #endif
 std::string RuntimeOption::StackTraceFilename;
 int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
+std::string RuntimeOption::RemoteTraceOutputDir = "/tmp";
 
 bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableAPCStats = false;
@@ -1669,6 +1670,8 @@ void RuntimeOption::Load(
     StackTraceFilename = stack_trace_stream.str();
 
     Config::Bind(StackTraceTimeout, ini, config, "Debug.StackTraceTimeout", 0);
+    Config::Bind(RemoteTraceOutputDir, ini, config,
+                 "Debug.RemoteTraceOutputDir", "/tmp");
 
     {
       // Debug SimpleCounter

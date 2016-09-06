@@ -520,6 +520,12 @@ module WithToken(Token: TokenType) = struct
       awaitable_async : t;
       awaitable_compound_statement : t;
     }
+    and xhp_enum_type = {
+      xhp_enum_token : t;
+      xhp_enum_left_brace : t;
+      xhp_enum_values : t;
+      xhp_enum_right_brace : t
+    }
     and xhp_class_attribute_declaration = {
       xhp_attr_token : t;
       xhp_attr_list : t;
@@ -650,6 +656,7 @@ module WithToken(Token: TokenType) = struct
     | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
+    | XHPEnumType of xhp_enum_type
     | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
     | XHPClassAttribute of xhp_class_attribute
     | TraitUse of trait_use
@@ -791,6 +798,7 @@ module WithToken(Token: TokenType) = struct
       | MethodishDeclaration _ -> SyntaxKind.MethodishDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
+      | XHPEnumType _ -> SyntaxKind.XHPEnumType
       | XHPClassAttributeDeclaration _ ->
         SyntaxKind.XHPClassAttributeDeclaration
       | XHPClassAttribute _ -> SyntaxKind.XHPClassAttribute
@@ -967,6 +975,7 @@ module WithToken(Token: TokenType) = struct
     let is_element_initializer node = kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
+    let is_xhp_enum_type node = kind node = SyntaxKind.XHPEnumType
     let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
     let is_xhp_open node = kind node = SyntaxKind.XHPOpen
     let is_xhp_attribute node = kind node = SyntaxKind.XHPAttribute
@@ -1156,6 +1165,11 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ classish_body_left_brace; classish_body_elements;
           classish_body_right_brace ]
+      | XHPEnumType
+        { xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
+          xhp_enum_right_brace } ->
+        [ xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
+          xhp_enum_right_brace ]
       | XHPClassAttributeDeclaration
         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
         [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]
@@ -1560,6 +1574,11 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ "classish_body_left_brace"; "classish_body_elements";
           "classish_body_right_brace" ]
+      | XHPEnumType
+        { xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
+          xhp_enum_right_brace } ->
+        [ "xhp_enum_token"; "xhp_enum_left_brace"; "xhp_enum_values";
+          "xhp_enum_right_brace" ]
       | XHPClassAttributeDeclaration
         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
         [ "xhp_attr_token"; "xhp_attr_list"; "xhp_attr_semicolon" ]
@@ -2252,6 +2271,12 @@ module WithToken(Token: TokenType) = struct
         ClassishBody {
           classish_body_left_brace; classish_body_elements;
           classish_body_right_brace }
+      | (SyntaxKind.XHPEnumType,
+        [ xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
+          xhp_enum_right_brace ]) ->
+        XHPEnumType
+        { xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
+          xhp_enum_right_brace }
       | (SyntaxKind.XHPClassAttributeDeclaration,
         [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]) ->
         XHPClassAttributeDeclaration
@@ -2818,6 +2843,10 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.ClassishBody [
           classish_body_left_brace; classish_body_elements;
           classish_body_right_brace ]
+
+      let make_xhp_enum_type token left items right =
+        from_children SyntaxKind.XHPEnumType
+        [ token; left; items; right ]
 
       let make_xhp_class_attribute_declaration attr attrs semi =
         from_children SyntaxKind.XHPClassAttributeDeclaration

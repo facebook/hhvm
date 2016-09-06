@@ -260,6 +260,12 @@ let rec get_doc node =
     let right = get_doc (classish_body_right_brace x) in
     let body = get_doc (classish_body_elements x) in
     indent_block_no_space left body right indt
+  | XHPEnumType x ->
+    let e = get_doc x.xhp_enum_token in
+    let l = get_doc x.xhp_enum_left_brace in
+    let v = get_doc x.xhp_enum_values in
+    let r = get_doc x.xhp_enum_right_brace in
+    group_doc (e ^| l ^| v ^| r)
   | XHPClassAttributeDeclaration x ->
     let attr = get_doc x.xhp_attr_token in
     let attrs = get_doc x.xhp_attr_list in

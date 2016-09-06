@@ -72,6 +72,18 @@ void perf_event_disable();
  */
 void perf_event_consume(perf_event_consume_fn_t consume);
 
+/*
+ * Pause or resume sampling for an event.
+ *
+ * Can be used instead of perf_event_{enable,disable}() for an event that has
+ * already been opened, but which should be briefly turned off.
+ *
+ * This should likely be called in whatever routine is used to consume events,
+ * to avoid reentrant sampling.
+ */
+void perf_event_pause();
+void perf_event_resume();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

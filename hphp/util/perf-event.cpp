@@ -229,6 +229,16 @@ bool install_sigio_handler() {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Pause or resume an event.
+ */
+void pause_event(const perf_event_handle& pe) {
+  ioctl(pe.fd, PERF_EVENT_IOC_DISABLE, 0);
+}
+void resume_event(const perf_event_handle& pe) {
+  ioctl(pe.fd, PERF_EVENT_IOC_ENABLE, 0);
+}
+
+/*
  * Logically delete all events that are currently buffered for `pe'.
  */
 void clear_events(const perf_event_handle& pe) {
@@ -442,6 +452,18 @@ bool perf_event_enable(uint64_t sample_freq, perf_event_signal_fn_t signal_fn) {
   return true;
 }
 
+void perf_event_pause() {
+  if (tl_perf_event.signal == nullptr) return;
+  pause_event(tl_perf_event.loads);
+  pause_event(tl_perf_event.stores);
+}
+
+void perf_event_resume() {
+  if (tl_perf_event.signal == nullptr) return;
+  resume_event(tl_perf_event.loads);
+  resume_event(tl_perf_event.stores);
+}
+
 void perf_event_disable() {
   if (tl_perf_event.signal == nullptr) return;
 
@@ -465,6 +487,8 @@ namespace HPHP {
 
 bool perf_event_enable(uint64_t, perf_event_signal_fn_t) { return false; }
 void perf_event_disable() {}
+void perf_event_pause() {}
+void perf_event_resume() {}
 void perf_event_consume(perf_event_consume_fn_t) {}
 
 }

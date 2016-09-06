@@ -81,23 +81,21 @@ enum class SimpleOp {
 // Property information.
 
 struct PropInfo {
-  PropInfo()
-    : offset{-1}
-    , repoAuthType{}
-    , baseClass{nullptr}
-  {}
-
+  PropInfo() = default;
   explicit PropInfo(int offset,
                     RepoAuthType repoAuthType,
-                    const Class* baseClass)
+                    const Class* objClass,
+                    const Class* propClass)
     : offset{offset}
     , repoAuthType{repoAuthType}
-    , baseClass{baseClass}
+    , objClass{objClass}
+    , propClass{propClass}
   {}
 
-  int offset;
-  RepoAuthType repoAuthType;
-  const Class* baseClass;
+  int offset{-1};
+  RepoAuthType repoAuthType{};
+  const Class* objClass{nullptr};
+  const Class* propClass{nullptr};
 };
 
 /*
@@ -148,7 +146,8 @@ PropInfo getPropertyOffset(IRGS& env,
   return PropInfo(
     baseClass->declPropOffset(idx),
     baseClass->declPropRepoAuthType(idx),
-    baseClass
+    baseClass,
+    baseClass->declProperties()[idx].cls
   );
 }
 
@@ -165,6 +164,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   auto cls = base->type().clsSpec().cls();
   auto propType = TGen;
   auto isDeclared = false;
+  auto propClass = cls;
 
   // If the property name is known, try to look it up and get its RAT.
   if (key->hasConstVal(TStr)) {
@@ -173,6 +173,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
     auto const lookup = cls->getDeclPropIndex(ctx, keyStr);
     if (lookup.prop != kInvalidSlot) {
       isDeclared = true;
+      propClass = cls->declProperties()[lookup.prop].cls;
       if (RuntimeOption::RepoAuthoritative) {
         propType = typeFromRAT(cls->declPropRepoAuthType(lookup.prop), nullptr);
       }
@@ -188,7 +189,10 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   // they're unset.
   if (!isDeclared && cls->hasNativePropHandler()) return false;
 
-  env.irb->constrainValue(base, TypeConstraint(cls));
+  if (propClass == cls ||
+      env.irb->constrainValue(base, TypeConstraint(propClass).setWeak())) {
+    env.irb->constrainValue(base, TypeConstraint(cls));
+  }
   return true;
 }
 
@@ -263,7 +267,7 @@ bool mightCallMagicPropMethod(MOpFlags flags, PropInfo propInfo) {
   if (!typeFromRAT(propInfo.repoAuthType, nullptr).maybe(TUninit)) {
     return false;
   }
-  auto const cls = propInfo.baseClass;
+  auto const cls = propInfo.objClass;
   if (!cls) return true;
   // NB: this function can't yet be used for unset or isset contexts.  Just get
   // and set.
@@ -301,7 +305,8 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 //////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
-PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType) {
+PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
+                                  bool constrain) {
   // We allow the use of clases from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
@@ -313,10 +318,13 @@ PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType) {
   if (info.offset == -1) return info;
 
   if (env.irb->constrainValue(base,
-                              TypeConstraint(baseCls).setWeak())) {
-    // We can't use this specialized class without making a guard more
-    // expensive, so don't do it.
-    return PropInfo{};
+                              TypeConstraint(info.propClass).setWeak())) {
+    if (!constrain) {
+      // We can't use this specialized class without making a guard more
+      // expensive, so don't do it.
+      return PropInfo{};
+    }
+    specializeObjBase(env, base);
   }
 
   return info;
@@ -872,7 +880,7 @@ void emitVectorSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* value) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
@@ -1189,9 +1197,7 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
     base = basePtr;
   }
 
-  specializeObjBase(env, base);
-
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
   if (propInfo.offset == -1 || (flags & MOpFlags::Unset) ||
       mightCallMagicPropMethod(flags, propInfo)) {
     return propGenericImpl(env, flags, base, key, nullsafe);
@@ -1392,8 +1398,7 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
 
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpFlags flags, bool nullsafe) {
-  specializeObjBase(env, base);
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MOpFlags::None, propInfo)) {
@@ -1481,10 +1486,8 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     base = basePtr;
   }
 
-  specializeObjBase(env, base);
-
   auto const flags = MOpFlags::Define;
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo.offset != -1 && !mightCallMagicPropMethod(flags, propInfo)) {
     auto propPtr = emitPropSpecialized(env, base, key, false, flags, propInfo);
@@ -2036,7 +2039,7 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
 
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
                       SSATmp* key, SSATmp* rhs) {
-  auto const propInfo = getCurrentPropertyOffset(env, base, key->type());
+  auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo.offset != -1 &&
       !mightCallMagicPropMethod(MOpFlags::Define, propInfo)) {

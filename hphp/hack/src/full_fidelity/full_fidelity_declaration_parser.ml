@@ -184,7 +184,6 @@ module WithExpressionAndStatementParser
     | RightBrace -> parser, make_missing ()
     | _ -> aux [] parser
 
-
   and parse_enum_declaration parser =
     (*
     enum-declaration:
@@ -484,20 +483,44 @@ module WithExpressionAndStatementParser
   and parse_xhp_type_specifier parser =
     (* SPEC (Draft)
       xhp-type-specifier:
-        enum { xhp-attribute-enum-list-opt } (TODO)
+        enum { xhp-attribute-enum-list-opt }
         type-specifier
+
+      xhp-attribute-enum-value:
+        any integer literal
+        any single-quoted-string literal
+        any double-quoted-string literal
+
+      TODO: What are the semantics of encapsulated expressions in double-quoted
+            string literals here?
+      TODO: Write the grammar for the comma-separated list
+      TODO: Can the list end in a trailing comma?
+      TODO: Can it be empty?
+      ERROR RECOVERY: We parse any expressions here;
+      TODO: give an error in a later pass if the expressions are not literals.
     *)
-    parse_type_specifier parser
+    if peek_token_kind parser = Enum then
+      let (parser, enum_token) = assert_token parser Enum in
+      let (parser, left_brace, values, right_brace) =
+        parse_braced_comma_list_opt_allow_trailing
+        parser parse_expression in
+      let result =
+        make_xhp_enum_type enum_token left_brace values right_brace in
+      (parser, result)
+    else
+      parse_type_specifier parser
 
   and parse_xhp_class_attribute parser =
     (* SPEC (Draft)
     xhp-attribute-declaration:
       xhp-class-name
-      xhp-type-specifier name initializer-opt required-opt (TODO)
+      xhp-type-specifier name initializer-opt @required-opt (TODO)
     *)
     if peek_token_kind parser = Colon then
       (* TODO: This doesn't give quite the right error message if it turns
       out to be malformed; consider tweaking this. *)
+      (* TODO: What about the case where we have a "type name = value"
+         attribute and the type starts with a colon? Is that ever legal? *)
       expect_class_name parser
     else
       let (parser, ty) = parse_xhp_type_specifier parser in

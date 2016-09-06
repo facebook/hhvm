@@ -60,6 +60,9 @@ SSATmp* ldClsPropAddrKnown(IRGS& env,
 }
 
 SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
+  assertx(ssaCls->isA(TCls));
+  assertx(ssaName->isA(TStr));
+
   /*
    * We can use ldClsPropAddrKnown if either we know which property it is and
    * that it is visible && accessible, or we know it is a property on this

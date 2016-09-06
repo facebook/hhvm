@@ -1133,6 +1133,8 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpFlags flags) {
 }
 
 void baseSImpl(IRGS& env, SSATmp* name, int32_t clsIdx) {
+  if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
+
   auto cls = topA(env, BCSPRelOffset{clsIdx});
   auto spropPtr = ldClsPropAddr(env, cls, name, true);
   gen(env, StMBase, spropPtr);

@@ -90,8 +90,16 @@ struct perf_event_handle {
     : fd(fd)
     , meta(meta)
   {}
+
+  // File descriptor of the opened perf_event.
   int fd{-1};
+
+  // Metadata header page, followed by the ring buffer for samples.
   struct perf_event_mmap_page* meta{nullptr};
+
+  // Buffer for samples that wrap around.
+  char* buf{nullptr};
+  size_t buf_sz{0};
 };
 
 /*
@@ -252,6 +260,7 @@ void clear_events(const perf_event_handle& pe) {
  */
 void close_event(const perf_event_handle& pe) {
   clear_events(pe);
+  free(pe.buf);
   ioctl(pe.fd, PERF_EVENT_IOC_DISABLE, 0);
   munmap(pe.meta, mmap_sz());
   close(pe.fd);
@@ -283,11 +292,16 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
   attr.size = sizeof(attr);
   attr.disabled = 1;
   attr.sample_freq = sample_freq;
-  attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_TID | PERF_SAMPLE_ADDR;
   attr.freq = 1;
   attr.watermark = 0;
   attr.wakeup_events = 1;
   attr.precise_ip = 2;  // request zero skid
+
+  attr.sample_type = PERF_SAMPLE_IP
+                   | PERF_SAMPLE_TID
+                   | PERF_SAMPLE_ADDR
+                   | PERF_SAMPLE_CALLCHAIN
+                   ;
 
   auto const ret = syscall(__NR_perf_event_open, &attr, 0, -1, -1, 0);
   if (ret < 0) {
@@ -361,15 +375,20 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Ensure that `pe.buf' can hold at least `cap' bytes.
+ */
+void ensure_buffer_capacity(perf_event_handle& pe, size_t cap) {
+  if (pe.buf_sz >= cap) return;
+  free(pe.buf);
+  pe.buf = reinterpret_cast<char*>(malloc(cap * 2));
+}
+
+/*
  * Iterate through all the pending sampled events in `pe' and pass each one to
  * `consume'.
  */
 void consume_events(PerfEvent kind, perf_event_handle& pe,
                     perf_event_consume_fn_t consume) {
-  // Temporary buffer for holding structs that were wrapped in the ring buffer.
-  // 256 bytes should be large enough to hold any perf records.
-  char tmp[256];
-
   auto const data_tail = pe.meta->data_tail;
   auto const data_head = pe.meta->data_head;
 
@@ -387,16 +406,15 @@ void consume_events(PerfEvent kind, perf_event_handle& pe,
     auto header = reinterpret_cast<struct perf_event_header*>(cur);
 
     if (cur + header->size > base + buffer_sz()) {
-      // Make sure the record isn't bigger than expected.
-      assertx(header->size <= 256);
-
       // The current entry wraps around the ring buffer.  Copy it into a stack
       // buffer, and update `cur' to wrap around appropriately.
       auto const prefix_len = base + buffer_sz() - cur;
 
-      memcpy(tmp, cur, prefix_len);
-      memcpy(tmp + prefix_len, base, header->size - prefix_len);
-      header = reinterpret_cast<struct perf_event_header*>(tmp);
+      ensure_buffer_capacity(pe, header->size);
+
+      memcpy(pe.buf, cur, prefix_len);
+      memcpy(pe.buf + prefix_len, base, header->size - prefix_len);
+      header = reinterpret_cast<struct perf_event_header*>(pe.buf);
 
       cur = base + header->size - prefix_len;
     } else if (cur + header->size == base + buffer_sz()) {

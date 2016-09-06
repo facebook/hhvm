@@ -29,10 +29,12 @@ enum class PerfEvent { Load, Store };
  * Raw data from a sampled perf event.
  */
 struct perf_event_sample {
-  uintptr_t ip;   // address of the sampled instruction
-  uint32_t pid;   // process in which the event occurred
-  uint32_t tid;   // thread in which the event occurred
-  uintptr_t addr; // memory address corresponding to the event, if applicable
+  uintptr_t ip;     // address of the sampled instruction
+  uint32_t pid;     // process in which the event occurred
+  uint32_t tid;     // thread in which the event occurred
+  uintptr_t addr;   // memory address corresponding to the event, if applicable
+  uint64_t nr;      // number of addresses in the callchain
+  uintptr_t ips[];  // instruction pointers in the callchain for the event
 };
 
 using perf_event_signal_fn_t = void (*)(PerfEvent);

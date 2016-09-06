@@ -481,17 +481,31 @@ module WithExpressionAndStatementParser
     let classish_elements = List.rev classish_elements in
     (parser, make_list classish_elements)
 
+  and parse_xhp_type_specifier parser =
+    (* SPEC (Draft)
+      xhp-type-specifier:
+        enum { xhp-attribute-enum-list-opt } (TODO)
+        type-specifier
+    *)
+    parse_type_specifier parser
+
   and parse_xhp_class_attribute parser =
     (* SPEC (Draft)
     xhp-attribute-declaration:
       xhp-class-name
-      TODO: enum { xhp-attribute-enum-list-opt } name
-      TODO: type-specifier name initializer-opt
+      xhp-type-specifier name initializer-opt required-opt (TODO)
     *)
-    (* TODO: This isn't quite right; this parses either a name or an
-    xhp class name, but we only want the latter. Fix this up when we
-    support the full syntax here. *)
-    expect_class_name parser
+    if peek_token_kind parser = Colon then
+      (* TODO: This doesn't give quite the right error message if it turns
+      out to be malformed; consider tweaking this. *)
+      expect_class_name parser
+    else
+      let (parser, ty) = parse_xhp_type_specifier parser in
+      let (parser, name) = expect_name parser in
+      let (parser, init) = parse_simple_initializer_opt parser in
+      (* TODO: Parse @required *)
+      let result = make_xhp_class_attribute ty name init in
+      (parser, result)
 
   and parse_xhp_class_attribute_declaration parser =
     (* SPEC: (Draft)

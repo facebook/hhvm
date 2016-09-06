@@ -59,8 +59,9 @@ let make_next_files genv : Relative_path.t MultiWorker.nextlist =
     (FindUtils.is_php s)
       (** If experimental disabled, we don't parse hhi files under
        * the experimental directory. *)
-      && (TypecheckerOptions.experimental_features
-        (ServerConfig.typechecker_options genv.config)
+      && (TypecheckerOptions.experimental_feature_enabled
+          (ServerConfig.typechecker_options genv.config)
+          TypecheckerOptions.experimental_dict
         || not (FindUtils.has_ancestor s "experimental"))
 
   end in

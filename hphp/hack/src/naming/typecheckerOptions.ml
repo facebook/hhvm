@@ -27,17 +27,21 @@ type t = {
   (* List of <<UserAttribute>> names expected in the codebase *)
   tco_user_attrs : SSet.t option;
 
-  (** Enable experimental features. *)
-  tco_experimental_features : bool;
+  (* Set of experimental features, in lowercase. *)
+  tco_experimental_features : SSet.t;
 }
+
+(* Currently there is only one experimental feature *)
+let experimental_dict = "dict"
+let experimental_all = SSet.add experimental_dict SSet.empty
 
 let default = {
   tco_assume_php = true;
   tco_unsafe_xhp = false;
   tco_user_attrs = None;
-  (** Default true for testing. Actual flag is set by reading from hhconfig,
-   * which defaults to false. *)
-  tco_experimental_features = true;
+  (** Default all features for testing. Actual options are set by reading
+   * from hhconfig, which defaults to empty. *)
+  tco_experimental_features = experimental_all;
 }
 
 (* Use this instead of default when you don't have access to a project .hhconfig
@@ -55,4 +59,4 @@ let user_attrs t = t.tco_user_attrs
 let allowed_attribute t name = match t.tco_user_attrs with
   | None -> true
   | Some attr_names -> SSet.mem name attr_names
-let experimental_features t = t.tco_experimental_features
+let experimental_feature_enabled t s = SSet.mem s t.tco_experimental_features

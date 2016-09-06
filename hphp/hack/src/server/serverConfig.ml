@@ -112,12 +112,27 @@ let load config_filename options =
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
   let load_mini_script =
     Option.map (SMap.get config "load_mini_script") maybe_relative_path in
+  let process_experimental sl =
+    match List.map sl String.lowercase with
+    | ["false"] -> SSet.empty
+    | ["true"] -> TypecheckerOptions.experimental_all
+    | other ->
+      begin
+        List.iter other ~f:(fun s ->
+          if not (SSet.mem TypecheckerOptions.experimental_all s)
+          then failwith ("invalid experimental feature " ^ s));
+        SSet.of_list other
+      end in
   let tcopts = { TypecheckerOptions.
     tco_assume_php = bool_ "assume_php" ~default:true config;
     tco_unsafe_xhp = bool_ "unsafe_xhp" ~default:false config;
     tco_user_attrs = config_user_attributes config;
     tco_experimental_features =
-      bool_ "enable_experimental_tc_features" ~default:false config;
+      process_experimental (string_list
+        ~delim:(Str.regexp ",")
+        "enable_experimental_tc_features"
+        ~default:[]
+        config);
   } in
   {
     load_script = load_script;

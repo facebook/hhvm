@@ -1338,7 +1338,8 @@ void remove_attribute(borrowed_ptr<const PhpObject> obj, Attr attr) {
 void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->subclassList.size() == 1 &&
-        !(cinfo->cls->attrs & AttrInterface)) {
+        !(cinfo->cls->attrs & AttrInterface) &&
+        cinfo->cls->attrs & AttrUnique) {
       assert(cinfo->subclassList.front() == borrow(cinfo));
       if (!(cinfo->cls->attrs & AttrNoOverride)) {
         FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
@@ -1362,6 +1363,7 @@ void mark_no_override_functions(IndexData& index) {
   // First, mark every (non-interface, non-special) method as AttrNoOverride.
   for (auto& meth : index.methods) {
     if (meth.second->cls->attrs & AttrInterface) continue;
+    if (!(meth.second->cls->attrs & AttrUnique)) continue;
     if (is_special_method_name(meth.second->name)) continue;
     add_attribute(meth.second, AttrNoOverride);
   }

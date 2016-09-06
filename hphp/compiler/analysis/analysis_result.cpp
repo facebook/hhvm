@@ -347,12 +347,17 @@ void AnalysisResult::markRedeclaringClasses() {
     }
   }
 
-  auto markRedeclaring = [&] (const std::string& name) {
+  auto markRedeclaring = [&] (const std::string& name, bool over) {
     auto it = m_classDecs.find(name);
     if (it != m_classDecs.end()) {
       auto& classes = it->second;
       for (size_t i = 0; i < classes.size(); ++i) {
-        classes[i]->setRedeclaring(ar, i);
+        auto cls = classes[i];
+        cls->setRedeclaring(ar, i);
+        // If a class_alias was extended, we don't
+        // keep track of that fact... so we need to mark
+        // them all as not final.
+        if (over) cls->setAttribute(ClassScope::NotFinal);
       }
     }
   };
@@ -382,8 +387,8 @@ void AnalysisResult::markRedeclaringClasses() {
   for (auto& kv : m_classAliases) {
     assert(kv.first == toLower(kv.first));
     assert(kv.second == toLower(kv.second));
-    markRedeclaring(kv.first);
-    markRedeclaring(kv.second);
+    markRedeclaring(kv.first, true);
+    markRedeclaring(kv.second, true);
   }
 
   /*
@@ -394,7 +399,8 @@ void AnalysisResult::markRedeclaringClasses() {
    */
   for (auto& name : m_typeAliasNames) {
     assert(toLower(name) == name);
-    markRedeclaring(name);
+    // unlike class_alias, you can't extend a type alias
+    markRedeclaring(name, false);
   }
 }
 

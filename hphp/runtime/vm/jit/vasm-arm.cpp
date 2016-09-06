@@ -351,17 +351,17 @@ void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
     // 'jmp' is 2 instructions, load followed by branch
-    *reinterpret_cast<TCA*>(p.instr + 2 * 4) = env.addrs[p.target];
     auto const begin = reinterpret_cast<char*>(p.instr + 2 * 4);
     auto const end = begin + sizeof(env.addrs[p.target]);
+    *reinterpret_cast<TCA*>(begin) = env.addrs[p.target];
     __builtin___clear_cache(begin, end);
   }
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
     // 'jcc' is 3 instructions, b.!cc + load followed by branch
-    *reinterpret_cast<TCA*>(p.instr + 3 * 4) = env.addrs[p.target];
     auto const begin = reinterpret_cast<char*>(p.instr + 3 * 4);
     auto const end = begin + sizeof(env.addrs[p.target]);
+    *reinterpret_cast<TCA*>(begin) = env.addrs[p.target];
     __builtin___clear_cache(begin, end);
   }
 }

@@ -178,7 +178,7 @@ let test_reuse_slots () =
   expect_get "2" "0";
   expect_stats ~nonempty:3 ~used:1
 
-let tests handle =
+let tests () =
   let list = [
     "test_ops", test_ops;
     "test_hashtbl_full_hh_add", test_hashtbl_full_hh_add;
@@ -187,14 +187,7 @@ let tests handle =
     "test_reuse_slots", test_reuse_slots;
   ] in
   let setup_test (name, test) = name, fun () ->
-    SharedMem.reset();
-    SharedMem.connect handle ~is_master:true;
-    test ();
-    true
-  in
-  List.map setup_test list
 
-let () =
   let handle = SharedMem.(
       init {
         global_size = 16;
@@ -205,6 +198,12 @@ let () =
         shm_min_avail = 0;
         log_level = 0;
       }
-    )
+    ) in
+    SharedMem.connect handle ~is_master:true;
+    test ();
+    true
   in
-  Unit_test.run_all (tests handle)
+  List.map setup_test list
+
+let () =
+  Unit_test.run_all (tests ())

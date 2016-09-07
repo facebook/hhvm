@@ -63,6 +63,7 @@ module Program =
          be 'restored' in the workers, because they are not 'forked'
          anymore. See `ServerWorker.{save/restore}_state`. *)
       HackSearchService.attach_hooks ();
+
       Sys_utils.set_signal Sys.sigusr1
         (Sys.Signal_handle Typing.debug_print_last_pos);
       Sys_utils.set_signal Sys.sigusr2
@@ -395,9 +396,12 @@ let run_once options handle =
  * The server monitor will pass client connections to this process
  * via ic.
  *)
-let daemon_main_exn (handle, options) (ic, oc) =
+let daemon_main_exn options (ic, oc) =
   let in_fd = Daemon.descr_of_in_channel ic in
   let out_fd = Daemon.descr_of_out_channel oc in
+  let config, _ = ServerConfig.(load filename options) in
+  let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
+  SharedMem.connect handle ~is_master:true;
 
   let genv = setup_server options handle in
   if ServerArgs.check_mode genv.options then
@@ -406,12 +410,10 @@ let daemon_main_exn (handle, options) (ic, oc) =
   let env = MainInit.go options (fun () -> program_init genv) in
   serve genv env in_fd out_fd
 
-let daemon_main (state, handle, options) (ic, oc) =
-  (* Even though the server monitor set up the shared memory, the server daemon
-   * is master here *)
-  SharedMem.connect handle ~is_master:true;
+let daemon_main (state, options) (ic, oc) =
+  (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state;
-  try daemon_main_exn (handle, options) (ic, oc)
+  try daemon_main_exn options (ic, oc)
   with
   | SharedMem.Out_of_shared_memory ->
     ServerInit.print_hash_stats ();

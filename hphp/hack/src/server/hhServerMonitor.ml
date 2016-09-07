@@ -22,7 +22,7 @@
 open HhServerMonitorConfig
 module SP = ServerProcess
 
-let start_server options handle name log_link daemon_entry =
+let start_server options name log_link daemon_entry =
   let log_fds =
     if ServerArgs.should_detach options then begin
       (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
@@ -43,7 +43,7 @@ let start_server options handle name log_link daemon_entry =
       ~channel_mode:`socket
       log_fds
       daemon_entry
-      (state, handle, options) in
+      (state, options) in
   Hh_logger.log "Just started %s server with pid: %d." name pid;
   let server =
     SP.({
@@ -56,9 +56,9 @@ let start_server options handle name log_link daemon_entry =
     }) in
   server
 
-let start_hh_server options handle =
+let start_hh_server options  =
   let log_link = ServerFiles.log_link (ServerArgs.root options) in
-  start_server options handle Program.hh_server log_link ServerMain.entry
+  start_server options Program.hh_server log_link ServerMain.entry
 
 
 (** Main method of the server monitor daemon. The daemon is responsible for
@@ -83,33 +83,25 @@ let monitor_daemon_main (options: ServerArgs.options) =
   end;
 
   ignore @@ Sys_utils.setsid ();
-
   (* Force hhi files to be extracted and their location saved before workers
    * fork, so everyone can know about the same hhi path. *)
   ignore (Hhi.get_hhi_root());
-
   Relative_path.set_path_prefix Relative_path.Root www_root;
 
   let config, local_config  =
-    ServerConfig.(load filename options) in
-  let config = ServerConfig.(sharedmem_config config) in
+   ServerConfig.(load filename options) in
   HackEventLogger.set_lazy_decl
-    local_config.ServerLocalConfig.lazy_decl;
-  let handle = SharedMem.init config in
-  let first_init = ref true in
+   local_config.ServerLocalConfig.lazy_decl;
 
   if ServerArgs.check_mode options then
+    let shared_config = ServerConfig.(sharedmem_config config) in
+    let handle = SharedMem.init shared_config in
+    SharedMem.connect handle ~is_master:true;
     ServerMain.run_once options handle
   else
     let hh_server_monitor_starter = begin fun () ->
-
-      if !first_init then begin
-        first_init := false
-      end else begin
-        SharedMem.reset ()
-      end;
-
-      let typechecker = start_hh_server options handle in
+      ignore (Hhi.get_hhi_root());
+      let typechecker = start_hh_server options in
       [typechecker]
     end in
     let waiting_client = ServerArgs.waiting_client options in

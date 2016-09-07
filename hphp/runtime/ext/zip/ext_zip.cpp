@@ -96,11 +96,9 @@ void ZipStream::sweep() {
   File::sweep();
 }
 
-struct ZipStreamWrapper : Stream::Wrapper {
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context) {
+struct ZipStreamWrapper final : Stream::Wrapper {
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override {
     std::string url(filename.c_str());
     auto pound = url.find('#');
     if (pound == std::string::npos) {

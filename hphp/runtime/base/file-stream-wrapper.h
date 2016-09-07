@@ -41,31 +41,29 @@ namespace HPHP {
 
 struct Directory;
 
-struct FileStreamWrapper : Stream::Wrapper {
-  static req::ptr<MemFile> openFromCache(
-    const String& filename, const String& mode);
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context);
-  virtual int access(const String& path, int mode) {
+struct FileStreamWrapper final : Stream::Wrapper {
+  static req::ptr<MemFile> openFromCache(const String& filename,
+                                         const String& mode);
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override;
+  int access(const String& path, int mode) override {
     return ::access(File::TranslatePath(path).data(), mode);
   }
-  virtual int stat(const String& path, struct stat* buf) {
+  int stat(const String& path, struct stat* buf) override {
     return ::stat(File::TranslatePath(path).data(), buf);
   }
-  virtual int lstat(const String& path, struct stat* buf) {
+  int lstat(const String& path, struct stat* buf) override {
     return ::lstat(File::TranslatePath(path).data(), buf);
   }
-  virtual int unlink(const String& path);
-  virtual int rename(const String& oldname, const String& newname);
-  virtual int mkdir(const String& path, int mode, int options);
-  virtual int rmdir(const String& path, int options) {
+  int unlink(const String& path) override;
+  int rename(const String& oldname, const String& newname) override;
+  int mkdir(const String& path, int mode, int options) override;
+  int rmdir(const String& path, int options) override {
     ERROR_RAISE_WARNING(::rmdir(File::TranslatePath(path).data()));
     return ret;
   }
 
-  virtual req::ptr<Directory> opendir(const String& path);
+  req::ptr<Directory> opendir(const String& path) override;
 
  private:
   int mkdir_recursive(const String& path, int mode);

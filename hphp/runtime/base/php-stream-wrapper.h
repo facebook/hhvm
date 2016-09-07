@@ -22,12 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct PhpStreamWrapper : Stream::Wrapper {
+struct PhpStreamWrapper final : Stream::Wrapper {
   req::ptr<File> openFD(const char *sFD);
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context);
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

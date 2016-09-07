@@ -49,11 +49,9 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 // compress.zlib:// stream wrapper
 
-static struct ZlibStreamWrapper : Stream::Wrapper {
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context) {
+static struct ZlibStreamWrapper final : Stream::Wrapper {
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override {
     String fname;
     static const char cz[] = "compress.zlib://";
 

@@ -501,7 +501,7 @@ private:
   };
 
   struct HierarchicalProfilerFrame : Frame {
-    virtual ~HierarchicalProfilerFrame() {
+    ~HierarchicalProfilerFrame() override {
     }
 
     uint64_t        m_tsc_start;   // start value for TSC counter
@@ -759,7 +759,7 @@ struct TraceWalker {
 // then processes that into per-function statistics. A single-frame
 // stack trace is used to aggregate stats for each function when
 // called from different call sites.
-struct TraceProfiler : Profiler {
+struct TraceProfiler final : Profiler {
   explicit TraceProfiler(int flags)
     : Profiler(true)
     , m_traceBuffer(nullptr)
@@ -880,17 +880,16 @@ struct TraceProfiler : Profiler {
     return true;
   }
 
-  virtual void beginFrame(const char *symbol) override {
+  void beginFrame(const char *symbol) override {
     doTrace(symbol, false);
   }
 
-  virtual void endFrame(const TypedValue *retval,
-                        const char *symbol,
-                        bool endMain = false) override {
+  void endFrame(const TypedValue *retval, const char *symbol,
+                bool endMain = false) override {
     doTrace(symbol, true);
   }
 
-  virtual void endAllFrames() override {
+  void endAllFrames() override {
     if (m_traceBuffer && m_nextTraceEntry < m_traceBufferSize - 1) {
       collectStats(nullptr, true, m_finalEntry);
       m_traceBufferFilled = true;
@@ -943,7 +942,7 @@ struct TraceProfiler : Profiler {
     walker.walk(begin, end, final, stats);
   }
 
-  virtual void writeStats(Array &ret) override {
+  void writeStats(Array &ret) override {
     TraceData my_begin;
     collectStats(my_begin);
     walkTrace(m_traceBuffer, m_traceBuffer + m_nextTraceEntry, &m_finalEntry,
@@ -969,7 +968,7 @@ struct TraceProfiler : Profiler {
     }
   }
 
-  virtual bool shouldSkipBuiltins() const override {
+  bool shouldSkipBuiltins() const override {
     return m_flags & NoTrackBuiltins;
   }
 
@@ -1005,7 +1004,7 @@ pthread_mutex_t TraceProfiler::s_inUse = PTHREAD_MUTEX_INITIALIZER;
 /**
  * Sampling based profiler.
  */
-struct SampleProfiler : Profiler {
+struct SampleProfiler final : Profiler {
 private:
   typedef std::pair<int64_t, int64_t> Timestamp;
   typedef req::vector<std::pair<Timestamp, std::string>> SampleVec;
@@ -1037,16 +1036,15 @@ public:
     m_sampling_interval_tsc = SAMPLING_INTERVAL * m_MHz;
   }
 
-  virtual void beginFrameEx(const char *symbol) override {
+  void beginFrameEx(const char *symbol) override {
     sample_check();
   }
 
-  virtual void endFrameEx(const TypedValue *retvalue,
-                          const char *symbol) override {
+  void endFrameEx(const TypedValue *retvalue, const char *symbol) override {
     sample_check();
   }
 
-  virtual void writeStats(Array &ret) override {
+  void writeStats(Array &ret) override {
     for (auto const& sample : m_samples) {
       auto const& time = sample.first;
       char timestr[512];
@@ -1137,14 +1135,14 @@ private:
 // others. In particular, it should provide the results via the return
 // value from writeStats, not print to stderr :) Task 3396401 tracks this.
 
-struct MemoProfiler : Profiler {
+struct MemoProfiler final : Profiler {
   explicit MemoProfiler(int flags) : Profiler(true) {}
 
   ~MemoProfiler() {
   }
 
  private:
-  virtual void beginFrame(const char *symbol) override {
+  void beginFrame(const char *symbol) override {
     VMRegAnchor _;
     ActRec *ar = vmfp();
     Frame f(symbol);
@@ -1166,9 +1164,8 @@ struct MemoProfiler : Profiler {
     m_stack.push_back(f);
   }
 
-  virtual void endFrame(const TypedValue *retval,
-                        const char *symbol,
-                        bool endMain = false) override {
+  void endFrame(const TypedValue *retval, const char *symbol,
+                bool endMain = false) override {
     if (m_stack.empty()) {
       fprintf(stderr, "STACK IMBALANCE empty %s\n", symbol);
       return;
@@ -1237,11 +1234,11 @@ struct MemoProfiler : Profiler {
     }
   }
 
-  virtual void endAllFrames() override {
+  void endAllFrames() override {
     // Nothing to do for this profiler since all work is done as we go.
   }
 
-  virtual void writeStats(Array &ret) override {
+  void writeStats(Array &ret) override {
     fprintf(stderr, "writeStats start\n");
     // RetSame: the return value is the same instance every time
     // HasThis: call has a this argument

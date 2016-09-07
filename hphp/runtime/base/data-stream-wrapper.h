@@ -24,14 +24,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////n
 
-struct DataStreamWrapper : Stream::Wrapper {
+struct DataStreamWrapper final : Stream::Wrapper {
   DataStreamWrapper() {
     m_isLocal = true;
   }
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context);
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

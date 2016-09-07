@@ -41,7 +41,7 @@ struct FrameData {
 };
 
 // TODO(#3704) Allow user to set maximum buffer size
-struct XDebugProfiler : Profiler {
+struct XDebugProfiler final : Profiler {
   explicit XDebugProfiler() : Profiler(true) {}
   ~XDebugProfiler() {
     if (m_profilingEnabled) {
@@ -137,7 +137,7 @@ private:
 
   // Populates the passed frame data. All fields should be filled, because
   // the passed frameData is filled with junk.
-  virtual void collectFrameData(FrameData& frameData, const TypedValue* retVal);
+  void collectFrameData(FrameData& frameData, const TypedValue* retVal);
 
   // Helper for begin/end frame that grabs the next frame data and populates it
   // If retVal is null, this is a begin frame. Otherwise this is a frame end

@@ -23,12 +23,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct GlobStreamWrapper : Stream::Wrapper {
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context);
-  virtual req::ptr<Directory> opendir(const String& path);
+struct GlobStreamWrapper final : Stream::Wrapper {
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override;
+  req::ptr<Directory> opendir(const String& path) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

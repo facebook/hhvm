@@ -39,11 +39,9 @@ static const StaticString
   s_mode("mode"),
   s_opendir("opendir");
 
-static struct PharStreamWrapper : Stream::Wrapper {
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context) {
+static struct PharStreamWrapper final : Stream::Wrapper {
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override {
     static const char cz[] = "phar://";
     if (strncmp(filename.data(), cz, sizeof(cz) - 1)) {
       return nullptr;
@@ -66,7 +64,7 @@ static struct PharStreamWrapper : Stream::Wrapper {
     return dyn_cast_or_null<File>(ret.asResRef());
   }
 
-  virtual int access(const String& path, int mode) {
+  int access(const String& path, int mode) override {
     Variant ret = callStat(path);
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
@@ -75,7 +73,7 @@ static struct PharStreamWrapper : Stream::Wrapper {
     return 0;
   }
 
-  virtual int stat(const String& path, struct stat* buf) {
+  int stat(const String& path, struct stat* buf) override {
     Variant ret = callStat(path);
     if (ret.isBoolean()) {
       assert(!ret.toBoolean());
@@ -90,11 +88,11 @@ static struct PharStreamWrapper : Stream::Wrapper {
     return 0;
   }
 
-  virtual int lstat(const String& path, struct stat* buf) {
+  int lstat(const String& path, struct stat* buf) override {
     return stat(path, buf);
   }
 
-  virtual req::ptr<Directory> opendir(const String& path) {
+  req::ptr<Directory> opendir(const String& path) override {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
     Variant ret;
     g_context->invokeFunc(

@@ -37,11 +37,9 @@ namespace HPHP {
 // compress.zlib:// stream wrapper
 
 namespace {
-static struct BZ2StreamWrapper : Stream::Wrapper {
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context) {
+static struct BZ2StreamWrapper final : Stream::Wrapper {
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override {
     static const char cz[] = "compress.bzip2://";
 
     if (strncmp(filename.c_str(), cz, sizeof(cz) - 1)) {

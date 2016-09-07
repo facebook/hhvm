@@ -294,10 +294,7 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
   // ways of getting 0 in a register anyway.
   always_assert(val != 0);
 
-  if (auto it = mcg->literals().find(val)) {
-    assertx(**it == val);
-    return *it;
-  }
+  if (auto addr = addrForLiteral(val)) return addr;
 
   auto& pending = env.meta.literals;
   auto it = pending.find(val);

@@ -108,6 +108,28 @@ struct CGMeta {
   std::vector<TransBCMapping> bcMap;
 };
 
+/*
+ * If the literal val has already been written into the TCA return its address,
+ * otherwise return nullptr
+ */
+const uint64_t* addrForLiteral(uint64_t val);
+
+/*
+ * Look up a TCA-to-landingpad mapping.
+ */
+folly::Optional<TCA> getCatchTrace(CTCA ip);
+
+/*
+ * Return the number of registered catch traces
+ */
+size_t numCatchTraces();
+
+/*
+ * Erase catch trace at addr. If no trace is registered at addr no action is
+ * performed.
+ */
+void eraseCatchTrace(CTCA addr);
+
 }}
 
 #endif

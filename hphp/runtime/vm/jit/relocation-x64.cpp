@@ -489,8 +489,8 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
       if (auto fixup = mcg->fixupMap().findFixup(start)) {
         meta.fixups.emplace_back(start, *fixup);
       }
-      if (auto ct = mcg->catchTraceMap().find(mcg->code().toOffset(start))) {
-        meta.catches.emplace_back(start, mcg->code().toAddr(*ct));
+      if (auto ct = getCatchTrace(start)) {
+        meta.catches.emplace_back(start, *ct);
       }
     }
   }

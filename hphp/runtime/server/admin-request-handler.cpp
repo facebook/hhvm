@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/unit-cache.h"
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -952,7 +953,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("rds", rds::usedBytes());
     appendStat("rds-local", rds::usedLocalBytes());
     appendStat("rds-persistent", rds::usedPersistentBytes());
-    appendStat("catch-traces", mcg->catchTraceMap().size());
+    appendStat("catch-traces", jit::numCatchTraces());
     appendStat("fixups", mcg->fixupMap().size());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());

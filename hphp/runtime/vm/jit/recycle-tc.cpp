@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -93,7 +94,6 @@ void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
  * catch trace annotations).
  */
 void clearTCMaps(TCA start, TCA end) {
-  auto& catchMap = mcg->catchTraceMap();
   auto const profData = jit::profData();
   while (start < end) {
 #if defined(__powerpc64__)
@@ -108,11 +108,7 @@ void clearTCMaps(TCA start, TCA end) {
                start, id);
       }
     }
-    if (auto ct = catchMap.find(mcg->code().toOffset(start))) {
-      // We mark nothrow with a nullptr, which will assert during unwinding,
-      // use a separate marker here to indicate the catch has been erased
-      *ct = kInvalidCatchTrace;
-    }
+    eraseCatchTrace(start);
     if (di.isCall()) {
       auto it = s_smashedCalls.find(start);
       if (it != s_smashedCalls.end()) {

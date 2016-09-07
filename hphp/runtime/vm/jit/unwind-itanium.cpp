@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -95,7 +96,7 @@ void sync_regstate(_Unwind_Context* context) {
  * is very bad---and we abort in this case.
  */
 TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
-  if (auto catchTraceOpt = mcg->getCatchTrace(rip)) {
+  if (auto catchTraceOpt = getCatchTrace(rip)) {
     if (auto catchTrace = *catchTraceOpt) return catchTrace;
 
     // FIXME: This assumes that smashable calls and regular calls look the

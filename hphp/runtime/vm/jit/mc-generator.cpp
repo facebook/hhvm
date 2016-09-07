@@ -94,10 +94,7 @@ void MCGenerator::syncWork() {
   Stats::inc(Stats::TC_Sync);
 }
 
-MCGenerator::MCGenerator()
-  : m_catchTraceMap(128)
-  , m_literals(128)
-{
+MCGenerator::MCGenerator() {
   TRACE(1, "MCGenerator@%p startup\n", this);
   mcg = this;
 
@@ -127,12 +124,6 @@ MCGenerator::MCGenerator()
   m_ehFrames.push_back(ehfw.register_and_release());
 }
 
-folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
-  auto const found = m_catchTraceMap.find(m_code.toOffset(ip));
-  if (found && *found != kInvalidCatchTrace) return m_code.toAddr(*found);
-  return folly::none;
-}
-
 void codeEmittedThisRequest(size_t& requestEntry, size_t& now) {
   requestEntry = s_initialTCSize;
   now = mcg->code().totalUsed();
@@ -147,7 +138,7 @@ void stashDebuggerCatch(const ActRec* fp) {
     tl_debuggerCatches = new std::unordered_map<const ActRec*, TCA>();
   }
 
-  auto optCatchBlock = mcg->getCatchTrace(TCA(fp->m_savedRip));
+  auto optCatchBlock = getCatchTrace(TCA(fp->m_savedRip));
   always_assert(optCatchBlock && *optCatchBlock);
   auto catchBlock = *optCatchBlock;
   FTRACE(1, "Pushing debugger catch {} with fp {}\n", catchBlock, fp);

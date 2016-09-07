@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/tread-hash-map.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -58,11 +57,6 @@ struct TransArgs;
 
 extern MCGenerator* mcg;
 
-constexpr uint32_t kInvalidCatchTrace = 0x0;
-
-using CatchTraceMap = TreadHashMap<uint32_t, uint32_t, std::hash<uint32_t>>;
-using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -96,8 +90,7 @@ using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
  *   modify the contents and frontiers of all code/data blocks in m_code.
  *
  * - MCGenerator::lockMetadata() gives the owning thread exclusive permission
- *   to modify the metadata tables owned by mcg (m_catchTraceMap, m_fixupMap,
- *   or m_srcDB, etc...).
+ *   to modify the metadata tables owned by mcg (m_fixupMap, or m_srcDB, etc).
  */
 struct MCGenerator {
   MCGenerator();
@@ -112,15 +105,8 @@ struct MCGenerator {
   CodeCache& code() { return m_code; }
   const UniqueStubs& ustubs() const { return m_ustubs; }
   Translator& tx() { return m_tx; }
-  CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   FixupMap& fixupMap() { return m_fixupMap; }
   Debug::DebugInfo* debugInfo() { return &m_debugInfo; }
-  LiteralMap& literals() { return m_literals; }
-
-  /*
-   * Look up a TCA-to-landingpad mapping.
-   */
-  folly::Optional<TCA> getCatchTrace(CTCA ip) const;
 
   /*
    * Get the SrcDB.
@@ -198,16 +184,11 @@ private:
 
   // Handles to registered .eh_frame sections.
   std::vector<EHFrameDesc> m_ehFrames;
-  // Landingpads for TC catch traces; used by the unwinder.
-  CatchTraceMap m_catchTraceMap;
-
   // Store of Fixups.  These let us reconstruct the state of the VM registers
   // from an up-stack invocation record.
   FixupMap m_fixupMap;
   // Global .debug_frame information.
   Debug::DebugInfo m_debugInfo;
-  // Map from integral literals to their location in the TC data section.
-  LiteralMap m_literals;
   // Lock protecting all metadata tables.
   SimpleMutex m_metadataLock{false, RankCodeMetadata};
 };

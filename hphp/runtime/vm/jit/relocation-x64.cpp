@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -486,7 +487,7 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
     start += di.size();
 
     if (di.isCall()) {
-      if (auto fixup = mcg->fixupMap().findFixup(start)) {
+      if (auto fixup = FixupMap::findFixup(start)) {
         meta.fixups.emplace_back(start, *fixup);
       }
       if (auto ct = getCatchTrace(start)) {

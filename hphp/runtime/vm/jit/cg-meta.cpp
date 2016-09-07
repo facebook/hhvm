@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -84,7 +85,7 @@ void CGMeta::process_only(
 
   for (auto const& pair : fixups) {
     assertx(tc::isValidCodeAddress(pair.first));
-    mcg->fixupMap().recordFixup(pair.first, pair.second);
+    FixupMap::recordFixup(pair.first, pair.second);
   }
   fixups.clear();
 

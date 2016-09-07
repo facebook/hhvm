@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -98,34 +97,6 @@ struct MCGenerator {
 
   MCGenerator(const MCGenerator&) = delete;
   MCGenerator& operator=(const MCGenerator&) = delete;
-
-  /*
-   * Accessors.
-   */
-  FixupMap& fixupMap() { return m_fixupMap; }
-
-  /////////////////////////////////////////////////////////////////////////////
-
-  /*
-   * Sync VM registers for the first TC frame in the callstack.
-   */
-  inline void sync() {
-    if (tl_regState == VMRegState::CLEAN) return;
-    syncWork();
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-
-private:
-  void syncWork();
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Data members.
-
-private:
-  // Store of Fixups.  These let us reconstruct the state of the VM registers
-  // from an up-stack invocation record.
-  FixupMap m_fixupMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

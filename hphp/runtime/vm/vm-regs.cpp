@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 
 namespace HPHP {
 
@@ -27,7 +27,7 @@ VMRegAnchor::VMRegAnchor()
   : m_old(tl_regState)
 {
   assert_native_stack_aligned();
-  jit::mcg->sync();
+  jit::syncVMRegs();
 }
 
 VMRegAnchor::VMRegAnchor(ActRec* ar)

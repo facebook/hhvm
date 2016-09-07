@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/fixup.h"
 
+#include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -50,14 +51,75 @@ ActRec* callerFrameHelper() {
   }
 }
 
-namespace jit {
+namespace jit { namespace FixupMap { namespace {
+
+TRACE_SET_MOD(fixup);
+
+constexpr unsigned kInitCapac = 128;
+
+struct VMRegs {
+  PC pc;
+  TypedValue* sp;
+  const ActRec* fp;
+};
+
+struct IndirectFixup {
+  explicit IndirectFixup(int retIpDisp) : returnIpDisp{retIpDisp} {}
+
+  /* FixupEntry uses magic to differentiate between IndirectFixup and Fixup. */
+  int32_t magic{-1};
+  int32_t returnIpDisp;
+};
+
+union FixupEntry {
+  explicit FixupEntry(Fixup f) : fixup(f) {}
+
+  /* Depends on the magic field in an IndirectFixup being -1. */
+  bool isIndirect() {
+    static_assert(
+      offsetof(IndirectFixup, magic) == offsetof(FixupEntry, firstElem),
+      "Differentiates between Fixup and IndirectFixup by looking at magic."
+    );
+
+    return firstElem < 0;
+  }
+
+  int32_t firstElem;
+  Fixup fixup;
+  IndirectFixup indirect;
+};
+
+TreadHashMap<uint32_t,FixupEntry,std::hash<uint32_t>> s_fixups{kInitCapac};
+
+PC pc(const ActRec* ar, const Func* f, const Fixup& fixup) {
+  assertx(f);
+  return f->getEntry() + fixup.pcOffset;
+}
+
+void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
+                    VMRegs* outRegs) {
+  const Func* f = ar->m_func;
+  assertx(f);
+  TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
+        (void*)tca, fixup.pcOffset, fixup.spOffset);
+  assertx(fixup.spOffset >= 0);
+  outRegs->pc = pc(ar, f, fixup);
+  outRegs->fp = ar;
+
+  if (UNLIKELY(ar->resumed())) {
+    TypedValue* stackBase = Stack::resumableStackBase(ar);
+    outRegs->sp = stackBase - fixup.spOffset;
+  } else {
+    outRegs->sp = (TypedValue*)ar - fixup.spOffset;
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 
-bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
+bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   CTCA tca = (CTCA)ar->m_savedRip;
 
-  auto ent = m_fixups.find(tc::addrToOffset(tca));
+  auto ent = s_fixups.find(tc::addrToOffset(tca));
   if (!ent) return false;
 
   // Note: If indirect fixups happen frequently enough, we could just compare
@@ -65,7 +127,7 @@ bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
   if (ent->isIndirect()) {
     auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
                         ent->indirect.returnIpDisp;
-    ent = m_fixups.find(
+    ent = s_fixups.find(
       tc::addrToOffset(*reinterpret_cast<CTCA*>(savedRIPAddr))
     );
     assertx(ent && !ent->isIndirect());
@@ -80,25 +142,30 @@ bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
   return true;
 }
 
-void FixupMap::recordFixup(CTCA tca, const Fixup& fixup) {
+//////////////////////////////////////////////////////////////////////
+}
+
+void recordFixup(CTCA tca, const Fixup& fixup) {
   TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
         tca, fixup.pcOffset, fixup.spOffset);
 
   auto const offset = tc::addrToOffset(tca);
-  if (auto pos = m_fixups.find(offset)) {
+  if (auto pos = s_fixups.find(offset)) {
     *pos = FixupEntry(fixup);
   } else {
-    m_fixups.insert(offset, FixupEntry(fixup));
+    s_fixups.insert(offset, FixupEntry(fixup));
   }
 }
 
-const Fixup* FixupMap::findFixup(CTCA tca) const {
-  auto ent = m_fixups.find(tc::addrToOffset(tca));
+const Fixup* findFixup(CTCA tca) {
+  auto ent = s_fixups.find(tc::addrToOffset(tca));
   if (!ent) return nullptr;
   return &ent->fixup;
 }
 
-void FixupMap::fixupWork(ExecutionContext* ec, ActRec* nextRbp) const {
+size_t size() { return s_fixups.size(); }
+
+void fixupWork(ExecutionContext* ec, ActRec* nextRbp) {
   assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
@@ -127,25 +194,10 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* nextRbp) const {
   }
 }
 
-void FixupMap::fixup(ExecutionContext* ec) const {
-  // Start looking for fixup entries at the current (C++) frame.  This
-  // will walk the frames upward until we find a TC frame.
-
-  // In order to avoid tail call elimination optimization issues, grab the
-  // parent frame pointer in order make sure this pointer is valid. The
-  // fixupWork() looks for a TC frame, and we never call fixup() directly
-  // from the TC, so skipping this frame isn't a problem.
-  DECLARE_FRAME_POINTER(framePtr);
-  auto fp = tl_regState >= VMRegState::GUARDED_THRESHOLD ?
-    (ActRec*)tl_regState : framePtr->m_sfp;
-
-  fixupWork(ec, fp);
-}
-
 /* This is somewhat hacky. It decides which helpers/builtins should
  * use eager vmreganchor based on profile information. Using eager
  * vmreganchor for all helper calls is a perf regression. */
-bool FixupMap::eagerRecord(const Func* func) {
+bool eagerRecord(const Func* func) {
   const char* list[] = {
     "func_get_args",
     "__SystemLib\\func_get_args_sl",
@@ -170,6 +222,29 @@ bool FixupMap::eagerRecord(const Func* func) {
     !strcmp(func->name()->data(), "join");
 }
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+}
+
+namespace detail {
+void syncVMRegsWork() {
+  assertx(tl_regState != VMRegState::CLEAN);
+
+  // Start looking for fixup entries at the current (C++) frame.  This
+  // will walk the frames upward until we find a TC frame.
+
+  // In order to avoid tail call elimination optimization issues, grab the
+  // parent frame pointer in order make sure this pointer is valid. The
+  // fixupWork() looks for a TC frame, and we never call fixup() directly
+  // from the TC, so skipping this frame isn't a problem.
+  DECLARE_FRAME_POINTER(framePtr);
+  auto fp = tl_regState >= VMRegState::GUARDED_THRESHOLD ?
+    (ActRec*)tl_regState : framePtr->m_sfp;
+
+  FixupMap::fixupWork(g_context.getNoCheck(), fp);
+
+  tl_regState = VMRegState::CLEAN;
+  Stats::inc(Stats::TC_Sync);
+}
+}
 
 }}

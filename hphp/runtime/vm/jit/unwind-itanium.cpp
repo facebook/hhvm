@@ -84,7 +84,7 @@ void sync_regstate(_Unwind_Context* context) {
   fakeAR.m_savedRip = ip;
 
   Stats::inc(Stats::TC_SyncUnwind);
-  mcg->fixupMap().fixupWork(g_context.getNoCheck(), &fakeAR);
+  FixupMap::fixupWork(g_context.getNoCheck(), &fakeAR);
   tl_regState = VMRegState::CLEAN;
   FTRACE(2, "synced vmfp {}, vmsp {}, vmpc {}\n", vmfp(), vmsp(), vmpc());
 }

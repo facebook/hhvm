@@ -80,13 +80,6 @@ MCGenerator* mcg;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void MCGenerator::syncWork() {
-  assertx(tl_regState != VMRegState::CLEAN);
-  m_fixupMap.fixup(g_context.getNoCheck());
-  tl_regState = VMRegState::CLEAN;
-  Stats::inc(Stats::TC_Sync);
-}
-
 MCGenerator::MCGenerator() {
   TRACE(1, "MCGenerator@%p startup\n", this);
   mcg = this;

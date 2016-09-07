@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -941,7 +942,6 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     HPHP::Server* server = HttpServer::Server->getPageServer();
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
-    auto mcg = jit::mcg;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
     auto const memInfos = jit::tc::getTCMemoryUsage();
     for (auto const info : memInfos) {
@@ -954,7 +954,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("rds-local", rds::usedLocalBytes());
     appendStat("rds-persistent", rds::usedPersistentBytes());
     appendStat("catch-traces", jit::numCatchTraces());
-    appendStat("fixups", mcg->fixupMap().size());
+    appendStat("fixups", jit::FixupMap::size());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
     appendStat("named-entities", NamedEntity::tableSize());

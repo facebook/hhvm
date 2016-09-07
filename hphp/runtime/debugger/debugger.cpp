@@ -21,7 +21,8 @@
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/debugger.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/text-color.h"
@@ -530,7 +531,7 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   m_proxyMap.erase(dummySid);
   // Clear the debugger blacklist PC upon last detach if JIT is used
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
-    jit::mcg->tx().clearDbgBL();
+    jit::clearDbgBL();
   }
 }
 

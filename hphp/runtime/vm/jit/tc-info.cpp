@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 
 #include "hphp/util/data-block.h"
 #include "hphp/util/build-info.h"
@@ -95,28 +96,28 @@ bool dumpTCData() {
   }
 
   if (!gzprintf(tcDataFile, "total_translations = %zu\n\n",
-                mcg->tx().getNumTranslations())) {
+                transdb::getNumTranslations())) {
     return false;
   }
 
   // Print all translations, including their execution counters. If global
   // counters are disabled (default), fall back to using ProfData, covering
   // only profiling translations.
-  if (!RuntimeOption::EvalJitTransCounters && Translator::isTransDBEnabled()) {
+  if (!RuntimeOption::EvalJitTransCounters && transdb::enabled()) {
     // Admin requests do not automatically init ProfData, so do it explicitly.
     // No need for matching exit call; data is immortal with trans DB enabled.
     requestInitProfData();
   }
-  for (TransID t = 0; t < mcg->tx().getNumTranslations(); t++) {
+  for (TransID t = 0; t < transdb::getNumTranslations(); t++) {
     int64_t count = 0;
     if (RuntimeOption::EvalJitTransCounters) {
-      count = mcg->tx().getTransCounter(t);
+      count = transdb::getTransCounter(t);
     } else if (auto prof = profData()) {
-      assertx(mcg->tx().getTransCounter(t) == 0);
+      assertx(transdb::getTransCounter(t) == 0);
       count = prof->transCounter(t);
     }
     auto const ret = gzputs(
-      tcDataFile, mcg->tx().getTransRec(t)->print(count).c_str()
+      tcDataFile, transdb::getTransRec(t)->print(count).c_str()
     );
     if (ret == -1) {
       return false;

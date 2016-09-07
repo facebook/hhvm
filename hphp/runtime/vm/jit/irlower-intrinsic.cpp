@@ -179,7 +179,7 @@ void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
 }
 
 bool skipAttemptGlobal() {
-  return !Translator::WriteLease().couldBeOwner();
+  return !GetWriteLease().couldBeOwner();
 }
 
 void cgCheckCold(IRLS& env, const IRInstruction* inst) {

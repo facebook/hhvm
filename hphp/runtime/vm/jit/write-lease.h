@@ -135,6 +135,8 @@ struct LeaseHolder {
   bool m_acquiredThread{false};
 };
 
+Lease& GetWriteLease();
+
 }} // HPHP::jit
 
 #endif /* incl_HPHP_WRITELEASE_H_ */

@@ -86,6 +86,25 @@ TCA retranslate(TransArgs args);
  */
 TCA retranslateOpt(SrcKey sk, TransID transId);
 
+/*
+ * Emit checks for (and hooks into) an attached debugger in front of each
+ * translation in `unit' or for `SrcKey{func, offset, resumed}'.
+ */
+bool addDbgGuards(const Unit* unit);
+bool addDbgGuard(const Func* func, Offset offset, bool resumed);
+
+namespace mcgen {
+/*
+ * Called once when the JIT is activated to initialize internal mcgen structures
+ */
+void processInit();
+}
+
+/*
+ * Return the timestamp at which mcgen::processInit was called
+ */
+int64_t jitInitTime();
+
 }}
 
 #endif

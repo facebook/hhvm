@@ -23,9 +23,11 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/debugger.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/pc-filter.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -33,7 +35,6 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
-using jit::mcg;
 
 using StepOutState = RequestInjectionData::StepOutState;
 
@@ -71,7 +72,7 @@ void DebuggerHook::detach(ThreadInfo* ti /* = nullptr */) {
   // If there are no more hooks attached, clear the blacklist.
   Lock lock(s_lock);
   if (--s_numAttached == 0) {
-    mcg->tx().clearDbgBL();
+    jit::clearDbgBL();
   }
 }
 
@@ -90,10 +91,10 @@ void blacklistRangesInJit(const Unit* unit, const OffsetRangeVec& offsets) {
   for (auto const& range : offsets) {
     for (PC pc = unit->at(range.base); pc < unit->at(range.past);
          pc += instrLen(pc)) {
-      mcg->tx().addDbgBLPC(pc);
+      jit::addDbgBLPC(pc);
     }
   }
-  if (!mcg->addDbgGuards(unit)) {
+  if (!jit::addDbgGuards(unit)) {
     Logger::Warning("Failed to set breakpoints in Jitted code");
   }
   // In this case, we may be setting a breakpoint in a tracelet which could
@@ -498,9 +499,9 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
   getBreakPointFilter()->addPC(pc);
   if (RuntimeOption::EvalJit) {
-    if (mcg->tx().addDbgBLPC(pc)) {
+    if (jit::addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!mcg->addDbgGuards(unit)) {
+      if (!jit::addDbgGuards(unit)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
       // In this case, we may be setting a breakpoint in a tracelet which could
@@ -527,9 +528,9 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
   // Blacklist the location
   if (RuntimeOption::EvalJit) {
-    if (mcg->tx().addDbgBLPC(pc)) {
+    if (jit::addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!mcg->addDbgGuard(f, base, false)) {
+      if (!jit::addDbgGuard(f, base, false)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
@@ -550,8 +551,8 @@ void phpAddBreakPointFuncExit(const Func* f) {
     RID().m_retBreakPointFilter.addPC(pc);
 
     // Blacklist the location
-    if (RuntimeOption::EvalJit && mcg->tx().addDbgBLPC(pc)) {
-      if (!mcg->addDbgGuard(f, unit->offsetOf(pc), false)) {
+    if (RuntimeOption::EvalJit && jit::addDbgBLPC(pc)) {
+      if (!jit::addDbgGuard(f, unit->offsetOf(pc), false)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }

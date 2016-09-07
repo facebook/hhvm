@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/debug-guards.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
+#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -33,8 +34,11 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/timer.h"
 
-namespace HPHP { namespace jit {
+TRACE_SET_MOD(mcg);
+
+namespace HPHP { namespace jit { namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -78,6 +82,76 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
   sr->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);
 }
 
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+bool addDbgGuards(const Unit* unit) {
+  // TODO refactor
+  // It grabs the write lease and iterates through whole SrcDB...
+  struct timespec tsBegin, tsEnd;
+  {
+    auto codeLock = mcg->lockCode();
+    auto metaLock = mcg->lockMetadata();
+
+    auto code = mcg->code().view();
+    auto& main = code.main();
+    auto& data = code.data();
+
+    HPHP::Timer::GetMonotonicTime(tsBegin);
+    // Doc says even find _could_ invalidate iterator, in pactice it should
+    // be very rare, so go with it now.
+    CGMeta fixups;
+    for (auto& pair : mcg->srcDB()) {
+      SrcKey const sk = SrcKey::fromAtomicInt(pair.first);
+      // We may have a SrcKey to a deleted function. NB: this may miss a
+      // race with deleting a Func. See task #2826313.
+      if (!Func::isFuncIdValid(sk.funcID())) continue;
+      SrcRec* sr = pair.second;
+      if (sr->unitMd5() == unit->md5() &&
+          !sr->hasDebuggerGuard() &&
+          isSrcKeyInDbgBL(sk)) {
+        addDbgGuardImpl(sk, sr, main, data, fixups);
+      }
+    }
+    fixups.process(nullptr);
+  }
+
+  HPHP::Timer::GetMonotonicTime(tsEnd);
+  int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
+  if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
+    Trace::traceRelease("addDbgGuards got lease for %" PRId64 " us\n", elapsed);
+  }
+  return true;
+}
+
+bool addDbgGuard(const Func* func, Offset offset, bool resumed) {
+  SrcKey sk(func, offset, resumed);
+  if (auto const sr = mcg->srcDB().find(sk)) {
+    if (sr->hasDebuggerGuard()) {
+      return true;
+    }
+  } else {
+    // no translation yet
+    return true;
+  }
+  if (debug) {
+    if (!isSrcKeyInDbgBL(sk)) {
+      TRACE(5, "calling addDbgGuard on PC that is not in blacklist");
+      return false;
+    }
+  }
+
+  auto codeLock = mcg->lockCode();
+  auto metaLock = mcg->lockMetadata();
+
+  CGMeta fixups;
+  if (auto sr = mcg->srcDB().find(sk)) {
+    auto code = mcg->code().view();
+    addDbgGuardImpl(sk, sr, code.main(), code.data(), fixups);
+  }
+  fixups.process(nullptr);
+  return true;
+}
 
 }}

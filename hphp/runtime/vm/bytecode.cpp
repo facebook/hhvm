@@ -109,6 +109,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
 
+#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"

@@ -104,7 +104,6 @@ struct MCGenerator {
    */
   CodeCache& code() { return m_code; }
   const UniqueStubs& ustubs() const { return m_ustubs; }
-  Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
   Debug::DebugInfo* debugInfo() { return &m_debugInfo; }
 
@@ -113,13 +112,6 @@ struct MCGenerator {
    */
   const SrcDB& srcDB() const { return m_srcDB; }
   SrcDB& srcDB()             { return m_srcDB; }
-
-  /*
-   * Emit checks for (and hooks into) an attached debugger in front of each
-   * translation in `unit' or for `SrcKey{func, offset, resumed}'.
-   */
-  bool addDbgGuards(const Unit* unit);
-  bool addDbgGuard(const Func* func, Offset offset, bool resumed);
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -180,7 +172,6 @@ private:
   SimpleMutex m_codeLock{false, RankCodeCache};
 
   UniqueStubs m_ustubs;
-  Translator m_tx;
 
   // Handles to registered .eh_frame sections.
   std::vector<EHFrameDesc> m_ehFrames;
@@ -194,20 +185,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Look up the catch block associated with the saved return address in `ar' and
- * stash it in a map.
- *
- * This is called by debugger helpers right before smashing the return address
- * to prevent returning directly the to TC.
- */
-void stashDebuggerCatch(const ActRec* ar);
-
-/*
- * Unstash the debugger catch block for `ar' and return it.
- */
-TCA unstashDebuggerCatch(const ActRec* ar);
 
 /*
  * Returns the total size of the TC now and at the beginning of this request,

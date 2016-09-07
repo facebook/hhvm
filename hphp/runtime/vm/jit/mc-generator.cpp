@@ -54,7 +54,7 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/debug-guards.h"
+#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -129,32 +129,6 @@ void codeEmittedThisRequest(size_t& requestEntry, size_t& now) {
   now = mcg->code().totalUsed();
 }
 
-namespace {
-__thread std::unordered_map<const ActRec*, TCA>* tl_debuggerCatches{nullptr};
-}
-
-void stashDebuggerCatch(const ActRec* fp) {
-  if (!tl_debuggerCatches) {
-    tl_debuggerCatches = new std::unordered_map<const ActRec*, TCA>();
-  }
-
-  auto optCatchBlock = getCatchTrace(TCA(fp->m_savedRip));
-  always_assert(optCatchBlock && *optCatchBlock);
-  auto catchBlock = *optCatchBlock;
-  FTRACE(1, "Pushing debugger catch {} with fp {}\n", catchBlock, fp);
-  tl_debuggerCatches->emplace(fp, catchBlock);
-}
-
-TCA unstashDebuggerCatch(const ActRec* fp) {
-  always_assert(tl_debuggerCatches);
-  auto const it = tl_debuggerCatches->find(fp);
-  always_assert(it != tl_debuggerCatches->end());
-  auto const catchBlock = it->second;
-  tl_debuggerCatches->erase(it);
-  FTRACE(1, "Popped debugger catch {} for fp {}\n", catchBlock, fp);
-  return catchBlock;
-}
-
 void MCGenerator::requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
@@ -168,11 +142,11 @@ void MCGenerator::requestInit() {
 }
 
 void MCGenerator::requestExit() {
-  always_assert(!Translator::WriteLease().amOwner());
+  always_assert(!GetWriteLease().amOwner());
   TRACE_MOD(txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
             " kept, %15" PRId64 " grabbed\n",
-            Process::GetThreadIdForTrace(), Translator::WriteLease().hintKept(),
-            Translator::WriteLease().hintGrabbed());
+            Process::GetThreadIdForTrace(), GetWriteLease().hintKept(),
+            GetWriteLease().hintGrabbed());
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();
@@ -189,81 +163,10 @@ void MCGenerator::requestExit() {
     Trace::traceRelease("\n");
   }
 
-  delete tl_debuggerCatches;
-  tl_debuggerCatches = nullptr;
+  clearDebuggerCatches();
 }
 
 MCGenerator::~MCGenerator() {
-}
-
-bool MCGenerator::addDbgGuards(const Unit* unit) {
-  // TODO refactor
-  // It grabs the write lease and iterates through whole SrcDB...
-  struct timespec tsBegin, tsEnd;
-  {
-    auto codeLock = lockCode();
-    auto metaLock = lockMetadata();
-
-    auto code = m_code.view();
-    auto& main = code.main();
-    auto& data = code.data();
-
-    HPHP::Timer::GetMonotonicTime(tsBegin);
-    // Doc says even find _could_ invalidate iterator, in pactice it should
-    // be very rare, so go with it now.
-    CGMeta fixups;
-    for (auto& pair : m_srcDB) {
-      SrcKey const sk = SrcKey::fromAtomicInt(pair.first);
-      // We may have a SrcKey to a deleted function. NB: this may miss a
-      // race with deleting a Func. See task #2826313.
-      if (!Func::isFuncIdValid(sk.funcID())) continue;
-      SrcRec* sr = pair.second;
-      if (sr->unitMd5() == unit->md5() &&
-          !sr->hasDebuggerGuard() &&
-          m_tx.isSrcKeyInBL(sk)) {
-        addDbgGuardImpl(sk, sr, main, data, fixups);
-      }
-    }
-    fixups.process(nullptr);
-  }
-
-  HPHP::Timer::GetMonotonicTime(tsEnd);
-  int64_t elapsed = gettime_diff_us(tsBegin, tsEnd);
-  if (Trace::moduleEnabledRelease(Trace::mcg, 5)) {
-    Trace::traceRelease("addDbgGuards got lease for %" PRId64 " us\n", elapsed);
-  }
-  return true;
-}
-
-bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
-  SrcKey sk(func, offset, resumed);
-  {
-    if (SrcRec* sr = m_srcDB.find(sk)) {
-      if (sr->hasDebuggerGuard()) {
-        return true;
-      }
-    } else {
-      // no translation yet
-      return true;
-    }
-  }
-  if (debug) {
-    if (!m_tx.isSrcKeyInBL(sk)) {
-      TRACE(5, "calling addDbgGuard on PC that is not in blacklist");
-      return false;
-    }
-  }
-
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  CGMeta fixups;
-  if (SrcRec* sr = m_srcDB.find(sk)) {
-    auto code = m_code.view();
-    addDbgGuardImpl(sk, sr, code.main(), code.data(), fixups);
-  }
-  fixups.process(nullptr);
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

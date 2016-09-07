@@ -54,8 +54,7 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
   auto tDest = getTranslation(args);
   if (!tDest) return nullptr;
 
-  LeaseHolder writer(Translator::WriteLease(), destSk.func(),
-                     TransKind::Profile);
+  LeaseHolder writer(GetWriteLease(), destSk.func(), TransKind::Profile);
   if (!writer) return tDest;
 
   auto const sr = mcg->srcDB().find(destSk);
@@ -268,7 +267,7 @@ TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
   }
 
   if (start && !RuntimeOption::EvalFailJitPrologs) {
-    LeaseHolder writer(Translator::WriteLease(), func, TransKind::Profile);
+    LeaseHolder writer(GetWriteLease(), func, TransKind::Profile);
     if (!writer) return start;
 
     // Someone else may have changed the func prologue while we waited for

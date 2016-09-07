@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc-info.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -406,7 +407,7 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
       profData->addTransProfPrologue(id, funcBody, paramIndex);
       return id;
     }
-    if (profData() && Translator::isTransDBEnabled()) {
+    if (profData() && transdb::enabled()) {
       return profData()->allocTransID();
     }
     return kInvalidTransID;
@@ -469,7 +470,7 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
           kind == TransKind::OptPrologue);
 
   auto tr = maker.rec(funcBody, transID, kind);
-  mcg->tx().addTranslation(tr);
+  transdb::addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
   }
@@ -565,7 +566,7 @@ TCA emitTranslation(TransEnv env) {
   auto tr = maker.rec(sk, env.transID, args.kind, args.region, fixups.bcMap,
                       std::move(env.annotations),
                       env.unit && cfgHasLoop(*env.unit));
-  mcg->tx().addTranslation(tr);
+  transdb::addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }

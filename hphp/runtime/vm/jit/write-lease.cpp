@@ -38,7 +38,11 @@ AtomicVectorInit s_funcOwnersInit{
   s_funcOwners, RuntimeOption::EvalFuncCountHint
 };
 std::atomic<int> s_jittingThreads{0};
+
+Lease s_writeLease;
 }
+
+Lease& GetWriteLease() { return s_writeLease; }
 
 Lease::Lease() {
   pthread_mutex_init(&m_lock, nullptr);

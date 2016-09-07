@@ -25,7 +25,7 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/tc-info.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
 
 #include "hphp/util/build-info.h"
@@ -136,7 +136,7 @@ static void bt_handler(int sig) {
     ::close(fd);
   }
 
-  if (jit::Translator::isTransDBEnabled()) {
+  if (jit::transdb::enabled()) {
     jit::dumpTC(true);
   }
 

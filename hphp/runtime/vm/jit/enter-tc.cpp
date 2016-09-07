@@ -39,7 +39,7 @@ void enterTC(TCA start, ActRec* stashedAR) {
   assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
-  assertx(!Translator::WriteLease().amOwner());
+  assertx(!GetWriteLease().amOwner());
 
   INC_TPC(enter_tc);
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {

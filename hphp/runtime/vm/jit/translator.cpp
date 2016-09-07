@@ -71,10 +71,6 @@ TRACE_SET_MOD(trans);
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-Lease Translator::s_writeLease;
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * NB: this opcode structure is sparse; it cannot just be indexed by
  * opcode.
@@ -471,9 +467,12 @@ static const struct {
                    {Stack1|MBase,     None,         OutNone         }},
 };
 
-static hphp_hash_map<Op, InstrInfo> instrInfo;
-static bool instrInfoInited;
-static void initInstrInfo() {
+namespace {
+hphp_hash_map<Op, InstrInfo> instrInfo;
+bool instrInfoInited;
+}
+
+void initInstrInfo() {
   if (!instrInfoInited) {
     for (auto& info : instrInfoSparse) {
       instrInfo[info.op] = info.info;
@@ -1083,53 +1082,6 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
   return false;
 }
 
-Translator::Translator()
-  : m_createdTime(HPHP::Timer::GetCurrentTimeMicros())
-{
-  initInstrInfo();
-}
-
-bool
-Translator::isSrcKeyInBL(SrcKey sk) {
-  auto unit = sk.unit();
-  if (unit->isInterpretOnly()) return true;
-  Lock l(m_dbgBlacklistLock);
-  if (m_dbgBLSrcKey.find(sk) != m_dbgBLSrcKey.end()) {
-    return true;
-  }
-
-  // Loop until the end of the basic block inclusively. This is useful for
-  // function exit breakpoints, which are implemented by blacklisting the RetC
-  // opcodes.
-  PC pc = nullptr;
-  do {
-    pc = (pc == nullptr) ? unit->at(sk.offset()) : pc + instrLen(pc);
-    if (m_dbgBLPC.checkPC(pc)) {
-      m_dbgBLSrcKey.insert(sk);
-      return true;
-    }
-  } while (!opcodeBreaksBB(peek_op(pc)));
-  return false;
-}
-
-void
-Translator::clearDbgBL() {
-  Lock l(m_dbgBlacklistLock);
-  m_dbgBLSrcKey.clear();
-  m_dbgBLPC.clear();
-}
-
-bool
-Translator::addDbgBLPC(PC pc) {
-  Lock l(m_dbgBlacklistLock);
-  if (m_dbgBLPC.checkPC(pc)) {
-    // already there
-    return false;
-  }
-  m_dbgBLPC.addPC(pc);
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 #define IMM_BLA(n)     ni.immVec
@@ -1253,73 +1205,6 @@ void translateInstr(
 }
 
 //////////////////////////////////////////////////////////////////////
-
-uint64_t* Translator::getTransCounterAddr() {
-  if (!isTransDBEnabled()) return nullptr;
-
-  TransID id = m_translations.size();
-
-  // allocate a new chunk of counters if necessary
-  if (id >= m_transCounters.size() * transCountersPerChunk) {
-    uint32_t   size = sizeof(uint64_t) * transCountersPerChunk;
-    auto *chunk = (uint64_t*)malloc(size);
-    bzero(chunk, size);
-    m_transCounters.push_back(chunk);
-  }
-  assertx(id / transCountersPerChunk < m_transCounters.size());
-  return &(m_transCounters[id / transCountersPerChunk]
-           [id % transCountersPerChunk]);
-}
-
-void Translator::addTranslation(const TransRec& transRec) {
-  if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
-    // Log the translation's size, creation time, SrcKey, and size
-    Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
-                        HPHP::Timer::GetCurrentTimeMicros() - m_createdTime,
-                        folly::format("{}:{}:{}",
-                          transRec.src.unit()->filepath(),
-                          transRec.src.funcID(),
-                          transRec.src.offset()).str().c_str(),
-                        transRec.aLen,
-                        transRec.acoldLen,
-                        static_cast<int>(transRec.kind));
-  }
-
-  if (!isTransDBEnabled()) return;
-  mcg->assertOwnsCodeLock();
-  TransID id = transRec.id == kInvalidTransID ? m_translations.size()
-                                              : transRec.id;
-  if (id >= m_translations.size()) {
-    m_translations.resize(id + 1);
-  }
-  m_translations[id] = transRec;
-  m_translations[id].id = id;
-
-  if (transRec.aLen > 0) {
-    m_transDB[transRec.aStart] = id;
-  }
-  if (transRec.acoldLen > 0) {
-    m_transDB[transRec.acoldStart] = id;
-  }
-
-  // Optimize storage of the created TransRec.
-  m_translations[id].optimizeForMemory();
-}
-
-uint64_t Translator::getTransCounter(TransID transId) const {
-  if (!isTransDBEnabled()) return -1ul;
-  assertx(transId < m_translations.size());
-
-  uint64_t counter;
-
-  if (transId / transCountersPerChunk >= m_transCounters.size()) {
-    counter = 0;
-  } else {
-    counter =  m_transCounters[transId / transCountersPerChunk]
-                              [transId % transCountersPerChunk];
-  }
-  return counter;
-}
 
 const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   bool& magicCall, bool staticLookup,

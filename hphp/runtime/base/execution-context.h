@@ -45,7 +45,6 @@ namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
 struct Resumable;
-namespace jit { struct Translator; }
 }
 
 namespace HPHP {

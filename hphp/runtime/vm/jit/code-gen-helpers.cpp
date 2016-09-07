@@ -28,8 +28,7 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -412,10 +411,10 @@ void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
 }
 
 void emitTransCounterInc(Vout& v) {
-  if (!mcg->tx().isTransDBEnabled()) return;
-  // Translator::getTransCounterAddr is not thread-safe.
+  if (!transdb::enabled()) return;
+  // transdb::getTransCounterAddr is not thread-safe.
   assertx(!RuntimeOption::EvalJitConcurrently);
-  auto t = v.cns(mcg->tx().getTransCounterAddr());
+  auto t = v.cns(transdb::getTransCounterAddr());
   v << incqmlock{*t, v.makeReg()};
 }
 

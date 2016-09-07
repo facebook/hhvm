@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
@@ -53,7 +54,7 @@ bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
     SKTRACE(2, sk, "{\n");
     TCA topTrans = srcRec.getTopTranslation();
     for (size_t i = 0; i < tns.size(); ++i) {
-      auto const rec = mcg->tx().getTransRec(tns[i].mainStart());
+      auto const rec = transdb::getTransRec(tns[i].mainStart());
       assertx(rec);
       SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
       if (tns[i].mainStart() == topTrans) {
@@ -194,18 +195,18 @@ bool createSrcRec(SrcKey sk) {
   assertx(asize == 0);
   if (coldSize && RuntimeOption::EvalDumpTCAnchors) {
     auto const transID =
-      profData() && Translator::isTransDBEnabled() ? profData()->allocTransID()
-                                                   : kInvalidTransID;
+      profData() && transdb::enabled() ? profData()->allocTransID()
+                                       : kInvalidTransID;
     TransRec tr(sk, transID, TransKind::Anchor,
                 astart, asize, coldStart, coldSize,
                 frozenStart, frozenSize);
-    mcg->tx().addTranslation(tr);
+    transdb::addTranslation(tr);
     if (RuntimeOption::EvalJitUseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }
 
-    assertx(!mcg->tx().isTransDBEnabled() ||
-            mcg->tx().getTransRec(coldStart)->kind == TransKind::Anchor);
+    assertx(!transdb::enabled() ||
+            transdb::getTransRec(coldStart)->kind == TransKind::Anchor);
   }
 
   return true;
@@ -244,8 +245,7 @@ TCA translate(TransArgs args) {
 
   // Lower the RegionDesc to an IRUnit, then lower that to a Vunit.
   if (args.region) {
-    if (args.kind == TransKind::Profile ||
-        (profData() && Translator::isTransDBEnabled())) {
+    if (args.kind == TransKind::Profile || (profData() && transdb::enabled())) {
       env.transID = profData()->allocTransID();
     }
     auto const transContext =
@@ -291,7 +291,7 @@ TCA createTranslation(TransArgs args) {
   if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
   auto sk = args.sk;
-  LeaseHolder writer(Translator::WriteLease(), sk.func(), args.kind);
+  LeaseHolder writer(GetWriteLease(), sk.func(), args.kind);
   if (!writer || !shouldTranslate(sk.func(), args.kind)) return nullptr;
 
   if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {

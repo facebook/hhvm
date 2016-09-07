@@ -21,46 +21,6 @@
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
-// TransDB.
-
-inline bool Translator::isTransDBEnabled() {
-  return debug ||
-         RuntimeOption::EvalDumpTC ||
-         RuntimeOption::EvalDumpIR ||
-         RuntimeOption::EvalDumpRegion;
-}
-
-inline const TransRec* Translator::getTransRec(TCA tca) const {
-  if (!isTransDBEnabled()) return nullptr;
-
-  TransDB::const_iterator it = m_transDB.find(tca);
-  if (it == m_transDB.end()) {
-    return nullptr;
-  }
-  if (it->second >= m_translations.size()) {
-    return nullptr;
-  }
-  return &m_translations[it->second];
-}
-
-inline const TransRec* Translator::getTransRec(TransID transId) const {
-  if (!isTransDBEnabled()) return nullptr;
-
-  always_assert(transId < m_translations.size());
-  return &m_translations[transId];
-}
-
-inline size_t Translator::getNumTranslations() const {
-  return m_translations.size();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-inline Lease& Translator::WriteLease() {
-  return s_writeLease;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // TransContext.
 
 inline TransContext::TransContext(

@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -47,8 +47,7 @@ IRMetadataUpdater::IRMetadataUpdater(const Venv& env, AsmInfo* asm_info)
     m_area_to_blockinfos.resize(m_env.text.areas().size());
     for (auto& r : m_area_to_blockinfos) r.resize(m_env.unit.blocks.size());
   }
-  if (mcg->tx().isTransDBEnabled() ||
-      RuntimeOption::EvalJitUseVtuneAPI) {
+  if (transdb::enabled() || RuntimeOption::EvalJitUseVtuneAPI) {
     m_bcmap = &env.meta.bcMap;
   }
 }

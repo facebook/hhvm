@@ -52,6 +52,8 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+constexpr int MaxJmpsTracedThrough = 5;
+
 struct Env {
   Env(const RegionContext& ctx,
       TransKind kind,
@@ -275,7 +277,7 @@ bool traceThroughJmp(Env& env) {
   // Don't trace through too many jumps, unless we're inlining. We want to make
   // sure we don't break a tracelet in the middle of an inlined call; if the
   // inlined callee becomes too big that's caught in shouldIRInline.
-  if (env.numJmps == Translator::MaxJmpsTracedThrough && !env.inlining) {
+  if (env.numJmps == MaxJmpsTracedThrough && !env.inlining) {
     return false;
   }
 

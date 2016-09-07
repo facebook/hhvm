@@ -20,11 +20,14 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
+#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
+#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg);
@@ -94,7 +97,7 @@ void checkFreeProfData() {
       mcg->code().main().used() >= CodeCache::AMaxUsage &&
       (!mcg->code().hotEnabled() ||
        profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
-      !Translator::isTransDBEnabled()) {
+      !transdb::enabled()) {
     discardProfData();
   }
 }
@@ -164,7 +167,7 @@ TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar, bool forRegenerate) {
            forRegenerate           ? TransKind::OptPrologue  :
                                      TransKind::LivePrologue;
   };
-  LeaseHolder writer(Translator::WriteLease(), func, computeKind());
+  LeaseHolder writer(GetWriteLease(), func, computeKind());
   if (!writer) return nullptr;
 
   auto const kind = computeKind();
@@ -209,7 +212,7 @@ TCA getFuncBody(Func* func) {
   auto tca = func->getFuncBody();
   if (tca != mcg->ustubs().funcBodyHelperThunk) return tca;
 
-  LeaseHolder writer(Translator::WriteLease(), func, TransKind::Profile);
+  LeaseHolder writer(GetWriteLease(), func, TransKind::Profile);
   if (!writer) return nullptr;
 
   tca = func->getFuncBody();
@@ -257,7 +260,7 @@ TCA retranslate(TransArgs args) {
   SCOPE_EXIT {
     if (locked) sr->freeLock();
   };
-  if (isDebuggerAttachedProcess() && mcg->tx().isSrcKeyInBL(args.sk)) {
+  if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
     SKTRACE(1, args.sk, "retranslate abort due to debugger\n");
@@ -282,7 +285,7 @@ TCA retranslate(TransArgs args) {
     return nullptr;
   }
 
-  LeaseHolder writer(Translator::WriteLease(), args.sk.func(), args.kind);
+  LeaseHolder writer(GetWriteLease(), args.sk.func(), args.kind);
   if (!writer || !shouldTranslate(args.sk.func(), kind())) {
     return nullptr;
   }
@@ -317,7 +320,7 @@ TCA retranslateOpt(SrcKey sk, TransID transId) {
   auto const funcID = func->getFuncId();
   if (profData() == nullptr || profData()->optimized(funcID)) return nullptr;
 
-  LeaseHolder writer(Translator::WriteLease(), func, TransKind::Optimize);
+  LeaseHolder writer(GetWriteLease(), func, TransKind::Optimize);
   if (!writer) return nullptr;
 
   if (profData()->optimized(funcID)) return nullptr;
@@ -364,5 +367,16 @@ TCA retranslateOpt(SrcKey sk, TransID transId) {
   checkFreeProfData();
   return start;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+namespace { int64_t s_startTime; }
+namespace mcgen {
+void processInit() {
+  s_startTime = HPHP::Timer::GetCurrentTimeMicros();
+  initInstrInfo();
+}
+}
+
+int64_t jitInitTime() { return s_startTime; }
 
 }}

@@ -16,13 +16,19 @@
 
 #include "hphp/runtime/base/perf-warning.h"
 
+#include <folly/String.h>
+
+#include "hphp/util/stack-trace.h"
+
 namespace HPHP {
 
 void logAHMSubMapWarning(folly::StringPiece mapName) {
+  StackTrace st;
   logPerfWarning(
     "AtomicHashMap overflow",
     [&](StructuredLogEntry& cols) {
       cols.setStr("map_name", mapName);
+      cols.setStackTrace("stack", st);
     }
   );
 }

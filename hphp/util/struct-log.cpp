@@ -18,11 +18,15 @@
 
 #include <folly/Random.h>
 
+#include "hphp/util/stack-trace.h"
+
 namespace HPHP {
 
 StructuredLogEntry::StructuredLogEntry()
   : ints(folly::dynamic::object())
   , strs(folly::dynamic::object())
+  , sets(folly::dynamic::object())
+  , vecs(folly::dynamic::object())
 {
 }
 
@@ -35,9 +39,41 @@ void StructuredLogEntry::setStr(folly::StringPiece key,
   strs[key] = value;
 }
 
+void StructuredLogEntry::setSet(folly::StringPiece key,
+                                const std::set<folly::StringPiece>& value) {
+  sets[key] = folly::dynamic::object();
+  for (auto const& v : value) sets[key][v] = 1;
+}
+
+void StructuredLogEntry::setVec(folly::StringPiece key,
+                                const std::vector<folly::StringPiece>& value) {
+  folly::dynamic arr = folly::dynamic::array();
+  arr.resize(value.size());
+  for (int i = 0; i < value.size(); ++i) {
+    arr[i] = value[i];
+  }
+  vecs[key] = arr;
+}
+
+void StructuredLogEntry::setStackTrace(folly::StringPiece key, StackTrace& st) {
+  std::vector<folly::StringPiece> stackFrames;
+  folly::split("\n", st.toString(), stackFrames);
+  const size_t kPrefixLen = 2; // First 2 parts are '#' and frame number.
+  for (auto& frame : stackFrames) {
+    std::vector<folly::StringPiece> parts;
+    folly::split(" ", frame, parts, /* ignore_empty = */ true);
+    if (parts.size() > kPrefixLen) {
+      frame = parts[kPrefixLen];
+    }
+  }
+  setVec(key, stackFrames);
+}
+
 void StructuredLogEntry::clear() {
   ints = folly::dynamic::object();
   strs = folly::dynamic::object();
+  sets = folly::dynamic::object();
+  vecs = folly::dynamic::object();
 }
 
 namespace StructuredLog {
@@ -67,7 +103,11 @@ void log(const std::string& tableName, const StructuredLogEntry& cols) {
 std::string show(const StructuredLogEntry& cols) {
   folly::dynamic out = cols.strs;
   out["ints"] = cols.ints;
-  return folly::toJson(out);
+  out["sets"] = cols.sets;
+  out["vecs"] = cols.vecs;
+  std::ostringstream oss;
+  oss << out;
+  return oss.str();
 }
 
 }

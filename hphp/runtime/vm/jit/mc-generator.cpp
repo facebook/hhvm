@@ -94,69 +94,6 @@ int MCGenerator::numTranslations(SrcKey sk) const {
   return 0;
 }
 
-/*
- * Support for the stub freelist.
- */
-TCA FreeStubList::maybePop() {
-  StubNode* ret = m_list;
-  if (ret) {
-    TRACE(1, "alloc stub %p\n", ret);
-    m_list = ret->m_next;
-    ret->m_freed = ~kStubFree;
-  }
-  return (TCA)ret;
-}
-
-void FreeStubList::push(TCA stub) {
-  /*
-   * A freed stub may be released by Treadmill more than once if multiple
-   * threads execute the service request before it is freed. We detect
-   * duplicates by marking freed stubs
-   */
-  StubNode* n = reinterpret_cast<StubNode*>(stub);
-  if (n->m_freed == kStubFree) {
-    TRACE(1, "already freed stub %p\n", stub);
-    return;
-  }
-  n->m_freed = kStubFree;
-  n->m_next = m_list;
-  TRACE(1, "free stub %p (-> %p)\n", stub, m_list);
-  m_list = n;
-}
-
-void MCGenerator::freeRequestStub(TCA stub) {
-  // We need to lock the code because m_freeStubs.push() writes to the stub and
-  // the metadata to protect m_freeStubs itself.
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  assertx(m_code.frozen().contains(stub));
-  m_debugInfo.recordRelocMap(stub, 0, "FreeStub");
-  m_freeStubs.push(stub);
-}
-
-TCA MCGenerator::getFreeStub(CodeBlock& frozen, CGMeta* fixups,
-                             bool* isReused) {
-  TCA ret = m_freeStubs.maybePop();
-  if (isReused) *isReused = ret;
-
-  if (ret) {
-    Stats::inc(Stats::Astub_Reused);
-    always_assert(m_freeStubs.peek() == nullptr ||
-                  m_code.isValidCodeAddress(m_freeStubs.peek()));
-    TRACE(1, "recycle stub %p\n", ret);
-  } else {
-    ret = frozen.frontier();
-    Stats::inc(Stats::Astub_New);
-    TRACE(1, "alloc new stub %p\n", ret);
-  }
-
-  if (fixups) {
-    fixups->reusedStubs.emplace_back(ret);
-  }
-  return ret;
-}
-
 void MCGenerator::syncWork() {
   assertx(tl_regState != VMRegState::CLEAN);
   m_fixupMap.fixup(g_context.getNoCheck());

@@ -65,22 +65,6 @@ using LiteralMap = TreadHashMap<uint64_t,const uint64_t*,std::hash<uint64_t>>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct FreeStubList {
-  struct StubNode {
-    StubNode* m_next;
-    uint64_t  m_freed;
-  };
-  static const uint64_t kStubFree = 0;
-  FreeStubList() : m_list(nullptr) {}
-  TCA peek() { return (TCA)m_list; }
-  TCA maybePop();
-  void push(TCA stub);
-private:
-  StubNode* m_list;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * MCGenerator handles the machine-level details of code generation (e.g.,
  * translation cache entry, code smashing, code cache management) and delegates
@@ -131,27 +115,12 @@ struct MCGenerator {
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
   FixupMap& fixupMap() { return m_fixupMap; }
   Debug::DebugInfo* debugInfo() { return &m_debugInfo; }
-  FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
 
   /*
    * Look up a TCA-to-landingpad mapping.
    */
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
-
-  /*
-   * Allocate or free an epehemeral service request stub.
-   *
-   * getFreeStub() returns the address of a freed stub if one is available;
-   * otherwise, it returns frozen.frontier().  If not nullptr, `isReused' is
-   * set to whether or not the returned stub is being reused.
-   *
-   * Note that we don't track the sizes of stubs anywhere---this code only
-   * works because all service requests emit a code segment of size
-   * svcreq::stub_size().
-   */
-  TCA getFreeStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused = nullptr);
-  void freeRequestStub(TCA stub);
 
   /*
    * Get the SrcDB.
@@ -254,8 +223,6 @@ private:
   FixupMap m_fixupMap;
   // Global .debug_frame information.
   Debug::DebugInfo m_debugInfo;
-  // Reusable service request stubs in m_code.frozen().
-  FreeStubList m_freeStubs;
   // Map from integral literals to their location in the TC data section.
   LiteralMap m_literals;
   // Lock protecting all metadata tables.

@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -150,7 +151,7 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
-    mcg->getFreeStub(cb, &fixups),
+    allocTCStub(cb, &fixups),
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_JMP,
     jmp,
@@ -165,7 +166,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
-    mcg->getFreeStub(cb, &fixups),
+    allocTCStub(cb, &fixups),
     target.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_BIND_ADDR,
     addr,

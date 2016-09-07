@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
@@ -235,7 +236,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
   if (smashed && info.stub) {
     auto const stub = info.stub;
-    Treadmill::enqueue([stub] { mcg->freeRequestStub(stub); });
+    Treadmill::enqueue([stub] { freeTCStub(stub); });
   }
 
   if (start == nullptr) {

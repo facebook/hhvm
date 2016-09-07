@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/stub-alloc.h"
 
 #include "hphp/tools/hfsort/jitsort.h"
 
@@ -559,13 +560,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
   always_assert(relocMap);
   fseek(relocMap, 0, SEEK_SET);
 
-  std::set<TCA> deadStubs;
-  auto stub = (FreeStubList::StubNode*)mcg->freeStubList().peek();
-  while (stub) {
-    deadStubs.insert((TCA)stub);
-    stub = stub->m_next;
-  }
-
+  auto deadStubs = getFreeTCStubs();
   auto param = PostProcessParam { rel, deadStubs, newRelocMap };
   std::set<TCA> liveStubs;
   readRelocations(relocMap, &liveStubs, postProcess, &param);

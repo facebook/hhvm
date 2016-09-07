@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -61,7 +62,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
-  if (rip == mcg->ustubs().callToExit) return;
+  if (rip == tc::ustubs().callToExit) return;
   checkFrame(fp, sp, false /* fullCheck */, 0);
   assertx(sp <= (Cell*)fp || fp->resumed());
 }
@@ -160,7 +161,7 @@ void cgAsyncRetFast(IRLS& env, const IRInstruction* inst) {
   auto args = vm_regs_with_sp() | rarg(1);
   if (!ret->isA(TNull)) args |= rarg(0);
 
-  v << jmpi{mcg->ustubs().asyncRetCtrl, args};
+  v << jmpi{tc::ustubs().asyncRetCtrl, args};
 }
 
 void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {
@@ -168,7 +169,7 @@ void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {
   adjustSPForReturn(env, inst);
   prepare_return_regs(v, inst->src(2), srcLoc(env, inst, 2),
                       inst->extra<AsyncSwitchFast>()->aux);
-  v << jmpi{mcg->ustubs().asyncSwitchCtrl, php_return_regs()};
+  v << jmpi{tc::ustubs().asyncSwitchCtrl, php_return_regs()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -204,8 +205,8 @@ void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {
   if (numLocals == 0) return;
 
   auto const target = numLocals > kNumFreeLocalsHelpers
-    ? mcg->ustubs().freeManyLocalsHelper
-    : mcg->ustubs().freeLocalsHelpers[numLocals - 1];
+    ? tc::ustubs().freeManyLocalsHelper
+    : tc::ustubs().freeLocalsHelpers[numLocals - 1];
 
   auto const iterReg = v.makeReg();
   v << lea{fp[localOffset(numLocals - 1)], iterReg};

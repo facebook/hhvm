@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -109,14 +110,13 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
 
   emitVunit(*vunit, env.unit, code, fixups);
 
-  auto metaLock = mcg->lockMetadata();
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;
     auto& frozen = code.frozen();
-    recordPerfRelocMap(start, main.frontier(),
-                       frozen.frontier(), frozen.frontier(),
-                       SrcKey { func, dvs[0].second, false },
-                       0, ibs, fixups);
+    tc::recordPerfRelocMap(start, main.frontier(),
+                           frozen.frontier(), frozen.frontier(),
+                           SrcKey { func, dvs[0].second, false },
+                           0, ibs, fixups);
   }
   fixups.process(nullptr);
 

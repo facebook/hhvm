@@ -36,10 +36,12 @@ struct CGMeta;
  * Note that we don't track the sizes of stubs anywhere---this code only
  * works because all service requests emit a code segment of size
  * svcreq::stub_size().
+ *
+ * Pre: tc::assertOwnsMetadataLock
  */
 TCA allocTCStub(CodeBlock& frozen, CGMeta* fixups,
                      bool* isReused = nullptr);
-void freeTCStub(TCA stub);
+void markStubFreed(TCA stub);
 
 /*
  * Return a set of all unused request stubs currently on the free list.

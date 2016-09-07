@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/runtime/vm/runtime.h"
@@ -35,7 +36,7 @@ void enterTC(TCA start, ActRec* stashedAR) {
     fflush(stderr);
   }
 
-  assertx(mcg->code().isValidCodeAddress(start));
+  assertx(tc::isValidCodeAddress(start));
   assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 

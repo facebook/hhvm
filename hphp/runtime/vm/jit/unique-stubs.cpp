@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stack-overflow.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-ppc64.h"
@@ -171,7 +172,7 @@ TCA fcallHelper(ActRec* ar) {
   assertx(!ar->resumed());
 
   if (LIKELY(!RuntimeOption::EvalFailJitPrologs)) {
-    auto const tca = getFuncPrologue(
+    auto const tca = mcgen::getFuncPrologue(
       const_cast<Func*>(ar->func()),
       ar->numArgs(),
       ar
@@ -187,7 +188,7 @@ TCA fcallHelper(ActRec* ar) {
   try {
     VMRegAnchor _(ar);
     if (doFCall(ar, vmpc())) {
-      return mcg->ustubs().resumeHelperRet;
+      return tc::ustubs().resumeHelperRet;
     }
     // We've been asked to skip the function body (fb_intercept).  The vmregs
     // have already been fixed; indicate this with a nullptr return.
@@ -232,9 +233,9 @@ TCA funcBodyHelper(ActRec* fp) {
   tl_regState = VMRegState::CLEAN;
 
   auto const func = const_cast<Func*>(fp->m_func);
-  auto tca = getFuncBody(func);
+  auto tca = mcgen::getFuncBody(func);
   if (!tca) {
-    tca = mcg->ustubs().resumeHelper;
+    tca = tc::ustubs().resumeHelper;
   }
 
   tl_regState = VMRegState::DIRTY;
@@ -1329,12 +1330,7 @@ TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
 
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
 void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
-  auto codeLock = mcg->lockCode();
-  auto metaLock = mcg->lockMetadata();
-
   auto view = code.view();
   auto& main = view.main();
   auto& cold = view.cold();
@@ -1476,7 +1472,7 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
     v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
   }
   v << copy{v.cns(sk.pc()), rarg(0)};
-  v << jmpi{mcg->ustubs().interpHelper, arg_regs(1)};
+  v << jmpi{tc::ustubs().interpHelper, arg_regs(1)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1486,7 +1482,7 @@ void enterTCImpl(TCA start, ActRec* stashedAR) {
   // register (aside from rvmfp()), since enterTCHelper does not save them.
   CALLEE_SAVED_BARRIER();
   auto& regs = vmRegsUnsafe();
-  mcg->ustubs().enterTCHelper(regs.stack.top(), regs.fp, start,
+  tc::ustubs().enterTCHelper(regs.stack.top(), regs.fp, start,
                               vmFirstAR(), rds::tl_base, stashedAR);
   CALLEE_SAVED_BARRIER();
 }

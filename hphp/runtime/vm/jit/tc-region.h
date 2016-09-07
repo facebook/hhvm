@@ -14,47 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SERVER_TC_INFO_H_
-#define incl_HPHP_SERVER_TC_INFO_H_
+#ifndef incl_HPHP_JIT_TC_REGION_H_
+#define incl_HPHP_JIT_TC_REGION_H_
 
-#include <string>
-#include <vector>
+#include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace jit {
-
-///////////////////////////////////////////////////////////////////////////////
-
-struct UsageInfo {
-  std::string name;
-  size_t used;
-  size_t capacity;
-  bool global;
-};
+namespace HPHP { namespace jit { namespace tc {
 
 /*
- * Get UsageInfo data for all the TC code sections, including global data, and
- * also for RDS.
+ * Invalidate the SrcDB entry for sk.
  */
-std::vector<UsageInfo> getUsageInfo();
+void invalidateSrcKey(SrcKey sk);
 
-/*
- * Like getUsageInfo(), but formatted as a pleasant string.
- */
-std::string getTCSpace();
-
-/*
- * Return a string containing the names and start addresses of all TC code
- * sections.
- */
-std::string getTCAddrs();
-
-/*
- * Dump the translation cache to files in /tmp, returning success.
- */
-bool dumpTC(bool ignoreLease = false);
-
-///////////////////////////////////////////////////////////////////////////////
-
-}}
+}}}
 
 #endif

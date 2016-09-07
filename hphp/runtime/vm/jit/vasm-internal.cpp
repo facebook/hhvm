@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -138,14 +139,14 @@ bool is_empty_catch(const Vblock& block) {
   return block.code.size() == 2 &&
          block.code[0].op == Vinstr::landingpad &&
          block.code[1].op == Vinstr::jmpi &&
-         block.code[1].jmpi_.target == mcg->ustubs().endCatchHelper;
+         block.code[1].jmpi_.target == tc::ustubs().endCatchHelper;
 }
 
 void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
   bool const is_empty = is_empty_catch(env.unit.blocks[p.target]);
 
   auto const catch_target = is_empty
-    ? mcg->ustubs().endCatchHelper
+    ? tc::ustubs().endCatchHelper
     : env.addrs[p.target];
   assertx(catch_target);
 
@@ -249,7 +250,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       { auto const& i = p.svcreq.fallback_;
         assertx(p.jmp && !p.jcc);
 
-        auto const srcrec = mcg->srcDB().find(i.target);
+        auto const srcrec = tc::findSrcRec(i.target);
         always_assert(srcrec);
         stub = i.trflags.packed
           ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
@@ -261,7 +262,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
       { auto const& i = p.svcreq.fallbackcc_;
         assertx(!p.jmp && p.jcc);
 
-        auto const srcrec = mcg->srcDB().find(i.target);
+        auto const srcrec = tc::findSrcRec(i.target);
         always_assert(srcrec);
         stub = i.trflags.packed
           ? svcreq::emit_retranslate_stub(frozen, env.text.data(),

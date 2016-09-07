@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -557,7 +558,8 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
          show(irgs.context.kind), profFactor, show(region));
 
   if (RuntimeOption::EvalDumpRegion &&
-      dumpTCAnnotation(*irgs.context.srcKey().func(), irgs.context.kind)) {
+      mcgen::dumpTCAnnotation(*irgs.context.srcKey().func(),
+                              irgs.context.kind)) {
     if (annotations) annotations->emplace_back("RegionDesc", show(region));
   }
 

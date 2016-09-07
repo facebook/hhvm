@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/util/asm-x64.h"
@@ -45,7 +46,7 @@ ALWAYS_INLINE bool isSmall(const Func* func) {
 }
 
 ALWAYS_INLINE bool isPrologueStub(TCA addr) {
-  return addr == mcg->ustubs().fcallHelperThunk;
+  return addr == tc::ustubs().fcallHelperThunk;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,7 +74,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
     emitSmashableMovq(a.code(), fixups, uint64_t(func), rax);
     a.  cmpq   (rax, rvmfp()[AROFF(m_func)]);
   }
-  a.    jnz    (mcg->ustubs().funcPrologueRedispatch);
+  a.    jnz    (tc::ustubs().funcPrologueRedispatch);
 
   DEBUG_ONLY auto guard = funcGuardFromPrologue(a.frontier(), func);
   assertx(funcGuardMatches(guard, func));

@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -38,9 +39,9 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace {
+namespace HPHP { namespace jit { namespace tc {
 
-///////////////////////////////////////////////////////////////////////////////
+namespace {
 
 void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
                      CGMeta& fixups) {
@@ -69,7 +70,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
     v << loadb{tinfo[dbgOff], attached};
     v << testbi{static_cast<int8_t>(0xffu), attached, sf};
 
-    v << jcci{CC_NZ, sf, done, mcg->ustubs().interpHelper};
+    v << jcci{CC_NZ, sf, done, ustubs().interpHelper};
 
     v = done;
     v << fallthru{};
@@ -82,27 +83,26 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
   sr->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);
 }
 
-}
-
 ///////////////////////////////////////////////////////////////////////////////
+}
 
 bool addDbgGuards(const Unit* unit) {
   // TODO refactor
   // It grabs the write lease and iterates through whole SrcDB...
   struct timespec tsBegin, tsEnd;
   {
-    auto codeLock = mcg->lockCode();
-    auto metaLock = mcg->lockMetadata();
+    auto codeLock = lockCode();
+    auto metaLock = lockMetadata();
 
-    auto code = mcg->code().view();
-    auto& main = code.main();
-    auto& data = code.data();
+    auto view = code().view();
+    auto& main = view.main();
+    auto& data = view.data();
 
     HPHP::Timer::GetMonotonicTime(tsBegin);
     // Doc says even find _could_ invalidate iterator, in pactice it should
     // be very rare, so go with it now.
     CGMeta fixups;
-    for (auto& pair : mcg->srcDB()) {
+    for (auto& pair : srcDB()) {
       SrcKey const sk = SrcKey::fromAtomicInt(pair.first);
       // We may have a SrcKey to a deleted function. NB: this may miss a
       // race with deleting a Func. See task #2826313.
@@ -127,7 +127,7 @@ bool addDbgGuards(const Unit* unit) {
 
 bool addDbgGuard(const Func* func, Offset offset, bool resumed) {
   SrcKey sk(func, offset, resumed);
-  if (auto const sr = mcg->srcDB().find(sk)) {
+  if (auto const sr = srcDB().find(sk)) {
     if (sr->hasDebuggerGuard()) {
       return true;
     }
@@ -142,16 +142,16 @@ bool addDbgGuard(const Func* func, Offset offset, bool resumed) {
     }
   }
 
-  auto codeLock = mcg->lockCode();
-  auto metaLock = mcg->lockMetadata();
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
 
   CGMeta fixups;
-  if (auto sr = mcg->srcDB().find(sk)) {
-    auto code = mcg->code().view();
-    addDbgGuardImpl(sk, sr, code.main(), code.data(), fixups);
+  if (auto sr = srcDB().find(sk)) {
+    auto view = code().view();
+    addDbgGuardImpl(sk, sr, view.main(), view.data(), fixups);
   }
   fixups.process(nullptr);
   return true;
 }
 
-}}
+}}}

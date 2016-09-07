@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/recycle-tc.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -35,7 +36,46 @@
 
 #include <folly/MoveWrapper.h>
 
-namespace HPHP { namespace jit {
+/*
+ * This module implements garbage collection for the translation cache so that
+ * unreachable translations may be overridden by new translations.
+ *
+ * Unreachable translations are created by either:
+ *  (1) Freeing a function through the treadmill
+ *  (2) Replacing profiling translations in a SrcRec
+ *
+ * SrcRecs and prologues are recorded as they are emitted in to the TC so that
+ * when their associated function becomes unreachable they may be freed. In the
+ * case of profiling translations, these are sometimes freed eagerly when they
+ * become unreachable, as they will be erased from their associated SrcRec and
+ * are not tracked elsewhere.
+ *
+ * Function callers and inter-translation jumps are recorded so that they may
+ * be smashed when space is reclaimed with the TC.
+ *
+ * Freed memory is tracked and allocated using the policy defined in DataBlock,
+ * and allocation is performed in MCGenerator following the creation of a new
+ * translation.
+ *
+ * Rather than emit new translations directly into freed memory they are written
+ * at the end of the TC and then relocated into freed memory. As the space
+ * required for a translation will be unknown until it is complete this strategy
+ * allows allocation of an appropriately sized block.
+ *
+ * Currently all allocation and deallocation is done eagerly, therefore the
+ * performance of the module is dependent on accurately detecting unreachable
+ * functions and translations.
+ *
+ * This module exports diagnostic data in the form of counts of smashed calls
+ * and branches, and recorded functions. Higher level diagnostic data exported
+ * by DataBlock may be of more use in tracking TC health. In particular, the
+ * number of free bytes and free blocks give a rough measure of fragmentation
+ * within the allocator.
+ *
+ * See DataBlock for details about the allocation strategy and free memory
+ * tracking.
+ */
+namespace HPHP { namespace jit { namespace tc {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -128,77 +168,9 @@ void clearTCMaps(TCA start, TCA end) {
   }
 }
 
-/*
- * Reclaim all translations associated with a SrcRec including the anchor
- * translation.
- */
-void reclaimSrcRec(const SrcRec* rec) {
-  mcg->assertOwnsCodeLock();
-  mcg->assertOwnsMetadataLock();
-
-  ITRACE(1, "Reclaiming SrcRec addr={} anchor={}\n", (void*)rec,
-         rec->getFallbackTranslation());
-
-  Trace::Indent _i;
-
-  auto anchor = rec->getFallbackTranslation();
-  mcg->code().blockFor(anchor).free(anchor, svcreq::stub_size());
-
-  for (auto& loc : rec->translations()) {
-    reclaimTranslation(loc);
-  }
-}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-int smashedCalls()    { return s_smashedCalls.size(); }
-int smashedBranches() { return s_smashedBranches.size(); }
-int recordedFuncs()   { return s_funcTCData.size(); }
-
-////////////////////////////////////////////////////////////////////////////////
-
-void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
-                      bool profiled, int numArgs) {
-  mcg->assertOwnsCodeLock();
-
-  FTRACE(1, "Recording smashed call @ {} to func {} (id = {})\n",
-         toSmash, func->fullName()->data(), func->getFuncId());
-
-  PrologueCaller pc {!immutable, profiled, numArgs};
-  s_funcTCData[func].callers.emplace(toSmash, pc);
-  s_smashedCalls[toSmash] = func;
-}
-
-void recordFuncSrcRec(const Func* func, SrcRec* rec) {
-  mcg->assertOwnsCodeLock();
-
-  FTRACE(1, "Recording SrcRec for func {} (id = {}) addr = {}\n",
-         func->fullName()->data(), func->getFuncId(), (void*)rec);
-  s_funcTCData[func].srcRecs.emplace_back(rec);
-}
-
-void recordFuncPrologue(const Func* func, TransLoc loc) {
-  mcg->assertOwnsCodeLock();
-
-  FTRACE(1, "Recording Prologue for func {} (id = {}) main={}\n",
-         func->fullName()->data(), func->getFuncId(), loc.mainStart());
-  s_funcTCData[func].prologues.emplace_back(loc);
-}
-
-void recordJump(TCA toSmash, SrcRec* sr) {
- mcg->assertOwnsCodeLock();
-
-  FTRACE(1, "Recording smashed branch @ {} to SrcRec addr={}\n",
-         toSmash, (void*)sr);
-  s_smashedBranches[toSmash] = sr;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void reclaimTranslation(TransLoc loc) {
-  mcg->assertOwnsCodeLock();
-  mcg->assertOwnsMetadataLock();
+  assertOwnsCodeLock();
+  assertOwnsMetadataLock();
 
   ITRACE(1, "Reclaiming translation M[{}, {}] C[{}, {}] F[{}, {}]\n",
          loc.mainStart(), loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
@@ -206,7 +178,7 @@ void reclaimTranslation(TransLoc loc) {
 
   Trace::Indent _i;
 
-  auto& cache = mcg->code();
+  auto& cache = code();
   cache.blockFor(loc.mainStart()).free(loc.mainStart(), loc.mainSize());
   cache.blockFor(loc.coldStart()).free(loc.coldStart(), loc.coldSize());
   if (loc.coldStart() != loc.frozenStart()) {
@@ -253,9 +225,77 @@ void reclaimTranslation(TransLoc loc) {
   }
 }
 
+/*
+ * Reclaim all translations associated with a SrcRec including the anchor
+ * translation.
+ */
+void reclaimSrcRec(const SrcRec* rec) {
+  assertOwnsCodeLock();
+  assertOwnsMetadataLock();
+
+  ITRACE(1, "Reclaiming SrcRec addr={} anchor={}\n", (void*)rec,
+         rec->getFallbackTranslation());
+
+  Trace::Indent _i;
+
+  auto anchor = rec->getFallbackTranslation();
+  code().blockFor(anchor).free(anchor, svcreq::stub_size());
+
+  for (auto& loc : rec->translations()) {
+    reclaimTranslation(loc);
+  }
+}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int smashedCalls()    { return s_smashedCalls.size(); }
+int smashedBranches() { return s_smashedBranches.size(); }
+int recordedFuncs()   { return s_funcTCData.size(); }
+
+////////////////////////////////////////////////////////////////////////////////
+
+void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
+                      bool profiled, int numArgs) {
+  assertOwnsCodeLock();
+
+  FTRACE(1, "Recording smashed call @ {} to func {} (id = {})\n",
+         toSmash, func->fullName()->data(), func->getFuncId());
+
+  PrologueCaller pc {!immutable, profiled, numArgs};
+  s_funcTCData[func].callers.emplace(toSmash, pc);
+  s_smashedCalls[toSmash] = func;
+}
+
+void recordFuncSrcRec(const Func* func, SrcRec* rec) {
+  assertOwnsCodeLock();
+
+  FTRACE(1, "Recording SrcRec for func {} (id = {}) addr = {}\n",
+         func->fullName()->data(), func->getFuncId(), (void*)rec);
+  s_funcTCData[func].srcRecs.emplace_back(rec);
+}
+
+void recordFuncPrologue(const Func* func, TransLoc loc) {
+  assertOwnsCodeLock();
+
+  FTRACE(1, "Recording Prologue for func {} (id = {}) main={}\n",
+         func->fullName()->data(), func->getFuncId(), loc.mainStart());
+  s_funcTCData[func].prologues.emplace_back(loc);
+}
+
+void recordJump(TCA toSmash, SrcRec* sr) {
+ assertOwnsCodeLock();
+
+  FTRACE(1, "Recording smashed branch @ {} to SrcRec addr={}\n",
+         toSmash, (void*)sr);
+  s_smashedBranches[toSmash] = sr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void reclaimFunction(const Func* func) {
-  auto codeLock = mcg->lockCode();
-  auto metaLock = mcg->lockMetadata();
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
 
   auto it = s_funcTCData.find(func);
   if (it == s_funcTCData.end()) return;
@@ -266,7 +306,7 @@ void reclaimFunction(const Func* func) {
   Trace::Indent _i;
 
   auto& data = it->second;
-  auto& us = mcg->ustubs();
+  auto& us = ustubs();
 
   ITRACE(1, "Smashing prologues\n");
   clobberFuncGuards(func);
@@ -292,8 +332,8 @@ void reclaimFunction(const Func* func) {
   // the function is now unreachable). Once the following block runs the guards
   // should be unreachable.
   Treadmill::enqueue([fname, fid, movedData] {
-    auto codeLock = mcg->lockCode();
-    auto metaLock = mcg->lockMetadata();
+    auto codeLock = lockCode();
+    auto metaLock = lockMetadata();
 
     ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
     Trace::Indent _i;
@@ -313,6 +353,18 @@ void reclaimFunction(const Func* func) {
   s_funcTCData.erase(it);
 }
 
+void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
+    auto twrap = folly::makeMoveWrapper(std::move(trans));
+    Treadmill::enqueue([twrap]() mutable {
+      auto codeLock = lockCode();
+      auto metaLock = lockMetadata();
+      for (auto& loc : *twrap) {
+        reclaimTranslation(loc);
+      }
+      twrap->clear();
+    });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}}}

@@ -35,6 +35,7 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -68,7 +69,7 @@ const int64_t k_CONNECTION_TIMEOUT = 2;
 static String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted more than 25kb of code.
   size_t begin, end;
-  jit::codeEmittedThisRequest(begin, end);
+  jit::tc::codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
   auto constexpr kMaxTCBytes = 25 << 10;
   if (diff > kMaxTCBytes) {

@@ -111,6 +111,11 @@ struct DebugInfo {
 };
 
 /*
+ * Initialize the global DebugInfo
+ */
+void initDebugInfo();
+
+/*
  * Gets the fake symbol name we want to use for a php function.
  */
 std::string lookupFunction(const Func* func,

@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/stack-overflow.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -62,7 +63,7 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
   v = done;
 
   vcold = cold;
-  auto const call = CallSpec::stub(mcg->ustubs().functionEnterHelper);
+  auto const call = CallSpec::stub(tc::ustubs().functionEnterHelper);
   auto const args = v.makeVcallArgs({});
   vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
 }
@@ -134,7 +135,7 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
   v << cmpqm{needed_top, rvmtl()[rds::kSurpriseFlagsOff], sf};
 
   unlikelyIfThen(v, vcold(env), CC_AE, sf, [&] (Vout& v) {
-    auto const stub = mcg->ustubs().functionSurprisedOrStackOverflow;
+    auto const stub = tc::ustubs().functionSurprisedOrStackOverflow;
     auto const done = v.makeBlock();
     v << vinvoke{CallSpec::stub(stub), v.makeVcallArgs({}), v.makeTuple({}),
                  {done, label(env, inst->taken())}, fixup };

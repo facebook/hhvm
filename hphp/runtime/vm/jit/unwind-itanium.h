@@ -108,13 +108,10 @@ struct TCUnwindInfo {
 TCUnwindInfo tc_unwind_resume(ActRec* fp);
 
 /*
- * Write a CIE for the TC using `ehfw'.
- *
- * This sets tc_unwind_personality() as the personality routine, and includes
- * basic instructions to the unwinder for rematerializing the call frame
- * registers.
+ * Called to initialize the unwinder and register an .eh_frame that covers the
+ * TC.
  */
-void write_tc_cie(EHFrameWriter& ehfw);
+void initUnwinder(TCA base, size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -28,6 +28,8 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 
 using namespace HPHP::jit;
 
@@ -556,7 +558,7 @@ int ElfWriter::writeStringSection() {
 
 int ElfWriter::writeTextSection() {
   int section = -1;
-  auto const& code = mcg->code();
+  auto const& code = tc::code();
   if ((section = newSection(
          ".text.tracelets", code.codeSize(),
          SHT_NOBITS, SHF_ALLOC | SHF_EXECINSTR,

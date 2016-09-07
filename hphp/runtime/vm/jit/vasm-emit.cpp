@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
@@ -81,7 +82,7 @@ private:
 void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   if (vunit.dataBlocks.empty()) return;
 
-  mcg->assertOwnsCodeLock();
+  tc::assertOwnsCodeLock();
   Timer timer(Timer::vasm_bind_ptrs);
   FTRACE(1, "{:-^80}\n", "binding VdataPtrs");
 
@@ -126,7 +127,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
   Timer _t(Timer::vasm_emit);
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
-  mcg->assertOwnsCodeLock();
+  tc::assertOwnsCodeLock();
 
   CodeBlock& main_in = code.main();
   CodeBlock& cold_in = code.cold();
@@ -154,7 +155,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
               RuntimeOption::EvalJitRelocationSize + off,
               RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
   } else {
-    // Use separate code blocks, so that attempts to use mcg->code()'s blocks
+    // Use separate code blocks, so that attempts to use code's blocks
     // directly will fail (e.g., by overwriting the same memory being written
     // through these locals).
     cold.init(cold_in.frontier(), cold_in.available(), cold_in.name().c_str());
@@ -179,10 +180,10 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   assertx(main_in.frontier() == main_start);
 
   if (do_relocate) {
-    relocateTranslation(unit,
-                        main, main_in, main_start,
-                        cold, cold_in, cold_start,
-                        *frozen, frozen_start, ai, meta);
+    tc::relocateTranslation(unit,
+                            main, main_in, main_start,
+                            cold, cold_in, cold_start,
+                            *frozen, frozen_start, ai, meta);
   } else {
     cold_in.skip(cold.frontier() - cold_in.frontier());
     main_in.skip(main.frontier() - main_in.frontier());

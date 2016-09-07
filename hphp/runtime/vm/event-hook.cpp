@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
 
@@ -391,7 +392,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
   if (RuntimeOption::EvalJit &&
-      ((jit::TCA) ar->m_savedRip == jit::mcg->ustubs().retInlHelper)) {
+      ((jit::TCA) ar->m_savedRip == jit::tc::ustubs().retInlHelper)) {
     return;
   }
 

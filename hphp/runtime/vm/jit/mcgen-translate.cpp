@@ -17,12 +17,12 @@
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/mcgen-emit.h"
 
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
@@ -138,80 +138,6 @@ RegionDescPtr prepareRegion(const TransArgs& args) {
   return selectRegion(rContext, args.kind);
 }
 
-bool createSrcRec(SrcKey sk) {
-  if (mcg->srcDB().find(sk)) return true;
-
-  auto const srcRecSPOff = sk.resumed() ? folly::none
-                                        : folly::make_optional(liveSpOff());
-
-  // We put retranslate requests at the end of our slab to more frequently
-  // allow conditional jump fall-throughs
-  auto codeLock  = mcg->lockCode();
-  auto code       = mcg->code().view();
-  TCA astart      = code.main().frontier();
-  TCA coldStart   = code.cold().frontier();
-  TCA frozenStart = code.frozen().frontier();
-  TCA req;
-  if (!RuntimeOption::EvalEnableReusableTC) {
-    req = svcreq::emit_persistent(code.cold(),
-                                  code.data(),
-                                  srcRecSPOff,
-                                  REQ_RETRANSLATE,
-                                  sk.offset(),
-                                  TransFlags().packed);
-  } else {
-    auto const stubsize = svcreq::stub_size();
-    auto newStart = code.cold().allocInner(stubsize);
-    if (!newStart) {
-      newStart = code.cold().frontier();
-    }
-    // Ensure that the anchor translation is a known size so that it can be
-    // reclaimed when the function is freed
-    req = svcreq::emit_ephemeral(code.cold(),
-                                 code.data(),
-                                 (TCA)newStart,
-                                 srcRecSPOff,
-                                 REQ_RETRANSLATE,
-                                 sk.offset(),
-                                 TransFlags().packed);
-  }
-  SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
-          sk.unit(), sk.offset(), req);
-
-  auto metaLock = mcg->lockMetadata();
-  always_assert(mcg->srcDB().find(sk) == nullptr);
-  auto const sr = mcg->srcDB().insert(sk);
-  if (RuntimeOption::EvalEnableReusableTC) {
-    recordFuncSrcRec(sk.func(), sr);
-  }
-  sr->setFuncInfo(sk.func());
-  sr->setAnchorTranslation(req);
-
-  if (srcRecSPOff) always_assert(sr->nonResumedSPOff() == *srcRecSPOff);
-
-  size_t asize      = code.main().frontier()   - astart;
-  size_t coldSize   = code.cold().frontier()   - coldStart;
-  size_t frozenSize = code.frozen().frontier() - frozenStart;
-  assertx(asize == 0);
-  if (coldSize && RuntimeOption::EvalDumpTCAnchors) {
-    auto const transID =
-      profData() && transdb::enabled() ? profData()->allocTransID()
-                                       : kInvalidTransID;
-    TransRec tr(sk, transID, TransKind::Anchor,
-                astart, asize, coldStart, coldSize,
-                frozenStart, frozenSize);
-    transdb::addTranslation(tr);
-    if (RuntimeOption::EvalJitUseVtuneAPI) {
-      reportTraceletToVtune(sk.unit(), sk.func(), tr);
-    }
-
-    assertx(!transdb::enabled() ||
-            transdb::getTransRec(coldStart)->kind == TransKind::Anchor);
-  }
-
-  return true;
-}
-
 bool liveFrameIsPseudoMain() {
   auto const ar = vmfp();
   if (!(ar->func()->attrs() & AttrMayUseVV)) return false;
@@ -228,11 +154,11 @@ TCA translate(TransArgs args) {
   assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
   assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
-  if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
+  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
   Timer timer(Timer::mcg_translate);
 
-  auto const srcRec = mcg->srcDB().find(args.sk);
+  auto const srcRec = tc::findSrcRec(args.sk);
   always_assert(srcRec);
 
   args.region = reachedTranslationLimit(args.sk, *srcRec) ? nullptr
@@ -260,7 +186,7 @@ TCA translate(TransArgs args) {
   }
 
   timer.stop();
-  return emitTranslation(std::move(env));
+  return tc::emitTranslation(std::move(env));
 }
 
 /*
@@ -275,7 +201,7 @@ TCA findTranslation(const TransArgs& args) {
     return nullptr;
   }
 
-  if (auto const sr = mcg->srcDB().find(sk)) {
+  if (auto const sr = tc::findSrcRec(sk)) {
     if (auto const tca = sr->getTopTranslation()) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);
       return tca;
@@ -286,21 +212,21 @@ TCA findTranslation(const TransArgs& args) {
 }
 
 TCA createTranslation(TransArgs args) {
-  args.kind = profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+  args.kind = tc::profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
 
-  if (!shouldTranslate(args.sk.func(), args.kind)) return nullptr;
+  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
   auto sk = args.sk;
   LeaseHolder writer(GetWriteLease(), sk.func(), args.kind);
-  if (!writer || !shouldTranslate(sk.func(), args.kind)) return nullptr;
+  if (!writer || !tc::shouldTranslate(sk.func(), args.kind)) return nullptr;
 
   if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {
     return nullptr;
   }
 
-  if (!createSrcRec(sk)) return nullptr;
+  tc::createSrcRec(sk);
 
-  auto sr = mcg->srcDB().find(sk);
+  auto sr = tc::findSrcRec(sk);
   always_assert(sr);
 
   if (auto const tca = sr->getTopTranslation()) {

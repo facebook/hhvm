@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -183,7 +184,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 void assert_tc_saved_rip(void* sp) {
   auto const saved_rip = *reinterpret_cast<uint8_t**>(sp);
-  auto const exittc = mcg->ustubs().enterTCExit;
+  auto const exittc = tc::ustubs().enterTCExit;
 
   DecodedInstruction di(saved_rip);
   auto const jmp_target = [&] { return saved_rip + di.size() + di.offset(); };

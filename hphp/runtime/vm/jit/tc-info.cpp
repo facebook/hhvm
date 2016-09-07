@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -33,7 +34,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP { namespace jit { namespace tc {
 
 namespace {
 
@@ -62,11 +63,11 @@ bool dumpTCCode(const char* filename) {
     }
   };
 
-  writeBlock(mcg->code().hot(), ahotFile);
-  writeBlock(mcg->code().main(), aFile);
-  writeBlock(mcg->code().prof(), aprofFile);
-  writeBlock(mcg->code().cold(), acoldFile);
-  writeBlock(mcg->code().frozen(), afrozenFile);
+  writeBlock(code().hot(), ahotFile);
+  writeBlock(code().main(), aFile);
+  writeBlock(code().prof(), aprofFile);
+  writeBlock(code().cold(), acoldFile);
+  writeBlock(code().frozen(), afrozenFile);
   return result;
 }
 
@@ -87,11 +88,11 @@ bool dumpTCData() {
                 "afrozen.base     = %p\n"
                 "afrozen.frontier = %p\n\n",
                 repoSchemaId().begin(),
-                mcg->code().hot().base(),    mcg->code().hot().frontier(),
-                mcg->code().main().base(),   mcg->code().main().frontier(),
-                mcg->code().prof().base(),   mcg->code().prof().frontier(),
-                mcg->code().cold().base(),   mcg->code().cold().frontier(),
-                mcg->code().frozen().base(), mcg->code().frozen().frontier())) {
+                code().hot().base(),    code().hot().frontier(),
+                code().main().base(),   code().main().frontier(),
+                code().prof().base(),   code().prof().frontier(),
+                code().cold().base(),   code().cold().frontier(),
+                code().frozen().base(), code().frozen().frontier())) {
     return false;
   }
 
@@ -131,23 +132,22 @@ bool dumpTCData() {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-bool dumpTC(bool ignoreLease /* = false */) {
+bool dump(bool ignoreLease /* = false */) {
   if (!mcg) return false;
 
   std::unique_lock<SimpleMutex> codeLock;
   std::unique_lock<SimpleMutex> metaLock;
   if (!ignoreLease) {
-    codeLock = mcg->lockCode();
-    metaLock = mcg->lockMetadata();
+    codeLock = lockCode();
+    metaLock = lockMetadata();
   }
   return dumpTCData() && dumpTCCode("/tmp/tc_dump");
 }
 
 std::vector<UsageInfo> getUsageInfo() {
-  auto const& code = mcg->code();
   std::vector<UsageInfo> tcUsageInfo;
 
-  mcg->code().forEachBlock([&] (const char* name, const CodeBlock& a) {
+  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
     tcUsageInfo.emplace_back(UsageInfo{
       std::string("code.") + name,
       a.used(),
@@ -157,8 +157,8 @@ std::vector<UsageInfo> getUsageInfo() {
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "data",
-    code.data().used(),
-    code.data().capacity(),
+    code().data().used(),
+    code().data().capacity(),
     true
   });
   tcUsageInfo.emplace_back(UsageInfo{
@@ -211,12 +211,27 @@ std::string getTCSpace() {
 std::string getTCAddrs() {
   std::string addrs;
 
-  mcg->code().forEachBlock([&] (const char* name, const CodeBlock& a) {
+  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
     addrs += folly::format("{}: {}\n", name, a.base()).str();
   });
   return addrs;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+std::vector<TCMemInfo> getTCMemoryUsage() {
+  std::vector<TCMemInfo> ret;
+  code().forEachBlock(
+    [&](const char* name, const CodeBlock& a) {
+      ret.emplace_back(TCMemInfo{
+        name,
+        a.used(),
+        a.numAllocs(),
+        a.numFrees(),
+        a.bytesFree(),
+        a.blocksFree()
+      });
+    }
+  );
+  return ret;
+}
 
-}}
+}}}

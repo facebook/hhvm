@@ -21,10 +21,10 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/trace.h"
 
@@ -60,12 +60,12 @@ void IncomingBranch::patch(TCA dest) {
   switch (type()) {
     case Tag::JMP:
       smashJmp(toSmash(), dest);
-      mcg->debugInfo()->recordRelocMap(toSmash(), dest, "Arc-2");
+      Debug::DebugInfo::Get()->recordRelocMap(toSmash(), dest, "Arc-2");
       break;
 
     case Tag::JCC:
       smashJcc(toSmash(), dest);
-      mcg->debugInfo()->recordRelocMap(toSmash(), dest, "Arc-1");
+      Debug::DebugInfo::Get()->recordRelocMap(toSmash(), dest, "Arc-1");
       break;
 
     case Tag::ADDR: {
@@ -92,29 +92,23 @@ TCA IncomingBranch::target() const {
   always_assert(false);
 }
 
-TCA TransLoc::mainStart()   const { return mcg->code().base() + m_mainOff; }
-TCA TransLoc::coldStart()   const { return mcg->code().base() + m_coldOff; }
-TCA TransLoc::frozenStart() const { return mcg->code().base() + m_frozenOff; }
+TCA TransLoc::mainStart()   const { return tc::offsetToAddr(m_mainOff); }
+TCA TransLoc::coldStart()   const { return tc::offsetToAddr(m_coldOff); }
+TCA TransLoc::frozenStart() const { return tc::offsetToAddr(m_frozenOff); }
 
 void TransLoc::setMainStart(TCA newStart) {
-  assert(mcg->code().base() <= newStart &&
-         newStart - mcg->code().base() < std::numeric_limits<uint32_t>::max());
-
-  m_mainOff = newStart - mcg->code().base();
+  assert(tc::isValidCodeAddress(newStart));
+  m_mainOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setColdStart(TCA newStart) {
-  assert(mcg->code().base() <= newStart &&
-         newStart - mcg->code().base() < std::numeric_limits<uint32_t>::max());
-
-  m_coldOff = newStart - mcg->code().base();
+  assert(tc::isValidCodeAddress(newStart));
+  m_coldOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setFrozenStart(TCA newStart) {
-  assert(mcg->code().base() <= newStart &&
-         newStart - mcg->code().base() < std::numeric_limits<uint32_t>::max());
-
-  m_frozenOff = newStart - mcg->code().base();
+  assert(tc::isValidCodeAddress(newStart));
+  m_frozenOff = tc::addrToOffset(newStart);
 }
 
 void SrcRec::setFuncInfo(const Func* f) {
@@ -142,7 +136,7 @@ FPInvOffset SrcRec::nonResumedSPOff() const {
 
 void SrcRec::chainFrom(IncomingBranch br) {
   assertx(br.type() == IncomingBranch::Tag::ADDR ||
-          mcg->code().isValidCodeAddress(br.toSmash()));
+          tc::isValidCodeAddress(br.toSmash()));
   TCA destAddr = getTopTranslation();
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",
@@ -152,7 +146,7 @@ void SrcRec::chainFrom(IncomingBranch br) {
   br.patch(destAddr);
 
   if (RuntimeOption::EvalEnableReusableTC) {
-    recordJump(br.toSmash(), this);
+    tc::recordJump(br.toSmash(), this);
   }
 }
 
@@ -269,7 +263,7 @@ void SrcRec::removeIncomingBranch(TCA toSmash) {
 }
 
 void SrcRec::replaceOldTranslations() {
-  mcg->assertOwnsCodeLock();
+  tc::assertOwnsCodeLock();
 
   // Everyone needs to give up on old translations; send them to the anchor,
   // which is a REQ_RETRANSLATE.
@@ -302,15 +296,7 @@ void SrcRec::replaceOldTranslations() {
   // unreachable-- to prevent a race we treadmill here and then reclaim their
   // associated TC space
   if (RuntimeOption::EvalEnableReusableTC) {
-    auto trans = folly::makeMoveWrapper(std::move(translations));
-    Treadmill::enqueue([trans]() mutable {
-      auto codeLock = mcg->lockCode();
-      auto metaLock = mcg->lockMetadata();
-      for (auto& loc : *trans) {
-        reclaimTranslation(loc);
-      }
-      trans->clear();
-    });
+    tc::reclaimTranslations(std::move(translations));
     return;
   }
 

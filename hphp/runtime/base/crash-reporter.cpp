@@ -24,7 +24,7 @@
 #include "hphp/runtime/ext/xdebug/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/ringbuffer-print.h"
 
@@ -137,7 +137,7 @@ static void bt_handler(int sig) {
   }
 
   if (jit::transdb::enabled()) {
-    jit::dumpTC(true);
+    jit::tc::dump(true);
   }
 
   if (!RuntimeOption::CoreDumpEmail.empty()) {

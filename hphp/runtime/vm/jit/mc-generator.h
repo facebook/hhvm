@@ -102,24 +102,9 @@ struct MCGenerator {
   /*
    * Accessors.
    */
-  CodeCache& code() { return m_code; }
-  const UniqueStubs& ustubs() const { return m_ustubs; }
   FixupMap& fixupMap() { return m_fixupMap; }
-  Debug::DebugInfo* debugInfo() { return &m_debugInfo; }
-
-  /*
-   * Get the SrcDB.
-   */
-  const SrcDB& srcDB() const { return m_srcDB; }
-  SrcDB& srcDB()             { return m_srcDB; }
 
   /////////////////////////////////////////////////////////////////////////////
-
-  /*
-   * Called before entering and after leaving a PHP "world."
-   */
-  void requestInit();
-  void requestExit();
 
   /*
    * Sync VM registers for the first TC frame in the callstack.
@@ -131,34 +116,6 @@ struct MCGenerator {
 
   /////////////////////////////////////////////////////////////////////////////
 
-  /*
-   * Acquire a lock on this object's code cache.
-   *
-   * Must be held even if the current thread owns the global write lease.
-   */
-  std::unique_lock<SimpleMutex> lockCode() {
-    return std::unique_lock<SimpleMutex>{m_codeLock};
-  }
-
-  void assertOwnsCodeLock() const {
-    m_codeLock.assertOwnedBySelf();
-  }
-
-  /*
-   * Acquire a lock on this object's metadata tables.
-   *
-   * Must be held even if the current thread owns the global write lease.
-   */
-  std::unique_lock<SimpleMutex> lockMetadata() {
-    return std::unique_lock<SimpleMutex>{m_metadataLock};
-  }
-
-  void assertOwnsMetadataLock() const {
-    m_metadataLock.assertOwnedBySelf();
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-
 private:
   void syncWork();
 
@@ -166,37 +123,10 @@ private:
   // Data members.
 
 private:
-  SrcDB m_srcDB;
-
-  CodeCache m_code;
-  SimpleMutex m_codeLock{false, RankCodeCache};
-
-  UniqueStubs m_ustubs;
-
-  // Handles to registered .eh_frame sections.
-  std::vector<EHFrameDesc> m_ehFrames;
   // Store of Fixups.  These let us reconstruct the state of the VM registers
   // from an up-stack invocation record.
   FixupMap m_fixupMap;
-  // Global .debug_frame information.
-  Debug::DebugInfo m_debugInfo;
-  // Lock protecting all metadata tables.
-  SimpleMutex m_metadataLock{false, RankCodeMetadata};
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Returns the total size of the TC now and at the beginning of this request,
- * in bytes. Note that the code may have been emitted by other threads.
- */
-void codeEmittedThisRequest(size_t& requestEntry, size_t& now);
-
-/*
- * Whether we should dump TC annotations for translations of `func' of
- * `transKind'.
- */
-bool dumpTCAnnotation(const Func& func, TransKind transKind);
 
 ///////////////////////////////////////////////////////////////////////////////
 

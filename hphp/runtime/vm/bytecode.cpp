@@ -113,6 +113,7 @@
 #include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -1543,13 +1544,13 @@ void pushLocalsAndIterators(const Func* func, int nparams /*= 0*/) {
 
 void unwindPreventReturnToTC(ActRec* ar) {
   auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
-  always_assert_flog(mcg->code().isValidCodeAddress(savedRip),
+  always_assert_flog(jit::tc::isValidCodeAddress(savedRip),
                      "preventReturnToTC({}): {} isn't in TC",
                      ar, savedRip);
 
   if (isReturnHelper(savedRip)) return;
 
-  auto& ustubs = mcg->ustubs();
+  auto& ustubs = jit::tc::ustubs();
   if (ar->resumed()) {
     // async functions use callToExit stub
     assert(ar->func()->isGenerator());
@@ -1562,7 +1563,7 @@ void unwindPreventReturnToTC(ActRec* ar) {
 
 void debuggerPreventReturnToTC(ActRec* ar) {
   auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
-  always_assert_flog(mcg->code().isValidCodeAddress(savedRip),
+  always_assert_flog(jit::tc::isValidCodeAddress(savedRip),
                      "preventReturnToTC({}): {} isn't in TC",
                      ar, savedRip);
 
@@ -1573,7 +1574,7 @@ void debuggerPreventReturnToTC(ActRec* ar) {
   // unwinder can find it when needed.
   jit::stashDebuggerCatch(ar);
 
-  auto& ustubs = mcg->ustubs();
+  auto& ustubs = jit::tc::ustubs();
   if (ar->resumed()) {
     // async functions use callToExit stub
     assert(ar->func()->isGenerator());
@@ -2787,7 +2788,7 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
     // interpreter. callToExit is special: it's a return helper but we don't
     // treat it like one in here in order to simplify some things higher up in
     // the pipeline.
-    if (reinterpret_cast<TCA>(savedRip) != mcg->ustubs().callToExit) {
+    if (reinterpret_cast<TCA>(savedRip) != jit::tc::ustubs().callToExit) {
       savedRip = 0;
     }
   } else if (!RID().getJit()) {
@@ -2851,7 +2852,7 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
   // live VM frame in %rbp.
   if (vmJitCalledFrame() == retInfo.fp) {
     FTRACE(1, "Returning from frame {}; resuming", vmJitCalledFrame());
-    return mcg->ustubs().resumeHelper;
+    return jit::tc::ustubs().resumeHelper;
   }
 
   return nullptr;
@@ -4674,7 +4675,7 @@ bool doFCall(ActRec* ar, PC& pc) {
 OPTBLD_INLINE void iopFCall(ActRec* ar, PC& pc, intva_t numArgs) {
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, mcg->ustubs().retHelper);
+  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   doFCall(ar, pc);
 }
 
@@ -4687,7 +4688,7 @@ void iopFCallD(ActRec* ar, PC& pc, intva_t numArgs, const StringData* clsName,
   }
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, mcg->ustubs().retHelper);
+  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   doFCall(ar, pc);
 }
 
@@ -4700,7 +4701,7 @@ void iopFCallAwait(ActRec* ar, PC& pc, intva_t numArgs,
   }
   assert(numArgs == ar->numArgs());
   checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, mcg->ustubs().retHelper);
+  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   ar->setFCallAwait();
   doFCall(ar, pc);
 }
@@ -4790,7 +4791,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
     TRACE(3, "FCallArray: pc %p func %p base %d\n", vmpc(),
           vmfp()->unit()->entry(),
           int(vmfp()->m_func->base()));
-    ar->setReturn(vmfp(), pc, mcg->ustubs().retHelper);
+    ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
 
     // When called from the jit, populate the correct return address
     if (ret) {
@@ -5383,8 +5384,8 @@ OPTBLD_INLINE void moveProgramCounterIntoGenerator(PC &pc, BaseGenerator* gen) {
   assert(gen->isRunning());
   ActRec* genAR = gen->actRec();
   genAR->setReturn(vmfp(), pc, genAR->func()->isAsync() ?
-    mcg->ustubs().asyncGenRetHelper :
-    mcg->ustubs().genRetHelper);
+    jit::tc::ustubs().asyncGenRetHelper :
+    jit::tc::ustubs().genRetHelper);
 
   vmfp() = genAR;
 
@@ -5868,7 +5869,7 @@ TCA suspendStack(PC &pc) {
     auto retIp = jitReturnPost(jitReturn);
     if (!suspendOuter) return retIp;
     if (retIp) {
-      auto const& us = mcg->ustubs();
+      auto const& us = jit::tc::ustubs();
       if (retIp == us.resumeHelper) retIp = us.fcallAwaitSuspendHelper;
       return retIp;
     }
@@ -6015,7 +6016,7 @@ void PrintTCCallerInfo() {
     // NB: We can't directly mutate the register-mapped `reg_fp'.
     for (ActRec* fp = reg_fp; fp; fp = fp->m_sfp) {
       auto const rip = jit::TCA(fp->m_savedRip);
-      if (mcg->code().isValidCodeAddress(rip)) return rip;
+      if (jit::tc::isValidCodeAddress(rip)) return rip;
     }
     return nullptr;
   }();
@@ -6725,7 +6726,7 @@ TCA dispatchImpl() {
        * been returned by jitReturnPost(), whether or not we were called from
        * the TC. We only actually return callToExit to our caller if that
        * caller is dispatchBB(). */                           \
-      assert(retAddr == mcg->ustubs().callToExit);    \
+      assert(retAddr == jit::tc::ustubs().callToExit);    \
       return breakOnCtlFlow ? retAddr : nullptr;              \
     }                                                         \
     assert(isCtlFlow || !retAddr);                            \
@@ -6785,7 +6786,7 @@ OPTBLD_INLINE TCA switchModeForDebugger(TCA retAddr) {
       // that will throw the execution from a safe place.
       FTRACE(1, "Want to throw VMSwitchMode but retAddr = {}, "
              "overriding with throwSwitchMode stub.\n", retAddr);
-      return mcg->ustubs().throwSwitchMode;
+      return jit::tc::ustubs().throwSwitchMode;
     } else {
       throw VMSwitchMode();
     }

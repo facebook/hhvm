@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -109,7 +110,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
               callee->unit()->entry() + callee->past());
     }
 
-    v << store{v.cns(mcg->ustubs().retHelper), calleeAR + AROFF(m_savedRip)};
+    v << store{v.cns(tc::ustubs().retHelper), calleeAR + AROFF(m_savedRip)};
     if (callee->attrs() & AttrMayUseVV) {
       v << storeqi{0, calleeAR + AROFF(m_invName)};
     }
@@ -163,8 +164,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
   // pointing to the callee ActRec.
   auto const target = callee
-    ? mcg->ustubs().immutableBindCallStub
-    : mcg->ustubs().bindCallStub;
+    ? tc::ustubs().immutableBindCallStub
+    : tc::ustubs().bindCallStub;
 
   auto const done = v.makeBlock();
   v << callphp{target, php_call_regs(), {{done, catchBlock}}};
@@ -185,8 +186,8 @@ void cgCallArray(IRLS& env, const IRInstruction* inst) {
   v << syncvmsp{syncSP};
 
   auto const target = extra->numParams == 0
-    ? mcg->ustubs().fcallArrayHelper
-    : mcg->ustubs().fcallUnpackHelper;
+    ? tc::ustubs().fcallArrayHelper
+    : tc::ustubs().fcallUnpackHelper;
 
   auto const pc = v.cns(extra->pc);
   auto const after = v.cns(extra->after);

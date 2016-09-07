@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -586,8 +587,7 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
     return nullptr;
   }
 
-  TransCFG cfg(callee->getFuncId(), profData, mcg->srcDB(),
-               true /* inlining */);
+  TransCFG cfg(callee->getFuncId(), profData, true /* inlining */);
 
   HotTransContext ctx;
   ctx.tid = dvID;

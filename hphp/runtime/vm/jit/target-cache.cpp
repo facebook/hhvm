@@ -26,6 +26,8 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
@@ -509,7 +511,7 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
 
   // We are using whether the code is already smashed to determine which thread
   // should free the SmashLoc.
-  auto codeLock = mcg->lockCode();
+  auto codeLock = tc::lockCode();
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);

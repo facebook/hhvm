@@ -67,7 +67,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -701,7 +701,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (RuntimeOption::EvalDumpTC ||
       RuntimeOption::EvalDumpIR ||
       RuntimeOption::EvalDumpRegion) {
-    jit::dumpTC();
+    jit::tc::dump();
   }
   if (xhprof) {
     Variant profileData = HHVM_FN(xhprof_disable)();
@@ -2362,7 +2362,7 @@ void hphp_session_exit() {
 
   // The treadmill must be flushed before profData is reset as the data may
   // be read during cleanup if EvalEnableReuseTC = true
-  jit::mcg->requestExit();
+  jit::tc::requestExit();
 
   TI().onSessionExit();
 

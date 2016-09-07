@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/data-block.h"
@@ -56,7 +57,7 @@ namespace jit {
 bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
   CTCA tca = (CTCA)ar->m_savedRip;
 
-  auto ent = m_fixups.find(mcg->code().toOffset(tca));
+  auto ent = m_fixups.find(tc::addrToOffset(tca));
   if (!ent) return false;
 
   // Note: If indirect fixups happen frequently enough, we could just compare
@@ -65,7 +66,7 @@ bool FixupMap::getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) const {
     auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
                         ent->indirect.returnIpDisp;
     ent = m_fixups.find(
-      mcg->code().toOffset(*reinterpret_cast<CTCA*>(savedRIPAddr))
+      tc::addrToOffset(*reinterpret_cast<CTCA*>(savedRIPAddr))
     );
     assertx(ent && !ent->isIndirect());
   }
@@ -83,7 +84,7 @@ void FixupMap::recordFixup(CTCA tca, const Fixup& fixup) {
   TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
         tca, fixup.pcOffset, fixup.spOffset);
 
-  auto const offset = mcg->code().toOffset(tca);
+  auto const offset = tc::addrToOffset(tca);
   if (auto pos = m_fixups.find(offset)) {
     *pos = FixupEntry(fixup);
   } else {
@@ -92,7 +93,7 @@ void FixupMap::recordFixup(CTCA tca, const Fixup& fixup) {
 }
 
 const Fixup* FixupMap::findFixup(CTCA tca) const {
-  auto ent = m_fixups.find(mcg->code().toOffset(tca));
+  auto ent = m_fixups.find(tc::addrToOffset(tca));
   if (!ent) return nullptr;
   return &ent->fixup;
 }

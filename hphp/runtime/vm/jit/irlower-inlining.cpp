@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -54,7 +55,7 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
 
   // Do roughly the same work as an HHIR Call.
   v << store{callerFP, ar + AROFF(m_sfp)};
-  emitImmStoreq(v, uintptr_t(mcg->ustubs().retInlHelper),
+  emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
                 ar + AROFF(m_savedRip));
   v << storeli{extra->retBCOff, ar + AROFF(m_soff)};
   if (extra->target->attrs() & AttrMayUseVV) {

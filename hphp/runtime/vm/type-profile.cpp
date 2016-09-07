@@ -47,9 +47,6 @@ TRACE_SET_MOD(typeProfile);
 
 //////////////////////////////////////////////////////////////////////
 
-void profileInit() {
-}
-
 /*
  * Warmup/profiling.
  *
@@ -244,7 +241,7 @@ void profileRequestStart() {
   }
 
   if (standardRequest && relocateRequests > 0 && !--relocateRequests) {
-    jit::liveRelocate(true);
+    jit::tc::liveRelocate(true);
   }
 }
 

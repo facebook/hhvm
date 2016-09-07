@@ -16,24 +16,17 @@
 #ifndef incl_HPHP_CODE_RELOCATION_H_
 #define incl_HPHP_CODE_RELOCATION_H_
 
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/util/data-block.h"
+
+#include <map>
 #include <set>
-#include <cstdio>
 #include <vector>
 
-#include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/srckey.h"
-
-namespace HPHP {
-
-struct CodeCache;
-
-namespace jit {
+namespace HPHP { namespace jit {
 
 struct AsmInfo;
-struct IRUnit;
-
-//////////////////////////////////////////////////////////////////////
+struct CGMeta;
 
 struct RelocationInfo {
   RelocationInfo() {}
@@ -73,79 +66,8 @@ struct RelocationInfo {
   std::set<TCA> addressImmediates;
 };
 
-/*
-  relocate using data from perf.
-  If time is non-negative, its used as the time to run perf record.
-  If time is -1, we pick a random subset of translations, and relocate them
-  in a random order.
-  If time is -2, we relocate all of the translations.
-
-  Currently we don't ever relocate anything from frozen (or prof). We also
-  don't relocate the cold portion of translations; but we still need to know
-  where those are in order to relocate back-references to the code that was
-  relocated.
-*/
-void liveRelocate(int time);
-inline void liveRelocate(bool random) {
-  return liveRelocate(random ? -1 : 20);
-}
-void recordPerfRelocMap(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CGMeta& fixups);
-String perfRelocMapInfo(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CGMeta& fixups);
-
-struct TransRelocInfo;
-void readRelocations(
-  FILE* relocFile,
-  std::set<TCA>* liveStubs,
-  void (*callback)(TransRelocInfo&& tri, void* data),
-  void* data);
-void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot,
-              CGMeta& fixups);
-
-/*
- * Relocate a new translation to the current frontiers of main and cold. Code
- * in frozen is not moved.
- *
- * TODO(t10543562): This can probably be merged with relocateNewTranslation.
- */
-void relocateTranslation(
-  const IRUnit& unit,
-  CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
-  CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
-  CodeBlock& frozen, CodeAddress frozen_start,
-  AsmInfo* ai, CGMeta& meta
-);
-
-/*
- * Relocate a new translation into a free region in the TC and update the
- * TransLoc.
- *
- * Attempt to relocate the main, cold, and frozen portions of the translation
- * loc into memory freed memory in the TC their respective code blocks. In
- * addition, reusable stubs associated with this translation will be relocated
- * to be outside of loc so that they can be managed separately.
- *
- * If set *adjust will be updated to its post relocation address.
- */
-bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
-                            CGMeta& fixups,
-                            TCA* adjust = nullptr);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * X64-specific portions of the code are separated out here.
- */
 namespace x64 {
+
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
@@ -159,11 +81,7 @@ size_t relocate(RelocationInfo& rel,
                 CGMeta& fixups,
                 TCA* exitAddr);
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-}}
+}}}
 
 
 #endif

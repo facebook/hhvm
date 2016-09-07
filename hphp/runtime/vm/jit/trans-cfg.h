@@ -19,7 +19,6 @@
 
 #include <vector>
 
-#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -78,7 +77,6 @@ struct TransCFG {
   TransCFG() {}
   TransCFG(FuncId funcId,
            const ProfData* profData,
-           const SrcDB& srcDB,
            bool inlining = false);
 
   const std::vector<TransID>& nodes() const { return m_transIds; }

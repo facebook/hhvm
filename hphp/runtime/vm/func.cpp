@@ -33,7 +33,7 @@
 
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/recycle-tc.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/system/systemlib.h"
@@ -117,7 +117,7 @@ void Func::destroy(Func* func) {
   if (func->m_funcId != InvalidFuncId) {
     if (mcg && RuntimeOption::EvalEnableReusableTC) {
       // Free TC-space associated with func
-      jit::reclaimFunction(func);
+      jit::tc::reclaimFunction(func);
     }
 
     DEBUG_ONLY auto oldVal = s_funcVec.exchange(func->m_funcId, nullptr);
@@ -142,7 +142,7 @@ void Func::freeClone() {
 
   if (mcg && RuntimeOption::EvalEnableReusableTC) {
     // Free TC-space associated with func
-    jit::reclaimFunction(this);
+    jit::tc::reclaimFunction(this);
   } else {
     jit::clobberFuncGuards(this);
   }
@@ -241,7 +241,7 @@ void Func::initPrologues(int numParams) {
     return;
   }
 
-  auto const& stubs = mcg->ustubs();
+  auto const& stubs = jit::tc::ustubs();
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
@@ -590,7 +590,7 @@ int Func::numPrologues() const {
 }
 
 void Func::resetPrologue(int numParams) {
-  auto const& stubs = mcg->ustubs();
+  auto const& stubs = jit::tc::ustubs();
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 

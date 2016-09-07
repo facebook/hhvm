@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
@@ -426,7 +427,7 @@ void HHProf::finishProfiledRequest() {
   }
 
   auto const is_valid = [] (void* p) {
-    return jit::mcg->code().isValidCodeAddress(jit::TCA(p));
+    return jit::tc::isValidCodeAddress(jit::TCA(p));
   };
 
   switch (transport->getMethod()) {

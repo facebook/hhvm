@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/pc-filter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -94,7 +95,7 @@ void blacklistRangesInJit(const Unit* unit, const OffsetRangeVec& offsets) {
       jit::addDbgBLPC(pc);
     }
   }
-  if (!jit::addDbgGuards(unit)) {
+  if (!jit::tc::addDbgGuards(unit)) {
     Logger::Warning("Failed to set breakpoints in Jitted code");
   }
   // In this case, we may be setting a breakpoint in a tracelet which could
@@ -501,7 +502,7 @@ void phpAddBreakPoint(const Unit* unit, Offset offset) {
   if (RuntimeOption::EvalJit) {
     if (jit::addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!jit::addDbgGuards(unit)) {
+      if (!jit::tc::addDbgGuards(unit)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
       // In this case, we may be setting a breakpoint in a tracelet which could
@@ -530,7 +531,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
   if (RuntimeOption::EvalJit) {
     if (jit::addDbgBLPC(pc)) {
       // if a new entry is added in blacklist
-      if (!jit::addDbgGuard(f, base, false)) {
+      if (!jit::tc::addDbgGuard(f, base, false)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }
@@ -552,7 +553,7 @@ void phpAddBreakPointFuncExit(const Func* f) {
 
     // Blacklist the location
     if (RuntimeOption::EvalJit && jit::addDbgBLPC(pc)) {
-      if (!jit::addDbgGuard(f, unit->offsetOf(pc), false)) {
+      if (!jit::tc::addDbgGuard(f, unit->offsetOf(pc), false)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }
     }

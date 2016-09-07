@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
 
 namespace HPHP { namespace jit {
@@ -49,14 +50,14 @@ size_t numCatchTraces() {
 }
 
 void eraseCatchTrace(CTCA addr) {
-  if (auto ct = s_catchTraceMap.find(mcg->code().toOffset(addr))) {
+  if (auto ct = s_catchTraceMap.find(tc::addrToOffset(addr))) {
     *ct = kInvalidCatchTrace;
   }
 }
 
 folly::Optional<TCA> getCatchTrace(CTCA ip) {
-  auto const found = s_catchTraceMap.find(mcg->code().toOffset(ip));
-  if (found && *found != kInvalidCatchTrace) return mcg->code().toAddr(*found);
+  auto const found = s_catchTraceMap.find(tc::addrToOffset(ip));
+  if (found && *found != kInvalidCatchTrace) return tc::offsetToAddr(*found);
   return folly::none;
 }
 
@@ -79,17 +80,17 @@ void CGMeta::process(
 void CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
-  mcg->assertOwnsMetadataLock();
+  tc::assertOwnsMetadataLock();
 
   for (auto const& pair : fixups) {
-    assertx(mcg->code().isValidCodeAddress(pair.first));
+    assertx(tc::isValidCodeAddress(pair.first));
     mcg->fixupMap().recordFixup(pair.first, pair.second);
   }
   fixups.clear();
 
   for (auto const& pair : catches) {
-    auto const key = mcg->code().toOffset(pair.first);
-    auto const val = mcg->code().toOffset(pair.second);
+    auto const key = tc::addrToOffset(pair.first);
+    auto const val = tc::addrToOffset(pair.second);
     if (auto pos = s_catchTraceMap.find(key)) {
       *pos = val;
     } else {
@@ -117,7 +118,7 @@ void CGMeta::process_only(
   assertx(inProgressTailJumps.empty());
 
   for (auto& stub : reusedStubs) {
-    mcg->debugInfo()->recordRelocMap(stub, nullptr, "NewStub");
+    Debug::DebugInfo::Get()->recordRelocMap(stub, nullptr, "NewStub");
   }
   reusedStubs.clear();
 }

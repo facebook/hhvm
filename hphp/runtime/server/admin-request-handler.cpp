@@ -35,9 +35,8 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/type-profile.h"
@@ -633,11 +632,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       auto time = transport->getIntParam("time");
       bool random = randomParam == "true" || randomParam == "1";
       if (allParam == "true" || allParam == "1") {
-        jit::liveRelocate(-2);
+        jit::tc::liveRelocate(-2);
       } else if (random || time == 0) {
-        jit::liveRelocate(random);
+        jit::tc::liveRelocate(random);
       } else {
-        jit::liveRelocate(time);
+        jit::tc::liveRelocate(time);
       }
       transport->sendString("OK\n");
       break;
@@ -944,12 +943,13 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("queued", server->getQueuedJobs());
     auto mcg = jit::mcg;
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
-    mcg->code().forEachBlock([&](const char* name, const CodeBlock& a) {
-      auto isMain = strncmp(name, "main", 4) == 0;
-      appendStat(folly::format("tc-{}size",
-                               isMain ? "" : name).str(),
-                 a.used());
-    });
+    auto const memInfos = jit::tc::getTCMemoryUsage();
+    for (auto const info : memInfos) {
+        auto isMain = info.name == "main";
+        appendStat(folly::format("tc-{}size",
+                                 isMain ? "" : info.name).str(),
+                   info.used);
+    }
     appendStat("rds", rds::usedBytes());
     appendStat("rds-local", rds::usedLocalBytes());
     appendStat("rds-persistent", rds::usedPersistentBytes());
@@ -975,16 +975,17 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     }
 
     if (RuntimeOption::EvalEnableReusableTC) {
-      mcg->code().forEachBlock([&](const char* name, const CodeBlock& a) {
-        appendStat(folly::format("tc-{}-allocs", name).str(), a.numAllocs());
-        appendStat(folly::format("tc-{}-frees", name).str(), a.numFrees());
-        appendStat(folly::format("tc-{}-free-size", name).str(), a.bytesFree());
-        appendStat(folly::format("tc-{}-free-blocks", name).str(),
-                   a.blocksFree());
-      });
-      appendStat("tc-recorded-funcs", jit::recordedFuncs());
-      appendStat("tc-smashed-calls", jit::smashedCalls());
-      appendStat("tc-smashed-branches", jit::smashedBranches());
+      for (auto const info : memInfos) {
+        appendStat(folly::format("tc-{}-allocs", info.name).str(), info.allocs);
+        appendStat(folly::format("tc-{}-frees", info.name).str(), info.frees);
+        appendStat(folly::format("tc-{}-free-size", info.name).str(),
+                   info.free_size);
+        appendStat(folly::format("tc-{}-free-blocks", info.name).str(),
+                   info.free_blocks);
+      }
+      appendStat("tc-recorded-funcs", jit::tc::recordedFuncs());
+      appendStat("tc-smashed-calls", jit::tc::smashedCalls());
+      appendStat("tc-smashed-branches", jit::tc::smashedBranches());
     }
 
     out << "}" << endl;
@@ -1297,11 +1298,11 @@ bool AdminRequestHandler::handleRandomStaticStringsRequest(
 bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
-    transport->sendString(jit::getTCSpace());
+    transport->sendString(jit::tc::getTCSpace());
     return true;
   }
   if (cmd == "vm-tcaddr") {
-    transport->sendString(jit::getTCAddrs());
+    transport->sendString(jit::tc::getTCAddrs());
     return true;
   }
   if (cmd == "vm-namedentities") {
@@ -1311,7 +1312,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (jit::dumpTC()) {
+    if (jit::tc::dump()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");

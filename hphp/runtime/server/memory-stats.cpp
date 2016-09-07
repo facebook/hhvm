@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/tc-info.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -100,7 +100,7 @@ namespace HPHP {
 
       w->beginObject("Details");
 
-      for (auto const& blockUsageInfo : jit::getUsageInfo()) {
+      for (auto const& blockUsageInfo : jit::tc::getUsageInfo()) {
         if (blockUsageInfo.global) {
           globalTCSize += blockUsageInfo.capacity;
           globalTCUsed += blockUsageInfo.used;

@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
@@ -442,7 +443,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
       emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
 
       unlikelyIfThen(v, vcold(env), CC_NLE, sf, [&] (Vout& v) {
-        auto const stub = mcg->ustubs().decRefGeneric;
+        auto const stub = tc::ustubs().decRefGeneric;
         v << copy2{data, type, rarg(0), rarg(1)};
         v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};
       });

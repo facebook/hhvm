@@ -26,12 +26,10 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 
-static TransIDSet findPredTrans(TransID dstID,
-                                const ProfData* profData,
-                                const SrcDB& srcDB) {
+static TransIDSet findPredTrans(TransID dstID, const ProfData* profData) {
   auto const dstRec = profData->transRec(dstID);
   auto const dstSK = dstRec->srcKey();
-  const SrcRec* dstSR = srcDB.find(dstSK);
+  const SrcRec* dstSR = tc::findSrcRec(dstSK);
   assertx(dstSR);
   TransIDSet predSet;
 
@@ -90,7 +88,6 @@ static bool inferredArcWeight(const TransCFG::ArcPtrVec& arcVec,
 
 TransCFG::TransCFG(FuncId funcId,
                    const ProfData* profData,
-                   const SrcDB& srcDB,
                    bool inlining /* = false */) {
   assertx(profData);
 
@@ -112,7 +109,7 @@ TransCFG::TransCFG(FuncId funcId,
     auto const dstSK = rec->srcKey();
     auto const dstBlock = rec->region()->entry();
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
-    TransIDSet predIDs = findPredTrans(dstId, profData, srcDB);
+    TransIDSet predIDs = findPredTrans(dstId, profData);
     for (auto predId : predIDs) {
       if (hasNode(predId)) {
         auto const predRec = profData->transRec(predId);

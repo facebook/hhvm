@@ -13,54 +13,55 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_TC_RELOCATE_H_
+#define incl_HPHP_TC_RELOCATE_H_
 
-#ifndef TYPE_PROFILE_H_
-#define TYPE_PROFILE_H_
+#include <set>
+#include <cstdio>
+#include <vector>
 
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+struct CodeCache;
 
-struct Func;
+namespace jit {
 
-enum class RequestKind {
-  Warmup,
-  Profile,
-  Standard
-};
+struct AsmInfo;
+struct IRUnit;
 
 //////////////////////////////////////////////////////////////////////
 
-void profileWarmupStart();
-void profileWarmupEnd();
-void profileRequestStart();
-void profileRequestEnd();
-void profileSetHotFuncAttr();
+namespace tc {
 
-int64_t requestCount();
-int singleJitRequestCount();
+String perfRelocMapInfo(
+  TCA start, TCA end,
+  TCA coldStart, TCA coldEnd,
+  SrcKey sk, int argNum,
+  const GrowableVector<IncomingBranch> &incomingBranches,
+  CGMeta& fixups);
+
+bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
+                            CGMeta& fixups,
+                            TCA* adjust = nullptr);
 
 /*
- * Profiling for func hotness goes through this module.
+ * Relocate a new translation into a free region in the TC and update the
+ * TransLoc.
+ *
+ * Attempt to relocate the main, cold, and frozen portions of the translation
+ * loc into memory freed memory in the TC their respective code blocks. In
+ * addition, reusable stubs associated with this translation will be relocated
+ * to be outside of loc so that they can be managed separately.
  */
-void profileIncrementFuncCounter(const Func*);
+void tryRelocateNewTranslation(SrcKey sk, TransLoc& loc,
+                               CodeCache::View code, CGMeta& fixups);
 
-extern __thread RequestKind requestKind;
-inline bool isProfileRequest() {
-  return requestKind == RequestKind::Profile;
-}
-
-extern __thread bool standardRequest;
-inline bool isStandardRequest() {
-  return standardRequest;
-}
-
-void setRelocateRequests(int32_t n);
 //////////////////////////////////////////////////////////////////////
 
-}
+}}}
 
 #endif

@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -256,7 +257,7 @@ tc_unwind_personality(int version,
 
     assert(g_unwind_rds.isInit());
 
-    auto& stubs = mcg->ustubs();
+    auto& stubs = tc::ustubs();
     if (ip == stubs.endCatchHelperPast) {
       FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
       return _URC_CONTINUE_UNWIND;
@@ -288,7 +289,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
                        fp, fp->m_savedRip);
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
 
-    if (savedRip == mcg->ustubs().callToExit) {
+    if (savedRip == tc::ustubs().callToExit) {
       // If we're the top VM frame, there's nothing we need to do; we can just
       // let the native C++ unwinder take over.
       ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
@@ -331,12 +332,20 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     }
 
     ITRACE(1, "No catch trace entry for {}; continuing\n",
-           mcg->ustubs().describe(savedRip));
+           tc::ustubs().describe(savedRip));
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+/*
+ * Write a CIE for the TC using `ehfw'.
+ *
+ * This sets tc_unwind_personality() as the personality routine, and includes
+ * basic instructions to the unwinder for rematerializing the call frame
+ * registers.
+ */
 void write_tc_cie(EHFrameWriter& ehfw) {
   ehfw.begin_cie(dw_reg::IP,
                  reinterpret_cast<const void*>(tc_unwind_personality));
@@ -363,6 +372,19 @@ void write_tc_cie(EHFrameWriter& ehfw) {
   ehfw.same_value(dw_reg::SP);
 
   ehfw.end_cie();
+}
+
+// Handles to registered .eh_frame sections.
+std::vector<EHFrameDesc> s_ehFrames;
+}
+
+void initUnwinder(TCA base, size_t size) {
+  EHFrameWriter ehfw;
+  write_tc_cie(ehfw);
+  ehfw.begin_fde(base);
+  ehfw.end_fde(size);
+  ehfw.null_fde();
+  s_ehFrames.push_back(ehfw.register_and_release());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

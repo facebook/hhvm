@@ -40,12 +40,17 @@ using namespace HPHP::jit;
 
 namespace HPHP {
 namespace Debug {
+namespace { DebugInfo* s_info; }
 
 void* DebugInfo::pidMapOverlayStart;
 void* DebugInfo::pidMapOverlayEnd;
 
+void initDebugInfo() {
+  s_info = new DebugInfo();
+}
+
 DebugInfo* DebugInfo::Get() {
-  return mcg->debugInfo();
+  return s_info;
 }
 
 DebugInfo::DebugInfo() {

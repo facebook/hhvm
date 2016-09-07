@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
-#include "hphp/runtime/vm/jit/mcgen-emit.h"
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
@@ -24,134 +23,44 @@
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
+
+#include "hphp/runtime/vm/debug/debug.h"
 
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace {
+namespace HPHP { namespace jit {
 
-bool shouldPGOFunc(const Func& func) {
-  if (profData() == nullptr) return false;
+TransEnv::~TransEnv() {}
 
-  // JITing pseudo-mains requires extra checks that blow the IR.  PGO
-  // can significantly increase the size of the regions, so disable it for
-  // pseudo-mains (so regions will be just tracelets).
-  if (func.isPseudoMain()) return false;
+namespace mcgen {
 
-  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return func.attrs() & AttrHot;
-}
-
-const StaticString
-  s_php_errormsg("php_errormsg"),
-  s_http_response_header("http_response_header");
-
-bool shouldTranslateNoSizeLimit(const Func* func) {
-  // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
-  if (!mcgen::canTranslate()) {
-    return false;
-  }
-
-  // Do not translate functions from units marked as interpret-only.
-  if (func->unit()->isInterpretOnly()) {
-    return false;
-  }
-
-  /*
-   * We don't support JIT compiling functions that use some super-dynamic php
-   * variables.
-   */
-  if (func->lookupVarId(s_php_errormsg.get()) != -1 ||
-      func->lookupVarId(s_http_response_header.get()) != -1) {
-    return false;
-  }
-
-  return true;
-}
+namespace {
 
 bool checkCachedPrologue(const Func* func, int paramIdx, TCA& prologue) {
   prologue = (TCA)func->getPrologue(paramIdx);
-  if (prologue != mcg->ustubs().fcallHelperThunk) {
+  if (prologue != tc::ustubs().fcallHelperThunk) {
     TRACE(1, "cached prologue %s(%d) -> cached %p\n",
           func->fullName()->data(), paramIdx, prologue);
-    assertx(mcg->code().isValidCodeAddress(prologue));
+    assertx(tc::isValidCodeAddress(prologue));
     return true;
   }
   return false;
 }
 
-void checkFreeProfData() {
-  // In PGO mode, we free all the profiling data once the main code area reaches
-  // its maximum usage and either the hot area is also full or all the functions
-  // that were profiled have already been optimized.
-  //
-  // However, we keep the data around indefinitely in a few special modes:
-  // * Eval.EnableReusableTC
-  // * TC dumping enabled (Eval.DumpTC/DumpIR/etc.)
-  if (profData() &&
-      !RuntimeOption::EvalEnableReusableTC &&
-      mcg->code().main().used() >= CodeCache::AMaxUsage &&
-      (!mcg->code().hotEnabled() ||
-       profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
-      !transdb::enabled()) {
-    discardProfData();
-  }
-}
+int64_t s_startTime;
 
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-bool profileSrcKey(SrcKey sk) {
-  if (!shouldPGOFunc(*sk.func())) return false;
-  if (profData()->optimized(sk.funcID())) return false;
-  if (profData()->profiling(sk.funcID())) return true;
-
-  // Don't start profiling new functions if the size of either main or
-  // prof is already above Eval.JitAMaxUsage and we already filled hot.
-  auto tcUsage = std::max(mcg->code().main().used(), mcg->code().prof().used());
-  if (tcUsage >= CodeCache::AMaxUsage && !mcg->code().hotEnabled()) {
-    return false;
-  }
-
-  // We have two knobs to control the number of functions we're allowed to
-  // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
-  // functions until either of these limits is exceeded. In practice we expect
-  // to hit the bytecode size limit first but we keep the request limit around
-  // as a safety net.
-  if (RuntimeOption::EvalJitProfileBCSize > 0 &&
-      profData()->profilingBCSize() >= RuntimeOption::EvalJitProfileBCSize) {
-    return false;
-  }
-
-  return requestCount() <= RuntimeOption::EvalJitProfileRequests;
-}
-
-bool shouldTranslate(const Func* func, TransKind kind) {
-  if (!shouldTranslateNoSizeLimit(func)) return false;
-
-  // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do allow PGO
-  // translations past that limit if there's still space in code.hot.
-  if (mcg->code().main().used() < CodeCache::AMaxUsage) return true;
-
-  switch (kind) {
-    case TransKind::ProfPrologue:
-    case TransKind::Profile:
-    case TransKind::OptPrologue:
-    case TransKind::Optimize:
-      return mcg->code().hotEnabled();
-
-    default:
-      return false;
-  }
-}
-
 TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar, bool forRegenerate) {
-  using namespace mcgen;
-
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
   int const numParams = func->numNonVariadicParams();
@@ -163,9 +72,9 @@ TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar, bool forRegenerate) {
 
   auto const funcBody = SrcKey{func, func->getEntryForNumArgs(nPassed), false};
   auto computeKind = [&] {
-    return profileSrcKey(funcBody) ? TransKind::ProfPrologue :
-           forRegenerate           ? TransKind::OptPrologue  :
-                                     TransKind::LivePrologue;
+    return tc::profileSrcKey(funcBody) ? TransKind::ProfPrologue :
+               forRegenerate           ? TransKind::OptPrologue  :
+                                         TransKind::LivePrologue;
   };
   LeaseHolder writer(GetWriteLease(), func, computeKind());
   if (!writer) return nullptr;
@@ -179,65 +88,31 @@ TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar, bool forRegenerate) {
   // but ignore the code size limits.  We still want to respect the global
   // translation limit and other restrictions, though.
   if (forRegenerate) {
-    if (!shouldTranslateNoSizeLimit(func)) return nullptr;
+    if (!tc::shouldTranslateNoSizeLimit(func)) return nullptr;
   } else {
-    if (!shouldTranslate(func, TransKind::LivePrologue)) return nullptr;
+    if (!tc::shouldTranslate(func, TransKind::LivePrologue)) return nullptr;
   }
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, paramIndex, prologue)) return prologue;
 
-  try {
-    return emitFuncPrologue(func, nPassed, kind);
-  } catch (const DataBlockFull& dbFull) {
-
-    // Fail hard if the block isn't code.hot.
-    always_assert_flog(dbFull.name == "hot",
-                       "data block = {}\nmessage: {}\n",
-                       dbFull.name, dbFull.what());
-
-    // Otherwise, fall back to code.main and retry.
-    mcg->code().disableHot();
-    try {
-      return emitFuncPrologue(func, nPassed, kind);
-    } catch (const DataBlockFull& dbFull) {
-      always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbFull.name, dbFull.what());
-    }
-  }
+  return tc::emitFuncPrologue(func, nPassed, kind);
 }
 
 TCA getFuncBody(Func* func) {
   auto tca = func->getFuncBody();
-  if (tca != mcg->ustubs().funcBodyHelperThunk) return tca;
+  if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
 
   LeaseHolder writer(GetWriteLease(), func, TransKind::Profile);
   if (!writer) return nullptr;
 
   tca = func->getFuncBody();
-  if (tca != mcg->ustubs().funcBodyHelperThunk) return tca;
+  if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
 
   auto const dvs = func->getDVFunclets();
   if (dvs.size()) {
-    auto codeLock = mcg->lockCode();
-    tca = genFuncBodyDispatch(func, dvs, mcg->code().view());
-    func->setFuncBody(tca);
-    if (!RuntimeOption::EvalJitNoGdb) {
-      mcg->debugInfo()->recordStub(
-        Debug::TCRange(tca, mcg->code().view().main().frontier(), false),
-        Debug::lookupFunction(func, false, false, true));
-    }
-    if (RuntimeOption::EvalJitUseVtuneAPI) {
-      reportHelperToVtune(func->fullName()->data(),
-                          tca,
-                          mcg->code().view().main().frontier());
-    }
-    if (RuntimeOption::EvalPerfPidMap) {
-      mcg->debugInfo()->recordPerfMap(
-        Debug::TCRange(tca, mcg->code().view().main().frontier(), false),
-        SrcKey{}, func, false, false);
-    }
+    tca = tc::emitFuncBodyDispatch(func, dvs);
   } else {
     SrcKey sk(func, func->base(), false);
     tca = getTranslation(TransArgs{sk});
@@ -248,13 +123,13 @@ TCA getFuncBody(Func* func) {
 }
 
 TCA getTranslation(const TransArgs& args) {
-  if (auto const tca = mcgen::findTranslation(args)) return tca;
+  if (auto const tca = findTranslation(args)) return tca;
 
-  return mcgen::createTranslation(args);
+  return createTranslation(args);
 }
 
 TCA retranslate(TransArgs args) {
-  auto sr = mcg->srcDB().find(args.sk);
+  auto sr = tc::findSrcRec(args.sk);
   always_assert(sr);
   bool locked = sr->tryLock();
   SCOPE_EXIT {
@@ -271,7 +146,7 @@ TCA retranslate(TransArgs args) {
   // answer to profileSrcKey() changes, so use a lambda rather than just
   // storing the result.
   auto kind = [&] {
-    return profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+    return tc::profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
   };
   args.kind = kind();
 
@@ -286,7 +161,7 @@ TCA retranslate(TransArgs args) {
   }
 
   LeaseHolder writer(GetWriteLease(), args.sk.func(), args.kind);
-  if (!writer || !shouldTranslate(args.sk.func(), kind())) {
+  if (!writer || !tc::shouldTranslate(args.sk.func(), kind())) {
     return nullptr;
   }
 
@@ -307,9 +182,9 @@ TCA retranslate(TransArgs args) {
   args.kind = kind();
   if (!writer.checkKind(args.kind)) return nullptr;
 
-  auto result = mcgen::translate(args);
+  auto result = translate(args);
 
-  checkFreeProfData();
+  tc::checkFreeProfData();
   return result;
 }
 
@@ -327,14 +202,14 @@ TCA retranslateOpt(SrcKey sk, TransID transId) {
   profData()->setOptimized(funcID);
 
   TRACE(1, "retranslateOpt: transId = %u\n", transId);
-  func->setFuncBody(mcg->ustubs().funcBodyHelperThunk);
+  func->setFuncBody(tc::ustubs().funcBodyHelperThunk);
 
   // Invalidate SrcDB's entries for all func's SrcKeys.
-  mcgen::invalidateFuncProfSrcKeys(func);
+  tc::invalidateFuncProfSrcKeys(func);
 
   // Regenerate the prologues and DV funclets before the actual function body.
   bool includedBody{false};
-  TCA start = mcgen::regeneratePrologues(func, sk, includedBody);
+  TCA start = regeneratePrologues(func, sk, includedBody);
 
   // Regionize func and translate all its regions.
   std::string transCFGAnnot;
@@ -351,11 +226,11 @@ TCA retranslateOpt(SrcKey sk, TransID transId) {
     transArgs.region = region;
     transArgs.kind = TransKind::Optimize;
 
-    auto const regionStart = mcgen::translate(transArgs);
+    auto const regionStart = translate(transArgs);
     if (regionStart != nullptr &&
         regionSk.offset() == func->base() &&
         func->getDVFunclets().size() == 0 &&
-        func->getFuncBody() == mcg->ustubs().funcBodyHelperThunk) {
+        func->getFuncBody() == tc::ustubs().funcBodyHelperThunk) {
       func->setFuncBody(regionStart);
     }
     if (start == nullptr && regionSk == sk) {
@@ -364,19 +239,35 @@ TCA retranslateOpt(SrcKey sk, TransID transId) {
     transCFGAnnot = ""; // so we don't annotate it again
   }
 
-  checkFreeProfData();
+  tc::checkFreeProfData();
   return start;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-namespace { int64_t s_startTime; }
-namespace mcgen {
+
 void processInit() {
+  TRACE(1, "mcgen startup\n");
+
+  g_unwind_rds.bind();
+
+  Debug::initDebugInfo();
+  tc::processInit();
+
+  if (Trace::moduleEnabledRelease(Trace::printir) &&
+      !RuntimeOption::EvalJit) {
+    Trace::traceRelease("TRACE=printir is set but the jit isn't on. "
+                        "Did you mean to run with -vEval.Jit=1?\n");
+  }
+
   s_startTime = HPHP::Timer::GetCurrentTimeMicros();
   initInstrInfo();
-}
 }
 
 int64_t jitInitTime() { return s_startTime; }
 
-}}
+bool dumpTCAnnotation(const Func& func, TransKind transKind) {
+  return RuntimeOption::EvalDumpTCAnnotationsForAllTrans ||
+    (transKind == TransKind::Optimize && (func.attrs() & AttrHot));
+}
+
+}}}

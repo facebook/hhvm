@@ -17,13 +17,13 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/mcgen-emit.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/trace.h"
 
@@ -60,7 +60,10 @@ TRACE_SET_MOD(mcg);
  * translation-time values of vmfp()/vmsp(), since they have an
  * unpredictable relationship to the source.
  */
-namespace HPHP { namespace jit { namespace mcgen { namespace {
+namespace HPHP { namespace jit { namespace mcgen {
+
+namespace {
+
 /**
  * Given the proflogueTransId for a TransProflogue translation, regenerate the
  * prologue (as a TransPrologue).  Returns the starting address for the
@@ -86,52 +89,21 @@ TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
 
   func->setPrologue(nArgs, start);
 
-  auto codeLock = mcg->lockCode();
-
-  // Smash callers of the old prologue with the address of the new one.
-  for (auto toSmash : rec->mainCallers()) {
-    smashCall(toSmash, start);
-  }
-
-  // If the prologue has a matching guard, then smash its guard-callers as
-  // well.
-  auto const guard = funcGuardFromPrologue(start, func);
-  if (funcGuardMatches(guard, func)) {
-    for (auto toSmash : rec->guardCallers()) {
-      smashCall(toSmash, guard);
-    }
-  }
-  rec->clearAllCallers();
-
-  // If this prologue has a DV funclet, then generate a translation for the DV
-  // funclet right after the prologue.
   TCA triggerSkStart = nullptr;
-  if (nArgs < func->numNonVariadicParams()) {
-    auto paramInfo = func->params()[nArgs];
-    if (paramInfo.hasDefaultValue()) {
-      SrcKey funcletSK(func, paramInfo.funcletOff, false);
-      auto funcletTransId = profData()->dvFuncletTransId(func, nArgs);
-      if (funcletTransId != kInvalidTransID) {
-        invalidateSrcKey(funcletSK);
-        // We're done touching the TC on behalf of the prologue so drop the
-        // lock.
-        codeLock.unlock();
-
-        auto args = TransArgs{funcletSK};
-        args.transId = funcletTransId;
-        args.kind = TransKind::Optimize;
-        auto dvStart = translate(args);
-        emittedDVInit |= dvStart != nullptr;
-        if (dvStart && funcletSK == triggerSk) {
-          triggerSkStart = dvStart;
-        }
-        // Flag that this translation has been retranslated, so that
-        // it's not retranslated again along with the function body.
-        profData()->setOptimized(funcletSK);
-      }
+  if (auto const par = tc::updateFuncPrologue(start, rec)) {
+    auto funcletSK = par->first;
+    auto args = TransArgs{funcletSK};
+    args.transId = par->second;
+    args.kind = TransKind::Optimize;
+    auto dvStart = translate(args);
+    emittedDVInit |= dvStart != nullptr;
+    if (dvStart && funcletSK == triggerSk) {
+      triggerSkStart = dvStart;
     }
+    // Flag that this translation has been retranslated, so that
+    // it's not retranslated again along with the function body.
+    profData()->setOptimized(funcletSK);
   }
-
   return triggerSkStart;
 }
 

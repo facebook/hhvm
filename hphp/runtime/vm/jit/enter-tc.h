@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_ENTER_TC_H_
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
@@ -40,7 +41,7 @@ void enterTC(TCA start, ActRec* stashedAR);
 }
 
 inline void enterTC() {
-  detail::enterTC(mcg->ustubs().resumeHelper, nullptr);
+  detail::enterTC(tc::ustubs().resumeHelper, nullptr);
 }
 
 inline void enterTCAtPrologue(ActRec* ar, TCA start) {

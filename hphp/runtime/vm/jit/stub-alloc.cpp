@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
 TRACE_SET_MOD(mcg);
 
@@ -89,7 +90,7 @@ TCA allocTCStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused) {
   if (ret) {
     Stats::inc(Stats::Astub_Reused);
     always_assert(s_freeStubs.peek() == nullptr ||
-                  mcg->code().isValidCodeAddress(s_freeStubs.peek()));
+                  tc::isValidCodeAddress(s_freeStubs.peek()));
     TRACE(1, "recycle stub %p\n", ret);
   } else {
     ret = frozen.frontier();
@@ -103,14 +104,7 @@ TCA allocTCStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused) {
   return ret;
 }
 
-void freeTCStub(TCA stub) {
-  // We need to lock the code because s_freeStubs.push() writes to the stub and
-  // the metadata to protect s_freeStubs itself.
-  auto codeLock = mcg->lockCode();
-  auto metaLock = mcg->lockMetadata();
-
-  assertx(mcg->code().frozen().contains(stub));
-  mcg->debugInfo()->recordRelocMap(stub, 0, "FreeStub");
+void markStubFreed(TCA stub) {
   s_freeStubs.push(stub);
 }
 

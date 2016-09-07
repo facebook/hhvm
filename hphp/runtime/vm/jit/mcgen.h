@@ -17,8 +17,10 @@
 #ifndef incl_HPHP_JIT_MCGEN_H_
 #define incl_HPHP_JIT_MCGEN_H_
 
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP {
@@ -26,6 +28,9 @@ namespace HPHP {
 struct ActRec;
 
 namespace jit {
+
+struct IRUnit;
+struct Vunit;
 
 /*
  * Arguments for the translate() entry points in Translator.
@@ -44,14 +49,42 @@ struct TransArgs {
 };
 
 /*
- * Whether we should try profile-guided optimization when translating `sk'.
+ * The state of a partially-complete translation.
+ *
+ * It is used to transfer context between translate() and emitTranslation()
+ * when the initial phase of translation can be done without the write lease.
  */
-bool profileSrcKey(SrcKey sk);
+struct TransEnv {
+  explicit TransEnv(const TransArgs& args) : args(args) {}
+  ~TransEnv();
 
-/*
- * Whether we should emit a translation of kind for func.
- */
-bool shouldTranslate(const Func* func, TransKind kind);
+  TransEnv(TransEnv&&) = default;
+  TransEnv& operator=(TransEnv&&) = default;
+
+  /*
+   * Context for the translation process.
+   */
+  TransArgs args;
+  FPInvOffset initSpOffset;
+  TransID transID{kInvalidTransID};
+
+  /*
+   * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
+   * successful (hhir -> vasm lowering never fails).
+   */
+  std::unique_ptr<IRUnit> unit;
+  std::unique_ptr<Vunit> vunit;
+
+  /*
+   * Metadata collected during bytecode -> hhir lowering.
+   */
+  PostConditions pconds;
+  Annotations annotations;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace mcgen {
 
 /*
  * Look up or translate a func prologue or func body.
@@ -87,24 +120,21 @@ TCA retranslate(TransArgs args);
 TCA retranslateOpt(SrcKey sk, TransID transId);
 
 /*
- * Emit checks for (and hooks into) an attached debugger in front of each
- * translation in `unit' or for `SrcKey{func, offset, resumed}'.
- */
-bool addDbgGuards(const Unit* unit);
-bool addDbgGuard(const Func* func, Offset offset, bool resumed);
-
-namespace mcgen {
-/*
  * Called once when the JIT is activated to initialize internal mcgen structures
  */
 void processInit();
-}
 
 /*
  * Return the timestamp at which mcgen::processInit was called
  */
 int64_t jitInitTime();
 
-}}
+/*
+ * Whether we should dump TC annotations for translations of `func' of
+ * `transKind'.
+ */
+bool dumpTCAnnotation(const Func& func, TransKind transKind);
+
+}}}
 
 #endif

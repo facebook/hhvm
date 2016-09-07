@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -776,7 +777,7 @@ RegionDescPtr selectHotRegion(TransID transId,
   assertx(profData);
   auto const& func = *profData->transRec(transId)->func();
   FuncId funcId = func.getFuncId();
-  TransCFG cfg(funcId, profData, mcg->srcDB());
+  TransCFG cfg(funcId, profData);
   assertx(regionMode() != RegionMode::Method);
   RegionDescPtr region;
   HotTransContext ctx;

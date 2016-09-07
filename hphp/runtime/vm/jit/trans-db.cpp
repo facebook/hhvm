@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -84,19 +85,20 @@ uint64_t* getTransCounterAddr() {
 void addTranslation(const TransRec& transRec) {
   if (Trace::moduleEnabledRelease(Trace::trans, 1)) {
     // Log the translation's size, creation time, SrcKey, and size
-    Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
-                        HPHP::Timer::GetCurrentTimeMicros() - jitInitTime(),
-                        folly::format("{}:{}:{}",
-                          transRec.src.unit()->filepath(),
-                          transRec.src.funcID(),
-                          transRec.src.offset()).str().c_str(),
-                        transRec.aLen,
-                        transRec.acoldLen,
-                        static_cast<int>(transRec.kind));
+    Trace::traceRelease(
+      "New translation: %" PRId64 " %s %u %u %d\n",
+      HPHP::Timer::GetCurrentTimeMicros() - mcgen::jitInitTime(),
+      folly::format("{}:{}:{}",
+                    transRec.src.unit()->filepath(),
+                    transRec.src.funcID(),
+                    transRec.src.offset()).str().c_str(),
+      transRec.aLen,
+      transRec.acoldLen,
+      static_cast<int>(transRec.kind));
   }
 
   if (!enabled()) return;
-  mcg->assertOwnsCodeLock();
+  tc::assertOwnsCodeLock();
   TransID id = transRec.id == kInvalidTransID ? s_translations.size()
                                               : transRec.id;
   if (id >= s_translations.size()) {

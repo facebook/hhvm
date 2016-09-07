@@ -181,6 +181,7 @@ private:
 public:
   Counter allocd_, marked_, ambig_, freed_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
+  Counter xscanned_roots_, xscanned_; // bytes
   size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
   size_t max_worklist_{0}; // max size of work_
 private:
@@ -208,6 +209,7 @@ inline DEBUG_ONLY HeaderKind kind(const void* p) {
 }
 
 void Marker::operator()(const ObjectData* p) {
+  xscanned_ += sizeof(p);
   if (!p) return;
   assert(isObjectKind(p->headerKind()));
   auto kind = p->headerKind();
@@ -243,6 +245,7 @@ void Marker::operator()(const ObjectData* p) {
 }
 
 void Marker::operator()(const ResourceHdr* p) {
+  xscanned_ += sizeof(p);
   if (p && mark(p)) {
     assert(kind(p) == HeaderKind::Resource);
     enqueue(p);
@@ -250,6 +253,7 @@ void Marker::operator()(const ResourceHdr* p) {
 }
 
 void Marker::operator()(const ResourceData* r) {
+  xscanned_ += sizeof(r);
   if (r && mark(r->hdr())) {
     assert(kind(r->hdr()) == HeaderKind::Resource);
     enqueue(r->hdr());
@@ -258,6 +262,7 @@ void Marker::operator()(const ResourceData* r) {
 
 // ArrayData objects could be static
 void Marker::operator()(const ArrayData* p) {
+  xscanned_ += sizeof(p);
   if (p && counted(p) && mark(p)) {
     assert(isArrayKind(kind(p)));
     enqueue(p);
@@ -266,6 +271,7 @@ void Marker::operator()(const ArrayData* p) {
 
 // RefData objects contain at most one ptr, scan it eagerly.
 void Marker::operator()(const RefData* p) {
+  xscanned_ += sizeof(p);
   if (!p) return;
   if (inRds(p)) {
     // p is a static local, initialized by RefData::initInRDS().
@@ -338,6 +344,7 @@ void Marker::operator()(const TypedValue& tv) {
 }
 
 void Marker::checkedEnqueue(const void* p, GCBits bits) {
+  if (bits == GCBits::Mark) xscanned_ += sizeof(p);
   auto h = ptrs_.header(p);
   if (!h) return;
   // mark p if it's an interesting kind. since we have metadata for it,
@@ -510,6 +517,7 @@ NEVER_INLINE void Marker::traceRoots() {
     scanRoots(*this);
   }
   cscanned_roots_ = cscanned_;
+  xscanned_roots_ = xscanned_;
 }
 
 NEVER_INLINE void Marker::trace() {
@@ -775,7 +783,8 @@ void logCollection(const char* phase, const Marker& mkr) {
     Trace::traceRelease(
       "gc mmUsage %luM trigger %luM max %luM init %lums mark %lums "
       "allocd %luM exact %.1f%% ambig %.1f%% free %.1fM "
-      "cscan-root %.1fM cscan-heap %.1fM\n",
+      "cscan-root %.1fM cscan-heap %.1fM "
+      "xscan-root %.1fM xscan-heap %.1fM\n",
       t_pre_stats.mmUsage/1024/1024,
       t_trigger/1024/1024,
       t_pre_stats.limit/1024/1024,
@@ -786,7 +795,9 @@ void logCollection(const char* phase, const Marker& mkr) {
       100.0 * mkr.ambig_.bytes / mkr.allocd_.bytes,
       mkr.freed_.bytes/1024.0/1024.0,
       mkr.cscanned_roots_.bytes/1024.0/1024.0,
-      (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0
+      (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0,
+      mkr.xscanned_roots_.bytes/1024.0/1024.0,
+      (mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes)/1024.0/1024.0
     );
   }
   auto sample = logCommon();
@@ -810,8 +821,11 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("freed_bytes", mkr.freed_.bytes);
   sample.setInt("trigger_bytes", t_trigger);
   sample.setInt("cscanned_roots", mkr.cscanned_roots_.bytes);
+  sample.setInt("xscanned_roots", mkr.xscanned_roots_.bytes);
   sample.setInt("cscanned_heap",
                 mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes);
+  sample.setInt("xscanned_heap",
+                mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes);
   sample.setInt("max_worklist", mkr.max_worklist_);
   StructuredLog::log("hhvm_gc", sample);
 }

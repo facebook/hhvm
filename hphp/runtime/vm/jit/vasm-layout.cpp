@@ -17,7 +17,6 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"

@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/atomic-vector.h"

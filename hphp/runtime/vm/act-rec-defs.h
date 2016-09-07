@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/vm/act-rec.h"
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 

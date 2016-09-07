@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/tc.h"

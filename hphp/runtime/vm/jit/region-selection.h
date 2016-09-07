@@ -39,7 +39,6 @@
 
 namespace HPHP { namespace jit {
 
-struct MCGenerator;
 struct ProfData;
 struct TransCFG;
 
@@ -468,7 +467,7 @@ void RegionDesc::forEachArc(Work w) const {
  *
  * This function may return nullptr.
  *
- * For now this is hooked up in MCGenerator::translateWork, and
+ * For now this is hooked up in mcgen::translateWork, and
  * returning nullptr causes it to use the current level 0 tracelet
  * analyzer.  Eventually we'd like this to completely replace analyze.
  */
@@ -479,8 +478,7 @@ RegionDescPtr selectRegion(const RegionContext& context, TransKind kind);
  * is used in JitPGO mode.  Argument transId specifies the profiling
  * translation that triggered the profiling-based region selection.
  */
-RegionDescPtr selectHotRegion(TransID transId,
-                              MCGenerator* mcg);
+RegionDescPtr selectHotRegion(TransID transId);
 
 /*
  * Select a compilation region as long as possible using the given context.
@@ -535,8 +533,7 @@ bool breaksRegion(SrcKey sk);
 /*
  * Creates regions covering all existing profile translations for func.
  */
-RegionVec regionizeFunc(const Func*  func, MCGenerator* mcg,
-                        std::string& transCFGAnnot);
+RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot);
 
 /*
  * Optimize the guards of `region' based on profiling data.

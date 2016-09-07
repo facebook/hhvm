@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 
 #include "hphp/runtime/vm/jit/irlower.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -125,7 +124,7 @@ RegionDescPtr prepareRegion(const TransArgs& args) {
     if (args.region) return args.region;
 
     assertx(isValidTransID(args.transId));
-    return selectHotRegion(args.transId, mcg);
+    return selectHotRegion(args.transId);
   }
 
   // Attempt to create a region at this SrcKey

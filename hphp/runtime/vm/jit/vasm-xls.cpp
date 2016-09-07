@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/reg-algorithms.h"

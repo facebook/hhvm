@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"

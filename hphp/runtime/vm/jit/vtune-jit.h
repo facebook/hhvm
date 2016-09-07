@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_VM_VTUNE_JIT_H
 #define incl_HPHP_VM_VTUNE_JIT_H
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "translator.h"
 
 namespace HPHP { namespace jit {

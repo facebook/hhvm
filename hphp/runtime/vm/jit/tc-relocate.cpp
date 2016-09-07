@@ -22,11 +22,11 @@
 
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/blob-helper.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"

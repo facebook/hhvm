@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_JIT_ENTER_TC_H_
 #define incl_HPHP_JIT_ENTER_TC_H_
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
 

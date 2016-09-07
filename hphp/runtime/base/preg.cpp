@@ -38,8 +38,10 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/util/logger.h"
@@ -746,14 +748,14 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       TCA end = start + size;
       std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
 
-      if (!RuntimeOption::EvalJitNoGdb && jit::mcg) {
+      if (!RuntimeOption::EvalJitNoGdb && jit::mcgen::initialized()) {
         Debug::DebugInfo::Get()->recordStub(Debug::TCRange(start, end, false),
                                             name);
       }
       if (RuntimeOption::EvalJitUseVtuneAPI) {
         HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
       }
-      if (RuntimeOption::EvalPerfPidMap && jit::mcg) {
+      if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
         Debug::DebugInfo::Get()->recordPerfMap(
           Debug::TCRange(start, end, false),
           SrcKey{},

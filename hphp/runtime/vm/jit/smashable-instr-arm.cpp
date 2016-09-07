@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/align-arm.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"

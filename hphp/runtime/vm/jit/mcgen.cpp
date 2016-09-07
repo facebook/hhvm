@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
@@ -56,6 +55,7 @@ bool checkCachedPrologue(const Func* func, int paramIdx, TCA& prologue) {
 }
 
 int64_t s_startTime;
+bool s_inited{false};
 
 ////////////////////////////////////////////////////////////////////////////////
 }
@@ -214,7 +214,7 @@ TCA retranslateOpt(SrcKey sk, TransID transId) {
   // Regionize func and translate all its regions.
   std::string transCFGAnnot;
   auto const regions = includedBody ? std::vector<RegionDescPtr>{}
-                                    : regionizeFunc(func, mcg, transCFGAnnot);
+                                    : regionizeFunc(func, transCFGAnnot);
 
   for (auto region : regions) {
     always_assert(!region->empty());
@@ -261,7 +261,11 @@ void processInit() {
 
   s_startTime = HPHP::Timer::GetCurrentTimeMicros();
   initInstrInfo();
+
+  s_inited = true;
 }
+
+bool initialized() { return s_inited; }
 
 int64_t jitInitTime() { return s_startTime; }
 

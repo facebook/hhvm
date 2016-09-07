@@ -15,6 +15,7 @@
 */
 
 #include <algorithm>
+#include <fstream>
 #include <vector>
 
 #include "hphp/util/assertions.h"
@@ -271,8 +272,7 @@ bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  *      2.2) select a region starting at this node and mark nodes/arcs as
  *           covered appropriately
  */
-RegionVec regionizeFunc(const Func* func, MCGenerator* mcg,
-                        std::string& transCFGAnnot) {
+RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
   const Timer rf_timer(Timer::regionizeFunc);
   assertx(profData());
 

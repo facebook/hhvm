@@ -16,9 +16,9 @@
 
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"

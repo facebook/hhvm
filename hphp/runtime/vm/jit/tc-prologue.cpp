@@ -20,11 +20,11 @@
 #include "hphp/runtime/vm/jit/tc-region.h"
 #include "hphp/runtime/vm/jit/tc-relocate.h"
 
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -167,8 +167,8 @@ static TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
   assertx(funcGuardMatches(funcGuardFromPrologue(start, func), func));
   assertx(code().isValidCodeAddress(start));
 
-  TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
-        mcg, func->fullName()->data(), argc, start);
+  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+        func->fullName()->data(), argc, start);
   func->setPrologue(paramIndex, start);
 
   assertx(kind == TransKind::LivePrologue ||

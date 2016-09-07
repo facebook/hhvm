@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_TC_H_
 #define incl_HPHP_JIT_TC_H_
 
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -40,7 +41,6 @@ struct CGMeta;
 struct IncomingBranch;
 struct IRUnit;
 struct ProfTransRec;
-struct SrcRec;
 struct TransEnv;
 struct TransLoc;
 struct Vunit;

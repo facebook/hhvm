@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/frame-state.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/util/timer.h"
 
 namespace HPHP { namespace jit {

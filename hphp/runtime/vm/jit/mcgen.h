@@ -125,6 +125,11 @@ TCA retranslateOpt(SrcKey sk, TransID transId);
 void processInit();
 
 /*
+ * True iff mcgen::processInit() has been called
+ */
+bool initialized();
+
+/*
  * Return the timestamp at which mcgen::processInit was called
  */
 int64_t jitInitTime();

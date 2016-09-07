@@ -17,7 +17,6 @@
 #include "hphp/compiler/option.h"
 
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -72,8 +71,6 @@ const StaticString s_TypeError("\\__SystemLib\\TypeError");
 
 void tweak_variant_dtors();
 void ProcessInit() {
-  // Create the global mcg object
-  jit::mcg = new jit::MCGenerator();
   jit::mcgen::processInit();
   jit::processInitProfData();
 

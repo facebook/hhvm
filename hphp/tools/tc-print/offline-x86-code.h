@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/perf-events.h"

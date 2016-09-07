@@ -32,10 +32,10 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/boot_timer.h"

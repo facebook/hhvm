@@ -29,12 +29,12 @@
 
 #include <folly/portability/SysTime.h>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/service-data.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {  namespace Treadmill {
 

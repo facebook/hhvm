@@ -39,7 +39,6 @@
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
 #include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"

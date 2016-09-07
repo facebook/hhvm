@@ -17,8 +17,9 @@
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
 TRACE_SET_MOD(mcg);

@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/util/arch.h"

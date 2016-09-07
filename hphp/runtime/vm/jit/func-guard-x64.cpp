@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/vm/jit/func-guard-x64.h"
 
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"

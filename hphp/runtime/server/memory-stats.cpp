@@ -17,7 +17,6 @@
 #include "hphp/runtime/server/memory-stats.h"
 
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include <algorithm>

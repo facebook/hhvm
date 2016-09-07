@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/trans-rec.h"
 
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 
 #include <unordered_map>

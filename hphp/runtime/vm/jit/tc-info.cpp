@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 
@@ -133,7 +133,7 @@ bool dumpTCData() {
 }
 
 bool dump(bool ignoreLease /* = false */) {
-  if (!mcg) return false;
+  if (!mcgen::initialized()) return false;
 
   std::unique_lock<SimpleMutex> codeLock;
   std::unique_lock<SimpleMutex> metaLock;

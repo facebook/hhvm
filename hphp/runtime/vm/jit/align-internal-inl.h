@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/util/data-block.h"
 

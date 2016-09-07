@@ -258,7 +258,7 @@ inline std::string typeCategoryName(DataTypeCategory c) {
 }
 
 /*
- * These are used in type-variant.cpp and mc-generator.cpp.
+ * These are used in type-variant.cpp.
  */
 constexpr int kShiftDataTypeToDestrIndex = 2;
 constexpr int kDestrTableSize = 31;

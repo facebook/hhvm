@@ -66,8 +66,8 @@
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -2391,8 +2391,6 @@ void hphp_process_exit() {
   LightProcess::Close();
 #endif
   InitFiniNode::ProcessFini();
-  delete jit::mcg;
-  jit::mcg = nullptr;
   folly::SingletonVault::singleton()->destroyInstances();
 }
 

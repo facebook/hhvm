@@ -20,13 +20,12 @@
 #include <utility>
 #include <vector>
 
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {
 namespace Stats {
-
-using namespace HPHP::jit;
 
 TRACE_SET_MOD(stats);
 

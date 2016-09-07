@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 #include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"

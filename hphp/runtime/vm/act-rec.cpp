@@ -17,11 +17,11 @@
 #include "hphp/runtime/vm/act-rec.h"
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/util/assertions.h"

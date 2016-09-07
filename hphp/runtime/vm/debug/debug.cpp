@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 
 #include "hphp/runtime/base/execution-context.h"
 
@@ -259,7 +259,7 @@ void DebugInfo::recordTracelet(TCRange range, const Func* func,
 
 void DebugInfo::recordDataMap(const void* from, const void* to,
                               const std::string& desc) {
-  if (!mcg) return;
+  if (!mcgen::initialized()) return;
   if (auto dataMap = Get()->m_dataMap) {
     fprintf(dataMap, "%" PRIxPTR " %" PRIx64 " %s\n",
             uintptr_t(from),

@@ -33,7 +33,6 @@
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/server/server-stats.h"
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"

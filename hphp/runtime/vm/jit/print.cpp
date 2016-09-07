@@ -34,7 +34,6 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/dasm-ppc64.h"

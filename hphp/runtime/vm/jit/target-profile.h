@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/rds.h"
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/util/type-scan.h"

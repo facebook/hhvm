@@ -109,9 +109,9 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -135,7 +135,6 @@ const bool skipCufOnInvalidParams = false;
 // to be closer to other bytecode.cpp data.
 bool RuntimeOption::RepoAuthoritative = false;
 
-using jit::mcg;
 using jit::TCA;
 
 // GCC 4.8 has some real problems with all the inlining in this file, so don't

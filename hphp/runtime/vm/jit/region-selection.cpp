@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include <algorithm>
+#include <fstream>
 #include <functional>
 #include <exception>
 #include <utility>
@@ -771,8 +772,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
   return region;
 }
 
-RegionDescPtr selectHotRegion(TransID transId,
-                              MCGenerator* mcg) {
+RegionDescPtr selectHotRegion(TransID transId) {
   auto const profData = jit::profData();
   assertx(profData);
   auto const& func = *profData->transRec(transId)->func();

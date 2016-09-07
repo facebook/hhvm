@@ -425,9 +425,11 @@ void consume_events(PerfEvent kind, perf_event_handle& pe,
     }
 
     if (header->type == PERF_RECORD_SAMPLE) {
-      assertx(header->size == sizeof(struct perf_event_header) +
-                              sizeof(perf_event_sample));
       auto const sample = reinterpret_cast<perf_event_sample*>(header + 1);
+
+      assertx(header->size == sizeof(struct perf_event_header) +
+                              sizeof(perf_event_sample) +
+                              sample->nr * sizeof(*sample->ips));
       consume(kind, sample);
     }
   }

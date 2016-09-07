@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -174,7 +175,7 @@ TCA fcallHelper(ActRec* ar) {
   assertx(!ar->resumed());
 
   if (LIKELY(!RuntimeOption::EvalFailJitPrologs)) {
-    auto const tca = mcg->getFuncPrologue(
+    auto const tca = getFuncPrologue(
       const_cast<Func*>(ar->func()),
       ar->numArgs(),
       ar
@@ -235,7 +236,7 @@ TCA funcBodyHelper(ActRec* fp) {
   tl_regState = VMRegState::CLEAN;
 
   auto const func = const_cast<Func*>(fp->m_func);
-  auto tca = mcg->getFuncBody(func);
+  auto tca = getFuncBody(func);
   if (!tca) {
     tca = mcg->ustubs().resumeHelper;
   }

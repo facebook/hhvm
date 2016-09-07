@@ -130,24 +130,6 @@ struct TransContext {
   bool resumed;
 };
 
-/*
- * Arguments for the translate() entry points in Translator.
- *
- * These include a variety of flags that help decide what to translate, or what
- * to do after we're done, so it's distinct from the TransContext above.
- */
-struct TransArgs {
-  explicit TransArgs(SrcKey sk) : sk{sk} {}
-
-  SrcKey sk;
-  Annotations annotations;
-  bool allowPartial{false};
-  TransFlags flags{0};
-  TransID transId{kInvalidTransID};
-  TransKind kind{TransKind::Invalid};
-  RegionDescPtr region{nullptr};
-};
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Translator.

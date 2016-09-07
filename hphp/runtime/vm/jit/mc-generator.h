@@ -54,6 +54,7 @@ namespace jit {
 
 struct CGMeta;
 struct MCGenerator;
+struct TransArgs;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -81,77 +82,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * The state of a partially-complete translation.
- *
- * It is used to transfer context between MCGenerator::translate() and
- * MCGenerator::finishTranslation() when the initial phase of translation can
- * be done without the write lease.
- */
-struct TransEnv {
-  explicit TransEnv(const TransArgs& args) : args(args) {}
-
-  TransEnv(TransEnv&&) = default;
-  TransEnv& operator=(TransEnv&&) = default;
-
-  /*
-   * Context for the translation process.
-   */
-  TransArgs args;
-  FPInvOffset initSpOffset;
-  TransID transID{kInvalidTransID};
-
-  /*
-   * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
-   * successful (hhir -> vasm lowering never fails).
-   */
-  std::unique_ptr<IRUnit> unit;
-  std::unique_ptr<Vunit> vunit;
-
-  /*
-   * Metadata collected during bytecode -> hhir lowering.
-   */
-  PostConditions pconds;
-  Annotations annotations;
-};
-
-/*
- * The result of the getTranslation() family of functions in MCGenerator,
- * representing a translation that may or may not be complete.
- */
-struct TransResult {
-  /* implicit */ TransResult(TCA tca)        : m_tca(tca) {}
-  /* implicit */ TransResult(TransEnv&& env) : m_env(std::move(env)) {}
-
-  TransResult(TransResult&&) = default;
-  TransResult& operator=(TransResult&&) = default;
-
-  /*
-   * Is the translation finished?
-   *
-   * If this function returns true, the TCA of the finished translation (or
-   * nullptr if it failed) can be retrieved using tca(). If it returns false,
-   * the state required to finish translation can be retrieved with env().
-   */
-  bool finished() const {
-    return !m_env.hasValue();
-  }
-
-  TCA tca() const {
-    assertx(finished());
-    return m_tca;
-  }
-
-  TransEnv& env() {
-    assertx(!finished());
-    return *m_env;
-  }
-
-private:
-  TCA m_tca;
-  folly::Optional<TransEnv> m_env;
-};
 
 /*
  * MCGenerator handles the machine-level details of code generation (e.g.,
@@ -228,9 +158,8 @@ struct MCGenerator {
   /*
    * Get the SrcDB.
    */
-  const SrcDB& srcDB() const {
-    return m_srcDB;
-  }
+  const SrcDB& srcDB() const { return m_srcDB; }
+  SrcDB& srcDB()             { return m_srcDB; }
 
   /*
    * Emit checks for (and hooks into) an attached debugger in front of each
@@ -256,13 +185,6 @@ struct MCGenerator {
    */
   void requestInit();
   void requestExit();
-
-  /*
-   * Look up or translate a func prologue or func body.
-   */
-  TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
-                      bool forRegeneratePrologue = false);
-  TCA getFuncBody(Func* func);
 
   /*
    * Sync VM registers for the first TC frame in the callstack.
@@ -384,42 +306,7 @@ private:
   TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req,
               TransFlags trflags, bool& smashed);
 
-  bool shouldTranslate(const Func*, TransKind) const;
-  bool shouldTranslateNoSizeLimit(const Func*) const;
-
   void syncWork();
-
-  TCA findTranslation(const TransArgs& args) const;
-  TransResult getTranslation(const TransArgs& args);
-  TransResult createTranslation(TransArgs args);
-  bool createSrcRec(SrcKey sk);
-  TransResult retranslate(TransArgs args);
-  TransResult translate(TransArgs args);
-  TCA finishTranslation(TransEnv env);
-
-  TCA lookupTranslation(SrcKey sk) const;
-  TCA retranslateOpt(SrcKey sk, TransID transId, bool align);
-  void checkFreeProfData();
-
-  /*
-   * Prologue-generation helpers.
-   */
-  TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody);
-  TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
-                         bool& emittedDVInit);
-  TCA emitFuncPrologue(Func* func, int nPassed, TransKind kind);
-  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
-
-  bool profileSrcKey(SrcKey sk) const;
-  void invalidateSrcKey(SrcKey sk);
-  void invalidateFuncProfSrcKeys(const Func* func);
-
-  void recordGdbTranslation(SrcKey sk, const Func* f,
-                            const CodeBlock& cb,
-                            const TCA start,
-                            bool exit, bool inPrologue);
-
-  void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 
   /*
    * TC dump helpers
@@ -440,9 +327,6 @@ private:
   UniqueStubs m_ustubs;
   Translator m_tx;
 
-  // Number of translations made so far.
-  std::atomic<uint64_t> m_numTrans;
-
   // Handles to registered .eh_frame sections.
   std::vector<EHFrameDesc> m_ehFrames;
   // Landingpads for TC catch traces; used by the unwinder.
@@ -462,11 +346,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Whether we should try profile-guided optimization when translating `func'.
- */
-bool shouldPGOFunc(const Func& func);
 
 /*
  * Look up the catch block associated with the saved return address in `ar' and

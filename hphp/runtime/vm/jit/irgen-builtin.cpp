@@ -1336,6 +1336,8 @@ void emitFCallBuiltin(IRGS& env,
                       const StringData* funcName) {
   auto const callee = Unit::lookupFunc(funcName);
 
+  if (!callee) PUNT(Missing-builtin);
+
   if (optimizedFCallBuiltin(env, callee, numArgs, numNonDefault)) return;
 
   auto params = prepare_params(

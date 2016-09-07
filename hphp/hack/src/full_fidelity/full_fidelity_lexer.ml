@@ -462,29 +462,22 @@ let scan_xhp_label lexer =
 
 let rec scan_xhp_element_name lexer =
   (* An XHP element name is a sequence of one or more XHP labels each separated
-     by a single : or -. *)
+  by a single : or -.  Note that it is possible for an XHP element name to be
+  followed immediately by a : or - that is the next token, so if we find
+  a : or - not followed by a label, we need to terminate the token. *)
   let lexer = scan_xhp_label lexer in
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
-  if ch0 = ':' || ch0 = '-' then
-    begin
-      if is_name_nondigit ch1 then
-        scan_xhp_element_name (advance lexer 1)
-      else
-        let lexer = with_error lexer SyntaxError.error0008 in
-        (advance lexer 1, TokenKind.Error)
-    end
+  if (ch0 = ':' || ch0 = '-') && (is_name_nondigit ch1) then
+    scan_xhp_element_name (advance lexer 1)
   else
     (lexer, TokenKind.XHPElementName)
 
 let scan_xhp_class_name lexer =
   (* An XHP class name is a colon followed by an xhp name. *)
-  if peek_char lexer 0 = ':' then
-    let (lexer, token) = scan_xhp_element_name (advance lexer 1) in
-    if token = TokenKind.XHPElementName then
-      (lexer, TokenKind.XHPClassName)
-    else
-      (lexer, token)
+  if (peek_char lexer 0 = ':') && (is_name_nondigit (peek_char lexer 1)) then
+    let (lexer, _) = scan_xhp_element_name (advance lexer 1) in
+    (lexer, TokenKind.XHPClassName)
   else
     let lexer = with_error lexer SyntaxError.error0008 in
     (advance lexer 1, TokenKind.Error)

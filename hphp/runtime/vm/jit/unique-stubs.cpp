@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/phys-reg-saver.h"
+#include "hphp/runtime/vm/jit/service-request-handlers.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -122,12 +123,6 @@ void loadReturnRegs(Vout& v) {
 void storeReturnRegs(Vout& v) {
   v << store{rret_data(), rvmsp()[TVOFF(m_data)]};
   v << store{rret_type(), rvmsp()[TVOFF(m_type)]};
-}
-
-void loadMCG(Vout& v, Vreg d) {
-  // TODO(#8060678): Why does this need to be RIP-relative?
-  auto const imcg = reinterpret_cast<uintptr_t>(&mcg);
-  v << loadqp{reg::rip[imcg], d};
 }
 
 /*
@@ -835,26 +830,21 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
   return vwrap(cb, data, [] (Vout& v) {
     v << phplogue{rvmfp()};
 
-    auto args = VregList { v.makeReg(), v.makeReg(),
-                           v.makeReg(), v.makeReg() };
-    loadMCG(v, args[0]);
+    auto args = VregList { v.makeReg(), v.makeReg(), v.makeReg() };
 
     // Reconstruct the address of the call from the saved RIP.
     auto const savedRIP = v.makeReg();
     auto const callLen = safe_cast<int>(smashableCallLen());
     v << load{rvmfp()[AROFF(m_savedRip)], savedRIP};
-    v << subqi{callLen, savedRIP, args[1], v.makeReg()};
+    v << subqi{callLen, savedRIP, args[0], v.makeReg()};
 
-    v << copy{rvmfp(), args[2]};
-    v << movb{v.cns(immutable), args[3]};
+    v << copy{rvmfp(), args[1]};
+    v << movb{v.cns(immutable), args[2]};
 
-    auto const handler = reinterpret_cast<void (*)()>(
-      getMethodPtr(&MCGenerator::handleBindCall)
-    );
     auto const ret = v.makeReg();
 
     v << vcall{
-      CallSpec::direct(handler),
+      CallSpec::direct(svcreq::handleBindCall),
       v.makeVcallArgs({args}),
       v.makeTuple({ret}),
       Fixup{},
@@ -976,16 +966,13 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
     v << phplogue{rvmfp()};
   });
   rh.resumeHelper = vwrap(cb, data, [] (Vout& v) {
-    v << ldimmb{0, rarg(1)};
+    v << ldimmb{0, rarg(0)};
   });
 
   rh.handleResume = vwrap(cb, data, [] (Vout& v) {
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
-    loadMCG(v, rarg(0));
 
-    auto const handler = reinterpret_cast<TCA>(
-      getMethodPtr(&MCGenerator::handleResume)
-    );
+    auto const handler = reinterpret_cast<TCA>(svcreq::handleResume);
     v << call{handler, arg_regs(2)};
   });
 
@@ -1017,17 +1004,14 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
   });
   us.interpHelperSyncedPC = vwrap(cb, data, [&] (Vout& v) {
     storeVMRegs(v);
-    v << ldimmb{1, rarg(1)};
-    v << jmpi{rh.handleResume, RegSet(rarg(1))};
+    v << ldimmb{1, rarg(0)};
+    v << jmpi{rh.handleResume, RegSet(rarg(0))};
   });
 
   us.fcallAwaitSuspendHelper = vwrap(cb, data, [&] (Vout& v) {
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
-    loadMCG(v, rarg(0));
 
-    auto const handler = reinterpret_cast<TCA>(
-      getMethodPtr(&MCGenerator::handleFCallAwaitSuspend)
-    );
+    auto const handler = reinterpret_cast<TCA>(svcreq::handleFCallAwaitSuspend);
     v << call{handler, arg_regs(2)};
     v << jmpi{rh.reenterTC, RegSet()};
   });
@@ -1251,16 +1235,14 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
     }
 
     // Call mcg->handleServiceRequest(rsp()).
-    auto const args = VregList { v.makeReg(), v.makeReg() };
-    loadMCG(v, args[0]);
-    v << copy{rsp(), args[1]};
+    auto const sp = v.makeReg();
+    v << copy{rsp(), sp};
 
-    auto const meth = &MCGenerator::handleServiceRequest;
     auto const ret = v.makeReg();
 
     v << vcall{
-      CallSpec::method(meth),
-      v.makeVcallArgs({args}),
+      CallSpec::direct(svcreq::handleServiceRequest),
+      v.makeVcallArgs({{sp}}),
       v.makeTuple({ret}),
       Fixup{},
       DestType::SSA

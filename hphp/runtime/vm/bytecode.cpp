@@ -109,6 +109,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
 
+#include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -1486,7 +1487,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
     int na = enterFnAr->numArgs();
     if (na > np) na = np + 1;
     jit::TCA start = enterFnAr->m_func->getPrologue(na);
-    mcg->enterTCAtPrologue(enterFnAr, start);
+    jit::enterTCAtPrologue(enterFnAr, start);
     return;
   }
 
@@ -1507,7 +1508,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
 
   if (useJit) {
     jit::TCA start = enterFnAr->m_func->getFuncBody();
-    mcg->enterTCAfterPrologue(start);
+    jit::enterTCAfterPrologue(start);
   } else {
     dispatch();
   }
@@ -1519,7 +1520,7 @@ void enterVMAtCurPC() {
   assert(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
   if (RID().getJit()) {
-    mcg->enterTC();
+    jit::enterTC();
   } else {
     dispatch();
   }

@@ -17,10 +17,12 @@
 #ifndef incl_HPHP_JIT_MCGEN_EMIT_H_
 #define incl_HPHP_JIT_MCGEN_EMIT_H_
 
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include <memory>
 
@@ -30,9 +32,7 @@ struct Func;
 
 namespace jit {
 
-struct IRUnit;
 struct ProfTransRec;
-struct Vunit;
 
 namespace mcgen {
 

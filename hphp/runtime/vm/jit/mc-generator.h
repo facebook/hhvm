@@ -25,13 +25,11 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
-#include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/data-block.h"
@@ -194,81 +192,6 @@ struct MCGenerator {
     syncWork();
   }
 
-private:
-  /*
-   * Main entry point for the translator from the bytecode interpreter.  It
-   * operates on behalf of a given nested invocation of the intepreter (calling
-   * back into it as necessary for blocks that need to be interpreted).
-   *
-   * If `start' is the address of a func prologue, `stashedAR' should be the
-   * ActRec prepared for the call to that function.  Otherwise it should be
-   * nullptr.
-   *
-   * But don't call it directly, use one of the helpers below.
-   */
-  void enterTC(TCA start, ActRec* stashedAR);
-
-public:
-  void enterTC() {
-    enterTC(ustubs().resumeHelper, nullptr);
-  }
-  void enterTCAtPrologue(ActRec* ar, TCA start) {
-    assertx(ar);
-    assertx(start);
-    enterTC(start, ar);
-  }
-  void enterTCAfterPrologue(TCA start) {
-    assertx(start);
-    enterTC(start, nullptr);
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Runtime handlers.
-
-  /*
-   * Handle a service request.
-   *
-   * This often involves looking up or creating a translation, smashing a jmp
-   * target or other address in the code, and returning the smashed-in value.
-   * This address indicates where the caller should resume execution.
-   */
-  TCA handleServiceRequest(svcreq::ReqInfo& info) noexcept;
-
-  /*
-   * Handle a bindcall request---i.e., look up (or create) the appropriate func
-   * prologue for `calleeFrame', then smash the call instruction at `toSmash'.
-   *
-   * If we can't find or make a translation, may return fcallHelperThunk
-   * instead, which uses C++ helpers to act like a prologue.
-   */
-  TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable);
-
-  /*
-   * If we suspend an FCallAwait frame we need to suspend the
-   * caller. Returning to the jitted code will automatically take care
-   * of that, but if we're returning in the interpreter, we have to
-   * handle it separately. If the frame we're returning from was the
-   * vmJitCalledFrame(), we have to exit from handleResume (see
-   * comments for jitReturnPre and jitReturnPost). After exiting from
-   * there, there is no correct bytecode to resume at, so we use this
-   * helper to cleanup and continue.
-   */
-  TCA handleFCallAwaitSuspend();
-
-  /*
-   * Look up (or create) and return the address of a translation for the
-   * current VM location.
-   *
-   * If no translation can be found or created, execute code in the interpreter
-   * until we find one, possibly throwing exceptions or reentering the VM.
-   *
-   * If `interpFirst' is true, at least one basic block will be interpreted
-   * before attempting to look up a translation.  This is necessary to ensure
-   * forward progress in certain situations, such as hitting the translation
-   * limit for a SrcKey.
-   */
-  TCA handleResume(bool interpFirst);
-
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -300,12 +223,6 @@ public:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  /*
-   * Service request handlers.
-   */
-  TCA bindJmp(TCA toSmash, SrcKey dest, ServiceRequest req,
-              TransFlags trflags, bool& smashed);
-
   void syncWork();
 
   /*

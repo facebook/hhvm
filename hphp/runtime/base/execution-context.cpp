@@ -57,6 +57,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -1952,7 +1953,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
     const bool useJit = RID().getJit();
     if (LIKELY(useJit && resumable->resumeAddr())) {
       Stats::inc(Stats::VMEnter);
-      jit::mcg->enterTCAfterPrologue(resumable->resumeAddr());
+      jit::enterTCAfterPrologue(resumable->resumeAddr());
     } else {
       enterVMAtCurPC();
     }

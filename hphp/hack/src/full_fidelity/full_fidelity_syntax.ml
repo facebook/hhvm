@@ -365,10 +365,12 @@ module WithToken(Token: TokenType) = struct
     }
     and break_statement = {
       break_keyword: t;
+      break_level: t;
       break_semicolon: t
     }
     and continue_statement = {
       continue_keyword: t;
+      continue_level: t;
       continue_semicolon: t
     }
     and function_static_statement = {
@@ -1290,11 +1292,11 @@ module WithToken(Token: TokenType) = struct
         { throw_keyword; throw_expr; throw_semicolon } ->
         [ throw_keyword; throw_expr; throw_semicolon ]
       | BreakStatement
-        { break_keyword; break_semicolon } ->
-        [ break_keyword; break_semicolon ]
+        { break_keyword; break_level; break_semicolon } ->
+        [ break_keyword; break_level; break_semicolon ]
       | ContinueStatement
-        { continue_keyword; continue_semicolon } ->
-        [ continue_keyword; continue_semicolon ]
+        { continue_keyword; continue_level; continue_semicolon } ->
+        [ continue_keyword; continue_level; continue_semicolon ]
       | FunctionStaticStatement
         { static_static; static_declarations; static_semicolon } ->
         [ static_static; static_declarations; static_semicolon ]
@@ -1703,11 +1705,11 @@ module WithToken(Token: TokenType) = struct
         { throw_keyword; throw_expr; throw_semicolon } ->
         [ "throw_keyword"; "throw_expr"; "throw_semicolon" ]
       | BreakStatement
-        { break_keyword; break_semicolon } ->
-        [ "break_keyword"; "break_semicolon" ]
+        { break_keyword; break_level; break_semicolon } ->
+        [ "break_keyword"; "break_level"; "break_semicolon" ]
       | ContinueStatement
-        { continue_keyword; continue_semicolon } ->
-        [ "continue_keyword"; "continue_semicolon" ]
+        { continue_keyword; continue_level; continue_semicolon } ->
+        [ "continue_keyword"; "continue_level"; "continue_semicolon" ]
       | FunctionStaticStatement
         { static_static; static_declarations; static_semicolon } ->
         [ "static_static"; "static_declarations"; "static_semicolon" ]
@@ -2010,10 +2012,6 @@ module WithToken(Token: TokenType) = struct
     let throw_keyword x = x.throw_keyword
     let throw_expr x = x.throw_expr
     let throw_semicolon x = x.throw_semicolon
-    let break_keyword x = x.break_keyword
-    let break_semicolon x = x.break_semicolon
-    let continue_keyword x = x.continue_keyword
-    let continue_semicolon x = x.continue_semicolon
     let echo_token x = x.echo_token
     let echo_expression_list x = x.echo_expression_list
     let echo_semicolon x = x.echo_semicolon
@@ -2403,11 +2401,14 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.ThrowStatement, [ throw_keyword;
         throw_expr; throw_semicolon ]) ->
         ThrowStatement { throw_keyword; throw_expr; throw_semicolon }
-      | (SyntaxKind.BreakStatement, [ break_keyword; break_semicolon ]) ->
-        BreakStatement { break_keyword; break_semicolon }
+      | (SyntaxKind.BreakStatement,
+        [ break_keyword; break_level; break_semicolon ]) ->
+        BreakStatement
+        { break_keyword; break_level; break_semicolon }
       | (SyntaxKind.ContinueStatement,
-          [ continue_keyword; continue_semicolon ]) ->
-        ContinueStatement { continue_keyword; continue_semicolon }
+        [ continue_keyword; continue_level; continue_semicolon ]) ->
+        ContinueStatement
+        { continue_keyword; continue_level; continue_semicolon }
       | (SyntaxKind.FunctionStaticStatement,
         [ static_static; static_declarations; static_semicolon ]) ->
         FunctionStaticStatement
@@ -3003,13 +3004,13 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.ThrowStatement
           [ throw_keyword; throw_expr; throw_semicolon ]
 
-      let make_break_statement break_keyword break_semicolon =
+      let make_break_statement keyword level semi =
         from_children SyntaxKind.BreakStatement
-          [ break_keyword; break_semicolon ]
+          [ keyword; level; semi ]
 
-      let make_continue_statement continue_keyword continue_semicolon =
+      let make_continue_statement keyword level semi =
         from_children SyntaxKind.ContinueStatement
-          [ continue_keyword; continue_semicolon ]
+          [ keyword; level; semi ]
 
       let make_function_static_statement static decls semi =
         from_children SyntaxKind.FunctionStaticStatement [ static; decls; semi ]

@@ -25,11 +25,11 @@
                         ((whitespace)(case)(whitespace))
                         (literal((decimal_literal)))
                         ((:)(whitespace))
-                        (break_statement((break))((;)(end_of_line))))
+                        (break_statement((break))(missing)((;)(end_of_line))))
                       (default_statement
                         ((whitespace)(default))
                         ((:)(whitespace))
-                        (break_statement((break))((;)(end_of_line)))))
+                        (break_statement((break))(missing)((;)(end_of_line)))))
                     ((whitespace)(})(end_of_line))))
               (missing)
               (else_clause
@@ -59,7 +59,7 @@
                           ((;)(end_of_line))))
                       (continue_statement
                         ((whitespace)(continue))
-                        ((;)(end_of_line))))
+                        (missing)((;)(end_of_line))))
                     ((whitespace)(})(whitespace)))
                   ((while)(whitespace))
                   ((lparen))

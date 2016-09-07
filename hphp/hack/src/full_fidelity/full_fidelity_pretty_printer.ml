@@ -860,13 +860,17 @@ let rec get_doc node =
     let back_part = expr ^^^ semicolon in
     group_doc (indent_doc keyword back_part indt)
   | BreakStatement x ->
-    let keyword = get_doc (break_keyword x) in
-    let semicolon = get_doc (break_semicolon x) in
-    keyword ^^^ semicolon
+    let b = get_doc x.break_keyword in
+    let l = get_doc x.break_level in
+    let s = get_doc x.break_semicolon in
+    if is_missing x.break_level then group_doc (b ^^^ l ^^^ s)
+    else group_doc (b ^| l ^^^ s)
   | ContinueStatement x ->
-    let keyword = get_doc (continue_keyword x) in
-    let semicolon = get_doc (continue_semicolon x) in
-    keyword ^^^ semicolon
+    let c = get_doc x.continue_keyword in
+    let l = get_doc x.continue_level in
+    let s = get_doc x.continue_semicolon in
+    if is_missing x.continue_level then group_doc (c ^^^ l ^^^ s)
+    else group_doc (c ^| l ^^^ s)
   | FunctionStaticStatement x ->
     let st = get_doc x.static_static in
     let ds = get_doc x.static_declarations in

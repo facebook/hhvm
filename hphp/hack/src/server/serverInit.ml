@@ -105,12 +105,14 @@ let check_json_obj_error kv =
  *)
 let load_state root cmd (_ic, oc) =
   try
+    let load_script_log_file = ServerFiles.load_log root in
     let cmd =
       Printf.sprintf
-        "%s %s %s"
+        "%s %s %s %s"
         (Filename.quote (Path.to_string cmd))
         (Filename.quote (Path.to_string root))
-        (Filename.quote Build_id.build_revision) in
+        (Filename.quote Build_id.build_revision)
+        (Filename.quote load_script_log_file) in
     Hh_logger.log "Running load_mini script: %s\n%!" cmd;
     let ic = Unix.open_process_in cmd in
     let json = read_json_line ic in

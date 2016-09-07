@@ -118,6 +118,10 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
                                    const Array& dependencies);
+  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
+                                   const Array& dependencies);
+  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
+                                   const Array& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
                           const Variant& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
@@ -134,6 +138,10 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
                         const Variant& callback);
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
+                          const Array& dependencies);
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
+                          const Array& dependencies);
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
                           const Array& dependencies);
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
                           const Variant& dependencies);

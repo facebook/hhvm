@@ -115,18 +115,16 @@ void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
                           const Array& dependencies) {
   auto ad = dependencies.get();
-  assert(ad);
+  assertx(ad);
+  assertx(ad->isPHPArray());
   if (!ad->size()) return Object{returnEmpty()};
 
 retry:
   switch (ad->kind()) {
     case ArrayData::kPackedKind:
-    case ArrayData::kVecKind:
       return c_AwaitAllWaitHandle::FromPackedArray(ad);
 
     case ArrayData::kMixedKind:
-    case ArrayData::kDictKind:
-    case ArrayData::kKeysetKind:
       return c_AwaitAllWaitHandle::FromMixedArray(MixedArray::asMixed(ad));
 
     case ArrayData::kProxyKind:
@@ -143,11 +141,35 @@ retry:
       // Handled by dependencies->size() check.
       not_reached();
 
+    case ArrayData::kVecKind:
+    case ArrayData::kDictKind:
+    case ArrayData::kKeysetKind:
+      // Shouldn't get Hack arrays
+      not_reached();
+
     case ArrayData::kNumKinds:
       not_reached();
   }
 
   not_reached();
+}
+
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
+                          const Array& dependencies) {
+  auto ad = dependencies.get();
+  assertx(ad);
+  assertx(ad->isVecArray());
+  if (!ad->size()) return Object{returnEmpty()};
+  return c_AwaitAllWaitHandle::FromPackedArray(ad);
+}
+
+Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
+                          const Array& dependencies) {
+  auto ad = dependencies.get();
+  assertx(ad);
+  assertx(ad->isDict());
+  if (!ad->size()) return Object{returnEmpty()};
+  return c_AwaitAllWaitHandle::FromMixedArray(MixedArray::asMixed(ad));
 }
 
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
@@ -205,6 +227,8 @@ Object c_AwaitAllWaitHandle::createAAWH(T start, T stop,
 }
 
 Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
+  assertx(dependencies->hasPackedLayout());
+
   auto const start = packedData(dependencies);
   auto const stop  = start + dependencies->getSize();
 
@@ -214,6 +238,8 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
 }
 
 Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
+  assertx(dependencies->hasMixedLayout());
+
   auto const start = dependencies->data();
   auto const stop = start + dependencies->iterLimit();
 
@@ -321,6 +347,8 @@ void AsioExtension::initAwaitAllWaitHandle() {
 #define AAWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, meth, AwaitAllWaitHandle, meth)
   AAWH_SME(fromArray);
+  AAWH_SME(fromVec);
+  AAWH_SME(fromDict);
   AAWH_SME(fromMap);
   AAWH_SME(fromVector);
   AAWH_SME(setOnCreateCallback);

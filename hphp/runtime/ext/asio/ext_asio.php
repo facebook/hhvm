@@ -180,6 +180,22 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromArray(array $dependencies): WaitHandle;
 
+  /* Create a wait handle that waits for a given vec of dependencies
+   * @param array $dependencies - A vec of dependencies to wait for
+   * @return object - A WaitHandle that will wait for a given vec of
+   * dependencies
+   */
+  <<__Native>>
+  public static function fromVec(vec $dependencies): WaitHandle;
+
+  /* Create a wait handle that waits for a given dict of dependencies
+   * @param array $dependencies - A dict of dependencies to wait for
+   * @return object - A WaitHandle that will wait for a given dict of
+   * dependencies
+   */
+  <<__Native>>
+  public static function fromDict(dict $dependencies): WaitHandle;
+
   /* Create a wait handle that waits for a given Map of dependencies
    * @param mixed $dependencies - A Map of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given Map of

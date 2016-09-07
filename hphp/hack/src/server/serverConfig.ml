@@ -116,12 +116,12 @@ let load config_filename options =
     match List.map sl String.lowercase with
     | ["false"] -> SSet.empty
     | ["true"] -> TypecheckerOptions.experimental_all
-    | other ->
+    | features ->
       begin
-        List.iter other ~f:(fun s ->
+        List.iter features ~f:(fun s ->
           if not (SSet.mem TypecheckerOptions.experimental_all s)
           then failwith ("invalid experimental feature " ^ s));
-        SSet.of_list other
+        List.fold_left features ~f:SSet.add ~init:SSet.empty
       end in
   let tcopts = { TypecheckerOptions.
     tco_assume_php = bool_ "assume_php" ~default:true config;

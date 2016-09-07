@@ -289,6 +289,7 @@ struct Generator {
   const Action& getAction(const Object& object) const;
   Action inferAction(const Object& object) const;
 
+  void genMetrics(std::ostream&) const;
   void genForwardDecls(std::ostream&) const;
   void genDataTable(std::ostream&) const;
   void genIndexInit(std::ostream&) const;
@@ -2955,6 +2956,54 @@ void Generator::genScannerFunc(std::ostream& os,
   }
 }
 
+void Generator::genMetrics(std::ostream& os) const {
+  os << "// type_scan Metrics:\n";
+  os << "// unique layouts: " << m_layouts.size() << std::endl;
+  os << "// indexed types: " << m_indexed_types.size() << std::endl;
+  os << "// pointer followable types: " << m_ptr_followable.size() << std::endl;
+  os << "// countable types: " << m_countable.size() << std::endl;
+  os << "// scannable countable types: " << m_scannable_countable.size()
+     << std::endl;
+
+  size_t conservative_fields{0};
+  size_t conservative_types{0};
+  size_t custom_fields{0};
+  size_t custom_types{0};
+  size_t custom_bases{0};
+  size_t ignored_fields{0};
+  size_t ignored_types{0};
+  size_t whitelisted_types{0};
+  size_t forbidden_templates{0};
+  size_t flexible_arrays{0};
+  for (auto& e : m_actions) {
+    auto& action = e.second;
+    if (action.ignore_all) ignored_types++;
+    if (action.conservative_all) conservative_types++;
+    if (action.whitelisted) whitelisted_types++;
+    if (action.forbidden_template) forbidden_templates++;
+    if (action.custom_all) custom_types++;
+    if (!action.flexible_array_field.empty()) flexible_arrays++;
+    // count custom guards?
+    ignored_fields += action.ignore_fields.size();
+    conservative_fields += action.conservative_fields.size();
+    custom_fields += action.custom_fields.size();
+    custom_bases += action.custom_bases.size();
+  }
+
+  os << "// object types: " << m_actions.size() << std::endl;
+  os << "// conservative-scanned types: " << conservative_types << std::endl;
+  os << "// conservative-scanned fields: " << conservative_fields << std::endl;
+  os << "// custom-scanned types: " << custom_types << std::endl;
+  os << "// custom-scanned fields: " << custom_fields << std::endl;
+  os << "// custom-scanned bases: " << custom_bases << std::endl;
+  os << "// ignored types: " << ignored_types << std::endl;
+  os << "// ignored fields: " << ignored_fields << std::endl;
+  os << "// whitelisted types: " << whitelisted_types << std::endl;
+  os << "// forbidden templates: " << forbidden_templates << std::endl;
+  os << "// flexible arrays: " << flexible_arrays << std::endl;
+  os << std::endl;
+}
+
 // Generate the entire C++ file.
 void Generator::operator()(std::ostream& os) const {
   os << "#include <limits>\n\n";
@@ -2965,6 +3014,7 @@ void Generator::operator()(std::ostream& os) const {
   os << "using namespace HPHP::type_scan;\n";
   os << "using namespace HPHP::type_scan::detail;\n\n";
 
+  genMetrics(os);
   genForwardDecls(os);
 
   os << "namespace {\n\n";

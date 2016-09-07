@@ -1310,7 +1310,7 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
     return true;
   }
   if (cmd == "vm-dump-tc") {
-    if (jit::mcg && jit::mcg->dumpTC()) {
+    if (jit::dumpTC()) {
       transport->sendString("Done");
     } else {
       transport->sendString("Error dumping the translation cache");

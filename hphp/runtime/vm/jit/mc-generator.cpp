@@ -87,13 +87,6 @@ bool dumpTCAnnotation(const Func& func, TransKind transKind) {
     (transKind == TransKind::Optimize && (func.attrs() & AttrHot));
 }
 
-int MCGenerator::numTranslations(SrcKey sk) const {
-  if (const SrcRec* sr = m_srcDB.find(sk)) {
-    return sr->translations().size();
-  }
-  return 0;
-}
-
 void MCGenerator::syncWork() {
   assertx(tl_regState != VMRegState::CLEAN);
   m_fixupMap.fixup(g_context.getNoCheck());
@@ -279,105 +272,6 @@ bool MCGenerator::addDbgGuard(const Func* func, Offset offset, bool resumed) {
     addDbgGuardImpl(sk, sr, code.main(), code.data(), fixups);
   }
   fixups.process(nullptr);
-  return true;
-}
-
-bool MCGenerator::dumpTCCode(const char* filename) {
-#define OPEN_FILE(F, SUFFIX)                                    \
-  std::string F ## name = std::string(filename).append(SUFFIX); \
-  FILE* F = fopen(F ## name .c_str(),"wb");                     \
-  if (F == nullptr) return false;                               \
-  SCOPE_EXIT{ fclose(F); };
-
-  OPEN_FILE(ahotFile,       "_ahot");
-  OPEN_FILE(aFile,          "_a");
-  OPEN_FILE(aprofFile,      "_aprof");
-  OPEN_FILE(acoldFile,      "_acold");
-  OPEN_FILE(afrozenFile,    "_afrozen");
-  OPEN_FILE(helperAddrFile, "_helpers_addrs.txt");
-
-#undef OPEN_FILE
-
-  // dump starting from the hot region
-  auto result = true;
-  auto writeBlock = [&](const CodeBlock& cb, FILE* file) {
-    if (result) {
-      auto const count = cb.used();
-      result = fwrite(cb.base(), 1, count, file) == count;
-    }
-  };
-
-  writeBlock(m_code.hot(), ahotFile);
-  writeBlock(m_code.main(), aFile);
-  writeBlock(m_code.prof(), aprofFile);
-  writeBlock(m_code.cold(), acoldFile);
-  writeBlock(m_code.frozen(), afrozenFile);
-  return result;
-}
-
-bool MCGenerator::dumpTC(bool ignoreLease /* = false */) {
-  std::unique_lock<SimpleMutex> codeLock;
-  std::unique_lock<SimpleMutex> metaLock;
-  if (!ignoreLease) {
-    codeLock = lockCode();
-    metaLock = lockMetadata();
-  }
-  return dumpTCData() && dumpTCCode("/tmp/tc_dump");
-}
-
-// Returns true on success
-bool MCGenerator::dumpTCData() {
-  gzFile tcDataFile = gzopen("/tmp/tc_data.txt.gz", "w");
-  if (!tcDataFile) return false;
-
-  if (!gzprintf(tcDataFile,
-                "repo_schema      = %s\n"
-                "ahot.base        = %p\n"
-                "ahot.frontier    = %p\n"
-                "a.base           = %p\n"
-                "a.frontier       = %p\n"
-                "aprof.base       = %p\n"
-                "aprof.frontier   = %p\n"
-                "acold.base       = %p\n"
-                "acold.frontier   = %p\n"
-                "afrozen.base     = %p\n"
-                "afrozen.frontier = %p\n\n",
-                repoSchemaId().begin(),
-                m_code.hot().base(), m_code.hot().frontier(),
-                m_code.main().base(), m_code.main().frontier(),
-                m_code.prof().base(), m_code.prof().frontier(),
-                m_code.cold().base(), m_code.cold().frontier(),
-                m_code.frozen().base(), m_code.frozen().frontier())) {
-    return false;
-  }
-
-  if (!gzprintf(tcDataFile, "total_translations = %zu\n\n",
-                m_tx.getNumTranslations())) {
-    return false;
-  }
-
-  // Print all translations, including their execution counters. If global
-  // counters are disabled (default), fall back to using ProfData, covering
-  // only profiling translations.
-  if (!RuntimeOption::EvalJitTransCounters && Translator::isTransDBEnabled()) {
-    // Admin requests do not automatically init ProfData, so do it explicitly.
-    // No need for matching exit call; data is immortal with trans DB enabled.
-    requestInitProfData();
-  }
-  for (TransID t = 0; t < m_tx.getNumTranslations(); t++) {
-    int64_t count = 0;
-    if (RuntimeOption::EvalJitTransCounters) {
-      count = m_tx.getTransCounter(t);
-    } else if (auto prof = profData()) {
-      assertx(m_tx.getTransCounter(t) == 0);
-      count = prof->transCounter(t);
-    }
-    if (gzputs(tcDataFile, m_tx.getTransRec(t)->print(count).c_str()) == -1) {
-      return false;
-    }
-  }
-
-  gzclose(tcDataFile);
   return true;
 }
 

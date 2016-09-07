@@ -48,6 +48,11 @@ std::string getTCSpace();
  */
 std::string getTCAddrs();
 
+/*
+ * Dump the translation cache to files in /tmp, returning success.
+ */
+bool dumpTC(bool ignoreLease = false);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

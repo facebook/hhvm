@@ -135,16 +135,6 @@ struct MCGenerator {
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
 
-  /*
-   * Number of translations made for `sk'.
-   */
-  int numTranslations(SrcKey sk) const;
-
-  /*
-   * Dump the translation cache to files in /tmp, returning success.
-   */
-  bool dumpTC(bool ignoreLease = false);
-
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -193,13 +183,6 @@ struct MCGenerator {
 
 private:
   void syncWork();
-
-  /*
-   * TC dump helpers
-   */
-  bool dumpTCCode(const char* filename);
-  bool dumpTCData();
-  void drawCFG(std::ofstream& out) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

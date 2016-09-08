@@ -76,14 +76,40 @@ module WithParser(Parser : ParserType) = struct
     (* TODO: What if the name is a keyword? *)
     expect_token parser TokenKind.Name SyntaxError.error1004
 
+  (* We have a number of issues involving xhp class names, which begin with
+     a colon and may contain internal colons and dashes.  These are some
+     helper methods to deal with them. *)
+
+  let is_next_xhp_class_name parser =
+    Parser.Lexer.is_next_xhp_class_name (Parser.lexer parser)
+
+  let next_xhp_class_name parser =
+    assert(is_next_xhp_class_name parser);
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_xhp_class_name lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token)
+
+  let expect_xhp_class_name parser =
+    if is_next_xhp_class_name parser then
+      let (parser, token) = next_xhp_class_name parser in
+      (parser, Syntax.make_token token)
+    else
+      (* ERROR RECOVERY: Create a missing token for the expected token,
+         and continue on from the current token. Don't skip it. *)
+      (* TODO: Different error? *)
+      (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
+
   let expect_class_name parser =
-    if peek_token_kind parser = TokenKind.Colon then
-      let lexer = Parser.lexer parser in
-      let (lexer, token) = Parser.Lexer.next_xhp_class_name lexer in
-      let parser = Parser.with_lexer parser lexer in
-      (parser, (Syntax.make_token token))
+    if is_next_xhp_class_name parser then
+      let (parser, token) = next_xhp_class_name parser in
+      (parser, Syntax.make_token token)
     else
       expect_name parser
+
+  let next_xhp_class_name_or_other parser =
+    if is_next_xhp_class_name parser then next_xhp_class_name parser
+    else next_token parser
 
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)

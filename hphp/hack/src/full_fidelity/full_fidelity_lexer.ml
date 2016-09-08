@@ -473,9 +473,13 @@ let rec scan_xhp_element_name lexer =
   else
     (lexer, TokenKind.XHPElementName)
 
+(* Is the next token we're going to lex a possible xhp class name? *)
+let is_xhp_class_name lexer =
+  (peek_char lexer 0 = ':') && (is_name_nondigit (peek_char lexer 1))
+
 let scan_xhp_class_name lexer =
   (* An XHP class name is a colon followed by an xhp name. *)
-  if (peek_char lexer 0 = ':') && (is_name_nondigit (peek_char lexer 1)) then
+  if is_xhp_class_name lexer then
     let (lexer, _) = scan_xhp_element_name (advance lexer 1) in
     (lexer, TokenKind.XHPClassName)
   else
@@ -766,6 +770,10 @@ let scan_trailing_trivia lexer =
       else aux lexer (t :: acc) in
   let (lexer, trivia_list) = aux lexer [] in
   (lexer, List.rev trivia_list)
+
+let is_next_xhp_class_name lexer =
+  let (lexer, _) = scan_leading_trivia lexer in
+  is_xhp_class_name lexer
 
 let as_keyword kind lexer =
   if kind = TokenKind.Name then

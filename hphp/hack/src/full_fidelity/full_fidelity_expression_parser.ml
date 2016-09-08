@@ -82,7 +82,7 @@ module WithStatementAndDeclParser
     old_errors = new_errors
 
   and parse_term parser =
-    let (parser1, token) = next_token parser in
+    let (parser1, token) = next_xhp_class_name_or_other parser in
     match (Token.kind token) with
     | DecimalLiteral
     | OctalLiteral
@@ -106,6 +106,7 @@ module WithStatementAndDeclParser
     | Name
     | QualifiedName ->
         parse_name_or_collection_literal_expression parser1 token
+    | XHPClassName
     | Self
     | Parent
     | Static -> parse_scope_resolution_expression parser1 (make_token token)

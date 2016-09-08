@@ -12,9 +12,11 @@ type key = Digest.t
 
 external hh_add    : key -> string -> unit = "hh_add"
 external hh_mem    : key -> bool           = "hh_mem"
-external hh_remove : key-> unit            = "hh_remove"
+external hh_remove : key -> unit           = "hh_remove"
 external hh_move   : key -> key -> unit    = "hh_move"
 external hh_get    : key -> string         = "hh_get_and_deserialize"
+external hh_collect    : bool -> unit         = "hh_collect"
+external heap_size: unit -> int = "hh_heap_size"
 
 let expect ~msg bool =
   if bool then () else begin
@@ -29,6 +31,15 @@ let mem key = hh_mem (to_key key)
 let remove key = hh_remove (to_key key)
 let move k1 k2 = hh_move (to_key k1) (to_key k2)
 let get key = hh_get (to_key key)
+let collect aggressive = hh_collect aggressive
+
+let expect_equals ~name value expected =
+  expect
+    ~msg:(
+      Printf.sprintf "Expected SharedMem.%s to equal %d, got %d"
+        name expected value
+    )
+    (value = expected)
 
 let expect_stats ~nonempty ~used =
   let open SharedMem in
@@ -42,17 +53,14 @@ let expect_stats ~nonempty ~used =
     used_slots;
     slots;
   } = hash_stats () in
-  let expect_equals ~name value expected =
-    expect
-      ~msg:(
-        Printf.sprintf "Expected SharedMem.%s to equal %d, got %d"
-          name expected value
-      )
-      (value = expected)
-  in
   expect_equals ~name:"nonempty_slots" nonempty_slots expected.nonempty_slots;
   expect_equals ~name:"used_slots" used_slots expected.used_slots;
   expect_equals ~name:"slots" slots expected.slots
+
+let expect_heap_size count =
+  (* Currently a single element takes 64 bytes *)
+  let heap_space_per_element = 64 in
+  expect_equals ~name:"heap_size" (heap_size()) (count * heap_space_per_element)
 
 let expect_mem key =
   expect ~msg:(Printf.sprintf "Expected key '%s' to be in hashtable" key)
@@ -178,16 +186,54 @@ let test_reuse_slots () =
   expect_get "2" "0";
   expect_stats ~nonempty:3 ~used:1
 
-let tests () =
+(* Test basic garbage collection works *)
+let test_gc_collect () =
+  expect_stats ~nonempty:0 ~used:0;
+  expect_heap_size 0;
+  add "0" "0";
+  add "1" "1";
+  expect_heap_size 2;
+  expect_mem "0";
+  expect_mem "1";
+  remove "1";
+  expect_heap_size 2;
+  (* Garbage collection should remove the space taken by the removed element *)
+  collect false;
+  expect_heap_size 1;
+  expect_mem "0"
+
+(* Test aggresive garbage collection versus gentle *)
+let test_gc_aggressive () =
+  expect_stats ~nonempty:0 ~used:0;
+  add "0" "0";
+  add "1" "1";
+  expect_heap_size 2;
+   (* Since latest heap size is zero,
+      now it should gc, but theres nothing to gc,
+      so the heap will stay the same *)
+  collect false;
+  expect_heap_size 2;
+  remove "1";
+  add "2" "2";
+  expect_heap_size 3;
+  (* Gentle garbage collection shouldn't catch this *)
+  collect false;
+  expect_heap_size 3;
+  (* Aggressive garbage collection should run *)
+  collect true;
+  expect_heap_size 2
+
+let tests handle =
   let list = [
     "test_ops", test_ops;
     "test_hashtbl_full_hh_add", test_hashtbl_full_hh_add;
     "test_hashtbl_full_hh_move", test_hashtbl_full_hh_move;
     "test_no_overwrite", test_no_overwrite;
     "test_reuse_slots", test_reuse_slots;
+    "test_gc_collect", test_gc_collect;
+    "test_gc_aggresive", test_gc_aggressive;
   ] in
   let setup_test (name, test) = name, fun () ->
-
   let handle = SharedMem.(
       init {
         global_size = 16;

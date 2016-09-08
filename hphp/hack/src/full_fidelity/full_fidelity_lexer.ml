@@ -274,6 +274,25 @@ let scan_decimal_or_float lexer =
 
 let scan_single_quote_string_literal lexer =
   (* TODO: What about newlines embedded? *)
+  (* SPEC:
+  single-quoted-string-literal::
+    b-opt  ' sq-char-sequence-opt  '
+
+    TODO: What is this b-opt?  We don't lex an optional 'b' before a literal.
+
+  sq-char-sequence::
+    sq-char
+    sq-char-sequence   sq-char
+
+  sq-char::
+    sq-escape-sequence
+    \opt   any character except single-quote (') or backslash (\)
+
+  sq-escape-sequence:: one of
+    \'  \\
+
+  *)
+
   let rec aux lexer =
     let ch0 = peek_char lexer 0 in
     let ch1 = peek_char lexer 1 in
@@ -285,11 +304,10 @@ let scan_single_quote_string_literal lexer =
       else
         let lexer = with_error lexer SyntaxError.error0006 in
         aux (advance lexer 1)
-    | ('\\', '\\')
-    | ('\\', '\'') -> aux (advance lexer 2)
-    | ('\\', _) ->
-      let lexer = with_error lexer SyntaxError.error0005 in
-      aux (advance lexer 1)
+    | ('\\', _) -> aux (advance lexer 2)
+      (* Note that an "invalid" escape sequence in a single-quoted string
+      literal is not an error. It's just the \ character followed by the
+      next character. So no matter what, we can simply skip two chars. *)
     | ('\'', _) -> (advance lexer 1, TokenKind.SingleQuotedStringLiteral)
     | _ -> aux (advance lexer 1) in
   aux (advance lexer 1)

@@ -1411,7 +1411,7 @@ void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
   });                                                   \
 }
 
-Y(cmpbm, movzbl, loadb, cmpl)
+Y(cmpbm, movzbl, loadzbl, cmpl)
 Y(cmpwm, uxth, loadw, cmpl)
 
 #undef Y

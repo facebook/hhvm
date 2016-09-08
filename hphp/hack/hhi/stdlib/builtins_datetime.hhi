@@ -196,7 +196,7 @@ class DatePeriod implements Iterator<DateTime> {
 
   public function __construct(
     /* DateTimeInterface */ $start, // date string converts
-    ?DateInterval $interval = null,
+    DateInterval $interval,
     /* ?DateTimeInterface */ $end = null, // date string converts
     int $options = 0,
   );

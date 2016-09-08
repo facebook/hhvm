@@ -15,7 +15,7 @@ class DatePeriod implements Iterator {
 
   public function __construct(
     DateTimeInterface $start,
-    DateInterval $interval = null,
+    DateInterval $interval,
     mixed $end = null,
     int $options = null) {
 
@@ -31,8 +31,14 @@ class DatePeriod implements Iterator {
         $end_date->add($interval);
       }
       $this->end = $end_date;
+    } else if ($end instanceof DateTimeInterface) {
+      $this->end = clone $end;
     } else {
-      $this->end = $end;
+      throw new Exception(
+        "DatePeriod::__construct(): This constructor accepts either " .
+        "(DateTimeInterface, DateInterval, int) OR (DateTimeInterface, ".
+        "DateInterval, DateTime) as arguments."
+      );
     }
 
     $this->options = $options;

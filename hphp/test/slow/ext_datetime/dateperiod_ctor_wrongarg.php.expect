@@ -1,0 +1,1 @@
+string(158) "DatePeriod::__construct(): This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) as arguments."

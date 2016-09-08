@@ -15,6 +15,9 @@
 */
 
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/relocation-x64.h"
+
+#include "hphp/util/arch.h"
 
 namespace HPHP { namespace jit {
 
@@ -76,5 +79,82 @@ void RelocationInfo::rewind(TCA start, TCA end) {
     }
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Wrappers. Not using ARCH_SWITCH_CALL as not all platforms implemented
+ * relocation.
+ */
+
+void adjustForRelocation(RelocationInfo& rel) {
+  switch (arch()) {
+  case Arch::X64:
+    x64::adjustForRelocation(rel);
+    break;
+  case Arch::PPC64:
+  case Arch::ARM:
+    break;
+  }
+}
+void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
+  switch (arch()) {
+  case Arch::X64:
+    x64::adjustForRelocation(rel, srcStart, srcEnd);
+    break;
+  case Arch::PPC64:
+  case Arch::ARM:
+    break;
+  }
+}
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
+  switch (arch()) {
+  case Arch::X64:
+    x64::adjustCodeForRelocation(rel, fixups);
+    break;
+  case Arch::PPC64:
+  case Arch::ARM:
+    break;
+  }
+}
+void adjustMetaDataForRelocation(RelocationInfo& rel,
+                                 AsmInfo* asmInfo,
+                                 CGMeta& fixups) {
+  switch (arch()) {
+  case Arch::X64:
+    x64::adjustMetaDataForRelocation(rel, asmInfo, fixups);
+    break;
+  case Arch::PPC64:
+  case Arch::ARM:
+    break;
+  }
+}
+void findFixups(TCA start, TCA end, CGMeta& fixups) {
+  switch (arch()) {
+  case Arch::X64:
+    x64::findFixups(start, end, fixups);
+    break;
+  case Arch::PPC64:
+  case Arch::ARM:
+    break;
+  }
+}
+size_t relocate(RelocationInfo& rel,
+                CodeBlock& destBlock,
+                TCA start, TCA end,
+                CGMeta& fixups,
+                TCA* exitAddr) {
+  switch (arch()) {
+  case Arch::X64:
+    return x64::relocate(rel, destBlock, start, end, fixups, exitAddr);
+    break;
+  case Arch::PPC64:
+  case Arch::ARM:
+    return 0;
+  }
+  not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}

@@ -29,9 +29,11 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
 #include <folly/MoveWrapper.h>
@@ -208,9 +210,18 @@ void reclaimTranslation(TransLoc loc) {
     // Ensure no one calls into the function
     ITRACE(1, "Overwriting function\n");
     auto clearBlock = [] (CodeBlock& cb) {
-      X64Assembler a {cb};
-      while (cb.available() >= 2) a.ud2();
-      if (cb.available() > 0) a.int3();
+      switch (arch()) {
+        case Arch::PPC64: {
+          ppc64_asm::Assembler a{cb};
+          a.emitExceptions(cb.available());
+        }
+        case Arch::X64: {
+          X64Assembler a{cb};
+          a.emitExceptions(cb.available());
+        }
+        case Arch::ARM:
+          not_implemented();
+      }
       always_assert(!cb.available());
     };
 

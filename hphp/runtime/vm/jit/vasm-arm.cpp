@@ -616,13 +616,48 @@ void Vgen::emit(const cloadq& i) {
  *   ZF, AF, PF are undefined
  *
  * In the following implementation,
- *   N, Z are updated according to result
- *   C, V are cleared (FIXME)
+ *   N, Z, V are updated according to result
+ *   C is cleared (FIXME)
  *   PF, AF are not available
  */
 void Vgen::emit(const imul& i) {
+
+  // Do the multiplication
   a->Mul(X(i.d), X(i.s0), X(i.s1));
+
+  vixl::Label after;
+  vixl::Label posResult;
+  vixl::Label noOverflow;
+
+  // Do the multiplication for the upper 64 bits of a 128 bit result.
+  // If the result is all zeroes or all ones, and the sign did not
+  // change, then there is no overflow.
+  a->smulh(rAsm, X(i.s0), X(i.s1));
+
+  a->Tst(X(i.d), 0);
+  a->B(&posResult, vixl::ge);
+
+  a->Cmp(rAsm, -1);
+  a->B(&noOverflow, vixl::eq);
+
+  a->bind(&posResult);
+  a->Cmp(rAsm, 0);
+  a->B(&noOverflow, vixl::eq);
+
+  // Overflow, so conditionally set N and Z bits and then or in V bit.
   a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
+  a->Mrs(rAsm, NZCV);
+  a->Lsr(rAsm, rAsm, 28);
+  a->Orr(rAsm, rAsm, 1);
+  a->Lsl(rAsm, rAsm, 28);
+  a->Msr(NZCV, rAsm);
+  a->B(&after);
+
+  // No Overflow, so conditionally set the N and Z only
+  a->bind(&noOverflow);
+  a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
+
+  a->bind(&after);
 }
 
 #define Y(vasm_opc, arm_opc)           \

@@ -24,8 +24,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-char TestBase::error_buffer[MAXPATHLEN];
-
 TestBase::TestBase() {
   Option::KeepStatementsWithNoEffect = true;
 }

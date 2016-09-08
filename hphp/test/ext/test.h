@@ -75,17 +75,6 @@ private:
                    test.fail_count, test.skip_count);                   \
   }                                                                     \
 
-#ifdef SEP_EXTENSION
-#define IMPLEMENT_SEP_EXTENSION_TEST(name)                              \
-  void Test::RunTestsImpl(bool &allPassed, std::string &suite,          \
-                          std::string &which, std::string &set) {       \
-    RUN_TESTSUITE(TestExt ## name);                                     \
-  }
-#else
-#define IMPLEMENT_SEP_EXTENSION_TEST(name)
-#endif
-
-extern const char *php_path;
 ///////////////////////////////////////////////////////////////////////////////
 
 #endif // incl_HPHP_TEST_H_

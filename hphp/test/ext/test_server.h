@@ -17,14 +17,14 @@
 #ifndef incl_HPHP_TEST_SERVER_H_
 #define incl_HPHP_TEST_SERVER_H_
 
-#include "hphp/test/ext/test_code_run.h"
+#include "hphp/test/ext/test_base.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Testing HTTP server.
  */
-struct TestServer : TestCodeRun {
+struct TestServer : TestBase {
   TestServer() = delete;
   explicit TestServer(const std::string serverType);
 

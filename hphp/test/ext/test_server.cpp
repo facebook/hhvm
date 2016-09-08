@@ -73,7 +73,6 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
   assert(input);
   if (port == 0) port = s_server_port;
 
-  if (!CleanUp()) return false;
   std::string fullPath = "runtime/tmp/string";
   std::ofstream f(fullPath.c_str());
   if (!f) {
@@ -192,8 +191,11 @@ void TestServer::RunServer() {
     nullptr
   };
 
+#ifdef HHVM_PATH
   // replace __HHVM__
   argv[0] = HHVM_PATH;
+#endif
+
   proc::exec(argv[0], argv, nullptr, out, &err);
 }
 

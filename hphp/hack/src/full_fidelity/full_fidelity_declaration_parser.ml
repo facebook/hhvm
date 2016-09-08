@@ -192,19 +192,15 @@ module WithExpressionAndStatementParser
       :  int
       :  string
     *)
+    (* TODO: SPEC ERROR: The spec states that the only legal enum types
+    are "int" and "string", but Hack allows any type, and apparently
+    some of those are meaningful and desired.  Figure out what types
+    are actually legal and illegal as enum base types; put them in the
+    spec, and add an error pass that says when they are wrong. *)
     let (parser, enum) = assert_token parser Enum in
     let (parser, name) = expect_name parser in
     let (parser, colon) = expect_colon parser in
-    let (parser1, base) = next_token parser in
-    let (parser, base) = match Token.kind base with
-    | String
-    | Int -> (parser1, make_token base)
-    | LeftBrace ->
-      (* ERROR RECOVERY *)
-      (parser, make_missing())
-    | _ ->
-      (* ERROR RECOVERY *)
-      (parser1, make_token base) in
+    let (parser, base) = parse_type_specifier parser in
     let (parser, enum_type) = parse_type_constraint_opt parser in
     let (parser, left_brace, enumerators, right_brace) = parse_delimited_list
       parser LeftBrace SyntaxError.error1037 RightBrace SyntaxError.error1006

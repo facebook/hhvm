@@ -3,7 +3,7 @@
   ((enum)(whitespace))
   ((name)(whitespace))
   ((:)(whitespace))
-  ((int)(whitespace))
+  (simple_type_specifier((int)(whitespace)))
   (missing)
   (({)(whitespace))
   (list

@@ -58,13 +58,10 @@ void StructuredLogEntry::setVec(folly::StringPiece key,
 void StructuredLogEntry::setStackTrace(folly::StringPiece key, StackTrace& st) {
   std::vector<folly::StringPiece> stackFrames;
   folly::split("\n", st.toString(), stackFrames);
-  const size_t kPrefixLen = 2; // First 2 parts are '#' and frame number.
   for (auto& frame : stackFrames) {
-    std::vector<folly::StringPiece> parts;
-    folly::split(" ", frame, parts, /* ignore_empty = */ true);
-    if (parts.size() > kPrefixLen) {
-      frame = parts[kPrefixLen];
-    }
+    const char* p = frame.begin();
+    while (*p == '#' || *p == ' ' || (*p >= '0' && *p <= '9')) ++p;
+    frame = folly::StringPiece(p, frame.end());
   }
   setVec(key, stackFrames);
 }

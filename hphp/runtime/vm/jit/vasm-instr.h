@@ -128,6 +128,7 @@ struct Vunit;
   O(absdbl, Inone, U(s), D(d))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(divint, Inone, U(s0) U(s1), D(d))\
+  O(mulint, Inone, U(s0) U(s1), D(d))	\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
   O(ud2, Inone, Un, Dn)\
@@ -160,6 +161,8 @@ struct Vunit;
   O(incqm, Inone, U(m), D(sf))\
   O(incqmlock, Inone, U(m), D(sf))\
   O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(smulh, Inone, U(s0) U(s1), D(d)) \
+  O(mul, Inone, U(s0) U(s1), D(d)) \
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
   O(not, Inone, UH(s,d), DH(d,s))\
@@ -203,6 +206,7 @@ struct Vunit;
   O(cmpqi, I(s0), U(s1), D(sf))\
   O(cmpqm, Inone, U(s0) U(s1), D(sf))\
   O(cmpqim, I(s0), U(s1), D(sf))\
+  O(cmpqsign, Inone, U(s0) U(s1), D(sf))	\
   O(cmpsd, I(pred), UA(s0) U(s1), D(d))\
   O(ucomisd, Inone, U(s0) U(s1), D(sf))\
   O(testb, Inone, U(s0) U(s1), D(sf))\
@@ -890,6 +894,11 @@ struct srem { Vreg s0, s1, d; };
  */
 struct divint { Vreg s0, s1, d; };
 
+/*
+ * Integer multiplication.
+ */
+struct mulint { Vreg s0, s1, d; Vlabel targets[2]; };
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -939,6 +948,8 @@ struct incqm { Vptr m; VregSF sf; };
 struct incqmlock { Vptr m; VregSF sf; };
 // mul: s0 * s1 => d, sf
 struct imul { Vreg64 s0, s1, d; VregSF sf; };
+struct mul { Vreg64 s0, s1, d; };
+struct smulh { Vreg64 s0, s1, d; };
 // neg: 0 - s => d, sf
 struct neg { Vreg64 s, d; VregSF sf; };
 // not: ~s => d
@@ -992,6 +1003,7 @@ struct cmpq { Vreg64 s0; Vreg64 s1; VregSF sf; };
 struct cmpqi { Immed s0; Vreg64 s1; VregSF sf; };
 struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; };
 struct cmpqim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpqsign { Vreg64 s0; Vreg64 s1; VregSF sf; };
 struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
 struct ucomisd { VregDbl s0, s1; VregSF sf; };
 // s1 & s0 => sf

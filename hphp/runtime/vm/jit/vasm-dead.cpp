@@ -69,6 +69,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cmpqi:
     case Vinstr::cmpqim:
     case Vinstr::cmpqm:
+    case Vinstr::cmpqsign:
     case Vinstr::cmpsd:
     case Vinstr::cmpsds:
     case Vinstr::cmpwim:
@@ -94,6 +95,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::fctidz:
     case Vinstr::fcvtzs:
     case Vinstr::imul:
+    case Vinstr::smulh:
+    case Vinstr::mul:
     case Vinstr::incl:
     case Vinstr::incq:
     case Vinstr::incw:
@@ -142,6 +145,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::movzlq:
     case Vinstr::mrs:
     case Vinstr::mulsd:
+    case Vinstr::mulint:
     case Vinstr::neg:
     case Vinstr::nop:
     case Vinstr::not:

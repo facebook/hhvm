@@ -220,13 +220,14 @@ struct Vgen {
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
+  void emit(const cmpqsign& i) { a->Cmp(X(i.s0), Operand(X(i.s1), ASR, 63)); }
   void emit(const cvtsi2sd& i) { a->Scvtf(D(i.d), X(i.s)); }
   void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, SetFlags); }
   void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, SetFlags); }
   void emit(const decqmlock& i);
   void emit(const divint& i) { a->Sdiv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const divsd& i) { a->Fdiv(D(i.d), D(i.s1), D(i.s0)); }
-  void emit(const imul& i);
+  void emit(const imul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const incl& i) { a->Add(W(i.d), W(i.s), 1, SetFlags); }
   void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1, SetFlags); }
   void emit(const incqmlock& i);
@@ -259,6 +260,7 @@ struct Vgen {
   void emit(const movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movzbq& i) { a->Uxtb(X(i.d), W(i.s).X()); }
   void emit(const movzlq& i) { a->Uxtw(X(i.d), W(i.s).X()); }
+  void emit(const mul& i) { a->Mul(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const neg& i) { a->Neg(X(i.d), X(i.s), SetFlags); }
   void emit(const nop& i) { a->Nop(); }
@@ -274,6 +276,7 @@ struct Vgen {
   void emit(const sar& i);
   void emit(const setcc& i) { a->Cset(W(i.d), C(i.cc)); }
   void emit(const shl& i);
+  void emit(const smulh& i) { a->Smulh(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const sqrtsd& i) { a->Fsqrt(D(i.d), D(i.s)); }
   void emit(const srem& i);
   void emit(const storeb& i) { a->Strb(W(i.s), M(i.m)); }
@@ -607,57 +610,6 @@ void Vgen::emit(const testli& i) {
 void Vgen::emit(const cloadq& i) {
   a->Ldr(rAsm, M(i.t));
   a->Csel(X(i.d), rAsm, X(i.f), C(i.cc));
-}
-
-/*
- * Flags
- *   SF should be set to MSB of the result
- *   CF, OF should be set to (1, 1) if the result is truncated, (0, 0) otherwise
- *   ZF, AF, PF are undefined
- *
- * In the following implementation,
- *   N, Z, V are updated according to result
- *   C is cleared (FIXME)
- *   PF, AF are not available
- */
-void Vgen::emit(const imul& i) {
-
-  // Do the multiplication
-  a->Mul(X(i.d), X(i.s0), X(i.s1));
-
-  vixl::Label after;
-  vixl::Label posResult;
-  vixl::Label noOverflow;
-
-  // Do the multiplication for the upper 64 bits of a 128 bit result.
-  // If the result is all zeroes or all ones, and the sign did not
-  // change, then there is no overflow.
-  a->smulh(rAsm, X(i.s0), X(i.s1));
-
-  a->Tst(X(i.d), 0);
-  a->B(&posResult, vixl::ge);
-
-  a->Cmp(rAsm, -1);
-  a->B(&noOverflow, vixl::eq);
-
-  a->bind(&posResult);
-  a->Cmp(rAsm, 0);
-  a->B(&noOverflow, vixl::eq);
-
-  // Overflow, so conditionally set N and Z bits and then or in V bit.
-  a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
-  a->Mrs(rAsm, NZCV);
-  a->Lsr(rAsm, rAsm, 28);
-  a->Orr(rAsm, rAsm, 1);
-  a->Lsl(rAsm, rAsm, 28);
-  a->Msr(NZCV, rAsm);
-  a->B(&after);
-
-  // No Overflow, so conditionally set the N and Z only
-  a->bind(&noOverflow);
-  a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
-
-  a->bind(&after);
 }
 
 #define Y(vasm_opc, arm_opc)           \
@@ -1180,6 +1132,18 @@ void lower(Vunit& u, absdbl& i, Vlabel b, size_t z) {
     v << copy{i.s, s};
     v << fabs{s, d};
     v << copy{d, i.d};
+  });
+}
+
+void lower(Vunit& u, mulint& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto tmp = v.makeReg();
+    auto sf = v.makeReg();
+
+    v << smulh{i.s0, i.s1, tmp};
+    v << mul{i.s0, i.s1, i.d};
+    v << cmpqsign{tmp, i.d, sf};
+    v << jcc{CC_NE, sf, i.targets[0], i.targets[1]};
   });
 }
 

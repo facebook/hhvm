@@ -870,6 +870,15 @@ void lower(Vunit& unit, divint& inst, Vlabel b, size_t i) {
   });
 }
 
+void lower(Vunit& unit, mulint& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    auto sf = v.makeReg();
+
+    v << imul{inst.s1, inst.s0, inst.d, sf};
+    v << jcc{CC_NE, sf, inst.targets[0], inst.targets[1]};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void lower(Vunit& unit, movtqb& inst, Vlabel b, size_t i) {

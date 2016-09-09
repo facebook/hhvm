@@ -20,6 +20,7 @@ type t =
 | Script
 | NamespaceDeclaration
 | NamespaceBody
+| NamespaceGroupUseDeclaration
 | NamespaceUseDeclaration
 | NamespaceUseClause
 | FunctionDeclaration
@@ -149,6 +150,7 @@ let to_string kind =
   | Script -> "script"
   | NamespaceDeclaration -> "namespace_declaration"
   | NamespaceBody -> "namespace_body"
+  | NamespaceGroupUseDeclaration -> "namespace_group_use_declaration"
   | NamespaceUseDeclaration -> "namespace_use_declaration"
   | NamespaceUseClause -> "namespace_use_clause"
   | FunctionDeclaration -> "function_declaration"

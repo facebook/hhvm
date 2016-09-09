@@ -371,6 +371,15 @@ let rec get_doc node =
     let a = get_doc x.namespace_use_as in
     let l = get_doc x.namespace_use_alias in
     k ^| n ^| a ^| l
+  | NamespaceGroupUseDeclaration x ->
+    let u = get_doc x.namespace_group_use in
+    let k = get_doc x.namespace_group_use_kind in
+    let p = get_doc x.namespace_group_use_prefix in
+    let l = get_doc x.namespace_group_use_left_brace in
+    let c = get_doc x.namespace_group_use_clauses in
+    let r = get_doc x.namespace_group_use_right_brace in
+    let s = get_doc x.namespace_group_use_semicolon in
+    u ^| k ^| p ^| l ^| c ^| r ^^^ s
   | FunctionDeclaration x ->
       let attr = get_doc (function_attribute_spec x) in
       let header = get_doc (function_declaration_header x) in

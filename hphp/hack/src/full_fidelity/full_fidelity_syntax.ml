@@ -142,6 +142,15 @@ module WithToken(Token: TokenType) = struct
       namespace_use_clauses : t;
       namespace_use_semicolon : t
     }
+    and namespace_group_use_declaration = {
+      namespace_group_use : t;
+      namespace_group_use_kind : t;
+      namespace_group_use_prefix : t;
+      namespace_group_use_left_brace : t;
+      namespace_group_use_clauses : t;
+      namespace_group_use_right_brace : t;
+      namespace_group_use_semicolon : t
+    }
     and namespace_use_clause = {
       namespace_use_clause_kind : t;
       namespace_use_name : t;
@@ -652,6 +661,7 @@ module WithToken(Token: TokenType) = struct
 
     | NamespaceDeclaration of namespace_declaration
     | NamespaceBody of namespace_body
+    | NamespaceGroupUseDeclaration of namespace_group_use_declaration
     | NamespaceUseDeclaration of namespace_use_declaration
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
@@ -794,6 +804,8 @@ module WithToken(Token: TokenType) = struct
       | PropertyDeclarator _ -> SyntaxKind.PropertyDeclarator
       | NamespaceDeclaration _ -> SyntaxKind.NamespaceDeclaration
       | NamespaceBody _ -> SyntaxKind.NamespaceBody
+      | NamespaceGroupUseDeclaration _ ->
+        SyntaxKind.NamespaceGroupUseDeclaration
       | NamespaceUseDeclaration _ -> SyntaxKind.NamespaceUseDeclaration
       | NamespaceUseClause _ -> SyntaxKind.NamespaceUseClause
       | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
@@ -913,6 +925,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.PropertyDeclarator
     let is_namespace node = kind node = SyntaxKind.NamespaceDeclaration
     let is_namespace_body node = kind node = SyntaxKind.NamespaceBody
+    let is_namespace_group_use node =
+      kind node = SyntaxKind.NamespaceGroupUseDeclaration
     let is_namespace_use node = kind node = SyntaxKind.NamespaceUseDeclaration
     let is_namespace_use_clause node = kind node = SyntaxKind.NamespaceUseClause
     let is_function node = kind node = SyntaxKind.FunctionDeclaration
@@ -1126,6 +1140,15 @@ module WithToken(Token: TokenType) = struct
           namespace_right_brace } ->
         [ namespace_left_brace; namespace_declarations;
           namespace_right_brace ]
+      | NamespaceGroupUseDeclaration
+        { namespace_group_use; namespace_group_use_kind;
+          namespace_group_use_prefix; namespace_group_use_left_brace;
+          namespace_group_use_clauses; namespace_group_use_right_brace;
+          namespace_group_use_semicolon } ->
+        [ namespace_group_use; namespace_group_use_kind;
+          namespace_group_use_prefix; namespace_group_use_left_brace;
+          namespace_group_use_clauses; namespace_group_use_right_brace;
+          namespace_group_use_semicolon ]
       | NamespaceUseDeclaration
         { namespace_use; namespace_use_kind; namespace_use_clauses;
           namespace_use_semicolon } ->
@@ -1532,6 +1555,15 @@ module WithToken(Token: TokenType) = struct
           namespace_right_brace } ->
         [ "namespace_left_brace"; "namespace_declarations";
           "namespace_right_brace" ]
+      | NamespaceGroupUseDeclaration
+        { namespace_group_use; namespace_group_use_kind;
+          namespace_group_use_prefix; namespace_group_use_left_brace;
+          namespace_group_use_clauses; namespace_group_use_right_brace;
+          namespace_group_use_semicolon } ->
+        [ "namespace_group_use"; "namespace_group_use_kind";
+          "namespace_group_use_prefix"; "namespace_group_use_left_brace";
+          "namespace_group_use_clauses"; "namespace_group_use_right_brace";
+          "namespace_group_use_semicolon" ]
       | NamespaceUseDeclaration
         { namespace_use; namespace_use_kind; namespace_use_clauses;
           namespace_use_semicolon } ->
@@ -2218,6 +2250,16 @@ module WithToken(Token: TokenType) = struct
         NamespaceBody
         { namespace_left_brace; namespace_declarations;
           namespace_right_brace }
+      | (SyntaxKind.NamespaceGroupUseDeclaration,
+        [ namespace_group_use; namespace_group_use_kind;
+          namespace_group_use_prefix; namespace_group_use_left_brace;
+          namespace_group_use_clauses; namespace_group_use_right_brace;
+          namespace_group_use_semicolon ]) ->
+        NamespaceGroupUseDeclaration
+        { namespace_group_use; namespace_group_use_kind;
+          namespace_group_use_prefix; namespace_group_use_left_brace;
+          namespace_group_use_clauses; namespace_group_use_right_brace;
+          namespace_group_use_semicolon }
       | (SyntaxKind.NamespaceUseDeclaration,
         [ namespace_use; namespace_use_kind; namespace_use_clauses;
           namespace_use_semicolon ]) ->
@@ -2795,6 +2837,10 @@ module WithToken(Token: TokenType) = struct
       let make_namespace_body left decls right =
         from_children SyntaxKind.NamespaceBody
           [ left; decls; right ]
+
+      let make_namespace_group_use token kind prefix left clauses right semi =
+        from_children SyntaxKind.NamespaceGroupUseDeclaration
+        [ token; kind; prefix; left; clauses; right; semi ]
 
       let make_namespace_use use use_kind clauses semi =
         from_children SyntaxKind.NamespaceUseDeclaration

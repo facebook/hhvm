@@ -358,25 +358,11 @@ void cgFwdCtxStaticCall(IRLS& env, const IRInstruction* inst) {
   } else {
     // If we don't know whether we have a $this, we need to check dynamically.
     auto const sf = v.makeReg();
-    if (arch() == Arch::X64) {
-      // To avoid branching, we eagerly load from srcCtx, and
-      // then choose the correct value using cmove.
-      // This is safe on x64 because a cctx is a valid, if
-      // misaligned pointer. Also, calling a non-static method
-      // statically is now deprecated - so we expect to have a
-      // $this most of the time.
-      assertx(sizeof(Class) >=
-              ObjectData::getVMClassOffset() + 1 + sizeof(LowPtr<Class>));
-      auto const tmp1 = ctx_from_this(v, srcCtx, v.makeReg());
-      v << testqi{ActRec::kHasClassBit, srcCtx, sf};
-      v << cmovq{CC_E, sf, srcCtx, tmp1, dstCtx};
-    } else {
-      v << testqi{ActRec::kHasClassBit, srcCtx, sf};
-      cond(v, CC_Z, sf, dstCtx,
-           [&] (Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); },
-           [&] (Vout& v) { return srcCtx; }
-          );
-    }
+    v << testqi{ActRec::kHasClassBit, srcCtx, sf};
+    unlikelyCond(v, vcold(env), CC_NZ, sf, dstCtx,
+         [&] (Vout& v) { return srcCtx; },
+         [&] (Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); }
+        );
   }
 }
 

@@ -45,7 +45,7 @@ void cgLdClsCtx(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testqi{ActRec::kHasClassBit, ctx, sf};
 
-  cond(v, CC_NZ, sf, dst,
+  unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
     [&] (Vout& v) { return emitLdClsCctx(v, ctx, v.makeReg()); }, // Cctx
     [&] (Vout& v) { return emitLdObjClass(v, ctx, v.makeReg()); } // This
   );

@@ -324,6 +324,7 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
                        return t;
                      },
                      [&] {
+                       hint(env, Block::Hint::Unlikely);
                        return cns(env, TInitNull);
                      });
     push(env, thiz);

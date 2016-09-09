@@ -2155,7 +2155,7 @@ struct Assembler {
     for (; nbytes > 0; nbytes -= 4) nop();
   }
 
-  void emitExceptions(int nbytes) {
+  void emitTrap(int nbytes) {
     assert((nbytes % 4 == 0) && "This arch supports only 4 bytes alignment");
     for (; nbytes > 0; nbytes -= 4) trap();
   }

@@ -93,12 +93,12 @@ struct CodeSmasher {
       switch (arch()) {
         case Arch::PPC64: {
           ppc64_asm::Assembler a{cb};
-          a.emitExceptions(cb.available());
+          a.emitTrap(cb.available());
           break;
         }
         case Arch::X64: {
           X64Assembler a{cb};
-          a.emitExceptions(cb.available());
+          a.emitTrap(cb.available());
           break;
         }
         case Arch::ARM:
@@ -543,12 +543,12 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
       switch (arch()) {
         case Arch::PPC64: {
           ppc64_asm::Assembler a{cb};
-          a.emitExceptions(cb.available());
+          a.emitTrap(cb.available());
           break;
         }
         case Arch::X64: {
           X64Assembler a{cb};
-          a.emitExceptions(cb.available());
+          a.emitTrap(cb.available());
           break;
         }
         case Arch::ARM:

@@ -300,6 +300,65 @@ struct HashCollection : ObjectData {
     return &e->data;
   }
 
+  /*
+   * Batch insertion interface that postpones hashing, for cache efficiency.
+   * Use these methods in order:
+   *  1. batchInsertBegin,
+   *  2. any number of batchInsert calls,
+   *  3. tryBatchInsertEnd or batchInsertAbort
+   * No other methods may be called between 1 and 3.
+   */
+  uint32_t batchInsertBegin(int64_t n) {
+    reserve(m_size + n);
+    return posLimit();
+  }
+  TypedValue* batchInsert(StringData* key) {
+    auto h = key->hash();
+    // Not hashing yet, so position is unused for now.
+    int32_t unusedPos = -1;
+    auto e = &allocElm(&unusedPos);
+    e->setStrKey(key, h);
+    updateIntLikeStrKeys(key);
+    return &e->data;
+  }
+  /*
+   * Attempts to finalize a batch insertion, given the return value from the
+   * call to batchInsertBegin. Returns true on success, and aborts and returns
+   * false on failure (e.g., duplicate keys).
+   */
+  bool tryBatchInsertEnd(uint32_t begin) {
+    for (auto i = begin; i < posLimit(); ++i) {
+      auto e = data()[i];
+      auto h = e.hash();
+      auto p = e.hasStrKey() ?
+        findForInsert(e.skey, h) :
+        findForInsert(e.ikey, h);
+      if (UNLIKELY(validPos(*p))) {
+        batchInsertAbort(begin);
+        return false;
+      }
+      *p = i;
+    }
+    return true;
+  }
+  /*
+   * Cancels a started batch insertion, given the return value from the call to
+   * batchInsertBegin, reverting to the state before it began. Idempotent.
+   */
+  void batchInsertAbort(uint32_t begin) {
+    for (auto i = posLimit(); i > begin; --i) {
+      auto& e = data()[i - 1];
+      auto tv = &e.data;
+      auto oldType = tv->m_type;
+      auto oldDatum = tv->m_data.num;
+      tv->m_type = kInvalidDataType;
+      decSize();
+      setPosLimit(i - 1);
+      if (e.hasStrKey()) decRefStr(e.skey);
+      tvRefcountedDecRefHelper(oldType, oldDatum);
+    }
+  }
+
   static bool validPos(ssize_t pos) {
     return pos >= 0;
   }

@@ -118,6 +118,12 @@ struct VariableUnserializer {
   void add(Variant* v, UnserializeMode mode);
 
   /*
+   * Preallocate memory for an expected number of values to be added
+   * (excluding those with mode UnserializeMode::Key).
+   */
+  void reserveForAdd(size_t count);
+
+  /*
    * Used by the 'r' encoding to get a reference.
    */
   Variant* getByVal(int id);

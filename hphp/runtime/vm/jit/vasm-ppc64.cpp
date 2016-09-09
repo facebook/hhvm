@@ -484,6 +484,12 @@ private:
     a.addi(rsfp(), rsp(), -min_frame_size);
     a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
   }
+
+  void emitSaveTOC() {
+    // TOC save/restore is required by ABI for external functions.
+    a.std(rtoc(), rsfp()[AROFF(SAVED_TOC())]);
+  }
+
   Venv& env;
   Vtext& text;
   Assembler a;
@@ -717,6 +723,14 @@ void Vgen::emit(const mcprep& i) {
 }
 
 void Vgen::emit(const inittc&) {
+  // Set info in the frame created on the caller
+  a.mflr(rfuncln());
+  a.std(rfuncln(), rsfp()[AROFF(m_savedRip)]);
+
+  // follow the ABI and create the calle frame and set its info
+  a.addi(rsfp(), rsfp(), -min_frame_size);
+  emitSaveTOC();
+
   // initialize our rone register
   a.li(ppc64::rone(), 1);
 }

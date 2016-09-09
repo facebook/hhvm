@@ -361,15 +361,16 @@ let rec get_doc node =
     indent_block_no_space left body right indt |> add_break
   | NamespaceUseDeclaration x ->
     let u = get_doc x.namespace_use in
-    let k = get_doc x.namespace_use_keywordopt in
+    let k = get_doc x.namespace_use_kind in
     let c = get_doc x.namespace_use_clauses in
     let s = get_doc x.namespace_use_semicolon in
     u ^| k ^| c ^^^ s
   | NamespaceUseClause x ->
+    let k = get_doc x.namespace_use_clause_kind in
     let n = get_doc x.namespace_use_name in
     let a = get_doc x.namespace_use_as in
     let l = get_doc x.namespace_use_alias in
-    n ^| a ^| l
+    k ^| n ^| a ^| l
   | FunctionDeclaration x ->
       let attr = get_doc (function_attribute_spec x) in
       let header = get_doc (function_declaration_header x) in

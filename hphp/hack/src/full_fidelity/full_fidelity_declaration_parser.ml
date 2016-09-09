@@ -255,13 +255,27 @@ module WithExpressionAndStatementParser
       let result = make_error [make_token token] in
       (parser, result)
 
+  and parse_namespace_use_kind_opt parser =
+    (* SPEC
+      namespace-use-kind:
+        function
+        const *)
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Function
+    | Const -> (parser1, (make_token token))
+    | _ -> (parser, (make_missing()))
+
   and parse_namespace_use_clause parser =
     (* SPEC
       namespace-use-clause:
         qualified-name  namespace-aliasing-clauseopt
+      namespace-use-kind-clause:
+        namespace-use-kind-opt qualified-name  namespace-aliasing-clauseopt
       namespace-aliasing-clause:
         as  name
     *)
+    let (parser, use_kind) = parse_namespace_use_kind_opt parser in
     let (parser, name) = expect_qualified_name parser in
     let (parser1, as_token) = next_token parser in
     let (parser, as_token, alias) =
@@ -271,28 +285,31 @@ module WithExpressionAndStatementParser
         (parser, as_token, alias)
       else
         (parser, (make_missing()), (make_missing())) in
-    let result = make_namespace_use_clause name as_token alias in
+    let result = make_namespace_use_clause use_kind name as_token alias in
     (parser, result)
 
   and parse_namespace_use_declaration parser =
     (* SPEC
-      namespace-use-declaration:
-        use  namespace-use-clauses  ;
-        use  const  namespace-use-clauses  ;
-        use  function  namespace-use-clauses  ;
+    namespace-use-declaration:
+      use namespace-use-kind-opt namespace-use-clauses  ;
+      TODO: use namespace-use-kind namespace-name-as-a-prefix
+        { namespace-use-clauses }  ;
+      TODO: use namespace-name-as-a-prefix { namespace-use-kind-clauses  }  ;
+
     *)
+    (* TODO: ERROR RECOVERY
+    In the "simple" format, the kind may only be specified up front.
+    In the "group" format, if the kind is specified up front then it may not
+    be specified in each clause.
+    We do not enforce this rule here. Rather, we allow the kind to be anywhere,
+    and we'll add an error reporting pass later that deduces violations. *)
+
     let (parser, use_token) = assert_token parser Use in
-    (* const, function case *)
-    let (parser1, keyword_token) = next_token parser in
-    let (parser, keyword_token) =
-      match Token.kind keyword_token with
-        | Function
-        | Const -> (parser1, make_token keyword_token)
-        | _ -> (parser, make_missing()) in
+    let (parser, use_kind) = parse_namespace_use_kind_opt parser in
     let (parser, clauses) = parse_comma_list
       parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_namespace_use use_token keyword_token clauses semi in
+    let result = make_namespace_use use_token use_kind clauses semi in
     (parser, result)
 
   and parse_classish_declaration parser attribute_spec =

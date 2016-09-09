@@ -60,22 +60,31 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cmpbi:
     case Vinstr::cmpbim:
     case Vinstr::cmpbm:
+    case Vinstr::cmpd:
+    case Vinstr::cmpdi:
     case Vinstr::cmpl:
+    case Vinstr::cmpld:
+    case Vinstr::cmpldi:
     case Vinstr::cmpli:
     case Vinstr::cmplim:
     case Vinstr::cmplims:
     case Vinstr::cmplm:
+    case Vinstr::cmplwi:
+    case Vinstr::cmplw:
     case Vinstr::cmpq:
     case Vinstr::cmpqi:
     case Vinstr::cmpqim:
     case Vinstr::cmpqm:
     case Vinstr::cmpsd:
     case Vinstr::cmpsds:
+    case Vinstr::cmpw:
+    case Vinstr::cmpwi:
     case Vinstr::cmpwim:
     case Vinstr::cmpwm:
     case Vinstr::copy:
     case Vinstr::copy2:
     case Vinstr::copyargs:
+    case Vinstr::copycr:
     case Vinstr::cvtsi2sd:
     case Vinstr::cvtsi2sdm:
     case Vinstr::cvttsd2siq:

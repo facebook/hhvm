@@ -493,11 +493,11 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfPersistentArray:
         return make_tv<KindOfPersistentArray>(tmp->arrVal());
       case KindOfPersistentVec:
-        return make_tv<KindOfPersistentVec>(tmp->arrVal());
+        return make_tv<KindOfPersistentVec>(tmp->vecVal());
       case KindOfPersistentDict:
-        return make_tv<KindOfPersistentDict>(tmp->arrVal());
+        return make_tv<KindOfPersistentDict>(tmp->dictVal());
       case KindOfPersistentKeyset:
-        return make_tv<KindOfPersistentKeyset>(tmp->arrVal());
+        return make_tv<KindOfPersistentKeyset>(tmp->keysetVal());
 
       case KindOfVec:
       case KindOfDict:

@@ -23,18 +23,18 @@ import repo
 # Frame sniffing.
 
 def is_jitted(fp, ip):
-    # Get the value of `mcg', the global MCGenerator pointer.
-    mcg = V('HPHP::jit::mcg')
+    # Get the value of `s_code', the global CodeCache pointer.
+    s_code = V('HPHP::jit::tc::(anonymous namespace)::s_code')
 
     # Set the bounds of the TC.
     try:
-        tc_base = mcg['m_code']['m_base']
-        tc_end = tc_base + mcg['m_code']['m_codeSize']
+        tc_base = s_code['m_base']
+        tc_end = tc_base + s_code['m_codeSize']
     except:
-        # We can't access `mcg' for whatever reason---maybe it's gotten
+        # We can't access `s_code' for whatever reason---maybe it's gotten
         # corrupted somehow.  Assume that the TC is above the data section,
         # but restricted to low memory.
-        tc_base = mcg.address.cast(T('uintptr_t'))
+        tc_base = s_code.address.cast(T('uintptr_t'))
         tc_end = 0x100000000
 
     return ip >= tc_base and ip < tc_end

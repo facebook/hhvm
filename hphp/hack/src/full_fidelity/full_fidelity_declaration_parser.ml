@@ -288,13 +288,47 @@ module WithExpressionAndStatementParser
     let result = make_namespace_use_clause use_kind name as_token alias in
     (parser, result)
 
+  and is_group_use parser =
+    (* We want a heuristic to determine whether to parse the use clause as
+    a group use or normal use clause.  We distinguish the two by (1) whether
+    there is a namespace prefix -- in this case it is definitely a group use
+    clause -- or, if there is a name followed by a curly. That's illegal, but
+    we should give an informative error message about that. *)
+    let (parser, _) = assert_token parser Use in
+    let (parser, _) = parse_namespace_use_kind_opt parser in
+    let (parser, token) = next_token parser in
+    match Token.kind token with
+    | NamespacePrefix -> true
+    | Name
+    | QualifiedName ->
+      peek_token_kind parser = LeftBrace
+    | _ -> false
+
+  and parse_group_use parser =
+    (* See below for grammar. *)
+    let (parser, use_token) = assert_token parser Use in
+    let (parser, use_kind) = parse_namespace_use_kind_opt parser in
+    (* We already know that this is a name, qualified name, or prefix. *)
+    (* TODO: Give an error in a later pass if it is not a prefix. *)
+    let (parser, prefix) = next_token parser in
+    let prefix = make_token prefix in
+    (* TODO: Should we allow a trailing comma?
+       TODO: Does the grammar in the spec reflect that? *)
+    let (parser, left, clauses, right) =
+      parse_braced_comma_list_opt_allow_trailing
+      parser parse_namespace_use_clause in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_namespace_group_use use_token use_kind prefix left
+      clauses right semi in
+    (parser, result)
+
   and parse_namespace_use_declaration parser =
     (* SPEC
     namespace-use-declaration:
       use namespace-use-kind-opt namespace-use-clauses  ;
-      TODO: use namespace-use-kind namespace-name-as-a-prefix
+      use namespace-use-kind namespace-name-as-a-prefix
         { namespace-use-clauses }  ;
-      TODO: use namespace-name-as-a-prefix { namespace-use-kind-clauses  }  ;
+      use namespace-name-as-a-prefix { namespace-use-kind-clauses  }  ;
 
     *)
     (* TODO: ERROR RECOVERY
@@ -303,14 +337,16 @@ module WithExpressionAndStatementParser
     be specified in each clause.
     We do not enforce this rule here. Rather, we allow the kind to be anywhere,
     and we'll add an error reporting pass later that deduces violations. *)
-
-    let (parser, use_token) = assert_token parser Use in
-    let (parser, use_kind) = parse_namespace_use_kind_opt parser in
-    let (parser, clauses) = parse_comma_list
-      parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
-    let (parser, semi) = expect_semicolon parser in
-    let result = make_namespace_use use_token use_kind clauses semi in
-    (parser, result)
+    if is_group_use parser then
+      parse_group_use parser
+    else
+      let (parser, use_token) = assert_token parser Use in
+      let (parser, use_kind) = parse_namespace_use_kind_opt parser in
+      let (parser, clauses) = parse_comma_list
+        parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
+      let (parser, semi) = expect_semicolon parser in
+      let result = make_namespace_use use_token use_kind clauses semi in
+      (parser, result)
 
   and parse_classish_declaration parser attribute_spec =
     let (parser, modifiers) =

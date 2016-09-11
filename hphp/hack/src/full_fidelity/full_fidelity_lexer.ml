@@ -133,15 +133,23 @@ let skip_end_of_line lexer =
   | ('\n', _) -> advance lexer 1
   | _ -> lexer
 
+(* A qualified name which ends with a backslash is a namespace prefix; this is
+   only legal in a "group use" declaration.
+   TODO: Consider detecting usages of namespace prefixes in places where names
+   and qualified names are expected; give a more meaningful error. *)
 let rec scan_qualified_name lexer =
   assert ((peek_char lexer 0) = '\\');
   let lexer = advance lexer 1 in
   if is_name_nondigit (peek_char lexer 0) then
-    let (lexer, _) = scan_name_or_qualified_name lexer in
-    (lexer, TokenKind.QualifiedName)
+    begin
+      let (lexer, token) = scan_name_or_qualified_name lexer in
+      if token = TokenKind.Name then
+        (lexer, TokenKind.QualifiedName)
+      else
+        (lexer, token)
+    end
   else
-    let lexer = with_error lexer SyntaxError.error0008 in
-    (lexer, TokenKind.QualifiedName)
+    (lexer, TokenKind.NamespacePrefix)
 and scan_name_or_qualified_name lexer =
   if (peek_char lexer 0) = '\\' then
     scan_qualified_name lexer

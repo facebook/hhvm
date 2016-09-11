@@ -147,7 +147,7 @@ type t =
 | EqualGreaterThan
 | EqualEqualGreaterThan
 | QuestionMinusGreaterThan
-| Backslash
+| NamespacePrefix
 | DotDotDot
 | DollarDollar
 | BarGreaterThan
@@ -299,6 +299,7 @@ let to_string kind =
   | List -> "list"
   | Mixed -> "mixed"
   | Namespace -> "namespace"
+  | NamespacePrefix -> "namespace_prefix"
   | New -> "new"
   | Newtype -> "newtype"
   | Noreturn -> "noreturn"
@@ -387,7 +388,6 @@ let to_string kind =
   | EqualGreaterThan -> "=>"
   | EqualEqualGreaterThan -> "==>"
   | QuestionMinusGreaterThan -> "?->"
-  | Backslash -> "\\"
   | DotDotDot -> "..."
   | DollarDollar -> "$$"
   | BarGreaterThan -> "|>"

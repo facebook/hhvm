@@ -210,7 +210,7 @@
 #define USE_FOLLY_SYMBOLIZER 1
 // Linking in libbfd is a gigantic PITA, but if folly symbolizer doesn't
 // work on your platform, you'll need to figure it out.
-#undef HAVE_LIBBFD
+#define HAVE_LIBBFD 1
 #endif
 
 #ifndef PACKAGE

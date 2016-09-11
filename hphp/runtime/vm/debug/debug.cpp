@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/util/current-executable.h"
+#include "hphp/util/portability.h"
 
 #include <sys/types.h>
 #include <stdio.h>

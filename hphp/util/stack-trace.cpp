@@ -222,7 +222,7 @@ int ALWAYS_INLINE get_backtrace(void** frame, int max) {
 ////////////////////////////////////////////////////////////////////////////////
 
 StackTraceBase::StackTraceBase() {
-#ifdef HAVE_LIBBFD
+#if !defined USE_FOLLY_SYMBOLIZER && defined HAVE_LIBBFD
   bfd_init();
 #endif
 }

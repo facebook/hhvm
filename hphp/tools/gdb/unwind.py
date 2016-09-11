@@ -68,4 +68,56 @@ falls back to the default GDB unwinder(s) otherwise.
 
         return unwind_info
 
-register_unwinder(None, HHVMUnwinder())
+
+#------------------------------------------------------------------------------
+# Unwinder initialization.
+
+_did_init = False
+
+def try_unwinder_init():
+    """Try to register the custom unwinder if it hasn't been already, and
+    return whether the unwinder has been successfully registered."""
+    global _did_init
+
+    if _did_init:
+        return True
+
+    # If we can't successfully call is_jitted(), then gdb startup hasn't
+    # proceeded to a point where it's safe to set up our unwinder yet, so just
+    # bail out.
+    try:
+        frame.is_jitted(0, 0)
+    except:
+        return False
+
+    register_unwinder(None, HHVMUnwinder())
+    _did_init = True
+
+    return True
+
+
+class UnwinderCommand(gdb.Command):
+    """Manage the custom unwinder."""
+
+    def __init__(self):
+        super(UnwinderCommand, self).__init__('unwinder', gdb.COMMAND_STACK,
+                                              gdb.COMPLETE_NONE, True)
+
+UnwinderCommand()
+
+class UnwinderInitCommand(gdb.Command):
+    """Initialize the custom unwinder."""
+
+    def __init__(self):
+        super(UnwinderInitCommand, self).__init__('unwinder init',
+                                                  gdb.COMMAND_STACK)
+
+    @errorwrap
+    def invoke(self, args, from_tty):
+        if try_unwinder_init():
+            print('HHVM unwinder has been initialized.')
+        else:
+            print('HHVM unwinder could not be initialized.')
+            print('Has gdb startup run to completion?')
+
+UnwinderInitCommand()

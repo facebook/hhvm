@@ -10,6 +10,7 @@ from compatibility import *
 import gdb
 from gdbutils import *
 import frame
+import unwind
 
 
 #------------------------------------------------------------------------------
@@ -35,6 +36,10 @@ The output backtrace has the following format:
         if len(argv) > 1:
             print('Usage: walkstk [fp]')
             return
+
+        # Bail early if the custom unwinder has not been set up.
+        if not unwind.try_unwinder_init():
+            print('walkstk: Could not initialize the HHVM unwinder.')
 
         # Find the starting native frame.
         native_frame = gdb.newest_frame()

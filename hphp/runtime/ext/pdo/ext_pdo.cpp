@@ -478,7 +478,7 @@ const StaticString
   s_message("message"),
   s_errorInfo("errorInfo"),
   s_PDOException("PDOException"),
-  s_PDOEntity("PDOEntity");
+  s_HH_PDOEntity("HH\\PDOEntity");
 
 void throw_pdo_exception(const Variant& code, const Variant& info,
                          const char *fmt, ...) {
@@ -2039,7 +2039,7 @@ static bool do_fetch(sp_PDOStatement stmt,
     case PDO_FETCH_CLASS:
       if ((flags & PDO_FETCH_SERIALIZE) == 0 || idx) {
 
-        if (ret.getObjectData()->instanceof(s_PDOEntity)) {
+        if (ret.getObjectData()->instanceof(s_HH_PDOEntity)) {
           if (!stmt->support(PDOStatement::MethodGetColumnMeta)) {
             pdo_raise_impl_error(stmt->dbh, stmt, "IM001",
                                  "driver doesn't support meta data");

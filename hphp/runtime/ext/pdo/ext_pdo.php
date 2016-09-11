@@ -4,11 +4,18 @@
 /**
  * Objects implementing PDOEntity can handle value by column name and meta
  */
+
+namespace HH {
+ 
 interface PDOEntity {
   
   public function setField(string $name, mixed $value, array $meta);
 
 }
+
+}
+
+namespace {
 
 /* Represents a connection between PHP and a database server.
  */
@@ -691,3 +698,5 @@ class PDOStatement implements Iterator {
  */
 <<__Native>>
 function pdo_drivers(): array;
+
+}

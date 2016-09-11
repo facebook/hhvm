@@ -109,7 +109,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     "SERVERPORT={$serverPort} $hhvm" .
     ' --mode=server' . $serverConfig . $logFileConfig .
     ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
-    ' --instance-id=' . $test_run_id . 
+    ' --instance-id=' . $test_run_id .
     ' -vPageletServer.ThreadCount=5' .
     $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
@@ -243,7 +243,7 @@ function http_request($host, $port, $path, $timeout = 1200) {
   }
   if ($headers) {
     foreach ($headers as $h => $v) {
-      $s[] = "-H '$h : $v'";
+      $s[] = "-H '$h: $v'";
     }
     $headers = implode(" ", $s);
   }

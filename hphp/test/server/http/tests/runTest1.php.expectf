@@ -33,29 +33,24 @@ Requesting 'test_header.php?test_string=f%%0d%%0aoo'
 NULL
 Requesting 'test_duplicate_headers.php'
 string(%d) "array(5) {
+  ["xxxxx"]=>
+  string(2) "45"
+  ["xyzzy"]=>
+  string(2) "44"
   ["Host"]=>
   string(%d) "%s"
-  ["xxxxx "]=>
-  string(2) "45"
-  ["xyzzy "]=>
-  string(2) "44"
   ["Accept"]=>
   string(3) "*/*"
   ["User-Agent"]=>
   string(%s) "%s"
 }
 array(5) {
-  ["host"]=>
-  array(1) {
-    [0]=>
-    string(%d) "%s"
-  }
-  ["xxxxx "]=>
+  ["xxxxx"]=>
   array(1) {
     [0]=>
     string(2) "45"
   }
-  ["xyzzy "]=>
+  ["xyzzy"]=>
   array(3) {
     [0]=>
     string(2) "42"
@@ -63,6 +58,11 @@ array(5) {
     string(2) "43"
     [2]=>
     string(2) "44"
+  }
+  ["host"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
   }
   ["accept"]=>
   array(1) {

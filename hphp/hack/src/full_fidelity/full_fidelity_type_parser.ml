@@ -27,6 +27,14 @@ module WithExpressionParser (ExpressionParser :
 include SimpleParser
 include Full_fidelity_parser_helpers.WithParser(SimpleParser)
 
+let parse_expression parser =
+  let expr_parser = ExpressionParser.make parser.lexer parser.errors in
+  let (expr_parser, node) = ExpressionParser.parse_expression expr_parser in
+  let lexer = ExpressionParser.lexer expr_parser in
+  let errors = ExpressionParser.errors expr_parser in
+  let parser = { lexer; errors } in
+  (parser, node)
+
 (* TODO: What about something like for::for? Is that a legal
   type constant?  *)
 
@@ -395,22 +403,16 @@ and parse_field_specifier parser =
     field-specifier:
       single-quoted-string-literal  =>  type-specifier
       qualified-name  =>  type-specifier
-      scope-resolution-expression  =>  type-specifier  TODO
+      scope-resolution-expression  =>  type-specifier
   *)
 
   (* TODO: We require that it be either all literals or no literals in the
            set of specifiers; make an error reporting pass that detects this. *)
 
-  (* ERROR RECOVERY: TODO: We allow any expression for the left-hand side.
+  (* ERROR RECOVERY: We allow any expression for the left-hand side.
      TODO: Make an error-detecting pass that gives an error if the left-hand
      side is not a literal or name. *)
-  let (parser, name) = next_token parser in
-  let parser = match Token.kind name with
-  | SingleQuotedStringLiteral
-  | QualifiedName
-  | Name -> parser
-  | _ -> with_error parser SyntaxError.error1025 in
-  let name = make_token name in
+  let (parser, name) = parse_expression parser in
   let (parser, arrow) = expect_arrow parser in
   let (parser, field_type) = parse_type_specifier parser in
   let result = make_field_specifier name arrow field_type in

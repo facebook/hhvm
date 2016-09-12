@@ -49,7 +49,7 @@
             ((whitespace)(shape))
             ((lparen))
             (field_specifier
-              ((name)(whitespace))
+              (qualified_name((name)(whitespace)))
               ((=>)(whitespace))
               (simple_type_specifier((int))))
             ((rparen)(whitespace)))

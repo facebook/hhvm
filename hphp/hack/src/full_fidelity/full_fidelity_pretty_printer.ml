@@ -838,6 +838,11 @@ let rec get_doc node =
     let right = get_doc (type_arguments_right_angle x) in
     let args = get_doc (type_arguments x) in
     indent_block_no_space left args right indt
+  | TypeParameters x ->
+    let left = get_doc x.type_parameters_left_angle in
+    let params = get_doc x.type_parameters in
+    let right = get_doc x.type_parameters_right_angle in
+    indent_block_no_space left params right indt
   | TupleTypeSpecifier x ->
     let left = get_doc x.tuple_left_paren in
     let types = get_doc x.tuple_types in

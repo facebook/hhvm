@@ -641,6 +641,11 @@ module WithToken(Token: TokenType) = struct
       type_arguments : t;
       type_arguments_right_angle : t
     }
+    and type_parameters = {
+      type_parameters_left_angle : t;
+      type_parameters : t;
+      type_parameters_right_angle : t
+    }
     and tuple_type_specifier = {
       tuple_left_paren : t;
       tuple_types : t;
@@ -754,6 +759,7 @@ module WithToken(Token: TokenType) = struct
     | TypeConstant of type_constant
     | GenericTypeSpecifier of generic_type
     | TypeArguments of type_arguments
+    | TypeParameters of type_parameters
     | TupleTypeSpecifier of tuple_type_specifier
     | VectorTypeSpecifier of vector_type_specifier
     | MapTypeSpecifier of map_type_specifier
@@ -878,6 +884,7 @@ module WithToken(Token: TokenType) = struct
       | NullableTypeSpecifier _ -> SyntaxKind.NullableTypeSpecifier
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
       | TypeArguments _ -> SyntaxKind.TypeArguments
+      | TypeParameters _ -> SyntaxKind.TypeParameters
       | TupleTypeSpecifier _ -> SyntaxKind.TupleTypeSpecifier
       | VectorTypeSpecifier _ -> SyntaxKind.VectorTypeSpecifier
       | MapTypeSpecifier _ -> SyntaxKind.MapTypeSpecifier
@@ -1002,6 +1009,7 @@ module WithToken(Token: TokenType) = struct
     let is_nullable_type_specifier node =
       kind node = SyntaxKind.NullableTypeSpecifier
     let is_type_arguments node = kind node = SyntaxKind.TypeArguments
+    let is_type_parameters node = kind node = SyntaxKind.TypeParameters
     let is_tuple_type node = kind node = SyntaxKind.TupleTypeSpecifier
     let is_vector_type_specifier node =
       kind node = SyntaxKind.VectorTypeSpecifier
@@ -1435,6 +1443,11 @@ module WithToken(Token: TokenType) = struct
           type_arguments_right_angle } ->
         [ type_arguments_left_angle; type_arguments;
           type_arguments_right_angle ]
+      | TypeParameters
+        { type_parameters_left_angle; type_parameters;
+          type_parameters_right_angle } ->
+        [ type_parameters_left_angle; type_parameters;
+          type_parameters_right_angle ]
       | TupleTypeSpecifier
         { tuple_left_paren; tuple_types; tuple_right_paren } ->
         [ tuple_left_paren; tuple_types; tuple_right_paren ]
@@ -1857,6 +1870,11 @@ module WithToken(Token: TokenType) = struct
           type_arguments_right_angle } ->
         [ "type_arguments_left_angle"; "type_arguments";
           "type_arguments_right_angle" ]
+      | TypeParameters
+        { type_parameters_left_angle; type_parameters;
+          type_parameters_right_angle } ->
+        [ "type_parameters_left_angle"; "type_parameters";
+          "type_parameters_right_angle" ]
       | TupleTypeSpecifier
         { tuple_left_paren; tuple_types; tuple_right_paren } ->
         [ "tuple_left_paren"; "tuple_types"; "tuple_right_paren" ]
@@ -2566,6 +2584,12 @@ module WithToken(Token: TokenType) = struct
           type_arguments; type_arguments_right_angle ]) ->
         TypeArguments { type_arguments_left_angle;
             type_arguments; type_arguments_right_angle }
+      | (SyntaxKind.TypeParameters,
+        [ type_parameters_left_angle; type_parameters;
+          type_parameters_right_angle ]) ->
+        TypeParameters
+        { type_parameters_left_angle; type_parameters;
+          type_parameters_right_angle }
       | (SyntaxKind.TypeParameter, [ type_variance_opt;
           type_name; type_constraint_list_opt  ]) ->
         TypeParameter { type_variance_opt;
@@ -3095,6 +3119,9 @@ module WithToken(Token: TokenType) = struct
 
       let make_type_arguments left items right =
         from_children SyntaxKind.TypeArguments [ left; items; right ]
+
+      let make_type_parameters left items right =
+        from_children SyntaxKind.TypeParameters [ left; items; right ]
 
       let make_tuple_type_specifier left types right =
         from_children SyntaxKind.TupleTypeSpecifier [ left; types; right ]

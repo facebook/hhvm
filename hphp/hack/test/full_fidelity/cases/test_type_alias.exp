@@ -3,7 +3,7 @@
 (list
 (alias_declaration((end_of_line)
 (type)(whitespace))((name))
-(type_arguments
+(type_parameters
 ((<))
 (type_parameter(missing)(simple_type_specifier((name)))(missing))
 ((>)(whitespace)))(missing)((=)(whitespace))
@@ -15,13 +15,13 @@
 ((=)(whitespace))
 (simple_type_specifier((name)))((;)(end_of_line)))
 (alias_declaration((type)(whitespace))((name))
-(type_arguments((<))
+(type_parameters((<))
 (type_parameter(missing)(simple_type_specifier((name)))(missing))
 ((>)(whitespace)))(missing)((=)(whitespace))
 (simple_type_specifier((name)))((;)(end_of_line)))
 (alias_declaration
 ((type)(whitespace))((name))
-(type_arguments
+(type_parameters
 ((<))
 (list
 (list_item(type_parameter(missing)
@@ -30,7 +30,7 @@
 ((>)(whitespace)))(missing)((=)(whitespace))(simple_type_specifier((name)))
 ((;)(end_of_line)))
 (alias_declaration((type)(whitespace))((name))
-(type_arguments
+(type_parameters
 ((<))
 (list(list_item
 (type_parameter(missing)

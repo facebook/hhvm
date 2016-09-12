@@ -117,6 +117,7 @@ type t =
 | TypeConstant
 | GenericTypeSpecifier
 | TypeArguments
+| TypeParameters
 | TupleTypeSpecifier
 | VectorTypeSpecifier
 | MapTypeSpecifier
@@ -220,6 +221,7 @@ let to_string kind =
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | TypeArguments -> "type_arguments"
+  | TypeParameters -> "type_parameters"
   | InclusionDirective -> "inclusion_directive"
   | EnumDeclaration -> "enum_declaration"
   | Enumerator -> "enumerator"

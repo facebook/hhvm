@@ -181,24 +181,15 @@ and parse_type_parameter parser =
 
   generic-type-parameters:
     generic-type-parameter
-    generic-type-parameter, generic-type-parameter
+    generic-type-parameter  ,  generic-type-parameter
 *)
 and parse_generic_type_parameter_list parser =
-  let (parser, open_angle) = next_token parser in
-  let open_angle = make_token open_angle in
-  let (parser, args) =  parse_comma_list_allow_trailing parser GreaterThan
+  let (parser, left) = assert_token parser LessThan in
+  let (parser, params) =  parse_comma_list_allow_trailing parser GreaterThan
     SyntaxError.error1007 parse_type_parameter in
-  let (parser1, close_angle) = next_token parser in
-  if (Token.kind close_angle) = GreaterThan then
-    let result = make_type_arguments open_angle args (make_token close_angle) in
-    (parser1, result)
-  else
-    (* ERROR RECOVERY: Don't eat the token that is in the place of the
-       missing > or ,.  Assume that it is the > that is missing and
-       try to parse whatever is coming after the type.  *)
-    let parser = with_error parser SyntaxError.error1014 in
-    let result = make_type_arguments open_angle args (make_missing()) in
-    (parser, result)
+  let (parser, right) = expect_right_angle parser in
+  let result = make_type_parameters left params right in
+  (parser, result)
 
 and parse_generic_parameter_list_opt parser =
   match peek_token_kind parser with

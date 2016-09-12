@@ -561,7 +561,18 @@ class Redis {
   }
 
   public function hScan($key, &$cursor, $pattern = null, $count = null) {
-    return $this->scanImpl('HSCAN', $key, $cursor, $pattern, $count);
+    $flat = $this->scanImpl('HSCAN', $key, $cursor, $pattern, $count);
+    /*
+     * HScan behaves differently from the other *scan functions. The wire
+     * protocol returns names in even slots s, and the corresponding value
+     * in odd slot s + 1. The PHP client returns these as an array mapping
+     * keys to values.
+     */
+    if ($flat === false) return $flat;
+    assert(count($flat) % 2 == 0);
+    $ret = array();
+    for ($i = 0; $i < count($flat); $i += 2) $ret[$flat[$i]] = $flat[$i + 1];
+    return $ret;
   }
 
   public function zScan($key, &$cursor, $pattern = null, $count = null) {

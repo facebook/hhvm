@@ -41,7 +41,8 @@ Vout& Vout::operator<<(const Vinstr& inst) {
   code.back().voff = m_irctx.voff == Vinstr::kInvalidVoff
     ? m_unit.cur_voff++
     : m_irctx.voff;
-  assertx(m_unit.cur_voff != Vinstr::kInvalidVoff);
+  // TODO(t13282062)
+  // assertx(m_unit.cur_voff != Vinstr::kInvalidVoff);
 
   FTRACE(6, "Vout << {}\n", show(m_unit, inst));
   return *this;

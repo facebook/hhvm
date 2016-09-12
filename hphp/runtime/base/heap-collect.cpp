@@ -91,7 +91,6 @@ struct Marker {
   void operator()(const Variant&);
   void operator()(const StringBuffer&);
   void operator()(const NameValueTable&);
-  void operator()(const AsioContext& p) { scanner().scan(p, *this); }
   void operator()(const VarEnv& venv) { (*this)(&venv); }
 
   // treat implicit pointers the same as real pointers
@@ -125,21 +124,11 @@ struct Marker {
     (*this)(p.get());
   }
 
-  void operator()(const ArrayIter& iter) {
-    scan(iter, *this);
-  }
-  void operator()(const MArrayIter& iter) {
-    scan(iter, *this);
-  }
-
   // TODO: these need to be implemented.
   void operator()(const ActRec&) { }
   void operator()(const Stack&) { }
 
   void operator()(const RequestEventHandler& h) { (*this)(&h); }
-
-  // TODO (6512343): this needs to be hooked into scan methods for Extensions.
-  void operator()(const Extension&) { }
 
   // Explicitly ignored field types.
   void operator()(const LowPtr<Class>&) {}

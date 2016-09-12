@@ -38,8 +38,6 @@ template <class T> class Optional;
 namespace HPHP {
 namespace req { template<typename T> struct ptr; }
 struct Array;
-struct ArrayIter;
-struct MArrayIter;
 struct String;
 struct Variant;
 struct ObjectData;
@@ -57,12 +55,10 @@ struct Stack;
 struct VarEnv;
 struct RequestEventHandler;
 struct IMarker;
-struct AsioContext;
 struct Expression;
 struct Unit;
 struct StreamContext;
 struct DateTime;
-struct Extension;
 template <typename T, bool isLow> struct AtomicSharedPtrImpl;
 template <typename T, typename A> struct FixedVector;
 template <typename T> struct SweepableMember;
@@ -109,15 +105,11 @@ struct IMarker {
   virtual void operator()(const Array&) = 0;
   virtual void operator()(const String&) = 0;
   virtual void operator()(const Variant&) = 0;
-  virtual void operator()(const ArrayIter&) = 0;
-  virtual void operator()(const MArrayIter&) = 0;
   virtual void operator()(const StringBuffer&) = 0;
   virtual void operator()(const ActRec&) = 0;
   virtual void operator()(const Stack&) = 0;
   virtual void operator()(const VarEnv&) = 0;
   virtual void operator()(const RequestEventHandler&) = 0;
-  virtual void operator()(const Extension&) = 0;
-  virtual void operator()(const AsioContext&) = 0;
 
   virtual void operator()(const StringData*) = 0;
   virtual void operator()(const ArrayData*) = 0;
@@ -147,7 +139,6 @@ struct IMarker {
   void operator()(const Resource* r) { (*this)(*r); }
   void operator()(const String* s) { (*this)(*s); }
   void operator()(const RequestEventHandler* reh) { (*this)(*reh); }
-  void operator()(const AsioContext* ctx) { (*this)(*ctx); }
 
   template <typename T>
   void operator()(const typename std::list<T>::iterator& p) {
@@ -465,20 +456,6 @@ protected:
   ~IMarker() {}
 };
 
-// This class is a temporary bridge that allows ResourceData scan functions to
-// work whether or not generated scan functions are present in a sandbox.
-struct scanner {
-  template <typename F, typename T> void scan(const T& v, F& mark) {
-    HPHP::scan(v, mark);
-  }
-  template <typename F> void scan(const ResourceData& v, F& mark) {
-    HPHP::scan(v, mark);
-  }
-  template <typename F> void scan(const AsioContext& v, F& mark) {
-    // do nothing for now.
-  }
-};
-
 // bridge between the templated-based marker interface and the
 // virtual-call based marker interface.
 template<class F> struct ExtMarker final: IMarker {
@@ -488,15 +465,11 @@ template<class F> struct ExtMarker final: IMarker {
   void operator()(const Resource& p) override { mark_(p); }
   void operator()(const String& p) override { mark_(p); }
   void operator()(const Variant& p) override { mark_(p); }
-  void operator()(const ArrayIter& p) override { mark_(p); }
-  void operator()(const MArrayIter& p) override { mark_(p); }
   void operator()(const StringBuffer& p) override { mark_(p); }
   void operator()(const ActRec& p) override { mark_(p); }
   void operator()(const Stack& p) override { mark_(p); }
   void operator()(const VarEnv& p) override { mark_(p); }
   void operator()(const RequestEventHandler& p) override { mark_(p); }
-  void operator()(const Extension& p) override { mark_(p); }
-  void operator()(const AsioContext& p) override { mark_(p); }
 
   void operator()(const StringData* p) override { mark_(p); }
   void operator()(const ArrayData* p) override { mark_(p); }

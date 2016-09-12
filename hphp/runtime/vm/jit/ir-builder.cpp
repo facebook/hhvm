@@ -184,13 +184,6 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     if (inst->is(LdRef, CheckRefInner)) {
       constrainValue(inst->src(0), DataTypeSpecific);
     }
-
-    // In psuedomains we have to pre-constrain local guards, because we don't
-    // ever actually generate code that will constrain them otherwise.
-    // (Because of the LdLocPseudoMain stuff.)
-    if (inst->marker().func()->isPseudoMain() && inst->is(CheckLoc)) {
-      constrainGuard(inst, DataTypeSpecific);
-    }
   }
 
   auto where = m_curBlock->end();

@@ -198,17 +198,23 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
   v << cvttsd2siq{src, d};
   v << cmpq{indef, d, sf};
 
+  // For ARM, use the cc which ignores unordered results for the first
+  // condition. Then use the ARM equivalent cc to check for the unordered
+  // result in the second condition.
+  ConditionCode cc_nb = (arch() == Arch::ARM) ? CC_GE : CC_NB;
+  ConditionCode cc_p = (arch() == Arch::ARM) ? CC_O : CC_P;
+
   unlikelyCond(v, vcold(env), CC_E, sf, dst,
     [&] (Vout& v) {
       // result > max signed int or unordered
       auto const sf = v.makeReg();
       v << ucomisd{v.cns(0.0), src, sf};
 
-      return cond(v, CC_NB, sf, v.makeReg(),
+      return cond(v, cc_nb, sf, v.makeReg(),
         [&] (Vout& v) { return d; },
         [&] (Vout& v) {
           // src > 0 (CF = 1 -> less than 0 or unordered)
-          return cond(v, CC_P, sf, v.makeReg(),
+          return cond(v, cc_p, sf, v.makeReg(),
             [&] (Vout& v) {
               // PF = 1 -> unordered, i.e., we are doing an int cast of NaN.
               // PHP5 didn't formally define this, but observationally returns

@@ -241,16 +241,23 @@ void cgCmpDbl(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  auto const tmp1 = v.makeReg();
-  auto const tmp2 = v.makeReg();
 
   assert(inst->src(0)->type() <= TDbl);
   assert(inst->src(1)->type() <= TDbl);
 
   v << ucomisd{s0, s1, sf};
-  v << cmovq{CC_A, sf, v.cns(-1), v.cns(1), tmp1};
-  v << cmovq{CC_NE, sf, v.cns(0), tmp1, tmp2};
-  v << cmovq{CC_P, sf, tmp2, v.cns(-1), d};
+  if (arch() == Arch::ARM) {
+    auto const tmp = v.makeReg();
+    // On ARM, CC_L => lt, which for FP is true for lower or unordered
+    v << cmovq{CC_L, sf, v.cns(1), v.cns(-1), tmp};
+    v << cmovq{CC_E, sf, tmp, v.cns(0), d};
+  } else {
+    auto const tmp1 = v.makeReg();
+    auto const tmp2 = v.makeReg();
+    v << cmovq{CC_A, sf, v.cns(-1), v.cns(1), tmp1};
+    v << cmovq{CC_NE, sf, v.cns(0), tmp1, tmp2};
+    v << cmovq{CC_P, sf, tmp2, v.cns(-1), d};
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

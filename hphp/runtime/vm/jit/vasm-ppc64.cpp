@@ -239,6 +239,24 @@ struct Vgen {
   void emit(const landingpad&) { }
   void emit(const ldimmw& i) { a.li(Reg64(i.d), i.s); }
   void emit(const ldarx& i) { a.ldarx(i.d, i.s); }
+  void emit(const loadups& i) {
+    // A lowering would be handy here, but the Vptr's displacement is only
+    // later added at the optimizeCopies optimization
+    Vptr p(i.s);
+    if ((!p.base.isValid()) || (p.base == 0)) {
+      p.base = ppc64_asm::reg::r0; // use zero not r0
+    }
+    if (!p.index.isValid()) {
+      a.li(rAsm, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
+    } else if (p.disp) {
+        a.addi(rAsm, p.index, p.disp);
+        p.index = rAsm;
+        p.disp = 0;
+    }
+    a.lxvd2x(i.d, p);
+  }
   void emit(const leap& i) { a.li64(i.d, i.s.r.disp, false); }
   void emit(const lead& i) { a.li64(i.d, (int64_t)i.s.get(), false); }
   void emit(const mfcr& i) { a.mfcr(i.d); }
@@ -290,8 +308,23 @@ struct Vgen {
   void emit(const sqrtsd& i) { a.xssqrtdp(i.d,i.s); }
 
   void emit(const stdcx& i) { a.stdcx(i.s, i.d); }
+  void emit(const storeups& i) {
+    Vptr p(i.m);
+    if ((!p.base.isValid()) || (p.base == 0)) {
+      p.base = ppc64_asm::reg::r0;
+    }
+    if (!p.index.isValid()) {
+      a.li(rAsm, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
+    } else if (p.disp) {
+        a.addi(rAsm, p.index, p.disp);
+        p.index = rAsm;
+        p.disp = 0;
+    }
+    a.stxvw4x(i.s, p);
+  }
 
-  void emit(const storeups& i) { a.stxvw4x(i.s,i.m); }
   // Subtractions: d = s1 - s0
   void emit(const subq& i) {
     a.subfo(i.d, i.s0, i.s1, true);
@@ -320,35 +353,6 @@ struct Vgen {
     a.mtfsb0(23); // clear VXCVI
     a.fctidz(i.d, i.s, false);
     a.mcrfs(0,5);
-  }
-  // TODO: this vasm must be lowered.
-  void emit(const loadups& i) {
-    Vptr p = i.s;
-    Vptr tmp(p);
-    switch(p.scale){
-      case 8:
-        tmp.index = rfuncln();
-        a.sldi(tmp.index, p.index, 3);
-        break;
-      case 4:
-        tmp.index = rfuncln();
-        a.sldi(tmp.index, p.index, 2);
-        break;
-      case 2:
-        tmp.index = rfuncln();
-        a.sldi(tmp.index, p.index, 1);
-        break;
-      default:
-        break;
-    }
-    if(p.disp != 0) {
-      tmp.base = rAsm;
-      a.li64(tmp.base, static_cast<int64_t>(p.disp), false);
-      a.add(tmp.base, p.base, tmp.base);
-      a.lxvd2x(i.d, tmp);
-    } else {
-      a.lxvd2x(i.d, p);
-    }
   }
   void emit(const movl& i) {
     int8_t sh = sizeof(int) * CHAR_BIT;

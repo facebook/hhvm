@@ -16,14 +16,14 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Operator = Full_fidelity_operator
 module PrecedenceParser = Full_fidelity_precedence_parser
-module TypeParser = Full_fidelity_type_parser
 
 open TokenKind
 open Syntax
 
-module WithStatementAndDeclParser
+module WithStatementAndDeclAndTypeParser
   (StatementParser : Full_fidelity_statement_parser_type.StatementParserType)
-  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType) :
+  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType)
+  (TypeParser : Full_fidelity_type_parser_type.TypeParserType) :
   Full_fidelity_expression_parser_type.ExpressionParserType = struct
 
   include PrecedenceParser

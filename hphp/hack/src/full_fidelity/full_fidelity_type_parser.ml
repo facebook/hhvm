@@ -20,6 +20,10 @@ module SimpleParser =
 open TokenKind
 open Syntax
 
+module WithExpressionParser (ExpressionParser :
+    Full_fidelity_expression_parser_type.ExpressionParserType) :
+  Full_fidelity_type_parser_type.TypeParserType = struct
+
 include SimpleParser
 include Full_fidelity_parser_helpers.WithParser(SimpleParser)
 
@@ -464,3 +468,5 @@ and parse_return_type parser =
     (parser1, make_token token)
   else
     parse_type_specifier parser
+
+end

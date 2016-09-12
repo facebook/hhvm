@@ -14,14 +14,14 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
-module TypeParser = Full_fidelity_type_parser
 module SimpleParser = Full_fidelity_simple_parser.WithLexer(Full_fidelity_lexer)
 
 open TokenKind
 open Syntax
 
-module WithExpressionParser
-  (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType) :
+module WithExpressionAndTypeParser
+  (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType)
+  (TypeParser : Full_fidelity_type_parser_type.TypeParserType) :
   Full_fidelity_statement_parser_type.StatementParserType = struct
 
   include SimpleParser

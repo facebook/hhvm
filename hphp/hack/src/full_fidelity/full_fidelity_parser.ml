@@ -16,19 +16,21 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Lexer = Full_fidelity_lexer
 module Operator = Full_fidelity_operator
-module TypeParser = Full_fidelity_type_parser
 module rec ExpressionParser :
   Full_fidelity_expression_parser_type.ExpressionParserType =
-  Full_fidelity_expression_parser.WithStatementAndDeclParser
-                                  (StatementParser) (DeclParser)
+  Full_fidelity_expression_parser.WithStatementAndDeclAndTypeParser
+    (StatementParser) (DeclParser) (TypeParser)
 and StatementParser :
   Full_fidelity_statement_parser_type.StatementParserType =
-  Full_fidelity_statement_parser.WithExpressionParser
-                                 (ExpressionParser)
+  Full_fidelity_statement_parser.WithExpressionAndTypeParser
+    (ExpressionParser) (TypeParser)
 and DeclParser :
   Full_fidelity_declaration_parser_type.DeclarationParserType =
-  Full_fidelity_declaration_parser.WithExpressionAndStatementParser
-                                   (ExpressionParser) (StatementParser)
+  Full_fidelity_declaration_parser.WithExpressionAndStatementAndTypeParser
+    (ExpressionParser) (StatementParser) (TypeParser)
+and TypeParser :
+  Full_fidelity_type_parser_type.TypeParserType =
+  Full_fidelity_type_parser.WithExpressionParser(ExpressionParser)
 
 type t = {
   lexer : Lexer.t;

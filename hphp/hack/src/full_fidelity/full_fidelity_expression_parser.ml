@@ -777,23 +777,13 @@ module WithStatementAndDeclParser
         single-quoted-string-literal  =>  expression
         integer-literal  =>  expression
         qualified-name  =>  expression
+        scope-resolution-expression  =>  expression
         *)
-    let (parser1, token) = next_token parser in
-    let (parser, name) = match Token.kind token with
-    | SingleQuotedStringLiteral
-    | DecimalLiteral
-    | OctalLiteral
-    | HexadecimalLiteral
-    | BinaryLiteral
-    | Name
-    | QualifiedName -> (parser1, make_token token)
-    | EqualGreaterThan ->
-      (* ERROR RECOVERY: We're missing the name. *)
-      (with_error parser SyntaxError.error1025, make_missing())
-    | _ ->
-      (* ERROR RECOVERY: We're missing the name and we have no arrow either.
-         Just eat the token and hope we get an arrow next. *)
-      (with_error parser1 SyntaxError.error1025, make_missing()) in
+
+    (* ERROR RECOVERY: We allow any expression as the left hand side.
+       TODO: Make a later error pass that detects when it is not a
+       literal or name. *)
+    let (parser, name) = with_reset_precedence parser parse_expression in
     let (parser, arrow) = expect_arrow parser in
     let (parser, value) = with_reset_precedence parser parse_expression in
     let result = make_field_initializer name arrow value in
@@ -805,6 +795,7 @@ module WithStatementAndDeclParser
         field-initializer
         field-initializer-list    ,  field-initializer
     *)
+    (* TODO: Do we allow trailing commas? Do we need to update the spec? *)
     parse_comma_list_opt
       parser RightParen SyntaxError.error1025 parse_field_initializer
 

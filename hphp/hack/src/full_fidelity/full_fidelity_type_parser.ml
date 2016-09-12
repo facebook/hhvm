@@ -337,6 +337,8 @@ and parse_tuple_type_specifier parser =
      actually requires a type list with two or more items. Give an error in
      a later pass if there is only one item here. *)
 
+  (* TODO: Should we allow trailing commas? If so, update the spec. *)
+
   let (parser, left_paren) = next_token parser in
   let left_paren = make_token left_paren in
   let (parser, args) = parse_type_list parser RightParen in
@@ -389,9 +391,15 @@ and parse_field_specifier parser =
     field-specifier:
       single-quoted-string-literal  =>  type-specifier
       qualified-name  =>  type-specifier
+      scope-resolution-expression  =>  type-specifier  TODO
   *)
 
-  (* TODO: ERROR RECOVERY is not very sophisticated here. *)
+  (* TODO: We require that it be either all literals or no literals in the
+           set of specifiers; make an error reporting pass that detects this. *)
+
+  (* ERROR RECOVERY: TODO: We allow any expression for the left-hand side.
+     TODO: Make an error-detecting pass that gives an error if the left-hand
+     side is not a literal or name. *)
   let (parser, name) = next_token parser in
   let parser = match Token.kind name with
   | SingleQuotedStringLiteral
@@ -410,6 +418,7 @@ and parse_field_list parser =
       field-specifier
       field-specifier-list  ,  field-specifier
     NOTE: trailing comma is allowed
+    TODO: Update the specification accordingly.
   *)
   parse_comma_list_allow_trailing parser RightParen SyntaxError.error1025
     parse_field_specifier

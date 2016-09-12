@@ -26,7 +26,7 @@
 namespace HPHP { namespace jit {
 
 TEST(PredictionOpts, basic) {
-  UNUSED auto const bcctx = BCContext { BCMarker::Dummy() };
+  UNUSED auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   IRUnit unit{test_context};
 
   Block* entry = unit.entry();

@@ -72,13 +72,20 @@ struct IRBuilder {
    */
   IRUnit& unit() const { return m_unit; }
   FrameStateMgr& fs() { return m_state; }
-  BCContext curBCContext() const { return m_curBCContext; }
   BCMarker curMarker() const { return m_curBCContext.marker; }
 
   /*
-   * Update the marker for instructions that were generated without one.
+   * Get the current BCContext, incrementing its `iroff'.
+   */
+  BCContext nextBCContext() {
+    return BCContext { m_curBCContext.marker, m_curBCContext.iroff++ };
+  }
+
+  /*
+   * Update the current BCContext.
    */
   void setCurMarker(BCMarker);
+  void resetCurIROff() { m_curBCContext.iroff = 0; }
 
   /*
    * Exception handling and IRBuilder.
@@ -264,7 +271,7 @@ private:
         return optimizeInst(inst, CloneFlag::Yes, nullptr);
       },
       op,
-      curBCContext(),
+      nextBCContext(),
       std::forward<Args>(args)...
     );
   }

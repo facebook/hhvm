@@ -38,7 +38,7 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 TEST(Simplifier, JumpConstFold) {
-  auto const dummy = BCContext { BCMarker::Dummy() };
+  auto const dummy = BCContext { BCMarker::Dummy(), 0 };
   IRUnit unit(test_context);
 
   // Folding JmpZero and JmpNZero.
@@ -63,7 +63,7 @@ TEST(Simplifier, JumpConstFold) {
 
 TEST(Simplifier, CondJmp) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
 
   // Folding Conv*ToBool
   {
@@ -94,7 +94,7 @@ TEST(Simplifier, CondJmp) {
 
 TEST(Simplifier, Count) {
   IRUnit unit{test_context};
-  auto const dummy = BCContext { BCMarker::Dummy() };
+  auto const dummy = BCContext { BCMarker::Dummy(), 0 };
 
   // Count($null) --> 0
   {
@@ -154,7 +154,7 @@ TEST(Simplifier, Count) {
 
 TEST(Simplifier, LdObjClass) {
   IRUnit unit{test_context};
-  auto const dummy = BCContext { BCMarker::Dummy() };
+  auto const dummy = BCContext { BCMarker::Dummy(), 0 };
   auto const cls = SystemLib::s_IteratorClass;
 
   // LdObjClass t1:Obj<=C doesn't simplify
@@ -179,7 +179,7 @@ TEST(Simplifier, LdObjClass) {
 
 TEST(Simplifier, LdObjInvoke) {
   IRUnit unit{test_context};
-  auto const dummy = BCContext { BCMarker::Dummy() };
+  auto const dummy = BCContext { BCMarker::Dummy(), 0 };
   auto const taken = unit.defBlock();
 
   // LdObjInvoke t1:Cls doesn't simplify

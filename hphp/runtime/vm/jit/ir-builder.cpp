@@ -129,7 +129,7 @@ bool dictElemMightRelax(const IRInstruction* inst) {
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
-  , m_curBCContext{initMarker}
+  , m_curBCContext{initMarker, 0}
   , m_state(initMarker)
   , m_curBlock(m_unit.entry())
 {
@@ -989,7 +989,7 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, false);
   m_curBlock = b;
-  m_curBCContext = BCContext { marker };
+  m_curBCContext = BCContext { marker, 0 };
 
   if (do_assert) {
     for (UNUSED auto const& state : m_savedBlocks) {

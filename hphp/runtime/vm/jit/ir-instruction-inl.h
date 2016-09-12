@@ -26,18 +26,15 @@ inline IRInstruction::IRInstruction(Opcode op,
                                     Edge* edges,
                                     uint32_t numSrcs,
                                     SSATmp** srcs)
-  : m_typeParam{}
-  , m_op(op)
+  : m_op(op)
+  , m_iroff(bcctx.iroff)
   , m_numSrcs(numSrcs)
   , m_numDsts(0)
   , m_hasTypeParam{false}
   , m_marker(bcctx.marker)
-  , m_id(kTransient)
   , m_srcs(srcs)
   , m_dest(nullptr)
-  , m_block(nullptr)
   , m_edges(edges)
-  , m_extra(nullptr)
 {
   if (op != DefConst) {
     // DefConst is the only opcode that's allowed to not have a marker, since
@@ -101,6 +98,10 @@ inline bool IRInstruction::isTransient() const {
   return m_id == kTransient;
 }
 
+inline uint16_t IRInstruction::iroff() const {
+  return m_iroff;
+}
+
 template<typename... Args>
 bool IRInstruction::is(Opcode op, Args&&... args) const {
   return m_op == op || is(std::forward<Args>(args)...);
@@ -123,7 +124,7 @@ inline BCMarker& IRInstruction::marker() {
 }
 
 inline BCContext IRInstruction::bcctx() const {
-  return BCContext { m_marker };
+  return BCContext { m_marker, m_iroff };
 }
 
 inline const Func* IRInstruction::func() const {

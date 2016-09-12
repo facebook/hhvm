@@ -253,6 +253,7 @@ void prepareForNextHHBC(IRGS& env,
   updateMarker(env);
   env.lastBcInst = lastBcInst;
   env.irb->exceptionStackBoundary();
+  env.irb->resetCurIROff();
 }
 
 void finishHHBC(IRGS& env) {

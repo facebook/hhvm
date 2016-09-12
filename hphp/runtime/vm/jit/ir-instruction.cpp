@@ -45,6 +45,7 @@ namespace HPHP { namespace jit {
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   : m_typeParam(inst->m_typeParam)
   , m_op(inst->m_op)
+  , m_iroff(inst->m_iroff)
   , m_numSrcs(inst->m_numSrcs)
   , m_numDsts(inst->m_numDsts)
   , m_hasTypeParam{inst->m_hasTypeParam}
@@ -52,7 +53,6 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
   , m_dest(nullptr)
-  , m_block(nullptr)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {

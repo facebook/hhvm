@@ -44,7 +44,7 @@ std::vector<AliasClass> generic_classes() {
 }
 
 std::vector<AliasClass> specialized_classes(IRUnit& unit) {
-  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
 
   // Specialized test cases need some SSATmp*'s and similar things, so let's
   // make some instructions.
@@ -212,7 +212,7 @@ TEST(AliasClass, Basic) {
 
 TEST(AliasClass, StackBasics) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
     DefSP, bcctx, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
@@ -257,7 +257,7 @@ TEST(AliasClass, StackBasics) {
 
 TEST(AliasClass, SpecializedUnions) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
 
   AliasClass const stk = AStack { FP, FPRelOffset { -10 }, 3 };
@@ -332,7 +332,7 @@ TEST(AliasClass, SpecializedUnions) {
 
 TEST(AliasClass, StackUnions) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
     DefSP, bcctx, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
@@ -380,7 +380,7 @@ TEST(AliasClass, StackUnions) {
 
 TEST(AliasClass, IterUnion) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
 
   {
@@ -462,7 +462,7 @@ TEST(AliasClass, IterUnion) {
 
 TEST(AliasClass, Pointees) {
   IRUnit unit{test_context};
-  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto ptr = unit.gen(LdMBase, bcctx, TPtrToGen)->dst();
   auto const acls = pointee(ptr);
   EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTV, acls);

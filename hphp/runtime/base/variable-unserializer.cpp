@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -368,6 +369,11 @@ void VariableUnserializer::set(const char* buf, const char* end) {
 Variant VariableUnserializer::unserialize() {
   Variant v;
   unserializeVariant(v, this);
+  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+    String ser(m_begin, m_end - m_begin, CopyString);
+    auto const fmt = folly::sformat("VU{}", (int)m_type);
+    StructuredLog::logSerDes(fmt.c_str(), "des", ser, v);
+  }
 
   for (auto& obj : m_sleepingObjects) {
     obj->invokeWakeup();

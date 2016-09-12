@@ -19,8 +19,10 @@
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/runtime/vm/bytecode.h"
 
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -118,6 +120,9 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
   assertx(json.get() != nullptr);
+  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+    StructuredLog::logSerDes("json", "ser", json, value);
+  }
 
   if (json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE) {
     return tvReturn(json_guard_error_result(json, options));
@@ -143,6 +148,10 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
   Variant z;
   if (JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options)) {
     return tvReturn(std::move(z));
+  }
+
+  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+    StructuredLog::logSerDes("json", "des", json, z);
   }
 
   String trimmed = HHVM_FN(trim)(json, "\t\n\r ");

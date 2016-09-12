@@ -177,7 +177,7 @@ and parse_type_parameter parser =
 
 (* SPEC
   type-parameter-list:
-  < generic-type-parameters >
+  < generic-type-parameters  ,-opt >
 
   generic-type-parameters:
     generic-type-parameter
@@ -186,7 +186,7 @@ and parse_type_parameter parser =
 and parse_generic_type_parameter_list parser =
   let (parser, open_angle) = next_token parser in
   let open_angle = make_token open_angle in
-  let (parser, args) =  parse_comma_list parser GreaterThan
+  let (parser, args) =  parse_comma_list_allow_trailing parser GreaterThan
     SyntaxError.error1007 parse_type_parameter in
   let (parser1, close_angle) = next_token parser in
   if (Token.kind close_angle) = GreaterThan then

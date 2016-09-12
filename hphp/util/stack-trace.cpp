@@ -15,8 +15,10 @@
 */
 #include "hphp/util/stack-trace.h"
 
+#include <fstream>
 #include <mutex>
 #include <set>
+#include <string>
 
 #if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER))
 #include <execinfo.h>
@@ -302,21 +304,34 @@ const std::string& StackTrace::toString(int skip, int limit) const {
 void StackTrace::PerfMap::rebuild() {
   m_map.clear();
 
-  char perfMapName[64];
-  snprintf(perfMapName, sizeof(perfMapName), "/tmp/perf-%d.map", getpid());
-  auto perfMap = fopen(perfMapName, "r");
-  if (!perfMap) {
-    return;
+  char filename[64];
+  snprintf(filename, sizeof(filename), "/tmp/perf-%d.map", getpid());
+
+  std::ifstream perf_map(filename);
+  if (!perf_map) return;
+
+  std::string line;
+
+  while (!perf_map.bad() && !perf_map.eof()) {
+    if (!std::getline(perf_map, line)) continue;
+
+    uintptr_t addr;
+    uint32_t size;
+    int name_pos = 0;
+    // We compare < 2 because some implementations of sscanf() increment the
+    // assignment count for %n against the specification.
+    if (sscanf(line.c_str(), "%lx %x %n", &addr, &size, &name_pos) < 2 ||
+        name_pos < 4 /* not assigned, or not enough spaces */) {
+      continue;
+    }
+    if (name_pos >= line.size()) continue;
+
+    auto const past = addr + size;
+    auto const range = PerfMap::Range { addr, past };
+
+    m_map[range] = line.substr(name_pos);
   }
-  SCOPE_EXIT { fclose(perfMap); };
-  uintptr_t addr;
-  uint32_t size;
-  char name[1024];
-  while (fscanf(perfMap, "%lx %x %1023s", &addr, &size, name) == 3) {
-    uintptr_t past = addr + size;
-    PerfMap::Range range = {addr, past};
-    m_map[range] = name;
-  }
+
   m_built = true;
 }
 
@@ -336,18 +351,38 @@ bool StackTrace::PerfMap::translate(StackFrameExtra* frame) const {
     frame->funcname = "TC?"; // Note HHProf::HandlePProfSymbol() dependency.
     return true;
   }
+
   // Found.
   auto const& filefunc = it->second;
-  auto endPhp = filefunc.find("::");
-  if (endPhp == std::string::npos) {
+  auto const colon_pos = filefunc.find("::");
+  if (colon_pos == std::string::npos) {
     frame->funcname = filefunc;
     return false;
   }
-  // Skip the ::
-  endPhp += 2;
-  auto const endFile = filefunc.find("::", endPhp);
-  frame->filename = std::string(filefunc, endPhp, endFile - endPhp);
-  frame->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
+
+  auto const prefix = std::string(filefunc, 0, colon_pos);
+  if (prefix == "HHVM") {
+    // HHVM unique stubs are simply "HHVM::stubName".
+    frame->funcname = filefunc + "()";
+    return false;
+  }
+
+  if (prefix != "PHP") {
+    // We don't recognize the prefix, so don't do any munging.
+    frame->funcname = filefunc;
+    return false;
+  }
+
+  // Jitted PHP functions have the format "PHP::file.php::Full::funcName".
+  auto const file_pos = colon_pos + 2;
+  auto const file_end_pos = filefunc.find("::", file_pos);
+  if (file_end_pos == std::string::npos) {
+    // Bad PHP function descriptor.
+    frame->funcname = filefunc;
+    return false;
+  }
+  frame->filename = std::string(filefunc, file_pos, file_end_pos - file_pos);
+  frame->funcname = "PHP::" + std::string(filefunc, file_end_pos + 2) + "()";
   return false;
 }
 

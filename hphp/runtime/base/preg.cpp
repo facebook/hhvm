@@ -36,14 +36,19 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
+
+#include "hphp/compiler/json.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/concurrent-scalable-cache.h"
 
@@ -758,11 +763,8 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
         Debug::DebugInfo::Get()->recordPerfMap(
           Debug::TCRange(start, end, false),
-          SrcKey{},
-          nullptr,
-          false,
-          false,
-          name
+          SrcKey{}, nullptr, false, false,
+          HPHP::JSON::Escape(name.c_str())
         );
       }
     }

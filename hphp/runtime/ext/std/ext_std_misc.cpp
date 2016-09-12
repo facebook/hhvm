@@ -66,12 +66,12 @@ const int64_t k_CONNECTION_ABORTED = 1;
 const int64_t k_CONNECTION_TIMEOUT = 2;
 
 static String HHVM_FUNCTION(server_warmup_status) {
-  // Fail if we jitted more than 25kb of code.
+  // Fail if we jitted at least Eval.JitWarmupStatusBytes of code.
   size_t begin, end;
   jit::tc::codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
-  auto constexpr kMaxTCBytes = 25 << 10;
-  if (diff > kMaxTCBytes) {
+  if (diff >= RuntimeOption::EvalJitWarmupStatusBytes) {
+    // TODO(13274666) Mismatch between 'to' and 'begin' below.
     return folly::format("Translation cache grew by {} bytes to {} bytes.",
                          diff, begin).str();
   }

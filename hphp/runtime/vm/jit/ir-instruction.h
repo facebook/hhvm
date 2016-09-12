@@ -30,14 +30,25 @@
 #include <string>
 
 namespace HPHP { namespace jit {
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 struct Block;
 struct Edge;
 struct IRUnit;
 struct SSATmp;
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Bytecode-relative position context for an IRInstruction.
+ *
+ * These are threaded around to construct IRInstructions.
+ */
+struct BCContext {
+  BCMarker marker;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * An HHIR instruction.
@@ -57,7 +68,7 @@ struct IRInstruction {
    * than directly via the constructor.
    */
   explicit IRInstruction(Opcode op,
-                         BCMarker marker,
+                         BCContext bcctx,
                          Edge* edges = nullptr,
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr);
@@ -171,6 +182,13 @@ struct IRInstruction {
    */
   const BCMarker& marker() const;
   BCMarker& marker();
+
+  /*
+   * Get the BCContext of the instruction.
+   *
+   * This is only used for threading through to IRInstruction's constructor.
+   */
+  BCContext bcctx() const;
 
   /*
    * Return the current Func, or nullptr if not known (it should only

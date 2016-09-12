@@ -275,7 +275,7 @@ void insertNegativeAssertTypes(IRUnit& unit, const BlockList& blocks) {
     auto const takenTy = negativeCheckType(srcTy, checkTy);
     if (takenTy < srcTy) {
       inst.taken()->prepend(
-        unit.gen(AssertType, inst.marker(), takenTy, inst.src(0))
+        unit.gen(AssertType, inst.bcctx(), takenTy, inst.src(0))
       );
     }
   }
@@ -296,7 +296,7 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
   assert(blk->numPreds() > 1);
   auto label = &blk->front();
   if (!label->is(DefLabel)) {
-    label = unit.defLabel(1, label->marker());
+    label = unit.defLabel(1, label->bcctx());
     blk->insert(blk->begin(), label);
   } else {
     for (auto d = label->numDsts(); d--; ) {

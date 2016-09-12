@@ -49,7 +49,7 @@ struct BCMarker {
     };
   }
 
-  explicit BCMarker() = default;
+  BCMarker() = default;
 
   BCMarker(SrcKey sk, FPInvOffset sp, TransID tid, SSATmp* fp)
     : m_sk(sk)

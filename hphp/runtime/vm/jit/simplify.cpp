@@ -100,7 +100,7 @@ SSATmp* cns(State& env, Args&&... cns) {
 }
 
 template<class... Args>
-SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
+SSATmp* gen(State& env, Opcode op, BCContext bcctx, Args&&... args) {
   return makeInstruction(
     [&] (IRInstruction* inst) -> SSATmp* {
       auto prevNewCount = env.newInsts.size();
@@ -120,7 +120,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
       }
     },
     op,
-    marker,
+    bcctx,
     std::forward<Args>(args)...
   );
 }
@@ -128,7 +128,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
 template<class... Args>
 SSATmp* gen(State& env, Opcode op, Args&&... args) {
   assertx(!env.insts.empty());
-  return gen(env, op, env.insts.top()->marker(), std::forward<Args>(args)...);
+  return gen(env, op, env.insts.top()->bcctx(), std::forward<Args>(args)...);
 }
 
 bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
@@ -3499,7 +3499,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
     if (res.instrs.empty() || !res.instrs.back()->isBlockEnd()) {
       // Our block-end instruction was eliminated (most likely a Jmp* converted
       // to a Nop).  Replace it with a Jmp to the next block.
-      res.instrs.push_back(unit.gen(Jmp, origInst->marker(), next));
+      res.instrs.push_back(unit.gen(Jmp, origInst->bcctx(), next));
     }
 
     auto last = res.instrs.back();

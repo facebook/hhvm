@@ -483,7 +483,7 @@ Block* insertLoopPreExit(IRUnit& unit,
   auto const jmp = &(oldPreHeader->back());
   oldPreHeader->erase(jmp);
   newPreHeader->prepend(jmp);
-  auto exitPlaceholder = unit.gen(ExitPlaceholder, jmp->marker(), preExit);
+  auto exitPlaceholder = unit.gen(ExitPlaceholder, jmp->bcctx(), preExit);
   oldPreHeader->insert(oldPreHeader->end(), exitPlaceholder);
   exitPlaceholder->setNext(newPreHeader);
 
@@ -529,7 +529,7 @@ void insertLoopPreHeader(IRUnit& unit,
   }
 
   auto const preHeader = unit.defBlock(loop.numInvocations);
-  auto const marker = header->front().marker();
+  auto const bcctx = header->front().bcctx();
 
   // If the header starts with a DefLabel, the arguments from all the incoming
   // edges need to be collected in a new DefLabel in the new pre-header, and
@@ -537,7 +537,7 @@ void insertLoopPreHeader(IRUnit& unit,
   jit::vector<SSATmp*> args;
   if (header->front().is(DefLabel)) {
     auto const num_args = header->front().numDsts();
-    auto const label = unit.defLabel(num_args, marker);
+    auto const label = unit.defLabel(num_args, bcctx);
     preHeader->insert(preHeader->begin(), label);
     if (num_args > 0) {
       args.reserve(num_args);
@@ -546,9 +546,9 @@ void insertLoopPreHeader(IRUnit& unit,
   }
 
   if (args.empty()) {
-    preHeader->prepend(unit.gen(Jmp, marker, header));
+    preHeader->prepend(unit.gen(Jmp, bcctx, header));
   } else {
-    preHeader->prepend(unit.gen(Jmp, marker, header,
+    preHeader->prepend(unit.gen(Jmp, bcctx, header,
                                 std::make_pair(args.size(), &args[0])));
   }
 

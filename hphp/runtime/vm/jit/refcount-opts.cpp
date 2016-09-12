@@ -3153,9 +3153,9 @@ Node* rule_inc_pass_sig(Env& env, Node* node) {
   auto const nsig     = to_sig(node->next);
 
   auto const value     = nold_inc->inst->src(0);
-  auto const marker    = nold_inc->inst->marker();
-  auto const new_taken = env.unit.gen(IncRef, marker, value);
-  auto const new_next  = env.unit.gen(IncRef, marker, value);
+  auto const bcctx     = nold_inc->inst->bcctx();
+  auto const new_taken = env.unit.gen(IncRef, bcctx, value);
+  auto const new_next  = env.unit.gen(IncRef, bcctx, value);
 
   FTRACE(2, "    ** inc_pass_sig: {} -> {}, {}\n",
     *nold_inc->inst, *new_taken, *new_next);
@@ -3214,7 +3214,7 @@ Node* rule_inc_pass_phi(Env& env, Node* node) {
   if (!sink) return node;
 
   auto const nphi     = to_phi(node);
-  auto const new_inc  = env.unit.gen(IncRef, sink->marker(), sink->src(0));
+  auto const new_inc  = env.unit.gen(IncRef, sink->bcctx(), sink->src(0));
   auto const nnew_inc = add_between(env, nphi, nphi->next, NInc{new_inc});
 
   nnew_inc->lower_bound = std::max(nphi->lower_bound - 1, 0);
@@ -3393,7 +3393,7 @@ void sink_incs(Env& env) {
     incs.pop_back();
 
     auto block  = inc->block();
-    auto marker = inc->marker();
+    auto bcctx  = inc->bcctx();
     auto tmp    = inc->src(0);
     if (!tmp->type().maybe(TUncounted)) continue;
 
@@ -3408,8 +3408,8 @@ void sink_incs(Env& env) {
       // try to sink past Check* instructions
       if (!can_sink(env, inc, block)) continue;
 
-      auto const new_taken = env.unit.gen(IncRef, marker, tmp);
-      auto const new_next  = env.unit.gen(IncRef, marker, tmp);
+      auto const new_taken = env.unit.gen(IncRef, bcctx, tmp);
+      auto const new_next  = env.unit.gen(IncRef, bcctx, tmp);
       block->taken()->prepend(new_taken);
       block->next()->prepend(new_next);
       incs.push_back(new_taken);
@@ -3420,7 +3420,7 @@ void sink_incs(Env& env) {
 
     } else if (iter != iterOrigSucc) {
       // insert the inc right before succ if we advanced any instruction
-      auto const new_inc = env.unit.gen(IncRef, marker, tmp);
+      auto const new_inc = env.unit.gen(IncRef, bcctx, tmp);
       block->insert(iter, new_inc);
       FTRACE(2, "    ** sink_incs: {} -> {}\n", *inc, *new_inc);
       remove_helper(inc);

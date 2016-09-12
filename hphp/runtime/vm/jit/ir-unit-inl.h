@@ -39,19 +39,19 @@ struct InstructionBuilder {
   /*
    * Create an IRInstruction, and then recursively chew on the Args list to
    * populate its fields.  Every instruction must have at least an Opcode and a
-   * BCMarker.
+   * BCContext.
    *
    * The IRInstruction is stack allocated, and should not escape the lambda, so
    * we fill it with 0xc0 in debug builds after we're done.
    */
   template<class... Args>
-  Ret go(Opcode op, BCMarker marker, Args&&... args) {
+  Ret go(Opcode op, BCContext bcctx, Args&&... args) {
     std::aligned_storage<sizeof(IRInstruction)>::type buffer;
     void* const vpBuffer = &buffer;
     SCOPE_EXIT { if (debug) memset(&buffer, 0xc0, sizeof(buffer)); };
     Edge edges[2];
 
-    new (vpBuffer) IRInstruction(op, marker, hasEdges(op) ? edges : nullptr);
+    new (vpBuffer) IRInstruction(op, bcctx, hasEdges(op) ? edges : nullptr);
     auto const inst = static_cast<IRInstruction*>(vpBuffer);
 
     SCOPE_EXIT { inst->clearExtra(); };
@@ -189,7 +189,7 @@ void IRUnit::replace(IRInstruction* old, Opcode op, Args... args) {
   makeInstruction(
     [&] (IRInstruction* replacement) { old->become(*this, replacement); },
     op,
-    old->marker(),
+    old->bcctx(),
     std::forward<Args>(args)...
   );
 }

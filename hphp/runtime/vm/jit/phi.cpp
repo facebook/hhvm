@@ -107,13 +107,13 @@ void optimizePhis(IRUnit& unit) {
       if (phiDest->hasConstVal() ||
           phiDest->type().subtypeOfAny(TUninit, TInitNull, TNullptr)) {
         newInst =
-          unit.gen(phiDest, Mov, label.marker(), unit.cns(phiDest->type()));
+          unit.gen(phiDest, Mov, label.bcctx(), unit.cns(phiDest->type()));
       } else if (values.size() == 1 ||
                  (values.size() == 2 && values.count(phiDest))) {
         values.erase(phiDest);
         // This is safe without any extra dominator checks because we know that
         // there are no preds that don't have the value available.
-        newInst = unit.gen(phiDest, Mov, label.marker(), *values.begin());
+        newInst = unit.gen(phiDest, Mov, label.bcctx(), *values.begin());
       } else if (auto sinkInst = findSinkablePhiSrc(values)) {
         // As long as DefInlineFP exists, FramePtr SSATmps aren't truly
         // SSA. We have to make sure the live FramePtr at the point of the

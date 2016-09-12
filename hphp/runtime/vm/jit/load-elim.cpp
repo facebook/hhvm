@@ -569,7 +569,7 @@ SSATmp* resolve_phis_work(Global& env,
   if (block->front().is(DefLabel)) {
     env.unit.expandLabel(&block->front(), 1);
   } else {
-    block->prepend(env.unit.defLabel(1, block->front().marker()));
+    block->prepend(env.unit.defLabel(1, block->front().bcctx()));
   }
   auto const label = &block->front();
   mutated_labels.push_back(label);
@@ -664,7 +664,7 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
     auto const taken = hasEdges(op) ? inst.taken() : nullptr;
     auto const newInst = env.unit.gen(
       op,
-      inst.marker(),
+      inst.bcctx(),
       taken,
       typeParam,
       resolved

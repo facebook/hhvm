@@ -170,7 +170,7 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
 
   env.irb->appendBlock(done_block);
   if (v1) {
-    auto const label = env.unit.defLabel(1, env.irb->curMarker());
+    auto const label = env.unit.defLabel(1, env.irb->curBCContext());
     done_block->push_back(label);
     auto const result = label->dst(0);
     result->setType(v1->type() | v2->type());
@@ -201,7 +201,7 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
   gen(env, Jmp, done_block, v2.first, v2.second);
 
   env.irb->appendBlock(done_block);
-  auto const label = env.unit.defLabel(2, env.irb->curMarker());
+  auto const label = env.unit.defLabel(2, env.irb->curBCContext());
   done_block->push_back(label);
   auto const result1 = label->dst(0);
   auto const result2 = label->dst(1);

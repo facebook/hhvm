@@ -129,7 +129,7 @@ bool dictElemMightRelax(const IRInstruction* inst) {
 IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
-  , m_curMarker(initMarker)
+  , m_curBCContext{initMarker}
   , m_state(initMarker)
   , m_curBlock(m_unit.entry())
 {
@@ -628,18 +628,18 @@ void IRBuilder::exceptionStackBoundary() {
    * trace that the unwinder won't be able to see.
    */
   FTRACE(2, "exceptionStackBoundary()\n");
-  assertx(m_state.bcSPOff() == m_curMarker.spOff());
+  assertx(m_state.bcSPOff() == curMarker().spOff());
   m_exnStack.syncedSpLevel = m_state.bcSPOff();
   m_state.resetStackModified();
 }
 
 void IRBuilder::setCurMarker(BCMarker newMarker) {
-  if (newMarker == m_curMarker) return;
+  if (newMarker == curMarker()) return;
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
-         m_curMarker.valid() ? m_curMarker.show() : "<invalid>",
+         curMarker().valid() ? curMarker().show() : "<invalid>",
          newMarker.show());
   assertx(newMarker.valid());
-  m_curMarker = newMarker;
+  m_curBCContext.marker = newMarker;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -980,16 +980,16 @@ void IRBuilder::resetGuardFailBlock() {
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
-         m_curBlock, m_curMarker.show(), b, marker.show());
+         m_curBlock, curMarker().show(), b, marker.show());
   assertx(b);
 
   m_savedBlocks.push_back(
-    BlockState { m_curBlock, m_curMarker, m_exnStack }
+    BlockState { m_curBlock, m_curBCContext, m_exnStack }
   );
   m_state.pauseBlock(m_curBlock);
   m_state.startBlock(b, false);
   m_curBlock = b;
-  m_curMarker = marker;
+  m_curBCContext = BCContext { marker };
 
   if (do_assert) {
     for (UNUSED auto const& state : m_savedBlocks) {
@@ -1004,11 +1004,11 @@ void IRBuilder::popBlock() {
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",
-         m_curBlock, m_curMarker.show(), top.block, top.marker.show());
+         m_curBlock, curMarker().show(), top.block, top.bcctx.marker.show());
   m_state.finishBlock(m_curBlock);
   m_state.unpauseBlock(top.block);
   m_curBlock = top.block;
-  m_curMarker = top.marker;
+  m_curBCContext = top.bcctx;
   m_exnStack = top.exnStack;
   m_savedBlocks.pop_back();
 }

@@ -26,22 +26,22 @@
 namespace HPHP { namespace jit {
 
 TEST(PredictionOpts, basic) {
-  UNUSED BCMarker marker = BCMarker::Dummy();
+  UNUSED auto const bcctx = BCContext { BCMarker::Dummy() };
   IRUnit unit{test_context};
 
   Block* entry = unit.entry();
   Block* taken = unit.defBlock();
   Block* end = unit.defBlock();
 
-  auto ptr = unit.gen(Conjure, marker, TPtrToGen);
-  auto ldm = unit.gen(LdMem, marker, TGen, ptr->dst());
-  auto inc = unit.gen(IncRef, marker, ldm->dst());
-  auto ckt = unit.gen(CheckType, marker, TInt, taken, ldm->dst());
+  auto ptr = unit.gen(Conjure, bcctx, TPtrToGen);
+  auto ldm = unit.gen(LdMem, bcctx, TGen, ptr->dst());
+  auto inc = unit.gen(IncRef, bcctx, ldm->dst());
+  auto ckt = unit.gen(CheckType, bcctx, TInt, taken, ldm->dst());
   ckt->setNext(end);
   entry->push_back({ptr, ldm, inc, ckt});
 
-  taken->push_back(unit.gen(Halt, marker));
-  end->push_back(unit.gen(Halt, marker));
+  taken->push_back(unit.gen(Halt, bcctx));
+  end->push_back(unit.gen(Halt, bcctx));
 
   optimizePredictions(unit);
 

@@ -389,7 +389,7 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
     case StStk:
       dbgInst = env.global.unit.gen(
         DbgTrashStk,
-        inst.marker(),
+        inst.bcctx(),
         IRSPRelOffsetData { inst.extra<StStk>()->offset },
         inst.src(0)
       );
@@ -397,13 +397,13 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
     case SpillFrame:
       dbgInst = env.global.unit.gen(
         DbgTrashFrame,
-        inst.marker(),
+        inst.bcctx(),
         IRSPRelOffsetData { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
       break;
     case StMem:
-      dbgInst = env.global.unit.gen(DbgTrashMem, inst.marker(), inst.src(0));
+      dbgInst = env.global.unit.gen(DbgTrashMem, inst.bcctx(), inst.src(0));
       break;
     default:
       dbgInst = nullptr;
@@ -710,7 +710,7 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
     // dst as the src of the Mov (this allows us to avoid
     // creating a new phi if there's already a suitable one
     // there).
-    auto mv = genv.unit.gen(Mov, blk->front().marker(), cand->src(i));
+    auto mv = genv.unit.gen(Mov, blk->front().bcctx(), cand->src(i));
     blk->prepend(mv);
     inst->setSrc(i, mv->dst());
   }

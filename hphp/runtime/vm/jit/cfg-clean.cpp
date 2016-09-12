@@ -80,9 +80,9 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
 
   if (isUnconditional) {
     assert(takenBlk);
-    auto const marker = term.marker();
+    auto const bcctx = term.bcctx();
     term.convertToNop();                // Removes edges to original dests.
-    block->push_back(unit.gen(Jmp, marker, takenBlk));
+    block->push_back(unit.gen(Jmp, bcctx, takenBlk));
     FTRACE(1, "Replaced conditional branch in B{} with Jmp to B{}.\n",
            block->id(), takenBlk->id());
     return true;
@@ -105,7 +105,7 @@ bool absorbDstBlock(IRUnit& unit, Block* block) {
   if (takenBlk->begin()->is(DefLabel)) {
     auto& defLabel = *takenBlk->begin();
     for (auto i = 0; i < defLabel.numDsts(); ++i) {
-      auto mov = unit.gen(Mov, defLabel.marker(), term.src(i));
+      auto mov = unit.gen(Mov, defLabel.bcctx(), term.src(i));
       mov->setDst(defLabel.dst(i));
       mov->dst()->setInstruction(mov);
       block->push_back(mov);

@@ -22,7 +22,7 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline IRInstruction::IRInstruction(Opcode op,
-                                    BCMarker marker,
+                                    BCContext bcctx,
                                     Edge* edges,
                                     uint32_t numSrcs,
                                     SSATmp** srcs)
@@ -31,7 +31,7 @@ inline IRInstruction::IRInstruction(Opcode op,
   , m_numSrcs(numSrcs)
   , m_numDsts(0)
   , m_hasTypeParam{false}
-  , m_marker(marker)
+  , m_marker(bcctx.marker)
   , m_id(kTransient)
   , m_srcs(srcs)
   , m_dest(nullptr)
@@ -120,6 +120,10 @@ inline const BCMarker& IRInstruction::marker() const {
 
 inline BCMarker& IRInstruction::marker() {
   return m_marker;
+}
+
+inline BCContext IRInstruction::bcctx() const {
+  return BCContext { m_marker };
 }
 
 inline const Func* IRInstruction::func() const {

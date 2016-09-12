@@ -79,7 +79,7 @@ std::string IRInstruction::toString() const {
 
 void IRInstruction::convertToNop() {
   if (hasEdges()) clearEdges();
-  IRInstruction nop(Nop, marker());
+  IRInstruction nop(Nop, bcctx());
   m_op           = nop.m_op;
   m_typeParam    = nop.m_typeParam;
   m_numSrcs      = nop.m_numSrcs;

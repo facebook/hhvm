@@ -402,7 +402,7 @@ void performHoisting(
     auto newBlock = unit.defBlock(exitingInst->block()->profCount());
     auto newCheck = unit.gen(
       oldCheck->op(),
-      exitingInst->marker(),
+      exitingInst->bcctx(),
       type,
       exitingInst->taken(),
       oldCheck->src(0)
@@ -444,7 +444,7 @@ void insertHaltBlocks(
   auto addHaltBlock = [&](IRInstruction* check) {
     assertx(check->is(CheckType));
     auto haltBlock = unit.defBlock();
-    auto halt = unit.gen(Halt, check->marker());
+    auto halt = unit.gen(Halt, check->bcctx());
     haltBlock->push_back(halt);
     check->setTaken(haltBlock);
   };

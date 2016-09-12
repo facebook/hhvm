@@ -91,7 +91,7 @@ SSATmp* gen(IRGS& env, Opcode op, Args&&... args) {
   return makeInstruction(
     [&] (IRInstruction* inst) { return detail::genInstruction(env, inst); },
     op,
-    env.irb->curMarker(),
+    env.irb->curBCContext(),
     std::forward<Args>(args)...
   );
 }

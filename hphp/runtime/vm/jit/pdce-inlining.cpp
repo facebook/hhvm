@@ -498,7 +498,7 @@ void adjustFrame(IRUnit& unit,
 
   auto syncInst = unit.gen(
     SyncReturnBC,
-    it->marker(),
+    it->bcctx(),
     SyncReturnBCData{after, extra->spOffset + extra->numParams},
     inst.src(0),
     def->dst()
@@ -667,7 +667,7 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
     // Don't put DefLabel in a block with a BeginCatch. Splitting critical
     // edges should hoist BeginCatch for us.
     assertx(!succ->isCatch());
-    auto ret = ctx.unit->defLabel(1, succ->front().marker());
+    auto ret = ctx.unit->defLabel(1, succ->front().bcctx());
     succ->insert(succ->begin(), ret);
     ITRACE(4, "Creating succ DefLabel: {}\n", succ->front());
     return ret;
@@ -835,7 +835,7 @@ void syncCatchTraces(OptimizeContext& ctx, BlockSet& exitBlocks) {
       auto& endCatch = block->back();
       auto sync = ctx.unit->gen(
         EagerSyncVMRegs,
-        endCatch.marker(),
+        endCatch.bcctx(),
         *endCatch.extra<EndCatch>(),
         endCatch.src(0),
         endCatch.src(1)

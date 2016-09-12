@@ -118,11 +118,10 @@ void optimizePredictions(IRUnit& unit) {
      * fallthrough block (specialized).
      */
     auto const newCheckType = unit.gen(CheckTypeMem,
-                                       checkType->marker(),
+                                       checkType->bcctx(),
                                        checkType->typeParam(),
                                        exit,
-                                       load->src(0)
-                                      );
+                                       load->src(0));
     newCheckType->setNext(specialized);
     mainBlock->insert(mainBlock->iteratorTo(load), newCheckType);
 

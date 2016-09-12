@@ -492,7 +492,7 @@ void tryReplaceInstruction(
     if (valueInst->producesReference()) {
       auto block = valueInst->block();
       auto iter = block->iteratorTo(valueInst);
-      block->insert(++iter, unit.gen(IncRef, valueInst->marker(), valueNumber));
+      block->insert(++iter, unit.gen(IncRef, valueInst->bcctx(), valueNumber));
     }
   }
 }

@@ -38,7 +38,7 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 TEST(Simplifier, JumpConstFold) {
-  BCMarker dummy = BCMarker::Dummy();
+  auto const dummy = BCContext { BCMarker::Dummy() };
   IRUnit unit(test_context);
 
   // Folding JmpZero and JmpNZero.
@@ -63,13 +63,13 @@ TEST(Simplifier, JumpConstFold) {
 
 TEST(Simplifier, CondJmp) {
   IRUnit unit{test_context};
-  BCMarker marker = BCMarker::Dummy();
+  auto const bcctx = BCContext { BCMarker::Dummy() };
 
   // Folding Conv*ToBool
   {
-    auto val = unit.gen(Conjure, marker, TInt);
-    auto cnv = unit.gen(ConvIntToBool, marker, val->dst());
-    auto jcc = unit.gen(JmpZero, marker, unit.defBlock(), cnv->dst());
+    auto val = unit.gen(Conjure, bcctx, TInt);
+    auto cnv = unit.gen(ConvIntToBool, bcctx, val->dst());
+    auto jcc = unit.gen(JmpZero, bcctx, unit.defBlock(), cnv->dst());
 
     auto result = simplify(unit, jcc, false);
 
@@ -80,9 +80,9 @@ TEST(Simplifier, CondJmp) {
 
   // Folding in negation
   {
-    auto val = unit.gen(Conjure, marker, TBool);
-    auto neg = unit.gen(XorBool, marker, val->dst(), unit.cns(true));
-    auto jcc = unit.gen(JmpZero, marker, unit.defBlock(), neg->dst());
+    auto val = unit.gen(Conjure, bcctx, TBool);
+    auto neg = unit.gen(XorBool, bcctx, val->dst(), unit.cns(true));
+    auto jcc = unit.gen(JmpZero, bcctx, unit.defBlock(), neg->dst());
 
     auto result = simplify(unit, jcc, false);
 
@@ -94,7 +94,7 @@ TEST(Simplifier, CondJmp) {
 
 TEST(Simplifier, Count) {
   IRUnit unit{test_context};
-  BCMarker dummy = BCMarker::Dummy();
+  auto const dummy = BCContext { BCMarker::Dummy() };
 
   // Count($null) --> 0
   {
@@ -154,7 +154,7 @@ TEST(Simplifier, Count) {
 
 TEST(Simplifier, LdObjClass) {
   IRUnit unit{test_context};
-  auto const dummy = BCMarker::Dummy();
+  auto const dummy = BCContext { BCMarker::Dummy() };
   auto const cls = SystemLib::s_IteratorClass;
 
   // LdObjClass t1:Obj<=C doesn't simplify
@@ -179,7 +179,7 @@ TEST(Simplifier, LdObjClass) {
 
 TEST(Simplifier, LdObjInvoke) {
   IRUnit unit{test_context};
-  auto const dummy = BCMarker::Dummy();
+  auto const dummy = BCContext { BCMarker::Dummy() };
   auto const taken = unit.defBlock();
 
   // LdObjInvoke t1:Cls doesn't simplify

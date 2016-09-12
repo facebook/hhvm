@@ -44,13 +44,13 @@ std::vector<AliasClass> generic_classes() {
 }
 
 std::vector<AliasClass> specialized_classes(IRUnit& unit) {
-  auto const marker = BCMarker::Dummy();
+  auto const bcctx = BCContext { BCMarker::Dummy() };
 
   // Specialized test cases need some SSATmp*'s and similar things, so let's
   // make some instructions.
-  auto const mainFP = unit.gen(DefFP, marker)->dst();
+  auto const mainFP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefSP, marker, FPInvOffsetData { FPInvOffset { 10 } }, mainFP)->dst();
+    DefSP, bcctx, FPInvOffsetData { FPInvOffset { 10 } }, mainFP)->dst();
 
   return {
     // Frame locals.
@@ -212,10 +212,10 @@ TEST(AliasClass, Basic) {
 
 TEST(AliasClass, StackBasics) {
   IRUnit unit{test_context};
-  auto const marker = BCMarker::Dummy();
-  auto const FP = unit.gen(DefFP, marker)->dst();
+  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefSP, marker, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
+    DefSP, bcctx, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
 
   // Some basic canonicalization and maybe.
   {
@@ -257,8 +257,8 @@ TEST(AliasClass, StackBasics) {
 
 TEST(AliasClass, SpecializedUnions) {
   IRUnit unit{test_context};
-  auto const marker = BCMarker::Dummy();
-  auto const FP = unit.gen(DefFP, marker)->dst();
+  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const FP = unit.gen(DefFP, bcctx)->dst();
 
   AliasClass const stk = AStack { FP, FPRelOffset { -10 }, 3 };
   AliasClass const unrelated_stk = AStack { FP, FPRelOffset { -14 }, 1 };
@@ -332,10 +332,10 @@ TEST(AliasClass, SpecializedUnions) {
 
 TEST(AliasClass, StackUnions) {
   IRUnit unit{test_context};
-  auto const marker = BCMarker::Dummy();
-  auto const FP = unit.gen(DefFP, marker)->dst();
+  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefSP, marker, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
+    DefSP, bcctx, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
 
   {
     AliasClass const stk1  = AStack { FP, FPRelOffset { -3 }, 1 };
@@ -380,8 +380,8 @@ TEST(AliasClass, StackUnions) {
 
 TEST(AliasClass, IterUnion) {
   IRUnit unit{test_context};
-  auto const marker = BCMarker::Dummy();
-  auto const FP = unit.gen(DefFP, marker)->dst();
+  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto const FP = unit.gen(DefFP, bcctx)->dst();
 
   {
     AliasClass const iterP0 = AIterPos { FP, 0 };
@@ -462,8 +462,8 @@ TEST(AliasClass, IterUnion) {
 
 TEST(AliasClass, Pointees) {
   IRUnit unit{test_context};
-  auto const marker = BCMarker::Dummy();
-  auto ptr = unit.gen(LdMBase, marker, TPtrToGen)->dst();
+  auto const bcctx = BCContext { BCMarker::Dummy() };
+  auto ptr = unit.gen(LdMBase, bcctx, TPtrToGen)->dst();
   auto const acls = pointee(ptr);
   EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTV, acls);
 }

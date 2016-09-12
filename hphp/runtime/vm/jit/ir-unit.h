@@ -231,7 +231,7 @@ struct IRUnit {
   /*
    * Create a DefLabel instruction.
    */
-  IRInstruction* defLabel(unsigned numDst, BCMarker marker);
+  IRInstruction* defLabel(unsigned numDst, BCContext bcctx);
 
   /*
    * Add some extra destinations to a defLabel.

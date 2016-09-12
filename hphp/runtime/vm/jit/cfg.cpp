@@ -115,7 +115,7 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
     branch.setNext(middle);
   }
 
-  middle->prepend(unit.gen(Jmp, branch.marker(), to));
+  middle->prepend(unit.gen(Jmp, branch.bcctx(), to));
   auto const unlikely = Block::Hint::Unlikely;
   if (from->hint() == unlikely || to->hint() == unlikely) {
     middle->setHint(unlikely);
@@ -158,7 +158,7 @@ bool splitCriticalEdges(IRUnit& unit) {
   for (auto b : newCatches) {
     auto bc = b->next()->begin();
     assertx(bc->is(BeginCatch));
-    b->prepend(unit.gen(BeginCatch, bc->marker()));
+    b->prepend(unit.gen(BeginCatch, bc->bcctx()));
   }
 
   for (auto b : oldCatches) {

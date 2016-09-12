@@ -38,8 +38,8 @@ IRUnit::IRUnit(TransContext context) : m_context(context)
   m_startNanos = HPHP::Timer::GetThreadCPUTimeNanos();
 }
 
-IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
-  IRInstruction inst(DefLabel, marker);
+IRInstruction* IRUnit::defLabel(unsigned numDst, BCContext bcctx) {
+  IRInstruction inst(DefLabel, bcctx);
   auto const label = clone(&inst);
   if (numDst > 0) {
     auto const dstsPtr = new (m_arena) SSATmp*[numDst];
@@ -90,7 +90,7 @@ Block* IRUnit::defBlock(uint64_t profCount /* =1 */,
 SSATmp* IRUnit::cns(Type type) {
   assertx(type.hasConstVal() ||
          type.subtypeOfAny(TUninit, TInitNull, TNullptr));
-  IRInstruction inst(DefConst, BCMarker{});
+  IRInstruction inst(DefConst, BCContext{});
   inst.setTypeParam(type);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
     assertx(tmp->type() == type);

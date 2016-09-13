@@ -636,6 +636,7 @@ bool canDCE(IRInstruction* inst) {
   case LdStaticLoc:
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
+  case ProfileInstanceCheck:
     return false;
   }
   not_reached();

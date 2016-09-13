@@ -215,6 +215,8 @@ void cgNInstanceOfBitmask(IRLS& env, const IRInstruction* inst) {
   implInstanceOfBitmask(env, inst, CC_Z);
 }
 
+IMPL_OPCODE_CALL(ProfileInstanceCheck)
+
 IMPL_OPCODE_CALL(InterfaceSupportsArr)
 IMPL_OPCODE_CALL(InterfaceSupportsVec)
 IMPL_OPCODE_CALL(InterfaceSupportsDict)

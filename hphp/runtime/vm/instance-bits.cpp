@@ -169,6 +169,10 @@ void init() {
   g_initFlag.store(true, std::memory_order_release);
 }
 
+bool initted() {
+  return g_initFlag.load(std::memory_order_acquire);
+}
+
 unsigned lookup(const StringData* name) {
   assert(g_initFlag.load(std::memory_order_acquire) ||
          pthread_equal(s_initThread.load(std::memory_order_acquire),

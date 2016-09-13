@@ -2452,9 +2452,6 @@ OPTBLD_INLINE void iopInstanceOf() {
 }
 
 OPTBLD_INLINE void iopInstanceOfD(Id id) {
-  if (isProfileRequest()) {
-    InstanceBits::profile(vmfp()->m_func->unit()->lookupLitstrId(id));
-  }
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
   Cell* c1 = vmStack().topC();
   bool r = cellInstanceOf(c1, ne);

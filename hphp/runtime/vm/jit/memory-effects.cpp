@@ -1206,7 +1206,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
 
   //////////////////////////////////////////////////////////////////////
-  // Instructions that never do anything to memory
+  // Instructions that never read or write memory locations tracked by this
+  // module.
 
   case AssertStk:
   case HintStkInner:
@@ -1316,6 +1317,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdARInvName:
   case StARInvName:
   case MethodExists:
+  case ProfileInstanceCheck:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

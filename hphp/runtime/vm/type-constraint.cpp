@@ -330,7 +330,6 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     const Class *c = nullptr;
     if (isObject()) {
       if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
-        if (isProfileRequest()) InstanceBits::profile(m_typeName);
         return true;
       }
       // We can't save the Class* since it moves around from request
@@ -356,9 +355,6 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
           // metatype cannot be Mixed
           not_reached();
       }
-    }
-    if (isProfileRequest() && c) {
-      InstanceBits::profile(c->preClass()->name());
     }
     if (c && tv->m_data.pobj->instanceof(c)) {
       return true;

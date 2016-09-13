@@ -28,9 +28,9 @@ namespace HPHP { struct StringData; }
 //////////////////////////////////////////////////////////////////////
 
 /*
- * During warmup, we profile the most common classes or interfaces involved in
- * instanceof checks in order to set up a bitmask for each class to allow these
- * checks to be performed quickly by the JIT.
+ * In Profile translations, we record the most common classes or interfaces
+ * involved in instanceof checks in order to set up a bitmask for each class to
+ * allow these checks to be performed quickly by the JIT.
  */
 namespace HPHP { namespace InstanceBits {
 
@@ -75,9 +75,11 @@ void ifInitElse(Init init, Uninit uninit) {
 void profile(const StringData* name);
 
 /*
- * InstanceBits::init() must be called by any thread that wants to call
- * lookup() or getMask().
+ * Query or ensure the initialized state of InstanceBits. All calls to lookup()
+ * or getMask() must be dominated by a call to init() or a call to initted()
+ * that returned true.
  */
+bool initted();
 void init();
 
 /*

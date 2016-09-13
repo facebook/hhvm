@@ -107,9 +107,14 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   auto const ssaClassName = cns(env, className);
   auto const objClass     = gen(env, LdObjClass, src);
 
-  InstanceBits::init();
-  if (InstanceBits::lookup(className) != 0) {
-    return gen(env, InstanceOfBitmask, objClass, ssaClassName);
+  if (env.context.kind == TransKind::Profile && !InstanceBits::initted()) {
+    gen(env, ProfileInstanceCheck, cns(env, className));
+  } else if (env.context.kind == TransKind::Optimize ||
+             InstanceBits::initted()) {
+    InstanceBits::init();
+    if (InstanceBits::lookup(className) != 0) {
+      return gen(env, InstanceOfBitmask, objClass, ssaClassName);
+    }
   }
 
   // If the class is an interface, we can just hit the class's vtable or

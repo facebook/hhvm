@@ -584,7 +584,7 @@ module WithExpressionAndStatementAndTypeParser
       expect_class_name parser
     else
       let (parser, ty) = parse_xhp_type_specifier parser in
-      let (parser, name) = expect_name parser in
+      let (parser, name) = expect_xhp_name parser in
       let (parser, init) = parse_simple_initializer_opt parser in
       let (parser, req) = parse_xhp_required_opt parser in
       let result = make_xhp_class_attribute ty name init req in

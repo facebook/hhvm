@@ -19,4 +19,6 @@ let next_token = Full_fidelity_lexer.next_token_in_type
 let next_token_as_name = Full_fidelity_lexer.next_token_as_name
 let next_xhp_class_name = Full_fidelity_lexer.next_xhp_class_name
 let is_next_xhp_class_name = Full_fidelity_lexer.is_next_xhp_class_name
+let is_next_name = Full_fidelity_lexer.is_next_name
+let next_xhp_name = Full_fidelity_lexer.next_xhp_name
 let errors = Full_fidelity_lexer.errors

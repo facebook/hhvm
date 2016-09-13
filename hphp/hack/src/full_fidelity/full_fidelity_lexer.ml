@@ -503,6 +503,9 @@ let rec scan_xhp_element_name lexer =
 let is_xhp_class_name lexer =
   (peek_char lexer 0 = ':') && (is_name_nondigit (peek_char lexer 1))
 
+let is_next_name lexer =
+  is_name_nondigit (peek_char lexer 0)
+
 let scan_xhp_class_name lexer =
   (* An XHP class name is a colon followed by an xhp name. *)
   if is_xhp_class_name lexer then
@@ -897,3 +900,6 @@ let next_xhp_body_token lexer =
 
 let next_xhp_class_name lexer =
   scan_token_and_trivia scan_xhp_class_name false lexer
+
+let next_xhp_name lexer =
+  scan_token_and_trivia scan_xhp_element_name false lexer

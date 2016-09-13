@@ -91,6 +91,16 @@ module WithParser(Parser : ParserType) = struct
      a colon and may contain internal colons and dashes.  These are some
      helper methods to deal with them. *)
 
+  let is_next_name parser =
+    Parser.Lexer.is_next_name (Parser.lexer parser)
+
+  let next_xhp_name parser =
+    assert(is_next_name parser);
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_xhp_name lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token)
+
   let is_next_xhp_class_name parser =
     Parser.Lexer.is_next_xhp_class_name (Parser.lexer parser)
 
@@ -104,6 +114,16 @@ module WithParser(Parser : ParserType) = struct
   let expect_xhp_class_name parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
+      (parser, Syntax.make_token token)
+    else
+      (* ERROR RECOVERY: Create a missing token for the expected token,
+         and continue on from the current token. Don't skip it. *)
+      (* TODO: Different error? *)
+      (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
+
+  let expect_xhp_name parser =
+    if is_next_name parser then
+      let (parser, token) = next_xhp_name parser in
       (parser, Syntax.make_token token)
     else
       (* ERROR RECOVERY: Create a missing token for the expected token,

@@ -40,8 +40,8 @@ let () =
     )
   }) in
   let env = ServerEnv.{ env with last_command_time = 0.0 } in
-  let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
-  match loop_outputs.push_message with
+  let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
+  (match loop_outputs.push_message with
   | Some (DIAGNOSTIC (id, [error]))
         when id = diagnostic_subscription_id ->
       let error = Errors.to_string error in
@@ -49,4 +49,9 @@ let () =
         ("File \"/foo.php\", line 3, characters 1-0:\n" ^
         "Expected } (Parsing[1002])\n")
         error
-  | _ -> Test.fail "Expected push diagnostic with single error"
+  | _ -> Test.fail "Expected push diagnostic with single error");
+  let env = ServerEnv.{ env with last_command_time = 0.0 } in
+  let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
+  match loop_outputs.push_message with
+  | Some _ -> Test.fail "Unexpected push message"
+  | None -> ()

@@ -309,6 +309,9 @@ let type_check genv env =
   in
   let errorl = Errors.merge errorl' errorl in
 
+  let diag_subscribe = Option.map old_env.diag_subscribe
+    ~f:(fun x -> Diagnostic_subscription.update x errorl) in
+
   let total_rechecked_count = Relative_path.Map.cardinal fast in
   HackEventLogger.type_check_end total_rechecked_count t;
   let t = Hh_logger.log_duration "Type-check" t in
@@ -328,7 +331,7 @@ let type_check genv env =
     last_command_time = old_env.last_command_time;
     edited_files = old_env.edited_files;
     files_to_check = Relative_path.Set.empty;
-    diag_subscribe = old_env.diag_subscribe;
+    diag_subscribe;
     symbols_cache;
   } in
   new_env, total_rechecked_count

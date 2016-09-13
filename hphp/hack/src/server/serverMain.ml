@@ -103,14 +103,6 @@ module Program =
         let new_env, total_rechecked = ServerTypeCheck.check genv check_env in
         ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
                                        (Errors.get_error_list new_env.errorl);
-        Option.iter new_env.diag_subscribe ~f:begin fun sub ->
-          let id = Diagnostic_subscription.get_id sub in
-          let errors = Errors.get_error_list new_env.errorl in
-          let errors = List.map ~f:Errors.to_absolute errors in
-          let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
-          let client = Utils.unsafe_opt new_env.persistent_client in
-          ClientProvider.send_push_message_to_client client res;
-        end;
         new_env, total_rechecked
       end
 
@@ -274,6 +266,22 @@ let serve_one_iteration genv env client_provider stats_refs =
       stats.total_rechecked_count;
     Hh_logger.log "Recheck id: %s" !recheck_id;
   end;
+
+  Option.iter env.diag_subscribe ~f:begin fun sub ->
+    let id = Diagnostic_subscription.get_id sub in
+    let errors = Diagnostic_subscription.get_errors sub
+      |> Errors.get_error_list |> List.map ~f:Errors.to_absolute in
+    if errors <> [] then begin
+      let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
+      let client = Utils.unsafe_opt env.persistent_client in
+      ClientProvider.send_push_message_to_client client res
+    end
+  end;
+
+  let env = { env with diag_subscribe =
+    Option.map env.diag_subscribe ~f:Diagnostic_subscription.clear }
+  in
+
   last_stats := stats;
   let env = if has_client then
     (try

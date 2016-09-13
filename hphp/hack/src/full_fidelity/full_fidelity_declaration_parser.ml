@@ -121,18 +121,15 @@ module WithExpressionAndStatementAndTypeParser
   and parse_alias_declaration parser =
     (* SPEC
       alias-declaration:
-        type  name  =  type-to-be-aliased  ;
-        newtype  name  type-constraintopt  =  type-to-be-aliased  ;
-
-      type-to-be-aliased:
-        type-specifier
-        qualified-name
-        NOTE alias name can contain generics.
-        TODO figure out the grammar for this add add second error pass to
-        report illegal names
+        type  name  generic-type-parameter-list-opt  =  type-specifier  ;
+        newtype  name  generic-type-parameter-list-opt type-constraint-opt  =
+          type-specifier  ;
     *)
 
-    (* TODO: Produce an error if the "type" version has a constraint. *)
+    (* ERROR RECOVERY: We allow the "type" version to have a constraint in the
+       initial parse.
+       TODO: Produce an error in a later pass if the "type" version has a
+       constraint. *)
 
     let (parser, token) = next_token parser in
     let token = make_token token in

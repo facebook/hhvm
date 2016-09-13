@@ -1207,19 +1207,5 @@ void throwInvalidAdditionException(const ArrayData* ad) {
   );
 }
 
-void throwInvalidMergeException(const ArrayData* ad) {
-  assertx(ad->isHackArray());
-  std::pair<const char*, const char*> type_str = [&]{
-    if (ad->isVecArray()) return std::make_pair("Vecs", "vecs");
-    if (ad->isDict()) return std::make_pair("Dicts", "dicts");
-    if (ad->isKeyset()) return std::make_pair("Keysets", "keysets");
-    not_reached();
-  }();
-  SystemLib::throwInvalidOperationExceptionObject(
-    folly::sformat("{} can only be merged with other {}",
-                   type_str.first, type_str.second)
-  );
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

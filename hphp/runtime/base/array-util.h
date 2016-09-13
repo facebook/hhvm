@@ -44,8 +44,10 @@ struct ArrayUtil final {
   /**
    * Returns a copy of input array padded with pad_value to size pad_size.
    */
-  static Variant Pad(const Array& input, const Variant& pad_value, int pad_size,
-                     bool pad_right = true);
+  static Variant PadLeft(const Array& input, const Variant& pad_value,
+                         int pad_size);
+  static Variant PadRight(const Array& input, const Variant& pad_value,
+                          int pad_size);
 
   /**
    * Create an array containing the range of integers or characters from low

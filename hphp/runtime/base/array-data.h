@@ -682,7 +682,6 @@ void decRefArr(ArrayData* arr) {
 [[noreturn]] void throwRefInvalidArrayValueException(const Array& arr);
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
-[[noreturn]] void throwInvalidMergeException(const ArrayData* ad);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

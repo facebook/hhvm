@@ -123,40 +123,21 @@ public:
 
   void escalate();
 
+  #define COPY_BODY(meth, def)                                          \
+    if (!m_arr) return def;                                             \
+    auto new_arr = m_arr->meth;                                         \
+    return new_arr != m_arr ? Array{new_arr, NoIncRef{}} : Array{*this};
+
   // Make a copy of this array. Like the underlying ArrayData::copy operation,
   // the returned Array may point to the same underlying array as the original,
   // or a new one.
-  Array copy() const {
-    if (!m_arr)
-      return Array{};
-    auto new_arr = m_arr->copy();
-    return (new_arr != m_arr) ?
-      Array{new_arr, NoIncRef{}} : Array{*this};
-  }
+  Array copy() const { COPY_BODY(copy(), Array{}) }
+  Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
+  Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
+  Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
+  Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
 
-  Array toPHPArray() const {
-    if (!m_arr) return Create();
-    auto new_arr = m_arr->toPHPArray(true);
-    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
-  }
-
-  Array toVec() const {
-    if (!m_arr) return CreateVec();
-    auto new_arr = m_arr->toVec(true);
-    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
-  }
-
-  Array toDict() const {
-    if (!m_arr) return CreateDict();
-    auto new_arr = m_arr->toDict(true);
-    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
-  }
-
-  Array toKeyset() const {
-    if (!m_arr) return CreateKeyset();
-    auto new_arr = m_arr->toKeyset(true);
-    return (new_arr != m_arr) ? Array{new_arr, NoIncRef{}} : Array{*this};
-  }
+  #undef COPY_BODY
 
   /*
    * Constructors. Those that take "arr" or "var" are copy constructors, taking

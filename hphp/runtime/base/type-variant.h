@@ -597,6 +597,9 @@ struct Variant : private TypedValue {
   bool isKeyset() const {
     return isKeysetType(getType());
   }
+  bool isHackArray() const {
+    return isHackArrayType(getType());
+  }
   bool isObject() const {
     return getType() == KindOfObject;
   }
@@ -1314,6 +1317,8 @@ struct VRefParamValue {
   ObjectData *getObjectData() const { return m_var.getObjectData(); }
 
   bool isArray() const { return m_var.isArray(); }
+  bool isHackArray() const { return m_var.isHackArray(); }
+  bool isPHPArray() const { return m_var.isPHPArray(); }
   ArrNR toArrNR() const { return m_var.toArrNR(); }
 
   RefData* getRefData() const {

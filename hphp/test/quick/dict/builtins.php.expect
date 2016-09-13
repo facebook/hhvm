@@ -1,6 +1,6 @@
 Testing: dict(0) {
 }
-array_pad (after): dict(10) {
+array_pad (after): array(10) {
   [0]=>
   string(3) "pad"
   [1]=>
@@ -22,7 +22,7 @@ array_pad (after): dict(10) {
   [9]=>
   string(3) "pad"
 }
-array_pad (before): dict(10) {
+array_pad (before): array(10) {
   [0]=>
   string(3) "pad"
   [1]=>
@@ -44,7 +44,7 @@ array_pad (before): dict(10) {
   [9]=>
   string(3) "pad"
 }
-array_pad (just one): dict(1) {
+array_pad (just one): array(1) {
   [0]=>
   string(3) "pad"
 }
@@ -112,7 +112,7 @@ Testing: dict(5) {
   [4]=>
   int(5)
 }
-array_pad (after): dict(10) {
+array_pad (after): array(10) {
   [0]=>
   int(1)
   [1]=>
@@ -134,7 +134,7 @@ array_pad (after): dict(10) {
   [9]=>
   string(3) "pad"
 }
-array_pad (before): dict(10) {
+array_pad (before): array(10) {
   [0]=>
   string(3) "pad"
   [1]=>
@@ -156,7 +156,7 @@ array_pad (before): dict(10) {
   [9]=>
   int(5)
 }
-array_pad (just one): dict(5) {
+array_pad (just one): array(5) {
   [0]=>
   int(1)
   [1]=>

@@ -493,18 +493,18 @@ void SetArray::erase(uint32_t* loc) {
 //////////////////////////////////////////////////////////////////////
 
 ssize_t SetArray::getIterBegin() const {
-  assert(!empty());
   return nextElm(data(), -1);
 }
 
 ssize_t SetArray::getIterLast() const {
-  assert(!empty());
-  auto const elms = data();
-  auto const pos = m_used - 1;
-  if (elms[pos].isTombstone()) {
-    return prevElm(elms, pos);
+  auto elms = data();
+  ssize_t ei = m_used;
+  while (--ei >= 0) {
+    if (!elms[ei].isTombstone()) {
+      return ei;
+    }
   }
-  return pos;
+  return m_used;
 }
 
 void SetArray::getElm(ssize_t ei, TypedValue* out) const {

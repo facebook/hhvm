@@ -58,9 +58,10 @@ enum class CaseMode {
 };
 
 TypedValue HHVM_FUNCTION(array_change_key_case,
-                         ArrayArg input,
+                         const Variant& input,
                          int64_t case_ /* = 0 */) {
-  return tvReturn(ArrayUtil::ChangeKeyCase(ArrNR(input.get()),
+  getCheckedContainer(input);
+  return tvReturn(ArrayUtil::ChangeKeyCase(arr_input,
                                            (CaseMode)case_ == CaseMode::LOWER));
 }
 
@@ -123,18 +124,18 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
 }
 
 TypedValue HHVM_FUNCTION(array_column,
-                         ArrayArg input,
+                         const Variant& input,
                          const Variant& val_key,
                          const Variant& idx_key /* = null_variant */) {
 
-  ArrNR arr_input(input.get());
+  getCheckedContainer(input);
   Variant val = val_key, idx = idx_key;
   if (!array_column_coerce_key(val, "column") ||
       !array_column_coerce_key(idx, "index")) {
     return make_tv<KindOfBoolean>(false);
   }
-  ArrayInit ret(input->size(), ArrayInit::Map{});
-  for(auto it = arr_input.asArray().begin(); !it.end(); it.next()) {
+  ArrayInit ret(arr_input.size(), ArrayInit::Map{});
+  for (ArrayIter it(arr_input); it; ++it) {
     if (!it.second().isArray()) {
       continue;
     }
@@ -381,10 +382,6 @@ Variant HHVM_FUNCTION(array_keys, int64_t argc,
   );
 }
 
-static void php_array_merge(Array &arr1, const Array& arr2) {
-  arr1.merge(arr2);
-}
-
 static bool couldRecur(const Variant& v, const ArrayData* arr) {
   return v.isReferenced() ||
     arr->kind() == ArrayData::kGlobalsKind ||
@@ -393,9 +390,13 @@ static bool couldRecur(const Variant& v, const ArrayData* arr) {
 
 static void php_array_merge_recursive(PointerSet &seen, bool check,
                                       Array &arr1, const Array& arr2) {
-  if (check && !seen.insert((void*)arr1.get()).second) {
-    raise_warning("array_merge_recursive(): recursion detected");
-    return;
+  auto const arr1_ptr = (void*)arr1.get();
+  if (check) {
+    if (seen.find(arr1_ptr) != seen.end()) {
+      raise_warning("array_merge_recursive(): recursion detected");
+      return;
+    }
+    seen.insert(arr1_ptr);
   }
 
   for (ArrayIter iter(arr2); iter; ++iter) {
@@ -407,10 +408,8 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
       Variant &v = arr1.lvalAt(key, AccessFlags::Key);
-      auto subarr1 = v.toArray().copy();
-      php_array_merge_recursive(seen,
-                                couldRecur(v, subarr1.get()),
-                                subarr1,
+      auto subarr1 = v.toArray().toPHPArray();
+      php_array_merge_recursive(seen, couldRecur(v, subarr1.get()), subarr1,
                                 value.toArray());
       v.unset(); // avoid contamination of the value that was strongly bound
       v = subarr1;
@@ -420,7 +419,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
   }
 
   if (check) {
-    seen.erase((void*)arr1.get());
+    seen.erase(arr1_ptr);
   }
 }
 
@@ -513,16 +512,17 @@ TypedValue HHVM_FUNCTION(array_map,
 
 TypedValue HHVM_FUNCTION(array_merge,
                          int64_t numArgs,
-                         ArrayArg array1,
+                         const Variant& array1,
                          const Variant& array2 /* = null_variant */,
                          const Array& args /* = null array */) {
-  Array ret = Array::attach(MixedArray::MakeReserveLike(array1.get(), 0));
-  php_array_merge(ret, ArrNR(array1.get()));
+  getCheckedContainer(array1);
+  Array ret = Array::Create();
+  ret.merge(arr_array1);
 
   if (UNLIKELY(numArgs < 2)) return tvReturn(std::move(ret));
 
-  getCheckedArrayRet(array2, make_tv<KindOfNull>());
-  php_array_merge(ret, arr_array2);
+  getCheckedArray(array2);
+  ret.merge(arr_array2);
 
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
@@ -531,7 +531,7 @@ TypedValue HHVM_FUNCTION(array_merge,
       return make_tv<KindOfNull>();
     }
     const Array& arr_v = v.asCArrRef();
-    php_array_merge(ret, arr_v);
+    ret.merge(arr_v);
   }
   return tvReturn(std::move(ret));
 }
@@ -543,7 +543,7 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
   auto in1 = array1.asCArrRef();
-  auto ret = Array::attach(MixedArray::MakeReserveLike(in1.get(), 0));
+  Array ret = Array::Create();
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assert(seen.empty());
@@ -586,9 +586,13 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     return;
   }
 
-  if (check && !seen.insert((void*)arr1.get()).second) {
-    raise_warning("array_replace_recursive(): recursion detected");
-    return;
+  auto const arr1_ptr = (void*)arr1.get();
+  if (check) {
+    if (seen.find(arr1_ptr) != seen.end()) {
+      raise_warning("array_replace_recursive(): recursion detected");
+      return;
+    }
+    seen.insert(arr1_ptr);
   }
 
   for (ArrayIter iter(arr2); iter; ++iter) {
@@ -597,7 +601,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     if (arr1.exists(key, true) && value.isArray()) {
       Variant &v = arr1.lvalAt(key, AccessFlags::Key);
       if (v.isArray()) {
-        Array subarr1 = v.toArray();
+        Array subarr1 = v.toArray().toPHPArray();
         const ArrNR& arr_value = value.toArrNR();
         php_array_replace_recursive(seen, couldRecur(v, subarr1.get()),
                                     subarr1, arr_value);
@@ -611,7 +615,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
   }
 
   if (check) {
-    seen.erase((void*)arr1.get());
+    seen.erase(arr1_ptr);
   }
 }
 
@@ -670,10 +674,13 @@ TypedValue HHVM_FUNCTION(array_pad,
                          int pad_size,
                          const Variant& pad_value) {
   getCheckedArray(input);
+  auto arr =
+    UNLIKELY(input.isHackArray()) ? arr_input.toPHPArray() : arr_input;
   if (pad_size > 0) {
-    return tvReturn(ArrayUtil::Pad(arr_input, pad_value, pad_size, true));
+    return tvReturn(ArrayUtil::PadRight(arr, pad_value, pad_size));
+  } else {
+    return tvReturn(ArrayUtil::PadLeft(arr, pad_value, -pad_size));
   }
-  return tvReturn(ArrayUtil::Pad(arr_input, pad_value, -pad_size, false));
 }
 
 TypedValue HHVM_FUNCTION(array_pop,
@@ -857,12 +864,11 @@ TypedValue HHVM_FUNCTION(array_rand,
 }
 
 TypedValue HHVM_FUNCTION(array_reverse,
-                         ArrayArg input,
+                         const Variant& input,
                          bool preserve_keys /* = false */) {
 
-  ArrNR arrNR(input.get());
-  const Array& arr = arrNR.asArray();
-  return tvReturn(ArrayUtil::Reverse(arr, preserve_keys));
+  getCheckedContainer(input);
+  return tvReturn(ArrayUtil::Reverse(arr_input, preserve_keys));
 }
 
 TypedValue HHVM_FUNCTION(array_shift,
@@ -965,7 +971,11 @@ TypedValue HHVM_FUNCTION(array_slice,
 Variant array_splice(VRefParam input, int offset,
                      const Variant& length, const Variant& replacement) {
   getCheckedArrayVariant(input);
-  Array ret(Array::Create());
+  if (arr_input.isHackArray()) {
+    throw_expected_array_exception("array_splice");
+    return init_null();
+  }
+  Array ret = Array::Create();
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
   input.assignIfRef(ArrayUtil::Splice(arr_input, offset, len, replacement, &ret));
   return ret;
@@ -1091,7 +1101,8 @@ TypedValue HHVM_FUNCTION(array_unshift,
       ref_array->asArrRef().prepend(var);
     } else {
       {
-        Array newArray;
+        auto newArray = Array::attach(
+          MixedArray::MakeReserveSame(cell_array->m_data.parr, 0));
         newArray.append(var);
         if (!args.empty()) {
           auto pos_limit = args->iter_end();
@@ -1100,13 +1111,20 @@ TypedValue HHVM_FUNCTION(array_unshift,
             newArray.append(args->getValueRef(pos));
           }
         }
-        for (ArrayIter iter(array.toArray()); iter; ++iter) {
-          Variant key(iter.first());
-          const Variant& value(iter.secondRef());
-          if (key.isInteger()) {
-            newArray.appendWithRef(value);
-          } else {
-            newArray.setWithRef(key, value, true);
+        if (cell_array->m_data.parr->isKeyset()) {
+          for (ArrayIter iter(array.toArray()); iter; ++iter) {
+            Variant key(iter.first());
+            newArray.append(key);
+          }
+        } else {
+          for (ArrayIter iter(array.toArray()); iter; ++iter) {
+            Variant key(iter.first());
+            const Variant& value(iter.secondRef());
+            if (key.isInteger()) {
+              newArray.appendWithRef(value);
+            } else {
+              newArray.setWithRef(key, value, true);
+            }
           }
         }
         *ref_array = std::move(newArray);
@@ -1206,7 +1224,7 @@ bool HHVM_FUNCTION(array_walk_recursive,
                    VRefParam input,
                    const Variant& funcname,
                    const Variant& userdata /* = null_variant */) {
-  if (!input.isArray()) {
+  if (!input.isPHPArray()) {
     throw_expected_array_exception("array_walk_recursive");
     return false;
   }
@@ -1226,7 +1244,7 @@ bool HHVM_FUNCTION(array_walk,
                    VRefParam input,
                    const Variant& funcname,
                    const Variant& userdata /* = null_variant */) {
-  if (!input.isArray()) {
+  if (!input.isPHPArray()) {
     throw_expected_array_exception("array_walk");
     return false;
   }
@@ -1241,14 +1259,17 @@ bool HHVM_FUNCTION(array_walk,
   return true;
 }
 
-static void compact(PointerSet& seen,
-                    VarEnv* v, Array &ret, const Variant& var) {
+static void compact(PointerSet& seen, VarEnv* v, Array &ret,
+                    const Variant& var) {
   if (var.isArray()) {
     auto adata = var.getArrayData();
     auto check = couldRecur(var, adata);
-    if (check && !seen.insert(adata).second) {
-      raise_warning("compact(): recursion detected");
-      return;
+    if (check) {
+      if (seen.find(adata) != seen.end()) {
+        raise_warning("compact(): recursion detected");
+        return;
+      }
+      seen.insert(adata);
     }
     for (ArrayIter iter(adata); iter; ++iter) {
       compact(seen, v, ret, iter.secondRef());
@@ -1305,7 +1326,7 @@ static int php_count_recursive(const Array& array) {
 
 bool HHVM_FUNCTION(shuffle,
                    VRefParam array) {
-  if (!array.isArray()) {
+  if (!array.isPHPArray()) {
     throw_expected_array_exception("shuffle");
     return false;
   }
@@ -1647,7 +1668,9 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 #define COMMA ,
 #define diff_intersect_body(type, vararg, intersect_params)     \
   getCheckedArray(array1);                                      \
-  if (!arr_array1.size()) return tvReturn(arr_array1);          \
+  if (!arr_array1.size()) {                                     \
+    return tvReturn(empty_array());                             \
+  }                                                             \
   Array ret = Array::Create();                                  \
   if (RuntimeOption::EnableZendSorting) {                       \
     getCheckedArray(array2);                                    \
@@ -2827,7 +2850,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
 
 TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
   TypedValue* tv = getArg(ar, 0);
-  if (tv == nullptr || !tvAsVariant(tv).isArray()) {
+  if (tv == nullptr || !tvAsVariant(tv).isPHPArray()) {
     throw_expected_array_exception("array_multisort");
     return arReturn(ar, false);
   }

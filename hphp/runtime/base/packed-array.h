@@ -136,11 +136,11 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* AppendRefVec(ArrayData*, Variant&, bool);
   static ArrayData* AppendWithRefVec(ArrayData*, const Variant&, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
-  static ArrayData* MergeVec(ArrayData*, const ArrayData*);
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);
   static ArrayData* ToDictVec(ArrayData*, bool);
   static ArrayData* ToVecVec(ArrayData*, bool);
 
+  static constexpr auto MergeVec = &Merge;
   static constexpr auto ReleaseVec = &Release;
   static constexpr auto NvGetIntVec = &NvGetInt;
   static constexpr auto NvGetStrVec = &NvGetStr;

@@ -298,10 +298,8 @@ ArrayData* EmptyArray::PlusEq(ArrayData*, const ArrayData* elems) {
 }
 
 ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
-  if (!elems->isPHPArray()) throwInvalidMergeException(elems);
-
   // Packed arrays don't need renumbering, so don't make a copy.
-  if (elems->hasPackedLayout()) {
+  if (elems->isPacked()) {
     elems->incRefCount();
     return const_cast<ArrayData*>(elems);
   }
@@ -312,7 +310,8 @@ ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
     MixedArray::Renumber(copy);
     return copy;
   }
-  auto copy = elems->copy();
+  auto copy = const_cast<ArrayData*>(elems)->toPHPArray(true);
+  copy = copy == elems ? elems->copy() : copy;
   assert(copy != elems);
   copy->renumber();
   return copy;

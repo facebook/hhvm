@@ -111,7 +111,7 @@ ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   return ad;
 }
 
-ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
+ArrayData* MixedArray::MakeReserveSame(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
@@ -132,6 +132,17 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
   }
 
   return MixedArray::MakeReserveMixed(capacity);
+}
+
+ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
+                                       uint32_t capacity) {
+  capacity = (capacity ? capacity : other->size());
+
+  if (other->hasPackedLayout()) {
+    return PackedArray::MakeReserve(capacity);
+  } else {
+    return MixedArray::MakeReserveMixed(capacity);
+  }
 }
 
 MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
@@ -1639,9 +1650,6 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
                                          const ArrayData* elems) {
-  assert((ret->isPHPArray() && elems->isPHPArray()) ||
-         (ret->isDict() && elems->isDict()));
-
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     const Variant& value = it.secondRef();
@@ -1659,14 +1667,9 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
 
 ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   assert(asMixed(ad)->checkInvariants());
-
-  if (ad->kind() != elems->kind()) {
-    if (ad->isDict()) throwInvalidMergeException(ad);
-    assertx(ad->isPHPArray());
-    if (!elems->isPHPArray()) throwInvalidMergeException(elems);
-  }
-
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
+  assert(ret->hasExactlyOneRef());
+  ret->m_hdr.init(HeaderKind::Mixed, 1);
 
   if (elems->hasMixedLayout()) {
     auto const rhs = asMixed(elems);

@@ -1,30 +1,51 @@
 Testing: vec(0) {
 }
-array_pad (after): vec(10) {
+array_pad (after): array(10) {
+  [0]=>
   string(3) "pad"
+  [1]=>
   string(3) "pad"
+  [2]=>
   string(3) "pad"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(3) "pad"
+  [8]=>
   string(3) "pad"
-  string(3) "pad"
-}
-array_pad (before): vec(10) {
-  string(3) "pad"
-  string(3) "pad"
-  string(3) "pad"
-  string(3) "pad"
-  string(3) "pad"
-  string(3) "pad"
-  string(3) "pad"
-  string(3) "pad"
-  string(3) "pad"
+  [9]=>
   string(3) "pad"
 }
-array_pad (just one): vec(1) {
+array_pad (before): array(10) {
+  [0]=>
+  string(3) "pad"
+  [1]=>
+  string(3) "pad"
+  [2]=>
+  string(3) "pad"
+  [3]=>
+  string(3) "pad"
+  [4]=>
+  string(3) "pad"
+  [5]=>
+  string(3) "pad"
+  [6]=>
+  string(3) "pad"
+  [7]=>
+  string(3) "pad"
+  [8]=>
+  string(3) "pad"
+  [9]=>
+  string(3) "pad"
+}
+array_pad (just one): array(1) {
+  [0]=>
   string(3) "pad"
 }
 array_pop: NULL
@@ -83,35 +104,60 @@ Testing: vec(5) {
   int(4)
   int(5)
 }
-array_pad (after): vec(10) {
+array_pad (after): array(10) {
+  [0]=>
   int(1)
+  [1]=>
   int(2)
+  [2]=>
   int(3)
+  [3]=>
   int(4)
+  [4]=>
   int(5)
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(3) "pad"
+  [8]=>
   string(3) "pad"
+  [9]=>
   string(3) "pad"
 }
-array_pad (before): vec(10) {
+array_pad (before): array(10) {
+  [0]=>
   string(3) "pad"
+  [1]=>
   string(3) "pad"
+  [2]=>
   string(3) "pad"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   int(1)
+  [6]=>
   int(2)
+  [7]=>
   int(3)
+  [8]=>
   int(4)
+  [9]=>
   int(5)
 }
-array_pad (just one): vec(5) {
+array_pad (just one): array(5) {
+  [0]=>
   int(1)
+  [1]=>
   int(2)
+  [2]=>
   int(3)
+  [3]=>
   int(4)
+  [4]=>
   int(5)
 }
 array_pop: int(5)
@@ -238,35 +284,60 @@ Testing: vec(5) {
   int(2)
   int(1)
 }
-array_pad (after): vec(10) {
+array_pad (after): array(10) {
+  [0]=>
   int(5)
+  [1]=>
   int(4)
+  [2]=>
   int(3)
+  [3]=>
   int(2)
+  [4]=>
   int(1)
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(3) "pad"
+  [8]=>
   string(3) "pad"
+  [9]=>
   string(3) "pad"
 }
-array_pad (before): vec(10) {
+array_pad (before): array(10) {
+  [0]=>
   string(3) "pad"
+  [1]=>
   string(3) "pad"
+  [2]=>
   string(3) "pad"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   int(5)
+  [6]=>
   int(4)
+  [7]=>
   int(3)
+  [8]=>
   int(2)
+  [9]=>
   int(1)
 }
-array_pad (just one): vec(5) {
+array_pad (just one): array(5) {
+  [0]=>
   int(5)
+  [1]=>
   int(4)
+  [2]=>
   int(3)
+  [3]=>
   int(2)
+  [4]=>
   int(1)
 }
 array_pop: int(1)
@@ -391,33 +462,56 @@ Testing: vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array_pad (after): vec(10) {
+array_pad (after): array(10) {
+  [0]=>
   string(1) "a"
+  [1]=>
   string(1) "b"
+  [2]=>
   string(1) "c"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(3) "pad"
+  [8]=>
   string(3) "pad"
+  [9]=>
   string(3) "pad"
 }
-array_pad (before): vec(10) {
+array_pad (before): array(10) {
+  [0]=>
   string(3) "pad"
+  [1]=>
   string(3) "pad"
+  [2]=>
   string(3) "pad"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(1) "a"
+  [8]=>
   string(1) "b"
+  [9]=>
   string(1) "c"
 }
-array_pad (just one): vec(3) {
+array_pad (just one): array(3) {
+  [0]=>
   string(1) "a"
+  [1]=>
   string(1) "b"
+  [2]=>
   string(1) "c"
 }
 array_pop: string(1) "c"
@@ -515,34 +609,58 @@ Testing: vec(4) {
   string(1) "a"
   string(1) "b"
 }
-array_pad (after): vec(10) {
+array_pad (after): array(10) {
+  [0]=>
   string(1) "b"
+  [1]=>
   string(1) "a"
+  [2]=>
   string(1) "a"
+  [3]=>
   string(1) "b"
+  [4]=>
   string(3) "pad"
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(3) "pad"
+  [8]=>
   string(3) "pad"
+  [9]=>
   string(3) "pad"
 }
-array_pad (before): vec(10) {
+array_pad (before): array(10) {
+  [0]=>
   string(3) "pad"
+  [1]=>
   string(3) "pad"
+  [2]=>
   string(3) "pad"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(1) "b"
+  [7]=>
   string(1) "a"
+  [8]=>
   string(1) "a"
+  [9]=>
   string(1) "b"
 }
-array_pad (just one): vec(4) {
+array_pad (just one): array(4) {
+  [0]=>
   string(1) "b"
+  [1]=>
   string(1) "a"
+  [2]=>
   string(1) "a"
+  [3]=>
   string(1) "b"
 }
 array_pop: string(1) "b"
@@ -651,31 +769,52 @@ dict(4) {
 Testing: vec(1) {
   int(100)
 }
-array_pad (after): vec(10) {
+array_pad (after): array(10) {
+  [0]=>
   int(100)
+  [1]=>
   string(3) "pad"
+  [2]=>
   string(3) "pad"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(3) "pad"
+  [8]=>
   string(3) "pad"
+  [9]=>
   string(3) "pad"
 }
-array_pad (before): vec(10) {
+array_pad (before): array(10) {
+  [0]=>
   string(3) "pad"
+  [1]=>
   string(3) "pad"
+  [2]=>
   string(3) "pad"
+  [3]=>
   string(3) "pad"
+  [4]=>
   string(3) "pad"
+  [5]=>
   string(3) "pad"
+  [6]=>
   string(3) "pad"
+  [7]=>
   string(3) "pad"
+  [8]=>
   string(3) "pad"
+  [9]=>
   int(100)
 }
-array_pad (just one): vec(1) {
+array_pad (just one): array(1) {
+  [0]=>
   int(100)
 }
 array_pop: int(100)

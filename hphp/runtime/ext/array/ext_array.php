@@ -12,7 +12,7 @@
  *
  */
 <<__Native, __IsFoldable>>
-function array_change_key_case(array $input, int $case_ = CASE_LOWER): mixed;
+function array_change_key_case(mixed $input, int $case_ = CASE_LOWER): mixed;
 
 /**
  * Chunks an array into size large chunks. The last chunk may contain less
@@ -44,7 +44,7 @@ function array_chunk(mixed $input,
  *
  */
 <<__Native>>
-function array_column(array $arr,
+function array_column(mixed $arr,
                       mixed $val_key,
                       mixed $idx_key = null): mixed;
 
@@ -205,7 +205,7 @@ function array_merge_recursive(mixed $array1,
  *
  */
 <<__Native("NumArgs"), __IsFoldable>>
-function array_merge(array $array1, mixed $array2 = null, ...$argv): mixed;
+function array_merge(mixed $array1, mixed $array2 = null, ...$argv): mixed;
 
 /**
  * array_replace_recursive() replaces the values of the first array with the
@@ -364,7 +364,7 @@ function array_rand(mixed $input, int $num_req = 1): mixed;
  *
  */
 <<__Native, __IsFoldable>>
-function array_reverse(array $array, bool $preserve_keys = false): mixed;
+function array_reverse(mixed $array, bool $preserve_keys = false): mixed;
 
 /**
  * Searches haystack for needle.

@@ -100,36 +100,42 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
   return out_hash;
 }
 
-Variant ArrayUtil::Pad(const Array& input, const Variant& pad_value, int pad_size,
-                       bool pad_right /* = true */) {
+Variant ArrayUtil::PadRight(const Array& input, const Variant& pad_value,
+                            int pad_size) {
   int input_size = input.size();
   if (input_size >= pad_size) {
     return input;
   }
 
-  if (pad_right) {
-    Array ret = input;
-    for (int i = input_size; i < pad_size; i++) {
-      ret.append(pad_value);
-    }
-    return ret;
-  } else {
-    auto ret = Array::attach(
-      MixedArray::MakeReserveLike(input.get(), pad_size)
-    );
-    for (int i = input_size; i < pad_size; i++) {
-      ret.append(pad_value);
-    }
-    for (ArrayIter iter(input); iter; ++iter) {
-      Variant key(iter.first());
-      if (key.isNumeric()) {
-        ret.appendWithRef(iter.secondRef());
-      } else {
-        ret.setWithRef(key, iter.secondRef(), true);
-      }
-    }
-    return ret;
+  Array ret = input;
+  for (int i = input_size; i < pad_size; i++) {
+    ret.append(pad_value);
   }
+  return ret;
+}
+
+Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
+                           int pad_size) {
+  int input_size = input.size();
+  if (input_size >= pad_size) {
+    return input;
+  }
+
+  auto ret = Array::attach(
+    MixedArray::MakeReserveLike(input.get(), pad_size)
+  );
+  for (int i = input_size; i < pad_size; i++) {
+    ret.append(pad_value);
+  }
+  for (ArrayIter iter(input); iter; ++iter) {
+    Variant key(iter.first());
+    if (key.isNumeric()) {
+      ret.appendWithRef(iter.secondRef());
+    } else {
+      ret.setWithRef(key, iter.secondRef(), true);
+    }
+  }
+  return ret;
 }
 
 Variant ArrayUtil::Range(unsigned char low, unsigned char high,
@@ -274,10 +280,10 @@ Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
 
 Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */) {
   if (input.empty()) {
-    return input;
+    return empty_array();
   }
 
-  auto ret = Array::attach(MixedArray::MakeReserveLike(input.get(), 0));
+  auto ret = Array::Create();
   auto pos_limit = input->iter_end();
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
        pos = input->iter_rewind(pos)) {

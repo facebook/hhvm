@@ -246,7 +246,6 @@ ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
 }
 
 ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
-  if (!elems->isPHPArray()) throwInvalidMergeException(elems);
   auto escalated = Array::attach(Escalate(ad));
   return escalated->merge(elems);
 }

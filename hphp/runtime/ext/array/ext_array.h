@@ -280,33 +280,24 @@ inline int64_t countHelper(TypedValue tv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define getCheckedArrayRet(input, fail)                           \
+#define getCheckedArrayRet(input, fail)                                  \
   auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
-  if (UNLIKELY(!isArrayLikeType(cell_##input->m_type))) {               \
-    throw_expected_array_exception();                             \
-    return fail;                                                  \
-  }                                                               \
-  ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
+  if (UNLIKELY(!isArrayLikeType(cell_##input->m_type))) {                \
+    throw_expected_array_exception();                                    \
+    return fail;                                                         \
+  }                                                                      \
+  ArrNR arrNR_##input{cell_##input->m_data.parr};                        \
   const Array& arr_##input = arrNR_##input.asArray();
 
-#define getCheckedArrayColumnRet(input, fail)                     \
-  auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
-  if (UNLIKELY(!isArrayLikeType(cell_##input->m_type))) {             \
-    if (cell_##input->m_type == KindOfString ||                   \
-        cell_##input->m_type == KindOfPersistentString) {             \
-      throw_bad_type_exception("array_column() expects parameter" \
-                               " 1 to be array, string given");   \
-    } else if (cell_##input->m_type == KindOfInt64) {             \
-      throw_bad_type_exception("array_column() expects parameter" \
-                               " 1 to be array, integer given");  \
-    } else {                                                      \
-      throw_expected_array_exception();                           \
-    }                                                             \
-    return fail;                                                  \
-  }                                                               \
-  ArrNR arrNR_##input(cell_##input->m_data.parr);                 \
-  Array arr_##input = arrNR_##input.asArray();
-
+#define getCheckedContainer(input)                                       \
+  if (UNLIKELY(!isContainer(input))) {                                   \
+    throw_expected_array_or_collection_exception();                      \
+    return make_tv<KindOfNull>();                                        \
+  }                                                                      \
+  Variant var_##input(input);                                            \
+  tvCastToArrayInPlace(var_##input.asTypedValue());                      \
+  assert(var_##input.isArray());                                         \
+  auto arr_##input = var_##input.toArray();
 
 #define getCheckedArray(input)        \
   getCheckedArrayRet(input, make_tv<KindOfNull>())

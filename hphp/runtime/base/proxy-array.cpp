@@ -322,7 +322,6 @@ ProxyArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 
 ArrayData*
 ProxyArray::Merge(ArrayData* ad, const ArrayData* elems) {
-  if (!elems->isPHPArray()) throwInvalidMergeException(elems);
   auto r = innerArr(ad)->merge(elems);
   reseatable(ad, r);
   return ad;

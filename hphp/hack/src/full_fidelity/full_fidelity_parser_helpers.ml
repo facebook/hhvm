@@ -72,6 +72,9 @@ module WithParser(Parser : ParserType) = struct
          and continue on from the current token. Don't skip it. *)
       (with_error parser error, (Syntax.make_missing()))
 
+  let expect_required parser =
+    expect_token parser TokenKind.Required SyntaxError.error1051
+
   let expect_name parser =
     expect_token parser TokenKind.Name SyntaxError.error1004
 

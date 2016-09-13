@@ -538,6 +538,10 @@ module WithToken(Token: TokenType) = struct
       xhp_enum_values : t;
       xhp_enum_right_brace : t
     }
+    and xhp_required = {
+      xhp_required_at : t;
+      xhp_required : t
+    }
     and xhp_class_attribute_declaration = {
       xhp_attr_token : t;
       xhp_attr_list : t;
@@ -546,7 +550,8 @@ module WithToken(Token: TokenType) = struct
     and xhp_class_attribute = {
       xhp_attr_decl_type : t;
       xhp_attr_decl_name : t;
-      xhp_attr_decl_init : t
+      xhp_attr_decl_init : t;
+      xhp_attr_decl_required : t
     }
     and xhp_attribute = {
       xhp_attr_name : t;
@@ -675,6 +680,7 @@ module WithToken(Token: TokenType) = struct
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
     | XHPEnumType of xhp_enum_type
+    | XHPRequired of xhp_required
     | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
     | XHPClassAttribute of xhp_class_attribute
     | TraitUse of trait_use
@@ -820,6 +826,7 @@ module WithToken(Token: TokenType) = struct
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | XHPEnumType _ -> SyntaxKind.XHPEnumType
+      | XHPRequired _ -> SyntaxKind.XHPRequired
       | XHPClassAttributeDeclaration _ ->
         SyntaxKind.XHPClassAttributeDeclaration
       | XHPClassAttribute _ -> SyntaxKind.XHPClassAttribute
@@ -1000,6 +1007,7 @@ module WithToken(Token: TokenType) = struct
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
     let is_xhp_enum_type node = kind node = SyntaxKind.XHPEnumType
+    let is_xhp_required node = kind node = SyntaxKind.XHPRequired
     let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
     let is_xhp_open node = kind node = SyntaxKind.XHPOpen
     let is_xhp_attribute node = kind node = SyntaxKind.XHPAttribute
@@ -1202,12 +1210,17 @@ module WithToken(Token: TokenType) = struct
           xhp_enum_right_brace } ->
         [ xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
           xhp_enum_right_brace ]
+      | XHPRequired
+        { xhp_required_at; xhp_required } ->
+        [ xhp_required_at; xhp_required ]
       | XHPClassAttributeDeclaration
         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
         [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]
       | XHPClassAttribute
-        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init } ->
-        [ xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init ]
+        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init;
+          xhp_attr_decl_required } ->
+        [ xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init;
+          xhp_attr_decl_required ]
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]
@@ -1623,12 +1636,17 @@ module WithToken(Token: TokenType) = struct
           xhp_enum_right_brace } ->
         [ "xhp_enum_token"; "xhp_enum_left_brace"; "xhp_enum_values";
           "xhp_enum_right_brace" ]
+      | XHPRequired
+        { xhp_required_at; xhp_required } ->
+        [ "xhp_required_at"; "xhp_required" ]
       | XHPClassAttributeDeclaration
         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon } ->
         [ "xhp_attr_token"; "xhp_attr_list"; "xhp_attr_semicolon" ]
       | XHPClassAttribute
-        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init } ->
-        [ "xhp_attr_decl_type"; "xhp_attr_decl_name"; "xhp_attr_decl_init" ]
+        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init;
+          xhp_attr_decl_required } ->
+        [ "xhp_attr_decl_type"; "xhp_attr_decl_name"; "xhp_attr_decl_init";
+          "xhp_attr_decl_required" ]
       | TraitUse
         { trait_use_token; trait_use_name_list; trait_use_semicolon; } ->
         [ "trait_use_token"; "trait_use_name_list"; "trait_use_semicolon"; ]
@@ -2330,14 +2348,20 @@ module WithToken(Token: TokenType) = struct
         XHPEnumType
         { xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
           xhp_enum_right_brace }
+      | (SyntaxKind.XHPRequired,
+        [ xhp_required_at; xhp_required ]) ->
+        XHPRequired
+        { xhp_required_at; xhp_required }
       | (SyntaxKind.XHPClassAttributeDeclaration,
         [ xhp_attr_token; xhp_attr_list; xhp_attr_semicolon ]) ->
         XHPClassAttributeDeclaration
         { xhp_attr_token; xhp_attr_list; xhp_attr_semicolon }
       | (SyntaxKind.XHPClassAttribute,
-        [ xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init ]) ->
+        [ xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init;
+          xhp_attr_decl_required ]) ->
         XHPClassAttribute
-        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init }
+        { xhp_attr_decl_type; xhp_attr_decl_name; xhp_attr_decl_init;
+          xhp_attr_decl_required }
       | (SyntaxKind.TraitUse,
         [ trait_use_token; trait_use_name_list; trait_use_semicolon; ]) ->
         TraitUse { trait_use_token; trait_use_name_list; trait_use_semicolon; }
@@ -2915,13 +2939,16 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.XHPEnumType
         [ token; left; items; right ]
 
+      let make_xhp_required at req =
+        from_children SyntaxKind.XHPRequired [ at; req ]
+
       let make_xhp_class_attribute_declaration attr attrs semi =
         from_children SyntaxKind.XHPClassAttributeDeclaration
           [ attr; attrs; semi ]
 
-      let make_xhp_class_attribute attr_type name init =
+      let make_xhp_class_attribute attr_type name init required =
         from_children SyntaxKind.XHPClassAttribute
-          [ attr_type; name; init ]
+          [ attr_type; name; init; required ]
 
       let make_trait_use trait_use_token trait_use_name_list
         trait_use_semicolon =

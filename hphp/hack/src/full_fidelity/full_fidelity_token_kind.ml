@@ -70,6 +70,7 @@ type t =
 | Public
 | Require
 | Require_once
+| Required
 | Resource
 | Return
 | Self
@@ -231,6 +232,7 @@ let from_string keyword =
   | "protected" -> Some Protected
   | "public" -> Some Public
   | "require" -> Some Require
+  | "required" -> Some Required
   | "require_once" -> Some Require_once
   | "resource" -> Some Resource
   | "return" -> Some Return
@@ -312,6 +314,7 @@ let to_string kind =
   | Public -> "public"
   | Require -> "require"
   | Require_once -> "require_once"
+  | Required -> "required"
   | Resource -> "resource"
   | Return -> "return"
   | Self -> "self"

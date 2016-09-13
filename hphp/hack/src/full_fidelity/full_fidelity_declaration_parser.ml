@@ -556,11 +556,25 @@ module WithExpressionAndStatementAndTypeParser
     else
       parse_type_specifier parser
 
+  and parse_xhp_required_opt parser =
+    (* SPEC (Draft)
+      xhp-required :
+        @  required
+
+      Note that these are two tokens. They can have whitespace between them. *)
+    if peek_token_kind parser = At then
+      let (parser, at) = assert_token parser At in
+      let (parser, req) = expect_required parser in
+      let result = make_xhp_required at req in
+      (parser, result)
+    else
+      (parser, (make_missing()))
+
   and parse_xhp_class_attribute parser =
     (* SPEC (Draft)
     xhp-attribute-declaration:
       xhp-class-name
-      xhp-type-specifier name initializer-opt @required-opt (TODO)
+      xhp-type-specifier xhp-name initializer-opt xhp-required-opt
     *)
     if peek_token_kind parser = Colon then
       (* TODO: This doesn't give quite the right error message if it turns
@@ -572,8 +586,8 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, ty) = parse_xhp_type_specifier parser in
       let (parser, name) = expect_name parser in
       let (parser, init) = parse_simple_initializer_opt parser in
-      (* TODO: Parse @required *)
-      let result = make_xhp_class_attribute ty name init in
+      let (parser, req) = parse_xhp_required_opt parser in
+      let result = make_xhp_class_attribute ty name init req in
       (parser, result)
 
   and parse_xhp_class_attribute_declaration parser =

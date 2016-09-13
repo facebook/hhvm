@@ -39,8 +39,6 @@
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/pc-filter.h"
 
-namespace vixl { class Simulator; }
-
 namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
@@ -572,7 +570,6 @@ public:
     mark(m_setprofileCallback);
     mark(m_memThresholdCallback);
     mark(m_executingSetprofileCallback);
-    //mark(m_activeSims);
     mark(m_headerCallback);
   }
 
@@ -653,7 +650,6 @@ public:
   Variant m_memThresholdCallback;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
-  req::vector<vixl::Simulator*> m_activeSims;
 public:
   Cell m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops

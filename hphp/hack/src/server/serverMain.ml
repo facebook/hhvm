@@ -200,7 +200,6 @@ let recheck genv old_env updates =
     end;
   end;
   let env, total_rechecked = Program.recheck genv old_env to_recheck in
-  BuildMain.incremental_update genv old_env env updates;
   env, to_recheck, total_rechecked
 
 (* When a rebase occurs, dfind takes a while to give us the full list of

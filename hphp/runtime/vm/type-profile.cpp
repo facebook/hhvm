@@ -81,6 +81,7 @@ const std::vector<int64_t> rfhBuckets = {
   360, 420, 480, 540, 600,                                   // every 1m, to 10m
   900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300, 3600, // every 5m, to 1h
   4500, 5400, 6300, 7200,                                    // every 15m, to 2h
+  3 * 3600, 4 * 3600, 5 * 3600, 6 * 3600,                    // every 1h, to 6h
 };
 std::atomic<size_t> nextRFH{0};
 

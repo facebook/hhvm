@@ -158,6 +158,8 @@ let main env =
       in
       match res with
       | ServerCommandTypes.DIAGNOSTIC (id, errors) ->
+        (* TODO: change the diagnostic JSON format to be a map, not a list *)
+        let errors = List.concat_map (SMap.bindings errors) ~f:snd in
         let errors_json = List.map ~f:Errors.to_json errors in
         write_response @@ IdeJsonUtils.json_string_of_response 0
           (Diagnostic_response (id, Hh_json.JSON_Array errors_json));

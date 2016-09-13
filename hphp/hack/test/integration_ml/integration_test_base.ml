@@ -72,6 +72,8 @@ let run_loop_once env inputs =
     push_message = TestClientProvider.get_push_message ();
   }
 
+let prepend_root x = root ^ x
+
 let fail x =
   print_endline x;
   exit 1

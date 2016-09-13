@@ -67,7 +67,7 @@ and streamed =
   | BUILD of ServerBuild.build_opts
 
 type push =
-  | DIAGNOSTIC of int * Pos.absolute Errors.error_ list
+  | DIAGNOSTIC of int * (Pos.absolute Errors.error_ list) SMap.t
 
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout

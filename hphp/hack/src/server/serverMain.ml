@@ -269,9 +269,8 @@ let serve_one_iteration genv env client_provider stats_refs =
 
   Option.iter env.diag_subscribe ~f:begin fun sub ->
     let id = Diagnostic_subscription.get_id sub in
-    let errors = Diagnostic_subscription.get_errors sub
-      |> Errors.get_error_list |> List.map ~f:Errors.to_absolute in
-    if errors <> [] then begin
+    let errors = Diagnostic_subscription.get_absolute_errors sub in
+    if not @@ SMap.is_empty errors then begin
       let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
       let client = Utils.unsafe_opt env.persistent_client in
       ClientProvider.send_push_message_to_client client res

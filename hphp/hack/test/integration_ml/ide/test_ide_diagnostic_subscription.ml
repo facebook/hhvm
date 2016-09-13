@@ -9,6 +9,7 @@
  *)
 
 open Integration_test_base_types
+open Reordered_argument_collections
 open ServerCommandTypes
 
 module Test = Integration_test_base
@@ -42,14 +43,20 @@ let () =
   let env = ServerEnv.{ env with last_command_time = 0.0 } in
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   (match loop_outputs.push_message with
-  | Some (DIAGNOSTIC (id, [error]))
-        when id = diagnostic_subscription_id ->
-      let error = Errors.to_string error in
-      Test.assertEqual
-        ("File \"/foo.php\", line 3, characters 1-0:\n" ^
-        "Expected } (Parsing[1002])\n")
-        error
-  | _ -> Test.fail "Expected push diagnostic with single error");
+  | Some (DIAGNOSTIC (id, errors))
+      when id = diagnostic_subscription_id ->
+    if not @@ (SMap.cardinal errors = 1) then
+      Test.fail "Expected errors for single file";
+    begin match SMap.get errors (Test.prepend_root foo_name) with
+      | Some [error] ->
+        let error = Errors.to_string error in
+        Test.assertEqual
+          ("File \"/foo.php\", line 3, characters 1-0:\n" ^
+          "Expected } (Parsing[1002])\n")
+          error
+      | _ -> Test.fail "Expected exactly one error"
+    end
+  | _ -> Test.fail "Expected push diagnostics");
   let env = ServerEnv.{ env with last_command_time = 0.0 } in
   let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
   match loop_outputs.push_message with

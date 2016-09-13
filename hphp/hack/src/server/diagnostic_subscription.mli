@@ -8,6 +8,8 @@
  *
  *)
 
+open Reordered_argument_collections
+
 type t
 
 val of_id : id:int -> t
@@ -18,4 +20,5 @@ val clear : t -> t
 
 val update : t -> Errors.t -> t
 
-val get_errors : t -> Errors.t
+(* Errors ready for sending to client *)
+val get_absolute_errors : t -> (Pos.absolute Errors.error_ list) SMap.t

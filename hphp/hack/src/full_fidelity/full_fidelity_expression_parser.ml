@@ -231,16 +231,18 @@ module WithStatementAndDeclAndTypeParser
     member-selection-expression:
       postfix-expression  ->  name
       postfix-expression  ->  variable-name
+      postfix-expression  ->  xhp-class-name (DRAFT XHP SPEC)
 
     null-safe-member-selection-expression:
-      postfix-expression  ->  name
-      postfix-expression  ->  variable-name
+      postfix-expression  ?->  name
+      postfix-expression  ?->  variable-name
+      postfix-expression  ?->  xhp-class-name (DRAFT XHP SPEC)
     *)
     let (parser, token) = next_token parser in
     let op = make_token token in
     (* TODO: We are putting the name / variable into the tree as a token
     leaf, rather than as a name or variable expression. Is that right? *)
-    let (parser, name) = expect_name_or_variable parser in
+    let (parser, name) = expect_xhp_class_name_or_name_or_variable parser in
     let result = if (Token.kind token) = MinusGreaterThan then
       make_member_selection_expression term op name
     else

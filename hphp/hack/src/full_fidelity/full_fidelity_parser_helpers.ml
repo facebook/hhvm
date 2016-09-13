@@ -220,6 +220,13 @@ module WithParser(Parser : ParserType) = struct
          and continue on from the current token. Don't skip it. *)
       (with_error parser SyntaxError.error1050, (Syntax.make_missing()))
 
+  let expect_xhp_class_name_or_name_or_variable parser =
+    if is_next_xhp_class_name parser then
+      let (parser, token) = next_xhp_class_name parser in
+      (parser, Syntax.make_token token)
+    else
+      expect_name_or_variable parser
+
   let expect_name_variable_or_class parser =
     let (parser1, token) = next_token parser in
     if Token.kind token = TokenKind.Class then

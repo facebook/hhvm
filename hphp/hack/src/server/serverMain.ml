@@ -91,7 +91,25 @@ module Program =
       (* Because of symlinks, we can have updates from files that aren't in
        * the .hhconfig directory *)
       let updates = SSet.filter updates (fun p -> string_starts_with p root) in
-      Relative_path.(relativize_set Root updates)
+      let updates = Relative_path.(relativize_set Root updates) in
+      let to_recheck =
+        Relative_path.Set.filter updates begin fun update ->
+          ServerEnv.file_filter (Relative_path.suffix update)
+        end in
+      let config_in_updates =
+        Relative_path.Set.mem updates ServerConfig.filename in
+      if config_in_updates then begin
+        let new_config, _ = ServerConfig.(load filename genv.options) in
+        if not (ServerConfig.is_compatible genv.config new_config) then begin
+          Hh_logger.log
+            "%s changed in an incompatible way; please restart %s.\n"
+            (Relative_path.suffix ServerConfig.filename)
+            GlobalConfig.program_name;
+           (** TODO: Notify the server monitor directly about this. *)
+           Exit_status.(exit Hhconfig_changed)
+        end;
+      end;
+      to_recheck
 
     let recheck genv old_env typecheck_updates =
       if Relative_path.Set.is_empty typecheck_updates then
@@ -181,24 +199,7 @@ let handle_connection genv env client is_persistent =
      flush stderr;
      env
 
-let recheck genv old_env updates =
-  let to_recheck =
-    Relative_path.Set.filter updates begin fun update ->
-      ServerEnv.file_filter (Relative_path.suffix update)
-    end in
-  let config_in_updates =
-    Relative_path.Set.mem updates ServerConfig.filename in
-  if config_in_updates then begin
-    let new_config, _ = ServerConfig.(load filename genv.options) in
-    if not (ServerConfig.is_compatible genv.config new_config) then begin
-      Hh_logger.log
-        "%s changed in an incompatible way; please restart %s.\n"
-        (Relative_path.suffix ServerConfig.filename)
-        GlobalConfig.program_name;
-       (** TODO: Notify the server monitor directly about this. *)
-       Exit_status.(exit Hhconfig_changed)
-    end;
-  end;
+let recheck genv old_env to_recheck =
   let env, total_rechecked = Program.recheck genv old_env to_recheck in
   env, to_recheck, total_rechecked
 

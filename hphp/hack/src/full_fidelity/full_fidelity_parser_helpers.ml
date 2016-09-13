@@ -73,8 +73,16 @@ module WithParser(Parser : ParserType) = struct
       (with_error parser error, (Syntax.make_missing()))
 
   let expect_name parser =
-    (* TODO: What if the name is a keyword? *)
     expect_token parser TokenKind.Name SyntaxError.error1004
+
+  let expect_name_allow_keywords parser =
+    let (parser1, token) = next_token_as_name parser in
+    if (Token.kind token) = TokenKind.Name then
+      (parser1, Syntax.make_token token)
+    else
+      (* ERROR RECOVERY: Create a missing token for the expected token,
+         and continue on from the current token. Don't skip it. *)
+      (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
 
   (* We have a number of issues involving xhp class names, which begin with
      a colon and may contain internal colons and dashes.  These are some

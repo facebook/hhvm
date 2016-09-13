@@ -160,7 +160,7 @@ and parse_generic_type_constraints parser =
     +
     -
   type-parameter-name:
-    type-specifier
+    name
 *)
 and parse_type_parameter parser =
   let token = peek_token parser in
@@ -171,7 +171,7 @@ and parse_type_parameter parser =
       (parser, variance)
     else
       (parser, make_missing()) in
-  let (parser, type_name) = parse_type_specifier parser in
+  let (parser, type_name) = expect_name_allow_keywords parser in
   let (parser, constraints) = parse_generic_type_constraints parser in
   (parser, make_type_parameter variance type_name constraints)
 

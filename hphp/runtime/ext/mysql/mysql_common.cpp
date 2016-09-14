@@ -48,10 +48,14 @@
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/server/server-stats.h"
 
+#include "hphp/runtime/ext/async_mysql/ext_async_mysql.h"
+#include "hphp/runtime/vm/native-data.h"
+
 namespace HPHP {
 
-const StaticString
-  s_mysqli_result("mysqli_result");
+using facebook::common::mysql_client::SSLOptionsProviderBase;
+
+const StaticString s_mysqli_result("mysqli_result");
 
 struct MySQLStaticInitializer {
   MySQLStaticInitializer() {
@@ -568,23 +572,106 @@ Variant php_mysql_field_info(const Resource& result, int field,
   return false;
 }
 
-
-
-Variant php_mysql_do_connect(const String& server, const String& username,
-                             const String& password, const String& database,
-                             int client_flags, bool persistent, bool async,
-                             int connect_timeout_ms, int query_timeout_ms) {
-  return php_mysql_do_connect_on_link(nullptr, server, username, password,
-                                      database, client_flags, persistent, async,
-                                      connect_timeout_ms, query_timeout_ms);
+Variant php_mysql_do_connect(
+    const String& server,
+    const String& username,
+    const String& password,
+    const String& database,
+    int client_flags,
+    bool persistent,
+    bool async,
+    int connect_timeout_ms,
+    int query_timeout_ms) {
+  return php_mysql_do_connect_on_link(
+      nullptr,
+      server,
+      username,
+      password,
+      database,
+      client_flags,
+      persistent,
+      async,
+      connect_timeout_ms,
+      query_timeout_ms);
 }
 
-Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
-                                     String server, String username,
-                                     String password, String database,
-                                     int client_flags, bool persistent,
-                                     bool async, int connect_timeout_ms,
-                                     int query_timeout_ms) {
+Variant php_mysql_do_connect_with_ssl(
+    const String& server,
+    const String& username,
+    const String& password,
+    const String& database,
+    int client_flags,
+    int connect_timeout_ms,
+    int query_timeout_ms,
+    const Variant& sslContextProvider /* = null */) {
+  std::shared_ptr<SSLOptionsProviderBase> ssl_provider;
+  if (!sslContextProvider.isNull()) {
+    auto* obj =
+        Native::data<HPHP::MySSLContextProvider>(sslContextProvider.toObject());
+    ssl_provider = obj->getSSLProvider();
+  }
+
+  return php_mysql_do_connect_on_link(
+      nullptr,
+      server,
+      username,
+      password,
+      database,
+      client_flags,
+      false,
+      false,
+      connect_timeout_ms,
+      query_timeout_ms,
+      ssl_provider);
+}
+
+static void mysql_set_ssl_options(
+    std::shared_ptr<MySQL> mySQL,
+    std::shared_ptr<SSLOptionsProviderBase> ssl_provider) {
+  if (!ssl_provider || !mySQL || mySQL->get() == nullptr) {
+    return;
+  }
+  auto ssl_context = ssl_provider->getSSLContext();
+  if (!ssl_context) {
+    return; // shouldn't happen
+  }
+
+  MYSQL* conn = mySQL->get();
+  mysql_options(conn, MYSQL_OPT_SSL_CONTEXT, ssl_context->getSSLCtx());
+  auto ssl_session = ssl_provider->getSSLSession();
+  if (ssl_session) {
+    mysql_options4(conn, MYSQL_OPT_SSL_SESSION, ssl_session, nullptr);
+  }
+}
+
+static void mysql_store_ssl_session(
+    std::shared_ptr<MySQL> mySQL,
+    std::shared_ptr<SSLOptionsProviderBase> ssl_provider) {
+  if (!ssl_provider || !mySQL || mySQL->get() == nullptr) {
+    return;
+  }
+  MYSQL* conn = mySQL->get();
+  // if we reused the session it means we already have it, no need to store
+  if (!mysql_get_ssl_session_reused(conn)) {
+    wangle::SSLSessionPtr session((SSL_SESSION*)mysql_get_ssl_session(conn));
+    if (session) {
+      ssl_provider->storeSSLSession(std::move(session));
+    }
+  }
+}
+
+Variant php_mysql_do_connect_on_link(
+    std::shared_ptr<MySQL> mySQL,
+    String server,
+    String username,
+    String password,
+    String database,
+    int client_flags,
+    bool persistent,
+    bool async,
+    int connect_timeout_ms,
+    int query_timeout_ms,
+    std::shared_ptr<SSLOptionsProviderBase> ssl_provider) {
   if (connect_timeout_ms < 0) {
     connect_timeout_ms = mysqlExtension::ConnectTimeout;
   }
@@ -635,9 +722,16 @@ Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
   }
 
   if (mySQL == nullptr) {
-    mySQL = std::make_shared<MySQL>(host.c_str(), port, username.c_str(),
-                                    password.c_str(), database.c_str());
+    mySQL = std::make_shared<MySQL>(
+        host.c_str(),
+        port,
+        username.c_str(),
+        password.c_str(),
+        database.c_str());
   }
+
+  // set SSL Options
+  mysql_set_ssl_options(mySQL, ssl_provider);
 
   if (mySQL->getState() == MySQLState::INITED) {
     if (async) {
@@ -672,9 +766,12 @@ Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
     }
   }
 
+  // store SSL Session
+  mysql_store_ssl_session(mySQL, ssl_provider);
+
   if (savePersistent) {
-    MySQL::SetPersistent(host, port, socket, username, password,
-                         client_flags, mySQL);
+    MySQL::SetPersistent(
+        host, port, socket, username, password, client_flags, mySQL);
     MySQL::SetCurrentNumPersistent(MySQL::GetCurrentNumPersistent() + 1);
   }
   MySQL::SetDefaultConn(mySQL);

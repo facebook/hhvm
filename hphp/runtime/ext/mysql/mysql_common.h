@@ -25,9 +25,10 @@
 
 #include "mysql.h"
 
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/ext/extension.h"
+#include "squangle/mysql_client/SSLOptionsProviderBase.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -40,15 +41,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct MySQLUtil {
-  enum TimeoutType {
-    ConnectTimeout,
-    ReadTimeout,
-    WriteTimeout
-  };
+  enum TimeoutType { ConnectTimeout, ReadTimeout, WriteTimeout };
 
-  static int set_mysql_timeout(MYSQL *mysql,
-                               MySQLUtil::TimeoutType type,
-                               int ms);
+  static int
+  set_mysql_timeout(MYSQL* mysql, MySQLUtil::TimeoutType type, int ms);
 };
 
 enum class MySQLState : int8_t {
@@ -448,23 +444,52 @@ enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };
 #define PHP_MYSQL_FIELD_FLAGS 5
 
 Variant php_mysql_field_info(const Resource& result, int field, int entry_type);
-Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
-                                     String server, String username,
-                                     String password, String database,
-                                     int client_flags, bool persistent,
-                                     bool async, int connect_timeout_ms,
-                                     int query_timeout_ms);
-Variant php_mysql_do_connect(const String& server, const String& username,
-                             const String& password, const String& database,
-                             int client_flags, bool persistent, bool async,
-                             int connect_timeout_ms, int query_timeout_ms);
+Variant php_mysql_do_connect_on_link(
+    std::shared_ptr<MySQL> mySQL,
+    String server,
+    String username,
+    String password,
+    String database,
+    int client_flags,
+    bool persistent,
+    bool async,
+    int connect_timeout_ms,
+    int query_timeout_ms,
+    std::shared_ptr<facebook::common::mysql_client::SSLOptionsProviderBase>
+        ssl_opts = nullptr);
+
+Variant php_mysql_do_connect(
+    const String& server,
+    const String& username,
+    const String& password,
+    const String& database,
+    int client_flags,
+    bool persistent,
+    bool async,
+    int connect_timeout_ms,
+    int query_timeout_ms);
+
+Variant php_mysql_do_connect_with_ssl(
+    const String& server,
+    const String& username,
+    const String& password,
+    const String& database,
+    int client_flags,
+    int connect_timeout_ms,
+    int query_timeout_ms,
+    const Variant& sslContextProvider /* = null */);
 
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };
-MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
-                                    bool async_mode);
+MySQLQueryReturn php_mysql_do_query(
+    const String& query,
+    const Variant& link_id,
+    bool async_mode);
 Variant php_mysql_get_result(const Variant& link_id, bool use_store);
-Variant php_mysql_do_query_and_get_result(const String& query, const Variant& link_id,
-                                          bool use_store, bool async_mode);
+Variant php_mysql_do_query_and_get_result(
+    const String& query,
+    const Variant& link_id,
+    bool use_store,
+    bool async_mode);
 
 #define PHP_MYSQL_ASSOC  1 << 0
 #define PHP_MYSQL_NUM    1 << 1

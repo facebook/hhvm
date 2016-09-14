@@ -19,6 +19,7 @@ const int MYSQL_CLIENT_SSL = 2048;
 function mysql_connect($server = null, $username = null, $password = null, $new_link = false, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
 function mysql_pconnect($server = null, $username = null, $password = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
 function mysql_connect_with_db($server = null, $username = null, $password = null, $database = null, $new_link = false, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
+function mysql_connect_with_ssl($server = null, $username = null, $password = null, $database = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1, ?MySSLContextProvider $ssl_context = null);
 function mysql_pconnect_with_db($server = null, $username = null, $password = null, $database = null, $client_flags = 0, $connect_timeout_ms = -1, $query_timeout_ms = -1);
 function mysql_set_charset($charset, $link_identifier = null);
 function mysql_ping($link_identifier = null);

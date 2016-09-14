@@ -319,124 +319,153 @@ void Assembler::isel(const Reg64& rt, const Reg64& ra, const Reg64& rb,
 }
 
 void Assembler::lbz(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(34, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lbzu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(35, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lbzux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 119);
 }
 
 void Assembler::lbzx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 87);
 }
 
 void Assembler::ld(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDSForm(58, rn(rt), rn(m.r.base), m.r.disp, 0);
 }
 
 void Assembler::ldbrx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 532);
 }
 
 void Assembler::ldu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDSForm(58, rn(rt), rn(m.r.base), m.r.disp, 1);
 }
 
 void Assembler::ldux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 53);
 }
 
 void Assembler::ldx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 21);
 }
 
 void Assembler::lhbrx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 790);
 }
 
 void Assembler::lhz(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(40, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lhzu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(41, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lhzux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 331);
 }
 
 void Assembler::lhzx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 279);
 }
 
 void Assembler::lha(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(42, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lhau(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(43, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lhaux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 375);
 }
 
 void Assembler::lhax(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 343);
 }
 
 void Assembler::lmw(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(46, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lq(const Reg64& rtp, MemoryRef m) {
-  //assert invalid instruction form
-  assert(rn(rtp) == rn(m.r.base));
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
+  assertx(rn(rtp) == rn(m.r.base)); // assert invalid instruction form
   EmitDQForm(56, rn(rtp), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lswi(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 597);
 }
 
 void Assembler::lswx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 533);
 }
 
 void Assembler::lwz(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(32, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lwzu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(33, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::lwzux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 55);
 }
 
 void Assembler::lwzx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 23);
 }
 
 void Assembler::lwa(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDSForm(58, rn(rt), rn(m.r.base), m.r.disp, 2);
 }
 
 void Assembler::lwaux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 373);
 }
 
 void Assembler::lwax(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 341);
 }
 
 void Assembler::lwbrx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 534);
 }
 
@@ -594,94 +623,117 @@ void Assembler::srw(const Reg64& ra, const Reg64& rs, const Reg64& rb,
 }
 
   void Assembler::stb(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(38, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::stbu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(39, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::stbux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 247);
 }
 
 void Assembler::stbx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 215);
 }
 
 void Assembler::sth(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(44, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::sthu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(45, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::sthux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 439);
 }
 
 void Assembler::sthx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 407);
 }
 
 void Assembler::stw(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(36, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::stwu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(37, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::stwux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 183);
 }
 
 void Assembler::stwx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 151);
 }
 
 void Assembler::std(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDSForm(62, rn(rt), rn(m.r.base), m.r.disp, 0);
 }
 
 void Assembler::stdu(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDSForm(62, rn(rt), rn(m.r.base), m.r.disp, 1);
 }
 
 void Assembler::stdux(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 181);
 }
 
 void Assembler::stdx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 149);
 }
 
 void Assembler::stq(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDSForm(62, rn(rt), rn(m.r.base), m.r.disp, 2);
 }
 
 void Assembler::sthbrx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 918);
 }
 
 void Assembler::stwbrx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 662);
 }
 
 void Assembler::stdbrx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 660);
 }
 
 void Assembler::stmw(const Reg64& rt, MemoryRef m) {
+  assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
   EmitDForm(47, rn(rt), rn(m.r.base), m.r.disp);
 }
 
 void Assembler::stswi(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 725);
 }
 
 void Assembler::stswx(const Reg64& rt, MemoryRef m) {
+  assertx(!m.r.disp);  // doesn't support immediate displacement
   EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 661);
 }
 void Assembler::subfic(const Reg64& rt, const Reg64& ra,  uint16_t imm) {

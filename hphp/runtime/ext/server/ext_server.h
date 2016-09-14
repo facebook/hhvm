@@ -47,6 +47,7 @@ String HHVM_FUNCTION(pagelet_server_task_result,
                      int64_t timeout_ms);
 int64_t HHVM_FUNCTION(pagelet_server_tasks_started);
 void HHVM_FUNCTION(pagelet_server_flush);
+bool HHVM_FUNCTION(pagelet_server_is_done);
 bool HHVM_FUNCTION(xbox_send_message,
                    const String& msg,
                    VRefParam ret,

@@ -46,6 +46,7 @@ static struct ServerExtension final : Extension {
     HHVM_FE(pagelet_server_task_result);
     HHVM_FE(pagelet_server_tasks_started);
     HHVM_FE(pagelet_server_flush);
+    HHVM_FE(pagelet_server_is_done);
     HHVM_FE(xbox_send_message);
     HHVM_FE(xbox_post_message);
     HHVM_FE(xbox_task_start);
@@ -137,6 +138,16 @@ void HHVM_FUNCTION(pagelet_server_flush) {
       PageletServer::AddToPipeline(s);
     }
   }
+}
+
+bool HHVM_FUNCTION(pagelet_server_is_done) {
+  PageletTransport *job =
+    dynamic_cast<PageletTransport *>(g_context->getTransport());
+  if (job) {
+    return job->isDone();
+  }
+  // if we aren't in a pagelet thread, this call is meaningless
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

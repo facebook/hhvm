@@ -88,6 +88,13 @@ function pagelet_server_tasks_started(): int;
 function pagelet_server_flush(): void;
 
 /**
+ * Determine whether or not the pagelet thread we are executing on has finished
+ * and closed its output buffer.
+ */
+<<__HipHopSpecific, __Native>>
+function pagelet_server_is_done(): bool;
+
+/**
  * Sends an xbox message and waits for response. Please read server
  *   documentation for what an xbox is.
  *

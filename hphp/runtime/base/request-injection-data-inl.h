@@ -33,6 +33,15 @@ inline bool RequestInjectionData::getJit() const {
   return m_jit;
 }
 
+inline bool RequestInjectionData::getJitFolding() const {
+  return m_jitFolding;
+  return true;
+}
+
+inline void RequestInjectionData::setJitFolding(bool flag) {
+  m_jitFolding = flag;
+}
+
 inline bool RequestInjectionData::getCoverage() const {
   return m_coverage;
 }

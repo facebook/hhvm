@@ -157,6 +157,12 @@ struct RequestInjectionData {
   void updateJit();
 
   /*
+   * Whether the JIT is performing function folding.
+   */
+  bool getJitFolding() const;
+  void setJitFolding(bool);
+
+  /*
    * Whether coverage is being collected.
    */
   bool getCoverage() const;
@@ -271,6 +277,7 @@ private:
   bool m_debuggerAttached{false};
   bool m_coverage{false};
   bool m_jit{false};
+  bool m_jitFolding{false};
   bool m_debuggerIntr{false};
 
   bool m_debuggerStepIn{false};

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/func-effects.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
@@ -553,6 +554,8 @@ SSATmp* opt_foldable(IRGS& env,
     vmpc() = vmfp()->m_func->getEntry();
     SCOPE_EXIT{ vmpc() = savedPC; };
 #endif
+    SCOPE_EXIT{ RID().setJitFolding(false); };
+    RID().setJitFolding(true);
     Variant v = invoke(func->name()->data(), args.toArray(), -1, true, true,
                        !func->unit()->useStrictTypes());
     auto const retVal = *v.asCell();

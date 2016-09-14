@@ -150,14 +150,17 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
-  v << lea{calleeAR, rvmfp()};
-
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     v << syncvmsp{v.cns(0x42)};
 
     constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
-    emitImmStoreq(v, kUninitializedRIP, rvmfp()[AROFF(m_savedRip)]);
+    emitImmStoreq(v, kUninitializedRIP, calleeAR + AROFF(m_savedRip));
   }
+
+  // A few vasm passes depend on the particular instruction sequence here:
+  //  - vasm-copy expects this lea{} to be immediately followed by the
+  //    callphp{} below.
+  v << lea{calleeAR, rvmfp()};
 
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,

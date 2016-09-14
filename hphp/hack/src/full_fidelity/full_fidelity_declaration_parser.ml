@@ -570,25 +570,34 @@ module WithExpressionAndStatementAndTypeParser
     else
       (parser, (make_missing()))
 
+  and parse_xhp_class_attribute_typed parser =
+    (* xhp-type-specifier xhp-name initializer-opt xhp-required-opt *)
+    let (parser, ty) = parse_xhp_type_specifier parser in
+    let (parser, name) = expect_xhp_name parser in
+    let (parser, init) = parse_simple_initializer_opt parser in
+    let (parser, req) = parse_xhp_required_opt parser in
+    let result = make_xhp_class_attribute ty name init req in
+    (parser, result)
+
   and parse_xhp_class_attribute parser =
     (* SPEC (Draft)
     xhp-attribute-declaration:
       xhp-class-name
       xhp-type-specifier xhp-name initializer-opt xhp-required-opt
+
+    ERROR RECOVERY:
+    The xhp type specifier could be an xhp class name. To disambiguate we peek
+    ahead a token; if it's a comma or semi, we're done. If not, then we assume
+    that we are in the more complex case.
     *)
-    if peek_token_kind parser = Colon then
-      (* TODO: This doesn't give quite the right error message if it turns
-      out to be malformed; consider tweaking this. *)
-      (* TODO: What about the case where we have a "type name = value"
-         attribute and the type starts with a colon? Is that ever legal? *)
-      expect_class_name parser
+    if is_next_xhp_class_name parser then
+      let (parser1, class_name) = expect_class_name parser in
+      match peek_token_kind parser1 with
+      | Comma
+      | Semicolon -> (parser1, class_name)
+      | _ -> parse_xhp_class_attribute_typed parser
     else
-      let (parser, ty) = parse_xhp_type_specifier parser in
-      let (parser, name) = expect_xhp_name parser in
-      let (parser, init) = parse_simple_initializer_opt parser in
-      let (parser, req) = parse_xhp_required_opt parser in
-      let result = make_xhp_class_attribute ty name init req in
-      (parser, result)
+      parse_xhp_class_attribute_typed parser
 
   and parse_xhp_class_attribute_declaration parser =
     (* SPEC: (Draft)

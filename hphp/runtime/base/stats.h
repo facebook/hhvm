@@ -35,13 +35,6 @@ namespace Stats {
   STAT(TgtCache_StaticMethodFHit) \
   STAT(TgtCache_StaticMethodFMiss) \
   STAT(TgtCache_StaticMethodFFill) \
-  /* Type prediction stats */ \
-  STAT(TypePred_Insert) \
-  STAT(TypePred_Evict) \
-  STAT(TypePred_Hit) \
-  STAT(TypePred_Miss) \
-  STAT(TypePred_MissTooFew) \
-  STAT(TypePred_MissTooWeak) \
   /* Translation cache statistics */ \
   STAT(TC_Sync) \
   STAT(TC_SyncUnwind) \
@@ -84,16 +77,6 @@ namespace Stats {
   STAT(Switch_Generic) \
   STAT(Switch_Integer) \
   STAT(Switch_String) \
-  /* ARM simulator */ \
-  STAT(vixl_SimulatedInstr) \
-  STAT(vixl_SimulatedLoad) \
-  STAT(vixl_SimulatedStore) \
-  /* ArrayGet */ \
-  STAT(ArrayGet_Total) \
-  STAT(ArrayGet_Opt) \
-  STAT(ArrayGet_Mono) \
-  STAT(ArrayGet_Packed) \
-  STAT(ArrayGet_Mixed) \
   /* ObjectData construction */ \
   STAT(ObjectData_new_dtor_yes) \
   STAT(ObjectData_new_dtor_no) \

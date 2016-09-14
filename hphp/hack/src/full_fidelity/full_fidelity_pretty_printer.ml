@@ -336,6 +336,9 @@ let rec get_doc node =
     let semicolon = get_doc x.enumerator_semicolon in
     n ^| e ^| v ^^^ semicolon
   | AliasDeclaration x ->
+    (* TODO: What's the best way to ensure that there's a newline between the
+    attribute and the alias declaration proper? *)
+    let attr = get_doc x.alias_attribute_spec in
     let a = get_doc x.alias_token in
     let n = get_doc x.alias_name in
     let generic = get_doc x.alias_generic_parameter in
@@ -343,7 +346,7 @@ let rec get_doc node =
     let e = get_doc x.alias_equal in
     let t = get_doc x.alias_type in
     let s = get_doc x.alias_semicolon in
-    a ^| n ^| generic ^| c ^| e ^| t ^^^ s
+    attr ^| a ^| n ^| generic ^| c ^| e ^| t ^^^ s
   | PropertyDeclaration x ->
     let m = get_doc x.prop_modifiers in
     let t = get_doc x.prop_type in

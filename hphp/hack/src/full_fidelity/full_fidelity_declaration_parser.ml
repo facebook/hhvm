@@ -121,9 +121,10 @@ module WithExpressionAndStatementAndTypeParser
   and parse_alias_declaration parser =
     (* SPEC
       alias-declaration:
-        type  name  generic-type-parameter-list-opt  =  type-specifier  ;
-        newtype  name  generic-type-parameter-list-opt type-constraint-opt  =
-          type-specifier  ;
+        attribute-spec-opt type  name
+          generic-type-parameter-list-opt  =  type-specifier  ;
+        attribute-spec-opt newtype  name
+          generic-type-parameter-list-opt type-constraint-opt  =type-specifier  ;
     *)
 
     (* ERROR RECOVERY: We allow the "type" version to have a constraint in the
@@ -131,6 +132,7 @@ module WithExpressionAndStatementAndTypeParser
        TODO: Produce an error in a later pass if the "type" version has a
        constraint. *)
 
+    let attr = make_missing() in (* TODO Parse the attribute *)
     let (parser, token) = next_token parser in
     let token = make_token token in
     let (parser, name) = expect_name parser in
@@ -139,7 +141,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, equal) = expect_equal parser in
     let (parser, ty) = parse_type_specifier parser in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_alias token name generic constr equal ty semi in
+    let result = make_alias attr token name generic constr equal ty semi in
     (parser, result)
 
   and parse_enumerator parser =

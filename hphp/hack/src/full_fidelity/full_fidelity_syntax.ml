@@ -108,6 +108,7 @@ module WithToken(Token: TokenType) = struct
       enumerator_semicolon : t
     }
     and alias_declaration = {
+      alias_attribute_spec : t;
       alias_token : t;
       alias_name : t;
       alias_generic_parameter : t;
@@ -1138,10 +1139,12 @@ module WithToken(Token: TokenType) = struct
         [ enumerator_name; enumerator_equal; enumerator_value;
           enumerator_semicolon ]
       | AliasDeclaration
-        { alias_token; alias_name; alias_generic_parameter; alias_constraint;
-          alias_equal; alias_type; alias_semicolon } ->
-        [ alias_token; alias_name; alias_generic_parameter; alias_constraint;
-          alias_equal; alias_type; alias_semicolon ]
+        { alias_attribute_spec; alias_token; alias_name;
+          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
+          alias_semicolon } ->
+        [ alias_attribute_spec; alias_token; alias_name;
+          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
+          alias_semicolon ]
       | PropertyDeclaration
         { prop_modifiers; prop_type; prop_declarators; prop_semicolon } ->
         [ prop_modifiers; prop_type; prop_declarators; prop_semicolon ]
@@ -1563,10 +1566,12 @@ module WithToken(Token: TokenType) = struct
         [ "enumerator_name"; "enumerator_equal"; "enumerator_value";
           "enumerator_semicolon" ]
       | AliasDeclaration
-        { alias_token; alias_name; alias_generic_parameter; alias_constraint;
-          alias_equal; alias_type; alias_semicolon } ->
-        [ "alias_token"; "alias_name"; "alias_generic_parameter";
-          "alias_constraint"; "alias_equal"; "alias_type"; "alias_semicolon" ]
+        { alias_attribute_spec; alias_token; alias_name;
+          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
+          alias_semicolon } ->
+        [ "alias_attribute_spec"; "alias_token"; "alias_name";
+          "alias_generic_parameter"; "alias_constraint"; "alias_equal";
+          "alias_type"; "alias_semicolon" ]
       | PropertyDeclaration
         { prop_modifiers; prop_type; prop_declarators; prop_semicolon } ->
         [ "prop_modifiers"; "prop_type"; "prop_declarators"; "prop_semicolon" ]
@@ -2263,11 +2268,13 @@ module WithToken(Token: TokenType) = struct
         { enumerator_name; enumerator_equal; enumerator_value;
           enumerator_semicolon }
       | (SyntaxKind.AliasDeclaration,
-        [ alias_token; alias_name; alias_generic_parameter; alias_constraint;
-          alias_equal; alias_type; alias_semicolon ]) ->
+        [ alias_attribute_spec; alias_token; alias_name;
+          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
+          alias_semicolon ]) ->
         AliasDeclaration
-        { alias_token; alias_name; alias_generic_parameter; alias_constraint;
-          alias_equal; alias_type; alias_semicolon }
+        { alias_attribute_spec; alias_token; alias_name;
+          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
+          alias_semicolon }
       | (SyntaxKind.PropertyDeclaration,
         [ prop_modifiers; prop_type; prop_declarators; prop_semicolon ]) ->
         PropertyDeclaration
@@ -2866,9 +2873,9 @@ module WithToken(Token: TokenType) = struct
       let make_enumerator name equal value semicolon =
         from_children SyntaxKind.Enumerator [ name; equal; value; semicolon ]
 
-      let make_alias token name generic constr equal ty semi =
+      let make_alias attr token name generic constr equal ty semi =
         from_children SyntaxKind.AliasDeclaration
-          [ token; name; generic; constr; equal; ty; semi ]
+          [ attr; token; name; generic; constr; equal; ty; semi ]
 
       let make_property_declaration mods ty decls semi =
         from_children SyntaxKind.PropertyDeclaration

@@ -287,6 +287,7 @@ and kvc_kind = [
 and vc_kind = [
   | `Vector
   | `ImmVector
+  | `Vec
   | `Set
   | `ImmSet
   | `Pair
@@ -431,11 +432,16 @@ let is_vc_kind experimental_enabled p name =
     if not experimental_enabled then
       Errors.experimental_feature p "keyset";
     true
+  end else if name = SN.Collections.cVec then begin
+    if not experimental_enabled then
+      Errors.experimental_feature p "vec";
+    true
   end else false)
 
 let get_vc_kind name = match name with
   | x when x = SN.Collections.cVector -> `Vector
   | x when x = SN.Collections.cImmVector -> `ImmVector
+  | x when x = SN.Collections.cVec -> `Vec
   | x when x = SN.Collections.cSet -> `Set
   | x when x = SN.Collections.cImmSet -> `ImmSet
   | x when x = SN.Collections.cKeyset -> `Keyset
@@ -447,6 +453,7 @@ let get_vc_kind name = match name with
 let vc_kind_to_name kind = match kind with
   | `Vector -> SN.Collections.cVector
   | `ImmVector -> SN.Collections.cImmVector
+  | `Vec -> SN.Collections.cVec
   | `Set -> SN.Collections.cSet
   | `ImmSet -> SN.Collections.cImmSet
   | `Keyset -> SN.Collections.cKeyset

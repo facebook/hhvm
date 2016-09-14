@@ -2748,8 +2748,8 @@ and expr_atomic_word env last_tok = function
       (** Dict body looks exactly like an array body. *)
       right env array_body;
       expect (token_to_string Trb) env;
-  | "keyset" ->
-      out "keyset" env;
+  | "keyset" | "vec" as v ->
+      out v env;
       expect (token_to_string Tlb) env;
       right env (list_comma_nl ~trailing:true expr);
       expect (token_to_string Trb) env;

@@ -392,7 +392,7 @@ OTHER_UNPARSEABLE_FILES = [
     'covariance7.php',
     'covariance8.php',
     'delayed_subst2.php',
-    # TODO: task 10395133
+    # TODO: #10395133 h2tp dict support
     'dict/dict_literal.php',
     'dict/dict_literal_empty.php',
     'dict/supports_unset_on_alias.php',
@@ -400,7 +400,7 @@ OTHER_UNPARSEABLE_FILES = [
     'dict/dict_literal_mixed_brace.php',
     'dict/dict_literal_mixed_brace2.php',
     'dict/construct_dict_from_array.php',
-    # TODO: task 12243871
+    # TODO: #10395133 h2tp keyset support
     'keyset/array_append_doesnt_upcast.php',
     'keyset/array_get.php',
     'keyset/array_set_error.php',
@@ -412,6 +412,8 @@ OTHER_UNPARSEABLE_FILES = [
     'keyset/unset.php',
     'keyset/is_keyset.php',
     'keyset/is_keyset_fail.php',
+    # TODO #10395133 h2tp vec support
+    'vec/vec_literal.php',
     'dynamic_new1.php',
     'dynamic_new3.php',
     'dynamic_new5.php',

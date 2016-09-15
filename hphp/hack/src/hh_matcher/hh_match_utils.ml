@@ -258,7 +258,9 @@ let nast_to_extent_stmt
   let visitor =
     new nast_ast_transformer content target_pos (nast_to_tag target_stmt) in
   let parse_errs, parse_res, _ =
-    Errors.do_ (fun () -> Parser_hack.program file content) in
+    (* FIXME: Don't use default tcopt *)
+    Errors.do_ (fun () ->
+      Parser_hack.program TypecheckerOptions.default file content) in
   (* If we can't parse the file, return None *)
   if Errors.is_empty parse_errs
   then

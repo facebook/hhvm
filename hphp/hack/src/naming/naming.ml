@@ -2217,7 +2217,7 @@ module Make (GetLocals : GetLocals) = struct
   let class_meth_bodies nenv nc =
     let _n_tparams, cstrs = nc.N.c_tparams in
     let genv  = Env.make_class_genv nenv cstrs
-      nc.N.c_mode (nc.N.c_name, nc.N.c_kind) Namespace_env.empty
+      nc.N.c_mode (nc.N.c_name, nc.N.c_kind) (Namespace_env.empty nenv)
     in
     let inst_meths = List.map nc.N.c_methods (meth_body genv) in
     let opt_constructor = match nc.N.c_constructor with

@@ -61,6 +61,7 @@ MODULES=\
   injection/default_injector\
   libancillary\
   naming\
+  options\
   parsing\
   procs\
   search\

@@ -25,7 +25,11 @@ type test_case = {
 let sanity_test_classic_parser source =
   let errorl, result, _ =
     Errors.do_ begin fun () ->
-      Parser_hack.program (Relative_path.default) source
+      (* FIXME: Don't use default tcopt *)
+      Parser_hack.program
+        TypecheckerOptions.default
+        (Relative_path.default)
+        source
     end
   in
   if not (Errors.is_empty errorl) then begin

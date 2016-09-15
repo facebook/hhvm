@@ -120,7 +120,8 @@ let functionDeclaration env node decl =
     (** TODOs *)
     let f_user_attributes = [] in
     let f_fun_kind = Ast.FSync in
-    let f_namespace = Namespace_env.empty in
+    (* FIXME: Don't use the default tcopt *)
+    let f_namespace = Namespace_env.empty TypecheckerOptions.default in
     let f_span = pos node in
     {
       f_mode = f_mode;

@@ -82,7 +82,8 @@ let parse_file file : match_ret * string * Parser_hack.parser_return =
     Errors.do_
       (fun () ->
        let rp = path_to_relative file in
-       Parser_hack.program rp content) in
+       (* FIXME: Don't use default tcopt *)
+       Parser_hack.program TypecheckerOptions.default rp content) in
   let pr =
     (* if the file is php, we can't search it *)
     if parser_output.Parser_hack.file_mode = None

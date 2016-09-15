@@ -615,8 +615,13 @@ let decl_and_run_mode {filename; mode; no_builtins} =
 
   let errors, files_info, _ = Errors.do_ begin fun () ->
     let parsed_files =
-      Relative_path.Map.mapi Parser_hack.program files_contents in
-    let parsed_builtins = Parser_hack.program builtins_filename builtins in
+      (* FIXME: Don't use default tcopt *)
+      Relative_path.Map.mapi
+       (Parser_hack.program TypecheckerOptions.default) files_contents in
+    (* FIXME: Don't use default tcopt *)
+    let parsed_builtins =
+      Parser_hack.program
+        TypecheckerOptions.default builtins_filename builtins in
     let parsed_files = Relative_path.Map.add parsed_files
       ~key:builtins_filename ~data:parsed_builtins in
 

@@ -123,7 +123,8 @@ let declare_file fn content =
   try
     Autocomplete.auto_complete := false;
     let {Parser_hack.file_mode; comments; ast} =
-      Parser_hack.program fn content
+      (* FIXME: Don't use default tcopt *)
+      Parser_hack.program TypecheckerOptions.default fn content
     in
     let is_php = file_mode = None in
     Parser_heap.ParserHeap.add fn ast;

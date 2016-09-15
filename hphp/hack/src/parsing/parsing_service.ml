@@ -38,10 +38,10 @@ let legacy_php_file_info = ref (fun fn ->
  * errorl is a list of errors
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
-let really_parse (acc, errorl, error_files) fn =
+let really_parse tcopt (acc, errorl, error_files) fn =
   let errorl', {Parser_hack.file_mode; comments; ast}, _ =
     Errors.do_ begin fun () ->
-      Parser_hack.from_file fn
+      Parser_hack.from_file tcopt fn
     end
   in
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
@@ -70,13 +70,13 @@ let really_parse (acc, errorl, error_files) fn =
     acc, errorl, error_files
   end
 
-let parse (acc, errorl, error_files) fn =
+let parse tcopt (acc, errorl, error_files) fn =
   (* Ugly hack... hack build requires that we keep JS files in our
    * files_info map, but we don't want to actually read them from disk
    * because we don't do anything with them. See also
    * ServerMain.Program.make_next_files *)
   if FindUtils.is_php (Relative_path.suffix fn) then
-    really_parse (acc, errorl, error_files) fn
+    really_parse tcopt (acc, errorl, error_files) fn
   else
     let info = empty_file_info in
     let acc = Relative_path.Map.add acc ~key:fn ~data:info in
@@ -90,33 +90,33 @@ let merge_parse
   Errors.merge status1 status2,
   Relative_path.Set.union files1 files2
 
-let parse_files acc fnl =
+let parse_files tcopt acc fnl =
   let parse =
     if !Utils.profile
     then (fun acc fn ->
       let t = Unix.gettimeofday () in
-      let result = parse acc fn in
+      let result = parse tcopt acc fn in
       let t' = Unix.gettimeofday () in
       let msg =
         Printf.sprintf "%f %s [parsing]" (t' -. t) (Relative_path.suffix fn) in
       !Utils.log msg;
       result)
-    else parse in
+    else parse tcopt in
   List.fold_left fnl ~init:acc ~f:parse
 
-let parse_parallel workers get_next =
+let parse_parallel workers get_next tcopt =
   MultiWorker.call
       workers
-      ~job:parse_files
+      ~job:(parse_files tcopt)
       ~neutral:neutral
       ~merge:merge_parse
       ~next:get_next
 
 (* sequentially parse IDE files opened by persistent connection *)
-let parse_sequential fn content (acc, errorl, error_files) =
+let parse_sequential fn content (acc, errorl, error_files) tcopt =
   let errorl', {Parser_hack.file_mode; comments; ast}, _ =
     Errors.do_ begin fun () ->
-      Parser_hack.program fn content
+      Parser_hack.program tcopt fn content
     end
   in
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
@@ -155,14 +155,14 @@ let parse_sequential fn content (acc, errorl, error_files) =
 (* Main entry points *)
 (*****************************************************************************)
 
-let go workers files_map ~get_next =
-  let acc = parse_parallel workers get_next in
+let go workers files_map ~get_next tcopt =
+  let acc = parse_parallel workers get_next tcopt in
   let fast, errorl, failed_parsing =
     Relative_path.Map.fold files_map ~init:acc ~f:(
       fun fn content (acc, errorl, error_files) ->
         if FindUtils.is_php (Relative_path.suffix fn) then
           let content = File_content.get_content content in
-          parse_sequential fn content (acc, errorl, error_files)
+          parse_sequential fn content (acc, errorl, error_files) tcopt
         else
           let info = empty_file_info in
           let acc = Relative_path.Map.add acc ~key:fn ~data:info in

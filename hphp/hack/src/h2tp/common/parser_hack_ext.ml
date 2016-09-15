@@ -18,7 +18,12 @@ include Parser_hack
 let parse_or_die file =
   let content = cat (Relative_path.to_absolute file) in
   let errors, res, _ = Errors.do_
-    (fun () -> Parser_hack.program file ~elaborate_namespaces:false content) in
+    (* FIXME: Don't use default tcopt *)
+    (fun () -> Parser_hack.program
+      ~elaborate_namespaces:false
+      TypecheckerOptions.default
+      file
+      content) in
   if not (Errors.is_empty errors)
   then raise (CE.ParseErrors (Errors.get_error_list errors));
   res

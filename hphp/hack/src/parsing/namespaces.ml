@@ -214,7 +214,7 @@ module ElaborateDefs = struct
         f_namespace = nsenv;
       }]
     | Typedef t -> nsenv, [Typedef {t with
-        t_id = elaborate_id_no_autos nsenv NSClass t.t_id;
+        t_id = elaborate_id_no_autos  nsenv NSClass t.t_id;
         t_namespace = nsenv;
       }]
     | Constant cst -> nsenv, [Constant {cst with
@@ -232,4 +232,5 @@ module ElaborateDefs = struct
     List.concat (List.rev acc)
 end
 
-let elaborate_defs ast = ElaborateDefs.program empty ast
+let elaborate_defs tcopt ast =
+  ElaborateDefs.program (Namespace_env.empty tcopt) ast

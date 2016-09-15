@@ -167,7 +167,7 @@ let parsing genv env =
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
-  Parsing_service.go genv.workers files_map ~get_next
+  Parsing_service.go genv.workers files_map ~get_next env.tcopt
 
 (*****************************************************************************)
 (* At any given point in time, we want to know what each file defines.

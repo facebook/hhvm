@@ -21,15 +21,18 @@
 #include <cassert>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include "hphp/util/data-block.h"
+
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/ppc64-asm/branch-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
-#include "hphp/util/asm-x64.h"
-#include "hphp/util/immed.h"
+
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace ppc64_asm {
 
@@ -174,6 +177,14 @@ namespace reg {
 // Forward declaration to be used in Label
 struct Assembler;
 
+enum class ImmType {
+              // Supports TOC? | Supports li64? | Fixed size?
+              // -------------------------------------------
+  AnyCompact, // Yes           | Yes            | No
+  AnyFixed,   // Yes           | Yes            | Yes (5 instr)
+  TocOnly,    // Yes           | No             | Yes (2 instr)
+};
+
 enum class LinkReg {
   Save,
   DoNotTouch
@@ -211,6 +222,84 @@ private:
   Assembler* m_a;
   CodeAddress m_address;
   std::vector<JumpInfo> m_toPatch;
+};
+
+/*
+ * Class that represents a virtual TOC
+ */
+struct VMTOC {
+
+private:
+  // VMTOC is a singleton
+  VMTOC()
+    : m_tocvector(nullptr)
+    , m_last_elem_pos(0)
+
+  {}
+
+  ~VMTOC(){
+    if (HPHP::RuntimeOption::Evalppc64dumpTOCNelements) {
+     pid_t pid = getpid();
+     std::string dumpedfile = "/tmp/nelements." + std::to_string(pid);
+     std::ofstream nelemdumped;
+     nelemdumped.open(dumpedfile);
+     if (nelemdumped.is_open())
+       nelemdumped << "Number of values stored in TOC: ";
+       nelemdumped << std::to_string(m_last_elem_pos);
+       nelemdumped << "\n";
+       nelemdumped.close();
+    }
+  }
+
+public:
+  VMTOC(VMTOC const&) = delete;
+
+  VMTOC operator=(VMTOC const&) = delete;
+
+  void setTOCDataBlock(HPHP::DataBlock *db);
+
+  /*
+   * Push a 64 bit element into the stack and return its index.
+   */
+  int64_t pushElem(int64_t elem);
+
+  /*
+   * Push a 32 bit element into the stack and return its index.
+   */
+  int64_t pushElem(int32_t elem);
+
+  /*
+   * Get the singleton instance.
+   */
+  static VMTOC& getInstance();
+
+  /*
+   * Return the address of the middle element from the vector.
+   *
+   * This is done so signed offsets can be used.
+   */
+  intptr_t getPtrVector();
+
+  /*
+   * Return a value previously pushed.
+   */
+  int64_t getValue(int64_t index, bool qword = false);
+
+private:
+  int64_t allocTOC (int32_t target, bool align = false);
+  void forceAlignment(HPHP::Address& addr);
+
+  HPHP::DataBlock *m_tocvector;
+
+  /*
+   * Vector position of the last element.
+   */
+  uint64_t m_last_elem_pos;
+
+  /*
+   * Map used to avoid insertion of duplicates.
+   */
+  std::map<int64_t, uint64_t> m_map;
 };
 
 struct Assembler {
@@ -765,6 +854,16 @@ struct Assembler {
   }
 
 //////////////////////////////////////////////////////////////////////
+// Auxiliary for loading immediates in the best way
+
+private:
+  void loadTOC(const Reg64& rt, const Reg64& rttoc, int64_t imm64,
+      uint64_t offset, bool fixedSize, bool fits32);
+
+public:
+  void limmediate(const Reg64& rt,
+                  int64_t imm64,
+                  ImmType immt = ImmType::AnyCompact);
 
   // Auxiliary for loading a complete 64bits immediate into a register
   void li64(const Reg64& rt, int64_t imm64, bool fixedSize = true);

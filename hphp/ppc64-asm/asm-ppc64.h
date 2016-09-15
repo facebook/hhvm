@@ -62,6 +62,9 @@ constexpr uint8_t instr_size_in_bytes       = sizeof(PPC64Instr);
 constexpr uint8_t call_skip_bytes_for_ret   = 1 * instr_size_in_bytes;
 
 
+// Allow TOC usage on branches - disabled at the moment.
+//#define USE_TOC_ON_BRANCH
+
 //////////////////////////////////////////////////////////////////////
 
 enum class RegNumber : uint32_t {};

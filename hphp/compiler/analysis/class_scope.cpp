@@ -398,8 +398,8 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
       cloneMeth->getModifiers(), cScope->isUserClass());
   cloneMeth->resetScope(cloneFuncScope);
   cloneFuncScope->setOuterScope(shared_from_this());
+  cloneFuncScope->setFromTrait(true);
   informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);
-
   cloneMeth->addTraitMethodToScope(ar,
                dynamic_pointer_cast<ClassScope>(shared_from_this()));
 
@@ -744,7 +744,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
   for (auto const& traitPair : importedTraitsWithOrigName) {
     auto traitMethod = traitPair.second;
-
     MethodStatementPtr newMeth = importTraitMethod(
       *traitMethod,
       ar,

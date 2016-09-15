@@ -329,9 +329,8 @@ inline bool Func::isMethod() const {
   return !isPseudoMain() && (bool)baseCls();
 }
 
-inline bool Func::isTraitMethod() const {
-  const PreClass* pcls = preClass();
-  return pcls && (pcls->attrs() & AttrTrait);
+inline bool Func::isFromTrait() const {
+  return m_attrs & AttrTrait;
 }
 
 inline bool Func::isPublic() const {

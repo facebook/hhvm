@@ -1516,7 +1516,7 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
     }
   }
 
-  if (method->attrs() & AttrAbstract) {
+  if ((method->attrs() & AttrAbstract) && !method->isFromTrait()) {
     raise_error("Cannot re-declare %sabstract method %s::%s() abstract in "
                 "class %s",
                 (parentMethod->attrs() & AttrAbstract) ? "" : "non-",
@@ -1553,11 +1553,13 @@ void Class::setMethods() {
   std::vector<Slot> parentMethodsWithStaticLocals;
   MethodMapBuilder builder;
 
+  ITRACE(5, "----------\nsetMethods() for {}:\n", this->name()->data());
   if (m_parent.get() != nullptr) {
     // Copy down the parent's method entries. These may be overridden below.
     for (Slot i = 0; i < m_parent->m_methods.size(); ++i) {
       Func* f = m_parent->getMethod(i);
       assert(f);
+      ITRACE(5, "  - adding parent method {}\n", f->name()->data());
       if ((f->attrs() & AttrClone) ||
           (!(f->attrs() & AttrPrivate) && f->hasStaticLocals())) {
         // When copying down an entry for a non-private method that has
@@ -1577,6 +1579,7 @@ void Class::setMethods() {
   // parent.
   for (size_t methI = 0; methI < m_preClass->numMethods(); ++methI) {
     Func* method = m_preClass->methods()[methI];
+    ITRACE(5, "  - processing pre-class method {}\n", method->name()->data());
     if (Func::isSpecial(method->name())) {
       if (method->name() == s_86ctor.get() ||
           method->name() == s_86sinit.get() ||
@@ -1594,6 +1597,9 @@ void Class::setMethods() {
       Func* parentMethod = builder[it2->second];
       // We should never have null func pointers to deal with
       assert(parentMethod);
+      // An abstract method that came from a trait doesn't override another
+      // method.
+      if (method->isFromTrait() && (method->attrs() & AttrAbstract)) continue;
       methodOverrideCheck(parentMethod, method);
       // Overlay.
       Func* f = method->clone(this);
@@ -2996,6 +3002,8 @@ void Class::importTraitMethod(const TMIData::MethodData& mdata,
 
   auto mm_iter = builder.find(mdata.name);
 
+  ITRACE(5, "  - processing trait method {}\n", method->name()->data());
+
   // For abstract methods, simply return if method already declared.
   if ((modifiers & AttrAbstract) && mm_iter != builder.end()) {
     return;
@@ -3024,7 +3032,7 @@ void Class::importTraitMethod(const TMIData::MethodData& mdata,
   }
   Func* f = method->clone(this, mdata.name);
   f->setNewFuncId();
-  f->setAttrs(modifiers);
+  f->setAttrs(modifiers | AttrTrait);
   if (!parentMethod) {
     // New method
     builder.add(mdata.name, f);

@@ -119,6 +119,8 @@ struct FunctionScope : BlockScope,
   void setGenerator(bool f) { m_generator = f; }
   bool isAsync() const { return m_async; }
   void setAsync(bool f) { m_async = f; }
+  bool isFromTrait() const { return m_fromTrait; }
+  void setFromTrait(bool f) { m_fromTrait = f; }
 
   int nextInlineIndex() { return ++m_inlineIndex; }
 
@@ -387,6 +389,7 @@ private:
   unsigned m_hasTry : 1;
   unsigned m_hasGoto : 1;
   unsigned m_localRedeclaring : 1;
+  unsigned m_fromTrait : 1;
 
   int m_redeclaring; // multiple definition of the same function
   int m_inlineIndex;

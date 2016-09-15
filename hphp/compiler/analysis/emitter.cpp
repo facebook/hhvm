@@ -7853,6 +7853,9 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
         !meth->getClassScope()->isRedeclaring()) {
       attrs = attrs | AttrNoOverride;
     }
+    if (funcScope->isFromTrait()) {
+      attrs = attrs | AttrTrait;
+    }
     if (funcScope->isSystem()) {
       assert((attrs & AttrPersistent) || meth->getClassScope());
       attrs = attrs | AttrBuiltin;

@@ -68,8 +68,8 @@ enum Attr {
   // using FCallBuiltin.                //       |          |         //
   AttrPhpLeafFn            = (1 <<  7), //       |          |    X    //
                                         //       |          |         //
-  // Is this class a trait?  On methods, this indicates that the method is NOT
-  // a constructor, even though it may look like one.  FIXME: This is insane.
+  // Is this class a trait?  On methods, this indicates that the method was
+  // imported from a trait.
   AttrTrait                = (1 <<  8), //    X  |          |    X    //
                                         //       |          |         //
   // Indicates that this function should be ignored in backtraces.    //

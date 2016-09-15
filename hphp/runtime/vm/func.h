@@ -601,15 +601,14 @@ struct Func final {
 
   /*
    * Is this function a method defined on a class?
+   * Note that trait methods may not satisfy isMethod().
    */
   bool isMethod() const;
 
   /*
-   * Is this function a method defined on a trait?
-   *
-   * Note that trait methods may not satisfy isMethod().
+   * Was this function imported from a trait?
    */
-  bool isTraitMethod() const;
+  bool isFromTrait() const;
 
   /*
    * Is this function declared with `public', `static', or `abstract'?

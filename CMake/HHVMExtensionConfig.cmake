@@ -983,7 +983,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     if (${addPaths})
       include_directories(${LIBUODBC_INCLUDE_DIRS})
       link_libraries(${LIBUODBC_LIBRARIES})
-      add_definitions("-DHAVE_UODBC")
       add_definitions("-DHAVE_LIBUODBC")
     endif()
   else()

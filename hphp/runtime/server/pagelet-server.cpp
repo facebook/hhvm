@@ -144,7 +144,9 @@ void PageletTransport::onSendEndImpl() {
   Lock lock(this);
   m_done = true;
   if (m_event) {
+    constexpr uintptr_t kTrashedEvent = 0xfeeefeeef001f001;
     m_event->finish();
+    m_event = reinterpret_cast<PageletServerTaskEvent*>(kTrashedEvent);
   }
   notify();
 }
@@ -164,6 +166,9 @@ bool PageletTransport::isDone() {
 }
 
 void PageletTransport::addToPipeline(const std::string &s) {
+  // the output buffer is already closed; nothing to do
+  if (m_done) return;
+
   Lock lock(this);
   m_pipeline.push_back(s);
   if (m_event) {

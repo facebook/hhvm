@@ -255,9 +255,7 @@ module WithToken(Token: TokenType) = struct
     }
     and inclusion_directive = {
       inclusion_require : t;
-      inclusion_left_paren : t;
       inclusion_filename : t;
-      inclusion_right_paren : t;
       inclusion_semicolon : t
     }
     and compound_statement = {
@@ -1263,10 +1261,8 @@ module WithToken(Token: TokenType) = struct
         [ attribute_name; attribute_left_paren; attribute_values;
           attribute_right_paren ]
       | InclusionDirective
-        { inclusion_require; inclusion_left_paren; inclusion_filename;
-          inclusion_right_paren; inclusion_semicolon } ->
-        [ inclusion_require; inclusion_left_paren; inclusion_filename;
-          inclusion_right_paren; inclusion_semicolon ]
+        { inclusion_require; inclusion_filename; inclusion_semicolon } ->
+        [ inclusion_require; inclusion_filename; inclusion_semicolon ]
       | CompoundStatement
         { compound_left_brace; compound_statements; compound_right_brace } ->
         [ compound_left_brace; compound_statements; compound_right_brace ]
@@ -1693,10 +1689,8 @@ module WithToken(Token: TokenType) = struct
         [ "attribute_name"; "attribute_left_paren"; "attribute_values";
           "attribute_right_paren" ]
       | InclusionDirective
-        { inclusion_require; inclusion_left_paren; inclusion_filename;
-          inclusion_right_paren; inclusion_semicolon } ->
-        [ "inclusion_require"; "inclusion_left_paren"; "inclusion_filename";
-          "inclusion_right_paren"; "inclusion_semicolon" ]
+        { inclusion_require; inclusion_filename; inclusion_semicolon } ->
+        [ "inclusion_require"; "inclusion_filename"; "inclusion_semicolon" ]
       | CompoundStatement
         { compound_left_brace; compound_statements; compound_right_brace } ->
         [ "compound_left_brace"; "compound_statements"; "compound_right_brace" ]
@@ -2409,11 +2403,9 @@ module WithToken(Token: TokenType) = struct
         Attribute { attribute_name; attribute_left_paren; attribute_values;
           attribute_right_paren }
       | (SyntaxKind.InclusionDirective ,
-        [ inclusion_require; inclusion_left_paren; inclusion_filename;
-          inclusion_right_paren; inclusion_semicolon ]) ->
+        [ inclusion_require; inclusion_filename; inclusion_semicolon ]) ->
         InclusionDirective
-        { inclusion_require; inclusion_left_paren; inclusion_filename;
-          inclusion_right_paren; inclusion_semicolon }
+        { inclusion_require; inclusion_filename; inclusion_semicolon }
       | (SyntaxKind.CompoundStatement, [ compound_left_brace;
         compound_statements; compound_right_brace ]) ->
         CompoundStatement { compound_left_brace; compound_statements;
@@ -3005,10 +2997,9 @@ module WithToken(Token: TokenType) = struct
         [ attribute_name; attribute_left_paren; attribute_values;
           attribute_right_paren ]
 
-      let make_inclusion_directive
-          require left_paren filename right_paren semicolon =
+      let make_inclusion_directive require filename semicolon =
         from_children SyntaxKind.InclusionDirective
-          [ require; left_paren; filename; right_paren; semicolon ]
+          [ require; filename; semicolon ]
 
       let make_compound_statement
         compound_left_brace compound_statements compound_right_brace =

@@ -91,31 +91,24 @@ module WithExpressionAndStatementAndTypeParser
       require-once-directive
 
     require-multiple-directive:
-      require  (  include-filename  )  ;
       require  include-filename  ;
 
     include-filename:
       expression
 
     require-once-directive:
-      require_once  (  include-filename  )  ;
       require_once  include-filename  ;
-    TODO The php spec says that include and include_once is followed by
-      expression, we need to know what kind of expression is allowed.
+
+    TODO: We allow "include" and "include_once" as well, which are PHP-isms
+    specified as not supported in Hack. Do we need to produce an error in
+    strict mode?
     *)
 
     let (parser, require) = next_token parser in
     let require = make_token require in
-    let (parser, left_paren) = optional_token parser LeftParen in
     let (parser, filename) = parse_expression parser in
-    (* ERROR RECOVERY: TODO: We could detect if there is a right paren but
-       no left paren and give an error saying the left paren is missing. *)
-    let (parser, right_paren) =
-      if is_missing left_paren then (parser, (make_missing()))
-      else expect_right_paren parser in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_inclusion_directive
-      require left_paren filename right_paren semi in
+    let result = make_inclusion_directive require filename semi in
     (parser, result)
 
   and parse_alias_declaration parser attr =
@@ -124,7 +117,8 @@ module WithExpressionAndStatementAndTypeParser
         attribute-spec-opt type  name
           generic-type-parameter-list-opt  =  type-specifier  ;
         attribute-spec-opt newtype  name
-          generic-type-parameter-list-opt type-constraint-opt  =type-specifier  ;
+          generic-type-parameter-list-opt type-constraint-opt
+            =  type-specifier  ;
     *)
 
     (* ERROR RECOVERY: We allow the "type" version to have a constraint in the

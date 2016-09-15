@@ -1523,75 +1523,26 @@ void fixVptr(Vout& v, Vptr& p) {
     }
 
     case AddressModes::Invalid:
-    default:
       assert(false && "Invalid address mode");
       break;
   }
 }
 
-/* Fallback, when no Vptr is to be fixed */
-template <typename Inst>
-void fixVptrsForPPC64(Vout& v, Inst& inst) {}
-
 /*
- * Every vasm that has a Vptr parameter should be patched below
+ * Every vasm that has a Vptr parameter must be handled
  */
-void fixVptrsForPPC64(Vout& v, addlim& inst)    { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, addlm& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, addqim& inst)    { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, andbim& inst)    { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, callm& inst)     { fixVptr(v, inst.target); }
-void fixVptrsForPPC64(Vout& v, cloadq& inst)    { fixVptr(v, inst.t); }
-void fixVptrsForPPC64(Vout& v, cmpbim& inst)    { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cmplim& inst)    { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cmplm& inst)     { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cmpqim& inst)    { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cmpqm& inst)     { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cmpwim& inst)    { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cmpwm& inst)     { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cmpbm& inst)     { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, cvtsi2sdm& inst) { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, declm& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, decqm& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, decqmlock& inst) { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, inclm& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, incqm& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, incqmlock& inst) { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, incwm& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, jmpm& inst)      { fixVptr(v, inst.target); }
-void fixVptrsForPPC64(Vout& v, ldarx& inst)     { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, lea& inst)       { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, load& inst)      { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadb& inst)     { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadl& inst)     { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadsd& inst)    { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadtqb& inst)   { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadups& inst)   { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadw& inst)     { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadzbl& inst)   { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadzbq& inst)   { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, loadzlq& inst)   { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, orbim& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, orqim& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, orwim& inst)     { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, popm& inst)      { fixVptr(v, inst.d); }
-void fixVptrsForPPC64(Vout& v, pushm& inst)     { fixVptr(v, inst.s); }
-void fixVptrsForPPC64(Vout& v, stdcx& inst)     { fixVptr(v, inst.d); }
-void fixVptrsForPPC64(Vout& v, store& inst)     { fixVptr(v, inst.d); }
-void fixVptrsForPPC64(Vout& v, storeb& inst)    { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storebi& inst)   { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storel& inst)    { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storeli& inst)   { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storeqi& inst)   { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storesd& inst)   { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storeups& inst)  { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storew& inst)    { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, storewi& inst)   { fixVptr(v, inst.m); }
-void fixVptrsForPPC64(Vout& v, testbim& inst)   { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, testlim& inst)   { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, testqim& inst)   { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, testqm& inst)    { fixVptr(v, inst.s1); }
-void fixVptrsForPPC64(Vout& v, testwim& inst)   { fixVptr(v, inst.s1); }
+struct VptrFixVisit {
+explicit VptrFixVisit(Vout& v) : m_v(v) {}
+  Vout& m_v;
+
+  template<class T> void def(T) {}
+  template<class T> void imm(const T&) {}
+  template<class T> void across(T) {}
+  template<class T, class H> void defHint(T, H) {}
+  template<class T, class H> void useHint(T, H) {}
+  template <typename T> void use(T) {}
+  void use(Vptr& ptr) { fixVptr(m_v, ptr); }
+};
 
 /*
  * PPC64 can't handle complex addressing mode like X64 with base, index and
@@ -1613,28 +1564,12 @@ void fixVptrsForPPC64(Vunit& unit) {
       auto& inst = blocks[ib].code[ii];
       SCOPE_EXIT {unit.freeScratchBlock(scratch);};
       Vout v(unit, scratch, inst.irctx());
+      VptrFixVisit vptrFixVisit {v};
 
-      switch (inst.op) {
-        /*
-         * Call every fix and provide only what is necessary:
-         * Vout& v : the Vout instance so vasms can be emitted
-         * <Type> inst : the current vasm to be lowered
-         *
-         * Prepend any vasm that was emitted inside of the fixVptr.
-         */
-
-#define O(name, imms, uses, defs)                         \
-        case Vinstr::name:                                \
-          fixVptrsForPPC64(v, inst.name##_);              \
-          if (!v.empty()) {                               \
-            vector_splice(unit.blocks[ib].code, ii, 0,    \
-                          unit.blocks[scratch].code);     \
-          }                                               \
-          break;
-
-          VASM_OPCODES
-#undef O
-
+      visitOperands(inst, vptrFixVisit);
+      if (!v.empty()) {
+        vector_splice(unit.blocks[ib].code, ii, 0,
+                      unit.blocks[scratch].code);
       }
     }
   });

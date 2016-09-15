@@ -101,6 +101,37 @@ private:
   Address dataStart;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * There are a number of different locks that protect data owned by or related
+ * to the tc, described here in ascending Rank order (see hphp/util/rank.h).
+ *
+ * - Global write lease (GetWriteLease()). The write lease has a number of
+ *   heuristics that are used to ensure we lay out Live translations in a good
+ *   order. When Eval.JitConcurrently == 0, holding the write lease gives the
+ *   owning thread exclusive permission to write to the Translation Cache (TC)
+ *   and all associated metadata tables. When Eval.JitConcurrently > 0, the
+ *   global write lease is only used to influence code layout and provides no
+ *   protection against data races. In the latter case, the remaining locks are
+ *   used to protect the integrity of the TC and its metadata:
+ *
+ * - Func-specific write leases (Func* argument to LeaseHolder). These locks
+ *   give the owning thread exclusive permission to write to the SrcRec for
+ *   translations of the corresponding Func, modify its prologue table, and
+ *   read/write any ProfTransRecs for translations in the Func. Note that the
+ *   Func-specific lease *must* be held to modify any Func-specific metadata
+ *   when Eval.JitConcurrently > 0, even if the current thread holds the global
+ *   write lease.
+ *
+ * - tc::lockCode() gives the owning thread exclusive permission to modify the
+ *   contents and frontiers of all code/data blocks in m_code.
+ *
+ * - tc::lockMetadata() gives the owning thread exclusive permission to modify
+ *   the metadata tables owned by the tc (FixupMap::recordFixup(), or
+ *   tc::srcDB(), etc).
+ */
+
 /*
  * Structure representing the various parts of the TC available to the JIT. The
  * code lock must be acquired before attempting to write into code.

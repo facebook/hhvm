@@ -16,7 +16,6 @@
 
 #pragma once
 
-//#include <folly/Portability.h>
 #include <folly/portability/Memory.h>
 
 namespace folly_ext {

@@ -1218,8 +1218,8 @@ private:
   AtomicLowPtr<uint8_t> m_funcBody;
   mutable rds::Link<LowPtr<Func>> m_cachedFunc{rds::kInvalidHandle};
   FuncId m_funcId{InvalidFuncId};
-  LowStringPtr m_fullName;
-  LowStringPtr m_name;
+  LowStringPtr m_fullName{nullptr};
+  LowStringPtr m_name{nullptr};
   // The first Class in the inheritance hierarchy that declared this method.
   // Note that this may be an abstract class that did not provide an
   // implementation.

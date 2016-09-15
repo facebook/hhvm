@@ -122,13 +122,16 @@ void Func::destroy(Func* func) {
     assert(oldVal == func);
     func->m_funcId = InvalidFuncId;
 
+    if (RuntimeOption::EvalEnableReverseDataMap) {
+      // We register Funcs to data_map in Func::init() and Func::clone(), both
+      // of which are accompanied by calls to Func::setNewFuncId().
+      data_map::deregister(func);
+    }
+
     if (s_treadmill.load(std::memory_order_acquire)) {
       Treadmill::enqueue([func](){ destroy(func); });
       return;
     }
-  }
-  if (RuntimeOption::EvalEnableReverseDataMap) {
-    data_map::deregister(func);
   }
   func->~Func();
   low_free_data(func);
@@ -175,6 +178,10 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->m_cls = cls;
   f->setFullName(numParams);
 
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    data_map::register_start(f);
+  }
+
   if (f != this) {
     f->m_cachedFunc = rds::Link<LowPtr<Func>>{rds::kInvalidHandle};
     f->m_maybeIntercepted = -1;
@@ -208,6 +215,10 @@ void Func::init(int numParams) {
   if (!preClass()) {
     setNewFuncId();
     setFullName(numParams);
+
+    if (RuntimeOption::EvalEnableReverseDataMap) {
+      data_map::register_start(this);
+    }
   } else {
     m_fullName = nullptr;
   }
@@ -263,10 +274,6 @@ void Func::setFullName(int numParams) {
     if (!isMethod()) {
       setNamedEntity(NamedEntity::get(m_name));
     }
-  }
-
-  if (RuntimeOption::EvalEnableReverseDataMap) {
-    data_map::register_start(this);
   }
 
   if (RuntimeOption::DynamicInvokeFunctions.size()) {

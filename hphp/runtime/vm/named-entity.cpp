@@ -91,7 +91,8 @@ void NamedEntity::removeClass(Class* goner) {
   if (!head) return;
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
-    data_map::deregister(this);
+    // This deregisters Classes registered to data_map in Unit::defClass().
+    data_map::deregister(goner);
   }
 
   if (head == goner) {

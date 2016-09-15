@@ -194,7 +194,9 @@ Unit::Unit()
 {}
 
 Unit::~Unit() {
-  if (RuntimeOption::EvalEnableReverseDataMap) {
+  if (RuntimeOption::EvalEnableReverseDataMap &&
+      m_mergeState != MergeState::Unmerged) {
+    // Units are registered to data_map in Unit::initialMerge().
     data_map::deregister(this);
   }
 
@@ -772,6 +774,7 @@ Class* Unit::defClass(const PreClass* preClass,
     );
 
     if (RuntimeOption::EvalEnableReverseDataMap) {
+      // The corresponding deregister is in NamedEntity::removeClass().
       data_map::register_start(newClass.get());
     }
 

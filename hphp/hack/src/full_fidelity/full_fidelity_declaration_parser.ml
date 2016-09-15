@@ -118,7 +118,7 @@ module WithExpressionAndStatementAndTypeParser
       require left_paren filename right_paren semi in
     (parser, result)
 
-  and parse_alias_declaration parser =
+  and parse_alias_declaration parser attr =
     (* SPEC
       alias-declaration:
         attribute-spec-opt type  name
@@ -132,7 +132,6 @@ module WithExpressionAndStatementAndTypeParser
        TODO: Produce an error in a later pass if the "type" version has a
        constraint. *)
 
-    let attr = make_missing() in (* TODO Parse the attribute *)
     let (parser, token) = next_token parser in
     let token = make_token token in
     let (parser, name) = expect_name parser in
@@ -1082,10 +1081,14 @@ module WithExpressionAndStatementAndTypeParser
     aux [] parser
 
   and parse_classish_or_function_declaration parser =
+    (* A type alias, function, interface, trait or class may all begin with
+    an attribute. *)
     let parser, attribute_specification =
       parse_attribute_specification_opt parser in
     let parser1, token = next_token parser in
     match Token.kind token with
+    | Type | Newtype ->
+      parse_alias_declaration parser attribute_specification
     | Async | Function ->
       parse_function_declaration parser attribute_specification
     | Abstract
@@ -1105,7 +1108,7 @@ module WithExpressionAndStatementAndTypeParser
     | Require
     | Require_once -> parse_inclusion_directive parser
     | Type
-    | Newtype -> parse_alias_declaration parser
+    | Newtype -> parse_alias_declaration parser (make_missing())
     | Enum -> parse_enum_declaration parser
     | Namespace -> parse_namespace_declaration parser
     | Use -> parse_namespace_use_declaration parser

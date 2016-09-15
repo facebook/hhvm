@@ -90,6 +90,25 @@ let elaborate_into_current_ns nsenv id =
     | None -> "\\" ^ id
     | Some ns -> "\\" ^ ns ^ "\\" ^ id
 
+(* Helper function for namespace aliasing
+ * Walks over the namespace map and checks if any source
+ * matches the given id.
+ * If a match is found, then removes the match and
+ * replaces it with the target
+ * If no match is found,  returns the id *)
+let rec exists_in_auto_ns_map ns_map id =
+  match ns_map with
+    | [] -> id
+    | (source, target)::rest ->
+        try
+          (* Append backslash at the end so that it doesn't match partially *)
+          if String_utils.string_starts_with id (source ^ "\\")
+          (* Strip out the prefix and connect it to the next beginning *)
+          then target ^ (String_utils.lstrip id source)
+          else exists_in_auto_ns_map rest id
+        (* If there is some matching problem, that means we are not aliasing *)
+        with _ -> id
+
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".
  *
@@ -112,6 +131,8 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
     if id <> "" && id.[0] = '\\' then id
     else if autoimport && is_autoimport_name id then "\\" ^ id
     else begin
+      let id = exists_in_auto_ns_map
+        (TypecheckerOptions.auto_namespace_map nsenv.ns_tcopt) id in
       (* Expand "use" imports. *)
       let (bslash_loc, has_bslash) =
         try String.index id '\\', true
@@ -214,7 +235,7 @@ module ElaborateDefs = struct
         f_namespace = nsenv;
       }]
     | Typedef t -> nsenv, [Typedef {t with
-        t_id = elaborate_id_no_autos  nsenv NSClass t.t_id;
+        t_id = elaborate_id_no_autos nsenv NSClass t.t_id;
         t_namespace = nsenv;
       }]
     | Constant cst -> nsenv, [Constant {cst with

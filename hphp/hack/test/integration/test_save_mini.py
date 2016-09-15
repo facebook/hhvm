@@ -68,6 +68,7 @@ use_watchman = true
 # some comment
 assume_php = false
 load_mini_script = %s
+auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 """ % os.path.join(self.repo_dir, script_name))
 
     def write_watchman_config(self):

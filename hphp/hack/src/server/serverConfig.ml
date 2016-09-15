@@ -102,6 +102,25 @@ let maybe_relative_path fn =
     else fn
   end
 
+let extract_auto_namespace_element ns_map element =
+  match element with
+    | (source, Hh_json.JSON_String target) ->
+       (source, target)::ns_map
+    | _ -> ns_map (* This means the JSON we received is incorrect *)
+
+let convert_auto_namespace_to_map map =
+  let json = Hh_json.json_of_string ~strict:true map in
+  let pairs = Hh_json.get_object_exn json in
+  (* We do a fold instead of a map to filter
+   * out the incorrect entrie as we look at each item *)
+  List.fold_left ~init:[] ~f:extract_auto_namespace_element pairs
+
+let prepare_auto_namespace_map config =
+  Option.value_map
+    (SMap.get config "auto_namespace_map")
+    ~default:[]
+    ~f:convert_auto_namespace_to_map
+
 let load config_filename options =
   let config = Config_file.parse (Relative_path.to_absolute config_filename) in
   let local_config = ServerLocalConfig.load () in
@@ -133,6 +152,7 @@ let load config_filename options =
         "enable_experimental_tc_features"
         ~default:[]
         config);
+    tco_auto_namespace_map = prepare_auto_namespace_map config;
   } in
   {
     load_script = load_script;

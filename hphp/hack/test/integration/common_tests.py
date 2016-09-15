@@ -1025,3 +1025,22 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             0,
             msg="Exit status does not match"
         )
+
+    def test_auto_namespace_alias_addition(self):
+        """
+        Add namespace alias and check if it is still good
+        """
+
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+
+        with open(os.path.join(self.repo_dir, 'auto_ns_2.php'), 'w') as f:
+            f.write("""
+            <?hh
+            function haha() {
+                Herp\\f();
+                return 1;
+            }
+            """)
+
+        self.check_cmd(['No errors!'])

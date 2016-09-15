@@ -99,16 +99,30 @@ module WithExpressionAndStatementAndTypeParser
     require-once-directive:
       require_once  include-filename  ;
 
+    In non-strict mode we allow an inclusion directive (without semi) to be
+    used as an expression. It is therefore easier to actually parse this as:
+
+    inclusion-directive:
+      inclusion-expression  ;
+
+    inclusion-expression:
+      require include-filename
+      require_once include-filename
+
     TODO: We allow "include" and "include_once" as well, which are PHP-isms
     specified as not supported in Hack. Do we need to produce an error in
     strict mode?
     *)
+    let (parser, expr) = parse_inclusion_expression parser in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_inclusion_directive expr semi in
+    (parser, result)
 
+  and parse_inclusion_expression parser =
     let (parser, require) = next_token parser in
     let require = make_token require in
     let (parser, filename) = parse_expression parser in
-    let (parser, semi) = expect_semicolon parser in
-    let result = make_inclusion_directive require filename semi in
+    let result = make_inclusion_expression require filename in
     (parser, result)
 
   and parse_alias_declaration parser attr =

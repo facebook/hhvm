@@ -70,6 +70,7 @@ type t =
 | SimpleInitializer
 
 (* Expressions *)
+| InclusionExpression
 | MemberSelectionExpression
 | SafeMemberSelectionExpression
 | ScopeResolutionExpression
@@ -224,6 +225,7 @@ let to_string kind =
   | TypeArguments -> "type_arguments"
   | TypeParameters -> "type_parameters"
   | InclusionDirective -> "inclusion_directive"
+  | InclusionExpression -> "inclusion_expression"
   | EnumDeclaration -> "enum_declaration"
   | Enumerator -> "enumerator"
   | AliasDeclaration -> "alias_declaration"

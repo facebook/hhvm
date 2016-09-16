@@ -27,7 +27,10 @@ let make_genv options config local_config handle =
   let watchman =
     if check_mode || not local_config.SLC.use_watchman
     then None
-    else Watchman.init local_config.SLC.watchman_init_timeout root
+    else Watchman.init
+           local_config.SLC.watchman_init_timeout
+           local_config.SLC.watchman_subscribe
+           root
   in
   if Option.is_some watchman then Hh_logger.log "Using watchman";
   let indexer, notifier, wait_until_ready =

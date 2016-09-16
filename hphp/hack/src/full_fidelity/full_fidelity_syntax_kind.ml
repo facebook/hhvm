@@ -102,6 +102,7 @@ type t =
 | ElementInitializer
 | SubscriptExpression
 | AwaitableCreationExpression
+| XHPCategoryDeclaration
 | XHPExpression
 | XHPOpen
 | XHPAttribute
@@ -232,6 +233,7 @@ let to_string kind =
   | PropertyDeclaration -> "property_declaration"
   | PropertyDeclarator -> "property_declarator"
   | AwaitableCreationExpression -> "awaitable_creation_expression"
+  | XHPCategoryDeclaration -> "xhp_category_declaration"
   | XHPExpression -> "xhp_expression"
   | XHPOpen -> "xhp_open"
   | XHPAttribute -> "xhp_attribute"

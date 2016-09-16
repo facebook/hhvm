@@ -534,6 +534,11 @@ module WithToken(Token: TokenType) = struct
       awaitable_async : t;
       awaitable_compound_statement : t;
     }
+    and xhp_category_declaration = {
+      xhp_category : t;
+      xhp_category_list : t;
+      xhp_category_semicolon : t
+    }
     and xhp_enum_type = {
       xhp_enum_token : t;
       xhp_enum_left_brace : t;
@@ -681,6 +686,7 @@ module WithToken(Token: TokenType) = struct
     | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
+    | XHPCategoryDeclaration of xhp_category_declaration
     | XHPEnumType of xhp_enum_type
     | XHPRequired of xhp_required
     | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
@@ -828,6 +834,7 @@ module WithToken(Token: TokenType) = struct
       | MethodishDeclaration _ -> SyntaxKind.MethodishDeclaration
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
+      | XHPCategoryDeclaration _ -> SyntaxKind.XHPCategoryDeclaration
       | XHPEnumType _ -> SyntaxKind.XHPEnumType
       | XHPRequired _ -> SyntaxKind.XHPRequired
       | XHPClassAttributeDeclaration _ ->
@@ -1012,6 +1019,8 @@ module WithToken(Token: TokenType) = struct
     let is_element_initializer node = kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
+    let is_xhp_category_declaration node =
+      kind node = SyntaxKind.XHPCategoryDeclaration
     let is_xhp_enum_type node = kind node = SyntaxKind.XHPEnumType
     let is_xhp_required node = kind node = SyntaxKind.XHPRequired
     let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
@@ -1213,6 +1222,9 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ classish_body_left_brace; classish_body_elements;
           classish_body_right_brace ]
+      | XHPCategoryDeclaration
+        { xhp_category; xhp_category_list; xhp_category_semicolon } ->
+        [ xhp_category; xhp_category_list; xhp_category_semicolon ]
       | XHPEnumType
         { xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
           xhp_enum_right_brace } ->
@@ -1642,6 +1654,9 @@ module WithToken(Token: TokenType) = struct
           classish_body_right_brace } ->
         [ "classish_body_left_brace"; "classish_body_elements";
           "classish_body_right_brace" ]
+      | XHPCategoryDeclaration
+        { xhp_category; xhp_category_list; xhp_category_semicolon } ->
+        [ "xhp_category"; "xhp_category_list"; "xhp_category_semicolon" ]
       | XHPEnumType
         { xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
           xhp_enum_right_brace } ->
@@ -2356,6 +2371,10 @@ module WithToken(Token: TokenType) = struct
         ClassishBody {
           classish_body_left_brace; classish_body_elements;
           classish_body_right_brace }
+      | (SyntaxKind.XHPCategoryDeclaration,
+        [ xhp_category; xhp_category_list; xhp_category_semicolon ]) ->
+        XHPCategoryDeclaration
+        { xhp_category; xhp_category_list; xhp_category_semicolon }
       | (SyntaxKind.XHPEnumType,
         [ xhp_enum_token; xhp_enum_left_brace; xhp_enum_values;
           xhp_enum_right_brace ]) ->
@@ -2954,6 +2973,10 @@ module WithToken(Token: TokenType) = struct
       let make_xhp_enum_type token left items right =
         from_children SyntaxKind.XHPEnumType
         [ token; left; items; right ]
+
+      let make_xhp_category_declaration category items semi =
+        from_children SyntaxKind.XHPCategoryDeclaration
+        [ category; items; semi ]
 
       let make_xhp_required at req =
         from_children SyntaxKind.XHPRequired [ at; req ]

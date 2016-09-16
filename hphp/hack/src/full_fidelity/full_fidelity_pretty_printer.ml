@@ -264,6 +264,11 @@ let rec get_doc node =
     let a = get_doc x.xhp_required_at in
     let r = get_doc x.xhp_required in
     a ^^^ r
+  | XHPCategoryDeclaration x ->
+    let c = get_doc x.xhp_category in
+    let l = get_doc x.xhp_category_list in
+    let s = get_doc x.xhp_category_semicolon in
+    c ^| l ^^^ s;
   | XHPEnumType x ->
     let e = get_doc x.xhp_enum_token in
     let l = get_doc x.xhp_enum_left_brace in

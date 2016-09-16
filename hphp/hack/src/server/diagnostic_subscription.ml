@@ -18,10 +18,21 @@ type t = {
   pending_errors : (Errors.error list) Relative_path.Map.t;
 }
 
-let of_id ~id = {
+let errors_to_map errors =
+  List.fold_right (Errors.get_sorted_error_list errors)
+    ~init:Relative_path.Map.empty
+    ~f:begin fun e acc ->
+      let file = Errors.get_pos e |> Pos.filename in
+
+      let entry = Relative_path.Map.singleton file [e] in
+      Relative_path.Map.merge acc entry
+        (fun _ x y -> Option.merge x y ~f:(fun x y -> x @ y))
+    end
+
+let of_id ~id ~init = {
   id;
   pushed_errors = Relative_path.Set.empty;
-  pending_errors = Relative_path.Map.empty;
+  pending_errors = errors_to_map init;
 }
 
 let get_id ds = ds.id
@@ -46,17 +57,6 @@ let get_absolute_errors ds =
     let errors = List.map errors ~f:Errors.to_absolute in
     SMap.add acc path errors
   end
-
-let errors_to_map errors =
-  List.fold_right (Errors.get_sorted_error_list errors)
-    ~init:Relative_path.Map.empty
-    ~f:begin fun e acc ->
-      let file = Errors.get_pos e |> Pos.filename in
-
-      let entry = Relative_path.Map.singleton file [e] in
-      Relative_path.Map.merge acc entry
-        (fun _ x y -> Option.merge x y ~f:(fun x y -> x @ y))
-    end
 
 let update ds checked_files errors =
   let new_errors = errors_to_map errors in

@@ -12,7 +12,7 @@ open Reordered_argument_collections
 
 type t
 
-val of_id : id:int -> t
+val of_id : id:int -> init:Errors.t -> t
 
 val get_id : t -> int
 

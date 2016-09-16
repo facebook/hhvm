@@ -30,6 +30,19 @@ let foo_clear_diagnostics = "
 /foo.php:
 "
 
+let bar_name = "bar.php"
+
+let bar_contents = "
+<?hh // strict
+function test() {} // missing return type
+"
+
+let bar_diagnostics = "
+/bar.php:
+File \"/bar.php\", line 3, characters 10-13:
+Was expecting a return type hint (Typing[4030])
+"
+
 let assert_no_push_message loop_outputs =
   match loop_outputs.push_message with
   | Some _ -> Test.fail "Unexpected push message"
@@ -39,8 +52,12 @@ let () =
 
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in
-
+  (* Initially there is a single typing error in bar.php *)
+  let env = Test.setup_disk env [(bar_name, bar_contents)] in
   let env = Test.subscribe_diagnostic ~id:diagnostic_subscription_id env in
+  let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
+  (* Initial list of errors is pushed after subscribing *)
+  Test.assert_diagnostics loop_outputs bar_diagnostics;
   let env = Test.open_file env foo_name in
   (* Edit file to have errors *)
   let env, _ = Test.edit_file env foo_name foo_contents in

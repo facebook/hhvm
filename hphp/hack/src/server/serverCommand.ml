@@ -18,6 +18,8 @@ module TLazyHeap = Typing_lazy_heap
 let rpc_command_needs_full_check : type a. a t -> bool = function
   (* global error list is not updated during small checks *)
   | STATUS -> true
+  (* newly subscribed client will need a full list of errors *)
+  | SUBSCRIBE_DIAGNOSTIC _ -> true
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
    * file sync commands (and resulting small checks), but putting it here just
    * to be safe *)

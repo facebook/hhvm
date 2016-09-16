@@ -152,7 +152,7 @@ let handle : type a. genv -> env -> a t -> env * a =
         new_env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->
         let new_env = { env with
-          diag_subscribe = Some (Diagnostic_subscription.of_id id)
+          diag_subscribe = Some (Diagnostic_subscription.of_id id env.errorl)
         } in
         new_env, ()
     | UNSUBSCRIBE_DIAGNOSTIC id ->

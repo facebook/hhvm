@@ -686,6 +686,11 @@ let rec get_doc node =
     let op = get_doc (binary_operator x) in
     let right = get_doc (binary_right_operand x) in
     group_doc (left ^| op ^| right)
+  | InstanceofExpression x ->
+    let left = get_doc x.instanceof_left_operand in
+    let op = get_doc x.instanceof_operator in
+    let right = get_doc x.instanceof_right_operand in
+    group_doc (left ^| op ^| right)
   | ConditionalExpression x ->
     let tst = get_doc (conditional_test x) in
     let qm = get_doc (conditional_question x) in

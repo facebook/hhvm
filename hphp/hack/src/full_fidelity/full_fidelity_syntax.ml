@@ -466,6 +466,11 @@ module WithToken(Token: TokenType) = struct
       binary_operator : t;
       binary_right_operand : t
     }
+    and instanceof_expression = {
+      instanceof_left_operand : t;
+      instanceof_operator : t;
+      instanceof_right_operand : t
+    }
     and conditional_expression = {
       conditional_test : t;
       conditional_question : t;
@@ -754,6 +759,7 @@ module WithToken(Token: TokenType) = struct
     | PrefixUnaryOperator of unary_operator
     | PostfixUnaryOperator of unary_operator
     | BinaryOperator of binary_operator
+    | InstanceofExpression of instanceof_expression
     | ConditionalExpression of conditional_expression
     | FunctionCallExpression of function_call_expression
     | ParenthesizedExpression of parenthesized_expression
@@ -884,6 +890,7 @@ module WithToken(Token: TokenType) = struct
       | PrefixUnaryOperator _ -> SyntaxKind.PrefixUnaryOperator
       | PostfixUnaryOperator _ -> SyntaxKind.PostfixUnaryOperator
       | BinaryOperator _ -> SyntaxKind.BinaryOperator
+      | InstanceofExpression _ -> SyntaxKind.InstanceofExpression
       | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
       | FunctionCallExpression _ -> SyntaxKind.FunctionCallExpression
       | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
@@ -1003,6 +1010,8 @@ module WithToken(Token: TokenType) = struct
     let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
     let is_postfix_operator node = kind node = SyntaxKind.PostfixUnaryOperator
     let is_binary_operator node = kind node = SyntaxKind.BinaryOperator
+    let is_instanceof_operator node =
+      kind node = SyntaxKind.InstanceofExpression
     let is_type_constraint node = kind node = SyntaxKind.TypeConstraint
     let is_type_parameter node = kind node = SyntaxKind.TypeParameter
     let is_conditional_expression node =
@@ -1394,6 +1403,11 @@ module WithToken(Token: TokenType) = struct
       | BinaryOperator
         { binary_left_operand; binary_operator; binary_right_operand } ->
         [ binary_left_operand; binary_operator; binary_right_operand ]
+      | InstanceofExpression
+        { instanceof_left_operand; instanceof_operator;
+          instanceof_right_operand } ->
+        [ instanceof_left_operand; instanceof_operator;
+          instanceof_right_operand ]
       | ConditionalExpression
         { conditional_test; conditional_question; conditional_consequence;
           conditional_colon; conditional_alternative } ->
@@ -1833,6 +1847,11 @@ module WithToken(Token: TokenType) = struct
       | BinaryOperator
         { binary_left_operand; binary_operator; binary_right_operand } ->
         [ "binary_left_operand"; "binary_operator"; "binary_right_operand" ]
+      | InstanceofExpression
+        { instanceof_left_operand; instanceof_operator;
+          instanceof_right_operand } ->
+        [ "instanceof_left_operand"; "instanceof_operator";
+          "instanceof_right_operand" ]
       | ConditionalExpression
         { conditional_test; conditional_question; conditional_consequence;
           conditional_colon; conditional_alternative } ->
@@ -2566,6 +2585,13 @@ module WithToken(Token: TokenType) = struct
         binary_right_operand ]) ->
         BinaryOperator { binary_left_operand; binary_operator;
         binary_right_operand }
+
+      | (SyntaxKind.InstanceofExpression,
+        [ instanceof_left_operand; instanceof_operator;
+          instanceof_right_operand ]) ->
+        InstanceofExpression
+        { instanceof_left_operand; instanceof_operator;
+          instanceof_right_operand }
       | (SyntaxKind.ConditionalExpression,
         [ conditional_test; conditional_question; conditional_consequence;
           conditional_colon; conditional_alternative ]) ->
@@ -2760,6 +2786,9 @@ module WithToken(Token: TokenType) = struct
         binary_left_operand binary_operator binary_right_operand =
           from_children SyntaxKind.BinaryOperator
             [ binary_left_operand; binary_operator; binary_right_operand ]
+
+      let make_instanceof_operator left op right =
+        from_children SyntaxKind.InstanceofExpression [left; op; right ]
 
       let make_conditional_expression
         conditional_test conditional_question conditional_consequence

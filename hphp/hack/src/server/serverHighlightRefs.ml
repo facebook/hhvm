@@ -9,7 +9,6 @@
  *)
 
 open Core
-open ServerEnv
 
 let get_target symbol =
   let open SymbolOccurrence in
@@ -79,24 +78,6 @@ let rec combine_result l l1 l2 =
       | 0 -> combine_result (l @ [h1]) l1_ l2_
       | _ -> l
     end
-
-let go_from_file (p, line, column) env =
-  let (path, file_info, ast, symbols) = SMap.find_unsafe p env.symbols_cache in
-  let symbols = List.filter symbols (fun symbol ->
-    IdentifySymbolService.is_target line column symbol.SymbolOccurrence.pos) in
-  match symbols with
-  | symbol::_ ->
-    ServerIdeUtils.oldify_file_info path file_info;
-    Parser_heap.ParserHeap.add path ast;
-    let {FileInfo.funs; classes; typedefs;_} = file_info in
-    NamingGlobal.make_env ~funs ~classes ~typedefs ~consts:[];
-    let symbols = filter_result symbols symbol in
-    let res = List.fold symbols ~init:[] ~f:(fun acc symbol ->
-      combine_result [] acc
-        (highlight_symbol env.tcopt (line, column) path file_info symbol)) in
-    ServerIdeUtils.revive_file_info path file_info;
-    res
-  | _ -> []
 
 let go (content, line, char) tcopt =
   ServerIdentifyFunction.get_occurrence_and_map content line char

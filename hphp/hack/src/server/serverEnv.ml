@@ -64,8 +64,6 @@ type env = {
     needs_full_check : bool;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
-    (* Highlight information cached for ide related commands *)
-    symbols_cache  : IdentifySymbolService.cache;
   }
 
 let file_filter f =

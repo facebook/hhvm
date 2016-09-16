@@ -109,5 +109,4 @@ let make_env config =
     needs_decl = Relative_path.Set.empty;
     needs_full_check = false;
     diag_subscribe = None;
-    symbols_cache  = SMap.empty;
   }

@@ -10,7 +10,6 @@
 
 open Core
 open Option.Monad_infix
-open Reordered_argument_collections
 open ServerEnv
 open File_content
 open ServerCommandTypes
@@ -104,51 +103,30 @@ let handle : type a. genv -> env -> a t -> env * a =
     | IDE_HIGHLIGHT_REF (path, {line; column}) ->
         let content =
           ServerFileSync.try_relativize_path path >>= fun relative_path ->
-          Relative_path.Map.get env.edited_files relative_path
+          Relative_path.Map.get env.edited_files relative_path >>= fun fc ->
+          Some (File_content.get_content fc)
         in
-        begin match content with
-        | Some content ->
-          begin match SMap.mem env.symbols_cache path with
-          | true ->
-            env, ServerHighlightRefs.go_from_file (path, line, column) env
-          | false ->
-            let content = File_content.get_content @@ content in
-            let res = ServerIdentifyFunction.get_full_occurrence_pair content in
-            let symbols_cache_ = SMap.add env.symbols_cache path res in
-            let env = {env with symbols_cache = symbols_cache_} in
-            env, ServerHighlightRefs.go_from_file (path, line, column) env
-          end
-        | None ->
-          let content = try Sys_utils.cat path with _ -> "" in
-          env, ServerHighlightRefs.go (content, line, column) env.tcopt
-        end
+        let content = match content with
+          | Some c -> c
+          | None -> try Sys_utils.cat path with _ -> ""
+        in
+        env, ServerHighlightRefs.go (content, line, column) env.tcopt
     | IDE_IDENTIFY_FUNCTION (path, {line; column}) ->
         let content =
           ServerFileSync.try_relativize_path path >>= fun relative_path ->
-          Relative_path.Map.get env.edited_files relative_path
+          Relative_path.Map.get env.edited_files relative_path >>= fun fc ->
+          Some (File_content.get_content fc)
         in
-        begin match content with
-        | Some content ->
-          begin match SMap.mem env.symbols_cache path with
-          | true ->
-            env, ServerIdentifyFunction.go_from_file (path, line, column) env
-          | false ->
-            let content = File_content.get_content content in
-            let res = ServerIdentifyFunction.get_full_occurrence_pair content in
-            let symbols_cache_ = SMap.add env.symbols_cache path res in
-            let env = {env with symbols_cache = symbols_cache_} in
-            env, ServerIdentifyFunction.go_from_file (path, line, column) env
-          end
-        | None ->
-          let content = try Sys_utils.cat path with _ -> "" in
-          env, ServerIdentifyFunction.go_absolute content line column env.tcopt
-        end
+        let content = match content with
+          | Some c -> c
+          | None -> try Sys_utils.cat path with _ -> ""
+        in
+        env, ServerIdentifyFunction.go_absolute content line column env.tcopt
     | DISCONNECT ->
         let new_env = {env with
         persistent_client = None;
         edited_files = Relative_path.Map.empty;
-        diag_subscribe = None;
-        symbols_cache = SMap.empty} in
+        diag_subscribe = None;} in
         new_env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->
         let new_env = { env with

@@ -306,7 +306,6 @@ module type CheckKindType = sig
     lazy_decl_failed:Relative_path.Set.t ->
     failed_check:Relative_path.Set.t ->
     diag_subscribe:Diagnostic_subscription.t option ->
-    symbols_cache:IdentifySymbolService.cache ->
     ServerEnv.env
 end
 
@@ -341,7 +340,7 @@ module FullCheckKind : CheckKindType = struct
 
   let get_new_env ~old_env ~files_info ~errorl ~failed_parsing ~failed_naming
     ~failed_decl ~lazy_decl_later:_ ~lazy_decl_failed ~failed_check
-      ~diag_subscribe ~symbols_cache =
+      ~diag_subscribe =
     {
       files_info;
       tcopt = old_env.tcopt;
@@ -357,7 +356,6 @@ module FullCheckKind : CheckKindType = struct
       needs_decl = Relative_path.Set.empty;
       needs_full_check = false;
       diag_subscribe;
-      symbols_cache;
     }
 end
 
@@ -384,7 +382,7 @@ module LazyCheckKind : CheckKindType = struct
 
   let get_new_env ~old_env ~files_info ~errorl:_ ~failed_parsing:_
     ~failed_naming:_ ~failed_decl:_ ~lazy_decl_later
-      ~lazy_decl_failed:_ ~failed_check:_ ~diag_subscribe ~symbols_cache =
+      ~lazy_decl_failed:_ ~failed_check:_ ~diag_subscribe =
 
     let needs_decl =
       List.fold (Relative_path.Map.keys lazy_decl_later)
@@ -397,7 +395,6 @@ module LazyCheckKind : CheckKindType = struct
        needs_decl;
        needs_full_check = true;
        diag_subscribe;
-       symbols_cache;
      }
 end
 
@@ -415,11 +412,6 @@ end = functor(CheckKind:CheckKindType) -> struct
       Relative_path.Set.(cardinal disk_files + cardinal ide_files) in
     Printf.eprintf "******************************************\n";
     Hh_logger.log "Files to recompute: %d" reparse_count;
-
-    (* RESET HIGHLIGHTS CACHE FOR RECHECKED IDE FILES *)
-    let symbols_cache = Relative_path.Set.fold ide_files
-      ~init:env.symbols_cache
-      ~f:(fun path map -> SMap.remove map (Relative_path.to_absolute path)) in
 
     (* PARSING *)
     let start_t = Unix.gettimeofday () in
@@ -536,7 +528,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let new_env = CheckKind.get_new_env old_env files_info errorl failed_parsing
        failed_naming failed_decl lazy_decl_later lazy_decl_failed
-        failed_check diag_subscribe symbols_cache in
+        failed_check diag_subscribe in
 
     new_env, reparse_count, total_rechecked_count
 end

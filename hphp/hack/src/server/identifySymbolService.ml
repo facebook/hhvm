@@ -178,10 +178,6 @@ let attach_hooks result_ref line char =
   let is_target_fun = is_target line char in
   really_attach_hooks result_ref is_target_fun
 
-let attach_full_hooks result_ref =
-  let is_target_fun = fun _ -> true in
-  really_attach_hooks result_ref is_target_fun
-
 let detach_hooks () =
   Naming_hooks.remove_all_hooks ();
   Decl_hooks.remove_all_hooks ();

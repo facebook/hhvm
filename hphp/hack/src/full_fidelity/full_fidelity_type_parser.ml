@@ -376,14 +376,21 @@ and parse_nullable_type_specifier parser =
 and parse_classname_type_specifier parser =
   (* SPEC
     classname-type-specifier:
-      classname  <  qualified-name  >
+      classname  <  qualified-name generic-type-argument-list-opt >
+
+      TODO: We parse any type as the class name type; we should write an
+      error detection pass later that determines when this is a bad type.
+
+      TODO: Is this grammar correct?  In particular, can the name have a
+      scope resolution operator (::) in it?  Find out and update the spec if
+      this is permitted.
   *)
 
   (* TODO ERROR RECOVERY is unsophisticated here. *)
   let (parser, classname) = next_token parser in
   let classname = make_token classname in
   let (parser, left_angle) = expect_left_angle parser in
-  let (parser, classname_type) = expect_qualified_name parser in
+  let (parser, classname_type) = parse_type_specifier parser in
   let (parser, right_angle) = expect_right_angle parser in
   let result = make_classname_type_specifier
     classname left_angle classname_type right_angle in

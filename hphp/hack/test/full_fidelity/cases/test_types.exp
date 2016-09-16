@@ -60,10 +60,12 @@
           (classname_type_specifier
             ((whitespace)(classname))
             ((<))
-            ((name))
+            (generic_type_specifier
+              ((name))
+              (type_arguments((<))(simple_type_specifier((name)))((>))))
             ((>)(whitespace)))
-          ((variable)(end_of_line))
-          (missing)))
+            ((variable)(end_of_line))
+            (missing)))
         ((rparen)(whitespace))
         ((:)(whitespace))
         (simple_type_specifier

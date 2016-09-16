@@ -62,6 +62,7 @@ let rec parse_type_specifier parser =
   | LeftParen -> parse_tuple_or_closure_type_specifier parser
   | Shape -> parse_shape_specifier parser
   | Question -> parse_nullable_type_specifier parser
+  | At -> parse_soft_type_specifier parser
   | Classname -> parse_classname_type_specifier parser
   | _ ->
     let parser = with_error parser1 SyntaxError.error1007 in
@@ -371,6 +372,22 @@ and parse_nullable_type_specifier parser =
   let (parser, question) = assert_token parser Question in
   let (parser, nullable_type) = parse_type_specifier parser in
   let result = make_nullable_type_specifier question nullable_type in
+  (parser, result)
+
+and parse_soft_type_specifier parser =
+  (* SPEC (Draft)
+    soft-type-specifier:
+      @ type-specifier
+
+    TODO: The spec does not mention this type grammar.  Work out where and
+    when it is legal, and what the exact semantics are, and put it in the spec.
+    Add an error pass if necessary to identify illegal usages of this type.
+
+    Note that it is legal for trivia to come between the @ and the type.
+  *)
+  let (parser, soft_at) = assert_token parser At in
+  let (parser, soft_type) = parse_type_specifier parser in
+  let result = make_soft_type_specifier soft_at soft_type in
   (parser, result)
 
 and parse_classname_type_specifier parser =

@@ -57,13 +57,14 @@
           ((,)(end_of_line)))
         (parameter_declaration
           (missing)(missing)
-          (classname_type_specifier
-            ((whitespace)(classname))
-            ((<))
-            (generic_type_specifier
-              ((name))
-              (type_arguments((<))(simple_type_specifier((name)))((>))))
-            ((>)(whitespace)))
+          (soft_type_specifier((whitespace)(@))
+            (classname_type_specifier
+              ((classname))
+              ((<))
+              (generic_type_specifier
+                ((name))
+                (type_arguments((<))(simple_type_specifier((name)))((>))))
+              ((>)(whitespace))))
             ((variable)(end_of_line))
             (missing)))
         ((rparen)(whitespace))

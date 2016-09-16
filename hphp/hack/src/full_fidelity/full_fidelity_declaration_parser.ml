@@ -1249,9 +1249,14 @@ module WithExpressionAndStatementAndTypeParser
         semicolon in
       (parser1, syntax)
     | _ ->
-      (* ERROR RECOVERY: skip to the next token *)
+      (* ERROR RECOVERY: We expected either a block or a semicolon; we got
+      neither. Use the offending token as the body of the method.
+      TODO: Is this the right error recovery? *)
+      let error = make_error [make_token token] in
+      let syntax = make_methodish
+        attribute_spec modifiers header error (make_missing()) in
       let parser = with_error parser1 SyntaxError.error1041 in
-      (parser, make_error [make_token token])
+      (parser, syntax)
 
   and parse_modifiers parser =
     let rec aux acc parser =

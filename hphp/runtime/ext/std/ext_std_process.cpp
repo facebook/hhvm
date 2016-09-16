@@ -189,6 +189,8 @@ namespace {
 
 struct ShellExecContext final {
   ShellExecContext() {
+    // Use the default handler while exec'ing in a shell,
+    // saving the previous signal action.
     m_sig_handler = signal(SIGCHLD, SIG_DFL);
   }
 
@@ -201,7 +203,13 @@ struct ShellExecContext final {
 #endif
     }
     if (m_sig_handler) {
-      signal(SIGCHLD, m_sig_handler);
+      // If we saved the previous signal action, then re-attach it now.
+      // Note: We're using LightProcess::AttachHandler() for this since
+      //       instead of the the signal(SIGCHLD, m_sig_handler) that's
+      //       typically seen in example code because we're re-attaching
+      //       a signal action and not a simple signal handler, and the
+      //       latter approach only supports simple signal handlers.
+      LightProcess::AttachHandler();
     }
   }
 

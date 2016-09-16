@@ -45,6 +45,7 @@ struct LightProcess {
 
   static void Close();
   static bool Available();
+  static void AttachHandler();
   static void Initialize(const std::string &prefix, int count,
                          bool trackProcessTimes,
                          const std::vector<int> &inherited_fds);

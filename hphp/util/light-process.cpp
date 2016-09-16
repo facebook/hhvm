@@ -436,6 +436,17 @@ void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
   }
 }
 
+void LightProcess::AttachHandler(void)
+{
+  struct sigaction sa = {};
+  sa.sa_sigaction = &LightProcess::SigChldHandler;
+  sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
+  if (sigaction(SIGCHLD, &sa, nullptr) != 0) {
+    Logger::Error("Couldn't install SIGCHLD handler");
+    abort();
+  }
+}
+
 void LightProcess::Initialize(const std::string &prefix, int count,
                               bool trackProcessTimes,
                               const std::vector<int> &inherited_fds) {
@@ -484,14 +495,7 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   }
 
   if (!s_handlerInited) {
-    struct sigaction sa;
-    struct sigaction old_sa;
-    sa.sa_sigaction = &LightProcess::SigChldHandler;
-    sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
-    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
-      Logger::Error("Couldn't install SIGCHLD handler");
-      abort();
-    }
+    AttachHandler();
     s_handlerInited = true;
   }
 }
@@ -654,8 +658,7 @@ void LightProcess::closeShadow() {
       handleException("closeShadow");
     }
     // removes the "zombie" process, so not to interfere with later waits
-    int status;
-    ::waitpid(m_shadowProcess, &status, 0);
+    ::waitpid(m_shadowProcess, nullptr, 0);
     m_shadowProcess = 0;
   }
   closeFiles();

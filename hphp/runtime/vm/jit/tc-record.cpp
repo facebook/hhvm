@@ -145,7 +145,7 @@ void reportJitMaturity(const CodeCache& code) {
 
 void logTranslation(const TransEnv& env) {
   auto nanos = HPHP::Timer::GetThreadCPUTimeNanos() - env.unit->startNanos();
-  StructuredLogEntry cols;
+  auto& cols = *env.unit->logEntry();
   auto& context = env.unit->context();
   auto kind = show(context.kind);
   cols.setStr("trans_kind", !debug ? kind : kind + "_debug");

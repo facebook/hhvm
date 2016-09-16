@@ -286,6 +286,10 @@ inline int64_t IRUnit::startNanos() const {
   return m_startNanos;
 }
 
+inline folly::Optional<StructuredLogEntry>& IRUnit::logEntry() const {
+  return m_logEntry;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> SSATmp* IRUnit::cns(T val) {

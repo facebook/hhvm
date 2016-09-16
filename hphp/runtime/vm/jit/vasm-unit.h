@@ -211,6 +211,7 @@ struct Vunit {
   uint8_t cur_voff{0};  // current instruction index managed by Vout
   bool padding{false};
   folly::Optional<TransContext> context;
+  StructuredLogEntry* log_entry{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

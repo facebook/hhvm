@@ -2907,7 +2907,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     spi.used_spill_slots += extra;
   }
   if (spi.used_spill_slots == 0) return;
-  Timer t(Timer::vasm_xls_spill);
+  Timer t(Timer::vasm_xls_spill, unit.log_entry);
   always_assert(ctx.abi.canSpill);
 
   // Make sure we always allocate spill space in multiples of 16 bytes, to keep
@@ -3160,16 +3160,15 @@ DEBUG_ONLY void printVariables(const char* caption,
 ///////////////////////////////////////////////////////////////////////////////
 
 struct XLSStats {
-  size_t instrs{0};
-  size_t moves{0};
-  size_t loads{0};
-  size_t spills{0};
-  size_t consts{0};
-  size_t total_copies{0};
+  size_t instrs{0}; // total instruction count after xls
+  size_t moves{0}; // number of movs inserted
+  size_t loads{0}; // number of loads inserted
+  size_t spills{0}; // number of spill-stores inserted
+  size_t consts{0}; // number of const-loads inserted
+  size_t total_copies{0}; // moves+loads+spills
 };
 
-DEBUG_ONLY void dumpStats(const Vunit& unit,
-                          const ResolutionPlan& resolution) {
+void dumpStats(const Vunit& unit, const ResolutionPlan& resolution) {
   XLSStats stats;
 
   for (auto const& blk : unit.blocks) {
@@ -3207,13 +3206,21 @@ DEBUG_ONLY void dumpStats(const Vunit& unit,
     stats.instrs, stats.moves, stats.loads, stats.spills,
     stats.consts, stats.total_copies
   );
+
+  if (auto entry = unit.log_entry) {
+    entry->setInt("xls_instrs", stats.instrs);
+    entry->setInt("xls_moves", stats.moves);
+    entry->setInt("xls_loads", stats.loads);
+    entry->setInt("xls_spills", stats.spills);
+    entry->setInt("xls_consts", stats.consts);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
 void allocateRegisters(Vunit& unit, const Abi& abi) {
-  Timer timer(Timer::vasm_xls);
+  Timer timer(Timer::vasm_xls, unit.log_entry);
   auto const counter = s_counter.fetch_add(1, std::memory_order_relaxed);
 
   splitCriticalEdges(unit);
@@ -3253,9 +3260,15 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
 
   // Insert instructions for creating spill space.
   allocateSpillSpace(unit, ctx, spill_info);
+  if (auto entry = unit.log_entry) {
+    entry->setInt("num_spills", spill_info.num_spills);
+    entry->setInt("used_spill_slots", spill_info.used_spill_slots);
+  }
 
   printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
-  ONTRACE_MOD(Trace::xls_stats, 1, dumpStats(unit, resolution));
+  if (HPHP::Trace::moduleEnabled(Trace::xls_stats, 1) || unit.log_entry) {
+    dumpStats(unit, resolution);
+  }
 
   // Free the variable metadata.
   for (auto var : variables) {

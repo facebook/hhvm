@@ -24,6 +24,7 @@
 #include <folly/Format.h>
 
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/vdso.h"
@@ -54,24 +55,28 @@ int64_t getCPUTimeNanos() {
 
 }
 
-Timer::Timer(Name name)
+Timer::Timer(Name name, StructuredLogEntry* log_entry)
   : m_name(name)
-  , m_start(getCPUTimeNanos())
   , m_finished(false)
+  , m_start(getCPUTimeNanos())
+  , m_log_entry(log_entry)
 {
 }
 
 Timer::~Timer() {
-  if (!RuntimeOption::EvalJitTimer || m_finished) return;
-  stop();
+  if (!m_finished) stop();
 }
 
 int64_t Timer::stop() {
   if (!RuntimeOption::EvalJitTimer) return 0;
 
   assertx(!m_finished);
-  auto const finish = getCPUTimeNanos();
-  auto const elapsed = finish - m_start;
+  auto const elapsed = getCPUTimeNanos() - m_start;
+
+  if (m_log_entry) {
+    m_log_entry->setInt(std::string(s_names[(size_t)m_name].str) + "_micros",
+                        elapsed / 1000);
+  }
 
   auto& counter = s_counters[m_name];
   counter.total += elapsed;

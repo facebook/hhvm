@@ -264,11 +264,8 @@ TCA emitTranslation(TransEnv env) {
 
   reportJitMaturity(code());
 
-  if (env.unit) {
-    auto func = env.unit->context().func;
-    auto enable = func ? func->shouldSampleJit() :
-                  StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate);
-    if (enable) logTranslation(env);
+  if (env.unit && env.unit->logEntry()) {
+    logTranslation(env);
   }
 
   return loc.mainStart();

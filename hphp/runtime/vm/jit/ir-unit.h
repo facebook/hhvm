@@ -26,9 +26,11 @@
 #include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/arena.h"
+#include "hphp/util/struct-log.h"
 
 #include <string>
 #include <type_traits>
+#include <folly/Optional.h>
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -199,6 +201,8 @@ struct IRUnit {
    * Return the "start" timestamp when this IRUnit was constructed.
    */
   int64_t startNanos() const;
+  folly::Optional<StructuredLogEntry>& logEntry() const;
+  void initLogEntry(const Func*);
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -274,8 +278,8 @@ private:
   // "Cursor" for IRInstructions in the current bytecode.  Managed externally.
   uint16_t m_iroff{0};
 
-  // Timestamp at construction time.
-  int64_t m_startNanos;
+  int64_t m_startNanos; // Timestamp at construction time.
+  mutable folly::Optional<StructuredLogEntry> m_logEntry;
 };
 
 //////////////////////////////////////////////////////////////////////

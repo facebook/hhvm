@@ -38,6 +38,13 @@ IRUnit::IRUnit(TransContext context) : m_context(context)
   m_startNanos = HPHP::Timer::GetThreadCPUTimeNanos();
 }
 
+void IRUnit::initLogEntry(const Func* func) {
+  if (func ? func->shouldSampleJit() :
+      StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate)) {
+    m_logEntry.emplace();
+  }
+}
+
 IRInstruction* IRUnit::defLabel(unsigned numDst, BCContext bcctx) {
   IRInstruction inst(DefLabel, bcctx);
   auto const label = clone(&inst);

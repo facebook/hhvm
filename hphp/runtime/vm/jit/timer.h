@@ -54,7 +54,9 @@
   TIMER_NAME(vasm_optimize)                     \
   TIMER_NAME(vasm_dce)                          \
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+struct StructuredLogEntry;
+namespace jit {
 
 /*
  * Timer is used to track how much CPU time we spend in the different stages of
@@ -92,7 +94,7 @@ struct Timer {
     }
   };
 
-  explicit Timer(Name name);
+  explicit Timer(Name name, StructuredLogEntry* = nullptr);
   ~Timer();
 
   /*
@@ -110,8 +112,9 @@ struct Timer {
 
  private:
   Name m_name;
-  int64_t m_start;
   bool m_finished;
+  int64_t m_start;
+  StructuredLogEntry* m_log_entry;
 };
 
 } }

@@ -874,6 +874,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
   while (result == TranslateResult::Retry) {
     unit = folly::make_unique<IRUnit>(context);
+    unit->initLogEntry(context.func);
     irgen::IRGS irgs{*unit};
 
     // Set up inlining context, but disable it for profiling mode.

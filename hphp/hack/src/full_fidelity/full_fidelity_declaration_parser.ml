@@ -385,34 +385,102 @@ module WithExpressionAndStatementAndTypeParser
       | _ -> (with_error parser SyntaxError.error1035, (make_missing()))
 
   and parse_classish_extends_opt parser =
+    (* In this routine we parse a list which starts with "extends" and then
+    consists of comma-separated types.
+
+    The rules for extends lists are:
+
+    * In an interface, the list, if it exists, can have one or more types.
+    * In a class, the list, if it exists, must have one type.
+    * In a trait, there is no extends clause.
+
+    However, we parse the clause in all three cases the same; this makes it
+    easier to report a good error later.
+
+    TODO: Report that error.
+
+
+
+    *)
+
     let (parser1, extends_token) = next_token parser in
     if (Token.kind extends_token) <> Extends then
       (parser, make_missing (), Syntax.make_missing ())
     else
-    let (parser, extends_list) = parse_qualified_name_list parser1 in
+    let (parser, extends_list) = parse_special_type_list parser1 in
     (parser, make_token extends_token, extends_list)
 
   and parse_classish_implements_opt parser =
+    (* The rules for implements are similar to those for extends; see above.
+
+    * In a class, the list, if it exists, can have one or more types.
+    * In an interface, there is no implements clause
+    * In a trait, there is no implements clause
+
+    But again, it is easier to simply parse it now and give an error later.
+
+    TODO: Give that error.
+    *)
     let (parser1, implements_token) = next_token parser in
     if (Token.kind implements_token) <> Implements then
       (parser, make_missing (), Syntax.make_missing ())
     else
-    let (parser, implements_list) = parse_qualified_name_list parser1 in
+    let (parser, implements_list) = parse_special_type_list parser1 in
     (parser, make_token implements_token, implements_list)
 
-  and parse_qualified_name_list parser =
+  and parse_special_type_list parser =
+    (*
+      An extends / implements list is a comma-separated list of types, but
+      very special types; we want the types to consist of a name and an
+      optional generic type argument list.
+
+      TODO: Can the type name be of the form "foo::bar"? Those do not
+      necessarily start with names. Investigate this.
+
+      Normally we'd use one of the separated list helpers, but there is no
+      specific end token we could use to detect the end of the list, and we
+      want to bail out if we get something that is not a type of the right form.
+      So we have custom logic here.
+
+      TODO: This is one of the rare cases in Hack where a comma-separated list
+      may not have a trailing comma. Is that desirable, or was that an
+      oversight when the trailing comma rules were added?  If possible we
+      should keep the rule as-is, and disallow the trailing comma; it makes
+      parsing and error recovery easier.
+   *)
     let rec aux parser acc =
-      let token = peek_token parser in
+      let (parser1, token) = next_xhp_class_name_or_other parser in
       match (Token.kind token) with
-        | Comma ->
-            let (parser1, token) = next_token parser in
-            aux parser1 ((make_token token) :: acc)
-        | Name
-        | QualifiedName ->
-            let (parser, classish_reference) = parse_type_specifier parser in
-            aux parser (classish_reference :: acc)
-        | _ -> (parser, acc)
-    in
+      | Comma ->
+          (* ERROR RECOVERY. We expected a type but we got a comma.
+          Give the error that we expected a type, not a name, even though
+          not every type is legal here. *)
+          let parser = with_error parser1 SyntaxError.error1007 in
+          let item = Syntax.make_missing() in
+          let separator = Syntax.make_token token in
+          let list_item = Syntax.make_list_item item separator  in
+          aux parser (list_item :: acc)
+      | Name
+      | XHPClassName
+      | QualifiedName ->
+          (* We got the start of a type. Back up to the start and parse it.  *)
+          let (parser, item) = parse_type_specifier parser in
+          (* If what follows is a comma then keep on going. Otherwise,
+          we're done. *)
+          if peek_token_kind parser = Comma then
+            let (parser, separator) = assert_token parser Comma in
+            let list_item = Syntax.make_list_item item separator  in
+            aux parser (list_item :: acc)
+          else
+            (parser, (item :: acc))
+      | _ ->
+        (* We expected a type but we got neither a type nor a comma. *)
+        (* ERROR RECOVERY: Give the error that we expected a type. Do not
+           eat the offending token.
+           TODO: Is this the right thing to do? Suppose the offending token
+           is "int"? That's a bad user experience. *)
+         let parser = with_error parser SyntaxError.error1007 in
+         (parser, acc) in
     let (parser, qualified_name_list) = aux parser [] in
     let qualified_name_list = List.rev qualified_name_list in
     (parser, make_list qualified_name_list)
@@ -630,6 +698,10 @@ module WithExpressionAndStatementAndTypeParser
     (* TODO: The spec is incomplete; we need to be able to parse
        require extends Foo<int>;
        Fix the spec.
+       TODO: Check whether we also need to handle
+         require extends :foo ;
+         require extends foo::bar
+       and so on.
        *)
     (* ERROR RECOVERY: Detect if the implements/extends, name and semi are
        missing. *)

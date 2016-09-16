@@ -31,7 +31,8 @@ let mem key = hh_mem (to_key key)
 let remove key = hh_remove (to_key key)
 let move k1 k2 = hh_move (to_key k1) (to_key k2)
 let get key = hh_get (to_key key)
-let collect aggressive = hh_collect aggressive
+let gentle_collect () = hh_collect false
+let aggressive_collect () = hh_collect true
 
 let expect_equals ~name value expected =
   expect
@@ -198,7 +199,7 @@ let test_gc_collect () =
   remove "1";
   expect_heap_size 2;
   (* Garbage collection should remove the space taken by the removed element *)
-  collect false;
+  gentle_collect ();
   expect_heap_size 1;
   expect_mem "0"
 
@@ -211,17 +212,42 @@ let test_gc_aggressive () =
    (* Since latest heap size is zero,
       now it should gc, but theres nothing to gc,
       so the heap will stay the same *)
-  collect false;
+  gentle_collect ();
   expect_heap_size 2;
   remove "1";
   add "2" "2";
   expect_heap_size 3;
   (* Gentle garbage collection shouldn't catch this *)
-  collect false;
+  gentle_collect ();
   expect_heap_size 3;
   (* Aggressive garbage collection should run *)
-  collect true;
+  aggressive_collect ();
   expect_heap_size 2
+
+let test_heapsize_decrease () =
+  expect_stats ~nonempty:0 ~used:0;
+  add "0" "0";
+  add "1" "1";
+  add "2" "2";
+  add "3" "3";
+  add "4" "4";
+  add "5" "5";
+  expect_heap_size 6;
+  remove "1";
+  remove "0";
+  add "6" "6";
+  add "7" "7";
+  expect_heap_size 8;
+  gentle_collect (); (* This runs *)
+  expect_heap_size 6;
+  add "0" "0";
+  add "1" "1";
+  remove "6";
+  remove "7";
+  expect_heap_size 8; (* Latest heap size should be set to 6, not 8 *)
+  aggressive_collect (); (* Aggressive collection should kick in *)
+  expect_heap_size 6
+
 
 let tests handle =
   let list = [
@@ -231,7 +257,8 @@ let tests handle =
     "test_no_overwrite", test_no_overwrite;
     "test_reuse_slots", test_reuse_slots;
     "test_gc_collect", test_gc_collect;
-    "test_gc_aggresive", test_gc_aggressive;
+    "test_gc_aggressive", test_gc_aggressive;
+    "test_heapsize_decrease", test_heapsize_decrease;
   ] in
   let setup_test (name, test) = name, fun () ->
   let handle = SharedMem.(

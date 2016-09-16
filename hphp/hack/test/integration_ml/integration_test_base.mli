@@ -53,6 +53,17 @@ val ide_autocomplete :
 
 val prepend_root: string -> string
 
+(* Helpers for asserting things *)
+
 val fail: string -> unit
 val assertEqual: string -> string -> unit
 val assertSingleError: string -> Errors.error list -> unit
+
+val assert_no_diagnostics : ('a, 'b) loop_outputs -> unit
+
+val assert_has_diagnostics : ('a, 'b) loop_outputs -> unit
+
+val assert_diagnostics : ('a, 'b) loop_outputs -> string -> unit
+
+val assert_autocomplete :
+  ('a, AutocompleteService.result) loop_outputs -> string list -> unit

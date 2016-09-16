@@ -43,9 +43,7 @@ let run_and_check_autocomplete env =
   let env = Test.wait env in
 
   let env, loop_output = Test.ide_autocomplete env (bar_name, 3, 15) in
-  (match loop_output.persistent_client_response with
-  | Some [x] when x.AutocompleteService.res_name = "foo" -> ()
-  | _ -> Test.fail "Unexpected or missing autocomplete response");
+  Test.assert_autocomplete loop_output ["foo"];
   env, loop_output
 
 let () =

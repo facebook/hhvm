@@ -9,8 +9,6 @@
  *)
 
 open Integration_test_base_types
-open Reordered_argument_collections
-open ServerCommandTypes
 
 module Test = Integration_test_base
 
@@ -20,6 +18,12 @@ let foo_name = "foo.php"
 
 let foo_contents = "<?hh
 {
+"
+
+let foo_diagnostics = "
+/foo.php:
+File \"/foo.php\", line 3, characters 1-0:
+Expected } (Parsing[1002])
 "
 
 let () =
@@ -32,21 +36,7 @@ let () =
   let env, _ = Test.edit_file env foo_name foo_contents in
   let env = Test.wait env in
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
-  (match loop_outputs.push_message with
-  | Some (DIAGNOSTIC (id, errors))
-      when id = diagnostic_subscription_id ->
-    if not @@ (SMap.cardinal errors = 1) then
-      Test.fail "Expected errors for single file";
-    begin match SMap.get errors (Test.prepend_root foo_name) with
-      | Some [error] ->
-        let error = Errors.to_string error in
-        Test.assertEqual
-          ("File \"/foo.php\", line 3, characters 1-0:\n" ^
-          "Expected } (Parsing[1002])\n")
-          error
-      | _ -> Test.fail "Expected exactly one error"
-    end
-  | _ -> Test.fail "Expected push diagnostics");
+  Test.assert_diagnostics loop_outputs foo_diagnostics;
   let env = Test.wait env in
   let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
   match loop_outputs.push_message with

@@ -10,6 +10,7 @@
 
 open Core
 open Integration_test_base_types
+open Reordered_argument_collections
 open ServerCommandTypes
 
 let root = "/"
@@ -80,6 +81,8 @@ let fail x =
   exit 1
 
 let assertEqual expected got =
+  let expected = String.trim expected in
+  let got = String.trim got in
   if expected <> got then fail
     (Printf.sprintf "Expected:\n%s\nGot:\n%s\n" expected got)
 
@@ -162,3 +165,51 @@ let ide_autocomplete env (path, line, column) =
       (path, File_content.{line; column})
     )
   }
+
+let assert_no_diagnostics loop_output =
+  match loop_output.push_message with
+  | Some (DIAGNOSTIC _) ->
+    fail "Did not expect to receive push diagnostics."
+  | None -> ()
+
+let assert_has_diagnostics loop_output =
+  match loop_output.push_message with
+  | Some (DIAGNOSTIC _) -> ()
+  | None -> fail "Expected to receive push diagnostics."
+
+let errors_to_string buf x =
+  List.iter x ~f: begin fun error ->
+    Printf.bprintf buf "%s\n" (Errors.to_string error)
+  end
+
+let diagnostics_to_string x =
+  let buf = Buffer.create 1024 in
+  SMap.iter x ~f:begin fun path errors ->
+    Printf.bprintf buf "%s:\n" path;
+    errors_to_string buf errors;
+  end;
+  Buffer.contents buf
+
+let assert_diagnostics loop_output expected =
+  let diagnostics = match loop_output.push_message with
+    | None -> fail "Expected push diagnostics"
+    | Some (DIAGNOSTIC (_, m)) -> m
+  in
+
+  let diagnostics_as_string = diagnostics_to_string diagnostics in
+  assertEqual expected diagnostics_as_string
+
+let list_to_string l =
+  let buf = Buffer.create 1024 in
+  List.iter l ~f:(Printf.bprintf buf "%s ");
+  Buffer.contents buf
+
+let assert_autocomplete loop_output expected =
+  let results = match loop_output.persistent_client_response with
+    | Some res -> res
+    | _ -> fail "Expected autocomplete response"
+  in
+  let results = List.map results ~f:(fun x -> x.AutocompleteService.res_name) in
+  let results_as_string = list_to_string results in
+  let expected_as_string = list_to_string expected in
+  assertEqual expected_as_string results_as_string

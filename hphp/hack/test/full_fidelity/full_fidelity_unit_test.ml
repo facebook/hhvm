@@ -132,6 +132,7 @@ let minimal_tests =
     "test_closure_type";
     "test_inclusion_directive";
     "test_awaitable_creation";
+    "test_phpisms";
   ] ~f:mapper
 
 let error_tests =

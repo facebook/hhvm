@@ -90,6 +90,7 @@ type t =
 | Type
 | Unset
 | Use
+| Var
 | Void
 | While
 | Yield
@@ -258,6 +259,7 @@ let from_string keyword =
   | "type" -> Some Type
   | "unset" -> Some Unset
   | "use" -> Some Use
+  | "var" -> Some Var
   | "void" -> Some Void
   | "while" -> Some While
   | "yield" -> Some Yield
@@ -341,6 +343,7 @@ let to_string kind =
   | Type -> "type"
   | Unset -> "unset"
   | Use -> "use"
+  | Var -> "var"
   | Void -> "void"
   | While -> "while"
   | Yield -> "yield"

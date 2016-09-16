@@ -594,6 +594,13 @@ module WithExpressionAndStatementAndTypeParser
       | TokenKind.Attribute -> let (parser, attr) =
         parse_xhp_class_attribute_declaration parser in
         aux parser (attr :: acc)
+      | Var ->
+        (* TODO: We allow "var" as a synonym for "public" in a property; this
+        is a PHP-ism that we do not support in Hack, but we parse anyways
+        so as to give an error later.  Write an error detection pass. *)
+        let (parser, var) = assert_token parser Var in
+        let (parser, prop) = parse_property_declaration parser var in
+        aux parser (prop :: acc)
       | _ ->
           (* TODO *)
         let (parser, token) = next_token parser in

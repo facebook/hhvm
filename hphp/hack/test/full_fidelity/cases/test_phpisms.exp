@@ -1,0 +1,17 @@
+(script
+  (header((<))((?))((name)(end_of_line)))
+  (classish_declaration
+    (missing)(missing)
+    ((single_line_comment)(end_of_line)
+    (single_line_comment)(end_of_line)
+    (single_line_comment)(end_of_line)
+    (class)(whitespace))
+    ((name)(whitespace))(missing)(missing)(missing)(missing)(missing)
+    (classish_body
+      (({)(end_of_line))
+      (property_declaration
+        ((whitespace)(var)(whitespace))
+        (missing)
+        (property_declarator((variable))(missing))
+        ((;)(whitespace)(single_line_comment)(end_of_line)))
+      ((})))))

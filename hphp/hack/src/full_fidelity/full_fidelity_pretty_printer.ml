@@ -812,6 +812,10 @@ let rec get_doc node =
     let qm = get_doc x.nullable_question in
     let ty = get_doc x.nullable_type in
     qm ^^^ ty
+  | SoftTypeSpecifier x ->
+    let a = get_doc x.soft_at in
+    let t = get_doc x.soft_type in
+    a ^^^ t
   | GenericTypeSpecifier x ->
     let name = get_doc (generic_class_type x) in
     let argument = get_doc (generic_arguments x) in

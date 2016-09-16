@@ -115,6 +115,7 @@ type t =
 | XHPRequired
 
 (* Types *)
+| SoftTypeSpecifier
 | SimpleTypeSpecifier
 | NullableTypeSpecifier
 | TypeConstraint
@@ -214,6 +215,7 @@ let to_string kind =
   | SubscriptExpression -> "subscript_expression"
   | TypeConstant -> "type_constant"
   | SimpleTypeSpecifier -> "simple_type_specifier"
+  | SoftTypeSpecifier -> "soft_type_specifier"
   | TypeConstraint -> "type_constraint"
   | TypeParameter -> "type_parameter"
   | NullableTypeSpecifier -> "nullable_type_specifier"

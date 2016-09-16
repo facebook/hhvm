@@ -658,6 +658,10 @@ module WithToken(Token: TokenType) = struct
       nullable_question : t;
       nullable_type : t
     }
+    and soft_type_specifier = {
+      soft_at : t;
+      soft_type : t
+    }
     and type_arguments = {
       type_arguments_left_angle : t;
       type_arguments : t;
@@ -781,6 +785,7 @@ module WithToken(Token: TokenType) = struct
 
     | SimpleTypeSpecifier of t
     | NullableTypeSpecifier of nullable_type_specifier
+    | SoftTypeSpecifier of soft_type_specifier
     | TypeConstraint of type_constraint_specifier
     | TypeParameter of type_parameter
     | TypeConstant of type_constant
@@ -914,6 +919,7 @@ module WithToken(Token: TokenType) = struct
       | TypeConstraint _ -> SyntaxKind.TypeConstraint
       | TypeParameter _ -> SyntaxKind.TypeParameter
       | NullableTypeSpecifier _ -> SyntaxKind.NullableTypeSpecifier
+      | SoftTypeSpecifier _ -> SyntaxKind.SoftTypeSpecifier
       | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
       | TypeArguments _ -> SyntaxKind.TypeArguments
       | TypeParameters _ -> SyntaxKind.TypeParameters
@@ -1049,6 +1055,8 @@ module WithToken(Token: TokenType) = struct
     let is_generic_type node = kind node = SyntaxKind.GenericTypeSpecifier
     let is_nullable_type_specifier node =
       kind node = SyntaxKind.NullableTypeSpecifier
+    let is_soft_type_specifier node =
+      kind node = SyntaxKind.SoftTypeSpecifier
     let is_type_arguments node = kind node = SyntaxKind.TypeArguments
     let is_type_parameters node = kind node = SyntaxKind.TypeParameters
     let is_tuple_type node = kind node = SyntaxKind.TupleTypeSpecifier
@@ -1495,6 +1503,9 @@ module WithToken(Token: TokenType) = struct
       | NullableTypeSpecifier
         { nullable_question; nullable_type } ->
         [ nullable_question; nullable_type ]
+      | SoftTypeSpecifier
+        { soft_at; soft_type } ->
+        [ soft_at; soft_type ]
       | GenericTypeSpecifier
         { generic_class_type; generic_arguments } ->
         [ generic_class_type; generic_arguments ]
@@ -1938,6 +1949,9 @@ module WithToken(Token: TokenType) = struct
         [ "type_variance_opt"; "type_name"; "type_constraint_list_opt " ]
       | TypeConstraint { constraint_token; matched_type } ->
         [ "constraint_token"; "matched_type" ]
+      | SoftTypeSpecifier
+        { soft_at; soft_type } ->
+        [ "soft_at"; "soft_type" ]
       | NullableTypeSpecifier
         { nullable_question; nullable_type } ->
         [ "nullable_question"; "nullable_type" ]
@@ -2682,8 +2696,12 @@ module WithToken(Token: TokenType) = struct
         GenericTypeSpecifier { generic_class_type; generic_arguments }
       | (SyntaxKind.NullableTypeSpecifier,
           [ nullable_question; nullable_type ]) ->
-          NullableTypeSpecifier
+        NullableTypeSpecifier
           { nullable_question; nullable_type }
+      | (SyntaxKind.SoftTypeSpecifier,
+          [ soft_at; soft_type ]) ->
+        SoftTypeSpecifier
+          { soft_at; soft_type }
       | (SyntaxKind.TypeArguments, [ type_arguments_left_angle;
           type_arguments; type_arguments_right_angle ]) ->
         TypeArguments { type_arguments_left_angle;
@@ -3227,6 +3245,10 @@ module WithToken(Token: TokenType) = struct
 
       let make_simple_type_specifier simple_type =
         from_children SyntaxKind.SimpleTypeSpecifier [ simple_type ]
+
+      let make_soft_type_specifier soft_at soft_type =
+        from_children SyntaxKind.SoftTypeSpecifier
+          [ soft_at; soft_type ]
 
       let make_nullable_type_specifier nullable_question nullable_type =
         from_children SyntaxKind.NullableTypeSpecifier

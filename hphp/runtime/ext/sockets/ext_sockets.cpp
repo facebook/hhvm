@@ -15,11 +15,16 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/base/zend-php-config.h"
 
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+
+#if HAVE_IF_NAMETOINDEX
+#include <net/if.h>
+#endif
 
 #include <folly/String.h>
 #include <folly/SocketAddress.h>
@@ -35,6 +40,7 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/mem-file.h"
+#include "hphp/runtime/base/zend-functions.h"
 #include "hphp/util/logger.h"
 
 #define PHP_NORMAL_READ 0x0001
@@ -121,6 +127,26 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
   return false;
 }
 
+namespace {
+static bool php_string_to_if_index(const char *val, unsigned *out)
+{
+#if HAVE_IF_NAMETOINDEX
+  unsigned int ind = if_nametoindex(val);
+  if (ind == 0) {
+    raise_warning("no interface with name \"%s\" could be found", val);
+    return false;
+  } else {
+    *out = ind;
+    return true;
+  }
+#else
+  raise_warning("this platform does not support looking up an interface by "
+                "name, an integer interface index must be supplied instead");
+  return false;
+#endif
+}
+}
+
 static bool php_set_inet6_addr(struct sockaddr_in6 *sin6,
                                const char *address,
                                req::ptr<Socket> sock) {
@@ -152,6 +178,23 @@ static bool php_set_inet6_addr(struct sockaddr_in6 *sin6,
            ((struct sockaddr_in6*)(addrinfo->ai_addr))->sin6_addr.s6_addr,
            sizeof(struct in6_addr));
     freeaddrinfo(addrinfo);
+  }
+
+  const char *scope = strchr(address, '%');
+  if (scope++) {
+    int64_t lval = 0;
+    double dval = 0;
+    unsigned scope_id = 0;
+    if (KindOfInt64 == is_numeric_string(scope, strlen(scope), &lval, &dval,
+                                         0)) {
+      if (lval > 0 && lval <= UINT_MAX) {
+        scope_id = lval;
+      }
+    } else {
+      php_string_to_if_index(scope, &scope_id);
+    }
+
+    sin6->sin6_scope_id = scope_id;
   }
 
   return true;
@@ -1359,7 +1402,7 @@ String HHVM_FUNCTION(socket_strerror,
    */
   if (errnum < -10000) {
     errnum = (-errnum) - 10000;
-#ifdef HAVE_HSTRERROR
+#if HAVE_HSTRERROR
     return String(hstrerror(errnum), CopyString);
 #endif
     return folly::format("Host lookup error {}", errnum).str();

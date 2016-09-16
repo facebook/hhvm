@@ -85,20 +85,21 @@ let handle : type a. genv -> env -> a t -> env * a =
           try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
         let fc = of_content ~content in
         let edited_files = Relative_path.Map.add env.edited_files path fc in
-        let files_to_check = Relative_path.Set.add env.files_to_check path in
+        let ide_needs_parsing =
+          Relative_path.Set.add env.ide_needs_parsing path in
         let last_command_time = Unix.gettimeofday () in
         let new_env = { env with
-          edited_files; files_to_check; last_command_time;
+          edited_files; ide_needs_parsing; last_command_time;
         } in
         new_env, ()
     | CLOSE_FILE path ->
         let path = Relative_path.(concat Root path) in
         let edited_files = Relative_path.Map.remove env.edited_files path in
-        let files_to_check =
-          Relative_path.Set.remove env.files_to_check path in
+        let ide_needs_parsing =
+          Relative_path.Set.remove env.ide_needs_parsing path in
         let last_command_time = Unix.gettimeofday () in
         let new_env = { env with
-          edited_files; files_to_check; last_command_time
+          edited_files; ide_needs_parsing; last_command_time
         } in
         new_env, ()
     | EDIT_FILE (path, edits) ->
@@ -111,11 +112,11 @@ let handle : type a. genv -> env -> a t -> env * a =
         let edited_fc = edit_file fc edits in
         let edited_files =
           Relative_path.Map.add env.edited_files path edited_fc in
-        let files_to_check =
-          Relative_path.Set.add env.files_to_check path in
+        let ide_needs_parsing =
+          Relative_path.Set.add env.ide_needs_parsing path in
         let last_command_time = Unix.gettimeofday () in
         let new_env = { env with
-          edited_files; files_to_check; last_command_time
+          edited_files; ide_needs_parsing; last_command_time
         } in
         new_env, ()
     | IDE_AUTOCOMPLETE (path, pos) ->

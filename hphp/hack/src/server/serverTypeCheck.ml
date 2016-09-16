@@ -164,7 +164,7 @@ let get_files_to_parse env =
     Relative_path.Set.union env.disk_needs_parsing env.failed_parsing in
   let disk_files = Relative_path.Set.filter all_disk_files
     (fun x -> not @@ Relative_path.Map.mem env.edited_files x) in
-  disk_files, env.files_to_check
+  disk_files, env.ide_needs_parsing
 
 let parsing genv env disk_files ide_files =
 
@@ -346,7 +346,7 @@ let type_check genv env =
     persistent_client = old_env.persistent_client;
     last_command_time = old_env.last_command_time;
     edited_files = old_env.edited_files;
-    files_to_check = Relative_path.Set.empty;
+    ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;
     diag_subscribe;
     symbols_cache;

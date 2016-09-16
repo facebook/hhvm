@@ -207,7 +207,7 @@ let rec recheck_loop acc genv env =
 
   let disk_recheck = not (Relative_path.Set.is_empty updates) in
   let ide_recheck =
-    (not @@ Relative_path.Set.is_empty env.files_to_check) && is_idle in
+    (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle in
   if (not disk_recheck) && (not ide_recheck) then
     acc, env
   else begin

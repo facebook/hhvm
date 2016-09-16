@@ -52,10 +52,9 @@ type env = {
     last_command_time : float;
     (* The map from full path to synchronized file contents *)
     edited_files   : File_content.t Relative_path.Map.t;
-    (* The list of full path of synchronized files need to be type checked *)
-    files_to_check : Relative_path.Set.t;
-    (* Files which parse trees were invalidated (because they changed on disk)
-     * and need to be re-parsed *)
+    (* Files which parse trees were invalidated (because they changed on disk
+     * or in editor) and need to be re-parsed *)
+    ide_needs_parsing : Relative_path.Set.t;
     disk_needs_parsing : Relative_path.Set.t;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;

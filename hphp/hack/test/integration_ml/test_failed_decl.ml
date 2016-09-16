@@ -35,14 +35,12 @@ class Qux {
 
 let () =
   let env = Test.setup_server () in
-  let env, loop_output = Test.run_loop_once env {
+  let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
       "foo.php", foo_contents;
       "baz.php", baz_contents;
     ];
-    new_client = None;
-    persistent_client_request = None;
-  } in
+  }) in
 
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
@@ -54,13 +52,11 @@ let () =
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl);
 
   (* Now let's edit a wholly unrelated file *)
-  let env, loop_output = Test.run_loop_once env {
+  let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
       "qux.php", qux_contents;
     ];
-    new_client = None;
-    persistent_client_request = None;
-  } in
+  }) in
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let path = Relative_path.create Relative_path.Root "/baz.php" in

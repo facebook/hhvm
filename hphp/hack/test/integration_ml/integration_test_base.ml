@@ -30,7 +30,8 @@ let default_loop_input = {
   persistent_client_request = None;
 }
 
-let run_loop_once env inputs =
+let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
+    (ServerEnv.env * (a, b) loop_outputs) = fun env inputs ->
   TestClientProvider.clear();
   Option.iter inputs.new_client (function
   | RequestResponse x ->
@@ -104,3 +105,60 @@ let assertSingleError expected err_list =
       let error_string = Errors.(to_string (to_absolute x)) in
       assertEqual expected error_string
   | _ -> fail "Expected to have exactly one error"
+
+let subscribe_diagnostic ?(id=4) env =
+  let env, _ = run_loop_once env { default_loop_input with
+    persistent_client_request = Some (
+      SUBSCRIBE_DIAGNOSTIC id
+    )
+  } in
+  if not @@ Option.is_some env.ServerEnv.diag_subscribe then
+    fail "Expected to subscribe to push diagnostics";
+  env
+
+let open_file env file_name =
+  let env, loop_output = run_loop_once env { default_loop_input with
+    persistent_client_request = Some (OPEN_FILE file_name)
+  } in
+  (match loop_output.persistent_client_response with
+  | Some () -> ()
+  | None -> fail "Expected OPEN_FILE to be processeded");
+  env
+
+let edit_file env name contents =
+  let env, loop_output = run_loop_once env { default_loop_input with
+    persistent_client_request = Some (EDIT_FILE
+      (name, [File_content.{range = None; text = contents;}])
+    )
+  } in
+  (match loop_output.persistent_client_response with
+  | Some () -> ()
+  | None -> fail "Expected EDIT_FILE to be processeded");
+  env, loop_output
+
+let close_file env name =
+  let env, loop_output = run_loop_once env { default_loop_input with
+    persistent_client_request = Some (CLOSE_FILE name)
+  } in
+  (match loop_output.persistent_client_response with
+  | Some () -> ()
+  | None -> fail "Expected CLOSE_FILE to be processeded");
+  env, loop_output
+
+let wait env =
+  (* We simulate waiting one second since last command by manipulating
+   * last_command_time. Will not work on timers that compare against other
+   * counters. *)
+  ServerEnv.{ env with last_command_time = env.last_command_time -. 1.0 }
+
+let autocomplete env contents =
+  run_loop_once env { default_loop_input with
+    persistent_client_request = Some (AUTOCOMPLETE contents)
+  }
+
+let ide_autocomplete env (path, line, column) =
+  run_loop_once env { default_loop_input with
+    persistent_client_request = Some (IDE_AUTOCOMPLETE
+      (path, File_content.{line; column})
+    )
+  }

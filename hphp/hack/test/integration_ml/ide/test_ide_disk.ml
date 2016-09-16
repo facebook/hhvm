@@ -9,7 +9,6 @@
  *)
 
 open Integration_test_base_types
-open ServerCommandTypes
 open ServerEnv
 
 module Test = Integration_test_base
@@ -56,12 +55,10 @@ let () =
   check_has_no_errors env;
 
   (* Open pre-existing file in editor *)
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (OPEN_FILE foo_name)
-  }) in
+  let env = Test.open_file env foo_name in
 
   (* Update disk contents to contain errors *)
-  let env, loop_output = Test.(run_loop_once env {default_loop_input with
+  let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
       foo_name, foo_with_errors
     ]
@@ -71,35 +68,24 @@ let () =
   check_has_no_errors env;
 
   (* We edit the file to content with errors *)
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (EDIT_FILE
-      (foo_name, [File_content.{range = None; text = foo_with_errors;}])
-    )
-  }) in
+  let env, _ = Test.edit_file env foo_name foo_with_errors in
   (* Sending a command just schedules a recheck, but it doesn't happen
    * immediately *)
   check_has_no_errors env;
   (* Simulate time passing since last command to trigger a recheck *)
-  let env = { env with last_command_time = 0.0 } in
+  let env = Test.wait env in
   (* Next iteration executes the recheck and generates the errors *)
   let env, _ = Test.(run_loop_once env default_loop_input) in
   check_has_errors env;
 
   (* Edit file back to have no errors *)
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (EDIT_FILE
-      (foo_name, [File_content.{range = None; text = foo_no_errors;}])
-    )
-  }) in
-  let env = { env with last_command_time = 0.0 } in
+  let env, _ = Test.edit_file env foo_name foo_no_errors in
+  let env = Test.wait env in
   let env, _ = Test.(run_loop_once env default_loop_input) in
   check_has_no_errors env;
   (* We close the file, disk contents should be taken into account again *)
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (CLOSE_FILE foo_name)
-  }) in
-
-  let env = { env with last_command_time = 0.0 } in
+  let env, _ = Test.close_file env foo_name in
+  let env = Test.wait env in
   (* TODO: this should be unnecessary, closing the file should recheck the disk
    * contents automatically *)
   let env, _  = Test.(run_loop_once env {default_loop_input with

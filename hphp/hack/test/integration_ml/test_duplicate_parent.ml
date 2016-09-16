@@ -40,15 +40,13 @@ let bar_contents = "
 
 let () =
   let env = Test.setup_server () in
-  let env, loop_output = Test.run_loop_once env {
+  let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
       "foo.php", foo_contents;
       "qux.php", qux_contents;
       "bar.php", bar_contents;
     ];
-    new_client = None;
-    persistent_client_request = None;
-  } in
+  }) in
 
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";

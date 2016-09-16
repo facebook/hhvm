@@ -27,20 +27,10 @@ let () =
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in
 
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (
-      SUBSCRIBE_DIAGNOSTIC diagnostic_subscription_id
-    )
-  }) in
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (OPEN_FILE foo_name)
-  }) in
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (EDIT_FILE
-      (foo_name, [File_content.{range = None; text = foo_contents;}])
-    )
-  }) in
-  let env = ServerEnv.{ env with last_command_time = 0.0 } in
+  let env = Test.subscribe_diagnostic ~id:diagnostic_subscription_id env in
+  let env = Test.open_file env foo_name in
+  let env, _ = Test.edit_file env foo_name foo_contents in
+  let env = Test.wait env in
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   (match loop_outputs.push_message with
   | Some (DIAGNOSTIC (id, errors))
@@ -57,7 +47,7 @@ let () =
       | _ -> Test.fail "Expected exactly one error"
     end
   | _ -> Test.fail "Expected push diagnostics");
-  let env = ServerEnv.{ env with last_command_time = 0.0 } in
+  let env = Test.wait env in
   let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
   match loop_outputs.push_message with
   | Some _ -> Test.fail "Unexpected push message"

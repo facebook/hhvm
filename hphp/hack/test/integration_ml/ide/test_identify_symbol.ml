@@ -47,13 +47,7 @@ let () =
   }) in
   check_identify_foo_response loop_output.new_client_response;
 
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    new_client = Some ConnectPersistent
-  }) in
-
-  (match env.ServerEnv.persistent_client with
-  | Some _ -> ()
-  | None -> Test.fail "Expected persistent client to be connected");
+  let env = Test.connect_persistent_client env in
 
   let _, loop_output = Test.(run_loop_once env { default_loop_input with
     persistent_client_request = Some identify_foo_request

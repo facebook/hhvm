@@ -21,6 +21,36 @@ val default_loop_input: ('a, 'b) loop_inputs
 val run_loop_once: ServerEnv.env -> ('a, 'b) loop_inputs ->
   (ServerEnv.env * ('a, 'b) loop_outputs)
 
+(* wrappers around run_loop_once for most common operations *)
+
+val subscribe_diagnostic : ?id:int -> ServerEnv.env  -> ServerEnv.env
+
+val open_file : ServerEnv.env -> string -> ServerEnv.env
+
+val edit_file :
+  ServerEnv.env ->
+  string ->
+  string ->
+  ServerEnv.env * ('a, unit) loop_outputs
+
+val close_file :
+  ServerEnv.env ->
+  string ->
+  ServerEnv.env * ('a, unit) loop_outputs
+
+val wait :
+  ServerEnv.env -> ServerEnv.env
+
+val autocomplete :
+  ServerEnv.env ->
+  string ->
+  ServerEnv.env * ('a, AutocompleteService.result) loop_outputs
+
+val ide_autocomplete :
+  ServerEnv.env ->
+  (string * int * int) ->
+  ServerEnv.env * ('a, AutocompleteService.result) loop_outputs
+
 val prepend_root: string -> string
 
 val fail: string -> unit

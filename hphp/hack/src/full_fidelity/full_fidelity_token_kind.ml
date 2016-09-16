@@ -41,6 +41,7 @@ type t =
 | Echo
 | Else
 | Elseif
+| Empty
 | Enum
 | Extends
 | Float
@@ -205,6 +206,7 @@ let from_string keyword =
   | "echo" -> Some Echo
   | "else" -> Some Else
   | "elseif" -> Some Elseif
+  | "empty" -> Some Empty
   | "enum" -> Some Enum
   | "extends" -> Some Extends
   | "false" -> Some BooleanLiteral
@@ -289,6 +291,7 @@ let to_string kind =
   | Echo -> "echo"
   | Else -> "else"
   | Elseif -> "elseif"
+  | Empty -> "empty"
   | Enum -> "enum"
   | Extends -> "extends"
   | Float -> "float"

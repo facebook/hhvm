@@ -543,7 +543,8 @@ module WithExpressionAndStatementAndTypeParser
       // XHP category declaration
       category ... ;
 
-      // TODO: XHP children declaration
+      // XHP children declaration
+      children ... ;
 
     *)
     let rec aux parser acc =
@@ -551,6 +552,9 @@ module WithExpressionAndStatementAndTypeParser
       match (Token.kind token) with
       | RightBrace
       | EndOfFile -> (parser, acc)
+      | Children ->
+        let (parser, children) = parse_xhp_children_declaration parser in
+        aux parser (children :: acc)
       | Category ->
         let (parser, category) = parse_xhp_category_declaration parser in
         aux parser (category :: acc)
@@ -599,6 +603,73 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, classish_elements) = aux parser [] in
     let classish_elements = List.rev classish_elements in
     (parser, make_list classish_elements)
+
+  and parse_xhp_children_paren parser =
+    (* TODO: Allow trailing comma? *)
+    let (parser, left, exprs, right) =
+      parse_parenthesized_comma_list parser parse_xhp_children_expression in
+    let result = make_parenthesized_expression left exprs right in
+    (parser, result)
+
+  and parse_xhp_children_term parser =
+    (* SPEC (Draft)
+    xhp-children-term:
+      name
+      xhp-class-name
+      xhp-category-name
+      ( xhp-children-expressions )  /// TODO: allow trailing comma?
+    *)
+    let (parser1, token) = next_xhp_children_name_or_other parser in
+    let name = make_token token in
+    match Token.kind token with
+    | Name
+    | XHPClassName
+    | XHPCategoryName -> (parser1, name)
+    | LeftParen -> parse_xhp_children_paren parser
+    | _ ->
+      (* ERROR RECOVERY: Eat the offending token, keep going. *)
+      (with_error parser SyntaxError.error1053, name)
+
+  and parse_xhp_children_trailing parser term =
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Star
+    | Plus
+    | Question ->
+      let result = make_postfix_unary_operator term (make_token token) in
+      (parser1, result)
+    | Bar ->
+      let (parser, right) = parse_xhp_children_expression parser1 in
+      let result = make_binary_operator term (make_token token) right in
+      (parser, result)
+    | _ -> (parser, term)
+
+  and parse_xhp_children_expression parser =
+    (* SPEC (Draft)
+    xhp-children-expression:
+      xhp-children-term
+      xhp-children-expression *
+      xhp-children-expression +
+      xhp-children-expression ?
+      xhp-children-term | xhp-children-expression
+    *)
+    let (parser, term) = parse_xhp_children_term parser in
+    parse_xhp_children_trailing parser term
+
+  and parse_xhp_children_declaration parser =
+    (* SPEC (Draft)
+    xhp-children-declaration:
+      children empty ;
+      children xhp-children-expression ;
+    *)
+    let (parser, children) = assert_token parser Children in
+    let (parser, expr) = if peek_token_kind parser = Empty then
+      assert_token parser Empty
+    else
+      parse_xhp_children_expression parser in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_xhp_children_declaration children expr semi in
+    (parser, result)
 
   and parse_xhp_category parser =
     let (parser, token) = next_xhp_category_name parser in
@@ -1104,17 +1175,28 @@ module WithExpressionAndStatementAndTypeParser
       parameter_list right_paren_token colon_token return_type in
     (parser, syntax)
 
-  (* a function label is either a function name, a __construct label, or a
-   * __destruct label *)
+  (* A function label is either a function name, a __construct label, or a
+  __destruct label. *)
   and parse_function_label parser =
-    let parser, token = next_token parser in
+    let (parser1, token) = next_token parser in
     match Token.kind token with
-    | Name | Construct | Destruct -> (parser, make_token token)
+    | Name
+    | Construct
+    | Destruct -> (parser1, make_token token)
     | _ ->
-      (* ERRPR RECOVERY *)
-      let parser = with_error parser SyntaxError.error1044 in
-      let error = make_error [make_token token] in
-      (parser, error)
+      (* TODO: We might have a non-reserved keyword as the name here; "empty",
+      for example, is a keyword but a legal function name. What we do here is
+      accept any keyword; what we *should* do is figure out which keywords are
+      reserved and which are not, and reject the reserved keywords. *)
+      let (parser, token) = next_token_as_name parser in
+      if Token.kind token = Name then
+        (parser, make_token token)
+      else
+        (* ERROR RECOVERY: Eat the offending token. *)
+        let parser = with_error parser SyntaxError.error1044 in
+        let error = make_error [make_token token] in
+        (parser, error)
+
   (* SPEC
       method-declaration:
         attribute-spec-opt method-modifiers function-definition

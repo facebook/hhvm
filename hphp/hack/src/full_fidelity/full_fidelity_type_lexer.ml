@@ -21,5 +21,6 @@ let next_xhp_class_name = Full_fidelity_lexer.next_xhp_class_name
 let is_next_xhp_class_name = Full_fidelity_lexer.is_next_xhp_class_name
 let is_next_name = Full_fidelity_lexer.is_next_name
 let next_xhp_name = Full_fidelity_lexer.next_xhp_name
+let is_next_xhp_category_name = Full_fidelity_lexer.is_next_xhp_category_name
 let next_xhp_category_name = Full_fidelity_lexer.next_xhp_category_name
 let errors = Full_fidelity_lexer.errors

@@ -40,9 +40,27 @@
   (missing)(missing)(missing)(missing)(missing)
   (classish_body
     (({)(end_of_line))
-    (xhp_category_declaration
-      ((whitespace)(category)(whitespace))
-      (list
-        (list_item((XHP_category_name))((,)(whitespace)))
-        (list_item((XHP_category_name))((,)(whitespace))))
-      ((;)(end_of_line)))((}))))))
+    (list
+      (xhp_category_declaration
+        ((whitespace)(category)(whitespace))
+        (list
+          (list_item((XHP_category_name))((,)(whitespace)))
+          (list_item((XHP_category_name))((,)(whitespace))))
+        ((;)(end_of_line)))
+      (xhp_children_declaration
+        ((whitespace)(children)(whitespace))
+        (postfix_unary_operator
+          (parenthesized_expression
+            ((lparen))
+            (list
+              (list_item
+                (postfix_unary_operator((name))((+)))
+                ((,)(whitespace)))
+              (list_item
+                (postfix_unary_operator((XHP_category_name))((*)))
+                ((,)(whitespace)))
+              (postfix_unary_operator((XHP_class_name))((?))))
+            ((rparen)))
+          ((*)))
+        ((;)(end_of_line))))
+    ((}))))))

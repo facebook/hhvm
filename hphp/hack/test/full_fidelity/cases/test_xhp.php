@@ -6,4 +6,5 @@ function foo() {
 }
 class :c {
   category %x, %y, ;
+  children (foo+, %bar*, :blah-blah?)*;
 }

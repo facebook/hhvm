@@ -148,6 +148,15 @@ module WithParser(Parser : ParserType) = struct
     if is_next_xhp_class_name parser then next_xhp_class_name parser
     else next_token parser
 
+  let is_next_xhp_category_name parser =
+    Parser.Lexer.is_next_xhp_category_name (Parser.lexer parser)
+
+  let next_xhp_children_name_or_other parser =
+    if is_next_xhp_category_name parser then
+      next_xhp_category_name parser
+    else
+      next_xhp_class_name_or_other parser
+
   (* We accept either a Name or a QualifiedName token when looking for a
      qualified name. *)
   let expect_qualified_name parser =
@@ -368,6 +377,12 @@ module WithParser(Parser : ParserType) = struct
   let parse_parenthesized_list parser parse_items =
     parse_delimited_list parser TokenKind.LeftParen SyntaxError.error1019
       TokenKind.RightParen SyntaxError.error1011 parse_items
+
+  let parse_parenthesized_comma_list parser parse_item =
+    let parse_items parser =
+      parse_comma_list
+        parser TokenKind.RightParen SyntaxError.error1011 parse_item in
+    parse_parenthesized_list parser parse_items
 
   let parse_parenthesized_comma_list_opt parser parse_item =
     let parse_items parser =

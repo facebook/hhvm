@@ -907,11 +907,14 @@ let next_xhp_class_name lexer =
 let next_xhp_name lexer =
   scan_token_and_trivia scan_xhp_element_name false lexer
 
-let scan_xhp_category_name lexer =
+let is_next_xhp_category_name lexer =
   (* An XHP category is an xhp element name preceded by a %. *)
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
-  if ch0 = '%' && is_name_nondigit ch1 then
+  ch0 = '%' && is_name_nondigit ch1
+
+let scan_xhp_category_name lexer =
+  if is_next_xhp_category_name lexer then
     let (lexer, _) = scan_xhp_element_name (advance lexer 1) in
     (lexer, TokenKind.XHPCategoryName)
   else

@@ -80,45 +80,11 @@ let handle : type a. genv -> env -> a t -> env * a =
     | ECHO_FOR_TEST msg ->
         env, msg
     | OPEN_FILE path ->
-        let path = Relative_path.(concat Root path) in
-        let content =
-          try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
-        let fc = of_content ~content in
-        let edited_files = Relative_path.Map.add env.edited_files path fc in
-        let ide_needs_parsing =
-          Relative_path.Set.add env.ide_needs_parsing path in
-        let last_command_time = Unix.gettimeofday () in
-        let new_env = { env with
-          edited_files; ide_needs_parsing; last_command_time;
-        } in
-        new_env, ()
+        ServerFileSync.open_file env path, ()
     | CLOSE_FILE path ->
-        let path = Relative_path.(concat Root path) in
-        let edited_files = Relative_path.Map.remove env.edited_files path in
-        let ide_needs_parsing =
-          Relative_path.Set.remove env.ide_needs_parsing path in
-        let last_command_time = Unix.gettimeofday () in
-        let new_env = { env with
-          edited_files; ide_needs_parsing; last_command_time
-        } in
-        new_env, ()
+        ServerFileSync.close_file env path, ()
     | EDIT_FILE (path, edits) ->
-        let path = Relative_path.(concat Root path) in
-        let fc = try Relative_path.Map.find_unsafe env.edited_files path
-        with Not_found ->
-          let content =
-            try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
-          of_content ~content in
-        let edited_fc = edit_file fc edits in
-        let edited_files =
-          Relative_path.Map.add env.edited_files path edited_fc in
-        let ide_needs_parsing =
-          Relative_path.Set.add env.ide_needs_parsing path in
-        let last_command_time = Unix.gettimeofday () in
-        let new_env = { env with
-          edited_files; ide_needs_parsing; last_command_time
-        } in
-        new_env, ()
+        ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
         let path = Relative_path.(concat Root path) in
         let fc = try

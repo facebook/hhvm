@@ -833,25 +833,22 @@ module WithStatementAndDeclAndTypeParser
     let result = make_field_initializer name arrow value in
     (parser, result)
 
-  and parse_field_initializer_list_opt parser =
-    (* SPEC
-      field-initializer-list:
-        field-initializer
-        field-initializer-list    ,  field-initializer
-    *)
-    (* TODO: Do we allow trailing commas? Do we need to update the spec? *)
-    parse_comma_list_opt
-      parser RightParen SyntaxError.error1025 parse_field_initializer
-
   and parse_shape_expression parser =
     (* SPEC
       shape-literal:
         shape  (  field-initializer-list-opt  )
+
+      field-initializer-list:
+        field-initializers  ,-op
+
+      field-initializers:
+        field-initializer
+        field-initializers  ,  field-initializer
     *)
     let (parser, shape) = assert_token parser Shape in
-    let (parser, left_paren) = expect_left_paren parser in
-    let (parser, fields) = parse_field_initializer_list_opt parser in
-    let (parser, right_paren) = expect_right_paren parser in
+    let (parser, left_paren, fields, right_paren) =
+      parse_parenthesized_comma_list_opt_allow_trailing
+        parser parse_field_initializer in
     let result = make_shape_expression shape left_paren fields right_paren in
     (parser, result)
 

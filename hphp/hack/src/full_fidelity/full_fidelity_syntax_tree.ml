@@ -40,9 +40,9 @@ let strip_comment_start s =
 let analyze_header text header =
   match MinimalSyntax.syntax header with
   | MinimalSyntax.ScriptHeader h ->
-    let lt = MinimalSyntax.header_less_than h in
-    let qm = MinimalSyntax.header_question h in
-    let lang = MinimalSyntax.header_language h in
+    let lt = h.MinimalSyntax.header_less_than in
+    let qm = h.MinimalSyntax.header_question in
+    let lang = h.MinimalSyntax.header_language in
     let lt_full_width = MinimalSyntax.full_width lt in
     let qm_full_width = MinimalSyntax.full_width qm in
     let lang_leading = MinimalSyntax.leading_width lang in
@@ -63,7 +63,7 @@ let analyze_header text header =
 let get_language_and_mode text root =
   match MinimalSyntax.syntax root with
   | MinimalSyntax.Script s ->
-    let header = MinimalSyntax.script_header s in
+    let header = s.MinimalSyntax.script_header in
     analyze_header text header
   | _ -> failwith "unexpected missing script node"
     (* The parser never produces a missing script, even if the file is empty *)

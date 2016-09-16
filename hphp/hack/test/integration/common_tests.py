@@ -140,7 +140,7 @@ class CommonTestDriver(object):
             hh_client,
             'ide',
             self.repo_dir], env={})
-        return IdeConnection(proc)
+        return IdeConnection(proc, self.repo_dir)
 
 
 class DebugSubscription(object):
@@ -171,8 +171,9 @@ class IdeConnection(object):
     """
     Wraps `hh_client ide`.
     """
-    def __init__(self, proc):
+    def __init__(self, proc, root):
         self.proc = proc
+        self.root = root
 
     def close_stdin(self):
         self.proc.stdin.close()
@@ -189,7 +190,11 @@ class IdeConnection(object):
         retcode = self.proc.wait()
         return (stdout_data, stderr_data, retcode)
 
+    def make_absolute(self, file):
+        return self.root + "/" + file
+
     def open(self, file):
+        file = self.make_absolute(file)
         return(
             '{"protocol" : "service_framework3_rpc","id" : 123,"type" : ' +
             '"call","method" : "didOpenFile","args" : {"filename":"' +
@@ -198,6 +203,7 @@ class IdeConnection(object):
         )
 
     def close(self, file):
+        file = self.make_absolute(file)
         return(
             '{"protocol" : "service_framework3_rpc","id" : 123,"type" : ' +
             '"call","method" : "didCloseFile","args" : {"filename":"' +
@@ -206,6 +212,7 @@ class IdeConnection(object):
         )
 
     def edit(self, file, st_line, st_column, ed_line, ed_column, text):
+        file = self.make_absolute(file)
         return(
             '{"protocol" : "service_framework3_rpc","id" : 456,"type" : ' +
             '"call","method" : "didChangeFile","args" : {"filename" : "' +
@@ -224,6 +231,7 @@ class IdeConnection(object):
         )
 
     def auto_complete(self, file, line, column):
+        file = self.make_absolute(file)
         return(
             '{"protocol" : "service_framework3_rpc","id" : 789,"type" : ' +
             '"call","method" : "getCompletions","args" : {"filename" : "' +
@@ -252,6 +260,7 @@ class IdeConnection(object):
                ',"type":"unsubscribe"}\n')
 
     def highlight_ref(self, file, line, column):
+        file = self.make_absolute(file)
         return(
             '{"protocol" : "service_framework3_rpc","id" : 987,"type" : ' +
             '"call","method" : "getSourceHighlights","args" : {"filename" : "' +
@@ -264,6 +273,7 @@ class IdeConnection(object):
         )
 
     def identify_function(self, file, line, column):
+        file = self.make_absolute(file)
         return(
             '{"protocol" : "service_framework3_rpc","id" : 987,"type" : ' +
             '"call","method" : "getDefinition","args" : {"filename" : "' +

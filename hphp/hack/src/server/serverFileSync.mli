@@ -15,3 +15,5 @@ val edit_file :
   string -> File_content.code_edit list -> ServerEnv.env
 
 val close_file : ServerEnv.env -> string -> ServerEnv.env
+
+val try_relativize_path : string -> Relative_path.t option

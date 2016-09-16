@@ -68,7 +68,7 @@ let () =
   (* Add a new definition to the file *)
   let env, _ = Test.(run_loop_once env { default_loop_input with
     persistent_client_request = Some (EDIT_FILE
-      (bar_name, [build_code_edit 2 1 2 1 foo2_definition])
+      (Test.prepend_root bar_name, [build_code_edit 2 1 2 1 foo2_definition])
     )
   }) in
 

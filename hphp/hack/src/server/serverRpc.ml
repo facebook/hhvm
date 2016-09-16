@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Option.Monad_infix
 open Reordered_argument_collections
 open ServerEnv
 open File_content
@@ -86,54 +87,59 @@ let handle : type a. genv -> env -> a t -> env * a =
     | EDIT_FILE (path, edits) ->
         ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
-        let path = Relative_path.(concat Root path) in
-        let fc = try
-        Relative_path.Map.find_unsafe env.edited_files path
-        with Not_found ->
-        let content =
-          try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
-        of_content content in
+        let fc =
+          begin ServerFileSync.try_relativize_path path >>= fun path ->
+            match Relative_path.Map.get env.edited_files path with
+            | Some x -> Some x (* File is open in IDE *)
+            | None -> Option.try_with (fun () -> (* Use the disk version *)
+              of_content (Sys_utils.cat (Relative_path.to_absolute path)))
+          end
+            (* In case of errors, proceed with empty file contents *)
+            |> Option.value ~default:(of_content "")
+        in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
         let edited_fc = edit_file fc edits in
         let content = get_content edited_fc in
         env, ServerAutoComplete.auto_complete env.tcopt content
     | IDE_HIGHLIGHT_REF (path, {line; column}) ->
-        let relative_path = Relative_path.(concat Root path) in
-        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
-        begin match Relative_path.Map.mem env.edited_files relative_path with
-        | true ->
-          begin match SMap.exists env.symbols_cache (fun p _ -> p = path) with
+        let content =
+          ServerFileSync.try_relativize_path path >>= fun relative_path ->
+          Relative_path.Map.get env.edited_files relative_path
+        in
+        begin match content with
+        | Some content ->
+          begin match SMap.mem env.symbols_cache path with
           | true ->
             env, ServerHighlightRefs.go_from_file (path, line, column) env
           | false ->
-            let content = File_content.get_content @@
-              Relative_path.Map.find_unsafe env.edited_files relative_path in
+            let content = File_content.get_content @@ content in
             let res = ServerIdentifyFunction.get_full_occurrence_pair content in
             let symbols_cache_ = SMap.add env.symbols_cache path res in
             let env = {env with symbols_cache = symbols_cache_} in
             env, ServerHighlightRefs.go_from_file (path, line, column) env
           end
-        | false ->
+        | None ->
           let content = try Sys_utils.cat path with _ -> "" in
           env, ServerHighlightRefs.go (content, line, column) env.tcopt
         end
     | IDE_IDENTIFY_FUNCTION (path, {line; column}) ->
-        let relative_path = Relative_path.(concat Root path) in
-        let path = Relative_path.path_of_prefix Relative_path.Root ^ path in
-        begin match Relative_path.Map.mem env.edited_files relative_path with
-        | true ->
-          begin match SMap.exists env.symbols_cache (fun p _ -> p = path) with
+        let content =
+          ServerFileSync.try_relativize_path path >>= fun relative_path ->
+          Relative_path.Map.get env.edited_files relative_path
+        in
+        begin match content with
+        | Some content ->
+          begin match SMap.mem env.symbols_cache path with
           | true ->
             env, ServerIdentifyFunction.go_from_file (path, line, column) env
           | false ->
-            let content = File_content.get_content @@
-              Relative_path.Map.find_unsafe env.edited_files relative_path in
+            let content = File_content.get_content content in
             let res = ServerIdentifyFunction.get_full_occurrence_pair content in
             let symbols_cache_ = SMap.add env.symbols_cache path res in
             let env = {env with symbols_cache = symbols_cache_} in
             env, ServerIdentifyFunction.go_from_file (path, line, column) env
           end
-        | false ->
+        | None ->
           let content = try Sys_utils.cat path with _ -> "" in
           env, ServerIdentifyFunction.go_absolute content line column env.tcopt
         end

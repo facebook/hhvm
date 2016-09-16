@@ -121,7 +121,7 @@ let subscribe_diagnostic ?(id=4) env =
 
 let open_file env file_name =
   let env, loop_output = run_loop_once env { default_loop_input with
-    persistent_client_request = Some (OPEN_FILE file_name)
+    persistent_client_request = Some (OPEN_FILE (root ^ file_name))
   } in
   (match loop_output.persistent_client_response with
   | Some () -> ()
@@ -131,7 +131,7 @@ let open_file env file_name =
 let edit_file env name contents =
   let env, loop_output = run_loop_once env { default_loop_input with
     persistent_client_request = Some (EDIT_FILE
-      (name, [File_content.{range = None; text = contents;}])
+      (root ^ name, [File_content.{range = None; text = contents;}])
     )
   } in
   (match loop_output.persistent_client_response with
@@ -141,7 +141,7 @@ let edit_file env name contents =
 
 let close_file env name =
   let env, loop_output = run_loop_once env { default_loop_input with
-    persistent_client_request = Some (CLOSE_FILE name)
+    persistent_client_request = Some (CLOSE_FILE (root ^ name))
   } in
   (match loop_output.persistent_client_response with
   | Some () -> ()
@@ -162,7 +162,7 @@ let autocomplete env contents =
 let ide_autocomplete env (path, line, column) =
   run_loop_once env { default_loop_input with
     persistent_client_request = Some (IDE_AUTOCOMPLETE
-      (path, File_content.{line; column})
+      (root ^ path, File_content.{line; column})
     )
   }
 

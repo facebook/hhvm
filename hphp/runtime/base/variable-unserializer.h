@@ -34,6 +34,9 @@ enum class UnserializeMode {
   DictValue = 5,
 };
 
+struct InvalidAllowedClassesException : Exception {
+};
+
 struct VariableUnserializer {
 
   /*

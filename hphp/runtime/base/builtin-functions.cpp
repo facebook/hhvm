@@ -838,6 +838,11 @@ Variant unserialize_ex(const char* str, int len,
     v = vu.unserialize();
   } catch (FatalErrorException &e) {
     throw;
+  } catch (InvalidAllowedClassesException &e) {
+    raise_warning(
+      "unserialize(): allowed_classes option should be array or boolean"
+    );
+    return false;
   } catch (Exception &e) {
     raise_notice("Unable to unserialize: [%.1000s]. %s.", str,
                  e.getMessage().c_str());

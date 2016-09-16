@@ -459,8 +459,11 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
     auto allowed_classes = m_options[s_allowed_classes];
     if (allowed_classes.isArray()) {
       return isWhitelistClass(clsName, allowed_classes.toArray());
+    } else if (allowed_classes.isBoolean()) {
+      return allowed_classes.toBoolean();
+    } else {
+      throw InvalidAllowedClassesException();
     }
-    return allowed_classes.toBoolean();
   }
 
   if (!RuntimeOption::UnserializationWhitelistCheck) {

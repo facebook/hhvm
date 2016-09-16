@@ -362,7 +362,13 @@ end
 module LazyCheckKind : CheckKindType = struct
   let get_files_to_parse env =
     (* Skip the disk updates, process the IDE updates *)
-    Relative_path.Set.empty, env.ide_needs_parsing, true
+    let ide_files, disk_files  =
+      Relative_path.Set.partition (Relative_path.Map.mem env.edited_files)
+        env.ide_needs_parsing in
+    (* in this case, disk files are files "updated in IDE that need to be
+     * rechecked from the disk", i.e. files that were open and then closed
+     * in IDE *)
+    disk_files, ide_files, true
 
   let get_defs_to_redecl ~parsing_defs ~files_info:_ ~env:_ =
     (* We don't need to add env.failed_decl here because lazy check doesn't

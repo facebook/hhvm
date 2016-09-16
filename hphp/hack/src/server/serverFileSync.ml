@@ -33,7 +33,7 @@ let close_file env path =
   let new_env = try_relativize_path path >>= fun path ->
     let edited_files = Relative_path.Map.remove env.edited_files path in
     let ide_needs_parsing =
-      Relative_path.Set.remove env.ide_needs_parsing path in
+      Relative_path.Set.add env.ide_needs_parsing path in
     let last_command_time = Unix.gettimeofday () in
     Some { env with
       edited_files; ide_needs_parsing; last_command_time

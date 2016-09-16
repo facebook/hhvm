@@ -143,11 +143,13 @@ module WithStatementAndDeclAndTypeParser
       (parser1, make_pipe_variable_expression (make_token token))
     | Async ->
       parse_anon_or_lambda_or_awaitable parser
+    | Include
+    | Include_once
+    | Require
+    | Require_once -> parse_inclusion_expression parser
 
     | Dollar (* TODO: ? *)
 
-    (* TODO: List *)
-    (* TODO: imports *)
     (* TODO: non-lowercased true false null array *)
     (* TODO: Unsafe *)
     (* TODO: What keywords are legal as names? *)
@@ -159,6 +161,47 @@ module WithStatementAndDeclAndTypeParser
     | _ ->
       (* TODO: Error, expected expression *)
       (parser1, make_token token)
+
+  and parse_inclusion_expression parser =
+  (* SPEC:
+    inclusion-directive:
+      require-multiple-directive
+      require-once-directive
+
+    require-multiple-directive:
+      require  include-filename  ;
+
+    include-filename:
+      expression
+
+    require-once-directive:
+      require_once  include-filename  ;
+
+    In non-strict mode we allow an inclusion directive (without semi) to be
+    used as an expression. It is therefore easier to actually parse this as:
+
+    inclusion-directive:
+      inclusion-expression  ;
+
+    inclusion-expression:
+      require include-filename
+      require_once include-filename
+
+    TODO: We allow "include" and "include_once" as well, which are PHP-isms
+    specified as not supported in Hack. Do we need to produce an error in
+    strict mode?
+
+    TODO: Produce an error if this is used in an expression context
+    in strict mode.
+    *)
+
+    let (parser, require) = next_token parser in
+    let operator = Operator.prefix_unary_from_token (Token.kind require) in
+    let require = make_token require in
+    let (parser, filename) = parse_expression_with_operator_precedence
+      parser operator in
+    let result = make_inclusion_expression require filename in
+    (parser, result)
 
   and next_is_lower_precedence parser =
     let kind = peek_token_kind parser in
@@ -505,14 +548,13 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_prefix_unary_expression parser =
     (* TODO: Operand to ++ and -- must be an lvalue. *)
-    let (parser1, token) = next_token parser in
+    let (parser, token) = next_token parser in
     let operator = Operator.prefix_unary_from_token (Token.kind token) in
-    let precedence = Operator.precedence operator in
-    let parser2 = with_precedence parser1 precedence in
-    let (parser3, expression) = parse_expression parser2 in
-    let syntax = make_prefix_unary_operator (make_token token) expression in
-    let parser4 = with_precedence parser3 parser.precedence in
-    (parser4, syntax)
+    let token = make_token token in
+    let (parser, operand) = parse_expression_with_operator_precedence
+      parser operator in
+    let result = make_prefix_unary_operator token operand in
+    (parser, result)
 
   and parse_remaining_binary_operator parser left_term =
     (* We have a left term. If we get here then we know that

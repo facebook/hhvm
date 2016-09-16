@@ -70,6 +70,10 @@ type t =
 | ScopeResolutionOperator
 | UnaryPlusOperator
 | UnaryMinusOperator
+| IncludeOperator
+| IncludeOnceOperator
+| RequireOperator
+| RequireOnceOperator
 
 type assoc =
 | LeftAssociative
@@ -77,7 +81,7 @@ type assoc =
 | NotAssociative
 
 let precedence operator =
-  (* TODO: Import, eval *)
+  (* TODO: eval *)
   (* TODO: Comma *)
   (* TODO: print *)
   (* TODO: elseif *)
@@ -86,7 +90,9 @@ let precedence operator =
   (* TODO: variable operator $ *)
   match operator with
 
-  | AwaitOperator -> 1
+  | IncludeOperator | IncludeOnceOperator | RequireOperator
+  | RequireOnceOperator | AwaitOperator
+    -> 1
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
   | DivisionAssignmentOperator | ExponentiationAssignmentOperator
@@ -139,7 +145,9 @@ let associativity operator =
   | MultiplicationOperator | DivisionOperator | RemainderOperator
   | MemberSelectionOperator | NullSafeMemberSelectionOperator
   | ScopeResolutionOperator | FunctionCallOperator | IndexingOperator
-  (* Import, eval *)
+  | IncludeOperator | IncludeOnceOperator | RequireOperator
+  | RequireOnceOperator
+  (* eval *)
   (* Comma *)
   (* elseif *)
   (* else *)
@@ -174,6 +182,10 @@ let prefix_unary_from_token token =
   | At -> ErrorControlOperator
   | New -> NewOperator
   | Clone -> CloneOperator
+  | Include -> IncludeOperator
+  | Include_once -> IncludeOnceOperator
+  | Require -> RequireOperator
+  | Require_once -> RequireOnceOperator
   | _ -> failwith "not a unary operator"
 
 (* Is this a token that can appear after an expression? *)
@@ -401,3 +413,7 @@ let to_string kind =
   | ScopeResolutionOperator -> "scope_resolution"
   | UnaryPlusOperator -> "unary_plus"
   | UnaryMinusOperator -> "unary_minus"
+  | IncludeOperator -> "include"
+  | IncludeOnceOperator -> "include_once"
+  | RequireOperator -> "require"
+  | RequireOnceOperator -> "require_once"

@@ -2754,7 +2754,7 @@ module WithToken(Token: TokenType) = struct
 
       let make_postfix_unary_operator unary_operator unary_operand =
         from_children SyntaxKind.PostfixUnaryOperator
-          [ unary_operand; unary_operator ]
+          [ unary_operator; unary_operand ]
 
       let make_binary_operator
         binary_left_operand binary_operator binary_right_operand =

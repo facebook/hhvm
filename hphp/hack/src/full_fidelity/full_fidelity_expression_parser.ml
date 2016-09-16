@@ -543,7 +543,7 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_postfix_unary parser term =
     let (parser, token) = next_token parser in
-    let term = make_postfix_unary_operator (make_token token) term in
+    let term = make_postfix_unary_operator term (make_token token) in
     parse_remaining_expression parser term
 
   and parse_prefix_unary_expression parser =

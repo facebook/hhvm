@@ -31,23 +31,23 @@ size_t DecodedInstruction::size() const {
 }
 
 int32_t DecodedInstruction::offset() const {
-  return Decoder::GetDecoder().decode(m_ip)->offset();
+  return Decoder::GetDecoder().decode(m_ip).offset();
 }
 
 bool DecodedInstruction::isNop() const {
-  return Decoder::GetDecoder().decode(m_ip)->isNop();
+  return Decoder::GetDecoder().decode(m_ip).isNop();
 }
 
 bool DecodedInstruction::isBranch(bool allowCond /* = true */) const {
   // skip the preparation instructions that are not actually the branch.
   auto branch_instr = m_ip + Assembler::kJccLen - instr_size_in_bytes;
-  return Decoder::GetDecoder().decode(branch_instr)->isBranch(allowCond);
+  return Decoder::GetDecoder().decode(branch_instr).isBranch(allowCond);
 }
 
 bool DecodedInstruction::isCall() const {
   // skip the preparation instructions that are not actually the branch.
   auto branch_instr = m_ip + Assembler::kCallLen - instr_size_in_bytes;
-  return Decoder::GetDecoder().decode(branch_instr)->isBranch(false);
+  return Decoder::GetDecoder().decode(branch_instr).isBranch(false);
 }
 
 bool DecodedInstruction::isJmp() const {
@@ -56,11 +56,11 @@ bool DecodedInstruction::isJmp() const {
 }
 
 bool DecodedInstruction::isSpOffsetInstr() const {
-  return Decoder::GetDecoder().decode(m_ip)->isSpOffsetInstr();
+  return Decoder::GetDecoder().decode(m_ip).isSpOffsetInstr();
 }
 
 bool DecodedInstruction::isClearSignBit() const {
-  return Decoder::GetDecoder().decode(m_ip)->isClearSignBit();
+  return Decoder::GetDecoder().decode(m_ip).isClearSignBit();
 }
 
 HPHP::jit::ConditionCode DecodedInstruction::jccCondCode() const {

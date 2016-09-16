@@ -19,36 +19,43 @@
 
 namespace ppc64_asm {
 
-BranchParams::BranchParams(PPC64Instr instr) {
-  DecoderInfo* dinfo = Decoder::GetDecoder().decode(instr);
-  switch (dinfo->opcode_name()) {
+void BranchParams::decodeInstr(const PPC64Instr* const pinstr) {
+  const DecoderInfo dinfo = Decoder::GetDecoder().decode(pinstr);
+  switch (dinfo.opcode_name()) {
     case OpcodeNames::op_b:
-    case OpcodeNames::op_ba:
     case OpcodeNames::op_bl:
-    case OpcodeNames::op_bla:
-      assert(dinfo->form() == Form::kI);
+      assert(dinfo.form() == Form::kI);
       defineBoBi(BranchConditions::Always);
       break;
     case OpcodeNames::op_bc:
-    case OpcodeNames::op_bca:
-    case OpcodeNames::op_bclr:
-      assert(dinfo->form() == Form::kB);
+      assert(dinfo.form() == Form::kB);
       B_form_t bform;
-      bform.instruction = dinfo->instruction_image();
+      bform.instruction = dinfo.instruction_image();
       m_bo = BranchParams::BO(bform.BO);
       m_bi = BranchParams::BI(bform.BI);
       break;
     case OpcodeNames::op_bcctr:
     case OpcodeNames::op_bcctrl:
-      assert(dinfo->form() == Form::kXL);
+      assert(dinfo.form() == Form::kXL);
       XL_form_t xlform;
-      xlform.instruction = dinfo->instruction_image();
+      xlform.instruction = dinfo.instruction_image();
       m_bo = BranchParams::BO(xlform.BT);
       m_bi = BranchParams::BI(xlform.BA);
       break;
     default:
       assert(false && "Not a valid conditional branch instruction");
       // also possible: defineBoBi(BranchConditions::Always);
+      break;
+  }
+
+  // Set m_lr accordingly for all 'call' flavors used
+  switch (dinfo.opcode_name()) {
+    case OpcodeNames::op_bl:
+    case OpcodeNames::op_bcctrl:
+      m_lr = true;
+      break;
+    default:
+      m_lr = false;
       break;
   }
 }
@@ -807,14 +814,14 @@ static void patchOffset(CodeAddress jmp, ssize_t diff) {
   // Used for a relative branch
   PPC64Instr* instr = reinterpret_cast<PPC64Instr*>(jmp);
 
-  DecoderInfo* dinfo = Decoder::GetDecoder().decode(*instr);
-  OpcodeNames opn = dinfo->opcode_name();
+  DecoderInfo dinfo = Decoder::GetDecoder().decode(instr);
+  OpcodeNames opn = dinfo.opcode_name();
   switch (opn) {
     case OpcodeNames::op_b:
     case OpcodeNames::op_bl:
-      assert(dinfo->form() == Form::kI);
+      assert(dinfo.form() == Form::kI);
       I_form_t iform;
-      iform.instruction = dinfo->instruction_image();
+      iform.instruction = dinfo.instruction_image();
 
       // relative branch. Branch offset can be up to 26 bits
       always_assert(HPHP::jit::deltaFitsBits(diff, 26) &&
@@ -825,9 +832,9 @@ static void patchOffset(CodeAddress jmp, ssize_t diff) {
       *instr = iform.instruction;
       break;
     case OpcodeNames::op_bc:
-      assert(dinfo->form() == Form::kB);
+      assert(dinfo.form() == Form::kB);
       B_form_t bform;
-      bform.instruction = dinfo->instruction_image();
+      bform.instruction = dinfo.instruction_image();
 
       // relative branch
       always_assert(HPHP::jit::deltaFits(diff, HPHP::sz::word) &&
@@ -859,8 +866,8 @@ void Assembler::patchBranch(CodeAddress jmp, CodeAddress dest) {
       jmp + Assembler::kLi64InstrLen + 3 * instr_size_in_bytes;
 
     // check for instruction opcode
-    DecoderInfo* dinfo = Decoder::GetDecoder().decode(bctr_addr);
-    OpcodeNames opn = dinfo->opcode_name();
+    DecoderInfo dinfo = Decoder::GetDecoder().decode(bctr_addr);
+    OpcodeNames opn = dinfo.opcode_name();
     if ((opn == OpcodeNames::op_bcctr) || (opn == OpcodeNames::op_bcctrl)) {
       patchAbsolute(jmp, dest);
       return;
@@ -876,8 +883,8 @@ void Assembler::patchBranch(CodeAddress jmp, CodeAddress dest) {
   auto diff = new_target - base;
 
   // There are 2 flavors of offset branching. (See BranchType for more info)
-  DecoderInfo* dinfo = Decoder::GetDecoder().decode(jmp);
-  OpcodeNames opn = dinfo->opcode_name();
+  DecoderInfo dinfo = Decoder::GetDecoder().decode(jmp);
+  OpcodeNames opn = dinfo.opcode_name();
 
   // checks if @opn is 'b', 'bl' or 'bc' and if the offset @diff fits it
   auto branch_fits_offset = [](OpcodeNames opn, int64_t diff) -> bool {
@@ -971,17 +978,17 @@ int64_t Assembler::getLi64(PPC64Instr* pinstr) {
     uint8_t nNops = 0;
     auto total_li64_instr = kLi64InstrLen/instr_size_in_bytes;
     for (PPC64Instr* i = pinstr; i < pinstr + total_li64_instr; i++) {
-      if (Decoder::GetDecoder().decode(*i)->isNop()) nNops++;
+      if (Decoder::GetDecoder().decode(i).isNop()) nNops++;
     }
     return nNops;
   }();
 
   auto hasClearSignBit = [&](PPC64Instr* i) -> bool {
-    return Decoder::GetDecoder().decode(*i)->isClearSignBit();
+    return Decoder::GetDecoder().decode(i).isClearSignBit();
   };
 
   auto getImm = [&](PPC64Instr* i) -> uint16_t {
-    return Decoder::GetDecoder().decode(*i)->offset();
+    return Decoder::GetDecoder().decode(i).offset();
   };
 
   uint8_t immParts = 0;
@@ -1069,14 +1076,14 @@ int32_t Assembler::getLi32(PPC64Instr* pinstr) {
   // @pinstr should be pointing to the beginning of the li32 block
 
   auto getImm = [&](PPC64Instr* i) -> uint32_t {
-    return Decoder::GetDecoder().decode(*i)->offset();
+    return Decoder::GetDecoder().decode(i).offset();
   };
 
   // if first instruction is a li, it's using 16bits only
-  bool is_16b_only = [&](PPC64Instr i) -> bool {
-    auto opn = Decoder::GetDecoder().decode(i)->opcode_name();
+  bool is_16b_only = [&](PPC64Instr* i) -> bool {
+    auto opn = Decoder::GetDecoder().decode(i).opcode_name();
     return OpcodeNames::op_addi == opn;
-  }(*pinstr);
+  }(pinstr);
 
   uint32_t imm32 = 0;
   if (is_16b_only) {

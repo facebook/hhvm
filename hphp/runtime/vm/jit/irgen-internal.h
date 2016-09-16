@@ -456,9 +456,16 @@ inline SSATmp* topA(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
 //////////////////////////////////////////////////////////////////////
 // Frame
 
+inline SSATmp* castCtxThis(IRGS& env, SSATmp* val) {
+  assertx(val->isA(TCtx));
+  auto const func = curFunc(env);
+  auto const thisType = func ? thisTypeFromFunc(func) : TObj;
+  return gen(env, AssertType, thisType, val);
+}
+
 inline SSATmp* ldThis(IRGS& env) {
   auto const ctx = gen(env, LdCtx, fp(env));
-  return gen(env, CastCtxThis, ctx);
+  return castCtxThis(env, ctx);
 }
 
 inline SSATmp* ldCtx(IRGS& env) {

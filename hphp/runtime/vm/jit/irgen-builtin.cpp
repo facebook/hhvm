@@ -1256,7 +1256,7 @@ void nativeImplInlined(IRGS& env) {
     if (!callee->isMethod()) return nullptr;
     auto ctx = ldCtx(env);
     if (callee->isStatic()) return gen(env, LdClsCtx, ctx);
-    return gen(env, CastCtxThis, ctx);
+    return castCtxThis(env, ctx);
   }();
 
   auto numNonDefault = fp(env)->inst()->extra<DefInlineFP>()->numNonDefault;
@@ -1392,7 +1392,7 @@ void emitNativeImpl(IRGS& env) {
           thiz = gen(env, LdClsCtx, thiz);
         } else {
           gen(env, CheckCtxThis, fallback, thiz);
-          thiz = gen(env, CastCtxThis, thiz);
+          thiz = castCtxThis(env, thiz);
         }
       }
 

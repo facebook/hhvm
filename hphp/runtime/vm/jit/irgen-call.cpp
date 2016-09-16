@@ -345,7 +345,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
     env,
     [&] (Block* taken) {
       gen(env, CheckCtxThis, taken, ctx);
-      auto thiz = gen(env, CastCtxThis, ctx);
+      auto thiz = castCtxThis(env, ctx);
       if (!canUseThis) {
         auto thizCls = gen(env, LdObjClass, thiz);
         auto flag = gen(env, ExtendsClass,
@@ -621,7 +621,7 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
                  gen(env, CheckCtxThis, taken, ctx);
                },
                [&] {
-                 auto const obj = gen(env, CastCtxThis, ctx);
+                 auto const obj = castCtxThis(env, ctx);
                  gen(env, IncRef, obj);
                },
                [&] {

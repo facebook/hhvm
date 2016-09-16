@@ -181,7 +181,6 @@ bool canDCE(IRInstruction* inst) {
   case LdCtx:
   case LdCctx:
   case LdClosure:
-  case CastCtxThis:
   case LdClsCtx:
   case LdClsCctx:
   case FwdCtxStaticCall:

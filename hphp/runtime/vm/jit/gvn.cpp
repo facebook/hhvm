@@ -331,7 +331,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdRDSAddr:
   case LdCtx:
   case LdCctx:
-  case CastCtxThis:
   case LdClsCtx:
   case LdClsCctx:
   case LdClsCtor:

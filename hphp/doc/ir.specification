@@ -1036,11 +1036,6 @@ To string conversions:
   Check that the context (m_this or m_cls) in S0 is a non-null $this
   pointer. If not, branch to B.
 
-| CastCtxThis, DThis, S(Ctx), P
-
-  Convert a Ctx known to contain a $this pointer to a specific object type,
-  based on the marker func for this instruction.
-
 | LdClsCtx, DCtxCls, S(Ctx), NF
 
   Loads into D the class representing the current context. Extracts the class

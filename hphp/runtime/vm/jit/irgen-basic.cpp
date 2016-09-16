@@ -243,7 +243,7 @@ void emitInitThisLoc(IRGS& env, int32_t id) {
          [&] (Block* skip) { gen(env, CheckCtxThis, skip, ctx); },
          [&] {
            auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeCountness);
-           auto const this_  = gen(env, CastCtxThis, ctx);
+           auto const this_  = castCtxThis(env, ctx);
            gen(env, IncRef, this_);
            stLocRaw(env, id, fp(env), this_);
            decRef(env, oldLoc);
@@ -292,7 +292,7 @@ void emitThis(IRGS& env) {
     push(env, cns(env, TInitNull));
     return;
   }
-  auto const this_ = gen(env, CastCtxThis, ctx);
+  auto const this_ = castCtxThis(env, ctx);
   pushIncRef(env, this_);
 }
 
@@ -319,7 +319,7 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
                        gen(env, CheckCtxThis, taken, ctx);
                      },
                      [&] {
-                       auto t = gen(env, CastCtxThis, ctx);
+                       auto t = castCtxThis(env, ctx);
                        gen(env, IncRef, t);
                        return t;
                      },
@@ -337,7 +337,7 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
     gen(env, CheckCtxThis, makeExitSlow(env), ctx);
   }
 
-  pushIncRef(env, gen(env, CastCtxThis, ctx));
+  pushIncRef(env, castCtxThis(env, ctx));
 }
 
 void emitClone(IRGS& env) {

@@ -351,12 +351,6 @@ SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
-  assertx(inst->marker().func()->mayHaveThis());
-  if (inst->src(0)->type() <= TObj) return inst->src(0);
-  return nullptr;
-}
-
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
   assertx(inst->marker().func()->cls());
   SSATmp* ctx = inst->src(0);
@@ -3282,7 +3276,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdVecElem)
   X(MethodExists)
   X(CheckCtxThis)
-  X(CastCtxThis)
   X(CheckFuncStatic)
   X(RaiseMissingThis)
   X(LdObjClass)

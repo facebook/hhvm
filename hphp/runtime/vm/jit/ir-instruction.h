@@ -420,6 +420,14 @@ using InstructionList = boost::intrusive::list<IRInstruction,
 Type outputType(const IRInstruction*, int dstId = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return a type appropriate for $this given a function.
+ */
+Type thisTypeFromFunc(const Func* func);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #include "hphp/runtime/vm/jit/ir-instruction-inl.h"

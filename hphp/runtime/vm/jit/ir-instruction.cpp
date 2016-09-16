@@ -200,6 +200,15 @@ SSATmp* IRInstruction::dst(unsigned i) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Type thisTypeFromFunc(const Func* func) {
+  assertx(func && func->cls());
+  // If the function is a cloned closure which may have a re-bound $this which
+  // is not a subclass of the context return an unspecialized type.
+  return func->hasForeignThis() ? TObj : Type::SubObj(func->cls());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // outputType().
 
 namespace {
@@ -318,24 +327,12 @@ Type keysetElemReturn(const IRInstruction* inst) {
   return resultType;
 }
 
-Type thisReturn(const IRInstruction* inst) {
-  auto const func = inst->func();
-
-  // If the function is a cloned closure which may have a re-bound $this which
-  // is not a subclass of the context return an unspecialized type.
-  if (!func || func->hasForeignThis()) return TObj;
-
-  if (auto const cls = func->cls()) {
-    return Type::SubObj(cls);
-  }
-  return TObj;
-}
-
 Type ctxReturn(const IRInstruction* inst) {
   auto const func = inst->func();
   if (!func) return TCtx;
+
   if (func->requiresThisInBody()) {
-    return thisReturn(inst);
+    return thisTypeFromFunc(func);
   }
   if (func->hasForeignThis()) {
     return func->isStatic() ? TCctx : TCtx;
@@ -347,7 +344,7 @@ Type ctxReturn(const IRInstruction* inst) {
     }
     return TCctx;
   }
-  return thisReturn(inst) | TCctx;
+  return thisTypeFromFunc(func) | TCctx;
 }
 
 Type ctxClsReturn(const IRInstruction* inst) {
@@ -428,7 +425,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DKeysetElem     return keysetElemReturn(inst);
 #define DArrPacked      return Type::Array(ArrayData::kPackedKind);
 #define DCol            return newColReturn(inst);
-#define DThis           return thisReturn(inst);
 #define DCtx            return ctxReturn(inst);
 #define DCtxCls         return ctxClsReturn(inst);
 #define DMulti          return TBottom;
@@ -464,7 +460,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DKeysetElem
 #undef DArrPacked
 #undef DCol
-#undef DThis
 #undef DCtx
 #undef DCtxCls
 #undef DMulti

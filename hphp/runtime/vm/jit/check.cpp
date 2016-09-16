@@ -514,7 +514,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DKeysetElem
 #define DArrPacked
 #define DCol
-#define DThis
 #define DCtx
 #define DCtxCls
 #define DCns
@@ -557,7 +556,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DKeysetElem
 #undef DArrPacked
 #undef DCol
-#undef DThis
 #undef DCtx
 #undef DCtxCls
 #undef DCns

@@ -68,8 +68,6 @@ struct SSATmp;
                       intersected with an optional type parameter
  *     DKeysetElem single dst has type int or string, intersected with an
  *                   optional type parameter.
- *     DThis        single dst has type Obj<ctx>, where ctx is the
- *                    current context class
  *     DCtx         single dst has type Cctx|Obj<=ctx, where ctx is the
  *                    current context class
  *     DMulti       multiple dests. type and number depend on instruction

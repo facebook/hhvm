@@ -9,9 +9,20 @@
     ((name)(whitespace))(missing)(missing)(missing)(missing)(missing)
     (classish_body
       (({)(end_of_line))
-      (property_declaration
-        ((whitespace)(var)(whitespace))
-        (missing)
-        (property_declarator((variable))(missing))
-        ((;)(whitespace)(single_line_comment)(end_of_line)))
+      (list
+        (property_declaration
+          ((whitespace)(var)(whitespace))
+          (missing)
+          (property_declarator((variable))(missing))
+          ((;)(whitespace)(single_line_comment)(end_of_line)))
+        (methodish_declaration
+          (missing)(missing)
+          (function_declaration_header
+            (missing)((whitespace)(function)(whitespace))((name))(missing)
+            ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
+            (compound_statement
+              (({))
+              (missing)
+              ((})(whitespace)(single_line_comment)(end_of_line)))
+            (missing)))
       ((})))))

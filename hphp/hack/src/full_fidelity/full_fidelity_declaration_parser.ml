@@ -594,6 +594,14 @@ module WithExpressionAndStatementAndTypeParser
       | TokenKind.Attribute -> let (parser, attr) =
         parse_xhp_class_attribute_declaration parser in
         aux parser (attr :: acc)
+      | Function ->
+        (* ERROR RECOVERY
+        Hack requires that a function inside a class be marked
+        with a visibility modifier, but PHP does not have this requirement.
+        TODO: Add an error in a later pass for Hack files. *)
+        let (parser, result) =
+          parse_methodish parser (make_missing()) (make_missing()) in
+        aux parser (result :: acc)
       | Var ->
         (* TODO: We allow "var" as a synonym for "public" in a property; this
         is a PHP-ism that we do not support in Hack, but we parse anyways

@@ -4,4 +4,5 @@
 // TODO: Add those errors, and test them.
 class foo {
   var $x; // PHP allows "var" as a synonym for "public" on a property.
+  function bar() {} // PHP allows functions with no modifiers.
 }

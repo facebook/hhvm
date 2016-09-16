@@ -1029,9 +1029,11 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       String serialized = unserializeString(uns, '{', '}');
 
       auto obj = [&]() -> Object {
-        if (auto const cls = Unit::loadClass(clsName.get())) {
-          return Object::attach(g_context->createObject(cls, init_null_variant,
-                                                        false /* init */));
+        if (uns->whitelistCheck(clsName)) {
+          if (auto const cls = Unit::loadClass(clsName.get())) {
+            return Object::attach(g_context->createObject(cls, init_null_variant,
+                                                          false /* init */));
+          }
         }
         if (!uns->allowUnknownSerializableClass()) {
           raise_error("unknown class %s", clsName.data());

@@ -29,6 +29,16 @@ module WithStatementAndDeclAndTypeParser
   include PrecedenceParser
   include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
 
+  (* This method is unused right now; in the event that we need a type
+  parser for instanceof, cast operator, etc, in the future, it's here. *)
+  let _parse_type_specifier parser =
+    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let parser = { parser with lexer; errors } in
+    (parser, node)
+
   let parse_return_type parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
     let (type_parser, node) = TypeParser.parse_return_type type_parser in
@@ -103,10 +113,11 @@ module WithStatementAndDeclAndTypeParser
 
     | Variable -> parse_variable_or_lambda parser
 
+    | XHPClassName
     | Name
     | QualifiedName ->
         parse_name_or_collection_literal_expression parser1 token
-    | XHPClassName
+
     | Self
     | Parent
     | Static -> parse_scope_resolution_expression parser1 (make_token token)
@@ -251,10 +262,11 @@ module WithStatementAndDeclAndTypeParser
     | GreaterThanGreaterThan
     | Carat
     | BarGreaterThan
-    | QuestionQuestion
-    | Instanceof ->
+    | QuestionQuestion ->
     (* TODO: "and" "or" "xor" *)
       parse_remaining_binary_operator parser term
+    | Instanceof ->
+      parse_instanceof_expression parser term
     | QuestionMinusGreaterThan
     | MinusGreaterThan -> parse_member_selection_expression parser term
     | ColonColon ->
@@ -555,6 +567,104 @@ module WithStatementAndDeclAndTypeParser
       parser operator in
     let result = make_prefix_unary_operator token operand in
     (parser, result)
+
+  and parse_instanceof_expression parser left =
+    (* SPEC:
+    instanceof-expression:
+      instanceof-subject  instanceof   instanceof-type-designator
+
+    instanceof-subject:
+      expression
+
+    instanceof-type-designator:
+      qualified-name
+      variable-name
+
+    TODO: The spec is plainly wrong here. This is a bit of a mess and there
+    are a number of issues.
+
+    The issues arise from the fact that the thing on the right can be either
+    a type, or an expression that evaluates to a string that names the type.
+
+    The grammar in the spec, above, says that the only things that can be
+    here are a qualified name -- in which case it names the type directly --
+    or a variable of classname type, which names the type.  But this is
+    not the grammar that is accepted by Hack / HHVM.  The accepted grammar
+    treats "instanceof" as a binary operator which takes expressions on
+    each side, and is of lower precedence than ->.  Thus
+
+    $x instanceof $y -> z
+
+    must be parsed as ($x instanceof ($y -> z)), and not, as the grammar
+    implies, (($x instanceof $y) -> z).
+
+    But wait, it gets worse.
+
+    The less-than operator is of lower precedence than instanceof, so
+    "$x instanceof foo < 10" should be parsed as (($x instanceof foo) < 10).
+    But it seems plausible that we might want to parse
+    "$x instanceof foo<int>" someday, in which case now we have an ambiguity.
+    How do we know when we see the < whether we are attempting to parse a type?
+
+    Moreover: we need to be able to parse XHP class names on the right hand
+    side of the operator.  That is, we need to be able to say
+
+    $x instanceof :foo
+
+    However, we cannot simply say that the grammar is
+
+    instanceof-type-designator:
+      xhp-class-name
+      expression
+
+    Why not?   Because that then gives the wrong parse for:
+
+    class :foo { static $bar = "abc" }
+    class abc { }
+    ...
+    $x instanceof :foo :: $bar
+
+    We need to parse that as $x instanceof (:foo :: $bar).
+
+    The solution to all this is as follows.
+
+    First, an XHP class name must be a legal expression. I had thought that
+    it might be possible to say that an XHP class name is a legal type, or
+    legal in an expression context when immediately followed by ::, but
+    that's not the case. We need to be able to parse both
+
+    $x instanceof :foo :: $bar
+
+    and
+
+    $x instanceof :foo
+
+    so the most expedient way to do that is to parse any expression on the
+    right, and to make XHP class names into legal expressions.
+
+    So, with all this in mind, the grammar we will actually parse here is:
+
+    instanceof-type-designator:
+      expression
+
+    This has the unfortunate property that the common case, say,
+
+    $x instanceof C
+
+    creates a parse node for C as a name token, not as a name token wrapped
+    up as a simple type.
+
+    Should we ever need to parse both arbitrary expressions and arbitrary
+    types here, we'll have some tricky problems to solve.
+
+    *)
+    let (parser, op) = assert_token parser Instanceof in
+    let precedence = Operator.precedence Operator.InstanceofOperator in
+    let (parser, right_term) = parse_term parser in
+    let (parser, right) = parse_remaining_binary_operator_helper
+      parser right_term precedence in
+    let result = make_instanceof_expression left op right in
+    parse_remaining_expression parser result
 
   and parse_remaining_binary_operator parser left_term =
     (* We have a left term. If we get here then we know that

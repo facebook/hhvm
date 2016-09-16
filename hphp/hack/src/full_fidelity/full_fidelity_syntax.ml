@@ -2787,7 +2787,7 @@ module WithToken(Token: TokenType) = struct
           from_children SyntaxKind.BinaryOperator
             [ binary_left_operand; binary_operator; binary_right_operand ]
 
-      let make_instanceof_operator left op right =
+      let make_instanceof_expression left op right =
         from_children SyntaxKind.InstanceofExpression [left; op; right ]
 
       let make_conditional_expression

@@ -12,6 +12,8 @@ open Typing_defs
 open Decl_defs
 module Inst = Decl_instantiate
 
+exception Decl_heap_elems_bug
+
 let rec apply_substs substs class_context ty =
   match SMap.get class_context substs with
   | None -> ty
@@ -63,7 +65,11 @@ let to_class_type {
 } =
   let map_elements find elts = SMap.mapi begin fun name elt ->
     let ty = lazy begin
-      apply_substs dc_substs elt.elt_origin @@ find (elt.elt_origin, name)
+      let elem = try find (elt.elt_origin, name)
+        (* TODO: t13396089 *)
+        with Not_found -> raise Decl_heap_elems_bug
+      in
+      apply_substs dc_substs elt.elt_origin @@ elem
     end in
     element_to_class_elt ty elt
   end elts in

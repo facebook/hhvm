@@ -422,6 +422,9 @@ let daemon_main (state, options) (ic, oc) =
     ServerInit.print_hash_stats ();
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit_status.(exit Hash_table_full)
+  | Decl_class.Decl_heap_elems_bug ->
+    Exit_status.(exit Decl_heap_elems_bug)
+
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

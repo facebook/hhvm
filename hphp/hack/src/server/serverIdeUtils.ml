@@ -161,7 +161,14 @@ let recheck tcopt filetuple_l =
 let check_file_input tcopt files_info fi =
   match fi with
   | ServerUtils.FileContent content ->
-      declare_and_check content ~f:(fun path _ -> path);
+      begin
+        try
+          declare_and_check content ~f:(fun path _ -> path)
+        with Decl_class.Decl_heap_elems_bug -> begin
+          Hh_logger.log "%s" content;
+          Exit_status.(exit Decl_heap_elems_bug)
+        end
+      end
   | ServerUtils.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
       let () = match Relative_path.Map.get files_info path with

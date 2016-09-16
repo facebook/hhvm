@@ -507,7 +507,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let errorl = Errors.merge errorl' errorl in
 
     let diag_subscribe = Option.map old_env.diag_subscribe
-      ~f:(fun x -> Diagnostic_subscription.update x errorl) in
+      ~f:(fun x -> Diagnostic_subscription.update x fast errorl) in
 
     let total_rechecked_count = Relative_path.Map.cardinal fast in
     HackEventLogger.type_check_end total_rechecked_count t;

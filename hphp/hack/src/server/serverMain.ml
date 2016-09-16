@@ -271,7 +271,7 @@ let serve_one_iteration genv env client_provider stats_refs =
   end;
 
   let env = { env with diag_subscribe =
-    Option.map env.diag_subscribe ~f:Diagnostic_subscription.clear }
+    Option.map env.diag_subscribe ~f:Diagnostic_subscription.mark_as_pushed }
   in
 
   last_stats := stats;

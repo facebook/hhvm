@@ -26,6 +26,7 @@ type t =
 | Break
 | Case
 | Catch
+| Category
 | Class
 | Classname
 | Clone
@@ -188,6 +189,7 @@ let from_string keyword =
   | "break" -> Some Break
   | "case" -> Some Case
   | "catch" -> Some Catch
+  | "category" -> Some Category
   | "class" -> Some Class
   | "classname" -> Some Classname
   | "clone" -> Some Clone
@@ -270,6 +272,7 @@ let to_string kind =
   | Break -> "break"
   | Case -> "case"
   | Catch -> "catch"
+  | Category -> "category"
   | Class -> "class"
   | Classname -> "classname"
   | Clone -> "clone"

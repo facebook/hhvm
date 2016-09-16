@@ -307,8 +307,6 @@ module WithExpressionAndStatementAndTypeParser
     (* TODO: Give an error in a later pass if it is not a prefix. *)
     let (parser, prefix) = next_token parser in
     let prefix = make_token prefix in
-    (* TODO: Should we allow a trailing comma?
-       TODO: Does the grammar in the spec reflect that? *)
     let (parser, left, clauses, right) =
       parse_braced_comma_list_opt_allow_trailing
       parser parse_namespace_use_clause in
@@ -325,6 +323,8 @@ module WithExpressionAndStatementAndTypeParser
         { namespace-use-clauses }  ;
       use namespace-name-as-a-prefix { namespace-use-kind-clauses  }  ;
 
+      TODO: Add the grammar for the namespace-use-clauses; ensure that it
+      indicates that trailing commas are allowed in the list.
     *)
     (* TODO: ERROR RECOVERY
     In the "simple" format, the kind may only be specified up front.
@@ -540,12 +540,20 @@ module WithExpressionAndStatementAndTypeParser
       // XHP class attribute declaration
       attribute ... ;
 
+      // XHP category declaration
+      category ... ;
+
+      // TODO: XHP children declaration
+
     *)
     let rec aux parser acc =
       let token = peek_token parser in
       match (Token.kind token) with
       | RightBrace
       | EndOfFile -> (parser, acc)
+      | Category ->
+        let (parser, category) = parse_xhp_category_declaration parser in
+        aux parser (category :: acc)
       | Use ->
           let (parser, classish_use) = parse_trait_use parser in
           aux parser (classish_use :: acc)
@@ -591,6 +599,29 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, classish_elements) = aux parser [] in
     let classish_elements = List.rev classish_elements in
     (parser, make_list classish_elements)
+
+  and parse_xhp_category parser =
+    let (parser, token) = next_xhp_category_name parser in
+    let category = make_token token in
+    match Token.kind token with
+    | XHPCategoryName -> (parser, category)
+    | _ -> (with_error parser SyntaxError.error1052, category)
+
+  and parse_xhp_category_declaration parser =
+    (* SPEC (Draft)
+    xhp-category-declaration:
+      category xhp-category-list ,-opt  ;
+
+    xhp-category-list:
+      xhp-category-name
+      xhp-category-list  ,  xhp-category-name
+    *)
+    let (parser, category) = assert_token parser Category in
+    let (parser, items) = parse_comma_list_allow_trailing parser Semicolon
+      SyntaxError.error1052 parse_xhp_category in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_xhp_category_declaration category items semi in
+    (parser, result)
 
   and parse_xhp_type_specifier parser =
     (* SPEC (Draft)

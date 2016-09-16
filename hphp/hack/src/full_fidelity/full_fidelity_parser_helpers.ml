@@ -87,6 +87,12 @@ module WithParser(Parser : ParserType) = struct
          and continue on from the current token. Don't skip it. *)
       (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
 
+  let next_xhp_category_name parser =
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_xhp_category_name lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token)
+
   (* We have a number of issues involving xhp class names, which begin with
      a colon and may contain internal colons and dashes.  These are some
      helper methods to deal with them. *)

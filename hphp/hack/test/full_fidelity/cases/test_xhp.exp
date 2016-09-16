@@ -1,4 +1,5 @@
 (script(header((<))((?))((name)(end_of_line)))
+  (list
   (function_declaration
   (missing)
   (function_declaration_header
@@ -33,4 +34,15 @@
           ((XHP_element_name))
           ((>))))
     ((;)(end_of_line)))
-  ((})))))
+((})(end_of_line))))
+(classish_declaration
+  (missing)(missing)((class)(whitespace))((XHP_class_name)(whitespace))
+  (missing)(missing)(missing)(missing)(missing)
+  (classish_body
+    (({)(end_of_line))
+    (xhp_category_declaration
+      ((whitespace)(category)(whitespace))
+      (list
+        (list_item((XHP_category_name))((,)(whitespace)))
+        (list_item((XHP_category_name))((,)(whitespace))))
+      ((;)(end_of_line)))((}))))))

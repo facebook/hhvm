@@ -38,7 +38,7 @@ const PPC64Instr kOperandMask = 0x03ffffff;
 // decoder size is the next prime number from the table size
 // decoder table is a hash table and this avoids some collisions, it's not
 // the better way to do this but it's simple.
-const size_t kDecoderSize = 1381;
+const size_t kDecoderSize = 211;
 
 // Instruction type decoder masks
 // The masks are sorted by number of bits needed to decode the instruction

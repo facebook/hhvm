@@ -858,34 +858,35 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       const bool allowObjectFormatForCollections = true;
 
       Class* cls;
+
       // If we are potentially dealing with a collection, we need to try to
       // load the collection class under an alternate name so that we can
       // deserialize data that was serialized before the migration of
       // collections to the HH namespace.
 
-      if (type != 'O') {
+      if (type == 'O') {
+        if (!uns->whitelistCheck(clsName)) {
+          cls = nullptr;
+        } else if (allowObjectFormatForCollections) {
+          // In order to support the legacy {O|V}:{Set|Vector|Map}
+          // serialization, we defer autoloading until we know that there's
+          // no alternate (builtin) collection class.
+          cls = Unit::getClass(clsName.get(), /* autoload */ false);
+          if (!cls) {
+            cls = tryAlternateCollectionClass(clsName.get());
+          }
+          if (!cls) {
+            cls = Unit::loadClass(clsName.get()); // with autoloading
+          }
+        } else {
+          cls = Unit::loadClass(clsName.get()); // with autoloading
+        }
+      } else {
         // Collections are CPP builtins; don't attempt to autoload
         cls = Unit::getClass(clsName.get(), /* autoload */ false);
         if (!cls) {
           cls = tryAlternateCollectionClass(clsName.get());
         }
-      } else if (allowObjectFormatForCollections) {
-        // In order to support the legacy {O|V}:{Set|Vector|Map}
-        // serialization, we defer autoloading until we know that there's
-        // no alternate (builtin) collection class.
-        cls = Unit::getClass(clsName.get(), /* autoload */ false);
-        if (!cls) {
-          cls = tryAlternateCollectionClass(clsName.get());
-        }
-        if (!cls) {
-          cls = Unit::loadClass(clsName.get()); // with autoloading
-        }
-      } else {
-        cls = Unit::loadClass(clsName.get()); // with autoloading
-      }
-
-      if ((type == 'O') && !uns->whitelistCheck(clsName)) {
-        cls = nullptr;
       }
 
       Object obj;

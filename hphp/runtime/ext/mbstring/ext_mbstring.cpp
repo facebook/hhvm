@@ -2658,6 +2658,8 @@ Variant HHVM_FUNCTION(mb_strrpos,
   mbs_needle.val = (unsigned char *)needle.data();
   mbs_needle.len = needle.size();
 
+  // This hack is so that if the caller puts the encoding in the offset field we
+  // attempt to detect it and use that as the encoding.  Ick.
   const char *enc_name = encoding.data();
   long noffset = 0;
   String soffset = offset.toString();
@@ -2684,7 +2686,7 @@ Variant HHVM_FUNCTION(mb_strrpos,
     noffset = offset.toInt32();
   }
 
-  if (!enc_name && !*enc_name) {
+  if (enc_name != nullptr && *enc_name) {
     mbs_haystack.no_encoding = mbs_needle.no_encoding =
       mbfl_name2no_encoding(enc_name);
     if (mbs_haystack.no_encoding == mbfl_no_encoding_invalid) {

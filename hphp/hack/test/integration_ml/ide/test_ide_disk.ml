@@ -51,6 +51,7 @@ let () =
     foo_name, foo_no_errors
   ] in
   let env = Test.connect_persistent_client env in
+  let env = Test.subscribe_diagnostic env in
   (* There are no errors initially *)
   check_has_no_errors env;
 
@@ -66,22 +67,27 @@ let () =
   assert loop_output.did_read_disk_changes;
   (* But since file is open in editor, contents from disk are ignored *)
   check_has_no_errors env;
+  Test.assert_no_diagnostics loop_output;
 
   (* We edit the file to content with errors *)
   let env, _ = Test.edit_file env foo_name foo_with_errors in
   (* Sending a command just schedules a recheck, but it doesn't happen
    * immediately *)
   check_has_no_errors env;
+  Test.assert_no_diagnostics loop_output;
   (* Simulate time passing since last command to trigger a recheck *)
   let env = Test.wait env in
   (* Next iteration executes the recheck and generates the errors *)
-  let env, _ = Test.(run_loop_once env default_loop_input) in
-  check_has_errors env;
+  let env, loop_output = Test.(run_loop_once env default_loop_input) in
+  (* IDE edits only create diagnostics, they don't update global error list *)
+  check_has_no_errors env;
+  Test.assert_has_diagnostics loop_output;
 
   (* Edit file back to have no errors *)
   let env, _ = Test.edit_file env foo_name foo_no_errors in
   let env = Test.wait env in
   let env, _ = Test.(run_loop_once env default_loop_input) in
+  Test.assert_has_diagnostics loop_output;
   check_has_no_errors env;
   (* We close the file, disk contents should be taken into account again *)
   let env, _ = Test.close_file env foo_name in

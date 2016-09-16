@@ -67,5 +67,5 @@ let () =
   (* If C had parse errors, we'll not update it's declarations, so
    * the result will not change *)
   let _, loop_output = run_and_check_autocomplete env in
-  if loop_output.rechecked_count != 2 then
-    Test.fail "Expected 2 files to be rechecked";
+  if loop_output.rechecked_count != 1 then
+    Test.fail "Expected 1 file to be rechecked";

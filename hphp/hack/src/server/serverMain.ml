@@ -216,7 +216,10 @@ let rec recheck_loop acc genv env =
       Relative_path.Set.union updates env.disk_needs_parsing in
 
     let env = { env with disk_needs_parsing } in
-    let check_kind = ServerTypeCheck.Full_check in
+    let check_kind = if disk_recheck
+      then ServerTypeCheck.Full_check
+      else ServerTypeCheck.Lazy_check
+    in
     let env, rechecked, total_rechecked = recheck genv env check_kind in
 
     let acc = {

@@ -67,9 +67,15 @@ let send_response_to_client client response =
     let fd = Unix.descr_of_out_channel oc in
     Marshal_tools.to_fd_with_preamble fd response
   | Persistent_client fd ->
-    Marshal_tools.to_fd_with_preamble fd response
+    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Response response)
 
-let send_push_message_to_client = send_response_to_client
+let send_push_message_to_client client response =
+  match client with
+  | Non_persistent_client _ ->
+    failwith "non-persistent clients don't expect push messages "
+  | Persistent_client fd ->
+    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
+
 
 let read_client_msg ic =
   Timeout.with_timeout

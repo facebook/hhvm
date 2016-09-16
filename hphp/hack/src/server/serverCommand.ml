@@ -58,6 +58,19 @@ let rpc : type a. Timeout.in_channel * out_channel -> a t -> a
   let fd = Unix.descr_of_out_channel oc in
   Marshal_tools.from_fd_with_preamble fd
 
+let rec wait_for_rpc_response fd push_messages =
+  match Marshal_tools.from_fd_with_preamble fd with
+  | Response r -> r, List.rev push_messages
+  | Push m -> wait_for_rpc_response fd (m :: push_messages)
+
+let rpc_persistent :
+  type a. Timeout.in_channel * out_channel -> a t -> a * push list
+= fun (_, oc) cmd ->
+  Marshal.to_channel oc (Rpc cmd) [];
+  flush oc;
+  let fd = Unix.descr_of_out_channel oc in
+  wait_for_rpc_response fd []
+
 let stream_request oc cmd =
   Marshal.to_channel oc (Stream cmd) [];
   flush oc

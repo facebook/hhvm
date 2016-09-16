@@ -69,5 +69,9 @@ and streamed =
 type push =
   | DIAGNOSTIC of int * (Pos.absolute Errors.error_ list) SMap.t
 
+type 'a persistent_connection_message_type =
+  | Push of push
+  | Response of 'a
+
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout

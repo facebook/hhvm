@@ -66,8 +66,23 @@ let connect_persistent env ~retries =
 let malformed_input () =
   raise Exit_status.(Exit_with IDE_malformed_request)
 
-let read_server_message fd : ServerCommandTypes.push =
-  Marshal_tools.from_fd_with_preamble fd
+let pending_push_messages = Queue.create ()
+
+let rpc conn command =
+  let res, push_messages = Cmd.rpc_persistent conn command in
+  List.iter push_messages (fun x -> Queue.push x pending_push_messages);
+  res
+
+let read_push_message_from_server fd : ServerCommandTypes.push =
+  let open ServerCommandTypes in
+  match Marshal_tools.from_fd_with_preamble fd with
+  | Response s -> failwith "unexpected response without a request"
+  | Push m -> m
+
+let get_next_push_message fd =
+  if Queue.is_empty pending_push_messages
+    then read_push_message_from_server fd
+    else Queue.take pending_push_messages
 
 let read_connection_response fd =
   let res = Marshal_tools.from_fd_with_preamble fd in
@@ -87,7 +102,8 @@ let write_response res =
   Printf.printf "%s\n" res;
   flush stdout
 
-let get_ready_channel server_in_fd =
+let get_ready_message server_in_fd =
+  if not @@ Queue.is_empty pending_push_messages then `Server else
   let stdin_fd = Unix.descr_of_in_channel stdin in
   let readable, _, _ = Unix.select [server_in_fd; stdin_fd] [] [] 1.0 in
   if readable = [] then `None
@@ -98,7 +114,7 @@ let handle conn id call =
 match call with
 | Auto_complete_call (path, pos) ->
   let raw_result =
-    Cmd.rpc conn (Rpc.IDE_AUTOCOMPLETE (path, pos)) in
+    rpc conn (Rpc.IDE_AUTOCOMPLETE (path, pos)) in
   let result =
     List.map raw_result AutocompleteService.autocomplete_result_to_json in
   let result_field = (Hh_json.JSON_Array result) in
@@ -106,29 +122,29 @@ match call with
     (Auto_complete_response result_field)
 | Highlight_ref_call (path, pos) ->
   let results =
-    Cmd.rpc conn (Rpc.IDE_HIGHLIGHT_REF (path, pos)) in
+    rpc conn (Rpc.IDE_HIGHLIGHT_REF (path, pos)) in
   let result_field = ClientHighlightRefs.to_json results in
   print_endline @@ IdeJsonUtils.json_string_of_response id
     (Highlight_ref_response result_field)
 | Identify_function_call (path, pos) ->
   let results =
-    Cmd.rpc conn (Rpc.IDE_IDENTIFY_FUNCTION (path, pos)) in
+    rpc conn (Rpc.IDE_IDENTIFY_FUNCTION (path, pos)) in
   let result_field = ClientGetDefinition.to_json results in
   print_endline @@ IdeJsonUtils.json_string_of_response id
     (Idetify_function_response result_field)
 | Open_file_call path ->
-  Cmd.rpc conn (Rpc.OPEN_FILE path)
+  rpc conn (Rpc.OPEN_FILE path)
 | Close_file_call path ->
-  Cmd.rpc conn (Rpc.CLOSE_FILE path)
+  rpc conn (Rpc.CLOSE_FILE path)
 | Edit_file_call (path, edits) ->
-  Cmd.rpc conn (Rpc.EDIT_FILE (path, edits))
+  rpc conn (Rpc.EDIT_FILE (path, edits))
 | Disconnect_call ->
-  Cmd.rpc conn (Rpc.DISCONNECT);
+  rpc conn (Rpc.DISCONNECT);
   server_disconnected ()
 | Subscribe_diagnostic_call ->
-  Cmd.rpc conn (Rpc.SUBSCRIBE_DIAGNOSTIC id)
+  rpc conn (Rpc.SUBSCRIBE_DIAGNOSTIC id)
 | Unsubscribe_diagnostic_call ->
-  Cmd.rpc conn (Rpc.UNSUBSCRIBE_DIAGNOSTIC id)
+  rpc conn (Rpc.UNSUBSCRIBE_DIAGNOSTIC id)
 | Sleep_for_test ->
   Unix.sleep 1
 
@@ -138,7 +154,7 @@ let main env =
   let fd = Unix.descr_of_out_channel oc in
   read_connection_response fd;
   while true do
-    match get_ready_channel fd with
+    match get_ready_message fd with
     | `None -> ()
     | `Stdin ->
       let request = read_request () in
@@ -152,7 +168,7 @@ let main env =
         print_endline msg
       end
     | `Server ->
-      let res = try read_server_message fd with
+      let res = try get_next_push_message fd with
         | Marshal_tools.Reading_Preamble_Exception
         | Unix.Unix_error _ -> server_disconnected ()
       in

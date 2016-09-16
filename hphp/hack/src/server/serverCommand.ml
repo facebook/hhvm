@@ -13,6 +13,39 @@ open ServerCommandTypes
 
 module TLazyHeap = Typing_lazy_heap
 
+(* Some client commands require full check to be run in order to update global
+ * state that they depend on *)
+let rpc_command_needs_full_check : type a. a t -> bool = function
+  (* global error list is not updated during small checks *)
+  | STATUS -> true
+  (* some Ai stuff - calls to those will likely never be interleaved with IDE
+   * file sync commands (and resulting small checks), but putting it here just
+   * to be safe *)
+  | FIND_DEPENDENT_FILES _ -> true
+  | TRACE_AI _ -> true
+  | AI_QUERY _ -> true
+  (* Finding references uses global dependency table *)
+  | FIND_REFS _ -> true
+  | IDE_FIND_REFS _ -> true
+  (* Codebase-wide rename, uses find references *)
+  | REFACTOR _ -> true
+  (* Same case as Ai commands *)
+  | CREATE_CHECKPOINT _ -> true
+  | RETRIEVE_CHECKPOINT _ -> true
+  | DELETE_CHECKPOINT _ -> true
+  | _ -> false
+
+let command_needs_full_check = function
+  | Rpc x -> rpc_command_needs_full_check x
+  | Stream BUILD _ -> true (* Build doesn't fully support lazy decl *)
+  | _ -> false
+
+let full_recheck_if_needed genv env msg =
+  if not env.ServerEnv.needs_full_check then env else
+  if not @@ command_needs_full_check msg then env else
+  let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
+  env
+
 (****************************************************************************)
 (* Called by the client *)
 (****************************************************************************)
@@ -149,6 +182,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
 
 let handle genv env client =
   let msg = ClientProvider.read_client_msg client in
+  let env = full_recheck_if_needed genv env msg in
   match msg with
   | Rpc cmd ->
       let t = Unix.gettimeofday () in

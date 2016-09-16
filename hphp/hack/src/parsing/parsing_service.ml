@@ -38,12 +38,9 @@ let legacy_php_file_info = ref (fun fn ->
  * errorl is a list of errors
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
-let really_parse tcopt (acc, errorl, error_files) fn =
-  let errorl', {Parser_hack.file_mode; comments; ast}, _ =
-    Errors.do_ begin fun () ->
-      Parser_hack.from_file tcopt fn
-    end
-  in
+let process_parse_result (acc, errorl, error_files) fn res =
+  let errorl', {Parser_hack.file_mode; comments; ast}, _ = res in
+
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
   if file_mode <> None then begin
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
@@ -69,6 +66,14 @@ let really_parse tcopt (acc, errorl, error_files) fn =
     let acc = Relative_path.Map.add acc ~key:fn ~data:info in
     acc, errorl, error_files
   end
+
+let really_parse tcopt acc fn =
+  let res =
+    Errors.do_ begin fun () ->
+      Parser_hack.from_file tcopt fn
+    end
+  in
+  process_parse_result acc fn res
 
 let parse tcopt (acc, errorl, error_files) fn =
   (* Ugly hack... hack build requires that we keep JS files in our
@@ -113,43 +118,13 @@ let parse_parallel workers get_next tcopt =
       ~next:get_next
 
 (* sequentially parse IDE files opened by persistent connection *)
-let parse_sequential fn content (acc, errorl, error_files) tcopt =
-  let errorl', {Parser_hack.file_mode; comments; ast}, _ =
+let parse_sequential fn content acc tcopt =
+  let res =
     Errors.do_ begin fun () ->
       Parser_hack.program tcopt fn content
     end
   in
-  Parsing_hooks.dispatch_file_parsed_hook fn ast;
-  if file_mode <> None then begin
-    let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
-    (* AST won't be updated if there are parsing errors in IDE files *)
-    if (Errors.is_empty errorl')
-    then begin
-      let set = Relative_path.Set.add Relative_path.Set.empty fn in
-      Parser_heap.ParserHeap.remove_batch set;
-      Parser_heap.ParserHeap.write_through fn ast;
-    end;
-    let defs =
-      {FileInfo.funs; classes; typedefs; consts; comments; file_mode;
-       consider_names_just_for_autoload = false}
-    in
-    let acc = Relative_path.Map.add acc ~key:fn ~data:defs in
-    let errorl = Errors.merge errorl' errorl in
-    let error_files =
-      if Errors.is_empty errorl'
-      then error_files
-      else Relative_path.Set.add error_files fn
-    in
-    acc, errorl, error_files
-  end
-  else begin
-    let info = try !legacy_php_file_info fn with _ -> empty_file_info in
-    (* we also now keep in the file_info regular php files
-     * as we need at least their names in hack build
-     *)
-    let acc = Relative_path.Map.add acc ~key:fn ~data:info in
-    acc, errorl, error_files
-  end
+  process_parse_result acc fn res
 
 (*****************************************************************************)
 (* Main entry points *)

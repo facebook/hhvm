@@ -179,21 +179,37 @@ let remove_failed fast failed =
 (* Parses the set of modified files *)
 (*****************************************************************************)
 
-let parsing genv env disk_files ide_files =
+let parsing genv env disk_files ide_files ~stop_at_errors =
 
   let files_map = Relative_path.Map.filter env.edited_files
      (fun path _ -> Relative_path.Set.mem ide_files path) in
 
   let to_check = Relative_path.Set.union disk_files ide_files in
-  (* Invalidating only disk files, Parsing_service removes ASTs of
-   * IDE files itself. TODO: what about fixmes/search? *)
-  Parser_heap.ParserHeap.remove_batch disk_files;
-  Fixmes.HH_FIXMES.remove_batch to_check;
+
+  if stop_at_errors then begin
+    Parser_heap.ParserHeap.oldify_batch to_check;
+    Fixmes.HH_FIXMES.oldify_batch to_check
+  end else begin
+    Parser_heap.ParserHeap.remove_batch to_check;
+    Fixmes.HH_FIXMES.remove_batch to_check
+  end;
   HackSearchService.MasterApi.clear_shared_memory to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
-  Parsing_service.go genv.workers files_map ~get_next env.tcopt
+  let (fast, errors, failed_parsing) as res =
+    Parsing_service.go genv.workers files_map ~get_next env.tcopt in
+  if stop_at_errors then begin
+    (* Revert changes and ignore results for files that failed parsing *)
+    let fast = Relative_path.Map.filter fast
+      (fun x _ -> not @@ Relative_path.Set.mem failed_parsing x) in
+    let success_parsing = Relative_path.Set.diff to_check failed_parsing in
+    Parser_heap.ParserHeap.revive_batch failed_parsing;
+    Fixmes.HH_FIXMES.revive_batch failed_parsing;
+    Parser_heap.ParserHeap.remove_old_batch success_parsing;
+    Fixmes.HH_FIXMES.remove_old_batch success_parsing;
+    (fast, errors, Relative_path.Set.empty)
+  end else res
 
 (*****************************************************************************)
 (* At any given point in time, we want to know what each file defines.
@@ -248,7 +264,8 @@ module type CheckKindType = sig
   *)
   val get_files_to_parse :
     ServerEnv.env ->
-    Relative_path.Set.t * Relative_path.Set.t (* disk files, ide files *)
+    Relative_path.Set.t * Relative_path.Set.t * bool
+    (* disk files, ide files, should we stop if there are parsing errors *)
 
   val get_defs_to_redecl :
     parsing_defs:FileInfo.fast ->
@@ -306,7 +323,7 @@ module FullCheckKind : CheckKindType = struct
       ~init:Relative_path.Set.empty
       ~f:(fun path _ acc -> Relative_path.Set.add acc path)
     in
-    disk_files, all_ide_files
+    disk_files, all_ide_files, false
 
   let get_defs_to_redecl ~parsing_defs ~files_info ~env =
     extend_fast parsing_defs files_info env.failed_decl
@@ -347,7 +364,7 @@ end
 module LazyCheckKind : CheckKindType = struct
   let get_files_to_parse env =
     (* Skip the disk updates, process the IDE updates *)
-    Relative_path.Set.empty, env.ide_needs_parsing
+    Relative_path.Set.empty, env.ide_needs_parsing, true
 
   let get_defs_to_redecl ~parsing_defs ~files_info:_ ~env:_ =
     (* We don't need to add env.failed_decl here because lazy check doesn't
@@ -391,7 +408,8 @@ module Make: functor(CheckKind:CheckKindType) -> sig
     ServerEnv.env * int * int
 end = functor(CheckKind:CheckKindType) -> struct
   let type_check genv env =
-    let disk_files, ide_files = CheckKind.get_files_to_parse env in
+    let disk_files, ide_files, stop_at_errors =
+      CheckKind.get_files_to_parse env in
 
     let reparse_count =
       Relative_path.Set.(cardinal disk_files + cardinal ide_files) in
@@ -407,7 +425,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let start_t = Unix.gettimeofday () in
     let t = start_t in
     let fast_parsed, errorl, failed_parsing =
-      parsing genv env disk_files ide_files in
+      parsing genv env disk_files ide_files ~stop_at_errors in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;

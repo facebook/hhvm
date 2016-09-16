@@ -106,6 +106,8 @@ let make_env config =
     edited_files   = Relative_path.Map.empty;
     ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;
+    needs_decl = Relative_path.Set.empty;
+    needs_full_check = false;
     diag_subscribe = None;
     symbols_cache  = SMap.empty;
   }

@@ -88,7 +88,7 @@ let apply_patch (genv:ServerEnv.genv) (env:ServerEnv.env) fn f =
   else begin
     write_file fn patched;
     let env = add_file env fn in
-    let env, _, _rechecked = ServerTypeCheck.type_check genv env in
+    let env, _, _rechecked = ServerTypeCheck.(type_check genv env Full_check)in
     let errors = env.ServerEnv.errorl in
     if not (Errors.is_empty env.ServerEnv.errorl)
     then begin
@@ -96,7 +96,8 @@ let apply_patch (genv:ServerEnv.genv) (env:ServerEnv.env) fn f =
       write_file fn content;
       let env = add_file env fn in
       Printf.printf "Failed\n"; flush stdout;
-      let env, _,  _rechecked = ServerTypeCheck.type_check genv env in
+      let env, _,  _rechecked =
+        ServerTypeCheck.(type_check genv env Full_check) in
       assert (Errors.is_empty env.ServerEnv.errorl);
       errors, env
     end

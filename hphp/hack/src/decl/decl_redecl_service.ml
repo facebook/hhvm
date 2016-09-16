@@ -244,17 +244,21 @@ let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
   SharedMem.collect `gentle;
   ()
 
+let remove_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
+  Decl_heap.Funs.remove_batch n_funs;
+  Decl_class_elements.remove_all elems;
+  Decl_heap.Classes.remove_batch n_classes;
+  Decl_heap.Typedefs.remove_batch n_types;
+  Decl_heap.GConsts.remove_batch n_consts;
+  SharedMem.collect `gentle;
+  ()
+
 let get_defs fast =
   Relative_path.Map.fold fast ~f:begin fun _ names1 names2 ->
     FileInfo.merge_names names1 names2
   end ~init:FileInfo.empty_names
 
-(*****************************************************************************)
-(* The main entry point *)
-(*****************************************************************************)
-
-let redo_type_decl workers ~bucket_size tcopt fast =
-  let fnl = Relative_path.Map.keys fast in
+let get_defs_and_elems workers ~bucket_size fast =
   let defs = get_defs fast in
   let classes = SSet.elements defs.FileInfo.n_classes in
   (* Getting the members of a class requires fetching the class from the heap.
@@ -273,6 +277,15 @@ let redo_type_decl workers ~bucket_size tcopt fast =
         ~neutral:SMap.empty
         ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
   in
+  defs, elems
+
+(*****************************************************************************)
+(* The main entry point *)
+(*****************************************************************************)
+
+let redo_type_decl workers ~bucket_size tcopt fast =
+  let fnl = Relative_path.Map.keys fast in
+  let defs, elems = get_defs_and_elems workers ~bucket_size fast in
   invalidate_heap defs elems;
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let result =
@@ -285,3 +298,7 @@ let redo_type_decl workers ~bucket_size tcopt fast =
   in
   remove_old_defs defs elems;
   result
+
+let invalidate_type_decl workers ~bucket_size fast =
+  let defs, elems = get_defs_and_elems workers ~bucket_size fast in
+  remove_defs defs elems

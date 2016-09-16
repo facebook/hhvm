@@ -56,6 +56,12 @@ type env = {
      * or in editor) and need to be re-parsed *)
     ide_needs_parsing : Relative_path.Set.t;
     disk_needs_parsing : Relative_path.Set.t;
+    (* Definitions that became invalidated and removed from heap. Depending
+     * on lazy decl to update them on as-needed basis. Things that require
+     * entire global state to be up to date (like global list of errors, build,
+     * or find all references) must be preceded by Full_check. *)
+    needs_decl : Relative_path.Set.t;
+    needs_full_check : bool;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     (* Highlight information cached for ide related commands *)

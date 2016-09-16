@@ -185,9 +185,9 @@ let handle_connection genv env client is_persistent =
      flush stderr;
      env
 
-let recheck genv old_env =
+let recheck genv old_env check_kind =
   let new_env, to_recheck, total_rechecked =
-    ServerTypeCheck.check genv old_env in
+    ServerTypeCheck.check genv old_env check_kind in
   ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
                                  (Errors.get_error_list new_env.errorl);
   new_env, to_recheck, total_rechecked
@@ -216,7 +216,8 @@ let rec recheck_loop acc genv env =
       Relative_path.Set.union updates env.disk_needs_parsing in
 
     let env = { env with disk_needs_parsing } in
-    let env, rechecked, total_rechecked = recheck genv env in
+    let check_kind = ServerTypeCheck.Full_check in
+    let env, rechecked, total_rechecked = recheck genv env check_kind in
 
     let acc = {
       rechecked_batches = acc.rechecked_batches + 1;

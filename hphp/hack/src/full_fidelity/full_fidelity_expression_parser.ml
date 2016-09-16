@@ -866,19 +866,6 @@ module WithStatementAndDeclAndTypeParser
       let result = make_prefix_unary_operator ampersand variable in
       (parser, result)
 
-  and parse_variable_list parser =
-    (* SPEC:
-      use-variable-name-list:
-        variable-name
-        use-variable-name-list  ,  variable-name
-    *)
-    (* TODO: Strict mode requires that it be a list of variables; in
-       non-strict mode we allow variables to be decorated with a leading
-       & to indicate they are captured by reference. We need to give an
-       error in a later pass for this. *)
-    parse_comma_list_opt
-      parser RightParen SyntaxError.error1025 parse_use_variable
-
   and parse_anon_or_lambda_or_awaitable parser =
     let (parser1, _) = assert_token parser Async in
     if peek_token_kind parser1 = Function then
@@ -903,17 +890,26 @@ module WithStatementAndDeclAndTypeParser
   and parse_anon_use_opt parser =
     (* SPEC:
       anonymous-function-use-clause:
-        use  (  use-variable-name-list  )
+        use  (  use-variable-name-list  ,-opt  )
+
+      use-variable-name-list:
+        variable-name
+        use-variable-name-list  ,  variable-name
+
+      TODO: Strict mode requires that it be a list of variables; in
+      non-strict mode we allow variables to be decorated with a leading
+      & to indicate they are captured by reference. We need to give an
+      error in a later pass for this.
     *)
     let (parser, use_token) = optional_token parser Use in
     if is_missing use_token then
-      (parser, use_token)
+      (parser, (make_missing()))
     else
-      let (parser, left_paren) = expect_left_paren parser in
-      let (parser, variables) = parse_variable_list parser in
-      let (parser, right_paren) = expect_right_paren parser in
+      let (parser, left, vars, right) =
+        parse_parenthesized_comma_list_opt_allow_trailing
+          parser parse_use_variable in
       let result = make_anonymous_function_use_clause use_token
-        left_paren variables right_paren in
+        left vars right in
       (parser, result)
 
   and parse_optional_return parser =

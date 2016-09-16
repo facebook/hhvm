@@ -216,7 +216,7 @@ and parse_type_list parser close_kind =
     parse_type_specifier
 
 and parse_type_or_ellipsis_list parser close_kind =
-  parse_comma_list parser close_kind SyntaxError.error1007
+  parse_comma_list_allow_trailing parser close_kind SyntaxError.error1007
   parse_type_or_ellipsis
 
 and parse_type_or_ellipsis parser =

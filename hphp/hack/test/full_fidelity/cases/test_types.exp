@@ -34,7 +34,7 @@
                     ((>)))
                   ((>)))
                 ((,)(whitespace)))
-                (simple_type_specifier((string))))
+              (list_item(simple_type_specifier((string)))((,))))
               ((rparen)(whitespace))
               ((:)(whitespace))
               (simple_type_specifier((void)))

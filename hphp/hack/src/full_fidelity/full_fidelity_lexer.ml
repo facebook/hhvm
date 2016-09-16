@@ -339,6 +339,9 @@ let scan_unicode_escape lexer =
     advance lexer 2
   else
     (* TODO: Verify that number is in range. *)
+    (* TODO: Verify that there are any digits at all! *)
+    (* Skip over the slash, u and brace, and start lexing the number. *)
+    let lexer = advance lexer 3 in
     let lexer = scan_hexadecimal_digits lexer in
     let ch = peek_char lexer 0 in
     if ch != '}' then

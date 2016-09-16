@@ -25,10 +25,15 @@ type call_type =
   | Unsubscribe_diagnostic_call
   | Sleep_for_test
 
+type diagnostic_response = {
+  path : string;
+  diagnostics : Pos.absolute Errors.error_ list;
+}
+
 type response_type =
   | Auto_complete_response of Hh_json.json
   | Idetify_function_response of Hh_json.json
-  | Diagnostic_response of call_id * Hh_json.json
+  | Diagnostic_response of call_id * diagnostic_response
   | Highlight_ref_response of Hh_json.json
 
 type parsing_result =

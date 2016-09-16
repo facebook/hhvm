@@ -239,12 +239,15 @@ let build_response_json id result_field =
     ("result", result_field);
   ]
 
-let build_diagnostic_json id errors =
+let build_diagnostic_json id x =
   JSON_Object [
     ("protocol", JSON_String "service_framework3_rpc");
     ("type", JSON_String "next");
     ("id", int_ id);
-    ("errors", errors);
+    ("diagnostics", JSON_Object [
+      ("filename", JSON_String x.path);
+      ("errors", JSON_Array (List.map x.diagnostics ~f:Errors.to_json));
+    ])
   ]
 
 let json_string_of_response id response =

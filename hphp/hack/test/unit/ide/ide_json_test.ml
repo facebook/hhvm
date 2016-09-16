@@ -224,9 +224,11 @@ let test_subscribe_call () =
 
 let test_diagnostic_response () =
   let id = 4 in
-  let response = Diagnostic_response (id, JSON_Array []) in
+  let diagnostics = { path = "foo.php"; diagnostics = [] } in
+  let response = Diagnostic_response (id, diagnostics) in
   (json_string_of_response id response) =
-  {|{"protocol":"service_framework3_rpc","type":"next","id":4,"errors":[]}|}
+  {|{"protocol":"service_framework3_rpc","type":"next","id":4,|} ^
+  {|"diagnostics":{"filename":"foo.php","errors":[]}}|}
 
 let test_unsubscribe_call () =
   let msg =

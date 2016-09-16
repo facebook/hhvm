@@ -8,10 +8,10 @@
  *
  *)
 
-val type_check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * int
+val type_check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * int * int
 
 (* just add also some debugging information on stdout *)
-val check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * int
+val check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * int * int
 
 val hook_after_parsing: (ServerEnv.genv ->
     (* new *) ServerEnv.env -> unit) option ref

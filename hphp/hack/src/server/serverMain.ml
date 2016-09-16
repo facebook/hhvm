@@ -110,20 +110,6 @@ module Program =
         end;
       end;
       to_recheck
-
-    let recheck genv old_env typecheck_updates =
-      if Relative_path.Set.is_empty typecheck_updates then
-        old_env, 0
-      else begin
-        let failed_parsing =
-          Relative_path.Set.union typecheck_updates old_env.failed_parsing in
-        let check_env = { old_env with failed_parsing = failed_parsing } in
-        let new_env, total_rechecked = ServerTypeCheck.check genv check_env in
-        ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
-                                       (Errors.get_error_list new_env.errorl);
-        new_env, total_rechecked
-      end
-
   end
 
 (*****************************************************************************)
@@ -199,9 +185,12 @@ let handle_connection genv env client is_persistent =
      flush stderr;
      env
 
-let recheck genv old_env to_recheck =
-  let env, total_rechecked = Program.recheck genv old_env to_recheck in
-  env, to_recheck, total_rechecked
+let recheck genv old_env =
+  let new_env, to_recheck, total_rechecked =
+    ServerTypeCheck.check genv old_env in
+  ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
+                                 (Errors.get_error_list new_env.errorl);
+  new_env, to_recheck, total_rechecked
 
 (* When a rebase occurs, dfind takes a while to give us the full list of
  * updates, and it often comes in batches. To get an accurate measurement
@@ -212,23 +201,26 @@ let recheck genv old_env to_recheck =
 let rec recheck_loop acc genv env =
   let t = Unix.gettimeofday () in
   let raw_updates = genv.notifier () in
+  let updates = Program.process_updates genv env raw_updates in
 
   let is_idle = t -. env.last_command_time > 0.5 in
 
-  let disk_recheck = not (SSet.is_empty raw_updates) in
+  let disk_recheck = not (Relative_path.Set.is_empty updates) in
   let ide_recheck =
     (not @@ Relative_path.Set.is_empty env.files_to_check) && is_idle in
   if (not disk_recheck) && (not ide_recheck) then
     acc, env
   else begin
     HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
-    let updates = Program.process_updates genv env raw_updates in
-    let updates = Relative_path.Set.union updates env.files_to_check in
-    let env, rechecked, total_rechecked = recheck genv env updates in
+    let disk_needs_parsing =
+      Relative_path.Set.union updates env.disk_needs_parsing in
+
+    let env = { env with disk_needs_parsing } in
+    let env, rechecked, total_rechecked = recheck genv env in
+
     let acc = {
       rechecked_batches = acc.rechecked_batches + 1;
-      rechecked_count =
-        acc.rechecked_count + Relative_path.Set.cardinal rechecked;
+      rechecked_count = acc.rechecked_count + rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
     } in
     recheck_loop acc genv env

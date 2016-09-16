@@ -43,8 +43,7 @@ type env = {
     files_info     : FileInfo.t Relative_path.Map.t;
     tcopt          : TypecheckerOptions.t;
     errorl         : Errors.t;
-    (* Keeps list of files containing parsing errors in the last iteration. File
-     * need to be rechecked will also join this list during typecheck *)
+    (* Keeps list of files containing parsing errors in the last iteration. *)
     failed_parsing : Relative_path.Set.t;
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;
@@ -55,6 +54,9 @@ type env = {
     edited_files   : File_content.t Relative_path.Map.t;
     (* The list of full path of synchronized files need to be type checked *)
     files_to_check : Relative_path.Set.t;
+    (* Files which parse trees were invalidated (because they changed on disk)
+     * and need to be re-parsed *)
+    disk_needs_parsing : Relative_path.Set.t;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     (* Highlight information cached for ide related commands *)

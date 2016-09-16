@@ -102,6 +102,7 @@ let make_env config =
     last_command_time = 0.0;
     edited_files   = Relative_path.Map.empty;
     files_to_check = Relative_path.Set.empty;
+    disk_needs_parsing = Relative_path.Set.empty;
     diag_subscribe = None;
     symbols_cache  = SMap.empty;
   }

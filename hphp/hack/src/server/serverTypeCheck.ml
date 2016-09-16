@@ -151,16 +151,29 @@ let remove_failed fast failed =
 (* Parses the set of modified files *)
 (*****************************************************************************)
 
-let parsing genv env =
-  let files_map = Relative_path.Map.filter env.edited_files
-    (fun path _ -> Relative_path.Set.mem env.files_to_check path) in
-
-  let to_check =
-    Relative_path.Set.union env.files_to_check env.failed_parsing in
-
-  let disk_files = Relative_path.Set.filter env.failed_parsing
+(* Parsing treats files open in IDE and files coming from disk differently:
+ *
+ * - for IDE files, we need to look up their contents in the map in env,
+ *     instead of reading from disk (duh)
+ * - we parse IDE files in master process (to avoid passing env to the workers)
+ * - to make the IDE more responsive, we try to shortcut the typechecking at
+ *   the parsing level if there were parsing errors
+ *)
+let get_files_to_parse env =
+  let all_disk_files =
+    Relative_path.Set.union env.disk_needs_parsing env.failed_parsing in
+  let disk_files = Relative_path.Set.filter all_disk_files
     (fun x -> not @@ Relative_path.Map.mem env.edited_files x) in
+  disk_files, env.files_to_check
 
+let parsing genv env disk_files ide_files =
+
+  let files_map = Relative_path.Map.filter env.edited_files
+     (fun path _ -> Relative_path.Set.mem ide_files path) in
+
+  let to_check = Relative_path.Set.union disk_files ide_files in
+  (* Invalidating only disk files, Parsing_service removes ASTs of
+   * IDE files itself. TODO: what about fixmes/search? *)
   Parser_heap.ParserHeap.remove_batch disk_files;
   Fixmes.HH_FIXMES.remove_batch to_check;
   HackSearchService.MasterApi.clear_shared_memory to_check;
@@ -211,20 +224,23 @@ let hook_after_parsing = ref None
 (*****************************************************************************)
 
 let type_check genv env =
+  let disk_files, ide_files = get_files_to_parse env in
 
-  let reparse_count = Relative_path.Set.cardinal env.failed_parsing in
+  let reparse_count =
+    Relative_path.Set.(cardinal disk_files + cardinal ide_files) in
   Printf.eprintf "******************************************\n";
   Hh_logger.log "Files to recompute: %d" reparse_count;
 
   (* RESET HIGHLIGHTS CACHE FOR RECHECKED IDE FILES *)
-  let symbols_cache = Relative_path.Set.fold env.files_to_check
+  let symbols_cache = Relative_path.Set.fold ide_files
     ~init:env.symbols_cache
     ~f:(fun path map -> SMap.remove map (Relative_path.to_absolute path)) in
 
   (* PARSING *)
   let start_t = Unix.gettimeofday () in
   let t = start_t in
-  let fast_parsed, errorl, failed_parsing = parsing genv env in
+  let fast_parsed, errorl, failed_parsing =
+    parsing genv env disk_files ide_files in
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
@@ -331,10 +347,11 @@ let type_check genv env =
     last_command_time = old_env.last_command_time;
     edited_files = old_env.edited_files;
     files_to_check = Relative_path.Set.empty;
+    disk_needs_parsing = Relative_path.Set.empty;
     diag_subscribe;
     symbols_cache;
   } in
-  new_env, total_rechecked_count
+  new_env, reparse_count, total_rechecked_count
 
 (*****************************************************************************)
 (* Checks that the working directory is clean *)

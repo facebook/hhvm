@@ -100,6 +100,8 @@ let get_push_message = Refs.get_push_message
 type t = unit
 type client = connection_type
 
+exception Client_went_away
+
 let provider_from_file_descriptor _ = ()
 let provider_for_test _ = ()
 

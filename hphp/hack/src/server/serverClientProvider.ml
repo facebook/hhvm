@@ -10,6 +10,8 @@
 
 open ServerCommandTypes
 
+exception Client_went_away
+
 type t = Unix.file_descr
 type client =
   | Non_persistent_client of Timeout.in_channel * out_channel
@@ -43,7 +45,11 @@ let accept_client parent_in_fd =
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
-  Marshal_tools.to_fd_with_preamble fd "Hello"
+  try
+    Marshal_tools.to_fd_with_preamble fd "Hello"
+  with
+  | Unix.Unix_error(Unix.EPIPE, "write", _) ->
+      raise Client_went_away
 
 let read_connection_type ic =
   Timeout.with_timeout

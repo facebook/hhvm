@@ -12,6 +12,8 @@ module type S = sig
   type t
   type client
 
+  exception Client_went_away
+
   val provider_from_file_descriptor : Unix.file_descr -> t
   val provider_for_test : unit -> t
 

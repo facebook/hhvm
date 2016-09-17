@@ -134,7 +134,7 @@ let handle_connection_ genv env client =
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
-  | Sys_error("Broken pipe") | Read_command_timeout ->
+  | ClientProvider.Client_went_away | Read_command_timeout ->
     ClientProvider.shutdown_client client;
     env
   | e ->

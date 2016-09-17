@@ -21,6 +21,7 @@ open Result.Monad_infix
 module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
+module LSC = LoadScriptConfig
 
 exception No_loader
 exception Loader_timeout of string
@@ -103,16 +104,17 @@ let check_json_obj_error kv =
  * The second line is a list of the files that have changed since the state
  * was built
  *)
-let load_state root cmd (_ic, oc) =
+let load_state root saved_state_load_type cmd (_ic, oc) =
   try
     let load_script_log_file = ServerFiles.load_log root in
     let cmd =
       Printf.sprintf
-        "%s %s %s %s"
+        "%s %s %s %s %s"
         (Filename.quote (Path.to_string cmd))
         (Filename.quote (Path.to_string root))
         (Filename.quote Build_id.build_revision)
-        (Filename.quote load_script_log_file) in
+        (Filename.quote load_script_log_file)
+        (Filename.quote saved_state_load_type) in
     Hh_logger.log "Running load_mini script: %s\n%!" cmd;
     let ic = Unix.open_process_in cmd in
     let json = read_json_line ic in
@@ -150,14 +152,14 @@ let with_loader_timeout timeout stage f =
  *
  * The loading of the dependency table must not run concurrently with any
  * operations that might write to the deptable. *)
-let mk_state_future root cmd =
+let mk_state_future root saved_state_load_type cmd =
   let start_time = Unix.gettimeofday () in
   Result.try_with @@ fun () ->
   let log_file =
     Sys_utils.make_link_of_timestamped (ServerFiles.load_log root) in
   let log_fd = Daemon.fd_of_path log_file in
   let {Daemon.channels = (ic, _oc); pid} as daemon =
-    Daemon.fork (log_fd, log_fd) (load_state root) cmd
+    Daemon.fork (log_fd, log_fd) (load_state root saved_state_load_type) cmd
   in fun () ->
   let fn =
     try
@@ -367,6 +369,9 @@ let init ?load_mini_script genv =
     && Option.is_none (ServerArgs.ai_mode genv.options) in
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
+  let saved_state_load_type =
+    LSC.saved_state_load_type_to_string
+    genv.local_config.SLC.load_script_config in
 
   (* Spawn this first so that it can run in the background while parsing is
    * going on. The script can fail in a variety of ways, but the resolution
@@ -374,7 +379,8 @@ let init ?load_mini_script genv =
    * in the Result monad provides a convenient way to locate the error
    * handling code in one place. *)
   let load_mini_script = Result.of_option load_mini_script ~error:No_loader in
-  let state_future = load_mini_script >>= mk_state_future root in
+  let state_future =
+    load_mini_script >>= mk_state_future root saved_state_load_type in
 
   let get_next, t = indexing genv in
   let env, t = parsing genv env ~get_next t in

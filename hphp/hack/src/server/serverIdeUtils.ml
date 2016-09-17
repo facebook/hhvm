@@ -135,6 +135,16 @@ let declare_and_check content ~f =
         | Nast.Typedef t -> Decl.typedef_decl t
         | Nast.Constant cst -> Decl.const_decl cst
       end;
+
+      (* If we remove a class member, there may still be child classes that
+       * refer to that member. We can either invalidate all the extends_deps
+       * of the classes we just declared, or revive the types of the class
+       * elements back into the new heap. We choose to revive since it should
+       * be faster, even though it is technically incorrect.
+       *)
+      classes
+      |> List.map ~f:snd
+      |> Decl_class_elements.revive_removed_elems;
       (* We must run all the declaration steps first to ensure that the
        * typechecking below sees all the new declarations. Lazy decl
        * won't work in this case because we haven't put the new ASTs into

@@ -118,3 +118,21 @@ let remove_all class_to_elems =
     Constructors.remove_batch (SSet.singleton cls);
     remove_batch elems
   end class_to_elems
+
+let revive_removed_elems classes =
+  List.iter ~f:begin fun cls ->
+    if not @@ Constructors.mem cls then
+      Constructors.revive_batch (SSet.singleton cls);
+    match Decl_heap.Classes.get_old cls with
+    | None -> ()
+    | Some c ->
+      let { props; sprops; meths; smeths } = from_class c in
+      let negate f x = not (f x) in
+      let elems = {
+        props = Props.(KeySet.filter (negate mem) props);
+        sprops = StaticProps.(KeySet.filter (negate mem) sprops);
+        meths = Methods.(KeySet.filter (negate mem) meths);
+        smeths = StaticMethods.(KeySet.filter (negate mem) smeths);
+      } in
+      revive_batch elems
+  end classes

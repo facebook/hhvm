@@ -549,30 +549,15 @@ NEVER_INLINE void Marker::trace() {
    * Do this after draining the worklist, as we want to prefer discovering
    * things via non-conservative means.
    */
-  if (RuntimeOption::EvalEnableGCTypeScan && type_scan::hasNonConservative()) {
+  if (!unknown_objects_.empty()) {
     auto const t0 = cpu_micros();
     SCOPE_EXIT { unknown_us_ = cpu_micros() - t0; };
     for (const auto* h : unknown_objects_) {
-      if (!mark(h, GCBits::CMark)) continue;
-      unknown_ += h->size();
-      switch (h->kind()) {
-        case HeaderKind::Resource:
-          assert(typeIndexIsUnknown(h->res_.typeIndex()));
-          (*this)(h->res_.data(), h->res_.heapSize() - sizeof(ResourceHdr));
-          break;
-        case HeaderKind::SmallMalloc:
-        case HeaderKind::BigMalloc:
-          assert(typeIndexIsUnknown(h->malloc_.typeIndex()));
-          (*this)((&h->malloc_)+1, h->malloc_.nbytes - sizeof(MallocNode));
-          break;
-        default:
-          assert(false && "unknown kind in unknown type list");
-          break;
+      if (mark(h, GCBits::CMark)) {
+        unknown_ += h->size();
+        enqueue(h);
       }
     }
-
-    // The conservative scans may have added more items to the
-    // worklist, so drain it again.
     process_worklist();
   } else {
     unknown_us_ = 0;

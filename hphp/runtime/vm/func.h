@@ -601,12 +601,16 @@ struct Func final {
 
   /*
    * Is this function a method defined on a class?
+   *
    * Note that trait methods may not satisfy isMethod().
    */
   bool isMethod() const;
 
   /*
    * Was this function imported from a trait?
+   *
+   * Note that this returns false for a trait method in the trait it was
+   * originally declared.
    */
   bool isFromTrait() const;
 

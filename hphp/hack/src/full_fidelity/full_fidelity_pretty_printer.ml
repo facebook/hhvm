@@ -220,7 +220,7 @@ let rec get_doc node =
 
     let preface = group_doc (
       get_doc x.classish_modifiers ^|
-      get_doc x.classish_token
+      get_doc x.classish_keyword
     ) in
 
     let name_and_generics =
@@ -298,14 +298,14 @@ let rec get_doc node =
     let semi = get_doc x.trait_use_semicolon in
     use ^| name_list ^^^ semi
   | RequireClause x ->
-    let r = get_doc x.require_token in
+    let r = get_doc x.require_keyword in
     let k = get_doc x.require_kind in
     let n = get_doc x.require_name in
     let s = get_doc x.require_semicolon in
     r ^| k ^| n ^^^ s
   | ConstDeclaration x ->
     let abstr = get_doc x.const_abstract in
-    let token = get_doc x.const_token in
+    let token = get_doc x.const_keyword in
     let ty = get_doc x.const_type_specifier in
     let lst = get_doc x.const_declarator_list in
     let semi = get_doc x.const_semicolon in
@@ -316,7 +316,7 @@ let rec get_doc node =
     group_doc (name ^| init)
   | TypeConstDeclaration x ->
     let abstr = get_doc x.type_const_abstract in
-    let const = get_doc x.type_const_const_token in
+    let const = get_doc x.type_const_keyword in
     let type_ = get_doc x.type_const_type_token in
     let name = get_doc x.type_const_name in
     let type_constraint = get_doc x.type_const_type_constraint in
@@ -330,7 +330,7 @@ let rec get_doc node =
       group_doc (type_spec ^^^ semicolon)
     )
   | EnumDeclaration x ->
-    let en = get_doc x.enum_enum in
+    let en = get_doc x.enum_keyword in
     let na = get_doc x.enum_name in
     let co = get_doc x.enum_colon in
     let ba = get_doc x.enum_base in
@@ -350,7 +350,7 @@ let rec get_doc node =
     (* TODO: What's the best way to ensure that there's a newline between the
     attribute and the alias declaration proper? *)
     let attr = get_doc x.alias_attribute_spec in
-    let a = get_doc x.alias_token in
+    let a = get_doc x.alias_keyword in
     let n = get_doc x.alias_name in
     let generic = get_doc x.alias_generic_parameter in
     let c = get_doc x.alias_constraint in
@@ -369,7 +369,7 @@ let rec get_doc node =
     let i = get_doc x.prop_init in
     n ^| i
   | NamespaceDeclaration x ->
-    let t = get_doc x.namespace_token in
+    let t = get_doc x.namespace_keyword in
     let n = get_doc x.namespace_name in
     let b = get_doc x.namespace_body in
     t ^| n ^| b
@@ -379,7 +379,7 @@ let rec get_doc node =
     let right = get_doc x.namespace_right_brace in
     indent_block_no_space left body right indt |> add_break
   | NamespaceUseDeclaration x ->
-    let u = get_doc x.namespace_use in
+    let u = get_doc x.namespace_use_keyword in
     let k = get_doc x.namespace_use_kind in
     let c = get_doc x.namespace_use_clauses in
     let s = get_doc x.namespace_use_semicolon in
@@ -391,7 +391,7 @@ let rec get_doc node =
     let l = get_doc x.namespace_use_alias in
     k ^| n ^| a ^| l
   | NamespaceGroupUseDeclaration x ->
-    let u = get_doc x.namespace_group_use in
+    let u = get_doc x.namespace_group_use_keyword in
     let k = get_doc x.namespace_group_use_kind in
     let p = get_doc x.namespace_group_use_prefix in
     let l = get_doc x.namespace_group_use_left_brace in
@@ -407,7 +407,7 @@ let rec get_doc node =
       group_doc (attr ^| after_attr)
   | FunctionDeclarationHeader x ->
     let preface = group_doc ( get_doc x.function_async
-                              ^| get_doc x.function_token) in
+                              ^| get_doc x.function_keyword) in
     let name_and_generics =
       let type_params = get_doc x.function_type_params in
       let name = get_doc x.function_name in

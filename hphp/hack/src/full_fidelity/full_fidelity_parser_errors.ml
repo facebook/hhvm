@@ -145,7 +145,7 @@ let rec containing_classish_kind parents =
   | h :: t ->
     begin
       match syntax h with
-      | ClassishDeclaration c -> token_kind c.classish_token
+      | ClassishDeclaration c -> token_kind c.classish_keyword
       | _ -> containing_classish_kind t
     end
 

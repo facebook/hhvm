@@ -895,7 +895,16 @@ struct srem { Vreg s0, s1, d; };
 struct divint { Vreg s0, s1, d; };
 
 /*
- * Integer multiplication.
+ * Integer multiplication (with overflow).
+ * 
+ * Performs a 64bit integer multiplication (d := s0 * s1) and checks for a
+ * possible overflow.  Given that the method to check for the overflow will
+ * be architecture specific, we don't expose any internal flag status and
+ * mark this as killing the flag register.
+ *
+ * Targets have the same order as for branch instructions (see below):
+ *   target[0] = next (i.e. fall-through)
+ *   target[1] = taken (i.e. slow-path)
  */
 struct mulint { Vreg s0, s1, d; Vlabel targets[2]; };
 

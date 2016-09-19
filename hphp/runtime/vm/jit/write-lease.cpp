@@ -41,10 +41,12 @@ static InitFiniNode s_funcOwnersReinit([]{
 
 std::atomic<int> s_jittingThreads{0};
 
-Lease s_writeLease;
+Lease s_globalLease;
+Lease s_liveLease;
+Lease s_optimizeLease;
 }
 
-Lease& GetWriteLease() { return s_writeLease; }
+Lease& GetWriteLease() { return s_globalLease; }
 
 Lease::Lease() {
   pthread_mutex_init(&m_lock, nullptr);
@@ -130,62 +132,99 @@ void Lease::drop(int64_t hintExpireDelay) {
   pthread_mutex_unlock(&m_lock);
 }
 
-bool Lease::couldBeOwner() const {
-  auto self = pthread_self();
-  if (m_held.load(std::memory_order_acquire)) {
-    return m_owner == self;
-  } else {
-    return m_owner == self || Timer::GetCurrentTimeMicros() > m_hintExpire;
-  }
+bool Lease::couldAcquire() const {
+  auto const self = pthread_self();
+  if (m_held.load(std::memory_order_acquire)) return m_owner == self;
+
+  return m_owner == self || Timer::GetCurrentTimeMicros() > m_hintExpire;
 }
 
-static bool concurrentlyJitKind(TransKind k) {
-  if (RuntimeOption::EvalJitConcurrently == 0) return false;
+namespace {
+LockLevel lockLevel(TransKind k) {
+  if (RuntimeOption::EvalJitConcurrently == 0) return LockLevel::Global;
 
   switch (k) {
     case TransKind::Anchor:
     case TransKind::Interp:
     case TransKind::Invalid:
-      assertx(false);
-      return false;
+      break;
     case TransKind::ProfPrologue:
     case TransKind::Profile:
-      return true;
+      return LockLevel::Func;
     case TransKind::OptPrologue:
     case TransKind::Optimize:
-      return RuntimeOption::EvalJitConcurrently >= 2;
+      return RuntimeOption::EvalJitConcurrently >= 2 ? LockLevel::Func
+                                                     : LockLevel::Kind;
     case TransKind::LivePrologue:
     case TransKind::Live:
-      return RuntimeOption::EvalJitConcurrently >= 3;
+      return RuntimeOption::EvalJitConcurrently >= 3 ? LockLevel::Func
+                                                     : LockLevel::Kind;
   }
-  not_reached();
+  always_assert(false);
 }
 
-bool LeaseHolder::NeedGlobal(TransKind kind) {
-  return !concurrentlyJitKind(kind);
+Lease& kindLease(TransKind k) {
+  switch (k) {
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Invalid:
+    case TransKind::ProfPrologue:
+    case TransKind::Profile:
+      break;
+    case TransKind::OptPrologue:
+    case TransKind::Optimize:
+      return s_optimizeLease;
+    case TransKind::LivePrologue:
+    case TransKind::Live:
+      return s_liveLease;
+  }
+  always_assert(false);
+}
+}
+
+bool couldAcquireOptimizeLease(const Func* func) {
+  switch (lockLevel(TransKind::Optimize)) {
+    case LockLevel::None:
+      break;
+    case LockLevel::Func: {
+      auto const funcId = func->getFuncId();
+      s_funcOwners.ensureSize(funcId + 1);
+      auto const owner = s_funcOwners[funcId].load(std::memory_order_relaxed);
+      auto const self = Treadmill::threadIdx();
+      return owner == self || owner == Treadmill::kInvalidThreadIdx;
+    }
+    case LockLevel::Kind:
+      return s_optimizeLease.couldAcquire();
+    case LockLevel::Global:
+      return s_globalLease.couldAcquire();
+  }
+  always_assert(false);
 }
 
 LeaseHolder::LeaseHolder(Lease& l, const Func* func, TransKind kind)
   : m_lease(l)
   , m_func{RuntimeOption::EvalJitConcurrently > 0 ? func : nullptr}
 {
-  auto const need_global = m_func == nullptr || NeedGlobal(kind);
+  assertx(func || RuntimeOption::EvalJitConcurrently == 0);
+  auto const level = m_func ? lockLevel(kind) : LockLevel::Global;
 
-  if (!need_global && !threadCanAcquireConcurrent) return;
+  if (level == LockLevel::Func && !threadCanAcquireConcurrent) return;
 
-  if (need_global && !m_lease.amOwner()) {
+  if (level == LockLevel::Global && !m_lease.amOwner()) {
     auto const blocking = RuntimeOption::EvalJitRequireWriteLease &&
       RuntimeOption::EvalJitConcurrently == 0;
     if (!(m_acquired = m_lease.acquire(blocking))) return;
   }
 
-  SCOPE_EXIT { if (!m_canTranslate) dropLocks(); };
+  SCOPE_EXIT { if (m_level == LockLevel::None) dropLocks(); };
+
+  if (level == LockLevel::Kind && !acquireKind(kind)) return;
 
   if (m_func) {
     auto const funcId = m_func->getFuncId();
     s_funcOwners.ensureSize(funcId + 1);
     auto& owner = s_funcOwners[funcId];
-    auto oldOwner = owner.load(std::memory_order_acquire);
+    auto oldOwner = owner.load(std::memory_order_relaxed);
     auto const self = Treadmill::threadIdx();
 
     if (oldOwner == self) {
@@ -194,9 +233,9 @@ LeaseHolder::LeaseHolder(Lease& l, const Func* func, TransKind kind)
       // Already owned by another thread.
       return;
     } else {
-      // Unowned. Try to grab it. Threads with the global write lease don't
-      // count towards Eval.JitThreads.
-      if (!need_global) {
+      // Unowned. Try to grab it. Only threads with LockLevel::Func count
+      // towards the Eval.JitThreads limit.
+      if (level == LockLevel::Func) {
         auto threads = s_jittingThreads.load(std::memory_order_relaxed);
         if (threads >= RuntimeOption::EvalJitThreads) return;
 
@@ -205,8 +244,9 @@ LeaseHolder::LeaseHolder(Lease& l, const Func* func, TransKind kind)
         if (threads >= RuntimeOption::EvalJitThreads) return;
       }
 
+      assertx(oldOwner == Treadmill::kInvalidThreadIdx);
       if (!owner.compare_exchange_strong(oldOwner, self,
-                                         std::memory_order_relaxed)) {
+                                         std::memory_order_acq_rel)) {
         return;
       }
       m_acquiredFunc = true;
@@ -214,11 +254,23 @@ LeaseHolder::LeaseHolder(Lease& l, const Func* func, TransKind kind)
   }
 
   // If we made it this far, we acquired all the locks we need to translate.
-  m_canTranslate = true;
+  m_level = level;
 }
 
 LeaseHolder::~LeaseHolder() {
   dropLocks();
+}
+
+bool LeaseHolder::acquireKind(TransKind kind) {
+  auto& lease = kindLease(kind);
+  if (lease.amOwner()) return true;
+
+  if (lease.acquire()) {
+    m_acquiredKind = kind;
+    return true;
+  }
+
+  return false;
 }
 
 void LeaseHolder::dropLocks() {
@@ -233,6 +285,11 @@ void LeaseHolder::dropLocks() {
     m_acquiredFunc = false;
   }
 
+  if (m_acquiredKind != TransKind::Invalid) {
+    kindLease(m_acquiredKind).drop(RuntimeOption::EvalJitWriteLeaseExpiration);
+    m_acquiredKind = TransKind::Invalid;
+  }
+
   if (m_acquired) {
     assertx(m_lease.amOwner());
     m_lease.drop(RuntimeOption::EvalJitWriteLeaseExpiration);
@@ -241,12 +298,21 @@ void LeaseHolder::dropLocks() {
 }
 
 bool LeaseHolder::checkKind(TransKind kind) {
-  assertx(m_canTranslate);
+  assertx(m_level != LockLevel::None);
 
-  return m_canTranslate =
-    m_lease.amOwner() ||
-    !NeedGlobal(kind) ||
-    (m_acquired = m_lease.acquire());
+  auto const level = lockLevel(kind);
+  if (level == m_level) return true;
+
+  if (level == LockLevel::Kind && !acquireKind(kind)) return false;
+
+  if (level == LockLevel::Global &&
+      !m_lease.amOwner() &&
+      !(m_acquired = m_lease.acquire())) {
+    return false;
+  }
+
+  m_level = level;
+  return true;
 }
 
 }}

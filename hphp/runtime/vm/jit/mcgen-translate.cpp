@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/runtime.h"
 

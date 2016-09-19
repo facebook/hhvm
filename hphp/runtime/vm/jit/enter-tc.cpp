@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/runtime.h"
 

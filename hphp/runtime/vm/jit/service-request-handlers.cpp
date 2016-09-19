@@ -22,11 +22,12 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
-#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
+#include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"

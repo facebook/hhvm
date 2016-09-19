@@ -58,7 +58,7 @@ struct Lease {
    * Returns true iff the current thread would be able to acquire the lease now
    * (or already owns it).
    */
-  bool couldBeOwner() const;
+  bool couldAcquire() const;
 
   static void mayLock(bool f);
   static void mayLockConcurrent(bool f);
@@ -90,6 +90,22 @@ enum class LeaseAcquire {
   BLOCKING
 };
 
+bool couldAcquireOptimizeLease(const Func*);
+
+/*
+ * Used to track which locks are required or acquired in LeaseHolder.
+ */
+enum class LockLevel {
+  /* No locks */
+  None,
+  /* Func-specific lock only: full concurrent jitting */
+  Func,
+  /* Kind-specific lock: allows 1 Optimize concurrent with 1 Live translation */
+  Kind,
+  /* Global lease required: 1 translation at a time */
+  Global,
+};
+
 struct LeaseHolder {
   LeaseHolder(Lease& l, const Func* f, TransKind kind);
   ~LeaseHolder();
@@ -99,32 +115,22 @@ struct LeaseHolder {
    * continue with translation.
    */
   explicit operator bool() const {
-    return m_canTranslate;
+    return m_level != LockLevel::None;
   }
 
   /*
-   * If the combination of RuntimeOption::EvalJitConcurrently and kind require
-   * holding the global write lease and it can't be acquired, return false.
+   * Check if the combination of RuntimeOption::EvalJitConcurrently and kind
+   * require acquiring more locks than this LeaseHolder currently has. If so
+   * and they can't be acquired, return false. Otherwise, return true.
    */
   bool checkKind(TransKind kind);
 
-  /*
-   * Returns whether the combination of RuntimeOption::EvalJitConcurrently and
-   * kind require holding the global write lease.
-   */
-  static bool NeedGlobal(TransKind kind);
-
  private:
+  bool acquireKind(TransKind kind);
   void dropLocks();
 
   Lease& m_lease;
   const Func* m_func;
-
-  /*
-   * Did this object acquire all the locks it was supposed to in its
-   * constructor?
-   */
-  bool m_canTranslate{false};
 
   /*
    * Flags indicating which specific locks were acquired by this object and
@@ -133,8 +139,13 @@ struct LeaseHolder {
   bool m_acquired{false};
   bool m_acquiredFunc{false};
   bool m_acquiredThread{false};
+  TransKind m_acquiredKind{TransKind::Invalid};
+  LockLevel m_level{LockLevel::None};
 };
 
+/*
+ * Get a reference to the global write lease.
+ */
 Lease& GetWriteLease();
 
 }} // HPHP::jit

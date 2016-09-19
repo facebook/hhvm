@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/debug/debug.h"
 

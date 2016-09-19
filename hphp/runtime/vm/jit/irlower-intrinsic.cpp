@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
@@ -34,10 +33,12 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/util/trace.h"
 
@@ -178,10 +179,6 @@ void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   v << decqmlock{v.cns(counterAddr)[0], v.makeReg()};
 }
 
-bool skipAttemptGlobal() {
-  return !GetWriteLease().couldBeOwner();
-}
-
 void cgCheckCold(IRLS& env, const IRInstruction* inst) {
   auto const transID = inst->extra<CheckCold>()->transId;
   auto const counterAddr = profData()->transCounterAddr(transID);
@@ -189,17 +186,17 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = v.makeReg();
   v << decqmlock{v.cns(counterAddr)[0], sf};
-  if (RuntimeOption::EvalJitFilterLease &&
-      LeaseHolder::NeedGlobal(TransKind::Optimize)) {
+  if (RuntimeOption::EvalJitFilterLease) {
     auto filter = v.makeBlock();
     v << jcc{CC_LE, sf, {label(env, inst->next()), filter}};
     v = filter;
     auto const res = v.makeReg();
-    cgCallHelper(v, env, CallSpec::direct(skipAttemptGlobal), callDest(res),
-                 SyncOptions::None, argGroup(env, inst));
+    cgCallHelper(v, env, CallSpec::direct(couldAcquireOptimizeLease),
+                 callDest(res), SyncOptions::None,
+                 argGroup(env, inst).immPtr(inst->func()));
     auto const sf2 = v.makeReg();
     v << testb{res, res, sf2};
-    v << jcc{CC_Z, sf2, {label(env, inst->next()), label(env, inst->taken())}};
+    v << jcc{CC_NZ, sf2, {label(env, inst->next()), label(env, inst->taken())}};
   } else {
     v << jcc{CC_LE, sf, {label(env, inst->next()), label(env, inst->taken())}};
   }

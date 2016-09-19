@@ -375,22 +375,35 @@ bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
-  if (arch() != Arch::X64) return false;
-  auto const def_op = env.def_insts[inst.s];
+  switch (arch()) {
+    // Both x64 and AArch64 have implicit zero-extension, so we want to do some
+    // redundant extension elimination...
+  case Arch::X64:
+  case Arch::ARM:
+    {
+      auto const def_op = env.def_insts[inst.s];
+      
+      // Check if `inst.s' was defined by an instruction with Vreg32 operands, or
+      // movzbl{} in particular (which lowers to a movl{}).
+      if (width(def_op) != Width::Long &&
+	  def_op != Vinstr::movzbl) {
+	return false;
+      }
 
-  // Check if `inst.s' was defined by an instruction with Vreg32 operands, or
-  // movzbl{} in particular (which lowers to a movl{}).
-  if (width(def_op) != Width::Long &&
-      def_op != Vinstr::movzbl) {
-    return false;
+      // If so, the movzlq{} is redundant---instructions on 32-bit registers on x64
+      // always zero the upper bits.
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+	  v << copy{inst.s, inst.d};
+	  return true;
+	});
+    }
+    break;
+
+  case Arch::PPC64:
+    break;
   }
 
-  // If so, the movzlq{} is redundant---instructions on 32-bit registers on x64
-  // always zero the upper bits.
-  return simplify_impl(env, b, i, [&] (Vout& v) {
-    v << copy{inst.s, inst.d};
-    return 1;
-  });
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

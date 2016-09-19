@@ -884,6 +884,7 @@ static Array HHVM_FUNCTION(ini_get_all,
 }
 
 static void HHVM_FUNCTION(ini_restore, const String& varname) {
+  IniSetting::RestoreUser(varname);
 }
 
 Variant HHVM_FUNCTION(ini_set,

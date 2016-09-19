@@ -1089,6 +1089,14 @@ bool IniSetting::SetUser(const String& name, const Variant& value) {
   return ini_set(name.toCppString(), value, PHP_INI_SET_USER);
 }
 
+void IniSetting::RestoreUser(const String& name) {
+  auto it = s_saved_defaults->find(name.toCppString());
+  if (it != s_saved_defaults->end() &&
+      ini_set(name.toCppString(), it->second, PHP_INI_SET_USER)) {
+    s_saved_defaults->erase(it);
+  }
+};
+
 bool IniSetting::ResetSystemDefault(const std::string& name) {
   auto it = s_system_settings.find(name);
   if (it == s_system_settings.end()) {

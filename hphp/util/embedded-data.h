@@ -50,6 +50,12 @@ std::string read_embedded_data(const embedded_data& desc);
  */
 void* dlopen_embedded_data(const embedded_data& desc, char* tmp_filename);
 
+/*
+ * Clean up any /tmp files that we created at process shutdown time.
+ */
+void embedded_data_cleanup();
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

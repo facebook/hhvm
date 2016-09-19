@@ -33,6 +33,7 @@
 
 #include <fstream>
 #include <memory>
+#include <vector>
 
 #ifdef __APPLE__
 #include <mach-o/getsect.h>
@@ -44,6 +45,22 @@
 #endif
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * /tmp files created by dlopen_embedded_data().
+ */
+std::vector<std::string> s_tmp_files;
+
+/*
+ * Lock around accesses to s_tmp_files.
+ */
+std::mutex s_tmp_files_lock;
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -138,7 +155,19 @@ void* dlopen_embedded_data(const embedded_data& desc, char* tmp_filename) {
                   folly::errnoStr(errno).c_str());
     return nullptr;
   }
-  SCOPE_EXIT { ::unlink(tmp_filename); };
+
+  { // We don't unlink these files here because doing so can cause gdb to
+    // segfault or fail in other mysterious ways.  Some bug reports suggest
+    // that to work around this, we need to use some sort of JIT extension
+    // live, which we don't want to do:
+    //    - https://sourceware.org/ml/gdb-prs/2014-q1/msg00178.html
+    //    - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64206
+    //
+    // So instead, we just hope that HHVM shuts down gracefully and that when
+    // it doesn't, some external job will clear /tmp out for us.
+    std::lock_guard<std::mutex> l(s_tmp_files_lock);
+    s_tmp_files.push_back(tmp_filename);
+  }
   SCOPE_EXIT { ::close(dest_file); };
 
   char buffer[64*1024];
@@ -170,6 +199,14 @@ void* dlopen_embedded_data(const embedded_data& desc, char* tmp_filename) {
 }
 
 #endif
+
+void embedded_data_cleanup() {
+  std::lock_guard<std::mutex> l(s_tmp_files_lock);
+
+  for (auto const& filename : s_tmp_files) {
+    ::unlink(filename.c_str());
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

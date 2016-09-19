@@ -2392,6 +2392,7 @@ void hphp_process_exit() {
 #endif
   InitFiniNode::ProcessFini();
   folly::SingletonVault::singleton()->destroyInstances();
+  embedded_data_cleanup();
 }
 
 bool is_hphp_session_initialized() {

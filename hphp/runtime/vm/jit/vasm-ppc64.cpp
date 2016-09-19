@@ -1469,6 +1469,13 @@ void lowerForPPC64(Vout& v, absdbl& inst) {
   v << copy{after_conv, inst.d};
 }
 
+void lowerForPPC64(Vout& v, mulint& inst) {
+  auto sf = v.makeReg();
+
+  v << imul{inst.s1, inst.s0, inst.d, sf};
+  v << jcc{CC_O, sf, inst.targets[0], inst.targets[1]};
+}
+
 void lowerForPPC64(Vout& v, decqmlock& inst) {
   Vptr p = inst.m;
   patchVptr(p, v);

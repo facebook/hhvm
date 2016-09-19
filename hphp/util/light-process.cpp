@@ -439,7 +439,7 @@ void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
 void LightProcess::AttachHandler(sighandler_t sighandler)
 {
   if (sighandler) {
-    always_assert_flog((void*)sighandler == (void*)&SigChldHandler,
+    always_assert_flog(sighandler == (sighandler_t)&SigChldHandler,
         "Trying to re-attach a sighandler other than SigChldHandler: `{}'",
         sighandler);
   }

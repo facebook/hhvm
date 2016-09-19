@@ -642,9 +642,11 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
 /*
  * Return the effect this instruction has on the value of `sp'.
  *
- * Asserts if an instruction mutates `sp' in an untrackable way.
+ * Asserts (if `do_assert' is set) if an instruction mutates `sp' in an
+ * untrackable way.
  */
-int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp) {
+int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp,
+             bool do_assert = debug) {
   switch (inst.op) {
     case Vinstr::push:
     case Vinstr::pushm:
@@ -661,7 +663,7 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp) {
       return 0;
     }
     default:
-      if (debug) {
+      if (do_assert) {
         visitDefs(unit, inst, [&] (Vreg r) { assertx(r != sp); });
       }
       return 0;
@@ -2717,7 +2719,7 @@ struct SpillStates {
  */
 bool instrNeedsSpill(const Vunit& unit, const Vinstr& inst, PhysReg sp) {
   // Implicit sp input/output.
-  if (inst.op == Vinstr::push || inst.op == Vinstr::pop) return true;
+  if (spEffect(unit, inst, sp, false) != 0) return true;
 
   auto foundSp = false;
   visitDefs(unit, inst, [&] (Vreg r) { if (r == sp) foundSp = true; });

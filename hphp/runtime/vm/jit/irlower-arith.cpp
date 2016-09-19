@@ -128,7 +128,6 @@ ARITH_OPS
 
 
 void cgMulIntO(IRLS& env, const IRInstruction* inst) {
-  //  implMulIntO(vmain(env), env, inst);
   auto const d = dstLoc(env, inst, 0).reg();
   auto const s0 = srcLoc(env, inst, 0).reg();
   auto const s1 = srcLoc(env, inst, 1).reg();

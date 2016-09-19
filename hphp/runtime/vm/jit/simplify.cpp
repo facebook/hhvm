@@ -742,6 +742,27 @@ SSATmp* simplifyMulDbl(State& env, const IRInstruction* inst) {
   return constImpl(env, inst->src(0), inst->src(1), std::multiplies<double>());
 }
 
+SSATmp* simplifyMulIntOWithConstant(State& env, SSATmp* s, int64_t c)
+{
+  // X * 0 --> 0
+  if (c == 0)
+    return cns(env, 0);
+
+  // X * 1 --> X
+  if (c == 1)
+    return s;
+
+  // X * (-1) --> (0 - X)
+  if (c == -1)
+    return gen(env, SubInt, cns(env, 0), s);
+
+  // X * 2 --> X + X  (w/ overflow-checking)
+  if (c == 2)
+    return gen(env, AddIntO, s, s);
+
+  return nullptr;
+}
+
 SSATmp* simplifyMulIntO(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -752,6 +773,13 @@ SSATmp* simplifyMulIntO(State& env, const IRInstruction* inst) {
       ? cns(env, double(a) * double(b))
       : cns(env, a * b);
   }
+
+  if (src2->hasConstVal())
+    return simplifyMulIntOWithConstant(env, src1, src2->intVal());
+
+  if (src1->hasConstVal())
+    return simplifyMulIntOWithConstant(env, src2, src1->intVal());
+
   return nullptr;
 }
 

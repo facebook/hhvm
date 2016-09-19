@@ -618,11 +618,11 @@ struct RuntimeOption {
    * processing a previous sample. */                                   \
   F(uint32_t, PerfMemEventSampleFreq, 80)                               \
   /* PPC64 Option: Minimum immediate size to use TOC */                 \
-  F(uint16_t, ppc64minTOCImmSize, 64)                                   \
+  F(uint16_t, PPC64minTOCImmSize, 64)                                   \
   /* PPC64 Option: Dump the number of elements stored in TOC */         \
-  F(bool, ppc64dumpTOCNelements, false)                                 \
+  F(bool, PPC64dumpTOCNelements, false)                                 \
   /* PPC64 Option: Allow lwz and not only ld to be used for TOC read */ \
-  F(bool, ppc64useTOCLwz, false)                                        \
+  F(bool, PPC64useTOCLwz, false)                                        \
   /* */
 
 private:

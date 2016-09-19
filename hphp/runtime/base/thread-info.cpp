@@ -23,15 +23,17 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/lock.h"
-#include "hphp/util/hphp-config.h"
+#include "hphp/util/perf-event.h"
 
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/ext/process/ext_process.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/runtime/base/builtin-functions.h"
+
+#include "hphp/runtime/ext/process/ext_process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -226,6 +228,13 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   }
   if (flags & SignaledFlag) {
     HHVM_FN(pcntl_signal_dispatch)();
+  }
+
+  if (flags & PendingPerfEventFlag) {
+    if (StickyFlags & PendingPerfEventFlag) {
+      clearSurpriseFlag(PendingPerfEventFlag);
+    }
+    perf_event_consume(record_perf_mem_event);
   }
 
   if (pendingException) {

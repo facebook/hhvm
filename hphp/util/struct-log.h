@@ -39,7 +39,7 @@ struct StructuredLogEntry {
               const std::set<folly::StringPiece>& values);
   void setVec(folly::StringPiece key,
               const std::vector<folly::StringPiece>& values);
-  void setStackTrace(folly::StringPiece key, StackTrace& st);
+  void setStackTrace(folly::StringPiece key, const StackTrace& st);
   void clear();
 
   folly::dynamic ints, strs, sets, vecs;

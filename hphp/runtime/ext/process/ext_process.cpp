@@ -420,6 +420,9 @@ struct SignalHandlers final : RequestEventHandler {
     // block all signals
     sigset_t set;
     sigfillset(&set);
+    if (RuntimeOption::EvalPerfMemEventRequestFreq != 0) {
+      sigdelset(&set, SIGIO);
+    }
     pthread_sigmask(SIG_BLOCK, &set, NULL);
 
     handlers.reset();

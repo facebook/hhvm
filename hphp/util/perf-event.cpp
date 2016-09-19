@@ -493,6 +493,8 @@ void perf_event_disable() {
 }
 
 void perf_event_consume(perf_event_consume_fn_t consume) {
+  if (tl_perf_event.signal == nullptr) return;
+
   consume_events(PerfEvent::Load,  tl_perf_event.loads,  consume);
   consume_events(PerfEvent::Store, tl_perf_event.stores, consume);
 }

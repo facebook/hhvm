@@ -55,7 +55,8 @@ void StructuredLogEntry::setVec(folly::StringPiece key,
   vecs[key] = arr;
 }
 
-void StructuredLogEntry::setStackTrace(folly::StringPiece key, StackTrace& st) {
+void StructuredLogEntry::setStackTrace(folly::StringPiece key,
+                                       const StackTrace& st) {
   std::vector<folly::StringPiece> stackFrames;
   folly::split("\n", st.toString(), stackFrames);
   for (auto& frame : stackFrames) {

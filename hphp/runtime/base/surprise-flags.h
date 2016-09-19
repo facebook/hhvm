@@ -60,6 +60,11 @@ enum SurpriseFlag : size_t {
   MemThresholdFlag     = 1ull << 61,
 
   /*
+   * Set if there are perf events waiting to be consumed.
+   */
+  PendingPerfEventFlag = 1ull << 62,
+
+  /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to
    * PHP-visible signals/exceptions and resource limits.
@@ -68,7 +73,8 @@ enum SurpriseFlag : size_t {
     MemExceededFlag |
     TimedOutFlag |
     CPUTimedOutFlag |
-    PendingGCFlag,
+    PendingGCFlag |
+    PendingPerfEventFlag,
 
   StickyFlags =
     AsyncEventHookFlag |
@@ -84,7 +90,8 @@ enum SurpriseFlag : size_t {
    * Flags that should only be checked at MemoryManager safe points.
    */
   SafepointFlags =
-    PendingGCFlag,
+    PendingGCFlag |
+    PendingPerfEventFlag,
 
   NonSafepointFlags = ~SafepointFlags & kSurpriseFlagMask,
 };

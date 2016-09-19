@@ -27,6 +27,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -93,9 +94,10 @@ void setRelocateRequests(int32_t n) {
 
 namespace {
 AtomicVector<uint32_t> s_func_counters{0, 0};
-AtomicVectorInit s_func_counters_init{
-  s_func_counters, RuntimeOption::EvalFuncCountHint
-};
+static InitFiniNode s_func_counters_reinit([]{
+  UnsafeReinitEmptyAtomicVector(
+    s_func_counters, RuntimeOption::EvalFuncCountHint);
+}, InitFiniNode::When::PostRuntimeOptions, "s_func_counters reinit");
 }
 
 void profileWarmupStart() {

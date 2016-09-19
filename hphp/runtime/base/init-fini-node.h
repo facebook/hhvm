@@ -42,6 +42,7 @@ struct InitFiniNode {
       ThreadFini,
       // ProcessInitConcurrent should only be used for thread-safe code with few
       // dependencies (e.g., runtime options, logging).
+      PostRuntimeOptions,    // after runtime options are set, single-threaded
       ProcessPreInit,        // after pthread initialization and config parsing
       ProcessInit,           // after PreInit
       ProcessInitConcurrent, // after PreInit, concurrently with Init and others
@@ -69,6 +70,9 @@ struct InitFiniNode {
   static void RequestFini()    { iterate(When::RequestFini);    }
   static void ThreadInit()     { iterate(When::ThreadInit);     }
   static void ThreadFini()     { iterate(When::ThreadFini);     }
+  static void ProcessPostRuntimeOptions() {
+    iterate(When::PostRuntimeOptions);
+  }
   static void ProcessPreInit() { iterate(When::ProcessPreInit); }
   static void ProcessInit()    { iterate(When::ProcessInit);    }
   // Use maxWorkers == 0 to run synchronously on current thread.

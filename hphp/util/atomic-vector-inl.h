@@ -131,17 +131,13 @@ Value AtomicVector<Value>::defaultValue() const {
   return m_default;
 }
 
-template<typename Vec>
-AtomicVectorInit::AtomicVectorInit(Vec& vec, const uint64_t& size) {
-  s_funcs.emplace_back(
-    [&vec, &size] {
-      if (size == vec.size()) return;
+template<typename Value>
+void UnsafeReinitEmptyAtomicVector(AtomicVector<Value>& vec, size_t size) {
+  always_assert(vec.size() == 0);
 
-      auto const defVal = vec.defaultValue();
-      vec.~Vec();
-      new (&vec) Vec(size, defVal);
-    }
-  );
+  auto const defVal = vec.defaultValue();
+  vec.~AtomicVector<Value>();
+  new (&vec) AtomicVector<Value>(size, defVal);
 }
 
 }

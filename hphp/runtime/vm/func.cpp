@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -62,9 +63,10 @@ std::atomic<bool>     Func::s_treadmill;
  */
 static std::atomic<FuncId> s_nextFuncId{0};
 static AtomicVector<const Func*> s_funcVec{0, nullptr};
-static AtomicVectorInit s_funcVecInit{
-  s_funcVec, RuntimeOption::EvalFuncCountHint
-};
+static InitFiniNode s_funcVecReinit([]{
+  UnsafeReinitEmptyAtomicVector(
+    s_funcVec, RuntimeOption::EvalFuncCountHint);
+}, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 
 const AtomicVector<const Func*>& Func::getFuncVec() {
   return s_funcVec;

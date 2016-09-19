@@ -61,6 +61,17 @@ struct AtomicVector {
 
   Value defaultValue() const;
 
+  /*
+   * Reconstruct a currently empty vector with new initial size. Thread-unsafe.
+   *
+   * A number of AtomicVectors have sizes that we'd like to control with runtime
+   * options, but these options are parsed after the relevant AtomicVectors are
+   * constructed. This method  allows us to reconstruct them once the options
+   * have been parsed.
+   */
+  template<typename V>
+  friend void UnsafeReinitEmptyAtomicVector(AtomicVector<V>& vec, size_t size);
+
  private:
   static std::string typeName();
 
@@ -69,29 +80,6 @@ struct AtomicVector {
   const Value m_default;
   std::unique_ptr<std::atomic<Value>[]> m_vals;
   TRACE_SET_MOD(atomicvector);
-};
-
-/*
- * A number of AtomicVectors have sizes that we'd like to control with runtime
- * options, but these options are parsed after the relevant AtomicVectors are
- * constructed. AtomicVectorInit is used to register a list of these
- * AtomicVectors, allowing us to reconstruct them once the options have been
- * parsed.
- */
-struct AtomicVectorInit {
-  template<typename Vec>
-  AtomicVectorInit(Vec& vector, const uint64_t& size);
-
-  /*
-   * Run any reinitialization code registered by AtomicVectorInit structs.
-   *
-   * This does not preserve the existing contents of any AtomicVectors that are
-   * reconstructed.
-   */
-  static void runAll();
-
-private:
-  static std::vector<std::function<void()>> s_funcs;
 };
 
 }

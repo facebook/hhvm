@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -33,9 +34,11 @@ __thread bool threadCanAcquire = true;
 __thread bool threadCanAcquireConcurrent = true;
 
 AtomicVector<int64_t> s_funcOwners{0, Treadmill::kInvalidThreadIdx};
-AtomicVectorInit s_funcOwnersInit{
-  s_funcOwners, RuntimeOption::EvalFuncCountHint
-};
+static InitFiniNode s_funcOwnersReinit([]{
+  UnsafeReinitEmptyAtomicVector(
+    s_funcOwners, RuntimeOption::EvalFuncCountHint);
+}, InitFiniNode::When::PostRuntimeOptions, "s_funcOwners reinit");
+
 std::atomic<int> s_jittingThreads{0};
 
 Lease s_writeLease;

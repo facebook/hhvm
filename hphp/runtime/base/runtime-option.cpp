@@ -53,6 +53,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #ifdef FACEBOOK
 #include "hphp/facebook/runtime/server/thrift-logger.h"
 #endif
@@ -1780,13 +1781,10 @@ void RuntimeOption::Load(
   Config::Bind(AliasedNamespaces, ini, config, "AliasedNamespaces");
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
+  // Run initializers depedent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
-
-  // Reconstruct AtomicVectors keyed by FuncId, making sure we haven't created
-  // any Funcs yet.
-  always_assert(Func::nextFuncId() == 0);
-  AtomicVectorInit::runAll();
-
+  InitFiniNode::ProcessPostRuntimeOptions();
+  always_assert(Func::getFuncVec().size() == RuntimeOption::EvalFuncCountHint);
 
   // **************************************************************************
   //                                  DANGER

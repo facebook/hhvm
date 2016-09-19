@@ -252,6 +252,13 @@ public:
    * Change an INI setting as if there was a call to ini_set()
    */
   static bool SetUser(const String& name, const Variant& value);
+
+  /**
+   * Restore an INI setting to the default value before the first call to
+   * SetUser().
+   */
+  static void RestoreUser(const String& name);
+
   /**
    * Fill in constant that may not have been bound when an
    * ini file was initially parsed

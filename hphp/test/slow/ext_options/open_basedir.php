@@ -11,3 +11,7 @@ var_dump(ini_get('open_basedir'));
 // Can add
 var_dump(ini_set('open_basedir', '/tmp/aasdfasdf'));
 var_dump(ini_get('open_basedir'));
+
+// Can't restore
+ini_restore('open_basedir');
+var_dump(ini_get('open_basedir'));

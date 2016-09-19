@@ -237,7 +237,7 @@ let class_constructor_destructor_has_non_void_type node parents =
   let is_missing = is_missing type_ano && is_missing function_colon in
   let is_void = match syntax type_ano with
     | SimpleTypeSpecifier spec ->
-      is_void spec
+      is_void spec.simple_type_specifier
     | _ -> false
   in
   (is_construct label || is_destruct label) &&
@@ -578,8 +578,8 @@ let type_errors node parents is_strict =
   match syntax node with
   | SimpleTypeSpecifier t ->
     let acc = [ ] in
-    produce_error acc (type_contains_array_in_strict is_strict) t
-    SyntaxError.error2032 t
+    produce_error acc (type_contains_array_in_strict is_strict)
+      t.simple_type_specifier SyntaxError.error2032 t.simple_type_specifier
   | _ -> [ ]
 
 let find_syntax_errors node is_strict =

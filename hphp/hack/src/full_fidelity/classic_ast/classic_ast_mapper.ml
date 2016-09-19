@@ -47,7 +47,7 @@ let f_tparams _env _node =
   []
 
 let f_ret env node = match (Syntax.syntax node) with
-  | SimpleTypeSpecifier c -> Some (happly_hint c)
+  | SimpleTypeSpecifier c -> Some (happly_hint c.simple_type_specifier)
   | _ ->
     (** TODO *)
     None
@@ -60,7 +60,7 @@ let f_body _env _node =
   []
 
 let hint _env node = match Syntax.syntax node with
-  | SimpleTypeSpecifier c -> Some (happly_hint c)
+  | SimpleTypeSpecifier c -> Some (happly_hint c.simple_type_specifier)
   | _ ->
       None
 

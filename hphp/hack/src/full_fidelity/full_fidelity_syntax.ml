@@ -658,6 +658,21 @@ module WithToken(Token: TokenType) = struct
       nullable_question : t;
       nullable_type : t
     }
+    and simple_type_specifier = {
+      simple_type_specifier : t;
+    }
+    and pipe_variable_expression = {
+      pipe_variable_expression : t;
+    }
+    and qualified_name_expression = {
+      qualified_name_expression : t;
+    }
+    and variable_expression = {
+      variable_expression : t;
+    }
+    and literal_expression = {
+      literal_expression : t;
+    }
     and soft_type_specifier = {
       soft_at : t;
       soft_type : t
@@ -686,10 +701,10 @@ module WithToken(Token: TokenType) = struct
     | Error of t list
     | Missing
     | SyntaxList of t list
+
     | ListItem of list_item
     | ScriptHeader of script_header
     | Script of script
-
     | NamespaceDeclaration of namespace_declaration
     | NamespaceBody of namespace_body
     | NamespaceGroupUseDeclaration of namespace_group_use_declaration
@@ -756,10 +771,10 @@ module WithToken(Token: TokenType) = struct
     | LambdaSignature of lambda_signature
     | AnonymousFunction of anonymous_function
     | AnonymousFunctionUseClause of anonymous_use
-    | LiteralExpression of t
-    | VariableExpression of t
-    | QualifiedNameExpression of t
-    | PipeVariableExpression of t
+    | LiteralExpression of literal_expression
+    | VariableExpression of variable_expression
+    | QualifiedNameExpression of qualified_name_expression
+    | PipeVariableExpression of pipe_variable_expression
     | PrefixUnaryOperator of unary_operator
     | PostfixUnaryOperator of unary_operator
     | BinaryOperator of binary_operator
@@ -783,7 +798,7 @@ module WithToken(Token: TokenType) = struct
     | XHPAttribute of xhp_attribute
     | XHPClose of xhp_close
 
-    | SimpleTypeSpecifier of t
+    | SimpleTypeSpecifier of simple_type_specifier
     | NullableTypeSpecifier of nullable_type_specifier
     | SoftTypeSpecifier of soft_type_specifier
     | TypeConstraint of type_constraint_specifier
@@ -1113,12 +1128,21 @@ module WithToken(Token: TokenType) = struct
       match node.syntax with
       | Missing -> []
       | Token _ -> []
-      | LiteralExpression x -> [x]
-      | VariableExpression x -> [x]
-      | QualifiedNameExpression x -> [x]
-      | PipeVariableExpression x -> [x]
       | Error x -> x
       | SyntaxList x -> x
+
+      | LiteralExpression
+        { literal_expression } ->
+        [ literal_expression ]
+      | VariableExpression
+        { variable_expression } ->
+        [ variable_expression ]
+      | QualifiedNameExpression
+        { qualified_name_expression } ->
+        [ qualified_name_expression ]
+      | PipeVariableExpression
+        { pipe_variable_expression } ->
+        [ pipe_variable_expression ]
       | ScopeResolutionExpression
         { scope_resolution_qualifier; scope_resolution_operator;
           scope_resolution_name } ->
@@ -1493,7 +1517,9 @@ module WithToken(Token: TokenType) = struct
           type_constant_right_type } ->
         [ type_constant_left_type; type_constant_separator;
         type_constant_right_type ]
-      | SimpleTypeSpecifier x -> [x]
+      | SimpleTypeSpecifier
+        { simple_type_specifier } ->
+        [ simple_type_specifier ]
       | TypeConstraint
         { constraint_token; matched_type } ->
         [ constraint_token; matched_type ]
@@ -1555,10 +1581,18 @@ module WithToken(Token: TokenType) = struct
       match node.syntax with
       | Missing -> []
       | Token _ -> []
-      | LiteralExpression _ -> [ "literal_expression" ]
-      | VariableExpression _ -> [ "variable_expression" ]
-      | QualifiedNameExpression _ -> [ "qualified_name_expression" ]
-      | PipeVariableExpression _ -> ["pipe_variable_expression"]
+      | LiteralExpression
+        { literal_expression }->
+        [ "literal_expression" ]
+      | VariableExpression
+        { variable_expression }->
+        [ "variable_expression" ]
+      | QualifiedNameExpression
+        { qualified_name_expression } ->
+        [ "qualified_name_expression" ]
+      | PipeVariableExpression
+        { pipe_variable_expression } ->
+        ["pipe_variable_expression"]
       | Error _ -> []
       | SyntaxList _ -> []
       | MemberSelectionExpression
@@ -1943,7 +1977,9 @@ module WithToken(Token: TokenType) = struct
           type_constant_right_type } ->
         [ "type_constant_left_type"; "type_constant_separator";
         "type_constant_right_type" ]
-      | SimpleTypeSpecifier _ -> [ "simple_type_specifier" ]
+      | SimpleTypeSpecifier
+        { simple_type_specifier } ->
+        [ "simple_type_specifier" ]
       | TypeParameter
         { type_variance_opt; type_name; type_constraint_list_opt  } ->
         [ "type_variance_opt"; "type_name"; "type_constraint_list_opt " ]
@@ -2117,11 +2153,26 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.ListItem, [ list_item; list_separator ]) ->
         ListItem { list_item; list_separator }
       | (SyntaxKind.Error, x) -> Error x
-      | (SyntaxKind.LiteralExpression, [x]) -> LiteralExpression x
-      | (SyntaxKind.VariableExpression, [x]) -> VariableExpression x
-      | (SyntaxKind.QualifiedNameExpression,[x]) -> QualifiedNameExpression x
-      | (SyntaxKind.PipeVariableExpression, [x]) -> PipeVariableExpression x
-      | (SyntaxKind.SimpleTypeSpecifier, [x]) -> SimpleTypeSpecifier x
+      | (SyntaxKind.LiteralExpression,
+          [ literal_expression ]) ->
+          LiteralExpression
+          { literal_expression }
+      | (SyntaxKind.VariableExpression,
+        [ variable_expression ]) ->
+        VariableExpression
+        { variable_expression }
+      | (SyntaxKind.QualifiedNameExpression,
+        [ qualified_name_expression ]) ->
+        QualifiedNameExpression
+        { qualified_name_expression }
+      | (SyntaxKind.PipeVariableExpression,
+        [ pipe_variable_expression ]) ->
+        PipeVariableExpression
+        { pipe_variable_expression }
+      | (SyntaxKind.SimpleTypeSpecifier,
+        [ simple_type_specifier ]) ->
+        SimpleTypeSpecifier
+        { simple_type_specifier }
       | (SyntaxKind.ScriptHeader,
         [ header_less_than; header_question; header_language ]) ->
         ScriptHeader { header_less_than; header_question; header_language }

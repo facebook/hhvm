@@ -202,12 +202,13 @@ let rec get_doc node =
   match syntax node with
   | Missing -> missing
   | Token x -> from_token x
-  | LiteralExpression x
-  | VariableExpression x
-  | QualifiedNameExpression x
-  | PipeVariableExpression x -> get_doc x
   | Error x -> get_from_children x
   | SyntaxList x -> get_from_children x
+
+  | LiteralExpression x -> get_doc x.literal_expression
+  | VariableExpression x -> get_doc x.variable_expression
+  | QualifiedNameExpression x -> get_doc x.qualified_name_expression
+  | PipeVariableExpression x -> get_doc x.pipe_variable_expression
   | ListItem x -> (get_doc x.list_item) ^^^ (get_doc x.list_separator)
   | ScriptHeader x -> get_doc x.header_less_than ^^^
                       get_doc x.header_question ^^^
@@ -798,7 +799,7 @@ let rec get_doc node =
     let right = get_doc x.type_constant_right_type in
     let separator = get_doc x.type_constant_separator in
     left ^^^ separator ^^^ right
-  | SimpleTypeSpecifier x -> get_doc x
+  | SimpleTypeSpecifier x -> get_doc x.simple_type_specifier
   | TypeConstraint x ->
     let operator = get_doc x.constraint_token in
     let mtype = get_doc x.matched_type in

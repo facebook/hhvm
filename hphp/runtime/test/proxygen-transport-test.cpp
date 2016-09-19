@@ -201,7 +201,7 @@ TEST_F(ProxygenTransportTest, push) {
 
   // Creates a new transaction and sends headers/body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(1), 1, m_egressQueue,
+                              HTTPCodec::StreamID(2), 1, m_egressQueue,
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
@@ -228,7 +228,7 @@ TEST_F(ProxygenTransportTest, push_empty_body) {
 
   // Creates a new transaction and sends headers and an empty body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(1), 1, m_egressQueue,
+                              HTTPCodec::StreamID(2), 1, m_egressQueue,
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
@@ -250,7 +250,7 @@ TEST_F(ProxygenTransportTest, push_abort_incomplete) {
 
   // Creates a new transaction and sends headers, but not body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(1), 1, m_egressQueue,
+                              HTTPCodec::StreamID(2), 1, m_egressQueue,
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
@@ -276,7 +276,7 @@ TEST_F(ProxygenTransportTest, push_abort) {
 
   // Creates a new transaction and sends headers, but not body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
-                              HTTPCodec::StreamID(1), 1, m_egressQueue,
+                              HTTPCodec::StreamID(2), 1, m_egressQueue,
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);

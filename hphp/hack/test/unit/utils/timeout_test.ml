@@ -15,7 +15,7 @@ let payload = "Hello"
 let test_basic_no_timeout () =
   Timeout.with_timeout
     ~timeout:1
-    ~on_timeout:(fun _ -> false)
+    ~on_timeout:(fun _ -> ())
     ~do_:begin fun _ ->
       true
     end
@@ -24,7 +24,7 @@ let test_basic_with_timeout () =
   try
     Timeout.with_timeout
       ~timeout:1
-      ~on_timeout:(fun _ -> true)
+      ~on_timeout:(fun _ -> ())
       ~do_:begin fun timeout ->
         let _ = Unix.select [] [] [] 2.0 in
         false
@@ -53,7 +53,7 @@ let test_input_within_timeout () =
   let ic, _ = handle.Daemon.channels in
   Timeout.with_timeout
     ~timeout:1
-    ~on_timeout:(fun _ -> false)
+    ~on_timeout:(fun _ -> ())
     ~do_:begin fun timeout ->
       let result: string = Daemon.from_channel ~timeout ic in
       assert (result = payload);
@@ -69,7 +69,7 @@ let test_input_exceeds_timeout () =
   try
     Timeout.with_timeout
       ~timeout:2
-      ~on_timeout:(fun _ -> true)
+      ~on_timeout:(fun _ -> ())
       ~do_:begin fun timeout ->
         let _result: string = Daemon.from_channel ~timeout ic in
         false

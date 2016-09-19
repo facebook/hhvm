@@ -276,13 +276,13 @@ let rec get_doc node =
     let s = get_doc x.xhp_category_semicolon in
     c ^| l ^^^ s
   | XHPEnumType x ->
-    let e = get_doc x.xhp_enum_token in
+    let e = get_doc x.xhp_enum_keyword in
     let l = get_doc x.xhp_enum_left_brace in
     let v = get_doc x.xhp_enum_values in
     let r = get_doc x.xhp_enum_right_brace in
     group_doc (e ^| l ^| v ^| r)
   | XHPClassAttributeDeclaration x ->
-    let attr = get_doc x.xhp_attr_token in
+    let attr = get_doc x.xhp_attr_keyword in
     let attrs = get_doc x.xhp_attr_list in
     let semi = get_doc x.xhp_attr_semicolon in
     group_doc (attr ^| attrs ^^^ semi)
@@ -293,7 +293,7 @@ let rec get_doc node =
     let r = get_doc x.xhp_attr_decl_required in
     group_doc (t ^| n ^| i ^| r)
   | TraitUse x ->
-    let use = get_doc x.trait_use_token in
+    let use = get_doc x.trait_use_keyword in
     let name_list = get_doc x.trait_use_name_list in
     let semi = get_doc x.trait_use_semicolon in
     use ^| name_list ^^^ semi
@@ -317,7 +317,7 @@ let rec get_doc node =
   | TypeConstDeclaration x ->
     let abstr = get_doc x.type_const_abstract in
     let const = get_doc x.type_const_keyword in
-    let type_ = get_doc x.type_const_type_token in
+    let type_ = get_doc x.type_const_type_keyword in
     let name = get_doc x.type_const_name in
     let type_constraint = get_doc x.type_const_type_constraint in
     let equal = get_doc x.type_const_equal in
@@ -623,11 +623,11 @@ let rec get_doc node =
     let nm = get_doc x.member_name in
     group_doc (ob ^^^ op ^^^ nm)
   | YieldExpression x ->
-    let y = get_doc x.yield_token in
+    let y = get_doc x.yield_keyword in
     let o = get_doc x.yield_operand in
     group_doc (y ^| o)
   | PrintExpression x ->
-    let t = get_doc x.print_token in
+    let t = get_doc x.print_keyword in
     let e = get_doc x.print_expr in
     group_doc (t ^| e)
   | CastExpression x ->
@@ -669,7 +669,7 @@ let rec get_doc node =
       ) in
       handle_compound_inline_brace before_body body missing
   | AnonymousFunctionUseClause x ->
-    let u = get_doc x.anonymous_use_token in
+    let u = get_doc x.anonymous_use_keyword in
     let l = get_doc x.anonymous_use_left_paren in
     let v = get_doc x.anonymous_use_variables in
     let r = get_doc x.anonymous_use_right_paren in
@@ -800,10 +800,10 @@ let rec get_doc node =
     let separator = get_doc x.type_constant_separator in
     left ^^^ separator ^^^ right
   | SimpleTypeSpecifier x -> get_doc x.simple_type_specifier
-  | TypeConstraint x ->
-    let operator = get_doc x.constraint_token in
-    let mtype = get_doc x.matched_type in
-    operator ^| mtype
+  | TypeConstraint { constraint_keyword; constraint_type } ->
+    let k = get_doc constraint_keyword in
+    let t = get_doc constraint_type in
+    k ^| t
   | TypeParameter x ->
     let variance = get_doc x.type_variance_opt in
     let name = get_doc x.type_name in
@@ -925,7 +925,7 @@ let rec get_doc node =
     let i = get_doc x.static_init in
     group_doc (n ^| i)
   | EchoStatement x ->
-    let echo = get_doc x.echo_token in
+    let echo = get_doc x.echo_keyword in
     let expr_list = get_doc x.echo_expression_list in
     let semicolon = get_doc x.echo_semicolon in
     echo ^| expr_list ^^^ semicolon

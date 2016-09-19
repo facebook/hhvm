@@ -643,7 +643,7 @@ Variant php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) {
         if (
           (ip[0] == 0) ||
           (ip[0] == 10) ||
-          (ip[0] == 100 && (ip[1] >= 64 || ip[1] <= 127)) ||
+          (ip[0] == 100 && (ip[1] >= 64 && ip[1] <= 127)) ||
           (ip[0] == 127) ||
           (ip[0] == 169 && ip[1] == 254) ||
           (ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||

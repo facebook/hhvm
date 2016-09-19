@@ -213,11 +213,11 @@ void reclaimTranslation(TransLoc loc) {
       switch (arch()) {
         case Arch::PPC64: {
           ppc64_asm::Assembler a{cb};
-          a.emitTrap(cb.available());
+          a.emitTrap();
         }
         case Arch::X64: {
           X64Assembler a{cb};
-          a.emitTrap(cb.available());
+          a.emitTrap();
         }
         case Arch::ARM:
           not_implemented();

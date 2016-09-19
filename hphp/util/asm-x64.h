@@ -1205,9 +1205,12 @@ public:
     bytes(n, nops[n]);
   }
 
-  void emitTrap(int n) {
-    while (canEmit(2)) ud2();
-    if (n > 0) int3();
+  /*
+   * Emit exception traps until the end of the codeblock.
+   */
+  void emitTrap() {
+    while (available() >= 2) ud2();
+    if (available() > 0) int3();
   }
 
   /*

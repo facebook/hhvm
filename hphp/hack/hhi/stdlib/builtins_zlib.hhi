@@ -45,8 +45,6 @@ function nzuncompress($compressed);
 function qlzcompress($data, $level = 1);
 function qlzuncompress(string $data, int $level = 1): mixed;
 function readgzfile($filename, $use_include_path = false);
-function sncompress($data);
-function snuncompress($data);
 function zlib_decode(string $data, int $max_len = 0): mixed; // string or false
 function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
 function zlib_get_coding_type();

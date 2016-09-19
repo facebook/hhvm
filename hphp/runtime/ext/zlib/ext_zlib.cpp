@@ -31,9 +31,6 @@
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
 #include <folly/String.h>
-#ifdef HAVE_SNAPPY
-#include <snappy.h>
-#endif
 #include <lz4.h>
 #include <lz4hc.h>
 #include <memory>
@@ -383,37 +380,6 @@ Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Snappy functions
-
-#ifdef HAVE_SNAPPY
-
-Variant HHVM_FUNCTION(snappy_compress, const String& data) {
-  size_t size;
-  char *compressed =
-    (char *)malloc(snappy::MaxCompressedLength(data.size()) + 1);
-
-  snappy::RawCompress(data.data(), data.size(), compressed, &size);
-  compressed = (char *)realloc(compressed, size + 1);
-  compressed[size] = '\0';
-  return String(compressed, size, AttachString);
-}
-
-Variant HHVM_FUNCTION(snappy_uncompress, const String& data) {
-  size_t dsize;
-
-  snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
-  String s = String(dsize, ReserveString);
-  char *uncompressed = s.mutableData();
-
-  if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
-    return false;
-  }
-  s.setSize(dsize);
-  return s;
-}
-#endif // HAVE_SNAPPY
-
-///////////////////////////////////////////////////////////////////////////////
 // NZLIB functions
 
 #define NZLIB_MAGIC 0x6e7a6c69 /* nzli */
@@ -716,10 +682,6 @@ struct ZlibExtension final : Extension {
     HHVM_FE(qlzcompress);
     HHVM_FE(qlzuncompress);
 #endif
-#ifdef HAVE_SNAPPY
-    HHVM_FE(snappy_compress);
-    HHVM_FE(snappy_uncompress);
-#endif
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
     HHVM_FE(lz4_compress);
@@ -737,9 +699,6 @@ struct ZlibExtension final : Extension {
     loadSystemlib();
 #ifdef HAVE_QUICKLZ
     loadSystemlib("zlib-qlz");
-#endif
-#ifdef HAVE_SNAPPY
-    loadSystemlib("zlib-snappy");
 #endif
   }
 } s_zlib_extension;

@@ -1469,7 +1469,7 @@ void lowerForPPC64(Vout& v, absdbl& inst) {
   v << copy{after_conv, inst.d};
 }
 
-void lowerForPPC64(Vout& v, mulint& inst) {
+void lowerForPPC64(Vout& v, mulinto& inst) {
   auto sf = v.makeReg();
 
   v << imul{inst.s1, inst.s0, inst.d, sf};

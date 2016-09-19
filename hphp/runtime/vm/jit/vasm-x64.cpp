@@ -870,7 +870,7 @@ void lower(Vunit& unit, divint& inst, Vlabel b, size_t i) {
   });
 }
 
-void lower(Vunit& unit, mulint& inst, Vlabel b, size_t i) {
+void lower(Vunit& unit, mulinto& inst, Vlabel b, size_t i) {
   lower_impl(unit, b, i, [&] (Vout& v) {
     auto sf = v.makeReg();
 

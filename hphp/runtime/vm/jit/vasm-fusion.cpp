@@ -54,7 +54,7 @@ bool sets_flags(const Vunit& unit, const Vinstr& inst) {
   case Vinstr::callphp:
   case Vinstr::callarray:
   case Vinstr::contenter:
-  case Vinstr::mulint:
+  case Vinstr::mulinto:
     return true;
   default:
     break;

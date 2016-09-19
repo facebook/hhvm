@@ -1135,7 +1135,7 @@ void lower(Vunit& u, absdbl& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, mulint& i, Vlabel b, size_t z) {
+void lower(Vunit& u, mulinto& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
     auto tmp = v.makeReg();
     auto sf = v.makeReg();

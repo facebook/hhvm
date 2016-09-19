@@ -133,7 +133,7 @@ void cgMulIntO(IRLS& env, const IRInstruction* inst) {
   auto const s1 = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
-  v << mulint{s0, s1, d, {label(env, inst->next()), label(env, inst->taken())}};
+  v << mulinto{s0, s1, d, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 void cgFloor(IRLS& env, const IRInstruction* inst) {

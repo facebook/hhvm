@@ -67,7 +67,7 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::leavetc:
     case Vinstr::fallthru:
     // slow-path for overflow
-    case Vinstr::mulint:
+    case Vinstr::mulinto:
       return true;
     default:
       return false;
@@ -305,7 +305,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::incqm:
     case Vinstr::incqmlock:
     case Vinstr::imul:
-    case Vinstr::mulint:
+    case Vinstr::mulinto:
     case Vinstr::neg:
     case Vinstr::not:
     case Vinstr::orq:

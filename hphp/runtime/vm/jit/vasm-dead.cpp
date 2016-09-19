@@ -144,7 +144,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::mrs:
     case Vinstr::mul:
     case Vinstr::mulsd:
-    case Vinstr::mulint:
+    case Vinstr::mulinto:
     case Vinstr::neg:
     case Vinstr::nop:
     case Vinstr::not:

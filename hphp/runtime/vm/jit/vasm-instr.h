@@ -128,7 +128,7 @@ struct Vunit;
   O(absdbl, Inone, U(s), D(d))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(divint, Inone, U(s0) U(s1), D(d))\
-  O(mulint, Inone, U(s0) U(s1), D(d))	\
+  O(mulinto, Inone, U(s0) U(s1), D(d))	\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
   O(ud2, Inone, Un, Dn)\
@@ -906,7 +906,7 @@ struct divint { Vreg s0, s1, d; };
  *   target[0] = next (i.e. fall-through)
  *   target[1] = taken (i.e. slow-path)
  */
-struct mulint { Vreg s0, s1, d; Vlabel targets[2]; };
+struct mulinto { Vreg s0, s1, d; Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

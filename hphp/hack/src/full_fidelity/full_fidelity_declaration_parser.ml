@@ -169,7 +169,7 @@ module WithExpressionAndStatementAndTypeParser
       | EndOfFile ->
         (* ERROR RECOVERY: reach end of file, expect brace of enumerator *)
         let parser = with_error parser SyntaxError.error1040 in
-        (parser, make_error [make_token token])
+        (parser, make_error (make_token token))
       | _ ->
         let (parser, enumerator) = parse_enumerator parser in
         aux (enumerator :: acc) parser
@@ -247,7 +247,7 @@ module WithExpressionAndStatementAndTypeParser
          TODO: Better would be to attempt to recover to the list of
          declarations? Suppose the offending token is "class" for instance? *)
       let parser = with_error parser SyntaxError.error1038 in
-      let result = make_error [make_token token] in
+      let result = make_error (make_token token) in
       (parser, result)
 
   and parse_namespace_use_kind_opt parser =
@@ -613,7 +613,7 @@ module WithExpressionAndStatementAndTypeParser
           (* TODO *)
         let (parser, token) = next_token parser in
         let parser = with_error parser SyntaxError.error1033 in
-        aux parser (make_error [make_token token] :: acc)
+        aux parser (make_error (make_token token) :: acc)
     in
     let (parser, classish_elements) = aux parser [] in
     let classish_elements = List.rev classish_elements in
@@ -1209,7 +1209,7 @@ module WithExpressionAndStatementAndTypeParser
       else
         (* ERROR RECOVERY: Eat the offending token. *)
         let parser = with_error parser SyntaxError.error1044 in
-        let error = make_error [make_token token] in
+        let error = make_error (make_token token) in
         (parser, error)
 
   (* SPEC
@@ -1252,7 +1252,7 @@ module WithExpressionAndStatementAndTypeParser
       (* ERROR RECOVERY: We expected either a block or a semicolon; we got
       neither. Use the offending token as the body of the method.
       TODO: Is this the right error recovery? *)
-      let error = make_error [make_token token] in
+      let error = make_error (make_token token) in
       let syntax = make_methodish
         attribute_spec modifiers header error (make_missing()) in
       let parser = with_error parser1 SyntaxError.error1041 in
@@ -1300,7 +1300,7 @@ module WithExpressionAndStatementAndTypeParser
     | Class -> parse_classish_declaration parser attribute_specification
     | _ ->
       (* TODO *)
-      (parser1, make_error [make_token token])
+      (parser1, make_error (make_token token))
 
   and parse_declaration parser =
     let (parser1, token) = next_token parser in

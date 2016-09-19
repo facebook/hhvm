@@ -66,7 +66,7 @@ let rec parse_type_specifier parser =
   | Classname -> parse_classname_type_specifier parser
   | _ ->
     let parser = with_error parser1 SyntaxError.error1007 in
-    (parser, make_error [(make_token token)])
+    (parser, make_error (make_token token))
 
 (* SPEC
   type-constant-type-name:

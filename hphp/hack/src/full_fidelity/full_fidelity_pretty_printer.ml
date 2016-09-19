@@ -202,9 +202,9 @@ let rec get_doc node =
   match syntax node with
   | Missing -> missing
   | Token x -> from_token x
-  | Error x -> get_from_children x
-  | SyntaxList x -> get_from_children x
 
+  | SyntaxList x -> get_from_children x
+  | Error { error } -> get_doc error
   | LiteralExpression x -> get_doc x.literal_expression
   | VariableExpression x -> get_doc x.variable_expression
   | QualifiedNameExpression x -> get_doc x.qualified_name_expression

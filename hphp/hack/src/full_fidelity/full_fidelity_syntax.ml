@@ -696,12 +696,14 @@ module WithToken(Token: TokenType) = struct
       list_item : t;
       list_separator : t
     }
+    and error = {
+      error : t;
+    }
     and syntax =
     | Token of Token.t
-    | Error of t list
     | Missing
     | SyntaxList of t list
-
+    | Error of error
     | ListItem of list_item
     | ScriptHeader of script_header
     | Script of script
@@ -1128,9 +1130,10 @@ module WithToken(Token: TokenType) = struct
       match node.syntax with
       | Missing -> []
       | Token _ -> []
-      | Error x -> x
       | SyntaxList x -> x
-
+      | Error
+        { error } ->
+        [ error ]
       | LiteralExpression
         { literal_expression } ->
         [ literal_expression ]
@@ -1605,7 +1608,9 @@ module WithToken(Token: TokenType) = struct
       | PipeVariableExpression
         { pipe_variable_expression } ->
         ["pipe_variable_expression"]
-      | Error _ -> []
+      | Error
+        { error } ->
+        [ "error" ]
       | SyntaxList _ -> []
       | MemberSelectionExpression
         { member_object; member_operator; member_name } ->
@@ -2067,7 +2072,6 @@ module WithToken(Token: TokenType) = struct
       let open Hh_json in
       let ch = match node.syntax with
       | Token t -> [ "token", Token.to_json t ]
-      | Error x -> [ ("errors", JSON_Array (List.map to_json x)) ]
       | SyntaxList x -> [ ("elements", JSON_Array (List.map to_json x)) ]
       | _ ->
         let rec aux acc c n =
@@ -2176,7 +2180,10 @@ module WithToken(Token: TokenType) = struct
           anonymous_use_variables; anonymous_use_right_paren }
       | (SyntaxKind.ListItem, [ list_item; list_separator ]) ->
         ListItem { list_item; list_separator }
-      | (SyntaxKind.Error, x) -> Error x
+      | (SyntaxKind.Error,
+        [ error ]) ->
+        Error
+        { error }
       | (SyntaxKind.LiteralExpression,
           [ literal_expression ]) ->
           LiteralExpression
@@ -2840,8 +2847,8 @@ module WithToken(Token: TokenType) = struct
       let make_list_item item separator =
         from_children SyntaxKind.ListItem [item; separator]
 
-      let make_error items =
-        from_children SyntaxKind.Error items
+      let make_error item =
+        from_children SyntaxKind.Error [ item ]
 
       let make_script_header header_less_than header_question header_language =
         from_children SyntaxKind.ScriptHeader

@@ -132,7 +132,7 @@ module WithExpressionAndTypeParser
          * and goes on to parse the next expression *)
         let parser, token = next_token parser in
         let parser, foreach_value = parse_expression parser in
-        (parser, after_as, make_error [make_token token], foreach_value)
+        (parser, after_as, make_error (make_token token), foreach_value)
     in
     let parser, right_paren_token = expect_right_paren parser in
     let parser, foreach_statement = parse_statement parser in

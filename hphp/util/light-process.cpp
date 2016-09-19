@@ -436,10 +436,16 @@ void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
   }
 }
 
-void LightProcess::AttachHandler(void)
+void LightProcess::AttachHandler(sighandler_t sighandler)
 {
+  if (sighandler) {
+    always_assert_flog((void*)sighandler == (void*)&SigChldHandler,
+        "Trying to re-attach a sighandler other than SigChldHandler: `{}'",
+        sighandler);
+  }
+
   struct sigaction sa = {};
-  sa.sa_sigaction = &LightProcess::SigChldHandler;
+  sa.sa_sigaction = &SigChldHandler;
   sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
   if (sigaction(SIGCHLD, &sa, nullptr) != 0) {
     Logger::Error("Couldn't install SIGCHLD handler");
@@ -495,7 +501,7 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   }
 
   if (!s_handlerInited) {
-    AttachHandler();
+    AttachHandler(nullptr);
     s_handlerInited = true;
   }
 }

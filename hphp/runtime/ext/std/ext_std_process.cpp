@@ -209,7 +209,7 @@ struct ShellExecContext final {
       //       typically seen in example code because we're re-attaching
       //       a signal action and not a simple signal handler, and the
       //       latter approach only supports simple signal handlers.
-      LightProcess::AttachHandler();
+      LightProcess::AttachHandler(m_sig_handler);
     }
   }
 

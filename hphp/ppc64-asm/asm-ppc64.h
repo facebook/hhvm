@@ -707,12 +707,15 @@ struct Assembler {
   void fdiv(const RegXMM& frt, const RegXMM& fra, const RegXMM& frb,
                                                                   bool rc = 0);
   void lfs(const RegXMM& frt, MemoryRef m) {
+    assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
     EmitDForm(48, rn(frt), rn(m.r.base), m.r.disp);
   }
   void lxvd2x(const RegXMM& Xt, const MemoryRef& m) {
+    assertx(!m.r.disp);  // doesn't support immediate displacement
     EmitXX1Form(31, rn(Xt), rn(m.r.base), rn(m.r.index), 844, 0);
   }
   void lxvw4x(const RegXMM& Xt, const MemoryRef& m) {
+    assertx(!m.r.disp);  // doesn't support immediate displacement
     EmitXX1Form(31, rn(Xt), rn(m.r.base), rn(m.r.index), 780, 0);
   }
   void isel(const Reg64& rt, const Reg64& ra, const Reg64& rb, uint8_t bc);
@@ -1272,12 +1275,14 @@ struct Assembler {
   void lbzcix()         { not_implemented(); }
   //TODO(rcardoso); check default for EH bit
   void ldarx(const Reg64& rt, MemoryRef m, bool eh = 1) {
+    assertx(!m.r.disp);  // doesn't support immediate displacement
     EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 84, eh);
   }
   void ldcix()          { not_implemented(); }
   void lddx()           { not_implemented(); }
   void ldepx()          { not_implemented(); }
   void lfd(const RegXMM& frt, MemoryRef m) {
+    assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
     EmitDForm(50, rn(frt), rn(m.r.base), m.r.disp);
   }
   void lfddx()          { not_implemented(); }
@@ -1287,6 +1292,7 @@ struct Assembler {
   void lfdu()           { not_implemented(); }
   void lfdux()          { not_implemented(); }
   void lfdx(const RegXMM& rt, MemoryRef m) {
+    assertx(!m.r.disp);  // doesn't support immediate displacement
     EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 599);
   }
   void lfiwax()         { not_implemented(); }
@@ -1432,11 +1438,13 @@ struct Assembler {
   void stbepx()         { not_implemented(); }
   void stdcix()         { not_implemented(); }
   void stdcx(const Reg64& rt, MemoryRef m) {
+    assertx(!m.r.disp);  // doesn't support immediate displacement
     EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 214, 1);
   }
   void stddx()          { not_implemented(); }
   void stdepx()         { not_implemented(); }
   void stfd(const RegXMM& frt, MemoryRef m) {
+    assertx(Reg64(-1) == m.r.index);  // doesn't support base+index
     EmitDForm(54, rn(frt), rn(m.r.base), m.r.disp);
   }
   void stfddx()         { not_implemented(); }
@@ -1446,6 +1454,7 @@ struct Assembler {
   void stfdu()          { not_implemented(); }
   void stfdux()         { not_implemented(); }
   void stfdx(const RegXMM& rt, MemoryRef m) {
+    assertx(!m.r.disp);  // doesn't support immediate displacement
     EmitXForm(31, rn(rt), rn(m.r.base), rn(m.r.index), 727);
   }
   void stfiwx()         { not_implemented(); }

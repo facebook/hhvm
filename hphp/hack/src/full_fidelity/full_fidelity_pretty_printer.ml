@@ -639,11 +639,17 @@ let rec get_doc node =
     let o = get_doc x.scope_resolution_operator in
     let n = get_doc x.scope_resolution_name in
     group_doc (q ^^^ o ^^^ n)
-  | MemberSelectionExpression x
-  | SafeMemberSelectionExpression x ->
-    let ob = get_doc x.member_object in
-    let op = get_doc x.member_operator in
-    let nm = get_doc x.member_name in
+  | MemberSelectionExpression
+    { member_object; member_operator; member_name } ->
+    let ob = get_doc member_object in
+    let op = get_doc member_operator in
+    let nm = get_doc member_name in
+    group_doc (ob ^^^ op ^^^ nm)
+  | SafeMemberSelectionExpression
+    { safe_member_object; safe_member_operator; safe_member_name } ->
+    let ob = get_doc safe_member_object in
+    let op = get_doc safe_member_operator in
+    let nm = get_doc safe_member_name in
     group_doc (ob ^^^ op ^^^ nm)
   | YieldExpression x ->
     let y = get_doc x.yield_keyword in
@@ -744,11 +750,12 @@ let rec get_doc node =
     let right = get_doc x.braced_expr_right_brace in
     let expr = get_doc x.braced_expr in
     indent_block_no_space left expr right indt
-  | ListExpression x ->
-    let keyword = get_doc x.listlike_keyword in
-    let left_paren = get_doc x.listlike_left_paren in
-    let right_paren = get_doc x.listlike_right_paren in
-    let members = get_doc x.listlike_members in
+  | ListExpression
+    { list_keyword; list_left_paren; list_members; list_right_paren } ->
+    let keyword = get_doc list_keyword in
+    let left_paren = get_doc list_left_paren in
+    let members = get_doc list_members in
+    let right_paren = get_doc list_right_paren in
     let left = group_doc (keyword ^| left_paren) in
     indent_block_no_space left members right_paren indt
   | CollectionLiteralExpression x ->

@@ -137,7 +137,8 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, equal) = expect_equal parser in
     let (parser, ty) = parse_type_specifier parser in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_alias attr token name generic constr equal ty semi in
+    let result = make_alias_declaration
+      attr token name generic constr equal ty semi in
     (parser, result)
 
   and parse_enumerator parser =
@@ -200,7 +201,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, left_brace, enumerators, right_brace) = parse_delimited_list
       parser LeftBrace SyntaxError.error1037 RightBrace SyntaxError.error1006
       parse_enumerator_list_opt in
-    let result = make_enum
+    let result = make_enum_declaration
       enum name colon base enum_type left_brace enumerators right_brace in
     (parser, result)
 
@@ -229,7 +230,7 @@ module WithExpressionAndStatementAndTypeParser
     | _ ->
       (with_error parser1 SyntaxError.error1004, make_token token) in
     let (parser, body) = parse_namespace_body parser in
-    let result = make_namespace namespace_token name body in
+    let result = make_namespace_declaration namespace_token name body in
     (parser, result)
 
   and parse_namespace_body parser =
@@ -311,7 +312,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_braced_comma_list_opt_allow_trailing
       parser parse_namespace_use_clause in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_namespace_group_use use_token use_kind prefix left
+    let result = make_namespace_group_use_declaration use_token use_kind prefix left
       clauses right semi in
     (parser, result)
 
@@ -340,7 +341,8 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, clauses) = parse_comma_list
         parser Semicolon SyntaxError.error1004 parse_namespace_use_clause in
       let (parser, semi) = expect_semicolon parser in
-      let result = make_namespace_use use_token use_kind clauses semi in
+      let result = make_namespace_use_declaration
+        use_token use_kind clauses semi in
       (parser, result)
 
   and parse_classish_declaration parser attribute_spec =
@@ -356,7 +358,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, classish_implements, classish_implements_list) =
       parse_classish_implements_opt parser in
     let (parser, body) = parse_classish_body parser in
-    let syntax = make_classish
+    let syntax = make_classish_declaration
       attribute_spec modifiers token name generic_type_parameter_list
       classish_extends classish_extends_list classish_implements
       classish_implements_list
@@ -1164,7 +1166,8 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, header) =
       parse_function_declaration_header parser in
     let (parser, body) = parse_compound_statement parser in
-    let syntax = make_function attribute_specification header body in
+    let syntax = make_function_declaration
+      attribute_specification header body in
     (parser, syntax)
 
   and parse_function_declaration_header parser =

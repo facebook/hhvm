@@ -414,7 +414,7 @@ module WithToken(Token: TokenType) = struct
       anonymous_use : t;
       anonymous_body : t
     }
-    and anonymous_use = {
+    and anonymous_function_use_clause = {
       anonymous_use_keyword : t;
       anonymous_use_left_paren : t;
       anonymous_use_variables : t;
@@ -448,6 +448,11 @@ module WithToken(Token: TokenType) = struct
       member_object : t;
       member_operator : t;
       member_name : t
+    }
+    and safe_member_selection_expression = {
+      safe_member_object : t;
+      safe_member_operator : t;
+      safe_member_name : t
     }
     and yield_expression = {
       yield_keyword : t;
@@ -494,11 +499,11 @@ module WithToken(Token: TokenType) = struct
       braced_expr : t;
       braced_expr_right_brace : t
     }
-    and listlike_expression = {
-      listlike_keyword: t;
-      listlike_left_paren: t;
-      listlike_members: t;
-      listlike_right_paren: t;
+    and list_expression = {
+      list_keyword: t;
+      list_left_paren: t;
+      list_members: t;
+      list_right_paren: t;
     }
     and collection_literal_expression = {
       collection_literal_name : t;
@@ -764,7 +769,7 @@ module WithToken(Token: TokenType) = struct
     | EchoStatement of echo_statement
 
     | MemberSelectionExpression of member_selection_expression
-    | SafeMemberSelectionExpression of member_selection_expression
+    | SafeMemberSelectionExpression of safe_member_selection_expression
     | ScopeResolutionExpression of scope_resolution_expression
     | YieldExpression of yield_expression
     | PrintExpression of print_expression
@@ -772,7 +777,7 @@ module WithToken(Token: TokenType) = struct
     | LambdaExpression of lambda_expression
     | LambdaSignature of lambda_signature
     | AnonymousFunction of anonymous_function
-    | AnonymousFunctionUseClause of anonymous_use
+    | AnonymousFunctionUseClause of anonymous_function_use_clause
     | LiteralExpression of literal_expression
     | VariableExpression of variable_expression
     | QualifiedNameExpression of qualified_name_expression
@@ -785,7 +790,7 @@ module WithToken(Token: TokenType) = struct
     | FunctionCallExpression of function_call_expression
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
-    | ListExpression of listlike_expression
+    | ListExpression of list_expression
     | CollectionLiteralExpression of collection_literal_expression
     | ObjectCreationExpression of object_creation_expression
     | ShapeExpression of shape
@@ -1044,7 +1049,7 @@ module WithToken(Token: TokenType) = struct
     let is_parenthesized_expression node =
       kind node = SyntaxKind.ParenthesizedExpression
     let is_braced_expression node = kind node = SyntaxKind.BracedExpression
-    let is_listlike_expression node = kind node = SyntaxKind.ListExpression
+    let is_list_expression node = kind node = SyntaxKind.ListExpression
     let is_collection_literal_expression node =
       kind node = SyntaxKind.CollectionLiteralExpression
     let is_object_creation_expression node =
@@ -1155,8 +1160,8 @@ module WithToken(Token: TokenType) = struct
         { member_object; member_operator; member_name } ->
         [ member_object; member_operator; member_name ]
       | SafeMemberSelectionExpression
-        { member_object; member_operator; member_name } ->
-        [ member_object; member_operator; member_name ]
+        { safe_member_object; safe_member_operator; safe_member_name } ->
+        [ safe_member_object; safe_member_operator; safe_member_name ]
       | YieldExpression
         { yield_keyword; yield_operand } ->
         [ yield_keyword; yield_operand ]
@@ -1470,10 +1475,10 @@ module WithToken(Token: TokenType) = struct
         { braced_expr_left_brace; braced_expr; braced_expr_right_brace } ->
         [ braced_expr_left_brace; braced_expr; braced_expr_right_brace ]
       | ListExpression
-        { listlike_keyword; listlike_left_paren; listlike_members;
-          listlike_right_paren } ->
-        [ listlike_keyword; listlike_left_paren; listlike_members;
-          listlike_right_paren ]
+        { list_keyword; list_left_paren; list_members;
+          list_right_paren } ->
+        [ list_keyword; list_left_paren; list_members;
+          list_right_paren ]
       | CollectionLiteralExpression
         { collection_literal_name; collection_literal_left_brace;
           collection_literal_initialization_list;
@@ -1616,8 +1621,8 @@ module WithToken(Token: TokenType) = struct
         { member_object; member_operator; member_name } ->
         [ "member_object"; "member_operator"; "member_name" ]
       | SafeMemberSelectionExpression
-        { member_object; member_operator; member_name } ->
-        [ "member_object"; "member_operator"; "member_name" ]
+        { safe_member_object; safe_member_operator; safe_member_name } ->
+        [ "safe_member_object"; "safe_member_operator"; "safe_member_name" ]
       | ScopeResolutionExpression
         { scope_resolution_qualifier; scope_resolution_operator;
           scope_resolution_name } ->
@@ -1941,10 +1946,10 @@ module WithToken(Token: TokenType) = struct
         { braced_expr_left_brace; braced_expr; braced_expr_right_brace } ->
         [ "braced_expr_left_brace"; "braced_expr"; "braced_expr_right_brace" ]
       | ListExpression
-        { listlike_keyword; listlike_left_paren; listlike_members;
-          listlike_right_paren } ->
-        [ "listlike_keyword"; "listlike_left_paren"; "listlike_members";
-          "listlike_right_paren" ]
+        { list_keyword; list_left_paren; list_members;
+          list_right_paren } ->
+        [ "list_keyword"; "list_left_paren"; "list_members";
+          "list_right_paren" ]
       | CollectionLiteralExpression
         { collection_literal_name; collection_literal_left_brace;
           collection_literal_initialization_list;
@@ -2134,9 +2139,9 @@ module WithToken(Token: TokenType) = struct
         MemberSelectionExpression
         { member_object; member_operator; member_name }
       | (SyntaxKind.SafeMemberSelectionExpression,
-        [ member_object; member_operator; member_name ]) ->
+        [ safe_member_object; safe_member_operator; safe_member_name ]) ->
         SafeMemberSelectionExpression
-        { member_object; member_operator; member_name }
+        { safe_member_object; safe_member_operator; safe_member_name }
       | (SyntaxKind.ScopeResolutionExpression,
         [ scope_resolution_qualifier; scope_resolution_operator;
           scope_resolution_name ]) ->
@@ -2520,10 +2525,10 @@ module WithToken(Token: TokenType) = struct
         braced_expr; braced_expr_right_brace ]) ->
         BracedExpression { braced_expr_left_brace; braced_expr;
           braced_expr_right_brace }
-      | (SyntaxKind.ListExpression, [ listlike_keyword; listlike_left_paren;
-        listlike_members; listlike_right_paren ]) ->
-        ListExpression { listlike_keyword; listlike_left_paren;
-          listlike_members; listlike_right_paren }
+      | (SyntaxKind.ListExpression, [ list_keyword; list_left_paren;
+        list_members; list_right_paren ]) ->
+        ListExpression { list_keyword; list_left_paren;
+          list_members; list_right_paren }
       | (SyntaxKind.CollectionLiteralExpression,
         [ collection_literal_name; collection_literal_left_brace;
           collection_literal_initialization_list;
@@ -2768,12 +2773,12 @@ module WithToken(Token: TokenType) = struct
           from_children SyntaxKind.BracedExpression
             [ braced_expr_left_brace; braced_expr; braced_expr_right_brace ]
 
-      let make_listlike_expression
-        listlike_keyword listlike_left_paren listlike_members
-        listlike_right_paren =
+      let make_list_expression
+        list_keyword list_left_paren list_members
+        list_right_paren =
         from_children SyntaxKind.ListExpression
-          [ listlike_keyword; listlike_left_paren; listlike_members;
-          listlike_right_paren ]
+          [ list_keyword; list_left_paren; list_members;
+          list_right_paren ]
 
       let make_collection_literal_expression
         collection_literal_name collection_literal_left_brace
@@ -2834,7 +2839,8 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.XHPClose
           [xhp_close_left_angle; xhp_close_name; xhp_close_right_angle ]
 
-      let make_xhp_attr xhp_attr_name xhp_attr_equal xhp_attr_expr =
+      let make_xhp_attribute
+        xhp_attr_name xhp_attr_equal xhp_attr_expr =
         from_children SyntaxKind.XHPAttribute
           [ xhp_attr_name; xhp_attr_equal; xhp_attr_expr ]
 
@@ -2857,7 +2863,7 @@ module WithToken(Token: TokenType) = struct
       let make_script script_header script_declarations =
         from_children SyntaxKind.Script [ script_header; script_declarations ]
 
-      let make_enum
+      let make_enum_declaration
           enum name colon base enum_type left_brace items right_brace =
         from_children SyntaxKind.EnumDeclaration
           [ enum; name; colon; base; enum_type; left_brace; items; right_brace ]
@@ -2865,7 +2871,7 @@ module WithToken(Token: TokenType) = struct
       let make_enumerator name equal value semicolon =
         from_children SyntaxKind.Enumerator [ name; equal; value; semicolon ]
 
-      let make_alias attr token name generic constr equal ty semi =
+      let make_alias_declaration attr token name generic constr equal ty semi =
         from_children SyntaxKind.AliasDeclaration
           [ attr; token; name; generic; constr; equal; ty; semi ]
 
@@ -2877,7 +2883,7 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.PropertyDeclarator
         [ name; init ]
 
-      let make_namespace token name body =
+      let make_namespace_declaration token name body =
         from_children SyntaxKind.NamespaceDeclaration
           [ token; name; body ]
 
@@ -2885,11 +2891,12 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.NamespaceBody
           [ left; decls; right ]
 
-      let make_namespace_group_use token kind prefix left clauses right semi =
+      let make_namespace_group_use_declaration
+        token kind prefix left clauses right semi =
         from_children SyntaxKind.NamespaceGroupUseDeclaration
         [ token; kind; prefix; left; clauses; right; semi ]
 
-      let make_namespace_use use use_kind clauses semi =
+      let make_namespace_use_declaration use use_kind clauses semi =
         from_children SyntaxKind.NamespaceUseDeclaration
           [ use; use_kind; clauses; semi ]
 
@@ -2897,7 +2904,7 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.NamespaceUseClause
           [ use_kind; name; as_token; alias ]
 
-      let make_function function_attribute_spec function_declaration_header
+      let make_function_declaration function_attribute_spec function_declaration_header
         function_body =
         from_children SyntaxKind.FunctionDeclaration
           [ function_attribute_spec; function_declaration_header;
@@ -2918,7 +2925,7 @@ module WithToken(Token: TokenType) = struct
           [ methodish_attr; methodish_modifiers; methodish_function_decl_header;
             methodish_function_body; methodish_semicolon ]
 
-      let make_classish classish_attr classish_modifiers
+      let make_classish_declaration classish_attr classish_modifiers
         classish_keyword classish_name classish_type_params classish_extends
         classish_extends_list classish_implements classish_implements_list
         classish_body =

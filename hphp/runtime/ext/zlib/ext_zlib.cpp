@@ -31,8 +31,6 @@
 #include "hphp/util/compression.h"
 #include "hphp/util/logger.h"
 #include <folly/String.h>
-#include <lz4.h>
-#include <lz4hc.h>
 #include <memory>
 #include <algorithm>
 
@@ -442,120 +440,6 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// LZ4 functions
-
-// Varint helper functions for lz4
-int VarintSize(int val) {
-  int s = 1;
-  while (val >= 128) {
-    ++s;
-    val >>= 7;
-  }
-  return s;
-}
-
-void VarintEncode(int val, char** dest) {
-  char* p = *dest;
-  while (val >= 128) {
-    *p++ = 0x80 | (static_cast<char>(val) & 0x7f);
-    val >>= 7;
-  }
-  *p++ = static_cast<char>(val);
-  *dest = p;
-}
-
-int VarintDecode(const char** src, int max_size) {
-  const char* p = *src;
-  int val = 0;
-  int shift = 0;
-  while (*p & 0x80) {
-    if (max_size <= 1) { return -1; }
-    --max_size;
-    val |= static_cast<int>(*p++ & 0x7f) << shift;
-    shift += 7;
-  }
-  val |= static_cast<int>(*p++) << shift;
-  *src = p;
-  return val;
-}
-
-Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
-                                    bool high /* = false */) {
-  if (high) {
-    return f_lz4_hccompress(uncompressed);
-  }
-  int bufsize = LZ4_compressBound(uncompressed.size());
-  if (bufsize < 0) {
-    return false;
-  }
-  int headerSize = VarintSize(uncompressed.size());
-  bufsize += headerSize;  // for the header
-  String s = String(bufsize, ReserveString);
-  char *compressed = s.mutableData();
-
-  VarintEncode(uncompressed.size(), &compressed);  // write the header
-
-  int csize = LZ4_compress(uncompressed.data(), compressed,
-      uncompressed.size());
-  if (csize < 0) {
-    return false;
-  }
-  bufsize = csize + headerSize;
-  s.shrink(bufsize);
-  return s;
-}
-
-Variant HHVM_FUNCTION(lz4_hccompress, const String& uncompressed) {
-  int bufsize = LZ4_compressBound(uncompressed.size());
-  if (bufsize < 0) {
-    return false;
-  }
-  int headerSize = VarintSize(uncompressed.size());
-  bufsize += headerSize;  // for the header
-  String s = String(bufsize, ReserveString);
-  char *compressed = s.mutableData();
-
-  VarintEncode(uncompressed.size(), &compressed);  // write the header
-
-  int csize = LZ4_compressHC(uncompressed.data(),
-      compressed, uncompressed.size());
-  if (csize < 0) {
-    return false;
-  }
-  bufsize = csize + headerSize;
-  s.shrink(bufsize);
-  return s;
-}
-
-Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
-  const char* compressed_ptr = compressed.data();
-  int dsize = VarintDecode(&compressed_ptr, compressed.size());
-  if (dsize < 0) {
-    return false;
-  }
-
-  int inSize = compressed.size() - (compressed_ptr - compressed.data());
-  String s = String(dsize, ReserveString);
-  char *uncompressed = s.mutableData();
-#ifdef LZ4_MAX_INPUT_SIZE
-  int ret = LZ4_decompress_safe(compressed_ptr, uncompressed, inSize, dsize);
-
-  if (ret != dsize) {
-    return false;
-  }
-#else
-  int ret = LZ4_decompress_fast(compressed_ptr, uncompressed, dsize);
-
-  if (ret <= 0 || ret > inSize) {
-    return false;
-  }
-#endif
-
-  s.setSize(dsize);
-  return s;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Chunk-based API
 namespace {
 
@@ -684,9 +568,6 @@ struct ZlibExtension final : Extension {
 #endif
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
-    HHVM_FE(lz4_compress);
-    HHVM_FE(lz4_hccompress);
-    HHVM_FE(lz4_uncompress);
 
     HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, eof,
                   HHVM_MN(ChunkedInflator, eof));

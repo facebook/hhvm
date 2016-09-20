@@ -9,6 +9,5 @@ HHVM_DEFINE_EXTENSION("zlib"
     ext_zlib.php
   DEPENDS
     libFolly
-    libLZ4
     libZLib
 )

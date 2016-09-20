@@ -54,10 +54,6 @@ Variant HHVM_FUNCTION(qlzuncompress, const String& data, int level = 1);
 #endif
 Variant HHVM_FUNCTION(nzcompress, const String& uncompressed);
 Variant HHVM_FUNCTION(nzuncompress, const String& compressed);
-Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
-                                    bool high = false);
-Variant HHVM_FUNCTION(lz4_hccompress, const String& uncompressed);
-Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions

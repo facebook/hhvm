@@ -17,8 +17,16 @@
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/trace.h"
+
+TRACE_SET_MOD(asmppc64);
 
 namespace ppc64_asm {
+VMTOC::~VMTOC() {
+  FTRACE(1, "Number of values stored in TOC: {}\n",
+    std::to_string(m_last_elem_pos));
+}
+
 int64_t VMTOC::pushElem(int64_t elem) {
   if (m_map.find(elem) != m_map.end()) {
     return m_map[elem];

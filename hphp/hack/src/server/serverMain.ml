@@ -37,17 +37,17 @@ let get_rechecked_count (stats_ref, _) = !stats_ref.rechecked_count
 module MainInit : sig
   val go:
     ServerArgs.options ->
+    string ->
     (unit -> env) ->    (* init function to run while we have init lock *)
     env
 end = struct
   (* This code is only executed when the options --check is NOT present *)
-  let go options init_fun =
+  let go options init_id init_fun =
     let root = ServerArgs.root options in
     let t = Unix.gettimeofday () in
     Hh_logger.log "Initializing Server (This might take some time)";
     (* note: we only run periodical tasks on the root, not extras *)
     ServerIdle.init root;
-    let init_id = Random_id.short_string () in
     Hh_logger.log "Init id: %s" init_id;
     let env = HackEventLogger.with_id ~stage:`Init init_id init_fun in
     Hh_logger.log "Server is READY";
@@ -348,6 +348,7 @@ let program_init genv =
   env
 
 let setup_server options handle =
+  let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   let root = ServerArgs.root options in
   (* The OCaml default is 500, but we care about minimizing the memory
@@ -364,7 +365,7 @@ let setup_server options handle =
   } as local_config = local_config in
   if Sys_utils.is_test_mode ()
   then EventLogger.init (Daemon.devnull ()) 0.0
-  else HackEventLogger.init root (Unix.gettimeofday ()) lazy_decl;
+  else HackEventLogger.init root init_id (Unix.gettimeofday ()) lazy_decl;
   let root_s = Path.to_string root in
   if Sys_utils.is_nfs root_s && not enable_on_nfs then begin
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;
@@ -380,10 +381,10 @@ let setup_server options handle =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   PidLog.init (ServerFiles.pids_file root);
   PidLog.log ~reason:"main" (Unix.getpid());
-  ServerEnvBuild.make_genv options config local_config handle
+  ServerEnvBuild.make_genv options config local_config handle, init_id
 
 let run_once options handle =
-  let genv = setup_server options handle in
+  let genv, _ = setup_server options handle in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
@@ -404,11 +405,11 @@ let daemon_main_exn options (ic, oc) =
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   SharedMem.connect handle ~is_master:true;
 
-  let genv = setup_server options handle in
+  let genv, init_id = setup_server options handle in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
-  let env = MainInit.go options (fun () -> program_init genv) in
+  let env = MainInit.go options init_id (fun () -> program_init genv) in
   serve genv env in_fd out_fd
 
 let daemon_main (state, options) (ic, oc) =

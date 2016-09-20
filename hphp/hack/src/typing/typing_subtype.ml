@@ -50,7 +50,8 @@ let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
       | Ast.Constraint_super ->
         Env.add_lower_bound env name ty
       | Ast.Constraint_as ->
-        Env.add_upper_bound env name ty) in
+        Env.add_upper_bound env name ty
+      | _ -> raise (TODODrphil "typing")) in
 
   let env = List.fold_left ft_sub.ft_tparams ~f:add_bound ~init:env in
 

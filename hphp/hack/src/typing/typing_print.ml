@@ -370,6 +370,7 @@ module PrintClass = struct
   let constraint_ty = function
     | (Ast.Constraint_as, ty) -> "as " ^ (Full.to_string_decl ty)
     | (Ast.Constraint_super, ty) -> "super " ^ (Full.to_string_decl ty)
+    | _ -> raise (TODODrphil "typing")
 
   let variance = function
     | Ast.Covariant -> "+"

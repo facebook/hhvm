@@ -1776,6 +1776,7 @@ and method_ env method_start ~modifiers ~attrs ~(sync:fun_decl_kind)
   let tparams = class_params env in
   let params = parameter_list env in
   let ret = hint_return_opt env in
+  let constrs = where_clause env in
   let is_generator, body_stmts = function_body env in
   let method_end = Pos.make env.file env.lb in
   let ret = method_implicit_return env pname ret in
@@ -1785,6 +1786,7 @@ and method_ env method_start ~modifiers ~attrs ~(sync:fun_decl_kind)
     m_tparams = tparams;
     m_params = params;
     m_ret = ret;
+    m_constrs = constrs;
     m_ret_by_ref = is_ref;
     m_body = body_stmts;
     m_kind = modifiers;
@@ -2443,6 +2445,39 @@ and parameter_default env =
       let default = expr env in
       Some default
   | _ -> L.back env.lb; None
+
+(*****************************************************************************)
+(* Method where-clause (type constraints) *)
+(*****************************************************************************)
+
+and where_clause env =
+  match L.token env.file env.lb with
+  | Tword when Lexing.lexeme env.lb = "where" -> where_clause_constraints env
+  | _ -> L.back env.lb; []
+
+and where_clause_constraints env =
+  if peek env = Tlcb then [] else
+  let error_state = !(env.errors) in
+  let t1 = hint env in
+  match option_constraint_operator env with
+  | None -> []
+  | Some c ->
+    let t2 = hint env in
+    let constr = (t1, c, t2) in
+    match L.token env.file env.lb with
+    | Tcomma ->
+      if !(env.errors) != error_state
+      then [constr]
+      else constr :: where_clause_constraints env
+    | Tlcb -> L.back env.lb; [constr]
+    | _ -> error_expect env ", or {"; [constr]
+
+and option_constraint_operator env =
+  match L.token env.file env.lb with
+  | Tword when Lexing.lexeme env.lb = "as" -> Some Constraint_as
+  | Teq -> Some Constraint_eq
+  | Tword when Lexing.lexeme env.lb = "super" -> Some Constraint_super
+  | _ -> error_expect env "type constraint operator (as, super or =)"; None
 
 (*****************************************************************************)
 (* Expressions *)

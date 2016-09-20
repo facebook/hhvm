@@ -254,7 +254,8 @@ let localize_generic_parameters_with_bounds
       let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
       match ck with
       | Ast.Constraint_super -> Env.add_lower_bound env id ty
-      | Ast.Constraint_as    -> Env.add_upper_bound env id ty) in
+      | Ast.Constraint_as    -> Env.add_upper_bound env id ty
+      | _ -> raise (TODODrphil "typing")) in
   List.fold_left tparams ~f:add_bound ~init:env
 
 

@@ -115,6 +115,7 @@ let default_method = {
   m_tparams = [];
   m_name = (Pos.none, "");
   m_params = [];
+  m_constrs = [];
   m_body = [Noop];
   m_user_attributes = [];
   m_ret = None;

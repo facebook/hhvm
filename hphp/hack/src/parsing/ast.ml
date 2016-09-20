@@ -67,6 +67,7 @@ and gconst = {
 
 and constraint_kind =
   | Constraint_as
+  | Constraint_eq
   | Constraint_super
 
 and tparam = variance * id * (constraint_kind * hint) list
@@ -203,6 +204,7 @@ and class_var = Pos.t * id * expr option
 and method_ = {
   m_kind: kind list ;
   m_tparams: tparam list;
+  m_constrs: (hint * constraint_kind * hint) list;
   m_name: id;
   m_params: fun_param list;
   m_body: block;

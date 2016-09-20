@@ -610,6 +610,8 @@ and constraint_ tcopt root env cstr =
       let pos = Reason.to_pos r in
       let reason = pos, Rconstraint_as, Pcontravariant in
       type_ tcopt root (Vcontravariant [reason]) env ty
+  | Ast.Constraint_eq, _ ->
+      raise (TODODrphil "variance")
   | Ast.Constraint_super, (r, _ as ty) ->
       let pos = Reason.to_pos r in
       let reason = pos, Rconstraint_super, Pcovariant in

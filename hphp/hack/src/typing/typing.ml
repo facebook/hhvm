@@ -3856,6 +3856,7 @@ and check_implements_tparaml (env: Env.env) ht =
           match ck with
           | Ast.Constraint_as ->
             ignore (Type.sub_type_decl p Reason.URnone env ty cstr)
+          | Ast.Constraint_eq -> raise (TODODrphil "typing")
           | Ast.Constraint_super ->
             ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
         end

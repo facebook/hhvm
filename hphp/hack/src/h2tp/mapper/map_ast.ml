@@ -156,6 +156,7 @@ let mk_mapper = fun m_in ->
     and v2 = map_id v2
     and v3 = map_of_list (fun (ck, h) -> ck, map_hint h) v3
     in (v1, v2, v3)
+  and map_constr (t1, c, t2) = (map_hint t1, c, map_hint t2)
   and map_tconstraint v = map_hint_option v
   and map_typedef_kind =
     function
@@ -337,6 +338,7 @@ let mk_mapper = fun m_in ->
       let k {
                   m_kind = v_m_kind;
                   m_tparams = v_m_tparams;
+                  m_constrs = v_m_constrs;
                   m_name = v_m_name;
                   m_params = v_m_params;
                   m_body = v_m_body;
@@ -348,6 +350,7 @@ let mk_mapper = fun m_in ->
                 } =
       let v_m_kind = map_of_list map_kind v_m_kind in
       let v_m_tparams = map_of_list map_tparam v_m_tparams in
+      let v_m_constrs = map_of_list map_constr v_m_constrs in
       let v_m_name = map_id v_m_name in
       let v_m_params = map_fun_params v_m_params in
       let v_m_body = map_block v_m_body in
@@ -361,6 +364,7 @@ let mk_mapper = fun m_in ->
         {
           m_kind = v_m_kind;
           m_tparams = v_m_tparams;
+          m_constrs = v_m_constrs;
           m_name = v_m_name;
           m_params = v_m_params;
           m_body = v_m_body;

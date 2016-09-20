@@ -561,7 +561,7 @@ and ignore_toplevel attr_start ~attr acc env terminate =
       | "abstract" | "final"
       | "class"| "trait" | "interface"
       | "namespace"
-      | "async" | "newtype"| "type"| "const" ->
+      | "async" | "newtype"| "type"| "const" | "enum" ->
           (* Parsing toplevel declarations (class, function etc ...) *)
           let def_start = Option.value attr_start
             ~default:(Pos.make env.file env.lb) in

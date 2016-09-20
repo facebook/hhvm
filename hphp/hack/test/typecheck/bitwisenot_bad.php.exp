@@ -1,0 +1,6 @@
+File "bitwisenot_bad.php", line 13, characters 10-12:
+Typing error (Typing[4110])
+File "bitwisenot_bad.php", line 13, characters 10-12:
+This is an int because this is used in an arithmetic operation
+File "bitwisenot_bad.php", line 12, characters 14-17:
+It is incompatible with a bool

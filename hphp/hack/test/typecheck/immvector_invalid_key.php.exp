@@ -1,8 +1,8 @@
 File "immvector_invalid_key.php", line 15, characters 8-22:
 Invalid index type for this ImmVector (Typing[4110])
 File "immvector_invalid_key.php", line 15, characters 12-21:
-This is a string
-File "immvector_invalid_key.php", line 15, characters 12-21:
-It is incompatible with an int
+This is an int
 File "immvector_invalid_key.php", line 14, characters 20-28:
 This can only be indexed with integers
+File "immvector_invalid_key.php", line 15, characters 12-21:
+It is incompatible with a string

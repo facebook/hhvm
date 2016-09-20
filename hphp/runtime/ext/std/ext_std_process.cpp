@@ -191,7 +191,12 @@ struct ShellExecContext final {
   ShellExecContext() {
     // Use the default handler while exec'ing in a shell,
     // saving the previous signal action.
-    m_sig_handler = signal(SIGCHLD, SIG_DFL);
+    struct sigaction sa = {};
+    sa.sa_handler = SIG_DFL;
+    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
+      Logger::Error("Couldn't install SIGCHLD handler");
+      abort();
+    }
   }
 
   ~ShellExecContext() {
@@ -202,14 +207,11 @@ struct ShellExecContext final {
       LightProcess::pclose(m_proc);
 #endif
     }
-    if (m_sig_handler) {
-      // If we saved the previous signal action, then re-attach it now.
-      // Note: We're using LightProcess::AttachHandler() for this since
-      //       instead of the the signal(SIGCHLD, m_sig_handler) that's
-      //       typically seen in example code because we're re-attaching
-      //       a signal action and not a simple signal handler, and the
-      //       latter approach only supports simple signal handlers.
-      LightProcess::AttachHandler(m_sig_handler);
+    if (old_sa.sa_handler != SIG_DFL) {
+      if (sigaction(SIGCHLD, &old_sa, nullptr) != 0) {
+        Logger::Error("Couldn't restore SIGCHLD handler");
+        abort();
+      }
     }
   }
 
@@ -248,7 +250,7 @@ struct ShellExecContext final {
   }
 
 private:
-  void (*m_sig_handler)(int);
+  struct sigaction old_sa = {};
   FILE *m_proc{nullptr};
 };
 

@@ -6,6 +6,18 @@
 # An integer representing the number of extensions that have
 # been defined.
 #
+# HHVM_EXTENSIONS_REQUIRED_LIBRARIES: <list of paths>
+# A list of the additional libraries that need to be linked
+# against for the enabled extensions.
+#
+# HHVM_EXTENSIONS_REQUIRED_INCLUDE_DIRS: <list of paths>
+# A list of the additional include paths that need to be used
+# in order to compile the enabled extensions.
+#
+# HHVM_EXTENSIONS_REQUIRED_DEFINES: <list of strings>
+# A list of the additional defines that need to be used in order
+# to compile the enabled extensions.
+#
 #
 # The extensions' internal info is stored in globals, prefixed by
 # HHVM_EXTENSION_#_ where # represents a number between 0 and
@@ -320,6 +332,9 @@ endfunction()
 # This will also add the appropriate libraries, include directories, and
 # defines for the enabled extensions' dependencies.
 function(HHVM_EXTENSION_RESOLVE_DEPENDENCIES)
+  set(HHVM_EXTENSIONS_REQUIRED_LIBRARIES "" CACHE INTERNAL "" FORCE)
+  set(HHVM_EXTENSIONS_REQUIRED_INCLUDE_DIRS "" CACHE INTERNAL "" FORCE)
+  set(HHVM_EXTENSIONS_REQUIRED_DEFINES "" CACHE INTERNAL "" FORCE)
   set(i 0)
   while (i LESS HHVM_EXTENSION_COUNT)
     HHVM_EXTENSION_INTERNAL_RESOLVE_DEPENDENCIES_OF_EXTENSION(wasResolved ${i} " ")
@@ -409,6 +424,14 @@ function (HHVM_EXTENSION_INTERNAL_SORT_OUT_SOURCES rootDir)
   set(HEADER_SOURCES ${HEADER_SOURCES} PARENT_SCOPE)
   set(ASM_SOURCES ${ASM_SOURCES} PARENT_SCOPE)
   set(PHP_SOURCES ${PHP_SOURCES} PARENT_SCOPE)
+endfunction()
+
+# Configure the specified target so that it can compile when
+# linked against the enabled extensions.
+function(HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES targetName)
+  target_link_libraries(${targetName} ${HHVM_EXTENSIONS_REQUIRED_LIBRARIES})
+  target_include_directories(${targetName} PUBLIC ${HHVM_EXTENSIONS_REQUIRED_INCLUDE_DIRS})
+  target_compile_definitions(${targetName} PUBLIC ${HHVM_EXTENSIONS_REQUIRED_DEFINES})
 endfunction()
 
 
@@ -515,6 +538,33 @@ function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDepende
   endif()
 endfunction()
 
+# Add a set of libraries to link against.
+function(HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES)
+  set(reqLibs ${HHVM_EXTENSIONS_REQUIRED_LIBRARIES})
+  foreach (lib ${ARGN})
+    list(APPEND reqLibs ${lib})
+  endforeach()
+  set(HHVM_EXTENSIONS_REQUIRED_LIBRARIES ${reqLibs} CACHE INTERNAL "" FORCE)
+endfunction()
+
+# Add a set of include directories to use.
+function(HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS)
+  set(incDirs ${HHVM_EXTENSIONS_REQUIRED_INCLUDE_DIRS})
+  foreach (inc ${ARGN})
+    list(APPEND incDirs ${inc})
+  endforeach()
+  set(HHVM_EXTENSIONS_REQUIRED_INCLUDE_DIRS ${incDirs} CACHE INTERNAL "" FORCE)
+endfunction()
+
+# Add a set of defines to use when compiling.
+function(HHVM_EXTENSION_INTERNAL_ADD_DEFINES)
+  set(defs ${HHVM_EXTENSIONS_REQUIRED_DEFINES})
+  foreach (def ${ARGN})
+    list(APPEND defs ${def})
+  endforeach()
+  set(HHVM_EXTENSIONS_REQUIRED_DEFINES ${defs} CACHE INTERNAL "" FORCE)
+endfunction()
+
 # This handles all the library dependencies, and determines if the libraries are present.
 function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependencyName addPaths)
   string(FIND ${dependencyName} "lib" libIdx)
@@ -567,10 +617,10 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${BZIP2_INCLUDE_DIR})
-      add_definitions(${BZIP2_DEFINITIONS})
-      link_libraries(${BZIP2_LIBRARIES})
-      add_definitions("-DHAVE_LIBBZIP2")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${BZIP2_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES(${BZIP2_DEFINITIONS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${BZIP2_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBBZIP2")
     endif()
   elseif (${libraryName} STREQUAL "cclient")
     find_package(CClient ${requiredVersion})
@@ -592,9 +642,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${CCLIENT_INCLUDE_PATH})
-      link_libraries(${CCLIENT_LIBRARY})
-      add_definitions("-DHAVE_LIBCCLIENT")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${CCLIENT_INCLUDE_PATH})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${CCLIENT_LIBRARY})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBCCLIENT")
 
       if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
         CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" auth_gss CCLIENT_HAS_GSS)
@@ -602,7 +652,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
         CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_HAS_GSS)
       endif()
       if (NOT CCLIENT_HAS_GSS)
-        add_definitions("-DSKIP_IMAP_GSS=1")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DSKIP_IMAP_GSS=1")
       endif()
 
       if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
@@ -611,7 +661,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
         CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" ssl_onceonlyinit CCLIENT_HAS_SSL)
       endif()
       if (NOT CCLIENT_HAS_SSL)
-        add_definitions("-DSKIP_IMAP_SSL=1")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DSKIP_IMAP_SSL=1")
       endif()
     endif()
   elseif (${libraryName} STREQUAL "curl")
@@ -627,17 +677,17 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)
       CHECK_FUNCTION_EXISTS("curl_multi_wait" HAVE_CURL_MULTI_WAIT)
       if (HAVE_CURL_MULTI_SELECT)
-        add_definitions("-DHAVE_CURL_MULTI_SELECT")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_CURL_MULTI_SELECT")
       endif()
       if (HAVE_CURL_MULTI_WAIT)
-        add_definitions("-DHAVE_CURL_MULTI_WAIT")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_CURL_MULTI_WAIT")
       endif()
       set(CMAKE_REQUIRED_LIBRARIES)
       set(CMAKE_REQUIRED_INCLUDES)
 
-      include_directories(${CURL_INCLUDE_DIR})
-      link_libraries(${CURL_LIBRARIES})
-      add_definitions("-DHAVE_LIBCURL")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${CURL_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${CURL_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBCURL")
     endif()
   elseif (${libraryName} STREQUAL "expat")
     find_package(EXPAT ${requiredVersion})
@@ -647,11 +697,11 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${EXPAT_INCLUDE_DIRS})
-      link_libraries(${EXPAT_LIBRARY})
-      add_definitions("-DHAVE_LIBEXPAT")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${EXPAT_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${EXPAT_LIBRARY})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBEXPAT")
       if (EXPAT_STATIC)
-        add_definitions("-DXML_STATIC")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DXML_STATIC")
       endif()
     endif()
   elseif (${libraryName} STREQUAL "freetype")
@@ -662,11 +712,11 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${FREETYPE_INCLUDE_DIRS})
-      link_libraries(${FREETYPE_LIBRARIES})
-      add_definitions("-DHAVE_LIBFREETYPE")
-      add_definitions("-DHAVE_GD_FREETYPE")
-      add_definitions("-DENABLE_GD_TTF")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${FREETYPE_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${FREETYPE_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBFREETYPE")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_GD_FREETYPE")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DENABLE_GD_TTF")
     endif()
   elseif (${libraryName} STREQUAL "fribidi")
     find_package(fribidi ${requiredVersion})
@@ -676,9 +726,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${FRIBIDI_INCLUDE_DIR})
-      link_libraries(${FRIBIDI_LIBRARY})
-      add_definitions("-DHAVE_LIBFRIBIDI")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${FRIBIDI_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${FRIBIDI_LIBRARY})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBFRIBIDI")
     endif()
   elseif (${libraryName} STREQUAL "glib")
     find_package(GLIB ${requiredVersion})
@@ -688,8 +738,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${GLIB_INCLUDE_DIR} ${GLIB_CONFIG_INCLUDE_DIR})
-      add_definitions("-DHAVE_LIBGLIB")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${GLIB_INCLUDE_DIR} ${GLIB_CONFIG_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBGLIB")
     endif()
   elseif (${libraryName} STREQUAL "gmp")
     find_package(LibGmp ${requiredVersion})
@@ -699,9 +749,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${GMP_INCLUDE_DIR})
-      link_libraries(${GMP_LIBRARY})
-      add_definitions("-DHAVE_LIBGMP")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${GMP_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${GMP_LIBRARY})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBGMP")
     endif()
   elseif (${libraryName} STREQUAL "iconv")
     find_package(Libiconv ${requiredVersion})
@@ -711,15 +761,15 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBICONV_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBICONV_INCLUDE_DIR})
       if (LIBICONV_LIBRARY)
-        link_libraries(${LIBICONV_LIBRARY})
+        HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBICONV_LIBRARY})
       endif()
-      add_definitions("-DHAVE_ICONV")
-      add_definitions("-DHAVE_LIBICONV")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_ICONV")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBICONV")
       if (LIBICONV_CONST)
         message(STATUS "Using const for input to iconv() call")
-        add_definitions("-DICONV_CONST=const")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DICONV_CONST=const")
       endif()
     endif()
   elseif (${libraryName} STREQUAL "icu")
@@ -743,9 +793,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif ()
 
     if (${addPaths})
-      include_directories(${ICU_INCLUDE_DIRS})
-      link_libraries(${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
-      add_definitions("-DHAVE_LIBICU")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${ICU_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBICU")
     endif()
   elseif (${libraryName} STREQUAL "intl")
     find_package(LibIntl ${requiredVersion})
@@ -755,11 +805,11 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBINTL_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBINTL_INCLUDE_DIRS})
       if (LIBINTL_LIBRARIES)
-        link_libraries(${LIBINTL_LIBRARIES})
+        HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBINTL_LIBRARIES})
       endif()
-      add_definitions("-DHAVE_LIBINTL")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBINTL")
     endif()
   elseif (${libraryName} STREQUAL "jpeg")
     find_package(LibJpeg ${requiredVersion})
@@ -769,10 +819,10 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBJPEG_INCLUDE_DIRS})
-      link_libraries(${LIBJPEG_LIBRARIES})
-      add_definitions("-DHAVE_LIBJPEG")
-      add_definitions("-DHAVE_GD_JPG")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBJPEG_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBJPEG_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBJPEG")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_GD_JPG")
     endif()
   elseif (${libraryName} STREQUAL "jsonc")
     find_package(Libjsonc ${requiredVersion})
@@ -782,9 +832,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBJSONC_INCLUDE_DIR})
-      link_libraries(${LIBJSONC_LIBRARY})
-      add_definitions("-DHAVE_LIBJSONC")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBJSONC_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBJSONC_LIBRARY})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBJSONC")
     endif()
   elseif (${libraryName} STREQUAL "ldap")
     find_package(Ldap ${requiredVersion})
@@ -794,9 +844,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LDAP_INCLUDE_DIR})
-      link_libraries(${LDAP_LIBRARIES})
-      add_definitions("-DHAVE_LIBLDAP")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LDAP_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LDAP_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBLDAP")
     endif()
   elseif (${libraryName} STREQUAL "magickwand")
     find_package(LibMagickWand ${requiredVersion})
@@ -806,9 +856,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBMAGICKWAND_INCLUDE_DIRS})
-      link_libraries(${LIBMAGICKWAND_LIBRARIES} ${LIBMAGICKCORE_LIBRARIES})
-      add_definitions("-DHAVE_LIBMAGICKWAND")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBMAGICKWAND_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBMAGICKWAND_LIBRARIES} ${LIBMAGICKCORE_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMAGICKWAND")
     endif()
   elseif (${libraryName} STREQUAL "mcrypt")
     find_package(Mcrypt ${requiredVersion})
@@ -818,9 +868,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${Mcrypt_INCLUDE_DIR})
-      link_libraries(${Mcrypt_LIB})
-      add_definitions("-DHAVE_LIBMCRYPT")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${Mcrypt_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${Mcrypt_LIB})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMCRYPT")
     endif()
   elseif (${libraryName} STREQUAL "memcached")
     find_package(Libmemcached ${requiredVersion})
@@ -843,9 +893,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBMEMCACHED_INCLUDE_DIR})
-      link_libraries(${LIBMEMCACHED_LIBRARY})
-      add_definitions("-DHAVE_LIBMEMCACHED")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBMEMCACHED_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBMEMCACHED_LIBRARY})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMEMCACHED")
     endif()
   elseif (${libraryName} STREQUAL "mysql")
     # mysql checks - if we're using async mysql, we use webscalesqlclient from
@@ -857,12 +907,12 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       )
 
       if (${addPaths})
-        include_directories(
+        HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(
           ${TP_DIR}/re2/src/
           ${TP_DIR}/squangle/src/
           ${TP_DIR}/webscalesqlclient/src/include/
         )
-        add_definitions("-DENABLE_ASYNC_MYSQL=1")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DENABLE_ASYNC_MYSQL=1")
       endif()
     else()
       find_package(MySQL ${requiredVersion})
@@ -873,14 +923,14 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
 
       if (${addPaths})
         link_directories(${MYSQL_LIB_DIR})
-        include_directories(${MYSQL_INCLUDE_DIR})
+        HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${MYSQL_INCLUDE_DIR})
       endif()
     endif()
 
     MYSQL_SOCKET_SEARCH()
     if (MYSQL_UNIX_SOCK_ADDR)
       if (${addPaths})
-        add_definitions("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
       endif()
     elseif (NOT ${addPaths})
       HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
@@ -890,7 +940,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      link_libraries(${MYSQL_CLIENT_LIBS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${MYSQL_CLIENT_LIBS})
     endif()
   elseif (${libraryName} STREQUAL "pgsql")
     FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h
@@ -914,8 +964,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
     
     if(${addPaths})
-      include_directories(${PGSQL_INCLUDE_DIR})
-      link_libraries(${PGSQL_LIBRARY})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${PGSQL_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${PGSQL_LIBRARY})
     endif()
   elseif (${libraryName} STREQUAL "png")
     find_package(LibPng ${requiredVersion})
@@ -925,11 +975,11 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBPNG_INCLUDE_DIRS})
-      link_libraries(${LIBPNG_LIBRARIES})
-      add_definitions("-DHAVE_LIBPNG")
-      add_definitions("-DHAVE_GD_PNG")
-      add_definitions("-DPNG_SKIP_SETJMP_CHECK")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBPNG_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBPNG_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBPNG")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_GD_PNG")
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPNG_SKIP_SETJMP_CHECK")
     endif()
   elseif (${libraryName} STREQUAL "snappy")
     find_package(Snappy ${requiredVersion})
@@ -939,8 +989,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${SNAPPY_INCLUDE_DIRS})
-      link_libraries(${SNAPPY_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${SNAPPY_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${SNAPPY_LIBRARIES})
     endif()
   elseif (${libraryName} STREQUAL "vpx")
     find_package(LibVpx ${requiredVersion})
@@ -950,9 +1000,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBVPX_INCLUDE_DIRS})
-      link_libraries(${LIBVPX_LIBRARIES})
-      add_definitions("-DHAVE_LIBVPX")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBVPX_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBVPX_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBVPX")
     endif()
   elseif (${libraryName} STREQUAL "xml2")
     find_package(LibXml2 ${requiredVersion})
@@ -962,10 +1012,10 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBXML2_INCLUDE_DIR})
-      add_definitions(${LIBXML2_DEFINITIONS})
-      link_libraries(${LIBXML2_LIBRARIES})
-      add_definitions("-DHAVE_LIBXML2")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBXML2_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES(${LIBXML2_DEFINITIONS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBXML2_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBXML2")
     endif()
   elseif (${libraryName} STREQUAL "xslt")
     find_package(LibXslt ${requiredVersion})
@@ -975,13 +1025,13 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBXSLT_INCLUDE_DIR})
-      add_definitions(${LIBXSLT_DEFINITIONS})
-      link_libraries(${LIBXSLT_LIBRARIES} ${LIBXSLT_EXSLT_LIBRARIES})
-      add_definitions("-DHAVE_LIBXSLT")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBXSLT_INCLUDE_DIR})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES(${LIBXSLT_DEFINITIONS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBXSLT_LIBRARIES} ${LIBXSLT_EXSLT_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBXSLT")
       if (LIBXSLT_STATIC)
-        add_definitions("-DLIBXSLT_STATIC=1")
-        add_definitions("-DLIBEXSLT_STATIC=1")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DLIBXSLT_STATIC=1")
+        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DLIBEXSLT_STATIC=1")
       endif()
     endif()
   elseif (${libraryName} STREQUAL "uodbc")
@@ -992,9 +1042,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
 
     if (${addPaths})
-      include_directories(${LIBUODBC_INCLUDE_DIRS})
-      link_libraries(${LIBUODBC_LIBRARIES})
-      add_definitions("-DHAVE_LIBUODBC")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBUODBC_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBUODBC_LIBRARIES})
+      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBUODBC")
     endif()
   else()
     message(FATAL_ERROR "Unknown library '${originalLibraryName}' as a dependency of the '${HHVM_EXTENSION_${extensionID}_PRETTY_NAME}' extension!")

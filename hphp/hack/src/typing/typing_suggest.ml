@@ -111,32 +111,6 @@ let save_initialized_members cname inits = if !is_suggest_mode then begin
   initialized_members := SMap.add cname inits !initialized_members
 end
 
-(* Normally, when we unify ?int and int, we don't want
- * them to be compatible, but here things are different,
- * we are trying to guess what the type should be.
-*)
-let rec my_unify depth env ty1 ty2 =
-  let my_unify = my_unify (depth+1) in
-  if depth > 10 then fst ty1, Tunresolved [ty1; ty2] else
-  match ty1, ty2 with
-  | (r, Tmixed), _
-  | _, (r, Tmixed) -> r, Tmixed
-  | (_, Tunresolved [ty1]), ty2
-  | ty2, (_, Tunresolved [ty1]) ->
-     my_unify env ty1 ty2
-  | (r, Toption ty1), (_, Toption ty2) ->
-      r, Toption (my_unify env ty1 ty2)
-  | (r, Toption ty1), ty2
-  | ty2, (r, Toption ty1) ->
-      r, Toption (my_unify env ty1 ty2)
-  | (r, Tarraykind _), (_, Tarraykind _) ->
-      (try snd (Typing_ops.unify Pos.none Typing_reason.URnone env ty1 ty2)
-      with _ -> (r, Tarraykind AKany))
-  | (_, Tunresolved tyl), ty2
-  | ty2, (_, Tunresolved tyl) ->
-      List.fold_left tyl ~f:(my_unify env) ~init:ty2
-  | (r, _), _ -> snd (TUtils.fold_unresolved env (r, Tunresolved [ty1; ty2]))
-
 (** returns the classes/interfaces implemented by a class
  * we are only interested in the non-parametric ones, infering
  * the parameter would be too hard anyway.

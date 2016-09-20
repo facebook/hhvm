@@ -292,6 +292,7 @@ module type CheckKindType = sig
     phase_2_decl_defs:FileInfo.fast ->
     files_info:FileInfo.t Relative_path.Map.t ->
     to_recheck:Relative_path.Set.t ->
+    env:ServerEnv.env ->
     FileInfo.fast
 
   (* Update the global state based on resuts of all phases *)
@@ -335,7 +336,9 @@ module FullCheckKind : CheckKindType = struct
     extend_fast Relative_path.Map.empty files_info env.needs_decl,
     Relative_path.Map.empty
 
-  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_recheck =
+  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_recheck ~env =
+    let to_recheck = Relative_path.Set.union env.failed_decl to_recheck in
+    let to_recheck = Relative_path.Set.union env.failed_check to_recheck in
     extend_fast phase_2_decl_defs files_info to_recheck
 
   let get_new_env ~old_env ~files_info ~errorl ~failed_parsing ~failed_naming
@@ -383,9 +386,12 @@ module LazyCheckKind : CheckKindType = struct
     Relative_path.Map.empty,
     extend_fast decl_defs files_info to_redecl_phase2
 
-  let get_defs_to_recheck ~phase_2_decl_defs ~files_info:_ ~to_recheck:_ =
-    (* Do not add any additional fanout *)
-    phase_2_decl_defs
+  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_recheck ~env =
+    (* Add only fanout related to open IDE files *)
+    let to_recheck = Relative_path.Set.filter to_recheck
+      ~f:(Relative_path.Map.mem env.edited_files)
+    in
+    extend_fast phase_2_decl_defs files_info to_recheck
 
   let get_new_env ~old_env ~files_info ~errorl:_ ~failed_parsing:_
     ~failed_naming:_ ~failed_decl:_ ~lazy_decl_later
@@ -492,8 +498,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     (* DECLARING TYPES: merging results of the 2 phases *)
     let fast = Relative_path.Map.union fast fast_redecl_phase2_now in
-    let to_recheck = Relative_path.Set.union env.failed_decl to_redecl_phase2 in
-    let to_recheck = Relative_path.Set.union to_recheck1 to_recheck in
+    let to_recheck = Relative_path.Set.union to_recheck1 to_redecl_phase2 in
     let to_recheck = Relative_path.Set.union to_recheck2 to_recheck in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
@@ -501,8 +506,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration "Type-decl" t in
 
     (* TYPE CHECKING *)
-    let to_recheck = Relative_path.Set.union to_recheck env.failed_check in
-    let fast = CheckKind.get_defs_to_recheck fast files_info to_recheck in
+    let fast = CheckKind.get_defs_to_recheck fast files_info to_recheck env in
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     let errorl', err_info =

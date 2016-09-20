@@ -66,15 +66,18 @@ struct RelocationInfo {
   std::set<TCA> addressImmediates;
 };
 
-/*
- * Wrappers
- */
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
-void adjustMetaDataForRelocation(RelocationInfo&, AsmInfo*, CGMeta&);
+void adjustMetaDataForRelocation(RelocationInfo& rel,
+                                 AsmInfo* asmInfo,
+                                 CGMeta& fixups);
 void findFixups(TCA start, TCA end, CGMeta& fixups);
-size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CGMeta&, TCA*);
+size_t relocate(RelocationInfo& rel,
+                CodeBlock& destBlock,
+                TCA start, TCA end,
+                CGMeta& fixups,
+                TCA* exitAddr);
 
 }}
 

@@ -341,7 +341,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     auto start DEBUG_ONLY = dest.frontier();
     try {
       relocate(rel, dest,
-                    reloc.start, reloc.end, reloc.fixups, nullptr);
+               reloc.start, reloc.end, reloc.fixups, nullptr);
     } catch (const DataBlockFull& dbf) {
       break;
     }
@@ -744,11 +744,11 @@ void relocateTranslation(
   size_t asm_count{0};
 
   asm_count += relocate(rel, main_in,
-                             main.base(), main.frontier(),
-                             meta, nullptr);
+                        main.base(), main.frontier(),
+                        meta, nullptr);
   asm_count += relocate(rel, cold_in,
-                             cold.base(), cold.frontier(),
-                             meta, nullptr);
+                        cold.base(), cold.frontier(),
+                        meta, nullptr);
 
   TRACE(1, "asm %ld\n", asm_count);
 

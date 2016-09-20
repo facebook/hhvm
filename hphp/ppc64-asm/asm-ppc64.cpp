@@ -784,7 +784,7 @@ void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
     return;
   }
 
-  bool fits32 = HPHP::RuntimeOption::EvalPPC64useTOCLwz && fits(imm64, 32);
+  bool fits32 = fits(imm64, 32);
   int64_t TOCoffset;
   if (fits32) {
     TOCoffset = VMTOC::getInstance().pushElem(

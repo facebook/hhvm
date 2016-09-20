@@ -30,7 +30,8 @@ module Dep :
     val compare : t -> t -> int
   end
 
-module DepSet : module type of Set.Make (Dep)
+module DepSet : module type of
+  Reordered_argument_collections.Reordered_argument_set(Set.Make (Dep))
 
 val trace : bool ref
 

@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Reordered_argument_collections
 open Utils
 
 (**********************************)
@@ -78,7 +79,7 @@ module Dep = struct
 
 end
 
-module DepSet = Set.Make (Dep)
+module DepSet = Reordered_argument_set(Set.Make (Dep))
 
 (****************************************************************************)
 (* Module for a compact graph. *)
@@ -93,7 +94,7 @@ module Graph = struct
   let get x =
     let l = hh_get_dep x in
     List.fold_left l ~f:begin fun acc node ->
-      DepSet.add node acc
+      DepSet.add acc node
     end ~init:DepSet.empty
 end
 
@@ -150,12 +151,12 @@ let get_bazooka x =
 let (ifiles: (Dep.t, Relative_path.Set.t) Hashtbl.t ref) = ref (Hashtbl.create 23)
 
 let get_files deps =
-  DepSet.fold begin fun dep acc ->
+  DepSet.fold ~f:begin fun dep acc ->
     try
       let files = Hashtbl.find !ifiles dep in
       Relative_path.Set.union files acc
     with Not_found -> acc
-  end deps Relative_path.Set.empty
+  end deps ~init:Relative_path.Set.empty
 
 let update_files fast =
   Relative_path.Map.iter fast begin fun filename info ->
@@ -166,16 +167,16 @@ let update_files fast =
          consider_names_just_for_autoload = _;
         } = info in
     let funs = List.fold_left funs ~f:begin fun acc (_, fun_id) ->
-      DepSet.add (Dep.make (Dep.Fun fun_id)) acc
+      DepSet.add acc (Dep.make (Dep.Fun fun_id))
     end ~init:DepSet.empty in
     let classes = List.fold_left classes ~f:begin fun acc (_, class_id) ->
-      DepSet.add (Dep.make (Dep.Class class_id)) acc
+      DepSet.add acc (Dep.make (Dep.Class class_id))
     end ~init:DepSet.empty in
     let classes = List.fold_left typedefs ~f:begin fun acc (_, type_id) ->
-      DepSet.add (Dep.make (Dep.Class type_id)) acc
+      DepSet.add acc (Dep.make (Dep.Class type_id))
     end ~init:classes in
     let defs = DepSet.union funs classes in
-    DepSet.iter begin fun def ->
+    DepSet.iter ~f:begin fun def ->
       let previous =
         try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
       in

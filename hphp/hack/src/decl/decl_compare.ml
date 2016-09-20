@@ -458,19 +458,19 @@ let class_big_diff class1 class2 =
  *)
 (*****************************************************************************)
 let rec get_extend_deps_ trace cid_hash to_redecl =
-  if DepSet.mem cid_hash !trace
+  if DepSet.mem !trace cid_hash
   then to_redecl
   else begin
-    trace := DepSet.add cid_hash !trace;
+    trace := DepSet.add !trace cid_hash;
     let cid_hash = Typing_deps.Dep.extends_of_class cid_hash in
     let ideps = Typing_deps.get_ideps_from_hash cid_hash in
-    DepSet.fold begin fun obj acc ->
+    DepSet.fold ~f:begin fun obj acc ->
       if Typing_deps.Dep.is_class obj
       then
-        let to_redecl = DepSet.add obj acc in
+        let to_redecl = DepSet.add acc obj in
         get_extend_deps_ trace obj to_redecl
       else to_redecl
-    end ideps to_redecl
+    end ideps ~init:to_redecl
   end
 
 (*****************************************************************************)

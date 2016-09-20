@@ -203,7 +203,7 @@ let fun_to_method f =
     (* Copy the rest over *)
     m_name = f.f_name; m_tparams = f.f_tparams; m_variadic = f.f_variadic;
     m_params = f.f_params; m_body = f.f_body; m_fun_kind = f.f_fun_kind;
-    m_user_attributes = f.f_user_attributes; m_ret = f.f_ret
+    m_user_attributes = f.f_user_attributes; m_ret = f.f_ret; m_locl_cstrs = []
   }
 
 let emit_fun nenv env f =

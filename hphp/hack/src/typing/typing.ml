@@ -1038,6 +1038,7 @@ and expr_
               ft_abstract = false;
               ft_arity = fun_arity;
               ft_tparams = fty.ft_tparams;
+              ft_locl_cstr = fty.ft_locl_cstr;
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
             } in
@@ -2104,7 +2105,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                 ft_pos = fty.ft_pos;
                 ft_deprecated = None;
                 ft_abstract = false;
-                ft_arity = Fstandard (arity, arity); ft_tparams = [];
+                ft_arity = Fstandard (arity, arity);
+                ft_tparams = [];
+                ft_locl_cstr = [];
                 ft_params = List.map vars (fun x -> (None, x));
                 ft_ret = tr;
               }
@@ -3856,7 +3859,11 @@ and check_implements_tparaml (env: Env.env) ht =
           match ck with
           | Ast.Constraint_as ->
             ignore (Type.sub_type_decl p Reason.URnone env ty cstr)
-          | Ast.Constraint_eq -> raise (TODODrphil "typing")
+          | Ast.Constraint_eq ->
+            (* This code could well be unreachable, because we don't allow
+             * equality constraints on class generics. *)
+            ignore (Type.sub_type_decl p Reason.URnone env ty cstr);
+            ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
           | Ast.Constraint_super ->
             ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
         end
@@ -4119,9 +4126,10 @@ and method_def env m =
   Reason.expr_display_id_map := IMap.empty;
   Typing_hooks.dispatch_enter_method_def_hook m;
   let env = Env.env_with_locals env Local_id.Map.empty in
-  let env = Phase.localize_generic_parameters_with_bounds env m.m_tparams
+  let todo = m.m_tparams @ m.m_locl_cstrs in
+  let env = Phase.localize_generic_parameters_with_bounds env todo
     ~ety_env:({ (Phase.env_with_self env) with from_class = Some CIstatic; }) in
-  TI.check_tparams_instantiable env m.m_tparams;
+  TI.check_tparams_instantiable env todo;
   let env = Env.set_local env this (Env.get_self env) in
   let env, ret = match m.m_ret with
     | None -> env, (Reason.Rwitness (fst m.m_name), Tany)

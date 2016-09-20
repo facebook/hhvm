@@ -198,6 +198,7 @@ and fun_decl_in_env env f =
     ft_abstract    = false;
     ft_arity       = arity;
     ft_tparams     = tparams;
+    ft_locl_cstr   = [];
     ft_params      = params;
     ft_ret         = ret_ty;
   } in
@@ -669,6 +670,7 @@ and method_decl env m =
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
   in
   let tparams = List.map m.m_tparams (type_param env) in
+  let locl_cstrs = List.map m.m_locl_cstrs (type_param env) in
   {
     ft_pos      = fst m.m_name;
     ft_deprecated =
@@ -676,6 +678,7 @@ and method_decl env m =
     ft_abstract = m.m_abstract;
     ft_arity    = arity;
     ft_tparams  = tparams;
+    ft_locl_cstr= locl_cstrs;
     ft_params   = params;
     ft_ret      = ret;
   }

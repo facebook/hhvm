@@ -46,6 +46,7 @@ type position_descr =
                                    * A<T1, ..>, T1 is (Rtype_argument "A")
                                    *)
   | Rconstraint_as
+  | Rconstraint_eq
   | Rconstraint_super
 
 type position_variance =
@@ -147,6 +148,8 @@ let reason_to_string ~sign (_, descr, variance) =
       "`super` constraints on method type parameters are covariant"
   | Rconstraint_as ->
       "`as` constraints on method type parameters are contravariant"
+  | Rconstraint_eq ->
+      "`=` constraints on method type parameters are invariant"
 
 let detailed_message variance pos stack =
   match stack with
@@ -604,15 +607,13 @@ and type_ tcopt root variance env (reason, ty) =
  * however -- you can't imagine doing very much with a returned value that is
  * some (unspecified) supertype of a class.
  *)
-and constraint_ tcopt root env cstr =
-  match cstr with
-  | Ast.Constraint_as, (r, _ as ty) ->
-      let pos = Reason.to_pos r in
-      let reason = pos, Rconstraint_as, Pcontravariant in
-      type_ tcopt root (Vcontravariant [reason]) env ty
-  | Ast.Constraint_eq, _ ->
-      raise (TODODrphil "variance")
-  | Ast.Constraint_super, (r, _ as ty) ->
-      let pos = Reason.to_pos r in
-      let reason = pos, Rconstraint_super, Pcovariant in
-      type_ tcopt root (Vcovariant [reason]) env ty
+and constraint_ tcopt root env (ck, (r, _ as ty)) =
+  let pos = Reason.to_pos r in
+  let var = match ck with
+    | Ast.Constraint_as -> Vcontravariant [pos, Rconstraint_as, Pcontravariant]
+    | Ast.Constraint_eq ->
+      let reasons = [pos, Rconstraint_eq, Pinvariant] in
+      Vinvariant (reasons, reasons)
+    | Ast.Constraint_super -> Vcovariant [pos, Rconstraint_super, Pcovariant]
+  in
+  type_ tcopt root var env ty

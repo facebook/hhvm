@@ -10,13 +10,6 @@ class Foo<T> {
     Tx = Vector<int>,
   {}
 
-  public function baz<Ta, Tb, Tc>(): Foo<Ta>
-  where
-    KeyedTraversable<Ta, Tb> super Map<Tc,T>,
-  {
-    return new Foo();
-  }
-
   public function qux<Tx>(Tx $x): Tx where Tx = T {
     return $x;
   }

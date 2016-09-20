@@ -197,6 +197,13 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
   (* Set the instantiated type parameter to initially point to unresolved, so
    * that it can grow and eventually be a subtype of something like "mixed".
    *)
+  let localize_tparam env (var, name, cstrl) =
+    let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
+      let env, ty = localize ~ety_env env ty in
+      env, (ck, ty)
+    end in
+    env, (var, name, cstrl)
+  in
   let env, substs =
     if instantiate_tparams
     then
@@ -214,15 +221,8 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
     let env, param = localize ~ety_env env param in
     env, (name, param)
   end in
-  let env, tparams = List.map_env env ft.ft_tparams
-      begin fun env (var, name, cstrl) ->
-        let env, cstrl = List.map_env env cstrl
-            (fun env (ck, ty) ->
-               let env, ty = localize ~ety_env env ty in
-               env, (ck, ty)) in
-        env, (var, name, cstrl)
-    end in
-
+  let env, tparams = List.map_env env ft.ft_tparams localize_tparam in
+  let env, locl_cstr = List.map_env env ft.ft_locl_cstr localize_tparam in
   let env, arity = match ft.ft_arity with
     | Fvariadic (min, (name, var_ty)) ->
        let env, var_ty = localize ~ety_env env var_ty in
@@ -230,7 +230,7 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
     | Fellipsis _ | Fstandard (_, _) as x -> env, x in
   let env, ret = localize ~ety_env env ft.ft_ret in
   env, { ft with ft_arity = arity; ft_params = params;
-                 ft_ret = ret; ft_tparams = tparams }
+                 ft_ret = ret; ft_tparams = tparams; ft_locl_cstr = locl_cstr }
 
 let env_with_self env =
   {
@@ -250,12 +250,15 @@ let localize_generic_parameters_with_bounds
     ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
   let env = Env.add_generic_parameters env tparams in
   let add_bound env ((_, (_,id), cstrl): Nast.tparam) =
-    List.fold_left cstrl ~init:env ~f:(fun env (ck, h) ->
+    List.fold_left cstrl ~init:env ~f:begin fun env (ck, h) ->
       let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
       match ck with
       | Ast.Constraint_super -> Env.add_lower_bound env id ty
+      | Ast.Constraint_eq    ->
+        let env = Env.add_upper_bound env id ty in
+        Env.add_lower_bound env id ty
       | Ast.Constraint_as    -> Env.add_upper_bound env id ty
-      | _ -> raise (TODODrphil "typing")) in
+  end in
   List.fold_left tparams ~f:add_bound ~init:env
 
 

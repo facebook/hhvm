@@ -37,7 +37,12 @@ let check_constraint env ck cstr_ty ty =
              * expanded type. *)
             TUtils.sub_type env ety cstr_ty
         | Ast.Constraint_eq ->
-            raise (Core.TODODrphil "generic constraint")
+            (* An equality constraint is the same as two commuting `as`
+             * constraints, i.e. X=Y is { X as Y, Y as X }. Thus, add
+             * add both expansions to the environment. We don't expand
+             * both sides of the equation simultaniously, to preserve an
+             * easier convergence indication. *)
+            TUtils.sub_type (TUtils.sub_type env ecstr_ty ty) ety cstr_ty
         | Ast.Constraint_super ->
             (* If cstr_ty is a Tvar, we don't want to unify that Tvar with
              * ty; we merely want the constraint itself to be added to the

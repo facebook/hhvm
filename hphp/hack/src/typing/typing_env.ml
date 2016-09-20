@@ -155,6 +155,7 @@ let make_ft p params ret_ty =
     ft_abstract = false;
     ft_arity    = Fstandard (arity, arity);
     ft_tparams  = [];
+    ft_locl_cstr= [];
     ft_params   = params;
     ft_ret      = ret_ty;
   }

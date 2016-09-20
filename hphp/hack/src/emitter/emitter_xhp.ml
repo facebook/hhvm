@@ -77,7 +77,7 @@ let named_body block = N.NamedBody {N.fnb_nast = block; N.fnb_unsafe = false }
 let empty_method name =
   {
     N.m_final = false; m_abstract = false; m_visibility = N.Protected;
-    m_tparams = []; m_variadic = N.FVnonVariadic;
+    m_tparams = []; m_locl_cstrs = []; m_variadic = N.FVnonVariadic;
     m_params = []; m_fun_kind = Ast.FSync;
     m_user_attributes = []; m_ret = None;
     m_body = named_body [];

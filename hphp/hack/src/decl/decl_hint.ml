@@ -61,6 +61,7 @@ and hint_ p env = function
       ft_abstract = false;
       ft_arity = arity;
       ft_tparams = [];
+      ft_locl_cstr = [];
       ft_params = paraml;
       ft_ret = ret;
     }

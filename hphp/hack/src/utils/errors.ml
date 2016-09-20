@@ -492,6 +492,7 @@ module NastCheck                            = struct
   let constructor_required                  = 3030 (* DONT MODIFY!!!! *)
   let interface_with_partial_typeconst      = 3031 (* DONT MODIFY!!!! *)
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
+  let malformed_locl_cstr                   = 3033 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1118,6 +1119,10 @@ let interface_with_partial_typeconst tconst_pos =
 let multiple_xhp_category pos =
   add NastCheck.multiple_xhp_category pos
     "XHP classes can only contain one category declaration"
+
+let malformed_locl_cstr pos =
+  add NastCheck.malformed_locl_cstr pos
+    "We currently only support a single generic on the LHS"
 
 let return_in_gen p =
   add NastCheck.return_in_gen p

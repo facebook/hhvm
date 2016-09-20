@@ -316,13 +316,14 @@ and shape_fields_known =
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'phase fun_type = {
-  ft_pos       : Pos.t;
-  ft_deprecated: string option   ;
-  ft_abstract  : bool            ;
-  ft_arity     : 'phase fun_arity    ;
-  ft_tparams   : 'phase tparam list     ;
-  ft_params    : 'phase fun_params   ;
-  ft_ret       : 'phase ty           ;
+  ft_pos        : Pos.t               ;
+  ft_deprecated : string option       ;
+  ft_abstract   : bool                ;
+  ft_arity      : 'phase fun_arity    ;
+  ft_tparams    : 'phase tparam list  ;
+  ft_locl_cstr  : 'phase tparam list  ;
+  ft_params     : 'phase fun_params   ;
+  ft_ret        : 'phase ty           ;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of

@@ -159,10 +159,11 @@ and method_ = {
   m_visibility      : visibility          ;
   m_name            : sid                 ;
   m_tparams         : tparam list         ;
+  m_locl_cstrs      : tparam list         ;
   m_variadic        : fun_variadicity     ;
   m_params          : fun_param list      ;
   m_body            : func_body           ;
-  m_fun_kind        : Ast.fun_kind;
+  m_fun_kind        : Ast.fun_kind        ;
   m_user_attributes : user_attribute list ;
   m_ret             : hint option         ;
 }

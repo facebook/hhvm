@@ -49,9 +49,10 @@ let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
       match ck with
       | Ast.Constraint_super ->
         Env.add_lower_bound env name ty
+      | Ast.Constraint_eq ->
+        Env.add_upper_bound (Env.add_lower_bound env name ty) name ty
       | Ast.Constraint_as ->
-        Env.add_upper_bound env name ty
-      | _ -> raise (TODODrphil "typing")) in
+        Env.add_upper_bound env name ty) in
 
   let env = List.fold_left ft_sub.ft_tparams ~f:add_bound ~init:env in
 

@@ -767,8 +767,8 @@ void Assembler::loadTOC(const Reg64& rt, const Reg64& rttoc,  int64_t imm64,
 }
 
 void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
-  always_assert(HPHP::RuntimeOption::EvalPPC64minTOCImmSize >= 0 &&
-    HPHP::RuntimeOption::EvalPPC64minTOCImmSize <= 64);
+  always_assert(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize >= 0 &&
+    HPHP::RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
 
   auto fits = [](int64_t imm64, uint16_t shift_n) {
      return (static_cast<uint64_t>(imm64) >> shift_n) == 0 ? true : false;
@@ -778,7 +778,7 @@ void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
 #ifndef USE_TOC_ON_BRANCH
       1 ||
 #endif
-      (fits(imm64, HPHP::RuntimeOption::EvalPPC64minTOCImmSize)
+      (fits(imm64, HPHP::RuntimeOption::EvalPPC64MinTOCImmSize)
       && (immt != ImmType::TocOnly))) {
     li64(rt, imm64, immt != ImmType::AnyCompact);
     return;

@@ -618,7 +618,7 @@ struct RuntimeOption {
    * processing a previous sample. */                                   \
   F(uint32_t, PerfMemEventSampleFreq, 80)                               \
   /* PPC64 Option: Minimum immediate size to use TOC */                 \
-  F(uint16_t, PPC64minTOCImmSize, 64)                                   \
+  F(uint16_t, PPC64MinTOCImmSize, 64)                                   \
   /* */
 
 private:

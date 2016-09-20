@@ -37,8 +37,7 @@ let debug () fnl =
       let parsing_errors1, parser_output1, _ = Errors.do_ begin fun () ->
         let rp =
           Relative_path.create Relative_path.Dummy (filepath :> string) in
-        (* FIXME: Don't use default tcopt *)
-        Parser_hack.program TypecheckerOptions.default rp content
+        Parser_hack.program_with_default_popt rp content
       end in
       if parser_output1.Parser_hack.file_mode = None
         || not (Errors.is_empty parsing_errors1)
@@ -97,8 +96,7 @@ let debug () fnl =
       (* Checking that we can parse the output *)
       let parsing_errors2, _parser_output2, _ = Errors.do_ begin fun () ->
         let rp = Relative_path.(create Dummy (filepath :> string)) in
-        (* FIXME: Don't use default tcopt *)
-        Parser_hack.program TypecheckerOptions.default rp content
+        Parser_hack.program_with_default_popt rp content
       end in
       if not (Errors.is_empty parsing_errors2)
       then begin

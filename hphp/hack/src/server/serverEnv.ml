@@ -42,6 +42,7 @@ type genv = {
 type env = {
     files_info     : FileInfo.t Relative_path.Map.t;
     tcopt          : TypecheckerOptions.t;
+    popt           : ParserOptions.t;
     errorl         : Errors.t;
     (* Keeps list of files containing parsing errors in the last iteration. *)
     failed_parsing : Relative_path.Set.t;

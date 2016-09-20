@@ -13,13 +13,16 @@ type env = {
   ns_fun_uses: string SMap.t;
   ns_const_uses: string SMap.t;
   ns_name: string option;
-  ns_tcopt: TypecheckerOptions.t;
+  ns_popt: ParserOptions.t;
 }
 
-let empty tcopt = {
+let empty popt = {
   ns_uses = SMap.empty;
   ns_fun_uses = SMap.empty;
   ns_const_uses = SMap.empty;
   ns_name = None;
-  ns_tcopt = tcopt;
+  ns_popt = popt;
 }
+
+let empty_with_default_popt =
+  empty ParserOptions.default

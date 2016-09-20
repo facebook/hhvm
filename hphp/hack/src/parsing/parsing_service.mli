@@ -13,7 +13,7 @@ val go:
   Worker.t list option ->
   File_content.t Relative_path.Map.t ->
   get_next:(unit -> Relative_path.t list) ->
-  TypecheckerOptions.t ->
+  ParserOptions.t ->
   FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t
 
 (* used by hack build *)

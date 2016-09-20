@@ -46,11 +46,9 @@ let parse_file (file : Relative_path.t) :
       (List.fold_left begin fun acc (sub_fn, content) ->
          let file =
            Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
-         (* FIXME: Don't use default tcopt *)
          (file, content,
-          (Parser_hack.program TypecheckerOptions.default file content)) :: acc
+          (Parser_hack.program_with_default_popt file content)) :: acc
       end [] files)
   else
-    (* FIXME: Don't use default tcopt *)
     [(file, content,
-      Parser_hack.program TypecheckerOptions.default file content)]
+      Parser_hack.program_with_default_popt file content)]

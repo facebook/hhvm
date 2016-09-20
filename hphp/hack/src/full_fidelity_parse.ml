@@ -43,8 +43,7 @@ let parse_and_print filename =
   Printf.printf "\n----\n";
   let errorl, result, _ =
     Errors.do_ begin fun () ->
-      (* FIXME: Don't use default tcopt *)
-      Parser_hack.from_file TypecheckerOptions.default file
+      Parser_hack.from_file_with_default_popt file
     end
   in
   if not (Errors.is_empty errorl) then begin

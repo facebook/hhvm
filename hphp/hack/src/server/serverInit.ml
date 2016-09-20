@@ -209,7 +209,7 @@ let parsing genv env ~get_next t =
       genv.workers
       Relative_path.Map.empty
       ~get_next
-      env.tcopt in
+      env.popt in
   let files_info = Relative_path.Map.union files_info env.files_info in
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;

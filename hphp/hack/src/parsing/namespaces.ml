@@ -132,7 +132,7 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
     else if autoimport && is_autoimport_name id then "\\" ^ id
     else begin
       let id = exists_in_auto_ns_map
-        (TypecheckerOptions.auto_namespace_map nsenv.ns_tcopt) id in
+        (ParserOptions.auto_namespace_map nsenv.ns_popt) id in
       (* Expand "use" imports. *)
       let (bslash_loc, has_bslash) =
         try String.index id '\\', true
@@ -253,5 +253,5 @@ module ElaborateDefs = struct
     List.concat (List.rev acc)
 end
 
-let elaborate_defs tcopt ast =
-  ElaborateDefs.program (Namespace_env.empty tcopt) ast
+let elaborate_defs popt ast =
+  ElaborateDefs.program (Namespace_env.empty popt) ast

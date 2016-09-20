@@ -198,7 +198,7 @@ let parsing genv env disk_files ide_files ~stop_at_errors =
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
   let (fast, errors, failed_parsing) as res =
-    Parsing_service.go genv.workers files_map ~get_next env.tcopt in
+    Parsing_service.go genv.workers files_map ~get_next env.popt in
   if stop_at_errors then begin
     (* Revert changes and ignore results for files that failed parsing *)
     let fast = Relative_path.Map.filter fast
@@ -344,6 +344,7 @@ module FullCheckKind : CheckKindType = struct
     {
       files_info;
       tcopt = old_env.tcopt;
+      popt = old_env.popt;
       errorl = errorl;
       failed_parsing = Relative_path.Set.union failed_naming failed_parsing;
       failed_decl = Relative_path.Set.union failed_decl lazy_decl_failed;

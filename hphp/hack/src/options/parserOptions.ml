@@ -8,8 +8,13 @@
  *
  *)
 
-val elaborate_id : Namespace_env.env ->
-                   Ast.ns_kind ->
-                   Ast.id ->
-                   Ast.id
-val elaborate_defs : ParserOptions.t -> Ast.program -> Ast.program
+type t = {
+  (* Namespace map that allows supporting namespace aliasing *)
+  po_auto_namespace_map : (string * string) list;
+}
+
+let default = {
+  po_auto_namespace_map = [];
+}
+
+let auto_namespace_map po = po.po_auto_namespace_map

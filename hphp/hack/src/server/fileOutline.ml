@@ -337,9 +337,7 @@ let add_docblocks defs comments =
 
 let outline content =
   let {Parser_hack.ast; comments; _} =
-    (* FIXME: Don't use default tcopt *)
-    Parser_hack.program
-      TypecheckerOptions.default
+    Parser_hack.program_with_default_popt
       Relative_path.default
       content
       ~include_line_comments:true

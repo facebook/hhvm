@@ -18,12 +18,20 @@ val program :
   ?elaborate_namespaces:bool ->
   ?include_line_comments:bool ->
   ?keep_errors:bool ->
-  TypecheckerOptions.t ->
+  ParserOptions.t ->
+  Relative_path.t ->
+  string -> parser_return
+
+val program_with_default_popt :
+  ?elaborate_namespaces:bool ->
+  ?include_line_comments:bool ->
+  ?keep_errors:bool ->
   Relative_path.t ->
   string -> parser_return
 
 (* Parses a file *)
-val from_file : TypecheckerOptions.t -> Relative_path.t -> parser_return
+val from_file : ParserOptions.t -> Relative_path.t -> parser_return
+val from_file_with_default_popt : Relative_path.t -> parser_return
 
 type saved_lb
 type assoc

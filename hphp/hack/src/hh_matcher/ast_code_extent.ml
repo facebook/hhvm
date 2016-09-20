@@ -42,8 +42,7 @@ let lexing_slice_to_string
 let parse_file file =
   let abs_fn = Relative_path.to_absolute file in
   let content = cat abs_fn in
-  (* FIXME: Don't use default tcopt *)
-  Parser_hack.program TypecheckerOptions.default file content
+  Parser_hack.program_with_default_popt file content
 
 (* required keywords we want to stop before *)
 let hack_keywords =

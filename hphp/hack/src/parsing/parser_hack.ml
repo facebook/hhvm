@@ -24,17 +24,17 @@ type env = {
   lb        : Lexing.lexbuf;
   errors    : (Pos.t * string) list ref;
   in_generator : bool ref;
-  tcopt       : TypecheckerOptions.t;
+  popt      : ParserOptions.t;
 }
 
-let init_env file lb tcopt = {
+let init_env file lb popt = {
   file     = file;
   mode     = FileInfo.Mpartial;
   priority = 0;
   lb       = lb;
   errors   = ref [];
   in_generator = ref false;
-  tcopt    = tcopt;
+  popt     = popt;
 }
 
 type parser_return = {
@@ -428,12 +428,12 @@ let rec program
     ?(elaborate_namespaces = true)
     ?(include_line_comments = false)
     ?(keep_errors = true)
-    tcopt file content =
+    popt file content =
   L.include_line_comments := include_line_comments;
   L.comment_list := [];
   L.fixmes := IMap.empty;
   let lb = Lexing.from_string content in
-  let env = init_env file lb tcopt in
+  let env = init_env file lb popt in
   let ast, file_mode = header env in
   let comments = !L.comment_list in
   let fixmes = !L.fixmes in
@@ -444,9 +444,22 @@ let rec program
     Option.iter (List.last !(env.errors)) Errors.parsing_error
   end;
   let ast = if elaborate_namespaces
-    then Namespaces.elaborate_defs env.tcopt ast
+    then Namespaces.elaborate_defs env.popt ast
     else ast in
   {file_mode; comments; ast}
+
+and program_with_default_popt
+    ?(elaborate_namespaces = true)
+    ?(include_line_comments = false)
+    ?(keep_errors = true)
+    file content =
+      program
+        ~elaborate_namespaces
+        ~include_line_comments
+        ~keep_errors
+        ParserOptions.default
+        file
+        content
 
 (*****************************************************************************)
 (* Hack headers (strict, decl, partial) *)
@@ -663,7 +676,7 @@ and toplevel_word def_start ~attr env = function
             cst_name = x;
             cst_type = h;
             cst_value = y;
-            cst_namespace = Namespace_env.empty env.tcopt;
+            cst_namespace = Namespace_env.empty env.popt;
           } end
       | _ -> assert false)
   | r when is_import r ->
@@ -686,7 +699,7 @@ and define_or_stmt env = function
       cst_name = name;
       cst_type = None;
       cst_value = value;
-      cst_namespace = Namespace_env.empty env.tcopt;
+      cst_namespace = Namespace_env.empty env.popt;
     }
   | stmt ->
       Stmt stmt
@@ -755,7 +768,7 @@ and fun_ fun_start ~attr ~(sync:fun_decl_kind) env =
     f_user_attributes = attr;
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
-    f_namespace = Namespace_env.empty env.tcopt;
+    f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.btw fun_start fun_end;
   }
 
@@ -785,7 +798,7 @@ and class_ class_start ~attr ~final ~kind env =
       c_name            = cname;
       c_extends         = cextends;
       c_body            = cbody;
-      c_namespace       = Namespace_env.empty env.tcopt;
+      c_namespace       = Namespace_env.empty env.popt;
       c_enum            = None;
       c_span         = span;
     }
@@ -819,7 +832,7 @@ and enum_ class_start ~attr env =
       c_name            = cname;
       c_extends         = [];
       c_body            = cbody;
-      c_namespace       = Namespace_env.empty env.tcopt;
+      c_namespace       = Namespace_env.empty env.popt;
       c_enum            = Some
         { e_base       = basety;
           e_constraint = constraint_;
@@ -2704,7 +2717,7 @@ and lambda_body ~sync env params ret =
     f_user_attributes = [];
     f_fun_kind;
     f_mode = env.mode;
-    f_namespace = Namespace_env.empty env.tcopt;
+    f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.none; (* We only care about span of "real" functions *)
   }
   in Lfun f
@@ -3217,7 +3230,7 @@ and expr_anon_fun env pos ~(sync:fun_decl_kind) =
     f_user_attributes = [];
     f_fun_kind = fun_kind sync is_generator;
     f_mode = env.mode;
-    f_namespace = Namespace_env.empty env.tcopt;
+    f_namespace = Namespace_env.empty env.popt;
     f_span = Pos.none; (* We only care about span of "real" functions *)
   }
   in
@@ -3944,7 +3957,7 @@ and typedef ~attr ~is_abstract env =
     t_constraint = tconstraint;
     t_kind = kind;
     t_user_attributes = attr;
-    t_namespace = Namespace_env.empty env.tcopt;
+    t_namespace = Namespace_env.empty env.popt;
     t_mode = env.mode;
   }
 
@@ -4103,7 +4116,10 @@ and namespace_group_use env kind prefix =
 (* Helper *)
 (*****************************************************************************)
 
-let from_file tcopt file =
+let from_file popt file =
   let content =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
-  program tcopt file content
+  program popt file content
+
+let from_file_with_default_popt file =
+  from_file ParserOptions.default file

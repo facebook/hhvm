@@ -23,6 +23,7 @@ type t = {
   gc_control       : Gc.control;
   sharedmem_config : SharedMem.config;
   tc_options       : TypecheckerOptions.t;
+  parser_options   : ParserOptions.t;
 }
 
 let filename = Relative_path.concat Relative_path.Root ".hhconfig"
@@ -152,7 +153,9 @@ let load config_filename options =
         "enable_experimental_tc_features"
         ~default:[]
         config);
-    tco_auto_namespace_map = prepare_auto_namespace_map config;
+  } in
+  let popts = { ParserOptions.
+    po_auto_namespace_map = prepare_auto_namespace_map config;
   } in
   {
     load_script = load_script;
@@ -161,6 +164,7 @@ let load config_filename options =
     gc_control = make_gc_control config;
     sharedmem_config = make_sharedmem_config config options local_config;
     tc_options = tcopts;
+    parser_options = popts;
   }, local_config
 
 (* useful in testing code *)
@@ -171,6 +175,7 @@ let default_config = {
   gc_control = GlobalConfig.gc_control;
   sharedmem_config = GlobalConfig.default_sharedmem_config;
   tc_options = TypecheckerOptions.default;
+  parser_options = ParserOptions.default;
 }
 
 let load_script config = config.load_script
@@ -179,3 +184,4 @@ let load_mini_script config = config.load_mini_script
 let gc_control config = config.gc_control
 let sharedmem_config config = config.sharedmem_config
 let typechecker_options config = config.tc_options
+let parser_options config = config.parser_options

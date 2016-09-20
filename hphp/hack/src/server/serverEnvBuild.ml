@@ -96,6 +96,7 @@ let default_genv =
 
 let make_env config =
   { tcopt          = ServerConfig.typechecker_options config;
+    popt           = ServerConfig.parser_options config;
     files_info     = Relative_path.Map.empty;
     errorl         = Errors.empty;
     failed_parsing = Relative_path.Set.empty;

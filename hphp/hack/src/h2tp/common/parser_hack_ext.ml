@@ -18,10 +18,8 @@ include Parser_hack
 let parse_or_die file =
   let content = cat (Relative_path.to_absolute file) in
   let errors, res, _ = Errors.do_
-    (* FIXME: Don't use default tcopt *)
-    (fun () -> Parser_hack.program
+    (fun () -> Parser_hack.program_with_default_popt
       ~elaborate_namespaces:false
-      TypecheckerOptions.default
       file
       content) in
   if not (Errors.is_empty errors)

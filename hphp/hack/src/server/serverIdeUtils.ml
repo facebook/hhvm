@@ -103,8 +103,7 @@ let declare_and_check content ~f =
   let file_info =
     Errors.ignore_ begin fun () ->
       let {Parser_hack.file_mode = _; comments = _; ast} =
-        (* FIXME: tcopt here doesn't use namespace aliasing *)
-        Parser_hack.program tcopt path content
+        Parser_hack.program_with_default_popt path content
       in
       let funs, classes, typedefs, consts =
         List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->

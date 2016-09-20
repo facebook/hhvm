@@ -29,8 +29,7 @@ let parse_old folder_name loop_const =
     in
     for l =  1 to loop_const do
       (* TODO how to make sure compiler do not optimize away pure functions? *)
-      (* FIXME: Don't use default tcopt *)
-      ignore (Parser_hack.program TypecheckerOptions.default file content)
+      ignore (Parser_hack.program_with_default_popt file content)
     done
   in
   List.iter loop all_files

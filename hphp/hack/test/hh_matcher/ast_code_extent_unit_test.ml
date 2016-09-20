@@ -20,9 +20,8 @@ type code_extent_test = {
 let dummy_path = Relative_path.default
 
 let get_first_method_as_string contents =
-  (* FIXME: Don't use default tcopt *)
   let {Parser_hack.ast; _} =
-    Parser_hack.program TypecheckerOptions.default dummy_path contents in
+    Parser_hack.program_with_default_popt dummy_path contents in
   let methods = Ast_utils.get_methods ast in
   let method_ = List.hd_exn methods in
   let extent = Ast_code_extent.source_extent_method_
@@ -32,27 +31,24 @@ let get_first_method_as_string contents =
   Ast_code_extent.lexing_slice_to_string extent contents
 
 let get_first_typeConst_as_string contents =
-  (* FIXME: Don't use default tcopt *)
   let {Parser_hack.ast; _} =
-    Parser_hack.program TypecheckerOptions.default dummy_path contents in
+    Parser_hack.program_with_default_popt dummy_path contents in
   let typeconsts = Ast_utils.get_typeConsts ast in
   let typeconst = List.hd_exn typeconsts in
   let extent = Ast_code_extent.source_extent_typeConst contents typeconst in
   Ast_code_extent.lexing_slice_to_string extent contents
 
 let get_first_classUse_as_string contents =
-  (* FIXME: Don't use default tcopt *)
   let {Parser_hack.ast; _} =
-    Parser_hack.program TypecheckerOptions.default dummy_path contents in
+    Parser_hack.program_with_default_popt dummy_path contents in
   let classUses = Ast_utils.get_classUses ast in
   let classUse = List.hd_exn classUses in
   let extent = Ast_code_extent.source_extent_classUse contents classUse in
   Ast_code_extent.lexing_slice_to_string extent contents
 
 let get_first_class_header_as_string contents =
-  (* FIXME: Don't use default tcopt *)
   let {Parser_hack.ast; _} =
-    Parser_hack.program TypecheckerOptions.default dummy_path contents in
+    Parser_hack.program_with_default_popt dummy_path contents in
   let classes = Ast_utils.get_classes ast in
   let class_ = List.hd_exn classes in
   let extent = Ast_code_extent.source_extent_class_header
@@ -61,9 +57,8 @@ let get_first_class_header_as_string contents =
   Ast_code_extent.lexing_slice_to_string extent contents
 
 let get_first_class_as_string contents =
-  (* FIXME: Don't use default tcopt *)
   let {Parser_hack.ast; _} =
-    Parser_hack.program TypecheckerOptions.default dummy_path contents in
+    Parser_hack.program_with_default_popt dummy_path contents in
   let classes = Ast_utils.get_classes ast in
   let class_ = List.hd_exn classes in
   let extent = Ast_code_extent.source_extent_class_

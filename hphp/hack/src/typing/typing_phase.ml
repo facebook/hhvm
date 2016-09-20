@@ -197,13 +197,6 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
   (* Set the instantiated type parameter to initially point to unresolved, so
    * that it can grow and eventually be a subtype of something like "mixed".
    *)
-  let localize_tparam env (var, name, cstrl) =
-    let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
-      let env, ty = localize ~ety_env env ty in
-      env, (ck, ty)
-    end in
-    env, (var, name, cstrl)
-  in
   let env, substs =
     if instantiate_tparams
     then
@@ -221,6 +214,13 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
     let env, param = localize ~ety_env env param in
     env, (name, param)
   end in
+  let localize_tparam env (var, name, cstrl) =
+    let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
+      let env, ty = localize ~ety_env env ty in
+      env, (ck, ty)
+    end in
+    env, (var, name, cstrl)
+  in
   let env, tparams = List.map_env env ft.ft_tparams localize_tparam in
   let env, locl_cstr = List.map_env env ft.ft_locl_cstr localize_tparam in
   let env, arity = match ft.ft_arity with
@@ -229,6 +229,14 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
        env, Fvariadic (min, (name, var_ty))
     | Fellipsis _ | Fstandard (_, _) as x -> env, x in
   let env, ret = localize ~ety_env env ft.ft_ret in
+  let env = List.fold_left locl_cstr ~init:env ~f:(fun env (_,(p,x),cstrl) ->
+    match SMap.get x substs with
+      | Some x_ty -> List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
+          let r = Reason.Rwitness p in
+          TGenConstraint.add_check_constraint_todo env r x ck ty x_ty
+        end
+      | None -> env
+  ) in
   env, { ft with ft_arity = arity; ft_params = params;
                  ft_ret = ret; ft_tparams = tparams; ft_locl_cstr = locl_cstr }
 
@@ -258,7 +266,7 @@ let localize_generic_parameters_with_bounds
         let env = Env.add_upper_bound env id ty in
         Env.add_lower_bound env id ty
       | Ast.Constraint_as    -> Env.add_upper_bound env id ty
-  end in
+    end in
   List.fold_left tparams ~f:add_bound ~init:env
 
 

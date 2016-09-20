@@ -611,7 +611,7 @@ module WithToken(Token: TokenType) = struct
       type_name : t;
       type_constraint_list_opt  : t;
     }
-    and type_constraint_specifier = {
+    and type_constraint = {
       constraint_keyword: t;
       constraint_type: t;
     }
@@ -808,7 +808,7 @@ module WithToken(Token: TokenType) = struct
     | SimpleTypeSpecifier of simple_type_specifier
     | NullableTypeSpecifier of nullable_type_specifier
     | SoftTypeSpecifier of soft_type_specifier
-    | TypeConstraint of type_constraint_specifier
+    | TypeConstraint of type_constraint
     | TypeParameter of type_parameter
     | TypeConstant of type_constant
     | GenericTypeSpecifier of generic_type
@@ -996,7 +996,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.NamespaceGroupUseDeclaration
     let is_namespace_use node = kind node = SyntaxKind.NamespaceUseDeclaration
     let is_namespace_use_clause node = kind node = SyntaxKind.NamespaceUseClause
-    let is_function node = kind node = SyntaxKind.FunctionDeclaration
+    let is_function_declaration node =
+      kind node = SyntaxKind.FunctionDeclaration
     let is_method node = kind node = SyntaxKind.MethodishDeclaration
     let is_classish node = kind node = SyntaxKind.ClassishDeclaration
     let is_classish_body node = kind node = SyntaxKind.ClassishBody
@@ -2827,7 +2828,7 @@ module WithToken(Token: TokenType) = struct
         from_children SyntaxKind.AwaitableCreationExpression
           [ async; compound_stmt; ]
 
-      let make_xhp xhp_open xhp_body xhp_close =
+      let make_xhp_expression xhp_open xhp_body xhp_close =
         from_children SyntaxKind.XHPExpression [xhp_open; xhp_body; xhp_close ]
 
       let make_xhp_open xhp_open_name xhp_open_attrs xhp_open_right_angle =
@@ -2910,7 +2911,7 @@ module WithToken(Token: TokenType) = struct
           [ function_attribute_spec; function_declaration_header;
           function_body ]
 
-      let make_function_header function_async function_keyword
+      let make_function_declaration_header function_async function_keyword
         function_name function_type_params function_left_paren function_params
         function_right_paren function_colon function_type =
       from_children SyntaxKind.FunctionDeclarationHeader [
@@ -2918,7 +2919,7 @@ module WithToken(Token: TokenType) = struct
         function_type_params; function_left_paren; function_params;
         function_right_paren; function_colon; function_type ]
 
-      let make_methodish methodish_attr methodish_modifiers
+      let make_methodish_declaration methodish_attr methodish_modifiers
         methodish_function_decl_header methodish_function_body
         methodish_semicolon =
         from_children SyntaxKind.MethodishDeclaration

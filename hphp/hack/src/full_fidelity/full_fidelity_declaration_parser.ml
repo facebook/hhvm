@@ -1188,7 +1188,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_parameter_list_opt parser in
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
-    let syntax = make_function_header async_token
+    let syntax = make_function_declaration_header async_token
       function_token label generic_type_parameter_list left_paren_token
       parameter_list right_paren_token colon_token return_type in
     (parser, syntax)
@@ -1243,12 +1243,14 @@ module WithExpressionAndStatementAndTypeParser
     | LeftBrace ->
       let (parser, body) = parse_compound_statement parser in
       let syntax =
-        make_methodish attribute_spec modifiers header body (make_missing ())in
+        make_methodish_declaration
+          attribute_spec modifiers header body (make_missing ())in
       (parser, syntax)
     | Semicolon ->
       let semicolon = make_token token in
       let syntax =
-        make_methodish attribute_spec modifiers header (make_missing())
+        make_methodish_declaration
+          attribute_spec modifiers header (make_missing())
         semicolon in
       (parser1, syntax)
     | _ ->
@@ -1256,7 +1258,7 @@ module WithExpressionAndStatementAndTypeParser
       neither. Use the offending token as the body of the method.
       TODO: Is this the right error recovery? *)
       let error = make_error (make_token token) in
-      let syntax = make_methodish
+      let syntax = make_methodish_declaration
         attribute_spec modifiers header error (make_missing()) in
       let parser = with_error parser1 SyntaxError.error1041 in
       (parser, syntax)

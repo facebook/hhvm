@@ -320,7 +320,7 @@ let switch_first_is_label compound =
 
 let rec parameter_type_is_required parents =
   match parents with
-  | h :: _ when is_function h -> true
+  | h :: _ when is_function_declaration h -> true
   | h :: _ when is_anonymous_function h -> false (* TODO: Lambda? *)
   | _ :: t -> parameter_type_is_required t
   | [] -> false

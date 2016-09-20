@@ -1154,19 +1154,19 @@ module WithStatementAndDeclAndTypeParser
     match (Token.kind token) with
     | SlashGreaterThan ->
       let xhp_open = make_xhp_open name attrs (make_token token) in
-      let xhp = make_xhp xhp_open (make_missing()) (make_missing()) in
+      let xhp = make_xhp_expression xhp_open (make_missing()) (make_missing()) in
       (parser1, xhp)
     | GreaterThan ->
       let xhp_open = make_xhp_open name attrs (make_token token) in
       let (parser, xhp_body) = parse_xhp_body parser1 in
       let (parser, xhp_close) = parse_xhp_close parser name_text in
-      let xhp = make_xhp xhp_open xhp_body xhp_close in
+      let xhp = make_xhp_expression xhp_open xhp_body xhp_close in
       (parser, xhp)
     | _ ->
       (* ERROR RECOVERY: Assume the unexpected token belongs to whatever
          comes next. *)
       let xhp_open = make_xhp_open name attrs (make_missing()) in
-      let xhp = make_xhp xhp_open (make_missing()) (make_missing()) in
+      let xhp = make_xhp_expression xhp_open (make_missing()) (make_missing()) in
       let parser = with_error parser SyntaxError.error1013 in
       (parser, xhp)
 

@@ -436,12 +436,12 @@ void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
   }
 }
 
-void LightProcess::AttachHandler(sighandler_t sighandler)
-{
-  if (sighandler) {
-    always_assert_flog(sighandler == (sighandler_t)&SigChldHandler,
-        "Trying to re-attach a sighandler other than SigChldHandler: `{}'",
-        sighandler);
+void LightProcess::AttachHandler(sighandler_t saved) {
+  // If re-attaching the handler after another handler was temporarily
+  // attached, then ensure that the original saved handler is the same.
+  if (saved) {
+    always_assert((saved == (sighandler_t)&SigChldHandler) &&
+        "Trying to re-attach a sighandler other than SigChldHandler.");
   }
 
   struct sigaction sa = {};

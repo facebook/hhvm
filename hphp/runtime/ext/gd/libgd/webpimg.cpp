@@ -73,15 +73,15 @@ static const uint32  ALPHA_SHIFT =
        8 * (sizeof(uint32) - 1 - ALPHA_CHANNEL);       /*  0 */
 
 static inline int GetRed(const uint32* rgba) {
-	return gdTrueColorGetRed(*rgba);
+  return gdTrueColorGetRed(*rgba);
 }
 
 static inline int GetGreen(const uint32* rgba) {
-	return gdTrueColorGetGreen(*rgba);
+  return gdTrueColorGetGreen(*rgba);
 }
 
 static inline int GetBlue(const uint32* rgba) {
-  	return gdTrueColorGetBlue(*rgba);
+    return gdTrueColorGetBlue(*rgba);
 }
 
 enum { YUV_FRAC = 16 };
@@ -254,28 +254,28 @@ double WebPGetPSNR(const uint8* Y1,
  */
 
 int SkipRiffHeader(const uint8** data_ptr, int *data_size_ptr) {
-	/* 20 bytes RIFF header 10 bytes VP8 header */
-	const int kHeaderSize = (20 + 10);
-	uint32 chunk_size = 0xffffffffu;
+  /* 20 bytes RIFF header 10 bytes VP8 header */
+  const int kHeaderSize = (20 + 10);
+  uint32 chunk_size = 0xffffffffu;
 
-	if (*data_size_ptr >= kHeaderSize && !memcmp(*data_ptr, "RIFF", 4)) {
-	if (memcmp(*data_ptr + 8, "WEBP", 4)) {
-		return 0;  /* wrong image file signature */
-	} else {
-		const uint32 riff_size = get_le32(*data_ptr + 4);
-		if (memcmp(*data_ptr + 12, "VP8 ", 4)) {
-		  return 0;   /* invalid compression format */
-		}
-		chunk_size = get_le32(*data_ptr + 16);
-		if ((chunk_size > riff_size + 8) || (chunk_size & 1)) {
-		  return 0;  /* inconsistent size information. */
-		}
-		/* We have a RIFF container. Skip it. */
-		*data_ptr += 20;
-		*data_size_ptr -= 20;
-	}
-	}
-	return chunk_size;
+  if (*data_size_ptr >= kHeaderSize && !memcmp(*data_ptr, "RIFF", 4)) {
+  if (memcmp(*data_ptr + 8, "WEBP", 4)) {
+    return 0;  /* wrong image file signature */
+  } else {
+    const uint32 riff_size = get_le32(*data_ptr + 4);
+    if (memcmp(*data_ptr + 12, "VP8 ", 4)) {
+      return 0;   /* invalid compression format */
+    }
+    chunk_size = get_le32(*data_ptr + 16);
+    if ((chunk_size > riff_size + 8) || (chunk_size & 1)) {
+      return 0;  /* inconsistent size information. */
+    }
+    /* We have a RIFF container. Skip it. */
+    *data_ptr += 20;
+    *data_size_ptr -= 20;
+  }
+  }
+  return chunk_size;
 }
 
 /* Generate RGBA row from an YUV row (with width upsampling of chrome data)
@@ -364,7 +364,7 @@ void gd_YUV420toRGBA(uint8* Y,
 
   /* output im must be truecolor */
   if (!im->trueColor) {
-  	return;
+    return;
   }
 
   if (!init_done)
@@ -545,40 +545,40 @@ void gd_RGBAToYUV420(gdImagePtr im2,
   int free_im = 0;
 
   if (!im2->trueColor) {
-  	/* Todo: Replace the color/YUV functions with our own and simplify
-  	   that should boost the conversion a bit as well, not only for
-  	   palette image. */
-  	im = gdImageCreateTrueColor(im2->sx, im2->sy);
-  	if (!im) {
-  		php_gd_error("gd-webp error: cannot convert palette input to truecolor");
-  		return;
-	}
-  	gdImageCopy(im, im2, 0, 0, 0, 0, im->sx, im->sy);
-  	free_im = 1;
+    /* Todo: Replace the color/YUV functions with our own and simplify
+       that should boost the conversion a bit as well, not only for
+       palette image. */
+    im = gdImageCreateTrueColor(im2->sx, im2->sy);
+    if (!im) {
+      php_gd_error("gd-webp error: cannot convert palette input to truecolor");
+      return;
+  }
+    gdImageCopy(im, im2, 0, 0, 0, 0, im->sx, im->sy);
+    free_im = 1;
   } else {
-  	im = im2;
+    im = im2;
   }
   for (y = 0; y < (y_height >> 1); ++y) {
-	RGBALinepairToYUV420((uint32*) im->tpixels[2 * y],
-						 (uint32*) im->tpixels[2 * y + 1],
-						 y_width,
-						 Y + 2 * y * y_stride,
-						 Y + (2 * y + 1) * y_stride,
-						 U + y * uv_stride,
-						 V + y * uv_stride);
+  RGBALinepairToYUV420((uint32*) im->tpixels[2 * y],
+             (uint32*) im->tpixels[2 * y + 1],
+             y_width,
+             Y + 2 * y * y_stride,
+             Y + (2 * y + 1) * y_stride,
+             U + y * uv_stride,
+             V + y * uv_stride);
   }
   if (y_height & 1) {
-	RGBALinepairToYUV420((uint32*) im->tpixels[y_height - 1],
-						 (uint32*) im->tpixels[y_height - 1],
-						 y_width,
-						 Y + (y_height - 1) * y_stride,
-						 Y + (y_height - 1) * y_stride,
-						 U + (y_height >> 1) * uv_stride,
-						 V + (y_height >> 1) * uv_stride);
+  RGBALinepairToYUV420((uint32*) im->tpixels[y_height - 1],
+             (uint32*) im->tpixels[y_height - 1],
+             y_width,
+             Y + (y_height - 1) * y_stride,
+             Y + (y_height - 1) * y_stride,
+             U + (y_height >> 1) * uv_stride,
+             V + (y_height >> 1) * uv_stride);
   }
-	if (free_im) {
-		gdImageDestroy(im);
-	}
+  if (free_im) {
+    gdImageDestroy(im);
+  }
 }
 
 /* Generates Y, U, V data (with color subsampling) from 32 bits
@@ -761,28 +761,28 @@ WebPResult WebPEncode(const uint8* Y,
                 p_out, p_out_size_bytes) != webp_success) {
     return webp_failure;
   } else {
-	  /* Write RIFF header */
-	  const int img_size_bytes  = *p_out_size_bytes - kRiffHeaderSize;
-	  const int chunk_size = (img_size_bytes + 1) & ~1;  /* make size even */
-	  const int riff_size = chunk_size + 12;
-	  const char kRiffHeader[20] = { 'R', 'I', 'F', 'F',
-										char((riff_size >>  0) & 255),
-										char((riff_size >>  8) & 255),
-										char((riff_size >> 16) & 255),
-										char((riff_size >> 24) & 255),
-										'W', 'E', 'B', 'P',
-										'V', 'P', '8', ' ',
-										char((chunk_size >>  0) & 255),
-										char((chunk_size >>  8) & 255),
-										char((chunk_size >> 16) & 255),
-										char((chunk_size >> 24) & 255) };
-	  memcpy(*p_out, kRiffHeader, kRiffHeaderSize);
+    /* Write RIFF header */
+    const int img_size_bytes  = *p_out_size_bytes - kRiffHeaderSize;
+    const int chunk_size = (img_size_bytes + 1) & ~1;  /* make size even */
+    const int riff_size = chunk_size + 12;
+    const char kRiffHeader[20] = { 'R', 'I', 'F', 'F',
+                    char((riff_size >>  0) & 255),
+                    char((riff_size >>  8) & 255),
+                    char((riff_size >> 16) & 255),
+                    char((riff_size >> 24) & 255),
+                    'W', 'E', 'B', 'P',
+                    'V', 'P', '8', ' ',
+                    char((chunk_size >>  0) & 255),
+                    char((chunk_size >>  8) & 255),
+                    char((chunk_size >> 16) & 255),
+                    char((chunk_size >> 24) & 255) };
+    memcpy(*p_out, kRiffHeader, kRiffHeaderSize);
 
-	  if (psnr) {
-		*psnr = WebPGetPSNR(Y, U, V, *p_out, *p_out_size_bytes);
-	  }
+    if (psnr) {
+    *psnr = WebPGetPSNR(Y, U, V, *p_out, *p_out_size_bytes);
+    }
 
-	  return webp_success;
+    return webp_success;
   }
 }
 
@@ -849,51 +849,51 @@ WebPResult WebPGetInfo(const uint8* data,
                        int data_size,
                        int *width,
                        int *height) {
-	const uint32 chunk_size = SkipRiffHeader(&data, &data_size);
+  const uint32 chunk_size = SkipRiffHeader(&data, &data_size);
 
-	if (width) *width = 0;
-	if (height) *height = 0;
+  if (width) *width = 0;
+  if (height) *height = 0;
 
-	if (!chunk_size) {
-	return webp_failure; /* unsupported RIFF header */
-	}
+  if (!chunk_size) {
+  return webp_failure; /* unsupported RIFF header */
+  }
 
-	/* Validate raw video data */
-	if (data_size < 10) {
-	return webp_failure;   /* not enough data */
-	}
+  /* Validate raw video data */
+  if (data_size < 10) {
+  return webp_failure;   /* not enough data */
+  }
 
-	/* check signature */
-	if (data[3] != 0x9d || data[4] != 0x01 || data[5] != 0x2a) {
-		return webp_failure;       /* Wrong signature. */
-	} else {
-		const uint32 bits = data[0] | (data[1] << 8) | (data[2] << 16);
+  /* check signature */
+  if (data[3] != 0x9d || data[4] != 0x01 || data[5] != 0x2a) {
+    return webp_failure;       /* Wrong signature. */
+  } else {
+    const uint32 bits = data[0] | (data[1] << 8) | (data[2] << 16);
 
-		if ((bits & 1)) {   /* Not a keyframe. */
-			return webp_failure;
-		} else {
-			const int profile = (bits >> 1) & 7;
-			const int show_frame  = (bits >> 4) & 1;
-			const uint32 partition_length = (bits >> 5);
+    if ((bits & 1)) {   /* Not a keyframe. */
+      return webp_failure;
+    } else {
+      const int profile = (bits >> 1) & 7;
+      const int show_frame  = (bits >> 4) & 1;
+      const uint32 partition_length = (bits >> 5);
 
-			if (profile > 3) {
-				return webp_failure;   /* unknown profile */
-			}
-			if (!show_frame) {
-				return webp_failure;     /* first frame is invisible! */
-			}
-			if (partition_length >= chunk_size) {
-				return webp_failure;   /* inconsistent size information. */
-			} else {
-				const int w = ((data[7] << 8) | data[6]) & 0x3fff;
-				const int h = ((data[9] << 8) | data[8]) & 0x3fff;
-				if (width) *width = w;
-				if (height) *height = h;
+      if (profile > 3) {
+        return webp_failure;   /* unknown profile */
+      }
+      if (!show_frame) {
+        return webp_failure;     /* first frame is invisible! */
+      }
+      if (partition_length >= chunk_size) {
+        return webp_failure;   /* inconsistent size information. */
+      } else {
+        const int w = ((data[7] << 8) | data[6]) & 0x3fff;
+        const int h = ((data[9] << 8) | data[8]) & 0x3fff;
+        if (width) *width = w;
+        if (height) *height = h;
 
-				return webp_success;
-			}
-		}
-	}
-	return webp_failure;
+        return webp_success;
+      }
+    }
+  }
+  return webp_failure;
 }
 #endif /* HAVE_LIBVPX */

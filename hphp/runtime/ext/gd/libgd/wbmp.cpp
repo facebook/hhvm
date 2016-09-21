@@ -20,10 +20,10 @@
 #include "gdhelpers.h"
 
 #ifdef NOTDEF
-#define __TEST			/* Compile with main function */
-#define __DEBUG			/* Extra verbose when with __TEST */
-#define __WRITE			/* readwbmp and writewbmp(stdout) */
-#define __VIEW			/* view the wbmp on stdout */
+#define __TEST      /* Compile with main function */
+#define __DEBUG     /* Extra verbose when with __TEST */
+#define __WRITE     /* readwbmp and writewbmp(stdout) */
+#define __VIEW      /* view the wbmp on stdout */
 #endif
 
 /* getmbi
@@ -43,7 +43,7 @@ getmbi (int (*getin) (void *in), void *in)
     {
       i = getin (in);
       if (i < 0)
-	return (-1);
+  return (-1);
       mbi = (mbi << 7) | (i & 0x7f);
     }
   while (i & 0x80);
@@ -95,7 +95,7 @@ skipheader (int (*getin) (void *in), void *in)
     {
       i = getin (in);
       if (i < 0)
-	return (-1);
+  return (-1);
     }
   while (i & 0x80);
 
@@ -206,25 +206,25 @@ readwbmp (int (*getin) (void *in), void *in, Wbmp ** return_wbmp)
   for (row = 0; row < wbmp->height; row++)
     {
       for (col = 0; col < wbmp->width;)
-	{
-	  byte = getin (in);
+  {
+    byte = getin (in);
 
-	  for (pel = 7; pel >= 0; pel--)
-	    {
-	      if (col++ < wbmp->width)
-		{
-		  if (byte & 1 << pel)
-		    {
-		      wbmp->bitmap[pos] = WBMP_WHITE;
-		    }
-		  else
-		    {
-		      wbmp->bitmap[pos] = WBMP_BLACK;
-		    }
-		  pos++;
-		}
-	    }
-	}
+    for (pel = 7; pel >= 0; pel--)
+      {
+        if (col++ < wbmp->width)
+    {
+      if (byte & 1 << pel)
+        {
+          wbmp->bitmap[pos] = WBMP_WHITE;
+        }
+      else
+        {
+          wbmp->bitmap[pos] = WBMP_BLACK;
+        }
+      pos++;
+    }
+      }
+  }
     }
 
   *return_wbmp = wbmp;
@@ -251,14 +251,14 @@ writewbmp (Wbmp * wbmp, void (*putout) (int c, void *out), void *out)
   int bitpos, octet;
 
   /* Generate the header */
-  putout (0, out);		/* WBMP Type 0: B/W, Uncompressed bitmap */
-  putout (0, out);		/* FixHeaderField */
+  putout (0, out);    /* WBMP Type 0: B/W, Uncompressed bitmap */
+  putout (0, out);    /* FixHeaderField */
 
 
 
   /* Size of the image */
-  putmbi (wbmp->width, putout, out);	/* width */
-  putmbi (wbmp->height, putout, out);	/* height */
+  putmbi (wbmp->width, putout, out);  /* width */
+  putmbi (wbmp->height, putout, out); /* height */
 
 
   /* Image data */
@@ -267,17 +267,17 @@ writewbmp (Wbmp * wbmp, void (*putout) (int c, void *out), void *out)
       bitpos = 8;
       octet = 0;
       for (col = 0; col < wbmp->width; col++)
-	{
-	  octet |= ((wbmp->bitmap[row * wbmp->width + col] == 1) ? WBMP_WHITE : WBMP_BLACK) << --bitpos;
-	  if (bitpos == 0)
-	    {
-	      bitpos = 8;
-	      putout (octet, out);
-	      octet = 0;
-	    }
-	}
+  {
+    octet |= ((wbmp->bitmap[row * wbmp->width + col] == 1) ? WBMP_WHITE : WBMP_BLACK) << --bitpos;
+    if (bitpos == 0)
+      {
+        bitpos = 8;
+        putout (octet, out);
+        octet = 0;
+      }
+  }
       if (bitpos != 8)
-	putout (octet, out);
+  putout (octet, out);
 
     }
   return (0);
@@ -310,16 +310,16 @@ printwbmp (Wbmp * wbmp)
   for (row = 0; row < wbmp->height; row++)
     {
       for (col = 0; col < wbmp->width; col++)
-	{
-	  if (wbmp->bitmap[wbmp->width * row + col] == WBMP_BLACK)
-	    {
-	      putchar ('#');
-	    }
-	  else
-	    {
-	      putchar (' ');
-	    }
-	}
+  {
+    if (wbmp->bitmap[wbmp->width * row + col] == WBMP_BLACK)
+      {
+        putchar ('#');
+      }
+    else
+      {
+        putchar (' ');
+      }
+  }
       putchar ('\n');
     }
 }

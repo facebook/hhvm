@@ -3870,7 +3870,7 @@ gdFontPtr gdFontMediumBold = &gdFontMediumBoldRep;
 
 gdFontPtr gdFontGetMediumBold(void)
 {
-	return gdFontMediumBold;
+  return gdFontMediumBold;
 }
 
 /* This file has not been truncated. */

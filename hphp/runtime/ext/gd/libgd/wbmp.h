@@ -10,7 +10,7 @@
 ** Header file
 */
 #ifndef __WBMP_H
-#define __WBMP_H	1
+#define __WBMP_H  1
 
 /* WBMP struct
 ** -----------
@@ -34,12 +34,12 @@ typedef struct Wbmp_
 ** -------
 **
 */
-void		putmbi( int i, void (*putout)(int c, void *out), void *out);
-int 	getmbi ( int (*getin)(void *in), void *in );
+void    putmbi( int i, void (*putout)(int c, void *out), void *out);
+int   getmbi ( int (*getin)(void *in), void *in );
 int     skipheader( int (*getin)(void *in), void *in );
 Wbmp   *createwbmp( int width, int height, int color );
 int     readwbmp( int (*getin)(void *in), void *in, Wbmp **wbmp );
-int		writewbmp( Wbmp *wbmp, void (*putout)( int c, void *out), void *out);
+int   writewbmp( Wbmp *wbmp, void (*putout)( int c, void *out), void *out);
 void    freewbmp( Wbmp *wbmp );
 void    printwbmp( Wbmp *wbmp );
 

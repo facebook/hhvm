@@ -70,14 +70,14 @@ debug (const char *format,...)
 static void
 error (const char *format,...)
 {
-	va_list args;
-	char *tmp;
+  va_list args;
+  char *tmp;
 
-	va_start(args, format);
-	HPHP::vspprintf(&tmp, 0, format, args);
-	va_end(args);
-	php_gd_error("%s: %s", LIBNAME, tmp);
-	gdFree(tmp);
+  va_start(args, format);
+  HPHP::vspprintf(&tmp, 0, format, args);
+  va_end(args);
+  php_gd_error("%s: %s", LIBNAME, tmp);
+  gdFree(tmp);
 }
 
 /* DetectKanjiCode() derived from DetectCodeType() by Ken Lunde. */
@@ -102,75 +102,75 @@ DetectKanjiCode (unsigned char *str)
   while ((whatcode == EUCORSJIS || whatcode == ASCII) && c != '\0')
     {
       if ((c = str[i++]) != '\0')
-	{
-	  if (c == ESC)
-	    {
-	      c = str[i++];
-	      if (c == '$')
-		{
-		  c = str[i++];
-		  if (c == 'B')
-		    whatcode = NEW;
-		  else if (c == '@')
-		    whatcode = OLD;
-		}
-	      else if (c == '(')
-		{
-		  c = str[i++];
-		  if (c == 'I')
-		    whatcode = ESCI;
-		}
-	      else if (c == 'K')
-		whatcode = NEC;
-	    }
-	  else if ((c >= 129 && c <= 141) || (c >= 143 && c <= 159))
-	    whatcode = SJIS;
-	  else if (c == SS2)
-	    {
-	      c = str[i++];
-	      if ((c >= 64 && c <= 126) || (c >= 128 && c <= 160) || (c >= 224 && c <= 252))
-		whatcode = SJIS;
-	      else if (c >= 161 && c <= 223)
-		whatcode = EUCORSJIS;
-	    }
-	  else if (c >= 161 && c <= 223)
-	    {
-	      c = str[i++];
-	      if (c >= 240 && c <= 254)
-		whatcode = EUC;
-	      else if (c >= 161 && c <= 223)
-		whatcode = EUCORSJIS;
-	      else if (c >= 224 && c <= 239)
-		{
-		  whatcode = EUCORSJIS;
-		  while (c >= 64 && c != '\0' && whatcode == EUCORSJIS)
-		    {
-		      if (c >= 129)
-			{
-			  if (c <= 141 || (c >= 143 && c <= 159))
-			    whatcode = SJIS;
-			  else if (c >= 253 && c <= 254)
-			    whatcode = EUC;
-			}
-		      c = str[i++];
-		    }
-		}
-	      else if (c <= 159)
-		whatcode = SJIS;
-	    }
-	  else if (c >= 240 && c <= 254)
-	    whatcode = EUC;
-	  else if (c >= 224 && c <= 239)
-	    {
-	      c = str[i++];
-	      if ((c >= 64 && c <= 126) || (c >= 128 && c <= 160))
-		whatcode = SJIS;
-	      else if (c >= 253 && c <= 254)
-		whatcode = EUC;
-	      else if (c >= 161 && c <= 252)
-		whatcode = EUCORSJIS;
-	    }
-	}
+  {
+    if (c == ESC)
+      {
+        c = str[i++];
+        if (c == '$')
+    {
+      c = str[i++];
+      if (c == 'B')
+        whatcode = NEW;
+      else if (c == '@')
+        whatcode = OLD;
+    }
+        else if (c == '(')
+    {
+      c = str[i++];
+      if (c == 'I')
+        whatcode = ESCI;
+    }
+        else if (c == 'K')
+    whatcode = NEC;
+      }
+    else if ((c >= 129 && c <= 141) || (c >= 143 && c <= 159))
+      whatcode = SJIS;
+    else if (c == SS2)
+      {
+        c = str[i++];
+        if ((c >= 64 && c <= 126) || (c >= 128 && c <= 160) || (c >= 224 && c <= 252))
+    whatcode = SJIS;
+        else if (c >= 161 && c <= 223)
+    whatcode = EUCORSJIS;
+      }
+    else if (c >= 161 && c <= 223)
+      {
+        c = str[i++];
+        if (c >= 240 && c <= 254)
+    whatcode = EUC;
+        else if (c >= 161 && c <= 223)
+    whatcode = EUCORSJIS;
+        else if (c >= 224 && c <= 239)
+    {
+      whatcode = EUCORSJIS;
+      while (c >= 64 && c != '\0' && whatcode == EUCORSJIS)
+        {
+          if (c >= 129)
+      {
+        if (c <= 141 || (c >= 143 && c <= 159))
+          whatcode = SJIS;
+        else if (c >= 253 && c <= 254)
+          whatcode = EUC;
+      }
+          c = str[i++];
+        }
+    }
+        else if (c <= 159)
+    whatcode = SJIS;
+      }
+    else if (c >= 240 && c <= 254)
+      whatcode = EUC;
+    else if (c >= 224 && c <= 239)
+      {
+        c = str[i++];
+        if ((c >= 64 && c <= 126) || (c >= 128 && c <= 160))
+    whatcode = SJIS;
+        else if (c >= 253 && c <= 254)
+    whatcode = EUC;
+        else if (c >= 161 && c <= 252)
+    whatcode = EUCORSJIS;
+      }
+  }
     }
 
 #ifdef DEBUG
@@ -188,28 +188,28 @@ DetectKanjiCode (unsigned char *str)
   if (whatcode == EUCORSJIS)
     {
       if (getenv ("LC_ALL"))
-	lang = getenv ("LC_ALL");
+  lang = getenv ("LC_ALL");
       else if (getenv ("LC_CTYPE"))
-	lang = getenv ("LC_CTYPE");
+  lang = getenv ("LC_CTYPE");
       else if (getenv ("LANG"))
-	lang = getenv ("LANG");
+  lang = getenv ("LANG");
 
       if (lang)
-	{
-	  if (strcmp (lang, "ja_JP.SJIS") == 0 ||
+  {
+    if (strcmp (lang, "ja_JP.SJIS") == 0 ||
 #ifdef hpux
-	      strcmp (lang, "japanese") == 0 ||
+        strcmp (lang, "japanese") == 0 ||
 #endif
-	      strcmp (lang, "ja_JP.mscode") == 0 ||
-	      strcmp (lang, "ja_JP.PCK") == 0)
-	    whatcode = SJIS;
-	  else if (strncmp (lang, "ja", 2) == 0)
+        strcmp (lang, "ja_JP.mscode") == 0 ||
+        strcmp (lang, "ja_JP.PCK") == 0)
+      whatcode = SJIS;
+    else if (strncmp (lang, "ja", 2) == 0)
 #ifdef SJISPRE
-	    whatcode = SJIS;
+      whatcode = SJIS;
 #else
-	    whatcode = EUC;
+      whatcode = EUC;
 #endif
-	}
+  }
     }
 
   if (whatcode == EUCORSJIS)
@@ -316,9 +316,9 @@ han2zen (int *p1, int *p2)
   };
 
   if (*p2 == 222 && IS_DAKU (*p1))
-    daku = TRUE;		/* Daku-ten */
+    daku = TRUE;    /* Daku-ten */
   else if (*p2 == 223 && IS_HANDAKU (*p1))
-    handaku = TRUE;		/* Han-daku-ten */
+    handaku = TRUE;   /* Han-daku-ten */
 
   *p1 = mtable[c - 161][0];
   *p2 = mtable[c - 161][1];
@@ -326,9 +326,9 @@ han2zen (int *p1, int *p2)
   if (daku)
     {
       if ((*p2 >= 74 && *p2 <= 103) || (*p2 >= 110 && *p2 <= 122))
-	(*p2)++;
+  (*p2)++;
       else if (*p2 == 131 && *p2 == 69)
-	*p2 = 148;
+  *p2 = 148;
     }
   else if (handaku && *p2 >= 110 && *p2 <= 122)
     (*p2) += 2;
@@ -347,8 +347,8 @@ do_convert (unsigned char *to, unsigned char *from, const char *code)
     {
       error ("iconv_open() error");
       if (errno == EINVAL)
-	error ("invalid code specification: \"%s\" or \"%s\"",
-	       EUCSTR, code);
+  error ("invalid code specification: \"%s\" or \"%s\"",
+         EUCSTR, code);
       strcpy ((char *) to, (const char *) from);
       return;
     }
@@ -360,13 +360,13 @@ do_convert (unsigned char *to, unsigned char *from, const char *code)
                   &from_len, (char **) &to, &to_len) == -1)
     {
       if (errno == EINVAL)
-	error ("invalid end of input string");
+  error ("invalid end of input string");
       else if (errno == EILSEQ)
-	error ("invalid code in input string");
+  error ("invalid code in input string");
       else if (errno == E2BIG)
-	error ("output buffer overflow at do_convert()");
+  error ("output buffer overflow at do_convert()");
       else
-	error ("something happen");
+  error ("something happen");
       strcpy ((char *) to, (const char *) from);
       return;
     }
@@ -434,36 +434,36 @@ do_check_and_conv (unsigned char *to, unsigned char *from)
     {
       j = 0;
       for (i = 0; tmp[i] != '\0' && j < BUFSIZ; i++)
-	{
-	  if (tmp[i] == SS2)
-	    {
-	      p1 = tmp[++i];
-	      if (tmp[i + 1] == SS2)
-		{
-		  p2 = tmp[i + 2];
-		  if (p2 == 222 || p2 == 223)
-		    i += 2;
-		  else
-		    p2 = 0;
-		}
-	      else
-		p2 = 0;
-	      han2zen (&p1, &p2);
-	      SJIStoJIS (&p1, &p2);
-	      to[j++] = p1 + 128;
-	      to[j++] = p2 + 128;
-	    }
-	  else
-	    to[j++] = tmp[i];
-	}
+  {
+    if (tmp[i] == SS2)
+      {
+        p1 = tmp[++i];
+        if (tmp[i + 1] == SS2)
+    {
+      p2 = tmp[i + 2];
+      if (p2 == 222 || p2 == 223)
+        i += 2;
+      else
+        p2 = 0;
+    }
+        else
+    p2 = 0;
+        han2zen (&p1, &p2);
+        SJIStoJIS (&p1, &p2);
+        to[j++] = p1 + 128;
+        to[j++] = p2 + 128;
+      }
+    else
+      to[j++] = tmp[i];
+  }
 
       if (j >= BUFSIZ)
-	{
-	  error ("output buffer overflow at Hankaku --> Zenkaku");
-	  ustrcpy (to, tmp);
-	}
+  {
+    error ("output buffer overflow at Hankaku --> Zenkaku");
+    ustrcpy (to, tmp);
+  }
       else
-	to[j] = '\0';
+  to[j] = '\0';
     }
   else
     ustrcpy (to, tmp);

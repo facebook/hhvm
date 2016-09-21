@@ -8,7 +8,7 @@
  * John Ellson  (ellson@graphviz.org)  Oct 31, 1997
  *
  * Test this with:
- *		 gcc -o gdcache -g -Wall -DTEST gdcache.c
+ *     gcc -o gdcache -g -Wall -DTEST gdcache.c
  *
  * The cache is implemented by a singly-linked list of elements
  * each containing a pointer to a user struct that is being managed by
@@ -18,10 +18,10 @@
  * element, and elements are moved to this position in the list each
  * time they are used.  The head also contains pointers to three
  * user defined functions:
- *		- a function to test if a cached userdata matches some keydata
- *		- a function to provide a new userdata struct to the cache
+ *    - a function to test if a cached userdata matches some keydata
+ *    - a function to provide a new userdata struct to the cache
  *          if there has been a cache miss.
- *		- a function to release a userdata struct when it is
+ *    - a function to release a userdata struct when it is
  *          no longer being managed by the cache
  *
  * In the event of a cache miss the cache is allowed to grow up to
@@ -54,28 +54,28 @@ typedef void (*gdCacheReleaseFn_t)(void *userdata);
 /* element structure */
 typedef struct gdCache_element_s gdCache_element_t;
 struct gdCache_element_s {
-	gdCache_element_t	*next;
-	void			*userdata;
+  gdCache_element_t *next;
+  void      *userdata;
 };
 
 /* head structure */
 typedef struct gdCache_head_s gdCache_head_t;
 struct gdCache_head_s {
-	gdCache_element_t	*mru;
-	int					size;
-	char				*error;
-	gdCacheTestFn_t		gdCacheTest;
-	gdCacheFetchFn_t	gdCacheFetch;
-	gdCacheReleaseFn_t	gdCacheRelease;
+  gdCache_element_t *mru;
+  int         size;
+  char        *error;
+  gdCacheTestFn_t   gdCacheTest;
+  gdCacheFetchFn_t  gdCacheFetch;
+  gdCacheReleaseFn_t  gdCacheRelease;
 };
 
 /* function templates */
 gdCache_head_t *
 gdCacheCreate(
-	int					size,
-	gdCacheTestFn_t		gdCacheTest,
-	gdCacheFetchFn_t	gdCacheFetch,
-	gdCacheReleaseFn_t	gdCacheRelease );
+  int         size,
+  gdCacheTestFn_t   gdCacheTest,
+  gdCacheFetchFn_t  gdCacheFetch,
+  gdCacheReleaseFn_t  gdCacheRelease );
 
 void
 gdCacheDelete( gdCache_head_t *head );

@@ -251,9 +251,9 @@ struct Vgen {
       p.index = rAsm;
       p.disp = 0;
     } else if (p.disp) {
-        a.addi(rAsm, p.index, p.disp);
-        p.index = rAsm;
-        p.disp = 0;
+      a.addi(rAsm, p.index, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
     }
     a.lxvd2x(i.d, p);
   }
@@ -318,9 +318,9 @@ struct Vgen {
       p.index = rAsm;
       p.disp = 0;
     } else if (p.disp) {
-        a.addi(rAsm, p.index, p.disp);
-        p.index = rAsm;
-        p.disp = 0;
+      a.addi(rAsm, p.index, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
     }
     a.stxvw4x(i.s, p);
   }
@@ -947,7 +947,7 @@ void lowerForPPC64(Vout& v, Inst& inst) {}
 #define ONE_R64(attr_1)         Reg64(inst.attr_1),
 #define TWO_R64(attr_1, attr_2) Reg64(inst.attr_1), Reg64(inst.attr_2),
 
-// Patches the Vptr, retrieve the immediate and emmit a related direct vasm
+// Retrieve the immediate and emmit a related direct vasm
 #define X(vasm_src, attr_data, vasm_dst, attr_addr, vasm_imm)           \
 void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vreg tmp = v.makeReg();                                               \
@@ -991,7 +991,7 @@ X(andqi,  andq,  s0, TWO(s1, d))
 #undef X
 
 // Simplify MemoryRef vasm types by their direct variant as ppc64 can't
-// change data directly in memory. Patches the Vptr, grab and save the data.
+// change data directly in memory. Grab and save the data.
 #define X(vasm_src, vasm_dst, vasm_load, vasm_store, attr_addr, attrs)  \
 void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vreg tmp = v.makeReg(), tmp2 = v.makeReg();                           \
@@ -1532,16 +1532,16 @@ void fixVptr(Vout& v, Vptr& p) {
  * Every vasm that has a Vptr parameter must be handled
  */
 struct VptrFixVisit {
-explicit VptrFixVisit(Vout& v) : m_v(v) {}
-  Vout& m_v;
-
+  explicit VptrFixVisit(Vout& v) : m_v(v) {}
   template<class T> void def(T) {}
   template<class T> void imm(const T&) {}
   template<class T> void across(T) {}
   template<class T, class H> void defHint(T, H) {}
-  template<class T, class H> void useHint(T, H) {}
+  template<class T, class H> void useHint(T r, H) { use(r); }
   template <typename T> void use(T) {}
   void use(Vptr& ptr) { fixVptr(m_v, ptr); }
+
+  Vout& m_v;
 };
 
 /*
@@ -1559,18 +1559,12 @@ void fixVptrsForPPC64(Vunit& unit) {
     assertx(!blocks[ib].code.empty());
 
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
-
-      auto scratch = unit.makeScratchBlock();
       auto& inst = blocks[ib].code[ii];
-      SCOPE_EXIT {unit.freeScratchBlock(scratch);};
-      Vout v(unit, scratch, inst.irctx());
-      VptrFixVisit vptrFixVisit {v};
-
-      visitOperands(inst, vptrFixVisit);
-      if (!v.empty()) {
-        vector_splice(unit.blocks[ib].code, ii, 0,
-                      unit.blocks[scratch].code);
-      }
+      vmodify(unit, ib, ii, [&] (Vout& v) {
+        VptrFixVisit vptrFixVisit {v};
+        visitOperands(inst, vptrFixVisit);
+        return 0;
+      });
     }
   });
 }

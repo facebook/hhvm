@@ -36,7 +36,7 @@ inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
     case Arch::X64:
       return x64::detail::emitTLSAddr(v, datum);
     case Arch::ARM:
-       return arm::detail::emitTLSAddr(v, datum);
+      return arm::detail::emitTLSAddr(v, datum);
     case Arch::PPC64:
       return ppc64::detail::emitTLSAddr(v, datum);
   }

@@ -34,7 +34,7 @@ template<typename T>
 Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
   uintptr_t vaddr = uintptr_t(datum.tls) - tlsBase();
 
-  auto b = v.makeReg();
+  auto const b = v.makeReg();
   v << mrs{vixl::SystemRegister::TPIDR_EL0, b};
 
   return b[vaddr];

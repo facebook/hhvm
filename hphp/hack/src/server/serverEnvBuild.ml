@@ -27,26 +27,36 @@ let make_genv options config local_config handle =
   let watchman =
     if check_mode || not local_config.SLC.use_watchman
     then None
-    else Watchman.init
-           local_config.SLC.watchman_init_timeout
-           local_config.SLC.watchman_subscribe
-           root
+    else Watchman.init {
+      Watchman.init_timeout = local_config.SLC.watchman_init_timeout;
+      subscribe_to_changes = local_config.SLC.watchman_subscribe;
+      root = root;
+    }
   in
   if Option.is_some watchman then Hh_logger.log "Using watchman";
   let indexer, notifier, wait_until_ready =
     match watchman with
     | Some watchman ->
+      (** Watchman state can change during requests (See
+       * Watchamn.Watchman_dead and Watchman_alive). We need to update
+       * a reference to the new instance. *)
+      let watchman = ref watchman in
       let indexer filter =
-        let files = Watchman.get_all_files watchman in
+        let watchman', files = Watchman.get_all_files !watchman in
+        let () = watchman := watchman' in
         Bucket.make
           ~num_workers:GlobalConfig.nbr_procs
           ~max_size:1000
           (List.filter filter files)
       in
-      let notifier () = Watchman.get_changes watchman in
+      let notifier () =
+        let watchman', changes = Watchman.get_changes !watchman in
+        watchman := watchman';
+        changes
+      in
       HackEventLogger.set_use_watchman ();
-      (* We don't have an easy way to wait for watchman's init crawl to
-       * finish *)
+      (* The initial watch-project command blocks until watchman's crawl is
+       * done, so we don't have anything else to wait for here. *)
       let wait_until_ready () = () in
       indexer, notifier, wait_until_ready
     | None ->

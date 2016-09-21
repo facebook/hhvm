@@ -708,14 +708,15 @@ let rec get_doc node =
     let v = get_doc x.anonymous_use_variables in
     let r = get_doc x.anonymous_use_right_paren in
     u ^| l ^^^ v ^^^ r
-  | PrefixUnaryOperator x ->
-    let op = x.unary_operator in
-    if is_separable_prefix op then
-      get_doc op ^| get_doc x.unary_operand
+  | PrefixUnaryOperator
+    { prefix_unary_operator; prefix_unary_operand } ->
+    if is_separable_prefix prefix_unary_operator then
+      get_doc prefix_unary_operator ^| get_doc prefix_unary_operand
     else
-      get_doc op ^^^ get_doc x.unary_operand
-  | PostfixUnaryOperator x ->
-    get_doc x.unary_operand ^^^ get_doc x.unary_operator
+      get_doc prefix_unary_operator ^^^ get_doc prefix_unary_operand
+  | PostfixUnaryOperator
+    { postfix_unary_operand; postfix_unary_operator } ->
+    get_doc postfix_unary_operand ^^^ get_doc postfix_unary_operator
   | BinaryOperator x ->
     let left = get_doc x.binary_left_operand in
     let op = get_doc x.binary_operator in
@@ -778,11 +779,13 @@ let rec get_doc node =
     let a = get_doc field_initializer_arrow in
     let v = get_doc field_initializer_value in
     n ^| a ^| v
-  | ShapeExpression x ->
-    let sh = get_doc x.shape_shape in
-    let lp = get_doc x.shape_left_paren in
-    let fs = get_doc x.shape_fields in
-    let rp = get_doc x.shape_right_paren in
+  | ShapeExpression
+    { shape_expression_keyword; shape_expression_left_paren;
+      shape_expression_fields; shape_expression_right_paren } ->
+    let sh = get_doc shape_expression_keyword in
+    let lp = get_doc shape_expression_left_paren in
+    let fs = get_doc shape_expression_fields in
+    let rp = get_doc shape_expression_right_paren in
     sh ^| lp ^^^ fs ^^^ rp
   | ArrayCreationExpression x ->
     let left_bracket = get_doc x.array_creation_left_bracket in
@@ -895,11 +898,13 @@ let rec get_doc node =
     let a = get_doc x.field_arrow in
     let t = get_doc x.field_type in
     n ^| a ^| t
-  | ShapeTypeSpecifier x ->
-    let sh = get_doc x.shape_shape in
-    let lp = get_doc x.shape_left_paren in
-    let fs = get_doc x.shape_fields in
-    let rp = get_doc x.shape_right_paren in
+  | ShapeTypeSpecifier
+    { shape_type_keyword; shape_type_left_paren;
+      shape_type_fields; shape_type_right_paren } ->
+    let sh = get_doc shape_type_keyword in
+    let lp = get_doc shape_type_left_paren in
+    let fs = get_doc shape_type_fields in
+    let rp = get_doc shape_type_right_paren in
     sh ^| lp ^^^ fs ^^^ rp
   | TypeArguments x ->
     let left = get_doc x.type_arguments_left_angle in

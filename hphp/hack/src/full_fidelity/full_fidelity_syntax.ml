@@ -462,9 +462,13 @@ module WithToken(Token: TokenType) = struct
       print_keyword : t;
       print_expr : t;
     }
-    and unary_operator = {
-      unary_operator : t;
-      unary_operand : t
+    and prefix_unary_operator = {
+      prefix_unary_operator : t;
+      prefix_unary_operand : t;
+    }
+    and postfix_unary_operator = {
+      postfix_unary_operand : t;
+      postfix_unary_operator : t;
     }
     and binary_operator = {
       binary_left_operand : t;
@@ -649,11 +653,17 @@ module WithToken(Token: TokenType) = struct
       field_initializer_arrow : t;
       field_initializer_value : t
     }
-    and shape = {
-      shape_shape : t;
-      shape_left_paren : t;
-      shape_fields : t;
-      shape_right_paren : t
+    and shape_type_specifier = {
+      shape_type_keyword : t;
+      shape_type_left_paren : t;
+      shape_type_fields : t;
+      shape_type_right_paren : t
+    }
+    and shape_expression = {
+      shape_expression_keyword : t;
+      shape_expression_left_paren : t;
+      shape_expression_fields : t;
+      shape_expression_right_paren : t
     }
     and generic_type = {
       generic_class_type : t;
@@ -782,8 +792,8 @@ module WithToken(Token: TokenType) = struct
     | VariableExpression of variable_expression
     | QualifiedNameExpression of qualified_name_expression
     | PipeVariableExpression of pipe_variable_expression
-    | PrefixUnaryOperator of unary_operator
-    | PostfixUnaryOperator of unary_operator
+    | PrefixUnaryOperator of prefix_unary_operator
+    | PostfixUnaryOperator of postfix_unary_operator
     | BinaryOperator of binary_operator
     | InstanceofExpression of instanceof_expression
     | ConditionalExpression of conditional_expression
@@ -793,7 +803,7 @@ module WithToken(Token: TokenType) = struct
     | ListExpression of list_expression
     | CollectionLiteralExpression of collection_literal_expression
     | ObjectCreationExpression of object_creation_expression
-    | ShapeExpression of shape
+    | ShapeExpression of shape_expression
     | FieldInitializer of field_initializer
     | ArrayCreationExpression of array_creation_expression
     | ArrayIntrinsicExpression of array_intrinsic_expression
@@ -819,7 +829,7 @@ module WithToken(Token: TokenType) = struct
     | MapTypeSpecifier of map_type_specifier
     | ClosureTypeSpecifier of closure_type_specifier
     | ClassnameTypeSpecifier of classname_type_specifier
-    | ShapeTypeSpecifier of shape
+    | ShapeTypeSpecifier of shape_type_specifier
     | FieldSpecifier of field_specifier
 
     and t = { syntax : syntax ; value : SyntaxValue.t}
@@ -1446,11 +1456,11 @@ module WithToken(Token: TokenType) = struct
         { echo_keyword; echo_expression_list; echo_semicolon; } ->
         [ echo_keyword; echo_expression_list; echo_semicolon; ]
       | PrefixUnaryOperator
-        { unary_operator; unary_operand } ->
-        [ unary_operator; unary_operand ]
+        { prefix_unary_operator; prefix_unary_operand } ->
+        [ prefix_unary_operator; prefix_unary_operand ]
       | PostfixUnaryOperator
-        { unary_operand; unary_operator } ->
-        [ unary_operand; unary_operator ]
+        { postfix_unary_operand; postfix_unary_operator } ->
+        [ postfix_unary_operand; postfix_unary_operator ]
       | BinaryOperator
         { binary_left_operand; binary_operator; binary_right_operand } ->
         [ binary_left_operand; binary_operator; binary_right_operand ]
@@ -1493,8 +1503,10 @@ module WithToken(Token: TokenType) = struct
         [ object_creation_new; object_creation_class; object_creation_lparen;
           object_creation_arguments; object_creation_rparen ]
       | ShapeExpression
-        { shape_shape; shape_left_paren; shape_fields; shape_right_paren } ->
-        [ shape_shape; shape_left_paren; shape_fields; shape_right_paren ]
+        { shape_expression_keyword; shape_expression_left_paren;
+          shape_expression_fields; shape_expression_right_paren } ->
+        [ shape_expression_keyword; shape_expression_left_paren;
+          shape_expression_fields; shape_expression_right_paren ]
       | FieldInitializer
         { field_initializer_name; field_initializer_arrow;
           field_initializer_value } ->
@@ -1592,8 +1604,10 @@ module WithToken(Token: TokenType) = struct
         [ classname_classname; classname_left_angle; classname_type;
           classname_right_angle ]
       | ShapeTypeSpecifier
-        { shape_shape; shape_left_paren; shape_fields; shape_right_paren } ->
-        [ shape_shape; shape_left_paren; shape_fields; shape_right_paren ]
+        { shape_type_keyword; shape_type_left_paren;
+          shape_type_fields; shape_type_right_paren } ->
+        [ shape_type_keyword; shape_type_left_paren;
+          shape_type_fields; shape_type_right_paren ]
       | FieldSpecifier
         { field_name; field_arrow; field_type } ->
         [ field_name; field_arrow; field_type ]
@@ -1917,11 +1931,11 @@ module WithToken(Token: TokenType) = struct
         { echo_keyword; echo_expression_list; echo_semicolon; } ->
         [ "echo_keyword"; "echo_expression_list"; "echo_semicolon"; ]
       | PrefixUnaryOperator
-        { unary_operator; unary_operand } ->
-        [ "unary_operator"; "unary_operand" ]
+        { prefix_unary_operator; prefix_unary_operand } ->
+        [ "prefix_unary_operator"; "prefix_unary_operand" ]
       | PostfixUnaryOperator
-        { unary_operand; unary_operator } ->
-        [ "unary_operand"; "unary_operator" ]
+        { postfix_unary_operand; postfix_unary_operator } ->
+        [ "postfix_unary_operand"; "postfix_unary_operator" ]
       | BinaryOperator
         { binary_left_operand; binary_operator; binary_right_operand } ->
         [ "binary_left_operand"; "binary_operator"; "binary_right_operand" ]
@@ -1966,9 +1980,10 @@ module WithToken(Token: TokenType) = struct
           "object_creation_lparen"; "object_creation_arguments";
           "object_creation_rparen" ]
       | ShapeExpression
-        { shape_shape; shape_left_paren; shape_fields; shape_right_paren } ->
-        [ "shape_shape"; "shape_left_paren"; "shape_fields";
-          "shape_right_paren" ]
+        { shape_expression_keyword; shape_expression_left_paren;
+          shape_expression_fields; shape_expression_right_paren } ->
+        [ "shape_expression_keyword"; "shape_expression_left_paren";
+          "shape_expression_fields"; "shape_expression_right_paren" ]
       | FieldInitializer
         { field_initializer_name; field_initializer_arrow;
           field_initializer_value } ->
@@ -2066,9 +2081,10 @@ module WithToken(Token: TokenType) = struct
         [ "classname_classname"; "classname_left_angle"; "classname_type";
           "classname_right_angle" ]
       | ShapeTypeSpecifier
-        { shape_shape; shape_left_paren; shape_fields; shape_right_paren } ->
-        [ "shape_shape"; "shape_left_paren"; "shape_fields";
-          "shape_right_paren" ]
+        { shape_type_keyword; shape_type_left_paren;
+          shape_type_fields; shape_type_right_paren } ->
+        [ "shape_type_keyword"; "shape_type_left_paren";
+          "shape_type_fields"; "shape_type_right_paren" ]
       | FieldSpecifier
         { field_name; field_arrow; field_type } ->
         [ "field_name"; "field_arrow"; "field_type" ]
@@ -2491,15 +2507,18 @@ module WithToken(Token: TokenType) = struct
         [ echo_keyword; echo_expression_list; echo_semicolon; ]) ->
         EchoStatement
         { echo_keyword; echo_expression_list; echo_semicolon; }
-      | (SyntaxKind.PrefixUnaryOperator, [ unary_operator; unary_operand ]) ->
-        PrefixUnaryOperator { unary_operator; unary_operand }
-      | (SyntaxKind.PostfixUnaryOperator, [ unary_operand; unary_operator ]) ->
-        PostfixUnaryOperator { unary_operand; unary_operator }
+      | (SyntaxKind.PrefixUnaryOperator,
+        [ prefix_unary_operator; prefix_unary_operand ]) ->
+        PrefixUnaryOperator
+        { prefix_unary_operator; prefix_unary_operand }
+      | (SyntaxKind.PostfixUnaryOperator,
+        [ postfix_unary_operand; postfix_unary_operator ]) ->
+        PostfixUnaryOperator
+        { postfix_unary_operand; postfix_unary_operator }
       | (SyntaxKind.BinaryOperator, [ binary_left_operand; binary_operator;
         binary_right_operand ]) ->
         BinaryOperator { binary_left_operand; binary_operator;
         binary_right_operand }
-
       | (SyntaxKind.InstanceofExpression,
         [ instanceof_left_operand; instanceof_operator;
           instanceof_right_operand ]) ->
@@ -2545,9 +2564,11 @@ module WithToken(Token: TokenType) = struct
         { object_creation_new; object_creation_class; object_creation_lparen;
           object_creation_arguments; object_creation_rparen }
       | (SyntaxKind.ShapeExpression,
-        [ shape_shape; shape_left_paren; shape_fields; shape_right_paren ]) ->
+        [ shape_expression_keyword; shape_expression_left_paren;
+          shape_expression_fields; shape_expression_right_paren ]) ->
         ShapeExpression
-        { shape_shape; shape_left_paren; shape_fields; shape_right_paren }
+        { shape_expression_keyword; shape_expression_left_paren;
+          shape_expression_fields; shape_expression_right_paren }
       | (SyntaxKind.FieldInitializer,
         [ field_initializer_name; field_initializer_arrow;
           field_initializer_value ]) ->
@@ -2654,9 +2675,11 @@ module WithToken(Token: TokenType) = struct
         { classname_classname; classname_left_angle; classname_type;
           classname_right_angle }
       | (SyntaxKind.ShapeTypeSpecifier,
-        [ shape_shape; shape_left_paren; shape_fields; shape_right_paren ]) ->
+        [ shape_type_keyword; shape_type_left_paren;
+          shape_type_fields; shape_type_right_paren ]) ->
         ShapeTypeSpecifier
-        { shape_shape; shape_left_paren; shape_fields; shape_right_paren }
+        { shape_type_keyword; shape_type_left_paren;
+          shape_type_fields; shape_type_right_paren }
       | (SyntaxKind.FieldSpecifier,
         [ field_name; field_arrow; field_type ]) ->
         FieldSpecifier

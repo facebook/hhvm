@@ -125,7 +125,7 @@ private:
   static void* allocMem(unsigned nargs);
 
 private:
-  TypedValue m_extraArgs[];
+  TypedValue m_extraArgs[0];
   TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_extraArgs);
 };
 

@@ -211,10 +211,12 @@ void reclaimTranslation(TransLoc loc) {
     // Ensure no one calls into the function
     ITRACE(1, "Overwriting function\n");
     auto clearBlock = [] (CodeBlock& cb) {
+      CGMeta fixups;
+      SCOPE_EXIT { assert(fixups.empty()); };
+
       DataBlock db;
-      vwrap(cb, db, [] (Vout& v) {
-        v << ud2{};
-      });
+      Vauto vasm { cb, cb, db, fixups };
+      vasm.unit().padding = true;
     };
 
     CodeBlock main, cold, frozen;

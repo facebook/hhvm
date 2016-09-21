@@ -91,10 +91,13 @@ struct CodeSmasher {
     for (auto& e : entries) {
       CodeBlock cb;
       cb.init(e.first, e.second - e.first, "relocated");
+
+      CGMeta fixups;
+      SCOPE_EXIT { assert(fixups.empty()); };
+
       DataBlock db;
-      vwrap(cb, db, [] (Vout& v) {
-        v << ud2{};
-      });
+      Vauto vasm { cb, cb, db, fixups };
+      vasm.unit().padding = true;
     }
     okToRelocate = true;
   }
@@ -530,10 +533,13 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
     auto clearRange = [](TCA start, TCA end) {
       CodeBlock cb;
       cb.init(start, end - start, "Dead code");
+
+      CGMeta fixups;
+      SCOPE_EXIT { assert(fixups.empty()); };
+
       DataBlock db;
-      vwrap(cb, db, [] (Vout& v) {
-        v << ud2{};
-      });
+      Vauto vasm { cb, cb, db, fixups };
+      vasm.unit().padding = true;
     };
 
     if (mainStartRel != loc.mainStart()) {

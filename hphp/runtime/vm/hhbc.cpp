@@ -509,7 +509,8 @@ int instrNumPushes(PC pc) {
   auto const op = peek_op(pc);
   auto const pushes = numberOfPushes[size_t(op)];
 
-  // BaseSC and BaseSL may push back a C that was on top of the A they removed.
+  // BaseSC and BaseSL may push back a C or V that was on top of the A they
+  // removed.
   if (pushes == -1) return getImm(pc, 1).u_IVA;
 
   return pushes;
@@ -532,7 +533,7 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
 FlavorDesc baseSFlavor(PC pc, uint32_t i) {
   always_assert(i <= 1);
   auto clsIdx = getImm(pc, 1).u_IVA;
-  return i == clsIdx ? AV : CV;
+  return i == clsIdx ? AV : CVV;
 }
 }
 

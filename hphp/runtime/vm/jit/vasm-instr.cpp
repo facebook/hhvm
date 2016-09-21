@@ -66,6 +66,8 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::phpret:
     case Vinstr::leavetc:
     case Vinstr::fallthru:
+    // slow-path for overflow
+    case Vinstr::mulinto:
       return true;
     default:
       return false;
@@ -184,6 +186,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::bln:
     case Vinstr::cmplims:
     case Vinstr::cmpsds:
+    case Vinstr::cmpqsign:
     case Vinstr::fabs:
     case Vinstr::lslwi:
     case Vinstr::lslwis:
@@ -195,6 +198,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::lsrxis:
     case Vinstr::mrs:
     case Vinstr::msr:
+    case Vinstr::mul:
     case Vinstr::orsw:
     case Vinstr::orswi:
     case Vinstr::popp:
@@ -301,6 +305,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::incqm:
     case Vinstr::incqmlock:
     case Vinstr::imul:
+    case Vinstr::mulinto:
     case Vinstr::neg:
     case Vinstr::not:
     case Vinstr::orq:
@@ -311,6 +316,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::sarqi:
     case Vinstr::shlqi:
     case Vinstr::shrqi:
+    case Vinstr::smulh:
     case Vinstr::subq:
     case Vinstr::subqi:
     case Vinstr::xorq:

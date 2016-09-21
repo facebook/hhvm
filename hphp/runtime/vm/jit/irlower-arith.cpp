@@ -105,7 +105,6 @@ void implShift(Vout& v, IRLS& env, const IRInstruction* inst) {
   AO(MulInt,  BinopSF,  imul)   \
   AO(AddIntO, ArithO,   addq)   \
   AO(SubIntO, ArithO,   subq)   \
-  AO(MulIntO, ArithO,   imul)   \
   AO(AddDbl,  Binop,    addsd)  \
   AO(SubDbl,  Binop,    subsd)  \
   AO(MulDbl,  Binop,    mulsd)  \
@@ -126,6 +125,16 @@ ARITH_OPS
 #undef ARITH_OPS
 
 ///////////////////////////////////////////////////////////////////////////////
+
+
+void cgMulIntO(IRLS& env, const IRInstruction* inst) {
+  auto const d = dstLoc(env, inst, 0).reg();
+  auto const s0 = srcLoc(env, inst, 0).reg();
+  auto const s1 = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  v << mulinto{s0, s1, d, {label(env, inst->next()), label(env, inst->taken())}};
+}
 
 void cgFloor(IRLS& env, const IRInstruction* inst) {
   implRound<RoundDirection::floor>(vmain(env), env, inst);

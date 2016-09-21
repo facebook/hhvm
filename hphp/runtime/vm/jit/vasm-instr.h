@@ -128,6 +128,7 @@ struct Vunit;
   O(absdbl, Inone, U(s), D(d))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(divint, Inone, U(s0) U(s1), D(d))\
+  O(mulinto, Inone, U(s0) U(s1), D(d))	\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
   O(ud2, Inone, Un, Dn)\
@@ -160,6 +161,7 @@ struct Vunit;
   O(incqm, Inone, U(m), D(sf))\
   O(incqmlock, Inone, U(m), D(sf))\
   O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(mul, Inone, U(s0) U(s1), D(d)) \
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
   O(not, Inone, UH(s,d), DH(d,s))\
@@ -203,6 +205,7 @@ struct Vunit;
   O(cmpqi, I(s0), U(s1), D(sf))\
   O(cmpqm, Inone, U(s0) U(s1), D(sf))\
   O(cmpqim, I(s0), U(s1), D(sf))\
+  O(cmpqsign, Inone, U(s0) U(s1), D(sf))	\
   O(cmpsd, I(pred), UA(s0) U(s1), D(d))\
   O(ucomisd, Inone, U(s0) U(s1), D(sf))\
   O(testb, Inone, U(s0) U(s1), D(sf))\
@@ -310,6 +313,7 @@ struct Vunit;
   O(orsw, Inone, U(s0) U(s1), D(d) D(sf)) \
   O(popp, Inone, Un, D(d0) D(d1))\
   O(pushp, Inone, U(s0) U(s1), Dn)\
+  O(smulh, Inone, U(s0) U(s1), D(d)) \
   O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
@@ -890,6 +894,20 @@ struct srem { Vreg s0, s1, d; };
  */
 struct divint { Vreg s0, s1, d; };
 
+/*
+ * Integer multiplication (with overflow).
+ * 
+ * Performs a 64bit integer multiplication (d := s0 * s1) and checks for a
+ * possible overflow.  Given that the method to check for the overflow will
+ * be architecture specific, we don't expose any internal flag status and
+ * mark this as killing the flag register.
+ *
+ * Targets have the same order as for branch instructions (see below):
+ *   target[0] = next (i.e. fall-through)
+ *   target[1] = taken (i.e. slow-path)
+ */
+struct mulinto { Vreg s0, s1, d; Vlabel targets[2]; };
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -1129,6 +1147,8 @@ struct asrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct bln {};
 struct cmplims { Immed s0; Vptr s1; VregSF sf; };
 struct cmpsds { ComparisonPred pred; VregDbl s0, s1, d; VregSF sf; };
+// cmpqsign: compares if s0 is the sign-extension of s1
+struct cmpqsign { Vreg64 s0; Vreg64 s1; VregSF sf; };
 struct fabs { VregDbl s, d; };
 struct fcvtzs { VregDbl s; Vreg64 d;};
 struct lslwi { Immed s0; Vreg32 s1, d; };
@@ -1141,10 +1161,12 @@ struct lsrxi { Immed s0; Vreg64 s1, d; };
 struct lsrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
+struct mul { Vreg64 s0, s1, d; };
 struct orswi { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct orsw { Vreg32 s0, s1, d; VregSF sf; };
 struct popp { Vreg64 d0, d1; };
 struct pushp { Vreg64 s0, s1; };
+struct smulh { Vreg64 s0, s1, d; };
 struct subsb { Vreg8 s0, s1, d; VregSF sf; };
 struct uxth { Vreg16 s; Vreg32 d; };
 

@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef INCLUDE_DASM_PPC64_H_
-#define INCLUDE_DASM_PPC64_H_
+#ifndef incl_HPHP_PPC64_ASM_DASM_PPC64_H_
+#define incl_HPHP_PPC64_ASM_DASM_PPC64_H_
 
 #include <ostream>
 
@@ -40,7 +40,9 @@ struct Disassembler {
 
   ~Disassembler() {}
 
-  void disassembly(std::ostream& out, uint8_t* instr);
+  void disassembly(std::ostream& out,
+                   const uint8_t* const instr,
+                   const uint8_t* const address = nullptr);
 
  private:
   bool print_encoding_;

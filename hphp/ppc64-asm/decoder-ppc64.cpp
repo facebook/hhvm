@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/ppc64-asm/branch-ppc64.h"
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 
 #include <cassert>
@@ -148,6 +149,7 @@ Decoder* Decoder::s_decoder = nullptr;
 
 Decoder::Decoder() {
   m_decoder_table = new DecoderInfo*[kDecoderSize];
+  m_decoder_table_size = 0;
   for (int i = 0; i < kDecoderSize; i++) {
     m_decoder_table[i] = nullptr;
   }
@@ -164,6 +166,9 @@ Decoder::Decoder() {
   setInstruction(instr_##name);
 
   PPC64_OPCODES
+
+  // Create index based on instruction opcode
+  createOpcodeIndex();
 
 #undef DE
 }
@@ -424,26 +429,66 @@ int32_t DecoderInfo::offset() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DecoderInfo* Decoder::decode(PPC64Instr instr) {
+const DecoderInfo Decoder::decode(const PPC64Instr* const ip) {
+  int32_t position;
+  PPC64Instr decoded_instr, operand, opcode_index, opcode_size;
+  PPC64Instr opcode = *ip & kOpcodeMask;
+
+  // Get index and size for the opcode.
+  opcode_index = (opcode_index_map.find(opcode))->second;
+  opcode_size = (opcode_size_map.find(opcode))->second;
+
   // To decode a instruction we extract the decoder fields
   // masking the instruction and test if it 'hits' the decoder table.
   for (size_t i = 0; i < sizeof(DecoderList)/sizeof(PPC64Instr); i++) {
-    auto decoded_instr = instr & DecoderList[i];
-    auto index = (decoded_instr % kDecoderSize);
+    decoded_instr = *ip & DecoderList[i];
+    operand = decoded_instr & kOperandMask;
 
-    while (m_decoder_table[index] != nullptr &&
-        m_decoder_table[index]->opcode() != decoded_instr) {
-      index = (index + 1) % kDecoderSize;
-    }
+    // Search the instruction for the current mask
+    position = searchInstr(opcode_index, opcode_size, operand);
 
-    if (m_decoder_table[index] != nullptr) {
-      m_decoder_table[index]->instruction_image(instr);
-      return m_decoder_table[index];
+    // If instruction found, return it.
+    if (position != -1) {
+      auto pdi = m_decoder_table[position];
+      assert(pdi->opcode() == decoded_instr);
+      pdi->instruction_image(*ip);
+      pdi->setIp(ip);
+      return *pdi;
     }
   }
 
   // invalid instruction! Use fallback.
-  return getInvalid();
+  DecoderInfo ret = getInvalid();
+  ret.setIp(ip);
+  return ret;
+}
+
+/*
+ * Binary search when looking for the operand
+ */
+int32_t Decoder::searchInstr(int32_t opd_index,
+                             int32_t opc_size,
+                             PPC64Instr search) const {
+  PPC64Instr operand;
+  auto first = opd_index;
+  auto last = opd_index + opc_size -1;
+  auto middle = (first + last)/2;
+
+  while (first <= last) {
+    operand = m_decoder_table[middle]->opcode() & kOperandMask;
+    if (operand < search) {
+      first = middle + 1;
+    }
+    else if (operand == search) {
+      return middle;
+    }
+    else {
+      last = middle -1;
+    }
+    middle = (first + last)/2;
+  }
+
+  return -1;
 }
 
 } // namespace ppc64_ams

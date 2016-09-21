@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
@@ -210,22 +211,10 @@ void reclaimTranslation(TransLoc loc) {
     // Ensure no one calls into the function
     ITRACE(1, "Overwriting function\n");
     auto clearBlock = [] (CodeBlock& cb) {
-      switch (arch()) {
-        case Arch::PPC64: {
-          ppc64_asm::Assembler a{cb};
-          a.emitTrap();
-          break;
-        }
-        case Arch::X64: {
-          X64Assembler a{cb};
-          a.emitTrap();
-          break;
-        }
-        case Arch::ARM:
-          not_implemented();
-          break;
-      }
-      always_assert(!cb.available());
+      DataBlock db;
+      vwrap(cb, db, [] (Vout& v) {
+        v << ud2{};
+      });
     };
 
     CodeBlock main, cold, frozen;

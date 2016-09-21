@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
 
 #include "hphp/tools/hfsort/jitsort.h"
 
@@ -90,21 +91,10 @@ struct CodeSmasher {
     for (auto& e : entries) {
       CodeBlock cb;
       cb.init(e.first, e.second - e.first, "relocated");
-      switch (arch()) {
-        case Arch::PPC64: {
-          ppc64_asm::Assembler a{cb};
-          a.emitTrap();
-          break;
-        }
-        case Arch::X64: {
-          X64Assembler a{cb};
-          a.emitTrap();
-          break;
-        }
-        case Arch::ARM:
-          not_implemented();
-          break;
-      }
+      DataBlock db;
+      vwrap(cb, db, [] (Vout& v) {
+        v << ud2{};
+      });
     }
     okToRelocate = true;
   }
@@ -540,22 +530,10 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
     auto clearRange = [](TCA start, TCA end) {
       CodeBlock cb;
       cb.init(start, end - start, "Dead code");
-      switch (arch()) {
-        case Arch::PPC64: {
-          ppc64_asm::Assembler a{cb};
-          a.emitTrap();
-          break;
-        }
-        case Arch::X64: {
-          X64Assembler a{cb};
-          a.emitTrap();
-          break;
-        }
-        case Arch::ARM:
-          not_implemented();
-          break;
-      }
-      always_assert(!cb.available());
+      DataBlock db;
+      vwrap(cb, db, [] (Vout& v) {
+        v << ud2{};
+      });
     };
 
     if (mainStartRel != loc.mainStart()) {

@@ -604,6 +604,8 @@ struct RuntimeOption {
   F(uint32_t, ReusableTCPadding, 128)                                   \
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
+  /* PPC64 Option: Minimum immediate size to use TOC */                 \
+  F(uint16_t, PPC64MinTOCImmSize, 64)                                   \
   /********************                                                 \
    | Profiling flags. |                                                 \
    ********************/                                                \
@@ -617,8 +619,6 @@ struct RuntimeOption {
    * kept low to avoid the risk of collecting a sample while we're      \
    * processing a previous sample. */                                   \
   F(uint32_t, PerfMemEventSampleFreq, 80)                               \
-  /* PPC64 Option: Minimum immediate size to use TOC */                 \
-  F(uint16_t, PPC64MinTOCImmSize, 64)                                   \
   /* */
 
 private:

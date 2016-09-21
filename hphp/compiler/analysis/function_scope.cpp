@@ -68,6 +68,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_async(false),
       m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
+      m_fromTrait(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0) {
   init(ar);
 
@@ -121,6 +122,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_noLSB(orig->m_noLSB),
       m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
       m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
+      m_fromTrait(orig->m_fromTrait),
       m_redeclaring(orig->m_redeclaring),
       m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction),
       m_nextID(0) {
@@ -203,7 +205,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_async(false),
       m_noLSB(false), m_nextLSB(false),
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
-      m_redeclaring(-1), m_inlineIndex(0),
+      m_fromTrait(false), m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
   m_dynamicInvoke = false;
   if (!method && Option::DynamicInvokeFunctions.find(name) !=

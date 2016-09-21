@@ -132,7 +132,7 @@ struct ThrowAllErrorsSetter {
   ThrowAllErrorsSetter();
   ~ThrowAllErrorsSetter();
 
-  private:
+private:
   bool m_throwAllErrors;
 };
 

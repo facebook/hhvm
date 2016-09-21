@@ -477,7 +477,7 @@ SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      uint32_t numArgs,
                      uint32_t numNonDefaultArgs) {
-  auto const constAsCell = [] (SSATmp* tmp) {
+  auto const constAsCell = [] (const SSATmp* tmp) {
     switch (tmp->type().toDataType()) {
       case KindOfUninit:
         return make_tv<KindOfUninit>();
@@ -520,10 +520,10 @@ SSATmp* opt_foldable(IRGS& env,
   // Don't pop the args yet---if the builtin throws at compile time (because
   // it would raise a warning or something at runtime) we're going to leave
   // the call alone.
-  auto const numNonVariadicArgs = (int32_t)func->numNonVariadicParams();
   PackedArrayInit args(numArgs);
-  for (auto bcOff = BCSPRelOffset{(int32_t)numArgs - 1};
-       bcOff > BCSPRelOffset{(int32_t)(numArgs - numNonDefaultArgs - 1)};
+  for (auto bcOff = BCSPRelOffset{static_cast<int32_t>(numArgs - 1)};
+       bcOff > 
+         BCSPRelOffset{static_cast<int32_t>(numArgs - numNonDefaultArgs - 1)};
        bcOff--) {
     auto const t = topType(env, bcOff);
     if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
@@ -532,7 +532,7 @@ SSATmp* opt_foldable(IRGS& env,
       args.append(cellAsCVarRef(constAsCell(topC(env, bcOff))));
     }
   }
-  if (numArgs != numNonVariadicArgs) {
+  if (numArgs != func->numNonVariadicParams()) {
     if (!topType(env).hasConstVal()) return nullptr;
 
     auto const variadicArgs = constAsCell(topC(env)).m_data.parr;
@@ -549,22 +549,25 @@ SSATmp* opt_foldable(IRGS& env,
     ThrowAllErrorsSetter taes;
 
 #ifdef DEBUG
+    VMRegAnchor _;
     auto const savedPC = vmpc();
     // ensure that vmpc is valid for later asserts within the invoke
     vmpc() = vmfp()->m_func->getEntry();
     SCOPE_EXIT{ vmpc() = savedPC; };
 #endif
-    SCOPE_EXIT{ RID().setJitFolding(false); };
     RID().setJitFolding(true);
-    Variant v = invoke(func->name()->data(), args.toArray(), -1, true, true,
-                       !func->unit()->useStrictTypes());
-    auto const retVal = *v.asCell();
+    SCOPE_EXIT{ RID().setJitFolding(false); };
+
+    Cell retVal;
+    g_context->invokeFunc(&retVal, func, args.toArray(), nullptr, nullptr,
+                          nullptr, nullptr, ExecutionContext::InvokeNormal,
+                          !func->unit()->useStrictTypes());
 
     if (isStringType(retVal.m_type)) {
       return cns(env, makeStaticString(retVal.m_data.pstr));
     } else if (isArrayLikeType(retVal.m_type)) {
-      return cns(env, make_array_like_tv(
-                     ArrayData::GetScalarArray(retVal.m_data.parr)));
+      auto const arr = ArrayData::GetScalarArray(retVal.m_data.parr);
+      return cns(env, make_array_like_tv(arr));
     } else if (retVal.m_type == KindOfObject ||
                retVal.m_type == KindOfResource) {
       return nullptr;
@@ -587,8 +590,9 @@ bool optimizedFCallBuiltin(IRGS& env,
 
     auto const fname = func->name();
 
-    SSATmp* retVal = opt_foldable(env, func, numArgs, numNonDefault);
-    if (retVal) return retVal;
+    if (auto const retVal = opt_foldable(env, func, numArgs, numNonDefault)) {
+      return retVal;
+    }
 #define X(x) \
     if (fname->isame(s_##x.get())) return opt_##x(env, numArgs);
 

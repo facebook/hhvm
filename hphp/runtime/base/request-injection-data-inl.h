@@ -35,7 +35,6 @@ inline bool RequestInjectionData::getJit() const {
 
 inline bool RequestInjectionData::getJitFolding() const {
   return m_jitFolding;
-  return true;
 }
 
 inline void RequestInjectionData::setJitFolding(bool flag) {

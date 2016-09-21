@@ -247,7 +247,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     case KindOfPersistentString:
     case KindOfString: {
       StringData *str = value.getStringData();
-      auto size = str->size();
+      auto const size = str->size();
       if (size >= RuntimeOption::MaxSerializedStringSize) {
         throw Exception("Size of serialized string (%d) exceeds max", size);
       }

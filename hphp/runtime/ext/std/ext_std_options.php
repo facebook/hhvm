@@ -295,7 +295,7 @@ function php_sapi_name(): string;
  * displaying the OS PHP was built on. This will only happen if your uname()
  * library call either doesn't exist or doesn't work.
  */
-<<__Native, __IsFoldable>>
+<<__Native>>
 function php_uname(string $mode = ""): mixed;
 
 /* Outputs a large amount of information about the current state of PHP. This

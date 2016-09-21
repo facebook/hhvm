@@ -2469,7 +2469,7 @@ and where_clause env =
   | _ -> L.back env.lb; []
 
 and where_clause_constraints env =
-  if peek env = Tlcb then [] else
+  if peek env = Tlcb || peek env = Tsc then [] else
   let error_state = !(env.errors) in
   let t1 = hint env in
   match option_constraint_operator env with
@@ -2482,8 +2482,8 @@ and where_clause_constraints env =
       if !(env.errors) != error_state
       then [constr]
       else constr :: where_clause_constraints env
-    | Tlcb -> L.back env.lb; [constr]
-    | _ -> error_expect env ", or {"; [constr]
+    | Tlcb | Tsc -> L.back env.lb; [constr]
+    | _ -> error_expect env ", or { or ;"; [constr]
 
 and option_constraint_operator env =
   match L.token env.file env.lb with

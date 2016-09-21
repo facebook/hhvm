@@ -2,7 +2,7 @@
 ;;; hack-mode.el --- Major mode for the Hack programming language
 
 ;;; Commentary:
-;; 
+;;
 ;; Implements `hack-mode' for the Hack programming language.  This includes
 ;; basic support for Hack typechecker integration and the Hack autocompletion
 ;; service
@@ -110,7 +110,7 @@
 	   "throw" "if" "else" "while" "do" "for" "foreach" "instanceof"
 	   "as" "switch" "default" "goto" "attribute" "category"
 	   "children" "enum" "clone" "include" "include_once" "require"
-	   "require_once" "namespace" "use" "global" "await")))
+	   "require_once" "namespace" "use" "global" "await" "where" "super")))
   "Hack Keywords.")
 
 (defconst hack-builtins
@@ -143,7 +143,7 @@
    (cons
 	(concat "[^_$]?\\<\\(" hack-builtins "\\)\\>[^_]?")
 	'(1 'hack-builtin))
-   
+
    '("\\<\\(break\\|case\\|continue\\)\\>\\s-+\\(-?\\sw+\\)?"
 	 (1 'hack-keyword) (2 'hack-constant t t))
    '("^\\s-*\\(\\sw+\\):\\>" (1 'hack-constant nil t))
@@ -195,11 +195,11 @@
 	'("->\\(\\sw+\\)" (1 'hack-field-name t t))
 	'("->\\(\\sw+\\)\\s-*(" (1 'hack-method-call t t))
 	'("\\<\\([a-z\\_][a-z0-9\\_]*\\)\\s-*[[(]" (1 'hack-function-call))
-	
+
 	;; Highlight types where they are easy to detect
 	;; Return types
 	`(")\\s-*:\\s-*" (,hack-type-regexp nil nil (0 'hack-type nil t)))
-	
+
 	;; Highlight special methods
 	(cons
 	 (concat "\\<function\\s-+\\(" hack-special-methods "\\)(")
@@ -302,7 +302,7 @@
 
   (setq-local c-block-stmt-1-key hack-block-stmt-1-key)
   (setq-local c-block-stmt-2-key hack-block-stmt-2-key)
-  
+
   (setq-local c-class-key hack-class-key)
 
   (setq-local font-lock-defaults
@@ -320,13 +320,13 @@
 				 ("*" . ". 23")
 				 (?\n . "> b"))
 				nil))
-  
+
   (setq font-lock-maximum-decoration t)
   (setq case-fold-search t)
-  
+
   (setq-local compile-command (concat hack-client-binary " --from emacs"))
-  
-  (add-hook 'completion-at-point-functions 'hack-completion nil t) 
+
+  (add-hook 'completion-at-point-functions 'hack-completion nil t)
 
   (run-hooks 'hack-mode-hooks))
 
@@ -335,7 +335,7 @@
 	(save-restriction
 	  (widen)
 	  (nth 2 (hack-get-completions ac-prefix))))
-  
+
   (defun ac-hack-prefix ()
 	(or (ac-prefix-symbol)
 		(let ((c (char-before)))

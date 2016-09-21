@@ -727,7 +727,7 @@ void Vgen::emit(const inittc&) {
   a.mflr(rfuncln());
   a.std(rfuncln(), rsfp()[AROFF(m_savedRip)]);
 
-  // follow the ABI and create the calle frame and set its info
+  // follow the ABI and create the callee frame and set its info
   a.addi(rsfp(), rsfp(), -min_frame_size);
   emitSaveTOC();
 

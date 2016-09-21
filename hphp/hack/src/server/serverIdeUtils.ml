@@ -64,10 +64,15 @@ let revive funs classes typedefs consts file_name =
   Naming_heap.FunPosHeap.revive_batch funs;
   Naming_heap.FunCanonHeap.revive_batch @@ canon_set funs;
 
-  Decl_heap.Classes.revive_batch classes;
+  (* It is important we revive the class elements first before we revive
+   * the class itself. We already revived all the class elements that were
+   * removed in declare_and_check. To restore the world to the original state
+   * we need to revive all the remaining class elements.
+   *)
   Decl_class_elements.(
     classes |> SSet.elements |> get_for_classes |> revive_all
   );
+  Decl_heap.Classes.revive_batch classes;
   Naming_heap.TypeIdHeap.revive_batch classes;
   Naming_heap.TypeCanonHeap.revive_batch @@ canon_set classes;
 
@@ -78,6 +83,8 @@ let revive funs classes typedefs consts file_name =
   Naming_heap.ConstPosHeap.revive_batch consts;
   Decl_heap.GConsts.revive_batch consts;
 
+  Fixmes.HH_FIXMES.revive_batch @@
+    Fixmes.HH_FIXMES.KeySet.singleton file_name;
   Parser_heap.ParserHeap.revive_batch @@
     Parser_heap.ParserHeap.KeySet.singleton file_name
 
@@ -102,6 +109,8 @@ let declare_and_check content ~f =
   Autocomplete.auto_complete_for_global := "";
   let file_info =
     Errors.ignore_ begin fun () ->
+      Fixmes.HH_FIXMES.oldify_batch @@
+        Fixmes.HH_FIXMES.KeySet.singleton path;
       let {Parser_hack.file_mode = _; comments = _; ast} =
         Parser_hack.program_with_default_popt path content
       in

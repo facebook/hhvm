@@ -78,6 +78,7 @@ let prepend_root x = root ^ x
 
 let fail x =
   print_endline x;
+  Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
   exit 1
 
 let assertEqual expected got =

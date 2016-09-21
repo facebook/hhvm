@@ -19,6 +19,7 @@ end
 let expect ~msg bool =
   if bool then () else begin
     print_endline msg;
+    Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
     exit 1
   end
 
@@ -63,7 +64,7 @@ let test_revive (module IntHeap: SharedMem.NoCache
   expect_equals "0" (IntHeap.get_old "0") None;
 
   IntHeap.revive_batch key;
-  expect_equals "0" (IntHeap.get "0") (Some 0);
+  expect_equals "0" (IntHeap.get "0") None;
   expect_equals "0" (IntHeap.get_old "0") None
 
 let tests () =

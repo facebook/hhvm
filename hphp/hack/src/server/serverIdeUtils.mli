@@ -8,10 +8,6 @@
  *
  *)
 
-val oldify_file_info: Relative_path.t -> FileInfo.t -> unit
-
-val revive_file_info: Relative_path.t -> FileInfo.t -> unit
-
 (* When typechecking a content buffer in IDE mode,
 * this is the path that will be assigned to it *)
 val path: Relative_path.t

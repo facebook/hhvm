@@ -189,7 +189,14 @@ namespace {
 
 struct ShellExecContext final {
   ShellExecContext() {
-    m_sig_handler = signal(SIGCHLD, SIG_DFL);
+    // Use the default handler while exec'ing in a shell,
+    // saving the previous signal action.
+    struct sigaction sa = {};
+    sa.sa_handler = SIG_DFL;
+    if (sigaction(SIGCHLD, &sa, &m_old_sa) != 0) {
+      Logger::Error("Couldn't install SIGCHLD handler");
+      abort();
+    }
   }
 
   ~ShellExecContext() {
@@ -200,8 +207,11 @@ struct ShellExecContext final {
       LightProcess::pclose(m_proc);
 #endif
     }
-    if (m_sig_handler) {
-      signal(SIGCHLD, m_sig_handler);
+    if (m_old_sa.sa_handler != SIG_DFL) {
+      if (sigaction(SIGCHLD, &m_old_sa, nullptr) != 0) {
+        Logger::Error("Couldn't restore SIGCHLD handler");
+        abort();
+      }
     }
   }
 
@@ -240,7 +250,7 @@ struct ShellExecContext final {
   }
 
 private:
-  void (*m_sig_handler)(int);
+  struct sigaction m_old_sa = {};
   FILE *m_proc{nullptr};
 };
 

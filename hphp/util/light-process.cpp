@@ -484,11 +484,10 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   }
 
   if (!s_handlerInited) {
-    struct sigaction sa;
-    struct sigaction old_sa;
+    struct sigaction sa = {};
     sa.sa_sigaction = &LightProcess::SigChldHandler;
     sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
-    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
+    if (sigaction(SIGCHLD, &sa, nullptr) != 0) {
       Logger::Error("Couldn't install SIGCHLD handler");
       abort();
     }

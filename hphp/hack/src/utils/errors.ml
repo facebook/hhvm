@@ -117,7 +117,7 @@ module type Errors_modes = sig
   val to_list: 'a error_ -> 'a message list
   val to_absolute : error -> Pos.absolute error_
 
-  val to_string : Pos.absolute error_ -> string
+  val to_string : ?indent:bool -> Pos.absolute error_ -> string
 
   val get_sorted_error_list: error list * applied_fixme list -> error list
 
@@ -167,7 +167,7 @@ module NonTracingErrors: Errors_modes = struct
     let msg_l = List.map msg_l (fun (p, s) -> Pos.to_absolute p, s) in
     code, msg_l
 
-  let to_string (error : Pos.absolute error_) : string =
+  let to_string ?(indent=false) (error : Pos.absolute error_) : string =
     let error_code, msgl = (get_code error), (to_list error) in
     let buf = Buffer.create 50 in
     (match msgl with
@@ -177,9 +177,11 @@ module NonTracingErrors: Errors_modes = struct
           let error_code = Common.error_code_to_string error_code in
           Printf.sprintf "%s\n%s (%s)\n"
             (Pos.string pos1) msg1 error_code
-        end;
+      end;
+        let indentstr = if indent then "  " else "" in
         List.iter rest_of_error begin fun (p, w) ->
-          let msg = Printf.sprintf "%s\n%s\n" (Pos.string p) w in
+          let msg = Printf.sprintf "%s%s\n%s%s\n"
+              indentstr (Pos.string p) indentstr w in
           Buffer.add_string buf msg
         end
     );
@@ -255,7 +257,7 @@ module TracingErrors: Errors_modes = struct
     bt, code, msg_l
 
   (** TODO: Much of this is copy-pasta. *)
-  let to_string (error : Pos.absolute error_) : string =
+  let to_string ?(indent=false) (error : Pos.absolute error_) : string =
     let bt, error_code, msgl = (get_bt error),
       (get_code error), (to_list error) in
     let buf = Buffer.create 50 in
@@ -268,8 +270,10 @@ module TracingErrors: Errors_modes = struct
             (Pos.string pos1) (Printexc.raw_backtrace_to_string bt)
             msg1 error_code
         end;
+        let indentstr = if indent then "  " else "" in
         List.iter rest_of_error begin fun (p, w) ->
-          let msg = Printf.sprintf "%s\n%s\n" (Pos.string p) w in
+          let msg = Printf.sprintf "%s%s\n%s%s\n"
+              indentstr (Pos.string p) indentstr w in
           Buffer.add_string buf msg
         end
     );

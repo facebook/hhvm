@@ -28,6 +28,7 @@ type mode =
   | Dump_inheritance
   | Dump_tast
   | Errors
+  | AllErrors
   | Lint
   | Suggest
   | Dump_deps
@@ -214,7 +215,8 @@ let die str =
   close_out oc;
   exit 2
 
-let error l = output_string stderr (Errors.to_string (Errors.to_absolute l))
+let error ?(indent=false) l =
+  output_string stderr (Errors.to_string ~indent (Errors.to_absolute l))
 
 let parse_options () =
   let fn_ref = ref None in
@@ -230,7 +232,10 @@ let parse_options () =
   let options = [
     "--ai",
       Arg.String (set_ai),
-      "Run the abstract interpreter";
+    "Run the abstract interpreter";
+    "--all-errors",
+      Arg.Unit (set_mode AllErrors),
+      "List all errors not just the first one";
     "--auto-complete",
       Arg.Unit (set_mode Autocomplete),
       "Produce autocomplete suggestions";
@@ -579,6 +584,11 @@ let handle_mode mode filename tcopt files_contents files_info errors =
       then Relative_path.Map.iter files_info suggest_and_print;
       if errors <> []
       then (error (List.hd_exn errors); exit 2)
+      else Printf.printf "No errors\n"
+  | AllErrors ->
+      let errors = check_errors tcopt errors files_info in
+      if errors <> []
+      then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
   | Dump_tast ->
       let pos_ty_map = ref Pos.Map.empty in

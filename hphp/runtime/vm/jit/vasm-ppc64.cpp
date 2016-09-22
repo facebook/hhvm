@@ -239,6 +239,24 @@ struct Vgen {
   void emit(const landingpad&) { }
   void emit(const ldimmw& i) { a.li(Reg64(i.d), i.s); }
   void emit(const ldarx& i) { a.ldarx(i.d, i.s); }
+  void emit(const loadups& i) {
+    // A lowering would be handy here, but the Vptr's displacement is only
+    // later added at the optimizeCopies optimization
+    Vptr p(i.s);
+    if ((!p.base.isValid()) || (p.base == 0)) {
+      p.base = ppc64_asm::reg::r0; // use zero not r0
+    }
+    if (!p.index.isValid()) {
+      a.li(rAsm, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
+    } else if (p.disp) {
+      a.addi(rAsm, p.index, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
+    }
+    a.lxvd2x(i.d, p);
+  }
   void emit(const leap& i) { a.li64(i.d, i.s.r.disp, false); }
   void emit(const lead& i) { a.li64(i.d, (int64_t)i.s.get(), false); }
   void emit(const mfcr& i) { a.mfcr(i.d); }
@@ -290,8 +308,23 @@ struct Vgen {
   void emit(const sqrtsd& i) { a.xssqrtdp(i.d,i.s); }
 
   void emit(const stdcx& i) { a.stdcx(i.s, i.d); }
+  void emit(const storeups& i) {
+    Vptr p(i.m);
+    if ((!p.base.isValid()) || (p.base == 0)) {
+      p.base = ppc64_asm::reg::r0;
+    }
+    if (!p.index.isValid()) {
+      a.li(rAsm, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
+    } else if (p.disp) {
+      a.addi(rAsm, p.index, p.disp);
+      p.index = rAsm;
+      p.disp = 0;
+    }
+    a.stxvw4x(i.s, p);
+  }
 
-  void emit(const storeups& i) { a.stxvw4x(i.s,i.m); }
   // Subtractions: d = s1 - s0
   void emit(const subq& i) {
     a.subfo(i.d, i.s0, i.s1, true);
@@ -320,35 +353,6 @@ struct Vgen {
     a.mtfsb0(23); // clear VXCVI
     a.fctidz(i.d, i.s, false);
     a.mcrfs(0,5);
-  }
-  // TODO: this vasm must be lowered.
-  void emit(const loadups& i) {
-    Vptr p = i.s;
-    Vptr tmp(p);
-    switch(p.scale){
-      case 8:
-        tmp.index = rfuncln();
-        a.sldi(tmp.index, p.index, 3);
-        break;
-      case 4:
-        tmp.index = rfuncln();
-        a.sldi(tmp.index, p.index, 2);
-        break;
-      case 2:
-        tmp.index = rfuncln();
-        a.sldi(tmp.index, p.index, 1);
-        break;
-      default:
-        break;
-    }
-    if(p.disp != 0) {
-      tmp.base = rAsm;
-      a.li64(tmp.base, static_cast<int64_t>(p.disp), false);
-      a.add(tmp.base, p.base, tmp.base);
-      a.lxvd2x(i.d, tmp);
-    } else {
-      a.lxvd2x(i.d, p);
-    }
   }
   void emit(const movl& i) {
     int8_t sh = sizeof(int) * CHAR_BIT;
@@ -916,99 +920,6 @@ bool patchImm(Immed imm, Vout& v, Vreg& tmpRegister) {
   }
 }
 
-/*
- * Vptr struct supports fancy x64 addressing modes.
- * So we need to patch it to avoid ppc64el unsuported address modes.
- *
- * After patching, the Vptr @p will only have either base and index or base and
- * displacement.
- */
-void patchVptr(Vptr& p, Vout& v) {
-  // Map all address modes that Vptr can be so it can be handled.
-  enum class AddressModes {
-    Invalid        = 0,
-    Disp           = 1, // Displacement
-    Base           = 2, // Base
-    BaseDisp       = 3, // Base+Displacement
-    Index          = 4, // Index
-    IndexDisp      = 5, // Index+Dispacement
-    IndexBase      = 6, // Index+Base
-    IndexBaseDisp  = 7  // Index+Base+Displacement
-  };
-
-  AddressModes mode = static_cast<AddressModes>(
-                    (((p.disp != 0)     & 0x1) << 0) |
-                    ((p.base.isValid()  & 0x1) << 1) |
-                    ((p.index.isValid() & 0x1) << 2));
-
-  // Index can never be used directly if shifting is necessary. Handling it here
-  uint8_t shift = p.scale == 2 ? 1 :
-                  p.scale == 4 ? 2 :
-                  p.scale == 8 ? 3 : 0;
-
-  if (p.index.isValid() && shift) {
-    Vreg shifted_index_reg = v.makeReg();
-    v << shlqi{shift, p.index, shifted_index_reg, VregSF(RegSF{0})};
-    p.index = shifted_index_reg;
-    p.scale = 1;  // scale is now normalized.
-  }
-
-  // taking care of the displacement, in case it is > 16bits
-  Vreg disp_reg;
-  bool patched_disp = patchImm(Immed(p.disp), v, disp_reg);
-  switch (mode) {
-    case AddressModes::Base:
-    case AddressModes::IndexBase:
-      // ppc64 can handle these address modes. Nothing to do here.
-      break;
-
-    case AddressModes::BaseDisp:
-      // ppc64 can handle this address mode if displacement < 16bits
-      if (patched_disp) {
-        // disp is loaded on a register. Change address mode to kBase_Index
-        p.index = disp_reg;
-        p.disp = 0;
-      }
-      break;
-
-    case AddressModes::Index:
-        // treat it as kBase to avoid a kIndex_Disp asm handling.
-        std::swap(p.base, p.index);
-      break;
-
-    case AddressModes::Disp:
-    case AddressModes::IndexDisp:
-      if (patched_disp) {
-        // disp is loaded on a register. Change address mode to kBase_Index
-        p.base = disp_reg;
-        p.disp = 0;
-      }
-      else {
-        // treat it as kBase_Disp to avoid a kIndex_Disp asm handling.
-        p.base = p.index;
-      }
-      break;
-
-    case AddressModes::IndexBaseDisp: {
-      // This mode is not supported: Displacement will be embedded on Index
-      Vreg index_disp_reg = v.makeReg();
-      if (patched_disp) {
-        v << addq{disp_reg, p.index, index_disp_reg, VregSF(RegSF{0})};
-      } else {
-        v << addqi{p.disp, p.index, index_disp_reg, VregSF(RegSF{0})};
-      }
-      p.index = index_disp_reg;
-      p.disp = 0;
-      break;
-    }
-
-    case AddressModes::Invalid:
-    default:
-      assert(false && "Invalid address mode");
-      break;
-  }
-}
-
 
 /*
  * Rules for the lowering of these vasms:
@@ -1036,12 +947,11 @@ void lowerForPPC64(Vout& v, Inst& inst) {}
 #define ONE_R64(attr_1)         Reg64(inst.attr_1),
 #define TWO_R64(attr_1, attr_2) Reg64(inst.attr_1), Reg64(inst.attr_2),
 
-// Patches the Vptr, retrieve the immediate and emmit a related direct vasm
+// Retrieve the immediate and emmit a related direct vasm
 #define X(vasm_src, attr_data, vasm_dst, attr_addr, vasm_imm)           \
 void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vreg tmp = v.makeReg();                                               \
   Vptr p = inst.attr_addr;                                              \
-  patchVptr(p, v);                                                      \
   v << vasm_imm{inst.attr_data, tmp};                                   \
   v << vasm_dst{tmp, p};                                                \
 }
@@ -1050,29 +960,6 @@ X(storebi, s, storeb, m, ldimmb)
 X(storewi, s, storew, m, ldimmw)
 X(storeli, s, storel, m, ldimml)
 X(storeqi, s, store,  m, ldimml)
-
-#undef X
-
-// Simply take care of the vasm's Vptr, reemmiting it if patch occured
-#define X(vasm, attr_addr, attr_1, attr_2)                              \
-void lowerForPPC64(Vout& v, vasm& inst) {                               \
-  patchVptr(inst.attr_addr, v);                                         \
-  if (!v.empty()) v << vasm{inst.attr_1, inst.attr_2};                  \
-}
-
-X(storeb,   m, s, m);
-X(storew,   m, s, m);
-X(storel,   m, s, m);
-X(store,    d, s, d);
-X(storeups, m, s, m);
-X(storesd,  m, s, m);
-X(load,     s, s, d);
-X(loadb,    s, s, d);
-X(loadl,    s, s, d);
-X(loadzbl,  s, s, d);
-X(loadzbq,  s, s, d);
-X(loadzlq,  s, s, d);
-X(lea,      s, s, d);
 
 #undef X
 
@@ -1104,12 +991,11 @@ X(andqi,  andq,  s0, TWO(s1, d))
 #undef X
 
 // Simplify MemoryRef vasm types by their direct variant as ppc64 can't
-// change data directly in memory. Patches the Vptr, grab and save the data.
+// change data directly in memory. Grab and save the data.
 #define X(vasm_src, vasm_dst, vasm_load, vasm_store, attr_addr, attrs)  \
 void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vreg tmp = v.makeReg(), tmp2 = v.makeReg();                           \
   Vptr p = inst.attr_addr;                                              \
-  patchVptr(p, v);                                                      \
   v << vasm_load{p, tmp};                                               \
   v << vasm_dst{attrs tmp, tmp2, inst.sf};                              \
   v << vasm_store{tmp2, p};                                             \
@@ -1131,7 +1017,6 @@ X(addlm, addl, loadw, storew, m, ONE(s0))
                   attr_addr, attr_data)                                 \
 void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vptr p = inst.attr_addr;                                              \
-  patchVptr(p, v);                                                      \
   Vreg tmp2 = v.makeReg(), tmp;                                         \
   v << vasm_load{p, tmp2};                                              \
   if (patchImm(inst.attr_data, v, tmp))                                 \
@@ -1155,7 +1040,6 @@ X(testqim, testq, testqi, load,  s1, s0)
 void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vreg tmp = v.makeReg(), tmp3 = v.makeReg(), tmp2;                     \
   Vptr p = inst.attr_addr;                                              \
-  patchVptr(p, v);                                                      \
   v << vasm_load{p, tmp};                                               \
   lowerImm(inst.attr_data, v, tmp2);                                    \
   v << vasm_dst{tmp2, tmp, tmp3, inst.sf};                              \
@@ -1173,7 +1057,6 @@ X(addlim,  addl, load,  store,  m, s0)
 #define X(vasm_src, vasm_dst, vasm_load, attr_addr, attr)               \
 void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vptr p = inst.attr_addr;                                              \
-  patchVptr(p, v);                                                      \
   Vreg tmp = v.makeReg();                                               \
   v << vasm_load{p, tmp};                                               \
   v << vasm_dst{inst.attr, tmp, inst.sf};                               \
@@ -1193,7 +1076,6 @@ void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
   Vreg tmp1 = v.makeReg(), tmp2 = v.makeReg();                          \
   Vptr p = inst.attr_addr;                                              \
   v << vasm_filter{inst.attr, tmp1};                                    \
-  patchVptr(p, v);                                                      \
   v << vasm_load{p, tmp2};                                              \
   v << vasm_dst{tmp1, tmp2, inst.sf};                                   \
 }
@@ -1329,7 +1211,6 @@ void lowerForPPC64(Vout& v, srem& i) {
 
 void lowerForPPC64(Vout& v, jmpm& inst) {
   Vptr p = inst.target;
-  patchVptr(p, v);
   Vreg tmp = v.makeReg();
   v << load{p, tmp};
   v << jmpr{tmp, inst.args};
@@ -1337,7 +1218,6 @@ void lowerForPPC64(Vout& v, jmpm& inst) {
 
 void lowerForPPC64(Vout& v, callm& inst) {
   Vptr p = inst.target;
-  patchVptr(p, v);
   auto d = v.makeReg();
   v << load{p, d};
   v << callr{d, inst.args};
@@ -1352,14 +1232,12 @@ void lowerForPPC64(Vout& v, loadqp& inst) {
 
 void lowerForPPC64(Vout& v, pushm& inst) {
   auto tmp = v.makeReg();
-  patchVptr(inst.s, v);
   v << load{inst.s, tmp};
   v << push{tmp};
 }
 
 void lowerForPPC64(Vout& v, popm& inst) {
   auto tmp = v.makeReg();
-  patchVptr(inst.d, v);
   v << pop{tmp};
   v << store{tmp, inst.d};
 }
@@ -1400,7 +1278,6 @@ void lowerForPPC64(Vout& v, cvttsd2siq& inst) {
  */
 void lowerForPPC64(Vout& v, cmplim& inst) {
   Vptr p = inst.s1;
-  patchVptr(p, v);                          // safe for emitDecRefWork
 
   // this temp reg is always needed. Use one of our scratches.
   Vreg tmp2 = Vreg32(PhysReg(rAsm));
@@ -1426,7 +1303,6 @@ void lowerForPPC64(Vout& v, cmovb& inst) {
 
 void lowerForPPC64(Vout& v, cloadq& inst) {
   auto m = inst.t;
-  patchVptr(m, v);
   auto tmp = v.makeReg();
   v << load{m, tmp};
   v << cmovq{inst.cc, inst.sf, inst.f, tmp, inst.d};
@@ -1471,14 +1347,12 @@ void lowerForPPC64(Vout& v, absdbl& inst) {
 
 void lowerForPPC64(Vout& v, decqmlock& inst) {
   Vptr p = inst.m;
-  patchVptr(p, v);
   // decqmlock uses ldarx and stdcx instructions that are X-Form instruction
-  // and support only index+base address mode. In case decqmlock uses base or
-  // base + displacement with displacement less than 16 bits patchVptr will
-  // not work so we need to copy the displacement to index register.
+  // and support only index+base address mode so we need to copy the
+  // displacement to index register.
   if (!p.index.isValid()) {
     p.index = v.makeReg();
-    v <<  ldimml{Immed(p.disp), p.index};
+    v << ldimml{Immed(p.disp), p.index};
   }
   v << decqmlock{p, inst.sf};
 }
@@ -1564,6 +1438,136 @@ void lowerForPPC64(Vunit& unit) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Vptr struct supports fancy x64 addressing modes.
+ * So we need to patch it to avoid ppc64el unsuported address modes.
+ *
+ * After patching, the Vptr @p will only have either base and index or base and
+ * displacement.
+ */
+void fixVptr(Vout& v, Vptr& p) {
+  // Map all address modes that Vptr can be so it can be handled.
+  enum class AddressModes {
+    Invalid        = 0,
+    Disp           = 1, // Displacement
+    Base           = 2, // Base
+    BaseDisp       = 3, // Base+Displacement
+    Index          = 4, // Index
+    IndexDisp      = 5, // Index+Dispacement
+    IndexBase      = 6, // Index+Base
+    IndexBaseDisp  = 7  // Index+Base+Displacement
+  };
+
+  AddressModes mode = static_cast<AddressModes>(
+                    (((p.disp != 0)     & 0x1) << 0) |
+                    ((p.base.isValid()  & 0x1) << 1) |
+                    ((p.index.isValid() & 0x1) << 2));
+
+  // Index can never be used directly if shifting is necessary. Handling it here
+  uint8_t shift = p.scale == 2 ? 1 :
+                  p.scale == 4 ? 2 :
+                  p.scale == 8 ? 3 : 0;
+
+  if (p.index.isValid() && shift) {
+    Vreg shifted_index_reg = v.makeReg();
+    v << shlqi{shift, p.index, shifted_index_reg, VregSF(RegSF{0})};
+    p.index = shifted_index_reg;
+    p.scale = 1;  // scale is now normalized.
+  }
+
+  // taking care of the displacement, in case it is > 16bits
+  Vreg disp_reg;
+  bool patched_disp = patchImm(Immed(p.disp), v, disp_reg);
+  switch (mode) {
+    case AddressModes::Base:
+    case AddressModes::IndexBase:
+      // ppc64 can handle these address modes. Nothing to do here.
+      break;
+
+    case AddressModes::BaseDisp:
+      // ppc64 can handle this address mode if displacement < 16bits
+      if (patched_disp) {
+        // disp is loaded on a register. Change address mode to kBase_Index
+        p.index = disp_reg;
+        p.disp = 0;
+      }
+      break;
+
+    case AddressModes::Index:
+        // treat it as kBase to avoid a kIndex_Disp asm handling.
+        std::swap(p.base, p.index);
+      break;
+
+    case AddressModes::Disp:
+    case AddressModes::IndexDisp:
+      if (patched_disp) {
+        // disp is loaded on a register. Change address mode to kBase_Index
+        p.base = disp_reg;
+        p.disp = 0;
+      }
+      else {
+        // treat it as kBase_Disp to avoid a kIndex_Disp asm handling.
+        p.base = p.index;
+      }
+      break;
+
+    case AddressModes::IndexBaseDisp: {
+      // This mode is not supported: Displacement will be embedded on Index
+      Vreg index_disp_reg = v.makeReg();
+      lowerImm(Immed(p.disp), v, disp_reg);
+      v << addq{disp_reg, p.index, index_disp_reg, VregSF(RegSF{0})};
+      p.index = index_disp_reg;
+      p.disp = 0;
+      break;
+    }
+
+    case AddressModes::Invalid:
+      assert(false && "Invalid address mode");
+      break;
+  }
+}
+
+/*
+ * Every vasm that has a Vptr parameter must be handled
+ */
+struct VptrFixVisit {
+  explicit VptrFixVisit(Vout& v) : m_v(v) {}
+  template<class T> void def(T) {}
+  template<class T> void imm(const T&) {}
+  template<class T> void across(T) {}
+  template<class T, class H> void defHint(T, H) {}
+  template<class T, class H> void useHint(T r, H) { use(r); }
+  template <typename T> void use(T) {}
+  void use(Vptr& ptr) { fixVptr(m_v, ptr); }
+
+  Vout& m_v;
+};
+
+/*
+ * PPC64 can't handle complex addressing mode like X64 with base, index and
+ * displacement. To counter that, this optimization phase (that needs to be
+ * before register allocation) will fix all Vptrs that are not as intended.
+ * It'll leave them with either base+index or base+displacement.
+ */
+void fixVptrsForPPC64(Vunit& unit) {
+  // Scratch block can change blocks allocation, hence cannot use regular
+  // iterators.
+  auto& blocks = unit.blocks;
+
+  PostorderWalker{unit}.dfs([&] (Vlabel ib) {
+    assertx(!blocks[ib].code.empty());
+
+    for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
+      auto& inst = blocks[ib].code[ii];
+      vmodify(unit, ib, ii, [&] (Vout& v) {
+        VptrFixVisit vptrFixVisit {v};
+        visitOperands(inst, vptrFixVisit);
+        return 0;
+      });
+    }
+  });
+}
 } // anonymous namespace
 
 void optimizePPC64(Vunit& unit, const Abi& abi, bool regalloc) {
@@ -1579,6 +1583,8 @@ void optimizePPC64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   simplify(unit);
   optimizeCopies(unit, abi);
+
+  fixVptrsForPPC64(unit);
 
   // 2nd lower call to affect new vasms
   lowerForPPC64(unit);

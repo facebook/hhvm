@@ -876,6 +876,7 @@ ident_for_class_const:
   | T_WHILE
   | T_AS
   | T_CATCH
+  | T_EMPTY
   /* no T_DIE ? */
   /** The following must be made semi-reserved since they were keywords in HHVM
     * but not PHP. */

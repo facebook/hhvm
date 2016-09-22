@@ -146,7 +146,7 @@ function f($p)
 //      const CON71A = 101;     // unexpected 'const'
         trace("CON71B", 101);   // succeeded
     }
-}   
+}
 
 f(10);
 //*/

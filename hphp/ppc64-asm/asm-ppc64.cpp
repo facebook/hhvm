@@ -60,7 +60,7 @@ intptr_t VMTOC::getPtrVector() {
 
 int64_t VMTOC::getValue(int64_t index, bool qword) {
   HPHP::Address addr = reinterpret_cast<HPHP::Address>(
-      reinterpret_cast<intptr_t>(index) + getPtrVector());
+      static_cast<intptr_t>(index) + getPtrVector());
   int64_t ret_val = 0;
   int max_elem = qword ? 8 : 4;
   for (int i = max_elem-1; i >= 0; i--) {

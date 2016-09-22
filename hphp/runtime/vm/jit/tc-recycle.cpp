@@ -28,10 +28,13 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/vasm-gen.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
 #include <folly/MoveWrapper.h>
@@ -208,10 +211,12 @@ void reclaimTranslation(TransLoc loc) {
     // Ensure no one calls into the function
     ITRACE(1, "Overwriting function\n");
     auto clearBlock = [] (CodeBlock& cb) {
-      X64Assembler a {cb};
-      while (cb.available() >= 2) a.ud2();
-      if (cb.available() > 0) a.int3();
-      always_assert(!cb.available());
+      CGMeta fixups;
+      SCOPE_EXIT { assert(fixups.empty()); };
+
+      DataBlock db;
+      Vauto vasm { cb, cb, db, fixups };
+      vasm.unit().padding = true;
     };
 
     CodeBlock main, cold, frozen;

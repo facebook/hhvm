@@ -801,8 +801,7 @@ struct Assembler {
 
   void emitNop(int nbytes) {
     assert((nbytes % 4 == 0) && "This arch supports only 4 bytes alignment");
-    for (; nbytes > 0; nbytes -= 4)
-      nop();
+    for (; nbytes > 0; nbytes -= 4) nop();
   }
 
   // Secure high level instruction emitter

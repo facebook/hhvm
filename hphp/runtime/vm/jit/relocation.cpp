@@ -15,6 +15,11 @@
 */
 
 #include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/relocation-arm.h"
+#include "hphp/runtime/vm/jit/relocation-ppc64.h"
+#include "hphp/runtime/vm/jit/relocation-x64.h"
+
+#include "hphp/util/arch.h"
 
 namespace HPHP { namespace jit {
 
@@ -76,5 +81,39 @@ void RelocationInfo::rewind(TCA start, TCA end) {
     }
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Wrappers.
+ */
+
+void adjustForRelocation(RelocationInfo& rel) {
+  return ARCH_SWITCH_CALL(adjustForRelocation, rel);
+}
+void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
+  return ARCH_SWITCH_CALL(adjustForRelocation, rel, srcStart, srcEnd);
+}
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
+  return ARCH_SWITCH_CALL(adjustCodeForRelocation, rel, fixups);
+}
+void adjustMetaDataForRelocation(RelocationInfo& rel,
+                                 AsmInfo* asmInfo,
+                                 CGMeta& fixups) {
+  return ARCH_SWITCH_CALL(adjustMetaDataForRelocation, rel, asmInfo, fixups);
+}
+void findFixups(TCA start, TCA end, CGMeta& fixups) {
+  return ARCH_SWITCH_CALL(findFixups, start, end, fixups);
+}
+size_t relocate(RelocationInfo& rel,
+                CodeBlock& destBlock,
+                TCA start, TCA end,
+                CGMeta& fixups,
+                TCA* exitAddr) {
+  return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, fixups,
+      exitAddr);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}

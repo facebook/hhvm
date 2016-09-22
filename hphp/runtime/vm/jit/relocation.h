@@ -66,8 +66,6 @@ struct RelocationInfo {
   std::set<TCA> addressImmediates;
 };
 
-namespace x64 {
-
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
@@ -81,7 +79,6 @@ size_t relocate(RelocationInfo& rel,
                 CGMeta& fixups,
                 TCA* exitAddr);
 
-}}}
-
+}}
 
 #endif

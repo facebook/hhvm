@@ -415,6 +415,10 @@ let daemon_main_exn options (ic, oc) =
 let daemon_main (state, options) (ic, oc) =
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state;
+  (* Restore hhi files every time the server restarts
+    in case the tmp folder changes *)
+  ignore (Hhi.get_hhi_root());
+
   try daemon_main_exn options (ic, oc)
   with
   | SharedMem.Out_of_shared_memory ->

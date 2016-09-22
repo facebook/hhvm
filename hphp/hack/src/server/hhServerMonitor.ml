@@ -84,8 +84,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
   end;
 
   ignore @@ Sys_utils.setsid ();
-  (* Force hhi files to be extracted and their location saved before workers
-   * fork, so everyone can know about the same hhi path. *)
   ignore (Hhi.get_hhi_root());
   Relative_path.set_path_prefix Relative_path.Root www_root;
 
@@ -101,7 +99,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
     ServerMain.run_once options handle
   else
     let hh_server_monitor_starter = begin fun () ->
-      ignore (Hhi.get_hhi_root());
       let typechecker = start_hh_server options in
       [typechecker]
     end in

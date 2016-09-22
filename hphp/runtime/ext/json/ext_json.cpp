@@ -146,12 +146,13 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     k_JSON_BIGINT_AS_STRING;
   int64_t parser_options = options & supported_options;
   Variant z;
-  if (JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options)) {
-    return tvReturn(std::move(z));
-  }
-
+  const auto ok =
+    JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options);
   if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
     StructuredLog::logSerDes("json", "des", json, z);
+  }
+  if (ok) {
+    return tvReturn(std::move(z));
   }
 
   String trimmed = HHVM_FN(trim)(json, "\t\n\r ");

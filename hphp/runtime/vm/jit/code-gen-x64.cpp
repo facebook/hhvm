@@ -148,52 +148,62 @@ CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(MapAddElemC)
 CALL_OPCODE(ColAddNewElemC)
 
-CALL_OPCODE(ConvBoolToArr);
-CALL_OPCODE(ConvDblToArr);
-CALL_OPCODE(ConvIntToArr);
-CALL_OPCODE(ConvObjToArr);
-CALL_OPCODE(ConvStrToArr);
-CALL_OPCODE(ConvVecToArr);
-CALL_OPCODE(ConvDictToArr);
-CALL_OPCODE(ConvKeysetToArr);
-CALL_OPCODE(ConvCellToArr);
+DELEGATE_OPCODE(ConvIntToBool);
+DELEGATE_OPCODE(ConvDblToBool);
+DELEGATE_OPCODE(ConvStrToBool);
+DELEGATE_OPCODE(ConvArrToBool);
+DELEGATE_OPCODE(ConvObjToBool);
+DELEGATE_OPCODE(ConvCellToBool);
 
-CALL_OPCODE(ConvArrToVec);
-CALL_OPCODE(ConvDictToVec);
-CALL_OPCODE(ConvKeysetToVec);
-CALL_OPCODE(ConvObjToVec);
+DELEGATE_OPCODE(ConvBoolToInt);
+DELEGATE_OPCODE(ConvDblToInt);
+DELEGATE_OPCODE(ConvStrToInt);
+DELEGATE_OPCODE(ConvArrToInt);
+DELEGATE_OPCODE(ConvObjToInt);
+DELEGATE_OPCODE(ConvResToInt);
+DELEGATE_OPCODE(ConvCellToInt);
 
-CALL_OPCODE(ConvArrToDict);
-CALL_OPCODE(ConvVecToDict);
-CALL_OPCODE(ConvKeysetToDict);
-CALL_OPCODE(ConvObjToDict);
+DELEGATE_OPCODE(ConvBoolToDbl);
+DELEGATE_OPCODE(ConvIntToDbl);
+DELEGATE_OPCODE(ConvStrToDbl);
+DELEGATE_OPCODE(ConvArrToDbl);
+DELEGATE_OPCODE(ConvObjToDbl);
+DELEGATE_OPCODE(ConvResToDbl);
+DELEGATE_OPCODE(ConvCellToDbl);
 
-CALL_OPCODE(ConvArrToKeyset);
-CALL_OPCODE(ConvVecToKeyset);
-CALL_OPCODE(ConvDictToKeyset);
-CALL_OPCODE(ConvObjToKeyset);
+DELEGATE_OPCODE(ConvBoolToStr);
+DELEGATE_OPCODE(ConvIntToStr);
+DELEGATE_OPCODE(ConvDblToStr);
+DELEGATE_OPCODE(ConvObjToStr);
+DELEGATE_OPCODE(ConvResToStr);
+DELEGATE_OPCODE(ConvCellToStr);
 
-CALL_OPCODE(ConvCellToBool);
+DELEGATE_OPCODE(ConvBoolToArr);
+DELEGATE_OPCODE(ConvDblToArr);
+DELEGATE_OPCODE(ConvIntToArr);
+DELEGATE_OPCODE(ConvStrToArr);
+DELEGATE_OPCODE(ConvVecToArr);
+DELEGATE_OPCODE(ConvDictToArr);
+DELEGATE_OPCODE(ConvKeysetToArr);
+DELEGATE_OPCODE(ConvObjToArr);
+DELEGATE_OPCODE(ConvCellToArr);
 
-CALL_OPCODE(ConvArrToDbl);
-CALL_OPCODE(ConvObjToDbl);
-CALL_OPCODE(ConvStrToDbl);
-CALL_OPCODE(ConvResToDbl);
-CALL_OPCODE(ConvCellToDbl);
+DELEGATE_OPCODE(ConvArrToVec);
+DELEGATE_OPCODE(ConvDictToVec);
+DELEGATE_OPCODE(ConvKeysetToVec);
+DELEGATE_OPCODE(ConvObjToVec);
 
-CALL_OPCODE(ConvArrToInt);
-CALL_OPCODE(ConvObjToInt);
-CALL_OPCODE(ConvStrToInt);
-CALL_OPCODE(ConvResToInt);
-CALL_OPCODE(ConvCellToInt);
+DELEGATE_OPCODE(ConvArrToDict);
+DELEGATE_OPCODE(ConvVecToDict);
+DELEGATE_OPCODE(ConvKeysetToDict);
+DELEGATE_OPCODE(ConvObjToDict);
 
-CALL_OPCODE(ConvCellToObj);
+DELEGATE_OPCODE(ConvArrToKeyset);
+DELEGATE_OPCODE(ConvVecToKeyset);
+DELEGATE_OPCODE(ConvDictToKeyset);
+DELEGATE_OPCODE(ConvObjToKeyset);
 
-CALL_OPCODE(ConvDblToStr);
-CALL_OPCODE(ConvIntToStr);
-CALL_OPCODE(ConvObjToStr);
-CALL_OPCODE(ConvResToStr);
-CALL_OPCODE(ConvCellToStr);
+DELEGATE_OPCODE(ConvCellToObj);
 
 CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
@@ -784,116 +794,6 @@ void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::cgConvDblToInt(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  constexpr uint64_t maxULong = std::numeric_limits<unsigned long>::max();
-  constexpr uint64_t maxLong = std::numeric_limits<long>::max();
-
-  auto rIndef = v.cns(0x8000000000000000L);
-  auto dst1 = v.makeReg();
-  v << cvttsd2siq{srcReg, dst1};
-  auto const sf = v.makeReg();
-  v << cmpq{rIndef, dst1, sf};
-  unlikelyCond(v, vcold(), CC_E, sf, dstReg, [&](Vout& v) {
-    // result > max signed int or unordered
-    auto const sf = v.makeReg();
-    v << ucomisd{v.cns(0.0), srcReg, sf};
-    return cond(v, CC_NB, sf, v.makeReg(), [&](Vout& v) {
-      return dst1;
-    }, [&](Vout& v) {
-      // src0 > 0 (CF = 1 -> less than 0 or unordered)
-      return cond(v, CC_P, sf, v.makeReg(), [&](Vout& v) {
-        // PF = 1 -> unordered, i.e., we are doing an int cast of NaN. PHP5
-        // didn't formally define this, but observationally returns the
-        // truncated value (i.e., what dst1 currently holds). PHP7 formally
-        // defines this case to return 0.
-        if (RuntimeOption::PHP7_IntSemantics) {
-          return v.cns(0);
-        } else {
-          return dst1;
-        }
-      }, [&](Vout& v) {
-        auto const sf = v.makeReg();
-        v << ucomisd{v.cns(static_cast<double>(maxULong)), srcReg, sf};
-        return cond(v, CC_B, sf, v.makeReg(), [&](Vout& v) { // src0 > ULONG_MAX
-            return v.cns(0);
-        }, [&](Vout& v) {
-          // 0 < src0 <= ULONG_MAX
-          // we know that LONG_MAX < src0 <= UINT_MAX, therefore,
-          // 0 < src0 - ULONG_MAX <= LONG_MAX
-          auto tmp_sub = v.makeReg();
-          auto tmp_int = v.makeReg();
-          auto dst5 = v.makeReg();
-          v << subsd{v.cns(static_cast<double>(maxLong)), srcReg, tmp_sub};
-          v << cvttsd2siq{tmp_sub, tmp_int};
-
-          // We want to simulate integer overflow so we take the resulting
-          // integer and flip its sign bit (NB: we don't use orq here
-          // because it's possible that src0 == LONG_MAX in which case
-          // cvttsd2siq will yield an indefiniteInteger, which we would
-          // like to make zero)
-          v << xorq{rIndef, tmp_int, dst5, v.makeReg()};
-          return dst5;
-        });
-      });
-    });
-  }, [&](Vout& v) {
-    return dst1;
-  });
-}
-
-void CodeGenerator::cgConvDblToBool(IRInstruction* inst) {
-  auto dst = dstLoc(inst, 0).reg();
-  auto src = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto t1 = v.makeReg();
-  auto const sf = v.makeReg();
-  auto const movtdq_res = v.makeReg();
-
-  v << movtdq{src, movtdq_res};
-  v << shlqi{1, movtdq_res, t1, sf}; // 0.0 stays zero and -0.0 is now 0.0
-  v << setcc{CC_NE, sf, dst}; // lower byte becomes 1 if dstReg != 0
-}
-
-void CodeGenerator::cgConvIntToBool(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << testq{srcReg, srcReg, sf};
-  v << setcc{CC_NE, sf, dstReg};
-}
-
-void CodeGenerator::cgConvArrToBool(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  auto const sf = v.makeReg();
-  v << cmplim{0, srcReg[ArrayData::offsetofSize()], sf};
-  unlikelyCond(v, vcold(), CC_S, sf, dstReg,
-    [&](Vout& v) {
-      auto vsize = v.makeReg();
-      auto dst1 = v.makeReg();
-      cgCallHelper(v, CallSpec::method(&ArrayData::vsize),
-                   callDest(vsize), SyncOptions::None,
-                   argGroup(inst).ssa(0));
-      auto const sf = v.makeReg();
-      v << testl{vsize, vsize, sf};
-      v << setcc{CC_NZ, sf, dst1};
-      return dst1;
-    },
-    [&](Vout& v) {
-      auto dst2 = v.makeReg();
-      v << setcc{CC_NZ, sf, dst2};
-      return dst2;
-    }
-  );
-}
-
 void CodeGenerator::cgIsCol(IRInstruction* inst) {
   assertx(inst->src(0)->type() <= TObj);
   auto const rdst = dstLoc(inst, 0).reg();
@@ -924,111 +824,6 @@ void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmplim{0, srcLoc(inst, 0).reg()[collections::FAST_SIZE_OFFSET], sf};
   v << setcc{CC_NE, sf, dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgConvObjToBool(IRInstruction* inst) {
-  auto const rdst = dstLoc(inst, 0).reg();
-  auto const rsrc = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  auto const sf = v.makeReg();
-  v << testwim{ObjectData::CallToImpl, rsrc[ObjectData::attributeOff()], sf};
-  unlikelyCond(v, vcold(), CC_NZ, sf, rdst,
-    [&] (Vout& v) {
-      auto const sf = v.makeReg();
-      v << testwim{ObjectData::IsCollection, rsrc[ObjectData::attributeOff()],
-                   sf};
-      return cond(v, CC_NZ, sf, v.makeReg(),
-        [&] (Vout& v) { // rsrc points to native collection
-          auto dst2 = v.makeReg();
-          auto const sf = v.makeReg();
-          v << cmplim{0, rsrc[collections::FAST_SIZE_OFFSET], sf};
-          v << setcc{CC_NE, sf, dst2}; // true iff size not zero
-          return dst2;
-        }, [&] (Vout& v) { // rsrc is not a native collection
-          auto dst3 = v.makeReg();
-          cgCallHelper(v,
-            CallSpec::method(&ObjectData::toBoolean),
-            CallDest{DestType::Byte, dst3},
-            SyncOptions::Sync,
-            argGroup(inst).ssa(0));
-          return dst3;
-        });
-    }, [&] (Vout& v) {
-      return v.cns(true);
-    }
-  );
-}
-
-void CodeGenerator::cgConvStrToBool(IRInstruction* inst) {
-  auto const dst = dstLoc(inst, 0).reg();
-  auto const src = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  auto const sf = v.makeReg();
-
-  v << cmplim{1, src[StringData::sizeOff()], sf};
-  unlikelyCond(v, vcold(), CC_E, sf, dst, [&] (Vout& v) {
-    // Unlikely case is we end up having to check whether the first byte of the
-    // string is equal to '0'.
-    auto const dst = v.makeReg();
-    auto const sf  = v.makeReg();
-#ifdef NO_M_DATA
-    v << cmpbim{'0', src[sizeof(StringData)], sf};
-#else
-    auto const sd  = v.makeReg();
-    v << load{src[StringData::dataOff()], sd};
-    v << cmpbim{'0', sd[0], sf};
-#endif
-    v << setcc{CC_NE, sf, dst};
-    return dst;
-  }, [&] (Vout& v) {
-    // Common case is we have an empty string or a string with size bigger than
-    // one.
-    auto const dst = v.makeReg();
-    v << setcc{CC_G, sf, dst};
-    return dst;
-  });
-}
-
-void CodeGenerator::emitConvBoolOrIntToDbl(IRInstruction* inst) {
-  SSATmp* src = inst->src(0);
-  assertx(src->isA(TBool) || src->isA(TInt));
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg = srcLoc(inst, 0).reg();
-  // cvtsi2sd doesn't modify the high bits of its target, which can
-  // cause false dependencies to prevent register renaming from kicking
-  // in. Break the dependency chain by zeroing out the XMM reg.
-  auto& v = vmain();
-  auto s2 = zeroExtendIfBool(v, src, srcReg);
-  v << cvtsi2sd{s2, dstReg};
-}
-
-void CodeGenerator::cgConvBoolToDbl(IRInstruction* inst) {
-  emitConvBoolOrIntToDbl(inst);
-}
-
-void CodeGenerator::cgConvIntToDbl(IRInstruction* inst) {
-  emitConvBoolOrIntToDbl(inst);
-}
-
-void CodeGenerator::cgConvBoolToInt(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg = srcLoc(inst, 0).reg();
-  vmain() << movzbq{srcReg, dstReg};
-}
-
-static const StaticString s_1("1");
-
-void CodeGenerator::cgConvBoolToStr(IRInstruction* inst) {
-  auto dstReg = dstLoc(inst, 0).reg();
-  auto srcReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto f = v.cns(staticEmptyString());
-  auto t = v.cns(s_1.get());
-  auto const sf = v.makeReg();
-  v << testb{srcReg, srcReg, sf};
-  v << cmovq{CC_NZ, sf, f, t, dstReg};
 }
 
 void CodeGenerator::cgLdArrFuncCtx(IRInstruction* inst) {

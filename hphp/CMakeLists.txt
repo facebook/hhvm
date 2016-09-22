@@ -21,9 +21,28 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
   get_filename_component(HPHP_HOME "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
   set(ENABLE_EXTENSION_PGSQL OFF CACHE INTERNAL "" FORCE)
+  set(TP_DIR "${HPHP_HOME}/hphp/public_tld/third-party/")
+  set(TP_BUILD_DIR "${TP_DIR}")
   set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/facebook/CMake"
                         "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/CMake"
                         ${CMAKE_MODULE_PATH})
+endif()
+
+include(HHVMExtensionConfig)
+# Before we do anything else, we'll configure the extensions,
+# so that the defines take effect globally.
+file(GLOB subdirs ${CMAKE_CURRENT_SOURCE_DIR}/runtime/ext/*)
+foreach (dir ${subdirs})
+  if (IS_DIRECTORY ${dir})
+    if (EXISTS "${dir}/config.cmake")
+      set(HRE_CURRENT_EXT_PATH "${dir}")
+      include("${dir}/config.cmake")
+    endif()
+  endif()
+endforeach()
+HHVM_EXTENSION_RESOLVE_DEPENDENCIES()
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   include(FBTLD)
 endif()
 

@@ -159,10 +159,28 @@ function(HHVM_GENERATE_CONFIG_COMPILES_DEFINE_STRING destVarName)
   set(${destVarName} "${builtString}" PARENT_SCOPE)
 endfunction()
 
+# Builds a string to define the macros for all enabled extensions.
+function(HHVM_GENERATE_CONFIG_EXTENSIONS_ENABLED_DEFINE_STRING destVarName)
+  set(builtString "/* Extensions */")
+  set(i 0)
+  while (i LESS HHVM_EXTENSION_COUNT)
+    string(TOUPPER ${HHVM_EXTENSION_${i}_NAME} upperExtName)
+    if (${HHVM_EXTENSION_${i}_ENABLED_STATE} EQUAL 1)
+      set(builtString "${builtString}\n#define ENABLE_EXTENSION_${upperExtName} 1")
+    else()
+      set(builtString "${builtString}\n/* #undef ENABLE_EXTENSION_${upperExtName} */")
+    endif()
+    math(EXPR i "${i} + 1")
+  endwhile()
+
+  set(${destVarName} "${builtString}" PARENT_SCOPE)
+endfunction()
+
 # Generate the config file for HHVM.
 function(HHVM_GENERATE_CONFIG dest)
   HHVM_GENERATE_CONFIG_HEADERS_FOUND_DEFINE_STRING(HHVM_HEADERS_FOUND_DEFINE_STRING)
   HHVM_GENERATE_CONFIG_FUNCTIONS_FOUND_DEFINE_STRING(HHVM_FUNCTIONS_FOUND_DEFINE_STRING)
   HHVM_GENERATE_CONFIG_COMPILES_DEFINE_STRING(HHVM_COMPILES_DEFINE_STRING)
+  HHVM_GENERATE_CONFIG_EXTENSIONS_ENABLED_DEFINE_STRING(HHVM_EXTENSIONS_ENABLED_DEFINE_STRING)
   configure_file("${HPHP_HOME}/hphp/util/hphp-config.h.in" "${dest}")
 endfunction()

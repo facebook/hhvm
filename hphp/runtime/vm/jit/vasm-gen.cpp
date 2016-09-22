@@ -105,6 +105,24 @@ Vauto::~Vauto() {
       return;
     }
   }
+
+  if (unit().padding) {
+    // Force emission due to padding
+    if (!main().closed()) main() << fallthru{};
+    if (!cold().closed()) cold() << fallthru{};
+
+    switch (arch()) {
+      case Arch::X64:
+        emitX64(unit(), m_text, m_fixups, nullptr);
+        break;
+      case Arch::ARM:
+        emitARM(unit(), m_text, m_fixups, nullptr);
+        break;
+      case Arch::PPC64:
+        emitPPC64(unit(), m_text, m_fixups, nullptr);
+        break;
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

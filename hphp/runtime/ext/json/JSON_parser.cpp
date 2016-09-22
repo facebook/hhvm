@@ -249,6 +249,9 @@ alignas(64) static const int8_t state_transition_table[30][32] = {
 /*<fb>*/
 /*
   Alternate "loose" transition table to support unquoted keys.
+
+  Note: State 3 has same outgoing transitions in both transition tables. This is
+  used below in the fast-case for appending simple characters (3 -> 3).
 */
 alignas(64) static const int8_t loose_state_transition_table[31][32] = {
 /* 0*/ { 0, 0,-8,-1,-6,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
@@ -298,6 +301,44 @@ enum class Mode {
 
 namespace {
 
+/*
+ * Malloc'ed string buffer that does NOT check its capacity in release mode.
+ * The user must ensure to never append past the given allocation.
+ */
+struct UncheckedBuffer {
+  void clear() { p = begin; }
+  // Clear and allocate a buffer with space for 'cap' chars, including '\0'.
+  void clearResize(int cap) {
+    free(begin);
+    begin = p = cap > 0 ? (char*)malloc(cap) : (char*)nullptr;
+#ifdef DEBUG
+    end = begin + cap;
+#endif
+  }
+  void append(char c) {
+    assert(p < end);
+    *p++ = c;
+  }
+  void shrinkBy(int decrease) {
+    p -= decrease;
+    assert(p >= begin);
+  }
+  int size() { return p - begin; }
+  // NUL-terminates the output before returning it, for backward-compatibility.
+  char* data() {
+    assert(p < end);
+    *p = 0;
+    return begin;
+  }
+  String copy() { return String(data(), size(), CopyString); }
+
+  char* p{nullptr};
+  char* begin{nullptr};
+#ifdef DEBUG
+  char* end{nullptr};
+#endif
+};
+
 /**
  * A stack maintains the states of nested structures.
  */
@@ -312,6 +353,27 @@ struct json_parser {
   int mark; // the watermark
   int depth;
   json_error_codes error_code;
+  // Thread-local buffers; reset on each call. Since JSON parsing cannot lead
+  // to code execution, we need not be re-entrant.
+  UncheckedBuffer sb_buf;
+  UncheckedBuffer sb_key;
+  int sb_cap{0};
+  void initSb(int length) {
+    if (UNLIKELY(length >= sb_cap)) {
+      // No decoded string in the output can use more bytes than input size.
+      sb_cap = length + 1;
+      sb_buf.clearResize(sb_cap);
+      sb_key.clearResize(sb_cap);
+    } else {
+      sb_buf.clear();
+      sb_key.clear();
+    }
+  }
+  void flushSb() {
+    sb_cap = 0;
+    sb_buf.clearResize(0);
+    sb_key.clearResize(0);
+  }
 };
 
 }
@@ -360,6 +422,10 @@ void json_parser_init() {
   s_json_parser->error_code = JSON_ERROR_NONE;
 }
 
+void json_parser_flush_caches() {
+  s_json_parser->flushSb();
+}
+
 /**
  * Push a mode onto the stack. Return false if there is overflow.
  */
@@ -396,20 +462,20 @@ static int dehexchar(char c) {
   return -1;
 }
 
-static String copy_and_clear(StringBuffer &buf) {
+static String copy_and_clear(UncheckedBuffer &buf) {
   auto ret = buf.size() > 0 ? buf.copy() : empty_string();
   buf.clear();
   return ret;
 }
 
-static Variant to_double(StringBuffer &buf) {
+static Variant to_double(UncheckedBuffer &buf) {
   auto data = buf.data();
   auto ret = data ? zend_strtod(data, nullptr) : 0.0;
   buf.clear();
   return ret;
 }
 
-static void json_create_zval(Variant &z, StringBuffer &buf, int type,
+static void json_create_zval(Variant &z, UncheckedBuffer &buf, int type,
                              int64_t options) {
   switch (DataType(type)) {
     case KindOfBoolean:
@@ -487,7 +553,7 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type,
 }
 
 NEVER_INLINE
-void utf16_to_utf8_tail(StringBuffer &buf, unsigned short utf16) {
+void utf16_to_utf8_tail(UncheckedBuffer &buf, unsigned short utf16) {
   if (utf16 < 0x800) {
     buf.append((char)(0xc0 | (utf16 >> 6)));
     buf.append((char)(0x80 | (utf16 & 0x3f)));
@@ -502,7 +568,7 @@ void utf16_to_utf8_tail(StringBuffer &buf, unsigned short utf16) {
     utf32 = (((buf.data()[buf.size() - 2] & 0xf) << 16)
              | ((buf.data()[buf.size() - 1] & 0x3f) << 10)
              | (utf16 & 0x3ff)) + 0x10000;
-    buf.resize(buf.size() - 3);
+    buf.shrinkBy(3);
 
     buf.append((char)(0xf0 | (utf32 >> 18)));
     buf.append((char)(0x80 | ((utf32 >> 12) & 0x3f)));
@@ -516,7 +582,7 @@ void utf16_to_utf8_tail(StringBuffer &buf, unsigned short utf16) {
 }
 
 ALWAYS_INLINE
-void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
+void utf16_to_utf8(UncheckedBuffer &buf, unsigned short utf16) {
   if (LIKELY(utf16 < 0x80)) {
     buf.append((char)utf16);
     return;
@@ -602,9 +668,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   }
   /*</fb>*/
 
-  StringBuffer sb_buf(127), sb_key(127);
-  StringBuffer *buf = &sb_buf;
-  StringBuffer *key = &sb_key;
+  // Clear and reuse the thread-local string buffers. They are only freed if
+  // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
+  // is explicitly flushed (e.g., due to being idle).
+  json->initSb(length);
+  UncheckedBuffer *buf = &json->sb_buf;
+  UncheckedBuffer *key = &json->sb_key;
+  static const int kMaxPersistentStringBufferCapacity = 256 * 1024;
 
   int type = -1;
   unsigned short utf16 = 0;
@@ -619,6 +689,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
     json->stack.resize(depth);
   }
   SCOPE_EXIT {
+    if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();
     if (json->stack.empty()) return;
     for (int i = 0; i <= json->mark; i++) {
       json->stack[i].key.reset();
@@ -633,6 +704,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   UTF8To16Decoder decoder(p, length, loose);
   for (;;) {
     b = decoder.decode();
+    // Fast-case most common transition: append a simple string character.
+    if (state == 3 && type == KindOfString) {
+      while (b != '\"' &&  b != '\\' && b != '\'' && b <= 127 && b >= ' ') {
+        buf->append((char)b);
+        b = decoder.decode();
+      }
+    }
     if (b == UTF8_END) break; // UTF-8 decoding finishes successfully.
     if (b == UTF8_ERROR) {
       s_json_parser->error_code = JSON_ERROR_UTF8;

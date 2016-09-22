@@ -82,6 +82,7 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
+#include "hphp/runtime/ext/json/JSON_parser.h"
 
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -666,6 +667,7 @@ void flush_evaluation_stack() {
     t_se->flush();
   }
   rds::flush();
+  json_parser_flush_caches();
 
   always_assert(MM().empty());
 }

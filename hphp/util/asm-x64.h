@@ -1206,14 +1206,6 @@ public:
   }
 
   /*
-   * Emit exception traps until the end of the codeblock.
-   */
-  void emitTrap() {
-    while (available() >= 2) ud2();
-    if (available() > 0) int3();
-  }
-
-  /*
    * Low-level emitter functions.
    *
    * These functions are the core of the assembler, and can also be

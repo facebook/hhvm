@@ -43,10 +43,13 @@ add_custom_command(
   COMMENT "Generating Repo Schema ID and Compiler ID"
   VERBATIM)
 
-find_package(LibNuma)
-if (LIBNUMA_INCLUDE_DIRS)
-  add_definitions("-DHAVE_NUMA=1")
-  include_directories(${LIBNUMA_INCLUDE_DIRS})
+option(DISABLE_NUMA "Disable NUMA support" OFF)
+if (NOT DISABLE_NUMA)
+  find_package(LibNuma)
+  if (LIBNUMA_INCLUDE_DIRS)
+    add_definitions("-DHAVE_NUMA=1")
+    include_directories(${LIBNUMA_INCLUDE_DIRS})
+  endif()
 endif()
 
 if(MSVC)
@@ -65,7 +68,7 @@ if (ENABLE_COTIRE)
   cotire(hphp_util)
 endif()
 
-if (LIBNUMA_LIBRARIES AND JEMALLOC_ENABLED)
+if (LIBNUMA_LIBRARIES AND JEMALLOC_ENABLED AND NOT DISABLE_NUMA)
   target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 endif()
 if (ENABLE_ASYNC_MYSQL)

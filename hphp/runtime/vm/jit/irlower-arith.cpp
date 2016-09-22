@@ -16,7 +16,12 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/vm/hhbc.h"
+
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -166,6 +171,36 @@ void cgMod(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   v << srem{dividend, divisor, d};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgSetOpCell(IRLS& env, const IRInstruction* inst) {
+  auto const op = inst->extra<SetOpData>()->op;
+  auto const helper = [&] {
+    switch (op) {
+      case SetOpOp::PlusEqual:   return cellAddEq;
+      case SetOpOp::MinusEqual:  return cellSubEq;
+      case SetOpOp::MulEqual:    return cellMulEq;
+      case SetOpOp::ConcatEqual: return cellConcatEq;
+      case SetOpOp::DivEqual:    return cellDivEq;
+      case SetOpOp::PowEqual:    return cellPowEq;
+      case SetOpOp::ModEqual:    return cellModEq;
+      case SetOpOp::AndEqual:    return cellBitAndEq;
+      case SetOpOp::OrEqual:     return cellBitOrEq;
+      case SetOpOp::XorEqual:    return cellBitXorEq;
+      case SetOpOp::SlEqual:     return cellShlEq;
+      case SetOpOp::SrEqual:     return cellShrEq;
+      case SetOpOp::PlusEqualO:  return cellAddEqO;
+      case SetOpOp::MinusEqualO: return cellSubEqO;
+      case SetOpOp::MulEqualO:   return cellMulEqO;
+    }
+    not_reached();
+  }();
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(helper), kVoidDest, SyncOptions::Sync,
+               argGroup(env, inst).ssa(0).typedValue(1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

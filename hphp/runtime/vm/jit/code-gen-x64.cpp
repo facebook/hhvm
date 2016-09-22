@@ -283,6 +283,7 @@ DELEGATE_OPCODE(XorInt)
 DELEGATE_OPCODE(Shl)
 DELEGATE_OPCODE(Shr)
 DELEGATE_OPCODE(XorBool)
+DELEGATE_OPCODE(SetOpCell)
 
 DELEGATE_OPCODE(GtInt)
 DELEGATE_OPCODE(GteInt)
@@ -567,6 +568,19 @@ DELEGATE_OPCODE(MapGet)
 DELEGATE_OPCODE(MapSet)
 DELEGATE_OPCODE(MapIsset)
 
+DELEGATE_OPCODE(IsCol)
+DELEGATE_OPCODE(ColIsEmpty)
+DELEGATE_OPCODE(ColIsNEmpty)
+DELEGATE_OPCODE(CountCollection)
+DELEGATE_OPCODE(NewCol)
+DELEGATE_OPCODE(NewColFromArray)
+DELEGATE_OPCODE(LdColArray)
+DELEGATE_OPCODE(LdVectorSize)
+DELEGATE_OPCODE(LdVectorBase)
+DELEGATE_OPCODE(VectorHasImmCopy)
+DELEGATE_OPCODE(VectorDoCow)
+DELEGATE_OPCODE(LdPairBase)
+
 DELEGATE_OPCODE(LdCls)
 DELEGATE_OPCODE(LdClsCached)
 DELEGATE_OPCODE(LdClsCachedSafe)
@@ -794,38 +808,6 @@ void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::cgIsCol(IRInstruction* inst) {
-  assertx(inst->src(0)->type() <= TObj);
-  auto const rdst = dstLoc(inst, 0).reg();
-  auto const rsrc = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << testwim{ObjectData::IsCollection, rsrc[ObjectData::attributeOff()], sf};
-  v << setcc{CC_NE, sf, rdst};
-}
-
-void CodeGenerator::cgColIsEmpty(IRInstruction* inst) {
-  DEBUG_ONLY auto const ty = inst->src(0)->type();
-  assertx(ty < TObj &&
-         ty.clsSpec().cls() &&
-         ty.clsSpec().cls()->isCollectionClass());
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmplim{0, srcLoc(inst, 0).reg()[collections::FAST_SIZE_OFFSET], sf};
-  v << setcc{CC_E, sf, dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgColIsNEmpty(IRInstruction* inst) {
-  DEBUG_ONLY auto const ty = inst->src(0)->type();
-  assertx(ty < TObj &&
-         ty.clsSpec().cls() &&
-         ty.clsSpec().cls()->isCollectionClass());
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmplim{0, srcLoc(inst, 0).reg()[collections::FAST_SIZE_OFFSET], sf};
-  v << setcc{CC_NE, sf, dstLoc(inst, 0).reg()};
-}
-
 void CodeGenerator::cgLdArrFuncCtx(IRInstruction* inst) {
   cgCallHelper(
     vmain(),
@@ -945,91 +927,6 @@ void CodeGenerator::cgLdVecElemAddr(IRInstruction* inst) {
   auto const addr =
     emitPackedLayoutAddr(inst->src(1), srcLoc(inst, 1), srcLoc(inst, 0));
   vmain() << lea{addr, dstLoc(inst, 0).reg()};
-}
-
-void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
-  DEBUG_ONLY auto vec = inst->src(0);
-  auto vecReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  assertx(vec->type() < TObj);
-  assertx(collections::isType(vec->type().clsSpec().cls(),
-                              CollectionType::Vector,
-                              CollectionType::ImmVector));
-  vmain() << loadzlq{vecReg[BaseVector::sizeOffset()], dstReg};
-}
-
-void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
-  DEBUG_ONLY auto vec = inst->src(0);
-  auto vecReg = srcLoc(inst, 0).reg();
-  auto dstReg = dstLoc(inst, 0).reg();
-  assertx(vec->type() < TObj);
-  assertx(collections::isType(vec->type().clsSpec().cls(),
-                              CollectionType::Vector,
-                              CollectionType::ImmVector));
-  auto& v = vmain();
-  auto arr = v.makeReg();
-  v << load{vecReg[BaseVector::arrOffset()], arr};
-  v << lea{arr[PackedArray::entriesOffset()], dstReg};
-}
-
-void CodeGenerator::cgLdColArray(IRInstruction* inst) {
-  auto const src = inst->src(0);
-  auto const cls = src->type().clsSpec().cls();
-  auto const rsrc = srcLoc(inst, 0).reg();
-  auto const rdst = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  always_assert_flog(
-    collections::isType(cls, CollectionType::Vector, CollectionType::ImmVector,
-                        CollectionType::Map, CollectionType::ImmMap,
-                        CollectionType::Set, CollectionType::ImmSet),
-    "LdColArray received an unsupported type: {}\n",
-    src->type().toString()
-  );
-  auto offset = collections::isType(cls, CollectionType::Vector,
-                                    CollectionType::ImmVector) ?
-    BaseVector::arrOffset() : HashCollection::arrOffset();
-  v << load{rsrc[offset], rdst};
-}
-
-void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
-  DEBUG_ONLY auto vec = inst->src(0);
-  auto vecReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-
-  assertx(vec->type() < TObj);
-  assertx(collections::isType(vec->type().clsSpec().cls(),
-                              CollectionType::Vector));
-
-  auto arr = v.makeReg();
-  v << load{vecReg[BaseVector::arrOffset()], arr};
-  auto const sf = v.makeReg();
-  v << cmplim{1, arr[FAST_REFCOUNT_OFFSET], sf};
-  v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-/**
- * Given the base of a vector object, pass it to a helper
- * which is responsible for triggering COW.
- */
-void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
-  DEBUG_ONLY auto vec = inst->src(0);
-  assertx(vec->type() < TObj);
-  assertx(collections::isType(vec->type().clsSpec().cls(),
-                              CollectionType::Vector));
-  auto args = argGroup(inst);
-  args.ssa(0); // vec
-  cgCallHelper(vmain(), CallSpec::direct(triggerCow),
-               kVoidDest, SyncOptions::Sync, args);
-}
-
-void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
-  DEBUG_ONLY auto pair = inst->src(0);
-  auto pairReg = srcLoc(inst, 0).reg();
-  assertx(pair->type() < TObj);
-  assertx(collections::isType(pair->type().clsSpec().cls(),
-                              CollectionType::Pair));
-  vmain() << lea{pairReg[c_Pair::dataOffset()], dstLoc(inst, 0).reg()};
 }
 
 template <class JmpFn>
@@ -1219,32 +1116,6 @@ void CodeGenerator::cgAKExistsObj(IRInstruction* inst) {
   );
 }
 
-void CodeGenerator::cgNewCol(IRInstruction* inst) {
-  auto& v = vmain();
-  auto const dest = callDest(inst);
-  auto args = argGroup(inst);
-  auto const target = [&]() -> CallSpec {
-    auto collectionType = inst->extra<NewCol>()->type;
-    auto helper = collections::allocEmptyFunc(collectionType);
-    return CallSpec::direct(helper);
-  }();
-  cgCallHelper(v, target, dest, SyncOptions::Sync, args);
-}
-
-void CodeGenerator::cgNewColFromArray(IRInstruction* inst) {
-  auto const target = [&]() -> CallSpec {
-    auto collectionType = inst->extra<NewColFromArray>()->type;
-    auto helper = collections::allocFromArrayFunc(collectionType);
-    return CallSpec::direct(helper);
-  }();
-
-  cgCallHelper(vmain(),
-               target,
-               callDest(inst),
-               SyncOptions::Sync,
-               argGroup(inst).ssa(0));
-}
-
 void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
   auto const data = inst->extra<NewStructData>();
 
@@ -1325,13 +1196,6 @@ void CodeGenerator::cgCountKeyset(IRInstruction* inst) {
   arrayLikeCountImpl(inst);
 }
 
-void CodeGenerator::cgCountCollection(IRInstruction* inst) {
-  auto const baseReg = srcLoc(inst, 0).reg();
-  auto const dstReg  = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  v << loadzlq{baseReg[collections::FAST_SIZE_OFFSET], dstReg};
-}
-
 void CodeGenerator::cgInitPackedLayoutArray(IRInstruction* inst) {
   auto const arrReg = srcLoc(inst, 0).reg();
   auto const index = inst->extra<InitPackedLayoutArray>()->index;
@@ -1377,35 +1241,6 @@ void CodeGenerator::cgInitPackedLayoutArrayLoop(IRInstruction* inst) {
       return sf;
     }
   );
-}
-
-void CodeGenerator::cgSetOpCell(IRInstruction* inst) {
-  auto const op = inst->extra<SetOpData>()->op;
-  auto const helper = [&] {
-    switch (op) {
-      case SetOpOp::PlusEqual:   return cellAddEq;
-      case SetOpOp::MinusEqual:  return cellSubEq;
-      case SetOpOp::MulEqual:    return cellMulEq;
-      case SetOpOp::ConcatEqual: return cellConcatEq;
-      case SetOpOp::DivEqual:    return cellDivEq;
-      case SetOpOp::PowEqual:    return cellPowEq;
-      case SetOpOp::ModEqual:    return cellModEq;
-      case SetOpOp::AndEqual:    return cellBitAndEq;
-      case SetOpOp::OrEqual:     return cellBitOrEq;
-      case SetOpOp::XorEqual:    return cellBitXorEq;
-      case SetOpOp::SlEqual:     return cellShlEq;
-      case SetOpOp::SrEqual:     return cellShrEq;
-      case SetOpOp::PlusEqualO:  return cellAddEqO;
-      case SetOpOp::MinusEqualO: return cellSubEqO;
-      case SetOpOp::MulEqualO:   return cellMulEqO;
-    }
-    not_reached();
-  }();
-
-  auto& v = vmain();
-  cgCallHelper(v, CallSpec::direct(helper),
-               kVoidDest, SyncOptions::Sync,
-               argGroup(inst).ssa(0).typedValue(1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

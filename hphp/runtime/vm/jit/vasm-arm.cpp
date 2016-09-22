@@ -626,35 +626,35 @@ void Vgen::emit(const imul& i) {
   a->Mul(X(i.d), X(i.s0), X(i.s1));
 
   vixl::Label after;
-  vixl::Label posResult;
-  vixl::Label noOverflow;
+  vixl::Label checkSign;
+  vixl::Label Overflow;
 
   // Do the multiplication for the upper 64 bits of a 128 bit result.
-  // If the result is all zeroes or all ones, and the sign did not
-  // change, then there is no overflow.
+  // If the result is not all zeroes or all ones, then we have overflow.
+  // If the result is all zeroes or all ones, and the sign is the same,
+  // for both hi and low, then there is no overflow.
   a->smulh(rAsm, X(i.s0), X(i.s1));
 
-  a->Tst(X(i.d), 0);
-  a->B(&posResult, vixl::ge);
-
-  a->Cmp(rAsm, -1);
-  a->B(&noOverflow, vixl::eq);
-
-  a->bind(&posResult);
+  // If hi is all 0's or 1's, then check the sign, else overflow (fallthrough)
   a->Cmp(rAsm, 0);
-  a->B(&noOverflow, vixl::eq);
+  a->B(&checkSign, vixl::eq);
+  a->Cmp(rAsm, -1);
+  a->B(&checkSign, vixl::eq);
 
   // Overflow, so conditionally set N and Z bits and then or in V bit.
+  a->Bind(&Overflow);
   a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
   a->Mrs(rAsm, NZCV);
-  a->Lsr(rAsm, rAsm, 28);
-  a->Orr(rAsm, rAsm, 1);
-  a->Lsl(rAsm, rAsm, 28);
+  a->Orr(rAsm, rAsm, 1<<28);
   a->Msr(NZCV, rAsm);
   a->B(&after);
 
+  // Check the signs of hi and lo.
+  a->Bind(&checkSign);
+  a->Eor(rAsm, rAsm, X(i.d));
+  a->Tbnz(rAsm, 63, &Overflow);
+
   // No Overflow, so conditionally set the N and Z only
-  a->bind(&noOverflow);
   a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
 
   a->bind(&after);

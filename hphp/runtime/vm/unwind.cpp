@@ -143,24 +143,19 @@ UnwindAction checkHandlers(const EHEnt* eh,
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
         return UnwindAction::ResumeVM;
       case EHEnt::Type::Catch:
-        // Note: we skip catch clauses if we have a pending C++ exception
-        // as part of our efforts to avoid running more PHP code in the
-        // face of such exceptions.
-        if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
-          auto const obj = fault.m_userException;
-          for (auto& idOff : eh->m_catches) {
-            ITRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
-            auto handler = func->unit()->at(idOff.second);
-            auto const cls = Unit::lookupClass(
-              func->unit()->lookupNamedEntityId(idOff.first)
-            );
-            if (!cls || !obj->instanceof(cls)) continue;
+        auto const obj = fault.m_userException;
+        for (auto& idOff : eh->m_catches) {
+          ITRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
+          auto handler = func->unit()->at(idOff.second);
+          auto const cls = Unit::lookupClass(
+            func->unit()->lookupNamedEntityId(idOff.first)
+          );
+          if (!cls || !obj->instanceof(cls)) continue;
 
-            ITRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
-            pc = handler;
-            DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-            return UnwindAction::ResumeVM;
-          }
+          ITRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
+          pc = handler;
+          DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
+          return UnwindAction::ResumeVM;
         }
         break;
       }
@@ -473,6 +468,13 @@ void unwindPhp() {
     }
 
     do {
+      // Note: we skip catch/finally clauses if we have a pending C++
+      // exception as part of our efforts to avoid running more PHP code
+      // in the face of such exceptions.
+      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {
+        continue;
+      }
+
       const EHEnt* eh = fp->m_func->findEH(fault.m_raiseOffset);
       if (eh != nullptr) {
         switch (checkHandlers(eh, fp, pc, fault)) {

@@ -1,0 +1,11 @@
+cpp_library(
+  name = 'FBSerialize',
+  headers = [
+    'FBSerialize.h',
+    'FBSerialize-inl.h',
+  ],
+  deps = [
+    '@/folly:bits',
+    '@/folly:conv',
+  ],
+)

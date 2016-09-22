@@ -125,8 +125,8 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       begin match SMap.get x ety_env.substs with
       | Some x_ty ->
           let env = List.fold cstrl ~init:env ~f:(fun env (ck, ty) ->
-                let env, ty = localize ~ety_env env ty in
-                TGenConstraint.add_check_constraint_todo env r x ck ty x_ty) in
+          let env, ty = localize ~ety_env env ty in
+          TGenConstraint.add_check_constraint_todo env r x ck ty x_ty) in
           env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None ->
         (* If parameter is registered for bounds in the environment

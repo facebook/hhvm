@@ -198,6 +198,7 @@ and unify_ env r1 ty1 r2 ty2 =
         | None -> env, None
         | Some (env, cstr) -> env, Some cstr in
       env, Tabstract (AKgeneric x1, tcstr)
+
   | Tabstract (ak1, tcstr1), Tabstract (ak2, tcstr2)
     when ak1 = ak2 && (Option.is_none tcstr1 = Option.is_none tcstr2) ->
       let env, tcstr = match Option.map2 tcstr1 tcstr2 ~f:(unify env) with
@@ -351,7 +352,6 @@ and unify_ env r1 ty1 r2 ty2 =
         add env ty2;
         TUtils.simplified_uerror env (r1, ty1) (r2, ty2);
         env, Tany
-
 
 and unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
   match anon_arity, func_arity with

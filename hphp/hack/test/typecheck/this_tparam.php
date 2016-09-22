@@ -40,6 +40,9 @@ abstract class GeneratorLegacyPreparable implements Awaitable<this> {
       $wh = $this->__genGen();
       invariant($wh instanceof WaitHandle, 'trust me');
       $this->wh = $wh;
+      // Remove this return when the new instanceof feature
+      // prevents leaking of refined types
+      return $this->wh;
     }
     return $this->wh;
   }

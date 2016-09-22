@@ -232,6 +232,19 @@ let add_generic_parameters env tparaml =
 let is_generic_parameter env name =
   SMap.mem name env.lenv.tpenv
 
+(* Generate a fresh generic parameter with a specified prefix but distinct
+ * from all generic parameters in the environment *)
+let add_fresh_generic_parameter env prefix =
+  let rec iterate i =
+    let name = Printf.sprintf "%s#%d" prefix i in
+    if is_generic_parameter env name then iterate (i+1) else name in
+  let name = iterate 1 in
+  let env =
+    env_with_tpenv env
+      (SMap.add name {lower_bounds = empty_bounds;
+                      upper_bounds = empty_bounds} env.lenv.tpenv) in
+  env, name
+
 (* When printing out types (by hh_show()), TVars are printed with an
  * associated identifier. We reindex them (in the order of appearance) to be
  * consecutive integers starting from zero, because the internal identifier

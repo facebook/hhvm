@@ -652,6 +652,8 @@ module Typing                               = struct
   let keyset_set                            = 4156 (* DONT MODIFY!!!! *)
   let eq_incompatible_types                 = 4157 (* DONT MODIFY!!!! *)
   let contravariant_this                    = 4158 (* DONT MODIFY!!!! *)
+  let instanceof_always_false               = 4159 (* DONT MODIFY!!!! *)
+  let instanceof_always_true                = 4160 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1964,6 +1966,15 @@ let abstract_concrete_override pos parent_pos kind =
     pos, "Cannot re-declare this " ^ kind_str ^ " as abstract";
     parent_pos, "Previously defined here"
   ])
+
+let instanceof_always_false pos =
+  add Typing.instanceof_always_false pos
+    "This 'instanceof' test will never succeed"
+
+let instanceof_always_true pos =
+  add Typing.instanceof_always_true pos
+    "This 'instanceof' test will always succeed"
+
 
 (*****************************************************************************)
 (* Typing decl errors *)

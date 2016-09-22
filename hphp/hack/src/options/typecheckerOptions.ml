@@ -31,9 +31,13 @@ type t = {
   tco_experimental_features : SSet.t;
 }
 
-(* Currently there is only one experimental feature *)
 let experimental_dict = "dict"
-let experimental_all = SSet.add experimental_dict SSet.empty
+let experimental_instanceof = "instanceof"
+let experimental_all =
+  List.fold_left
+    (fun acc x -> SSet.add x acc) SSet.empty
+    [experimental_dict; experimental_instanceof]
+
 
 let default = {
   tco_assume_php = true;

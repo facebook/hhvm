@@ -137,8 +137,10 @@ val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
 val add_upper_bound : env -> string -> locl ty -> env
 val add_lower_bound : env -> string -> locl ty -> env
+val env_with_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
+val add_fresh_generic_parameter : env -> string -> env * string
 val freeze_local_env : env -> env
 val env_with_locals : env -> local Local_id.Map.t -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty

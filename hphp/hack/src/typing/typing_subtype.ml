@@ -671,6 +671,157 @@ and sub_string p env ty2 =
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
       fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
 
+(* Given two types that we know are in a subtype relationship
+ *   ty_sub <: ty_super
+ * add to env.tpenv any bounds on generic type parameters that must
+ * hold for ty_sub <: ty_super to be valid.
+ *
+ * For example, suppose we know Cov<T> <: Cov<D> for a covariant class Cov.
+ * Then it must be the case that T <: D so we add an upper bound D to the
+ * bounds for T.
+ *
+ * Although some of this code is similar to that for subtype_with_uenv, its
+ * purpose is different. subtype_with_uenv takes two types t and u and makes
+ * updates to the substitution of type variables (through unification) to
+ * make t <: u true.
+ *
+ * decompose_subtype takes two types t and u for which t <: u is *assumed* to
+ * hold, and makes updates to bounds on generic parameters that *necessarily*
+ * hold in order for t <: u.
+ *
+ * If it turns out that there is no situation in which t <: u (for example, we
+ * are given string and int, or Cov<Derived> <: Cov<Base>) then evaluate the
+ * failure continuation `fail`
+ *)
+let rec decompose_subtype env ty_sub ty_super fail =
+  let env, ty_super = Env.expand_type env ty_super in
+  let env, ty_sub = Env.expand_type env ty_sub in
+
+  match ty_sub, ty_super with
+  | (_, Tabstract (AKgeneric name_sub, _)), _ ->
+    Env.add_upper_bound env name_sub ty_super
+
+  | _, (_, Tabstract (AKgeneric name_super, _)) ->
+    Env.add_lower_bound env name_super ty_sub
+
+  (* If ?ty_sub <: ?ty_super then it must be the case that ty_sub <: ty_super *)
+  | (_, Toption ty_sub'), (_, Toption ty_super') ->
+    decompose_subtype env ty_sub' ty_super' fail
+
+  | _, (_, Tunresolved [ty_super']) ->
+    decompose_subtype env ty_sub ty_super' fail
+
+  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
+    when (coll = SN.Collections.cTraversable ||
+        coll = SN.Collections.cContainer) ->
+      (match akind with
+      | AKany -> env
+      | AKempty -> env
+      (* If vec<tv> <: Traversable<tv_super>
+       * then it must be the case that tv <: tv_super
+       * Likewise for vec<tv> <: Container<tv_super>
+       *          and map<_,tv> <: Traversable<tv_super>
+       *          and map<_,tv> <: Container<tv_super>
+       *)
+      | AKvec tv | AKmap(_, tv) -> decompose_subtype env tv tv_super fail
+      | AKshape fdm ->
+          Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+            decompose_subtype env ty_sub ty_super fail
+          end env r fdm
+      | AKtuple fields ->
+          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
+            decompose_subtype env ty_sub ty_super fail
+          end env r fields
+      )
+  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tk_super; tv_super]))
+    when (coll = SN.Collections.cKeyedTraversable
+         || coll = SN.Collections.cKeyedContainer
+         || coll = SN.Collections.cIndexish) ->
+      (match akind with
+      | AKany -> env
+      | AKempty -> env
+      | AKvec tv ->
+        let env = decompose_subtype env (r, Tprim Nast.Tint) tk_super fail in
+        decompose_subtype env tv tv_super fail
+      | AKmap (tk, tv) ->
+        let env = decompose_subtype env tk tk_super fail in
+        decompose_subtype env tv tv_super fail
+      | AKshape fdm ->
+        Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
+          decompose_subtype env ty_sub ty_super fail
+        end env r fdm
+      | AKtuple fields ->
+          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
+            decompose_subtype env ty_sub ty_super fail
+          end env r fields
+      )
+
+  | (_, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super)))->
+    let cid_super, cid_sub = (snd x_super), (snd x_sub) in
+    begin match Env.get_class env cid_sub with
+    | None ->
+      env
+
+    | Some class_sub ->
+      (* If cid_sub = cid_super = C and C<tyl_sub> <: C<tyl_super>
+       * then it must be the case that tyl_sub and tyl_super are
+       * pointwise related according to the variance annotations on
+       * the type parameters of C
+       *)
+      if cid_super = cid_sub
+      then decompose_tparams env class_sub.tc_tparams tyl_sub tyl_super fail
+      else
+
+      (* Let's just do a sanity check on arity. We don't expect it to fail *)
+      if List.length class_sub.tc_tparams <> List.length tyl_sub
+      then env
+      else
+
+      (* Otherwise, let's look at the class it extends *)
+        begin match SMap.get cid_super class_sub.tc_ancestors with
+        | Some open_extends_ty ->
+          let ety_env = {
+            type_expansions = [];
+            substs = Subst.make class_sub.tc_tparams tyl_sub;
+            this_ty = ty_sub;
+            from_class = None;
+          } in
+          (* Substitute type arguments for formal generic parameters *)
+          let env, extends_ty = Phase.localize ~ety_env env open_extends_ty in
+
+          (* Now recurse with the new assumption extends_ty <: ty_super *)
+          decompose_subtype env extends_ty ty_super fail
+
+        | None ->
+          begin match Env.get_class env cid_super with
+            | None -> env
+            | Some class_super ->
+              if class_super.tc_kind = Ast.Cnormal
+              then fail env
+              else env
+          end
+        end
+    end
+
+  | _, _ ->
+    env
+
+and decompose_tparams env tparams children_tyl super_tyl fail =
+  match tparams, children_tyl, super_tyl with
+  | [], _, _
+  | _, [], _
+  | _, _, [] -> env
+  | (variance,_,_) :: tparams, child :: childrenl, super :: superl ->
+      let env = decompose_tparam env variance child super fail in
+      decompose_tparams env tparams childrenl superl fail
+
+and decompose_tparam env variance child super fail =
+  match variance with
+  | Ast.Covariant -> decompose_subtype env child super fail
+  | Ast.Contravariant -> decompose_subtype env super child fail
+  | Ast.Invariant ->
+    decompose_subtype (decompose_subtype env child super fail) super child fail
+
 (*****************************************************************************)
 (* Exporting *)
 (*****************************************************************************)

@@ -1,0 +1,8 @@
+File "instanceof_generic_bad4.php", line 9, characters 20-21:
+Invalid argument (Typing[4110])
+File "instanceof_generic_bad4.php", line 6, characters 29-32:
+This is an object of type Base
+File "instanceof_generic_bad4.php", line 8, characters 7-8:
+It is incompatible with a value of generic type Tinv#1 from this instanceof test matching \Inv<Tinv#1>
+File "instanceof_generic_bad4.php", line 6, characters 29-32:
+Considering that this type argument is invariant with respect to Inv

@@ -142,7 +142,8 @@ let incr_reason_stats r p reason_stats =
     | Rtconst_no_cstr _ -> "Rtconst_no_cstr"
     | Rused_as_map _ -> "Rused_as_map"
     | Rused_as_shape _ -> "Rused_as_shape"
-    | Rpredicated _ -> "Rpredicated" in
+    | Rpredicated _ -> "Rpredicated"
+    | Rinstanceof _ -> "Rinstanceof" in
   let pos_stats_map = match SMap.get string_key reason_stats with
     | Some x -> x
     | None -> Pos.Map.empty in

@@ -408,6 +408,10 @@ and stmt env = function
   | If (e, b1, b2)  ->
       let env, ty = expr env e in
       Async.enforce_not_awaitable env (fst e) ty;
+      (* We stash away the locals environment because condition updates it
+       * locally for checking b1. For example, we might have condition
+       * $x === null, or $x instanceof C, which changes the type of $x in
+       * lenv *)
       let parent_lenv = env.Env.lenv in
       let env   = condition env true e in
       let env   = block env b1 in
@@ -790,7 +794,6 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let env, tyc = raw_expr in_cond env c in
   Async.enforce_not_awaitable env (fst c) tyc;
   let parent_lenv = env.Env.lenv in
-  let parent_locals = parent_lenv.Env.local_types in
   let c = if coalesce then (p, Binop (Ast.Diff2, c, (p, Null))) else c in
   let env = condition env true c in
   let env, ty1 = match e1 with
@@ -809,11 +812,7 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   (* we restore the locals to their parent state so as not to leak the
    * effects of the `condition` calls above *)
   let env = { env with Env.lenv =
-                         { Env.fake_members = fake_members;
-                           Env.local_types = parent_locals;
-                           Env.tpenv = parent_lenv.Env.tpenv
-                         }
-            } in
+              { parent_lenv with Env.fake_members = fake_members } } in
   (* This is a shortened form of what we do in Typing_lenv.intersect. The
    * latter takes local environments as arguments, but our types here
    * aren't assigned to local variables in an environment *)
@@ -913,7 +912,7 @@ and expr_
       (* '$this' always refers to the late bound static type *)
       env, ExprDepTy.make env CIstatic ty
   | Assert (AE_assert e) ->
-      let env = condition env true e in
+    let env = condition env true e in
       env, (Reason.Rwitness p, Tprim Tvoid)
   | True
   | False ->
@@ -2846,7 +2845,7 @@ and obj_get_with_visibility ~is_method ~nullsafe env ty1
 
 (* k_lhs takes the type of the object receiver *)
 and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
-             k k_lhs =
+    k k_lhs =
   let env, ety1 = Env.expand_type env ty1 in
   let default_case () =
     k begin
@@ -3684,14 +3683,74 @@ and condition env tparamet =
   | _, Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
   | p, InstanceOf (ivar, cid) when tparamet && is_instance_var ivar ->
+      (* Check the expession and determine its static type *)
       let env, x_ty = expr env ivar in
       let env, x_ty = Env.expand_type env x_ty in
+
+      (* What is the local variable bound to the expression? *)
       let env, (ivar_pos, x) = get_instance_var env ivar in
-      let env = Env.set_local env x x_ty in
-      (* XXX the position p here is not really correct... it's the position
+
+      (* The position p here is not really correct... it's the position
        * of the instanceof expression, not the class id. But we don't store
        * position data for the latter. *)
       let env, obj_ty = static_class_id p env cid in
+
+      (* New implementation of instanceof that is statically safe *)
+      let safe_instanceof env obj_ty _c class_info =
+        (* Generate fresh names consisting of formal type parameter name
+         * with unique suffix *)
+        let env, tparams_with_new_names =
+          List.map_env env class_info.tc_tparams
+            (fun env ((_,(_,name),_) as tp) ->
+              let env, name = Env.add_fresh_generic_parameter env name in
+              env, (tp, name)) in
+        let s =
+            snd _c ^ "<" ^
+            String.concat "," (List.map tparams_with_new_names ~f:snd)
+            ^ ">" in
+        let reason = Reason.Rinstanceof (ivar_pos, s) in
+        let tyl_fresh = List.map
+            ~f:(fun (_,newname) -> (reason, Tabstract(AKgeneric newname, None)))
+            tparams_with_new_names in
+
+        (* Type of variable in block will be class name
+         * with fresh type parameters *)
+        let obj_ty = (fst obj_ty, Tclass(_c, tyl_fresh)) in
+
+        (* Add in constraints as assumptions on those type parameters *)
+        let ety_env = {
+          type_expansions = [];
+          substs = Subst.make class_info.tc_tparams tyl_fresh;
+          this_ty = obj_ty; (* In case `this` appears in constraints *)
+          from_class = None;
+        } in
+        let add_bounds env ((_, _, cstr_list), newname) =
+            List.fold_left cstr_list ~init:env ~f:begin fun env (ck, ty) ->
+              (* Substitute fresh type parameters for
+               * original formals in constraint *)
+              let env, ty = Phase.localize ~ety_env env ty in
+                match ck with
+                | Ast.Constraint_super -> Env.add_lower_bound env newname ty
+                | Ast.Constraint_as -> Env.add_upper_bound env newname ty
+                | Ast.Constraint_eq -> Env.add_upper_bound
+                    (Env.add_lower_bound env newname ty) newname ty
+              end in
+        let env =
+          List.fold_left tparams_with_new_names ~f:add_bounds ~init:env in
+
+        (* Finally, if we have a class-test on something with static class type,
+         * then we can chase the hierarchy and decompose the types to deduce
+         * further assumptions on type parameters. For example, we might have
+         *   class B<Tb> { ... }
+         *   class C extends B<int>
+         * and have obj_ty = C and x_ty = B<T> for a generic parameter T.
+         * Then decompose_subtype will deduce that T=int and add int as both
+         * lower and upper bound on T in env.lenv.tpenv
+         *)
+        let env = SubType.decompose_subtype env obj_ty x_ty
+            (fun env -> (*Errors.instanceof_always_false env.Env.pos;*) env) in
+        env, obj_ty in
+
       let rec resolve_obj env obj_ty =
         (* Expand so that we don't modify x *)
         let env, obj_ty = Env.expand_type env obj_ty in
@@ -3714,11 +3773,13 @@ and condition env tparamet =
           env, obj_ty
         | _, Tabstract ((AKdependent _ | AKnewtype _), Some ty) ->
           resolve_obj env ty
-        | _, Tclass ((_, cid as _c), _) ->
-          let class_ = Env.get_class env cid in
-          (match class_ with
-            | None -> env, (Reason.Rwitness ivar_pos, Tobject)
-            | Some _class ->
+        | _, Tclass ((_, cid as _c), tyl) ->
+          begin match Env.get_class env cid with
+            (* Why would this happen? *)
+            | None ->
+              env, (Reason.Rwitness ivar_pos, Tobject)
+
+            | Some class_info ->
               if SubType.is_sub_type env x_ty obj_ty
               then
                 (* If the right side of the `instanceof` object is
@@ -3734,8 +3795,17 @@ and condition env tparamet =
                  * of typing errors in partial mode (See also
                  * t3216948).  *)
                 env, x_ty
+              else
+                (* We only implement the safe instanceof in strict mode *)
+                (* Also: for generic types we implememt it only with
+                 * experimental feature enabled *)
+              if Env.is_strict env &&
+                 (tyl = [] || TypecheckerOptions.experimental_feature_enabled
+                   (Env.get_options env)
+                   TypecheckerOptions.experimental_instanceof)
+              then safe_instanceof env obj_ty _c class_info
               else env, obj_ty
-          )
+          end
         | r, Tunresolved tyl ->
           let env, tyl = List.map_env env tyl resolve_obj in
           env, (r, Tunresolved tyl)

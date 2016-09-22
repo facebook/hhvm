@@ -442,6 +442,11 @@ TEST(Type, Prim) {
     { ival(0),   TInitPrim },
   };
 
+  for (auto kv : subtype_true) {
+    EXPECT_TRUE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " subtypeOf " << show(kv.second);
+  }
+
   auto subtype_false = std::initializer_list<std::pair<Type,Type>> {
     { sval(s_test.get()), TPrim },
     { TSStr, TPrim },
@@ -460,6 +465,11 @@ TEST(Type, Prim) {
     { TPrim, dval(0.0) },
   };
 
+  for (auto kv : subtype_false) {
+    EXPECT_FALSE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " !subtypeOf " << show(kv.second);
+  }
+
   auto couldbe_true = std::initializer_list<std::pair<Type,Type>> {
     { TPrim, TInt },
     { TPrim, TBool },
@@ -473,6 +483,13 @@ TEST(Type, Prim) {
     { TPrim, TOptFalse },
   };
 
+  for (auto kv : couldbe_true) {
+    EXPECT_TRUE(kv.first.couldBe(kv.second))
+      << show(kv.first) << " couldbe " << show(kv.second);
+    EXPECT_TRUE(kv.second.couldBe(kv.first))
+      << show(kv.first) << " couldbe " << show(kv.second);
+  }
+
   auto couldbe_false = std::initializer_list<std::pair<Type,Type>> {
     { TPrim, TSStr },
     { TInitPrim, TSStr },
@@ -483,20 +500,6 @@ TEST(Type, Prim) {
     { TPrim, TObj },
   };
 
-  for (auto kv : subtype_true) {
-    EXPECT_TRUE(kv.first.subtypeOf(kv.second))
-      << show(kv.first) << " subtypeOf " << show(kv.second);
-  }
-  for (auto kv : subtype_false) {
-    EXPECT_FALSE(kv.first.subtypeOf(kv.second))
-      << show(kv.first) << " !subtypeOf " << show(kv.second);
-  }
-  for (auto kv : couldbe_true) {
-    EXPECT_TRUE(kv.first.couldBe(kv.second))
-      << show(kv.first) << " couldbe " << show(kv.second);
-    EXPECT_TRUE(kv.second.couldBe(kv.first))
-      << show(kv.first) << " couldbe " << show(kv.second);
-  }
   for (auto kv : couldbe_false) {
     EXPECT_TRUE(!kv.first.couldBe(kv.second))
       << show(kv.first) << " !couldbe " << show(kv.second);
@@ -714,6 +717,12 @@ TEST(Type, OptCouldBe) {
     { opt(TDbl), TNum },
   };
 
+  for (auto kv : true_cases) {
+    EXPECT_TRUE(kv.first.couldBe(kv.second))
+      << show(kv.first) << " couldBe " << show(kv.second)
+      << " should be true";
+  }
+
   auto false_cases = std::initializer_list<std::pair<Type,Type>> {
     { opt(sval(s_test.get())), TCStr },
     { opt(ival(2)), TDbl },
@@ -723,16 +732,12 @@ TEST(Type, OptCouldBe) {
     { TFalse, opt(TNum) },
   };
 
-  for (auto kv : true_cases) {
-    EXPECT_TRUE(kv.first.couldBe(kv.second))
-      << show(kv.first) << " couldBe " << show(kv.second)
-      << " should be true";
-  }
   for (auto kv : false_cases) {
     EXPECT_TRUE(!kv.first.couldBe(kv.second))
       << show(kv.first) << " couldBe " << show(kv.second)
       << " should be false";
   }
+
   for (auto kv : boost::join(true_cases, false_cases)) {
     EXPECT_EQ(kv.first.couldBe(kv.second), kv.second.couldBe(kv.first))
       << show(kv.first) << " couldBe " << show(kv.second)

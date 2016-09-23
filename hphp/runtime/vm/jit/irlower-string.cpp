@@ -142,6 +142,8 @@ IMPL_OPCODE_CALL(ConcatIntStr);
 IMPL_OPCODE_CALL(ConcatStr3);
 IMPL_OPCODE_CALL(ConcatStr4);
 
+IMPL_OPCODE_CALL(StringGet)
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

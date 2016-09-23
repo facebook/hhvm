@@ -137,16 +137,16 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
     irlower::cg##opcode(m_state, i);                  \
   }
 
-NOOP_OPCODE(FinishMemberOp)
+DELEGATE_OPCODE(FinishMemberOp)
 
-CALL_OPCODE(AddElemStrKey)
-CALL_OPCODE(AddElemIntKey)
-CALL_OPCODE(AddNewElem)
-CALL_OPCODE(DictAddElemStrKey)
-CALL_OPCODE(DictAddElemIntKey)
-CALL_OPCODE(ArrayAdd)
-CALL_OPCODE(MapAddElemC)
-CALL_OPCODE(ColAddNewElemC)
+DELEGATE_OPCODE(AddElemStrKey)
+DELEGATE_OPCODE(AddElemIntKey)
+DELEGATE_OPCODE(AddNewElem)
+DELEGATE_OPCODE(DictAddElemStrKey)
+DELEGATE_OPCODE(DictAddElemIntKey)
+DELEGATE_OPCODE(ArrayAdd)
+DELEGATE_OPCODE(MapAddElemC)
+DELEGATE_OPCODE(ColAddNewElemC)
 
 DELEGATE_OPCODE(ConvIntToBool);
 DELEGATE_OPCODE(ConvDblToBool);
@@ -206,17 +206,17 @@ DELEGATE_OPCODE(ConvObjToKeyset);
 DELEGATE_OPCODE(ConvCellToObj);
 
 // Vector instruction helpers
-CALL_OPCODE(StringGet)
-CALL_OPCODE(BindElem)
-CALL_OPCODE(SetWithRefElem)
-CALL_OPCODE(SetOpElem)
-CALL_OPCODE(IncDecElem)
-CALL_OPCODE(SetNewElem)
-CALL_OPCODE(SetNewElemArray)
-CALL_OPCODE(SetNewElemVec)
-CALL_OPCODE(BindNewElem)
-CALL_OPCODE(VectorIsset)
-CALL_OPCODE(PairIsset)
+DELEGATE_OPCODE(StringGet)
+DELEGATE_OPCODE(BindElem)
+DELEGATE_OPCODE(SetWithRefElem)
+DELEGATE_OPCODE(SetOpElem)
+DELEGATE_OPCODE(IncDecElem)
+DELEGATE_OPCODE(SetNewElem)
+DELEGATE_OPCODE(SetNewElemArray)
+DELEGATE_OPCODE(SetNewElemVec)
+DELEGATE_OPCODE(BindNewElem)
+DELEGATE_OPCODE(VectorIsset)
+DELEGATE_OPCODE(PairIsset)
 
 CALL_OPCODE(Count)
 
@@ -245,8 +245,8 @@ DELEGATE_OPCODE(IncTransCounter)
 DELEGATE_OPCODE(IncProfCounter)
 DELEGATE_OPCODE(CheckCold)
 
-CALL_OPCODE(ElemVecD)
-CALL_OPCODE(ElemVecU)
+DELEGATE_OPCODE(ElemVecD)
+DELEGATE_OPCODE(ElemVecU)
 
 DELEGATE_OPCODE(Box)
 DELEGATE_OPCODE(BoxPtr)

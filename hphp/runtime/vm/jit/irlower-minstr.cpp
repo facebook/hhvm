@@ -55,6 +55,8 @@ void cgBaseG(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
+void cgFinishMemberOp(IRLS&, const IRInstruction*) {}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -309,6 +311,13 @@ void cgSetElem(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, elemArgs(env, inst).typedValue(2));
 }
 
+IMPL_OPCODE_CALL(BindElem);
+IMPL_OPCODE_CALL(SetWithRefElem);
+IMPL_OPCODE_CALL(SetOpElem);
+IMPL_OPCODE_CALL(IncDecElem);
+IMPL_OPCODE_CALL(SetNewElem);
+IMPL_OPCODE_CALL(BindNewElem);
+
 void cgUnsetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(UNSET_ELEM_HELPER_TABLE, getKeyType(key));
@@ -345,146 +354,68 @@ ArgGroup arrArgs(IRLS& env, const IRInstruction* inst,
   return args;
 }
 
-void implElemArray(IRLS& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemArrayW ? MOpFlags::Warn : MOpFlags::None;
-  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
-              keyInfo.type, keyInfo.checkForInt, flags);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, arrArgs(env, inst, keyInfo));
-}
-
-void implArraySet(IRLS& env, const IRInstruction* inst) {
-  bool const setRef  = inst->op() == ArraySetRef;
-  auto const arr     = inst->src(0);
-  auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
-  BUILD_OPTAB(ARRAYSET_HELPER_TABLE,
-              keyInfo.type,
-              keyInfo.checkForInt,
-              setRef);
-
-  auto args = arrArgs(env, inst, keyInfo);
-  args.typedValue(2);
-  if (setRef) args.ssa(3);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implVecSet(IRLS& env, const IRInstruction* inst) {
-  bool const setRef  = inst->op() == VecSetRef;
-  BUILD_OPTAB(VECSET_HELPER_TABLE, setRef);
-
-  auto args = argGroup(env, inst).
-    ssa(0).
-    ssa(1).
-    typedValue(2);
-  if (setRef) args.ssa(3);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implDictSet(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  bool const setRef  = inst->op() == DictSetRef;
-  BUILD_OPTAB(DICTSET_HELPER_TABLE, getKeyType(key), setRef);
-
-  auto args = argGroup(env, inst).
-    ssa(0).
-    ssa(1).
-    typedValue(2);
-  if (setRef) args.ssa(3);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implElemDict(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemDictW ? MOpFlags::Warn : MOpFlags::None;
-  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), flags);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implDictGet(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const flags =
-    (inst->op() == DictGetQuiet) ? MOpFlags::None : MOpFlags::Warn;
-  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), flags);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implDictIsset(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  auto const empty   = inst->op() == DictEmptyElem;
-  BUILD_OPTAB(DICT_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implKeysetGet(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const flags =
-    (inst->op() == KeysetGetQuiet) ? MOpFlags::None : MOpFlags::Warn;
-  BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), flags);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implElemKeyset(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemKeysetW ? MOpFlags::Warn : MOpFlags::None;
-  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), flags);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
-void implKeysetIsset(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  auto const empty   = inst->op() == KeysetEmptyElem;
-  BUILD_OPTAB(KEYSET_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Offset profiling.
+
+namespace {
+
+template<class OpFunc>
+void implProfileHackArrayOffset(IRLS& env, const IRInstruction* inst,
+                                OpFunc opFunc) {
+  auto& v = vmain(env);
+
+  auto const rprof = v.makeReg();
+  v << lea{rvmtl()[inst->extra<RDSHandleData>()->handle], rprof};
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1).reg(rprof);
+
+  cgCallHelper(v, env, CallSpec::direct(opFunc), kVoidDest,
+               SyncOptions::Sync, args);
+}
+
+void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
+                                   KeyType key_type) {
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const key = srcLoc(env, inst, 1).reg();
+  auto const branch = label(env, inst->taken());
+  auto const pos = inst->extra<IndexData>()->index;
+  auto& v = vmain(env);
+
+  auto const elmOff = MixedArray::elmOff(pos);
+  using Elm = MixedArray::Elm;
+
+  { // Also fail if our predicted position exceeds bounds.
+    auto const sf = v.makeReg();
+    v << cmplim{safe_cast<int32_t>(pos), arr[MixedArray::usedOff()], sf};
+    ifThen(v, CC_LE, sf, branch);
+  }
+  { // Fail if the Elm key value doesn't match.
+    auto const sf = v.makeReg();
+    v << cmpqm{key, arr[elmOff + Elm::keyOff()], sf};
+    ifThen(v, CC_NE, sf, branch);
+  }
+  { // Fail if the Elm key type doesn't match.
+    auto const sf = v.makeReg();
+    v << cmplim{0, arr[elmOff + Elm::dataOff() + TVOFF(m_aux)], sf};
+
+    assertx(key_type != KeyType::Any);
+
+    // Note that if `key' actually is an integer-ish string, we'd fail this
+    // check (and most likely would have failed the previous check also), but
+    // this false negative is allowed.
+    auto const is_str_key = key_type == KeyType::Str;
+    ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
+  }
+  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
+    auto const sf = v.makeReg();
+    v << cmpbim{KindOfUninit, arr[elmOff + Elm::dataOff() + TVOFF(m_type)], sf};
+    ifThen(v, CC_L, sf, branch);
+  }
+}
+
+}
 
 void cgProfileMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
@@ -503,126 +434,25 @@ void cgProfileMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
                arrArgs(env, inst, keyInfo).reg(rprof));
 }
 
-void cgCheckMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
-  auto const arr = srcLoc(env, inst, 0).reg();
-  auto const key = srcLoc(env, inst, 1).reg();
-  auto const branch = label(env, inst->taken());
-  auto const pos = inst->extra<CheckMixedArrayOffset>()->index;
-  auto& v = vmain(env);
-
-  { // Also fail if our predicted position exceeds bounds.
-    auto const sf = v.makeReg();
-    v << cmplim{safe_cast<int32_t>(pos), arr[MixedArray::usedOff()], sf};
-    ifThen(v, CC_LE, sf, branch);
-  }
-  { // Fail if the Elm key value doesn't match.
-    auto const sf = v.makeReg();
-    v << cmpqm{key, arr[MixedArray::elmOff(pos) + MixedArray::Elm::keyOff()], sf};
-    ifThen(v, CC_NE, sf, branch);
-  }
-  auto const dataOff = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
-
-  { // Fail if the Elm key type doesn't match.
-    auto const sf = v.makeReg();
-    v << cmplim{0, arr[dataOff + TVOFF(m_aux)], sf};
-
-    auto const key_info = checkStrictlyInteger(
-      inst->src(0)->type(), // arr
-      inst->src(1)->type()  // key
-    );
-    assertx(key_info.type != KeyType::Any);
-
-    // Note that if `key' actually is an integer-ish string, we'd fail this
-    // check (and most likely would have failed the previous check also), but
-    // this false negative is allowed.
-    auto const is_str_key = key_info.type == KeyType::Str;
-    ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
-  }
-  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
-    auto const sf = v.makeReg();
-    v << cmpbim{KindOfUninit, arr[dataOff + TVOFF(m_type)], sf};
-    ifThen(v, CC_L, sf, branch);
-  }
-}
-
-void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
-  auto const arr = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << cmplim{1, arr[FAST_REFCOUNT_OFFSET], sf};
-  ifThen(v, CC_NE, sf, label(env, inst->taken()));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgProfileDictOffset(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-
-  BUILD_OPTAB(PROFILE_DICT_OFFSET_HELPER_TABLE, getKeyType(key));
-  auto& v = vmain(env);
-
-  auto const rprof = v.makeReg();
-  v << lea{rvmtl()[inst->extra<ProfileDictOffset>()->handle], rprof};
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1).reg(rprof);
-
-  cgCallHelper(v, env, CallSpec::direct(opFunc), kVoidDest, SyncOptions::Sync,
-               args);
-}
-
-void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
-  auto const dict = srcLoc(env, inst, 0).reg();
-  auto const key = srcLoc(env, inst, 1).reg();
-  auto const branch = label(env, inst->taken());
-  auto const pos = inst->extra<CheckDictOffset>()->index;
-  auto& v = vmain(env);
-
-  { // Also fail if our predicted position exceeds bounds.
-    auto const sf = v.makeReg();
-    v << cmplim{safe_cast<int32_t>(pos), dict[MixedArray::usedOff()], sf};
-    ifThen(v, CC_LE, sf, branch);
-  }
-  { // Fail if the Elm key value doesn't match.
-    auto const sf = v.makeReg();
-    v << cmpqm{key, dict[MixedArray::elmOff(pos) + MixedArray::Elm::keyOff()], sf};
-    ifThen(v, CC_NE, sf, branch);
-  }
-  auto const dataOff = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
-
-  { // Fail if the Elm key type doesn't match.
-    auto const sf = v.makeReg();
-    v << cmplim{0, dict[dataOff + TVOFF(m_aux)], sf};
-
-    auto const key_type = getKeyType(inst->src(1));
-    assertx(key_type != KeyType::Any);
-
-    // Note that if `key' actually is an integer-ish string, we'd fail this
-    // check (and most likely would have failed the previous check also), but
-    // this false negative is allowed.
-    auto const is_str_key = key_type == KeyType::Str;
-    ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
-  }
-  { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
-    auto const sf = v.makeReg();
-    v << cmpbim{KindOfUninit, dict[dataOff + TVOFF(m_type)], sf};
-    ifThen(v, CC_L, sf, branch);
-  }
+  BUILD_OPTAB(PROFILE_DICT_OFFSET_HELPER_TABLE, getKeyType(inst->src(1)));
+  implProfileHackArrayOffset(env, inst, opFunc);
 }
 
 void cgProfileKeysetOffset(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
+  BUILD_OPTAB(PROFILE_KEYSET_OFFSET_HELPER_TABLE, getKeyType(inst->src(1)));
+  implProfileHackArrayOffset(env, inst, opFunc);
+}
 
-  BUILD_OPTAB(PROFILE_KEYSET_OFFSET_HELPER_TABLE, getKeyType(key));
-  auto& v = vmain(env);
+void cgCheckMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
+  implCheckMixedArrayLikeOffset(
+    env, inst,
+    checkStrictlyInteger(inst->src(0)->type(), inst->src(1)->type()).type
+  );
+}
 
-  auto const rprof = v.makeReg();
-  v << lea{rvmtl()[inst->extra<ProfileKeysetOffset>()->handle], rprof};
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1).reg(rprof);
-
-  cgCallHelper(v, env, CallSpec::direct(opFunc), kVoidDest, SyncOptions::Sync,
-               args);
+void cgCheckDictOffset(IRLS& env, const IRInstruction* inst) {
+  implCheckMixedArrayLikeOffset(env, inst, getKeyType(inst->src(1)));
 }
 
 void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
@@ -660,7 +490,53 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   }
 }
 
+void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << cmplim{1, arr[FAST_REFCOUNT_OFFSET], sf};
+  ifThen(v, CC_NE, sf, label(env, inst->taken()));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+// Array.
+
+namespace {
+
+void implElemArray(IRLS& env, const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const flags = inst->op() == ElemArrayW ? MOpFlags::Warn : MOpFlags::None;
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
+  BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
+              keyInfo.type, keyInfo.checkForInt, flags);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, arrArgs(env, inst, keyInfo));
+}
+
+void implArraySet(IRLS& env, const IRInstruction* inst) {
+  bool const setRef  = inst->op() == ArraySetRef;
+  auto const arr     = inst->src(0);
+  auto const key     = inst->src(1);
+  auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
+  BUILD_OPTAB(ARRAYSET_HELPER_TABLE,
+              keyInfo.type,
+              keyInfo.checkForInt,
+              setRef);
+
+  auto args = arrArgs(env, inst, keyInfo);
+  args.typedValue(2);
+  if (setRef) args.ssa(3);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+}
 
 void cgElemArray(IRLS& env, const IRInstruction* i)  { implElemArray(env, i); }
 void cgElemArrayW(IRLS& env, const IRInstruction* i) { implElemArray(env, i); }
@@ -720,6 +596,12 @@ void cgMixedArrayGetK(IRLS& env, const IRInstruction* inst) {
 void cgArraySet(IRLS& env, const IRInstruction* i)    { implArraySet(env, i); }
 void cgArraySetRef(IRLS& env, const IRInstruction* i) { implArraySet(env, i); }
 
+IMPL_OPCODE_CALL(SetNewElemArray);
+
+IMPL_OPCODE_CALL(AddElemIntKey);
+IMPL_OPCODE_CALL(AddElemStrKey);
+IMPL_OPCODE_CALL(AddNewElem);
+
 void cgArrayIsset(IRLS& env, const IRInstruction* inst) {
   auto const arr     = inst->src(0);
   auto const key     = inst->src(1);
@@ -752,6 +634,7 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Vec.
 
 namespace {
 
@@ -789,6 +672,21 @@ Vptr implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
               + PackedArray::entriesOffset()];
 }
 
+void implVecSet(IRLS& env, const IRInstruction* inst) {
+  bool const setRef = inst->op() == VecSetRef;
+  BUILD_OPTAB(VECSET_HELPER_TABLE, setRef);
+
+  auto args = argGroup(env, inst).
+    ssa(0).
+    ssa(1).
+    typedValue(2);
+  if (setRef) args.ssa(3);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
 }
 
 void cgLdPackedArrayElemAddr(IRLS& env, const IRInstruction* inst) {
@@ -797,7 +695,6 @@ void cgLdPackedArrayElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
   vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
 }
-
 
 void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
@@ -813,10 +710,73 @@ void cgLdVecElem(IRLS& env, const IRInstruction* inst) {
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), addr);
 }
 
+IMPL_OPCODE_CALL(ElemVecD)
+IMPL_OPCODE_CALL(ElemVecU)
+
 void cgVecSet(IRLS& env, const IRInstruction* i)    { implVecSet(env, i); }
 void cgVecSetRef(IRLS& env, const IRInstruction* i) { implVecSet(env, i); }
 
+IMPL_OPCODE_CALL(SetNewElemVec);
+
 ///////////////////////////////////////////////////////////////////////////////
+// Dict.
+
+namespace {
+
+void implElemDict(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags = inst->op() == ElemDictW ? MOpFlags::Warn : MOpFlags::None;
+  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implDictGet(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags =
+    (inst->op() == DictGetQuiet) ? MOpFlags::None : MOpFlags::Warn;
+  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implDictSet(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  bool const setRef  = inst->op() == DictSetRef;
+  BUILD_OPTAB(DICTSET_HELPER_TABLE, getKeyType(key), setRef);
+
+  auto args = argGroup(env, inst).
+    ssa(0).
+    ssa(1).
+    typedValue(2);
+  if (setRef) args.ssa(3);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implDictIsset(IRLS& env, const IRInstruction* inst) {
+  auto const key     = inst->src(1);
+  auto const empty   = inst->op() == DictEmptyElem;
+  BUILD_OPTAB(DICT_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+}
 
 void cgElemDict(IRLS& env, const IRInstruction* i)  { implElemDict(env, i); }
 void cgElemDictW(IRLS& env, const IRInstruction* i) { implElemDict(env, i); }
@@ -874,6 +834,9 @@ void cgDictGetK(IRLS& env, const IRInstruction* inst) {
 void cgDictSet(IRLS& env, const IRInstruction* i)    { implDictSet(env, i); }
 void cgDictSetRef(IRLS& env, const IRInstruction* i) { implDictSet(env, i); }
 
+IMPL_OPCODE_CALL(DictAddElemIntKey);
+IMPL_OPCODE_CALL(DictAddElemStrKey);
+
 void cgDictIsset(IRLS& env, const IRInstruction* inst) {
   implDictIsset(env, inst);
 }
@@ -893,6 +856,51 @@ void cgDictIdx(IRLS& env, const IRInstruction* inst) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Keyset.
+
+namespace {
+
+void implElemKeyset(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags = inst->op() == ElemKeysetW
+    ? MOpFlags::Warn
+    : MOpFlags::None;
+  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implKeysetGet(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const flags = inst->op() == KeysetGetQuiet
+    ? MOpFlags::None
+    : MOpFlags::Warn;
+  BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), flags);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void implKeysetIsset(IRLS& env, const IRInstruction* inst) {
+  auto const key = inst->src(1);
+  auto const empty = inst->op() == KeysetEmptyElem;
+  BUILD_OPTAB(KEYSET_ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), empty);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+               SyncOptions::Sync, args);
+}
+
+}
 
 void cgElemKeyset(IRLS& e, const IRInstruction* i)  { implElemKeyset(e, i); }
 void cgElemKeysetW(IRLS& e, const IRInstruction* i) { implElemKeyset(e, i); }
@@ -965,6 +973,10 @@ void cgKeysetIdx(IRLS& env, const IRInstruction* inst) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Collections.
+
+IMPL_OPCODE_CALL(PairIsset);
+IMPL_OPCODE_CALL(VectorIsset);
 
 void cgMapGet(IRLS& env, const IRInstruction* inst) {
   auto const target = inst->src(1)->isA(TInt)
@@ -1005,6 +1017,9 @@ void cgMapIsset(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(MapIdx);
+
+IMPL_OPCODE_CALL(MapAddElemC);
+IMPL_OPCODE_CALL(ColAddNewElemC);
 
 ///////////////////////////////////////////////////////////////////////////////
 

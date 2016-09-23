@@ -258,6 +258,41 @@ IMPL_OPCODE_CALL(LookupClsRDS)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgLdArrFuncCtx(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .addr(srcLoc(env, inst, 1).reg(),
+          cellsToBytes(inst->extra<LdArrFuncCtx>()->offset.offset))
+    .ssa(2);
+
+  cgCallHelper(vmain(env), env, CallSpec::direct(loadArrayFunctionContext),
+               callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLdArrFPushCuf(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .addr(srcLoc(env, inst, 1).reg(),
+          cellsToBytes(inst->extra<LdArrFPushCuf>()->offset.offset))
+    .ssa(2);
+
+  cgCallHelper(vmain(env), env, CallSpec::direct(fpushCufHelperArray),
+               callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLdStrFPushCuf(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .addr(srcLoc(env, inst, 1).reg(),
+          cellsToBytes(inst->extra<LdStrFPushCuf>()->offset.offset))
+    .ssa(2);
+
+  cgCallHelper(vmain(env), env, CallSpec::direct(fpushCufHelperString),
+               callDest(env, inst), SyncOptions::Sync, args);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 IMPL_OPCODE_CALL(OODeclExists)
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -50,33 +50,6 @@ std::vector<SwitchCaseCount> sortedSwitchProfile(
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-uint32_t getKindIndex(ArrayData::ArrayKind kind) {
-  using AK = ArrayData::ArrayKind;
-  switch (kind) {
-    case AK::kEmptyKind : return 0;
-    case AK::kPackedKind: return 1;
-    case AK::kMixedKind : return 2;
-    default:              return 3;
-  }
-}
-
-}
-
-void ArrayKindProfile::report(ArrayData::ArrayKind kind) {
-  count[getKindIndex(kind)]++;
-}
-
-double ArrayKindProfile::fraction(ArrayData::ArrayKind kind) const {
-  const auto idx = getKindIndex(kind);
-  if (idx == kNumProfiledArrayKinds - 1) return 0; // untracked kinds
-  const auto tot = total();
-  if (tot == 0) return 0;
-  return (double)count[idx] / tot;
-}
-
-//////////////////////////////////////////////////////////////////////
 void MethProfile::reportMethHelper(const Class* cls, const Func* meth) {
   auto val = methValue();
   if (!val) {

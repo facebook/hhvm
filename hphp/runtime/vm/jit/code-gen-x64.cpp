@@ -205,15 +205,6 @@ DELEGATE_OPCODE(ConvObjToKeyset);
 
 DELEGATE_OPCODE(ConvCellToObj);
 
-CALL_OPCODE(NewArray)
-CALL_OPCODE(NewMixedArray)
-CALL_OPCODE(NewDictArray)
-CALL_OPCODE(NewLikeArray)
-CALL_OPCODE(AllocPackedArray)
-CALL_OPCODE(AllocVecArray)
-
-CALL_OPCODE(MapIdx)
-
 // Vector instruction helpers
 CALL_OPCODE(StringGet)
 CALL_OPCODE(BindElem)
@@ -497,6 +488,28 @@ DELEGATE_OPCODE(ConcatIntStr);
 DELEGATE_OPCODE(ConcatStr3);
 DELEGATE_OPCODE(ConcatStr4);
 
+DELEGATE_OPCODE(ProfileArrayKind)
+DELEGATE_OPCODE(CountArray)
+DELEGATE_OPCODE(CountArrayFast)
+DELEGATE_OPCODE(CountVec)
+DELEGATE_OPCODE(CountDict)
+DELEGATE_OPCODE(CountKeyset)
+DELEGATE_OPCODE(CheckPackedArrayBounds)
+DELEGATE_OPCODE(AKExistsArr)
+DELEGATE_OPCODE(AKExistsDict)
+DELEGATE_OPCODE(AKExistsKeyset)
+DELEGATE_OPCODE(AKExistsObj)
+DELEGATE_OPCODE(NewArray)
+DELEGATE_OPCODE(NewStructArray)
+DELEGATE_OPCODE(NewMixedArray)
+DELEGATE_OPCODE(NewLikeArray)
+DELEGATE_OPCODE(NewDictArray)
+DELEGATE_OPCODE(NewKeysetArray)
+DELEGATE_OPCODE(AllocPackedArray)
+DELEGATE_OPCODE(AllocVecArray)
+DELEGATE_OPCODE(InitPackedLayoutArray)
+DELEGATE_OPCODE(InitPackedLayoutArrayLoop)
+
 DELEGATE_OPCODE(BaseG)
 DELEGATE_OPCODE(PropX)
 DELEGATE_OPCODE(PropDX)
@@ -555,6 +568,9 @@ DELEGATE_OPCODE(DictEmptyElem)
 DELEGATE_OPCODE(DictSet)
 DELEGATE_OPCODE(DictSetRef)
 DELEGATE_OPCODE(DictIdx)
+DELEGATE_OPCODE(LdPackedArrayElemAddr)
+DELEGATE_OPCODE(LdVecElemAddr)
+DELEGATE_OPCODE(LdVecElem)
 DELEGATE_OPCODE(VecSet)
 DELEGATE_OPCODE(VecSetRef)
 DELEGATE_OPCODE(KeysetGet)
@@ -567,6 +583,7 @@ DELEGATE_OPCODE(KeysetIdx)
 DELEGATE_OPCODE(MapGet)
 DELEGATE_OPCODE(MapSet)
 DELEGATE_OPCODE(MapIsset)
+DELEGATE_OPCODE(MapIdx)
 
 DELEGATE_OPCODE(IsCol)
 DELEGATE_OPCODE(ColIsEmpty)
@@ -589,6 +606,9 @@ DELEGATE_OPCODE(LdFunc)
 DELEGATE_OPCODE(LdFuncCached)
 DELEGATE_OPCODE(LdFuncCachedU)
 DELEGATE_OPCODE(LdFuncCachedSafe)
+DELEGATE_OPCODE(LdArrFuncCtx)
+DELEGATE_OPCODE(LdArrFPushCuf)
+DELEGATE_OPCODE(LdStrFPushCuf)
 DELEGATE_OPCODE(OODeclExists)
 
 DELEGATE_OPCODE(LdObjMethod)
@@ -808,127 +828,6 @@ void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CodeGenerator::cgLdArrFuncCtx(IRInstruction* inst) {
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(loadArrayFunctionContext),
-    callDest(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .ssa(0)
-      .addr(srcLoc(inst, 1).reg(),
-            cellsToBytes(inst->extra<LdArrFuncCtx>()->offset.offset))
-      .ssa(2)
-  );
-}
-
-void CodeGenerator::cgLdArrFPushCuf(IRInstruction* inst) {
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(fpushCufHelperArray),
-    callDest(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .ssa(0)
-      .addr(srcLoc(inst, 1).reg(),
-            cellsToBytes(inst->extra<LdArrFPushCuf>()->offset.offset))
-      .ssa(2)
-  );
-}
-
-void CodeGenerator::cgLdStrFPushCuf(IRInstruction* inst) {
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(fpushCufHelperString),
-    callDest(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .ssa(0)
-      .addr(srcLoc(inst, 1).reg(),
-            cellsToBytes(inst->extra<LdStrFPushCuf>()->offset.offset))
-      .ssa(2)
-  );
-}
-
-void CodeGenerator::cgProfileArrayKind(IRInstruction* inst) {
-  auto const extra = inst->extra<RDSHandleData>();
-  auto& v = vmain();
-  auto const profile = v.makeReg();
-  v << lea{rvmtl()[extra->handle], profile};
-  cgCallHelper(v, CallSpec::direct(profileArrayKindHelper), kVoidDest,
-               SyncOptions::None, argGroup(inst).reg(profile).ssa(0));
-}
-
-void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
-  static_assert(ArrayData::sizeofSize() == 4, "");
-  // We may check packed array bounds on profiled arrays for which
-  // we do not statically know that they are of kPackedKind.
-  assertx(inst->taken());
-  auto arrReg = srcLoc(inst, 0).reg();
-  auto idxReg = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-  // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
-  // since idx is KindOfInt64.
-  auto tmp_size = v.makeReg();
-  v << loadzlq{arrReg[ArrayData::offsetofSize()], tmp_size};
-  auto const sf = v.makeReg();
-  v << cmpq{idxReg, tmp_size, sf};
-  v << jcc{CC_BE, sf, {label(inst->next()), label(inst->taken())}};
-}
-
-Vptr CodeGenerator::emitPackedLayoutAddr(SSATmp* idx, Vloc idxLoc,
-                                         Vloc arrLoc) {
-  auto const rArr = arrLoc.reg();
-  auto const rIdx = idxLoc.reg();
-  auto& v = vmain();
-
-  static_assert(sizeof(TypedValue) == 16, "");
-
-  if (idx->hasConstVal()) {
-    auto const offset =
-      PackedArray::entriesOffset() + idx->intVal() * sizeof(TypedValue);
-    if (deltaFits(offset, sz::dword)) {
-      return rArr[offset];
-    }
-  }
-
-  /*
-   * This computes `rArr + rIdx * sizeof(TypedValue) +
-   * PackedArray::entriesOffset()`. The logic of `scaledIdx * 16` is split in
-   * the following two instructions, in order to save a byte in the shl
-   * instruction.
-   *
-   * TODO(#7728856): We should really move this into vasm-x64.cpp...
-   */
-  auto idxl = v.makeReg();
-  auto scaled_idxl = v.makeReg();
-  auto scaled_idx = v.makeReg();
-  v << movtql{rIdx, idxl};
-  v << shlli{1, idxl, scaled_idxl, v.makeReg()};
-  v << movzlq{scaled_idxl, scaled_idx};
-  return rArr[scaled_idx * int(sizeof(TypedValue) / 2)
-              + PackedArray::entriesOffset()];
-}
-
-void CodeGenerator::cgLdPackedArrayElemAddr(IRInstruction* inst) {
-  auto const addr =
-    emitPackedLayoutAddr(inst->src(1), srcLoc(inst, 1), srcLoc(inst, 0));
-  vmain() << lea{addr, dstLoc(inst, 0).reg()};
-}
-
-
-void CodeGenerator::cgLdVecElem(IRInstruction* inst) {
-  auto const addr =
-    emitPackedLayoutAddr(inst->src(1), srcLoc(inst, 1), srcLoc(inst, 0));
-  loadTV(vmain(), inst->dst(), dstLoc(inst, 0), addr);
-}
-
-void CodeGenerator::cgLdVecElemAddr(IRInstruction* inst) {
-  auto const addr =
-    emitPackedLayoutAddr(inst->src(1), srcLoc(inst, 1), srcLoc(inst, 0));
-  vmain() << lea{addr, dstLoc(inst, 0).reg()};
-}
-
 template <class JmpFn>
 void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
                                       JmpFn doJcc) {
@@ -1037,210 +936,6 @@ void CodeGenerator::cgCheckRefs(IRInstruction* inst)  {
     [&](Vout& v, ConditionCode cc, Vreg sfTaken) {
       emitFwdJcc(v, cc, sfTaken, inst->taken());
     });
-}
-
-void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {
-  auto const arrTy = inst->src(0)->type();
-  auto const keyTy = inst->src(1)->type();
-  auto& v = vmain();
-
-  auto const keyInfo = checkStrictlyInteger(arrTy, keyTy);
-  auto const target =
-    keyInfo.checkForInt ? CallSpec::direct(ak_exist_string) :
-    keyInfo.type == KeyType::Int ? CallSpec::array(&g_array_funcs.existsInt)
-                                 : CallSpec::array(&g_array_funcs.existsStr);
-  auto args = argGroup(inst).ssa(0);
-  if (keyInfo.converted) {
-    args.imm(keyInfo.convertedInt);
-  } else {
-    args.ssa(1);
-  }
-
-  cgCallHelper(
-    v,
-    target,
-    callDest(inst),
-    SyncOptions::None,
-    args
-  );
-}
-
-void CodeGenerator::cgAKExistsDict(IRInstruction* inst) {
-  auto const keyTy = inst->src(1)->type();
-  auto& v = vmain();
-
-  auto const target = (keyTy <= TInt)
-    ? CallSpec::direct(MixedArray::ExistsIntDict)
-    : CallSpec::direct(MixedArray::ExistsStrDict);
-
-  cgCallHelper(
-    v,
-    target,
-    callDest(inst),
-    SyncOptions::None,
-    argGroup(inst).ssa(0).ssa(1)
-  );
-}
-
-void CodeGenerator::cgAKExistsKeyset(IRInstruction* inst) {
-  auto const keyTy = inst->src(1)->type();
-  auto& v = vmain();
-
-  auto const target = (keyTy <= TInt)
-    ? CallSpec::direct(SetArray::ExistsInt)
-    : CallSpec::direct(SetArray::ExistsStr);
-
-  cgCallHelper(
-    v,
-    target,
-    callDest(inst),
-    SyncOptions::None,
-    argGroup(inst).ssa(0).ssa(1)
-  );
-}
-
-void CodeGenerator::cgAKExistsObj(IRInstruction* inst) {
-  auto const keyTy = inst->src(1)->type();
-  auto& v = vmain();
-
-  cgCallHelper(
-    v,
-    keyTy <= TInt
-      ? CallSpec::direct(ak_exist_int_obj)
-      : CallSpec::direct(ak_exist_string_obj),
-    callDest(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .ssa(0)
-      .ssa(1)
-  );
-}
-
-void CodeGenerator::cgNewStructArray(IRInstruction* inst) {
-  auto const data = inst->extra<NewStructData>();
-
-  auto table = vmain().allocData<const StringData*>(data->numKeys);
-  memcpy(table, data->keys, data->numKeys * sizeof(*data->keys));
-  MixedArray* (*f)(uint32_t, const StringData* const*, const TypedValue*) =
-    &MixedArray::MakeStruct;
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(f),
-    callDest(inst),
-    SyncOptions::None,
-    argGroup(inst)
-      .imm(data->numKeys)
-      .dataPtr(table)
-      .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
-  );
-}
-
-void CodeGenerator::cgNewKeysetArray(IRInstruction* inst) {
-  auto const data = inst->extra<NewKeysetArray>();
-  cgCallHelper(
-    vmain(),
-    CallSpec::direct(SetArray::MakeSet),
-    callDest(inst),
-    SyncOptions::Sync,
-    argGroup(inst)
-      .imm(data->size)
-      .addr(srcLoc(inst, 0).reg(), cellsToBytes(data->offset.offset))
-  );
-}
-
-void CodeGenerator::cgCountArray(IRInstruction* inst) {
-  auto const baseReg = srcLoc(inst, 0).reg();
-  auto const dstReg  = dstLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto dst1 = v.makeReg();
-
-  v << loadl{baseReg[ArrayData::offsetofSize()], dst1};
-  auto const sf = v.makeReg();
-  v << testl{dst1, dst1, sf};
-
-  unlikelyCond(v, vcold(), CC_S, sf, dstReg,
-    [&](Vout& v) {
-      auto dst2 = v.makeReg();
-      cgCallHelper(v, CallSpec::array(&g_array_funcs.vsize),
-                   callDest(dst2), SyncOptions::None,
-                   argGroup(inst).ssa(0/*base*/));
-      return dst2;
-    },
-    [&](Vout& v) {
-      return dst1;
-    }
-  );
-}
-
-void CodeGenerator::arrayLikeCountImpl(IRInstruction* inst) {
-  static_assert(ArrayData::sizeofSize() == 4, "");
-  vmain() << loadzlq{
-    srcLoc(inst, 0).reg()[ArrayData::offsetofSize()],
-    dstLoc(inst, 0).reg()
-  };
-}
-
-void CodeGenerator::cgCountArrayFast(IRInstruction* inst) {
-  arrayLikeCountImpl(inst);
-}
-
-void CodeGenerator::cgCountVec(IRInstruction* inst) {
-  arrayLikeCountImpl(inst);
-}
-
-void CodeGenerator::cgCountDict(IRInstruction* inst) {
-  arrayLikeCountImpl(inst);
-}
-
-void CodeGenerator::cgCountKeyset(IRInstruction* inst) {
-  arrayLikeCountImpl(inst);
-}
-
-void CodeGenerator::cgInitPackedLayoutArray(IRInstruction* inst) {
-  auto const arrReg = srcLoc(inst, 0).reg();
-  auto const index = inst->extra<InitPackedLayoutArray>()->index;
-
-  auto slotOffset = PackedArray::entriesOffset() + index * sizeof(TypedValue);
-  storeTV(vmain(), arrReg[slotOffset], srcLoc(inst, 1), inst->src(1));
-}
-
-void CodeGenerator::cgInitPackedLayoutArrayLoop(IRInstruction* inst) {
-  auto const arrReg = srcLoc(inst, 0).reg();
-  int const count = inst->extra<InitPackedLayoutArrayLoop>()->size;
-  auto const offset = inst->extra<InitPackedLayoutArrayLoop>()->offset;
-  auto const spIn = srcLoc(inst, 1).reg();
-
-  auto& v = vmain();
-  auto const firstEntry = PackedArray::entriesOffset();
-
-  auto const sp = v.makeReg();
-  v << lea{spIn[cellsToBytes(offset.offset)], sp};
-
-  auto const i = v.cns(0);
-  auto const j = v.cns((count - 1) * 2);
-
-  // We know that we have at least one element in the array so we don't have to
-  // do an initial bounds check.
-  assertx(count);
-
-  doWhile(v, CC_GE, {i, j},
-    [&] (const VregList& in, const VregList& out) {
-      auto const i1 = in[0],  j1 = in[1];
-      auto const i2 = out[0], j2 = out[1];
-      auto const sf = v.makeReg();
-      auto const value = v.makeReg();
-
-      // Load the value from the stack and store into the array.  It's safe to
-      // copy all 16 bytes of the TV because packed arrays don't use m_aux.
-      v << loadups{sp[j1 * 8], value};
-      v << storeups{value, arrReg[i1 * 8] + firstEntry};
-
-      // Add 2 to the loop variable because we can only scale by at most 8.
-      v << lea{i1[2], i2};
-      v << subqi{2, j1, j2, sf};
-      return sf;
-    }
-  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

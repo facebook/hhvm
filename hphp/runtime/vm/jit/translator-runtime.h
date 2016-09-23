@@ -153,10 +153,6 @@ void raise_error_sd(const StringData* sd);
 
 RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
 
-bool ak_exist_string(ArrayData* arr, StringData* key);
-bool ak_exist_string_obj(ObjectData* obj, StringData* key);
-bool ak_exist_int_obj(ObjectData* obj, int64_t key);
-
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxIc(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
@@ -184,8 +180,6 @@ TypedValue* getSPropOrRaise(const Class* cls,
 int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
-
-void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr);
 
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
 

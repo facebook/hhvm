@@ -55,6 +55,7 @@ struct ArrayOffsetProfile {
                      const ArrayOffsetProfile& r);
 
   std::string toString() const;
+
 private:
   /*
    * Initialize the samples.

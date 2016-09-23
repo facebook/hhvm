@@ -271,50 +271,6 @@ struct MethProfile {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * ArrayKindProfile profiles the distribution of the array kinds
- * observed for a given value.  The array kinds currently tracked are
- * Empty, Packed, and Mixed.
- */
-struct ArrayKindProfile {
-
-  static const uint32_t kNumProfiledArrayKinds = 4;
-
-  std::string toString() const {
-    std::ostringstream out;
-    for (auto c : count) out << folly::format("{},", c);
-    return out.str();
-  }
-
-  static void reduce(ArrayKindProfile& a, const ArrayKindProfile& b) {
-    for (uint32_t i = 0; i < kNumProfiledArrayKinds; i++) {
-      a.count[i] += b.count[i];
-    }
-  }
-
-  void report(ArrayData::ArrayKind kind);
-
-  /*
-   * Returns what fraction of the total profiled arrays had the given `kind'.
-   */
-  double fraction(ArrayData::ArrayKind kind) const;
-
-  /*
-   * Returns the total number of samples profiled so far.
-   */
-  uint32_t total() const {
-    uint32_t sum = 0;
-    for (uint32_t i = 0; i < kNumProfiledArrayKinds; i++) {
-      sum += count[i];
-    }
-    return sum;
-  }
-
-  uint32_t count[kNumProfiledArrayKinds];
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * TypeProfile keeps the union of all the types observed during profiling.
  */
 struct TypeProfile {

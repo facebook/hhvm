@@ -697,35 +697,6 @@ RefData* ldClosureStaticLoc(StringData* name, ActRec* fp) {
   return refData;
 }
 
-ALWAYS_INLINE
-static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
-  int64_t n;
-  if (arr->convertKey(key, n)) {
-    return arr->exists(n);
-  }
-  return arr->exists(key);
-}
-
-bool ak_exist_string(ArrayData* arr, StringData* key) {
-  return ak_exist_string_impl(arr, key);
-}
-
-bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
-  if (obj->isCollection()) {
-    return collections::contains(obj, Variant{key});
-  }
-  auto arr = obj->toArray();
-  return ak_exist_string_impl(arr.get(), key);
-}
-
-bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
-  if (obj->isCollection()) {
-    return collections::contains(obj, key);
-  }
-  auto arr = obj->toArray();
-  return arr.get()->exists(key);
-}
-
 namespace {
 ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
@@ -878,10 +849,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
   auto const ival = o->toInt64();
   decRefObj(o);
   return switchBoundsCheck(ival, base, nTargets);
-}
-
-void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr) {
-  profile->report(arr->kind());
 }
 
 //////////////////////////////////////////////////////////////////////

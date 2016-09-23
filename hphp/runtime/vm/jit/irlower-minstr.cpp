@@ -17,6 +17,8 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -30,6 +32,7 @@
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/array-offset-profile.h"
 
+#include "hphp/util/immed.h"
 #include "hphp/util/trace.h"
 
 // This file does ugly things with macros so include last.
@@ -748,12 +751,72 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
                arrArgs(env, inst, keyInfo).typedValue(2));
 }
 
-/////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+Vptr implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
+                              Vloc idxLoc, const SSATmp* idx) {
+  auto const rarr = arrLoc.reg();
+  auto const ridx = idxLoc.reg();
+  auto& v = vmain(env);
+
+  static_assert(sizeof(TypedValue) == 16, "");
+
+  if (idx->hasConstVal()) {
+    auto const offset = PackedArray::entriesOffset() +
+                        idx->intVal() * sizeof(TypedValue);
+    if (deltaFits(offset, sz::dword)) {
+      return rarr[offset];
+    }
+  }
+
+  /*
+   * Compute `rarr + ridx * sizeof(TypedValue) + PackedArray::entriesOffset()`.
+   *
+   * The logic of `scaledIdx * 16` is split in the following two instructions,
+   * in order to save a byte in the shl instruction.
+   *
+   * TODO(#7728856): We should really move this into vasm-x64.cpp...
+   */
+  auto idxl = v.makeReg();
+  auto scaled_idxl = v.makeReg();
+  auto scaled_idx = v.makeReg();
+  v << movtql{ridx, idxl};
+  v << shlli{1, idxl, scaled_idxl, v.makeReg()};
+  v << movzlq{scaled_idxl, scaled_idx};
+  return rarr[scaled_idx * int(sizeof(TypedValue) / 2)
+              + PackedArray::entriesOffset()];
+}
+
+}
+
+void cgLdPackedArrayElemAddr(IRLS& env, const IRInstruction* inst) {
+  auto const arrLoc = srcLoc(env, inst, 0);
+  auto const idxLoc = srcLoc(env, inst, 1);
+  auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
+  vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
+}
+
+
+void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
+  auto const arrLoc = srcLoc(env, inst, 0);
+  auto const idxLoc = srcLoc(env, inst, 1);
+  auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
+  vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
+}
+
+void cgLdVecElem(IRLS& env, const IRInstruction* inst) {
+  auto const arrLoc = srcLoc(env, inst, 0);
+  auto const idxLoc = srcLoc(env, inst, 1);
+  auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), addr);
+}
 
 void cgVecSet(IRLS& env, const IRInstruction* i)    { implVecSet(env, i); }
 void cgVecSetRef(IRLS& env, const IRInstruction* i) { implVecSet(env, i); }
 
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 void cgElemDict(IRLS& env, const IRInstruction* i)  { implElemDict(env, i); }
 void cgElemDictW(IRLS& env, const IRInstruction* i) { implElemDict(env, i); }
@@ -829,13 +892,13 @@ void cgDictIdx(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-void cgElemKeyset(IRLS& env, const IRInstruction* i)  { implElemKeyset(env, i); }
-void cgElemKeysetW(IRLS& env, const IRInstruction* i) { implElemKeyset(env, i); }
+void cgElemKeyset(IRLS& e, const IRInstruction* i)  { implElemKeyset(e, i); }
+void cgElemKeysetW(IRLS& e, const IRInstruction* i) { implElemKeyset(e, i); }
 
 void cgElemKeysetU(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
+  auto const key = inst->src(1);
   BUILD_OPTAB(ELEM_KEYSET_U_HELPER_TABLE, getKeyType(key));
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
@@ -940,6 +1003,8 @@ void cgMapIsset(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst),
                SyncOptions::Sync, args);
 }
+
+IMPL_OPCODE_CALL(MapIdx);
 
 ///////////////////////////////////////////////////////////////////////////////
 

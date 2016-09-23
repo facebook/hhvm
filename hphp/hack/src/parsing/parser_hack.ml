@@ -567,12 +567,23 @@ and ignore_toplevel attr_start ~attr acc env terminate =
             ~default:(Pos.make env.file env.lb) in
           let def = toplevel_word def_start ~attr env (Lexing.lexeme env.lb) in
           ignore_toplevel None ~attr:[] (def @ acc) env terminate
-      | _ -> ignore_toplevel attr_start ~attr acc env terminate
+      | "use" ->
+        (* Ignore use statements in decl files *)
+        let error_state = !(env.errors) in
+        ignore (namespace_use env);
+        env.errors := error_state;
+        ignore_toplevel attr_start ~attr (acc) env terminate
+      | _ ->
+          begin
+            ignore_statement env;
+            ignore_toplevel attr_start ~attr (acc) env terminate
+          end
       )
   | Tclose_php ->
       error env "Hack does not allow the closing ?> tag";
       acc
-  | _ -> ignore_toplevel attr_start ~attr acc env terminate
+  | _ ->
+      ignore_toplevel attr_start ~attr (acc) env terminate
 
 (*****************************************************************************)
 (* Toplevel statements. *)
@@ -1990,6 +2001,18 @@ and statement env =
       let e = expr env in
       expect env Tsc;
       Expr e
+and ignore_statement env =
+  (* Parse and ignore statements *)
+  let error_state = !(env.errors) in
+  (* Any parsing error that occurs inside the statement should not
+     raise errors in decl mode(or when there's already a parse error).
+     For example, hack accepts:
+     <?hh // decl
+     foo(]);
+     As valid.
+  *)
+  ignore (statement env);
+  env.errors := error_state
 
 and statement_word env = function
   | "break"    -> statement_break env

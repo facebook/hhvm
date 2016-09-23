@@ -53,17 +53,6 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-void implCountArrayLike(IRLS& env, const IRInstruction* inst) {
-  static_assert(ArrayData::sizeofSize() == 4, "");
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  vmain(env) << loadzlq{src[ArrayData::offsetofSize()], dst};
-}
-
-}
-
 void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr) {
   profile->report(arr->kind());
 }
@@ -77,6 +66,42 @@ void cgProfileArrayKind(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, CallSpec::direct(profileArrayKindHelper), kVoidDest,
                SyncOptions::None, argGroup(env, inst).reg(profile).ssa(0));
 }
+
+void cgCheckPackedArrayBounds(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayData::sizeofSize() == 4, "");
+
+  // We may check packed array bounds on profiled arrays that we do not
+  // statically know have kPackedKind.
+  assertx(inst->taken());
+  auto arr = srcLoc(env, inst, 0).reg();
+  auto idx = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
+  // since idx is KindOfInt64.
+  auto const size = v.makeReg();
+  auto const sf = v.makeReg();
+  v << loadzlq{arr[ArrayData::offsetofSize()], size};
+  v << cmpq{idx, size, sf};
+  v << jcc{CC_BE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+IMPL_OPCODE_CALL(ArrayAdd);
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+void implCountArrayLike(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayData::sizeofSize() == 4, "");
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  vmain(env) << loadzlq{src[ArrayData::offsetofSize()], dst};
+}
+
+}
+
+IMPL_OPCODE_CALL(Count)
 
 void cgCountArray(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
@@ -115,27 +140,6 @@ void cgCountDict(IRLS& env, const IRInstruction* inst) {
 void cgCountKeyset(IRLS& env, const IRInstruction* inst) {
   implCountArrayLike(env, inst);
 }
-
-void cgCheckPackedArrayBounds(IRLS& env, const IRInstruction* inst) {
-  static_assert(ArrayData::sizeofSize() == 4, "");
-
-  // We may check packed array bounds on profiled arrays that we do not
-  // statically know have kPackedKind.
-  assertx(inst->taken());
-  auto arr = srcLoc(env, inst, 0).reg();
-  auto idx = srcLoc(env, inst, 1).reg();
-  auto& v = vmain(env);
-
-  // ArrayData::m_size is a uint32_t but we need to do a 64-bit comparison
-  // since idx is KindOfInt64.
-  auto const size = v.makeReg();
-  auto const sf = v.makeReg();
-  v << loadzlq{arr[ArrayData::offsetofSize()], size};
-  v << cmpq{idx, size, sf};
-  v << jcc{CC_BE, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
-IMPL_OPCODE_CALL(ArrayAdd);
 
 ///////////////////////////////////////////////////////////////////////////////
 // AKExists.

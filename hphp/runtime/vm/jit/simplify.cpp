@@ -2389,17 +2389,15 @@ SSATmp* simplifyCheckClosureStaticLocInit(State& env,
 }
 
 SSATmp* simplifyCheckRefs(State& env, const IRInstruction* inst) {
-  if (!constSrc(env, inst->src(0)) ||
-      !constSrc(env, inst->src(2)) ||
-      !constSrc(env, inst->src(3)) ||
-      !constSrc(env, inst->src(4))) {
+  if (!constSrc(env, inst->src(0))) {
     return nullptr;
   }
 
   auto const func = inst->src(0)->funcVal();
-  auto i = inst->src(2)->intVal();
-  uint64_t m = inst->src(3)->intVal();
-  uint64_t v = inst->src(4)->intVal();
+  auto const extra = inst->extra<CheckRefs>();
+  auto i = extra->firstBit;
+  auto m = extra->mask;
+  auto v = extra->vals;
   while (m) {
     if (m & 1) {
       if (func->byRef(i) != (v & 1)) {

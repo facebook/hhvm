@@ -132,6 +132,8 @@ IMPL_OPCODE_CALL(PrintBool)
 IMPL_OPCODE_CALL(PrintInt)
 IMPL_OPCODE_CALL(PrintStr)
 
+IMPL_OPCODE_CALL(GetMemoKey)
+
 void cgRBTraceEntry(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RBTraceEntry>();
 

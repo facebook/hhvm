@@ -302,15 +302,15 @@ exceptions depending on how coercion is implemented.
   a fixed threshold). If it's not (i.e. such translation has reached the
   "hotness threshold"), then branch to block B.
 
-| CheckRefs, ND, S(Func) S(Int) C(Int) S(Int) S(Int), B
+| CheckRefs<firstBit,mask,vals>, ND, S(Func) S(Int), B
 
   Perform reffiness guard checks. Operands:
 
     S0 - function pointer for the frame
     S1 - num params expected in the func
-    S2 - first bit to check, must be a multiple of 64
-    S3 - mask to check (RefDeps::Record::m_mask entries)
-    S4 - values to check (RefDeps::Record::m_vals entries)
+    firstBit - first bit to check, must be a multiple of 64
+    mask - mask to check (RefDeps::Record::m_mask entries)
+    vals - values to check (RefDeps::Record::m_vals entries)
 
   If any of the checks fail, branch to block B.
 

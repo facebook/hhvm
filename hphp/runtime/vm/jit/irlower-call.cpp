@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -408,6 +409,97 @@ void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
 void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   vmain(env) << phplogue{fp};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const nparams = srcLoc(env, inst, 1).reg();
+
+  auto const extra = inst->extra<CheckRefs>();
+  auto const mask64 = extra->mask;
+  auto const vals64 = extra->vals;
+  assertx(mask64);
+  assertx((vals64 & mask64) == vals64);
+
+  auto& v = vmain(env);
+
+  auto const thenBody = [&] (Vout& v) {
+    auto const sf = v.makeReg();
+
+    auto bitsOff = sizeof(uint64_t) * (extra->firstBit / 64);
+    auto bitsPtr = v.makeReg();
+    auto cond = CC_NE;
+
+    if (extra->firstBit == 0) {
+      bitsOff = Func::refBitValOff();
+      bitsPtr = func;
+    } else {
+      v << load{func[Func::sharedOff()], bitsPtr};
+      bitsOff -= sizeof(uint64_t);
+    }
+
+    if (vals64 == 0 || (mask64 & (mask64 - 1)) == 0) {
+      // If vals64 is zero, or we're testing a single bit, we can get away with
+      // a single test, rather than mask-and-compare.  The use of testbim{} and
+      // testlim{} here is little-endian specific but it's "ok" for now as long
+      // as nothing else is read or written using the same pointer.
+      if (mask64 <= 0xff) {
+        v << testbim{(int8_t)mask64, bitsPtr[bitsOff], sf};
+      } else if (mask64 <= 0xffffffff) {
+        v << testlim{(int32_t)mask64, bitsPtr[bitsOff], sf};
+      } else {
+        v << testqm{v.cns(mask64), bitsPtr[bitsOff], sf};
+      }
+      if (vals64) cond = CC_E;
+    } else {
+      auto const bits = v.makeReg();
+      v << load{bitsPtr[bitsOff], bits};
+
+      auto const truncBits = v.makeReg();
+      auto const maskedBits = v.makeReg();
+
+      if (mask64 <= 0xff && vals64 <= 0xff) {
+        v << movtqb{bits, truncBits};
+        v << andbi{(int8_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << cmpbi{(int8_t)vals64, maskedBits, sf};
+      } else if (mask64 <= 0xffffffff && vals64 <= 0xffffffff) {
+        v << movtql{bits, truncBits};
+        v << andli{(int32_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << cmpli{(int32_t)vals64, maskedBits, sf};
+      } else {
+        v << andq{v.cns(mask64), bits, maskedBits, v.makeReg()};
+        v << cmpq{v.cns(vals64), maskedBits, sf};
+      }
+    }
+    fwdJcc(v, env, cond, sf, inst->taken());
+  };
+
+  if (extra->firstBit == 0) {
+    assertx(inst->src(1)->hasConstVal());
+    // This is the first 64 bits.  No need to check nparams.
+    thenBody(v);
+  } else {
+    // Check number of args...
+    auto const sf = v.makeReg();
+    v << cmpqi{extra->firstBit, nparams, sf};
+
+    if (vals64 != 0 && vals64 != mask64) {
+      // If we're beyond nparams, then either all params are refs, or all
+      // params are non-refs, so if vals64 isn't 0 and isnt mask64, there's no
+      // possibility of a match.
+      fwdJcc(v, env, CC_LE, sf, inst->taken());
+      thenBody(v);
+    } else {
+      ifThenElse(v, CC_NLE, sf, thenBody, [&] (Vout& v) {
+        // If not special builtin...
+        auto const sf = v.makeReg();
+        v << testlim{AttrVariadicByRef, func[Func::attrsOff()], sf};
+        fwdJcc(v, env, vals64 ? CC_Z : CC_NZ, sf, inst->taken());
+      });
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

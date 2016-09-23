@@ -30,6 +30,7 @@
 
 #include "hphp/util/arena.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/safe-cast.h"
 
 #include <folly/Conv.h>
 #include <folly/Optional.h>
@@ -1093,7 +1094,7 @@ struct NewColData : IRExtraData {
 };
 
 struct LocalIdRange : IRExtraData {
-  explicit LocalIdRange(uint32_t start, uint32_t end)
+  LocalIdRange(uint32_t start, uint32_t end)
     : start(start)
     , end(end)
   {}
@@ -1121,6 +1122,22 @@ struct FuncEntryData : IRExtraData {
 
   const Func* func;
   uint32_t argc;
+};
+
+struct CheckRefsData : IRExtraData {
+  CheckRefsData(unsigned firstBit, uint64_t mask, uint64_t vals)
+    : firstBit(safe_cast<int>(firstBit))
+    , mask(mask)
+    , vals(vals)
+  {}
+
+  std::string show() const {
+    return folly::format("{},{},{}", firstBit, mask, vals).str();
+  }
+
+  int firstBit;
+  uint64_t mask;
+  uint64_t vals;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1288,6 +1305,7 @@ X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(DecRef,                       DecRefData);
 X(LdTVAux,                      LdTVAuxData);
+X(CheckRefs,                    CheckRefsData);
 
 #undef X
 

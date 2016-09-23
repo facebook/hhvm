@@ -138,6 +138,7 @@ void CodeGenerator::cgInst(IRInstruction* inst) {
   }
 
 DELEGATE_OPCODE(FinishMemberOp)
+DELEGATE_OPCODE(CheckRefs)
 
 DELEGATE_OPCODE(AddElemStrKey)
 DELEGATE_OPCODE(AddElemIntKey)
@@ -218,9 +219,9 @@ DELEGATE_OPCODE(BindNewElem)
 DELEGATE_OPCODE(VectorIsset)
 DELEGATE_OPCODE(PairIsset)
 
-CALL_OPCODE(Count)
+DELEGATE_OPCODE(Count)
 
-CALL_OPCODE(GetMemoKey)
+DELEGATE_OPCODE(GetMemoKey)
 
 DELEGATE_OPCODE(Nop)
 DELEGATE_OPCODE(DefConst)
@@ -824,118 +825,6 @@ void CodeGenerator::cgCallHelper(Vout& v, CallSpec call,
                                  SyncOptions sync,
                                  const ArgGroup& args) {
   irlower::cgCallHelper(v, m_state, call, dstInfo, sync, args);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-template <class JmpFn>
-void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
-                                      JmpFn doJcc) {
-  DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
-  SSATmp* firstBitNumTmp = inst->src(2);
-  SSATmp* mask64Tmp  = inst->src(3);
-  SSATmp* vals64Tmp  = inst->src(4);
-
-  auto funcPtrReg = srcLoc(inst, 0).reg();
-  auto nParamsReg = srcLoc(inst, 1).reg();
-  auto mask64Reg = srcLoc(inst, 3).reg();
-  auto vals64Reg = srcLoc(inst, 4).reg();
-
-  // Get values in place
-  assertx(firstBitNumTmp->hasConstVal(TInt));
-  auto firstBitNum = safe_cast<int32_t>(firstBitNumTmp->intVal());
-
-  uint64_t mask64 = mask64Tmp->intVal();
-  assertx(mask64);
-
-  uint64_t vals64 = vals64Tmp->intVal();
-  assertx((vals64 & mask64) == vals64);
-
-  auto& v = vmain();
-
-  auto thenBody = [&](Vout& v) {
-    auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
-    auto cond = CC_NE;
-    auto bitsPtrReg = v.makeReg();
-    if (firstBitNum == 0) {
-      bitsOff = Func::refBitValOff();
-      bitsPtrReg = funcPtrReg;
-    } else {
-      v << load{funcPtrReg[Func::sharedOff()], bitsPtrReg};
-      bitsOff -= sizeof(uint64_t);
-    }
-
-    if (vals64 == 0 || (mask64 & (mask64 - 1)) == 0) {
-      // If vals64 is zero, or we're testing a single bit, we can get away with
-      // a single test, rather than mask-and-compare. The use of testbim and
-      // testlim here is little-endian specific but it's "ok" for now as long
-      // as nothing else is read or written using the same pointer.
-      if (mask64 <= 0xff) {
-        v << testbim{(int8_t)mask64, bitsPtrReg[bitsOff], sf};
-      } else if (mask64 <= 0xffffffff) {
-        v << testlim{(int32_t)mask64, bitsPtrReg[bitsOff], sf};
-      } else {
-        v << testqm{mask64Reg, bitsPtrReg[bitsOff], sf};
-      }
-      if (vals64) cond = CC_E;
-    } else {
-      auto bitsValReg = v.makeReg();
-      v << load{bitsPtrReg[bitsOff], bitsValReg};
-
-      auto truncBits = v.makeReg();
-      auto maskedBits = v.makeReg();
-      if (mask64 <= 0xff && vals64 <= 0xff) {
-        v << movtqb{bitsValReg, truncBits};
-        v << andbi{(int8_t)mask64, truncBits, maskedBits, v.makeReg()};
-        v << cmpbi{(int8_t)vals64, maskedBits, sf};
-      } else if (mask64 <= 0xffffffff && vals64 <= 0xffffffff) {
-        v << movtql{bitsValReg, truncBits};
-        v << andli{(int32_t)mask64, truncBits, maskedBits, v.makeReg()};
-        v << cmpli{(int32_t)vals64, maskedBits, sf};
-      } else {
-        v << andq{mask64Reg, bitsValReg, maskedBits, v.makeReg()};
-        v << cmpq{vals64Reg, maskedBits, sf};
-      }
-    }
-    doJcc(v, cond, sf);
-  };
-
-  if (firstBitNum == 0) {
-    assertx(nParamsTmp->hasConstVal());
-    // This is the first 64 bits. No need to check
-    // nParams.
-    thenBody(v);
-  } else {
-    // Check number of args...
-    auto const sf2 = v.makeReg();
-    v << cmpqi{firstBitNum, nParamsReg, sf2};
-
-    if (vals64 != 0 && vals64 != mask64) {
-      // If we're beyond nParams, then either all params
-      // are refs, or all params are non-refs, so if vals64
-      // isn't 0 and isnt mask64, there's no possibility of
-      // a match
-      doJcc(v, CC_LE, sf2);
-      thenBody(v);
-    } else {
-      ifThenElse(v, CC_NLE, sf2, thenBody,
-                 /* else */ [&](Vout& v) {
-          //   If not special builtin...
-          auto const sf = v.makeReg();
-          v << testlim{AttrVariadicByRef, funcPtrReg[Func::attrsOff()], sf};
-          doJcc(v, vals64 ? CC_Z : CC_NZ, sf);
-        });
-    }
-  }
-}
-
-void CodeGenerator::cgCheckRefs(IRInstruction* inst)  {
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  emitReffinessTest(inst, sf,
-    [&](Vout& v, ConditionCode cc, Vreg sfTaken) {
-      emitFwdJcc(v, cc, sfTaken, inst->taken());
-    });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

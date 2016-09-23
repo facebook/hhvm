@@ -166,8 +166,9 @@ void checkRefs(IRGS& env,
     auto const vals64 = packBitVec(vals, i);
     auto failBlock = env.irb->guardFailBlock();
     if (failBlock == nullptr) failBlock = makeExit(env, dest);
-    gen(env, CheckRefs, failBlock, funcPtr, nParams,
-        cns(env, i), cns(env, mask64), cns(env, vals64));
+    gen(env, CheckRefs, failBlock,
+        CheckRefsData { i, mask64, vals64 },
+        funcPtr, nParams);
   }
 }
 

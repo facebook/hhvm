@@ -233,10 +233,10 @@ let recheck_loop = recheck_loop empty_recheck_loop_stats
 let serve_one_iteration genv env client_provider stats_refs =
   let last_stats, recheck_id = stats_refs in
   ServerMonitorUtils.exit_if_parent_dead ();
-  let has_client, has_persistent =
+  let client, has_persistent =
     ClientProvider.sleep_and_check client_provider env.persistent_client in
   let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
-  if not has_persistent && not has_client && not has_parsing_hook
+  if not has_persistent && client = None && not has_parsing_hook
   then begin
     (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
      * count so that we can figure out if the largest reclamations
@@ -276,26 +276,19 @@ let serve_one_iteration genv env client_provider stats_refs =
   in
 
   last_stats := stats;
-  let env = if has_client then
-    (try
-      let client = ClientProvider.accept_client client_provider in
-      HackEventLogger.got_client_channels start_t;
-      (try
-        let env = handle_connection genv env client false in
-        HackEventLogger.handled_connection start_t;
-        env
-      with
-      | e ->
-        HackEventLogger.handle_connection_exception e;
-        Hh_logger.log "Handling client failed. Ignoring.";
-        env)
+  let env = match client with
+  | None -> env
+  | Some client -> begin
+    try
+      let env = handle_connection genv env client false in
+      HackEventLogger.handled_connection start_t;
+      env
     with
     | e ->
-      HackEventLogger.get_client_channels_exception e;
-      Hh_logger.log
-        "Getting Client FDs failed. Ignoring.";
-      env)
-  else env in
+      HackEventLogger.handle_connection_exception e;
+      Hh_logger.log "Handling client failed. Ignoring.";
+      env
+  end in
   if has_persistent then
     let client = Utils.unsafe_opt env.persistent_client in
     HackEventLogger.got_persistent_client_channels start_t;

@@ -20,6 +20,21 @@ type client =
 let provider_from_file_descriptor x = x
 let provider_for_test () = failwith "for use in tests only"
 
+(** Retrieve channels to client from monitor process. *)
+let accept_client parent_in_fd =
+  let socket = Libancillary.ancil_recv_fd parent_in_fd in
+  Non_persistent_client (
+    (Timeout.in_channel_of_descr socket), (Unix.out_channel_of_descr socket)
+  )
+
+let accept_client_opt parent_in_fd =
+  try Some (accept_client parent_in_fd) with
+  | e -> begin
+    HackEventLogger.get_client_channels_exception e;
+    Hh_logger.log "Getting Client FDs failed. Ignoring.";
+    None
+  end
+
 let sleep_and_check in_fd persistent_client_opt =
   let l = match persistent_client_opt with
     | Some (Persistent_client fd) -> [in_fd ; fd]
@@ -32,16 +47,10 @@ let sleep_and_check in_fd persistent_client_opt =
   in
   let ready_fd_l, _, _ = Unix.select l [] [] (0.5) in
   match ready_fd_l with
-  | [_; _] -> true, true
-  | [fd] -> if (fd <> in_fd) then false, true else true, false
-  | _ -> false, false
-
-(** Retrieve channels to client from monitor process. *)
-let accept_client parent_in_fd =
-  let socket = Libancillary.ancil_recv_fd parent_in_fd in
-  Non_persistent_client (
-    (Timeout.in_channel_of_descr socket), (Unix.out_channel_of_descr socket)
-  )
+    | [_; _] -> accept_client_opt in_fd, true
+    | [fd] when fd = in_fd -> accept_client_opt in_fd, false
+    | [fd] when fd <> in_fd -> None, true
+    | _ -> None, false
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in

@@ -106,7 +106,7 @@ let provider_from_file_descriptor _ = ()
 let provider_for_test _ = ()
 
 let sleep_and_check _ _ =
-  Option.is_some (get_mocked_new_client_type ()),
+  get_mocked_new_client_type (),
   Option.is_some (get_mocked_client_request Persistent)
 
 let not_implemented () = failwith "not implemented"

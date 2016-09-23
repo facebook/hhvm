@@ -128,7 +128,7 @@ bool TempFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 
 int64_t TempFile::tell() {
   assert(valid());
-  if (getLength() <= 0) return -1;
+  if (getLength() < 0) return -1;
   return getPosition();
 }
 
@@ -144,7 +144,7 @@ int64_t TempFile::getLength() {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     folly::errnoStr(errno).c_str());
     // use fstat directly
-    fstat(getFd(), &sb);
+    if (fstat(getFd(), &sb) != 0) return -1;
     return sb.st_size;
   }
   return sb.st_size;

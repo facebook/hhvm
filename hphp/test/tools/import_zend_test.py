@@ -131,6 +131,9 @@ flaky_tests = (
     # these tests use each other's data
     '/ext/standard/tests/file/bug38086.php',
     '/ext/standard/tests/file/stream_copy_to_stream.php',
+    '/ext/gd/tests/gif2gd.php',
+    '/ext/gd/tests/jpg2gd.php',
+    '/ext/gd/tests/png2gd.php',
 
     # these all write to temp3.txt.gz
     '/ext/zlib/tests/gzseek_basic2.php',
@@ -155,6 +158,7 @@ flaky_tests = (
 
     # flaky for various reasons
     '/ext/sockets/tests/socket_getpeername_ipv6loop.php',
+    '/ext/sockets/tests/socket_read_params.php',
 
     # segfaults on contbuild in opt
     '/ext/standard/tests/strings/explode_bug.php',

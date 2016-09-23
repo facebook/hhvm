@@ -40,7 +40,7 @@ const int JSON_FB_LOOSE = 0;
 const int JSON_FB_UNLIMITED = 0;
 const int JSON_FB_EXTRA_ESCAPES = 0;
 const int JSON_FB_COLLECTIONS = 0;
-const int JSON_HACK_ARRAYS = 0;
+const int JSON_FB_HACK_ARRAYS = 0;
 
 function json_encode($value, $options = 0, $depth = 512);
 function json_decode($json, $assoc = false, $depth = 512, $options = 0);

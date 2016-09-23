@@ -890,8 +890,10 @@ struct CurlExtension final : Extension {
 #if LIBCURL_VERSION_NUM >= 0x070a06 /* Available since 7.10.6 */
     HHVM_RC_INT_SAME(CURLOPT_HTTPAUTH);
     /* http authentication options */
-    HHVM_RC_INT_SAME(CURLAUTH_ANY);
-    HHVM_RC_INT_SAME(CURLAUTH_ANYSAFE);
+    // These two options are uint64_t values with the top bit set,
+    // but they are bit masks, so its ok to convert to int64_t.
+    HHVM_RC_INT(CURLAUTH_ANY, static_cast<int64_t>(CURLAUTH_ANY));
+    HHVM_RC_INT(CURLAUTH_ANYSAFE, static_cast<int64_t>(CURLAUTH_ANYSAFE));
     HHVM_RC_INT_SAME(CURLAUTH_BASIC);
     HHVM_RC_INT_SAME(CURLAUTH_DIGEST);
     HHVM_RC_INT_SAME(CURLAUTH_GSSNEGOTIATE);

@@ -1036,10 +1036,12 @@ static struct DateTimeExtension final : Extension {
     HHVM_FE(timezone_name_from_abbr);
     HHVM_FE(timezone_version_get);
 
-    HHVM_RC_INT(SUNFUNCS_RET_DOUBLE, DateTime::SunInfoFormat::ReturnDouble);
-    HHVM_RC_INT(SUNFUNCS_RET_STRING, DateTime::SunInfoFormat::ReturnString);
+    HHVM_RC_INT(SUNFUNCS_RET_DOUBLE,
+                static_cast<int64_t>(DateTime::SunInfoFormat::ReturnDouble));
+    HHVM_RC_INT(SUNFUNCS_RET_STRING,
+                static_cast<int64_t>(DateTime::SunInfoFormat::ReturnString));
     HHVM_RC_INT(SUNFUNCS_RET_TIMESTAMP,
-                DateTime::SunInfoFormat::ReturnTimeStamp);
+                static_cast<int64_t>(DateTime::SunInfoFormat::ReturnTimeStamp));
 
     loadSystemlib("datetime");
   }

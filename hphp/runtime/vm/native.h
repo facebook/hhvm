@@ -151,39 +151,39 @@ struct Object;
     makeStaticString(#const_name), makeStaticString(const_value));
 #define HHVM_RC_INT(const_name, const_value)                         \
   Native::registerConstant<KindOfInt64>(                             \
-    makeStaticString(#const_name), int64_t(const_value));
+    makeStaticString(#const_name), int64_t{const_value});
 #define HHVM_RC_DBL(const_name, const_value)                         \
   Native::registerConstant<KindOfDouble>(                            \
-    makeStaticString(#const_name), double(const_value));
+    makeStaticString(#const_name), double{const_value});
 #define HHVM_RC_BOOL(const_name, const_value)                        \
   Native::registerConstant<KindOfBoolean>(                           \
-    makeStaticString(#const_name), bool(const_value));
+    makeStaticString(#const_name), bool{const_value});
 
 #define HHVM_RC_STR_SAME(const_name)                                 \
   Native::registerConstant<KindOfString>(                            \
     makeStaticString(#const_name), makeStaticString(const_name));
 #define HHVM_RC_INT_SAME(const_name)                                 \
   Native::registerConstant<KindOfInt64>(                             \
-    makeStaticString(#const_name), int64_t(const_name));
+    makeStaticString(#const_name), int64_t{const_name});
 #define HHVM_RC_DBL_SAME(const_name)                                 \
   Native::registerConstant<KindOfDouble>(                            \
-    makeStaticString(#const_name), double(const_name));
+    makeStaticString(#const_name), double{const_name});
 #define HHVM_RC_BOOL_SAME(const_name)                                \
   Native::registerConstant<KindOfBoolean>(                           \
-    makeStaticString(#const_name), bool(const_name));
+    makeStaticString(#const_name), bool{const_name});
 
 #define HHVM_RCC_STR(class_name, const_name, const_value)            \
   Native::registerClassConstant<KindOfString>(s_##class_name.get(),  \
     makeStaticString(#const_name), makeStaticString(const_value));
 #define HHVM_RCC_INT(class_name, const_name, const_value)            \
   Native::registerClassConstant<KindOfInt64>(s_##class_name.get(),   \
-    makeStaticString(#const_name), int64_t(const_value));
+    makeStaticString(#const_name), int64_t{const_value});
 #define HHVM_RCC_DBL(class_name, const_name, const_value)            \
   Native::registerClassConstant<KindOfDouble>(s_##class_name.get(),  \
-    makeStaticString(#const_name), double(const_value));
+    makeStaticString(#const_name), double{const_value});
 #define HHVM_RCC_BOOL(class_name, const_name, const_value)           \
   Native::registerClassConstant<KindOfBoolean>(s_##class_name.get(), \
-    makeStaticString(#const_name), bool(const_value));
+    makeStaticString(#const_name), bool{const_value});
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////

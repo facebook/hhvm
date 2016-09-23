@@ -2979,11 +2979,11 @@ struct ArrayExtension final : Extension {
     HHVM_RC_INT(ARRAY_FILTER_USE_BOTH, 1);
     HHVM_RC_INT(ARRAY_FILTER_USE_KEY, 2);
 
-    HHVM_RC_INT(CASE_LOWER,      CaseMode::LOWER);
-    HHVM_RC_INT(CASE_UPPER,      CaseMode::UPPER);
+    HHVM_RC_INT(CASE_LOWER, static_cast<int64_t>(CaseMode::LOWER));
+    HHVM_RC_INT(CASE_UPPER, static_cast<int64_t>(CaseMode::UPPER));
 
-    HHVM_RC_INT(COUNT_NORMAL,    CountMode::NORMAL);
-    HHVM_RC_INT(COUNT_RECURSIVE, CountMode::RECURSIVE);
+    HHVM_RC_INT(COUNT_NORMAL, static_cast<int64_t>(CountMode::NORMAL));
+    HHVM_RC_INT(COUNT_RECURSIVE, static_cast<int64_t>(CountMode::RECURSIVE));
 
     HHVM_RC_INT_SAME(SORT_ASC);
     HHVM_RC_INT_SAME(SORT_DESC);

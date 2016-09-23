@@ -1032,9 +1032,9 @@ void loadImagickConstants() {
 
   size_t range;
   MagickGetQuantumRange(&range);
-  HHVM_RC_INT(MW_MaxRGB, range);
-  HHVM_RC_INT(MW_QuantumRange, range);
-  HHVM_RC_INT(MW_TransparentOpacity, range);
+  HHVM_RC_INT(MW_MaxRGB, safe_cast<int64_t>(range));
+  HHVM_RC_INT(MW_QuantumRange, safe_cast<int64_t>(range));
+  HHVM_RC_INT(MW_TransparentOpacity, safe_cast<int64_t>(range));
 
   HHVM_RC_INT(MW_OpaqueOpacity, 0);
 }

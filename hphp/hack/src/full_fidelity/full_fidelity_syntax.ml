@@ -3,11 +3,12 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * LICENSE file in the "hack" directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
  *
  *)
-
+(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
 (**
  * This module contains the code describing the structure of a syntax tree.
  *
@@ -82,200 +83,218 @@ end
 module WithToken(Token: TokenType) = struct
   module WithSyntaxValue(SyntaxValue: SyntaxValueType) = struct
 
-    type script_header = {
-      header_less_than : t;
-      header_question : t;
-      header_language : t
+    type t = {
+      syntax : syntax ;
+      value : SyntaxValue.t
+    }
+    and script_header = {
+      header_less_than: t;
+      header_question: t;
+      header_language: t;
     }
     and script = {
-      script_header : t;
-      script_declarations : t
+      script_header: t;
+      script_declarations: t;
+    }
+    and simple_type_specifier = {
+      simple_type_specifier: t;
+    }
+    and literal_expression = {
+      literal_expression: t;
+    }
+    and variable_expression = {
+      variable_expression: t;
+    }
+    and qualified_name_expression = {
+      qualified_name_expression: t;
+    }
+    and pipe_variable_expression = {
+      pipe_variable_expression: t;
     }
     and enum_declaration = {
-      enum_keyword : t;
-      enum_name : t;
-      enum_colon : t;
-      enum_base : t;
-      enum_type : t;
-      enum_left_brace : t;
-      enum_enumerators : t;
-      enum_right_brace : t
+      enum_keyword: t;
+      enum_name: t;
+      enum_colon: t;
+      enum_base: t;
+      enum_type: t;
+      enum_left_brace: t;
+      enum_enumerators: t;
+      enum_right_brace: t;
     }
     and enumerator = {
-      enumerator_name : t;
-      enumerator_equal : t;
-      enumerator_value : t;
-      enumerator_semicolon : t
+      enumerator_name: t;
+      enumerator_equal: t;
+      enumerator_value: t;
+      enumerator_semicolon: t;
     }
     and alias_declaration = {
-      alias_attribute_spec : t;
-      alias_keyword : t;
-      alias_name : t;
-      alias_generic_parameter : t;
-      alias_constraint : t;
-      alias_equal : t;
-      alias_type : t;
-      alias_semicolon : t
+      alias_attribute_spec: t;
+      alias_keyword: t;
+      alias_name: t;
+      alias_generic_parameter: t;
+      alias_constraint: t;
+      alias_equal: t;
+      alias_type: t;
+      alias_semicolon: t;
     }
     and property_declaration = {
-      property_modifiers : t;
-      property_type : t;
-      property_declarators : t;
-      property_semicolon : t
+      property_modifiers: t;
+      property_type: t;
+      property_declarators: t;
+      property_semicolon: t;
     }
     and property_declarator = {
-      property_name : t;
-      property_initializer : t
+      property_name: t;
+      property_initializer: t;
     }
     and namespace_declaration = {
-      namespace_keyword : t;
-      namespace_name : t;
-      namespace_body : t
+      namespace_keyword: t;
+      namespace_name: t;
+      namespace_body: t;
     }
     and namespace_body = {
-      namespace_left_brace : t;
-      namespace_declarations : t;
-      namespace_right_brace : t
+      namespace_left_brace: t;
+      namespace_declarations: t;
+      namespace_right_brace: t;
     }
     and namespace_use_declaration = {
-      namespace_use_keyword : t;
-      namespace_use_kind : t;
-      namespace_use_clauses : t;
-      namespace_use_semicolon : t
+      namespace_use_keyword: t;
+      namespace_use_kind: t;
+      namespace_use_clauses: t;
+      namespace_use_semicolon: t;
     }
     and namespace_group_use_declaration = {
-      namespace_group_use_keyword : t;
-      namespace_group_use_kind : t;
-      namespace_group_use_prefix : t;
-      namespace_group_use_left_brace : t;
-      namespace_group_use_clauses : t;
-      namespace_group_use_right_brace : t;
-      namespace_group_use_semicolon : t
+      namespace_group_use_keyword: t;
+      namespace_group_use_kind: t;
+      namespace_group_use_prefix: t;
+      namespace_group_use_left_brace: t;
+      namespace_group_use_clauses: t;
+      namespace_group_use_right_brace: t;
+      namespace_group_use_semicolon: t;
     }
     and namespace_use_clause = {
-      namespace_use_clause_kind : t;
-      namespace_use_name : t;
-      namespace_use_as : t;
-      namespace_use_alias : t
+      namespace_use_clause_kind: t;
+      namespace_use_name: t;
+      namespace_use_as: t;
+      namespace_use_alias: t;
     }
     and function_declaration = {
-      function_attribute_spec : t;
-      function_declaration_header : t;
-      function_body : t
+      function_attribute_spec: t;
+      function_declaration_header: t;
+      function_body: t;
     }
     and function_declaration_header = {
-      function_async : t;
-      function_keyword : t;
-      function_name : t;
-      function_type_parameter_list : t;
-      function_left_paren : t;
-      function_parameter_list : t;
-      function_right_paren : t;
-      function_colon : t;
-      function_type : t;
+      function_async: t;
+      function_keyword: t;
+      function_name: t;
+      function_type_parameter_list: t;
+      function_left_paren: t;
+      function_parameter_list: t;
+      function_right_paren: t;
+      function_colon: t;
+      function_type: t;
     }
     and methodish_declaration = {
-      methodish_attribute : t;
-      methodish_modifiers : t;
-      methodish_function_decl_header : t;
-      (* Only one of function body and semicolon can be used *)
-      methodish_function_body : t;
-      methodish_semicolon : t;
+      methodish_attribute: t;
+      methodish_modifiers: t;
+      methodish_function_decl_header: t;
+      methodish_function_body: t;
+      methodish_semicolon: t;
     }
     and classish_declaration = {
-      classish_attribute : t;
-      classish_modifiers : t;
-      classish_keyword : t;
-      classish_name : t;
-      classish_type_parameter_list : t;
-      classish_extends : t;
-      classish_extends_list : t;
-      classish_implements : t;
-      classish_implements_list : t;
-      classish_body : t;
+      classish_attribute: t;
+      classish_modifiers: t;
+      classish_keyword: t;
+      classish_name: t;
+      classish_type_parameter_list: t;
+      classish_extends: t;
+      classish_extends_list: t;
+      classish_implements: t;
+      classish_implements_list: t;
+      classish_body: t;
     }
     and classish_body = {
-      classish_body_left_brace : t;
-      classish_body_elements : t;
-      classish_body_right_brace : t;
+      classish_body_left_brace: t;
+      classish_body_elements: t;
+      classish_body_right_brace: t;
     }
     and trait_use = {
-      trait_use_keyword : t;
-      trait_use_name_list : t;
-      trait_use_semicolon : t;
+      trait_use_keyword: t;
+      trait_use_name_list: t;
+      trait_use_semicolon: t;
     }
     and require_clause = {
-      require_keyword : t;
-      require_kind : t;
-      require_name : t;
-      require_semicolon : t
+      require_keyword: t;
+      require_kind: t;
+      require_name: t;
+      require_semicolon: t;
     }
     and const_declaration = {
-      const_abstract : t;
-      const_keyword : t;
-      const_type_specifier : t;
-      const_declarator_list : t;
-      const_semicolon : t;
+      const_abstract: t;
+      const_keyword: t;
+      const_type_specifier: t;
+      const_declarator_list: t;
+      const_semicolon: t;
     }
     and constant_declarator = {
-      constant_declarator_name : t;
-      constant_declarator_initializer : t;
+      constant_declarator_name: t;
+      constant_declarator_initializer: t;
     }
     and type_const_declaration = {
-      type_const_abstract : t;
-      type_const_keyword : t;
-      type_const_type_keyword : t;
-      type_const_name : t;
-      type_const_type_constraint : t;
-      type_const_equal : t;
-      type_const_type_specifier : t;
-      type_const_semicolon : t;
+      type_const_abstract: t;
+      type_const_keyword: t;
+      type_const_type_keyword: t;
+      type_const_name: t;
+      type_const_type_constraint: t;
+      type_const_equal: t;
+      type_const_type_specifier: t;
+      type_const_semicolon: t;
     }
     and decorated_expression = {
       decorated_expression_decorator: t;
       decorated_expression_expression: t;
     }
     and parameter_declaration = {
-      param_attribute : t;
-      param_visibility : t;
-      param_type : t;
-      param_name : t;
-      param_default : t
+      param_attribute: t;
+      param_visibility: t;
+      param_type: t;
+      param_name: t;
+      param_default: t;
     }
     and attribute_specification = {
-      attribute_spec_left_double_angle : t;
-      attribute_spec_attribute_list : t;
-      attribute_spec_right_double_angle : t
+      attribute_spec_left_double_angle: t;
+      attribute_spec_attribute_list: t;
+      attribute_spec_right_double_angle: t;
     }
     and attribute = {
-      attribute_name : t;
-      attribute_left_paren : t;
-      attribute_values : t;
-      attribute_right_paren : t
+      attribute_name: t;
+      attribute_left_paren: t;
+      attribute_values: t;
+      attribute_right_paren: t;
     }
     and inclusion_expression = {
-      inclusion_require : t;
-      inclusion_filename : t;
+      inclusion_require: t;
+      inclusion_filename: t;
     }
     and inclusion_directive = {
-      inclusion_expression : t;
-      inclusion_semicolon : t
+      inclusion_expression: t;
+      inclusion_semicolon: t;
     }
     and compound_statement = {
-      compound_left_brace : t;
-      compound_statements : t;
-      compound_right_brace : t
+      compound_left_brace: t;
+      compound_statements: t;
+      compound_right_brace: t;
     }
     and expression_statement = {
-      expr_statement_expr : t;
-      expr_statement_semicolon : t
+      expr_statement_expr: t;
+      expr_statement_semicolon: t;
     }
     and while_statement = {
-      while_keyword : t;
-      while_left_paren : t;
-      while_condition : t;
+      while_keyword: t;
+      while_left_paren: t;
+      while_condition: t;
       while_right_paren: t;
-      while_body: t
+      while_body: t;
     }
     and if_statement = {
       if_keyword: t;
@@ -286,12 +305,12 @@ module WithToken(Token: TokenType) = struct
       if_elseif_clauses: t;
       if_else_clause: t;
     }
-    and elseif_clause ={
+    and elseif_clause = {
       elseif_keyword: t;
       elseif_left_paren: t;
       elseif_condition: t;
       elseif_right_paren: t;
-      elseif_statement: t
+      elseif_statement: t;
     }
     and else_clause = {
       else_keyword: t;
@@ -322,7 +341,7 @@ module WithToken(Token: TokenType) = struct
       do_left_paren: t;
       do_condition_expr: t;
       do_right_paren: t;
-      do_semicolon: t
+      do_semicolon: t;
     }
     and for_statement = {
       for_keyword: t;
@@ -352,7 +371,7 @@ module WithToken(Token: TokenType) = struct
       switch_left_paren: t;
       switch_expr: t;
       switch_right_paren: t;
-      switch_compound_statement: t
+      switch_compound_statement: t;
     }
     and case_statement = {
       case_keyword: t;
@@ -368,140 +387,140 @@ module WithToken(Token: TokenType) = struct
     and return_statement = {
       return_keyword: t;
       return_expr: t;
-      return_semicolon: t
+      return_semicolon: t;
     }
     and throw_statement = {
       throw_keyword: t;
       throw_expr: t;
-      throw_semicolon: t
+      throw_semicolon: t;
     }
     and break_statement = {
       break_keyword: t;
       break_level: t;
-      break_semicolon: t
+      break_semicolon: t;
     }
     and continue_statement = {
       continue_keyword: t;
       continue_level: t;
-      continue_semicolon: t
+      continue_semicolon: t;
     }
     and function_static_statement = {
-      static_static : t;
-      static_declarations : t;
-      static_semicolon: t
+      static_static: t;
+      static_declarations: t;
+      static_semicolon: t;
     }
     and static_declarator = {
-      static_name : t;
-      static_initializer : t
+      static_name: t;
+      static_initializer: t;
     }
     and echo_statement = {
-      echo_keyword : t;
+      echo_keyword: t;
       echo_expression_list: t;
       echo_semicolon: t;
     }
     and simple_initializer = {
-      simple_initializer_equal : t;
-      simple_initializer_value : t
+      simple_initializer_equal: t;
+      simple_initializer_value: t;
     }
     and anonymous_function = {
-      anonymous_async : t;
-      anonymous_function : t;
-      anonymous_left_paren : t;
-      anonymous_parameter_list : t;
-      anonymous_right_paren : t;
-      anonymous_colon : t;
-      anonymous_type : t;
-      anonymous_use : t;
-      anonymous_body : t
+      anonymous_async: t;
+      anonymous_function: t;
+      anonymous_left_paren: t;
+      anonymous_parameter_list: t;
+      anonymous_right_paren: t;
+      anonymous_colon: t;
+      anonymous_type: t;
+      anonymous_use: t;
+      anonymous_body: t;
     }
     and anonymous_function_use_clause = {
-      anonymous_use_keyword : t;
-      anonymous_use_left_paren : t;
-      anonymous_use_variables : t;
-      anonymous_use_right_paren : t
+      anonymous_use_keyword: t;
+      anonymous_use_left_paren: t;
+      anonymous_use_variables: t;
+      anonymous_use_right_paren: t;
     }
     and lambda_expression = {
-      lambda_async : t;
-      lambda_signature : t;
-      lambda_arrow : t;
-      lambda_body : t
+      lambda_async: t;
+      lambda_signature: t;
+      lambda_arrow: t;
+      lambda_body: t;
     }
     and lambda_signature = {
-      lambda_left_paren : t;
-      lambda_parameter_list : t;
-      lambda_right_paren : t;
-      lambda_colon : t;
-      lambda_type : t
+      lambda_left_paren: t;
+      lambda_parameter_list: t;
+      lambda_right_paren: t;
+      lambda_colon: t;
+      lambda_type: t;
     }
     and cast_expression = {
-      cast_left_paren : t;
-      cast_type : t;
-      cast_right_paren : t;
-      cast_operand : t
+      cast_left_paren: t;
+      cast_type: t;
+      cast_right_paren: t;
+      cast_operand: t;
     }
     and scope_resolution_expression = {
-      scope_resolution_qualifier : t;
-      scope_resolution_operator : t;
-      scope_resolution_name : t
+      scope_resolution_qualifier: t;
+      scope_resolution_operator: t;
+      scope_resolution_name: t;
     }
     and member_selection_expression = {
-      member_object : t;
-      member_operator : t;
-      member_name : t
+      member_object: t;
+      member_operator: t;
+      member_name: t;
     }
     and safe_member_selection_expression = {
-      safe_member_object : t;
-      safe_member_operator : t;
-      safe_member_name : t
+      safe_member_object: t;
+      safe_member_operator: t;
+      safe_member_name: t;
     }
     and yield_expression = {
-      yield_keyword : t;
-      yield_operand : t
+      yield_keyword: t;
+      yield_operand: t;
     }
     and print_expression = {
-      print_keyword : t;
-      print_expr : t;
+      print_keyword: t;
+      print_expr: t;
     }
     and prefix_unary_operator = {
-      prefix_unary_operator : t;
-      prefix_unary_operand : t;
+      prefix_unary_operator: t;
+      prefix_unary_operand: t;
     }
     and postfix_unary_operator = {
-      postfix_unary_operand : t;
-      postfix_unary_operator : t;
+      postfix_unary_operand: t;
+      postfix_unary_operator: t;
     }
     and binary_operator = {
-      binary_left_operand : t;
-      binary_operator : t;
-      binary_right_operand : t
+      binary_left_operand: t;
+      binary_operator: t;
+      binary_right_operand: t;
     }
     and instanceof_expression = {
-      instanceof_left_operand : t;
-      instanceof_operator : t;
-      instanceof_right_operand : t
+      instanceof_left_operand: t;
+      instanceof_operator: t;
+      instanceof_right_operand: t;
     }
     and conditional_expression = {
-      conditional_test : t;
-      conditional_question : t;
-      conditional_consequence : t;
-      conditional_colon : t;
-      conditional_alternative : t
+      conditional_test: t;
+      conditional_question: t;
+      conditional_consequence: t;
+      conditional_colon: t;
+      conditional_alternative: t;
     }
     and function_call_expression = {
-      function_call_receiver  : t;
-      function_call_lparen : t;
-      function_call_arguments : t;
-      function_call_rparen : t
+      function_call_receiver: t;
+      function_call_lparen: t;
+      function_call_arguments: t;
+      function_call_rparen: t;
     }
     and parenthesized_expression = {
-      paren_expr_left_paren : t;
-      paren_expr : t;
-      paren_expr_right_paren : t
+      paren_expr_left_paren: t;
+      paren_expr: t;
+      paren_expr_right_paren: t;
     }
     and braced_expression = {
-      braced_expr_left_brace : t;
-      braced_expr : t;
-      braced_expr_right_brace : t
+      braced_expr_left_brace: t;
+      braced_expr: t;
+      braced_expr_right_brace: t;
     }
     and list_expression = {
       list_keyword: t;
@@ -510,17 +529,17 @@ module WithToken(Token: TokenType) = struct
       list_right_paren: t;
     }
     and collection_literal_expression = {
-      collection_literal_name : t;
-      collection_literal_left_brace : t;
-      collection_literal_initialization_list : t;
-      collection_literal_right_brace : t;
+      collection_literal_name: t;
+      collection_literal_left_brace: t;
+      collection_literal_initialization_list: t;
+      collection_literal_right_brace: t;
     }
     and object_creation_expression = {
-      object_creation_new : t;
-      object_creation_class : t;
-      object_creation_lparen : t;
-      object_creation_arguments : t;
-      object_creation_rparen : t
+      object_creation_new: t;
+      object_creation_class: t;
+      object_creation_lparen: t;
+      object_creation_arguments: t;
+      object_creation_rparen: t;
     }
     and array_creation_expression = {
       array_creation_left_bracket: t;
@@ -534,220 +553,203 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_right_paren: t;
     }
     and element_initializer = {
-      element_key : t;
-      element_arrow : t;
-      element_value : t
+      element_key: t;
+      element_arrow: t;
+      element_value: t;
     }
     and subscript_expression = {
-      subscript_receiver : t;
-      subscript_left : t;
-      subscript_index : t;
-      subscript_right : t
+      subscript_receiver: t;
+      subscript_left: t;
+      subscript_index: t;
+      subscript_right: t;
     }
     and awaitable_creation_expression = {
-      awaitable_async : t;
-      awaitable_compound_statement : t;
+      awaitable_async: t;
+      awaitable_compound_statement: t;
     }
     and xhp_children_declaration = {
-      xhp_children : t;
-      xhp_children_expression : t;
-      xhp_children_semicolon : t
+      xhp_children: t;
+      xhp_children_expression: t;
+      xhp_children_semicolon: t;
     }
     and xhp_category_declaration = {
-      xhp_category : t;
-      xhp_category_list : t;
-      xhp_category_semicolon : t
+      xhp_category: t;
+      xhp_category_list: t;
+      xhp_category_semicolon: t;
     }
     and xhp_enum_type = {
-      xhp_enum_keyword : t;
-      xhp_enum_left_brace : t;
-      xhp_enum_values : t;
-      xhp_enum_right_brace : t
+      xhp_enum_keyword: t;
+      xhp_enum_left_brace: t;
+      xhp_enum_values: t;
+      xhp_enum_right_brace: t;
     }
     and xhp_required = {
-      xhp_required_at : t;
-      xhp_required : t
+      xhp_required_at: t;
+      xhp_required: t;
     }
     and xhp_class_attribute_declaration = {
-      xhp_attribute_keyword : t;
-      xhp_attribute_list : t;
-      xhp_attribute_semicolon : t
+      xhp_attribute_keyword: t;
+      xhp_attribute_list: t;
+      xhp_attribute_semicolon: t;
     }
     and xhp_class_attribute = {
-      xhp_attribute_decl_type : t;
-      xhp_attribute_decl_name : t;
-      xhp_attribute_decl_initializer : t;
-      xhp_attribute_decl_required : t
+      xhp_attribute_decl_type: t;
+      xhp_attribute_decl_name: t;
+      xhp_attribute_decl_initializer: t;
+      xhp_attribute_decl_required: t;
     }
     and xhp_attribute = {
-      xhp_attribute_name : t;
-      xhp_attribute_equal : t;
-      xhp_attribute_expr : t;
+      xhp_attribute_name: t;
+      xhp_attribute_equal: t;
+      xhp_attribute_expr: t;
     }
     and xhp_open = {
-      xhp_open_name : t;
-      xhp_open_attributes : t;
-      xhp_open_right_angle : t;
+      xhp_open_name: t;
+      xhp_open_attributes: t;
+      xhp_open_right_angle: t;
     }
     and xhp_expression = {
-      xhp_open : t;
-      xhp_body : t;
-      xhp_close : t
+      xhp_open: t;
+      xhp_body: t;
+      xhp_close: t;
     }
     and xhp_close = {
-      xhp_close_left_angle : t;
-      xhp_close_name : t;
-      xhp_close_right_angle : t;
+      xhp_close_left_angle: t;
+      xhp_close_name: t;
+      xhp_close_right_angle: t;
     }
     and type_constant = {
-      type_constant_left_type : t;
-      type_constant_separator : t;
-      type_constant_right_type : t
+      type_constant_left_type: t;
+      type_constant_separator: t;
+      type_constant_right_type: t;
     }
     and vector_type_specifier = {
-      vector_array : t;
-      vector_left_angle : t;
-      vector_type : t;
-      vector_right_angle : t
+      vector_array: t;
+      vector_left_angle: t;
+      vector_type: t;
+      vector_right_angle: t;
     }
     and type_parameter = {
       type_variance_opt: t;
-      type_name : t;
-      type_constraint_list_opt  : t;
+      type_name: t;
+      type_constraint_list_opt: t;
     }
     and type_constraint = {
       constraint_keyword: t;
       constraint_type: t;
     }
     and map_type_specifier = {
-      map_array : t;
-      map_left_angle : t;
-      map_key : t;
-      map_comma : t;
-      map_value : t;
-      map_right_angle : t
+      map_array: t;
+      map_left_angle: t;
+      map_key: t;
+      map_comma: t;
+      map_value: t;
+      map_right_angle: t;
     }
     and closure_type_specifier = {
-      closure_outer_left_paren : t;
-      closure_function : t;
-      closure_inner_left_paren : t;
-      closure_parameter_types : t;
-      closure_inner_right_paren : t;
-      closure_colon : t;
-      closure_return_type : t;
-      closure_outer_right_paren : t
+      closure_outer_left_paren: t;
+      closure_function: t;
+      closure_inner_left_paren: t;
+      closure_parameter_types: t;
+      closure_inner_right_paren: t;
+      closure_colon: t;
+      closure_return_type: t;
+      closure_outer_right_paren: t;
     }
     and classname_type_specifier = {
-      classname_classname : t;
-      classname_left_angle : t;
-      classname_type : t;
-      classname_right_angle : t
+      classname_classname: t;
+      classname_left_angle: t;
+      classname_type: t;
+      classname_right_angle: t;
     }
     and field_specifier = {
-      field_name : t;
-      field_arrow : t;
-      field_type : t
+      field_name: t;
+      field_arrow: t;
+      field_type: t;
     }
     and field_initializer = {
-      field_initializer_name : t;
-      field_initializer_arrow : t;
-      field_initializer_value : t
+      field_initializer_name: t;
+      field_initializer_arrow: t;
+      field_initializer_value: t;
     }
     and shape_type_specifier = {
-      shape_type_keyword : t;
-      shape_type_left_paren : t;
-      shape_type_fields : t;
-      shape_type_right_paren : t
+      shape_type_keyword: t;
+      shape_type_left_paren: t;
+      shape_type_fields: t;
+      shape_type_right_paren: t;
     }
     and shape_expression = {
-      shape_expression_keyword : t;
-      shape_expression_left_paren : t;
-      shape_expression_fields : t;
-      shape_expression_right_paren : t
+      shape_expression_keyword: t;
+      shape_expression_left_paren: t;
+      shape_expression_fields: t;
+      shape_expression_right_paren: t;
     }
-    and generic_type = {
-      generic_class_type : t;
-      generic_arguments : t
+    and generic_type_specifier = {
+      generic_class_type: t;
+      generic_arguments: t;
     }
     and nullable_type_specifier = {
-      nullable_question : t;
-      nullable_type : t
-    }
-    and simple_type_specifier = {
-      simple_type_specifier : t;
-    }
-    and pipe_variable_expression = {
-      pipe_variable_expression : t;
-    }
-    and qualified_name_expression = {
-      qualified_name_expression : t;
-    }
-    and variable_expression = {
-      variable_expression : t;
-    }
-    and literal_expression = {
-      literal_expression : t;
+      nullable_question: t;
+      nullable_type: t;
     }
     and soft_type_specifier = {
-      soft_at : t;
-      soft_type : t
+      soft_at: t;
+      soft_type: t;
     }
     and type_arguments = {
-      type_arguments_left_angle : t;
-      type_arguments : t;
-      type_arguments_right_angle : t
+      type_arguments_left_angle: t;
+      type_arguments: t;
+      type_arguments_right_angle: t;
     }
     and type_parameters = {
-      type_parameters_left_angle : t;
-      type_parameters : t;
-      type_parameters_right_angle : t
+      type_parameters_left_angle: t;
+      type_parameters: t;
+      type_parameters_right_angle: t;
     }
     and tuple_type_specifier = {
-      tuple_left_paren : t;
-      tuple_types : t;
-      tuple_right_paren : t
-    }
-    and list_item = {
-      list_item : t;
-      list_separator : t
+      tuple_left_paren: t;
+      tuple_types: t;
+      tuple_right_paren: t;
     }
     and error = {
-      error : t;
+      error: t;
     }
+    and list_item = {
+      list_item: t;
+      list_separator: t;
+    }
+
     and syntax =
     | Token of Token.t
     | Missing
     | SyntaxList of t list
-    | Error of error
-    | ListItem of list_item
     | ScriptHeader of script_header
     | Script of script
+    | SimpleTypeSpecifier of simple_type_specifier
+    | LiteralExpression of literal_expression
+    | VariableExpression of variable_expression
+    | QualifiedNameExpression of qualified_name_expression
+    | PipeVariableExpression of pipe_variable_expression
+    | EnumDeclaration of enum_declaration
+    | Enumerator of enumerator
+    | AliasDeclaration of alias_declaration
+    | PropertyDeclaration of property_declaration
+    | PropertyDeclarator of property_declarator
     | NamespaceDeclaration of namespace_declaration
     | NamespaceBody of namespace_body
-    | NamespaceGroupUseDeclaration of namespace_group_use_declaration
     | NamespaceUseDeclaration of namespace_use_declaration
+    | NamespaceGroupUseDeclaration of namespace_group_use_declaration
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
     | FunctionDeclarationHeader of function_declaration_header
     | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
-    | XHPChildrenDeclaration of xhp_children_declaration
-    | XHPCategoryDeclaration of xhp_category_declaration
-    | XHPEnumType of xhp_enum_type
-    | XHPRequired of xhp_required
-    | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
-    | XHPClassAttribute of xhp_class_attribute
     | TraitUse of trait_use
     | RequireClause of require_clause
     | ConstDeclaration of const_declaration
     | ConstantDeclarator of constant_declarator
     | TypeConstDeclaration of type_const_declaration
-    | EnumDeclaration of enum_declaration
-    | Enumerator of enumerator
-    | AliasDeclaration of alias_declaration
-    | PropertyDeclaration of property_declaration
-    | PropertyDeclarator of property_declarator
     | DecoratedExpression of decorated_expression
     | ParameterDeclaration of parameter_declaration
     | AttributeSpecification of attribute_specification
@@ -774,24 +776,19 @@ module WithToken(Token: TokenType) = struct
     | BreakStatement of break_statement
     | ContinueStatement of continue_statement
     | FunctionStaticStatement of function_static_statement
-    | SimpleInitializer of simple_initializer
     | StaticDeclarator of static_declarator
     | EchoStatement of echo_statement
-
-    | MemberSelectionExpression of member_selection_expression
-    | SafeMemberSelectionExpression of safe_member_selection_expression
-    | ScopeResolutionExpression of scope_resolution_expression
-    | YieldExpression of yield_expression
-    | PrintExpression of print_expression
-    | CastExpression of cast_expression
-    | LambdaExpression of lambda_expression
-    | LambdaSignature of lambda_signature
+    | SimpleInitializer of simple_initializer
     | AnonymousFunction of anonymous_function
     | AnonymousFunctionUseClause of anonymous_function_use_clause
-    | LiteralExpression of literal_expression
-    | VariableExpression of variable_expression
-    | QualifiedNameExpression of qualified_name_expression
-    | PipeVariableExpression of pipe_variable_expression
+    | LambdaExpression of lambda_expression
+    | LambdaSignature of lambda_signature
+    | CastExpression of cast_expression
+    | ScopeResolutionExpression of scope_resolution_expression
+    | MemberSelectionExpression of member_selection_expression
+    | SafeMemberSelectionExpression of safe_member_selection_expression
+    | YieldExpression of yield_expression
+    | PrintExpression of print_expression
     | PrefixUnaryOperator of prefix_unary_operator
     | PostfixUnaryOperator of postfix_unary_operator
     | BinaryOperator of binary_operator
@@ -803,36 +800,41 @@ module WithToken(Token: TokenType) = struct
     | ListExpression of list_expression
     | CollectionLiteralExpression of collection_literal_expression
     | ObjectCreationExpression of object_creation_expression
-    | ShapeExpression of shape_expression
-    | FieldInitializer of field_initializer
     | ArrayCreationExpression of array_creation_expression
     | ArrayIntrinsicExpression of array_intrinsic_expression
     | ElementInitializer of element_initializer
     | SubscriptExpression of subscript_expression
     | AwaitableCreationExpression of awaitable_creation_expression
-    | XHPExpression of xhp_expression
-    | XHPOpen of xhp_open
+    | XHPChildrenDeclaration of xhp_children_declaration
+    | XHPCategoryDeclaration of xhp_category_declaration
+    | XHPEnumType of xhp_enum_type
+    | XHPRequired of xhp_required
+    | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
+    | XHPClassAttribute of xhp_class_attribute
     | XHPAttribute of xhp_attribute
+    | XHPOpen of xhp_open
+    | XHPExpression of xhp_expression
     | XHPClose of xhp_close
-
-    | SimpleTypeSpecifier of simple_type_specifier
-    | NullableTypeSpecifier of nullable_type_specifier
-    | SoftTypeSpecifier of soft_type_specifier
-    | TypeConstraint of type_constraint
-    | TypeParameter of type_parameter
     | TypeConstant of type_constant
-    | GenericTypeSpecifier of generic_type
-    | TypeArguments of type_arguments
-    | TypeParameters of type_parameters
-    | TupleTypeSpecifier of tuple_type_specifier
     | VectorTypeSpecifier of vector_type_specifier
+    | TypeParameter of type_parameter
+    | TypeConstraint of type_constraint
     | MapTypeSpecifier of map_type_specifier
     | ClosureTypeSpecifier of closure_type_specifier
     | ClassnameTypeSpecifier of classname_type_specifier
-    | ShapeTypeSpecifier of shape_type_specifier
     | FieldSpecifier of field_specifier
+    | FieldInitializer of field_initializer
+    | ShapeTypeSpecifier of shape_type_specifier
+    | ShapeExpression of shape_expression
+    | GenericTypeSpecifier of generic_type_specifier
+    | NullableTypeSpecifier of nullable_type_specifier
+    | SoftTypeSpecifier of soft_type_specifier
+    | TypeArguments of type_arguments
+    | TypeParameters of type_parameters
+    | TupleTypeSpecifier of tuple_type_specifier
+    | Error of error
+    | ListItem of list_item
 
-    and t = { syntax : syntax ; value : SyntaxValue.t}
 
     let make syntax value =
       { syntax; value }
@@ -847,264 +849,463 @@ module WithToken(Token: TokenType) = struct
       match syntax with
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
-      | MemberSelectionExpression _ -> SyntaxKind.MemberSelectionExpression
-      | SafeMemberSelectionExpression _ ->
-        SyntaxKind.SafeMemberSelectionExpression
-      | ScopeResolutionExpression _ -> SyntaxKind.ScopeResolutionExpression
-      | YieldExpression _ -> SyntaxKind.YieldExpression
-      | PrintExpression _ -> SyntaxKind.PrintExpression
-      | CastExpression _ -> SyntaxKind.CastExpression
-      | LambdaExpression _ -> SyntaxKind.LambdaExpression
-      | LambdaSignature _ -> SyntaxKind.LambdaSignature
-      | AnonymousFunction _ -> SyntaxKind.AnonymousFunction
-      | AnonymousFunctionUseClause _ -> SyntaxKind.AnonymousFunctionUseClause
-      | LiteralExpression _ -> SyntaxKind.LiteralExpression
-      | VariableExpression _ -> SyntaxKind.VariableExpression
-      | QualifiedNameExpression _ -> SyntaxKind.QualifiedNameExpression
-      | PipeVariableExpression _ -> SyntaxKind.PipeVariableExpression
-      | Error _ -> SyntaxKind.Error
       | SyntaxList _ -> SyntaxKind.SyntaxList
-      | ListItem _ -> SyntaxKind.ListItem
-      | ScriptHeader _ -> SyntaxKind.ScriptHeader
-      | Script _ -> SyntaxKind.Script
-      | EnumDeclaration _ -> SyntaxKind.EnumDeclaration
-      | Enumerator _ -> SyntaxKind.Enumerator
-      | AliasDeclaration _ -> SyntaxKind.AliasDeclaration
-      | PropertyDeclaration _ -> SyntaxKind.PropertyDeclaration
-      | PropertyDeclarator _ -> SyntaxKind.PropertyDeclarator
-      | NamespaceDeclaration _ -> SyntaxKind.NamespaceDeclaration
-      | NamespaceBody _ -> SyntaxKind.NamespaceBody
+      | ScriptHeader _ ->
+        SyntaxKind.ScriptHeader
+      | Script _ ->
+        SyntaxKind.Script
+      | SimpleTypeSpecifier _ ->
+        SyntaxKind.SimpleTypeSpecifier
+      | LiteralExpression _ ->
+        SyntaxKind.LiteralExpression
+      | VariableExpression _ ->
+        SyntaxKind.VariableExpression
+      | QualifiedNameExpression _ ->
+        SyntaxKind.QualifiedNameExpression
+      | PipeVariableExpression _ ->
+        SyntaxKind.PipeVariableExpression
+      | EnumDeclaration _ ->
+        SyntaxKind.EnumDeclaration
+      | Enumerator _ ->
+        SyntaxKind.Enumerator
+      | AliasDeclaration _ ->
+        SyntaxKind.AliasDeclaration
+      | PropertyDeclaration _ ->
+        SyntaxKind.PropertyDeclaration
+      | PropertyDeclarator _ ->
+        SyntaxKind.PropertyDeclarator
+      | NamespaceDeclaration _ ->
+        SyntaxKind.NamespaceDeclaration
+      | NamespaceBody _ ->
+        SyntaxKind.NamespaceBody
+      | NamespaceUseDeclaration _ ->
+        SyntaxKind.NamespaceUseDeclaration
       | NamespaceGroupUseDeclaration _ ->
         SyntaxKind.NamespaceGroupUseDeclaration
-      | NamespaceUseDeclaration _ -> SyntaxKind.NamespaceUseDeclaration
-      | NamespaceUseClause _ -> SyntaxKind.NamespaceUseClause
-      | FunctionDeclaration _ -> SyntaxKind.FunctionDeclaration
-      | FunctionDeclarationHeader _ -> SyntaxKind.FunctionDeclarationHeader
-      | MethodishDeclaration _ -> SyntaxKind.MethodishDeclaration
-      | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
-      | ClassishBody _ -> SyntaxKind.ClassishBody
-      | XHPChildrenDeclaration _ -> SyntaxKind.XHPChildrenDeclaration
-      | XHPCategoryDeclaration _ -> SyntaxKind.XHPCategoryDeclaration
-      | XHPEnumType _ -> SyntaxKind.XHPEnumType
-      | XHPRequired _ -> SyntaxKind.XHPRequired
+      | NamespaceUseClause _ ->
+        SyntaxKind.NamespaceUseClause
+      | FunctionDeclaration _ ->
+        SyntaxKind.FunctionDeclaration
+      | FunctionDeclarationHeader _ ->
+        SyntaxKind.FunctionDeclarationHeader
+      | MethodishDeclaration _ ->
+        SyntaxKind.MethodishDeclaration
+      | ClassishDeclaration _ ->
+        SyntaxKind.ClassishDeclaration
+      | ClassishBody _ ->
+        SyntaxKind.ClassishBody
+      | TraitUse _ ->
+        SyntaxKind.TraitUse
+      | RequireClause _ ->
+        SyntaxKind.RequireClause
+      | ConstDeclaration _ ->
+        SyntaxKind.ConstDeclaration
+      | ConstantDeclarator _ ->
+        SyntaxKind.ConstantDeclarator
+      | TypeConstDeclaration _ ->
+        SyntaxKind.TypeConstDeclaration
+      | DecoratedExpression _ ->
+        SyntaxKind.DecoratedExpression
+      | ParameterDeclaration _ ->
+        SyntaxKind.ParameterDeclaration
+      | AttributeSpecification _ ->
+        SyntaxKind.AttributeSpecification
+      | Attribute _ ->
+        SyntaxKind.Attribute
+      | InclusionExpression _ ->
+        SyntaxKind.InclusionExpression
+      | InclusionDirective _ ->
+        SyntaxKind.InclusionDirective
+      | CompoundStatement _ ->
+        SyntaxKind.CompoundStatement
+      | ExpressionStatement _ ->
+        SyntaxKind.ExpressionStatement
+      | WhileStatement _ ->
+        SyntaxKind.WhileStatement
+      | IfStatement _ ->
+        SyntaxKind.IfStatement
+      | ElseifClause _ ->
+        SyntaxKind.ElseifClause
+      | ElseClause _ ->
+        SyntaxKind.ElseClause
+      | TryStatement _ ->
+        SyntaxKind.TryStatement
+      | CatchClause _ ->
+        SyntaxKind.CatchClause
+      | FinallyClause _ ->
+        SyntaxKind.FinallyClause
+      | DoStatement _ ->
+        SyntaxKind.DoStatement
+      | ForStatement _ ->
+        SyntaxKind.ForStatement
+      | ForeachStatement _ ->
+        SyntaxKind.ForeachStatement
+      | SwitchStatement _ ->
+        SyntaxKind.SwitchStatement
+      | CaseStatement _ ->
+        SyntaxKind.CaseStatement
+      | DefaultStatement _ ->
+        SyntaxKind.DefaultStatement
+      | ReturnStatement _ ->
+        SyntaxKind.ReturnStatement
+      | ThrowStatement _ ->
+        SyntaxKind.ThrowStatement
+      | BreakStatement _ ->
+        SyntaxKind.BreakStatement
+      | ContinueStatement _ ->
+        SyntaxKind.ContinueStatement
+      | FunctionStaticStatement _ ->
+        SyntaxKind.FunctionStaticStatement
+      | StaticDeclarator _ ->
+        SyntaxKind.StaticDeclarator
+      | EchoStatement _ ->
+        SyntaxKind.EchoStatement
+      | SimpleInitializer _ ->
+        SyntaxKind.SimpleInitializer
+      | AnonymousFunction _ ->
+        SyntaxKind.AnonymousFunction
+      | AnonymousFunctionUseClause _ ->
+        SyntaxKind.AnonymousFunctionUseClause
+      | LambdaExpression _ ->
+        SyntaxKind.LambdaExpression
+      | LambdaSignature _ ->
+        SyntaxKind.LambdaSignature
+      | CastExpression _ ->
+        SyntaxKind.CastExpression
+      | ScopeResolutionExpression _ ->
+        SyntaxKind.ScopeResolutionExpression
+      | MemberSelectionExpression _ ->
+        SyntaxKind.MemberSelectionExpression
+      | SafeMemberSelectionExpression _ ->
+        SyntaxKind.SafeMemberSelectionExpression
+      | YieldExpression _ ->
+        SyntaxKind.YieldExpression
+      | PrintExpression _ ->
+        SyntaxKind.PrintExpression
+      | PrefixUnaryOperator _ ->
+        SyntaxKind.PrefixUnaryOperator
+      | PostfixUnaryOperator _ ->
+        SyntaxKind.PostfixUnaryOperator
+      | BinaryOperator _ ->
+        SyntaxKind.BinaryOperator
+      | InstanceofExpression _ ->
+        SyntaxKind.InstanceofExpression
+      | ConditionalExpression _ ->
+        SyntaxKind.ConditionalExpression
+      | FunctionCallExpression _ ->
+        SyntaxKind.FunctionCallExpression
+      | ParenthesizedExpression _ ->
+        SyntaxKind.ParenthesizedExpression
+      | BracedExpression _ ->
+        SyntaxKind.BracedExpression
+      | ListExpression _ ->
+        SyntaxKind.ListExpression
+      | CollectionLiteralExpression _ ->
+        SyntaxKind.CollectionLiteralExpression
+      | ObjectCreationExpression _ ->
+        SyntaxKind.ObjectCreationExpression
+      | ArrayCreationExpression _ ->
+        SyntaxKind.ArrayCreationExpression
+      | ArrayIntrinsicExpression _ ->
+        SyntaxKind.ArrayIntrinsicExpression
+      | ElementInitializer _ ->
+        SyntaxKind.ElementInitializer
+      | SubscriptExpression _ ->
+        SyntaxKind.SubscriptExpression
+      | AwaitableCreationExpression _ ->
+        SyntaxKind.AwaitableCreationExpression
+      | XHPChildrenDeclaration _ ->
+        SyntaxKind.XHPChildrenDeclaration
+      | XHPCategoryDeclaration _ ->
+        SyntaxKind.XHPCategoryDeclaration
+      | XHPEnumType _ ->
+        SyntaxKind.XHPEnumType
+      | XHPRequired _ ->
+        SyntaxKind.XHPRequired
       | XHPClassAttributeDeclaration _ ->
         SyntaxKind.XHPClassAttributeDeclaration
-      | XHPClassAttribute _ -> SyntaxKind.XHPClassAttribute
-      | TraitUse _ -> SyntaxKind.TraitUse
-      | RequireClause _ -> SyntaxKind.RequireClause
-      | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
-      | ConstantDeclarator _ -> SyntaxKind.ConstantDeclarator
-      | TypeConstDeclaration _ -> SyntaxKind.TypeConstDeclaration
-      | DecoratedExpression _ -> SyntaxKind.DecoratedExpression
-      | ParameterDeclaration _ -> SyntaxKind.ParameterDeclaration
-      | AttributeSpecification _ -> SyntaxKind.AttributeSpecification
-      | Attribute _ -> SyntaxKind.Attribute
-      | InclusionExpression _ -> SyntaxKind.InclusionExpression
-      | InclusionDirective _ -> SyntaxKind.InclusionDirective
-      | CompoundStatement _ -> SyntaxKind.CompoundStatement
-      | ExpressionStatement _ -> SyntaxKind.ExpressionStatement
-      | WhileStatement _ -> SyntaxKind.WhileStatement
-      | IfStatement _ -> SyntaxKind.IfStatement
-      | ElseifClause _ -> SyntaxKind.ElseifClause
-      | ElseClause _ -> SyntaxKind.ElseClause
-      | TryStatement _ -> SyntaxKind.TryStatement
-      | CatchClause _ -> SyntaxKind.CatchClause
-      | FinallyClause _ -> SyntaxKind.FinallyClause
-      | DoStatement _ -> SyntaxKind.DoStatement
-      | ForStatement _ -> SyntaxKind.ForStatement
-      | ForeachStatement _ -> SyntaxKind.ForeachStatement
-      | SwitchStatement _ -> SyntaxKind.SwitchStatement
-      | CaseStatement _ -> SyntaxKind.CaseStatement
-      | DefaultStatement _ -> SyntaxKind.DefaultStatement
-      | ReturnStatement _ -> SyntaxKind.ReturnStatement
-      | ThrowStatement _ -> SyntaxKind.ThrowStatement
-      | BreakStatement _ -> SyntaxKind.BreakStatement
-      | ContinueStatement _ -> SyntaxKind.ContinueStatement
-      | FunctionStaticStatement _ -> SyntaxKind.FunctionStaticStatement
-      | SimpleInitializer _ -> SyntaxKind.SimpleInitializer
-      | StaticDeclarator _ -> SyntaxKind.StaticDeclarator
-      | EchoStatement _ -> SyntaxKind.EchoStatement
-      | PrefixUnaryOperator _ -> SyntaxKind.PrefixUnaryOperator
-      | PostfixUnaryOperator _ -> SyntaxKind.PostfixUnaryOperator
-      | BinaryOperator _ -> SyntaxKind.BinaryOperator
-      | InstanceofExpression _ -> SyntaxKind.InstanceofExpression
-      | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
-      | FunctionCallExpression _ -> SyntaxKind.FunctionCallExpression
-      | ParenthesizedExpression _ -> SyntaxKind.ParenthesizedExpression
-      | BracedExpression _ -> SyntaxKind.BracedExpression
-      | ListExpression _ -> SyntaxKind.ListExpression
-      | CollectionLiteralExpression _ -> SyntaxKind.CollectionLiteralExpression
-      | ObjectCreationExpression _ -> SyntaxKind.ObjectCreationExpression
-      | ShapeExpression _ -> SyntaxKind.ShapeExpression
-      | FieldInitializer _ -> SyntaxKind.FieldInitializer
-      | ArrayCreationExpression _ -> SyntaxKind.ArrayCreationExpression
-      | ArrayIntrinsicExpression _ -> SyntaxKind.ArrayIntrinsicExpression
-      | ElementInitializer _ -> SyntaxKind.ElementInitializer
-      | SubscriptExpression _ -> SyntaxKind.SubscriptExpression
-      | AwaitableCreationExpression _ -> SyntaxKind.AwaitableCreationExpression
-      | XHPExpression _ -> SyntaxKind.XHPExpression
-      | XHPOpen _ -> SyntaxKind.XHPOpen
-      | XHPClose _ -> SyntaxKind.XHPClose
-      | XHPAttribute _ -> SyntaxKind.XHPAttribute
-      | TypeConstant _ ->  SyntaxKind.TypeConstant
-      | SimpleTypeSpecifier _ -> SyntaxKind.SimpleTypeSpecifier
-      | TypeConstraint _ -> SyntaxKind.TypeConstraint
-      | TypeParameter _ -> SyntaxKind.TypeParameter
-      | NullableTypeSpecifier _ -> SyntaxKind.NullableTypeSpecifier
-      | SoftTypeSpecifier _ -> SyntaxKind.SoftTypeSpecifier
-      | GenericTypeSpecifier _ -> SyntaxKind.GenericTypeSpecifier
-      | TypeArguments _ -> SyntaxKind.TypeArguments
-      | TypeParameters _ -> SyntaxKind.TypeParameters
-      | TupleTypeSpecifier _ -> SyntaxKind.TupleTypeSpecifier
-      | VectorTypeSpecifier _ -> SyntaxKind.VectorTypeSpecifier
-      | MapTypeSpecifier _ -> SyntaxKind.MapTypeSpecifier
-      | ClosureTypeSpecifier _ -> SyntaxKind.ClosureTypeSpecifier
-      | ClassnameTypeSpecifier _ -> SyntaxKind.ClassnameTypeSpecifier
-      | ShapeTypeSpecifier _ -> SyntaxKind.ShapeTypeSpecifier
-      | FieldSpecifier _ -> SyntaxKind.FieldSpecifier
+      | XHPClassAttribute _ ->
+        SyntaxKind.XHPClassAttribute
+      | XHPAttribute _ ->
+        SyntaxKind.XHPAttribute
+      | XHPOpen _ ->
+        SyntaxKind.XHPOpen
+      | XHPExpression _ ->
+        SyntaxKind.XHPExpression
+      | XHPClose _ ->
+        SyntaxKind.XHPClose
+      | TypeConstant _ ->
+        SyntaxKind.TypeConstant
+      | VectorTypeSpecifier _ ->
+        SyntaxKind.VectorTypeSpecifier
+      | TypeParameter _ ->
+        SyntaxKind.TypeParameter
+      | TypeConstraint _ ->
+        SyntaxKind.TypeConstraint
+      | MapTypeSpecifier _ ->
+        SyntaxKind.MapTypeSpecifier
+      | ClosureTypeSpecifier _ ->
+        SyntaxKind.ClosureTypeSpecifier
+      | ClassnameTypeSpecifier _ ->
+        SyntaxKind.ClassnameTypeSpecifier
+      | FieldSpecifier _ ->
+        SyntaxKind.FieldSpecifier
+      | FieldInitializer _ ->
+        SyntaxKind.FieldInitializer
+      | ShapeTypeSpecifier _ ->
+        SyntaxKind.ShapeTypeSpecifier
+      | ShapeExpression _ ->
+        SyntaxKind.ShapeExpression
+      | GenericTypeSpecifier _ ->
+        SyntaxKind.GenericTypeSpecifier
+      | NullableTypeSpecifier _ ->
+        SyntaxKind.NullableTypeSpecifier
+      | SoftTypeSpecifier _ ->
+        SyntaxKind.SoftTypeSpecifier
+      | TypeArguments _ ->
+        SyntaxKind.TypeArguments
+      | TypeParameters _ ->
+        SyntaxKind.TypeParameters
+      | TupleTypeSpecifier _ ->
+        SyntaxKind.TupleTypeSpecifier
+      | Error _ ->
+        SyntaxKind.Error
+      | ListItem _ ->
+        SyntaxKind.ListItem
+
 
     let kind node =
       to_kind (syntax node)
 
-    let is_missing node = kind node = SyntaxKind.Missing
-    let is_token node = kind node = SyntaxKind.Token
+    let is_missing node =
+      kind node = SyntaxKind.Missing
+
+    let is_list node =
+      kind node = SyntaxKind.SyntaxList
+
+    let is_script_header node =
+      kind node = SyntaxKind.ScriptHeader
+    let is_script node =
+      kind node = SyntaxKind.Script
+    let is_simple_type_specifier node =
+      kind node = SyntaxKind.SimpleTypeSpecifier
+    let is_literal_expression node =
+      kind node = SyntaxKind.LiteralExpression
+    let is_variable_expression node =
+      kind node = SyntaxKind.VariableExpression
+    let is_qualified_name_expression node =
+      kind node = SyntaxKind.QualifiedNameExpression
+    let is_pipe_variable_expression node =
+      kind node = SyntaxKind.PipeVariableExpression
+    let is_enum_declaration node =
+      kind node = SyntaxKind.EnumDeclaration
+    let is_enumerator node =
+      kind node = SyntaxKind.Enumerator
+    let is_alias_declaration node =
+      kind node = SyntaxKind.AliasDeclaration
+    let is_property_declaration node =
+      kind node = SyntaxKind.PropertyDeclaration
+    let is_property_declarator node =
+      kind node = SyntaxKind.PropertyDeclarator
+    let is_namespace_declaration node =
+      kind node = SyntaxKind.NamespaceDeclaration
+    let is_namespace_body node =
+      kind node = SyntaxKind.NamespaceBody
+    let is_namespace_use_declaration node =
+      kind node = SyntaxKind.NamespaceUseDeclaration
+    let is_namespace_group_use_declaration node =
+      kind node = SyntaxKind.NamespaceGroupUseDeclaration
+    let is_namespace_use_clause node =
+      kind node = SyntaxKind.NamespaceUseClause
+    let is_function_declaration node =
+      kind node = SyntaxKind.FunctionDeclaration
+    let is_function_declaration_header node =
+      kind node = SyntaxKind.FunctionDeclarationHeader
+    let is_methodish_declaration node =
+      kind node = SyntaxKind.MethodishDeclaration
+    let is_classish_declaration node =
+      kind node = SyntaxKind.ClassishDeclaration
+    let is_classish_body node =
+      kind node = SyntaxKind.ClassishBody
+    let is_trait_use node =
+      kind node = SyntaxKind.TraitUse
+    let is_require_clause node =
+      kind node = SyntaxKind.RequireClause
+    let is_const_declaration node =
+      kind node = SyntaxKind.ConstDeclaration
+    let is_constant_declarator node =
+      kind node = SyntaxKind.ConstantDeclarator
+    let is_type_const_declaration node =
+      kind node = SyntaxKind.TypeConstDeclaration
+    let is_decorated_expression node =
+      kind node = SyntaxKind.DecoratedExpression
+    let is_parameter_declaration node =
+      kind node = SyntaxKind.ParameterDeclaration
+    let is_attribute_specification node =
+      kind node = SyntaxKind.AttributeSpecification
+    let is_attribute node =
+      kind node = SyntaxKind.Attribute
+    let is_inclusion_expression node =
+      kind node = SyntaxKind.InclusionExpression
+    let is_inclusion_directive node =
+      kind node = SyntaxKind.InclusionDirective
+    let is_compound_statement node =
+      kind node = SyntaxKind.CompoundStatement
+    let is_expression_statement node =
+      kind node = SyntaxKind.ExpressionStatement
+    let is_while_statement node =
+      kind node = SyntaxKind.WhileStatement
+    let is_if_statement node =
+      kind node = SyntaxKind.IfStatement
+    let is_elseif_clause node =
+      kind node = SyntaxKind.ElseifClause
+    let is_else_clause node =
+      kind node = SyntaxKind.ElseClause
+    let is_try_statement node =
+      kind node = SyntaxKind.TryStatement
+    let is_catch_clause node =
+      kind node = SyntaxKind.CatchClause
+    let is_finally_clause node =
+      kind node = SyntaxKind.FinallyClause
+    let is_do_statement node =
+      kind node = SyntaxKind.DoStatement
+    let is_for_statement node =
+      kind node = SyntaxKind.ForStatement
+    let is_foreach_statement node =
+      kind node = SyntaxKind.ForeachStatement
+    let is_switch_statement node =
+      kind node = SyntaxKind.SwitchStatement
+    let is_case_statement node =
+      kind node = SyntaxKind.CaseStatement
+    let is_default_statement node =
+      kind node = SyntaxKind.DefaultStatement
+    let is_return_statement node =
+      kind node = SyntaxKind.ReturnStatement
+    let is_throw_statement node =
+      kind node = SyntaxKind.ThrowStatement
+    let is_break_statement node =
+      kind node = SyntaxKind.BreakStatement
+    let is_continue_statement node =
+      kind node = SyntaxKind.ContinueStatement
+    let is_function_static_statement node =
+      kind node = SyntaxKind.FunctionStaticStatement
+    let is_static_declarator node =
+      kind node = SyntaxKind.StaticDeclarator
+    let is_echo_statement node =
+      kind node = SyntaxKind.EchoStatement
+    let is_simple_initializer node =
+      kind node = SyntaxKind.SimpleInitializer
+    let is_anonymous_function node =
+      kind node = SyntaxKind.AnonymousFunction
+    let is_anonymous_function_use_clause node =
+      kind node = SyntaxKind.AnonymousFunctionUseClause
+    let is_lambda_expression node =
+      kind node = SyntaxKind.LambdaExpression
+    let is_lambda_signature node =
+      kind node = SyntaxKind.LambdaSignature
+    let is_cast_expression node =
+      kind node = SyntaxKind.CastExpression
     let is_scope_resolution_expression node =
       kind node = SyntaxKind.ScopeResolutionExpression
     let is_member_selection_expression node =
       kind node = SyntaxKind.MemberSelectionExpression
     let is_safe_member_selection_expression node =
       kind node = SyntaxKind.SafeMemberSelectionExpression
-    let is_yield_expression node = kind node = SyntaxKind.YieldExpression
-    let is_print_expression node = kind node = SyntaxKind.PrintExpression
-    let is_cast_expression node = kind node = SyntaxKind.CastExpression
-    let is_lambda_expression node = kind node = SyntaxKind.LambdaExpression
-    let is_lambda_signature node = kind node = SyntaxKind.LambdaSignature
-    let is_anonymous_function node = kind node = SyntaxKind.AnonymousFunction
-    let is_anonymous_function_use_clause node =
-      kind node = SyntaxKind.AnonymousFunctionUseClause
-    let is_literal node = kind node = SyntaxKind.LiteralExpression
-    let is_variable node = kind node = SyntaxKind.VariableExpression
-    let is_qualified_name node = kind node = SyntaxKind.QualifiedNameExpression
-    let is_pipe_variable node = kind node = SyntaxKind.PipeVariableExpression
-    let is_awaitable_creation node =
-      kind node = SyntaxKind.AwaitableCreationExpression
-    let is_error node = kind node = SyntaxKind.Error
-    let is_list node = kind node = SyntaxKind.SyntaxList
-    let is_list_item node = kind node = SyntaxKind.ListItem
-    let is_header node = kind node = SyntaxKind.ScriptHeader
-    let is_script node = kind node = SyntaxKind.Script
-    let is_enum node = kind node = SyntaxKind.EnumDeclaration
-    let is_enumerator node = kind node = SyntaxKind.Enumerator
-    let is_alias node = kind node = SyntaxKind.AliasDeclaration
-    let is_property_declaration node =
-      kind node = SyntaxKind.PropertyDeclaration
-    let is_property_declarator node =
-      kind node = SyntaxKind.PropertyDeclarator
-    let is_namespace node = kind node = SyntaxKind.NamespaceDeclaration
-    let is_namespace_body node = kind node = SyntaxKind.NamespaceBody
-    let is_namespace_group_use node =
-      kind node = SyntaxKind.NamespaceGroupUseDeclaration
-    let is_namespace_use node = kind node = SyntaxKind.NamespaceUseDeclaration
-    let is_namespace_use_clause node = kind node = SyntaxKind.NamespaceUseClause
-    let is_function_declaration node =
-      kind node = SyntaxKind.FunctionDeclaration
-    let is_method node = kind node = SyntaxKind.MethodishDeclaration
-    let is_classish node = kind node = SyntaxKind.ClassishDeclaration
-    let is_classish_body node = kind node = SyntaxKind.ClassishBody
-    let is_trait_use node = kind node = SyntaxKind.TraitUse
-    let is_require_clause node = kind node = SyntaxKind.RequireClause
-    let is_const_declaration node = kind node = SyntaxKind.ConstDeclaration
-    let is_constant_declarator node = kind node = SyntaxKind.ConstantDeclarator
-    let is_type_const_declaration node =
-      kind node = SyntaxKind.TypeConstDeclaration
-    let is_decorated_expression node =
-      kind node = SyntaxKind.DecoratedExpression
-    let is_parameter node = kind node = SyntaxKind.ParameterDeclaration
-    let is_attribute_specification node =
-      kind node = SyntaxKind.AttributeSpecification
-    let is_attribute node = kind node = SyntaxKind.Attribute
-    let is_inclusion_directive node = kind node = SyntaxKind.InclusionDirective
-    let is_inclusion_expression node =
-      kind node = SyntaxKind.InclusionExpression
-    let is_compound_statement node = kind node = SyntaxKind.CompoundStatement
-    let is_expression_statement node =
-      kind node = SyntaxKind.ExpressionStatement
-    let is_for_statement node = kind node = SyntaxKind.ForStatement
-    let is_foreach_statement node = kind node = SyntaxKind.ForeachStatement
-    let is_while_statement node = kind node = SyntaxKind.WhileStatement
-    let is_if_statement node = kind node = SyntaxKind.IfStatement
-    let is_elseif node = kind node = SyntaxKind.ElseifClause
-    let is_else node = kind node = SyntaxKind.ElseClause
-    let is_try_statement node = kind node = SyntaxKind.TryStatement
-    let is_catch node = kind node = SyntaxKind.CatchClause
-    let is_finally node = kind node = SyntaxKind.FinallyClause
-    let is_do_statement node = kind node = SyntaxKind.DoStatement
-    let is_function_static_statement node =
-      kind node = SyntaxKind.FunctionStaticStatement
-    let is_simple_initializer node = kind node = SyntaxKind.SimpleInitializer
-    let is_static_declarator node = kind node = SyntaxKind.StaticDeclarator
-    let is_echo_statement node =
-      kind node = SyntaxKind.EchoStatement
-    let is_switch_statement node = kind node = SyntaxKind.SwitchStatement
-    let is_prefix_operator node = kind node = SyntaxKind.PrefixUnaryOperator
-    let is_postfix_operator node = kind node = SyntaxKind.PostfixUnaryOperator
-    let is_binary_operator node = kind node = SyntaxKind.BinaryOperator
-    let is_instanceof_operator node =
+    let is_yield_expression node =
+      kind node = SyntaxKind.YieldExpression
+    let is_print_expression node =
+      kind node = SyntaxKind.PrintExpression
+    let is_prefix_unary_operator node =
+      kind node = SyntaxKind.PrefixUnaryOperator
+    let is_postfix_unary_operator node =
+      kind node = SyntaxKind.PostfixUnaryOperator
+    let is_binary_operator node =
+      kind node = SyntaxKind.BinaryOperator
+    let is_instanceof_expression node =
       kind node = SyntaxKind.InstanceofExpression
-    let is_type_constraint node = kind node = SyntaxKind.TypeConstraint
-    let is_type_parameter node = kind node = SyntaxKind.TypeParameter
     let is_conditional_expression node =
       kind node = SyntaxKind.ConditionalExpression
     let is_function_call_expression node =
       kind node = SyntaxKind.FunctionCallExpression
     let is_parenthesized_expression node =
       kind node = SyntaxKind.ParenthesizedExpression
-    let is_braced_expression node = kind node = SyntaxKind.BracedExpression
-    let is_list_expression node = kind node = SyntaxKind.ListExpression
+    let is_braced_expression node =
+      kind node = SyntaxKind.BracedExpression
+    let is_list_expression node =
+      kind node = SyntaxKind.ListExpression
     let is_collection_literal_expression node =
       kind node = SyntaxKind.CollectionLiteralExpression
     let is_object_creation_expression node =
       kind node = SyntaxKind.ObjectCreationExpression
-    let is_shape_expression node = kind node = SyntaxKind.ShapeExpression
-    let is_field_initializer node = kind node = SyntaxKind.FieldInitializer
     let is_array_creation_expression node =
       kind node = SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression node =
       kind node = SyntaxKind.ArrayIntrinsicExpression
-    let is_element_initializer node = kind node = SyntaxKind.ElementInitializer
+    let is_element_initializer node =
+      kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
-    let is_xhp_category_declaration node =
-      kind node = SyntaxKind.XHPCategoryDeclaration
+    let is_awaitable_creation_expression node =
+      kind node = SyntaxKind.AwaitableCreationExpression
     let is_xhp_children_declaration node =
       kind node = SyntaxKind.XHPChildrenDeclaration
-    let is_xhp_enum_type node = kind node = SyntaxKind.XHPEnumType
-    let is_xhp_required node = kind node = SyntaxKind.XHPRequired
-    let is_xhp_expression node = kind node = SyntaxKind.XHPExpression
-    let is_xhp_open node = kind node = SyntaxKind.XHPOpen
-    let is_xhp_attribute node = kind node = SyntaxKind.XHPAttribute
-    let is_type_constant node = kind node = SyntaxKind.TypeConstant
-    let is_simple_type node = kind node = SyntaxKind.SimpleTypeSpecifier
-    let is_generic_type node = kind node = SyntaxKind.GenericTypeSpecifier
-    let is_nullable_type_specifier node =
-      kind node = SyntaxKind.NullableTypeSpecifier
-    let is_soft_type_specifier node =
-      kind node = SyntaxKind.SoftTypeSpecifier
-    let is_type_arguments node = kind node = SyntaxKind.TypeArguments
-    let is_type_parameters node = kind node = SyntaxKind.TypeParameters
-    let is_tuple_type node = kind node = SyntaxKind.TupleTypeSpecifier
+    let is_xhp_category_declaration node =
+      kind node = SyntaxKind.XHPCategoryDeclaration
+    let is_xhp_enum_type node =
+      kind node = SyntaxKind.XHPEnumType
+    let is_xhp_required node =
+      kind node = SyntaxKind.XHPRequired
+    let is_xhp_class_attribute_declaration node =
+      kind node = SyntaxKind.XHPClassAttributeDeclaration
+    let is_xhp_class_attribute node =
+      kind node = SyntaxKind.XHPClassAttribute
+    let is_xhp_attribute node =
+      kind node = SyntaxKind.XHPAttribute
+    let is_xhp_open node =
+      kind node = SyntaxKind.XHPOpen
+    let is_xhp_expression node =
+      kind node = SyntaxKind.XHPExpression
+    let is_xhp_close node =
+      kind node = SyntaxKind.XHPClose
+    let is_type_constant node =
+      kind node = SyntaxKind.TypeConstant
     let is_vector_type_specifier node =
       kind node = SyntaxKind.VectorTypeSpecifier
+    let is_type_parameter node =
+      kind node = SyntaxKind.TypeParameter
+    let is_type_constraint node =
+      kind node = SyntaxKind.TypeConstraint
     let is_map_type_specifier node =
       kind node = SyntaxKind.MapTypeSpecifier
     let is_closure_type_specifier node =
       kind node = SyntaxKind.ClosureTypeSpecifier
     let is_classname_type_specifier node =
       kind node = SyntaxKind.ClassnameTypeSpecifier
-    let is_shape_type_specifier node =
-      kind node = SyntaxKind.ShapeTypeSpecifier
     let is_field_specifier node =
       kind node = SyntaxKind.FieldSpecifier
+    let is_field_initializer node =
+      kind node = SyntaxKind.FieldInitializer
+    let is_shape_type_specifier node =
+      kind node = SyntaxKind.ShapeTypeSpecifier
+    let is_shape_expression node =
+      kind node = SyntaxKind.ShapeExpression
+    let is_generic_type_specifier node =
+      kind node = SyntaxKind.GenericTypeSpecifier
+    let is_nullable_type_specifier node =
+      kind node = SyntaxKind.NullableTypeSpecifier
+    let is_soft_type_specifier node =
+      kind node = SyntaxKind.SoftTypeSpecifier
+    let is_type_arguments node =
+      kind node = SyntaxKind.TypeArguments
+    let is_type_parameters node =
+      kind node = SyntaxKind.TypeParameters
+    let is_tuple_type_specifier node =
+      kind node = SyntaxKind.TupleTypeSpecifier
+    let is_error node =
+      kind node = SyntaxKind.Error
+    let is_list_item node =
+      kind node = SyntaxKind.ListItem
+
 
     let is_loop_statement node =
       is_for_statement node ||
@@ -1147,947 +1348,2315 @@ module WithToken(Token: TokenType) = struct
       | Missing -> []
       | Token _ -> []
       | SyntaxList x -> x
-      | Error
-        { error } ->
-        [ error ]
-      | LiteralExpression
-        { literal_expression } ->
-        [ literal_expression ]
-      | VariableExpression
-        { variable_expression } ->
-        [ variable_expression ]
-      | QualifiedNameExpression
-        { qualified_name_expression } ->
-        [ qualified_name_expression ]
-      | PipeVariableExpression
-        { pipe_variable_expression } ->
-        [ pipe_variable_expression ]
-      | ScopeResolutionExpression
-        { scope_resolution_qualifier; scope_resolution_operator;
-          scope_resolution_name } ->
-        [ scope_resolution_qualifier; scope_resolution_operator;
-          scope_resolution_name ]
-      | MemberSelectionExpression
-        { member_object; member_operator; member_name } ->
-        [ member_object; member_operator; member_name ]
-      | SafeMemberSelectionExpression
-        { safe_member_object; safe_member_operator; safe_member_name } ->
-        [ safe_member_object; safe_member_operator; safe_member_name ]
-      | YieldExpression
-        { yield_keyword; yield_operand } ->
-        [ yield_keyword; yield_operand ]
-      | PrintExpression
-        { print_keyword; print_expr; } ->
-        [ print_keyword; print_expr; ]
-      | CastExpression
-        { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
-        [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]
-      | LambdaExpression
-        { lambda_async; lambda_signature; lambda_arrow; lambda_body } ->
-        [ lambda_async; lambda_signature; lambda_arrow; lambda_body ]
-      | LambdaSignature
-        { lambda_left_paren; lambda_parameter_list; lambda_right_paren;
-          lambda_colon; lambda_type } ->
-        [ lambda_left_paren; lambda_parameter_list; lambda_right_paren;
-          lambda_colon; lambda_type ]
-      | AnonymousFunction
-        { anonymous_async; anonymous_function; anonymous_left_paren;
-          anonymous_parameter_list; anonymous_right_paren; anonymous_colon;
-          anonymous_type; anonymous_use; anonymous_body } ->
-        [ anonymous_async; anonymous_function; anonymous_left_paren;
-          anonymous_parameter_list; anonymous_right_paren; anonymous_colon;
-          anonymous_type; anonymous_use; anonymous_body ]
-      | AnonymousFunctionUseClause
-        { anonymous_use_keyword; anonymous_use_left_paren;
-          anonymous_use_variables; anonymous_use_right_paren } ->
-        [ anonymous_use_keyword; anonymous_use_left_paren;
-          anonymous_use_variables; anonymous_use_right_paren ]
-      | ListItem
-        { list_item; list_separator } ->
-        [ list_item; list_separator ]
-      | ScriptHeader
-        { header_less_than; header_question; header_language } ->
-        [ header_less_than; header_question; header_language ]
-      | Script
-        { script_header; script_declarations } ->
-        [ script_header; script_declarations ]
-      | EnumDeclaration
-        { enum_keyword; enum_name; enum_colon; enum_base; enum_type;
-          enum_left_brace; enum_enumerators; enum_right_brace } ->
-        [ enum_keyword; enum_name; enum_colon; enum_base; enum_type;
-          enum_left_brace; enum_enumerators; enum_right_brace ]
-      | Enumerator
-        { enumerator_name; enumerator_equal; enumerator_value;
-          enumerator_semicolon } ->
-        [ enumerator_name; enumerator_equal; enumerator_value;
-          enumerator_semicolon ]
-      | AliasDeclaration
-        { alias_attribute_spec; alias_keyword; alias_name;
-          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
-          alias_semicolon } ->
-        [ alias_attribute_spec; alias_keyword; alias_name;
-          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
-          alias_semicolon ]
-      | PropertyDeclaration
-        { property_modifiers; property_type;
-          property_declarators; property_semicolon } ->
-        [ property_modifiers; property_type;
-          property_declarators; property_semicolon ]
-      | PropertyDeclarator
-        { property_name; property_initializer } ->
-        [ property_name; property_initializer ]
-      | NamespaceDeclaration
-        { namespace_keyword; namespace_name; namespace_body } ->
-        [ namespace_keyword; namespace_name; namespace_body ]
-      | NamespaceBody
-        { namespace_left_brace; namespace_declarations;
-          namespace_right_brace } ->
-        [ namespace_left_brace; namespace_declarations;
-          namespace_right_brace ]
-      | NamespaceGroupUseDeclaration
-        { namespace_group_use_keyword; namespace_group_use_kind;
-          namespace_group_use_prefix; namespace_group_use_left_brace;
-          namespace_group_use_clauses; namespace_group_use_right_brace;
-          namespace_group_use_semicolon } ->
-        [ namespace_group_use_keyword; namespace_group_use_kind;
-          namespace_group_use_prefix; namespace_group_use_left_brace;
-          namespace_group_use_clauses; namespace_group_use_right_brace;
-          namespace_group_use_semicolon ]
-      | NamespaceUseDeclaration
-        { namespace_use_keyword; namespace_use_kind; namespace_use_clauses;
-          namespace_use_semicolon } ->
-        [ namespace_use_keyword; namespace_use_kind; namespace_use_clauses;
-          namespace_use_semicolon ]
-      | NamespaceUseClause
-        { namespace_use_clause_kind; namespace_use_name;
-          namespace_use_as; namespace_use_alias } ->
-        [ namespace_use_clause_kind; namespace_use_name;
-          namespace_use_as; namespace_use_alias ]
-      | FunctionDeclaration
-        { function_attribute_spec; function_declaration_header; function_body}
-        ->
-        [ function_attribute_spec; function_declaration_header; function_body]
-      | FunctionDeclarationHeader
-        { function_async; function_keyword; function_name;
-          function_type_parameter_list; function_left_paren;
-          function_parameter_list;
-          function_right_paren; function_colon; function_type } ->
-        [ function_async; function_keyword; function_name;
-          function_type_parameter_list; function_left_paren;
-          function_parameter_list;
-          function_right_paren; function_colon; function_type ]
-      | MethodishDeclaration
-        { methodish_attribute; methodish_modifiers;
-          methodish_function_decl_header;
-          methodish_function_body; methodish_semicolon } ->
-        [ methodish_attribute; methodish_modifiers;
-          methodish_function_decl_header;
-          methodish_function_body; methodish_semicolon ]
-      | ClassishDeclaration
-        { classish_attribute; classish_modifiers; classish_keyword;
-          classish_name; classish_type_parameter_list; classish_extends;
-          classish_extends_list; classish_implements; classish_implements_list;
-          classish_body } ->
-        [ classish_attribute; classish_modifiers; classish_keyword;
-          classish_name; classish_type_parameter_list; classish_extends;
-          classish_extends_list; classish_implements; classish_implements_list;
-          classish_body ]
-      | ClassishBody
-        { classish_body_left_brace; classish_body_elements;
-          classish_body_right_brace } ->
-        [ classish_body_left_brace; classish_body_elements;
-          classish_body_right_brace ]
-      | XHPChildrenDeclaration
-        { xhp_children; xhp_children_expression; xhp_children_semicolon } ->
-        [ xhp_children; xhp_children_expression; xhp_children_semicolon ]
-      | XHPCategoryDeclaration
-        { xhp_category; xhp_category_list; xhp_category_semicolon } ->
-        [ xhp_category; xhp_category_list; xhp_category_semicolon ]
-      | XHPEnumType
-        { xhp_enum_keyword; xhp_enum_left_brace; xhp_enum_values;
-          xhp_enum_right_brace } ->
-        [ xhp_enum_keyword; xhp_enum_left_brace; xhp_enum_values;
-          xhp_enum_right_brace ]
-      | XHPRequired
-        { xhp_required_at; xhp_required } ->
-        [ xhp_required_at; xhp_required ]
-      | XHPClassAttributeDeclaration
-        { xhp_attribute_keyword; xhp_attribute_list;
-          xhp_attribute_semicolon } ->
-        [ xhp_attribute_keyword; xhp_attribute_list;
-          xhp_attribute_semicolon ]
-      | XHPClassAttribute
-        { xhp_attribute_decl_type; xhp_attribute_decl_name;
-          xhp_attribute_decl_initializer; xhp_attribute_decl_required } ->
-        [ xhp_attribute_decl_type; xhp_attribute_decl_name;
-          xhp_attribute_decl_initializer; xhp_attribute_decl_required ]
-      | TraitUse
-        { trait_use_keyword; trait_use_name_list; trait_use_semicolon; } ->
-        [ trait_use_keyword; trait_use_name_list; trait_use_semicolon; ]
-      | RequireClause
-        { require_keyword; require_kind; require_name; require_semicolon } ->
-        [ require_keyword; require_kind; require_name; require_semicolon ]
-      | ConstDeclaration
-        { const_abstract; const_keyword; const_type_specifier;
-          const_declarator_list; const_semicolon; } ->
-        [ const_abstract; const_keyword; const_type_specifier;
-          const_declarator_list; const_semicolon; ]
-      | ConstantDeclarator
-        { constant_declarator_name; constant_declarator_initializer; } ->
-        [ constant_declarator_name; constant_declarator_initializer; ]
-      | TypeConstDeclaration
-        { type_const_abstract; type_const_keyword; type_const_type_keyword;
-          type_const_name; type_const_type_constraint; type_const_equal;
-          type_const_type_specifier; type_const_semicolon; } ->
-        [ type_const_abstract; type_const_keyword; type_const_type_keyword;
-          type_const_name; type_const_type_constraint; type_const_equal;
-          type_const_type_specifier; type_const_semicolon; ]
-      | DecoratedExpression
-        { decorated_expression_decorator; decorated_expression_expression; } ->
-        [ decorated_expression_decorator; decorated_expression_expression; ]
-      | ParameterDeclaration
-        { param_attribute; param_visibility; param_type;
-          param_name; param_default }
-        ->
-        [ param_attribute; param_visibility; param_type;
-          param_name; param_default ]
-      | AttributeSpecification
-        { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
-          attribute_spec_right_double_angle } ->
-        [ attribute_spec_left_double_angle; attribute_spec_attribute_list ;
-          attribute_spec_right_double_angle ]
-      | Attribute
-        { attribute_name; attribute_left_paren; attribute_values;
-          attribute_right_paren } ->
-        [ attribute_name; attribute_left_paren; attribute_values;
-          attribute_right_paren ]
-      | InclusionExpression
-        { inclusion_require; inclusion_filename } ->
-        [ inclusion_require; inclusion_filename ]
-      | InclusionDirective
-        { inclusion_expression; inclusion_semicolon } ->
-        [ inclusion_expression; inclusion_semicolon ]
-      | CompoundStatement
-        { compound_left_brace; compound_statements; compound_right_brace } ->
-        [ compound_left_brace; compound_statements; compound_right_brace ]
-      | ExpressionStatement
-        { expr_statement_expr; expr_statement_semicolon } ->
-        [ expr_statement_expr; expr_statement_semicolon ]
-      | WhileStatement
-        { while_keyword; while_left_paren; while_condition;
-          while_right_paren; while_body } ->
-        [ while_keyword; while_left_paren; while_condition;
-          while_right_paren; while_body ]
-      | IfStatement
-        { if_keyword; if_left_paren; if_condition; if_right_paren;
-          if_statement; if_elseif_clauses; if_else_clause } ->
-        [ if_keyword; if_left_paren; if_condition; if_right_paren;
-          if_statement; if_elseif_clauses; if_else_clause ]
-      | ElseifClause
-        { elseif_keyword; elseif_left_paren; elseif_condition;
-          elseif_right_paren; elseif_statement } ->
-        [ elseif_keyword; elseif_left_paren; elseif_condition;
-          elseif_right_paren; elseif_statement ]
-      | ElseClause
-        { else_keyword; else_statement } ->
-        [ else_keyword; else_statement ]
-      | TryStatement {try_keyword; try_compound_statement; catch_clauses;
-                      finally_clause} ->
-        [try_keyword; try_compound_statement; catch_clauses; finally_clause]
-      | CatchClause
-        { catch_keyword; catch_left_paren; catch_type; catch_variable;
-          catch_right_paren; catch_compound_statement} ->
-        [ catch_keyword; catch_left_paren; catch_type; catch_variable;
-          catch_right_paren; catch_compound_statement]
-      | FinallyClause {finally_keyword; finally_compound_statement} ->
-        [finally_keyword; finally_compound_statement]
-      | DoStatement
-        { do_keyword; do_statement; do_while_keyword; do_left_paren;
-          do_condition_expr; do_right_paren; do_semicolon } ->
-        [ do_keyword; do_statement; do_while_keyword; do_left_paren;
-          do_condition_expr; do_right_paren; do_semicolon ]
-      | ForStatement
-        { for_keyword; for_left_paren; for_initializer_expr;
-          for_first_semicolon; for_control_expr; for_second_semicolon;
-          for_end_of_loop_expr; for_right_paren; for_statement } ->
-        [ for_keyword; for_left_paren; for_initializer_expr;
-          for_first_semicolon; for_control_expr; for_second_semicolon;
-          for_end_of_loop_expr; for_right_paren; for_statement ]
-      | ForeachStatement
-        { foreach_keyword; foreach_left_paren; foreach_collection_name;
-          foreach_await_opt; foreach_as; foreach_key_opt; foreach_key_arrow_opt;
-          foreach_value; foreach_right_paren; foreach_statement } ->
-        [ foreach_keyword; foreach_left_paren; foreach_collection_name;
-          foreach_await_opt; foreach_as; foreach_key_opt; foreach_key_arrow_opt;
-          foreach_value; foreach_right_paren; foreach_statement ]
-      | SwitchStatement
-        { switch_keyword; switch_left_paren; switch_expr; switch_right_paren;
-          switch_compound_statement } ->
-        [ switch_keyword; switch_left_paren; switch_expr; switch_right_paren;
-          switch_compound_statement ]
-      | CaseStatement
-        { case_keyword; case_expr; case_colon; case_stmt } ->
-        [ case_keyword; case_expr; case_colon; case_stmt ]
-      | DefaultStatement
-        { default_keyword; default_colon; default_stmt } ->
-        [ default_keyword; default_colon; default_stmt ]
-      | ReturnStatement
-        { return_keyword; return_expr; return_semicolon } ->
-        [ return_keyword; return_expr; return_semicolon ]
-      | ThrowStatement
-        { throw_keyword; throw_expr; throw_semicolon } ->
-        [ throw_keyword; throw_expr; throw_semicolon ]
-      | BreakStatement
-        { break_keyword; break_level; break_semicolon } ->
-        [ break_keyword; break_level; break_semicolon ]
-      | ContinueStatement
-        { continue_keyword; continue_level; continue_semicolon } ->
-        [ continue_keyword; continue_level; continue_semicolon ]
-      | FunctionStaticStatement
-        { static_static; static_declarations; static_semicolon } ->
-        [ static_static; static_declarations; static_semicolon ]
-      | SimpleInitializer
-        { simple_initializer_equal; simple_initializer_value } ->
-        [ simple_initializer_equal; simple_initializer_value ]
-      | StaticDeclarator
-        { static_name; static_initializer } ->
-        [ static_name; static_initializer ]
-      | EchoStatement
-        { echo_keyword; echo_expression_list; echo_semicolon; } ->
-        [ echo_keyword; echo_expression_list; echo_semicolon; ]
-      | PrefixUnaryOperator
-        { prefix_unary_operator; prefix_unary_operand } ->
-        [ prefix_unary_operator; prefix_unary_operand ]
-      | PostfixUnaryOperator
-        { postfix_unary_operand; postfix_unary_operator } ->
-        [ postfix_unary_operand; postfix_unary_operator ]
-      | BinaryOperator
-        { binary_left_operand; binary_operator; binary_right_operand } ->
-        [ binary_left_operand; binary_operator; binary_right_operand ]
-      | InstanceofExpression
-        { instanceof_left_operand; instanceof_operator;
-          instanceof_right_operand } ->
-        [ instanceof_left_operand; instanceof_operator;
-          instanceof_right_operand ]
-      | ConditionalExpression
-        { conditional_test; conditional_question; conditional_consequence;
-          conditional_colon; conditional_alternative } ->
-        [ conditional_test; conditional_question; conditional_consequence;
-          conditional_colon; conditional_alternative ]
-      | FunctionCallExpression
-        { function_call_receiver; function_call_lparen;
-          function_call_arguments; function_call_rparen } ->
-        [ function_call_receiver; function_call_lparen;
-          function_call_arguments; function_call_rparen ]
-      | ParenthesizedExpression
-        { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
-        [ paren_expr_left_paren; paren_expr; paren_expr_right_paren ]
-      | BracedExpression
-        { braced_expr_left_brace; braced_expr; braced_expr_right_brace } ->
-        [ braced_expr_left_brace; braced_expr; braced_expr_right_brace ]
-      | ListExpression
-        { list_keyword; list_left_paren; list_members;
-          list_right_paren } ->
-        [ list_keyword; list_left_paren; list_members;
-          list_right_paren ]
-      | CollectionLiteralExpression
-        { collection_literal_name; collection_literal_left_brace;
-          collection_literal_initialization_list;
-          collection_literal_right_brace; } ->
-        [ collection_literal_name; collection_literal_left_brace;
-          collection_literal_initialization_list;
-          collection_literal_right_brace; ]
-      | ObjectCreationExpression
-        { object_creation_new; object_creation_class; object_creation_lparen;
-          object_creation_arguments; object_creation_rparen } ->
-        [ object_creation_new; object_creation_class; object_creation_lparen;
-          object_creation_arguments; object_creation_rparen ]
-      | ShapeExpression
-        { shape_expression_keyword; shape_expression_left_paren;
-          shape_expression_fields; shape_expression_right_paren } ->
-        [ shape_expression_keyword; shape_expression_left_paren;
-          shape_expression_fields; shape_expression_right_paren ]
-      | FieldInitializer
-        { field_initializer_name; field_initializer_arrow;
-          field_initializer_value } ->
-        [ field_initializer_name; field_initializer_arrow;
-          field_initializer_value ]
-      | ArrayCreationExpression
-        { array_creation_left_bracket; array_creation_members;
-          array_creation_right_bracket } ->
-        [ array_creation_left_bracket; array_creation_members;
-          array_creation_right_bracket ]
-      | ArrayIntrinsicExpression
-       { array_intrinsic_keyword; array_intrinsic_left_paren;
-         array_intrinsic_members; array_intrinsic_right_paren } ->
-       [ array_intrinsic_keyword; array_intrinsic_left_paren;
-         array_intrinsic_members; array_intrinsic_right_paren ]
-      | ElementInitializer
-        { element_key; element_arrow; element_value } ->
-        [ element_key; element_arrow; element_value ]
-      | SubscriptExpression
-        { subscript_receiver; subscript_left;
-          subscript_index; subscript_right } ->
-        [ subscript_receiver; subscript_left;
-          subscript_index; subscript_right ]
-      | AwaitableCreationExpression
-        { awaitable_async; awaitable_compound_statement; } ->
-        [ awaitable_async; awaitable_compound_statement; ]
-      | XHPExpression
-        { xhp_open; xhp_body; xhp_close } ->
-        [ xhp_open; xhp_body; xhp_close ]
-      | XHPOpen
-        { xhp_open_name; xhp_open_attributes; xhp_open_right_angle } ->
-        [ xhp_open_name; xhp_open_attributes; xhp_open_right_angle ]
-      | XHPClose
-        { xhp_close_left_angle; xhp_close_name; xhp_close_right_angle } ->
-        [ xhp_close_left_angle; xhp_close_name; xhp_close_right_angle ]
-      | XHPAttribute
-        { xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expr } ->
-        [ xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expr ]
-      | TypeConstant
-        { type_constant_left_type; type_constant_separator;
-          type_constant_right_type } ->
-        [ type_constant_left_type; type_constant_separator;
-        type_constant_right_type ]
-      | SimpleTypeSpecifier
-        { simple_type_specifier } ->
-        [ simple_type_specifier ]
-      | TypeConstraint
-        { constraint_keyword; constraint_type } ->
-        [ constraint_keyword; constraint_type ]
-      | TypeParameter
-        { type_variance_opt; type_name; type_constraint_list_opt } ->
-        [ type_variance_opt; type_name; type_constraint_list_opt ]
-      | NullableTypeSpecifier
-        { nullable_question; nullable_type } ->
-        [ nullable_question; nullable_type ]
-      | SoftTypeSpecifier
-        { soft_at; soft_type } ->
-        [ soft_at; soft_type ]
-      | GenericTypeSpecifier
-        { generic_class_type; generic_arguments } ->
-        [ generic_class_type; generic_arguments ]
-      | TypeArguments
-        { type_arguments_left_angle; type_arguments;
-          type_arguments_right_angle } ->
-        [ type_arguments_left_angle; type_arguments;
-          type_arguments_right_angle ]
-      | TypeParameters
-        { type_parameters_left_angle; type_parameters;
-          type_parameters_right_angle } ->
-        [ type_parameters_left_angle; type_parameters;
-          type_parameters_right_angle ]
-      | TupleTypeSpecifier
-        { tuple_left_paren; tuple_types; tuple_right_paren } ->
-        [ tuple_left_paren; tuple_types; tuple_right_paren ]
-      | VectorTypeSpecifier
-        { vector_array; vector_left_angle; vector_type; vector_right_angle } ->
-        [ vector_array; vector_left_angle; vector_type; vector_right_angle ]
-      | MapTypeSpecifier
-        { map_array; map_left_angle; map_key; map_comma; map_value;
-          map_right_angle } ->
-        [ map_array; map_left_angle; map_key; map_comma; map_value;
-          map_right_angle ]
-      | ClosureTypeSpecifier
-        { closure_outer_left_paren; closure_function;
-          closure_inner_left_paren; closure_parameter_types;
-          closure_inner_right_paren; closure_colon; closure_return_type;
-          closure_outer_right_paren } ->
-        [ closure_outer_left_paren; closure_function;
-          closure_inner_left_paren; closure_parameter_types;
-          closure_inner_right_paren; closure_colon; closure_return_type;
-          closure_outer_right_paren ]
-      | ClassnameTypeSpecifier
-        { classname_classname; classname_left_angle; classname_type;
-          classname_right_angle } ->
-        [ classname_classname; classname_left_angle; classname_type;
-          classname_right_angle ]
-      | ShapeTypeSpecifier
-        { shape_type_keyword; shape_type_left_paren;
-          shape_type_fields; shape_type_right_paren } ->
-        [ shape_type_keyword; shape_type_left_paren;
-          shape_type_fields; shape_type_right_paren ]
-      | FieldSpecifier
-        { field_name; field_arrow; field_type } ->
-        [ field_name; field_arrow; field_type ]
+      | ScriptHeader {
+        header_less_than;
+        header_question;
+        header_language;
+      } -> [
+        header_less_than;
+        header_question;
+        header_language;
+      ]
+      | Script {
+        script_header;
+        script_declarations;
+      } -> [
+        script_header;
+        script_declarations;
+      ]
+      | SimpleTypeSpecifier {
+        simple_type_specifier;
+      } -> [
+        simple_type_specifier;
+      ]
+      | LiteralExpression {
+        literal_expression;
+      } -> [
+        literal_expression;
+      ]
+      | VariableExpression {
+        variable_expression;
+      } -> [
+        variable_expression;
+      ]
+      | QualifiedNameExpression {
+        qualified_name_expression;
+      } -> [
+        qualified_name_expression;
+      ]
+      | PipeVariableExpression {
+        pipe_variable_expression;
+      } -> [
+        pipe_variable_expression;
+      ]
+      | EnumDeclaration {
+        enum_keyword;
+        enum_name;
+        enum_colon;
+        enum_base;
+        enum_type;
+        enum_left_brace;
+        enum_enumerators;
+        enum_right_brace;
+      } -> [
+        enum_keyword;
+        enum_name;
+        enum_colon;
+        enum_base;
+        enum_type;
+        enum_left_brace;
+        enum_enumerators;
+        enum_right_brace;
+      ]
+      | Enumerator {
+        enumerator_name;
+        enumerator_equal;
+        enumerator_value;
+        enumerator_semicolon;
+      } -> [
+        enumerator_name;
+        enumerator_equal;
+        enumerator_value;
+        enumerator_semicolon;
+      ]
+      | AliasDeclaration {
+        alias_attribute_spec;
+        alias_keyword;
+        alias_name;
+        alias_generic_parameter;
+        alias_constraint;
+        alias_equal;
+        alias_type;
+        alias_semicolon;
+      } -> [
+        alias_attribute_spec;
+        alias_keyword;
+        alias_name;
+        alias_generic_parameter;
+        alias_constraint;
+        alias_equal;
+        alias_type;
+        alias_semicolon;
+      ]
+      | PropertyDeclaration {
+        property_modifiers;
+        property_type;
+        property_declarators;
+        property_semicolon;
+      } -> [
+        property_modifiers;
+        property_type;
+        property_declarators;
+        property_semicolon;
+      ]
+      | PropertyDeclarator {
+        property_name;
+        property_initializer;
+      } -> [
+        property_name;
+        property_initializer;
+      ]
+      | NamespaceDeclaration {
+        namespace_keyword;
+        namespace_name;
+        namespace_body;
+      } -> [
+        namespace_keyword;
+        namespace_name;
+        namespace_body;
+      ]
+      | NamespaceBody {
+        namespace_left_brace;
+        namespace_declarations;
+        namespace_right_brace;
+      } -> [
+        namespace_left_brace;
+        namespace_declarations;
+        namespace_right_brace;
+      ]
+      | NamespaceUseDeclaration {
+        namespace_use_keyword;
+        namespace_use_kind;
+        namespace_use_clauses;
+        namespace_use_semicolon;
+      } -> [
+        namespace_use_keyword;
+        namespace_use_kind;
+        namespace_use_clauses;
+        namespace_use_semicolon;
+      ]
+      | NamespaceGroupUseDeclaration {
+        namespace_group_use_keyword;
+        namespace_group_use_kind;
+        namespace_group_use_prefix;
+        namespace_group_use_left_brace;
+        namespace_group_use_clauses;
+        namespace_group_use_right_brace;
+        namespace_group_use_semicolon;
+      } -> [
+        namespace_group_use_keyword;
+        namespace_group_use_kind;
+        namespace_group_use_prefix;
+        namespace_group_use_left_brace;
+        namespace_group_use_clauses;
+        namespace_group_use_right_brace;
+        namespace_group_use_semicolon;
+      ]
+      | NamespaceUseClause {
+        namespace_use_clause_kind;
+        namespace_use_name;
+        namespace_use_as;
+        namespace_use_alias;
+      } -> [
+        namespace_use_clause_kind;
+        namespace_use_name;
+        namespace_use_as;
+        namespace_use_alias;
+      ]
+      | FunctionDeclaration {
+        function_attribute_spec;
+        function_declaration_header;
+        function_body;
+      } -> [
+        function_attribute_spec;
+        function_declaration_header;
+        function_body;
+      ]
+      | FunctionDeclarationHeader {
+        function_async;
+        function_keyword;
+        function_name;
+        function_type_parameter_list;
+        function_left_paren;
+        function_parameter_list;
+        function_right_paren;
+        function_colon;
+        function_type;
+      } -> [
+        function_async;
+        function_keyword;
+        function_name;
+        function_type_parameter_list;
+        function_left_paren;
+        function_parameter_list;
+        function_right_paren;
+        function_colon;
+        function_type;
+      ]
+      | MethodishDeclaration {
+        methodish_attribute;
+        methodish_modifiers;
+        methodish_function_decl_header;
+        methodish_function_body;
+        methodish_semicolon;
+      } -> [
+        methodish_attribute;
+        methodish_modifiers;
+        methodish_function_decl_header;
+        methodish_function_body;
+        methodish_semicolon;
+      ]
+      | ClassishDeclaration {
+        classish_attribute;
+        classish_modifiers;
+        classish_keyword;
+        classish_name;
+        classish_type_parameter_list;
+        classish_extends;
+        classish_extends_list;
+        classish_implements;
+        classish_implements_list;
+        classish_body;
+      } -> [
+        classish_attribute;
+        classish_modifiers;
+        classish_keyword;
+        classish_name;
+        classish_type_parameter_list;
+        classish_extends;
+        classish_extends_list;
+        classish_implements;
+        classish_implements_list;
+        classish_body;
+      ]
+      | ClassishBody {
+        classish_body_left_brace;
+        classish_body_elements;
+        classish_body_right_brace;
+      } -> [
+        classish_body_left_brace;
+        classish_body_elements;
+        classish_body_right_brace;
+      ]
+      | TraitUse {
+        trait_use_keyword;
+        trait_use_name_list;
+        trait_use_semicolon;
+      } -> [
+        trait_use_keyword;
+        trait_use_name_list;
+        trait_use_semicolon;
+      ]
+      | RequireClause {
+        require_keyword;
+        require_kind;
+        require_name;
+        require_semicolon;
+      } -> [
+        require_keyword;
+        require_kind;
+        require_name;
+        require_semicolon;
+      ]
+      | ConstDeclaration {
+        const_abstract;
+        const_keyword;
+        const_type_specifier;
+        const_declarator_list;
+        const_semicolon;
+      } -> [
+        const_abstract;
+        const_keyword;
+        const_type_specifier;
+        const_declarator_list;
+        const_semicolon;
+      ]
+      | ConstantDeclarator {
+        constant_declarator_name;
+        constant_declarator_initializer;
+      } -> [
+        constant_declarator_name;
+        constant_declarator_initializer;
+      ]
+      | TypeConstDeclaration {
+        type_const_abstract;
+        type_const_keyword;
+        type_const_type_keyword;
+        type_const_name;
+        type_const_type_constraint;
+        type_const_equal;
+        type_const_type_specifier;
+        type_const_semicolon;
+      } -> [
+        type_const_abstract;
+        type_const_keyword;
+        type_const_type_keyword;
+        type_const_name;
+        type_const_type_constraint;
+        type_const_equal;
+        type_const_type_specifier;
+        type_const_semicolon;
+      ]
+      | DecoratedExpression {
+        decorated_expression_decorator;
+        decorated_expression_expression;
+      } -> [
+        decorated_expression_decorator;
+        decorated_expression_expression;
+      ]
+      | ParameterDeclaration {
+        param_attribute;
+        param_visibility;
+        param_type;
+        param_name;
+        param_default;
+      } -> [
+        param_attribute;
+        param_visibility;
+        param_type;
+        param_name;
+        param_default;
+      ]
+      | AttributeSpecification {
+        attribute_spec_left_double_angle;
+        attribute_spec_attribute_list;
+        attribute_spec_right_double_angle;
+      } -> [
+        attribute_spec_left_double_angle;
+        attribute_spec_attribute_list;
+        attribute_spec_right_double_angle;
+      ]
+      | Attribute {
+        attribute_name;
+        attribute_left_paren;
+        attribute_values;
+        attribute_right_paren;
+      } -> [
+        attribute_name;
+        attribute_left_paren;
+        attribute_values;
+        attribute_right_paren;
+      ]
+      | InclusionExpression {
+        inclusion_require;
+        inclusion_filename;
+      } -> [
+        inclusion_require;
+        inclusion_filename;
+      ]
+      | InclusionDirective {
+        inclusion_expression;
+        inclusion_semicolon;
+      } -> [
+        inclusion_expression;
+        inclusion_semicolon;
+      ]
+      | CompoundStatement {
+        compound_left_brace;
+        compound_statements;
+        compound_right_brace;
+      } -> [
+        compound_left_brace;
+        compound_statements;
+        compound_right_brace;
+      ]
+      | ExpressionStatement {
+        expr_statement_expr;
+        expr_statement_semicolon;
+      } -> [
+        expr_statement_expr;
+        expr_statement_semicolon;
+      ]
+      | WhileStatement {
+        while_keyword;
+        while_left_paren;
+        while_condition;
+        while_right_paren;
+        while_body;
+      } -> [
+        while_keyword;
+        while_left_paren;
+        while_condition;
+        while_right_paren;
+        while_body;
+      ]
+      | IfStatement {
+        if_keyword;
+        if_left_paren;
+        if_condition;
+        if_right_paren;
+        if_statement;
+        if_elseif_clauses;
+        if_else_clause;
+      } -> [
+        if_keyword;
+        if_left_paren;
+        if_condition;
+        if_right_paren;
+        if_statement;
+        if_elseif_clauses;
+        if_else_clause;
+      ]
+      | ElseifClause {
+        elseif_keyword;
+        elseif_left_paren;
+        elseif_condition;
+        elseif_right_paren;
+        elseif_statement;
+      } -> [
+        elseif_keyword;
+        elseif_left_paren;
+        elseif_condition;
+        elseif_right_paren;
+        elseif_statement;
+      ]
+      | ElseClause {
+        else_keyword;
+        else_statement;
+      } -> [
+        else_keyword;
+        else_statement;
+      ]
+      | TryStatement {
+        try_keyword;
+        try_compound_statement;
+        catch_clauses;
+        finally_clause;
+      } -> [
+        try_keyword;
+        try_compound_statement;
+        catch_clauses;
+        finally_clause;
+      ]
+      | CatchClause {
+        catch_keyword;
+        catch_left_paren;
+        catch_type;
+        catch_variable;
+        catch_right_paren;
+        catch_compound_statement;
+      } -> [
+        catch_keyword;
+        catch_left_paren;
+        catch_type;
+        catch_variable;
+        catch_right_paren;
+        catch_compound_statement;
+      ]
+      | FinallyClause {
+        finally_keyword;
+        finally_compound_statement;
+      } -> [
+        finally_keyword;
+        finally_compound_statement;
+      ]
+      | DoStatement {
+        do_keyword;
+        do_statement;
+        do_while_keyword;
+        do_left_paren;
+        do_condition_expr;
+        do_right_paren;
+        do_semicolon;
+      } -> [
+        do_keyword;
+        do_statement;
+        do_while_keyword;
+        do_left_paren;
+        do_condition_expr;
+        do_right_paren;
+        do_semicolon;
+      ]
+      | ForStatement {
+        for_keyword;
+        for_left_paren;
+        for_initializer_expr;
+        for_first_semicolon;
+        for_control_expr;
+        for_second_semicolon;
+        for_end_of_loop_expr;
+        for_right_paren;
+        for_statement;
+      } -> [
+        for_keyword;
+        for_left_paren;
+        for_initializer_expr;
+        for_first_semicolon;
+        for_control_expr;
+        for_second_semicolon;
+        for_end_of_loop_expr;
+        for_right_paren;
+        for_statement;
+      ]
+      | ForeachStatement {
+        foreach_keyword;
+        foreach_left_paren;
+        foreach_collection_name;
+        foreach_await_opt;
+        foreach_as;
+        foreach_key_opt;
+        foreach_key_arrow_opt;
+        foreach_value;
+        foreach_right_paren;
+        foreach_statement;
+      } -> [
+        foreach_keyword;
+        foreach_left_paren;
+        foreach_collection_name;
+        foreach_await_opt;
+        foreach_as;
+        foreach_key_opt;
+        foreach_key_arrow_opt;
+        foreach_value;
+        foreach_right_paren;
+        foreach_statement;
+      ]
+      | SwitchStatement {
+        switch_keyword;
+        switch_left_paren;
+        switch_expr;
+        switch_right_paren;
+        switch_compound_statement;
+      } -> [
+        switch_keyword;
+        switch_left_paren;
+        switch_expr;
+        switch_right_paren;
+        switch_compound_statement;
+      ]
+      | CaseStatement {
+        case_keyword;
+        case_expr;
+        case_colon;
+        case_stmt;
+      } -> [
+        case_keyword;
+        case_expr;
+        case_colon;
+        case_stmt;
+      ]
+      | DefaultStatement {
+        default_keyword;
+        default_colon;
+        default_stmt;
+      } -> [
+        default_keyword;
+        default_colon;
+        default_stmt;
+      ]
+      | ReturnStatement {
+        return_keyword;
+        return_expr;
+        return_semicolon;
+      } -> [
+        return_keyword;
+        return_expr;
+        return_semicolon;
+      ]
+      | ThrowStatement {
+        throw_keyword;
+        throw_expr;
+        throw_semicolon;
+      } -> [
+        throw_keyword;
+        throw_expr;
+        throw_semicolon;
+      ]
+      | BreakStatement {
+        break_keyword;
+        break_level;
+        break_semicolon;
+      } -> [
+        break_keyword;
+        break_level;
+        break_semicolon;
+      ]
+      | ContinueStatement {
+        continue_keyword;
+        continue_level;
+        continue_semicolon;
+      } -> [
+        continue_keyword;
+        continue_level;
+        continue_semicolon;
+      ]
+      | FunctionStaticStatement {
+        static_static;
+        static_declarations;
+        static_semicolon;
+      } -> [
+        static_static;
+        static_declarations;
+        static_semicolon;
+      ]
+      | StaticDeclarator {
+        static_name;
+        static_initializer;
+      } -> [
+        static_name;
+        static_initializer;
+      ]
+      | EchoStatement {
+        echo_keyword;
+        echo_expression_list;
+        echo_semicolon;
+      } -> [
+        echo_keyword;
+        echo_expression_list;
+        echo_semicolon;
+      ]
+      | SimpleInitializer {
+        simple_initializer_equal;
+        simple_initializer_value;
+      } -> [
+        simple_initializer_equal;
+        simple_initializer_value;
+      ]
+      | AnonymousFunction {
+        anonymous_async;
+        anonymous_function;
+        anonymous_left_paren;
+        anonymous_parameter_list;
+        anonymous_right_paren;
+        anonymous_colon;
+        anonymous_type;
+        anonymous_use;
+        anonymous_body;
+      } -> [
+        anonymous_async;
+        anonymous_function;
+        anonymous_left_paren;
+        anonymous_parameter_list;
+        anonymous_right_paren;
+        anonymous_colon;
+        anonymous_type;
+        anonymous_use;
+        anonymous_body;
+      ]
+      | AnonymousFunctionUseClause {
+        anonymous_use_keyword;
+        anonymous_use_left_paren;
+        anonymous_use_variables;
+        anonymous_use_right_paren;
+      } -> [
+        anonymous_use_keyword;
+        anonymous_use_left_paren;
+        anonymous_use_variables;
+        anonymous_use_right_paren;
+      ]
+      | LambdaExpression {
+        lambda_async;
+        lambda_signature;
+        lambda_arrow;
+        lambda_body;
+      } -> [
+        lambda_async;
+        lambda_signature;
+        lambda_arrow;
+        lambda_body;
+      ]
+      | LambdaSignature {
+        lambda_left_paren;
+        lambda_parameter_list;
+        lambda_right_paren;
+        lambda_colon;
+        lambda_type;
+      } -> [
+        lambda_left_paren;
+        lambda_parameter_list;
+        lambda_right_paren;
+        lambda_colon;
+        lambda_type;
+      ]
+      | CastExpression {
+        cast_left_paren;
+        cast_type;
+        cast_right_paren;
+        cast_operand;
+      } -> [
+        cast_left_paren;
+        cast_type;
+        cast_right_paren;
+        cast_operand;
+      ]
+      | ScopeResolutionExpression {
+        scope_resolution_qualifier;
+        scope_resolution_operator;
+        scope_resolution_name;
+      } -> [
+        scope_resolution_qualifier;
+        scope_resolution_operator;
+        scope_resolution_name;
+      ]
+      | MemberSelectionExpression {
+        member_object;
+        member_operator;
+        member_name;
+      } -> [
+        member_object;
+        member_operator;
+        member_name;
+      ]
+      | SafeMemberSelectionExpression {
+        safe_member_object;
+        safe_member_operator;
+        safe_member_name;
+      } -> [
+        safe_member_object;
+        safe_member_operator;
+        safe_member_name;
+      ]
+      | YieldExpression {
+        yield_keyword;
+        yield_operand;
+      } -> [
+        yield_keyword;
+        yield_operand;
+      ]
+      | PrintExpression {
+        print_keyword;
+        print_expr;
+      } -> [
+        print_keyword;
+        print_expr;
+      ]
+      | PrefixUnaryOperator {
+        prefix_unary_operator;
+        prefix_unary_operand;
+      } -> [
+        prefix_unary_operator;
+        prefix_unary_operand;
+      ]
+      | PostfixUnaryOperator {
+        postfix_unary_operand;
+        postfix_unary_operator;
+      } -> [
+        postfix_unary_operand;
+        postfix_unary_operator;
+      ]
+      | BinaryOperator {
+        binary_left_operand;
+        binary_operator;
+        binary_right_operand;
+      } -> [
+        binary_left_operand;
+        binary_operator;
+        binary_right_operand;
+      ]
+      | InstanceofExpression {
+        instanceof_left_operand;
+        instanceof_operator;
+        instanceof_right_operand;
+      } -> [
+        instanceof_left_operand;
+        instanceof_operator;
+        instanceof_right_operand;
+      ]
+      | ConditionalExpression {
+        conditional_test;
+        conditional_question;
+        conditional_consequence;
+        conditional_colon;
+        conditional_alternative;
+      } -> [
+        conditional_test;
+        conditional_question;
+        conditional_consequence;
+        conditional_colon;
+        conditional_alternative;
+      ]
+      | FunctionCallExpression {
+        function_call_receiver;
+        function_call_lparen;
+        function_call_arguments;
+        function_call_rparen;
+      } -> [
+        function_call_receiver;
+        function_call_lparen;
+        function_call_arguments;
+        function_call_rparen;
+      ]
+      | ParenthesizedExpression {
+        paren_expr_left_paren;
+        paren_expr;
+        paren_expr_right_paren;
+      } -> [
+        paren_expr_left_paren;
+        paren_expr;
+        paren_expr_right_paren;
+      ]
+      | BracedExpression {
+        braced_expr_left_brace;
+        braced_expr;
+        braced_expr_right_brace;
+      } -> [
+        braced_expr_left_brace;
+        braced_expr;
+        braced_expr_right_brace;
+      ]
+      | ListExpression {
+        list_keyword;
+        list_left_paren;
+        list_members;
+        list_right_paren;
+      } -> [
+        list_keyword;
+        list_left_paren;
+        list_members;
+        list_right_paren;
+      ]
+      | CollectionLiteralExpression {
+        collection_literal_name;
+        collection_literal_left_brace;
+        collection_literal_initialization_list;
+        collection_literal_right_brace;
+      } -> [
+        collection_literal_name;
+        collection_literal_left_brace;
+        collection_literal_initialization_list;
+        collection_literal_right_brace;
+      ]
+      | ObjectCreationExpression {
+        object_creation_new;
+        object_creation_class;
+        object_creation_lparen;
+        object_creation_arguments;
+        object_creation_rparen;
+      } -> [
+        object_creation_new;
+        object_creation_class;
+        object_creation_lparen;
+        object_creation_arguments;
+        object_creation_rparen;
+      ]
+      | ArrayCreationExpression {
+        array_creation_left_bracket;
+        array_creation_members;
+        array_creation_right_bracket;
+      } -> [
+        array_creation_left_bracket;
+        array_creation_members;
+        array_creation_right_bracket;
+      ]
+      | ArrayIntrinsicExpression {
+        array_intrinsic_keyword;
+        array_intrinsic_left_paren;
+        array_intrinsic_members;
+        array_intrinsic_right_paren;
+      } -> [
+        array_intrinsic_keyword;
+        array_intrinsic_left_paren;
+        array_intrinsic_members;
+        array_intrinsic_right_paren;
+      ]
+      | ElementInitializer {
+        element_key;
+        element_arrow;
+        element_value;
+      } -> [
+        element_key;
+        element_arrow;
+        element_value;
+      ]
+      | SubscriptExpression {
+        subscript_receiver;
+        subscript_left;
+        subscript_index;
+        subscript_right;
+      } -> [
+        subscript_receiver;
+        subscript_left;
+        subscript_index;
+        subscript_right;
+      ]
+      | AwaitableCreationExpression {
+        awaitable_async;
+        awaitable_compound_statement;
+      } -> [
+        awaitable_async;
+        awaitable_compound_statement;
+      ]
+      | XHPChildrenDeclaration {
+        xhp_children;
+        xhp_children_expression;
+        xhp_children_semicolon;
+      } -> [
+        xhp_children;
+        xhp_children_expression;
+        xhp_children_semicolon;
+      ]
+      | XHPCategoryDeclaration {
+        xhp_category;
+        xhp_category_list;
+        xhp_category_semicolon;
+      } -> [
+        xhp_category;
+        xhp_category_list;
+        xhp_category_semicolon;
+      ]
+      | XHPEnumType {
+        xhp_enum_keyword;
+        xhp_enum_left_brace;
+        xhp_enum_values;
+        xhp_enum_right_brace;
+      } -> [
+        xhp_enum_keyword;
+        xhp_enum_left_brace;
+        xhp_enum_values;
+        xhp_enum_right_brace;
+      ]
+      | XHPRequired {
+        xhp_required_at;
+        xhp_required;
+      } -> [
+        xhp_required_at;
+        xhp_required;
+      ]
+      | XHPClassAttributeDeclaration {
+        xhp_attribute_keyword;
+        xhp_attribute_list;
+        xhp_attribute_semicolon;
+      } -> [
+        xhp_attribute_keyword;
+        xhp_attribute_list;
+        xhp_attribute_semicolon;
+      ]
+      | XHPClassAttribute {
+        xhp_attribute_decl_type;
+        xhp_attribute_decl_name;
+        xhp_attribute_decl_initializer;
+        xhp_attribute_decl_required;
+      } -> [
+        xhp_attribute_decl_type;
+        xhp_attribute_decl_name;
+        xhp_attribute_decl_initializer;
+        xhp_attribute_decl_required;
+      ]
+      | XHPAttribute {
+        xhp_attribute_name;
+        xhp_attribute_equal;
+        xhp_attribute_expr;
+      } -> [
+        xhp_attribute_name;
+        xhp_attribute_equal;
+        xhp_attribute_expr;
+      ]
+      | XHPOpen {
+        xhp_open_name;
+        xhp_open_attributes;
+        xhp_open_right_angle;
+      } -> [
+        xhp_open_name;
+        xhp_open_attributes;
+        xhp_open_right_angle;
+      ]
+      | XHPExpression {
+        xhp_open;
+        xhp_body;
+        xhp_close;
+      } -> [
+        xhp_open;
+        xhp_body;
+        xhp_close;
+      ]
+      | XHPClose {
+        xhp_close_left_angle;
+        xhp_close_name;
+        xhp_close_right_angle;
+      } -> [
+        xhp_close_left_angle;
+        xhp_close_name;
+        xhp_close_right_angle;
+      ]
+      | TypeConstant {
+        type_constant_left_type;
+        type_constant_separator;
+        type_constant_right_type;
+      } -> [
+        type_constant_left_type;
+        type_constant_separator;
+        type_constant_right_type;
+      ]
+      | VectorTypeSpecifier {
+        vector_array;
+        vector_left_angle;
+        vector_type;
+        vector_right_angle;
+      } -> [
+        vector_array;
+        vector_left_angle;
+        vector_type;
+        vector_right_angle;
+      ]
+      | TypeParameter {
+        type_variance_opt;
+        type_name;
+        type_constraint_list_opt;
+      } -> [
+        type_variance_opt;
+        type_name;
+        type_constraint_list_opt;
+      ]
+      | TypeConstraint {
+        constraint_keyword;
+        constraint_type;
+      } -> [
+        constraint_keyword;
+        constraint_type;
+      ]
+      | MapTypeSpecifier {
+        map_array;
+        map_left_angle;
+        map_key;
+        map_comma;
+        map_value;
+        map_right_angle;
+      } -> [
+        map_array;
+        map_left_angle;
+        map_key;
+        map_comma;
+        map_value;
+        map_right_angle;
+      ]
+      | ClosureTypeSpecifier {
+        closure_outer_left_paren;
+        closure_function;
+        closure_inner_left_paren;
+        closure_parameter_types;
+        closure_inner_right_paren;
+        closure_colon;
+        closure_return_type;
+        closure_outer_right_paren;
+      } -> [
+        closure_outer_left_paren;
+        closure_function;
+        closure_inner_left_paren;
+        closure_parameter_types;
+        closure_inner_right_paren;
+        closure_colon;
+        closure_return_type;
+        closure_outer_right_paren;
+      ]
+      | ClassnameTypeSpecifier {
+        classname_classname;
+        classname_left_angle;
+        classname_type;
+        classname_right_angle;
+      } -> [
+        classname_classname;
+        classname_left_angle;
+        classname_type;
+        classname_right_angle;
+      ]
+      | FieldSpecifier {
+        field_name;
+        field_arrow;
+        field_type;
+      } -> [
+        field_name;
+        field_arrow;
+        field_type;
+      ]
+      | FieldInitializer {
+        field_initializer_name;
+        field_initializer_arrow;
+        field_initializer_value;
+      } -> [
+        field_initializer_name;
+        field_initializer_arrow;
+        field_initializer_value;
+      ]
+      | ShapeTypeSpecifier {
+        shape_type_keyword;
+        shape_type_left_paren;
+        shape_type_fields;
+        shape_type_right_paren;
+      } -> [
+        shape_type_keyword;
+        shape_type_left_paren;
+        shape_type_fields;
+        shape_type_right_paren;
+      ]
+      | ShapeExpression {
+        shape_expression_keyword;
+        shape_expression_left_paren;
+        shape_expression_fields;
+        shape_expression_right_paren;
+      } -> [
+        shape_expression_keyword;
+        shape_expression_left_paren;
+        shape_expression_fields;
+        shape_expression_right_paren;
+      ]
+      | GenericTypeSpecifier {
+        generic_class_type;
+        generic_arguments;
+      } -> [
+        generic_class_type;
+        generic_arguments;
+      ]
+      | NullableTypeSpecifier {
+        nullable_question;
+        nullable_type;
+      } -> [
+        nullable_question;
+        nullable_type;
+      ]
+      | SoftTypeSpecifier {
+        soft_at;
+        soft_type;
+      } -> [
+        soft_at;
+        soft_type;
+      ]
+      | TypeArguments {
+        type_arguments_left_angle;
+        type_arguments;
+        type_arguments_right_angle;
+      } -> [
+        type_arguments_left_angle;
+        type_arguments;
+        type_arguments_right_angle;
+      ]
+      | TypeParameters {
+        type_parameters_left_angle;
+        type_parameters;
+        type_parameters_right_angle;
+      } -> [
+        type_parameters_left_angle;
+        type_parameters;
+        type_parameters_right_angle;
+      ]
+      | TupleTypeSpecifier {
+        tuple_left_paren;
+        tuple_types;
+        tuple_right_paren;
+      } -> [
+        tuple_left_paren;
+        tuple_types;
+        tuple_right_paren;
+      ]
+      | Error {
+        error;
+      } -> [
+        error;
+      ]
+      | ListItem {
+        list_item;
+        list_separator;
+      } -> [
+        list_item;
+        list_separator;
+      ]
+
 
     let children_names node =
       match node.syntax with
       | Missing -> []
       | Token _ -> []
-      | LiteralExpression
-        { literal_expression }->
-        [ "literal_expression" ]
-      | VariableExpression
-        { variable_expression }->
-        [ "variable_expression" ]
-      | QualifiedNameExpression
-        { qualified_name_expression } ->
-        [ "qualified_name_expression" ]
-      | PipeVariableExpression
-        { pipe_variable_expression } ->
-        ["pipe_variable_expression"]
-      | Error
-        { error } ->
-        [ "error" ]
       | SyntaxList _ -> []
-      | MemberSelectionExpression
-        { member_object; member_operator; member_name } ->
-        [ "member_object"; "member_operator"; "member_name" ]
-      | SafeMemberSelectionExpression
-        { safe_member_object; safe_member_operator; safe_member_name } ->
-        [ "safe_member_object"; "safe_member_operator"; "safe_member_name" ]
-      | ScopeResolutionExpression
-        { scope_resolution_qualifier; scope_resolution_operator;
-          scope_resolution_name } ->
-        [ "scope_resolution_qualifier"; "scope_resolution_operator";
-          "scope_resolution_name" ]
-      | YieldExpression
-        { yield_keyword; yield_operand } ->
-        [ "yield_keyword"; "yield_operand" ]
-      | PrintExpression
-        { print_keyword; print_expr; } ->
-        [ "print_keyword"; "print_expr"; ]
-      | CastExpression
-        { cast_left_paren; cast_type; cast_right_paren; cast_operand } ->
-        [ "cast_left_paren"; "cast_type"; "cast_right_paren"; "cast_operand" ]
-      | LambdaExpression
-        { lambda_async; lambda_signature; lambda_arrow; lambda_body } ->
-        [ "lambda_async"; "lambda_signature"; "lambda_arrow"; "lambda_body" ]
-      | LambdaSignature
-        { lambda_left_paren; lambda_parameter_list; lambda_right_paren;
-          lambda_colon; lambda_type } ->
-        [ "lambda_left_paren"; "lambda_parameter_list"; "lambda_right_paren";
-          "lambda_colon"; "lambda_type" ]
-      | AnonymousFunction
-        { anonymous_async; anonymous_function; anonymous_left_paren;
-          anonymous_parameter_list; anonymous_right_paren; anonymous_colon;
-          anonymous_type; anonymous_use; anonymous_body } ->
-        [ "anonymous_async"; "anonymous_function"; "anonymous_left_paren";
-          "anonymous_parameter_list"; "anonymous_right_paren";
-          "anonymous_colon"; "anonymous_type"; "anonymous_use";
-          "anonymous_body" ]
-      | AnonymousFunctionUseClause
-        { anonymous_use_keyword; anonymous_use_left_paren;
-          anonymous_use_variables; anonymous_use_right_paren } ->
-        [ "anonymous_use_keyword"; "anonymous_use_left_paren";
-          "anonymous_use_variables"; "anonymous_use_right_paren" ]
-      | ListItem
-        { list_item; list_separator } ->
-        [ "list_item"; "list_separator" ]
-      | ScriptHeader
-        { header_less_than; header_question; header_language } ->
-        [ "header_less_than"; "header_question"; "header_language" ]
-      | Script
-        { script_header; script_declarations } ->
-        [ "script_header"; "script_declarations" ]
-      | EnumDeclaration
-        { enum_keyword; enum_name; enum_colon; enum_base; enum_type;
-          enum_left_brace; enum_enumerators; enum_right_brace } ->
-        [ "enum_keyword"; "enum_name"; "enum_colon"; "enum_base"; "enum_type";
-          "enum_left_brace"; "enum_enumerators"; "enum_right_brace" ]
-      | Enumerator
-        { enumerator_name; enumerator_equal; enumerator_value;
-          enumerator_semicolon } ->
-        [ "enumerator_name"; "enumerator_equal"; "enumerator_value";
-          "enumerator_semicolon" ]
-      | AliasDeclaration
-        { alias_attribute_spec; alias_keyword; alias_name;
-          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
-          alias_semicolon } ->
-        [ "alias_attribute_spec"; "alias_keyword"; "alias_name";
-          "alias_generic_parameter"; "alias_constraint"; "alias_equal";
-          "alias_type"; "alias_semicolon" ]
-      | PropertyDeclaration
-        { property_modifiers; property_type;
-          property_declarators; property_semicolon } ->
-        [ "property_modifiers"; "property_type";
-          "property_declarators"; "property_semicolon" ]
-      | PropertyDeclarator
-        { property_name; property_initializer } ->
-        [ "property_name"; "property_initializer" ]
-      | NamespaceDeclaration
-        { namespace_keyword; namespace_name; namespace_body } ->
-        [ "namespace_keyword"; "namespace_name"; "namespace_body" ]
-      | NamespaceBody
-        { namespace_left_brace; namespace_declarations;
-          namespace_right_brace } ->
-        [ "namespace_left_brace"; "namespace_declarations";
-          "namespace_right_brace" ]
-      | NamespaceGroupUseDeclaration
-        { namespace_group_use_keyword; namespace_group_use_kind;
-          namespace_group_use_prefix; namespace_group_use_left_brace;
-          namespace_group_use_clauses; namespace_group_use_right_brace;
-          namespace_group_use_semicolon } ->
-        [ "namespace_group_use_keyword"; "namespace_group_use_kind";
-          "namespace_group_use_prefix"; "namespace_group_use_left_brace";
-          "namespace_group_use_clauses"; "namespace_group_use_right_brace";
-          "namespace_group_use_semicolon" ]
-      | NamespaceUseDeclaration
-        { namespace_use_keyword; namespace_use_kind; namespace_use_clauses;
-          namespace_use_semicolon } ->
-        [ "namespace_use"; "namespace_use_kind"; "namespace_use_clauses";
-          "namespace_use_keyword_semicolon" ]
-      | NamespaceUseClause
-        { namespace_use_clause_kind; namespace_use_name;
-          namespace_use_as; namespace_use_alias } ->
-        [ "namespace_use_clause_kind"; "namespace_use_name";
-          "namespace_use_as"; "namespace_use_alias" ]
-      | FunctionDeclaration
-        { function_attribute_spec; function_declaration_header; function_body }
-        -> [ "function_attribute_spec"; "function_declaration_header";
-        "function_body" ]
-      | FunctionDeclarationHeader
-        { function_async; function_keyword; function_name;
-          function_type_parameter_list; function_left_paren;
-          function_parameter_list;
-          function_right_paren; function_colon; function_type; } ->
-        [ "function_async"; "function_keyword"; "function_name";
-          "function_type_parameter_list"; "function_left_paren";
-          "function_parameter_list";
-          "function_right_paren"; "function_colon"; "function_type"; ]
-      | MethodishDeclaration
-        { methodish_attribute; methodish_modifiers;
-          methodish_function_decl_header;
-          methodish_function_body; methodish_semicolon } ->
-        [ "methodish_attribute"; "methodish_modifiers";
-          "methodish_function_decl_header"; "methodish_function_body";
-          "methodish_semicolon" ]
-      | ClassishDeclaration
-        { classish_attribute; classish_modifiers; classish_keyword;
-          classish_name; classish_type_parameter_list; classish_extends;
-          classish_extends_list; classish_implements; classish_implements_list;
-          classish_body } ->
-        [ "classish_attribute"; "classish_modifiers";
-          "classish_keyword"; "classish_name"; "classish_type_parameter_list";
-          "classish_extends"; "classish_extends_list"; "classish_implements";
-          "classish_implements_list"; "classish_body" ]
-      | ClassishBody
-        { classish_body_left_brace; classish_body_elements;
-          classish_body_right_brace } ->
-        [ "classish_body_left_brace"; "classish_body_elements";
-          "classish_body_right_brace" ]
-      | XHPChildrenDeclaration
-        { xhp_children; xhp_children_expression; xhp_children_semicolon } ->
-        [ "xhp_children"; "xhp_children_expression"; "xhp_children_semicolon" ]
-      | XHPCategoryDeclaration
-        { xhp_category; xhp_category_list; xhp_category_semicolon } ->
-        [ "xhp_category"; "xhp_category_list"; "xhp_category_semicolon" ]
-      | XHPEnumType
-        { xhp_enum_keyword; xhp_enum_left_brace; xhp_enum_values;
-          xhp_enum_right_brace } ->
-        [ "xhp_enum_keyword"; "xhp_enum_left_brace"; "xhp_enum_values";
-          "xhp_enum_right_brace" ]
-      | XHPRequired
-        { xhp_required_at; xhp_required } ->
-        [ "xhp_required_at"; "xhp_required" ]
-      | XHPClassAttributeDeclaration
-        { xhp_attribute_keyword; xhp_attribute_list;
-          xhp_attribute_semicolon } ->
-        [ "xhp_attribute_keyword"; "xhp_attribute_list";
-          "xhp_attribute_semicolon" ]
-      | XHPClassAttribute
-        { xhp_attribute_decl_type; xhp_attribute_decl_name;
-          xhp_attribute_decl_initializer; xhp_attribute_decl_required } ->
-        [ "xhp_attribute_decl_type"; "xhp_attribute_decl_name";
-          "xhp_attribute_decl_initializer"; "xhp_attribute_decl_required" ]
-      | TraitUse
-        { trait_use_keyword; trait_use_name_list; trait_use_semicolon; } ->
-        [ "trait_use_keyword"; "trait_use_name_list"; "trait_use_semicolon"; ]
-      | RequireClause
-        { require_keyword; require_kind; require_name; require_semicolon } ->
-        [ "require_keyword"; "require_kind"; "require_name";
-          "require_semicolon" ]
-      | ConstDeclaration
-        { const_abstract; const_keyword; const_type_specifier;
-          const_declarator_list; const_semicolon; } ->
-        [ "const_abstract"; "const_keyword"; "const_type_specifier";
-          "const_declarator_list"; "const_semicolon"; ]
-      | ConstantDeclarator
-        { constant_declarator_name; constant_declarator_initializer; } ->
-        [ "constant_declarator_name"; "constant_declarator_initializer"; ]
-      | TypeConstDeclaration
-        { type_const_abstract; type_const_keyword; type_const_type_keyword;
-          type_const_name; type_const_type_constraint; type_const_equal;
-          type_const_type_specifier; type_const_semicolon; } ->
-        [ "type_const_abstract"; "type_const_keyword";
-          "type_const_type_keyword"; "type_const_name";
-          "type_const_type_constraint"; "type_const_equal";
-          "type_const_type_specifier"; "type_const_semicolon"; ]
-      | DecoratedExpression
-        { decorated_expression_decorator; decorated_expression_expression; } ->
-        [ "decorated_expression_decorator"; "decorated_expression_expression"; ]
-      | ParameterDeclaration
-        { param_attribute; param_visibility; param_type; param_name;
-          param_default }
-        ->
-        [ "param_attribute"; "param_visibility"; "param_type"; "param_name";
-          "param_default" ]
-      | AttributeSpecification
-        { attribute_spec_left_double_angle; attribute_spec_attribute_list ;
-          attribute_spec_right_double_angle } ->
-        [ "attribute_spec_left_double_angle"; "attribute_spec_attribute_list" ;
-          "attribute_spec_right_double_angle" ]
-      | Attribute
-        { attribute_name; attribute_left_paren; attribute_values;
-          attribute_right_paren } ->
-        [ "attribute_name"; "attribute_left_paren"; "attribute_values";
-          "attribute_right_paren" ]
-      | InclusionExpression
-        { inclusion_require; inclusion_filename } ->
-        [ "inclusion_require"; "inclusion_filename" ]
-      | InclusionDirective
-        { inclusion_expression; inclusion_semicolon } ->
-        [ "inclusion_expression"; "inclusion_semicolon" ]
-      | CompoundStatement
-        { compound_left_brace; compound_statements; compound_right_brace } ->
-        [ "compound_left_brace"; "compound_statements"; "compound_right_brace" ]
-      | ExpressionStatement
-        { expr_statement_expr; expr_statement_semicolon } ->
-        [ "expr_statement_expr"; "expr_statement_semicolon" ]
-      | WhileStatement
-        { while_keyword; while_left_paren; while_condition;
-          while_right_paren; while_body } ->
-        [ "while_keyword"; "while_left_paren"; "while_condition";
-          "while_right_paren"; "while_body" ]
-      | IfStatement
-        { if_keyword; if_left_paren; if_condition; if_right_paren;
-          if_statement; if_elseif_clauses; if_else_clause } ->
-        [ "if_keyword"; "if_left_paren"; "if_condition"; "if_right_paren";
-          "if_statement"; "if_elseif_clauses"; "if_else_clause" ]
-      | ElseifClause
-        { elseif_keyword; elseif_left_paren; elseif_condition;
-          elseif_right_paren; elseif_statement } ->
-        [ "elseif_keyword"; "elseif_left_paren"; "elseif_condition";
-          "elseif_right_paren"; "elseif_statement" ]
-      | ElseClause
-        { else_keyword; else_statement } ->
-        [ "else_keyword"; "else_statement" ]
-      | TryStatement {try_keyword; try_compound_statement; catch_clauses;
-                      finally_clause} ->
-        ["try_keyword"; "try_compound_statement"; "catch_clauses";
-        "finally_clause"]
-      | CatchClause
-        { catch_keyword; catch_left_paren; catch_type; catch_variable;
-          catch_right_paren; catch_compound_statement} ->
-        [ "catch_keyword"; "catch_left_paren"; "catch_type"; "catch_variable";
-          "catch_right_paren"; "catch_compound_statement" ]
-      | FinallyClause {finally_keyword; finally_compound_statement} ->
-        ["finally_keyword"; "finally_compound_statement"]
-      | DoStatement
-        { do_keyword; do_statement; do_while_keyword; do_left_paren;
-          do_condition_expr; do_right_paren; do_semicolon } ->
-        [ "do_keyword"; "do_statement"; "do_while_keyword"; "do_left_paren";
-          "do_condition_expr"; "do_right_paren"; "do_semicolon" ]
-      | ForStatement
-        { for_keyword; for_left_paren; for_initializer_expr;
-          for_first_semicolon; for_control_expr; for_second_semicolon;
-          for_end_of_loop_expr; for_right_paren; for_statement } ->
-        [ "for_keyword"; "for_left_paren"; "for_initializer_expr";
-          "for_first_semicolon"; "for_control_expr"; "for_second_semicolon";
-          "for_end_of_loop_expr"; "for_right_paren"; "for_statement" ]
-      | ForeachStatement
-        { foreach_keyword; foreach_left_paren; foreach_collection_name;
-          foreach_await_opt; foreach_as; foreach_key_opt; foreach_key_arrow_opt;
-          foreach_value; foreach_right_paren; foreach_statement } ->
-        [ "foreach_keyword"; "foreach_left_paren"; "foreach_collection_name";
-          "foreach_await_opt"; "foreach_as"; "foreach_key_opt";
-          "foreach_key_arrow_opt"; "foreach_value"; "foreach_right_paren";
-          "foreach_statement" ]
-      | SwitchStatement
-        { switch_keyword; switch_left_paren; switch_expr;
-          switch_right_paren; switch_compound_statement } ->
-        [ "switch_keyword"; "switch_left_paren"; "switch_expr";
-          "switch_right_paren"; "switch_compound_statement" ]
-      | CaseStatement
-        { case_keyword; case_expr; case_colon; case_stmt } ->
-        [ "case_keyword"; "case_expr"; "case_colon"; "case_stmt" ]
-      | DefaultStatement
-        { default_keyword; default_colon; default_stmt } ->
-        [ "default_keyword"; "default_colon"; "default_stmt" ]
-      | ReturnStatement
-        { return_keyword; return_expr; return_semicolon } ->
-        [ "return_keyword"; "return_expr"; "return_semicolon" ]
-      | ThrowStatement
-        { throw_keyword; throw_expr; throw_semicolon } ->
-        [ "throw_keyword"; "throw_expr"; "throw_semicolon" ]
-      | BreakStatement
-        { break_keyword; break_level; break_semicolon } ->
-        [ "break_keyword"; "break_level"; "break_semicolon" ]
-      | ContinueStatement
-        { continue_keyword; continue_level; continue_semicolon } ->
-        [ "continue_keyword"; "continue_level"; "continue_semicolon" ]
-      | FunctionStaticStatement
-        { static_static; static_declarations; static_semicolon } ->
-        [ "static_static"; "static_declarations"; "static_semicolon" ]
-      | SimpleInitializer
-        { simple_initializer_equal; simple_initializer_value } ->
-        [ "simple_initializer_equal"; "simple_initializer_value" ]
-      | StaticDeclarator
-        { static_name; static_initializer } ->
-        [ "static_name"; "static_initializer" ]
-      | EchoStatement
-        { echo_keyword; echo_expression_list; echo_semicolon; } ->
-        [ "echo_keyword"; "echo_expression_list"; "echo_semicolon"; ]
-      | PrefixUnaryOperator
-        { prefix_unary_operator; prefix_unary_operand } ->
-        [ "prefix_unary_operator"; "prefix_unary_operand" ]
-      | PostfixUnaryOperator
-        { postfix_unary_operand; postfix_unary_operator } ->
-        [ "postfix_unary_operand"; "postfix_unary_operator" ]
-      | BinaryOperator
-        { binary_left_operand; binary_operator; binary_right_operand } ->
-        [ "binary_left_operand"; "binary_operator"; "binary_right_operand" ]
-      | InstanceofExpression
-        { instanceof_left_operand; instanceof_operator;
-          instanceof_right_operand } ->
-        [ "instanceof_left_operand"; "instanceof_operator";
-          "instanceof_right_operand" ]
-      | ConditionalExpression
-        { conditional_test; conditional_question; conditional_consequence;
-          conditional_colon; conditional_alternative } ->
-        [ "conditional_test"; "conditional_question"; "conditional_consequence";
-          "conditional_colon"; "conditional_alternative" ]
-      | FunctionCallExpression
-        { function_call_receiver; function_call_lparen;
-          function_call_arguments; function_call_rparen } ->
-        [ "function_call_receiver"; "function_call_lparen";
-          "function_call_arguments"; "function_call_rparen" ]
-      | ParenthesizedExpression
-        { paren_expr_left_paren; paren_expr; paren_expr_right_paren } ->
-        [ "paren_expr_left_paren"; "paren_expr"; "paren_expr_right_paren" ]
-      | BracedExpression
-        { braced_expr_left_brace; braced_expr; braced_expr_right_brace } ->
-        [ "braced_expr_left_brace"; "braced_expr"; "braced_expr_right_brace" ]
-      | ListExpression
-        { list_keyword; list_left_paren; list_members;
-          list_right_paren } ->
-        [ "list_keyword"; "list_left_paren"; "list_members";
-          "list_right_paren" ]
-      | CollectionLiteralExpression
-        { collection_literal_name; collection_literal_left_brace;
-          collection_literal_initialization_list;
-          collection_literal_right_brace; } ->
-        [ "collection_literal_name"; "collection_literal_left_brace";
-          "collection_literal_initialization_list";
-          "collection_literal_right_brace"; ]
-      | ObjectCreationExpression
-        { object_creation_new; object_creation_class;
-          object_creation_lparen; object_creation_arguments;
-          object_creation_rparen } ->
-        [ "object_creation_new"; "object_creation_class";
-          "object_creation_lparen"; "object_creation_arguments";
-          "object_creation_rparen" ]
-      | ShapeExpression
-        { shape_expression_keyword; shape_expression_left_paren;
-          shape_expression_fields; shape_expression_right_paren } ->
-        [ "shape_expression_keyword"; "shape_expression_left_paren";
-          "shape_expression_fields"; "shape_expression_right_paren" ]
-      | FieldInitializer
-        { field_initializer_name; field_initializer_arrow;
-          field_initializer_value } ->
-        [ "field_initializer_name"; "field_initializer_arrow";
-          "field_initializer_value" ]
-      | ArrayCreationExpression
-        { array_creation_left_bracket; array_creation_members;
-          array_creation_right_bracket } ->
-        [ "array_creation_left_bracket"; "array_creation_members";
-          "array_creation_right_bracket" ]
-      | ArrayIntrinsicExpression
-       { array_intrinsic_keyword; array_intrinsic_left_paren;
-         array_intrinsic_members; array_intrinsic_right_paren } ->
-       [ "array_intrinsic_keyword"; "array_intrinsic_left_paren";
-         "array_intrinsic_members"; "array_intrinsic_right_paren" ]
-     | ElementInitializer
-       { element_key; element_arrow; element_value } ->
-       [ "element_key"; "element_arrow"; "element_value" ]
-      | SubscriptExpression
-        { subscript_receiver; subscript_left;
-          subscript_index; subscript_right } ->
-        [ "subscript_receiver"; "subscript_left";
-          "subscript_index"; "subscript_right" ]
-      | AwaitableCreationExpression
-        { awaitable_async; awaitable_compound_statement; } ->
-        [ "awaitable_async"; "awaitable_compound_statement"; ]
-      | XHPExpression
-        { xhp_open; xhp_body; xhp_close } ->
-        [ "xhp_open"; "xhp_body"; "xhp_close" ]
-      | XHPOpen
-        { xhp_open_name; xhp_open_attributes; xhp_open_right_angle } ->
-        [ "xhp_open_name"; "xhp_open_attributes"; "xhp_open_right_angle" ]
-      | XHPClose
-        { xhp_close_left_angle; xhp_close_name; xhp_close_right_angle } ->
-        [ "xhp_close_left_angle"; "xhp_close_name"; "xhp_close_right_angle" ]
-      | XHPAttribute
-        { xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expr } ->
-        [ "xhp_attribute_name"; "xhp_attribute_equal"; "xhp_attribute_expr" ]
-      | TypeConstant
-        { type_constant_left_type; type_constant_separator;
-          type_constant_right_type } ->
-        [ "type_constant_left_type"; "type_constant_separator";
-        "type_constant_right_type" ]
-      | SimpleTypeSpecifier
-        { simple_type_specifier } ->
-        [ "simple_type_specifier" ]
-      | TypeParameter
-        { type_variance_opt; type_name; type_constraint_list_opt  } ->
-        [ "type_variance_opt"; "type_name"; "type_constraint_list_opt " ]
-      | TypeConstraint { constraint_keyword; constraint_type } ->
-        [ "constraint_keyword"; "constraint_type" ]
-      | SoftTypeSpecifier
-        { soft_at; soft_type } ->
-        [ "soft_at"; "soft_type" ]
-      | NullableTypeSpecifier
-        { nullable_question; nullable_type } ->
-        [ "nullable_question"; "nullable_type" ]
-      | GenericTypeSpecifier
-        { generic_class_type; generic_arguments } ->
-        [ "generic_class_type"; "generic_arguments" ]
-      | TypeArguments
-        { type_arguments_left_angle; type_arguments;
-          type_arguments_right_angle } ->
-        [ "type_arguments_left_angle"; "type_arguments";
-          "type_arguments_right_angle" ]
-      | TypeParameters
-        { type_parameters_left_angle; type_parameters;
-          type_parameters_right_angle } ->
-        [ "type_parameters_left_angle"; "type_parameters";
-          "type_parameters_right_angle" ]
-      | TupleTypeSpecifier
-        { tuple_left_paren; tuple_types; tuple_right_paren } ->
-        [ "tuple_left_paren"; "tuple_types"; "tuple_right_paren" ]
-      | VectorTypeSpecifier
-        { vector_array; vector_left_angle; vector_type; vector_right_angle } ->
-        [ "vector_array"; "vector_left_angle"; "vector_type";
-          "vector_right_angle" ]
-      | MapTypeSpecifier
-        { map_array; map_left_angle; map_key; map_comma; map_value;
-          map_right_angle } ->
-        [ "map_array"; "map_left_angle"; "map_key"; "map_comma"; "map_value";
-          "map_right_angle" ]
-      | ClosureTypeSpecifier
-        { closure_outer_left_paren; closure_function;
-          closure_inner_left_paren; closure_parameter_types;
-          closure_inner_right_paren; closure_colon; closure_return_type;
-          closure_outer_right_paren } ->
-        [ "closure_outer_left_paren"; "closure_function";
-          "closure_inner_left_paren"; "closure_parameter_types";
-          "closure_inner_right_paren"; "closure_colon"; "closure_return_type";
-          "closure_outer_right_paren" ]
-      | ClassnameTypeSpecifier
-        { classname_classname; classname_left_angle; classname_type;
-          classname_right_angle } ->
-        [ "classname_classname"; "classname_left_angle"; "classname_type";
-          "classname_right_angle" ]
-      | ShapeTypeSpecifier
-        { shape_type_keyword; shape_type_left_paren;
-          shape_type_fields; shape_type_right_paren } ->
-        [ "shape_type_keyword"; "shape_type_left_paren";
-          "shape_type_fields"; "shape_type_right_paren" ]
-      | FieldSpecifier
-        { field_name; field_arrow; field_type } ->
-        [ "field_name"; "field_arrow"; "field_type" ]
+      | ScriptHeader {
+        header_less_than;
+        header_question;
+        header_language;
+      } -> [
+        "header_less_than";
+        "header_question";
+        "header_language";
+      ]
+      | Script {
+        script_header;
+        script_declarations;
+      } -> [
+        "script_header";
+        "script_declarations";
+      ]
+      | SimpleTypeSpecifier {
+        simple_type_specifier;
+      } -> [
+        "simple_type_specifier";
+      ]
+      | LiteralExpression {
+        literal_expression;
+      } -> [
+        "literal_expression";
+      ]
+      | VariableExpression {
+        variable_expression;
+      } -> [
+        "variable_expression";
+      ]
+      | QualifiedNameExpression {
+        qualified_name_expression;
+      } -> [
+        "qualified_name_expression";
+      ]
+      | PipeVariableExpression {
+        pipe_variable_expression;
+      } -> [
+        "pipe_variable_expression";
+      ]
+      | EnumDeclaration {
+        enum_keyword;
+        enum_name;
+        enum_colon;
+        enum_base;
+        enum_type;
+        enum_left_brace;
+        enum_enumerators;
+        enum_right_brace;
+      } -> [
+        "enum_keyword";
+        "enum_name";
+        "enum_colon";
+        "enum_base";
+        "enum_type";
+        "enum_left_brace";
+        "enum_enumerators";
+        "enum_right_brace";
+      ]
+      | Enumerator {
+        enumerator_name;
+        enumerator_equal;
+        enumerator_value;
+        enumerator_semicolon;
+      } -> [
+        "enumerator_name";
+        "enumerator_equal";
+        "enumerator_value";
+        "enumerator_semicolon";
+      ]
+      | AliasDeclaration {
+        alias_attribute_spec;
+        alias_keyword;
+        alias_name;
+        alias_generic_parameter;
+        alias_constraint;
+        alias_equal;
+        alias_type;
+        alias_semicolon;
+      } -> [
+        "alias_attribute_spec";
+        "alias_keyword";
+        "alias_name";
+        "alias_generic_parameter";
+        "alias_constraint";
+        "alias_equal";
+        "alias_type";
+        "alias_semicolon";
+      ]
+      | PropertyDeclaration {
+        property_modifiers;
+        property_type;
+        property_declarators;
+        property_semicolon;
+      } -> [
+        "property_modifiers";
+        "property_type";
+        "property_declarators";
+        "property_semicolon";
+      ]
+      | PropertyDeclarator {
+        property_name;
+        property_initializer;
+      } -> [
+        "property_name";
+        "property_initializer";
+      ]
+      | NamespaceDeclaration {
+        namespace_keyword;
+        namespace_name;
+        namespace_body;
+      } -> [
+        "namespace_keyword";
+        "namespace_name";
+        "namespace_body";
+      ]
+      | NamespaceBody {
+        namespace_left_brace;
+        namespace_declarations;
+        namespace_right_brace;
+      } -> [
+        "namespace_left_brace";
+        "namespace_declarations";
+        "namespace_right_brace";
+      ]
+      | NamespaceUseDeclaration {
+        namespace_use_keyword;
+        namespace_use_kind;
+        namespace_use_clauses;
+        namespace_use_semicolon;
+      } -> [
+        "namespace_use_keyword";
+        "namespace_use_kind";
+        "namespace_use_clauses";
+        "namespace_use_semicolon";
+      ]
+      | NamespaceGroupUseDeclaration {
+        namespace_group_use_keyword;
+        namespace_group_use_kind;
+        namespace_group_use_prefix;
+        namespace_group_use_left_brace;
+        namespace_group_use_clauses;
+        namespace_group_use_right_brace;
+        namespace_group_use_semicolon;
+      } -> [
+        "namespace_group_use_keyword";
+        "namespace_group_use_kind";
+        "namespace_group_use_prefix";
+        "namespace_group_use_left_brace";
+        "namespace_group_use_clauses";
+        "namespace_group_use_right_brace";
+        "namespace_group_use_semicolon";
+      ]
+      | NamespaceUseClause {
+        namespace_use_clause_kind;
+        namespace_use_name;
+        namespace_use_as;
+        namespace_use_alias;
+      } -> [
+        "namespace_use_clause_kind";
+        "namespace_use_name";
+        "namespace_use_as";
+        "namespace_use_alias";
+      ]
+      | FunctionDeclaration {
+        function_attribute_spec;
+        function_declaration_header;
+        function_body;
+      } -> [
+        "function_attribute_spec";
+        "function_declaration_header";
+        "function_body";
+      ]
+      | FunctionDeclarationHeader {
+        function_async;
+        function_keyword;
+        function_name;
+        function_type_parameter_list;
+        function_left_paren;
+        function_parameter_list;
+        function_right_paren;
+        function_colon;
+        function_type;
+      } -> [
+        "function_async";
+        "function_keyword";
+        "function_name";
+        "function_type_parameter_list";
+        "function_left_paren";
+        "function_parameter_list";
+        "function_right_paren";
+        "function_colon";
+        "function_type";
+      ]
+      | MethodishDeclaration {
+        methodish_attribute;
+        methodish_modifiers;
+        methodish_function_decl_header;
+        methodish_function_body;
+        methodish_semicolon;
+      } -> [
+        "methodish_attribute";
+        "methodish_modifiers";
+        "methodish_function_decl_header";
+        "methodish_function_body";
+        "methodish_semicolon";
+      ]
+      | ClassishDeclaration {
+        classish_attribute;
+        classish_modifiers;
+        classish_keyword;
+        classish_name;
+        classish_type_parameter_list;
+        classish_extends;
+        classish_extends_list;
+        classish_implements;
+        classish_implements_list;
+        classish_body;
+      } -> [
+        "classish_attribute";
+        "classish_modifiers";
+        "classish_keyword";
+        "classish_name";
+        "classish_type_parameter_list";
+        "classish_extends";
+        "classish_extends_list";
+        "classish_implements";
+        "classish_implements_list";
+        "classish_body";
+      ]
+      | ClassishBody {
+        classish_body_left_brace;
+        classish_body_elements;
+        classish_body_right_brace;
+      } -> [
+        "classish_body_left_brace";
+        "classish_body_elements";
+        "classish_body_right_brace";
+      ]
+      | TraitUse {
+        trait_use_keyword;
+        trait_use_name_list;
+        trait_use_semicolon;
+      } -> [
+        "trait_use_keyword";
+        "trait_use_name_list";
+        "trait_use_semicolon";
+      ]
+      | RequireClause {
+        require_keyword;
+        require_kind;
+        require_name;
+        require_semicolon;
+      } -> [
+        "require_keyword";
+        "require_kind";
+        "require_name";
+        "require_semicolon";
+      ]
+      | ConstDeclaration {
+        const_abstract;
+        const_keyword;
+        const_type_specifier;
+        const_declarator_list;
+        const_semicolon;
+      } -> [
+        "const_abstract";
+        "const_keyword";
+        "const_type_specifier";
+        "const_declarator_list";
+        "const_semicolon";
+      ]
+      | ConstantDeclarator {
+        constant_declarator_name;
+        constant_declarator_initializer;
+      } -> [
+        "constant_declarator_name";
+        "constant_declarator_initializer";
+      ]
+      | TypeConstDeclaration {
+        type_const_abstract;
+        type_const_keyword;
+        type_const_type_keyword;
+        type_const_name;
+        type_const_type_constraint;
+        type_const_equal;
+        type_const_type_specifier;
+        type_const_semicolon;
+      } -> [
+        "type_const_abstract";
+        "type_const_keyword";
+        "type_const_type_keyword";
+        "type_const_name";
+        "type_const_type_constraint";
+        "type_const_equal";
+        "type_const_type_specifier";
+        "type_const_semicolon";
+      ]
+      | DecoratedExpression {
+        decorated_expression_decorator;
+        decorated_expression_expression;
+      } -> [
+        "decorated_expression_decorator";
+        "decorated_expression_expression";
+      ]
+      | ParameterDeclaration {
+        param_attribute;
+        param_visibility;
+        param_type;
+        param_name;
+        param_default;
+      } -> [
+        "param_attribute";
+        "param_visibility";
+        "param_type";
+        "param_name";
+        "param_default";
+      ]
+      | AttributeSpecification {
+        attribute_spec_left_double_angle;
+        attribute_spec_attribute_list;
+        attribute_spec_right_double_angle;
+      } -> [
+        "attribute_spec_left_double_angle";
+        "attribute_spec_attribute_list";
+        "attribute_spec_right_double_angle";
+      ]
+      | Attribute {
+        attribute_name;
+        attribute_left_paren;
+        attribute_values;
+        attribute_right_paren;
+      } -> [
+        "attribute_name";
+        "attribute_left_paren";
+        "attribute_values";
+        "attribute_right_paren";
+      ]
+      | InclusionExpression {
+        inclusion_require;
+        inclusion_filename;
+      } -> [
+        "inclusion_require";
+        "inclusion_filename";
+      ]
+      | InclusionDirective {
+        inclusion_expression;
+        inclusion_semicolon;
+      } -> [
+        "inclusion_expression";
+        "inclusion_semicolon";
+      ]
+      | CompoundStatement {
+        compound_left_brace;
+        compound_statements;
+        compound_right_brace;
+      } -> [
+        "compound_left_brace";
+        "compound_statements";
+        "compound_right_brace";
+      ]
+      | ExpressionStatement {
+        expr_statement_expr;
+        expr_statement_semicolon;
+      } -> [
+        "expr_statement_expr";
+        "expr_statement_semicolon";
+      ]
+      | WhileStatement {
+        while_keyword;
+        while_left_paren;
+        while_condition;
+        while_right_paren;
+        while_body;
+      } -> [
+        "while_keyword";
+        "while_left_paren";
+        "while_condition";
+        "while_right_paren";
+        "while_body";
+      ]
+      | IfStatement {
+        if_keyword;
+        if_left_paren;
+        if_condition;
+        if_right_paren;
+        if_statement;
+        if_elseif_clauses;
+        if_else_clause;
+      } -> [
+        "if_keyword";
+        "if_left_paren";
+        "if_condition";
+        "if_right_paren";
+        "if_statement";
+        "if_elseif_clauses";
+        "if_else_clause";
+      ]
+      | ElseifClause {
+        elseif_keyword;
+        elseif_left_paren;
+        elseif_condition;
+        elseif_right_paren;
+        elseif_statement;
+      } -> [
+        "elseif_keyword";
+        "elseif_left_paren";
+        "elseif_condition";
+        "elseif_right_paren";
+        "elseif_statement";
+      ]
+      | ElseClause {
+        else_keyword;
+        else_statement;
+      } -> [
+        "else_keyword";
+        "else_statement";
+      ]
+      | TryStatement {
+        try_keyword;
+        try_compound_statement;
+        catch_clauses;
+        finally_clause;
+      } -> [
+        "try_keyword";
+        "try_compound_statement";
+        "catch_clauses";
+        "finally_clause";
+      ]
+      | CatchClause {
+        catch_keyword;
+        catch_left_paren;
+        catch_type;
+        catch_variable;
+        catch_right_paren;
+        catch_compound_statement;
+      } -> [
+        "catch_keyword";
+        "catch_left_paren";
+        "catch_type";
+        "catch_variable";
+        "catch_right_paren";
+        "catch_compound_statement";
+      ]
+      | FinallyClause {
+        finally_keyword;
+        finally_compound_statement;
+      } -> [
+        "finally_keyword";
+        "finally_compound_statement";
+      ]
+      | DoStatement {
+        do_keyword;
+        do_statement;
+        do_while_keyword;
+        do_left_paren;
+        do_condition_expr;
+        do_right_paren;
+        do_semicolon;
+      } -> [
+        "do_keyword";
+        "do_statement";
+        "do_while_keyword";
+        "do_left_paren";
+        "do_condition_expr";
+        "do_right_paren";
+        "do_semicolon";
+      ]
+      | ForStatement {
+        for_keyword;
+        for_left_paren;
+        for_initializer_expr;
+        for_first_semicolon;
+        for_control_expr;
+        for_second_semicolon;
+        for_end_of_loop_expr;
+        for_right_paren;
+        for_statement;
+      } -> [
+        "for_keyword";
+        "for_left_paren";
+        "for_initializer_expr";
+        "for_first_semicolon";
+        "for_control_expr";
+        "for_second_semicolon";
+        "for_end_of_loop_expr";
+        "for_right_paren";
+        "for_statement";
+      ]
+      | ForeachStatement {
+        foreach_keyword;
+        foreach_left_paren;
+        foreach_collection_name;
+        foreach_await_opt;
+        foreach_as;
+        foreach_key_opt;
+        foreach_key_arrow_opt;
+        foreach_value;
+        foreach_right_paren;
+        foreach_statement;
+      } -> [
+        "foreach_keyword";
+        "foreach_left_paren";
+        "foreach_collection_name";
+        "foreach_await_opt";
+        "foreach_as";
+        "foreach_key_opt";
+        "foreach_key_arrow_opt";
+        "foreach_value";
+        "foreach_right_paren";
+        "foreach_statement";
+      ]
+      | SwitchStatement {
+        switch_keyword;
+        switch_left_paren;
+        switch_expr;
+        switch_right_paren;
+        switch_compound_statement;
+      } -> [
+        "switch_keyword";
+        "switch_left_paren";
+        "switch_expr";
+        "switch_right_paren";
+        "switch_compound_statement";
+      ]
+      | CaseStatement {
+        case_keyword;
+        case_expr;
+        case_colon;
+        case_stmt;
+      } -> [
+        "case_keyword";
+        "case_expr";
+        "case_colon";
+        "case_stmt";
+      ]
+      | DefaultStatement {
+        default_keyword;
+        default_colon;
+        default_stmt;
+      } -> [
+        "default_keyword";
+        "default_colon";
+        "default_stmt";
+      ]
+      | ReturnStatement {
+        return_keyword;
+        return_expr;
+        return_semicolon;
+      } -> [
+        "return_keyword";
+        "return_expr";
+        "return_semicolon";
+      ]
+      | ThrowStatement {
+        throw_keyword;
+        throw_expr;
+        throw_semicolon;
+      } -> [
+        "throw_keyword";
+        "throw_expr";
+        "throw_semicolon";
+      ]
+      | BreakStatement {
+        break_keyword;
+        break_level;
+        break_semicolon;
+      } -> [
+        "break_keyword";
+        "break_level";
+        "break_semicolon";
+      ]
+      | ContinueStatement {
+        continue_keyword;
+        continue_level;
+        continue_semicolon;
+      } -> [
+        "continue_keyword";
+        "continue_level";
+        "continue_semicolon";
+      ]
+      | FunctionStaticStatement {
+        static_static;
+        static_declarations;
+        static_semicolon;
+      } -> [
+        "static_static";
+        "static_declarations";
+        "static_semicolon";
+      ]
+      | StaticDeclarator {
+        static_name;
+        static_initializer;
+      } -> [
+        "static_name";
+        "static_initializer";
+      ]
+      | EchoStatement {
+        echo_keyword;
+        echo_expression_list;
+        echo_semicolon;
+      } -> [
+        "echo_keyword";
+        "echo_expression_list";
+        "echo_semicolon";
+      ]
+      | SimpleInitializer {
+        simple_initializer_equal;
+        simple_initializer_value;
+      } -> [
+        "simple_initializer_equal";
+        "simple_initializer_value";
+      ]
+      | AnonymousFunction {
+        anonymous_async;
+        anonymous_function;
+        anonymous_left_paren;
+        anonymous_parameter_list;
+        anonymous_right_paren;
+        anonymous_colon;
+        anonymous_type;
+        anonymous_use;
+        anonymous_body;
+      } -> [
+        "anonymous_async";
+        "anonymous_function";
+        "anonymous_left_paren";
+        "anonymous_parameter_list";
+        "anonymous_right_paren";
+        "anonymous_colon";
+        "anonymous_type";
+        "anonymous_use";
+        "anonymous_body";
+      ]
+      | AnonymousFunctionUseClause {
+        anonymous_use_keyword;
+        anonymous_use_left_paren;
+        anonymous_use_variables;
+        anonymous_use_right_paren;
+      } -> [
+        "anonymous_use_keyword";
+        "anonymous_use_left_paren";
+        "anonymous_use_variables";
+        "anonymous_use_right_paren";
+      ]
+      | LambdaExpression {
+        lambda_async;
+        lambda_signature;
+        lambda_arrow;
+        lambda_body;
+      } -> [
+        "lambda_async";
+        "lambda_signature";
+        "lambda_arrow";
+        "lambda_body";
+      ]
+      | LambdaSignature {
+        lambda_left_paren;
+        lambda_parameter_list;
+        lambda_right_paren;
+        lambda_colon;
+        lambda_type;
+      } -> [
+        "lambda_left_paren";
+        "lambda_parameter_list";
+        "lambda_right_paren";
+        "lambda_colon";
+        "lambda_type";
+      ]
+      | CastExpression {
+        cast_left_paren;
+        cast_type;
+        cast_right_paren;
+        cast_operand;
+      } -> [
+        "cast_left_paren";
+        "cast_type";
+        "cast_right_paren";
+        "cast_operand";
+      ]
+      | ScopeResolutionExpression {
+        scope_resolution_qualifier;
+        scope_resolution_operator;
+        scope_resolution_name;
+      } -> [
+        "scope_resolution_qualifier";
+        "scope_resolution_operator";
+        "scope_resolution_name";
+      ]
+      | MemberSelectionExpression {
+        member_object;
+        member_operator;
+        member_name;
+      } -> [
+        "member_object";
+        "member_operator";
+        "member_name";
+      ]
+      | SafeMemberSelectionExpression {
+        safe_member_object;
+        safe_member_operator;
+        safe_member_name;
+      } -> [
+        "safe_member_object";
+        "safe_member_operator";
+        "safe_member_name";
+      ]
+      | YieldExpression {
+        yield_keyword;
+        yield_operand;
+      } -> [
+        "yield_keyword";
+        "yield_operand";
+      ]
+      | PrintExpression {
+        print_keyword;
+        print_expr;
+      } -> [
+        "print_keyword";
+        "print_expr";
+      ]
+      | PrefixUnaryOperator {
+        prefix_unary_operator;
+        prefix_unary_operand;
+      } -> [
+        "prefix_unary_operator";
+        "prefix_unary_operand";
+      ]
+      | PostfixUnaryOperator {
+        postfix_unary_operand;
+        postfix_unary_operator;
+      } -> [
+        "postfix_unary_operand";
+        "postfix_unary_operator";
+      ]
+      | BinaryOperator {
+        binary_left_operand;
+        binary_operator;
+        binary_right_operand;
+      } -> [
+        "binary_left_operand";
+        "binary_operator";
+        "binary_right_operand";
+      ]
+      | InstanceofExpression {
+        instanceof_left_operand;
+        instanceof_operator;
+        instanceof_right_operand;
+      } -> [
+        "instanceof_left_operand";
+        "instanceof_operator";
+        "instanceof_right_operand";
+      ]
+      | ConditionalExpression {
+        conditional_test;
+        conditional_question;
+        conditional_consequence;
+        conditional_colon;
+        conditional_alternative;
+      } -> [
+        "conditional_test";
+        "conditional_question";
+        "conditional_consequence";
+        "conditional_colon";
+        "conditional_alternative";
+      ]
+      | FunctionCallExpression {
+        function_call_receiver;
+        function_call_lparen;
+        function_call_arguments;
+        function_call_rparen;
+      } -> [
+        "function_call_receiver";
+        "function_call_lparen";
+        "function_call_arguments";
+        "function_call_rparen";
+      ]
+      | ParenthesizedExpression {
+        paren_expr_left_paren;
+        paren_expr;
+        paren_expr_right_paren;
+      } -> [
+        "paren_expr_left_paren";
+        "paren_expr";
+        "paren_expr_right_paren";
+      ]
+      | BracedExpression {
+        braced_expr_left_brace;
+        braced_expr;
+        braced_expr_right_brace;
+      } -> [
+        "braced_expr_left_brace";
+        "braced_expr";
+        "braced_expr_right_brace";
+      ]
+      | ListExpression {
+        list_keyword;
+        list_left_paren;
+        list_members;
+        list_right_paren;
+      } -> [
+        "list_keyword";
+        "list_left_paren";
+        "list_members";
+        "list_right_paren";
+      ]
+      | CollectionLiteralExpression {
+        collection_literal_name;
+        collection_literal_left_brace;
+        collection_literal_initialization_list;
+        collection_literal_right_brace;
+      } -> [
+        "collection_literal_name";
+        "collection_literal_left_brace";
+        "collection_literal_initialization_list";
+        "collection_literal_right_brace";
+      ]
+      | ObjectCreationExpression {
+        object_creation_new;
+        object_creation_class;
+        object_creation_lparen;
+        object_creation_arguments;
+        object_creation_rparen;
+      } -> [
+        "object_creation_new";
+        "object_creation_class";
+        "object_creation_lparen";
+        "object_creation_arguments";
+        "object_creation_rparen";
+      ]
+      | ArrayCreationExpression {
+        array_creation_left_bracket;
+        array_creation_members;
+        array_creation_right_bracket;
+      } -> [
+        "array_creation_left_bracket";
+        "array_creation_members";
+        "array_creation_right_bracket";
+      ]
+      | ArrayIntrinsicExpression {
+        array_intrinsic_keyword;
+        array_intrinsic_left_paren;
+        array_intrinsic_members;
+        array_intrinsic_right_paren;
+      } -> [
+        "array_intrinsic_keyword";
+        "array_intrinsic_left_paren";
+        "array_intrinsic_members";
+        "array_intrinsic_right_paren";
+      ]
+      | ElementInitializer {
+        element_key;
+        element_arrow;
+        element_value;
+      } -> [
+        "element_key";
+        "element_arrow";
+        "element_value";
+      ]
+      | SubscriptExpression {
+        subscript_receiver;
+        subscript_left;
+        subscript_index;
+        subscript_right;
+      } -> [
+        "subscript_receiver";
+        "subscript_left";
+        "subscript_index";
+        "subscript_right";
+      ]
+      | AwaitableCreationExpression {
+        awaitable_async;
+        awaitable_compound_statement;
+      } -> [
+        "awaitable_async";
+        "awaitable_compound_statement";
+      ]
+      | XHPChildrenDeclaration {
+        xhp_children;
+        xhp_children_expression;
+        xhp_children_semicolon;
+      } -> [
+        "xhp_children";
+        "xhp_children_expression";
+        "xhp_children_semicolon";
+      ]
+      | XHPCategoryDeclaration {
+        xhp_category;
+        xhp_category_list;
+        xhp_category_semicolon;
+      } -> [
+        "xhp_category";
+        "xhp_category_list";
+        "xhp_category_semicolon";
+      ]
+      | XHPEnumType {
+        xhp_enum_keyword;
+        xhp_enum_left_brace;
+        xhp_enum_values;
+        xhp_enum_right_brace;
+      } -> [
+        "xhp_enum_keyword";
+        "xhp_enum_left_brace";
+        "xhp_enum_values";
+        "xhp_enum_right_brace";
+      ]
+      | XHPRequired {
+        xhp_required_at;
+        xhp_required;
+      } -> [
+        "xhp_required_at";
+        "xhp_required";
+      ]
+      | XHPClassAttributeDeclaration {
+        xhp_attribute_keyword;
+        xhp_attribute_list;
+        xhp_attribute_semicolon;
+      } -> [
+        "xhp_attribute_keyword";
+        "xhp_attribute_list";
+        "xhp_attribute_semicolon";
+      ]
+      | XHPClassAttribute {
+        xhp_attribute_decl_type;
+        xhp_attribute_decl_name;
+        xhp_attribute_decl_initializer;
+        xhp_attribute_decl_required;
+      } -> [
+        "xhp_attribute_decl_type";
+        "xhp_attribute_decl_name";
+        "xhp_attribute_decl_initializer";
+        "xhp_attribute_decl_required";
+      ]
+      | XHPAttribute {
+        xhp_attribute_name;
+        xhp_attribute_equal;
+        xhp_attribute_expr;
+      } -> [
+        "xhp_attribute_name";
+        "xhp_attribute_equal";
+        "xhp_attribute_expr";
+      ]
+      | XHPOpen {
+        xhp_open_name;
+        xhp_open_attributes;
+        xhp_open_right_angle;
+      } -> [
+        "xhp_open_name";
+        "xhp_open_attributes";
+        "xhp_open_right_angle";
+      ]
+      | XHPExpression {
+        xhp_open;
+        xhp_body;
+        xhp_close;
+      } -> [
+        "xhp_open";
+        "xhp_body";
+        "xhp_close";
+      ]
+      | XHPClose {
+        xhp_close_left_angle;
+        xhp_close_name;
+        xhp_close_right_angle;
+      } -> [
+        "xhp_close_left_angle";
+        "xhp_close_name";
+        "xhp_close_right_angle";
+      ]
+      | TypeConstant {
+        type_constant_left_type;
+        type_constant_separator;
+        type_constant_right_type;
+      } -> [
+        "type_constant_left_type";
+        "type_constant_separator";
+        "type_constant_right_type";
+      ]
+      | VectorTypeSpecifier {
+        vector_array;
+        vector_left_angle;
+        vector_type;
+        vector_right_angle;
+      } -> [
+        "vector_array";
+        "vector_left_angle";
+        "vector_type";
+        "vector_right_angle";
+      ]
+      | TypeParameter {
+        type_variance_opt;
+        type_name;
+        type_constraint_list_opt;
+      } -> [
+        "type_variance_opt";
+        "type_name";
+        "type_constraint_list_opt";
+      ]
+      | TypeConstraint {
+        constraint_keyword;
+        constraint_type;
+      } -> [
+        "constraint_keyword";
+        "constraint_type";
+      ]
+      | MapTypeSpecifier {
+        map_array;
+        map_left_angle;
+        map_key;
+        map_comma;
+        map_value;
+        map_right_angle;
+      } -> [
+        "map_array";
+        "map_left_angle";
+        "map_key";
+        "map_comma";
+        "map_value";
+        "map_right_angle";
+      ]
+      | ClosureTypeSpecifier {
+        closure_outer_left_paren;
+        closure_function;
+        closure_inner_left_paren;
+        closure_parameter_types;
+        closure_inner_right_paren;
+        closure_colon;
+        closure_return_type;
+        closure_outer_right_paren;
+      } -> [
+        "closure_outer_left_paren";
+        "closure_function";
+        "closure_inner_left_paren";
+        "closure_parameter_types";
+        "closure_inner_right_paren";
+        "closure_colon";
+        "closure_return_type";
+        "closure_outer_right_paren";
+      ]
+      | ClassnameTypeSpecifier {
+        classname_classname;
+        classname_left_angle;
+        classname_type;
+        classname_right_angle;
+      } -> [
+        "classname_classname";
+        "classname_left_angle";
+        "classname_type";
+        "classname_right_angle";
+      ]
+      | FieldSpecifier {
+        field_name;
+        field_arrow;
+        field_type;
+      } -> [
+        "field_name";
+        "field_arrow";
+        "field_type";
+      ]
+      | FieldInitializer {
+        field_initializer_name;
+        field_initializer_arrow;
+        field_initializer_value;
+      } -> [
+        "field_initializer_name";
+        "field_initializer_arrow";
+        "field_initializer_value";
+      ]
+      | ShapeTypeSpecifier {
+        shape_type_keyword;
+        shape_type_left_paren;
+        shape_type_fields;
+        shape_type_right_paren;
+      } -> [
+        "shape_type_keyword";
+        "shape_type_left_paren";
+        "shape_type_fields";
+        "shape_type_right_paren";
+      ]
+      | ShapeExpression {
+        shape_expression_keyword;
+        shape_expression_left_paren;
+        shape_expression_fields;
+        shape_expression_right_paren;
+      } -> [
+        "shape_expression_keyword";
+        "shape_expression_left_paren";
+        "shape_expression_fields";
+        "shape_expression_right_paren";
+      ]
+      | GenericTypeSpecifier {
+        generic_class_type;
+        generic_arguments;
+      } -> [
+        "generic_class_type";
+        "generic_arguments";
+      ]
+      | NullableTypeSpecifier {
+        nullable_question;
+        nullable_type;
+      } -> [
+        "nullable_question";
+        "nullable_type";
+      ]
+      | SoftTypeSpecifier {
+        soft_at;
+        soft_type;
+      } -> [
+        "soft_at";
+        "soft_type";
+      ]
+      | TypeArguments {
+        type_arguments_left_angle;
+        type_arguments;
+        type_arguments_right_angle;
+      } -> [
+        "type_arguments_left_angle";
+        "type_arguments";
+        "type_arguments_right_angle";
+      ]
+      | TypeParameters {
+        type_parameters_left_angle;
+        type_parameters;
+        type_parameters_right_angle;
+      } -> [
+        "type_parameters_left_angle";
+        "type_parameters";
+        "type_parameters_right_angle";
+      ]
+      | TupleTypeSpecifier {
+        tuple_left_paren;
+        tuple_types;
+        tuple_right_paren;
+      } -> [
+        "tuple_left_paren";
+        "tuple_types";
+        "tuple_right_paren";
+      ]
+      | Error {
+        error;
+      } -> [
+        "error";
+      ]
+      | ListItem {
+        list_item;
+        list_separator;
+      } -> [
+        "list_item";
+        "list_separator";
+      ]
 
 
     let rec to_json node =
@@ -2149,543 +3718,1273 @@ module WithToken(Token: TokenType) = struct
 
     let syntax_from_children kind ts =
       match kind, ts with
-      | (SyntaxKind.Missing, []) -> Missing
-      | (SyntaxKind.SyntaxList, x) -> SyntaxList x
-      | (SyntaxKind.MemberSelectionExpression,
-        [ member_object; member_operator; member_name ]) ->
-        MemberSelectionExpression
-        { member_object; member_operator; member_name }
-      | (SyntaxKind.SafeMemberSelectionExpression,
-        [ safe_member_object; safe_member_operator; safe_member_name ]) ->
-        SafeMemberSelectionExpression
-        { safe_member_object; safe_member_operator; safe_member_name }
-      | (SyntaxKind.ScopeResolutionExpression,
-        [ scope_resolution_qualifier; scope_resolution_operator;
-          scope_resolution_name ]) ->
-        ScopeResolutionExpression
-        { scope_resolution_qualifier; scope_resolution_operator;
-          scope_resolution_name }
-      | (SyntaxKind.YieldExpression,
-        [ yield_keyword; yield_operand ]) ->
-        YieldExpression
-        { yield_keyword; yield_operand }
-      | (SyntaxKind.PrintExpression,
-        [ print_keyword; print_expr; ]) ->
-        PrintExpression { print_keyword; print_expr; }
-      | (SyntaxKind.CastExpression,
-        [ cast_left_paren; cast_type; cast_right_paren; cast_operand ]) ->
-        CastExpression
-        { cast_left_paren; cast_type; cast_right_paren; cast_operand }
-      | (SyntaxKind.LambdaExpression,
-        [ lambda_async; lambda_signature; lambda_arrow; lambda_body ]) ->
-        LambdaExpression
-        { lambda_async; lambda_signature; lambda_arrow; lambda_body }
-      | (SyntaxKind.LambdaSignature,
-        [ lambda_left_paren; lambda_parameter_list; lambda_right_paren;
-          lambda_colon; lambda_type ]) ->
-        LambdaSignature
-        { lambda_left_paren; lambda_parameter_list; lambda_right_paren;
-          lambda_colon; lambda_type }
-      | (SyntaxKind.AnonymousFunction,
-        [ anonymous_async; anonymous_function; anonymous_left_paren;
-          anonymous_parameter_list; anonymous_right_paren; anonymous_colon;
-          anonymous_type; anonymous_use; anonymous_body ]) ->
-        AnonymousFunction
-        { anonymous_async; anonymous_function; anonymous_left_paren;
-          anonymous_parameter_list; anonymous_right_paren; anonymous_colon;
-          anonymous_type; anonymous_use; anonymous_body }
-      | (SyntaxKind.AnonymousFunctionUseClause,
-        [ anonymous_use_keyword; anonymous_use_left_paren;
-          anonymous_use_variables; anonymous_use_right_paren ]) ->
-        AnonymousFunctionUseClause
-        { anonymous_use_keyword; anonymous_use_left_paren;
-          anonymous_use_variables; anonymous_use_right_paren }
-      | (SyntaxKind.ListItem, [ list_item; list_separator ]) ->
-        ListItem { list_item; list_separator }
-      | (SyntaxKind.Error,
-        [ error ]) ->
-        Error
-        { error }
-      | (SyntaxKind.LiteralExpression,
-          [ literal_expression ]) ->
-          LiteralExpression
-          { literal_expression }
-      | (SyntaxKind.VariableExpression,
-        [ variable_expression ]) ->
-        VariableExpression
-        { variable_expression }
-      | (SyntaxKind.QualifiedNameExpression,
-        [ qualified_name_expression ]) ->
-        QualifiedNameExpression
-        { qualified_name_expression }
-      | (SyntaxKind.PipeVariableExpression,
-        [ pipe_variable_expression ]) ->
-        PipeVariableExpression
-        { pipe_variable_expression }
-      | (SyntaxKind.SimpleTypeSpecifier,
-        [ simple_type_specifier ]) ->
-        SimpleTypeSpecifier
-        { simple_type_specifier }
-      | (SyntaxKind.ScriptHeader,
-        [ header_less_than; header_question; header_language ]) ->
-        ScriptHeader { header_less_than; header_question; header_language }
-      | (SyntaxKind.Script, [ script_header; script_declarations ]) ->
-        Script { script_header; script_declarations }
-      | (SyntaxKind.EnumDeclaration,
-        [ enum_keyword; enum_name; enum_colon; enum_base; enum_type;
-          enum_left_brace; enum_enumerators; enum_right_brace ]) ->
-        EnumDeclaration
-        { enum_keyword; enum_name; enum_colon; enum_base; enum_type;
-          enum_left_brace; enum_enumerators; enum_right_brace }
-      | (SyntaxKind.Enumerator,
-        [ enumerator_name; enumerator_equal; enumerator_value;
-          enumerator_semicolon ]) ->
-        Enumerator
-        { enumerator_name; enumerator_equal; enumerator_value;
-          enumerator_semicolon }
-      | (SyntaxKind.AliasDeclaration,
-        [ alias_attribute_spec; alias_keyword; alias_name;
-          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
-          alias_semicolon ]) ->
-        AliasDeclaration
-        { alias_attribute_spec; alias_keyword; alias_name;
-          alias_generic_parameter; alias_constraint; alias_equal; alias_type;
-          alias_semicolon }
-      | (SyntaxKind.PropertyDeclaration,
-        [ property_modifiers; property_type;
-          property_declarators; property_semicolon ]) ->
-        PropertyDeclaration
-        { property_modifiers; property_type;
-          property_declarators; property_semicolon }
-      | (SyntaxKind.PropertyDeclarator,
-        [property_name; property_initializer ]) ->
-        PropertyDeclarator
-        { property_name; property_initializer }
-      | (SyntaxKind.NamespaceDeclaration,
-        [ namespace_keyword; namespace_name; namespace_body ]) ->
-        NamespaceDeclaration
-        { namespace_keyword; namespace_name; namespace_body }
-      | (SyntaxKind.NamespaceBody,
-        [ namespace_left_brace; namespace_declarations;
-          namespace_right_brace ]) ->
-        NamespaceBody
-        { namespace_left_brace; namespace_declarations;
-          namespace_right_brace }
-      | (SyntaxKind.NamespaceGroupUseDeclaration,
-        [ namespace_group_use_keyword; namespace_group_use_kind;
-          namespace_group_use_prefix; namespace_group_use_left_brace;
-          namespace_group_use_clauses; namespace_group_use_right_brace;
-          namespace_group_use_semicolon ]) ->
-        NamespaceGroupUseDeclaration
-        { namespace_group_use_keyword; namespace_group_use_kind;
-          namespace_group_use_prefix; namespace_group_use_left_brace;
-          namespace_group_use_clauses; namespace_group_use_right_brace;
-          namespace_group_use_semicolon }
-      | (SyntaxKind.NamespaceUseDeclaration,
-        [ namespace_use_keyword; namespace_use_kind; namespace_use_clauses;
-          namespace_use_semicolon ]) ->
-        NamespaceUseDeclaration
-        { namespace_use_keyword; namespace_use_kind; namespace_use_clauses;
-          namespace_use_semicolon }
-      | (SyntaxKind.NamespaceUseClause,
-        [ namespace_use_clause_kind; namespace_use_name;
-          namespace_use_as; namespace_use_alias ]) ->
-        NamespaceUseClause
-        { namespace_use_clause_kind; namespace_use_name;
-          namespace_use_as; namespace_use_alias }
-      | (SyntaxKind.FunctionDeclaration,
-        [ function_attribute_spec; function_declaration_header; function_body ])
-        -> FunctionDeclaration
-        { function_attribute_spec; function_declaration_header; function_body }
-      | (SyntaxKind.FunctionDeclarationHeader,
-        [ function_async;
-          function_keyword; function_name; function_type_parameter_list;
-          function_left_paren; function_parameter_list; function_right_paren;
-          function_colon; function_type ]) ->
-        FunctionDeclarationHeader
-        { function_async;
-          function_keyword; function_name; function_type_parameter_list;
-          function_left_paren; function_parameter_list; function_right_paren;
-          function_colon; function_type }
-      | (SyntaxKind.MethodishDeclaration,
-        [ methodish_attribute; methodish_modifiers;
+      | (SyntaxKind.ScriptHeader, [
+          header_less_than;
+          header_question;
+          header_language;
+        ]) ->
+        ScriptHeader {
+          header_less_than;
+          header_question;
+          header_language;
+        }
+        | (SyntaxKind.Script, [
+          script_header;
+          script_declarations;
+        ]) ->
+        Script {
+          script_header;
+          script_declarations;
+        }
+        | (SyntaxKind.SimpleTypeSpecifier, [
+          simple_type_specifier;
+        ]) ->
+        SimpleTypeSpecifier {
+          simple_type_specifier;
+        }
+        | (SyntaxKind.LiteralExpression, [
+          literal_expression;
+        ]) ->
+        LiteralExpression {
+          literal_expression;
+        }
+        | (SyntaxKind.VariableExpression, [
+          variable_expression;
+        ]) ->
+        VariableExpression {
+          variable_expression;
+        }
+        | (SyntaxKind.QualifiedNameExpression, [
+          qualified_name_expression;
+        ]) ->
+        QualifiedNameExpression {
+          qualified_name_expression;
+        }
+        | (SyntaxKind.PipeVariableExpression, [
+          pipe_variable_expression;
+        ]) ->
+        PipeVariableExpression {
+          pipe_variable_expression;
+        }
+        | (SyntaxKind.EnumDeclaration, [
+          enum_keyword;
+          enum_name;
+          enum_colon;
+          enum_base;
+          enum_type;
+          enum_left_brace;
+          enum_enumerators;
+          enum_right_brace;
+        ]) ->
+        EnumDeclaration {
+          enum_keyword;
+          enum_name;
+          enum_colon;
+          enum_base;
+          enum_type;
+          enum_left_brace;
+          enum_enumerators;
+          enum_right_brace;
+        }
+        | (SyntaxKind.Enumerator, [
+          enumerator_name;
+          enumerator_equal;
+          enumerator_value;
+          enumerator_semicolon;
+        ]) ->
+        Enumerator {
+          enumerator_name;
+          enumerator_equal;
+          enumerator_value;
+          enumerator_semicolon;
+        }
+        | (SyntaxKind.AliasDeclaration, [
+          alias_attribute_spec;
+          alias_keyword;
+          alias_name;
+          alias_generic_parameter;
+          alias_constraint;
+          alias_equal;
+          alias_type;
+          alias_semicolon;
+        ]) ->
+        AliasDeclaration {
+          alias_attribute_spec;
+          alias_keyword;
+          alias_name;
+          alias_generic_parameter;
+          alias_constraint;
+          alias_equal;
+          alias_type;
+          alias_semicolon;
+        }
+        | (SyntaxKind.PropertyDeclaration, [
+          property_modifiers;
+          property_type;
+          property_declarators;
+          property_semicolon;
+        ]) ->
+        PropertyDeclaration {
+          property_modifiers;
+          property_type;
+          property_declarators;
+          property_semicolon;
+        }
+        | (SyntaxKind.PropertyDeclarator, [
+          property_name;
+          property_initializer;
+        ]) ->
+        PropertyDeclarator {
+          property_name;
+          property_initializer;
+        }
+        | (SyntaxKind.NamespaceDeclaration, [
+          namespace_keyword;
+          namespace_name;
+          namespace_body;
+        ]) ->
+        NamespaceDeclaration {
+          namespace_keyword;
+          namespace_name;
+          namespace_body;
+        }
+        | (SyntaxKind.NamespaceBody, [
+          namespace_left_brace;
+          namespace_declarations;
+          namespace_right_brace;
+        ]) ->
+        NamespaceBody {
+          namespace_left_brace;
+          namespace_declarations;
+          namespace_right_brace;
+        }
+        | (SyntaxKind.NamespaceUseDeclaration, [
+          namespace_use_keyword;
+          namespace_use_kind;
+          namespace_use_clauses;
+          namespace_use_semicolon;
+        ]) ->
+        NamespaceUseDeclaration {
+          namespace_use_keyword;
+          namespace_use_kind;
+          namespace_use_clauses;
+          namespace_use_semicolon;
+        }
+        | (SyntaxKind.NamespaceGroupUseDeclaration, [
+          namespace_group_use_keyword;
+          namespace_group_use_kind;
+          namespace_group_use_prefix;
+          namespace_group_use_left_brace;
+          namespace_group_use_clauses;
+          namespace_group_use_right_brace;
+          namespace_group_use_semicolon;
+        ]) ->
+        NamespaceGroupUseDeclaration {
+          namespace_group_use_keyword;
+          namespace_group_use_kind;
+          namespace_group_use_prefix;
+          namespace_group_use_left_brace;
+          namespace_group_use_clauses;
+          namespace_group_use_right_brace;
+          namespace_group_use_semicolon;
+        }
+        | (SyntaxKind.NamespaceUseClause, [
+          namespace_use_clause_kind;
+          namespace_use_name;
+          namespace_use_as;
+          namespace_use_alias;
+        ]) ->
+        NamespaceUseClause {
+          namespace_use_clause_kind;
+          namespace_use_name;
+          namespace_use_as;
+          namespace_use_alias;
+        }
+        | (SyntaxKind.FunctionDeclaration, [
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+        ]) ->
+        FunctionDeclaration {
+          function_attribute_spec;
+          function_declaration_header;
+          function_body;
+        }
+        | (SyntaxKind.FunctionDeclarationHeader, [
+          function_async;
+          function_keyword;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+        ]) ->
+        FunctionDeclarationHeader {
+          function_async;
+          function_keyword;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_colon;
+          function_type;
+        }
+        | (SyntaxKind.MethodishDeclaration, [
+          methodish_attribute;
+          methodish_modifiers;
           methodish_function_decl_header;
-          methodish_function_body; methodish_semicolon ]) ->
-        MethodishDeclaration
-        { methodish_attribute; methodish_modifiers;
-          methodish_function_decl_header; methodish_function_body;
-          methodish_semicolon }
-      | (SyntaxKind.ClassishDeclaration,
-        [ classish_attribute; classish_modifiers; classish_keyword;
-          classish_name; classish_type_parameter_list; classish_extends;
-          classish_extends_list; classish_implements; classish_implements_list;
-          classish_body ]) ->
+          methodish_function_body;
+          methodish_semicolon;
+        ]) ->
+        MethodishDeclaration {
+          methodish_attribute;
+          methodish_modifiers;
+          methodish_function_decl_header;
+          methodish_function_body;
+          methodish_semicolon;
+        }
+        | (SyntaxKind.ClassishDeclaration, [
+          classish_attribute;
+          classish_modifiers;
+          classish_keyword;
+          classish_name;
+          classish_type_parameter_list;
+          classish_extends;
+          classish_extends_list;
+          classish_implements;
+          classish_implements_list;
+          classish_body;
+        ]) ->
         ClassishDeclaration {
-          classish_attribute; classish_modifiers; classish_keyword;
-          classish_name; classish_type_parameter_list; classish_extends;
-          classish_extends_list; classish_implements; classish_implements_list;
-          classish_body }
-      | (SyntaxKind.ClassishBody,
-        [ classish_body_left_brace; classish_body_elements;
-          classish_body_right_brace ]) ->
+          classish_attribute;
+          classish_modifiers;
+          classish_keyword;
+          classish_name;
+          classish_type_parameter_list;
+          classish_extends;
+          classish_extends_list;
+          classish_implements;
+          classish_implements_list;
+          classish_body;
+        }
+        | (SyntaxKind.ClassishBody, [
+          classish_body_left_brace;
+          classish_body_elements;
+          classish_body_right_brace;
+        ]) ->
         ClassishBody {
-          classish_body_left_brace; classish_body_elements;
-          classish_body_right_brace }
-      | (SyntaxKind.XHPChildrenDeclaration,
-        [ xhp_children; xhp_children_expression; xhp_children_semicolon ]) ->
-        XHPChildrenDeclaration
-        { xhp_children; xhp_children_expression; xhp_children_semicolon }
-      | (SyntaxKind.XHPCategoryDeclaration,
-        [ xhp_category; xhp_category_list; xhp_category_semicolon ]) ->
-        XHPCategoryDeclaration
-        { xhp_category; xhp_category_list; xhp_category_semicolon }
-      | (SyntaxKind.XHPEnumType,
-        [ xhp_enum_keyword; xhp_enum_left_brace; xhp_enum_values;
-          xhp_enum_right_brace ]) ->
-        XHPEnumType
-        { xhp_enum_keyword; xhp_enum_left_brace; xhp_enum_values;
-          xhp_enum_right_brace }
-      | (SyntaxKind.XHPRequired,
-        [ xhp_required_at; xhp_required ]) ->
-        XHPRequired
-        { xhp_required_at; xhp_required }
-      | (SyntaxKind.XHPClassAttributeDeclaration,
-        [ xhp_attribute_keyword; xhp_attribute_list;
-          xhp_attribute_semicolon ]) ->
-        XHPClassAttributeDeclaration
-        { xhp_attribute_keyword; xhp_attribute_list; xhp_attribute_semicolon }
-      | (SyntaxKind.XHPClassAttribute,
-        [ xhp_attribute_decl_type; xhp_attribute_decl_name;
-          xhp_attribute_decl_initializer; xhp_attribute_decl_required ]) ->
-        XHPClassAttribute
-        { xhp_attribute_decl_type; xhp_attribute_decl_name;
-          xhp_attribute_decl_initializer; xhp_attribute_decl_required }
-      | (SyntaxKind.TraitUse,
-        [ trait_use_keyword; trait_use_name_list; trait_use_semicolon; ]) ->
-        TraitUse
-        { trait_use_keyword; trait_use_name_list; trait_use_semicolon; }
-      | (SyntaxKind.ConstDeclaration,
-        [ const_abstract; const_keyword; const_type_specifier;
-          const_declarator_list; const_semicolon; ]) ->
-        ConstDeclaration { const_abstract; const_keyword; const_type_specifier;
-          const_declarator_list; const_semicolon; }
-      | (SyntaxKind.ConstantDeclarator,
-        [ constant_declarator_name; constant_declarator_initializer; ]) ->
-        ConstantDeclarator { constant_declarator_name;
-          constant_declarator_initializer; }
-      | (SyntaxKind.TypeConstDeclaration,
-        [ type_const_abstract; type_const_keyword; type_const_type_keyword;
-          type_const_name; type_const_type_constraint; type_const_equal;
-          type_const_type_specifier; type_const_semicolon; ]) ->
-        TypeConstDeclaration { type_const_abstract; type_const_keyword;
-          type_const_type_keyword; type_const_name; type_const_type_constraint;
-          type_const_equal; type_const_type_specifier; type_const_semicolon; }
-      | (SyntaxKind.DecoratedExpression,
-        [ decorated_expression_decorator; decorated_expression_expression; ]) ->
-        DecoratedExpression
-        { decorated_expression_decorator; decorated_expression_expression; }
-      | (SyntaxKind.ParameterDeclaration,
-        [ param_attribute; param_visibility;
-          param_type; param_name; param_default ]) ->
-        ParameterDeclaration
-        { param_attribute; param_visibility; param_type;
-          param_name; param_default }
-      | (SyntaxKind.RequireClause,
-        [ require_keyword; require_kind; require_name; require_semicolon ]) ->
-        RequireClause
-        { require_keyword; require_kind; require_name; require_semicolon }
-      | SyntaxKind.AttributeSpecification, [ attribute_spec_left_double_angle;
-        attribute_spec_attribute_list; attribute_spec_right_double_angle ] ->
-        AttributeSpecification { attribute_spec_left_double_angle;
-          attribute_spec_attribute_list; attribute_spec_right_double_angle }
-      | SyntaxKind.Attribute, [ attribute_name; attribute_left_paren;
-        attribute_values; attribute_right_paren ] ->
-        Attribute { attribute_name; attribute_left_paren; attribute_values;
-          attribute_right_paren }
-      | (SyntaxKind.InclusionExpression,
-        [ inclusion_require; inclusion_filename ]) ->
-        InclusionExpression
-        { inclusion_require; inclusion_filename }
-      | (SyntaxKind.InclusionDirective,
-        [ inclusion_expression; inclusion_semicolon ]) ->
-        InclusionDirective
-        { inclusion_expression; inclusion_semicolon }
-      | (SyntaxKind.CompoundStatement, [ compound_left_brace;
-        compound_statements; compound_right_brace ]) ->
-        CompoundStatement { compound_left_brace; compound_statements;
-          compound_right_brace }
-      | (SyntaxKind.ExpressionStatement, [ expr_statement_expr;
-        expr_statement_semicolon ]) ->
-        ExpressionStatement { expr_statement_expr; expr_statement_semicolon }
-      | (SyntaxKind.WhileStatement, [ while_keyword; while_left_paren;
-        while_condition; while_right_paren; while_body ]) ->
-        WhileStatement{ while_keyword; while_left_paren;
-          while_condition; while_right_paren; while_body }
-      | (SyntaxKind.IfStatement, [ if_keyword; if_left_paren; if_condition;
-        if_right_paren; if_statement; if_elseif_clauses; if_else_clause ]) ->
-        IfStatement { if_keyword; if_left_paren; if_condition;
-          if_right_paren; if_statement; if_elseif_clauses; if_else_clause }
-      | (SyntaxKind.ElseifClause, [ elseif_keyword; elseif_left_paren;
-        elseif_condition; elseif_right_paren; elseif_statement ]) ->
-        ElseifClause { elseif_keyword; elseif_left_paren;
-          elseif_condition; elseif_right_paren; elseif_statement }
-      | (SyntaxKind.ElseClause, [ else_keyword; else_statement ]) ->
-        ElseClause { else_keyword; else_statement }
-
-      | SyntaxKind.TryStatement, [try_keyword; try_compound_statement;
-        catch_clauses; finally_clause] ->
-        TryStatement {try_keyword; try_compound_statement; catch_clauses;
-          finally_clause}
-      | SyntaxKind.CatchClause,
-        [ catch_keyword; catch_left_paren; catch_type; catch_variable;
-          catch_right_paren; catch_compound_statement ] ->
-        CatchClause
-        { catch_keyword; catch_left_paren; catch_type; catch_variable;
-          catch_right_paren; catch_compound_statement }
-      | SyntaxKind.FinallyClause, [finally_keyword;
-        finally_compound_statement] ->
-        FinallyClause {finally_keyword; finally_compound_statement}
-      | (SyntaxKind.DoStatement, [ do_keyword; do_statement;
-        do_while_keyword; do_left_paren; do_condition_expr;
-        do_right_paren; do_semicolon ]) ->
-        DoStatement { do_keyword; do_statement;
-          do_while_keyword; do_left_paren; do_condition_expr;
-          do_right_paren; do_semicolon }
-      | (SyntaxKind.ForStatement, [ for_keyword; for_left_paren;
-        for_initializer_expr; for_first_semicolon; for_control_expr;
-        for_second_semicolon; for_end_of_loop_expr; for_right_paren;
-        for_statement ]) ->
-        ForStatement { for_keyword; for_left_paren;
-          for_initializer_expr; for_first_semicolon; for_control_expr;
-          for_second_semicolon; for_end_of_loop_expr; for_right_paren;
-          for_statement }
-      | (SyntaxKind.ForeachStatement, [ foreach_keyword; foreach_left_paren;
-          foreach_collection_name; foreach_await_opt; foreach_as;
-          foreach_key_opt; foreach_key_arrow_opt; foreach_value;
-          foreach_right_paren; foreach_statement ]) ->
-        ForeachStatement { foreach_keyword; foreach_left_paren;
-          foreach_collection_name; foreach_await_opt; foreach_as;
-          foreach_key_opt; foreach_key_arrow_opt; foreach_value;
-          foreach_right_paren; foreach_statement }
-      | (SyntaxKind.SwitchStatement, [ switch_keyword; switch_left_paren;
-        switch_expr; switch_right_paren; switch_compound_statement ]) ->
-        SwitchStatement{ switch_keyword; switch_left_paren;
-          switch_expr; switch_right_paren; switch_compound_statement }
-      | (SyntaxKind.CaseStatement, [ case_keyword;
-        case_expr; case_colon; case_stmt ]) ->
-        CaseStatement { case_keyword; case_expr; case_colon; case_stmt }
-      | (SyntaxKind.DefaultStatement, [ default_keyword;
-          default_colon; default_stmt ]) ->
-        DefaultStatement { default_keyword; default_colon; default_stmt }
-      | (SyntaxKind.ReturnStatement, [ return_keyword;
-        return_expr; return_semicolon ]) ->
-        ReturnStatement { return_keyword; return_expr; return_semicolon }
-      | (SyntaxKind.ThrowStatement, [ throw_keyword;
-        throw_expr; throw_semicolon ]) ->
-        ThrowStatement { throw_keyword; throw_expr; throw_semicolon }
-      | (SyntaxKind.BreakStatement,
-        [ break_keyword; break_level; break_semicolon ]) ->
-        BreakStatement
-        { break_keyword; break_level; break_semicolon }
-      | (SyntaxKind.ContinueStatement,
-        [ continue_keyword; continue_level; continue_semicolon ]) ->
-        ContinueStatement
-        { continue_keyword; continue_level; continue_semicolon }
-      | (SyntaxKind.FunctionStaticStatement,
-        [ static_static; static_declarations; static_semicolon ]) ->
-        FunctionStaticStatement
-        { static_static; static_declarations; static_semicolon }
-      | (SyntaxKind.SimpleInitializer,
-        [ simple_initializer_equal; simple_initializer_value ]) ->
-        SimpleInitializer
-        { simple_initializer_equal; simple_initializer_value }
-      | (SyntaxKind.StaticDeclarator,
-        [ static_name; static_initializer ]) ->
-        StaticDeclarator
-        { static_name; static_initializer }
-      | (SyntaxKind.EchoStatement,
-        [ echo_keyword; echo_expression_list; echo_semicolon; ]) ->
-        EchoStatement
-        { echo_keyword; echo_expression_list; echo_semicolon; }
-      | (SyntaxKind.PrefixUnaryOperator,
-        [ prefix_unary_operator; prefix_unary_operand ]) ->
-        PrefixUnaryOperator
-        { prefix_unary_operator; prefix_unary_operand }
-      | (SyntaxKind.PostfixUnaryOperator,
-        [ postfix_unary_operand; postfix_unary_operator ]) ->
-        PostfixUnaryOperator
-        { postfix_unary_operand; postfix_unary_operator }
-      | (SyntaxKind.BinaryOperator, [ binary_left_operand; binary_operator;
-        binary_right_operand ]) ->
-        BinaryOperator { binary_left_operand; binary_operator;
-        binary_right_operand }
-      | (SyntaxKind.InstanceofExpression,
-        [ instanceof_left_operand; instanceof_operator;
-          instanceof_right_operand ]) ->
-        InstanceofExpression
-        { instanceof_left_operand; instanceof_operator;
-          instanceof_right_operand }
-      | (SyntaxKind.ConditionalExpression,
-        [ conditional_test; conditional_question; conditional_consequence;
-          conditional_colon; conditional_alternative ]) ->
-        ConditionalExpression
-        { conditional_test; conditional_question; conditional_consequence;
-          conditional_colon; conditional_alternative }
-      | (SyntaxKind.FunctionCallExpression,
-          [ function_call_receiver; function_call_lparen;
-            function_call_arguments; function_call_rparen ]) ->
-        FunctionCallExpression
-          { function_call_receiver; function_call_lparen;
-            function_call_arguments; function_call_rparen }
-      | (SyntaxKind.ParenthesizedExpression, [ paren_expr_left_paren;
-        paren_expr; paren_expr_right_paren ]) ->
-        ParenthesizedExpression { paren_expr_left_paren; paren_expr;
-          paren_expr_right_paren }
-      | (SyntaxKind.BracedExpression, [ braced_expr_left_brace;
-        braced_expr; braced_expr_right_brace ]) ->
-        BracedExpression { braced_expr_left_brace; braced_expr;
-          braced_expr_right_brace }
-      | (SyntaxKind.ListExpression, [ list_keyword; list_left_paren;
-        list_members; list_right_paren ]) ->
-        ListExpression { list_keyword; list_left_paren;
-          list_members; list_right_paren }
-      | (SyntaxKind.CollectionLiteralExpression,
-        [ collection_literal_name; collection_literal_left_brace;
+          classish_body_left_brace;
+          classish_body_elements;
+          classish_body_right_brace;
+        }
+        | (SyntaxKind.TraitUse, [
+          trait_use_keyword;
+          trait_use_name_list;
+          trait_use_semicolon;
+        ]) ->
+        TraitUse {
+          trait_use_keyword;
+          trait_use_name_list;
+          trait_use_semicolon;
+        }
+        | (SyntaxKind.RequireClause, [
+          require_keyword;
+          require_kind;
+          require_name;
+          require_semicolon;
+        ]) ->
+        RequireClause {
+          require_keyword;
+          require_kind;
+          require_name;
+          require_semicolon;
+        }
+        | (SyntaxKind.ConstDeclaration, [
+          const_abstract;
+          const_keyword;
+          const_type_specifier;
+          const_declarator_list;
+          const_semicolon;
+        ]) ->
+        ConstDeclaration {
+          const_abstract;
+          const_keyword;
+          const_type_specifier;
+          const_declarator_list;
+          const_semicolon;
+        }
+        | (SyntaxKind.ConstantDeclarator, [
+          constant_declarator_name;
+          constant_declarator_initializer;
+        ]) ->
+        ConstantDeclarator {
+          constant_declarator_name;
+          constant_declarator_initializer;
+        }
+        | (SyntaxKind.TypeConstDeclaration, [
+          type_const_abstract;
+          type_const_keyword;
+          type_const_type_keyword;
+          type_const_name;
+          type_const_type_constraint;
+          type_const_equal;
+          type_const_type_specifier;
+          type_const_semicolon;
+        ]) ->
+        TypeConstDeclaration {
+          type_const_abstract;
+          type_const_keyword;
+          type_const_type_keyword;
+          type_const_name;
+          type_const_type_constraint;
+          type_const_equal;
+          type_const_type_specifier;
+          type_const_semicolon;
+        }
+        | (SyntaxKind.DecoratedExpression, [
+          decorated_expression_decorator;
+          decorated_expression_expression;
+        ]) ->
+        DecoratedExpression {
+          decorated_expression_decorator;
+          decorated_expression_expression;
+        }
+        | (SyntaxKind.ParameterDeclaration, [
+          param_attribute;
+          param_visibility;
+          param_type;
+          param_name;
+          param_default;
+        ]) ->
+        ParameterDeclaration {
+          param_attribute;
+          param_visibility;
+          param_type;
+          param_name;
+          param_default;
+        }
+        | (SyntaxKind.AttributeSpecification, [
+          attribute_spec_left_double_angle;
+          attribute_spec_attribute_list;
+          attribute_spec_right_double_angle;
+        ]) ->
+        AttributeSpecification {
+          attribute_spec_left_double_angle;
+          attribute_spec_attribute_list;
+          attribute_spec_right_double_angle;
+        }
+        | (SyntaxKind.Attribute, [
+          attribute_name;
+          attribute_left_paren;
+          attribute_values;
+          attribute_right_paren;
+        ]) ->
+        Attribute {
+          attribute_name;
+          attribute_left_paren;
+          attribute_values;
+          attribute_right_paren;
+        }
+        | (SyntaxKind.InclusionExpression, [
+          inclusion_require;
+          inclusion_filename;
+        ]) ->
+        InclusionExpression {
+          inclusion_require;
+          inclusion_filename;
+        }
+        | (SyntaxKind.InclusionDirective, [
+          inclusion_expression;
+          inclusion_semicolon;
+        ]) ->
+        InclusionDirective {
+          inclusion_expression;
+          inclusion_semicolon;
+        }
+        | (SyntaxKind.CompoundStatement, [
+          compound_left_brace;
+          compound_statements;
+          compound_right_brace;
+        ]) ->
+        CompoundStatement {
+          compound_left_brace;
+          compound_statements;
+          compound_right_brace;
+        }
+        | (SyntaxKind.ExpressionStatement, [
+          expr_statement_expr;
+          expr_statement_semicolon;
+        ]) ->
+        ExpressionStatement {
+          expr_statement_expr;
+          expr_statement_semicolon;
+        }
+        | (SyntaxKind.WhileStatement, [
+          while_keyword;
+          while_left_paren;
+          while_condition;
+          while_right_paren;
+          while_body;
+        ]) ->
+        WhileStatement {
+          while_keyword;
+          while_left_paren;
+          while_condition;
+          while_right_paren;
+          while_body;
+        }
+        | (SyntaxKind.IfStatement, [
+          if_keyword;
+          if_left_paren;
+          if_condition;
+          if_right_paren;
+          if_statement;
+          if_elseif_clauses;
+          if_else_clause;
+        ]) ->
+        IfStatement {
+          if_keyword;
+          if_left_paren;
+          if_condition;
+          if_right_paren;
+          if_statement;
+          if_elseif_clauses;
+          if_else_clause;
+        }
+        | (SyntaxKind.ElseifClause, [
+          elseif_keyword;
+          elseif_left_paren;
+          elseif_condition;
+          elseif_right_paren;
+          elseif_statement;
+        ]) ->
+        ElseifClause {
+          elseif_keyword;
+          elseif_left_paren;
+          elseif_condition;
+          elseif_right_paren;
+          elseif_statement;
+        }
+        | (SyntaxKind.ElseClause, [
+          else_keyword;
+          else_statement;
+        ]) ->
+        ElseClause {
+          else_keyword;
+          else_statement;
+        }
+        | (SyntaxKind.TryStatement, [
+          try_keyword;
+          try_compound_statement;
+          catch_clauses;
+          finally_clause;
+        ]) ->
+        TryStatement {
+          try_keyword;
+          try_compound_statement;
+          catch_clauses;
+          finally_clause;
+        }
+        | (SyntaxKind.CatchClause, [
+          catch_keyword;
+          catch_left_paren;
+          catch_type;
+          catch_variable;
+          catch_right_paren;
+          catch_compound_statement;
+        ]) ->
+        CatchClause {
+          catch_keyword;
+          catch_left_paren;
+          catch_type;
+          catch_variable;
+          catch_right_paren;
+          catch_compound_statement;
+        }
+        | (SyntaxKind.FinallyClause, [
+          finally_keyword;
+          finally_compound_statement;
+        ]) ->
+        FinallyClause {
+          finally_keyword;
+          finally_compound_statement;
+        }
+        | (SyntaxKind.DoStatement, [
+          do_keyword;
+          do_statement;
+          do_while_keyword;
+          do_left_paren;
+          do_condition_expr;
+          do_right_paren;
+          do_semicolon;
+        ]) ->
+        DoStatement {
+          do_keyword;
+          do_statement;
+          do_while_keyword;
+          do_left_paren;
+          do_condition_expr;
+          do_right_paren;
+          do_semicolon;
+        }
+        | (SyntaxKind.ForStatement, [
+          for_keyword;
+          for_left_paren;
+          for_initializer_expr;
+          for_first_semicolon;
+          for_control_expr;
+          for_second_semicolon;
+          for_end_of_loop_expr;
+          for_right_paren;
+          for_statement;
+        ]) ->
+        ForStatement {
+          for_keyword;
+          for_left_paren;
+          for_initializer_expr;
+          for_first_semicolon;
+          for_control_expr;
+          for_second_semicolon;
+          for_end_of_loop_expr;
+          for_right_paren;
+          for_statement;
+        }
+        | (SyntaxKind.ForeachStatement, [
+          foreach_keyword;
+          foreach_left_paren;
+          foreach_collection_name;
+          foreach_await_opt;
+          foreach_as;
+          foreach_key_opt;
+          foreach_key_arrow_opt;
+          foreach_value;
+          foreach_right_paren;
+          foreach_statement;
+        ]) ->
+        ForeachStatement {
+          foreach_keyword;
+          foreach_left_paren;
+          foreach_collection_name;
+          foreach_await_opt;
+          foreach_as;
+          foreach_key_opt;
+          foreach_key_arrow_opt;
+          foreach_value;
+          foreach_right_paren;
+          foreach_statement;
+        }
+        | (SyntaxKind.SwitchStatement, [
+          switch_keyword;
+          switch_left_paren;
+          switch_expr;
+          switch_right_paren;
+          switch_compound_statement;
+        ]) ->
+        SwitchStatement {
+          switch_keyword;
+          switch_left_paren;
+          switch_expr;
+          switch_right_paren;
+          switch_compound_statement;
+        }
+        | (SyntaxKind.CaseStatement, [
+          case_keyword;
+          case_expr;
+          case_colon;
+          case_stmt;
+        ]) ->
+        CaseStatement {
+          case_keyword;
+          case_expr;
+          case_colon;
+          case_stmt;
+        }
+        | (SyntaxKind.DefaultStatement, [
+          default_keyword;
+          default_colon;
+          default_stmt;
+        ]) ->
+        DefaultStatement {
+          default_keyword;
+          default_colon;
+          default_stmt;
+        }
+        | (SyntaxKind.ReturnStatement, [
+          return_keyword;
+          return_expr;
+          return_semicolon;
+        ]) ->
+        ReturnStatement {
+          return_keyword;
+          return_expr;
+          return_semicolon;
+        }
+        | (SyntaxKind.ThrowStatement, [
+          throw_keyword;
+          throw_expr;
+          throw_semicolon;
+        ]) ->
+        ThrowStatement {
+          throw_keyword;
+          throw_expr;
+          throw_semicolon;
+        }
+        | (SyntaxKind.BreakStatement, [
+          break_keyword;
+          break_level;
+          break_semicolon;
+        ]) ->
+        BreakStatement {
+          break_keyword;
+          break_level;
+          break_semicolon;
+        }
+        | (SyntaxKind.ContinueStatement, [
+          continue_keyword;
+          continue_level;
+          continue_semicolon;
+        ]) ->
+        ContinueStatement {
+          continue_keyword;
+          continue_level;
+          continue_semicolon;
+        }
+        | (SyntaxKind.FunctionStaticStatement, [
+          static_static;
+          static_declarations;
+          static_semicolon;
+        ]) ->
+        FunctionStaticStatement {
+          static_static;
+          static_declarations;
+          static_semicolon;
+        }
+        | (SyntaxKind.StaticDeclarator, [
+          static_name;
+          static_initializer;
+        ]) ->
+        StaticDeclarator {
+          static_name;
+          static_initializer;
+        }
+        | (SyntaxKind.EchoStatement, [
+          echo_keyword;
+          echo_expression_list;
+          echo_semicolon;
+        ]) ->
+        EchoStatement {
+          echo_keyword;
+          echo_expression_list;
+          echo_semicolon;
+        }
+        | (SyntaxKind.SimpleInitializer, [
+          simple_initializer_equal;
+          simple_initializer_value;
+        ]) ->
+        SimpleInitializer {
+          simple_initializer_equal;
+          simple_initializer_value;
+        }
+        | (SyntaxKind.AnonymousFunction, [
+          anonymous_async;
+          anonymous_function;
+          anonymous_left_paren;
+          anonymous_parameter_list;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+        ]) ->
+        AnonymousFunction {
+          anonymous_async;
+          anonymous_function;
+          anonymous_left_paren;
+          anonymous_parameter_list;
+          anonymous_right_paren;
+          anonymous_colon;
+          anonymous_type;
+          anonymous_use;
+          anonymous_body;
+        }
+        | (SyntaxKind.AnonymousFunctionUseClause, [
+          anonymous_use_keyword;
+          anonymous_use_left_paren;
+          anonymous_use_variables;
+          anonymous_use_right_paren;
+        ]) ->
+        AnonymousFunctionUseClause {
+          anonymous_use_keyword;
+          anonymous_use_left_paren;
+          anonymous_use_variables;
+          anonymous_use_right_paren;
+        }
+        | (SyntaxKind.LambdaExpression, [
+          lambda_async;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+        ]) ->
+        LambdaExpression {
+          lambda_async;
+          lambda_signature;
+          lambda_arrow;
+          lambda_body;
+        }
+        | (SyntaxKind.LambdaSignature, [
+          lambda_left_paren;
+          lambda_parameter_list;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+        ]) ->
+        LambdaSignature {
+          lambda_left_paren;
+          lambda_parameter_list;
+          lambda_right_paren;
+          lambda_colon;
+          lambda_type;
+        }
+        | (SyntaxKind.CastExpression, [
+          cast_left_paren;
+          cast_type;
+          cast_right_paren;
+          cast_operand;
+        ]) ->
+        CastExpression {
+          cast_left_paren;
+          cast_type;
+          cast_right_paren;
+          cast_operand;
+        }
+        | (SyntaxKind.ScopeResolutionExpression, [
+          scope_resolution_qualifier;
+          scope_resolution_operator;
+          scope_resolution_name;
+        ]) ->
+        ScopeResolutionExpression {
+          scope_resolution_qualifier;
+          scope_resolution_operator;
+          scope_resolution_name;
+        }
+        | (SyntaxKind.MemberSelectionExpression, [
+          member_object;
+          member_operator;
+          member_name;
+        ]) ->
+        MemberSelectionExpression {
+          member_object;
+          member_operator;
+          member_name;
+        }
+        | (SyntaxKind.SafeMemberSelectionExpression, [
+          safe_member_object;
+          safe_member_operator;
+          safe_member_name;
+        ]) ->
+        SafeMemberSelectionExpression {
+          safe_member_object;
+          safe_member_operator;
+          safe_member_name;
+        }
+        | (SyntaxKind.YieldExpression, [
+          yield_keyword;
+          yield_operand;
+        ]) ->
+        YieldExpression {
+          yield_keyword;
+          yield_operand;
+        }
+        | (SyntaxKind.PrintExpression, [
+          print_keyword;
+          print_expr;
+        ]) ->
+        PrintExpression {
+          print_keyword;
+          print_expr;
+        }
+        | (SyntaxKind.PrefixUnaryOperator, [
+          prefix_unary_operator;
+          prefix_unary_operand;
+        ]) ->
+        PrefixUnaryOperator {
+          prefix_unary_operator;
+          prefix_unary_operand;
+        }
+        | (SyntaxKind.PostfixUnaryOperator, [
+          postfix_unary_operand;
+          postfix_unary_operator;
+        ]) ->
+        PostfixUnaryOperator {
+          postfix_unary_operand;
+          postfix_unary_operator;
+        }
+        | (SyntaxKind.BinaryOperator, [
+          binary_left_operand;
+          binary_operator;
+          binary_right_operand;
+        ]) ->
+        BinaryOperator {
+          binary_left_operand;
+          binary_operator;
+          binary_right_operand;
+        }
+        | (SyntaxKind.InstanceofExpression, [
+          instanceof_left_operand;
+          instanceof_operator;
+          instanceof_right_operand;
+        ]) ->
+        InstanceofExpression {
+          instanceof_left_operand;
+          instanceof_operator;
+          instanceof_right_operand;
+        }
+        | (SyntaxKind.ConditionalExpression, [
+          conditional_test;
+          conditional_question;
+          conditional_consequence;
+          conditional_colon;
+          conditional_alternative;
+        ]) ->
+        ConditionalExpression {
+          conditional_test;
+          conditional_question;
+          conditional_consequence;
+          conditional_colon;
+          conditional_alternative;
+        }
+        | (SyntaxKind.FunctionCallExpression, [
+          function_call_receiver;
+          function_call_lparen;
+          function_call_arguments;
+          function_call_rparen;
+        ]) ->
+        FunctionCallExpression {
+          function_call_receiver;
+          function_call_lparen;
+          function_call_arguments;
+          function_call_rparen;
+        }
+        | (SyntaxKind.ParenthesizedExpression, [
+          paren_expr_left_paren;
+          paren_expr;
+          paren_expr_right_paren;
+        ]) ->
+        ParenthesizedExpression {
+          paren_expr_left_paren;
+          paren_expr;
+          paren_expr_right_paren;
+        }
+        | (SyntaxKind.BracedExpression, [
+          braced_expr_left_brace;
+          braced_expr;
+          braced_expr_right_brace;
+        ]) ->
+        BracedExpression {
+          braced_expr_left_brace;
+          braced_expr;
+          braced_expr_right_brace;
+        }
+        | (SyntaxKind.ListExpression, [
+          list_keyword;
+          list_left_paren;
+          list_members;
+          list_right_paren;
+        ]) ->
+        ListExpression {
+          list_keyword;
+          list_left_paren;
+          list_members;
+          list_right_paren;
+        }
+        | (SyntaxKind.CollectionLiteralExpression, [
+          collection_literal_name;
+          collection_literal_left_brace;
           collection_literal_initialization_list;
-          collection_literal_right_brace; ]) ->
-        CollectionLiteralExpression
-        { collection_literal_name; collection_literal_left_brace;
+          collection_literal_right_brace;
+        ]) ->
+        CollectionLiteralExpression {
+          collection_literal_name;
+          collection_literal_left_brace;
           collection_literal_initialization_list;
-          collection_literal_right_brace; }
-      | (SyntaxKind.ObjectCreationExpression,
-        [ object_creation_new; object_creation_class; object_creation_lparen;
-          object_creation_arguments; object_creation_rparen ]) ->
-        ObjectCreationExpression
-        { object_creation_new; object_creation_class; object_creation_lparen;
-          object_creation_arguments; object_creation_rparen }
-      | (SyntaxKind.ShapeExpression,
-        [ shape_expression_keyword; shape_expression_left_paren;
-          shape_expression_fields; shape_expression_right_paren ]) ->
-        ShapeExpression
-        { shape_expression_keyword; shape_expression_left_paren;
-          shape_expression_fields; shape_expression_right_paren }
-      | (SyntaxKind.FieldInitializer,
-        [ field_initializer_name; field_initializer_arrow;
-          field_initializer_value ]) ->
-        FieldInitializer
-        { field_initializer_name; field_initializer_arrow;
-          field_initializer_value }
-      | SyntaxKind.ArrayCreationExpression, [ array_creation_left_bracket;
-        array_creation_members; array_creation_right_bracket ] ->
-        ArrayCreationExpression { array_creation_left_bracket;
-          array_creation_members; array_creation_right_bracket }
-      | (SyntaxKind.ElementInitializer,
-        [ element_key; element_arrow; element_value ]) ->
-        ElementInitializer
-        { element_key; element_arrow; element_value }
-      | SyntaxKind.ArrayIntrinsicExpression, [ array_intrinsic_keyword;
-        array_intrinsic_left_paren; array_intrinsic_members;
-        array_intrinsic_right_paren ] ->
-        ArrayIntrinsicExpression { array_intrinsic_keyword;
-          array_intrinsic_left_paren; array_intrinsic_members;
-          array_intrinsic_right_paren }
-      | SyntaxKind.SubscriptExpression,
-        [ subscript_receiver; subscript_left;
-          subscript_index; subscript_right ] ->
-        SubscriptExpression
-        { subscript_receiver; subscript_left;
-          subscript_index; subscript_right }
-      | SyntaxKind.AwaitableCreationExpression,
-        [ awaitable_async; awaitable_compound_statement; ] ->
-        AwaitableCreationExpression
-        { awaitable_async; awaitable_compound_statement; }
-      | (SyntaxKind.XHPExpression, [ xhp_open; xhp_body; xhp_close ]) ->
-        XHPExpression { xhp_open; xhp_body; xhp_close }
-      | (SyntaxKind.XHPOpen,
-        [ xhp_open_name; xhp_open_attributes; xhp_open_right_angle ]) ->
-        XHPOpen
-        { xhp_open_name; xhp_open_attributes; xhp_open_right_angle }
-      | (SyntaxKind.XHPClose, [ xhp_close_left_angle; xhp_close_name;
-          xhp_close_right_angle ]) ->
-        XHPClose { xhp_close_left_angle; xhp_close_name; xhp_close_right_angle }
-      | (SyntaxKind.XHPAttribute, [ xhp_attribute_name; xhp_attribute_equal;
-          xhp_attribute_expr ]) ->
-        XHPAttribute
-        { xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expr }
-      | (SyntaxKind.TypeConstant, [ type_constant_left_type;
-          type_constant_separator; type_constant_right_type ]) ->
-        TypeConstant { type_constant_left_type; type_constant_separator;
-          type_constant_right_type }
-      | (SyntaxKind.GenericTypeSpecifier, [ generic_class_type;
-          generic_arguments ]) ->
-        GenericTypeSpecifier { generic_class_type; generic_arguments }
-      | (SyntaxKind.NullableTypeSpecifier,
-          [ nullable_question; nullable_type ]) ->
-        NullableTypeSpecifier
-          { nullable_question; nullable_type }
-      | (SyntaxKind.SoftTypeSpecifier,
-          [ soft_at; soft_type ]) ->
-        SoftTypeSpecifier
-          { soft_at; soft_type }
-      | (SyntaxKind.TypeArguments, [ type_arguments_left_angle;
-          type_arguments; type_arguments_right_angle ]) ->
-        TypeArguments { type_arguments_left_angle;
-            type_arguments; type_arguments_right_angle }
-      | (SyntaxKind.TypeParameters,
-        [ type_parameters_left_angle; type_parameters;
-          type_parameters_right_angle ]) ->
-        TypeParameters
-        { type_parameters_left_angle; type_parameters;
-          type_parameters_right_angle }
-      | (SyntaxKind.TypeParameter, [ type_variance_opt;
-          type_name; type_constraint_list_opt  ]) ->
-        TypeParameter { type_variance_opt;
-          type_name; type_constraint_list_opt  }
-      | (SyntaxKind.TypeConstraint, [ constraint_keyword;
-          constraint_type ]) ->
-        TypeConstraint { constraint_keyword; constraint_type }
-      | (SyntaxKind.TupleTypeSpecifier,
-          [ tuple_left_paren; tuple_types; tuple_right_paren ]) ->
-        TupleTypeSpecifier
-          { tuple_left_paren; tuple_types; tuple_right_paren }
-      | (SyntaxKind.VectorTypeSpecifier,
-        [ vector_array; vector_left_angle; vector_type; vector_right_angle ]) ->
-        VectorTypeSpecifier
-        { vector_array; vector_left_angle; vector_type; vector_right_angle }
-      | (SyntaxKind.MapTypeSpecifier,
-        [ map_array; map_left_angle; map_key; map_comma; map_value;
-          map_right_angle ]) ->
-        MapTypeSpecifier
-        { map_array; map_left_angle; map_key; map_comma; map_value;
-          map_right_angle }
-      | (SyntaxKind.ClosureTypeSpecifier,
-        [ closure_outer_left_paren; closure_function;
-          closure_inner_left_paren; closure_parameter_types;
-          closure_inner_right_paren; closure_colon; closure_return_type;
-          closure_outer_right_paren ]) ->
-        ClosureTypeSpecifier
-        { closure_outer_left_paren; closure_function;
-          closure_inner_left_paren; closure_parameter_types;
-          closure_inner_right_paren; closure_colon; closure_return_type;
-          closure_outer_right_paren }
-      | (SyntaxKind.ClassnameTypeSpecifier,
-        [ classname_classname; classname_left_angle; classname_type;
-          classname_right_angle ]) ->
-        ClassnameTypeSpecifier
-        { classname_classname; classname_left_angle; classname_type;
-          classname_right_angle }
-      | (SyntaxKind.ShapeTypeSpecifier,
-        [ shape_type_keyword; shape_type_left_paren;
-          shape_type_fields; shape_type_right_paren ]) ->
-        ShapeTypeSpecifier
-        { shape_type_keyword; shape_type_left_paren;
-          shape_type_fields; shape_type_right_paren }
-      | (SyntaxKind.FieldSpecifier,
-        [ field_name; field_arrow; field_type ]) ->
-        FieldSpecifier
-        { field_name; field_arrow; field_type }
+          collection_literal_right_brace;
+        }
+        | (SyntaxKind.ObjectCreationExpression, [
+          object_creation_new;
+          object_creation_class;
+          object_creation_lparen;
+          object_creation_arguments;
+          object_creation_rparen;
+        ]) ->
+        ObjectCreationExpression {
+          object_creation_new;
+          object_creation_class;
+          object_creation_lparen;
+          object_creation_arguments;
+          object_creation_rparen;
+        }
+        | (SyntaxKind.ArrayCreationExpression, [
+          array_creation_left_bracket;
+          array_creation_members;
+          array_creation_right_bracket;
+        ]) ->
+        ArrayCreationExpression {
+          array_creation_left_bracket;
+          array_creation_members;
+          array_creation_right_bracket;
+        }
+        | (SyntaxKind.ArrayIntrinsicExpression, [
+          array_intrinsic_keyword;
+          array_intrinsic_left_paren;
+          array_intrinsic_members;
+          array_intrinsic_right_paren;
+        ]) ->
+        ArrayIntrinsicExpression {
+          array_intrinsic_keyword;
+          array_intrinsic_left_paren;
+          array_intrinsic_members;
+          array_intrinsic_right_paren;
+        }
+        | (SyntaxKind.ElementInitializer, [
+          element_key;
+          element_arrow;
+          element_value;
+        ]) ->
+        ElementInitializer {
+          element_key;
+          element_arrow;
+          element_value;
+        }
+        | (SyntaxKind.SubscriptExpression, [
+          subscript_receiver;
+          subscript_left;
+          subscript_index;
+          subscript_right;
+        ]) ->
+        SubscriptExpression {
+          subscript_receiver;
+          subscript_left;
+          subscript_index;
+          subscript_right;
+        }
+        | (SyntaxKind.AwaitableCreationExpression, [
+          awaitable_async;
+          awaitable_compound_statement;
+        ]) ->
+        AwaitableCreationExpression {
+          awaitable_async;
+          awaitable_compound_statement;
+        }
+        | (SyntaxKind.XHPChildrenDeclaration, [
+          xhp_children;
+          xhp_children_expression;
+          xhp_children_semicolon;
+        ]) ->
+        XHPChildrenDeclaration {
+          xhp_children;
+          xhp_children_expression;
+          xhp_children_semicolon;
+        }
+        | (SyntaxKind.XHPCategoryDeclaration, [
+          xhp_category;
+          xhp_category_list;
+          xhp_category_semicolon;
+        ]) ->
+        XHPCategoryDeclaration {
+          xhp_category;
+          xhp_category_list;
+          xhp_category_semicolon;
+        }
+        | (SyntaxKind.XHPEnumType, [
+          xhp_enum_keyword;
+          xhp_enum_left_brace;
+          xhp_enum_values;
+          xhp_enum_right_brace;
+        ]) ->
+        XHPEnumType {
+          xhp_enum_keyword;
+          xhp_enum_left_brace;
+          xhp_enum_values;
+          xhp_enum_right_brace;
+        }
+        | (SyntaxKind.XHPRequired, [
+          xhp_required_at;
+          xhp_required;
+        ]) ->
+        XHPRequired {
+          xhp_required_at;
+          xhp_required;
+        }
+        | (SyntaxKind.XHPClassAttributeDeclaration, [
+          xhp_attribute_keyword;
+          xhp_attribute_list;
+          xhp_attribute_semicolon;
+        ]) ->
+        XHPClassAttributeDeclaration {
+          xhp_attribute_keyword;
+          xhp_attribute_list;
+          xhp_attribute_semicolon;
+        }
+        | (SyntaxKind.XHPClassAttribute, [
+          xhp_attribute_decl_type;
+          xhp_attribute_decl_name;
+          xhp_attribute_decl_initializer;
+          xhp_attribute_decl_required;
+        ]) ->
+        XHPClassAttribute {
+          xhp_attribute_decl_type;
+          xhp_attribute_decl_name;
+          xhp_attribute_decl_initializer;
+          xhp_attribute_decl_required;
+        }
+        | (SyntaxKind.XHPAttribute, [
+          xhp_attribute_name;
+          xhp_attribute_equal;
+          xhp_attribute_expr;
+        ]) ->
+        XHPAttribute {
+          xhp_attribute_name;
+          xhp_attribute_equal;
+          xhp_attribute_expr;
+        }
+        | (SyntaxKind.XHPOpen, [
+          xhp_open_name;
+          xhp_open_attributes;
+          xhp_open_right_angle;
+        ]) ->
+        XHPOpen {
+          xhp_open_name;
+          xhp_open_attributes;
+          xhp_open_right_angle;
+        }
+        | (SyntaxKind.XHPExpression, [
+          xhp_open;
+          xhp_body;
+          xhp_close;
+        ]) ->
+        XHPExpression {
+          xhp_open;
+          xhp_body;
+          xhp_close;
+        }
+        | (SyntaxKind.XHPClose, [
+          xhp_close_left_angle;
+          xhp_close_name;
+          xhp_close_right_angle;
+        ]) ->
+        XHPClose {
+          xhp_close_left_angle;
+          xhp_close_name;
+          xhp_close_right_angle;
+        }
+        | (SyntaxKind.TypeConstant, [
+          type_constant_left_type;
+          type_constant_separator;
+          type_constant_right_type;
+        ]) ->
+        TypeConstant {
+          type_constant_left_type;
+          type_constant_separator;
+          type_constant_right_type;
+        }
+        | (SyntaxKind.VectorTypeSpecifier, [
+          vector_array;
+          vector_left_angle;
+          vector_type;
+          vector_right_angle;
+        ]) ->
+        VectorTypeSpecifier {
+          vector_array;
+          vector_left_angle;
+          vector_type;
+          vector_right_angle;
+        }
+        | (SyntaxKind.TypeParameter, [
+          type_variance_opt;
+          type_name;
+          type_constraint_list_opt;
+        ]) ->
+        TypeParameter {
+          type_variance_opt;
+          type_name;
+          type_constraint_list_opt;
+        }
+        | (SyntaxKind.TypeConstraint, [
+          constraint_keyword;
+          constraint_type;
+        ]) ->
+        TypeConstraint {
+          constraint_keyword;
+          constraint_type;
+        }
+        | (SyntaxKind.MapTypeSpecifier, [
+          map_array;
+          map_left_angle;
+          map_key;
+          map_comma;
+          map_value;
+          map_right_angle;
+        ]) ->
+        MapTypeSpecifier {
+          map_array;
+          map_left_angle;
+          map_key;
+          map_comma;
+          map_value;
+          map_right_angle;
+        }
+        | (SyntaxKind.ClosureTypeSpecifier, [
+          closure_outer_left_paren;
+          closure_function;
+          closure_inner_left_paren;
+          closure_parameter_types;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+        ]) ->
+        ClosureTypeSpecifier {
+          closure_outer_left_paren;
+          closure_function;
+          closure_inner_left_paren;
+          closure_parameter_types;
+          closure_inner_right_paren;
+          closure_colon;
+          closure_return_type;
+          closure_outer_right_paren;
+        }
+        | (SyntaxKind.ClassnameTypeSpecifier, [
+          classname_classname;
+          classname_left_angle;
+          classname_type;
+          classname_right_angle;
+        ]) ->
+        ClassnameTypeSpecifier {
+          classname_classname;
+          classname_left_angle;
+          classname_type;
+          classname_right_angle;
+        }
+        | (SyntaxKind.FieldSpecifier, [
+          field_name;
+          field_arrow;
+          field_type;
+        ]) ->
+        FieldSpecifier {
+          field_name;
+          field_arrow;
+          field_type;
+        }
+        | (SyntaxKind.FieldInitializer, [
+          field_initializer_name;
+          field_initializer_arrow;
+          field_initializer_value;
+        ]) ->
+        FieldInitializer {
+          field_initializer_name;
+          field_initializer_arrow;
+          field_initializer_value;
+        }
+        | (SyntaxKind.ShapeTypeSpecifier, [
+          shape_type_keyword;
+          shape_type_left_paren;
+          shape_type_fields;
+          shape_type_right_paren;
+        ]) ->
+        ShapeTypeSpecifier {
+          shape_type_keyword;
+          shape_type_left_paren;
+          shape_type_fields;
+          shape_type_right_paren;
+        }
+        | (SyntaxKind.ShapeExpression, [
+          shape_expression_keyword;
+          shape_expression_left_paren;
+          shape_expression_fields;
+          shape_expression_right_paren;
+        ]) ->
+        ShapeExpression {
+          shape_expression_keyword;
+          shape_expression_left_paren;
+          shape_expression_fields;
+          shape_expression_right_paren;
+        }
+        | (SyntaxKind.GenericTypeSpecifier, [
+          generic_class_type;
+          generic_arguments;
+        ]) ->
+        GenericTypeSpecifier {
+          generic_class_type;
+          generic_arguments;
+        }
+        | (SyntaxKind.NullableTypeSpecifier, [
+          nullable_question;
+          nullable_type;
+        ]) ->
+        NullableTypeSpecifier {
+          nullable_question;
+          nullable_type;
+        }
+        | (SyntaxKind.SoftTypeSpecifier, [
+          soft_at;
+          soft_type;
+        ]) ->
+        SoftTypeSpecifier {
+          soft_at;
+          soft_type;
+        }
+        | (SyntaxKind.TypeArguments, [
+          type_arguments_left_angle;
+          type_arguments;
+          type_arguments_right_angle;
+        ]) ->
+        TypeArguments {
+          type_arguments_left_angle;
+          type_arguments;
+          type_arguments_right_angle;
+        }
+        | (SyntaxKind.TypeParameters, [
+          type_parameters_left_angle;
+          type_parameters;
+          type_parameters_right_angle;
+        ]) ->
+        TypeParameters {
+          type_parameters_left_angle;
+          type_parameters;
+          type_parameters_right_angle;
+        }
+        | (SyntaxKind.TupleTypeSpecifier, [
+          tuple_left_paren;
+          tuple_types;
+          tuple_right_paren;
+        ]) ->
+        TupleTypeSpecifier {
+          tuple_left_paren;
+          tuple_types;
+          tuple_right_paren;
+        }
+        | (SyntaxKind.Error, [
+          error;
+        ]) ->
+        Error {
+          error;
+        }
+        | (SyntaxKind.ListItem, [
+          list_item;
+          list_separator;
+        ]) ->
+        ListItem {
+          list_item;
+          list_separator;
+        }
 
-      | _ -> failwith "with_children called with wrong number of children"
+      | (SyntaxKind.Missing, []) -> Missing
+      | (SyntaxKind.SyntaxList, items) -> SyntaxList items
+      | _ -> failwith
+        "syntax_from_children called with wrong number of children"
 
     let all_tokens node =
       let rec aux acc nodes =
@@ -2719,527 +5018,1386 @@ module WithToken(Token: TokenType) = struct
       let make_missing () =
         from_children SyntaxKind.Missing []
 
-      let make_prefix_unary_operator unary_operator unary_operand =
-        from_children SyntaxKind.PrefixUnaryOperator
-          [ unary_operator; unary_operand ]
-
-      let make_postfix_unary_operator unary_operator unary_operand =
-        from_children SyntaxKind.PostfixUnaryOperator
-          [ unary_operator; unary_operand ]
-
-      let make_binary_operator
-        binary_left_operand binary_operator binary_right_operand =
-          from_children SyntaxKind.BinaryOperator
-            [ binary_left_operand; binary_operator; binary_right_operand ]
-
-      let make_instanceof_expression left op right =
-        from_children SyntaxKind.InstanceofExpression [left; op; right ]
-
-      let make_conditional_expression
-        conditional_test conditional_question conditional_consequence
-        conditional_colon conditional_alternative =
-        from_children SyntaxKind.ConditionalExpression
-        [ conditional_test; conditional_question; conditional_consequence;
-          conditional_colon; conditional_alternative ]
-
-      let make_function_call_expression
-          function_call_receiver function_call_lparen
-          function_call_arguments function_call_rparen =
-        from_children SyntaxKind.FunctionCallExpression
-          [ function_call_receiver; function_call_lparen;
-            function_call_arguments; function_call_rparen ]
-
-      let make_member_selection_expression ob op name =
-        from_children SyntaxKind.MemberSelectionExpression [ ob; op; name ]
-
-      let make_safe_member_selection_expression ob op name =
-        from_children SyntaxKind.SafeMemberSelectionExpression [ ob; op; name ]
-
-      let make_scope_resolution_expression qualifier op name =
-        from_children SyntaxKind.ScopeResolutionExpression
-          [ qualifier; op; name ]
-
-      let make_yield_expression token operand =
-        from_children SyntaxKind.YieldExpression [ token; operand ]
-
-      let make_print_expression print_keyword print_expr =
-        from_children SyntaxKind.PrintExpression
-          [ print_keyword; print_expr; ]
-
-      let make_cast_expression left cast_type right operand =
-        from_children SyntaxKind.CastExpression
-          [ left; cast_type; right; operand ]
-
-      let make_lambda_expression async signature arrow body =
-        from_children SyntaxKind.LambdaExpression
-          [async; signature; arrow; body ]
-
-      let make_lambda_signature left params right colon lambda_type =
-        from_children SyntaxKind.LambdaSignature
-        [ left; params; right; colon; lambda_type ]
-
-      let make_anonymous_function
-          async func left params right colon return_type uses body =
-        from_children SyntaxKind.AnonymousFunction
-          [async; func; left; params; right; colon; return_type; uses; body ]
-
-      let make_anonymous_function_use_clause use_token left vars right =
-        from_children SyntaxKind.AnonymousFunctionUseClause
-          [ use_token; left; vars; right ]
-
-      let make_parenthesized_expression
-        paren_expr_left_paren paren_expr paren_expr_right_paren =
-          from_children SyntaxKind.ParenthesizedExpression
-            [ paren_expr_left_paren; paren_expr; paren_expr_right_paren ]
-
-      let make_braced_expression
-        braced_expr_left_brace braced_expr braced_expr_right_brace =
-          from_children SyntaxKind.BracedExpression
-            [ braced_expr_left_brace; braced_expr; braced_expr_right_brace ]
-
-      let make_list_expression
-        list_keyword list_left_paren list_members
-        list_right_paren =
-        from_children SyntaxKind.ListExpression
-          [ list_keyword; list_left_paren; list_members;
-          list_right_paren ]
-
-      let make_collection_literal_expression
-        collection_literal_name collection_literal_left_brace
-        collection_literal_initialization_list collection_literal_right_brace =
-        from_children SyntaxKind.CollectionLiteralExpression
-          [ collection_literal_name; collection_literal_left_brace;
-          collection_literal_initialization_list;
-          collection_literal_right_brace; ]
-
-      let make_object_creation_expression
-        object_creation_new object_creation_class object_creation_lparen
-        object_creation_arguments object_creation_rparen =
-        from_children SyntaxKind.ObjectCreationExpression
-        [ object_creation_new; object_creation_class; object_creation_lparen;
-          object_creation_arguments; object_creation_rparen]
-
-      let make_field_initializer name arrow value =
-        from_children SyntaxKind.FieldInitializer [ name; arrow; value ]
-
-      let make_shape_expression shape lparen fields rparen =
-        from_children SyntaxKind.ShapeExpression
-          [ shape; lparen; fields; rparen ]
-
-      let make_element_initializer key arrow value =
-        from_children SyntaxKind.ElementInitializer [ key; arrow; value ]
-
-      let make_array_creation_expression
-        array_creation_left_bracket array_creation_members
-        array_creation_right_bracket =
-        from_children SyntaxKind.ArrayCreationExpression
-          [array_creation_left_bracket; array_creation_members;
-          array_creation_right_bracket ]
-
-      let make_array_intrinsic_expression
-        array_intrinsic_keyword array_intrinsic_left_paren
-        array_intrinsic_members array_intrinsic_right_paren =
-        from_children SyntaxKind.ArrayIntrinsicExpression
-          [ array_intrinsic_keyword; array_intrinsic_left_paren;
-          array_intrinsic_members; array_intrinsic_right_paren ]
-
-      let make_subscript_expression receiver left index right =
-        from_children SyntaxKind.SubscriptExpression
-        [ receiver; left; index; right ]
-
-      let make_awaitable_creation_expression async compound_stmt =
-        from_children SyntaxKind.AwaitableCreationExpression
-          [ async; compound_stmt; ]
-
-      let make_xhp_expression xhp_open xhp_body xhp_close =
-        from_children SyntaxKind.XHPExpression [xhp_open; xhp_body; xhp_close ]
-
-      let make_xhp_open xhp_open_name xhp_open_attrs xhp_open_right_angle =
-        from_children SyntaxKind.XHPOpen
-          [xhp_open_name; xhp_open_attrs; xhp_open_right_angle ]
-
-      let make_xhp_close
-          xhp_close_left_angle xhp_close_name xhp_close_right_angle =
-        from_children SyntaxKind.XHPClose
-          [xhp_close_left_angle; xhp_close_name; xhp_close_right_angle ]
-
-      let make_xhp_attribute
-        xhp_attr_name xhp_attr_equal xhp_attr_expr =
-        from_children SyntaxKind.XHPAttribute
-          [ xhp_attr_name; xhp_attr_equal; xhp_attr_expr ]
-
       let make_list items =
         match items with
         | [] -> make_missing()
         | h :: [] -> h
         | _ -> from_children SyntaxKind.SyntaxList items
 
-      let make_list_item item separator =
-        from_children SyntaxKind.ListItem [item; separator]
+    let make_script_header
+      header_less_than
+      header_question
+      header_language
+    =
+      from_children SyntaxKind.ScriptHeader [
+        header_less_than;
+        header_question;
+        header_language;
+      ]
 
-      let make_error item =
-        from_children SyntaxKind.Error [ item ]
+    let make_script
+      script_header
+      script_declarations
+    =
+      from_children SyntaxKind.Script [
+        script_header;
+        script_declarations;
+      ]
 
-      let make_script_header header_less_than header_question header_language =
-        from_children SyntaxKind.ScriptHeader
-          [ header_less_than; header_question; header_language ]
+    let make_simple_type_specifier
+      simple_type_specifier
+    =
+      from_children SyntaxKind.SimpleTypeSpecifier [
+        simple_type_specifier;
+      ]
 
-      let make_script script_header script_declarations =
-        from_children SyntaxKind.Script [ script_header; script_declarations ]
+    let make_literal_expression
+      literal_expression
+    =
+      from_children SyntaxKind.LiteralExpression [
+        literal_expression;
+      ]
 
-      let make_enum_declaration
-          enum name colon base enum_type left_brace items right_brace =
-        from_children SyntaxKind.EnumDeclaration
-          [ enum; name; colon; base; enum_type; left_brace; items; right_brace ]
+    let make_variable_expression
+      variable_expression
+    =
+      from_children SyntaxKind.VariableExpression [
+        variable_expression;
+      ]
 
-      let make_enumerator name equal value semicolon =
-        from_children SyntaxKind.Enumerator [ name; equal; value; semicolon ]
+    let make_qualified_name_expression
+      qualified_name_expression
+    =
+      from_children SyntaxKind.QualifiedNameExpression [
+        qualified_name_expression;
+      ]
 
-      let make_alias_declaration attr token name generic constr equal ty semi =
-        from_children SyntaxKind.AliasDeclaration
-          [ attr; token; name; generic; constr; equal; ty; semi ]
+    let make_pipe_variable_expression
+      pipe_variable_expression
+    =
+      from_children SyntaxKind.PipeVariableExpression [
+        pipe_variable_expression;
+      ]
 
-      let make_property_declaration mods ty decls semi =
-        from_children SyntaxKind.PropertyDeclaration
-        [ mods; ty; decls; semi ]
+    let make_enum_declaration
+      enum_keyword
+      enum_name
+      enum_colon
+      enum_base
+      enum_type
+      enum_left_brace
+      enum_enumerators
+      enum_right_brace
+    =
+      from_children SyntaxKind.EnumDeclaration [
+        enum_keyword;
+        enum_name;
+        enum_colon;
+        enum_base;
+        enum_type;
+        enum_left_brace;
+        enum_enumerators;
+        enum_right_brace;
+      ]
 
-      let make_property_declarator name init =
-        from_children SyntaxKind.PropertyDeclarator
-        [ name; init ]
+    let make_enumerator
+      enumerator_name
+      enumerator_equal
+      enumerator_value
+      enumerator_semicolon
+    =
+      from_children SyntaxKind.Enumerator [
+        enumerator_name;
+        enumerator_equal;
+        enumerator_value;
+        enumerator_semicolon;
+      ]
 
-      let make_namespace_declaration token name body =
-        from_children SyntaxKind.NamespaceDeclaration
-          [ token; name; body ]
+    let make_alias_declaration
+      alias_attribute_spec
+      alias_keyword
+      alias_name
+      alias_generic_parameter
+      alias_constraint
+      alias_equal
+      alias_type
+      alias_semicolon
+    =
+      from_children SyntaxKind.AliasDeclaration [
+        alias_attribute_spec;
+        alias_keyword;
+        alias_name;
+        alias_generic_parameter;
+        alias_constraint;
+        alias_equal;
+        alias_type;
+        alias_semicolon;
+      ]
 
-      let make_namespace_body left decls right =
-        from_children SyntaxKind.NamespaceBody
-          [ left; decls; right ]
+    let make_property_declaration
+      property_modifiers
+      property_type
+      property_declarators
+      property_semicolon
+    =
+      from_children SyntaxKind.PropertyDeclaration [
+        property_modifiers;
+        property_type;
+        property_declarators;
+        property_semicolon;
+      ]
 
-      let make_namespace_group_use_declaration
-        token kind prefix left clauses right semi =
-        from_children SyntaxKind.NamespaceGroupUseDeclaration
-        [ token; kind; prefix; left; clauses; right; semi ]
+    let make_property_declarator
+      property_name
+      property_initializer
+    =
+      from_children SyntaxKind.PropertyDeclarator [
+        property_name;
+        property_initializer;
+      ]
 
-      let make_namespace_use_declaration use use_kind clauses semi =
-        from_children SyntaxKind.NamespaceUseDeclaration
-          [ use; use_kind; clauses; semi ]
+    let make_namespace_declaration
+      namespace_keyword
+      namespace_name
+      namespace_body
+    =
+      from_children SyntaxKind.NamespaceDeclaration [
+        namespace_keyword;
+        namespace_name;
+        namespace_body;
+      ]
 
-      let make_namespace_use_clause use_kind name as_token alias =
-        from_children SyntaxKind.NamespaceUseClause
-          [ use_kind; name; as_token; alias ]
+    let make_namespace_body
+      namespace_left_brace
+      namespace_declarations
+      namespace_right_brace
+    =
+      from_children SyntaxKind.NamespaceBody [
+        namespace_left_brace;
+        namespace_declarations;
+        namespace_right_brace;
+      ]
 
-      let make_function_declaration function_attribute_spec function_declaration_header
-        function_body =
-        from_children SyntaxKind.FunctionDeclaration
-          [ function_attribute_spec; function_declaration_header;
-          function_body ]
+    let make_namespace_use_declaration
+      namespace_use_keyword
+      namespace_use_kind
+      namespace_use_clauses
+      namespace_use_semicolon
+    =
+      from_children SyntaxKind.NamespaceUseDeclaration [
+        namespace_use_keyword;
+        namespace_use_kind;
+        namespace_use_clauses;
+        namespace_use_semicolon;
+      ]
 
-      let make_function_declaration_header function_async function_keyword
-        function_name function_type_params function_left_paren function_params
-        function_right_paren function_colon function_type =
+    let make_namespace_group_use_declaration
+      namespace_group_use_keyword
+      namespace_group_use_kind
+      namespace_group_use_prefix
+      namespace_group_use_left_brace
+      namespace_group_use_clauses
+      namespace_group_use_right_brace
+      namespace_group_use_semicolon
+    =
+      from_children SyntaxKind.NamespaceGroupUseDeclaration [
+        namespace_group_use_keyword;
+        namespace_group_use_kind;
+        namespace_group_use_prefix;
+        namespace_group_use_left_brace;
+        namespace_group_use_clauses;
+        namespace_group_use_right_brace;
+        namespace_group_use_semicolon;
+      ]
+
+    let make_namespace_use_clause
+      namespace_use_clause_kind
+      namespace_use_name
+      namespace_use_as
+      namespace_use_alias
+    =
+      from_children SyntaxKind.NamespaceUseClause [
+        namespace_use_clause_kind;
+        namespace_use_name;
+        namespace_use_as;
+        namespace_use_alias;
+      ]
+
+    let make_function_declaration
+      function_attribute_spec
+      function_declaration_header
+      function_body
+    =
+      from_children SyntaxKind.FunctionDeclaration [
+        function_attribute_spec;
+        function_declaration_header;
+        function_body;
+      ]
+
+    let make_function_declaration_header
+      function_async
+      function_keyword
+      function_name
+      function_type_parameter_list
+      function_left_paren
+      function_parameter_list
+      function_right_paren
+      function_colon
+      function_type
+    =
       from_children SyntaxKind.FunctionDeclarationHeader [
-        function_async; function_keyword; function_name;
-        function_type_params; function_left_paren; function_params;
-        function_right_paren; function_colon; function_type ]
+        function_async;
+        function_keyword;
+        function_name;
+        function_type_parameter_list;
+        function_left_paren;
+        function_parameter_list;
+        function_right_paren;
+        function_colon;
+        function_type;
+      ]
 
-      let make_methodish_declaration methodish_attr methodish_modifiers
-        methodish_function_decl_header methodish_function_body
-        methodish_semicolon =
-        from_children SyntaxKind.MethodishDeclaration
-          [ methodish_attr; methodish_modifiers; methodish_function_decl_header;
-            methodish_function_body; methodish_semicolon ]
+    let make_methodish_declaration
+      methodish_attribute
+      methodish_modifiers
+      methodish_function_decl_header
+      methodish_function_body
+      methodish_semicolon
+    =
+      from_children SyntaxKind.MethodishDeclaration [
+        methodish_attribute;
+        methodish_modifiers;
+        methodish_function_decl_header;
+        methodish_function_body;
+        methodish_semicolon;
+      ]
 
-      let make_classish_declaration classish_attr classish_modifiers
-        classish_keyword classish_name classish_type_params classish_extends
-        classish_extends_list classish_implements classish_implements_list
-        classish_body =
-        from_children SyntaxKind.ClassishDeclaration [
-          classish_attr; classish_modifiers; classish_keyword;
-          classish_name; classish_type_params; classish_extends;
-          classish_extends_list; classish_implements; classish_implements_list;
-          classish_body ]
+    let make_classish_declaration
+      classish_attribute
+      classish_modifiers
+      classish_keyword
+      classish_name
+      classish_type_parameter_list
+      classish_extends
+      classish_extends_list
+      classish_implements
+      classish_implements_list
+      classish_body
+    =
+      from_children SyntaxKind.ClassishDeclaration [
+        classish_attribute;
+        classish_modifiers;
+        classish_keyword;
+        classish_name;
+        classish_type_parameter_list;
+        classish_extends;
+        classish_extends_list;
+        classish_implements;
+        classish_implements_list;
+        classish_body;
+      ]
 
-      let make_classish_body classish_body_left_brace classish_body_elements
-        classish_body_right_brace =
-        from_children SyntaxKind.ClassishBody [
-          classish_body_left_brace; classish_body_elements;
-          classish_body_right_brace ]
+    let make_classish_body
+      classish_body_left_brace
+      classish_body_elements
+      classish_body_right_brace
+    =
+      from_children SyntaxKind.ClassishBody [
+        classish_body_left_brace;
+        classish_body_elements;
+        classish_body_right_brace;
+      ]
 
-      let make_xhp_enum_type token left items right =
-        from_children SyntaxKind.XHPEnumType
-        [ token; left; items; right ]
+    let make_trait_use
+      trait_use_keyword
+      trait_use_name_list
+      trait_use_semicolon
+    =
+      from_children SyntaxKind.TraitUse [
+        trait_use_keyword;
+        trait_use_name_list;
+        trait_use_semicolon;
+      ]
 
-      let make_xhp_category_declaration category items semi =
-        from_children SyntaxKind.XHPCategoryDeclaration
-        [ category; items; semi ]
+    let make_require_clause
+      require_keyword
+      require_kind
+      require_name
+      require_semicolon
+    =
+      from_children SyntaxKind.RequireClause [
+        require_keyword;
+        require_kind;
+        require_name;
+        require_semicolon;
+      ]
 
-      let make_xhp_children_declaration children expr semi =
-        from_children SyntaxKind.XHPChildrenDeclaration
-          [ children; expr; semi ]
+    let make_const_declaration
+      const_abstract
+      const_keyword
+      const_type_specifier
+      const_declarator_list
+      const_semicolon
+    =
+      from_children SyntaxKind.ConstDeclaration [
+        const_abstract;
+        const_keyword;
+        const_type_specifier;
+        const_declarator_list;
+        const_semicolon;
+      ]
 
-      let make_xhp_required at req =
-        from_children SyntaxKind.XHPRequired [ at; req ]
+    let make_constant_declarator
+      constant_declarator_name
+      constant_declarator_initializer
+    =
+      from_children SyntaxKind.ConstantDeclarator [
+        constant_declarator_name;
+        constant_declarator_initializer;
+      ]
 
-      let make_xhp_class_attribute_declaration attr attrs semi =
-        from_children SyntaxKind.XHPClassAttributeDeclaration
-          [ attr; attrs; semi ]
+    let make_type_const_declaration
+      type_const_abstract
+      type_const_keyword
+      type_const_type_keyword
+      type_const_name
+      type_const_type_constraint
+      type_const_equal
+      type_const_type_specifier
+      type_const_semicolon
+    =
+      from_children SyntaxKind.TypeConstDeclaration [
+        type_const_abstract;
+        type_const_keyword;
+        type_const_type_keyword;
+        type_const_name;
+        type_const_type_constraint;
+        type_const_equal;
+        type_const_type_specifier;
+        type_const_semicolon;
+      ]
 
-      let make_xhp_class_attribute attr_type name init required =
-        from_children SyntaxKind.XHPClassAttribute
-          [ attr_type; name; init; required ]
+    let make_decorated_expression
+      decorated_expression_decorator
+      decorated_expression_expression
+    =
+      from_children SyntaxKind.DecoratedExpression [
+        decorated_expression_decorator;
+        decorated_expression_expression;
+      ]
 
-      let make_trait_use trait_use_keyword trait_use_name_list
-        trait_use_semicolon =
-        from_children SyntaxKind.TraitUse [
-          trait_use_keyword; trait_use_name_list; trait_use_semicolon; ]
+    let make_parameter_declaration
+      param_attribute
+      param_visibility
+      param_type
+      param_name
+      param_default
+    =
+      from_children SyntaxKind.ParameterDeclaration [
+        param_attribute;
+        param_visibility;
+        param_type;
+        param_name;
+        param_default;
+      ]
 
-      let make_require_clause require kind name semi =
-        from_children SyntaxKind.RequireClause [ require; kind; name; semi ]
+    let make_attribute_specification
+      attribute_spec_left_double_angle
+      attribute_spec_attribute_list
+      attribute_spec_right_double_angle
+    =
+      from_children SyntaxKind.AttributeSpecification [
+        attribute_spec_left_double_angle;
+        attribute_spec_attribute_list;
+        attribute_spec_right_double_angle;
+      ]
 
-      let make_const_declaration const_abstract const_keyword
-        const_type_specifier const_declarator_list const_semicolon =
-        from_children SyntaxKind.ConstDeclaration [
-          const_abstract; const_keyword; const_type_specifier;
-          const_declarator_list; const_semicolon; ]
+    let make_attribute
+      attribute_name
+      attribute_left_paren
+      attribute_values
+      attribute_right_paren
+    =
+      from_children SyntaxKind.Attribute [
+        attribute_name;
+        attribute_left_paren;
+        attribute_values;
+        attribute_right_paren;
+      ]
 
-      let make_constant_declarator constant_declarator_name
-        constant_declarator_initializer =
-        from_children SyntaxKind.ConstantDeclarator
-          [ constant_declarator_name; constant_declarator_initializer; ]
+    let make_inclusion_expression
+      inclusion_require
+      inclusion_filename
+    =
+      from_children SyntaxKind.InclusionExpression [
+        inclusion_require;
+        inclusion_filename;
+      ]
 
-      let make_type_const_declaration type_const_abstract type_const_keyword
-        type_const_type_keyword type_const_name type_const_type_constraint
-        type_const_equal type_const_type_specifier type_const_semicolon =
-        from_children SyntaxKind.TypeConstDeclaration
-          [ type_const_abstract; type_const_keyword; type_const_type_keyword;
-            type_const_name; type_const_type_constraint; type_const_equal;
-            type_const_type_specifier; type_const_semicolon; ]
+    let make_inclusion_directive
+      inclusion_expression
+      inclusion_semicolon
+    =
+      from_children SyntaxKind.InclusionDirective [
+        inclusion_expression;
+        inclusion_semicolon;
+      ]
 
-      let make_decorated_expression decorator expression =
-        from_children SyntaxKind.DecoratedExpression [ decorator; expression ]
+    let make_compound_statement
+      compound_left_brace
+      compound_statements
+      compound_right_brace
+    =
+      from_children SyntaxKind.CompoundStatement [
+        compound_left_brace;
+        compound_statements;
+        compound_right_brace;
+      ]
 
-      let make_parameter_declaration
-        param_attr param_visibility param_type param_name param_default =
-        from_children SyntaxKind.ParameterDeclaration
-          [ param_attr; param_visibility; param_type; param_name;
-          param_default ]
+    let make_expression_statement
+      expr_statement_expr
+      expr_statement_semicolon
+    =
+      from_children SyntaxKind.ExpressionStatement [
+        expr_statement_expr;
+        expr_statement_semicolon;
+      ]
 
-      let make_attribute_specification attribute_spec_left_double_angle
-        attribute_spec_attribute_list attribute_spec_right_double_angle =
-        from_children SyntaxKind.AttributeSpecification
-          [ attribute_spec_left_double_angle; attribute_spec_attribute_list;
-          attribute_spec_right_double_angle ]
+    let make_while_statement
+      while_keyword
+      while_left_paren
+      while_condition
+      while_right_paren
+      while_body
+    =
+      from_children SyntaxKind.WhileStatement [
+        while_keyword;
+        while_left_paren;
+        while_condition;
+        while_right_paren;
+        while_body;
+      ]
 
-      let make_attribute attribute_name attribute_left_paren attribute_values
-        attribute_right_paren =
-        from_children SyntaxKind.Attribute
-        [ attribute_name; attribute_left_paren; attribute_values;
-          attribute_right_paren ]
+    let make_if_statement
+      if_keyword
+      if_left_paren
+      if_condition
+      if_right_paren
+      if_statement
+      if_elseif_clauses
+      if_else_clause
+    =
+      from_children SyntaxKind.IfStatement [
+        if_keyword;
+        if_left_paren;
+        if_condition;
+        if_right_paren;
+        if_statement;
+        if_elseif_clauses;
+        if_else_clause;
+      ]
 
-      let make_inclusion_expression require filename =
-        from_children SyntaxKind.InclusionExpression [ require; filename ]
+    let make_elseif_clause
+      elseif_keyword
+      elseif_left_paren
+      elseif_condition
+      elseif_right_paren
+      elseif_statement
+    =
+      from_children SyntaxKind.ElseifClause [
+        elseif_keyword;
+        elseif_left_paren;
+        elseif_condition;
+        elseif_right_paren;
+        elseif_statement;
+      ]
 
-      let make_inclusion_directive expr semicolon =
-        from_children SyntaxKind.InclusionDirective [ expr; semicolon ]
+    let make_else_clause
+      else_keyword
+      else_statement
+    =
+      from_children SyntaxKind.ElseClause [
+        else_keyword;
+        else_statement;
+      ]
 
-      let make_compound_statement
-        compound_left_brace compound_statements compound_right_brace =
-        from_children SyntaxKind.CompoundStatement
-          [ compound_left_brace; compound_statements; compound_right_brace ]
+    let make_try_statement
+      try_keyword
+      try_compound_statement
+      catch_clauses
+      finally_clause
+    =
+      from_children SyntaxKind.TryStatement [
+        try_keyword;
+        try_compound_statement;
+        catch_clauses;
+        finally_clause;
+      ]
 
-      let make_expression_statement expr_statement_expr
-        expr_statement_semicolon =
-        from_children SyntaxKind.ExpressionStatement
-          [ expr_statement_expr; expr_statement_semicolon ]
+    let make_catch_clause
+      catch_keyword
+      catch_left_paren
+      catch_type
+      catch_variable
+      catch_right_paren
+      catch_compound_statement
+    =
+      from_children SyntaxKind.CatchClause [
+        catch_keyword;
+        catch_left_paren;
+        catch_type;
+        catch_variable;
+        catch_right_paren;
+        catch_compound_statement;
+      ]
 
-      let make_while_statement
-        while_keyword while_left_paren while_condition
-        while_right_paren while_body =
-        from_children SyntaxKind.WhileStatement
-          [ while_keyword; while_left_paren; while_condition;
-          while_right_paren; while_body ]
+    let make_finally_clause
+      finally_keyword
+      finally_compound_statement
+    =
+      from_children SyntaxKind.FinallyClause [
+        finally_keyword;
+        finally_compound_statement;
+      ]
 
-      let make_if_statement
-        if_keyword if_left_paren if_condition if_right_paren if_statement
-        if_elseif_clauses if_else_clause =
-        from_children SyntaxKind.IfStatement
-          [ if_keyword; if_left_paren; if_condition; if_right_paren;
-          if_statement; if_elseif_clauses; if_else_clause ]
+    let make_do_statement
+      do_keyword
+      do_statement
+      do_while_keyword
+      do_left_paren
+      do_condition_expr
+      do_right_paren
+      do_semicolon
+    =
+      from_children SyntaxKind.DoStatement [
+        do_keyword;
+        do_statement;
+        do_while_keyword;
+        do_left_paren;
+        do_condition_expr;
+        do_right_paren;
+        do_semicolon;
+      ]
 
-      let make_elseif_clause
-        elseif_keyword elseif_left_paren elseif_condition
-        elseif_right_paren elseif_statement =
-        from_children SyntaxKind.ElseifClause
-          [ elseif_keyword; elseif_left_paren; elseif_condition;
-          elseif_right_paren; elseif_statement ]
+    let make_for_statement
+      for_keyword
+      for_left_paren
+      for_initializer_expr
+      for_first_semicolon
+      for_control_expr
+      for_second_semicolon
+      for_end_of_loop_expr
+      for_right_paren
+      for_statement
+    =
+      from_children SyntaxKind.ForStatement [
+        for_keyword;
+        for_left_paren;
+        for_initializer_expr;
+        for_first_semicolon;
+        for_control_expr;
+        for_second_semicolon;
+        for_end_of_loop_expr;
+        for_right_paren;
+        for_statement;
+      ]
 
-      let make_else_clause else_keyword else_statement =
-        from_children SyntaxKind.ElseClause [ else_keyword; else_statement ]
+    let make_foreach_statement
+      foreach_keyword
+      foreach_left_paren
+      foreach_collection_name
+      foreach_await_opt
+      foreach_as
+      foreach_key_opt
+      foreach_key_arrow_opt
+      foreach_value
+      foreach_right_paren
+      foreach_statement
+    =
+      from_children SyntaxKind.ForeachStatement [
+        foreach_keyword;
+        foreach_left_paren;
+        foreach_collection_name;
+        foreach_await_opt;
+        foreach_as;
+        foreach_key_opt;
+        foreach_key_arrow_opt;
+        foreach_value;
+        foreach_right_paren;
+        foreach_statement;
+      ]
 
-      let make_try_statement
-        try_keyword try_compound_statement catch_clauses finally_clause =
-          from_children SyntaxKind.TryStatement
-          [ try_keyword; try_compound_statement; catch_clauses; finally_clause ]
+    let make_switch_statement
+      switch_keyword
+      switch_left_paren
+      switch_expr
+      switch_right_paren
+      switch_compound_statement
+    =
+      from_children SyntaxKind.SwitchStatement [
+        switch_keyword;
+        switch_left_paren;
+        switch_expr;
+        switch_right_paren;
+        switch_compound_statement;
+      ]
 
-      let make_catch_clause keyword left catch_type catch_var right body =
-        from_children SyntaxKind.CatchClause
-          [ keyword; left; catch_type; catch_var; right; body ]
+    let make_case_statement
+      case_keyword
+      case_expr
+      case_colon
+      case_stmt
+    =
+      from_children SyntaxKind.CaseStatement [
+        case_keyword;
+        case_expr;
+        case_colon;
+        case_stmt;
+      ]
 
-      let make_finally_clause finally_keyword finally_compound_statement =
-        from_children SyntaxKind.FinallyClause
-          [finally_keyword; finally_compound_statement]
+    let make_default_statement
+      default_keyword
+      default_colon
+      default_stmt
+    =
+      from_children SyntaxKind.DefaultStatement [
+        default_keyword;
+        default_colon;
+        default_stmt;
+      ]
 
-      let make_do_statement
-        do_keyword do_statement do_while_keyword do_left_paren
-        do_condition_expr do_right_paren do_semicolon =
-        from_children SyntaxKind.DoStatement
-          [ do_keyword; do_statement; do_while_keyword; do_left_paren;
-          do_condition_expr; do_right_paren; do_semicolon ]
+    let make_return_statement
+      return_keyword
+      return_expr
+      return_semicolon
+    =
+      from_children SyntaxKind.ReturnStatement [
+        return_keyword;
+        return_expr;
+        return_semicolon;
+      ]
 
-      let make_for_statement
-        for_keyword for_left_paren for_initializer_expr for_first_semicolon
-        for_control_expr for_second_semicolon for_end_of_loop_expr
-        for_right_paren for_statement =
-        from_children SyntaxKind.ForStatement
-        [ for_keyword; for_left_paren; for_initializer_expr;
-        for_first_semicolon; for_control_expr; for_second_semicolon;
-        for_end_of_loop_expr; for_right_paren; for_statement ]
+    let make_throw_statement
+      throw_keyword
+      throw_expr
+      throw_semicolon
+    =
+      from_children SyntaxKind.ThrowStatement [
+        throw_keyword;
+        throw_expr;
+        throw_semicolon;
+      ]
 
-      let make_foreach_statement foreach_keyword foreach_left_paren
-        foreach_collection_name foreach_await_opt foreach_as foreach_key_opt
-        foreach_arrow foreach_value foreach_right_paren foreach_statement =
-        from_children SyntaxKind.ForeachStatement
-        [ foreach_keyword; foreach_left_paren; foreach_collection_name;
-        foreach_await_opt; foreach_as; foreach_key_opt; foreach_arrow;
-        foreach_value; foreach_right_paren; foreach_statement]
+    let make_break_statement
+      break_keyword
+      break_level
+      break_semicolon
+    =
+      from_children SyntaxKind.BreakStatement [
+        break_keyword;
+        break_level;
+        break_semicolon;
+      ]
 
-      let make_switch_statement
-        switch_keyword switch_left_paren switch_expr
-        switch_right_paren switch_compound_statement =
-        from_children SyntaxKind.SwitchStatement
-          [ switch_keyword; switch_left_paren; switch_expr;
-          switch_right_paren; switch_compound_statement ]
+    let make_continue_statement
+      continue_keyword
+      continue_level
+      continue_semicolon
+    =
+      from_children SyntaxKind.ContinueStatement [
+        continue_keyword;
+        continue_level;
+        continue_semicolon;
+      ]
 
-      let make_case_statement case_keyword case_expr case_colon case_stmt =
-      from_children SyntaxKind.CaseStatement
-          [ case_keyword; case_expr; case_colon; case_stmt ]
+    let make_function_static_statement
+      static_static
+      static_declarations
+      static_semicolon
+    =
+      from_children SyntaxKind.FunctionStaticStatement [
+        static_static;
+        static_declarations;
+        static_semicolon;
+      ]
 
-      let make_default_statement default_keyword default_colon default_stmt =
-        from_children SyntaxKind.DefaultStatement
-          [ default_keyword; default_colon; default_stmt ]
+    let make_static_declarator
+      static_name
+      static_initializer
+    =
+      from_children SyntaxKind.StaticDeclarator [
+        static_name;
+        static_initializer;
+      ]
 
-      let make_return_statement return_keyword return_expr return_semicolon =
-        from_children SyntaxKind.ReturnStatement
-          [ return_keyword; return_expr; return_semicolon ]
+    let make_echo_statement
+      echo_keyword
+      echo_expression_list
+      echo_semicolon
+    =
+      from_children SyntaxKind.EchoStatement [
+        echo_keyword;
+        echo_expression_list;
+        echo_semicolon;
+      ]
 
-      let make_throw_statement throw_keyword throw_expr throw_semicolon =
-        from_children SyntaxKind.ThrowStatement
-          [ throw_keyword; throw_expr; throw_semicolon ]
+    let make_simple_initializer
+      simple_initializer_equal
+      simple_initializer_value
+    =
+      from_children SyntaxKind.SimpleInitializer [
+        simple_initializer_equal;
+        simple_initializer_value;
+      ]
 
-      let make_break_statement keyword level semi =
-        from_children SyntaxKind.BreakStatement
-          [ keyword; level; semi ]
+    let make_anonymous_function
+      anonymous_async
+      anonymous_function
+      anonymous_left_paren
+      anonymous_parameter_list
+      anonymous_right_paren
+      anonymous_colon
+      anonymous_type
+      anonymous_use
+      anonymous_body
+    =
+      from_children SyntaxKind.AnonymousFunction [
+        anonymous_async;
+        anonymous_function;
+        anonymous_left_paren;
+        anonymous_parameter_list;
+        anonymous_right_paren;
+        anonymous_colon;
+        anonymous_type;
+        anonymous_use;
+        anonymous_body;
+      ]
 
-      let make_continue_statement keyword level semi =
-        from_children SyntaxKind.ContinueStatement
-          [ keyword; level; semi ]
+    let make_anonymous_function_use_clause
+      anonymous_use_keyword
+      anonymous_use_left_paren
+      anonymous_use_variables
+      anonymous_use_right_paren
+    =
+      from_children SyntaxKind.AnonymousFunctionUseClause [
+        anonymous_use_keyword;
+        anonymous_use_left_paren;
+        anonymous_use_variables;
+        anonymous_use_right_paren;
+      ]
 
-      let make_function_static_statement static decls semi =
-        from_children SyntaxKind.FunctionStaticStatement [ static; decls; semi ]
+    let make_lambda_expression
+      lambda_async
+      lambda_signature
+      lambda_arrow
+      lambda_body
+    =
+      from_children SyntaxKind.LambdaExpression [
+        lambda_async;
+        lambda_signature;
+        lambda_arrow;
+        lambda_body;
+      ]
 
-      let make_simple_initializer equal value =
-        from_children SyntaxKind.SimpleInitializer [ equal; value ]
+    let make_lambda_signature
+      lambda_left_paren
+      lambda_parameter_list
+      lambda_right_paren
+      lambda_colon
+      lambda_type
+    =
+      from_children SyntaxKind.LambdaSignature [
+        lambda_left_paren;
+        lambda_parameter_list;
+        lambda_right_paren;
+        lambda_colon;
+        lambda_type;
+      ]
 
-      let make_static_declarator variable init =
-        from_children SyntaxKind.StaticDeclarator [ variable; init ]
+    let make_cast_expression
+      cast_left_paren
+      cast_type
+      cast_right_paren
+      cast_operand
+    =
+      from_children SyntaxKind.CastExpression [
+        cast_left_paren;
+        cast_type;
+        cast_right_paren;
+        cast_operand;
+      ]
 
-      let make_echo_statement
-        echo_keyword echo_expression_list echo_semicolon =
-        from_children SyntaxKind.EchoStatement
-        [ echo_keyword; echo_expression_list; echo_semicolon; ]
+    let make_scope_resolution_expression
+      scope_resolution_qualifier
+      scope_resolution_operator
+      scope_resolution_name
+    =
+      from_children SyntaxKind.ScopeResolutionExpression [
+        scope_resolution_qualifier;
+        scope_resolution_operator;
+        scope_resolution_name;
+      ]
 
-      let make_type_constant type_constant_left_type type_constant_separator
-          type_constant_right_type =
-        from_children SyntaxKind.TypeConstant
-          [ type_constant_left_type; type_constant_separator;
-          type_constant_right_type ]
+    let make_member_selection_expression
+      member_object
+      member_operator
+      member_name
+    =
+      from_children SyntaxKind.MemberSelectionExpression [
+        member_object;
+        member_operator;
+        member_name;
+      ]
 
-      let make_type_constraint constraint_keyword constraint_type =
-        from_children SyntaxKind.TypeConstraint
-          [ constraint_keyword; constraint_type ]
+    let make_safe_member_selection_expression
+      safe_member_object
+      safe_member_operator
+      safe_member_name
+    =
+      from_children SyntaxKind.SafeMemberSelectionExpression [
+        safe_member_object;
+        safe_member_operator;
+        safe_member_name;
+      ]
 
-      let make_type_parameter variance_opt type_name constraint_list_opt =
-        from_children SyntaxKind.TypeParameter
-          [ variance_opt; type_name; constraint_list_opt ]
+    let make_yield_expression
+      yield_keyword
+      yield_operand
+    =
+      from_children SyntaxKind.YieldExpression [
+        yield_keyword;
+        yield_operand;
+      ]
 
-      let make_simple_type_specifier simple_type =
-        from_children SyntaxKind.SimpleTypeSpecifier [ simple_type ]
+    let make_print_expression
+      print_keyword
+      print_expr
+    =
+      from_children SyntaxKind.PrintExpression [
+        print_keyword;
+        print_expr;
+      ]
 
-      let make_soft_type_specifier soft_at soft_type =
-        from_children SyntaxKind.SoftTypeSpecifier
-          [ soft_at; soft_type ]
+    let make_prefix_unary_operator
+      prefix_unary_operator
+      prefix_unary_operand
+    =
+      from_children SyntaxKind.PrefixUnaryOperator [
+        prefix_unary_operator;
+        prefix_unary_operand;
+      ]
 
-      let make_nullable_type_specifier nullable_question nullable_type =
-        from_children SyntaxKind.NullableTypeSpecifier
-          [ nullable_question; nullable_type ]
+    let make_postfix_unary_operator
+      postfix_unary_operand
+      postfix_unary_operator
+    =
+      from_children SyntaxKind.PostfixUnaryOperator [
+        postfix_unary_operand;
+        postfix_unary_operator;
+      ]
 
-      let make_generic_type_specifier generic_class_type generic_arguments =
-        from_children SyntaxKind.GenericTypeSpecifier
-          [ generic_class_type; generic_arguments ]
+    let make_binary_operator
+      binary_left_operand
+      binary_operator
+      binary_right_operand
+    =
+      from_children SyntaxKind.BinaryOperator [
+        binary_left_operand;
+        binary_operator;
+        binary_right_operand;
+      ]
 
-      let make_type_arguments left items right =
-        from_children SyntaxKind.TypeArguments [ left; items; right ]
+    let make_instanceof_expression
+      instanceof_left_operand
+      instanceof_operator
+      instanceof_right_operand
+    =
+      from_children SyntaxKind.InstanceofExpression [
+        instanceof_left_operand;
+        instanceof_operator;
+        instanceof_right_operand;
+      ]
 
-      let make_type_parameters left items right =
-        from_children SyntaxKind.TypeParameters [ left; items; right ]
+    let make_conditional_expression
+      conditional_test
+      conditional_question
+      conditional_consequence
+      conditional_colon
+      conditional_alternative
+    =
+      from_children SyntaxKind.ConditionalExpression [
+        conditional_test;
+        conditional_question;
+        conditional_consequence;
+        conditional_colon;
+        conditional_alternative;
+      ]
 
-      let make_tuple_type_specifier left types right =
-        from_children SyntaxKind.TupleTypeSpecifier [ left; types; right ]
+    let make_function_call_expression
+      function_call_receiver
+      function_call_lparen
+      function_call_arguments
+      function_call_rparen
+    =
+      from_children SyntaxKind.FunctionCallExpression [
+        function_call_receiver;
+        function_call_lparen;
+        function_call_arguments;
+        function_call_rparen;
+      ]
 
-      let make_vector_type_specifier
-          vector_array vector_left_angle vector_type vector_right_angle =
-        from_children SyntaxKind.VectorTypeSpecifier
-          [ vector_array; vector_left_angle; vector_type; vector_right_angle ]
+    let make_parenthesized_expression
+      paren_expr_left_paren
+      paren_expr
+      paren_expr_right_paren
+    =
+      from_children SyntaxKind.ParenthesizedExpression [
+        paren_expr_left_paren;
+        paren_expr;
+        paren_expr_right_paren;
+      ]
 
-      let make_map_type_specifier
-          map_array map_left_angle map_key map_comma map_value map_right_angle =
-        from_children SyntaxKind.MapTypeSpecifier
-          [ map_array; map_left_angle; map_key; map_comma; map_value;
-            map_right_angle ]
+    let make_braced_expression
+      braced_expr_left_brace
+      braced_expr
+      braced_expr_right_brace
+    =
+      from_children SyntaxKind.BracedExpression [
+        braced_expr_left_brace;
+        braced_expr;
+        braced_expr_right_brace;
+      ]
 
-      let make_closure_type_specifier
-          closure_outer_left_paren closure_function
-          closure_inner_left_paren closure_parameter_types
-          closure_inner_right_paren closure_colon closure_return_type
-          closure_outer_right_paren =
-        from_children SyntaxKind.ClosureTypeSpecifier
-          [ closure_outer_left_paren; closure_function;
-            closure_inner_left_paren; closure_parameter_types;
-            closure_inner_right_paren; closure_colon; closure_return_type;
-            closure_outer_right_paren ]
+    let make_list_expression
+      list_keyword
+      list_left_paren
+      list_members
+      list_right_paren
+    =
+      from_children SyntaxKind.ListExpression [
+        list_keyword;
+        list_left_paren;
+        list_members;
+        list_right_paren;
+      ]
 
-      let make_classname_type_specifier classname left classname_type right =
-        from_children SyntaxKind.ClassnameTypeSpecifier
-          [ classname; left; classname_type; right ]
+    let make_collection_literal_expression
+      collection_literal_name
+      collection_literal_left_brace
+      collection_literal_initialization_list
+      collection_literal_right_brace
+    =
+      from_children SyntaxKind.CollectionLiteralExpression [
+        collection_literal_name;
+        collection_literal_left_brace;
+        collection_literal_initialization_list;
+        collection_literal_right_brace;
+      ]
 
-      let make_field_specifier name arrow field_type =
-        from_children SyntaxKind.FieldSpecifier [ name; arrow; field_type ]
+    let make_object_creation_expression
+      object_creation_new
+      object_creation_class
+      object_creation_lparen
+      object_creation_arguments
+      object_creation_rparen
+    =
+      from_children SyntaxKind.ObjectCreationExpression [
+        object_creation_new;
+        object_creation_class;
+        object_creation_lparen;
+        object_creation_arguments;
+        object_creation_rparen;
+      ]
 
-      let make_shape_type_specifier shape lparen fields rparen =
-        from_children SyntaxKind.ShapeTypeSpecifier
-          [ shape; lparen; fields; rparen ]
+    let make_array_creation_expression
+      array_creation_left_bracket
+      array_creation_members
+      array_creation_right_bracket
+    =
+      from_children SyntaxKind.ArrayCreationExpression [
+        array_creation_left_bracket;
+        array_creation_members;
+        array_creation_right_bracket;
+      ]
 
-      let make_literal_expression literal =
-        from_children SyntaxKind.LiteralExpression [ literal ]
+    let make_array_intrinsic_expression
+      array_intrinsic_keyword
+      array_intrinsic_left_paren
+      array_intrinsic_members
+      array_intrinsic_right_paren
+    =
+      from_children SyntaxKind.ArrayIntrinsicExpression [
+        array_intrinsic_keyword;
+        array_intrinsic_left_paren;
+        array_intrinsic_members;
+        array_intrinsic_right_paren;
+      ]
 
-      let make_variable_expression variable =
-        from_children SyntaxKind.VariableExpression [ variable ]
+    let make_element_initializer
+      element_key
+      element_arrow
+      element_value
+    =
+      from_children SyntaxKind.ElementInitializer [
+        element_key;
+        element_arrow;
+        element_value;
+      ]
 
-      let make_qualified_name_expression name =
-        from_children SyntaxKind.QualifiedNameExpression [ name ]
+    let make_subscript_expression
+      subscript_receiver
+      subscript_left
+      subscript_index
+      subscript_right
+    =
+      from_children SyntaxKind.SubscriptExpression [
+        subscript_receiver;
+        subscript_left;
+        subscript_index;
+        subscript_right;
+      ]
 
-      let make_pipe_variable_expression variable =
-        from_children SyntaxKind.PipeVariableExpression [ variable ]
+    let make_awaitable_creation_expression
+      awaitable_async
+      awaitable_compound_statement
+    =
+      from_children SyntaxKind.AwaitableCreationExpression [
+        awaitable_async;
+        awaitable_compound_statement;
+      ]
+
+    let make_xhp_children_declaration
+      xhp_children
+      xhp_children_expression
+      xhp_children_semicolon
+    =
+      from_children SyntaxKind.XHPChildrenDeclaration [
+        xhp_children;
+        xhp_children_expression;
+        xhp_children_semicolon;
+      ]
+
+    let make_xhp_category_declaration
+      xhp_category
+      xhp_category_list
+      xhp_category_semicolon
+    =
+      from_children SyntaxKind.XHPCategoryDeclaration [
+        xhp_category;
+        xhp_category_list;
+        xhp_category_semicolon;
+      ]
+
+    let make_xhp_enum_type
+      xhp_enum_keyword
+      xhp_enum_left_brace
+      xhp_enum_values
+      xhp_enum_right_brace
+    =
+      from_children SyntaxKind.XHPEnumType [
+        xhp_enum_keyword;
+        xhp_enum_left_brace;
+        xhp_enum_values;
+        xhp_enum_right_brace;
+      ]
+
+    let make_xhp_required
+      xhp_required_at
+      xhp_required
+    =
+      from_children SyntaxKind.XHPRequired [
+        xhp_required_at;
+        xhp_required;
+      ]
+
+    let make_xhp_class_attribute_declaration
+      xhp_attribute_keyword
+      xhp_attribute_list
+      xhp_attribute_semicolon
+    =
+      from_children SyntaxKind.XHPClassAttributeDeclaration [
+        xhp_attribute_keyword;
+        xhp_attribute_list;
+        xhp_attribute_semicolon;
+      ]
+
+    let make_xhp_class_attribute
+      xhp_attribute_decl_type
+      xhp_attribute_decl_name
+      xhp_attribute_decl_initializer
+      xhp_attribute_decl_required
+    =
+      from_children SyntaxKind.XHPClassAttribute [
+        xhp_attribute_decl_type;
+        xhp_attribute_decl_name;
+        xhp_attribute_decl_initializer;
+        xhp_attribute_decl_required;
+      ]
+
+    let make_xhp_attribute
+      xhp_attribute_name
+      xhp_attribute_equal
+      xhp_attribute_expr
+    =
+      from_children SyntaxKind.XHPAttribute [
+        xhp_attribute_name;
+        xhp_attribute_equal;
+        xhp_attribute_expr;
+      ]
+
+    let make_xhp_open
+      xhp_open_name
+      xhp_open_attributes
+      xhp_open_right_angle
+    =
+      from_children SyntaxKind.XHPOpen [
+        xhp_open_name;
+        xhp_open_attributes;
+        xhp_open_right_angle;
+      ]
+
+    let make_xhp_expression
+      xhp_open
+      xhp_body
+      xhp_close
+    =
+      from_children SyntaxKind.XHPExpression [
+        xhp_open;
+        xhp_body;
+        xhp_close;
+      ]
+
+    let make_xhp_close
+      xhp_close_left_angle
+      xhp_close_name
+      xhp_close_right_angle
+    =
+      from_children SyntaxKind.XHPClose [
+        xhp_close_left_angle;
+        xhp_close_name;
+        xhp_close_right_angle;
+      ]
+
+    let make_type_constant
+      type_constant_left_type
+      type_constant_separator
+      type_constant_right_type
+    =
+      from_children SyntaxKind.TypeConstant [
+        type_constant_left_type;
+        type_constant_separator;
+        type_constant_right_type;
+      ]
+
+    let make_vector_type_specifier
+      vector_array
+      vector_left_angle
+      vector_type
+      vector_right_angle
+    =
+      from_children SyntaxKind.VectorTypeSpecifier [
+        vector_array;
+        vector_left_angle;
+        vector_type;
+        vector_right_angle;
+      ]
+
+    let make_type_parameter
+      type_variance_opt
+      type_name
+      type_constraint_list_opt
+    =
+      from_children SyntaxKind.TypeParameter [
+        type_variance_opt;
+        type_name;
+        type_constraint_list_opt;
+      ]
+
+    let make_type_constraint
+      constraint_keyword
+      constraint_type
+    =
+      from_children SyntaxKind.TypeConstraint [
+        constraint_keyword;
+        constraint_type;
+      ]
+
+    let make_map_type_specifier
+      map_array
+      map_left_angle
+      map_key
+      map_comma
+      map_value
+      map_right_angle
+    =
+      from_children SyntaxKind.MapTypeSpecifier [
+        map_array;
+        map_left_angle;
+        map_key;
+        map_comma;
+        map_value;
+        map_right_angle;
+      ]
+
+    let make_closure_type_specifier
+      closure_outer_left_paren
+      closure_function
+      closure_inner_left_paren
+      closure_parameter_types
+      closure_inner_right_paren
+      closure_colon
+      closure_return_type
+      closure_outer_right_paren
+    =
+      from_children SyntaxKind.ClosureTypeSpecifier [
+        closure_outer_left_paren;
+        closure_function;
+        closure_inner_left_paren;
+        closure_parameter_types;
+        closure_inner_right_paren;
+        closure_colon;
+        closure_return_type;
+        closure_outer_right_paren;
+      ]
+
+    let make_classname_type_specifier
+      classname_classname
+      classname_left_angle
+      classname_type
+      classname_right_angle
+    =
+      from_children SyntaxKind.ClassnameTypeSpecifier [
+        classname_classname;
+        classname_left_angle;
+        classname_type;
+        classname_right_angle;
+      ]
+
+    let make_field_specifier
+      field_name
+      field_arrow
+      field_type
+    =
+      from_children SyntaxKind.FieldSpecifier [
+        field_name;
+        field_arrow;
+        field_type;
+      ]
+
+    let make_field_initializer
+      field_initializer_name
+      field_initializer_arrow
+      field_initializer_value
+    =
+      from_children SyntaxKind.FieldInitializer [
+        field_initializer_name;
+        field_initializer_arrow;
+        field_initializer_value;
+      ]
+
+    let make_shape_type_specifier
+      shape_type_keyword
+      shape_type_left_paren
+      shape_type_fields
+      shape_type_right_paren
+    =
+      from_children SyntaxKind.ShapeTypeSpecifier [
+        shape_type_keyword;
+        shape_type_left_paren;
+        shape_type_fields;
+        shape_type_right_paren;
+      ]
+
+    let make_shape_expression
+      shape_expression_keyword
+      shape_expression_left_paren
+      shape_expression_fields
+      shape_expression_right_paren
+    =
+      from_children SyntaxKind.ShapeExpression [
+        shape_expression_keyword;
+        shape_expression_left_paren;
+        shape_expression_fields;
+        shape_expression_right_paren;
+      ]
+
+    let make_generic_type_specifier
+      generic_class_type
+      generic_arguments
+    =
+      from_children SyntaxKind.GenericTypeSpecifier [
+        generic_class_type;
+        generic_arguments;
+      ]
+
+    let make_nullable_type_specifier
+      nullable_question
+      nullable_type
+    =
+      from_children SyntaxKind.NullableTypeSpecifier [
+        nullable_question;
+        nullable_type;
+      ]
+
+    let make_soft_type_specifier
+      soft_at
+      soft_type
+    =
+      from_children SyntaxKind.SoftTypeSpecifier [
+        soft_at;
+        soft_type;
+      ]
+
+    let make_type_arguments
+      type_arguments_left_angle
+      type_arguments
+      type_arguments_right_angle
+    =
+      from_children SyntaxKind.TypeArguments [
+        type_arguments_left_angle;
+        type_arguments;
+        type_arguments_right_angle;
+      ]
+
+    let make_type_parameters
+      type_parameters_left_angle
+      type_parameters
+      type_parameters_right_angle
+    =
+      from_children SyntaxKind.TypeParameters [
+        type_parameters_left_angle;
+        type_parameters;
+        type_parameters_right_angle;
+      ]
+
+    let make_tuple_type_specifier
+      tuple_left_paren
+      tuple_types
+      tuple_right_paren
+    =
+      from_children SyntaxKind.TupleTypeSpecifier [
+        tuple_left_paren;
+        tuple_types;
+        tuple_right_paren;
+      ]
+
+    let make_error
+      error
+    =
+      from_children SyntaxKind.Error [
+        error;
+      ]
+
+    let make_list_item
+      list_item
+      list_separator
+    =
+      from_children SyntaxKind.ListItem [
+        list_item;
+        list_separator;
+      ]
+
+
 
     end (* WithValueBuilder *)
   end (* WithSyntaxValue *)

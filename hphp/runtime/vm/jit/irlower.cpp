@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/irlower.h"
+#include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -22,7 +23,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/code-gen-x64.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>
@@ -54,6 +55,31 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgInst(IRLS& env, const IRInstruction* inst){
+  SCOPE_ASSERT_DETAIL("cgInst") { return inst->toString(); };
+
+  switch (inst->op()) {
+#define O(name, dsts, srcs, flags)  \
+    case name:                      \
+      FTRACE(7, "cg" #name "\n");   \
+      cg##name(env, inst);          \
+      break;
+    IR_OPCODES
+#undef O
+    default:
+      always_assert(false);
+  }
+
+  auto& v = vmain(env);
+  if (inst->isBlockEnd() && !v.closed()) {
+    if (auto const next = inst->next()) {
+      v << jmp{label(env, next)};
+    } else {
+      v << ud2{}; // or end?
+    }
+  }
+}
+
 /*
  * Lower `block' from HHIR to vasm.
  */
@@ -62,13 +88,12 @@ void genBlock(IRLS& env, Vout& v, Vout& vc, Block& block) {
 
   env.vmain = &v;
   env.vcold = &vc;
-  CodeGenerator cg(env);
 
   for (auto& inst : block) {
     v.unit().cur_voff = 0;
     v.setOrigin(&inst);
     vc.setOrigin(&inst);
-    cg.cgInst(&inst);
+    cgInst(env, &inst);
   }
 }
 

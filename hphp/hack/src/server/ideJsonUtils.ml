@@ -244,7 +244,7 @@ let build_diagnostic_json id x =
     ("protocol", JSON_String "service_framework3_rpc");
     ("type", JSON_String "next");
     ("id", int_ id);
-    ("diagnostics", JSON_Object [
+    ("value", JSON_Object [
       ("filename", JSON_String x.path);
       ("errors", JSON_Array (List.map x.diagnostics ~f:Errors.to_json));
     ])

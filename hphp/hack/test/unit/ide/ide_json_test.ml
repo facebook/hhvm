@@ -228,7 +228,7 @@ let test_diagnostic_response () =
   let response = Diagnostic_response (id, diagnostics) in
   (json_string_of_response id response) =
   {|{"protocol":"service_framework3_rpc","type":"next","id":4,|} ^
-  {|"diagnostics":{"filename":"foo.php","errors":[]}}|}
+  {|"value":{"filename":"foo.php","errors":[]}}|}
 
 let test_unsubscribe_call () =
   let msg =

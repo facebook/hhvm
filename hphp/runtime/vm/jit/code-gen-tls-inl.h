@@ -34,8 +34,9 @@ template<typename T>
 inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
   switch (arch()) {
     case Arch::X64:
-    case Arch::ARM:
       return x64::detail::emitTLSAddr(v, datum);
+    case Arch::ARM:
+      return arm::detail::emitTLSAddr(v, datum);
     case Arch::PPC64:
       return ppc64::detail::emitTLSAddr(v, datum);
   }

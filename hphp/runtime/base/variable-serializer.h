@@ -113,11 +113,16 @@ struct VariableSerializer {
   void writeRefCount(); // for DebugDump only
 
   void writeArrayHeader(int size, bool isVectorData, ArrayKind kind);
-  void writeArrayKey(const Variant& key);
-  void writeArrayValue(const Variant& value);
-  void writeCollectionKey(const Variant& key);
-  void writeCollectionKeylessPrefix();
-  void writeArrayFooter();
+  void writeArrayKey(const Variant& key, VariableSerializer::ArrayKind kind);
+  void writeArrayValue(
+    const Variant& value,
+    VariableSerializer::ArrayKind kind
+  );
+  void writeCollectionKey(
+    const Variant& key,
+    VariableSerializer::ArrayKind kind
+  );
+  void writeArrayFooter(VariableSerializer::ArrayKind kind);
   void writeSerializableObject(const String& clsname, const String& serialized);
 
   /**

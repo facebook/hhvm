@@ -959,7 +959,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
                        ? false : info.is_vector;
     }
 
-    if (info.is_vector) {
+    if (info.is_vector || kind == ArrayKind::Keyset) {
       m_buf->append('[');
     } else {
       m_buf->append('{');
@@ -1015,7 +1015,10 @@ void VariableSerializer::writePropertyKey(const String& prop) {
 }
 
 /* key MUST be a non-reference string or int */
-void VariableSerializer::writeArrayKey(const Variant& key) {
+void VariableSerializer::writeArrayKey(
+  const Variant& key,
+  VariableSerializer::ArrayKind kind
+) {
   auto const keyCell = tvAssertCell(key.asTypedValue());
   bool const skey = isStringType(keyCell->m_type);
 
@@ -1072,16 +1075,16 @@ void VariableSerializer::writeArrayKey(const Variant& key) {
     break;
 
   case Type::JSON:
-    if (!info.first_element) {
-      m_buf->append(',');
-    }
-    if (UNLIKELY(m_option & k_JSON_PRETTY_PRINT)) {
+    if (!info.is_vector && kind != ArrayKind::Keyset) {
       if (!info.first_element) {
-        m_buf->append("\n");
+        m_buf->append(',');
       }
-      indent();
-    }
-    if (!info.is_vector) {
+      if (UNLIKELY(m_option & k_JSON_PRETTY_PRINT)) {
+        if (!info.first_element) {
+          m_buf->append("\n");
+        }
+        indent();
+      }
       if (skey) {
         auto const sdata = keyCell->m_data.pstr;
         const char *k = sdata->data();
@@ -1110,48 +1113,21 @@ void VariableSerializer::writeArrayKey(const Variant& key) {
   }
 }
 
-void VariableSerializer::writeCollectionKey(const Variant& key) {
+void VariableSerializer::writeCollectionKey(
+  const Variant& key,
+  VariableSerializer::ArrayKind kind
+) {
   if (m_type == Type::Serialize || m_type == Type::APCSerialize ||
       m_type == Type::DebuggerSerialize) {
     m_valueCount++;
   }
-  writeArrayKey(key);
+  writeArrayKey(key, kind);
 }
 
-void VariableSerializer::writeCollectionKeylessPrefix() {
-  switch (m_type) {
-  case Type::PrintR:
-  case Type::VarExport:
-  case Type::PHPOutput:
-  case Type::DebuggerDump:
-    indent();
-    break;
-  case Type::VarDump:
-  case Type::DebugDump:
-  case Type::APCSerialize:
-  case Type::Serialize:
-  case Type::DebuggerSerialize:
-    break;
-  case Type::JSON: {
-    ArrayInfo &info = m_arrayInfos.back();
-    if (!info.first_element) {
-      m_buf->append(',');
-    }
-    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
-      if (!info.first_element) {
-        m_buf->append("\n");
-      }
-      indent();
-    }
-    break;
-  }
-  default:
-    assert(false);
-    break;
-  }
-}
-
-void VariableSerializer::writeArrayValue(const Variant& value) {
+void VariableSerializer::writeArrayValue(
+  const Variant& value,
+  VariableSerializer::ArrayKind kind
+) {
   switch (m_type) {
   case Type::Serialize:
   case Type::APCSerialize:
@@ -1176,16 +1152,35 @@ void VariableSerializer::writeArrayValue(const Variant& value) {
     m_buf->append(",\n");
     break;
 
+  case Type::JSON: {
+    ArrayInfo &info = m_arrayInfos.back();
+    if (info.is_vector || kind == ArrayKind::Keyset) {
+      if (!info.first_element) {
+        m_buf->append(',');
+      }
+      if (UNLIKELY(m_option & k_JSON_PRETTY_PRINT)) {
+        if (!info.first_element) {
+          m_buf->append("\n");
+        }
+        indent();
+      }
+    }
+    write(value);
+    break;
+  }
+
   default:
     write(value);
     break;
   }
 
-  ArrayInfo &info = m_arrayInfos.back();
-  info.first_element = false;
+  ArrayInfo &last_info = m_arrayInfos.back();
+  last_info.first_element = false;
 }
 
-void VariableSerializer::writeArrayFooter() {
+void VariableSerializer::writeArrayFooter(
+  VariableSerializer::ArrayKind kind
+) {
   ArrayInfo &info = m_arrayInfos.back();
 
   m_indent -= info.indent_delta;
@@ -1234,7 +1229,7 @@ void VariableSerializer::writeArrayFooter() {
       m_buf->append("\n");
       indent();
     }
-    if (info.is_vector) {
+    if (info.is_vector || kind == ArrayKind::Keyset) {
       m_buf->append(']');
     } else {
       m_buf->append('}');
@@ -1453,17 +1448,19 @@ static void serializeString(const String& str, VariableSerializer* serializer) {
 
 static void serializeArrayImpl(const ArrayData* arr,
                                VariableSerializer* serializer) {
+  using AK = VariableSerializer::ArrayKind;
+  AK kind = getKind(arr);
   serializer->writeArrayHeader(
     arr->size(),
     arr->isVectorData(),
-    getKind(arr)
+    kind
   );
 
   if (arr->isVecArray()) {
     PackedArray::IterateV(
       arr,
       [&](const TypedValue* v) {
-        serializer->writeArrayValue(tvAsCVarRef(v));
+        serializer->writeArrayValue(tvAsCVarRef(v), kind);
         return false;
       }
     );
@@ -1471,7 +1468,7 @@ static void serializeArrayImpl(const ArrayData* arr,
     SetArray::Iterate(
       SetArray::asSet(arr),
       [&](const TypedValue* v) {
-        serializer->writeArrayValue(tvAsCVarRef(v));
+        serializer->writeArrayValue(tvAsCVarRef(v), kind);
         return false;
       }
     );
@@ -1479,20 +1476,20 @@ static void serializeArrayImpl(const ArrayData* arr,
     IterateKV(
       arr,
       [&](const TypedValue* k, const TypedValue* v) {
-        serializer->writeArrayKey(tvAsCVarRef(k));
-        serializer->writeArrayValue(tvAsCVarRef(v));
+        serializer->writeArrayKey(tvAsCVarRef(k), kind);
+        serializer->writeArrayValue(tvAsCVarRef(v), kind);
         return false;
       }
     );
   }
-  serializer->writeArrayFooter();
+  serializer->writeArrayFooter(kind);
 }
 
 static void serializeArray(const ArrayData* arr, VariableSerializer* serializer,
                            bool skipNestCheck /* = false */) {
   if (arr->size() == 0) {
     serializer->writeArrayHeader(0, arr->isVectorData(), getKind(arr));
-    serializer->writeArrayFooter();
+    serializer->writeArrayFooter(getKind(arr));
     return;
   }
   if (!skipNestCheck) {
@@ -1528,10 +1525,10 @@ void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
     serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'K');
     serializer->writeArrayHeader(sz, false, AK::PHP);
     for (ArrayIter iter(obj); iter; ++iter) {
-      serializer->writeCollectionKey(iter.first());
-      serializer->writeArrayValue(iter.second());
+      serializer->writeCollectionKey(iter.first(), AK::PHP);
+      serializer->writeArrayValue(iter.second(), AK::PHP);
     }
-    serializer->writeArrayFooter();
+    serializer->writeArrayFooter(AK::PHP);
 
   } else {
     assertx(isVectorCollection(type) ||
@@ -1548,23 +1545,29 @@ void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
       // For the 'V' serialization format, we don't print out keys
       // for Serialize, APCSerialize, DebuggerSerialize
       for (ArrayIter iter(obj); iter; ++iter) {
-        serializer->writeCollectionKeylessPrefix();
-        serializer->writeArrayValue(iter.second());
+        if (ser_type == VariableSerializer::Type::VarExport ||
+            ser_type == VariableSerializer::Type::PHPOutput) {
+          serializer->indent();
+        }
+        serializer->writeArrayValue(iter.second(), AK::PHP);
       }
     } else {
       if (isSetCollection(type)) {
         for (ArrayIter iter(obj); iter; ++iter) {
-          serializer->writeCollectionKeylessPrefix();
-          serializer->writeArrayValue(iter.second());
+          if (ser_type == VariableSerializer::Type::PrintR ||
+              ser_type == VariableSerializer::Type::DebuggerDump) {
+            serializer->indent();
+          }
+          serializer->writeArrayValue(iter.second(), AK::PHP);
         }
       } else {
         for (ArrayIter iter(obj); iter; ++iter) {
-          serializer->writeCollectionKey(iter.first());
-          serializer->writeArrayValue(iter.second());
+          serializer->writeCollectionKey(iter.first(), AK::PHP);
+          serializer->writeArrayValue(iter.second(), AK::PHP);
         }
       }
     }
-    serializer->writeArrayFooter();
+    serializer->writeArrayFooter(AK::PHP);
   }
   serializer->popObjectInfo();
 }

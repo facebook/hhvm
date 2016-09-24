@@ -148,14 +148,8 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   public static function fromArray<T>(
     array<WaitHandle<T>> $deps
   ): WaitHandle<void>;
-  public static function fromDict<Tk, Tv>(
-    dict<Tk, WaitHandle<T>> $deps
-  ): WaitHandle<void>;
   public static function fromMap<Tk, Tv>(
     ConstMap<Tk, WaitHandle<Tv>> $deps
-  ): WaitHandle<void>;
-  public static function fromVec<T>(
-    vec<WaitHandle<T>> $deps
   ): WaitHandle<void>;
   public static function fromVector<T>(
     ConstVector<WaitHandle<T>> $deps

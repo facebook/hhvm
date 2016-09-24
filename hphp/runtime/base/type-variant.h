@@ -1521,6 +1521,11 @@ inline Array& forceToArray(Variant& var) {
   return var.toArrRef();
 }
 
+inline Array& forceToDict(Variant& var) {
+  if (!var.isDict()) var = Variant(Array::CreateDict());
+  return var.toArrRef();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE Variant empty_string_variant() {

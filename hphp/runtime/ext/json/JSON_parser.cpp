@@ -299,6 +299,18 @@ enum class Mode {
   ARRAY = 4
 };
 
+/**
+ * These are the types of containers that can be returned
+ * depending on the options used for json_decode.
+ *
+ * Objects are not included here.
+ */
+enum class ContainerType {
+  PHP_ARRAYS = 1,
+  COLLECTIONS = 2,
+  HACK_ARRAYS = 3,
+};
+
 namespace {
 
 /*
@@ -596,7 +608,7 @@ static void object_set(Variant &var,
                        const String& key,
                        const Variant& value,
                        int assoc,
-                       bool collections) {
+                       ContainerType container_type) {
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
@@ -605,9 +617,11 @@ static void object_set(Variant &var,
       var.getObjectData()->o_set(key, value);
     }
   } else {
-    if (collections) {
+    if (container_type == ContainerType::COLLECTIONS) {
       auto keyTV = make_tv<KindOfString>(key.get());
       collections::set(var.getObjectData(), &keyTV, value.asCell());
+    } else if (container_type == ContainerType::HACK_ARRAYS) {
+      forceToDict(var).set(key, value);
     } else {
       forceToArray(var).set(key, value);
     }
@@ -617,7 +631,7 @@ static void object_set(Variant &var,
 static void attach_zval(json_parser *json,
                         const String& key,
                         int assoc,
-                        bool collections) {
+                        ContainerType container_type) {
   if (json->top < 1) {
     return;
   }
@@ -627,14 +641,27 @@ static void attach_zval(json_parser *json,
   auto up_mode = json->stack[json->top - 1].mode;
 
   if (up_mode == Mode::ARRAY) {
-    if (collections) {
+    if (container_type == ContainerType::COLLECTIONS) {
       collections::append(root.getObjectData(), child.asCell());
     } else {
       root.toArrRef().append(child);
     }
   } else if (up_mode == Mode::OBJECT) {
-    object_set(root, key, child, assoc, collections);
+    object_set(root, key, child, assoc, container_type);
   }
+}
+
+ContainerType get_container_type_from_options(int64_t options) {
+  if ((options & k_JSON_FB_STABLE_MAPS) ||
+      (options & k_JSON_FB_COLLECTIONS)) {
+    return ContainerType::COLLECTIONS;
+  }
+
+  if (options & k_JSON_FB_HACK_ARRAYS) {
+    return ContainerType::HACK_ARRAYS;
+  }
+
+  return ContainerType::PHP_ARRAYS;
 }
 
 /**
@@ -643,6 +670,24 @@ static void attach_zval(json_parser *json,
  *
  * It is implemented as a Pushdown Automaton; that means it is a finite state
  * machine with a stack.
+ *
+ * The behavior is as follows:
+ * Container Type | is_assoc | JSON input => output type
+ *
+ * COLLECTIONS    | true     | "{}"       => c_Map
+ * COLLECTIONS    | false    | "{}"       => c_Map
+ * COLLECTIONS    | true     | "[]"       => c_Vector
+ * COLLECTIONS    | false    | "[]"       => c_Vector
+ *
+ * HACK_ARRAYS    | true     | "{}"       => dict
+ * HACK_ARRAYS    | false    | "{}"       => stdClass
+ * HACK_ARRAYS    | true     | "[]"       => vec
+ * HACK_ARRAYS    | false    | "[]"       => stdClass
+ *
+ * PHP_ARRAYS     | true     | "{}"       => array
+ * PHP_ARRAYS     | false    | "{}"       => stdClass
+ * PHP_ARRAYS     | true     | "[]"       => array
+ * PHP_ARRAYS     | false    | "[]"       => stdClass
  */
 bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                  int depth, int64_t options) {
@@ -654,8 +699,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
 
   /*<fb>*/
   bool const loose = options & k_JSON_FB_LOOSE;
-  bool const stable_maps = options & k_JSON_FB_STABLE_MAPS;
-  bool const collections = stable_maps || (options & k_JSON_FB_COLLECTIONS);
+  ContainerType const container_type = get_container_type_from_options(options);
   int qchr = 0;
   int8_t const *byte_class;
   int8_t const (*next_state_table)[32];
@@ -754,7 +798,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           empty }
         */
       case -9:
-        attach_zval(json, json->stack[json->top].key, assoc, collections);
+        attach_zval(json, json->stack[json->top].key, assoc, container_type);
         if (!pop(json, Mode::KEY)) {
           return false;
         }
@@ -778,13 +822,17 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             top.unset();
           }
           /*<fb>*/
-          if (collections) {
+          if (container_type == ContainerType::COLLECTIONS) {
             // stable_maps is meaningless
             top = req::make<c_Map>();
           } else {
           /*</fb>*/
             if (!assoc) {
               top = SystemLib::AllocStdClassObject();
+            /* <fb> */
+            } else if (container_type == ContainerType::HACK_ARRAYS) {
+              top = Array::CreateDict();
+            /* </fb> */
             } else {
               top = Array::Create();
             }
@@ -818,13 +866,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           Variant mval;
           json_create_zval(mval, *buf, type, options);
           Variant &top = json->stack[json->top].val;
-          object_set(top, copy_and_clear(*key), mval, assoc, collections);
+          object_set(top, copy_and_clear(*key), mval, assoc, container_type);
           buf->clear();
           reset_type();
         }
 
         attach_zval(json, json->stack[json->top].key,
-          assoc, collections);
+          assoc, container_type);
 
         if (!pop(json, Mode::OBJECT)) {
           s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
@@ -850,8 +898,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             top.unset();
           }
           /*<fb>*/
-          if (collections) {
+          if (container_type == ContainerType::COLLECTIONS) {
             top = req::make<c_Vector>();
+          } else if (container_type == ContainerType::HACK_ARRAYS) {
+            top = Array::CreateVec();
           } else {
             top = Array::Create();
           }
@@ -870,7 +920,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             Variant mval;
             json_create_zval(mval, *buf, type, options);
             auto& top = json->stack[json->top].val;
-            if (collections) {
+            if (container_type == ContainerType::COLLECTIONS) {
               collections::append(top.getObjectData(), mval.asCell());
             } else {
               top.toArrRef().append(mval);
@@ -879,7 +929,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             reset_type();
           }
 
-          attach_zval(json, json->stack[json->top].key, assoc, collections);
+          attach_zval(json, json->stack[json->top].key, assoc, container_type);
 
           if (!pop(json, Mode::ARRAY)) {
             s_json_parser->error_code = JSON_ERROR_STATE_MISMATCH;
@@ -932,7 +982,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                 push(json, Mode::KEY)) {
               if (type != -1) {
                 Variant &top = json->stack[json->top].val;
-                object_set(top, copy_and_clear(*key), mval, assoc, collections);
+                object_set(
+                  top,
+                  copy_and_clear(*key),
+                  mval,
+                  assoc,
+                  container_type
+                );
               }
               state = 29;
             }
@@ -940,7 +996,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           case Mode::ARRAY:
             if (type != -1) {
               auto& top = json->stack[json->top].val;
-              if (collections) {
+              if (container_type == ContainerType::COLLECTIONS) {
                 collections::append(top.getObjectData(), mval.asCell());
               } else {
                 top.toArrRef().append(mval);

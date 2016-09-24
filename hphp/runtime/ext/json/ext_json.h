@@ -45,6 +45,7 @@ extern const int64_t k_JSON_FB_LOOSE;
 extern const int64_t k_JSON_FB_EXTRA_ESCAPES;
 extern const int64_t k_JSON_FB_UNLIMITED;
 extern const int64_t k_JSON_FB_COLLECTIONS;
+extern const int64_t k_JSON_FB_HACK_ARRAYS;
 extern const int64_t k_JSON_FB_STABLE_MAPS;
 extern const int64_t k_JSON_BIGINT_AS_STRING;
 

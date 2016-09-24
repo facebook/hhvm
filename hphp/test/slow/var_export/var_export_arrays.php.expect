@@ -1,0 +1,71 @@
+** array **
+array (
+)
+
+array (
+  0 => 'foo',
+)
+
+array (
+  0 => 'foo',
+  1 => 'bar',
+)
+
+array (
+  'foo' => 'fooval',
+)
+
+array (
+  'foo' => 'fooval',
+  'bar' => 'barval',
+)
+
+array (
+  4 => 'zuckval',
+  '4bar' => 'barval',
+)
+
+** vec **
+vec [
+]
+
+vec [
+'foo',
+]
+
+vec [
+'foo',
+'bar',
+]
+
+** dict **
+dict [
+]
+
+dict [
+  'foo' => 'fooval',
+]
+
+dict [
+  'foo' => 'fooval',
+  'bar' => 'barval',
+]
+
+dict [
+  '4' => 'zuckval',
+  '4bar' => 'barval',
+]
+
+** keyset **
+keyset [
+]
+
+keyset [
+'foo',
+]
+
+keyset [
+'foo',
+'bar',
+]
+

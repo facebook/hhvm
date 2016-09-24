@@ -850,13 +850,13 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
-        m_buf->append("dict (\n");
+        m_buf->append("dict [\n");
         break;
       case ArrayKind::Vec:
-        m_buf->append("vec (\n");
+        m_buf->append("vec [\n");
         break;
       case ArrayKind::Keyset:
-        m_buf->append("keyset (\n");
+        m_buf->append("keyset [\n");
         break;
       case ArrayKind::PHP:
         m_buf->append("array (\n");
@@ -1208,7 +1208,16 @@ void VariableSerializer::writeArrayFooter(
         m_buf->append("}");
       }
     } else if (m_rsrcName.empty()) { // for rsrc, only write NULL in arrayHeader
-      m_buf->append(')');
+      switch (kind) {
+      case ArrayKind::Dict:
+      case ArrayKind::Vec:
+      case ArrayKind::Keyset:
+        m_buf->append("]");
+        break;
+      case ArrayKind::PHP:
+        m_buf->append(')');
+        break;
+      }
     }
     break;
   case Type::VarDump:

@@ -351,7 +351,7 @@ bool AutoloadHandler::autoloadType(const String& name) {
  * Taken from php-src
  * https://github.com/php/php-src/blob/PHP-5.6/Zend/zend_execute_API.c#L960
  */
-static bool is_valid_class_name(const String& className) {
+bool is_valid_class_name(const String& className) {
   return strspn(
     className.data(),
     "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177"

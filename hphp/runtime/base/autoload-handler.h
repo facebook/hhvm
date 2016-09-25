@@ -28,6 +28,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+bool is_valid_class_name(const String& className);
+
 struct AutoloadHandler final : RequestEventHandler {
 private:
   enum Result {

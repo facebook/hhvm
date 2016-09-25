@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -208,6 +209,11 @@ void throwDictRefValue() {
 [[noreturn]] NEVER_INLINE
 void throwKeysetValue() {
   throw Exception("Keysets can only contain integers and strings");
+}
+
+[[noreturn]] NEVER_INLINE
+void throwInvalidClassName() {
+  throw Exception("Provided class name is invalid");
 }
 }
 
@@ -860,7 +866,7 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
 
       const bool allowObjectFormatForCollections = true;
 
-      Class* cls;
+      Class* cls = nullptr;
 
       // If we are potentially dealing with a collection, we need to try to
       // load the collection class under an alternate name so that we can
@@ -868,21 +874,24 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
       // collections to the HH namespace.
 
       if (type == 'O') {
-        if (!uns->whitelistCheck(clsName)) {
-          cls = nullptr;
-        } else if (allowObjectFormatForCollections) {
-          // In order to support the legacy {O|V}:{Set|Vector|Map}
-          // serialization, we defer autoloading until we know that there's
-          // no alternate (builtin) collection class.
-          cls = Unit::getClass(clsName.get(), /* autoload */ false);
-          if (!cls) {
-            cls = tryAlternateCollectionClass(clsName.get());
+        if (uns->whitelistCheck(clsName)) {
+          if (allowObjectFormatForCollections) {
+            // In order to support the legacy {O|V}:{Set|Vector|Map}
+            // serialization, we defer autoloading until we know that there's
+            // no alternate (builtin) collection class.
+            cls = Unit::getClass(clsName.get(), /* autoload */ false);
+            if (!cls) {
+              cls = tryAlternateCollectionClass(clsName.get());
+            }
           }
+
+          // No valid class was found, lets try the autoloader.
           if (!cls) {
+            if (!is_valid_class_name(clsName)) {
+              throwInvalidClassName();
+            }
             cls = Unit::loadClass(clsName.get()); // with autoloading
           }
-        } else {
-          cls = Unit::loadClass(clsName.get()); // with autoloading
         }
       } else {
         // Collections are CPP builtins; don't attempt to autoload
@@ -1033,7 +1042,15 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
 
       auto obj = [&]() -> Object {
         if (uns->whitelistCheck(clsName)) {
-          if (auto const cls = Unit::loadClass(clsName.get())) {
+          // Try loading without the autoloader first
+          auto cls = Unit::getClass(clsName.get(), /* autoload */ false);
+          if (!cls) {
+            if (!is_valid_class_name(clsName)) {
+              throwInvalidClassName();
+            }
+            cls = Unit::loadClass(clsName.get());
+          }
+          if (cls) {
             return Object::attach(g_context->createObject(cls, init_null_variant,
                                                           false /* init */));
           }

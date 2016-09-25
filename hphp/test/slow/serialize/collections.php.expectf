@@ -1,0 +1,28 @@
+object(__PHP_Incomplete_Class)#1 (1) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "B"
+}
+string(1) "a"
+object(B)#1 (0) {
+}
+
+Notice: Unable to unserialize: %s. B is not a collection class. in %s on line 14
+bool(false)
+
+Notice: Unable to unserialize: %s. B is not a collection class. in %s on line 15
+bool(false)
+
+Notice: Unable to unserialize: %s. B is not a collection class. in %s on line 14
+bool(false)
+
+Notice: Unable to unserialize: %s. B is not a collection class. in %s on line 15
+bool(false)
+object(HH\Set)#1 (0) {
+}
+object(HH\Set)#1 (0) {
+}
+object(HH\Map)#1 (0) {
+}
+object(HH\Map)#1 (0) {
+}
+

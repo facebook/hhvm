@@ -890,6 +890,9 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
         if (!cls) {
           cls = tryAlternateCollectionClass(clsName.get());
         }
+        if (!cls || !cls->isCollectionClass()) {
+          throwNotCollection(clsName);
+        }
       }
 
       Object obj;

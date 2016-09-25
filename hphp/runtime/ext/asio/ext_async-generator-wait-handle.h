@@ -60,6 +60,8 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
 
+  Resumable* resumable() const;
+
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncGenerator, state); }
   void prepareChild(c_WaitableWaitHandle* child);

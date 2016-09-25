@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -68,9 +69,14 @@ static ActRec* getActRecFromWaitHandle(
   while (currentWaitHandle != nullptr) {
     assertx(!currentWaitHandle->isFinished());
     if (currentWaitHandle->getKind() == c_WaitHandle::Kind::AsyncFunction) {
-      auto wh = currentWaitHandle->asAsyncFunction();
-      *prevPc = wh->resumable()->resumeOffset();
-      return wh->actRec();
+      auto resumable = currentWaitHandle->asAsyncFunction()->resumable();
+      *prevPc = resumable->resumeOffset();
+      return resumable->actRec();
+    }
+    if (currentWaitHandle->getKind() == c_WaitHandle::Kind::AsyncGenerator) {
+      auto resumable = currentWaitHandle->asAsyncGenerator()->resumable();
+      *prevPc = resumable->resumeOffset();
+      return resumable->actRec();
     }
 
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
@@ -82,8 +88,19 @@ static ActRec* getActRecFromWaitHandle(
 static ActRec* getPrevActRec(
     const ActRec* fp, Offset* prevPc,
     folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
-  if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
-    c_WaitableWaitHandle* currentWaitHandle = frame_afwh(fp);
+  c_WaitableWaitHandle* currentWaitHandle = nullptr;
+
+  if (fp && fp->func() && fp->resumed()) {
+    if (fp->func()->isAsyncFunction()) {
+      currentWaitHandle = frame_afwh(fp);
+    } else if (fp->func()->isAsyncGenerator() &&
+               frame_async_generator(fp)->isRunning()) {
+      // getWaitHandle may return null, if generator is executing eagerly
+      currentWaitHandle = frame_async_generator(fp)->getWaitHandle();
+    }
+  }
+
+  if (currentWaitHandle != nullptr) {
     if (currentWaitHandle->isFinished()) {
       /*
        * It's possible in very rare cases (it will return a truncated stack):
@@ -102,6 +119,7 @@ static ActRec* getPrevActRec(
     return getActRecFromWaitHandle(
       currentWaitHandle, contextIdx, prevPc, visitedWHs);
   }
+
   return g_context->getPrevVMState(fp, prevPc);
 }
 

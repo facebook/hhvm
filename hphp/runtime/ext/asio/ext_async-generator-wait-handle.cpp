@@ -159,6 +159,11 @@ c_WaitableWaitHandle* c_AsyncGeneratorWaitHandle::getChild() {
   }
 }
 
+Resumable* c_AsyncGeneratorWaitHandle::resumable() const {
+  auto generator = Native::data<AsyncGenerator>(m_generator);
+  return generator->resumable();
+}
+
 void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx));
 

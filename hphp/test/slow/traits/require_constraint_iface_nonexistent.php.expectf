@@ -1,1 +1,1 @@
-Fatal error: 'NonExistent' required by interface 'I1' cannot be loaded in %s/slow/traits/require_constraint_iface_nonexistent.php on line 3
+Fatal error: Class 'X' required to extend class 'NonExistent' by interface 'I1' in %s/test/slow/traits/require_constraint_iface_nonexistent.php on line 7

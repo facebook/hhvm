@@ -437,28 +437,39 @@ void ClassScope::informClosuresAboutScopeClone(
   }
 }
 
-void ClassScope::addClassRequirement(const std::string &requiredName,
+bool ClassScope::addClassRequirement(const std::string &requiredName,
                                      bool isExtends) {
   assert(isTrait() || (isInterface() && isExtends)
          // when flattening traits, their requirements get flattened
          || Option::WholeProgram);
+
   if (isExtends) {
+    if (m_requiredImplements.count(requiredName)) return false;
     m_requiredExtends.insert(requiredName);
   } else {
+    if (m_requiredExtends.count(requiredName)) return false;
     m_requiredImplements.insert(requiredName);
   }
+
+  return true;
 }
 
 void ClassScope::importClassRequirements(AnalysisResultPtr ar,
                                          ClassScopePtr trait) {
-  /* Defer enforcement of requirements until the creation of the class
-   * happens at runtime. */
-  for (auto const& req : trait->getClassRequiredExtends()) {
-    addClassRequirement(req, true);
-  }
-  for (auto const& req : trait->getClassRequiredImplements()) {
-    addClassRequirement(req, false);
-  }
+  auto addRequires = [&] (
+    const boost::container::flat_set<std::string>& reqs, bool isExtends) {
+    for (auto const& req : reqs) {
+      if (!addClassRequirement(req, isExtends)) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidTraitStatement,
+          "Conflicting requirements for '%s'",
+          req.c_str());
+      }
+    }
+  };
+
+  addRequires(trait->getClassRequiredExtends(), true);
+  addRequires(trait->getClassRequiredImplements(), false);
 }
 
 bool ClassScope::hasMethod(const std::string &methodName) const {

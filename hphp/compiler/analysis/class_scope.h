@@ -299,7 +299,7 @@ public:
 
   void addTraitAlias(TraitAliasStatementPtr aliasStmt);
 
-  void addClassRequirement(const std::string &requiredName, bool isExtends);
+  bool addClassRequirement(const std::string &requiredName, bool isExtends);
 
   void importUsedTraits(AnalysisResultPtr ar);
 

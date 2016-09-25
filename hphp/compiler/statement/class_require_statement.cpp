@@ -58,7 +58,14 @@ void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
   }
 
   ar->parseOnDemandByClass(toLower(m_required));
-  scope->addClassRequirement(m_required, m_extends);
+  if (!scope->addClassRequirement(m_required, m_extends)) {
+    parseTimeFatal(
+      fs,
+      Compiler::InvalidTraitStatement,
+      "Conflicting requirements for '%s'",
+      m_required.c_str()
+    );
+  }
 }
 
 

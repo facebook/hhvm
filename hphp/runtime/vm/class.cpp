@@ -2605,7 +2605,10 @@ void Class::setRequirements() {
       reqBuilder.add(req->name(), req);
       return;
     }
-    assert(reqBuilder[it->second]->is_same(req));
+    if (!reqBuilder[it->second]->is_same(req)) {
+      raise_error("Conflicting requirements for '%s'",
+                  req->name()->data());
+    }
   };
 
   if (m_parent.get() != nullptr) {
@@ -2625,85 +2628,48 @@ void Class::setRequirements() {
     }
   }
 
-  if (attrs() & AttrTrait) {
-    // Check that requirements are semantically valid.
-    for (auto const& req : m_preClass->requirements()) {
-      auto const reqName = req.name();
-      auto const reqCls = Unit::loadClass(reqName);
-      if (!reqCls) {
-        raise_error("%s '%s' required by trait '%s' cannot be loaded",
-                    req.is_extends() ? "Class" : "Interface",
-                    reqName->data(),
-                    m_preClass->name()->data());
-      }
-
-      if (req.is_extends()) {
-        if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
-          raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
-                      m_preClass->name()->data(),
-                      reqName->data(),
-                      reqName->data());
-        }
-      } else {
-        assert(req.is_implements());
-        if (!(reqCls->attrs() & AttrInterface)) {
-          raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
-                      m_preClass->name()->data(),
-                      reqName->data(),
-                      reqName->data());
-        }
-      }
-
-      addReq(&req);
-    }
-  } else if (attrs() & AttrInterface) {
+  if (attrs() & AttrInterface) {
     // Check that requirements are semantically valid
+    // We don't require the class to exist yet, to avoid creating
+    // pointless circular dependencies, but if it does, we check
+    // that it's the right kind.
     for (auto const& req : m_preClass->requirements()) {
-      auto const reqName = req.name();
-      auto const reqCls = Unit::loadClass(reqName);
-      if (!reqCls) {
-        raise_error("'%s' required by interface '%s' cannot be loaded",
-                    reqName->data(),
-                    m_preClass->name()->data());
-      }
-
       assert(req.is_extends());
-      if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
-        raise_error("Interface '%s' requires extension of '%s', but %s "
-                    "is not an extendable class",
-                    m_preClass->name()->data(),
-                    reqName->data(),
-                    reqName->data());
-      }
-      addReq(&req);
-    }
-  } else if (RuntimeOption::RepoAuthoritative) {
-    // The flattening of traits may result in requirements migrating from
-    // the trait's declaration into that of the "using" class.
-    for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
-      auto const reqCls = Unit::loadClass(reqName);
-      if (!reqCls) {
-        raise_error("%s '%s' required by trait '%s' cannot be loaded",
-                    req.is_extends() ? "Class" : "Interface",
-                    reqName->data(),
-                    m_preClass->name()->data());
-      }
-
-      if (req.is_extends()) {
+      auto const reqCls = Unit::lookupClass(reqName);
+      if (reqCls) {
         if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
-          raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
+          raise_error("Interface '%s' requires extension of '%s', but %s "
+                      "is not an extendable class",
                       m_preClass->name()->data(),
                       reqName->data(),
                       reqName->data());
         }
-      } else {
-        assert(req.is_implements());
-        if (!(reqCls->attrs() & AttrInterface)) {
-          raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
-                      m_preClass->name()->data(),
-                      reqName->data(),
-                      reqName->data());
+      }
+      addReq(&req);
+    }
+  } else if (attrs() & AttrTrait || RuntimeOption::RepoAuthoritative) {
+    // Check that requirements are semantically valid.
+    // Note that in repo-auth mode, trait flatening could have migrated
+    // requirements onto a class's preClass.
+    for (auto const& req : m_preClass->requirements()) {
+      auto const reqName = req.name();
+      if (auto const reqCls = Unit::lookupClass(reqName)) {
+        if (req.is_extends()) {
+          if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
+            raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
+                        m_preClass->name()->data(),
+                        reqName->data(),
+                        reqName->data());
+          }
+        } else {
+          assert(req.is_implements());
+          if (!(reqCls->attrs() & AttrInterface)) {
+            raise_error(Strings::TRAIT_BAD_REQ_IMPLEMENTS,
+                        m_preClass->name()->data(),
+                        reqName->data(),
+                        reqName->data());
+          }
         }
       }
       addReq(&req);
@@ -2841,21 +2807,10 @@ void Class::checkRequirementConstraints() const {
       if (UNLIKELY(
             (reqExtCls == nullptr) ||
             (reqExtCls->attrs() & (AttrTrait | AttrInterface)))) {
-        // If this class is being created from scratch from the PreClass
-        // for the first time in this request, then errors would already
-        // have been raised when the trait/interface from which the
-        // requirement came was loaded. If however we're subject to the
-        // whims of Class::avail() and reusing a Class, the failure of the
-        // lookup indicates that the requirement was not satisfied in the
-        // previous request; if the requirement had been satisfied, the
-        // appropriate reqExtCls would again loaded via the class parent
-        // and interfaces checked in Class::avail()
         raiseUnsatisfiedRequirement(req);
       }
 
-      if (UNLIKELY(
-            (m_classVecLen < reqExtCls->m_classVecLen) ||
-            (m_classVec[reqExtCls->m_classVecLen-1] != reqExtCls))) {
+      if (UNLIKELY(!classofNonIFace(reqExtCls))) {
         raiseUnsatisfiedRequirement(req);
       }
     }

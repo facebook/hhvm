@@ -161,7 +161,8 @@ struct PtrFilter: F {
 
   // mark ambigous pointers in the range [start,start+len). If the start or
   // end is a partial word, don't scan that word.
-  void operator()(const void* start, size_t len) {
+  void FOLLY_DISABLE_ADDRESS_SANITIZER
+  operator()(const void* start, size_t len) {
     const uintptr_t M{7}; // word size - 1
     auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
     auto e = (char**)((uintptr_t(start) + len) & ~M); // round down

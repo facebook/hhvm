@@ -125,7 +125,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   auto cap = num > 2 ? folly::nextPowTwo(num) : 2;
 
   auto size = sizeof(APCArray) + sizeof(int) * cap + sizeof(Bucket) * num;
-  auto p = malloc(size);
+  auto p = std::malloc(size);
   APCArray* ret = new (p) APCArray(HashedCtor{}, kind, cap);
 
   for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
@@ -145,7 +145,8 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
       }
     );
   } catch (...) {
-    delete ret;
+    ret->~APCArray();
+    std::free(p);
     throw;
   }
 
@@ -200,7 +201,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
                                      bool unserializeObj) {
   auto num_elems = arr->size();
   auto size = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
-  auto p = malloc(size);
+  auto p = std::malloc(size);
   auto ret = new (p) APCArray(PackedCtor{}, kind, num_elems);
 
   size_t i = 0;
@@ -219,7 +220,8 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
     assertx(i == num_elems);
   } catch (...) {
     ret->m_size = i;
-    delete ret;
+    ret->~APCArray();
+    std::free(p);
     throw;
   }
 

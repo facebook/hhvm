@@ -212,6 +212,9 @@ String string_base64_decode(const char *input, int len, bool strict);
 String string_escape_shell_arg(const char *str);
 String string_escape_shell_cmd(const char *str);
 
+std::string base64_encode(const char *input, int len);
+std::string base64_decode(const char *input, int len, bool strict);
+
 /**
  * Convert between strings and numbers.
  */

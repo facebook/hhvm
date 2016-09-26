@@ -282,7 +282,7 @@ void readRelocations(
       }
       assert(pos != std::string::npos && pos > n);
       auto b64 = line.substr(pos + 1);
-      String decoded = string_base64_decode(b64.c_str(), b64.size(), true);
+      auto decoded = base64_decode(b64.c_str(), b64.size(), true);
 
       BlobDecoder blob(decoded.data(), decoded.size());
       TransRelocInfoHelper trih;
@@ -646,7 +646,7 @@ void liveRelocate(int time) {
   always_assert(fixups.empty());
 }
 
-String perfRelocMapInfo(
+std::string perfRelocMapInfo(
     TCA start, TCA end,
     TCA coldStart, TCA coldEnd,
     SrcKey sk, int argNum,
@@ -683,9 +683,8 @@ String perfRelocMapInfo(
   BlobEncoder blob;
   blob(trih);
 
-  String data = string_base64_encode(static_cast<const char*>(blob.data()),
-                                     blob.size());
-  String id;
+  auto data = base64_encode(static_cast<const char*>(blob.data()), blob.size());
+  std::string id;
   if (sk.valid()) {
     int fid = sk.funcID();
     if (&code().blockFor(start) == &code().prof()) {
@@ -693,12 +692,12 @@ String perfRelocMapInfo(
       // to relocate (currently just profiling trs).
       fid = -fid;
     }
-    id = String(static_cast<int64_t>(fid));
+    id = folly::to<std::string>(static_cast<int64_t>(fid));
   } else {
-    id = String("Stub");
+    id = std::string("Stub");
   }
 
-  return id + String(" ") + data;
+  return id + " " + data;
 }
 
 //////////////////////////////////////////////////////////////////////

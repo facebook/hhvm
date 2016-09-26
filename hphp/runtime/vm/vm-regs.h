@@ -262,6 +262,27 @@ struct VMRegGuard {
   VMRegState m_old;
 };
 
+/*
+ * Asserts that the VM is unused in parts of mcgen and tc which may
+ * conditionally execute on request threads but must never read or alter VM
+ * state.
+ */
+struct AssertVMUnused {
+  static __thread bool is_protected;
+
+#ifndef NDEBUG
+  AssertVMUnused();
+  ~AssertVMUnused();
+
+private:
+  void* m_oldBase;
+  VMRegState m_oldState;
+  bool m_oldProtected;
+#else
+  AssertVMUnused() {}
+#endif
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {

@@ -15,27 +15,33 @@
 */
 
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/mcgen-prologue.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
+#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace mcgen { namespace {
+namespace HPHP { namespace jit { namespace mcgen {
+
+namespace {
+
 /*
  * Returns true iff we already have Eval.JitMaxTranslations translations
  * recorded in srcRec.
@@ -75,84 +81,12 @@ bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
   return true;
 }
 
-void populateLiveContext(RegionContext& ctx) {
-  auto const fp = vmfp();
-  auto const sp = vmsp();
-
-  always_assert(ctx.func == fp->m_func);
-
-  auto const ctxClass = ctx.func->cls();
-  // Track local types.
-  for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
-    ctx.liveTypes.push_back(
-      { Location::Local{i}, typeFromTV(frame_local(fp, i), ctxClass) }
-    );
-    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
-  }
-
-  // Track stack types and pre-live ActRecs.
-  int32_t stackOff = 0;
-  visitStackElems(
-    fp, sp, ctx.bcOffset,
-    [&] (const ActRec* ar, Offset) {
-      auto const objOrCls =
-        !ar->func()->cls() ? TNullptr :
-        (ar->hasThis()  ?
-         Type::SubObj(ar->getThis()->getVMClass()) :
-         Type::SubCls(ar->getClass()));
-
-      ctx.preLiveARs.push_back({ stackOff, ar->func(), objOrCls });
-      FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
-      stackOff += kNumActRecCells;
-    },
-    [&] (const TypedValue* tv) {
-      ctx.liveTypes.push_back(
-        { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv, ctxClass) }
-      );
-      stackOff++;
-      FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
-    }
-  );
-}
-
-/*
- * Analyze the given TransArgs and return the region to translate, or nullptr
- * if one could not be selected.
- */
-RegionDescPtr prepareRegion(const TransArgs& args) {
-  if (args.kind == TransKind::Optimize) {
-    assertx(RuntimeOption::EvalJitPGO);
-    if (args.region) return args.region;
-
-    assertx(isValidTransID(args.transId));
-    return selectHotRegion(args.transId);
-  }
-
-  // Attempt to create a region at this SrcKey
-  assertx(args.kind == TransKind::Profile || args.kind == TransKind::Live);
-  auto const sk = args.sk;
-  RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
-                           sk.resumed() };
-  FTRACE(2, "populating live context for region\n");
-  populateLiveContext(rContext);
-  return selectRegion(rContext, args.kind);
-}
-
-bool liveFrameIsPseudoMain() {
-  auto const ar = vmfp();
-  if (!(ar->func()->attrs() & AttrMayUseVV)) return false;
-  return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-TCA translate(TransArgs args) {
+TCA translate(TransArgs args, FPInvOffset spOff, ProfTransRec* prologue) {
   INC_TPC(translate);
-
   assert(args.kind != TransKind::Invalid);
-  assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
-  assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
 
   if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 
@@ -161,16 +95,14 @@ TCA translate(TransArgs args) {
   auto const srcRec = tc::findSrcRec(args.sk);
   always_assert(srcRec);
 
-  args.region = reachedTranslationLimit(args.sk, *srcRec) ? nullptr
-                                                          : prepareRegion(args);
   TransEnv env{args};
-  env.initSpOffset = args.region ? args.region->entry()->initialSpOffset()
-                                 : liveSpOff();
+  env.prologue = prologue;
+  env.initSpOffset = spOff;
   env.annotations.insert(env.annotations.end(),
                          args.annotations.begin(), args.annotations.end());
 
   // Lower the RegionDesc to an IRUnit, then lower that to a Vunit.
-  if (args.region) {
+  if (args.region && !reachedTranslationLimit(args.sk, *srcRec)) {
     if (args.kind == TransKind::Profile || (profData() && transdb::enabled())) {
       env.transID = profData()->allocTransID();
     }
@@ -189,54 +121,119 @@ TCA translate(TransArgs args) {
   return tc::emitTranslation(std::move(env));
 }
 
-/*
- * Return an existing translation for `args', or nullptr if one can't be found.
- */
-TCA findTranslation(const TransArgs& args) {
-  auto sk = args.sk;
-  sk.func()->validate();
+TCA retranslate(TransArgs args, const RegionContext& ctx) {
+  AssertVMUnused _;
 
-  if (liveFrameIsPseudoMain() && !RuntimeOption::EvalJitPseudomain) {
-    SKTRACE(2, sk, "punting on pseudoMain\n");
+  auto sr = tc::findSrcRec(args.sk);
+  always_assert(sr);
+  bool locked = sr->tryLock();
+  SCOPE_EXIT {
+    if (locked) sr->freeLock();
+  };
+  if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
+    // We are about to translate something known to be blacklisted by
+    // debugger, exit early
+    SKTRACE(1, args.sk, "retranslate abort due to debugger\n");
     return nullptr;
   }
 
-  if (auto const sr = tc::findSrcRec(sk)) {
-    if (auto const tca = sr->getTopTranslation()) {
-      SKTRACE(2, sk, "getTranslation: found %p\n", tca);
-      return tca;
-    }
+  // We need to recompute the kind after acquiring the write lease in case the
+  // answer to profileSrcKey() changes, so use a lambda rather than just
+  // storing the result.
+  auto kind = [&] {
+    return tc::profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+  };
+  args.kind = kind();
+
+  // Only start profiling new functions at their entry point. This reduces the
+  // chances of profiling the body of a function but not its entry (where we
+  // trigger retranslation) and helps remove bias towards larger functions that
+  // can cause variations in the size of code.prof.
+  if (args.kind == TransKind::Profile &&
+      !profData()->profiling(args.sk.funcID()) &&
+      !args.sk.func()->isEntry(args.sk.offset())) {
+    return nullptr;
   }
 
-  return nullptr;
+  LeaseHolder writer(GetWriteLease(), args.sk.func(), args.kind);
+  if (!writer || !tc::shouldTranslate(args.sk.func(), kind())) {
+    return nullptr;
+  }
+
+  if (!locked) {
+    // Even though we knew above that we were going to skip doing another
+    // translation, we wait until we get the write lease, to avoid spinning
+    // through the tracelet guards again and again while another thread is
+    // writing to it.
+    return sr->getTopTranslation();
+  }
+  if (sr->translations().size() > RuntimeOption::EvalJitMaxTranslations) {
+    always_assert(sr->translations().size() ==
+                  RuntimeOption::EvalJitMaxTranslations + 1);
+    return sr->getTopTranslation();
+  }
+  SKTRACE(1, args.sk, "retranslate\n");
+
+  args.kind = kind();
+  if (!writer.checkKind(args.kind)) return nullptr;
+
+  args.region = selectRegion(ctx, args.kind);
+  auto result = translate(args, ctx.spOffset);
+
+  tc::checkFreeProfData();
+  return result;
 }
 
-TCA createTranslation(TransArgs args) {
-  args.kind = tc::profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+TCA retranslateOpt(SrcKey sk, TransID transId) {
+  AssertVMUnused _;
 
-  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
+  if (isDebuggerAttachedProcess()) return nullptr;
 
-  auto sk = args.sk;
-  LeaseHolder writer(GetWriteLease(), sk.func(), args.kind);
-  if (!writer || !tc::shouldTranslate(sk.func(), args.kind)) return nullptr;
+  auto const func = const_cast<Func*>(sk.func());
+  auto const funcID = func->getFuncId();
+  if (profData() == nullptr || profData()->optimized(funcID)) return nullptr;
 
-  if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {
-    return nullptr;
+  LeaseHolder writer(GetWriteLease(), func, TransKind::Optimize);
+  if (!writer) return nullptr;
+
+  if (profData()->optimized(funcID)) return nullptr;
+  profData()->setOptimized(funcID);
+
+  TRACE(1, "retranslateOpt: transId = %u\n", transId);
+  func->setFuncBody(tc::ustubs().funcBodyHelperThunk);
+
+  // Invalidate SrcDB's entries for all func's SrcKeys.
+  tc::invalidateFuncProfSrcKeys(func);
+
+  // Regenerate the prologues and DV funclets before the actual function body.
+  bool includedBody{false};
+  TCA start = regeneratePrologues(func, sk, includedBody);
+
+  // Regionize func and translate all its regions.
+  std::string transCFGAnnot;
+  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
+                                    : regionizeFunc(func, transCFGAnnot);
+
+  for (auto region : regions) {
+    always_assert(!region->empty());
+    auto regionSk = region->start();
+    auto transArgs = TransArgs{regionSk};
+    if (transCFGAnnot.size() > 0) {
+      transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
+    }
+    transArgs.region = region;
+    transArgs.kind = TransKind::Optimize;
+
+    auto const spOff = region->entry()->initialSpOffset();
+    auto const regionStart = translate(transArgs, spOff);
+    if (start == nullptr && regionSk == sk) {
+      start = regionStart;
+    }
+    transCFGAnnot = ""; // so we don't annotate it again
   }
 
-  tc::createSrcRec(sk);
-
-  auto sr = tc::findSrcRec(sk);
-  always_assert(sr);
-
-  if (auto const tca = sr->getTopTranslation()) {
-    // Handle extremely unlikely race; someone may have just added the first
-    // translation for this SrcRec while we did a non-blocking wait on the
-    // write lease in createSrcRec().
-    return tca;
-  }
-
-  return retranslate(args);
+  tc::checkFreeProfData();
+  return start;
 }
 
 }}}

@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/trace.h"
 
@@ -63,6 +64,17 @@ namespace HPHP { namespace jit { namespace mcgen {
 
 namespace {
 
+TCA checkCachedPrologue(const Func* func, int paramIdx) {
+  TCA prologue = (TCA)func->getPrologue(paramIdx);
+  if (prologue != tc::ustubs().fcallHelperThunk) {
+    TRACE(1, "cached prologue %s(%d) -> cached %p\n",
+          func->fullName()->data(), paramIdx, prologue);
+    assertx(tc::isValidCodeAddress(prologue));
+    return prologue;
+  }
+  return nullptr;
+}
+
 /**
  * Given the proflogueTransId for a TransProflogue translation, regenerate the
  * prologue (as a TransPrologue).  Returns the starting address for the
@@ -76,34 +88,46 @@ TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
   auto nArgs = rec->prologueArgs();
   emittedDVInit = false;
 
-  // Regenerate the prologue.
+  assertx(GetWriteLease().amOwner());
+
   func->resetPrologue(nArgs);
-  auto const start = getFuncPrologue(
-    func,
-    nArgs,
-    nullptr /* ActRec */,
-    true /* regeneratePrologue */
-  );
-  if (!start) return nullptr;
 
-  func->setPrologue(nArgs, start);
+  // If we're regenerating a prologue, and we want to check shouldTranslate()
+  // but ignore the code size limits.  We still want to respect the global
+  // translation limit and other restrictions, though.
+  if (!tc::shouldTranslateNoSizeLimit(func)) return nullptr;
 
-  TCA triggerSkStart = nullptr;
-  if (auto const par = tc::updateFuncPrologue(start, rec)) {
-    auto funcletSK = par->first;
-    auto args = TransArgs{funcletSK};
-    args.transId = par->second;
-    args.kind = TransKind::Optimize;
-    auto dvStart = translate(args);
-    emittedDVInit |= dvStart != nullptr;
-    if (dvStart && funcletSK == triggerSk) {
-      triggerSkStart = dvStart;
+  // Double check the prologue array now that we have the write lease
+  // in case another thread snuck in and set the prologue already.
+  if (auto const p = checkCachedPrologue(func, nArgs)) return p;
+
+  // If this prologue has a DV funclet, then invalidate it and return its SrcKey
+  // and TransID
+  if (nArgs < func->numNonVariadicParams()) {
+    auto paramInfo = func->params()[nArgs];
+    if (paramInfo.hasDefaultValue()) {
+      SrcKey funcletSK(func, paramInfo.funcletOff, false);
+      auto funcletTransId = profData()->dvFuncletTransId(func, nArgs);
+      if (funcletTransId != kInvalidTransID) {
+        tc::invalidateSrcKey(funcletSK);
+        auto args = TransArgs{funcletSK};
+        args.transId = funcletTransId;
+        args.kind = TransKind::Optimize;
+        args.region = selectHotRegion(funcletTransId);
+        auto const spOff = args.region->entry()->initialSpOffset();
+        auto dvStart = translate(args, spOff, rec);
+        emittedDVInit |= dvStart != nullptr;
+
+        // Flag that this translation has been retranslated, so that
+        // it's not retranslated again along with the function body.
+        profData()->setOptimized(funcletSK);
+        return dvStart && funcletSK == triggerSk ? dvStart : nullptr;
+      }
     }
-    // Flag that this translation has been retranslated, so that
-    // it's not retranslated again along with the function body.
-    profData()->setOptimized(funcletSK);
   }
-  return triggerSkStart;
+
+  tc::emitFuncPrologueOpt(rec);
+  return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +136,8 @@ TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
 TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
+
+  AssertVMUnused _;
 
   for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
     TransID tid = profData()->proflogueTransId(func, nArgs);
@@ -163,6 +189,39 @@ TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody) {
   if (!emittedAnyDVInit) includedBody = false;
 
   return triggerStart;
+}
+
+TCA getFuncPrologue(Func* func, int nPassed) {
+  AssertVMUnused _;
+
+  func->validate();
+  TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
+  int const numParams = func->numNonVariadicParams();
+  int paramIndex = nPassed <= numParams ? nPassed : numParams + 1;
+
+  // Do a quick test before grabbing the write lease
+  if (auto const p = checkCachedPrologue(func, paramIndex)) return p;
+
+  auto const funcBody = SrcKey{func, func->getEntryForNumArgs(nPassed), false};
+  auto computeKind = [&] {
+    return tc::profileSrcKey(funcBody) ? TransKind::ProfPrologue :
+                                         TransKind::LivePrologue;
+  };
+  LeaseHolder writer(GetWriteLease(), func, computeKind());
+  if (!writer) return nullptr;
+
+  auto const kind = computeKind();
+  // Check again now that we have the write lease, in case the answer to
+  // profileSrcKey() changed.
+  if (!writer.checkKind(kind)) return nullptr;
+
+  if (!tc::shouldTranslate(func, TransKind::LivePrologue)) return nullptr;
+
+  // Double check the prologue array now that we have the write lease
+  // in case another thread snuck in and set the prologue already.
+  if (auto const p = checkCachedPrologue(func, paramIndex)) return p;
+
+  return tc::emitFuncPrologue(func, nPassed, kind);
 }
 
 }}}

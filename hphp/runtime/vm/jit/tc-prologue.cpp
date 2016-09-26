@@ -37,12 +37,15 @@ TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
-folly::Optional<std::pair<SrcKey,TransID>>
-updateFuncPrologue(TCA start, ProfTransRec* rec) {
+namespace {
+
+void updateFuncPrologue(TCA start, ProfTransRec* rec) {
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
 
   auto codeLock = lockCode();
+
+  func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.
   for (auto toSmash : rec->mainCallers()) {
@@ -58,25 +61,9 @@ updateFuncPrologue(TCA start, ProfTransRec* rec) {
     }
   }
   rec->clearAllCallers();
-
-  // If this prologue has a DV funclet, then invalidate it and return its SrcKey
-  // and TransID
-  if (nArgs < func->numNonVariadicParams()) {
-    auto paramInfo = func->params()[nArgs];
-    if (paramInfo.hasDefaultValue()) {
-      SrcKey funcletSK(func, paramInfo.funcletOff, false);
-      auto funcletTransId = profData()->dvFuncletTransId(func, nArgs);
-      if (funcletTransId != kInvalidTransID) {
-        invalidateSrcKey(funcletSK);
-        return std::make_pair(funcletSK, funcletTransId);
-      }
-    }
-  }
-
-  return folly::none;
 }
 
-static TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
+TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
   if (!newTranslation()) {
     return nullptr;
   }
@@ -189,7 +176,12 @@ static TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
   return start;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+}
+
 TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
+  AssertVMUnused _;
+
   try {
     return emitFuncPrologueImpl(func, argc, kind);
   } catch (const DataBlockFull& dbFull) {
@@ -210,7 +202,21 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
   }
 }
 
+TCA emitFuncPrologueOpt(ProfTransRec* rec) {
+  AssertVMUnused _;
+
+  auto start = emitFuncPrologue(
+    rec->func(),
+    rec->prologueArgs(),
+    TransKind::OptPrologue
+  );
+  updateFuncPrologue(start, rec);
+  return start;
+}
+
 TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
+  AssertVMUnused _;
+
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 

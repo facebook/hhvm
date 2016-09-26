@@ -74,6 +74,11 @@ TCA handleFCallAwaitSuspend();
  */
 TCA handleResume(bool interpFirst);
 
+/*
+ * Look up (or create) the translation for the body of fp.func().
+ */
+TCA funcBodyHelper(ActRec* fp);
+
 }}}
 
 #endif

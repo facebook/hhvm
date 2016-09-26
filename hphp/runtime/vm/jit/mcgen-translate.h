@@ -21,6 +21,8 @@
 
 namespace HPHP { namespace jit {
 
+struct FPInvOffset;
+struct ProfTransRec;
 struct TransArgs;
 
 namespace mcgen {
@@ -35,23 +37,8 @@ namespace mcgen {
  * Should the region be absent, an appropriate region for the designated kind
  * will be selected.
  */
-TCA translate(TransArgs args);
-
-/*
- * Create a translation for the SrcKey specified in args.
- *
- * If a translation for this SrcKey already exists it will be returned. The kind
- * of translation created will be selected based on the SrcKey specified.
- */
-TCA createTranslation(TransArgs args);
-
-/*
- * Find the translation for the SrcKey specified in args.
- *
- * If no translation exists or the current VM frame is a pseudomain then return
- * nullptr.
- */
-TCA findTranslation(const TransArgs& args);
+TCA translate(TransArgs args, FPInvOffset spOff,
+              ProfTransRec* prologue = nullptr);
 
 }}}
 

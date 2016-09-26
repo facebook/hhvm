@@ -47,11 +47,11 @@ void recordPerfRelocMap(
     SrcKey sk, int argNum,
     const GrowableVector<IncomingBranch> &incomingBranchesIn,
     CGMeta& fixups) {
-  String info = perfRelocMapInfo(start, end,
-                                 coldStart, coldEnd,
-                                 sk, argNum,
-                                 incomingBranchesIn,
-                                 fixups);
+  auto info = perfRelocMapInfo(start, end,
+                               coldStart, coldEnd,
+                               sk, argNum,
+                               incomingBranchesIn,
+                               fixups);
   Debug::DebugInfo::Get()->recordRelocMap(start, end, info);
 }
 

@@ -46,4 +46,37 @@ VMRegAnchor::VMRegAnchor(ActRec* ar)
   regs.fp = prevAr;
 }
 
+__thread bool AssertVMUnused::is_protected = false;
+
+#ifndef NDEBUG
+AssertVMUnused::AssertVMUnused()
+  : m_oldBase(rds::tl_base)
+  , m_oldState(tl_regState)
+  , m_oldProtected(is_protected)
+{
+  if (!rds::tl_base) return;
+  rds::tl_base = nullptr;
+  tl_regState = VMRegState::DIRTY;
+  is_protected = true;
+  rds::threadInit();
+
+  auto const protlen =
+    rds::persistentSection().begin() - (const char*)rds::tl_base;
+
+  // The current thread may attempt to read the Gen numbers of the normal
+  // portion of rds. These will all be invalid. No writes to non-persistent
+  // rds should occur while this guard is active.
+  auto const result = mprotect(rds::tl_base, protlen, PROT_READ);
+  always_assert(result == 0);
+}
+
+AssertVMUnused::~AssertVMUnused() {
+  if (!m_oldBase) return;
+  rds::threadExit();
+  is_protected = m_oldProtected;
+  tl_regState = m_oldState;
+  rds::tl_base = m_oldBase;
+}
+#endif
+
 }

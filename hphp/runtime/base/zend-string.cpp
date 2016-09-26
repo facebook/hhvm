@@ -1349,7 +1349,9 @@ String string_uudecode(const char *src, int src_len) {
 ///////////////////////////////////////////////////////////////////////////////
 // base64
 
-static const char base64_table[] = {
+namespace {
+
+const char base64_table[] = {
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
   'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -1357,9 +1359,9 @@ static const char base64_table[] = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '\0'
 };
 
-static const char base64_pad = '=';
+const char base64_pad = '=';
 
-static const short base64_reverse_table[256] = {
+const short base64_reverse_table[256] = {
   -2, -2, -2, -2, -2, -2, -2, -2, -2, -1, -1, -2, -2, -1, -2, -2,
   -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
   -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 62, -2, -2, -2, 63,
@@ -1378,17 +1380,18 @@ static const short base64_reverse_table[256] = {
   -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2
 };
 
-static String php_base64_encode(const unsigned char *str, int length) {
-  const unsigned char *current = str;
-  unsigned char *p;
-  unsigned char *result;
-
+folly::Optional<int> maxEncodedSize(int length) {
   if ((length + 2) < 0 || ((length + 2) / 3) >= (1 << (sizeof(int) * 8 - 2))) {
-    return String();
+    return folly::none;
   }
+  return ((length + 2) / 3) * 4;
+}
 
-  String ret(((length + 2) / 3) * 4, ReserveString);
-  p = result = (unsigned char *)ret.mutableData();
+// outstr must be at least maxEncodedSize(length) bytes
+size_t php_base64_encode(const unsigned char *str, int length,
+                         unsigned char* outstr) {
+  const unsigned char *current = str;
+  unsigned char *p = outstr;
 
   while (length > 2) { /* keep going until we have less than 24 bits */
     *p++ = base64_table[current[0] >> 2];
@@ -1413,17 +1416,17 @@ static String php_base64_encode(const unsigned char *str, int length) {
       *p++ = base64_pad;
     }
   }
-  ret.setSize(p - result);
-  return ret;
+  return p - outstr;
 }
 
-static String php_base64_decode(const char *str, int length, bool strict) {
+// outstr must be at least length bytes
+ssize_t php_base64_decode(const char *str, int length, bool strict,
+                         unsigned char* outstr) {
   const unsigned char *current = (unsigned char*)str;
   int ch, i = 0, j = 0, k;
   /* this sucks for threaded environments */
 
-  String retString(length, ReserveString);
-  unsigned char* result = (unsigned char*)retString.mutableData();
+  unsigned char* result = outstr;
 
   /* run through the whole string, converting as we go */
   while ((ch = *current++) != '\0' && length-- > 0) {
@@ -1437,7 +1440,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
             continue;
           }
         }
-        return String();
+        return -1;
       }
       continue;
     }
@@ -1447,7 +1450,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
       /* a space or some other separator character, we simply skip over */
       continue;
     } else if (ch == -2) {
-      return String();
+      return -1;
     }
 
     switch(i % 4) {
@@ -1474,23 +1477,61 @@ static String php_base64_decode(const char *str, int length, bool strict) {
   if (ch == base64_pad) {
     switch(i % 4) {
     case 1:
-      return String();
+      return -1;
     case 2:
       k++;
     case 3:
       result[k] = 0;
     }
   }
-  retString.setSize(j);
-  return retString;
+  return j;
 }
 
-String string_base64_encode(const char *input, int len) {
-  return php_base64_encode((unsigned char *)input, len);
 }
 
-String string_base64_decode(const char *input, int len, bool strict) {
-  return php_base64_decode(input, len, strict);
+String string_base64_encode(const char* input, int len) {
+  if (auto const wantedSize = maxEncodedSize(len)) {
+    String ret(*wantedSize, ReserveString);
+    auto actualSize = php_base64_encode((unsigned char*)input, len,
+                                        (unsigned char*)ret.mutableData());
+    ret.setSize(actualSize);
+    return ret;
+  }
+  return String();
+}
+
+String string_base64_decode(const char* input, int len, bool strict) {
+  String ret(len, ReserveString);
+  auto actualSize = php_base64_decode(input, len, strict,
+                                      (unsigned char*)ret.mutableData());
+  if (actualSize < 0) return String();
+
+  ret.setSize(actualSize);
+  return ret;
+}
+
+std::string base64_encode(const char* input, int len) {
+  if (auto const wantedSize = maxEncodedSize(len)) {
+    std::string ret;
+    ret.resize(*wantedSize);
+    auto actualSize = php_base64_encode((unsigned char*)input, len,
+                                        (unsigned char*)ret.data());
+    ret.resize(actualSize);
+    return ret;
+  }
+  return std::string();
+}
+
+std::string base64_decode(const char* input, int len, bool strict) {
+  if (!len) return std::string();
+  std::string ret;
+  ret.resize(len);
+  auto actualSize = php_base64_decode(input, len, strict,
+                                      (unsigned char*)ret.data());
+  if (!actualSize) return std::string();
+
+  ret.resize(actualSize);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

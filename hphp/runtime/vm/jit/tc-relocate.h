@@ -37,7 +37,7 @@ struct IRUnit;
 
 namespace tc {
 
-String perfRelocMapInfo(
+std::string perfRelocMapInfo(
   TCA start, TCA end,
   TCA coldStart, TCA coldEnd,
   SrcKey sk, int argNum,

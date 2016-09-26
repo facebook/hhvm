@@ -41,7 +41,7 @@ struct DebugInfo {
 
   static void recordDataMap(const void* from, const void* to,
                             const std::string& desc);
-  void recordRelocMap(void* from, void* to, const String& desc);
+  void recordRelocMap(void* from, void* to, const std::string& desc);
   FILE* getRelocMap() const { return m_relocMap; }
   const std::string& getRelocMapName() const { return m_relocMapName; }
 

@@ -35,10 +35,10 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
@@ -87,11 +87,11 @@ SrcRec* findSrcRec(SrcKey sk) {
   return srcDB().find(sk);
 }
 
-void createSrcRec(SrcKey sk) {
+void createSrcRec(SrcKey sk, FPInvOffset spOff) {
   if (srcDB().find(sk)) return;
 
   auto const srcRecSPOff = sk.resumed() ? folly::none
-                                        : folly::make_optional(liveSpOff());
+                                        : folly::make_optional(spOff);
 
   // We put retranslate requests at the end of our slab to more frequently
   // allow conditional jump fall-throughs
@@ -164,6 +164,13 @@ void createSrcRec(SrcKey sk) {
 
 TCA emitTranslation(TransEnv env) {
   Timer timer(Timer::mcg_finishTranslation);
+
+  AssertVMUnused _;
+
+  if (env.prologue) {
+    assertx(env.args.kind == TransKind::Optimize);
+    emitFuncPrologueOpt(env.prologue);
+  }
 
   auto& args = env.args;
   auto const sk = args.sk;
@@ -268,10 +275,22 @@ TCA emitTranslation(TransEnv env) {
     logTranslation(env);
   }
 
+  if (env.unit) {
+    auto func = const_cast<Func*>(env.unit->context().func);
+
+    auto const regionSk = env.unit->context().srcKey();
+    if (env.args.kind == TransKind::Optimize &&
+        regionSk.offset() == func->base() &&
+        func->getDVFunclets().size() == 0 &&
+        func->getFuncBody() == ustubs().funcBodyHelperThunk) {
+      func->setFuncBody(loc.mainStart());
+    }
+  }
+
   return loc.mainStart();
 }
 
-void invalidateSrcKey(SrcKey sk) {
+static void invalidateSrcKeyNoLock(SrcKey sk) {
   assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
@@ -292,12 +311,17 @@ void invalidateSrcKey(SrcKey sk) {
   sr->replaceOldTranslations();
 }
 
+void invalidateSrcKey(SrcKey sk) {
+  auto codeLock = lockCode();
+  invalidateSrcKeyNoLock(sk);
+}
+
 void invalidateFuncProfSrcKeys(const Func* func) {
   assertx(profData());
   auto const funcId = func->getFuncId();
   auto codeLock = lockCode();
   for (auto tid : profData()->funcProfTransIDs(funcId)) {
-    invalidateSrcKey(profData()->transRec(tid)->srcKey());
+    invalidateSrcKeyNoLock(profData()->transRec(tid)->srcKey());
   }
 }
 

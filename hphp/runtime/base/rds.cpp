@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include <cassert>
 #include <cstdio>
@@ -274,7 +275,6 @@ Handle alloc(Mode mode, size_t numBytes,
         auto const begin = *free;
         addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
         auto const handle = begin + prefix;
-        uninitHandle(handle);
         s_normal_alloc_descs.push_back(
           AllocDescriptor{Handle(handle), numBytes, tyIndex}
         );
@@ -287,7 +287,7 @@ Handle alloc(Mode mode, size_t numBytes,
       addFreeBlock(s_normal_free_lists, oldFrontier,
                   s_normal_frontier - oldFrontier);
       s_normal_frontier += adjustedBytes;
-      if (debug) {
+      if (debug && !AssertVMUnused::is_protected) {
         memset(
           (char*)(tl_base) + oldFrontier,
           kRDSTrashFill,
@@ -303,7 +303,6 @@ Handle alloc(Mode mode, size_t numBytes,
       addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
 
       auto const handle = begin + prefix;
-      uninitHandle(handle);
 
       s_normal_alloc_descs.push_back(
         AllocDescriptor{Handle(handle), numBytes, tyIndex}

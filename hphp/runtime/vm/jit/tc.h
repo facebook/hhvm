@@ -38,6 +38,7 @@ namespace jit {
 
 struct AsmInfo;
 struct CGMeta;
+struct FPInvOffset;
 struct IncomingBranch;
 struct IRUnit;
 struct ProfTransRec;
@@ -56,6 +57,11 @@ namespace tc {
 void invalidateFuncProfSrcKeys(const Func* func);
 
 /*
+ * Invalidate the SrcDB entries for sk.
+ */
+void invalidateSrcKey(SrcKey sk);
+
+/*
  * Emit machine code for env. Returns nullptr if the global translation limit
  * has been reached, generates an interp request if vunit is null or codegen
  * fails.
@@ -69,11 +75,12 @@ TCA emitTranslation(TransEnv env);
 TCA emitFuncPrologue(Func* func, int argc, TransKind kind);
 
 /*
- * Smashes the callers of the prologue for rec. If a DV initializer for rec
- * exists it is invalidated and its SrcKey and TransID are returned.
+ * Emits an optimized prologue for rec.
+ *
+ * Smashes the callers of the prologue for rec and updates the cached func
+ * prologue.
  */
-folly::Optional<std::pair<SrcKey,TransID>>
-updateFuncPrologue(TCA start, ProfTransRec* rec);
+TCA emitFuncPrologueOpt(ProfTransRec* rec);
 
 /*
  * Emit the prologue dispatch for func which contains dvs DV initializers, and
@@ -117,9 +124,9 @@ void checkFreeProfData();
 SrcRec* findSrcRec(SrcKey sk);
 
 /*
- * Create a SrcRec for sk.
+ * Create a SrcRec for sk with an sp offset of spOff.
  */
-void createSrcRec(SrcKey sk);
+void createSrcRec(SrcKey sk, FPInvOffset spOff);
 
 ////////////////////////////////////////////////////////////////////////////////
 

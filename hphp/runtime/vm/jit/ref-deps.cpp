@@ -119,7 +119,8 @@ ActRecState::pop() {
  * the beginning of the tracelet and ar.
  */
 bool
-ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps) {
+ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps,
+                        const RegionContext& ctx) {
   FTRACE(2, "ActRecState: getting reffiness for arg {}, arDelta {}\n",
          argNum, entryArDelta);
   if (m_arStack.empty()) {
@@ -127,12 +128,17 @@ ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps) {
     // tracelet, so we can make a guess about parameter reffiness and
     // record our assumptions about parameter reffiness as tracelet
     // guards.
-    const ActRec* ar = arFromSpOffset((ActRec*)vmsp(), entryArDelta);
+    auto const func = [&] {
+      for (auto& ar : ctx.preLiveARs) {
+        if (ar.stackOff == entryArDelta) return ar.func;
+      }
+      not_reached();
+    }();
     Record r;
     r.m_state = State::GUESSABLE;
     r.m_entryArDelta = entryArDelta;
-    ar->m_func->validate();
-    r.m_topFunc = ar->m_func;
+    func->validate();
+    r.m_topFunc = func;
     m_arStack.push_back(r);
   }
   Record& r = m_arStack.back();

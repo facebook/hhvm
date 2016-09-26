@@ -173,8 +173,7 @@ TCA fcallHelper(ActRec* ar) {
   if (LIKELY(!RuntimeOption::EvalFailJitPrologs)) {
     auto const tca = mcgen::getFuncPrologue(
       const_cast<Func*>(ar->func()),
-      ar->numArgs(),
-      ar
+      ar->numArgs()
     );
     if (tca) return tca;
   }
@@ -198,47 +197,6 @@ TCA fcallHelper(ActRec* ar) {
     tl_regState = VMRegState::CLEAN;
     throw;
   }
-}
-
-void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
-  auto& regs = vmRegsUnsafe();
-  regs.fp = fp;
-  regs.stack.top() = (Cell*)sp;
-
-  auto const nargs = fp->numArgs();
-  auto const nparams = fp->func()->numNonVariadicParams();
-  auto const& paramInfo = fp->func()->params();
-
-  auto firstDVI = InvalidAbsoluteOffset;
-
-  for (auto i = nargs; i < nparams; ++i) {
-    auto const dvi = paramInfo[i].funcletOff;
-    if (dvi != InvalidAbsoluteOffset) {
-      firstDVI = dvi;
-      break;
-    }
-  }
-  if (firstDVI != InvalidAbsoluteOffset) {
-    regs.pc = fp->m_func->unit()->entry() + firstDVI;
-  } else {
-    regs.pc = fp->m_func->getEntry();
-  }
-}
-
-TCA funcBodyHelper(ActRec* fp) {
-  assert_native_stack_aligned();
-  void* const sp = reinterpret_cast<Cell*>(fp) - fp->func()->numSlotsInFrame();
-  syncFuncBodyVMRegs(fp, sp);
-  tl_regState = VMRegState::CLEAN;
-
-  auto const func = const_cast<Func*>(fp->m_func);
-  auto tca = mcgen::getFuncBody(func);
-  if (!tca) {
-    tca = tc::ustubs().resumeHelper;
-  }
-
-  tl_regState = VMRegState::DIRTY;
-  return tca;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -345,7 +303,7 @@ TCA emitFuncBodyHelperThunk(CodeBlock& cb, DataBlock& data) {
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
-    TCA (*helper)(ActRec*) = &funcBodyHelper;
+    TCA (*helper)(ActRec*) = &svcreq::funcBodyHelper;
     auto const dest = v.makeReg();
     v << simplecall(v, helper, rvmfp(), dest);
     v << jmpr{dest};

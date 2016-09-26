@@ -29,6 +29,7 @@ struct Func;
 namespace jit {
 
 struct NormalizedInstruction;
+struct RegionContext;
 
 struct RefDeps {
   struct Record {
@@ -86,7 +87,8 @@ struct ActRecState {
   void pushFuncD(const Func* func);
   void pushDynFunc();
   void pop();
-  bool checkByRef(int argNum, int stackOffset, RefDeps* outRefDeps);
+  bool checkByRef(int argNum, int stackOffset, RefDeps* outRefDeps,
+                  const RegionContext& ctx);
   const Func* knownFunc();
   State currentState();
 };

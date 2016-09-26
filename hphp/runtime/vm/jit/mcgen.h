@@ -69,6 +69,13 @@ struct TransEnv {
   TransID transID{kInvalidTransID};
 
   /*
+   * If set regenerate the prologue for this trans rec. This is intended for
+   * optimized translations of DV initializers which should always follow their
+   * prologues.
+   */
+  ProfTransRec* prologue{nullptr};
+
+  /*
    * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
    * successful (hhir -> vasm lowering never fails).
    */
@@ -89,22 +96,7 @@ namespace mcgen {
 /*
  * Look up or translate a func prologue or func body.
  */
-TCA getFuncPrologue(Func* func, int nPassed, ActRec* ar = nullptr,
-                    bool forRegeneratePrologue = false);
-
-/*
- * Get the entry point for the body of func. The returned address will be for
- * a func-body dispatch should the function contain DV initializers, otherwise
- * it will correspond to the translation for the entry src-key of func.
- */
-TCA getFuncBody(Func* func);
-
-/*
- * Find or create a translation for `args'. Returns TCA of "best" current
- * translation. May return nullptr if it is currently impossible to create a
- * translation.
- */
-TCA getTranslation(const TransArgs& args);
+TCA getFuncPrologue(Func* func, int nPassed);
 
 /*
  * Create a live or profile retranslation based on args.
@@ -112,7 +104,7 @@ TCA getTranslation(const TransArgs& args);
  * Will return null if the write-lease could not be obtained or a translation
  * could not be generated.
  */
-TCA retranslate(TransArgs args);
+TCA retranslate(TransArgs args, const RegionContext& ctx);
 
 /*
  * Generate an optimized translation for sk using profile data from transId.

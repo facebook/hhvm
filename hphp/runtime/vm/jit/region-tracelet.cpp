@@ -239,7 +239,8 @@ bool prepareInstruction(Env& env) {
 
     try {
       env.inst.preppedByRef =
-        env.arStates.back().checkByRef(argNum, entryArDelta, &env.refDeps);
+        env.arStates.back().checkByRef(argNum, entryArDelta, &env.refDeps,
+                                       env.ctx);
     } catch (const UnknownInputExc& exn) {
       // We don't have a guess for the current ActRec.
       FTRACE(1, "selectTracelet: don't have reffiness guess for {}\n",

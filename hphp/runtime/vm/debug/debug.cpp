@@ -309,7 +309,8 @@ void DebugInfo::recordDataMap(const void* from, const void* to,
   }
 }
 
-void DebugInfo::recordRelocMap(void* from, void* to, const String& transInfo) {
+void DebugInfo::recordRelocMap(void* from, void* to,
+                               const std::string& transInfo) {
   if (m_relocMap) {
     fprintf(m_relocMap, "%" PRIxPTR " %" PRIxPTR " %s\n",
             uintptr_t(from),

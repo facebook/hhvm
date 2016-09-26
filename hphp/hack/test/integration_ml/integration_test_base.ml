@@ -56,10 +56,11 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
 
   let genv = { !genv with
     ServerEnv.notifier = begin fun () ->
-      if not !did_read_disk_changes_ref then begin
+      let set = if not !did_read_disk_changes_ref then begin
         did_read_disk_changes_ref := true;
         SSet.of_list (List.map disk_changes fst)
-      end else SSet.empty
+      end else SSet.empty in
+      ServerNotifierTypes.Notifier_synchronous_changes set
     end
   } in
 

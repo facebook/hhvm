@@ -24,7 +24,7 @@ let make_genv options config local_config handle =
     ServerArgs.save_filename options <> None;
   let gc_control = ServerConfig.gc_control config in
   let workers = Some (ServerWorker.make gc_control handle) in
-  let watchman =
+  let watchman_env =
     if check_mode || not local_config.SLC.use_watchman
     then None
     else Watchman.init {
@@ -33,26 +33,30 @@ let make_genv options config local_config handle =
       root = root;
     }
   in
-  if Option.is_some watchman then Hh_logger.log "Using watchman";
+  if Option.is_some watchman_env then Hh_logger.log "Using watchman";
   let indexer, notifier, wait_until_ready =
-    match watchman with
-    | Some watchman ->
-      (** Watchman state can change during requests (See
-       * Watchamn.Watchman_dead and Watchman_alive). We need to update
-       * a reference to the new instance. *)
-      let watchman = ref watchman in
+    match watchman_env with
+    | Some watchman_env ->
       let indexer filter =
-        let watchman', files = Watchman.get_all_files !watchman in
-        let () = watchman := watchman' in
+        let files = Watchman.get_all_files watchman_env in
         Bucket.make
           ~num_workers:GlobalConfig.nbr_procs
           ~max_size:1000
           (List.filter filter files)
       in
+      (** Watchman state can change during requests (See
+       * Watchamn.Watchman_dead and Watchman_alive). We need to update
+       * a reference to the new instance. *)
+      let watchman = ref (Watchman.Watchman_alive watchman_env) in
       let notifier () =
         let watchman', changes = Watchman.get_changes !watchman in
         watchman := watchman';
-        changes
+        let open ServerNotifierTypes in
+        match changes with
+        | Watchman.Watchman_unavailable -> Notifier_unavailable
+        | Watchman.Watchman_pushed changes -> Notifier_async_changes changes
+        | Watchman.Watchman_synchronous changes ->
+          Notifier_async_changes changes
       in
       HackEventLogger.set_use_watchman ();
       (* The initial watch-project command blocks until watchman's crawl is
@@ -67,13 +71,14 @@ let make_genv options config local_config handle =
       let dfind = DfindLib.init
         (log_fd, log_fd) (GlobalConfig.scuba_table_name, [root]) in
       let notifier () =
-        begin try
+        let set = begin try
           Timeout.with_timeout ~timeout:120
             ~on_timeout:(fun () -> Exit_status.(exit Dfind_unresponsive))
             ~do_:(fun t -> DfindLib.get_changes ~timeout:t dfind)
         with _ ->
           Exit_status.(exit Dfind_died)
-        end
+        end in
+        ServerNotifierTypes.Notifier_synchronous_changes set
       in
       let ready = ref false in
       let wait_until_ready () =
@@ -99,7 +104,8 @@ let default_genv =
     local_config     = ServerLocalConfig.default;
     workers          = None;
     indexer          = (fun _ -> fun () -> []);
-    notifier         = (fun () -> SSet.empty);
+    notifier         = (fun () ->
+      ServerNotifierTypes.Notifier_synchronous_changes SSet.empty);
     wait_until_ready = (fun () -> ());
     debug_channels   = None;
   }

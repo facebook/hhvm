@@ -408,6 +408,11 @@ let init ?load_mini_script genv =
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier () in
+    let open ServerNotifierTypes in
+    let updates = match updates with
+      | Notifier_unavailable -> SSet.empty
+      | Notifier_synchronous_changes updates
+      | Notifier_async_changes updates -> updates in
     let updates = SSet.filter updates (fun p ->
       string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in

@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Reordered_argument_collections
 
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)
@@ -24,7 +23,7 @@ type genv = {
     indexer          : (string -> bool) -> string MultiWorker.nextlist;
     (* Each time this is called, it should return the files that have changed
      * since the last invocation *)
-    notifier         : unit -> SSet.t;
+    notifier         : unit -> ServerNotifierTypes.notifier_changes;
     (* If daemons are spawned as part of the init process, wait for them here *)
     wait_until_ready : unit -> unit;
     mutable debug_channels   : (Timeout.in_channel * out_channel) option;

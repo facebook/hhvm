@@ -14,6 +14,7 @@ open Reordered_argument_collections
 open String_utils
 
 type recheck_loop_stats = {
+  updates_stale : bool;
   rechecked_batches : int;
   rechecked_count : int;
   (* includes dependencies *)
@@ -23,6 +24,7 @@ type recheck_loop_stats = {
 type main_loop_stats = recheck_loop_stats ref * string ref
 
 let empty_recheck_loop_stats = {
+  updates_stale = false;
   rechecked_batches = 0;
   rechecked_count = 0;
   total_rechecked_count = 0;
@@ -197,8 +199,17 @@ let recheck genv old_env check_kind =
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
 let rec recheck_loop acc genv env =
+  let open ServerNotifierTypes in
   let t = Unix.gettimeofday () in
   let raw_updates = genv.notifier () in
+  let acc, raw_updates = match raw_updates with
+  | Notifier_unavailable ->
+    { acc with updates_stale = true; }, SSet.empty
+  | Notifier_async_changes updates ->
+    { acc with updates_stale = true; }, updates
+  | Notifier_synchronous_changes updates ->
+    acc, updates
+  in
   let updates = Program.process_updates genv env raw_updates in
 
   let is_idle = t -. env.last_command_time > 0.5 in
@@ -221,6 +232,7 @@ let rec recheck_loop acc genv env =
     let env, rechecked, total_rechecked = recheck genv env check_kind in
 
     let acc = {
+      updates_stale = acc.updates_stale;
       rechecked_batches = acc.rechecked_batches + 1;
       rechecked_count = acc.rechecked_count + rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;

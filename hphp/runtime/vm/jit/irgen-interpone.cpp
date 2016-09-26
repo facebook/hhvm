@@ -421,7 +421,6 @@ void emitLowInvalid(IRGS& env)                { std::abort(); }
 void emitCGetL3(IRGS& env, int32_t)           { INTERP }
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
-void emitClsCns(IRGS& env, const StringData*) { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
 void emitFatal(IRGS& env, FatalOp)            { INTERP }
 void emitUnwind(IRGS& env)                    { INTERP }

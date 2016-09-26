@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -126,15 +127,16 @@ void emitCnsU(IRGS& env,
   implCns(env, name, fallback, false);
 }
 
-void emitClsCnsD(IRGS& env,
-                 const StringData* cnsNameStr,
-                 const StringData* clsNameStr) {
+void implClsCns(IRGS& env,
+                const Class* cls,
+                const StringData* cnsNameStr,
+                const StringData* clsNameStr) {
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
 
   // If the class is already defined in this request, the class is persistent
   // or a parent of the current context, and this constant is a scalar
   // constant, we can just compile it to a literal.
-  if (auto const cls = Unit::lookupClass(clsNameStr)) {
+  if (cls) {
     Slot ignore;
     auto const tv = cls->cnsNameToTV(cnsNameStr, ignore);
     if (tv && tv->m_type != KindOfUninit &&
@@ -167,6 +169,37 @@ void emitClsCnsD(IRGS& env,
       push(env, val);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
       return nullptr;
+    }
+  );
+}
+
+void emitClsCnsD(IRGS& env,
+                 const StringData* cnsNameStr,
+                 const StringData* clsNameStr) {
+  implClsCns(env, Unit::lookupClass(clsNameStr), cnsNameStr, clsNameStr);
+}
+
+void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
+  auto const clsTy = topType(env, BCSPRelOffset{0});
+  if (!(clsTy < TCls) || !clsTy.clsSpec()) {
+    interpOne(env, TUncountedInit, 1);
+    return;
+  }
+
+  auto const cls = clsTy.clsSpec().cls();
+  auto const clsTmp = topA(env);
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckType, taken, Type::ExactCls(cls), clsTmp);
+    },
+    [&] {
+      discard(env, 1);
+      implClsCns(env, cls, cnsNameStr, cls->name());
+    },
+    [&] {
+      env.irb->exceptionStackBoundary();
+      gen(env, Jmp, makeExitSlow(env));
     }
   );
 }

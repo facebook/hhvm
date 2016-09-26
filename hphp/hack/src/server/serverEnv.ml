@@ -11,6 +11,27 @@
 open Core
 
 (*****************************************************************************)
+(* Recheck loop types. *)
+(*****************************************************************************)
+
+type recheck_loop_stats = {
+  (** Watchman subscription has gone down, so state of the world after the
+   * recheck loop may not reflect what is actually on disk. *)
+  updates_stale : bool;
+  rechecked_batches : int;
+  rechecked_count : int;
+  (* includes dependencies *)
+  total_rechecked_count : int;
+}
+
+let empty_recheck_loop_stats = {
+  updates_stale = false;
+  rechecked_batches = 0;
+  rechecked_count = 0;
+  total_rechecked_count = 0;
+}
+
+(*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)
 (*****************************************************************************)
 
@@ -64,6 +85,7 @@ type env = {
     needs_full_check : bool;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
+    recent_recheck_loop_stats : recheck_loop_stats;
   }
 
 let file_filter f =

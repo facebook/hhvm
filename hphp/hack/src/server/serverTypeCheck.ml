@@ -360,6 +360,7 @@ module FullCheckKind : CheckKindType = struct
       needs_decl = Relative_path.Set.empty;
       needs_full_check = false;
       diag_subscribe;
+      recent_recheck_loop_stats = old_env.recent_recheck_loop_stats;
     }
 end
 

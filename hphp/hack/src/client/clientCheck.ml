@@ -75,6 +75,13 @@ let rpc args command =
   let conn = connect args in
   Cmd.rpc conn @@ command
 
+let is_stale_msg liveness =
+   match liveness with
+    | Rpc.Stale_status ->
+      Some ("(but this may be stale, probably due to" ^
+      " watchman being unresponsive)\n")
+    | Rpc.Live_status -> None
+
 let main args =
   let mode_s = ClientEnv.mode_to_string args.mode in
   HackEventLogger.client_set_from args.from;
@@ -249,14 +256,19 @@ let main args =
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
     | MODE_STATUS ->
-      let error_list = rpc args Rpc.STATUS in
+      let liveness, error_list = rpc args Rpc.STATUS in
+      let stale_msg = is_stale_msg liveness in
       if args.output_json || args.from <> "" || error_list = []
       then begin
         (* this should really go to stdout but we need to adapt the various
          * IDE plugins first *)
         let oc = if args.output_json then stderr else stdout in
-        ServerError.print_errorl args.output_json error_list oc
-      end else List.iter error_list ClientCheckStatus.print_error_color;
+        ServerError.print_errorl
+          stale_msg args.output_json error_list oc
+      end else begin
+        List.iter error_list ClientCheckStatus.print_error_color;
+        Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg)
+      end;
       if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_SHOW classname ->
       let ic, oc = connect args in

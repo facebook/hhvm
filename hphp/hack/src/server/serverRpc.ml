@@ -14,12 +14,13 @@ open ServerEnv
 open File_content
 open ServerCommandTypes
 
-let handle : type a. genv -> env -> a t -> env * a =
-  fun genv env -> function
+let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
+  fun genv env ~is_stale -> function
     | STATUS ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
         let el = Errors.get_sorted_error_list env.errorl in
-        env, List.map ~f:Errors.to_absolute el
+        let el = List.map ~f:Errors.to_absolute el in
+        env, ((if is_stale then Stale_status else Live_status), el)
     | COVERAGE_LEVELS fn -> env, ServerColorFile.go env fn
     | INFER_TYPE (fn, line, char) ->
         env, ServerInferType.go env (fn, line, char)

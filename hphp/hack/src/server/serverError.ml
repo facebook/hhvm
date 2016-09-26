@@ -39,7 +39,7 @@ let print_errorl_json oc el =
   Hh_json.json_to_output oc res;
   flush oc
 
-let print_errorl use_json el oc =
+let print_errorl is_stale_msg use_json el oc =
   if use_json then
     print_errorl_json oc el
   else begin
@@ -57,4 +57,5 @@ let print_errorl use_json el oc =
         output_string oc "\n";
       end sl
   end;
+  Option.iter is_stale_msg ~f:(fun msg -> output_string oc msg);
   flush oc

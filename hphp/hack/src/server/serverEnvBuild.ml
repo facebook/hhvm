@@ -56,7 +56,7 @@ let make_genv options config local_config handle =
         | Watchman.Watchman_unavailable -> Notifier_unavailable
         | Watchman.Watchman_pushed changes -> Notifier_async_changes changes
         | Watchman.Watchman_synchronous changes ->
-          Notifier_async_changes changes
+          Notifier_synchronous_changes changes
       in
       HackEventLogger.set_use_watchman ();
       (* The initial watch-project command blocks until watchman's crawl is
@@ -126,4 +126,5 @@ let make_env config =
     needs_decl = Relative_path.Set.empty;
     needs_full_check = false;
     diag_subscribe = None;
+    recent_recheck_loop_stats = empty_recheck_loop_stats;
   }

@@ -8,10 +8,14 @@ type connection_response =
   | Persistent_client_connected
   | Persistent_client_alredy_exists
 
+type status_liveness =
+  | Stale_status
+  | Live_status
+
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
-  | STATUS : Pos.absolute Errors.error_ list t
+  | STATUS : (status_liveness * Pos.absolute Errors.error_ list) t
   | INFER_TYPE : ServerUtils.file_input * int * int ->
       InferAtPosService.result t
   | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t

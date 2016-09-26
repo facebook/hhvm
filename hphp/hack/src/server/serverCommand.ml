@@ -201,7 +201,9 @@ let handle genv env client =
   match msg with
   | Rpc cmd ->
       let t = Unix.gettimeofday () in
-      let new_env, response = ServerRpc.handle genv env cmd in
+      let new_env, response = ServerRpc.handle
+        ~is_stale:env.ServerEnv.recent_recheck_loop_stats.ServerEnv.updates_stale
+        genv env cmd in
       let cmd_string = ServerRpc.to_string cmd in
       HackEventLogger.handled_command cmd_string t;
       ClientProvider.send_response_to_client client response;

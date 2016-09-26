@@ -103,6 +103,12 @@ struct CGMeta {
   GrowableVector<IncomingBranch> inProgressTailJumps;
 
   /*
+   * Smashable locations. Used on relocation to be sure a smashable instruction
+   * is not optimized in size.
+   */
+  std::set<TCA> smashableLocations;
+
+  /*
    * Debug-only map from bytecode to machine code address.
    */
   std::vector<TransBCMapping> bcMap;

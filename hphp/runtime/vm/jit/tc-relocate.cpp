@@ -586,10 +586,10 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
 void liveRelocate(int time) {
   switch (arch()) {
   case Arch::X64:
+  case Arch::PPC64:
     break;
   case Arch::ARM:
-  case Arch::PPC64:
-    // Relocation is not supported on arm nor on ppc64.
+    // Relocation is not supported on arm.
     return;
   }
 

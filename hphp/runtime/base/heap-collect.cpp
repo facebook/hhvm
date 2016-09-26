@@ -626,6 +626,7 @@ NEVER_INLINE void Marker::sweep() {
   const bool use_quarantine = RuntimeOption::EvalQuarantine;
   if (use_quarantine) mm.beginQuarantine();
   SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
+  std::deque<Header*> defer;
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
     assert(check_sweep_header(hdr));
     if (hdr->hdr_.marks != GCBits::Unmarked) {
@@ -663,18 +664,17 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::ImmSet:
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::NativeData: {
-        freed_ += h_size;
         auto obj = h->obj();
         if (obj->getAttribute(ObjectData::HasDynPropArr)) {
-          // dynPropTable is a req::hash_map, so this will req::free junk
-          g_context->dynPropTable.erase(obj);
+          defer.push_back(h);
+        } else {
+          freed_ += h_size;
+          mm.objFree(h, h_size);
         }
-        mm.objFree(h, h->size());
         break;
       }
       case HeaderKind::Apc:
-        freed_ += h_size;
-        h->apc_.reap(); // also frees localCache and atomic-dec APCArray
+        defer.push_back(h);
         break;
       case HeaderKind::String:
         freed_ += h_size;
@@ -694,6 +694,24 @@ NEVER_INLINE void Marker::sweep() {
         break;
     }
   });
+  // deferred items explicitly free auxilary blocks, so it's unsafe to
+  // sweep them while iterating over ptrs_.
+  for (auto h : defer) {
+    if (isObjectKind(h->kind()) || h->kind() == HeaderKind::NativeData ||
+        h->kind() == HeaderKind::AsyncFuncFrame) {
+      assert(h->obj()->getAttribute(ObjectData::HasDynPropArr));
+      auto obj = h->obj();
+      // dynPropTable is a req::hash_map, so this will req::free junk
+      g_context->dynPropTable.erase(obj);
+      freed_ += h->size();
+      mm.objFree(h, h->size());
+    } else if (h->kind() == HeaderKind::Apc) {
+      freed_ += h->size();
+      h->apc_.reap(); // also frees localCache and atomic-dec APCArray
+    } else {
+      always_assert(false && "what other kinds need deferral?");
+    }
+  }
 }
 
 template<size_t NBITS> struct BloomFilter {

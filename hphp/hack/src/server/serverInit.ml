@@ -127,10 +127,8 @@ let load_state root saved_state_load_type cmd (_ic, oc) =
       Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
     let read_deptable_time = SharedMem.load_dep_table deptable_fn in
     let end_time = Unix.gettimeofday () in
-    Hh_logger.log
-      "Reading the dependency file took (sec): %d" read_deptable_time;
-    HackEventLogger.load_deptable_end read_deptable_time;
-    Daemon.to_channel oc @@ Ok (`Fst (state_fn, is_cached, end_time));
+    Daemon.to_channel oc
+      @@ Ok (`Fst (state_fn, is_cached, end_time, read_deptable_time));
     let json = read_json_line ic in
     assert (Unix.close_process_in ic = Unix.WEXITED 0);
     let kv = Hh_json.get_object_exn json in
@@ -168,7 +166,10 @@ let mk_state_future root saved_state_load_type cmd =
     try
       Daemon.from_channel ic >>| function
       | `Snd _ -> assert false
-      | `Fst (fn, is_cached, end_time) ->
+      | `Fst (fn, is_cached, end_time, read_deptable_time) ->
+        Hh_logger.log
+          "Reading the dependency file took (sec): %d" read_deptable_time;
+        HackEventLogger.load_deptable_end read_deptable_time;
         HackEventLogger.load_mini_worker_end ~is_cached start_time end_time;
         let time_taken = end_time -. start_time in
         Hh_logger.log "Loading mini-state took %.2fs" time_taken;
@@ -181,7 +182,9 @@ let mk_state_future root saved_state_load_type cmd =
        * through *)
       (try Daemon.kill daemon with e -> Hh_logger.exc e);
       raise e
-  in fun () ->
+  in
+  let t = Unix.gettimeofday () in
+  fun () ->
   fn >>= fun fn ->
   Daemon.from_channel ic >>| function
   | `Fst _ -> assert false
@@ -191,6 +194,8 @@ let mk_state_future root saved_state_load_type cmd =
     let chan = open_in fn in
     let old_fast = Marshal.from_channel chan in
     let dirty_files = List.map dirty_files Relative_path.(concat Root) in
+    HackEventLogger.vcs_changed_files_end t;
+    let _ = Hh_logger.log_duration "Finding changed files" t in
     Relative_path.set_of_list dirty_files, old_fast
 
 let is_check_mode options =
@@ -423,8 +428,6 @@ let init ?load_mini_script genv =
       Relative_path.Set.union dirty_files (get_build_targets env) in
     Ok (dirty_files, changed_while_parsing, old_fast)
   in
-  HackEventLogger.vcs_changed_files_end t;
-  let t = Hh_logger.log_duration "Finding changed files" t in
 
   let env, t =
     match state with

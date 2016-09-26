@@ -9,7 +9,7 @@
  *
  */
 
-class A<T as A> {
+class A<T as A<T>> {
   public function bar(T $x): T {
     return $x;
   }
@@ -25,4 +25,3 @@ function test(): void {
   $x = new A();
   $x->bar(new Z())->foo();
 }
-

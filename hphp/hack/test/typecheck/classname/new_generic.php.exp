@@ -3,7 +3,7 @@
 [2]intersect(App \C<Tint, >)
 File "new_generic.php", line 19, characters 29-36:
 Some type constraint(s) here are violated (Typing[4110])
-File "new_generic.php", line 11, characters 4-7:
+File "new_generic.php", line 8, characters 26-29:
 'Tobj' is a constrained type
 File "new_generic.php", line 17, characters 35-37:
 This is an int

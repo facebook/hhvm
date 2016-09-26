@@ -1,6 +1,6 @@
 File "super_constraint_9.php", line 12, characters 16-17:
 Some type constraint(s) here are violated (Typing[4110])
-File "super_constraint_9.php", line 6, characters 63-65:
+File "super_constraint_9.php", line 6, characters 17-19:
 'Tk2' is a constrained type
 File "super_constraint_9.php", line 6, characters 17-19:
 This is an int

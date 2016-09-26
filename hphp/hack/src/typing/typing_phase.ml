@@ -124,10 +124,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
   | r, Tgeneric (x, cstrl) ->
       begin match SMap.get x ety_env.substs with
       | Some x_ty ->
-          let env = List.fold cstrl ~init:env ~f:(fun env (ck, ty) ->
-          let env, ty = localize ~ety_env env ty in
-          TGenConstraint.add_check_constraint_todo env r x ck ty x_ty) in
-          env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
+        env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None ->
         (* If parameter is registered for bounds in the environment
          * then don't embed them in the type as well (unify doesn't
@@ -214,6 +211,7 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
     let env, param = localize ~ety_env env param in
     env, (name, param)
   end in
+  (* Localize the constraints for a type parameter declaration *)
   let localize_tparam env (var, name, cstrl) =
     let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
       let env, ty = localize ~ety_env env ty in
@@ -221,24 +219,61 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
     end in
     env, (var, name, cstrl)
   in
+  (* Do this for generic parameters to the method and for "where" constraints *)
   let env, tparams = List.map_env env ft.ft_tparams localize_tparam in
   let env, locl_cstr = List.map_env env ft.ft_locl_cstr localize_tparam in
+
+  (* Now check that constraints are satisfied under the
+   * substitution [ety_env.substs].
+   * TODO: move this elsewhere. It's a bit odd to do this in localize_ft;
+   * we're simply taking advantage of function type localization being used
+   * when checking function and method call expressions *)
+  let env = check_tparams_constraints ~ety_env env ft.ft_tparams in
+  let env = check_tparams_constraints ~ety_env env ft.ft_locl_cstr in
   let env, arity = match ft.ft_arity with
     | Fvariadic (min, (name, var_ty)) ->
        let env, var_ty = localize ~ety_env env var_ty in
        env, Fvariadic (min, (name, var_ty))
     | Fellipsis _ | Fstandard (_, _) as x -> env, x in
   let env, ret = localize ~ety_env env ft.ft_ret in
-  let env = List.fold_left locl_cstr ~init:env ~f:(fun env (_,(p,x),cstrl) ->
-    match SMap.get x substs with
-      | Some x_ty -> List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
-          let r = Reason.Rwitness p in
-          TGenConstraint.add_check_constraint_todo env r x ck ty x_ty
-        end
-      | None -> env
-  ) in
   env, { ft with ft_arity = arity; ft_params = params;
                  ft_ret = ret; ft_tparams = tparams; ft_locl_cstr = locl_cstr }
+
+(* Given a list of generic parameters [tparams] and a substitution
+ * in [ety_env.substs] whose domain is at least these generic parameters,
+ * check that the types satisfy
+ * the constraints on the corresponding generic parameter.
+ *
+ * Note that the constraints may contain occurrences of the generic
+ * parameters, but the subsitution will be applied to them. e.g. if tparams is
+ *   <Tu as MyCovariant<Tu>, Tv super Tu>
+ * and ety_env.substs is
+ *   Tu :-> C
+ *   Tv :-> I
+ * with
+ *   class C extends MyContravariant<I> implements I { ... }
+ * Then the constraints are satisfied, because
+ *   C is a subtype of MyContravariant<C>
+ *   I is a supertype of C
+ *
+ * In fact, the constraint checking isn't done immediately, but rather pushed
+ * onto the env.todo list. Typically we haven't resolved types sufficiently
+ * (e.g. we have completely unresolved type variables) and so the actual
+ * constraint checking is deferred until we have finished checking a
+ * function's body.
+ *)
+and check_tparams_constraints ~ety_env env tparams =
+  let check_tparam_constraints env (_var, (p, name), cstrl) =
+    let r = Reason.Rwitness p in
+    List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
+      let env, ty = localize ~ety_env env ty in
+      match SMap.get name ety_env.substs with
+      | Some x_ty ->
+        TGenConstraint.add_check_constraint_todo env r name ck ty x_ty
+      | None ->
+        env
+    end in
+  List.fold_left tparams ~init:env ~f:check_tparam_constraints
 
 let env_with_self env =
   {

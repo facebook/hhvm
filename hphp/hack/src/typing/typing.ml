@@ -1003,7 +1003,6 @@ and expr_
           (Phase.env_with_self env) with
           substs = Subst.make class_.tc_tparams tvarl;
         } in
-        (* AKENN: what about the bounds on the generic parameters? *)
         let env, local_obj_ty = Phase.localize ~ety_env env obj_type in
         let env, fty =
           obj_get ~is_method:true ~nullsafe:None env local_obj_ty
@@ -1019,11 +1018,12 @@ and expr_
             let env, tvar = TUtils.unresolved_tparam env tparam in
             let param = Reason.Rwitness pos,
               Tgeneric (class_name, [(Ast.Constraint_as, obj_type)]) in
+            let tparams = tparam :: class_.tc_tparams in
             let ety_env = {
               ety_env with
-              substs = Subst.make (tparam :: class_.tc_tparams) (tvar :: tvarl)
+              substs = Subst.make tparams (tvar :: tvarl)
             } in
-            (* AKENN: do we need to generate bounds here? *)
+            let env = Phase.check_tparams_constraints ~ety_env env tparams in
             let env, param = Phase.localize ~ety_env env param in
             let fty = { fty with
                         ft_params = (None, param) :: fty.ft_params } in
@@ -1224,7 +1224,7 @@ and expr_
             end in
             let ety_env = { (Phase.env_with_self env) with
                             substs = Subst.make tparaml tparams } in
-            (* AKENN: do we generate bounds here from the Tgeneric above? *)
+            let env = Phase.check_tparams_constraints ~ety_env env tparaml in
             Phase.localize ~ety_env env typename
         | None ->
             (* Should never hit this case since we only construct this AST node
@@ -1528,11 +1528,7 @@ and new_object ~check_not_abstract p env c el uel =
       let env, params = List.map_env env class_.tc_tparams begin fun env _ ->
         Env.fresh_unresolved_type env
       end in
-      let env =
-        if SSet.mem "XHP" class_.tc_extends then env else
-        let env = call_construct p env class_ params el uel c in
-        env
-      in
+      let env = call_construct p env class_ params el uel c in
       let r_witness = Reason.Rwitness p in
       let obj_ty = r_witness, Tclass (cname, params) in
       if not (snd class_.tc_construct) then
@@ -3151,6 +3147,16 @@ and static_class_id p env = function
       in env, resolve_ety ty
 
 and call_construct p env class_ params el uel cid =
+  let cid = if cid = CIparent then CIstatic else cid in
+  let env, cid_ty = static_class_id p env cid in
+  let ety_env = {
+    type_expansions = [];
+    this_ty = cid_ty;
+    substs = Subst.make class_.tc_tparams params;
+    from_class = Some cid;
+  } in
+  let env = Phase.check_tparams_constraints ~ety_env env class_.tc_tparams in
+  if SSet.mem "XHP" class_.tc_extends then env else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
   Typing_hooks.dispatch_constructor_hook class_ env p;
@@ -3163,14 +3169,6 @@ and call_construct p env class_ params el uel cid =
       fst (List.map_env env el expr)
     | Some { ce_visibility = vis; ce_type = lazy m; _ } ->
       TVis.check_obj_access p env (Reason.to_pos (fst m), vis);
-      let cid = if cid = CIparent then CIstatic else cid in
-      let env, cid_ty = static_class_id p env cid in
-      let ety_env = {
-        type_expansions = [];
-        this_ty = cid_ty;
-        substs = Subst.make class_.tc_tparams params;
-        from_class = Some cid;
-      } in
       let env, m = Phase.localize ~ety_env env m in
       fst (call p env m el uel)
 

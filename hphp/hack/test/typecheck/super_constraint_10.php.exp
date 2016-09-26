@@ -1,6 +1,6 @@
 File "super_constraint_10.php", line 22, characters 34-38:
 Some type constraint(s) here are violated (Typing[4110])
-File "super_constraint_10.php", line 10, characters 10-12:
+File "super_constraint_10.php", line 7, characters 42-44:
 'Tk1' is a constrained type
 File "super_constraint_10.php", line 7, characters 42-44:
 This is a value of generic type Tk1

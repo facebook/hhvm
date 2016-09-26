@@ -24,7 +24,7 @@
     (compound_statement(
       ({)(end_of_line))
         (expression_statement(
-          postfix_unary_operator
+          postfix_unary_expression
           (variable((whitespace)(variable)))
           ((++)))((;)(end_of_line)))
           ((whitespace)

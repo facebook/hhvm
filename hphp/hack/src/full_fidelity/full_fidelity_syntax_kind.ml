@@ -9,6 +9,12 @@
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(**
+  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
+  the binary.
+  buck build hphp/hack/src:generate_full_fidelity
+  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
+*)
 type t =
 | Token
 | Missing
@@ -79,9 +85,9 @@ type t =
 | SafeMemberSelectionExpression
 | YieldExpression
 | PrintExpression
-| PrefixUnaryOperator
-| PostfixUnaryOperator
-| BinaryOperator
+| PrefixUnaryExpression
+| PostfixUnaryExpression
+| BinaryExpression
 | InstanceofExpression
 | ConditionalExpression
 | FunctionCallExpression
@@ -197,9 +203,9 @@ let to_string kind =
   | SafeMemberSelectionExpression -> "safe_member_selection_expression"
   | YieldExpression -> "yield_expression"
   | PrintExpression -> "print_expression"
-  | PrefixUnaryOperator -> "prefix_unary_operator"
-  | PostfixUnaryOperator -> "postfix_unary_operator"
-  | BinaryOperator -> "binary_operator"
+  | PrefixUnaryExpression -> "prefix_unary_expression"
+  | PostfixUnaryExpression -> "postfix_unary_expression"
+  | BinaryExpression -> "binary_expression"
   | InstanceofExpression -> "instanceof_expression"
   | ConditionalExpression -> "conditional_expression"
   | FunctionCallExpression -> "function_call_expression"

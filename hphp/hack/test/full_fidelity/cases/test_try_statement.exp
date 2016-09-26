@@ -10,7 +10,7 @@
     (try_statement((whitespace)(try)(whitespace))
       (compound_statement(({)(end_of_line))
         (expression_statement
-          (postfix_unary_operator(variable((whitespace)(variable)))((++)))
+          (postfix_unary_expression(variable((whitespace)(variable)))((++)))
           ((;)(end_of_line)))((whitespace)(})(end_of_line)))
       (catch_clause
         ((whitespace)(catch)(whitespace))

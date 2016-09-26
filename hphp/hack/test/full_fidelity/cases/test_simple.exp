@@ -14,12 +14,12 @@
     (compound_statement
       (({)(end_of_line))
         (expression_statement(
-          binary_operator(variable((whitespace)(variable)(whitespace)))
+          binary_expression(variable((whitespace)(variable)(whitespace)))
           ((=)(whitespace))
-          (binary_operator
+          (binary_expression
             (parenthesized_expression
               ((lparen))
-              (binary_operator(
+              (binary_expression(
                 literal((decimal_literal)(whitespace)))
                 ((+)(whitespace))
                 (variable((variable))))

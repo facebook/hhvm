@@ -49,17 +49,17 @@
         ((;)(end_of_line)))
       (xhp_children_declaration
         ((whitespace)(children)(whitespace))
-        (postfix_unary_operator
+        (postfix_unary_expression
           (parenthesized_expression
             ((lparen))
             (list
               (list_item
-                (postfix_unary_operator((name))((+)))
+                (postfix_unary_expression((name))((+)))
                 ((,)(whitespace)))
               (list_item
-                (postfix_unary_operator((XHP_category_name))((*)))
+                (postfix_unary_expression((XHP_category_name))((*)))
                 ((,)(whitespace)))
-              (postfix_unary_operator((XHP_class_name))((?))))
+              (postfix_unary_expression((XHP_class_name))((?))))
             ((rparen)))
           ((*)))
         ((;)(end_of_line))))

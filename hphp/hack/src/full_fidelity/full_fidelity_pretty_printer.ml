@@ -708,16 +708,16 @@ let rec get_doc node =
     let v = get_doc x.anonymous_use_variables in
     let r = get_doc x.anonymous_use_right_paren in
     u ^| l ^^^ v ^^^ r
-  | PrefixUnaryOperator
+  | PrefixUnaryExpression
     { prefix_unary_operator; prefix_unary_operand } ->
     if is_separable_prefix prefix_unary_operator then
       get_doc prefix_unary_operator ^| get_doc prefix_unary_operand
     else
       get_doc prefix_unary_operator ^^^ get_doc prefix_unary_operand
-  | PostfixUnaryOperator
+  | PostfixUnaryExpression
     { postfix_unary_operand; postfix_unary_operator } ->
     get_doc postfix_unary_operand ^^^ get_doc postfix_unary_operator
-  | BinaryOperator x ->
+  | BinaryExpression x ->
     let left = get_doc x.binary_left_operand in
     let op = get_doc x.binary_operator in
     let right = get_doc x.binary_right_operand in

@@ -10,6 +10,12 @@
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
 (**
+  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
+  the binary.
+  buck build hphp/hack/src:generate_full_fidelity
+  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
+*)
+(**
  * This module contains the code describing the structure of a syntax tree.
  *
  * The relationships between the various functors and signatures here needs
@@ -481,15 +487,15 @@ module WithToken(Token: TokenType) = struct
       print_keyword: t;
       print_expr: t;
     }
-    and prefix_unary_operator = {
+    and prefix_unary_expression = {
       prefix_unary_operator: t;
       prefix_unary_operand: t;
     }
-    and postfix_unary_operator = {
+    and postfix_unary_expression = {
       postfix_unary_operand: t;
       postfix_unary_operator: t;
     }
-    and binary_operator = {
+    and binary_expression = {
       binary_left_operand: t;
       binary_operator: t;
       binary_right_operand: t;
@@ -789,9 +795,9 @@ module WithToken(Token: TokenType) = struct
     | SafeMemberSelectionExpression of safe_member_selection_expression
     | YieldExpression of yield_expression
     | PrintExpression of print_expression
-    | PrefixUnaryOperator of prefix_unary_operator
-    | PostfixUnaryOperator of postfix_unary_operator
-    | BinaryOperator of binary_operator
+    | PrefixUnaryExpression of prefix_unary_expression
+    | PostfixUnaryExpression of postfix_unary_expression
+    | BinaryExpression of binary_expression
     | InstanceofExpression of instanceof_expression
     | ConditionalExpression of conditional_expression
     | FunctionCallExpression of function_call_expression
@@ -982,12 +988,12 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.YieldExpression
       | PrintExpression _ ->
         SyntaxKind.PrintExpression
-      | PrefixUnaryOperator _ ->
-        SyntaxKind.PrefixUnaryOperator
-      | PostfixUnaryOperator _ ->
-        SyntaxKind.PostfixUnaryOperator
-      | BinaryOperator _ ->
-        SyntaxKind.BinaryOperator
+      | PrefixUnaryExpression _ ->
+        SyntaxKind.PrefixUnaryExpression
+      | PostfixUnaryExpression _ ->
+        SyntaxKind.PostfixUnaryExpression
+      | BinaryExpression _ ->
+        SyntaxKind.BinaryExpression
       | InstanceofExpression _ ->
         SyntaxKind.InstanceofExpression
       | ConditionalExpression _ ->
@@ -1215,12 +1221,12 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.YieldExpression
     let is_print_expression node =
       kind node = SyntaxKind.PrintExpression
-    let is_prefix_unary_operator node =
-      kind node = SyntaxKind.PrefixUnaryOperator
-    let is_postfix_unary_operator node =
-      kind node = SyntaxKind.PostfixUnaryOperator
-    let is_binary_operator node =
-      kind node = SyntaxKind.BinaryOperator
+    let is_prefix_unary_expression node =
+      kind node = SyntaxKind.PrefixUnaryExpression
+    let is_postfix_unary_expression node =
+      kind node = SyntaxKind.PostfixUnaryExpression
+    let is_binary_expression node =
+      kind node = SyntaxKind.BinaryExpression
     let is_instanceof_expression node =
       kind node = SyntaxKind.InstanceofExpression
     let is_conditional_expression node =
@@ -2070,21 +2076,21 @@ module WithToken(Token: TokenType) = struct
         print_keyword;
         print_expr;
       ]
-      | PrefixUnaryOperator {
+      | PrefixUnaryExpression {
         prefix_unary_operator;
         prefix_unary_operand;
       } -> [
         prefix_unary_operator;
         prefix_unary_operand;
       ]
-      | PostfixUnaryOperator {
+      | PostfixUnaryExpression {
         postfix_unary_operand;
         postfix_unary_operator;
       } -> [
         postfix_unary_operand;
         postfix_unary_operator;
       ]
-      | BinaryOperator {
+      | BinaryExpression {
         binary_left_operand;
         binary_operator;
         binary_right_operand;
@@ -3228,21 +3234,21 @@ module WithToken(Token: TokenType) = struct
         "print_keyword";
         "print_expr";
       ]
-      | PrefixUnaryOperator {
+      | PrefixUnaryExpression {
         prefix_unary_operator;
         prefix_unary_operand;
       } -> [
         "prefix_unary_operator";
         "prefix_unary_operand";
       ]
-      | PostfixUnaryOperator {
+      | PostfixUnaryExpression {
         postfix_unary_operand;
         postfix_unary_operator;
       } -> [
         "postfix_unary_operand";
         "postfix_unary_operator";
       ]
-      | BinaryOperator {
+      | BinaryExpression {
         binary_left_operand;
         binary_operator;
         binary_right_operand;
@@ -3728,7 +3734,7 @@ module WithToken(Token: TokenType) = struct
           header_question;
           header_language;
         }
-        | (SyntaxKind.Script, [
+      | (SyntaxKind.Script, [
           script_header;
           script_declarations;
         ]) ->
@@ -3736,37 +3742,37 @@ module WithToken(Token: TokenType) = struct
           script_header;
           script_declarations;
         }
-        | (SyntaxKind.SimpleTypeSpecifier, [
+      | (SyntaxKind.SimpleTypeSpecifier, [
           simple_type_specifier;
         ]) ->
         SimpleTypeSpecifier {
           simple_type_specifier;
         }
-        | (SyntaxKind.LiteralExpression, [
+      | (SyntaxKind.LiteralExpression, [
           literal_expression;
         ]) ->
         LiteralExpression {
           literal_expression;
         }
-        | (SyntaxKind.VariableExpression, [
+      | (SyntaxKind.VariableExpression, [
           variable_expression;
         ]) ->
         VariableExpression {
           variable_expression;
         }
-        | (SyntaxKind.QualifiedNameExpression, [
+      | (SyntaxKind.QualifiedNameExpression, [
           qualified_name_expression;
         ]) ->
         QualifiedNameExpression {
           qualified_name_expression;
         }
-        | (SyntaxKind.PipeVariableExpression, [
+      | (SyntaxKind.PipeVariableExpression, [
           pipe_variable_expression;
         ]) ->
         PipeVariableExpression {
           pipe_variable_expression;
         }
-        | (SyntaxKind.EnumDeclaration, [
+      | (SyntaxKind.EnumDeclaration, [
           enum_keyword;
           enum_name;
           enum_colon;
@@ -3786,7 +3792,7 @@ module WithToken(Token: TokenType) = struct
           enum_enumerators;
           enum_right_brace;
         }
-        | (SyntaxKind.Enumerator, [
+      | (SyntaxKind.Enumerator, [
           enumerator_name;
           enumerator_equal;
           enumerator_value;
@@ -3798,7 +3804,7 @@ module WithToken(Token: TokenType) = struct
           enumerator_value;
           enumerator_semicolon;
         }
-        | (SyntaxKind.AliasDeclaration, [
+      | (SyntaxKind.AliasDeclaration, [
           alias_attribute_spec;
           alias_keyword;
           alias_name;
@@ -3818,7 +3824,7 @@ module WithToken(Token: TokenType) = struct
           alias_type;
           alias_semicolon;
         }
-        | (SyntaxKind.PropertyDeclaration, [
+      | (SyntaxKind.PropertyDeclaration, [
           property_modifiers;
           property_type;
           property_declarators;
@@ -3830,7 +3836,7 @@ module WithToken(Token: TokenType) = struct
           property_declarators;
           property_semicolon;
         }
-        | (SyntaxKind.PropertyDeclarator, [
+      | (SyntaxKind.PropertyDeclarator, [
           property_name;
           property_initializer;
         ]) ->
@@ -3838,7 +3844,7 @@ module WithToken(Token: TokenType) = struct
           property_name;
           property_initializer;
         }
-        | (SyntaxKind.NamespaceDeclaration, [
+      | (SyntaxKind.NamespaceDeclaration, [
           namespace_keyword;
           namespace_name;
           namespace_body;
@@ -3848,7 +3854,7 @@ module WithToken(Token: TokenType) = struct
           namespace_name;
           namespace_body;
         }
-        | (SyntaxKind.NamespaceBody, [
+      | (SyntaxKind.NamespaceBody, [
           namespace_left_brace;
           namespace_declarations;
           namespace_right_brace;
@@ -3858,7 +3864,7 @@ module WithToken(Token: TokenType) = struct
           namespace_declarations;
           namespace_right_brace;
         }
-        | (SyntaxKind.NamespaceUseDeclaration, [
+      | (SyntaxKind.NamespaceUseDeclaration, [
           namespace_use_keyword;
           namespace_use_kind;
           namespace_use_clauses;
@@ -3870,7 +3876,7 @@ module WithToken(Token: TokenType) = struct
           namespace_use_clauses;
           namespace_use_semicolon;
         }
-        | (SyntaxKind.NamespaceGroupUseDeclaration, [
+      | (SyntaxKind.NamespaceGroupUseDeclaration, [
           namespace_group_use_keyword;
           namespace_group_use_kind;
           namespace_group_use_prefix;
@@ -3888,7 +3894,7 @@ module WithToken(Token: TokenType) = struct
           namespace_group_use_right_brace;
           namespace_group_use_semicolon;
         }
-        | (SyntaxKind.NamespaceUseClause, [
+      | (SyntaxKind.NamespaceUseClause, [
           namespace_use_clause_kind;
           namespace_use_name;
           namespace_use_as;
@@ -3900,7 +3906,7 @@ module WithToken(Token: TokenType) = struct
           namespace_use_as;
           namespace_use_alias;
         }
-        | (SyntaxKind.FunctionDeclaration, [
+      | (SyntaxKind.FunctionDeclaration, [
           function_attribute_spec;
           function_declaration_header;
           function_body;
@@ -3910,7 +3916,7 @@ module WithToken(Token: TokenType) = struct
           function_declaration_header;
           function_body;
         }
-        | (SyntaxKind.FunctionDeclarationHeader, [
+      | (SyntaxKind.FunctionDeclarationHeader, [
           function_async;
           function_keyword;
           function_name;
@@ -3932,7 +3938,7 @@ module WithToken(Token: TokenType) = struct
           function_colon;
           function_type;
         }
-        | (SyntaxKind.MethodishDeclaration, [
+      | (SyntaxKind.MethodishDeclaration, [
           methodish_attribute;
           methodish_modifiers;
           methodish_function_decl_header;
@@ -3946,7 +3952,7 @@ module WithToken(Token: TokenType) = struct
           methodish_function_body;
           methodish_semicolon;
         }
-        | (SyntaxKind.ClassishDeclaration, [
+      | (SyntaxKind.ClassishDeclaration, [
           classish_attribute;
           classish_modifiers;
           classish_keyword;
@@ -3970,7 +3976,7 @@ module WithToken(Token: TokenType) = struct
           classish_implements_list;
           classish_body;
         }
-        | (SyntaxKind.ClassishBody, [
+      | (SyntaxKind.ClassishBody, [
           classish_body_left_brace;
           classish_body_elements;
           classish_body_right_brace;
@@ -3980,7 +3986,7 @@ module WithToken(Token: TokenType) = struct
           classish_body_elements;
           classish_body_right_brace;
         }
-        | (SyntaxKind.TraitUse, [
+      | (SyntaxKind.TraitUse, [
           trait_use_keyword;
           trait_use_name_list;
           trait_use_semicolon;
@@ -3990,7 +3996,7 @@ module WithToken(Token: TokenType) = struct
           trait_use_name_list;
           trait_use_semicolon;
         }
-        | (SyntaxKind.RequireClause, [
+      | (SyntaxKind.RequireClause, [
           require_keyword;
           require_kind;
           require_name;
@@ -4002,7 +4008,7 @@ module WithToken(Token: TokenType) = struct
           require_name;
           require_semicolon;
         }
-        | (SyntaxKind.ConstDeclaration, [
+      | (SyntaxKind.ConstDeclaration, [
           const_abstract;
           const_keyword;
           const_type_specifier;
@@ -4016,7 +4022,7 @@ module WithToken(Token: TokenType) = struct
           const_declarator_list;
           const_semicolon;
         }
-        | (SyntaxKind.ConstantDeclarator, [
+      | (SyntaxKind.ConstantDeclarator, [
           constant_declarator_name;
           constant_declarator_initializer;
         ]) ->
@@ -4024,7 +4030,7 @@ module WithToken(Token: TokenType) = struct
           constant_declarator_name;
           constant_declarator_initializer;
         }
-        | (SyntaxKind.TypeConstDeclaration, [
+      | (SyntaxKind.TypeConstDeclaration, [
           type_const_abstract;
           type_const_keyword;
           type_const_type_keyword;
@@ -4044,7 +4050,7 @@ module WithToken(Token: TokenType) = struct
           type_const_type_specifier;
           type_const_semicolon;
         }
-        | (SyntaxKind.DecoratedExpression, [
+      | (SyntaxKind.DecoratedExpression, [
           decorated_expression_decorator;
           decorated_expression_expression;
         ]) ->
@@ -4052,7 +4058,7 @@ module WithToken(Token: TokenType) = struct
           decorated_expression_decorator;
           decorated_expression_expression;
         }
-        | (SyntaxKind.ParameterDeclaration, [
+      | (SyntaxKind.ParameterDeclaration, [
           param_attribute;
           param_visibility;
           param_type;
@@ -4066,7 +4072,7 @@ module WithToken(Token: TokenType) = struct
           param_name;
           param_default;
         }
-        | (SyntaxKind.AttributeSpecification, [
+      | (SyntaxKind.AttributeSpecification, [
           attribute_spec_left_double_angle;
           attribute_spec_attribute_list;
           attribute_spec_right_double_angle;
@@ -4076,7 +4082,7 @@ module WithToken(Token: TokenType) = struct
           attribute_spec_attribute_list;
           attribute_spec_right_double_angle;
         }
-        | (SyntaxKind.Attribute, [
+      | (SyntaxKind.Attribute, [
           attribute_name;
           attribute_left_paren;
           attribute_values;
@@ -4088,7 +4094,7 @@ module WithToken(Token: TokenType) = struct
           attribute_values;
           attribute_right_paren;
         }
-        | (SyntaxKind.InclusionExpression, [
+      | (SyntaxKind.InclusionExpression, [
           inclusion_require;
           inclusion_filename;
         ]) ->
@@ -4096,7 +4102,7 @@ module WithToken(Token: TokenType) = struct
           inclusion_require;
           inclusion_filename;
         }
-        | (SyntaxKind.InclusionDirective, [
+      | (SyntaxKind.InclusionDirective, [
           inclusion_expression;
           inclusion_semicolon;
         ]) ->
@@ -4104,7 +4110,7 @@ module WithToken(Token: TokenType) = struct
           inclusion_expression;
           inclusion_semicolon;
         }
-        | (SyntaxKind.CompoundStatement, [
+      | (SyntaxKind.CompoundStatement, [
           compound_left_brace;
           compound_statements;
           compound_right_brace;
@@ -4114,7 +4120,7 @@ module WithToken(Token: TokenType) = struct
           compound_statements;
           compound_right_brace;
         }
-        | (SyntaxKind.ExpressionStatement, [
+      | (SyntaxKind.ExpressionStatement, [
           expr_statement_expr;
           expr_statement_semicolon;
         ]) ->
@@ -4122,7 +4128,7 @@ module WithToken(Token: TokenType) = struct
           expr_statement_expr;
           expr_statement_semicolon;
         }
-        | (SyntaxKind.WhileStatement, [
+      | (SyntaxKind.WhileStatement, [
           while_keyword;
           while_left_paren;
           while_condition;
@@ -4136,7 +4142,7 @@ module WithToken(Token: TokenType) = struct
           while_right_paren;
           while_body;
         }
-        | (SyntaxKind.IfStatement, [
+      | (SyntaxKind.IfStatement, [
           if_keyword;
           if_left_paren;
           if_condition;
@@ -4154,7 +4160,7 @@ module WithToken(Token: TokenType) = struct
           if_elseif_clauses;
           if_else_clause;
         }
-        | (SyntaxKind.ElseifClause, [
+      | (SyntaxKind.ElseifClause, [
           elseif_keyword;
           elseif_left_paren;
           elseif_condition;
@@ -4168,7 +4174,7 @@ module WithToken(Token: TokenType) = struct
           elseif_right_paren;
           elseif_statement;
         }
-        | (SyntaxKind.ElseClause, [
+      | (SyntaxKind.ElseClause, [
           else_keyword;
           else_statement;
         ]) ->
@@ -4176,7 +4182,7 @@ module WithToken(Token: TokenType) = struct
           else_keyword;
           else_statement;
         }
-        | (SyntaxKind.TryStatement, [
+      | (SyntaxKind.TryStatement, [
           try_keyword;
           try_compound_statement;
           catch_clauses;
@@ -4188,7 +4194,7 @@ module WithToken(Token: TokenType) = struct
           catch_clauses;
           finally_clause;
         }
-        | (SyntaxKind.CatchClause, [
+      | (SyntaxKind.CatchClause, [
           catch_keyword;
           catch_left_paren;
           catch_type;
@@ -4204,7 +4210,7 @@ module WithToken(Token: TokenType) = struct
           catch_right_paren;
           catch_compound_statement;
         }
-        | (SyntaxKind.FinallyClause, [
+      | (SyntaxKind.FinallyClause, [
           finally_keyword;
           finally_compound_statement;
         ]) ->
@@ -4212,7 +4218,7 @@ module WithToken(Token: TokenType) = struct
           finally_keyword;
           finally_compound_statement;
         }
-        | (SyntaxKind.DoStatement, [
+      | (SyntaxKind.DoStatement, [
           do_keyword;
           do_statement;
           do_while_keyword;
@@ -4230,7 +4236,7 @@ module WithToken(Token: TokenType) = struct
           do_right_paren;
           do_semicolon;
         }
-        | (SyntaxKind.ForStatement, [
+      | (SyntaxKind.ForStatement, [
           for_keyword;
           for_left_paren;
           for_initializer_expr;
@@ -4252,7 +4258,7 @@ module WithToken(Token: TokenType) = struct
           for_right_paren;
           for_statement;
         }
-        | (SyntaxKind.ForeachStatement, [
+      | (SyntaxKind.ForeachStatement, [
           foreach_keyword;
           foreach_left_paren;
           foreach_collection_name;
@@ -4276,7 +4282,7 @@ module WithToken(Token: TokenType) = struct
           foreach_right_paren;
           foreach_statement;
         }
-        | (SyntaxKind.SwitchStatement, [
+      | (SyntaxKind.SwitchStatement, [
           switch_keyword;
           switch_left_paren;
           switch_expr;
@@ -4290,7 +4296,7 @@ module WithToken(Token: TokenType) = struct
           switch_right_paren;
           switch_compound_statement;
         }
-        | (SyntaxKind.CaseStatement, [
+      | (SyntaxKind.CaseStatement, [
           case_keyword;
           case_expr;
           case_colon;
@@ -4302,7 +4308,7 @@ module WithToken(Token: TokenType) = struct
           case_colon;
           case_stmt;
         }
-        | (SyntaxKind.DefaultStatement, [
+      | (SyntaxKind.DefaultStatement, [
           default_keyword;
           default_colon;
           default_stmt;
@@ -4312,7 +4318,7 @@ module WithToken(Token: TokenType) = struct
           default_colon;
           default_stmt;
         }
-        | (SyntaxKind.ReturnStatement, [
+      | (SyntaxKind.ReturnStatement, [
           return_keyword;
           return_expr;
           return_semicolon;
@@ -4322,7 +4328,7 @@ module WithToken(Token: TokenType) = struct
           return_expr;
           return_semicolon;
         }
-        | (SyntaxKind.ThrowStatement, [
+      | (SyntaxKind.ThrowStatement, [
           throw_keyword;
           throw_expr;
           throw_semicolon;
@@ -4332,7 +4338,7 @@ module WithToken(Token: TokenType) = struct
           throw_expr;
           throw_semicolon;
         }
-        | (SyntaxKind.BreakStatement, [
+      | (SyntaxKind.BreakStatement, [
           break_keyword;
           break_level;
           break_semicolon;
@@ -4342,7 +4348,7 @@ module WithToken(Token: TokenType) = struct
           break_level;
           break_semicolon;
         }
-        | (SyntaxKind.ContinueStatement, [
+      | (SyntaxKind.ContinueStatement, [
           continue_keyword;
           continue_level;
           continue_semicolon;
@@ -4352,7 +4358,7 @@ module WithToken(Token: TokenType) = struct
           continue_level;
           continue_semicolon;
         }
-        | (SyntaxKind.FunctionStaticStatement, [
+      | (SyntaxKind.FunctionStaticStatement, [
           static_static;
           static_declarations;
           static_semicolon;
@@ -4362,7 +4368,7 @@ module WithToken(Token: TokenType) = struct
           static_declarations;
           static_semicolon;
         }
-        | (SyntaxKind.StaticDeclarator, [
+      | (SyntaxKind.StaticDeclarator, [
           static_name;
           static_initializer;
         ]) ->
@@ -4370,7 +4376,7 @@ module WithToken(Token: TokenType) = struct
           static_name;
           static_initializer;
         }
-        | (SyntaxKind.EchoStatement, [
+      | (SyntaxKind.EchoStatement, [
           echo_keyword;
           echo_expression_list;
           echo_semicolon;
@@ -4380,7 +4386,7 @@ module WithToken(Token: TokenType) = struct
           echo_expression_list;
           echo_semicolon;
         }
-        | (SyntaxKind.SimpleInitializer, [
+      | (SyntaxKind.SimpleInitializer, [
           simple_initializer_equal;
           simple_initializer_value;
         ]) ->
@@ -4388,7 +4394,7 @@ module WithToken(Token: TokenType) = struct
           simple_initializer_equal;
           simple_initializer_value;
         }
-        | (SyntaxKind.AnonymousFunction, [
+      | (SyntaxKind.AnonymousFunction, [
           anonymous_async;
           anonymous_function;
           anonymous_left_paren;
@@ -4410,7 +4416,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_use;
           anonymous_body;
         }
-        | (SyntaxKind.AnonymousFunctionUseClause, [
+      | (SyntaxKind.AnonymousFunctionUseClause, [
           anonymous_use_keyword;
           anonymous_use_left_paren;
           anonymous_use_variables;
@@ -4422,7 +4428,7 @@ module WithToken(Token: TokenType) = struct
           anonymous_use_variables;
           anonymous_use_right_paren;
         }
-        | (SyntaxKind.LambdaExpression, [
+      | (SyntaxKind.LambdaExpression, [
           lambda_async;
           lambda_signature;
           lambda_arrow;
@@ -4434,7 +4440,7 @@ module WithToken(Token: TokenType) = struct
           lambda_arrow;
           lambda_body;
         }
-        | (SyntaxKind.LambdaSignature, [
+      | (SyntaxKind.LambdaSignature, [
           lambda_left_paren;
           lambda_parameter_list;
           lambda_right_paren;
@@ -4448,7 +4454,7 @@ module WithToken(Token: TokenType) = struct
           lambda_colon;
           lambda_type;
         }
-        | (SyntaxKind.CastExpression, [
+      | (SyntaxKind.CastExpression, [
           cast_left_paren;
           cast_type;
           cast_right_paren;
@@ -4460,7 +4466,7 @@ module WithToken(Token: TokenType) = struct
           cast_right_paren;
           cast_operand;
         }
-        | (SyntaxKind.ScopeResolutionExpression, [
+      | (SyntaxKind.ScopeResolutionExpression, [
           scope_resolution_qualifier;
           scope_resolution_operator;
           scope_resolution_name;
@@ -4470,7 +4476,7 @@ module WithToken(Token: TokenType) = struct
           scope_resolution_operator;
           scope_resolution_name;
         }
-        | (SyntaxKind.MemberSelectionExpression, [
+      | (SyntaxKind.MemberSelectionExpression, [
           member_object;
           member_operator;
           member_name;
@@ -4480,7 +4486,7 @@ module WithToken(Token: TokenType) = struct
           member_operator;
           member_name;
         }
-        | (SyntaxKind.SafeMemberSelectionExpression, [
+      | (SyntaxKind.SafeMemberSelectionExpression, [
           safe_member_object;
           safe_member_operator;
           safe_member_name;
@@ -4490,7 +4496,7 @@ module WithToken(Token: TokenType) = struct
           safe_member_operator;
           safe_member_name;
         }
-        | (SyntaxKind.YieldExpression, [
+      | (SyntaxKind.YieldExpression, [
           yield_keyword;
           yield_operand;
         ]) ->
@@ -4498,7 +4504,7 @@ module WithToken(Token: TokenType) = struct
           yield_keyword;
           yield_operand;
         }
-        | (SyntaxKind.PrintExpression, [
+      | (SyntaxKind.PrintExpression, [
           print_keyword;
           print_expr;
         ]) ->
@@ -4506,33 +4512,33 @@ module WithToken(Token: TokenType) = struct
           print_keyword;
           print_expr;
         }
-        | (SyntaxKind.PrefixUnaryOperator, [
+      | (SyntaxKind.PrefixUnaryExpression, [
           prefix_unary_operator;
           prefix_unary_operand;
         ]) ->
-        PrefixUnaryOperator {
+        PrefixUnaryExpression {
           prefix_unary_operator;
           prefix_unary_operand;
         }
-        | (SyntaxKind.PostfixUnaryOperator, [
+      | (SyntaxKind.PostfixUnaryExpression, [
           postfix_unary_operand;
           postfix_unary_operator;
         ]) ->
-        PostfixUnaryOperator {
+        PostfixUnaryExpression {
           postfix_unary_operand;
           postfix_unary_operator;
         }
-        | (SyntaxKind.BinaryOperator, [
+      | (SyntaxKind.BinaryExpression, [
           binary_left_operand;
           binary_operator;
           binary_right_operand;
         ]) ->
-        BinaryOperator {
+        BinaryExpression {
           binary_left_operand;
           binary_operator;
           binary_right_operand;
         }
-        | (SyntaxKind.InstanceofExpression, [
+      | (SyntaxKind.InstanceofExpression, [
           instanceof_left_operand;
           instanceof_operator;
           instanceof_right_operand;
@@ -4542,7 +4548,7 @@ module WithToken(Token: TokenType) = struct
           instanceof_operator;
           instanceof_right_operand;
         }
-        | (SyntaxKind.ConditionalExpression, [
+      | (SyntaxKind.ConditionalExpression, [
           conditional_test;
           conditional_question;
           conditional_consequence;
@@ -4556,7 +4562,7 @@ module WithToken(Token: TokenType) = struct
           conditional_colon;
           conditional_alternative;
         }
-        | (SyntaxKind.FunctionCallExpression, [
+      | (SyntaxKind.FunctionCallExpression, [
           function_call_receiver;
           function_call_lparen;
           function_call_arguments;
@@ -4568,7 +4574,7 @@ module WithToken(Token: TokenType) = struct
           function_call_arguments;
           function_call_rparen;
         }
-        | (SyntaxKind.ParenthesizedExpression, [
+      | (SyntaxKind.ParenthesizedExpression, [
           paren_expr_left_paren;
           paren_expr;
           paren_expr_right_paren;
@@ -4578,7 +4584,7 @@ module WithToken(Token: TokenType) = struct
           paren_expr;
           paren_expr_right_paren;
         }
-        | (SyntaxKind.BracedExpression, [
+      | (SyntaxKind.BracedExpression, [
           braced_expr_left_brace;
           braced_expr;
           braced_expr_right_brace;
@@ -4588,7 +4594,7 @@ module WithToken(Token: TokenType) = struct
           braced_expr;
           braced_expr_right_brace;
         }
-        | (SyntaxKind.ListExpression, [
+      | (SyntaxKind.ListExpression, [
           list_keyword;
           list_left_paren;
           list_members;
@@ -4600,7 +4606,7 @@ module WithToken(Token: TokenType) = struct
           list_members;
           list_right_paren;
         }
-        | (SyntaxKind.CollectionLiteralExpression, [
+      | (SyntaxKind.CollectionLiteralExpression, [
           collection_literal_name;
           collection_literal_left_brace;
           collection_literal_initialization_list;
@@ -4612,7 +4618,7 @@ module WithToken(Token: TokenType) = struct
           collection_literal_initialization_list;
           collection_literal_right_brace;
         }
-        | (SyntaxKind.ObjectCreationExpression, [
+      | (SyntaxKind.ObjectCreationExpression, [
           object_creation_new;
           object_creation_class;
           object_creation_lparen;
@@ -4626,7 +4632,7 @@ module WithToken(Token: TokenType) = struct
           object_creation_arguments;
           object_creation_rparen;
         }
-        | (SyntaxKind.ArrayCreationExpression, [
+      | (SyntaxKind.ArrayCreationExpression, [
           array_creation_left_bracket;
           array_creation_members;
           array_creation_right_bracket;
@@ -4636,7 +4642,7 @@ module WithToken(Token: TokenType) = struct
           array_creation_members;
           array_creation_right_bracket;
         }
-        | (SyntaxKind.ArrayIntrinsicExpression, [
+      | (SyntaxKind.ArrayIntrinsicExpression, [
           array_intrinsic_keyword;
           array_intrinsic_left_paren;
           array_intrinsic_members;
@@ -4648,7 +4654,7 @@ module WithToken(Token: TokenType) = struct
           array_intrinsic_members;
           array_intrinsic_right_paren;
         }
-        | (SyntaxKind.ElementInitializer, [
+      | (SyntaxKind.ElementInitializer, [
           element_key;
           element_arrow;
           element_value;
@@ -4658,7 +4664,7 @@ module WithToken(Token: TokenType) = struct
           element_arrow;
           element_value;
         }
-        | (SyntaxKind.SubscriptExpression, [
+      | (SyntaxKind.SubscriptExpression, [
           subscript_receiver;
           subscript_left;
           subscript_index;
@@ -4670,7 +4676,7 @@ module WithToken(Token: TokenType) = struct
           subscript_index;
           subscript_right;
         }
-        | (SyntaxKind.AwaitableCreationExpression, [
+      | (SyntaxKind.AwaitableCreationExpression, [
           awaitable_async;
           awaitable_compound_statement;
         ]) ->
@@ -4678,7 +4684,7 @@ module WithToken(Token: TokenType) = struct
           awaitable_async;
           awaitable_compound_statement;
         }
-        | (SyntaxKind.XHPChildrenDeclaration, [
+      | (SyntaxKind.XHPChildrenDeclaration, [
           xhp_children;
           xhp_children_expression;
           xhp_children_semicolon;
@@ -4688,7 +4694,7 @@ module WithToken(Token: TokenType) = struct
           xhp_children_expression;
           xhp_children_semicolon;
         }
-        | (SyntaxKind.XHPCategoryDeclaration, [
+      | (SyntaxKind.XHPCategoryDeclaration, [
           xhp_category;
           xhp_category_list;
           xhp_category_semicolon;
@@ -4698,7 +4704,7 @@ module WithToken(Token: TokenType) = struct
           xhp_category_list;
           xhp_category_semicolon;
         }
-        | (SyntaxKind.XHPEnumType, [
+      | (SyntaxKind.XHPEnumType, [
           xhp_enum_keyword;
           xhp_enum_left_brace;
           xhp_enum_values;
@@ -4710,7 +4716,7 @@ module WithToken(Token: TokenType) = struct
           xhp_enum_values;
           xhp_enum_right_brace;
         }
-        | (SyntaxKind.XHPRequired, [
+      | (SyntaxKind.XHPRequired, [
           xhp_required_at;
           xhp_required;
         ]) ->
@@ -4718,7 +4724,7 @@ module WithToken(Token: TokenType) = struct
           xhp_required_at;
           xhp_required;
         }
-        | (SyntaxKind.XHPClassAttributeDeclaration, [
+      | (SyntaxKind.XHPClassAttributeDeclaration, [
           xhp_attribute_keyword;
           xhp_attribute_list;
           xhp_attribute_semicolon;
@@ -4728,7 +4734,7 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_list;
           xhp_attribute_semicolon;
         }
-        | (SyntaxKind.XHPClassAttribute, [
+      | (SyntaxKind.XHPClassAttribute, [
           xhp_attribute_decl_type;
           xhp_attribute_decl_name;
           xhp_attribute_decl_initializer;
@@ -4740,7 +4746,7 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_decl_initializer;
           xhp_attribute_decl_required;
         }
-        | (SyntaxKind.XHPAttribute, [
+      | (SyntaxKind.XHPAttribute, [
           xhp_attribute_name;
           xhp_attribute_equal;
           xhp_attribute_expr;
@@ -4750,7 +4756,7 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_equal;
           xhp_attribute_expr;
         }
-        | (SyntaxKind.XHPOpen, [
+      | (SyntaxKind.XHPOpen, [
           xhp_open_name;
           xhp_open_attributes;
           xhp_open_right_angle;
@@ -4760,7 +4766,7 @@ module WithToken(Token: TokenType) = struct
           xhp_open_attributes;
           xhp_open_right_angle;
         }
-        | (SyntaxKind.XHPExpression, [
+      | (SyntaxKind.XHPExpression, [
           xhp_open;
           xhp_body;
           xhp_close;
@@ -4770,7 +4776,7 @@ module WithToken(Token: TokenType) = struct
           xhp_body;
           xhp_close;
         }
-        | (SyntaxKind.XHPClose, [
+      | (SyntaxKind.XHPClose, [
           xhp_close_left_angle;
           xhp_close_name;
           xhp_close_right_angle;
@@ -4780,7 +4786,7 @@ module WithToken(Token: TokenType) = struct
           xhp_close_name;
           xhp_close_right_angle;
         }
-        | (SyntaxKind.TypeConstant, [
+      | (SyntaxKind.TypeConstant, [
           type_constant_left_type;
           type_constant_separator;
           type_constant_right_type;
@@ -4790,7 +4796,7 @@ module WithToken(Token: TokenType) = struct
           type_constant_separator;
           type_constant_right_type;
         }
-        | (SyntaxKind.VectorTypeSpecifier, [
+      | (SyntaxKind.VectorTypeSpecifier, [
           vector_array;
           vector_left_angle;
           vector_type;
@@ -4802,7 +4808,7 @@ module WithToken(Token: TokenType) = struct
           vector_type;
           vector_right_angle;
         }
-        | (SyntaxKind.TypeParameter, [
+      | (SyntaxKind.TypeParameter, [
           type_variance_opt;
           type_name;
           type_constraint_list_opt;
@@ -4812,7 +4818,7 @@ module WithToken(Token: TokenType) = struct
           type_name;
           type_constraint_list_opt;
         }
-        | (SyntaxKind.TypeConstraint, [
+      | (SyntaxKind.TypeConstraint, [
           constraint_keyword;
           constraint_type;
         ]) ->
@@ -4820,7 +4826,7 @@ module WithToken(Token: TokenType) = struct
           constraint_keyword;
           constraint_type;
         }
-        | (SyntaxKind.MapTypeSpecifier, [
+      | (SyntaxKind.MapTypeSpecifier, [
           map_array;
           map_left_angle;
           map_key;
@@ -4836,7 +4842,7 @@ module WithToken(Token: TokenType) = struct
           map_value;
           map_right_angle;
         }
-        | (SyntaxKind.ClosureTypeSpecifier, [
+      | (SyntaxKind.ClosureTypeSpecifier, [
           closure_outer_left_paren;
           closure_function;
           closure_inner_left_paren;
@@ -4856,7 +4862,7 @@ module WithToken(Token: TokenType) = struct
           closure_return_type;
           closure_outer_right_paren;
         }
-        | (SyntaxKind.ClassnameTypeSpecifier, [
+      | (SyntaxKind.ClassnameTypeSpecifier, [
           classname_classname;
           classname_left_angle;
           classname_type;
@@ -4868,7 +4874,7 @@ module WithToken(Token: TokenType) = struct
           classname_type;
           classname_right_angle;
         }
-        | (SyntaxKind.FieldSpecifier, [
+      | (SyntaxKind.FieldSpecifier, [
           field_name;
           field_arrow;
           field_type;
@@ -4878,7 +4884,7 @@ module WithToken(Token: TokenType) = struct
           field_arrow;
           field_type;
         }
-        | (SyntaxKind.FieldInitializer, [
+      | (SyntaxKind.FieldInitializer, [
           field_initializer_name;
           field_initializer_arrow;
           field_initializer_value;
@@ -4888,7 +4894,7 @@ module WithToken(Token: TokenType) = struct
           field_initializer_arrow;
           field_initializer_value;
         }
-        | (SyntaxKind.ShapeTypeSpecifier, [
+      | (SyntaxKind.ShapeTypeSpecifier, [
           shape_type_keyword;
           shape_type_left_paren;
           shape_type_fields;
@@ -4900,7 +4906,7 @@ module WithToken(Token: TokenType) = struct
           shape_type_fields;
           shape_type_right_paren;
         }
-        | (SyntaxKind.ShapeExpression, [
+      | (SyntaxKind.ShapeExpression, [
           shape_expression_keyword;
           shape_expression_left_paren;
           shape_expression_fields;
@@ -4912,7 +4918,7 @@ module WithToken(Token: TokenType) = struct
           shape_expression_fields;
           shape_expression_right_paren;
         }
-        | (SyntaxKind.GenericTypeSpecifier, [
+      | (SyntaxKind.GenericTypeSpecifier, [
           generic_class_type;
           generic_arguments;
         ]) ->
@@ -4920,7 +4926,7 @@ module WithToken(Token: TokenType) = struct
           generic_class_type;
           generic_arguments;
         }
-        | (SyntaxKind.NullableTypeSpecifier, [
+      | (SyntaxKind.NullableTypeSpecifier, [
           nullable_question;
           nullable_type;
         ]) ->
@@ -4928,7 +4934,7 @@ module WithToken(Token: TokenType) = struct
           nullable_question;
           nullable_type;
         }
-        | (SyntaxKind.SoftTypeSpecifier, [
+      | (SyntaxKind.SoftTypeSpecifier, [
           soft_at;
           soft_type;
         ]) ->
@@ -4936,7 +4942,7 @@ module WithToken(Token: TokenType) = struct
           soft_at;
           soft_type;
         }
-        | (SyntaxKind.TypeArguments, [
+      | (SyntaxKind.TypeArguments, [
           type_arguments_left_angle;
           type_arguments;
           type_arguments_right_angle;
@@ -4946,7 +4952,7 @@ module WithToken(Token: TokenType) = struct
           type_arguments;
           type_arguments_right_angle;
         }
-        | (SyntaxKind.TypeParameters, [
+      | (SyntaxKind.TypeParameters, [
           type_parameters_left_angle;
           type_parameters;
           type_parameters_right_angle;
@@ -4956,7 +4962,7 @@ module WithToken(Token: TokenType) = struct
           type_parameters;
           type_parameters_right_angle;
         }
-        | (SyntaxKind.TupleTypeSpecifier, [
+      | (SyntaxKind.TupleTypeSpecifier, [
           tuple_left_paren;
           tuple_types;
           tuple_right_paren;
@@ -4966,13 +4972,13 @@ module WithToken(Token: TokenType) = struct
           tuple_types;
           tuple_right_paren;
         }
-        | (SyntaxKind.Error, [
+      | (SyntaxKind.Error, [
           error;
         ]) ->
         Error {
           error;
         }
-        | (SyntaxKind.ListItem, [
+      | (SyntaxKind.ListItem, [
           list_item;
           list_separator;
         ]) ->
@@ -4980,7 +4986,6 @@ module WithToken(Token: TokenType) = struct
           list_item;
           list_separator;
         }
-
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
       | _ -> failwith
@@ -5878,30 +5883,30 @@ module WithToken(Token: TokenType) = struct
         print_expr;
       ]
 
-    let make_prefix_unary_operator
+    let make_prefix_unary_expression
       prefix_unary_operator
       prefix_unary_operand
     =
-      from_children SyntaxKind.PrefixUnaryOperator [
+      from_children SyntaxKind.PrefixUnaryExpression [
         prefix_unary_operator;
         prefix_unary_operand;
       ]
 
-    let make_postfix_unary_operator
+    let make_postfix_unary_expression
       postfix_unary_operand
       postfix_unary_operator
     =
-      from_children SyntaxKind.PostfixUnaryOperator [
+      from_children SyntaxKind.PostfixUnaryExpression [
         postfix_unary_operand;
         postfix_unary_operator;
       ]
 
-    let make_binary_operator
+    let make_binary_expression
       binary_left_operand
       binary_operator
       binary_right_operand
     =
-      from_children SyntaxKind.BinaryOperator [
+      from_children SyntaxKind.BinaryExpression [
         binary_left_operand;
         binary_operator;
         binary_right_operand;

@@ -264,7 +264,7 @@ module WithStatementAndDeclAndTypeParser
     | BarGreaterThan
     | QuestionQuestion ->
     (* TODO: "and" "or" "xor" *)
-      parse_remaining_binary_operator parser term
+      parse_remaining_binary_expression parser term
     | Instanceof ->
       parse_instanceof_expression parser term
     | QuestionMinusGreaterThan
@@ -555,7 +555,7 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_postfix_unary parser term =
     let (parser, token) = next_token parser in
-    let term = make_postfix_unary_operator term (make_token token) in
+    let term = make_postfix_unary_expression term (make_token token) in
     parse_remaining_expression parser term
 
   and parse_prefix_unary_expression parser =
@@ -565,7 +565,7 @@ module WithStatementAndDeclAndTypeParser
     let token = make_token token in
     let (parser, operand) = parse_expression_with_operator_precedence
       parser operator in
-    let result = make_prefix_unary_operator token operand in
+    let result = make_prefix_unary_expression token operand in
     (parser, result)
 
   and parse_instanceof_expression parser left =
@@ -661,12 +661,12 @@ module WithStatementAndDeclAndTypeParser
     let (parser, op) = assert_token parser Instanceof in
     let precedence = Operator.precedence Operator.InstanceofOperator in
     let (parser, right_term) = parse_term parser in
-    let (parser, right) = parse_remaining_binary_operator_helper
+    let (parser, right) = parse_remaining_binary_expression_helper
       parser right_term precedence in
     let result = make_instanceof_expression left op right in
     parse_remaining_expression parser result
 
-  and parse_remaining_binary_operator parser left_term =
+  and parse_remaining_binary_expression parser left_term =
     (* We have a left term. If we get here then we know that
      * we have a binary operator to its right, and that furthermore,
      * the binary operator is of equal or higher precedence than the
@@ -710,12 +710,13 @@ module WithStatementAndDeclAndTypeParser
       let operator = Operator.trailing_from_token (Token.kind token) in
       let precedence = Operator.precedence operator in
       let (parser2, right_term) = parse_term parser1 in
-      let (parser2, right_term) = parse_remaining_binary_operator_helper
+      let (parser2, right_term) = parse_remaining_binary_expression_helper
         parser2 right_term precedence in
-      let term = make_binary_operator left_term (make_token token) right_term in
+      let term = make_binary_expression
+        left_term (make_token token) right_term in
       parse_remaining_expression parser2 term
 
-  and parse_remaining_binary_operator_helper
+  and parse_remaining_binary_expression_helper
       parser right_term left_precedence =
     (* This gathers up terms to the right of an operator that are
        operands of operators of higher precedence than the
@@ -737,7 +738,7 @@ module WithStatementAndDeclAndTypeParser
         let (parser2, right_term) =
           parse_remaining_expression parser1 right_term in
         let parser3 = with_precedence parser2 parser.precedence in
-        parse_remaining_binary_operator_helper
+        parse_remaining_binary_expression_helper
           parser3 right_term left_precedence
       else
         (parser, right_term)
@@ -970,7 +971,7 @@ module WithStatementAndDeclAndTypeParser
     if is_missing ampersand then
       (parser, variable)
     else
-      let result = make_prefix_unary_operator ampersand variable in
+      let result = make_prefix_unary_expression ampersand variable in
       (parser, result)
 
   and parse_anon_or_lambda_or_awaitable parser =
@@ -1154,7 +1155,8 @@ module WithStatementAndDeclAndTypeParser
     match (Token.kind token) with
     | SlashGreaterThan ->
       let xhp_open = make_xhp_open name attrs (make_token token) in
-      let xhp = make_xhp_expression xhp_open (make_missing()) (make_missing()) in
+      let xhp = make_xhp_expression
+        xhp_open (make_missing()) (make_missing()) in
       (parser1, xhp)
     | GreaterThan ->
       let xhp_open = make_xhp_open name attrs (make_token token) in
@@ -1166,7 +1168,8 @@ module WithStatementAndDeclAndTypeParser
       (* ERROR RECOVERY: Assume the unexpected token belongs to whatever
          comes next. *)
       let xhp_open = make_xhp_open name attrs (make_missing()) in
-      let xhp = make_xhp_expression xhp_open (make_missing()) (make_missing()) in
+      let xhp = make_xhp_expression
+        xhp_open (make_missing()) (make_missing()) in
       let parser = with_error parser SyntaxError.error1013 in
       (parser, xhp)
 

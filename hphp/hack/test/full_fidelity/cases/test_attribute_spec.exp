@@ -5,7 +5,7 @@
 list_item(attribute((name))
 ((lparen))(missing)((rparen)))((,)(whitespace)))
 (list_item(attribute((name))((lparen))
-(list_item(binary_operator(
+(list_item(binary_expression(
 literal((decimal_literal)))((+))(literal((decimal_literal))))
 (missing))((rparen)))
 ((,)(whitespace)))

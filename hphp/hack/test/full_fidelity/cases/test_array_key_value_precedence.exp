@@ -7,9 +7,9 @@
 (compound_statement(({)
 (end_of_line))
 (expression_statement(
-prefix_unary_operator((whitespace)
+prefix_unary_expression((whitespace)
 (await)(whitespace))
-(binary_operator(variable((variable)(whitespace)))
+(binary_expression(variable((variable)(whitespace)))
 ((.)(whitespace))
 (array_intrinsic_expression(
 (array)(whitespace))
@@ -17,7 +17,7 @@ prefix_unary_operator((whitespace)
 (list_item
 (element_initializer(variable((variable)(whitespace)))
 ((=>)(whitespace))
-(binary_operator(
+(binary_expression(
 qualified_name((name)(whitespace)))
 ((*=)(whitespace))
 (literal((decimal_literal)))))

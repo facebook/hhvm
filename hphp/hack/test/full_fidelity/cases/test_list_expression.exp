@@ -10,7 +10,7 @@
 (compound_statement(({)(end_of_line))
 (list(
 expression_statement(
-binary_operator(
+binary_expression(
 list_expression
 ((whitespace)(list))
 ((lparen))
@@ -20,7 +20,7 @@ list_expression
 ((=)(whitespace))(variable((variable))))
 ((;)(end_of_line)))
 (expression_statement(
-binary_operator(
+binary_expression(
 list_expression(
 (whitespace)(list))
 ((lparen))

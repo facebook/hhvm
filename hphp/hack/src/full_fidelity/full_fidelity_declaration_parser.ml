@@ -312,8 +312,8 @@ module WithExpressionAndStatementAndTypeParser
       parse_braced_comma_list_opt_allow_trailing
       parser parse_namespace_use_clause in
     let (parser, semi) = expect_semicolon parser in
-    let result = make_namespace_group_use_declaration use_token use_kind prefix left
-      clauses right semi in
+    let result = make_namespace_group_use_declaration
+      use_token use_kind prefix left clauses right semi in
     (parser, result)
 
   and parse_namespace_use_declaration parser =
@@ -653,11 +653,11 @@ module WithExpressionAndStatementAndTypeParser
     | Star
     | Plus
     | Question ->
-      let result = make_postfix_unary_operator term (make_token token) in
+      let result = make_postfix_unary_expression term (make_token token) in
       (parser1, result)
     | Bar ->
       let (parser, right) = parse_xhp_children_expression parser1 in
-      let result = make_binary_operator term (make_token token) right in
+      let result = make_binary_expression term (make_token token) right in
       (parser, result)
     | _ -> (parser, term)
 

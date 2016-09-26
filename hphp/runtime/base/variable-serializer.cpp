@@ -1465,7 +1465,7 @@ static void serializeArrayImpl(const ArrayData* arr,
     kind
   );
 
-  if (arr->isVecArray()) {
+  if (kind == AK::Vec) {
     PackedArray::IterateV(
       arr,
       [&](const TypedValue* v) {
@@ -1473,7 +1473,7 @@ static void serializeArrayImpl(const ArrayData* arr,
         return false;
       }
     );
-  } else if (arr->isKeyset()) {
+  } else if (kind == AK::Keyset) {
     SetArray::Iterate(
       SetArray::asSet(arr),
       [&](const TypedValue* v) {
@@ -1553,18 +1553,22 @@ void serializeCollection(ObjectData* obj, VariableSerializer* serializer) {
         ser_type == VariableSerializer::Type::PHPOutput) {
       // For the 'V' serialization format, we don't print out keys
       // for Serialize, APCSerialize, DebuggerSerialize
+      bool const should_indent =
+        ser_type == VariableSerializer::Type::VarExport ||
+        ser_type == VariableSerializer::Type::PHPOutput;
       for (ArrayIter iter(obj); iter; ++iter) {
-        if (ser_type == VariableSerializer::Type::VarExport ||
-            ser_type == VariableSerializer::Type::PHPOutput) {
+        if (should_indent) {
           serializer->indent();
         }
         serializer->writeArrayValue(iter.second(), AK::PHP);
       }
     } else {
       if (isSetCollection(type)) {
+        bool const should_indent =
+          ser_type == VariableSerializer::Type::PrintR ||
+          ser_type == VariableSerializer::Type::DebuggerDump;
         for (ArrayIter iter(obj); iter; ++iter) {
-          if (ser_type == VariableSerializer::Type::PrintR ||
-              ser_type == VariableSerializer::Type::DebuggerDump) {
+          if (should_indent) {
             serializer->indent();
           }
           serializer->writeArrayValue(iter.second(), AK::PHP);

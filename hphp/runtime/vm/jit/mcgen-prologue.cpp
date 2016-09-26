@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/trace.h"

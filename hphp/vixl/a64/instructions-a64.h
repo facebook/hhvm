@@ -234,6 +234,11 @@ class Instruction {
            (Mask(MoveWideImmediateMask) == MOVN_w);
   }
 
+  inline bool IsMovz() const {
+    return (Mask(MoveWideImmediateMask) == MOVZ_x) ||
+           (Mask(MoveWideImmediateMask) == MOVZ_w);
+  }
+
   // Indicate whether Rd can be the stack pointer or the zero register. This
   // does not check that the instruction actually has an Rd field.
   inline Reg31Mode RdMode() const {

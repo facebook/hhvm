@@ -32,6 +32,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
+#include "hphp/vixl/a64/disasm-a64.h"
 
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
@@ -207,9 +208,18 @@ namespace x64 {
 }
 
 namespace arm {
-  // 'lea' results in atmost 4 instructions (see vasm-arm.cpp)
-  static constexpr int kMovLen = 4 * 4;
-  static constexpr int kLeaVmSpLen = 4 * 4;
+  // vasm lea is emitted in 4 bytes.
+  //   ADD imm
+  static constexpr int kLeaVmSpLen = 4;
+  // The largest of vasm setcc, copy, or leap is emitted in 8 bytes.
+  //   AND imm, MOV, or ADRP + ADD imm
+  static constexpr int kMovLen = 8;
+  // The largest of vasm copy or leap is emitted in 8 bytes.
+  //   MOV or ADRP + ADD imm
+  static constexpr int kPersist = 8;
+  // vasm copy and jmpi is emitted in 20 bytes.
+  //   MOV and 16
+  static constexpr int kSvcReqExit = 20;
 }
 
 namespace ppc64 {
@@ -227,7 +237,9 @@ size_t stub_size() {
     case Arch::X64:
       return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
     case Arch::ARM:
-      return kTotalArgs * arm::kMovLen + arm::kLeaVmSpLen;
+      return arm::kLeaVmSpLen +
+        kTotalArgs * arm::kMovLen +
+        arm::kPersist + arm::kSvcReqExit;
     case Arch::PPC64:
       // This calculus was based on the amount of emitted instructions in
       // emit_svcreq.
@@ -254,42 +266,36 @@ FPInvOffset extract_spoff(TCA stub) {
     }
 
     case Arch::ARM: {
-      struct Decoder : public vixl::Decoder {
-        void VisitAddSubImmediate(vixl::Instruction* inst) {
-          // For immediate operands, shift can be '0' or '12'
-          int64_t immed =
-            inst->ImmAddSub() << ((inst->ShiftAddSub() == 1) ? 12 : 0);
-          switch (inst->Mask(vixl::AddSubOpMask)) {
-            case vixl::ADD: offset = immed; break;
-            case vixl::SUB: offset = -immed; break;
-            default: break;
-          }
-        }
-        void VisitMoveWideImmediate(vixl::Instruction* inst) {
-          // For wide moves, shift can be 0, 16, 32 or 64
-          int64_t immed = safe_cast<int64_t>(
-            inst->ImmMoveWide() << (inst->ShiftMoveWide() << 4));
-          switch (inst->Mask(vixl::MoveWideImmediateMask)) {
-            case vixl::MOVN_w:
-            case vixl::MOVN_x:
-              immed = safe_cast<int64_t>(~immed);
-              break;
-          }
-          offset = immed;
-        }
-        folly::Optional<int32_t> offset;
-      };
-      Decoder decoder;
-      decoder.Decode((vixl::Instruction*)(stub));
+      auto instr = reinterpret_cast<vixl::Instruction*>(stub);
 
-      // 'lea' becomes
-      //   a. 'add dst, base, #imm' or
-      //   b. 'mov r, #imm'
-      //      'add dst, base, r'
-      // FIXME: Return '0' if vasm optimizes 'lea' to 'mov'
-      if (!decoder.offset) return FPInvOffset{0};
-      always_assert(decoder.offset && (*decoder.offset % sizeof(Cell)) == 0);
-      return FPInvOffset{-(*decoder.offset / int32_t{sizeof(Cell)})};
+      if (instr->IsAddSubImmediate()) {
+        auto const offBytes = safe_cast<int32_t>(instr->ImmAddSub());
+        always_assert((offBytes % sizeof(Cell)) == 0);
+
+        if (instr->Mask(vixl::AddSubImmediateMask) == vixl::SUB_w_imm ||
+            instr->Mask(vixl::AddSubImmediateMask) == vixl::SUB_x_imm) {
+          return FPInvOffset{offBytes / int32_t{sizeof(Cell)}};
+        } else if (instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_w_imm ||
+		   instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_x_imm) {
+          return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+	}
+      } else if (instr->IsMovn()) {
+        auto next = instr->NextInstruction();
+        always_assert(next->Mask(vixl::AddSubShiftedMask) == vixl::ADD_w_shift ||
+                      next->Mask(vixl::AddSubShiftedMask) == vixl::ADD_x_shift);
+        auto const offBytes = safe_cast<int32_t>(~instr->ImmMoveWide());
+        always_assert((offBytes % sizeof(Cell)) == 0);
+        return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+      } else if (instr->IsMovz()) {
+        auto next = instr->NextInstruction();
+        always_assert(next->Mask(vixl::AddSubShiftedMask) == vixl::SUB_w_shift ||
+                      next->Mask(vixl::AddSubShiftedMask) == vixl::SUB_x_shift);
+        auto const offBytes = safe_cast<int32_t>(instr->ImmMoveWide());
+        always_assert((offBytes % sizeof(Cell)) == 0);
+        return FPInvOffset{offBytes / int32_t{sizeof(Cell)}};
+      } else {
+        always_assert(false && "Expected an instruction that offsets SP");
+      }
     }
 
     case Arch::PPC64: {

@@ -283,7 +283,13 @@ void HttpServer::runOrExitProcess() {
     Logger::Info("debugger server started");
   }
 
-  InitFiniNode::ServerInit();
+  try {
+    InitFiniNode::ServerInit();
+  } catch (std::exception &e) {
+    startupFailure(
+      folly::sformat("Exception in InitFiniNode::ServerInit(): {}",
+                     e.what()));
+  }
 
   {
     BootStats::mark("servers started");

@@ -84,8 +84,8 @@ struct ArgDesc {
     return m_typeImm;
   }
   Immed disp() const {
-    assertx((m_kind == Kind::Addr) ||
-	    (m_kind == Kind::IndRet));
+    assertx(m_kind == Kind::Addr ||
+	    m_kind == Kind::IndRet);
     return m_disp32;
   }
   bool isZeroExtend() const { return m_zeroExtend; }
@@ -199,6 +199,12 @@ struct ArgGroup {
     return *this;
   }
 
+  /*
+   * indRet args are similar to simple addr args, but are used specifically to
+   * pass the address that the native call will use for indirect returns. If a
+   * platform has no dedicated registers for indirect returns, then it uses
+   * the first general purpose argument register.
+   */
   ArgGroup& indRet(Vreg base, Immed off) {
     push_arg(ArgDesc(ArgDesc::Kind::IndRet, base, off));
     return *this;

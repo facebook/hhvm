@@ -47,7 +47,7 @@ namespace {
 void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
   switch (arg.kind()) {
     case ArgDesc::Kind::IndRet: {
-      auto tmp = v.makeReg();
+      auto const tmp = v.makeReg();
       v << lea{arg.srcReg()[arg.disp().l()], tmp};
       vargs.push_back(tmp);
       break;

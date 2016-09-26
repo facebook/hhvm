@@ -564,13 +564,14 @@ static inline int64_t availableMemory(const MemInfo& mem, int64_t rss,
 
 bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
                              int64_t rssNeeded, int cacheFreeFactor) {
-  assert(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
   if (!mem.valid()) return false;
   // Don't proceed if free memory is too limited, no matter how big
   // the cache is.
   if (mem.freeMb < rssNeeded / 16) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
-  return (rssMb + availableMb >= rssNeeded);
+  auto const result = (rssMb + availableMb >= rssNeeded);
+  if (result) assert(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
+  return result;
 }
 
 bool HttpServer::CanStep(const MemInfo& mem, int64_t rssMb,
@@ -614,13 +615,16 @@ void HttpServer::CheckMemAndWait(bool final) {
                   memInfo.freeMb, memInfo.cachedMb, memInfo.buffersMb,
                   rssMb, rssNeeded);
 
-    if (CanContinue(memInfo, rssMb, rssNeeded, factor)) return;
-    if (!final && CanStep(memInfo, rssMb, rssNeeded, factor)) return;
+    if (!final) {
+      if (CanStep(memInfo, rssMb, rssNeeded, factor)) return;
+    } else {
+      if (CanContinue(memInfo, rssMb, rssNeeded, factor)) return;
+    }
 
     // OK, we don't have enough memory, let's do something.
     HttpServer::StopOldServer();  // nop if already called before
-    sleep(1);
-  } while (true);        // Guaranteed to exit, at least upon timeout.
+    /* sleep override */ sleep(1);
+  } while (true); // Guaranteed to return in the loop, at least upon timeout.
   not_reached();
 }
 

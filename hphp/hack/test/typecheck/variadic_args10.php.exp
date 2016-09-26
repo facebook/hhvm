@@ -1,9 +1,10 @@
 File "variadic_args10.php", line 7, characters 7-8:
-This object is of type C2 (Typing[4110])
+Class C2 does not correctly implement all required methods  (Typing[4110])
 File "variadic_args10.php", line 7, characters 18-19:
-It is incompatible with this object of type C1
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type C1
 Read the following to see why:
+File "variadic_args10.php", line 8, characters 19-22:
+Member meth has the wrong type
 File "variadic_args10.php", line 8, characters 24-26:
 This is an int
 File "variadic_args10.php", line 4, characters 34-38:

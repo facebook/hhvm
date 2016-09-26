@@ -1,9 +1,10 @@
 File "constraint_gen_fail3.php", line 23, characters 7-7:
-This object is of type U (Typing[4110])
+Class U does not correctly implement all required methods  (Typing[4110])
 File "constraint_gen_fail3.php", line 23, characters 20-20:
-It is incompatible with this object of type L
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type L
 Read the following to see why:
+File "constraint_gen_fail3.php", line 24, characters 19-21:
+Member get has the wrong type
 File "constraint_gen_fail3.php", line 23, characters 22-22:
 This is an object of type A
 File "constraint_gen_fail3.php", line 20, characters 27-27:

@@ -1,9 +1,10 @@
 File "construct_consist3.php", line 11, characters 7-8:
-This object is of type C3 (Typing[4040])
+Class C3 does not correctly implement all required methods  (Typing[4040])
 File "construct_consist3.php", line 11, characters 18-19:
-It is incompatible with this object of type C2
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type C2
 Read the following to see why:
+File "construct_consist3.php", line 13, characters 19-29:
+Member __construct has the wrong type
 File "construct_consist3.php", line 13, characters 19-29:
 Too few arguments
 File "construct_consist3.php", line 8, characters 19-29:

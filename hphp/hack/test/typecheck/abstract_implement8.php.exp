@@ -1,9 +1,10 @@
 File "abstract_implement8.php", line 15, characters 16-16:
-This object is of type A (Typing[4110])
+Class A does not correctly implement all required methods  (Typing[4110])
 File "abstract_implement8.php", line 15, characters 29-33:
-It is incompatible with this object of type Alpha
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type Alpha
 Read the following to see why:
+File "abstract_implement8.php", line 16, characters 19-27:
+Member getMyName has the wrong type
 File "abstract_implement8.php", line 12, characters 32-37:
 This is a string
 File "abstract_implement8.php", line 16, characters 32-34:

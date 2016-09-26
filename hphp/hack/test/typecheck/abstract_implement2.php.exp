@@ -1,9 +1,10 @@
 File "abstract_implement2.php", line 20, characters 7-12:
-This object is of type BClass (Typing[4110])
+Class BClass does not correctly implement all required methods  (Typing[4110])
 File "abstract_implement2.php", line 20, characters 22-27:
-It is incompatible with this object of type AClass
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type AClass
 Read the following to see why:
+File "abstract_implement2.php", line 21, characters 19-21:
+Member foo has the wrong type
 File "abstract_implement2.php", line 20, characters 29-32:
 This is a bool
 File "abstract_implement2.php", line 18, characters 43-43:

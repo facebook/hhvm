@@ -1233,21 +1233,29 @@ let visibility_extends vis pos parent_pos parent_vis =
   add_list Typing.visibility_extends [msg1; msg2]
 
 let member_not_implemented member_name parent_pos pos defn_pos =
-  let msg1 = pos, "This object doesn't implement the method "^member_name in
+  let msg1 = pos, "This type doesn't implement the method "^member_name in
   let msg2 = parent_pos, "Which is required by this interface" in
   let msg3 = defn_pos, "As defined here" in
   add_list Typing.member_not_implemented [msg1; msg2; msg3]
 
 let bad_decl_override parent_pos parent_name pos name (error: error) =
-  let msg1 = pos, ("This object is of type "^(strip_ns name)) in
+  let msg1 = pos, ("Class " ^ (strip_ns name)
+      ^ " does not correctly implement all required methods ") in
   let msg2 = parent_pos,
-    ("It is incompatible with this object of type "^(strip_ns parent_name)^
-     "\nbecause some declarations are incompatible."^
+    ("Some methods are incompatible with those declared in type "
+     ^ (strip_ns parent_name) ^
      "\nRead the following to see why:"
     ) in
   (* This is a cascading error message *)
   let code, msgl = (get_code error), (to_list error) in
   add_list code (msg1 :: msg2 :: msgl)
+
+let bad_method_override pos member_name (error: error) =
+  let msg = pos, ("Member " ^ (strip_ns member_name)
+      ^ " has the wrong type") in
+  (* This is a cascading error message *)
+  let code, msgl = (get_code error), (to_list error) in
+  add_list code (msg :: msgl)
 
 let bad_enum_decl pos (error: error) =
   let msg = pos,

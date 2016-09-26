@@ -1,9 +1,10 @@
 File "generic_incompatible_implementation.php", line 6, characters 7-9:
-This object is of type Foo (Typing[4110])
+Class Foo does not correctly implement all required methods  (Typing[4110])
 File "generic_incompatible_implementation.php", line 6, characters 22-24:
-It is incompatible with this object of type Bar
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type Bar
 Read the following to see why:
+File "generic_incompatible_implementation.php", line 7, characters 19-19:
+Member f has the wrong type
 File "generic_incompatible_implementation.php", line 7, characters 26-26:
 This is a value of generic type T
 File "generic_incompatible_implementation.php", line 11, characters 26-26:

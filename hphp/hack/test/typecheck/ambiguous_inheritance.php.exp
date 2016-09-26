@@ -1,9 +1,10 @@
 File "ambiguous_inheritance.php", line 11, characters 16-16:
-This object is of type C (Typing[4110])
+Class C does not correctly implement all required methods  (Typing[4110])
 File "ambiguous_inheritance.php", line 11, characters 33-34:
-It is incompatible with this object of type I2
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type I2
 Read the following to see why:
+File "ambiguous_inheritance.php", line 4, characters 28-30:
+Member foo has the wrong type
 File "ambiguous_inheritance.php", line 8, characters 35-37:
 This is an int
 File "ambiguous_inheritance.php", line 4, characters 35-39:

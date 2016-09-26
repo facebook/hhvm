@@ -1,9 +1,10 @@
 File "var_args_inheritance1.php", line 16, characters 7-7:
-This object is of type B (Typing[4042])
+Class B does not correctly implement all required methods  (Typing[4042])
 File "var_args_inheritance1.php", line 16, characters 17-17:
-It is incompatible with this object of type A
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type A
 Read the following to see why:
+File "var_args_inheritance1.php", line 17, characters 19-20:
+Member f1 has the wrong type
 File "var_args_inheritance1.php", line 17, characters 19-20:
 Should have a variadic argument
 File "var_args_inheritance1.php", line 13, characters 19-20:

@@ -1,9 +1,10 @@
 File "iface_require_incompat4.php", line 15, characters 11-12:
-This object is of type I3 (Typing[4110])
+Class I3 does not correctly implement all required methods  (Typing[4110])
 File "iface_require_incompat4.php", line 15, characters 26-27:
-It is incompatible with this object of type I2
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type I2
 Read the following to see why:
+File "iface_require_incompat4.php", line 4, characters 10-11:
+Member x has the wrong type
 File "iface_require_incompat4.php", line 4, characters 10-11:
 Typing error
 File "iface_require_incompat4.php", line 12, characters 25-29:

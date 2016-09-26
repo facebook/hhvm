@@ -1,9 +1,10 @@
 File "simplify_error.php", line 7, characters 16-16:
-This object is of type C (Typing[4110])
+Class C does not correctly implement all required methods  (Typing[4110])
 File "simplify_error.php", line 7, characters 26-26:
-It is incompatible with this object of type P
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type P
 Read the following to see why:
+File "simplify_error.php", line 13, characters 31-33:
+Member foo has the wrong type
 File "simplify_error.php", line 7, characters 28-34:
 This is the abstract type constant C::T
 File "simplify_error.php", line 4, characters 38-38:

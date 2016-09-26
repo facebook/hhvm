@@ -1,9 +1,10 @@
 File "incompatible_interface.php", line 16, characters 7-7:
-This object is of type B (Typing[4110])
+Class B does not correctly implement all required methods  (Typing[4110])
 File "incompatible_interface.php", line 16, characters 23-23:
-It is incompatible with this object of type A
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type A
 Read the following to see why:
+File "incompatible_interface.php", line 18, characters 19-21:
+Member foo has the wrong type
 File "incompatible_interface.php", line 13, characters 26-28:
 This is an int
 File "incompatible_interface.php", line 16, characters 9-9:

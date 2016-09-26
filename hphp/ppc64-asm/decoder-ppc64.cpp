@@ -14,11 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/ppc64-asm/branch-ppc64.h"
-#include "hphp/ppc64-asm/decoder-ppc64.h"
-
 #include <cassert>
 
+#include "hphp/ppc64-asm/branch-ppc64.h"
+#include "hphp/ppc64-asm/decoder-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
 
 namespace ppc64_asm {
@@ -29,23 +28,26 @@ Decoder* Decoder::s_decoder = nullptr;
 #define PPC_OPERAND_GPR      0x1
 #define PPC_OPERAND_GPR_0    0x2
 #define PPC_OPERAND_SIGNED   0x4
-#define PPC_OPERAND_PAREN    0x8
-#define PPC_OPERAND_RELATIVE 0x10
-#define PPC_OPERAND_ABSOLUTE 0x20
-#define PPC_OPERAND_OPTIONAL 0x40
-#define PPC_OPERAND_FPR      0x80
-#define PPC_OPERAND_VR       0x100
-#define PPC_OPERAND_VSX      0x200
-#define PPC_OPERAND_SIGNOPT  0x400
-#define PPC_OPERAND_CR       0x800
-#define PPC_OPERAND_NEXT     0x1000
-#define PPC_OPERAND_PLUS1    0x2000
+#define PPC_OPERAND_UNSIGNED 0x8
+#define PPC_OPERAND_PAREN    0x10
+#define PPC_OPERAND_RELATIVE 0x20
+#define PPC_OPERAND_ABSOLUTE 0x40
+#define PPC_OPERAND_OPTIONAL 0x80
+#define PPC_OPERAND_FPR      0x100
+#define PPC_OPERAND_VR       0x200
+#define PPC_OPERAND_VSX      0x400
+#define PPC_OPERAND_SIGNOPT  0x800
+#define PPC_OPERAND_CR       0x1000
+#define PPC_OPERAND_NEXT     0x2000
+#define PPC_OPERAND_PLUS1    0x4000
+#define PPC_OPERAND_NOSHIFT  0x8000
 
 #define A         { 0x2000000, 0x0 }
 #define A_L       { 0x20, 0x0 }
 #define BA        { 0x001f0000, 0x0 }
 #define BB        { 0x0000f800, 0x0 }
-#define BD        { 0x0000fffc, 0x0 }
+#define BD        { 0x0000fffc, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED | \
+                                PPC_OPERAND_NOSHIFT }
 #define BDA       { 0xfffc, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED }
 #define BF        BDA
 #define BFA       { 0x1c0000, PPC_OPERAND_CR }
@@ -63,7 +65,8 @@ Decoder* Decoder::s_decoder = nullptr;
 #define DGM       DCM
 #define DM        { 0xc0, 0x0 }
 #define DQ        { 0xfff0, 0x0 }
-#define DS        { 0xfffc, PPC_OPERAND_PAREN | PPC_OPERAND_SIGNED }
+#define DS        { 0xfffc, PPC_OPERAND_PAREN | PPC_OPERAND_SIGNED | \
+                            PPC_OPERAND_NOSHIFT}
 #define DUI       { 0x3e00000, 0x0 }
 #define DUIS      { 0x1ff800, PPC_OPERAND_SIGNED }
 #define E         { 0x8000, 0x0 }
@@ -81,8 +84,10 @@ Decoder* Decoder::s_decoder = nullptr;
 #define FXM       { 0xff000, 0x0 }
 #define L         { 0x2000000, PPC_OPERAND_OPTIONAL }
 #define LEV       { 0xfe0, PPC_OPERAND_OPTIONAL }
-#define LI        { 0x3fffffc, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED }
-#define LIA       { 0x3fffffc, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED }
+#define LI        { 0x3fffffc, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED | \
+                               PPC_OPERAND_NOSHIFT }
+#define LIA       { 0x3fffffc, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED | \
+                               PPC_OPERAND_NOSHIFT }
 #define LS        { 0x600000, PPC_OPERAND_OPTIONAL }
 #define MB6       { 0x7e0, 0x0 }
 #define ME6       MB6
@@ -130,7 +135,7 @@ Decoder* Decoder::s_decoder = nullptr;
 #define TH        { 0x3e00000, 0x0 }
 #define TO        TH
 #define U         { 0xf000, 0x0 }
-#define UI        { 0xffff, 0x0 }
+#define UI        { 0xffff, PPC_OPERAND_UNSIGNED }
 #define UIMM      { 0x1f0000, PPC_OPERAND_SIGNED }
 #define UN        { 0x0, 0x0 }
 #define VA        { 0x1f0000, PPC_OPERAND_VR }
@@ -288,15 +293,30 @@ std::string DecoderInfo::toString() {
 
   bool hasParen = false;
   for (auto oper : m_operands) {
-    auto op = (m_image & oper.m_mask) >> oper.operandShift();
+    auto op = m_image & oper.m_mask;
+    if (!(oper.m_flags & PPC_OPERAND_NOSHIFT)) op >>= oper.operandShift();
+    auto toHex = [] (std::string& instr, intptr_t n) {
+      std::stringstream stringStream;
+      if (n < 0) {
+          stringStream << "-0x";
+          n = -n;
+      } else stringStream << "0x";
+      stringStream << std::hex << n;
+      instr += stringStream.str();
+    };
     if (oper.m_flags & PPC_OPERAND_GPR)   { instr += "r"; }
     if (oper.m_flags & PPC_OPERAND_GPR_0) { if (op != 0) instr += "r"; }
     if (oper.m_flags & PPC_OPERAND_FPR)   { instr += "f"; }
     if (oper.m_flags & PPC_OPERAND_VR)    { instr += "vs"; }
-    if (oper.m_flags & PPC_OPERAND_SIGNED) {
-      int32_t n = static_cast<int32_t>(op);
-      if (n < 0) instr += "-";
-      instr += std::to_string(n);
+    if (oper.m_flags & PPC_OPERAND_RELATIVE) {
+      // print branch target instead of the relative offset
+      int32_t n = static_cast<int32_t>(op << 6) >> 6; // extend sign
+      toHex(instr, reinterpret_cast<intptr_t>(m_ip) + n);
+    } else if (oper.m_flags & PPC_OPERAND_SIGNED) {
+      int16_t n = static_cast<int16_t>(op);
+      toHex(instr, n);
+    } else if (oper.m_flags & PPC_OPERAND_UNSIGNED) {
+      toHex(instr, op);
     } else {
       instr += std::to_string(op);
     }

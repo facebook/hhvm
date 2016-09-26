@@ -837,7 +837,7 @@ void Label::branch(Assembler& a, BranchConditions bc, LinkReg lr) {
       if (BranchConditions::Always == bc) {
         // unconditional branch
         if (HPHP::jit::deltaFitsBits(diff, 26)) {
-          addJump(&a, BranchType::b);
+          addJump(&a);
           if (LinkReg::Save == lr) a.bl(diff);
           else                     a.b (diff);
           return;
@@ -846,7 +846,7 @@ void Label::branch(Assembler& a, BranchConditions bc, LinkReg lr) {
         // conditional branch
         if (HPHP::jit::deltaFits(diff, HPHP::sz::word)) {
           BranchParams bp(bc);
-          addJump(&a, BranchType::bc);
+          addJump(&a);
           assert(LinkReg::DoNotTouch == lr &&
               "Conditional call is NOT supported.");
 
@@ -867,11 +867,11 @@ void Label::branch(Assembler& a, BranchConditions bc, LinkReg lr) {
 }
 
 void Label::branchFar(Assembler& a, BranchConditions bc, LinkReg lr) {
-  BranchParams bp(bc);
-  const ssize_t address = ssize_t(m_address);
+  // Marking current address for patchAbsolute
+  addJump(&a);
 
   // Use reserved function linkage register
-  addJump(&a, BranchType::bctr);  // marking THIS address for patchAbsolute
+  const ssize_t address = ssize_t(m_address);
   a.li64(reg::r12, address);
 
   // When branching to another context, r12 need to keep the target address
@@ -886,8 +886,14 @@ void Label::branchFar(Assembler& a, BranchConditions bc, LinkReg lr) {
     a.emitNop(2 * instr_size_in_bytes);
   }
 
-  if (LinkReg::Save == lr) a.bctrl();
-  else                     a.bcctr(bp.bo(), bp.bi(), 0);
+  BranchParams bp(bc);
+  if (LinkReg::Save == lr) {
+    // call
+    a.bctrl();
+  } else {
+    // jcc
+    a.bcctr(bp.bo(), bp.bi(), 0);
+  }
 }
 
 void Label::asm_label(Assembler& a) {
@@ -896,10 +902,9 @@ void Label::asm_label(Assembler& a) {
   m_address = a.frontier();
 }
 
-void Label::addJump(Assembler* a, BranchType type) {
+void Label::addJump(Assembler* a) {
   if (m_address) return;
   JumpInfo info;
-  info.type = type;
   info.a = a;
   info.addr = a->codeBlock.frontier();
   m_toPatch.push_back(info);

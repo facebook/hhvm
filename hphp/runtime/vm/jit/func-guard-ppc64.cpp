@@ -34,9 +34,10 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// funcGuard: li64 (5 instr), ld, cmpd, li64 (5 instr), mtctr, nop, nop, bctr
+// funcGuard: Immediate, ld, cmpd, kJccLen
 // it needs to rewind all of those instructions but pointing to the first.
-constexpr auto kFuncGuardLen = 16 * ppc64_asm::instr_size_in_bytes;
+constexpr auto kFuncGuardLen = smashableMovqLen()
+  + 2 * ppc64_asm::instr_size_in_bytes + ppc64_asm::Assembler::kJccLen;
 
 ALWAYS_INLINE bool isPrologueStub(TCA addr) {
   return addr == tc::ustubs().fcallHelperThunk;

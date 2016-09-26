@@ -66,7 +66,10 @@ std::atomic<bool> g_initFlag{false};
 //////////////////////////////////////////////////////////////////////
 
 void profile(const StringData* name) {
-  if (g_initFlag.load(std::memory_order_acquire)) return;
+  if (g_initFlag.load(std::memory_order_acquire) ||
+      !RuntimeOption::RepoAuthoritative) {
+    return;
+  }
 
   assert(name->isStatic());
   unsigned inc = 1;
@@ -90,6 +93,10 @@ void init() {
 
   Lock l(s_initLock);
   if (g_initFlag.load(std::memory_order_acquire)) return;
+  if (!RuntimeOption::RepoAuthoritative) {
+    g_initFlag.store(true, std::memory_order_release);
+    return;
+  }
   if (do_assert) s_initThread.store(pthread_self(), std::memory_order_release);
 
   // First, grab a write lock on s_instanceCounts and grab the current set of

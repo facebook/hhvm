@@ -89,8 +89,6 @@ TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk,
   auto nArgs = rec->prologueArgs();
   emittedDVInit = false;
 
-  assertx(GetWriteLease().amOwner());
-
   func->resetPrologue(nArgs);
 
   // If we're regenerating a prologue, and we want to check shouldTranslate()

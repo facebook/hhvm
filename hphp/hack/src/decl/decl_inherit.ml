@@ -95,10 +95,10 @@ let add_const name const acc =
   | None ->
     SMap.add name const acc
   | Some existing_const ->
-    match (snd const.cc_type, snd existing_const.cc_type) with
-    | Tgeneric(_, _), Tgeneric(_, _) ->
+    match (const.cc_abstract, existing_const.cc_abstract) with
+    | true, true ->
       SMap.add name const acc
-    | Tgeneric(_, _), _ ->
+    | true, _ ->
       acc
     | _, _ ->
       SMap.add name const acc

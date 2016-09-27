@@ -87,23 +87,17 @@ let check_members_implemented check_private parent_reason reason
 
 (* When constant is overridden we need to check if the type is
  * compatible with the previous type defined in the parent.
- *
- * Note that we determine if a constant is abstract by seeing if it is
- * a Tgeneric.
-*)
-(* TODO akenn: multiple constraints *)
-let check_types_for_const env parent_type class_type =
-  match (snd parent_type, snd class_type) with
-    | Tgeneric (_, []), _ -> ()
-      (* parent abstract constant; no constraints *)
-    | Tgeneric (_, [(Ast.Constraint_as, fty_parent)]),
-      Tgeneric (_, [(Ast.Constraint_as, fty_child)]) ->
+ *)
+let check_types_for_const env
+    parent_abstract parent_type class_abstract class_type =
+  match (parent_type, class_type) with
+    | fty_parent, fty_child when parent_abstract && class_abstract ->
       (* redeclaration of an abstract constant *)
       ignore (Phase.sub_type_decl env fty_child fty_parent)
-    | Tgeneric (_, [(Ast.Constraint_as, fty_parent)]), _ ->
+    | fty_parent, _ when parent_abstract ->
       (* const definition constrained by parent abstract const *)
       ignore (Phase.sub_type_decl env class_type fty_parent)
-    | _, Tgeneric(_, _) ->
+    | _, _ when class_abstract ->
       (* Trying to override concrete type with an abstract one *)
       let pos = Reason.to_pos (fst class_type) in
       let parent_pos = Reason.to_pos (fst parent_type) in
@@ -178,7 +172,9 @@ let check_const_override env
     parent_class class_ parent_class_const class_const =
   let _class_known, check_params = should_check_params parent_class class_ in
   if check_params then
-    check_types_for_const env parent_class_const.cc_type class_const.cc_type
+    check_types_for_const env
+      parent_class_const.cc_abstract parent_class_const.cc_type
+      class_const.cc_abstract class_const.cc_type
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =

@@ -500,32 +500,30 @@ and class_const_decl env c acc (h, id, e) =
       acc
   | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface | Ast.Cenum ->
     let c_name = (snd c.c_name) in
-    let ty =
+    let ty, abstract =
+      (* Optional hint h, optional expression e *)
       match h, e with
-        | Some h, Some _ -> Decl_hint.hint env h
-        | Some h, None ->
-          let h_ty = Decl_hint.hint env h in
-          let pos, name = id in
-          Reason.Rwitness pos,
-            Tgeneric (c_name^"::"^name, [(Ast.Constraint_as, h_ty)])
-        | None, Some e ->
+      | Some h, Some _ ->
+        Decl_hint.hint env h, false
+      | Some h, None ->
+        Decl_hint.hint env h, true
+      | None, Some e ->
           begin match infer_const e with
-            | Some ty -> ty
+            | Some ty -> ty, false
             | None ->
               if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
               then Errors.missing_typehint (fst id);
-              Reason.Rwitness (fst id), Tany
+              (Reason.Rwitness (fst id), Tany), false
           end
         | None, None ->
-          let pos, name = id in
+          let pos, _name = id in
           if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
           let r = Reason.Rwitness pos in
-          let const_ty = r, Tgeneric (c_name^"::"^name,
-            [(Ast.Constraint_as, (r, Tany))]) in
-          const_ty
+          (r, Tany), true
     in
     let cc = {
       cc_synthesized = false;
+      cc_abstract = abstract;
       cc_type = ty;
       cc_expr = e;
       cc_origin = c_name;
@@ -541,6 +539,7 @@ and class_class_decl class_id =
   let classname_ty =
     reason, Tapply ((pos, SN.Classes.cClassname), [reason, Tthis]) in
   {
+    cc_abstract    = false;
     cc_synthesized = true;
     cc_type        = classname_ty;
     cc_expr        = None;
@@ -613,14 +612,12 @@ and visibility cid = function
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
-and typeconst_ty_decl pos c_name dc_name ~is_abstract =
+and typeconst_ty_decl pos dc_name ~is_abstract =
   let r = Reason.Rwitness pos in
   let tsid = pos, SN.FB.cTypeStructure in
   let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [pos, dc_name])]) in
-  let ts_ty = if is_abstract
-    then r, Tgeneric (c_name^"::"^dc_name, [(Ast.Constraint_as, ts_ty)])
-    else ts_ty in
   {
+    cc_abstract    = is_abstract;
     cc_synthesized = true;
     cc_type        = ts_ty;
     cc_expr        = None;
@@ -644,7 +641,7 @@ and typeconst_decl env c (acc, acc2) {
       let constr = Option.map constr (Decl_hint.hint env) in
       let ty = Option.map type_ (Decl_hint.hint env) in
       let is_abstract = Option.is_none ty in
-      let ts = typeconst_ty_decl pos (snd c.c_name) name ~is_abstract in
+      let ts = typeconst_ty_decl pos name ~is_abstract in
       let acc2 = SMap.add name ts acc2 in
       let tc = {
         ttc_name = (pos, name);

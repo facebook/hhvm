@@ -995,8 +995,8 @@ and expr_
         *)
         let env, tvarl =
           List.map_env env class_.tc_tparams TUtils.unresolved_tparam in
-        let params = List.map class_.tc_tparams begin fun (_, (p, n), cstr) ->
-          Reason.Rwitness p, Tgeneric (n, cstr)
+        let params = List.map class_.tc_tparams begin fun (_, (p, n), _) ->
+          Reason.Rwitness p, Tgeneric (n, [])
         end in
         let obj_type = Reason.Rwitness p, Tapply (pos_cname, params) in
         let ety_env = {
@@ -1016,8 +1016,7 @@ and expr_
             let tparam = Ast.Invariant, pos_cname,
               [(Ast.Constraint_as, obj_type)] in
             let env, tvar = TUtils.unresolved_tparam env tparam in
-            let param = Reason.Rwitness pos,
-              Tgeneric (class_name, [(Ast.Constraint_as, obj_type)]) in
+            let param = Reason.Rwitness pos, Tgeneric (class_name, []) in
             let tparams = tparam :: class_.tc_tparams in
             let ety_env = {
               ety_env with
@@ -2736,9 +2735,12 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
           | None ->
             smember_not_found p ~is_const ~is_method class_ mid;
             env, (Reason.Rnone, Tany)
-          | Some { cc_type; _ } ->
+          | Some { cc_type; cc_abstract; _ } ->
             let env, cc_type = Phase.localize ~ety_env env cc_type in
-            env, cc_type
+            env, (if cc_abstract
+              then (fst cc_type, Tabstract
+                    (AKgeneric (class_.tc_name ^ "::" ^ mid), Some cc_type))
+              else cc_type)
         end else begin
           let smethod = Env.get_static_member is_method env class_ mid in
           match smethod with
@@ -4100,7 +4102,7 @@ and check_extend_abstract_typeconst ~is_final p smap =
 and check_extend_abstract_const ~is_final p smap =
   SMap.iter begin fun x cc ->
     match cc.cc_type with
-    | r, Tgeneric _ when not cc.cc_synthesized ->
+    | r, _ when cc.cc_abstract && not cc.cc_synthesized ->
       Errors.implement_abstract ~is_final p (Reason.to_pos r) "constant" x
     | _, (Tany | Tmixed | Tarray (_, _) | Toption _ | Tprim _ | Tfun _
           | Tapply (_, _) | Ttuple _ | Tshape _ | Taccess (_, _) | Tthis

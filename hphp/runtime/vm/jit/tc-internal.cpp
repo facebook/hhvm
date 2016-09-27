@@ -17,9 +17,12 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
@@ -31,13 +34,16 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
+#include <atomic>
+
 namespace HPHP { namespace jit { namespace tc {
+
+///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
@@ -95,12 +101,18 @@ bool shouldTranslateNoSizeLimit(const Func* func) {
   return true;
 }
 
+static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
+
 bool shouldTranslate(const Func* func, TransKind kind) {
   if (!shouldTranslateNoSizeLimit(func)) return false;
 
-  // Otherwise, follow the Eval.JitAMaxUsage limit.  However, we do allow PGO
+  auto const main_under = code().main().used() < CodeCache::AMaxUsage;
+  auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
+
+  // Otherwise, follow the Eval.JitAMaxUsage limits.  However, we do allow PGO
   // translations past that limit if there's still space in code.hot.
-  if (code().main().used() < CodeCache::AMaxUsage) return true;
+  if (main_under && cold_under && froz_under) return true;
 
   switch (kind) {
     case TransKind::ProfPrologue:
@@ -108,10 +120,21 @@ bool shouldTranslate(const Func* func, TransKind kind) {
     case TransKind::OptPrologue:
     case TransKind::Optimize:
       return code().hotEnabled();
-
     default:
-      return false;
+      break;
   }
+
+  if (main_under && !s_did_log.test_and_set()) {
+    // If we ran out of TC space in cold or frozen but not in main, something
+    // unexpected is happening and we should take note of it.
+    if (!cold_under) {
+      logPerfWarning("cold_full", 1, [] (StructuredLogEntry&) {});
+    }
+    if (!froz_under) {
+      logPerfWarning("frozen_full", 1, [] (StructuredLogEntry&) {});
+    }
+  }
+  return false;
 }
 
 bool newTranslation() {
@@ -254,5 +277,7 @@ bool profileSrcKey(SrcKey sk) {
 
   return requestCount() <= RuntimeOption::EvalJitProfileRequests;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

@@ -161,6 +161,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // A few vasm passes depend on the particular instruction sequence here:
   //  - vasm-copy expects this lea{} to be immediately followed by the
   //    callphp{} below.
+  //  - vasm-prof-branch requires that this lea{} fall through straight to the
+  //    callphp{}, with no intervening control flow (though it doesn't care if
+  //    they're contiguous).
   v << lea{calleeAR, rvmfp()};
 
   // Emit a smashable call that initially calls a recyclable service request

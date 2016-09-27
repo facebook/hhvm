@@ -270,8 +270,10 @@ struct Vunit;
   /* push/pop */\
   O(pop, Inone, Un, D(d))\
   O(popm, Inone, U(d), Dn)\
+  O(popf, Inone, Un, D(d))\
   O(push, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
+  O(pushf, Inone, U(s), Dn)\
   /* floating-point conversions */\
   O(cvttsd2siq, Inone, U(s), D(d))\
   O(cvtsi2sd, Inone, U(s), D(d))\
@@ -1091,8 +1093,10 @@ struct jmpi { TCA target; RegSet args; };
  */
 struct pop { Vreg64 d; };
 struct popm { Vptr d; };
+struct popf { VregSF d; };
 struct push { Vreg64 s; };
 struct pushm { Vptr s; };
+struct pushf { VregSF s; };
 
 /*
  * Integer-float conversions.
@@ -1182,10 +1186,10 @@ struct Vinstr {
    */
   struct ir_context {
     const IRInstruction* origin;
-    uint8_t voff;
+    uint16_t voff;
   };
 
-  static constexpr auto kInvalidVoff = std::numeric_limits<uint8_t>::max();
+  static constexpr auto kInvalidVoff = std::numeric_limits<uint16_t>::max();
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -1256,7 +1260,7 @@ struct Vinstr {
   /*
    * The index of this instruction within the code for `origin'.
    */
-  uint8_t voff;
+  uint16_t voff;
 
   // 2-byte hole here.
 

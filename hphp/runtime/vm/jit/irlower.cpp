@@ -124,6 +124,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
   auto vunit = folly::make_unique<Vunit>();
   vunit->context = unit.context();
   vunit->log_entry = unit.logEntry().get_pointer();
+  vunit->profiling = true;
   Vasm vasm{*vunit};
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(*vunit); };
 

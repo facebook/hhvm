@@ -152,7 +152,7 @@ enum class CodeKind : uint8_t {
  *
  * kNumAreas must be kept up to date.
  */
-enum class AreaIndex : unsigned { Main, Cold, Frozen };
+enum class AreaIndex : uint8_t { Main, Cold, Frozen };
 constexpr size_t kNumAreas = 3;
 
 inline std::string areaAsString(AreaIndex area) {

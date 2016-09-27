@@ -649,9 +649,11 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp,
              bool do_assert = debug) {
   switch (inst.op) {
     case Vinstr::push:
+    case Vinstr::pushf:
     case Vinstr::pushm:
       return -8;
     case Vinstr::pop:
+    case Vinstr::popf:
     case Vinstr::popm:
       return 8;
     case Vinstr::lea: {

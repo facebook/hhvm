@@ -253,9 +253,11 @@ bool effectful(Vinstr& inst) {
     case Vinstr::phpret:
     case Vinstr::pop:
     case Vinstr::popm:
+    case Vinstr::popf:
     case Vinstr::popp:
     case Vinstr::push:
     case Vinstr::pushm:
+    case Vinstr::pushf:
     case Vinstr::pushp:
     case Vinstr::resumetc:
     case Vinstr::ret:

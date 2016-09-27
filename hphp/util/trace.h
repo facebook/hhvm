@@ -148,6 +148,7 @@ namespace Trace {
       TM(perf_mem_event) \
       TM(pgo)           \
       TM(printir)       \
+      TM(prof_branch)   \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \

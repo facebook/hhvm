@@ -127,7 +127,9 @@ bool shouldTranslate(const Func* func, TransKind kind) {
   if (main_under && !s_did_log.test_and_set()) {
     // If we ran out of TC space in cold or frozen but not in main, something
     // unexpected is happening and we should take note of it.
-    if (!cold_under) {
+    if (!cold_under && RuntimeOption::EvalProfBranchSampleFreq == 0) {
+      // We skip logging cold-full if TC branch profiling is on, since it
+      // causes us to fill up cold code at a much higher rate.
       logPerfWarning("cold_full", 1, [] (StructuredLogEntry&) {});
     }
     if (!froz_under) {

@@ -41,8 +41,11 @@ Vout& Vout::operator<<(const Vinstr& inst) {
   code.back().voff = m_irctx.voff == Vinstr::kInvalidVoff
     ? m_unit.cur_voff++
     : m_irctx.voff;
-  // TODO(t13282062)
-  // assertx(m_unit.cur_voff != Vinstr::kInvalidVoff);
+
+  // Don't let `voff' overflow.  It's only used for debugging and logging, so a
+  // value of UINT_MAX - 1 can be considered to have an implicit "or greater"
+  // qualifier attached.
+  if (UNLIKELY(m_unit.cur_voff == Vinstr::kInvalidVoff)) --m_unit.cur_voff;
 
   FTRACE(6, "Vout << {}\n", show(m_unit, inst));
   return *this;

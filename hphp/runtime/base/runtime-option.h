@@ -619,6 +619,8 @@ struct RuntimeOption {
    * kept low to avoid the risk of collecting a sample while we're      \
    * processing a previous sample. */                                   \
   F(uint32_t, PerfMemEventSampleFreq, 80)                               \
+  /* Sampling frequency for TC branch profiling. */                     \
+  F(uint32_t, ProfBranchSampleFreq, 0)                                  \
   /* */
 
 private:

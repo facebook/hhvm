@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
+#include "hphp/runtime/base/runtime-option.h"
+
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -31,6 +33,7 @@
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 #include "hphp/runtime/vm/jit/vasm-lower.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-prof.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
@@ -208,10 +211,12 @@ struct Vgen {
   void emit(const orqim& i) { a.orq(i.s0, i.m); }
   void emit(const pop& i) { a.pop(i.d); }
   void emit(const popm& i) { a.pop(i.d); }
+  void emit(const popf& i) { assertx(i.d == RegSF{0}); a.popf(); }
   void emit(psllq i) { binary(i); a.psllq(i.s0, i.d); }
   void emit(psrlq i) { binary(i); a.psrlq(i.s0, i.d); }
   void emit(const push& i) { a.push(i.s); }
   void emit(const pushm& i) { a.push(i.s); }
+  void emit(const pushf& i) { assertx(i.s == RegSF{0}); a.pushf(); }
   void emit(const roundsd& i) { a.roundsd(i.dir, i.s, i.d); }
   void emit(const sarq& i) { unary(i); a.sarq(i.d); }
   void emit(sarqi i) { binary(i); a.sarq(i.s0, i.d); }
@@ -961,6 +966,14 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   optimizeExits(unit);
 
   assertx(checkWidths(unit));
+
+  if (abi.canSpill && RuntimeOption::EvalProfBranchSampleFreq > 0) {
+    // Only profile branches if we're allowed to spill (and if branch profiling
+    // is on, of course).  This is not only for the freedom to generate
+    // arbitrary code, but also because we don't want to profile unique stubs
+    // and such.
+    profile_branches(unit);
+  }
 
   lowerForX64(unit);
   simplify(unit);

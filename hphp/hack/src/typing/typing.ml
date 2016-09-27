@@ -2735,10 +2735,10 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
           | None ->
             smember_not_found p ~is_const ~is_method class_ mid;
             env, (Reason.Rnone, Tany)
-          | Some { cc_type; cc_abstract; _ } ->
+          | Some { cc_type; cc_abstract; cc_pos; _ } ->
             let env, cc_type = Phase.localize ~ety_env env cc_type in
             env, (if cc_abstract
-              then (fst cc_type, Tabstract
+              then (Reason.Rwitness cc_pos, Tabstract
                     (AKgeneric (class_.tc_name ^ "::" ^ mid), Some cc_type))
               else cc_type)
         end else begin

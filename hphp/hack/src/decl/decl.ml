@@ -524,6 +524,7 @@ and class_const_decl env c acc (h, id, e) =
     let cc = {
       cc_synthesized = false;
       cc_abstract = abstract;
+      cc_pos = fst id;
       cc_type = ty;
       cc_expr = e;
       cc_origin = c_name;
@@ -540,6 +541,7 @@ and class_class_decl class_id =
     reason, Tapply ((pos, SN.Classes.cClassname), [reason, Tthis]) in
   {
     cc_abstract    = false;
+    cc_pos         = pos;
     cc_synthesized = true;
     cc_type        = classname_ty;
     cc_expr        = None;
@@ -618,6 +620,7 @@ and typeconst_ty_decl pos dc_name ~is_abstract =
   let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [pos, dc_name])]) in
   {
     cc_abstract    = is_abstract;
+    cc_pos         = pos;
     cc_synthesized = true;
     cc_type        = ts_ty;
     cc_expr        = None;

@@ -129,10 +129,6 @@ static_assert(
  * values. The actual container nodes are allocated with a conservative scan
  * action, so if the container lies on the stack or anywhere else we're
  * conservative scanning, we'll conservative scan that as well.
- *
- * scanPtr() is used in the custom scanners because its possible for two types
- * to mutually refer to each other via certain containers (so we need a cycle
- * check).
  */
 
 template <typename Key,
@@ -146,7 +142,7 @@ struct map final : std::map<Key, T, Compare,
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(Key, T) {
-    for (const auto& pair : *this) scanner.scanPtr(&pair);
+    for (const auto& pair : *this) scanner.scan(pair);
   }
 };
 
@@ -161,7 +157,7 @@ struct multimap final : std::multimap<Key, T, Compare,
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(Key, T) {
-    for (const auto& pair : *this) scanner.scanPtr(&pair);
+    for (const auto& pair : *this) scanner.scan(pair);
   }
 };
 
@@ -171,7 +167,7 @@ struct set final : std::set<T, Compare, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -181,7 +177,7 @@ struct multiset final : std::multiset<T, Compare, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -191,7 +187,7 @@ struct deque final : std::deque<T, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -201,7 +197,7 @@ struct vector final : std::vector<T, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -211,7 +207,7 @@ struct list final : std::list<T, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -221,7 +217,7 @@ struct forward_list final : std::forward_list<T, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -249,7 +245,7 @@ struct flat_map final : boost::container::flat_map<
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K, V) {
-    for (const auto& pair : *this) scanner.scanPtr(&pair);
+    for (const auto& pair : *this) scanner.scan(pair);
   }
 };
 
@@ -263,7 +259,7 @@ struct flat_multimap final : boost::container::flat_multimap<
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K, V) {
-    for (const auto& pair : *this) scanner.scanPtr(&pair);
+    for (const auto& pair : *this) scanner.scan(pair);
   }
 };
 
@@ -282,7 +278,7 @@ struct flat_set final : boost::container::flat_set<K, Compare,
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -295,7 +291,7 @@ struct flat_multiset final : boost::container::flat_multiset<
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(K) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -320,7 +316,7 @@ struct hash_map final : std::unordered_map<
 
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T, U) {
-   for (const auto& pair : *this) scanner.scanPtr(&pair);
+   for (const auto& pair : *this) scanner.scan(pair);
   }
 };
 
@@ -345,7 +341,7 @@ struct hash_multimap final : std::unordered_multimap<
 
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T, U) {
-   for (const auto& pair : *this) scanner.scanPtr(&pair);
+   for (const auto& pair : *this) scanner.scan(pair);
   }
 };
 
@@ -361,7 +357,7 @@ struct hash_set final : std::unordered_set<T,V,W,ConservativeAllocator<T> > {
 
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-   for (const auto& v : *this) scanner.scanPtr(&v);
+   for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -371,7 +367,7 @@ struct FixedVector final : HPHP::FixedVector<T, ConservativeAllocator<T>> {
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 
@@ -406,7 +402,7 @@ struct TinyVector final : HPHP::TinyVector<T,
   using Base::Base;
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_CUSTOM(T) {
-    for (const auto& v : *this) scanner.scanPtr(&v);
+    for (const auto& v : *this) scanner.scan(v);
   }
 };
 

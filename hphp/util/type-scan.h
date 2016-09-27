@@ -286,23 +286,6 @@ struct Scanner {
     }
   }
 
-  // Similar to scan(), but includes an additional check for cycles. Even though
-  // this takes a pointer, it is scanned immediately, not enqueued. This is
-  // meant to be called from type custom scanners for things like containers. We
-  // want to treat the container elements as logically part of the container,
-  // even though they're separate pointers. However we must take into account
-  // mutually referential objects.
-  template <typename T>
-  void scanPtr(const T* ptr, std::size_t size = sizeof(T)) {
-    // Scan this pointer only if it already isn't on the visited list. IE, we
-    // have not already traversed through it to reach here.
-    if (std::find(m_visited.begin(), m_visited.end(), ptr) == m_visited.end()) {
-      m_visited.push_back(ptr);
-      SCOPE_EXIT { m_visited.pop_back(); };
-      scan(*ptr, size);
-    }
-  }
-
   // Called once all the scanning is done. Reports enqueued pointers via the
   // first passed callback, and conservative ranges via the second passed
   // callback. Afterwards, all the state is cleared. The Scanner can be re-used

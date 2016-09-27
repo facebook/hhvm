@@ -14,12 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef INCLUDE_PPC64_ISA_H_
-#define INCLUDE_PPC64_ISA_H_
+#ifndef incl_HPHP_PPC64_ASM_ISA_PPC64_H_
+#define incl_HPHP_PPC64_ASM_ISA_PPC64_H_
 
 namespace ppc64_asm {
 
 typedef uint32_t PPC64Instr;
+
+// How many bytes a PPC64 instruction length is.
+constexpr uint8_t instr_size_in_bytes       = sizeof(PPC64Instr);
 
 enum class Form {
   kInvalid = 0,

@@ -478,6 +478,12 @@ struct Vgen {
 private:
   CodeBlock& frozen() { return text.frozen().code; }
 
+  void emitCallPrologue() {
+    // Setup r1 with a valid frame in order to allow LR save by callee's
+    // prologue.
+    a.addi(rsfp(), rsp(), -min_frame_size);
+    a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
+  }
   Venv& env;
   Vtext& text;
   Assembler a;
@@ -772,9 +778,7 @@ void Vgen::emit(const lea& i) {
 }
 
 void Vgen::emit(const call& i) {
-  // Setup r1 with a valid frame in order to allow LR save by callee's prologue.
-  a.addi(rsfp(), rsp(), -min_frame_size);
-  a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
+  emitCallPrologue();
   // TOC save/restore is required by ABI for external functions.
   a.std(rtoc(), rsfp()[AROFF(SAVED_TOC())]);
   a.call(i.target, Assembler::CallArg::External);
@@ -786,9 +790,7 @@ void Vgen::emit(const call& i) {
 }
 
 void Vgen::emit(const callr& i) {
-  // Setup r1 with a valid frame in order to allow LR save by callee's prologue.
-  a.addi(rsfp(), rsp(), -min_frame_size);
-  a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
+  emitCallPrologue();
   // TOC save/restore is required by ABI for external functions.
   a.std(rtoc(), rsfp()[AROFF(SAVED_TOC())]);
   a.call(i.target.asReg(), Assembler::CallArg::External);
@@ -798,8 +800,7 @@ void Vgen::emit(const calls& i) {
   // calls is used to call c++ function like handlePrimeCacheInit so setup the
   // r1 pointer to a valid frame in order to allow LR save by callee's
   // prologue.
-  a.addi(rsfp(), rsp(), -min_frame_size);
-  a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
+  emitCallPrologue();
   emitSmashableCall(a.code(), env.meta, i.target);
 }
 
@@ -818,8 +819,7 @@ void Vgen::emit(const callstub& i) {
   // Build a minimal call frame in order to save the LR but avoid writing to
   // rsp() directly as there are stubs that are called that doesn't have a
   // stublogue/stubret (e.g: freeLocalsHelpers)
-  a.addi(rsfp(), rsp(), -min_frame_size);
-  a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
+  emitCallPrologue();
   a.call(i.target);
 }
 

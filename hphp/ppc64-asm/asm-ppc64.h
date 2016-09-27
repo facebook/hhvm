@@ -54,12 +54,9 @@ constexpr uint8_t min_frame_size            = 4 * 8;
 // Must be the same value of AROFF(_savedToc).
 constexpr uint8_t toc_position_on_frame     = 3 * 8;
 
-// How many bytes a PPC64 instruction length is.
-constexpr uint8_t instr_size_in_bytes       = sizeof(PPC64Instr);
 // Amount of bytes to skip after an Assembler::call to grab the return address.
 // Currently it skips a "nop" or a "ld 2,24(1)"
 constexpr uint8_t call_skip_bytes_for_ret   = 1 * instr_size_in_bytes;
-
 
 // Allow TOC usage on branches - disabled at the moment.
 //#define USE_TOC_ON_BRANCH
@@ -206,20 +203,13 @@ struct Label {
   void branchFar(Assembler& a, BranchConditions bc, LinkReg lr);
   void asm_label(Assembler& a);
 
-  enum class BranchType {
-    b,    // unconditional branch up to 26 bits offset
-    bc,   // conditional branch up to 16 bits offset
-    bctr  // conditional branch by using a 64 bits absolute address
-  };
-
 private:
   struct JumpInfo {
-    BranchType type;
     Assembler* a;
     CodeAddress addr;
   };
 
-  void addJump(Assembler* a, BranchType type);
+  void addJump(Assembler* a);
 
   Assembler* m_a;
   CodeAddress m_address;
@@ -1371,38 +1361,17 @@ protected:
    }
 
 private:
-  //Low-level emitter functions.
-  void byte(uint8_t b) {
-    codeBlock.byte(b);
-  }
-  void word(uint16_t w) {
-    codeBlock.word(w);
-  }
+  HPHP::CodeBlock& codeBlock;
+
+  // Low-level emitter functions.
   void dword(uint32_t dw) {
     codeBlock.dword(dw);
   }
-  void qword(uint64_t qw) {
-    codeBlock.qword(qw);
-  }
-  void bytes(size_t n, const uint8_t* bs) {
-    codeBlock.bytes(n, bs);
-  }
 
-  HPHP::CodeBlock& codeBlock;
-
-  RegNumber rn(Reg64 r) {
+  template <typename T>
+  RegNumber rn(T r) {
     return RegNumber(int(r));
   }
-  RegNumber rn(RegXMM r) {
-    return RegNumber(int(r));
-  }
-  RegNumber rn(RegSF r) {
-    return RegNumber(int(r));
-  }
-  RegNumber rn(int n) {
-    return RegNumber(int(n));
-  }
-
 };
 
 } // namespace ppc64_asm

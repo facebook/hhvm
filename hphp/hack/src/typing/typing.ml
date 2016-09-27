@@ -1213,8 +1213,9 @@ and expr_
   | Typename sid ->
       begin match Env.get_typedef env (snd sid) with
         | Some {td_tparams = tparaml; _} ->
-            let params = List.map ~f:begin fun (_, (p, x), cstr) ->
-              Reason.Rwitness p, Tgeneric (x, cstr)
+            (* Typedef type parameters cannot have constraints *)
+            let params = List.map ~f:begin fun (_, (p, x), _) ->
+              Reason.Rwitness p, Tgeneric (x, [])
             end tparaml in
             let tdef = Reason.Rwitness (fst sid), Tapply (sid, params) in
             let typename =
@@ -4001,15 +4002,12 @@ and class_def tcopt c =
 
 (* Given a class definition construct a type consisting of the
  * class instantiated at its generic parameters.
- * TODO AKENN: remove the need for embedded constraints here. *)
-and get_self_from_c env c =
-  let tparams = List.map (fst c.c_tparams) begin fun (_, (p, s), cstr) ->
-    let cstr = List.map cstr
-      begin fun (ck, h) -> (ck, Decl_hint.hint env.Env.decl_env h) end in
-    Reason.Rwitness p, Tgeneric (s, cstr)
+*)
+and get_self_from_c c =
+  let tparams = List.map (fst c.c_tparams) begin fun (_, (p, s), _) ->
+    Reason.Rwitness p, Tgeneric (s, [])
   end in
-  let ret = Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams) in
-  ret
+  Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams)
 
 and class_def_ env c tc =
   Typing_hooks.dispatch_enter_class_def_hook c tc;
@@ -4026,7 +4024,7 @@ and class_def_ env c tc =
 
   (* Set up self identifier and type *)
   let env = Env.set_self_id env (snd c.c_name) in
-  let self = get_self_from_c env c in
+  let self = get_self_from_c c in
   (* For enums, localize makes self:: into an abstract type, which we don't
    * want *)
   let env, self = match c.c_kind with
@@ -4141,12 +4139,9 @@ and class_constr_def env c =
      method_def env m
 
 and class_implements_type env c1 ctype2 =
-  let env, params =
-    List.map_env env (fst c1.c_tparams) begin fun env (_, (p, s), param) ->
-      let param = List.map param begin fun (ck, h) ->
-            let ty = Decl_hint.hint env.Env.decl_env h in
-            (ck, ty) end in
-      env, (Reason.Rwitness p, Tgeneric (s, param))
+  let params =
+    List.map (fst c1.c_tparams) begin fun (_, (p, s), _) ->
+      (Reason.Rwitness p, Tgeneric (s, []))
     end in
   let r = Reason.Rwitness (fst c1.c_name) in
   let ctype1 = r, Tapply (c1.c_name, params) in

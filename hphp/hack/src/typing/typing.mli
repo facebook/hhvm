@@ -28,5 +28,5 @@ val expr:
   Typing_env.env * Typing_defs.locl Typing_defs.ty
 
 val get_self_from_c:
-  Typing_env.env -> Nast.class_ ->
+  Nast.class_ ->
   Typing_defs.decl Typing_defs.ty

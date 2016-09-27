@@ -23,8 +23,9 @@ module TUtils = Typing_utils
 let make_ts env ty =
   match Env.get_typedef env SN.FB.cTypeStructure with
   | Some {td_tparams; _} ->
-      let params = List.map ~f:begin fun (_, (p, x), cstr) ->
-        Reason.Rwitness p, Tgeneric (x, cstr)
+      (* Typedef parameters can not have constraints *)
+      let params = List.map ~f:begin fun (_, (p, x), _) ->
+        Reason.Rwitness p, Tgeneric (x, [])
       end td_tparams in
       let ts = fst ty, Tapply ((Pos.none, SN.FB.cTypeStructure), params) in
       let ety_env = { (Phase.env_with_self env) with

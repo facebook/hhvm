@@ -134,7 +134,15 @@ std::string GetPrimaryIP() {
   return ipaddress;
 }
 
-static std::string normalizeIPv6Address(const std::string& address) {
+static std::string normalizeIPv6Address(std::string address) {
+  // strip the scopeId
+  std::string scopeId;
+  auto it = address.find('%');
+  if (it != std::string::npos) {
+    scopeId = address.substr(it + 1);
+    address = address.substr(0, it);
+  }
+
   struct in6_addr addr;
   if (inet_pton(AF_INET6, address.c_str(), &addr) <= 0) {
     return std::string();
@@ -145,7 +153,13 @@ static std::string normalizeIPv6Address(const std::string& address) {
     return std::string();
   }
 
-  return ipPresentation;
+  // restore the scopeId if it was originally present
+  std::string res(ipPresentation);
+  if (!scopeId.empty()) {
+    res += "%" + scopeId;
+  }
+
+  return res;
 }
 
 HostURL::HostURL(const std::string &hosturl, int port) :

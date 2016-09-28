@@ -143,28 +143,25 @@ let load config_filename options =
           then failwith ("invalid experimental feature " ^ s));
         List.fold_left features ~f:SSet.add ~init:SSet.empty
       end in
-  let tcopts = { TypecheckerOptions.
-    tco_assume_php = bool_ "assume_php" ~default:true config;
-    tco_unsafe_xhp = bool_ "unsafe_xhp" ~default:false config;
-    tco_user_attrs = config_user_attributes config;
-    tco_experimental_features =
-      process_experimental (string_list
-        ~delim:(Str.regexp ",")
-        "enable_experimental_tc_features"
-        ~default:[]
-        config);
-  } in
-  let popts = { ParserOptions.
-    po_auto_namespace_map = prepare_auto_namespace_map config;
-  } in
+  let global_opts = GlobalOptions.make
+    (bool_ "assume_php" ~default:true config)
+    (bool_ "unsafe_xhp" ~default:false config)
+    (config_user_attributes config)
+    (process_experimental (string_list
+      ~delim:(Str.regexp ",")
+      "enable_experimental_tc_features"
+      ~default:[]
+      config))
+    (prepare_auto_namespace_map config)
+  in
   {
     load_script = load_script;
     load_script_timeout = load_script_timeout;
     load_mini_script = load_mini_script;
     gc_control = make_gc_control config;
     sharedmem_config = make_sharedmem_config config options local_config;
-    tc_options = tcopts;
-    parser_options = popts;
+    tc_options = global_opts;
+    parser_options = global_opts;
   }, local_config
 
 (* useful in testing code *)

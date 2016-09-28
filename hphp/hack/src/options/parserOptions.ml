@@ -8,13 +8,6 @@
  *
  *)
 
-type t = {
-  (* Namespace map that allows supporting namespace aliasing *)
-  po_auto_namespace_map : (string * string) list;
-}
-
-let default = {
-  po_auto_namespace_map = [];
-}
-
-let auto_namespace_map po = po.po_auto_namespace_map
+type t = GlobalOptions.t
+let auto_namespace_map = GlobalOptions.po_auto_namespace_map
+let default = GlobalOptions.default

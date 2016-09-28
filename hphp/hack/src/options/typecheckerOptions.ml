@@ -8,59 +8,15 @@
  *
  *)
 
-type t = {
-  (* When we encounter an unknown class|function|constant name outside
-   * of strict mode, is that an error? *)
-  tco_assume_php : bool;
-  (* For somewhat silly historical reasons having to do with the lack
-   * of .hhi's for fairly core XHP classes, we unfortunately mark all
-   * XHP classes as not having their members fully known at Facebook.
-   *
-   * We've also historically not typechecked attributes, and using string
-   * literals for things that aren't strings (eg colspan="3") is common.
-   *
-   * If set to true, this option disables the new, stricter behavior. Please
-   * don't use for new code, but it's useful for migrating existing XHP
-   * codebases. *)
-  tco_unsafe_xhp : bool;
-
-  (* List of <<UserAttribute>> names expected in the codebase *)
-  tco_user_attrs : SSet.t option;
-
-  (* Set of experimental features, in lowercase. *)
-  tco_experimental_features : SSet.t;
-}
-
-let experimental_dict = "dict"
-let experimental_instanceof = "instanceof"
-let experimental_all =
-  List.fold_left
-    (fun acc x -> SSet.add x acc) SSet.empty
-    [experimental_dict; experimental_instanceof]
-
-
-let default = {
-  tco_assume_php = true;
-  tco_unsafe_xhp = false;
-  tco_user_attrs = None;
-  (** Default all features for testing. Actual options are set by reading
-   * from hhconfig, which defaults to empty. *)
-  tco_experimental_features = experimental_all;
-}
-
-(* Use this instead of default when you don't have access to a project .hhconfig
- * and it's acceptable to omit some errors. IDE integration is one example,
- * assuming the IDE also talks to hh_client to get the full list with higher
- * latency.
- *
- * Use 'default' if it's fine to be potentially stricter than the rest of the
- * project requires, eg hh_single_typecheck *)
-let permissive = { default with tco_unsafe_xhp = true; }
-
-let assume_php t = t.tco_assume_php
-let unsafe_xhp t = t.tco_unsafe_xhp
-let user_attrs t = t.tco_user_attrs
-let allowed_attribute t name = match t.tco_user_attrs with
-  | None -> true
-  | Some attr_names -> SSet.mem name attr_names
-let experimental_feature_enabled t s = SSet.mem s t.tco_experimental_features
+type t = GlobalOptions.t
+let assume_php = GlobalOptions.tco_assume_php
+let unsafe_xhp = GlobalOptions.tco_unsafe_xhp
+let user_attrs = GlobalOptions.tco_user_attrs
+let allowed_attribute = GlobalOptions.tco_allowed_attribute
+let experimental_feature_enabled =
+  GlobalOptions.tco_experimental_feature_enabled
+let default = GlobalOptions.default
+let permissive = GlobalOptions.permissive
+let experimental_dict = GlobalOptions.tco_experimental_dict
+let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
+let experimental_all = GlobalOptions.tco_experimental_all

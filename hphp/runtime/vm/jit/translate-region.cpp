@@ -669,10 +669,9 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // HHIR may have figured the topFunc even though the RegionDesc
       // didn't know it.  When that happens, update topFunc.
       if (!topFunc && !irb.fs().fpiStack().empty()) {
-        auto& fpiInfo = irb.fs().fpiStack().back();
-        auto func = fpiInfo.func;
-        if (func && func->isNameBindingImmutable(block.unit())) {
-          topFunc = func;
+        auto const& fpiInfo = irb.fs().fpiStack().back();
+        if (fpiInfo.func) {
+          topFunc = fpiInfo.func;
         }
       }
 

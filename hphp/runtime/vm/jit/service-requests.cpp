@@ -276,9 +276,9 @@ FPInvOffset extract_spoff(TCA stub) {
             instr->Mask(vixl::AddSubImmediateMask) == vixl::SUB_x_imm) {
           return FPInvOffset{offBytes / int32_t{sizeof(Cell)}};
         } else if (instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_w_imm ||
-		   instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_x_imm) {
+                   instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_x_imm) {
           return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
-	}
+        }
       } else if (instr->IsMovn()) {
         auto next = instr->NextInstruction();
         always_assert(next->Mask(vixl::AddSubShiftedMask) == vixl::ADD_w_shift ||

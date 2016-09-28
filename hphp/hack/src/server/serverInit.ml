@@ -412,7 +412,7 @@ let init ?load_mini_script genv =
     |> Result.join >>= fun (dirty_files, old_fast) ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
-    let updates = genv.notifier () in
+    let updates = genv.notifier_async () in
     let open ServerNotifierTypes in
     let updates = match updates with
       | Notifier_unavailable -> SSet.empty

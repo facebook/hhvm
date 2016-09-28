@@ -34,7 +34,7 @@ let make_genv options config local_config handle =
     }
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
-  let indexer, notifier, wait_until_ready =
+  let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with
     | Some watchman_env ->
       let indexer filter =
@@ -48,7 +48,7 @@ let make_genv options config local_config handle =
        * Watchamn.Watchman_dead and Watchman_alive). We need to update
        * a reference to the new instance. *)
       let watchman = ref (Watchman.Watchman_alive watchman_env) in
-      let notifier () =
+      let notifier_async () =
         let watchman', changes = Watchman.get_changes !watchman in
         watchman := watchman';
         let open ServerNotifierTypes in
@@ -58,11 +58,18 @@ let make_genv options config local_config handle =
         | Watchman.Watchman_synchronous changes ->
           Notifier_synchronous_changes changes
       in
+      let notifier () =
+        let watchman', changes =
+          (** Timeout is arbitrary. We just use 30 seconds for now. *)
+          Watchman.get_changes_synchronously ~timeout:30 !watchman in
+        watchman := watchman';
+        changes
+      in
       HackEventLogger.set_use_watchman ();
       (* The initial watch-project command blocks until watchman's crawl is
        * done, so we don't have anything else to wait for here. *)
       let wait_until_ready () = () in
-      indexer, notifier, wait_until_ready
+      indexer, notifier_async, notifier, wait_until_ready
     | None ->
       let indexer filter = Find.make_next_files ~name:"root" ~filter root in
       let log_link = ServerFiles.dfind_log root in
@@ -78,20 +85,23 @@ let make_genv options config local_config handle =
         with _ ->
           Exit_status.(exit Dfind_died)
         end in
-        ServerNotifierTypes.Notifier_synchronous_changes set
+        set
       in
       let ready = ref false in
       let wait_until_ready () =
         if !ready then ()
         else (DfindLib.wait_until_ready dfind; ready := true)
       in
-      indexer, notifier, wait_until_ready
+      indexer, (fun() ->
+        ServerNotifierTypes.Notifier_synchronous_changes (notifier ())
+        ), notifier, wait_until_ready
   in
   { options;
     config;
     local_config;
     workers;
     indexer;
+    notifier_async;
     notifier;
     wait_until_ready;
     debug_channels = None;
@@ -104,8 +114,9 @@ let default_genv =
     local_config     = ServerLocalConfig.default;
     workers          = None;
     indexer          = (fun _ -> fun () -> []);
-    notifier         = (fun () ->
+    notifier_async   = (fun () ->
       ServerNotifierTypes.Notifier_synchronous_changes SSet.empty);
+    notifier         = (fun () -> SSet.empty);
     wait_until_ready = (fun () -> ());
     debug_channels   = None;
   }

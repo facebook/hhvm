@@ -180,15 +180,28 @@ let recheck genv old_env check_kind =
  * right after one rechecking round finishes to be part of the same
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
-let rec recheck_loop acc genv env =
+let rec recheck_loop acc genv env new_client =
   let open ServerNotifierTypes in
   let t = Unix.gettimeofday () in
-  let raw_updates = genv.notifier () in
+  (** When a new client connects, we use the synchronous notifier.
+   * This is to get synchronous file system changes when invoking
+   * hh_client in terminal.
+   *
+   * NB: This also uses synchronous notify on establishing a persistent
+   * connection. This is harmless, but could maybe be filtered away. *)
+  let raw_updates = match new_client with
+  | Some _ -> begin
+    try Notifier_synchronous_changes (genv.notifier ()) with
+    | Watchman.Timeout -> Notifier_unavailable
+    end
+  | None ->
+    genv.notifier_async ()
+  in
   let acc, raw_updates = match raw_updates with
   | Notifier_unavailable ->
     { acc with updates_stale = true; }, SSet.empty
   | Notifier_async_changes updates ->
-    { acc with updates_stale = false; }, updates
+    { acc with updates_stale = true; }, updates
   | Notifier_synchronous_changes updates ->
     { acc with updates_stale = false; }, updates
   in
@@ -219,11 +232,11 @@ let rec recheck_loop acc genv env =
       rechecked_count = acc.rechecked_count + rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
     } in
-    recheck_loop acc genv env
+    recheck_loop acc genv env new_client
   end
 
-let recheck_loop genv env =
-  let stats, env = recheck_loop empty_recheck_loop_stats genv env in
+let recheck_loop genv env client =
+  let stats, env = recheck_loop empty_recheck_loop_stats genv env client in
   { env with recent_recheck_loop_stats = stats }
 
 let new_serve_iteration_id () =
@@ -251,7 +264,7 @@ let serve_one_iteration genv env client_provider =
   end;
   let start_t = Unix.gettimeofday () in
   HackEventLogger.with_id ~stage:`Recheck recheck_id @@ fun () ->
-  let env = recheck_loop genv env in
+  let env = recheck_loop genv env client in
   let stats = env.recent_recheck_loop_stats in
   if stats.rechecked_count > 0 then begin
     HackEventLogger.recheck_end start_t has_parsing_hook

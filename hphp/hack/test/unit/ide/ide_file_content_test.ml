@@ -27,7 +27,7 @@ let test_basic_edit () =
       st = {line = 1; column = 1};
       ed = {line = 1; column = 1}};
     text = "just "} in
-  let edited_fc = edit_file fc [edit] in
+  let edited_fc = edit_file_unsafe fc [edit] in
   expect_has_content edited_fc "just for test\n"
 
 let test_basic_edit2 () =
@@ -38,7 +38,7 @@ let test_basic_edit2 () =
       st = {line = 1; column = 2};
       ed = {line = 1; column = 4}};
     text = "ree"} in
-  let edited_fc = edit_file fc [edit] in
+  let edited_fc = edit_file_unsafe fc [edit] in
   expect_has_content edited_fc "free test\n"
 
 let test_multi_line_edit () =
@@ -49,7 +49,7 @@ let test_multi_line_edit () =
       st = {line = 1; column = 4};
       ed = {line = 2; column = 2}};
     text = "b\nbbbb\nb"} in
-  let edited_fc = edit_file fc [edit] in
+  let edited_fc = edit_file_unsafe fc [edit] in
   expect_has_content edited_fc "aaab\nbbbb\nbccc\n"
 
 let test_multi_line_edit2 () =
@@ -60,7 +60,7 @@ let test_multi_line_edit2 () =
       st = {line = 1; column = 1};
       ed = {line = 3; column = 1}};
     text = ""} in
-  let edited_fc = edit_file fc [edit] in
+  let edited_fc = edit_file_unsafe fc [edit] in
   expect_has_content edited_fc ""
 
 let test_special_edit () =
@@ -71,7 +71,7 @@ let test_special_edit () =
       st = {line = 2; column = 1};
       ed = {line = 3; column = 1}};
     text = "aaa\nbbb\n"} in
-  let edited_fc = edit_file fc [edit] in
+  let edited_fc = edit_file_unsafe fc [edit] in
   expect_has_content edited_fc "\naaa\nbbb\n\n"
 
 let test_multiple_edits () =
@@ -87,7 +87,7 @@ let test_multiple_edits () =
       st = {line = 1; column = 4};
       ed = {line = 2; column = 2}};
     text = "b\nbbbb\nb"} in
-  let edited_fc = edit_file fc [edit1;edit2] in
+  let edited_fc = edit_file_unsafe fc [edit1;edit2] in
   expect_has_content edited_fc "aaab\nbbbb\nbccc\n"
 
 let test_invalid_edit () =
@@ -98,8 +98,9 @@ let test_invalid_edit () =
       st = {line = 1; column = 15};
       ed = {line = 2; column = 1}};
     text = "just "} in
-  let edited_fc = edit_file fc [edit] in
-  expect_has_content edited_fc "for test\n"
+  match edit_file fc [edit] with
+  | Result.Error _ -> true
+  | Result.Ok _ -> false
 
 let test_empty_edit () =
   let content = "" in

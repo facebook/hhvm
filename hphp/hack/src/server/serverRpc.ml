@@ -98,7 +98,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             |> Option.value ~default:(of_content "")
         in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
-        let edited_fc = edit_file fc edits in
+        let edited_fc = edit_file_unsafe fc edits in
         let content = get_content edited_fc in
         env, ServerAutoComplete.auto_complete env.tcopt content
     | IDE_HIGHLIGHT_REF (path, {line; column}) ->

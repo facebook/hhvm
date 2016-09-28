@@ -47,7 +47,13 @@ let edit_file env path edits =
       let content =
         try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
       of_content ~content in
-    let edited_fc = edit_file fc edits in
+    let edited_fc = match edit_file fc edits with
+      | Result.Ok r -> r
+      | Result.Error e ->
+        Hh_logger.log "%s" e;
+        (* TODO: do not crash, but surface this to the client somehow *)
+        assert false
+    in
     let edited_files =
       Relative_path.Map.add env.edited_files path edited_fc in
     let ide_needs_parsing =

@@ -101,6 +101,19 @@ let test_invalid_edit () =
   let edited_fc = edit_file fc [edit] in
   expect_has_content edited_fc "for test\n"
 
+let test_empty_edit () =
+  let content = "" in
+  let fc = of_content ~content in
+  let edit = {
+    range = Some {
+      st = { line = 1; column = 1};
+      ed = { line = 1; column = 1};
+    };
+    text = "lol";
+  } in
+  let edited_fc = edit_file_unsafe fc [edit] in
+  expect_has_content edited_fc "lol"
+
 let tests = [
   "test_create", test_create;
   "test_basic_edit", test_basic_edit;
@@ -110,6 +123,7 @@ let tests = [
   "test_special_edit", test_special_edit;
   "test_multiple_edits", test_multiple_edits;
   "test_invalid_edit", test_invalid_edit;
+  "test_empty_edit", test_empty_edit;
 ]
 
 let () =

@@ -807,11 +807,6 @@ struct Assembler {
 //////////////////////////////////////////////////////////////////////
 // Auxiliary for loading immediates in the best way
 
-private:
-  void loadTOC(const Reg64& rt, const Reg64& rttoc, int64_t imm64,
-      uint64_t offset, bool fixedSize, bool fits32);
-
-public:
   void limmediate(const Reg64& rt,
                   int64_t imm64,
                   ImmType immt = ImmType::AnyCompact);

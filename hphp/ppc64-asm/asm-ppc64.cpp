@@ -29,9 +29,8 @@ VMTOC::~VMTOC() {
 }
 
 int64_t VMTOC::pushElem(int64_t elem) {
-  if (m_map.find(elem) != m_map.end()) {
-    return m_map[elem];
-  }
+  if (m_map.find(elem) != m_map.end()) return m_map[elem];
+
   auto offset = allocTOC(static_cast<int32_t>(elem & 0xffffffff), true);
   m_map.insert( { elem, offset });
   allocTOC(static_cast<int32_t>((elem & 0xffffffff00000000) >> 32));
@@ -40,9 +39,8 @@ int64_t VMTOC::pushElem(int64_t elem) {
 }
 
 int64_t VMTOC::pushElem(int32_t elem) {
-  if (m_map.find(elem) != m_map.end()) {
-    return m_map[elem];
-  }
+  if (m_map.find(elem) != m_map.end()) return m_map[elem];
+
   auto offset = allocTOC(elem);
   m_map.insert( { elem, offset });
   m_last_elem_pos++;
@@ -573,20 +571,6 @@ void Assembler::li32 (const Reg64& rt, int32_t imm32) {
   }
 }
 
-void Assembler::loadTOC(const Reg64& rt, const Reg64& rttoc,  int64_t imm64,
-      uint64_t offset, bool fixedSize, bool fits32) {
-  if (fits32) {
-    Assembler::lwz(rt,rttoc[offset]);
-  }
-  else {
-    Assembler::ld(rt, rttoc[offset]);
-  }
-  if (fixedSize) {
-    emitNop(3 * instr_size_in_bytes);
-  }
-  return;
-}
-
 void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
   always_assert(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize >= 0 &&
     HPHP::RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
@@ -610,29 +594,30 @@ void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
   if (fits32) {
     TOCoffset = VMTOC::getInstance().pushElem(
         static_cast<int32_t>(UINT32_MAX & imm64));
-  }
-  else {
+  } else {
     TOCoffset = VMTOC::getInstance().pushElem(imm64);
   }
 
+  auto const toc_start = frontier();
   if (TOCoffset > INT16_MAX) {
     int16_t complement = 0;
     // If last four bytes is still bigger than a signed 16bits, uses as two
     // complement.
     if ((TOCoffset & UINT16_MAX) > INT16_MAX) complement = 1;
     addis(rt, reg::r2, static_cast<int16_t>((TOCoffset >> 16) + complement));
-    loadTOC(rt, rt, imm64, TOCoffset & UINT16_MAX,
-        immt == ImmType::AnyFixed, fits32);
+    if (fits32) lwz(rt, rt[TOCoffset & UINT16_MAX]);
+    else        ld (rt, rt[TOCoffset & UINT16_MAX]);
+  } else {
+    if (fits32) lwz(rt, reg::r2[TOCoffset]);
+    else        ld (rt, reg::r2[TOCoffset]);
   }
-  else {
-    loadTOC(rt, reg::r2, imm64, TOCoffset, immt == ImmType::AnyFixed, fits32);
-    bool toc_may_grow = HPHP::RuntimeOption::EvalJitRelocationSize != 0;
-    if ((immt != ImmType::AnyCompact) || toc_may_grow) {
-      emitNop(1 * instr_size_in_bytes);
-    }
+  bool toc_may_grow = HPHP::RuntimeOption::EvalJitRelocationSize != 0;
+  auto const toc_max_size = (immt == ImmType::AnyFixed) ? kLi64Len
+    : ((immt == ImmType::TocOnly) || toc_may_grow) ? kTocLen
+    : 0;
+  if (toc_max_size) {
+    emitNop(toc_max_size - (frontier() - toc_start));
   }
-
-  return;
 }
 
 //////////////////////////////////////////////////////////////////////

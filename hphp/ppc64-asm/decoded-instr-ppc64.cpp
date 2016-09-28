@@ -313,10 +313,10 @@ uint8_t DecodedInstruction::decodeImm() {
   if (m_dinfo.isLd(true)) {
     m_imm = VMTOC::getInstance().getValue(calcIndex(0, m_dinfo.offsetDS()),
       true);
-    return instr_size_in_bytes;
+    return Assembler::kLimmLen;
   } else if (m_dinfo.isLwz(true)) {
     m_imm = VMTOC::getInstance().getValue(calcIndex(0, m_dinfo.offsetD()));
-    return instr_size_in_bytes;
+    return Assembler::kLimmLen;
   } else if (m_dinfo.isAddis(true)) {
     auto bigIndexTOC = m_dinfo.offsetD();
     // Get next instruction
@@ -324,11 +324,11 @@ uint8_t DecodedInstruction::decodeImm() {
     if (di.isLd()) {
       m_imm = VMTOC::getInstance().getValue(calcIndex(bigIndexTOC,
           di.offsetDS()), true);
-      return 2*instr_size_in_bytes;
+      return Assembler::kLimmLen;
     } else if (di.isLwz()) {
       m_imm = VMTOC::getInstance().getValue(calcIndex(bigIndexTOC,
           di.offsetD()));
-      return 2*instr_size_in_bytes;
+      return Assembler::kLimmLen;
     }
   }
 
@@ -412,6 +412,8 @@ uint8_t DecodedInstruction::decodeImm() {
       m_imm = m_imm | tmp_bits;
     } else if (isOris(&dinfo, dest_reg, &tmp_bits)) {
       m_imm = m_imm | (tmp_bits << 16);
+    } else if (dinfo.isNop()) {
+      // do nothing but let it count as a part of it.
     } else { break; }
 
     pinstr++;

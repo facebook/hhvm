@@ -127,7 +127,7 @@ static struct PharStreamWrapper final : Stream::Wrapper {
 } s_phar_stream_wrapper;
 
 struct pharExtension final : Extension {
-  pharExtension() : Extension("phar") {}
+  pharExtension() : Extension("Phar", "2.0.2") {}
   void moduleInit() override {
     s_phar_stream_wrapper.registerAs("phar");
   }

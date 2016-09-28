@@ -108,8 +108,6 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-void incTransCounter(IRGS& env) { gen(env, IncTransCounter); }
-
 void incProfCounter(IRGS& env, TransID transId) {
   gen(env, IncProfCounter, TransIDData(transId));
 }

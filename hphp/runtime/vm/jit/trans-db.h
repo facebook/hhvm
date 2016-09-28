@@ -61,20 +61,6 @@ void addTranslation(const TransRec& transRec);
  */
 size_t getNumTranslations();
 
-/*
- * Get the translation counter for `transId'.
- *
- * Return -1 if the TransDB is not enabled.
- */
-uint64_t getTransCounter(TransID transId);
-
-/*
- * Get a pointer to the translation counter for the current translation.
- *
- * Return nullptr if the TransDB is not enabled.
- */
-uint64_t* getTransCounterAddr();
-
 }}}
 
 #endif

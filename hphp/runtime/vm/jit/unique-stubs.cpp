@@ -1422,8 +1422,6 @@ RegSet interp_one_cf_regs() {
 }
 
 void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
-  if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(v);
-
   if (!sk.resumed()) {
     v << lea{rvmfp()[-cellsToBytes(spOff.offset)], rvmsp()};
   }

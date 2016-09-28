@@ -206,7 +206,7 @@ TCA getFuncPrologue(Func* func, int nPassed) {
     return tc::profileSrcKey(funcBody) ? TransKind::ProfPrologue :
                                          TransKind::LivePrologue;
   };
-  LeaseHolder writer(GetWriteLease(), func, computeKind());
+  LeaseHolder writer(func, computeKind());
   if (!writer) return nullptr;
 
   auto const kind = computeKind();

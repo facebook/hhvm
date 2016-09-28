@@ -31,64 +31,12 @@ struct Func;
 namespace jit {
 
 /*
- * The write Lease guards write access to the translation caches, srcDB, and
- * TransDB. The term "lease" is meant to indicate that the right of ownership
- * is conferred for a long, variable time: often the entire length of a
- * request. If a request is not actively translating, it will perform a "hinted
- * drop" of the lease: the lease is unlocked but all calls to acquire(false)
- * from other threads will fail for a short period of time.
+ * Set whether or not the current thread is allowed to acquire the global write
+ * lease or a concurrent (Func-specific) write lease. Used to enforce
+ * Eval.NumSingleJitRequests.
  */
-
-struct LeaseHolderBase;
-struct Lease {
-  friend struct LeaseHolder;
-
-  Lease();
-  ~Lease();
-
-  /*
-   * Returns true iff the Lease is locked and the current thread is the owner.
-   */
-  bool amOwner() const;
-
-  int64_t hintKept()    const { return m_hintKept; }
-  int64_t hintGrabbed() const { return m_hintGrabbed; }
-
-  /*
-   * Returns true iff the current thread would be able to acquire the lease now
-   * (or already owns it).
-   */
-  bool couldAcquire() const;
-
-  static void mayLock(bool f);
-  static void mayLockConcurrent(bool f);
-
-private:
-  // acquire: also returns true if we are already the writer.
-  bool acquire(bool blocking = false);
-  void drop(int64_t hintExpireDelay = 0);
-  void gremlinUnlockImpl();
-
-  // Since there's no portable, universally invalid pthread_t, explicitly
-  // represent the held <-> unheld state machine with m_held.
-  pthread_t         m_owner;
-  std::atomic<bool> m_held{false};
-  pthread_mutex_t   m_lock;
-
-  // Timestamp for when a hinted lease drop (see block comment above) will
-  // expire.
-  int64_t m_hintExpire{0};
-
-  // Statistics about how many times the write lease is picked back up by the
-  // thread that did a hinted drop.
-  int64_t m_hintKept{0};
-  int64_t m_hintGrabbed{0};
-};
-
-enum class LeaseAcquire {
-  ACQUIRE,
-  BLOCKING
-};
+void setMayAcquireLease(bool f);
+void setMayAcquireConcurrentLease(bool f);
 
 bool couldAcquireOptimizeLease(const Func*);
 
@@ -107,7 +55,7 @@ enum class LockLevel {
 };
 
 struct LeaseHolder {
-  LeaseHolder(Lease& l, const Func* f, TransKind kind);
+  LeaseHolder(const Func* f, TransKind kind);
   ~LeaseHolder();
 
   /*
@@ -129,24 +77,18 @@ struct LeaseHolder {
   bool acquireKind(TransKind kind);
   void dropLocks();
 
-  Lease& m_lease;
   const Func* m_func;
 
   /*
    * Flags indicating which specific locks were acquired by this object and
    * should be released in its destructor.
    */
-  bool m_acquired{false};
+  bool m_acquiredGlobal{false};
   bool m_acquiredFunc{false};
   bool m_acquiredThread{false};
   TransKind m_acquiredKind{TransKind::Invalid};
   LockLevel m_level{LockLevel::None};
 };
-
-/*
- * Get a reference to the global write lease.
- */
-Lease& GetWriteLease();
 
 }} // HPHP::jit
 

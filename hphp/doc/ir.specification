@@ -2230,11 +2230,6 @@ To string conversions:
   'force' flag. This opcode becomes a noop iff (force == false and runtime
   stats are not enabled) at translation time.
 
-| IncTransCounter, ND, NA, NF
-
-  Increment a translation counter.  This is probably something related to TC
-  print.
-
 | IncStatGrouped, ND, CStr CStr C(Int), NF
 
   Adds the value S2 to the counter named S1, in the category S0.

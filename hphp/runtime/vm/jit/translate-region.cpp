@@ -246,10 +246,6 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   if (isEntry) {
     irgen::gen(irgs, EndGuards);
 
-    if (RuntimeOption::EvalJitTransCounters) {
-      irgen::incTransCounter(irgs);
-    }
-
     if (irgs.context.kind == TransKind::Profile) {
       if (block.func()->isEntry(bcOff)) {
         irgen::checkCold(irgs, irgs.context.transID);

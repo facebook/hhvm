@@ -218,12 +218,6 @@ void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem);
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
 
 /*
- * Atomically increment the translation counter for the translation we are
- * currently emitting.
- */
-void emitTransCounterInc(Vout& v);
-
-/*
  * Write `msg' of type `t' to the global ring buffer.
  */
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);

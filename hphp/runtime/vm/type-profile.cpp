@@ -208,8 +208,8 @@ void profileRequestStart() {
 
   bool okToJit = requestKind == RequestKind::Standard;
   if (okToJit) {
-    jit::Lease::mayLock(true);
-    jit::Lease::mayLockConcurrent(true);
+    jit::setMayAcquireLease(true);
+    jit::setMayAcquireConcurrentLease(true);
     assertx(!acquiredSingleJit);
     assertx(!acquiredSingleJitConcurrent);
 
@@ -217,7 +217,7 @@ void profileRequestStart() {
       if (!singleJitLock.exchange(true, std::memory_order_relaxed)) {
         acquiredSingleJit = true;
       } else {
-        jit::Lease::mayLock(false);
+        jit::setMayAcquireLease(false);
       }
 
       if (RuntimeOption::EvalJitConcurrently > 0) {
@@ -231,7 +231,7 @@ void profileRequestStart() {
               threads, threads + 1, std::memory_order_relaxed)) {
           acquiredSingleJitConcurrent = true;
         } else {
-          jit::Lease::mayLockConcurrent(false);
+          jit::setMayAcquireConcurrentLease(false);
         }
       }
     }

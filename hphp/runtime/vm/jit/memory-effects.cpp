@@ -1426,7 +1426,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LtRes:
   case LteRes:
   case CmpRes:
-  case IncTransCounter:
   case LdBindAddr:
   case LdAsyncArParentChain:
   case LdSSwitchDestFast:

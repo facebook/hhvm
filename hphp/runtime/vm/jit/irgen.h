@@ -146,10 +146,8 @@ void prepareEntry(IRGS&);
 void makeExitPlaceholder(IRGS&);
 
 /*
- * Support for translation counters of various types, including reoptimization
- * (CheckCold).
+ * Support for Profiling counters, including reoptimization (CheckCold).
  */
-void incTransCounter(IRGS&);
 void incProfCounter(IRGS&, TransID);
 void checkCold(IRGS&, TransID);
 

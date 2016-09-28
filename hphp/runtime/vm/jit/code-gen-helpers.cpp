@@ -410,14 +410,6 @@ void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
 }
 
-void emitTransCounterInc(Vout& v) {
-  if (!transdb::enabled()) return;
-  // transdb::getTransCounterAddr is not thread-safe.
-  assertx(!RuntimeOption::EvalJitConcurrently);
-  auto t = v.cns(transdb::getTransCounterAddr());
-  v << incqmlock{*t, v.makeReg()};
-}
-
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) return;
   v << vcall{CallSpec::direct(Trace::ringbufferMsg),

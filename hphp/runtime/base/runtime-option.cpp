@@ -1107,11 +1107,6 @@ void RuntimeOption::Load(
       throw std::runtime_error("Code coverage is not supported with "
         "Eval.Jit=true");
     }
-    if (EvalJitConcurrently && EvalJitTransCounters) {
-      // TODO(12493872): Make thread-safe or remove counters.
-      throw std::runtime_error("Translation counters are not supported with "
-        "Eval.JitConcurrently != 0");
-    }
     Config::Bind(DisableSmallAllocator, ini, config,
                  "Eval.DisableSmallAllocator", DisableSmallAllocator);
     SetArenaSlabAllocBypass(DisableSmallAllocator);

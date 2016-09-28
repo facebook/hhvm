@@ -169,10 +169,6 @@ void cgIncStat(IRLS& env, const IRInstruction *inst) {
 
 IMPL_OPCODE_CALL(IncStatGrouped)
 
-void cgIncTransCounter(IRLS& env, const IRInstruction* inst) {
-  emitTransCounterInc(vmain(env));
-}
-
 void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   auto const transID = inst->extra<TransIDData>()->transId;
   auto const counterAddr = profData()->transCounterAddr(transID);

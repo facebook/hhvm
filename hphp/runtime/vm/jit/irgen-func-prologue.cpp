@@ -261,9 +261,6 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
     auto msg = RBMsgData { Trace::RBTypeFuncPrologue, func->fullName() };
     gen(env, RBTraceMsg, msg);
   }
-  if (RuntimeOption::EvalJitTransCounters) {
-    gen(env, IncTransCounter);
-  }
 
   gen(env, EnterFrame, fp(env));
 

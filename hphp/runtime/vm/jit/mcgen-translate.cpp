@@ -155,7 +155,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
     return nullptr;
   }
 
-  LeaseHolder writer(GetWriteLease(), args.sk.func(), args.kind);
+  LeaseHolder writer(args.sk.func(), args.kind);
   if (!writer || !tc::shouldTranslate(args.sk.func(), kind())) {
     return nullptr;
   }
@@ -193,7 +193,7 @@ TCA retranslateOpt(SrcKey sk, TransID transId) {
   auto const funcID = func->getFuncId();
   if (profData() == nullptr || profData()->optimized(funcID)) return nullptr;
 
-  LeaseHolder writer(GetWriteLease(), func, TransKind::Optimize);
+  LeaseHolder writer(func, TransKind::Optimize);
   if (!writer) return nullptr;
 
   if (profData()->optimized(funcID)) return nullptr;

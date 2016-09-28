@@ -104,17 +104,14 @@ bool dumpTCData() {
   // Print all translations, including their execution counters. If global
   // counters are disabled (default), fall back to using ProfData, covering
   // only profiling translations.
-  if (!RuntimeOption::EvalJitTransCounters && transdb::enabled()) {
+  if (transdb::enabled()) {
     // Admin requests do not automatically init ProfData, so do it explicitly.
     // No need for matching exit call; data is immortal with trans DB enabled.
     requestInitProfData();
   }
   for (TransID t = 0; t < transdb::getNumTranslations(); t++) {
     int64_t count = 0;
-    if (RuntimeOption::EvalJitTransCounters) {
-      count = transdb::getTransCounter(t);
-    } else if (auto prof = profData()) {
-      assertx(transdb::getTransCounter(t) == 0);
+    if (auto prof = profData()) {
       count = prof->transCounter(t);
     }
     auto const ret = gzputs(

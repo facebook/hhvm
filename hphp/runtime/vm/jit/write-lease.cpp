@@ -30,6 +30,47 @@ namespace HPHP { namespace jit {
 TRACE_SET_MOD(txlease);
 
 namespace {
+/*
+ * A Lease is a roughly a mutex with the ability to perform a "hinted drop":
+ * the Lease is unlocked but all calls to acquire(false) from threads other
+ * than the last owner will fail for a short period of time. This is used to
+ * help provide better code locality in the translation cache.
+ */
+struct Lease {
+  Lease();
+  ~Lease();
+
+  /*
+   * Returns true iff the Lease is locked and the current thread is the owner.
+   */
+  bool amOwner() const;
+
+  /*
+   * Returns true iff the current thread would be able to acquire the lease now
+   * (or already owns it).
+   */
+  bool couldAcquire() const;
+
+  // acquire: also returns true if we are already the writer.
+  bool acquire(bool blocking = false);
+
+  /*
+   * Drop this lease with an expiration hint in microseconds.
+   */
+  void drop(int64_t hintExpireDelay = 0);
+
+private:
+  // Since there's no portable, universally invalid pthread_t, explicitly
+  // represent the held <-> unheld state machine with m_held.
+  pthread_t         m_owner;
+  std::atomic<bool> m_held{false};
+  pthread_mutex_t   m_lock;
+
+  // Timestamp for when a hinted lease drop (see block comment above) will
+  // expire.
+  int64_t m_hintExpire{0};
+};
+
 __thread bool threadCanAcquire = true;
 __thread bool threadCanAcquireConcurrent = true;
 
@@ -44,19 +85,13 @@ std::atomic<int> s_jittingThreads{0};
 Lease s_globalLease;
 Lease s_liveLease;
 Lease s_optimizeLease;
-}
-
-Lease& GetWriteLease() { return s_globalLease; }
 
 Lease::Lease() {
   pthread_mutex_init(&m_lock, nullptr);
 }
 
 Lease::~Lease() {
-  if (amOwner()) {
-    // Can happen, e.g., in exception scenarios.
-    pthread_mutex_unlock(&m_lock);
-  }
+  always_assert(!amOwner());
   pthread_mutex_destroy(&m_lock);
 }
 
@@ -65,24 +100,12 @@ bool Lease::amOwner() const {
     pthread_equal(m_owner, pthread_self());
 }
 
-void Lease::mayLock(bool f) {
-  threadCanAcquire = f;
-}
-
-void Lease::mayLockConcurrent(bool f) {
-  threadCanAcquireConcurrent = f;
-}
-
 // acquire: also returns true if we are already the writer.
 bool Lease::acquire(bool blocking /* = false */ ) {
-  if (amOwner()) {
-    return true;
-  }
-  if (!threadCanAcquire && !blocking) {
-    return false;
-  }
-  int64_t expire = m_hintExpire;
-  int64_t expireDiff = expire - Timer::GetCurrentTimeMicros();
+  if (amOwner()) return true;
+  if (!threadCanAcquire && !blocking) return false;
+
+  auto const expireDiff = m_hintExpire - Timer::GetCurrentTimeMicros();
   if (!blocking && (m_held.load(std::memory_order_acquire) ||
                     (expireDiff > 0 && m_owner != pthread_self()))) {
     return false;
@@ -92,21 +115,7 @@ bool Lease::acquire(bool blocking /* = false */ ) {
   auto const locked = blocking ? pthread_mutex_lock(&m_lock)
                                : pthread_mutex_trylock(&m_lock);
   if (locked == 0) {
-    TRACE(4, "thr%" PRIx64 ": acquired lease, called by %p,%p\n",
-          Process::GetThreadIdForTrace(), __builtin_return_address(0),
-          __builtin_return_address(1));
-    if (debug) {
-      pushRank(RankWriteLease);
-      if (expire != 0 && m_owner != pthread_self()) {
-        m_hintGrabbed++;
-        TRACE(3,
-              "thr%" PRIx64 ": acquired hinted lease"
-              ", expired %" PRId64 "us ago\n",
-              Process::GetThreadIdForTrace(), -expireDiff);
-      } else if (expire != 0 && m_owner == pthread_self()) {
-        m_hintKept++;
-      }
-    }
+    if (debug) pushRank(RankWriteLease);
 
     m_owner = pthread_self();
     m_hintExpire = 0;
@@ -120,12 +129,8 @@ bool Lease::acquire(bool blocking /* = false */ ) {
 
 void Lease::drop(int64_t hintExpireDelay) {
   assertx(amOwner());
-  TRACE(4, "thr%" PRIx64 ": dropping lease, called by %p,%p\n",
-        Process::GetThreadIdForTrace(), __builtin_return_address(0),
-        __builtin_return_address(1));
-  if (debug) {
-    popRank(RankWriteLease);
-  }
+  if (debug) popRank(RankWriteLease);
+
   m_hintExpire = hintExpireDelay > 0 ?
     Timer::GetCurrentTimeMicros() + hintExpireDelay : 0;
   m_held.store(false, std::memory_order_release);
@@ -139,7 +144,6 @@ bool Lease::couldAcquire() const {
   return m_owner == self || Timer::GetCurrentTimeMicros() > m_hintExpire;
 }
 
-namespace {
 LockLevel lockLevel(TransKind k) {
   if (RuntimeOption::EvalJitConcurrently == 0) return LockLevel::Global;
 
@@ -182,6 +186,14 @@ Lease& kindLease(TransKind k) {
 }
 }
 
+void setMayAcquireLease(bool f) {
+  threadCanAcquire = f;
+}
+
+void setMayAcquireConcurrentLease(bool f) {
+  threadCanAcquireConcurrent = f;
+}
+
 bool couldAcquireOptimizeLease(const Func* func) {
   switch (lockLevel(TransKind::Optimize)) {
     case LockLevel::None:
@@ -201,19 +213,18 @@ bool couldAcquireOptimizeLease(const Func* func) {
   always_assert(false);
 }
 
-LeaseHolder::LeaseHolder(Lease& l, const Func* func, TransKind kind)
-  : m_lease(l)
-  , m_func{RuntimeOption::EvalJitConcurrently > 0 ? func : nullptr}
+LeaseHolder::LeaseHolder(const Func* func, TransKind kind)
+  : m_func{RuntimeOption::EvalJitConcurrently > 0 ? func : nullptr}
 {
   assertx(func || RuntimeOption::EvalJitConcurrently == 0);
   auto const level = m_func ? lockLevel(kind) : LockLevel::Global;
 
   if (level == LockLevel::Func && !threadCanAcquireConcurrent) return;
 
-  if (level == LockLevel::Global && !m_lease.amOwner()) {
+  if (level == LockLevel::Global && !s_globalLease.amOwner()) {
     auto const blocking = RuntimeOption::EvalJitRequireWriteLease &&
       RuntimeOption::EvalJitConcurrently == 0;
-    if (!(m_acquired = m_lease.acquire(blocking))) return;
+    if (!(m_acquiredGlobal = s_globalLease.acquire(blocking))) return;
   }
 
   SCOPE_EXIT { if (m_level == LockLevel::None) dropLocks(); };
@@ -290,10 +301,10 @@ void LeaseHolder::dropLocks() {
     m_acquiredKind = TransKind::Invalid;
   }
 
-  if (m_acquired) {
-    assertx(m_lease.amOwner());
-    m_lease.drop(RuntimeOption::EvalJitWriteLeaseExpiration);
-    m_acquired = false;
+  if (m_acquiredGlobal) {
+    assertx(s_globalLease.amOwner());
+    s_globalLease.drop(RuntimeOption::EvalJitWriteLeaseExpiration);
+    m_acquiredGlobal = false;
   }
 }
 
@@ -306,8 +317,8 @@ bool LeaseHolder::checkKind(TransKind kind) {
   if (level == LockLevel::Kind && !acquireKind(kind)) return false;
 
   if (level == LockLevel::Global &&
-      !m_lease.amOwner() &&
-      !(m_acquired = m_lease.acquire())) {
+      !s_globalLease.amOwner() &&
+      !(m_acquiredGlobal = s_globalLease.acquire())) {
     return false;
   }
 

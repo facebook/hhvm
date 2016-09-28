@@ -171,11 +171,6 @@ void requestInit() {
 }
 
 void requestExit() {
-  always_assert(!GetWriteLease().amOwner());
-  TRACE_MOD(Trace::txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
-            " kept, %15" PRId64 " grabbed\n",
-            Process::GetThreadIdForTrace(), GetWriteLease().hintKept(),
-            GetWriteLease().hintGrabbed());
   Stats::dump();
   Stats::clear();
   Timer::RequestExit();

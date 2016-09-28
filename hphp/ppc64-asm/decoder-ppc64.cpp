@@ -366,7 +366,7 @@ bool DecoderInfo::isLd(bool toc) const {
 
     DS_form_t dsform;
     dsform.instruction = m_image;
-    if (Reg64(dsform.RA) == reg::r2) {
+    if (Reg64(dsform.RA) == HPHP::jit::ppc64::rtoc()) {
       return true;
     }
   }
@@ -382,7 +382,7 @@ bool DecoderInfo::isDformOp(OpcodeNames opn, bool toc) const {
 
     D_form_t dform;
     dform.instruction = m_image;
-    if (Reg64(dform.RA) == reg::r2) {
+    if (Reg64(dform.RA) == HPHP::jit::ppc64::rtoc()) {
       return true;
     }
   }

@@ -576,8 +576,23 @@ void dce(Env& env, const bc::SetL& op) {
   if (!isLive(env, op.loc1->id) && !effects) return markDead(env);
   push(env);
   pop(env);
-  if (!effects) addKill(env, op.loc1->id);
-  if (effects)  addGen(env, op.loc1->id);
+  if (effects) {
+    addGen(env, op.loc1->id);
+  } else {
+    addKill(env, op.loc1->id);
+  }
+}
+
+void dce(Env& env, const bc::UnsetL& op) {
+  auto const oldTy   = locRaw(env, op.loc1);
+  auto const effects = setCouldHaveSideEffects(oldTy);
+  if (oldTy.subtypeOf(TUninit)) return markDead(env);
+  if (!isLive(env, op.loc1->id) && !effects) return markDead(env);
+  if (effects) {
+    addGen(env, op.loc1->id);
+  } else {
+    addKill(env, op.loc1->id);
+  }
 }
 
 /*

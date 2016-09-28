@@ -40,11 +40,6 @@
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
 
-// used for mmapping contiguous heap space
-// If used, anonymous pages are not cleared when mapped with mmap. It is not
-// enabled by default and should be checked before use
-#define       MAP_UNINITIALIZED 0x4000000 /* XXX Fragile. */
-
 namespace HPHP {
 
 struct APCLocalArray;

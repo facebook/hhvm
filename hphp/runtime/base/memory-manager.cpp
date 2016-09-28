@@ -53,22 +53,6 @@ TRACE_SET_MOD(mm);
 std::atomic<MemoryManager::ReqProfContext*>
   MemoryManager::s_trigger{nullptr};
 
-// generate mmap flags for contiguous heap
-uint32_t getRequestHeapFlags() {
-  struct stat buf;
-
-  // check if MAP_UNITIALIZED is supported
-  auto mapUninitializedSupported =
-    (stat("/sys/kernel/debug/fb_map_uninitialized", &buf) == 0);
-  auto mmapFlags = MAP_NORESERVE | MAP_ANON | MAP_PRIVATE;
-
-  /* Check whether mmap(2) supports the MAP_UNINITIALIZED flag. */
- if (mapUninitializedSupported) {
-    mmapFlags |= MAP_UNINITIALIZED;
-  }
- return mmapFlags;
-}
-
 #ifdef USE_JEMALLOC
 bool MemoryManager::s_statsEnabled = false;
 size_t MemoryManager::s_cactiveLimitCeiling = 0;

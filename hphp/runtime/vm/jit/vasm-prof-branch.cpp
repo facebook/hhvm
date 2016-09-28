@@ -256,7 +256,6 @@ Vout vheader(Vunit& unit, Vlabel s, AreaIndex area_cap = AreaIndex::Main) {
  */
 Vreg check_counter(Vout& v) {
   s_counter.bind(rds::Mode::Local);
-  if (*s_counter == 0) reset_counter();
 
   auto const handle = s_counter.handle();
   auto const sf = v.makeReg();
@@ -403,7 +402,7 @@ void create_profiling_header(Env& env, BranchID branch, Vlabel to,
 
   // Check the profiling counter, and log a sample if it overflows.
   auto const sf = check_counter(v);
-  unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
+  unlikelyIfThen(v, vc, CC_LE, sf, [&] (Vout& v) {
     sample_branch(v, env, branch, inst.origin->func(), to);
   });
 
@@ -465,7 +464,7 @@ void profile(Env& env, jcci& inst, Vlabel b) {
   auto const header = Vlabel(v);
 
   auto const sf = check_counter(v);
-  unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
+  unlikelyIfThen(v, vc, CC_LE, sf, [&] (Vout& v) {
     auto const& vinstr = env.unit.blocks[b].code.back();
     sample_branch(v, env, branch.take(true), vinstr.origin->func(), b);
   });

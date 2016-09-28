@@ -1285,6 +1285,7 @@ X(StAsyncArResume,              ResumeOffset);
 X(StContArResume,               ResumeOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
+X(DbgAssertARFunc,              IRSPRelOffsetData);
 X(LdARFuncPtr,                  IRSPRelOffsetData);
 X(EndCatch,                     IRSPRelOffsetData);
 X(EagerSyncVMRegs,              IRSPRelOffsetData);

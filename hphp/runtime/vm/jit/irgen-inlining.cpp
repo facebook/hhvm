@@ -117,9 +117,8 @@ bool beginInlining(IRGS& env,
   assertx(!ctx || (ctx->type() <= (TCtx | TCls) && target->implCls()));
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto arFunc = gen(env, LdARFuncPtr,
-                      IRSPRelOffsetData{calleeAROff}, sp(env));
-    gen(env, DbgAssertFunc, arFunc, cns(env, target));
+    gen(env, DbgAssertARFunc, IRSPRelOffsetData{calleeAROff},
+        sp(env), cns(env, target));
   }
 
   gen(env, BeginInlining, IRSPRelOffsetData{calleeAROff}, sp(env));

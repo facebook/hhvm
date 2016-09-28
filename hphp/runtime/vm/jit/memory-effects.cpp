@@ -1205,6 +1205,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty
     );
 
+  case DbgAssertARFunc:
+    // Similar to LdARFuncPtr
+    return may_load_store(
+      AStack {
+        inst.src(0),
+        inst.extra<DbgAssertARFunc>()->offset + int32_t{kNumActRecCells} - 1,
+        int32_t{kNumActRecCells}
+      },
+      AEmpty
+    );
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.
@@ -1282,7 +1293,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Halt:
   case ConvBoolToInt:
   case ConvBoolToDbl:
-  case DbgAssertFunc:
   case DefConst:
   case LdLocAddr:
   case Sqrt:

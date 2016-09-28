@@ -91,7 +91,7 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__HipHopSpecific, __Native, __IsFoldable>>
+<<__HipHopSpecific, __Native>>
 function fb_utf8ize(mixed &$input): bool;
 
 /* Count the number of UTF-8 code points in string or byte count if it's not

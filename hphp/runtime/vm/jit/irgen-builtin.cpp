@@ -535,6 +535,7 @@ SSATmp* opt_foldable(IRGS& env,
   if (numArgs != func->numNonVariadicParams()) {
     if (!topType(env).hasConstVal()) return nullptr;
 
+    assertx(isArrayType(constAsCell(topC(env)).m_type));
     auto const variadicArgs = constAsCell(topC(env)).m_data.parr;
     auto const numVariadicArgs = variadicArgs->size();
     for (auto i = 0; i < numVariadicArgs; i++) {

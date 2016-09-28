@@ -134,7 +134,7 @@ let declare_and_check content ~f =
 
       oldify_file_info path file_info;
 
-      Parser_heap.ParserHeap.add path ast;
+      Parser_heap.ParserHeap.add path (ast, Parser_heap.Full);
       NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
       let nast = Naming.program tcopt ast in
       List.iter nast begin function

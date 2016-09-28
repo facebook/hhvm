@@ -73,7 +73,7 @@ let emit_file { filename; read_stdin; is_test } () =
      file_mode <> Some FileInfo.Mpartial then
     die "Can only emit files in strict/partial mode\n";
 
-  Parser_heap.ParserHeap.add filename ast;
+  Parser_heap.ParserHeap.add filename (ast, Parser_heap.Full);
 
   (* Build a naming environment and run naming *)
   let tcopt = TypecheckerOptions.default in

@@ -199,7 +199,7 @@ let suggest_files fnl =
   List.iter fnl begin fun fn ->
     let tcopt = TypecheckerOptions.permissive in
     match Parser_heap.ParserHeap.get fn with
-    | Some ast ->
+    | Some (ast, _) ->
       let nast = Naming.program tcopt ast in
       List.iter nast begin function
         | Nast.Fun f -> Typing.fun_def tcopt f

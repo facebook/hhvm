@@ -426,45 +426,45 @@ let print_symbol (symbol, definition) =
       ~f:(fun x -> Pos.multiline_string_no_file x.SymbolDefinition.span)
       ~default:"None")
 
-let check_errors tcopt errors files_info =
+let check_errors opts errors files_info =
   Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->
     errors @ Errors.get_error_list
-        (Typing_check_utils.check_defs tcopt fn fileinfo)
+        (Typing_check_utils.check_defs opts fn fileinfo)
   end ~init:errors
 
-let with_named_body tcopt n_fun =
+let with_named_body opts n_fun =
   (** In the naming heap, the function bodies aren't actually named yet, so
    * we need to invoke naming here.
    * See also docs in Naming.Make. *)
-  let n_f_body = TNBody.func_body tcopt n_fun in
+  let n_f_body = TNBody.func_body opts n_fun in
   { n_fun with Nast.f_body = Nast.NamedBody n_f_body }
 
-let n_fun_fold tcopt fn acc (_, fun_name) =
-  match Parser_heap.find_fun_in_file fn fun_name with
+let n_fun_fold opts fn acc (_, fun_name) =
+  match Parser_heap.find_fun_in_file_full opts fn fun_name with
   | None -> acc
   | Some f ->
-    let n_fun = Naming.fun_ tcopt f in
-    (with_named_body tcopt n_fun) :: acc
+    let n_fun = Naming.fun_ opts f in
+    (with_named_body opts n_fun) :: acc
 
 let n_class_fold _tcopt _fn acc _class_name = acc
 let n_type_fold _tcopt _fn acc _type_name = acc
 let n_const_fold _tcopt _fn acc _const_name = acc
 
 (** Load the Nast for the file from the Nast heaps. *)
-let nast_for_file tcopt fn
+let nast_for_file opts fn
 { FileInfo.funs; classes; typedefs; consts; _} =
-  List.fold_left funs ~init:[] ~f:(n_fun_fold tcopt fn),
-  List.fold_left classes ~init:[] ~f:(n_class_fold tcopt fn),
-  List.fold_left typedefs ~init:[] ~f:(n_type_fold tcopt fn),
-  List.fold_left consts ~init:[] ~f:(n_const_fold tcopt fn)
+  List.fold_left funs ~init:[] ~f:(n_fun_fold opts fn),
+  List.fold_left classes ~init:[] ~f:(n_class_fold opts fn),
+  List.fold_left typedefs ~init:[] ~f:(n_type_fold opts fn),
+  List.fold_left consts ~init:[] ~f:(n_const_fold opts fn)
 
-let handle_mode mode filename tcopt files_contents files_info errors =
+let handle_mode mode filename opts files_contents files_info errors =
   match mode with
   | Ai _ -> ()
   | Autocomplete ->
       let file = cat (Relative_path.to_absolute filename) in
       let result =
-        ServerAutoComplete.auto_complete tcopt file in
+        ServerAutoComplete.auto_complete opts file in
       List.iter ~f: begin fun r ->
         let open AutocompleteService in
         Printf.printf "%s %s\n" r.res_name r.res_ty
@@ -473,7 +473,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if fn = builtins_filename then () else begin
           let result = ServerColorFile.get_level_list begin fun () ->
-            ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo;
+            ignore @@ Typing_check_utils.check_defs opts fn fileinfo;
             fn
           end in
           print_colored fn result;
@@ -500,7 +500,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
       let lint_errors = Relative_path.Map.fold files_contents ~init:[]
         ~f:begin fun fn content lint_errors ->
           lint_errors @ fst (Lint.do_ begin fun () ->
-            Linting_service.lint tcopt fn content
+            Linting_service.lint opts fn content
           end)
         end in
       if lint_errors <> []
@@ -515,7 +515,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
       else Printf.printf "No lint errors\n"
   | Dump_deps ->
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
-      ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo
+      ignore @@ Typing_check_utils.check_defs opts fn fileinfo
     end;
     Typing_deps.dump_deps stdout
   | Dump_inheritance ->
@@ -525,7 +525,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Ancestors of %s and their overridden methods:\n"
             class_;
-          let ancestors = MethodJumps.get_inheritance tcopt
+          let ancestors = MethodJumps.get_inheritance opts
             class_ ~find_children:false files_info None in
           ClientMethodJumps.print_readable ancestors ~find_children:false;
           Printf.printf "\n";
@@ -534,7 +534,7 @@ let handle_mode mode filename tcopt files_contents files_info errors =
         List.iter fileinfo.FileInfo.classes begin fun (_p, class_) ->
           Printf.printf "Children of %s and the methods they override:\n"
             class_;
-          let children = MethodJumps.get_inheritance tcopt
+          let children = MethodJumps.get_inheritance opts
             class_ ~find_children:true files_info None in
           ClientMethodJumps.print_readable children ~find_children:true;
           Printf.printf "\n";
@@ -543,13 +543,13 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     end;
   | Identify_symbol (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    let result = ServerIdentifyFunction.go file line column tcopt in
+    let result = ServerIdentifyFunction.go file line column opts in
     begin match result with
       | [] -> print_endline "None"
       | _ -> List.iter result print_symbol
     end
   | Symbol_definition_by_id id ->
-    let result = ServerSymbolDefinition.from_symbol_id tcopt id in
+    let result = ServerSymbolDefinition.from_symbol_id opts id in
     begin match result with
       | None -> print_endline "None"
       | Some s -> FileOutline.print [SymbolDefinition.to_absolute s]
@@ -568,37 +568,37 @@ let handle_mode mode filename tcopt files_contents files_info errors =
     let genv = ServerEnvBuild.default_genv in
     let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
       ServerEnv.files_info;
-      ServerEnv.tcopt;
+      ServerEnv.tcopt = opts;
     } in
     let file = cat (Relative_path.to_absolute filename) in
     let results = ServerFindRefs.go_from_file (file, line, column) genv env in
     FindRefsService.print results;
   | Highlight_refs (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    let results = ServerHighlightRefs.go (file, line, column) tcopt  in
+    let results = ServerHighlightRefs.go (file, line, column) opts  in
     ClientHighlightRefs.go results ~output_json:false;
   | Suggest
   | Errors ->
-      let errors = check_errors tcopt errors files_info in
+      let errors = check_errors opts errors files_info in
       if mode = Suggest
       then Relative_path.Map.iter files_info suggest_and_print;
       if errors <> []
       then (error (List.hd_exn errors); exit 2)
       else Printf.printf "No errors\n"
   | AllErrors ->
-      let errors = check_errors tcopt errors files_info in
+      let errors = check_errors opts errors files_info in
       if errors <> []
       then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
   | Dump_tast ->
       let pos_ty_map = ref Pos.Map.empty in
       Typing_hooks.attach_infer_ty_hook (Typed_ast.save_ty pos_ty_map);
-      let errors = check_errors tcopt errors files_info in
+      let errors = check_errors opts errors files_info in
       Typing_hooks.remove_all_hooks ();
       let nasts = Relative_path.Map.fold files_info
         ~f:begin fun fn fileinfo nasts ->
           Relative_path.Map.add nasts ~key:fn
-          ~data:(nast_for_file tcopt fn fileinfo)
+          ~data:(nast_for_file opts fn fileinfo)
         end ~init:Relative_path.Map.empty
       in
       if errors <> []
@@ -621,7 +621,7 @@ let decl_and_run_mode {filename; mode; no_builtins} =
   let builtins = if no_builtins then "" else builtins in
   let filename = Relative_path.create Relative_path.Dummy filename in
   let files_contents = file_to_files filename in
-  let tcopt = TypecheckerOptions.default in
+  let opts = TypecheckerOptions.default in
 
   let errors, files_info, _ = Errors.do_ begin fun () ->
     let parsed_files =
@@ -636,7 +636,7 @@ let decl_and_run_mode {filename; mode; no_builtins} =
     let files_info =
       Relative_path.Map.mapi begin fun fn parsed_file ->
         let {Parser_hack.file_mode; comments; ast} = parsed_file in
-        Parser_heap.ParserHeap.add fn ast;
+        Parser_heap.ParserHeap.add fn (ast, Parser_heap.Full);
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.
           file_mode; funs; classes; typedefs; consts; comments;
@@ -649,12 +649,12 @@ let decl_and_run_mode {filename; mode; no_builtins} =
     end;
 
     Relative_path.Map.iter files_info begin fun fn _ ->
-      Decl.make_env tcopt fn
+      Decl.make_env opts fn
     end;
 
     files_info
   end in
-  handle_mode mode filename tcopt files_contents files_info
+  handle_mode mode filename opts files_contents files_info
     (Errors.get_error_list errors)
 
 let main_hack ({filename; mode; no_builtins;} as opts) =

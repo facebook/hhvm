@@ -31,33 +31,33 @@ let neutral = Errors.empty,
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
-let type_fun tcopt fn x =
-  match Parser_heap.find_fun_in_file fn x with
+let type_fun opts fn x =
+  match Parser_heap.find_fun_in_file_full opts fn x with
   | Some f ->
-    let fun_ = Naming.fun_ tcopt f in
-    Typing.fun_def tcopt fun_
+    let fun_ = Naming.fun_ opts f in
+    Typing.fun_def opts fun_
   | None -> ()
 
-let type_class tcopt fn x =
-  match Parser_heap.find_class_in_file fn x with
+let type_class opts fn x =
+  match Parser_heap.find_class_in_file_full opts fn x with
   | Some cls ->
-    let class_ = Naming.class_ tcopt cls in
-    Typing.class_def tcopt class_
+    let class_ = Naming.class_ opts cls in
+    Typing.class_def opts class_
   | None -> ()
 
-let check_typedef tcopt fn x =
-  match Parser_heap.find_typedef_in_file fn x with
+let check_typedef opts fn x =
+  match Parser_heap.find_typedef_in_file_full opts fn x with
   | Some t ->
-    let typedef = Naming.typedef tcopt t in
+    let typedef = Naming.typedef opts t in
     Typing.typedef_def typedef;
-    Typing_variance.typedef tcopt x
+    Typing_variance.typedef opts x
   | None -> ()
 
-let check_const tcopt fn x =
-  match Parser_heap.find_const_in_file fn x with
+let check_const opts fn x =
+  match Parser_heap.find_const_in_file_full opts fn x with
   | None -> ()
   | Some cst ->
-    let cst = Naming.global_const tcopt cst in
+    let cst = Naming.global_const opts cst in
     match cst.Nast.cst_value with
     | None -> ()
     | Some v ->
@@ -75,13 +75,13 @@ let check_const tcopt fn x =
         ()
       | None -> ()
 
-let check_file tcopt (errors, failed, decl_failed) (fn, file_infos) =
+let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
   let errors', (), err_flags = Errors.do_ begin fun () ->
-    SSet.iter (type_fun tcopt fn) n_funs;
-    SSet.iter (type_class tcopt fn) n_classes;
-    SSet.iter (check_typedef tcopt fn) n_types;
-    SSet.iter (check_const tcopt fn) n_consts;
+    SSet.iter (type_fun opts fn) n_funs;
+    SSet.iter (type_class opts fn) n_classes;
+    SSet.iter (check_typedef opts fn) n_types;
+    SSet.iter (check_const opts fn) n_consts;
   end in
   let lazy_decl_err = Errors.get_lazy_decl_flag err_flags in
   let errors = Errors.merge errors' errors in
@@ -95,7 +95,7 @@ let check_file tcopt (errors, failed, decl_failed) (fn, file_infos) =
     else decl_failed in
   errors, failed, decl_failed
 
-let check_files tcopt (errors, err_info) fnl =
+let check_files opts (errors, err_info) fnl =
   SharedMem.invalidate_caches();
   let { Decl_service.
     errs = failed;
@@ -105,14 +105,14 @@ let check_files tcopt (errors, err_info) fnl =
     if !Utils.profile
     then (fun acc fn ->
       let t = Unix.gettimeofday () in
-      let result = check_file tcopt acc fn in
+      let result = check_file opts acc fn in
       let t' = Unix.gettimeofday () in
       let msg =
         Printf.sprintf "%f %s [type-check]" (t' -. t)
           (Relative_path.suffix (fst fn)) in
       !Utils.log msg;
       result)
-    else check_file tcopt in
+    else check_file opts in
   let errors, failed, decl_failed = List.fold_left fnl
     ~f:check_file ~init:(errors, failed, decl_failed) in
   let error_record = { Decl_service.
@@ -122,15 +122,15 @@ let check_files tcopt (errors, err_info) fnl =
   errors, error_record
 
 let load_and_check_files acc fnl =
-  let tcopt = TypeCheckStore.load() in
-  check_files tcopt acc fnl
+  let opts = TypeCheckStore.load() in
+  check_files opts acc fnl
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
-let parallel_check workers tcopt fnl =
-  TypeCheckStore.store tcopt;
+let parallel_check workers opts fnl =
+  TypeCheckStore.store opts;
   let result =
     MultiWorker.call
       workers
@@ -142,8 +142,8 @@ let parallel_check workers tcopt fnl =
   TypeCheckStore.clear();
   result
 
-let go workers tcopt fast =
+let go workers opts fast =
   let fnl = Relative_path.Map.elements fast in
   if List.length fnl < 10
-  then check_files tcopt neutral fnl
-  else parallel_check workers tcopt fnl
+  then check_files opts neutral fnl
+  else parallel_check workers opts fnl

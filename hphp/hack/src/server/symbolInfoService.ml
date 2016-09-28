@@ -16,7 +16,7 @@ open SymbolInfoServiceTypes
 let recheck_naming filename_l =
   List.iter filename_l begin fun file ->
     match Parser_heap.ParserHeap.get file with
-    | Some ast -> begin
+    | Some (ast, _) -> begin
       let tcopt = TypecheckerOptions.permissive in
         Errors.ignore_ begin fun () ->
           (* We only need to name to find references to locals *)

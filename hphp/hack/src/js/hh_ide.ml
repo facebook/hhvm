@@ -65,18 +65,18 @@ let error el =
 
 (*****************************************************************************)
 
-let type_fun tcopt x fn =
-  match Parser_heap.find_fun_in_file fn x with
+let type_fun opts x fn =
+  match Parser_heap.find_fun_in_file_full opts fn x with
   | Some f ->
-    let fun_ = Naming.fun_ tcopt f in
-    Typing.fun_def tcopt fun_
+    let fun_ = Naming.fun_ opts f in
+    Typing.fun_def opts fun_
   | None -> ()
 
-let type_class tcopt x fn =
-  match Parser_heap.find_class_in_file fn x with
+let type_class opts x fn =
+  match Parser_heap.find_class_in_file_full opts fn x with
   | Some cls ->
-    let class_ = Naming.class_ tcopt cls in
-    Typing.class_def tcopt class_
+    let class_ = Naming.class_ opts cls in
+    Typing.class_def opts class_
   | None -> ()
 
 let make_funs_classes ast =
@@ -126,23 +126,23 @@ let declare_file fn content =
       Parser_hack.program_with_default_popt fn content
     in
     let is_php = file_mode = None in
-    Parser_heap.ParserHeap.add fn ast;
+    Parser_heap.ParserHeap.add fn (ast, Parser_heap.Full);
     if not is_php
     then begin
       let funs, classes, typedefs, consts = make_funs_classes ast in
       Hashtbl.replace globals fn (is_php, funs, classes);
-      let tcopt = TypecheckerOptions.permissive in
+      let opts = TypecheckerOptions.permissive in
       NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
       let all_classes = List.fold_right classes ~f:begin fun (_, cname) acc ->
         SMap.add cname (Relative_path.Set.singleton fn) acc
       end ~init:SMap.empty in
-      Decl.make_env tcopt fn;
+      Decl.make_env opts fn;
       let sub_classes = get_sub_classes all_classes in
       SSet.iter begin fun cname ->
         match Naming_heap.TypeIdHeap.get cname with
         | Some (p, `Class) ->
           let filename = Pos.filename p in
-          Decl.declare_class_in_file tcopt filename cname
+          Decl.declare_class_in_file opts filename cname
         | _ -> ()
       end sub_classes
     end
@@ -189,13 +189,13 @@ let hh_check fn =
       Autocomplete.auto_complete := false;
       Errors.try_
         begin fun () ->
-        let ast = Parser_heap.ParserHeap.find_unsafe fn in
+        let ast, _ = Parser_heap.ParserHeap.find_unsafe fn in
         let funs, classes, typedefs, consts = make_funs_classes ast in
-        let tcopt = TypecheckerOptions.permissive in
+        let opts = TypecheckerOptions.permissive in
         NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
-        Decl.make_env tcopt fn;
-        List.iter funs (fun (_, fname) -> type_fun tcopt fname fn);
-        List.iter classes (fun (_, cname) -> type_class tcopt cname fn);
+        Decl.make_env opts fn;
+        List.iter funs (fun (_, fname) -> type_fun opts fname fn);
+        List.iter classes (fun (_, cname) -> type_class opts cname fn);
         error []
         end
         begin fun l ->
@@ -203,21 +203,21 @@ let hh_check fn =
         end
 
 let hh_auto_complete fn =
-  let tcopt = TypecheckerOptions.permissive in
+  let opts = TypecheckerOptions.permissive in
   let fn = make_path fn in
   AutocompleteService.attach_hooks();
   try
-    let ast = Parser_heap.ParserHeap.find_unsafe fn in
+    let ast, _ = Parser_heap.ParserHeap.find_unsafe fn in
     Errors.ignore_ begin fun () ->
       List.iter ast begin fun def ->
         match def with
         | Ast.Fun f ->
-          let f = Naming.fun_ tcopt f in
-          Typing.fun_def tcopt f
+          let f = Naming.fun_ opts f in
+          Typing.fun_def opts f
         | Ast.Class c ->
-          let c = Naming.class_ tcopt c in
-          Decl.class_decl tcopt c;
-          Typing.class_def tcopt c
+          let c = Naming.class_ opts c in
+          Decl.class_decl opts c;
+          Typing.class_def opts c
         | _ -> ()
       end;
     end;
@@ -229,7 +229,7 @@ let hh_auto_complete fn =
       | Some Autocomplete.Acclass_get -> "class_get"
       | Some Autocomplete.Acprop -> "var"
       | None -> "none" in
-    let result = AutocompleteService.get_results tcopt SSet.empty SSet.empty in
+    let result = AutocompleteService.get_results opts SSet.empty SSet.empty in
     let result =
       List.map result AutocompleteService.autocomplete_result_to_json
     in

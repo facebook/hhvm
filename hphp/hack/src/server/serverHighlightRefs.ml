@@ -39,7 +39,7 @@ let highlight_symbol tcopt (line, char) path file_info symbol =
       List.rev (List.map results snd)
     | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
       begin match Parser_heap.ParserHeap.get path with
-      | Some ast -> ServerFindLocals.go_from_ast ast line char
+      | Some (ast, _) -> ServerFindLocals.go_from_ast ast line char
       | None -> []
       end
     | None -> []

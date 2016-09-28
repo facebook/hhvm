@@ -29,7 +29,7 @@ let get_occurrence content line char =
 
 let go content line char tcopt =
   get_occurrence_and_map content line char ~f:(fun path _ symbols ->
-    let ast = Parser_heap.ParserHeap.find_unsafe path in
+    let (ast, _) = Parser_heap.ParserHeap.find_unsafe path in
     List.map symbols ~f:(fun x ->
       let symbol_definition = ServerSymbolDefinition.go tcopt ast x in
       x, symbol_definition

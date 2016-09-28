@@ -861,7 +861,7 @@ let name_and_declare_types_program tcopt prog =
 let make_env tcopt fn =
   match Parser_heap.ParserHeap.get fn with
   | None -> ()
-  | Some prog ->
+  | Some (prog, _) ->
     name_and_declare_types_program tcopt prog
 
 let declare_class_in_file tcopt file name =

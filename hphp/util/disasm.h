@@ -87,6 +87,7 @@ struct Disasm {
    * disassemble. */
   void disasm(std::ostream& out, uint8_t* start, uint8_t* end);
 
+  static void ExcludedAddressRange(void* low, size_t len);
  private:
 #ifdef HAVE_LIBXED
   xed_state_t m_xedState;

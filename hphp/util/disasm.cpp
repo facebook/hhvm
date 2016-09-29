@@ -27,13 +27,18 @@
 
 namespace HPHP {
 
+static uintptr_t excludeLow, excludeLen;
+
 #ifdef HAVE_LIBXED
+
 // XED callback function to get a symbol from an address
 static int addressToSymbol(xed_uint64_t  address,
                            char*         symbolBuffer,
                            xed_uint32_t  bufferLength,
                            xed_uint64_t* offset,
                            void*         context) {
+  if (address - excludeLow < excludeLen) return 0;
+
   auto name = boost::trim_copy(getNativeFunctionName((void*)address));
   if (boost::starts_with(name, "0x")) {
     return 0;
@@ -48,6 +53,11 @@ static int addressToSymbol(xed_uint64_t  address,
   return 1;
 }
 #endif /* HAVE_LIBXED */
+
+void Disasm::ExcludedAddressRange(void* low, size_t len) {
+  excludeLow = uintptr_t(low);
+  excludeLen = len;
+}
 
 Disasm::Disasm(const Disasm::Options& opts)
     : m_opts(opts)

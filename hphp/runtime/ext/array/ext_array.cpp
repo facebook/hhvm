@@ -136,10 +136,14 @@ TypedValue HHVM_FUNCTION(array_column,
   }
   ArrayInit ret(arr_input.size(), ArrayInit::Map{});
   for (ArrayIter it(arr_input); it; ++it) {
-    if (!it.second().isArray()) {
+    Array sub;
+    if (UNLIKELY(RuntimeOption::PHP7_Builtins && it.second().isObject())) {
+      sub = it.second().toObject().toArray();
+    } else if (it.second().isArray()) {
+      sub = it.second().toArray();
+    } else {
       continue;
     }
-    Array sub = it.second().toArray();
 
     Variant elem;
     if (val.isNull()) {

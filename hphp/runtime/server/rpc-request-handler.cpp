@@ -67,7 +67,7 @@ RPCRequestHandler::~RPCRequestHandler() {
 void RPCRequestHandler::initState() {
   hphp_session_init();
   bool isServer = RuntimeOption::ServerExecutionMode();
-  m_context = hphp_context_init();
+  m_context = g_context.getNoCheck();
   if (isServer) {
     m_context->obStart(uninit_null(),
                        0,

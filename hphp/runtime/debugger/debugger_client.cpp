@@ -754,7 +754,6 @@ void DebuggerClient::run() {
   }
 
   hphp_session_init();
-  hphp_context_init();
   if (m_options.extension.empty()) {
     hphp_invoke_simple("", true); // warm-up only
   } else {

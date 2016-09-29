@@ -63,7 +63,6 @@ void for_each(const std::vector<Item>& inputs, Func func) {
       try {
         hphp_thread_init();
         hphp_session_init();
-        hphp_context_init();
         SCOPE_EXIT {
           hphp_context_exit();
           hphp_session_exit();
@@ -118,7 +117,6 @@ map(const std::vector<Item>& inputs, Func func) {
       try {
         hphp_thread_init();
         hphp_session_init();
-        hphp_context_init();
         SCOPE_EXIT {
           hphp_context_exit();
           hphp_session_exit();

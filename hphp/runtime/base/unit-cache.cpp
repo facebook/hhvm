@@ -562,7 +562,6 @@ void preloadRepo() {
     workers.push_back(std::thread([&] {
       hphp_thread_init();
       hphp_session_init();
-      hphp_context_init();
 
       while (true) {
         auto begin = index.fetch_add(batchSize);

@@ -417,7 +417,7 @@ void HttpRequestHandler::abortRequest(Transport* transport) {
 bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                            RequestURI &reqURI,
                                            SourceRootInfo &sourceRootInfo) {
-  ExecutionContext *context = hphp_context_init();
+  auto context = g_context.getNoCheck();
   OBFlags obFlags = OBFlags::Default;
   if (transport->getHTTPVersion() != "1.1") {
     obFlags |= OBFlags::OutputDisabled;

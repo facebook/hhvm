@@ -655,7 +655,6 @@ struct OptWorker : JobQueueWorker<BlockScope*, void*, true, true> {
 
   void onThreadEnter() override {
     hphp_session_init();
-    hphp_context_init();
   }
 
   void onThreadExit() override {

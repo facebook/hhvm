@@ -54,7 +54,6 @@ let () =
   let env = Test.subscribe_diagnostic env in
   (* There are no errors initially *)
   check_has_no_errors env;
-
   (* Open pre-existing file in editor *)
   let env = Test.open_file env foo_name in
 

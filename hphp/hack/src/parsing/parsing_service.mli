@@ -10,6 +10,7 @@
 val empty_file_info: FileInfo.t
 
 val go:
+  ?quick: bool ->
   Worker.t list option ->
   File_content.t Relative_path.Map.t ->
   get_next:(unit -> Relative_path.t list) ->

@@ -132,6 +132,7 @@ class LazyDeclTestDriver(MiniStateTestDriver):
 use_mini_state = true
 use_watchman = true
 lazy_decl = true
+lazy_parse = true
 """)
 
 class MiniStateCommonTests(common_tests.CommonTests, MiniStateTestDriver,

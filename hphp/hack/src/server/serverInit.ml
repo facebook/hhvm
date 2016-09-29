@@ -211,9 +211,11 @@ let indexing genv =
   let t = Hh_logger.log_duration "Indexing" t in
   get_next, t
 
-let parsing genv env ~get_next t =
+let parsing ~lazy_parse genv env ~get_next t =
+  let quick = lazy_parse in
   let files_info, errorl, failed =
     Parsing_service.go
+      ~quick
       genv.workers
       Relative_path.Map.empty
       ~get_next
@@ -373,8 +375,9 @@ let get_build_targets env =
 (* entry point *)
 let init ?load_mini_script genv =
   (* Log lazy declarations *)
-  let lazy_decl = genv.local_config.SLC.lazy_decl
-    && Option.is_none (ServerArgs.ai_mode genv.options) in
+  let lazy_decl = genv.local_config.SLC.lazy_decl &&
+    Option.is_none (ServerArgs.ai_mode genv.options) in
+  let lazy_parse = lazy_decl && genv.local_config.SLC.lazy_parse in
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
   let saved_state_load_type =
@@ -391,7 +394,7 @@ let init ?load_mini_script genv =
     load_mini_script >>= mk_state_future root saved_state_load_type in
 
   let get_next, t = indexing genv in
-  let env, t = parsing genv env ~get_next t in
+  let env, t = parsing ~lazy_parse genv env ~get_next t in
 
   let timeout = genv.local_config.SLC.load_mini_script_timeout in
   let state_future = state_future >>= fun f ->

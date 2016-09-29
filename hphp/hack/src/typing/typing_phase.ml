@@ -121,25 +121,12 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
         | None, Some _ ->
             failwith "Invalid array declaration type" in
       env, (ety_env, (r, ty))
-  | r, Tgeneric (x, cstrl) ->
+  | r, Tgeneric x ->
       begin match SMap.get x ety_env.substs with
       | Some x_ty ->
         env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None ->
-        (* If parameter is registered for bounds in the environment
-         * then don't embed them in the type as well (unify doesn't
-         * deal with this situation). *)
-        if Env.is_generic_parameter env x
-        then env, (ety_env, (r, Tabstract (AKgeneric x, None)))
-        else
-          (match cstrl with
-           (* TODO: need to deal with multiple constraints *)
-          | [(Ast.Constraint_as, ty)] ->
-              let env, ty = localize ~ety_env env ty in
-              env, (ety_env, (r, Tabstract (AKgeneric x, Some ty)))
-          | _ ->
-            env, (ety_env, (r, Tabstract (AKgeneric x, None)))
-            )
+        env, (ety_env, (r, Tabstract (AKgeneric x, None)))
     end
   | r, Toption ty ->
        let env, ty = localize ~ety_env env ty in

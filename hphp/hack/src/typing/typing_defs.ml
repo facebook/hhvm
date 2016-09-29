@@ -38,17 +38,12 @@ and _ ty_ =
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : Nast.sid * decl ty list -> decl ty_
 
-  (* The type of a generic inside a function using that generic, with an
-   * optional "as" or "super" constraint. For example:
-   *
-   * function f<T as int>(T $x) {
-   *   // ...
-   * }
-   *
-   * The type of $x inside f() is
-   * Tgeneric("T", Some(Constraint_as, Tprim Tint))
+  (* The type of a generic parameter. The constraints on a generic parameter
+   * are accessed through the lenv.tpenv component of the environment, which
+   * is set up when checking the body of a function or method. See uses of
+   * Typing_phase.localize_generic_parameters_with_bounds.
    *)
-  | Tgeneric : string * (Ast.constraint_kind * decl ty) list -> decl ty_
+  | Tgeneric : string -> decl ty_
 
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : taccess_type -> decl ty_

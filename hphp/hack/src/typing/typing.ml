@@ -996,7 +996,7 @@ and expr_
         let env, tvarl =
           List.map_env env class_.tc_tparams TUtils.unresolved_tparam in
         let params = List.map class_.tc_tparams begin fun (_, (p, n), _) ->
-          Reason.Rwitness p, Tgeneric (n, [])
+          Reason.Rwitness p, Tgeneric n
         end in
         let obj_type = Reason.Rwitness p, Tapply (pos_cname, params) in
         let ety_env = {
@@ -1016,7 +1016,7 @@ and expr_
             let tparam = Ast.Invariant, pos_cname,
               [(Ast.Constraint_as, obj_type)] in
             let env, tvar = TUtils.unresolved_tparam env tparam in
-            let param = Reason.Rwitness pos, Tgeneric (class_name, []) in
+            let param = Reason.Rwitness pos, Tgeneric class_name in
             let tparams = tparam :: class_.tc_tparams in
             let ety_env = {
               ety_env with
@@ -1214,7 +1214,7 @@ and expr_
         | Some {td_tparams = tparaml; _} ->
             (* Typedef type parameters cannot have constraints *)
             let params = List.map ~f:begin fun (_, (p, x), _) ->
-              Reason.Rwitness p, Tgeneric (x, [])
+              Reason.Rwitness p, Tgeneric x
             end tparaml in
             let tdef = Reason.Rwitness (fst sid), Tapply (sid, params) in
             let typename =
@@ -1899,7 +1899,7 @@ and call_parent_construct pos env el uel =
   match parent with
     | _, Tapply _ ->
       check_parent_construct pos env el uel parent
-    | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_, _) | Toption _ | Tprim _
+    | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric _ | Toption _ | Tprim _
           | Tfun _ | Ttuple _ | Tshape _ | Taccess (_, _) | Tthis
          ) -> (* continue here *)
       let default = env, (Reason.Rnone, Tany) in
@@ -2218,14 +2218,14 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
             | _ -> assert false in
         let params, ret = match List.length el with
           | 2 ->
-            let param2 = (name2, (r2, Toption (r2, Tgeneric ("Tk", [])))) in
+            let param2 = (name2, (r2, Toption (r2, Tgeneric "Tk"))) in
             let rret = fst fty.ft_ret in
-            let ret = (rret, Toption (rret, Tgeneric ("Tv", []))) in
+            let ret = (rret, Toption (rret, Tgeneric "Tv")) in
             [param1; param2], ret
           | 3 ->
-            let param2 = (name2, (r2, Tgeneric ("Tk", []))) in
-            let param3 = (name3, (r3, Tgeneric ("Tv", []))) in
-            let ret = (fst fty.ft_ret, Tgeneric ("Tv", [])) in
+            let param2 = (name2, (r2, Tgeneric "Tk")) in
+            let param3 = (name3, (r3, Tgeneric "Tv")) in
+            let ret = (fst fty.ft_ret, Tgeneric "Tv") in
             [param1; param2; param3], ret
           | _ -> fty.ft_params, fty.ft_ret in
         let fty = { fty with ft_params = params; ft_ret = ret } in
@@ -4007,7 +4007,7 @@ and class_def tcopt c =
 *)
 and get_self_from_c c =
   let tparams = List.map (fst c.c_tparams) begin fun (_, (p, s), _) ->
-    Reason.Rwitness p, Tgeneric (s, [])
+    Reason.Rwitness p, Tgeneric s
   end in
   Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams)
 
@@ -4143,7 +4143,7 @@ and class_constr_def env c =
 and class_implements_type env c1 ctype2 =
   let params =
     List.map (fst c1.c_tparams) begin fun (_, (p, s), _) ->
-      (Reason.Rwitness p, Tgeneric (s, []))
+      (Reason.Rwitness p, Tgeneric s)
     end in
   let r = Reason.Rwitness (fst c1.c_name) in
   let ctype1 = r, Tapply (c1.c_name, params) in

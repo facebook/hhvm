@@ -29,13 +29,12 @@ let rec instantiate subst (r, ty: decl ty) =
    *)
   if SMap.is_empty subst then (r, ty) else
   match ty with
-  | Tgeneric (x, cstrl) ->
+  | Tgeneric x ->
       (match SMap.get x subst with
       | Some x_ty ->
         (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty)
       | None ->
-        (r, Tgeneric (x, List.map cstrl
-             (fun (ck, ty) -> (ck, instantiate subst ty))))
+        (r, Tgeneric x)
       )
   | _ ->
       let ty = instantiate_ subst ty in

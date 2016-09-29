@@ -63,7 +63,7 @@ module ErrorString = struct
     | Tvar _             -> "some value"
     | Tanon _    -> "a function"
     | Tfun _     -> "a function"
-    | Tgeneric (x, _)    -> "a value of declared generic type "^x
+    | Tgeneric x    -> "a value of declared generic type " ^ x
     | Tabstract (AKnewtype (x, _), _)
         when x = SN.Classes.cClassname -> "a classname string"
     | Tabstract (AKnewtype (x, _), _)
@@ -124,7 +124,7 @@ module ErrorString = struct
       List.fold_left ~f:(fun acc (_, sid) -> acc^"::"^sid)
         ~init:("the type constant "^strip_ns x) ids in
     match snd root_ty with
-    | Tgeneric (x, _) -> f x
+    | Tgeneric x -> f x
     | Tapply ((_, x), _) -> f x
     | Tclass ((_, x), _) -> f x
     | Tabstract (ak, _) -> f @@ AbstractKind.to_string ak
@@ -158,7 +158,7 @@ module Suggest = struct
     | Ttuple (l)             -> "("^list l^")"
     | Tany                   -> "..."
     | Tmixed                 -> "mixed"
-    | Tgeneric (s, _)        -> s
+    | Tgeneric s             -> s
     | Tabstract (AKgeneric s, _) -> s
     | Toption ty             -> "?" ^ type_ ty
     | Tprim tp               -> prim tp
@@ -248,7 +248,7 @@ module Full = struct
     | Tarray (None, Some _) -> assert false
     | Tclass ((_, s), []) -> o s
     | Tapply ((_, s), []) -> o s
-    | Tgeneric (s, _) -> o s
+    | Tgeneric s -> o s
     | Taccess (root_ty, ids) ->
         k root_ty;
         o (List.fold_left ids

@@ -25,7 +25,7 @@ let make_ts env ty =
   | Some {td_tparams; _} ->
       (* Typedef parameters can not have constraints *)
       let params = List.map ~f:begin fun (_, (p, x), _) ->
-        Reason.Rwitness p, Tgeneric (x, [])
+        Reason.Rwitness p, Tgeneric x
       end td_tparams in
       let ts = fst ty, Tapply ((Pos.none, SN.FB.cTypeStructure), params) in
       let ety_env = { (Phase.env_with_self env) with

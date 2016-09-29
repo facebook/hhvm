@@ -469,20 +469,8 @@ and type_ tcopt root variance env (reason, ty) =
      * covariant type params).
      *)
     env
-  | Tgeneric (name, constraints) ->
-     let pos = Reason.to_pos reason in
-     (* As above for 'Tthis', if 'this' appears in any constraints on the type,
-      * check that it's being referenced in a proper position.
-      *)
-     List.iter constraints begin fun (_, (r, _ as ty))  ->
-        match ty with
-        | (_, Tthis) ->
-           Option.value_map
-             (snd root)
-             ~default:()
-             ~f: (check_final_this_pos_variance variance (Reason.to_pos r))
-        | _ -> ()
-      end ;
+  | Tgeneric name ->
+    let pos = Reason.to_pos reason in
       (* This section makes the position more precise.
        * Say we find a return type that is a tuple (int, int, T).
        * The whole tuple is in covariant position, and so the position

@@ -307,7 +307,7 @@ let tconst_subsumption env parent_typeconst child_typeconst =
     Errors.abstract_concrete_override pos parent_pos `typeconst;
 
   let default = Reason.Rtconst_no_cstr child_typeconst.ttc_name,
-                Tgeneric (name, []) in
+                Tgeneric name in
   let child_cstr =
     if child_is_abstract
     then Some (Option.value child_typeconst.ttc_constraint ~default)

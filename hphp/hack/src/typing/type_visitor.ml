@@ -17,8 +17,7 @@ class type ['a] type_visitor_type = object
   method on_tmixed : 'a -> Reason.t -> 'a
   method on_tthis : 'a -> Reason.t -> 'a
   method on_tarray : 'a -> Reason.t -> 'b ty option -> 'b ty option -> 'a
-  method on_tgeneric :
-    'a -> Reason.t -> string -> (Ast.constraint_kind * decl ty) list -> 'a
+  method on_tgeneric : 'a -> Reason.t -> string -> 'a
   method on_toption : 'a -> Reason.t -> 'b ty -> 'a
   method on_tprim : 'a -> Reason.t -> Nast.tprim -> 'a
   method on_tvar : 'a -> Reason.t -> Ident.t -> 'a
@@ -46,8 +45,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     let acc = Option.fold ~f:this#on_type ~init:acc ty1_opt in
     let acc = Option.fold ~f:this#on_type ~init:acc ty2_opt in
     acc
-  method on_tgeneric acc _ _ cstrl =
-    List.fold_left ~f:this#on_type ~init:acc (List.map cstrl snd)
+  method on_tgeneric acc _ _ = acc
   method on_toption: type a. _ -> Reason.t -> a ty -> _ =
     fun acc _ ty -> this#on_type acc ty
   method on_tprim acc _ _ = acc
@@ -107,7 +105,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | Tthis -> this#on_tthis acc r
     | Tarray (ty1_opt, ty2_opt) ->
       this#on_tarray acc r ty1_opt ty2_opt
-    | Tgeneric (s, cstrl) -> this#on_tgeneric acc r s cstrl
+    | Tgeneric s -> this#on_tgeneric acc r s
     | Toption ty -> this#on_toption acc r ty
     | Tprim prim -> this#on_tprim acc r prim
     | Tvar id -> this#on_tvar acc r id

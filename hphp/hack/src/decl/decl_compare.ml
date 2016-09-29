@@ -97,9 +97,8 @@ module CompareTypes = struct
         let acc = ty_opt (subst, same) ty1 ty3 in
         let acc = ty_opt acc ty2 ty4 in
         acc
-    | Tgeneric (s1, cstr1), Tgeneric (s2, cstr2) ->
-        let same = same && s1 = s2 in
-        constraints_ (subst, same) cstr1 cstr2
+    | Tgeneric s1, Tgeneric s2 ->
+        subst, same && s1 = s2
     | Toption ty1, Toption ty2 ->
         ty acc ty1 ty2
     | Tprim x, Tprim y ->
@@ -133,7 +132,7 @@ module CompareTypes = struct
                end unset_fields1 (subst, same)
           | _ -> subst, same && (fields_known1 = fields_known2)
         end
-    | (Tany | Tmixed | Tarray (_, _) | Tfun _ | Taccess (_, _) | Tgeneric (_, _)
+    | (Tany | Tmixed | Tarray (_, _) | Tfun _ | Taccess (_, _) | Tgeneric _
        | Toption _ | Tprim _ | Tshape _| Tapply (_, _) | Ttuple _ | Tthis
       ), _ -> default
 

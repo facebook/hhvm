@@ -122,7 +122,7 @@ let get_implements tcopt (_, x) =
       SMap.fold begin fun _ ty set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
-        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tfun _
+        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric _ | Tfun _
           | Toption _ | Tapply (_, _) | Ttuple _ | Tshape _ | Taccess (_, _)
           | Tthis) ->
           raise Exit

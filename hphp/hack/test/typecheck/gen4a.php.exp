@@ -5,6 +5,10 @@ Some methods are incompatible with those declared in type A
 Read the following to see why:
 File "gen4a.php", line 20, characters 19-21:
 Member foo has the wrong type
+File "gen4a.php", line 13, characters 31-31:
+Some type constraint(s) here are violated
+File "gen4a.php", line 20, characters 23-23:
+'T' is a constrained type
 File "gen4a.php", line 20, characters 28-28:
 This is an object of type B
 File "gen4a.php", line 13, characters 28-28:

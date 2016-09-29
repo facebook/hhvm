@@ -927,8 +927,10 @@ public:
   void emitUnset(Emitter& e, ExpressionPtr exp = ExpressionPtr());
   void emitVisitAndUnset(Emitter& e, ExpressionPtr exp);
   void emitSet(Emitter& e);
+  void emitSetL(Emitter& e, Id local);
   void emitSetOp(Emitter& e, int op);
   void emitBind(Emitter& e);
+  void emitBindL(Emitter& e, Id local);
   void emitIncDec(Emitter& e, IncDecOp cop);
   void emitPop(Emitter& e);
   void emitConvertToCell(Emitter& e);
@@ -2368,34 +2370,18 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
     if (r->isTryFinally()) {
       // We encountered a try block - a finally needs to be run
       // before returning.
-      Id stateLocal = getStateLocal();
-      Id retLocal = getRetLocal();
-      // Set the unnamed "state" local to the appropriate identifier
-      emitVirtualLocal(retLocal);
       assert(t->isRegistered());
       e.Int(t->m_state);
-      e.SetL(stateLocal);
+      emitSetL(e, getStateLocal());
       e.PopC();
       // Emit code stashing the current return value in the "ret" unnamed
       // local
       if (sym == StackSym::C) {
-        // For legacy purposes, SetL expects its immediate argument to
-        // be present on the symbolic stack. In reality, retLocal is
-        // an immediate argument. The following pop and push instructions
-        // ensure that the arguments are place on the symbolic stack
-        // in a correct order. In reality the following three calls are
-        // a no-op.
-        popEvalStack(StackSym::C);
-        emitVirtualLocal(retLocal);
-        pushEvalStack(StackSym::C);
-        e.SetL(retLocal);
+        emitSetL(e, getRetLocal());
         e.PopC();
       } else {
         assert(sym == StackSym::V);
-        popEvalStack(StackSym::V);
-        emitVirtualLocal(retLocal);
-        pushEvalStack(StackSym::V);
-        e.BindL(retLocal);
+        emitBindL(e, getRetLocal());
         e.PopV();
       }
       emitJump(e, iters, r->m_finallyLabel);
@@ -2428,11 +2414,9 @@ void EmitterVisitor::emitGoto(Emitter& e, StringData* name, StatementPtr s) {
     if (r->isTryFinally()) {
       // We came across a try region, need to run a finally block.
       // Store appropriate value inside the state local.
-      Id stateLocal = getStateLocal();
-      emitVirtualLocal(stateLocal);
       assert(t->isRegistered());
       e.Int(t->m_state);
-      e.SetL(stateLocal);
+      emitSetL(e, getStateLocal());
       e.PopC();
       // Jump to the finally block and free any pending iterators on the
       // way.
@@ -2460,10 +2444,8 @@ void EmitterVisitor::emitBreak(Emitter& e, int depth, StatementPtr s) {
       // Encountered a try block, need to run finally.
       assert(r->m_breakTargets.count(depth));
       assert(t->isRegistered());
-      Id stateLocal = getStateLocal();
-      emitVirtualLocal(stateLocal);
       e.Int(t->m_state);
-      e.SetL(stateLocal);
+      emitSetL(e, getStateLocal());
       e.PopC();
       emitJump(e, iters, r->m_finallyLabel);
       return;
@@ -2500,11 +2482,9 @@ void EmitterVisitor::emitContinue(Emitter& e, int depth, StatementPtr s) {
     if (r->isTryFinally()) {
       // Encountered a try block, need to run finally.
       assert(r->m_continueTargets.count(depth));
-      Id stateLocal = getStateLocal();
-      emitVirtualLocal(stateLocal);
       assert(t->isRegistered());
       e.Int(t->m_state);
-      e.SetL(stateLocal);
+      emitSetL(e, getStateLocal());
       e.PopC();
       emitJump(e, iters, r->m_finallyLabel);
       return;
@@ -2550,14 +2530,13 @@ void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
   // Now that we have our vector of Label*'s ready, we can emit a
   // Switch instruction and/or conditional branches, and we can
   // emit the body of each case.
-  Id stateLocal = getStateLocal();
-  emitVirtualLocal(stateLocal);
-  e.IssetL(stateLocal);
+  emitVirtualLocal(getStateLocal());
+  emitIsset(e);
   e.JmpZ(after);
   if (count >= 3) {
     // A switch is needed since there are more than two cases.
-    emitVirtualLocal(stateLocal);
-    e.CGetL(stateLocal);
+    emitVirtualLocal(getStateLocal());
+    emitCGet(e);
     e.Switch(SwitchKind::Unbounded, 0, cases);
   }
   for (auto& p : region->m_returnTargets) {
@@ -2605,17 +2584,16 @@ void EmitterVisitor::emitReturnTrampoline(Emitter& e,
     if (region->m_parent == nullptr) {
       // At the bottom of the hierarchy. Restore the return value
       // and perform the actual return.
-      Id retLocal = getRetLocal();
-      emitVirtualLocal(retLocal);
+      emitVirtualLocal(getRetLocal());
       if (sym == StackSym::C) {
-        e.CGetL(retLocal);
+        emitCGet(e);
         if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeC();
         }
         e.RetC();
       } else {
         assert(sym == StackSym::V);
-        e.VGetL(retLocal);
+        emitVGet(e);
         if (shouldEmitVerifyRetType()) {
           e.VerifyRetTypeV();
         }
@@ -2647,11 +2625,10 @@ void EmitterVisitor::emitGotoTrampoline(Emitter& e,
     if (region->m_gotoLabels.count(name)) {
       // If only there is the appropriate label inside the current region
       // perform a jump.
-      Id stateLocal = getStateLocal();
-      emitVirtualLocal(stateLocal);
       // We need to unset the state unnamed local in order to correctly
       // fall through any future finally blocks.
-      e.UnsetL(stateLocal);
+      emitVirtualLocal(getStateLocal());
+      emitUnset(e);
       // Jump to the label and free any pending iterators.
       emitJump(e, iters, t->m_label);
       return;
@@ -2710,9 +2687,8 @@ void EmitterVisitor::emitBreakTrampoline(Emitter& e, Region* region,
     if (depth == 1) {
       // This is the last loop to break out of. Unset the state local in
       // order to correctly fall through any future finally blocks
-      Id stateLocal = getStateLocal();
-      emitVirtualLocal(stateLocal);
-      e.UnsetL(stateLocal);
+      emitVirtualLocal(getStateLocal());
+      emitUnset(e);
       // Jump to the break label and free any pending iterators on the
       // way.
       emitJump(e, iters, t->m_label);
@@ -2750,9 +2726,8 @@ void EmitterVisitor::emitContinueTrampoline(Emitter& e, Region* region,
       // This is the last loop level to continue out of. Don't free the
       // iterator for the current loop. We need to free the state unnamed
       // local in order to fall through any future finallies correctly
-      Id stateLocal = getStateLocal();
-      emitVirtualLocal(stateLocal);
-      e.UnsetL(stateLocal);
+      emitVirtualLocal(getStateLocal());
+      emitUnset(e);
       // Jump to the continue label and free any pending iterators
       emitJump(e, iters, t->m_label);
       return;
@@ -3239,12 +3214,10 @@ struct FinallyThunklet final : Thunklet {
       visitor.createRegion(m_finallyStatement, Region::Kind::FaultFunclet);
     visitor.enterRegion(region);
     SCOPE_EXIT { visitor.leaveRegion(region); };
-    Id stateLocal = visitor.getStateLocal();
-    visitor.emitVirtualLocal(stateLocal);
-    e.UnsetL(stateLocal);
-    Id retLocal = visitor.getStateLocal();
-    visitor.emitVirtualLocal(retLocal);
-    e.UnsetL(retLocal);
+    visitor.emitVirtualLocal(visitor.getStateLocal());
+    visitor.emitUnset(e);
+    visitor.emitVirtualLocal(visitor.getRetLocal());
+    visitor.emitUnset(e);
     auto* func = visitor.getFuncEmitter();
     int oldNumLiveIters = func->numLiveIterators();
     func->setNumLiveIterators(m_numLiveIters);
@@ -6735,13 +6708,8 @@ Id EmitterVisitor::emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp) {
 }
 
 Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
-  // HACK: emitVirtualLocal would pollute m_evalStack before visiting exp,
-  //       YieldExpression won't be happy
   Id tempLocal = m_curFunc->allocUnnamedLocal();
-  auto& ue = e.getUnitEmitter();
-  ue.emitOp(OpSetL);
-  ue.emitIVA(tempLocal);
-
+  emitSetL(e, tempLocal);
   emitPop(e);
   return tempLocal;
 }
@@ -7196,6 +7164,20 @@ void EmitterVisitor::emitSet(Emitter& e) {
   }
 }
 
+/*
+ * emitSet() requires the destination to be placed on the stack before the
+ * source cell. If the destination is a local, this restriction imposed by
+ * the symbolic stack abstraction goes beyond the actual requirements of HHBC,
+ * where the local is represented by an immediate argument passed to SetL.
+ * This function allows you to bypass this requirement.
+ */
+void EmitterVisitor::emitSetL(Emitter& e, Id local) {
+  popEvalStack(StackSym::C);
+  emitVirtualLocal(local);
+  pushEvalStack(StackSym::C);
+  e.SetL(local);
+}
+
 void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
   if (checkIfStackEmpty("SetOp*")) return;
 
@@ -7278,6 +7260,14 @@ void EmitterVisitor::emitBind(Emitter& e) {
       emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define}.rhs());
     e.BindM(stackCount, symToMemberKey(e, iLast, true /* allowW */));
   }
+}
+
+// See EmitterVisitor::emitSetL().
+void EmitterVisitor::emitBindL(Emitter& e, Id local) {
+  popEvalStack(StackSym::V);
+  emitVirtualLocal(local);
+  pushEvalStack(StackSym::V);
+  e.BindL(local);
 }
 
 void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {

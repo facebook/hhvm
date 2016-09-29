@@ -19,6 +19,7 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/server/transport.h"
 
 #include <chrono>
 
@@ -93,6 +94,7 @@ public:
   const std::set<std::string> &getPasswords() const { return m_passwords;}
   bool alwaysReset() const { return m_alwaysReset;}
   const std::set<std::string> &getFunctions() const { return m_functions; }
+  Transport::Method getMethod() const { return m_method;}
 
 protected:
   std::string m_name;
@@ -109,6 +111,7 @@ protected:
   std::set<std::string> m_passwords;
   bool m_alwaysReset = false;
   std::set<std::string> m_functions;
+  Transport::Method m_method;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

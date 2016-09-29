@@ -52,6 +52,15 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
   m_alwaysReset = Config::GetBool(ini, hdf, "AlwaysReset", false, false);
   m_functions = Config::GetSet(ini, hdf, "Functions", m_functions, false);
 
+  std::string method  = Config::GetString(ini, hdf, "Method", "", false);
+  if (method == "POST") {
+    m_method = Transport::Method::POST;
+  } else if (method == "GET") {
+    m_method = Transport::Method::GET;
+  } else {
+    m_method = Transport::Method::AUTO;
+  }
+
   std::string type = Config::GetString(ini, hdf, "Type", "", false);
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;

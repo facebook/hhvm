@@ -35,9 +35,15 @@ let test_empty_string () =
     false
   with Hh_json.Syntax_error _ -> true
 
+let test_whitespace_string () =
+  (match Hh_json.json_of_string "\" \"" with
+  | Hh_json.JSON_String " " -> true
+  | _ -> false)
+
 let tests = [
   "test_escape_unescape", test_escape_unescape;
   "test_empty_string", test_empty_string;
+  "test_whitespace_string", test_whitespace_string
 ]
 
 let () =

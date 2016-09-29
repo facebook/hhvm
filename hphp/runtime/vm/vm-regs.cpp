@@ -20,6 +20,8 @@
 
 namespace HPHP {
 
+///////////////////////////////////////////////////////////////////////////////
+
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
 
@@ -46,37 +48,73 @@ VMRegAnchor::VMRegAnchor(ActRec* ar)
   regs.fp = prevAr;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 __thread bool AssertVMUnused::is_protected = false;
 
 #ifndef NDEBUG
-AssertVMUnused::AssertVMUnused()
-  : m_oldBase(rds::tl_base)
-  , m_oldState(tl_regState)
-  , m_oldProtected(is_protected)
-{
-  if (!rds::tl_base) return;
+
+namespace {
+
+__thread const AssertVMUnused* tl_top_prot = nullptr;
+
+void protect() {
   rds::tl_base = nullptr;
   tl_regState = VMRegState::DIRTY;
-  is_protected = true;
+  AssertVMUnused::is_protected = true;
+
   rds::threadInit();
 
   auto const protlen =
     rds::persistentSection().begin() - (const char*)rds::tl_base;
 
   // The current thread may attempt to read the Gen numbers of the normal
-  // portion of rds. These will all be invalid. No writes to non-persistent
+  // portion of rds.  These will all be invalid.  No writes to non-persistent
   // rds should occur while this guard is active.
   auto const result = mprotect(rds::tl_base, protlen, PROT_READ);
   always_assert(result == 0);
 }
 
+void deprotect(void* base, VMRegState state, bool prot) {
+  rds::threadExit();
+
+  AssertVMUnused::is_protected = prot;
+  tl_regState = state;
+  rds::tl_base = base;
+}
+
+}
+
+AssertVMUnused::AssertVMUnused()
+  : m_oldBase(rds::tl_base)
+  , m_oldState(tl_regState)
+  , m_oldProt(is_protected)
+{
+  if (!rds::tl_base) return;
+
+  if (tl_top_prot == nullptr) tl_top_prot = this;
+  protect();
+}
+
 AssertVMUnused::~AssertVMUnused() {
   if (!m_oldBase) return;
-  rds::threadExit();
-  is_protected = m_oldProtected;
-  tl_regState = m_oldState;
-  rds::tl_base = m_oldBase;
+
+  deprotect(m_oldBase, m_oldState, m_oldProt);
+  if (tl_top_prot == this) tl_top_prot = nullptr;
 }
+
+AssertVMUnusedDisabler::AssertVMUnusedDisabler() {
+  if (auto const prot = tl_top_prot) {
+    deprotect(prot->m_oldBase, prot->m_oldState, prot->m_oldProt);
+  }
+}
+
+AssertVMUnusedDisabler::~AssertVMUnusedDisabler() {
+  if (tl_top_prot) protect();
+}
+
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
 
 }

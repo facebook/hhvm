@@ -591,17 +591,19 @@ void gdImageColorDeallocate (gdImagePtr im, int color)
 
 void gdImageColorTransparent (gdImagePtr im, int color)
 {
-	if (!im->trueColor) {
-		if (im->transparent != -1) {
-			im->alpha[im->transparent] = gdAlphaOpaque;
-		}
-		if (color > -1 && color < im->colorsTotal && color < gdMaxColors) {
-			im->alpha[color] = gdAlphaTransparent;
-		} else {
-			return;
-		}
-	}
-	im->transparent = color;
+  if (color < 0) {
+    return;
+  }
+  if (!im->trueColor) {
+    if (color > im->colorsTotal || color > gdMaxColors) {
+      return;
+    }
+    if (im->transparent != -1) {
+      im->alpha[im->transparent] = gdAlphaOpaque;
+    }
+    im->alpha[color] = gdAlphaTransparent;
+  }
+  im->transparent = color;
 }
 
 void gdImagePaletteCopy (gdImagePtr to, gdImagePtr from)

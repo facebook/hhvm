@@ -1,0 +1,15 @@
+File "constraint_override_bad.php", line 9, characters 7-7:
+Class C does not correctly implement all required methods  (Typing[4110])
+File "constraint_override_bad.php", line 9, characters 17-17:
+Some methods are incompatible with those declared in type B
+Read the following to see why:
+File "constraint_override_bad.php", line 10, characters 19-21:
+Member foo has the wrong type
+File "", line 0, characters 0--1:
+Some type constraint(s) here are violated
+File "constraint_override_bad.php", line 10, characters 23-23:
+'T' is a constrained type
+File "constraint_override_bad.php", line 5, characters 31-31:
+This is an object of type C
+File "constraint_override_bad.php", line 10, characters 31-31:
+It is incompatible with an object of type B

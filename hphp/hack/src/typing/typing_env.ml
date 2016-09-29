@@ -220,6 +220,14 @@ let add_lower_bound env name ty =
     end in
   env_with_tpenv env (add_lower_bound_ tpenv name ty)
 
+let add_constraint env id ck ty =
+  match ck with
+  | Ast.Constraint_super -> add_lower_bound env id ty
+  | Ast.Constraint_eq    ->
+    let env = add_upper_bound env id ty in
+    add_lower_bound env id ty
+  | Ast.Constraint_as    -> add_upper_bound env id ty
+
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
 let add_generic_parameters env tparaml =

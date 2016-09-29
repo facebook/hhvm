@@ -137,6 +137,7 @@ val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
 val add_upper_bound : env -> string -> locl ty -> env
 val add_lower_bound : env -> string -> locl ty -> env
+val add_constraint : env -> string -> Ast.constraint_kind -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool

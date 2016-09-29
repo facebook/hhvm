@@ -8,12 +8,23 @@
  *
  *)
 
+open Core
 open Typing_defs
 
 module TUtils = Typing_utils
 module N = Nast
 module Reason = Typing_reason
 module Env = Typing_env
+
+(* Given a list of generic parameter declarations of type [locl tparam list]
+ * add entries for each generic parameter to env.lenv.tpenv, with lower
+ * bounds for `super` constraints, upper bounds for `as` constraints, and
+ * both bounds for `eq` constraints. *)
+let add_tparams_bounds env (tparams: locl tparam list) =
+  let add_bound env (_, (_, name), cstrl) =
+    List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
+      Env.add_constraint env name ck ty) in
+  List.fold_left tparams ~f:add_bound ~init: env
 
 let check_constraint env ck cstr_ty ty =
   let env, ety = Env.expand_type env ty in

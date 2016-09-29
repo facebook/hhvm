@@ -298,9 +298,9 @@ module Full = struct
     fun st env o ft ->
     (match ft.ft_tparams, ft.ft_arity with
       | [], Fstandard _ -> ()
-      | [], _ -> o "<...>";
-      | l, Fstandard _ -> o "<"; list_sep o ", " (tparam o) l; o ">"
-      | l, _ -> o "<"; list_sep o ", " (tparam o) l; o "..."; o ">"
+      | [], _ -> o "<...>"
+      | l, Fstandard _ -> (o "<"; list_sep o ", " (tparam st o env) l; o ">")
+      | l, _ -> (o "<"; list_sep o ", " (tparam st o env) l; o "..."; o ">")
     );
     o "("; list_sep o ", " (fun_param st env o) ft.ft_params; o "): ";
     ty st env o ft.ft_ret
@@ -313,8 +313,19 @@ module Full = struct
     | Some param_name, param_type ->
         ty st env o param_type; o " "; o param_name
 
-  and tparam: type a. _ -> a tparam -> _ =
-    fun o (_, (_, x), _) -> o x
+  and tparam: type a.  _ -> _ -> _ ->  a Typing_defs.tparam -> _ =
+    fun st o env (_, (_, x), cstrl) ->
+      (o x; list_sep o " " (tparam_constraint st env o) cstrl)
+
+  and tparam_constraint:
+    type a. _ -> _ -> _ -> (Ast.constraint_kind * a ty) -> _ =
+    fun st env o (ck, cty) ->
+      begin (match ck with
+      | Ast.Constraint_as -> o " as "
+      | Ast.Constraint_super -> o " super "
+      | Ast.Constraint_eq -> o " = ");
+        ty st env o cty
+      end
 
   let to_string env x =
     let buf = Buffer.create 50 in

@@ -180,13 +180,22 @@ bool UserFile::openImpl(const String& filename, const String& mode,
       .toArray(),
     invoked
   );
-  if (invoked && (ret.toBoolean() == true)) {
-    setIsClosed(false);
-    return true;
+  if (!invoked || !ret.toBoolean()) {
+    raise_warning("\"%s::stream_open\" call failed", m_cls->name()->data());
+    return false;
   }
 
-  raise_warning("\"%s::stream_open\" call failed", m_cls->name()->data());
-  return false;
+  if (m_StreamTell && (memchr(mode.data(), 'a', mode.size()) != nullptr)) {
+    // Call stream_tell() to determine if the initial position isn't 0.  If the
+    // call fails just assume we're starting at a position of 0.
+    ret = invoke(m_StreamTell, s_stream_tell, Array::Create(), invoked);
+    if (invoked && ret.isInteger()) {
+      setPosition(ret.toInt64());
+    }
+  }
+
+  setIsClosed(false);
+  return true;
 }
 
 bool UserFile::close() {

@@ -584,7 +584,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 /* returns 0 for ok, 1 for error */
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath TSRMLS_DC) /* {{{ */
 {
-  int path_length = strlen(path);
+  int path_length = strnlen(path, MAXPATHLEN);
   char resolved_path[MAXPATHLEN];
   int start = 1;
   int ll = 0;
@@ -593,7 +593,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
   int add_slash;
   void *tmp;
 
-  if (path_length == 0 || path_length >= MAXPATHLEN-1) {
+  if (path_length <= 0 || path_length >= MAXPATHLEN-1) {
 #ifdef TSRM_WIN32
 # if _MSC_VER < 1300
     errno = EINVAL;

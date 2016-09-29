@@ -925,6 +925,7 @@ public:
   void emitIsType(Emitter& e, IsTypeOp op);
   void emitEmpty(Emitter& e);
   void emitUnset(Emitter& e, ExpressionPtr exp = ExpressionPtr());
+  void emitUnsetL(Emitter& e, Id local);
   void emitVisitAndUnset(Emitter& e, ExpressionPtr exp);
   void emitSet(Emitter& e);
   void emitSetL(Emitter& e, Id local);
@@ -2627,8 +2628,7 @@ void EmitterVisitor::emitGotoTrampoline(Emitter& e,
       // perform a jump.
       // We need to unset the state unnamed local in order to correctly
       // fall through any future finally blocks.
-      emitVirtualLocal(getStateLocal());
-      emitUnset(e);
+      emitUnsetL(e, getStateLocal());
       // Jump to the label and free any pending iterators.
       emitJump(e, iters, t->m_label);
       return;
@@ -2687,8 +2687,7 @@ void EmitterVisitor::emitBreakTrampoline(Emitter& e, Region* region,
     if (depth == 1) {
       // This is the last loop to break out of. Unset the state local in
       // order to correctly fall through any future finally blocks
-      emitVirtualLocal(getStateLocal());
-      emitUnset(e);
+      emitUnsetL(e, getStateLocal());
       // Jump to the break label and free any pending iterators on the
       // way.
       emitJump(e, iters, t->m_label);
@@ -2726,8 +2725,7 @@ void EmitterVisitor::emitContinueTrampoline(Emitter& e, Region* region,
       // This is the last loop level to continue out of. Don't free the
       // iterator for the current loop. We need to free the state unnamed
       // local in order to fall through any future finallies correctly
-      emitVirtualLocal(getStateLocal());
-      emitUnset(e);
+      emitUnsetL(e, getStateLocal());
       // Jump to the continue label and free any pending iterators
       emitJump(e, iters, t->m_label);
       return;
@@ -3170,8 +3168,7 @@ struct UnsetUnnamedLocalThunklet final : Thunklet {
   explicit UnsetUnnamedLocalThunklet(Id loc)
     : m_loc(loc) {}
   void emit(Emitter& e) override {
-    e.getEmitterVisitor().emitVirtualLocal(m_loc);
-    e.getEmitterVisitor().emitUnset(e);
+    e.getEmitterVisitor().emitUnsetL(e, m_loc);
     e.Unwind();
   }
 private:
@@ -3184,8 +3181,7 @@ struct UnsetUnnamedLocalsThunklet final : Thunklet {
   void emit(Emitter& e) override {
     auto& visitor = e.getEmitterVisitor();
     for (auto loc : m_locs) {
-      visitor.emitVirtualLocal(loc);
-      visitor.emitUnset(e);
+      visitor.emitUnsetL(e, loc);
     }
     e.Unwind();
   }
@@ -3214,10 +3210,8 @@ struct FinallyThunklet final : Thunklet {
       visitor.createRegion(m_finallyStatement, Region::Kind::FaultFunclet);
     visitor.enterRegion(region);
     SCOPE_EXIT { visitor.leaveRegion(region); };
-    visitor.emitVirtualLocal(visitor.getStateLocal());
-    visitor.emitUnset(e);
-    visitor.emitVirtualLocal(visitor.getRetLocal());
-    visitor.emitUnset(e);
+    visitor.emitUnsetL(e, visitor.getStateLocal());
+    visitor.emitUnsetL(e, visitor.getRetLocal());
     auto* func = visitor.getFuncEmitter();
     int oldNumLiveIters = func->numLiveIterators();
     func->setNumLiveIterators(m_numLiveIters);
@@ -4266,8 +4260,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       assert(start != InvalidAbsoluteOffset);
       newFaultRegionAndFunclet(start, m_ue.bcPos(),
                                new UnsetUnnamedLocalThunklet(tempLocal));
-      emitVirtualLocal(tempLocal);
-      emitUnset(e);
+      emitUnsetL(e, tempLocal);
       m_curFunc->freeUnnamedLocal(tempLocal);
     }
     return false;
@@ -6121,10 +6114,8 @@ bool EmitterVisitor::emitInlineGena(
       endloop.set(e);
     }
     // Clear item and key.  Free iterator.
-    emitVirtualLocal(item);
-    emitUnset(e);
-    emitVirtualLocal(key);
-    emitUnset(e);
+    emitUnsetL(e, item);
+    emitUnsetL(e, key);
     m_curFunc->freeIterator(initItId);
 
     newFaultRegionAndFunclet(iterStart, m_ue.bcPos(),
@@ -6187,10 +6178,8 @@ bool EmitterVisitor::emitInlineGena(
       endloop2.set(e);
     }
     // Clear item and key.  Free iterator.
-    emitVirtualLocal(item);
-    emitUnset(e);
-    emitVirtualLocal(key);
-    emitUnset(e);
+    emitUnsetL(e, item);
+    emitUnsetL(e, key);
     m_curFunc->freeIterator(resultItId);
 
     newFaultRegionAndFunclet(iterStart2, m_ue.bcPos(),
@@ -7130,6 +7119,11 @@ void EmitterVisitor::emitUnset(Emitter& e,
   }
 }
 
+void EmitterVisitor::emitUnsetL(Emitter&e, Id local) {
+  emitVirtualLocal(local);
+  e.UnsetL(local);
+}
+
 void EmitterVisitor::emitVisitAndUnset(Emitter& e, ExpressionPtr exp) {
   visit(exp);
   emitUnset(e, exp);
@@ -7407,8 +7401,7 @@ void EmitterVisitor::emitResolveClsBase(Emitter& e, int pos) {
     int loc = m_evalStack.getLoc(pos);
     emitVirtualLocal(loc);
     emitAGet(e);
-    emitVirtualLocal(loc);
-    emitUnset(e);
+    emitUnsetL(e, loc);
     newFaultRegionAndFunclet(m_evalStack.getUnnamedLocStart(pos),
                              m_ue.bcPos(),
                              new UnsetUnnamedLocalThunklet(loc));
@@ -9812,8 +9805,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
       }
       emitPop(e);
     }
-    emitVirtualLocal(valTempLocal);
-    emitUnset(e);
+    emitUnsetL(e, valTempLocal);
     newFaultRegionAndFunclet(bIterStart, m_ue.bcPos(),
                              new UnsetUnnamedLocalThunklet(valTempLocal));
     if (key) {
@@ -9830,8 +9822,7 @@ void EmitterVisitor::emitForeach(Emitter& e,
         emitSet(e);
         emitPop(e);
       }
-      emitVirtualLocal(keyTempLocal);
-      emitUnset(e);
+      emitUnsetL(e, keyTempLocal);
       newFaultRegionAndFunclet(bIterStart, m_ue.bcPos(),
                                new UnsetUnnamedLocalThunklet(keyTempLocal));
     }
@@ -9960,8 +9951,7 @@ void EmitterVisitor::emitForeachAwaitAs(Emitter& e,
 
   newFaultRegionAndFunclet(resultTempStartUse, m_ue.bcPos(),
                            new UnsetUnnamedLocalThunklet(resultTempLocal));
-  emitVirtualLocal(resultTempLocal);
-  emitUnset(e);
+  emitUnsetL(e, resultTempLocal);
 
   // Run body.
   {
@@ -9976,14 +9966,12 @@ void EmitterVisitor::emitForeachAwaitAs(Emitter& e,
   // Exit cleanup.
   exit.set(e);
 
-  emitVirtualLocal(resultTempLocal);
-  emitUnset(e);
+  emitUnsetL(e, resultTempLocal);
   m_curFunc->freeUnnamedLocal(resultTempLocal);
 
   newFaultRegionAndFunclet(iterTempStartUse, m_ue.bcPos(),
                            new UnsetUnnamedLocalThunklet(iterTempLocal));
-  emitVirtualLocal(iterTempLocal);
-  emitUnset(e);
+  emitUnsetL(e, iterTempLocal);
   m_curFunc->freeUnnamedLocal(iterTempLocal);
 }
 

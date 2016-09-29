@@ -1,7 +1,4 @@
 INCLUDE(CMakeDependentOption)
-CMAKE_DEPENDENT_OPTION(ENABLE_MONGO
-  "Enable Mongo extension (requires ENABLE_ZEND_COMPAT)" OFF
-  "ENABLE_ZEND_COMPAT" OFF)
 CMAKE_DEPENDENT_OPTION(ENABLE_EZC_TEST
   "Enable ezc_test (requires ENABLE_ZEND_COMPAT)" OFF "ENABLE_ZEND_COMPAT" OFF)
 
@@ -54,13 +51,6 @@ if (ENABLE_ZEND_COMPAT)
         include_directories(${LibYaml_INCLUDE_DIRS})
         list(APPEND ZEND_COMPAT_LINK_LIBRARIES ${LibYaml_LIBRARIES})
         auto_systemlib("${EZC_DIR}/yaml")
-      endif()
-    elseif (${ezc_project} STREQUAL "mongo")
-      if (ENABLE_MONGO)
-        message(WARNING "The ext_zend_compat version of the MongoDB extension is deprecated. Please use the official driver at https://github.com/mongodb/mongo-hhvm-driver instead.")
-        HHVM_SELECT_SOURCES("${EZC_DIR}/mongo")
-        include_directories("${EZC_DIR}/mongo/mcon")
-        auto_systemlib("${EZC_DIR}/mongo")
       endif()
     elseif (${ezc_project} STREQUAL "ezc_test")
       if (ENABLE_EZC_TEST)

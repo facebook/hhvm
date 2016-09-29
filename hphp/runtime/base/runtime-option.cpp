@@ -194,6 +194,7 @@ bool RuntimeOption::StopOldServer = false;
 int RuntimeOption::OldServerWait = 30;
 int RuntimeOption::CacheFreeFactor = 50;
 int64_t RuntimeOption::ServerRSSNeededMb = 4096;
+int64_t RuntimeOption::ServerCriticalFreeMb = 512;
 std::vector<std::string> RuntimeOption::ServerNextProtocols;
 bool RuntimeOption::ServerEnableH2C = false;
 int RuntimeOption::BrotliCompressionEnabled = -1;
@@ -1352,6 +1353,8 @@ void RuntimeOption::Load(
     Config::Bind(StopOldServer, ini, config, "Server.StopOld", false);
     Config::Bind(OldServerWait, ini, config, "Server.StopOldWait", 30);
     Config::Bind(ServerRSSNeededMb, ini, config, "Server.RSSNeededMb", 4096);
+    Config::Bind(ServerCriticalFreeMb, ini, config,
+                 "Server.CriticalFreeMb", 512);
     Config::Bind(CacheFreeFactor, ini, config, "Server.CacheFreeFactor", 50);
     if (CacheFreeFactor > 100) CacheFreeFactor = 100;
     if (CacheFreeFactor < 0) CacheFreeFactor = 0;

@@ -182,6 +182,9 @@ struct RuntimeOption {
   // server is made.
   static bool StopOldServer;
   static int64_t ServerRSSNeededMb;
+  // Threshold of free memory below which the old server is shutdown immediately
+  // upon a memory pressure check.
+  static int64_t ServerCriticalFreeMb;
   static int OldServerWait;
   // The percentage of page caches that can be considered as free (0 -
   // 100).  This is experimental.

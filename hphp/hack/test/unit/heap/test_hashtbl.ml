@@ -26,7 +26,7 @@ let expect ~msg bool =
 
 let to_key = Digest.string
 
-let add key value = hh_add (to_key key) (Marshal.to_string value [])
+let add key value = hh_add (to_key key) value
 let mem key = hh_mem (to_key key)
 let remove key = hh_remove (to_key key)
 let move k1 k2 = hh_move (to_key k1) (to_key k2)

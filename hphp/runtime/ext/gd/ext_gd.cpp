@@ -6443,6 +6443,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo,
       if (value_end - (dir_start+10) < 4) return 0;
       offset_diff = 2 + NumDirEntries*12 + 4 -
                     php_ifd_get32u(dir_start+10, ImageInfo->motorola_intel);
+      if (offset_diff < 0 || offset_diff >= value_len) return 0;
       offset_base = value_ptr + offset_diff;
       break;
     default:

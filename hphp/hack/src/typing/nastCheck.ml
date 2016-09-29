@@ -287,9 +287,7 @@ and hint env (p, h) =
   hint_ env p h
 
 and hint_ env p = function
-  | Habstr (_, cstrl) ->
-    List.iter cstrl (fun (_, h) -> hint env h)
-  | Hany  | Hmixed  | Hprim _  | Hthis | Haccess _ ->
+  | Hany  | Hmixed  | Hprim _  | Hthis | Haccess _ | Habstr _ ->
       ()
   | Harray (ty1, ty2) ->
       maybe hint env ty1;
@@ -434,7 +432,7 @@ and check_is_interface (env, error_verb) (x : hint) =
         | Some { tc_name; _ } ->
           Errors.non_interface (fst x) tc_name error_verb
       )
-    | Habstr (_, _) ->
+    | Habstr _ ->
       Errors.non_interface (fst x) "generic" error_verb
     | _ ->
       Errors.non_interface (fst x) "invalid type hint" error_verb
@@ -455,7 +453,7 @@ and check_is_class env (x : hint) =
         | Some { tc_kind; tc_name; _ } ->
           Errors.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
       )
-    | Habstr (name, _) ->
+    | Habstr name ->
       Errors.requires_non_class (fst x) name "a generic"
     | _ ->
       Errors.requires_non_class (fst x) "This" "an invalid type hint"
@@ -598,8 +596,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Hany | Hmixed | Hprim _ | Hthis -> ()
     (* We have found a type parameter. Make sure its name does not match
      * a name in class_tparams *)
-    | Habstr (tparam_name, cstrl) ->
-        List.iter (List.map cstrl snd) check_tparams;
+    | Habstr tparam_name ->
         matches_class_tparam tparam_name
     | Harray (ty1, ty2) ->
         maybe_check_tparams ty1;
@@ -648,6 +645,7 @@ and method_ (env, is_static) m =
                ~ety_env:(Phase.env_with_self env.tenv) in
   let env = { env with tenv = tenv } in
   List.iter m.m_params (fun_param env);
+  List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
   CheckFunctionType.block m.m_fun_kind named_body.fnb_nast;

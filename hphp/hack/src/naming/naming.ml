@@ -809,7 +809,7 @@ module Make (GetLocals : GetLocals) = struct
       | _ when SMap.mem x params ->
           if hl <> [] then
           Errors.tparam_with_tparam p x;
-          N.Habstr (x, get_constraint env x)
+          N.Habstr x
       | _ ->
         let name = Env.type_name env id ~allow_typedef in
         (* Note that we are intentionally setting allow_typedef to `true` here.
@@ -854,16 +854,6 @@ module Make (GetLocals : GetLocals) = struct
       | Some _ when canon <> x -> Errors.primitive_invalid_alias p x canon
       | _ -> ()
     in opt_hint
-
-  and get_constraint env tparam =
-    let params = (fst env).type_params in
-    let gen_constraint = SMap.find_unsafe tparam params in
-    let genv, lenv = env in
-    (* this prevents an infinite loop from occurring since hint invokes
-     * get_constraint *)
-    let genv = { genv with type_params = SMap.add tparam [] params } in
-    let env = genv, lenv in
-    List.map gen_constraint (constraint_ env)
 
   and constraint_ ?(forbid_this=false) env (ck, h) = ck, hint ~forbid_this env h
 

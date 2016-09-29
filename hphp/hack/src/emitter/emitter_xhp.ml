@@ -48,7 +48,7 @@ let convert_prop prop =
         | N.Hprim N.Tbool -> XC.cTYPE_BOOL, null
         | N.Hprim N.Tint -> XC.cTYPE_INTEGER, null
         | N.Harray _ | N.Htuple _ | N.Hshape _ -> XC.cTYPE_ARRAY, null
-        | N.Habstr (s, _) | N.Happly ((_, s), _) ->
+        | N.Habstr s | N.Happly ((_, s), _) ->
           XC.cTYPE_OBJECT, (p, N.String (p, C.fmt_name s))
         | N.Hprim (N.Tvoid | N.Tresource | N.Tnum |
                    N.Tarraykey | N.Tnoreturn as pr) ->

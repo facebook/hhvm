@@ -346,7 +346,7 @@ let unresolved env ty =
 let unwrap_class_hint = function
   | (_, N.Happly ((pos, class_name), type_parameters)) ->
       pos, class_name, type_parameters
-  | p, N.Habstr(_, _) ->
+  | p, N.Habstr _ ->
       Errors.expected_class ~suffix:" or interface but got a generic" p;
       Pos.none, "", []
   | p, _ ->

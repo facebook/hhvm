@@ -29,8 +29,7 @@ class type ['a] hint_visitor_type = object
   method on_mixed  : 'a -> 'a
   method on_this   : 'a -> 'a
   method on_tuple  : 'a -> Nast.hint list -> 'a
-  method on_abstr  : 'a -> string -> (Ast.constraint_kind * Nast.hint) list
-                      -> 'a
+  method on_abstr  : 'a -> string -> 'a
   method on_array  : 'a -> Nast.hint option -> Nast.hint option -> 'a
   method on_prim   : 'a -> Nast.tprim -> 'a
   method on_option : 'a -> Nast.hint -> 'a
@@ -53,7 +52,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Hmixed                -> this#on_mixed  acc
     | Hthis                 -> this#on_this   acc
     | Htuple hl             -> this#on_tuple  acc (hl:Nast.hint list)
-    | Habstr (x, cstr_opt)  -> this#on_abstr  acc x cstr_opt
+    | Habstr x              -> this#on_abstr  acc x
     | Harray (hopt1, hopt2) -> this#on_array  acc hopt1 hopt2
     | Hprim p               -> this#on_prim   acc p
     | Hoption h             -> this#on_option acc h
@@ -68,8 +67,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
   method on_tuple acc hl =
     List.fold_left ~f:this#on_hint ~init:acc (hl:Nast.hint list)
 
-  method on_abstr acc _ hl =
-    List.fold_left ~f:(fun acc (_, h) -> this#on_hint acc h) ~init:acc hl
+  method on_abstr acc _ = acc
 
   method on_array acc hopt1 hopt2 =
     let acc = match hopt1 with
@@ -146,7 +144,7 @@ module CheckInstantiability = struct
       then Option.iter (List.hd hl) validate_classname
       else super#on_apply () (usage_pos, n) hl
 
-    method! on_abstr () _ _ =
+    method! on_abstr () _ =
       (* there should be no need to descend into abstract params, as
        * the necessary param checks happen on the declaration of the
        * constraint *)

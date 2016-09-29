@@ -35,7 +35,7 @@ let rec fmt_hint (_, h) =
   | N.Hmixed -> "HH\\mixed"
   | N.Hthis -> "HH\\this"
   | N.Hprim prim -> fmt_prim prim
-  | N.Habstr (s, _) -> C.fmt_name s
+  | N.Habstr s -> C.fmt_name s
 
   | N.Happly ((_, s), []) -> C.fmt_name s
   | N.Happly ((_, s), args) ->
@@ -100,7 +100,7 @@ let rec hint_info ~tparams (_, h) =
 
   | N.Haccess (_, _) -> Some "", ["hh_type"; "extended_hint"; "type_constant"]
   (* Need to differentiate between type params and classes *)
-  | N.Habstr (s, _) | N.Happly ((_, s), _) ->
+  | N.Habstr s | N.Happly ((_, s), _) ->
     if List.mem tparams s then
       Some "", ["hh_type"; "extended_hint"; "type_var"]
     else

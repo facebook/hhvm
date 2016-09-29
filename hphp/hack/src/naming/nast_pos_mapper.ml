@@ -112,11 +112,8 @@ and hint_ f = function
   | Hmixed -> Hmixed
   | Hthis -> Hthis
   | Htuple hl -> Htuple (List.map hl (hint f))
-  | Habstr (s, cstr) ->
-    let cstr = List.map cstr begin fun (ck, h) ->
-      ck, hint f h
-    end in
-    Habstr (s, cstr)
+  | Habstr s ->
+    Habstr s
   | Harray (h1, h2) ->
     Harray (Option.map h1 (hint f), Option.map h2 (hint f))
   | Hprim tprim -> Hprim tprim

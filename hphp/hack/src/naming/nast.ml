@@ -46,7 +46,7 @@ and hint_ =
   | Hany
   | Hmixed
   | Htuple of hint list
-  | Habstr of string * (Ast.constraint_kind * hint) list
+  | Habstr of string
   | Harray of hint option * hint option
   | Hprim of tprim
   | Hoption of hint

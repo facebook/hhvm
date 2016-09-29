@@ -18,10 +18,13 @@
 
 #include <mutex>
 #include <set>
+#include <string>
 #include <vector>
+#include <folly/Format.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -34,6 +37,8 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
+
+TRACE_SET_MOD(apc);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -51,6 +56,14 @@ bool check_noTTL(const char* key, size_t keyLen) {
   }
   return false;
 }
+
+#ifdef HPHP_TRACE
+std::string show(const StoreValue& sval) {
+  return sval.data.left() ?
+    folly::sformat("size {} kind {}", sval.dataSize, (int)sval.getKind()) :
+    folly::sformat("size {} serialized", std::abs(sval.dataSize));
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -451,6 +464,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
     assert(!expired);  // primed keys never say true to expired()
   }
 
+  FTRACE(2, "Remove {} {}\n", acc->first, show(acc->second));
   APCStats::getAPCStats().removeKey(strlen(acc->first));
   const void* vpkey = acc->first;
   /*
@@ -515,6 +529,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
     }
     ++i;
   }
+  FTRACE(1, "Expired {} entries", i);
 }
 
 bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
@@ -580,6 +595,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
 }
 
 bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
+  FTRACE(3, "Get {}\n", keyStr.get()->data());
   HotCache::Idx hotIdx;
   if (s_hotCache.get(keyStr.get(), value, hotIdx)) return true;
   const StoreValue *sval;
@@ -828,7 +844,9 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
           overwritePrime = true;
         }
       );
+      FTRACE(2, "Update {} {}\n", acc->first, show(acc->second));
     } else {
+      FTRACE(2, "Add {} {}\n", acc->first, show(acc->second));
       APCStats::getAPCStats().addKey(keyLen);
     }
 
@@ -906,6 +924,7 @@ void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
       acc->second.dataSize = item.sSize;
       APCStats::getAPCStats().addInFileValue(std::abs(acc->second.dataSize));
     }
+    FTRACE(2, "Primed key {} {}\n", acc->first, show(acc->second));
   }
 }
 

@@ -35,6 +35,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/trace.h"
 
 // ftello is 64-bit by default under OSX,
 // and ftello64 doesn't exist.
@@ -43,6 +44,8 @@ ALWAYS_INLINE static off_t ftello64(FILE* stream) { return ftello(stream); }
 #endif
 
 namespace HPHP {
+
+TRACE_SET_MOD(apc);
 
 void SnapshotBuilder::writeToFile(const std::string& filename) {
   m_file = fopen(filename.c_str(), "w+");
@@ -134,6 +137,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   all.reserve(keyCountEstimate);
   {
     std::vector<KeyValuePair> ints(read32());
+    FTRACE(1, "Snapshot loading {} ints\n", ints.size());
     for (auto& item : ints) {
       setKey(readString(), item);
       s.constructPrime(read64(), item);
@@ -142,6 +146,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   }
   {
     std::vector<KeyValuePair> chars(read32());
+    FTRACE(1, "Snapshot loading {} singletons\n", chars.size());
     for (auto& item : chars) {
       setKey(readString(), item);
       switch (static_cast<SnapshotBuilder::CharBasedType>(read<char>())) {
@@ -166,6 +171,8 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   for (int i = 0; i < numStringBased; ++i) {
     auto type = static_cast<SnapshotBuilder::StringBasedType>(i);
     std::vector<KeyValuePair> items(read32());
+    FTRACE(1, "Snapshot loading {} string-based items of type {}\n",
+           items.size(), (int)type);
     for (auto& item : items) {
       setKey(readString(), item);
       auto data = readString();
@@ -204,6 +211,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
   {
     const char* disk = m_begin + header().diskOffset;
     std::vector<KeyValuePair> items(read32());
+    FTRACE(1, "Snapshot loading {} serialized items\n", items.size());
     for (auto& item : items) {
       setKey(readString(), item);
       item.sSize = read32();

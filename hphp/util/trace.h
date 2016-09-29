@@ -88,6 +88,7 @@ namespace Trace {
 #define TRACE_MODULES \
       TM(tprefix)     /* Meta: prefix with string */  \
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
+      TM(apc)           \
       TM(asmx64)        \
       TM(asmppc64)      \
       TM(atomicvector)  \

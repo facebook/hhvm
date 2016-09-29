@@ -94,7 +94,9 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
   return start;
 }
 
-TCA emitSmashableJmpImpl(CodeBlock& cb, TCA target) {
+TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target) {
+  align(cb, &fixups, Alignment::SmashJmp, AlignContext::Live);
+
   vixl::MacroAssembler a { cb };
   vixl::Label target_data;
 
@@ -112,16 +114,16 @@ TCA emitSmashableJmpImpl(CodeBlock& cb, TCA target) {
   return start;
 }
 
-TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target) {
-  align(cb, &fixups, Alignment::SmashJmp, AlignContext::Live);
-  return emitSmashableJmpImpl(cb, target);
-}
-
-TCA emitSmashableJccImpl(CodeBlock& cb, TCA target, ConditionCode cc) {
-  // During smashing, 'cc' is modified first followed by the target address.
-  // This can cause 'new cc' jump to 'old target', but never the 'old cc'
-  // jump to 'new target'. The former is safe because the 'old target'
-  // is a stub.
+// While a b.cc can be overwritten on ARM, if the cc and the target
+// are both changed then the behavior can cause old cc to jump to new
+// target or new cc to jump to old target. Therefore we'll keep
+// the branch as an indirect branch to a target stored in the
+// instruction stream. This we we can at least guarantee that old cc
+// won't jump to new target. We can still have an issue where new cc
+// jumps to old target, but that old target is *likely* a stub.
+TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
+                     ConditionCode cc) {
+  align(cb, &fixups, Alignment::SmashJcc, AlignContext::Live);
 
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
@@ -132,18 +134,12 @@ TCA emitSmashableJccImpl(CodeBlock& cb, TCA target, ConditionCode cc) {
   a.    B    (&after_data, InvertCondition(arm::convertCC(cc)));
 
   // Emit the smashable jump
-  emitSmashableJmpImpl(cb, target);
+  emitSmashableJmp(cb, fixups, target);
   a.    bind (&after_data);
 
   __builtin___clear_cache(reinterpret_cast<char*>(start),
                           reinterpret_cast<char*>(cb.frontier()));
   return start;
-}
-
-TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
-                     ConditionCode cc) {
-  align(cb, &fixups, Alignment::SmashJcc, AlignContext::Live);
-  return emitSmashableJccImpl(cb, target, cc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,28 +161,36 @@ void smashCmpq(TCA inst, uint32_t target) {
 }
 
 void smashCall(TCA inst, TCA target) {
-  // Skip over the initial branch instruction
-  *reinterpret_cast<TCA*>(inst + 4) = target;
-  auto const begin = reinterpret_cast<char*>(inst + 4);
-  auto const end = begin + 8;
-  __builtin___clear_cache(begin, end);
+  smashInstr(inst, target, (1 * 4) + 8);
 }
 
 void smashJmp(TCA inst, TCA target) {
+
+  // If the target is within the smashable jmp, then set the target to the
+  // end. This mirrors logic in x86_64 with the exception that ARM cannot
+  // replace the entire smashable jmp with nops.
+  if (target > inst && target - inst <= smashableJmpLen()) {
+    target = inst + smashableJmpLen();
+  }
   smashInstr(inst, target, smashableJmpLen());
 }
 
 void smashJcc(TCA inst, TCA target, ConditionCode cc) {
+  using namespace vixl;
+
+  // Smash the conditional branch if required
   if (cc != CC_None) {
-    // Condition has changed, emit the 'jccs' sequence again
-    CodeBlock cb;
-    cb.init(inst, smashableJccLen(), "smashJcc");
-    emitSmashableJccImpl(cb, target, cc);
-    auto const begin = reinterpret_cast<char*>(cb.frontier());
-    auto const end = begin + smashableJccLen();
+    Instruction* bcc = Instruction::Cast(inst);
+    Instr bits = bcc->InstructionBits();
+    bits = (bits >> 4 << 4) | InvertCondition(arm::convertCC(cc));
+    bcc->SetInstructionBits(bits);
+    auto const begin = reinterpret_cast<char*>(inst);
+    auto const end = begin + 4;
     __builtin___clear_cache(begin, end);
-  } else {
-    // Update the target address
+  }
+
+  // Then smash the target if changed
+  if (smashableJccTarget(inst) != target) {
     smashInstr(inst, target, smashableJccLen());
   }
 }
@@ -201,31 +205,63 @@ uint32_t smashableCmpqImm(TCA inst) {
   not_implemented();
 }
 
-TCA smashableCallTarget(TCA call) {
-  // Skip over the initial branch instruction
-  return *reinterpret_cast<TCA*>(call + 4);
+TCA smashableCallTarget(TCA inst) {
+  using namespace vixl;
+
+  Instruction* ldr = Instruction::Cast(inst + (1 * 4) + 8);
+  if (ldr->Bits(31, 24) != 0x58) return nullptr;
+
+  Instruction* blr = Instruction::Cast(inst + (2 * 4) + 8);
+  if (blr->Bits(31, 10) != 0x358FC0 || blr->Bits(4, 0) != 0) return nullptr;
+
+  uintptr_t dest = reinterpret_cast<uintptr_t>(inst + (1 * 4));
+  assertx((dest & 3) == 0);
+
+  return *reinterpret_cast<TCA*>(dest);
 }
 
-TCA smashableJmpTarget(TCA jmp) {
-  return *reinterpret_cast<TCA*>(jmp + smashableJmpLen() - 8);
+TCA smashableJmpTarget(TCA inst) {
+  using namespace vixl;
+
+  // This doesn't verify that each of the two or three instructions that make
+  // up this sequence matches; just the first one and the indirect jump.
+  Instruction* ldr = Instruction::Cast(inst);
+  if (ldr->Bits(31, 24) != 0x58) return nullptr;
+
+  Instruction* br = Instruction::Cast(inst + 4);
+  if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
+
+  uintptr_t dest = reinterpret_cast<uintptr_t>(inst + 8);
+  assertx((dest & 3) == 0);
+
+  return *reinterpret_cast<TCA*>(dest);
 }
 
-TCA smashableJccTarget(TCA jcc) {
-  return *reinterpret_cast<TCA*>(jcc + smashableJccLen() - 8);
+TCA smashableJccTarget(TCA inst) {
+  using namespace vixl;
+
+  Instruction* b = Instruction::Cast(inst);
+  if (b->Bits(31, 24) != 0x54 || b->Bit(4) != 0) return nullptr;
+
+  Instruction* br = Instruction::Cast(inst + 8);
+  if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return nullptr;
+
+  uintptr_t dest = reinterpret_cast<uintptr_t>(inst + 12);
+  assertx((dest & 3) == 0);
+
+  return *reinterpret_cast<TCA*>(dest);
 }
 
 ConditionCode smashableJccCond(TCA inst) {
   using namespace vixl;
-  struct JccDecoder : public Decoder {
-    void VisitConditionalBranch(Instruction* inst) override {
-      cc = (Condition)inst->ConditionBranch();
-    }
-    folly::Optional<Condition> cc;
-  };
-  JccDecoder decoder;
-  decoder.Decode(Instruction::Cast(inst));
-  always_assert(decoder.cc);
-  return convertCC(InvertCondition(*decoder.cc));
+  Instruction* b = Instruction::Cast(inst);
+  if (b->Bits(31, 24) != 0x54 || b->Bit(4) != 0) return CC_NP;
+
+  Instruction* br = Instruction::Cast(inst + 8);
+  if (br->Bits(31, 10) != 0x3587C0 || br->Bits(4, 0) != 0) return CC_NP;
+
+  return arm::convertCC(InvertCondition(static_cast<Condition>(b->Bits(3, 0))));
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

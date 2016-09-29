@@ -289,6 +289,26 @@ static Variant HHVM_STATIC_METHOD(Locale, acceptFromHttp,
   char out[MAX_LOCALE_LEN];
   UAcceptResult result;
   error = U_ZERO_ERROR;
+
+  if(header.size() > ULOC_FULLNAME_CAPACITY) {
+    /* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */
+    char *start = (char *)header.c_str();
+    char *end;
+    size_t len;
+    do {
+      end = strchr(start, ',');
+      len = end ? end-start : header.size()-(start-header.c_str());
+      if(len > ULOC_FULLNAME_CAPACITY) {
+        s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                               "locale_accept_from_http: locale string too long");
+        return false;
+      }
+      if(end) {
+        start = end+1;
+      }
+    } while(end != NULL);
+  }
+
   int len = uloc_acceptLanguageFromHTTP(out, sizeof(out), &result,
                                         header.c_str(), avail, &error);
   uenum_close(avail);

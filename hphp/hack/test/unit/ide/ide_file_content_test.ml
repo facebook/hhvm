@@ -75,7 +75,7 @@ let test_special_edit () =
   expect_has_content edited_fc "\naaa\nbbb\n\n"
 
 let test_multiple_edits () =
-  let content = "a\nc" in
+  let content = "a\nc\n" in
   let fc = of_content ~content in
   let edit1 = {
     range = Some {
@@ -115,6 +115,19 @@ let test_empty_edit () =
   let edited_fc = edit_file_unsafe fc [edit] in
   expect_has_content edited_fc "lol"
 
+let test_end_of_line_edit () =
+  let content = "a" in
+  let fc = of_content ~content in
+  let edit = {
+    range = Some {
+      st = { line = 1; column = 2};
+      ed = { line = 1; column = 2};
+    };
+    text = "a";
+  } in
+  let edited_fc = edit_file_unsafe fc [edit] in
+  expect_has_content edited_fc "aa"
+
 let tests = [
   "test_create", test_create;
   "test_basic_edit", test_basic_edit;
@@ -125,6 +138,7 @@ let tests = [
   "test_multiple_edits", test_multiple_edits;
   "test_invalid_edit", test_invalid_edit;
   "test_empty_edit", test_empty_edit;
+  "test_end_of_line_edit", test_end_of_line_edit;
 ]
 
 let () =

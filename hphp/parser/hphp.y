@@ -2648,19 +2648,17 @@ static_expr_list:
   | static_expr                        { _p->onExprListElem($$, NULL, $1);}
 ;
 
-static_class_constant:
-    class_namespace_string_typeargs
-    T_DOUBLE_COLON
-    ident_for_class_const              { _p->onClassConst($$, $1, $3, 1);}
-  | T_XHP_LABEL T_DOUBLE_COLON
-    ident_for_class_const              { $1.xhpLabel();
-                                         _p->onClassConst($$, $1, $3, 1);}
-  | T_XHP_LABEL T_DOUBLE_COLON
-    T_CLASS                            { $1.xhpLabel();
-                                         _p->onClassClass($$, $1, $3, 1);}
-  | class_namespace_string_typeargs
+static_class_class_constant:
+    fully_qualified_class_name
     T_DOUBLE_COLON
     T_CLASS                            { _p->onClassClass($$, $1, $3, 1);}
+;
+
+static_class_constant:
+    fully_qualified_class_name
+    T_DOUBLE_COLON
+    ident_for_class_const              { _p->onClassConst($$, $1, $3, 1);}
+  | static_class_class_constant        { $$ = $1;}
 ;
 
 scalar:
@@ -2729,6 +2727,12 @@ static_string_expr_ae:
 static_scalar_ae:
     common_scalar_ae
   | static_string_expr_ae              { $$ = $1;}
+  | static_class_class_constant        { $$ = $1;}
+  | fully_qualified_class_name
+    T_DOUBLE_COLON
+    T_STRING                           { HPHP_PARSER_ERROR("User-defined "
+                                        "constants are not allowed in "
+                                        "user attribute expressions", _p);}
   | ident_no_semireserved              { constant_ae(_p,$$,$1);}
   | '+' static_numeric_scalar_ae       { UEXP($$,$2,'+',1);}
   | '-' static_numeric_scalar_ae       { UEXP($$,$2,'-',1);}

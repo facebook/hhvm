@@ -204,7 +204,7 @@ let rec get_doc node =
   | Token x -> from_token x
 
   | SyntaxList x -> get_from_children x
-  | Error { error } -> get_doc error
+  | Error { error_error } -> get_doc error_error
   | LiteralExpression x -> get_doc x.literal_expression
   | VariableExpression x -> get_doc x.variable_expression
   | QualifiedNameExpression x -> get_doc x.qualified_name_expression
@@ -264,19 +264,25 @@ let rec get_doc node =
     let right = get_doc x.classish_body_right_brace in
     let body = get_doc x.classish_body_elements in
     indent_block_no_space left body right indt
-  | XHPRequired x ->
-    let a = get_doc x.xhp_required_at in
-    let r = get_doc x.xhp_required in
+  | XHPRequired { xhp_required_at; xhp_required_keyword } ->
+    let a = get_doc xhp_required_at in
+    let r = get_doc xhp_required_keyword in
     a ^^^ r
-  | XHPChildrenDeclaration x ->
-    let c = get_doc x.xhp_children in
-    let e = get_doc x.xhp_children_expression in
-    let s = get_doc x.xhp_children_semicolon in
+  | XHPChildrenDeclaration {
+      xhp_children_keyword;
+      xhp_children_expression;
+      xhp_children_semicolon } ->
+    let c = get_doc xhp_children_keyword in
+    let e = get_doc xhp_children_expression in
+    let s = get_doc xhp_children_semicolon in
     c ^| e ^^^ s
-  | XHPCategoryDeclaration x ->
-    let c = get_doc x.xhp_category in
-    let l = get_doc x.xhp_category_list in
-    let s = get_doc x.xhp_category_semicolon in
+  | XHPCategoryDeclaration {
+    xhp_category_keyword;
+    xhp_category_list;
+    xhp_category_semicolon } ->
+    let c = get_doc xhp_category_keyword in
+    let l = get_doc xhp_category_list in
+    let s = get_doc xhp_category_semicolon in
     c ^| l ^^^ s
   | XHPEnumType x ->
     let e = get_doc x.xhp_enum_keyword in
@@ -543,13 +549,17 @@ let rec get_doc node =
     let statement = x.else_statement in
     handle_compound_brace_prefix_indent keyword statement indt
     |> add_break
-  | TryStatement x ->
-    let keyword = get_doc x.try_keyword in
-    let compound_stmt = x.try_compound_statement in
+  | TryStatement
+    { try_keyword;
+      try_compound_statement;
+      try_catch_clauses;
+      try_finally_clause } ->
+    let keyword = get_doc try_keyword in
+    let compound_stmt = try_compound_statement in
     let try_part =
       handle_compound_brace_prefix_indent keyword compound_stmt indt in
-    let catch_clauses = get_doc x.catch_clauses in
-    let finally_clause = get_doc x.finally_clause in
+    let catch_clauses = get_doc try_catch_clauses in
+    let finally_clause = get_doc try_finally_clause in
     group_doc (try_part ^| catch_clauses ^| finally_clause)
     |> add_break
   | CatchClause x ->
@@ -741,15 +751,21 @@ let rec get_doc node =
     let args = get_doc x.function_call_arguments in
     let rparen = get_doc x.function_call_rparen in
     receiver ^^^ lparen ^^^ args ^^^ rparen
-  | ParenthesizedExpression x ->
-    let left = get_doc x.paren_expr_left_paren in
-    let right = get_doc x.paren_expr_right_paren in
-    let expr = get_doc x.paren_expr in
+  | ParenthesizedExpression {
+    paren_expr_left_paren;
+    paren_expr_expression;
+    paren_expr_right_paren } ->
+    let left = get_doc paren_expr_left_paren in
+    let expr = get_doc paren_expr_expression in
+    let right = get_doc paren_expr_right_paren in
     indent_block_no_space left expr right indt
-  | BracedExpression x ->
-    let left = get_doc x.braced_expr_left_brace in
-    let right = get_doc x.braced_expr_right_brace in
-    let expr = get_doc x.braced_expr in
+  | BracedExpression {
+    braced_expr_left_brace;
+    braced_expr_expression;
+    braced_expr_right_brace } ->
+    let left = get_doc braced_expr_left_brace in
+    let expr = get_doc braced_expr_expression in
+    let right = get_doc braced_expr_right_brace in
     indent_block_no_space left expr right indt
   | ListExpression
     { list_keyword; list_left_paren; list_members; list_right_paren } ->
@@ -906,15 +922,21 @@ let rec get_doc node =
     let fs = get_doc shape_type_fields in
     let rp = get_doc shape_type_right_paren in
     sh ^| lp ^^^ fs ^^^ rp
-  | TypeArguments x ->
-    let left = get_doc x.type_arguments_left_angle in
-    let right = get_doc x.type_arguments_right_angle in
-    let args = get_doc x.type_arguments in
+  | TypeArguments {
+    type_arguments_left_angle;
+    type_arguments_types;
+    type_arguments_right_angle } ->
+    let left = get_doc type_arguments_left_angle in
+    let args = get_doc type_arguments_types in
+    let right = get_doc type_arguments_right_angle in
     indent_block_no_space left args right indt
-  | TypeParameters x ->
-    let left = get_doc x.type_parameters_left_angle in
-    let params = get_doc x.type_parameters in
-    let right = get_doc x.type_parameters_right_angle in
+  | TypeParameters {
+    type_parameters_left_angle;
+    type_parameters_parameters;
+    type_parameters_right_angle } ->
+    let left = get_doc type_parameters_left_angle in
+    let params = get_doc type_parameters_parameters in
+    let right = get_doc type_parameters_right_angle in
     indent_block_no_space left params right indt
   | TupleTypeSpecifier x ->
     let left = get_doc x.tuple_left_paren in

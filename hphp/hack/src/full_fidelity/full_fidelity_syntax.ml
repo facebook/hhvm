@@ -325,8 +325,8 @@ module WithToken(Token: TokenType) = struct
     and try_statement = {
       try_keyword: t;
       try_compound_statement: t;
-      catch_clauses: t;
-      finally_clause: t;
+      try_catch_clauses: t;
+      try_finally_clause: t;
     }
     and catch_clause = {
       catch_keyword: t;
@@ -520,12 +520,12 @@ module WithToken(Token: TokenType) = struct
     }
     and parenthesized_expression = {
       paren_expr_left_paren: t;
-      paren_expr: t;
+      paren_expr_expression: t;
       paren_expr_right_paren: t;
     }
     and braced_expression = {
       braced_expr_left_brace: t;
-      braced_expr: t;
+      braced_expr_expression: t;
       braced_expr_right_brace: t;
     }
     and list_expression = {
@@ -574,12 +574,12 @@ module WithToken(Token: TokenType) = struct
       awaitable_compound_statement: t;
     }
     and xhp_children_declaration = {
-      xhp_children: t;
+      xhp_children_keyword: t;
       xhp_children_expression: t;
       xhp_children_semicolon: t;
     }
     and xhp_category_declaration = {
-      xhp_category: t;
+      xhp_category_keyword: t;
       xhp_category_list: t;
       xhp_category_semicolon: t;
     }
@@ -591,7 +591,7 @@ module WithToken(Token: TokenType) = struct
     }
     and xhp_required = {
       xhp_required_at: t;
-      xhp_required: t;
+      xhp_required_keyword: t;
     }
     and xhp_class_attribute_declaration = {
       xhp_attribute_keyword: t;
@@ -704,12 +704,12 @@ module WithToken(Token: TokenType) = struct
     }
     and type_arguments = {
       type_arguments_left_angle: t;
-      type_arguments: t;
+      type_arguments_types: t;
       type_arguments_right_angle: t;
     }
     and type_parameters = {
       type_parameters_left_angle: t;
-      type_parameters: t;
+      type_parameters_parameters: t;
       type_parameters_right_angle: t;
     }
     and tuple_type_specifier = {
@@ -718,7 +718,7 @@ module WithToken(Token: TokenType) = struct
       tuple_right_paren: t;
     }
     and error = {
-      error: t;
+      error_error: t;
     }
     and list_item = {
       list_item: t;
@@ -1776,13 +1776,13 @@ module WithToken(Token: TokenType) = struct
       | TryStatement {
         try_keyword;
         try_compound_statement;
-        catch_clauses;
-        finally_clause;
+        try_catch_clauses;
+        try_finally_clause;
       } -> [
         try_keyword;
         try_compound_statement;
-        catch_clauses;
-        finally_clause;
+        try_catch_clauses;
+        try_finally_clause;
       ]
       | CatchClause {
         catch_keyword;
@@ -2134,20 +2134,20 @@ module WithToken(Token: TokenType) = struct
       ]
       | ParenthesizedExpression {
         paren_expr_left_paren;
-        paren_expr;
+        paren_expr_expression;
         paren_expr_right_paren;
       } -> [
         paren_expr_left_paren;
-        paren_expr;
+        paren_expr_expression;
         paren_expr_right_paren;
       ]
       | BracedExpression {
         braced_expr_left_brace;
-        braced_expr;
+        braced_expr_expression;
         braced_expr_right_brace;
       } -> [
         braced_expr_left_brace;
-        braced_expr;
+        braced_expr_expression;
         braced_expr_right_brace;
       ]
       | ListExpression {
@@ -2233,20 +2233,20 @@ module WithToken(Token: TokenType) = struct
         awaitable_compound_statement;
       ]
       | XHPChildrenDeclaration {
-        xhp_children;
+        xhp_children_keyword;
         xhp_children_expression;
         xhp_children_semicolon;
       } -> [
-        xhp_children;
+        xhp_children_keyword;
         xhp_children_expression;
         xhp_children_semicolon;
       ]
       | XHPCategoryDeclaration {
-        xhp_category;
+        xhp_category_keyword;
         xhp_category_list;
         xhp_category_semicolon;
       } -> [
-        xhp_category;
+        xhp_category_keyword;
         xhp_category_list;
         xhp_category_semicolon;
       ]
@@ -2263,10 +2263,10 @@ module WithToken(Token: TokenType) = struct
       ]
       | XHPRequired {
         xhp_required_at;
-        xhp_required;
+        xhp_required_keyword;
       } -> [
         xhp_required_at;
-        xhp_required;
+        xhp_required_keyword;
       ]
       | XHPClassAttributeDeclaration {
         xhp_attribute_keyword;
@@ -2468,20 +2468,20 @@ module WithToken(Token: TokenType) = struct
       ]
       | TypeArguments {
         type_arguments_left_angle;
-        type_arguments;
+        type_arguments_types;
         type_arguments_right_angle;
       } -> [
         type_arguments_left_angle;
-        type_arguments;
+        type_arguments_types;
         type_arguments_right_angle;
       ]
       | TypeParameters {
         type_parameters_left_angle;
-        type_parameters;
+        type_parameters_parameters;
         type_parameters_right_angle;
       } -> [
         type_parameters_left_angle;
-        type_parameters;
+        type_parameters_parameters;
         type_parameters_right_angle;
       ]
       | TupleTypeSpecifier {
@@ -2494,9 +2494,9 @@ module WithToken(Token: TokenType) = struct
         tuple_right_paren;
       ]
       | Error {
-        error;
+        error_error;
       } -> [
-        error;
+        error_error;
       ]
       | ListItem {
         list_item;
@@ -2934,13 +2934,13 @@ module WithToken(Token: TokenType) = struct
       | TryStatement {
         try_keyword;
         try_compound_statement;
-        catch_clauses;
-        finally_clause;
+        try_catch_clauses;
+        try_finally_clause;
       } -> [
         "try_keyword";
         "try_compound_statement";
-        "catch_clauses";
-        "finally_clause";
+        "try_catch_clauses";
+        "try_finally_clause";
       ]
       | CatchClause {
         catch_keyword;
@@ -3292,20 +3292,20 @@ module WithToken(Token: TokenType) = struct
       ]
       | ParenthesizedExpression {
         paren_expr_left_paren;
-        paren_expr;
+        paren_expr_expression;
         paren_expr_right_paren;
       } -> [
         "paren_expr_left_paren";
-        "paren_expr";
+        "paren_expr_expression";
         "paren_expr_right_paren";
       ]
       | BracedExpression {
         braced_expr_left_brace;
-        braced_expr;
+        braced_expr_expression;
         braced_expr_right_brace;
       } -> [
         "braced_expr_left_brace";
-        "braced_expr";
+        "braced_expr_expression";
         "braced_expr_right_brace";
       ]
       | ListExpression {
@@ -3391,20 +3391,20 @@ module WithToken(Token: TokenType) = struct
         "awaitable_compound_statement";
       ]
       | XHPChildrenDeclaration {
-        xhp_children;
+        xhp_children_keyword;
         xhp_children_expression;
         xhp_children_semicolon;
       } -> [
-        "xhp_children";
+        "xhp_children_keyword";
         "xhp_children_expression";
         "xhp_children_semicolon";
       ]
       | XHPCategoryDeclaration {
-        xhp_category;
+        xhp_category_keyword;
         xhp_category_list;
         xhp_category_semicolon;
       } -> [
-        "xhp_category";
+        "xhp_category_keyword";
         "xhp_category_list";
         "xhp_category_semicolon";
       ]
@@ -3421,10 +3421,10 @@ module WithToken(Token: TokenType) = struct
       ]
       | XHPRequired {
         xhp_required_at;
-        xhp_required;
+        xhp_required_keyword;
       } -> [
         "xhp_required_at";
-        "xhp_required";
+        "xhp_required_keyword";
       ]
       | XHPClassAttributeDeclaration {
         xhp_attribute_keyword;
@@ -3626,20 +3626,20 @@ module WithToken(Token: TokenType) = struct
       ]
       | TypeArguments {
         type_arguments_left_angle;
-        type_arguments;
+        type_arguments_types;
         type_arguments_right_angle;
       } -> [
         "type_arguments_left_angle";
-        "type_arguments";
+        "type_arguments_types";
         "type_arguments_right_angle";
       ]
       | TypeParameters {
         type_parameters_left_angle;
-        type_parameters;
+        type_parameters_parameters;
         type_parameters_right_angle;
       } -> [
         "type_parameters_left_angle";
-        "type_parameters";
+        "type_parameters_parameters";
         "type_parameters_right_angle";
       ]
       | TupleTypeSpecifier {
@@ -3652,9 +3652,9 @@ module WithToken(Token: TokenType) = struct
         "tuple_right_paren";
       ]
       | Error {
-        error;
+        error_error;
       } -> [
-        "error";
+        "error_error";
       ]
       | ListItem {
         list_item;
@@ -4185,14 +4185,14 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.TryStatement, [
           try_keyword;
           try_compound_statement;
-          catch_clauses;
-          finally_clause;
+          try_catch_clauses;
+          try_finally_clause;
         ]) ->
         TryStatement {
           try_keyword;
           try_compound_statement;
-          catch_clauses;
-          finally_clause;
+          try_catch_clauses;
+          try_finally_clause;
         }
       | (SyntaxKind.CatchClause, [
           catch_keyword;
@@ -4576,22 +4576,22 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.ParenthesizedExpression, [
           paren_expr_left_paren;
-          paren_expr;
+          paren_expr_expression;
           paren_expr_right_paren;
         ]) ->
         ParenthesizedExpression {
           paren_expr_left_paren;
-          paren_expr;
+          paren_expr_expression;
           paren_expr_right_paren;
         }
       | (SyntaxKind.BracedExpression, [
           braced_expr_left_brace;
-          braced_expr;
+          braced_expr_expression;
           braced_expr_right_brace;
         ]) ->
         BracedExpression {
           braced_expr_left_brace;
-          braced_expr;
+          braced_expr_expression;
           braced_expr_right_brace;
         }
       | (SyntaxKind.ListExpression, [
@@ -4685,22 +4685,22 @@ module WithToken(Token: TokenType) = struct
           awaitable_compound_statement;
         }
       | (SyntaxKind.XHPChildrenDeclaration, [
-          xhp_children;
+          xhp_children_keyword;
           xhp_children_expression;
           xhp_children_semicolon;
         ]) ->
         XHPChildrenDeclaration {
-          xhp_children;
+          xhp_children_keyword;
           xhp_children_expression;
           xhp_children_semicolon;
         }
       | (SyntaxKind.XHPCategoryDeclaration, [
-          xhp_category;
+          xhp_category_keyword;
           xhp_category_list;
           xhp_category_semicolon;
         ]) ->
         XHPCategoryDeclaration {
-          xhp_category;
+          xhp_category_keyword;
           xhp_category_list;
           xhp_category_semicolon;
         }
@@ -4718,11 +4718,11 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.XHPRequired, [
           xhp_required_at;
-          xhp_required;
+          xhp_required_keyword;
         ]) ->
         XHPRequired {
           xhp_required_at;
-          xhp_required;
+          xhp_required_keyword;
         }
       | (SyntaxKind.XHPClassAttributeDeclaration, [
           xhp_attribute_keyword;
@@ -4944,22 +4944,22 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.TypeArguments, [
           type_arguments_left_angle;
-          type_arguments;
+          type_arguments_types;
           type_arguments_right_angle;
         ]) ->
         TypeArguments {
           type_arguments_left_angle;
-          type_arguments;
+          type_arguments_types;
           type_arguments_right_angle;
         }
       | (SyntaxKind.TypeParameters, [
           type_parameters_left_angle;
-          type_parameters;
+          type_parameters_parameters;
           type_parameters_right_angle;
         ]) ->
         TypeParameters {
           type_parameters_left_angle;
-          type_parameters;
+          type_parameters_parameters;
           type_parameters_right_angle;
         }
       | (SyntaxKind.TupleTypeSpecifier, [
@@ -4973,10 +4973,10 @@ module WithToken(Token: TokenType) = struct
           tuple_right_paren;
         }
       | (SyntaxKind.Error, [
-          error;
+          error_error;
         ]) ->
         Error {
-          error;
+          error_error;
         }
       | (SyntaxKind.ListItem, [
           list_item;
@@ -5529,14 +5529,14 @@ module WithToken(Token: TokenType) = struct
     let make_try_statement
       try_keyword
       try_compound_statement
-      catch_clauses
-      finally_clause
+      try_catch_clauses
+      try_finally_clause
     =
       from_children SyntaxKind.TryStatement [
         try_keyword;
         try_compound_statement;
-        catch_clauses;
-        finally_clause;
+        try_catch_clauses;
+        try_finally_clause;
       ]
 
     let make_catch_clause
@@ -5953,23 +5953,23 @@ module WithToken(Token: TokenType) = struct
 
     let make_parenthesized_expression
       paren_expr_left_paren
-      paren_expr
+      paren_expr_expression
       paren_expr_right_paren
     =
       from_children SyntaxKind.ParenthesizedExpression [
         paren_expr_left_paren;
-        paren_expr;
+        paren_expr_expression;
         paren_expr_right_paren;
       ]
 
     let make_braced_expression
       braced_expr_left_brace
-      braced_expr
+      braced_expr_expression
       braced_expr_right_brace
     =
       from_children SyntaxKind.BracedExpression [
         braced_expr_left_brace;
-        braced_expr;
+        braced_expr_expression;
         braced_expr_right_brace;
       ]
 
@@ -6072,23 +6072,23 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_xhp_children_declaration
-      xhp_children
+      xhp_children_keyword
       xhp_children_expression
       xhp_children_semicolon
     =
       from_children SyntaxKind.XHPChildrenDeclaration [
-        xhp_children;
+        xhp_children_keyword;
         xhp_children_expression;
         xhp_children_semicolon;
       ]
 
     let make_xhp_category_declaration
-      xhp_category
+      xhp_category_keyword
       xhp_category_list
       xhp_category_semicolon
     =
       from_children SyntaxKind.XHPCategoryDeclaration [
-        xhp_category;
+        xhp_category_keyword;
         xhp_category_list;
         xhp_category_semicolon;
       ]
@@ -6108,11 +6108,11 @@ module WithToken(Token: TokenType) = struct
 
     let make_xhp_required
       xhp_required_at
-      xhp_required
+      xhp_required_keyword
     =
       from_children SyntaxKind.XHPRequired [
         xhp_required_at;
-        xhp_required;
+        xhp_required_keyword;
       ]
 
     let make_xhp_class_attribute_declaration
@@ -6355,23 +6355,23 @@ module WithToken(Token: TokenType) = struct
 
     let make_type_arguments
       type_arguments_left_angle
-      type_arguments
+      type_arguments_types
       type_arguments_right_angle
     =
       from_children SyntaxKind.TypeArguments [
         type_arguments_left_angle;
-        type_arguments;
+        type_arguments_types;
         type_arguments_right_angle;
       ]
 
     let make_type_parameters
       type_parameters_left_angle
-      type_parameters
+      type_parameters_parameters
       type_parameters_right_angle
     =
       from_children SyntaxKind.TypeParameters [
         type_parameters_left_angle;
-        type_parameters;
+        type_parameters_parameters;
         type_parameters_right_angle;
       ]
 
@@ -6387,10 +6387,10 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_error
-      error
+      error_error
     =
       from_children SyntaxKind.Error [
-        error;
+        error_error;
       ]
 
     let make_list_item

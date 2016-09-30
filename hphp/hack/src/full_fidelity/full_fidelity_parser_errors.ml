@@ -508,8 +508,8 @@ let statement_errors node parents =
   | ContinueStatement _
     when not (continue_is_legal parents) ->
     Some (node, SyntaxError.error2006)
-  | TryStatement { catch_clauses; finally_clause; _ }
-    when (is_missing catch_clauses) && (is_missing finally_clause) ->
+  | TryStatement { try_catch_clauses; try_finally_clause; _ }
+    when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
     Some (node, SyntaxError.error2007)
   | SwitchStatement { switch_compound_statement; _ }
     when not (switch_first_is_label switch_compound_statement) ->

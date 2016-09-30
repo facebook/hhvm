@@ -67,13 +67,13 @@ let hint _env node = match Syntax.syntax node with
 let rec f_param _env acc node =
   let open Ast in
   match Syntax.syntax node with
-  | ParameterDeclaration record ->
-    let name = match (Syntax.syntax record.param_name) with
-      | VariableExpression _ -> Syntax.text record.param_name
+  | ParameterDeclaration { parameter_name; parameter_type; _ } ->
+    let name = match (Syntax.syntax parameter_name) with
+      | VariableExpression _ -> Syntax.text parameter_name
       | _ -> ""
     in
-    let param_id = (pos record.param_name, name) in
-    let param_hint = hint _env record.param_type in
+    let param_id = (pos parameter_name, name) in
+    let param_hint = hint _env parameter_type in
     (** TODOs *)
     let is_reference = false in
     let is_variadic = false in

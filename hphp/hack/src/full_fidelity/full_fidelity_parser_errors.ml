@@ -71,9 +71,8 @@ let is_variadic node =
 let misplaced_variadic_param params =
   let is_variadic node =
     begin match syntax node with
-    | ParameterDeclaration { param_attribute; param_visibility; param_type;
-      param_name; param_default } ->
-        is_variadic param_name
+    | ParameterDeclaration { parameter_name; _ } ->
+        is_variadic parameter_name
     | _ -> false
     end
   in
@@ -207,8 +206,8 @@ let class_non_constructor_has_visibility_param node parents =
   let params = node.function_parameter_list in
   let has_visibility node =
     match syntax node with
-    | ParameterDeclaration node ->
-      node.param_visibility |> is_missing |> not
+    | ParameterDeclaration { parameter_visibility; _ } ->
+      parameter_visibility |> is_missing |> not
     | _ -> false
   in
   ( not (is_construct label)) &&
@@ -390,20 +389,18 @@ let produce_error_for_header acc check node error error_node =
 let methodish_errors node parents =
   match syntax node with
   (* TODO how to narrow the range of error *)
-  | FunctionDeclarationHeader header ->
+  | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
     let errors = [] in
-    let params = header.function_parameter_list in
-    let type_ano = header.function_type in
     let errors =
       produce_error_for_header errors class_destructor_has_param node parents
-      SyntaxError.error2011 params in
+      SyntaxError.error2011 function_parameter_list in
     let errors =
       produce_error_for_header errors
       class_constructor_destructor_has_non_void_type
-      node parents SyntaxError.error2018 type_ano in
+      node parents SyntaxError.error2018 function_type in
     let errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
-      node parents SyntaxError.error2010 params in
+      node parents SyntaxError.error2010 function_parameter_list in
     errors
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
@@ -466,16 +463,16 @@ let params_errors params =
 
 let parameter_errors node parents is_strict =
   match syntax node with
-  | ParameterDeclaration p
-    when is_strict && (is_missing p.param_type) &&
+  | ParameterDeclaration { parameter_type; _}
+    when is_strict && (is_missing parameter_type) &&
     (parameter_type_is_required parents) ->
       let s = start_offset node in
       let e = end_offset node in
       [ SyntaxError.make s e SyntaxError.error2001 ]
   | FunctionDeclarationHeader { function_parameter_list; _ } ->
     params_errors function_parameter_list
-  | AnonymousFunction { anonymous_parameter_list; _ } ->
-    params_errors anonymous_parameter_list
+  | AnonymousFunction { anonymous_parameters; _ } ->
+    params_errors anonymous_parameters
   | _ -> []
 
 let function_errors node _parents is_strict =
@@ -511,9 +508,9 @@ let statement_errors node parents =
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
     Some (node, SyntaxError.error2007)
-  | SwitchStatement { switch_compound_statement; _ }
-    when not (switch_first_is_label switch_compound_statement) ->
-    Some (switch_compound_statement, SyntaxError.error2008)
+  | SwitchStatement { switch_body; _ }
+    when not (switch_first_is_label switch_body) ->
+    Some (switch_body, SyntaxError.error2008)
   | _ -> None in
   match result with
   | None -> [ ]
@@ -532,7 +529,8 @@ let property_errors node is_strict =
 
 let expression_errors node =
   match syntax node with
-  | SubscriptExpression s when is_left_brace s.subscript_left ->
+  | SubscriptExpression { subscript_left_bracket; _}
+    when is_left_brace subscript_left_bracket ->
     let s = start_offset node in
     let e = end_offset node in
     [ SyntaxError.make s e SyntaxError.error2020 ]

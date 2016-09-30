@@ -34,6 +34,16 @@ constexpr Arch arch() {
 #endif
 }
 
+constexpr bool arch_any() { return false; }
+
+/*
+ * Convenience helper for guarding on a set of architectures.
+ */
+template<class... Tail>
+bool arch_any(Arch a, Tail&&... archs) {
+  return arch() == a || arch_any(archs...);
+}
+
 /*
  * MSVC's Preprocessor is completely idiotic, so we have to play by its rules
  * and forcefully expand the variadic args so they aren't all interpreted as the

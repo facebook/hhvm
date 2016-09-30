@@ -640,7 +640,11 @@ static void mysql_set_ssl_options(
   mysql_options(conn, MYSQL_OPT_SSL_CONTEXT, ssl_context->getSSLCtx());
   auto ssl_session = ssl_provider->getSSLSession();
   if (ssl_session) {
-    mysql_options4(conn, MYSQL_OPT_SSL_SESSION, ssl_session, nullptr);
+    mysql_options4(
+        conn,
+        MYSQL_OPT_SSL_SESSION,
+        ssl_session,
+        (void*)1 /* take ownership */);
   }
 }
 

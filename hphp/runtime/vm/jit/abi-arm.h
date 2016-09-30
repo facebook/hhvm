@@ -66,8 +66,6 @@ constexpr size_t num_arg_regs_simd() { return 8; }
 constexpr size_t num_arg_regs_ind_ret() { return 1; }
 
 RegSet arg_regs(size_t n);
-RegSet arg_regs_simd(size_t n);
-RegSet arg_regs_ind_ret(size_t n);
 
 PhysReg r_svcreq_req();
 PhysReg r_svcreq_stub();

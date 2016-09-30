@@ -97,8 +97,6 @@ size_t num_arg_regs_ind_ret();
  * RegSet for a call with `n' arguments.
  */
 RegSet arg_regs(size_t n);
-RegSet arg_regs_simd(size_t n);
-RegSet arg_regs_ind_ret(size_t n);
 
 /*
  * Service request argument registers.

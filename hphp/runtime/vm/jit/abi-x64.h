@@ -56,11 +56,9 @@ PhysReg rarg_ind_ret(size_t i);
 
 size_t num_arg_regs();
 size_t num_arg_regs_simd();
-size_t num_arg_regs_ind_ret();
+constexpr size_t num_arg_regs_ind_ret() { return 0; }
 
 RegSet arg_regs(size_t n);
-RegSet arg_regs_simd(size_t n);
-RegSet arg_regs_ind_ret(size_t n);
 
 constexpr PhysReg r_svcreq_req()  { return reg::rdi; }
 constexpr PhysReg r_svcreq_stub() { return reg::r10; }

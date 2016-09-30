@@ -183,9 +183,6 @@ size_t num_arg_regs() {
 size_t num_arg_regs_simd() {
   return sizeof(simd_args) / sizeof(PhysReg);
 }
-size_t num_arg_regs_ind_ret() {
-  return 0;
-}
 
 
 PhysReg r_svcreq_sf() {

@@ -63,18 +63,6 @@ RegSet arg_regs(size_t n) {
   return regs;
 }
 
-RegSet arg_regs_simd(size_t n) {
-  RegSet regs;
-  for (auto i = 0; i < n; i++) regs |= rarg_simd(i);
-  return regs;
-}
-
-RegSet arg_regs_ind_ret(size_t n) {
-  RegSet regs;
-  for (auto i = 0; i < n; i++) regs |= rarg_ind_ret(i);
-  return regs;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

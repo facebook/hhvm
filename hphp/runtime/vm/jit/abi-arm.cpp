@@ -169,12 +169,6 @@ PhysReg rarg_ind_ret(size_t i) {
 RegSet arg_regs(size_t n) {
   return jit::arg_regs(n);
 }
-RegSet arg_regs_simd(size_t n) {
-  return jit::arg_regs_simd(n);
-}
-RegSet arg_regs_ind_ret(size_t n) {
-  return jit::arg_regs_ind_ret(n);
-}
 
 PhysReg r_svcreq_req() { return rarg(0); }
 PhysReg r_svcreq_stub() { return rarg(1); }

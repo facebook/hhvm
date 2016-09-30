@@ -96,7 +96,7 @@ PhysReg rarg_ind_ret(size_t i);
 
 size_t num_arg_regs();
 size_t num_arg_regs_simd();
-size_t num_arg_regs_ind_ret();
+constexpr size_t num_arg_regs_ind_ret() { return 0; }
 
 constexpr PhysReg r_svcreq_req()  { return ppc64_asm::reg::r3; }
 constexpr PhysReg r_svcreq_stub() { return ppc64_asm::reg::r8; }

@@ -1242,7 +1242,8 @@ and expr_
       TUtils.process_static_find_ref cid mid;
       let env, cty = static_class_id p env cid in
       let env, cty = Env.expand_type env cty in
-      let env, ty = class_get ~is_method:false ~is_const:false env cty mid cid in
+      let env, ty, _ =
+        class_get ~is_method:false ~is_const:false env cty mid cid in
       if Env.FakeMembers.is_static_invalid env cid (snd mid)
       then
         let fake_name = Env.FakeMembers.make_static_id cid (snd mid) in
@@ -1384,15 +1385,15 @@ and class_const ?(incl_tc=false) env p (cid, mid) =
   TUtils.process_static_find_ref cid mid;
   let env, cty = static_class_id p env cid in
   let env, cty = Env.expand_type env cty in
-  let env, const_ty =
+  let env, const_ty, cc_abstract_info =
     class_get ~is_method:false ~is_const:true ~incl_tc env cty mid cid in
-  match const_ty with
-    | r, Tabstract (AKgeneric n, _) ->
+  match cc_abstract_info with
+    | Some (cc_pos, cc_name) ->
       let () = match cid with
         | CIstatic | CIexpr _ -> ();
-        | _ -> Errors.abstract_const_usage p (Reason.to_pos r) n; ()
+        | _ -> Errors.abstract_const_usage p cc_pos cc_name; ()
       in env, const_ty
-    | _ ->
+    | None ->
       env, const_ty
 
 (*****************************************************************************)
@@ -2297,7 +2298,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       then begin
         (* in static context, you can only call parent::foo() on static
          * methods *)
-        let env, fty = class_get ~is_method:true ~is_const:false env ty1 m CIparent in
+        let env, fty, _ =
+          class_get ~is_method:true ~is_const:false env ty1 m CIparent in
         let env, fty = Env.expand_type env fty in
         let fty = check_abstract_parent_meth (snd m) p fty in
         call p env fty el uel
@@ -2326,7 +2328,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
             in
             env, method_
           | Some _ ->
-            let env, fty = class_get ~is_method:true ~is_const:false env ty1 m CIparent in
+            let env, fty, _ =
+              class_get ~is_method:true ~is_const:false env ty1 m CIparent in
             let env, fty = Env.expand_type env fty in
             let fty = check_abstract_parent_meth (snd m) p fty in
             call p env fty el uel
@@ -2335,7 +2338,8 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
   | Class_const(e1, m) ->
       TUtils.process_static_find_ref e1 m;
       let env, ty1 = static_class_id p env e1 in
-      let env, fty = class_get ~is_method:true ~is_const:false env ty1 m e1 in
+      let env, fty, _ =
+        class_get ~is_method:true ~is_const:false env ty1 m e1 in
       let env, fty = Env.expand_type env fty in
       let () = match e1 with
         | CIself when is_abstract_ft fty ->
@@ -2693,24 +2697,26 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
 (p, mid) =
   let env, cty = Env.expand_type env cty in
   match cty with
-  | _, Tany -> env, (Reason.Rnone, Tany)
+  | _, Tany -> env, (Reason.Rnone, Tany), None
   | _, Tunresolved tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty ->
+      let env, ty, _ =
         class_get_ ~is_method ~is_const ~ety_env ~incl_tc env cid ty (p, mid)
+          in env, ty
       end in
       let env, method_ = TUtils.in_var env (fst cty, Tunresolved tyl) in
-      env, method_
+      env, method_, None
   | _, Tabstract _ ->
       begin match TUtils.get_concrete_supertypes env cty with
       | env, Some cty ->
         class_get_ ~is_method ~is_const ~ety_env ~incl_tc env cid cty (p, mid)
       | env, None ->
-        env, (Reason.Rnone, Tany)
+        env, (Reason.Rnone, Tany), None
       end
   | _, Tclass ((_, c), paraml) ->
       let class_ = Env.get_class env c in
       (match class_ with
-      | None -> env, (Reason.Rnone, Tany)
+      | None -> env, (Reason.Rnone, Tany), None
       | Some class_ ->
         if !Typing_defs.accumulate_method_calls then
           Typing_defs.accumulate_method_calls_result :=
@@ -2734,13 +2740,13 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
           match const with
           | None ->
             smember_not_found p ~is_const ~is_method class_ mid;
-            env, (Reason.Rnone, Tany)
+            env, (Reason.Rnone, Tany), None
           | Some { cc_type; cc_abstract; cc_pos; _ } ->
             let env, cc_type = Phase.localize ~ety_env env cc_type in
-            env, (if cc_abstract
-              then (Reason.Rwitness cc_pos, Tabstract
-                    (AKgeneric (class_.tc_name ^ "::" ^ mid), Some cc_type))
-              else cc_type)
+            env, cc_type,
+            (if cc_abstract
+             then Some (cc_pos, class_.tc_name ^ "::" ^ mid)
+             else None)
         end else begin
           let smethod = Env.get_static_member is_method env class_ mid in
           match smethod with
@@ -2748,7 +2754,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
             (match Env.get_static_member is_method env class_ SN.Members.__callStatic with
               | None ->
                 smember_not_found p ~is_const ~is_method class_ mid;
-                env, (Reason.Rnone, Tany)
+                env, (Reason.Rnone, Tany), None
               | Some {ce_visibility = vis; ce_type = lazy (r, Tfun ft); _} ->
                 let p_vis = Reason.to_pos r in
                 TVis.check_class_access p env (p_vis, vis) cid class_;
@@ -2757,21 +2763,21 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
                   ft_arity = Fellipsis 0;
                   ft_tparams = []; ft_params = [];
                 } in
-                env, (r, Tfun ft)
+                env, (r, Tfun ft), None
               | _ -> assert false)
           | Some { ce_visibility = vis; ce_type = lazy method_; _ } ->
             let p_vis = Reason.to_pos (fst method_) in
             TVis.check_class_access p env (p_vis, vis) cid class_;
             let env, method_ =
               Phase.localize ~ety_env env method_ in
-            env, method_
+            env, method_, None
         end
       )
   | _, (Tmixed | Tarraykind _ | Toption _
         | Tprim _ | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
        | Tshape _) ->
       (* should never happen; static_class_id takes care of these *)
-      env, (Reason.Rnone, Tany)
+      env, (Reason.Rnone, Tany), None
 
 and smember_not_found pos ~is_const ~is_method class_ member_name =
   let kind =
@@ -4294,7 +4300,7 @@ and gconst_def cst =
  * return value type *)
 and overload_function p env class_id method_id el uel f =
   let env, ty = static_class_id p env class_id in
-  let env, fty =
+  let env, fty, _ =
     class_get ~is_method:true ~is_const:false env ty method_id class_id in
   (* call the function as declared to validate arity and input types,
      but ignore the result and overwrite with custom one *)

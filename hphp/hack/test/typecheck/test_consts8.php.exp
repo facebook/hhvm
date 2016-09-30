@@ -1,9 +1,5 @@
 File "test_consts8.php", line 6, characters 12-20:
 Invalid return type (Typing[4110])
-File "test_consts8.php", line 6, characters 12-20:
-Some type constraint(s) here are violated
-File "test_consts8.php", line 4, characters 22-22:
-'C1::X' is a constrained type
 File "test_consts8.php", line 5, characters 24-29:
 This is a string
 File "test_consts8.php", line 4, characters 18-20:

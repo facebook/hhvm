@@ -106,7 +106,7 @@ void ThreadSafeLocaleHandler::reset() {
 
 const char* ThreadSafeLocaleHandler::actuallySetLocale(
   int category, const char* locale_cstr) {
-  if (category < 0 || category > m_category_locale_map.size()) {
+  if (category < 0 || category >= m_category_locale_map.size()) {
     return nullptr;
   }
 

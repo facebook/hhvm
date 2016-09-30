@@ -28,11 +28,11 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/trace.h"
 
@@ -122,7 +122,7 @@ TCA translate(TransArgs args, FPInvOffset spOff, ProfTransRec* prologue) {
 }
 
 TCA retranslate(TransArgs args, const RegionContext& ctx) {
-  AssertVMUnused _;
+  VMProtect _;
 
   auto sr = tc::findSrcRec(args.sk);
   always_assert(sr);
@@ -185,7 +185,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
 }
 
 TCA retranslateOpt(SrcKey sk, TransID transId) {
-  AssertVMUnused _;
+  VMProtect _;
 
   if (isDebuggerAttachedProcess()) return nullptr;
 

@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
 #include "hphp/util/trace.h"
@@ -180,7 +181,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
 }
 
 TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
-  AssertVMUnused _;
+  VMProtect _;
 
   try {
     return emitFuncPrologueImpl(func, argc, kind);
@@ -203,7 +204,7 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
 }
 
 TCA emitFuncPrologueOpt(ProfTransRec* rec) {
-  AssertVMUnused _;
+  VMProtect _;
 
   auto start = emitFuncPrologue(
     rec->func(),
@@ -215,7 +216,7 @@ TCA emitFuncPrologueOpt(ProfTransRec* rec) {
 }
 
 TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {
-  AssertVMUnused _;
+  VMProtect _;
 
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();

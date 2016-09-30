@@ -37,8 +37,8 @@
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
@@ -165,7 +165,7 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
 TCA emitTranslation(TransEnv env) {
   Timer timer(Timer::mcg_finishTranslation);
 
-  AssertVMUnused _;
+  VMProtect _;
 
   if (env.prologue) {
     assertx(env.args.kind == TransKind::Optimize);

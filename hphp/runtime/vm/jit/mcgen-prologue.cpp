@@ -23,8 +23,8 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/trace.h"
 
@@ -136,7 +136,7 @@ TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody) {
   TCA triggerStart = nullptr;
   std::vector<TransID> prologTransIDs;
 
-  AssertVMUnused _;
+  VMProtect _;
 
   for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
     TransID tid = profData()->proflogueTransId(func, nArgs);
@@ -191,7 +191,7 @@ TCA regeneratePrologues(Func* func, SrcKey triggerSk, bool& includedBody) {
 }
 
 TCA getFuncPrologue(Func* func, int nPassed) {
-  AssertVMUnused _;
+  VMProtect _;
 
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);

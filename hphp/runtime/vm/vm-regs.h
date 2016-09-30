@@ -262,39 +262,6 @@ struct VMRegGuard {
   VMRegState m_old;
 };
 
-/*
- * RAII assertion guard that ensures VM state (specifically, all of RDS) is
- * not modified while it is in scope.
- *
- * Used by parts of the JIT in the mcgen and tc namespaces.
- */
-struct AssertVMUnused {
-  friend struct AssertVMUnusedDisabler;
-
-  static __thread bool is_protected;
-
-#ifndef NDEBUG
-  AssertVMUnused();
-  ~AssertVMUnused();
-
-private:
-  void* m_oldBase;
-  VMRegState m_oldState;
-  bool m_oldProt;
-#else
-  AssertVMUnused() {}
-#endif
-};
-
-struct AssertVMUnusedDisabler {
-#ifndef NDEBUG
-  AssertVMUnusedDisabler();
-  ~AssertVMUnusedDisabler();
-#else
-  AssertVMUnusedDisabler() {}
-#endif
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {

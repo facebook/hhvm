@@ -40,6 +40,7 @@
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 
 namespace HPHP { namespace rds {
 
@@ -287,7 +288,7 @@ Handle alloc(Mode mode, size_t numBytes,
       addFreeBlock(s_normal_free_lists, oldFrontier,
                   s_normal_frontier - oldFrontier);
       s_normal_frontier += adjustedBytes;
-      if (debug && !AssertVMUnused::is_protected) {
+      if (debug && !jit::VMProtect::is_protected) {
         memset(
           (char*)(tl_base) + oldFrontier,
           kRDSTrashFill,
@@ -619,9 +620,12 @@ void threadInit() {
   always_assert(tl_same == tl_base);
 #endif
   numa_bind_to(tl_base, s_persistent_base, s_numaNode);
+#ifdef NDEBUG
+  // A huge-page RDS is incompatible with VMProtect in vm-regs.cpp
   if (RuntimeOption::EvalMapTgtCacheHuge) {
     hintHuge(tl_base, RuntimeOption::EvalJitTargetCacheSize);
   }
+#endif
 
   {
     Guard g(s_tlBaseListLock);

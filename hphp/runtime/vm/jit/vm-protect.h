@@ -14,40 +14,45 @@
    +----------------------------------------------------------------------+
 */
 
+#pragma once
+
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/vm/jit/fixup.h"
+namespace HPHP { namespace jit {
 
-namespace HPHP {
+/*
+ * RAII assertion guard that ensures VM state (specifically, all of RDS,
+ * including vmfp, vmsp, and vmpc) is not modified while it is in
+ * scope. VMProtect::Pause may be used if the protection should be temporarily
+ * disabled within a scope.
+ *
+ * The only rule for nesting is that no VMProtect structs may be constructed
+ * inside a scope containing a VMProtect::Pause struct. The scope containing
+ * the VMProtect::Pause struct may contain 0 or more VMProtect structs,
+ * although only the outermost VMProtect struct will do any real work.
+ */
+struct VMProtect {
+  struct Pause {
+#ifndef NDEBUG
+    Pause();
+    ~Pause();
+#else
+    Pause() {}
+#endif
+  };
 
-///////////////////////////////////////////////////////////////////////////////
+  static __thread bool is_protected;
 
-// Register dirtiness: thread-private.
-__thread VMRegState tl_regState = VMRegState::CLEAN;
+#ifndef NDEBUG
+  VMProtect();
+  ~VMProtect();
 
-VMRegAnchor::VMRegAnchor()
-  : m_old(tl_regState)
-{
-  assert_native_stack_aligned();
-  jit::syncVMRegs();
-}
+private:
+  void* m_oldBase;
+  VMRegState m_oldState;
+#else
+  VMProtect() {}
+#endif
+};
 
-VMRegAnchor::VMRegAnchor(ActRec* ar)
-  : m_old(tl_regState)
-{
-  assert(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-
-  auto prevAr = g_context->getOuterVMFrame(ar);
-  const Func* prevF = prevAr->m_func;
-  assert(!ar->resumed());
-  auto& regs = vmRegs();
-  regs.stack.top() = (TypedValue*)ar - ar->numArgs();
-  assert(vmStack().isValidAddress((uintptr_t)vmsp()));
-  regs.pc = prevF->unit()->at(prevF->base() + ar->m_soff);
-  regs.fp = prevAr;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}
+}}

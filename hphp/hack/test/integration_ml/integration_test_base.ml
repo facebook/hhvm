@@ -108,6 +108,11 @@ let connect_persistent_client env =
   | Some _ -> env
   | None -> fail "Expected persistent client to be connected"
 
+let get_errors env = Errors.get_error_list env.ServerEnv.errorl
+
+let assert_no_errors env =
+  if get_errors env <> [] then fail "Expected to have no errors"
+
 let assertSingleError expected err_list =
   match err_list with
   | [x] ->

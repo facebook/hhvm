@@ -56,7 +56,11 @@ val prepend_root: string -> string
 (* Helpers for asserting things *)
 
 val fail: string -> unit
+
 val assertEqual: string -> string -> unit
+
+val assert_no_errors: ServerEnv.env -> unit
+
 val assertSingleError: string -> Errors.error list -> unit
 
 val assert_no_diagnostics : ('a, 'b) loop_outputs -> unit

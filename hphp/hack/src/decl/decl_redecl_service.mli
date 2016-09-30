@@ -8,6 +8,7 @@
  *
  *)
 
+open Reordered_argument_collections
 open Typing_deps
 
 val redo_type_decl :
@@ -16,6 +17,18 @@ val redo_type_decl :
   TypecheckerOptions.t ->
   FileInfo.fast ->
   Errors.t * Relative_path.Set.t * DepSet.t * DepSet.t
+
+(**
+ * Exposed for tests only!
+ * For a set of classes, return all the declared classes that share their class
+ * elements (see Decl_class_elements).
+ * Not for general use case since it doesn't use lazy decl and makes sense only
+ * in a very particular use case of invalidate_type_decl.
+ *)
+val get_dependent_classes :
+  FileInfo.t Relative_path.Map.t ->
+  SSet.t ->
+  SSet.t
 
 val invalidate_type_decl :
   Worker.t list option ->

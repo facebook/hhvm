@@ -17,6 +17,7 @@
  *)
 (*****************************************************************************)
 open Core
+open Reordered_argument_collections
 open Typing_deps
 
 (*****************************************************************************)
@@ -257,6 +258,54 @@ let get_defs fast =
   Relative_path.Map.fold fast ~f:begin fun _ names1 names2 ->
     FileInfo.merge_names names1 names2
   end ~init:FileInfo.empty_names
+
+let intersection_nonempty s1 mem_f s2  =
+  SSet.exists s1 ~f:(mem_f s2)
+
+let is_dependent_class_of_any classes c =
+  if SSet.mem classes c then true else
+  match Decl_heap.Classes.get c with
+  | None -> false (* it might be a dependent class, but we are only doing this
+                   * check for the purpose of invalidating things from the heap
+                   * - if it's already not there, then we don't care. *)
+  | Some c ->
+    (intersection_nonempty classes SMap.mem c.Decl_defs.dc_ancestors) ||
+    (intersection_nonempty classes SSet.mem
+      c.Decl_defs.dc_req_ancestors_extends)
+
+let get_maybe_dependent_classes_in_file file_info path =
+  match Relative_path.Map.get file_info path with
+  | None -> SSet.empty
+  | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
+
+let get_maybe_dependent_classes file_info classes files =
+  Relative_path.Set.fold files
+    ~init:classes
+    ~f:begin fun x acc ->
+      SSet.union acc @@ get_maybe_dependent_classes_in_file file_info x
+    end
+  |> SSet.elements
+
+let get_dependent_classes_files c =
+  let c_hash = Dep.make (Dep.Class c) in
+  let c_deps = Decl_compare.get_extend_deps c_hash Typing_deps.DepSet.empty in
+  Typing_deps.get_files c_deps
+
+let get_dependent_classes_files classes =
+  SSet.fold classes
+    ~init:Relative_path.Set.empty
+    ~f:begin fun x acc ->
+      Relative_path.Set.union acc @@ get_dependent_classes_files x
+    end
+
+let filter_dependent_classes classes maybe_dependent_classes =
+  List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any classes)
+
+let get_dependent_classes file_info classes =
+  get_dependent_classes_files classes |>
+  get_maybe_dependent_classes file_info classes |>
+  filter_dependent_classes classes |>
+  SSet.of_list
 
 let get_defs_and_elems workers ~bucket_size fast =
   let defs = get_defs fast in

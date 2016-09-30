@@ -52,11 +52,6 @@ File \"/foo.php\", line 4, characters 25-30:
 It is incompatible with a string
 "
 
-let get_errors env = Errors.get_error_list env.ServerEnv.errorl
-
-let assert_no_errors env =
-  if get_errors env <> [] then Test.fail "Expected to have no errors"
-
 let () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
@@ -68,7 +63,7 @@ let () =
   (* We need to suppress all the errors (see HH_FIXMEs above), otherwise the
    * logic that always rechecks the files with errors kicks in and does the
    * same job as phase2 fanout. We want to test the latter one in this test. *)
-  assert_no_errors env;
+  Test.assert_no_errors env;
 
   (* restore parent, but with a mismatching return type of f() *)
   let env, _ = Test.(run_loop_once env { default_loop_input with
@@ -76,4 +71,4 @@ let () =
       foo_name, foo_contents;
     ]
   }) in
-  Test.assertSingleError bar_errors (get_errors env)
+  Test.assertSingleError bar_errors (Errors.get_error_list env.ServerEnv.errorl)

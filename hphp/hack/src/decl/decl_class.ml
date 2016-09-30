@@ -14,6 +14,12 @@ module Inst = Decl_instantiate
 
 exception Decl_heap_elems_bug
 
+let wrap_not_found find x =
+  try
+    find x
+    (* TODO: t13396089 *)
+  with Not_found -> raise Decl_heap_elems_bug
+
 let rec apply_substs substs class_context ty =
   match SMap.get class_context substs with
   | None -> ty
@@ -65,10 +71,7 @@ let to_class_type {
 } =
   let map_elements find elts = SMap.mapi begin fun name elt ->
     let ty = lazy begin
-      let elem = try find (elt.elt_origin, name)
-        (* TODO: t13396089 *)
-        with Not_found -> raise Decl_heap_elems_bug
-      in
+      let elem =  wrap_not_found find (elt.elt_origin, name) in
       apply_substs dc_substs elt.elt_origin @@ elem
     end in
     element_to_class_elt ty elt
@@ -82,7 +85,7 @@ let to_class_type {
     | Some elt, consistent ->
       let ty = lazy begin
         elt.elt_origin |>
-        Decl_heap.Constructors.find_unsafe |>
+        wrap_not_found Decl_heap.Constructors.find_unsafe |>
         ft_to_ty |>
         apply_substs dc_substs elt.elt_origin
       end in

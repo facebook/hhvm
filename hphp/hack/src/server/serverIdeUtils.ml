@@ -94,6 +94,18 @@ let revive_file_info path file_info =
   } = FileInfo.simplify file_info in
   revive n_funs n_classes n_types n_consts path
 
+(** Surrounds f() with oldify and revive, but resilient to f throwing. Reraises
+ * the exception thrown and ensures revive is always done. *)
+let oldify_then_revive path file_info f =
+  let () = oldify_file_info path file_info in
+  let result = try f () with
+  | e ->
+    let () = revive_file_info path file_info in
+    raise e
+  in
+  let () = revive_file_info path file_info in
+  result
+
 let path = Relative_path.default
 (* This will parse, declare and check all functions and classes in content
  * buffer.
@@ -107,7 +119,7 @@ let declare_and_check content ~f =
   let tcopt = TypecheckerOptions.permissive in
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
-  let file_info =
+  let result =
     Errors.ignore_ begin fun () ->
       Fixmes.HH_FIXMES.oldify_batch @@
         Fixmes.HH_FIXMES.KeySet.singleton path;
@@ -132,42 +144,40 @@ let declare_and_check content ~f =
         FileInfo.funs; classes; typedefs; consts;
       } in
 
-      oldify_file_info path file_info;
+      oldify_then_revive path file_info begin fun () ->
+        Parser_heap.ParserHeap.add path (ast, Parser_heap.Full);
+        NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
+        let nast = Naming.program tcopt ast in
+        List.iter nast begin function
+          | Nast.Fun f -> Decl.fun_decl f
+          | Nast.Class c -> Decl.class_decl tcopt c
+          | Nast.Typedef t -> Decl.typedef_decl t
+          | Nast.Constant cst -> Decl.const_decl cst
+        end;
 
-      Parser_heap.ParserHeap.add path (ast, Parser_heap.Full);
-      NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
-      let nast = Naming.program tcopt ast in
-      List.iter nast begin function
-        | Nast.Fun f -> Decl.fun_decl f
-        | Nast.Class c -> Decl.class_decl tcopt c
-        | Nast.Typedef t -> Decl.typedef_decl t
-        | Nast.Constant cst -> Decl.const_decl cst
-      end;
-
-      (* If we remove a class member, there may still be child classes that
-       * refer to that member. We can either invalidate all the extends_deps
-       * of the classes we just declared, or revive the types of the class
-       * elements back into the new heap. We choose to revive since it should
-       * be faster, even though it is technically incorrect.
-       *)
-      classes
-      |> List.map ~f:snd
-      |> Decl_class_elements.revive_removed_elems;
-      (* We must run all the declaration steps first to ensure that the
-       * typechecking below sees all the new declarations. Lazy decl
-       * won't work in this case because we haven't put the new ASTs into
-       * the parsing heap. *)
-      List.iter nast begin function
-        | Nast.Fun f -> Typing.fun_def tcopt f;
-        | Nast.Class c -> Typing.class_def tcopt c;
-        | Nast.Typedef t -> Typing.typedef_def t;
-        | Nast.Constant cst -> Typing.gconst_def cst;
-      end;
-      file_info
+        (* If we remove a class member, there may still be child classes that
+         * refer to that member. We can either invalidate all the extends_deps
+         * of the classes we just declared, or revive the types of the class
+         * elements back into the new heap. We choose to revive since it should
+         * be faster, even though it is technically incorrect.
+         *)
+        classes
+        |> List.map ~f:snd
+        |> Decl_class_elements.revive_removed_elems;
+        (* We must run all the declaration steps first to ensure that the
+         * typechecking below sees all the new declarations. Lazy decl
+         * won't work in this case because we haven't put the new ASTs into
+         * the parsing heap. *)
+        List.iter nast begin function
+          | Nast.Fun f -> Typing.fun_def tcopt f;
+          | Nast.Class c -> Typing.class_def tcopt c;
+          | Nast.Typedef t -> Typing.typedef_def t;
+          | Nast.Constant cst -> Typing.gconst_def cst;
+        end;
+        f path file_info
+      end
     end
   in
-  let result = f path file_info in
-  revive_file_info path file_info;
   result
 
 let recheck tcopt filetuple_l =

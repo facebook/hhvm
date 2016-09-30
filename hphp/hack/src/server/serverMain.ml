@@ -122,6 +122,7 @@ let handle_connection_ genv env client =
     ClientProvider.shutdown_client client;
     env
   | e ->
+    HackEventLogger.handle_connection_exception e;
     let msg = Printexc.to_string e in
     EventLogger.master_exception msg;
     Printf.fprintf stderr "Error: %s\n%!" msg;

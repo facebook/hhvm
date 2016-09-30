@@ -67,6 +67,7 @@ let malformed_input () =
   raise Exit_status.(Exit_with IDE_malformed_request)
 
 let pending_push_messages = Queue.create ()
+let pending_stdin_messages = Queue.create ()
 
 let rpc conn command =
   let res, push_messages = Cmd.rpc_persistent conn command in
@@ -84,6 +85,35 @@ let get_next_push_message fd =
     then read_push_message_from_server fd
     else Queue.take pending_push_messages
 
+let rec read_stdin_message ?line_part:(line_part="") () =
+  let b = String.create 1024 in
+
+  let bytes_read = Unix.read Unix.stdin b 0 1024 in
+  assert (bytes_read > 0);
+
+  let last_line_complete = String.get b (bytes_read - 1) = '\n' in
+  let s = line_part ^ (String.sub b 0 bytes_read) in
+
+  let lines = Str.split (Str.regexp "\n") s in
+  let lines_read = List.length lines in
+
+  let last_line_part = ref "" in
+
+  List.iteri lines ~f:begin fun i line ->
+    if last_line_complete || i < lines_read - 1 then
+      Queue.push line pending_stdin_messages
+    else last_line_part := line
+  end;
+
+  if last_line_complete
+    then Queue.take pending_stdin_messages
+    else read_stdin_message ~line_part:!last_line_part ()
+
+let get_next_stdin_message () =
+  if Queue.is_empty pending_stdin_messages
+    then read_stdin_message ()
+    else Queue.take pending_stdin_messages
+
 let read_connection_response fd =
   let res = Marshal_tools.from_fd_with_preamble fd in
   match res with
@@ -95,7 +125,7 @@ let server_disconnected () =
   raise Exit_status.(Exit_with No_error)
 
 let read_request () =
-  try read_line () with End_of_file ->
+  try get_next_stdin_message () with Unix.Unix_error _ ->
     malformed_input ()
 
 let write_response res =
@@ -104,6 +134,7 @@ let write_response res =
 
 let get_ready_message server_in_fd =
   if not @@ Queue.is_empty pending_push_messages then `Server else
+  if not @@ Queue.is_empty pending_stdin_messages then `Stdin else
   let stdin_fd = Unix.descr_of_in_channel stdin in
   let readable, _, _ = Unix.select [server_in_fd; stdin_fd] [] [] 1.0 in
   if readable = [] then `None

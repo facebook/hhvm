@@ -249,7 +249,7 @@ class IdeConnection(object):
 
     def disconnect(self):
         return('{"protocol" : "service_framework3_rpc","id" : 233,"type" : ' +
-                '"call","method" : "disconnect","args" : {}}')
+                '"call","method" : "disconnect","args" : {}}\n')
 
     def subscribe_diagnostic(self, id):
         return('{"protocol" : "service_framework3_rpc","id" : ' + id +

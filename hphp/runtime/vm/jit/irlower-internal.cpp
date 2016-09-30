@@ -46,6 +46,13 @@ namespace {
  */
 void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
   switch (arg.kind()) {
+    case ArgDesc::Kind::IndRet: {
+      auto const tmp = v.makeReg();
+      v << lea{arg.srcReg()[arg.disp().l()], tmp};
+      vargs.push_back(tmp);
+      break;
+    }
+
     case ArgDesc::Kind::Reg: {
       auto reg = arg.srcReg();
       if (arg.isZeroExtend()) {
@@ -111,8 +118,11 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
                   SyncOptions sync, const ArgGroup& args) {
   auto const inst = args.inst();
-  jit::vector<Vreg> vargs, vSimdArgs, vStkArgs;
+  jit::vector<Vreg> vIndRetArgs, vargs, vSimdArgs, vStkArgs;
 
+  for (size_t i = 0; i < args.numIndRetArgs(); ++i) {
+    prepareArg(args.indRetArg(i), v, vIndRetArgs);
+  }
   for (size_t i = 0; i < args.numGpArgs(); ++i) {
     prepareArg(args.gpArg(i), v, vargs);
   }
@@ -174,7 +184,7 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
     std::move(vargs),
     std::move(vSimdArgs),
     std::move(vStkArgs),
-    args.isIndirect()
+    std::move(vIndRetArgs)
   });
   auto const dstId = v.makeTuple(std::move(dstRegs));
 
@@ -199,6 +209,8 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
     switch (info.dest) {
       case DestType::None:
         return kVoidDest;
+      case DestType::Indirect:
+        return kIndirectDest;
       case DestType::TV:
       case DestType::SIMD:
         return callDestTV(env, inst);

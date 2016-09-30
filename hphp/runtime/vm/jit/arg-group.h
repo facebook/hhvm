@@ -44,12 +44,13 @@ namespace NativeCalls { struct CallInfo; }
 //////////////////////////////////////////////////////////////////////
 
 enum class DestType : uint8_t {
-  None,  // return void (no valid registers)
-  SSA,   // return a single-register value
-  Byte,  // return a single-byte register value
-  TV,    // return a TypedValue packed in two registers
-  Dbl,   // return scalar double in a single FP register
-  SIMD,  // return a TypedValue in one SIMD register
+  None,      // return void (no valid registers)
+  Indirect,  // return struct/object to the address in the first arg
+  SSA,       // return a single-register value
+  Byte,      // return a single-byte register value
+  TV,        // return a TypedValue packed in two registers
+  Dbl,       // return scalar double in a single FP register
+  SIMD,      // return a TypedValue in one SIMD register
 };
 const char* destTypeName(DestType);
 
@@ -58,6 +59,7 @@ struct CallDest {
   Vreg reg0, reg1;
 };
 UNUSED const CallDest kVoidDest { DestType::None };
+UNUSED const CallDest kIndirectDest { DestType::Indirect };
 
 struct ArgDesc {
   enum class Kind {
@@ -66,6 +68,7 @@ struct ArgDesc {
     TypeImm, // DataType Immediate
     Addr,    // Address (register plus 32-bit displacement)
     DataPtr, // Pointer to data section
+    IndRet,  // Indirect Return Address (register plus 32-bit displacement)
   };
 
   PhysReg dstReg() const { return m_dstReg; }
@@ -80,7 +83,11 @@ struct ArgDesc {
     assertx(m_kind == Kind::TypeImm);
     return m_typeImm;
   }
-  Immed disp() const { assertx(m_kind == Kind::Addr); return m_disp32; }
+  Immed disp() const {
+    assertx(m_kind == Kind::Addr ||
+	    m_kind == Kind::IndRet);
+    return m_disp32;
+  }
   bool isZeroExtend() const { return m_zeroExtend; }
   bool done() const { return m_done; }
   void markDone() { m_done = true; }
@@ -143,7 +150,7 @@ struct ArgGroup {
   size_t numGpArgs() const { return m_gpArgs.size(); }
   size_t numSimdArgs() const { return m_simdArgs.size(); }
   size_t numStackArgs() const { return m_stkArgs.size(); }
-  bool isIndirect() const { return m_indirect; }
+  size_t numIndRetArgs() const { return m_indRetArgs.size(); }
 
   ArgDesc& gpArg(size_t i) {
     assertx(i < m_gpArgs.size());
@@ -159,6 +166,10 @@ struct ArgGroup {
   const ArgDesc& stkArg(size_t i) const {
     assertx(i < m_stkArgs.size());
     return m_stkArgs[i];
+  }
+  const ArgDesc& indRetArg(size_t i) const {
+    assertx(i < m_indRetArgs.size());
+    return m_indRetArgs[i];
   }
   ArgDesc& operator[](size_t i) = delete;
 
@@ -188,6 +199,17 @@ struct ArgGroup {
     return *this;
   }
 
+  /*
+   * indRet args are similar to simple addr args, but are used specifically to
+   * pass the address that the native call will use for indirect returns. If a
+   * platform has no dedicated registers for indirect returns, then it uses
+   * the first general purpose argument register.
+   */
+  ArgGroup& indRet(Vreg base, Immed off) {
+    push_arg(ArgDesc(ArgDesc::Kind::IndRet, base, off));
+    return *this;
+  }
+
   ArgGroup& ssa(int i, bool isFP = false) {
     auto s = m_inst->src(i);
     ArgDesc arg(s, m_locs[s]);
@@ -200,11 +222,6 @@ struct ArgGroup {
     } else {
       push_arg(arg);
     }
-    return *this;
-  }
-
-  ArgGroup& indirect() {
-    m_indirect = true;
     return *this;
   }
 
@@ -250,10 +267,10 @@ private:
   const IRInstruction* m_inst;
   const StateVector<SSATmp,Vloc>& m_locs;
   ArgVec* m_override{nullptr}; // force args to go into a specific ArgVec
+  ArgVec m_indRetArgs; // Indirect Return Address
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
-  bool m_indirect{false}; // has indirect result?
 };
 
 ArgGroup toArgGroup(const NativeCalls::CallInfo&,

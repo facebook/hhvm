@@ -161,12 +161,19 @@ PhysReg rarg_simd(size_t i) {
   assertx(i < num_arg_regs_simd());
   return vixl::FPRegister::DRegFromCode(i);
 }
+PhysReg rarg_ind_ret(size_t i) {
+  assertx(i < num_arg_regs_ind_ret());
+  return vixl::x8;
+}
 
 RegSet arg_regs(size_t n) {
   return jit::arg_regs(n);
 }
 RegSet arg_regs_simd(size_t n) {
   return jit::arg_regs_simd(n);
+}
+RegSet arg_regs_ind_ret(size_t n) {
+  return jit::arg_regs_ind_ret(n);
 }
 
 PhysReg r_svcreq_req() { return rarg(0); }

@@ -41,13 +41,14 @@ PhysReg rret_type() { return ARCH_SWITCH_CALL(rret_type); }
 
 PhysReg rret(size_t i) { return ARCH_SWITCH_CALL(rret, i); }
 PhysReg rret_simd(size_t i) { return ARCH_SWITCH_CALL(rret_simd, i); }
-PhysReg rret_indirect() { return ARCH_SWITCH_CALL(rret_indirect); }
 
 PhysReg rarg(size_t i) { return ARCH_SWITCH_CALL(rarg, i); }
 PhysReg rarg_simd(size_t i) { return ARCH_SWITCH_CALL(rarg_simd, i); }
+PhysReg rarg_ind_ret(size_t i) { return ARCH_SWITCH_CALL(rarg_ind_ret, i); }
 
 size_t num_arg_regs() { return ARCH_SWITCH_CALL(num_arg_regs); }
 size_t num_arg_regs_simd() { return ARCH_SWITCH_CALL(num_arg_regs_simd); }
+size_t num_arg_regs_ind_ret() { return ARCH_SWITCH_CALL(num_arg_regs_ind_ret); }
 
 PhysReg r_svcreq_req() { return ARCH_SWITCH_CALL(r_svcreq_req); }
 PhysReg r_svcreq_stub() { return ARCH_SWITCH_CALL(r_svcreq_stub); }
@@ -65,6 +66,12 @@ RegSet arg_regs(size_t n) {
 RegSet arg_regs_simd(size_t n) {
   RegSet regs;
   for (auto i = 0; i < n; i++) regs |= rarg_simd(i);
+  return regs;
+}
+
+RegSet arg_regs_ind_ret(size_t n) {
+  RegSet regs;
+  for (auto i = 0; i < n; i++) regs |= rarg_ind_ret(i);
   return regs;
 }
 

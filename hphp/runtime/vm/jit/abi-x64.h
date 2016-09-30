@@ -49,16 +49,18 @@ constexpr PhysReg rret_type() { return reg::rdx; }
 
 PhysReg rret(size_t i = 0);
 PhysReg rret_simd(size_t i);
-constexpr PhysReg rret_indirect() { return reg::rax; }
 
 PhysReg rarg(size_t i);
 PhysReg rarg_simd(size_t i);
+PhysReg rarg_ind_ret(size_t i);
 
 size_t num_arg_regs();
 size_t num_arg_regs_simd();
+size_t num_arg_regs_ind_ret();
 
 RegSet arg_regs(size_t n);
 RegSet arg_regs_simd(size_t n);
+RegSet arg_regs_ind_ret(size_t n);
 
 constexpr PhysReg r_svcreq_req()  { return reg::rdi; }
 constexpr PhysReg r_svcreq_stub() { return reg::r10; }

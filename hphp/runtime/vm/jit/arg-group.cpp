@@ -29,12 +29,13 @@ TRACE_SET_MOD(hhir);
 
 const char* destTypeName(DestType dt) {
   switch (dt) {
-    case DestType::None: return "None";
-    case DestType::SSA:  return "SSA";
-    case DestType::Byte: return "Byte";
-    case DestType::TV:   return "TV";
-    case DestType::Dbl:  return "Dbl";
-    case DestType::SIMD: return "SIMD";
+    case DestType::None:     return "None";
+    case DestType::Indirect: return "Indirect";
+    case DestType::SSA:      return "SSA";
+    case DestType::Byte:     return "Byte";
+    case DestType::TV:       return "TV";
+    case DestType::Dbl:      return "Dbl";
+    case DestType::SIMD:     return "SIMD";
   }
   not_reached();
 }
@@ -98,7 +99,11 @@ void ArgGroup::push_arg(const ArgDesc& arg) {
   // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
   ArgVec* args = m_override;
   if (!args) {
-    args = m_gpArgs.size() < num_arg_regs() ? &m_gpArgs : &m_stkArgs;
+    if (arg.kind() == ArgDesc::Kind::IndRet && num_arg_regs_ind_ret() > 0) {
+      args = &m_indRetArgs;
+    } else {
+      args = m_gpArgs.size() < num_arg_regs() ? &m_gpArgs : &m_stkArgs;
+    }
   }
   args->push_back(arg);
 }

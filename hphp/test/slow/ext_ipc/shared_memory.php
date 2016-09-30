@@ -2,6 +2,10 @@
 
 $ret = shm_attach(0xDEADBEEF);
 if ($ret === false) { echo "failed\n"; exit(1); }
+shm_remove($ret); // just in case its left over from an earlier run
+$ret = shm_attach(0xDEADBEEF);
+if ($ret === false) { echo "failed\n"; exit(1); }
+
 $index = $ret;
 var_dump(shm_has_var($index, 1234));
 shm_put_var($index, 1234, "test");
@@ -20,16 +24,11 @@ if ($pid == 0) {
   exit(0);
 }
 
-// Verifying shm_remove_var worked, this is not sure test though.
+pcntl_waitpid($pid, $status);
+var_dump($status);
+
+// Verify that shm_remove_var worked
 $ret = shm_get_var($index, 1234);
-for ($i = 0; $i < 1000; $i++) {
-  if ($ret === false) break;
-  usleep(1000);
-  $ret = shm_get_var($index, 1234);
-}
 var_dump($ret === false);
 
 shm_remove($index);
-
-pcntl_waitpid($pid, $status);
-

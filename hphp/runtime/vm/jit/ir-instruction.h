@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/string-tag.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include <boost/intrusive/list.hpp>
@@ -385,6 +386,7 @@ private:
   bool m_hasTypeParam : 1;
   BCMarker m_marker;
   const Id m_id{kTransient};
+  // 4-byte hole
   SSATmp** m_srcs{nullptr};
   union {
     SSATmp* m_dest;  // if HasDest

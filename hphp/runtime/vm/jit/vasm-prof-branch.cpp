@@ -79,12 +79,13 @@ void reset_counter() {
  */
 struct VasmID {
   VasmID(Offset bcoff, uint16_t iroff, uint16_t voff,
-         Op bc, Opcode ir, AreaIndex area_idx)
+         Op bc, Opcode ir, AreaIndex area_idx, StringTag tag)
     : bcoff(bcoff)
     , iroff(iroff)
     , voff(voff)
     , bc_op(bc)
     , ir_op(ir)
+    , tag(tag)
     , aidx(static_cast<uint8_t>(area_idx))
     , taken(false)
     , imm(false)
@@ -105,6 +106,7 @@ public:
     struct {
       Op bc_op;
       Opcode ir_op;
+      StringTag tag;
       uint8_t aidx : 2;
       bool taken : 1;
       bool imm : 1;
@@ -183,6 +185,10 @@ void record_branch_hit(const BranchID* branch,
     record.setInt(pref + "_iroff", id.iroff);
     record.setInt(pref + "_voff", id.voff);
     record.setStr(pref + "_area", areaAsString(id.area_idx()));
+
+    if (auto const str = string_from_tag(id.tag)) {
+      record.setStr(pref + "_tag", str);
+    }
   };
 
   record_vasm_id("from", b.from);
@@ -294,6 +300,19 @@ struct Env {
 };
 
 /*
+ * Get the StringTag for a Vinstr, if it has one.
+ */
+StringTag string_tag_for(const Vinstr& inst) {
+  switch (inst.op) {
+    case Vinstr::jcc:
+      return inst.jcc_.tag;
+    default:
+      break;
+  }
+  return StringTag{};
+}
+
+/*
  * Pack the VasmID for `inst' in block `b'.
  */
 VasmID vasm_id_for(Env& env, const Vinstr& inst, Vlabel b) {
@@ -306,7 +325,8 @@ VasmID vasm_id_for(Env& env, const Vinstr& inst, Vlabel b) {
     inst.voff,
     origin->marker().sk().op(),
     origin->op(),
-    env.unit.blocks[b].area_idx
+    env.unit.blocks[b].area_idx,
+    string_tag_for(inst)
   };
 };
 

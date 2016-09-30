@@ -1081,7 +1081,7 @@ struct storesd { VregDbl s; Vptr m; };
  *
  * In vasm, targets are always ordered {next, taken}.
  */
-struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
+struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; StringTag tag; };
 struct jcci { ConditionCode cc; VregSF sf; Vlabel target; TCA taken; };
 struct jmp { Vlabel target; };
 struct jmpr { Vreg64 target; RegSet args; };

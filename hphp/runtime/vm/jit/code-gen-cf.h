@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_CODE_GEN_CF_H_
 #define incl_HPHP_VM_CODE_GEN_CF_H_
 
+#include "hphp/runtime/vm/jit/string-tag.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -31,11 +32,11 @@ namespace code_gen_detail {
 
 template <class Then>
 void ifThen(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-            Then thenBlock) {
+            Then thenBlock, StringTag tag) {
   auto then = vcold.makeBlock();
   auto done = vmain.makeBlock();
 
-  vmain << jcc{cc, sf, {done, then}};
+  vmain << jcc{cc, sf, {done, then}, tag};
 
   vcold = then;
   thenBlock(vcold);
@@ -46,12 +47,12 @@ void ifThen(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
 
 template <class Then, class Else>
 void ifThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-                Then thenBlock, Else elseBlock) {
+                Then thenBlock, Else elseBlock, StringTag tag) {
   auto elze = vmain.makeBlock();
   auto then = vcold.makeBlock();
   auto done = vmain.makeBlock();
 
-  vmain << jcc{cc, sf, {elze, then}};
+  vmain << jcc{cc, sf, {elze, then}, tag};
 
   vmain = elze;
   elseBlock(vmain);
@@ -66,12 +67,12 @@ void ifThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
 
 template <class Then, class Else>
 Vreg cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-          Vreg dst, Then thenBlock, Else elseBlock) {
+          Vreg dst, Then thenBlock, Else elseBlock, StringTag tag) {
   auto elze = vmain.makeBlock();
   auto then = vcold.makeBlock();
   auto done = vmain.makeBlock();
 
-  vmain << jcc{cc, sf, {elze, then}};
+  vmain << jcc{cc, sf, {elze, then}, tag};
 
   vmain = elze;
   auto r1 = elseBlock(vmain);
@@ -108,30 +109,32 @@ Vreg cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
  * `thenBlock' takes a single argument: the Vout to emit to.
  */
 template <class Then>
-void ifThen(Vout& vmain, ConditionCode cc, Vreg sf, Then thenBlock) {
-  code_gen_detail::ifThen(vmain, vmain, cc, sf, thenBlock);
+void ifThen(Vout& vmain, ConditionCode cc, Vreg sf, Then thenBlock,
+            StringTag tag = StringTag{}) {
+  code_gen_detail::ifThen(vmain, vmain, cc, sf, thenBlock, tag);
 }
 
 template <class Then>
 void unlikelyIfThen(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-                    Then thenBlock) {
-  code_gen_detail::ifThen(vmain, vcold, cc, sf, thenBlock);
+                    Then thenBlock, StringTag tag = StringTag{}) {
+  code_gen_detail::ifThen(vmain, vcold, cc, sf, thenBlock, tag);
 }
 
 template <class Then>
 void ifThen(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-            Then thenBlock, bool unlikely) {
+            Then thenBlock, bool unlikely, StringTag tag = StringTag{}) {
   code_gen_detail::ifThen(vmain, unlikely ? vcold : vmain,
-                          cc, sf, thenBlock);
+                          cc, sf, thenBlock, tag);
 }
 
 /*
  * Like the above flavors of ifThen(), except with a block label instead of a
  * block-emitting lambda.
  */
-inline void ifThen(Vout& v, ConditionCode cc, Vreg sf, Vlabel then) {
+inline void ifThen(Vout& v, ConditionCode cc, Vreg sf, Vlabel then,
+                   StringTag tag = StringTag{}) {
   auto const done = v.makeBlock();
-  v << jcc{cc, sf, {done, then}};
+  v << jcc{cc, sf, {done, then}, tag};
   v = done;
 }
 
@@ -146,21 +149,23 @@ inline void ifThen(Vout& v, ConditionCode cc, Vreg sf, Vlabel then) {
  */
 template <class Then, class Else>
 void ifThenElse(Vout& vmain, ConditionCode cc, Vreg sf,
-                Then thenBlock, Else elseBlock) {
-  code_gen_detail::ifThenElse(vmain, vmain, cc, sf, thenBlock, elseBlock);
+                Then thenBlock, Else elseBlock, StringTag tag = StringTag{}) {
+  code_gen_detail::ifThenElse(vmain, vmain, cc, sf, thenBlock, elseBlock, tag);
 }
 
 template <class Then, class Else>
 void unlikelyIfThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-                        Then thenBlock, Else elseBlock) {
-  code_gen_detail::ifThenElse(vmain, vcold, cc, sf, thenBlock, elseBlock);
+                        Then thenBlock, Else elseBlock,
+                        StringTag tag = StringTag{}) {
+  code_gen_detail::ifThenElse(vmain, vcold, cc, sf, thenBlock, elseBlock, tag);
 }
 
 template <class Then, class Else>
 void ifThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-                Then thenBlock, Else elseBlock, bool unlikely) {
+                Then thenBlock, Else elseBlock, bool unlikely,
+                StringTag tag = StringTag{}) {
   code_gen_detail::ifThenElse(vmain, unlikely ? vcold : vmain,
-                              cc, sf, thenBlock, elseBlock);
+                              cc, sf, thenBlock, elseBlock, tag);
 }
 
 /*
@@ -173,21 +178,26 @@ void ifThenElse(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
  */
 template <class Then, class Else>
 Vreg cond(Vout& vmain, ConditionCode cc, Vreg sf,
-          Vreg dst, Then thenBlock, Else elseBlock) {
-  return code_gen_detail::cond(vmain, vmain, cc, sf, dst, thenBlock, elseBlock);
+          Vreg dst, Then thenBlock, Else elseBlock,
+          StringTag tag = StringTag{}) {
+  return code_gen_detail::cond(vmain, vmain, cc, sf, dst,
+                               thenBlock, elseBlock, tag);
 }
 
 template <class Then, class Else>
 Vreg unlikelyCond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-                  Vreg dst, Then thenBlock, Else elseBlock) {
-  return code_gen_detail::cond(vmain, vcold, cc, sf, dst, thenBlock, elseBlock);
+                  Vreg dst, Then thenBlock, Else elseBlock,
+                  StringTag tag = StringTag{}) {
+  return code_gen_detail::cond(vmain, vcold, cc, sf, dst,
+                               thenBlock, elseBlock, tag);
 }
 
 template <class Then, class Else>
 Vreg cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
-          Vreg dst, Then thenBlock, Else elseBlock, bool unlikely) {
+          Vreg dst, Then thenBlock, Else elseBlock, bool unlikely,
+          StringTag tag = StringTag{}) {
   return code_gen_detail::cond(vmain, unlikely ? vcold : vmain,
-                               cc, sf, dst, thenBlock, elseBlock);
+                               cc, sf, dst, thenBlock, elseBlock, tag);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

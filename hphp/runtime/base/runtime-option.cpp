@@ -306,6 +306,7 @@ int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
 std::string RuntimeOption::TakeoverFilename;
 int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
+int RuntimeOption::AdminServerQueueToWorkerRatio = 1;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
 
@@ -1626,7 +1627,12 @@ void RuntimeOption::Load(
   {
     // Admin Server
     Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
+    // Single-threaded by default. If increasing the max thread count > 1, the
+    // queue-to-worker ratio can be raised for a more conservative growth: e.g.,
+    // a ratio of 3 means a second thread will spwan at 3 queued requests, etc.
     Config::Bind(AdminThreadCount, ini, config, "AdminServer.ThreadCount", 1);
+    Config::Bind(AdminServerQueueToWorkerRatio, ini, config,
+                 "AdminServer.QueueToWorkerRatio", 1);
     Config::Bind(AdminPassword, ini, config, "AdminServer.Password");
     Config::Bind(AdminPasswords, ini, config, "AdminServer.Passwords");
   }

@@ -311,7 +311,8 @@ struct ServerOptions {
       m_serverFD(-1),
       m_sslFD(-1),
       m_takeoverFilename(),
-      m_useFileSocket(false) {
+      m_useFileSocket(false),
+      m_queueToWorkerRatio(1) {
     assert(m_maxThreads >= 0);
     if (m_initThreads < 0 || m_initThreads > m_maxThreads) {
       m_initThreads = m_maxThreads;
@@ -326,6 +327,7 @@ struct ServerOptions {
   int m_sslFD;
   std::string m_takeoverFilename;
   bool m_useFileSocket;
+  int m_queueToWorkerRatio;
 };
 
 /**

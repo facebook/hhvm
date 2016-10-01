@@ -123,6 +123,8 @@ HttpServer::HttpServer()
   ServerOptions admin_options
     (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
      RuntimeOption::AdminThreadCount);
+  admin_options.m_queueToWorkerRatio =
+    RuntimeOption::AdminServerQueueToWorkerRatio;
   m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);

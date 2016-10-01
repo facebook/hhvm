@@ -511,12 +511,14 @@ struct JobQueueDispatcher : IHostHealthObserver {
                      int maxJobQueuingMs = -1, int numPriorities = 1,
                      int queuedJobsReleaseRate = 3,
                      int hugeCount = 0,
-                     int initThreadCount = -1)
+                     int initThreadCount = -1,
+                     int queueToWorkerRatio = 1) // A worker per 1 queued job.
       : m_stopped(true), m_healthStatus(HealthLevel::Bold), m_id(0),
         m_context(context), m_maxThreadCount(maxThreadCount),
         m_currThreadCountLimit(initThreadCount),
         m_hugeThreadCount(hugeCount),
         m_startReaperThread(maxJobQueuingMs > 0),
+        m_queueToWorkerRatio(queueToWorkerRatio),
         m_queue(maxThreadCount, dropCacheTimeout, dropStack,
                 lifoSwitchThreshold, maxJobQueuingMs, numPriorities,
                 queuedJobsReleaseRate, this) {
@@ -551,7 +553,15 @@ struct JobQueueDispatcher : IHostHealthObserver {
 
   int getTargetNumWorkers() {
     if (TWorker::CountActive) {
-      int target = getActiveWorker() + getQueuedJobs();
+      int target = getActiveWorker();
+      const auto queued = getQueuedJobs();
+      const auto r = m_queueToWorkerRatio;
+      always_assert(r >= 1);
+      if (target == 0) {
+        target += (queued + r - 1) / r; // Round up.
+      } else {
+        target += queued / r; // Round down.
+      }
       if (target > m_currThreadCountLimit) return m_currThreadCountLimit;
       return target;
     } else {
@@ -715,6 +725,7 @@ private:
   int m_currThreadCountLimit;           // initial limit can be lower than max
   int m_hugeThreadCount{0};
   const bool m_startReaperThread;
+  int m_queueToWorkerRatio{1};
   JobQueue<typename TWorker::JobType,
            TWorker::Waitable,
            typename TWorker::DropCachePolicy> m_queue;

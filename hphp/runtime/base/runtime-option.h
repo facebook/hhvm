@@ -303,6 +303,7 @@ struct RuntimeOption {
   static std::string TakeoverFilename;
   static int AdminServerPort;
   static int AdminThreadCount;
+  static int AdminServerQueueToWorkerRatio;
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
 

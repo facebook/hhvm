@@ -73,6 +73,8 @@ template<class F> void scanHeader(const Header* h,
       return h->set_.scan(mark);
     case HeaderKind::Apc:
       return h->apc_.scan(mark);
+    case HeaderKind::Apcu:
+      return h->apcu_.scan(mark);
     case HeaderKind::Globals:
       return h->globals_.scan(mark);
     case HeaderKind::Object:

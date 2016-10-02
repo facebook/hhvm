@@ -1827,8 +1827,11 @@ static void serializeObjectImpl(const ObjectData* obj,
           return;
         }
       }
-      if (type != VariableSerializer::Type::VarDump &&
-          className.asString() == s_PHP_Incomplete_Class) {
+      if (className.get() == s_PHP_Incomplete_Class.get() &&
+          (type == VariableSerializer::Type::Serialize ||
+           type == VariableSerializer::Type::APCSerialize ||
+           type == VariableSerializer::Type::DebuggerSerialize ||
+           type == VariableSerializer::Type::DebuggerDump)) {
         auto const cname = obj->o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {
           serializer->pushObjectInfo(cname->toCStrRef(), obj->getId(), 'O');

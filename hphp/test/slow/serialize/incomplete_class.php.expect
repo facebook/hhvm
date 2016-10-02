@@ -1,0 +1,14 @@
+object(__PHP_Incomplete_Class)#1 (1) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(7) "invalid"
+}
+__PHP_Incomplete_Class::__set_state(array(
+  '__PHP_Incomplete_Class_Name' => 'invalid',
+))__PHP_Incomplete_Class Object
+(
+    [__PHP_Incomplete_Class_Name] => invalid
+)
+object(__PHP_Incomplete_Class)#1 (1) refcount(2){
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(7) "invalid" refcount(2)
+}

@@ -49,7 +49,6 @@ and tfun = env -> env
 val fresh : unit -> int
 val fresh_type : unit -> locl ty
 val fresh_unresolved_type : env -> env * locl ty
-val fresh_abstract_type : ?constr: locl ty -> Reason.t -> locl ty
 val add_subst : env -> int -> int -> env
 val get_var : env -> int -> env * int
 val rename : env -> int -> int -> env

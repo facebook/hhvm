@@ -3884,16 +3884,19 @@ and is_type env e tprim =
 
 and is_array env ty p pf (_, lv) =
   let r = Reason.Rpredicated (p, pf) in
-  let tarrkey () = Env.fresh_abstract_type ~constr:(r, Tprim Tarraykey) r in
-  let tfresh () = Env.fresh_abstract_type r in
+  let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" in
+  let env = Env.add_upper_bound env tarrkey_name (r, Tprim Tarraykey) in
+  let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
+  let env, tfresh_name = Env.add_fresh_generic_parameter env "T" in
+  let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
   let ty =
     match ty with
     | `HackDict ->
-      Tclass ((Pos.none, SN.Collections.cDict), [tarrkey (); tfresh ()])
+      Tclass ((Pos.none, SN.Collections.cDict), [tarrkey; tfresh])
     | `HackVec ->
-      Tclass ((Pos.none, SN.Collections.cVec), [tfresh ()])
+      Tclass ((Pos.none, SN.Collections.cVec), [tfresh])
     | `HackKeyset ->
-      Tclass ((Pos.none, SN.Collections.cKeyset), [tarrkey ()])
+      Tclass ((Pos.none, SN.Collections.cKeyset), [tarrkey])
     | `PHPArray ->
       Tarraykind AKany in
   match lv with

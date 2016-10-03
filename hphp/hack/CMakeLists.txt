@@ -9,7 +9,7 @@ find_package(LibElf)
 if (OCAMLC_FOUND)
   # This is totally the wrong way to do this, but I am tired of fighting with
   # build systems and don't really care to make this work the right way. libelf
-  # is all we need right now anyways.
+  # and lz4 are all we need right now anyways.
   unset(extra_include_paths)
   unset(extra_lib_paths)
   unset(extra_cc_flags)
@@ -36,6 +36,16 @@ if (OCAMLC_FOUND)
     get_filename_component(pth ${lib} PATH)
     list(APPEND extra_lib_paths ${pth})
   endforeach()
+
+  if(LZ4_FOUND)
+    list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})
+    get_filename_component(pth ${LZ4_LIBRARY} PATH)
+    list(APPEND extra_lib_paths ${pth})
+  else()
+    list(APPEND extra_include_paths "${TP_DIR}/lz4/src/lib")
+    list(APPEND extra_lib_paths "${TP_BUILD_DIR}/lz4")
+  endif()
+  list(APPEND extra_native_libraries "lz4")
 
   # Xcode/Ninja generators undefined MAKE
   if(NOT MAKE)
@@ -66,6 +76,13 @@ if (OCAMLC_FOUND)
           BYTECODE="${EMIT_OCAML_BYTECODE}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
+
+  if(NOT LZ4_FOUND)
+    # if the system does not have lz4, make sure that the one in public_tl
+    # gets built
+    add_dependencies(hack lz4)
+    add_dependencies(hack_test lz4)
+  endif()
 
   install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
     DESTINATION bin

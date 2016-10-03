@@ -217,9 +217,9 @@ let rec get_doc node =
                      ^| get_doc x.script_declarations )
   | ClassishDeclaration
     { classish_attribute; classish_modifiers; classish_keyword;
-      classish_name; classish_type_parameters; classish_extends;
-      classish_extends_list; classish_implements; classish_implements_list;
-      classish_body } ->
+      classish_name; classish_type_parameters; classish_extends_keyword;
+      classish_extends_list; classish_implements_keyword;
+      classish_implements_list; classish_body } ->
     let attr = add_break (get_doc classish_attribute) in
     let preface = group_doc (
       get_doc classish_modifiers ^|
@@ -233,13 +233,13 @@ let rec get_doc node =
     in
 
     let extends =
-      let extends_token = get_doc classish_extends in
+      let extends_token = get_doc classish_extends_keyword in
       let extends_list = get_doc classish_extends_list in
       group_doc (indent_doc extends_token extends_list indt)
     in
 
     let implements =
-      let implements_token = get_doc classish_implements in
+      let implements_token = get_doc classish_implements_keyword in
       let implements_list = get_doc classish_implements_list in
       group_doc (indent_doc implements_token implements_list indt)
     in
@@ -479,12 +479,12 @@ let rec get_doc node =
     parameter_visibility;
     parameter_type;
     parameter_name;
-    parameter_default } ->
+    parameter_default_value } ->
     let attr = get_doc parameter_attribute in
     let visibility = get_doc parameter_visibility in
     let parameter_type = get_doc parameter_type in
     let parameter_name = get_doc parameter_name in
-    let parameter_default = get_doc parameter_default in
+    let parameter_default = get_doc parameter_default_value in
     group_doc
       ( attr ^| visibility ^| parameter_type ^| parameter_name
       ^| parameter_default )
@@ -607,14 +607,14 @@ let rec get_doc node =
   | DoStatement {
     do_keyword;
     do_body;
-    do_while;
+    do_while_keyword;
     do_left_paren;
     do_condition;
     do_right_paren;
     do_semicolon } ->
     let keyword = get_doc do_keyword in
     let statement = do_body in
-    let while_keyword = get_doc do_while in
+    let while_keyword = get_doc do_while_keyword in
     let left = get_doc do_left_paren in
     let right = get_doc do_right_paren in
     let condition = get_doc do_condition in
@@ -739,11 +739,17 @@ let rec get_doc node =
     let ty = get_doc lambda_type in
     group_doc (left ^| params ^| right ^| colon ^| ty)
   | AnonymousFunction
-    { anonymous_async; anonymous_function; anonymous_left_paren;
-    anonymous_parameters; anonymous_right_paren; anonymous_colon;
-    anonymous_type; anonymous_use; anonymous_body } ->
-    let async = get_doc anonymous_async in
-    let fn = get_doc anonymous_function in
+    { anonymous_async_keyword;
+      anonymous_function_keyword;
+      anonymous_left_paren;
+      anonymous_parameters;
+      anonymous_right_paren;
+      anonymous_colon;
+      anonymous_type;
+      anonymous_use;
+      anonymous_body } ->
+    let async = get_doc anonymous_async_keyword in
+    let fn = get_doc anonymous_function_keyword in
     let left = get_doc anonymous_left_paren in
     let params = get_doc anonymous_parameters in
     let right = get_doc anonymous_right_paren in
@@ -796,11 +802,11 @@ let rec get_doc node =
   | FunctionCallExpression {
     function_call_receiver;
     function_call_left_paren;
-    function_call_arguments;
+    function_call_argument_list;
     function_call_right_paren } ->
     let receiver = get_doc function_call_receiver in
     let lparen = get_doc function_call_left_paren in
-    let args = get_doc function_call_arguments in
+    let args = get_doc function_call_argument_list in
     let rparen = get_doc function_call_right_paren in
     receiver ^^^ lparen ^^^ args ^^^ rparen
   | ParenthesizedExpression {
@@ -833,12 +839,17 @@ let rec get_doc node =
     let expression_list = get_doc x.collection_literal_initializers in
     let right_brace = get_doc x.collection_literal_right_brace in
     token ^| left_brace ^| expression_list ^| right_brace
-  | ObjectCreationExpression x ->
-    let n = get_doc x.object_creation_new in
-    let c = get_doc x.object_creation_class in
-    let l = get_doc x.object_creation_left_paren in
-    let a = get_doc x.object_creation_arguments in
-    let r = get_doc x.object_creation_right_paren in
+  | ObjectCreationExpression
+    { object_creation_new_keyword;
+      object_creation_type;
+      object_creation_left_paren;
+      object_creation_argument_list;
+      object_creation_right_paren } ->
+    let n = get_doc object_creation_new_keyword in
+    let c = get_doc object_creation_type in
+    let l = get_doc object_creation_left_paren in
+    let a = get_doc object_creation_argument_list in
+    let r = get_doc object_creation_right_paren in
     n ^| c ^^^ l ^^^ a ^^^ r
   | FieldInitializer
     { field_initializer_name; field_initializer_arrow;
@@ -927,9 +938,11 @@ let rec get_doc node =
     let a = get_doc x.soft_at in
     let t = get_doc x.soft_type in
     a ^^^ t
-  | GenericTypeSpecifier x ->
-    let name = get_doc x.generic_class_type in
-    let argument = get_doc x.generic_arguments in
+  | GenericTypeSpecifier
+    { generic_class_type;
+      generic_argument_list } ->
+    let name = get_doc generic_class_type in
+    let argument = get_doc generic_argument_list in
     group_doc (indent_doc_no_space name argument indt)
   | VectorTypeSpecifier x ->
     let ar = get_doc x.vector_array in
@@ -945,15 +958,23 @@ let rec get_doc node =
     let vt = get_doc x.map_value in
     let ra = get_doc x.map_right_angle in
     ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
-  | ClosureTypeSpecifier x ->
-    let olp = get_doc x.closure_outer_left_paren in
-    let fnc = get_doc x.closure_function in
-    let ilp = get_doc x.closure_inner_left_paren in
-    let pts = get_doc x.closure_parameter_types in
-    let irp = get_doc x.closure_inner_right_paren in
-    let col = get_doc x.closure_colon in
-    let ret = get_doc x.closure_return_type in
-    let orp = get_doc x.closure_outer_right_paren in
+  | ClosureTypeSpecifier
+  { closure_outer_left_paren;
+    closure_function_keyword;
+    closure_inner_left_paren;
+    closure_parameter_types;
+    closure_inner_right_paren;
+    closure_colon;
+    closure_return_type;
+    closure_outer_right_paren } ->
+    let olp = get_doc closure_outer_left_paren in
+    let fnc = get_doc closure_function_keyword in
+    let ilp = get_doc closure_inner_left_paren in
+    let pts = get_doc closure_parameter_types in
+    let irp = get_doc closure_inner_right_paren in
+    let col = get_doc closure_colon in
+    let ret = get_doc closure_return_type in
+    let orp = get_doc closure_outer_right_paren in
     olp ^^^ fnc ^^| ilp ^^^ pts ^^^ irp ^^^ col ^^^ ret ^^^ orp
   | ClassnameTypeSpecifier x ->
     let cn = get_doc x.classname_keyword in
@@ -1033,10 +1054,13 @@ let rec get_doc node =
     let s = get_doc x.continue_semicolon in
     if is_missing x.continue_level then group_doc (c ^^^ l ^^^ s)
     else group_doc (c ^| l ^^^ s)
-  | FunctionStaticStatement x ->
-    let st = get_doc x.static_static in
-    let ds = get_doc x.static_declarations in
-    let se = get_doc x.static_semicolon in
+  | FunctionStaticStatement {
+    static_static_keyword;
+    static_declarations;
+    static_semicolon } ->
+    let st = get_doc static_static_keyword in
+    let ds = get_doc static_declarations in
+    let se = get_doc static_semicolon in
     st ^| ds ^^^ se
   | StaticDeclarator
     { static_name; static_initializer } ->

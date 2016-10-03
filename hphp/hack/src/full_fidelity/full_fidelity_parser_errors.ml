@@ -534,8 +534,8 @@ let expression_errors node =
     let s = start_offset node in
     let e = end_offset node in
     [ SyntaxError.make s e SyntaxError.error2020 ]
-  | FunctionCallExpression s ->
-    begin match misplaced_variadic_arg s.function_call_arguments with
+  | FunctionCallExpression { function_call_argument_list; _} ->
+    begin match misplaced_variadic_arg function_call_argument_list with
       | Some h ->
         let s = start_offset h in
         let e = end_offset h in

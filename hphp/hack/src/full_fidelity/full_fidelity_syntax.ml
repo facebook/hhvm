@@ -213,9 +213,9 @@ module WithToken(Token: TokenType) = struct
       classish_keyword: t;
       classish_name: t;
       classish_type_parameters: t;
-      classish_extends: t;
+      classish_extends_keyword: t;
       classish_extends_list: t;
-      classish_implements: t;
+      classish_implements_keyword: t;
       classish_implements_list: t;
       classish_body: t;
     }
@@ -265,7 +265,7 @@ module WithToken(Token: TokenType) = struct
       parameter_visibility: t;
       parameter_type: t;
       parameter_name: t;
-      parameter_default: t;
+      parameter_default_value: t;
     }
     and attribute_specification = {
       attribute_specification_left_double_angle: t;
@@ -343,7 +343,7 @@ module WithToken(Token: TokenType) = struct
     and do_statement = {
       do_keyword: t;
       do_body: t;
-      do_while: t;
+      do_while_keyword: t;
       do_left_paren: t;
       do_condition: t;
       do_right_paren: t;
@@ -411,7 +411,7 @@ module WithToken(Token: TokenType) = struct
       continue_semicolon: t;
     }
     and function_static_statement = {
-      static_static: t;
+      static_static_keyword: t;
       static_declarations: t;
       static_semicolon: t;
     }
@@ -429,8 +429,8 @@ module WithToken(Token: TokenType) = struct
       simple_initializer_value: t;
     }
     and anonymous_function = {
-      anonymous_async: t;
-      anonymous_function: t;
+      anonymous_async_keyword: t;
+      anonymous_function_keyword: t;
       anonymous_left_paren: t;
       anonymous_parameters: t;
       anonymous_right_paren: t;
@@ -515,7 +515,7 @@ module WithToken(Token: TokenType) = struct
     and function_call_expression = {
       function_call_receiver: t;
       function_call_left_paren: t;
-      function_call_arguments: t;
+      function_call_argument_list: t;
       function_call_right_paren: t;
     }
     and parenthesized_expression = {
@@ -541,10 +541,10 @@ module WithToken(Token: TokenType) = struct
       collection_literal_right_brace: t;
     }
     and object_creation_expression = {
-      object_creation_new: t;
-      object_creation_class: t;
+      object_creation_new_keyword: t;
+      object_creation_type: t;
       object_creation_left_paren: t;
-      object_creation_arguments: t;
+      object_creation_argument_list: t;
       object_creation_right_paren: t;
     }
     and array_creation_expression = {
@@ -654,7 +654,7 @@ module WithToken(Token: TokenType) = struct
     }
     and closure_type_specifier = {
       closure_outer_left_paren: t;
-      closure_function: t;
+      closure_function_keyword: t;
       closure_inner_left_paren: t;
       closure_parameter_types: t;
       closure_inner_right_paren: t;
@@ -692,7 +692,7 @@ module WithToken(Token: TokenType) = struct
     }
     and generic_type_specifier = {
       generic_class_type: t;
-      generic_arguments: t;
+      generic_argument_list: t;
     }
     and nullable_type_specifier = {
       nullable_question: t;
@@ -1568,9 +1568,9 @@ module WithToken(Token: TokenType) = struct
         classish_keyword;
         classish_name;
         classish_type_parameters;
-        classish_extends;
+        classish_extends_keyword;
         classish_extends_list;
-        classish_implements;
+        classish_implements_keyword;
         classish_implements_list;
         classish_body;
       } -> [
@@ -1579,9 +1579,9 @@ module WithToken(Token: TokenType) = struct
         classish_keyword;
         classish_name;
         classish_type_parameters;
-        classish_extends;
+        classish_extends_keyword;
         classish_extends_list;
-        classish_implements;
+        classish_implements_keyword;
         classish_implements_list;
         classish_body;
       ]
@@ -1665,13 +1665,13 @@ module WithToken(Token: TokenType) = struct
         parameter_visibility;
         parameter_type;
         parameter_name;
-        parameter_default;
+        parameter_default_value;
       } -> [
         parameter_attribute;
         parameter_visibility;
         parameter_type;
         parameter_name;
-        parameter_default;
+        parameter_default_value;
       ]
       | AttributeSpecification {
         attribute_specification_left_double_angle;
@@ -1809,7 +1809,7 @@ module WithToken(Token: TokenType) = struct
       | DoStatement {
         do_keyword;
         do_body;
-        do_while;
+        do_while_keyword;
         do_left_paren;
         do_condition;
         do_right_paren;
@@ -1817,7 +1817,7 @@ module WithToken(Token: TokenType) = struct
       } -> [
         do_keyword;
         do_body;
-        do_while;
+        do_while_keyword;
         do_left_paren;
         do_condition;
         do_right_paren;
@@ -1937,11 +1937,11 @@ module WithToken(Token: TokenType) = struct
         continue_semicolon;
       ]
       | FunctionStaticStatement {
-        static_static;
+        static_static_keyword;
         static_declarations;
         static_semicolon;
       } -> [
-        static_static;
+        static_static_keyword;
         static_declarations;
         static_semicolon;
       ]
@@ -1969,8 +1969,8 @@ module WithToken(Token: TokenType) = struct
         simple_initializer_value;
       ]
       | AnonymousFunction {
-        anonymous_async;
-        anonymous_function;
+        anonymous_async_keyword;
+        anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -1979,8 +1979,8 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       } -> [
-        anonymous_async;
-        anonymous_function;
+        anonymous_async_keyword;
+        anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -2124,12 +2124,12 @@ module WithToken(Token: TokenType) = struct
       | FunctionCallExpression {
         function_call_receiver;
         function_call_left_paren;
-        function_call_arguments;
+        function_call_argument_list;
         function_call_right_paren;
       } -> [
         function_call_receiver;
         function_call_left_paren;
-        function_call_arguments;
+        function_call_argument_list;
         function_call_right_paren;
       ]
       | ParenthesizedExpression {
@@ -2173,16 +2173,16 @@ module WithToken(Token: TokenType) = struct
         collection_literal_right_brace;
       ]
       | ObjectCreationExpression {
-        object_creation_new;
-        object_creation_class;
+        object_creation_new_keyword;
+        object_creation_type;
         object_creation_left_paren;
-        object_creation_arguments;
+        object_creation_argument_list;
         object_creation_right_paren;
       } -> [
-        object_creation_new;
-        object_creation_class;
+        object_creation_new_keyword;
+        object_creation_type;
         object_creation_left_paren;
-        object_creation_arguments;
+        object_creation_argument_list;
         object_creation_right_paren;
       ]
       | ArrayCreationExpression {
@@ -2377,7 +2377,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
-        closure_function;
+        closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;
         closure_inner_right_paren;
@@ -2386,7 +2386,7 @@ module WithToken(Token: TokenType) = struct
         closure_outer_right_paren;
       } -> [
         closure_outer_left_paren;
-        closure_function;
+        closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;
         closure_inner_right_paren;
@@ -2447,10 +2447,10 @@ module WithToken(Token: TokenType) = struct
       ]
       | GenericTypeSpecifier {
         generic_class_type;
-        generic_arguments;
+        generic_argument_list;
       } -> [
         generic_class_type;
-        generic_arguments;
+        generic_argument_list;
       ]
       | NullableTypeSpecifier {
         nullable_question;
@@ -2726,9 +2726,9 @@ module WithToken(Token: TokenType) = struct
         classish_keyword;
         classish_name;
         classish_type_parameters;
-        classish_extends;
+        classish_extends_keyword;
         classish_extends_list;
-        classish_implements;
+        classish_implements_keyword;
         classish_implements_list;
         classish_body;
       } -> [
@@ -2737,9 +2737,9 @@ module WithToken(Token: TokenType) = struct
         "classish_keyword";
         "classish_name";
         "classish_type_parameters";
-        "classish_extends";
+        "classish_extends_keyword";
         "classish_extends_list";
-        "classish_implements";
+        "classish_implements_keyword";
         "classish_implements_list";
         "classish_body";
       ]
@@ -2823,13 +2823,13 @@ module WithToken(Token: TokenType) = struct
         parameter_visibility;
         parameter_type;
         parameter_name;
-        parameter_default;
+        parameter_default_value;
       } -> [
         "parameter_attribute";
         "parameter_visibility";
         "parameter_type";
         "parameter_name";
-        "parameter_default";
+        "parameter_default_value";
       ]
       | AttributeSpecification {
         attribute_specification_left_double_angle;
@@ -2967,7 +2967,7 @@ module WithToken(Token: TokenType) = struct
       | DoStatement {
         do_keyword;
         do_body;
-        do_while;
+        do_while_keyword;
         do_left_paren;
         do_condition;
         do_right_paren;
@@ -2975,7 +2975,7 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "do_keyword";
         "do_body";
-        "do_while";
+        "do_while_keyword";
         "do_left_paren";
         "do_condition";
         "do_right_paren";
@@ -3095,11 +3095,11 @@ module WithToken(Token: TokenType) = struct
         "continue_semicolon";
       ]
       | FunctionStaticStatement {
-        static_static;
+        static_static_keyword;
         static_declarations;
         static_semicolon;
       } -> [
-        "static_static";
+        "static_static_keyword";
         "static_declarations";
         "static_semicolon";
       ]
@@ -3127,8 +3127,8 @@ module WithToken(Token: TokenType) = struct
         "simple_initializer_value";
       ]
       | AnonymousFunction {
-        anonymous_async;
-        anonymous_function;
+        anonymous_async_keyword;
+        anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -3137,8 +3137,8 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       } -> [
-        "anonymous_async";
-        "anonymous_function";
+        "anonymous_async_keyword";
+        "anonymous_function_keyword";
         "anonymous_left_paren";
         "anonymous_parameters";
         "anonymous_right_paren";
@@ -3282,12 +3282,12 @@ module WithToken(Token: TokenType) = struct
       | FunctionCallExpression {
         function_call_receiver;
         function_call_left_paren;
-        function_call_arguments;
+        function_call_argument_list;
         function_call_right_paren;
       } -> [
         "function_call_receiver";
         "function_call_left_paren";
-        "function_call_arguments";
+        "function_call_argument_list";
         "function_call_right_paren";
       ]
       | ParenthesizedExpression {
@@ -3331,16 +3331,16 @@ module WithToken(Token: TokenType) = struct
         "collection_literal_right_brace";
       ]
       | ObjectCreationExpression {
-        object_creation_new;
-        object_creation_class;
+        object_creation_new_keyword;
+        object_creation_type;
         object_creation_left_paren;
-        object_creation_arguments;
+        object_creation_argument_list;
         object_creation_right_paren;
       } -> [
-        "object_creation_new";
-        "object_creation_class";
+        "object_creation_new_keyword";
+        "object_creation_type";
         "object_creation_left_paren";
-        "object_creation_arguments";
+        "object_creation_argument_list";
         "object_creation_right_paren";
       ]
       | ArrayCreationExpression {
@@ -3535,7 +3535,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
-        closure_function;
+        closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;
         closure_inner_right_paren;
@@ -3544,7 +3544,7 @@ module WithToken(Token: TokenType) = struct
         closure_outer_right_paren;
       } -> [
         "closure_outer_left_paren";
-        "closure_function";
+        "closure_function_keyword";
         "closure_inner_left_paren";
         "closure_parameter_types";
         "closure_inner_right_paren";
@@ -3605,10 +3605,10 @@ module WithToken(Token: TokenType) = struct
       ]
       | GenericTypeSpecifier {
         generic_class_type;
-        generic_arguments;
+        generic_argument_list;
       } -> [
         "generic_class_type";
-        "generic_arguments";
+        "generic_argument_list";
       ]
       | NullableTypeSpecifier {
         nullable_question;
@@ -3958,9 +3958,9 @@ module WithToken(Token: TokenType) = struct
           classish_keyword;
           classish_name;
           classish_type_parameters;
-          classish_extends;
+          classish_extends_keyword;
           classish_extends_list;
-          classish_implements;
+          classish_implements_keyword;
           classish_implements_list;
           classish_body;
         ]) ->
@@ -3970,9 +3970,9 @@ module WithToken(Token: TokenType) = struct
           classish_keyword;
           classish_name;
           classish_type_parameters;
-          classish_extends;
+          classish_extends_keyword;
           classish_extends_list;
-          classish_implements;
+          classish_implements_keyword;
           classish_implements_list;
           classish_body;
         }
@@ -4063,14 +4063,14 @@ module WithToken(Token: TokenType) = struct
           parameter_visibility;
           parameter_type;
           parameter_name;
-          parameter_default;
+          parameter_default_value;
         ]) ->
         ParameterDeclaration {
           parameter_attribute;
           parameter_visibility;
           parameter_type;
           parameter_name;
-          parameter_default;
+          parameter_default_value;
         }
       | (SyntaxKind.AttributeSpecification, [
           attribute_specification_left_double_angle;
@@ -4221,7 +4221,7 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.DoStatement, [
           do_keyword;
           do_body;
-          do_while;
+          do_while_keyword;
           do_left_paren;
           do_condition;
           do_right_paren;
@@ -4230,7 +4230,7 @@ module WithToken(Token: TokenType) = struct
         DoStatement {
           do_keyword;
           do_body;
-          do_while;
+          do_while_keyword;
           do_left_paren;
           do_condition;
           do_right_paren;
@@ -4359,12 +4359,12 @@ module WithToken(Token: TokenType) = struct
           continue_semicolon;
         }
       | (SyntaxKind.FunctionStaticStatement, [
-          static_static;
+          static_static_keyword;
           static_declarations;
           static_semicolon;
         ]) ->
         FunctionStaticStatement {
-          static_static;
+          static_static_keyword;
           static_declarations;
           static_semicolon;
         }
@@ -4395,8 +4395,8 @@ module WithToken(Token: TokenType) = struct
           simple_initializer_value;
         }
       | (SyntaxKind.AnonymousFunction, [
-          anonymous_async;
-          anonymous_function;
+          anonymous_async_keyword;
+          anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -4406,8 +4406,8 @@ module WithToken(Token: TokenType) = struct
           anonymous_body;
         ]) ->
         AnonymousFunction {
-          anonymous_async;
-          anonymous_function;
+          anonymous_async_keyword;
+          anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
           anonymous_right_paren;
@@ -4565,13 +4565,13 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.FunctionCallExpression, [
           function_call_receiver;
           function_call_left_paren;
-          function_call_arguments;
+          function_call_argument_list;
           function_call_right_paren;
         ]) ->
         FunctionCallExpression {
           function_call_receiver;
           function_call_left_paren;
-          function_call_arguments;
+          function_call_argument_list;
           function_call_right_paren;
         }
       | (SyntaxKind.ParenthesizedExpression, [
@@ -4619,17 +4619,17 @@ module WithToken(Token: TokenType) = struct
           collection_literal_right_brace;
         }
       | (SyntaxKind.ObjectCreationExpression, [
-          object_creation_new;
-          object_creation_class;
+          object_creation_new_keyword;
+          object_creation_type;
           object_creation_left_paren;
-          object_creation_arguments;
+          object_creation_argument_list;
           object_creation_right_paren;
         ]) ->
         ObjectCreationExpression {
-          object_creation_new;
-          object_creation_class;
+          object_creation_new_keyword;
+          object_creation_type;
           object_creation_left_paren;
-          object_creation_arguments;
+          object_creation_argument_list;
           object_creation_right_paren;
         }
       | (SyntaxKind.ArrayCreationExpression, [
@@ -4844,7 +4844,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.ClosureTypeSpecifier, [
           closure_outer_left_paren;
-          closure_function;
+          closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_types;
           closure_inner_right_paren;
@@ -4854,7 +4854,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         ClosureTypeSpecifier {
           closure_outer_left_paren;
-          closure_function;
+          closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_types;
           closure_inner_right_paren;
@@ -4920,11 +4920,11 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.GenericTypeSpecifier, [
           generic_class_type;
-          generic_arguments;
+          generic_argument_list;
         ]) ->
         GenericTypeSpecifier {
           generic_class_type;
-          generic_arguments;
+          generic_argument_list;
         }
       | (SyntaxKind.NullableTypeSpecifier, [
           nullable_question;
@@ -5283,9 +5283,9 @@ module WithToken(Token: TokenType) = struct
       classish_keyword
       classish_name
       classish_type_parameters
-      classish_extends
+      classish_extends_keyword
       classish_extends_list
-      classish_implements
+      classish_implements_keyword
       classish_implements_list
       classish_body
     =
@@ -5295,9 +5295,9 @@ module WithToken(Token: TokenType) = struct
         classish_keyword;
         classish_name;
         classish_type_parameters;
-        classish_extends;
+        classish_extends_keyword;
         classish_extends_list;
-        classish_implements;
+        classish_implements_keyword;
         classish_implements_list;
         classish_body;
       ]
@@ -5396,14 +5396,14 @@ module WithToken(Token: TokenType) = struct
       parameter_visibility
       parameter_type
       parameter_name
-      parameter_default
+      parameter_default_value
     =
       from_children SyntaxKind.ParameterDeclaration [
         parameter_attribute;
         parameter_visibility;
         parameter_type;
         parameter_name;
-        parameter_default;
+        parameter_default_value;
       ]
 
     let make_attribute_specification
@@ -5568,7 +5568,7 @@ module WithToken(Token: TokenType) = struct
     let make_do_statement
       do_keyword
       do_body
-      do_while
+      do_while_keyword
       do_left_paren
       do_condition
       do_right_paren
@@ -5577,7 +5577,7 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.DoStatement [
         do_keyword;
         do_body;
-        do_while;
+        do_while_keyword;
         do_left_paren;
         do_condition;
         do_right_paren;
@@ -5716,12 +5716,12 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_function_static_statement
-      static_static
+      static_static_keyword
       static_declarations
       static_semicolon
     =
       from_children SyntaxKind.FunctionStaticStatement [
-        static_static;
+        static_static_keyword;
         static_declarations;
         static_semicolon;
       ]
@@ -5756,8 +5756,8 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_anonymous_function
-      anonymous_async
-      anonymous_function
+      anonymous_async_keyword
+      anonymous_function_keyword
       anonymous_left_paren
       anonymous_parameters
       anonymous_right_paren
@@ -5767,8 +5767,8 @@ module WithToken(Token: TokenType) = struct
       anonymous_body
     =
       from_children SyntaxKind.AnonymousFunction [
-        anonymous_async;
-        anonymous_function;
+        anonymous_async_keyword;
+        anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
         anonymous_right_paren;
@@ -5941,13 +5941,13 @@ module WithToken(Token: TokenType) = struct
     let make_function_call_expression
       function_call_receiver
       function_call_left_paren
-      function_call_arguments
+      function_call_argument_list
       function_call_right_paren
     =
       from_children SyntaxKind.FunctionCallExpression [
         function_call_receiver;
         function_call_left_paren;
-        function_call_arguments;
+        function_call_argument_list;
         function_call_right_paren;
       ]
 
@@ -6000,17 +6000,17 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_object_creation_expression
-      object_creation_new
-      object_creation_class
+      object_creation_new_keyword
+      object_creation_type
       object_creation_left_paren
-      object_creation_arguments
+      object_creation_argument_list
       object_creation_right_paren
     =
       from_children SyntaxKind.ObjectCreationExpression [
-        object_creation_new;
-        object_creation_class;
+        object_creation_new_keyword;
+        object_creation_type;
         object_creation_left_paren;
-        object_creation_arguments;
+        object_creation_argument_list;
         object_creation_right_paren;
       ]
 
@@ -6246,7 +6246,7 @@ module WithToken(Token: TokenType) = struct
 
     let make_closure_type_specifier
       closure_outer_left_paren
-      closure_function
+      closure_function_keyword
       closure_inner_left_paren
       closure_parameter_types
       closure_inner_right_paren
@@ -6256,7 +6256,7 @@ module WithToken(Token: TokenType) = struct
     =
       from_children SyntaxKind.ClosureTypeSpecifier [
         closure_outer_left_paren;
-        closure_function;
+        closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_types;
         closure_inner_right_paren;
@@ -6328,11 +6328,11 @@ module WithToken(Token: TokenType) = struct
 
     let make_generic_type_specifier
       generic_class_type
-      generic_arguments
+      generic_argument_list
     =
       from_children SyntaxKind.GenericTypeSpecifier [
         generic_class_type;
-        generic_arguments;
+        generic_argument_list;
       ]
 
     let make_nullable_type_specifier

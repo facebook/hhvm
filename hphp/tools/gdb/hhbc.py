@@ -78,13 +78,14 @@ class HHBC(object):
         encoding."""
 
         pc = pc.cast(T('uint8_t').pointer())
-        raw_val = ~pc.dereference()
+        raw_val = (~pc.dereference()).cast(T('size_t'))
 
         if (raw_val == 0xff):
+            pc += 1
             byte = ~pc.dereference()
             raw_val += byte
 
-        return raw_val.cast(T('HPHP::Op'))
+        return [raw_val.cast(T('HPHP::Op')), 2 if raw_val >= 0xff else 1]
 
     @staticmethod
     def op_name(op):
@@ -93,12 +94,6 @@ class HHBC(object):
         table_name = 'HPHP::opcodeToName(HPHP::Op)::namesArr'
         table_type = T('char').pointer().pointer()
         return op_table(table_name).cast(table_type)[as_idx(op)]
-
-    @staticmethod
-    def op_size(op):
-        """Return the encoding size of the HPHP::Op `op'."""
-
-        return 1 if op.cast(T('size_t')) < 0xff else 2
 
     ##
     # Opcode immediate info.
@@ -189,13 +184,12 @@ class HHBC(object):
     #
     @staticmethod
     def instr_info(bc):
-        op = HHBC.decode_op(bc)
+        op, instrlen = HHBC.decode_op(bc)
 
         if op <= V('HPHP::OpLowInvalid') or op >= V('HPHP::OpHighInvalid'):
-            print('Invalid Op %d @ %p' % (op, bc))
-            return 1
+            print('hhx: Invalid Op %d @ 0x%x' % (op, bc))
+            return None
 
-        instrlen = HHBC.op_size(op)
         imms = []
 
         for i in xrange(0, int(HHBC.num_imms(op))):
@@ -257,6 +251,10 @@ remains where it left off after the previous call.
 
         for i in xrange(0, self.count):
             instr = HHBC.instr_info(self.bcpos)
+            if instr is None:
+                print('hhx: Bytecode dump failed')
+                break
+
             name = HHBC.op_name(instr['op']).string()
 
             start_addr = bcstart.cast(T('void').pointer())

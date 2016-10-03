@@ -60,7 +60,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cmpl:
     case Vinstr::cmpli:
     case Vinstr::cmplim:
-    case Vinstr::cmplims:
     case Vinstr::cmplm:
     case Vinstr::cmpq:
     case Vinstr::cmpqi:
@@ -271,6 +270,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::vcall:
     case Vinstr::vcallarray:
     case Vinstr::vinvoke:
+    case Vinstr::vregrestrict:
+    case Vinstr::vregunrestrict:
     case Vinstr::conjure:
     case Vinstr::conjureuse:
       return true;

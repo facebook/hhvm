@@ -48,6 +48,8 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
   gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
     v << pushp{r0, r1 == InvalidReg ? r0 : r1};
   });
+
+  v << vregunrestrict{};
 }
 
 PhysRegSaver::~PhysRegSaver() {
@@ -56,6 +58,8 @@ PhysRegSaver::~PhysRegSaver() {
 
   auto gpr = m_regs & abi().gp();
   auto xmm = m_regs & abi().simd();
+
+  v << vregrestrict{};
 
   gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
     v << popp{r0 == InvalidReg ? v.makeReg() : Vreg{r0}, r1};

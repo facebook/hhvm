@@ -1362,7 +1362,7 @@ void lowerForPPC64(Vout& v, decqmlock& inst) {
  * that intend to deal with smaller data will actually operate on 64bits
  */
 void lowerForPPC64(Vunit& unit) {
-  vasm_lower(unit, [&] (Vinstr& inst, Vlabel b, size_t i) {
+  vasm_lower(unit, [&] (const VLS& env, Vinstr& inst, Vlabel b, size_t i) {
     vmodify(unit, b, i, [&] (Vout& v) {
       switch (inst.op) {
 #define O(name, imms, uses, defs)                         \

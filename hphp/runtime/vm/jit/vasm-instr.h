@@ -126,6 +126,9 @@ struct Vunit;
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
   O(ud2, Inone, Un, Dn)\
+  /* restrict/unrestrict new virtuals */\
+  O(vregrestrict, Inone, Un, Dn)\
+  O(vregunrestrict, Inone, Un, Dn)\
   /* arithmetic instructions */\
   O(addl, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
@@ -292,7 +295,6 @@ struct Vunit;
   O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
   /* arm instructions */\
-  O(cmplims, I(s0) I(fl), U(s1), D(sf))\
   O(fcvtzs, Inone, U(s), D(d))\
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
@@ -870,6 +872,12 @@ struct nop {};
 struct ud2 {};
 
 /*
+ * Restrict/unrestrict new virtuals.
+ */
+struct vregrestrict {};
+struct vregunrestrict {};
+
+/*
  * Arithmetic instructions.
  */
 // add: s0 + {s1|m} => {d|m}, sf
@@ -1101,7 +1109,6 @@ struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 /*
  * arm intrinsics.
  */
-struct cmplims { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
 struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };

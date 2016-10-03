@@ -23,14 +23,9 @@
 
 #include "hphp/util/data-block.h"
 
-#include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/types.h"
-
 #include "hphp/ppc64-asm/branch-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
-
-#include "hphp/runtime/base/runtime-option.h"
 
 
 namespace ppc64_asm {

@@ -32,7 +32,7 @@ __thread const VMProtect* tl_active_prot{nullptr};
 
 void protect() {
   rds::tl_base = nullptr;
-  rds::threadInit();
+  rds::threadInit(false /* shouldRegister */);
 
   // The current thread may attempt to read the Gen numbers of the normal
   // portion of rds. These will all be invalid. No writes to non-persistent rds
@@ -51,7 +51,7 @@ void protect() {
 }
 
 void unprotect(void* base, VMRegState state) {
-  rds::threadExit();
+  rds::threadExit(false /* shouldUnregister */);
   rds::tl_base = base;
   tl_regState = state;
   VMProtect::is_protected = false;

@@ -592,7 +592,7 @@ static void initPersistentCache() {
   s_local_frontier = s_persistent_frontier = s_persistent_base;
 }
 
-void threadInit() {
+void threadInit(bool shouldRegister) {
   assert(tl_base == nullptr);
 
   if (!s_tc_fd) {
@@ -627,7 +627,7 @@ void threadInit() {
   }
 #endif
 
-  {
+  if (shouldRegister) {
     Guard g(s_tlBaseListLock);
     assert(std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base) ==
              end(s_tlBaseList));
@@ -663,8 +663,8 @@ void threadInit() {
   }
 }
 
-void threadExit() {
-  {
+void threadExit(bool shouldUnregister) {
+  if (shouldUnregister) {
     Guard g(s_tlBaseListLock);
     auto it = std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base);
     if (it != end(s_tlBaseList)) {

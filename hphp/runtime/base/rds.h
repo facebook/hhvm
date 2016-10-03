@@ -107,12 +107,13 @@ namespace HPHP { namespace rds {
 
 /*
  * Lifetime-related hooks, exported to be called at the appropriate
- * times.
+ * times. If shouldRegister is false the resultant rds will be excluded from
+ * the global rds list.
  */
 void requestInit();
 void requestExit();
-void threadInit();
-void threadExit();
+void threadInit(bool shouldRegister = true);
+void threadExit(bool shouldUnregister = true);
 
 /*
  * Flushing RDS means to madvise the memory away.  Should only be done

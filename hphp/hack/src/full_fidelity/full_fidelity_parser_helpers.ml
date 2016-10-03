@@ -8,10 +8,11 @@
  *
  *)
 module Token = Full_fidelity_minimal_token
-module Syntax = Full_fidelity_minimal_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SyntaxError = Full_fidelity_syntax_error
+
+open Full_fidelity_minimal_syntax
 
 module type ParserType = sig
   module Lexer : Full_fidelity_lexer_sig.Lexer_S
@@ -66,11 +67,11 @@ module WithParser(Parser : ParserType) = struct
   let expect_token parser kind error =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then
-      (parser1, Syntax.make_token token)
+      (parser1, make_token token)
     else
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
-      (with_error parser error, (Syntax.make_missing()))
+      (with_error parser error, (make_missing()))
 
   let expect_required parser =
     expect_token parser TokenKind.Required SyntaxError.error1051
@@ -81,11 +82,11 @@ module WithParser(Parser : ParserType) = struct
   let expect_name_allow_keywords parser =
     let (parser1, token) = next_token_as_name parser in
     if (Token.kind token) = TokenKind.Name then
-      (parser1, Syntax.make_token token)
+      (parser1, make_token token)
     else
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
-      (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
+      (with_error parser SyntaxError.error1004, (make_missing()))
 
   let next_xhp_category_name parser =
     let lexer = Parser.lexer parser in
@@ -120,27 +121,27 @@ module WithParser(Parser : ParserType) = struct
   let expect_xhp_class_name parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
-      (parser, Syntax.make_token token)
+      (parser, make_token token)
     else
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
       (* TODO: Different error? *)
-      (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
+      (with_error parser SyntaxError.error1004, (make_missing()))
 
   let expect_xhp_name parser =
     if is_next_name parser then
       let (parser, token) = next_xhp_name parser in
-      (parser, Syntax.make_token token)
+      (parser, make_token token)
     else
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
       (* TODO: Different error? *)
-      (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
+      (with_error parser SyntaxError.error1004, (make_missing()))
 
   let expect_class_name parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
-      (parser, Syntax.make_token token)
+      (parser, make_token token)
     else
       expect_name parser
 
@@ -164,9 +165,9 @@ module WithParser(Parser : ParserType) = struct
     let (parser1, name) = next_token parser in
     match Token.kind name with
     | TokenKind.QualifiedName
-    | TokenKind.Name -> (parser1, Syntax.make_token name)
+    | TokenKind.Name -> (parser1, make_token name)
     | _ ->
-      (with_error parser SyntaxError.error1004, (Syntax.make_missing()))
+      (with_error parser SyntaxError.error1004, (make_missing()))
 
   let expect_function parser =
     expect_token parser TokenKind.Function SyntaxError.error1003
@@ -229,59 +230,59 @@ module WithParser(Parser : ParserType) = struct
     let (parser1, token) = next_token_as_name parser in
     match Token.kind token with
     | TokenKind.Name
-    | TokenKind.Variable -> (parser1, Syntax.make_token token)
+    | TokenKind.Variable -> (parser1, make_token token)
     | _ ->
       (* ERROR RECOVERY: Create a missing token for the expected token,
          and continue on from the current token. Don't skip it. *)
-      (with_error parser SyntaxError.error1050, (Syntax.make_missing()))
+      (with_error parser SyntaxError.error1050, (make_missing()))
 
   let expect_xhp_class_name_or_name_or_variable parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
-      (parser, Syntax.make_token token)
+      (parser, make_token token)
     else
       expect_name_or_variable parser
 
   let expect_xhp_class_name_or_qualified_name_or_variable parser =
     if is_next_xhp_class_name parser then
       let (parser, token) = next_xhp_class_name parser in
-      (parser, Syntax.make_token token)
+      (parser, make_token token)
     else
       let (parser1, token) = next_token_as_name parser in
       match Token.kind token with
       | TokenKind.Name
       | TokenKind.QualifiedName
-      | TokenKind.Variable -> (parser1, Syntax.make_token token)
+      | TokenKind.Variable -> (parser1, make_token token)
       | _ ->
         (* ERROR RECOVERY: Create a missing token for the expected token,
            and continue on from the current token. Don't skip it. *)
-        (with_error parser SyntaxError.error1050, (Syntax.make_missing()))
+        (with_error parser SyntaxError.error1050, (make_missing()))
 
   let expect_name_variable_or_class parser =
     let (parser1, token) = next_token parser in
     if Token.kind token = TokenKind.Class then
-      (parser1, Syntax.make_token token)
+      (parser1, make_token token)
     else
       let (parser1, token) = next_token_as_name parser in
       match Token.kind token with
       | TokenKind.Name
-      | TokenKind.Variable -> (parser1, Syntax.make_token token)
+      | TokenKind.Variable -> (parser1, make_token token)
       | _ ->
         (* ERROR RECOVERY: Create a missing token for the expected token,
            and continue on from the current token. Don't skip it. *)
-        (with_error parser SyntaxError.error1048, (Syntax.make_missing()))
+        (with_error parser SyntaxError.error1048, (make_missing()))
 
   let optional_token parser kind =
     let (parser1, token) = next_token parser in
     if (Token.kind token) = kind then
-      (parser1, Syntax.make_token token)
+      (parser1, make_token token)
     else
-      (parser, Syntax.make_missing())
+      (parser, make_missing())
 
   let assert_token parser kind =
     let (parser, token) = next_token parser in
     assert ((Token.kind token) = kind);
-    (parser, Syntax.make_token token)
+    (parser, make_token token)
 
   (* This helper method parses a list of the form
 
@@ -309,7 +310,7 @@ module WithParser(Parser : ParserType) = struct
         (* ERROR RECOVERY: We expected an item but we found a close or
            the end of the file. Make the item "missing" and give an error. *)
         let parser = with_error parser error in
-        let item = Syntax.make_missing() in
+        let item = make_missing() in
         (parser, (item :: acc))
       else if kind = separator_kind then
 
@@ -324,9 +325,9 @@ module WithParser(Parser : ParserType) = struct
           parameter list.  *)
 
         let parser = with_error parser1 error in
-        let item = Syntax.make_missing() in
-        let separator = Syntax.make_token token in
-        let list_item = Syntax.make_list_item item separator  in
+        let item = make_missing() in
+        let separator = make_token token in
+        let list_item = make_list_item item separator  in
         aux parser (list_item :: acc)
       else
 
@@ -338,8 +339,8 @@ module WithParser(Parser : ParserType) = struct
         if kind = close_kind then
           (parser, (item :: acc))
         else if kind = separator_kind then
-          let separator = Syntax.make_token token in
-          let list_item = Syntax.make_list_item item separator in
+          let separator = make_token token in
+          let list_item = make_list_item item separator in
           let acc = list_item :: acc in
           (* We got an item followed by a separator; what if the thing
              that comes next is a close? *)
@@ -352,14 +353,14 @@ module WithParser(Parser : ParserType) = struct
              got neither. Bail out. Caller will give an error. *)
           (parser, (item :: acc)) in
     let (parser, items) = aux parser [] in
-    (parser, Syntax.make_list (List.rev items))
+    (parser, make_list (List.rev items))
 
   let parse_separated_list_opt
       parser separator_kind allow_trailing close_kind error parse_item =
     let token = peek_token parser in
     let kind = Token.kind token in
     if kind = close_kind then
-      (parser, Syntax.make_missing())
+      (parser, make_missing())
     else
       parse_separated_list
         parser separator_kind allow_trailing close_kind error parse_item

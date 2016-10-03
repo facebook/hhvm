@@ -9,7 +9,6 @@
  *)
 
 module Token = Full_fidelity_minimal_token
-module Syntax = Full_fidelity_minimal_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
@@ -18,7 +17,7 @@ module Operator = Full_fidelity_operator
 module SimpleParser = Full_fidelity_simple_parser.WithLexer(Full_fidelity_lexer)
 
 open TokenKind
-open Syntax
+open Full_fidelity_minimal_syntax
 
 module WithExpressionAndStatementAndTypeParser
   (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType)
@@ -407,7 +406,7 @@ module WithExpressionAndStatementAndTypeParser
 
     let (parser1, extends_token) = next_token parser in
     if (Token.kind extends_token) <> Extends then
-      (parser, make_missing (), Syntax.make_missing ())
+      (parser, make_missing (), make_missing ())
     else
     let (parser, extends_list) = parse_special_type_list parser1 in
     (parser, make_token extends_token, extends_list)
@@ -425,7 +424,7 @@ module WithExpressionAndStatementAndTypeParser
     *)
     let (parser1, implements_token) = next_token parser in
     if (Token.kind implements_token) <> Implements then
-      (parser, make_missing (), Syntax.make_missing ())
+      (parser, make_missing (), make_missing ())
     else
     let (parser, implements_list) = parse_special_type_list parser1 in
     (parser, make_token implements_token, implements_list)
@@ -458,9 +457,9 @@ module WithExpressionAndStatementAndTypeParser
           Give the error that we expected a type, not a name, even though
           not every type is legal here. *)
           let parser = with_error parser1 SyntaxError.error1007 in
-          let item = Syntax.make_missing() in
-          let separator = Syntax.make_token token in
-          let list_item = Syntax.make_list_item item separator  in
+          let item = make_missing() in
+          let separator = make_token token in
+          let list_item = make_list_item item separator  in
           aux parser (list_item :: acc)
       | Name
       | XHPClassName
@@ -471,7 +470,7 @@ module WithExpressionAndStatementAndTypeParser
           we're done. *)
           if peek_token_kind parser = Comma then
             let (parser, separator) = assert_token parser Comma in
-            let list_item = Syntax.make_list_item item separator  in
+            let list_item = make_list_item item separator  in
             aux parser (list_item :: acc)
           else
             (parser, (item :: acc))

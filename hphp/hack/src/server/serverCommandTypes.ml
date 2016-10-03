@@ -46,6 +46,7 @@ type _ t =
   | FORMAT : string * int * int -> string Format_hack.return t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
+  | DUMP_FULL_FIDELITY_PARSE : string -> string t
   | ECHO_FOR_TEST : string -> string t
   | OPEN_FILE : string -> unit t
   | CLOSE_FILE : string -> unit t

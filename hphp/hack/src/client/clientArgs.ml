@@ -267,6 +267,9 @@ let parse_check_args cmd =
      * and is optimized to be faster in that case *) "";
     "--ai-query", Arg.String (fun x -> set_mode (MODE_AI_QUERY x) ()),
     (* Send an AI query *) "";
+    "--dump-full-fidelity-parse",
+        Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x) ()),
+        "";
     (* flags *)
     "--json", Arg.Set output_json,
       " output json for machine consumption. (default: false)";

@@ -9,7 +9,6 @@
  *)
 
 module Token = Full_fidelity_minimal_token
-module Syntax = Full_fidelity_minimal_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module TokenKind = Full_fidelity_token_kind
 module SourceText = Full_fidelity_source_text
@@ -18,7 +17,7 @@ module SimpleParser =
   Full_fidelity_simple_parser.WithLexer(Full_fidelity_type_lexer)
 
 open TokenKind
-open Syntax
+open Full_fidelity_minimal_syntax
 
 module WithExpressionParser (ExpressionParser :
     Full_fidelity_expression_parser_type.ExpressionParserType) :

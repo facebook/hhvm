@@ -367,6 +367,20 @@ let main args =
       let results = rpc args @@ Rpc.AI_QUERY json in
       ClientAiQuery.go results;
       Exit_status.No_error
+    | MODE_FULL_FIDELITY_PARSE file ->
+      (* We can cheaply do this on the client today, but we might want to
+      do it on the server and cache the results in the future. *)
+      let do_it_on_server = false in
+      let results = if do_it_on_server then
+        rpc args @@ Rpc.DUMP_FULL_FIDELITY_PARSE file
+      else
+        let file = Relative_path.create Relative_path.Dummy file in
+        let source_text = Full_fidelity_source_text.from_file file in
+        let syntax_tree = Full_fidelity_syntax_tree.make source_text in
+        let json = Full_fidelity_syntax_tree.to_json syntax_tree in
+        Hh_json.json_to_string json in
+      ClientFullFidelityParse.go results;
+      Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   exit_status

@@ -20,11 +20,11 @@
 module SourceText = Full_fidelity_source_text
 module Parser = Full_fidelity_parser
 module SyntaxError = Full_fidelity_syntax_error
-module MinimalSyntax = Full_fidelity_minimal_syntax
+open Full_fidelity_minimal_syntax
 
 type t = {
   text : SourceText.t;
-  root : MinimalSyntax.t;
+  root : Full_fidelity_minimal_syntax.t;
   errors : SyntaxError.t list;
   language : string;
   mode : string
@@ -38,16 +38,16 @@ let strip_comment_start s =
     s
 
 let analyze_header text header =
-  match MinimalSyntax.syntax header with
-  | MinimalSyntax.ScriptHeader h ->
-    let lt = h.MinimalSyntax.header_less_than in
-    let qm = h.MinimalSyntax.header_question in
-    let lang = h.MinimalSyntax.header_language in
-    let lt_full_width = MinimalSyntax.full_width lt in
-    let qm_full_width = MinimalSyntax.full_width qm in
-    let lang_leading = MinimalSyntax.leading_width lang in
-    let lang_width = MinimalSyntax.width lang in
-    let lang_trailing = MinimalSyntax.trailing_width lang in
+  match syntax header with
+  | ScriptHeader h ->
+    let lt = h.header_less_than in
+    let qm = h.header_question in
+    let lang = h.header_language in
+    let lt_full_width = full_width lt in
+    let qm_full_width = full_width qm in
+    let lang_leading = leading_width lang in
+    let lang_width = width lang in
+    let lang_trailing = trailing_width lang in
     let language = SourceText.sub text (lt_full_width +
       qm_full_width) lang_width in
     let mode = SourceText.sub text (lt_full_width + qm_full_width +
@@ -61,9 +61,9 @@ let analyze_header text header =
      width tokens if it needs to. *)
 
 let get_language_and_mode text root =
-  match MinimalSyntax.syntax root with
-  | MinimalSyntax.Script s ->
-    let header = s.MinimalSyntax.script_header in
+  match syntax root with
+  | Script s ->
+    let header = s.script_header in
     analyze_header text header
   | _ -> failwith "unexpected missing script node"
     (* The parser never produces a missing script, even if the file is empty *)
@@ -98,3 +98,11 @@ let is_php tree =
 
 let is_strict tree =
   (is_hack tree) && tree.mode = "strict"
+
+let to_json tree =
+  let root = to_json tree.root in
+  let text = Hh_json.JSON_String tree.text.SourceText.text in
+  Hh_json.JSON_Object [
+    "parse_tree", root;
+    "program_text", text;
+  ]

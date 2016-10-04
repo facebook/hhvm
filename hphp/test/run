@@ -556,6 +556,7 @@ function find_tests($files, array $options = null) {
       function($test) {
         return file_exists($test . '.expect') ||
                file_exists($test . '.expectf') ||
+               file_exists($test . '.expectregex') ||
                file_exists($test . '.hhvm.expect') ||
                file_exists($test . '.hhvm.expectf');
       }

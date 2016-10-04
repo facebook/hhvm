@@ -1,16 +1,34 @@
 <?hh // strict
 
-class Foo<T> {
-  const where = 0; // 'where' shouldn't be a keyword everywhere
+class Foo {
+}
 
-  public function bar<Tx>(
-  ): void
-  where
-    T as Tx,
-    Tx = Vector<int>,
-  {}
+class Bar<+Tbar> extends Foo {
+  public function barMethod(): this {
+    return $this;
+  }
+}
 
-  public function qux<Tx>(Tx $x): Tx where Tx = T {
-    return $x;
+class Baz<+Tbaz> extends Bar<Tbaz> {
+  public function bazMethod<Tcorge>(Tcorge $x): Tcorge where
+    Tcorge as Bar<Tcorge>,
+  {
+    return $x->barMethod();
+  }
+}
+
+class Qux extends Baz<Qux> {
+  <<__Override>>
+  public function bazMethod<Tcorge>(Tcorge $x): Tcorge where
+    Tcorge as Bar<Tcorge>,
+  {
+    return $x->barMethod();
+  }
+}
+
+class WhereClauseTest {
+  const where = 'where is not a keyword everywhere';
+  public function callBazMethod(Qux $x): Bar<Foo> {
+    return $x->bazMethod($x);
   }
 }

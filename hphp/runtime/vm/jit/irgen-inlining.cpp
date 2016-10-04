@@ -58,7 +58,9 @@ bool beginInlining(IRGS& env,
     return false;
   }
 
-  always_assert(!isFPushCuf(info.fpushOpc) && !info.interp);
+  always_assert(isFPush(info.fpushOpc) &&
+                !isFPushCuf(info.fpushOpc) &&
+                !info.interp);
 
   SSATmp** params = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (unsigned i = 0; i < numParams; ++i) {
@@ -164,7 +166,9 @@ bool conjureBeginInlining(IRGS& env,
       cns(env, t) : gen(env, Conjure, t);
   };
 
+  always_assert(isFPush(env.context.callerFPushOp));
   auto const numParams = args.size();
+  env.irb->fs().setFPushOverride(env.context.callerFPushOp);
   fpushActRec(
     env,
     cns(env, func),
@@ -172,6 +176,7 @@ bool conjureBeginInlining(IRGS& env,
     numParams,
     nullptr /* invName */
   );
+  assertx(!env.irb->fs().hasFPushOverride());
 
   for (auto const argType : args) {
     push(env, conjure(argType));

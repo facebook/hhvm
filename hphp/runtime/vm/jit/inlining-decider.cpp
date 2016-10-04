@@ -332,13 +332,15 @@ using RegionKeySet = std::unordered_set<
   InlineRegionKey::Eq
 >;
 
-Vcost computeTranslationCostSlow(SrcKey at, const RegionDesc& region) {
+Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
+                                 const RegionDesc& region) {
   TransContext ctx {
     kInvalidTransID,
     TransKind::Optimize,
     TransFlags{},
     at,
-    FPInvOffset{0}
+    FPInvOffset{0},
+    callerFPushOp
   };
 
   auto const unit = irGenInlineRegion(ctx, region);
@@ -350,14 +352,15 @@ Vcost computeTranslationCostSlow(SrcKey at, const RegionDesc& region) {
 
 folly::Synchronized<InlineCostCache, folly::RWSpinLock> s_inlCostCache;
 
-int computeTranslationCost(SrcKey at, const RegionDesc& region) {
+int computeTranslationCost(SrcKey at, Op callerFPushOp,
+                           const RegionDesc& region) {
   InlineRegionKey irk{region};
   SYNCHRONIZED_CONST(s_inlCostCache) {
     auto f = s_inlCostCache.find(irk);
     if (f != s_inlCostCache.end()) return f->second;
   }
 
-  auto const info = computeTranslationCostSlow(at, region);
+  auto const info = computeTranslationCostSlow(at, callerFPushOp, region);
   auto cost = info.cost;
 
   // If the region wasn't complete, don't cache the result, unless we already
@@ -384,9 +387,10 @@ int computeTranslationCost(SrcKey at, const RegionDesc& region) {
  * Update context for start of inlining.
  */
 void InliningDecider::accountForInlining(SrcKey callerSk,
+                                         Op callerFPushOp,
                                          const Func* callee,
                                          const RegionDesc& region) {
-  int cost = computeTranslationCost(callerSk, region);
+  int cost = computeTranslationCost(callerSk, callerFPushOp, region);
   m_costStack.push_back(cost);
   m_cost       += cost;
   m_callDepth  += 1;
@@ -400,6 +404,7 @@ void InliningDecider::initWithCallee(const Func* callee) {
 }
 
 bool InliningDecider::shouldInline(SrcKey callerSk,
+                                   Op callerFPushOp,
                                    const Func* callee,
                                    const RegionDesc& region,
                                    uint32_t maxTotalCost) {
@@ -489,7 +494,7 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
   const int maxCost = maxTotalCost - m_cost;
-  const int cost = computeTranslationCost(callerSk, region);
+  const int cost = computeTranslationCost(callerSk, callerFPushOp, region);
   if (cost > maxCost) {
     return refuse("too expensive");
   }
@@ -613,9 +618,10 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   auto const op = sk.pc();
   auto const numArgs = getImm(op, 0).u_IVA;
 
-  auto const& fpi = irgs.irb->fs().fpiStack();
-  assertx(!fpi.empty());
-  auto const ctx = fpi.back().ctxType;
+  auto const& fpiStack = irgs.irb->fs().fpiStack();
+  assertx(!fpiStack.empty());
+  auto const& fpiInfo = fpiStack.back();
+  auto const ctx = fpiInfo.ctxType;
 
   if (ctx == TBottom) return nullptr;
 
@@ -644,14 +650,20 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
       maxBCInstrs
     );
     auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
-    if (region && inl.shouldInline(sk, callee, *region, maxCost)) return region;
+    if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
+                                   callee, *region, maxCost)) {
+      return region;
+    }
     if (mode == "tracelet") return nullptr;
   }
 
   if (profData()) {
     auto region = selectCalleeCFG(callee, numArgs, ctx, argTypes, maxBCInstrs);
     auto const maxCost = RuntimeOption::EvalHHIRInliningMaxVasmCost;
-    if (region && inl.shouldInline(sk, callee, *region, maxCost)) return region;
+    if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
+                                   callee, *region, maxCost)) {
+      return region;
+    }
   }
 
   return nullptr;

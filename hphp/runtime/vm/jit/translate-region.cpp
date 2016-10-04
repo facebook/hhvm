@@ -530,7 +530,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  inl.accountForInlining(psk.srcKey, callee, *calleeRegion);
+  inl.accountForInlining(psk.srcKey, info.fpushOpc, callee, *calleeRegion);
   return calleeRegion;
 }
 

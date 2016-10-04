@@ -120,7 +120,7 @@ void simplifyOrdStrIdx(IRUnit& unit) {
 }
 
 void optimize(IRUnit& unit, TransKind kind) {
-  Timer timer(Timer::optimize);
+  Timer timer(Timer::optimize, unit.logEntry().get_pointer());
 
   assertx(checkEverything(unit));
 

@@ -32,6 +32,12 @@
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
   TIMER_NAME(optimize_reoptimize)               \
+  TIMER_NAME(optimize_loads)                    \
+  TIMER_NAME(optimize_stores)                   \
+  TIMER_NAME(optimize_gvn)                      \
+  TIMER_NAME(optimize_phis)                     \
+  TIMER_NAME(optimize_licm)                     \
+  TIMER_NAME(hoist_type_checks)                 \
   TIMER_NAME(partial_dce_DefInlineFP)           \
   TIMER_NAME(regalloc)                          \
   TIMER_NAME(regionizeFunc)                     \

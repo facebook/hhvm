@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include <unordered_map>
 
 namespace HPHP { namespace jit {
@@ -479,6 +480,7 @@ void forwardHoistedSrcsToDsts(IRUnit& unit) {
 
 void hoistTypeChecks(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_checkhoist, "Hoist typechecks"};
+  Timer t(Timer::hoist_type_checks, unit.logEntry().get_pointer());
 
   auto const rpoBlocks = rpoSortCfg(unit);
   auto const dominators = findDominators(

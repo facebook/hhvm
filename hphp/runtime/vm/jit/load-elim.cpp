@@ -17,7 +17,6 @@
 
 #include <cstdint>
 #include <algorithm>
-#include <utility>
 
 #include <boost/variant.hpp>
 #include <folly/Optional.h>
@@ -41,6 +40,7 @@
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
 
@@ -1001,6 +1001,7 @@ void analyze(Global& genv) {
  */
 void optimizeLoads(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
+  Timer t(Timer::optimize_loads, unit.logEntry().get_pointer());
 
   auto genv = Global { unit };
   if (genv.ainfo.locations.size() == 0) {

@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 #include "hphp/util/trace.h"
 
@@ -88,6 +89,7 @@ const IRInstruction* findSinkablePhiSrc(
 void optimizePhis(IRUnit& unit) {
   auto changed = false;
   PassTracer pt{&unit, TRACEMOD, "optimizePhis", &changed};
+  Timer t(Timer::optimize_phis, unit.logEntry().get_pointer());
 
   bool repeat;
   jit::flat_set<SSATmp*> values;

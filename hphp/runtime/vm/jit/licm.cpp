@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
 
@@ -720,6 +721,7 @@ void insert_pre_headers_and_exits(IRUnit& unit, LoopAnalysis& loops) {
 
 void optimizeLoopInvariantCode(IRUnit& unit) {
   PassTracer tracer { &unit, Trace::hhir_licm, "LICM" };
+  Timer t(Timer::optimize_licm, unit.logEntry().get_pointer());
   Env env { unit, rpoSortCfg(unit) };
   if (env.loops.loops.empty()) {
     FTRACE(1, "no loops\n");

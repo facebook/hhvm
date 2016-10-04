@@ -3434,7 +3434,7 @@ void sink_incs(Env& env) {
 //////////////////////////////////////////////////////////////////////
 
 void optimizeRefcounts(IRUnit& unit) {
-  Timer timer(Timer::optimize_refcountOpts);
+  Timer timer(Timer::optimize_refcountOpts, unit.logEntry().get_pointer());
   splitCriticalEdges(unit);
 
   PassTracer tracer{&unit, Trace::hhir_refcount, "optimizeRefcounts"};

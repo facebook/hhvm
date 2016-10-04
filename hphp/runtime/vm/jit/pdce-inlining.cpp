@@ -931,7 +931,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void optimizeInlineReturns(IRUnit& unit) {
-  Timer timer(Timer::partial_dce_DefInlineFP);
+  Timer timer(Timer::partial_dce_DefInlineFP, unit.logEntry().get_pointer());
 
   ITRACE(1, "optimize_inline_returns()\n");
   ITRACE(2, "splitting critical edges\n");

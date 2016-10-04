@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
-#include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
@@ -69,7 +68,7 @@ bool typeSufficientlyGeneric(Type t) {
  * specialize code earlier and avoid generic operations.
  */
 void optimizePredictions(IRUnit& unit) {
-  Timer timer(Timer::optimize_predictionOpts);
+  Timer timer(Timer::optimize_predictionOpts, unit.logEntry().get_pointer());
 
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };

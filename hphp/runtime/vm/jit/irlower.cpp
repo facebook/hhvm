@@ -41,8 +41,6 @@
 #include <folly/Format.h>
 #include <folly/Range.h>
 
-#include <cstdlib>
-#include <cstring>
 #include <sstream>
 
 namespace HPHP { namespace jit { namespace irlower {
@@ -118,7 +116,7 @@ void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
 
 std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
                                  bool regAlloc /* = true */) noexcept {
-  Timer timer(Timer::hhir_lower);
+  Timer timer(Timer::hhir_lower, unit.logEntry().get_pointer());
   SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
   auto vunit = folly::make_unique<Vunit>();

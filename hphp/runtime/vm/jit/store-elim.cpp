@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 /*
   This implements partial-redundancy elimination for stores.
@@ -1283,6 +1284,7 @@ void compute_placement_possible(
 
 void optimizeStores(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_store, "optimizeStores"};
+  Timer t(Timer::optimize_stores, unit.logEntry().get_pointer());
 
   // This isn't required for correctness, but it may allow removing stores that
   // otherwise we would leave alone.

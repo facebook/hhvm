@@ -917,7 +917,7 @@ void lower_vcallarray(Vunit& unit, Vlabel b) {
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
 void lowerForX64(Vunit& unit) {
-  Timer timer(Timer::vasm_lower);
+  Timer timer(Timer::vasm_lower, unit.log_entry);
 
   // This pass relies on having no critical edges in the unit.
   splitCriticalEdges(unit);
@@ -957,7 +957,7 @@ void lowerForX64(Vunit& unit) {
 }
 
 void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
-  Timer timer(Timer::vasm_optimize);
+  Timer timer(Timer::vasm_optimize, unit.log_entry);
 
   removeTrivialNops(unit);
   optimizePhis(unit);

@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include <unordered_map>
 
 namespace HPHP { namespace jit {
@@ -519,6 +520,7 @@ void replaceRedundantComputations(
 
 void gvn(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_gvn, "gvn"};
+  Timer t(Timer::optimize_gvn, unit.logEntry().get_pointer());
 
   GVNState state;
   auto const rpoBlocks = rpoSortCfg(unit);

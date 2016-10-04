@@ -25,6 +25,20 @@ module ParserHeap = SharedMem.WithCache (Relative_path.S) (struct
     let description = "Parser"
   end)
 
+module LocalParserHeap = SharedMem.LocalCache (Relative_path.S) (struct
+    type t = Ast.program
+    let prefix = Prefix.make()
+    let description = "ParserLocal"
+  end)
+
+let get_from_local_heap popt file_name =
+  match LocalParserHeap.get file_name with
+  | Some ast -> ast
+  | None ->
+    let { Parser_hack.ast;
+      _ } = Parser_hack.from_file popt file_name in
+    LocalParserHeap.add file_name ast;
+    ast
 let get_class defs class_name =
   List.fold_left defs ~init:None ~f:begin fun acc def ->
     match def with
@@ -53,15 +67,12 @@ let get_const defs name =
     | _ -> acc
   end
 
-let get_from_parser_heap ?(full = false) ?popt file_name name fold_f =
+let get_from_parser_heap ?(full = false) ?popt file_name name get_element =
   match ParserHeap.get file_name with
     | None -> None
     | Some (_, Decl) when full ->
-      let { Parser_hack.ast;
-        _ } = Parser_hack.from_file (Utils.unsafe_opt popt) file_name in
-      ParserHeap.add file_name (ast, Full);
-      fold_f ast name
-    | Some (defs, _) -> fold_f defs name
+      get_element (get_from_local_heap (Utils.unsafe_opt popt) file_name) name
+    | Some (defs, _) -> get_element defs name
 
 let find_class_in_file file_name class_name =
   get_from_parser_heap file_name class_name get_class

@@ -19,8 +19,7 @@
 #include "hphp/ppc64-asm/branch-ppc64.h"
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
-
-#include "hphp/runtime/vm/jit/abi-ppc64.h"
+#include "hphp/ppc64-asm/asm-ppc64.h"
 
 namespace ppc64_asm {
 
@@ -366,7 +365,7 @@ bool DecoderInfo::isLd(bool toc) const {
 
     DS_form_t dsform;
     dsform.instruction = m_image;
-    if (Reg64(dsform.RA) == HPHP::jit::ppc64::rtoc()) {
+    if (Reg64(dsform.RA) == reg::r2) {
       return true;
     }
   }
@@ -382,7 +381,7 @@ bool DecoderInfo::isDformOp(OpcodeNames opn, bool toc) const {
 
     D_form_t dform;
     dform.instruction = m_image;
-    if (Reg64(dform.RA) == HPHP::jit::ppc64::rtoc()) {
+    if (Reg64(dform.RA) == reg::r2) {
       return true;
     }
   }

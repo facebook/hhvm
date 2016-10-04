@@ -59,11 +59,11 @@ let default = {
 * Use 'default' if it's fine to be potentially stricter than the rest of the
 * project requires, eg hh_single_typecheck *)
 let permissive = { default with tco_unsafe_xhp = true; }
-let make tco_assume_php
-        tco_unsafe_xhp
-        tco_user_attrs
-        tco_experimental_features
-        po_auto_namespace_map = {
+let make ~tco_assume_php
+         ~tco_unsafe_xhp
+         ~tco_user_attrs
+         ~tco_experimental_features
+         ~po_auto_namespace_map = {
                    tco_assume_php;
                    tco_unsafe_xhp;
                    tco_user_attrs;

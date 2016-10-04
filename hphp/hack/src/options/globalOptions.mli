@@ -10,7 +10,11 @@
 
 type t
 val make :
-  bool -> bool -> SSet.t option -> SSet.t -> (string * string) list -> t
+  tco_assume_php: bool ->
+  tco_unsafe_xhp: bool ->
+  tco_user_attrs: SSet.t option ->
+  tco_experimental_features: SSet.t ->
+  po_auto_namespace_map: (string * string) list -> t
 val tco_assume_php : t -> bool
 val tco_unsafe_xhp : t -> bool
 val tco_user_attrs : t -> SSet.t option

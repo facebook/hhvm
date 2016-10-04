@@ -14,15 +14,32 @@ open Reordered_argument_collections
 open ServerCommandTypes
 
 let root = "/"
-let genv = ref ServerEnvBuild.default_genv
+let server_config = ServerEnvBuild.default_genv.ServerEnv.config
+let global_opts = GlobalOptions.make
+  ~tco_assume_php: false
+  ~tco_unsafe_xhp: false
+  ~tco_user_attrs: None
+  ~tco_experimental_features: GlobalOptions.tco_experimental_all
+  ~po_auto_namespace_map: []
 
-let setup_server () =
+let server_config = ServerConfig.set_tc_options server_config global_opts
+let server_config = ServerConfig.set_parser_options
+  server_config global_opts
+
+let genv = ref { ServerEnvBuild.default_genv with
+  ServerEnv.config = server_config
+}
+
+let setup_server ?custom_config ()  =
   Printexc.record_backtrace true;
   EventLogger.init (Daemon.devnull ()) 0.0;
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   HackSearchService.attach_hooks ();
   let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
-  ServerEnvBuild.make_env !genv.ServerEnv.config
+  match custom_config with
+  | Some config -> ServerEnvBuild.make_env config
+  | None -> ServerEnvBuild.make_env !genv.ServerEnv.config
+
 
 let default_loop_input = {
   disk_changes = [];

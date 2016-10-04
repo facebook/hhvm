@@ -10,7 +10,7 @@
 
 open Integration_test_base_types
 
-val setup_server: unit -> ServerEnv.env
+val setup_server: ?custom_config:ServerConfig.t -> unit -> ServerEnv.env
 
 val setup_disk: ServerEnv.env -> disk_changes_type -> ServerEnv.env
 

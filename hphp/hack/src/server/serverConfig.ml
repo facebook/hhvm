@@ -175,6 +175,8 @@ let default_config = {
   parser_options = ParserOptions.default;
 }
 
+let set_parser_options config popt = { config with parser_options = popt }
+let set_tc_options config tcopt = { config with tc_options = tcopt }
 let load_script config = config.load_script
 let load_script_timeout config = config.load_script_timeout
 let load_mini_script config = config.load_mini_script

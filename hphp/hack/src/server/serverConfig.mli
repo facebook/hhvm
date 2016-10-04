@@ -10,6 +10,8 @@
 
 type t
 
+val set_parser_options : t -> ParserOptions.t -> t
+val set_tc_options : t -> TypecheckerOptions.t -> t
 val filename : Relative_path.t
 val load : Relative_path.t -> ServerArgs.options -> t * ServerLocalConfig.t
 val is_compatible : t -> t -> bool

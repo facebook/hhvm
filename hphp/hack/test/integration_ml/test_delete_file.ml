@@ -4,7 +4,7 @@ open ServerEnv
 
 module Test = Integration_test_base
 
-let foo_contents = "<?hh //strict
+let foo_contents = "<?hh
     class Foo {
         public static function g(): string {
             return 'a';
@@ -12,13 +12,14 @@ let foo_contents = "<?hh //strict
     }
 "
 
-let bar_contents = "<?hh //strict
+let bar_contents = "<?hh
         function h(): string {
             return Foo::g();
         }
 "
 
 let () =
+
   let env = Test.setup_server () in
   let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [

@@ -246,12 +246,6 @@ DEBUG_ONLY bool validate(const State& env,
     "HasDest mismatch between input and output"
   );
 
-  assert_last(
-    IMPLIES(last->isBlockEnd(), origInst->isBlockEnd()),
-    "Block-end instruction produced for simplification of non-block-end "
-    "instruction"
-  );
-
   if (last->hasEdges()) {
     assert_last(
       origInst->hasEdges(),
@@ -3523,7 +3517,14 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
   }
 
   auto const block = origInst->block();
-  auto const pos = ++block->iteratorTo(origInst);
+  auto pos = ++block->iteratorTo(origInst);
+
+  if (last != nullptr && last->isTerminal()) {
+    // Delete remaining instructions in the block if a terminal is created.
+    // This can happen, e.g., 'Halt' may be created when the block is
+    // unreachable.
+    while (pos != block->end()) pos = block->erase(pos);
+  }
 
   if (need_mov) {
     /*

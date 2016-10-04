@@ -448,6 +448,14 @@ static inline bool pgoDefault() {
 #endif
 }
 
+static inline bool eagerGcDefault() {
+#ifdef HHVM_EAGER_GC
+  return true;
+#else
+  return false;
+#endif
+}
+
 static inline uint64_t pgoThresholdDefault() {
   return debug ? 2 : 2000;
 }

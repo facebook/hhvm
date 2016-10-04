@@ -579,16 +579,16 @@ struct RuntimeOption {
   F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
   F(bool, RandomHotFuncs,              false)                           \
-  F(bool, EnableGC,                    false)                           \
+  F(bool, EnableGC,                    eagerGcDefault())                \
   /* Run GC eagerly at each surprise point. */                          \
-  F(bool, EagerGC,                     false)                           \
+  F(bool, EagerGC,                     eagerGcDefault())                \
   /* only run eager-gc once at each surprise point (much faster) */     \
   F(bool, FilterGCPoints,              true)                            \
-  F(bool, Quarantine,                  false)                           \
-  F(bool, EnableGCTypeScan,            false)                           \
+  F(bool, Quarantine,                  eagerGcDefault())                \
+  F(bool, EnableGCTypeScan,            eagerGcDefault())                \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
-  F(uint32_t, GCSampleRate,                1)                           \
+  F(uint32_t, GCSampleRate,            (eagerGcDefault() ? 0 : 1))      \
   F(uint32_t, SerDesSampleRate,            0)                           \
   F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, JitFilterLease,              1)                           \

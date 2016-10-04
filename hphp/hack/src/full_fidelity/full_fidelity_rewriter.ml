@@ -24,41 +24,42 @@ module WithSyntax(Syntax: RewritableType) = struct
      then f is called on the rewritten node. *)
 
   let parented_rewrite_post f node =
-    let rec aux parents f node =
-      let folder (acc, changed) child =
-        let (new_child, child_changed) = aux (node :: parents) f child in
-        (new_child :: acc, changed || child_changed) in
-      let cs = Syntax.children node in
-      let (new_children, child_changed) =
-        List.fold_left folder ([], false) cs in
-      let with_new_children =
-        if child_changed then
-          Syntax.from_children (Syntax.kind node) (List.rev new_children)
+    let rec aux parents node =
+      let folder child (acc, changed) = match aux (node :: parents) child with
+        | Some (child, changed') -> (child :: acc, changed || changed')
+        | None -> (acc, true)
+      in
+      let (new_children, changed) =
+        List.fold_right folder (Syntax.children node) ([], false) in
+      let node = if changed then
+          Syntax.from_children (Syntax.kind node) new_children
         else
-          node in
-      let (new_node, node_changed) = f parents with_new_children in
-      (new_node, node_changed || child_changed) in
-    aux [] f node
+          node
+      in
+      Option.map (f parents node) ~f:(fun (n, c) -> n, c || changed) in
+    Option.value ~default:(node, false) (aux [] node)
 
   (* As above, but the rewrite happens to the node first and then
      recurses on the children. *)
 
   let parented_rewrite_pre f node =
-    let rec aux parents f node =
-      let folder (acc, changed) child =
-        let (new_child, child_changed) = aux (node :: parents) f child in
-        (new_child :: acc, changed || child_changed) in
-      let (new_node, node_changed) = f parents node in
-      let cs = Syntax.children new_node in
-      let (new_children, child_changed) =
-        List.fold_left folder ([], false) cs in
-      let with_new_children =
-        if child_changed then
-          Syntax.from_children (Syntax.kind new_node) (List.rev new_children)
-        else
-          new_node in
-      (with_new_children, node_changed || child_changed) in
-    aux [] f node
+    let rec aux parents node =
+      let folder child (acc, changed) = match aux (node :: parents) child with
+        | Some (child, changed') -> (child :: acc, changed || changed')
+        | None -> (acc, true)
+      in
+      Option.map (f parents node) ~f:begin fun (new_node, node_changed) ->
+        let cs = Syntax.children new_node in
+        let (new_children, child_changed) =
+          List.fold_right folder cs ([], false) in
+        let with_new_children =
+          if child_changed then
+            Syntax.from_children (Syntax.kind new_node) (List.rev new_children)
+          else
+            new_node in
+        (with_new_children, node_changed || child_changed)
+      end in
+    Option.value ~default:(node, false) (aux [] node)
 
   (* These are simpler versions of the rewriter, for cases where the caller
      does not need the parent context.

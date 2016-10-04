@@ -20,16 +20,17 @@
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
-#include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/util/data-block.h"
 
@@ -207,8 +208,7 @@ bool emit(Venv& env, const fallbackcc& i) {
 }
 
 bool emit(Venv& env, const retransopt& i) {
-  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(),
-                                    i.spOff, i.target, i.transID);
+  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(), i.spOff, i.sk);
   return true;
 }
 

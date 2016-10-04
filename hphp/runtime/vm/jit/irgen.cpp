@@ -113,7 +113,7 @@ void incProfCounter(IRGS& env, TransID transId) {
 }
 
 void checkCold(IRGS& env, TransID transId) {
-  gen(env, CheckCold, makeExitOpt(env, transId), TransIDData(transId));
+  gen(env, CheckCold, makeExitOpt(env), TransIDData(transId));
 }
 
 void ringbufferEntry(IRGS& env, Trace::RingBufferType t, SrcKey sk, int level) {

@@ -394,10 +394,9 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
 void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ReqRetranslateOpt>();
   auto& v = vmain(env);
-  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
+  maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
   v << retransopt{
-    extra->transID,
-    extra->target,
+    inst->marker().sk(),
     inst->marker().spOff(),
     cross_trace_args(inst->marker())
   };

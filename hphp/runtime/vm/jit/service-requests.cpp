@@ -189,14 +189,13 @@ TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
 }
 
 TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
-                              SrcKey target, TransID transID) {
+                              SrcKey sk) {
   return emit_persistent(
     cb,
     data,
-    target.resumed() ? folly::none : folly::make_optional(spOff),
+    sk.resumed() ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE_OPT,
-    target.toAtomicInt(),
-    transID
+    sk.toAtomicInt()
   );
 }
 

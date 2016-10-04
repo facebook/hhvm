@@ -68,7 +68,7 @@ Block* makePseudoMainExit(IRGS&);
  * Create a block that exits the current region by making a retranslate opt
  * service request.  Must not be used inside of an inlined function.
  */
-Block* makeExitOpt(IRGS&, TransID);
+Block* makeExitOpt(IRGS&);
 
 /*
  * Create a block that side exits the current region, after first calling the

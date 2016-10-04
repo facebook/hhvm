@@ -209,7 +209,7 @@ const RegionDesc::BlockVec& RegionDesc::blocks() const {
 
 RegionDesc::BlockData& RegionDesc::data(BlockId id) {
   auto it = m_data.find(id);
-  assertx(it != m_data.end());
+  always_assert_flog(it != m_data.end(), "BlockId {} doesn't exist in m_data");
   return it->second;
 }
 
@@ -404,9 +404,9 @@ RegionDesc::BlockId findFirstInSet(const Chain& c, RegionDesc::BlockIdSet s) {
  * each region block, all its successor have distinct SrcKeys.
  */
 void RegionDesc::chainRetransBlocks() {
-
   jit::vector<Chain> chains;
   BlockToChainMap block2chain;
+  SCOPE_ASSERT_DETAIL("RegionDesc::chainRetransBlocks") { return show(*this); };
 
   // 1. Initially assign each region block to its own chain.
   for (auto b : blocks()) {

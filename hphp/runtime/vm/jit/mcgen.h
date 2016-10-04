@@ -107,9 +107,11 @@ TCA getFuncPrologue(Func* func, int nPassed);
 TCA retranslate(TransArgs args, const RegionContext& ctx);
 
 /*
- * Generate an optimized translation for sk using profile data from transId.
+ * Regionize and optimize the given function using profile data.
+ *
+ * Returns true iff the function was successfully retranslated.
  */
-TCA retranslateOpt(SrcKey sk, TransID transId);
+bool retranslateOpt(FuncId funcId);
 
 /*
  * Called once when the JIT is activated to initialize internal mcgen structures

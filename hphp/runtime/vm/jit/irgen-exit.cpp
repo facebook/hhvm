@@ -127,16 +127,11 @@ Block* makePseudoMainExit(IRGS& env) {
     : nullptr;
 }
 
-Block* makeExitOpt(IRGS& env, TransID transId) {
-  assertx(!isInlining(env));
-  auto const targetBcOff = bcOff(env);
+Block* makeExitOpt(IRGS& env) {
+  always_assert(!isInlining(env));
   auto const exit = defBlock(env, Block::Hint::Unlikely);
-  BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
-  auto const data = ReqRetranslateOptData {
-    transId,
-    SrcKey { curSrcKey(env), targetBcOff },
-    bcSPOffset(env)
-  };
+  BlockPusher blockPusher(*env.irb, makeMarker(env, bcOff(env)), exit);
+  auto const data = IRSPRelOffsetData{bcSPOffset(env)};
   gen(env, ReqRetranslateOpt, data, sp(env), fp(env));
   return exit;
 }

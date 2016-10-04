@@ -269,10 +269,17 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
     case REQ_RETRANSLATE_OPT: {
       sk = SrcKey::fromAtomicInt(info.args[0].sk);
-      auto transID = info.args[1].transID;
-      start = mcgen::retranslateOpt(sk, transID);
-      SKTRACE(2, sk, "retranslated-OPT: transId = %d  start: @%p\n", transID,
-              start);
+      if (mcgen::retranslateOpt(sk.funcID())) {
+        // Retranslation was successful. Resume execution at the new Optimize
+        // translation.
+        vmpc() = sk.unit()->at(sk.offset());
+        start = tc::ustubs().resumeHelper;
+      } else {
+        // Retranslation failed, probably because we couldn't get the write
+        // lease. Interpret a BB before running more Profile translations, to
+        // avoid spinning through this path repeatedly.
+        start = nullptr;
+      }
       break;
     }
 

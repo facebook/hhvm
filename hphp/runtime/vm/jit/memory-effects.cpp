@@ -450,7 +450,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqRetranslateOpt:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqRetranslateOpt>()->irSPOff - 1)
+      stack_below(inst.src(0), inst.extra<ReqRetranslateOpt>()->offset - 1)
     };
   case JmpSwitchDest:
     return ExitEffects {

@@ -87,11 +87,12 @@ struct CGMeta;
   REQ(RETRANSLATE)        \
                           \
   /*
-   * retranslate_opt(SrcKey target, TransID transID)
+   * retranslate_opt(SrcKey sk)
    *
-   * A request to retranslate a function entry `target', leveraging profiling
-   * data to produce a larger, more optimized translation.  Only used when PGO
-   * is enabled.
+   * A request to retranslate the function from `sk', leveraging profiling data
+   * to produce a set of larger, more optimized translations.  Only used when
+   * PGO is enabled. Execution will resume at `sk' whether or not retranslation
+   * is successful.
    */                     \
   REQ(RETRANSLATE_OPT)    \
                           \
@@ -216,7 +217,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
                           SrcKey target, TransFlags trflags);
 TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
-                              SrcKey target, TransID transID);
+                              SrcKey sk);
 
 /*
  * Space used by an ephemeral stub.

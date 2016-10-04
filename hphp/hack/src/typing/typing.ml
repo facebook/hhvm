@@ -3751,10 +3751,10 @@ and condition env tparamet =
          *   class B<Tb> { ... }
          *   class C extends B<int>
          * and have obj_ty = C and x_ty = B<T> for a generic parameter T.
-         * Then decompose_subtype will deduce that T=int and add int as both
-         * lower and upper bound on T in env.lenv.tpenv
+         * Then SubType.add_constraint will deduce that T=int and add int as
+         * both lower and upper bound on T in env.lenv.tpenv
          *)
-        let env = SubType.decompose_subtype env obj_ty x_ty
+        let env = SubType.add_constraint env Ast.Constraint_as obj_ty x_ty
             (fun env -> (*Errors.instanceof_always_false env.Env.pos;*) env) in
         env, obj_ty in
 

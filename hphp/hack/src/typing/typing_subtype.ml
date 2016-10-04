@@ -778,24 +778,34 @@ and sub_string p env ty2 =
 let rec decompose_subtype env ty_sub ty_super fail =
   let env, ty_super = Env.expand_type env ty_super in
   let env, ty_sub = Env.expand_type env ty_sub in
-
+  let again env ty_sub =
+    decompose_subtype env ty_sub ty_super fail in
   match ty_sub, ty_super with
+  (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (_, Tabstract (AKgeneric name_sub, _)), _ ->
-    Env.add_upper_bound env name_sub ty_super
+    let tys = Env.get_upper_bounds env name_sub in
+    (* Don't add the same type twice! *)
+    if List.mem tys ty_super then env
+    else Env.add_upper_bound env name_sub ty_super
 
+  (* ty_sub <: name_super so add a lower bound on name_super *)
   | _, (_, Tabstract (AKgeneric name_super, _)) ->
-    Env.add_lower_bound env name_super ty_sub
+    let tys = Env.get_lower_bounds env name_super in
+    (* Don't add the same type twice! *)
+    if List.mem tys ty_sub then env
+    else Env.add_lower_bound env name_super ty_sub
 
-  (* If ?ty_sub <: ?ty_super then it must be the case that ty_sub <: ty_super *)
+  (* If ?ty_sub' <: ?ty_super' then must have ty_sub <: ty_super *)
   | (_, Toption ty_sub'), (_, Toption ty_super') ->
     decompose_subtype env ty_sub' ty_super' fail
 
+  (* Singleton union *)
   | _, (_, Tunresolved [ty_super']) ->
     decompose_subtype env ty_sub ty_super' fail
 
   | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
     when (coll = SN.Collections.cTraversable ||
-        coll = SN.Collections.cContainer) ->
+          coll = SN.Collections.cContainer) ->
       (match akind with
       | AKany -> env
       | AKempty -> env
@@ -807,14 +817,11 @@ let rec decompose_subtype env ty_sub ty_super fail =
        *)
       | AKvec tv | AKmap(_, tv) -> decompose_subtype env tv tv_super fail
       | AKshape fdm ->
-          Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-            decompose_subtype env ty_sub ty_super fail
-          end env r fdm
+        Typing_arrays.fold_akshape_as_akmap again env r fdm
       | AKtuple fields ->
-          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-            decompose_subtype env ty_sub ty_super fail
-          end env r fields
-      )
+        Typing_arrays.fold_aktuple_as_akvec again env r fields
+    )
+
   | (r, Tarraykind akind), (_, Tclass ((_, coll), [tk_super; tv_super]))
     when (coll = SN.Collections.cKeyedTraversable
          || coll = SN.Collections.cKeyedContainer
@@ -823,19 +830,15 @@ let rec decompose_subtype env ty_sub ty_super fail =
       | AKany -> env
       | AKempty -> env
       | AKvec tv ->
-        let env = decompose_subtype env (r, Tprim Nast.Tint) tk_super fail in
-        decompose_subtype env tv tv_super fail
+        let env' = decompose_subtype env (r, Tprim Nast.Tint) tk_super fail in
+        decompose_subtype env' tv tv_super fail
       | AKmap (tk, tv) ->
-        let env = decompose_subtype env tk tk_super fail in
-        decompose_subtype env tv tv_super fail
+        let env' = decompose_subtype env tk tk_super fail in
+        decompose_subtype env' tv tv_super fail
       | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap begin fun env ty_sub ->
-          decompose_subtype env ty_sub ty_super fail
-        end env r fdm
+        Typing_arrays.fold_akshape_as_akmap again env r fdm
       | AKtuple fields ->
-          Typing_arrays.fold_aktuple_as_akvec begin fun env ty_sub ->
-            decompose_subtype env ty_sub ty_super fail
-          end env r fields
+        Typing_arrays.fold_aktuple_as_akvec again env r fields
       )
 
   | (_, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super)))->
@@ -894,15 +897,72 @@ and decompose_tparams env tparams children_tyl super_tyl fail =
   | _, [], _
   | _, _, [] -> env
   | (variance,_,_) :: tparams, child :: childrenl, super :: superl ->
-      let env = decompose_tparam env variance child super fail in
-      decompose_tparams env tparams childrenl superl fail
+    let ck =
+      match variance with
+      | Ast.Covariant -> Ast.Constraint_as
+      | Ast.Contravariant -> Ast.Constraint_super
+      | Ast.Invariant -> Ast.Constraint_eq in
+    let env' = decompose_constraint env ck child super fail in
+    decompose_tparams env' tparams childrenl superl fail
 
-and decompose_tparam env variance child super fail =
-  match variance with
-  | Ast.Covariant -> decompose_subtype env child super fail
-  | Ast.Contravariant -> decompose_subtype env super child fail
-  | Ast.Invariant ->
-    decompose_subtype (decompose_subtype env child super fail) super child fail
+(* Decompose a general constraint *)
+and decompose_constraint env ck ty_sub ty_super fail =
+  match ck with
+  | Ast.Constraint_as ->
+    decompose_subtype env ty_sub ty_super fail
+  | Ast.Constraint_super ->
+    decompose_subtype env ty_super ty_sub fail
+  | Ast.Constraint_eq ->
+    let env' = decompose_subtype env ty_sub ty_super fail in
+    decompose_subtype env' ty_super ty_sub fail
+
+(* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
+ * add bounds to type parameters in the environment that necessarily
+ * must hold in order for ty1 ck ty2.
+ *
+ * First, we invoke decompose_constraint to add initial bounds to
+ * the environment. Then we iterate, decomposing constraints that
+ * arise through transitivity across bounds.
+ *
+ * For example, suppose that env already contains
+ *   C<T1> <: T2
+ * for some covariant class C. Now suppose we add the
+ * constraint "T2 as C<T3>" i.e. we end up with
+ *   C<T1> <: T2 <: C<T3>
+ * Then by transitivity we know that T1 <: T3 so we add this to the
+ * environment also.
+ *
+ * We repeat this process until no further bounds are added to the
+ * environment, or some limit is reached. (It's possible to construct
+ * types that expand forever under inheritance.)
+ *
+ * If the constraint turns out to be unsatisfiable, invoke
+ * the failure continuation fail.
+*)
+let constraint_iteration_limit = 20
+let add_constraint env ck ty_sub ty_super fail =
+  let oldsize = Env.get_tpenv_size env in
+  let env' = decompose_constraint env ck ty_sub ty_super fail in
+  if Env.get_tpenv_size env' = oldsize
+  then env'
+  else
+  let rec iter n env =
+    if n > constraint_iteration_limit then env
+    else
+      let oldsize = Env.get_tpenv_size env in
+      let env' =
+        List.fold_left (Env.get_generic_parameters env) ~init:env
+          ~f:(fun env x ->
+            List.fold_left (Env.get_lower_bounds env x) ~init:env
+              ~f:(fun env ty_sub' ->
+                List.fold_left (Env.get_upper_bounds env x) ~init:env
+                  ~f:(fun env ty_super' ->
+                    decompose_subtype env ty_sub' ty_super' fail))) in
+      if Env.get_tpenv_size env' = oldsize
+      then env'
+      else iter (n+1) env'
+  in
+    iter 0 env'
 
 (*****************************************************************************)
 (* Exporting *)

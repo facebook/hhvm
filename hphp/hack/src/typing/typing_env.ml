@@ -236,6 +236,14 @@ let add_generic_parameters env tparaml =
 let is_generic_parameter env name =
   SMap.mem name env.lenv.tpenv
 
+let get_generic_parameters env =
+  SMap.keys env.lenv.tpenv
+
+let get_tpenv_size env =
+  SMap.fold (fun _x { lower_bounds; upper_bounds } count ->
+    count + List.length lower_bounds + List.length upper_bounds)
+    env.lenv.tpenv 0
+
 (* Generate a fresh generic parameter with a specified prefix but distinct
  * from all generic parameters in the environment *)
 let add_fresh_generic_parameter env prefix =

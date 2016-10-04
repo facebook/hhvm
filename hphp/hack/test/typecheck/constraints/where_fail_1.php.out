@@ -1,8 +1,0 @@
-File "where_fail_1.php", line 14, characters 28-29:
-Some type constraint(s) here are violated (Typing[4110])
-File "where_fail_1.php", line 10, characters 56-56:
-'T' is a constrained type
-File "where_fail_1.php", line 10, characters 61-67:
-This is an object of type Derived
-File "where_fail_1.php", line 13, characters 24-27:
-It is incompatible with an object of type Base

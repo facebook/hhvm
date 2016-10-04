@@ -143,6 +143,9 @@ struct FormatVisitor {
   void imm(RoundDirection rd) {
     str << sep() << show(rd);
   }
+  void imm(Vflags fl) {
+    str << sep() << folly::format("{:#x}", fl);
+  }
 
   void imm(RegSet x) { print(x); }
   void imm(ComparisonPred x) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,6 +116,43 @@ vixl::Condition C(ConditionCode cc) {
   return arm::convertCC(cc);
 }
 
+/*
+ * Uses the flags from the Vinstr which defs SF to determine
+ * whether or not the Vixl assembler should emit code which
+ * sets the status flags.
+ */
+vixl::FlagsUpdate UF(Vflags flags) {
+  return flags ? SetFlags : LeaveFlags;
+}
+
+/*
+ * There are numerous ARM instructions that don't set status flags, and
+ * therefore those flags must be set synthetically in the emitters. This
+ * assertion is applied to the emitters which don't set all of the status
+ * flags required by the Vinstr which defs SF. The flags field of the
+ * Vinstr is used to determine which bits are required. Those required
+ * bits are compared against the bits which are actually set by the
+ * implementation.
+ */
+template<class Inst> void checkSF(const Inst& i, StatusFlags s) {
+  Vflags required = i.fl;
+  Vflags set = static_cast<Vflags>(s);
+  always_assert_flog((required & set) == required,
+                     "should def SF but does not: {}\n",
+                     vinst_names[Vinstr(i).op]);
+}
+
+template<class Inst> void checkSF(const Inst& i) {
+  checkSF(i, StatusFlags::None);
+}
+
+/*
+ * Returns true if the queried flag(s) is in the set of required flags.
+ */
+bool flagRequired(Vflags flags, StatusFlags flag) {
+  return (flags & static_cast<Vflags>(flag));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Vgen {
@@ -195,17 +232,17 @@ struct Vgen {
 
   // instructions
   void emit(const absdbl& i) { a->Fabs(D(i.d), D(i.s)); }
-  void emit(const addl& i) { a->Add(W(i.d), W(i.s1), W(i.s0), SetFlags); }
-  void emit(const addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
-  void emit(const addq& i) { a->Add(X(i.d), X(i.s1), X(i.s0), SetFlags); }
-  void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
+  void emit(const addl& i) { a->Add(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
+  void emit(const addli& i) { a->Add(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
+  void emit(const addq& i) { a->Add(X(i.d), X(i.s1), X(i.s0), UF(i.fl));}
+  void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
-  void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), SetFlags); }
+  void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andbi& i);
-  void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), SetFlags); }
+  void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andli& i);
-  void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), SetFlags); }
-  void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
+  void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
+  void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovq& i) { a->Csel(X(i.d), X(i.t), X(i.f), C(i.cc)); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
@@ -214,15 +251,15 @@ struct Vgen {
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
   void emit(const cmpsd& i);
   void emit(const cvtsi2sd& i) { a->Scvtf(D(i.d), X(i.s)); }
-  void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, SetFlags); }
-  void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, SetFlags); }
+  void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, UF(i.fl)); }
+  void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, UF(i.fl)); }
   void emit(const decqmlock& i);
   void emit(const divint& i) { a->Sdiv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const divsd& i) { a->Fdiv(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const imul& i);
-  void emit(const incl& i) { a->Add(W(i.d), W(i.s), 1, SetFlags); }
-  void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1, SetFlags); }
-  void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, SetFlags); }
+  void emit(const incl& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); }
+  void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1, UF(i.fl)); }
+  void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
@@ -251,7 +288,7 @@ struct Vgen {
   void emit(const movzwq& i) { a->Uxth(X(i.d), W(i.s).X()); }
   void emit(const movzlq& i) { a->Uxtw(X(i.d), W(i.s).X()); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }
-  void emit(const neg& i) { a->Neg(X(i.d), X(i.s), SetFlags); }
+  void emit(const neg& i) { a->Neg(X(i.d), X(i.s), UF(i.fl)); }
   void emit(const nop& i) { a->Nop(); }
   void emit(const notb& i) { a->Mvn(W(i.d), W(i.s)); }
   void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
@@ -263,8 +300,13 @@ struct Vgen {
   void emit(const pushp& i);
   void emit(const roundsd& i);
   void emit(const sar& i);
+  void emit(const sarqi& i);
   void emit(const setcc& i) { a->Cset(W(i.d), C(i.cc)); }
   void emit(const shl& i);
+  void emit(const shlli& i);
+  void emit(const shlqi& i);
+  void emit(const shrli& i);
+  void emit(const shrqi& i);
   void emit(const sqrtsd& i) { a->Fsqrt(D(i.d), D(i.s)); }
   void emit(const srem& i);
   void emit(const storeb& i) { a->Strb(W(i.s), M(i.m)); }
@@ -272,12 +314,12 @@ struct Vgen {
   void emit(const storesd& i) { emit(store{i.s, i.m}); }
   void emit(const storeups& i);
   void emit(const storew& i) { a->Strh(W(i.s), M(i.m)); }
-  void emit(const subb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), SetFlags); }
-  void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
-  void emit(const subl& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), SetFlags); }
-  void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), SetFlags); }
-  void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), SetFlags); }
-  void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
+  void emit(const subb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
+  void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
+  void emit(const subl& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
+  void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
+  void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
+  void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testli& i);
@@ -293,19 +335,8 @@ struct Vgen {
   void emit(const xorqi& i);
 
   // arm intrinsics
-  void emit(const addxi& i) { a->Add(X(i.d), X(i.s1), i.s0.q()); }
-  void emit(const asrxi& i);
-  void emit(const asrxis& i);
   void emit(const cmplims& i);
   void emit(const fcvtzs& i) { a->Fcvtzs(X(i.d), D(i.s)); }
-  void emit(const lslwi& i);
-  void emit(const lslwis& i);
-  void emit(const lslxi& i);
-  void emit(const lslxis& i);
-  void emit(const lsrwi& i);
-  void emit(const lsrwis& i);
-  void emit(const lsrxi& i);
-  void emit(const lsrxis& i);
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
 
@@ -554,11 +585,11 @@ void Vgen::emit(const unwind& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const andbi& i) {
-  a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), SetFlags);
+  a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), UF(i.fl));
 }
 
 void Vgen::emit(const andli& i) {
-  a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), SetFlags);
+  a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), UF(i.fl));
 }
 
 void Vgen::emit(const testli& i) {
@@ -574,46 +605,54 @@ void Vgen::emit(const testli& i) {
  * In the following implementation,
  *   N, Z, V are updated according to result
  *   C is cleared (FIXME)
- *   PF, AF are not available
  */
 void Vgen::emit(const imul& i) {
 
   // Do the multiplication
   a->Mul(X(i.d), X(i.s0), X(i.s1));
 
-  vixl::Label after;
-  vixl::Label checkSign;
-  vixl::Label Overflow;
+  // If we have to set any flags, then always set N and Z since it's cheap.
+  // Only set V when absolutely necessary. C is not supported.
+  if (i.fl) {
+    vixl::Label after;
 
-  // Do the multiplication for the upper 64 bits of a 128 bit result.
-  // If the result is not all zeroes or all ones, then we have overflow.
-  // If the result is all zeroes or all ones, and the sign is the same,
-  // for both hi and low, then there is no overflow.
-  a->smulh(rAsm, X(i.s0), X(i.s1));
+    checkSF(i, StatusFlags::NotC);
 
-  // If hi is all 0's or 1's, then check the sign, else overflow (fallthrough)
-  a->Cmp(rAsm, 0);
-  a->B(&checkSign, vixl::eq);
-  a->Cmp(rAsm, -1);
-  a->B(&checkSign, vixl::eq);
+    if (flagRequired(i.fl, StatusFlags::V)) {
+      vixl::Label checkSign;
+      vixl::Label Overflow;
 
-  // Overflow, so conditionally set N and Z bits and then or in V bit.
-  a->Bind(&Overflow);
-  a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
-  a->Mrs(rAsm, NZCV);
-  a->Orr(rAsm, rAsm, 1<<28);
-  a->Msr(NZCV, rAsm);
-  a->B(&after);
+      // Do the multiplication for the upper 64 bits of a 128 bit result.
+      // If the result is not all zeroes or all ones, then we have overflow.
+      // If the result is all zeroes or all ones, and the sign is the same,
+      // for both hi and low, then there is no overflow.
+      a->smulh(rAsm, X(i.s0), X(i.s1));
 
-  // Check the signs of hi and lo.
-  a->Bind(&checkSign);
-  a->Eor(rAsm, rAsm, X(i.d));
-  a->Tbnz(rAsm, 63, &Overflow);
+      // If hi is all 0's or 1's, then check the sign, else overflow (fallthrough)
+      a->Cmp(rAsm, 0);
+      a->B(&checkSign, vixl::eq);
+      a->Cmp(rAsm, -1);
+      a->B(&checkSign, vixl::eq);
 
-  // No Overflow, so conditionally set the N and Z only.
-  a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
+      // Overflow, so conditionally set N and Z bits and then or in V bit.
+      a->Bind(&Overflow);
+      a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
+      a->Mrs(rAsm, NZCV);
+      a->Orr(rAsm, rAsm, 1<<28);
+      a->Msr(NZCV, rAsm);
+      a->B(&after);
 
-  a->bind(&after);
+      // Check the signs of hi and lo.
+      a->Bind(&checkSign);
+      a->Eor(rAsm, rAsm, X(i.d));
+      a->Tbnz(rAsm, 63, &Overflow);
+    }
+
+    // No Overflow, so conditionally set the N and Z only
+    a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags);
+
+    a->bind(&after);
+  }
 }
 
 #define Y(vasm_opc, arm_opc)           \
@@ -723,12 +762,13 @@ Y(storeups, st1, s, m)
  * In the following implementation,
  *   N, Z are updated according to result
  *   C, V are cleared
- *   PF, AF are not available
  */
-#define Y(vasm_opc, arm_opc, gpr_w, s0, zr)         \
-void Vgen::emit(const vasm_opc& i) {                \
-  a->arm_opc(gpr_w(i.d), gpr_w(i.s1), s0);          \
-  a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags); \
+#define Y(vasm_opc, arm_opc, gpr_w, s0, zr)           \
+void Vgen::emit(const vasm_opc& i) {                  \
+  a->arm_opc(gpr_w(i.d), gpr_w(i.s1), s0);            \
+  if (i.fl) {                                         \
+    a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags); \
+  }                                                   \
 }
 
 Y(orqi, Orr, X, i.s0.q(), xzr);
@@ -778,22 +818,6 @@ void Vgen::emit(const roundsd& i) {
     }
   }
 }
-
-/*
- * N, Z are updated according to result
- * C, V are cleared (FIXME)
- * PF, AF are not available
- */
-#define Y(vasm_opc, arm_opc)                      \
-void Vgen::emit(const vasm_opc& i) {              \
-  a->arm_opc(X(i.d), X(i.s1), X(i.s0));           \
-  a->Bic(vixl::xzr, X(i.d), vixl::xzr, SetFlags); \
-}
-
-Y(sar, Asr)
-Y(shl, Lsl)
-
-#undef Y
 
 void Vgen::emit(const srem& i) {
   a->Sdiv(rAsm, X(i.s0), X(i.s1));
@@ -871,71 +895,184 @@ void Vgen::emit(const cmpsd& i) {
   a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 }
 
-#define Y(vasm_opc, arm_opc, gpr_w)              \
-void Vgen::emit(const vasm_opc& i) {             \
-  a->arm_opc(gpr_w(i.d), gpr_w(i.s1), i.s0.l()); \
-}
 
-Y(asrxi, Asr, X)
-Y(lslwi, Lsl, W)
-Y(lslxi, Lsl, X)
-Y(lsrwi, Lsr, W)
-Y(lsrxi, Lsr, X)
-
-#undef Y
+///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Flags for shift instructions
- *   SF, ZF, PF should be updated according to result
- *   CF should be the last bit shifted out of the operand
- *   OF is defined only if 'count' is 1
- *     For left shifts, OF should be set to 0 if the MSB of result is same as CF
- *     (i.e., the top 2 bits of the operand are same). OF is set to 1 otherwise.
- *     For SAR, OF should be set to 0. For SHR, OF should be set to MSB of
- *     original operand
- *   AF is undefined
+ * For the shifts:
  *
- * In the following implementation,
- *   N, Z are updated according to result
- *   C is updated with the shifted out bit flipped
- *     Note: Flipping is needed to make jcc{CC_BE} and jcc{CC_A} work
- *   V is cleared (FIXME)
- *   PF, AF are not available
+ * C is set through inspection
+ * N, Z are updated according to result
+ * V is cleared (FIXME)
+ * PF, AF are not available
+ *
+ * Only set the flags if there are any required flags (i.fl).
+ * Setting the C flag is particularly expensive, so when setting
+ * flags check this flag specifically.
  */
-#define Y(vasm_opc, arm_opc, gpr_w, zr)                 \
-void Vgen::emit(const vasm_opc& i) {                    \
-  a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags);     \
-  a->Mrs(rAsm, NZCV);                                   \
-  auto d = i.s1;                                        \
-  if (i.s0.l() > 1) {                                   \
-    a->arm_opc(gpr_w(i.df), gpr_w(i.s1), i.s0.l() - 1); \
-    d = i.df;                                           \
-  }                                                     \
-  a->mvn(W(d).X(), W(d).X());                           \
-  a->bfm(rAsm, W(d).X(), 35, 0);                        \
-  a->Msr(NZCV, rAsm);                                   \
+#define Y(vasm_opc, arm_opc, gpr_w, zr)                      \
+void Vgen::emit(const vasm_opc& i) {                         \
+  if (!i.fl) {                                               \
+    /* Just perform the shift. */                            \
+    a->arm_opc(gpr_w(i.d), gpr_w(i.s1), gpr_w(i.s0));        \
+  } else {                                                   \
+    checkSF(i, StatusFlags::NotV);                           \
+    if (!flagRequired(i.fl, StatusFlags::C)) {               \
+      /* Perform the shift and set N and Z. */               \
+      a->arm_opc(gpr_w(i.d), gpr_w(i.s1), gpr_w(i.s0));      \
+      a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags);      \
+    } else {                                                 \
+      /* Use VIXL's macroassembler scratch regs. */          \
+      a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);      \
+      /* Perform the shift using temp and set N and Z. */    \
+      a->arm_opc(rVixlScratch0, gpr_w(i.s1), gpr_w(i.s0));   \
+      a->Bic(vixl::zr, rVixlScratch0, vixl::zr, SetFlags);   \
+      /* Read the flags into a temp. */                      \
+      a->Mrs(rAsm, NZCV);                                    \
+      /* Reshift right leaving the last bit as bit 0. */     \
+      a->Sub(rVixlScratch1, gpr_w(i.s0), 1);                 \
+      a->Lsr(rVixlScratch1, gpr_w(i.s1), rVixlScratch1);     \
+      /* Negate the bits, including bit 0 to match X64. */   \
+      a->Mvn(rVixlScratch1, rVixlScratch1);                  \
+      /* Copy bit zero into bit 29 of the flags. */          \
+      a->bfm(rAsm, rVixlScratch1, 35, 0);                    \
+      /* Copy the flags back to the system register. */      \
+      a->Msr(NZCV, rAsm);                                    \
+      /* Copy the result to the destination. */              \
+      a->Mov(gpr_w(i.d), rVixlScratch0);                     \
+      /* Restore VIXL's scratch regs. */                     \
+      a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);  \
+    }                                                        \
+  }                                                          \
 }
 
-Y(asrxis, Asr, X, xzr)
-Y(lsrwis, Lsr, W, wzr)
-Y(lsrxis, Lsr, X, xzr)
+Y(sar, Asr, X, xzr)
 
 #undef Y
 
-#define Y(vasm_opc, gpr_w, zr, sz)                  \
-void Vgen::emit(const vasm_opc& i) {                \
-  a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags); \
-  a->Mrs(rAsm, NZCV);                               \
-  a->Lsr(gpr_w(i.df), gpr_w(i.s1), sz - i.s0.l());  \
-  a->mvn(W(i.df).X(), W(i.df).X());                 \
-  a->bfm(rAsm, W(i.df).X(), 35, 0);                 \
-  a->Msr(NZCV, rAsm);                               \
+#define Y(vasm_opc, arm_opc, gpr_w, sz, zr)                 \
+void Vgen::emit(const vasm_opc& i) {                        \
+  if (!i.fl) {                                              \
+    /* Just perform the shift. */                           \
+    a->arm_opc(gpr_w(i.d), gpr_w(i.s1), gpr_w(i.s0));       \
+  } else {                                                  \
+    checkSF(i, StatusFlags::NotV);                          \
+    if (!flagRequired(i.fl, StatusFlags::C)) {              \
+      /* Perform the shift and set N and Z. */              \
+      a->arm_opc(gpr_w(i.d), gpr_w(i.s1), gpr_w(i.s0));     \
+      a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags);     \
+    } else {                                                \
+      /* Use VIXL's macroassembler scratch regs. */         \
+      a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);     \
+      /* Perform the shift using temp and set N and Z. */   \
+      a->arm_opc(rVixlScratch0, gpr_w(i.s1), gpr_w(i.s0));  \
+      a->Bic(vixl::zr, rVixlScratch0, vixl::zr, SetFlags);  \
+      /* Read the flags into a temp. */                     \
+      a->Mrs(rAsm, NZCV);                                   \
+      /* Reshift right leaving the last bit as bit 0. */    \
+      a->Mov(rVixlScratch1, sz);                            \
+      a->Sub(rVixlScratch1, rVixlScratch1, gpr_w(i.s0));    \
+      a->Lsr(rVixlScratch1, gpr_w(i.s1), rVixlScratch1);    \
+      /* Negate the bits, including bit 0 to match X64. */  \
+      a->Mvn(rVixlScratch1, rVixlScratch1);                 \
+      /* Copy bit zero into bit 29 of the flags. */         \
+      a->bfm(rAsm, rVixlScratch1, 35, 0);                   \
+      /* Copy the flags back to the system register. */     \
+      a->Msr(NZCV, rAsm);                                   \
+      /* Copy the result to the destination. */             \
+      a->Mov(gpr_w(i.d), rVixlScratch0);                    \
+      /* Restore VIXL's scratch regs. */                    \
+      a->SetScratchRegisters(rVixlScratch0, rVixlScratch1); \
+    }                                                       \
+  }                                                         \
 }
 
-Y(lslwis, W, wzr, 32)
-Y(lslxis, X, xzr, 64)
+Y(shl, Lsl, X, 64, xzr)
 
 #undef Y
+
+#define Y(vasm_opc, arm_opc, gpr_w, zr)                     \
+void Vgen::emit(const vasm_opc& i) {                        \
+  if (!i.fl) {                                              \
+    /* Just perform the shift. */                           \
+    a->arm_opc(gpr_w(i.d), gpr_w(i.s1), i.s0.l());          \
+  } else {                                                  \
+    checkSF(i, StatusFlags::NotV);                          \
+    if (!flagRequired(i.fl, StatusFlags::C)) {              \
+      /* Perform the shift and set N and Z. */              \
+      a->arm_opc(gpr_w(i.d), gpr_w(i.s1), i.s0.l());        \
+      a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags);     \
+    } else {                                                \
+      /* Use VIXL's macroassembler scratch regs. */         \
+      a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);     \
+      /* Perform the shift using temp and set N and Z. */   \
+      a->arm_opc(rVixlScratch0, gpr_w(i.s1), i.s0.l());     \
+      a->Bic(vixl::zr, rVixlScratch0, vixl::zr, SetFlags);  \
+      /* Read the flags into a temp. */                     \
+      a->Mrs(rAsm, NZCV);                                   \
+      /* Reshift right leaving the last bit as bit 0. */    \
+      a->Lsr(rVixlScratch1, gpr_w(i.s1), i.s0.l() - 1);     \
+      /* Negate the bits, including bit 0 to match X64. */  \
+      a->Mvn(rVixlScratch1, rVixlScratch1);                 \
+      /* Copy bit zero into bit 29 of the flags. */         \
+      a->bfm(rAsm, rVixlScratch1, 35, 0);                   \
+      /* Copy the flags back to the system register. */     \
+      a->Msr(NZCV, rAsm);                                   \
+      /* Copy the result to the destination. */             \
+      a->Mov(gpr_w(i.d), rVixlScratch0);                    \
+      /* Restore VIXL's scratch regs. */                    \
+      a->SetScratchRegisters(rVixlScratch0, rVixlScratch1); \
+    }                                                       \
+  }                                                         \
+}
+
+Y(sarqi, Asr, X, xzr)
+Y(shrli, Lsr, W, wzr)
+Y(shrqi, Lsr, X, xzr)
+
+#undef Y
+
+#define Y(vasm_opc, arm_opc, gpr_w, sz, zr)                  \
+void Vgen::emit(const vasm_opc& i) {                         \
+  if (!i.fl) {                                               \
+    /* Just perform the shift. */                            \
+    a->arm_opc(gpr_w(i.d), gpr_w(i.s1), i.s0.l());           \
+  } else {                                                   \
+    checkSF(i, StatusFlags::NotV);                           \
+    if (!flagRequired(i.fl, StatusFlags::C)) {               \
+      /* Perform the shift and set N and Z. */               \
+      a->arm_opc(gpr_w(i.d), gpr_w(i.s1), i.s0.l());         \
+      a->Bic(vixl::zr, gpr_w(i.d), vixl::zr, SetFlags);      \
+    } else {                                                 \
+      /* Use VIXL's macroassembler scratch regs. */          \
+      a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);      \
+      /* Perform the shift using temp and set N and Z. */    \
+      a->arm_opc(rVixlScratch0, gpr_w(i.s1), i.s0.l());      \
+      a->Bic(vixl::zr, rVixlScratch0, vixl::zr, SetFlags);   \
+      /* Read the flags into a temp. */                      \
+      a->Mrs(rAsm, NZCV);                                    \
+      /* Reshift right leaving the last bit as bit 0. */     \
+      a->Lsr(rVixlScratch1, gpr_w(i.s1), sz - i.s0.l());     \
+      /* Negate the bits, including bit 0 to match X64. */   \
+      a->Mvn(rVixlScratch1, rVixlScratch1);                  \
+      /* Copy bit zero into bit 29 of the flags. */          \
+      a->bfm(rAsm, rVixlScratch1, 35, 0);                    \
+      /* Copy the flags back to the system register. */      \
+      a->Msr(NZCV, rAsm);                                    \
+      /* Copy the result to the destination. */              \
+      a->Mov(gpr_w(i.d), rVixlScratch0);                     \
+      /* Restore VIXL's scratch regs. */                     \
+      a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);  \
+    }                                                        \
+  }                                                          \
+}
+
+Y(shlli, Lsl, W, 32, wzr)
+Y(shlqi, Lsl, X, 64, xzr)
+
+#undef Y
+
+///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const popp& i) {
   a->Ldp(X(i.d0), X(i.d1), MemOperand(sp, 16, PostIndex));
@@ -980,7 +1117,7 @@ void lowerVptr(Vptr& p, Vout& v) {
       // Not supported, convert to [base].
       if (p.scale > 1) {
         auto t = v.makeReg();
-        v << lslxi{Log2(p.scale), p.index, t};
+        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
         p.base = t;
       } else {
         p.base = p.index;
@@ -1018,7 +1155,7 @@ void lowerVptr(Vptr& p, Vout& v) {
       // Not supported, convert to [base, #imm] or [base, index].
       if (p.scale > 1) {
         auto t = v.makeReg();
-        v << lslxi{Log2(p.scale), p.index, t};
+        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
         p.base = t;
       } else {
         p.base = p.index;
@@ -1040,10 +1177,10 @@ void lowerVptr(Vptr& p, Vout& v) {
       auto index = v.makeReg();
       if (p.scale > 1) {
         auto t = v.makeReg();
-        v << lslxi{Log2(p.scale), p.index, t};
-        v << addxi{p.disp, t, index};
+        v << shlqi{Log2(p.scale), p.index, t, v.makeReg()};
+        v << addqi{p.disp, t, index, v.makeReg()};
       } else {
-        v << addxi{p.disp, p.index, index};
+        v << addqi{p.disp, p.index, index, v.makeReg()};
       }
       p.index = index;
       p.scale = 1;
@@ -1451,31 +1588,6 @@ void lower(Vunit& u, testbi& i, Vlabel b, size_t z) {
   });
 }
 
-/*
- * Shift instructions were split into 2, one does the actual shifting and the
- * other updates the flags. Following code makes a copy of the original
- * register, outputs the shift instruction followed by flags update instruction.
- * If the 'SF' register is not used by subsequent code, the copy and flags
- * update instructions are removed by the dead code elimination pass.
- */
-#define Y(vasm_opc, lower_opc, sf_opc)                  \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(u, b, z, [&] (Vout& v) {                   \
-    auto r = v.makeReg(), d = v.makeReg();              \
-    v << copy{i.s1, r};                                 \
-    v << lower_opc{i.s0, i.s1, i.d};                    \
-    v << sf_opc{i.s0, r, i.d, d, i.sf};                 \
-  });                                                   \
-}
-
-Y(sarqi, asrxi, asrxis)
-Y(shlli, lslwi, lslwis)
-Y(shlqi, lslxi, lslxis)
-Y(shrli, lsrwi, lsrwis)
-Y(shrqi, lsrxi, lsrxis)
-
-#undef Y
-
 #define Y(vasm_opc, lower_opc, load_opc, imm)           \
 void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(u, b, z, [&] (Vout& v) {                   \
@@ -1605,6 +1717,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
 
   optimizeCopies(unit, abi);
 
+  annotateSFUses(unit);
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
     if (regalloc) allocateRegisters(unit, abi);

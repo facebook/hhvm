@@ -746,12 +746,7 @@ __thread bool t_enable_samples;
 __thread size_t t_trigger;
 __thread MemoryUsageStats t_pre_stats;
 
-constexpr bool kHaveTypeIds =
-#ifdef HHVM_BUILD_TYPE_SCANNERS
-  true;
-#else
-  false;
-#endif
+constexpr bool kHaveTypeIds = type_scan::kBuildScanners;
 
 StructuredLogEntry logCommon() {
   StructuredLogEntry sample;

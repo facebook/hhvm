@@ -592,21 +592,15 @@ struct Generator::IndexedType {
   folly::Optional<LayoutError> errors;
 };
 
-Generator::Generator(const std::string& filename)
-#ifdef HHVM_BUILD_TYPE_SCANNERS
-    // Parsing the debug information can take quite a bit of time right now, so
-    // only actually do it if someone has explicitly opted into it.
-    : m_parser{TypeParser::make(filename)}
-#else
-    : m_parser{nullptr}
-#endif
-{
+Generator::Generator(const std::string& filename) {
   // Either this platform has no support for parsing debug information, or the
   // preprocessor symbol to enable actually building scanner isn't
   // enabled. Either way, just bail out. Everything will get a conservative
   // scanner by default if someone actually tries to use the scanners at
   // runtime.
-  if (!m_parser) return;
+  if (!HPHP::type_scan::kBuildScanners) return;
+
+  m_parser = TypeParser::make(filename);
 
   std::vector<ObjectType> indexer_types;
   std::vector<ObjectType> countable_markers;

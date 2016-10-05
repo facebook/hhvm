@@ -305,6 +305,14 @@ struct Scanner {
   std::vector<const void*> m_visited;
 };
 
+constexpr bool kBuildScanners =
+  /* Doesn't work with Clang at the moment. t10336705 */
+#if defined(HHVM_BUILD_TYPE_SCANNERS) && !defined(__clang__)
+  true;
+#else
+  false;
+#endif
+
 /*
  * Type annotations to change generated function behavior:
  *

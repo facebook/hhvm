@@ -1749,28 +1749,42 @@ void parse_parameter_list(AsmState& as) {
   // have a dv-initializer.
   bool inDVInits = false;
 
+  bool seenVariadic = false;
+
   for (;;) {
     FuncEmitter::ParamInfo param;
 
     as.in.skipWhitespace();
     int ch = as.in.peek();
     if (ch == ')') { as.in.getc(); break; } // allow empty param lists
+
+    if (seenVariadic) {
+      as.error("functions can only have one variadic argument");
+    }
+
     if (ch == '.') {
       as.in.getc();
       if (as.in.getc() != '.' ||
           as.in.getc() != '.') {
         as.error("expecting '...'");
       }
-      as.in.expectWs(')');
-      as.fe->attrs |= AttrMayUseVV;
-      break;
+
+      seenVariadic = true;
+      param.variadic = true;
+      as.fe->attrs |= AttrVariadicParam;
     }
 
-    std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
+    if (!seenVariadic) {
+      std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
+    }
+
     as.in.skipWhitespace();
     ch = as.in.getc();
 
     if (ch == '&') {
+      if (seenVariadic) {
+        as.error("variadic parameter cannot be by-ref");
+      }
       param.byRef = true;
       ch = as.in.getc();
     }
@@ -1786,6 +1800,10 @@ void parse_parameter_list(AsmState& as) {
     ch = as.in.getc();
     if (ch == '=') {
       inDVInits = true;
+
+      if (seenVariadic) {
+        as.error("variadic parameter cannot have dv-initializer");
+      }
 
       std::string label;
       if (!as.in.readword(label)) {
@@ -1817,7 +1835,7 @@ void parse_parameter_list(AsmState& as) {
         ch = as.in.getc();
       }
     } else {
-      if (inDVInits) {
+      if (inDVInits && !seenVariadic) {
         as.error("all parameters after the first with a dv-initializer "
                  "must have a dv-initializer");
       }

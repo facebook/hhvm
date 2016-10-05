@@ -1,15 +1,24 @@
-.function array_map($func = no_args, $arr = one_arg, $res = one_array, ...) {
+.function array_map($func = no_args, $arr = one_arg, $res = one_array, ...$extra) {
           .numiters 2;
 
 # If we get here, a value was supplied for $res (or we did not get an
 # an array as $arr), so we bail out to the c++ implementation
 
-call_cpp_impl:
-          FPushFuncD   1   "__SystemLib\\array_map"
-          FCallBuiltin 0 0 "__SystemLib\\func_get_args_sl"
+call_cpp_impl_with_extra:
+          FPushFuncD   4   "__SystemLib\\array_map"
+          FPassL 0 $func
+          FPassL 1 $arr
+          FPassL 2 $res
+          FPassL 3 $extra
+          FCallUnpack 4
           UnboxR
-          FPassC       0
-          FCallArray
+          RetC
+
+call_cpp_impl:
+          FPushFuncD   2   "__SystemLib\\array_map"
+          FPassL 0 $func
+          FPassL 1 $arr
+          FCall 2
           UnboxR
           RetC
 

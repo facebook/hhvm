@@ -293,13 +293,16 @@ final class AsyncMysqlConnection {
   }
 
   /**
-   * Begin running a query on the MySQL database client.
+   * Begin running an unsafe query on the MySQL database client.
    *
    * If you have a direct query that requires no placeholders, then you can
    * use this method. It takes a raw string query that will be executed as-is.
    *
    * You may want to call `escapeString()` to ensure that any queries out of
    * your direct control are safe.
+   *
+   * We strongly recommend using `queryf()` instead in all cases, which
+   * automatically escapes parameters.
    *
    * @param $query - The query itself.
    * @param $timeout_micros - The maximum time, in microseconds, in which the
@@ -370,6 +373,10 @@ final class AsyncMysqlConnection {
    * `join` on the returned `Awaitable`, you will get a `Vector` of
    * `AsyncMysqlQueryResult`, one result for each query.
    *
+   * We strongly recommend using multiple calls to `queryf()` instead as it
+   * escapes parameters; multiple queries can be executed simultaneously by
+   * combining `queryf()` with `HH\Asio\v()`.
+   *
    * @param $queries - A `Vector` of queries, with each query being a `string`
    *                    in the array.
    * @param $timeout_micros - The maximum time, in microseconds, in which the
@@ -386,10 +393,14 @@ final class AsyncMysqlConnection {
     int $timeout_micros = -1): Awaitable<Vector<AsyncMysqlQueryResult>>;
 
   /**
-   * Escape a string to be safe to include in a query.
+   * Escape a string to be safe to include in a raw query.
    *
    * Use this method to ensure your query is safe from, for example, SQL
-   * injection.
+   * injection if you are not using an API that automatically escapes
+   * queries.
+   *
+   * We strongly recommend using `queryf()` instead, which automatically
+   * escapes string parameters.
    *
    * This method is equivalent to PHP's
    * [mysql_real_escape_string()](http://goo.gl/bnxqtE).

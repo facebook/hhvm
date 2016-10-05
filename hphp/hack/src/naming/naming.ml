@@ -1893,7 +1893,7 @@ module Make (GetLocals : GetLocals) = struct
           | [e] -> N.Special_func (N.Gena (expr env e))
           | _ -> Errors.gena_arity p; N.Any
           )
-        end else if cn = SN.FB.fgenva then begin
+        end else if cn = SN.FB.fgenva || cn = SN.HH.asio_va then begin
           arg_unpack_unexpected uel ;
           if List.length el < 1
           then (Errors.genva_arity p; N.Any)

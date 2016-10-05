@@ -203,7 +203,10 @@ let builtins =
   "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"^
   "abstract final class keyset<+T as arraykey> implements Indexish<T, T> {}\n"^
   "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"^
-  "function meth_caller(string $cls_name, string $meth_name);\n"
+  "function meth_caller(string $cls_name, string $meth_name);\n"^
+  "namespace HH\\Asio {"^
+  "  function va(...$args);\n"^
+  "}\n"
 
 (*****************************************************************************)
 (* Helpers *)

@@ -19,6 +19,18 @@ function main() {
   };
   var_dump(HH\Asio\join(HH\Asio\v($in_m)));
   var_dump(HH\Asio\join(HH\Asio\m($in_m)));
+
+  var_dump(HH\Asio\join(HH\Asio\va(
+    asyncval(123),
+    asyncval(456),
+    asyncval(789),
+  )));
+
+  var_dump(HH\Asio\join(HH\Asio\va(
+    asyncval(123),
+    asyncval('foo'),
+    asyncval(array(1)),
+  )));
 }
 
 main();

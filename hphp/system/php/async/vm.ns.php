@@ -78,4 +78,28 @@ async function v<Tv>(
   return $ret;
 }
 
+/**
+ * Translate a varargs of `Awaitable`s into a single `Awaitable<(...)>`.
+ * This function's behavior cannot be expressed with type hints,
+ * so it's hardcoded in the typechecker:
+ *
+ *     HH\Asio\va(Awaitable<T1>, Awaitable<T2>, ... , Awaitable<Tn>)
+ *
+ * will return
+ *
+ *     Awaitable<(T1, T2, ..., Tn)>
+ */
+async function va(...$args): Awaitable/*<(...)>*/ {
+  $wait_handles = array();
+  foreach ($args as $value) {
+    $wait_handles[] = $value->getWaitHandle();
+  }
+  await AwaitAllWaitHandle::fromArray($wait_handles);
+  $ret = array();
+  foreach ($wait_handles as $value) {
+    $ret[] = $value->result();
+  }
+  return $ret;
+}
+
 } // namespace HH\Asio

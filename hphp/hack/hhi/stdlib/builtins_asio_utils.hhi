@@ -145,4 +145,8 @@ function v<Tv>(
   Traversable<Awaitable<Tv>> $awaitables,
 ): Awaitable<Vector<Tv>> {}
 
+function va(
+  /* Awaitable<T1>, Awaitable<T2>, ..., Awaitable<Tn> */...$args
+): Awaitable/*<(T1,T2,...,Tn)>*/ {}
+
 } // namespace HH\Asio

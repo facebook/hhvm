@@ -13,3 +13,8 @@ async function slow_adder(Awaitable<int> $sturm, Awaitable<int> $drang) : Awaita
   list($so, $deep) = await genva($sturm, $drang);
   return $so + $deep;
 }
+
+async function slow_adder2(Awaitable<int> $sturm, Awaitable<int> $drang) : Awaitable<int> {
+  list($so, $deep) = await \HH\Asio\va($sturm, $drang);
+  return $so + $deep;
+}

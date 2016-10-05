@@ -243,6 +243,12 @@ module FB = struct
 
 end
 
+module HH = struct
+
+  let asio_va                = "\\HH\\Asio\\va"
+
+end
+
 module Shapes = struct
   let cShapes                = "\\Shapes"
   let idx                    = "idx"

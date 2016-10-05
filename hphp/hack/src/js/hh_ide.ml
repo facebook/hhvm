@@ -122,7 +122,7 @@ let declare_file fn content =
   end;
   try
     Autocomplete.auto_complete := false;
-    let {Parser_hack.file_mode; comments; ast} =
+    let {Parser_hack.file_mode; comments; ast; _;} =
       Parser_hack.program_with_default_popt fn content
     in
     let is_php = file_mode = None in

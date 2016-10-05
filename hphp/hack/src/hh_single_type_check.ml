@@ -635,7 +635,7 @@ let decl_and_run_mode {filename; mode; no_builtins} =
 
     let files_info =
       Relative_path.Map.mapi begin fun fn parsed_file ->
-        let {Parser_hack.file_mode; comments; ast} = parsed_file in
+        let {Parser_hack.file_mode; comments; ast; _} = parsed_file in
         Parser_heap.ParserHeap.add fn (ast, Parser_heap.Full);
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.

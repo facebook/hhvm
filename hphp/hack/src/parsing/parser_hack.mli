@@ -12,6 +12,7 @@ type parser_return = {
     file_mode  : FileInfo.mode option; (* None if PHP *)
     comments   : (Pos.t * string) list;
     ast        : Ast.program;
+    content   : string;
   }
 
 val program :

@@ -123,7 +123,7 @@ let declare_and_check content ~f =
     Errors.ignore_ begin fun () ->
       Fixmes.HH_FIXMES.oldify_batch @@
         Fixmes.HH_FIXMES.KeySet.singleton path;
-      let {Parser_hack.file_mode = _; comments = _; ast} =
+      let {Parser_hack.file_mode = _; comments = _; content = _; ast} =
         Parser_hack.program_with_default_popt path content
       in
       let funs, classes, typedefs, consts =

@@ -17,7 +17,7 @@ open Core
 (* We store only the names and declarations in the ParserHeap.
    The full flag in each function runs a full parsing with method bodies. *)
 
-type parse_type = Decl | Full
+type parse_type = Decl of string | Full
 
 module ParserHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = Ast.program * parse_type
@@ -31,14 +31,15 @@ module LocalParserHeap = SharedMem.LocalCache (Relative_path.S) (struct
     let description = "ParserLocal"
   end)
 
-let get_from_local_heap popt file_name =
+let get_from_local_heap popt file_name contents =
   match LocalParserHeap.get file_name with
-  | Some ast -> ast
+  | Some ast ->ast
   | None ->
-    let { Parser_hack.ast;
-      _ } = Parser_hack.from_file popt file_name in
-    LocalParserHeap.add file_name ast;
-    ast
+        let { Parser_hack.ast;
+          _ } = Parser_hack.program popt file_name contents in
+        LocalParserHeap.add file_name ast;
+        ast
+
 let get_class defs class_name =
   List.fold_left defs ~init:None ~f:begin fun acc def ->
     match def with
@@ -70,8 +71,9 @@ let get_const defs name =
 let get_from_parser_heap ?(full = false) ?popt file_name name get_element =
   match ParserHeap.get file_name with
     | None -> None
-    | Some (_, Decl) when full ->
-      get_element (get_from_local_heap (Utils.unsafe_opt popt) file_name) name
+    | Some (_, Decl content) when full ->
+      let ast = get_from_local_heap (Utils.unsafe_opt popt) file_name content in
+      get_element ast name
     | Some (defs, _) -> get_element defs name
 
 let find_class_in_file file_name class_name =

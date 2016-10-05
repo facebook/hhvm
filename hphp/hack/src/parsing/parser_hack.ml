@@ -43,6 +43,7 @@ type parser_return = {
   file_mode  : FileInfo.mode option; (* None if PHP *)
   comments   : (Pos.t * string) list;
   ast        : Ast.program;
+  content    : string;
 }
 
 (*****************************************************************************)
@@ -450,7 +451,7 @@ let rec program
   let ast = if elaborate_namespaces
     then Namespaces.elaborate_defs env.popt ast
     else ast in
-  {file_mode; comments; ast}
+  {file_mode; comments; ast; content}
 
 and program_with_default_popt
     ?(elaborate_namespaces = true)

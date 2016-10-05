@@ -39,12 +39,12 @@ let legacy_php_file_info = ref (fun fn ->
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
 let process_parse_result ~quick (acc, errorl, error_files) fn res =
-  let errorl', {Parser_hack.file_mode; comments; ast}, _ = res in
+  let errorl', {Parser_hack.file_mode; comments; ast; content;}, _ = res in
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
 
   if file_mode <> None then begin
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
-    let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
+    let mode = if quick then Parser_heap.Decl content else Parser_heap.Full in
     Parser_heap.ParserHeap.write_through fn (ast, mode);
     let defs =
       {FileInfo.funs; classes; typedefs; consts; comments; file_mode;

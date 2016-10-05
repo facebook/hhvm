@@ -217,30 +217,6 @@ void ClassScope::inheritedMagicMethods(ClassScopePtr super) {
   }
 }
 
-bool ClassScope::implementsArrayAccess() {
-  return
-    getAttribute(MayHaveArrayAccess) |
-    getAttribute(HasArrayAccess) |
-    getAttribute(InheritsArrayAccess);
-}
-
-bool ClassScope::implementsAccessor(int prop) {
-  if (m_attribute & prop) return true;
-  if (prop & MayHaveUnknownPropGetter) {
-    prop |= HasUnknownPropGetter | InheritsUnknownPropGetter;
-  }
-  if (prop & MayHaveUnknownPropSetter) {
-    prop |= HasUnknownPropSetter | InheritsUnknownPropSetter;
-  }
-  if (prop & MayHaveUnknownPropTester) {
-    prop |= HasUnknownPropTester | InheritsUnknownPropTester;
-  }
-  if (prop & MayHavePropUnsetter) {
-    prop |= HasPropUnsetter | InheritsPropUnsetter;
-  }
-  return m_attribute & prop;
-}
-
 void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
   seen.insert(m_scopeName);
 
@@ -544,14 +520,7 @@ MethodStatementPtr findTraitMethodImpl(AnalysisResultPtr ar,
 void ClassScope::TMIOps::addTraitAlias(ClassScope* cs,
                                        TraitAliasStatementPtr stmt,
                                        ClassScopePtr traitCls) {
-  auto const& traitName = stmt->getTraitName();
-  auto const& origMethName = stmt->getMethodName();
-  auto const& newMethName = stmt->getNewMethodName();
-
-  auto origName = traitName.empty() ? "(null)" : traitName;
-  origName += "::" + origMethName;
-
-  cs->m_traitAliases.push_back(std::make_pair(newMethName, origName));
+  // We don't actually need to track this here, so do nothing.
 }
 
 ClassScopePtr
@@ -923,11 +892,6 @@ void ClassScope::setSystem() {
   for (const auto& func : m_functionsVec) {
     func->setSystem();
   }
-}
-
-bool ClassScope::needLazyStaticInitializer() {
-  return getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
-    getConstants()->hasDynamic();
 }
 
 bool ClassScope::hasConst(const std::string &name) const {

@@ -39,7 +39,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
                              const std::string *filename /* = NULL */)
     : m_out(nullptr), m_output(output),
-      m_context(NoContext), m_itemIndex(-1) {
+      m_context(NoContext) {
   for (int i = 0; i < StreamCount; i++) {
     m_streams[i] = nullptr;
     m_indentation[i] = 0;
@@ -75,20 +75,10 @@ bool CodeGenerator::usingStream(Stream stream) {
   return m_out == m_streams[stream];
 }
 
-std::ostream *CodeGenerator::getStream(Stream stream) const {
-  assert(stream >= 0 && stream < StreamCount);
-  return m_streams[stream];
-}
-
 void CodeGenerator::setStream(Stream stream, std::ostream *out) {
   assert(out);
   assert(stream >= 0 && stream < StreamCount);
   m_streams[stream] = out;
-}
-
-int CodeGenerator::getLineNo(Stream stream) const {
-  assert(stream >= 0 && stream < StreamCount);
-  return m_lineNo[stream];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,10 +92,6 @@ void CodeGenerator::indentBegin(const char *fmt, ...) {
   m_indentation[m_curStream]++;
 }
 
-void CodeGenerator::indentBegin() {
-  m_indentation[m_curStream]++;
-}
-
 void CodeGenerator::indentEnd(const char *fmt, ...) {
   assert(m_indentation[m_curStream]);
   m_indentation[m_curStream]--;
@@ -115,26 +101,6 @@ void CodeGenerator::indentEnd(const char *fmt, ...) {
 void CodeGenerator::indentEnd() {
   assert(m_indentation[m_curStream]);
   m_indentation[m_curStream]--;
-}
-
-bool CodeGenerator::inComments() const {
-  return m_inComments[m_curStream] > 0;
-}
-
-void CodeGenerator::startComments() {
-  m_inComments[m_curStream]++;
-  printf(" /*");
-}
-
-void CodeGenerator::endComments() {
-  assert(m_inComments[m_curStream] > 0);
-  m_inComments[m_curStream]--;
-  printf(" */");
-}
-
-void CodeGenerator::printSection(const char *name, bool newline /* = true */) {
-  if (newline) printf("\n");
-  printf("// %s\n", name);
 }
 
 void CodeGenerator::printSeparator() {
@@ -157,64 +123,6 @@ void CodeGenerator::namespaceEnd() {
   printf("\n");
   printSeparator();
   printf("}\n");
-}
-
-std::string CodeGenerator::getFormattedName(const std::string &file) {
-  char *fn = strdup(file.c_str());
-  int len = strlen(fn);
-  always_assert(len == (int)file.size());
-  for (int i = 0; i < len; i++) {
-    if (!isalnum(fn[i])) fn[i] = '_';
-  }
-  std::string formatted = fn;
-  free(fn);
-  int hash = hash_string_unsafe(file.data(), file.size());
-  formatted += boost::str(boost::format("%08x") % hash);
-  return formatted;
-}
-
-bool CodeGenerator::ensureInNamespace() {
-  if (m_inNamespace) return false;
-  namespaceBegin();
-  return true;
-}
-
-bool CodeGenerator::ensureOutOfNamespace() {
-  if (!m_inNamespace) return false;
-  namespaceEnd();
-  return true;
-}
-
-void CodeGenerator::ifdefBegin(bool ifdef, const char *fmt, ...) {
-  printf(ifdef ? "#ifdef " : "#ifndef ");
-  va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
-  printf("\n");
-}
-
-void CodeGenerator::ifdefEnd(const char *fmt, ...) {
-  printf("#endif // ");
-  va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
-  printf("\n");
-}
-
-void CodeGenerator::printDocComment(const std::string comment) {
-  if (comment.empty()) return;
-  std::string escaped;
-  escaped.reserve(comment.size() + 10);
-  for (unsigned int i = 0; i < comment.size(); i++) {
-    char ch = comment[i];
-    escaped += ch;
-    if (ch == '/' && i > 1 && comment[i+1] == '*') {
-      escaped += '\\'; // splitting illegal /* into /\*
-    }
-  }
-  print(escaped.c_str(), false);
-  printf("\n");
-}
-
-std::string CodeGenerator::EscapeLabel(const std::string &name,
-                                       bool *binary /* = NULL */) {
-  return escapeStringForCPP(name, binary);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -298,82 +206,6 @@ std::string CodeGenerator::GetNewLambda() {
     folly::to<std::string>(++s_idLambda);
 }
 
-void CodeGenerator::resetIdCount(const std::string &key) {
-  m_idCounters[key] = 0;
-}
-
 int CodeGenerator::createNewId(const std::string &key) {
   return ++m_idCounters[key];
 }
-
-int CodeGenerator::createNewId(ConstructPtr cs) {
-  FileScopePtr fs = cs->getFileScope();
-  if (fs) {
-    return createNewId(fs->getName());
-  }
-  return createNewId("");
-}
-
-int CodeGenerator::createNewLocalId(ConstructPtr ar) {
-  if (m_wrappedExpression[m_curStream]) {
-    return m_localId[m_curStream]++;
-  }
-  FunctionScopePtr func = ar->getFunctionScope();
-  if (func) {
-    return func->nextInlineIndex();
-  }
-  FileScopePtr fs = ar->getFileScope();
-  if (fs) {
-    return createNewId(fs->getName());
-  }
-  return createNewId("");
-}
-
-void CodeGenerator::pushBreakScope(int labelId,
-                                   bool loopCounter /* = true */) {
-  m_breakScopes.push_back(labelId);
-  if (loopCounter) {
-    printf("LOOP_COUNTER(%d);\n", int(labelId & ~BreakScopeBitMask));
-  }
-}
-
-void CodeGenerator::popBreakScope() {
-  m_breakScopes.pop_back();
-  if (m_breakScopes.size() == 0) {
-    m_breakLabelIds.clear();
-    m_contLabelIds.clear();
-  }
-}
-
-void CodeGenerator::pushCallInfo(int cit) {
-  m_callInfos.push_back(cit);
-}
-void CodeGenerator::popCallInfo() {
-  m_callInfos.pop_back();
-}
-int CodeGenerator::callInfoTop() {
-  if (m_callInfos.empty()) return -1;
-  return m_callInfos.back();
-}
-
-void CodeGenerator::addLabelId(const char *name, int labelId) {
-  if (!strcmp(name, "break")) {
-    m_breakLabelIds.insert(labelId);
-  } else if (!strcmp(name, "continue")) {
-    m_contLabelIds.insert(labelId);
-  } else {
-    assert(false);
-  }
-}
-
-bool CodeGenerator::findLabelId(const char *name, int labelId) {
-  if (!strcmp(name, "break")) {
-    return m_breakLabelIds.find(labelId) != m_breakLabelIds.end();
-  } else if (!strcmp(name, "continue")) {
-    return m_contLabelIds.find(labelId) != m_contLabelIds.end();
-  } else {
-    assert(false);
-  }
-  return false;
-}
-

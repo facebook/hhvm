@@ -65,7 +65,6 @@ bool Option::GeneratePickledPHP = false;
 bool Option::GenerateInlinedPHP = false;
 bool Option::GenerateTrimmedPHP = false;
 bool Option::ConvertSuperGlobals = false;
-bool Option::ConvertQOpExpressions = false;
 std::string Option::ProgramPrologue;
 std::string Option::TrimmedPrologue;
 std::set<std::string, stdltistr> Option::DynamicInvokeFunctions;
@@ -93,17 +92,9 @@ const char *Option::UserFilePrefix = "php/";
 
 bool Option::PreOptimization = false;
 bool Option::PostOptimization = false;
-bool Option::SeparateCompilation = false;
-bool Option::SeparateCompLib = false;
-bool Option::AnalyzePerfectVirtuals = true;
 bool Option::HardConstProp = true;
 
 bool Option::KeepStatementsWithNoEffect = false;
-
-int Option::ConditionalIncludeExpandLevel = 1;
-
-int Option::DependencyMaxProgram = 1;
-int Option::CodeErrorMaxProgram = 1;
 
 std::string Option::ProgramName;
 
@@ -155,18 +146,6 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
       Config::GetString(ini_rm, hdf_rm, "path", "", false);
   };
   Config::Iterate(root_map_callback, ini, roots, name);
-}
-
-void Option::LoadRootHdf(const IniSetting::Map& ini,
-                         const Hdf &roots,
-                         const std::string& name,
-                         std::vector<std::string> &vec) {
-  auto root_vec_callback = [&] (const IniSetting::Map &ini_rv,
-                                const Hdf &hdf_rv,
-                                const std::string &ini_rv_key) {
-    vec.push_back(Config::GetString(ini_rv, hdf_rv, "", "", false));
-  };
-  Config::Iterate(root_vec_callback, ini, roots, name);
 }
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {

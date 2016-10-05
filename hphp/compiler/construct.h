@@ -292,7 +292,6 @@ public:
   void dumpNode(int spc) const;
 
   void dump(int spc, AnalysisResultConstPtr ar);
-  void dumpNode(int spc, AnalysisResultConstPtr ar);
 
   /**
    * Called when generating code.
@@ -312,10 +311,6 @@ public:
 
   void recomputeEffects();
 
-  /**
-   * Write where this construct was in PHP files.
-   */
-  void printSource(CodeGenerator &cg);
   ExpressionPtr makeConstant(AnalysisResultConstPtr ar,
                              const std::string &value) const;
   ExpressionPtr makeScalarExpression(AnalysisResultConstPtr ar,

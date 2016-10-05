@@ -85,11 +85,7 @@ struct FunctionScope : BlockScope,
   FunctionScope(bool method, const std::string &name, bool reference);
   void setParamCounts(AnalysisResultConstPtr ar,
                       int minParam, int numDeclParam);
-  void setParamName(int index, const std::string &name);
   void setRefParam(int index);
-  bool hasRefParam(int max) const;
-
-  void addModifier(int mod);
 
   bool hasUserAttr(const char *attr) const;
 
@@ -125,15 +121,8 @@ struct FunctionScope : BlockScope,
   int nextInlineIndex() { return ++m_inlineIndex; }
 
   bool usesLSB() const { return !m_noLSB; }
-  void clearUsesLSB() { m_noLSB = true; }
   bool nextLSB() const { return m_nextLSB; }
   void setNextLSB(bool f) { m_nextLSB = f; }
-
-  void setHasGoto() { m_hasGoto = true; }
-  void setHasTry() { m_hasTry = true; }
-  bool hasGoto() const { return m_hasGoto; }
-  bool hasTry() const { return m_hasTry; }
-  unsigned getNewID() { return m_nextID++; }
 
   bool needsLocalThis() const;
 
@@ -142,20 +131,7 @@ struct FunctionScope : BlockScope,
     return isNamed(n.c_str());
   }
 
-  /**
-   * Either __construct or a class-name constructor.
-   */
-  bool isConstructor(ClassScopePtr cls) const;
-
   const std::string &getParamName(int index) const;
-
-//  const std::string &name() const {
-//    return getName();
-//  }
-
-  int getRedeclaringId() const {
-    return m_redeclaring;
-  }
 
   void setSystem() {
     m_system = true;
@@ -196,30 +172,13 @@ struct FunctionScope : BlockScope,
    * Whether this function has no side effects
    */
   bool hasEffect() const;
-  void setNoEffect();
 
   /**
    * Whether this function can be constant folded
    */
   bool isFoldable() const;
 
-  /*
-   * If this is a builtin function and does not need an ActRec
-   */
-  bool noFCallBuiltin() const;
-  void setNoFCallBuiltin();
-
   bool needsFinallyLocals() const;
-
-  /**
-   * Whether this function is a runtime helper function
-   */
-  void setHelperFunction();
-
-  /**
-   * Whether this function returns reference or has reference parameters.
-   */
-  bool containsReference() const;
 
   /**
    * Whether this function contains a usage of $this
@@ -229,15 +188,10 @@ struct FunctionScope : BlockScope,
   bool containsBareThis() const { return m_containsBareThis; }
   bool containsRefThis() const { return m_containsBareThis & 2; }
   void setContainsBareThis(bool f, bool ref = false);
-  /**
-   * How many parameters a caller should provide.
-   */
-  int getMinParamCount() const { return m_minParam; }
   int getDeclParamCount() const { return m_numDeclParams; }
   int getMaxParamCount() const {
     return hasVariadicParam() ? (m_numDeclParams-1) : m_numDeclParams;
   }
-  int getOptionalParamCount() const { return getMaxParamCount() - m_minParam;}
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
@@ -298,19 +252,11 @@ struct FunctionScope : BlockScope,
     m_closureVars = closureVars;
   }
 
-  ExpressionListPtr getClosureVars() const {
-    return m_closureVars;
-  }
-
-  void getClosureUseVars(ParameterExpressionPtrIdxPairVec &useVars,
-                         bool filterUsed = true);
-
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);
 
   struct FunctionInfo {
     explicit FunctionInfo(int rva = -1)
-      : m_maybeStatic(false)
       /*
        * Note: m_maybeRefReturn used to implement an optimization to
        * avoid unbox checks when we call functions where we know no
@@ -319,7 +265,7 @@ struct FunctionScope : BlockScope,
        * it's disabled here.  (The default to enable it should be
        * 'false'.)
        */
-      , m_maybeRefReturn(true)
+      : m_maybeRefReturn(true)
       , m_refVarArg(rva)
     {}
 
@@ -336,14 +282,10 @@ struct FunctionScope : BlockScope,
       m_refParams.insert(p);
     }
 
-    void setMaybeStatic() { m_maybeStatic = true; }
-    bool getMaybeStatic() { return m_maybeStatic; }
-
     void setMaybeRefReturn() { m_maybeRefReturn = true; }
     bool getMaybeRefReturn() { return m_maybeRefReturn; }
 
   private:
-    bool m_maybeStatic; // this could be a static method
     bool m_maybeRefReturn;
     int m_refVarArg; // -1: no ref varargs;
                      // otherwise, any arg >= m_refVarArg is a reference
@@ -386,8 +328,6 @@ private:
   unsigned m_async : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
-  unsigned m_hasTry : 1;
-  unsigned m_hasGoto : 1;
   unsigned m_localRedeclaring : 1;
   unsigned m_fromTrait : 1;
 
@@ -396,7 +336,6 @@ private:
   FunctionOptPtr m_optFunction;
   ExpressionListPtr m_closureVars;
   ExpressionListPtr m_closureValues;
-  unsigned m_nextID; // used when cloning generators for traits
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 };
 

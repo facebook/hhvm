@@ -169,67 +169,6 @@ size_t RepoAuthType::hash() const {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<DataType> convertToDataType(RepoAuthType ty) {
-  using T = RepoAuthType::Tag;
-  switch (ty.tag()) {
-  case T::OptBool:
-  case T::OptInt:
-  case T::OptSArr:
-  case T::OptArr:
-  case T::OptSVec:
-  case T::OptVec:
-  case T::OptSDict:
-  case T::OptDict:
-  case T::OptSKeyset:
-  case T::OptKeyset:
-  case T::OptSStr:
-  case T::OptStr:
-  case T::OptDbl:
-  case T::OptRes:
-  case T::OptSubObj:
-  case T::OptExactObj:
-  case T::OptObj:
-  case T::Null:
-    return folly::none;
-
-  case T::Cell:
-  case T::Ref:
-  case T::InitUnc:
-  case T::Unc:
-  case T::InitCell:
-  case T::InitGen:
-  case T::Gen:
-    return folly::none;
-
-  case T::Uninit:       return KindOfUninit;
-  case T::InitNull:     return KindOfNull;
-  case T::Bool:         return KindOfBoolean;
-  case T::Int:          return KindOfInt64;
-  case T::Dbl:          return KindOfDouble;
-  case T::Res:          return KindOfResource;
-
-  case T::SStr:
-  case T::Str:          return KindOfString;
-
-  case T::SArr:
-  case T::Arr:          return KindOfArray;
-
-  case T::SVec:
-  case T::Vec:          return KindOfVec;
-
-  case T::SDict:
-  case T::Dict:         return KindOfDict;
-
-  case T::SKeyset:
-  case T::Keyset:       return KindOfKeyset;
-
-  case T::Obj:
-  case T::SubObj:
-  case T::ExactObj:     return KindOfObject;
-  }
-  not_reached();
-}
-
 bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   assert(tvIsPlausible(tv));
 

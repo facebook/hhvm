@@ -139,8 +139,6 @@ public:
    * Whether this is a user-defined class.
    */
   bool isUserClass() const { return !getAttribute(System);}
-  bool isExtensionClass() const { return getAttribute(Extension); }
-  bool isBaseClass() const { return m_bases.empty(); }
   bool isBuiltin() const { return !getStmt(); }
 
   /**
@@ -154,17 +152,12 @@ public:
    */
   void setRedeclaring(AnalysisResultConstPtr ar, int redecId);
   bool isRedeclaring() const { return m_redeclaring >= 0;}
-  int getRedeclaringId() { return m_redeclaring; }
-
-  void addReferer(BlockScopePtr ref, int useKinds);
 
   /* For class_exists */
   void setVolatile();
   bool isVolatile() const { return m_volatile; }
   bool isPersistent() const { return m_persistent; }
   void setPersistent(bool p) { m_persistent = p; }
-
-  bool needLazyStaticInitializer();
 
   Derivation derivesFromRedeclaring() const {
     return m_derivesFromRedeclaring;
@@ -184,9 +177,6 @@ public:
     if (getAttribute(attr)) return true;
     ClassScopePtr parent = getParentScope(ar);
     return parent && !parent->isRedeclaring() && parent->hasAttribute(attr, ar);
-  }
-  const std::vector<FunctionScopePtr>& getFunctionsVec() const {
-    return m_functionsVec;
   }
   KindOf getKind() {
     return m_kindOf;
@@ -260,12 +250,6 @@ public:
 
   ClassScopePtr getParentScope(AnalysisResultConstPtr ar) const;
 
-  void addUsedTrait(const std::string &s) {
-    if (!usesTrait(s)) {
-      m_usedTraitNames.push_back(s);
-    }
-  }
-
   void addUsedTraits(const std::vector<std::string> &names) {
     for (unsigned i = 0; i < names.size(); i++) {
       if (!usesTrait(names[i])) {
@@ -291,13 +275,6 @@ public:
   const std::vector<std::string> &getUsedTraitNames() const {
     return m_usedTraitNames;
   }
-
-  const std::vector<std::pair<std::string, std::string>>& getTraitAliases()
-    const {
-    return m_traitAliases;
-  }
-
-  void addTraitAlias(TraitAliasStatementPtr aliasStmt);
 
   bool addClassRequirement(const std::string &requiredName, bool isExtends);
 
@@ -325,17 +302,6 @@ public:
 
   void inheritedMagicMethods(ClassScopePtr super);
   void derivedMagicMethods(ClassScopePtr super);
-  /* true if it might, false if it doesnt */
-  bool implementsArrayAccess();
-  /* true if it might, false if it doesnt */
-  bool implementsAccessor(int prop);
-
-  void outputForwardDeclaration(CodeGenerator &cg);
-
-  void clearBases() {
-    m_bases.clear();
-    m_parent = "";
-  }
 
   /**
    * Override function container
@@ -528,8 +494,6 @@ private:
   std::vector<std::string> m_usedTraitNames;
   boost::container::flat_set<std::string> m_requiredExtends;
   boost::container::flat_set<std::string> m_requiredImplements;
-  // m_traitAliases is used to support ReflectionClass::getTraitAliases
-  std::vector<std::pair<std::string, std::string>> m_traitAliases;
 
   mutable int m_attribute;
   int m_redeclaring; // multiple definition of the same class

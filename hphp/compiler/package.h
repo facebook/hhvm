@@ -63,7 +63,6 @@ struct Package {
   int getFileCount() const { return m_files.size();}
   int getLineCount() const { return m_lineCount;}
   int getCharCount() const { return m_charCount;}
-  void getFiles(std::vector<std::string> &files) const;
 
   void saveStatsToFile(const char *filename, int totalSeconds) const;
 

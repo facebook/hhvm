@@ -170,20 +170,6 @@ getArgStrict(ActRec *ar, unsigned arg,
   return unpack_tv<DType>(tv);
 }
 
-/**
- * Parse typed values from the function call
- * based on an expect format.
- *
- * e.g.:
- *   int64_t lval;
- *   double dval;
- *   TypedValye *tv = nullptr;
- *   if (!parseArgs(ar, "ld|v", &lval, &dval, &tv)) {
- *     return false;
- *   }
- */
-bool parseArgs(ActRec *ar, const char *format, ...);
-
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 #endif // incl_HPHP_ACTREC_ARGS_H

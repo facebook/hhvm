@@ -202,7 +202,6 @@ String string_strip_tags(const char *s, int len, const char *allow,
 /**
  * Encoding/decoding strings according to certain formats.
  */
-String string_addslashes(const char *str, int length);
 String string_quoted_printable_encode(const char *input, int len);
 String string_quoted_printable_decode(const char *input, int len, bool is_q);
 String string_uuencode(const char *src, int src_len);

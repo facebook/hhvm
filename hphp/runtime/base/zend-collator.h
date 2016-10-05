@@ -35,8 +35,6 @@ bool collator_sort(Variant& array, int sort_flags, bool ascending,
                    UCollator* coll, Intl::IntlError* errcode);
 bool collator_asort(Variant& array, int sort_flags, bool ascending,
                     UCollator* coll, Intl::IntlError* errcode);
-bool collator_ksort(Variant &array, int sort_flags, bool ascending,
-                    UCollator *coll, Intl::IntlError *errcode);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

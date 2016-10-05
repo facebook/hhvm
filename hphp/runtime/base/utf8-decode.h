@@ -27,12 +27,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct json_utf8_decode {
-  int the_index;
-  const char *the_input;
-  int the_length;
-};
-
 struct UTF8To16Decoder {
   UTF8To16Decoder(const char *utf8, int length, bool loose)
     : m_str(utf8), m_strlen(length), m_cursor(0), m_loose(loose),

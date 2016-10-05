@@ -708,12 +708,6 @@ NEOERR* hdf_set_value (HDF *hdf, const char *name, const char *value)
   return nerr_pass(_set_value (hdf, name, value, 1, 1, 0, NULL, NULL));
 }
 
-NEOERR* hdf_set_value_attr (HDF *hdf, const char *name, const char *value,
-                            HDF_ATTR *attr)
-{
-  return nerr_pass(_set_value (hdf, name, value, 1, 1, 0, attr, NULL));
-}
-
 NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
 {
   _walk_hdf(hdf, name, ret);

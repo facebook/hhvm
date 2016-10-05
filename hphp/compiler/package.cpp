@@ -128,17 +128,6 @@ void Package::addPHPDirectory(const char *path, bool force) {
   }
 }
 
-void Package::getFiles(std::vector<std::string> &files) const {
-  assert(m_filesToParse.empty());
-
-  files.clear();
-  files.reserve(m_files.size());
-  for (unsigned int i = 0; i < m_files.size(); i++) {
-    const char *fileName = m_files.at(i);
-    files.push_back(fileName);
-  }
-}
-
 std::shared_ptr<FileCache> Package::getFileCache() {
   for (auto iter = m_directories.begin();
        iter != m_directories.end(); ++iter) {

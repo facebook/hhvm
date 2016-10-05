@@ -95,9 +95,6 @@ void ne_vwarn (const char *fmt, va_list ap)
                ATTRIBUTE_PRINTF(1,0);
 void ne_warn (const char *fmt, ...)
               ATTRIBUTE_PRINTF(1,2);
-void ne_set_log (int level);
-void ne_log (int level, const char *fmt, ...)
-             ATTRIBUTE_PRINTF(2,3);
 UINT32 ne_crc (UINT8 *data, UINT32 bytes);
 
 __END_DECLS

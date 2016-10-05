@@ -105,7 +105,6 @@ struct Option {
    */
   static bool PreOptimization;
   static bool PostOptimization;
-  static bool AnalyzePerfectVirtuals;
 
   /*
    * Flags that only affect HHBBC right now.  See hhbbc/hhbbc.h for
@@ -114,19 +113,12 @@ struct Option {
   static bool HardConstProp;
 
   /**
-   * Separate compilation
-   */
-  static bool SeparateCompilation;
-  static bool SeparateCompLib;
-
-  /**
    * CodeGenerator options for PHP.
    */
   static bool GeneratePickledPHP;
   static bool GenerateInlinedPHP;
   static bool GenerateTrimmedPHP;
   static bool ConvertSuperGlobals;    // $GLOBALS['var'] => global $var
-  static bool ConvertQOpExpressions;  // $var = $exp ? $yes : $no => if-else
   static std::string ProgramPrologue;
   static std::string TrimmedPrologue;
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
@@ -169,21 +161,6 @@ struct Option {
   static bool KeepStatementsWithNoEffect;
 
   /**
-   * When we have an include inside a function or a method, how many levels
-   * do we expand? If 0, we rely on "require" vs. "include" to give explicit
-   * instructions. If 1, we only inline just one level, and all deeper
-   * includes are considered as libraries, and they will be moved to top
-   * level. If -1, we completely disable conditional include handling.
-   */
-  static int ConditionalIncludeExpandLevel;
-
-  /**
-   * Maximum number of examplar programs to store in each output.
-   */
-  static int DependencyMaxProgram;
-  static int CodeErrorMaxProgram;
-
-  /**
    * Whether or not name matches AUTOLOAD files. If not, returns empty. If
    * yes, returns root directory for the file.
    */
@@ -198,7 +175,6 @@ struct Option {
   static std::string ProgramName;
 
   static bool ParseTimeOpts;
-  static bool OutputHHBC;
   static bool EnableHipHopSyntax;
   static bool EnableZendCompat;
   static bool JitEnableRenameFunction;
@@ -233,9 +209,6 @@ private:
   static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
                           const std::string& name,
                           std::map<std::string, std::string> &map);
-  static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
-                          const std::string& name,
-                          std::vector<std::string> &vec);
 };
 
 //////////////////////////////////////////////////////////////////////

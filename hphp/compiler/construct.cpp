@@ -157,16 +157,6 @@ void Construct::serialize(JSON::CodeError::OutputStream &out) const {
   ls.done();
 }
 
-void Construct::printSource(CodeGenerator &cg) {
-  if (auto scope = getFileScope()) {
-    cg_printf("/* SRC: %s line %d */\n", scope->getName().c_str(), m_r.line0);
-  }
-}
-
-void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
-  dumpNode(spc);
-}
-
 void Construct::dumpNode(int spc) const {
   // evil, but helpful!
   const_cast<Construct*>(this)->dumpNode(spc);

@@ -126,63 +126,6 @@ void *ne_hash_remove(NE_HASH *hash, void *key)
   return value;
 }
 
-int ne_hash_has_key(NE_HASH *hash, void *key)
-{
-  NE_HASHNODE *node;
-
-  node = *_hash_lookup_node(hash, key, NULL);
-
-  if (node) return 1;
-  return 0;
-}
-
-void *ne_hash_next(NE_HASH *hash, void **key)
-{
-  NE_HASHNODE **node = 0;
-  UINT32 hashv, bucket;
-
-  if (*key)
-  {
-    node = _hash_lookup_node(hash, key, NULL);
-
-    if (*node)
-    {
-      bucket = (*node)->hashv & (hash->size - 1);
-    }
-    else
-    {
-      hashv = hash->hash_func(*key);
-      bucket = hashv & (hash->size - 1);
-    }
-  }
-  else
-  {
-    bucket = 0;
-  }
-
-  if (*node)
-  {
-    if ((*node)->next)
-    {
-      *key = (*node)->next->key;
-      return (*node)->next->value;
-    }
-    bucket++;
-  }
-
-  while (bucket < hash->size)
-  {
-    if (hash->nodes[bucket])
-    {
-      *key = hash->nodes[bucket]->key;
-      return hash->nodes[bucket]->value;
-    }
-    bucket++;
-  }
-
-  return NULL;
-}
-
 static NE_HASHNODE **_hash_lookup_node (NE_HASH *hash, void *key, UINT32 *o_hashv)
 {
   UINT32 hashv, bucket;
@@ -269,25 +212,4 @@ static NEOERR *_hash_resize(NE_HASH *hash)
   }
 
   return STATUS_OK;
-}
-
-int ne_hash_str_comp(const void *a, const void *b)
-{
-  return !strcmp((const char *)a, (const char *)b);
-}
-
-UINT32 ne_hash_str_hash(const void *a)
-{
-  return ne_crc((unsigned char *)a, strlen((const char *)a));
-}
-
-int ne_hash_int_comp(const void *a, const void *b)
-{
-  if (a == b) return 1;
-  return 0;
-}
-
-UINT32 ne_hash_int_hash(const void *a)
-{
-  return (UINT32)(long)(a);
 }

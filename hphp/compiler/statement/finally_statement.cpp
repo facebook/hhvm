@@ -48,10 +48,6 @@ int FinallyStatement::getRecursiveCount() const {
 
 void FinallyStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    FunctionScopeRawPtr fs = getFunctionScope();
-    if (fs) fs->setHasTry();
-  }
 }
 
 bool FinallyStatement::hasDecl() const {

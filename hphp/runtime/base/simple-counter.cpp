@@ -92,10 +92,5 @@ void SimpleCounter::Count(const std::string &name) {
   }
 }
 
-// For places where it is not supposed to include simple_counter.h.
-void counting(const char *s) {
-  COUNTING(s);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

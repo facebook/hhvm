@@ -189,18 +189,6 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Return the DataType corresponding to a RepoAuthType, if the
- * RepoAuthType is refined enough to specify a DataType that
- * corresponds to a php value.  (I.e., this function won't return
- * things like KindOfUncounted.)
- *
- * Returns KindOfString for both SStr and Str.
- *
- * Otherwise returns folly::none.
- */
-folly::Optional<DataType> convertToDataType(RepoAuthType);
-
-/*
  * Return whether a TypedValue is a legal match for a RepoAuthType.
  * This can be used for validating that assumptions from static
  * analysis are not violated (for example, by unserializing objects

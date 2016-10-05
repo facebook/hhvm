@@ -65,10 +65,6 @@ void TryStatement::analyzeProgram(AnalysisResultPtr ar) {
     m_catches->analyzeProgram(ar);
   if (m_finallyStmt)
     m_finallyStmt->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    FunctionScopeRawPtr fs = getFunctionScope();
-    if (fs) fs->setHasTry();
-  }
 }
 
 bool TryStatement::hasDecl() const {

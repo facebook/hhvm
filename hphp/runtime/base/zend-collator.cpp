@@ -618,14 +618,5 @@ bool collator_asort(Variant &array, int sort_flags, bool ascending,
   return ret;
 }
 
-bool collator_ksort(Variant &array, int sort_flags, bool ascending,
-                    UCollator *coll, Intl::IntlError *errcode) {
-  assert(coll);
-  bool byKey = true;
-  bool ret = collator_sort_internal(false, array, sort_flags, ascending, byKey,
-                                    coll, errcode);
-  return ret;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

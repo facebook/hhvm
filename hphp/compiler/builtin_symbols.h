@@ -38,21 +38,11 @@ struct BuiltinSymbols {
 
   static bool Load(AnalysisResultPtr ar);
 
-  static void LoadFunctions(AnalysisResultPtr ar,
-                            StringToFunctionScopePtrMap &functions);
-  static void LoadClasses(AnalysisResultPtr ar,
-                          StringToClassScopePtrMap &classes);
-  static void LoadVariables(AnalysisResultPtr ar,
-                            VariableTablePtr variables);
-  static void LoadConstants(AnalysisResultPtr ar,
-                            ConstantTablePtr constants);
-
   /**
    * Testing whether a variable is a PHP superglobal.
    */
   static bool IsSuperGlobal(const std::string &name);
 
-  static bool IsDeclaredDynamic(const std::string& name);
   static void LoadSuperGlobals();
 
   static const char *const GlobalNames[];

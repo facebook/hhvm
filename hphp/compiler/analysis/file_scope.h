@@ -62,7 +62,6 @@ struct FileScope : BlockScope, FunctionContainer,
     NoEffect                 = 0x0100, // does not side effect
     HelperFunction           = 0x0200, // runtime helper function
     ContainsGetDefinedVars   = 0x0400, // need VariableTable with getDefinedVars
-    IsFoldable               = 0x01000,// function can be constant folded
     NoFCallBuiltin           = 0x02000,// function should not use FCallBuiltin
     NeedsFinallyLocals       = 0x08000,
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
@@ -74,9 +73,6 @@ public:
   ~FileScope() { delete m_redeclaredFunctions; }
   int getSize() const { return m_size;}
 
-  // implementing FunctionContainer
-  virtual std::string getParentName() const { assert(false); return "";}
-
   const std::string &getName() const { return m_fileName;}
   const MD5& getMd5() const { return m_md5; }
   void setMd5(const MD5& md5) { m_md5 = md5; }
@@ -85,7 +81,6 @@ public:
     return m_classes;
   }
   void getClassesFlattened(std::vector<ClassScopePtr>& classes) const;
-  ClassScopePtr getClass(const char *name);
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
   int getFunctionCount() const;
@@ -93,7 +88,6 @@ public:
 
   void pushAttribute();
   void setAttribute(Attribute attr);
-  int getGlobalAttribute() const;
   int popAttribute();
 
   void serialize(JSON::DocTarget::OutputStream &out) const;
@@ -129,10 +123,7 @@ public:
    * save the symbols for our iface.
    * This stuff only happens in the filechanged state.
    */
-  void addConstant(const std::string &name, ExpressionPtr value,
-                   AnalysisResultPtr ar, ConstructPtr con);
   void declareConstant(AnalysisResultPtr ar, const std::string &name);
-  void getConstantNames(std::vector<std::string> &names);
 
   void addClassAlias(const std::string& target, const std::string& alias) {
     m_classAliasMap.emplace(toLower(target), toLower(alias));

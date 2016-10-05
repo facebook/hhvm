@@ -36,7 +36,6 @@ int NERR_DB = 0;
 int NERR_EXISTS = 0;
 int NERR_MAX_RECURSION = 0;
 
-static NEOERR *FreeList = NULL;
 static ULIST *Errors = NULL;
 static int Inited = 0;
 #ifdef HAVE_PTHREADS
@@ -44,55 +43,16 @@ static int Inited = 0;
 static pthread_mutex_t InitLock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-/* Set this to 1 to enable non-thread safe re-use of NEOERR data
- * structures.  This was a premature performance optimization that isn't
- * thread safe, if we want it thread safe we need to add mutex code...
- * which has its own performance penalties...
- */
-static int UseFreeList = 0;
 
 static NEOERR *_err_alloc(void)
 {
-  NEOERR *err;
-
-  if (!UseFreeList || FreeList == NULL)
+  NEOERR *err = (NEOERR *)calloc (1, sizeof (NEOERR));
+  if (err == NULL)
   {
-    err = (NEOERR *)calloc (1, sizeof (NEOERR));
-    if (err == NULL)
-    {
-      ne_warn ("INTERNAL ERROR: Unable to allocate memory for NEOERR");
-      return INTERNAL_ERR;
-    }
-    return err;
+    ne_warn ("INTERNAL ERROR: Unable to allocate memory for NEOERR");
+    return INTERNAL_ERR;
   }
-  else
-  {
-    err = FreeList;
-    FreeList = FreeList->next;
-  }
-  err->flags |= NE_IN_USE;
-  err->next = NULL;
   return err;
-}
-
-static int _err_free (NEOERR *err)
-{
-  if (err == NULL || err == INTERNAL_ERR)
-    return 0;
-  if (err->next != NULL)
-    _err_free(err->next);
-  if (UseFreeList)
-  {
-    err->next = FreeList;
-    FreeList = err;
-    err->flags = 0;
-    err->desc[0] = '\0';
-  }
-  else
-  {
-    free(err);
-  }
-  return 0;
 }
 
 NEOERR *nerr_raisef (const char *func, const char *file, int lineno, int error,
@@ -287,126 +247,6 @@ void nerr_error_string (NEOERR *err, NEOSTRING *str)
       return;
     }
   }
-}
-
-void nerr_error_traceback (NEOERR *err, NEOSTRING *str)
-{
-  NEOERR *more;
-  char buf[1024];
-  char buf2[1024];
-  char *err_name;
-
-  if (err == STATUS_OK)
-    return;
-
-  if (err == INTERNAL_ERR)
-  {
-    string_append (str, "Internal error");
-    return;
-  }
-
-  more = err;
-  string_append (str, "Traceback (innermost last):\n");
-  while (more && more != INTERNAL_ERR)
-  {
-    err = more;
-    more = err->next;
-    if (err->error != NERR_PASS)
-    {
-      NEOERR *r;
-      if (err->error == 0)
-      {
-	err_name = buf;
-	snprintf (buf, sizeof (buf), "Unknown Error");
-      }
-      else
-      {
-	r = uListGet (Errors, err->error - 1, (void **)&err_name);
-	if (r != STATUS_OK)
-	{
-	  err_name = buf;
-	  snprintf (buf, sizeof (buf), "Error %d", err->error);
-	}
-      }
-
-      snprintf (buf2, sizeof(buf2),
-	  "  File \"%s\", line %d, in %s()\n%s: %s\n", err->file,
-	  err->lineno, err->func, err_name, err->desc);
-      string_append(str, buf2);
-    }
-    else
-    {
-      snprintf (buf2, sizeof(buf2), "  File \"%s\", line %d, in %s()\n",
-	  err->file, err->lineno, err->func);
-      string_append(str, buf2);
-      if (err->desc[0])
-      {
-	snprintf (buf2, sizeof(buf2), "    %s\n", err->desc);
-	string_append(str, buf2);
-      }
-    }
-  }
-}
-
-void nerr_ignore (NEOERR **err)
-{
-  _err_free (*err);
-  *err = STATUS_OK;
-}
-
-int nerr_handle (NEOERR **err, int etype)
-{
-  NEOERR *walk = *err;
-
-  while (walk != STATUS_OK && walk != INTERNAL_ERR)
-  {
-
-    if (walk->error == etype)
-    {
-      _err_free(*err);
-      *err = STATUS_OK;
-      return 1;
-    }
-    walk = walk->next;
-  }
-
-  if (walk == STATUS_OK && etype == STATUS_OK_INT)
-    return 1;
-  if (walk == STATUS_OK)
-    return 0;
-
-  if (walk == INTERNAL_ERR && etype == INTERNAL_ERR_INT)
-  {
-    *err = STATUS_OK;
-    return 1;
-  }
-  if (walk == INTERNAL_ERR)
-    return 0;
-
-  return 0;
-}
-
-int nerr_match (NEOERR *err, int etype)
-{
-  while (err != STATUS_OK && err != INTERNAL_ERR)
-  {
-
-    if (err->error == etype)
-      return 1;
-    err = err->next;
-  }
-
-  if (err == STATUS_OK && etype == STATUS_OK_INT)
-    return 1;
-  if (err == STATUS_OK)
-    return 0;
-
-  if (err == INTERNAL_ERR && etype == INTERNAL_ERR_INT)
-    return 1;
-  if (err == INTERNAL_ERR)
-    return 0;
-
-  return 0;
 }
 
 NEOERR *nerr_register (int *val, const char *name)

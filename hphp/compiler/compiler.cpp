@@ -100,7 +100,6 @@ struct CompilerOptions {
   int revision;
   bool genStats;
   bool keepTempDir;
-  bool noTypeInference;
   int logLevel;
   bool force;
   int optimizeLevel;

@@ -42,15 +42,7 @@ NEOERR *ne_hash_init (NE_HASH **hash, NE_HASH_FUNC hash_func, NE_COMP_FUNC comp_
 void ne_hash_destroy (NE_HASH **hash);
 NEOERR *ne_hash_insert(NE_HASH *hash, void *key, void *value);
 void *ne_hash_lookup(NE_HASH *hash, void *key);
-int ne_hash_has_key(NE_HASH *hash, void *key);
 void *ne_hash_remove(NE_HASH *hash, void *key);
-void *ne_hash_next(NE_HASH *hash, void **key);
-
-int ne_hash_str_comp(const void *a, const void *b);
-UINT32 ne_hash_str_hash(const void *a);
-
-int ne_hash_int_comp(const void *a, const void *b);
-UINT32 ne_hash_int_hash(const void *a);
 
 __END_DECLS
 

@@ -181,12 +181,6 @@ bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
   return false;
 }
 
-ClassScopePtr FileScope::getClass(const char *name) {
-  auto iter = m_classes.find(name);
-  if (iter == m_classes.end()) return ClassScopePtr();
-  return iter->second.back();
-}
-
 void FileScope::addAnonClass(ClassStatementPtr stmt) {
   m_anonClasses.push_back(stmt);
 }
@@ -221,11 +215,6 @@ int FileScope::popAttribute() {
   return ret;
 }
 
-int FileScope::getGlobalAttribute() const {
-  assert(m_attributes.size() == 1);
-  return m_attributes.back();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
@@ -237,13 +226,6 @@ ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
 
 void FileScope::declareConstant(AnalysisResultPtr ar, const std::string &name) {
   ar->declareConst(shared_from_this(), name);
-}
-
-void FileScope::addConstant(const std::string &name,
-                            ExpressionPtr value,
-                            AnalysisResultPtr ar, ConstructPtr con) {
-  BlockScopePtr f = ar->findConstantDeclarer(name);
-  f->getConstants()->add(name, value, ar, con);
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {

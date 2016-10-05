@@ -287,11 +287,21 @@ struct Func final {
    *              which implements the method, but for closure methods (i.e.,
    *              the __invoke() method on a closure object), it is instead the
    *              Class that the Closure object is scoped to.
+   *
    * preClass():  The PreClass of the method's cls().  For closures, this still
    *              corresponds to the Closure subclass, rather than to the
    *              scoped Class.
+   *
+   *              When isFromTrait() is true, preClass() refers to different
+   *              entities in repo vs. non-repo mode.  In repo mode, traits are
+   *              flattened ahead of time, and preClass() refers to the class
+   *              which imported the trait.  In non-repo mode, trait methods
+   *              are cloned into trait users, but preClass() will still refer
+   *              to the trait which defined the method.
+   *
    * baseCls():   The first Class in the inheritance hierarchy which declares
    *              this method.
+   *
    * implCls():   The Class which implements the method.  Just like cls(), but
    *              ignores closure scope (so it returns baseCls() for closures).
    *

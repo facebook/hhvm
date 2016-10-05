@@ -183,16 +183,44 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  * so we can just burn it into the TC without using RDS.
  */
 void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
-  auto cls = Unit::lookupUniqueClassInContext(clsName, nullptr)->rescope(
-    const_cast<Class*>(curClass(env))
-  );
-  assertx(cls && (cls->attrs() & AttrUnique));
+  auto cls = Unit::lookupUniqueClassInContext(clsName, nullptr);
+  while (cls) {
+    // It's possible for two requests to concurrently (read: before either
+    // request has finished) merge two different Unit*'s that correspond to
+    // precisely the same file contents, F.  This could happen if, e.g., an
+    // intervening request saw a version of the file with different contents,
+    // F'.  The second time we load a Unit, U2, for F, we'll load it from the
+    // repo, so the names of closures defined within will be the same as the
+    // first time, U1, that we loaded it.
+    //
+    // Suppose we have the following sequence of events:
+    //  - our request merges U1
+    //  - a different request merges U2
+    //  - our request compiles a CreateCl that was part of U1
+    //
+    // At this point, the top Class* on the clsList() for `clsName' would
+    // belong to U2, and it would be incorrect to burn it into the TC, since
+    // its lifetime won't be properly tied to U1's (or to that of the function
+    // we're compiling).  So we have to walk the clsList() until we find a
+    // Class* whose Unit* matches ours.
+    if (cls->preClass()->unit() == curUnit(env)) break;
+
+    // In RepoAuthoritative mode, the above situation should never occur, so we
+    // should always match the top entry.
+    assertx(!RuntimeOption::RepoAuthoritative);
+    cls = cls->m_nextClass;
+  }
+
+  assertx(cls);
+  assertx(cls->attrs() & AttrUnique);
+
+  cls = cls->rescope(const_cast<Class*>(curClass(env)));
 
   auto const func = cls->getCachedInvoke();
 
   auto const closure = allocObjFast(env, cls);
 
-  auto const ctx = [&]{
+  auto const live_ctx = [&] {
     auto const ldctx = ldCtx(env);
     if (!ldctx->type().maybe(TObj)) {
       return ldctx;
@@ -204,7 +232,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
     return ldctx;
   }();
 
-  gen(env, StClosureCtx, closure, ctx);
+  gen(env, StClosureCtx, closure, live_ctx);
 
   SSATmp** args = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (int32_t i = 0; i < numParams; ++i) {

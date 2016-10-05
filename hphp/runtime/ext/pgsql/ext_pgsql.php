@@ -311,6 +311,9 @@ function pg_send_query(resource $connection, string $query): bool;
 function pg_set_client_encoding(resource $connection, string $encoding): int;
 
 <<__Native>>
+function pg_set_error_verbosity(resource $connection, int $verbosity): mixed;
+
+<<__Native>>
 function pg_trace(string $pathname, string $mode, resource $connection): bool;
 
 <<__Native>>

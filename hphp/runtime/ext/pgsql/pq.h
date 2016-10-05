@@ -343,6 +343,10 @@ struct Connection {
     return pg_encoding_to_char(enc);
   }
 
+  PGVerbosity setErrorVerbosity(int verbosity) {
+    return PQsetErrorVerbosity(m_conn, (PGVerbosity) verbosity);
+  }
+
   int backendPID() {
     return PQbackendPID(m_conn);
   }

@@ -808,6 +808,32 @@ static Variant HHVM_FUNCTION(pg_client_encoding, const Resource& connection) {
   return ret;
 }
 
+static int HHVM_FUNCTION(pg_set_client_encoding,
+  const Resource& connection, const String& enc) {
+  auto pgsql = PGSQL::Get(connection);
+
+  if (!pgsql) {
+    return -1;
+  }
+
+  return pgsql->get().setClientEncoding(enc.c_str()) ? 0 : -1;
+}
+
+static Variant HHVM_FUNCTION(pg_set_error_verbosity,
+  const Resource& connection, int64_t verbosity) {
+  auto pgsql = PGSQL::Get(connection);
+
+  if (!pgsql) {
+    return false;
+  }
+
+  if (verbosity & (PQERRORS_TERSE|PQERRORS_DEFAULT|PQERRORS_VERBOSE)) {
+    return pgsql->get().setErrorVerbosity(verbosity);
+  }
+
+  return false;
+}
+
 static int64_t HHVM_FUNCTION(pg_transaction_status,
   const Resource& connection) {
   auto pgsql = PGSQL::Get(connection);
@@ -1708,6 +1734,8 @@ static struct pgsqlExtension : Extension {
     HHVM_FE(pg_send_prepare);
     HHVM_FE(pg_send_query_params);
     HHVM_FE(pg_send_query);
+    HHVM_FE(pg_set_client_encoding);
+    HHVM_FE(pg_set_error_verbosity);
     HHVM_FE(pg_transaction_status);
     HHVM_FE(pg_unescape_bytea);
     HHVM_FE(pg_version);

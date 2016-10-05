@@ -236,7 +236,7 @@ let default_constructor_ce class_ =
              ft_abstract = false;
              ft_arity    = Fstandard (0, 0);
              ft_tparams  = [];
-             ft_locl_cstr= [];
+             ft_where_constraints = [];
              ft_params   = [];
              ft_ret      = r, Tprim Nast.Tvoid;
            }

@@ -496,7 +496,6 @@ module NastCheck                            = struct
   let constructor_required                  = 3030 (* DONT MODIFY!!!! *)
   let interface_with_partial_typeconst      = 3031 (* DONT MODIFY!!!! *)
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
-  let malformed_locl_cstr                   = 3033 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1126,10 +1125,6 @@ let multiple_xhp_category pos =
   add NastCheck.multiple_xhp_category pos
     "XHP classes can only contain one category declaration"
 
-let malformed_locl_cstr pos =
-  add NastCheck.malformed_locl_cstr pos
-    "We currently only support a single generic on the LHS"
-
 let return_in_gen p =
   add NastCheck.return_in_gen p
     ("You cannot return a value in a generator (a generator"^
@@ -1411,6 +1406,14 @@ let explain_constraint p_inst pos name (error : error) =
   add_list code begin
     [p_inst, inst_msg;
      pos, "'"^name^"' is a constrained type"] @ msgl
+  end
+
+let explain_where_constraint use_pos def_pos (error : error) =
+  let inst_msg = "A 'where' type constraint is violated here" in
+  let code, msgl = (get_code error), (to_list error) in
+  add_list code begin
+    [use_pos, inst_msg;
+     def_pos, "This is the method with 'where' type constraints"] @ msgl
   end
 
 let explain_type_constant reason_msgl (error: error) =

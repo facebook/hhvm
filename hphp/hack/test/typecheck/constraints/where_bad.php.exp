@@ -1,0 +1,10 @@
+File "where_bad.php", line 10, characters 43-44:
+A 'where' type constraint is violated here (Typing[4110])
+File "where_bad.php", line 7, characters 19-23:
+This is the method with 'where' type constraints
+File "where_bad.php", line 10, characters 35-40:
+This is a string
+File "where_bad.php", line 7, characters 37-37:
+  via this generic T
+File "where_bad.php", line 7, characters 41-43:
+It is incompatible with an int

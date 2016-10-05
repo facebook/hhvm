@@ -180,7 +180,7 @@ and localize ~ety_env env ty =
 and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
   (* Set the instantiated type parameter to initially point to unresolved, so
    * that it can grow and eventually be a subtype of something like "mixed".
-   *)
+  *)
   let env, substs =
     if instantiate_tparams
     then
@@ -207,6 +207,12 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
     env, (var, name, cstrl)
   in
 
+  let localize_where_constraint env (ty1, ck, ty2) =
+    let env, ty1 = localize ~ety_env env ty1 in
+    let env, ty2 = localize ~ety_env env ty2 in
+    env, (ty1, ck, ty2)
+  in
+
   (* If we're instantiating the generic parameters then remove them
    * from the result. Otherwise localize them *)
   let env, tparams =
@@ -214,7 +220,8 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
     else List.map_env env ft.ft_tparams localize_tparam in
 
   (* Localize the 'where' constraints *)
-  let env, locl_cstr = List.map_env env ft.ft_locl_cstr localize_tparam in
+  let env, where_constraints =
+    List.map_env env ft.ft_where_constraints localize_where_constraint in
 
   (* If we're instantiating the generic parameters then add a deferred
    * check that constraints are satisfied under the
@@ -223,7 +230,8 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
   let env =
     if instantiate_tparams then
       let env = check_tparams_constraints ~ety_env env ft.ft_tparams in
-      let env = check_tparams_constraints ~ety_env env ft.ft_locl_cstr in
+      let env = check_where_constraints ~ety_env env ft.ft_pos
+                  ft.ft_where_constraints in
       env
     else env in
 
@@ -235,7 +243,7 @@ and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
   let env, ret = localize ~ety_env env ft.ft_ret in
   env, { ft with ft_arity = arity; ft_params = params;
                  ft_ret = ret; ft_tparams = tparams;
-                 ft_locl_cstr = locl_cstr }
+                 ft_where_constraints = where_constraints }
 
 (* Given a list of generic parameters [tparams] and a substitution
  * in [ety_env.substs] whose domain is at least these generic parameters,
@@ -272,6 +280,13 @@ and check_tparams_constraints ~ety_env env tparams =
         env
     end in
   List.fold_left tparams ~init:env ~f:check_tparam_constraints
+
+and check_where_constraints ~ety_env env def_pos cstrl =
+  List.fold_left cstrl ~init:env ~f:begin fun env (ty1, ck, ty2) ->
+      let env, ty1 = localize ~ety_env env ty1 in
+      let env, ty2 = localize ~ety_env env ty2 in
+      TGenConstraint.add_check_where_constraint_todo env def_pos ck ty2 ty1
+    end
 
 let env_with_self env =
   {

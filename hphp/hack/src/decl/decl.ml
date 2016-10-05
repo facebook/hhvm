@@ -198,7 +198,7 @@ and fun_decl_in_env env f =
     ft_abstract    = false;
     ft_arity       = arity;
     ft_tparams     = tparams;
-    ft_locl_cstr   = [];
+    ft_where_constraints = [];
     ft_params      = params;
     ft_ret         = ret_ty;
   } in
@@ -206,6 +206,9 @@ and fun_decl_in_env env f =
 
 and type_param env (variance, x, cstrl) =
   variance, x, List.map cstrl (fun (ck, h) -> (ck, Decl_hint.hint env h))
+
+and where_constraint env (ty1, ck, ty2) =
+  (Decl_hint.hint env ty1, ck, Decl_hint.hint env ty2)
 
 and check_default pos mandatory e =
   if not mandatory && e = None
@@ -670,7 +673,8 @@ and method_decl env m =
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
   in
   let tparams = List.map m.m_tparams (type_param env) in
-  let locl_cstrs = List.map m.m_locl_cstrs (type_param env) in
+  let where_constraints =
+    List.map m.m_where_constraints (where_constraint env) in
   {
     ft_pos      = fst m.m_name;
     ft_deprecated =
@@ -678,7 +682,7 @@ and method_decl env m =
     ft_abstract = m.m_abstract;
     ft_arity    = arity;
     ft_tparams  = tparams;
-    ft_locl_cstr= locl_cstrs;
+    ft_where_constraints = where_constraints;
     ft_params   = params;
     ft_ret      = ret;
   }

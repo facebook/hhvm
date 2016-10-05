@@ -1036,7 +1036,7 @@ and expr_
               ft_abstract = false;
               ft_arity = fun_arity;
               ft_tparams = fty.ft_tparams;
-              ft_locl_cstr = fty.ft_locl_cstr;
+              ft_where_constraints = fty.ft_where_constraints;
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
             } in
@@ -2103,7 +2103,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                 ft_abstract = false;
                 ft_arity = Fstandard (arity, arity);
                 ft_tparams = [];
-                ft_locl_cstr = [];
+                ft_where_constraints = [];
                 ft_params = List.map vars (fun x -> (None, x));
                 ft_ret = tr;
               }
@@ -4196,15 +4196,29 @@ and class_var_def env ~is_static c cv =
       let _ = Type.sub_type p Reason.URhint env ty cty in
       ()
 
+and localize_where_constraints
+    ~ety_env (env:Env.env) (where_constraints:Nast.where_constraint list) =
+  let add_constraint env (h1, ck, h2) =
+    let env, ty1 =
+      Phase.localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
+    let env, ty2 =
+      Phase.localize env (Decl_hint.hint env.Env.decl_env h2) ~ety_env in
+    SubType.add_constraint env ck ty1 ty2 (fun env -> env)
+  in
+  List.fold_left where_constraints ~f:add_constraint ~init:env
+
 and method_def env m =
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
   Typing_hooks.dispatch_enter_method_def_hook m;
   let env = Env.env_with_locals env Local_id.Map.empty in
-  let todo = m.m_tparams @ m.m_locl_cstrs in
-  let env = Phase.localize_generic_parameters_with_bounds env todo
-    ~ety_env:({ (Phase.env_with_self env) with from_class = Some CIstatic; }) in
-  TI.check_tparams_instantiable env todo;
+  let ety_env =
+    { (Phase.env_with_self env) with from_class = Some CIstatic; } in
+  let env = Phase.localize_generic_parameters_with_bounds env m.m_tparams
+    ~ety_env:ety_env in
+  TI.check_tparams_instantiable env m.m_tparams;
+  let env =
+    localize_where_constraints ~ety_env env m.m_where_constraints in
   let env = Env.set_local env this (Env.get_self env) in
   let env, ret = match m.m_ret with
     | None -> env, (Reason.Rwitness (fst m.m_name), Tany)

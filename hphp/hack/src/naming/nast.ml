@@ -129,6 +129,8 @@ and user_attribute = {
 
 and tparam = Ast.variance * sid * (Ast.constraint_kind * hint) list
 
+and where_constraint = hint * Ast.constraint_kind * hint
+
 (* expr = None indicates an abstract const *)
 and class_const = hint option * sid * expr option
 
@@ -159,7 +161,7 @@ and method_ = {
   m_visibility      : visibility          ;
   m_name            : sid                 ;
   m_tparams         : tparam list         ;
-  m_locl_cstrs      : tparam list         ;
+  m_where_constraints : where_constraint list;
   m_variadic        : fun_variadicity     ;
   m_params          : fun_param list      ;
   m_body            : func_body           ;

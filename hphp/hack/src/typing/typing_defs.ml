@@ -316,7 +316,7 @@ and 'phase fun_type = {
   ft_abstract   : bool                ;
   ft_arity      : 'phase fun_arity    ;
   ft_tparams    : 'phase tparam list  ;
-  ft_locl_cstr  : 'phase tparam list  ;
+  ft_where_constraints : 'phase where_constraint list  ;
   ft_params     : 'phase fun_params   ;
   ft_ret        : 'phase ty           ;
 }
@@ -428,6 +428,9 @@ and typedef_type = {
 
 and 'phase tparam =
   Ast.variance * Ast.id * (Ast.constraint_kind * 'phase ty) list
+
+and 'phase where_constraint =
+  'phase ty * Ast.constraint_kind * 'phase ty
 
 type phase_ty =
   | DeclTy of decl ty

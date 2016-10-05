@@ -838,7 +838,7 @@ module WithToken(Token: TokenType) = struct
     | TypeArguments of type_arguments
     | TypeParameters of type_parameters
     | TupleTypeSpecifier of tuple_type_specifier
-    | Error of error
+    | ErrorSyntax of error
     | ListItem of list_item
 
 
@@ -1074,8 +1074,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.TypeParameters
       | TupleTypeSpecifier _ ->
         SyntaxKind.TupleTypeSpecifier
-      | Error _ ->
-        SyntaxKind.Error
+      | ErrorSyntax _ ->
+        SyntaxKind.ErrorSyntax
       | ListItem _ ->
         SyntaxKind.ListItem
 
@@ -1308,7 +1308,7 @@ module WithToken(Token: TokenType) = struct
     let is_tuple_type_specifier node =
       kind node = SyntaxKind.TupleTypeSpecifier
     let is_error node =
-      kind node = SyntaxKind.Error
+      kind node = SyntaxKind.ErrorSyntax
     let is_list_item node =
       kind node = SyntaxKind.ListItem
 
@@ -2493,7 +2493,7 @@ module WithToken(Token: TokenType) = struct
         tuple_types;
         tuple_right_paren;
       ]
-      | Error {
+      | ErrorSyntax {
         error_error;
       } -> [
         error_error;
@@ -3651,7 +3651,7 @@ module WithToken(Token: TokenType) = struct
         "tuple_types";
         "tuple_right_paren";
       ]
-      | Error {
+      | ErrorSyntax {
         error_error;
       } -> [
         "error_error";
@@ -4972,10 +4972,10 @@ module WithToken(Token: TokenType) = struct
           tuple_types;
           tuple_right_paren;
         }
-      | (SyntaxKind.Error, [
+      | (SyntaxKind.ErrorSyntax, [
           error_error;
         ]) ->
-        Error {
+        ErrorSyntax {
           error_error;
         }
       | (SyntaxKind.ListItem, [
@@ -6389,7 +6389,7 @@ module WithToken(Token: TokenType) = struct
     let make_error
       error_error
     =
-      from_children SyntaxKind.Error [
+      from_children SyntaxKind.ErrorSyntax [
         error_error;
       ]
 

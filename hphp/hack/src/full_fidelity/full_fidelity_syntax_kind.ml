@@ -128,7 +128,7 @@ type t =
 | TypeArguments
 | TypeParameters
 | TupleTypeSpecifier
-| Error
+| ErrorSyntax
 | ListItem
 
 
@@ -246,5 +246,5 @@ let to_string kind =
   | TypeArguments -> "type_arguments"
   | TypeParameters -> "type_parameters"
   | TupleTypeSpecifier -> "tuple_type_specifier"
-  | Error -> "error"
+  | ErrorSyntax -> "error"
   | ListItem -> "list_item"

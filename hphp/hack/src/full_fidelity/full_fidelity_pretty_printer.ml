@@ -204,7 +204,7 @@ let rec get_doc node =
   | Token x -> from_token x
 
   | SyntaxList x -> get_from_children x
-  | Error { error_error } -> get_doc error_error
+  | ErrorSyntax { error_error } -> get_doc error_error
   | LiteralExpression x -> get_doc x.literal_expression
   | VariableExpression x -> get_doc x.variable_expression
   | QualifiedNameExpression x -> get_doc x.qualified_name_expression

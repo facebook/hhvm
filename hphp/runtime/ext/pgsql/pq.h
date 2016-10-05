@@ -343,6 +343,14 @@ struct Connection {
     return pg_encoding_to_char(enc);
   }
 
+  bool setClientEncoding(const char* enc) {
+    return PQsetClientEncoding(m_conn, enc) == 0;
+  }
+
+  PGVerbosity setErrorVerbosity(int verbosity) {
+    return PQsetErrorVerbosity(m_conn, (PGVerbosity) verbosity);
+  }
+
   int backendPID() {
     return PQbackendPID(m_conn);
   }

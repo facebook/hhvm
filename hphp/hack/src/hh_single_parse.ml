@@ -30,7 +30,7 @@ let parse_and_print filename =
   Printf.printf "%s" str
 
 let main filename =
-  EventLogger.init (Daemon.devnull ()) 0.0;
+  EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   if (String.length filename) = 0 then begin
     Printf.eprintf "%s" usage;

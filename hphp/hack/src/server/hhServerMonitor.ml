@@ -67,7 +67,7 @@ let start_hh_server options  =
 let monitor_daemon_main (options: ServerArgs.options) =
   let init_id = Random_id.short_string () in
   if Sys_utils.is_test_mode ()
-  then EventLogger.init (Daemon.devnull ()) 0.0
+  then EventLogger.init EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init_monitor (ServerArgs.root options) init_id
       (Unix.gettimeofday ());
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;

@@ -123,7 +123,7 @@ let test_suite =
   "Classic_mapper_suite" >::: (run_tests test_data)
 
 let main () =
-  EventLogger.init (Daemon.devnull ()) 0.0;
+  EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   run_test_tt_main test_suite
 

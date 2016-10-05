@@ -52,7 +52,7 @@ let parse_new folder_name loop_const =
 
 
 let main folder_name loop_const use_old =
-  EventLogger.init (Daemon.devnull ()) 0.0;
+  EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _ = SharedMem.(init GlobalConfig.default_sharedmem_config) in
   if (String.length folder_name) = 0 then begin
     Printf.eprintf "%s" usage;

@@ -32,7 +32,7 @@ let genv = ref { ServerEnvBuild.default_genv with
 
 let setup_server ?custom_config ()  =
   Printexc.record_backtrace true;
-  EventLogger.init (Daemon.devnull ()) 0.0;
+  EventLogger.init EventLogger.Event_logger_fake 0.0;
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   HackSearchService.attach_hooks ();
   let _ = SharedMem.init GlobalConfig.default_sharedmem_config in

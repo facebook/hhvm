@@ -369,7 +369,7 @@ let setup_server options handle =
   let saved_state_load_type =
     LoadScriptConfig.saved_state_load_type_to_string load_script_config in
   if Sys_utils.is_test_mode ()
-  then EventLogger.init (Daemon.devnull ()) 0.0
+  then EventLogger.init EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init
     root
     init_id

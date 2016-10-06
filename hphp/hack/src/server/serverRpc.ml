@@ -70,7 +70,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | STATS -> env, Stats.get_stats ()
     | KILL -> env, ()
     | FIND_LVAR_REFS (content, line, char) ->
-        env, ServerFindLocals.go content line char
+        env, ServerFindLocals.go env.tcopt content line char
     | FORMAT (content, from, to_) ->
         env, ServerFormat.go content from to_
     | TRACE_AI action ->

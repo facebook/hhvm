@@ -517,10 +517,11 @@ class local_finding_visitor = object(this)
     LocalMap.pop localmap
 end
 
-let parse content =
+let parse tcopt content =
   Errors.ignore_ begin fun () ->
     let {Parser_hack.ast; comments = _; file_mode = _; content = _;} =
-      Parser_hack.program_with_default_popt
+      Parser_hack.program
+        tcopt
         Relative_path.default
         content
     in ast
@@ -537,9 +538,9 @@ let go_from_ast ast line char =
   * position within it, identifying a local, are given. The result is a
   * list of the positions of other uses of that local in the file.
   *)
-let go content line char =
+let go tcopt content line char =
   try
-    let ast = parse content in
+    let ast = parse tcopt content in
     let results_list = go_from_ast ast line char in
     List.map results_list Pos.to_absolute
   with Failure error ->

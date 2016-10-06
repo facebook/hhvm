@@ -559,7 +559,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     end
   | Find_local (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    let result = ServerFindLocals.go file line column in
+    let result = ServerFindLocals.go popt file line column in
     let print pos = Printf.printf "%s\n" (Pos.string_no_file pos) in
     List.iter result print
   | Outline ->

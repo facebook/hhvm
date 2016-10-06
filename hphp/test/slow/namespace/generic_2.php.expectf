@@ -1,2 +1,2 @@
 
-Catchable fatal error: Argument 1 passed to NSTest\f() must be an instance of T, int given in %s/test/slow/namespace/generic_2.php on line 9
+Catchable fatal error: Argument 1 passed to NSTest\f() must be an instance of T, int given in %s/test/slow/namespace/generic_2.php on line 11

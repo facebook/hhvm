@@ -41,7 +41,6 @@
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
-#include "hphp/runtime/base/file-util.h"
 
 #include "hphp/parser/scanner.h"
 
@@ -49,23 +48,25 @@
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/access-log.h"
-
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/apc-file-storage.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/init-fini-node.h"
 #ifdef FACEBOOK
 #include "hphp/facebook/runtime/server/thrift-logger.h"
 #endif
-#include "hphp/runtime/base/simple-counter.h"
+
+#include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
 
@@ -1807,6 +1808,21 @@ void RuntimeOption::Load(
   }
 
   Config::Bind(AliasedNamespaces, ini, config, "AliasedNamespaces");
+  for (auto it = AliasedNamespaces.begin(); it != AliasedNamespaces.end(); ) {
+    if (!is_valid_class_name(it->second)) {
+      Logger::Warning("Skipping invalid AliasedNamespace %s\n",
+                      it->second.c_str());
+      it = AliasedNamespaces.erase(it);
+      continue;
+    }
+
+    while (it->second.size() && it->second[0] == '\\') {
+      it->second = it->second.substr(1);
+    }
+
+    ++it;
+  }
+
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
   // Run initializers depedent on options, e.g., resizing atomic maps/vectors.

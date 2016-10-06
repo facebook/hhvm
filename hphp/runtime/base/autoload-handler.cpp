@@ -351,7 +351,7 @@ bool AutoloadHandler::autoloadType(const String& name) {
  * Taken from php-src
  * https://github.com/php/php-src/blob/PHP-5.6/Zend/zend_execute_API.c#L960
  */
-bool is_valid_class_name(const String& className) {
+bool is_valid_class_name(folly::StringPiece className) {
   return strspn(
     className.data(),
     "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177"
@@ -363,7 +363,7 @@ bool is_valid_class_name(const String& className) {
     "\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345"
     "\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366"
     "\367\370\371\372\373\374\375\376\377\\"
-  ) == className.length();
+  ) == className.size();
 }
 
 bool AutoloadHandler::autoloadClass(const String& clsName,
@@ -371,7 +371,7 @@ bool AutoloadHandler::autoloadClass(const String& clsName,
   if (clsName.empty()) return false;
   const String& className = normalizeNS(clsName);
   // Verify class name before passing it to __autoload()
-  if (!is_valid_class_name(className)) {
+  if (!is_valid_class_name(className.slice())) {
     return false;
   }
   if (!m_map.isNull()) {

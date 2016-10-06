@@ -28,7 +28,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-bool is_valid_class_name(const String& className);
+bool is_valid_class_name(folly::StringPiece className);
 
 struct AutoloadHandler final : RequestEventHandler {
 private:

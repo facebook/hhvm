@@ -1,0 +1,1 @@
+Fatal error: Call to undefined function foo\bar\foobar() in %s/test/slow/compilation/aliased-namespaces.php on line 4

@@ -887,7 +887,7 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
 
           // No valid class was found, lets try the autoloader.
           if (!cls) {
-            if (!is_valid_class_name(clsName)) {
+            if (!is_valid_class_name(clsName.slice())) {
               throwInvalidClassName();
             }
             cls = Unit::loadClass(clsName.get()); // with autoloading
@@ -1045,7 +1045,7 @@ void unserializeVariant(Variant& self, VariableUnserializer* uns,
           // Try loading without the autoloader first
           auto cls = Unit::getClass(clsName.get(), /* autoload */ false);
           if (!cls) {
-            if (!is_valid_class_name(clsName)) {
+            if (!is_valid_class_name(clsName.slice())) {
               throwInvalidClassName();
             }
             cls = Unit::loadClass(clsName.get());

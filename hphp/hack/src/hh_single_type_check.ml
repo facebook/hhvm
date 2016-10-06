@@ -461,7 +461,7 @@ let nast_for_file opts fn
   List.fold_left typedefs ~init:[] ~f:(n_type_fold opts fn),
   List.fold_left consts ~init:[] ~f:(n_const_fold opts fn)
 
-let handle_mode mode filename opts files_contents files_info errors =
+let handle_mode mode filename opts popt files_contents files_info errors =
   match mode with
   | Ai _ -> ()
   | Autocomplete ->
@@ -564,7 +564,7 @@ let handle_mode mode filename opts files_contents files_info errors =
     List.iter result print
   | Outline ->
     let file = cat (Relative_path.to_absolute filename) in
-    let results = FileOutline.outline file in
+    let results = FileOutline.outline popt file in
     FileOutline.print results;
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
@@ -619,7 +619,7 @@ let handle_mode mode filename opts files_contents files_info errors =
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {filename; mode; no_builtins} =
+let decl_and_run_mode {filename; mode; no_builtins} popt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   let builtins = if no_builtins then "" else builtins in
   let filename = Relative_path.create Relative_path.Dummy filename in
@@ -629,9 +629,9 @@ let decl_and_run_mode {filename; mode; no_builtins} =
   let errors, files_info, _ = Errors.do_ begin fun () ->
     let parsed_files =
       Relative_path.Map.mapi
-       Parser_hack.program_with_default_popt files_contents in
+       (Parser_hack.program popt) files_contents in
     let parsed_builtins =
-      Parser_hack.program_with_default_popt
+      Parser_hack.program popt
         builtins_filename builtins in
     let parsed_files = Relative_path.Map.add parsed_files
       ~key:builtins_filename ~data:parsed_builtins in
@@ -657,10 +657,11 @@ let decl_and_run_mode {filename; mode; no_builtins} =
 
     files_info
   end in
-  handle_mode mode filename opts files_contents files_info
+  handle_mode mode filename opts popt files_contents files_info
     (Errors.get_error_list errors)
 
 let main_hack ({filename; mode; no_builtins;} as opts) =
+  let popt = ParserOptions.default in
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init EventLogger.Event_logger_fake 0.0;
@@ -671,7 +672,7 @@ let main_hack ({filename; mode; no_builtins;} as opts) =
   | Ai ai_options ->
     Ai.do_ Typing_check_utils.check_defs filename ai_options
   | _ ->
-    decl_and_run_mode opts
+    decl_and_run_mode opts popt
 
 (* command line driver *)
 let _ =

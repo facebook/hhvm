@@ -239,12 +239,26 @@ let main args =
       Exit_status.No_error
     | MODE_OUTLINE ->
       let content = Sys_utils.read_stdin_to_string () in
-      let results = FileOutline.outline content in
+      let results = FileOutline.outline
+        (**
+         * TODO: Don't use default parser options.
+         *
+         * Parser options enables certain features (such as namespace aliasing)
+         * Thus, for absolute correctness of outlining, we need to use the same
+         * parser options that the server uses. But this client request doesn't
+         * hit the server at all. So either change this to a server RPC, or
+         * ask the server what its parser options are, or parse the
+         * options from the .hhconfig file (needs to be the same hhconfig file the
+         * server used).
+         * *)
+        ParserOptions.default content in
       ClientOutline.go_legacy results args.output_json;
       Exit_status.No_error
     | MODE_OUTLINE2 ->
       let content = Sys_utils.read_stdin_to_string () in
-      let results = FileOutline.outline content in
+      let results = FileOutline.outline
+        (** TODO: Don't use default parser options. See same comment above. *)
+        ParserOptions.default content in
       ClientOutline.go results args.output_json;
       Exit_status.No_error
     | MODE_METHOD_JUMP_CHILDREN class_ ->

@@ -335,9 +335,10 @@ let add_docblocks defs comments =
   in
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
-let outline content =
+let outline popt content =
   let {Parser_hack.ast; comments; _} =
-    Parser_hack.program_with_default_popt
+    Parser_hack.program
+      popt
       Relative_path.default
       content
       ~include_line_comments:true
@@ -346,8 +347,8 @@ let outline content =
   let result = outline_ast ast in
   add_docblocks result comments
 
-let outline_legacy content =
-  to_legacy @@ outline content
+let outline_legacy popt content =
+  to_legacy @@ outline popt content
 
 let rec definition_to_json def =
   Hh_json.JSON_Object ([

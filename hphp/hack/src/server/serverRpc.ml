@@ -29,7 +29,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDENTIFY_FUNCTION (content, line, char) ->
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | OUTLINE content ->
-        env, FileOutline.outline content
+        env, FileOutline.outline env.popt content
     | GET_DEFINITION_BY_ID id ->
         env, Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
           SymbolDefinition.to_absolute

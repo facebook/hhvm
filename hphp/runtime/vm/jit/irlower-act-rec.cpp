@@ -17,13 +17,21 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -275,6 +283,144 @@ void cgStARInvName(IRLS& env, const IRInstruction* inst) {
   auto const val = srcLoc(env, inst, 1).reg();
   vmain(env) << store{val, fp[AROFF(m_invName)]};
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * The standard VMRegAnchor treatment won't work for some cases called during
+ * function prologues.
+ *
+ * The fp sync machinery is fundamentally based on the notion that instruction
+ * pointers in the TC are uniquely associated with source HHBC instructions,
+ * and that source HHBC instructions are in turn uniquely associated with
+ * SP->FP deltas.
+ *
+ * trimExtraArgs() is called from the prologue of the callee.  The prologue is
+ * (a) still in the caller frame for now, and (b) shared across multiple call
+ * sites.  (a) means that we have the fp from the caller's frame, and (b) means
+ * that this fp is not enough to figure out sp.
+ *
+ * However, the prologue passes us the callee ActRec, whose predecessor has to
+ * be the caller.  So we can sync sp and fp by ourselves here.  Geronimo!
+ */
+static void sync_regstate_to_caller(ActRec* preLive) {
+  assertx(tl_regState == VMRegState::DIRTY);
+  auto const ec = g_context.getNoCheck();
+  auto& regs = vmRegsUnsafe();
+
+  regs.stack.top() = reinterpret_cast<TypedValue*>(preLive)
+                     - preLive->numArgs();
+  auto fp = preLive == vmFirstAR()
+    ? ec->m_nestedVMs.back().fp
+    : preLive->m_sfp;
+  regs.fp = fp;
+  regs.pc = fp->func()->unit()->at(fp->func()->base() + preLive->m_soff);
+
+  tl_regState = VMRegState::CLEAN;
+}
+
+NEVER_INLINE
+static void trimExtraArgsMayReenter(ActRec* ar,
+                                    TypedValue* tvArgs,
+                                    TypedValue* limit) {
+  sync_regstate_to_caller(ar);
+  do {
+    tvRefcountedDecRef(tvArgs); // may reenter for __destruct
+    ++tvArgs;
+  } while (tvArgs != limit);
+  ar->setNumArgs(ar->m_func->numParams());
+
+  // Go back to dirty (see the comments of sync_regstate_to_caller()).
+  tl_regState = VMRegState::DIRTY;
+}
+
+}
+
+#define SHUFFLE_EXTRA_ARGS_PRELUDE()                                    \
+  auto const f = ar->func();                                            \
+  auto const numParams = f->numNonVariadicParams();                     \
+  auto const numArgs = ar->numArgs();                                   \
+  assertx(numArgs > numParams);                                         \
+  auto const numExtra = numArgs - numParams;                            \
+  TRACE(1, "extra args: %d args, function %s takes only %d, ar %p\n",   \
+        numArgs, f->name()->data(), numParams, ar);                     \
+  auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;            \
+  /* end SHUFFLE_EXTRA_ARGS_PRELUDE */
+
+void trimExtraArgs(ActRec* ar) {
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assertx(!f->hasVariadicCaptureParam());
+  assertx(!(f->attrs() & AttrMayUseVV));
+
+  auto limit = tvArgs + numExtra;
+  do {
+    if (UNLIKELY(tvDecRefWillCallHelper(tvArgs))) {
+      trimExtraArgsMayReenter(ar, tvArgs, limit);
+      return;
+    }
+    tvDecRefOnly(tvArgs);
+    ++tvArgs;
+  } while (tvArgs != limit);
+
+  assertx(f->numParams() == (numArgs - numExtra));
+  assertx(f->numParams() == numParams);
+  ar->setNumArgs(numParams);
+}
+
+void shuffleExtraArgsMayUseVV(ActRec* ar) {
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assertx(!f->hasVariadicCaptureParam());
+  assertx(f->attrs() & AttrMayUseVV);
+
+  ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
+}
+
+void shuffleExtraArgsVariadic(ActRec* ar) {
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assertx(f->hasVariadicCaptureParam());
+  assertx(!(f->attrs() & AttrMayUseVV));
+
+  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
+  // Write into the last (variadic) param.
+  auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+  tv->m_type = KindOfArray;
+  tv->m_data.parr = varArgsArray.detach();
+  assertx(tv->m_data.parr->hasExactlyOneRef());
+
+  // No incref is needed, since extra values are being transferred from the
+  // stack to the last local.
+  assertx(f->numParams() == (numArgs - numExtra + 1));
+  assertx(f->numParams() == (numParams + 1));
+  ar->setNumArgs(numParams + 1);
+}
+
+void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
+  SHUFFLE_EXTRA_ARGS_PRELUDE()
+  assertx(f->hasVariadicCaptureParam());
+  assertx(f->attrs() & AttrMayUseVV);
+
+  ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
+
+  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
+  auto tvIncr = tvArgs;
+  // An incref is needed to compensate for discarding from the stack.
+  for (uint32_t i = 0; i < numExtra; ++i, ++tvIncr) {
+    tvRefcountedIncRef(tvIncr);
+  }
+  // Write into the last (variadic) param.
+  auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+  tv->m_type = KindOfArray;
+  tv->m_data.parr = varArgsArray.detach();
+  assertx(tv->m_data.parr->hasExactlyOneRef());
+  // Before, for each arg: refcount = n + 1 (stack).
+  // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray).
+}
+
+#undef SHUFFLE_EXTRA_ARGS_PRELUDE
+
+///////////////////////////////////////////////////////////////////////////////
 
 void cgInitExtraArgs(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();

@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/func-effects.h"
+#include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"

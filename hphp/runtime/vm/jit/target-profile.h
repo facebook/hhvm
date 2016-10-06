@@ -13,32 +13,35 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TARGET_PROFILE_H_
-#define incl_HPHP_TARGET_PROFILE_H_
 
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/static-string-table.h"
+#ifndef incl_HPHP_JIT_TARGET_PROFILE_H_
+#define incl_HPHP_JIT_TARGET_PROFILE_H_
+
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/types.h"
 
-#include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 
-#include "hphp/util/type-scan.h"
+#include "hphp/util/assertions.h"
 
-#include <folly/Optional.h>
+#include <utility>
 
 namespace HPHP {
+
 struct Func;
 struct Class;
+
+namespace jit {
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+  void addTargetProfileInfo(const rds::Profile& key,
+                            const std::string& dbgInfo);
 }
-
-namespace HPHP { namespace jit {
-
-//////////////////////////////////////////////////////////////////////
-
-void addTargetProfileInfo(const rds::Profile& key, const std::string& dbgInfo);
 
 /*
  * This is a utility for creating or querying a 'target profiling'
@@ -120,8 +123,10 @@ struct TargetProfile {
              std::forward<Args>(extraArgs)...);
     }
     if (RuntimeOption::EvalDumpTargetProfiles) {
-      addTargetProfileInfo(m_key,
-                           out.toString(std::forward<Args>(extraArgs)...));
+      detail::addTargetProfileInfo(
+        m_key,
+        out.toString(std::forward<Args>(extraArgs)...)
+      );
     }
   }
 
@@ -179,159 +184,16 @@ private:
     not_reached();
   }
 
+  static void addDebugInfo(const rds::Profile& key,
+                           const std::string& dbgInfo);
+
 private:
   rds::Link<T> const m_link;
   TransKind const m_kind;
   rds::Profile const m_key;
 };
 
-//////////////////////////////////////////////////////////////////////
-
-struct MethProfile {
-  using RawType = LowPtr<Class>::storage_type;
-
-  enum class Tag {
-    UniqueClass = 0,
-    UniqueMeth = 1,
-    BaseMeth = 2,
-    InterfaceMeth = 3,
-    Invalid = 4
-  };
-
-  MethProfile() : m_curMeth(nullptr), m_curClass(nullptr) {}
-  MethProfile(const MethProfile& other) :
-      m_curMeth(other.m_curMeth),
-      m_curClass(other.m_curClass) {}
-
-  std::string toString() const;
-
-  const Class* uniqueClass() const {
-    return curTag() == Tag::UniqueClass ? rawClass() : nullptr;
-  }
-
-  const Func* uniqueMeth() const {
-    return curTag() == Tag::UniqueMeth || curTag() == Tag::UniqueClass ?
-      rawMeth() : nullptr;
-  }
-
-  const Func* baseMeth() const {
-    return curTag() == Tag::BaseMeth ? rawMeth() : nullptr;
-  }
-
-  const Func* interfaceMeth() const {
-    return curTag() == Tag::InterfaceMeth ? rawMeth() : nullptr;
-  }
-
-  void reportMeth(const ActRec* ar, const Class* cls) {
-    auto const meth = ar->func();
-    if (!cls && meth->cls()) {
-      cls = ar->hasThis() ?
-        ar->getThis()->getVMClass() : ar->getClass();
-    }
-    reportMethHelper(cls, meth);
-  }
-
-  static void reduce(MethProfile& a, const MethProfile& b);
- private:
-  void reportMethHelper(const Class* cls, const Func* meth);
-
-  static Tag toTag(uintptr_t val) {
-    return static_cast<Tag>(val & 7);
-  }
-
-  static const Func* fromValue(uintptr_t value) {
-    return (Func*)(value & uintptr_t(-8));
-  }
-
-  Tag curTag() const { return toTag(methValue()); }
-
-  const Class* rawClass() const {
-    return m_curClass;
-  }
-
-  const Func* rawMeth() const {
-    return fromValue(methValue());
-  }
-
-  const uintptr_t methValue() const {
-    return uintptr_t(m_curMeth.get());
-  }
-
-  void setMeth(const Func* meth, Tag tag) {
-    auto encoded_meth = (Func*)(uintptr_t(meth) | static_cast<uintptr_t>(tag));
-    m_curMeth = encoded_meth;
-  }
-
-  AtomicLowPtr<const Func,
-               std::memory_order_acquire, std::memory_order_release> m_curMeth;
-  AtomicLowPtr<const Class,
-               std::memory_order_acquire, std::memory_order_release> m_curClass;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * TypeProfile keeps the union of all the types observed during profiling.
- */
-struct TypeProfile {
-  Type type; // this gets initialized with 0, which is TBottom
-  static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
-
-  std::string toString() const { return type.toString(); }
-
-  void report(TypedValue tv) {
-    type |= typeFromTV(&tv, nullptr);
-  }
-
-  static void reduce(TypeProfile& a, const TypeProfile& b) {
-    a.type |= b.type;
-  }
-
-  // In RDS but can't contain pointers to request-allocated data
-  TYPE_SCAN_IGNORE_ALL;
-};
-
-//////////////////////////////////////////////////////////////////////
-
-struct SwitchProfile {
-  SwitchProfile(const SwitchProfile&) = delete;
-  SwitchProfile& operator=(const SwitchProfile&) = delete;
-
-  std::string toString(int nCases) const {
-    std::ostringstream out;
-    for (int i = 0; i < nCases; ++i) out << folly::format("{},", cases[i]);
-    return out.str();
-  }
-
-  uint32_t cases[0]; // dynamically sized
-
-  static void reduce(SwitchProfile& a, const SwitchProfile& b, int nCases) {
-    for (uint32_t i = 0; i < nCases; ++i) {
-      a.cases[i] += b.cases[i];
-    }
-  }
-
-  // In RDS but can't contain pointers to request-allocated data
-  TYPE_SCAN_IGNORE_ALL;
-};
-
-struct SwitchCaseCount {
-  int32_t caseIdx;
-  uint32_t count;
-
-  bool operator<(const SwitchCaseCount& b) const { return count > b.count; }
-};
-
-/*
- * Collect the data for the given SwitchProfile, and return a vector of case
- * indexes and hit count, sorted in descending order of hit count.
- */
-std::vector<SwitchCaseCount> sortedSwitchProfile(
-  TargetProfile<SwitchProfile>& profile,
-  int32_t nCases
-);
-
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

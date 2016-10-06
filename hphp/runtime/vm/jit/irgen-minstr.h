@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 

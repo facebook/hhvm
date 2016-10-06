@@ -39,7 +39,6 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -59,12 +58,6 @@ TRACE_SET_MOD(irlower);
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void traceRet(ActRec* fp, Cell* sp, void* rip) {
-  if (rip == tc::ustubs().callToExit) return;
-  checkFrame(fp, sp, false /* fullCheck */, 0);
-  assertx(sp <= (Cell*)fp || fp->resumed());
-}
 
 Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
@@ -116,6 +109,12 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void traceRet(ActRec* fp, Cell* sp, void* rip) {
+  if (rip == tc::ustubs().callToExit) return;
+  checkFrame(fp, sp, false /* fullCheck */, 0);
+  assertx(sp <= (Cell*)fp || fp->resumed());
+}
 
 void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 1).reg();
@@ -290,7 +289,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
         cgCallHelper(
           v, env,
           CallSpec::direct(static_cast<void (*)(ActRec*)>(
-                            ExtraArgs::deallocate)),
+                           ExtraArgs::deallocate)),
           kVoidDest,
           SyncOptions::Sync,
           argGroup(env, inst).reg(fp)
@@ -300,7 +299,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
         cgCallHelper(
           v, env,
           CallSpec::direct(static_cast<void (*)(ActRec*)>(
-                            VarEnv::deallocate)),
+                           VarEnv::deallocate)),
           kVoidDest,
           SyncOptions::Sync,
           argGroup(env, inst).reg(fp)

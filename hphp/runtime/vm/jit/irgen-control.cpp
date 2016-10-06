@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"

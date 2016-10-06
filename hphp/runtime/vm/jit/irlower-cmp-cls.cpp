@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/instance-bits.h"
 
 #include "hphp/runtime/vm/jit/types.h"

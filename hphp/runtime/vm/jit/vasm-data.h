@@ -22,6 +22,7 @@
 #include "hphp/util/assertions.h"
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 namespace HPHP { namespace jit {

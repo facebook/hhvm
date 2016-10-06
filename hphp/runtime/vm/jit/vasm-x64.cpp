@@ -977,6 +977,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   lowerForX64(unit);
   simplify(unit);
+  lowerForX64(unit);
 
   if (!unit.constToReg.empty()) {
     foldImms<x64::ImmFolder>(unit);

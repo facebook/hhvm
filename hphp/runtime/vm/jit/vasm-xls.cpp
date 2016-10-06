@@ -2400,19 +2400,11 @@ void optimize(Vunit& unit, ldimmq& inst, Vlabel b, size_t i, F sf_live) {
   optimize_ldimm<xorq>(unit, inst, b, i, sf_live);
 }
 
-template <typename F>
+template<typename F>
 void optimize(Vunit& unit, lea& inst, Vlabel b, size_t i, F sf_live) {
   if (!sf_live() && inst.d == rsp()) {
     assertx(inst.s.base == inst.d && !inst.s.index.isValid());
     unit.blocks[b].code[i] = addqi{inst.s.disp, inst.d, inst.d, RegSF{0}};
-  }
-}
-
-template <typename F>
-void optimize(Vunit& unit, andqi& inst, Vlabel b, size_t i, F sf_live) {
-  if (!sf_live() && inst.s0.q() == 0xff) {
-    Vreg8 src = Reg8(inst.s1);
-    unit.blocks[b].code[i] = movzbq{src, inst.d};
   }
 }
 

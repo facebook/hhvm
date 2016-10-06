@@ -107,9 +107,9 @@ bool checkBlockEnd(const Vunit& v, Vlabel b);
  */
 void allocateRegisters(Vunit&, const Abi&);
 void fuseBranches(Vunit&);
+void optimizeCopies(Vunit&, const Abi&);
 void optimizeExits(Vunit&);
 void optimizeJmps(Vunit&);
-void optimizeCopies(Vunit&, const Abi&);
 void optimizePhis(Vunit&);
 void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);

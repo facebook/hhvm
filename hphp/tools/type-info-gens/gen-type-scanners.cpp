@@ -1545,7 +1545,14 @@ Generator::Action Generator::inferAction(const Object& object) const {
   }
 
   if (HPHP::type_scan::detail::isForbiddenTemplate(object.name.name)) {
+    sanityCheckTemplateParams(object);
     action.forbidden_template = true;
+    return action;
+  }
+
+  if (HPHP::type_scan::detail::isForcedConservativeTemplate(object.name.name)) {
+    sanityCheckTemplateParams(object);
+    action.conservative_all = true;
     return action;
   }
 
@@ -2353,7 +2360,9 @@ void Generator::genLayout(const Object& object,
       begin = std::min(begin, *member.offset);
       end = std::max(end, *member.offset + determineSize(member.type));
     }
-    if (begin < end) layout.addConservative(begin, end);
+    if (begin < end) {
+      layout.addConservative(begin + offset, end - begin);
+    }
     return;
   }
 

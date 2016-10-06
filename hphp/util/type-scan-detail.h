@@ -284,6 +284,10 @@ bool isIgnoredType(const std::string& name);
 // is to prevent people accidently using the standard kind.
 bool isForbiddenTemplate(const std::string& name);
 
+// Check if a type with the given name is on the list of template types which
+// will always be scanned conservatively.
+bool isForcedConservativeTemplate(const std::string& name);
+
 // Macro trickery to generate field names for type annotations.
 #define TYPE_SCAN_BUILD_NAME(A,B) TYPE_SCAN_BUILD_NAME_HIDDEN(A,B)
 #define TYPE_SCAN_BUILD_NAME_HIDDEN(A,B) A##B##_

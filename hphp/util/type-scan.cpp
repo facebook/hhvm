@@ -55,7 +55,6 @@ const std::unordered_set<std::string> forbidden_template = {
   "std::priority_queue",
   "std::queue",
   "std::set",
-  "std::shared_ptr",
   "std::stack",
   "std::unique_ptr",
   "std::unordered_map",
@@ -63,6 +62,13 @@ const std::unordered_set<std::string> forbidden_template = {
   "std::unordered_multiset",
   "std::unordered_set",
   "std::vector"
+};
+
+const std::unordered_set<std::string> forced_conservative = {
+  "boost::variant",
+  "folly::Optional",
+  "std::optional",
+  "std::shared_ptr",
 };
 
 std::string stripTemplateArgs(std::string name) {
@@ -117,6 +123,10 @@ bool isIgnoredType(const std::string& name) {
 
 bool isForbiddenTemplate(const std::string& name) {
   return forbidden_template.count(stripTemplateArgs(name));
+}
+
+bool isForcedConservativeTemplate(const std::string& name) {
+  return forced_conservative.count(stripTemplateArgs(name));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

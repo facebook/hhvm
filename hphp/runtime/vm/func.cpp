@@ -618,6 +618,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
   if (attrs & AttrMayUseVV) { out << " (mayusevv)"; }
+  if (attrs & AttrRequiresThis) { out << " (requiresthis)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {

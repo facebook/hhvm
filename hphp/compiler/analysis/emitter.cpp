@@ -7787,7 +7787,7 @@ static void parseUserAttributes(FuncEmitter* fe, Attr& attrs) {
   if (fe->userAttributes.count(s_IsFoldable.get())) {
     attrs = attrs | AttrIsFoldable;
   }
-  if (!SystemLib::s_inited &&
+  if ((attrs & AttrBuiltin) &&
       fe->pce() &&
       !(attrs & AttrStatic) &&
       !fe->userAttributes.count(s_AllowStatic.get())) {

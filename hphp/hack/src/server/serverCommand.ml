@@ -141,7 +141,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       | None ->
           output_string oc "Missing from typing env\n"
       | Some f ->
-          let fun_str = Typing_print.fun_ f in
+          let fun_str = Typing_print.fun_ env.ServerEnv.tcopt f in
           output_string oc (fun_str^"\n")
       );
       output_string oc "\nglobal const:\n";
@@ -152,7 +152,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       (match gconst_ty with
       | None -> output_string oc "Missing from typing env\n"
       | Some gc ->
-          let gconst_str = Typing_print.gconst gc in
+          let gconst_str = Typing_print.gconst env.ServerEnv.tcopt gc in
           output_string oc ("ty: "^gconst_str^"\n")
       );
       output_string oc "typedef:\n";
@@ -164,7 +164,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
       | None ->
           output_string oc "Missing from typing env\n"
       | Some td ->
-          let td_str = Typing_print.typedef td in
+          let td_str = Typing_print.typedef env.ServerEnv.tcopt td in
           output_string oc (td_str^"\n")
       );
       flush oc;

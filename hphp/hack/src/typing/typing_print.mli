@@ -20,6 +20,6 @@ val full_rec: Typing_env.env -> int -> 'a Typing_defs.ty -> string
 val full_strip_ns: Typing_env.env -> 'a Typing_defs.ty -> string
 val debug: Typing_env.env -> 'a Typing_defs.ty -> string
 val class_: TypecheckerOptions.t -> Typing_defs.class_type -> string
-val gconst: Decl_heap.GConst.t -> string
-val fun_: Decl_heap.Fun.t -> string
-val typedef: Decl_heap.Typedef.t -> string
+val gconst: TypecheckerOptions.t -> Decl_heap.GConst.t -> string
+val fun_: TypecheckerOptions.t -> Decl_heap.Fun.t -> string
+val typedef: TypecheckerOptions.t -> Decl_heap.Typedef.t -> string

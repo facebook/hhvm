@@ -90,24 +90,32 @@ let elaborate_into_current_ns nsenv id =
     | None -> "\\" ^ id
     | Some ns -> "\\" ^ ns ^ "\\" ^ id
 
-(* Helper function for namespace aliasing
- * Walks over the namespace map and checks if any source
+(* Walks over the namespace map and checks if any source
  * matches the given id.
  * If a match is found, then removes the match and
  * replaces it with the target
  * If no match is found,  returns the id *)
-let rec exists_in_auto_ns_map ns_map id =
+let rec translate_id ns_map id =
   match ns_map with
     | [] -> id
-    | (source, target)::rest ->
-        try
-          (* Append backslash at the end so that it doesn't match partially *)
-          if String_utils.string_starts_with id (source ^ "\\")
-          (* Strip out the prefix and connect it to the next beginning *)
-          then target ^ (String_utils.lstrip id source)
-          else exists_in_auto_ns_map rest id
-        (* If there is some matching problem, that means we are not aliasing *)
-        with _ -> id
+    | (target, source)::rest ->
+      (* Append backslash at the end so that it doesn't match partially *)
+      if String_utils.string_starts_with id (source ^ "\\")
+      (* Strip out the prefix and connect it to the next beginning *)
+      then target ^ (String_utils.lstrip id source)
+      else translate_id rest id
+
+(* Runs the autonamespace translation for both fully qualified and non qualified
+ * names *)
+let exists_in_auto_ns_map ns_map id =
+  try
+    let has_bslash = id.[0] = '\\' in
+    let len = String.length id in
+    let id = if has_bslash then String.sub id 1 (len - 1) else id in
+    let translation = translate_id ns_map id in
+    if has_bslash then "\\" ^ translation else translation
+  (* If there is some matching problem, that means we are not aliasing *)
+  with _ -> id
 
 (* Resolves an identifier in a given namespace environment. For example, if we
  * are in the namespace "N\O", the identifier "P\Q" is resolved to "\N\O\P\Q".
@@ -131,8 +139,6 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
     if id <> "" && id.[0] = '\\' then id
     else if autoimport && is_autoimport_name id then "\\" ^ id
     else begin
-      let id = exists_in_auto_ns_map
-        (ParserOptions.auto_namespace_map nsenv.ns_popt) id in
       (* Expand "use" imports. *)
       let (bslash_loc, has_bslash) =
         try String.index id '\\', true
@@ -159,7 +165,9 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
           use ^ (String.sub id bslash_loc len)
         end
     end in
-  p, fully_qualified
+  let translated = exists_in_auto_ns_map
+      (ParserOptions.auto_namespace_map nsenv.ns_popt) fully_qualified in
+  p, translated
 
 let elaborate_id = elaborate_id_impl ~autoimport:true
 (* When a name that clashes with an auto-imported name is first being

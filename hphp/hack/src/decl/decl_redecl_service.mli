@@ -26,12 +26,21 @@ val redo_type_decl :
  * in a very particular use case of invalidate_type_decl.
  *)
 val get_dependent_classes :
+  Worker.t list option ->
+  bucket_size:int ->
   FileInfo.t Relative_path.Map.t ->
   SSet.t ->
   SSet.t
 
 val invalidate_type_decl :
   Worker.t list option ->
+  FileInfo.t Relative_path.Map.t ->
   bucket_size:int ->
+  (* Invalidating classes also invalidates their elements
+   * (see Decl_class_elements), which might be shared with other classes.
+   * We need to remove all of them too to avoid dangling references - the only
+   * exception is if we are sure that removed classes will be immediately
+   * redeclared, before anyone tries to access their elements *)
+  invalidate_dependent_classes:bool ->
   FileInfo.fast ->
   unit

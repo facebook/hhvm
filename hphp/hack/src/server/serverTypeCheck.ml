@@ -486,7 +486,8 @@ end = functor(CheckKind:CheckKindType) -> struct
      * by lazy decl, while we want to compare against declarations that were
      * valid during last full check. *)
     Decl_redecl_service.invalidate_type_decl
-      ~bucket_size genv.workers fast_redecl_phase2_from_scratch;
+      ~bucket_size ~invalidate_dependent_classes:false
+      genv.workers files_info fast_redecl_phase2_from_scratch;
 
     debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
     let errorl', failed_decl, _to_redecl2, to_recheck2 =
@@ -494,7 +495,8 @@ end = functor(CheckKind:CheckKindType) -> struct
         ~bucket_size genv.workers env.tcopt fast_redecl_phase2_now in
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
     Decl_redecl_service.invalidate_type_decl
-      ~bucket_size genv.workers lazy_decl_later;
+      ~bucket_size ~invalidate_dependent_classes:true
+      genv.workers files_info lazy_decl_later;
     let errorl = Errors.merge errorl' errorl in
 
     (* DECLARING TYPES: merging results of the 2 phases *)

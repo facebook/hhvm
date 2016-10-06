@@ -301,10 +301,36 @@ let get_dependent_classes_files classes =
 let filter_dependent_classes classes maybe_dependent_classes =
   List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any classes)
 
-let get_dependent_classes file_info classes =
+module ClassSetStore = GlobalStorage.Make(struct
+  type t = SSet.t
+end)
+
+let load_and_filter_dependent_classes maybe_dependent_classes =
+  let classes = ClassSetStore.load () in
+  filter_dependent_classes classes maybe_dependent_classes
+
+let filter_dependent_classes_parallel workers ~bucket_size
+    classes maybe_dependent_classes =
+  if List.length maybe_dependent_classes < 10 then
+    filter_dependent_classes classes maybe_dependent_classes
+  else begin
+    ClassSetStore.store classes;
+    let res = MultiWorker.call
+      workers
+      ~job:(fun _ c -> load_and_filter_dependent_classes c)
+      ~merge:(@)
+      ~neutral:[]
+      ~next:(MultiWorker.next ~max_size:bucket_size
+        workers maybe_dependent_classes)
+    in
+    ClassSetStore.clear ();
+    res
+  end
+
+let get_dependent_classes workers ~bucket_size file_info classes =
   get_dependent_classes_files classes |>
   get_maybe_dependent_classes file_info classes |>
-  filter_dependent_classes classes |>
+  filter_dependent_classes_parallel workers ~bucket_size classes |>
   SSet.of_list
 
 let get_defs_and_elems workers ~bucket_size fast =
@@ -348,6 +374,13 @@ let redo_type_decl workers ~bucket_size tcopt fast =
   remove_old_defs defs elems;
   result
 
-let invalidate_type_decl workers ~bucket_size fast =
+let invalidate_type_decl workers file_info
+    ~bucket_size ~invalidate_dependent_classes fast =
   let defs, elems = get_defs_and_elems workers ~bucket_size fast in
+  let defs = if invalidate_dependent_classes then begin
+    let classes = defs.FileInfo.n_classes in
+    let classes = get_dependent_classes workers ~bucket_size
+      file_info classes in
+    { defs with FileInfo.n_classes = classes }
+  end else defs in
   remove_defs defs elems

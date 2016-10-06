@@ -38,6 +38,8 @@ let () =
   Test.assert_no_errors env;
 
   let dependent_classes = Decl_redecl_service.get_dependent_classes
+    None
+    ~bucket_size:1
     env.ServerEnv.files_info
     (SSet.of_list ["\\C"; "\\H"; "\\J"])
   in

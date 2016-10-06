@@ -291,6 +291,7 @@ module type CheckKindType = sig
   val get_defs_to_recheck :
     phase_2_decl_defs:FileInfo.fast ->
     files_info:FileInfo.t Relative_path.Map.t ->
+    to_redecl_phase2_deps:Typing_deps.DepSet.t ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
     FileInfo.fast
@@ -336,7 +337,8 @@ module FullCheckKind : CheckKindType = struct
     extend_fast Relative_path.Map.empty files_info env.needs_decl,
     Relative_path.Map.empty
 
-  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_recheck ~env =
+  let get_defs_to_recheck ~phase_2_decl_defs ~files_info
+      ~to_redecl_phase2_deps:_ ~to_recheck ~env =
     let to_recheck = Relative_path.Set.union env.failed_decl to_recheck in
     let to_recheck = Relative_path.Set.union env.failed_check to_recheck in
     extend_fast phase_2_decl_defs files_info to_recheck
@@ -387,9 +389,22 @@ module LazyCheckKind : CheckKindType = struct
     Relative_path.Map.empty,
     extend_fast decl_defs files_info to_redecl_phase2
 
-  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_recheck ~env =
+  let get_related_files dep =
+    Typing_deps.get_ideps_from_hash dep |> Typing_deps.get_files
+
+  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_redecl_phase2_deps
+      ~to_recheck ~env =
+    (* We didn't do the full fan-out from to_redecl_phase2_deps, so the
+     * to_recheck set might not be complete. We approximate it by taking all the
+     * possible dependencies of dependencies and preemptively rechecking them
+     * if they are open in the editor *)
+    let related_files = Typing_deps.DepSet.fold to_redecl_phase2_deps
+      ~init:to_recheck
+      ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
+    in
+
     (* Add only fanout related to open IDE files *)
-    let to_recheck = Relative_path.Set.filter to_recheck
+    let to_recheck = Relative_path.Set.filter related_files
       ~f:(Relative_path.Map.mem env.edited_files)
     in
     extend_fast phase_2_decl_defs files_info to_recheck
@@ -464,10 +479,10 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     debug_print_fast_keys genv "to_redecl_phase1" fast;
-    let _, _, to_redecl_phase2, to_recheck1 =
+    let _, _, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
         ~bucket_size genv.workers env.tcopt fast in
-    let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2 in
+    let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
     let to_recheck1 = Typing_deps.get_files to_recheck1 in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
@@ -509,7 +524,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration "Type-decl" t in
 
     (* TYPE CHECKING *)
-    let fast = CheckKind.get_defs_to_recheck fast files_info to_recheck env in
+    let fast = CheckKind.get_defs_to_recheck fast files_info
+      to_redecl_phase2_deps to_recheck env in
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     let errorl', err_info =

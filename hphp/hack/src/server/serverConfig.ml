@@ -94,6 +94,25 @@ let config_user_attributes config =
       let custom_attrs = Str.split config_list_regexp s in
       Some (List.fold_left custom_attrs ~f:SSet.add ~init:SSet.empty)
 
+let process_experimental sl =
+  match List.map sl String.lowercase with
+    | ["false"] -> SSet.empty
+    | ["true"] -> TypecheckerOptions.experimental_all
+    | features ->
+      begin
+        List.iter features ~f:(fun s ->
+          if not (SSet.mem TypecheckerOptions.experimental_all s)
+          then failwith ("invalid experimental feature " ^ s));
+        List.fold_left features ~f:SSet.add ~init:SSet.empty
+      end
+
+let config_experimental_tc_features config =
+  match SMap.get config "enable_experimental_tc_features" with
+    | None -> SSet.empty
+    | Some s ->
+      let sl = Str.split config_list_regexp s in
+      process_experimental sl
+
 let maybe_relative_path fn =
   (* Note: this is not the same as calling realpath; the cwd is not
    * necessarily the same as hh_server's root!!! *)
@@ -132,26 +151,11 @@ let load config_filename options =
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
   let load_mini_script =
     Option.map (SMap.get config "load_mini_script") maybe_relative_path in
-  let process_experimental sl =
-    match List.map sl String.lowercase with
-    | ["false"] -> SSet.empty
-    | ["true"] -> TypecheckerOptions.experimental_all
-    | features ->
-      begin
-        List.iter features ~f:(fun s ->
-          if not (SSet.mem TypecheckerOptions.experimental_all s)
-          then failwith ("invalid experimental feature " ^ s));
-        List.fold_left features ~f:SSet.add ~init:SSet.empty
-      end in
   let global_opts = GlobalOptions.make
     (bool_ "assume_php" ~default:true config)
     (bool_ "unsafe_xhp" ~default:false config)
     (config_user_attributes config)
-    (process_experimental (string_list
-      ~delim:(Str.regexp ",")
-      "enable_experimental_tc_features"
-      ~default:[]
-      config))
+    (config_experimental_tc_features config)
     (prepare_auto_namespace_map config)
   in
   {

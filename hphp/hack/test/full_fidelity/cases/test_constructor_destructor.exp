@@ -30,7 +30,7 @@
       (missing)(missing)(missing)
       ((variable)(whitespace))
       (simple_initializer((=)(whitespace))
-      (literal((null_literal)))))
+      (literal((null)))))
     ((rparen)(whitespace))(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration(missing)((whitespace)
@@ -56,7 +56,7 @@
       ((variable)(whitespace))
       (simple_initializer
         ((=)(whitespace))
-        (literal((null_literal)))))
+        (literal((null)))))
     ((rparen)(whitespace))
     (missing)(missing))
   (compound_statement
@@ -101,7 +101,7 @@
       ((variable)(whitespace))
       (simple_initializer
         ((=)(whitespace))
-        (literal((null_literal)))))
+        (literal((null)))))
     ((rparen)(whitespace))(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration(missing)((whitespace)

@@ -422,7 +422,7 @@ let to_string kind =
   | HeredocStringLiteral -> "heredoc_string_literal"
   | NowdocStringLiteral -> "nowdoc_string_literal"
   | BooleanLiteral -> "boolean_literal"
-  | NullLiteral -> "null_literal"
+  | NullLiteral -> "null"
   | XHPCategoryName -> "XHP_category_name"
   | XHPElementName -> "XHP_element_name"
   | XHPClassName -> "XHP_class_name"

@@ -64,7 +64,7 @@ let check_const opts fn x =
       let filename = Pos.filename (fst cst.Nast.cst_name) in
       let dep = Typing_deps.Dep.GConst (snd cst.Nast.cst_name) in
       let env =
-        Typing_env.empty TypecheckerOptions.default filename (Some dep) in
+        Typing_env.empty opts filename (Some dep) in
       let env = Typing_env.set_mode env cst.Nast.cst_mode in
       let env, value_type = Typing.expr env v in
       match cst.Nast.cst_type with

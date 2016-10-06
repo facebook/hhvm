@@ -172,7 +172,7 @@ let declare_and_check content ~f =
           | Nast.Fun f -> Typing.fun_def tcopt f;
           | Nast.Class c -> Typing.class_def tcopt c;
           | Nast.Typedef t -> Typing.typedef_def t;
-          | Nast.Constant cst -> Typing.gconst_def cst;
+          | Nast.Constant cst -> Typing.gconst_def cst tcopt;
         end;
         f path file_info
       end

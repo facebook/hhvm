@@ -297,10 +297,10 @@ let select_files env dirname =
   end ~init:Relative_path.Map.empty
 
 (* Infers the types where annotations are missing. *)
-let infer_types genv env dirname =
+let infer_types genv env dirname tcopt =
   let fast = select_files env dirname in
   let fast = FileInfo.simplify_fast fast in
-  Typing_suggest_service.go genv.workers fast
+  Typing_suggest_service.go genv.workers fast tcopt
 
 (* Tries to apply the patches one by one, rolls back if it failed. *)
 let apply_patches tried_patches (genv:ServerEnv.genv) env continue patches =
@@ -336,11 +336,12 @@ let go (genv:ServerEnv.genv) env dirname_path =
   let continue = ref false in
   check_no_error !env;
   let tried_patches = Hashtbl.create 23 in
-  let patches = infer_types genv !env dirname in
+  let tcopt = (!env).tcopt in
+  let patches = infer_types genv !env dirname tcopt in
   apply_patches tried_patches genv env continue patches;
   while !continue do
     continue := false;
-    let patches = infer_types genv !env dirname in
+    let patches = infer_types genv !env dirname tcopt in
     apply_patches tried_patches genv env continue patches;
   done;
   ()

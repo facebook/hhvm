@@ -21,7 +21,7 @@ val class_def:
 val typedef_def:
   Nast.typedef -> unit
 val gconst_def:
-  Nast.gconst -> unit
+  Nast.gconst -> TypecheckerOptions.t -> unit
 
 val expr:
   Typing_env.env -> Nast.expr ->

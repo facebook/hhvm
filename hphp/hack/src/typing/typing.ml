@@ -4295,7 +4295,7 @@ and typedef_def typedef =
     ignore (check_shape_keys_validity env pos (ShapeMap.keys fdm))
   | _ -> ()
 
-and gconst_def cst =
+and gconst_def cst tcopt =
   Typing_hooks.dispatch_global_const_hook cst.cst_name;
   match cst.cst_value with
   | None -> ()
@@ -4303,7 +4303,7 @@ and gconst_def cst =
     let filename = Pos.filename (fst cst.cst_name) in
     let dep = Typing_deps.Dep.GConst (snd cst.cst_name) in
     let env =
-      Typing_env.empty TypecheckerOptions.default filename (Some dep) in
+      Typing_env.empty tcopt filename (Some dep) in
     let env = Typing_env.set_mode env cst.cst_mode in
     let env, value_type = expr env value in
     match cst.cst_type with

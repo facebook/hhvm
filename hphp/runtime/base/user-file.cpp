@@ -410,6 +410,8 @@ static int statFill(Variant stat_array, struct stat* stat_sb)
     return -1;
   }
   auto a = stat_array.getArrayData();
+  // make sure to clear all the unset fields (like st_mtim.tv_nsec).
+  memset(stat_sb, 0, sizeof(*stat_sb));
   stat_sb->st_dev = a->get(s_dev.get()).toInt64();
   stat_sb->st_ino = a->get(s_ino.get()).toInt64();
   stat_sb->st_mode = a->get(s_mode.get()).toInt64();

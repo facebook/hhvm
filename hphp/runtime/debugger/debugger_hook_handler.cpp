@@ -80,7 +80,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
     auto fileName = bp->m_file;
     if (!fileName.empty()) {
       for (auto& kv : g_context->m_evaledFiles) {
-        auto const unit = kv.second;
+        auto const unit = kv.second.unit;
         if (!BreakPointInfo::MatchFile(fileName,
                             unit->filepath()->toCppString())) {
           continue;

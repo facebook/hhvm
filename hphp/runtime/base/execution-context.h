@@ -556,7 +556,7 @@ public:
     //mark(m_apcHandles);
     //mark(dynPropTable); // don't root objects with dyn props
     mark(m_globalVarEnv);
-    mark(m_evaledFiles);
+    for (auto& e : m_evaledFiles) { mark(e.first); mark(e.second.unit); }
     mark(m_evaledFilesOrder);
     mark(m_createdFuncs);
     //for (auto& f : m_faults) mark(f);
@@ -631,7 +631,12 @@ public:
   // destroying the context, so C++ order of destruction is not an issue.
   req::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
   VarEnv* m_globalVarEnv;
-  req::hash_map<const StringData*,Unit*,string_data_hash,string_data_same>
+  struct FileInfo {
+    Unit* unit;
+    time_t ts_sec; // timestamp seconds
+    unsigned long ts_nsec; // timestamp nanoseconds (or 0 if ns not supported)
+  };
+  req::hash_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
   req::vector<Unit*> m_createdFuncs;

@@ -109,7 +109,7 @@ const Unit* find_unit(String filename) {
   // Search the given filename in the list of evaled files. We translate each
   // unit's filename to a canonical format, which is slow, but necessary.
   for (auto& kv : g_context->m_evaledFiles) {
-    auto const unit = kv.second;
+    auto const unit = kv.second.unit;
     String ufilename(const_cast<StringData*>(unit->filepath()));
     if (filename == File::TranslatePath(ufilename)) {
       return unit;

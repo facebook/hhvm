@@ -511,8 +511,14 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   // Check if this file has already been included.
   auto it = eContext->m_evaledFiles.find(spath.get());
   if (it != end(eContext->m_evaledFiles)) {
-    initial = false;
-    return it->second;
+    // In RepoAuthoritative mode we assume that the files are unchanged.
+    if (RuntimeOption::RepoAuthoritative ||
+        (it->second.ts_sec > s.st_mtime) ||
+        ((it->second.ts_sec == s.st_mtime) &&
+         (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
+      initial = false;
+      return it->second.unit;
+    }
   }
 
   // This file hasn't been included yet, so we need to parse the file
@@ -526,10 +532,12 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     // if parsing was successful, update the mappings for spath and
     // rpath (if it exists).
     eContext->m_evaledFilesOrder.push_back(cunit.unit->filepath());
-    eContext->m_evaledFiles[spath.get()] = cunit.unit;
+    eContext->m_evaledFiles[spath.get()] =
+      {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
     spath.get()->incRefCount();
     if (!cunit.unit->filepath()->same(spath.get())) {
-      eContext->m_evaledFiles[cunit.unit->filepath()] = cunit.unit;
+      eContext->m_evaledFiles[cunit.unit->filepath()] =
+        {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
     }
     if (g_system_profiler) {
       g_system_profiler->fileLoadCallBack(path->toCppString());

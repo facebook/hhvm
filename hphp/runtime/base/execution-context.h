@@ -631,7 +631,7 @@ public:
   // destroying the context, so C++ order of destruction is not an issue.
   req::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
   VarEnv* m_globalVarEnv;
-  req::hash_map<const StringData*,Unit*,string_data_hash,string_data_same>
+  req::hash_map<const StringData*,std::pair<Unit*,time_t>,string_data_hash,string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
   req::vector<Unit*> m_createdFuncs;

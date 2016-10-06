@@ -510,9 +510,9 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
 
   // Check if this file has already been included.
   auto it = eContext->m_evaledFiles.find(spath.get());
-  if (it != end(eContext->m_evaledFiles)) {
-    initial = false;
-    return it->second;
+  if (it != end(eContext->m_evaledFiles) && it->second.second >= s.st_mtime) {
+        initial = false;
+        return it->second.first;
   }
 
   // This file hasn't been included yet, so we need to parse the file
@@ -526,10 +526,10 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     // if parsing was successful, update the mappings for spath and
     // rpath (if it exists).
     eContext->m_evaledFilesOrder.push_back(cunit.unit->filepath());
-    eContext->m_evaledFiles[spath.get()] = cunit.unit;
+    eContext->m_evaledFiles[spath.get()] =  std::make_pair(cunit.unit,time(NULL));
     spath.get()->incRefCount();
     if (!cunit.unit->filepath()->same(spath.get())) {
-      eContext->m_evaledFiles[cunit.unit->filepath()] = cunit.unit;
+      eContext->m_evaledFiles[cunit.unit->filepath()] = std::make_pair(cunit.unit,time(NULL));
     }
     if (g_system_profiler) {
       g_system_profiler->fileLoadCallBack(path->toCppString());

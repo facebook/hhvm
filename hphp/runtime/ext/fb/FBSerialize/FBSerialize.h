@@ -55,6 +55,13 @@ namespace HPHP { namespace serialize {
  *
  *  18 (VECTOR): followed by a list of values until STOP is seen. Represents a
  *  vector.
+ *
+ *  19 (LIST): like VECTOR but whose serialization will write the
+ *                   FB_SERIALIZE_LIST code. This is unlike the
+ *                   VECTOR serialization which writes
+ *                   FB_SERIALIZE_STRUCT (instead of FB_SERIALIZE_VECTOR)
+ *                   for reasons beyond me. The length of the list is first
+ *                   written followed by each element in the list.
  */
 
 enum class Type {
@@ -66,6 +73,7 @@ enum class Type {
   MAP,
   STRING,
   OBJECT,
+  LIST,
 };
 
 struct FBSerializeBase {
@@ -81,7 +89,8 @@ struct FBSerializeBase {
     FB_SERIALIZE_VARCHAR = 15,
     FB_SERIALIZE_DOUBLE  = 16,
     FB_SERIALIZE_BOOLEAN = 17,
-    FB_SERIALIZE_VECTOR = 18,
+    FB_SERIALIZE_VECTOR  = 18,
+    FB_SERIALIZE_LIST    = 19,
   };
 
   static const size_t CODE_SIZE = 1;
@@ -116,6 +125,8 @@ struct FBSerializer : private FBSerializeBase {
   void serializeMap(const Map& map, size_t depth);
   template <typename Vector>
   void serializeVector(const Vector& vec, size_t depth);
+  template <typename Vector>
+  void serializeList(const Vector& vec, size_t depth);
   template <typename Variant>
   void serializeThing(const Variant& thing, size_t depth);
 
@@ -126,6 +137,8 @@ struct FBSerializer : private FBSerializeBase {
   static size_t serializedSizeMap(const Map& v, size_t depth);
   template <typename Vector>
   static size_t serializedSizeVector(const Vector& v, size_t depth);
+  template <typename Vector>
+  static size_t serializedSizeList(const Vector& v, size_t depth);
   template <typename Variant>
   static size_t serializedSizeThing(const Variant& v, size_t depth);
 };
@@ -143,6 +156,7 @@ struct FBUnserializer : private FBSerializeBase {
   folly::StringPiece unserializeStringPiece();
   typename V::MapType unserializeMap();
   typename V::VectorType unserializeVector();
+  typename V::VectorType unserializeList();
   // read the next map but don't unserialze it (for lazy or delay
   // unserialization)
   folly::StringPiece getSerializedMap();

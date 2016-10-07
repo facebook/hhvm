@@ -769,6 +769,9 @@ ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
   return static_cast<ArrayData*>(vp);
 }
 
+ALWAYS_INLINE Array empty_dict_array() {
+  return Array::attach(staticEmptyDictArray());
+}
 //////////////////////////////////////////////////////////////////////
 
 }

@@ -1,8 +1,70 @@
+*** string serialize-and-unserialize ***
 string(4) "test"
 bool(true)
+string(4) "test"
+bool(true)
+
+*** array serialize-and-unserialize ***
 array(1) {
   [0]=>
   string(4) "test"
 }
 bool(true)
+
+* array with flag on serialize and unserialize *
+dict(1) {
+  [0]=>
+  string(4) "test"
+}
+bool(true)
+
+* array with flag on only unserialize *
+dict(1) {
+  [0]=>
+  string(4) "test"
+}
+bool(true)
+
+* array with flag on only serialize *
+array(1) {
+  [0]=>
+  string(4) "test"
+}
+bool(true)
+array(2) {
+  [0]=>
+  string(4) "test"
+  [1]=>
+  int(42)
+}
+bool(true)
+array(2) {
+  ["test"]=>
+  string(7) "testval"
+  [42]=>
+  string(5) "42val"
+}
+bool(true)
+
+*** bad_unserialize ***
 bool(false)
+
+*** vec serialize-and-unserialize ***
+bool(false)
+bool(false)
+vec(2) {
+  string(3) "foo"
+  int(42)
+}
+bool(true)
+
+*** dict serialize-and-unserialize ***
+bool(false)
+bool(false)
+dict(2) {
+  ["foo"]=>
+  string(1) "f"
+  [42]=>
+  string(5) "42val"
+}
+bool(true)

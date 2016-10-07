@@ -23,8 +23,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(fb_serialize, const Variant& thing);
-Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success);
+extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS;
+
+Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options = 0);
+Variant HHVM_FUNCTION(fb_unserialize,
+                      const Variant& thing,
+                      VRefParam success,
+                      int64_t options = 0);
 Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing);
 Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, VRefParam success,
@@ -65,7 +70,10 @@ enum FBCompactSerializeBehavior {
   MemoizeParam,
 };
 
-Variant fb_unserialize(const char* str, int len, VRefParam success);
+Variant fb_unserialize(const char* str,
+                       int len,
+                       VRefParam success,
+                       int64_t options);
 String fb_compact_serialize(const Variant& thing,
                             FBCompactSerializeBehavior behavior);
 Variant fb_compact_unserialize(const char* str, int len,

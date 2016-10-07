@@ -5,19 +5,22 @@
  * fb_unserialize().
  * @param mixed $thing - What to serialize. Note that objects are not
  * supported.
+ * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS.
  * @return mixed - Serialized data.
  */
 <<__HipHopSpecific, __Native>>
-function fb_serialize(mixed $thing): mixed;
+function fb_serialize(mixed $thing, int $options = 0): mixed;
 
 /* Unserialize previously fb_serialize()-ed data.
  * @param mixed $thing - What to unserialize.
  * @param mixed $success - Whether it was successful or not.
+ * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS.
  * @return mixed - Unserialized data.
  */
 <<__HipHopSpecific, __Native>>
 function fb_unserialize(mixed $thing,
-                        mixed &$success): mixed;
+                        mixed &$success,
+                        int $options = 0): mixed;
 
 /* Serialize data into a compact format that can be unserialized by
  * fb_compact_unserialize(). In general produces smaller output compared to

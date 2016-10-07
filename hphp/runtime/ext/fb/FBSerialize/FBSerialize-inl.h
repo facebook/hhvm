@@ -140,10 +140,26 @@ void FBSerializer<V>::serializeMap(const Map& map, size_t depth) {
 
 template <class V>
 template <typename Vector>
+void FBSerializer<V>::serializeList(const Vector& vec, size_t depth) {
+  writeCode(FB_SERIALIZE_LIST);
+
+  // write the size so that unserializers can reserve it
+  serializeInt64(V::vectorSize(vec));
+
+  for (auto it = V::vectorIterator(vec);
+       V::vectorNotEnd(vec, it);
+       V::vectorNext(it)) {
+    serializeThing(V::vectorValue(it), depth + 1);
+  }
+  writeCode(FB_SERIALIZE_STOP);
+}
+
+template <class V>
+template <typename Vector>
 void FBSerializer<V>::serializeVector(const Vector& vec, size_t depth) {
   writeCode(FB_SERIALIZE_STRUCT);
 
-  size_t index = 0;
+  int64_t index = 0;
   for (auto it = V::vectorIterator(vec);
        V::vectorNotEnd(vec, it);
        V::vectorNext(it), ++index) {
@@ -187,6 +203,10 @@ void FBSerializer<V>::serializeThing(const Variant& thing, size_t depth) {
 
     case Type::VECTOR:
       serializeVector(V::asVector(thing), depth);
+      break;
+
+    case Type::LIST:
+      serializeList(V::asVector(thing), depth);
       break;
 
     default:
@@ -235,6 +255,10 @@ size_t FBSerializer<V>::serializedSizeThing(const Variant& thing,
 
     case Type::VECTOR:
       return serializedSizeVector(V::asVector(thing), depth);
+      break;
+
+    case Type::LIST:
+      return serializedSizeList(V::asVector(thing), depth);
       break;
 
     default:
@@ -302,6 +326,25 @@ size_t FBSerializer<V>::serializedSizeVector(const Vector& vec, size_t depth) {
        V::vectorNotEnd(vec, it);
        V::vectorNext(it), ++index) {
     ret += serializedSizeInt64(index);
+    ret += serializedSizeThing(V::vectorValue(it), depth + 1);
+  }
+
+  return ret;
+}
+
+template <class V>
+template <typename Vector>
+size_t FBSerializer<V>::serializedSizeList(
+  const Vector& vec,
+  size_t depth) {
+  // List code + stop code
+  size_t ret = CODE_SIZE + CODE_SIZE;
+
+  ret += serializedSizeInt64(V::vectorSize(vec));
+
+  for (auto it = V::vectorIterator(vec);
+       V::vectorNotEnd(vec, it);
+       V::vectorNext(it)) {
     ret += serializedSizeThing(V::vectorValue(it), depth + 1);
   }
 
@@ -477,6 +520,24 @@ inline typename V::VectorType FBUnserializer<V>::unserializeVector() {
   return ret;
 }
 
+template <class V>
+inline typename V::VectorType FBUnserializer<V>::unserializeList() {
+  p_ += CODE_SIZE;
+
+  // the list size is written so we can reserve it in the vector
+  // in future. Skip past it for now.
+  unserializeInt64();
+
+  typename V::VectorType ret = V::createVector();
+
+  size_t code = nextCode();
+  while (code != FB_SERIALIZE_STOP) {
+    V::vectorAppend(ret, unserializeThing());
+    code = nextCode();
+  }
+  p_ += CODE_SIZE;
+  return ret;
+}
 
 template <class V>
 inline folly::StringPiece FBUnserializer<V>::getSerializedMap() {
@@ -557,6 +618,8 @@ inline typename V::VariantType FBUnserializer<V>::unserializeThing() {
       return V::fromBool(unserializeBoolean());
     case FB_SERIALIZE_VECTOR:
       return V::fromVector(unserializeVector());
+    case FB_SERIALIZE_LIST:
+      return V::fromVector(unserializeList());
     default:
       throw UnserializeError("Invalid code: " + folly::to<std::string>(code)
                              + " at location " + folly::to<std::string>(p_));

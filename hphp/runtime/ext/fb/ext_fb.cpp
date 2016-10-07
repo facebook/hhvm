@@ -53,6 +53,9 @@
 
 namespace HPHP {
 
+// fb_serialize options
+const int64_t k_FB_SERIALIZE_HACK_ARRAYS = 1<<1;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
@@ -106,21 +109,36 @@ enum TType {
 /* Return the smallest (supported) unsigned length that can store the value */
 #define LEN_SIZE(x) ((((unsigned)x) == ((uint8_t)x)) ? 1 : 4)
 
-Variant HHVM_FUNCTION(fb_serialize, const Variant& thing) {
+Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
   try {
-    size_t len =
-      HPHP::serialize::FBSerializer<VariantController>::serializedSize(thing);
-    String s(len, ReserveString);
-    HPHP::serialize::FBSerializer<VariantController>::serialize(
-      thing, s.mutableData());
-    s.setSize(len);
-    return s;
+    if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
+      size_t len =  HPHP::serialize
+        ::FBSerializer<VariantControllerUsingHackArrays>
+        ::serializedSize(thing);
+      String s(len, ReserveString);
+      HPHP::serialize
+        ::FBSerializer<VariantControllerUsingHackArrays>
+        ::serialize(thing, s.mutableData());
+      s.setSize(len);
+      return s;
+    } else {
+      size_t len =
+        HPHP::serialize::FBSerializer<VariantController>::serializedSize(thing);
+      String s(len, ReserveString);
+      HPHP::serialize::FBSerializer<VariantController>::serialize(
+        thing, s.mutableData());
+      s.setSize(len);
+      return s;
+    }
   } catch (const HPHP::serialize::SerializeError&) {
     return init_null();
   }
 }
 
-Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success) {
+Variant HHVM_FUNCTION(fb_unserialize,
+                      const Variant& thing,
+                      VRefParam success,
+                      int64_t options) {
   if (thing.isString()) {
     String sthing = thing.toString();
 
@@ -128,7 +146,7 @@ Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success) {
       return fb_compact_unserialize(sthing.data(), sthing.size(),
                                     success);
     } else {
-      return fb_unserialize(sthing.data(), sthing.size(), success);
+      return fb_unserialize(sthing.data(), sthing.size(), success, options);
     }
   }
 
@@ -136,12 +154,23 @@ Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success) {
   return false;
 }
 
-Variant fb_unserialize(const char* str, int len, VRefParam success) {
+Variant fb_unserialize(const char* str,
+                       int len,
+                       VRefParam success,
+                       int64_t options) {
   try {
-    auto res = HPHP::serialize::FBUnserializer<VariantController>::unserialize(
-      folly::StringPiece(str, len));
-    success.assignIfRef(true);
-    return res;
+    if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
+      auto res = HPHP::serialize
+        ::FBUnserializer<VariantControllerUsingHackArrays>
+        ::unserialize(folly::StringPiece(str, len));
+      success.assignIfRef(true);
+      return res;
+    } else {
+      auto res = HPHP::serialize::FBUnserializer<VariantController>
+        ::unserialize(folly::StringPiece(str, len));
+      success.assignIfRef(true);
+      return res;
+    }
   } catch (const HPHP::serialize::UnserializeError&) {
     success.assignIfRef(false);
     return false;
@@ -1202,6 +1231,8 @@ struct FBExtension : Extension {
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE);
+
+    HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS, k_FB_SERIALIZE_HACK_ARRAYS);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);

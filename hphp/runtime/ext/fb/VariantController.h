@@ -24,10 +24,16 @@
 
 namespace HPHP {
 
+enum VariantControllerHackArraysMode {
+  OFF,
+  ON,
+};
+
 /**
  * Hphp datatype conforming to datatype requirements in FBSerialize.h
  */
-struct VariantController {
+template <VariantControllerHackArraysMode HackArraysMode>
+struct VariantControllerImpl {
   typedef Variant VariantType;
   typedef Array MapType;
   typedef Array VectorType;
@@ -41,15 +47,27 @@ struct VariantController {
       case KindOfBoolean:    return HPHP::serialize::Type::BOOL;
       case KindOfDouble:     return HPHP::serialize::Type::DOUBLE;
       case KindOfInt64:      return HPHP::serialize::Type::INT64;
-      case KindOfPersistentArray:
-      case KindOfArray:      return HPHP::serialize::Type::MAP;
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
-      case KindOfPersistentVec:
-      case KindOfVec:
+      case KindOfPersistentArray:
+      case KindOfArray:      return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:
-      case KindOfDict:
+      case KindOfDict: {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
+          return HPHP::serialize::Type::MAP;
+        }
+        throw HPHP::serialize::SerializeError(
+          "don't know how to serialize HPHP Variant");
+      }
+      case KindOfPersistentVec:
+      case KindOfVec: {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
+          return HPHP::serialize::Type::LIST;
+        }
+        throw HPHP::serialize::SerializeError(
+          "don't know how to serialize HPHP Variant");
+      }
       case KindOfPersistentKeyset:
       case KindOfKeyset:
       case KindOfResource:
@@ -80,7 +98,10 @@ struct VariantController {
   static VariantType fromVector(const VectorType& vec) { return vec; }
 
   // map methods
-  static MapType createMap() { return empty_array(); }
+  static MapType createMap() {
+    return HackArraysMode == VariantControllerHackArraysMode::ON
+      ? empty_dict_array() : empty_array();
+  }
   static MapType createMap(ArrayInit&& map) {
     return map.toArray();
   }
@@ -118,7 +139,13 @@ struct VariantController {
   static const VariantType& mapValue(ArrayIter& it) { return it.secondRef(); }
 
   // vector methods
-  static VectorType createVector() { return empty_array(); }
+  static VectorType createVector() {
+    return HackArraysMode == VariantControllerHackArraysMode::ON
+      ? empty_vec_array() : empty_array();
+  }
+  static int64_t vectorSize(const VectorType& vec) {
+    return vec.size();
+  }
   static void vectorAppend(VectorType& vec, const VariantType& v) {
     vec.append(v);
   }
@@ -164,6 +191,11 @@ struct VariantController {
   }
 };
 
+using VariantController =
+  VariantControllerImpl<VariantControllerHackArraysMode::OFF>;
+using VariantControllerUsingHackArrays =
+  VariantControllerImpl<VariantControllerHackArraysMode::ON>;
 }
+
 
 #endif

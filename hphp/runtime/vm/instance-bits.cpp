@@ -61,12 +61,15 @@ std::atomic<pthread_t> s_initThread;
 //////////////////////////////////////////////////////////////////////
 
 ReadWriteMutex g_clsInitLock(RankInstanceBitsClsInit);
+// True if initialization has been finished
 std::atomic<bool> g_initFlag{false};
+// True if profiling should no longer be done
+std::atomic<bool> g_profileDoneFlag{false};
 
 //////////////////////////////////////////////////////////////////////
 
 void profile(const StringData* name) {
-  if (g_initFlag.load(std::memory_order_acquire) ||
+  if (g_profileDoneFlag.load(std::memory_order_acquire) ||
       !RuntimeOption::RepoAuthoritative) {
     return;
   }
@@ -93,6 +96,17 @@ void init() {
 
   Lock l(s_initLock);
   if (g_initFlag.load(std::memory_order_acquire)) return;
+
+  // Stop profiling before attempting to acquire the instance-counts lock. The
+  // reason for having two flags is because ReadWriteLock can in certain
+  // implementations favor readers over writers. Thus if there's a steady stream
+  // of calls to profile(), we'll block indefinitely waiting to acquire the
+  // instance-counts lock. Since this function is called from JITing threads,
+  // this can eventually lead to starvation. So, set this flag to stop other
+  // threads from attempting to acquire the instance-counts lock, and avoid
+  // starvation.
+  g_profileDoneFlag.store(true, std::memory_order_release);
+
   if (!RuntimeOption::RepoAuthoritative) {
     g_initFlag.store(true, std::memory_order_release);
     return;

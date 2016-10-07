@@ -97,7 +97,7 @@ bool regeneratePrologue(TransID prologueTransId) {
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.
-  if (auto const p = checkCachedPrologue(func, nArgs)) return false;
+  if (checkCachedPrologue(func, nArgs)) return false;
 
   // If this prologue has a DV funclet, then invalidate it and return its SrcKey
   // and TransID

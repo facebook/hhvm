@@ -393,6 +393,23 @@ bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
   });
 }
 
+bool simplify(Env& env, const popp& inst, Vlabel b, size_t i) {
+  if (!env.use_counts[inst.d0]) { decltype(inst.d0){Vreg::kInvalidReg}; }
+  if (!env.use_counts[inst.d1]) { decltype(inst.d1){Vreg::kInvalidReg}; }
+  return false;
+}
+
+bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.d]) {
+    return false;
+  } else {
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << lea{reg::rsp[8], reg::rsp};
+      return 1;
+    });
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

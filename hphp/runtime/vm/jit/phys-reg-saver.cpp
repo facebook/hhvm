@@ -46,7 +46,12 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
   }
 
   gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
-    v << pushp{r1, r0};
+    // Push r0 twice to avoid vasm-check failures
+    if (r1 == InvalidReg) {
+      v << pushp{r0, r0};
+    } else {
+      v << pushp{r1, r0};
+    }
   });
 }
 
@@ -58,7 +63,12 @@ PhysRegSaver::~PhysRegSaver() {
   auto xmm = m_regs & abi().simd();
 
   gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
-    v << popp{r0, r1};
+    // Pop second value into new virtual to avoid vasm-check failures
+    if (r1 == InvalidReg) {
+      v << popp{r0, v.makeReg()};
+    } else {
+      v << popp{r0, r1};
+    }
   });
 
   if (!xmm.empty()) {

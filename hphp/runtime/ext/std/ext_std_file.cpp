@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
+#include "hphp/util/hphp-config.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -39,6 +40,9 @@
 #include "hphp/runtime/base/user-stream-wrapper.h"
 #include "hphp/runtime/base/zend-scanf.h"
 #include "hphp/runtime/ext/hash/ext_hash.h"
+#if ENABLE_EXTENSION_POSIX
+#include "hphp/runtime/ext/posix/ext_posix.h"
+#endif
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/static-content-cache.h"
@@ -1899,12 +1903,20 @@ Variant HHVM_FUNCTION(getcwd) {
 bool HHVM_FUNCTION(chdir,
                    const String& directory) {
   CHECK_PATH_FALSE(directory, 1);
-  if (HHVM_FN(is_dir)(directory)) {
-    g_context->setCwd(HHVM_FN(realpath)(directory).toString());
-    return true;
+  if (!HHVM_FN(is_dir)(directory)) {
+    raise_warning("chdir(): No such file or directory (errno 2)");
+    return false;
   }
-  raise_warning("No such file or directory (errno 2)");
-  return false;
+
+#if ENABLE_EXTENSION_POSIX
+  if (!HHVM_FN(posix_access)(directory, k_POSIX_X_OK)) {
+    raise_warning("chdir(): Permission denied (errno 13)");
+    return false;
+  }
+#endif
+
+  g_context->setCwd(HHVM_FN(realpath)(directory).toString());
+  return true;
 }
 
 #ifndef WIN32

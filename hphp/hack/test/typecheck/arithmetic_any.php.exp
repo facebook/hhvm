@@ -1,0 +1,19 @@
+Tint
+X
+Tfloat
+Tfloat
+X
+Tnum
+Tnum
+Tfloat
+Tfloat
+Tnum
+Tnum
+Tnum
+X
+X
+intersect(X)
+intersect(X)
+intersect(Tint, option(Tint))
+Tfloat
+No errors

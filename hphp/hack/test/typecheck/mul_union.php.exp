@@ -1,0 +1,6 @@
+File "mul_union.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "mul_union.php", line 4, characters 27-29:
+This is an int
+File "mul_union.php", line 6, characters 10-10:
+It is incompatible with a num (int/float)

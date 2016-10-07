@@ -553,12 +553,10 @@ and stmt env = function
       LEnv.intersect_list env parent_lenv cl
   | Foreach (e1, e2, b) as st ->
       let env, ty1 = expr env e1 in
-      let env, ty1 = TUtils.fold_unresolved env ty1 in
-      let env, ety1 = Env.expand_type env ty1 in
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let env, ty2 = as_expr env (fst e1) e2 in
-      let env = Type.sub_type (fst e1) Reason.URforeach env ety1 ty2 in
+      let env = Type.sub_type (fst e1) Reason.URforeach env ty1 ty2 in
       let alias_depth =
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
       let env = Env.in_loop env begin
@@ -3376,12 +3374,29 @@ and unop p env uop ty =
       env, ty
 
 and binop in_cond p env bop p1 ty1 p2 ty2 =
-  let expand_num_type env p ty =
-    let env, ty = TUtils.fold_unresolved env ty in
-    let env = Type.sub_type p Reason.URnone env ty
-        (Reason.Rarith p, Tprim Tnum) in
-    let env, ety = Env.expand_type env ty in
-    (env, ety) in
+  let rec is_any ty =
+    match Env.expand_type env ty with
+    | (_, (_, Tany)) -> true
+    | (_, (_, Tunresolved tyl)) -> List.for_all tyl is_any
+    | _ -> false in
+  (* Test if `ty` is *not* the any type (or a variant thereof) and
+   * is a subtype of the primitive type `prim`. *)
+  let is_sub_prim env ty prim =
+    let ty_prim = (Reason.Rarith p, Tprim prim) in
+    if not (is_any ty) && SubType.is_sub_type env ty ty_prim
+    then Some (fst ty) else None in
+  (* Test if `ty` is *not* the any type (or a variant thereof) and
+   * is a subtype of `num` but is not a subtype of `int` *)
+  let is_sub_num_not_sub_int env ty =
+    let ty_num = (Reason.Rarith p, Tprim Tnum) in
+    let ty_int = (Reason.Rarith p, Tprim Tint) in
+    if not (is_any ty) && SubType.is_sub_type env ty ty_num
+       && not (SubType.is_sub_type env ty ty_int)
+    then Some (fst ty) else None in
+  (* Force ty1 to be a subtype of ty2 (unless it is any) *)
+  let enforce_sub_ty env ty1 ty2 =
+    let env = Type.sub_type p Reason.URnone env ty1 ty2 in
+    Env.expand_type env ty1 in
   match bop with
   | Ast.Plus ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -3424,86 +3439,56 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
         ), _ -> binop in_cond p env Ast.Minus p1 ty1 p2 ty2
       )
   | Ast.Minus | Ast.Star ->
-      let env, ty1 = TUtils.fold_unresolved env ty1 in
-      let env, ty2 = TUtils.fold_unresolved env ty2 in
-      let env = Type.sub_type p1 Reason.URnone env ty1
-        (Reason.Rarith p1, Tprim Tnum) in
-      let env = Type.sub_type p2 Reason.URnone env ty2
-        (Reason.Rarith p2, Tprim Tnum) in
-      let env, ety1 = Env.expand_type env ty1 in
-      let env, ety2 = Env.expand_type env ty2 in
-      (match ety1, ety2 with
-      | (r, Tprim Tfloat), _ | _, (r, Tprim Tfloat) ->
-          (* if either side is a float then float: 1.0 - 1 -> float *)
-          env, (r, Tprim Tfloat)
-      | (r, Tprim Tnum), _ | _, (r, Tprim Tnum) ->
-          (* if either side is a num, then num: (3 / x) - 1 -> num *)
-          env, (r, Tprim Tnum)
-      | (_, Tprim Tint), (_, Tprim Tint) ->
-          (* Both sides are integers, then integer: 1 - 1 -> int *)
-          env, (Reason.Rarith_ret p, Tprim Tint)
-      | (_, (Tany | Tmixed | Tarraykind _ | Toption _
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
-        | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
-            )
-        ), _->
-          (* Either side is unknown, unknown *)
-          (* TODO um, what? This seems very wrong, particularly where "newtype
-           * as" is concerned.
-           * This also causes issues with primitive constraints on generics.
-           * See test/typecheck/generic_primitive_invariant.php as an example *)
-          env, ety1)
-  | Ast.Slash ->
-      let env, ety1 = expand_num_type env p1 ty1 in
-      let env, ety2 = expand_num_type env p2 ty2 in
-      (match ety1, ety2 with
-      | (r, Tprim Tfloat), _ | _, (r, Tprim Tfloat) -> env, (r, Tprim Tfloat)
-      | (_, (Tany | Tmixed | Tarraykind _ | Toption _
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
-        | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
-        )
-        ), _ -> env, (Reason.Rret_div p, Tprim Tnum)
-      )
-  | Ast.Starstar ->
-      let env, ety1 = expand_num_type env p1 ty1 in
-      let env, ety2 = expand_num_type env p2 ty2 in
-      (match ety1, ety2 with
-      | (r, Tprim Tfloat), _ | _, (r, Tprim Tfloat) -> env, (r, Tprim Tfloat)
-      | (_, (Tany | Tmixed | Tarraykind _ | Toption _
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
-        | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
-        )
-        ), _ -> env, (Reason.Rarith_ret p, Tprim Tnum)
-      )
+    begin
+      let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
+      let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
+      (* if either side is a float then float: 1.0 - 1 -> float *)
+      match is_sub_prim env ty1 Tfloat, is_sub_prim env ty2 Tfloat with
+      | (Some r, _) | (_, Some r) -> env, (r, Tprim Tfloat)
+      | _, _ ->
+      (* Both sides are integers, then integer: 1 - 1 -> int *)
+        match is_sub_prim env ty1 Tint, is_sub_prim env ty2 Tint with
+        | (Some _, Some _) -> env, (Reason.Rarith_ret p, Tprim Tint)
+        | _, _ ->
+          (* Either side is a non-int num then num *)
+          match is_sub_num_not_sub_int env ty1,
+                is_sub_num_not_sub_int env ty2 with
+          | (Some r, _) | (_, Some r) -> env, (r, Tprim Tnum)
+          (* Otherwise? *)
+          | _, _ -> env, ty1
+    end
+  | Ast.Slash | Ast.Starstar ->
+    begin
+      let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
+      let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
+      (* If either side is a float then float *)
+      match is_sub_prim env ty1 Tfloat, is_sub_prim env ty2 Tfloat with
+      | (Some r, _) | (_, Some r) -> env, (r, Tprim Tfloat)
+      (* Otherwise num *)
+      | _, _ ->
+      let r = match bop with
+        | Ast.Slash -> Reason.Rret_div p
+        | _ -> Reason.Rarith_ret p in
+      env, (r, Tprim Tnum)
+    end
   | Ast.Percent ->
-      let env = Type.sub_type p Reason.URnone env ty1
-        (Reason.Rarith p1, Tprim Tint) in
-      let env = Type.sub_type p Reason.URnone env ty2
-        (Reason.Rarith p1, Tprim Tint) in
+      let env, _ = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
+      let env, _ = enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
       env, (Reason.Rarith_ret p, Tprim Tint)
   | Ast.Xor ->
-      let env, ty1 = TUtils.fold_unresolved env ty1 in
-      let env, ty2 = TUtils.fold_unresolved env ty2 in
-      let env, ety1 = Env.expand_type env ty1 in
-      let env, ety2 = Env.expand_type env ty2 in
-      (match ety1, ety2 with
-      | (_, Tprim Tbool), _ | _, (_, Tprim Tbool) ->
-          let env = Type.sub_type p Reason.URnone env ty1
-            (Reason.Rlogic_ret p1, Tprim Tbool) in
-          let env = Type.sub_type p Reason.URnone env ty2
-            (Reason.Rlogic_ret p1, Tprim Tbool) in
-          env, (Reason.Rlogic_ret p, Tprim Tbool)
-      | (_, (Tany | Tmixed | Tarraykind _ | Toption _
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
-        | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
-        )
-        ), _ ->
-          let env = Type.sub_type p Reason.URnone env ty1
-            (Reason.Rarith p1, Tprim Tint) in
-          let env = Type.sub_type p Reason.URnone env ty2
-            (Reason.Rarith p1, Tprim Tint) in
-          env, (Reason.Rarith_ret p, Tprim Tint)
-      )
+    begin
+      match is_sub_prim env ty1 Tbool, is_sub_prim env ty2 Tbool with
+      | (Some _, _) | (_, Some _) ->
+        let env, _ =
+          enforce_sub_ty env ty1 (Reason.Rlogic_ret p1, Tprim Tbool) in
+        let env, _ =
+          enforce_sub_ty env ty2 (Reason.Rlogic_ret p1, Tprim Tbool) in
+        env, (Reason.Rlogic_ret p, Tprim Tbool)
+      | _, _ ->
+        let env, _ = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
+        let env, _ = enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
+        env, (Reason.Rarith_ret p, Tprim Tint)
+    end
   | Ast.Eqeq  | Ast.Diff  ->
       env, (Reason.Rcomp p, Tprim Tbool)
   | Ast.EQeqeq | Ast.Diff2 ->
@@ -3532,10 +3517,8 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
   | Ast.BArbar ->
       env, (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Amp | Ast.Bar | Ast.Ltlt | Ast.Gtgt ->
-      let env = Type.sub_type p Reason.URnone env ty1
-        (Reason.Rbitwise p1, Tprim Tint) in
-      let env = Type.sub_type p Reason.URnone env ty2
-        (Reason.Rbitwise p2, Tprim Tint) in
+      let env, _ = enforce_sub_ty env ty1 (Reason.Rbitwise p1, Tprim Tint) in
+      let env, _ = enforce_sub_ty env ty2 (Reason.Rbitwise p2, Tprim Tint) in
       env, (Reason.Rbitwise_ret p, Tprim Tint)
   | Ast.Eq _ ->
       assert false

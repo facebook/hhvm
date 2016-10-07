@@ -708,10 +708,22 @@ and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | _, _ ->
     sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
+(* BEWARE: hack upon hack here.
+ * To implement a predicate that tests whether `ty_sub` is a subtype of
+ * `ty_super`, we call sub_type but handle any unification errors and
+ * turn them into `false` result. Unfortunately HH_FIXME might end up
+ * hiding the "error", and so we need to disable the fixme mechanism
+ * before calling sub_type and then re-enable it afterwards.
+ *)
 and is_sub_type env ty_sub ty_super =
-  Errors.try_
-    (fun () -> ignore(sub_type env ty_sub ty_super); true)
-    (fun _ -> false)
+  let f = !Errors.is_hh_fixme in
+  Errors.is_hh_fixme := (fun _ _ -> false);
+  let result =
+    Errors.try_
+      (fun () -> ignore(sub_type env ty_sub ty_super); true)
+      (fun _ -> false) in
+  Errors.is_hh_fixme := f;
+  result
 
 and sub_string p env ty2 =
   let env, ety2 = Env.expand_type env ty2 in

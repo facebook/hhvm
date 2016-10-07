@@ -1,4 +1,4 @@
-File "unsafeexpr5.php", line 11, characters 8-9:
+File "unsafeexpr5.php", line 11, characters 8-13:
 Typing error (Typing[4110])
 File "unsafeexpr5.php", line 11, characters 8-9:
 This is a num (int/float) because this is used in an arithmetic operation

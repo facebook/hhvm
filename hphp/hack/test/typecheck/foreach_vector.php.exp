@@ -1,4 +1,4 @@
-File "foreach_vector.php", line 21, characters 10-13:
+File "foreach_vector.php", line 21, characters 10-17:
 Typing error (Typing[4110])
 File "foreach_vector.php", line 21, characters 10-13:
 This is a num (int/float) because this is used in an arithmetic operation

@@ -376,6 +376,7 @@ INTERNAL_ERRORS = {
 
 OTHER_UNPARSEABLE_FILES = [
     'abstract_final_classname.php',
+    'arithmetic_any.php',
     'capitalization2.php',
     'capitalization4.php',
     'class_abstract_final_1.php',
@@ -393,6 +394,7 @@ OTHER_UNPARSEABLE_FILES = [
     'covariance7.php',
     'covariance8.php',
     'delayed_subst2.php',
+    'div_abstract.php',
     # TODO: #10395133 h2tp dict support
     'dict/dict_literal.php',
     'dict/dict_literal_empty.php',

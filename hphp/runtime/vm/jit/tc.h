@@ -109,7 +109,7 @@ bool shouldTranslate(const Func* func, TransKind kind);
 /*
  * Whether we should try profile-guided optimization when translating `sk'.
  */
-bool profileSrcKey(SrcKey sk);
+bool profileFunc(const Func* sk);
 
 /*
  * Attempt to discard profData via the treadmill if it is no longer needed.

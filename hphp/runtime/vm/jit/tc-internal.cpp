@@ -56,16 +56,16 @@ __thread size_t s_initialTCSize;
 UniqueStubs s_ustubs;
 SrcDB s_srcDB;
 
-bool shouldPGOFunc(const Func& func) {
+bool shouldPGOFunc(const Func* func) {
   if (profData() == nullptr) return false;
 
   // JITing pseudo-mains requires extra checks that blow the IR.  PGO
   // can significantly increase the size of the regions, so disable it for
   // pseudo-mains (so regions will be just tracelets).
-  if (func.isPseudoMain()) return false;
+  if (func->isPseudoMain()) return false;
 
   if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return func.attrs() & AttrHot;
+  return func->attrs() & AttrHot;
 }
 
 }
@@ -252,10 +252,10 @@ void checkFreeProfData() {
   }
 }
 
-bool profileSrcKey(SrcKey sk) {
-  if (!shouldPGOFunc(*sk.func())) return false;
-  if (profData()->optimized(sk.funcID())) return false;
-  if (profData()->profiling(sk.funcID())) return true;
+bool profileFunc(const Func* func) {
+  if (!shouldPGOFunc(func)) return false;
+  if (profData()->optimized(func->getFuncId())) return false;
+  if (profData()->profiling(func->getFuncId())) return true;
 
   // Don't start profiling new functions if the size of either main or
   // prof is already above Eval.JitAMaxUsage and we already filled hot.

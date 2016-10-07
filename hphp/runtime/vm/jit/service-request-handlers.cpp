@@ -117,7 +117,8 @@ TCA getTranslation(TransArgs args) {
     }
   }
 
-  args.kind = tc::profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+  args.kind = tc::profileFunc(args.sk.func()) ?
+    TransKind::Profile : TransKind::Live;
 
   if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
 

@@ -138,10 +138,11 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   }
 
   // We need to recompute the kind after acquiring the write lease in case the
-  // answer to profileSrcKey() changes, so use a lambda rather than just
+  // answer to profileFunc() changes, so use a lambda rather than just
   // storing the result.
   auto kind = [&] {
-    return tc::profileSrcKey(args.sk) ? TransKind::Profile : TransKind::Live;
+    return tc::profileFunc(args.sk.func()) ?
+      TransKind::Profile : TransKind::Live;
   };
   args.kind = kind();
 

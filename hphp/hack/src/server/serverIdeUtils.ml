@@ -124,7 +124,7 @@ let declare_and_check content ~f =
       Fixmes.HH_FIXMES.oldify_batch @@
         Fixmes.HH_FIXMES.KeySet.singleton path;
       let {Parser_hack.file_mode = _; comments = _; content = _; ast} =
-        Parser_hack.program_with_default_popt path content
+        Parser_hack.program tcopt path content
       in
       let funs, classes, typedefs, consts =
         List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->

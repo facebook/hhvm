@@ -665,14 +665,6 @@ void tvGetStrings(
   }
 }
 
-int getClassSize(Class* cls) {
-  int size = 0;
-  auto precls = cls->preClass();
-  size += precls->builtinObjSize();
-  size += sizeof(ObjectData);
-  return size;
-}
-
 bool supportsToArray(ObjectData* obj) {
   if (obj->isCollection()) {
     assertx(isValidCollection(obj->collectionType()));
@@ -724,7 +716,7 @@ std::pair<int, double> getObjSize(
   if (UNLIKELY(obj->getAttribute(ObjectData::IsWaitHandle))) {
     size = asio_object_size(obj);
   } else {
-    size = getClassSize(cls);
+    size = sizeof(ObjectData);
   }
 
   double sized = size;

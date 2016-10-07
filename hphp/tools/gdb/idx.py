@@ -216,11 +216,7 @@ def tread_hash_map_at(thm, key, hasher=None):
 # PHP value accessors.
 
 def _object_data_prop_vec(obj):
-    cls = rawptr(obj['m_cls'])
-    extra = rawptr(cls['m_extra'])
-
-    prop_vec = (obj.address + 1).cast(T('uintptr_t')) + \
-                extra['m_builtinODTailSize']
+    prop_vec = (obj.address + 1).cast(T('uintptr_t'))
     return prop_vec.cast(T('HPHP::TypedValue').pointer())
 
 

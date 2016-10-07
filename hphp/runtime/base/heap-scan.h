@@ -76,6 +76,7 @@ template<class F> void scanHeader(const Header* h,
     case HeaderKind::Globals:
       return h->globals_.scan(mark);
     case HeaderKind::Object:
+    case HeaderKind::Closure:
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
@@ -116,6 +117,7 @@ template<class F> void scanHeader(const Header* h,
       return h->nativeObj()->scan(mark);
     case HeaderKind::AsyncFuncFrame:
       return h->asyncFuncWH()->scan(mark);
+    case HeaderKind::ClosureHdr:
     case HeaderKind::String:
     case HeaderKind::Free:
       // these don't have pointers. some clients might generically
@@ -143,6 +145,9 @@ template<class F> void ObjectData::scan(F& mark) const {
     // scan C++ properties after [ObjectData] header. should pick up
     // unioned and bit-packed fields
     mark(this + 1, asio_object_size(this) - sizeof(*this));
+  } else if (m_hdr.kind == HeaderKind::Closure) {
+    auto closure_hdr = static_cast<const c_Closure*>(this)->hdr();
+    mark(&closure_hdr->ctx, sizeof(closure_hdr->ctx));
   }
 
   if (getAttribute(HasNativeData)) {
@@ -151,10 +156,6 @@ template<class F> void ObjectData::scan(F& mark) const {
   }
 
   auto props = propVec();
-  if (getAttribute(IsCppBuiltin)) {
-    // [ObjectData][C++ fields][props]
-    mark(this + 1, uintptr_t(props) - uintptr_t(this + 1));
-  }
   for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {
     mark(props[i]);
   }

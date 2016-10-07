@@ -58,6 +58,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Ref:
       break;
     case HeaderKind::Object:
+    case HeaderKind::Closure:
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
@@ -80,6 +81,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       break;
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
+    case HeaderKind::ClosureHdr:
       break;
     case HeaderKind::Free:
       out << "[" << h->free_.size() << "]";

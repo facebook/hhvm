@@ -32,6 +32,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include <algorithm>
 
@@ -99,6 +100,18 @@ struct Header {
     assert(isObjectKind(obj->headerKind()));
     return obj;
   }
+  const ObjectData* closureObj() const {
+    assert(kind() == HeaderKind::ClosureHdr);
+    auto obj = reinterpret_cast<const ObjectData*>(&closure_hdr_ + 1);
+    assert(obj->headerKind() == HeaderKind::Closure);
+    return obj;
+  }
+  ObjectData* closureObj() {
+    assert(kind() == HeaderKind::ClosureHdr);
+    auto obj = reinterpret_cast<ObjectData*>(&closure_hdr_ + 1);
+    assert(obj->headerKind() == HeaderKind::Closure);
+    return obj;
+  }
 
   // if this header is one of the types that contains an ObjectData,
   // return the (possibly inner ptr) ObjectData*
@@ -106,6 +119,7 @@ struct Header {
     return isObjectKind(kind()) ? &obj_ :
            kind() == HeaderKind::AsyncFuncFrame ? asyncFuncWH() :
            kind() == HeaderKind::NativeData ? nativeObj() :
+           kind() == HeaderKind::ClosureHdr ? closureObj() :
            nullptr;
   }
 
@@ -132,6 +146,8 @@ public:
     FreeNode free_;
     NativeNode native_;
     c_AwaitAllWaitHandle awaitall_;
+    ClosureHdr closure_hdr_;
+    c_Closure closure_;
   };
 };
 
@@ -155,10 +171,15 @@ inline size_t Header::size() const {
       return sizeof(ProxyArray);
     case HeaderKind::String:
       return str_.heapSize();
+    case HeaderKind::Closure:
     case HeaderKind::Object:
-    case HeaderKind::AsyncFuncWH:
-      // [ObjectData][subclass][props]
+      // [ObjectData][props]
       return obj_.heapSize();
+    case HeaderKind::AsyncFuncWH:
+      return sizeof(c_AsyncFunctionWaitHandle);
+    case HeaderKind::ClosureHdr:
+      // [ClosureHdr][ObjectData][use vars]
+      return closure_hdr_.size();
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:
@@ -274,6 +295,7 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::WaitHandle:
       case HeaderKind::AsyncFuncWH:
       case HeaderKind::AwaitAllWH:
+      case HeaderKind::Closure:
       case HeaderKind::Vector:
       case HeaderKind::Map:
       case HeaderKind::Set:
@@ -288,6 +310,9 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
         break;
       case HeaderKind::NativeData:
         ptrs.push_back(h->nativeObj());
+        break;
+      case HeaderKind::ClosureHdr:
+        ptrs.push_back(h->closureObj());
         break;
       case HeaderKind::Packed:
       case HeaderKind::Mixed:

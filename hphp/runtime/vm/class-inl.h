@@ -180,10 +180,6 @@ inline BuiltinDtorFunction Class::instanceDtor() const {
   return m_extra->m_instanceDtor;
 }
 
-inline int32_t Class::builtinODTailSize() const {
-  return m_extra->m_builtinODTailSize;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Methods.
 

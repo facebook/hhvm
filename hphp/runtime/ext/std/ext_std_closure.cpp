@@ -102,7 +102,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
       getThisUnchecked()->incRefCount();
     }
   } else {
-    m_ctx = nullptr;
+    hdr()->ctx = nullptr;
   }
 
   /*
@@ -276,12 +276,12 @@ static Variant HHVM_METHOD(Closure, call,
 static ObjectData* closureInstanceCtor(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
-  assertx(cls->builtinODTailSize() == sizeof(c_Closure) - sizeof(ObjectData));
+  assertx(cls->parent() == c_Closure::classof());
   auto const nProps = cls->numDeclProperties();
-  auto const size = ObjectData::sizeForNProps(nProps) +
-                    sizeof(c_Closure) - sizeof(ObjectData);
-  auto obj = new (MM().objMalloc(size))
-             c_Closure(cls, ObjectData::IsCppBuiltin | ObjectData::HasClone);
+  auto const size = sizeof(ClosureHdr) + ObjectData::sizeForNProps(nProps);
+  auto hdr = static_cast<ClosureHdr*>(MM().objMalloc(size));
+  hdr->hdr.init(HeaderKind::ClosureHdr, size);
+  auto obj = new (hdr + 1) c_Closure(cls);
   assertx(obj->hasExactlyOneRef());
   return obj;
 }
@@ -290,7 +290,7 @@ ObjectData* c_Closure::clone() {
   auto const cls = getVMClass();
   auto ret = c_Closure::fromObject(closureInstanceCtor(cls));
 
-  ret->m_ctx = m_ctx;
+  ret->hdr()->ctx = hdr()->ctx;
   if (auto t = getThis()) {
     t->incRefCount();
   }
@@ -310,19 +310,18 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
   auto const nProps = size_t{cls->numDeclProperties()};
   auto prop = c_Closure::fromObject(obj)->getUseVars();
   auto const stop = prop + nProps;
-  if (auto t = c_Closure::fromObject(obj)->getThis()) {
+  auto closure = c_Closure::fromObject(obj);
+  if (auto t = closure->getThis()) {
     decRefObj(t);
   }
   for (; prop != stop; ++prop) {
     tvRefcountedDecRef(prop);
   }
-  auto const size = ObjectData::sizeForNProps(nProps) +
-                    sizeof(c_Closure) - sizeof(ObjectData);
-  MM().objFree(obj, size);
+  auto hdr = closure->hdr();
+  MM().objFree(hdr, hdr->size());
 }
 
 void PreClassEmitter::setClosurePreClass() {
-  m_builtinObjSize = sizeof(c_Closure) - sizeof(ObjectData);
   m_instanceCtor = closureInstanceCtor;
   m_instanceDtor = closureInstanceDtor;
 }

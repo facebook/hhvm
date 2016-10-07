@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class.h"
@@ -312,6 +311,7 @@ bool record_request_heap_mem_event(const void* addr, const Header* hdr,
       break;
 
     case HeaderKind::Object:
+    case HeaderKind::Closure:
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
@@ -328,6 +328,7 @@ bool record_request_heap_mem_event(const void* addr, const Header* hdr,
 
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
+    case HeaderKind::ClosureHdr:
       break;
 
     case HeaderKind::SmallMalloc:

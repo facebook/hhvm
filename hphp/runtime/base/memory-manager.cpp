@@ -566,15 +566,16 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-const char* header_names[] = {
+const std::array<char*,NumHeaderKinds> header_names = {
   "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
   "GlobalsArray", "ProxyArray", "DictArray", "VecArray", "KeysetArray",
-  "String", "Resource", "Ref", "Object", "WaitHandle", "AsyncFuncWH",
-  "AwaitAllWH", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
-  "AsyncFuncFrame", "NativeData", "SmallMalloc", "BigMalloc", "BigObj",
+  "String", "Resource", "Ref",
+  "Object", "WaitHandle", "AsyncFuncWH", "AwaitAllWH", "Closure",
+  "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
+  "AsyncFuncFrame", "NativeData", "ClosureHdr",
+  "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole"
 };
-static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole(void* ptr, uint32_t size) {
@@ -658,6 +659,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::WaitHandle:
       case HeaderKind::AsyncFuncWH:
       case HeaderKind::AwaitAllWH:
+      case HeaderKind::Closure:
       case HeaderKind::Vector:
       case HeaderKind::Map:
       case HeaderKind::Set:
@@ -669,6 +671,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Ref:
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::NativeData:
+      case HeaderKind::ClosureHdr:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
         break;

@@ -251,7 +251,6 @@ struct PreClassEmitter {
   PreClass::Hoistable m_hoistable;
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};
-  uint32_t m_builtinObjSize{0};
   int32_t m_numDeclMethods{-1};
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};

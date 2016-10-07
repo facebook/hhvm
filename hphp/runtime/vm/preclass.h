@@ -330,14 +330,6 @@ public:
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
 
   /*
-   * For a builtin class c_Foo:
-   *
-   * builtinObjSize is the size of the object, excluding ObjectData (i.e.,
-   * sizeof(c_Foo) - sizeof(ObjectData)).
-   */
-  uint32_t builtinObjSize() const { return m_builtinObjSize; }
-
-  /*
    * Extension builtin classes have custom creation and destruction routines.
    */
   BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
@@ -449,7 +441,6 @@ private:
   int m_line2;
   Offset m_offset;
   Id m_id;
-  uint32_t m_builtinObjSize{0};
   Attr m_attrs;
   Hoistable m_hoistable;
   LowStringPtr m_name;

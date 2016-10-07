@@ -18,9 +18,16 @@
 #define incl_HPHP_HEADER_KIND_H_
 
 #include <cstdint>
+#include <array>
 
 namespace HPHP {
 
+/*
+ * every request-allocated object has a 1-byte kind field in its
+ * header, from this enum. If you update the enum, be sure to
+ * update header_names[] as well, and either unset or change
+ * HHVM_REPO_SCHEMA, because kind values are used in HHBC.
+ */
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Mixed, Empty, Apc, Globals, Proxy,
@@ -28,12 +35,13 @@ enum class HeaderKind : uint8_t {
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
   String, Resource, Ref,
-  Object, WaitHandle, AsyncFuncWH, AwaitAllWH,
+  Object, WaitHandle, AsyncFuncWH, AwaitAllWH, Closure,
   // Collections
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
   // other kinds, not used for countable objects.
   AsyncFuncFrame, // NativeNode followed by Frame, Resumable, AFWH
   NativeData, // a NativeData header preceding an HNI ObjectData
+  ClosureHdr, // a ClosureHdr preceding a Closure ObjectData
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block
   BigObj, // big size-tracked object (valid header follows MallocNode)
@@ -41,7 +49,7 @@ enum class HeaderKind : uint8_t {
   Hole, // wasted space not in any freelist
 };
 const unsigned NumHeaderKinds = unsigned(HeaderKind::Hole) + 1;
-extern const char* header_names[];
+extern const std::array<char*,NumHeaderKinds> header_names;
 
 inline bool haveCount(HeaderKind k) {
   return uint8_t(k) < uint8_t(HeaderKind::AsyncFuncFrame);

@@ -216,7 +216,6 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     m_hoistable);
   pc->m_instanceCtor = m_instanceCtor;
   pc->m_instanceDtor = m_instanceDtor;
-  pc->m_builtinObjSize = m_builtinObjSize;
   pc->m_interfaces = m_interfaces;
   pc->m_usedTraits = m_usedTraits;
   pc->m_requirements = m_requirements;

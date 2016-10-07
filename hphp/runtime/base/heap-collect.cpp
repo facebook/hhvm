@@ -214,6 +214,11 @@ void Marker::operator()(const ObjectData* p) {
       enqueue(p);
     }
     assert(!p->getVMClass()->getNativeDataInfo());
+  } else if (kind == HeaderKind::Closure) {
+    auto closure_hdr = static_cast<const c_Closure*>(p)->hdr();
+    if (mark(closure_hdr)) {
+      enqueue(p);
+    }
   } else if (p->getAttribute(ObjectData::HasNativeData)) {
     // HNI style native object; mark the NativeNode header, queue the object.
     // [NativeNode][NativeData][ObjectData][props] is one allocation.
@@ -376,9 +381,13 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
     case HeaderKind::NativeData:
       enqueue(h->nativeObj());
       break;
+    case HeaderKind::ClosureHdr:
+      enqueue(h->closureObj());
+      break;
     case HeaderKind::String:
       // nothing to queue since strings don't have pointers
       break;
+    case HeaderKind::Closure:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::BigObj:
     case HeaderKind::Free:
@@ -472,6 +481,14 @@ NEVER_INLINE void Marker::init() {
         obj->hdr_.marks = GCBits::Unmarked;
         break;
       }
+      case HeaderKind::ClosureHdr: {
+        // Pointers to either the closure header or the closure object will
+        // be mapped to the closure header.
+        ptrs_.insert(h);
+        auto obj = reinterpret_cast<const Header*>(h->closureObj());
+        obj->hdr_.marks = GCBits::Unmarked;
+        break;
+      }
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
         ptrs_.insert(h);
@@ -482,6 +499,9 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::AsyncFuncWH:
         // AsyncFuncWH should not be encountered on their own while scanning.
         // They should always be prefixed by an AsyncFuncFrame allocation.
+      case HeaderKind::Closure:
+        // Closure should not be encountered on their own while scanning.
+        // They should always be prefixed by a ClosureHdr.
       case HeaderKind::Free:
       case HeaderKind::Hole:
       case HeaderKind::BigObj:
@@ -596,6 +616,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       break;
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
+    case HeaderKind::ClosureHdr:
       // not counted but marked when embedded object is marked
       break;
     case HeaderKind::SmallMalloc:
@@ -607,6 +628,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       assert(!(h->hdr_.marks & GCBits::Mark));
       break;
     case HeaderKind::AsyncFuncWH:
+    case HeaderKind::Closure:
     case HeaderKind::BigObj:
     case HeaderKind::Hole:
       // These should never be encountered because they don't represent
@@ -663,6 +685,7 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::ImmMap:
       case HeaderKind::ImmSet:
       case HeaderKind::AsyncFuncFrame:
+      case HeaderKind::ClosureHdr:
       case HeaderKind::NativeData: {
         auto obj = h->obj();
         if (obj->getAttribute(ObjectData::HasDynPropArr)) {
@@ -690,6 +713,7 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::Hole:
       case HeaderKind::BigObj:
       case HeaderKind::AsyncFuncWH:
+      case HeaderKind::Closure:
         assert(false && "skipped by forEachHeader()");
         break;
     }

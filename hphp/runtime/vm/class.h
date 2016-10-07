@@ -521,13 +521,6 @@ public:
   BuiltinDtorFunction instanceDtor() const;
 
   /*
-   * This value is the pointer adjustment from an ObjectData* to get to the
-   * property vector, for a builtin class.  In other words, it's the number of
-   * bytes of subclass data following the ObjectData subobject.
-   */
-  int32_t builtinODTailSize() const;
-
-  /*
    * Whether this C++ extension class has opted into serialization.
    *
    * @requires: instanceCtor()
@@ -1023,7 +1016,6 @@ private:
      */
     BuiltinCtorFunction m_instanceCtor{nullptr};
     BuiltinDtorFunction m_instanceDtor{nullptr};
-    uint32_t m_builtinODTailSize{0};
 
     /*
      * Cache for Closure subclass scopings.

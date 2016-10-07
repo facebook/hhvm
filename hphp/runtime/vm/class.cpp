@@ -1107,9 +1107,7 @@ DataType Class::clsCnsType(const StringData* cnsName) const {
 size_t Class::declPropOffset(Slot index) const {
   static_assert(std::is_unsigned<Slot>::value,
                 "Slot is supposed to be unsigned");
-  return sizeof(ObjectData) +
-         m_extra->m_builtinODTailSize +
-         index * sizeof(TypedValue);
+  return sizeof(ObjectData) + index * sizeof(TypedValue);
 }
 
 
@@ -1211,12 +1209,10 @@ void Class::setParent() {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_preClass->instanceCtor();
     m_extra.raw()->m_instanceDtor = m_preClass->instanceDtor();
-    m_extra.raw()->m_builtinODTailSize = m_preClass->builtinObjSize();
   } else if (m_parent.get() && m_parent->m_extra->m_instanceCtor) {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_parent->m_extra->m_instanceCtor;
     m_extra.raw()->m_instanceDtor = m_parent->m_extra->m_instanceDtor;
-    m_extra.raw()->m_builtinODTailSize = m_parent->m_extra->m_builtinODTailSize;
     // XXX: should this be copying over the clsInfo also?  Might be broken...
   }
 }

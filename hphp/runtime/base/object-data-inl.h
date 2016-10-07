@@ -71,7 +71,7 @@ inline ObjectData::ObjectData(Class* cls,
 }
 
 inline size_t ObjectData::heapSize() const {
-  return m_cls->builtinODTailSize() + sizeForNProps(m_cls->numDeclProperties());
+  return sizeForNProps(m_cls->numDeclProperties());
 }
 
 inline ObjectData* ObjectData::newInstance(Class* cls) {
@@ -236,11 +236,7 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
 }
 
 inline TypedValue* ObjectData::propVec() {
-  auto const ret = reinterpret_cast<uintptr_t>(this + 1);
-  if (UNLIKELY(getAttribute(IsCppBuiltin))) {
-    return reinterpret_cast<TypedValue*>(ret + m_cls->builtinODTailSize());
-  }
-  return reinterpret_cast<TypedValue*>(ret);
+  return reinterpret_cast<TypedValue*>(uintptr_t(this + 1));
 }
 
 inline const TypedValue* ObjectData::propVec() const {

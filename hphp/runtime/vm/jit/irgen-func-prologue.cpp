@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -131,8 +130,7 @@ void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
   // Closure object properties are the use vars followed by the static locals
   // (which are per-instance).
   auto const nuse = cls->numDeclProperties() - func->numStaticLocals();
-
-  ptrdiff_t use_var_off = sizeof(ObjectData) + cls->builtinODTailSize();
+  ptrdiff_t use_var_off = sizeof(ObjectData);
 
   for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
     auto const ty = typeFromRAT(cls->declPropRepoAuthType(i), func->cls());

@@ -134,7 +134,7 @@ static HeapGraphContextPtr get_valid_heapgraph_context_resource(
 ///////////////////////////////////////////////////////////////////////////////
 // TRAVERSAL FUNCTIONS
 
-bool supportsToArray(ObjectData* obj) {
+bool supportsToArray(const ObjectData* obj) {
   if (obj->isCollection()) {
     assertx(isValidCollection(obj->collectionType()));
     return true;
@@ -158,7 +158,7 @@ bool supportsToArray(ObjectData* obj) {
 }
 
 std::string getObjectConnectionName(
-  ObjectData* obj,
+  const ObjectData* obj,
   const void* target
 ) {
   Class* cls = obj->getVMClass();
@@ -194,7 +194,7 @@ std::string getObjectConnectionName(
       key, tname(val_tv->m_type)
     );
 
-    // We're only interested in the porperty name that points to our target
+    // We're only interested in the property name that points to our target
     if ((void*)val_tv->m_data.pobj != target) {
       continue;
     }
@@ -238,6 +238,11 @@ std::string getNodesConnectionName(
     auto h = g.nodes[from].h;
     auto th = g.nodes[to].h;
 
+    // get the from/to object, if any. this deals with object kinds that
+    // have data before the object: AFWH, Native, and Closure.
+    auto h_obj = h->obj();
+    auto th_obj = th->obj();
+
     switch (h->kind()) {
       // Known generalized cases that don't really need pointer kind
       case HeaderKind::Mixed:
@@ -266,9 +271,13 @@ std::string getNodesConnectionName(
 
       case HeaderKind::Map:
       case HeaderKind::ImmMap:
+      case HeaderKind::ClosureHdr:
+      case HeaderKind::Closure:
+      case HeaderKind::NativeData:
       case HeaderKind::Object: {
-        std::string conn_name = getObjectConnectionName(
-            const_cast<ObjectData*>(&h->obj_), &th->obj_
+        auto conn_name = getObjectConnectionName(h_obj,
+            th_obj ? static_cast<const void*>(th_obj) :
+            static_cast<const void*>(th)
         );
         if (!conn_name.empty()) {
           return conn_name;
@@ -286,7 +295,6 @@ std::string getNodesConnectionName(
       case HeaderKind::Resource:
       case HeaderKind::BigMalloc:
       case HeaderKind::SmallMalloc:
-      case HeaderKind::NativeData:
       case HeaderKind::Free:
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
@@ -381,11 +389,11 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
   cnodes.reserve(hg.nodes.size());
   for (int i = 0; i < hg.nodes.size(); ++i) {
     const auto& src_node = hg.nodes[i];
+    auto obj = src_node.h->obj();
     auto new_node = CapturedNode{
       /* kind */      src_node.h->kind(),
       /* size */      uint32_t(src_node.h->size()),
-      /* classname */ src_node.h->kind() == HeaderKind::Object ?
-        src_node.h->obj_.classname_cstr() : nullptr
+      /* classname */ obj ? obj->classname_cstr() : nullptr
     };
     cnodes.push_back(new_node);
 

@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/util/trace.h"
 
@@ -85,12 +86,10 @@ namespace {
 
 void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
                           Vreg dst, const Class* cls, size_t nprops) {
-  auto const propsOff = sizeof(ObjectData) + cls->builtinODTailSize();
-
   // If the object has a small number of properties, just emit stores inline.
   if (nprops < 8) {
     for (int i = 0; i < nprops; ++i) {
-      auto const propOffset = propsOff + sizeof(TypedValue) * i;
+      auto const propOffset = sizeof(ObjectData) + sizeof(TypedValue) * i;
       auto const& initTV = cls->declPropInit()[i];
 
       if (!isNullType(initTV.m_type)) {
@@ -103,7 +102,7 @@ void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
 
   // Use memcpy for large numbers of properties.
   auto args = argGroup(env, inst)
-    .addr(dst, safe_cast<int32_t>(propsOff))
+    .addr(dst, safe_cast<int32_t>(sizeof(ObjectData)))
     .imm(reinterpret_cast<uintptr_t>(&cls->declPropInit()[0]))
     .imm(cellsToBytes(nprops));
 
@@ -145,9 +144,8 @@ void cgInitObjProps(IRLS& env, const IRInstruction* inst) {
       v << load{Vreg(rvmtl())[propHandle], propInitVec};
       v << load{propInitVec[Class::PropInitVec::dataOff()], propData};
 
-      auto const propsOff = sizeof(ObjectData) + cls->builtinODTailSize();
       auto args = argGroup(env, inst)
-        .addr(obj, safe_cast<int32_t>(propsOff))
+        .addr(obj, safe_cast<int32_t>(sizeof(ObjectData)))
         .reg(propData);
 
       if (!cls->hasDeepInitProps()) {

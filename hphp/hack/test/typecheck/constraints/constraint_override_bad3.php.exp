@@ -1,0 +1,15 @@
+File "constraint_override_bad3.php", line 23, characters 7-12:
+Class BadSub does not correctly implement all required methods  (Typing[4110])
+File "constraint_override_bad3.php", line 23, characters 26-30:
+Some methods are incompatible with those declared in type Super
+Read the following to see why:
+File "constraint_override_bad3.php", line 24, characters 19-21:
+Member foo has the wrong type
+File "constraint_override_bad3.php", line 12, characters 36-37:
+Some type constraint(s) here are violated
+File "constraint_override_bad3.php", line 24, characters 67-68:
+'Tz' is a constrained type
+File "constraint_override_bad3.php", line 24, characters 73-73:
+This is an object of type B
+File "constraint_override_bad3.php", line 12, characters 70-71:
+It is incompatible with an object of type GB

@@ -22,31 +22,262 @@ module TUEnv = Typing_unification_env
 module SN = Naming_special_names
 module Phase = Typing_phase
 
+(* Given two types that we know are in a subtype relationship
+ *   ty_sub <: ty_super
+ * add to env.tpenv any bounds on generic type parameters that must
+ * hold for ty_sub <: ty_super to be valid.
+ *
+ * For example, suppose we know Cov<T> <: Cov<D> for a covariant class Cov.
+ * Then it must be the case that T <: D so we add an upper bound D to the
+ * bounds for T.
+ *
+ * Although some of this code is similar to that for subtype_with_uenv, its
+ * purpose is different. subtype_with_uenv takes two types t and u and makes
+ * updates to the substitution of type variables (through unification) to
+ * make t <: u true.
+ *
+ * decompose_subtype takes two types t and u for which t <: u is *assumed* to
+ * hold, and makes updates to bounds on generic parameters that *necessarily*
+ * hold in order for t <: u.
+ *
+ * If it turns out that there is no situation in which t <: u (for example, we
+ * are given string and int, or Cov<Derived> <: Cov<Base>) then evaluate the
+ * failure continuation `fail`
+ *)
+let rec decompose_subtype env ty_sub ty_super fail =
+  let env, ty_super = Env.expand_type env ty_super in
+  let env, ty_sub = Env.expand_type env ty_sub in
+  let again env ty_sub =
+    decompose_subtype env ty_sub ty_super fail in
+  match ty_sub, ty_super with
+  (* name_sub <: ty_super so add an upper bound on name_sub *)
+  | (_, Tabstract (AKgeneric name_sub, _)), _ when ty_sub != ty_super ->
+    let tys = Env.get_upper_bounds env name_sub in
+    (* Don't add the same type twice! *)
+    if List.mem tys ty_super then env
+    else Env.add_upper_bound env name_sub ty_super
+
+  (* ty_sub <: name_super so add a lower bound on name_super *)
+  | _, (_, Tabstract (AKgeneric name_super, _)) when ty_sub != ty_super ->
+    let tys = Env.get_lower_bounds env name_super in
+    (* Don't add the same type twice! *)
+    if List.mem tys ty_sub then env
+    else Env.add_lower_bound env name_super ty_sub
+
+  (* If ?ty_sub' <: ?ty_super' then must have ty_sub <: ty_super *)
+  | (_, Toption ty_sub'), (_, Toption ty_super') ->
+    decompose_subtype env ty_sub' ty_super' fail
+
+  (* Singleton union *)
+  | _, (_, Tunresolved [ty_super']) ->
+    decompose_subtype env ty_sub ty_super' fail
+
+  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
+    when (coll = SN.Collections.cTraversable ||
+          coll = SN.Collections.cContainer) ->
+      (match akind with
+      | AKany -> env
+      | AKempty -> env
+      (* If vec<tv> <: Traversable<tv_super>
+       * then it must be the case that tv <: tv_super
+       * Likewise for vec<tv> <: Container<tv_super>
+       *          and map<_,tv> <: Traversable<tv_super>
+       *          and map<_,tv> <: Container<tv_super>
+       *)
+      | AKvec tv | AKmap(_, tv) -> decompose_subtype env tv tv_super fail
+      | AKshape fdm ->
+        Typing_arrays.fold_akshape_as_akmap again env r fdm
+      | AKtuple fields ->
+        Typing_arrays.fold_aktuple_as_akvec again env r fields
+    )
+
+  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tk_super; tv_super]))
+    when (coll = SN.Collections.cKeyedTraversable
+         || coll = SN.Collections.cKeyedContainer
+         || coll = SN.Collections.cIndexish) ->
+      (match akind with
+      | AKany -> env
+      | AKempty -> env
+      | AKvec tv ->
+        let env' = decompose_subtype env (r, Tprim Nast.Tint) tk_super fail in
+        decompose_subtype env' tv tv_super fail
+      | AKmap (tk, tv) ->
+        let env' = decompose_subtype env tk tk_super fail in
+        decompose_subtype env' tv tv_super fail
+      | AKshape fdm ->
+        Typing_arrays.fold_akshape_as_akmap again env r fdm
+      | AKtuple fields ->
+        Typing_arrays.fold_aktuple_as_akvec again env r fields
+      )
+
+  | (_, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super)))->
+    let cid_super, cid_sub = (snd x_super), (snd x_sub) in
+    begin match Env.get_class env cid_sub with
+    | None ->
+      env
+
+    | Some class_sub ->
+      (* If cid_sub = cid_super = C and C<tyl_sub> <: C<tyl_super>
+       * then it must be the case that tyl_sub and tyl_super are
+       * pointwise related according to the variance annotations on
+       * the type parameters of C
+       *)
+      if cid_super = cid_sub
+      then decompose_tparams env class_sub.tc_tparams tyl_sub tyl_super fail
+      else
+
+      (* Let's just do a sanity check on arity. We don't expect it to fail *)
+      if List.length class_sub.tc_tparams <> List.length tyl_sub
+      then env
+      else
+
+      (* Otherwise, let's look at the class it extends *)
+        begin match SMap.get cid_super class_sub.tc_ancestors with
+        | Some open_extends_ty ->
+          let ety_env = {
+            type_expansions = [];
+            substs = Subst.make class_sub.tc_tparams tyl_sub;
+            this_ty = ty_sub;
+            from_class = None;
+          } in
+          (* Substitute type arguments for formal generic parameters *)
+          let env, extends_ty = Phase.localize ~ety_env env open_extends_ty in
+
+          (* Now recurse with the new assumption extends_ty <: ty_super *)
+          decompose_subtype env extends_ty ty_super fail
+
+        | None ->
+          begin match Env.get_class env cid_super with
+            | None -> env
+            | Some class_super ->
+              if class_super.tc_kind = Ast.Cnormal
+              then fail env
+              else env
+          end
+        end
+    end
+
+  | _, _ ->
+    env
+
+and decompose_tparams env tparams children_tyl super_tyl fail =
+  match tparams, children_tyl, super_tyl with
+  | [], _, _
+  | _, [], _
+  | _, _, [] -> env
+  | (variance,_,_) :: tparams, child :: childrenl, super :: superl ->
+    let ck =
+      match variance with
+      | Ast.Covariant -> Ast.Constraint_as
+      | Ast.Contravariant -> Ast.Constraint_super
+      | Ast.Invariant -> Ast.Constraint_eq in
+    let env' = decompose_constraint env ck child super fail in
+    decompose_tparams env' tparams childrenl superl fail
+
+(* Decompose a general constraint *)
+and decompose_constraint env ck ty_sub ty_super fail =
+  match ck with
+  | Ast.Constraint_as ->
+    decompose_subtype env ty_sub ty_super fail
+  | Ast.Constraint_super ->
+    decompose_subtype env ty_super ty_sub fail
+  | Ast.Constraint_eq ->
+    let env' = decompose_subtype env ty_sub ty_super fail in
+    decompose_subtype env' ty_super ty_sub fail
+
+(* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
+ * add bounds to type parameters in the environment that necessarily
+ * must hold in order for ty1 ck ty2.
+ *
+ * First, we invoke decompose_constraint to add initial bounds to
+ * the environment. Then we iterate, decomposing constraints that
+ * arise through transitivity across bounds.
+ *
+ * For example, suppose that env already contains
+ *   C<T1> <: T2
+ * for some covariant class C. Now suppose we add the
+ * constraint "T2 as C<T3>" i.e. we end up with
+ *   C<T1> <: T2 <: C<T3>
+ * Then by transitivity we know that T1 <: T3 so we add this to the
+ * environment also.
+ *
+ * We repeat this process until no further bounds are added to the
+ * environment, or some limit is reached. (It's possible to construct
+ * types that expand forever under inheritance.)
+ *
+ * If the constraint turns out to be unsatisfiable, invoke
+ * the failure continuation fail.
+*)
+let constraint_iteration_limit = 20
+let add_constraint env ck ty_sub ty_super fail =
+  let oldsize = Env.get_tpenv_size env in
+  let env' = decompose_constraint env ck ty_sub ty_super fail in
+  if Env.get_tpenv_size env' = oldsize
+  then env'
+  else
+  let rec iter n env =
+    if n > constraint_iteration_limit then env
+    else
+      let oldsize = Env.get_tpenv_size env in
+      let env' =
+        List.fold_left (Env.get_generic_parameters env) ~init:env
+          ~f:(fun env x ->
+            List.fold_left (Env.get_lower_bounds env x) ~init:env
+              ~f:(fun env ty_sub' ->
+                List.fold_left (Env.get_upper_bounds env x) ~init:env
+                  ~f:(fun env ty_super' ->
+                    decompose_subtype env ty_sub' ty_super' fail))) in
+      if Env.get_tpenv_size env' = oldsize
+      then env'
+      else iter (n+1) env'
+  in
+    iter 0 env'
+
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super. The rules must take account of arity,
  * generic parameters and their constraints, parameter types, and return type.
  *
  * Suppose ft_super is of the form
- *    <T1 csuper1, ..., Tn csupern>(tsuper1, ..., tsuperm) : tsuper
+ *    <T1 csuper1, ..., Tn csupern>(tsuper1, ..., tsuperm) : tsuper where wsuper
  * and ft_sub is of the form
- *    <T1 csub1, ..., Tn csubn>(tsub1, ..., tsubm) : tsub
- * where csuperX and csubX are constraints on type parameters.
+ *    <T1 csub1, ..., Tn csubn>(tsub1, ..., tsubm) : tsub where wsub
+ * where csuperX and csubX are constraints on type parameters and wsuper and
+ * wsub are 'where' constraints. Note that all types in the superclass,
+ * including constraints (so csuperX, tsuperX, tsuper and wsuper) have had
+ * any class type parameters instantiated appropriately according to
+ * the actual arguments of the superclass. For example, suppose we have
+ *
+ *   class Super<T> {
+ *     function foo<Tu as A<T>>(T $x) : B<T> where T super C<T>
+ *   }
+ *   class Sub extends Super<D> {
+ *     ...override of foo...
+ *   }
+ * then the actual signature in the superclass that we need to check is
+ *     function foo<Tu as A<D>>(D $x) : B<D> where D super C<D>
+ * Note in particular the generali form of the 'where' constraint.
+ *
+ * (Currently, this instantiation happens in
+ *   Typing_extends.check_class_implements which in turn calls
+ *   Decl_instantiate.instantiate_ce)
  *
  * Then for ft_sub to be a subtype of ft_super it must be the case that
  * (1) tsub1 = tsuper1, ..., tsubn = tsupern.
  *     This is invariant subtyping on parameter types.
  *     (See D3834381 where this is relaxed to contravariant subtyping.)
- * (2) tsub <: tsuper (under constraints T1 csuper1, ..., Tn csupern)
+ *
+ * (2) tsub <: tsuper (under constraints T1 csuper1, ..., Tn csupern and wsuper)
  *     This is covariant subtyping on result type. For constraints consider
  *       e.g. consider ft_super = <T super I>(): T
  *                 and ft_sub = <T>(): I
+ *
  * (3) The constraints for ft_super entail the constraints for ft_sub, because
  *     we might be calling the function having checked that csuperX are
  *     satisfied but the definition of the function (e.g. consider an override)
  *     has been checked under csubX.
  *     More precisely, we must assume constraints T1 csuper1, ..., Tn csupern
- *     and check that T1 satisfies csub1, ..., Tn satisfies csubn under those
- *     assumptions.
+ *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
+ *     and that wsub holds under those assumptions.
  *)
 let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
   let p_sub = Reason.to_pos r_sub in
@@ -83,8 +314,23 @@ let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
    * subtyping in the context of the ft_super constraints. But we'd better
    * restore tpenv afterwards *)
   let old_tpenv = env.Env.lenv.Env.tpenv in
+  let add_tparams_constraints env (tparams: locl tparam list) =
+    let add_bound env (_, (pos, name), cstrl) =
+      List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
+        let tparam_ty = (Reason.Rwitness pos,
+          Tabstract(AKgeneric name, None)) in
+        add_constraint env ck tparam_ty ty (fun env -> env)) in
+    List.fold_left tparams ~f:add_bound ~init: env in
+
+  let add_where_constraints env (cstrl: locl where_constraint list) =
+    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
+      add_constraint env ck ty1 ty2 (fun env -> env)) in
+
   let env =
-    Typing_generic_constraint.add_tparams_bounds env ft_super.ft_tparams in
+    add_tparams_constraints env ft_super.ft_tparams in
+  let env =
+    add_where_constraints env ft_super.ft_where_constraints in
+
   (* Checking that if the return type was defined in the parent class, it
    * is defined in the subclass too (requested by Gabe Levi).
    *)
@@ -114,6 +360,11 @@ let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
     end in
   List.fold_left tparams ~init:env ~f:check_tparam_constraints in
 
+  let check_where_constraints env cstrl =
+    List.fold_left cstrl ~init:env ~f:begin fun env (ty1, ck, ty2) ->
+      Typing_generic_constraint.check_constraint env ck ty2 ty1
+    end in
+
   (* We only do this if the ft_tparam lengths match. Currently we don't even
    * report this as an error, indeed different names for type parameters.
    * TODO: make it an error to override with wrong number of type parameters
@@ -122,6 +373,8 @@ let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
     if List.length ft_sub.ft_tparams <> List.length ft_super.ft_tparams
     then env
     else check_tparams_constraints env ft_sub.ft_tparams in
+  let env =
+    check_where_constraints env ft_sub.ft_where_constraints in
 
   Env.env_with_tpenv env old_tpenv
 
@@ -764,217 +1017,6 @@ and sub_string p env ty2 =
   | _, (Tmixed | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
       fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
-
-(* Given two types that we know are in a subtype relationship
- *   ty_sub <: ty_super
- * add to env.tpenv any bounds on generic type parameters that must
- * hold for ty_sub <: ty_super to be valid.
- *
- * For example, suppose we know Cov<T> <: Cov<D> for a covariant class Cov.
- * Then it must be the case that T <: D so we add an upper bound D to the
- * bounds for T.
- *
- * Although some of this code is similar to that for subtype_with_uenv, its
- * purpose is different. subtype_with_uenv takes two types t and u and makes
- * updates to the substitution of type variables (through unification) to
- * make t <: u true.
- *
- * decompose_subtype takes two types t and u for which t <: u is *assumed* to
- * hold, and makes updates to bounds on generic parameters that *necessarily*
- * hold in order for t <: u.
- *
- * If it turns out that there is no situation in which t <: u (for example, we
- * are given string and int, or Cov<Derived> <: Cov<Base>) then evaluate the
- * failure continuation `fail`
- *)
-let rec decompose_subtype env ty_sub ty_super fail =
-  let env, ty_super = Env.expand_type env ty_super in
-  let env, ty_sub = Env.expand_type env ty_sub in
-  let again env ty_sub =
-    decompose_subtype env ty_sub ty_super fail in
-  match ty_sub, ty_super with
-  (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (_, Tabstract (AKgeneric name_sub, _)), _ ->
-    let tys = Env.get_upper_bounds env name_sub in
-    (* Don't add the same type twice! *)
-    if List.mem tys ty_super then env
-    else Env.add_upper_bound env name_sub ty_super
-
-  (* ty_sub <: name_super so add a lower bound on name_super *)
-  | _, (_, Tabstract (AKgeneric name_super, _)) ->
-    let tys = Env.get_lower_bounds env name_super in
-    (* Don't add the same type twice! *)
-    if List.mem tys ty_sub then env
-    else Env.add_lower_bound env name_super ty_sub
-
-  (* If ?ty_sub' <: ?ty_super' then must have ty_sub <: ty_super *)
-  | (_, Toption ty_sub'), (_, Toption ty_super') ->
-    decompose_subtype env ty_sub' ty_super' fail
-
-  (* Singleton union *)
-  | _, (_, Tunresolved [ty_super']) ->
-    decompose_subtype env ty_sub ty_super' fail
-
-  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
-    when (coll = SN.Collections.cTraversable ||
-          coll = SN.Collections.cContainer) ->
-      (match akind with
-      | AKany -> env
-      | AKempty -> env
-      (* If vec<tv> <: Traversable<tv_super>
-       * then it must be the case that tv <: tv_super
-       * Likewise for vec<tv> <: Container<tv_super>
-       *          and map<_,tv> <: Traversable<tv_super>
-       *          and map<_,tv> <: Container<tv_super>
-       *)
-      | AKvec tv | AKmap(_, tv) -> decompose_subtype env tv tv_super fail
-      | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap again env r fdm
-      | AKtuple fields ->
-        Typing_arrays.fold_aktuple_as_akvec again env r fields
-    )
-
-  | (r, Tarraykind akind), (_, Tclass ((_, coll), [tk_super; tv_super]))
-    when (coll = SN.Collections.cKeyedTraversable
-         || coll = SN.Collections.cKeyedContainer
-         || coll = SN.Collections.cIndexish) ->
-      (match akind with
-      | AKany -> env
-      | AKempty -> env
-      | AKvec tv ->
-        let env' = decompose_subtype env (r, Tprim Nast.Tint) tk_super fail in
-        decompose_subtype env' tv tv_super fail
-      | AKmap (tk, tv) ->
-        let env' = decompose_subtype env tk tk_super fail in
-        decompose_subtype env' tv tv_super fail
-      | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap again env r fdm
-      | AKtuple fields ->
-        Typing_arrays.fold_aktuple_as_akvec again env r fields
-      )
-
-  | (_, (Tclass (x_sub, tyl_sub))), (_, (Tclass (x_super, tyl_super)))->
-    let cid_super, cid_sub = (snd x_super), (snd x_sub) in
-    begin match Env.get_class env cid_sub with
-    | None ->
-      env
-
-    | Some class_sub ->
-      (* If cid_sub = cid_super = C and C<tyl_sub> <: C<tyl_super>
-       * then it must be the case that tyl_sub and tyl_super are
-       * pointwise related according to the variance annotations on
-       * the type parameters of C
-       *)
-      if cid_super = cid_sub
-      then decompose_tparams env class_sub.tc_tparams tyl_sub tyl_super fail
-      else
-
-      (* Let's just do a sanity check on arity. We don't expect it to fail *)
-      if List.length class_sub.tc_tparams <> List.length tyl_sub
-      then env
-      else
-
-      (* Otherwise, let's look at the class it extends *)
-        begin match SMap.get cid_super class_sub.tc_ancestors with
-        | Some open_extends_ty ->
-          let ety_env = {
-            type_expansions = [];
-            substs = Subst.make class_sub.tc_tparams tyl_sub;
-            this_ty = ty_sub;
-            from_class = None;
-          } in
-          (* Substitute type arguments for formal generic parameters *)
-          let env, extends_ty = Phase.localize ~ety_env env open_extends_ty in
-
-          (* Now recurse with the new assumption extends_ty <: ty_super *)
-          decompose_subtype env extends_ty ty_super fail
-
-        | None ->
-          begin match Env.get_class env cid_super with
-            | None -> env
-            | Some class_super ->
-              if class_super.tc_kind = Ast.Cnormal
-              then fail env
-              else env
-          end
-        end
-    end
-
-  | _, _ ->
-    env
-
-and decompose_tparams env tparams children_tyl super_tyl fail =
-  match tparams, children_tyl, super_tyl with
-  | [], _, _
-  | _, [], _
-  | _, _, [] -> env
-  | (variance,_,_) :: tparams, child :: childrenl, super :: superl ->
-    let ck =
-      match variance with
-      | Ast.Covariant -> Ast.Constraint_as
-      | Ast.Contravariant -> Ast.Constraint_super
-      | Ast.Invariant -> Ast.Constraint_eq in
-    let env' = decompose_constraint env ck child super fail in
-    decompose_tparams env' tparams childrenl superl fail
-
-(* Decompose a general constraint *)
-and decompose_constraint env ck ty_sub ty_super fail =
-  match ck with
-  | Ast.Constraint_as ->
-    decompose_subtype env ty_sub ty_super fail
-  | Ast.Constraint_super ->
-    decompose_subtype env ty_super ty_sub fail
-  | Ast.Constraint_eq ->
-    let env' = decompose_subtype env ty_sub ty_super fail in
-    decompose_subtype env' ty_super ty_sub fail
-
-(* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
- * add bounds to type parameters in the environment that necessarily
- * must hold in order for ty1 ck ty2.
- *
- * First, we invoke decompose_constraint to add initial bounds to
- * the environment. Then we iterate, decomposing constraints that
- * arise through transitivity across bounds.
- *
- * For example, suppose that env already contains
- *   C<T1> <: T2
- * for some covariant class C. Now suppose we add the
- * constraint "T2 as C<T3>" i.e. we end up with
- *   C<T1> <: T2 <: C<T3>
- * Then by transitivity we know that T1 <: T3 so we add this to the
- * environment also.
- *
- * We repeat this process until no further bounds are added to the
- * environment, or some limit is reached. (It's possible to construct
- * types that expand forever under inheritance.)
- *
- * If the constraint turns out to be unsatisfiable, invoke
- * the failure continuation fail.
-*)
-let constraint_iteration_limit = 20
-let add_constraint env ck ty_sub ty_super fail =
-  let oldsize = Env.get_tpenv_size env in
-  let env' = decompose_constraint env ck ty_sub ty_super fail in
-  if Env.get_tpenv_size env' = oldsize
-  then env'
-  else
-  let rec iter n env =
-    if n > constraint_iteration_limit then env
-    else
-      let oldsize = Env.get_tpenv_size env in
-      let env' =
-        List.fold_left (Env.get_generic_parameters env) ~init:env
-          ~f:(fun env x ->
-            List.fold_left (Env.get_lower_bounds env x) ~init:env
-              ~f:(fun env ty_sub' ->
-                List.fold_left (Env.get_upper_bounds env x) ~init:env
-                  ~f:(fun env ty_super' ->
-                    decompose_subtype env ty_sub' ty_super' fail))) in
-      if Env.get_tpenv_size env' = oldsize
-      then env'
-      else iter (n+1) env'
-  in
-    iter 0 env'
 
 (*****************************************************************************)
 (* Exporting *)

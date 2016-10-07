@@ -9,7 +9,7 @@ abstract class MyList<T> {
 }
 
 class Nil<Ta> extends MyList<Ta> {
-  public function Flatten<Tu>(): MyList<Tu> {
+  public function Flatten<Tu>(): MyList<Tu> where Ta = MyList<Tu> {
     return new Nil();
   }
   public function Append(MyList<Ta> $that): MyList<Ta> {
@@ -19,6 +19,7 @@ class Nil<Ta> extends MyList<Ta> {
     return 0;
   }
 }
+
 class Cons<Ta> extends MyList<Ta> {
   public function __construct(private Ta $head, private MyList<Ta> $tail) { }
   public function Append(MyList<Ta> $that): MyList<Ta> {

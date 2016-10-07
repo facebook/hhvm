@@ -85,8 +85,12 @@ and instantiate_ subst x =
       let tparams = List.map ft.ft_tparams begin fun (var, name, cstrl) ->
         (var, name, List.map cstrl
            (fun (ck, ty) -> (ck, instantiate subst ty))) end in
+      let where_constraints = List.map ft.ft_where_constraints
+          begin (fun (ty1, ck, ty2) ->
+            (instantiate subst ty1, ck, instantiate subst ty2)) end in
       Tfun { ft with ft_arity = arity; ft_params = params;
-                     ft_ret = ret; ft_tparams = tparams }
+                     ft_ret = ret; ft_tparams = tparams;
+                     ft_where_constraints = where_constraints }
   | Tapply (x, tyl) ->
       let tyl = List.map tyl (instantiate subst) in
       Tapply (x, tyl)

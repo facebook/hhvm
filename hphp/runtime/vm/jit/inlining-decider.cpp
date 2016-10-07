@@ -222,11 +222,6 @@ bool isInlinableCPPBuiltin(const Func* f) {
     return false;
   }
 
-  // For now, don't inline when we'd need to adjust ObjectData pointers.
-  if (f->cls() && f->cls()->preClass()->builtinODOffset() != 0) {
-    return false;
-  }
-
   return true;
 }
 

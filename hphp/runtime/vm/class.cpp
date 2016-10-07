@@ -1211,8 +1211,7 @@ void Class::setParent() {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_preClass->instanceCtor();
     m_extra.raw()->m_instanceDtor = m_preClass->instanceDtor();
-    m_extra.raw()->m_builtinODTailSize = m_preClass->builtinObjSize() -
-                                         m_preClass->builtinODOffset();
+    m_extra.raw()->m_builtinODTailSize = m_preClass->builtinObjSize();
   } else if (m_parent.get() && m_parent->m_extra->m_instanceCtor) {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_parent->m_extra->m_instanceCtor;

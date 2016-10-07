@@ -126,7 +126,6 @@ void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src) {
 
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
   assert(!cls->preClass()->builtinObjSize());
-  assert(!cls->preClass()->builtinODOffset());
   obj->~ObjectData();
 
   auto const nProps = size_t{cls->numDeclProperties()};

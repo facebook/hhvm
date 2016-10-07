@@ -162,7 +162,6 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
   }
 
   assert(!cls->preClass()->builtinObjSize());
-  assert(!cls->preClass()->builtinODOffset());
 
   // `this' is being torn down now---be careful about where/how you dereference
   // this from here on.

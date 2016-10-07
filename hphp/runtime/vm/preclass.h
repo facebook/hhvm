@@ -334,11 +334,8 @@ public:
    *
    * builtinObjSize is the size of the object, excluding ObjectData (i.e.,
    * sizeof(c_Foo) - sizeof(ObjectData)).
-   *
-   * builtinODOffset is the offset of the ObjectData subobject in c_Foo.
    */
   uint32_t builtinObjSize() const { return m_builtinObjSize; }
-  int32_t builtinODOffset() const { return m_builtinODOffset; }
 
   /*
    * Extension builtin classes have custom creation and destruction routines.
@@ -453,7 +450,6 @@ private:
   Offset m_offset;
   Id m_id;
   uint32_t m_builtinObjSize{0};
-  int32_t m_builtinODOffset{0};
   Attr m_attrs;
   Hoistable m_hoistable;
   LowStringPtr m_name;

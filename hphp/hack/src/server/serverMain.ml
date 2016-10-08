@@ -121,6 +121,18 @@ let handle_connection_ genv env client =
   | ClientProvider.Client_went_away | Read_command_timeout ->
     ClientProvider.shutdown_client client;
     env
+  (** Connection dropped off. Its unforunate that we don't actually know
+   * which connection went bad (could be any write to any connection to
+   * child processes/daemons), we just assume at this top-level that
+   * since its not caught elsewhere, its the connection to the client.
+   *
+   * TODO: Make sure the pipe exception is really about this client.*)
+  | Unix.Unix_error (Unix.EPIPE, _, _)
+  | Sys_error("Broken pipe")
+  | Sys_error("Connection reset by peer") ->
+    Hh_logger.log "Client channel went bad. Shutting down client connection";
+    ClientProvider.shutdown_client client;
+    env
   | e ->
     HackEventLogger.handle_connection_exception e;
     let msg = Printexc.to_string e in
@@ -134,7 +146,11 @@ let handle_persistent_connection_ genv env client =
    try
      ServerCommand.handle genv env client
    with
-   | Sys_error("Broken pipe") | ServerCommandTypes.Read_command_timeout ->
+   (** TODO: Make sure the pipe exception is really about this client. *)
+   | Unix.Unix_error (Unix.EPIPE, _, _)
+   | Sys_error("Connection reset by peer")
+   | Sys_error("Broken pipe")
+   | ServerCommandTypes.Read_command_timeout ->
      ClientProvider.shutdown_client client;
      {env with
      persistent_client = None;
@@ -153,20 +169,9 @@ let handle_persistent_connection_ genv env client =
 
 let handle_connection genv env client is_persistent =
   ServerIdle.stamp_connection ();
-  try match is_persistent with
+  match is_persistent with
     | true -> handle_persistent_connection_ genv env client
     | false -> handle_connection_ genv env client
-  with
-  | Unix.Unix_error (e, _, _) ->
-     Printf.fprintf stderr "Unix error: %s\n" (Unix.error_message e);
-     Printexc.print_backtrace stderr;
-     flush stderr;
-     env
-  | e ->
-     Printf.fprintf stderr "Error: %s\n" (Printexc.to_string e);
-     Printexc.print_backtrace stderr;
-     flush stderr;
-     env
 
 let recheck genv old_env check_kind =
   let new_env, to_recheck, total_rechecked =
@@ -410,6 +415,7 @@ let run_once options handle =
  * via ic.
  *)
 let daemon_main_exn options (ic, oc) =
+  Printexc.record_backtrace true;
   let in_fd = Daemon.descr_of_in_channel ic in
   let out_fd = Daemon.descr_of_out_channel oc in
   let config, _ = ServerConfig.(load filename options) in

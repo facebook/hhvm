@@ -1,0 +1,6 @@
+File "enum_as_false_input.php", line 23, characters 10-24:
+Invalid return type (Typing[4110])
+File "enum_as_false_input.php", line 22, characters 27-35:
+This is a value of enum DerpyEnum
+File "enum_as_false_input.php", line 23, characters 10-17:
+It is incompatible with an object of type BaitEnum

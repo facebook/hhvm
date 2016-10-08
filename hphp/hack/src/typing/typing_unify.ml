@@ -304,6 +304,12 @@ and unify_ env r1 ty1 r2 ty2 =
         (* After doing apply_shape in both directions we can be sure that
          * fields_known1 = fields_known2 *)
       env, Tshape (fields_known1, res)
+  | Tabstract (AKenum enum_name, _), Tclass ((post, class_name), tylist)
+    when String.compare enum_name class_name = 0 ->
+      env, Tclass ((post, class_name), tylist)
+  | (Tclass ((post, class_name), tylist), Tabstract (AKenum enum_name, _))
+    when String.compare enum_name class_name = 0 ->
+      env, Tclass ((post, class_name), tylist)
   | (Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->

@@ -151,10 +151,10 @@ struct Scope {
     m_scope.back().offset = offset;
   }
 
-  void pushAnonType(Dwarf_Off offset) {
+  void pushUnnamedType(std::string name, Dwarf_Off offset) {
     m_scope.emplace_back(
       ObjectTypeName{
-        "(anonymous type)",
+        std::move(name),
         ObjectTypeName::Linkage::none
       },
       false
@@ -169,10 +169,10 @@ struct Scope {
     );
   }
 
-  void pushAnonNamespace() {
+  void pushUnnamedNamespace() {
     m_scope.emplace_back(
       ObjectTypeName{
-        "(anonymous namespace)",
+        "(unnamed namespace)",
         ObjectTypeName::Linkage::internal
       },
       true
@@ -1022,9 +1022,9 @@ void TypeParserImpl::genNames(Dwarf_Die die,
     case DW_TAG_unspecified_type: {
       // Object-types. These have names and linkages, so we must record them.
 
-      // Determine the base name and whether this is an incomplete type or not
-      // from the DIE's attributes.
-      const auto info = [&]() -> std::pair<std::string, bool> {
+      // Determine the base name, whether this type was unnamed, and whether
+      // this is an incomplete type or not from the DIE's attributes.
+      const auto info = [&]() -> std::tuple<std::string, bool, bool> {
         std::string name;
         std::string linkage_name;
         bool incomplete = false;
@@ -1050,7 +1050,7 @@ void TypeParserImpl::genNames(Dwarf_Die die,
         );
 
         // If there's an explicit name, just use that.
-        if (!name.empty()) return {name, incomplete};
+        if (!name.empty()) return std::make_tuple(name, false, incomplete);
 
         // Otherwise, if there's a linkage name, demangle it, and strip off
         // everything except the last section, and use that as the base
@@ -1060,40 +1060,51 @@ void TypeParserImpl::genNames(Dwarf_Die die,
           auto demangled = folly::demangle(linkage_name.c_str()).toStdString();
           auto index = demangled.rfind("::");
           if (index != decltype(demangled)::npos) demangled.erase(0, index+2);
-          return {demangled, incomplete};
+          return std::make_tuple(demangled, false, incomplete);
         }
 
         // No explicit name and no linkage name to use, so we have to try to
-        // infer one ourself.
+        // infer one ourself (making it a synthetic name).
 
-        // If this is an enumeration, use the first enumerator.
-        if (tag == DW_TAG_enumeration_type) {
-          std::string enumerator;
-          m_dwarf.forEachChild(
-            die,
-            [&](Dwarf_Die child) {
-              if (m_dwarf.getTag(child) == DW_TAG_enumerator) {
-                enumerator = m_dwarf.getDIEName(child);
-              }
-              return enumerator.empty();
-            }
-          );
-          if (!enumerator.empty()) return {enumerator, incomplete};
-        }
-
-        // If this is an union, use the first union member.
-        if (tag == DW_TAG_union_type) {
+        // Try the first named member
+        auto const first_member = [&](const char* type,
+                                      Dwarf_Half member_type) {
           std::string first_member;
           m_dwarf.forEachChild(
             die,
             [&](Dwarf_Die child) {
-              if (m_dwarf.getTag(child) == DW_TAG_member) {
+              if (m_dwarf.getTag(child) == member_type) {
                 first_member = m_dwarf.getDIEName(child);
               }
               return first_member.empty();
             }
           );
-          if (!first_member.empty()) return {first_member, incomplete};
+          if (!first_member.empty()) {
+            return folly::sformat(
+              "(unnamed {} containing '{}')", type, first_member
+            );
+          }
+          return std::string{};
+        };
+
+        auto const type_name = [&]{
+          if (tag == DW_TAG_enumeration_type) return "enumeration";
+          if (tag == DW_TAG_union_type) return "union";
+          if (tag == DW_TAG_structure_type) return "struct";
+          if (tag == DW_TAG_class_type) return "class";
+          return "type";
+        };
+
+        auto const member_type = [&]() {
+          if (tag == DW_TAG_enumeration_type) return DW_TAG_enumerator;
+          return DW_TAG_member;
+        };
+
+        auto first_member_name = first_member(type_name(), member_type());
+        if (!first_member_name.empty()) {
+          return std::make_tuple(
+            std::move(first_member_name), true, incomplete
+          );
         }
 
         // If this is within a namespace, don't infer any name at all, keep it
@@ -1104,21 +1115,32 @@ void TypeParserImpl::genNames(Dwarf_Die die,
         // it.
         if (!scope.isInNamespaceScope()) {
           scope.incUnnamedTypeCount();
-          return {
-            folly::sformat("(anonymous type #{})", scope.unnamedTypeCount()),
+          return std::make_tuple(
+            folly::sformat(
+              "(unnamed {} #{})",
+              type_name(),
+              scope.unnamedTypeCount()
+            ),
+            true,
             incomplete
-          };
-        } else return {std::string{}, incomplete};
+          );
+        }
+
+        return std::make_tuple(
+          folly::sformat("(unnamed {})", type_name()),
+          true,
+          incomplete
+        );
       }();
 
       auto offset = m_dwarf.getDIEOffset(die);
       auto parent_offset = scope.typeOffset();
 
       // If we inferred a base name, use that to form the fully qualified name,
-      // otherwise treat it as an anonymous type.
-      info.first.empty() ?
-        scope.pushAnonType(offset) :
-        scope.pushType(info.first, offset);
+      // otherwise treat it as an unnamed type.
+      std::get<1>(info) ?
+        scope.pushUnnamedType(std::get<0>(info), offset) :
+        scope.pushType(std::get<0>(info), offset);
       SCOPE_EXIT { scope.pop(); };
 
       // Record this object type, with fully qualified name, key, and linkage.
@@ -1126,7 +1148,7 @@ void TypeParserImpl::genNames(Dwarf_Die die,
         ObjectType{
           scope.name(),
           ObjectTypeKey{offset, scope.cuOffset()},
-          info.second
+          std::get<2>(info)
         }
       );
 
@@ -1146,12 +1168,12 @@ void TypeParserImpl::genNames(Dwarf_Die die,
       break;
     }
     case DW_TAG_namespace: {
-      // Record the namespace in the scope and recurse. If this is an anonymous
+      // Record the namespace in the scope and recurse. If this is an unnamed
       // namespace, that means any type found in child DIEs will have internal
       // linkage.
       auto name = m_dwarf.getDIEName(die);
       name.empty() ?
-        scope.pushAnonNamespace() :
+        scope.pushUnnamedNamespace() :
         scope.pushNamespace(std::move(name));
       SCOPE_EXIT { scope.pop(); };
       recurse();
@@ -1636,7 +1658,17 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
         }
       );
     }
+  }
 
+  auto type = m_dwarf.onDIEAtOffset(
+    *die_offset,
+    [&](Dwarf_Die die){ return genType(die); }
+  );
+
+  if (name.empty()) {
+    name = is_static
+      ? folly::sformat("(unnamed static member of type '{}')", type.toString())
+      : folly::sformat("(unnamed member of type '{}')", type.toString());
   }
 
   return Object::Member{
@@ -1644,10 +1676,7 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
     is_static ? folly::none : folly::Optional<std::size_t>{offset},
     linkage_name,
     address,
-    m_dwarf.onDIEAtOffset(
-      *die_offset,
-      [&](Dwarf_Die die){ return genType(die); }
-    )
+    std::move(type)
   };
 }
 

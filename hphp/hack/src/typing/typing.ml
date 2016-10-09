@@ -3714,19 +3714,15 @@ and condition env tparamet =
           this_ty = obj_ty; (* In case `this` appears in constraints *)
           from_class = None;
         } in
-        let add_bounds env ((_, _, cstr_list), newname) =
+        let add_bounds env ((_, _, cstr_list), ty_fresh) =
             List.fold_left cstr_list ~init:env ~f:begin fun env (ck, ty) ->
               (* Substitute fresh type parameters for
                * original formals in constraint *)
-              let env, ty = Phase.localize ~ety_env env ty in
-                match ck with
-                | Ast.Constraint_super -> Env.add_lower_bound env newname ty
-                | Ast.Constraint_as -> Env.add_upper_bound env newname ty
-                | Ast.Constraint_eq -> Env.add_upper_bound
-                    (Env.add_lower_bound env newname ty) newname ty
-              end in
+            let env, ty = Phase.localize ~ety_env env ty in
+            SubType.add_constraint env ck ty_fresh ty end in
         let env =
-          List.fold_left tparams_with_new_names ~f:add_bounds ~init:env in
+          List.fold_left (List.zip_exn class_info.tc_tparams tyl_fresh)
+            ~f:add_bounds ~init:env in
 
         (* Finally, if we have a class-test on something with static class type,
          * then we can chase the hierarchy and decompose the types to deduce
@@ -3737,8 +3733,7 @@ and condition env tparamet =
          * Then SubType.add_constraint will deduce that T=int and add int as
          * both lower and upper bound on T in env.lenv.tpenv
          *)
-        let env = SubType.add_constraint env Ast.Constraint_as obj_ty x_ty
-            (fun env -> (*Errors.instanceof_always_false env.Env.pos;*) env) in
+        let env = SubType.add_constraint env Ast.Constraint_as obj_ty x_ty in
         env, obj_ty in
 
       let rec resolve_obj env obj_ty =
@@ -3865,15 +3860,23 @@ and is_type env e tprim =
       Env.set_local env x (Reason.Rwitness p, Tprim tprim)
     | _ -> env
 
-and is_array env ty p pf (_, lv) =
-  let r = Reason.Rpredicated (p, pf) in
+(* Refine type for is_array, is_vec, is_keyset and is_dict tests
+ * `pred_name` is the function name itself (e.g. 'is_vec')
+ * `p` is position of the function name in the source
+ * `arg_expr` is the argument to the function
+ *)
+and is_array env ty p pred_name arg_expr =
+  let env, arg_ty = expr env arg_expr in
+  let r = Reason.Rpredicated (p, pred_name) in
   let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" in
-  let env = Env.add_upper_bound env tarrkey_name (r, Tprim Tarraykey) in
   let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
+  let env = SubType.add_constraint env Ast.Constraint_as
+      tarrkey (r, Tprim Tarraykey) in
   let env, tfresh_name = Env.add_fresh_generic_parameter env "T" in
   let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
-  let ty =
-    match ty with
+  (* This is the refined type of e inside the branch *)
+  let refined_ty =
+    (r, (match ty with
     | `HackDict ->
       Tclass ((Pos.none, SN.Collections.cDict), [tarrkey; tfresh])
     | `HackVec ->
@@ -3881,16 +3884,20 @@ and is_array env ty p pf (_, lv) =
     | `HackKeyset ->
       Tclass ((Pos.none, SN.Collections.cKeyset), [tarrkey])
     | `PHPArray ->
-      Tarraykind AKany in
-  match lv with
-  | Class_get (cname, (_, member_name)) ->
+      Tarraykind AKany)) in
+  (* Add constraints on generic parameters that must
+   * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
+   * and refined_ty is keyset<T#1> then we know T#1 <: T *)
+  let env = SubType.add_constraint env Ast.Constraint_as refined_ty arg_ty in
+  match arg_expr with
+  | (_, Class_get (cname, (_, member_name))) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
-      Env.set_local env local (r, ty)
-  | Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
+      Env.set_local env local refined_ty
+  | (_, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _)) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
-      Env.set_local env local (r, ty)
-  | Lvar (_, x) ->
-      Env.set_local env x (r, ty)
+      Env.set_local env local refined_ty
+  | (_, Lvar (_, x)) ->
+      Env.set_local env x refined_ty
   | _ -> env
 
 and string2 env idl =
@@ -4186,7 +4193,7 @@ and localize_where_constraints
       Phase.localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
     let env, ty2 =
       Phase.localize env (Decl_hint.hint env.Env.decl_env h2) ~ety_env in
-    SubType.add_constraint env ck ty1 ty2 (fun env -> env)
+    SubType.add_constraint env ck ty1 ty2
   in
   List.fold_left where_constraints ~f:add_constraint ~init:env
 

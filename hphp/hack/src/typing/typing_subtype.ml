@@ -209,7 +209,7 @@ and decompose_constraint env ck ty_sub ty_super fail =
  * the failure continuation fail.
 *)
 let constraint_iteration_limit = 20
-let add_constraint env ck ty_sub ty_super fail =
+let add_constraint_with_fail env ck ty_sub ty_super fail =
   let oldsize = Env.get_tpenv_size env in
   let env' = decompose_constraint env ck ty_sub ty_super fail in
   if Env.get_tpenv_size env' = oldsize
@@ -232,6 +232,13 @@ let add_constraint env ck ty_sub ty_super fail =
       else iter (n+1) env'
   in
     iter 0 env'
+
+(* Default is to ignore unsatisfiable constraints; in future we might
+ * want to produce an error. (For example, if after instantiation a
+ * constraint becomes C<string> as C<int>)
+ *)
+let add_constraint env ck ty_sub ty_super =
+  add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super. The rules must take account of arity,
@@ -319,12 +326,12 @@ let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let tparam_ty = (Reason.Rwitness pos,
           Tabstract(AKgeneric name, None)) in
-        add_constraint env ck tparam_ty ty (fun env -> env)) in
+        add_constraint env ck tparam_ty ty) in
     List.fold_left tparams ~f:add_bound ~init: env in
 
   let add_where_constraints env (cstrl: locl where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-      add_constraint env ck ty1 ty2 (fun env -> env)) in
+      add_constraint env ck ty1 ty2) in
 
   let env =
     add_tparams_constraints env ft_super.ft_tparams in

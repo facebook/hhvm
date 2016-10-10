@@ -53,30 +53,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# mysql checks - if we're using async mysql, we use webscalesqlclient from
-# third-party/ instead
-if (ENABLE_ASYNC_MYSQL)
-  include_directories(
-    ${TP_DIR}/re2/src/
-    ${TP_DIR}/squangle/src/
-    ${TP_DIR}/webscalesqlclient/src/include/
-  )
-  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-  set(MYSQL_CLIENT_LIBS
-    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
-  )
-else()
-  find_package(MySQL REQUIRED)
-  link_directories(${MYSQL_LIB_DIR})
-  include_directories(${MYSQL_INCLUDE_DIR})
-endif()
-MYSQL_SOCKET_SEARCH()
-if (MYSQL_UNIX_SOCK_ADDR)
-  add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
-else ()
-  message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
-endif ()
-
 # pcre checks
 find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
@@ -441,7 +417,6 @@ macro(hphp_link target)
   endif()
 
   target_link_libraries(${target} ${Boost_LIBRARIES})
-  target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)
   endif()

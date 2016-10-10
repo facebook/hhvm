@@ -54,11 +54,7 @@ let sleep_and_check in_fd persistent_client_opt =
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
-  try
-    Marshal_tools.to_fd_with_preamble fd "Hello"
-  with
-  | Unix.Unix_error(Unix.EPIPE, "write", _) ->
-      raise Client_went_away
+  Marshal_tools.to_fd_with_preamble fd "Hello"
 
 let read_connection_type ic =
   Timeout.with_timeout
@@ -68,8 +64,14 @@ let read_connection_type ic =
 
 let read_connection_type = function
   | Non_persistent_client (ic, oc) ->
-    say_hello oc;
-    read_connection_type ic
+    begin try
+      say_hello oc;
+      read_connection_type ic
+    with
+    | Sys_error("Connection reset by peer")
+    | Unix.Unix_error(Unix.EPIPE, "write", _) ->
+      raise Client_went_away
+    end
   | Persistent_client _ ->
     (* Every client starts as Non_persistent_client, and after we read its
      * desired connection type, can be turned into Persistent_client

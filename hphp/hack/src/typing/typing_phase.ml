@@ -319,12 +319,14 @@ let hint_locl env h =
   let h = Decl_hint.hint env.Env.decl_env h in
   localize_with_self env h
 
+(* Ensure that types are equivalent i.e. subtypes of each other *)
 let unify_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in
   let env, ty2 = localize_with_self env ty2 in
-  TUtils.unify env ty1 ty2
+  ignore (TUtils.sub_type env ty2 ty1);
+  ignore (TUtils.sub_type env ty1 ty2)
 
 let sub_type_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in
   let env, ty2 = localize_with_self env ty2 in
-  TUtils.sub_type env ty1 ty2
+  ignore (TUtils.sub_type env ty1 ty2)

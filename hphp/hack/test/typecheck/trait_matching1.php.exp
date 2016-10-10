@@ -7,7 +7,7 @@ File "trait_matching1.php", line 25, characters 13-18:
 Member x has the wrong type
 File "trait_matching1.php", line 25, characters 13-18:
 Typing error
-File "trait_matching1.php", line 13, characters 13-16:
-This is a nullable type
+File "trait_matching1.php", line 13, characters 14-16:
+This is an int
 File "trait_matching1.php", line 25, characters 13-18:
 It is incompatible with a string

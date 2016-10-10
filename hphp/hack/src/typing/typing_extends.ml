@@ -93,18 +93,18 @@ let check_types_for_const env
   match (parent_type, class_type) with
     | fty_parent, fty_child when parent_abstract && class_abstract ->
       (* redeclaration of an abstract constant *)
-      ignore (Phase.sub_type_decl env fty_child fty_parent)
+      Phase.sub_type_decl env fty_child fty_parent
     | fty_parent, _ when parent_abstract ->
       (* const definition constrained by parent abstract const *)
-      ignore (Phase.sub_type_decl env class_type fty_parent)
+      Phase.sub_type_decl env class_type fty_parent
     | _, _ when class_abstract ->
       (* Trying to override concrete type with an abstract one *)
       let pos = Reason.to_pos (fst class_type) in
       let parent_pos = Reason.to_pos (fst parent_type) in
-      Errors.abstract_concrete_override pos parent_pos `constant;
+      Errors.abstract_concrete_override pos parent_pos `constant
     | (_, _) ->
       (* types should be the same *)
-      ignore (Phase.unify_decl env parent_type class_type)
+      Phase.unify_decl env parent_type class_type
 
 (* An abstract member can be declared in multiple ancestors. Sometimes these
  * declarations can be different, but yet compatible depending on which ancestor
@@ -162,7 +162,7 @@ let check_override env member_name ?(ignore_fun_return = false)
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         (Reason.to_pos r_child) class_ class_elt.ce_origin
     | lazy fty_parent, _ ->
-      ignore (unify_decl pos Typing_reason.URnone env fty_parent fty_child)
+      unify_decl pos Typing_reason.URnone env fty_parent fty_child
     )
     (fun errorl ->
       Errors.bad_method_override pos member_name errorl)
@@ -327,8 +327,8 @@ let tconst_subsumption env parent_typeconst child_typeconst =
    * the child's assigned type is compatible with the parent's *)
   let check x y =
     if is_final
-    then ignore(unify_decl pos Reason.URsubsume_tconst_assign env x y)
-    else ignore(sub_type_decl pos Reason.URsubsume_tconst_assign env y x) in
+    then unify_decl pos Reason.URsubsume_tconst_assign env x y
+    else sub_type_decl pos Reason.URsubsume_tconst_assign env y x in
   ignore @@ Option.map2
     parent_typeconst.ttc_type
     child_typeconst.ttc_type

@@ -3929,14 +3929,14 @@ and check_implements_tparaml (env: Env.env) ht =
           let cstr = Inst.instantiate subst cstr in
           match ck with
           | Ast.Constraint_as ->
-            ignore (Type.sub_type_decl p Reason.URnone env ty cstr)
+            Type.sub_type_decl p Reason.URnone env ty cstr
           | Ast.Constraint_eq ->
             (* This code could well be unreachable, because we don't allow
              * equality constraints on class generics. *)
-            ignore (Type.sub_type_decl p Reason.URnone env ty cstr);
-            ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
+            Type.sub_type_decl p Reason.URnone env ty cstr;
+            Type.sub_type_decl p Reason.URnone env cstr ty
           | Ast.Constraint_super ->
-            ignore (Type.sub_type_decl p Reason.URnone env cstr ty)
+            Type.sub_type_decl p Reason.URnone env cstr ty
         end
       end class_.dc_tparams paraml
 

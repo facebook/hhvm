@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "hphp/util/match.h"
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
@@ -362,6 +363,16 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
   always_assert(ret.locations.size() <= kMaxTrackedALocs);
   if (ret.locations.size() == kMaxTrackedALocs) {
+    logLowPriPerfWarning(
+      "alias-analysis kMaxTrackedALocs",
+      1,
+      [&](StructuredLogEntry& cols) {
+        auto const func = unit.context().func;
+        cols.setStr("func", func->fullName()->slice());
+        cols.setStr("filename", func->unit()->filepath()->slice());
+        cols.setStr("ir_unit", show(unit));
+      }
+    );
     FTRACE(1, "max locations limit was reached\n");
   }
 

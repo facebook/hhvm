@@ -224,19 +224,19 @@ void getEffects(const Abi& abi, const Vinstr& i,
 
     case Vinstr::cqo:
       if (arch() == Arch::X64) {
-	uses = RegSet(reg::rax);
-	defs = reg::rax | reg::rdx;
+        uses = RegSet(reg::rax);
+        defs = reg::rax | reg::rdx;
       }
       break;
     case Vinstr::idiv:
       if (arch() == Arch::X64) {
-	uses = defs = reg::rax | reg::rdx;
+        uses = defs = reg::rax | reg::rdx;
       }
       break;
     case Vinstr::shlq:
     case Vinstr::sarq:
       if (arch() == Arch::X64) {
-	across = RegSet(reg::rcx);
+        across = RegSet(reg::rcx);
       }
       break;
 

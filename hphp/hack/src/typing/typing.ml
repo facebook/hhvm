@@ -848,31 +848,35 @@ and expr_
       let env, values = List.rev_map_env env l array_field_value in
       let has_unknown = List.exists values (fun (_, ty) -> ty = Tany) in
       let env, values = List.rev_map_env env values TUtils.unresolved in
-      let unify_value = Type.unify p Reason.URarray_value in
+      let subtype_value env ty =
+        Type.sub_type p Reason.URarray_value env ty value in
       let env, value =
         if has_unknown (* If one of the values comes from PHP land,
                         * we have to be conservative and consider that
                         * we don't know what the type of the values are.
                         *)
         then env, (Reason.Rnone, Tany)
-        else List.fold_left_env env values ~init:value ~f:unify_value in
+        else List.fold_left values ~init:env ~f:subtype_value, value in
       if is_vec then
         env, (Reason.Rwitness p, Tarraykind (AKvec value))
       else
         let env, key = Env.fresh_unresolved_type env in
         let env, keys = List.rev_map_env env l array_field_key in
         let env, keys = List.rev_map_env env keys TUtils.unresolved in
-        let unify_key = Type.unify p Reason.URarray_key in
-        let env, key = List.fold_left_env env keys ~init:key ~f:unify_key in
+        let subtype_key env ty =
+          Type.sub_type p Reason.URarray_key env ty key in
+        let env = List.fold_left keys ~init:env ~f:subtype_key in
         env, (Reason.Rwitness p, Tarraykind (AKmap (key, value)))
   | ValCollection (kind, el) ->
       let env, x = Env.fresh_unresolved_type env in
       let env, tyl = List.map_env env el expr in
       let env, tyl = List.map_env env tyl Typing_env.unbind in
       let env, tyl = List.map_env env tyl TUtils.unresolved in
-      let env, v =
-        List.fold_left_env env tyl ~init:x ~f:(Type.unify p Reason.URvector) in
-      let tvector = Tclass ((p, vc_kind_to_name kind), [v]) in
+      let subtype_val env ty =
+        Type.sub_type p Reason.URvector env ty x in
+      let env =
+        List.fold_left tyl ~init:env ~f:subtype_val in
+      let tvector = Tclass ((p, vc_kind_to_name kind), [x]) in
       let ty = Reason.Rwitness p, tvector in
       env, ty
   | KeyValCollection (kind, l) ->
@@ -884,11 +888,13 @@ and expr_
       let env, k = Env.fresh_unresolved_type env in
       let env, v = Env.fresh_unresolved_type env in
       let env, kl = List.map_env env kl TUtils.unresolved in
-      let env, k =
-        List.fold_left_env env kl ~init:k ~f:(Type.unify p Reason.URkey) in
+      let subtype_key env ty = Type.sub_type p Reason.URkey env ty k in
+      let env =
+        List.fold_left kl ~init:env ~f:subtype_key in
+      let subtype_val env ty = Type.sub_type p Reason.URvalue env ty v in
       let env, vl = List.map_env env vl TUtils.unresolved in
-      let env, v =
-        List.fold_left_env env vl ~init:v ~f:(Type.unify p Reason.URvalue) in
+      let env =
+        List.fold_left vl ~init:env ~f:subtype_val in
       let ty = Tclass ((p, kvc_kind_to_name kind), [k; v])
       in
       env, (Reason.Rwitness p, ty)

@@ -32,7 +32,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/async-job.h"
-#include "hphp/util/boot_timer.h"
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 

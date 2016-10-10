@@ -28,7 +28,7 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/xbox-server.h"
-#include "hphp/util/boot_timer.h"
+#include "hphp/util/boot-stats.h"
 
 namespace HPHP {
 

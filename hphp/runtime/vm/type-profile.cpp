@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/atomic-vector.h"
-#include "hphp/util/boot_timer.h"
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/struct-log.h"
 
 namespace HPHP {

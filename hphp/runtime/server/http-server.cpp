@@ -34,7 +34,7 @@
 #include "hphp/runtime/server/xbox-server.h"
 
 #include "hphp/util/alloc.h"
-#include "hphp/util/boot_timer.h"
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"

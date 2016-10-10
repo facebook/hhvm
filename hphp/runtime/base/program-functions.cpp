@@ -76,7 +76,7 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/arch.h"
-#include "hphp/util/boot_timer.h"
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"

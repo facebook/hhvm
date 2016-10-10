@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/boot_timer.h"
+#include "hphp/util/boot-stats.h"
 
 #include <cassert>
 

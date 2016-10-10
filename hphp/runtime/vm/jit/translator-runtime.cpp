@@ -967,35 +967,6 @@ bool methodExistsHelper(Class* cls, StringData* meth) {
   return cls->lookupMethod(meth) != nullptr;
 }
 
-int64_t decodeCufIterHelper(Iter* it, TypedValue func) {
-  DECLARE_FRAME_POINTER(fp);
-
-  ObjectData* obj = nullptr;
-  Class* cls = nullptr;
-  StringData* invName = nullptr;
-
-  auto ar = fp->m_sfp;
-  if (LIKELY(ar->func()->isBuiltin())) {
-    ar = g_context->getOuterVMFrame(ar);
-  }
-  auto const f = vm_decode_function(tvAsVariant(&func),
-                                    ar, false,
-                                    obj, cls, invName,
-                                    DecodeFlags::NoWarn);
-  if (UNLIKELY(!f)) return false;
-
-  auto& cit = it->cuf();
-  cit.setFunc(f);
-  if (obj) {
-    cit.setCtx(obj);
-    obj->incRefCount();
-  } else {
-    cit.setCtx(cls);
-  }
-  cit.setName(invName);
-  return true;
-}
-
 void throwOOBException(TypedValue base, TypedValue key) {
   if (isArrayLikeType(base.m_type)) {
     throwOOBArrayKeyException(key, base.m_data.parr);

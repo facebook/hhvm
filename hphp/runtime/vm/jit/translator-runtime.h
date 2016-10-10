@@ -213,8 +213,6 @@ void registerLiveObj(ObjectData* obj);
 /* Check if a method of the given name exists on the class. */
 bool methodExistsHelper(Class*, StringData*);
 
-int64_t decodeCufIterHelper(Iter* it, TypedValue func);
-
 /*
  * Throw a VMSwitchMode exception.
  */

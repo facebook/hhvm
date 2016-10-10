@@ -106,3 +106,16 @@ let merge_names t_names1 t_names2 =
 
 let simplify_fast fast =
   Relative_path.Map.map fast simplify
+
+let print_names name =
+  Printf.printf "Funs:\n";
+  SSet.iter (Printf.printf "\t%s\n") name.n_funs;
+  Printf.printf "Classes:\n";
+  SSet.iter (Printf.printf "\t%s\n") name.n_classes;
+  Printf.printf "Types:\n";
+  SSet.iter (Printf.printf "\t%s\n") name.n_types;
+  Printf.printf "Consts:\n";
+  SSet.iter (Printf.printf "\t%s\n") name.n_consts;
+  Printf.printf "\n";
+  flush stdout;
+  ()

@@ -100,8 +100,8 @@ int PDOConnection::parseDataSource(const char *data_source,
                                    int data_source_len,
                                    struct pdo_data_src_parser *parsed,
                                    int nparams,
-                                   const char *seperators/* = ";" */,
-                                   int seperatorCount/* = 1 */) {
+                                   const char *separators/* = ";" */,
+                                   int separatorCount/* = 1 */) {
   int i, j;
   int valstart = -1;
   int semi = -1;
@@ -110,7 +110,7 @@ int PDOConnection::parseDataSource(const char *data_source,
   int n_matches = 0;
 
   char flags[256];
-  string_charmask(seperators, seperatorCount, flags);
+  string_charmask(separators, separatorCount, flags);
 
   // Can always end with \0
   flags[0] = 1;
@@ -130,7 +130,7 @@ int PDOConnection::parseDataSource(const char *data_source,
 
     valstart = ++i;
 
-    /* now we're looking for VALUE<seperator> or just VALUE<NUL> */
+    /* now we're looking for VALUE<separator> or just VALUE<NUL> */
     semi = -1;
     while (i < data_source_len) {
       if (flags[(unsigned char)data_source[i]]) {

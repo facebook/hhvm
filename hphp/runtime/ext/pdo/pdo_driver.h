@@ -434,8 +434,8 @@ protected:
                       int data_source_len,
                       struct pdo_data_src_parser *parsed,
                       int nparams,
-                      const char* seperators = ";",
-                      int seperatorCount = 1);
+                      const char* separators = ";",
+                      int separatorCount = 1);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

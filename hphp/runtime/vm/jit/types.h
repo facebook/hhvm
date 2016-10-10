@@ -142,7 +142,10 @@ enum class CodeKind : uint8_t {
   CrossTrace,
 
   /*
-   * Helper code that uses scratch registers only.
+   * Helper code that uses native scratch registers only.
+   *
+   * This roughly means unreserved, caller-saved, non-argument registers---but
+   * best to just look at the helper ABI in the appropriate abi-*.cpp file.
    */
   Helper,
 };

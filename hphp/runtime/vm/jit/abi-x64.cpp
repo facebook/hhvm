@@ -75,7 +75,7 @@ const RegSet kScratchCrossTraceRegs =
 /*
  * Helper code ABI registers.
  */
-const RegSet kGPHelperRegs = x64::rAsm | reg::r11;
+const RegSet kGPHelperRegs = reg::r10 | reg::r11;
 const RegSet kXMMHelperRegs = reg::xmm5 | reg::xmm6 | reg::xmm7;
 
 ///////////////////////////////////////////////////////////////////////////////

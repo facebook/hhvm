@@ -65,7 +65,7 @@ struct RuntimeOption {
   }
 
   static bool GcSamplingEnabled() {
-    return EvalEnableGC && EvalGCSampleRate > 0;
+    return EvalGCSampleRate > 0;
   }
 
   static bool JitSamplingEnabled() {

@@ -904,7 +904,7 @@ void MemoryManager::updateNextGc() {
 }
 
 void MemoryManager::collect(const char* phase) {
-  if (!RuntimeOption::EvalEnableGC || empty()) return;
+  if (empty()) return;
   t_trigger = m_nextGc;
   collectImpl(phase);
   updateNextGc();

@@ -34,13 +34,10 @@ namespace req {
  * as roots (thread locals, stack, rds, ExecutionContext, etc).
  */
 struct root_handle {
-  static constexpr size_t INVALID = -1LL;
-  ALWAYS_INLINE bool enable() const {
-    return RuntimeOption::EvalEnableGC;
-  }
+  static constexpr auto INVALID = ~size_t(0);
 
   root_handle()
-    : m_id(enable() ? addRootHandle() : INVALID)
+    : m_id(addRootHandle())
   {}
 
   // move construction takes over the old handle's id.
@@ -50,7 +47,7 @@ struct root_handle {
 
   // move-assignment poaches the old handle's id if necessary.
   root_handle& operator=(root_handle&& h) {
-    if (m_id == INVALID && enable()) m_id = stealRootHandle(&h);
+    if (m_id == INVALID) m_id = stealRootHandle(&h);
     return *this;
   }
 

@@ -52,14 +52,21 @@ String pdo_attr_strval(const Array& options, int opt, const char *def){
 }
 
 const StaticString s_PDO("PDO");
-static struct PDOPGSQLExtension final : Extension {
+
+static struct PDOPGSQLExtension : Extension {
   PDOPGSQLExtension() : Extension("pdo_pgsql") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
-    HHVM_RCC_INT(PDO, PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT,
-                 PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT);
-    HHVM_RCC_INT(PDO, PGSQL_ATTR_DISABLE_PREPARES,
-                 PDO_PGSQL_ATTR_DISABLE_PREPARES);
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT.get(),
+      PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_PGSQL_ATTR_DISABLE_PREPARES.get(),
+      PDO_PGSQL_ATTR_DISABLE_PREPARES
+    );
   }
 } s_pdopgsql_extension;
 }

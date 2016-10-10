@@ -747,6 +747,8 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
+const StaticString s_MEMCACHE_HAVE_SESSION("MEMCACHE_HAVE_SESSION");
 
 struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
@@ -776,8 +778,12 @@ struct MemcacheExtension final : Extension {
     }
 
     void moduleInit() override {
-      HHVM_RC_INT(MEMCACHE_COMPRESSED, k_MEMCACHE_COMPRESSED);
-      HHVM_RC_BOOL(MEMCACHE_HAVE_SESSION, true);
+      Native::registerConstant<KindOfInt64>(
+        s_MEMCACHE_COMPRESSED.get(), k_MEMCACHE_COMPRESSED
+      );
+      Native::registerConstant<KindOfBoolean>(
+        s_MEMCACHE_HAVE_SESSION.get(), true
+      );
       HHVM_ME(Memcache, connect);
       HHVM_ME(Memcache, add);
       HHVM_ME(Memcache, set);

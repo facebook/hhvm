@@ -63,6 +63,140 @@ const int64_t q_Memcached$$OPT_COMPRESSION = -1001;
 const int64_t q_Memcached$$OPT_PREFIX_KEY  = -1002;
 const int64_t q_Memcached$$OPT_SERIALIZER  = -1003;
 
+// Indicate whether igbinary serializer is available
+const bool q_Memcached$$HAVE_IGBINARY = false;
+
+// Indicate whether json serializer is available
+const bool q_Memcached$$HAVE_JSON = true;
+
+// libmemcached behavior options
+const int64_t q_Memcached$$OPT_HASH
+          = MEMCACHED_BEHAVIOR_HASH;
+const int64_t q_Memcached$$HASH_DEFAULT
+          = MEMCACHED_HASH_DEFAULT;
+const int64_t q_Memcached$$HASH_MD5
+          = MEMCACHED_HASH_MD5;
+const int64_t q_Memcached$$HASH_CRC
+          = MEMCACHED_HASH_CRC;
+const int64_t q_Memcached$$HASH_FNV1_64
+          = MEMCACHED_HASH_FNV1_64;
+const int64_t q_Memcached$$HASH_FNV1A_64
+          = MEMCACHED_HASH_FNV1A_64;
+const int64_t q_Memcached$$HASH_FNV1_32
+          = MEMCACHED_HASH_FNV1_32;
+const int64_t q_Memcached$$HASH_FNV1A_32
+          = MEMCACHED_HASH_FNV1A_32;
+const int64_t q_Memcached$$HASH_HSIEH
+          = MEMCACHED_HASH_HSIEH;
+const int64_t q_Memcached$$HASH_MURMUR
+          = MEMCACHED_HASH_MURMUR;
+const int64_t q_Memcached$$OPT_DISTRIBUTION
+          = MEMCACHED_BEHAVIOR_DISTRIBUTION;
+const int64_t q_Memcached$$DISTRIBUTION_MODULA
+          = MEMCACHED_DISTRIBUTION_MODULA;
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT
+          = MEMCACHED_DISTRIBUTION_CONSISTENT;
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_KETAMA;
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const int64_t q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+          = MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED;
+#endif
+const int64_t q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
+          = MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED;
+const int64_t q_Memcached$$OPT_LIBKETAMA_HASH
+          = MEMCACHED_BEHAVIOR_KETAMA_HASH;
+const int64_t q_Memcached$$OPT_BUFFER_WRITES
+          = MEMCACHED_BEHAVIOR_BUFFER_REQUESTS;
+const int64_t q_Memcached$$OPT_BINARY_PROTOCOL
+          = MEMCACHED_BEHAVIOR_BINARY_PROTOCOL;
+const int64_t q_Memcached$$OPT_NO_BLOCK
+          = MEMCACHED_BEHAVIOR_NO_BLOCK;
+const int64_t q_Memcached$$OPT_TCP_NODELAY
+          = MEMCACHED_BEHAVIOR_TCP_NODELAY;
+const int64_t q_Memcached$$OPT_SOCKET_SEND_SIZE
+          = MEMCACHED_BEHAVIOR_SOCKET_SEND_SIZE;
+const int64_t q_Memcached$$OPT_SOCKET_RECV_SIZE
+          = MEMCACHED_BEHAVIOR_SOCKET_RECV_SIZE;
+const int64_t q_Memcached$$OPT_CONNECT_TIMEOUT
+          = MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT;
+const int64_t q_Memcached$$OPT_RETRY_TIMEOUT
+          = MEMCACHED_BEHAVIOR_RETRY_TIMEOUT;
+const int64_t q_Memcached$$OPT_SEND_TIMEOUT
+          = MEMCACHED_BEHAVIOR_SND_TIMEOUT;
+const int64_t q_Memcached$$OPT_RECV_TIMEOUT
+          = MEMCACHED_BEHAVIOR_RCV_TIMEOUT;
+const int64_t q_Memcached$$OPT_POLL_TIMEOUT
+          = MEMCACHED_BEHAVIOR_POLL_TIMEOUT;
+const int64_t q_Memcached$$OPT_CACHE_LOOKUPS
+          = MEMCACHED_BEHAVIOR_CACHE_LOOKUPS;
+const int64_t q_Memcached$$OPT_SERVER_FAILURE_LIMIT
+          = MEMCACHED_BEHAVIOR_SERVER_FAILURE_LIMIT;
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+const int64_t q_Memcached$$OPT_DEAD_TIMEOUT
+          = MEMCACHED_BEHAVIOR_DEAD_TIMEOUT;
+#endif
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+const int64_t q_Memcached$$OPT_REMOVE_FAILED_SERVERS
+          = MEMCACHED_BEHAVIOR_REMOVE_FAILED_SERVERS;
+#endif
+
+// libmemcached result codes
+const int64_t q_Memcached$$RES_SUCCESS
+          = MEMCACHED_SUCCESS;
+const int64_t q_Memcached$$RES_FAILURE
+          = MEMCACHED_FAILURE;
+const int64_t q_Memcached$$RES_HOST_LOOKUP_FAILURE
+          = MEMCACHED_HOST_LOOKUP_FAILURE;
+const int64_t q_Memcached$$RES_UNKNOWN_READ_FAILURE
+          = MEMCACHED_UNKNOWN_READ_FAILURE;
+const int64_t q_Memcached$$RES_PROTOCOL_ERROR
+          = MEMCACHED_PROTOCOL_ERROR;
+const int64_t q_Memcached$$RES_CLIENT_ERROR
+          = MEMCACHED_CLIENT_ERROR;
+const int64_t q_Memcached$$RES_SERVER_ERROR
+          = MEMCACHED_SERVER_ERROR;
+const int64_t q_Memcached$$RES_WRITE_FAILURE
+          = MEMCACHED_WRITE_FAILURE;
+const int64_t q_Memcached$$RES_DATA_EXISTS
+          = MEMCACHED_DATA_EXISTS;
+const int64_t q_Memcached$$RES_NOTSTORED
+          = MEMCACHED_NOTSTORED;
+const int64_t q_Memcached$$RES_NOTFOUND
+          = MEMCACHED_NOTFOUND;
+const int64_t q_Memcached$$RES_PARTIAL_READ
+          = MEMCACHED_PARTIAL_READ;
+const int64_t q_Memcached$$RES_SOME_ERRORS
+          = MEMCACHED_SOME_ERRORS;
+const int64_t q_Memcached$$RES_NO_SERVERS
+          = MEMCACHED_NO_SERVERS;
+const int64_t q_Memcached$$RES_END
+          = MEMCACHED_END;
+const int64_t q_Memcached$$RES_ERRNO
+          = MEMCACHED_ERRNO;
+const int64_t q_Memcached$$RES_BUFFERED
+          = MEMCACHED_BUFFERED;
+const int64_t q_Memcached$$RES_TIMEOUT
+          = MEMCACHED_TIMEOUT;
+const int64_t q_Memcached$$RES_BAD_KEY_PROVIDED
+          = MEMCACHED_BAD_KEY_PROVIDED;
+const int64_t q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
+          = MEMCACHED_CONNECTION_SOCKET_CREATE_FAILURE;
+const int64_t q_Memcached$$RES_NOT_SUPPORTED
+          = MEMCACHED_NOT_SUPPORTED;
+const int64_t q_Memcached$$RES_INVALID_HOST_PROTOCOL
+          = MEMCACHED_INVALID_HOST_PROTOCOL;
+const int64_t q_Memcached$$OPT_VERIFY_KEY
+          = MEMCACHED_BEHAVIOR_VERIFY_KEY;
+const int64_t q_Memcached$$OPT_SORT_HOSTS
+          = MEMCACHED_BEHAVIOR_SORT_HOSTS;
+const int64_t q_Memcached$$RES_SERVER_MARKED_DEAD
+          = MEMCACHED_SERVER_MARKED_DEAD;
+const int64_t q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
+          = MEMCACHED_SERVER_TEMPORARILY_DISABLED;
+const int64_t q_Memcached$$OPT_HASH_WITH_PREFIX_KEY
+          = MEMCACHED_BEHAVIOR_HASH_WITH_PREFIX_KEY;
+
 // Our result codes
 const int64_t q_Memcached$$RES_PAYLOAD_FAILURE = -1001;
 
@@ -117,7 +251,7 @@ struct MemcachedData {
     Impl() :
       compression(true),
       serializer(q_Memcached$$SERIALIZER_PHP),
-      rescode(MEMCACHED_SUCCESS) {
+      rescode(q_Memcached$$RES_SUCCESS) {
       memcached_create(&memcached);
     };
     ~Impl() {
@@ -316,7 +450,7 @@ struct MemcachedData {
       if (returnValue) returnValue->set(String(key), init_null(), true);
     }
     if (keysCopy.size() == 0) {
-      m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+      m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
       return false;
     }
 
@@ -356,9 +490,9 @@ struct MemcachedData {
   bool setOperationImpl(SetOperation op, const String& server_key,
                         const String& key, const Variant& value,
                         int expiration) {
-    m_impl->rescode = MEMCACHED_SUCCESS;
+    m_impl->rescode = q_Memcached$$RES_SUCCESS;
     if (key.empty()) {
-      m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+      m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
       return false;
     }
 
@@ -374,9 +508,9 @@ struct MemcachedData {
   Variant incDecOp(bool isInc,
                    const StringData* server_key, const StringData* key,
                    int64_t offset, const Variant& initial_value, int64_t expiry) {
-    m_impl->rescode = MEMCACHED_SUCCESS;
+    m_impl->rescode = q_Memcached$$RES_SUCCESS;
     if (key->empty() || strchr(key->data(), ' ')) {
-      m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+      m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
       return false;
     }
     if (offset < 0) {
@@ -508,9 +642,9 @@ Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
                                          const Variant& cache_cb /*= null*/,
                                          VRefParam cas_token /*= null*/) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    data->m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+    data->m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -553,7 +687,7 @@ Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
                                VRefParam cas_tokens /*= null_variant*/,
                                int flags /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   bool preserveOrder = flags & q_Memcached$$GET_PRESERVE_ORDER;
   Array returnValue = Array::Create();
@@ -595,7 +729,7 @@ bool HHVM_METHOD(Memcached, getdelayedbykey, const String& server_key,
                             const Array& keys, bool with_cas /*= false*/,
                             const Variant& value_cb /*= null_variant*/) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   if (!data->getMultiImpl(server_key, keys, with_cas, nullptr)) return false;
   if (value_cb.isNull()) return true;
@@ -605,14 +739,14 @@ bool HHVM_METHOD(Memcached, getdelayedbykey, const String& server_key,
     vm_call_user_func(value_cb, make_packed_array(Variant(this_), item));
   }
 
-  if (data->m_impl->rescode != MEMCACHED_END) return false;
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  if (data->m_impl->rescode != q_Memcached$$RES_END) return false;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   return true;
 }
 
 Variant HHVM_METHOD(Memcached, fetch) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   MemcachedResultWrapper result(&data->m_impl->memcached); Array item;
   if (!data->fetchImpl(result.value, item)) return false;
@@ -622,7 +756,7 @@ Variant HHVM_METHOD(Memcached, fetch) {
 
 Variant HHVM_METHOD(Memcached, fetchall) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   Array returnValue;
   MemcachedResultWrapper result(&data->m_impl->memcached); Array item;
@@ -630,7 +764,7 @@ Variant HHVM_METHOD(Memcached, fetchall) {
     returnValue.append(item);
   }
 
-  if (data->m_impl->rescode != MEMCACHED_END) return false;
+  if (data->m_impl->rescode != q_Memcached$$RES_END) return false;
   return returnValue;
 }
 
@@ -689,9 +823,9 @@ bool HHVM_METHOD(Memcached, casbykey, double cas_token,
                                       const Variant& value,
                                       int expiration /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    data->m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+    data->m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -708,9 +842,9 @@ bool HHVM_METHOD(Memcached, deletebykey, const String& server_key,
                                          const String& key,
                                          int time /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    data->m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+    data->m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -724,7 +858,7 @@ Variant HHVM_METHOD(Memcached, deletemultibykey, const String& server_key,
                                          const Array& keys,
                                          int64_t time /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 
   memcached_return status_memcached;
   bool status;
@@ -790,7 +924,7 @@ Variant HHVM_METHOD(Memcached, decrementbykey,
 bool HHVM_METHOD(Memcached, addserver, const String& host, int port,
                                        int weight /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (!host.empty() && host[0] == '/') {
     return data->handleError(memcached_server_add_unix_socket_with_weight(
         &data->m_impl->memcached, host.c_str(), weight));
@@ -841,9 +975,9 @@ bool HHVM_METHOD(Memcached, resetserverlist) {
 
 Variant HHVM_METHOD(Memcached, getserverbykey, const String& server_key) {
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (server_key.empty()) {
-    data->m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+    data->m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -1156,9 +1290,9 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
   return false;
 #else
   auto data = Native::data<MemcachedData>(this_);
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   if (key.empty()) {
-    data->m_impl->rescode = MEMCACHED_BAD_KEY_PROVIDED;
+    data->m_impl->rescode = q_Memcached$$RES_BAD_KEY_PROVIDED;
     return false;
   }
 
@@ -1177,7 +1311,7 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
                         key.c_str(), key.length(), expiration);
 
   if (!data->handleError(status)) return false;
-  data->m_impl->rescode = MEMCACHED_SUCCESS;
+  data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
   return true;
 #endif
 }
@@ -1187,6 +1321,85 @@ bool HHVM_METHOD(Memcached, touchbykey, const String& server_key,
 IMPLEMENT_THREAD_LOCAL(MemcachedData::ImplMap, MemcachedData::s_persistentMap);
 
 const StaticString s_Memcached("Memcached");
+const StaticString s_DISTRIBUTION_CONSISTENT("DISTRIBUTION_CONSISTENT");
+const StaticString s_DISTRIBUTION_CONSISTENT_KETAMA("DISTRIBUTION_CONSISTENT_KETAMA");
+#ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
+const StaticString s_DISTRIBUTION_CONSISTENT_WEIGHTED("DISTRIBUTION_CONSISTENT_WEIGHTED");
+#endif
+const StaticString s_DISTRIBUTION_MODULA("DISTRIBUTION_MODULA");
+const StaticString s_GET_PRESERVE_ORDER("GET_PRESERVE_ORDER");
+const StaticString s_GET_ERROR_RETURN_VALUE("GET_ERROR_RETURN_VALUE");
+const StaticString s_HASH_CRC("HASH_CRC");
+const StaticString s_HASH_DEFAULT("HASH_DEFAULT");
+const StaticString s_HASH_FNV1_32("HASH_FNV1_32");
+const StaticString s_HASH_FNV1_64("HASH_FNV1_64");
+const StaticString s_HASH_FNV1A_32("HASH_FNV1A_32");
+const StaticString s_HASH_FNV1A_64("HASH_FNV1A_64");
+const StaticString s_HASH_HSIEH("HASH_HSIEH");
+const StaticString s_HASH_MD5("HASH_MD5");
+const StaticString s_HASH_MURMUR("HASH_MURMUR");
+const StaticString s_HAVE_IGBINARY("HAVE_IGBINARY");
+const StaticString s_HAVE_JSON("HAVE_JSON");
+const StaticString s_LIBMEMCACHED_VERSION_HEX("LIBMEMCACHED_VERSION_HEX");
+const StaticString s_OPT_BINARY_PROTOCOL("OPT_BINARY_PROTOCOL");
+const StaticString s_OPT_BUFFER_WRITES("OPT_BUFFER_WRITES");
+const StaticString s_OPT_CACHE_LOOKUPS("OPT_CACHE_LOOKUPS");
+const StaticString s_OPT_COMPRESSION("OPT_COMPRESSION");
+const StaticString s_OPT_CONNECT_TIMEOUT("OPT_CONNECT_TIMEOUT");
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
+const StaticString s_OPT_DEAD_TIMEOUT("OPT_DEAD_TIMEOUT");
+#endif
+const StaticString s_OPT_DISTRIBUTION("OPT_DISTRIBUTION");
+const StaticString s_OPT_HASH("OPT_HASH");
+const StaticString s_OPT_LIBKETAMA_COMPATIBLE("OPT_LIBKETAMA_COMPATIBLE");
+const StaticString s_OPT_LIBKETAMA_HASH("OPT_LIBKETAMA_HASH");
+const StaticString s_OPT_NO_BLOCK("OPT_NO_BLOCK");
+const StaticString s_OPT_POLL_TIMEOUT("OPT_POLL_TIMEOUT");
+const StaticString s_OPT_PREFIX_KEY("OPT_PREFIX_KEY");
+const StaticString s_OPT_HASH_WITH_PREFIX_KEY("OPT_HASH_WITH_PREFIX_KEY");
+const StaticString s_OPT_RECV_TIMEOUT("OPT_RECV_TIMEOUT");
+#if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
+const StaticString s_OPT_REMOVE_FAILED_SERVERS("OPT_REMOVE_FAILED_SERVERS");
+#endif
+const StaticString s_OPT_RETRY_TIMEOUT("OPT_RETRY_TIMEOUT");
+const StaticString s_OPT_SEND_TIMEOUT("OPT_SEND_TIMEOUT");
+const StaticString s_OPT_SERIALIZER("OPT_SERIALIZER");
+const StaticString s_OPT_SERVER_FAILURE_LIMIT("OPT_SERVER_FAILURE_LIMIT");
+const StaticString s_OPT_SOCKET_RECV_SIZE("OPT_SOCKET_RECV_SIZE");
+const StaticString s_OPT_SOCKET_SEND_SIZE("OPT_SOCKET_SEND_SIZE");
+const StaticString s_OPT_SORT_HOSTS("OPT_SORT_HOSTS");
+const StaticString s_OPT_TCP_NODELAY("OPT_TCP_NODELAY");
+const StaticString s_OPT_VERIFY_KEY("OPT_VERIFY_KEY");
+const StaticString s_RES_BAD_KEY_PROVIDED("RES_BAD_KEY_PROVIDED");
+const StaticString s_RES_BUFFERED("RES_BUFFERED");
+const StaticString s_RES_CLIENT_ERROR("RES_CLIENT_ERROR");
+const StaticString
+ s_RES_CONNECTION_SOCKET_CREATE_FAILURE("RES_CONNECTION_SOCKET_CREATE_FAILURE");
+const StaticString s_RES_DATA_EXISTS("RES_DATA_EXISTS");
+const StaticString s_RES_END("RES_END");
+const StaticString s_RES_ERRNO("RES_ERRNO");
+const StaticString s_RES_FAILURE("RES_FAILURE");
+const StaticString s_RES_HOST_LOOKUP_FAILURE("RES_HOST_LOOKUP_FAILURE");
+const StaticString s_RES_INVALID_HOST_PROTOCOL("RES_INVALID_HOST_PROTOCOL");
+const StaticString s_RES_NO_SERVERS("RES_NO_SERVERS");
+const StaticString s_RES_NOT_SUPPORTED("RES_NOT_SUPPORTED");
+const StaticString s_RES_NOTFOUND("RES_NOTFOUND");
+const StaticString s_RES_NOTSTORED("RES_NOTSTORED");
+const StaticString s_RES_PARTIAL_READ("RES_PARTIAL_READ");
+const StaticString s_RES_PAYLOAD_FAILURE("RES_PAYLOAD_FAILURE");
+const StaticString s_RES_PROTOCOL_ERROR("RES_PROTOCOL_ERROR");
+const StaticString s_RES_SERVER_ERROR("RES_SERVER_ERROR");
+const StaticString s_RES_SERVER_MARKED_DEAD("RES_SERVER_MARKED_DEAD");
+const StaticString
+ s_RES_SERVER_TEMPORARILY_DISABLED("RES_SERVER_TEMPORARILY_DISABLED");
+const StaticString s_RES_SOME_ERRORS("RES_SOME_ERRORS");
+const StaticString s_RES_SUCCESS("RES_SUCCESS");
+const StaticString s_RES_TIMEOUT("RES_TIMEOUT");
+const StaticString s_RES_UNKNOWN_READ_FAILURE("RES_UNKNOWN_READ_FAILURE");
+const StaticString s_RES_WRITE_FAILURE("RES_WRITE_FAILURE");
+const StaticString s_SERIALIZER_IGBINARY("SERIALIZER_IGBINARY");
+const StaticString s_SERIALIZER_JSON("SERIALIZER_JSON");
+const StaticString s_SERIALIZER_PHP("SERIALIZER_PHP");
 
 struct MemcachedExtension final : Extension {
   MemcachedExtension() : Extension("memcached", "2.2.0b1") {}
@@ -1242,107 +1455,257 @@ struct MemcachedExtension final : Extension {
 
     Native::registerNativeDataInfo<MemcachedData>(s_MemcachedData.get());
 
-    HHVM_RCC_BOOL(Memcached, HAVE_IGBINARY, false);
-    HHVM_RCC_BOOL(Memcached, HAVE_JSON, true);
+    Native::registerClassConstant<KindOfBoolean>(
+      s_Memcached.get(), s_HAVE_IGBINARY.get(), q_Memcached$$HAVE_IGBINARY
+    );
+    Native::registerClassConstant<KindOfBoolean>(
+      s_Memcached.get(), s_HAVE_JSON.get(), q_Memcached$$HAVE_JSON
+    );
 
-    HHVM_RCC_INT(Memcached, DISTRIBUTION_CONSISTENT,
-                 MEMCACHED_DISTRIBUTION_CONSISTENT);
-    HHVM_RCC_INT(Memcached, DISTRIBUTION_CONSISTENT_KETAMA,
-                 MEMCACHED_DISTRIBUTION_CONSISTENT_KETAMA);
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_KETAMA.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_KETAMA
+    );
 #ifdef MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED
-    HHVM_RCC_INT(Memcached, DISTRIBUTION_CONSISTENT_WEIGHTED,
-                 MEMCACHED_DISTRIBUTION_CONSISTENT_WEIGHTED);
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_CONSISTENT_WEIGHTED.get(),
+      q_Memcached$$DISTRIBUTION_CONSISTENT_WEIGHTED
+    );
 #endif
-    HHVM_RCC_INT(Memcached, DISTRIBUTION_MODULA, MEMCACHED_DISTRIBUTION_MODULA);
-    HHVM_RCC_INT(Memcached, GET_PRESERVE_ORDER,
-                 q_Memcached$$GET_PRESERVE_ORDER);
-    HHVM_RCC_INT(Memcached, HASH_CRC, MEMCACHED_HASH_CRC);
-    HHVM_RCC_INT(Memcached, HASH_DEFAULT, MEMCACHED_HASH_DEFAULT);
-    HHVM_RCC_INT(Memcached, HASH_FNV1_32, MEMCACHED_HASH_FNV1_32);
-    HHVM_RCC_INT(Memcached, HASH_FNV1_64, MEMCACHED_HASH_FNV1_64);
-    HHVM_RCC_INT(Memcached, HASH_FNV1A_32, MEMCACHED_HASH_FNV1A_32);
-    HHVM_RCC_INT(Memcached, HASH_FNV1A_64, MEMCACHED_HASH_FNV1A_64);
-    HHVM_RCC_INT(Memcached, HASH_HSIEH, MEMCACHED_HASH_HSIEH);
-    HHVM_RCC_INT(Memcached, HASH_MD5, MEMCACHED_HASH_MD5);
-    HHVM_RCC_INT(Memcached, HASH_MURMUR, MEMCACHED_HASH_MURMUR);
-    HHVM_RCC_INT(Memcached, OPT_BINARY_PROTOCOL,
-                 MEMCACHED_BEHAVIOR_BINARY_PROTOCOL);
-    HHVM_RCC_INT(Memcached, OPT_BUFFER_WRITES,
-                 MEMCACHED_BEHAVIOR_BUFFER_REQUESTS);
-    HHVM_RCC_INT(Memcached, OPT_CACHE_LOOKUPS,
-                 MEMCACHED_BEHAVIOR_CACHE_LOOKUPS);
-    HHVM_RCC_INT(Memcached, OPT_COMPRESSION, q_Memcached$$OPT_COMPRESSION);
-    HHVM_RCC_INT(Memcached, OPT_CONNECT_TIMEOUT,
-                 MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT);
-    HHVM_RCC_INT(Memcached, OPT_DISTRIBUTION, MEMCACHED_BEHAVIOR_DISTRIBUTION);
-    HHVM_RCC_INT(Memcached, OPT_HASH, MEMCACHED_BEHAVIOR_HASH);
-    HHVM_RCC_INT(Memcached, OPT_LIBKETAMA_COMPATIBLE,
-                 MEMCACHED_BEHAVIOR_KETAMA_WEIGHTED);
-    HHVM_RCC_INT(Memcached, OPT_LIBKETAMA_HASH, MEMCACHED_BEHAVIOR_KETAMA_HASH);
-    HHVM_RCC_INT(Memcached, OPT_NO_BLOCK, MEMCACHED_BEHAVIOR_NO_BLOCK);
-    HHVM_RCC_INT(Memcached, OPT_POLL_TIMEOUT, MEMCACHED_BEHAVIOR_POLL_TIMEOUT);
-    HHVM_RCC_INT(Memcached, OPT_PREFIX_KEY, q_Memcached$$OPT_PREFIX_KEY);
-    HHVM_RCC_INT(Memcached, OPT_HASH_WITH_PREFIX_KEY,
-                 MEMCACHED_BEHAVIOR_HASH_WITH_PREFIX_KEY);
-    HHVM_RCC_INT(Memcached, OPT_RECV_TIMEOUT, MEMCACHED_BEHAVIOR_RCV_TIMEOUT);
-    HHVM_RCC_INT(Memcached, OPT_RETRY_TIMEOUT,
-                 MEMCACHED_BEHAVIOR_RETRY_TIMEOUT);
-    HHVM_RCC_INT(Memcached, OPT_SEND_TIMEOUT, MEMCACHED_BEHAVIOR_SND_TIMEOUT);
-    HHVM_RCC_INT(Memcached, OPT_SERIALIZER, q_Memcached$$OPT_SERIALIZER);
-    HHVM_RCC_INT(Memcached, OPT_SERVER_FAILURE_LIMIT,
-                 MEMCACHED_BEHAVIOR_SERVER_FAILURE_LIMIT);
-    HHVM_RCC_INT(Memcached, OPT_SOCKET_RECV_SIZE,
-                 MEMCACHED_BEHAVIOR_SOCKET_RECV_SIZE);
-    HHVM_RCC_INT(Memcached, OPT_SOCKET_SEND_SIZE,
-                 MEMCACHED_BEHAVIOR_SOCKET_SEND_SIZE);
-    HHVM_RCC_INT(Memcached, OPT_TCP_NODELAY, MEMCACHED_BEHAVIOR_TCP_NODELAY);
-    HHVM_RCC_INT(Memcached, RES_BAD_KEY_PROVIDED, MEMCACHED_BAD_KEY_PROVIDED);
-    HHVM_RCC_INT(Memcached, RES_BUFFERED, MEMCACHED_BUFFERED);
-    HHVM_RCC_INT(Memcached, RES_CLIENT_ERROR, MEMCACHED_CLIENT_ERROR);
-    HHVM_RCC_INT(Memcached, RES_CONNECTION_SOCKET_CREATE_FAILURE,
-                 MEMCACHED_CONNECTION_SOCKET_CREATE_FAILURE);
-    HHVM_RCC_INT(Memcached, RES_DATA_EXISTS, MEMCACHED_DATA_EXISTS);
-    HHVM_RCC_INT(Memcached, RES_END, MEMCACHED_END);
-    HHVM_RCC_INT(Memcached, RES_ERRNO, MEMCACHED_ERRNO);
-    HHVM_RCC_INT(Memcached, RES_FAILURE, MEMCACHED_FAILURE);
-    HHVM_RCC_INT(Memcached, RES_HOST_LOOKUP_FAILURE,
-                 MEMCACHED_HOST_LOOKUP_FAILURE);
-    HHVM_RCC_INT(Memcached, RES_INVALID_HOST_PROTOCOL,
-                 MEMCACHED_INVALID_HOST_PROTOCOL);
-    HHVM_RCC_INT(Memcached, RES_NO_SERVERS, MEMCACHED_NO_SERVERS);
-    HHVM_RCC_INT(Memcached, RES_NOT_SUPPORTED, MEMCACHED_NOT_SUPPORTED);
-    HHVM_RCC_INT(Memcached, RES_NOTFOUND, MEMCACHED_NOTFOUND);
-    HHVM_RCC_INT(Memcached, RES_NOTSTORED, MEMCACHED_NOTSTORED);
-    HHVM_RCC_INT(Memcached, RES_PARTIAL_READ, MEMCACHED_PARTIAL_READ);
-    HHVM_RCC_INT(Memcached, RES_PAYLOAD_FAILURE,
-                 q_Memcached$$RES_PAYLOAD_FAILURE);
-    HHVM_RCC_INT(Memcached, RES_PROTOCOL_ERROR, MEMCACHED_PROTOCOL_ERROR);
-    HHVM_RCC_INT(Memcached, RES_SERVER_ERROR, MEMCACHED_SERVER_ERROR);
-    HHVM_RCC_INT(Memcached, RES_SOME_ERRORS, MEMCACHED_SOME_ERRORS);
-    HHVM_RCC_INT(Memcached, RES_SUCCESS, MEMCACHED_SUCCESS);
-    HHVM_RCC_INT(Memcached, RES_TIMEOUT, MEMCACHED_TIMEOUT);
-    HHVM_RCC_INT(Memcached, RES_UNKNOWN_READ_FAILURE,
-                 MEMCACHED_UNKNOWN_READ_FAILURE);
-    HHVM_RCC_INT(Memcached, RES_WRITE_FAILURE, MEMCACHED_WRITE_FAILURE);
-    HHVM_RCC_INT(Memcached, SERIALIZER_IGBINARY,
-                 q_Memcached$$SERIALIZER_IGBINARY);
-    HHVM_RCC_INT(Memcached, SERIALIZER_JSON, q_Memcached$$SERIALIZER_JSON);
-    HHVM_RCC_INT(Memcached, SERIALIZER_PHP, q_Memcached$$SERIALIZER_PHP);
-    HHVM_RCC_INT(Memcached, OPT_VERIFY_KEY, MEMCACHED_BEHAVIOR_VERIFY_KEY);
-    HHVM_RCC_INT(Memcached, OPT_SORT_HOSTS, MEMCACHED_BEHAVIOR_SORT_HOSTS);
-    HHVM_RCC_INT(Memcached, RES_SERVER_MARKED_DEAD,
-                 MEMCACHED_SERVER_MARKED_DEAD);
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_DISTRIBUTION_MODULA.get(),
+      q_Memcached$$DISTRIBUTION_MODULA
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_GET_PRESERVE_ORDER.get(),
+      q_Memcached$$GET_PRESERVE_ORDER
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_CRC.get(), q_Memcached$$HASH_CRC
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_DEFAULT.get(), q_Memcached$$HASH_DEFAULT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_FNV1_32.get(), q_Memcached$$HASH_FNV1_32
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_FNV1_64.get(), q_Memcached$$HASH_FNV1_64
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_FNV1A_32.get(), q_Memcached$$HASH_FNV1A_32
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_FNV1A_64.get(), q_Memcached$$HASH_FNV1A_64
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_HSIEH.get(), q_Memcached$$HASH_HSIEH
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_MD5.get(), q_Memcached$$HASH_MD5
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_HASH_MURMUR.get(), q_Memcached$$HASH_MURMUR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_BINARY_PROTOCOL.get(),
+      q_Memcached$$OPT_BINARY_PROTOCOL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_BUFFER_WRITES.get(),
+      q_Memcached$$OPT_BUFFER_WRITES
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_CACHE_LOOKUPS.get(),
+      q_Memcached$$OPT_CACHE_LOOKUPS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_COMPRESSION.get(), q_Memcached$$OPT_COMPRESSION
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_CONNECT_TIMEOUT.get(),
+      q_Memcached$$OPT_CONNECT_TIMEOUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_DISTRIBUTION.get(), q_Memcached$$OPT_DISTRIBUTION
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_HASH.get(), q_Memcached$$OPT_HASH
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_LIBKETAMA_COMPATIBLE.get(),
+      q_Memcached$$OPT_LIBKETAMA_COMPATIBLE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_LIBKETAMA_HASH.get(),
+      q_Memcached$$OPT_LIBKETAMA_HASH
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_NO_BLOCK.get(), q_Memcached$$OPT_NO_BLOCK
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_POLL_TIMEOUT.get(), q_Memcached$$OPT_POLL_TIMEOUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_PREFIX_KEY.get(), q_Memcached$$OPT_PREFIX_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_HASH_WITH_PREFIX_KEY.get(),
+      q_Memcached$$OPT_HASH_WITH_PREFIX_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_RECV_TIMEOUT.get(), q_Memcached$$OPT_RECV_TIMEOUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_RETRY_TIMEOUT.get(),
+      q_Memcached$$OPT_RETRY_TIMEOUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SEND_TIMEOUT.get(), q_Memcached$$OPT_SEND_TIMEOUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SERIALIZER.get(), q_Memcached$$OPT_SERIALIZER
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SERVER_FAILURE_LIMIT.get(),
+      q_Memcached$$OPT_SERVER_FAILURE_LIMIT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SOCKET_RECV_SIZE.get(),
+      q_Memcached$$OPT_SOCKET_RECV_SIZE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SOCKET_SEND_SIZE.get(),
+      q_Memcached$$OPT_SOCKET_SEND_SIZE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_TCP_NODELAY.get(), q_Memcached$$OPT_TCP_NODELAY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_BAD_KEY_PROVIDED.get(),
+      q_Memcached$$RES_BAD_KEY_PROVIDED
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_BUFFERED.get(), q_Memcached$$RES_BUFFERED
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_CLIENT_ERROR.get(), q_Memcached$$RES_CLIENT_ERROR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_CONNECTION_SOCKET_CREATE_FAILURE.get(),
+      q_Memcached$$RES_CONNECTION_SOCKET_CREATE_FAILURE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_DATA_EXISTS.get(), q_Memcached$$RES_DATA_EXISTS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_END.get(), q_Memcached$$RES_END
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_ERRNO.get(), q_Memcached$$RES_ERRNO
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_FAILURE.get(), q_Memcached$$RES_FAILURE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_HOST_LOOKUP_FAILURE.get(),
+      q_Memcached$$RES_HOST_LOOKUP_FAILURE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_INVALID_HOST_PROTOCOL.get(),
+      q_Memcached$$RES_INVALID_HOST_PROTOCOL
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_NO_SERVERS.get(), q_Memcached$$RES_NO_SERVERS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_NOT_SUPPORTED.get(),
+      q_Memcached$$RES_NOT_SUPPORTED
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_NOTFOUND.get(), q_Memcached$$RES_NOTFOUND
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_NOTSTORED.get(), q_Memcached$$RES_NOTSTORED
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_PARTIAL_READ.get(), q_Memcached$$RES_PARTIAL_READ
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_PAYLOAD_FAILURE.get(),
+      q_Memcached$$RES_PAYLOAD_FAILURE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_PROTOCOL_ERROR.get(),
+      q_Memcached$$RES_PROTOCOL_ERROR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SERVER_ERROR.get(), q_Memcached$$RES_SERVER_ERROR
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SOME_ERRORS.get(), q_Memcached$$RES_SOME_ERRORS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SUCCESS.get(), q_Memcached$$RES_SUCCESS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_TIMEOUT.get(), q_Memcached$$RES_TIMEOUT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_UNKNOWN_READ_FAILURE.get(),
+      q_Memcached$$RES_UNKNOWN_READ_FAILURE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_WRITE_FAILURE.get(),
+      q_Memcached$$RES_WRITE_FAILURE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_SERIALIZER_IGBINARY.get(),
+      q_Memcached$$SERIALIZER_IGBINARY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_SERIALIZER_JSON.get(), q_Memcached$$SERIALIZER_JSON
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_SERIALIZER_PHP.get(), q_Memcached$$SERIALIZER_PHP
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_VERIFY_KEY.get(), q_Memcached$$OPT_VERIFY_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_SORT_HOSTS.get(), q_Memcached$$OPT_SORT_HOSTS
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SERVER_MARKED_DEAD.get(),
+      q_Memcached$$RES_SERVER_MARKED_DEAD
+    );
 #if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x00049000
-    HHVM_RCC_INT(Memcached, OPT_REMOVE_FAILED_SERVERS,
-                 MEMCACHED_BEHAVIOR_REMOVE_FAILED_SERVERS);
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_REMOVE_FAILED_SERVERS.get(),
+      q_Memcached$$OPT_REMOVE_FAILED_SERVERS
+    );
 #endif
 #if defined(LIBMEMCACHED_VERSION_HEX) && LIBMEMCACHED_VERSION_HEX >= 0x01000003
-    HHVM_RCC_INT(Memcached, OPT_DEAD_TIMEOUT, MEMCACHED_BEHAVIOR_DEAD_TIMEOUT);
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_OPT_DEAD_TIMEOUT.get(),
+      q_Memcached$$OPT_DEAD_TIMEOUT
+    );
 #endif
-    HHVM_RCC_INT(Memcached, RES_SERVER_TEMPORARILY_DISABLED,
-                 MEMCACHED_SERVER_TEMPORARILY_DISABLED);
-    HHVM_RCC_INT(Memcached, LIBMEMCACHED_VERSION_HEX, LIBMEMCACHED_VERSION_HEX);
-    HHVM_RCC_BOOL(Memcached, GET_ERROR_RETURN_VALUE, false);
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_RES_SERVER_TEMPORARILY_DISABLED.get(),
+      q_Memcached$$RES_SERVER_TEMPORARILY_DISABLED
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_Memcached.get(), s_LIBMEMCACHED_VERSION_HEX.get(),
+      LIBMEMCACHED_VERSION_HEX
+    );
+    Native::registerClassConstant<KindOfBoolean>(
+      s_Memcached.get(), s_GET_ERROR_RETURN_VALUE.get(), false
+    );
 
 
     loadSystemlib();

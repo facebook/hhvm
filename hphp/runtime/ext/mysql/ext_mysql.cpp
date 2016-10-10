@@ -958,6 +958,18 @@ static Variant HHVM_FUNCTION(mysql_field_flags, const Resource& result,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_MYSQL_ASSOC("MYSQL_ASSOC");
+const StaticString s_MYSQL_BOTH("MYSQL_BOTH");
+const StaticString s_MYSQL_CLIENT_COMPRESS("MYSQL_CLIENT_COMPRESS");
+const StaticString s_MYSQL_CLIENT_IGNORE_SPACE("MYSQL_CLIENT_IGNORE_SPACE");
+const StaticString s_MYSQL_CLIENT_INTERACTIVE("MYSQL_CLIENT_INTERACTIVE");
+const StaticString s_MYSQL_CLIENT_SSL("MYSQL_CLIENT_SSL");
+const StaticString s_MYSQL_NUM("MYSQL_NUM");
+const StaticString s_ASYNC_OP_INVALID("ASYNC_OP_INVALID");
+const StaticString s_ASYNC_OP_UNSET("ASYNC_OP_UNSET");
+const StaticString s_ASYNC_OP_CONNECT("ASYNC_OP_CONNECT");
+const StaticString s_ASYNC_OP_QUERY("ASYNC_OP_QUERY");
+
 void mysqlExtension::moduleInit() {
   HHVM_FE(mysql_connect);
   HHVM_FE(mysql_connect_with_db);
@@ -1009,17 +1021,39 @@ void mysqlExtension::moduleInit() {
   HHVM_FE(mysql_field_type);
   HHVM_FE(mysql_field_flags);
 
-  HHVM_RC_INT(MYSQL_ASSOC, PHP_MYSQL_ASSOC);
-  HHVM_RC_INT(MYSQL_BOTH, PHP_MYSQL_BOTH);
-  HHVM_RC_INT(MYSQL_NUM, PHP_MYSQL_NUM);
-  HHVM_RC_INT(MYSQL_CLIENT_COMPRESS, 32);
-  HHVM_RC_INT(MYSQL_CLIENT_IGNORE_SPACE, 256);
-  HHVM_RC_INT(MYSQL_CLIENT_INTERACTIVE, 1024);
-  HHVM_RC_INT(MYSQL_CLIENT_SSL, 2048);
-  HHVM_RC_INT(ASYNC_OP_INVALID, k_ASYNC_OP_INVALID);
-  HHVM_RC_INT(ASYNC_OP_UNSET, k_ASYNC_OP_UNSET);
-  HHVM_RC_INT(ASYNC_OP_CONNECT, k_ASYNC_OP_CONNECT);
-  HHVM_RC_INT(ASYNC_OP_QUERY, k_ASYNC_OP_QUERY);
+  Native::registerConstant<KindOfInt64>(
+    s_MYSQL_ASSOC.get(), PHP_MYSQL_ASSOC
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_MYSQL_BOTH.get(), PHP_MYSQL_BOTH
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_MYSQL_NUM.get(), PHP_MYSQL_NUM
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_MYSQL_CLIENT_COMPRESS.get(), 32
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_MYSQL_CLIENT_IGNORE_SPACE.get(), 256
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_MYSQL_CLIENT_INTERACTIVE.get(), 1024
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_MYSQL_CLIENT_SSL.get(), 2048
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_ASYNC_OP_INVALID.get(), k_ASYNC_OP_INVALID
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_ASYNC_OP_UNSET.get(), k_ASYNC_OP_UNSET
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_ASYNC_OP_CONNECT.get(), k_ASYNC_OP_CONNECT
+  );
+  Native::registerConstant<KindOfInt64>(
+    s_ASYNC_OP_QUERY.get(), k_ASYNC_OP_QUERY
+  );
 
   loadSystemlib("mysql");
 

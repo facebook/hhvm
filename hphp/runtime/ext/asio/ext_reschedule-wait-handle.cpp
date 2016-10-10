@@ -112,15 +112,26 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_HH_RescheduleWaitHandle("HH\\RescheduleWaitHandle");
+const StaticString
+  s_HH_RescheduleWaitHandle("HH\\RescheduleWaitHandle"),
+  s_QUEUE_DEFAULT("QUEUE_DEFAULT"),
+  s_QUEUE_NO_PENDING_IO("QUEUE_NO_PENDING_IO");
+
 void AsioExtension::initRescheduleWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\RescheduleWaitHandle, create,
                      RescheduleWaitHandle, create);
 
-  HHVM_RCC_INT(HH_RescheduleWaitHandle, QUEUE_DEFAULT,
-               AsioContext::QUEUE_DEFAULT);
-  HHVM_RCC_INT(HH_RescheduleWaitHandle, QUEUE_NO_PENDING_IO,
-               AsioContext::QUEUE_NO_PENDING_IO);
+  Native::registerClassConstant<KindOfInt64>(
+    s_HH_RescheduleWaitHandle.get(),
+    s_QUEUE_DEFAULT.get(),
+    AsioContext::QUEUE_DEFAULT
+  );
+
+  Native::registerClassConstant<KindOfInt64>(
+    s_HH_RescheduleWaitHandle.get(),
+    s_QUEUE_NO_PENDING_IO.get(),
+    AsioContext::QUEUE_NO_PENDING_IO
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -46,6 +46,8 @@ const int64_t
 #define LDAP_MODIFY_BATCH_VALUES "values"
 
 static const StaticString
+  s_LDAP_ESCAPE_FILTER("LDAP_ESCAPE_FILTER"),
+  s_LDAP_ESCAPE_DN("LDAP_ESCAPE_DN"),
   s_LDAP_MODIFY_BATCH_ATTRIB(LDAP_MODIFY_BATCH_ATTRIB),
   s_LDAP_MODIFY_BATCH_MODTYPE(LDAP_MODIFY_BATCH_MODTYPE),
   s_LDAP_MODIFY_BATCH_VALUES(LDAP_MODIFY_BATCH_VALUES);
@@ -53,8 +55,10 @@ static const StaticString
 static struct LdapExtension final : Extension {
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
-    HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
-    HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
+    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_FILTER.get(),
+                                          k_LDAP_ESCAPE_FILTER);
+    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_DN.get(),
+                                          k_LDAP_ESCAPE_DN);
 
     HHVM_FE(ldap_connect);
     HHVM_FE(ldap_explode_dn);

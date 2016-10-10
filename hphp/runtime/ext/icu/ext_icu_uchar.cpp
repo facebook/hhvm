@@ -352,8 +352,7 @@ void IntlExtension::initUChar() {
   HHVM_RCC_INT(IntlChar, FOLD_CASE_DEFAULT, U_FOLD_CASE_DEFAULT);
   HHVM_RCC_INT(IntlChar, FOLD_CASE_EXCLUDE_SPECIAL_I,
                U_FOLD_CASE_EXCLUDE_SPECIAL_I);
-  Native::registerClassConstant<KindOfDouble>
-  (s_IntlChar.get(), makeStaticString("NO_NUMERIC_VALUE"), U_NO_NUMERIC_VALUE);
+  HHVM_RCC_DBL(IntlChar, NO_NUMERIC_VALUE, U_NO_NUMERIC_VALUE);
 
 /* All enums used by the uchar APIs.  There are a LOT of them,
   * so they're separated out into include files,

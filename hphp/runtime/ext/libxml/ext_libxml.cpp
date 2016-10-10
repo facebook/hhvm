@@ -136,33 +136,7 @@ const StaticString
   s_column("column"),
   s_message("message"),
   s_file("file"),
-  s_line("line"),
-  s_LIBXML_VERSION("LIBXML_VERSION"),
-  s_LIBXML_DOTTED_VERSION("LIBXML_DOTTED_VERSION"),
-  s_LIBXML_LOADED_VERSION("LIBXML_LOADED_VERSION"),
-  s_LIBXML_NOENT("LIBXML_NOENT"),
-  s_LIBXML_DTDLOAD("LIBXML_DTDLOAD"),
-  s_LIBXML_DTDATTR("LIBXML_DTDATTR"),
-  s_LIBXML_DTDVALID("LIBXML_DTDVALID"),
-  s_LIBXML_NOERROR("LIBXML_NOERROR"),
-  s_LIBXML_NOWARNING("LIBXML_NOWARNING"),
-  s_LIBXML_NOBLANKS("LIBXML_NOBLANKS"),
-  s_LIBXML_XINCLUDE("LIBXML_XINCLUDE"),
-  s_LIBXML_NSCLEAN("LIBXML_NSCLEAN"),
-  s_LIBXML_NOCDATA("LIBXML_NOCDATA"),
-  s_LIBXML_NONET("LIBXML_NONET"),
-  s_LIBXML_PEDANTIC("LIBXML_PEDANTIC"),
-  s_LIBXML_COMPACT("LIBXML_COMPACT"),
-  s_LIBXML_NOXMLDECL("LIBXML_NOXMLDECL"),
-  s_LIBXML_PARSEHUGE("LIBXML_PARSEHUGE"),
-  s_LIBXML_NOEMPTYTAG("LIBXML_NOEMPTYTAG"),
-  s_LIBXML_SCHEMA_CREATE("LIBXML_SCHEMA_CREATE"),
-  s_LIBXML_HTML_NOIMPLIED("LIBXML_HTML_NOIMPLIED"),
-  s_LIBXML_HTML_NODEFDTD("LIBXML_HTML_NODEFDTD"),
-  s_LIBXML_ERR_NONE("LIBXML_ERR_NONE"),
-  s_LIBXML_ERR_WARNING("LIBXML_ERR_WARNING"),
-  s_LIBXML_ERR_ERROR("LIBXML_ERR_ERROR"),
-  s_LIBXML_ERR_FATAL("LIBXML_ERR_FATAL");
+  s_line("line");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -616,17 +590,6 @@ void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
 struct LibXMLExtension final : Extension {
     LibXMLExtension() : Extension("libxml") {}
 
-  private:
-    // Aliases for brevity
-    inline static void cnsInt(const StaticString & name, int64_t value) {
-      Native::registerConstant<KindOfInt64>(name.get(), value);
-    }
-
-    inline static void cnsStr(const StaticString & name, const char * value) {
-      Native::registerConstant<KindOfPersistentString>(
-          name.get(), StaticString(value).get());
-    }
-
     void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
 
       // Grab the external entity whitelist and set up the map, then register
@@ -645,47 +608,47 @@ struct LibXMLExtension final : Extension {
     }
 
     void moduleInit() override {
-      cnsInt(s_LIBXML_VERSION, LIBXML_VERSION);
-      cnsStr(s_LIBXML_DOTTED_VERSION, LIBXML_DOTTED_VERSION);
-      cnsStr(s_LIBXML_LOADED_VERSION, xmlParserVersion);
+      HHVM_RC_INT(LIBXML_VERSION, LIBXML_VERSION);
+      HHVM_RC_STR(LIBXML_DOTTED_VERSION, LIBXML_DOTTED_VERSION);
+      HHVM_RC_STR(LIBXML_LOADED_VERSION, xmlParserVersion);
 
       // For use with loading xml
-      cnsInt(s_LIBXML_NOENT, XML_PARSE_NOENT);
-      cnsInt(s_LIBXML_DTDLOAD, XML_PARSE_DTDLOAD);
-      cnsInt(s_LIBXML_DTDATTR, XML_PARSE_DTDATTR);
-      cnsInt(s_LIBXML_DTDVALID, XML_PARSE_DTDVALID);
-      cnsInt(s_LIBXML_NOERROR, XML_PARSE_NOERROR);
-      cnsInt(s_LIBXML_NOWARNING, XML_PARSE_NOWARNING);
-      cnsInt(s_LIBXML_NOBLANKS, XML_PARSE_NOBLANKS);
-      cnsInt(s_LIBXML_XINCLUDE, XML_PARSE_XINCLUDE);
-      cnsInt(s_LIBXML_NSCLEAN, XML_PARSE_NSCLEAN);
-      cnsInt(s_LIBXML_NOCDATA, XML_PARSE_NOCDATA);
-      cnsInt(s_LIBXML_NONET, XML_PARSE_NONET);
-      cnsInt(s_LIBXML_PEDANTIC, XML_PARSE_PEDANTIC);
-      cnsInt(s_LIBXML_COMPACT, XML_PARSE_COMPACT);
-      cnsInt(s_LIBXML_NOXMLDECL, XML_SAVE_NO_DECL);
-      cnsInt(s_LIBXML_PARSEHUGE, XML_PARSE_HUGE);
-      cnsInt(s_LIBXML_NOEMPTYTAG, LIBXML_SAVE_NOEMPTYTAG);
+      HHVM_RC_INT(LIBXML_NOENT, XML_PARSE_NOENT);
+      HHVM_RC_INT(LIBXML_DTDLOAD, XML_PARSE_DTDLOAD);
+      HHVM_RC_INT(LIBXML_DTDATTR, XML_PARSE_DTDATTR);
+      HHVM_RC_INT(LIBXML_DTDVALID, XML_PARSE_DTDVALID);
+      HHVM_RC_INT(LIBXML_NOERROR, XML_PARSE_NOERROR);
+      HHVM_RC_INT(LIBXML_NOWARNING, XML_PARSE_NOWARNING);
+      HHVM_RC_INT(LIBXML_NOBLANKS, XML_PARSE_NOBLANKS);
+      HHVM_RC_INT(LIBXML_XINCLUDE, XML_PARSE_XINCLUDE);
+      HHVM_RC_INT(LIBXML_NSCLEAN, XML_PARSE_NSCLEAN);
+      HHVM_RC_INT(LIBXML_NOCDATA, XML_PARSE_NOCDATA);
+      HHVM_RC_INT(LIBXML_NONET, XML_PARSE_NONET);
+      HHVM_RC_INT(LIBXML_PEDANTIC, XML_PARSE_PEDANTIC);
+      HHVM_RC_INT(LIBXML_COMPACT, XML_PARSE_COMPACT);
+      HHVM_RC_INT(LIBXML_NOXMLDECL, XML_SAVE_NO_DECL);
+      HHVM_RC_INT(LIBXML_PARSEHUGE, XML_PARSE_HUGE);
+      HHVM_RC_INT(LIBXML_NOEMPTYTAG, LIBXML_SAVE_NOEMPTYTAG);
 
       // Schema validation options
 #if defined(LIBXML_SCHEMAS_ENABLED)
-      cnsInt(s_LIBXML_SCHEMA_CREATE, XML_SCHEMA_VAL_VC_I_CREATE);
+      HHVM_RC_INT(LIBXML_SCHEMA_CREATE, XML_SCHEMA_VAL_VC_I_CREATE);
 #endif
 
       // Additional constants for use with loading html
 #if LIBXML_VERSION >= 20707
-      cnsInt(s_LIBXML_HTML_NOIMPLIED, HTML_PARSE_NOIMPLIED);
+      HHVM_RC_INT(LIBXML_HTML_NOIMPLIED, HTML_PARSE_NOIMPLIED);
 #endif
 
 #if LIBXML_VERSION >= 20708
-      cnsInt(s_LIBXML_HTML_NODEFDTD, HTML_PARSE_NODEFDTD);
+      HHVM_RC_INT(LIBXML_HTML_NODEFDTD, HTML_PARSE_NODEFDTD);
 #endif
 
       // Error levels
-      cnsInt(s_LIBXML_ERR_NONE, XML_ERR_NONE);
-      cnsInt(s_LIBXML_ERR_WARNING, XML_ERR_WARNING);
-      cnsInt(s_LIBXML_ERR_ERROR, XML_ERR_ERROR);
-      cnsInt(s_LIBXML_ERR_FATAL, XML_ERR_FATAL);
+      HHVM_RC_INT(LIBXML_ERR_NONE, XML_ERR_NONE);
+      HHVM_RC_INT(LIBXML_ERR_WARNING, XML_ERR_WARNING);
+      HHVM_RC_INT(LIBXML_ERR_ERROR, XML_ERR_ERROR);
+      HHVM_RC_INT(LIBXML_ERR_FATAL, XML_ERR_FATAL);
 
       HHVM_FE(libxml_get_errors);
       HHVM_FE(libxml_get_last_error);

@@ -58,7 +58,13 @@ let default = {
 *
 * Use 'default' if it's fine to be potentially stricter than the rest of the
 * project requires, eg hh_single_typecheck *)
-let permissive = { default with tco_unsafe_xhp = true; }
+let make_permissive tcopt =
+  { tcopt with
+    tco_assume_php = true;
+    tco_unsafe_xhp = true;
+    tco_user_attrs = None;
+  }
+
 let make ~tco_assume_php
          ~tco_unsafe_xhp
          ~tco_user_attrs

@@ -46,6 +46,7 @@ type env = {
 and genv
 and anon = env -> locl fun_params -> env * locl ty
 and tfun = env -> env
+val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
 val fresh_type : unit -> locl ty
 val fresh_unresolved_type : env -> env * locl ty

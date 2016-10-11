@@ -29,8 +29,9 @@ let count_exprs fn type_acc =
     SMap.add acc ~key:kind ~data:(incr_counter lvl (r, p, counter))
   ) type_acc SMap.empty
 
-let accumulate_types fn defs =
+let accumulate_types fn defs tcopt =
   let type_acc = Hashtbl.create 0 in
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
   Typing.with_expr_hook (fun (p, e) ty ->
     let expr_kind_opt = match e with
       | Nast.Array_get _ -> Some "array_get"
@@ -44,7 +45,6 @@ let accumulate_types fn defs =
     Option.iter expr_kind_opt (fun kind ->
       Hashtbl.replace type_acc (p, kind) ty))
     (fun () ->
-      let tcopt = TypecheckerOptions.permissive in
       ignore (Typing_check_utils.check_defs tcopt fn defs));
   type_acc
 
@@ -90,14 +90,14 @@ let relativize root path =
   else None
 
 (* Returns a list of (file_name, assoc list of counts) *)
-let get_coverage root neutral fnl =
+let get_coverage root tcopt neutral fnl  =
   SharedMem.invalidate_caches();
   let files_info = FileInfoStore.load () in
   let file_counts = List.rev_filter_map fnl begin fun fn ->
     match Relative_path.Map.get files_info fn with
     | None -> None
     | Some defs ->
-        let type_acc = accumulate_types fn defs in
+        let type_acc = accumulate_types fn defs tcopt in
         let counts = count_exprs fn type_acc in
         Some (fn, counts)
   end in
@@ -114,10 +114,11 @@ let go_ fn genv env =
     (genv.ServerEnv.indexer FindUtils.is_php)
   in
   FileInfoStore.store env.ServerEnv.files_info;
+  let tcopt = env.ServerEnv.tcopt in
   let result =
     MultiWorker.call
       genv.ServerEnv.workers
-      ~job:(get_coverage root)
+      ~job:(get_coverage root tcopt)
       ~neutral:None
       ~merge:merge_trie_opt
       ~next:next_files

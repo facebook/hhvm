@@ -59,7 +59,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, Ai.InfoService.go Typing_check_utils.check_defs genv.workers
           file_list (ServerArgs.ai_mode genv.options) env.tcopt
     | ARGUMENT_INFO (contents, line, col) ->
-        env, ServerArgumentInfo.go contents line col
+        env, ServerArgumentInfo.go contents line col env.tcopt
     | SEARCH (query, type_) -> env, ServerSearch.go genv.workers query type_
     | COVERAGE_COUNTS path -> env, ServerCoverageMetric.go path genv env
     | LINT fnl -> env, ServerLint.go genv env fnl

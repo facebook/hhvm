@@ -329,7 +329,7 @@ let suggest_and_print tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
       (* Sort so that the unit tests come out in a consistent order, normally
        * doesn't matter. *)
       let l = List.sort ~cmp: (fun (x, _, _) (y, _, _) -> x - y) l in
-      List.iter ~f: (ServerConvert.print_patch fn) l
+      List.iter ~f: (ServerConvert.print_patch fn tcopt) l
     end
 
 (* This allows one to fake having multiple files in one file. This
@@ -485,7 +485,8 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Coverage ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if fn = builtins_filename then () else begin
-          let type_acc = ServerCoverageMetric.accumulate_types fn fileinfo in
+          let type_acc =
+            ServerCoverageMetric.accumulate_types fn fileinfo opts in
           print_coverage fn type_acc;
         end
       end
@@ -493,7 +494,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       begin match Relative_path.Map.get files_info filename with
         | Some fileinfo ->
             let raw_result =
-              SymbolInfoService.helper [] [(filename, fileinfo)] in
+              SymbolInfoService.helper opts [] [(filename, fileinfo)] in
             let result = SymbolInfoService.format_result raw_result in
             let result_json = ClientSymbolInfo.to_json result in
             print_endline (Hh_json.json_to_multiline result_json)

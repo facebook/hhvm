@@ -2299,7 +2299,7 @@ module Make (GetLocals : GetLocals) = struct
       to_capture := x :: !to_capture;
       p, Local_id.tmp()
     in
-    let tcopt = TypecheckerOptions.permissive in
+    let tcopt = TypecheckerOptions.make_permissive TypecheckerOptions.default in
     let genv = Env.make_fun_decl_genv tcopt SMap.empty f in
     let lenv = Env.empty_local @@ UBMFunc handle_unbound in
     let env = genv, lenv in

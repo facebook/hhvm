@@ -16,19 +16,19 @@ open Core
  * will execute in the same environment that the symbol was identified -
  * content ASTs and defs will still be available in shared memory for the
  * subsequent operation. *)
-let get_occurrence_and_map content line char ~f =
+let get_occurrence_and_map tcopt content line char ~f =
   let result = ref [] in
   IdentifySymbolService.attach_hooks result line char;
   ServerIdeUtils.declare_and_check content ~f:begin fun path file_info ->
     IdentifySymbolService.detach_hooks ();
     f path file_info !result
-  end
+  end tcopt
 
 let get_occurrence content line char =
   get_occurrence_and_map content line char ~f:(fun _ _ x -> x)
 
-let go content line char tcopt =
-  get_occurrence_and_map content line char ~f:(fun path _ symbols ->
+let go content line char (tcopt : TypecheckerOptions.t) =
+  get_occurrence_and_map tcopt content line char ~f:(fun path _ symbols ->
     let (ast, _) = Parser_heap.ParserHeap.find_unsafe path in
     List.map symbols ~f:(fun x ->
       let symbol_definition = ServerSymbolDefinition.go tcopt ast x in

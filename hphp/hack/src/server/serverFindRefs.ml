@@ -92,8 +92,9 @@ let go action genv env =
   res
 
 let go_from_file (content, line, char) genv env =
+  let tcopt =  env.ServerEnv.tcopt in
   let result =
-    List.hd (ServerIdentifyFunction.get_occurrence content line char)
+    List.hd (ServerIdentifyFunction.get_occurrence tcopt content line char)
       >>= fun symbol ->
     let name = symbol.SymbolOccurrence.name in
     begin match symbol.SymbolOccurrence.type_ with

@@ -15,8 +15,8 @@ open Core
 open Typing_defs
 open Utils
 
-let compare_types x y =
-  let tcopt = TypecheckerOptions.permissive in
+let compare_types x y tcopt =
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
   let tenv = Typing_env.empty tcopt Relative_path.default ~droot:None in
   String.compare
     (Typing_print.full tenv x) (Typing_print.full tenv y)
@@ -42,9 +42,11 @@ let (types: (Env.env * Pos.t * hint_kind * locl ty) list ref) = ref []
 let (initialized_members: (SSet.t SMap.t) ref) = ref SMap.empty
 
 let add_type env pos k type_ =
+  let tcopt = Env.get_tcopt env in
   let new_env =
     Env.empty
-      TypecheckerOptions.permissive Relative_path.default ~droot:None in
+      (TypecheckerOptions.make_permissive tcopt)
+      Relative_path.default ~droot:None in
   let new_type = (
     (* Some stuff in env isn't serializable, which we need so that we can infer
      * types part of the codebase at a time in worker threads. Fortunately we
@@ -90,22 +92,23 @@ let save_param name env x arg = save_type (Kparam name) env x arg
  * }
  *
  *)
-let uninitialized_member cname mname env x arg = if !is_suggest_mode then begin
-  match SMap.get cname !initialized_members with
-    (* No static initalizer and no initalization in the constructor means that
-     * this variable can be used before it's written to, and thus must be
-     * nullable. *)
-    | Some inits ->
-      if not (SSet.mem mname inits)
-      then save_member mname env x (fst x, Toption arg)
+let uninitialized_member cname mname env x arg =
+  if !is_suggest_mode then begin
+    match SMap.get cname !initialized_members with
+      (* No static initalizer and no initalization in the constructor means that
+       * this variable can be used before it's written to, and thus must be
+       * nullable. *)
+      | Some inits ->
+        if not (SSet.mem mname inits)
+        then save_member mname env x (fst x, Toption arg)
 
-    (* Some constructions, such as traits, don't calculate initialized members.
-     * TODO: this will suggest wrong types for some member variables defined in
-     * traits, since they might be nullable, but that depends on the constructor
-     * of the class that includes the trait (!). Not sure how to deal with this
-     * right now, will just let the "revert bad patch" logic take care of it. *)
-    | None -> ()
-end
+      (* Some constructions, such as traits, don't calculate initialized members.
+       * TODO: this will suggest wrong types for some member variables defined in
+       * traits, since they might be nullable, but that depends on the constructor
+       * of the class that includes the trait (!). Not sure how to deal with this
+       * right now, will just let the "revert bad patch" logic take care of it. *)
+      | None -> ()
+  end
 
 let save_initialized_members cname inits = if !is_suggest_mode then begin
   initialized_members := SMap.add cname inits !initialized_members
@@ -168,7 +171,7 @@ and normalize_ tcopt = function
       if SSet.cardinal set = 1
       then Tclass ((Pos.none, SSet.choose set), [])
       else raise Exit
-  | Tunresolved (x :: (y :: _ as rl)) when compare_types x y = 0 ->
+  | Tunresolved (x :: (y :: _ as rl)) when compare_types x y tcopt = 0 ->
       normalize_ tcopt (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
   | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)

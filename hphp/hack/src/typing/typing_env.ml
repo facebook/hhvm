@@ -84,6 +84,7 @@ and genv = {
 and anon = env -> locl fun_params -> env * locl ty
 and tfun = env -> env
 
+let get_tcopt env = env.genv.tcopt
 let fresh () =
   Ident.tmp()
 

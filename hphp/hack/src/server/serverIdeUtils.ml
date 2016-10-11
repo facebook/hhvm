@@ -115,8 +115,8 @@ let path = Relative_path.default
  * SharedMem.S.oldify_batch) - after working with local content is done,
  * original definitions can (and should) be restored using "revive".
  *)
-let declare_and_check content ~f =
-  let tcopt = TypecheckerOptions.permissive in
+let declare_and_check content ~f tcopt =
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
   let result =
@@ -171,7 +171,7 @@ let declare_and_check content ~f =
         List.iter nast begin function
           | Nast.Fun f -> Typing.fun_def tcopt f;
           | Nast.Class c -> Typing.class_def tcopt c;
-          | Nast.Typedef t -> Typing.typedef_def t;
+          | Nast.Typedef t -> Typing.typedef_def tcopt t;
           | Nast.Constant cst -> Typing.gconst_def cst tcopt;
         end;
         f path file_info
@@ -191,7 +191,7 @@ let check_file_input tcopt files_info fi =
   | ServerUtils.FileContent content ->
       begin
         try
-          declare_and_check content ~f:(fun path _ -> path)
+          declare_and_check content ~f:(fun path _ -> path) tcopt
         with Decl_class.Decl_heap_elems_bug -> begin
           Hh_logger.log "%s" content;
           Exit_status.(exit Decl_heap_elems_bug)

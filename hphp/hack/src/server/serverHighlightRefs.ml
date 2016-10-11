@@ -35,7 +35,7 @@ let highlight_symbol tcopt (line, char) path file_info symbol =
   let res = match get_target symbol with
     | Some target ->
       let results = FindRefsService.find_refs
-        (Some tcopt) target [] [(path, file_info)] in
+         tcopt target [] [(path, file_info)] in
       List.rev (List.map results snd)
     | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
       begin match Parser_heap.ParserHeap.get path with
@@ -80,7 +80,7 @@ let rec combine_result l l1 l2 =
     end
 
 let go (content, line, char) tcopt =
-  ServerIdentifyFunction.get_occurrence_and_map content line char
+  ServerIdentifyFunction.get_occurrence_and_map tcopt content line char
     ~f:begin fun path file_info symbols ->
       match symbols with
       | symbol::_ ->

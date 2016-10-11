@@ -135,7 +135,6 @@ let resolve_types tcopt acc collated_values =
     (* XXX should probably use the real .hhconfig-based tcopt to lazy decl to
      * be correct in incremental mode, but --convert is not really maintained
      * anyway and precludes incremental mode *)
-    let tcopt = TypecheckerOptions.permissive in
     match Typing_suggest.normalize tcopt type_ with
     | None -> ()
     | Some ty ->
@@ -191,13 +190,13 @@ let keys map = Relative_path.Map.fold map ~init:[] ~f:(fun x _ y -> x :: y)
 
 (* Typecheck a part of the codebase, in order to record the type suggestions in
  * Type_suggest.types. *)
-let suggest_files fnl =
+let suggest_files tcopt fnl =
   SharedMem.invalidate_caches();
   Typing_defs.is_suggest_mode := true;
   Typing_suggest.types := [];
   Typing_suggest.initialized_members := SMap.empty;
   List.iter fnl begin fun fn ->
-    let tcopt = TypecheckerOptions.permissive in
+    let tcopt = TypecheckerOptions.make_permissive tcopt in
     match Parser_heap.ParserHeap.get fn with
     | Some (ast, _) ->
       let nast = Naming.program tcopt ast in
@@ -214,16 +213,16 @@ let suggest_files fnl =
   Typing_suggest.initialized_members := SMap.empty;
   result
 
-let suggest_files_worker acc fnl =
-  let types = suggest_files fnl in
+let suggest_files_worker tcopt acc fnl  =
+  let types = suggest_files tcopt fnl  in
   List.rev_append types acc
 
-let parallel_suggest_files workers fast =
+let parallel_suggest_files workers fast tcopt =
   let fnl = keys fast in
   let result =
     MultiWorker.call
       workers
-      ~job:suggest_files_worker
+      ~job:(suggest_files_worker tcopt)
       ~neutral:[]
       ~merge:(List.rev_append)
       ~next:(MultiWorker.next workers fnl)
@@ -239,8 +238,8 @@ let go workers fast tcopt =
   Typing_deps.trace := false;
   let types =
     match workers with
-    | Some _ -> parallel_suggest_files workers fast
-    | None -> suggest_files (keys fast) in
+    | Some _ -> parallel_suggest_files workers fast tcopt
+    | None -> suggest_files tcopt (keys fast) in
   let collated = collate_types fast types in
   let resolved =
     match workers with

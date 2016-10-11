@@ -55,6 +55,7 @@ let test_early_revive () =
   in
 
   let env = Test.setup_server () in
+  let tcopt = env.tcopt in
 
   let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = init_disk_changes;
@@ -65,7 +66,7 @@ let test_early_revive () =
 
   expect_mem();
   SharedMem.invalidate_caches();
-  ServerIdeUtils.declare_and_check content ~f:(fun _ _ -> expect_mem());
+  ServerIdeUtils.declare_and_check content ~f:(fun _ _ -> expect_mem()) tcopt;
   SharedMem.invalidate_caches();
   expect_mem();
 
@@ -128,12 +129,13 @@ let test_cleanup () =
   in
   let f _ _ = () in
   let env = Test.setup_server () in
+  let tcopt = env.tcopt in
 
   let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = ["base.php", kitchen_sink_content];
   }) in
   let {SharedMem.used_slots; _ } = SharedMem.hash_stats () in
-  ServerIdeUtils.declare_and_check kitchen_sink_content2 ~f;
+  ServerIdeUtils.declare_and_check kitchen_sink_content2 ~f tcopt;
   let {SharedMem.used_slots = after_used_slots; _ } =
     SharedMem.hash_stats () in
   expect_same used_slots after_used_slots;
@@ -142,7 +144,7 @@ let test_cleanup () =
     disk_changes = ["base.php", kitchen_sink_content2];
   }) in
   let {SharedMem.used_slots; _ } = SharedMem.hash_stats () in
-  ServerIdeUtils.declare_and_check kitchen_sink_content ~f;
+  ServerIdeUtils.declare_and_check kitchen_sink_content ~f tcopt;
   let {SharedMem.used_slots = after_used_slots; _ } =
     SharedMem.hash_stats () in
   expect_same used_slots after_used_slots;
@@ -151,7 +153,7 @@ let test_cleanup () =
     disk_changes = ["base.php", ""];
   }) in
   let {SharedMem.used_slots; _ } = SharedMem.hash_stats () in
-  ServerIdeUtils.declare_and_check kitchen_sink_content ~f;
+  ServerIdeUtils.declare_and_check kitchen_sink_content ~f tcopt;
   let {SharedMem.used_slots = after_used_slots; _ } =
     SharedMem.hash_stats () in
   expect_same used_slots after_used_slots;
@@ -160,7 +162,7 @@ let test_cleanup () =
     disk_changes = ["base.php", ""];
   }) in
   let {SharedMem.used_slots; _ } = SharedMem.hash_stats () in
-  ServerIdeUtils.declare_and_check kitchen_sink_content2 ~f;
+  ServerIdeUtils.declare_and_check kitchen_sink_content2 ~f tcopt;
   let {SharedMem.used_slots = after_used_slots; _ } =
     SharedMem.hash_stats () in
   expect_same used_slots after_used_slots

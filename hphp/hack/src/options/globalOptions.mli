@@ -22,7 +22,7 @@ val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val default : t
-val permissive : t
+val make_permissive : t -> t
 val tco_experimental_dict : string
 val tco_experimental_instanceof : string
 val tco_experimental_all : SSet.t

@@ -4253,12 +4253,12 @@ and method_def env m =
     | Some _ -> ();
   Typing_hooks.dispatch_exit_method_def_hook m
 
-and typedef_def typedef =
+and typedef_def tcopt typedef  =
   let tid = (snd typedef.t_name) in
   let filename = Pos.filename (fst typedef.t_kind) in
   let dep = Typing_deps.Dep.Class tid in
   let env =
-    Typing_env.empty TypecheckerOptions.permissive filename (Some dep) in
+    Typing_env.empty tcopt filename (Some dep) in
   (* Mode for typedefs themselves doesn't really matter right now, but
    * they can expand hints, so make it loose so that the typedef doesn't
    * fail. (The hint will get re-checked with the proper mode anyways.)

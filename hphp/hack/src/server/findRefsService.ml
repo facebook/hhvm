@@ -54,17 +54,10 @@ let check_if_extends_class tcopt target_class_name class_name =
   | _ -> false
 
 let is_target_class tcopt target_classes class_name =
-  match tcopt, target_classes with
-  | _, Class_set s -> SSet.mem s class_name
-  | Some tcopt, Subclasses_of s ->
+  match target_classes with
+  | Class_set s -> SSet.mem s class_name
+  | Subclasses_of s ->
     s = class_name || check_if_extends_class tcopt s class_name
-  | None, Subclasses_of _ ->
-    (* The only reason why tcopt is optional is because this function can
-     * be called both from master and parallel worker. In current usage,
-     * the workers always use Class_set method so they won't need the
-     * tcopt, and passing it down to them is complicated/expensive.
-     *)
-    failwith "TypecheckerOptions are required to check subtyping"
 
 let process_member_id tcopt results_acc target_classes  target_member
     class_ id _ _ ~is_method ~is_const =
@@ -205,17 +198,17 @@ let get_deps_set_gconst tcopt cst_name =
 let find_refs tcopt target acc fileinfo_l =
   let results_acc = ref Pos.Map.empty in
   attach_hooks tcopt results_acc target;
-  let tcopt = TypecheckerOptions.permissive in
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
   ServerIdeUtils.recheck tcopt fileinfo_l;
   detach_hooks ();
   Pos.Map.fold begin fun p str acc ->
     (str, p) :: acc
   end !results_acc acc
 
-let parallel_find_refs workers fileinfo_l target =
+let parallel_find_refs workers fileinfo_l target tcopt =
   MultiWorker.call
     workers
-    ~job:(find_refs None target)
+    ~job:(find_refs tcopt target)
     ~neutral:([])
     ~merge:(List.rev_append)
     ~next:(MultiWorker.next workers fileinfo_l)
@@ -262,9 +255,9 @@ let find_references tcopt workers target include_defs
   end ~init:[] in
   let results =
     if List.length fileinfo_l < 10 then
-      find_refs None target [] fileinfo_l
+      find_refs tcopt target [] fileinfo_l
     else
-      parallel_find_refs workers fileinfo_l target
+      parallel_find_refs workers fileinfo_l target tcopt
     in
   if include_defs then
     let defs = get_definitions tcopt target in

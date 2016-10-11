@@ -13,11 +13,11 @@ open SymbolInfoServiceTypes
 
 (* This module dumps all the symbol info(like fun-calls) in input files *)
 
-let recheck_naming filename_l =
+let recheck_naming filename_l tcopt =
   List.iter filename_l begin fun file ->
     match Parser_heap.ParserHeap.get file with
     | Some (ast, _) -> begin
-      let tcopt = TypecheckerOptions.permissive in
+      let tcopt = TypecheckerOptions.make_permissive tcopt in
         Errors.ignore_ begin fun () ->
           (* We only need to name to find references to locals *)
           List.iter ast begin function
@@ -34,29 +34,29 @@ let recheck_naming filename_l =
     | None -> () (* Do nothing if the file is not in parser heap *)
   end
 
-let recheck_typing filetuple_l =
-  let tcopt = TypecheckerOptions.permissive in
+let recheck_typing filetuple_l tcopt =
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
   ignore(ServerIdeUtils.recheck tcopt filetuple_l)
 
-let helper acc filetuple_l =
+let helper tcopt acc filetuple_l  =
   let fun_call_map = ref Pos.Map.empty in
   SymbolFunCallService.attach_hooks fun_call_map;
   let type_map = ref Pos.Map.empty in
   let lvar_map = ref Pos.Map.empty in
   SymbolTypeService.attach_hooks type_map lvar_map;
   let filename_l = List.rev_map filetuple_l fst in
-  recheck_naming filename_l;
-  recheck_typing filetuple_l;
+  recheck_naming filename_l tcopt;
+  recheck_typing filetuple_l tcopt;
   SymbolFunCallService.detach_hooks ();
   SymbolTypeService.detach_hooks ();
   let fun_calls = Pos.Map.values !fun_call_map in
   let symbol_types = SymbolTypeService.generate_types !lvar_map !type_map in
   (fun_calls, symbol_types) :: acc
 
-let parallel_helper workers filetuple_l =
+let parallel_helper workers filetuple_l tcopt =
   MultiWorker.call
     workers
-    ~job:helper
+    ~job:(helper tcopt)
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers filetuple_l)
@@ -85,9 +85,10 @@ let go workers file_list env =
     | None -> acc
   end ~init:[]
   in
+  let tcopt = env.ServerEnv.tcopt in
   let raw_result =
     if (List.length file_list) < 10 then
-      helper [] filetuple_l
+      helper tcopt [] filetuple_l
     else
-      parallel_helper workers filetuple_l in
+      parallel_helper workers filetuple_l tcopt in
   format_result raw_result

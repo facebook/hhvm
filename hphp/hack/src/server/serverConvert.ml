@@ -16,11 +16,12 @@ open Utils
 (* Pretty prints a patch *)
 (*****************************************************************************)
 
-let print_patch filename (line, kind, type_) =
+let print_patch filename tcopt (line, kind, type_)  =
   let line = string_of_int line in
   let kind = Typing_suggest.string_of_kind kind in
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
   let tenv =
-    Typing_env.empty TypecheckerOptions.permissive filename ~droot:None in
+    Typing_env.empty tcopt filename ~droot:None in
   let type_ = Typing_print.full tenv type_ in
   Printf.printf "File: %s, line: %s, kind: %s, type: %s\n"
     (Relative_path.to_absolute filename) line kind type_

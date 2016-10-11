@@ -22,6 +22,6 @@ let get_results tcopt _ file_info =
 let auto_complete tcopt content =
   AutocompleteService.attach_hooks();
   let result =
-    ServerIdeUtils.declare_and_check content ~f:(get_results tcopt) in
+    ServerIdeUtils.declare_and_check content ~f:(get_results tcopt) tcopt in
   AutocompleteService.detach_hooks();
   result

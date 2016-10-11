@@ -17,7 +17,9 @@ let get_class id =
     match Parser_heap.find_class_in_file fn id with
     | None -> None
     | Some class_ ->
-      Some (Naming.class_ TypecheckerOptions.permissive class_)
+      Some (Naming.class_
+        (TypecheckerOptions.make_permissive TypecheckerOptions.default)
+        class_)
 
 let get_fun id =
   match Naming_heap.FunPosHeap.get id with
@@ -27,4 +29,6 @@ let get_fun id =
     match Parser_heap.find_fun_in_file fn id with
     | None -> None
     | Some fun_ ->
-      Some (Naming.fun_ TypecheckerOptions.permissive fun_)
+      Some (Naming.fun_
+        (TypecheckerOptions.make_permissive TypecheckerOptions.default)
+        fun_)

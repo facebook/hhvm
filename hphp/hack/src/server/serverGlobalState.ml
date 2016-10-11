@@ -8,14 +8,16 @@
  *
  *)
 
-type t = Path.t * Path.t * bool
+type t = Path.t * Path.t * bool * bool
 
 let save () =
   Path.make (Relative_path.(path_of_prefix Root)),
   Path.make (Relative_path.(path_of_prefix Hhi)),
-  !Typing_deps.trace
+  !Typing_deps.trace,
+  !Parsing_hooks.fuzzy
 
-let restore (saved_root, saved_hhi, trace) =
+let restore (saved_root, saved_hhi, trace, fuzzy) =
+  Parsing_hooks.fuzzy := fuzzy;
   HackSearchService.attach_hooks ();
   Relative_path.(set_path_prefix Root saved_root);
   Relative_path.(set_path_prefix Hhi saved_hhi);

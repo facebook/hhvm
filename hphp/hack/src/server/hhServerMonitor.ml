@@ -92,6 +92,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
   HackEventLogger.set_lazy_levels
    (local_config.ServerLocalConfig.lazy_decl)
    (local_config.ServerLocalConfig.lazy_parse);
+
+  Parsing_hooks.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
   if ServerArgs.check_mode options then
     let shared_config = ServerConfig.(sharedmem_config config) in
     let handle = SharedMem.init shared_config in

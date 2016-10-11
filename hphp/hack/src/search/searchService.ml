@@ -34,9 +34,10 @@ module Make(S : SearchUtils.Searchable) = struct
 
     (* Called by the master process when there is new information in
      * shared memory for us to index *)
-    let update_search_index files =
+    let update_search_index ~fuzzy files =
       Trie.MasterApi.index_files files;
       AutocompleteTrie.MasterApi.index_files files;
+      if fuzzy then
       Fuzzy.index_files files;
       (* At this point, users can start searching again so we should clear the
        * cache that contains the actual results. We don't have to worry

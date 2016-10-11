@@ -10,6 +10,8 @@
 
 open Core
 
+let fuzzy = ref false
+
 let (file_parsed_hooks:
   (Relative_path.t -> Ast.program -> unit) list ref) = ref []
 

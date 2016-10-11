@@ -131,10 +131,12 @@ module MasterApi = struct
   let clear_shared_memory =
     SS.MasterApi.clear_shared_memory
 
-  let update_search_index files =
-    SS.MasterApi.update_search_index files
+  let update_search_index ~fuzzy files =
+    SS.MasterApi.update_search_index ~fuzzy files
 end
 
 let attach_hooks () =
+  let fuzzy = !Parsing_hooks.fuzzy in
   Parsing_hooks.attach_file_parsed_hook WorkerApi.update;
-  Parsing_hooks.attach_parse_task_completed_hook MasterApi.update_search_index
+  Parsing_hooks.attach_parse_task_completed_hook
+    (MasterApi.update_search_index ~fuzzy)

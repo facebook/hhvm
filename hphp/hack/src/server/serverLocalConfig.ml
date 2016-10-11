@@ -19,6 +19,7 @@ type t = {
   load_mini_script_timeout: int; (* in seconds *)
   type_decl_bucket_size: int;
   enable_on_nfs: bool;
+  enable_fuzzy_search: bool;
   lazy_decl: bool;
   lazy_parse: bool;
   io_priority: int;
@@ -35,6 +36,7 @@ let default = {
   load_mini_script_timeout = 20;
   type_decl_bucket_size = 1000;
   enable_on_nfs = false;
+  enable_fuzzy_search = true;
   lazy_decl = false;
   lazy_parse = false;
   io_priority = 7;
@@ -56,6 +58,7 @@ let load_ fn =
   let use_watchman = bool_ "use_watchman" ~default:false config in
   let use_mini_state = bool_ "use_mini_state" ~default:false config in
   let enable_on_nfs = bool_ "enable_on_nfs" ~default:false config in
+  let enable_fuzzy_search = bool_ "enable_fuzzy_search" ~default:true config in
   let lazy_decl = bool_ "lazy_decl" ~default:false config in
   let lazy_parse = bool_ "lazy_parse" ~default:false config in
   let load_mini_script_timeout =
@@ -86,6 +89,7 @@ let load_ fn =
     load_mini_script_timeout;
     type_decl_bucket_size;
     enable_on_nfs;
+    enable_fuzzy_search;
     lazy_decl;
     lazy_parse;
     io_priority;

@@ -291,7 +291,6 @@ struct Scanner {
   // callback. Afterwards, all the state is cleared. The Scanner can be re-used
   // after this.
   template <typename F1, typename F2> void finish(F1&& f1, F2&& f2) {
-    assert(m_visited.empty());
     for (const auto& p : m_ptrs) if (p) { f1(p); }
     for (const auto& p : m_conservative) f2(p.first, p.second);
     m_ptrs.clear();
@@ -302,7 +301,6 @@ struct Scanner {
   // functions can manipulate them directly.
   std::vector<const void*> m_ptrs;
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
-  std::vector<const void*> m_visited;
 };
 
 constexpr bool kBuildScanners =

@@ -422,6 +422,7 @@ public:
     uint64_t out;
     uint8_t r[2];
     uint8_t i = 0;
+    bool adjust;
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (fls64(bits, out)) {
@@ -432,14 +433,20 @@ public:
           f(PhysReg(r[0]), PhysReg(r[1]));
           i = 0;
         }
+        if (adjust) {
+            f(InvalidReg, PhysReg(r[0]));
+          adjust = false;
+          i = 0;
+        }
       }
     };
 
     // High to low.
     auto copy = *this;
+    adjust = (folly::popcount(copy.m_hi) +
+              folly::popcount(copy.m_lo)) & 0x1;
     go(copy.m_hi, 64);
     go(copy.m_lo, 0);
-    if (i > 0) f(PhysReg(r[0]), InvalidReg);
   }
 
   /*

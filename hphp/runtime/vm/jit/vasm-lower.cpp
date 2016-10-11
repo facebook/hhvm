@@ -70,7 +70,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
     numArgs--;
   }
   for (int i = numArgs - 1; i >= 0; i -= 2) {
-    v << pushp{vargs.stkArgs[i], vargs.stkArgs[i-1]};
+    v << pushp{vargs.stkArgs[i-1], vargs.stkArgs[i]};
   }
 
   // Get the arguments in the proper registers.

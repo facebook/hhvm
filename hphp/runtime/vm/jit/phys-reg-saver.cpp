@@ -64,8 +64,8 @@ PhysRegSaver::~PhysRegSaver() {
 
   gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
     // Pop second value into new virtual to avoid vasm-check failures
-    if (r1 == InvalidReg) {
-      v << popp{r0, v.makeReg()};
+    if (r0 == InvalidReg) {
+        v << popp{v.makeReg(), r1};
     } else {
       v << popp{r0, r1};
     }

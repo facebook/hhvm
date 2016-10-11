@@ -163,8 +163,7 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
     m_volatile = true;
   }
 
-  if (!m_method && Option::DynamicInvokeFunctions.find(m_scopeName) !=
-      Option::DynamicInvokeFunctions.end()) {
+  if (!m_method && RuntimeOption::DynamicInvokeFunctions.count(m_scopeName)) {
     setDynamicInvoke();
   }
   if (m_modifiers) {
@@ -204,8 +203,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_fromTrait(false), m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
   m_dynamicInvoke = false;
-  if (!method && Option::DynamicInvokeFunctions.find(name) !=
-      Option::DynamicInvokeFunctions.end()) {
+  if (!method && RuntimeOption::DynamicInvokeFunctions.count(name)) {
     setDynamicInvoke();
   }
 }
@@ -434,7 +432,7 @@ bool FunctionScope::mayUseVV() const {
      variables->getAttribute(VariableTable::ContainsAssert) ||
      variables->getAttribute(VariableTable::ContainsCompact) ||
      variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
-     (!Option::EnableHipHopSyntax &&
+     (!RuntimeOption::EnableHipHopSyntax &&
       variables->getAttribute(VariableTable::ContainsDynamicFunctionCall)));
 }
 

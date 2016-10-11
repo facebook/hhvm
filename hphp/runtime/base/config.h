@@ -128,7 +128,8 @@ struct Config {
                    const double defValue = 0,
                    const bool prepend_hhvm = true);
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
-                   const Hdf& config, const std::string& name = "");
+                   const Hdf& config, const std::string& name,
+                   HackStrictOption def);
   static void Bind(ConfigVector& loc, const IniSettingMap& ini,
                    const Hdf& config, const std::string& name = "",
                    const ConfigVector& defValue = ConfigVector(),

@@ -22,7 +22,6 @@
 #include <boost/filesystem.hpp>
 #include <fstream>
 
-#include "hphp/compiler/option.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/util/logger.h"
@@ -334,14 +333,12 @@ CONTAINER_CONFIG_BODY(ConfigIMap, IMap)
 
 static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
                                             const Hdf& config,
-                                            const std::string& name /* = "" */
+                                            const std::string& name /* = "" */,
+                                            HackStrictOption def
                                            ) {
   auto val = Config::GetString(ini, config, name);
   if (val.empty()) {
-    if (Option::EnableHipHopSyntax || RuntimeOption::EnableHipHopSyntax) {
-      return HackStrictOption::ON;
-    }
-    return HackStrictOption::OFF;
+    return def;
   }
   if (val == "warn") {
     return HackStrictOption::WARN;
@@ -352,10 +349,11 @@ static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
 }
 
 void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
-                  const Hdf& config, const std::string& name /* = "" */) {
+                  const Hdf& config, const std::string& name /* = "" */,
+                  HackStrictOption def) {
   // Currently this doens't bind to ini_get since it is hard to thread through
   // an enum
-  loc = GetHackStrictOption(ini, config, name);
+  loc = GetHackStrictOption(ini, config, name, def);
 }
 
 // No `ini` binding yet. Hdf still takes precedence but will be removed

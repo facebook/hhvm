@@ -794,7 +794,8 @@ void RuntimeOption::Load(
   Config::Bind(PidFile, ini, config, "PidFile", "www.pid");
   Config::Bind(DeploymentId, ini, config, "DeploymentId");
 
-  Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions");
+  Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions",
+               DynamicInvokeFunctions);
 
   {
     // Logging
@@ -1083,13 +1084,15 @@ void RuntimeOption::Load(
   }
   {
     // Eval
-    Config::Bind(EnableHipHopSyntax, ini, config, "Eval.EnableHipHopSyntax");
+    Config::Bind(EnableHipHopSyntax, ini, config, "Eval.EnableHipHopSyntax",
+                 EnableHipHopSyntax);
     Config::Bind(EnableHipHopExperimentalSyntax, ini,
                  config, "Eval.EnableHipHopExperimentalSyntax");
     Config::Bind(EnableShortTags, ini, config, "Eval.EnableShortTags", true);
     Config::Bind(EnableAspTags, ini, config, "Eval.EnableAspTags");
-    Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", false);
-    Config::Bind(EnableZendCompat, ini, config, "Eval.EnableZendCompat", false);
+    Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
+    Config::Bind(EnableZendCompat, ini, config, "Eval.EnableZendCompat",
+                 EnableZendCompat);
     Config::Bind(EnableZendSorting, ini, config, "Eval.EnableZendSorting",
                  false);
     Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",
@@ -1220,14 +1223,17 @@ void RuntimeOption::Load(
     // Hack Language
     Config::Bind(IntsOverflowToInts, ini, config,
                  "Hack.Lang.IntsOverflowToInts", EnableHipHopSyntax);
+    auto const def = RuntimeOption::EnableHipHopSyntax ?
+      HackStrictOption::ON : HackStrictOption::OFF;
+
     Config::Bind(StrictArrayFillKeys, ini, config,
-                 "Hack.Lang.StrictArrayFillKeys");
+                 "Hack.Lang.StrictArrayFillKeys", def);
     Config::Bind(DisallowDynamicVarEnvFuncs, ini, config,
-                 "Hack.Lang.DisallowDynamicVarEnvFuncs");
+                 "Hack.Lang.DisallowDynamicVarEnvFuncs", def);
     Config::Bind(IconvIgnoreCorrect, ini, config,
-                 "Hack.Lang.IconvIgnoreCorrect");
+                 "Hack.Lang.IconvIgnoreCorrect", def);
     Config::Bind(MinMaxAllowDegenerate, ini, config,
-                 "Hack.Lang.MinMaxAllowDegenerate");
+                 "Hack.Lang.MinMaxAllowDegenerate", def);
 
 #ifdef FACEBOOK
     // Force off for Facebook unless you explicitly turn on; folks here both

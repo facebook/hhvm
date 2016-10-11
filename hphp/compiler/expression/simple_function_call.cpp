@@ -126,8 +126,8 @@ SimpleFunctionCall::SimpleFunctionCall
   , m_safe(0)
 {
   if (!m_class && !hasStaticClass()) {
-    m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_origName) !=
-      Option::DynamicInvokeFunctions.end();
+    m_dynamicInvoke =
+      RuntimeOption::DynamicInvokeFunctions.count(m_origName) != 0;
     auto iter = FunctionTypeMap.find(m_origName);
     if (iter != FunctionTypeMap.end()) {
       m_type = iter->second;
@@ -947,8 +947,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
           }
           case FunType::FunctionExists: {
             const std::string &lname = toLower(symbol);
-            if (Option::DynamicInvokeFunctions.find(lname) ==
-                Option::DynamicInvokeFunctions.end()) {
+            if (!RuntimeOption::DynamicInvokeFunctions.count(lname)) {
               FunctionScopePtr func = ar->findFunction(lname);
               if (!func) {
                 if (Option::WholeProgram) {

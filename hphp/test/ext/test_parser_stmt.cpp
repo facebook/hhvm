@@ -657,7 +657,6 @@ bool TestParserStmt::TestGotoStatement() {
 bool TestParserStmt::TestYieldStatement() {
 
   WithOpt w0(RuntimeOption::EnableHipHopSyntax);
-  WithOpt w1(Option::EnableHipHopSyntax);
 
   V("<?php function foo() { yield break;}",
     "function foo() {\n"
@@ -691,4 +690,3 @@ bool TestParserStmt::TestUseTraitStatement() {
 
   return true;
 }
-

@@ -278,11 +278,8 @@ void Func::setFullName(int numParams) {
     }
   }
 
-  if (RuntimeOption::DynamicInvokeFunctions.size()) {
-    if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=
-        RuntimeOption::DynamicInvokeFunctions.end()) {
-      m_attrs = Attr(m_attrs | AttrInterceptable);
-    }
+  if (RuntimeOption::DynamicInvokeFunctions.count(m_fullName->data())) {
+    m_attrs = Attr(m_attrs | AttrInterceptable);
   }
 }
 

@@ -350,7 +350,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
 
   setSpecialMethod(fileScope, classScope);
 
-  if (Option::DynamicInvokeFunctions.count(getOriginalFullName())) {
+  if (RuntimeOption::DynamicInvokeFunctions.count(getOriginalFullName())) {
     funcScope->setDynamicInvoke();
   }
   if (m_params) {

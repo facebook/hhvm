@@ -5023,7 +5023,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     } else if (call->isCallToFunction("hh\\invariant")) {
       if (emitHHInvariant(e, call)) return true;
     } else if (call->isCallToFunction("hh\\idx") &&
-               !Option::JitEnableRenameFunction) {
+               !RuntimeOption::EvalJitEnableRenameFunction) {
       if (params && (params->getCount() == 2 || params->getCount() == 3)) {
         visit((*params)[0]);
         emitConvertToCell(e);
@@ -5112,7 +5112,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       return true;
     } else if (call->isCallToFunction("array_slice") &&
                params && params->getCount() == 2 &&
-               !Option::JitEnableRenameFunction) {
+               !RuntimeOption::EvalJitEnableRenameFunction) {
       ExpressionPtr p0 = (*params)[0];
       ExpressionPtr p1 = (*params)[1];
       Variant v1;
@@ -5165,7 +5165,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.String(name);
       return true;
     } else if (((call->isCallToFunction("dict") &&
-                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\dict")) &&
                params && params->getCount() == 1) {
       visit((*params)[0]);
@@ -5173,7 +5173,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.CastDict();
       return true;
     } else if (((call->isCallToFunction("vec") &&
-                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\vec")) &&
                params && params->getCount() == 1) {
       visit((*params)[0]);
@@ -5181,7 +5181,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.CastVec();
       return true;
     } else if (((call->isCallToFunction("keyset") &&
-                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\keyset")) &&
                params && params->getCount() == 1) {
       visit((*params)[0]);
@@ -5189,21 +5189,21 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.CastKeyset();
       return true;
     } else if (((call->isCallToFunction("is_vec") &&
-                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\is_vec")) &&
                params && params->getCount() == 1) {
       visit((*call->getParams())[0]);
       emitIsType(e, IsTypeOp::Vec);
       return true;
     } else if (((call->isCallToFunction("is_dict") &&
-                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\is_dict")) &&
                params && params->getCount() == 1) {
       visit((*call->getParams())[0]);
       emitIsType(e, IsTypeOp::Dict);
       return true;
     } else if (((call->isCallToFunction("is_keyset") &&
-                 (m_ue.m_isHHFile || Option::EnableHipHopSyntax)) ||
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\is_keyset")) &&
                params && params->getCount() == 1) {
       visit((*call->getParams())[0]);
@@ -6204,9 +6204,9 @@ bool EmitterVisitor::emitInlineGen(
   Emitter& e,
   const ExpressionPtr& expression
 ) {
-  if (!m_ue.m_isHHFile || !Option::EnableHipHopSyntax ||
+  if (!m_ue.m_isHHFile || !RuntimeOption::EnableHipHopSyntax ||
       !expression->is(Expression::KindOfSimpleFunctionCall) ||
-      Option::JitEnableRenameFunction) {
+      RuntimeOption::EvalJitEnableRenameFunction) {
     return false;
   }
 
@@ -9040,15 +9040,12 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
 
 Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
                                          int numParams) {
-  if (Option::JitEnableRenameFunction ||
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
       !RuntimeOption::EvalEnableCallBuiltin) {
     return nullptr;
   }
-  if (Option::DynamicInvokeFunctions.size()) {
-    if (Option::DynamicInvokeFunctions.find(name) !=
-        Option::DynamicInvokeFunctions.end()) {
-      return nullptr;
-    }
+  if (RuntimeOption::DynamicInvokeFunctions.count(name)) {
+    return nullptr;
   }
   Func* f = Unit::lookupFunc(makeStaticString(name));
   if (!f ||
@@ -11208,16 +11205,8 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                           const char* filename, Unit** releaseUnit) {
   if (UNLIKELY(!code)) {
     // Do initialization when code is null; see above.
-    Option::EnableHipHopSyntax = RuntimeOption::EnableHipHopSyntax;
     HHBBC::options.HardReturnTypeHints =
       RuntimeOption::EvalCheckReturnTypeHints >= 3;
-    Option::EnableZendCompat = RuntimeOption::EnableZendCompat;
-    Option::JitEnableRenameFunction =
-      RuntimeOption::EvalJitEnableRenameFunction;
-    for (auto& i : RuntimeOption::DynamicInvokeFunctions) {
-      Option::DynamicInvokeFunctions.insert(i);
-    }
-    Option::IntsOverflowToInts = RuntimeOption::IntsOverflowToInts;
     Option::RecordErrors = false;
     Option::ParseTimeOpts = false;
     Option::WholeProgram = false;

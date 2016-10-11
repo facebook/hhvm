@@ -415,12 +415,11 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
     Config::ParseHdfString(po.confStrings[i].c_str(), config);
   }
-  Option::Load(ini, config);
-  IniSetting::Map iniR = IniSetting::Map::object;
   Hdf runtime = config["Runtime"];
   // The configuration command line strings were already processed above
   // Don't process them again.
-  RuntimeOption::Load(iniR, runtime);
+  RuntimeOption::Load(ini, runtime);
+  Option::Load(ini, config);
   RuntimeOption::EvalJit = false;
 
   initialize_repo();
@@ -770,16 +769,9 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
-  RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
   if (HHBBC::options.HardReturnTypeHints) {
     RuntimeOption::EvalCheckReturnTypeHints = 3;
   }
-  RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
-  RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
-  RuntimeOption::IntsOverflowToInts = Option::IntsOverflowToInts;
-  RuntimeOption::StrictArrayFillKeys = Option::StrictArrayFillKeys;
-  RuntimeOption::DisallowDynamicVarEnvFuncs =
-    Option::DisallowDynamicVarEnvFuncs;
 
   // Turn off commits, because we don't want systemlib to get included
   RuntimeOption::RepoCommit = false;

@@ -121,7 +121,6 @@ struct Option {
   static bool ConvertSuperGlobals;    // $GLOBALS['var'] => global $var
   static std::string ProgramPrologue;
   static std::string TrimmedPrologue;
-  static std::set<std::string, stdltistr> DynamicInvokeFunctions;
   static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string, stdltistr> AutoloadClassMap;
   static std::map<std::string,std::string, stdltistr> AutoloadFuncMap;
@@ -175,16 +174,9 @@ struct Option {
   static std::string ProgramName;
 
   static bool ParseTimeOpts;
-  static bool EnableHipHopSyntax;
-  static bool EnableZendCompat;
-  static bool JitEnableRenameFunction;
   static bool EnableHipHopExperimentalSyntax;
   static bool EnableShortTags;
   static bool EnableAspTags;
-  static bool EnableXHP;
-  static bool IntsOverflowToInts;
-  static HackStrictOption StrictArrayFillKeys;
-  static HackStrictOption DisallowDynamicVarEnvFuncs;
   static int ParserThreadCount;
 
   static int GetScannerType();

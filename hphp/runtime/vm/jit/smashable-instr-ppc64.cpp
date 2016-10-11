@@ -171,7 +171,7 @@ TCA smashableCallTarget(TCA inst) {
 
 static TCA smashableBranchTarget(TCA inst, bool allowCond) {
   const DecodedInstruction di(inst);
-  auto ac = (allowCond)
+  auto ac = allowCond
     ? ppc64_asm::AllowCond::Any
     : ppc64_asm::AllowCond::OnlyUncond;
   if (!di.isBranch(ac)) return nullptr;

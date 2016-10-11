@@ -14,7 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/relocation.h"
+#include "hphp/runtime/vm/jit/relocation-ppc64.h"
+
+#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/align-ppc64.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
@@ -27,19 +29,9 @@
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
-/*
- * Allow a Far branch be converted to a Near branch.
- */
-//#define SHRINK_FAR_BRANCHES
-
-/*
- * Remove nops from a Far branch.
- */
-#define REMOVE_FAR_BRANCHES_NOPS
-
 namespace HPHP { namespace jit { namespace ppc64 {
 
-/* using override */ using ppc64_asm::DecodedInstruction;
+using ppc64_asm::DecodedInstruction;
 
 namespace {
 
@@ -190,14 +182,13 @@ size_t relocateImpl(RelocationInfo& rel,
           TCA adjusted_target = rel.adjustedAddressAfter(old_target);
           TCA new_target = (adjusted_target) ? adjusted_target : old_target;
 
-#ifdef REMOVE_FAR_BRANCHES_NOPS
-          // if it's smashable, don't remove nops (leave it as fixed size) and
-          // mark this relocated address to be used on adjustForRelocation
-          bool keep_nops = (0 != fixups.smashableLocations.count(src));
-          if (keep_nops) rel.markSmashableRelocation(dest);
-#else
           bool keep_nops = true;
-#endif
+          if (RuntimeOption::EvalPPC64RelocationRemoveFarBranchesNops) {
+            // if it's smashable, don't remove nops (leave it as fixed size) and
+            // mark this relocated address to be used on adjustForRelocation
+            keep_nops = (0 != fixups.smashableLocations.count(src));
+            if (keep_nops) rel.markSmashableRelocation(dest);
+          }
           if (!d2.setFarBranchTarget(new_target, keep_nops)) {
             assertx(false && "Couldn't set Far branch target");
           }
@@ -246,12 +237,7 @@ size_t relocateImpl(RelocationInfo& rel,
             }
           } else {
             bool keep_nops =
-#ifdef REMOVE_FAR_BRANCHES_NOPS
-              false
-#else
-              true
-#endif
-              ;
+              !RuntimeOption::EvalPPC64RelocationRemoveFarBranchesNops;
             if (!d2.setFarBranchTarget(new_target, keep_nops)) {
               always_assert(false && "Widen branch relocation failed");
             }
@@ -286,13 +272,10 @@ size_t relocateImpl(RelocationInfo& rel,
             insert_near_jmp = true;
           } else if (new_far_target) {
             // Far target will be relocated.
-            bool keep_nops =
-#ifdef REMOVE_FAR_BRANCHES_NOPS
-              rel.isSmashableRelocation(dest);
-#else
-              true
-#endif
-              ;
+            bool keep_nops = true;
+            if (RuntimeOption::EvalPPC64RelocationRemoveFarBranchesNops) {
+              keep_nops = rel.isSmashableRelocation(dest);
+            }
             if (!d2.setFarBranchTarget(new_far_target, keep_nops)) {
               assert(false && "Far branch target setting failed");
             }
@@ -302,12 +285,11 @@ size_t relocateImpl(RelocationInfo& rel,
             }
           }
           // shrinkBranch is only allowed for non-smashable branches
-          if (insert_near_jmp && !fixups.smashableLocations.count(src)) {
+          if (insert_near_jmp && !fixups.smashableLocations.count(src) &&
+              RuntimeOption::EvalPPC64RelocationShrinkFarBranches) {
             // Mark it as Near branch and run this again
-#ifdef SHRINK_FAR_BRANCHES
             near_jmps.insert(src);
             ok = false;
-#endif
           }
         }
         src += di.size();
@@ -337,7 +319,8 @@ void adjustInstruction(RelocationInfo& rel, DecodedInstruction& di) {
      */
     if (TCA adjusted = rel.adjustedAddressAfter(di.nearBranchTarget())) {
       if (!di.setNearBranchTarget(adjusted)) {
-        assertx(false && "Tried to patch near branch but it doesn't fit.");
+        always_assert(false &&
+            "Tried to patch near branch but it doesn't fit.");
       }
     }
   } else if (di.isImmediate()) {
@@ -352,13 +335,10 @@ void adjustInstruction(RelocationInfo& rel, DecodedInstruction& di) {
     }
   } else if (di.isFarBranch()) {
     if (TCA adjusted = rel.adjustedAddressAfter(di.farBranchTarget())) {
-      bool keep_nops =
-#ifdef REMOVE_FAR_BRANCHES_NOPS
-        rel.isSmashableRelocation(di.ip());
-#else
-      true
-#endif
-        ;
+      bool keep_nops = true;
+      if (RuntimeOption::EvalPPC64RelocationRemoveFarBranchesNops) {
+        keep_nops = rel.isSmashableRelocation(di.ip());
+      }
       if (!di.setFarBranchTarget(adjusted, keep_nops)) {
         always_assert(false && "Not an expected Far branch.");
       }
@@ -373,7 +353,7 @@ void adjustInstruction(RelocationInfo& rel, DecodedInstruction& di) {
  */
 void adjustForRelocation(RelocationInfo& rel) {
   for (const auto& range : rel.srcRanges()) {
-    adjustForRelocation(rel, range.first, range.second);
+    ppc64::adjustForRelocation(rel, range.first, range.second);
   }
 }
 

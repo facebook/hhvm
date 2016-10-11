@@ -135,7 +135,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   CodeBlock cold;
   CodeBlock* frozen = &code.frozen();
 
-  auto const do_relocate = ((arch() == Arch::X64) || (arch() == Arch::PPC64)) &&
+  auto const do_relocate = arch_any(Arch::X64, Arch::PPC64) &&
     !RuntimeOption::EvalEnableReusableTC &&
     RuntimeOption::EvalJitRelocationSize &&
     cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3);

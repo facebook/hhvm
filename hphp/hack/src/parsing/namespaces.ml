@@ -94,25 +94,32 @@ let elaborate_into_current_ns nsenv id =
  * matches the given id.
  * If a match is found, then removes the match and
  * replaces it with the target
- * If no match is found,  returns the id *)
-let rec translate_id ns_map id =
+ * If no match is found, returns the id
+ *
+ * Regularly, translates from the long name to the short name.
+ * If the reverse flag is give, then translation is done
+ * otherway around.*)
+let rec translate_id ~reverse ns_map id =
   match ns_map with
     | [] -> id
-    | (target, source)::rest ->
+    | (short_name, long_name)::rest ->
+      let (target, source) = if reverse
+                             then (long_name, short_name)
+                             else (short_name, long_name) in
       (* Append backslash at the end so that it doesn't match partially *)
       if String_utils.string_starts_with id (source ^ "\\")
       (* Strip out the prefix and connect it to the next beginning *)
       then target ^ (String_utils.lstrip id source)
-      else translate_id rest id
+      else translate_id ~reverse rest id
 
 (* Runs the autonamespace translation for both fully qualified and non qualified
  * names *)
-let exists_in_auto_ns_map ns_map id =
+let renamespace_if_aliased ?(reverse = false) ns_map id =
   try
     let has_bslash = id.[0] = '\\' in
     let len = String.length id in
     let id = if has_bslash then String.sub id 1 (len - 1) else id in
-    let translation = translate_id ns_map id in
+    let translation = translate_id ~reverse ns_map id in
     if has_bslash then "\\" ^ translation else translation
   (* If there is some matching problem, that means we are not aliasing *)
   with _ -> id
@@ -165,7 +172,7 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
           use ^ (String.sub id bslash_loc len)
         end
     end in
-  let translated = exists_in_auto_ns_map
+  let translated = renamespace_if_aliased
       (ParserOptions.auto_namespace_map nsenv.ns_popt) fully_qualified in
   p, translated
 

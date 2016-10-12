@@ -126,11 +126,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         in
         env, ServerIdentifyFunction.go_absolute content line column env.tcopt
     | DISCONNECT ->
-        let new_env = {env with
-        persistent_client = None;
-        edited_files = Relative_path.Map.empty;
-        diag_subscribe = None;} in
-        new_env, ()
+        ServerFileSync.clear_sync_data env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->
         let new_env = { env with
           diag_subscribe = Some (Diagnostic_subscription.of_id id env.errorl)

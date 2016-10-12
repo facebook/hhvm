@@ -91,8 +91,10 @@ let send_push_message_to_client client response =
   | Non_persistent_client _ ->
     failwith "non-persistent clients don't expect push messages "
   | Persistent_client fd ->
-    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
-
+    try
+      Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
+    with Unix.Unix_error(Unix.EPIPE, "write", "") ->
+      raise Client_went_away
 
 let read_client_msg ic =
   Timeout.with_timeout

@@ -142,6 +142,10 @@ let handle_connection_ genv env client =
     ClientProvider.shutdown_client client;
     env
 
+let shutdown_persistent_client env client =
+  ClientProvider.shutdown_client client;
+  ServerFileSync.clear_sync_data env
+
 let handle_persistent_connection_ genv env client =
    try
      ServerCommand.handle genv env client
@@ -151,21 +155,13 @@ let handle_persistent_connection_ genv env client =
    | Sys_error("Connection reset by peer")
    | Sys_error("Broken pipe")
    | ServerCommandTypes.Read_command_timeout ->
-     ClientProvider.shutdown_client client;
-     {env with
-     persistent_client = None;
-     edited_files = Relative_path.Map.empty;
-     diag_subscribe = None;}
+     shutdown_persistent_client env client
    | e ->
      let msg = Printexc.to_string e in
      EventLogger.master_exception msg;
      Printf.fprintf stderr "Error: %s\n%!" msg;
      Printexc.print_backtrace stderr;
-     ClientProvider.shutdown_client client;
-     {env with
-     persistent_client = None;
-     edited_files = Relative_path.Map.empty;
-     diag_subscribe = None;}
+     shutdown_persistent_client env client
 
 let handle_connection genv env client is_persistent =
   ServerIdle.stamp_connection ();
@@ -286,7 +282,11 @@ let serve_one_iteration genv env client_provider =
     if not @@ SMap.is_empty errors then begin
       let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
       let client = Utils.unsafe_opt env.persistent_client in
-      ClientProvider.send_push_message_to_client client res
+      try
+        ClientProvider.send_push_message_to_client client res
+      with ClientProvider.Client_went_away ->
+        (* Leaving cleanup of this condition to handled_connection function *)
+        ()
     end
   end;
 

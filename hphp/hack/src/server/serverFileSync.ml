@@ -27,15 +27,17 @@ let open_file env path content =
     } in
   Option.value new_env ~default:env
 
+let close_relative_path env path =
+  let edited_files = Relative_path.Map.remove env.edited_files path in
+  let ide_needs_parsing =
+    Relative_path.Set.add env.ide_needs_parsing path in
+  let last_command_time = Unix.gettimeofday () in
+  { env with
+    edited_files; ide_needs_parsing; last_command_time
+  }
+
 let close_file env path =
-  let new_env = try_relativize_path path >>= fun path ->
-    let edited_files = Relative_path.Map.remove env.edited_files path in
-    let ide_needs_parsing =
-      Relative_path.Set.add env.ide_needs_parsing path in
-    let last_command_time = Unix.gettimeofday () in
-    Some { env with
-      edited_files; ide_needs_parsing; last_command_time
-    } in
+  let new_env = try_relativize_path path >>| close_relative_path env in
   Option.value new_env ~default:env
 
 let edit_file env path edits =
@@ -61,3 +63,13 @@ let edit_file env path edits =
       edited_files; ide_needs_parsing; last_command_time
     } in
   Option.value new_env ~default:env
+
+let clear_sync_data env =
+  let env = Relative_path.Map.fold env.edited_files
+    ~init:env
+    ~f:(fun x _ env -> close_relative_path env x)
+  in
+{ env with
+  persistent_client = None;
+  diag_subscribe = None;
+}

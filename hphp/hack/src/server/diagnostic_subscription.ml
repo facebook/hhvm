@@ -24,9 +24,9 @@ let errors_to_map errors =
     ~f:begin fun e acc ->
       let file = Errors.get_pos e |> Pos.filename in
 
-      let entry = Relative_path.Map.singleton file [e] in
-      Relative_path.Map.merge acc entry
-        (fun _ x y -> Option.merge x y ~f:(fun x y -> x @ y))
+      Relative_path.Map.add acc file (match Relative_path.Map.get acc file with
+      | None -> [e]
+      | Some x -> e :: x)
     end
 
 let of_id ~id ~init = {

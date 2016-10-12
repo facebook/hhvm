@@ -29,13 +29,13 @@ function test(): void {
 let full_diagnostics = "
 /bar.php:
 File \"/bar.php\", line 4, characters 3-5:
-Unbound name (typing): foo (Typing[4107])
+Unbound name: foo (a global function) (Naming[2049])
 
 File \"/bar.php\", line 4, characters 3-5:
 Unbound name: foo (a global constant) (Naming[2049])
 
 File \"/bar.php\", line 4, characters 3-5:
-Unbound name: foo (a global function) (Naming[2049])
+Unbound name (typing): foo (Typing[4107])
 "
 
 let () =

@@ -135,6 +135,7 @@ let make_env config =
     ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;
     needs_decl = Relative_path.Set.empty;
+    needs_check = Relative_path.Set.empty;
     needs_full_check = false;
     diag_subscribe = None;
     recent_recheck_loop_stats = empty_recheck_loop_stats;

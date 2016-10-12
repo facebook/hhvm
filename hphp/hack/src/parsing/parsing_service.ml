@@ -121,6 +121,18 @@ let parse_parallel ?(quick = false) workers get_next popt =
 let parse_sequential ~quick fn content acc popt =
   let res =
     Errors.do_ begin fun () ->
+      (* DISGUSTING: so far, parser was used only for text files from disk, and
+      * those files are (or our reading primitives make them?) terminated with
+      * newline. Files that come from memory don't have this guarantee, and it
+      * breaks the parser in few places. Appending a sentinel newline doesn't
+      * change the parse tree, and is much easier than debugging the parser. *)
+      let length = String.length content in
+      let content =
+        if length > 0 && content.[length - 1] <> '\n' then
+          content ^ "\n"
+        else
+          content
+      in
       Parser_hack.program popt fn content
     end
   in

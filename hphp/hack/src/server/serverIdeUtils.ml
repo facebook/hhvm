@@ -21,89 +21,89 @@ let canon_set names =
   |> List.map ~f:NamingGlobal.canon_key
   |> List.fold_left ~f:SSet.add ~init:SSet.empty
 
-let oldify_funs names =
-  Naming_heap.FunPosHeap.oldify_batch names;
-  Naming_heap.FunCanonHeap.oldify_batch @@ canon_set names;
-  Decl_heap.Funs.oldify_batch names;
+let shelve_funs names =
+  Naming_heap.FunPosHeap.shelve_batch names;
+  Naming_heap.FunCanonHeap.shelve_batch @@ canon_set names;
+  Decl_heap.Funs.shelve_batch names;
   ()
 
-let oldify_classes names =
-  Naming_heap.TypeIdHeap.oldify_batch names;
-  Naming_heap.TypeCanonHeap.oldify_batch @@ canon_set names;
+let shelve_classes names =
+  Naming_heap.TypeIdHeap.shelve_batch names;
+  Naming_heap.TypeCanonHeap.shelve_batch @@ canon_set names;
   Decl_class_elements.(
-    names |> SSet.elements |> get_for_classes |> oldify_all
+    names |> SSet.elements |> get_for_classes |> shelve_all
   );
-  Decl_heap.Classes.oldify_batch names;
+  Decl_heap.Classes.shelve_batch names;
   ()
 
-let oldify_typedefs names =
-  Naming_heap.TypeIdHeap.oldify_batch names;
-  Naming_heap.TypeCanonHeap.oldify_batch @@ canon_set names;
-  Decl_heap.Typedefs.oldify_batch names
+let shelve_typedefs names =
+  Naming_heap.TypeIdHeap.shelve_batch names;
+  Naming_heap.TypeCanonHeap.shelve_batch @@ canon_set names;
+  Decl_heap.Typedefs.shelve_batch names
 
-let oldify_consts names =
-  Naming_heap.ConstPosHeap.oldify_batch names;
-  Decl_heap.GConsts.oldify_batch names
+let shelve_consts names =
+  Naming_heap.ConstPosHeap.shelve_batch names;
+  Decl_heap.GConsts.shelve_batch names
 
-let oldify_file name =
-  Parser_heap.ParserHeap.oldify_batch @@
+let shelve_file name =
+  Parser_heap.ParserHeap.shelve_batch @@
     Parser_heap.ParserHeap.KeySet.singleton name
 
-let oldify_file_info path file_info =
-  oldify_file path;
+let shelve_file_info path file_info =
+  shelve_file path;
   let {
     FileInfo.n_funs; n_classes; n_types; n_consts
   } = FileInfo.simplify file_info in
-  oldify_funs n_funs;
-  oldify_classes n_classes;
-  oldify_typedefs n_types;
-  oldify_consts n_consts
+  shelve_funs n_funs;
+  shelve_classes n_classes;
+  shelve_typedefs n_types;
+  shelve_consts n_consts
 
-let revive funs classes typedefs consts file_name =
-  Decl_heap.Funs.revive_batch funs;
-  Naming_heap.FunPosHeap.revive_batch funs;
-  Naming_heap.FunCanonHeap.revive_batch @@ canon_set funs;
+let unshelve funs classes typedefs consts file_name =
+  Decl_heap.Funs.unshelve_batch funs;
+  Naming_heap.FunPosHeap.unshelve_batch funs;
+  Naming_heap.FunCanonHeap.unshelve_batch @@ canon_set funs;
 
-  (* It is important we revive the class elements first before we revive
-   * the class itself. We already revived all the class elements that were
+  (* It is important we unshelve the class elements first before we unshelve
+   * the class itself. We already unshelved all the class elements that were
    * removed in declare_and_check. To restore the world to the original state
-   * we need to revive all the remaining class elements.
+   * we need to unshelve all the remaining class elements.
    *)
   Decl_class_elements.(
-    classes |> SSet.elements |> get_for_classes |> revive_all
+    classes |> SSet.elements |> get_for_classes |> unshelve_all
   );
-  Decl_heap.Classes.revive_batch classes;
-  Naming_heap.TypeIdHeap.revive_batch classes;
-  Naming_heap.TypeCanonHeap.revive_batch @@ canon_set classes;
+  Decl_heap.Classes.unshelve_batch classes;
+  Naming_heap.TypeIdHeap.unshelve_batch classes;
+  Naming_heap.TypeCanonHeap.unshelve_batch @@ canon_set classes;
 
-  Naming_heap.TypeIdHeap.revive_batch typedefs;
-  Naming_heap.TypeCanonHeap.revive_batch @@ canon_set typedefs;
-  Decl_heap.Typedefs.revive_batch typedefs;
+  Naming_heap.TypeIdHeap.unshelve_batch typedefs;
+  Naming_heap.TypeCanonHeap.unshelve_batch @@ canon_set typedefs;
+  Decl_heap.Typedefs.unshelve_batch typedefs;
 
-  Naming_heap.ConstPosHeap.revive_batch consts;
-  Decl_heap.GConsts.revive_batch consts;
+  Naming_heap.ConstPosHeap.unshelve_batch consts;
+  Decl_heap.GConsts.unshelve_batch consts;
 
-  Fixmes.HH_FIXMES.revive_batch @@
+  Fixmes.HH_FIXMES.unshelve_batch @@
     Fixmes.HH_FIXMES.KeySet.singleton file_name;
-  Parser_heap.ParserHeap.revive_batch @@
+  Parser_heap.ParserHeap.unshelve_batch @@
     Parser_heap.ParserHeap.KeySet.singleton file_name
 
-let revive_file_info path file_info =
+let unshelve_file_info path file_info =
   let {
     FileInfo.n_funs; n_classes; n_types; n_consts
   } = FileInfo.simplify file_info in
-  revive n_funs n_classes n_types n_consts path
+  unshelve n_funs n_classes n_types n_consts path
 
-(** Surrounds f() with oldify and revive, but resilient to f throwing. Reraises
- * the exception thrown and ensures revive is always done. *)
-let oldify_then_revive path file_info f =
-  let () = oldify_file_info path file_info in
+(** Surrounds f() with shelve and unshelve, but resilient to f throwing. Reraises
+ * the exception thrown and ensures unshelve is always done. *)
+let shelve_then_unshelve path file_info f =
+  let () = shelve_file_info path file_info in
   let result = try f () with
   | e ->
-    let () = revive_file_info path file_info in
+    let () = unshelve_file_info path file_info in
     raise e
   in
-  let () = revive_file_info path file_info in
+  let () = unshelve_file_info path file_info in
   result
 
 let path = Relative_path.default
@@ -111,9 +111,9 @@ let path = Relative_path.default
  * buffer.
  *
  * Declaring will overwrite definitions on shared heap, so before doing this,
- * the function will also "oldify" them (see functions above and
- * SharedMem.S.oldify_batch) - after working with local content is done,
- * original definitions can (and should) be restored using "revive".
+ * the function will also "shelve" them (see functions above and
+ * SharedMem.S.shelve_batch) - after working with local content is done,
+ * original definitions can (and should) be restored using "unshelve".
  *)
 let declare_and_check content ~f tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
@@ -121,7 +121,7 @@ let declare_and_check content ~f tcopt =
   Autocomplete.auto_complete_for_global := "";
   let result =
     Errors.ignore_ begin fun () ->
-      Fixmes.HH_FIXMES.oldify_batch @@
+      Fixmes.HH_FIXMES.shelve_batch @@
         Fixmes.HH_FIXMES.KeySet.singleton path;
       let {Parser_hack.file_mode = _; comments = _; content = _; ast} =
         Parser_hack.program tcopt path content
@@ -144,7 +144,7 @@ let declare_and_check content ~f tcopt =
         FileInfo.funs; classes; typedefs; consts;
       } in
 
-      oldify_then_revive path file_info begin fun () ->
+      shelve_then_unshelve path file_info begin fun () ->
         Parser_heap.ParserHeap.add path (ast, Parser_heap.Full);
         NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
         let nast = Naming.program tcopt ast in
@@ -157,13 +157,13 @@ let declare_and_check content ~f tcopt =
 
         (* If we remove a class member, there may still be child classes that
          * refer to that member. We can either invalidate all the extends_deps
-         * of the classes we just declared, or revive the types of the class
-         * elements back into the new heap. We choose to revive since it should
+         * of the classes we just declared, or unshelve the types of the class
+         * elements back into the new heap. We choose to unshelve since it should
          * be faster, even though it is technically incorrect.
          *)
         classes
         |> List.map ~f:snd
-        |> Decl_class_elements.revive_removed_elems;
+        |> Decl_class_elements.unshelve_removed_elems;
         (* We must run all the declaration steps first to ensure that the
          * typechecking below sees all the new declarations. Lazy decl
          * won't work in this case because we haven't put the new ASTs into

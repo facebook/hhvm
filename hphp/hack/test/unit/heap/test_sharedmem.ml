@@ -35,7 +35,7 @@ let expect_equals ~name value expected =
     )
     (value = expected)
 
-let test_revive (module IntHeap: SharedMem.NoCache
+let test_unshelve (module IntHeap: SharedMem.NoCache
                   with type t = int
                    and type key = string
                 ) () =
@@ -44,35 +44,35 @@ let test_revive (module IntHeap: SharedMem.NoCache
   IntHeap.add "0" 0;
   expect_equals "0" (IntHeap.get "0") (Some 0);
 
-  IntHeap.oldify_batch key;
+  IntHeap.shelve_batch key;
   expect_equals "0" (IntHeap.get "0") None;
-  expect_equals "0" (IntHeap.get_old "0") (Some 0);
+  expect_equals "0" (IntHeap.get_shelved "0") (Some 0);
 
   IntHeap.add "0" 1;
   expect_equals "0" (IntHeap.get "0") (Some 1);
 
-  IntHeap.revive_batch key;
+  IntHeap.unshelve_batch key;
   expect_equals "0" (IntHeap.get "0") (Some 0);
-  expect_equals "0" (IntHeap.get_old "0") None;
+  expect_equals "0" (IntHeap.get_shelved "0") None;
 
-  IntHeap.oldify_batch key;
+  IntHeap.shelve_batch key;
   expect_equals "0" (IntHeap.get "0") None;
-  expect_equals "0" (IntHeap.get_old "0") (Some 0);
+  expect_equals "0" (IntHeap.get_shelved "0") (Some 0);
 
-  IntHeap.revive_batch key;
+  IntHeap.unshelve_batch key;
   expect_equals "0" (IntHeap.get "0") (Some 0);
-  expect_equals "0" (IntHeap.get_old "0") None;
+  expect_equals "0" (IntHeap.get_shelved "0") None;
 
-  IntHeap.revive_batch key;
+  IntHeap.unshelve_batch key;
   expect_equals "0" (IntHeap.get "0") None;
-  expect_equals "0" (IntHeap.get_old "0") None
+  expect_equals "0" (IntHeap.get_shelved "0") None
 
 let tests () =
   let list = [
-    "test_revive_no_cache", test_revive (
+    "test_unshelve_no_cache", test_unshelve (
       module SharedMem.NoCache (StringKey) (IntVal)
     );
-    "test_revive_with_cache", test_revive (
+    "test_unshelve_with_cache", test_unshelve (
       module SharedMem.WithCache (StringKey) (IntVal)
     );
   ] in

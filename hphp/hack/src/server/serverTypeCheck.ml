@@ -187,8 +187,8 @@ let parsing genv env disk_files ide_files ~stop_at_errors =
   let to_check = Relative_path.Set.union disk_files ide_files in
 
   if stop_at_errors then begin
-    Parser_heap.ParserHeap.oldify_batch to_check;
-    Fixmes.HH_FIXMES.oldify_batch to_check
+    Parser_heap.ParserHeap.shelve_batch to_check;
+    Fixmes.HH_FIXMES.shelve_batch to_check;
   end else begin
     Parser_heap.ParserHeap.remove_batch to_check;
     Fixmes.HH_FIXMES.remove_batch to_check
@@ -204,10 +204,10 @@ let parsing genv env disk_files ide_files ~stop_at_errors =
     let fast = Relative_path.Map.filter fast
       (fun x _ -> not @@ Relative_path.Set.mem failed_parsing x) in
     let success_parsing = Relative_path.Set.diff to_check failed_parsing in
-    Parser_heap.ParserHeap.revive_batch failed_parsing;
-    Fixmes.HH_FIXMES.revive_batch failed_parsing;
-    Parser_heap.ParserHeap.remove_old_batch success_parsing;
-    Fixmes.HH_FIXMES.remove_old_batch success_parsing;
+    Parser_heap.ParserHeap.unshelve_batch failed_parsing;
+    Fixmes.HH_FIXMES.unshelve_batch failed_parsing;
+    Parser_heap.ParserHeap.remove_shelved_batch success_parsing;
+    Fixmes.HH_FIXMES.remove_shelved_batch success_parsing;
     (fast, errors, Relative_path.Set.empty)
   end else res
 

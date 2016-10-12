@@ -30,10 +30,10 @@ struct HttpServer : Synchronizable, TakeoverListener,
                     Server::ServerEventListener {
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
+  static std::atomic<double> LoadFactor;
 
 private:
   static std::atomic_int_fast64_t PrepareToStopTime;
-  static std::atomic_int LoadFactor;
   static time_t OldServerStopTime;
 
 public:
@@ -68,9 +68,6 @@ public:
   // Get total ongoing/queued request count for all satellite servers.
   std::pair<int, int> getSatelliteRequestCount() const;
 
-  static int GetLoadFactor() {
-    return LoadFactor.load(std::memory_order_relaxed);
-  }
   static int64_t GetPrepareToStopTime() {
     // Make sure changes are seen right away after PrepareToStop().
     return PrepareToStopTime.load(std::memory_order_acquire);

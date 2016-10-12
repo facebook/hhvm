@@ -70,6 +70,7 @@
 #include <folly/Random.h>
 #include <folly/portability/Unistd.h>
 
+#include <cstdio>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -343,6 +344,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/proxy:           set up request proxy\n"
         "    origin        URL to proxy requests to\n"
         "    percentage    percentage of requests to proxy\n"
+        "/load-factor:     get or set load factor\n"
+        "    set           optional, set new load factor (default 1.0,"
+        "                  valid range [-1.0, 10.0])\n"
         ;
 #ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
@@ -655,6 +659,28 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     if (strncmp(cmd.c_str(), "random-apc", 10) == 0 &&
         handleRandomApcRequest(cmd, transport)) {
+      break;
+    }
+
+    if (cmd == "load-factor") {
+      auto const factorStr = transport->getParam("set");
+      if (factorStr.empty()) {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(3)
+            << HttpServer::LoadFactor.load();
+        transport->sendString(oss.str());
+        break;
+      }
+      double factor = 1.0;
+      if (sscanf(factorStr.c_str(), "%lf", &factor) < 1 ||
+          factor > 10 || factor < -1) {
+        transport->sendString("Invalid load factor spec: " + factorStr, 400);
+        break;
+      }
+      HttpServer::LoadFactor.store(factor, std::memory_order_relaxed);
+      transport->sendString(folly::sformat("Load factor updated to {}\n",
+                                           factor));
+      Logger::Info("Load factor updated to %lf", factor);
       break;
     }
 

@@ -166,9 +166,9 @@ let test_server_busy_reponse () =
 
 let test_open_file_call () =
   let msg = build_call_msg "\"didOpenFile\"" [
-    {|"filename" : "test.php"|};
+    {|"filename" : "test.php","contents":"<?hh"|};
   ] in
-  expect_call msg (Open_file_call "test.php")
+  expect_call msg (Open_file_call ("test.php", "<?hh"))
 
 let test_close_file_call () =
   let msg = build_call_msg "\"didCloseFile\"" [

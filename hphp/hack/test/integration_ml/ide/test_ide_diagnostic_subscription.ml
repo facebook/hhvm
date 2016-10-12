@@ -58,9 +58,8 @@ let () =
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   (* Initial list of errors is pushed after subscribing *)
   Test.assert_diagnostics loop_outputs bar_diagnostics;
-  let env = Test.open_file env foo_name in
-  (* Edit file to have errors *)
-  let env, _ = Test.edit_file env foo_name foo_contents in
+  (* Open and edit file to have errors *)
+  let env = Test.open_file env foo_name ~contents:foo_contents in
   let env = Test.wait env in
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_outputs foo_diagnostics;

@@ -25,7 +25,7 @@ val run_loop_once: ServerEnv.env -> ('a, 'b) loop_inputs ->
 
 val subscribe_diagnostic : ?id:int -> ServerEnv.env  -> ServerEnv.env
 
-val open_file : ServerEnv.env -> string -> ServerEnv.env
+val open_file : ServerEnv.env -> ?contents:string -> string -> ServerEnv.env
 
 val edit_file :
   ServerEnv.env ->

@@ -64,11 +64,8 @@ let () =
   let env = Test.connect_persistent_client env in
   let env = Test.subscribe_diagnostic env in
 
-  let env = Test.open_file env foo_parent_name in
-  let env, _ = Test.edit_file env foo_parent_name foo_parent_contents1 in
-
-  let env = Test.open_file env foo_name in
-  let env, _ = Test.edit_file env foo_name foo_contents1 in
+  let env = Test.open_file env foo_parent_name ~contents:foo_parent_contents1 in
+  let env = Test.open_file env foo_name ~contents:foo_contents1 in
 
   let env = Test.wait env in
   let env, loop_output = Test.(run_loop_once env default_loop_input) in

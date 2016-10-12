@@ -58,7 +58,7 @@ let () =
   let env = Test.connect_persistent_client env in
 
   (* Open a new file in editor *)
-  let env = Test.open_file env bar_name in
+  let env = Test.open_file env bar_name ~contents:"" in
   (* Start typing in the new file *)
   let env, _ = Test.edit_file env bar_name bar_contents in
   (* Request completions *)

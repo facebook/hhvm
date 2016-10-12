@@ -115,7 +115,12 @@ let to_call cmd args =
     let pos = parse_position pos in
     Identify_function_call (path, pos)
   | "didOpenFile" ->
-    Open_file_call (get_filename ())
+    let path = get_filename () in
+    let contents = match get_field args "contents" with
+      | Some (JSON_String s) -> s
+      | _ -> raise Not_found
+    in
+    Open_file_call (path, contents)
   | "didCloseFile" ->
     Close_file_call (get_filename ())
   | "didChangeFile" ->

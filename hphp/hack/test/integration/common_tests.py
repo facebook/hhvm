@@ -195,11 +195,14 @@ class IdeConnection(object):
 
     def open(self, file):
         file = self.make_absolute(file)
+        f = open(file)
+        contents = f.read()
+        f.close()
         return(
             '{"protocol" : "service_framework3_rpc","id" : 123,"type" : ' +
             '"call","method" : "didOpenFile","args" : {"filename":"' +
             file +
-            '"}}\n'
+            '","contents" : ' + json.dumps(contents) + '}}\n'
         )
 
     def close(self, file):

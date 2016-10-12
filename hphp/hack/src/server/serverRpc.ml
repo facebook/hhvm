@@ -82,8 +82,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, FullFidelityParseService.go file
     | ECHO_FOR_TEST msg ->
         env, msg
-    | OPEN_FILE path ->
-        ServerFileSync.open_file env path, ()
+    | OPEN_FILE (path, contents) ->
+        ServerFileSync.open_file env path contents, ()
     | CLOSE_FILE path ->
         ServerFileSync.close_file env path, ()
     | EDIT_FILE (path, edits) ->

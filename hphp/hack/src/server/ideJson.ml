@@ -17,7 +17,7 @@ type call_type =
   | Auto_complete_call of string * File_content.content_pos
   | Highlight_ref_call of string * File_content.content_pos
   | Identify_function_call of string * File_content.content_pos
-  | Open_file_call of string
+  | Open_file_call of string * string
   | Close_file_call of string
   | Edit_file_call of string * (File_content.code_edit list)
   | Disconnect_call

@@ -163,8 +163,8 @@ match call with
   let result_field = ClientGetDefinition.to_json results in
   print_endline @@ IdeJsonUtils.json_string_of_response id
     (Idetify_function_response result_field)
-| Open_file_call path ->
-  rpc conn (Rpc.OPEN_FILE path)
+| Open_file_call (path, contents) ->
+  rpc conn (Rpc.OPEN_FILE (path, contents))
 | Close_file_call path ->
   rpc conn (Rpc.CLOSE_FILE path)
 | Edit_file_call (path, edits) ->

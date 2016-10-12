@@ -15,10 +15,8 @@ open ServerEnv
 let try_relativize_path x =
   Option.try_with (fun () -> Relative_path.(create Root x))
 
-let open_file env path =
+let open_file env path content =
   let new_env = try_relativize_path path >>= fun path ->
-    let content =
-      try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
     let fc = of_content ~content in
     let edited_files = Relative_path.Map.add env.edited_files path fc in
     let ide_needs_parsing =

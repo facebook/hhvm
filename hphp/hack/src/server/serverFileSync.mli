@@ -8,7 +8,7 @@
  *
  *)
 
-val open_file : ServerEnv.env -> string -> ServerEnv.env
+val open_file : ServerEnv.env -> string -> string -> ServerEnv.env
 
 val edit_file :
   ServerEnv.env ->

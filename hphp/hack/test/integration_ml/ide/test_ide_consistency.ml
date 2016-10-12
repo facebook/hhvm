@@ -52,10 +52,8 @@ let () =
   let env = Test.connect_persistent_client env in
 
   (* Create and put content in two files *)
-  let env = Test.open_file env foo_name in
-  let env = Test.open_file env bar_name in
-  let env, _ = Test.edit_file env foo_name foo_contents in
-  let env, _ = Test.edit_file env bar_name bar_contents in
+  let env = Test.open_file env foo_name ~contents:foo_contents in
+  let env = Test.open_file env bar_name ~contents:bar_contents in
 
   (* Check that autocompletions in one file are aware of definitions in
    * another one*)

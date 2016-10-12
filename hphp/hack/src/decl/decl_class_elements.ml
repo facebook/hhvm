@@ -44,9 +44,10 @@ let from_class {
     smeths = filter_inherited_elements (module StaticMethods) dc_smethods;
   }
 
-let get_for_classes classes =
+let get_for_classes ~old classes =
+  let get = if old then Decl_heap.Classes.get_old else Decl_heap.Classes.get in
   List.fold ~f:begin fun acc cls ->
-    match Decl_heap.Classes.get cls with
+    match get cls with
     | None -> acc
     | Some c -> SMap.add cls (from_class c) acc
   end classes ~init:SMap.empty

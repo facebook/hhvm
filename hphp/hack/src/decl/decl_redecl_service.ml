@@ -227,7 +227,7 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
 (*****************************************************************************)
 (* Code invalidating the heap *)
 (*****************************************************************************)
-let invalidate_heap { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
+let oldify_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
   Decl_heap.Funs.oldify_batch n_funs;
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
@@ -253,11 +253,6 @@ let remove_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
   Decl_heap.GConsts.remove_batch n_consts;
   SharedMem.collect `gentle;
   ()
-
-let get_defs fast =
-  Relative_path.Map.fold fast ~f:begin fun _ names1 names2 ->
-    FileInfo.merge_names names1 names2
-  end ~init:FileInfo.empty_names
 
 let intersection_nonempty s1 mem_f s2  =
   SSet.exists s1 ~f:(mem_f s2)
@@ -333,35 +328,44 @@ let get_dependent_classes workers ~bucket_size file_info classes =
   filter_dependent_classes_parallel workers ~bucket_size classes |>
   SSet.of_list
 
-let get_defs_and_elems workers ~bucket_size fast =
-  let defs = get_defs fast in
+let get_elems workers ~bucket_size ~old defs =
   let classes = SSet.elements defs.FileInfo.n_classes in
   (* Getting the members of a class requires fetching the class from the heap.
    * Doing this for too many classes will cause a large amount of allocations
    * to be performed on the master process triggering the GC and slowing down
    * redeclaration. Using the workers prevents this from occurring
    *)
-  let elems = if List.length classes < 10
+  if List.length classes < 10
     then
-      Decl_class_elements.get_for_classes classes
+      Decl_class_elements.get_for_classes ~old classes
     else
       MultiWorker.call
         workers
-        ~job:(fun _ c -> Decl_class_elements.get_for_classes c)
+        ~job:(fun _ c -> Decl_class_elements.get_for_classes ~old c)
         ~merge:SMap.union
         ~neutral:SMap.empty
         ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
-  in
-  defs, elems
 
 (*****************************************************************************)
 (* The main entry point *)
 (*****************************************************************************)
 
-let redo_type_decl workers ~bucket_size tcopt fast =
+let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
+  (* Some of the defintions are already in the old heap, left there by a
+   * previous lazy check *)
+  let oldified_defs, current_defs =
+    Decl_utils.split_defs defs all_oldified_defs in
+
+  (* Oldify the remaining defs along with their elements *)
+  let get_elems = get_elems workers ~bucket_size in
+  let current_elems = get_elems current_defs ~old:false in
+  oldify_defs current_defs current_elems;
+
+  (* Fetch the already oldified elements too so we can remove them later *)
+  let oldified_elems = get_elems oldified_defs ~old:true in
+  let all_elems = SMap.union current_elems oldified_elems in
+
   let fnl = Relative_path.Map.keys fast in
-  let defs, elems = get_defs_and_elems workers ~bucket_size fast in
-  invalidate_heap defs elems;
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let result =
     if List.length fnl < 10
@@ -371,16 +375,28 @@ let redo_type_decl workers ~bucket_size tcopt fast =
       errors, failed, to_redecl, to_recheck
     else parallel_otf_decl workers bucket_size tcopt fast fnl
   in
-  remove_old_defs defs elems;
+  remove_old_defs defs all_elems;
   result
 
-let invalidate_type_decl workers file_info
-    ~bucket_size ~invalidate_dependent_classes fast =
-  let defs, elems = get_defs_and_elems workers ~bucket_size fast in
-  let defs = if invalidate_dependent_classes then begin
-    let classes = defs.FileInfo.n_classes in
-    let classes = get_dependent_classes workers ~bucket_size
-      file_info classes in
-    { defs with FileInfo.n_classes = classes }
-  end else defs in
-  remove_defs defs elems
+let oldify_type_decl workers file_info ~bucket_size all_oldified_defs defs =
+
+  (* Some defs are already oldified - ignore them *)
+  let _oldified_defs, current_defs =
+    Decl_utils.split_defs defs all_oldified_defs in
+
+  let current_elems = get_elems workers ~bucket_size current_defs ~old:false in
+
+  oldify_defs current_defs current_elems;
+
+  (* Oldifying classes also oldifies their elements (see Decl_class_elements),
+   * which might be shared with other classes. We need to remove all of them too
+   * to avoid dangling references *)
+  let current_classes = current_defs.FileInfo.n_classes in
+  let dependent_classes =
+    get_dependent_classes workers file_info ~bucket_size current_classes in
+
+  let dependent_classes = FileInfo.({ empty_names with
+    n_classes = SSet.diff dependent_classes current_classes
+  }) in
+
+  remove_defs dependent_classes SMap.empty

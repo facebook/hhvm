@@ -273,19 +273,13 @@ module type CheckKindType = sig
     env:ServerEnv.env ->
     FileInfo.fast
 
-  (* Returns a triple:
-  * - files to redecl now, and compare them with their old versions to infer
-  *   typing dependencies
-  * - files to redecl now, but do it from the scratch, taking full typing
-  *   dependencies
-  * - files to redecl later
-  *)
+  (* Returns a tuple: files to redecl now, files to redecl later *)
   val get_defs_to_redecl_phase2 :
     decl_defs:FileInfo.fast ->
     files_info:FileInfo.t Relative_path.Map.t ->
     to_redecl_phase2:Relative_path.Set.t ->
     env:ServerEnv.env ->
-    FileInfo.fast * FileInfo.fast * FileInfo.fast
+    FileInfo.fast * FileInfo.fast
 
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
@@ -335,9 +329,7 @@ module FullCheckKind : CheckKindType = struct
     let fast = extend_fast decl_defs files_info to_redecl_phase2 in
     (* Add decl fanout that was delayed by previous lazy checks to phase 2 *)
     let fast = extend_fast fast files_info env.needs_decl in
-    fast,
-    extend_fast Relative_path.Map.empty files_info env.needs_decl,
-    Relative_path.Map.empty
+    fast, Relative_path.Map.empty
 
   let get_defs_to_recheck ~phase_2_decl_defs ~files_info
       ~to_redecl_phase2_deps:_ ~to_redecl_phase2 ~to_recheck ~env =
@@ -390,9 +382,7 @@ module LazyCheckKind : CheckKindType = struct
   let get_defs_to_redecl_phase2
       ~decl_defs ~files_info ~to_redecl_phase2 ~env:_ =
     (* Do phase2 only for IDE files, delay the fanout until next full check *)
-    decl_defs,
-    Relative_path.Map.empty,
-    extend_fast decl_defs files_info to_redecl_phase2
+    decl_defs, extend_fast decl_defs files_info to_redecl_phase2
 
   let get_related_files dep =
     Typing_deps.get_ideps_from_hash dep |> Typing_deps.get_files
@@ -446,18 +436,38 @@ module Make: functor(CheckKind:CheckKindType) -> sig
     ServerEnv.env ->
     ServerEnv.env * int * int
 end = functor(CheckKind:CheckKindType) -> struct
+
+  let get_defs fast =
+    Relative_path.Map.fold fast ~f:begin fun _ names1 names2 ->
+      FileInfo.merge_names names1 names2
+    end ~init:FileInfo.empty_names
+
+  let get_oldified_defs env =
+    Relative_path.Set.fold env.needs_decl ~f:begin fun path acc ->
+      match Relative_path.Map.get env.files_info path with
+      | None -> acc
+      | Some names -> FileInfo.(merge_names (simplify names) acc)
+    end ~init:FileInfo.empty_names
+
   let type_check genv env =
+    let start_t = Unix.gettimeofday () in
+    let t = start_t in
+    (* Files in env.needs_decl contain declarations which were not finished.
+     * They were only oldified, but we didn't run phase2 redeclarations for them
+     * which would compute new versions, compare them with old ones and remove
+     * the old ones. We'll use oldified_defs sets to track what is in the old
+     * heap as we progress with redeclaration *)
+    let oldified_defs = get_oldified_defs env in
+
     let disk_files, ide_files, stop_at_errors =
       CheckKind.get_files_to_parse env in
 
     let reparse_count =
       Relative_path.Set.(cardinal disk_files + cardinal ide_files) in
-    Printf.eprintf "******************************************\n";
     Hh_logger.log "Files to recompute: %d" reparse_count;
 
     (* PARSING *)
-    let start_t = Unix.gettimeofday () in
-    let t = start_t in
+
     let fast_parsed, errorl, failed_parsing =
       parsing genv env disk_files ide_files ~stop_at_errors in
     let hs = SharedMem.heap_size () in
@@ -492,9 +502,15 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     debug_print_fast_keys genv "to_redecl_phase1" fast;
+    let defs_to_redecl = get_defs fast in
     let _, _, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
-        ~bucket_size genv.workers env.tcopt fast in
+        ~bucket_size genv.workers env.tcopt oldified_defs fast defs_to_redecl in
+
+    (* Things that were redeclared are no longer in old heap, so we substract
+     * defs_ro_redecl from oldified_defs *)
+    let oldified_defs =
+      snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl in
     let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
     let to_recheck1 = Typing_deps.get_files to_recheck1 in
     let hs = SharedMem.heap_size () in
@@ -503,28 +519,22 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration "Determining changes" t in
 
     (* DECLARING TYPES: Phase2 *)
-    let fast_redecl_phase2_now,
-        fast_redecl_phase2_from_scratch,
-        lazy_decl_later =
+    let fast_redecl_phase2_now, lazy_decl_later =
       CheckKind.get_defs_to_redecl_phase2 fast files_info to_redecl_phase2 env
     in
-    (* There is no point comparing the old declarations of things that were
-     * invalidated before (by lazy checks), but not redeclared immediately,
-     * since the declarations we would compare with could be the ones populated
-     * by lazy decl, while we want to compare against declarations that were
-     * valid during last full check. *)
-    Decl_redecl_service.invalidate_type_decl
-      ~bucket_size ~invalidate_dependent_classes:false
-      genv.workers files_info fast_redecl_phase2_from_scratch;
 
     debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
+
+    let defs_to_redecl_phase2 = get_defs fast_redecl_phase2_now in
     let errorl', failed_decl, _to_redecl2, to_recheck2 =
-      Decl_redecl_service.redo_type_decl
-        ~bucket_size genv.workers env.tcopt fast_redecl_phase2_now in
+      Decl_redecl_service.redo_type_decl ~bucket_size genv.workers
+        env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
+    let oldified_defs =
+      snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl_phase2 in
+
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
-    Decl_redecl_service.invalidate_type_decl
-      ~bucket_size ~invalidate_dependent_classes:true
-      genv.workers files_info lazy_decl_later;
+    Decl_redecl_service.oldify_type_decl ~bucket_size
+      genv.workers files_info oldified_defs (get_defs lazy_decl_later);
     let errorl = Errors.merge errorl' errorl in
 
     (* DECLARING TYPES: merging results of the 2 phases *)
@@ -583,6 +593,7 @@ let type_check genv env kind =
     | Full_check -> "Full_check"
     | Lazy_check -> "Lazy_check"
   in
+  Printf.eprintf "******************************************\n";
   Hh_logger.log "Check kind: %s" check_kind;
   match kind with
   | Full_check -> FC.type_check genv env

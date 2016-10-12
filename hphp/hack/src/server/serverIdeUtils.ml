@@ -31,7 +31,7 @@ let shelve_classes names =
   Naming_heap.TypeIdHeap.shelve_batch names;
   Naming_heap.TypeCanonHeap.shelve_batch @@ canon_set names;
   Decl_class_elements.(
-    names |> SSet.elements |> get_for_classes |> shelve_all
+    names |> SSet.elements |> get_for_classes ~old:false |> shelve_all
   );
   Decl_heap.Classes.shelve_batch names;
   ()
@@ -70,7 +70,7 @@ let unshelve funs classes typedefs consts file_name =
    * we need to unshelve all the remaining class elements.
    *)
   Decl_class_elements.(
-    classes |> SSet.elements |> get_for_classes |> unshelve_all
+    classes |> SSet.elements |> get_for_classes ~old:false |> unshelve_all
   );
   Decl_heap.Classes.unshelve_batch classes;
   Naming_heap.TypeIdHeap.unshelve_batch classes;

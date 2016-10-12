@@ -114,6 +114,13 @@ int emulate_zend(int argc, char** argv) {
       cnt += 2;
       continue;
     }
+    if (strcmp(argv[cnt], "-i") == 0 || strcmp(argv[cnt], "--info") == 0) {
+      // Pretend they did "-r 'phpinfo();'"
+      program = "phpinfo();";
+      need_file = true;
+      cnt = argc; // no need to check the rest of options and arguments
+      break;
+    }
     if (strcmp(argv[cnt], "-w") == 0) {
       cnt++;
       show = true;

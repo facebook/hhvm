@@ -309,48 +309,7 @@ function php_uname(string $mode = ""): mixed;
  * EGPCS (Environment, GET, POST, Cookie, Server) data.
  */
 function phpinfo(int $what = 0): bool {
-  echo '<html>';
-
-  echo '<head>';
-  echo '<title>HHVM phpinfo</title>';
-  echo '<style type="text/css">';
-  echo 'body { margin: auto; text-align: center; width: 600px; }';
-  echo 'hr { margin-top: 30px; }';
-  echo 'table { border-collapse: collapse; margin: auto; width: 100%; }';
-  echo 'td { border: 1px solid black; padding: 5px; }';
-  echo '.l { background-color: #CCF; }';
-  echo '.r { background-color: #CCC; word-break: break-all; }';
-  echo '</style>';
-  echo '</head>';
-
-  echo '<body>';
-
-  echo '<h1>HHVM Version '.HHVM_VERSION.'</h1>';
-  echo '<hr>';
-
-  echo '<h2>Version</h2>';
-  echo '<table>';
-  \__SystemLib\phpinfo_tr('Version', HHVM_VERSION);
-  \__SystemLib\phpinfo_tr('Version ID', HHVM_VERSION_ID);
-  \__SystemLib\phpinfo_tr('Debug', HHVM_DEBUG);
-  \__SystemLib\phpinfo_tr('Compiler ID', HHVM_COMPILER_ID);
-  \__SystemLib\phpinfo_tr('Repo Schema', HHVM_REPO_SCHEMA);
-  \__SystemLib\phpinfo_tr('PHP Version', phpversion());
-  \__SystemLib\phpinfo_tr('Zend Version', zend_version());
-  \__SystemLib\phpinfo_tr('uname', php_uname());
-  echo '</table>';
-
-  \__SystemLib\phpinfo_table('INI', ini_get_all('', false));
-
-  if (function_exists('getallheaders')) {
-    \__SystemLib\phpinfo_table('Headers', getallheaders());
-  }
-
-  \__SystemLib\phpinfo_table('$_SERVER', $_SERVER);
-  \__SystemLib\phpinfo_table('$_ENV', $_ENV);
-
-  echo '</body>';
-  echo '</html>';
+  (new \__SystemLib\PhpInfo())->report();
   return true;
 }
 
@@ -443,17 +402,164 @@ namespace __SystemLib {
   <<__Native>>
   function assert(mixed $assertion, mixed $message = null): ?bool;
 
-  function phpinfo_tr($l, $d) {
-    echo "<tr><td class=\"l\">$l</td><td class=\"r\">$d</td></tr>";
-  }
 
-  function phpinfo_table($l, $a) {
-    echo '<hr>';
-    echo "<h2>$l</h2>";
-    echo '<table>';
-    foreach ($a as $k => $v) {
-      phpinfo_tr($k, print_r($v, true));
+  class PhpInfo {
+
+    private \DOMDocument $xml;
+    private \DOMElement $body;
+
+    public function __construct() {
+      $this->xml = new \DOMDocument('1.0', 'UTF-8');
+      $this->body = $this->element('body');
     }
-    echo '</table>';
+
+    private function is_cli() { return php_sapi_name() == 'cli'; }
+
+    private function appendChildren(\DOMElement $el, ?array $children) {
+      if ($children) {
+        foreach ($children as $v) {
+          if ($v === null) {
+          } else if ($v instanceof \DOMElement) {
+            $el->appendChild($v);
+          } else if (is_array($v)) {
+            $this->appendChildren($el, $v);
+          } else {
+            $el->appendChild($this->xml->createTextNode($v));
+          }
+        }
+      }
+    }
+
+    private function element(string $tag, ?array $attr = null, ...$children) {
+      $el = $this->xml->createElement($tag);
+      if ($attr) {
+        foreach ($attr as $k => $v) {
+          $el->setAttribute($k, $v);
+        }
+      }
+      $this->appendChildren($el, $children);
+      return $el;
+    }
+
+    private function tr(string $l, mixed $d) {
+      return
+        $this->element(
+          'tr', [],
+          $this->element('td', ['class' => 'l'], $l),
+          $this->element('td', ['class' => 'r'], $d));
+    }
+
+    private function table(string $title, array $data) {
+      if ($this->is_cli()) {
+        echo $title . "\n";
+        echo "\n";
+        foreach ($data as $k => $v) {
+          echo $k . " => " . print_r($v, true) . "\n";
+        }
+        echo "\n";
+      } else {
+        $children = [];
+        foreach ($data as $k => $v) {
+          array_push($children, $this->tr($k, print_r($v, true)));
+        }
+        return [
+          $this->element('hr'),
+          $this->element('h2', [], $title),
+          $this->element('table', [], $children)
+        ];
+      }
+    }
+
+    private function appendHead(\DOMElement $html) {
+      $style =
+        'body { margin: auto; text-align: center; width: 600px; }' .
+        'hr { margin-top: 30px; }' .
+        'table { border-collapse: collapse; margin: auto; width: 100%; }' .
+        'td { border: 1px solid black; padding: 5px; }' .
+        '.l { background-color: #CCF; }' .
+        '.r { background-color: #CCC; word-break: break-all; }';
+
+      $html->appendChild(
+        $this->element(
+          'head', [],
+          $this->element('title', [], "HHVM phpinfo"),
+          $this->element('style', ['type' => 'text/css'], $style)));
+    }
+
+    private function reportVersionTitle() {
+      if ($this->is_cli()) {
+        echo 'HHVM Version => ' . HHVM_VERSION . "\n";
+      } else {
+        $this->body->appendChild(
+          $this->element('h1', [], 'HHVM Version ' . HHVM_VERSION));
+      }
+    }
+
+    private function reportVersions() {
+      if (!$this->is_cli()) {
+        $this->body->appendChild($this->element('h2', [], 'Version'));
+      }
+
+      $data = array(
+        'Version' => HHVM_VERSION,
+        'Version ID' => HHVM_VERSION_ID,
+        'Debug' => HHVM_DEBUG,
+        'Compiler ID' => HHVM_COMPILER_ID,
+        'Repo Schema' => HHVM_REPO_SCHEMA,
+        'PHP Version' => phpversion(),
+        'Zend Version' => zend_version(),
+        'uname' => php_uname());
+
+      $this->appendChildren($this->body, $this->table('Version', $data));
+    }
+
+    private function reportIni() {
+      $this->appendChildren($this->body,
+                            $this->table('INI', ini_get_all('', false)));
+    }
+
+    private function reportHeaders() {
+      if (!function_exists('getallheaders')) return;
+      $this->appendChildren($this->body,
+                            $this->table('Headers', getallheaders()));
+    }
+
+    private function reportMap(string $name, array $map) {
+      $data = [];
+      foreach ($map as $k => $v) {
+        $data[sprintf("%s['%s']", $name, $k)] = $v;
+      }
+      $this->appendChildren($this->body, $this->table($name, $data));
+    }
+
+    public function report() {
+
+      $html = $this->element('html');
+
+      if (!$this->is_cli()) {
+        $this->appendHead($html);
+        $html->appendChild($this->body);
+      }
+
+      $this->reportVersionTitle();
+
+      if (!$this->is_cli()) {
+        $this->body->appendChild($this->element('hr'));
+      }
+
+      $this->reportVersions();
+      $this->reportIni();
+      $this->reportHeaders();
+
+      $this->reportMap('$_SERVER', $_SERVER);
+      $this->reportMap('$_ENV', $_ENV);
+
+      if (!$this->is_cli()) {
+        $this->body->appendChild($this->element('br'));
+        $this->xml->appendChild($html);
+        header('content-type: text/html; charset=UTF-8');
+        echo $this->xml->saveHTML();
+      }
+    }
   }
 }

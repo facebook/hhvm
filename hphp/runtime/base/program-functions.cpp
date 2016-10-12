@@ -32,7 +32,6 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/simple-counter.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -1382,6 +1381,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("help", "display this message")
     ("version", "display version number")
     ("modules", "display modules")
+    ("info", "PHP information")
     ("php", "emulate the standard php command line")
     ("compiler-id", "display the git hash for the compiler")
     ("repo-schema", "display the repository schema id")

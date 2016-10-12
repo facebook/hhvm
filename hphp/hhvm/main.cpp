@@ -56,6 +56,15 @@ int main(int argc, char** argv) {
     return HPHP::emulate_zend(argc - 1, argv + 1);
   }
 
+  if (argc > 1 && !strcmp(argv[1], "--info")) {
+    // prepare a command line of "<command> --php -r 'phpinfo();'"
+    std::vector<char*> args;
+    args.push_back(argv[0]);
+    args.push_back("-r");
+    args.push_back("phpinfo();");
+    return HPHP::emulate_zend(args.size(), args.data());
+  }
+
   HPHP::embedded_data data;
   if (!HPHP::get_embedded_data("repo", &data)) {
     return HPHP::execute_program(argc, argv);

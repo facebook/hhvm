@@ -265,6 +265,7 @@ let is_dependent_class_of_any classes c =
                    * - if it's already not there, then we don't care. *)
   | Some c ->
     (intersection_nonempty classes SMap.mem c.Decl_defs.dc_ancestors) ||
+    (intersection_nonempty classes SSet.mem c.Decl_defs.dc_extends) ||
     (intersection_nonempty classes SSet.mem
       c.Decl_defs.dc_req_ancestors_extends)
 

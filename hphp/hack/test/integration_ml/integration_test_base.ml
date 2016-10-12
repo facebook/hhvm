@@ -199,6 +199,11 @@ let ide_autocomplete env (path, line, column) =
     )
   }
 
+let status env =
+  run_loop_once env { default_loop_input with
+    new_client = Some (RequestResponse ServerCommandTypes.STATUS)
+  }
+
 let assert_no_diagnostics loop_output =
   match loop_output.push_message with
   | Some (DIAGNOSTIC _) ->

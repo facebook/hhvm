@@ -51,6 +51,12 @@ val ide_autocomplete :
   (string * int * int) ->
   ServerEnv.env * ('a, AutocompleteService.result) loop_outputs
 
+val status :
+  ServerEnv.env ->
+  ServerEnv.env *
+    (ServerCommandTypes.status_liveness *
+      Pos.absolute Errors.error_ list, 'a) loop_outputs
+
 val prepend_root: string -> string
 
 (* Helpers for asserting things *)

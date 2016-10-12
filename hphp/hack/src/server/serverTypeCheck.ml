@@ -390,14 +390,13 @@ module LazyCheckKind : CheckKindType = struct
   let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_redecl_phase2_deps
       ~to_redecl_phase2:_ ~to_recheck ~env =
 
-    let files_with_errors = match env.diag_subscribe with
-      | Some ds ->  Diagnostic_subscription.get_files_with_errors ds
-      | None -> Relative_path.Set.empty
+    let has_errors_in_ide = match env.diag_subscribe with
+      | Some ds ->  Diagnostic_subscription.file_has_errors_in_ide ds
+      | None -> (fun _ -> false)
     in
 
     let is_ide_file x =
-      Relative_path.Map.mem env.edited_files x ||
-      Relative_path.Set.mem files_with_errors x
+      Relative_path.Map.mem env.edited_files x || has_errors_in_ide x
     in
 
     let to_recheck_now, to_recheck_later =

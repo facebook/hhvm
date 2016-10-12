@@ -276,10 +276,14 @@ let serve_one_iteration genv env client_provider =
     Hh_logger.log "Recheck id: %s" recheck_id;
   end;
 
-  Option.iter env.diag_subscribe ~f:begin fun sub ->
-    let id = Diagnostic_subscription.get_id sub in
-    let errors = Diagnostic_subscription.get_absolute_errors sub in
+  let env = Option.value_map env.diag_subscribe
+      ~default:env
+      ~f:begin fun sub ->
+
+    let sub, errors = Diagnostic_subscription.pop_errors sub env.edited_files in
+
     if not @@ SMap.is_empty errors then begin
+      let id = Diagnostic_subscription.get_id sub in
       let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
       let client = Utils.unsafe_opt env.persistent_client in
       try
@@ -287,12 +291,9 @@ let serve_one_iteration genv env client_provider =
       with ClientProvider.Client_went_away ->
         (* Leaving cleanup of this condition to handled_connection function *)
         ()
-    end
-  end;
-
-  let env = { env with diag_subscribe =
-    Option.map env.diag_subscribe ~f:Diagnostic_subscription.mark_as_pushed }
-  in
+    end;
+    { env with diag_subscribe = Some sub }
+  end in
 
   let env = match client with
   | None -> env

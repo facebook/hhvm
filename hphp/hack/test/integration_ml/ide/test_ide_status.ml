@@ -8,8 +8,6 @@
  *
  *)
 
-open Integration_test_base_types
-
 module Test = Integration_test_base
 
 let foo_name = "foo.php"
@@ -62,8 +60,6 @@ let () =
    * so we don't recheck it immediately. *)
   Test.assert_no_diagnostics loop_outputs;
   (* Asking for global error list will trigger recheck of bar.php *)
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    new_client = Some (RequestResponse (ServerCommandTypes.STATUS))
-  }) in
+  let env, _ = Test.status env in
   let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_outputs full_diagnostics

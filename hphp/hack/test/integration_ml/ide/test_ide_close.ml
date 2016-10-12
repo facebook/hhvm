@@ -8,7 +8,6 @@
  *
  *)
 
-open Integration_test_base_types
 open ServerEnv
 
 module Test = Integration_test_base
@@ -80,9 +79,7 @@ let () =
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
 
   (* Force update to global error list *)
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    new_client = Some (RequestResponse ServerCommandTypes.STATUS)
-  }) in
+  let env, _ = Test.status env in
 
   Test.assertSingleError foo_ide_errors (Errors.get_error_list env.errorl);
   Test.assert_diagnostics loop_output foo_ide_diagnostics;
@@ -93,9 +90,7 @@ let () =
   let env = Test.wait env in
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
 
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    new_client = Some (RequestResponse ServerCommandTypes.STATUS)
-  }) in
+  let env, _ = Test.status env in
 
   Test.assertSingleError foo_disk_errors (Errors.get_error_list env.errorl);
   Test.assert_diagnostics loop_output foo_disk_diagnostics

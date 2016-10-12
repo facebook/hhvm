@@ -50,6 +50,9 @@ let mark_as_pushed ds =
   in
   { ds with pushed_errors; pending_errors = Relative_path.Map.empty }
 
+let get_files_with_errors ds =
+  ds.pushed_errors
+
 let get_absolute_errors ds =
   Relative_path.Map.fold ds.pending_errors ~init:SMap.empty
   ~f:begin fun path errors acc ->

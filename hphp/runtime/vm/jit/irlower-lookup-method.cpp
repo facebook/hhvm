@@ -22,8 +22,10 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/typed-value.h"
+
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/method-lookup.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -142,7 +144,7 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
     const Func* f;
     auto const ctx = fp->m_func->cls();
     auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
-    auto const res = g_context->lookupClsMethod(f, cls, meth, obj, ctx, true);
+    auto const res = lookupClsMethod(f, cls, meth, obj, ctx, true);
 
     ar->m_func = f;
 

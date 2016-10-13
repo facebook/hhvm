@@ -22,14 +22,16 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/smashable-instr.h"
-#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
+
+#include "hphp/runtime/vm/method-lookup.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/text-util.h"
 
@@ -200,13 +202,7 @@ namespace {
 [[noreturn]] NEVER_INLINE
 void raiseFatal(ActRec* ar, Class* cls, StringData* name, Class* ctx) {
   try {
-    g_context->lookupMethodCtx(
-      cls,
-      name,
-      ctx,
-      CallType::ObjMethod,
-      true // raise error
-    );
+    lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, true /* raise */);
     not_reached();
   } catch (...) {
     // The jit stored an ObjectData in the ActRec, but we didn't set
@@ -238,7 +234,7 @@ void nullFunc(ActRec* ar, StringData* name) {
 template<bool fatal>
 NEVER_INLINE
 void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
-  auto func = g_context->lookupMethodCtx(
+  auto func = lookupMethodCtx(
     cls,
     name,
     ctx,
@@ -628,7 +624,6 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
         clsName->data(), methName->data(), __builtin_return_address(0));
 
   const Func* f;
-  auto const ec = g_context.getNoCheck();
   auto const cls = Unit::loadClass(ne, clsName);
   if (UNLIKELY(!cls)) {
     raise_error(Strings::UNKNOWN_CLASS, clsName->data());
@@ -643,12 +638,12 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
     assertx(rds::handleToRef<LowPtr<Class>>(cls_ch).get() == cls);
   }
 
-  LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         nullptr, // there may be an active
-                                                  // this, but we can just fall
-                                                  // through in that case.
-                                         arGetContextClass((ActRec*)vmfp),
-                                         false /*raise*/);
+  LookupResult res = lookupClsMethod(f, cls, methName,
+                                     nullptr, // there may be an active
+                                              // this, but we can just fall
+                                              // through in that case.
+                                     arGetContextClass((ActRec*)vmfp),
+                                     false /*raise*/);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
              f->isStatic())) {
@@ -678,11 +673,10 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
 
   const Func* f;
-  auto const ec = g_context.getNoCheck();
-  LookupResult res = ec->lookupClsMethod(f, cls, methName,
-                                         nullptr,
-                                         arGetContextClass((ActRec*)vmfp),
-                                         false /*raise*/);
+  LookupResult res = lookupClsMethod(f, cls, methName,
+                                     nullptr,
+                                     arGetContextClass((ActRec*)vmfp),
+                                     false /*raise*/);
   assertx(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {
     // We called lookupClsMethod with a NULL this and got back a method that

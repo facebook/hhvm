@@ -41,13 +41,14 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
+#include "hphp/runtime/vm/bc-pattern.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/vm/bc-pattern.h"
 
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
@@ -1214,8 +1215,8 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   auto ctx = ctxFunc->cls();
   const Func* func;
   LookupResult res = staticLookup ?
-    g_context->lookupClsMethod(func, cls, name, nullptr, ctx, false) :
-    g_context->lookupObjMethod(func, cls, name, ctx, false);
+    lookupClsMethod(func, cls, name, nullptr, ctx, false) :
+    lookupObjMethod(func, cls, name, ctx, false);
 
   if (res == LookupResult::MethodNotFound) return nullptr;
 

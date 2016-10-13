@@ -87,8 +87,8 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/act-rec-defs.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -99,6 +99,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -4232,7 +4233,7 @@ void fPushObjMethodImpl(StringData* name, ObjectData* obj, int numArgs) {
   LookupResult res;
   auto cls = obj->getVMClass();
   try {
-    res = g_context->lookupObjMethod(
+    res = lookupObjMethod(
       f, cls, name, arGetContextClass(vmfp()), true);
   } catch (...) {
     decRefObj(obj);
@@ -4327,7 +4328,7 @@ void pushClsMethodImpl(Class* cls, StringData* name, int numArgs) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
-  auto const res = g_context->lookupClsMethod(f, cls, name, obj, ctx, true);
+  auto const res = lookupClsMethod(f, cls, name, obj, ctx, true);
   if (res == LookupResult::MethodFoundNoThis ||
       res == LookupResult::MagicCallStaticFound) {
     if (!f->isStaticInProlog()) {
@@ -4416,7 +4417,7 @@ OPTBLD_INLINE void iopFPushCtor(intva_t numArgs) {
   assert(cls != nullptr);
   // Lookup the ctor
   const Func* f;
-  LookupResult res UNUSED = g_context->lookupCtorMethod(f, cls, true);
+  auto res UNUSED = lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
   assert(res == LookupResult::MethodFoundWithThis);
   // Replace input with uninitialized instance.
   ObjectData* this_ = newInstance(cls);
@@ -4444,7 +4445,7 @@ OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
   }
   // Lookup the ctor
   const Func* f;
-  LookupResult res UNUSED = g_context->lookupCtorMethod(f, cls, true);
+  auto res UNUSED = lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
   assert(res == LookupResult::MethodFoundWithThis);
   // Push uninitialized instance.
   ObjectData* this_ = newInstance(cls);

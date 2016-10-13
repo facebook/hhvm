@@ -16,39 +16,47 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 
-#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/request-injection-data.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/unit-cache.h"
+
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
+
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+
+#include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/method-lookup.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/unit-util.h"
+#include "hphp/runtime/vm/unit.h"
+
+#include "hphp/system/systemlib.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/event-hook.h"
-#include "hphp/system/systemlib.h"
-#include <folly/Format.h>
-#include "hphp/util/text-util.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/backtrace.h"
+#include "hphp/util/text-util.h"
+
+#include <folly/Format.h>
 
 #include <boost/format.hpp>
-#include <limits>
+
 #include <algorithm>
+#include <limits>
 
 namespace HPHP {
 
@@ -340,8 +348,7 @@ vm_decode_function(const Variant& function,
     }
     assert(cls);
     CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
-    const HPHP::Func* f =
-      g_context->lookupMethodCtx(cc, name.get(), ctx, lookupType);
+    auto f = lookupMethodCtx(cc, name.get(), ctx, lookupType);
     if (f && (f->attrs() & AttrStatic)) {
       // If we found a method and its static, null out this_
       this_ = nullptr;

@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/rds.h"
@@ -28,10 +27,12 @@
 #include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/vm/named-entity.h"
+
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/method-lookup.h"
+#include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -362,7 +363,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     }
 
     auto const inst = elem0->m_data.pobj;
-    auto const func = g_context->lookupMethodCtx(
+    auto const func = lookupMethodCtx(
       inst->getVMClass(),
       elem1->m_data.pstr,
       fp->func()->cls(),

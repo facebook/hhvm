@@ -39,20 +39,23 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/hash/ext_hash.h"
+
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/ext/hash/ext_hash.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/wddx/ext_wddx.h"
+
 #include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/vm/method-lookup.h"
 
 namespace HPHP {
 
@@ -345,7 +348,7 @@ void SystemlibSessionModule::lookupClass() {
   }
 
   if (LookupResult::MethodFoundWithThis !=
-      g_context->lookupCtorMethod(m_ctor, cls)) {
+      lookupCtorMethod(m_ctor, cls, arGetContextClass(vmfp()))) {
     raise_error("Unable to call %s's constructor", m_classname);
   }
 

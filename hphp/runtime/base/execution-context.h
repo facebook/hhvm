@@ -63,19 +63,6 @@ struct VMState {
   }
 };
 
-enum class CallType {
-  ClsMethod,
-  ObjMethod,
-  CtorMethod,
-};
-enum class LookupResult {
-  MethodFoundWithThis,
-  MethodFoundNoThis,
-  MagicCallFound,
-  MagicCallStaticFound,
-  MethodNotFound,
-};
-
 enum class InclOpFlags {
   Default = 0,
   Fatal = 1,
@@ -335,25 +322,6 @@ public:
   void cleanup();
 
 public:
-  const Func* lookupMethodCtx(const Class* cls,
-                                        const StringData* methodName,
-                                        const Class* pctx,
-                                        CallType lookupType,
-                                        bool raise = false);
-  LookupResult lookupObjMethod(const Func*& f,
-                               const Class* cls,
-                               const StringData* methodName,
-                               const Class* ctx,
-                               bool raise = false);
-  LookupResult lookupClsMethod(const Func*& f,
-                               const Class* cls,
-                               const StringData* methodName,
-                               ObjectData* this_,
-                               const Class* ctx,
-                               bool raise = false);
-  LookupResult lookupCtorMethod(const Func*& f,
-                                const Class* cls,
-                                bool raise = false);
   ObjectData* createObject(const Class* cls,
                            const Variant& params,
                            bool init);

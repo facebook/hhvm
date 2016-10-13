@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -891,7 +892,7 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
     auto const ctx = arGetContextClass(fp);
     UNUSED auto func =
-      g_context->lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, true);
+      lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, true);
     assertx(func == f);
   }
   return f;

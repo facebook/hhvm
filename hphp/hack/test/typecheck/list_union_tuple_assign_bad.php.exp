@@ -1,0 +1,6 @@
+File "list_union_tuple_assign_bad.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+File "list_union_tuple_assign_bad.php", line 3, characters 24-26:
+This is an int
+File "list_union_tuple_assign_bad.php", line 7, characters 16-20:
+It is incompatible with a string

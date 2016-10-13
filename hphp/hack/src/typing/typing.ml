@@ -1702,7 +1702,8 @@ and assign p env e1 ty2 =
   | (_, List el) ->
     let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
     let env, opt_folded_ety2 = TUtils.get_concrete_supertypes env folded_ty2 in
-      (match opt_folded_ety2 with
+    (match opt_folded_ety2 with
+     (* Vector<t> or ImmVector<t> or ConstVector<t> *)
       | Some (_, Tclass ((_, x), [elt_type]))
         when x = SN.Collections.cVector
           || x = SN.Collections.cImmVector
@@ -1711,11 +1712,13 @@ and assign p env e1 ty2 =
             assign (fst e) env e elt_type
           end in
           env, ty2
+      (* array<t> *)
       | Some (_, Tarraykind (AKvec elt_type)) ->
           let env, _ = List.map_env env el begin fun env e ->
             assign (fst e) env e elt_type
           end in
           env, ty2
+      (* array or empty array or Tany *)
       | Some (r, Tarraykind AKany)
       | Some (r, Tarraykind AKempty)
       | Some (r, Tany) ->
@@ -1723,6 +1726,7 @@ and assign p env e1 ty2 =
             assign (fst e) env e (r, Tany)
           end in
           env, ty2
+      (* Pair<t1,t2> *)
       | Some ((r, Tclass ((_, coll), [ty1; ty2])) as folded_ety2)
         when coll = SN.Collections.cPair ->
           (match el with
@@ -1733,14 +1737,12 @@ and assign p env e1 ty2 =
           | _ ->
               Errors.pair_arity p;
               env, (r, Tany)
-          )
-      | Some (r, (Ttuple _ | Tarraykind (AKtuple _) as tuple)) ->
+        )
+      (* tuple-like array *)
+      | Some (r, Tarraykind (AKtuple fields)) ->
           let p1 = fst e1 in
           let p2 = Reason.to_pos r in
-          let tyl = match tuple with
-            | Ttuple tyl -> tyl
-            | Tarraykind (AKtuple fields) -> List.rev (IMap.values fields)
-            | _ -> Errors.internal_error p2 "Unexpected tuple type"; [] in
+          let tyl = List.rev (IMap.values fields) in
           let size1 = List.length el in
           let size2 = List.length tyl in
           if size1 <> size2
@@ -1753,10 +1755,19 @@ and assign p env e1 ty2 =
               fst (assign p env lvalue ty2)
             end ~init:env in
             env, ty2
-      | (Some (_, (Tmixed | Tarraykind _ | Toption _ | Tprim _
+      (* Other, including tuples. Create a tuple type for the left hand
+       * side and attempt subtype against it. In particular this deals with
+       * types such as (string,int) | (int,bool) *)
+      | (Some (_, (Ttuple _ | Tmixed | Tarraykind _ | Toption _ | Tprim _
         | Tvar _ | Tfun _ | Tanon (_, _) | Tabstract _
-        | Tunresolved _ | Tclass (_, _) | Tobject | Tshape _))) | None ->
-          assign_simple p env e1 ty2
+        | Tunresolved _ | Tclass (_, _) | Tobject | Tshape _)) | None) ->
+        let env, tyl =
+          List.map_env env el (fun env _ -> Env.fresh_unresolved_type env) in
+        let env = Type.sub_type p Reason.URassign env folded_ty2
+            (Reason.Rwitness (fst e1), Ttuple tyl) in
+        let env = List.fold2_exn el tyl ~init:env ~f:(fun env lvalue ty2 ->
+          fst (assign p env lvalue ty2)) in
+        env, folded_ty2
       )
   | _, Class_get _
   | _, Obj_get _ ->

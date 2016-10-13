@@ -10,8 +10,6 @@ function v(): void {}
 
 async function test(): Awaitable<void> {
   list($x, $_) = await genva(yield_int(), yield_void());
-  hh_show($x);
-  hh_show($_);
   $_ = v();
 
   /* HH_FIXME[4119] even though void is subtype of Tmixed */

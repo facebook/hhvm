@@ -28,30 +28,40 @@ namespace HPHP { namespace jit {
 
 namespace {
 
+std::mutex s_lock;
+std::atomic<void*> s_fakeRdsBase{nullptr};
 __thread const VMProtect* tl_active_prot{nullptr};
 
 void protect() {
-  rds::tl_base = nullptr;
-  rds::threadInit(false /* shouldRegister */);
+  if (UNLIKELY(!s_fakeRdsBase.load(std::memory_order_acquire))) {
+    std::lock_guard<std::mutex> guard(s_lock);
+    if (!s_fakeRdsBase.load(std::memory_order_relaxed)) {
+      rds::tl_base = nullptr;
+      rds::threadInit(false /* shouldRegister */);
 
-  // The current thread may attempt to read the Gen numbers of the normal
-  // portion of rds. These will all be invalid. No writes to non-persistent rds
-  // should occur while this guard is active. Leave the first page unprotected
-  // since surprise flags live there and we still do things in the jit that
-  // could write to them (like allocating request memory).
-  auto const base = static_cast<char*>(rds::tl_base) + sysconf(_SC_PAGESIZE);
-  auto const protlen = rds::persistentSection().begin() - base;
-  if (protlen > 0) {
-    auto const result = mprotect(base, protlen, PROT_READ);
-    always_assert(result == 0);
+      // The current thread may attempt to read the Gen numbers of the normal
+      // portion of rds. These will all be invalid. No writes to non-persistent
+      // rds should occur while this guard is active. Leave the first page
+      // unprotected since surprise flags live there and we still do things in
+      // the jit that could write to them (like allocating request memory).
+      auto const base =
+        static_cast<char*>(rds::tl_base) + sysconf(_SC_PAGESIZE);
+      auto const protlen = rds::persistentSection().begin() - base;
+      if (protlen > 0) {
+        auto const result = mprotect(base, protlen, PROT_READ);
+        always_assert(result == 0);
+      }
+      s_fakeRdsBase.store(rds::tl_base, std::memory_order_release);
+    }
   }
+  rds::tl_base = s_fakeRdsBase.load(std::memory_order_acquire);
 
   tl_regState = VMRegState::DIRTY;
   VMProtect::is_protected = true;
 }
 
 void unprotect(void* base, VMRegState state) {
-  rds::threadExit(false /* shouldUnregister */);
+  assert(rds::tl_base == s_fakeRdsBase.load(std::memory_order_relaxed));
   rds::tl_base = base;
   tl_regState = state;
   VMProtect::is_protected = false;

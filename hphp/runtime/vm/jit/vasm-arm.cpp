@@ -1017,15 +1017,11 @@ Y(lslxis, X, xzr, 64)
 #undef Y
 
 void Vgen::emit(const popp& i) {
-  Register r0 = i.d0.isValid() ? X(i.d0) : vixl::xzr;
-  Register r1 = i.d1.isValid() ? X(i.d1) : vixl::xzr;
-  a->Ldp(r0, r1, MemOperand(sp, 16, PostIndex));
+  a->Ldp(X(i.d0), X(i.d1), MemOperand(sp, 16, PostIndex));
 }
 
 void Vgen::emit(const pushp& i) {
-  Register r0 = i.s0.isValid() ? X(i.s0) : vixl::xzr;
-  Register r1 = i.s1.isValid() ? X(i.s1) : vixl::xzr;
-  a->Stp(r0, r1, MemOperand(sp, -16, PreIndex));
+  a->Stp(X(i.s0), X(i.s1), MemOperand(sp, -16, PreIndex));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

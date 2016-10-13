@@ -434,7 +434,7 @@ public:
           i = 0;
         }
         if (adjust) {
-            f(InvalidReg, PhysReg(r[0]));
+          f(InvalidReg, PhysReg(r[0]));
           adjust = false;
           i = 0;
         }

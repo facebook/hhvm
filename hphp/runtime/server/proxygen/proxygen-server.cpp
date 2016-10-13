@@ -20,6 +20,7 @@
 #include <memory>
 #include <thread>
 #include "hphp/runtime/server/fake-transport.h"
+#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 #include "hphp/runtime/server/server-name-indication.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -361,7 +362,7 @@ void ProxygenServer::stop() {
 
 void ProxygenServer::stopListening(bool hard) {
   m_shutdownState = ShutdownState::DRAINING_READS;
-
+  HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DRAIN_READS);
 #define SHUT_FBLISTEN 3
   /*
    * Modifications to the Linux kernel to support shutting down a listen
@@ -386,9 +387,8 @@ void ProxygenServer::stopListening(bool hard) {
 
   if (RuntimeOption::ServerShutdownListenWait > 0) {
     std::chrono::seconds s(RuntimeOption::ServerShutdownListenWait);
-    VLOG(4) << this << ": scheduling shutdown listen timeout=" <<
-      s.count() <<
-      " port=" << m_port;
+    VLOG(4) << this << ": scheduling shutdown listen timeout="
+            << s.count() << " port=" << m_port;
     scheduleTimeout(s);
     if (RuntimeOption::ServerShutdownEOMWait > 0) {
       int delayMilliSeconds = RuntimeOption::ServerShutdownEOMWait * 1000;
@@ -479,6 +479,7 @@ void ProxygenServer::doShutdown() {
 
 void ProxygenServer::stopVM() {
   m_shutdownState = ShutdownState::STOPPING_VM;
+  HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DRAIN_DISPATCHER);
   // we can't call m_dispatcher.stop() from the event loop, because it blocks
   // all I/O.  Spawn a thread to call it and callback when it's done.
   std::thread vmStopper([this] {
@@ -496,6 +497,7 @@ void ProxygenServer::stopVM() {
 
 void ProxygenServer::vmStopped() {
   m_shutdownState = ShutdownState::DRAINING_WRITES;
+  HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DRAIN_WRITES);
   if (!drained() && RuntimeOption::ServerGracefulShutdownWait > 0) {
     m_worker.getEventBase()->runInEventBaseThread([&] {
         std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);
@@ -511,7 +513,6 @@ void ProxygenServer::vmStopped() {
 void ProxygenServer::forceStop() {
   Logger::Info("%p: forceStop ProxygenServer port=%d, enqueued=%d, conns=%d",
                this, m_port, m_enqueuedCount, getLibEventConnectionCount());
-
   m_httpServerSocket.reset();
   m_httpsServerSocket.reset();
 
@@ -533,6 +534,9 @@ void ProxygenServer::forceStop() {
 
   // Aaaand we're done - oops not thread safe.  Does it matter?
   setStatus(RunStatus::STOPPED);
+
+  HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DONE);
+
   for (auto listener: m_listeners) {
     listener->serverStopped(this);
   }

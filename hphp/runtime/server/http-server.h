@@ -19,11 +19,12 @@
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/shutdown-stats.h"
 #include "hphp/util/async-func.h"
 
-namespace HPHP {
-struct MemInfo;
+#include <folly/MicroSpinLock.h>
 
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct HttpServer : Synchronizable, TakeoverListener,
@@ -35,6 +36,8 @@ struct HttpServer : Synchronizable, TakeoverListener,
 private:
   static std::atomic_int_fast64_t PrepareToStopTime;
   static time_t OldServerStopTime;
+  static std::vector<ShutdownStat> ShutdownStats;
+  static folly::MicroSpinLock StatsLock; // for ShutdownStats
 
 public:
   explicit HttpServer();
@@ -67,6 +70,9 @@ public:
   void getSatelliteStats(std::vector<std::pair<std::string, int>> *stats);
   // Get total ongoing/queued request count for all satellite servers.
   std::pair<int, int> getSatelliteRequestCount() const;
+
+  static void MarkShutdownStat(ShutdownEvent event);
+  static void LogShutdownStats();
 
   static int64_t GetPrepareToStopTime() {
     // Make sure changes are seen right away after PrepareToStop().

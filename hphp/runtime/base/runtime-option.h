@@ -603,6 +603,7 @@ struct RuntimeOption {
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   F(bool, EnableCallBuiltin, true)                                      \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
+  F(bool, LogServerRestartStats, false)                                 \
   F(uint32_t, ReusableTCPadding, 128)                                   \
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \

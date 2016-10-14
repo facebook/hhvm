@@ -52,7 +52,7 @@ module Make(S : SearchUtils.Searchable) = struct
       Fuzzy.SearchKeyToTermMap.remove_batch fns;
       Fuzzy.SearchKeys.remove_batch fns
 
-    let query workers input type_ =
+    let query ~fuzzy workers input type_ =
       let is_fuzzy_indexed = match type_ with
         | Some ty -> List.mem S.fuzzy_types ty
         | None -> true
@@ -62,10 +62,12 @@ module Make(S : SearchUtils.Searchable) = struct
         | None, _ -> Trie.MasterApi.search_query input
         | _ -> []
       in
-      let fuzzy_results = match type_, is_fuzzy_indexed with
-        | Some _, true
-        | None, _ -> Fuzzy.query workers input type_
-        | _ -> []
+
+      let fuzzy_results = if not fuzzy then [] else
+        match type_, is_fuzzy_indexed with
+          | Some _, true
+          | None, _ -> Fuzzy.query workers input type_
+          | _ -> []
       in
       let res = List.merge fuzzy_results trie_results ~cmp:begin fun a b ->
         (snd a) - (snd b)

@@ -56,5 +56,6 @@ let result_to_json res =
     ]
 
 let go workers query type_ =
-  let results = HackSearchService.MasterApi.query workers query type_ in
+  let fuzzy = !Parsing_hooks.fuzzy in
+  let results = HackSearchService.MasterApi.query ~fuzzy workers query type_ in
   List.map results SearchUtils.to_absolute

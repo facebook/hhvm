@@ -327,11 +327,6 @@ void PDOSqliteResource::sweep() {
   PDOResource::sweep();
 }
 
-void PDOSqliteResource::vscan(IMarker& mark) const {
-  PDOResource::vscan(mark);
-  for (auto& udf : m_udfs) udf->scan(mark);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 PDOSqliteStatement::PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt)

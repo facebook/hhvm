@@ -93,7 +93,6 @@ struct PDOSqliteResource : PDOResource {
                       int argcount);
 
   DECLARE_RESOURCE_ALLOCATION(PDOSqliteResource);
-  void vscan(IMarker&) const override;
 
 private:
 

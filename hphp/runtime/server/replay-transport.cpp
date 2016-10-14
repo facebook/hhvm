@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/util/process.h"
+#include "hphp/util/safe-cast.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

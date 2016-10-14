@@ -55,9 +55,8 @@
 
 namespace HPHP {
 
-template<class F> void scanHeader(const Header* h,
-                                  F& mark,
-                                  type_scan::Scanner* scanner = nullptr) {
+template<class F> void scanHeader(const Header* h, F& mark,
+                                  type_scan::Scanner& scanner) {
   switch (h->kind()) {
     case HeaderKind::Proxy:
       return h->proxy_.scan(mark);
@@ -92,27 +91,20 @@ template<class F> void scanHeader(const Header* h,
     case HeaderKind::ImmSet:
       return h->hashcoll_.scan(mark);
     case HeaderKind::Resource:
-      if (scanner) {
-        return scanner->scanByIndex(
-          h->res_.typeIndex(),
-          h->res_.data(),
-          h->res_.heapSize() - sizeof(ResourceHdr)
-        );
-      } else {
-        return h->res_.data()->scan(mark);
-      }
+      return scanner.scanByIndex(
+        h->res_.typeIndex(),
+        h->res_.data(),
+        h->res_.heapSize() - sizeof(ResourceHdr)
+      );
     case HeaderKind::Ref:
       return h->ref_.scan(mark);
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
-      if (scanner) {
-        return scanner->scanByIndex(
-          h->malloc_.typeIndex(),
-          (&h->malloc_)+1,
-          h->malloc_.nbytes - sizeof(MallocNode)
-        );
-      }
-      return mark((&h->malloc_)+1, h->malloc_.nbytes - sizeof(MallocNode));
+      return scanner.scanByIndex(
+        h->malloc_.typeIndex(),
+        (&h->malloc_)+1,
+        h->malloc_.nbytes - sizeof(MallocNode)
+      );
     case HeaderKind::NativeData:
       // TODO t11247058: use typescan machenery to scan NativeData
       return h->nativeObj()->scan(mark);
@@ -165,11 +157,6 @@ template<class F> void ObjectData::scan(F& mark) const {
     // which is not marked as a root. Mark the array when scanning the object.
     mark.implicit(g_context->dynPropTable[this].arr());
   }
-}
-
-template<class F> void ResourceData::scan(F& mark) const {
-  ExtMarker<F> bridge(mark);
-  vscan(bridge);
 }
 
 template<class F> void RequestEventHandler::scan(F& mark) const {
@@ -229,35 +216,27 @@ template<class F> void req::root_handle::scan(F& mark) const {
 //    jit to tell us where the pointers live.
 //  * rds shared part: should not contain heap pointers!
 template<class F> void scanRds(F& mark, rds::Header* rds,
-                               type_scan::Scanner* scanner = nullptr) {
+                               type_scan::Scanner& scanner) {
   // rds sections
 
   auto markSection = [&](folly::Range<const char*> r) {
     mark(r.begin(), r.size());
   };
 
-  if (scanner) {
-    scanner->scan(*rds::header());
+  scanner.scan(*rds::header());
 
-    rds::forEachNormalAlloc(
-      [&](const void* p, std::size_t size, type_scan::Index index) {
-        scanner->scanByIndex(index, p, size);
-      }
-    );
+  rds::forEachNormalAlloc(
+    [&](const void* p, std::size_t size, type_scan::Index index) {
+      scanner.scanByIndex(index, p, size);
+    }
+  );
 
-    // Class stores pointers to request allocated memory in the local
-    // section. Depending on circumstances, this may or may not be valid data,
-    // so scan it conservatively for now. TODO #12203436
-    mark.where(RootKind::RdsLocal);
-    markSection(rds::localSection());
-
-    // Persistent shouldn't contain pointers to any request allocated memory.
-  } else {
-    mark.where(RootKind::RdsNormal);
-    markSection(rds::normalSection());
-    mark.where(RootKind::RdsLocal);
-    markSection(rds::localSection());
-  }
+  // Class stores pointers to request allocated memory in the local
+  // section. Depending on circumstances, this may or may not be valid data,
+  // so scan it conservatively for now. TODO #12203436
+  // Persistent shouldn't contain pointers to any request allocated memory.
+  mark.where(RootKind::RdsLocal);
+  markSection(rds::localSection());
 
   // php stack TODO #6509338 exactly scan the php stack.
   mark.where(RootKind::PhpStack);
@@ -287,12 +266,12 @@ template <typename F>
 void MemoryManager::scanRootMaps(F& m) const {
   if (m_objectRoots) {
     for(const auto& root : *m_objectRoots) {
-      scan(root.second, m);
+      m(root.second);
     }
   }
   if (m_resourceRoots) {
     for(const auto& root : *m_resourceRoots) {
-      scan(root.second, m);
+      m(root.second);
     }
   }
   for (const auto root : m_root_handles) {
@@ -314,8 +293,7 @@ void ThreadLocalManager::scan(F& mark) const {
 }
 
 // Scan request-local roots
-template<class F> void scanRoots(F& mark,
-                                 type_scan::Scanner* scanner = nullptr) {
+template<class F> void scanRoots(F& mark, type_scan::Scanner& scanner) {
   // rds, including php stack
   if (auto rds = rds::header()) {
     scanRds(mark, rds, scanner);

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/imarker.h"
 
 namespace HPHP {
 namespace req {

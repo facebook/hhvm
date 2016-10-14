@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/imarker.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {
@@ -141,9 +140,6 @@ struct ResourceData : type_scan::MarkCountable<ResourceData> {
   void operator delete(void* p) {
     always_assert(false);
   }
-
-  template<class F> void scan(F&) const;
-  virtual void vscan(IMarker& mark) const;
 
   const String& o_getClassName() const;
   virtual const String& o_getClassNameHook() const;

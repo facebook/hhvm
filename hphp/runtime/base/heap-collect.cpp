@@ -149,6 +149,7 @@ private:
   }
 
   void checkedEnqueue(const void* p, GCBits bits);
+  void finish_typescan();
 
   template<class T> void enqueue(const T* p) {
     auto h = reinterpret_cast<const Header*>(p);
@@ -163,8 +164,7 @@ private:
   // Whether the object with the given type-index should be recorded as an
   // "unknown" object.
   bool typeIndexIsUnknown(type_scan::Index tyindex) const {
-    return RuntimeOption::EvalEnableGCTypeScan &&
-      type_scan::hasNonConservative() &&
+    return type_scan::hasNonConservative() &&
       tyindex == type_scan::kIndexUnknown;
   }
 public:
@@ -513,18 +513,18 @@ NEVER_INLINE void Marker::init() {
   ptrs_.prepare();
 }
 
+void Marker::finish_typescan() {
+  type_scanner_.finish(
+    [this](const void* p){ checkedEnqueue(p, GCBits::Mark); },
+    [this](const void* p, std::size_t size){ (*this)(p, size); }
+  );
+}
+
 NEVER_INLINE void Marker::traceRoots() {
   auto const t0 = cpu_micros();
   SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
-  if (RuntimeOption::EvalEnableGCTypeScan) {
-    scanRoots(*this, &type_scanner_);
-    type_scanner_.finish(
-      [this](const void* p){ checkedEnqueue(p, GCBits::Mark); },
-      [this](const void* p, std::size_t size){ (*this)(p, size); }
-    );
-  } else {
-    scanRoots(*this);
-  }
+  scanRoots(*this, type_scanner_);
+  finish_typescan();
   cscanned_roots_ = cscanned_;
   xscanned_roots_ = xscanned_;
 }
@@ -536,15 +536,8 @@ NEVER_INLINE void Marker::trace() {
     while (!work_.empty()) {
       auto h = work_.back();
       work_.pop_back();
-      if (RuntimeOption::EvalEnableGCTypeScan) {
-        scanHeader(h, *this, &type_scanner_);
-        type_scanner_.finish(
-          [this](const void* p){ checkedEnqueue(p, GCBits::Mark); },
-          [this](const void* p, std::size_t size){ (*this)(p, size); }
-        );
-      } else {
-        scanHeader(h, *this);
-      }
+      scanHeader(h, *this, type_scanner_);
+      finish_typescan();
     }
   };
 
@@ -811,8 +804,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   }
   auto sample = logCommon();
   sample.setStr("phase", phase);
-  std::string scanner(!RuntimeOption::EvalEnableGCTypeScan ? "legacy" :
-                      type_scan::kBuildScanners ? "typescan" : "ts-cons");
+  std::string scanner(type_scan::kBuildScanners ? "typescan" : "ts-cons");
   sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
   sample.setInt("gc_num", t_gc_num);
   // timers of gc-sub phases

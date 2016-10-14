@@ -40,16 +40,7 @@ struct SQLite3 {
     Variant func;
     Variant step;
     Variant fini;
-    template<class F> void scan(F& mark) const {
-      mark(func);
-      mark(step);
-      mark(fini);
-    }
   };
-
-  void scan(IMarker& mark) const {
-    for (auto& udf : m_udfs) udf->scan(mark);
-  }
 
 public:
   sqlite3 *m_raw_db;

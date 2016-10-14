@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/req-root.h"
-#include "hphp/runtime/base/imarker.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

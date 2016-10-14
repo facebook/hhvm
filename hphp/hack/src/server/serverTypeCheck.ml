@@ -592,19 +592,25 @@ end = functor(CheckKind:CheckKindType) -> struct
     new_env, reparse_count, total_rechecked_count
 end
 
+let check_kind_to_string = function
+  | Full_check -> "Full_check"
+  | Lazy_check -> "Lazy_check"
+
 module FC = Make(FullCheckKind)
 module LC = Make(LazyCheckKind)
 
 let type_check genv env kind =
-  let check_kind = match kind with
-    | Full_check -> "Full_check"
-    | Lazy_check -> "Lazy_check"
-  in
-  Printf.eprintf "******************************************\n";
-  Hh_logger.log "Check kind: %s" check_kind;
-  match kind with
-  | Full_check -> FC.type_check genv env
-  | Lazy_check -> LC.type_check genv env
+  (match kind with
+  | Lazy_check -> HackEventLogger.set_lazy_incremental ()
+  | Full_check -> ());
+  let check_kind = check_kind_to_string kind in
+  HackEventLogger.with_check_kind check_kind @@ begin fun () ->
+    Printf.eprintf "******************************************\n";
+    Hh_logger.log "Check kind: %s" check_kind;
+    match kind with
+    | Full_check -> FC.type_check genv env
+    | Lazy_check -> LC.type_check genv env
+  end
 
 (*****************************************************************************)
 (* Checks that the working directory is clean *)

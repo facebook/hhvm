@@ -10,6 +10,7 @@
 
 let set_use_watchman _ = ()
 let set_lazy_levels _ _ = ()
+let set_lazy_incremental _ = ()
 let bad_exit _ _ _ ~is_oom:_ = ()
 let init _ _ _ _ _ _ = ()
 let init_monitor _ _ _ = ()
@@ -68,6 +69,7 @@ let load_mini_exn _ = ()
 let with_id ~stage:_ _ f = f ()
 let with_rechecked_stats _ _ _ f = f ()
 let with_init_type _ f = f ()
+let with_check_kind _ f = f ()
 
 (** Server Monitor events *)
 let accepting_on_socket_exception _ = ()

@@ -12,6 +12,8 @@
    | Lazy_check
    | Full_check
 
+val check_kind_to_string : check_kind -> string
+
 val type_check: ServerEnv.genv -> ServerEnv.env -> check_kind ->
   ServerEnv.env * int * int
 

@@ -60,6 +60,23 @@ let start_hh_server options  =
   let log_link = ServerFiles.log_link (ServerArgs.root options) in
   start_server options Program.hh_server log_link ServerMain.entry
 
+(*
+ * Every server has lazy incremental mode capability, but we want to know
+ * whether this particular run actually exercised it.
+ *)
+let check_log_for_lazy_incremental monitor_config =
+  let cmd = Printf.sprintf "grep -m 1 %s %s | wc -l"
+    ServerTypeCheck.(check_kind_to_string Lazy_check)
+    monitor_config.ServerMonitorUtils.server_log_file
+  in
+  try
+    match Sys_utils.exec_read cmd with
+    | "0" -> ()
+    | "1" -> HackEventLogger.set_lazy_incremental ()
+    | x -> Hh_logger.log "Unexpected output of command '%s': %s" cmd x
+  with e ->
+    Hh_logger.log "Exception while running command '%s': %s"
+      cmd (Printexc.to_string e)
 
 (** Main method of the server monitor daemon. The daemon is responsible for
  * listening to socket requests from hh_client, checking Build ID, and relaying
@@ -111,6 +128,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
       server_log_file = ServerFiles.log_link www_root;
       monitor_log_file = ServerFiles.monitor_log_link www_root;
       load_script_log_file = ServerFiles.load_log www_root;
+      on_server_exit = check_log_for_lazy_incremental
     }) hh_server_monitor_starter
 
 let daemon_entry =

@@ -329,7 +329,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   out.indent();
 #define O(opcode, imms, ...)                              \
   case Op::opcode:                                        \
-    ++pc;                                                 \
+    pc += encoded_op_size(Op::opcode);                    \
     out.fmt("{}", #opcode);                               \
     IMM_##imms                                            \
     break;

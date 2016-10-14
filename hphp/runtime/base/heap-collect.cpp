@@ -770,8 +770,6 @@ __thread bool t_enable_samples;
 __thread size_t t_trigger;
 __thread MemoryUsageStats t_pre_stats;
 
-constexpr bool kHaveTypeIds = type_scan::kBuildScanners;
-
 StructuredLogEntry logCommon() {
   StructuredLogEntry sample;
   sample.setInt("pid", (int64_t)getpid());
@@ -814,7 +812,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   auto sample = logCommon();
   sample.setStr("phase", phase);
   std::string scanner(!RuntimeOption::EvalEnableGCTypeScan ? "legacy" :
-                      kHaveTypeIds ? "typescan" : "ts-cons");
+                      type_scan::kBuildScanners ? "typescan" : "ts-cons");
   sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
   sample.setInt("gc_num", t_gc_num);
   // timers of gc-sub phases

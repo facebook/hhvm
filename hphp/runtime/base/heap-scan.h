@@ -114,6 +114,7 @@ template<class F> void scanHeader(const Header* h,
       }
       return mark((&h->malloc_)+1, h->malloc_.nbytes - sizeof(MallocNode));
     case HeaderKind::NativeData:
+      // TODO t11247058: use typescan machenery to scan NativeData
       return h->nativeObj()->scan(mark);
     case HeaderKind::AsyncFuncFrame:
       return h->asyncFuncWH()->scan(mark);

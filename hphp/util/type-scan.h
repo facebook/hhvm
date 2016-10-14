@@ -136,7 +136,7 @@ template <typename T> struct WithSuffix {};
 }
 
 // The type scanners need to know which types are "countable". A countable type
-// is one with a reference count that is explicitly manages. The ultimate goal
+// is one with a reference count that is explicitly managed. The ultimate goal
 // for the type scanners is to find all the pointers to countable types. To mark
 // a type as being countable, instantiate MarkCountable<> on the type. Its
 // usually easiest to have the type T derive from MarkCountable<T>.
@@ -305,7 +305,7 @@ struct Scanner {
 
 constexpr bool kBuildScanners =
   /* Doesn't work with Clang at the moment. t10336705 */
-#if defined(HHVM_BUILD_TYPE_SCANNERS) && !defined(__clang__)
+#if !defined(HHVM_DISABLE_TYPE_SCANNERS) && !defined(__clang__)
   true;
 #else
   false;

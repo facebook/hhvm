@@ -585,7 +585,7 @@ struct RuntimeOption {
   /* only run eager-gc once at each surprise point (much faster) */     \
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  eagerGcDefault())                \
-  F(bool, EnableGCTypeScan,            eagerGcDefault())                \
+  F(bool, EnableGCTypeScan,            true)                            \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(uint32_t, GCSampleRate,            0)                               \

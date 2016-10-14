@@ -630,14 +630,12 @@ Generator::Generator(const std::string& filename) {
     m_objects_by_name.emplace(type.name, type.key);
   }
 
-  // This isn't strictly necessary (the rest of the logic will work fine without
-  // it), but fail fast if it looks like we don't have any debug info
-  // enabled. This will prevent someone from doing a build without debug info
-  // and silently getting conservative scanning for everything.
+  // Complain if it looks like we don't have any debug info enabled.
+  // (falls back to conservative scanning for everything)
   if (countable_markers.empty() && indexer_types.empty()) {
-    throw Exception{
-      "No countable or indexed types found. Is debug-info enabled?"
-    };
+    std::cerr << "gen-type-scanners: warning: "
+                 "No countable or indexed types found. "
+                 "Is debug-info enabled?" << std::endl;
   }
 
   // Extract all the types that Mark[Scannable]Countable<> was instantiated on

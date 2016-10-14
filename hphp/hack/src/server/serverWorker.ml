@@ -15,6 +15,7 @@ let entry = Worker.register_entry_point ~restore:(ServerGlobalState.restore)
 
 let make gc_control heap_handle =
   Worker.make
+    ?call_wrapper:None
     ~saved_state:(ServerGlobalState.save ())
     ~entry
     ~nbr_procs: (GlobalConfig.nbr_procs)

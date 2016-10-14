@@ -1,7 +1,8 @@
 let entry = Worker.register_entry_point ~restore:(fun () -> ())
 
-let make_worker heap_handle =
+let make_worker ?call_wrapper heap_handle =
   Worker.make
+    ?call_wrapper
     ~saved_state:()
     ~entry
     ~nbr_procs:2
@@ -15,6 +16,47 @@ let rec wait_until_ready handle =
   | ready :: _ ->
     ready
 
+(** If "f x" throws, we exit the program with a custom exit code. *)
+let catch_exception_and_custom_exit_wrapper: 'x 'b. ('x -> 'b) -> 'x -> 'b = fun f x ->
+  try f x with
+  | _ -> exit 17
+
+let call_and_verify_result worker f x expected =
+  let result = Worker.call worker f x
+    |> wait_until_ready
+    |> Worker.get_result
+  in
+  result = expected
+
+(** This is just like the test_worker_uncaught_exception_exits_with_2 test
+ * except we add a call_wapper to the worker. It catches all exceptions and
+ * makes the worker exit with code 17. *)
+let test_wrapped_worker_with_custom_exit heap_handle () =
+  let workers = make_worker
+    ~call_wrapper:{ Worker.wrap = catch_exception_and_custom_exit_wrapper }
+    heap_handle in
+  match workers with
+  | [] ->
+    Printf.eprintf "Failed to create workers";
+    false
+  | worker :: workers ->
+    try call_and_verify_result worker
+    (fun () -> raise (Failure "oops")) () "dummy" with
+    | Worker.Worker_exited_abnormally i ->
+      i = 17
+
+let test_worker_uncaught_exception_exits_with_2 heap_handle () =
+  let workers = make_worker heap_handle in
+  match workers with
+  | [] ->
+    Printf.eprintf "Failed to create workers";
+    false
+  | worker :: workers ->
+    try call_and_verify_result worker (fun () -> raise (Failure "oops"))
+    () "dummy" with
+    | Worker.Worker_exited_abnormally i ->
+      i = 2
+
 let test_simple_worker_spawn heap_handle () =
   let workers = make_worker heap_handle in
   match workers with
@@ -22,14 +64,15 @@ let test_simple_worker_spawn heap_handle () =
     Printf.eprintf "Failed to create workers";
     false
   | worker :: workers ->
-    let handle = Worker.call worker (fun () -> "hello") () in
-    let handle = wait_until_ready handle in
-    let result = Worker.get_result handle in
-    if result = "hello" then true
-    else false
+    call_and_verify_result worker (fun () -> "hello") () "hello"
 
 let make_tests handle = [
-  "simple_worker_spawn_test", test_simple_worker_spawn handle;
+  "simple_worker_spawn_test",
+    test_simple_worker_spawn handle;
+  "worker_uncaught_exception_exits_with_2",
+    test_worker_uncaught_exception_exits_with_2 handle;
+  "wrapped_worker_with_custom_exit",
+    test_wrapped_worker_with_custom_exit handle;
 ]
 
 let () =

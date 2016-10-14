@@ -7,7 +7,7 @@ $str_array = array(
  		    "1.testing lcfirst",
 		    "HELLO wORLD",
 		    'HELLO wORLD',
-                    "\0",		// Null 
+                    "\0",		// Null
                     "\x00",		// Hex Null
                     "\x000",
                     "abcd",		// double quoted string
@@ -47,13 +47,13 @@ echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
 $str_arr = array("Hello", "?world", "!$%**()%**[][[[&@#~!", array());
-var_dump( lcfirst($str_arr) );  
+var_dump( lcfirst($str_arr) );
 
 echo "\n--- Testing lowercamelcase action call example ---\n";
 class Setter {
-    
+
     protected $vars = array('partnerName' => false);
-    
+
     public function __call($m, $v) {
         if (stristr($m, 'set')) {
             $action = lcfirst(substr($m, 3));
@@ -94,7 +94,7 @@ var_dump(lcfirst("$obj_string"));
 
 
 echo "\n--- Testing Resources ---\n";
-$filename1 = "dummy.txt";
+$filename1 = "dummy-lcfirst.txt";
 $file1 = fopen($filename1, "w");                // creating new file
 
 /* getting resource type for file handle */
@@ -102,13 +102,13 @@ $string1 = get_resource_type($file1);
 $string2 = (int)get_resource_type($file1);      // converting stream type to int
 
 /* $string1 is of "stream" type */
-var_dump(lcfirst($string1)); 
+var_dump(lcfirst($string1));
 
 /* $string2 holds a value of "int(0)" */
 var_dump(lcfirst($string2));
 
-fclose($file1);                                 // closing the file "dummy.txt"
-unlink("$filename1");                           // deletes "dummy.txt"
+fclose($file1);                                 // closing the file "dummy-lcfirst.txt"
+unlink("$filename1");                           // deletes "dummy-lcfirst.txt"
 
 
 echo "\n--- Testing a longer and heredoc string ---\n";

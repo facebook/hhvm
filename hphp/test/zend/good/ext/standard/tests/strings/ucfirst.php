@@ -7,7 +7,7 @@ $str_array = array(
  		    "1.testing ucfirst",
 		    "hELLO wORLD",
 		    'hELLO wORLD',
-                    "\0",		// Null 
+                    "\0",		// Null
                     "\x00",		// Hex Null
                     "\x000",
                     "abcd",		// double quoted string
@@ -47,7 +47,7 @@ echo "\n#### Testing Miscelleneous inputs ####\n";
 
 echo "--- Testing arrays ---";
 $str_arr = array("hello", "?world", "!$%**()%**[][[[&@#~!", array());
-var_dump( ucfirst($str_arr) );  
+var_dump( ucfirst($str_arr) );
 
 echo "\n--- Testing objects ---\n";
 /* we get "Catchable fatal error: saying Object of class could not be converted
@@ -65,7 +65,7 @@ var_dump(ucfirst("$obj_string"));
 
 
 echo "\n--- Testing Resources ---\n";
-$filename1 = "dummy.txt";
+$filename1 = "dummy-ucfirst.txt";
 $file1 = fopen($filename1, "w");                // creating new file
 
 /* getting resource type for file handle */
@@ -73,13 +73,13 @@ $string1 = get_resource_type($file1);
 $string2 = (int)get_resource_type($file1);      // converting stream type to int
 
 /* $string1 is of "stream" type */
-var_dump(ucfirst($string1)); 
+var_dump(ucfirst($string1));
 
 /* $string2 holds a value of "int(0)" */
 var_dump(ucfirst($string2));
 
-fclose($file1);                                 // closing the file "dummy.txt"
-unlink("$filename1");                           // deletes "dummy.txt"
+fclose($file1);                                 // closing the file "dummy-ucfirst.txt"
+unlink("$filename1");                           // deletes "dummy-ucfirst.txt"
 
 
 echo "\n--- Testing a longer and heredoc string ---\n";

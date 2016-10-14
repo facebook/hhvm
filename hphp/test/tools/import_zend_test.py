@@ -1363,6 +1363,10 @@ def walk(filename, dest_subdir):
     if '/ext/standard/tests/strings/md5_file.php' in full_dest_filename:
         test = test.replace('DataFile.txt', 'md5_DataFile.txt')
         test = test.replace('EmptyFile.txt', 'md5_EmptyFile.txt')
+    if 'ext/standard/tests/strings/lcfirst.php' in full_dest_filename:
+        test = test.replace('dummy.txt', 'dummy-lcfirst.txt')
+    if 'ext/standard/tests/strings/ucfirst.php' in full_dest_filename:
+        test = test.replace('dummy.txt', 'dummy-ucfirst.txt')
     if '/ext/intl/tests/calendar_getNow_basic.php' in full_dest_filename:
         test = test.replace('500)', '1000)')
         test = test.replace('1000)', '2000)')

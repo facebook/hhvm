@@ -102,8 +102,8 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
         positions.push_back(input.size() - pos0);
         found++;
       }
-      int iMax = (found + limit) << 1;
-      for (int i = 0; i < iMax; i += 2) {
+      unsigned nelems = std::max(found + limit, 0);
+      for (unsigned i = 0; i < nelems * 2; i += 2) {
         ret.append(input.substr(positions[i], positions[i+1]));
       }
     } // else we have negative limit and delimiter not found

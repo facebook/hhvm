@@ -180,6 +180,14 @@ let declare_and_check content ~f tcopt =
   in
   result
 
+let declare_and_check content ~f tcopt =
+  try
+    declare_and_check content ~f tcopt
+  with Decl_class.Decl_heap_elems_bug -> begin
+    Hh_logger.log "%s" content;
+    Exit_status.(exit Decl_heap_elems_bug)
+  end
+
 let recheck tcopt filetuple_l =
   SharedMem.invalidate_caches();
   List.iter filetuple_l begin fun (fn, defs) ->
@@ -189,14 +197,7 @@ let recheck tcopt filetuple_l =
 let check_file_input tcopt files_info fi =
   match fi with
   | ServerUtils.FileContent content ->
-      begin
-        try
-          declare_and_check content ~f:(fun path _ -> path) tcopt
-        with Decl_class.Decl_heap_elems_bug -> begin
-          Hh_logger.log "%s" content;
-          Exit_status.(exit Decl_heap_elems_bug)
-        end
-      end
+      declare_and_check content ~f:(fun path _ -> path) tcopt
   | ServerUtils.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
       let () = match Relative_path.Map.get files_info path with

@@ -729,9 +729,8 @@ void gdImageSetPixel (gdImagePtr im, int x, int y, int color)
       if (!im->style) {
         /* Refuse to draw if no style is set. */
         return;
-      } else {
-        p = im->style[im->stylePos++];
       }
+      p = im->style[im->stylePos++];
       if (p != gdTransparent) {
         gdImageSetPixel(im, x, y, p);
       }
@@ -2738,6 +2737,12 @@ void gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
 {
   if (im->style) {
     gdFree(im->style);
+  }
+  if (noOfPixels == 0) {
+    im->style = nullptr;
+    im->styleLength = 0;
+    im->stylePos = 0;
+    return;
   }
   im->style = (int *) gdMalloc(sizeof(int) * noOfPixels);
   memcpy(im->style, style, sizeof(int) * noOfPixels);

@@ -220,6 +220,12 @@ let errors_to_string buf x =
     Printf.bprintf buf "%s\n" (Errors.to_string error)
   end
 
+let assert_errors env expected =
+  let buf = Buffer.create 1024 in
+  (Errors.get_error_list env.ServerEnv.errorl)
+    |> List.map ~f:(Errors.to_absolute) |> errors_to_string buf;
+  assertEqual expected (Buffer.contents buf)
+
 let diagnostics_to_string x =
   let buf = Buffer.create 1024 in
   SMap.iter x ~f:begin fun path errors ->

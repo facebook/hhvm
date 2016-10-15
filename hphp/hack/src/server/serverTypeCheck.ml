@@ -168,14 +168,6 @@ let remove_decls env fast_parsed =
   env
 
 (*****************************************************************************)
-(* Removes the files that failed *)
-(*****************************************************************************)
-
-let remove_failed fast failed =
-  Relative_path.Set.fold failed ~init:fast
-    ~f:(fun x m -> Relative_path.Map.remove m x)
-
-(*****************************************************************************)
 (* Parses the set of modified files *)
 (*****************************************************************************)
 
@@ -238,8 +230,7 @@ let declare_names env fast_parsed =
       let failed = Relative_path.Set.union failed' failed in
       errorl, failed
     end ~init:(Errors.empty, Relative_path.Set.empty) in
-  let fast = remove_failed fast_parsed failed_naming in
-  let fast = FileInfo.simplify_fast fast in
+  let fast = FileInfo.simplify_fast fast_parsed in
   env, errorl, failed_naming, fast
 
 (*****************************************************************************)

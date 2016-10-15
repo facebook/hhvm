@@ -67,6 +67,8 @@ val assertEqual: string -> string -> unit
 
 val assert_no_errors: ServerEnv.env -> unit
 
+val assert_errors: ServerEnv.env -> string -> unit
+
 val assertSingleError: string -> Errors.error list -> unit
 
 val assert_no_diagnostics : ('a, 'b) loop_outputs -> unit

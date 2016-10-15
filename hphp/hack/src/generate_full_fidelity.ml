@@ -1099,6 +1099,14 @@ module GenerateFFSyntax = struct
     Printf.sprintf "    let is_%s node =\n      kind node = SyntaxKind.%s\n"
       x.type_name x.kind_name
 
+  let to_child_list_from_type x =
+    let mapper1 f = Printf.sprintf "      %s_%s;\n" x.prefix f in
+    let mapper2 f = Printf.sprintf "      %s_%s" x.prefix f in
+    let fields1 = map_and_concat mapper1 x.fields in
+    let fields2 = String.concat ",\n" (List.map mapper2 x.fields) in
+    Printf.sprintf "    let get_%s_children {\n%s    } = (\n%s\n    )\n\n"
+      x.type_name fields1 fields2
+
   let to_children x =
     let mapper f = Printf.sprintf "        %s_%s;\n" x.prefix f in
     let fields = map_and_concat mapper x.fields in
@@ -1302,6 +1310,8 @@ TYPE_TESTS
     let is_comma = is_specific_token Full_fidelity_token_kind.Comma
     let is_array = is_specific_token Full_fidelity_token_kind.Array
 
+CHILD_LIST_FROM_TYPE
+
     let children node =
       match node.syntax with
       | Missing -> []
@@ -1434,6 +1444,7 @@ end (* WithToken *)
       { pattern = "SYNTAX"; func = to_syntax };
       { pattern = "TO_KIND"; func = to_to_kind };
       { pattern = "TYPE_TESTS"; func = to_type_tests };
+      { pattern = "CHILD_LIST_FROM_TYPE"; func = to_child_list_from_type };
       { pattern = "CHILDREN"; func = to_children };
       { pattern = "CHILDREN_NAMES"; func = to_children_names };
       { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };

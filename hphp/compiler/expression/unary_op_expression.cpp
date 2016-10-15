@@ -287,7 +287,7 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
 bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
   bool ret = true;
   try {
-    g_context->setThrowAllErrors(true);
+    ThrowAllErrorsSetter taes;
     auto add = RuntimeOption::IntsOverflowToInts ? cellAdd : cellAddO;
     auto sub = RuntimeOption::IntsOverflowToInts ? cellSub : cellSubO;
 
@@ -337,7 +337,6 @@ bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
   } catch (...) {
     ret = false;
   }
-  g_context->setThrowAllErrors(false);
   return ret;
 }
 

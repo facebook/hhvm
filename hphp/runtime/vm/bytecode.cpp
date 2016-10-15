@@ -1476,7 +1476,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
   assert(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
 
-  const bool useJit = RID().getJit();
+  const bool useJit = RID().getJit() && !RID().getJitFolding();
   const bool useJitPrologue = useJit && vmfp()
     && !enterFnAr->magicDispatch()
     && !varEnv

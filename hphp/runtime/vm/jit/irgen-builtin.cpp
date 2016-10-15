@@ -40,6 +40,34 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+struct ParamPrep {
+  explicit ParamPrep(size_t count) : info(count) {}
+
+  struct Info {
+    SSATmp* value{nullptr};
+    bool passByAddr{false};
+    bool needsConversion{false};
+    bool isOutputArg{false};
+  };
+
+  const Info& operator[](size_t idx) const { return info[idx]; }
+  Info& operator[](size_t idx) { return info[idx]; }
+  size_t size() const { return info.size(); }
+
+  SSATmp* thiz{nullptr};       // may be null if call is not a method
+  SSATmp* count{nullptr};      // if non-null, the count of arguments
+  jit::vector<Info> info;
+  uint32_t numByAddr{0};
+
+  // if set, coerceFailure determines the target of a failed coercion;
+  // if not set, we side-exit to the next byte-code instruction (only
+  //   applies to an inlined NativeImpl, or an FCallBuiltin).
+  Block* coerceFailure{nullptr};
+  bool forNativeImpl{false};
+};
+
+//////////////////////////////////////////////////////////////////////
+
 const StaticString
   s_is_a("is_a"),
   s_is_subclass_of("is_subclass_of"),
@@ -82,12 +110,29 @@ bool type_converts_to_number(Type ty) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* is_a_impl(IRGS& env, uint32_t numArgs, bool subclassOnly) {
-  if (numArgs != 3) return nullptr;
+Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
+  // The params have been popped and if we're inlining the ActRec is gone
+  env.irb->setCurMarker(makeMarker(env, nextBcOff(env)));
+  env.irb->exceptionStackBoundary();
 
-  auto const allowString = topC(env, BCSPRelOffset{0});
-  auto const classname   = topC(env, BCSPRelOffset{1});
-  auto const obj         = topC(env, BCSPRelOffset{2});
+  auto const exit = defBlock(env, Block::Hint::Unlikely);
+  BlockPusher bp(*env.irb, makeMarker(env, nextBcOff(env)), exit);
+  gen(env, BeginCatch);
+  for (auto i = params.size(); i--; ) {
+    decRef(env, params[i].value);
+  }
+  gen(env, EndCatch,
+      IRSPRelOffsetData { bcSPOffset(env) },
+      fp(env), sp(env));
+  return exit;
+}
+
+SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
+  if (params.size() != 3) return nullptr;
+
+  auto const allowString = params[2].value;
+  auto const classname   = params[1].value;
+  auto const obj         = params[0].value;
 
   if (!obj->isA(TObj) ||
       !classname->hasConstVal(TStr) ||
@@ -123,19 +168,19 @@ SSATmp* is_a_impl(IRGS& env, uint32_t numArgs, bool subclassOnly) {
   );
 }
 
-SSATmp* opt_is_a(IRGS& env, uint32_t numArgs) {
-  return is_a_impl(env, numArgs, false /* subclassOnly */);
+SSATmp* opt_is_a(IRGS& env, const ParamPrep& params) {
+  return is_a_impl(env, params, false /* subclassOnly */);
 }
 
-SSATmp* opt_is_subclass_of(IRGS& env, uint32_t numArgs) {
-  return is_a_impl(env, numArgs, true /* subclassOnly */);
+SSATmp* opt_is_subclass_of(IRGS& env, const ParamPrep& params) {
+  return is_a_impl(env, params, true /* subclassOnly */);
 }
 
-SSATmp* opt_method_exists(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 2) return nullptr;
+SSATmp* opt_method_exists(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 2) return nullptr;
 
-  auto const meth = topC(env, BCSPRelOffset{0});
-  auto const obj  = topC(env, BCSPRelOffset{1});
+  auto const meth = params[1].value;
+  auto const obj  = params[0].value;
 
   if (!obj->isA(TObj) || !meth->isA(TStr)) return nullptr;
 
@@ -143,26 +188,29 @@ SSATmp* opt_method_exists(IRGS& env, uint32_t numArgs) {
   return gen(env, MethodExists, cls, meth);
 }
 
-SSATmp* opt_count(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 2) return nullptr;
+SSATmp* opt_count(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 2) return nullptr;
 
-  auto const mode = topC(env, BCSPRelOffset{0});
-  auto const val = topC(env, BCSPRelOffset{1});
+  auto const mode = params[1].value;
+  auto const val = params[0].value;
 
   // Bail if we're trying to do a recursive count()
   if (!mode->hasConstVal(0)) return nullptr;
 
-  return gen(env, Count, val);
+  // Count may throw
+  return gen(env, Count, make_opt_catch(env, params), val);
 }
 
-SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_ord(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
 
-  auto const arg = topC(env, BCSPRelOffset{0});
+  auto const arg = params[0].value;
   auto const arg_type = arg->type();
   if (arg_type <= TStr) {
     return gen(env, OrdStr, arg);
   }
+
+  if (params.forNativeImpl) return nullptr;
 
   // In strict mode type mismatches won't be coerced (for legacy reasons in HH
   // files builtins are always weak).
@@ -193,10 +241,10 @@ SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_chr(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_chr(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
 
-  auto const arg = topC(env, BCSPRelOffset{0});
+  auto const arg = params[0].value;
   auto const arg_type = arg->type();
   if (arg_type <= TInt) {
     return gen(env, ChrInt, arg);
@@ -205,18 +253,19 @@ SSATmp* opt_chr(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_func_num_args(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 0 || curFunc(env)->isPseudoMain()) return nullptr;
+SSATmp* opt_func_num_args(IRGS& env, const ParamPrep& params) {
+  if (params.forNativeImpl) return nullptr;
+  if (params.size() != 0 || curFunc(env)->isPseudoMain()) return nullptr;
   return gen(env, LdARNumParams, fp(env));
 }
 
-SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
 
   // Only generate the optimized version if the argument passed in is a
   // static string with a constant literal value so we can get the string value
   // at JIT time.
-  auto const argType = topType(env, BCSPRelOffset{0});
+  auto const argType = params[0].value->type();
   if (!(argType.hasConstVal(TStaticStr))) {
     return nullptr;
   }
@@ -229,7 +278,7 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
   // known static address or thread-local address of where the setting lives.
   // This might be worth doing specifically for the zend.assertions setting,
   // for which the emitter emits an ini_get around every call to assert().
-  auto const settingName = top(env, BCSPRelOffset{0})->strVal()->toCppString();
+  auto const settingName = params[0].value->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
   if (!IniSetting::GetMode(settingName, mode)) {
     return nullptr;
@@ -261,19 +310,19 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_dirname(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_dirname(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
 
   // Only generate the optimized version if the argument passed in is a
   // static string with a constant literal value so we can get the string value
   // at JIT time.
-  auto const argType = topType(env, BCSPRelOffset{0});
+  auto const argType = params[0].value->type();
   if (!(argType.hasConstVal(TStaticStr))) {
     return nullptr;
   }
 
   // Return the directory portion of the path
-  auto path = top(env, BCSPRelOffset{0})->strVal();
+  auto path = params[0].value->strVal();
   return cns(env, makeStaticString(FileUtil::dirname(StrNR{path})));
 }
 
@@ -281,17 +330,17 @@ SSATmp* opt_dirname(IRGS& env, uint32_t numArgs) {
  * Transforms in_array with a static haystack argument into an AKExistsArr with
  * the haystack flipped.
  */
-SSATmp* opt_in_array(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 3) return nullptr;
+SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 3 && params.size() != 2) return nullptr;
 
   // We will restrict this optimization to needles that are strings, and
   // haystacks that have only non-numeric string keys. This avoids a bunch of
   // complication around numeric-string array-index semantics.
-  if (!(topType(env, BCSPRelOffset{2}) <= TStr)) {
+  if (!(params[0].value->type() <= TStr)) {
     return nullptr;
   }
 
-  auto const haystackType = topType(env, BCSPRelOffset{1});
+  auto const haystackType = params[1].value->type();
   if (!haystackType.hasConstVal(TStaticArr)) {
     // Haystack isn't statically known
     return nullptr;
@@ -323,7 +372,7 @@ SSATmp* opt_in_array(IRGS& env, uint32_t numArgs) {
     flipped.set(key.asCStrRef(), init_null_variant);
   }
 
-  auto const needle = topC(env, BCSPRelOffset{2});
+  auto const needle = params[0].value;
   auto const array = flipped.toArray();
   return gen(
     env,
@@ -333,15 +382,15 @@ SSATmp* opt_in_array(IRGS& env, uint32_t numArgs) {
   );
 }
 
-SSATmp* opt_get_class(IRGS& env, uint32_t numArgs) {
-  auto const curCls = curClass(env);
+SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
+  auto const curCls = !params.forNativeImpl ? curClass(env) : nullptr;
   auto const curName = [&] {
     return curCls != nullptr ? cns(env, curCls->name()) : nullptr;
   };
-  if (numArgs == 0) return curName();
-  if (numArgs != 1) return nullptr;
+  if (params.size() == 0) return curName();
+  if (params.size() != 1) return nullptr;
 
-  auto const val = topC(env, BCSPRelOffset{0});
+  auto const val = params[0].value;
   auto const ty  = val->type();
   if (ty <= TNull) return curName();
   if (ty <= TObj) {
@@ -352,18 +401,19 @@ SSATmp* opt_get_class(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_get_called_class(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 0) return nullptr;
+SSATmp* opt_get_called_class(IRGS& env, const ParamPrep& params) {
+  if (params.forNativeImpl) return nullptr;
+  if (params.size() != 0) return nullptr;
   if (!curClass(env)) return nullptr;
   auto const ctx = ldCtx(env);
   auto const cls = gen(env, LdClsCtx, ctx);
   return gen(env, LdClsName, cls);
 }
 
-SSATmp* opt_sqrt(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_sqrt(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
 
-  auto const val = topC(env);
+  auto const val = params[0].value;
   auto const ty  = val->type();
   if (ty <= TDbl) return gen(env, Sqrt, val);
   if (ty <= TInt) {
@@ -373,22 +423,23 @@ SSATmp* opt_sqrt(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_strlen(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_strlen(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
 
-  auto const val = topC(env);
+  auto const val = params[0].value;
   auto const ty  = val->type();
 
   if (ty <= TStr) {
     return gen(env, LdStrLen, val);
   }
 
-  if (ty.subtypeOfAny(TNull, TBool)) {
-    return gen(env, ConvCellToInt, val);
-  }
+  if (ty <= TNull) return cns(env, 0);
+  if (ty <= TBool) return gen(env, ConvBoolToInt, val);
 
   if (ty.subtypeOfAny(TInt, TDbl)) {
-    auto str = gen(env, ConvCellToStr, val);
+    auto str = ty <= TInt
+      ? gen(env, ConvIntToStr, val)
+      : gen(env, ConvDblToStr, val);
     auto len = gen(env, LdStrLen, str);
     decRef(env, str);
     return len;
@@ -397,10 +448,10 @@ SSATmp* opt_strlen(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* minmax(IRGS& env, const bool is_max) {
-  auto const val1 = topC(env, BCSPRelOffset{0});
+SSATmp* minmax(IRGS& env, const ParamPrep& params, const bool is_max) {
+  auto const val1 = params[1].value;
   auto const ty1 = val1->type();
-  auto const val2 = topC(env, BCSPRelOffset{1});
+  auto const val2 = params[0].value;
   auto const ty2 = val2->type();
 
   // this optimization is only for 2 ints/doubles
@@ -429,38 +480,40 @@ SSATmp* minmax(IRGS& env, const bool is_max) {
   );
 }
 
-SSATmp* opt_max2(IRGS& env, uint32_t numArgs) {
+SSATmp* opt_max2(IRGS& env, const ParamPrep& params) {
   // max2 is only called for 2 operands
-  return numArgs == 2 ? minmax(env, true) : nullptr;
+  return params.size() == 2 ? minmax(env, params, true) : nullptr;
 }
 
-SSATmp* opt_min2(IRGS& env, uint32_t numArgs) {
+SSATmp* opt_min2(IRGS& env, const ParamPrep& params) {
   // min2 is only called for 2 operands
-  return numArgs == 2 ? minmax(env, false) : nullptr;
+  return params.size() == 2 ? minmax(env, params, false) : nullptr;
 }
 
-SSATmp* opt_ceil(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_ceil(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
   if (!folly::CpuId().sse41()) return nullptr;
-  auto const val = topC(env);
+  auto const val = params[0].value;
   if (!type_converts_to_number(val->type())) return nullptr;
-  auto const dbl = gen(env, ConvCellToDbl, val);
+  // May throw
+  auto const dbl = gen(env, ConvCellToDbl, make_opt_catch(env, params), val);
   return gen(env, Ceil, dbl);
 }
 
-SSATmp* opt_floor(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_floor(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
   if (!folly::CpuId().sse41()) return nullptr;
-  auto const val = topC(env);
+  auto const val = params[0].value;
   if (!type_converts_to_number(val->type())) return nullptr;
-  auto const dbl = gen(env, ConvCellToDbl, val);
+  // May throw
+  auto const dbl = gen(env, ConvCellToDbl, make_opt_catch(env, params), val);
   return gen(env, Floor, dbl);
 }
 
-SSATmp* opt_abs(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_abs(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
 
-  auto const value = topC(env);
+  auto const value = params[0].value;
   if (value->type() <= TInt) {
     // compute integer absolute value ((src>>63) ^ src) - (src>>63)
     auto const t1 = gen(env, Shr, value, cns(env, 63));
@@ -474,14 +527,15 @@ SSATmp* opt_abs(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_set_frame_metadata(IRGS& env, uint32_t numArgs) {
-  if (numArgs != 1) return nullptr;
+SSATmp* opt_set_frame_metadata(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  if (params.forNativeImpl) return nullptr;
   auto func = curFunc(env);
   if (func->isPseudoMain() || (func->attrs() & AttrMayUseVV)) return nullptr;
   auto const local = func->lookupVarId(s_86metadata.get());
   if (local == kInvalidId) return nullptr;
   auto oldVal = ldLoc(env, local, nullptr, DataTypeCountness);
-  auto newVal = topC(env);
+  auto newVal = params[0].value;
   stLocRaw(env, local, fp(env), newVal);
   decRef(env, oldVal);
   gen(env, IncRef, newVal);
@@ -490,15 +544,15 @@ SSATmp* opt_set_frame_metadata(IRGS& env, uint32_t numArgs) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool optimizedFCallBuiltin(IRGS& env,
+SSATmp* optimizedFCallBuiltin(IRGS& env,
                            const Func* func,
-                           uint32_t numArgs,
+                           const ParamPrep& params,
                            uint32_t numNonDefault) {
   auto const result = [&]() -> SSATmp* {
 
     auto const fname = func->name();
 #define X(x) \
-    if (fname->isame(s_##x.get())) return opt_##x(env, numArgs);
+    if (fname->isame(s_##x.get())) return opt_##x(env, params);
 
     X(get_called_class)
     X(get_class)
@@ -527,18 +581,21 @@ bool optimizedFCallBuiltin(IRGS& env,
     return nullptr;
   }();
 
-  if (result == nullptr) return false;
+  if (result == nullptr) return nullptr;
 
-  // Decref and free args
-  for (int i = 0; i < numArgs; i++) {
-    auto const arg = popR(env);
-    if (i >= numArgs - numNonDefault) {
-      decRef(env, arg);
+  // NativeImpl will do a RetC
+  if (!params.forNativeImpl) {
+    if (params.thiz && params.thiz->type() <= TObj) {
+      decRef(env, params.thiz);
+    }
+
+    // Decref and free args
+    for (int i = numNonDefault - 1; i >= 0; --i) {
+      decRef(env, params[i].value);
     }
   }
 
-  push(env, result);
-  return true;
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -572,32 +629,6 @@ Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-struct ParamPrep {
-  explicit ParamPrep(size_t count) : info(count) {}
-
-  struct Info {
-    SSATmp* value{nullptr};
-    bool passByAddr{false};
-    bool needsConversion{false};
-    bool isOutputArg{false};
-  };
-
-  const Info& operator[](size_t idx) const { return info[idx]; }
-  Info& operator[](size_t idx) { return info[idx]; }
-  size_t size() const { return info.size(); }
-
-  SSATmp* thiz{nullptr};       // may be null if call is not a method
-  SSATmp* count{nullptr};      // if non-null, the count of arguments
-  jit::vector<Info> info;
-  uint32_t numByAddr{0};
-
-  // if set, coerceFailure determines the target of a failed coercion;
-  // if not set, we side-exit to the next byte-code instruction (only
-  //   applies to an inlined NativeImpl, or an FCallBuiltin).
-  Block* coerceFailure{nullptr};
-  bool forNativeImpl{false};
-};
 
 /*
  * Collect parameters for a call to a builtin.  Also determine which ones will
@@ -1166,6 +1197,11 @@ SSATmp* builtinCall(IRGS& env,
                     ParamPrep& params,
                     int32_t numNonDefault,
                     const CatchMaker& catchMaker) {
+  // Try to replace the builtin call with a specialized implementation of the
+  // builtin
+  auto optRet = optimizedFCallBuiltin(env, callee, params, numNonDefault);
+  if (optRet) return optRet;
+
   if (!params.forNativeImpl) {
     /*
      * Everything that needs to be on the stack gets spilled now.
@@ -1337,8 +1373,6 @@ void emitFCallBuiltin(IRGS& env,
   auto const callee = Unit::lookupFunc(funcName);
 
   if (!callee) PUNT(Missing-builtin);
-
-  if (optimizedFCallBuiltin(env, callee, numArgs, numNonDefault)) return;
 
   auto params = prepare_params(
     env,

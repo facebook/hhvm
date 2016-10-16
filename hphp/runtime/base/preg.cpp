@@ -743,9 +743,10 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
         throw;
       }
     }
-    if (!RuntimeOption::EvalJitNoGdb ||
-        RuntimeOption::EvalJitUseVtuneAPI ||
-        RuntimeOption::EvalPerfPidMap) {
+    if ((!RuntimeOption::EvalJitNoGdb ||
+         RuntimeOption::EvalJitUseVtuneAPI ||
+         RuntimeOption::EvalPerfPidMap) &&
+        extra->executable_jit != nullptr) {
       unsigned int size;
       pcre_fullinfo(re, extra, PCRE_INFO_JITSIZE, &size);
 

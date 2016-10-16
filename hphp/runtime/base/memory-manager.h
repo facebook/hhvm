@@ -806,7 +806,7 @@ struct MemoryManager {
   template <typename T> bool removeRoot(const req::ptr<T>& ptr);
   template <typename T> bool removeRoot(const T* ptr);
   template <typename T> req::ptr<T> removeRoot(RootId token);
-  template <typename F> void scanRootMaps(F& m) const;
+  template <typename F> void scanRootMaps(F& m, type_scan::Scanner&) const;
   template <typename F> void scanSweepLists(F& m) const;
 
   /*

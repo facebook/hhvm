@@ -171,11 +171,6 @@ template<class F> void scan_ezc_resources(F& mark) {
 #endif
 }
 
-template<class F> void req::root_handle::scan(F& mark) const {
-  ExtMarker<F> bridge(mark);
-  vscan(bridge);
-}
-
 //   [<-stack[iters[locals[params[ActRec[stack[iters[locals[ActRec...
 //   ^m_top                      ^fp                       ^firstAR
 //
@@ -263,19 +258,19 @@ void MemoryManager::scanSweepLists(F& mark) const {
 }
 
 template <typename F>
-void MemoryManager::scanRootMaps(F& m) const {
+void MemoryManager::scanRootMaps(F& mark, type_scan::Scanner& scanner) const {
   if (m_objectRoots) {
     for(const auto& root : *m_objectRoots) {
-      m(root.second);
+      mark(root.second);
     }
   }
   if (m_resourceRoots) {
     for(const auto& root : *m_resourceRoots) {
-      m(root.second);
+      mark(root.second);
     }
   }
   for (const auto root : m_root_handles) {
-    root->scan(m);
+    root->scan(scanner);
   }
 }
 
@@ -334,7 +329,7 @@ template<class F> void scanRoots(F& mark, type_scan::Scanner& scanner) {
   ExtensionRegistry::scanExtensions(xm);
   // Root maps
   mark.where(RootKind::RootMaps);
-  MM().scanRootMaps(mark);
+  MM().scanRootMaps(mark, scanner);
   // treat sweep lists as roots until we are ready to test what happens
   // when we start calling various sweep() functions early.
   mark.where(RootKind::SweepLists);

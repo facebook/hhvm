@@ -154,7 +154,9 @@ struct TypedValueAux : TypedValue {
   bool& deepInit() { return m_aux.u_deepInit; }
   const bool& deepInit() const { return m_aux.u_deepInit; }
   ConstModifiers& constModifiers() { return m_aux.u_constModifiers; }
-  const ConstModifiers& constModifiers() const { return m_aux.u_constModifiers; }
+  const ConstModifiers& constModifiers() const {
+    return m_aux.u_constModifiers;
+  }
   VarNrFlag& varNrFlag() { return m_aux.u_varNrFlag; }
   const VarNrFlag& varNrFlag() const { return m_aux.u_varNrFlag; }
 

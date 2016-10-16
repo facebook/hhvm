@@ -21,13 +21,11 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include <utility>
 
-namespace HPHP {
-struct IMarker;
-namespace req {
+namespace HPHP { namespace req {
 
 /*
  * An explicitly-tracked root, registered on construction and de-registered
- * on destruction. Subclasses of this implement vscan() and detach() methods
+ * on destruction. Subclasses of this implement tyindex() and detach() methods
  * so instances can be scanned as needed.
  * Warning: this extra tracking is expensive, and only necessary when
  * creating and destroying heap pointers in areas not already known
@@ -63,8 +61,7 @@ struct root_handle {
     m_id = INVALID;
     detach();
   }
-  template<class F> void scan(F&) const;
-  virtual void vscan(IMarker&) const = 0;
+  virtual void scan(type_scan::Scanner&) const = 0;
   virtual void detach() = 0;
 private:
   size_t addRootHandle();
@@ -121,11 +118,11 @@ struct root : T, root_handle {
   }
 
   // implement root_handle
-  void vscan(IMarker& mark) const override;
+  void scan(type_scan::Scanner&) const override;
   void detach() override;
 };
 
-template<> void root<TypedValue>::vscan(IMarker& mark) const;
+template<> void root<TypedValue>::scan(type_scan::Scanner&) const;
 template<> void root<TypedValue>::detach();
 
 }}

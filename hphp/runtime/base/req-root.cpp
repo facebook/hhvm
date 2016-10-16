@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/imarker.h"
 
 namespace HPHP {
 namespace req {
@@ -50,16 +49,16 @@ void req::root_handle::delRootHandle() {
   handles.pop_back();
 }
 
-template<class T> void root<T>::vscan(IMarker& mark) const {
-  T::scan(mark);
+template<class T> void root<T>::scan(type_scan::Scanner& scanner) const {
+  scanner.scan(*static_cast<const T*>(this));
 }
 
 template<class T> void root<T>::detach() {
   T::detach();
 }
 
-template<> void req::root<TypedValue>::vscan(IMarker& mark) const {
-  mark(*static_cast<const TypedValue*>(this));
+template<> void req::root<TypedValue>::scan(type_scan::Scanner& scanner) const {
+  scanner.scan(*static_cast<const TypedValue*>(this));
 }
 
 template<> void req::root<TypedValue>::detach() {

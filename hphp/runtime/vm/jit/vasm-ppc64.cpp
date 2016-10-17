@@ -723,13 +723,16 @@ void Vgen::emit(const mcprep& i) {
 }
 
 void Vgen::emit(const inittc&) {
+  // Set info in the frame created on the caller
+  a.mflr(rfuncln());
+  a.std(rfuncln(), rsfp()[AROFF(m_savedRip)]);
+
+  // follow the ABI and create the callee frame and set its info
+  a.addi(rsfp(), rsfp(), -min_frame_size);
+  emitSaveTOC();
+
   // initialize our rone register
   a.li(ppc64::rone(), 1);
-
-  // Set rvmfp to the previous value, as the enterTCHelper will not create
-  // a frame, so the stublogue can save the correct info regarding the
-  // previous frame, in the stublogue{ true }.
-  a.ld(rvmfp(), rsfp()[0]);
 }
 
 void Vgen::emit(const leavetc&) {

@@ -429,10 +429,12 @@ void FastCGITransport::onHeadersComplete() {
     m_httpVersion = Transport::getHTTPVersion();
   }
 
-  if (m_pathTranslated.empty()) {
-    // If someone follows http://wiki.nginx.org/HttpFastcgiModule they won't
-    // pass in PATH_TRANSLATED and instead will just send SCRIPT_FILENAME
-    m_pathTranslated = getRawHeader(s_scriptFilename);
+  if (m_scriptFilename.empty() || RuntimeOption::ServerFixPathInfo) {
+    // According to php-fpm, some servers don't set SCRIPT_FILENAME. In
+    // this case, it uses PATH_TRANSLATED.
+    // Added runtime option to change m_scriptFilename to s_pathTranslated
+    // which will allow mod_fastcgi and mod_action to work correctly.
+    m_scriptFilename = getRawHeader(s_pathTranslated);
   }
 
   // do a check for mod_proxy_fcgi and remove the extra portions of the string

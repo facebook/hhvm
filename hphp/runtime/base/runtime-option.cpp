@@ -127,6 +127,7 @@ int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
+bool RuntimeOption::ServerFixPathInfo = false;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 boost::container::flat_set<std::string>
 RuntimeOption::ServerHighPriorityEndPoints;
@@ -814,6 +815,7 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     ServerThreadDropStack = Config::GetBool(ini, server["ThreadDropStack"]);
     ServerHttpSafeMode = Config::GetBool(ini, server["HttpSafeMode"]);
     ServerStatCache = Config::GetBool(ini, server["StatCache"], false);
+    ServerFixPathInfo = Config::GetBool(ini, server["FixPathInfo"], false);
     Config::Get(ini, server["WarmupRequests"], ServerWarmupRequests);
     Config::Get(ini, server["HighPriorityEndPoints"], ServerHighPriorityEndPoints);
     ServerExitOnBindFail = Config::GetBool(ini, server["ExitOnBindFail"], false);

@@ -211,15 +211,14 @@ bool eagerRecord(const Func* func) {
     "thrift_protocol_read_binary_struct",
     "thrift_protocol_read_compact",
     "thrift_protocol_read_compact_struct",
+    "HH\\Asio\\join",
   };
 
   for (auto str : list) {
     if (!strcmp(func->name()->data(), str)) return true;
   }
 
-  return func->cls() &&
-    !strcmp(func->cls()->name()->data(), "HH\\WaitHandle") &&
-    !strcmp(func->name()->data(), "join");
+  return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

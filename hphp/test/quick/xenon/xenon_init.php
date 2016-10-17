@@ -49,7 +49,6 @@ $required_functions = array(
   'HH\Asio\join',
   'HH\Asio\v',
   Exception::class.'::__construct',
-  WaitHandle::class.'::join',
   WaitHandle::class.'::result',
 
   'fa0',

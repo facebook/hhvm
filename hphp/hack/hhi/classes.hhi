@@ -109,7 +109,6 @@ final class Generator<Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
 abstract class WaitHandle<+T> implements Awaitable<T> {
   public function getWaitHandle(): this {}
   public function import(): void {}
-  public function join(): T {}
   public function isFinished(): bool {}
   public function isSucceeded(): bool {}
   public function isFailed(): bool {}

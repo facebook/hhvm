@@ -54,7 +54,6 @@ $required_functions = array(
   'HH\Asio\join',
   'HH\Asio\result',
   Exception::class.'::__construct',
-  WaitHandle::class.'::join',
 
   'genList',
   'Closure$genList',

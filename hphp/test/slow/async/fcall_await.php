@@ -26,7 +26,7 @@ async function bar($x) {
 function main() {
   for ($i =0; $i < 7; $i++) {
     try {
-      var_dump(bar($i)->join());
+      var_dump(\HH\Asio\join(bar($i)));
     } catch (Exception $e) {
       var_dump("Caught exception: i=$i");
     }

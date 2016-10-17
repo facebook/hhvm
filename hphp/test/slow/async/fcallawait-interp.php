@@ -23,7 +23,7 @@ async function d() {
 }
 
 try {
-  a()->join();
+  \HH\Asio\join(a());
 } catch (Exception $e) {
   echo "Caught!\n";
 }

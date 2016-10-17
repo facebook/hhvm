@@ -1,4 +1,4 @@
-array(4) {
+array(3) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -25,18 +25,6 @@ array(4) {
   }
   [2]=>
   array(4) {
-    ["function"]=>
-    string(4) "join"
-    ["class"]=>
-    string(13) "HH\WaitHandle"
-    ["type"]=>
-    string(2) "->"
-    ["args"]=>
-    array(0) {
-    }
-  }
-  [3]=>
-  array(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -51,7 +39,7 @@ array(4) {
     }
   }
 }
-array(4) {
+array(3) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -79,18 +67,6 @@ array(4) {
     string(8) "I am foo"
   }
   [2]=>
-  array(4) {
-    ["function"]=>
-    string(4) "join"
-    ["class"]=>
-    string(13) "HH\WaitHandle"
-    ["type"]=>
-    string(2) "->"
-    ["args"]=>
-    array(0) {
-    }
-  }
-  [3]=>
   array(4) {
     ["file"]=>
     string(%d) "%s"

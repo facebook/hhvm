@@ -24,8 +24,8 @@ abstract class WaitHandle implements Awaitable {
   <<__HipHopSpecific, __Native>>
   final public static function setOnIOWaitExitCallback(mixed $callback): void;
 
-  /* Set callback for when join() is called
-   * @param mixed $callback - A Closure to be called on join()
+  /* Set callback for when \HH\Asio\join() is called
+   * @param mixed $callback - A Closure to be called on \HH\Asio\join()
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnJoinCallback(mixed $callback): void;
@@ -41,13 +41,6 @@ abstract class WaitHandle implements Awaitable {
    */
   <<__Native>>
   final public function import(): void;
-
-  /* Wait until this wait handle is finished and return its result (operates in
-   * a new scheduler context)
-   * @return mixed - A result of the operation represented by given wait handle
-   */
-  <<__Native("NoFCallBuiltin")>>
-  final public function join(): mixed;
 
   /* Return the wait handle's result if it is already finished (and valid),
    * throw an exception otherwise
@@ -356,13 +349,8 @@ async function void(): Awaitable<void> {}
  * Launches a new instance of scheduler to drive asynchronous execution
  * until the provided Awaitable is finished.
  */
-function join<T>(Awaitable<T> $awaitable): T {
-  invariant(
-    $awaitable instanceof WaitHandle,
-    'unsupported user-land Awaitable',
-  );
-  return $awaitable->join();
-}
+<<__Native("NoFCallBuiltin")>>
+function join<T>(Awaitable<T> $awaitable): mixed;
 
 /**
  * Get result of an already finished Awaitable.

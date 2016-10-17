@@ -77,7 +77,7 @@ struct AsioContext final {
 
   template<class F> void scan(F& mark) const {
     // m_savedFP is a pointer to a frame on the stack that represents
-    // a WaitHandle::join() call; it's guaranteed to be on the stack
+    // a \HH\Asio\join() call; it's guaranteed to be on the stack
     mark(m_runnableQueue);
     mark(m_fastRunnableQueue);
     for (auto& p : m_priorityQueueDefault) {
@@ -97,7 +97,7 @@ private:
   bool runSingle(reschedule_priority_queue_t& queue);
 
 private:
-  // Frame pointer to the ActRec of the WaitHandle::join() call.
+  // Frame pointer to the ActRec of the \HH\Asio\join() call.
   ActRec* m_savedFP;
 
   // stack of ResumableWaitHandles ready for immediate execution

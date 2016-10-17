@@ -50,7 +50,7 @@ foreach ($typeMap as $type => $inputs) {
       $func = "HH\\Asio\\{$type}{$call}{$wrap}";
       $wh = $cgen($func, $inputs);
       echo "{$func}() => ";
-      var_dump($wgen($wh->join()));
+      var_dump($wgen(\HH\Asio\join($wh)));
     }
   }
 }

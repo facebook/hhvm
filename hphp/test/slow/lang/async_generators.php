@@ -110,15 +110,12 @@ async function main($exit_type) {
   } while ($res);
 }
 
-function my_join(WaitHandle $awaitable) {
-  return $awaitable->join();
-}
-
+Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 echo "start\n";
 for ($exit_type = 0; $exit_type < 4; ++$exit_type) {
   echo "--------------------testing $exit_type--------------------\n";
   try {
-    main($exit_type)->join();
+    \HH\Asio\join(main($exit_type));
   } catch (Exception $e) {
     echo "exception: ".$e->getMessage()."\n";
     $e = null;

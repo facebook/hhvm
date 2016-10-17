@@ -18,11 +18,13 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/systemlib.h"
@@ -60,6 +62,26 @@ Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
 
 Object HHVM_FUNCTION(asio_get_running) {
   return Object{c_ResumableWaitHandle::getRunning(GetCallerFrameForArgs())};
+}
+
+Variant HHVM_FUNCTION(join, const Object& obj) {
+  if (!obj->instanceof(c_WaitHandle::classof())) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Joining unsupported for user-land Awaitable");
+  }
+  auto handle = wait_handle<c_WaitHandle>(obj.get());
+  if (!handle->isFinished()) {
+    // run the full blown machinery
+    assertx(handle->instanceof(c_WaitableWaitHandle::classof()));
+    static_cast<c_WaitableWaitHandle*>(handle)->join();
+    assertx(handle->isFinished());
+  }
+
+  if (LIKELY(handle->isSucceeded())) {
+    return cellAsCVarRef(handle->getResult());
+  } else {
+    throw_object(Object{handle->getException()});
+  }
 }
 
 bool HHVM_FUNCTION(cancel, const Object& obj, const Object& exception) {
@@ -121,6 +143,7 @@ void AsioExtension::initFunctions() {
     asio_get_current_context_idx);
   HHVM_FALIAS(HH\\asio_get_running_in_context, asio_get_running_in_context);
   HHVM_FALIAS(HH\\asio_get_running, asio_get_running);
+  HHVM_FALIAS(HH\\Asio\\join, join);
   HHVM_FALIAS(HH\\Asio\\cancel, cancel);
   HHVM_FALIAS(HH\\Asio\\backtrace, backtrace);
 }

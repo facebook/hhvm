@@ -588,42 +588,42 @@ ALWAYS_INLINE void tvUnset(TypedValue* to) {
 ALWAYS_INLINE Variant& tvAsVariant(TypedValue* tv) {
   assert(tv != nullptr);
   assert(tvIsPlausible(*tv));
-  return *(Variant*)(tv);
+  return reinterpret_cast<Variant&>(*tv);
 }
 
 ALWAYS_INLINE Variant& tvAsUninitializedVariant(TypedValue* tv) {
   // A special case, for use when constructing a variant and we don't
   // assume initialization.
-  return *(Variant*)(tv);
+  return reinterpret_cast<Variant&>(*tv);
 }
 
 // Assumes 'tv' is live
 ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue* tv) {
-  return *(const Variant*)(tv);
+  return reinterpret_cast<const Variant&>(*tv);
 }
 
 // Assumes 'tv' is live
 ALWAYS_INLINE Variant& cellAsVariant(Cell& cell) {
   assert(cellIsPlausible(cell));
-  return *(Variant*)(&cell);
+  return reinterpret_cast<Variant&>(cell);
 }
 
 // Assumes 'tv' is live
 ALWAYS_INLINE const Variant& cellAsCVarRef(const Cell& cell) {
   assert(cellIsPlausible(cell));
-  return *(const Variant*)(&cell);
+  return reinterpret_cast<const Variant&>(cell);
 }
 
 // Assumes 'tv' is live
 ALWAYS_INLINE Variant& refAsVariant(Ref& ref) {
   assert(refIsPlausible(ref));
-  return *(Variant*)(&ref);
+  return reinterpret_cast<Variant&>(ref);
 }
 
 // Assumes 'tv' is live
 ALWAYS_INLINE const Variant& refAsCVarRef(const Ref& ref) {
   assert(refIsPlausible(ref));
-  return *(const Variant*)(&ref);
+  return reinterpret_cast<const Variant&>(ref);
 }
 
 ALWAYS_INLINE bool tvIsStronglyBound(const TypedValue* tv) {

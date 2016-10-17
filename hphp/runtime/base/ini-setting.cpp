@@ -507,7 +507,7 @@ void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
 
 void IniSetting::ParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
-  Variant *arr = (Variant*)arg;
+  Variant *arr = static_cast<Variant*>(arg);
   String skey(key);
   Variant sval(value);
   forceToArray(*arr).set(skey, sval);
@@ -518,7 +518,7 @@ void IniSetting::ParserCallback::onPopEntry(
     const std::string &value,
     const std::string &offset,
     void *arg) {
-  Variant *arr = (Variant*)arg;
+  Variant *arr = static_cast<Variant*>(arg);
   forceToArray(*arr);
 
   bool oEmpty = offset.empty();

@@ -108,8 +108,12 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
     return &m_tv;
   }
 
-  const Variant* var() const { return (const Variant*)tv(); }
-  Variant* var() { return reinterpret_cast<Variant*>(tv()); }
+  const Variant* var() const {
+    return reinterpret_cast<const Variant*>(tv());
+  }
+  Variant* var() {
+    return reinterpret_cast<Variant*>(tv());
+  }
 
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
   static constexpr int cowZOffset() {

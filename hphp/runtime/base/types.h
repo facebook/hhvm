@@ -59,8 +59,8 @@ using LowStringPtr = LowPtr<const StringData>;
 using VRefParam = const struct VRefParamValue&;
 using RefResult = const struct RefResultValue&;
 
-inline const Variant& variant(RefResult v)      {
-  return *(Variant*)&v;
+inline const Variant& variant(RefResult v) {
+  return reinterpret_cast<const Variant&>(v);
 }
 
 inline const Variant& variant(const Variant& v) {

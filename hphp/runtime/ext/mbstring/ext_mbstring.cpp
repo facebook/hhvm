@@ -1428,7 +1428,7 @@ Variant HHVM_FUNCTION(mb_convert_variables,
                                         MBSTRG(strict_detection));
     if (identd != nullptr) {
       for (int n = -1; n < args.size(); n++) {
-        if (php_mbfl_encoding_detect(n < 0 ? (Variant&)vars : args[n],
+        if (php_mbfl_encoding_detect(n < 0 ? vars.wrapped() : args[n],
                                      identd, &string)) {
           break;
         }

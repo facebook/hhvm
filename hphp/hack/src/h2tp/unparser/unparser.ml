@@ -839,6 +839,7 @@ let rec u_program v = u_of_list_spc u_def v
     | Float f -> u_pstring f
     | String (p, s) ->
       StrList [Str "\""; u_pstring (p, Php_escaping.escape s); Str "\""]
+    | String2 [elem] -> StrList [u_expr elem; Str ".\"\""]
     | String2 elems ->
       (* build the string back by concatenating the parts *)
       List.map ~f:u_expr elems |>

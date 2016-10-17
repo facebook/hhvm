@@ -82,7 +82,6 @@ struct Cluster {
 
   std::vector<TargetId> targets;
   uint32_t samples;
-  double arcWeight; // intra-cluster callgraph arc weight
   uint32_t size;
   bool frozen; // not a candidate for merging
 };

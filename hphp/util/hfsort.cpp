@@ -74,7 +74,6 @@ const Arc& TargetGraph::incArcWeight(TargetId src, TargetId dst, double w) {
 Cluster::Cluster(TargetId id, const Target& f) {
   targets.push_back(id);
   size = f.size;
-  arcWeight = 0;
   samples = f.samples;
   frozen = false;
   HFTRACE(1, "new Cluster: %s\n", toString().c_str());
@@ -111,11 +110,9 @@ void mergeInto(Cluster& into, Cluster&& other, const double aw = 0) {
   into.targets.insert(into.targets.end(), other.targets.begin(), other.targets.end());
   into.size += other.size;
   into.samples += other.samples;
-  into.arcWeight += (other.arcWeight + aw);
 
   other.size = 0;
   other.samples = 0;
-  other.arcWeight = 0;
   other.targets.clear();
 }
 }

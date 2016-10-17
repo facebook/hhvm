@@ -189,9 +189,9 @@ void print(CallGraph& cg, const char* filename,
   HFTRACE(1, "============== page 0 ==============\n");
   for (auto& cluster : clusters) {
     HFTRACE(1,
-            "-------- density = %.3lf (%u / %u) arcWeight = %.1lf --------\n",
+            "-------- density = %.3lf (%u / %u) --------\n",
             (double) cluster.samples / cluster.size,
-            cluster.samples, cluster.size, cluster.arcWeight);
+            cluster.samples, cluster.size);
     for (auto fid : cluster.targets) {
       if (cg.targets[fid].samples > 0) {
         hotfuncs++;

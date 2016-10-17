@@ -283,8 +283,6 @@ struct ImageMemoryAlloc final : RequestEventHandler {
   }
 #endif
 
-  void vscan(IMarker&) const override {}
-
 private:
   size_t m_mallocSize;
 #ifdef IM_MEMORY_CHECK

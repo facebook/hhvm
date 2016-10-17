@@ -18,8 +18,6 @@
 
 namespace HPHP {
 
-struct IMarker;
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -33,8 +31,6 @@ struct RequestEventHandler {
 
   virtual void requestInit() = 0;
   virtual void requestShutdown() = 0;
-  virtual void vscan(IMarker&) const = 0;
-  template<class F> void scan(F&) const;
 
   /*
    * Priority of request shutdown call. Lower priority values are called

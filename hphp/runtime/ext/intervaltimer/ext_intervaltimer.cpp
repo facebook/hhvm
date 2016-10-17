@@ -42,11 +42,10 @@ struct TimerPool final : RequestEventHandler {
     } while (!timers.empty());
   }
 
-  void vscan(IMarker& mark) const override {
-    for (auto timer : timers) timer->scan(mark);
-  }
-
   std::unordered_set<IntervalTimer*> timers;
+  TYPE_SCAN_CUSTOM_FIELD(timers) {
+    for (auto& e : timers) scanner.scan(e);
+  }
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(TimerPool, s_timer_pool);

@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
@@ -159,11 +158,6 @@ template<class F> void ObjectData::scan(F& mark) const {
   }
 }
 
-template<class F> void RequestEventHandler::scan(F& mark) const {
-  ExtMarker<F> bridge(mark);
-  vscan(bridge);
-}
-
 template<class F> void scan_ezc_resources(F& mark) {
 #ifdef ENABLE_ZEND_COMPAT
   ExtMarker<F> bridge(mark);
@@ -274,15 +268,16 @@ void MemoryManager::scanRootMaps(F& mark, type_scan::Scanner& scanner) const {
   }
 }
 
-template<class F>
-void ThreadLocalManager::scan(F& mark) const {
+inline void ThreadLocalManager::scan(type_scan::Scanner& scanner) const {
   auto list = getList(pthread_getspecific(m_key));
   if (!list) return;
   // Skip MemoryManager. TODO(9923909): Type-specific scan, cf. NativeData.
   auto mm = (void*)&MM();
   for (auto p = list->head; p != nullptr;) {
     auto node = static_cast<ThreadLocalNode<void>*>(p);
-    if (node->m_p && node->m_p != mm) mark(node->m_p, node->m_size);
+    if (node->m_p && node->m_p != mm) {
+      scanner.scanByIndex(node->m_tyindex, node->m_p, node->m_size);
+    }
     p = node->m_next;
   }
 }
@@ -322,7 +317,7 @@ template<class F> void scanRoots(F& mark, type_scan::Scanner& scanner) {
   }
   // ThreadLocal nodes (but skip MemoryManager)
   mark.where(RootKind::ThreadLocalManager);
-  ThreadLocalManager::GetManager().scan(mark);
+  ThreadLocalManager::GetManager().scan(scanner);
   // Extension thread locals
   mark.where(RootKind::Extensions);
   ExtMarker<F> xm(mark);

@@ -74,6 +74,7 @@ private:
 #else
   clockid_t m_clockType;
   timer_t m_timerId;
+  TYPE_SCAN_IGNORE_FIELD(m_timerId); // timer_t is void*
 
   /* Whether we've created our timer yet. */
   bool m_hasTimer{false};

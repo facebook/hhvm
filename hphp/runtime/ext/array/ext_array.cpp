@@ -2459,10 +2459,6 @@ struct Collator final : RequestEventHandler {
     }
   }
 
-  void vscan(IMarker& mark) const override {
-    mark(m_locale);
-  }
-
 private:
   String     m_locale;
   UCollator *m_ucoll;

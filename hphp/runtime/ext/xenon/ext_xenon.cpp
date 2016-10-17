@@ -76,9 +76,6 @@ struct XenonRequestLocalData final : RequestEventHandler  {
   // implement RequestEventHandler
   void requestInit() override;
   void requestShutdown() override;
-  void vscan(IMarker& mark) const override {
-    mark(m_stackSnapshots);
-  }
 
   // an array of php stacks
   Array m_stackSnapshots;

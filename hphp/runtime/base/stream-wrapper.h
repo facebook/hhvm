@@ -70,7 +70,7 @@ struct Wrapper {
 
   virtual ~Wrapper() {}
 
-  virtual void vscan(IMarker& mark) const {}
+  virtual void scan(type_scan::Scanner&) const = 0;
 
   /**
    * Is there a chance that open() could return a file that is local?

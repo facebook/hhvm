@@ -33,7 +33,6 @@ struct SimpleCounter final : RequestEventHandler {
 
   void requestInit() override;
   void requestShutdown() override;
-  void vscan(IMarker&) const override {}
 
   static void Count(const std::string &name);
 

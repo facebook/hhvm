@@ -55,11 +55,11 @@ struct ZendExceptionStore final : RequestEventHandler {
       std::rethrow_exception(p);
     }
   }
-  void vscan(IMarker&) const override {
-  }
 
 private:
   std::exception_ptr m_ptr;
+  TYPE_SCAN_IGNORE_FIELD(m_ptr); // if a ptr-rich exn is thrown,
+  // it should already have been registered as root with req::root<T>
   DECLARE_STATIC_REQUEST_LOCAL(ZendExceptionStore, tl_instance);
 };
 

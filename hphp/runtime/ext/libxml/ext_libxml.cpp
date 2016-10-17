@@ -80,10 +80,6 @@ struct LibXmlRequestData final : RequestEventHandler {
     m_streams_context = nullptr;
   }
 
-  void vscan(IMarker& mark) const override {
-    mark(m_streams_context);
-  }
-
   bool m_entity_loader_disabled;
   bool m_suppress_error;
   bool m_use_error;

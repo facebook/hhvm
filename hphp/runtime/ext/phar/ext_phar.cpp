@@ -23,8 +23,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/directory.h"
 
-#include <folly/portability/Unistd.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // phar:// stream wrapper
@@ -122,6 +120,10 @@ static struct PharStreamWrapper final : Stream::Wrapper {
       SystemLib::s_PharClass
     );
     return ret;
+  }
+
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
 } s_phar_stream_wrapper;

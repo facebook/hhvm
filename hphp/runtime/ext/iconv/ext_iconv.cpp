@@ -127,12 +127,6 @@ struct ICONVGlobals final : RequestEventHandler {
 
   ICONVGlobals() {}
 
-  void vscan(IMarker& mark) const override {
-    mark(input_encoding);
-    mark(output_encoding);
-    mark(internal_encoding);
-  }
-
   void requestInit() override {
     input_encoding = s_ISO_8859_1;
     output_encoding = s_ISO_8859_1;

@@ -87,10 +87,6 @@ struct SystemlibSessionInstance final : RequestEventHandler {
   void requestInit() override { m_obj.reset(); }
   void requestShutdown() override { m_obj.reset(); }
 
-  void vscan(IMarker& mark) const override {
-    mark(m_obj);
-  }
-
 private:
   Object m_obj;
 };

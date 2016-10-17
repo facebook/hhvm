@@ -33,7 +33,6 @@ namespace HPHP {
  *   struct MyRequestLocalClass final : RequestEventHandler {
  *     virtual void requestInit() override {...}
  *     virtual void requestShutdown() override {...}
- *     virtual void vscan(IMarker&) const override {...}
  *   };
  *   IMPLEMENT_STATIC_REQUEST_LOCAL(MyRequestLocalClass, s_data);
  *

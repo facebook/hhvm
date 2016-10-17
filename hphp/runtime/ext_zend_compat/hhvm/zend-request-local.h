@@ -47,11 +47,6 @@ struct ZendRequestLocalVector final : RequestEventHandler {
   container& get() { return m_container; }
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
-  void vscan(IMarker& mark) const override {
-    for (const auto& p : m_container) {
-      if (p) p->scan(mark);
-    }
-  }
 private:
   void clear() {
     for (size_t i = 0; i < m_container.size(); ++i) {
@@ -67,6 +62,10 @@ private:
 
   container m_container;
   F m_destroy_callback;
+
+  TYPE_SCAN_CUSTOM_FIELD(m_container) {
+    for (auto& e : m_container) scanner.scan(e);
+  }
 };
 
 #define ZEND_REQUEST_LOCAL_MAP(K, V, N)                 \
@@ -80,15 +79,11 @@ struct ZendRequestLocalMap final : RequestEventHandler {
   container& get() { return m_map; }
   void requestInit() override { m_map.clear(); }
   void requestShutdown() override { m_map.clear(); }
-  void vscan(IMarker& mark) const override {
-    // TODO: t7925927 this is wrong when container has pointers. The below is
-    // sufficient for the current usage of this class.
-    for (const auto& pair : m_map) {
-      mark(&pair.second, sizeof(pair.second));
-    }
-  }
 private:
   container m_map;
+  TYPE_SCAN_CUSTOM_FIELD(m_map) {
+    for (auto& e : m_map) scanner.scan(e);
+  }
 };
 
 }

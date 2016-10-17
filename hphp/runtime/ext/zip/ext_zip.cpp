@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
@@ -120,6 +119,9 @@ struct ZipStreamWrapper final : Stream::Wrapper {
     }
 
     return req::make<ZipStream>(z, file);
+  }
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 };
 

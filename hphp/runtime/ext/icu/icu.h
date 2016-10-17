@@ -159,7 +159,6 @@ struct IntlGlobalError final : RequestEventHandler, Intl::IntlError {
   void requestShutdown() override {
     clearError();
   }
-  void vscan(IMarker&) const override {}
 };
 DECLARE_EXTERN_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 

@@ -990,6 +990,8 @@ private:
 
   // freelists to use when quarantine is active
   std::array<FreeList,kNumSmallSizes> m_quarantine;
+
+  TYPE_SCAN_IGNORE_ALL; // heap-scan handles MM fields itslef.
 };
 
 //////////////////////////////////////////////////////////////////////

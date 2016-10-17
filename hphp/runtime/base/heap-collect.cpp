@@ -73,7 +73,6 @@ struct Marker {
   void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
   void operator()(const NameValueTable*);
   void operator()(const VarEnv*);
-  void operator()(const RequestEventHandler*);
 
   // mark ambiguous pointers in the range [start,start+len)
   void operator()(const void* start, size_t len);
@@ -127,8 +126,6 @@ struct Marker {
   // TODO: these need to be implemented.
   void operator()(const ActRec&) { }
   void operator()(const Stack&) { }
-
-  void operator()(const RequestEventHandler& h) { (*this)(&h); }
 
   // Explicitly ignored field types.
   void operator()(const LowPtr<Class>&) {}
@@ -295,10 +292,6 @@ void Marker::operator()(const NameValueTable* p) {}
 // objects. assume a VarEnv* is a unique ptr, and scan it eagerly.
 void Marker::operator()(const VarEnv* p) {
   if (p) p->scan(*this);
-}
-
-void Marker::operator()(const RequestEventHandler* p) {
-  p->scan(*this);
 }
 
 void Marker::operator()(const String& p)    { (*this)(p.get()); }

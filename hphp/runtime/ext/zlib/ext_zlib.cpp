@@ -77,6 +77,9 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
     }
     return file;
   }
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
+  }
 } s_zlib_stream_wrapper;
 
 } // nil namespace

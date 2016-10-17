@@ -57,13 +57,6 @@ struct InterceptRequestData final : RequestEventHandler {
 
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
-  void vscan(IMarker& mark) const override {
-    // maybe better to teach heap-trace and IMarker about hphp_hash_set/map
-    for (auto& s : m_allowed_functions) mark(s);
-    for (auto& p : m_renamed_functions) mark(p);
-    mark(m_global_handler);
-    for (auto& p : m_intercept_handlers) mark(p);
-  }
 
 public:
   bool m_use_allowed_functions;
@@ -71,6 +64,16 @@ public:
   StringIMap<String> m_renamed_functions;
   Variant m_global_handler;
   StringIMap<Variant> m_intercept_handlers;
+
+  TYPE_SCAN_CUSTOM_FIELD(m_allowed_functions) {
+    for (auto& s : m_allowed_functions) scanner.scan(s);
+  }
+  TYPE_SCAN_CUSTOM_FIELD(m_renamed_functions) {
+    for (auto& e : m_renamed_functions) scanner.scan(e);
+  }
+  TYPE_SCAN_CUSTOM_FIELD(m_intercept_handlers) {
+    for (auto& e : m_intercept_handlers) scanner.scan(e);
+  }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 

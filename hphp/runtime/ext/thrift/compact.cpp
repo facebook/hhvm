@@ -166,8 +166,6 @@ struct CompactRequestData final : RequestEventHandler {
     clear();
   }
 
-  void vscan(IMarker&) const override {}
-
   uint8_t version;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);

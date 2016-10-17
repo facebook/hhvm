@@ -132,6 +132,7 @@ protected:
     bool threadLogOnly{false};
     PFUNC_LOG hook{nullptr};
     void *hookData;
+    TYPE_SCAN_CONSERVATIVE_FIELD(hookData);
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 

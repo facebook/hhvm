@@ -332,7 +332,6 @@ private:
       }
       return ret.toArray();
     }
-    void vscan(IMarker&) const override {}
 
   private:
     timelib_error_container *m_errors;

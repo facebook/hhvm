@@ -69,9 +69,6 @@ struct PtrFilter: F {
   void operator()(const NameValueTable& p) { p.scan(*this); }
   void operator()(const VarEnv& venv) { (*this)(&venv); }
 
-  void operator()(const RequestEventHandler& p) { p.scan(*this); }
-  void operator()(const RequestEventHandler* p) { p->scan(*this); }
-
   // mark a TypedValue or TypedValueAux. taking tv by value would exclude aux.
   void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
   void operator()(const TypedValue& tv) {

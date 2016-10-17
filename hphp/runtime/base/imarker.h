@@ -53,7 +53,6 @@ struct NameValueTable;
 struct ActRec;
 struct Stack;
 struct VarEnv;
-struct RequestEventHandler;
 struct IMarker;
 struct Expression;
 struct Unit;
@@ -109,7 +108,6 @@ struct IMarker {
   virtual void operator()(const ActRec&) = 0;
   virtual void operator()(const Stack&) = 0;
   virtual void operator()(const VarEnv&) = 0;
-  virtual void operator()(const RequestEventHandler&) = 0;
 
   virtual void operator()(const StringData*) = 0;
   virtual void operator()(const ArrayData*) = 0;
@@ -138,7 +136,6 @@ struct IMarker {
   void operator()(const Array* a) { (*this)(*a); }
   void operator()(const Resource* r) { (*this)(*r); }
   void operator()(const String* s) { (*this)(*s); }
-  void operator()(const RequestEventHandler* reh) { (*this)(*reh); }
 
   template <typename T>
   void operator()(const typename std::list<T>::iterator& p) {
@@ -469,7 +466,6 @@ template<class F> struct ExtMarker final: IMarker {
   void operator()(const ActRec& p) override { mark_(p); }
   void operator()(const Stack& p) override { mark_(p); }
   void operator()(const VarEnv& p) override { mark_(p); }
-  void operator()(const RequestEventHandler& p) override { mark_(p); }
 
   void operator()(const StringData* p) override { mark_(p); }
   void operator()(const ArrayData* p) override { mark_(p); }

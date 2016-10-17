@@ -309,9 +309,6 @@ struct ExtensionList final : RequestEventHandler {
   void requestShutdown() override {
     extensions.reset();
   }
-  void vscan(IMarker& mark) const override {
-    mark(extensions);
-  }
 
   Array extensions;
 };

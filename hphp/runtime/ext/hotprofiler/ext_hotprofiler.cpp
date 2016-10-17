@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -573,7 +572,8 @@ public:
     return m_flags & NoTrackBuiltins;
   }
 
-  void vscan(IMarker& mark) const override {
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
 private:
@@ -972,7 +972,8 @@ struct TraceProfiler final : Profiler {
     return m_flags & NoTrackBuiltins;
   }
 
-  void vscan(IMarker& mark) const override {
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
   TraceEntry* m_traceBuffer;
@@ -1055,8 +1056,8 @@ public:
     }
   }
 
-  void vscan(IMarker& mark) const override {
-    // nothing to mark
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
 private:
@@ -1285,10 +1286,6 @@ struct MemoProfiler final : Profiler {
   }
 
   struct MemberMemoInfo {
-    template<class F> void scan(F& mark) const {
-      mark(m_return_value);
-      mark(m_ret_tv);
-    }
     String m_return_value;
     TypedValue m_ret_tv;
     int m_count{0};
@@ -1296,11 +1293,6 @@ struct MemoProfiler final : Profiler {
   using MemberMemoMap = hphp_hash_map<std::string, MemberMemoInfo, string_hash>;
 
   struct MemoInfo {
-    template<class F> void scan(F& mark) const {
-      for (auto& e : m_member_memos) e.second.scan(mark);
-      mark(m_return_value);
-      mark(m_ret_tv);
-    }
     MemberMemoMap m_member_memos; // Keyed by serialized args
     String m_return_value;
     TypedValue m_ret_tv;
@@ -1308,26 +1300,31 @@ struct MemoProfiler final : Profiler {
     bool m_ignore{false};
     bool m_has_this{false};
     bool m_ret_tv_same{true};
+    TYPE_SCAN_CUSTOM_FIELD(m_member_memos) {
+      for (auto& e : m_member_memos) scanner.scan(e.second);
+    }
   };
   using MemoMap = hphp_hash_map<std::string, MemoInfo, string_hash>;
 
   struct Frame {
     explicit Frame(const char* symbol) : m_symbol(symbol) {}
-    template<class F> void scan(F& mark) const {
-      mark(m_args);
-    }
     const char* m_symbol;
     String m_args;
   };
 
-  void vscan(IMarker& mark) const override {
-    for (auto& e : m_memos) e.second.scan(mark);
-    for (auto& f : m_stack) f.scan(mark);
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
 public:
   MemoMap m_memos; // Keyed by function name
   vector<Frame> m_stack;
+  TYPE_SCAN_CUSTOM_FIELD(m_memos) {
+    for (auto& e : m_memos) scanner.scan(e.second);
+  }
+  TYPE_SCAN_CUSTOM_FIELD(m_stack) {
+    for (auto& e : m_stack) scanner.scan(e);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

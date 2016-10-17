@@ -1943,9 +1943,6 @@ struct DirectoryData final : RequestEventHandler {
   void requestShutdown() override {
     defaultDirectory = nullptr;
   }
-  void vscan(IMarker& mark) const override {
-    mark(defaultDirectory);
-  }
   req::ptr<Directory> defaultDirectory;
 };
 

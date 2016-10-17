@@ -58,6 +58,7 @@ struct PtrMap {
   private:
     void* getPointerImpl(void* ptr) const;
     void* m_root;
+    TYPE_SCAN_IGNORE_FIELD(m_root); // points to a malloc'd radix tree node
   };
 
   PtrMap m_map;

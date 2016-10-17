@@ -173,10 +173,6 @@ struct ShmopRequestLocal final : RequestEventHandler {
     m_records.clear();
   }
 
-  virtual void vscan(IMarker&) const override {
-    // no-op
-  }
-
   ShmRec* findShm(const char* functionName, int64_t shmid) {
     auto const it = m_records.find(shmid);
     if (it == m_records.end()) {

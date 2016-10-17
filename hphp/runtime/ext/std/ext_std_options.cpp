@@ -80,10 +80,6 @@ struct OptionData final : RequestEventHandler {
     assertCallback.unset();
   }
 
-  void vscan(IMarker& mark) const override {
-    mark(assertCallback);
-  }
-
   int assertActive;
   int assertException;
   int assertWarning;

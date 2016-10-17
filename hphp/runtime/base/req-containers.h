@@ -111,6 +111,17 @@ shared_ptr<T> make_shared(Args&&... args) {
   );
 }
 
+template <typename T>
+struct weak_ptr final : std::weak_ptr<T> {
+  using Base = std::weak_ptr<T>;
+  using Base::Base;
+  shared_ptr<T> lock() const {
+    return shared_ptr<T>(Base::lock());
+  }
+  TYPE_SCAN_IGNORE_BASES(Base);
+  TYPE_SCAN_IGNORE_ALL;
+};
+
 #ifndef __APPLE__ // XXX: this affects codegen quality but not correctness
 static_assert(
   sizeof(unique_ptr<int>) == sizeof(std::unique_ptr<int>),

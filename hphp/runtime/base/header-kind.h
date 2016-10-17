@@ -65,7 +65,7 @@ enum class Counted {
   Always // objects must be in request-heap with positive refcounts
 };
 
-enum class GCBits: uint8_t {
+enum GCBits {
   Unmarked = 0,
   Mark = 1,
   CMark = 2,
@@ -96,7 +96,8 @@ struct HeaderWord {
     struct {
       T aux;
       HeaderKind kind;
-      mutable GCBits marks;
+      mutable bool weak_refed:1;
+      mutable GCBits marks:7;
       mutable RefCount count;
     };
     struct { uint32_t lo32, hi32; };

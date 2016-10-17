@@ -66,7 +66,7 @@ bool PDOPgSqlConnection::create(const Array &options){
     { "user", nullptr, 0 },
     { "password", nullptr, 0 }
   };
-  parseDataSource(data_source.data(), data_source.size(), vars, 5);
+  parseDataSource(data_source.data(), data_source.size(), vars, 5, "; ");
 
   std::stringstream conninfo;
   conninfo << "host='";

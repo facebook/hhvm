@@ -15,6 +15,9 @@ type t = {
   use_watchman: bool;
   watchman_init_timeout: int; (* in seconds *)
   watchman_subscribe: bool;
+  (** The directory (relative path) for touching temporary files
+   * meant for synchronized watchman queries. *)
+  watchman_sync_directory: string;
   use_mini_state: bool;
   load_mini_script_timeout: int; (* in seconds *)
   type_decl_bucket_size: int;
@@ -32,6 +35,7 @@ let default = {
   use_watchman = false;
   watchman_init_timeout = 10;
   watchman_subscribe = false;
+  watchman_sync_directory = "";
   use_mini_state = false;
   load_mini_script_timeout = 20;
   type_decl_bucket_size = 1000;
@@ -48,6 +52,14 @@ let default = {
 let path =
   let dir = try Sys.getenv "HH_LOCALCONF_PATH" with _ -> "/etc" in
   Filename.concat dir "hh.conf"
+
+let warn_dir_not_exist dir = match dir with
+  | None ->
+    Hh_logger.log "%s" ("Watchman sync directory not specified. We will be " ^
+      "using the repo root.");
+    default.watchman_sync_directory
+  | Some dir ->
+    dir
 
 let load_ fn =
   (* Print out the contents in our logs so we know what settings this server
@@ -69,6 +81,14 @@ let load_ fn =
   let watchman_init_timeout =
     int_ "watchman_init_timeout" ~default:10 config in
   let watchman_subscribe = bool_ "watchman_subscribe" ~default:false config in
+  let watchman_sync_directory_opt =
+    string_opt "watchman_sync_directory" config in
+  let watchman_sync_directory =
+    if use_watchman
+    then warn_dir_not_exist watchman_sync_directory_opt
+    else
+      ""
+  in
   let io_priority = int_ "io_priority" ~default:7 config in
   let cpu_priority = int_ "cpu_priority" ~default:10 config in
   let shm_dirs = string_list
@@ -85,6 +105,7 @@ let load_ fn =
     use_watchman;
     watchman_init_timeout;
     watchman_subscribe;
+    watchman_sync_directory;
     use_mini_state;
     load_mini_script_timeout;
     type_decl_bucket_size;
@@ -100,6 +121,8 @@ let load_ fn =
 
 let load () =
   try load_ path
-  with _ ->
+  with
+  | e ->
+    Hh_logger.log "Loading config exception: %s" (Printexc.to_string e);
     Hh_logger.log "Could not load config at %s, using defaults" path;
     default

@@ -30,6 +30,7 @@ let make_genv options config local_config handle =
     else Watchman.init {
       Watchman.init_timeout = local_config.SLC.watchman_init_timeout;
       subscribe_to_changes = local_config.SLC.watchman_subscribe;
+      sync_directory = local_config.SLC.watchman_sync_directory;
       root = root;
     }
   in

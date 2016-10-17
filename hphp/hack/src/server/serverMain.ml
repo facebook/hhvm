@@ -447,6 +447,9 @@ let daemon_main (state, options) (ic, oc) =
     ServerInit.print_hash_stats ();
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit_status.(exit Hash_table_full)
+  | Worker.Worker_oomed as e->
+    Hh_logger.exc e;
+    Exit_status.(exit Worker_oomed)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
 

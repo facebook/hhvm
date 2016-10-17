@@ -334,7 +334,10 @@ int main(int argc, char* argv[]) {
     readEdgcntData(cg, edgcntFile);
     fclose(edgcntFile);
   }
-  cg.printDot("cg.dot");
+  cg.printDot("cg.dot",
+              [&](TargetId id) {
+                return cg.funcs[id].mangledNames[0].c_str();
+              });
 
   std::vector<Cluster> clusters;
 

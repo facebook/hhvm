@@ -57,39 +57,6 @@ TargetId CallGraph::addrToTargetId(uint64_t addr) const {
   return it->second;
 }
 
-void CallGraph::printDot(char* fileName) const {
-  FILE* file = fopen(fileName, "wt");
-  if (!file) return;
-  SCOPE_EXIT { fclose(file); };
-
-  fprintf(file, "digraph g {\n");
-  for (size_t f = 0; f < funcs.size(); f++) {
-    if (targets[f].samples == 0) continue;
-    fprintf(
-      file,
-      "f%lu [label=\"%s\\nsamples=%u\\nsize=%u\"];\n",
-      f,
-      funcs[f].mangledNames[0].c_str(),
-      targets[f].samples,
-      targets[f].size);
-  }
-  for (size_t f = 0; f < funcs.size(); f++) {
-    if (targets[f].samples == 0) continue;
-    for (auto dst : targets[f].succs) {
-      auto& arc = *arcs.find(Arc(f, dst));
-      fprintf(
-        file,
-        "f%lu -> f%u [label=\"normWgt=%.3lf,weight=%.0lf,callOffset=%.1lf\"];\n",
-        f,
-        dst,
-        arc.normalizedWeight,
-        arc.weight,
-        arc.avgCallOffset);
-    }
-  }
-  fprintf(file, "}\n");
-}
-
 std::string CallGraph::toString(TargetId id) const {
   return folly::sformat("func = {:5} : samples = {:6} : size = {:6} : {}\n",
                         id, targets[id].samples, targets[id].size,

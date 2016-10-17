@@ -71,6 +71,9 @@ struct TargetGraph {
   TargetId addTarget(uint32_t size, uint32_t samples = 0);
   const Arc& incArcWeight(TargetId src, TargetId dst, double w = 1.0);
 
+  template<class L>
+  void printDot(char* fileName, L getLabel) const;
+
   std::vector<Target> targets;
   std::unordered_set<Arc, ArcHash> arcs;
 };
@@ -86,6 +89,8 @@ struct Cluster {
   bool frozen; // not a candidate for merging
 };
 
+/////////////////////////////////////////////////////////////////////////
+
 bool compareClustersDensity(const Cluster& c1, const Cluster& c2);
 std::vector<Cluster> clusterize(const TargetGraph& cg);
 
@@ -95,6 +100,43 @@ std::vector<Cluster> clusterize(const TargetGraph& cg);
  *            PLDI '90
  */
 std::vector<Cluster> pettisAndHansen(const TargetGraph& cg);
+
+/////////////////////////////////////////////////////////////////////////
+
+template<class L>
+void TargetGraph::printDot(char* fileName, L getLabel) const {
+  FILE* file = fopen(fileName, "wt");
+  if (!file) return;
+
+  fprintf(file, "digraph g {\n");
+  for (size_t f = 0; f < targets.size(); f++) {
+    if (targets[f].samples == 0) continue;
+    fprintf(
+      file,
+      "f%lu [label=\"%s\\nsamples=%u\\nsize=%u\"];\n",
+      f,
+      getLabel(f),
+      targets[f].samples,
+      targets[f].size);
+  }
+  for (size_t f = 0; f < targets.size(); f++) {
+    if (targets[f].samples == 0) continue;
+    for (auto dst : targets[f].succs) {
+      auto& arc = *arcs.find(Arc(f, dst));
+      fprintf(
+        file,
+        "f%lu -> f%u [label=\"normWgt=%.3lf,weight=%.0lf,callOffset=%.1lf\"];"
+        "\n",
+        f,
+        dst,
+        arc.normalizedWeight,
+        arc.weight,
+        arc.avgCallOffset);
+    }
+  }
+  fprintf(file, "}\n");
+  fclose(file);
+}
 
 }}
 

@@ -277,6 +277,12 @@ struct ImmFolder {
   void fold(movzlq& in, Vinstr& out) {
     extend_truncate_impl(in, out);
   }
+  void fold(movzwl& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
+  }
+  void fold(movzwq& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
+  }
   void fold(movtql& in, Vinstr& out) {
     extend_truncate_impl(in, out);
   }

@@ -233,6 +233,8 @@ struct Vunit;
   O(movzbw, Inone, UH(s,d), DH(d,s))\
   O(movzbl, Inone, UH(s,d), DH(d,s))\
   O(movzbq, Inone, UH(s,d), DH(d,s))\
+  O(movzwl, Inone, UH(s,d), DH(d,s))\
+  O(movzwq, Inone, UH(s,d), DH(d,s))\
   O(movzlq, Inone, UH(s,d), DH(d,s))\
   O(movtdb, Inone, UH(s,d), DH(d,s))\
   O(movtdq, Inone, UH(s,d), DH(d,s))\
@@ -315,6 +317,7 @@ struct Vunit;
   O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
   O(extrb, Inone, UH(s,d), DH(d,s))\
+  O(extrw, Inone, UH(s,d), DH(d,s))\
   O(extsb, Inone, UH(s,d), DH(d,s))\
   O(extsw, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
@@ -1036,6 +1039,8 @@ struct movl { Vreg32 s, d; };
 struct movzbw { Vreg8 s; Vreg16 d; };
 struct movzbl { Vreg8 s; Vreg32 d; };
 struct movzbq { Vreg8 s; Vreg64 d; };
+struct movzwl { Vreg16 s; Vreg32 d; };
+struct movzwq { Vreg16 s; Vreg64 d; };
 struct movzlq { Vreg32 s; Vreg64 d; };
 // truncated s to d
 struct movtdb { VregDbl s; Vreg8 d; };
@@ -1152,6 +1157,7 @@ struct uxth { Vreg16 s; Vreg32 d; };
  * ppc64 intrinsics.
  */
 struct extrb { Vreg8 s; Vreg8 d; };   // Extract and zeros the upper bits
+struct extrw { Vreg16 s; Vreg64 d; }; // Extract and zeros the upper bits
 struct extsb { Vreg64 s; Vreg64 d; }; // Extend byte sign
 struct extsw { Vreg64 s; Vreg64 d; }; // Extend word sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };

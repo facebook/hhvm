@@ -203,9 +203,13 @@ struct Vgen {
   void emit(const divint& i) { a.divd(i.d,  i.s0, i.s1, false); }
   void emit(const divsd& i) { a.fdiv(i.d, i.s1, i.s0); }
   void emit(const extrb& i ) {
-    int8_t sh = CHAR_BIT;
+    int8_t sh = 8;
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lower byte
     a.extsb(Reg64(i.d), Reg64(i.d));                // extend sign
+  }
+  void emit(const extrw& i ) {
+    int8_t sh = 16;
+    a.rlwinm(i.d, Reg64(i.s), 0, 32-sh, 31); // extract lower 16 bits
   }
   void emit(const extsb& i) { a.extsb(i.d, i.s); }
   void emit(const extsw& i) { a.extsw(i.d, i.s); }
@@ -1197,6 +1201,8 @@ void lowerForPPC64(Vout& v, movtdq& inst) { v << copy{inst.s, inst.d}; }
 // Lower all movzb* to extrb as ppc64 always sign extend the unused bits of reg.
 void lowerForPPC64(Vout& v, movzbl& i)    { v << extrb{i.s, Reg8(i.d)}; }
 void lowerForPPC64(Vout& v, movzbq& i)    { v << extrb{i.s, Reg8(i.d)}; }
+void lowerForPPC64(Vout& v, movzwl& i)    { v << extrw{i.s, Reg64(i.d)}; }
+void lowerForPPC64(Vout& v, movzwq& i)    { v << extrw{i.s, i.d}; }
 void lowerForPPC64(Vout& v, movzlq& i)    { v << movl{i.s, Reg32(i.d)}; }
 
 void lowerForPPC64(Vout& v, srem& i) {

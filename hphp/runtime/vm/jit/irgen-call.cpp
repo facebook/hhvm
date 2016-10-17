@@ -319,7 +319,8 @@ const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
 inline SSATmp* ldCtxForClsMethod(IRGS& env,
                                  const Func* callee,
                                  SSATmp* callCtx,
-                                 const Class* cls) {
+                                 const Class* cls,
+                                 bool exact) {
 
   assertx(callCtx->isA(TCls));
 
@@ -335,10 +336,28 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
     return gen_missing_this();
   }
 
-  auto const canUseThis = curClass(env)->classof(cls);
-  if (!canUseThis && !cls->classof(curClass(env))) {
+  auto const maybeUseThis = curClass(env)->classof(cls);
+  if (!maybeUseThis && !cls->classof(curClass(env))) {
     return gen_missing_this();
   }
+
+  auto skipAT = [] (SSATmp* val) {
+    while (val->inst()->is(AssertType, CheckType, CheckCtxThis)) {
+      val = val->inst()->src(0);
+    }
+    return val;
+  };
+
+  auto const canUseThis = [&] () -> bool {
+    // A static::foo() call can always pass through a $this
+    // from the caller (if it has one). Match the common patterns
+    auto cc = skipAT(callCtx);
+    if (cc->inst()->is(LdObjClass, LdClsCtx, LdClsCctx)) {
+      cc = skipAT(cc->inst()->src(0));
+      if (cc->inst()->is(LdCtx, LdCctx)) return true;
+    }
+    return maybeUseThis && (exact || cls->attrs() & AttrNoOverride);
+  }();
 
   auto const ctx = gen(env, LdCtx, fp(env));
 
@@ -349,8 +368,9 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
       auto thiz = castCtxThis(env, ctx);
       if (!canUseThis) {
         auto thizCls = gen(env, LdObjClass, thiz);
-        auto flag = gen(env, ExtendsClass,
-                        ExtendsClassData{ cls, true }, thizCls);
+        auto flag = exact ?
+          gen(env, ExtendsClass, ExtendsClassData{ cls, true }, thizCls) :
+          gen(env, InstanceOf, thizCls, callCtx);
         gen(env, JmpZero, taken, flag);
       }
       return thiz;
@@ -383,7 +403,8 @@ bool optimizeProfiledPushMethod(IRGS& env,
                     SSATmp* ctx,
                     const Class* cls) -> SSATmp* {
     if (isStaticCall) {
-      return ldCtxForClsMethod(env, callee, ctx, cls ? cls : callee->cls());
+      return ldCtxForClsMethod(env, callee, ctx,
+                               cls ? cls : callee->cls(), cls != nullptr);
     }
     if (!callee->isStatic()) return ctx;
     assertx(ctx->type() <= TObj);
@@ -667,7 +688,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
     if (forward) {
       ctx = forwardCtx(env, ldCtx(env), cns(env, callee));
     } else {
-      ctx = ldCtxForClsMethod(env, callee, cns(env, cls), cls);
+      ctx = ldCtxForClsMethod(env, callee, cns(env, cls), cls, true);
     }
   } else {
     ctx = cns(env, TNullptr);
@@ -905,7 +926,7 @@ bool fpushClsMethodKnown(IRGS& env,
                                           exact);
   if (!func) return false;
 
-  auto const objOrCls = ldCtxForClsMethod(env, func, ctx, baseClass);
+  auto const objOrCls = ldCtxForClsMethod(env, func, ctx, baseClass, exact);
   if (check) {
     assertx(exact);
     if (!classIsPersistentOrCtxParent(env, baseClass)) {

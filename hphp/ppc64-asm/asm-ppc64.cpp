@@ -29,20 +29,22 @@ VMTOC::~VMTOC() {
 }
 
 int64_t VMTOC::pushElem(int64_t elem) {
-  if (m_map.count(elem)) return m_map[elem];
+  auto& map_elem = m_map[elem];
+  if (map_elem) return map_elem;
 
   auto offset = allocTOC(static_cast<int32_t>(elem & 0xffffffff), true);
-  m_map.insert( { elem, offset });
+  map_elem = offset;
   allocTOC(static_cast<int32_t>((elem & 0xffffffff00000000) >> 32));
   m_last_elem_pos += 2;
   return offset;
 }
 
 int64_t VMTOC::pushElem(int32_t elem) {
-  if (m_map.count(elem)) return m_map[elem];
+  auto& map_elem = m_map[elem];
+  if (map_elem) return map_elem;
 
   auto offset = allocTOC(elem);
-  m_map.insert( { elem, offset });
+  map_elem = offset;
   m_last_elem_pos++;
   return offset;
 }

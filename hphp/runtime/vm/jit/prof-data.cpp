@@ -104,10 +104,10 @@ TransID ProfData::proflogueTransId(const Func* func, int nArgs) const {
   );
 }
 
-TransID ProfData::dvFuncletTransId(const Func* func, int nArgs) const {
+TransID ProfData::dvFuncletTransId(SrcKey sk) const {
   return folly::get_default(
     m_dvFuncletDB,
-    PrologueID{func->getFuncId(), nArgs},
+    sk.toAtomicInt(),
     kInvalidTransID
   );
 }
@@ -132,13 +132,12 @@ void ProfData::addTransProfile(TransID transID,
   auto const bcOffset = startSk.offset();
 
   if (func->isDVEntry(bcOffset)) {
-    auto const nParams = func->getDVEntryNumParams(bcOffset);
     // Normal DV funclets don't have type guards, and thus have a single
     // translation.  However, some special functions written in hhas
     // (e.g. array_map) have complex DV funclets that get retranslated for
     // different types.  For those functions, m_dvFuncletDB keeps the TransID
     // for their first translation.
-    m_dvFuncletDB.emplace(PrologueID{funcId, nParams}, transID);
+    m_dvFuncletDB.emplace(startSk.toAtomicInt(), transID);
   }
 
   {

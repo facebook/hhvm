@@ -150,7 +150,7 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
 
     if (res == LookupResult::MethodFoundNoThis ||
         res == LookupResult::MagicCallStaticFound) {
-      if (!f->isStaticInProlog()) {
+      if (!f->isStaticInPrologue()) {
         raise_missing_this(f);
       }
       ar->setClass(cls);

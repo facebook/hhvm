@@ -681,7 +681,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   ctx.func = ctx.cls->lookupMethod(s.get());
   if (ctx.func) {
     // Null out this_ for statically called methods
-    if (ctx.func->isStaticInProlog()) {
+    if (ctx.func->isStaticInPrologue()) {
       ctx.this_ = nullptr;
     }
   } else {

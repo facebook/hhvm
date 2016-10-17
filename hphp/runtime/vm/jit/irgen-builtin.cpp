@@ -1422,10 +1422,9 @@ void emitNativeImpl(IRGS& env) {
     env,
     [&] (Block* fallback) {
       if (thiz) {
-        if (callee->isStatic()) {
+        if (!hasThis(env)) {
           thiz = gen(env, LdClsCtx, thiz);
         } else {
-          gen(env, CheckCtxThis, fallback, thiz);
           thiz = castCtxThis(env, thiz);
         }
       }

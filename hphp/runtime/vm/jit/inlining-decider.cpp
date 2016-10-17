@@ -516,12 +516,22 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
                                    int32_t maxBCInstrs) {
   auto const numParams = callee->numParams();
 
+  bool hasThis;
+  if (ctxType <= TObj || !ctxType.maybe(TObj)) {
+    hasThis = ctxType <= TObj;
+  } else if (!callee->hasThisVaries()) {
+    hasThis = callee->mayHaveThis();
+  } else {
+    return RegionDescPtr{};
+  }
+
   // Set up the RegionContext for the tracelet selector.
-  RegionContext ctx;
-  ctx.func = callee;
-  ctx.bcOffset = callee->getEntryForNumArgs(numArgs);
-  ctx.spOffset = FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())};
-  ctx.resumed = false;
+  RegionContext ctx{
+    callee, callee->getEntryForNumArgs(numArgs),
+    FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())},
+    false,
+    hasThis
+  };
 
   for (uint32_t i = 0; i < numArgs; ++i) {
     auto type = argTypes[i];
@@ -550,16 +560,23 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
 
 TransID findTransIDForCallee(const ProfData* profData,
                              const Func* callee, const int numArgs,
-                             std::vector<Type>& argTypes) {
+                             Type ctxType, std::vector<Type>& argTypes) {
   auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
 
   auto const offset = callee->getEntryForNumArgs(numArgs);
+  TransID ret = kInvalidTransID;
+  bool hasThisVaries = callee->hasThisVaries() &&
+    ctxType.maybe(TObj) && !(ctxType <= TObj);
   for (auto const id : idvec) {
     auto const rec = profData->transRec(id);
     if (rec->startBcOff() != offset) continue;
     auto const region = rec->region();
 
     auto const isvalid = [&] () {
+      if (!hasThisVaries &&
+          (rec->srcKey().hasThis() != ctxType.maybe(TObj))) {
+        return false;
+      }
       for (auto const& typeloc : region->entry()->typePreConditions()) {
         if (typeloc.location.tag() != LTag::Local) continue;
         auto const locId = typeloc.location.localId();
@@ -571,9 +588,14 @@ TransID findTransIDForCallee(const ProfData* profData,
       return true;
     }();
 
-    if (isvalid) return id;
+    if (!isvalid) continue;
+    if (!hasThisVaries) return id;
+    // The function may be called with or without $this, if we've seen
+    // both, give up.
+    if (ret != kInvalidTransID) return kInvalidTransID;
+    ret = id;
   }
-  return kInvalidTransID;
+  return ret;
 }
 
 RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
@@ -582,7 +604,9 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
   auto const profData = jit::profData();
   if (!profData || !profData->profiling(callee->getFuncId())) return nullptr;
 
-  auto const dvID = findTransIDForCallee(profData, callee, numArgs, argTypes);
+  auto const dvID = findTransIDForCallee(profData, callee,
+                                         numArgs, ctxType, argTypes);
+
   if (dvID == kInvalidTransID) {
     return nullptr;
   }
@@ -616,9 +640,18 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   auto const& fpiStack = irgs.irb->fs().fpiStack();
   assertx(!fpiStack.empty());
   auto const& fpiInfo = fpiStack.back();
-  auto const ctx = fpiInfo.ctxType;
+  auto ctx = fpiInfo.ctxType;
 
   if (ctx == TBottom) return nullptr;
+  if (callee->isClosureBody()) {
+    if (!callee->cls()) {
+      ctx = TNullptr;
+    } else if (callee->mayHaveThis()) {
+      ctx = TCtx;
+    } else {
+      ctx = TCctx;
+    }
+  }
 
   std::vector<Type> argTypes;
   for (int i = numArgs - 1; i >= 0; --i) {

@@ -163,12 +163,6 @@ struct FrameState {
   bool needRatchet{false};
 
   /*
-   * thisAvailable tracks whether the current frame is known to have a
-   * non-null $this pointer.
-   */
-  bool thisAvailable{false};
-
-  /*
    * ctx tracks the current ActRec's this/ctx field
    */
   SSATmp* ctx{nullptr};
@@ -333,7 +327,6 @@ struct FrameStateMgr final {
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
   SSATmp*     memberBaseValue()   const { return cur().mbase.value; }
   bool        needRatchet()       const { return cur().needRatchet; }
-  bool        thisAvailable()     const { return cur().thisAvailable; }
   bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
   bool        stackModified()     const { return cur().stackModified; }
   const jit::vector<FPIInfo>& fpiStack() const { return cur().fpiStack; }
@@ -346,7 +339,6 @@ struct FrameStateMgr final {
    */
   void setMemberBaseValue(SSATmp* base) { cur().mbase.value = base; }
   void setNeedRatchet(bool b)           { cur().needRatchet = b; }
-  void setThisAvailable()               { cur().thisAvailable = true; }
   void resetStackModified()             { cur().stackModified = false; }
   void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
   void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }

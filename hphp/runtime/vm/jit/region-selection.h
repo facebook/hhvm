@@ -287,8 +287,8 @@ struct RegionDesc::Block {
   using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
   using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
-  explicit Block(const Func* func, bool resumed, Offset start, int length,
-                 FPInvOffset initSpOff);
+  explicit Block(const Func* func, bool resumed, bool hasThis,
+                 Offset start, int length, FPInvOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -299,10 +299,12 @@ struct RegionDesc::Block {
   BlockId     id()                const { return m_id; }
   const Unit* unit()              const { return m_func->unit(); }
   const Func* func()              const { return m_func; }
-  SrcKey      start()             const { return SrcKey { m_func, m_start,
-                                                          m_resumed }; }
-  SrcKey      last()              const { return SrcKey { m_func, m_last,
-                                                          m_resumed }; }
+  SrcKey      start()             const {
+    return SrcKey { m_func, m_start, m_resumed, m_hasThis };
+  }
+  SrcKey      last()              const {
+    return SrcKey { m_func, m_last, m_resumed, m_hasThis };
+  }
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
@@ -386,6 +388,7 @@ private:
   BlockId         m_id;
   const Func*     m_func;
   const bool      m_resumed;
+  const bool      m_hasThis;
   const Offset    m_start;
   Offset          m_last;
   int             m_length;
@@ -418,10 +421,15 @@ struct RegionContext {
   struct LiveType;
   struct PreLiveAR;
 
+  RegionContext(const Func* f, Offset bcOff, FPInvOffset spOff,
+                bool r, bool ht) :
+      func(f), bcOffset(bcOff), spOffset(spOff), resumed(r), hasThis(ht) {}
+
   const Func* func;
   Offset bcOffset;
   FPInvOffset spOffset;
   bool resumed;
+  bool hasThis;
   jit::vector<LiveType> liveTypes;
   jit::vector<PreLiveAR> preLiveARs;
 };

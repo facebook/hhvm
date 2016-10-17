@@ -369,7 +369,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       fp->func()->cls(),
       CallType::ObjMethod
     );
-    if (UNLIKELY(!func || func->isStaticInProlog())) {
+    if (UNLIKELY(!func || func->isStaticInPrologue())) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 

@@ -256,7 +256,7 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
     return;
   }
 
-  auto const isStatic = func->isStaticInProlog();
+  auto const isStatic = func->isStaticInPrologue();
   mce->m_key   = reinterpret_cast<uintptr_t>(cls) | uintptr_t{isStatic} << 1;
   mce->m_value = func;
   ar->m_func   = func;
@@ -364,7 +364,7 @@ void handleSlowPath(rds::Handle mce_handle,
     }
     mceValue = mce->m_value;
   }
-  assertx(!mceValue->isStaticInProlog());
+  assertx(!mceValue->isStaticInPrologue());
 
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
@@ -430,7 +430,7 @@ void handleSlowPath(rds::Handle mce_handle,
       // Bummer.
       ar->m_func   = cand;
       mce->m_value = cand;
-      if (UNLIKELY(cand->isStaticInProlog())) {
+      if (UNLIKELY(cand->isStaticInPrologue())) {
         return readPublicStatic<fatal>(mce, ar, cls, cand);
       }
       mce->m_key = reinterpret_cast<uintptr_t>(cls);
@@ -447,7 +447,7 @@ void handleSlowPath(rds::Handle mce_handle,
     // call the new implementation too.  We also know the new function
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == mceValue->baseCls())) {
-      assertx(!cand->isStaticInProlog());
+      assertx(!cand->isStaticInPrologue());
       ar->m_func   = cand;
       mce->m_value = cand;
       mce->m_key   = reinterpret_cast<uintptr_t>(cls);

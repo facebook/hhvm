@@ -386,7 +386,6 @@ SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
     inst->convertToNop();
     return gen(Jmp, taken);
   }
-  if (m_state.thisAvailable()) inst->convertToNop();
   return nullptr;
 }
 

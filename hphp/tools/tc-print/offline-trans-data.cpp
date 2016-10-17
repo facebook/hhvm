@@ -70,6 +70,8 @@ void OfflineTransData::loadTCData(string dumpDir) {
     uint32_t  kind;
     FuncId    funcId;
     int32_t   resumed;
+    int32_t   hasThis;
+    int32_t   prologue;
     uint64_t  profCount;
     uint64_t  annotationsCount;
     size_t    numBCMappings = 0;
@@ -89,6 +91,8 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
     READ(" src.resumed = %d", &resumed);
+    READ(" src.hasThis = %d", &hasThis);
+    READ(" src.prologue = %d", &prologue);
     READ(" src.bcStart = %d", &tRec.bcStart);
 
     READ(" src.blocks = %lu", &numBlocks);
@@ -196,7 +200,14 @@ void OfflineTransData::loadTCData(string dumpDir) {
 
     READ_EMPTY();
     READ_EMPTY();
-    tRec.src = SrcKey { funcId, tRec.bcStart, static_cast<bool>(resumed) };
+    if (prologue) {
+      tRec.src = SrcKey { funcId, tRec.bcStart, SrcKey::PrologueTag{} };
+    } else {
+      tRec.src = SrcKey {
+        funcId, tRec.bcStart,
+        static_cast<bool>(resumed), static_cast<bool>(hasThis)
+      };
+    }
     tRec.kind = (TransKind)kind;
     always_assert_flog(tid == tRec.id,
                        "Translation {} has id {}", tid, tRec.id);
@@ -316,6 +327,8 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
     "  src.resumed = {}\n"
+    "  src.hasThis = {}\n"
+    "  src.prologue = {}\n"
     "  src.bcStartOffset = {}\n"
     "  src.guards = {}\n",
     tRec->id,
@@ -323,6 +336,8 @@ void OfflineTransData::printTransRec(TransID transId,
     tRec->src.funcID(),
     tRec->funcName,
     tRec->src.resumed(),
+    tRec->src.hasThis(),
+    tRec->src.prologue(),
     tRec->src.offset(),
     tRec->guards.size());
 

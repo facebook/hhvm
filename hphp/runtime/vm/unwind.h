@@ -82,7 +82,7 @@ struct VMSwitchMode : std::exception {
 };
 
 /*
- * Thrown for stack overflow in a jitted prolog.
+ * Thrown for stack overflow in a jitted prologue.
  */
 struct VMStackOverflow : std::exception {
   const char* what() const noexcept override {

@@ -33,6 +33,7 @@ inline TransContext::TransContext(
   , callerFPushOp(fpushOff)
   , func(sk.valid() ? sk.func() : nullptr)
   , initBcOffset(sk.offset())
+  , hasThis(sk.hasThis())
   , prologue(sk.prologue())
   , resumed(sk.resumed())
 {}
@@ -42,7 +43,7 @@ inline SrcKey TransContext::srcKey() const {
     assertx(!resumed);
     return SrcKey { func, initBcOffset, SrcKey::PrologueTag{} };
   }
-  return SrcKey { func, initBcOffset, resumed };
+  return SrcKey { func, initBcOffset, resumed, hasThis };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -76,6 +76,16 @@ TCA checkCachedPrologue(const Func* func, int paramIdx) {
   return nullptr;
 }
 
+template <class F>
+void withThis(const Func* func, F f) {
+  if (!func->hasThisVaries()) {
+    f(func->mayHaveThis());
+    return;
+  }
+  f(true);
+  f(false);
+}
+
 /**
  * Given the proflogueTransId for a TransProflogue translation, regenerate the
  * prologue (as a TransPrologue).
@@ -95,31 +105,32 @@ bool regeneratePrologue(TransID prologueTransId) {
   // translation limit and other restrictions, though.
   if (!tc::shouldTranslateNoSizeLimit(func)) return false;
 
-  // Double check the prologue array now that we have the write lease
-  // in case another thread snuck in and set the prologue already.
-  if (checkCachedPrologue(func, nArgs)) return false;
-
   // If this prologue has a DV funclet, then invalidate it and return its SrcKey
   // and TransID
   if (nArgs < func->numNonVariadicParams()) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
-      SrcKey funcletSK(func, paramInfo.funcletOff, false);
-      auto funcletTransId = profData()->dvFuncletTransId(func, nArgs);
-      if (funcletTransId != kInvalidTransID) {
+      bool ret = false;
+      auto genPrologue = [&] (bool hasThis) {
+        SrcKey funcletSK(func, paramInfo.funcletOff, false, hasThis);
+        if (profData()->optimized(funcletSK)) return;
+        auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
+        if (funcletTransId == kInvalidTransID) return;
         tc::invalidateSrcKey(funcletSK);
         auto args = TransArgs{funcletSK};
         args.transId = funcletTransId;
         args.kind = TransKind::Optimize;
         args.region = selectHotRegion(funcletTransId);
         auto const spOff = args.region->entry()->initialSpOffset();
-        auto const dvStart = translate(args, spOff, rec);
-
-        // Flag that this translation has been retranslated, so that
-        // it's not retranslated again along with the function body.
-        profData()->setOptimized(funcletSK);
-        return dvStart != nullptr;
-      }
+        if (translate(args, spOff, rec)) {
+          // Flag that this translation has been retranslated, so that
+          // it's not retranslated again along with the function body.
+          profData()->setOptimized(funcletSK);
+          ret = true;
+        }
+      };
+      withThis(func, genPrologue);
+      if (ret) return true;
     }
   }
 
@@ -162,12 +173,24 @@ bool regeneratePrologues(Func* func) {
   // to temporarily mark the SrcKey for the function body as already optimized.
   // (The region selectors break a region whenever they hit a SrcKey that has
   // already been optimized.)
-  SrcKey funcBodySk(func, func->base(), false);
   auto const includedBody = prologTransIDs.size() <= 1 &&
     func->past() - func->base() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
 
-  if (!includedBody) profData()->setOptimized(funcBodySk);
-  SCOPE_EXIT{ profData()->clearOptimized(funcBodySk); };
+  auto funcBodySk = [&] (bool hasThis) {
+    return SrcKey{func, func->base(), false, hasThis};
+  };
+  if (!includedBody) {
+    withThis(func,
+            [&] (bool hasThis) {
+              profData()->setOptimized(funcBodySk(hasThis));
+            });
+  }
+  SCOPE_EXIT{
+    withThis(func,
+             [&] (bool hasThis) {
+               profData()->clearOptimized(funcBodySk(hasThis));
+             });
+  };
 
   bool emittedAnyDVInit = false;
   for (TransID tid : prologTransIDs) {
@@ -177,8 +200,7 @@ bool regeneratePrologues(Func* func) {
   // If we tried to include the function body along with a DV init, but didn't
   // end up generating any DV init, then flag that the function body was not
   // included.
-  if (!emittedAnyDVInit) return false;
-  return includedBody;
+  return emittedAnyDVInit && includedBody;
 }
 
 TCA getFuncPrologue(Func* func, int nPassed) {

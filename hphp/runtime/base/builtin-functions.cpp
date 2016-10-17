@@ -390,7 +390,7 @@ vm_decode_function(const Variant& function,
       }
     }
 
-    if (!this_ && !f->isStaticInProlog()) {
+    if (!this_ && !f->isStaticInPrologue()) {
       if (flags == DecodeFlags::Warn) raise_missing_this(f);
       if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
         return nullptr;
@@ -419,7 +419,7 @@ vm_decode_function(const Variant& function,
     this_ = function.asCObjRef().get();
     cls = nullptr;
     const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());
-    if (f != nullptr && f->isStaticInProlog()) {
+    if (f != nullptr && f->isStaticInPrologue()) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;

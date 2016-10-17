@@ -918,6 +918,10 @@ constexpr bool isFPushClsMethod(Op opcode) {
   return opcode >= OpFPushClsMethod && opcode <= OpFPushClsMethodD;
 }
 
+constexpr bool isFPushObjMethod(Op opcode) {
+  return opcode == OpFPushObjMethod || opcode == OpFPushObjMethodD;
+}
+
 constexpr bool isFPushCtor(Op opcode) {
   return opcode == OpFPushCtor || opcode == OpFPushCtorD;
 }

@@ -126,6 +126,7 @@ struct TransContext {
   Op callerFPushOp;
   const Func* func;
   Offset initBcOffset;
+  bool hasThis;
   bool prologue;
   bool resumed;
 };

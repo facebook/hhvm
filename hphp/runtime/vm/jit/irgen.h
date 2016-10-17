@@ -238,6 +238,7 @@ bool isInlining(const IRGS& env);
 bool beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
+                   SrcKey startSk,
                    Offset returnBcOffset,
                    ReturnTarget returnTarget);
 
@@ -261,6 +262,7 @@ void endInlining(IRGS& env);
  */
 bool conjureBeginInlining(IRGS& env,
                           const Func* func,
+                          SrcKey startSk,
                           Type thisType,
                           const std::vector<Type>& args,
                           ReturnTarget returnTarget);

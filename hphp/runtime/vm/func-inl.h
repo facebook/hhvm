@@ -341,13 +341,16 @@ inline bool Func::isStatic() const {
   return m_attrs & AttrStatic;
 }
 
-inline bool Func::isStaticInProlog() const {
-  return
-    (m_attrs & (AttrStatic | AttrRequiresThis)) == AttrStatic;
+inline bool Func::isStaticInPrologue() const {
+  return (m_attrs & (AttrStatic | AttrRequiresThis)) == AttrStatic;
 }
 
 inline bool Func::requiresThisInBody() const {
   return (m_attrs & AttrRequiresThis) && !isClosureBody();
+}
+
+inline bool Func::hasThisVaries() const {
+  return mayHaveThis() && !requiresThisInBody();
 }
 
 inline bool Func::isAbstract() const {

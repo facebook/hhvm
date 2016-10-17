@@ -589,7 +589,7 @@ const Func* Class::getDeclaredCtor() const {
 }
 
 const Func* Class::getCachedInvoke() const {
-  assert(IMPLIES(m_invoke, !m_invoke->isStaticInProlog()));
+  assert(IMPLIES(m_invoke, !m_invoke->isStaticInPrologue()));
   return m_invoke;
 }
 
@@ -1243,7 +1243,7 @@ const StaticString
   s_clone("__clone");
 
 static Func* markNonStatic(Func* meth) {
-  // Do not use isStaticInProlog here, since that uses the
+  // Do not use isStaticInPrologue here, since that uses the
   // AttrRequiresThis flag.
   if (meth && (!meth->isStatic() || meth->isClosureBody())) {
     meth->setAttrs(meth->attrs() | AttrRequiresThis);
@@ -1272,7 +1272,7 @@ void Class::setSpecial() {
    * the appropriate static context.)
    */
   m_invoke = markNonStatic(this, s_invoke);
-  if (m_invoke && m_invoke->isStaticInProlog()) {
+  if (m_invoke && m_invoke->isStaticInPrologue()) {
     m_invoke = nullptr;
   }
 

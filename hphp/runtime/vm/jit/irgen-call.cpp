@@ -204,7 +204,7 @@ void fpushObjMethodExactFunc(
    */
   SSATmp* objOrCls = obj;
   emitIncStat(env, Stats::ObjMethod_known, 1);
-  if (func->isStaticInProlog()) {
+  if (func->isStaticInPrologue()) {
     objOrCls = exactClass ? cns(env, exactClass) : gen(env, LdObjClass, obj);
     decRef(env, obj);
   }
@@ -266,7 +266,7 @@ void fpushObjMethodNonExactFunc(
     cns(env, -(func->methodSlot() + 1))
   );
   SSATmp* objOrCls = obj;
-  if (func->isStaticInProlog()) {
+  if (func->isStaticInPrologue()) {
     decRef(env, obj);
     objOrCls = clsTmp;
   }
@@ -332,7 +332,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
   };
 
   if (callee->isStatic()) return callCtx;
-  if (curFunc(env)->isStatic() || !curClass(env)) {
+  if (!hasThis(env)) {
     return gen_missing_this();
   }
 
@@ -360,22 +360,23 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
   }();
 
   auto const ctx = gen(env, LdCtx, fp(env));
+  auto thiz = castCtxThis(env, ctx);
+
+  if (canUseThis) {
+    gen(env, IncRef, thiz);
+    return thiz;
+  }
 
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckCtxThis, taken, ctx);
-      auto thiz = castCtxThis(env, ctx);
-      if (!canUseThis) {
-        auto thizCls = gen(env, LdObjClass, thiz);
-        auto flag = exact ?
-          gen(env, ExtendsClass, ExtendsClassData{ cls, true }, thizCls) :
-          gen(env, InstanceOf, thizCls, callCtx);
-        gen(env, JmpZero, taken, flag);
-      }
-      return thiz;
+      auto thizCls = gen(env, LdObjClass, thiz);
+      auto flag = exact ?
+        gen(env, ExtendsClass, ExtendsClassData{ cls, true }, thizCls) :
+        gen(env, InstanceOf, thizCls, callCtx);
+      gen(env, JmpZero, taken, flag);
     },
-    [&] (SSATmp* thiz) {
+    [&] {
       gen(env, IncRef, thiz);
       return thiz;
     },
@@ -612,53 +613,34 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
   assertx(ctx->type() <= TCtx);
   assertx(funcTmp->type() <= TFunc);
 
-  auto forwardStaticCallee = [&] {
-    return gen(env, FwdCtxStaticCall, ctx);
-  };
-
   auto forwardDynamicCallee = [&] {
-    // CheckCtxThis will assert if used in a context that doesn't
-    // support $this. This check is broader - but we might as well
-    // catch as much as possible.
-    if (!ctx->type().maybe(TObj)) {
+    if (!hasThis(env)) {
       gen(env, RaiseMissingThis, funcTmp);
       return ctx;
     }
 
-    // We don't have control flow opts yet, so nothing will
-    // reduce CheckCtxThis/IncRef back to a plain IncRef,
-    // so we need this upfront optimization. We don't
-    // really need to check for TObj - the simplifier would
-    // deal with it, but again, since we need the optimization
-    // we might as well make it as broad as possible.
-    if (ctx->isA(TObj) ||
-        (funcTmp->hasConstVal() &&
-         !needs_missing_this_check(funcTmp->funcVal()))) {
-      gen(env, IncRef, ctx);
-      return ctx;
-    }
-
-    ifThenElse(env,
-               [&] (Block* taken) {
-                 gen(env, CheckCtxThis, taken, ctx);
-               },
-               [&] {
-                 auto const obj = castCtxThis(env, ctx);
-                 gen(env, IncRef, obj);
-               },
-               [&] {
-                 hint(env, Block::Hint::Unlikely);
-                 gen(env, RaiseMissingThis, funcTmp);
-               });
-    return ctx;
+    auto const obj = castCtxThis(env, ctx);
+    gen(env, IncRef, obj);
+    return obj;
   };
+
+  if (funcTmp->hasConstVal()) {
+    assertx(!funcTmp->funcVal()->isClosureBody());
+    if (funcTmp->funcVal()->isStatic()) {
+      return gen(env, FwdCtxStaticCall, ctx);
+    } else {
+      return forwardDynamicCallee();
+    }
+  }
 
   return cond(env,
               [&](Block* target) {
                 gen(env, CheckFuncStatic, target, funcTmp);
               },
               forwardDynamicCallee,
-              forwardStaticCallee);
+              [&] {
+                return gen(env, FwdCtxStaticCall, ctx);
+              });
 }
 
 void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {

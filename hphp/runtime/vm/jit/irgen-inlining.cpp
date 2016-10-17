@@ -33,6 +33,7 @@ bool isInlining(const IRGS& env) {
 bool beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
+                   SrcKey startSk,
                    Offset returnBcOffset,
                    ReturnTarget returnTarget) {
   auto const& fpiStack = env.irb->fs().fpiStack();
@@ -62,18 +63,6 @@ bool beginInlining(IRGS& env,
                 !isFPushCuf(info.fpushOpc) &&
                 !info.interp);
 
-  SSATmp** params = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
-  for (unsigned i = 0; i < numParams; ++i) {
-    params[numParams - i - 1] = popF(env);
-  }
-
-  /*
-    NB: Now that we've pushed the callee's arguments off the stack and thus
-    modified the caller's frame state, we're committed to inlining. If we bail
-    out from now on, the caller's frame state will be as if the arguments don't
-    exist on the stack (even though they do).
-   */
-
   auto const prevSP    = fpiStack.back().returnSP;
   auto const prevSPOff = fpiStack.back().returnSPOff;
   auto const calleeSP  = sp(env);
@@ -83,33 +72,48 @@ bool beginInlining(IRGS& env,
     "FPI stack pointer and callee stack pointer didn't match in beginInlining"
   );
 
-  // NB: the arguments were just popped from the VM stack above, so the VM
-  // stack-pointer is conceptually pointing to the callee's ActRec at this
-  // point.
-  IRSPRelOffset calleeAROff = bcSPOffset(env);
+  // The VM stack-pointer is conceptually pointing to the last
+  // parameter, so we need to add numParams to get to the ActRec
+  IRSPRelOffset calleeAROff = bcSPOffset(env) + numParams;
 
   auto ctx = [&] () -> SSATmp* {
-    if (info.ctx) {
-      if (info.ctx->isA(TNullptr)) {
-        // We get a TNullptr either because its not a method,
-        // or because we looked up the method dynamically.
-        // In the former, we don't need to set the ctx, and
-        // in the latter, we must not set the ctx, since
-        // it is guaranteed to be incorrect.
-        return nullptr;
-      }
-      if (info.ctx->type() <= info.ctxType) {
-        return info.ctx;
-      }
-      return gen(env, AssertType, info.ctxType, info.ctx);
-    }
-    if (isFPushFunc(info.fpushOpc)) {
+    if (!target->implCls()) {
       return nullptr;
     }
-    if (info.ctxType <= TObj) {
-      constexpr int32_t adjust = AROFF(m_thisUnsafe) / sizeof(Cell);
-      IRSPRelOffset ctxOff = calleeAROff + adjust;
-      return gen(env, LdStk, info.ctxType, IRSPRelOffsetData{ctxOff}, sp(env));
+    auto ty = info.ctxType;
+    if (!target->isClosureBody()) {
+      if (target->isStaticInPrologue() ||
+          (!hasThis(env) &&
+           isFPushClsMethod(info.fpushOpc))) {
+        assertx(!ty.maybe(TObj));
+        if (ty.hasConstVal(TCctx)) {
+          ty = Type::ExactCls(ty.cctxVal().cls());
+        } else if (!ty.hasConstVal(TCls)) {
+          if (!ty.maybe(TCls)) ty = TCls;
+          ty &= Type::SubCls(target->cls());
+        }
+      } else {
+        if (target->attrs() & AttrRequiresThis ||
+            isFPushObjMethod(info.fpushOpc) ||
+            ty <= TObj) {
+          ty &= Type::SubObj(target->cls());
+        }
+      }
+    }
+    if (info.ctx && !info.ctx->isA(TNullptr)) {
+      if (info.ctx->type() <= ty) {
+        return info.ctx;
+      }
+      if (info.ctx->type().maybe(ty)) {
+        return gen(env, AssertType, ty, info.ctx);
+      }
+      if (info.ctx->type().maybe(TCctx) && ty <= TCls) {
+        return gen(env, AssertType, ty, gen(env, LdClsCctx, info.ctx));
+      }
+    }
+    if (ty.subtypeOfAny(TObj, TCls)) {
+      auto const ctxOff = calleeAROff + AROFF(m_thisUnsafe) / sizeof(Cell);
+      return gen(env, LdStk, ty, IRSPRelOffsetData{ctxOff}, sp(env));
     }
     return nullptr;
   }();
@@ -117,6 +121,17 @@ bool beginInlining(IRGS& env,
   // If the ctx was extracted from SpillFrame it may be a TCls, otherwise it
   // will be a TCtx (= TObj | TCctx) read from the stack
   assertx(!ctx || (ctx->type() <= (TCtx | TCls) && target->implCls()));
+
+  jit::vector<SSATmp*> params{numParams};
+  for (unsigned i = 0; i < numParams; ++i) {
+    params[numParams - i - 1] = popF(env);
+  }
+
+  // NB: Now that we've popped the callee's arguments off the stack
+  // and thus modified the caller's frame state, we're committed to
+  // inlining. If we bail out from now on, the caller's frame state
+  // will be as if the arguments don't exist on the stack (even though
+  // they do).
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     gen(env, DbgAssertARFunc, IRSPRelOffsetData{calleeAROff},
@@ -133,14 +148,11 @@ bool beginInlining(IRGS& env,
   data.spOffset      = calleeAROff;
   data.numNonDefault = numParams;
 
-  // Push state and update the marker before emitting any instructions so
-  // they're all given markers in the callee.
-  auto const key = SrcKey {
-    target,
-    target->getEntryForNumArgs(numParams),
-    false
-  };
-  env.bcStateStack.emplace_back(key);
+  assertx(startSk.func() == target &&
+          startSk.offset() == target->getEntryForNumArgs(numParams) &&
+          !startSk.resumed());
+
+  env.bcStateStack.emplace_back(startSk);
   env.inlineReturnTarget.emplace_back(returnTarget);
   env.inlineLevel++;
   updateMarker(env);
@@ -152,11 +164,62 @@ bool beginInlining(IRGS& env,
   }
   emitPrologueLocals(env, numParams, target, ctx);
 
+  if (data.ctx && data.ctx->isA(TObj)) {
+    assertx(startSk.hasThis());
+  } else if (data.ctx && !data.ctx->type().maybe(TObj)) {
+    assertx(!startSk.hasThis());
+  } else if (target->cls()) {
+    auto const psk =
+      SrcKey{startSk.func(), startSk.offset(), SrcKey::PrologueTag{}};
+    env.bcStateStack.back() = psk;
+    updateMarker(env);
+
+    auto sideExit = [&] (bool hasThis) {
+      hint(env, Block::Hint::Unlikely);
+      auto const sk =
+        SrcKey { startSk.func(), startSk.offset(), false, hasThis };
+      gen(
+        env,
+        ReqBindJmp,
+        ReqBindJmpData {
+          sk,
+          FPInvOffset { startSk.func()->numSlotsInFrame() },
+          bcSPOffset(env),
+          TransFlags{}
+        },
+        sp(env),
+        fp(env)
+      );
+    };
+
+    ifThenElse(
+      env,
+      [&] (Block* taken) {
+        auto const maybeThis = gen(env, LdCtx, fp(env));
+        gen(env, CheckCtxThis, taken, maybeThis);
+      },
+      [&] {
+        if (!startSk.hasThis()) {
+          sideExit(true);
+        }
+      },
+      [&] {
+        if (startSk.hasThis()) {
+          sideExit(false);
+        }
+      }
+    );
+
+    env.bcStateStack.back() = startSk;
+    updateMarker(env);
+  }
+
   return true;
 }
 
 bool conjureBeginInlining(IRGS& env,
                           const Func* func,
+                          SrcKey startSk,
                           Type thisType,
                           const std::vector<Type>& args,
                           ReturnTarget returnTarget) {
@@ -186,6 +249,7 @@ bool conjureBeginInlining(IRGS& env,
     env,
     numParams,
     func,
+    startSk,
     0 /* returnBcOffset */,
     returnTarget
   );

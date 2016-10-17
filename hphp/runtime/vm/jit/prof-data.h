@@ -175,7 +175,7 @@ struct ProfTransRec {
    */
   SrcKey lastSrcKey() const {
     assertx(m_kind == TransKind::Profile);
-    return SrcKey(m_sk.func(), m_lastBcOff, m_sk.resumed());
+    return SrcKey{m_sk, m_lastBcOff};
   }
 
   /*
@@ -348,11 +348,7 @@ struct ProfData {
    * are passed. If no such funclet has been associated with a TransID,
    * (kInvalidTransID|nullptr) is returned.
    */
-  TransID dvFuncletTransId(const Func* func, int nArgs) const;
-  const ProfTransRec* dvFuncletTransRec(const Func* func, int nArgs) const {
-    auto tid = dvFuncletTransId(func, nArgs);
-    return tid != kInvalidTransID ? transRec(tid) : nullptr;
-  }
+  TransID dvFuncletTransId(SrcKey sk) const;
 
   /*
    * Record a profiling translation: creates a ProfTransRec and returns the
@@ -538,10 +534,13 @@ private:
   folly::AtomicHashMap<SrcKey::AtomicInt, bool> m_optimizedSKs;
 
   /*
-   * Maps from (FuncId, nArgs) pairs to prologue TransID or DV funclet TransID,
-   * respectively.
+   * Map from (FuncId, nArgs) pairs to prologue TransID.
    */
   folly::AtomicHashMap<uint64_t, TransID> m_proflogueDB;
+
+  /*
+   * Map from SrcKey.toAtomicInt() to DV funclet TransID.
+   */
   folly::AtomicHashMap<uint64_t, TransID> m_dvFuncletDB;
 
   /*

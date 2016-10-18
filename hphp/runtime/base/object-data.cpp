@@ -335,10 +335,9 @@ Variant* ObjectData::realPropImpl(const String& propName, int flags,
   // Property is non-NULL if we reach here.
   if ((lookup.accessible && prop->m_type != KindOfUninit) ||
       (flags & (RealPropUnchecked|RealPropExist))) {
-    return reinterpret_cast<Variant*>(prop);
-  } else {
-    return nullptr;
+    return &tvAsVariant(prop);
   }
+  return nullptr;
 }
 
 Variant* ObjectData::o_realProp(const String& propName, int flags,

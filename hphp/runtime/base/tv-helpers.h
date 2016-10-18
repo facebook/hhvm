@@ -602,25 +602,25 @@ ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue* tv) {
   return reinterpret_cast<const Variant&>(*tv);
 }
 
-// Assumes 'tv' is live
+// Assumes cell is live
 ALWAYS_INLINE Variant& cellAsVariant(Cell& cell) {
   assert(cellIsPlausible(cell));
   return reinterpret_cast<Variant&>(cell);
 }
 
-// Assumes 'tv' is live
+// Assumes cell is live
 ALWAYS_INLINE const Variant& cellAsCVarRef(const Cell& cell) {
   assert(cellIsPlausible(cell));
   return reinterpret_cast<const Variant&>(cell);
 }
 
-// Assumes 'tv' is live
+// Assumes ref is live
 ALWAYS_INLINE Variant& refAsVariant(Ref& ref) {
   assert(refIsPlausible(ref));
   return reinterpret_cast<Variant&>(ref);
 }
 
-// Assumes 'tv' is live
+// Assumes ref is live
 ALWAYS_INLINE const Variant& refAsCVarRef(const Ref& ref) {
   assert(refIsPlausible(ref));
   return reinterpret_cast<const Variant&>(ref);

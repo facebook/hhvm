@@ -452,7 +452,9 @@ let daemon_main (state, options) (ic, oc) =
     Exit_status.(exit Worker_oomed)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
-
+  | SharedMem.C_assertion_failure _ as e ->
+    Hh_logger.exc e;
+    Exit_status.(exit Shared_mem_assertion_failure)
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

@@ -1133,10 +1133,9 @@ and expr_
   | Array_get (e1, Some e2) ->
       let env, ty1 = update_array_type p env e1 (Some e2) valkind in
       let env, ty1 = TUtils.fold_unresolved env ty1 in
-      let env, ety1 = Env.expand_type env ty1 in
       let env, ty2 = expr env e2 in
       let is_lvalue = (valkind == `lvalue) in
-      array_get is_lvalue p env ty1 ety1 e2 ty2
+      array_get is_lvalue p env ty1 e2 ty2
   | Call (Cnormal, (_, Id (_, hh_show)), [x], [])
       when hh_show = SN.PseudoFunctions.hh_show ->
       let env, ty = expr env x in
@@ -1245,7 +1244,6 @@ and expr_
   | Class_get (cid, mid) ->
       TUtils.process_static_find_ref cid mid;
       let env, cty = static_class_id p env cid in
-      let env, cty = Env.expand_type env cty in
       let env, ty, _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
       if Env.FakeMembers.is_static_invalid env cid (snd mid)
@@ -1388,7 +1386,6 @@ and expr_
 and class_const ?(incl_tc=false) env p (cid, mid) =
   TUtils.process_static_find_ref cid mid;
   let env, cty = static_class_id p env cid in
-  let env, cty = Env.expand_type env cty in
   let env, const_ty, cc_abstract_info =
     class_get ~is_method:false ~is_const:true ~incl_tc env cty mid cid in
   match cc_abstract_info with
@@ -2014,7 +2011,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->
       (* dispatch the call to typecheck the arguments *)
       let env, fty = fun_type_of_id env id in
-      let env, fty = Env.expand_type env fty in
       let env, res = call p env fty el uel in
       (* but ignore the result and overwrite it with custom return type *)
       let x = List.hd_exn el in
@@ -2315,7 +2311,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
          * methods *)
         let env, fty, _ =
           class_get ~is_method:true ~is_const:false env ty1 m CIparent in
-        let env, fty = Env.expand_type env fty in
         let fty = check_abstract_parent_meth (snd m) p fty in
         call p env fty el uel
       end
@@ -2334,7 +2329,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
             let env, method_, _ =
               obj_get_ ~is_method:true ~nullsafe:None env ty1 CIparent m
               begin fun (env, fty, _) ->
-                let env, fty = Env.expand_type env fty in
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 let env, method_ = call p env fty el uel in
                 env, method_, None
@@ -2345,7 +2339,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
           | Some _ ->
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false env ty1 m CIparent in
-            let env, fty = Env.expand_type env fty in
             let fty = check_abstract_parent_meth (snd m) p fty in
             call p env fty el uel
         )
@@ -2355,7 +2348,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       let env, ty1 = static_class_id p env e1 in
       let env, fty, _ =
         class_get ~is_method:true ~is_const:false env ty1 m e1 in
-      let env, fty = Env.expand_type env fty in
       let () = match e1 with
         | CIself when is_abstract_ft fty ->
           (match Env.get_self env with
@@ -2381,7 +2373,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
           | OG_nullsafe -> Some p
         ) in
       let fn = (fun (env, fty, _) ->
-        let env, fty = Env.expand_type env fty in
         let env, method_ = call p env fty el uel in
         env, method_, None) in
       obj_get ~is_method ~nullsafe env ty1 (CIexpr e1) m fn
@@ -2389,11 +2380,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
   | Id x ->
       Typing_hooks.dispatch_id_hook x env;
       let env, fty = fun_type_of_id env x in
-      let env, fty = Env.expand_type env fty in
       call p env fty el uel
   | _ ->
       let env, fty = expr env e in
-      let env, fty = Env.expand_type env fty in
       call p env fty el uel
 
 and fun_type_of_id env x =
@@ -2414,7 +2403,7 @@ and fun_type_of_id env x =
  * side of an assignment (example: $x[...] = 0).
  *)
 (*****************************************************************************)
-and array_get is_lvalue p env ty1 ety1 e2 ty2 =
+and array_get is_lvalue p env ty1 e2 ty2 =
   (* This is a little weird -- we enforce the right arity when you use certain
    * collections, even in partial mode (where normally completely omitting the
    * type parameter list is admitted). Basically the "omit type parameter"
@@ -2423,14 +2412,14 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
    * errored (with an inscrutable error message) when you try to actually use
    * a collection with omitted type parameters, we can continue to error and
    * give a more useful error message. *)
+  let env, ety1 = Env.expand_type env ty1 in
   let arity_error (_, name) =
-    Errors.array_get_arity p name (Reason.to_pos (fst ty1))
+    Errors.array_get_arity p name (Reason.to_pos (fst ety1))
   in
   match snd ety1 with
   | Tunresolved tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty1 ->
-        let env, ety1 = Env.expand_type env ty1 in
-        array_get is_lvalue p env ty1 ety1 e2 ty2
+        array_get is_lvalue p env ty1 e2 ty2
       end in
       env, (fst ety1, Tunresolved tyl)
   | Tarraykind (AKvec ty) ->
@@ -2531,9 +2520,8 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
         | None ->
           (* Key is dynamic, or static and not in the array - treat it as
             regular map or vec like array *)
-          let env, ty1 = Typing_arrays.downcast_aktypes env ty1 in
-          let env, ety1 = Env.expand_type env ty1 in
-          array_get is_lvalue p env ty1 ety1 e2 ty2
+          let env, ty1 = Typing_arrays.downcast_aktypes env ety1 in
+          array_get is_lvalue p env ty1 e2 ty2
       end
   | Tany | Tarraykind (AKany | AKempty)-> env, (Reason.Rnone, Tany)
   | Tprim Tstring ->
@@ -2608,14 +2596,13 @@ and array_get is_lvalue p env ty1 ety1 e2 ty2 =
         when ts = SN.FB.cTypeStructure ->
       let env, fields = TS.transform_shapemap env ty fields in
       let ty = r, Tshape (fk, fields) in
-      array_get is_lvalue p env ty ty e2 ty2
+      array_get is_lvalue p env ty e2 ty2
   | Tabstract _ ->
     begin match TUtils.get_concrete_supertypes env ety1 with
       | env, None -> error_array env p ety1
       | env, Some ty ->
-        let env, ety = Env.expand_type env ty in
         Errors.try_
-          (fun () -> array_get is_lvalue p env ty ety e2 ty2)
+          (fun () -> array_get is_lvalue p env ty e2 ty2)
           (fun _ -> error_array env p ety1)
     end
   | Tmixed | Tprim _ | Tvar _ | Tfun _
@@ -3544,7 +3531,6 @@ and non_null env ty =
   let env, ty = Env.expand_type env ty in
   match ty with
   | _, Toption ty ->
-      let env, ty = Env.expand_type env ty in
       (* When "??T" appears in the typing environment due to implicit
        * typing, the recursion here ensures that it's treated as
        * isomorphic to "?T"; that is, all nulls are created equal.
@@ -3578,7 +3564,6 @@ and condition_var_non_null env = function
   | _, Lvar (_, x)
   | _, Dollardollar (_, x) ->
       let env, x_ty = Env.get_local env x in
-      let env, x_ty = Env.expand_type env x_ty in
       let env, x_ty = non_null env x_ty in
       Env.set_local env x x_ty
   | p, Class_get (cname, (_, member_name)) as e ->
@@ -3626,7 +3611,6 @@ and condition env tparamet =
   | r, Binop ((Ast.Eqeq | Ast.EQeqeq as bop),
               e, (_, Null)) when not tparamet ->
       let env, x_ty = expr env e in
-      let env, x_ty = Env.expand_type env x_ty in
       let env =
         if bop == Ast.Eqeq then check_null_wtf env r x_ty else env in
       condition_var_non_null env e
@@ -3643,7 +3627,6 @@ and condition env tparamet =
           condition env (not tparamet) (p, Binop (Ast.Eqeq, e, (p, Null))))
   | r, Binop (Ast.Eq None, var, e) when tparamet ->
       let env, e_ty = expr env e in
-      let env, e_ty = Env.expand_type env e_ty in
       let env = check_null_wtf env r e_ty in
       condition_var_non_null env var
   | p1, Binop (Ast.Eq None, (_, (Lvar _ | Obj_get _) as lv), (p2, _)) ->
@@ -3692,7 +3675,6 @@ and condition env tparamet =
   | p, InstanceOf (ivar, cid) when tparamet && is_instance_var ivar ->
       (* Check the expession and determine its static type *)
       let env, x_ty = expr env ivar in
-      let env, x_ty = Env.expand_type env x_ty in
 
       (* What is the local variable bound to the expression? *)
       let env, (ivar_pos, x) = get_instance_var env ivar in

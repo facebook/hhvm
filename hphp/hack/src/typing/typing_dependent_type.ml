@@ -90,7 +90,9 @@ module ExprDepTy = struct
    *  // (`cls '\A') <> (\cls '\B')
    *  $x->expression_dependent_function();
    *)
-  let rec should_apply env (_, ty_ as ty) = match ty_ with
+  let rec should_apply env ty =
+    let env, ty = Env.expand_type env ty in
+    match snd ty with
     | Tabstract (AKgeneric _, _) ->
       begin match Typing_utils.get_concrete_supertypes env ty with
         | _, None -> true
@@ -105,9 +107,6 @@ module ExprDepTy = struct
         should_apply env ty
     | Tabstract (AKdependent _, Some _) ->
         false
-    | Tvar _ ->
-        let env, ty = Env.expand_type env ty in
-        should_apply env ty
     | Tunresolved tyl ->
         List.exists tyl (should_apply env)
     | Tclass ((_, x), _) ->
@@ -121,7 +120,7 @@ module ExprDepTy = struct
           ~f:(fun class_ty ->
               not (TUtils.class_is_final_and_not_contravariant class_ty))
     | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
-    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany ->
+    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ ->
         false
 
   (****************************************************************************)

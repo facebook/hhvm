@@ -450,6 +450,9 @@ let daemon_main (state, options) (ic, oc) =
   | Worker.Worker_oomed as e->
     Hh_logger.exc e;
     Exit_status.(exit Worker_oomed)
+  | Worker.Worker_busy as e ->
+    Hh_logger.exc e;
+    Exit_status.(exit Worker_busy)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
   | SharedMem.C_assertion_failure _ as e ->

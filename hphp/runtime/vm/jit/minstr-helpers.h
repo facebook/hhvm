@@ -68,6 +68,16 @@ BASE_G_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
+template <MOpFlags flags, bool isObj, KeyType keyType = KeyType::Any>
+inline TypedValue* PropImpl(TypedValue& tvRef, const Class* ctx,
+                            TypedValue* base, key_type<keyType> key) {
+  if (isObj) {
+    auto obj = reinterpret_cast<ObjectData*>(base);
+    return PropObj<flags,keyType>(tvRef, ctx, obj, key);
+  }
+  return Prop<flags,keyType>(tvRef, ctx, base, key);
+}
+
 #define PROP_HELPER_TABLE(m)                                \
   /* name      flags                 keyType       isObj */ \
   m(propC,     MOpFlags::None,       KeyType::Any, false)   \
@@ -90,7 +100,7 @@ BASE_G_HELPER_TABLE(X)
 #define X(nm, flags, kt, isObj)                                       \
 inline TypedValue* nm(Class* ctx, TypedValue* base, key_type<kt> key, \
                       TypedValue& tvRef) {                            \
-  return Prop<flags, isObj, kt>(tvRef, ctx, base, key);               \
+  return PropImpl<flags, isObj, kt>(tvRef, ctx, base, key);           \
 }
 PROP_HELPER_TABLE(X)
 #undef X
@@ -132,7 +142,7 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
 template <KeyType keyType, bool isObj, MOpFlags flags>
 TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Prop<flags, isObj, keyType>(localTvRef, ctx, base, key);
+  auto result = PropImpl<flags, isObj, keyType>(localTvRef, ctx, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -193,7 +203,7 @@ inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
 template <KeyType keyType, bool isObj>
 RefData* vGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Prop<MOpFlags::Define, isObj, keyType>(
+  auto result = PropImpl<MOpFlags::Define, isObj, keyType>(
     localTvRef, ctx, base, key
   );
 
@@ -220,7 +230,7 @@ template <bool isObj>
 void bindPropImpl(Class* ctx, TypedValue* base, TypedValue key,
                   RefData* val) {
   TypedValue localTvRef;
-  auto prop = Prop<MOpFlags::Define, isObj>(localTvRef, ctx, base, key);
+  auto prop = PropImpl<MOpFlags::Define, isObj>(localTvRef, ctx, base, key);
 
   if (UNLIKELY(prop == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
@@ -249,7 +259,12 @@ BINDPROP_HELPER_TABLE(X)
 
 template <KeyType kt, bool isObj>
 void setPropImpl(Class* ctx, TypedValue* base, key_type<kt> key, Cell val) {
-  HPHP::SetProp<false, isObj, kt>(ctx, base, key, &val);
+  if (isObj) {
+    HPHP::SetPropObj<kt>(
+        ctx, reinterpret_cast<ObjectData*>(base), key, &val);
+  } else {
+    HPHP::SetProp<false, kt>(ctx, base, key, &val);
+  }
 }
 
 #define SETPROP_HELPER_TABLE(m)                 \
@@ -270,7 +285,11 @@ SETPROP_HELPER_TABLE(X)
 
 template <bool isObj>
 void unsetPropImpl(Class* ctx, TypedValue* base, TypedValue key) {
-  HPHP::UnsetProp<isObj>(ctx, base, key);
+  if (isObj) {
+    HPHP::UnsetPropObj(ctx, reinterpret_cast<ObjectData*>(base), key);
+  } else {
+    HPHP::UnsetProp(ctx, base, key);
+  }
 }
 
 #define UNSETPROP_HELPER_TABLE(m)  \
@@ -291,8 +310,13 @@ template <bool isObj>
 TypedValue setOpPropImpl(Class* ctx, TypedValue* base,
                          TypedValue key, Cell val, SetOpOp op) {
   TypedValue localTvRef;
-  auto result = HPHP::SetOpProp<isObj>(localTvRef, ctx, op, base, key, &val);
-
+  if (isObj) {
+    auto result = SetOpPropObj(localTvRef, ctx, op,
+                        reinterpret_cast<ObjectData*>(base),
+                        key, &val);
+    return cGetRefShuffle(localTvRef, result);
+  }
+  auto result = HPHP::SetOpProp(localTvRef, ctx, op, base, key, &val);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -319,7 +343,12 @@ TypedValue incDecPropImpl(
   IncDecOp op
 ) {
   auto result = make_tv<KindOfUninit>();
-  HPHP::IncDecProp<isObj>(ctx, op, base, key, result);
+  if (isObj) {
+    auto base_obj = reinterpret_cast<ObjectData*>(base);
+    HPHP::IncDecPropObj(ctx, op, base_obj, key, result);
+  } else {
+    HPHP::IncDecProp(ctx, op, base, key, result);
+  }
   assertx(result.m_type != KindOfRef);
   return result;
 }
@@ -345,7 +374,11 @@ INCDECPROP_HELPER_TABLE(X)
 
 template <KeyType kt, bool useEmpty, bool isObj>
 bool issetEmptyPropImpl(Class* ctx, TypedValue* base, key_type<kt> key) {
-  return HPHP::IssetEmptyProp<useEmpty, isObj, kt>(ctx, base, key);
+  if (isObj) {
+    auto obj = reinterpret_cast<ObjectData*>(base);
+    return IssetEmptyPropObj<useEmpty, kt>(ctx, obj, key);
+  }
+  return HPHP::IssetEmptyProp<useEmpty, kt>(ctx, base, key);
 }
 
 #define ISSET_EMPTY_PROP_HELPER_TABLE(m)                          \

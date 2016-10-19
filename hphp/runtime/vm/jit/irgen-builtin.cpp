@@ -17,11 +17,14 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/func-effects.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -74,7 +77,6 @@ const StaticString
   s_method_exists("method_exists"),
   s_count("count"),
   s_ini_get("ini_get"),
-  s_dirname("dirname"),
   s_86metadata("86metadata"),
   s_set_frame_metadata("hh\\set_frame_metadata"),
   s_in_array("in_array"),
@@ -310,22 +312,6 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_dirname(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-
-  // Only generate the optimized version if the argument passed in is a
-  // static string with a constant literal value so we can get the string value
-  // at JIT time.
-  auto const argType = params[0].value->type();
-  if (!(argType.hasConstVal(TStaticStr))) {
-    return nullptr;
-  }
-
-  // Return the directory portion of the path
-  auto path = params[0].value->strVal();
-  return cns(env, makeStaticString(FileUtil::dirname(StrNR{path})));
-}
-
 /*
  * Transforms in_array with a static haystack argument into an AKExistsArr with
  * the haystack flipped.
@@ -542,6 +528,114 @@ SSATmp* opt_set_frame_metadata(IRGS& env, const ParamPrep& params) {
   return cns(env, TInitNull);
 }
 
+SSATmp* opt_foldable(IRGS& env,
+                     const Func* func,
+                     const ParamPrep& params,
+                     uint32_t numNonDefaultArgs) {
+  auto const constAsCell = [] (const SSATmp* tmp) {
+    switch (tmp->type().toDataType()) {
+      case KindOfUninit:
+        return make_tv<KindOfUninit>();
+      case KindOfNull:
+        return make_tv<KindOfNull>();
+      case KindOfBoolean:
+        return make_tv<KindOfBoolean>(tmp->boolVal());
+      case KindOfInt64:
+        return make_tv<KindOfInt64>(tmp->intVal());
+      case KindOfDouble:
+        return make_tv<KindOfDouble>(tmp->dblVal());
+      case KindOfPersistentString:
+        return make_tv<KindOfPersistentString>(tmp->strVal());
+      case KindOfPersistentArray:
+        return make_tv<KindOfPersistentArray>(tmp->arrVal());
+      case KindOfPersistentVec:
+        return make_tv<KindOfPersistentVec>(tmp->vecVal());
+      case KindOfPersistentDict:
+        return make_tv<KindOfPersistentDict>(tmp->dictVal());
+      case KindOfPersistentKeyset:
+        return make_tv<KindOfPersistentKeyset>(tmp->keysetVal());
+
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
+      case KindOfClass:
+      case KindOfString:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+        break;
+    }
+    // Other Kinds are not expected to be ConstVal
+    not_reached();
+  };
+
+  if (!func->isFoldable()) return nullptr;
+
+  // Don't pop the args yet---if the builtin throws at compile time (because
+  // it would raise a warning or something at runtime) we're going to leave
+  // the call alone.
+  PackedArrayInit args(params.size());
+  for (auto i = 0; i < numNonDefaultArgs; ++i) {
+    auto const t = params[i].value->type();
+    if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
+      return nullptr;
+    } else {
+      args.append(cellAsCVarRef(constAsCell(params[i].value)));
+    }
+  }
+  if (params.size() != func->numNonVariadicParams()) {
+    auto const variadic = params.info.back().value;
+    if (!variadic->type().hasConstVal()) return nullptr;
+
+    auto const variadicArgs = constAsCell(variadic).m_data.parr;
+    auto const numVariadicArgs = variadicArgs->size();
+    for (auto i = 0; i < numVariadicArgs; i++) {
+      args.append(variadicArgs->get(i));
+    }
+  }
+
+  try {
+    // We don't know if notices would be enabled or not when this function
+    // would normally get called, so be safe and don't optimize any calls that
+    // COULD generate notices.
+    ThrowAllErrorsSetter taes;
+
+#ifdef DEBUG
+    VMProtect::Pause deprot;
+    VMRegAnchor _;
+
+    auto const savedPC = vmpc();
+    // Ensure that vmpc is valid for later asserts within the invoke.
+    vmpc() = vmfp()->m_func->getEntry();
+    SCOPE_EXIT{ vmpc() = savedPC; };
+#endif
+
+    RID().setJitFolding(true);
+    SCOPE_EXIT{ RID().setJitFolding(false); };
+
+    Cell retVal;
+    g_context->invokeFunc(&retVal, func, args.toArray(), nullptr, nullptr,
+                          nullptr, nullptr, ExecutionContext::InvokeNormal,
+                          !func->unit()->useStrictTypes());
+
+    if (isStringType(retVal.m_type)) {
+      return cns(env, makeStaticString(retVal.m_data.pstr));
+    } else if (isArrayLikeType(retVal.m_type)) {
+      auto const arr = ArrayData::GetScalarArray(retVal.m_data.parr);
+      return cns(env, make_array_like_tv(arr));
+    } else if (retVal.m_type == KindOfObject ||
+               retVal.m_type == KindOfResource) {
+      return nullptr;
+    } else {
+      return cns(env, retVal);
+    }
+  } catch (...) {
+    // If an exception or notice occurred, don't optimize
+  }
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedFCallBuiltin(IRGS& env,
@@ -551,6 +645,10 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
   auto const result = [&]() -> SSATmp* {
 
     auto const fname = func->name();
+
+    if (auto const retVal = opt_foldable(env, func, params, numNonDefault)) {
+      return retVal;
+    }
 #define X(x) \
     if (fname->isame(s_##x.get())) return opt_##x(env, params);
 
@@ -571,9 +669,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(ord)
     X(chr)
     X(func_num_args)
-    X(max2)
     X(min2)
-    X(dirname)
     X(set_frame_metadata)
 
 #undef X

@@ -2189,4 +2189,13 @@ void ExecutionContext::exitDebuggerDummyEnv() {
   vmpc() = nullptr;
 }
 
+ThrowAllErrorsSetter::ThrowAllErrorsSetter() {
+  m_throwAllErrors = g_context->getThrowAllErrors();
+  g_context->setThrowAllErrors(true);
+}
+
+ThrowAllErrorsSetter::~ThrowAllErrorsSetter() {
+  g_context->setThrowAllErrors(m_throwAllErrors);
+}
+
 }

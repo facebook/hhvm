@@ -814,27 +814,25 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
 
   if (!m_classScope) {
     if (m_type == FunType::Unknown && m_funcScope->isFoldable()) {
-      Array arr;
-      if (m_params) {
-        if (!m_params->isScalar()) return ExpressionPtr();
-        for (int i = 0, n = m_params->getCount(); i < n; ++i) {
-          Variant v;
-          if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
-          arr.set(i, v);
-        }
-        if (m_arrayParams) {
-          arr = arr[0];
-        }
-      }
       try {
-        g_context->setThrowAllErrors(true);
+        ThrowAllErrorsSetter taes;
+        Array arr;
+        if (m_params) {
+          if (!m_params->isScalar()) return ExpressionPtr();
+          for (int i = 0, n = m_params->getCount(); i < n; ++i) {
+            Variant v;
+            if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
+            arr.set(i, v);
+          }
+          if (m_arrayParams) {
+            arr = arr[0];
+          }
+        }
         Variant v = invoke(m_funcScope->getScopeName().c_str(),
                            arr, -1, true, true,
                            !getFileScope()->useStrictTypes());
-        g_context->setThrowAllErrors(false);
         return makeScalarExpression(ar, v);
       } catch (...) {
-        g_context->setThrowAllErrors(false);
       }
       return ExpressionPtr();
     }

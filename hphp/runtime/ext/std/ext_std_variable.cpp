@@ -247,11 +247,15 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     case KindOfPersistentString:
     case KindOfString: {
       StringData *str = value.getStringData();
+      auto const size = str->size();
+      if (size >= RuntimeOption::MaxSerializedStringSize) {
+        throw Exception("Size of serialized string (%d) exceeds max", size);
+      }
       StringBuffer sb;
       sb.append("s:");
-      sb.append(str->size());
+      sb.append(size);
       sb.append(":\"");
-      sb.append(str->data(), str->size());
+      sb.append(str->data(), size);
       sb.append("\";");
       return sb.detach();
     }

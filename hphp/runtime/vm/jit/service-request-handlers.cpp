@@ -113,6 +113,11 @@ TCA getTranslation(TransArgs args) {
     return nullptr;
   }
 
+  if (!RID().getJit()) {
+    SKTRACE(2, sk, "punting because jitting was disabled\n");
+    return nullptr;
+  }
+
   if (auto const sr = tc::findSrcRec(sk)) {
     if (auto const tca = sr->getTopTranslation()) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);

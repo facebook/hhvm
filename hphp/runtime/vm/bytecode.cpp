@@ -5843,12 +5843,14 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
 
 TCA suspendStack(PC &pc) {
   while (true) {
-    auto const jitReturn = []() {
-      // FixMe: what to do here?
+    auto const jitReturn = [&] {
       try {
         return jitReturnPre(vmfp());
+      } catch (VMSwitchMode&) {
+        vmpc() = pc;
+        throw VMSuspendStack();
       } catch (...) {
-        // We're halfway through a bytecode
+        // We're halfway through a bytecode; we can't recover
         always_assert(false);
       }
     }();

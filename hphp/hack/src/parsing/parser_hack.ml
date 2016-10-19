@@ -1907,10 +1907,12 @@ and function_body env =
          * Between function foo(); and function foo() {}
          *)
         [Noop]
+      | _ when env.quick ->
+        ignore_body env;
+        [Noop]
       | _ ->
         (match statement_list env with
           | [] -> [Noop]
-          | _ when env.quick -> [Noop]
           | x -> x)
     ) in
     let in_generator = !(env.in_generator) in
@@ -1960,6 +1962,9 @@ and ignore_body env =
     ignore (xhp env);
     ignore_body env
   | Teof -> error_expect env "}"; ()
+  | Tunsafeexpr ->
+    ignore (L.comment (Buffer.create 256) env.file env.lb);
+    ignore_body env
   | _ -> ignore_body env
 
 and with_ignored_yield env fn =
@@ -3805,6 +3810,8 @@ and is_xhp env =
   look_ahead env begin fun env ->
     let tok = L.xhpname env.file env.lb in
     tok = Txhpname &&
+    Lexing.lexeme env.lb <> "new" &&
+    Lexing.lexeme env.lb <> "yield" &&
     let tok2 = L.xhpattr env.file env.lb in
     tok2 = Tgt || tok2 = Tword ||
     (tok2 = Tslash && L.xhpattr env.file env.lb = Tgt)

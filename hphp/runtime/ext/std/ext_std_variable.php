@@ -154,7 +154,7 @@ function debug_zval_dump(mixed $variable): void;
 <<__Native>>
 function serialize(mixed $value): string;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function unserialize(string $str,
                      array $options = []): mixed;
 

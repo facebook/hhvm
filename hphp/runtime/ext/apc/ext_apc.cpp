@@ -1053,7 +1053,7 @@ String apc_reserialize(const String& str) {
   VariableUnserializer uns(str.data(), str.size(),
                            VariableUnserializer::Type::APCSerialize);
   StringBuffer buf;
-  reserialize(&uns, buf);
+  uns.reserialize(buf);
 
   return buf.detach();
 }

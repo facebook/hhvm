@@ -797,7 +797,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   }
   auto sample = logCommon();
   sample.setStr("phase", phase);
-  std::string scanner(type_scan::kBuildScanners ? "typescan" : "ts-cons");
+  std::string scanner(type_scan::hasNonConservative() ? "typescan" : "ts-cons");
   sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
   sample.setInt("gc_num", t_gc_num);
   // timers of gc-sub phases

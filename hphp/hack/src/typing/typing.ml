@@ -1665,22 +1665,33 @@ and check_shape_keys_validity env pos keys =
         List.fold_left ~f:(check_field pos info) ~init:env rest_keys
 
 and check_valid_rvalue p env ty =
-  let env, folded_ty = TUtils.fold_unresolved env ty in
-  let _deliberately_discarded_env, folded_ety =
-    Env.expand_type env folded_ty in
-  match folded_ety with
-    | r, Tprim Tnoreturn ->
-      let () = Errors.noreturn_usage p
-        (Reason.to_string "A noreturn function always throws or exits" r)
-      in r, Tany
-    | r, Tprim Tvoid ->
-      let () = Errors.void_usage p
-        (Reason.to_string "A void function doesn't return a value" r)
-      in r, Tany
-    | _ -> ty
+    let rec iter_over_types env tyl =
+      match tyl with
+      | [] ->
+        env, ty
+
+      | ty::tyl ->
+        let env, ety = Env.expand_type env ty in
+        match ety with
+        | r, Tprim Tnoreturn ->
+          Errors.noreturn_usage p
+            (Reason.to_string "A noreturn function always throws or exits" r);
+          env, (r, Tany)
+
+        | r, Tprim Tvoid ->
+          Errors.void_usage p
+            (Reason.to_string "A void function doesn't return a value" r);
+          env, (r, Tany)
+
+        | _, Tunresolved tyl2 ->
+          iter_over_types env (tyl2 @ tyl)
+
+        | _, _ ->
+          iter_over_types env tyl in
+    iter_over_types env [ty]
 
 and set_valid_rvalue p env x ty =
-  let ty = check_valid_rvalue p env ty in
+  let env, ty = check_valid_rvalue p env ty in
   let env = Env.set_local env x ty in
   (* We are assigning a new value to the local variable, so we need to
    * generate a new expression id
@@ -1842,9 +1853,7 @@ and assign p env e1 ty2 =
 
 and assign_simple pos env e1 ty2 =
   let env, ty1 = lvalue env e1 in
-
-  let ty2 = check_valid_rvalue pos env ty2 in
-
+  let env, ty2 = check_valid_rvalue pos env ty2 in
   let env, ty2 = TUtils.unresolved env ty2 in
   let env = Type.sub_type pos (Reason.URassign) env ty2 ty1 in
   env, ty2
@@ -3254,7 +3263,7 @@ and call_ pos env fty el uel =
     let el = el @ uel in
     let env, _ = List.map_env env el begin fun env elt ->
       let env, arg_ty = expr env elt in
-      let arg_ty = check_valid_rvalue pos env arg_ty in
+      let env, arg_ty = check_valid_rvalue pos env arg_ty in
       env, arg_ty
     end in
     Typing_hooks.dispatch_fun_call_hooks [] (List.map (el @ uel) fst) env;
@@ -3319,7 +3328,7 @@ and call_param todos env (name, x) ((pos, _ as e), arg_ty) =
   | None -> ()
   | Some name -> Typing_suggest.save_param name env x arg_ty
   );
-  let arg_ty = check_valid_rvalue pos env arg_ty in
+  let env, arg_ty = check_valid_rvalue pos env arg_ty in
 
   (* When checking params the type 'x' may be expression dependent. Since
    * we store the expression id in the local env for Lvar, we want to apply

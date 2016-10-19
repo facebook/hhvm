@@ -946,6 +946,7 @@ public:
   void emitClsIfSPropBase(Emitter& e);
   Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
   Id emitSetUnnamedL(Emitter& e);
+  void emitFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   MaybeDataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
   void emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
@@ -4760,8 +4761,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       visit(b->getExp2());
       emitConvertToCell(e);
       releasePipeLocal(pipeVar);
-      emitPushAndFreeUnnamedL(e, pipeVar, m_ue.bcPos());
-      e.PopC();
+      emitFreeUnnamedL(e, pipeVar, m_ue.bcPos());
       return true;
     }
 
@@ -6701,6 +6701,15 @@ Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
   emitSetL(e, tempLocal);
   emitPop(e);
   return tempLocal;
+}
+
+void EmitterVisitor::emitFreeUnnamedL(Emitter& e, Id tempLocal, Offset start) {
+  assert(tempLocal >= 0);
+  assert(start != InvalidAbsoluteOffset);
+  newFaultRegionAndFunclet(start, m_ue.bcPos(),
+                           new UnsetUnnamedLocalThunklet(tempLocal));
+  emitUnsetL(e, tempLocal);
+  m_curFunc->freeUnnamedLocal(tempLocal);
 }
 
 void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal,

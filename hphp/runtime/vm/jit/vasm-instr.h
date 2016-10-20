@@ -316,6 +316,15 @@ struct Vunit;
   O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
+  O(cmpd, Inone, U(s0) U(s1), D(sf))\
+  O(cmpdi, I(s0), U(s1), D(sf))\
+  O(cmpld, Inone, U(s0) U(s1), D(sf))\
+  O(cmpldi, I(s0), U(s1), D(sf))\
+  O(cmplw, Inone, U(s0) U(s1), D(sf))\
+  O(cmplwi, I(s0), U(s1), D(sf))\
+  O(cmpw, Inone, U(s0) U(s1), D(sf))\
+  O(cmpwi, I(s0), U(s1), D(sf))\
+  O(copycr, Inone, Un, Dn)\
   O(extrb, Inone, UH(s,d), DH(d,s))\
   O(extrw, Inone, UH(s,d), DH(d,s))\
   O(extsb, Inone, UH(s,d), DH(d,s))\
@@ -1156,6 +1165,15 @@ struct uxth { Vreg16 s; Vreg32 d; };
 /*
  * ppc64 intrinsics.
  */
+struct cmpd { Vreg64 s0; Vreg64 s1; VregSF sf; };
+struct cmpdi { Immed s0; Vreg64 s1; VregSF sf; };
+struct cmpld { Vreg64 s0; Vreg64 s1; VregSF sf; };
+struct cmpldi { Immed s0; Vreg64 s1; VregSF sf; };
+struct cmplw { Vreg32 s0; Vreg32 s1; VregSF sf; };
+struct cmplwi { Immed s0; Vreg32 s1; VregSF sf; };
+struct cmpw { Vreg32 s0; Vreg32 s1; VregSF sf; };
+struct cmpwi { Immed s0; Vreg64 s1; VregSF sf; };
+struct copycr {};
 struct extrb { Vreg8 s; Vreg8 d; };   // Extract and zeros the upper bits
 struct extrw { Vreg16 s; Vreg64 d; }; // Extract and zeros the upper bits
 struct extsb { Vreg64 s; Vreg64 d; }; // Extend byte sign
@@ -1167,10 +1185,10 @@ struct ldarx { Vptr s; Vreg64 d; };
 struct mfcr { Vreg64 d; };
 struct mflr { Vreg64 d; };
 struct mfvsrd { Vreg128 s; Vreg64 d; };
-struct xscvdpsxds { Vreg128 s, d; };
 struct mtlr { Vreg64 s; };
 struct mtvsrd { Vreg64 s; Vreg128 d; };
 struct stdcx { Vreg64 s; Vptr d; };
+struct xscvdpsxds { Vreg128 s, d; };
 struct xscvsxddp { Vreg128 s, d; };
 struct xxlxor { Vreg128 s0, s1, d; };
 struct xxpermdi { Vreg128 s0, s1, d; };
@@ -1179,7 +1197,7 @@ struct xxpermdi { Vreg128 s0, s1, d; };
 
 struct Vinstr {
 #define O(name, imms, uses, defs) name,
-  enum Opcode : uint8_t { VASM_OPCODES };
+  enum Opcode : uint16_t { VASM_OPCODES };
 #undef O
 
   /*

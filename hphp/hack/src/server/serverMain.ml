@@ -374,6 +374,8 @@ let setup_server options handle =
   } as local_config = local_config in
   let saved_state_load_type =
     LoadScriptConfig.saved_state_load_type_to_string load_script_config in
+  let use_sql =
+    LoadScriptConfig.use_sql load_script_config in
   if Sys_utils.is_test_mode ()
   then EventLogger.init EventLogger.Event_logger_fake 0.0
   else HackEventLogger.init
@@ -382,7 +384,8 @@ let setup_server options handle =
     (Unix.gettimeofday ())
     lazy_decl
     lazy_parse
-    saved_state_load_type;
+    saved_state_load_type
+    use_sql;
   let root_s = Path.to_string root in
   if Sys_utils.is_nfs root_s && not enable_on_nfs then begin
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;

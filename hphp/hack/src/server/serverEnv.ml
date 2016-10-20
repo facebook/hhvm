@@ -72,6 +72,10 @@ type env = {
     persistent_client : ClientProvider.client option;
     (* Timestamp of last IDE file synchronization command *)
     last_command_time : float;
+    (* Timestamp of last query for disk changes *)
+    last_notifier_check_time : float;
+    (* Timestamp of last ServerIdle.go run *)
+    last_idle_job_time : float;
     (* The map from full path to synchronized file contents *)
     edited_files   : File_content.t Relative_path.Map.t;
     (* Files which parse trees were invalidated (because they changed on disk

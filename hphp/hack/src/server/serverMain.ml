@@ -191,13 +191,15 @@ let rec recheck_loop acc genv env new_client =
    *
    * NB: This also uses synchronous notify on establishing a persistent
    * connection. This is harmless, but could maybe be filtered away. *)
-  let raw_updates = match new_client with
+  let env, raw_updates = match new_client with
   | Some _ -> begin
-    try Notifier_synchronous_changes (genv.notifier ()) with
+    env, try Notifier_synchronous_changes (genv.notifier ()) with
     | Watchman.Timeout -> Notifier_unavailable
     end
+  | None when t -. env.last_notifier_check_time > 0.5 ->
+    { env with last_notifier_check_time = t; }, genv.notifier_async ()
   | None ->
-    genv.notifier_async ()
+    env, Notifier_async_changes SSet.empty
   in
   let acc, raw_updates = match raw_updates with
   | Notifier_unavailable ->
@@ -209,7 +211,7 @@ let rec recheck_loop acc genv env new_client =
   in
   let updates = Program.process_updates genv env raw_updates in
 
-  let is_idle = t -. env.last_command_time > 0.5 in
+  let is_idle = t -. env.last_command_time > 0.1 in
 
   let disk_recheck = not (Relative_path.Set.is_empty updates) in
   let ide_recheck =
@@ -250,7 +252,7 @@ let serve_one_iteration genv env client_provider =
   let client, has_persistent =
     ClientProvider.sleep_and_check client_provider env.persistent_client in
   let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
-  if not has_persistent && client = None && not has_parsing_hook
+  let env = if not has_persistent && client = None && not has_parsing_hook
   then begin
     let last_stats = env.recent_recheck_loop_stats in
     (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
@@ -262,8 +264,13 @@ let serve_one_iteration genv env client_provider =
       last_stats.rechecked_batches
       last_stats.rechecked_count
       last_stats.total_rechecked_count
-      ServerIdle.go;
-  end;
+      (fun () -> SharedMem.collect `aggressive);
+    let t = Unix.gettimeofday () in
+    if t -. env.last_idle_job_time > 0.5 then begin
+      ServerIdle.go ();
+      { env with last_idle_job_time = t }
+    end else env
+  end else env in
   let start_t = Unix.gettimeofday () in
   HackEventLogger.with_id ~stage:`Recheck recheck_id @@ fun () ->
   let env = recheck_loop genv env client in

@@ -1705,13 +1705,11 @@ static int execute_program_impl(int argc, char** argv) {
 
   // We want to do this as early as possible because any allocations before-hand
   // will get a generic unknown type type-index.
-  if (RuntimeOption::EvalEnableGC) {
-    try {
-      type_scan::init();
-    } catch (const type_scan::InitException& exn) {
-      Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
-      exit(HPHP_EXIT_FAILURE);
-    }
+  try {
+    type_scan::init();
+  } catch (const type_scan::InitException& exn) {
+    Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
+    exit(HPHP_EXIT_FAILURE);
   }
 
   // It's okay if this fails.

@@ -456,6 +456,10 @@ let daemon_main (state, options) (ic, oc) =
   | Worker.Worker_busy as e ->
     Hh_logger.exc e;
     Exit_status.(exit Worker_busy)
+  | (Worker.Worker_exited_abnormally i) as e ->
+    Hh_logger.exc e;
+    (** Exit with the same exit code that that worker used. *)
+    exit i
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
   | SharedMem.C_assertion_failure _ as e ->

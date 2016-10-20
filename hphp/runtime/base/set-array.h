@@ -471,12 +471,12 @@ public:
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static ArrayData* LvalInt(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalIntRef(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStr(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalStrRef(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNew(ArrayData*, Variant*&, bool);
-  static ArrayData* LvalNewRef(ArrayData*, Variant*&, bool);
+  static ArrayLval LvalInt(ArrayData*, int64_t, bool);
+  static ArrayLval LvalIntRef(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStr(ArrayData*, StringData*, bool);
+  static ArrayLval LvalStrRef(ArrayData*, StringData*, bool);
+  static ArrayLval LvalNew(ArrayData*, bool);
+  static ArrayLval LvalNewRef(ArrayData*, bool);
   static ArrayData* SetRefInt(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStr(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell, bool);

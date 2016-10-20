@@ -797,33 +797,33 @@ bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return a->find(k, k->hash()) != -1;
 }
 
-ArrayData* SetArray::LvalInt(ArrayData*, int64_t, Variant*&, bool) {
+ArrayLval SetArray::LvalInt(ArrayData*, int64_t, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval int)"
   );
 }
 
-ArrayData* SetArray::LvalIntRef(ArrayData* ad, int64_t, Variant*&, bool) {
+ArrayLval SetArray::LvalIntRef(ArrayData* ad, int64_t, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::LvalStr(ArrayData*, StringData*, Variant*&, bool) {
+ArrayLval SetArray::LvalStr(ArrayData*, StringData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval string)"
   );
 }
 
-ArrayData* SetArray::LvalStrRef(ArrayData* ad, StringData*, Variant*&, bool) {
+ArrayLval SetArray::LvalStrRef(ArrayData* ad, StringData*, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::LvalNew(ArrayData*, Variant*&, bool) {
+ArrayLval SetArray::LvalNew(ArrayData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval new)"
   );
 }
 
-ArrayData* SetArray::LvalNewRef(ArrayData* ad, Variant*&, bool) {
+ArrayLval SetArray::LvalNewRef(ArrayData* ad, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 

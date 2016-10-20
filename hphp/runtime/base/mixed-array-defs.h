@@ -311,12 +311,11 @@ ArrayData* MixedArray::updateRef(K k, Variant& data) {
 }
 
 template <class K>
-ArrayData* MixedArray::addLvalImpl(K k, Variant*& ret) {
+ArrayLval MixedArray::addLvalImpl(K k) {
   assert(!isFull());
   auto p = insert(k);
   if (!p.found) tvWriteNull(&p.tv);
-  ret = &tvAsVariant(&p.tv);
-  return this;
+  return {this, &tvAsVariant(&p.tv)};
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -79,12 +79,11 @@ public:
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
 
-  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
+  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
   static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
-                            bool copy);
+  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
   static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static ArrayLval LvalNew(ArrayData*, bool copy);
   static constexpr auto LvalNewRef = &LvalNew;
 
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);

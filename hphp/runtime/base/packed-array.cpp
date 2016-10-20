@@ -712,96 +712,80 @@ bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* s) {
   return false;
 }
 
-ArrayData* PackedArray::LvalInt(ArrayData* adIn,
-                                int64_t k,
-                                Variant*& ret,
-                                bool copy) {
+ArrayLval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
 
   if (LIKELY(size_t(k) < adIn->m_size)) {
     auto const ad = copy ? Copy(adIn) : adIn;
-    ret = &tvAsVariant(&packedData(ad)[k]);
-    return ad;
+    return {ad, &tvAsVariant(&packedData(ad)[k])};
   }
 
   // We can stay packed if the index is m_size, and the operation does
   // the same thing as LvalNew.
-  if (size_t(k) == adIn->m_size) return LvalNew(adIn, ret, copy);
+  if (size_t(k) == adIn->m_size) return LvalNew(adIn, copy);
 
   // Promote-to-mixed path, we know the key is new and should be using
   // findForNewInsert but aren't yet TODO(#2606310).
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addLvalImpl(k, ret);
+  return mixed->addLvalImpl(k);
 }
 
-ArrayData* PackedArray::LvalIntVec(ArrayData* adIn,
-                                   int64_t k,
-                                   Variant*& ret,
-                                   bool copy) {
+ArrayLval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   auto const ad = copy ? Copy(adIn) : adIn;
-  ret = &tvAsVariant(&packedData(ad)[k]);
-  return ad;
+  return {ad, &tvAsVariant(&packedData(ad)[k])};
 }
 
-ArrayData* PackedArray::LvalSilentInt(ArrayData* adIn,
-                                      int64_t k,
-                                      Variant*& ret,
-                                      bool copy) {
+ArrayLval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
-  if (UNLIKELY(size_t(k) >= adIn->m_size)) return adIn;
+  if (UNLIKELY(size_t(k) >= adIn->m_size)) return {adIn, nullptr};
   auto const ad = copy ? Copy(adIn) : adIn;
-  ret = &tvAsVariant(&packedData(ad)[k]);
-  return ad;
+  return {ad, &tvAsVariant(&packedData(ad)[k])};
 }
 
-ArrayData* PackedArray::LvalStr(ArrayData* adIn,
-                                StringData* key,
-                                Variant*& ret,
-                                bool copy) {
+ArrayLval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
   // We have to promote.  We know the key doesn't exist, but aren't
   // making use of that fact yet.  TODO(#2606310).
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  return mixed->addLvalImpl(key, ret);
+  return mixed->addLvalImpl(key);
 }
 
-ArrayData*
-PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, Variant*&, bool) {
+ArrayLval
+PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-ArrayData*
-PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, Variant*&, bool) {
+ArrayLval
+PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData*
-PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, Variant*&, bool) {
+ArrayLval
+PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-ArrayData* PackedArray::LvalNew(ArrayData* adIn, Variant*& ret, bool copy) {
+ArrayLval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
   assert(checkInvariants(adIn));
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
-  ret = &tvAsVariant(&tv);
-  return ad;
+  return {ad, &tvAsVariant(&tv)};
 }
 
-ArrayData* PackedArray::LvalNewRefVec(ArrayData* adIn, Variant*&, bool) {
+ArrayLval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);

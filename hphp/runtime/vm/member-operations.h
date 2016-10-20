@@ -537,20 +537,18 @@ inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
  */
 template <bool reffy>
 inline TypedValue* ElemDVecPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
 
   if (reffy) throwRefInvalidArrayValueException(oldArr);
 
-  ArrayData* newArr =
-    PackedArray::LvalIntVec(oldArr, key, ret, oldArr->cowCheck());
-  if (newArr != oldArr) {
+  auto const r = PackedArray::LvalIntVec(oldArr, key, oldArr->cowCheck());
+  if (r.array != oldArr) {
     base->m_type = KindOfVec;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 template <bool reffy>
@@ -582,50 +580,46 @@ inline TypedValue* ElemDVec(TypedValue* base, key_type<keyType> key) {
  */
 template <bool reffy>
 inline TypedValue* ElemDDictPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
 
   if (reffy) throwRefInvalidArrayValueException(oldArr);
 
-  ArrayData* newArr =
-    MixedArray::LvalSilentIntDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    assertx(oldArr == newArr);
+  auto const r = MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
+    assertx(oldArr == r.array);
     throwOOBArrayKeyException(key, oldArr);
   }
 
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
 
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 template <bool reffy>
 inline TypedValue* ElemDDictPre(TypedValue* base, StringData* key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
 
   if (reffy) throwRefInvalidArrayValueException(oldArr);
 
-  ArrayData* newArr =
-    MixedArray::LvalSilentStrDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    assertx(oldArr == newArr);
+  auto const r = MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
+    assertx(oldArr == r.array);
     throwOOBArrayKeyException(key, oldArr);
   }
 
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
 
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 template <bool reffy>
@@ -840,20 +834,18 @@ inline TypedValue* ElemUArray(TypedValue* base, key_type<keyType> key) {
  * ElemU when base is a Vec
  */
 inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    PackedArray::LvalSilentIntVec(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
+  auto const r = PackedArray::LvalSilentIntVec(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
     return const_cast<TypedValue*>(init_null_variant.asTypedValue());
   }
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfVec;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* base, StringData* key) {
@@ -882,37 +874,33 @@ inline TypedValue* ElemUVec(TypedValue* base, key_type<keyType> key) {
  * ElemU when base is a Dict
  */
 inline TypedValue* ElemUDictPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    MixedArray::LvalSilentIntDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
+  auto const r = MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
     return const_cast<TypedValue*>(init_null_variant.asTypedValue());
   }
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 inline TypedValue* ElemUDictPre(TypedValue* base, StringData* key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    MixedArray::LvalSilentStrDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
+  auto const r = MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
     return const_cast<TypedValue*>(init_null_variant.asTypedValue());
   }
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 inline TypedValue* ElemUDictPre(TypedValue* base, TypedValue key) {

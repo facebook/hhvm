@@ -34,8 +34,6 @@
 #include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/runtime/base/zend-string.h"
 
-#include "hphp/parser/hphp.tab.hpp"
-
 #include "hphp/util/exception.h"
 
 #include <unicode/coll.h> // icu
@@ -653,20 +651,18 @@ Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {
 
 Variant &Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  Variant *ret = nullptr;
-  ArrayData *escalated = m_arr->lvalNew(ret, m_arr->cowCheck());
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  assert(ret);
-  return *ret;
+  auto const r = m_arr->lvalNew(m_arr->cowCheck());
+  if (r.array != m_arr) m_arr = Ptr::attach(r.array);
+  assert(r.val);
+  return *r.val;
 }
 
 Variant &Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  Variant *ret = nullptr;
-  ArrayData *escalated = m_arr->lvalNewRef(ret, m_arr->cowCheck());
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  assert(ret);
-  return *ret;
+  auto const r = m_arr->lvalNewRef(m_arr->cowCheck());
+  if (r.array != m_arr) m_arr = Ptr::attach(r.array);
+  assert(r.val);
+  return *r.val;
 }
 
 Variant &Array::lvalAt(const String& key, AccessFlags flags) {

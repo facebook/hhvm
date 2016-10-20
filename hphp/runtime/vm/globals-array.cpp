@@ -121,15 +121,11 @@ GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }
 
-ArrayData*
-GlobalsArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                               bool copy) {
-  return LvalStr(ad, String(k).get(), ret, copy);
+ArrayLval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+  return LvalStr(ad, String(k).get(), copy);
 }
 
-ArrayData*
-GlobalsArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
-                               bool copy) {
+ArrayLval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   auto a = asGlobals(ad);
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
@@ -137,14 +133,11 @@ GlobalsArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
     tvWriteNull(&nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
-  ret = &tvAsVariant(tv);
-  return a;
+  return {a, &tvAsVariant(tv)};
 }
 
-ArrayData*
-GlobalsArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
-  ret = &lvalBlackHole();
-  return ad;
+ArrayLval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
+  return {ad, &lvalBlackHole()};
 }
 
 ArrayData* GlobalsArray::SetInt(ArrayData* ad,

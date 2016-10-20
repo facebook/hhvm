@@ -76,30 +76,30 @@ inline const Variant& ArrayData::get(const StringData* k, bool error) const {
   return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 
-inline ArrayData* ArrayData::lval(const String& k, Variant *&ret, bool copy) {
+inline ArrayLval ArrayData::lval(const String& k, bool copy) {
   assert(IsValidKey(k));
-  return lval(k.get(), ret, copy);
+  return lval(k.get(), copy);
 }
 
-inline ArrayData* ArrayData::lval(const Variant& k, Variant *&ret, bool copy) {
+inline ArrayLval ArrayData::lval(const Variant& k, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
-  return isIntKey(cell) ? lval(getIntKey(cell), ret, copy)
-                        : lval(getStringKey(cell), ret, copy);
+  return isIntKey(cell) ? lval(getIntKey(cell), copy)
+                        : lval(getStringKey(cell), copy);
 }
 
-inline ArrayData*
-ArrayData::lvalRef(const String& k, Variant *&ret, bool copy) {
+inline ArrayLval
+ArrayData::lvalRef(const String& k, bool copy) {
   assert(IsValidKey(k));
-  return lvalRef(k.get(), ret, copy);
+  return lvalRef(k.get(), copy);
 }
 
-inline ArrayData*
-ArrayData::lvalRef(const Variant& k, Variant *&ret, bool copy) {
+inline ArrayLval
+ArrayData::lvalRef(const Variant& k, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
-  return isIntKey(cell) ? lvalRef(getIntKey(cell), ret, copy)
-                        : lvalRef(getStringKey(cell), ret, copy);
+  return isIntKey(cell) ? lvalRef(getIntKey(cell), copy)
+                        : lvalRef(getStringKey(cell), copy);
 }
 
 inline ArrayData* ArrayData::set(const String& k, const Variant& v,
@@ -254,28 +254,28 @@ inline bool ArrayData::exists(const StringData* k) const {
   return g_array_funcs.existsStr[kind()](this, k);
 }
 
-inline ArrayData* ArrayData::lval(int64_t k, Variant*& ret, bool copy) {
-  return g_array_funcs.lvalInt[kind()](this, k, ret, copy);
+inline ArrayLval ArrayData::lval(int64_t k, bool copy) {
+  return g_array_funcs.lvalInt[kind()](this, k, copy);
 }
 
-inline ArrayData* ArrayData::lvalRef(int64_t k, Variant*& ret, bool copy) {
-  return g_array_funcs.lvalIntRef[kind()](this, k, ret, copy);
+inline ArrayLval ArrayData::lvalRef(int64_t k, bool copy) {
+  return g_array_funcs.lvalIntRef[kind()](this, k, copy);
 }
 
-inline ArrayData* ArrayData::lval(StringData* k, Variant*& ret, bool copy) {
-  return g_array_funcs.lvalStr[kind()](this, k, ret, copy);
+inline ArrayLval ArrayData::lval(StringData* k, bool copy) {
+  return g_array_funcs.lvalStr[kind()](this, k, copy);
 }
 
-inline ArrayData* ArrayData::lvalRef(StringData* k, Variant*& ret, bool copy) {
-  return g_array_funcs.lvalStrRef[kind()](this, k, ret, copy);
+inline ArrayLval ArrayData::lvalRef(StringData* k, bool copy) {
+  return g_array_funcs.lvalStrRef[kind()](this, k, copy);
 }
 
-inline ArrayData* ArrayData::lvalNew(Variant*& ret, bool copy) {
-  return g_array_funcs.lvalNew[kind()](this, ret, copy);
+inline ArrayLval ArrayData::lvalNew(bool copy) {
+  return g_array_funcs.lvalNew[kind()](this, copy);
 }
 
-inline ArrayData* ArrayData::lvalNewRef(Variant*& ret, bool copy) {
-  return g_array_funcs.lvalNewRef[kind()](this, ret, copy);
+inline ArrayLval ArrayData::lvalNewRef(bool copy) {
+  return g_array_funcs.lvalNewRef[kind()](this, copy);
 }
 
 inline ArrayData* ArrayData::setRef(int64_t k, Variant& v, bool copy) {

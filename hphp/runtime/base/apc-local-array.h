@@ -48,13 +48,11 @@ struct APCLocalArray final : private ArrayData,
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
-  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant *&ret,
-                            bool copy);
+  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
   static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant *&ret,
-                            bool copy);
+  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
   static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayData* LvalNew(ArrayData*, Variant *&ret, bool copy);
+  static ArrayLval LvalNew(ArrayData*, bool copy);
   static constexpr auto LvalNewRef = &LvalNew;
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);

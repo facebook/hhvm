@@ -854,19 +854,6 @@ MixedArray* MixedArray::initRef(TypedValue& tv, Variant& v) {
 }
 
 ALWAYS_INLINE
-MixedArray* MixedArray::getLval(TypedValue& tv, Variant*& ret) {
-  ret = &tvAsVariant(&tv);
-  return this;
-}
-
-ALWAYS_INLINE
-MixedArray* MixedArray::initLval(TypedValue& tv, Variant*& ret) {
-  tvWriteNull(&tv);
-  ret = &tvAsVariant(&tv);
-  return this;
-}
-
-ALWAYS_INLINE
 MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
@@ -1181,68 +1168,56 @@ ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
   return zInitVal(e.data, data);
 }
 
-ArrayData* MixedArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                               bool copy) {
+ArrayLval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) {
     a = a->copyMixedAndResizeIfNeeded();
   } else {
     a = a->resizeIfNeeded();
   }
-  return a->addLvalImpl(k, ret);
+  return a->addLvalImpl(k);
 }
 
-ArrayData* MixedArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
-                               bool copy) {
+ArrayLval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
-  return a->addLvalImpl(key, ret);
+  return a->addLvalImpl(key);
 }
 
-ArrayData* MixedArray::LvalSilentInt(ArrayData* ad,
-                                     int64_t k,
-                                     Variant*& ret,
-                                     bool copy) {
+ArrayLval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, hashint(k));
-  if (UNLIKELY(!validPos(pos))) return a;
+  if (UNLIKELY(!validPos(pos))) return {a, nullptr};
   if (copy) a = a->copyMixed();
-  ret = &tvAsVariant(&a->data()[pos].data);
-  return a;
+  return {a, &tvAsVariant(&a->data()[pos].data)};
 }
 
-ArrayData* MixedArray::LvalSilentStr(ArrayData* ad,
-                                     const StringData* k,
-                                     Variant*& ret,
+ArrayLval MixedArray::LvalSilentStr(ArrayData* ad, const StringData* k,
                                      bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, k->hash());
-  if (UNLIKELY(!validPos(pos))) return a;
+  if (UNLIKELY(!validPos(pos))) return {a, nullptr};
   if (copy) a = a->copyMixed();
-  ret = &tvAsVariant(&a->data()[pos].data);
-  return a;
+  return {a, &tvAsVariant(&a->data()[pos].data)};
 }
 
-ArrayData* MixedArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
+ArrayLval MixedArray::LvalNew(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
-    ret = &lvalBlackHole();
-    return a;
+    return {a, &lvalBlackHole()};
   }
 
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
   if (UNLIKELY(!a->nextInsert(make_tv<KindOfNull>()))) {
-    ret = &lvalBlackHole();
-    return a;
+    return {a, &lvalBlackHole()};
   }
 
-  ret = &tvAsVariant(&a->data()[a->m_used - 1].data);
-  return a;
+  return {a, &tvAsVariant(&a->data()[a->m_used - 1].data)};
 }
 
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
@@ -1656,10 +1631,9 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
     if (key.asTypedValue()->m_type == KindOfInt64) {
       ret->nextInsertWithRef(value);
     } else {
-      Variant* p;
       StringData* sd = key.getStringData();
-      ret->addLvalImpl(sd, p);
-      p->setWithRef(value);
+      auto const r = ret->addLvalImpl(sd);
+      r.val->setWithRef(value);
     }
   }
   return ret;
@@ -1682,9 +1656,8 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
       if (srcElem->hasIntKey()) {
         ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
       } else {
-        Variant* p;
-        ret->addLvalImpl(srcElem->skey, p);
-        p->setWithRef(tvAsCVarRef(&srcElem->data));
+        auto const r = ret->addLvalImpl(srcElem->skey);
+        r.val->setWithRef(tvAsCVarRef(&srcElem->data));
       }
     }
     return ret;
@@ -1887,21 +1860,21 @@ const TypedValue* MixedArray::NvTryGetStrHackArr(const ArrayData* ad,
   return tv;
 }
 
-ArrayData*
-MixedArray::LvalIntRefHackArr(ArrayData* adIn, int64_t, Variant*&, bool) {
+ArrayLval
+MixedArray::LvalIntRefHackArr(ArrayData* adIn, int64_t, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData*
-MixedArray::LvalStrRefHackArr(ArrayData* adIn, StringData*, Variant*&, bool) {
+ArrayLval
+MixedArray::LvalStrRefHackArr(ArrayData* adIn, StringData*, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData* MixedArray::LvalNewRefHackArr(ArrayData* adIn, Variant*&, bool) {
+ArrayLval MixedArray::LvalNewRefHackArr(ArrayData* adIn, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);

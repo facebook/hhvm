@@ -1,0 +1,4 @@
+File "pipe_operator_dollardollar_static_call.php", line 11, characters 15-26:
+Could not find static method doesNotExist in type Foo (Typing[4090])
+File "pipe_operator_dollardollar_static_call.php", line 3, characters 7-9:
+Declaration of Foo is here

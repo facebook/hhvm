@@ -1,0 +1,4 @@
+File "pipe_operator_dollardollar_static_member.php", line 14, characters 15-25:
+Could not find class variable $notAMember in type Foo (Typing[4090])
+File "pipe_operator_dollardollar_static_member.php", line 3, characters 7-9:
+Declaration of Foo is here

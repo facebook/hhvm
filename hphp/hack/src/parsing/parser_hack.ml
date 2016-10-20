@@ -3039,12 +3039,15 @@ and expr_arrow env e1 tok =
 and expr_colcol env e1 =
   reduce env e1 Tcolcol begin fun e1 env ->
     (match e1 with
-    | (_, Id cname) ->
+    | _, Id cname ->
         (* XYZ::class is OK ... *)
         expr_colcol_remain ~allow_class:true env e1 cname
-    | pos, Lvar cname  ->
-        (* ... but get_class($x) should be used instead of $x::class *)
+    | _, Lvar cname ->
+        (* ... but get_class($x) should be used instead of $x::class ... *)
         expr_colcol_remain ~allow_class:false env e1 cname
+    | pos, Dollardollar ->
+        (* ... and $$ is a special "variable" that resolves while naming. *)
+        expr_colcol_remain ~allow_class:false env e1 (pos, "$$")
     | pos, _ ->
         error_at env pos "Expected class name";
         e1

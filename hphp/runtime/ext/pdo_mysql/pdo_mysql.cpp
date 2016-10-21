@@ -328,11 +328,15 @@ bool PDOMySqlConnection::create(const Array& options) {
     ssl_cipher = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CIPHER,
                                  nullptr);
 
-    if ((ssl_ca || ssl_capath || ssl_key || ssl_cert || ssl_cipher) &&
+    if ((!ssl_ca.empty() || !ssl_capath.empty() || !ssl_key.empty()
+        || !ssl_cert.empty() || !ssl_cipher.empty()) &&
         !host.same(s_localhost)) {
-      if (mysql_ssl_set(m_server, ssl_key.c_str(), ssl_cert.c_str(),
-                        ssl_ca.c_str(), ssl_capath.c_str(),
-                        ssl_cipher.c_str())) {
+      if (mysql_ssl_set(m_server,
+          ssl_key.empty() ? nullptr : ssl_key.c_str(),
+          ssl_cert.empty() ? nullptr : ssl_cert.c_str(),
+          ssl_ca.empty() ? nullptr : ssl_ca.c_str(),
+          ssl_capath.empty() ? nullptr : ssl_capath.c_str(),
+          ssl_cipher.empty() ? nullptr : ssl_cipher.c_str())) {
         handleError(__FILE__, __LINE__);
         goto cleanup;
       }

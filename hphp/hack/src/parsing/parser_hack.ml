@@ -1907,12 +1907,10 @@ and function_body env =
          * Between function foo(); and function foo() {}
          *)
         [Noop]
-      | _ when env.quick ->
-        ignore_body env;
-        [Noop]
       | _ ->
         (match statement_list env with
           | [] -> [Noop]
+          | _ when env.quick -> [Noop]
           | x -> x)
     ) in
     let in_generator = !(env.in_generator) in

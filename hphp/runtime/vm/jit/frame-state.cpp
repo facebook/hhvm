@@ -1092,7 +1092,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().ctx              = extra->ctx;
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
-  cur().bcSPOff          = FPInvOffset{target->numLocals()};
+  cur().bcSPOff          = FPInvOffset{target->numSlotsInFrame()};
 
   /*
    * To set up irSPOff, we want the FPInvOffset for the new fpValue and

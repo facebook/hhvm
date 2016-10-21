@@ -81,16 +81,16 @@ double HHVM_FUNCTION(fmod, double x, double y);
 double HHVM_FUNCTION(sqrt, double arg);
 
 int64_t HHVM_FUNCTION(getrandmax);
-void HHVM_FUNCTION(srand, const Variant& seed = null_variant);
+void HHVM_FUNCTION(srand, const Variant& seed = uninit_variant);
 int64_t HHVM_FUNCTION(rand,
                       int64_t min = 0,
-                      const Variant& max = null_variant);
+                      const Variant& max = uninit_variant);
 int64_t HHVM_FUNCTION(mt_getrandmax);
 void HHVM_FUNCTION(mt_srand,
-                   const Variant& seed = null_variant);
+                   const Variant& seed = uninit_variant);
 int64_t HHVM_FUNCTION(mt_rand,
                       int64_t min = 0,
-                      const Variant& max = null_variant);
+                      const Variant& max = uninit_variant);
 double HHVM_FUNCTION(lcg_value);
 
 ///////////////////////////////////////////////////////////////////////////////

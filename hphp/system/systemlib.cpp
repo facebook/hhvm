@@ -133,10 +133,10 @@ Object AllocDOMExceptionObject(const Variant& message,
 
 Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& message,
-                                 const Variant& actor /* = null_variant */,
-                                 const Variant& detail /* = null_variant */,
-                                 const Variant& name /* = null_variant */,
-                                 const Variant& header /* = null_variant */) {
+                                 const Variant& actor /* = uninit_variant */,
+                                 const Variant& detail /* = uninit_variant */,
+                                 const Variant& name /* = uninit_variant */,
+                                 const Variant& header /* = uninit_variant */) {
   return createAndConstruct(
     s_SoapFaultClass,
     make_packed_array(code,
@@ -215,10 +215,10 @@ void throwDOMExceptionObject(const Variant& message,
 
 void throwSoapFaultObject(const Variant& code,
                           const Variant& message,
-                          const Variant& actor /* = null_variant */,
-                          const Variant& detail /* = null_variant */,
-                          const Variant& name /* = null_variant */,
-                          const Variant& header /* = null_variant */) {
+                          const Variant& actor /* = uninit_variant */,
+                          const Variant& detail /* = uninit_variant */,
+                          const Variant& name /* = uninit_variant */,
+                          const Variant& header /* = uninit_variant */) {
   throw_object(Object{AllocSoapFaultObject(code, message,
                                     actor, detail,
                                     name, header)});

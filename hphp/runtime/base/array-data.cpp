@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/type-conversions.h"
@@ -1012,32 +1011,32 @@ const Variant& ArrayData::get(const Variant& k, bool error) const {
 
 const Variant& ArrayData::getNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
-  return null_variant;
+  return uninit_variant;
 }
 
 const Variant& ArrayData::getNotFound(const StringData* k) {
   raise_notice("Undefined index: %s", k->data());
-  return null_variant;
+  return uninit_variant;
 }
 
 const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
   return error && kind() != kGlobalsKind ? getNotFound(k) :
-         null_variant;
+         uninit_variant;
 }
 
 const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
   return error && kind() != kGlobalsKind ? getNotFound(k) :
-         null_variant;
+         uninit_variant;
 }
 
 const Variant& ArrayData::getNotFound(const String& k) {
   raise_notice("Undefined index: %s", k.data());
-  return null_variant;
+  return uninit_variant;
 }
 
 const Variant& ArrayData::getNotFound(const Variant& k) {
   raise_notice("Undefined index: %s", k.toString().data());
-  return null_variant;
+  return uninit_variant;
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {

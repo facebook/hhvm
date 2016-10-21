@@ -104,7 +104,7 @@ const StaticString DateTimeData::s_className("DateTime");
 
 void HHVM_METHOD(DateTime, __construct,
                  const String& time /*= "now"*/,
-                 const Variant& timezone /*= null_variant*/) {
+                 const Variant& timezone /*= uninit_variant*/) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
   auto tz = TimeZone::Current();
   if (!timezone.isNull()) {
@@ -125,7 +125,7 @@ void HHVM_METHOD(DateTime, __construct,
 Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
                            const String& format,
                            const String& time,
-                           const Variant& timezone /*= null_variant */) {
+                           const Variant& timezone /*= uninit_variant */) {
   auto tz = TimeZone::Current();
   if (!timezone.isNull()) {
     const Object& obj_timezone = timezone.toObject();
@@ -835,7 +835,7 @@ Variant HHVM_FUNCTION(date_parse_from_format,
 
 Variant HHVM_FUNCTION(date_create,
                       const Variant& time /* = null_string */,
-                      const Variant& timezone /* = null_variant */) {
+                      const Variant& timezone /* = uninit_variant */) {
   const String& str_time = time.isNull() ? null_string : time.toString();
   auto tz = TimeZone::Current();
   if (!timezone.isNull()) {

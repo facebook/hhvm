@@ -2754,11 +2754,11 @@ static Variant php_imagettftext_common(int mode, int extended,
                                        const Variant& arg2,
                                        const Variant& arg3,
                                        const Variant& arg4,
-                                       const Variant& arg5 = null_variant,
-                                       const Variant& arg6 = null_variant,
-                                       const Variant& arg7 = null_variant,
-                                       const Variant& arg8 = null_variant,
-                                       const Variant& arg9 = null_variant) {
+                                       const Variant& arg5 = uninit_variant,
+                                       const Variant& arg6 = uninit_variant,
+                                       const Variant& arg7 = uninit_variant,
+                                       const Variant& arg8 = uninit_variant,
+                                       const Variant& arg9 = uninit_variant) {
   gdImagePtr im=nullptr;
   long col = -1, x = -1, y = -1;
   int brect[8];

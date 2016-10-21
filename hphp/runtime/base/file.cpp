@@ -904,7 +904,7 @@ Array File::readCSV(int64_t length /* = 0 */,
     }
 
     if (first_field && bptr == line_end) {
-      ret.append(null_variant);
+      ret.append(uninit_variant);
       break;
     }
     first_field = false;

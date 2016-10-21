@@ -45,7 +45,6 @@
 #include <folly/Optional.h>
 
 #include <sstream>
-#include <type_traits>
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -261,7 +260,7 @@ SSATmp* ptrToInitNull(IRGS& env) {
 SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(env, Type::cns(&null_variant, TPtrToOtherUninit));
+  return cns(env, Type::cns(&uninit_variant, TPtrToOtherUninit));
 }
 
 bool mightCallMagicPropMethod(MOpFlags flags, PropInfo propInfo) {

@@ -259,7 +259,7 @@ Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
 }
 
 bool HHVM_FUNCTION(spl_autoload_register,
-                   const Variant& autoload_function /* = null_variant */,
+                   const Variant& autoload_function /* = uninit_variant */,
                    bool throws /* = true */,
                    bool prepend /* = false */) {
   if (same(autoload_function, s_spl_autoload_call)) {

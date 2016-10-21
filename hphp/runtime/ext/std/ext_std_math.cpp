@@ -434,7 +434,7 @@ static void randinit(uint32_t seed) {
 #endif
 }
 
-void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
+void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
   if (seed.isNull()) {
     randinit(math_generate_seed());
     return;
@@ -448,7 +448,7 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
 
 int64_t HHVM_FUNCTION(rand,
                       int64_t min /* = 0 */,
-                      const Variant& max /* = null_variant */) {
+                      const Variant& max /* = uninit_variant */) {
 #if defined(__APPLE__) || defined(_MSC_VER)
   if (!s_rand_is_seeded) {
 #else
@@ -477,7 +477,7 @@ int64_t HHVM_FUNCTION(rand,
 int64_t HHVM_FUNCTION(mt_getrandmax) { return MT_RAND_MAX;}
 
 void HHVM_FUNCTION(mt_srand,
-                   const Variant& seed /* = null_variant */) {
+                   const Variant& seed /* = uninit_variant */) {
   if (seed.isNull()) {
     return math_mt_srand(math_generate_seed());
   }
@@ -490,7 +490,7 @@ void HHVM_FUNCTION(mt_srand,
 
 int64_t HHVM_FUNCTION(mt_rand,
                       int64_t min /* = 0 */,
-                      const Variant& max /* = null_variant */) {
+                      const Variant& max /* = uninit_variant */) {
   return math_mt_rand(min, max.isNull() ? RAND_MAX : max.toInt64());
 }
 

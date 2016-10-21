@@ -159,7 +159,7 @@ function pg_field_num(resource $result, string $field_name): int;
 function pg_field_prtlen(
   resource $result,
   mixed $row_number,
-  mixed $field = null_variant,
+  mixed $field = uninit_variant,
 ): ?int;
 
 <<__Native>>

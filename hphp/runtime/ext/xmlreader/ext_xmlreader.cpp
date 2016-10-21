@@ -110,7 +110,7 @@ void XMLReader::close() {
 
 Variant HHVM_METHOD(XMLReader, open,
                  const String& uri,
-                 const Variant& encoding /*= null_variant*/,
+                 const Variant& encoding /*= uninit_variant*/,
                  int64_t options /*= 0*/) {
   auto* data = Native::data<XMLReader>(this_);
   const String& str_encoding = encoding.isNull()
@@ -160,7 +160,7 @@ Variant HHVM_METHOD(XMLReader, open,
 
 bool HHVM_METHOD(XMLReader, XML,
                  const String& source,
-                 const Variant& encoding /*= null_variant*/,
+                 const Variant& encoding /*= uninit_variant*/,
                  int64_t options /*= 0*/) {
   auto* data = Native::data<XMLReader>(this_);
   const String& str_encoding = encoding.isNull()
@@ -235,7 +235,7 @@ bool HHVM_METHOD(XMLReader, read) {
 }
 
 bool HHVM_METHOD(XMLReader, next,
-                 const Variant& localname /*= null_variant*/) {
+                 const Variant& localname /*= uninit_variant*/) {
   auto* data = Native::data<XMLReader>(this_);
   const String& str_localname = localname.isNull()
                               ? null_string

@@ -49,7 +49,7 @@ bool HHVM_FUNCTION(key_exists,
                    const Variant& key,
                    const Variant& search);
 Variant array_keys_helper(const Variant& input,
-                          const Variant& search_value = null_variant,
+                          const Variant& search_value = uninit_variant,
                           bool strict = false);
 TypedValue HHVM_FUNCTION(array_map,
                          const Variant& callback,
@@ -58,15 +58,15 @@ TypedValue HHVM_FUNCTION(array_map,
 TypedValue HHVM_FUNCTION(array_merge_recursive,
                          int64_t numArgs,
                          const Variant& array1,
-                         const Variant& array2 = null_variant,
+                         const Variant& array2 = uninit_variant,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_replace_recursive,
                          const Variant& array1,
-                         const Variant& array2 = null_variant,
+                         const Variant& array2 = uninit_variant,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_replace,
                          const Variant& array1,
-                         const Variant& array2 = null_variant,
+                         const Variant& array2 = uninit_variant,
                          const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_pad,
                          const Variant& input,
@@ -90,8 +90,8 @@ TypedValue HHVM_FUNCTION(array_shift,
 TypedValue HHVM_FUNCTION(array_splice,
                          VRefParam input,
                          int offset,
-                         const Variant& length = null_variant,
-                         const Variant& replacement = null_variant);
+                         const Variant& length = uninit_variant,
+                         const Variant& replacement = uninit_variant);
 TypedValue HHVM_FUNCTION(array_sum,
                          const Variant& array);
 TypedValue HHVM_FUNCTION(array_unique,
@@ -106,11 +106,11 @@ TypedValue HHVM_FUNCTION(array_values,
 bool HHVM_FUNCTION(array_walk_recursive,
                    VRefParam input,
                    const Variant& funcname,
-                   const Variant& userdata = null_variant);
+                   const Variant& userdata = uninit_variant);
 bool HHVM_FUNCTION(array_walk,
                    VRefParam input,
                    const Variant& funcname,
-                    const Variant& userdata = null_variant);
+                    const Variant& userdata = uninit_variant);
 Array HHVM_FUNCTION(compact,
                     const Variant& varname,
                     const Array& args = null_array);

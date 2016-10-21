@@ -56,7 +56,6 @@
 #include <boost/format.hpp>
 
 #include <algorithm>
-#include <limits>
 
 namespace HPHP {
 
@@ -143,7 +142,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     const Variant& clsname = arr.rvalAtRef(int64_t(0));
     const Variant& mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
-        &clsname == &null_variant ||
+        &clsname == &uninit_variant ||
         !mthname.isString()) {
       if (name) *name->var() = array_string;
       return false;

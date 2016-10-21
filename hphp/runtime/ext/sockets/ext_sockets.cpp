@@ -1032,7 +1032,7 @@ Variant socket_server_impl(
   int flags, /* = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN */
   VRefParam errnum /* = null */,
   VRefParam errstr /* = null */,
-  const Variant& context /* = null_variant */
+  const Variant& context /* = uninit_variant */
 ) {
   errnum.assignIfRef(0);
   errstr.assignIfRef(empty_string());
@@ -1501,7 +1501,7 @@ Variant HHVM_FUNCTION(fsockopen,
                       VRefParam errstr /* = null */,
                       double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
-  return sockopen_impl(hosturl, errnum, errstr, timeout, false, null_variant);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, false, uninit_variant);
 }
 
 Variant HHVM_FUNCTION(pfsockopen,
@@ -1511,7 +1511,7 @@ Variant HHVM_FUNCTION(pfsockopen,
                       VRefParam errstr /* = null */,
                       double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
-  return sockopen_impl(hosturl, errnum, errstr, timeout, true, null_variant);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, true, uninit_variant);
 }
 
 String ipaddr_convert(struct sockaddr *addr, int addrlen) {

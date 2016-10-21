@@ -539,7 +539,7 @@ const TypedValue* elemArrayNotFound(int64_t k) {
   if (flags & MOpFlags::Warn) {
     raise_notice("Undefined index: %" PRId64, k);
   }
-  return null_variant.asTypedValue();
+  return uninit_variant.asTypedValue();
 }
 
 template<MOpFlags flags>
@@ -548,7 +548,7 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
   if (flags & MOpFlags::Warn) {
     raise_notice("Undefined index: %s", k->data());
   }
-  return null_variant.asTypedValue();
+  return uninit_variant.asTypedValue();
 }
 
 template<KeyType keyType, bool checkForInt, MOpFlags flags>

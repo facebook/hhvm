@@ -37,20 +37,20 @@ struct TypedValue;
 
 #define INVOKE_FEW_ARGS_COUNT 6
 #define INVOKE_FEW_ARGS_DECL3                        \
-  const Variant& a0 = null_variant,                  \
-  const Variant& a1 = null_variant,                  \
-  const Variant& a2 = null_variant
+  const Variant& a0 = uninit_variant,                \
+  const Variant& a1 = uninit_variant,                \
+  const Variant& a2 = uninit_variant
 #define INVOKE_FEW_ARGS_DECL6                        \
   INVOKE_FEW_ARGS_DECL3,                             \
-  const Variant& a3 = null_variant,                  \
-  const Variant& a4 = null_variant,                  \
-  const Variant& a5 = null_variant
+  const Variant& a3 = uninit_variant,                \
+  const Variant& a4 = uninit_variant,                \
+  const Variant& a5 = uninit_variant
 #define INVOKE_FEW_ARGS_DECL10                       \
   INVOKE_FEW_ARGS_DECL6,                             \
-  const Variant& a6 = null_variant,                  \
-  const Variant& a7 = null_variant,                  \
-  const Variant& a8 = null_variant,                  \
-  const Variant& a9 = null_variant
+  const Variant& a6 = uninit_variant,                \
+  const Variant& a7 = uninit_variant,                \
+  const Variant& a8 = uninit_variant,                \
+  const Variant& a9 = uninit_variant
 #define INVOKE_FEW_ARGS_HELPER(kind,num) kind##num
 #define INVOKE_FEW_ARGS(kind,num) \
   INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)

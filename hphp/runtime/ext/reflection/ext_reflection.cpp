@@ -612,7 +612,7 @@ static Array get_function_static_variables(const Func* func) {
       VarNR(sv.name),
       refData.isInit()
         ? tvAsCVarRef(refData.get()->tv())
-        : null_variant
+        : uninit_variant
     );
   }
   return ai.toArray();

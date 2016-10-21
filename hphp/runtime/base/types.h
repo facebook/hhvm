@@ -29,7 +29,7 @@ struct Array;
 struct Variant;
 struct VarNR;
 
-extern const Variant null_variant;      // uninitialized variant
+extern const Variant uninit_variant;    // uninitialized variant
 extern const Variant init_null_variant; // php null
 extern const VarNR null_varNR;
 extern const VarNR true_varNR;

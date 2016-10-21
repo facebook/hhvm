@@ -16,15 +16,12 @@
 
 #include "hphp/runtime/base/type-variant.h"
 
-#include "hphp/parser/hphp.tab.hpp"
-
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -47,7 +44,7 @@
 
 namespace HPHP {
 
-const Variant null_variant;                         // uninitialized variant
+const Variant uninit_variant; // uninitialized variant
 const Variant init_null_variant((Variant::NullInit())); // php null
 const VarNR null_varNR;
 const VarNR true_varNR(true);

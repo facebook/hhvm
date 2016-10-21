@@ -1171,7 +1171,7 @@ struct Variant : private TypedValue {
 
  private:
   static ALWAYS_INLINE void PromoteToRef(Variant& v) {
-    assert(&v != &null_variant);
+    assert(&v != &uninit_variant);
     if (v.m_type != KindOfRef) {
       auto const ref = RefData::Make(*v.asTypedValue());
       v.m_type = KindOfRef;

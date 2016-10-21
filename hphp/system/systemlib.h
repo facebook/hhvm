@@ -107,10 +107,10 @@ Object AllocDirectoryObject();
 Object AllocPDOExceptionObject();
 Object AllocSoapFaultObject(const Variant& code,
                             const Variant& message,
-                            const Variant& actor = null_variant,
-                            const Variant& detail = null_variant,
-                            const Variant& name = null_variant,
-                            const Variant& header = null_variant);
+                            const Variant& actor = uninit_variant,
+                            const Variant& detail = uninit_variant,
+                            const Variant& name = uninit_variant,
+                            const Variant& header = uninit_variant);
 Object AllocLazyKVZipIterableObject(const Variant& mp);
 
 Object AllocLazyIterableViewObject(const Variant& iterable);
@@ -136,10 +136,10 @@ void throwDOMExceptionObject(const Variant& message,
 [[noreturn]]
 void throwSoapFaultObject(const Variant& code,
                           const Variant& message,
-                          const Variant& actor = null_variant,
-                          const Variant& detail = null_variant,
-                          const Variant& name = null_variant,
-                          const Variant& header = null_variant);
+                          const Variant& actor = uninit_variant,
+                          const Variant& detail = uninit_variant,
+                          const Variant& name = uninit_variant,
+                          const Variant& header = uninit_variant);
 
 
 /**

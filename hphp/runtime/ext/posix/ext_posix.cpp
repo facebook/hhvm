@@ -19,15 +19,15 @@
 #include <memory>
 
 #include <sys/times.h>
-#include <sys/time.h>
+#include <folly/portability/SysTime.h>
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/resource.h>
+#include <folly/portability/SysResource.h>
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #endif
-#include <unistd.h>
+#include <folly/portability/Unistd.h>
 #include <pwd.h>
 
 #include <folly/String.h>
@@ -212,7 +212,7 @@ const StaticString
   s_shell("shell");
 
 static Variant php_posix_group_to_array(int gid,
-                   const String& gname = null_variant.toString()) {
+                   const String& gname = uninit_variant.toString()) {
   // Don't pass a gid *and* a gname to this.
   assert((gid <  0) || gname.size() == 0);
 
@@ -312,7 +312,7 @@ int64_t HHVM_FUNCTION(posix_getppid) {
 }
 
 static Variant php_posix_passwd_to_array(int uid,
-                   const String& name = null_variant.toString()) {
+                   const String& name = uninit_variant.toString()) {
   // Don't pass a uid *and* a name to this.
   assert((uid <  0) || name.size() == 0);
 

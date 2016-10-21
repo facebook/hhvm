@@ -36,7 +36,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sweepable.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/externals.h"
@@ -1860,7 +1859,7 @@ const Variant& ExecutionContext::getEvaledArg(const StringData* val,
 
   if (m_evaledArgs.get()) {
     const Variant& arg = m_evaledArgs.get()->get(key);
-    if (&arg != &null_variant) return arg;
+    if (&arg != &uninit_variant) return arg;
   }
 
   String code;

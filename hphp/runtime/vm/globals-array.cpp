@@ -98,7 +98,7 @@ void GlobalsArray::NvGetKey(const ArrayData* ad, TypedValue* out,
 const Variant& GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
-  return iter.valid() ? tvAsCVarRef(iter.curVal()) : null_variant;
+  return iter.valid() ? tvAsCVarRef(iter.curVal()) : uninit_variant;
 }
 
 bool

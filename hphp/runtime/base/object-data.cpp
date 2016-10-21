@@ -1587,7 +1587,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
     if (propInd != kInvalidSlot) {
       // Declared property.
-      tvSetIgnoreRef(*null_variant.asTypedValue(), *prop);
+      tvSetIgnoreRef(*uninit_variant.asTypedValue(), *prop);
     } else {
       // Dynamic property.
       dynPropArray().remove(StrNR(key).asString(), true /* isString */);

@@ -3763,7 +3763,7 @@ Variant HHVM_METHOD(DOMDocument, saveXML,
 }
 
 Variant HHVM_METHOD(DOMDocument, saveHTML,
-                    const Variant& node /* = null_variant */) {
+                    const Variant& node /* = uninit_variant */) {
   auto* data = Native::data<DOMNode>(this_);
   const Object& obj_node = node.isNull() ? null_object : node.toObject();
   return save_html_or_xml(data, /* as_xml = */ false, obj_node);

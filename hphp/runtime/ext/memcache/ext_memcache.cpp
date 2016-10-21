@@ -22,7 +22,6 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/zend-string.h"
 #include <vector>
 
@@ -724,7 +723,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
                         bool persistent /* = false */,
                         int weight /* = 0 */, int timeout /* = 0 */,
                         int retry_interval /* = 0 */, bool status /* = true */,
-                        const Variant& failure_callback /* = null_variant */,
+                        const Variant& failure_callback /* = uninit_variant */,
                         int timeoutms /* = 0 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;

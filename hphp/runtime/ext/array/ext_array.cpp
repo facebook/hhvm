@@ -126,7 +126,7 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
 TypedValue HHVM_FUNCTION(array_column,
                          const Variant& input,
                          const Variant& val_key,
-                         const Variant& idx_key /* = null_variant */) {
+                         const Variant& idx_key /* = uninit_variant */) {
 
   getCheckedContainer(input);
   Variant val = val_key, idx = idx_key;
@@ -381,7 +381,7 @@ Variant HHVM_FUNCTION(array_keys, int64_t argc,
                                   bool strict /*=false*/) {
   return array_keys_helper(
     input,
-    argc < 2 ? null_variant : search_value,
+    argc < 2 ? uninit_variant : search_value,
     strict
   );
 }
@@ -517,7 +517,7 @@ TypedValue HHVM_FUNCTION(array_map,
 TypedValue HHVM_FUNCTION(array_merge,
                          int64_t numArgs,
                          const Variant& array1,
-                         const Variant& array2 /* = null_variant */,
+                         const Variant& array2 /* = uninit_variant */,
                          const Array& args /* = null array */) {
   getCheckedContainer(array1);
   Array ret = Array::Create();
@@ -543,7 +543,7 @@ TypedValue HHVM_FUNCTION(array_merge,
 TypedValue HHVM_FUNCTION(array_merge_recursive,
                          int64_t numArgs,
                          const Variant& array1,
-                         const Variant& array2 /* = null_variant */,
+                         const Variant& array2 /* = uninit_variant */,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
   auto in1 = array1.asCArrRef();
@@ -625,7 +625,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
 
 TypedValue HHVM_FUNCTION(array_replace,
                          const Variant& array1,
-                         const Variant& array2 /* = null_variant */,
+                         const Variant& array2 /* = uninit_variant */,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
@@ -648,7 +648,7 @@ TypedValue HHVM_FUNCTION(array_replace,
 
 TypedValue HHVM_FUNCTION(array_replace_recursive,
                          const Variant& array1,
-                         const Variant& array2 /* = null_variant */,
+                         const Variant& array2 /* = uninit_variant */,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
   Array ret = Array::Create();
@@ -904,7 +904,7 @@ TypedValue HHVM_FUNCTION(array_shift,
 TypedValue HHVM_FUNCTION(array_slice,
                          TypedValue cell_input,
                          int64_t offset,
-                         const Variant& length /* = null_variant */,
+                         const Variant& length /* = uninit_variant */,
                          bool preserve_keys /* = false */) {
   if (UNLIKELY(!isContainer(cell_input))) {
     raise_warning("Invalid operand type was used: %s expects "
@@ -1227,7 +1227,7 @@ static void walk_func(Variant& value,
 bool HHVM_FUNCTION(array_walk_recursive,
                    VRefParam input,
                    const Variant& funcname,
-                   const Variant& userdata /* = null_variant */) {
+                   const Variant& userdata /* = uninit_variant */) {
   if (!input.isPHPArray()) {
     throw_expected_array_exception("array_walk_recursive");
     return false;
@@ -1247,7 +1247,7 @@ bool HHVM_FUNCTION(array_walk_recursive,
 bool HHVM_FUNCTION(array_walk,
                    VRefParam input,
                    const Variant& funcname,
-                   const Variant& userdata /* = null_variant */) {
+                   const Variant& userdata /* = uninit_variant */) {
   if (!input.isPHPArray()) {
     throw_expected_array_exception("array_walk");
     return false;
@@ -2812,7 +2812,7 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
       VarNR index = key.toKey(arr);
       if (!index.isNull()) {
         const Variant& ret = arr->get(index, false);
-        return tvReturn((&ret != &null_variant) ? ret : def);
+        return tvReturn((&ret != &uninit_variant) ? ret : def);
       }
     } else {
       raise_error("hphp_array_idx: search must be an array");

@@ -122,9 +122,9 @@ void HHVM_FUNCTION(socket_close,
 String HHVM_FUNCTION(socket_strerror,
                      int errnum);
 int64_t HHVM_FUNCTION(socket_last_error,
-                      const Variant& socket = null_variant);
+                      const Variant& socket = uninit_variant);
 void HHVM_FUNCTION(socket_clear_error,
-                   const Variant& socket = null_variant);
+                   const Variant& socket = uninit_variant);
 Variant HHVM_FUNCTION(getaddrinfo,
                       const String& host,
                       const String& port,
@@ -157,7 +157,7 @@ Variant socket_server_impl(const HostURL &hosturl,
                              k_STREAM_SERVER_LISTEN,
                            VRefParam errnum = uninit_null(),
                            VRefParam errstr = uninit_null(),
-                           const Variant& context = null_variant);
+                           const Variant& context = uninit_variant);
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
                       VRefParam errstr, double timeout, bool persistent,
                       const Variant& context);

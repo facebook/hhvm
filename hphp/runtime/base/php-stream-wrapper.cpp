@@ -64,7 +64,7 @@ static void phpStreamApplyFilterList(const Resource& fpres,
   filter = strtok_r(filter, "|", &token);
   while (filter) {
     auto ret = HHVM_FN(stream_filter_append)(fpres, String(filter, CopyString),
-                                             rwMode, null_variant);
+                                             rwMode, uninit_variant);
     if (!ret.toBoolean()) {
       raise_warning("Unable to create filter (%s)", filter);
     }

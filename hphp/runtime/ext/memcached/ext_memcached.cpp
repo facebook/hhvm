@@ -684,7 +684,7 @@ Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
 
 Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
                                const Array& keys,
-                               VRefParam cas_tokens /*= null_variant*/,
+                               VRefParam cas_tokens /*= uninit_variant*/,
                                int flags /*= 0*/) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
@@ -727,7 +727,7 @@ Variant HHVM_METHOD(Memcached, getmultibykey, const String& server_key,
 
 bool HHVM_METHOD(Memcached, getdelayedbykey, const String& server_key,
                             const Array& keys, bool with_cas /*= false*/,
-                            const Variant& value_cb /*= null_variant*/) {
+                            const Variant& value_cb /*= uninit_variant*/) {
   auto data = Native::data<MemcachedData>(this_);
   data->m_impl->rescode = q_Memcached$$RES_SUCCESS;
 

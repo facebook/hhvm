@@ -725,7 +725,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(ldap_connect,
-                      const Variant& hostname /* = null_variant */,
+                      const Variant& hostname /* = uninit_variant */,
                       int port /* = 389 */) {
   const String& str_hostname = hostname.isNull()
                              ? null_string
@@ -1121,8 +1121,8 @@ bool HHVM_FUNCTION(ldap_modify_batch,
 
 bool HHVM_FUNCTION(ldap_bind,
                    const Resource& link,
-                   const Variant& bind_rdn /* = null_variant */,
-                   const Variant& bind_password /* = null_variant */) {
+                   const Variant& bind_rdn /* = uninit_variant */,
+                   const Variant& bind_password /* = uninit_variant */) {
 
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1493,7 +1493,7 @@ Variant HHVM_FUNCTION(ldap_list,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,
@@ -1506,7 +1506,7 @@ Variant HHVM_FUNCTION(ldap_read,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,
@@ -1519,7 +1519,7 @@ Variant HHVM_FUNCTION(ldap_search,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,

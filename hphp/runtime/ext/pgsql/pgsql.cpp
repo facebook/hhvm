@@ -1310,7 +1310,7 @@ static Variant HHVM_FUNCTION(pg_fetch_all_columns,
 
 static Variant HHVM_FUNCTION(pg_fetch_array,
   const Resource& result,
-  const Variant& row /* = null_variant */,
+  const Variant& row /* = uninit_variant */,
   int64_t result_type /* = PGSQL_BOTH */
 ) {
   auto res = PGSQLResult::Get(result);
@@ -1352,7 +1352,7 @@ static Variant HHVM_FUNCTION(pg_fetch_array,
 }
 
 static Variant HHVM_FUNCTION(pg_fetch_assoc,
-  const Resource& result, const Variant& row /* = null_variant */) {
+  const Resource& result, const Variant& row /* = uninit_variant */) {
   return f_pg_fetch_array(result, row, PGSQL_ASSOC);
 }
 
@@ -1378,8 +1378,8 @@ static Variant HHVM_FUNCTION(pg_fetch_all, const Resource& result) {
 
 static Variant HHVM_FUNCTION(pg_fetch_result,
   const Resource& result,
-  const Variant& row /* = null_variant */,
-  const Variant& field /* = null_variant */
+  const Variant& row /* = uninit_variant */,
+  const Variant& field /* = uninit_variant */
 ) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
@@ -1390,7 +1390,7 @@ static Variant HHVM_FUNCTION(pg_fetch_result,
 }
 
 static Variant HHVM_FUNCTION(pg_fetch_row,
-  const Resource& result, const Variant& row /* = null_variant */) {
+  const Resource& result, const Variant& row /* = uninit_variant */) {
   return f_pg_fetch_array(result, row, PGSQL_NUM);
 }
 
@@ -1399,7 +1399,7 @@ static Variant HHVM_FUNCTION(pg_fetch_row,
 static Variant HHVM_FUNCTION(pg_field_is_null,
   const Resource& result,
   const Variant& row,
-  const Variant& field /* = null_variant */
+  const Variant& field /* = uninit_variant */
 ) {
   auto res = PGSQLResult::Get(result);
   if (!res) {
@@ -1445,7 +1445,7 @@ static int64_t HHVM_FUNCTION(pg_field_num,
 static Variant HHVM_FUNCTION(pg_field_prtlen,
   const Resource& result,
   const Variant& row_number,
-  const Variant& field /* = null_variant */
+  const Variant& field /* = uninit_variant */
 ) {
   auto res = PGSQLResult::Get(result);
   if (!res) {

@@ -153,7 +153,7 @@ void BaseMap::addAllPairs(const Variant& iterable) {
 }
 
 Variant BaseMap::firstKey() {
-  if (!m_size) return null_variant;
+  if (!m_size) return uninit_variant;
   auto e = firstElm();
   assert(e != elmLimit());
   if (e->hasIntKey()) {
@@ -164,14 +164,14 @@ Variant BaseMap::firstKey() {
 }
 
 Variant BaseMap::firstValue() {
-  if (!m_size) return null_variant;
+  if (!m_size) return uninit_variant;
   auto e = firstElm();
   assert(e != elmLimit());
   return tvAsCVarRef(&e->data);
 }
 
 Variant BaseMap::lastKey() {
-  if (!m_size) return null_variant;
+  if (!m_size) return uninit_variant;
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
   // we could use that here instead of having to use a
@@ -189,7 +189,7 @@ Variant BaseMap::lastKey() {
 }
 
 Variant BaseMap::lastValue() {
-  if (!m_size) return null_variant;
+  if (!m_size) return uninit_variant;
   // TODO Task# 4281431: If nthElmPos(n) is optimized to
   // walk backward from the end when n > m_size/2, then
   // we could use that here instead of having to use a

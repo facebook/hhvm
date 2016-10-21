@@ -57,64 +57,17 @@ ArgType immType(const Op opcode, int idx) {
   assert(isValidOpcode(opcode));
   assert(idx >= 0 && idx < numImmediates(opcode));
   always_assert(idx < 4); // No opcodes have more than four immediates
-  static const int8_t arg0Types[] = {
-#define NA -1,
-#define ONE(a) a,
-#define TWO(a, b) a,
-#define THREE(a, b, c) a,
-#define FOUR(a, b, c, d) a,
+  static const int8_t argTypes[][4] = {
+#define NA               {-1, -1, -1, -1},
+#define ONE(a)           { a, -1, -1, -1},
+#define TWO(a, b)        { a,  b, -1, -1},
+#define THREE(a, b, c)   { a,  b,  c, -1},
+#define FOUR(a, b, c, d) { a,  b,  c,  d},
 #define OA(x) OA
 #define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
-// re-using definition of O below.
-#undef OA
-#undef NA
-#undef ONE
-#undef TWO
-#undef THREE
-#undef FOUR
-  };
-  static const int8_t arg1Types[] = {
-#define NA -1,
-#define ONE(a) -1,
-#define TWO(a, b) b,
-#define THREE(a, b, c) b,
-#define FOUR(a, b, c, d) b,
-#define OA(x) OA
-    OPCODES
-// re-using definition of O below.
-#undef OA
-#undef NA
-#undef ONE
-#undef TWO
-#undef THREE
-#undef FOUR
-  };
-  static const int8_t arg2Types[] = {
-#define NA -1,
-#define ONE(a) -1,
-#define TWO(a, b) -1,
-#define THREE(a, b, c) c,
-#define FOUR(a, b, c, d) c,
-#define OA(x) OA
-    OPCODES
-#undef OA
-#undef NA
-#undef ONE
-#undef TWO
-#undef THREE
-#undef FOUR
-  };
-  static const int8_t arg3Types[] = {
-#define NA -1,
-#define ONE(a) -1,
-#define TWO(a, b) -1,
-#define THREE(a, b, c) -1,
-#define FOUR(a, b, c, d) d,
-#define OA(x) OA
-    OPCODES
-#undef OA
 #undef O
+#undef OA
 #undef NA
 #undef ONE
 #undef TWO
@@ -122,13 +75,7 @@ ArgType immType(const Op opcode, int idx) {
 #undef FOUR
   };
   auto opInt = size_t(opcode);
-  switch (idx) {
-    case 0: return (ArgType)arg0Types[opInt];
-    case 1: return (ArgType)arg1Types[opInt];
-    case 2: return (ArgType)arg2Types[opInt];
-    case 3: return (ArgType)arg3Types[opInt];
-    default: assert(false); return (ArgType)-1;
-  }
+  return (ArgType)argTypes[opInt][idx];
 }
 
 static size_t encoded_iva_size(uint8_t lowByte) {

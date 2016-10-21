@@ -109,8 +109,15 @@ class HHBC(object):
     def imm_type(op, arg):
         """Return the type of the arg'th immediate for HPHP::Op `op'."""
 
-        table_fmt = 'HPHP::immType(HPHP::Op, int)::arg%dTypes'
-        immtype = op_table(table_fmt % arg)[as_idx(op)]
+        op_count = V('HPHP::Op_count')
+
+        table_name = 'HPHP::immType(HPHP::Op, int)::argTypes'
+        # This looks like an int8_t[4][op_count], but in fact, it's actually an
+        # int8_t[op_count][4], as desired.
+        table_type = T('int8_t').array(4 - 1).array(op_count - 1).pointer()
+        table = op_table(table_name).cast(table_type).dereference()
+
+        immtype = table[as_idx(op)][arg]
         return immtype.cast(T('HPHP::ArgType'))
 
     @staticmethod

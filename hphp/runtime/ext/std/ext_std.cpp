@@ -7,8 +7,6 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_HHVM_DEBUG("HHVM_DEBUG");
-
 void StandardExtension::initStandard() {
   // define('HHVM_VERSION_ID', XXYYZZ);
   HHVM_RC_INT(
@@ -22,7 +20,7 @@ void StandardExtension::initStandard() {
   // define('HHVM_VERSION', 'XX.YY.XX')
   HHVM_RC_STR_SAME(HHVM_VERSION);
   HHVM_RC_STR(HPHP_VERSION, HHVM_VERSION);
-  Native::registerConstant<KindOfBoolean>(s_HHVM_DEBUG.get(), debug);
+  HHVM_RC_BOOL(HHVM_DEBUG, debug);
   HHVM_RC_STR(HHVM_COMPILER_ID, compilerId());
   HHVM_RC_STR(HHVM_REPO_SCHEMA, repoSchemaId());
 }

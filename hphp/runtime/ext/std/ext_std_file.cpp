@@ -1909,7 +1909,7 @@ bool HHVM_FUNCTION(chdir,
   }
 
 #if ENABLE_EXTENSION_POSIX
-  if (!HHVM_FN(posix_access)(directory, k_POSIX_X_OK)) {
+  if (!HHVM_FN(posix_access)(directory, X_OK)) {
     raise_warning("chdir(): Permission denied (errno 13)");
     return false;
   }

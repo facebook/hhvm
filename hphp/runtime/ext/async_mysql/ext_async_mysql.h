@@ -42,44 +42,6 @@ struct c_Vector;
 namespace am = facebook::common::mysql_client;
 namespace db = facebook::db;
 
-extern const int64_t k_NOT_NULL_FLAG;
-extern const int64_t k_PRI_KEY_FLAG;
-extern const int64_t k_UNIQUE_KEY_FLAG;
-extern const int64_t k_MULTIPLE_KEY_FLAG;
-extern const int64_t k_UNSIGNED_FLAG;
-extern const int64_t k_ZEROFILL_FLAG;
-extern const int64_t k_BINARY_FLAG;
-extern const int64_t k_AUTO_INCREMENT_FLAG;
-extern const int64_t k_ENUM_FLAG;
-extern const int64_t k_SET_FLAG;
-extern const int64_t k_BLOB_FLAG;
-extern const int64_t k_TIMESTAMP_FLAG;
-extern const int64_t k_NUM_FLAG;
-extern const int64_t k_NO_DEFAULT_VALUE_FLAG;
-
-extern const int64_t k_MYSQL_TYPE_TINY;
-extern const int64_t k_MYSQL_TYPE_SHORT;
-extern const int64_t k_MYSQL_TYPE_LONG;
-extern const int64_t k_MYSQL_TYPE_INT24;
-extern const int64_t k_MYSQL_TYPE_LONGLONG;
-extern const int64_t k_MYSQL_TYPE_DECIMAL;
-extern const int64_t k_MYSQL_TYPE_NEWDECIMAL;
-extern const int64_t k_MYSQL_TYPE_FLOAT;
-extern const int64_t k_MYSQL_TYPE_DOUBLE;
-extern const int64_t k_MYSQL_TYPE_BIT;
-extern const int64_t k_MYSQL_TYPE_TIMESTAMP;
-extern const int64_t k_MYSQL_TYPE_DATE;
-extern const int64_t k_MYSQL_TYPE_TIME;
-extern const int64_t k_MYSQL_TYPE_DATETIME;
-extern const int64_t k_MYSQL_TYPE_YEAR;
-extern const int64_t k_MYSQL_TYPE_STRING;
-extern const int64_t k_MYSQL_TYPE_VAR_STRING;
-extern const int64_t k_MYSQL_TYPE_BLOB;
-extern const int64_t k_MYSQL_TYPE_SET;
-extern const int64_t k_MYSQL_TYPE_ENUM;
-extern const int64_t k_MYSQL_TYPE_GEOMETRY;
-extern const int64_t k_MYSQL_TYPE_NULL;
-
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlConnectionPool
 

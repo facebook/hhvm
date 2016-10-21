@@ -158,52 +158,19 @@ struct FribidiExtension final : Extension {
   FribidiExtension() : Extension("fribidi") {}
   void moduleInit() override {
     // Charsets
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_CHARSET_UTF8.get(),
-      FRIBIDI_CHAR_SET_UTF8
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_CHARSET_8859_6.get(),
-      FRIBIDI_CHAR_SET_ISO8859_6
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_CHARSET_8859_8.get(),
-      FRIBIDI_CHAR_SET_ISO8859_8
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_CHARSET_CP1255.get(),
-      FRIBIDI_CHAR_SET_CP1255
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_CHARSET_CP1256.get(),
-      FRIBIDI_CHAR_SET_CP1256
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_CHARSET_CAP_RTL.get(),
-      FRIBIDI_CHAR_SET_CAP_RTL
-    );
+    HHVM_RC_INT(FRIBIDI_CHARSET_UTF8, FRIBIDI_CHAR_SET_UTF8);
+    HHVM_RC_INT(FRIBIDI_CHARSET_8859_6, FRIBIDI_CHAR_SET_ISO8859_6);
+    HHVM_RC_INT(FRIBIDI_CHARSET_8859_8, FRIBIDI_CHAR_SET_ISO8859_8);
+    HHVM_RC_INT(FRIBIDI_CHARSET_CP1255, FRIBIDI_CHAR_SET_CP1255);
+    HHVM_RC_INT(FRIBIDI_CHARSET_CP1256, FRIBIDI_CHAR_SET_CP1256);
+    HHVM_RC_INT(FRIBIDI_CHARSET_CAP_RTL, FRIBIDI_CHAR_SET_CAP_RTL);
 
     // Directions
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_AUTO.get(),
-      FRIBIDI_PAR_ON
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_LTR.get(),
-      FRIBIDI_PAR_LTR
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_RTL.get(),
-      FRIBIDI_PAR_RTL
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_WLTR.get(),
-      FRIBIDI_PAR_WLTR
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_FRIBIDI_WRTL.get(),
-      FRIBIDI_PAR_WRTL
-    );
+    HHVM_RC_INT(FRIBIDI_AUTO, FRIBIDI_PAR_ON);
+    HHVM_RC_INT(FRIBIDI_LTR, FRIBIDI_PAR_LTR);
+    HHVM_RC_INT(FRIBIDI_RTL, FRIBIDI_PAR_RTL);
+    HHVM_RC_INT(FRIBIDI_WLTR, FRIBIDI_PAR_WLTR);
+    HHVM_RC_INT(FRIBIDI_WRTL, FRIBIDI_PAR_WRTL);
 
     HHVM_FE(fribidi_log2vis);
     HHVM_FE(fribidi_charset_info);

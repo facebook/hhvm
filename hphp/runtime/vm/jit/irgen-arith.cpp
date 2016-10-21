@@ -1339,6 +1339,23 @@ void emitShr(IRGS& env) {
 }
 
 void emitPow(IRGS& env) {
+  // Special-case exponent of 2, i.e.
+  // $x**2 becomes $x*$x
+  auto exponent = topC(env);
+  auto base = topC(env, BCSPRelOffset{1});
+  if (exponent->hasConstVal(2) &&
+      (base->isA(TDbl) || base->isA(TInt))) {
+    if (base->isA(TInt)) {
+      auto const exitSlow = makeExitSlow(env);
+      auto genMulIntO = gen(env, MulIntO, exitSlow, base, base);
+      discard(env, 2);
+      push(env, genMulIntO);
+    } else {
+      discard(env, 2);
+      push(env, gen(env, MulDbl, base, base));
+    }
+    return;
+  }
   interpOne(env, TUncountedInit, 2);
 }
 

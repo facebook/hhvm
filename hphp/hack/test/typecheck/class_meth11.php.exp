@@ -1,7 +1,7 @@
-fun  -> Tstring
-fun  -> Tstring
-fun  -> Tstring
-fun  -> Tstring
-fun  -> Tstring
-fun  -> Tstring
+(function(): string)
+(function(): string)
+(function(): string)
+(function(): string)
+(function(): string)
+(function(): string)
 No errors

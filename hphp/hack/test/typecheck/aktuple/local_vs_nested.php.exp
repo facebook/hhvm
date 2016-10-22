@@ -1,5 +1,5 @@
-array[[1]intersect(Tstring)]
-[2]intersect(array[[3]intersect(Tint, Tstring)])
+tuple-like-array(^(string))
+^(tuple-like-array(^(int | string)))
 File "local_vs_nested.php", line 18, characters 15-23:
 Invalid argument (Typing[4110])
 File "local_vs_nested.php", line 22, characters 22-27:

@@ -1,6 +1,6 @@
-[<expr#1>]generic Tobj where Tobj as App \C<generic Targ, >
-[1]intersect(App \C<Tint, >)
-[2]intersect(App \C<Tint, >)
+<expr#1> as Tobj
+^(C<int>)
+^(C<int>)
 File "new_generic.php", line 19, characters 29-36:
 Some type constraint(s) here are violated (Typing[4110])
 File "new_generic.php", line 8, characters 26-29:

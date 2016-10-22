@@ -212,17 +212,35 @@ module Suggest = struct
 end
 
 (*****************************************************************************)
-(* Pretty-printer of the "full" type. *)
+(* Pretty-printer of the "full" type.                                        *)
+(* This is used in server/symbolTypeService and elsewhere                    *)
+(* With debug_mode set it is used for hh_show                                *)
 (*****************************************************************************)
 
 module Full = struct
   module Env = Typing_env
+
+  let debug_mode = ref false
 
   let rec list_sep o s f l =
     match l with
     | [] -> ()
     | [x] -> f x
     | x :: rl -> f x; o s; list_sep o s f rl
+
+  let shape_map o fdm f =
+  let cmp = (fun (k1, _) (k2, _) ->
+     compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)) in
+  let fields = List.sort ~cmp (Nast.ShapeMap.elements fdm) in
+  let o_field = (fun (k, v) ->
+     o (Env.get_shape_field_name k); o " => "; f v;)
+  in
+  (match fields with
+  | [] -> ()
+  | f::l ->
+    o_field f;
+    List.iter l (fun f -> o ", "; o_field f;))
+
 
   let rec ty: type a. _ -> _ -> _ -> _ -> a ty -> _ =
     fun tcopt st env o (_, x) -> ty_ tcopt st env o x
@@ -243,8 +261,10 @@ module Full = struct
     | Tarray (Some x, None) -> o "array<"; k x; o ">"
     | Tarray (Some x, Some y) -> o "array<"; k x; o ", "; k y; o ">"
     | Tarraykind (AKmap (x, y)) -> o "array<"; k x; o ", "; k y; o ">"
-    | Tarraykind (AKshape _) -> o "[shape-like array]"
-    | Tarraykind (AKtuple _) -> o "[tuple-like array]"
+    | Tarraykind (AKshape fdm) -> o "shape-like-array(";
+      shape_map o fdm (fun (_tk, tv) -> k tv); o ")"
+    | Tarraykind (AKtuple fields) ->
+      o "tuple-like-array("; list k (List.rev (IMap.values fields)); o ")"
     | Tarray (None, Some _) -> assert false
     | Tclass ((_, s), []) -> o s
     | Tapply ((_, s), []) -> o s
@@ -259,6 +279,8 @@ module Full = struct
       let _, n' = Env.get_var env n in
       if ISet.mem n' st then o "[rec]"
       else
+        (* In debug mode we show where type variables appear *)
+        if !debug_mode then o "^";
         let _, ety = Env.expand_type env (Reason.Rnone, x) in
         let st = ISet.add n' st in
         ty tcopt st env o ety
@@ -271,15 +293,33 @@ module Full = struct
     | Tclass ((_, s), tyl) -> o s; o "<"; list k tyl; o ">"
     | Tabstract (AKnewtype (s, []), _) -> o s
     | Tabstract (AKnewtype (s, tyl), _) -> o s; o "<"; list k tyl; o ">"
-    | Tabstract (ak, _) -> o @@ AbstractKind.to_string ak;
+    | Tabstract (ak, cstr) -> o @@ AbstractKind.to_string ak;
+      (if !debug_mode
+       then Option.iter cstr ~f:(fun ty -> o " as "; k ty))
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
     *)
     | Tapply ((_, s), tyl) -> o s; o "<"; list k tyl; o ">"
     | Ttuple tyl -> o "("; list k tyl; o ")"
     | Tanon _ -> o "[fun]"
-    | Tunresolved tyl -> list_sep o " | " k tyl
+    | Tunresolved [] -> o "[unresolved]"
+    | Tunresolved [ty] -> if !debug_mode then (o "("; k ty; o ")") else k ty
+    | Tunresolved tyl -> o "("; list_sep o " | " k tyl; o ")"
     | Tobject -> o "object"
-    | Tshape _ -> o "[shape]"
+    | Tshape (fields_known, fdm) ->
+      o "shape";
+      begin match fields_known with
+      | FieldsFullyKnown -> ()
+      | FieldsPartiallyKnown unset_fields -> begin
+          o "(unset fields:";
+            Nast.ShapeMap.iter begin fun k _ ->
+              o (Env.get_shape_field_name k); o " "
+            end unset_fields;
+          o ")"
+        end
+      end;
+      o "(";
+      shape_map o fdm (fun t -> k t);
+      o ")"
 
   and prim o x =
     o (match x with
@@ -587,9 +627,10 @@ let full env ty = Full.to_string env ty
 let full_rec env n ty = Full.to_string_rec env n ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
 let debug env ty =
-  let e_str = error (snd ty) in
+  Full.debug_mode := true;
   let f_str = full_strip_ns env ty in
-  e_str^" "^f_str
+  Full.debug_mode := false;
+  f_str
 let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt gc
 let fun_ tcopt f = PrintFun.fun_type tcopt f

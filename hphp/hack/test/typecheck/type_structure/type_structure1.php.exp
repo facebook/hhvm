@@ -1,16 +1,16 @@
-App \TypeStructure<Tint, >
-App \classname<App \C<[1]intersect(), >, >
-App \classname<App \D<>, >
-App \classname<App \Vector<Tint, >, >
-tuple(App \TypeStructure<Tint, >)
-App \classname<App \C<Tstring, >, >
-tuple(App \TypeStructure<Tstring, >)
-tuple(App \TypeStructure<tuple(App \C<Tint, >, App \C<Tint, >), >)
-App \TypeStructure<Tint, >
-tuple(App \TypeStructure<App \Vector<App \C<Tint, >, >, >)
-App \classname<App \Vector<App \C<Tint, >, >, >
-App \classname<App \C<Tint, >, >
-shape<FieldsPartiallyKnown(unset fields:)>(bar => App \TypeStructure<shape<FieldsPartiallyKnown(unset fields:)>(x => tuple(Tnum, Tnum)), >, foo => App \TypeStructure<App \D<>, >)
-App \TypeStructure<App \D<>, >
-App \TypeStructure<Tnum, >
+TypeStructure<int>
+classname<C<^[unresolved]>>
+classname<D>
+classname<Vector<int>>
+(TypeStructure<int>)
+classname<C<string>>
+(TypeStructure<string>)
+(TypeStructure<(C<int>, C<int>)>)
+TypeStructure<int>
+(TypeStructure<Vector<C<int>>>)
+classname<Vector<C<int>>>
+classname<C<int>>
+shape(unset fields:)(bar => TypeStructure<shape(unset fields:)(x => (num, num))>, foo => TypeStructure<D>)
+TypeStructure<D>
+TypeStructure<num>
 No errors

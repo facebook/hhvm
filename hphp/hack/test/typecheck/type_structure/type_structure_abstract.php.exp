@@ -1,4 +1,4 @@
-option(App \classname<[<static>::T][this::T][\P::T], >)
-App \classname<[<static>::T][this::T][\C::T]App \IBase<>, >
-App \classname<App \IChild<>, >
+?classname<<static>::T as this::T as P::T>
+classname<<static>::T as this::T as C::T as IBase>
+classname<IChild>
 No errors

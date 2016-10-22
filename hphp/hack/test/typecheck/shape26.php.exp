@@ -1,5 +1,5 @@
-[1]intersect(shape<FieldsFullyKnown>(x => [2]intersect(Tint)), shape<FieldsFullyKnown>(y => [3]intersect(Tstring)))
-[4]intersect(shape<FieldsFullyKnown>(x => [5]intersect(Tstring, Tint)))
-[6]intersect(shape<FieldsPartiallyKnown(unset fields:)>(x => Tint), shape<FieldsPartiallyKnown(unset fields:)>(x => Tint, y => option(Tstring)))
-[7]intersect(shape<FieldsFullyKnown>(x => [8]intersect(Tint)), shape<FieldsPartiallyKnown(unset fields:)>(x => Tint, y => option(Tstring)))
+^(shape(x => ^(int)) | shape(y => ^(string)))
+^(shape(x => ^(string | int)))
+^(shape(unset fields:)(x => int) | shape(unset fields:)(x => int, y => ?string))
+^(shape(x => ^(int)) | shape(unset fields:)(x => int, y => ?string))
 No errors

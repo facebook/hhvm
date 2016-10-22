@@ -1,2 +1,2 @@
-fun Tstring,  -> Tint
+(function(string $s): int)
 No errors

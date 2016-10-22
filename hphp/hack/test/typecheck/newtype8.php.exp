@@ -1,6 +1,6 @@
-Tbool
-Tstring
-Tstring
-Tint
-Tint
+bool
+string
+string
+int
+int
 No errors

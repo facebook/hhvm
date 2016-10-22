@@ -1,5 +1,5 @@
-generic Ta where Ta super generic Tb where Tb as App \Foo<>, generic Ta
-generic Tb where Tb as App \Foo<>, generic Ta
-generic Ta where Ta as generic Tb where Tb super App \Foo<>, generic Ta
-generic Tb where Tb super App \Foo<>, generic Ta
+Ta
+Tb
+Ta
+Tb
 No errors

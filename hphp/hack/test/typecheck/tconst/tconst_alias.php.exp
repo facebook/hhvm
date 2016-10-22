@@ -1,2 +1,2 @@
-[<static>::TBar::TData][this::TBar::TData][\Test::TBar::TData][\Bar::TData]
+<static>::TBar::TData as this::TBar::TData as Test::TBar::TData as Bar::TData
 No errors

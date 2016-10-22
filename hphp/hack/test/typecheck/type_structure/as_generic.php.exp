@@ -1,11 +1,11 @@
-Tint
-option(Tstring)
-option(Tstring)
-option(App \classname<generic T, >)
-option(array)
-option(array)
-option(Tbool)
-option(array)
-option(array)
-option(array)
+int
+?string
+?string
+?classname<T>
+?array
+?array
+?bool
+?array
+?array
+?array
 No errors

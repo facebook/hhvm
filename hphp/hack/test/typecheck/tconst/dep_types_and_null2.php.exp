@@ -1,4 +1,4 @@
-[1]intersect([\C]App \C<>, option([2]tvar_2))
-[1]intersect([\C]App \C<>, option([3][\C]App \C<>))
-intersect([\C]App \C<>)
+^(C as C | ?^_)
+^(C as C | ?^C as C)
+(C as C)
 No errors

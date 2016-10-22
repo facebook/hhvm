@@ -1,5 +1,5 @@
-intersect(Tstring, Tint)
-intersect(Tstring, Tint)
-intersect(Tstring, Tint)
-intersect(Tstring, Tint)
+(string | int)
+(string | int)
+(string | int)
+(string | int)
 No errors

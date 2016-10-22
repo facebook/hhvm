@@ -1,5 +1,5 @@
-[<expr#1>]generic T where T as App \I<>
-[<expr#1>]generic T where T as App \C<>
-[<expr#1>]generic Td where Td as App \D<App \I<>, >
-[<expr#1>]generic T where T as App \C<>
+<expr#1> as T
+<expr#1> as T
+<expr#1> as Td
+<expr#1> as T
 No errors

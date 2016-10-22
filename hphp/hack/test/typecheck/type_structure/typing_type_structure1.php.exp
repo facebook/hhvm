@@ -1,11 +1,11 @@
-Tint
-App \classname<App \Vector<Tint, >, >
-tuple(App \TypeStructure<Tint, >)
-App \classname<App \C<Tstring, >, >
-tuple(App \TypeStructure<Tstring, >)
-tuple(App \TypeStructure<Tbool, >, App \TypeStructure<option(Tbool), >)
-Tbool
-tuple(App \TypeStructure<App \C<Tint, >, >)
-tuple(App \TypeStructure<App \Vector<App \C<Tint, >, >, >)
-App \classname<[<static>][this]App \D<>, >
+int
+classname<Vector<int>>
+(TypeStructure<int>)
+classname<C<string>>
+(TypeStructure<string>)
+(TypeStructure<bool>, TypeStructure<?bool>)
+bool
+(TypeStructure<C<int>>)
+(TypeStructure<Vector<C<int>>>)
+classname<<static> as this as D>
 No errors

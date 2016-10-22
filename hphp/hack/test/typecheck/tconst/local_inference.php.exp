@@ -1,2 +1,2 @@
-[1]intersect(App \Foo<>, App \IFoo<>)
+^(Foo | IFoo)
 No errors

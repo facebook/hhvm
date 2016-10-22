@@ -1,4 +1,4 @@
-Tstring
-App \classname<generic T, > where T as App \I<>
-Tstring
+string
+classname<T>
+string
 No errors

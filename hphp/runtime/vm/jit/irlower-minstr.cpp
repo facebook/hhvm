@@ -77,14 +77,22 @@ void implProp(IRLS& env, const IRInstruction* inst) {
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB(PROP_HELPER_TABLE, flags, keyType, base->isA(TObj));
+
+  void (*helper)();
+  if (base->isA(TObj)) {
+    BUILD_OPTAB(PROP_OBJ_HELPER_TABLE, flags, keyType);
+    helper = opFunc;
+  } else {
+    BUILD_OPTAB(PROP_HELPER_TABLE, flags, keyType);
+    helper = opFunc;
+  }
 
   auto const args = propArgs(env, inst)
     .memberKeyS(1)
     .ssa(2);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+  cgCallHelper(v, env, CallSpec::direct(helper), callDest(env, inst),
                SyncOptions::Sync, args);
 }
 
@@ -93,12 +101,20 @@ void implIssetEmptyProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
   auto const key = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB(ISSET_EMPTY_PROP_HELPER_TABLE, keyType, isEmpty, base->isA(TObj));
+
+  void (*helper)();
+  if (base->isA(TObj)) {
+    BUILD_OPTAB(ISSET_EMPTY_OBJ_PROP_HELPER_TABLE, keyType, isEmpty);
+    helper = opFunc;
+  } else {
+    BUILD_OPTAB(ISSET_EMPTY_PROP_HELPER_TABLE, keyType, isEmpty);
+    helper = opFunc;
+  }
 
   auto const args = propArgs(env, inst).memberKeyS(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+  cgCallHelper(v, env, CallSpec::direct(helper), callDest(env, inst),
                SyncOptions::Sync, args);
 }
 
@@ -127,12 +143,20 @@ void cgCGetProp(IRLS& env, const IRInstruction* inst) {
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB(CGETPROP_HELPER_TABLE, keyType, base->isA(TObj), flags);
+
+  void (*helper)();
+  if (base->isA(TObj)) {
+    BUILD_OPTAB(CGET_OBJ_PROP_HELPER_TABLE, keyType, flags);
+    helper = opFunc;
+  } else {
+    BUILD_OPTAB(CGET_PROP_HELPER_TABLE, keyType, flags);
+    helper = opFunc;
+  }
 
   auto const args = propArgs(env, inst).memberKeyS(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
+  cgCallHelper(v, env, CallSpec::direct(helper), callDestTV(env, inst),
                SyncOptions::Sync, args);
 }
 
@@ -155,56 +179,79 @@ void cgVGetProp(IRLS& env, const IRInstruction* inst) {
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB(VGETPROP_HELPER_TABLE, keyType, base->isA(TObj));
+
+  void (*helper)();
+  if (base->isA(TObj)) {
+    BUILD_OPTAB(VGET_OBJ_PROP_HELPER_TABLE, keyType);
+    helper = opFunc;
+  } else {
+    BUILD_OPTAB(VGET_PROP_HELPER_TABLE, keyType);
+    helper = opFunc;
+  }
 
   auto const args = propArgs(env, inst).memberKeyS(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
+  cgCallHelper(v, env, CallSpec::direct(helper), callDest(env, inst),
                SyncOptions::Sync, args);
 }
 
 void cgBindProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
-  BUILD_OPTAB(BINDPROP_HELPER_TABLE, base->isA(TObj));
+
+  auto helper = base->isA(TObj)
+    ? CallSpec::direct(MInstrHelpers::bindPropCO)
+    : CallSpec::direct(MInstrHelpers::bindPropC);
 
   auto const args = propArgs(env, inst).typedValue(1).ssa(2);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
-               SyncOptions::Sync, args);
+  cgCallHelper(v, env, helper, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void cgSetProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
   auto const key = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
-  BUILD_OPTAB(SETPROP_HELPER_TABLE, keyType, base->isA(TObj));
+
+  void (*helper)();
+  if (base->isA(TObj)) {
+    BUILD_OPTAB(SETPROP_OBJ_HELPER_TABLE, keyType);
+    helper = opFunc;
+  } else {
+    BUILD_OPTAB(SETPROP_HELPER_TABLE, keyType);
+    helper = opFunc;
+  }
 
   auto const args = propArgs(env, inst)
     .memberKeyS(1)
     .typedValue(2);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc),
+  cgCallHelper(v, env, CallSpec::direct(helper),
                kVoidDest, SyncOptions::Sync, args);
 }
 
 void cgUnsetProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
-  BUILD_OPTAB(UNSETPROP_HELPER_TABLE, base->isA(TObj));
+
+  auto helper = base->isA(TObj)
+    ? CallSpec::direct(MInstrHelpers::unsetPropCO)
+    : CallSpec::direct(MInstrHelpers::unsetPropC);
 
   auto const args = propArgs(env, inst).typedValue(1);
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc),
-               kVoidDest, SyncOptions::Sync, args);
+  cgCallHelper(v, env, helper, kVoidDest, SyncOptions::Sync, args);
 }
 
 void cgSetOpProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
   auto const extra = inst->extra<SetOpProp>();
-  BUILD_OPTAB(SETOPPROP_HELPER_TABLE, base->isA(TObj));
+
+  auto helper = base->isA(TObj)
+    ? CallSpec::direct(MInstrHelpers::setOpPropCO)
+    : CallSpec::direct(MInstrHelpers::setOpPropC);
 
   auto const args = propArgs(env, inst)
     .typedValue(1)
@@ -212,21 +259,23 @@ void cgSetOpProp(IRLS& env, const IRInstruction* inst) {
     .imm(static_cast<int32_t>(extra->op));
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
-               SyncOptions::Sync, args);
+  cgCallHelper(v, env, helper, callDestTV(env, inst), SyncOptions::Sync, args);
 }
 
 void cgIncDecProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
   auto const extra = inst->extra<IncDecProp>();
-  BUILD_OPTAB(INCDECPROP_HELPER_TABLE, base->isA(TObj));
+
+  auto helper = base->isA(TObj)
+    ? CallSpec::direct(MInstrHelpers::incDecPropCO)
+    : CallSpec::direct(MInstrHelpers::incDecPropC);
 
   auto const args = propArgs(env, inst)
     .typedValue(1)
     .imm(static_cast<int32_t>(extra->op));
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
+  cgCallHelper(v, env, helper, callDestTV(env, inst),
                SyncOptions::Sync, args);
 }
 

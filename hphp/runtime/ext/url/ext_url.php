@@ -81,7 +81,7 @@ function get_meta_tags(string $filename,
 <<__Native, __IsFoldable>>
 function http_build_query(
   mixed $query_data,
-  string $numeric_prefix = "",
+  ?string $numeric_prefix = "",
   string $arg_separator = "",
   int $enc_type = PHP_QUERY_RFC1738): mixed;
 

@@ -124,7 +124,7 @@ public:
   virtual void clearContext(Context context) { m_context &= ~context;}
   void copyContext(ExpressionPtr from) { copyContext(from->m_context); }
   void copyContext(int contexts);
-  ExpressionPtr replaceValue(ExpressionPtr rep);
+  ExpressionPtr replaceValue(ExpressionPtr rep, bool noWarn = false);
   void clearContext();
   int getContext() const { return m_context;}
   bool hasContext(Context context) const {

@@ -6779,7 +6779,8 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
     case Expression::KindOfExpressionList: {
       auto el = static_pointer_cast<ExpressionList>(exp);
       if (el->getListKind() != ExpressionList::ListKindParam) {
-        return PassByRefKind::WarnOnCell;
+        return el->getListKind() == ExpressionList::ListKindWrappedNoWarn ?
+          PassByRefKind::AllowCell : PassByRefKind::WarnOnCell;
       }
     } break;
     default:

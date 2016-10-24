@@ -30,6 +30,7 @@ struct ExpressionList : Expression {
     ListKindParam,
     ListKindComma,
     ListKindWrapped,
+    ListKindWrappedNoWarn,
     ListKindLeft
   };
 

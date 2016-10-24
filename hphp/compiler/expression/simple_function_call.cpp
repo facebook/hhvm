@@ -714,9 +714,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
           case EXTR_OVERWRITE: {
             auto arr = static_pointer_cast<ExpressionList>(
               static_pointer_cast<UnaryOpExpression>(vars)->getExpression());
-            ExpressionListPtr rep(
-              new ExpressionList(getScope(), getRange(),
-                                 ExpressionList::ListKindWrapped));
+            auto rep = std::make_shared<ExpressionList>(
+              getScope(), getRange(), ExpressionList::ListKindWrappedNoWarn);
             std::string root_name;
             int n = arr ? arr->getCount() : 0;
             int i, j, k;
@@ -828,18 +827,19 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
             arr = arr[0];
           }
         }
-        Variant v = invoke(m_funcScope->getScopeName().c_str(),
-                           arr, -1, true, true,
-                           !getFileScope()->useStrictTypes());
-        return makeScalarExpression(ar, v);
+        auto const v = invoke(m_funcScope->getScopeName().c_str(),
+                              arr, -1, true, true,
+                              !getFileScope()->useStrictTypes());
+        return replaceValue(makeScalarExpression(ar, v), true);
       } catch (...) {
       }
       return ExpressionPtr();
     }
     if (m_funcScope->getOptFunction()) {
-      auto self = static_pointer_cast<SimpleFunctionCall>(shared_from_this());
-      ExpressionPtr e = (m_funcScope->getOptFunction())(0, ar, self, 0);
-      if (e) return e;
+      auto const self =
+        static_pointer_cast<SimpleFunctionCall>(shared_from_this());
+      auto const e = (m_funcScope->getOptFunction())(0, ar, self, 0);
+      if (e) return replaceValue(e, true);
     }
   }
 

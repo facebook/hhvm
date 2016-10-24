@@ -92,7 +92,9 @@ void ExpressionList::clearElements() {
 }
 
 bool ExpressionList::isRefable(bool checkError /* = false */) const {
-  if (m_kind == ListKindWrapped || m_kind == ListKindLeft) {
+  if (m_kind == ListKindWrapped ||
+      m_kind == ListKindWrappedNoWarn ||
+      m_kind == ListKindLeft) {
     // Its legal to ref a list...
     if (checkError) return true;
     // ...but we shouldnt apply ref() to it unless the corresponding
@@ -310,7 +312,9 @@ void ExpressionList::setNthKid(int n, ConstructPtr cp) {
 
 ExpressionPtr ExpressionList::listValue() const {
   if (size_t i = m_exps.size()) {
-    if (m_kind == ListKindComma || m_kind == ListKindWrapped) {
+    if (m_kind == ListKindComma ||
+        m_kind == ListKindWrapped ||
+        m_kind == ListKindWrappedNoWarn) {
       return m_exps[i-1];
     } else if (m_kind == ListKindLeft) {
       return m_exps[0];
@@ -354,7 +358,7 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
       }
     }
     if (m_exps.size() == 1) {
-      m_kind = ListKindWrapped;
+      if (m_kind != ListKindWrappedNoWarn) m_kind = ListKindWrapped;
     } else if (m_kind == ListKindLeft && m_exps[0]->isScalar()) {
       ExpressionPtr e = m_exps[0];
       removeElement(0);

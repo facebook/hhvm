@@ -135,7 +135,6 @@ struct ArrayIter {
     if (LIKELY(hasArrayData())) {
       auto* ad = getArrayData();
       return !ad || m_pos == ad->iter_end();
-      return endHelper();
     }
     return endHelper();
   }
@@ -199,9 +198,6 @@ struct ArrayIter {
   }
   bool hasCollection() const {
     return (!hasArrayData() && getObject()->isCollection());
-  }
-  bool hasIteratorObj() const {
-    return (!hasArrayData() && !getObject()->isCollection());
   }
 
   //
@@ -273,6 +269,12 @@ struct ArrayIter {
   void setPos(ssize_t newPos) {
     m_pos = newPos;
   }
+  void advance(ssize_t count) {
+    while (!end() && count--) {
+      next();
+    }
+  }
+  void rewind();
   Type getIterType() const {
     return m_itype;
   }

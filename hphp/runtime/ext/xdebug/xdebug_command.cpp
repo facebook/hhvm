@@ -1469,7 +1469,8 @@ struct SourceCmd : XDebugCommand {
     // Compute the source string. The initial size is arbitrary, we just guess
     // 80 characters per line
     StringBuffer buf((m_endLine - m_beginLine) * 80);
-    ArrayIter iter(source); iter.setPos(m_beginLine);
+    ArrayIter iter(source);
+    iter.advance(m_beginLine);
     for (int i = m_beginLine; i <= m_endLine && iter; i++, ++iter) {
       buf.append(iter.second());
     }

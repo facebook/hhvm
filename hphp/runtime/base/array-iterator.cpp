@@ -222,6 +222,19 @@ void ArrayIter::cellInit(const Cell c) {
   }
 }
 
+void ArrayIter::rewind() {
+  if (LIKELY(hasArrayData())) {
+    if (auto* data = getArrayData())
+      m_pos = data->iter_begin();
+  } else {
+    assert(hasCollection());
+    auto* obj = getObject();
+    auto i = obj->isCollection() ? ctype_index(obj->collectionType()) :
+      MaxCollectionTypes;
+    initFuncTable[i](this, obj);
+  }
+}
+
 void ArrayIter::destruct() {
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();

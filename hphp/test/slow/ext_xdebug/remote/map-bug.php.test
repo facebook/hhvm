@@ -1,0 +1,11 @@
+<?hh
+
+function x() {
+  $x = Map{'foo' => 1, 'bar' => 2};
+  $x->remove('foo');
+  $y = 1;
+  return $x['bar'] + $y;
+}
+
+x();
+

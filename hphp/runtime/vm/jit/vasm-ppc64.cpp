@@ -485,11 +485,6 @@ private:
     a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
   }
 
-  void emitSaveTOC() {
-    // TOC save/restore is required by ABI for external functions.
-    a.std(rtoc(), rsfp()[AROFF(SAVED_TOC())]);
-  }
-
   Venv& env;
   Vtext& text;
   Assembler a;

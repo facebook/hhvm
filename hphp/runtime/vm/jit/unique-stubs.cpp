@@ -1073,18 +1073,13 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
 TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   return vwrap(cb, data, [&] (Vout& v) {
-    bool saveFrame = true;
-
     // Eagerly save VM regs and realign the native stack.
     storeVMRegs(v);
 
     // Realign the native stack.
     switch (arch()) {
-      case Arch::PPC64:
-        // Do not load the FP when leaving the TC, as it was not saved in
-        // the stublogue.
-        saveFrame = false;
       case Arch::X64:
+      case Arch::PPC64:
         v << lea{rsp()[8], rsp()};
         break;
       case Arch::ARM:
@@ -1103,7 +1098,9 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     storeReturnRegs(v);
 
     // Perform a native return.
-    v << stubret{RegSet(), saveFrame};
+    // On PPC64, as there is no new frame created when entering the VM, the FP
+    // must no be saved.
+    v << stubret{RegSet(), arch() != Arch::PPC64};
   });
 }
 
@@ -1123,25 +1120,11 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 #endif
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
-    bool saveFrame = true;
-
     // Architecture-specific setup for entering the TC.
     v << inittc{};
 
-    // Set if FP need to be saved.
-    switch (arch()) {
-      case Arch::ARM:
-      case Arch::X64:
-        break;
-      case Arch::PPC64:
-        // Do no save the FP for PPC64, as no new frame is created in the
-        // stublogue
-        saveFrame = false;
-        break;
-    }
-
     // Native func prologue.
-    v << stublogue{saveFrame};
+    v << stublogue{arch() != Arch::PPC64};
 
 #if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
     // Windows hates argument registers.

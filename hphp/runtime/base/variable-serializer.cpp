@@ -932,7 +932,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
   case Type::JSON:
     info.is_vector =
       (m_objClass.empty() || m_objCode == 'V' || m_objCode == 'K') &&
-      isVectorData;
+      isVectorData &&
+      kind != ArrayKind::Dict;
+
     if (info.is_vector && m_type == Type::JSON) {
       info.is_vector = (m_option & k_JSON_FORCE_OBJECT)
                        ? false : info.is_vector;

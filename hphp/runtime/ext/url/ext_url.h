@@ -43,7 +43,7 @@ Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */);
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
-                           const String& numeric_prefix /* = null_string */,
+                           const Variant& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */,
                            int enc_type = k_PHP_QUERY_RFC1738);
 Variant HHVM_FUNCTION(parse_url, const String& url,

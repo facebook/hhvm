@@ -875,7 +875,7 @@ void MemoryManager::requestEagerGC() {
 }
 
 void MemoryManager::requestGC() {
-  if (RuntimeOption::EvalEnableGC && rds::header()) {
+  if (this->isGCEnabled() && rds::header()) {
     if (m_stats.usage() > m_nextGc) {
       setSurpriseFlag(PendingGCFlag);
     }

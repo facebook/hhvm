@@ -20,15 +20,15 @@
 namespace HPHP {
 
 static bool HHVM_FUNCTION(gc_enabled) {
-  return RuntimeOption::EvalEnableGC;
+  return MM().isGCEnabled();
 }
 
 static void HHVM_FUNCTION(gc_enable) {
-  // maybe this should turn on/off gc for just this request?
+  MM().setGCEnabled(true);
 }
 
 static void HHVM_FUNCTION(gc_disable) {
-  // maybe this should turn on/off gc for just this request?
+  MM().setGCEnabled(false);
 }
 
 static int64_t HHVM_FUNCTION(gc_collect_cycles) {

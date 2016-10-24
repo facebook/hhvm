@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -181,6 +182,9 @@ MemoryManager::MemoryManager() {
   // make the circular-lists empty.
   m_strings.next = m_strings.prev = &m_strings;
   m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
+
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL, "zend.enable_gc",
+      &m_gc_enabled);
 }
 
 MemoryManager::~MemoryManager() {
@@ -506,6 +510,7 @@ void MemoryManager::resetAllocator() {
   m_sweeping = false;
   m_exiting = false;
   resetStatsImpl(true);
+  setGCEnabled(RuntimeOption::EvalEnableGC);
   resetGC();
   FTRACE(1, "reset: strings {}\n", nstrings);
   if (debug) resetEagerGC();
@@ -1134,6 +1139,14 @@ void MemoryManager::requestShutdown() {
 
 /* static */ void MemoryManager::teardownProfiling() {
   MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
+}
+
+bool MemoryManager::isGCEnabled() {
+  return m_gc_enabled;
+}
+
+void MemoryManager::setGCEnabled(bool isGCEnabled) {
+  m_gc_enabled = isGCEnabled;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

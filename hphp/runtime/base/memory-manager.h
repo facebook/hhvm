@@ -816,6 +816,9 @@ struct MemoryManager {
   void resetGC();
   void updateNextGc();
 
+  bool isGCEnabled();
+  void setGCEnabled(bool isGCEnabled);
+
   /*
    * beginQuarantine() swaps out the normal freelists. endQuarantine()
    * fills everything freed with holes, then restores the original freelists.
@@ -966,6 +969,8 @@ private:
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
+
+  bool m_gc_enabled{RuntimeOption::EvalEnableGC};
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;

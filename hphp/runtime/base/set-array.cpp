@@ -16,12 +16,13 @@
 
 #include "hphp/runtime/base/set-array.h"
 
+#include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/apc-array.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hash.h"
@@ -1119,31 +1120,93 @@ ArrayData* SetArray::ToKeyset(ArrayData* ad, bool copy) {
   return ad;
 }
 
-bool SetArray::Equal(const ArrayData* ad1, const ArrayData* ad2) {
+ALWAYS_INLINE
+bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
+                           bool strict) {
   assert(asSet(ad1)->checkInvariants());
   assert(asSet(ad2)->checkInvariants());
 
   if (ad1 == ad2) return true;
   if (ad1->size() != ad2->size()) return false;
 
-  auto const a1 = asSet(ad1);
-  auto const used = a1->m_used;
-  auto const elms = a1->data();
-  for (uint32_t i = 0; i < used; ++i) {
-    auto& elm = elms[i];
-    if (UNLIKELY(elm.isTombstone())) continue;
-    if (elm.hasIntKey()) {
-      if (!NvGetInt(ad2, elm.intKey())) return false;
+  if (strict) {
+    auto const a1 = asSet(ad1);
+    auto const a2 = asSet(ad2);
+    auto elm1 = a1->data();
+    auto elm2 = a2->data();
+    auto i1 = a1->m_used;
+    auto i2 = a2->m_used;
+    while (i1 > 0 && i2 > 0) {
+      if (UNLIKELY(elm1->isTombstone())) {
+        ++elm1;
+        --i1;
+        continue;
+      }
+      if (UNLIKELY(elm2->isTombstone())) {
+        ++elm2;
+        --i2;
+        continue;
+      }
+      if (elm1->hasIntKey()) {
+        if (!elm2->hasIntKey()) return false;
+        if (elm1->intKey() != elm2->intKey()) return false;
+      } else {
+        assertx(elm1->hasStrKey());
+        if (!elm2->hasStrKey()) return false;
+        if (!same(elm1->strKey(), elm2->strKey())) return false;
+      }
+      ++elm1;
+      ++elm2;
+      --i1;
+      --i2;
+    }
+
+    if (!i1) {
+      while (i2 > 0) {
+        if (UNLIKELY(!elm2->isTombstone())) return false;
+        ++elm2;
+        --i2;
+      }
     } else {
-      if (!NvGetStr(ad2, elm.strKey())) return false;
+      assertx(!i2);
+      while (i1 > 0) {
+        if (UNLIKELY(!elm1->isTombstone())) return false;
+        ++elm1;
+        --i1;
+      }
+    }
+  } else {
+    auto const a1 = asSet(ad1);
+    auto const used = a1->m_used;
+    auto const elms = a1->data();
+    for (uint32_t i = 0; i < used; ++i) {
+      auto& elm = elms[i];
+      if (UNLIKELY(elm.isTombstone())) continue;
+      if (elm.hasIntKey()) {
+        if (!NvGetInt(ad2, elm.intKey())) return false;
+      } else {
+        if (!NvGetStr(ad2, elm.strKey())) return false;
+      }
     }
   }
 
   return true;
 }
 
+bool SetArray::Equal(const ArrayData* ad1, const ArrayData* ad2) {
+  return EqualHelper(ad1, ad2, false);
+}
+
 bool SetArray::NotEqual(const ArrayData* ad1, const ArrayData* ad2) {
-  return !Equal(ad1, ad2);
+  return !EqualHelper(ad1, ad2, false);
+}
+
+bool SetArray::Same(const ArrayData* ad1, const ArrayData* ad2) {
+  return EqualHelper(ad1, ad2, true);
+}
+
+bool SetArray::NotSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return !EqualHelper(ad1, ad2, true);
 }
 
 } // namespace HPHP

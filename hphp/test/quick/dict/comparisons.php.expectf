@@ -277,8 +277,8 @@ dict(3) {
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 	==  : bool(true)
 	!=  : bool(false)
-	=== : bool(true)
-	!== : bool(false)
+	=== : bool(false)
+	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Comparing:
 dict(3) {
@@ -303,8 +303,8 @@ dict(3) {
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 	==  : bool(true)
 	!=  : bool(false)
-	=== : bool(true)
-	!== : bool(false)
+	=== : bool(false)
+	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Comparing:
 dict(2) {

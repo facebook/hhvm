@@ -1923,24 +1923,69 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   // Prevent circular referenced objects/arrays or deep ones.
   check_recursion_error();
 
-  auto const arr1 = asMixed(ad1);
-  auto elm = arr1->data();
-  for (auto i = arr1->m_used; i--; elm++) {
-    if (UNLIKELY(elm->isTombstone())) continue;
-    const TypedValue* other;
-    if (elm->hasIntKey()) {
-      other = NvGetIntDict(ad2, elm->ikey);
-    } else {
-      assert(elm->hasStrKey());
-      other = NvGetStrDict(ad2, elm->skey);
-    }
-    if (!other) return false;
-    if (strict) {
-      if (!cellSame(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+  if (strict) {
+    auto const arr1 = asMixed(ad1);
+    auto const arr2 = asMixed(ad2);
+    auto elm1 = arr1->data();
+    auto elm2 = arr2->data();
+    auto i1 = arr1->m_used;
+    auto i2 = arr2->m_used;
+    while (i1 > 0 && i2 > 0) {
+      if (UNLIKELY(elm1->isTombstone())) {
+        ++elm1;
+        --i1;
+        continue;
+      }
+      if (UNLIKELY(elm2->isTombstone())) {
+        ++elm2;
+        --i2;
+        continue;
+      }
+      if (elm1->hasIntKey()) {
+        if (!elm2->hasIntKey()) return false;
+        if (elm1->ikey != elm2->ikey) return false;
+      } else {
+        assertx(elm1->hasStrKey());
+        if (!elm2->hasStrKey()) return false;
+        if (!same(elm1->skey, elm2->skey)) return false;
+      }
+      if (!cellSame(*tvAssertCell(&elm1->data), *tvAssertCell(&elm2->data))) {
         return false;
       }
+      ++elm1;
+      ++elm2;
+      --i1;
+      --i2;
+    }
+
+    if (!i1) {
+      while (i2 > 0) {
+        if (UNLIKELY(!elm2->isTombstone())) return false;
+        ++elm2;
+        --i2;
+      }
     } else {
-      if (!cellEqual(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+      assertx(!i2);
+      while (i1 > 0) {
+        if (UNLIKELY(!elm1->isTombstone())) return false;
+        ++elm1;
+        --i1;
+      }
+    }
+  } else {
+    auto const arr1 = asMixed(ad1);
+    auto elm = arr1->data();
+    for (auto i = arr1->m_used; i--; elm++) {
+      if (UNLIKELY(elm->isTombstone())) continue;
+      const TypedValue* other;
+      if (elm->hasIntKey()) {
+        other = NvGetIntDict(ad2, elm->ikey);
+      } else {
+        assertx(elm->hasStrKey());
+        other = NvGetStrDict(ad2, elm->skey);
+      }
+      if (!other ||
+          !cellEqual(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
         return false;
       }
     }

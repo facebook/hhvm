@@ -728,6 +728,10 @@ To string conversions:
 
 | NeqKeyset,                   D(Bool), S(Keyset) S(Keyset),              NF
 
+| SameKeyset,                  D(Bool), S(Keyset) S(Keyset),              NF
+
+| NSameKeyset,                 D(Bool), S(Keyset) S(Keyset),              NF
+
   Perform comparison of keysets. As keysets can only contain ints and strings,
   comparisons never re-enter or throw. Relational comparisons for keysets are
   not supported.

@@ -290,7 +290,7 @@ private:
   /*
    * Comparison helper.
    */
-  static bool EqualHelper(const ArrayData*, const ArrayData*);
+  static bool EqualHelper(const ArrayData*, const ArrayData*, bool);
 
 //////////////////////////////////////////////////////////////////////
 // Elements
@@ -519,7 +519,8 @@ public:
   static ArrayData* ToKeyset(ArrayData*, bool);
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);
-  static constexpr auto Same = &Equal;
+  static bool Same(const ArrayData*, const ArrayData*);
+  static bool NotSame(const ArrayData*, const ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

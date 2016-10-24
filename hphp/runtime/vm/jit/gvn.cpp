@@ -300,6 +300,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case NSameDict:
   case EqKeyset:
   case NeqKeyset:
+  case SameKeyset:
+  case NSameKeyset:
   case GtRes:
   case GteRes:
   case LtRes:

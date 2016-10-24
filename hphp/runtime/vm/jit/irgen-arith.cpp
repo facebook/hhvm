@@ -295,10 +295,10 @@ Opcode toDictCmpOpcode(Op op) {
 
 Opcode toKeysetCmpOpcode(Op op) {
   switch (op) {
-    case Op::Eq:
-    case Op::Same:  return EqKeyset;
-    case Op::Neq:
-    case Op::NSame: return NeqKeyset;
+    case Op::Eq:    return EqKeyset;
+    case Op::Same:  return SameKeyset;
+    case Op::Neq:   return NeqKeyset;
+    case Op::NSame: return NSameKeyset;
     default: always_assert(false);
   }
 }

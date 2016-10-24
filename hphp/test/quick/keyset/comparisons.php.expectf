@@ -117,8 +117,8 @@ keyset(3) {
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	==  : bool(true)
 	!=  : bool(false)
-	=== : bool(true)
-	!== : bool(false)
+	=== : bool(false)
+	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Comparing:
 keyset(3) {
@@ -137,8 +137,8 @@ keyset(3) {
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	==  : bool(true)
 	!=  : bool(false)
-	=== : bool(true)
-	!== : bool(false)
+	=== : bool(false)
+	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Comparing:
 keyset(3) {
@@ -157,8 +157,8 @@ keyset(3) {
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	==  : bool(true)
 	!=  : bool(false)
-	=== : bool(true)
-	!== : bool(false)
+	=== : bool(false)
+	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Comparing:
 keyset(3) {
@@ -177,8 +177,8 @@ keyset(3) {
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	==  : bool(true)
 	!=  : bool(false)
-	=== : bool(true)
-	!== : bool(false)
+	=== : bool(false)
+	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Comparing:
 keyset(2) {

@@ -179,12 +179,11 @@ let parsing genv env disk_files ide_files ~stop_at_errors =
   let to_check = Relative_path.Set.union disk_files ide_files in
 
   if stop_at_errors then begin
-    Parser_heap.ParserHeap.shelve_batch to_check;
-    Fixmes.HH_FIXMES.shelve_batch to_check;
-  end else begin
-    Parser_heap.ParserHeap.remove_batch to_check;
-    Fixmes.HH_FIXMES.remove_batch to_check
+    Parser_heap.ParserHeap.LocalChanges.push_stack ();
+    Fixmes.HH_FIXMES.LocalChanges.push_stack ();
   end;
+  Parser_heap.ParserHeap.remove_batch to_check;
+  Fixmes.HH_FIXMES.remove_batch to_check;
   HackSearchService.MasterApi.clear_shared_memory to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
@@ -196,10 +195,14 @@ let parsing genv env disk_files ide_files ~stop_at_errors =
     let fast = Relative_path.Map.filter fast
       (fun x _ -> not @@ Relative_path.Set.mem failed_parsing x) in
     let success_parsing = Relative_path.Set.diff to_check failed_parsing in
-    Parser_heap.ParserHeap.unshelve_batch failed_parsing;
-    Fixmes.HH_FIXMES.unshelve_batch failed_parsing;
-    Parser_heap.ParserHeap.remove_shelved_batch success_parsing;
-    Fixmes.HH_FIXMES.remove_shelved_batch success_parsing;
+
+    Parser_heap.ParserHeap.LocalChanges.revert_batch failed_parsing;
+    Fixmes.HH_FIXMES.LocalChanges.revert_batch failed_parsing;
+    Parser_heap.ParserHeap.LocalChanges.commit_batch success_parsing;
+    Fixmes.HH_FIXMES.LocalChanges.commit_batch success_parsing;
+
+    Parser_heap.ParserHeap.LocalChanges.pop_stack ();
+    Fixmes.HH_FIXMES.LocalChanges.pop_stack ();
     (fast, errors, Relative_path.Set.empty)
   end else res
 

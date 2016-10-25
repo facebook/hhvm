@@ -249,7 +249,7 @@ let naming env t =
       let errorl, failed = NamingGlobal.ndecl_file k v in
       { env with
         errorl = Errors.merge errorl env.errorl;
-        failed_parsing = Relative_path.Set.union env.failed_parsing failed;
+        failed_naming = Relative_path.Set.union env.failed_naming failed;
       }
     end ~init:env
   in

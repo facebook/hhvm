@@ -300,8 +300,11 @@ end
 
 module FullCheckKind : CheckKindType = struct
   let get_files_to_parse env =
-    let all_disk_files =
-      Relative_path.Set.union env.disk_needs_parsing env.failed_parsing in
+    let all_disk_files = Relative_path.(
+        env.failed_parsing |>
+        Set.union env.disk_needs_parsing |>
+        Set.union env.failed_naming)
+    in
     let disk_files = Relative_path.Set.filter all_disk_files
       (fun x -> not @@ Relative_path.Map.mem env.edited_files x) in
     (* Full_check reconstructs error list from the scratch, so it always
@@ -338,7 +341,8 @@ module FullCheckKind : CheckKindType = struct
       tcopt = old_env.tcopt;
       popt = old_env.popt;
       errorl = errorl;
-      failed_parsing = Relative_path.Set.union failed_naming failed_parsing;
+      failed_parsing;
+      failed_naming;
       failed_decl = Relative_path.Set.union failed_decl lazy_decl_failed;
       failed_check = failed_check;
       persistent_client = old_env.persistent_client;
@@ -358,10 +362,12 @@ end
 
 module LazyCheckKind : CheckKindType = struct
   let get_files_to_parse env =
+    let files_to_parse =
+      Relative_path.Set.union env.ide_needs_parsing env.failed_naming in
     (* Skip the disk updates, process the IDE updates *)
     let ide_files, disk_files  =
       Relative_path.Set.partition (Relative_path.Map.mem env.edited_files)
-        env.ide_needs_parsing in
+        files_to_parse in
     (* in this case, disk files are files "updated in IDE that need to be
      * rechecked from the disk", i.e. files that were open and then closed
      * in IDE *)
@@ -410,7 +416,7 @@ module LazyCheckKind : CheckKindType = struct
     extend_fast phase_2_decl_defs files_info to_recheck_now, to_recheck_later
 
   let get_new_env ~old_env ~files_info ~errorl:_ ~failed_parsing:_
-      ~failed_naming:_ ~failed_decl:_ ~lazy_decl_later ~lazy_decl_failed:_
+      ~failed_naming ~failed_decl:_ ~lazy_decl_later ~lazy_decl_failed:_
       ~failed_check:_ ~lazy_check_later ~diag_subscribe =
 
     let needs_decl =
@@ -422,6 +428,7 @@ module LazyCheckKind : CheckKindType = struct
       Relative_path.Set.union old_env.needs_check lazy_check_later in
     { old_env with
        files_info;
+       failed_naming;
        ide_needs_parsing = Relative_path.Set.empty;
        needs_decl;
        needs_check;

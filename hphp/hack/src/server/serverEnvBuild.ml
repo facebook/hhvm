@@ -128,6 +128,7 @@ let make_env config =
     files_info     = Relative_path.Map.empty;
     errorl         = Errors.empty;
     failed_parsing = Relative_path.Set.empty;
+    failed_naming  = Relative_path.Set.empty;
     failed_decl    = Relative_path.Set.empty;
     failed_check   = Relative_path.Set.empty;
     persistent_client = None;

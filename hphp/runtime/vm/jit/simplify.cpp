@@ -621,9 +621,10 @@ SSATmp* simplifyAddIntO(State& env, const IRInstruction* inst) {
   if (src1->hasConstVal() && src2->hasConstVal()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
-    return add_overflow(a, b)
-      ? cns(env, double(a) + double(b))
-      : cns(env, a + b);
+    if (add_overflow(a, b)) {
+      gen(env, Jmp, inst->taken());
+    }
+    return cns(env, a + b);
   }
   return nullptr;
 }
@@ -666,9 +667,10 @@ SSATmp* simplifySubIntO(State& env, const IRInstruction* inst) {
   if (src1->hasConstVal() && src2->hasConstVal()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
-    return sub_overflow(a, b)
-      ? cns(env, double(a) - double(b))
-      : cns(env, a - b);
+    if (sub_overflow(a, b)) {
+      gen(env, Jmp, inst->taken());
+    }
+    return cns(env, a - b);
   }
   return nullptr;
 }
@@ -736,9 +738,10 @@ SSATmp* simplifyMulIntO(State& env, const IRInstruction* inst) {
   if (src1->hasConstVal() && src2->hasConstVal()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
-    return mul_overflow(a, b)
-      ? cns(env, double(a) * double(b))
-      : cns(env, a * b);
+    if (mul_overflow(a, b)) {
+      gen(env, Jmp, inst->taken());
+    }
+    return cns(env, a * b);
   }
   return nullptr;
 }

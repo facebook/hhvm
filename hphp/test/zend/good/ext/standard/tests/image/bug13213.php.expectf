@@ -1,3 +1,4 @@
+Warning: corrupt JPEG data: 2 extraneous bytes before marker in %s%ebug13213.php on line %d
 array(7) {
   [0]=>
   int(1)

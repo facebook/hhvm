@@ -726,47 +726,35 @@ static unsigned short php_read2(const req::ptr<File>& stream) {
 
 static unsigned int php_next_marker(const req::ptr<File>& file,
                                     int last_marker,
-                                    int comment_correction,
                                     int ff_read) {
   int a=0, marker;
 
   // get marker byte, swallowing possible padding
-  if (last_marker==M_COM && comment_correction) {
-    // some software does not count the length bytes of COM section
-    // one company doing so is very much envolved in JPEG... so we accept too
-    // by the way: some of those companies changed their code now...
-    comment_correction = 2;
-  } else {
-    last_marker = 0;
-    comment_correction = 0;
+  if (!ff_read) {
+    size_t extraneous = 0;
+
+    while ((marker = file->getc()) != 0xff) {
+      if (marker == EOF) {
+        return M_EOI;/* we hit EOF */
+      }
+      extraneous++;
+    }
+    if (extraneous) {
+      raise_warning("corrupt JPEG data: %zu extraneous bytes before marker",
+                    extraneous);
+    }
   }
-  if (ff_read) {
-    a = 1; /* already read 0xff in filetype detection */
-  }
+  a = 1;
   do {
     if ((marker = file->getc()) == EOF)
     {
       return M_EOI;/* we hit EOF */
-    }
-    if (last_marker==M_COM && comment_correction>0)
-    {
-      if (marker != 0xFF)
-      {
-        marker = 0xff;
-        comment_correction--;
-      } else {
-        last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
-      }
     }
     ++a;
   } while (marker == 0xff);
   if (a < 2)
   {
     return M_EOI; /* at least one 0xff is needed before marker code */
-  }
-  if ( last_marker==M_COM && comment_correction)
-  {
-    return M_EOI; /* ah illegal: char after COM section not 0xFF */
   }
   return (unsigned int)marker;
 }
@@ -816,7 +804,7 @@ struct gfxinfo *php_handle_jpeg(const req::ptr<File>& file, Array& info) {
   unsigned short length, ff_read=1;
 
   for (;;) {
-    marker = php_next_marker(file, marker, 1, ff_read);
+    marker = php_next_marker(file, marker, ff_read);
     ff_read = 0;
     switch (marker) {
     case M_SOF0:

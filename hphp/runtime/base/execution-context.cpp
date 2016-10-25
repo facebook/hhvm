@@ -772,21 +772,23 @@ void ExecutionContext::handleError(const std::string& msg,
     mode = ErrorThrowMode::IfUnhandled;
   }
 
-  ErrorStateHelper esh(this, newErrorState);
   auto const ee = skipFrame ?
     ExtendedException(ExtendedException::SkipFrame{}, msg) :
     ExtendedException(msg);
   bool handled = false;
-  if (callUserHandler) {
-    handled = callUserErrorHandler(ee, errnum, false);
-  }
+  {
+    ErrorStateHelper esh(this, newErrorState);
+    if (callUserHandler) {
+      handled = callUserErrorHandler(ee, errnum, false);
+    }
 
-  if (!handled) {
-    recordLastError(ee, errnum);
-  }
+    if (!handled) {
+      recordLastError(ee, errnum);
+    }
 
-  if (g_system_profiler) {
-    g_system_profiler->errorCallBack(ee, errnum, msg);
+    if (g_system_profiler) {
+      g_system_profiler->errorCallBack(ee, errnum, msg);
+    }
   }
 
   if (mode == ErrorThrowMode::Always ||

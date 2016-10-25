@@ -11231,6 +11231,11 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     if (unit && releaseUnit) *releaseUnit = unit.release();
   };
 
+  // We don't want to invoke the JIT when trying to run PHP code.
+  auto const prevFolding = RID().getJitFolding();
+  RID().setJitFolding(true);
+  SCOPE_EXIT { RID().setJitFolding(prevFolding); };
+
   try {
     UnitOrigin unitOrigin = UnitOrigin::File;
     if (!filename) {

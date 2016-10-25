@@ -186,30 +186,20 @@ bool ExpressionList::flattenLiteralStrings(
 
 bool ExpressionList::getScalarValue(Variant &value) {
   if (m_elems_kind != ElemsKind::None) {
-    if (isScalarArrayPairs()) {
-      ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
-      for (const auto ape : m_exps) {
-        auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
-        auto name = exp->getName();
-        auto val = exp->getValue();
-        if (!name) {
-          Variant v;
-          bool ret = val->getScalarValue(v);
-          if (!ret) assert(false);
-          init.append(v);
-        } else {
-          Variant n;
-          Variant v;
-          bool ret1 = name->getScalarValue(n);
-          bool ret2 = val->getScalarValue(v);
-          if (!(ret1 && ret2)) return false;
+    ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
+    auto const result = getListScalars(
+      [&](const Variant& n, const Variant& v) {
+        if (n.isInitialized()) {
           init.setUnknownKey(n, v);
+        } else {
+          init.append(v);
         }
+        return true;
       }
-      value = init.toVariant();
-      return true;
-    }
-    return false;
+    );
+    if (!result) return false;
+    value = init.toVariant();
+    return true;
   }
   if (m_kind != ListKindParam && !hasEffect()) {
     ExpressionPtr v(listValue());

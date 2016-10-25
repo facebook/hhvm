@@ -419,8 +419,10 @@ void binOpBoolImpl(ISS& env, Fun fun) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
-    constprop(env);
-    return push(env, fun(*v2, *v1) ? TTrue : TFalse);
+    if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
+      constprop(env);
+      return push(env, *r ? TTrue : TFalse);
+    }
   }
   // TODO_4: evaluate when these can throw, non-constant type stuff.
   push(env, TBool);
@@ -433,8 +435,10 @@ void binOpInt64Impl(ISS& env, Fun fun) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
-    constprop(env);
-    return push(env, ival(fun(*v2, *v1)));
+    if (auto r = eval_cell_value([&]{ return ival(fun(*v2, *v1)); })) {
+      constprop(env);
+      return push(env, *r);
+    }
   }
   // TODO_4: evaluate when these can throw, non-constant type stuff.
   push(env, TInt);

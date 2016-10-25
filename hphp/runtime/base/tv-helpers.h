@@ -676,6 +676,10 @@ ALWAYS_INLINE bool tvIsArray(const TypedValue* tv) {
   return isArrayType(tv->m_type);
 }
 
+ALWAYS_INLINE bool tvIsHackArray(const TypedValue* tv) {
+  return isHackArrayType(tv->m_type);
+}
+
 ALWAYS_INLINE bool tvIsVecArray(const TypedValue* tv) {
   return isVecType(tv->m_type);
 }

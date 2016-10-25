@@ -104,6 +104,24 @@ inline std::string show(TransKind k) {
   not_reached();
 }
 
+inline bool isPrologue(TransKind k) {
+  switch (k) {
+    case TransKind::LivePrologue:
+    case TransKind::ProfPrologue:
+    case TransKind::OptPrologue:
+      return true;
+
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Live:
+    case TransKind::Profile:
+    case TransKind::Optimize:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
+}
+
 /*
  * Compact flags which may be threaded through a service request to provide
  * hints or demands for retranslations.

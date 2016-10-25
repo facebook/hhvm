@@ -67,6 +67,14 @@ It is incompatible with a string
 "
 
 let foo_duplicate_diagnostics = "
+/bar_expects_int.php:
+File \"/bar_expects_int.php\", line 4, characters 10-14:
+Invalid return type (Typing[4110])
+File \"/bar_expects_int.php\", line 3, characters 21-23:
+This is an int
+File \"/foo_returns_string_name.php\", line 3, characters 18-23:
+It is incompatible with a string
+
 /foo_returns_int.php:
 File \"/foo_returns_int.php\", line 3, characters 10-12:
 Name already bound: foo (Naming[2012])

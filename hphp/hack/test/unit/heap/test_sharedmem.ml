@@ -67,14 +67,128 @@ let test_unshelve (module IntHeap: SharedMem.NoCache
   expect_equals "0" (IntHeap.get "0") None;
   expect_equals "0" (IntHeap.get_shelved "0") None
 
+let test_local_changes (
+    module IntHeap: SharedMem.NoCache
+      with type t = int
+       and type key = string
+  ) () =
+  let expect_value ~name expected =
+    expect_equals ~name (IntHeap.get name) expected;
+    let mem = expected <> None in
+    let str = if mem then "be" else "not be" in
+    expect
+      ~msg:(
+        Printf.sprintf "Expected key %s to %s a member" name str
+      )
+      (IntHeap.mem name = mem)
+  in
+
+  let expect_add key value =
+    IntHeap.add key value;
+    expect_value key (Some value)
+  in
+  let expect_remove key =
+    IntHeap.remove_batch (IntHeap.KeySet.singleton key);
+    expect_value key None
+  in
+
+  let test () =
+    expect_value "Filled" (Some 0);
+    expect_value "Empty" None;
+
+    IntHeap.LocalChanges.push_stack ();
+    begin
+      expect_value "Filled" (Some 0);
+      expect_value "Empty" None;
+
+      (* For local changes we allow overriding values *)
+      expect_add "Filled" 1;
+      expect_add "Empty" 2;
+
+      expect_remove "Filled";
+      expect_remove "Empty";
+
+      expect_add "Filled" 1;
+      expect_add "Empty" 2
+    end;
+    IntHeap.LocalChanges.pop_stack ();
+    expect_value "Filled" (Some 0);
+    expect_value "Empty" None;
+
+    (* Commit changes are reflected in the shared memory *)
+    IntHeap.LocalChanges.push_stack ();
+    begin
+      expect_add "Filled" 1;
+      expect_add "Empty" 2
+    end;
+    IntHeap.LocalChanges.commit_all ();
+    IntHeap.LocalChanges.pop_stack ();
+    expect_value "Filled" (Some 1);
+    expect_value "Empty" (Some 2);
+
+    IntHeap.LocalChanges.push_stack ();
+    begin
+      expect_remove "Filled";
+      expect_remove "Empty"
+    end;
+    IntHeap.LocalChanges.pop_stack ();
+    expect_value "Filled" (Some 1);
+    expect_value "Empty" (Some 2);
+
+    IntHeap.LocalChanges.push_stack ();
+    begin
+      expect_remove "Filled";
+      expect_remove "Empty"
+    end;
+    IntHeap.LocalChanges.commit_all ();
+    IntHeap.LocalChanges.pop_stack ();
+    expect_value "Filled" None;
+    expect_value "Empty" None;
+
+    IntHeap.LocalChanges.push_stack ();
+    begin
+      expect_add "Filled" 0;
+      expect_add "Empty" 2;
+      IntHeap.LocalChanges.commit_batch (IntHeap.KeySet.singleton "Filled");
+      IntHeap.LocalChanges.revert_batch (IntHeap.KeySet.singleton "Empty");
+      expect_value "Filled" (Some 0);
+      expect_value "Empty" None
+    end;
+    IntHeap.LocalChanges.pop_stack ();
+    expect_value "Filled" (Some 0);
+    expect_value "Empty" None
+  in
+
+  IntHeap.add "Filled" 0;
+  test ();
+
+  IntHeap.(remove_batch @@ KeySet.singleton "Filled");
+  IntHeap.add "Empty" 2;
+  IntHeap.LocalChanges.push_stack ();
+  IntHeap.add "Filled" 0;
+  IntHeap.(remove_batch @@ KeySet.singleton "Empty");
+  test ();
+  IntHeap.LocalChanges.pop_stack ()
+
+module TestNoCache = SharedMem.NoCache (StringKey) (IntVal)
+module TestWithCache = SharedMem.WithCache (StringKey) (IntVal)
+
 let tests () =
   let list = [
-    "test_unshelve_no_cache", test_unshelve (
-      module SharedMem.NoCache (StringKey) (IntVal)
-    );
-    "test_unshelve_with_cache", test_unshelve (
-      module SharedMem.WithCache (StringKey) (IntVal)
-    );
+    "test_unshelve_no_cache", (fun () ->
+        TestNoCache.LocalChanges.push_stack ();
+        test_unshelve (module TestNoCache) ();
+        TestNoCache.LocalChanges.pop_stack ();
+        test_unshelve (module TestNoCache) ()
+      );
+    "test_unshelve_with_cache", (fun () ->
+        TestWithCache.LocalChanges.push_stack ();
+        test_unshelve (module TestWithCache) ();
+        TestWithCache.LocalChanges.pop_stack ();
+        test_unshelve (module TestWithCache) ()
+      );
+    "test_local_changes_no_cache", test_local_changes (module TestNoCache);
+    "test_local_changes_with_cache", test_local_changes (module TestWithCache);
   ] in
   let setup_test (name, test) = name, fun () ->
   let handle = SharedMem.(

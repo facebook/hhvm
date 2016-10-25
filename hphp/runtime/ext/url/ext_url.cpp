@@ -224,8 +224,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
   std::set<void*> seen_arrs;
 
   String num_prefix;
-  if (!numeric_prefix.isNull())
-  {
+  if (!numeric_prefix.isNull()) {
     num_prefix = numeric_prefix.toCStrRef();
   }
   url_encode_array(ret, formdata, seen_arrs,

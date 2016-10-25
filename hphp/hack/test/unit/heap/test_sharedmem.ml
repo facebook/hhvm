@@ -35,38 +35,6 @@ let expect_equals ~name value expected =
     )
     (value = expected)
 
-let test_unshelve (module IntHeap: SharedMem.NoCache
-                  with type t = int
-                   and type key = string
-                ) () =
-  let key = IntHeap.KeySet.singleton "0" in
-
-  IntHeap.add "0" 0;
-  expect_equals "0" (IntHeap.get "0") (Some 0);
-
-  IntHeap.shelve_batch key;
-  expect_equals "0" (IntHeap.get "0") None;
-  expect_equals "0" (IntHeap.get_shelved "0") (Some 0);
-
-  IntHeap.add "0" 1;
-  expect_equals "0" (IntHeap.get "0") (Some 1);
-
-  IntHeap.unshelve_batch key;
-  expect_equals "0" (IntHeap.get "0") (Some 0);
-  expect_equals "0" (IntHeap.get_shelved "0") None;
-
-  IntHeap.shelve_batch key;
-  expect_equals "0" (IntHeap.get "0") None;
-  expect_equals "0" (IntHeap.get_shelved "0") (Some 0);
-
-  IntHeap.unshelve_batch key;
-  expect_equals "0" (IntHeap.get "0") (Some 0);
-  expect_equals "0" (IntHeap.get_shelved "0") None;
-
-  IntHeap.unshelve_batch key;
-  expect_equals "0" (IntHeap.get "0") None;
-  expect_equals "0" (IntHeap.get_shelved "0") None
-
 let test_local_changes (
     module IntHeap: SharedMem.NoCache
       with type t = int
@@ -175,18 +143,6 @@ module TestWithCache = SharedMem.WithCache (StringKey) (IntVal)
 
 let tests () =
   let list = [
-    "test_unshelve_no_cache", (fun () ->
-        TestNoCache.LocalChanges.push_stack ();
-        test_unshelve (module TestNoCache) ();
-        TestNoCache.LocalChanges.pop_stack ();
-        test_unshelve (module TestNoCache) ()
-      );
-    "test_unshelve_with_cache", (fun () ->
-        TestWithCache.LocalChanges.push_stack ();
-        test_unshelve (module TestWithCache) ();
-        TestWithCache.LocalChanges.pop_stack ();
-        test_unshelve (module TestWithCache) ()
-      );
     "test_local_changes_no_cache", test_local_changes (module TestNoCache);
     "test_local_changes_with_cache", test_local_changes (module TestWithCache);
   ] in

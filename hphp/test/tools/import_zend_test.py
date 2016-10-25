@@ -918,6 +918,7 @@ other_files = (
     '/ext/standard/tests/image/75x50.xbm',
     '/ext/standard/tests/image/blank_file.bmp',
     '/ext/standard/tests/image/bug13213.jpg',
+    '/ext/standard/tests/image/bug72278.jpg',
     '/ext/standard/tests/image/skipif_imagetype.inc',
     '/ext/standard/tests/image/test13pix.swf',
     '/ext/standard/tests/image/test1bpix.bmp',

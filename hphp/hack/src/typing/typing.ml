@@ -406,8 +406,7 @@ and stmt env = function
          | _ -> Async.enforce_not_awaitable env (fst e) ty);
       env
   | If (e, b1, b2)  ->
-      let env, ty = expr env e in
-      Async.enforce_not_awaitable env (fst e) ty;
+      let env, _ = expr env e in
       (* We stash away the locals environment because condition updates it
        * locally for checking b1. For example, we might have condition
        * $x === null, or $x instanceof C, which changes the type of $x in
@@ -486,8 +485,7 @@ and stmt env = function
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let env = block env b in
-      let env, ty = expr env e in
-      Async.enforce_not_awaitable env (fst e) ty;
+      let env, _ = expr env e in
       let after_block = env.Env.lenv in
       let alias_depth =
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
@@ -508,8 +506,7 @@ and stmt env = function
       in
       condition env false e
   | While (e, b) as st ->
-      let env, ty = expr env e in
-      Async.enforce_not_awaitable env (fst e) ty;
+      let env, _ = expr env e in
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let alias_depth =
@@ -790,7 +787,6 @@ and lvalue env e =
  * look for sketchy null checks in the condition. *)
 and eif env ~coalesce ~in_cond p c e1 e2 =
   let env, tyc = raw_expr in_cond env c in
-  Async.enforce_not_awaitable env (fst c) tyc;
   let parent_lenv = env.Env.lenv in
   let c = if coalesce then (p, Binop (Ast.Diff2, c, (p, Null))) else c in
   let env = condition env true c in
@@ -3601,7 +3597,11 @@ and condition_isset env = function
  * conditional statements.
  *)
 and condition env tparamet =
-  let expr = raw_expr ~in_cond:true in function
+  let expr env x =
+    let env, ty = raw_expr ~in_cond:true env x in
+    Async.enforce_not_awaitable env (fst x) ty;
+    env, ty
+  in function
   | _, Expr_list [] -> env
   | _, Expr_list [x] ->
       let env, _ = expr env x in
@@ -3684,7 +3684,7 @@ and condition env tparamet =
       condition env (not tparamet) e
   | p, InstanceOf (ivar, cid) when tparamet && is_instance_var ivar ->
       (* Check the expession and determine its static type *)
-      let env, x_ty = expr env ivar in
+      let env, x_ty = raw_expr ~in_cond:false env ivar in
 
       (* What is the local variable bound to the expression? *)
       let env, (ivar_pos, x) = get_instance_var env ivar in
@@ -3744,6 +3744,10 @@ and condition env tparamet =
          *)
         let env = SubType.add_constraint env Ast.Constraint_as obj_ty x_ty in
         env, obj_ty in
+
+        if SubType.is_sub_type env obj_ty (
+          Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Tany])
+        ) then () else Async.enforce_not_awaitable env (fst ivar) x_ty;
 
       let rec resolve_obj env obj_ty =
         (* Expand so that we don't modify x *)

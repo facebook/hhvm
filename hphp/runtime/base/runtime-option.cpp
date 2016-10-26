@@ -103,6 +103,7 @@ bool RuntimeOption::AutoprimeGenerators = true;
 #ifdef FACEBOOK
 bool RuntimeOption::UseThriftLogger = false;
 size_t RuntimeOption::LoggerBatchSize = 100;
+size_t RuntimeOption::LoggerFlushTimeout = 0;
 #endif
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
   {Logger::DEFAULT, ErrorLogFileData()},
@@ -848,6 +849,7 @@ void RuntimeOption::Load(
 #ifdef FACEBOOK
     Config::Bind(UseThriftLogger, ini, config, "Log.UseThriftLogger");
     Config::Bind(LoggerBatchSize, ini, config, "Log.BatchSize", 100);
+    Config::Bind(LoggerFlushTimeout, ini, config, "Log.FlushTimeout", 0);
     if (UseThriftLogger) {
       fprintf(stderr,
               "WARNING: Log.UseThriftLogger overrides other logger options.\n"

@@ -1114,6 +1114,8 @@ static int start_server(const std::string &username, int xhprof) {
     Logger::Info("Turning logger batching on, batch size %ld",
                  RuntimeOption::LoggerBatchSize);
     Logger::SetBatchSize(RuntimeOption::LoggerBatchSize);
+    Logger::SetFlushTimeout(
+      std::chrono::milliseconds(RuntimeOption::LoggerFlushTimeout));
   }
 #endif
 

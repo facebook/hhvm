@@ -144,6 +144,13 @@ void Logger::SetBatchSize(size_t bsize) {
   }
 }
 
+void Logger::SetFlushTimeout(std::chrono::milliseconds timeoutMs) {
+  for (auto& l : s_loggers) {
+    auto& logger = l.second;
+    logger->setFlushTimeout(timeoutMs);
+  }
+}
+
 int Logger::GetSyslogLevel(LogLevelType level) {
   switch (level) {
   case LogError:   return LOG_ERR;

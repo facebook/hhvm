@@ -1339,21 +1339,32 @@ void emitShr(IRGS& env) {
 }
 
 void emitPow(IRGS& env) {
-  // Special-case exponent of 2, i.e.
-  // $x**2 becomes $x*$x
+  // Special-case exponent of 2 or 3, i.e.
+  // $x**2 becomes $x*$x,
+  // $x**3 becomes ($x*$x)*$x
+  // TODO(t14096669) if input will result in integer overflow,
+  // compute double result and return instead of slow exit path.
   auto exponent = topC(env);
   auto base = topC(env, BCSPRelOffset{1});
-  if (exponent->hasConstVal(2) &&
+  if ((exponent->hasConstVal(2) || exponent->hasConstVal(3)) &&
       (base->isA(TDbl) || base->isA(TInt))) {
+    auto intVal = exponent->intVal();
+    SSATmp* genPowResult;
+    auto const exitSlow = makeExitSlow(env);
     if (base->isA(TInt)) {
-      auto const exitSlow = makeExitSlow(env);
-      auto genMulIntO = gen(env, MulIntO, exitSlow, base, base);
-      discard(env, 2);
-      push(env, genMulIntO);
+      genPowResult = gen(env, MulIntO, exitSlow, base, base);
     } else {
-      discard(env, 2);
-      push(env, gen(env, MulDbl, base, base));
+      genPowResult = gen(env, MulDbl, base, base);
     }
+    if (intVal == 3) {
+      if (genPowResult->isA(TInt)) {
+        genPowResult = gen(env, MulIntO, exitSlow, genPowResult, base);
+      } else {
+        genPowResult = gen(env, MulDbl, genPowResult, base);
+      }
+    }
+    discard(env, 2);
+    push(env, genPowResult);
     return;
   }
   interpOne(env, TUncountedInit, 2);

@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 
 #include <boost/variant.hpp>
+#include <folly/Optional.h>
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,24 +66,24 @@ struct XDebugBreakpoint {
   // internally between this and a conditional breakpoint (which is in the spec)
   // The encoded condition is kept around for display purposes. The unit is
   // updated to the matched unit once the breakpoint has been matched.
-  req::root<String> fileName;
+  std::string fileName;
   int line = -1;
   Unit* conditionUnit = nullptr;
-  req::root<String> condition;
+  std::string condition;
   const Unit* unit = nullptr;
 
   // A call or return breakpoint occurs when the function in the given class
   // with the given name is called/returns. The class name and function name
   // are kept around for listing breakpoint info. The function id is added
   // once the breakpoint has been matched with a function
-  req::root<Variant> className = init_null(); // optional
-  req::root<String> funcName;
-  req::root<String> fullFuncName;
+  folly::Optional<std::string> className;
+  std::string funcName;
+  std::string fullFuncName;
   int funcId = -1;
 
   // An exception breakpoint occurs when an exception with a given name is
   // thrown.
-  req::root<String> exceptionName;
+  std::string exceptionName;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

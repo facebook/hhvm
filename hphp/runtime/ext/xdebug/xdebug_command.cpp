@@ -203,14 +203,14 @@ xdebug_xml_node* breakpoint_xml_node(
     // Line breakpoints add a file, line, and possibly a condition
     case XDebugBreakpoint::Type::LINE:
       xdebug_xml_add_attribute(xml, "type", "line");
-      xdebug_xml_add_attribute_dup(xml, "filename",
-                                   xdebug_path_to_url(bp.fileName).data());
+      xdebug_xml_add_attribute(xml, "filename",
+                               xdebug_path_to_url(bp.fileName.c_str()));
       xdebug_xml_add_attribute(xml, "lineno", bp.line);
 
       // Add the condition. cast is due to xml api
       if (bp.conditionUnit != nullptr) {
         xdebug_xml_node* expr_xml = xdebug_xml_node_init("expression");
-        xdebug_xml_add_text(expr_xml, xdstrdup(bp.condition.data()));
+        xdebug_xml_add_text(expr_xml, xdstrdup(bp.condition.c_str()));
         xdebug_xml_add_child(xml, expr_xml);
       }
       break;
@@ -221,19 +221,17 @@ xdebug_xml_node* breakpoint_xml_node(
     // Call breakpoints add function + class (optionally)
     case XDebugBreakpoint::Type::CALL:
       xdebug_xml_add_attribute(xml, "type", "call");
-      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.data());
-      if (!bp.className.isNull()) {
-        xdebug_xml_add_attribute_dup(xml, "class",
-                                     bp.className.toString().data());
+      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.c_str());
+      if (bp.className.hasValue()) {
+        xdebug_xml_add_attribute_dup(xml, "class", bp.className.value().c_str());
       }
       break;
     // Return breakpoints add function + class (optionally)
     case XDebugBreakpoint::Type::RETURN:
       xdebug_xml_add_attribute(xml, "type", "return");
-      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.data());
-      if (!bp.className.isNull()) {
-        xdebug_xml_add_attribute_dup(xml, "class",
-                                     bp.className.toString().data());
+      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.c_str());
+      if (bp.className.hasValue()) {
+        xdebug_xml_add_attribute_dup(xml, "class", bp.className.value().c_str());
       }
       break;
   }
@@ -669,18 +667,18 @@ struct BreakpointSetCmd : XDebugCommand {
         if (filename == staticEmptyString()) {
           throw_exn(Error::StackDepthInvalid);
         }
-        bp.fileName = String(filename);
+        bp.fileName = filename->toCppString();
       } else {
-        bp.fileName = xdebug_path_from_url(args['f'].toString());
+        bp.fileName = xdebug_path_from_url(args['f'].toString()).toCppString();
       }
 
       // Ensure consistency between filenames
-      bp.fileName = File::TranslatePath(bp.fileName);
+      bp.fileName = File::TranslatePath(String(bp.fileName)).toCppString();
 
       // Create the condition unit if a condition string was supplied
       if (!args['-'].isNull()) {
         auto condition = StringUtil::Base64Decode(args['-'].toString());
-        bp.condition = condition;
+        bp.condition = condition.toCppString();
         bp.conditionUnit = compile_expression(condition);
       }
     }
@@ -691,18 +689,18 @@ struct BreakpointSetCmd : XDebugCommand {
       if (args['m'].isNull()) {
         throw_exn(Error::InvalidArgs);
       }
-      bp.funcName = args['m'].toString();
+      bp.funcName = args['m'].toString().toCppString();
 
       // This is in php5 xdebug, but not in the spec. If 'a' is passed, the
       // value is expected to be a class name that will be prepended to the
       // passed method name.
       if (!args['a'].isNull()) {
-        bp.className = args['a'];
+        bp.className = args['a'].toString().toCppString();
       }
 
       // Precompute full function name
-      bp.fullFuncName = bp.className.isNull() ?
-        bp.funcName : (bp.className.toString() + "::" + bp.funcName);
+      bp.fullFuncName = !bp.className.hasValue() ?
+        bp.funcName : (bp.className.value() + "::" + bp.funcName);
     }
 
     // Exception type
@@ -710,7 +708,7 @@ struct BreakpointSetCmd : XDebugCommand {
       if (args['x'].isNull()) {
         throw_exn(Error::InvalidArgs);
       }
-      bp.exceptionName = args['x'].toString();
+      bp.exceptionName = args['x'].toString().toCppString();
       return;
     }
   }

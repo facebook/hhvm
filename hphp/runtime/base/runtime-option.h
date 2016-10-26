@@ -500,9 +500,9 @@ struct RuntimeOption {
   F(string, ProfileHWEvents,           std::string(""))                 \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
-  F(uint32_t, JitMaxTranslations,      12)                              \
+  F(uint32_t, JitMaxTranslations,      17)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
-  F(uint32_t, JitMaxRegionInstrs,      1000)                            \
+  F(uint32_t, JitMaxRegionInstrs,      1347)                            \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
@@ -527,8 +527,8 @@ struct RuntimeOption {
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
-  F(uint32_t, HHIRInliningMaxVasmCost, 400)                             \
-  F(uint32_t, HHIRInliningMaxReturnDecRefs, 6)                          \
+  F(uint32_t, HHIRInliningMaxVasmCost, 370)                             \
+  F(uint32_t, HHIRInliningMaxReturnDecRefs, 12)                         \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \
@@ -541,7 +541,7 @@ struct RuntimeOption {
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
-  F(double, HHIRMixedArrayProfileThreshold, 0.8)                        \
+  F(double, HHIRMixedArrayProfileThreshold, 0.8554)                     \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -554,8 +554,8 @@ struct RuntimeOption {
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
   F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
-  F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
-  F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
+  F(uint32_t, JitUnlikelyDecRefPercent, 5)                              \
+  F(uint32_t, JitPGOReleaseVVMinPercent, 8)                             \
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(uint32_t, JitPGOMinBlockCountPercent, 0)                            \
   F(double,   JitPGOMinArcProbability, 0.0)                             \

@@ -277,14 +277,16 @@ SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
   return preOptimizeCheckLocation(inst, stk(inst->extra<CheckStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
-  auto const locId = inst->extra<HintLocInner>()->locId;
-  if (!(local(locId, DataTypeGeneric).type <= TBoxedCell) ||
-      predictedLocalInnerType(locId).box() <= inst->typeParam()) {
+SSATmp* IRBuilder::preOptimizeHintInner(IRInstruction* inst, Location l) {
+  if (!(typeOf(l, DataTypeGeneric) <= TBoxedCell) ||
+      predictedInnerType(l).box() <= inst->typeParam()) {
     inst->convertToNop();
-    return nullptr;
   }
   return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
+  return preOptimizeHintInner(inst, loc(inst->extra<HintLocInner>()->locId));
 }
 
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
@@ -872,16 +874,18 @@ Type IRBuilder::typeOf(Location l, TypeConstraint tc) {
   return m_state.typeOf(l);
 }
 
-Type IRBuilder::predictedLocalInnerType(uint32_t id) const {
-  auto const ty = m_state.local(id).predictedType;
+Type IRBuilder::predictedInnerType(Location l) const {
+  auto const ty = m_state.predictedTypeOf(l);
   assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
+Type IRBuilder::predictedLocalInnerType(uint32_t id) const {
+  return predictedInnerType(loc(id));
+}
+
 Type IRBuilder::predictedStackInnerType(IRSPRelOffset offset) const {
-  auto const ty = m_state.stack(offset).predictedType;
-  assertx(ty <= TBoxedCell);
-  return ldRefReturn(ty.unbox());
+  return predictedInnerType(stk(offset));
 }
 
 /*

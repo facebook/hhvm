@@ -125,6 +125,7 @@ struct IRBuilder {
    *
    * @returns: ldRefReturn(fs().predictedTypeOf(location).unbox())
    */
+  Type predictedInnerType(Location l) const;
   Type predictedLocalInnerType(uint32_t id) const;
   Type predictedStackInnerType(IRSPRelOffset) const;
 
@@ -288,6 +289,7 @@ private:
   SSATmp* preOptimizeCheckLocation(IRInstruction*, Location);
   SSATmp* preOptimizeCheckLoc(IRInstruction*);
   SSATmp* preOptimizeCheckStk(IRInstruction*);
+  SSATmp* preOptimizeHintInner(IRInstruction*, Location);
   SSATmp* preOptimizeHintLocInner(IRInstruction*);
   SSATmp* preOptimizeAssertTypeOp(IRInstruction* inst,
                                   Type oldType,

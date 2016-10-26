@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -531,10 +530,10 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   if (!cls) {
     return;
   }
-  TypedValue ret;
   ObjectData* inst = object.get();
-  g_context->invokeFunc(&ret, cls->getCtor(), ctor_args.toArray(), inst);
-  tvRefcountedDecRef(&ret);
+  tvRefcountedDecRef(
+    g_context->invokeFunc(cls->getCtor(), ctor_args.toArray(), inst)
+  );
 }
 
 static bool valid_statement_class(sp_PDOResource dbh, const Variant& opt,

@@ -17,8 +17,9 @@ Class* c_ImmMap::s_cls;
 inline
 bool invokeAndCastToBool(const CallCtx& ctx, int argc,
                          const TypedValue* argv) {
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctx, argc, argv);
+  auto ret = Variant::attach(
+      g_context->invokeFuncFew(ctx, argc, argv)
+  );
   return ret.toBoolean();
 }
 

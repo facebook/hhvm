@@ -81,7 +81,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   String cache_key("HPHP.SOAP.WSDL.");
   cache_key += filename;
 
-  Variant content = Variant::attach(HHVM_FN(apc_fetch)(cache_key));
+  auto content = Variant::attach(HHVM_FN(apc_fetch)(cache_key));
   if (same(content, false)) {
     Variant cxt = HHVM_FN(stream_context_create)(make_map_array(
                   s_http, make_map_array(s_timeout, 1000)));
@@ -96,7 +96,8 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
 
   if (!same(content, false)) {
     String scontent = content.toString();
-    xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size(), false);
+    xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size(),
+                                        false);
     if (ret) {
       ret->URL = xmlCharStrdup(filename);
     }

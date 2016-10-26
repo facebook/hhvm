@@ -1334,10 +1334,9 @@ Variant MySQLStmt::result_metadata() {
   auto cls = Unit::lookupClass(s_mysqli_result.get());
   Object obj{cls};
 
-  TypedValue ret;
-  g_context->invokeFunc(&ret, cls->getCtor(), args, obj.get());
-  tvRefcountedDecRef(&ret);
-
+  tvRefcountedDecRef(
+    g_context->invokeFunc(cls->getCtor(), args, obj.get())
+  );
   return obj;
 }
 

@@ -1073,9 +1073,7 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!isContainerOrNull(params)) {
     throw_param_is_not_container();
   }
-  TypedValue ret;
-  invokeFunc(&ret, ctor, params, o);
-  tvRefcountedDecRef(&ret);
+  tvRefcountedDecRef(invokeFunc(ctor, params, o));
   return o;
 }
 
@@ -1259,12 +1257,12 @@ bool ExecutionContext::setHeaderCallback(const Variant& callback) {
   return true;
 }
 
-void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
+TypedValue ExecutionContext::invokeUnit(const Unit* unit) {
   checkHHConfig(unit);
 
   auto const func = unit->getMain(nullptr);
-  invokeFunc(retval, func, init_null_variant, nullptr, nullptr,
-             m_globalVarEnv, nullptr, InvokePseudoMain);
+  return invokeFunc(func, init_null_variant, nullptr, nullptr,
+                    m_globalVarEnv, nullptr, InvokePseudoMain);
 }
 
 void ExecutionContext::syncGdbState() {
@@ -1458,14 +1456,13 @@ void ExecutionContext::requestExit() {
  */
 template<class FStackCheck, class FInitArgs, class FEnterVM>
 ALWAYS_INLINE
-void ExecutionContext::invokeFuncImpl(TypedValue* retptr, const Func* f,
-                                      ObjectData* thiz, Class* cls,
-                                      uint32_t argc, StringData* invName,
-                                      bool useWeakTypes,
-                                      FStackCheck doStackCheck,
-                                      FInitArgs doInitArgs,
-                                      FEnterVM doEnterVM) {
-  assert(retptr);
+TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
+                                            ObjectData* thiz, Class* cls,
+                                            uint32_t argc, StringData* invName,
+                                            bool useWeakTypes,
+                                            FStackCheck doStackCheck,
+                                            FInitArgs doInitArgs,
+                                            FEnterVM doEnterVM) {
   assert(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
   assert(IMPLIES(!f->preClass(), f->isPseudoMain() || (!thiz && !cls)));
@@ -1482,7 +1479,8 @@ void ExecutionContext::invokeFuncImpl(TypedValue* retptr, const Func* f,
 
   if (thiz != nullptr) thiz->incRefCount();
 
-  if (doStackCheck()) return;
+  TypedValue retval;
+  if (doStackCheck(retval)) return retval;
 
   ActRec* ar = vmStack().allocA();
   ar->setReturnVMExit();
@@ -1515,7 +1513,7 @@ void ExecutionContext::invokeFuncImpl(TypedValue* retptr, const Func* f,
   }
 #endif
 
-  if (doInitArgs(ar)) return;
+  if (doInitArgs(ar, retval)) return retval;
 
   if (useWeakTypes) {
     ar->setUseWeakTypes();
@@ -1523,7 +1521,6 @@ void ExecutionContext::invokeFuncImpl(TypedValue* retptr, const Func* f,
     setTypesFlag(vmfp(), ar);
   }
 
-  TypedValue retval;
   {
     pushVMState(reentrySP);
     SCOPE_EXIT {
@@ -1542,8 +1539,7 @@ void ExecutionContext::invokeFuncImpl(TypedValue* retptr, const Func* f,
     tvCopy(*vmStack().topTV(), retval);
     vmStack().discard();
   }
-
-  tvCopy(retval, *retptr);
+  return retval;
 }
 
 /**
@@ -1577,15 +1573,14 @@ static inline void enterVM(ActRec* ar, Action action) {
   enterVMCustomHandler(ar, [&] { exception_handler(action); });
 }
 
-void ExecutionContext::invokeFunc(TypedValue* retptr,
-                                  const Func* f,
-                                  const Variant& args_,
-                                  ObjectData* thiz /* = NULL */,
-                                  Class* cls /* = NULL */,
-                                  VarEnv* varEnv /* = NULL */,
-                                  StringData* invName /* = NULL */,
-                                  InvokeFlags flags /* = InvokeNormal */,
-                                  bool useWeakTypes /* = false */) {
+TypedValue ExecutionContext::invokeFunc(const Func* f,
+                                        const Variant& args_,
+                                        ObjectData* thiz /* = NULL */,
+                                        Class* cls /* = NULL */,
+                                        VarEnv* varEnv /* = NULL */,
+                                        StringData* invName /* = NULL */,
+                                        InvokeFlags flags /* = InvokeNormal */,
+                                        bool useWeakTypes /* = false */) {
   const auto& args = *args_.asCell();
   assert(isContainerOrNull(args));
 
@@ -1593,7 +1588,7 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
   // If we are inheriting a variable environment, then `args' must be empty.
   assert(IMPLIES(varEnv, argc == 0));
 
-  auto const doCheckStack = [&] {
+  auto const doCheckStack = [&](TypedValue& retval) {
     // We must do a stack overflow check for leaf functions on re-entry,
     // because we won't have checked that the stack is deep enough for a
     // leaf function /after/ re-entry, and the prologue for the leaf
@@ -1617,22 +1612,22 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
       auto toMerge = f->unit();
       toMerge->merge();
       if (toMerge->isMergeOnly()) {
-        *retptr = *toMerge->getMainReturn();
+        retval = *toMerge->getMainReturn();
         return true;
       }
     }
     return false;
   };
 
-  auto const doInitArgs = [&] (ActRec* ar) {
+  auto const doInitArgs = [&] (ActRec* ar, TypedValue& retval) {
     if (!varEnv) {
       auto const& prepArgs = cellIsNull(&args)
         ? make_tv<KindOfArray>(staticEmptyArray())
         : args;
       auto prepResult = prepareArrayArgs(ar, prepArgs, vmStack(), 0,
-                                         flags & InvokeCuf, retptr);
+                                         flags & InvokeCuf, &retval);
       if (UNLIKELY(!prepResult)) {
-        assert(KindOfNull == retptr->m_type);
+        assert(KindOfNull == retval.m_type);
         return true;
       }
     }
@@ -1649,18 +1644,17 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
     });
   };
 
-  invokeFuncImpl(retptr, f, thiz, cls, argc, invName, useWeakTypes,
-                 doCheckStack, doInitArgs, doEnterVM);
+  return invokeFuncImpl(f, thiz, cls, argc, invName, useWeakTypes,
+                        doCheckStack, doInitArgs, doEnterVM);
 }
 
-void ExecutionContext::invokeFuncFew(TypedValue* retptr,
-                                     const Func* f,
-                                     void* thisOrCls,
-                                     StringData* invName,
-                                     int argc,
-                                     const TypedValue* argv,
-                                     bool useWeakTypes /* = false */) {
-  auto const doCheckStack = [&] {
+TypedValue ExecutionContext::invokeFuncFew(const Func* f,
+                                           void* thisOrCls,
+                                           StringData* invName,
+                                           int argc,
+                                           const TypedValue* argv,
+                                           bool useWeakTypes /* = false */) {
+  auto const doCheckStack = [&](TypedValue&) {
     // See comments in invokeFunc().
     if (f->attrs() & AttrPhpLeafFn ||
         !(argc + kNumActRecCells <= kStackCheckReenterPadding)) {
@@ -1671,7 +1665,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
     return false;
   };
 
-  auto const doInitArgs = [&] (ActRec* ar) {
+  auto const doInitArgs = [&] (ActRec* ar, TypedValue&) {
     for (ssize_t i = 0; i < argc; ++i) {
       const TypedValue *from = &argv[i];
       TypedValue *to = vmStack().allocTV();
@@ -1688,11 +1682,11 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
     enterVM(ar, [&] { enterVMAtFunc(ar, StackArgsState::Untrimmed, nullptr); });
   };
 
-  invokeFuncImpl(retptr, f,
-                 ActRec::decodeThis(thisOrCls),
-                 ActRec::decodeClass(thisOrCls),
-                 argc, invName, useWeakTypes,
-                 doCheckStack, doInitArgs, doEnterVM);
+  return invokeFuncImpl(f,
+                        ActRec::decodeThis(thisOrCls),
+                        ActRec::decodeClass(thisOrCls),
+                        argc, invName, useWeakTypes,
+                        doCheckStack, doInitArgs, doEnterVM);
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {
@@ -1874,11 +1868,12 @@ const Variant& ExecutionContext::getEvaledArg(const StringData* val,
   }
   Unit* unit = compileEvalString(code.get());
   assert(unit != nullptr);
-  Variant v;
   // Default arg values are not currently allowed to depend on class context.
-  g_context->invokeFunc((TypedValue*)&v, unit->getMain(nullptr),
+  auto v = Variant::attach(
+    g_context->invokeFunc(unit->getMain(nullptr),
                           init_null_variant, nullptr, nullptr, nullptr, nullptr,
-                          InvokePseudoMain);
+                          InvokePseudoMain)
+  );
   Variant &lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
   lv = v;
   return lv;
@@ -2017,10 +2012,11 @@ StrNR ExecutionContext::createFunction(const String& args,
   //   create_function('', '} echo "hi"; if (0) {');
   //
   // We have to eval now to emulate this behavior.
-  TypedValue retval;
-  invokeFunc(&retval, unit->getMain(nullptr), init_null_variant,
-             nullptr, nullptr, nullptr, nullptr,
-             InvokePseudoMain);
+  tvRefcountedDecRef(
+      invokeFunc(unit->getMain(nullptr), init_null_variant,
+                 nullptr, nullptr, nullptr, nullptr,
+                 InvokePseudoMain)
+  );
 
   // __lambda_func will be the only hoistable function.
   // Any functions or closures defined in it will not be hoistable.
@@ -2109,7 +2105,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
-    invokeFunc(retval, unit->getMain(functionClass), init_null_variant,
+    *retval = invokeFunc(unit->getMain(functionClass), init_null_variant,
                this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
                InvokePseudoMain);
     failed = false;

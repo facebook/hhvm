@@ -614,10 +614,10 @@ SSATmp* opt_foldable(IRGS& env,
     RID().setJitFolding(true);
     SCOPE_EXIT{ RID().setJitFolding(false); };
 
-    Cell retVal;
-    g_context->invokeFunc(&retVal, func, args.toArray(), nullptr, nullptr,
+    auto retVal = g_context->invokeFunc(func, args.toArray(), nullptr, nullptr,
                           nullptr, nullptr, ExecutionContext::InvokeNormal,
                           !func->unit()->useStrictTypes());
+    SCOPE_EXIT { tvRefcountedDecRef(retVal); };
 
     if (isStringType(retVal.m_type)) {
       return cns(env, makeStaticString(retVal.m_data.pstr));

@@ -21,7 +21,6 @@
 #ifndef _MSC_VER
 #include <dlfcn.h>
 #endif
-#include <limits>
 #include <memory>
 #include <set>
 #include <vector>
@@ -408,12 +407,11 @@ Variant HHVM_FUNCTION(apc_delete,
       );
       return false;
     }
-    TypedValue tvResult;
-    tvWriteUninit(&tvResult);
     const Func* method =
       SystemLib::s_APCIteratorClass->lookupMethod(s_delete.get());
-    g_context->invokeFuncFew(&tvResult, method, key.getObjectData());
-    return tvAsVariant(&tvResult);
+    return Variant::attach(
+      g_context->invokeFuncFew(method, key.getObjectData())
+    );
   }
 
   return apc_store().eraseKey(key.toString());

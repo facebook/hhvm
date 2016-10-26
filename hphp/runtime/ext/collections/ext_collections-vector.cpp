@@ -56,8 +56,9 @@ void BaseVector::throwBadKeyType() {
 ALWAYS_INLINE static
 bool invokeAndCastToBool(const CallCtx& ctx, int argc,
                          const TypedValue* argv) {
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctx, argc, argv);
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(ctx, argc, argv)
+  );
   return ret.toBoolean();
 }
 
@@ -87,12 +88,12 @@ BaseVector::php_map(const Variant& callback) {
     argv[0].m_type = KindOfInt64;
   }
   for (uint32_t i = 0; i < sz; ++i) {
-    TypedValue* tv = &nv->data()[i];
     if (useKey) {
       argv[0].m_data.num = i;
     }
     argv[argc-1] = data()[i];
-    g_context->invokeFuncFew(tv, ctx, argc, argv);
+    TypedValue* tv = &nv->data()[i];
+    *tv = g_context->invokeFuncFew(ctx, argc, argv);
     if (UNLIKELY(version != m_version)) {
       tvRefcountedDecRef(tv);
       throw_collection_modified();

@@ -54,9 +54,7 @@ using CufIterPtr = req::unique_ptr<CufIter>;
 Variant invoke_for_autoload(const String& function, const Variant& params) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
-    Variant ret;
-    g_context->invokeFunc(ret.asTypedValue(), func, params);
-    return ret;
+    return Variant::attach(g_context->invokeFunc(func, params));
   }
   raise_warning("call_user_func to non-existent function %s",
     function.c_str());
@@ -83,10 +81,10 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   if (invName) {
     invName->incRefCount();
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
+                          ExecutionContext::InvokeCuf)
+  );
 }
 
 /*
@@ -256,11 +254,11 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       auto const unit = lookupUnit(fName.get(), "", &initial);
       if (unit) {
         if (initial) {
-          TypedValue retval;
-          ec->invokeFunc(&retval, unit->getMain(nullptr), init_null_variant,
-                         nullptr, nullptr, nullptr, nullptr,
-                         ExecutionContext::InvokePseudoMain);
-          tvRefcountedDecRef(&retval);
+          tvRefcountedDecRef(
+            ec->invokeFunc(unit->getMain(nullptr), init_null_variant,
+                           nullptr, nullptr, nullptr, nullptr,
+                           ExecutionContext::InvokePseudoMain)
+          );
         }
         ok = true;
       }

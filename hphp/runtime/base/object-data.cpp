@@ -708,9 +708,9 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
       (!isContainer(params) && !params.isNull())) {
     return Variant(Variant::NullInit());
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, ctx, params);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFunc(ctx, params)
+  );
 }
 
 #define INVOKE_FEW_ARGS_IMPL3                        \
@@ -751,9 +751,9 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
     case  0: break;
   }
 
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctx, count, args);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFuncFew(ctx, count, args)
+  );
 }
 
 ObjectData* ObjectData::clone() {

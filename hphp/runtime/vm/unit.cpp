@@ -1673,7 +1673,6 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           unit->mergeImpl<debugger>(tcbase, unit->m_mergeInfo);
           if (UNLIKELY(!unit->isMergeOnly())) {
             Stats::inc(Stats::PseudoMain_Reentered);
-            TypedValue ret;
             VarEnv* ve = nullptr;
             ActRec* fp = vmfp();
             if (!fp) {
@@ -1687,10 +1686,11 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
                 // local scope.
               }
             }
-            g_context->invokeFunc(&ret, unit->getMain(nullptr),
-                                  init_null_variant,
-                                  nullptr, nullptr, ve);
-            tvRefcountedDecRef(&ret);
+            tvRefcountedDecRef(
+              g_context->invokeFunc(unit->getMain(nullptr),
+                                    init_null_variant,
+                                    nullptr, nullptr, ve)
+            );
           } else {
             Stats::inc(Stats::PseudoMain_SkipDeep);
           }

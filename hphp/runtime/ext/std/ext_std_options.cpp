@@ -190,19 +190,17 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     }
   }
   auto const func = unit->getMain(ctx);
-  TypedValue retVal;
-  g_context->invokeFunc(
-    &retVal,
-    func,
-    init_null_variant,
-    thiz,
-    cls,
-    varEnv,
-    nullptr,
-    ExecutionContext::InvokePseudoMain
+  return Variant::attach(
+    g_context->invokeFunc(
+      func,
+      init_null_variant,
+      thiz,
+      cls,
+      varEnv,
+      nullptr,
+      ExecutionContext::InvokePseudoMain
+    )
   );
-
-  return tvAsVariant(&retVal);
 }
 
 // assert_impl already defined in util/assertions.h

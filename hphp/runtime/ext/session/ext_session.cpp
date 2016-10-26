@@ -367,14 +367,14 @@ const Object& SystemlibSessionModule::getObject() {
   }
 
   VMRegAnchor _;
-  Variant ret;
-
   if (!m_cls) {
     lookupClass();
   }
   s_obj->setObject(Object{m_cls});
   const auto& obj = s_obj->getObject();
-  g_context->invokeFuncFew(ret.asTypedValue(), m_ctor, obj.get());
+  tvRefcountedDecRef(
+    g_context->invokeFuncFew(m_ctor, obj.get())
+  );
   return obj;
 }
 
@@ -384,10 +384,10 @@ bool SystemlibSessionModule::open(const char *save_path,
 
   Variant savePath = String(save_path, CopyString);
   Variant sessionName = String(session_name, CopyString);
-  Variant ret;
   TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
-  g_context->invokeFuncFew(ret.asTypedValue(), m_open, obj.get(),
-                           nullptr, 2, args);
+  auto ret = Variant::attach(
+      g_context->invokeFuncFew(m_open, obj.get(), nullptr, 2, args)
+  );
 
   if (ret.isBoolean() && ret.toBoolean()) {
     s_session->mod_data = true;
@@ -406,8 +406,9 @@ bool SystemlibSessionModule::close() {
     return true;
   }
 
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_close, obj.get());
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(m_close, obj.get())
+  );
   s_obj->destroy();
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -422,9 +423,10 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
   const auto& obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_read, obj.get(),
-                             nullptr, 1, sessionKey.asCell());
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(m_read, obj.get(),
+                             nullptr, 1, sessionKey.asCell())
+  );
 
   if (ret.isString()) {
     value = ret.toString();
@@ -440,10 +442,10 @@ bool SystemlibSessionModule::write(const char *key, const String& value) {
 
   Variant sessionKey = String(key, CopyString);
   Variant sessionVal = value;
-  Variant ret;
   TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
-  g_context->invokeFuncFew(ret.asTypedValue(), m_write, obj.get(),
-                             nullptr, 2, args);
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(m_write, obj.get(), nullptr, 2, args)
+  );
 
   if (ret.isBoolean() && ret.toBoolean()) {
     return true;
@@ -457,9 +459,10 @@ bool SystemlibSessionModule::destroy(const char *key) {
   const auto& obj = getObject();
 
   Variant sessionKey = String(key, CopyString);
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_destroy, obj.get(),
-                             nullptr, 1, sessionKey.asCell());
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(m_destroy, obj.get(),
+                             nullptr, 1, sessionKey.asCell())
+  );
 
   if (ret.isBoolean() && ret.toBoolean()) {
     return true;
@@ -473,9 +476,10 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
   const auto& obj = getObject();
 
   Variant maxLifeTime = maxlifetime;
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), m_gc, obj.get(),
-                             nullptr, 1, maxLifeTime.asCell());
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(m_gc, obj.get(),
+                             nullptr, 1, maxLifeTime.asCell())
+  );
 
   if (ret.isInteger()) {
     if (nrdels) {

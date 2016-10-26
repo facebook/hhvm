@@ -31,12 +31,9 @@ namespace {
 ALWAYS_INLINE
 Object createAndConstruct(Class* cls, const Variant& args) {
   Object inst{cls};
-  TypedValue ret;
-  g_context->invokeFunc(&ret,
-                        cls->getCtor(),
-                        args,
-                        inst.get());
-  tvRefcountedDecRef(&ret);
+  tvRefcountedDecRef(
+    g_context->invokeFunc(cls->getCtor(), args, inst.get())
+  );
   return inst;
 }
 

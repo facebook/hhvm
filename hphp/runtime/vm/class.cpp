@@ -649,9 +649,9 @@ void Class::initProps() const {
     // Iteratively invoke 86pinit() methods upward
     // through the inheritance chain.
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
-      TypedValue retval;
-      g_context->invokeFunc(&retval, *it, init_null_variant, nullptr,
-                              const_cast<Class*>(this));
+      DEBUG_ONLY auto retval = g_context->invokeFunc(
+        *it, init_null_variant, nullptr, const_cast<Class*>(this)
+      );
       assert(retval.m_type == KindOfNull);
     }
   } catch (...) {
@@ -718,9 +718,9 @@ void Class::initSProps() const {
   // They will override the KindOfUninit values set by scalar initialization.
   if (hasNonscalarInit) {
     for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
-      TypedValue retval;
-      g_context->invokeFunc(&retval, m_sinitVec[i], init_null_variant,
-                            nullptr, const_cast<Class*>(this));
+      DEBUG_ONLY auto retval = g_context->invokeFunc(
+        m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this)
+      );
       assert(retval.m_type == KindOfNull);
     }
   }
@@ -1058,9 +1058,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     make_tv<KindOfPersistentString>(const_cast<StringData*>(cns.name.get()))
   };
 
-  Cell ret;
-  g_context->invokeFuncFew(
-    &ret,
+  auto ret = g_context->invokeFuncFew(
     meth86cinit,
     ActRec::encodeClass(this),
     nullptr,

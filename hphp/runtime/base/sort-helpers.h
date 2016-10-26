@@ -311,14 +311,13 @@ struct ElmUCompare {
   ElmUCompare() : warned(!RuntimeOption::EnableHipHopSyntax) {}
 
   bool operator()(ElmT left, ElmT right) const {
-    Variant ret;
-    {
-      TypedValue args[2] = {
-        *acc.getValue(left).asCell(),
-        *acc.getValue(right).asCell()
-      };
-      g_context->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
-    }
+    TypedValue args[2] = {
+      *acc.getValue(left).asCell(),
+      *acc.getValue(right).asCell()
+    };
+    auto ret = Variant::attach(
+      g_context->invokeFuncFew(*ctx, 2, args)
+    );
     if (LIKELY(ret.isInteger())) {
       return ret.toInt64() > 0;
     }

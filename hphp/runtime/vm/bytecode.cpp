@@ -27,7 +27,6 @@
 #include <boost/filesystem.hpp>
 
 #include <folly/String.h>
-#include <folly/portability/Libgen.h>
 #include <folly/portability/SysMman.h>
 
 #include "hphp/util/debug.h"
@@ -78,7 +77,6 @@
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
@@ -3814,9 +3812,7 @@ TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
     key,
     def
   };
-  TypedValue ret;
-  g_context->invokeFuncFew(&ret, func, nullptr, nullptr, 3, &args[0]);
-  return ret;
+  return g_context->invokeFuncFew(func, nullptr, nullptr, 3, &args[0]);
 }
 }
 
@@ -5817,10 +5813,10 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
       auto const cls = obj->getVMClass();
       auto const func = cls->lookupMethod(s_getWaitHandle.get());
       if (func && !(func->attrs() & AttrStatic)) {
-        TypedValue ret;
-        g_context->invokeFuncFew(&ret, func, obj, nullptr, 0, nullptr);
-        cellSet(*tvToCell(&ret), *vmStack().topC());
-        tvRefcountedDecRef(ret);
+        auto ret = Variant::attach(
+            g_context->invokeFuncFew(func, obj, nullptr, 0, nullptr)
+        );
+        cellSet(*tvToCell(ret.asTypedValue()), *vmStack().topC());
         wh = c_WaitHandle::fromCell(vmStack().topC());
       }
     }

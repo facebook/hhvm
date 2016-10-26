@@ -380,12 +380,13 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
     raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
   }
 
-  Variant ret;
-  g_context->invokeFunc(ret.asTypedValue(), ctx, params);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFunc(ctx, params)
+  );
 }
 
-Object HHVM_FUNCTION(hphp_create_object, const String& name, const Variant& params) {
+Object HHVM_FUNCTION(hphp_create_object, const String& name,
+                     const Variant& params) {
   return Object::attach(g_context->createObject(name.get(), params));
 }
 
@@ -537,12 +538,11 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
 [[noreturn]]
 void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   Object inst{s_ReflectionExceptionClass};
-  TypedValue ret;
-  g_context->invokeFunc(&ret,
-                        s_ReflectionExceptionClass->getCtor(),
-                        make_packed_array(message),
-                        inst.get());
-  tvRefcountedDecRef(&ret);
+  tvRefcountedDecRef(
+    g_context->invokeFunc(s_ReflectionExceptionClass->getCtor(),
+                          make_packed_array(message),
+                          inst.get())
+  );
   throw_object(inst);
 }
 

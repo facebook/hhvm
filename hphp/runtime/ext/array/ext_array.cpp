@@ -460,9 +460,9 @@ TypedValue HHVM_FUNCTION(array_map,
       keyConverted = !collectionAllowsIntStringKeys(col_type);
     }
     for (ArrayIter iter(arr1); iter; ++iter) {
-      Variant result;
-      g_context->invokeFuncFew((TypedValue*)&result, ctx, 1,
-                               iter.secondRefPlus().asCell());
+      auto result = Variant::attach(
+        g_context->invokeFuncFew(ctx, 1, iter.secondRefPlus().asCell())
+      );
       // if keyConverted is false, it's possible that ret will have fewer
       // elements than cell_arr1; keys int(1) and string('1') may both be
       // present
@@ -502,10 +502,10 @@ TypedValue HHVM_FUNCTION(array_map,
     }
     Array params = params_ai.toArray();
     if (ctx.func) {
-      Variant result;
-      g_context->invokeFunc((TypedValue*)&result,
-                              ctx.func, params, ctx.this_,
-                              ctx.cls, nullptr, ctx.invName);
+      auto result = Variant::attach(
+        g_context->invokeFunc(ctx.func, params, ctx.this_,
+                              ctx.cls, nullptr, ctx.invName)
+      );
       ret_ai.append(result);
     } else {
       ret_ai.append(params);
@@ -1218,10 +1218,11 @@ static void walk_func(Variant& value,
                       const Variant& userdata,
                       const void *data) {
   CallCtx* ctx = (CallCtx*)data;
-  Variant sink;
   int nargs = userdata.isInitialized() ? 3 : 2;
   TypedValue args[3] = { *value.asRef(), *key.asCell(), *userdata.asCell() };
-  g_context->invokeFuncFew(sink.asTypedValue(), *ctx, nargs, args);
+  tvRefcountedDecRef(
+    g_context->invokeFuncFew(*ctx, nargs, args)
+  );
 }
 
 bool HHVM_FUNCTION(array_walk_recursive,

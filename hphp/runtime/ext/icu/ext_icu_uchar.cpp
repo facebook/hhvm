@@ -97,8 +97,9 @@ static UBool enumCharType_callback(CallCtx* ctx,
   args[0].m_data.num = start;
   args[1].m_data.num = limit;
   args[2].m_data.num = type;
-  Variant retval;
-  g_context->invokeFuncFew(retval.asTypedValue(), *ctx, 3, args);
+  tvRefcountedDecRef(
+    g_context->invokeFuncFew(*ctx, 3, args)
+  );
   return true;
 }
 
@@ -164,8 +165,9 @@ static UBool enumCharNames_callback(CallCtx *ctx,
   Variant charName = String(name, length, CopyString);
   tvCopy(*charName.asTypedValue(), args[2]);
 
-  Variant retval;
-  g_context->invokeFuncFew(retval.asTypedValue(), *ctx, 3, args);
+  tvRefcountedDecRef(
+    g_context->invokeFuncFew(*ctx, 3, args)
+  );
   return true;
 }
 

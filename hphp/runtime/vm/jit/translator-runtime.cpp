@@ -289,14 +289,24 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
 }
 
 ArrayData* convObjToVecHelper(ObjectData* obj) {
-  if (!obj->isCollection()) {
-    raise_warning("Non-collection object conversion to vec");
+  if (obj->isCollection()) {
+    auto a = collections::toArray(obj).toVec();
     decRefObj(obj);
-    return staticEmptyVecArray();
+    return a.detach();
   }
-  auto a = collections::toArray(obj).toVec();
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateVec();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.append(iter.second());
+    }
+    decRefObj(obj);
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to vec");
   decRefObj(obj);
-  return a.detach();
+  return staticEmptyVecArray();
 }
 
 ArrayData* convArrToDictHelper(ArrayData* adIn) {
@@ -322,14 +332,24 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 }
 
 ArrayData* convObjToDictHelper(ObjectData* obj) {
-  if (!obj->isCollection()) {
-    raise_warning("Non-collection object conversion to dict");
+  if (obj->isCollection()) {
+    auto a = collections::toArray(obj).toDict();
     decRefObj(obj);
-    return staticEmptyDictArray();
+    return a.detach();
   }
-  auto a = collections::toArray(obj).toDict();
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateDict();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.set(iter.first(), iter.second());
+    }
+    decRefObj(obj);
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to dict");
   decRefObj(obj);
-  return a.detach();
+  return staticEmptyDictArray();
 }
 
 ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
@@ -355,14 +375,24 @@ ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
 }
 
 ArrayData* convObjToKeysetHelper(ObjectData* obj) {
-  if (!obj->isCollection()) {
-    raise_warning("Non-collection object conversion to keyset");
+  if (obj->isCollection()) {
+    auto a = collections::toArray(obj).toKeyset();
     decRefObj(obj);
-    return staticEmptyKeysetArray();
+    return a.detach();
   }
-  auto a = collections::toArray(obj).toKeyset();
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateKeyset();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.append(iter.first());
+    }
+    decRefObj(obj);
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to keyset");
   decRefObj(obj);
-  return a.detach();
+  return staticEmptyKeysetArray();
 }
 
 int64_t convObjToDblHelper(const ObjectData* o) {

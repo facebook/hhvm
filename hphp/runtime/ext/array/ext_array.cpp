@@ -2904,9 +2904,16 @@ Array HHVM_FUNCTION(HH_dict, const Variant& input) {
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
     return HHVM_FN(HH_dict)(toArray(inputCell->m_data.pobj));
+  } else if (inputCell->m_type == KindOfObject &&
+             inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateDict();
+    for (ArrayIter iter(input.toObject()); iter; ++iter) {
+      arr.set(iter.first(), iter.second());
+    }
+    return arr;
   } else {
     raise_warning(
-      "Only arrays, vecs, keysets, and collections can be converted into dicts"
+      "Only arrays, vecs, keysets, and iterables can be converted into dicts"
     );
     return Array::CreateDict();
   }
@@ -2920,9 +2927,16 @@ Array HHVM_FUNCTION(HH_keyset, const Variant& input) {
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
     return HHVM_FN(HH_keyset)(toArray(inputCell->m_data.pobj));
+  } else if (inputCell->m_type == KindOfObject &&
+             inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateKeyset();
+    for (ArrayIter iter(input.toObject()); iter; ++iter) {
+      arr.append(iter.first());
+    }
+    return arr;
   } else {
     raise_warning(
-      "Only arrays, vecs, dicts, and collections can be converted into keysets"
+      "Only arrays, vecs, dicts, and iterables can be converted into keysets"
     );
     return Array::CreateKeyset();
   }
@@ -2936,9 +2950,16 @@ Array HHVM_FUNCTION(HH_vec, const Variant& input) {
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
     return HHVM_FN(HH_vec)(toArray(inputCell->m_data.pobj));
+  } else if (inputCell->m_type == KindOfObject &&
+             inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateVec();
+    for (ArrayIter iter(input.toObject()); iter; ++iter) {
+      arr.append(iter.second());
+    }
+    return arr;
   } else {
     raise_warning(
-      "Only arrays, dicts, keysets, and collections can be converted into vecs"
+      "Only arrays, dicts, keysets, and iterables can be converted into vecs"
     );
     return Array::CreateVec();
   }

@@ -723,11 +723,17 @@ void tvCastToVecInPlace(TypedValue* tv) {
 
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
-        if (!obj->isCollection()) {
-          raise_warning("Non-collection object conversion to vec");
-          a = staticEmptyVecArray();
-        } else {
+        if (obj->isCollection()) {
           a = collections::toArray(obj).toVec().detach();
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          auto arr = Array::CreateVec();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.append(iter.second());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to vec");
+          a = staticEmptyVecArray();
         }
         decRefObj(obj);
         continue;
@@ -823,11 +829,17 @@ void tvCastToDictInPlace(TypedValue* tv) {
 
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
-        if (!obj->isCollection()) {
-          raise_warning("Non-collection object conversion to dict");
-          a = staticEmptyDictArray();
-        } else {
+        if (obj->isCollection()) {
           a = collections::toArray(obj).toDict().detach();
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          auto arr = Array::CreateDict();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.set(iter.first(), iter.second());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to dict");
+          a = staticEmptyDictArray();
         }
         decRefObj(obj);
         continue;
@@ -923,11 +935,17 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
 
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
-        if (!obj->isCollection()) {
-          raise_warning("Non-collection object conversion to keyset");
-          a = staticEmptyKeysetArray();
-        } else {
+        if (obj->isCollection()) {
           a = collections::toArray(obj).toKeyset().detach();
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          auto arr = Array::CreateKeyset();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.append(iter.first());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to keyset");
+          a = staticEmptyKeysetArray();
         }
         decRefObj(obj);
         continue;

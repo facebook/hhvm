@@ -1,0 +1,10 @@
+vec(3) {
+  string(1) "r"
+  string(2) "un"
+  string(3) "uno"
+}
+vec(3) {
+  string(1) "b"
+  string(3) "one"
+  string(3) "ONE"
+}

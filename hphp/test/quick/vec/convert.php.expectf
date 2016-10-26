@@ -216,7 +216,7 @@ object(stdClass)#%d (0) {
 }
 ----------------------------------------------------
 
-Warning: Non-collection object conversion to vec in %s on line %d
+Warning: Non-iterable object conversion to vec in %s on line %d
 vec(0) {
 }
 ====================================================

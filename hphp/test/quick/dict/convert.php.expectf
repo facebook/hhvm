@@ -268,7 +268,7 @@ object(stdClass)#%d (0) {
 }
 ----------------------------------------------------
 
-Warning: Non-collection object conversion to dict in %s on line %d
+Warning: Non-iterable object conversion to dict in %s on line %d
 dict(0) {
 }
 ====================================================

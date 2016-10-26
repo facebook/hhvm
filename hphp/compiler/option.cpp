@@ -90,7 +90,6 @@ std::string Option::Tab = "  ";
 const char *Option::UserFilePrefix = "php/";
 
 bool Option::PreOptimization = false;
-bool Option::PostOptimization = false;
 bool Option::HardConstProp = true;
 
 bool Option::KeepStatementsWithNoEffect = false;

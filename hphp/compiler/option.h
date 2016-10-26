@@ -104,7 +104,6 @@ struct Option {
    * Optimization flags
    */
   static bool PreOptimization;
-  static bool PostOptimization;
 
   /*
    * Flags that only affect HHBBC right now.  See hhbbc/hhbbc.h for

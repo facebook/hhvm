@@ -194,13 +194,6 @@ void translateFromPerfMap(StackFrameExtra* frame) {
   }
 }
 
-struct StackTraceLog {
-  hphp_string_map<std::string> data;
-
-  static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
-};
-IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
-
 template <bool safe>
 int ALWAYS_INLINE get_backtrace(void** frame, int max) {
   int ret = 0;
@@ -220,6 +213,13 @@ int ALWAYS_INLINE get_backtrace(void** frame, int max) {
 }
 
 }
+
+struct StackTraceLog {
+  hphp_string_map<std::string> data;
+
+  static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
+};
+IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -78,6 +78,8 @@ const StaticString
   s_from("from"),
   s_to("to");
 
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // CONTEXT OBJECTS
 
@@ -114,6 +116,8 @@ struct HeapGraphContext : SweepableResourceData {
 };
 
 IMPLEMENT_RESOURCE_ALLOCATION(HeapGraphContext)
+
+namespace {
 
 using HeapGraphContextPtr = req::ptr<HeapGraphContext>;
 static HeapGraphContextPtr get_valid_heapgraph_context_resource(

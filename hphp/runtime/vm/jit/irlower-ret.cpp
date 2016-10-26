@@ -222,8 +222,6 @@ void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
 const StaticString s_ReleaseVV("ReleaseVV");
 
 struct ReleaseVVProfile {
@@ -244,8 +242,6 @@ struct ReleaseVVProfile {
   uint16_t executed;
   uint16_t released;
 };
-
-}
 
 void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();

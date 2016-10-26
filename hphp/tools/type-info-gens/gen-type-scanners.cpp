@@ -2764,6 +2764,17 @@ void Generator::checkForLayoutErrors() const {
       }
       oss << "\t- from type '" << *indexed.type << "'\n\n";
     }
+    // Error if an indexed type had internal linkage.
+    for (const auto& address : indexed.addresses) {
+      HPHP::match<void>(address,
+        [&](const std::string&) { /* ok */ },
+        [&](uintptr_t) {
+          ++error_count;
+          oss << "error: type " << *indexed.type << " has internal linkage.\n"
+                 " Indexed types need external linkage.\n";
+        }
+      );
+    }
   }
   if (error_count > 0) throw Exception{oss.str()};
 }

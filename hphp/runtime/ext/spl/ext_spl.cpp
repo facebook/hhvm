@@ -301,7 +301,6 @@ void HHVM_FUNCTION(spl_autoload_call, const String& class_name) {
   AutoloadHandler::s_instance->autoloadClass(class_name, true);
 }
 
-namespace {
 struct ExtensionList final : RequestEventHandler {
   void requestInit() override {
     extensions = make_packed_array(String(".inc"), String(".php"));
@@ -314,7 +313,6 @@ struct ExtensionList final : RequestEventHandler {
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
-}
 
 String HHVM_FUNCTION(spl_autoload_extensions,
                      const String& file_extensions /* = null_string */) {

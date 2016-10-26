@@ -351,6 +351,8 @@ struct UncheckedBuffer {
 #endif
 };
 
+}
+
 /**
  * A stack maintains the states of nested structures.
  */
@@ -387,8 +389,6 @@ struct json_parser {
     sb_key.clearResize(0);
   }
 };
-
-}
 
 IMPLEMENT_THREAD_LOCAL(json_parser, s_json_parser);
 

@@ -98,7 +98,6 @@ namespace HPHP {
 #define twist(m,u,v) \
   (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
-namespace {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct RandData {
@@ -115,6 +114,8 @@ struct RandData {
   int32_t lcg_s1;
   int32_t lcg_s2;
 };
+
+namespace {
 
 /*
  * Use a ThreadLocalNoCheck to hold RandData instead of directly using __thread.

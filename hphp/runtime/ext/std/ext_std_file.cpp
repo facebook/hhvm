@@ -1935,7 +1935,6 @@ bool HHVM_FUNCTION(chroot,
  * A stack maintains the states of nested structures.
  */
 
-namespace {
 struct DirectoryData final : RequestEventHandler {
   void requestInit() override {
     assert(!defaultDirectory);
@@ -1945,6 +1944,8 @@ struct DirectoryData final : RequestEventHandler {
   }
   req::ptr<Directory> defaultDirectory;
 };
+
+namespace {
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryData, s_directory_data);
 

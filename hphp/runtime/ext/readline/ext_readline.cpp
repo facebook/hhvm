@@ -29,7 +29,6 @@
 
 namespace HPHP {
 
-namespace {
 struct ReadlineVars {
   Variant completion;
   Array array;
@@ -37,10 +36,10 @@ struct ReadlineVars {
 
 IMPLEMENT_THREAD_LOCAL(ReadlineVars, s_readline);
 
-}
-
 static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
-  auto result = readline(prompt.isString() ? prompt.toString().data() : nullptr);
+  auto result = readline(
+    prompt.isString() ? prompt.toString().data() : nullptr
+  );
   if (result == nullptr) {
     return false;
   } else {

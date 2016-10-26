@@ -106,8 +106,6 @@ void ifRefCountedNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
 struct IncRefProfile {
   std::string toString() const {
     return folly::sformat("tryinc: {:4}", tryinc);
@@ -123,8 +121,6 @@ struct IncRefProfile {
    */
   uint16_t tryinc;
 };
-
-}
 
 void cgIncRef(IRLS& env, const IRInstruction* inst) {
   // This is redundant with a check in ifRefCountedNonPersistent, but we check
@@ -182,8 +178,6 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
 /*
  * Profile for the type and release-frequency of a DecRef instruction.
  */
@@ -217,6 +211,8 @@ struct DecRefProfile {
    */
   uint16_t destroy;
 };
+
+namespace {
 
 using OptDecRefProfile = folly::Optional<TargetProfile<DecRefProfile>>;
 

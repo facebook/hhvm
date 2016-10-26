@@ -36,8 +36,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // compress.zlib:// stream wrapper
 
-namespace {
-static struct BZ2StreamWrapper final : Stream::Wrapper {
+struct BZ2StreamWrapper final : Stream::Wrapper {
   req::ptr<File> open(const String& filename, const String& mode, int options,
                       const req::ptr<StreamContext>& context) override {
     static const char cz[] = "compress.bzip2://";
@@ -69,8 +68,9 @@ static struct BZ2StreamWrapper final : Stream::Wrapper {
   void scan(type_scan::Scanner& scanner) const override {
     scanner.scan(*this);
   }
-} s_bzip2_stream_wrapper;
-} // nil namespace
+};
+
+static BZ2StreamWrapper s_bzip2_stream_wrapper;
 
 ///////////////////////////////////////////////////////////////////////////////
 

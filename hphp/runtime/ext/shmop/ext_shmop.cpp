@@ -20,9 +20,7 @@
 
 #include <sys/shm.h>
 
-namespace {
-
-using namespace HPHP;
+namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -163,7 +161,6 @@ private:
   char* m_addr;
 };
 
-
 struct ShmopRequestLocal final : RequestEventHandler {
   virtual void requestInit() override {
     // no-op
@@ -272,4 +269,4 @@ struct ShmopExtension final : Extension {
 } s_shmop_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
-} // anonymous namespace
+}

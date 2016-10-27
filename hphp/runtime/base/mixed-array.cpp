@@ -1397,11 +1397,11 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
 
 #endif
 
-void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
+Cell MixedArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assert(pos != a->m_used);
   assert(!isTombstone(a->data()[pos].data.m_type));
-  getElmKey(a->data()[pos], out);
+  return getElmKey(a->data()[pos]);
 }
 
 ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {

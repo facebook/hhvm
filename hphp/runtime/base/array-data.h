@@ -250,16 +250,12 @@ public:
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may customize methods either
    * by providing a custom static method in g_array_funcs.
-   *
-   * An old comment said: nvGetKey does not touch out->_count, so can
-   * be used for inner or outer cells.  (It's unclear if anything is
-   * relying on this, but try not to in new code.)
    */
   const TypedValue* nvGet(int64_t k) const;
   const TypedValue* nvGet(const StringData* k) const;
   const TypedValue* nvTryGet(int64_t k) const;
   const TypedValue* nvTryGet(const StringData* k) const;
-  void nvGetKey(TypedValue* out, ssize_t pos) const;
+  Cell nvGetKey(ssize_t pos) const;
 
   // wrappers that call getValueRef()
   Variant getValue(ssize_t pos) const;
@@ -605,7 +601,7 @@ struct ArrayFunctions {
   const TypedValue* (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   const TypedValue* (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
-  void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
+  Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
                            bool copy);

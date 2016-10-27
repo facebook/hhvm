@@ -165,7 +165,7 @@ struct ArrayIter {
   void nvFirst(TypedValue* out) {
     const ArrayData* ad = getArrayData();
     assert(ad && m_pos != ad->iter_end());
-    const_cast<ArrayData*>(ad)->nvGetKey(out, m_pos);
+    cellCopy(ad->nvGetKey(m_pos), *out);
   }
 
   /*

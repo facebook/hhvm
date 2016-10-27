@@ -57,7 +57,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static size_t Vsize(const ArrayData*);

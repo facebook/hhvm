@@ -156,9 +156,8 @@ inline Variant ArrayData::getValue(ssize_t pos) const {
 }
 
 inline Variant ArrayData::getKey(ssize_t pos) const {
-  TypedValue tv;
-  nvGetKey(&tv, pos);
-  return std::move(tvAsVariant(&tv));
+  auto key = nvGetKey(pos);
+  return std::move(cellAsVariant(key));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -197,8 +196,8 @@ inline const TypedValue* ArrayData::nvTryGet(const StringData* skey) const {
   return g_array_funcs.nvTryGetStr[kind()](this, skey);
 }
 
-inline void ArrayData::nvGetKey(TypedValue* out, ssize_t pos) const {
-  g_array_funcs.nvGetKey[kind()](this, out, pos);
+inline Cell ArrayData::nvGetKey(ssize_t pos) const {
+  return g_array_funcs.nvGetKey[kind()](this, pos);
 }
 
 inline ArrayData* ArrayData::set(int64_t k, const Variant& v, bool copy) {

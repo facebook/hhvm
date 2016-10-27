@@ -206,7 +206,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvTryGetStr)
 
   /*
-   * void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos)
+   * Cell NvGetKey(const ArrayData*, ssize_t pos)
    *
    *   Look up the key for an array position.  `pos' must be a valid
    *   position for this array.

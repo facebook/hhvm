@@ -508,11 +508,13 @@ ssize_t SetArray::getIterLast() const {
   return m_used;
 }
 
-void SetArray::getElm(ssize_t ei, TypedValue* out) const {
+Cell SetArray::getElm(ssize_t ei) const {
   assert(0 <= ei && ei < m_used);
   auto& elm = data()[ei];
   assert(!elm.isInvalid());
-  tvDup(elm.tv, *out);
+  Cell out;
+  tvDup(elm.tv, out);
+  return out;
 }
 
 ssize_t SetArray::nextElm(Elm* elms, ssize_t ei) const {
@@ -769,11 +771,11 @@ const TypedValue* SetArray::NvTryGetStr(const ArrayData* ad,
   return tv;
 }
 
-void SetArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
+Cell SetArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
   assert(0 <= pos  && pos < a->m_used);
   assert(!a->data()[pos].isInvalid());
-  a->getElm(pos, out);
+  return a->getElm(pos);
 }
 
 size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
@@ -994,7 +996,7 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   if (a->cowCheck()) a = a->copySet();
   if (a->m_size) {
     ssize_t pos = a->getIterLast();
-    a->getElm(pos, value.asTypedValue());
+    cellCopy(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
     auto loc = a->findImpl<FindType::Remove>(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
@@ -1017,7 +1019,7 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
   if (a->cowCheck()) a = a->copySet();
   if (a->m_size) {
     ssize_t pos = a->getIterBegin();
-    a->getElm(pos, value.asTypedValue());
+    cellCopy(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
     auto loc = a->findImpl<FindType::Remove>(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }

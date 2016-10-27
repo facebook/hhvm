@@ -277,16 +277,12 @@ const TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
   return GetValueRef(a, index).asTypedValue();
 }
 
-void APCLocalArray::NvGetKey(const ArrayData* ad,
-                             TypedValue* out,
-                             ssize_t pos) {
+Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
-  TypedValue* tv = k.asTypedValue();
-  // copy w/out clobbering out->_count.
-  out->m_type = tv->m_type;
-  out->m_data.num = tv->m_data.num;
-  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
+  auto const tv = k.asTypedValue();
+  tvRefcountedIncRef(tv);
+  return *tv;
 }
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {

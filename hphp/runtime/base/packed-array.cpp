@@ -684,11 +684,10 @@ const TypedValue* PackedArray::NvTryGetStrVec(const ArrayData* ad,
   throwInvalidArrayKeyException(s, ad);
 }
 
-void PackedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
+Cell PackedArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   assert(checkInvariants(ad));
   assert(pos != ad->m_size);
-  out->m_data.num = pos;
-  out->m_type = KindOfInt64;
+  return make_tv<KindOfInt64>(pos);
 }
 
 size_t PackedArray::Vsize(const ArrayData*) {

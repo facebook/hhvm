@@ -81,18 +81,18 @@ size_t GlobalsArray::Vsize(const ArrayData* ad) {
   return count;
 }
 
-void GlobalsArray::NvGetKey(const ArrayData* ad, TypedValue* out,
-                                     ssize_t pos) {
+Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   if (iter.valid()) {
     auto k = iter.curKey();
-    out->m_data.pstr = const_cast<StringData*>(k);
-    out->m_type = KindOfString;
-    k->incRefCount();
-  } else {
-    out->m_type = KindOfUninit;
+    if (k->isRefCounted()) {
+      k->incRefCount();
+      return make_tv<KindOfString>(const_cast<StringData*>(k));
+    }
+    return make_tv<KindOfPersistentString>(k);
   }
+  return make_tv<KindOfUninit>();
 }
 
 const Variant& GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {

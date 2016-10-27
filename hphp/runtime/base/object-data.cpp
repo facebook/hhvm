@@ -617,8 +617,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
     ssize_t iter = ad->iter_begin();
     auto pos_limit = ad->iter_end();
     while (iter != pos_limit) {
-      TypedValue key;
-      dynProps->get()->nvGetKey(&key, iter);
+      auto const key = dynProps->get()->nvGetKey(iter);
       iter = dynProps->get()->iter_advance(iter);
 
       // You can get this if you cast an array to object. These

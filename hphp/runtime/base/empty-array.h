@@ -58,7 +58,7 @@ struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
     return nullptr;
   }
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData* ad, int64_t, bool) {

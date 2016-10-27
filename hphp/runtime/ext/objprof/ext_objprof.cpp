@@ -75,7 +75,6 @@ struct ObjprofClassReferral {
   std::unordered_set<Class*> sources;
 };
 
-
 struct ObjprofMetrics {
   uint64_t instances{0};
   uint64_t bytes{0};
@@ -236,14 +235,14 @@ std::pair<int, double> sizeOfArray(
     FTRACE(2, "Iterating mixed array\n");
     while (iter != pos_limit) {
       // Get key
-      TypedValue key;
-      MixedArray::NvGetKey(props, &key, iter);
+      auto const key = MixedArray::NvGetKey(props, iter);
       // Measure val
       const TypedValue* val;
       std::pair<int, double> key_size_pair;
       switch (key.m_type) {
+        case KindOfPersistentString:
         case KindOfString: {
-          StringData* str = key.m_data.pstr;
+          auto const str = key.m_data.pstr;
           val = MixedArray::NvGetStr(props, str);
           if (stack) {
             auto key_str = str->toCppString();
@@ -353,11 +352,11 @@ void stringsOfArray(
   if (props->isMixed()) {
     while (iter != pos_limit) {
       // Get key
-      TypedValue key;
-      MixedArray::NvGetKey(props, &key, iter);
+      auto const key = MixedArray::NvGetKey(props, iter);
       // Measure val
       const TypedValue* val;
       switch (key.m_type) {
+        case KindOfPersistentString:
         case KindOfString: {
           StringData* str = key.m_data.pstr;
           val = MixedArray::NvGetStr(props, str);
@@ -742,7 +741,7 @@ std::pair<int, double> getObjSize(
     TypedValue key_tv = *iter.first().asTypedValue();
     auto val_tv = iter.secondRef().asTypedValue();
     auto key = tvAsVariant(&key_tv).toString();
-    if (key_tv.m_type == HPHP::KindOfString) {
+    if (isStringType(key_tv.m_type)) {
       // If the key begins with a NUL, it's a private or protected property.
       // Read the class name from between the two NUL bytes.
       //
@@ -754,9 +753,8 @@ std::pair<int, double> getObjSize(
       }
     }
 
-    bool is_declared =
-        key_tv.m_type == HPHP::KindOfString &&
-        cls->lookupDeclProp(key.get()) != kInvalidSlot;
+    bool is_declared = isStringType(key_tv.m_type) &&
+                       cls->lookupDeclProp(key.get()) != kInvalidSlot;
 
     int key_size = 0;
     double key_sized = 0;
@@ -858,7 +856,7 @@ void getObjStrings(
     auto key_tv = first.asTypedValue();
     auto val_tv = iter.secondRef().asTypedValue();
 
-    if (key_tv->m_type == HPHP::KindOfString) {
+    if (isStringType(key_tv->m_type)) {
       // If the key begins with a NUL, it's a private or protected property.
       // Read the class name from between the two NUL bytes.
       //
@@ -869,9 +867,8 @@ void getObjStrings(
       }
     }
 
-    bool is_declared =
-      key_tv->m_type == HPHP::KindOfString &&
-      cls->lookupDeclProp(key.get()) != kInvalidSlot;
+    bool is_declared = isStringType(key_tv->m_type) &&
+                       cls->lookupDeclProp(key.get()) != kInvalidSlot;
 
     if (!is_declared && !is_packed) {
       FTRACE(2, "Inspecting key {} because it's non-declared/packed\n",

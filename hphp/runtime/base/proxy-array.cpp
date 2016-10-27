@@ -95,8 +95,8 @@ size_t ProxyArray::Vsize(const ArrayData* ad) {
   return innerArr(ad)->size();
 }
 
-void ProxyArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
-  return innerArr(ad)->nvGetKey(out, pos);
+Cell ProxyArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+  return innerArr(ad)->nvGetKey(pos);
 }
 
 const Variant& ProxyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {

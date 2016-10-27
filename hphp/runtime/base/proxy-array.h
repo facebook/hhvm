@@ -135,7 +135,7 @@ public:
   static void Release(ArrayData*);
 
   static size_t Vsize(const ArrayData*);
-  static void NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);

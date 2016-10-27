@@ -183,7 +183,7 @@ std::string getObjectConnectionName(
     auto key_tv = first.asTypedValue();
     auto val_tv = iter.secondRef().asTypedValue();
 
-    if (key_tv->m_type == HPHP::KindOfString) {
+    if (isStringType(key_tv->m_type)) {
       // If the key begins with a NUL, it's a private or protected property.
       // Read the class name from between the two NUL bytes.
       //
@@ -203,9 +203,8 @@ std::string getObjectConnectionName(
       continue;
     }
 
-    bool is_declared =
-        key_tv->m_type == HPHP::KindOfString &&
-        cls->lookupDeclProp(key.get()) != kInvalidSlot;
+    bool is_declared = isStringType(key_tv->m_type) &&
+                       cls->lookupDeclProp(key.get()) != kInvalidSlot;
 
     if (!is_declared && !is_packed) {
       return std::string("Key:" + key);

@@ -286,7 +286,7 @@ public:
   static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
@@ -534,7 +534,7 @@ public:
   }
 
 private:
-  static void getElmKey(const Elm& e, TypedValue* out);
+  static Cell getElmKey(const Elm& e);
 
 private:
   enum class AllocMode : bool { Request, Static };

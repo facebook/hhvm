@@ -53,7 +53,7 @@ void EmptyArray::Release(ArrayData*) {
   always_assert(!"never try to free the empty array");
 }
 
-void EmptyArray::NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos) {
+Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t pos) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }

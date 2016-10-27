@@ -183,9 +183,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
 
     # ARM64
     if(IS_AARCH64)
-      # Force char type to be signed, which is not the case on aarch64.
-      list(APPEND GENERAL_OPTIONS "fsigned-char")
-
       # If a CPU was specified, build a -mcpu option for the compiler.
       set(CPU "" CACHE STRING "CPU to tell gcc to optimize for (-mcpu)")
       if(CPU)

@@ -516,9 +516,6 @@ let rec scan_xhp_element_name lexer =
 let is_xhp_class_name lexer =
   (peek_char lexer 0 = ':') && (is_name_nondigit (peek_char lexer 1))
 
-let is_next_name lexer =
-  is_name_nondigit (peek_char lexer 0)
-
 let scan_xhp_class_name lexer =
   (* An XHP class name is a colon followed by an xhp name. *)
   if is_xhp_class_name lexer then
@@ -813,6 +810,10 @@ let scan_trailing_trivia lexer =
   let (lexer, trivia_list) = aux lexer [] in
   (lexer, List.rev trivia_list)
 
+let is_next_name lexer =
+  let (lexer, _) = scan_leading_trivia lexer in
+  is_name_nondigit (peek_char lexer 0)
+
 let is_next_xhp_class_name lexer =
   let (lexer, _) = scan_leading_trivia lexer in
   is_xhp_class_name lexer
@@ -918,6 +919,7 @@ let next_xhp_name lexer =
   scan_token_and_trivia scan_xhp_element_name false lexer
 
 let is_next_xhp_category_name lexer =
+  let (lexer, _) = scan_leading_trivia lexer in
   (* An XHP category is an xhp element name preceded by a %. *)
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in

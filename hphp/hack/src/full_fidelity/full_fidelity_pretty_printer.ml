@@ -430,7 +430,7 @@ let rec get_doc node =
       let after_attr = handle_compound_inline_brace header body missing in
       group_doc (attr ^| after_attr)
   | FunctionDeclarationHeader
-    { function_async; function_keyword; function_name;
+    { function_async; function_keyword; function_ampersand; function_name;
       function_type_parameter_list; function_left_paren;
       function_parameter_list; function_right_paren; function_colon;
       function_type }
@@ -439,8 +439,9 @@ let rec get_doc node =
                               ^| get_doc function_keyword) in
     let name_and_generics =
       let type_params = get_doc function_type_parameter_list in
+      let ampersand = get_doc function_ampersand in
       let name = get_doc function_name in
-      group_doc (indent_doc name type_params indt)
+      group_doc (indent_doc (ampersand ^^^ name) type_params indt)
     in
     let parameters =
       let left = get_doc function_left_paren in

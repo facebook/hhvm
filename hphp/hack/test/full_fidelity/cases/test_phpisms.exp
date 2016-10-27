@@ -18,7 +18,8 @@
         (methodish_declaration
           (missing)(missing)
           (function_declaration_header
-            (missing)((whitespace)(function)(whitespace))((name))(missing)
+            (missing)((whitespace)(function)(whitespace))(missing)
+            ((name))(missing)
             ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
             (compound_statement
               (({))

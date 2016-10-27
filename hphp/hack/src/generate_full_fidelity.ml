@@ -194,6 +194,7 @@ let schema = List.map from_list [
     "function";
     "async";
     "keyword";
+    "ampersand";
     "name";
     "type_parameter_list";
     "left_paren";

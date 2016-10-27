@@ -5,6 +5,7 @@
       (function_declaration_header
         (missing)
         ((delimited_comment)(whitespace)(function)(whitespace))
+        (missing)
         ((name))(missing)
         ((lparen))(missing)
         ((rparen)(whitespace))

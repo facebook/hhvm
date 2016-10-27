@@ -3,6 +3,7 @@
   (function_declaration_header
     (missing)
     ((function)(whitespace))
+    (missing)
     ((name))
     (missing)
     ((lparen))

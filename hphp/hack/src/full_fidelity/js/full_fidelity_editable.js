@@ -4026,6 +4026,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   constructor(
     async,
     keyword,
+    ampersand,
     name,
     type_parameter_list,
     left_paren,
@@ -4037,6 +4038,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     super('function_declaration_header', {
       async: async,
       keyword: keyword,
+      ampersand: ampersand,
       name: name,
       type_parameter_list: type_parameter_list,
       left_paren: left_paren,
@@ -4047,6 +4049,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   }
   get async() { return this.children.async; }
   get keyword() { return this.children.keyword; }
+  get ampersand() { return this.children.ampersand; }
   get name() { return this.children.name; }
   get type_parameter_list() { return this.children.type_parameter_list; }
   get left_paren() { return this.children.left_paren; }
@@ -4058,6 +4061,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       async,
       this.keyword,
+      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4070,6 +4074,20 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       keyword,
+      this.ampersand,
+      this.name,
+      this.type_parameter_list,
+      this.left_paren,
+      this.parameter_list,
+      this.right_paren,
+      this.colon,
+      this.type);
+  }
+  with_ampersand(ampersand){
+    return new FunctionDeclarationHeader(
+      this.async,
+      this.keyword,
+      ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4082,6 +4100,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       this.keyword,
+      this.ampersand,
       name,
       this.type_parameter_list,
       this.left_paren,
@@ -4094,6 +4113,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       this.keyword,
+      this.ampersand,
       this.name,
       type_parameter_list,
       this.left_paren,
@@ -4106,6 +4126,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       this.keyword,
+      this.ampersand,
       this.name,
       this.type_parameter_list,
       left_paren,
@@ -4118,6 +4139,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       this.keyword,
+      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4130,6 +4152,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       this.keyword,
+      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4142,6 +4165,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       this.keyword,
+      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4154,6 +4178,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
       this.async,
       this.keyword,
+      this.ampersand,
       this.name,
       this.type_parameter_list,
       this.left_paren,
@@ -4170,6 +4195,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     new_parents.push(this);
     var async = this.async.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var ampersand = this.ampersand.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var type_parameter_list = this.type_parameter_list.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
@@ -4180,6 +4206,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     if (
       async === this.async &&
       keyword === this.keyword &&
+      ampersand === this.ampersand &&
       name === this.name &&
       type_parameter_list === this.type_parameter_list &&
       left_paren === this.left_paren &&
@@ -4195,6 +4222,7 @@ class FunctionDeclarationHeader extends EditableSyntax
       return rewriter(new FunctionDeclarationHeader(
         async,
         keyword,
+        ampersand,
         name,
         type_parameter_list,
         left_paren,
@@ -4212,6 +4240,9 @@ class FunctionDeclarationHeader extends EditableSyntax
     let keyword = EditableSyntax.from_json(
       json.function_keyword, position, source);
     position += keyword.width;
+    let ampersand = EditableSyntax.from_json(
+      json.function_ampersand, position, source);
+    position += ampersand.width;
     let name = EditableSyntax.from_json(
       json.function_name, position, source);
     position += name.width;
@@ -4236,6 +4267,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     return new FunctionDeclarationHeader(
         async,
         keyword,
+        ampersand,
         name,
         type_parameter_list,
         left_paren,
@@ -4250,6 +4282,7 @@ class FunctionDeclarationHeader extends EditableSyntax
       FunctionDeclarationHeader._children_keys = [
         'async',
         'keyword',
+        'ampersand',
         'name',
         'type_parameter_list',
         'left_paren',

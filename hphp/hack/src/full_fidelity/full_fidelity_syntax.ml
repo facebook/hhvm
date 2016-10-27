@@ -192,6 +192,7 @@ module WithToken(Token: TokenType) = struct
     and function_declaration_header = {
       function_async: t;
       function_keyword: t;
+      function_ampersand: t;
       function_name: t;
       function_type_parameter_list: t;
       function_left_paren: t;
@@ -1544,6 +1545,7 @@ module WithToken(Token: TokenType) = struct
     let get_function_declaration_header_children {
       function_async;
       function_keyword;
+      function_ampersand;
       function_name;
       function_type_parameter_list;
       function_left_paren;
@@ -1554,6 +1556,7 @@ module WithToken(Token: TokenType) = struct
     } = (
       function_async,
       function_keyword,
+      function_ampersand,
       function_name,
       function_type_parameter_list,
       function_left_paren,
@@ -2795,6 +2798,7 @@ module WithToken(Token: TokenType) = struct
       | FunctionDeclarationHeader {
         function_async;
         function_keyword;
+        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;
@@ -2805,6 +2809,7 @@ module WithToken(Token: TokenType) = struct
       } -> [
         function_async;
         function_keyword;
+        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;
@@ -3953,6 +3958,7 @@ module WithToken(Token: TokenType) = struct
       | FunctionDeclarationHeader {
         function_async;
         function_keyword;
+        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;
@@ -3963,6 +3969,7 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "function_async";
         "function_keyword";
+        "function_ampersand";
         "function_name";
         "function_type_parameter_list";
         "function_left_paren";
@@ -5183,6 +5190,7 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.FunctionDeclarationHeader, [
           function_async;
           function_keyword;
+          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -5194,6 +5202,7 @@ module WithToken(Token: TokenType) = struct
         FunctionDeclarationHeader {
           function_async;
           function_keyword;
+          function_ampersand;
           function_name;
           function_type_parameter_list;
           function_left_paren;
@@ -6506,6 +6515,7 @@ module WithToken(Token: TokenType) = struct
     let make_function_declaration_header
       function_async
       function_keyword
+      function_ampersand
       function_name
       function_type_parameter_list
       function_left_paren
@@ -6517,6 +6527,7 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.FunctionDeclarationHeader [
         function_async;
         function_keyword;
+        function_ampersand;
         function_name;
         function_type_parameter_list;
         function_left_paren;

@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass.h"
@@ -518,6 +519,7 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
 }
 
 std::unique_ptr<Unit> UnitEmitter::create() {
+  INC_TPC(unit_load);
   auto u = folly::make_unique<Unit>();
   u->m_repoId = m_repoId;
   u->m_sn = m_sn;

@@ -541,6 +541,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_REQUIRE_ONCE:  cg_printf("require_once "); break;
     case T_FILE:          cg_printf("__FILE__");      break;
     case T_DIR:           cg_printf("__DIR__");       break;
+    case T_METHOD_C:      cg_printf("__METHOD__");    break;
     case T_CLASS:         cg_printf("class ");        break;
     case T_FUNCTION:      cg_printf("function ");     break;
     default:

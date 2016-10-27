@@ -485,15 +485,15 @@ void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitPopA(IRGS& env) { popA(env); }
-void emitPopC(IRGS& env) { popDecRef(env, DataTypeGeneric); }
-void emitPopV(IRGS& env) { popDecRef(env, DataTypeGeneric); }
-void emitPopR(IRGS& env) { popDecRef(env, DataTypeGeneric); }
+void emitPopA(IRGS& env)   { popA(env); }
+void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
+void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
+void emitPopR(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 
-void emitDir(IRGS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }
-void emitFile(IRGS& env) { push(env, cns(env, curUnit(env)->filepath())); }
-
-void emitDup(IRGS& env) { pushIncRef(env, topC(env)); }
+void emitDir(IRGS& env)    { push(env, cns(env, curUnit(env)->dirpath())); }
+void emitFile(IRGS& env)   { push(env, cns(env, curUnit(env)->filepath())); }
+void emitMethod(IRGS& env) { push(env, cns(env, curFunc(env)->fullName())); }
+void emitDup(IRGS& env)    { pushIncRef(env, topC(env)); }
 
 //////////////////////////////////////////////////////////////////////
 

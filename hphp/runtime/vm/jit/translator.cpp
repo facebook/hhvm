@@ -137,6 +137,7 @@ static const struct {
   { OpClsCnsD,     {None,             Stack1,       OutUnknown      }},
   { OpFile,        {None,             Stack1,       OutString       }},
   { OpDir,         {None,             Stack1,       OutString       }},
+  { OpMethod,      {None,             Stack1,       OutString       }},
   { OpNameA,       {Stack1,           Stack1,       OutString       }},
 
   /*** 3. Operator instructions ***/
@@ -929,6 +930,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::IssetS:
   case Op::IterFree:
   case Op::LateBoundCls:
+  case Op::Method:
   case Op::MIterFree:
   case Op::Mod:
   case Op::Pow:

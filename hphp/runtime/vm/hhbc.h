@@ -380,6 +380,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(NameA,           NA,               ONE(AV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
+  O(Method,          NA,               NOV,             ONE(CV),    NF) \
   O(Concat,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ConcatN,         ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(Add,             NA,               TWO(CV,CV),      ONE(CV),    NF) \

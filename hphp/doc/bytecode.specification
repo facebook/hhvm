@@ -1181,9 +1181,10 @@ ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
 
 File    []  ->  [C:Static Str]
 Dir     []  ->  [C:Static Str]
+Method  []  ->  [C:Static Str]
 
-  Push string. File pushes __FILE__ onto the stack, and Dir pushes __DIR__ onto
-  the stack.
+  Push string. File pushes __FILE__ onto the stack, Dir pushes __DIR__ onto
+  the stack, and Method pushes __METHOD__.
 
 NameA   [A] ->  [C:Static Str]
 

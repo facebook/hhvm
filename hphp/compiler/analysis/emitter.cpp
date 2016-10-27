@@ -4550,7 +4550,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     } else {
       // __FILE__ and __DIR__ are special unary ops that don't
       // have expressions
-      assert(op == T_FILE || op == T_DIR);
+      assert(op == T_FILE || op == T_DIR || op == T_METHOD_C);
     }
     switch (op) {
       case T_INC:
@@ -4611,6 +4611,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       }
       case T_DIR: {
         e.Dir();
+        break;
+      }
+      case T_METHOD_C: {
+        e.Method();
         break;
       }
       default:

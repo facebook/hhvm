@@ -315,8 +315,9 @@ void in(ISS& env, const bc::ClsCnsD& op) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::File&)  { nothrow(env); push(env, TSStr); }
-void in(ISS& env, const bc::Dir&)   { nothrow(env); push(env, TSStr); }
+void in(ISS& env, const bc::File&)   { nothrow(env); push(env, TSStr); }
+void in(ISS& env, const bc::Dir&)    { nothrow(env); push(env, TSStr); }
+void in(ISS& env, const bc::Method&) { nothrow(env); push(env, TSStr); }
 
 void in(ISS& env, const bc::NameA&) {
   nothrow(env);

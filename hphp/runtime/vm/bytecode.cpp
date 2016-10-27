@@ -1861,6 +1861,11 @@ OPTBLD_INLINE void iopDir() {
   vmStack().pushStaticString(s);
 }
 
+OPTBLD_INLINE void iopMethod() {
+  auto s = vmfp()->m_func->fullName();
+  vmStack().pushStaticString(s);
+}
+
 OPTBLD_INLINE void iopNameA() {
   auto const cls  = vmStack().topA();
   auto const name = cls->name();

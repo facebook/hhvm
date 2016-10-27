@@ -38,6 +38,8 @@ class EditableSyntax
   get is_token() { return false; }
   get is_trivia() { return false; }
   get is_list() { return false; }
+  get is_missing() { return false; }
+
   get width() { return this._children_width; }
 
   get full_text()
@@ -294,16 +296,43 @@ class EditableSyntax
     }
   }
 
-  reduce(reducer, accumulator)
+  reduce(reducer, accumulator, parents)
   {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
     for(let key of this.children_keys)
-      accumulator = this.children[key].reduce(reducer, accumulator);
-    return reducer(this, accumulator);
+    {
+      accumulator = this.children[key].reduce(
+        reducer, accumulator, new_parents);
+    }
+    return reducer(this, accumulator, parents);
   }
 
+  // Returns all the parents (and the node itself) of the first node
+  // that matches a predicate, or [] if there is no such node.
+  find(predicate, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    if (predicate(this))
+      return new_parents;
+    for(let key of this.children_keys)
+    {
+      let result = this.children[key].find(predicate, new_parents);
+      if (result.length != 0)
+        return result;
+    }
+    return [];
+  }
+
+  // Returns a list of nodes that match a predicate.
   filter(predicate)
   {
-    let reducer = (node, acc) => {
+    let reducer = (node, acc, parents) => {
       if (predicate(node))
         acc.push(node);
       return acc;
@@ -322,6 +351,63 @@ class EditableSyntax
     return this.remove_where((node) => node === target);
   }
 
+  replace(new_node, target)
+  {
+    return this.rewrite((node, parents) => node === target ? new_node : node);
+  }
+
+  pre_order(action, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    action(this, parents);
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    for(let key of this.children_keys)
+      this.children[key].pre_order(action, new_parents);
+  }
+
+  get leftmost_token()
+  {
+    if (this.is_token)
+      return this;
+
+    for(let key of this.children_keys)
+    {
+      if (!this.children[key].is_missing)
+        return this.children[key].leftmost_token;
+    }
+    return null;
+  }
+
+  insert_before(new_node, target)
+  {
+    // Inserting before missing is an error.
+    if (target.is_missing)
+      throw 'Target must not be missing in insert_before.';
+
+    // Inserting missing is a no-op
+    if (new_node.is_missing)
+      return this;
+
+    if (new_node.is_trivia && !target.is_trivia)
+    {
+      let token = target.is_token ? target : target.leftmost_token;
+      if (token == null)
+        throw 'Unable to find token to insert trivia.'
+
+      // Inserting trivia before token is inserting to the right end of
+      // the leading trivia.
+      let new_leading = EditableSyntax.concatenate_lists(
+        token.leading, new_node);
+      let new_token = token.with_leading(new_leading);
+      return this.replace(new_token, token);
+    }
+
+    return this.replace(
+      EditableSyntax.concatenate_lists(new_node, target), target);
+  }
+
   static to_list(syntax_list)
   {
     if (syntax_list.length == 0)
@@ -330,6 +416,21 @@ class EditableSyntax
       return syntax_list[0];
     else
       return new EditableList(syntax_list);
+  }
+
+  static concatenate_lists(left, right)
+  {
+    if (left.is_missing)
+      return right;
+    if (right.is_missing)
+      return left;
+    if (left.is_list && right.is_list)
+      return new EditableList(left.children.concat(right.children));
+    if (left.is_list)
+      return new EditableList(left.children.splice().push(right));
+    if (right.is_list)
+      return new EditableList([right].concat(left.children));
+    return new EditableList([left, right]);
   }
 }
 
@@ -2151,6 +2252,7 @@ class Missing extends EditableSyntax
   {
     super('missing', {});
   }
+  get is_missing() { return true; }
   static get missing() { return Missing._missing; }
   static from_json(json, position, source)
   {

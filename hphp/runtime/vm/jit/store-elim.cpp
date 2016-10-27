@@ -40,23 +40,32 @@
 /*
   This implements partial-redundancy elimination for stores.
 
-  The basic algorithm follows Morel & Renvoise "Global Optimization
-  by Suppression of Partial Redundancies". That paper talks about
-  redundancy of expressions, so we have to "reverse" everything
-  to apply it to stores (Anticipated <=> Available, In <=> Out).
-  In addition, there are two forms of (non)-transparency for stores.
-  A (possible) use of the result of a candidate store prevents the
-  candidate from being moved past the use, and also prevents the candidate
-  from being killed by a later store. This is very similar to transparency
-  of expressions. But in addition, a possibly interfering store following a
-  candidate store prevents the candidate from moving past the store, but does
-  not prevent the candidate from being killed by a later store. We split
-  these out into alteredAnt, and alteredAvl. This also affects local
-  availabilty; a store may not be available in the sense that it can be moved
-  to the end of the block (because of a possible conflicting write), but it may
-  still be available in the sense that it can be killed by a later store. We
-  split this out into AvlLoc (can be moved to the end), and DelLoc (can be
-  deleted if its anticipated out).
+  The basic algorithm follows Morel & Renvoise "Global Optimization by
+  Suppression of Partial Redundancies".  That paper talks about redundancy of
+  expressions, so we have to "reverse" everything to apply it to stores
+  (Anticipated <=> Available, In <=> Out).
+
+  Some general terminology:
+    - A store to a location L is /available/ at code position P if it has
+      happened on all paths to P, and there is no interference (loads or
+      other stores) of L between those stores and P.
+    - A store to a location L is /anticipated/ at code position P if it occurs
+      between P and any subsequent use of L.
+
+  There are two forms of (non)-transparency for stores.  A (possible) use of
+  the result of a candidate store prevents the candidate from being moved past
+  the use, and also prevents the candidate from being killed by a later store.
+  This is very similar to transparency of expressions.  But in addition, a
+  possibly interfering store following a candidate store prevents the candidate
+  from moving past the store, but does not prevent the candidate from being
+  killed by a later store.  We represent these two criteria via alteredAnt and
+  alteredAvl (see below).
+
+  This also affects local availabilty; a store may not be available in the
+  sense that it can be moved to the end of the block (because of a possible
+  conflicting write), but it may still be available in the sense that it can be
+  killed by a later store.  We split this out into AvlLoc (can be moved to the
+  end), and DelLoc (can be deleted if it's anticipated out).
 
   Finally, we make some simplifications to the CONST term in M & R to
   reduce the number of bitvectors involved, and reduce the bidirectionality
@@ -64,21 +73,27 @@
 
   The final equations are:
 
-   Local bitvectors (contents of BlockAnalysis):
-    antLoc     : A store can be moved to the start of its block, without
-                 changing the meaning of the program
-    avlLoc     : A store can be moved to the end of its block, without changing
-                 the meaning of the program
-    delLoc     : A store can be killed if it would be redundant at the end of
-                 the block (even though it may not be legal to move it there)
+  Local bitvectors (contents of BlockAnalysis), per block B:
+    antLoc[L]     : There exists a store to L in B which is anticipated at the
+                    start of B---and thus can be moved there, without changing
+                    the meaning of the program.
+    avlLoc[L]     : There exists a store to L in B which is available at the
+                    end of B---and thus can be moved there, without changing
+                    the meaning of the program.
+    delLoc[L]     : There exists a store to L in B which could be killed if it
+                    would be redundant at the end of B (even though it may not
+                    be legal to move it there).
 
-    alteredAnt : prevents a store from being moved forward through this block,
-                 but does not prevent it being killed by a store in a later
-                 block.
-    alteredAvl : prevents a store from being moved forward through this block,
-                 and prevents it from being killed by a later store.
+    alteredAnt[L] : B contains a possible use of L.  This prevents a store to L
+                    from being killed by an otherwise-redundant store in a
+                    later block.  (It also prevents stores from being moved
+                    forward through this block.)
+    alteredAvl[L] : B contains a possible use or store of L.  This prevents a
+                    store to L from being moved through this block, but stores
+                    might still be allowed to be eliminated due to redundancy
+                    with later stores (unless, of course, alteredAnt[L] holds).
 
-   Global bitvectors:
+  Global bitvectors:
     Anticipated: (backward walk, initial 1s except in exit blocks)
     AntIn = AntLoc | (AntOut & ~alteredAnt);
     AntOut = Product(succs, AntIn(s))
@@ -99,11 +114,11 @@
 
       Roughly speaking, at any given block, we're interested in the stores that
       are PAntOut, because they're redundant on at least one path from this
-      block to the exit of the region. We can place a store at the end of a
-      block if its AvlLoc (by definition) or if its PPIn and "transparent" to
+      block to the exit of the region.  We can place a store at the end of a
+      block if it's AvlLoc (by definition) or if it's PPIn and "transparent" to
       the block; but since we're actually going to be inserting at the start of
       blocks, there's no point marking a block PPOut unless the store is PPIn
-      or its redundant in each of the following blocks.
+      or it's redundant in each of the following blocks.
 
       Note that we could use 1s instead of AvlIn/AvlOut, but convergence would
       be slower, and we would still need to deal with stores where the
@@ -111,13 +126,13 @@
       store).
 
     Insert = PPIn & ~AntIn & (~PPOut | alteredAvl);
-      We want to insert if its possible, and the store is not redundant, and we
+      We want to insert if it's possible, and the store is not redundant, and we
       can't push the store any later.
 
     Delete = (AntOut & DelLoc) | (PPOut & AvlLoc);
-      AntOut & DelLoc means its redundant; we'll just kill it.
+      AntOut & DelLoc means it's redundant; we'll just kill it.
       PPOut => PPIn | AntIn in each successor, meaning that for each successor
-      (recursively) we can either push the store into that successor, or its
+      (recursively) we can either push the store into that successor, or it's
       redundant there.
 */
 
@@ -642,6 +657,8 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
   return BlockAnalysis {
     env.antLoc,
     env.mayLoad,
+    // Note that we unset must-store bits in env.mayStore, so including
+    // env.antLoc and env.delLoc is required for correctness here.
     env.mayLoad | env.mayStore | env.antLoc | env.delLoc,
     env.avlLoc,
     env.delLoc

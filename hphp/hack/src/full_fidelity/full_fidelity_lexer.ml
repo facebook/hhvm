@@ -368,6 +368,7 @@ let scan_double_quote_string_literal lexer =
       else
         let lexer = with_error lexer SyntaxError.error0006 in
         aux (advance lexer 1)
+    | ('\\', '\\')
     | ('\\', '"')
     | ('\\', '$')
     | ('\\', 'e')
@@ -391,7 +392,16 @@ let scan_double_quote_string_literal lexer =
       (* Here we need to actually scan them for errors. *)
     | ('\\', 'u') -> aux (scan_unicode_escape lexer)
     | ('\\', _) ->
-      let lexer = with_error lexer SyntaxError.error0005 in
+      (* TODO: A backslash followed by something other than an escape sequence
+         is legal in hack, and treated as though it was just the backslash
+         and the character. However we might consider making this a warning.
+         It is particularly egregious when we have something like:
+         $x = "abcdef \
+               ghi";
+         The author of the code likely means the backslash to mean line
+         continuation but in fact it just means to put a backslash and newline
+         in the string.
+         *)
       aux (advance lexer 1)
     | ('"', _) -> (advance lexer 1, TokenKind.DoubleQuotedStringLiteral)
     | _ -> aux (advance lexer 1) in

@@ -196,6 +196,13 @@ struct Class {
    */
   folly::Optional<Class> commonAncestor(const Class& o) const;
 
+  /*
+   * Returns true if we have a ClassInfo for this Class.
+   */
+  bool resolved() const {
+    return val.right() != nullptr;
+  }
+
 private:
   Class(borrowed_ptr<const Index>, Either<SString,borrowed_ptr<ClassInfo>>);
 
@@ -362,12 +369,10 @@ struct Index {
    * Resolve a closure class.
    *
    * Returns both a resolved Class, and the actual php::Class for the
-   * closure.  This function should only be used with class names are
-   * guaranteed to be closures (for example, the name supplied to a
-   * CreateCl opcode).
+   * closure.
    */
   std::pair<res::Class,borrowed_ptr<php::Class>>
-    resolve_closure_class(Context ctx, SString name) const;
+    resolve_closure_class(Context ctx, int32_t idx) const;
 
   /*
    * Return a resolved class for a builtin class.

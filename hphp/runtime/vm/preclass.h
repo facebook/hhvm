@@ -96,11 +96,6 @@ using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
  *    required) is not known at parse time.  This leads to the Maybe/Always
  *    split below.
  *
- *    Closures have a special kind of hoistability, ClosureHoistable, that
- *    requires them to be defined first (before any other classes or
- *    functions), to avoid races if other threads are trying to load the same
- *    unit.  See the comments in Unit::initialMerge for more information.
- *
  */
 struct PreClass : AtomicCountable {
   friend struct PreClassEmitter;
@@ -113,7 +108,6 @@ struct PreClass : AtomicCountable {
     Mergeable,
     MaybeHoistable,
     AlwaysHoistable,
-    ClosureHoistable
   };
 
   /*

@@ -827,6 +827,51 @@ void emitFPushCtorD(IRGS& env,
   fpushActRec(env, ssaFunc, obj, numParams, nullptr);
 }
 
+void emitFPushCtorI(IRGS& env,
+                    int32_t numParams,
+                    int32_t clsIx) {
+  auto const preClass = curFunc(env)->unit()->lookupPreClassId(clsIx);
+  auto const cls = [&] () -> Class* {
+    auto const c = preClass->namedEntity()->clsList();
+    if (c && (c->attrs() & AttrUnique)) return c;
+    return nullptr;
+  }();
+  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
+  bool const canInstantiate = canInstantiateClass(cls);
+  bool const fastAlloc =
+    persistentCls &&
+    canInstantiate &&
+    !cls->hasNativePropHandler();
+
+  auto const func = lookupImmutableCtor(cls, curClass(env));
+
+  auto const ssaCls = [&] {
+    if (!persistentCls) {
+      auto const cachedCls = cond(
+        env,
+        [&] (Block* taken) {
+          return gen(env, LdClsCachedSafe, taken, cns(env, preClass->name()));
+        },
+        [&] (SSATmp* val) {
+          return val;
+        },
+        [&] {
+          return gen(env, DefCls, cns(env, clsIx));
+        }
+      );
+      if (!cls) return cachedCls;
+    }
+    return cns(env, cls);
+  }();
+
+  auto const ssaFunc = func ? cns(env, func)
+                            : gen(env, LdClsCtor, ssaCls, fp(env));
+  auto const obj = fastAlloc ? allocObjFast(env, cls)
+                             : gen(env, AllocObj, ssaCls);
+  pushIncRef(env, obj);
+  fpushActRec(env, ssaFunc, obj, numParams, nullptr);
+}
+
 void emitFPushFuncD(IRGS& env, int32_t nargs, const StringData* name) {
   fpushFuncCommon(env, nargs, name, nullptr);
 }

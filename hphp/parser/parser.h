@@ -28,6 +28,8 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 
+#include <folly/String.h>
+
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \
   Token *xhpGetAttributes() {                   \
@@ -90,7 +92,13 @@ struct ParserBase {
     StaticName
   };
 
-  static bool IsClosureName                (const std::string &name);
+  static bool IsClosureName(const std::string &name);
+  /*
+   * Is this the name of an anonymous class (either a closure,
+   * or a ClassExpression).
+   */
+  static bool IsAnonymousClassName(folly::StringPiece name);
+
   std::string newClosureName(
       const std::string &namespaceName,
       const std::string &className,

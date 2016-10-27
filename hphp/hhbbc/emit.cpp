@@ -847,7 +847,7 @@ void emit_class(EmitUnitState& state,
                 const php::Class& cls) {
   FTRACE(2, "    class: {}\n", cls.name->data());
   auto const pce = ue.newPreClassEmitter(
-    cls.name,
+    cls.name->toCppString(),
     cls.hoistability
   );
   pce->init(

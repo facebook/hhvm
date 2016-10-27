@@ -1433,6 +1433,19 @@ void in(ISS& env, const bc::FPushCtorD& op) {
   fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
 }
 
+void in(ISS& env, const bc::FPushCtorI& op) {
+  auto const name = env.ctx.unit->classes[op.arg2]->name;
+  auto const rcls = env.index.resolve_class(env.ctx, name);
+  always_assert_flog(
+    rcls.hasValue() && rcls->resolved(),
+    "An anonymous class ({}) failed to resolve",
+    name->data()
+  );
+  push(env, objExact(*rcls));
+  auto const rfunc = env.index.resolve_ctor(env.ctx, *rcls);
+  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
+}
+
 void in(ISS& env, const bc::FPushCtor& op) {
   auto const t1 = topA(env);
   if (is_specialized_cls(t1)) {
@@ -2043,7 +2056,7 @@ void in(ISS& env, const bc::Parent&) { push(env, TCls); }
 
 void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;
-  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.str2);
+  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.arg2);
 
   /*
    * Every closure should have a unique allocation site, but we may see it

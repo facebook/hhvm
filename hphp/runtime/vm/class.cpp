@@ -253,7 +253,7 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   // Look up the generated template class for this particular subclass of
   // Closure.  This class maintains the table of scoped clones of itself, and
   // if we create a new scoped clone, we need to map it there.
-  auto template_cls = is_dynamic ? Unit::lookupClass(name()) : this;
+  auto template_cls = is_dynamic ? preClass()->namedEntity()->clsList() : this;
   auto const invoke = template_cls->m_invoke;
 
   assert(IMPLIES(is_dynamic, m_scoped));

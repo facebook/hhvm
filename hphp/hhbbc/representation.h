@@ -458,6 +458,11 @@ struct Class {
   borrowed_ptr<Unit> unit;
 
   /*
+   * The id used to reference the class within its unit
+   */
+  int32_t id;
+
+  /*
    * Hoistability of this class.  See the description in class.h
    * formation on hoistability.
    */

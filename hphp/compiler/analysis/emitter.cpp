@@ -840,9 +840,6 @@ private:
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;
-  typedef tbb::concurrent_hash_map<const StringData*, int,
-                                   StringDataHashICompare> EmittedClosures;
-  static EmittedClosures s_emittedClosures;
   std::deque<Funclet*> m_funclets;
   std::map<StatementPtr, Funclet*> m_memoizedFunclets;
   std::deque<CatchRegion*> m_catchRegions;
@@ -1042,7 +1039,7 @@ public:
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);
   void emitBuiltinDefaultArg(Emitter& e, Variant& v,
                              MaybeDataType t, int paramId);
-  void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
+  Id emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   Id emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e,
                                  ListAssignmentPtr la,
@@ -2844,8 +2841,6 @@ void EmitterVisitor::unregisterControlTarget(ControlTarget* t) {
 //=============================================================================
 // EmitterVisitor.
 
-EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
-
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
   : m_ue(ue),
     m_curFunc(ue.getMain()),
@@ -3471,10 +3466,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
     auto region = createRegion(stmts, Region::Kind::Global);
     enterRegion(region);
     SCOPE_EXIT { leaveRegion(region); };
-
-    for (auto cls : m_file->getAnonClasses()) {
-      emitClass(e, cls->getClassScope(), true);
-    }
 
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
@@ -5750,42 +5741,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                                    useVars[i].second, false);
     }
 
-    // The parser generated a unique name for the function,
-    // use that for the class
-    std::string clsName = ce->getClosureFunction()->getOriginalName();
-
-    if (m_curFunc->isPseudoMain()) {
-      std::ostringstream oss;
-      oss << clsName << '$' << std::hex <<
-        m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0] << '$';
-      clsName = oss.str();
-    }
-
-    if (Option::WholeProgram) {
-      int my_id;
-      {
-        EmittedClosures::accessor acc;
-        s_emittedClosures.insert(acc, makeStaticString(clsName));
-        my_id = ++acc->second;
-      }
-      if (my_id > 1) {
-        // The closure was from a trait, so we need a unique name in the
-        // implementing class. _ is different from the #, which is used for
-        // many closures in the same func in ParserBase::newClosureName
-        folly::toAppend('_', my_id, &clsName);
-      }
-    }
-
-    auto ssClsName = makeStaticString(clsName);
-    e.CreateCl(useCount, ssClsName);
-
-    // From here on out, we're creating a new class to hold the closure.
-    const static StringData* parentName = makeStaticString("Closure");
+    // Create a new class to hold the closure.
     PreClassEmitter* pce = m_ue.newPreClassEmitter(
-      ssClsName, PreClass::ClosureHoistable);
+      ce->getClosureFunction()->getOriginalName(), PreClass::NotHoistable);
 
     auto const attrs = AttrNoOverride | AttrUnique | AttrPersistent;
 
+    static auto const parentName = makeStaticString("Closure");
     pce->init(ce->line0(), ce->line1(), m_ue.bcPos(),
               attrs, parentName, nullptr);
 
@@ -5800,26 +5762,35 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     // The __invoke method. This is the body of the closure, preceded by
     // code that pulls the object's instance variables into locals.
-    static const StringData* invokeName = makeStaticString("__invoke");
-    FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
+    static auto const invokeName = makeStaticString("__invoke");
+    auto const invoke = m_ue.newMethodEmitter(invokeName, pce);
     invoke->isClosureBody = true;
     pce->addMethod(invoke);
-    auto body = static_pointer_cast<MethodStatement>(ce->getClosureFunction());
+    auto const body =
+      static_pointer_cast<MethodStatement>(ce->getClosureFunction());
     postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
+
+    e.CreateCl(useCount, pce->id());
 
     return true;
   }
   case Construct::KindOfClassExpression: {
     auto ce = static_pointer_cast<ClassExpression>(node);
-    // The parser generated a unique name for the class, use that
-    std::string clsName = ce->getClass()->getOriginalName();
-    auto ssClsName = makeStaticString(clsName);
-    auto fpiStart = m_ue.bcPos();
-    auto params = ce->getParams();
-    int numParams = params ? params->getCount() : 0;
-    e.FPushCtorD(numParams, ssClsName);
-    emitCall(e, ce, ce->getParams(), fpiStart);
-    e.PopR();
+
+    auto save = m_evalStack;
+    auto const id = emitClass(e, ce->getClass()->getClassScope(), false);
+    if (id < 0) {
+      m_evalStackIsUnknown = false;
+      m_evalStack = save;
+      e.Null();
+    } else {
+      auto fpiStart = m_ue.bcPos();
+      auto params = ce->getParams();
+      int numParams = params ? params->getCount() : 0;
+      e.FPushCtorI(numParams, id);
+      emitCall(e, ce, ce->getParams(), fpiStart);
+      e.PopR();
+    }
     return true;
   }
   case Construct::KindOfYieldExpression: {
@@ -9373,19 +9344,18 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   return id;
 }
 
-void EmitterVisitor::emitClass(Emitter& e,
-                               ClassScopePtr cNode,
-                               bool toplevel) {
+Id EmitterVisitor::emitClass(Emitter& e,
+                             ClassScopePtr cNode,
+                             bool toplevel) {
 
   const StringData* fatal_msg = cNode->getFatalMessage();
   if (fatal_msg != nullptr) {
     e.String(fatal_msg);
     e.Fatal(FatalOp::Runtime);
-    return;
+    return -1;
   }
 
   auto is = static_pointer_cast<InterfaceStatement>(cNode->getStmt());
-  StringData* className = makeStaticString(cNode->getOriginalName());
   StringData* parentName = makeStaticString(cNode->getOriginalParent());
   StringData* classDoc = Option::GenerateDocComments ?
     makeStaticString(cNode->getDocComment()) : staticEmptyString();
@@ -9444,7 +9414,8 @@ void EmitterVisitor::emitClass(Emitter& e,
       m_hoistables.insert(cNode->getOriginalName());
     }
   }
-  PreClassEmitter* pce = m_ue.newPreClassEmitter(className, hoistable);
+  PreClassEmitter* pce = m_ue.newPreClassEmitter(cNode->getOriginalName(),
+                                                 hoistable);
   pce->init(is->line0(), is->line1(), m_ue.bcPos(), attr, parentName,
             classDoc);
   auto r = is->getRange();
@@ -9664,6 +9635,8 @@ void EmitterVisitor::emitClass(Emitter& e,
       determine_type_constraint_from_annot(cs->getEnumBaseTy(), true);
     pce->setEnumBaseTy(typeConstraint);
   }
+
+  return pce->id();
 }
 
 namespace {

@@ -364,6 +364,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckRefInner:
   case CheckCtxThis:
   case CheckFuncStatic:
+  case DefCls:
   case LdClsCtor:
   case LdCls:
   case LdClsCached:

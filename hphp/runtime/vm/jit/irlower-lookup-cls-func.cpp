@@ -97,6 +97,22 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
 
 }
 
+void cgDefCls(IRLS& env, const IRInstruction* inst) {
+  auto unit = inst->marker().func()->unit();
+  auto args = argGroup(env, inst)
+    .immPtr(unit->lookupPreClassId(inst->src(0)->intVal())).
+    imm(true);
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(&Unit::defClass),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    args
+  );
+}
+
 void cgLdCls(IRLS& env, const IRInstruction* inst) {
   implLdMeta<ClassCache>(env, inst);
 }

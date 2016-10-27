@@ -4460,6 +4460,29 @@ OPTBLD_INLINE void iopFPushCtorD(intva_t numArgs, Id id) {
   setTypesFlag(vmfp(), ar);
 }
 
+OPTBLD_INLINE void iopFPushCtorI(intva_t numArgs, intva_t clsIx) {
+  auto const func = vmfp()->m_func;
+  auto const preCls = func->unit()->lookupPreClassId(clsIx);
+  auto const cls = Unit::defClass(preCls, true);
+
+  // Lookup the ctor
+  const Func* f;
+  auto res UNUSED = lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
+  assert(res == LookupResult::MethodFoundWithThis);
+  // Push uninitialized instance.
+  ObjectData* this_ = newInstance(cls);
+  TRACE(2, "FPushCtorI: new'ed an instance of class %s: %p\n",
+        cls->name()->data(), this_);
+  vmStack().pushObject(this_);
+  // Push new activation record.
+  ActRec* ar = vmStack().allocA();
+  ar->m_func = f;
+  ar->setThis(this_);
+  ar->initNumArgs(numArgs);
+  ar->trashVarEnv();
+  setTypesFlag(vmfp(), ar);
+}
+
 OPTBLD_INLINE
 void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
   CufIter &cit = it->cuf();
@@ -5313,10 +5336,12 @@ OPTBLD_INLINE void iopParent() {
   vmStack().pushClass(parent);
 }
 
-OPTBLD_INLINE void iopCreateCl(intva_t numArgs, const StringData* clsName) {
-  auto const cls = Unit::loadClass(clsName)->rescope(
-    const_cast<Class*>(vmfp()->m_func->cls())
-  );
+OPTBLD_INLINE void iopCreateCl(intva_t numArgs, intva_t clsIx) {
+  auto const func = vmfp()->m_func;
+  auto const preCls = func->unit()->lookupPreClassId(clsIx);
+  auto const c = Unit::defClosure(preCls);
+
+  auto const cls = c->rescope(const_cast<Class*>(func->cls()));
   auto obj = newInstance(cls);
   c_Closure::fromObject(obj)->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);

@@ -6,7 +6,7 @@
   PopC
 
   CUGetL $x
-  CreateCl 1 "ClosureTest"
+  CreateCl 1 0
 
   FPushFunc 0
   FCall 0

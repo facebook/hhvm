@@ -242,17 +242,7 @@ void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
 
   if (hoistable >= PreClass::MaybeHoistable) {
     m_hoistablePreClassSet.insert(pce->name());
-    if (hoistable == PreClass::ClosureHoistable) {
-      // Closures should appear at the VERY top of the file, so if any class in
-      // the same file tries to use them, they are already defined. We had a
-      // fun race where one thread was autoloading a file, finished parsing the
-      // class, then another thread came along and saw the class was already
-      // loaded and ran it before the first thread had time to parse the
-      // closure class.
-      m_hoistablePceIdList.push_front(pce->id());
-    } else {
-      m_hoistablePceIdList.push_back(pce->id());
-    }
+    m_hoistablePceIdList.push_back(pce->id());
   } else {
     m_allClassesHoistable = false;
   }
@@ -267,7 +257,7 @@ void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
 }
 
 PreClassEmitter* UnitEmitter::newBarePreClassEmitter(
-  const StringData* name,
+  const std::string& name,
   PreClass::Hoistable hoistable
 ) {
   auto pce = new PreClassEmitter(*this, m_pceVec.size(), name, hoistable);
@@ -276,7 +266,7 @@ PreClassEmitter* UnitEmitter::newBarePreClassEmitter(
 }
 
 PreClassEmitter* UnitEmitter::newPreClassEmitter(
-  const StringData* name,
+  const std::string& name,
   PreClass::Hoistable hoistable
 ) {
   PreClassEmitter* pce = newBarePreClassEmitter(name, hoistable);
@@ -284,6 +274,14 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(
   return pce;
 }
 
+Id UnitEmitter::pceId(folly::StringPiece clsName) {
+  Id id = 0;
+  for (auto p : m_pceVec) {
+    if (p->name()->slice() == clsName) return id;
+    id++;
+  }
+  return -1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases.

@@ -85,10 +85,8 @@ struct ParseUnitState {
    * associated CreateCl opcode(s).
    */
   std::unordered_map<
-    SString,
-    std::unordered_set<borrowed_ptr<php::Func>>,
-    string_data_hash,
-    string_data_isame
+    int32_t,
+    std::unordered_set<borrowed_ptr<php::Func>>
   > createClMap;
 };
 
@@ -446,7 +444,7 @@ void populate_block(ParseUnitState& puState,
     puState.defClsMap[b.DefClsNop.arg1] = &func;
   };
   auto createcl = [&] (const Bytecode& b) {
-    puState.createClMap[b.CreateCl.str2].insert(&func);
+    puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -805,6 +803,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->attrs             = static_cast<Attr>(pce.attrs() & ~AttrNoOverride);
   ret->hoistability      = pce.hoistability();
   ret->userAttributes    = pce.userAttributes();
+  ret->id                = pce.id();
 
   for (auto& iface : pce.interfaces()) {
     ret->interfaceNames.push_back(iface);
@@ -878,7 +877,7 @@ void assign_closure_context(const ParseUnitState& puState,
                             borrowed_ptr<php::Class> clo) {
   if (clo->closureContextCls) return;
 
-  auto clIt = puState.createClMap.find(clo->name);
+  auto clIt = puState.createClMap.find(clo->id);
   if (clIt == end(puState.createClMap)) {
     // Unused closure class.  Technically not prohibited by the spec.
     return;

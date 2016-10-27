@@ -1808,7 +1808,8 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
 }
 
 std::pair<res::Class,borrowed_ptr<php::Class>>
-Index::resolve_closure_class(Context ctx, SString name) const {
+Index::resolve_closure_class(Context ctx, int32_t idx) const {
+  auto const name = ctx.unit->classes[idx]->name;
   auto const rcls = resolve_class(ctx, name);
 
   // Closure classes must be unique and defined in the unit that uses

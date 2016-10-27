@@ -773,7 +773,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
       if (inTrait()) {
         exp = NEW_EXP(ScalarExpression, type, scalar->text(),
                       clsName() + "::" + realFuncName());
-      } else if (clsName().find('$') != std::string::npos) {
+      } else if (IsAnonymousClassName(clsName())) {
         onUnaryOpExp(out, scalar, type, true);
         return;
       } else {
@@ -781,7 +781,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
       }
       break;
     case T_CLASS_C:
-      if (inTrait()) {
+      if (inTrait() || IsAnonymousClassName(clsName())) {
         // Inside traits we already did the magic for static::class so lets
         // reuse that
         out->exp = NEW_EXP(SimpleFunctionCall, "get_class", true,

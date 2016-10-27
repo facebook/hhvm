@@ -276,6 +276,10 @@ static ObjectData* closureInstanceCtor(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
   assertx(cls->parent() == c_Closure::classof());
+  if (cls->classHandle() != rds::kInvalidHandle &&
+      !rds::isPersistentHandle(cls->classHandle())) {
+    cls->setCached();
+  }
   auto const nProps = cls->numDeclProperties();
   auto const size = sizeof(ClosureHdr) + ObjectData::sizeForNProps(nProps);
   auto hdr = static_cast<ClosureHdr*>(MM().objMalloc(size));

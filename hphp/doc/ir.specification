@@ -1055,6 +1055,10 @@ To string conversions:
   Loads into D the constructor of class S0. If the constructor cannot be called
   from the context in S1, raise an error.
 
+| DefCls, D(Cls), S(Int), Er
+
+  Define the class corresponding to PreClass S0 in the current unit.
+
 | DefConst<T>, DParam, NA, NF
 
   Define a constant value of type T. D is presumed to be globally available and

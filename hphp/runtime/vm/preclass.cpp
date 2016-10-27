@@ -45,7 +45,8 @@ PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
   , m_name(n)
   , m_parent(parent)
   , m_docComment(docComment)
-{}
+{
+}
 
 PreClass::~PreClass() {
   std::for_each(methods(), methods() + numMethods(), Func::destroy);
@@ -196,13 +197,12 @@ void PreClass::Const::prettyPrint(std::ostream& out,
 
 PreClass::TraitAliasRule::NamePair
 PreClass::TraitAliasRule::asNamePair() const {
-  char* buf = (char*)alloca(sizeof(char) *
-    (traitName()->size() + origMethodName()->size() + 9));
-  sprintf(buf, "%s::%s",
-          traitName()->empty() ? "(null)" : traitName()->data(),
-          origMethodName()->data());
+  auto const tmp = folly::sformat(
+    "{}::{}",
+    traitName()->empty() ? "(null)" : traitName()->data(),
+    origMethodName());
 
-  auto origName = makeStaticString(buf);
+  auto origName = makeStaticString(tmp);
   return std::make_pair(newMethodName(), origName);
 }
 

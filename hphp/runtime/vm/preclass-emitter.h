@@ -143,7 +143,7 @@ struct PreClassEmitter {
   typedef IndexedStringMap<Prop, true, Slot> PropMap;
   typedef IndexedStringMap<Const, true, Slot> ConstMap;
 
-  PreClassEmitter(UnitEmitter& ue, Id id, const StringData* n,
+  PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name,
                   PreClass::Hoistable hoistable);
   ~PreClassEmitter();
 

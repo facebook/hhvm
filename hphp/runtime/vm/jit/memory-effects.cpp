@@ -1608,6 +1608,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitProps:
   case InitSProps:
   case OODeclExists:
+  case DefCls:         // autoload
   case LdCls:          // autoload
   case LdClsCached:    // autoload
   case LdFunc:         // autoload

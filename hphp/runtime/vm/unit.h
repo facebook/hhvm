@@ -537,6 +537,12 @@ public:
   static Class* defClass(const PreClass* preClass, bool failIsFatal = true);
 
   /*
+   * Define a closure from preClass. Closures have unique names, so unlike
+   * defClass, this is a one time operation.
+   */
+  static Class* defClosure(const PreClass* preClass);
+
+  /*
    * Set the NamedEntity for `alias' to refer to the Class `original' in this
    * request.
    *

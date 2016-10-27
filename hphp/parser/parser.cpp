@@ -29,6 +29,10 @@ bool ParserBase::IsClosureName(const std::string &name) {
   return boost::istarts_with(name, "closure$");
 }
 
+bool ParserBase::IsAnonymousClassName(folly::StringPiece name) {
+  return name.find('$') != std::string::npos;
+}
+
 std::string ParserBase::newClosureName(
     const std::string &namespaceName,
     const std::string &className,
@@ -41,11 +45,8 @@ std::string ParserBase::newAnonClassName(
     const std::string &namespaceName,
     const std::string &className,
     const std::string &funcName) {
-  // Class names must be globally unique.  The easiest way to do
-  // this is include a hash of the filename.
-  int64_t hash = hash_string_cs(m_fileName, strlen(m_fileName));
 
-  std::string name = prefix + "$";
+  auto name = prefix + "$";
   if (!className.empty()) {
     name += className + "::";
   } else if (!namespaceName.empty()) {
@@ -54,13 +55,11 @@ std::string ParserBase::newAnonClassName(
   }
   name += funcName;
 
-  int id = ++m_seenAnonClasses[name];
+  auto const id = ++m_seenAnonClasses[name];
   if (id > 1) {
     // we've seen the same name before, uniquify
-    name = name + '#' + std::to_string(id);
+    folly::format(&name, "#{}", id);
   }
-
-  folly::format(&name, ";{}", hash);
 
   return name;
 }

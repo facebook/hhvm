@@ -2092,6 +2092,7 @@ FPushClsMethodD <num params> <litstr id> <litstr id>    []  ->  []
 
 FPushCtor <num params>                 [A]  ->  [C]
 FPushCtorD <num params> <litstr id>    []  ->  [C]
+FPushCtorI <num params> <class id>     []  ->  [C]
 
   FPI push constructor. First, these instructions load a value into x as given
   by the following table:
@@ -2100,9 +2101,11 @@ FPushCtorD <num params> <litstr id>    []  ->  [C]
     --------------+----
       FPushCtor   | $1
       FPushCtorD  | %2
+      FPushCtorI  | %2
 
   When loading %2 into x, FPushCtorD will perform the work performed by the
-  AGetC instruction to convert the name given by %2 into a classref.
+  AGetC instruction to convert the name given by %2 into a classref, and
+  FPushCtorI will load the class in the current unit with id %2.
 
   This instruction pushes an uninitialized object onto the stack (to be
   initialized during FCall*) prior to entering the FPI region, then pushes a
@@ -3943,15 +3946,14 @@ AKExists    [C C] -> [C:Bool]
   key. Throws a fatal error if $1 is not an array or object, and raises a
   warning if $2 is not a string, integer, or null.
 
-CreateCl <num args> <class name>  [C|V|U..C|V|U]  ->  [C]
+CreateCl <num args> <class id>  [C|V|U..C|V|U]  ->  [C]
 
-  Creates an instance of <class name> and pushes it on the stack.
+  Creates an instance of the class specified by <class id> and pushes it on the
+  stack.
 
-  The class named by %2 must be a subclass of "Closure", must have a single
-  public method named __invoke, must be defined at the point of the CreateCl
-  opcode, must be defined in the same unit as the CreateCl opcode, and must
-  always be tagged as "ClosureHoistable" (see comments near
-  PreClass---hoistability metadata is currently not covered by this spec).
+  The specified class must be a subclass of "Closure", must have a single
+  public method named __invoke, and must be defined in the same unit as the
+  CreateCl opcode.
 
   If there is more than one CreateCl opcode in the unit for the Closure
   subclass named by %2, all of the opcodes must be possible to associate with

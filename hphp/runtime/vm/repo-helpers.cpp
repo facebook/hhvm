@@ -257,6 +257,10 @@ void RepoQuery::bindStdString(const char* paramName, const std::string& s) {
   bindText(paramName, s.data(), s.size(), true);
 }
 
+void RepoQuery::bindStringPiece(const char* paramName, folly::StringPiece s) {
+  bindText(paramName, s.data(), s.size(), true);
+}
+
 void RepoQuery::bindDouble(const char* paramName, double val) {
   sqlite3_stmt* stmt = m_stmt.get();
   int rc UNUSED =

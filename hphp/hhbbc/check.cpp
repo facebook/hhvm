@@ -236,7 +236,6 @@ bool check(const php::Class& c) {
     assert(c.methods.size() == 1);
     assert(c.methods[0]->name->isame(s_invoke.get()));
     assert(c.methods[0]->isClosureBody);
-    assert(c.hoistability == PreClass::ClosureHoistable);
   } else {
     assert(!c.closureContextCls);
   }

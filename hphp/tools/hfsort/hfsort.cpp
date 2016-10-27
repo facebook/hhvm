@@ -105,16 +105,7 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
 
   if (!computeArcWeight) return;
 
-  // Normalize incoming arc weights and compute avgCallOffset for each node.
-  for (TargetId f = 0; f < cg.targets.size(); f++) {
-    auto& func = cg.targets[f];
-    for (auto src : func.preds) {
-      auto& arc = *cg.arcs.find(Arc(src, f));
-      arc.normalizedWeight = arc.weight / func.samples;
-      arc.avgCallOffset = arc.avgCallOffset / arc.weight;
-      assert(arc.avgCallOffset < cg.targets[src].size);
-    }
-  }
+  cg.normalizeArcWeights();
 }
 
 void readEdgcntData(CallGraph& cg, FILE* file) {

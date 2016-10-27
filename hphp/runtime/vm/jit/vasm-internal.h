@@ -116,6 +116,12 @@ void vasm_emit(const Vunit& u, Vtext& text, CGMeta& fixups,
  */
 const uint64_t* alloc_literal(Venv& env, uint64_t val);
 
+/*
+ * Record in ProfData that the control-transfer instruction `jmp' is associated
+ * with the current translation being emitted.
+ */
+void setJmpTransID(Venv& env, TCA jmp);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

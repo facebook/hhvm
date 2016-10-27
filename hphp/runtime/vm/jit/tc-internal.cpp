@@ -222,6 +222,10 @@ bool isValidCodeAddress(TCA addr) {
   return s_code->isValidCodeAddress(addr);
 }
 
+bool isProfileCodeAddress(TCA addr) {
+  return s_code->prof().contains(addr);
+}
+
 void freeTCStub(TCA stub) {
   // We need to lock the code because s_freeStubs.push() writes to the stub and
   // the metadata to protect s_freeStubs itself.
@@ -242,19 +246,37 @@ void checkFreeProfData() {
   // However, we keep the data around indefinitely in a few special modes:
   // * Eval.EnableReusableTC
   // * TC dumping enabled (Eval.DumpTC/DumpIR/etc.)
+  //
+  // Finally, when the RetranslateAll mode is enabled, the ProfData is discarded
+  // via a different mechanism, after all the optimized translations are
+  // generated.
   if (profData() &&
       !RuntimeOption::EvalEnableReusableTC &&
       code().main().used() >= CodeCache::AMaxUsage &&
       (!code().hotEnabled() ||
        profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
-      !transdb::enabled()) {
+      !transdb::enabled() &&
+      !RuntimeOption::EvalJitRetranslateAllRequest) {
     discardProfData();
   }
 }
 
 bool profileFunc(const Func* func) {
   if (!shouldPGOFunc(func)) return false;
+
+  // If retranslateAll is enabled and we already passed the point that it should
+  // be scheduled to execute (via the treadmill), then we can't emit more
+  // Profile translations.  This is to ensure that, when retranslateAll() runs,
+  // no more Profile translations are being added to ProfData.
+  if (RuntimeOption::EvalJitRetranslateAllRequest != 0 &&
+      hasEnoughProfDataToRetranslateAll()) {
+    return false;
+  }
+
   if (profData()->optimized(func->getFuncId())) return false;
+
+  // If we already started profiling `func', then we return true and skip the
+  // other checks below.
   if (profData()->profiling(func->getFuncId())) return true;
 
   // Don't start profiling new functions if the size of either main or
@@ -266,8 +288,8 @@ bool profileFunc(const Func* func) {
 
   // We have two knobs to control the number of functions we're allowed to
   // profile: Eval.JitProfileRequests and Eval.JitProfileBCSize. We profile new
-  // functions until either of these limits is exceeded. In practice we expect
-  // to hit the bytecode size limit first but we keep the request limit around
+  // functions until either of these limits is exceeded. In practice, we expect
+  // to hit the bytecode size limit first, but we keep the request limit around
   // as a safety net.
   if (RuntimeOption::EvalJitProfileBCSize > 0 &&
       profData()->profilingBCSize() >= RuntimeOption::EvalJitProfileBCSize) {

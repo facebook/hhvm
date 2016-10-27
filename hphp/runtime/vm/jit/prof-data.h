@@ -416,6 +416,13 @@ struct ProfData {
   }
 
   /*
+   * The maximum FuncId among all the functions that are being profiled.
+   */
+  FuncId maxProfilingFuncId() const {
+    return m_profilingFuncs.size() - 1;
+  }
+
+  /*
    * Returns the count of functions that are or were profiling or have been
    * optimized, respectively.
    */
@@ -564,6 +571,14 @@ private:
   mutable ReadWriteMutex m_targetProfilesLock;
   std::unordered_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Returns whether or not we've collected enough profile data to trigger
+ * retranslateAll.
+ */
+bool hasEnoughProfDataToRetranslateAll();
 
 //////////////////////////////////////////////////////////////////////
 

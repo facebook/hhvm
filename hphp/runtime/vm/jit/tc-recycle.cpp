@@ -144,7 +144,7 @@ void clearTCMaps(TCA start, TCA end) {
 #else
     x64::DecodedInstruction di(start);
 #endif
-    if (profData && (di.isBranch() || di.isNop())) {
+    if (profData && (di.isBranch() || di.isNop() || di.isCall())) {
       auto const id = profData->clearJmpTransID(start);
       if (id != kInvalidTransID) {
         ITRACE(1, "Erasing jmpTransID @ {} to {}\n",

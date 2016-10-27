@@ -60,6 +60,11 @@ TargetId TargetGraph::addTarget(uint32_t size, uint32_t samples) {
   return id;
 }
 
+void TargetGraph::setSamples(TargetId id, uint32_t samples) {
+  assertx(id < targets.size());
+  targets[id].samples = samples;
+}
+
 const Arc& TargetGraph::incArcWeight(TargetId src, TargetId dst, double w) {
   auto res = arcs.emplace(src, dst, w);
   if (!res.second) {
@@ -69,6 +74,19 @@ const Arc& TargetGraph::incArcWeight(TargetId src, TargetId dst, double w) {
   targets[src].succs.push_back(dst);
   targets[dst].preds.push_back(src);
   return *res.first;
+}
+
+// Normalize incoming arc weights and compute avgCallOffset for each node.
+void TargetGraph::normalizeArcWeights() {
+  for (TargetId f = 0; f < targets.size(); f++) {
+    auto& func = targets[f];
+    for (auto src : func.preds) {
+      auto& arc = *arcs.find(Arc(src, f));
+      arc.normalizedWeight = arc.weight / func.samples;
+      arc.avgCallOffset = arc.avgCallOffset / arc.weight;
+      assert(arc.avgCallOffset < targets[src].size);
+    }
+  }
 }
 
 Cluster::Cluster(TargetId id, const Target& f) {

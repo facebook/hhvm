@@ -2363,6 +2363,9 @@ void hphp_session_exit() {
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
+  // In JitPGO mode, check if it's time to schedule the retranslation of all
+  // profiled functions and, if so, schedule it.
+  jit::mcgen::checkRetranslateAll();
   // Similarly, apc strings could be in the ServerNote array, and
   // its possible they are scheduled to be destroyed after this request
   // finishes.

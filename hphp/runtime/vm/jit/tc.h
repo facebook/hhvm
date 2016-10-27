@@ -107,9 +107,9 @@ bool shouldTranslateNoSizeLimit(const Func* func);
 bool shouldTranslate(const Func* func, TransKind kind);
 
 /*
- * Whether we should try profile-guided optimization when translating `sk'.
+ * Whether we should try profile-guided optimization when translating `func'.
  */
-bool profileFunc(const Func* sk);
+bool profileFunc(const Func* func);
 
 /*
  * Attempt to discard profData via the treadmill if it is no longer needed.
@@ -283,9 +283,14 @@ TCA offsetToAddr(uint32_t off);
 uint32_t addrToOffset(CTCA addr);
 
 /*
- * Assert that an address is within the TC.
+ * Check if `addr' is an address within the TC.
  */
 bool isValidCodeAddress(TCA addr);
+
+/*
+ * Check if `addr' is an address within the profile code block in the TC.
+ */
+bool isProfileCodeAddress(TCA addr);
 
 ////////////////////////////////////////////////////////////////////////////////
 

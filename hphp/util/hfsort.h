@@ -69,7 +69,9 @@ struct Target {
 
 struct TargetGraph {
   TargetId addTarget(uint32_t size, uint32_t samples = 0);
+  void setSamples(TargetId id, uint32_t samples);
   const Arc& incArcWeight(TargetId src, TargetId dst, double w = 1.0);
+  void normalizeArcWeights();
 
   template<class L>
   void printDot(char* fileName, L getLabel) const;

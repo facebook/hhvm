@@ -510,6 +510,7 @@ struct RuntimeOption {
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
+  F(uint32_t, JitRetranslateAllRequest, 0)                              \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
@@ -562,6 +563,7 @@ struct RuntimeOption {
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
+  F(bool,     JitPGODumpCallGraph,     false)                           \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(uint32_t, HotFuncCount,            4100)                            \

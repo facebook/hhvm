@@ -555,7 +555,8 @@ void Vgen::emit(const phpret& i) {
 }
 
 void Vgen::emit(const callphp& i) {
-  emitSmashableCall(a.code(), env.meta, i.stub);
+  const auto call = emitSmashableCall(a.code(), env.meta, i.stub);
+  setJmpTransID(env, call);
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
 

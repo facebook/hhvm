@@ -340,6 +340,11 @@ class EditableSyntax
     return this.reduce(reducer, []);
   }
 
+  of_syntax_kind(kind)
+  {
+    return this.filter((node) => node.syntax_kind == kind);
+  }
+
   remove_where(predicate)
   {
     return this.rewrite(
@@ -380,6 +385,19 @@ class EditableSyntax
     return null;
   }
 
+  get rightmost_token()
+  {
+    if (this.is_token)
+      return this;
+
+    for (let i = this.children_keys.length - 1; i >= 0; i--)
+    {
+      if (!this.children[this.children_keys[i]].is_missing)
+        return this.children[key].rightmost_token;
+    }
+    return null;
+  }
+
   insert_before(new_node, target)
   {
     // Inserting before missing is an error.
@@ -406,6 +424,34 @@ class EditableSyntax
 
     return this.replace(
       EditableSyntax.concatenate_lists(new_node, target), target);
+  }
+
+  insert_after(new_node, target)
+  {
+    // Inserting after missing is an error.
+    if (target.is_missing)
+      throw 'Target must not be missing in insert_after.';
+
+    // Inserting missing is a no-op
+    if (new_node.is_missing)
+      return this;
+
+    if (new_node.is_trivia && !target.is_trivia)
+    {
+      let token = target.is_token ? target : target.rightmost_token;
+      if (token == null)
+        throw 'Unable to find token to insert trivia.'
+
+      // Inserting trivia after token is inserting to the left end of
+      // the trailing trivia.
+      let new_trailing = EditableSyntax.concatenate_lists(
+        new_node, token.trailing);
+      let new_token = token.with_trailing(new_trailing);
+      return this.replace(new_token, token);
+    }
+
+    return this.replace(
+      EditableSyntax.concatenate_lists(target, new_node), target);
   }
 
   static to_list(syntax_list)

@@ -26,10 +26,13 @@ function main(json)
   // with the old tree, so this is pretty memory-efficient.
 
   let original = editable.from_json(json);
-  let tries = original.filter((node) => node.syntax_kind == 'try_statement');
+  let tries = original.of_syntax_kind('try_statement');
   let first_try_body = tries[0].compound_statement;
   let comment = new editable.DelimitedComment("/* HELLO WORLD */");
-  let rewritten = original.insert_before(comment, first_try_body);
+  let rewritten_try = original.insert_before(comment, first_try_body);
+  let catches = rewritten_try.of_syntax_kind('catch_clause');
+  let left_brace = catches[0].body.left_brace;
+  let rewritten = rewritten_try.insert_after(comment, left_brace);
 
   console.log("---original---");
   console.log(original.full_text);

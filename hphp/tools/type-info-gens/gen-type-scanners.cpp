@@ -2881,7 +2881,17 @@ void Generator::genBuiltinScannerFuncs(std::ostream& os) const {
 
 void Generator::genScannerFuncs(std::ostream& os) const {
   genBuiltinScannerFuncs(os);
+  std::vector<std::vector<std::string>> types(m_layouts.size());
+  for (const auto& indexed : m_indexed_types) {
+    if (indexed.ignore || indexed.conservative) continue;
+    types[indexed.layout_index].push_back(indexed.type->toString());
+  }
   for (size_t i = 0; i < m_layouts.size(); ++i) {
+    auto& type_list = types[i];
+    std::sort(type_list.begin(), type_list.end());
+    for (auto& t : type_list) {
+      os << "// " << t << "\n";
+    }
     os << "void scanner_" << i << "(Scanner& scanner, "
        << "const void* ptr, size_t size) {\n";
     genScannerFunc(os, m_layouts[i]);

@@ -9,12 +9,16 @@
  *
  */
 
-
 "use strict";
 let parser = require('./full_fidelity_parser.js');
 let editable = require("./full_fidelity_editable.js");
 
-function rewriter(node)
+
+// Turn any comment associated with a try statement into blah blah blah.
+// Note that this will detect both comments that appear before the try
+// token and comments that appear anywhere inside the try / catch / finally,
+// and comments which immediately follow the trailing } of the statement.
+function rewriter(node, parents)
 {
   if (node.syntax_kind === "single_line_comment")
     return node.with_text("// blah blah blah");

@@ -1574,7 +1574,7 @@ module GenerateFFJavaScript = struct
         f f x.kind_name inner in
     let withs = map_and_concat_separated "\n  " withs_mapper x.fields in
     let rewriter_mapper f =
-      Printf.sprintf "var %s = this.%s.rewrite(rewriter);" f f in
+      Printf.sprintf "var %s = this.%s.rewrite(rewriter, new_parents);" f f in
     let rewriter =
       map_and_concat_separated "\n    " rewriter_mapper x.fields in
     let condition_mapper f = Printf.sprintf "%s === this.%s" f f in
@@ -1598,18 +1598,22 @@ module GenerateFFJavaScript = struct
   }
   %s
   %s
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
     %s
     if (
       %s)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new %s(
-        %s));
+        %s), parents);
     }
   }
   static from_json(json, position, source)
@@ -1801,14 +1805,16 @@ class EditableList extends EditableSyntax
     return new EditableList(children);
   }
 
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
     let dirty = false;
     let new_children = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
     for (let key of this.children_keys)
     {
       let child = this.children[key];
-      let new_child = child.rewrite(rewriter);
+      let new_child = child.rewrite(rewriter, new_parents);
       if (new_child != child)
         dirty = true;
       if (new_child != null)
@@ -1832,7 +1838,7 @@ class EditableList extends EditableSyntax
       else
         result = new EditableList(new_children);
     }
-    return rewriter(result);
+    return rewriter(result, parents);
   }
   get children_keys()
   {
@@ -1884,15 +1890,17 @@ FACTORY_VARIABLE_TEXT_TOKENS
     }
   }
 
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    let leading = this.leading.rewrite(rewriter);
-    let trailing = this.trailing.rewrite(rewriter);
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    let leading = this.leading.rewrite(rewriter, new_parents);
+    let trailing = this.trailing.rewrite(rewriter, new_parents);
     if (leading === this.leading && trailing === this.trailing)
-      return rewriter(this);
+      return rewriter(this, parents);
     else
       return rewriter(EditableToken.factory(
-        this.token_kind, leading, trailing, this.text));
+        this.token_kind, leading, trailing, this.text), parents);
   }
 
   reduce(reducer, accumulator)
@@ -1960,9 +1968,10 @@ class EditableTrivia extends EditableSyntax
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
   }
-  rewrite(rewriter)
+
+  rewrite(rewriter, parents)
   {
-    return rewriter(this);
+    return rewriter(this, parents);
   }
   get children_keys()
   {
@@ -2017,9 +2026,9 @@ class Missing extends EditableSyntax
   {
     return Missing._missing;
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    return rewriter(this);
+    return rewriter(this, parents);
   }
   get children_keys()
   {

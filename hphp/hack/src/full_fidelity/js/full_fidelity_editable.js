@@ -333,14 +333,16 @@ class EditableList extends EditableSyntax
     return new EditableList(children);
   }
 
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
     let dirty = false;
     let new_children = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
     for (let key of this.children_keys)
     {
       let child = this.children[key];
-      let new_child = child.rewrite(rewriter);
+      let new_child = child.rewrite(rewriter, new_parents);
       if (new_child != child)
         dirty = true;
       if (new_child != null)
@@ -364,7 +366,7 @@ class EditableList extends EditableSyntax
       else
         result = new EditableList(new_children);
     }
-    return rewriter(result);
+    return rewriter(result, parents);
   }
   get children_keys()
   {
@@ -744,15 +746,17 @@ class EditableToken extends EditableSyntax
     }
   }
 
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    let leading = this.leading.rewrite(rewriter);
-    let trailing = this.trailing.rewrite(rewriter);
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    let leading = this.leading.rewrite(rewriter, new_parents);
+    let trailing = this.trailing.rewrite(rewriter, new_parents);
     if (leading === this.leading && trailing === this.trailing)
-      return rewriter(this);
+      return rewriter(this, parents);
     else
       return rewriter(EditableToken.factory(
-        this.token_kind, leading, trailing, this.text));
+        this.token_kind, leading, trailing, this.text), parents);
   }
 
   reduce(reducer, accumulator)
@@ -2073,9 +2077,10 @@ class EditableTrivia extends EditableSyntax
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
   }
-  rewrite(rewriter)
+
+  rewrite(rewriter, parents)
   {
-    return rewriter(this);
+    return rewriter(this, parents);
   }
   get children_keys()
   {
@@ -2130,9 +2135,9 @@ class Missing extends EditableSyntax
   {
     return Missing._missing;
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    return rewriter(this);
+    return rewriter(this, parents);
   }
   get children_keys()
   {
@@ -2174,24 +2179,28 @@ class ScriptHeader extends EditableSyntax
       this.question,
       language);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var less_than = this.less_than.rewrite(rewriter);
-    var question = this.question.rewrite(rewriter);
-    var language = this.language.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var less_than = this.less_than.rewrite(rewriter, new_parents);
+    var question = this.question.rewrite(rewriter, new_parents);
+    var language = this.language.rewrite(rewriter, new_parents);
     if (
       less_than === this.less_than &&
       question === this.question &&
       language === this.language)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ScriptHeader(
         less_than,
         question,
-        language));
+        language), parents);
     }
   }
   static from_json(json, position, source)
@@ -2242,21 +2251,25 @@ class Script extends EditableSyntax
       this.header,
       declarations);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var header = this.header.rewrite(rewriter);
-    var declarations = this.declarations.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var header = this.header.rewrite(rewriter, new_parents);
+    var declarations = this.declarations.rewrite(rewriter, new_parents);
     if (
       header === this.header &&
       declarations === this.declarations)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new Script(
         header,
-        declarations));
+        declarations), parents);
     }
   }
   static from_json(json, position, source)
@@ -2293,18 +2306,22 @@ class SimpleTypeSpecifier extends EditableSyntax
     return new SimpleTypeSpecifier(
       specifier);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var specifier = this.specifier.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var specifier = this.specifier.rewrite(rewriter, new_parents);
     if (
       specifier === this.specifier)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new SimpleTypeSpecifier(
-        specifier));
+        specifier), parents);
     }
   }
   static from_json(json, position, source)
@@ -2336,18 +2353,22 @@ class LiteralExpression extends EditableSyntax
     return new LiteralExpression(
       expression);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var expression = this.expression.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
     if (
       expression === this.expression)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new LiteralExpression(
-        expression));
+        expression), parents);
     }
   }
   static from_json(json, position, source)
@@ -2379,18 +2400,22 @@ class VariableExpression extends EditableSyntax
     return new VariableExpression(
       expression);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var expression = this.expression.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
     if (
       expression === this.expression)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new VariableExpression(
-        expression));
+        expression), parents);
     }
   }
   static from_json(json, position, source)
@@ -2422,18 +2447,22 @@ class QualifiedNameExpression extends EditableSyntax
     return new QualifiedNameExpression(
       expression);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var expression = this.expression.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
     if (
       expression === this.expression)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new QualifiedNameExpression(
-        expression));
+        expression), parents);
     }
   }
   static from_json(json, position, source)
@@ -2465,18 +2494,22 @@ class PipeVariableExpression extends EditableSyntax
     return new PipeVariableExpression(
       expression);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var expression = this.expression.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
     if (
       expression === this.expression)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new PipeVariableExpression(
-        expression));
+        expression), parents);
     }
   }
   static from_json(json, position, source)
@@ -2613,16 +2646,20 @@ class EnumDeclaration extends EditableSyntax
       this.enumerators,
       right_brace);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var base = this.base.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var enumerators = this.enumerators.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var base = this.base.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var enumerators = this.enumerators.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       name === this.name &&
@@ -2633,7 +2670,7 @@ class EnumDeclaration extends EditableSyntax
       enumerators === this.enumerators &&
       right_brace === this.right_brace)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -2645,7 +2682,7 @@ class EnumDeclaration extends EditableSyntax
         type,
         left_brace,
         enumerators,
-        right_brace));
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -2745,19 +2782,23 @@ class Enumerator extends EditableSyntax
       this.value,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var equal = this.equal.rewrite(rewriter);
-    var value = this.value.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var equal = this.equal.rewrite(rewriter, new_parents);
+    var value = this.value.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       equal === this.equal &&
       value === this.value &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -2765,7 +2806,7 @@ class Enumerator extends EditableSyntax
         name,
         equal,
         value,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -2917,16 +2958,20 @@ class AliasDeclaration extends EditableSyntax
       this.type,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var attribute_spec = this.attribute_spec.rewrite(rewriter);
-    var keyword = this.keyword.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var generic_parameter = this.generic_parameter.rewrite(rewriter);
-    var constraint = this.constraint.rewrite(rewriter);
-    var equal = this.equal.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var generic_parameter = this.generic_parameter.rewrite(rewriter, new_parents);
+    var constraint = this.constraint.rewrite(rewriter, new_parents);
+    var equal = this.equal.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       attribute_spec === this.attribute_spec &&
       keyword === this.keyword &&
@@ -2937,7 +2982,7 @@ class AliasDeclaration extends EditableSyntax
       type === this.type &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -2949,7 +2994,7 @@ class AliasDeclaration extends EditableSyntax
         constraint,
         equal,
         type,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -3049,19 +3094,23 @@ class PropertyDeclaration extends EditableSyntax
       this.declarators,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var modifiers = this.modifiers.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var declarators = this.declarators.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var declarators = this.declarators.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       modifiers === this.modifiers &&
       type === this.type &&
       declarators === this.declarators &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -3069,7 +3118,7 @@ class PropertyDeclaration extends EditableSyntax
         modifiers,
         type,
         declarators,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -3125,21 +3174,25 @@ class PropertyDeclarator extends EditableSyntax
       this.name,
       initializer);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var initializer = this.initializer.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       initializer === this.initializer)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new PropertyDeclarator(
         name,
-        initializer));
+        initializer), parents);
     }
   }
   static from_json(json, position, source)
@@ -3196,24 +3249,28 @@ class NamespaceDeclaration extends EditableSyntax
       this.name,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       name === this.name &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new NamespaceDeclaration(
         keyword,
         name,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -3275,24 +3332,28 @@ class NamespaceBody extends EditableSyntax
       this.declarations,
       right_brace);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var declarations = this.declarations.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var declarations = this.declarations.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       left_brace === this.left_brace &&
       declarations === this.declarations &&
       right_brace === this.right_brace)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new NamespaceBody(
         left_brace,
         declarations,
-        right_brace));
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -3367,19 +3428,23 @@ class NamespaceUseDeclaration extends EditableSyntax
       this.clauses,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var kind = this.kind.rewrite(rewriter);
-    var clauses = this.clauses.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var kind = this.kind.rewrite(rewriter, new_parents);
+    var clauses = this.clauses.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       kind === this.kind &&
       clauses === this.clauses &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -3387,7 +3452,7 @@ class NamespaceUseDeclaration extends EditableSyntax
         keyword,
         kind,
         clauses,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -3518,15 +3583,19 @@ class NamespaceGroupUseDeclaration extends EditableSyntax
       this.right_brace,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var kind = this.kind.rewrite(rewriter);
-    var prefix = this.prefix.rewrite(rewriter);
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var clauses = this.clauses.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var kind = this.kind.rewrite(rewriter, new_parents);
+    var prefix = this.prefix.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var clauses = this.clauses.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       kind === this.kind &&
@@ -3536,7 +3605,7 @@ class NamespaceGroupUseDeclaration extends EditableSyntax
       right_brace === this.right_brace &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -3547,7 +3616,7 @@ class NamespaceGroupUseDeclaration extends EditableSyntax
         left_brace,
         clauses,
         right_brace,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -3642,19 +3711,23 @@ class NamespaceUseClause extends EditableSyntax
       this.as,
       alias);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var clause_kind = this.clause_kind.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var as = this.as.rewrite(rewriter);
-    var alias = this.alias.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var clause_kind = this.clause_kind.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var as = this.as.rewrite(rewriter, new_parents);
+    var alias = this.alias.rewrite(rewriter, new_parents);
     if (
       clause_kind === this.clause_kind &&
       name === this.name &&
       as === this.as &&
       alias === this.alias)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -3662,7 +3735,7 @@ class NamespaceUseClause extends EditableSyntax
         clause_kind,
         name,
         as,
-        alias));
+        alias), parents);
     }
   }
   static from_json(json, position, source)
@@ -3729,24 +3802,28 @@ class FunctionDeclaration extends EditableSyntax
       this.declaration_header,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var attribute_spec = this.attribute_spec.rewrite(rewriter);
-    var declaration_header = this.declaration_header.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
+    var declaration_header = this.declaration_header.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       attribute_spec === this.attribute_spec &&
       declaration_header === this.declaration_header &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new FunctionDeclaration(
         attribute_spec,
         declaration_header,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -3916,17 +3993,21 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.colon,
       type);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var async = this.async.rewrite(rewriter);
-    var keyword = this.keyword.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var type_parameter_list = this.type_parameter_list.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var parameter_list = this.parameter_list.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var async = this.async.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var type_parameter_list = this.type_parameter_list.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var parameter_list = this.parameter_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
     if (
       async === this.async &&
       keyword === this.keyword &&
@@ -3938,7 +4019,7 @@ class FunctionDeclarationHeader extends EditableSyntax
       colon === this.colon &&
       type === this.type)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -3951,7 +4032,7 @@ class FunctionDeclarationHeader extends EditableSyntax
         parameter_list,
         right_paren,
         colon,
-        type));
+        type), parents);
     }
   }
   static from_json(json, position, source)
@@ -4071,13 +4152,17 @@ class MethodishDeclaration extends EditableSyntax
       this.function_body,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var attribute = this.attribute.rewrite(rewriter);
-    var modifiers = this.modifiers.rewrite(rewriter);
-    var function_decl_header = this.function_decl_header.rewrite(rewriter);
-    var function_body = this.function_body.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute = this.attribute.rewrite(rewriter, new_parents);
+    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
+    var function_decl_header = this.function_decl_header.rewrite(rewriter, new_parents);
+    var function_body = this.function_body.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       attribute === this.attribute &&
       modifiers === this.modifiers &&
@@ -4085,7 +4170,7 @@ class MethodishDeclaration extends EditableSyntax
       function_body === this.function_body &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -4094,7 +4179,7 @@ class MethodishDeclaration extends EditableSyntax
         modifiers,
         function_decl_header,
         function_body,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -4299,18 +4384,22 @@ class ClassishDeclaration extends EditableSyntax
       this.implements_list,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var attribute = this.attribute.rewrite(rewriter);
-    var modifiers = this.modifiers.rewrite(rewriter);
-    var keyword = this.keyword.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var type_parameters = this.type_parameters.rewrite(rewriter);
-    var extends_keyword = this.extends_keyword.rewrite(rewriter);
-    var extends_list = this.extends_list.rewrite(rewriter);
-    var implements_keyword = this.implements_keyword.rewrite(rewriter);
-    var implements_list = this.implements_list.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute = this.attribute.rewrite(rewriter, new_parents);
+    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var type_parameters = this.type_parameters.rewrite(rewriter, new_parents);
+    var extends_keyword = this.extends_keyword.rewrite(rewriter, new_parents);
+    var extends_list = this.extends_list.rewrite(rewriter, new_parents);
+    var implements_keyword = this.implements_keyword.rewrite(rewriter, new_parents);
+    var implements_list = this.implements_list.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       attribute === this.attribute &&
       modifiers === this.modifiers &&
@@ -4323,7 +4412,7 @@ class ClassishDeclaration extends EditableSyntax
       implements_list === this.implements_list &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -4337,7 +4426,7 @@ class ClassishDeclaration extends EditableSyntax
         extends_list,
         implements_keyword,
         implements_list,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -4434,24 +4523,28 @@ class ClassishBody extends EditableSyntax
       this.elements,
       right_brace);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var elements = this.elements.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var elements = this.elements.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       left_brace === this.left_brace &&
       elements === this.elements &&
       right_brace === this.right_brace)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ClassishBody(
         left_brace,
         elements,
-        right_brace));
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -4513,24 +4606,28 @@ class TraitUse extends EditableSyntax
       this.names,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var names = this.names.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var names = this.names.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       names === this.names &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new TraitUse(
         keyword,
         names,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -4605,19 +4702,23 @@ class RequireClause extends EditableSyntax
       this.name,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var kind = this.kind.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var kind = this.kind.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       kind === this.kind &&
       name === this.name &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -4625,7 +4726,7 @@ class RequireClause extends EditableSyntax
         keyword,
         kind,
         name,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -4720,13 +4821,17 @@ class ConstDeclaration extends EditableSyntax
       this.declarators,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var abstract = this.abstract.rewrite(rewriter);
-    var keyword = this.keyword.rewrite(rewriter);
-    var type_specifier = this.type_specifier.rewrite(rewriter);
-    var declarators = this.declarators.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var abstract = this.abstract.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var type_specifier = this.type_specifier.rewrite(rewriter, new_parents);
+    var declarators = this.declarators.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       abstract === this.abstract &&
       keyword === this.keyword &&
@@ -4734,7 +4839,7 @@ class ConstDeclaration extends EditableSyntax
       declarators === this.declarators &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -4743,7 +4848,7 @@ class ConstDeclaration extends EditableSyntax
         keyword,
         type_specifier,
         declarators,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -4804,21 +4909,25 @@ class ConstantDeclarator extends EditableSyntax
       this.name,
       initializer);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var initializer = this.initializer.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       initializer === this.initializer)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ConstantDeclarator(
         name,
-        initializer));
+        initializer), parents);
     }
   }
   static from_json(json, position, source)
@@ -4960,16 +5069,20 @@ class TypeConstDeclaration extends EditableSyntax
       this.type_specifier,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var abstract = this.abstract.rewrite(rewriter);
-    var keyword = this.keyword.rewrite(rewriter);
-    var type_keyword = this.type_keyword.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var type_constraint = this.type_constraint.rewrite(rewriter);
-    var equal = this.equal.rewrite(rewriter);
-    var type_specifier = this.type_specifier.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var abstract = this.abstract.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var type_keyword = this.type_keyword.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var type_constraint = this.type_constraint.rewrite(rewriter, new_parents);
+    var equal = this.equal.rewrite(rewriter, new_parents);
+    var type_specifier = this.type_specifier.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       abstract === this.abstract &&
       keyword === this.keyword &&
@@ -4980,7 +5093,7 @@ class TypeConstDeclaration extends EditableSyntax
       type_specifier === this.type_specifier &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -4992,7 +5105,7 @@ class TypeConstDeclaration extends EditableSyntax
         type_constraint,
         equal,
         type_specifier,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -5068,21 +5181,25 @@ class DecoratedExpression extends EditableSyntax
       this.decorator,
       expression);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var decorator = this.decorator.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var decorator = this.decorator.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
     if (
       decorator === this.decorator &&
       expression === this.expression)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new DecoratedExpression(
         decorator,
-        expression));
+        expression), parents);
     }
   }
   static from_json(json, position, source)
@@ -5167,13 +5284,17 @@ class ParameterDeclaration extends EditableSyntax
       this.name,
       default_value);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var attribute = this.attribute.rewrite(rewriter);
-    var visibility = this.visibility.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var default_value = this.default_value.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute = this.attribute.rewrite(rewriter, new_parents);
+    var visibility = this.visibility.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var default_value = this.default_value.rewrite(rewriter, new_parents);
     if (
       attribute === this.attribute &&
       visibility === this.visibility &&
@@ -5181,7 +5302,7 @@ class ParameterDeclaration extends EditableSyntax
       name === this.name &&
       default_value === this.default_value)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -5190,7 +5311,7 @@ class ParameterDeclaration extends EditableSyntax
         visibility,
         type,
         name,
-        default_value));
+        default_value), parents);
     }
   }
   static from_json(json, position, source)
@@ -5262,24 +5383,28 @@ class AttributeSpecification extends EditableSyntax
       this.attributes,
       right_double_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_double_angle = this.left_double_angle.rewrite(rewriter);
-    var attributes = this.attributes.rewrite(rewriter);
-    var right_double_angle = this.right_double_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_double_angle = this.left_double_angle.rewrite(rewriter, new_parents);
+    var attributes = this.attributes.rewrite(rewriter, new_parents);
+    var right_double_angle = this.right_double_angle.rewrite(rewriter, new_parents);
     if (
       left_double_angle === this.left_double_angle &&
       attributes === this.attributes &&
       right_double_angle === this.right_double_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new AttributeSpecification(
         left_double_angle,
         attributes,
-        right_double_angle));
+        right_double_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -5354,19 +5479,23 @@ class Attribute extends EditableSyntax
       this.values,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var values = this.values.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var values = this.values.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       left_paren === this.left_paren &&
       values === this.values &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -5374,7 +5503,7 @@ class Attribute extends EditableSyntax
         name,
         left_paren,
         values,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -5430,21 +5559,25 @@ class InclusionExpression extends EditableSyntax
       this.require,
       filename);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var require = this.require.rewrite(rewriter);
-    var filename = this.filename.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var require = this.require.rewrite(rewriter, new_parents);
+    var filename = this.filename.rewrite(rewriter, new_parents);
     if (
       require === this.require &&
       filename === this.filename)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new InclusionExpression(
         require,
-        filename));
+        filename), parents);
     }
   }
   static from_json(json, position, source)
@@ -5490,21 +5623,25 @@ class InclusionDirective extends EditableSyntax
       this.expression,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var expression = this.expression.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       expression === this.expression &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new InclusionDirective(
         expression,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -5561,24 +5698,28 @@ class CompoundStatement extends EditableSyntax
       this.statements,
       right_brace);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var statements = this.statements.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var statements = this.statements.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       left_brace === this.left_brace &&
       statements === this.statements &&
       right_brace === this.right_brace)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new CompoundStatement(
         left_brace,
         statements,
-        right_brace));
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -5629,21 +5770,25 @@ class ExpressionStatement extends EditableSyntax
       this.expression,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var expression = this.expression.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       expression === this.expression &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ExpressionStatement(
         expression,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -5728,13 +5873,17 @@ class WhileStatement extends EditableSyntax
       this.right_paren,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var condition = this.condition.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var condition = this.condition.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
@@ -5742,7 +5891,7 @@ class WhileStatement extends EditableSyntax
       right_paren === this.right_paren &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -5751,7 +5900,7 @@ class WhileStatement extends EditableSyntax
         left_paren,
         condition,
         right_paren,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -5887,15 +6036,19 @@ class IfStatement extends EditableSyntax
       this.elseif_clauses,
       else_clause);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var condition = this.condition.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var statement = this.statement.rewrite(rewriter);
-    var elseif_clauses = this.elseif_clauses.rewrite(rewriter);
-    var else_clause = this.else_clause.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var condition = this.condition.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
+    var elseif_clauses = this.elseif_clauses.rewrite(rewriter, new_parents);
+    var else_clause = this.else_clause.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
@@ -5905,7 +6058,7 @@ class IfStatement extends EditableSyntax
       elseif_clauses === this.elseif_clauses &&
       else_clause === this.else_clause)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -5916,7 +6069,7 @@ class IfStatement extends EditableSyntax
         right_paren,
         statement,
         elseif_clauses,
-        else_clause));
+        else_clause), parents);
     }
   }
   static from_json(json, position, source)
@@ -6026,13 +6179,17 @@ class ElseifClause extends EditableSyntax
       this.right_paren,
       statement);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var condition = this.condition.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var statement = this.statement.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var condition = this.condition.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
@@ -6040,7 +6197,7 @@ class ElseifClause extends EditableSyntax
       right_paren === this.right_paren &&
       statement === this.statement)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -6049,7 +6206,7 @@ class ElseifClause extends EditableSyntax
         left_paren,
         condition,
         right_paren,
-        statement));
+        statement), parents);
     }
   }
   static from_json(json, position, source)
@@ -6110,21 +6267,25 @@ class ElseClause extends EditableSyntax
       this.keyword,
       statement);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var statement = this.statement.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       statement === this.statement)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ElseClause(
         keyword,
-        statement));
+        statement), parents);
     }
   }
   static from_json(json, position, source)
@@ -6194,19 +6355,23 @@ class TryStatement extends EditableSyntax
       this.catch_clauses,
       finally_clause);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var compound_statement = this.compound_statement.rewrite(rewriter);
-    var catch_clauses = this.catch_clauses.rewrite(rewriter);
-    var finally_clause = this.finally_clause.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var compound_statement = this.compound_statement.rewrite(rewriter, new_parents);
+    var catch_clauses = this.catch_clauses.rewrite(rewriter, new_parents);
+    var finally_clause = this.finally_clause.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       compound_statement === this.compound_statement &&
       catch_clauses === this.catch_clauses &&
       finally_clause === this.finally_clause)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -6214,7 +6379,7 @@ class TryStatement extends EditableSyntax
         keyword,
         compound_statement,
         catch_clauses,
-        finally_clause));
+        finally_clause), parents);
     }
   }
   static from_json(json, position, source)
@@ -6326,14 +6491,18 @@ class CatchClause extends EditableSyntax
       this.right_paren,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var variable = this.variable.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var variable = this.variable.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
@@ -6342,7 +6511,7 @@ class CatchClause extends EditableSyntax
       right_paren === this.right_paren &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -6352,7 +6521,7 @@ class CatchClause extends EditableSyntax
         type,
         variable,
         right_paren,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -6418,21 +6587,25 @@ class FinallyClause extends EditableSyntax
       this.keyword,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new FinallyClause(
         keyword,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -6553,15 +6726,19 @@ class DoStatement extends EditableSyntax
       this.right_paren,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
-    var while_keyword = this.while_keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var condition = this.condition.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
+    var while_keyword = this.while_keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var condition = this.condition.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       body === this.body &&
@@ -6571,7 +6748,7 @@ class DoStatement extends EditableSyntax
       right_paren === this.right_paren &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -6582,7 +6759,7 @@ class DoStatement extends EditableSyntax
         left_paren,
         condition,
         right_paren,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -6772,17 +6949,21 @@ class ForStatement extends EditableSyntax
       this.right_paren,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var initializer = this.initializer.rewrite(rewriter);
-    var first_semicolon = this.first_semicolon.rewrite(rewriter);
-    var control = this.control.rewrite(rewriter);
-    var second_semicolon = this.second_semicolon.rewrite(rewriter);
-    var end_of_loop = this.end_of_loop.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
+    var first_semicolon = this.first_semicolon.rewrite(rewriter, new_parents);
+    var control = this.control.rewrite(rewriter, new_parents);
+    var second_semicolon = this.second_semicolon.rewrite(rewriter, new_parents);
+    var end_of_loop = this.end_of_loop.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
@@ -6794,7 +6975,7 @@ class ForStatement extends EditableSyntax
       right_paren === this.right_paren &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -6807,7 +6988,7 @@ class ForStatement extends EditableSyntax
         second_semicolon,
         end_of_loop,
         right_paren,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -7032,18 +7213,22 @@ class ForeachStatement extends EditableSyntax
       this.right_paren,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var collection = this.collection.rewrite(rewriter);
-    var await = this.await.rewrite(rewriter);
-    var as = this.as.rewrite(rewriter);
-    var key = this.key.rewrite(rewriter);
-    var arrow = this.arrow.rewrite(rewriter);
-    var value = this.value.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var collection = this.collection.rewrite(rewriter, new_parents);
+    var await = this.await.rewrite(rewriter, new_parents);
+    var as = this.as.rewrite(rewriter, new_parents);
+    var key = this.key.rewrite(rewriter, new_parents);
+    var arrow = this.arrow.rewrite(rewriter, new_parents);
+    var value = this.value.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
@@ -7056,7 +7241,7 @@ class ForeachStatement extends EditableSyntax
       right_paren === this.right_paren &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -7070,7 +7255,7 @@ class ForeachStatement extends EditableSyntax
         arrow,
         value,
         right_paren,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -7195,13 +7380,17 @@ class SwitchStatement extends EditableSyntax
       this.right_paren,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
@@ -7209,7 +7398,7 @@ class SwitchStatement extends EditableSyntax
       right_paren === this.right_paren &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -7218,7 +7407,7 @@ class SwitchStatement extends EditableSyntax
         left_paren,
         expression,
         right_paren,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -7303,19 +7492,23 @@ class CaseStatement extends EditableSyntax
       this.colon,
       statement);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var statement = this.statement.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       expression === this.expression &&
       colon === this.colon &&
       statement === this.statement)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -7323,7 +7516,7 @@ class CaseStatement extends EditableSyntax
         keyword,
         expression,
         colon,
-        statement));
+        statement), parents);
     }
   }
   static from_json(json, position, source)
@@ -7390,24 +7583,28 @@ class DefaultStatement extends EditableSyntax
       this.colon,
       statement);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var statement = this.statement.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       colon === this.colon &&
       statement === this.statement)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new DefaultStatement(
         keyword,
         colon,
-        statement));
+        statement), parents);
     }
   }
   static from_json(json, position, source)
@@ -7469,24 +7666,28 @@ class ReturnStatement extends EditableSyntax
       this.expression,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       expression === this.expression &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ReturnStatement(
         keyword,
         expression,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -7548,24 +7749,28 @@ class ThrowStatement extends EditableSyntax
       this.expression,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       expression === this.expression &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ThrowStatement(
         keyword,
         expression,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -7627,24 +7832,28 @@ class BreakStatement extends EditableSyntax
       this.level,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var level = this.level.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var level = this.level.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       level === this.level &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new BreakStatement(
         keyword,
         level,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -7706,24 +7915,28 @@ class ContinueStatement extends EditableSyntax
       this.level,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var level = this.level.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var level = this.level.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       level === this.level &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ContinueStatement(
         keyword,
         level,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -7785,24 +7998,28 @@ class FunctionStaticStatement extends EditableSyntax
       this.declarations,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var static_keyword = this.static_keyword.rewrite(rewriter);
-    var declarations = this.declarations.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var static_keyword = this.static_keyword.rewrite(rewriter, new_parents);
+    var declarations = this.declarations.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       static_keyword === this.static_keyword &&
       declarations === this.declarations &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new FunctionStaticStatement(
         static_keyword,
         declarations,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -7853,21 +8070,25 @@ class StaticDeclarator extends EditableSyntax
       this.name,
       initializer);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var initializer = this.initializer.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       initializer === this.initializer)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new StaticDeclarator(
         name,
-        initializer));
+        initializer), parents);
     }
   }
   static from_json(json, position, source)
@@ -7924,24 +8145,28 @@ class EchoStatement extends EditableSyntax
       this.expressions,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var expressions = this.expressions.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var expressions = this.expressions.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       expressions === this.expressions &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new EchoStatement(
         keyword,
         expressions,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -7992,21 +8217,25 @@ class SimpleInitializer extends EditableSyntax
       this.equal,
       value);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var equal = this.equal.rewrite(rewriter);
-    var value = this.value.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var equal = this.equal.rewrite(rewriter, new_parents);
+    var value = this.value.rewrite(rewriter, new_parents);
     if (
       equal === this.equal &&
       value === this.value)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new SimpleInitializer(
         equal,
-        value));
+        value), parents);
     }
   }
   static from_json(json, position, source)
@@ -8171,17 +8400,21 @@ class AnonymousFunction extends EditableSyntax
       this.use,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var async_keyword = this.async_keyword.rewrite(rewriter);
-    var function_keyword = this.function_keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var parameters = this.parameters.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var use = this.use.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
+    var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var parameters = this.parameters.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var use = this.use.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       async_keyword === this.async_keyword &&
       function_keyword === this.function_keyword &&
@@ -8193,7 +8426,7 @@ class AnonymousFunction extends EditableSyntax
       use === this.use &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -8206,7 +8439,7 @@ class AnonymousFunction extends EditableSyntax
         colon,
         type,
         use,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -8311,19 +8544,23 @@ class AnonymousFunctionUseClause extends EditableSyntax
       this.variables,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var variables = this.variables.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var variables = this.variables.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       variables === this.variables &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -8331,7 +8568,7 @@ class AnonymousFunctionUseClause extends EditableSyntax
         keyword,
         left_paren,
         variables,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -8411,19 +8648,23 @@ class LambdaExpression extends EditableSyntax
       this.arrow,
       body);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var async = this.async.rewrite(rewriter);
-    var signature = this.signature.rewrite(rewriter);
-    var arrow = this.arrow.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var async = this.async.rewrite(rewriter, new_parents);
+    var signature = this.signature.rewrite(rewriter, new_parents);
+    var arrow = this.arrow.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
     if (
       async === this.async &&
       signature === this.signature &&
       arrow === this.arrow &&
       body === this.body)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -8431,7 +8672,7 @@ class LambdaExpression extends EditableSyntax
         async,
         signature,
         arrow,
-        body));
+        body), parents);
     }
   }
   static from_json(json, position, source)
@@ -8526,13 +8767,17 @@ class LambdaSignature extends EditableSyntax
       this.colon,
       type);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var parameters = this.parameters.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var parameters = this.parameters.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
     if (
       left_paren === this.left_paren &&
       parameters === this.parameters &&
@@ -8540,7 +8785,7 @@ class LambdaSignature extends EditableSyntax
       colon === this.colon &&
       type === this.type)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -8549,7 +8794,7 @@ class LambdaSignature extends EditableSyntax
         parameters,
         right_paren,
         colon,
-        type));
+        type), parents);
     }
   }
   static from_json(json, position, source)
@@ -8634,19 +8879,23 @@ class CastExpression extends EditableSyntax
       this.right_paren,
       operand);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
-    var operand = this.operand.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var operand = this.operand.rewrite(rewriter, new_parents);
     if (
       left_paren === this.left_paren &&
       type === this.type &&
       right_paren === this.right_paren &&
       operand === this.operand)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -8654,7 +8903,7 @@ class CastExpression extends EditableSyntax
         left_paren,
         type,
         right_paren,
-        operand));
+        operand), parents);
     }
   }
   static from_json(json, position, source)
@@ -8721,24 +8970,28 @@ class ScopeResolutionExpression extends EditableSyntax
       this.operator,
       name);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var qualifier = this.qualifier.rewrite(rewriter);
-    var operator = this.operator.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var qualifier = this.qualifier.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
     if (
       qualifier === this.qualifier &&
       operator === this.operator &&
       name === this.name)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ScopeResolutionExpression(
         qualifier,
         operator,
-        name));
+        name), parents);
     }
   }
   static from_json(json, position, source)
@@ -8800,24 +9053,28 @@ class MemberSelectionExpression extends EditableSyntax
       this.operator,
       name);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var object = this.object.rewrite(rewriter);
-    var operator = this.operator.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var object = this.object.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
     if (
       object === this.object &&
       operator === this.operator &&
       name === this.name)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new MemberSelectionExpression(
         object,
         operator,
-        name));
+        name), parents);
     }
   }
   static from_json(json, position, source)
@@ -8879,24 +9136,28 @@ class SafeMemberSelectionExpression extends EditableSyntax
       this.operator,
       name);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var object = this.object.rewrite(rewriter);
-    var operator = this.operator.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var object = this.object.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
     if (
       object === this.object &&
       operator === this.operator &&
       name === this.name)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new SafeMemberSelectionExpression(
         object,
         operator,
-        name));
+        name), parents);
     }
   }
   static from_json(json, position, source)
@@ -8947,21 +9208,25 @@ class YieldExpression extends EditableSyntax
       this.keyword,
       operand);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var operand = this.operand.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var operand = this.operand.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       operand === this.operand)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new YieldExpression(
         keyword,
-        operand));
+        operand), parents);
     }
   }
   static from_json(json, position, source)
@@ -9007,21 +9272,25 @@ class PrintExpression extends EditableSyntax
       this.keyword,
       expression);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       expression === this.expression)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new PrintExpression(
         keyword,
-        expression));
+        expression), parents);
     }
   }
   static from_json(json, position, source)
@@ -9067,21 +9336,25 @@ class PrefixUnaryExpression extends EditableSyntax
       this.operator,
       operand);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var operator = this.operator.rewrite(rewriter);
-    var operand = this.operand.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var operand = this.operand.rewrite(rewriter, new_parents);
     if (
       operator === this.operator &&
       operand === this.operand)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new PrefixUnaryExpression(
         operator,
-        operand));
+        operand), parents);
     }
   }
   static from_json(json, position, source)
@@ -9127,21 +9400,25 @@ class PostfixUnaryExpression extends EditableSyntax
       this.operand,
       operator);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var operand = this.operand.rewrite(rewriter);
-    var operator = this.operator.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var operand = this.operand.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
     if (
       operand === this.operand &&
       operator === this.operator)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new PostfixUnaryExpression(
         operand,
-        operator));
+        operator), parents);
     }
   }
   static from_json(json, position, source)
@@ -9198,24 +9475,28 @@ class BinaryExpression extends EditableSyntax
       this.operator,
       right_operand);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_operand = this.left_operand.rewrite(rewriter);
-    var operator = this.operator.rewrite(rewriter);
-    var right_operand = this.right_operand.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_operand = this.left_operand.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var right_operand = this.right_operand.rewrite(rewriter, new_parents);
     if (
       left_operand === this.left_operand &&
       operator === this.operator &&
       right_operand === this.right_operand)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new BinaryExpression(
         left_operand,
         operator,
-        right_operand));
+        right_operand), parents);
     }
   }
   static from_json(json, position, source)
@@ -9277,24 +9558,28 @@ class InstanceofExpression extends EditableSyntax
       this.operator,
       right_operand);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_operand = this.left_operand.rewrite(rewriter);
-    var operator = this.operator.rewrite(rewriter);
-    var right_operand = this.right_operand.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_operand = this.left_operand.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var right_operand = this.right_operand.rewrite(rewriter, new_parents);
     if (
       left_operand === this.left_operand &&
       operator === this.operator &&
       right_operand === this.right_operand)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new InstanceofExpression(
         left_operand,
         operator,
-        right_operand));
+        right_operand), parents);
     }
   }
   static from_json(json, position, source)
@@ -9384,13 +9669,17 @@ class ConditionalExpression extends EditableSyntax
       this.colon,
       alternative);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var test = this.test.rewrite(rewriter);
-    var question = this.question.rewrite(rewriter);
-    var consequence = this.consequence.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var alternative = this.alternative.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var test = this.test.rewrite(rewriter, new_parents);
+    var question = this.question.rewrite(rewriter, new_parents);
+    var consequence = this.consequence.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var alternative = this.alternative.rewrite(rewriter, new_parents);
     if (
       test === this.test &&
       question === this.question &&
@@ -9398,7 +9687,7 @@ class ConditionalExpression extends EditableSyntax
       colon === this.colon &&
       alternative === this.alternative)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -9407,7 +9696,7 @@ class ConditionalExpression extends EditableSyntax
         question,
         consequence,
         colon,
-        alternative));
+        alternative), parents);
     }
   }
   static from_json(json, position, source)
@@ -9492,19 +9781,23 @@ class FunctionCallExpression extends EditableSyntax
       this.argument_list,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var receiver = this.receiver.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var argument_list = this.argument_list.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var receiver = this.receiver.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       receiver === this.receiver &&
       left_paren === this.left_paren &&
       argument_list === this.argument_list &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -9512,7 +9805,7 @@ class FunctionCallExpression extends EditableSyntax
         receiver,
         left_paren,
         argument_list,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -9579,24 +9872,28 @@ class ParenthesizedExpression extends EditableSyntax
       this.expression,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       left_paren === this.left_paren &&
       expression === this.expression &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ParenthesizedExpression(
         left_paren,
         expression,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -9658,24 +9955,28 @@ class BracedExpression extends EditableSyntax
       this.expression,
       right_brace);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       left_brace === this.left_brace &&
       expression === this.expression &&
       right_brace === this.right_brace)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new BracedExpression(
         left_brace,
         expression,
-        right_brace));
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -9750,19 +10051,23 @@ class ListExpression extends EditableSyntax
       this.members,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var members = this.members.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       members === this.members &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -9770,7 +10075,7 @@ class ListExpression extends EditableSyntax
         keyword,
         left_paren,
         members,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -9850,19 +10155,23 @@ class CollectionLiteralExpression extends EditableSyntax
       this.initializers,
       right_brace);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var initializers = this.initializers.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var initializers = this.initializers.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       left_brace === this.left_brace &&
       initializers === this.initializers &&
       right_brace === this.right_brace)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -9870,7 +10179,7 @@ class CollectionLiteralExpression extends EditableSyntax
         name,
         left_brace,
         initializers,
-        right_brace));
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -9965,13 +10274,17 @@ class ObjectCreationExpression extends EditableSyntax
       this.argument_list,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var new_keyword = this.new_keyword.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var argument_list = this.argument_list.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var new_keyword = this.new_keyword.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       new_keyword === this.new_keyword &&
       type === this.type &&
@@ -9979,7 +10292,7 @@ class ObjectCreationExpression extends EditableSyntax
       argument_list === this.argument_list &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -9988,7 +10301,7 @@ class ObjectCreationExpression extends EditableSyntax
         type,
         left_paren,
         argument_list,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -10060,24 +10373,28 @@ class ArrayCreationExpression extends EditableSyntax
       this.members,
       right_bracket);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_bracket = this.left_bracket.rewrite(rewriter);
-    var members = this.members.rewrite(rewriter);
-    var right_bracket = this.right_bracket.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       left_bracket === this.left_bracket &&
       members === this.members &&
       right_bracket === this.right_bracket)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ArrayCreationExpression(
         left_bracket,
         members,
-        right_bracket));
+        right_bracket), parents);
     }
   }
   static from_json(json, position, source)
@@ -10152,19 +10469,23 @@ class ArrayIntrinsicExpression extends EditableSyntax
       this.members,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var members = this.members.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       members === this.members &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -10172,7 +10493,7 @@ class ArrayIntrinsicExpression extends EditableSyntax
         keyword,
         left_paren,
         members,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -10239,24 +10560,28 @@ class ElementInitializer extends EditableSyntax
       this.arrow,
       value);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var key = this.key.rewrite(rewriter);
-    var arrow = this.arrow.rewrite(rewriter);
-    var value = this.value.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var key = this.key.rewrite(rewriter, new_parents);
+    var arrow = this.arrow.rewrite(rewriter, new_parents);
+    var value = this.value.rewrite(rewriter, new_parents);
     if (
       key === this.key &&
       arrow === this.arrow &&
       value === this.value)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ElementInitializer(
         key,
         arrow,
-        value));
+        value), parents);
     }
   }
   static from_json(json, position, source)
@@ -10331,19 +10656,23 @@ class SubscriptExpression extends EditableSyntax
       this.index,
       right_bracket);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var receiver = this.receiver.rewrite(rewriter);
-    var left_bracket = this.left_bracket.rewrite(rewriter);
-    var index = this.index.rewrite(rewriter);
-    var right_bracket = this.right_bracket.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var receiver = this.receiver.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var index = this.index.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       receiver === this.receiver &&
       left_bracket === this.left_bracket &&
       index === this.index &&
       right_bracket === this.right_bracket)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -10351,7 +10680,7 @@ class SubscriptExpression extends EditableSyntax
         receiver,
         left_bracket,
         index,
-        right_bracket));
+        right_bracket), parents);
     }
   }
   static from_json(json, position, source)
@@ -10407,21 +10736,25 @@ class AwaitableCreationExpression extends EditableSyntax
       this.async,
       compound_statement);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var async = this.async.rewrite(rewriter);
-    var compound_statement = this.compound_statement.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var async = this.async.rewrite(rewriter, new_parents);
+    var compound_statement = this.compound_statement.rewrite(rewriter, new_parents);
     if (
       async === this.async &&
       compound_statement === this.compound_statement)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new AwaitableCreationExpression(
         async,
-        compound_statement));
+        compound_statement), parents);
     }
   }
   static from_json(json, position, source)
@@ -10478,24 +10811,28 @@ class XHPChildrenDeclaration extends EditableSyntax
       this.expression,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       expression === this.expression &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPChildrenDeclaration(
         keyword,
         expression,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -10557,24 +10894,28 @@ class XHPCategoryDeclaration extends EditableSyntax
       this.categories,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var categories = this.categories.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var categories = this.categories.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       categories === this.categories &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPCategoryDeclaration(
         keyword,
         categories,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -10649,19 +10990,23 @@ class XHPEnumType extends EditableSyntax
       this.values,
       right_brace);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_brace = this.left_brace.rewrite(rewriter);
-    var values = this.values.rewrite(rewriter);
-    var right_brace = this.right_brace.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var values = this.values.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_brace === this.left_brace &&
       values === this.values &&
       right_brace === this.right_brace)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -10669,7 +11014,7 @@ class XHPEnumType extends EditableSyntax
         keyword,
         left_brace,
         values,
-        right_brace));
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -10725,21 +11070,25 @@ class XHPRequired extends EditableSyntax
       this.at,
       keyword);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var at = this.at.rewrite(rewriter);
-    var keyword = this.keyword.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var at = this.at.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
     if (
       at === this.at &&
       keyword === this.keyword)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPRequired(
         at,
-        keyword));
+        keyword), parents);
     }
   }
   static from_json(json, position, source)
@@ -10796,24 +11145,28 @@ class XHPClassAttributeDeclaration extends EditableSyntax
       this.attributes,
       semicolon);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var attributes = this.attributes.rewrite(rewriter);
-    var semicolon = this.semicolon.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var attributes = this.attributes.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       attributes === this.attributes &&
       semicolon === this.semicolon)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPClassAttributeDeclaration(
         keyword,
         attributes,
-        semicolon));
+        semicolon), parents);
     }
   }
   static from_json(json, position, source)
@@ -10888,19 +11241,23 @@ class XHPClassAttribute extends EditableSyntax
       this.initializer,
       required);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var type = this.type.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var initializer = this.initializer.rewrite(rewriter);
-    var required = this.required.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
+    var required = this.required.rewrite(rewriter, new_parents);
     if (
       type === this.type &&
       name === this.name &&
       initializer === this.initializer &&
       required === this.required)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -10908,7 +11265,7 @@ class XHPClassAttribute extends EditableSyntax
         type,
         name,
         initializer,
-        required));
+        required), parents);
     }
   }
   static from_json(json, position, source)
@@ -10975,24 +11332,28 @@ class XHPAttribute extends EditableSyntax
       this.equal,
       expression);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var equal = this.equal.rewrite(rewriter);
-    var expression = this.expression.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var equal = this.equal.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       equal === this.equal &&
       expression === this.expression)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPAttribute(
         name,
         equal,
-        expression));
+        expression), parents);
     }
   }
   static from_json(json, position, source)
@@ -11054,24 +11415,28 @@ class XHPOpen extends EditableSyntax
       this.attributes,
       right_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var attributes = this.attributes.rewrite(rewriter);
-    var right_angle = this.right_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var attributes = this.attributes.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       attributes === this.attributes &&
       right_angle === this.right_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPOpen(
         name,
         attributes,
-        right_angle));
+        right_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -11133,24 +11498,28 @@ class XHPExpression extends EditableSyntax
       this.body,
       close);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var open = this.open.rewrite(rewriter);
-    var body = this.body.rewrite(rewriter);
-    var close = this.close.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var open = this.open.rewrite(rewriter, new_parents);
+    var body = this.body.rewrite(rewriter, new_parents);
+    var close = this.close.rewrite(rewriter, new_parents);
     if (
       open === this.open &&
       body === this.body &&
       close === this.close)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPExpression(
         open,
         body,
-        close));
+        close), parents);
     }
   }
   static from_json(json, position, source)
@@ -11212,24 +11581,28 @@ class XHPClose extends EditableSyntax
       this.name,
       right_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_angle = this.left_angle.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var right_angle = this.right_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       left_angle === this.left_angle &&
       name === this.name &&
       right_angle === this.right_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new XHPClose(
         left_angle,
         name,
-        right_angle));
+        right_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -11291,24 +11664,28 @@ class TypeConstant extends EditableSyntax
       this.separator,
       right_type);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_type = this.left_type.rewrite(rewriter);
-    var separator = this.separator.rewrite(rewriter);
-    var right_type = this.right_type.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_type = this.left_type.rewrite(rewriter, new_parents);
+    var separator = this.separator.rewrite(rewriter, new_parents);
+    var right_type = this.right_type.rewrite(rewriter, new_parents);
     if (
       left_type === this.left_type &&
       separator === this.separator &&
       right_type === this.right_type)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new TypeConstant(
         left_type,
         separator,
-        right_type));
+        right_type), parents);
     }
   }
   static from_json(json, position, source)
@@ -11383,19 +11760,23 @@ class VectorTypeSpecifier extends EditableSyntax
       this.type,
       right_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var array = this.array.rewrite(rewriter);
-    var left_angle = this.left_angle.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var right_angle = this.right_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var array = this.array.rewrite(rewriter, new_parents);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       array === this.array &&
       left_angle === this.left_angle &&
       type === this.type &&
       right_angle === this.right_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -11403,7 +11784,7 @@ class VectorTypeSpecifier extends EditableSyntax
         array,
         left_angle,
         type,
-        right_angle));
+        right_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -11470,24 +11851,28 @@ class TypeParameter extends EditableSyntax
       this.name,
       constraints);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var variance = this.variance.rewrite(rewriter);
-    var name = this.name.rewrite(rewriter);
-    var constraints = this.constraints.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var variance = this.variance.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var constraints = this.constraints.rewrite(rewriter, new_parents);
     if (
       variance === this.variance &&
       name === this.name &&
       constraints === this.constraints)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new TypeParameter(
         variance,
         name,
-        constraints));
+        constraints), parents);
     }
   }
   static from_json(json, position, source)
@@ -11538,21 +11923,25 @@ class TypeConstraint extends EditableSyntax
       this.keyword,
       type);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       type === this.type)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new TypeConstraint(
         keyword,
-        type));
+        type), parents);
     }
   }
   static from_json(json, position, source)
@@ -11654,14 +12043,18 @@ class MapTypeSpecifier extends EditableSyntax
       this.value,
       right_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var array = this.array.rewrite(rewriter);
-    var left_angle = this.left_angle.rewrite(rewriter);
-    var key = this.key.rewrite(rewriter);
-    var comma = this.comma.rewrite(rewriter);
-    var value = this.value.rewrite(rewriter);
-    var right_angle = this.right_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var array = this.array.rewrite(rewriter, new_parents);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var key = this.key.rewrite(rewriter, new_parents);
+    var comma = this.comma.rewrite(rewriter, new_parents);
+    var value = this.value.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       array === this.array &&
       left_angle === this.left_angle &&
@@ -11670,7 +12063,7 @@ class MapTypeSpecifier extends EditableSyntax
       value === this.value &&
       right_angle === this.right_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -11680,7 +12073,7 @@ class MapTypeSpecifier extends EditableSyntax
         key,
         comma,
         value,
-        right_angle));
+        right_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -11842,16 +12235,20 @@ class ClosureTypeSpecifier extends EditableSyntax
       this.return_type,
       outer_right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var outer_left_paren = this.outer_left_paren.rewrite(rewriter);
-    var function_keyword = this.function_keyword.rewrite(rewriter);
-    var inner_left_paren = this.inner_left_paren.rewrite(rewriter);
-    var parameter_types = this.parameter_types.rewrite(rewriter);
-    var inner_right_paren = this.inner_right_paren.rewrite(rewriter);
-    var colon = this.colon.rewrite(rewriter);
-    var return_type = this.return_type.rewrite(rewriter);
-    var outer_right_paren = this.outer_right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var outer_left_paren = this.outer_left_paren.rewrite(rewriter, new_parents);
+    var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
+    var inner_left_paren = this.inner_left_paren.rewrite(rewriter, new_parents);
+    var parameter_types = this.parameter_types.rewrite(rewriter, new_parents);
+    var inner_right_paren = this.inner_right_paren.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    var return_type = this.return_type.rewrite(rewriter, new_parents);
+    var outer_right_paren = this.outer_right_paren.rewrite(rewriter, new_parents);
     if (
       outer_left_paren === this.outer_left_paren &&
       function_keyword === this.function_keyword &&
@@ -11862,7 +12259,7 @@ class ClosureTypeSpecifier extends EditableSyntax
       return_type === this.return_type &&
       outer_right_paren === this.outer_right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -11874,7 +12271,7 @@ class ClosureTypeSpecifier extends EditableSyntax
         inner_right_paren,
         colon,
         return_type,
-        outer_right_paren));
+        outer_right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -11974,19 +12371,23 @@ class ClassnameTypeSpecifier extends EditableSyntax
       this.type,
       right_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_angle = this.left_angle.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
-    var right_angle = this.right_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_angle === this.left_angle &&
       type === this.type &&
       right_angle === this.right_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -11994,7 +12395,7 @@ class ClassnameTypeSpecifier extends EditableSyntax
         keyword,
         left_angle,
         type,
-        right_angle));
+        right_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -12061,24 +12462,28 @@ class FieldSpecifier extends EditableSyntax
       this.arrow,
       type);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var arrow = this.arrow.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var arrow = this.arrow.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       arrow === this.arrow &&
       type === this.type)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new FieldSpecifier(
         name,
         arrow,
-        type));
+        type), parents);
     }
   }
   static from_json(json, position, source)
@@ -12140,24 +12545,28 @@ class FieldInitializer extends EditableSyntax
       this.arrow,
       value);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var name = this.name.rewrite(rewriter);
-    var arrow = this.arrow.rewrite(rewriter);
-    var value = this.value.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var arrow = this.arrow.rewrite(rewriter, new_parents);
+    var value = this.value.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       arrow === this.arrow &&
       value === this.value)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new FieldInitializer(
         name,
         arrow,
-        value));
+        value), parents);
     }
   }
   static from_json(json, position, source)
@@ -12232,19 +12641,23 @@ class ShapeTypeSpecifier extends EditableSyntax
       this.fields,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var fields = this.fields.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var fields = this.fields.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       fields === this.fields &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -12252,7 +12665,7 @@ class ShapeTypeSpecifier extends EditableSyntax
         keyword,
         left_paren,
         fields,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -12332,19 +12745,23 @@ class ShapeExpression extends EditableSyntax
       this.fields,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var keyword = this.keyword.rewrite(rewriter);
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var fields = this.fields.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var fields = this.fields.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       fields === this.fields &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
@@ -12352,7 +12769,7 @@ class ShapeExpression extends EditableSyntax
         keyword,
         left_paren,
         fields,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -12408,21 +12825,25 @@ class GenericTypeSpecifier extends EditableSyntax
       this.class_type,
       argument_list);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var class_type = this.class_type.rewrite(rewriter);
-    var argument_list = this.argument_list.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var class_type = this.class_type.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
     if (
       class_type === this.class_type &&
       argument_list === this.argument_list)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new GenericTypeSpecifier(
         class_type,
-        argument_list));
+        argument_list), parents);
     }
   }
   static from_json(json, position, source)
@@ -12468,21 +12889,25 @@ class NullableTypeSpecifier extends EditableSyntax
       this.question,
       type);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var question = this.question.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var question = this.question.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
     if (
       question === this.question &&
       type === this.type)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new NullableTypeSpecifier(
         question,
-        type));
+        type), parents);
     }
   }
   static from_json(json, position, source)
@@ -12528,21 +12953,25 @@ class SoftTypeSpecifier extends EditableSyntax
       this.at,
       type);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var at = this.at.rewrite(rewriter);
-    var type = this.type.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var at = this.at.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
     if (
       at === this.at &&
       type === this.type)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new SoftTypeSpecifier(
         at,
-        type));
+        type), parents);
     }
   }
   static from_json(json, position, source)
@@ -12599,24 +13028,28 @@ class TypeArguments extends EditableSyntax
       this.types,
       right_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_angle = this.left_angle.rewrite(rewriter);
-    var types = this.types.rewrite(rewriter);
-    var right_angle = this.right_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var types = this.types.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       left_angle === this.left_angle &&
       types === this.types &&
       right_angle === this.right_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new TypeArguments(
         left_angle,
         types,
-        right_angle));
+        right_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -12678,24 +13111,28 @@ class TypeParameters extends EditableSyntax
       this.parameters,
       right_angle);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_angle = this.left_angle.rewrite(rewriter);
-    var parameters = this.parameters.rewrite(rewriter);
-    var right_angle = this.right_angle.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var parameters = this.parameters.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       left_angle === this.left_angle &&
       parameters === this.parameters &&
       right_angle === this.right_angle)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new TypeParameters(
         left_angle,
         parameters,
-        right_angle));
+        right_angle), parents);
     }
   }
   static from_json(json, position, source)
@@ -12757,24 +13194,28 @@ class TupleTypeSpecifier extends EditableSyntax
       this.types,
       right_paren);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var left_paren = this.left_paren.rewrite(rewriter);
-    var types = this.types.rewrite(rewriter);
-    var right_paren = this.right_paren.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var types = this.types.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       left_paren === this.left_paren &&
       types === this.types &&
       right_paren === this.right_paren)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new TupleTypeSpecifier(
         left_paren,
         types,
-        right_paren));
+        right_paren), parents);
     }
   }
   static from_json(json, position, source)
@@ -12816,18 +13257,22 @@ class ErrorSyntax extends EditableSyntax
     return new ErrorSyntax(
       error);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var error = this.error.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var error = this.error.rewrite(rewriter, new_parents);
     if (
       error === this.error)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ErrorSyntax(
-        error));
+        error), parents);
     }
   }
   static from_json(json, position, source)
@@ -12868,21 +13313,25 @@ class ListItem extends EditableSyntax
       this.item,
       separator);
   }
-  rewrite(rewriter)
+  rewrite(rewriter, parents)
   {
-    var item = this.item.rewrite(rewriter);
-    var separator = this.separator.rewrite(rewriter);
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var item = this.item.rewrite(rewriter, new_parents);
+    var separator = this.separator.rewrite(rewriter, new_parents);
     if (
       item === this.item &&
       separator === this.separator)
     {
-      return rewriter(this);
+      return rewriter(this, parents);
     }
     else
     {
       return rewriter(new ListItem(
         item,
-        separator));
+        separator), parents);
     }
   }
   static from_json(json, position, source)

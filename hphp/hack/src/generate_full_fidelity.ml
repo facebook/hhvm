@@ -1773,6 +1773,27 @@ FROM_JSON_SYNTAX
     return reducer(this, accumulator);
   }
 
+  filter(predicate)
+  {
+    let reducer = (node, acc) => {
+      if (predicate(node))
+        acc.push(node);
+      return acc;
+    };
+    return this.reduce(reducer, []);
+  }
+
+  remove_where(predicate)
+  {
+    return this.rewrite(
+      (node, parents) => predicate(node) ? Missing.missing : node);
+  }
+
+  without(target)
+  {
+    return this.remove_where((node) => node === target);
+  }
+
   static to_list(syntax_list)
   {
     if (syntax_list.length == 0)

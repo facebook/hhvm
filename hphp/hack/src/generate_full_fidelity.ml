@@ -1672,7 +1672,7 @@ let to_editable_given_text x =
     Printf.sprintf
 "    case '%s':
        return new %sToken(leading, trailing);
- "
+"
       x.token_text x.token_kind
 
   let to_factory_given_text = to_factory_no_text
@@ -1680,7 +1680,7 @@ let to_editable_given_text x =
   let to_factory_variable_text x =
     Printf.sprintf
 "    case '%s':
-      return new %sToken(leading, trailing, token_text);
+       return new %sToken(leading, trailing, token_text);
 "
       x.token_text x.token_kind
 
@@ -1762,6 +1762,13 @@ FROM_JSON_SYNTAX
     }
   }
 
+  reduce(reducer, accumulator)
+  {
+    for(let key of this.children_keys)
+      accumulator = this.children[key].reduce(reducer, accumulator);
+    return reducer(this, accumulator);
+  }
+
   static to_list(syntax_list)
   {
     if (syntax_list.length == 0)
@@ -1798,8 +1805,9 @@ class EditableList extends EditableSyntax
   {
     let dirty = false;
     let new_children = [];
-    for (let child of this.children)
+    for (let key of this.children_keys)
     {
+      let child = this.children[key];
       let new_child = child.rewrite(rewriter);
       if (new_child != child)
         dirty = true;
@@ -1885,6 +1893,14 @@ FACTORY_VARIABLE_TEXT_TOKENS
     else
       return rewriter(EditableToken.factory(
         this.token_kind, leading, trailing, this.text));
+  }
+
+  reduce(reducer, accumulator)
+  {
+    accumulator = this.leading.reduce(reducer, accumulator);
+    accumulator = reducer(this, accumulator);
+    accumulator = this.trailing.reduce(reducer, accumulator);
+    return accumulator;
   }
 
   static from_json(json, position, source)

@@ -294,6 +294,13 @@ class EditableSyntax
     }
   }
 
+  reduce(reducer, accumulator)
+  {
+    for(let key of this.children_keys)
+      accumulator = this.children[key].reduce(reducer, accumulator);
+    return reducer(this, accumulator);
+  }
+
   static to_list(syntax_list)
   {
     if (syntax_list.length == 0)
@@ -330,8 +337,9 @@ class EditableList extends EditableSyntax
   {
     let dirty = false;
     let new_children = [];
-    for (let child of this.children)
+    for (let key of this.children_keys)
     {
+      let child = this.children[key];
       let new_child = child.rewrite(rewriter);
       if (new_child != child)
         dirty = true;
@@ -405,331 +413,331 @@ class EditableToken extends EditableSyntax
 
     case 'abstract':
        return new AbstractToken(leading, trailing);
-     case 'array':
+    case 'array':
        return new ArrayToken(leading, trailing);
-     case 'arraykey':
+    case 'arraykey':
        return new ArraykeyToken(leading, trailing);
-     case 'as':
+    case 'as':
        return new AsToken(leading, trailing);
-     case 'async':
+    case 'async':
        return new AsyncToken(leading, trailing);
-     case 'attribute':
+    case 'attribute':
        return new AttributeToken(leading, trailing);
-     case 'await':
+    case 'await':
        return new AwaitToken(leading, trailing);
-     case 'bool':
+    case 'bool':
        return new BoolToken(leading, trailing);
-     case 'break':
+    case 'break':
        return new BreakToken(leading, trailing);
-     case 'case':
+    case 'case':
        return new CaseToken(leading, trailing);
-     case 'catch':
+    case 'catch':
        return new CatchToken(leading, trailing);
-     case 'category':
+    case 'category':
        return new CategoryToken(leading, trailing);
-     case 'children':
+    case 'children':
        return new ChildrenToken(leading, trailing);
-     case 'class':
+    case 'class':
        return new ClassToken(leading, trailing);
-     case 'classname':
+    case 'classname':
        return new ClassnameToken(leading, trailing);
-     case 'clone':
+    case 'clone':
        return new CloneToken(leading, trailing);
-     case 'const':
+    case 'const':
        return new ConstToken(leading, trailing);
-     case '__construct':
+    case '__construct':
        return new ConstructToken(leading, trailing);
-     case 'continue':
+    case 'continue':
        return new ContinueToken(leading, trailing);
-     case 'default':
+    case 'default':
        return new DefaultToken(leading, trailing);
-     case '__destruct':
+    case '__destruct':
        return new DestructToken(leading, trailing);
-     case 'do':
+    case 'do':
        return new DoToken(leading, trailing);
-     case 'double':
+    case 'double':
        return new DoubleToken(leading, trailing);
-     case 'echo':
+    case 'echo':
        return new EchoToken(leading, trailing);
-     case 'else':
+    case 'else':
        return new ElseToken(leading, trailing);
-     case 'elseif':
+    case 'elseif':
        return new ElseifToken(leading, trailing);
-     case 'empty':
+    case 'empty':
        return new EmptyToken(leading, trailing);
-     case 'enum':
+    case 'enum':
        return new EnumToken(leading, trailing);
-     case 'extends':
+    case 'extends':
        return new ExtendsToken(leading, trailing);
-     case 'float':
+    case 'float':
        return new FloatToken(leading, trailing);
-     case 'final':
+    case 'final':
        return new FinalToken(leading, trailing);
-     case 'finally':
+    case 'finally':
        return new FinallyToken(leading, trailing);
-     case 'for':
+    case 'for':
        return new ForToken(leading, trailing);
-     case 'foreach':
+    case 'foreach':
        return new ForeachToken(leading, trailing);
-     case 'function':
+    case 'function':
        return new FunctionToken(leading, trailing);
-     case 'if':
+    case 'if':
        return new IfToken(leading, trailing);
-     case 'implements':
+    case 'implements':
        return new ImplementsToken(leading, trailing);
-     case 'include':
+    case 'include':
        return new IncludeToken(leading, trailing);
-     case 'include_once':
+    case 'include_once':
        return new Include_onceToken(leading, trailing);
-     case 'instanceof':
+    case 'instanceof':
        return new InstanceofToken(leading, trailing);
-     case 'insteadof':
+    case 'insteadof':
        return new InsteadofToken(leading, trailing);
-     case 'int':
+    case 'int':
        return new IntToken(leading, trailing);
-     case 'interface':
+    case 'interface':
        return new InterfaceToken(leading, trailing);
-     case 'list':
+    case 'list':
        return new ListToken(leading, trailing);
-     case 'mixed':
+    case 'mixed':
        return new MixedToken(leading, trailing);
-     case 'namespace':
+    case 'namespace':
        return new NamespaceToken(leading, trailing);
-     case 'new':
+    case 'new':
        return new NewToken(leading, trailing);
-     case 'newtype':
+    case 'newtype':
        return new NewtypeToken(leading, trailing);
-     case 'noreturn':
+    case 'noreturn':
        return new NoreturnToken(leading, trailing);
-     case 'num':
+    case 'num':
        return new NumToken(leading, trailing);
-     case 'object':
+    case 'object':
        return new ObjectToken(leading, trailing);
-     case 'parent':
+    case 'parent':
        return new ParentToken(leading, trailing);
-     case 'print':
+    case 'print':
        return new PrintToken(leading, trailing);
-     case 'private':
+    case 'private':
        return new PrivateToken(leading, trailing);
-     case 'protected':
+    case 'protected':
        return new ProtectedToken(leading, trailing);
-     case 'public':
+    case 'public':
        return new PublicToken(leading, trailing);
-     case 'require':
+    case 'require':
        return new RequireToken(leading, trailing);
-     case 'require_once':
+    case 'require_once':
        return new Require_onceToken(leading, trailing);
-     case 'required':
+    case 'required':
        return new RequiredToken(leading, trailing);
-     case 'resource':
+    case 'resource':
        return new ResourceToken(leading, trailing);
-     case 'return':
+    case 'return':
        return new ReturnToken(leading, trailing);
-     case 'self':
+    case 'self':
        return new SelfToken(leading, trailing);
-     case 'shape':
+    case 'shape':
        return new ShapeToken(leading, trailing);
-     case 'static':
+    case 'static':
        return new StaticToken(leading, trailing);
-     case 'string':
+    case 'string':
        return new StringToken(leading, trailing);
-     case 'super':
+    case 'super':
        return new SuperToken(leading, trailing);
-     case 'switch':
+    case 'switch':
        return new SwitchToken(leading, trailing);
-     case 'this':
+    case 'this':
        return new ThisToken(leading, trailing);
-     case 'throw':
+    case 'throw':
        return new ThrowToken(leading, trailing);
-     case 'trait':
+    case 'trait':
        return new TraitToken(leading, trailing);
-     case 'try':
+    case 'try':
        return new TryToken(leading, trailing);
-     case 'tuple':
+    case 'tuple':
        return new TupleToken(leading, trailing);
-     case 'type':
+    case 'type':
        return new TypeToken(leading, trailing);
-     case 'unset':
+    case 'unset':
        return new UnsetToken(leading, trailing);
-     case 'use':
+    case 'use':
        return new UseToken(leading, trailing);
-     case 'var':
+    case 'var':
        return new VarToken(leading, trailing);
-     case 'void':
+    case 'void':
        return new VoidToken(leading, trailing);
-     case 'while':
+    case 'while':
        return new WhileToken(leading, trailing);
-     case 'yield':
+    case 'yield':
        return new YieldToken(leading, trailing);
-     case '[':
+    case '[':
        return new LeftBracketToken(leading, trailing);
-     case ']':
+    case ']':
        return new RightBracketToken(leading, trailing);
-     case '(':
+    case '(':
        return new LeftParenToken(leading, trailing);
-     case ')':
+    case ')':
        return new RightParenToken(leading, trailing);
-     case '{':
+    case '{':
        return new LeftBraceToken(leading, trailing);
-     case '}':
+    case '}':
        return new RightBraceToken(leading, trailing);
-     case '.':
+    case '.':
        return new DotToken(leading, trailing);
-     case '->':
+    case '->':
        return new MinusGreaterThanToken(leading, trailing);
-     case '++':
+    case '++':
        return new PlusPlusToken(leading, trailing);
-     case '--':
+    case '--':
        return new MinusMinusToken(leading, trailing);
-     case '**':
+    case '**':
        return new StarStarToken(leading, trailing);
-     case '*':
+    case '*':
        return new StarToken(leading, trailing);
-     case '+':
+    case '+':
        return new PlusToken(leading, trailing);
-     case '-':
+    case '-':
        return new MinusToken(leading, trailing);
-     case '~':
+    case '~':
        return new TildeToken(leading, trailing);
-     case '!':
+    case '!':
        return new ExclamationToken(leading, trailing);
-     case '$':
+    case '$':
        return new DollarToken(leading, trailing);
-     case '/':
+    case '/':
        return new SlashToken(leading, trailing);
-     case '%':
+    case '%':
        return new PercentToken(leading, trailing);
-     case '<<':
+    case '<<':
        return new LessThanLessThanToken(leading, trailing);
-     case '>>':
+    case '>>':
        return new GreaterThanGreaterThanToken(leading, trailing);
-     case '<':
+    case '<':
        return new LessThanToken(leading, trailing);
-     case '>':
+    case '>':
        return new GreaterThanToken(leading, trailing);
-     case '<=':
+    case '<=':
        return new LessThanEqualToken(leading, trailing);
-     case '>=':
+    case '>=':
        return new GreaterThanEqualToken(leading, trailing);
-     case '==':
+    case '==':
        return new EqualEqualToken(leading, trailing);
-     case '===':
+    case '===':
        return new EqualEqualEqualToken(leading, trailing);
-     case '!=':
+    case '!=':
        return new ExclamationEqualToken(leading, trailing);
-     case '!==':
+    case '!==':
        return new ExclamationEqualEqualToken(leading, trailing);
-     case '^':
+    case '^':
        return new CaratToken(leading, trailing);
-     case '|':
+    case '|':
        return new BarToken(leading, trailing);
-     case '&':
+    case '&':
        return new AmpersandToken(leading, trailing);
-     case '&&':
+    case '&&':
        return new AmpersandAmpersandToken(leading, trailing);
-     case '||':
+    case '||':
        return new BarBarToken(leading, trailing);
-     case '?':
+    case '?':
        return new QuestionToken(leading, trailing);
-     case '??':
+    case '??':
        return new QuestionQuestionToken(leading, trailing);
-     case ':':
+    case ':':
        return new ColonToken(leading, trailing);
-     case ';':
+    case ';':
        return new SemicolonToken(leading, trailing);
-     case '=':
+    case '=':
        return new EqualToken(leading, trailing);
-     case '**=':
+    case '**=':
        return new StarStarEqualToken(leading, trailing);
-     case '*=':
+    case '*=':
        return new StarEqualToken(leading, trailing);
-     case '/=':
+    case '/=':
        return new SlashEqualToken(leading, trailing);
-     case '%=':
+    case '%=':
        return new PercentEqualToken(leading, trailing);
-     case '+=':
+    case '+=':
        return new PlusEqualToken(leading, trailing);
-     case '-=':
+    case '-=':
        return new MinusEqualToken(leading, trailing);
-     case '.=':
+    case '.=':
        return new DotEqualToken(leading, trailing);
-     case '<<=':
+    case '<<=':
        return new LessThanLessThanEqualToken(leading, trailing);
-     case '>>=':
+    case '>>=':
        return new GreaterThanGreaterThanEqualToken(leading, trailing);
-     case '&=':
+    case '&=':
        return new AmpersandEqualToken(leading, trailing);
-     case '^=':
+    case '^=':
        return new CaratEqualToken(leading, trailing);
-     case '|=':
+    case '|=':
        return new BarEqualToken(leading, trailing);
-     case ',':
+    case ',':
        return new CommaToken(leading, trailing);
-     case '@':
+    case '@':
        return new AtToken(leading, trailing);
-     case '::':
+    case '::':
        return new ColonColonToken(leading, trailing);
-     case '=>':
+    case '=>':
        return new EqualGreaterThanToken(leading, trailing);
-     case '==>':
+    case '==>':
        return new EqualEqualGreaterThanToken(leading, trailing);
-     case '?->':
+    case '?->':
        return new QuestionMinusGreaterThanToken(leading, trailing);
-     case '...':
+    case '...':
        return new DotDotDotToken(leading, trailing);
-     case '$$':
+    case '$$':
        return new DollarDollarToken(leading, trailing);
-     case '|>':
+    case '|>':
        return new BarGreaterThanToken(leading, trailing);
-     case 'null':
+    case 'null':
        return new NullLiteralToken(leading, trailing);
-     case '/>':
+    case '/>':
        return new SlashGreaterThanToken(leading, trailing);
-     case '</':
+    case '</':
        return new LessThanSlashToken(leading, trailing);
 
     case 'error_token':
-      return new ErrorTokenToken(leading, trailing, token_text);
+       return new ErrorTokenToken(leading, trailing, token_text);
     case 'name':
-      return new NameToken(leading, trailing, token_text);
+       return new NameToken(leading, trailing, token_text);
     case 'qualified_name':
-      return new QualifiedNameToken(leading, trailing, token_text);
+       return new QualifiedNameToken(leading, trailing, token_text);
     case 'variable':
-      return new VariableToken(leading, trailing, token_text);
+       return new VariableToken(leading, trailing, token_text);
     case 'namespace_prefix':
-      return new NamespacePrefixToken(leading, trailing, token_text);
+       return new NamespacePrefixToken(leading, trailing, token_text);
     case 'decimal_literal':
-      return new DecimalLiteralToken(leading, trailing, token_text);
+       return new DecimalLiteralToken(leading, trailing, token_text);
     case 'octal_literal':
-      return new OctalLiteralToken(leading, trailing, token_text);
+       return new OctalLiteralToken(leading, trailing, token_text);
     case 'hexadecimal_literal':
-      return new HexadecimalLiteralToken(leading, trailing, token_text);
+       return new HexadecimalLiteralToken(leading, trailing, token_text);
     case 'binary_literal':
-      return new BinaryLiteralToken(leading, trailing, token_text);
+       return new BinaryLiteralToken(leading, trailing, token_text);
     case 'floating_literal':
-      return new FloatingLiteralToken(leading, trailing, token_text);
+       return new FloatingLiteralToken(leading, trailing, token_text);
     case 'single_quoted_string_literal':
-      return new SingleQuotedStringLiteralToken(leading, trailing, token_text);
+       return new SingleQuotedStringLiteralToken(leading, trailing, token_text);
     case 'double_quoted_string_literal':
-      return new DoubleQuotedStringLiteralToken(leading, trailing, token_text);
+       return new DoubleQuotedStringLiteralToken(leading, trailing, token_text);
     case 'heredoc_string_literal':
-      return new HeredocStringLiteralToken(leading, trailing, token_text);
+       return new HeredocStringLiteralToken(leading, trailing, token_text);
     case 'nowdoc_string_literal':
-      return new NowdocStringLiteralToken(leading, trailing, token_text);
+       return new NowdocStringLiteralToken(leading, trailing, token_text);
     case 'boolean_literal':
-      return new BooleanLiteralToken(leading, trailing, token_text);
+       return new BooleanLiteralToken(leading, trailing, token_text);
     case 'XHP_category_name':
-      return new XHPCategoryNameToken(leading, trailing, token_text);
+       return new XHPCategoryNameToken(leading, trailing, token_text);
     case 'XHP_element_name':
-      return new XHPElementNameToken(leading, trailing, token_text);
+       return new XHPElementNameToken(leading, trailing, token_text);
     case 'XHP_class_name':
-      return new XHPClassNameToken(leading, trailing, token_text);
+       return new XHPClassNameToken(leading, trailing, token_text);
     case 'XHP_string_literal':
-      return new XHPStringLiteralToken(leading, trailing, token_text);
+       return new XHPStringLiteralToken(leading, trailing, token_text);
     case 'XHP_body':
-      return new XHPBodyToken(leading, trailing, token_text);
+       return new XHPBodyToken(leading, trailing, token_text);
     case 'XHP_comment':
-      return new XHPCommentToken(leading, trailing, token_text);
+       return new XHPCommentToken(leading, trailing, token_text);
 
       default: throw 'unexpected token kind; ' + token_kind;
       // TODO: Better error
@@ -745,6 +753,14 @@ class EditableToken extends EditableSyntax
     else
       return rewriter(EditableToken.factory(
         this.token_kind, leading, trailing, this.text));
+  }
+
+  reduce(reducer, accumulator)
+  {
+    accumulator = this.leading.reduce(reducer, accumulator);
+    accumulator = reducer(this, accumulator);
+    accumulator = this.trailing.reduce(reducer, accumulator);
+    return accumulator;
   }
 
   static from_json(json, position, source)

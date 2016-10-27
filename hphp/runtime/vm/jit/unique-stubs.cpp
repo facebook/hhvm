@@ -1098,8 +1098,9 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     storeReturnRegs(v);
 
     // Perform a native return.
+
     // On PPC64, as there is no new frame created when entering the VM, the FP
-    // must no be saved.
+    // must not be saved.
     v << stubret{RegSet(), arch() != Arch::PPC64};
   });
 }

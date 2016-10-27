@@ -373,12 +373,13 @@ void write_tc_cie(EHFrameWriter& ehfw) {
   switch (arch()) {
     case Arch::ARM:
     case Arch::X64:
-      ehfw.offset_extended_sf(dw_reg::IP, (record_size - AROFF(m_savedRip)) / 8);
+      ehfw.offset_extended_sf(dw_reg::IP,
+                              (record_size - AROFF(m_savedRip)) / 8);
       break;
     case Arch::PPC64:
-      // On PPC64 the return addres of a current frame is found in the parent,
-      // so to get it, the content of the FP need to be taken to achieve the
-      // parent.
+      // On PPC64, the return address for the current frame is found in the
+      // parent frame. The following expression uses the FP to get the parent
+      // frame and recovers the return address from it.
       // The following expression uses the FP to get the parent frame and
       // recover the return address from it.
       // LR is at (*SP) + 2 * data_align

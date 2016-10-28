@@ -1083,6 +1083,14 @@ let rec get_doc node =
     let expr_list = get_doc x.echo_expressions in
     let semicolon = get_doc x.echo_semicolon in
     echo ^| expr_list ^^^ semicolon
+  | GlobalStatement {
+    global_keyword;
+    global_variables;
+    global_semicolon } ->
+    let g = get_doc global_keyword in
+    let v = get_doc global_variables in
+    let s = get_doc global_semicolon in
+    g ^| v ^^^ s
   | SimpleInitializer
     { simple_initializer_equal; simple_initializer_value } ->
     let e = get_doc simple_initializer_equal in

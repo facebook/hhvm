@@ -24,6 +24,18 @@
             (compound_statement
               (({)(whitespace)(single_line_comment)(end_of_line))
                 (list
+
+                  (global_statement
+                    ((whitespace)(global)(whitespace))
+                    ((variable))
+                    ((;)(whitespace)(single_line_comment)(end_of_line)))
+                  (expression_statement
+                    (function_call_expression
+                      ((whitespace)(global))
+                      ((lparen))
+                      (literal((decimal_literal)))
+                      ((rparen)))
+                      ((;)(whitespace)(single_line_comment)(end_of_line)))
                   (expression_statement
                     (binary_expression
                       (variable((whitespace)(variable)(whitespace)))

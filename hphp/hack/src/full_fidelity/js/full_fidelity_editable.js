@@ -178,6 +178,8 @@ class EditableSyntax
       return StaticDeclarator.from_json(json, position, source);
     case 'echo_statement':
       return EchoStatement.from_json(json, position, source);
+    case 'global_statement':
+      return GlobalStatement.from_json(json, position, source);
     case 'simple_initializer':
       return SimpleInitializer.from_json(json, position, source);
     case 'anonymous_function':
@@ -653,6 +655,8 @@ class EditableToken extends EditableSyntax
        return new ForeachToken(leading, trailing);
     case 'function':
        return new FunctionToken(leading, trailing);
+    case 'global':
+       return new GlobalToken(leading, trailing);
     case 'if':
        return new IfToken(leading, trailing);
     case 'implements':
@@ -1228,6 +1232,13 @@ class FunctionToken extends EditableToken
   constructor(leading, trailing)
   {
     super('function', leading, trailing, 'function');
+  }
+}
+class GlobalToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('global', leading, trailing, 'global');
   }
 }
 class IfToken extends EditableToken
@@ -8455,6 +8466,89 @@ class EchoStatement extends EditableSyntax
     return EchoStatement._children_keys;
   }
 }
+class GlobalStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    variables,
+    semicolon)
+  {
+    super('global_statement', {
+      keyword: keyword,
+      variables: variables,
+      semicolon: semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get variables() { return this.children.variables; }
+  get semicolon() { return this.children.semicolon; }
+  with_keyword(keyword){
+    return new GlobalStatement(
+      keyword,
+      this.variables,
+      this.semicolon);
+  }
+  with_variables(variables){
+    return new GlobalStatement(
+      this.keyword,
+      variables,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new GlobalStatement(
+      this.keyword,
+      this.variables,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var variables = this.variables.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      variables === this.variables &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new GlobalStatement(
+        keyword,
+        variables,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.global_keyword, position, source);
+    position += keyword.width;
+    let variables = EditableSyntax.from_json(
+      json.global_variables, position, source);
+    position += variables.width;
+    let semicolon = EditableSyntax.from_json(
+      json.global_semicolon, position, source);
+    position += semicolon.width;
+    return new GlobalStatement(
+        keyword,
+        variables,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (GlobalStatement._children_keys == null)
+      GlobalStatement._children_keys = [
+        'keyword',
+        'variables',
+        'semicolon'];
+    return GlobalStatement._children_keys;
+  }
+}
 class SimpleInitializer extends EditableSyntax
 {
   constructor(
@@ -13664,6 +13758,7 @@ exports.FinallyToken = FinallyToken;
 exports.ForToken = ForToken;
 exports.ForeachToken = ForeachToken;
 exports.FunctionToken = FunctionToken;
+exports.GlobalToken = GlobalToken;
 exports.IfToken = IfToken;
 exports.ImplementsToken = ImplementsToken;
 exports.IncludeToken = IncludeToken;
@@ -13856,6 +13951,7 @@ exports.ContinueStatement = ContinueStatement;
 exports.FunctionStaticStatement = FunctionStaticStatement;
 exports.StaticDeclarator = StaticDeclarator;
 exports.EchoStatement = EchoStatement;
+exports.GlobalStatement = GlobalStatement;
 exports.SimpleInitializer = SimpleInitializer;
 exports.AnonymousFunction = AnonymousFunction;
 exports.AnonymousFunctionUseClause = AnonymousFunctionUseClause;

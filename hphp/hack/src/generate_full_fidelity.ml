@@ -500,6 +500,13 @@ let schema = List.map from_list [
     "keyword";
     "expressions";
     "semicolon" ];
+  [ "GlobalStatement";
+    "global_statement";
+    "global_statement";
+    "global";
+    "keyword";
+    "variables";
+    "semicolon" ];
   [ "SimpleInitializer";
     "simple_initializer";
     "simple_initializer";
@@ -976,6 +983,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "For"; "for" ];
   [ "Foreach"; "foreach" ];
   [ "Function"; "function" ];
+  [ "Global"; "global" ];
   [ "If"; "if" ];
   [ "Implements"; "implements" ];
   [ "Include"; "include" ];

@@ -818,9 +818,20 @@ let is_next_xhp_class_name lexer =
   let (lexer, _) = scan_leading_trivia lexer in
   is_xhp_class_name lexer
 
+let as_case_insensitive_keyword text =
+  (* Keywords true, false, null and array are case-insensitive in Hack. *)
+  (* TODO: Consider making non-lowercase versions of these keywords errors
+     in strict mode. *)
+  (* TODO: Should these be case-insensitive only when we are parsing the
+     interior of an expression? *)
+  let lower = String.lowercase text in
+  match lower with
+  | "true" | "false" | "null" | "array" -> lower
+  | _ -> text
+
 let as_keyword kind lexer =
   if kind = TokenKind.Name then
-    let text = current_text lexer in
+    let text = as_case_insensitive_keyword (current_text lexer) in
     match TokenKind.from_string text with
     | Some keyword -> keyword
     | _ -> TokenKind.Name

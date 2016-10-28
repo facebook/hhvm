@@ -388,9 +388,15 @@ module WithStatementAndDeclAndTypeParser
       object-creation-expression:
         new  class-type-designator  (  argument-expression-list-opt  )
     *)
+    (* PHP allows the entire expression list to be omitted. *)
+    (* TODO: Give an error in a later pass if it is omitted in Hack. *)
     let (parser, new_token) = assert_token parser New in
     let (parser, designator) = parse_designator parser in
-    let (parser, left, args, right) = parse_expression_list_opt parser in
+    let (parser, left, args, right) =
+    if peek_token_kind parser = LeftParen then
+      parse_expression_list_opt parser
+    else
+      (parser, make_missing(), make_missing(), make_missing()) in
     let result =
       make_object_creation_expression new_token designator left args right in
     (parser, result)

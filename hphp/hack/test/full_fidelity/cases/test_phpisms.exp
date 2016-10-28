@@ -23,18 +23,28 @@
             ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
             (compound_statement
               (({)(whitespace)(single_line_comment)(end_of_line))
-              (return_statement((whitespace)(return)(whitespace))
-                (binary_expression
-                  (variable((variable)(whitespace)))
-                  ((or)(whitespace))
-                  (binary_expression
+                (list
+                  (expression_statement
                     (binary_expression
-                      (variable((variable)(whitespace)))
-                      ((and)(whitespace))
-                      (variable((variable)(whitespace))))
-                    ((xor)(whitespace))
-                    (variable((variable)))))
-                ((;)(whitespace)(single_line_comment)(end_of_line)))
+                      (variable((whitespace)(variable)(whitespace)))
+                      ((=)(whitespace))
+                      (object_creation_expression
+                        ((new)(whitespace))
+                        (qualified_name((name)))
+                        (missing)(missing)(missing)))
+                    ((;)(whitespace)(single_line_comment)(end_of_line)))
+                (return_statement((whitespace)(return)(whitespace))
+                  (binary_expression
+                    (variable((variable)(whitespace)))
+                    ((or)(whitespace))
+                    (binary_expression
+                      (binary_expression
+                        (variable((variable)(whitespace)))
+                        ((and)(whitespace))
+                        (variable((variable)(whitespace))))
+                      ((xor)(whitespace))
+                      (variable((variable)))))
+                  ((;)(whitespace)(single_line_comment)(end_of_line))))
               ((whitespace)(})(end_of_line)))
             (missing)))
       ((})))))

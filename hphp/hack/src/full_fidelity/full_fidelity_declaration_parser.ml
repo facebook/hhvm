@@ -934,11 +934,18 @@ module WithExpressionAndStatementAndTypeParser
     (* TODO Use Eric's helper here to assert length of errors *)
     let before = List.length (errors parser) in
     let (parser1, _) = parse_type_specifier parser in
-    let (parser1, _) = expect_name parser1 in
+    let (parser1, _) = expect_name_allow_keywords parser1 in
     List.length (errors parser1) = before
 
   and parse_constant_declarator parser =
-    let (parser, const_name) = expect_name parser in
+    (* TODO: We allow const names to be keywords here; in particular we
+       require that const string TRUE = "true"; be legal.  Likely this
+       should be more strict. What are the rules for which keywords are
+       legal constant names and which are not?
+       Note that if this logic is changed, it should be changed in
+       is_type_in_const above as well.
+    *)
+    let (parser, const_name) = expect_name_allow_keywords parser in
     let (parser, initializer_) = parse_simple_initializer_opt parser in
     (parser, make_constant_declarator const_name initializer_)
 

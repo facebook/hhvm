@@ -187,19 +187,19 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       list(APPEND GENERAL_OPTIONS "fsigned-char")
 
       # If a CPU was specified, build a -mcpu option for the compiler.
-      set(CPU "" CACHE STRING "CPU to tell gcc to optimize for (-mcpu)")
-      if(CPU)
-        list(APPEND GENERAL_OPTIONS "mcpu=${CPU}")
-      endif()
+      set(AARCH64_TARGET_CPU "" CACHE STRING "CPU to tell gcc to optimize for (-mcpu)")
+      if(AARCH64_TARGET_CPU)
+        list(APPEND GENERAL_OPTIONS "mcpu=${AARCH64_TARGET_CPU}")
 
-      # Make sure GCC is not using the fix for errata 843419. This change
-      # interferes with the gold linker. Note that GCC applies this fix
-      # even if you specify an mcpu other than cortex-a53, which is why
-      # it's explicitly being disabled here for any cpu other than
-      # cortex-a53. If you're running a newer pass of the cortex-a53, then
-      # you can likely disable this fix with the following flag too. YMMV
-      if(NOT ${CPU} STREQUAL "cortex-a53")
-        list(APPEND GENERAL_OPTIONS "mno-fix-cortex-a53-843419")
+        # Make sure GCC is not using the fix for errata 843419. This change
+        # interferes with the gold linker. Note that GCC applies this fix
+        # even if you specify an mcpu other than cortex-a53, which is why
+        # it's explicitly being disabled here for any cpu other than
+        # cortex-a53. If you're running a newer pass of the cortex-a53, then
+        # you can likely disable this fix with the following flag too. YMMV
+        if(NOT ${AARCH64_TARGET_CPU} STREQUAL "cortex-a53")
+          list(APPEND GENERAL_OPTIONS "mno-fix-cortex-a53-843419")
+        endif()
       endif()
     endif()
 

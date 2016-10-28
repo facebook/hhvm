@@ -272,14 +272,10 @@ static Variant HHVM_METHOD(Closure, call,
 
 // Minified versions of nativeDataInstanceCtor/Dtor
 
-static ObjectData* closureInstanceCtor(Class* cls) {
+static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
   assertx(cls->parent() == c_Closure::classof());
-  if (cls->classHandle() != rds::kInvalidHandle &&
-      !rds::isPersistentHandle(cls->classHandle())) {
-    cls->setCached();
-  }
   auto const nProps = cls->numDeclProperties();
   auto const size = sizeof(ClosureHdr) + ObjectData::sizeForNProps(nProps);
   auto hdr = static_cast<ClosureHdr*>(MM().objMalloc(size));
@@ -289,9 +285,21 @@ static ObjectData* closureInstanceCtor(Class* cls) {
   return obj;
 }
 
+static ObjectData* closureInstanceCtor(Class* cls) {
+  /*
+   * We call Unit::defClosure while jitting, so its not allowed to
+   * mark the class as cached unless its persistent. Do it here
+   * instead, but only in non-repo-auth mode.
+   */
+  if (!rds::isHandleInit(cls->classHandle())) {
+    cls->preClass()->namedEntity()->clsList()->setCached();
+  }
+  return closureInstanceCtorRepoAuth(cls);
+}
+
 ObjectData* c_Closure::clone() {
   auto const cls = getVMClass();
-  auto ret = c_Closure::fromObject(closureInstanceCtor(cls));
+  auto ret = c_Closure::fromObject(closureInstanceCtorRepoAuth(cls));
 
   ret->hdr()->ctx = hdr()->ctx;
   if (auto t = getThis()) {
@@ -325,7 +333,8 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
 }
 
 void PreClassEmitter::setClosurePreClass() {
-  m_instanceCtor = closureInstanceCtor;
+  m_instanceCtor = RuntimeOption::RepoAuthoritative ?
+    closureInstanceCtorRepoAuth : closureInstanceCtor;
   m_instanceDtor = closureInstanceDtor;
 }
 

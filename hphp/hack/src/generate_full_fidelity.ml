@@ -98,6 +98,8 @@ let schema = List.map from_list [
     "enum_declaration";
     "enum_declaration";
     "enum";
+    "attribute_spec";
+    (* TODO: Make all uses of attribute_spec consistent in the API. *)
     "keyword";
     "name";
     "colon";

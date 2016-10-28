@@ -2727,6 +2727,7 @@ class PipeVariableExpression extends EditableSyntax
 class EnumDeclaration extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     keyword,
     name,
     colon,
@@ -2737,6 +2738,7 @@ class EnumDeclaration extends EditableSyntax
     right_brace)
   {
     super('enum_declaration', {
+      attribute_spec: attribute_spec,
       keyword: keyword,
       name: name,
       colon: colon,
@@ -2746,6 +2748,7 @@ class EnumDeclaration extends EditableSyntax
       enumerators: enumerators,
       right_brace: right_brace });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get keyword() { return this.children.keyword; }
   get name() { return this.children.name; }
   get colon() { return this.children.colon; }
@@ -2754,8 +2757,21 @@ class EnumDeclaration extends EditableSyntax
   get left_brace() { return this.children.left_brace; }
   get enumerators() { return this.children.enumerators; }
   get right_brace() { return this.children.right_brace; }
+  with_attribute_spec(attribute_spec){
+    return new EnumDeclaration(
+      attribute_spec,
+      this.keyword,
+      this.name,
+      this.colon,
+      this.base,
+      this.type,
+      this.left_brace,
+      this.enumerators,
+      this.right_brace);
+  }
   with_keyword(keyword){
     return new EnumDeclaration(
+      this.attribute_spec,
       keyword,
       this.name,
       this.colon,
@@ -2767,6 +2783,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_name(name){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       name,
       this.colon,
@@ -2778,6 +2795,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_colon(colon){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       colon,
@@ -2789,6 +2807,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_base(base){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2800,6 +2819,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_type(type){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2811,6 +2831,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_left_brace(left_brace){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2822,6 +2843,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_enumerators(enumerators){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2833,6 +2855,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_right_brace(right_brace){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2848,6 +2871,7 @@ class EnumDeclaration extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var colon = this.colon.rewrite(rewriter, new_parents);
@@ -2857,6 +2881,7 @@ class EnumDeclaration extends EditableSyntax
     var enumerators = this.enumerators.rewrite(rewriter, new_parents);
     var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       keyword === this.keyword &&
       name === this.name &&
       colon === this.colon &&
@@ -2871,6 +2896,7 @@ class EnumDeclaration extends EditableSyntax
     else
     {
       return rewriter(new EnumDeclaration(
+        attribute_spec,
         keyword,
         name,
         colon,
@@ -2883,6 +2909,9 @@ class EnumDeclaration extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.enum_attribute_spec, position, source);
+    position += attribute_spec.width;
     let keyword = EditableSyntax.from_json(
       json.enum_keyword, position, source);
     position += keyword.width;
@@ -2908,6 +2937,7 @@ class EnumDeclaration extends EditableSyntax
       json.enum_right_brace, position, source);
     position += right_brace.width;
     return new EnumDeclaration(
+        attribute_spec,
         keyword,
         name,
         colon,
@@ -2921,6 +2951,7 @@ class EnumDeclaration extends EditableSyntax
   {
     if (EnumDeclaration._children_keys == null)
       EnumDeclaration._children_keys = [
+        'attribute_spec',
         'keyword',
         'name',
         'colon',

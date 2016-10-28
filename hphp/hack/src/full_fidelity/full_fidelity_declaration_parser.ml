@@ -182,10 +182,11 @@ module WithExpressionAndStatementAndTypeParser
     | RightBrace -> parser, make_missing ()
     | _ -> aux [] parser
 
-  and parse_enum_declaration parser =
+  and parse_enum_declaration parser attrs =
     (*
     enum-declaration:
-      enum  name  enum-base  type-constraint-opt  {  enumerator-list-opt  }
+      attribute-specification-opt enum  name  enum-base  type-constraint-opt /
+        {  enumerator-list-opt  }
     enum-base:
       :  int
       :  string
@@ -204,7 +205,7 @@ module WithExpressionAndStatementAndTypeParser
       parser LeftBrace SyntaxError.error1037 RightBrace SyntaxError.error1006
       parse_enumerator_list_opt in
     let result = make_enum_declaration
-      enum name colon base enum_type left_brace enumerators right_brace in
+      attrs enum name colon base enum_type left_brace enumerators right_brace in
     (parser, result)
 
   and parse_namespace_declaration parser =
@@ -1306,13 +1307,14 @@ module WithExpressionAndStatementAndTypeParser
     in
     aux [] parser
 
-  and parse_classish_or_function_declaration parser =
-    (* A type alias, function, interface, trait or class may all begin with
-    an attribute. *)
+  and parse_enum_or_classish_or_function_declaration parser =
+    (* An enum, type alias, function, interface, trait or class may all
+      begin with an attribute. *)
     let parser, attribute_specification =
       parse_attribute_specification_opt parser in
     let parser1, token = next_token parser in
     match Token.kind token with
+    | Enum -> parse_enum_declaration parser attribute_specification
     | Type | Newtype ->
       parse_alias_declaration parser attribute_specification
     | Async | Function ->
@@ -1335,7 +1337,7 @@ module WithExpressionAndStatementAndTypeParser
     | Require_once -> parse_inclusion_directive parser
     | Type
     | Newtype -> parse_alias_declaration parser (make_missing())
-    | Enum -> parse_enum_declaration parser
+    | Enum -> parse_enum_declaration parser (make_missing())
     | Namespace -> parse_namespace_declaration parser
     | Use -> parse_namespace_use_declaration parser
     | Trait
@@ -1346,7 +1348,7 @@ module WithExpressionAndStatementAndTypeParser
     | Async
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->
-      parse_classish_or_function_declaration parser
+      parse_enum_or_classish_or_function_declaration parser
       (* TODO figure out what global const differs from class const *)
     | Const -> parse_const_declaration parser1 (make_missing ())
               (make_token token)

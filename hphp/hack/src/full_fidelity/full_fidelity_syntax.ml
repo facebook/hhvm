@@ -118,6 +118,7 @@ module WithToken(Token: TokenType) = struct
       pipe_variable_expression: t;
     }
     and enum_declaration = {
+      enum_attribute_spec: t;
       enum_keyword: t;
       enum_name: t;
       enum_colon: t;
@@ -1399,6 +1400,7 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_enum_declaration_children {
+      enum_attribute_spec;
       enum_keyword;
       enum_name;
       enum_colon;
@@ -1408,6 +1410,7 @@ module WithToken(Token: TokenType) = struct
       enum_enumerators;
       enum_right_brace;
     } = (
+      enum_attribute_spec,
       enum_keyword,
       enum_name,
       enum_colon,
@@ -2663,6 +2666,7 @@ module WithToken(Token: TokenType) = struct
         pipe_variable_expression;
       ]
       | EnumDeclaration {
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;
@@ -2672,6 +2676,7 @@ module WithToken(Token: TokenType) = struct
         enum_enumerators;
         enum_right_brace;
       } -> [
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;
@@ -3823,6 +3828,7 @@ module WithToken(Token: TokenType) = struct
         "pipe_variable_expression";
       ]
       | EnumDeclaration {
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;
@@ -3832,6 +3838,7 @@ module WithToken(Token: TokenType) = struct
         enum_enumerators;
         enum_right_brace;
       } -> [
+        "enum_attribute_spec";
         "enum_keyword";
         "enum_name";
         "enum_colon";
@@ -5044,6 +5051,7 @@ module WithToken(Token: TokenType) = struct
           pipe_variable_expression;
         }
       | (SyntaxKind.EnumDeclaration, [
+          enum_attribute_spec;
           enum_keyword;
           enum_name;
           enum_colon;
@@ -5054,6 +5062,7 @@ module WithToken(Token: TokenType) = struct
           enum_right_brace;
         ]) ->
         EnumDeclaration {
+          enum_attribute_spec;
           enum_keyword;
           enum_name;
           enum_colon;
@@ -6358,6 +6367,7 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_enum_declaration
+      enum_attribute_spec
       enum_keyword
       enum_name
       enum_colon
@@ -6368,6 +6378,7 @@ module WithToken(Token: TokenType) = struct
       enum_right_brace
     =
       from_children SyntaxKind.EnumDeclaration [
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;

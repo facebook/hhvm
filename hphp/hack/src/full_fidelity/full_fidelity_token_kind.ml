@@ -20,6 +20,7 @@ type t =
   | EndOfFile
 
   | Abstract
+  | And
   | Array
   | Arraykey
   | As
@@ -70,6 +71,7 @@ type t =
   | Noreturn
   | Num
   | Object
+  | Or
   | Parent
   | Print
   | Private
@@ -97,6 +99,7 @@ type t =
   | Var
   | Void
   | While
+  | Xor
   | Yield
   | LeftBracket
   | RightBracket
@@ -190,6 +193,7 @@ let from_string keyword =
   | "true" -> Some BooleanLiteral
   | "false" -> Some BooleanLiteral
   | "abstract" -> Some Abstract
+  | "and" -> Some And
   | "array" -> Some Array
   | "arraykey" -> Some Arraykey
   | "as" -> Some As
@@ -240,6 +244,7 @@ let from_string keyword =
   | "noreturn" -> Some Noreturn
   | "num" -> Some Num
   | "object" -> Some Object
+  | "or" -> Some Or
   | "parent" -> Some Parent
   | "print" -> Some Print
   | "private" -> Some Private
@@ -267,6 +272,7 @@ let from_string keyword =
   | "var" -> Some Var
   | "void" -> Some Void
   | "while" -> Some While
+  | "xor" -> Some Xor
   | "yield" -> Some Yield
   | "[" -> Some LeftBracket
   | "]" -> Some RightBracket
@@ -338,6 +344,7 @@ let to_string kind =
 match kind with
 | EndOfFile -> "end of file"
   | Abstract -> "abstract"
+  | And -> "and"
   | Array -> "array"
   | Arraykey -> "arraykey"
   | As -> "as"
@@ -388,6 +395,7 @@ match kind with
   | Noreturn -> "noreturn"
   | Num -> "num"
   | Object -> "object"
+  | Or -> "or"
   | Parent -> "parent"
   | Print -> "print"
   | Private -> "private"
@@ -415,6 +423,7 @@ match kind with
   | Var -> "var"
   | Void -> "void"
   | While -> "while"
+  | Xor -> "xor"
   | Yield -> "yield"
   | LeftBracket -> "["
   | RightBracket -> "]"

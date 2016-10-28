@@ -583,6 +583,8 @@ class EditableToken extends EditableSyntax
 
     case 'abstract':
        return new AbstractToken(leading, trailing);
+    case 'and':
+       return new AndToken(leading, trailing);
     case 'array':
        return new ArrayToken(leading, trailing);
     case 'arraykey':
@@ -683,6 +685,8 @@ class EditableToken extends EditableSyntax
        return new NumToken(leading, trailing);
     case 'object':
        return new ObjectToken(leading, trailing);
+    case 'or':
+       return new OrToken(leading, trailing);
     case 'parent':
        return new ParentToken(leading, trailing);
     case 'print':
@@ -737,6 +741,8 @@ class EditableToken extends EditableSyntax
        return new VoidToken(leading, trailing);
     case 'while':
        return new WhileToken(leading, trailing);
+    case 'xor':
+       return new XorToken(leading, trailing);
     case 'yield':
        return new YieldToken(leading, trailing);
     case '[':
@@ -977,6 +983,13 @@ class AbstractToken extends EditableToken
   constructor(leading, trailing)
   {
     super('abstract', leading, trailing, 'abstract');
+  }
+}
+class AndToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('and', leading, trailing, 'and');
   }
 }
 class ArrayToken extends EditableToken
@@ -1329,6 +1342,13 @@ class ObjectToken extends EditableToken
     super('object', leading, trailing, 'object');
   }
 }
+class OrToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('or', leading, trailing, 'or');
+  }
+}
 class ParentToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1516,6 +1536,13 @@ class WhileToken extends EditableToken
   constructor(leading, trailing)
   {
     super('while', leading, trailing, 'while');
+  }
+}
+class XorToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('xor', leading, trailing, 'xor');
   }
 }
 class YieldToken extends EditableToken
@@ -13571,6 +13598,7 @@ exports.EditableToken = EditableToken;
 exports.EndOfFileToken = EndOfFileToken;
 
 exports.AbstractToken = AbstractToken;
+exports.AndToken = AndToken;
 exports.ArrayToken = ArrayToken;
 exports.ArraykeyToken = ArraykeyToken;
 exports.AsToken = AsToken;
@@ -13621,6 +13649,7 @@ exports.NewtypeToken = NewtypeToken;
 exports.NoreturnToken = NoreturnToken;
 exports.NumToken = NumToken;
 exports.ObjectToken = ObjectToken;
+exports.OrToken = OrToken;
 exports.ParentToken = ParentToken;
 exports.PrintToken = PrintToken;
 exports.PrivateToken = PrivateToken;
@@ -13648,6 +13677,7 @@ exports.UseToken = UseToken;
 exports.VarToken = VarToken;
 exports.VoidToken = VoidToken;
 exports.WhileToken = WhileToken;
+exports.XorToken = XorToken;
 exports.YieldToken = YieldToken;
 exports.LeftBracketToken = LeftBracketToken;
 exports.RightBracketToken = RightBracketToken;

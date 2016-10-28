@@ -22,8 +22,19 @@
             ((name))(missing)
             ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
             (compound_statement
-              (({))
-              (missing)
-              ((})(whitespace)(single_line_comment)(end_of_line)))
+              (({)(whitespace)(single_line_comment)(end_of_line))
+              (return_statement((whitespace)(return)(whitespace))
+                (binary_expression
+                  (variable((variable)(whitespace)))
+                  ((or)(whitespace))
+                  (binary_expression
+                    (binary_expression
+                      (variable((variable)(whitespace)))
+                      ((and)(whitespace))
+                      (variable((variable)(whitespace))))
+                    ((xor)(whitespace))
+                    (variable((variable)))))
+                ((;)(whitespace)(single_line_comment)(end_of_line)))
+              ((whitespace)(})(end_of_line)))
             (missing)))
       ((})))))

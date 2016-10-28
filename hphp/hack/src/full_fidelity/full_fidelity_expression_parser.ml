@@ -225,6 +225,10 @@ module WithStatementAndDeclAndTypeParser
     if next_is_lower_precedence parser then (parser, term)
     else match peek_token_kind parser with
     (* Binary operators *)
+    (* TODO Add an error if PHP and / or / xor are used in Hack.  *)
+    | And
+    | Or
+    | Xor
     | Plus
     | Minus
     | Star
@@ -262,7 +266,6 @@ module WithStatementAndDeclAndTypeParser
     | Carat
     | BarGreaterThan
     | QuestionQuestion ->
-    (* TODO: "and" "or" "xor" *)
       parse_remaining_binary_expression parser term
     | Instanceof ->
       parse_instanceof_expression parser term

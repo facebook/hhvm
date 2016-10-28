@@ -939,6 +939,7 @@ let no_text_tokens = List.map token_node_from_list [
 
 let given_text_tokens = List.map token_node_from_list [
   [ "Abstract"; "abstract" ];
+  [ "And"; "and" ];
   [ "Array"; "array" ];
   [ "Arraykey"; "arraykey" ];
   [ "As"; "as" ];
@@ -989,6 +990,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Noreturn"; "noreturn" ];
   [ "Num"; "num" ];
   [ "Object"; "object" ];
+  [ "Or"; "or" ];
   [ "Parent"; "parent" ];
   [ "Print"; "print" ];
   [ "Private"; "private" ];
@@ -1016,6 +1018,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Var"; "var" ];
   [ "Void"; "void" ];
   [ "While"; "while" ];
+  [ "Xor"; "xor" ];
   [ "Yield"; "yield" ];
   [ "LeftBracket"; "[" ];
   [ "RightBracket"; "]" ];
@@ -2226,8 +2229,7 @@ exports.Whitespace = Whitespace;
 exports.EndOfLine = EndOfLine;
 exports.DelimitedComment = DelimitedComment;
 exports.SingleLineComment = SingleLineComment;
-EXPORTS_SYNTAX
-"
+EXPORTS_SYNTAX"
 
   let full_fidelity_javascript =
   {

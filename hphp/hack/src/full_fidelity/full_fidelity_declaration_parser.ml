@@ -149,7 +149,10 @@ module WithExpressionAndStatementAndTypeParser
       *)
     (* TODO: Add an error to a later pass that determines the value is
              a constant. *)
-    let (parser, name) = expect_name parser in
+
+    (* TODO: We must allow TRUE to be a legal enum member name; here we allow
+      any keyword.  Consider making this more strict. *)
+    let (parser, name) = expect_name_allow_keywords parser in
     let (parser, equal) = expect_equal parser in
     let (parser, value) = parse_expression parser in
     let (parser, semicolon) = expect_semicolon parser  in

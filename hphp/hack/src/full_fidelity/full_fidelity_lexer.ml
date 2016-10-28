@@ -410,12 +410,30 @@ let scan_double_quote_string_literal lexer =
 
 (*  A heredoc string literal has the form
 
+header
+optional body
+trailer
+
+The header is:
+
 <<< (optional whitespace) name (no whitespace) (newline)
+
+The optional body is:
+
 any characters whatsoever including newlines (newline)
+
+The trailer is:
+
 (no whitespace) name (no whitespace) (optional semi) (no whitespace) (newline)
 
-The names must be identical.  The trailing semi and newline are NOT part of
-the literal, but they must be present.
+The names must be identical.  The trailing semi and newline must be present.
+
+The body is any and all characters, up to the first line that exactly matches
+the trailer.
+
+The body may contain embedded expressions.
+
+TODO: parse the embedded expressions
 
 A nowdoc string literal has the same form except that the first name is
 enclosed in single quotes.
@@ -482,16 +500,7 @@ let scan_docstring_remainder name lexer =
 
 let scan_docstring_literal lexer =
   let (lexer, name, kind) = scan_docstring_header lexer in
-  (* We need at least one line *)
-  let lexer = skip_to_end_of_line lexer in
-  let ch = peek_char lexer 0 in
-  let lexer =
-    if is_newline ch then
-      scan_docstring_remainder name (skip_end_of_line lexer)
-    else
-      (* If we got here then we ran off the end of the file without
-      finding a newline. Just bail. *)
-      with_error lexer SyntaxError.error0011 in
+  let lexer = scan_docstring_remainder name lexer in
   (lexer, kind)
 
 let scan_xhp_label lexer =

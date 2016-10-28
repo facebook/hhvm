@@ -523,7 +523,7 @@ let scan_xhp_class_name lexer =
     (lexer, TokenKind.XHPClassName)
   else
     let lexer = with_error lexer SyntaxError.error0008 in
-    (advance lexer 1, TokenKind.Error)
+    (advance lexer 1, TokenKind.ErrorToken)
 
 let scan_xhp_string_literal lexer =
   (* XHP string literals are just straight up "find the closing quote"
@@ -569,7 +569,7 @@ let scan_xhp_token lexer =
       scan_xhp_element_name lexer
     else
       let lexer = with_error lexer SyntaxError.error0006 in
-      (advance lexer 1, TokenKind.Error)
+      (advance lexer 1, TokenKind.ErrorToken)
 
 let scan_xhp_comment lexer =
   let rec aux lexer =
@@ -720,7 +720,7 @@ let scan_token in_type lexer =
       scan_name_or_qualified_name lexer
     else
       let lexer = with_error lexer SyntaxError.error0006 in
-      (advance lexer 1, TokenKind.Error)
+      (advance lexer 1, TokenKind.ErrorToken)
 
 (* Lexing trivia *)
 

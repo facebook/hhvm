@@ -813,11 +813,12 @@ module WithExpressionAndStatementAndTypeParser
         require-implements-clause:
           require  implements  qualified-name  ;
     *)
+    (* We must also parse "require extends :foo;" *)
+    (* TODO: What about "require extends :foo<int>;" ? *)
     (* TODO: The spec is incomplete; we need to be able to parse
        require extends Foo<int>;
        Fix the spec.
        TODO: Check whether we also need to handle
-         require extends :foo ;
          require extends foo::bar
        and so on.
        *)
@@ -829,7 +830,11 @@ module WithExpressionAndStatementAndTypeParser
     | Implements
     | Extends -> (parser1, make_token req_kind_token)
     | _ -> (with_error parser SyntaxError.error1045, make_missing()) in
-    let (parser, name) = parse_qualified_name_type parser in
+    let (parser, name) = if is_next_xhp_class_name parser then
+      let (parser, token) = next_xhp_class_name parser in
+      (parser, make_token token)
+    else
+      parse_qualified_name_type parser in
     let (parser, semi) = expect_semicolon parser in
     let result = make_require_clause req req_kind name semi in
     (parser, result)

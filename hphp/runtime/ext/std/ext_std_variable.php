@@ -162,7 +162,7 @@ function unserialize(string $str,
  * defined variables, be they environment, server or user-defined
  * variables, within the scope in which get_defined_vars() is called.
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame")>>
 function get_defined_vars(): array;
 
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if
@@ -185,7 +185,7 @@ function import_request_variables(string $types,
  * key to see whether it has a valid variable name. It also checks for
  * collisions with existing variables in the symbol table.
  */
-<<__Native>>
+<<__Native("WritesCallerFrame")>>
 function extract(mixed &$var_array,
                  int $extract_type = EXTR_OVERWRITE,
                  string $prefix = ""): int;
@@ -202,30 +202,9 @@ function extract(mixed &$var_array,
  * parse_str() uses the same mechanism that PHP uses to populate the $_GET,
  * $_POST, etc. variables.
  */
-<<__Native>>
+<<__Native("WritesCallerFrame")>>
 function parse_str(string $str, mixed &$arr = null): void;
 
-}
-
-/*
- * Several of the above functions can affect the variable environment of the
- * their caller.  In order to allow the JIT to make more aggressive
- * optimizations, we have an option that disables dynamic calls to these
- * functions---to make that work, non-dynamic calls are rewritten to call these
- * __SystemLib versions, which are still allowed to modify the caller variable
- * environment when the option is enabled.
- */
-namespace __SystemLib {
-  <<__Native>>
-  function extract(mixed &$var_array,
-                   int $extract_type = EXTR_OVERWRITE,
-                   string $prefix = ""): int;
-
-  <<__Native>>
-  function get_defined_vars(): array;
-
-  <<__Native>>
-  function parse_str(string $str, mixed &$arr = null): void;
 }
 
 namespace HH {

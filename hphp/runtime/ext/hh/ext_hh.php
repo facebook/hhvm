@@ -64,7 +64,7 @@ function serialize_memoize_param(mixed $param): arraykey;
  * Attach metadata to the caller's stack frame. The metadata can be retrieved
  * using debug_backtrace(DEBUG_BACKTRACE_PROVIDE_METADATA).
  */
-<<__Native>>
+<<__Native("WritesCallerFrame")>>
 function set_frame_metadata(mixed $metadata): void;
 
 }

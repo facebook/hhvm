@@ -368,22 +368,6 @@ bool dontGuardAnyInputs(Op op);
  */
 bool isAlwaysNop(Op op);
 
-/*
- * Could `inst' clobber the locals in the environment of `caller'?
- *
- * This occurs, e.g., if `inst' is a call to extract().
- */
-bool callDestroysLocals(const NormalizedInstruction& inst,
-                        const Func* caller);
-
-/*
- * Could the CPP builtin function `callee` destroy the locals
- * in the environment of its caller?
- *
- * This occurs, e.g., if `func' is extract().
- */
-bool builtinFuncDestroysLocals(const Func* callee);
-
 ///////////////////////////////////////////////////////////////////////////////
 // Completely unrelated functionality.
 

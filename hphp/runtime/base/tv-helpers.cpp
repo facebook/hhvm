@@ -1427,7 +1427,7 @@ void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
   if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
     return;                                                       \
   }                                                               \
-  raise_param_type_warning(callee->name()->data(),                \
+  raise_param_type_warning(callee->displayName()->data(),         \
                            arg_num, KindOf##expkind, tv->m_type); \
   throw TVCoercionException(callee, arg_num, tv->m_type,          \
                             KindOf##expkind);                     \

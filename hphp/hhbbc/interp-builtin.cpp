@@ -362,7 +362,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   auto const func = env.index.resolve_func(env.ctx, name);
   auto const rt = env.index.lookup_return_type(env.ctx, func);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-  specialFunctionEffects(env, name);
+  specialFunctionEffects(env, func);
   push(env, rt);
 }
 

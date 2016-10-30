@@ -200,10 +200,8 @@ void fixupWork(ExecutionContext* ec, ActRec* nextRbp) {
 bool eagerRecord(const Func* func) {
   const char* list[] = {
     "func_get_args",
-    "__SystemLib\\func_get_args_sl",
     "get_called_class",
     "func_num_args",
-    "__SystemLib\\func_num_arg_",
     "array_filter",
     "array_map",
     "__SystemLib\\func_slice_args",
@@ -215,7 +213,7 @@ bool eagerRecord(const Func* func) {
   };
 
   for (auto str : list) {
-    if (!strcmp(func->name()->data(), str)) return true;
+    if (!strcmp(func->displayName()->data(), str)) return true;
   }
 
   return false;

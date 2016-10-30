@@ -250,7 +250,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     // Check for include.
-    String funcname{const_cast<StringData*>(fp->func()->name())};
+    String funcname{const_cast<StringData*>(fp->func()->displayName())};
     if (fp->func()->isClosureBody()) {
       // Strip the file hash from the closure name.
       String fullName{const_cast<StringData*>(fp->func()->baseCls()->name())};

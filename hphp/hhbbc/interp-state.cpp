@@ -73,7 +73,11 @@ bool operator==(const ActRec& a, const ActRec& b) {
     a.func.hasValue() != b.func.hasValue() ? false :
     a.func.hasValue() ? a.func->same(*b.func) :
     true;
-  return a.kind == b.kind && fsame;
+  auto const fsame2 =
+    a.fallbackFunc.hasValue() != b.fallbackFunc.hasValue() ? false :
+    a.fallbackFunc.hasValue() ? a.fallbackFunc->same(*b.fallbackFunc) :
+    true;
+  return a.kind == b.kind && fsame && fsame2;
 }
 
 bool operator==(const State& a, const State& b) {
@@ -294,6 +298,7 @@ std::string show(const ActRec& a) {
     a.cls ? show(*a.cls) : "",
     a.cls && a.func ? "::" : "",
     a.func ? show(*a.func) : "",
+    a.fallbackFunc ? show(*a.fallbackFunc) : "",
     " }"
   );
 }

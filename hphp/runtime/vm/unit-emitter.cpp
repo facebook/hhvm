@@ -585,6 +585,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     } else {
       assert(!mi->m_firstHoistableFunc);
     }
+    assert(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
   assert(u->getMain(nullptr)->isPseudoMain());
@@ -654,10 +655,19 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   }
 
   for (size_t i = 0; i < m_feTab.size(); ++i) {
-    assert(m_feTab[i].second->past == m_feTab[i].first);
-    assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());
-    u->m_funcTable.push_back(
-      FuncEntry(m_feTab[i].first, m_fMap.find(m_feTab[i].second)->second));
+    auto const past = m_feTab[i].first;
+    auto const fe = m_feTab[i].second;
+    assert(fe->past == past);
+    assert(m_fMap.find(fe) != m_fMap.end());
+    auto func = m_fMap.find(fe)->second;
+    u->m_funcTable.push_back(FuncEntry(past, func));
+    // If this function has a dynamic call wrapper, hookup the Func* pointers so
+    // they point to each other.
+    if (fe->dynCallWrapperId != kInvalidId) {
+      auto wrapper = u->lookupFuncId(fe->dynCallWrapperId);
+      func->setDynCallWrapper(wrapper);
+      wrapper->setDynCallTarget(func);
+    }
   }
 
   // Funcs can be recorded out of order when loading them from the

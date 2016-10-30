@@ -114,10 +114,6 @@ bool HHVM_FUNCTION(array_walk,
 Array HHVM_FUNCTION(compact,
                     const Variant& varname,
                     const Array& args = null_array);
-// __SystemLib\\compact_sl
-Array HHVM_FUNCTION(__SystemLib_compact_sl,
-                    const Variant& varname,
-                    const Array& args = null_array);
 bool HHVM_FUNCTION(shuffle,
                    VRefParam array);
 int64_t HHVM_FUNCTION(count,

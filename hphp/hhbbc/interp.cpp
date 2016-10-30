@@ -1345,8 +1345,13 @@ void in(ISS& env, const bc::FPushFunc& op) {
     auto const name = normalizeNS(v1->m_data.pstr);
     // FPushFuncD doesn't support class-method pair strings yet.
     if (isNSNormalized(name) && notClassMethodPair(name)) {
-      return reduce(env, bc::PopC {},
-                         bc::FPushFuncD { op.arg1, name });
+      auto const rfunc = env.index.resolve_func(env.ctx, name);
+      // Don't turn dynamic calls to caller frame affecting functions into
+      // static calls, because they might fatal (whereas the static one won't).
+      if (!rfunc.mightAccessCallerFrame()) {
+        return reduce(env, bc::PopC {},
+                           bc::FPushFuncD { op.arg1, name });
+      }
     }
   }
   popC(env);
@@ -1357,9 +1362,12 @@ void in(ISS& env, const bc::FPushFunc& op) {
 }
 
 void in(ISS& env, const bc::FPushFuncU& op) {
-  auto const rfunc =
+  auto const rfuncPair =
     env.index.resolve_func_fallback(env.ctx, op.str2, op.str3);
-  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc });
+  fpiPush(
+    env,
+    ActRec { FPIKind::Func, folly::none, rfuncPair.first, rfuncPair.second }
+  );
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
@@ -1630,22 +1638,36 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
     CallContext { env.ctx, args },
     *ar.func
   );
-  pushCallReturnType(env, ty);
+  if (!ar.fallbackFunc) {
+    pushCallReturnType(env, ty);
+    return;
+  }
+  auto const ty2 = env.index.lookup_return_type(
+    CallContext { env.ctx, args },
+    *ar.fallbackFunc
+  );
+  pushCallReturnType(env, union_of(ty, ty2));
 }
 
 void in(ISS& env, const bc::FCall& op) {
   auto const ar = fpiTop(env);
-  if (ar.func) {
+  if (ar.func && !ar.fallbackFunc) {
     switch (ar.kind) {
     case FPIKind::Unknown:
     case FPIKind::CallableArr:
     case FPIKind::ObjInvoke:
       not_reached();
     case FPIKind::Func:
-      return reduce(
-        env,
-        bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
-      );
+      // Don't turn dynamic calls into static calls with functions that can
+      // potentially touch the caller's frame. Such functions will fatal if
+      // called dynamically and we want to preserve that behavior.
+      if (!ar.func->mightAccessCallerFrame()) {
+        return reduce(
+          env,
+          bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
+        );
+      }
+      break;
     case FPIKind::Ctor:
       /*
        * Need to be wary of old-style ctors. We could get into the situation
@@ -1697,7 +1719,12 @@ void fcallArrayImpl(ISS& env) {
   specialFunctionEffects(env, ar);
   if (ar.func) {
     auto const ty = env.index.lookup_return_type(env.ctx, *ar.func);
-    pushCallReturnType(env, ty);
+    if (!ar.fallbackFunc) {
+      pushCallReturnType(env, ty);
+      return;
+    }
+    auto const ty2 = env.index.lookup_return_type(env.ctx, *ar.fallbackFunc);
+    pushCallReturnType(env, union_of(ty, ty2));
     return;
   }
   return push(env, TInitGen);
@@ -2202,6 +2229,8 @@ void in(ISS& env, const bc::Silence& op) {
       break;
   }
 }
+
+void in(ISS& emv, const bc::VarEnvDynCall&) {}
 
 void in(ISS& env, const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
 void in(ISS& env, const bc::HighInvalid&) { always_assert(!"HighInvalid"); }

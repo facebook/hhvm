@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/func-effects.h"
@@ -36,6 +38,8 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
+
+#include "hphp/util/text-util.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -91,7 +95,7 @@ const StaticString
   s_abs("abs"),
   s_ord("ord"),
   s_chr("chr"),
-  s_func_num_args("__SystemLib\\func_num_arg_"),
+  s_func_num_args("func_num_args"),
   s_one("1"),
   s_empty("");
 
@@ -1350,7 +1354,7 @@ SSATmp* builtinCall(IRGS& env,
       bcSPOffset(env),
       callee,
       params.count ? -1 : numNonDefault,
-      builtinFuncDestroysLocals(callee),
+      funcDestroysLocals(callee),
       builtinFuncNeedsCallerFrame(callee)
     },
     catchMaker.makeUnusualCatch(),
@@ -1979,4 +1983,23 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 
 //////////////////////////////////////////////////////////////////////
 
+void emitVarEnvDynCall(IRGS& env) {
+  auto const func = curFunc(env);
+  assertx(func->dynCallTarget());
+
+  if (RuntimeOption::RepoAuthoritative &&
+      Repo::global().DisallowDynamicVarEnvFuncs) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::DISALLOWED_DYNCALL,
+      func->fullDisplayName()->data()
+    );
+    gen(env, RaiseError, cns(env, makeStaticString(msg)));
+  } else {
+    gen(env, RaiseVarEnvDynCall, cns(env, func->dynCallTarget()));
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 }}}

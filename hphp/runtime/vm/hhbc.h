@@ -641,6 +641,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
   O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
+  O(VarEnvDynCall,   NA,               NOV,             NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
 enum class Op : uint16_t {

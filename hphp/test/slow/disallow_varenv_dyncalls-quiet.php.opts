@@ -1,0 +1,3 @@
+--count=120
+-vHack.Lang.DisallowDynamicVarEnvFuncs=0
+-vEval.JitPGOThreshold=2

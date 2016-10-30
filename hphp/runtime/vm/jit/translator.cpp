@@ -367,6 +367,8 @@ static const struct {
   { OpThis,        {None,             Stack1,       OutThisObject   }},
   { OpBareThis,    {None,             Stack1,       OutUnknown      }},
   { OpCheckThis,   {This,             None,         OutNone         }},
+  { OpVarEnvDynCall,
+                   {None,             None,         OutNone         }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
   { OpStaticLoc,
@@ -1007,6 +1009,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::UnsetM:
   case Op::SetWithRefLML:
   case Op::SetWithRefRML:
+  case Op::VarEnvDynCall:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.

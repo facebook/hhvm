@@ -281,6 +281,12 @@ struct FuncInfo {
   bool thisAvailable = false;
 
   /*
+   * Whether this function can potentially read or write to the caller's frame.
+   */
+  bool readsCallerFrame = false;
+  bool writesCallerFrame = false;
+
+  /*
    * Call-context sensitive return types are cached here.  This is not
    * an optimization.
    *
@@ -588,6 +594,36 @@ bool Func::cantBeMagicCall() const {
   );
 }
 
+bool Func::mightReadCallerFrame() const {
+  return match<bool>(
+    val,
+    [&] (FuncName s)                  { return false; },
+    [&] (MethodName s)                { return false; },
+    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->readsCallerFrame; },
+    [&] (borrowed_ptr<FuncFamily> fa) {
+      for (auto const& finfo : fa->possibleFuncs) {
+        if (finfo->readsCallerFrame) return true;
+      }
+      return false;
+    }
+  );
+}
+
+bool Func::mightWriteCallerFrame() const {
+  return match<bool>(
+    val,
+    [&] (FuncName s)                  { return false; },
+    [&] (MethodName s)                { return false; },
+    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->writesCallerFrame; },
+    [&] (borrowed_ptr<FuncFamily> fa) {
+      for (auto const& finfo : fa->possibleFuncs) {
+        if (finfo->writesCallerFrame) return true;
+      }
+      return false;
+    }
+  );
+}
+
 std::string show(const Func& f) {
   std::string ret = f.name()->data();
   match<void>(
@@ -719,6 +755,8 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
     // here saves on whole-program iterations.
     ret.returnTy = native_function_return_type(f);
   }
+  if (f->attrs & AttrReadsCallerFrame) ret.readsCallerFrame = true;
+  if (f->attrs & AttrWritesCallerFrame) ret.writesCallerFrame = true;
   ret.thisAvailable = false;
   return &ret;
 }
@@ -2027,7 +2065,7 @@ res::Func Index::resolve_func(Context ctx, SString name) const {
   return resolve_func_helper(funcs, name);
 }
 
-folly::Optional<res::Func>
+std::pair<res::Func, folly::Optional<res::Func>>
 Index::resolve_func_fallback(Context ctx,
                              SString nsName,
                              SString fallbackName) const {
@@ -2043,10 +2081,14 @@ Index::resolve_func_fallback(Context ctx,
     // It could come from either at runtime.  (We could try to rule it
     // out by figuring out if one must be defined based on the
     // ctx.unit, but it's unlikely to matter for now.)
-    return folly::none;
+    return std::make_pair(
+      resolve_func_helper(r1, nsName),
+      resolve_func_helper(r2, fallbackName)
+    );
   }
-  return begin(r1) == end(r1) ? resolve_func_helper(r2, fallbackName)
-                              : resolve_func_helper(r1, nsName);
+  return begin(r1) == end(r1)
+    ? std::make_pair(resolve_func_helper(r2, fallbackName), folly::none)
+    : std::make_pair(resolve_func_helper(r1, nsName), folly::none);
 }
 
 Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {

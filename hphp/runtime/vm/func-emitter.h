@@ -300,6 +300,8 @@ public:
   StringData *memoizePropName;
   int memoizeSharedPropIndex;
 
+  Id dynCallWrapperId{kInvalidId};
+
 private:
   /*
    * FuncEmitter-managed state.

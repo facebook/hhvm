@@ -70,6 +70,10 @@ module WorkerApi = struct
         | _ -> acc
     end ~init:acc
 
+  let add_trie_term id type_ acc =
+    let (pos, name) = id in
+    SS.WorkerApi.process_trie_term (strip_ns name) name pos type_ acc
+
   let add_fuzzy_term id type_ acc =
     let name = snd id in
     let key = strip_ns name in
@@ -80,28 +84,27 @@ module WorkerApi = struct
     let key = strip_ns name in
     SS.WorkerApi.process_autocomplete_term key name pos type_ acc
 
+  let update_defs id type_ fuzzy_defs trie_defs =
+    if !Parsing_hooks.fuzzy then
+    add_fuzzy_term id type_ fuzzy_defs, trie_defs
+    else
+    fuzzy_defs, add_trie_term id type_ trie_defs
+
   (* Called by a worker after the file is parsed *)
   let update fn ast =
     let fuzzy_defs, trie_defs =
       List.fold_left ast ~f:begin fun (fuzzy_defs, trie_defs) def ->
       match def with
       | Ast.Fun f ->
-          let fuzzy_defs = add_fuzzy_term f.Ast.f_name Function fuzzy_defs in
-          fuzzy_defs, trie_defs
+          update_defs f.Ast.f_name Function fuzzy_defs trie_defs
       | Ast.Class c ->
-          let fuzzy_defs =
-            add_fuzzy_term c.Ast.c_name (Class c.Ast.c_kind) fuzzy_defs in
           (* Still index methods for trie search *)
           let trie_defs = update_class c trie_defs in
-          fuzzy_defs, trie_defs
+          update_defs c.Ast.c_name (Class c.Ast.c_kind) fuzzy_defs trie_defs
       | Ast.Typedef td ->
-          let fuzzy_defs = add_fuzzy_term td.Ast.t_id Typedef fuzzy_defs in
-          fuzzy_defs, trie_defs
+          update_defs td.Ast.t_id Typedef fuzzy_defs trie_defs
       | Ast.Constant cst ->
-          let fuzzy_defs =
-            add_fuzzy_term cst.Ast.cst_name Constant fuzzy_defs
-          in
-          fuzzy_defs, trie_defs
+          update_defs cst.Ast.cst_name Constant fuzzy_defs trie_defs
       | _ -> fuzzy_defs, trie_defs
     end ~init:(SS.Fuzzy.TMap.empty, []) in
     let autocomplete_defs = List.fold_left ast ~f:begin fun acc def ->

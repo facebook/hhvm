@@ -3,15 +3,15 @@
  (name: \foo)
  (body:
   (stmt(If
-    ((Tbool TPrim) expr binop((Tint TPrim) expr Lvar -187650736)((Tint TPrim) expr Int))
+    ((Tbool TPrim) expr binop((Tint TPrim) expr Lvar $x)((Tint TPrim) expr Int))
     (stmt
-     ((Tint TPrim) expr binop(TAny expr Lvar 4)((Tint TPrim) expr Int)))
+     ((Tint TPrim) expr binop(TAny expr Lvar $y)((Tint TPrim) expr Int)))
     
     (stmt
-     ((Tstring TPrim) expr binop(TAny expr Lvar 4)((Tstring TPrim) expr other)))
+     ((Tstring TPrim) expr binop(TAny expr Lvar $y)((Tstring TPrim) expr other)))
     ))
   (stmt
-   ((Tvoid TPrim) expr Call(TAny expr Id \g)((TUnion(Tint TPrim)(Tstring TPrim)) expr Lvar 4)))
+   ((Tvoid TPrim) expr Call(TAny expr Id \g)((TUnion(Tint TPrim)(Tstring TPrim)) expr Lvar $y)))
   ))
 (fun
  (name: \g)

@@ -1153,8 +1153,11 @@ and expr_
   | Call (Cnormal, (_, Id (_, hh_show)), [x], [])
       when hh_show = SN.PseudoFunctions.hh_show ->
       let env, ty = expr env x in
-      let s = Typing_print.debug env ty in
-      print_string s; print_newline();
+      Typing_log.hh_show p env ty;
+      env, Env.fresh_type()
+  | Call (Cnormal, (_, Id (_, hh_show_env)), [], [])
+      when hh_show_env = SN.PseudoFunctions.hh_show_env ->
+      Typing_log.hh_show_env p env;
       env, Env.fresh_type()
   | Call (call_type, e, el, uel) ->
       let env, result = dispatch_call p env call_type e el uel in

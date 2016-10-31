@@ -112,6 +112,7 @@ let builtins =
   "interface Stringish {public function __toString(): string {}}\n"^
   "interface XHPChild {}\n"^
   "function hh_show($val) {}\n"^
+  "function hh_show_env() {}\n"^
   "interface Countable { public function count(): int; }\n"^
   "interface AsyncIterator<+Tv> {}\n"^
   "interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {}\n"^
@@ -622,6 +623,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
 
 let decl_and_run_mode {filename; mode; no_builtins} popt tcopt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
+  Local_id.track_names := true;
   let builtins = if no_builtins then "" else builtins in
   let filename = Relative_path.create Relative_path.Dummy filename in
   let files_contents = file_to_files filename in

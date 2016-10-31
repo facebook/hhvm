@@ -1,3 +1,5 @@
-<static> as this as ^(C)
-^(<static>::T as this::T as C::T)
+File "expr_dep_this_var.php", line 12, characters 5-18:
+  <static> as this as ^(C)
+File "expr_dep_this_var.php", line 13, characters 5-25:
+  ^(<static>::T as this::T as C::T)
 No errors

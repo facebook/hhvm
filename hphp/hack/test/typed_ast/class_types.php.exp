@@ -3,7 +3,7 @@
  (name: \foo)
  (body:
   (stmt
-   ((Tvoid TPrim) expr Call(TAny expr Id \bar)((TClass \A < >) expr Lvar -943623712)((TClass \B <(TClass \A < >) >) expr Lvar -1047294126)))
+   ((Tvoid TPrim) expr Call(TAny expr Id \bar)((TClass \A < >) expr Lvar $a)((TClass \B <(TClass \A < >) >) expr Lvar $b)))
   ))
 (fun
  (name: \bar)

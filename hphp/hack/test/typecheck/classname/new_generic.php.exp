@@ -1,6 +1,9 @@
-<expr#1> as Tobj
-^(C<int>)
-^(C<int>)
+File "new_generic.php", line 13, characters 3-16:
+  <expr#1> as Tobj
+File "new_generic.php", line 18, characters 3-32:
+  ^(C<int>)
+File "new_generic.php", line 19, characters 3-38:
+  ^(C<int>)
 File "new_generic.php", line 19, characters 29-36:
 Some type constraint(s) here are violated (Typing[4110])
 File "new_generic.php", line 8, characters 26-29:

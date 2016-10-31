@@ -3,13 +3,13 @@
  (name: \foo)
  (body:
   (stmt
-   (TNull expr binop(TAny expr Lvar 4)(TNull expr other)))
+   (TNull expr binop(TAny expr Lvar $x)(TNull expr other)))
   (stmt
-   ((Tvoid TPrim) expr Call(TAny expr Id \bar)(TNull expr Lvar 4)))
+   ((Tvoid TPrim) expr Call(TAny expr Id \bar)(TNull expr Lvar $x)))
   (stmt
-   (TNotImpl expr binop(TAny expr Lvar 4)(TNotImpl expr other)))
+   (TNotImpl expr binop(TAny expr Lvar $x)(TNotImpl expr other)))
   (stmt
-   ((Tvoid TPrim) expr Call(TAny expr Id \bar)(TNotImpl expr Lvar 4)))
+   ((Tvoid TPrim) expr Call(TAny expr Id \bar)(TNotImpl expr Lvar $x)))
   ))
 (fun
  (name: \bar)

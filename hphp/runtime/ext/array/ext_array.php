@@ -852,7 +852,7 @@ function array_diff_assoc(mixed $array1, mixed $array2, ...$argv): mixed;
 /**
  * Compares array1 against array2 and returns the difference. Unlike
  *   array_diff() the array keys are used in the comparison. Unlike
- *   array_diff_assoc() an user supplied callback function is used for the
+ *   array_diff_assoc() a user supplied callback function is used for the
  *   indices comparison, not internal function.
  *
  * @param mixed $array1 - The array to compare from

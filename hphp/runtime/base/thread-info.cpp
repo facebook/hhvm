@@ -181,16 +181,39 @@ static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
     "request has exceeded memory limit", exceptionStack);
 }
 
+// suppress certain callbacks when we're running a user error handler;
+// to reduce the chances that a subsequent error occurs in the callback
+// and obscures the effect that the first handler would have had.
+static bool callbacksOk() {
+  switch (g_context->getErrorState()) {
+    case ExecutionContext::ErrorState::NoError:
+    case ExecutionContext::ErrorState::ErrorRaised:
+    case ExecutionContext::ErrorState::ErrorRaisedByUserHandler:
+      return true;
+    case ExecutionContext::ErrorState::ExecutingUserHandler:
+      return false;
+  }
+  not_reached();
+}
+
 size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   auto& info = TI();
   auto& p = info.m_reqInjectionData;
 
-  auto const flags = fetchAndClearSurpriseFlags() & mask;
+  auto flags = fetchAndClearSurpriseFlags() & mask;
   auto const debugging = p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the thread.
   auto pendingException = info.m_pendingException;
   info.m_pendingException = nullptr;
+
+  if (auto cbFlags =
+      flags & (XenonSignalFlag | MemThresholdFlag | IntervalTimerFlag)) {
+    if (!callbacksOk()) {
+      setSurpriseFlag(static_cast<SurpriseFlag>(cbFlags));
+      flags -= cbFlags;
+    }
+  }
 
   if ((flags & TimedOutFlag) && !debugging) {
     p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.

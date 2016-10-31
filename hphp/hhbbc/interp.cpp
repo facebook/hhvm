@@ -1433,25 +1433,21 @@ void in(ISS& env, const bc::FPushClsMethodF& op) {
   impl(env, bc::FPushClsMethod { op.arg1 });
 }
 
-void in(ISS& env, const bc::FPushCtorD& op) {
-  auto const rcls = env.index.resolve_class(env.ctx, op.str2);
+void ctorHelper(ISS& env, SString name) {
+  auto const rcls = env.index.resolve_class(env.ctx, name);
   push(env, rcls ? objExact(*rcls) : TObj);
   auto const rfunc =
     rcls ? env.index.resolve_ctor(env.ctx, *rcls) : folly::none;
   fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
 }
 
+void in(ISS& env, const bc::FPushCtorD& op) {
+  ctorHelper(env, op.str2);
+}
+
 void in(ISS& env, const bc::FPushCtorI& op) {
   auto const name = env.ctx.unit->classes[op.arg2]->name;
-  auto const rcls = env.index.resolve_class(env.ctx, name);
-  always_assert_flog(
-    rcls.hasValue() && rcls->resolved(),
-    "An anonymous class ({}) failed to resolve",
-    name->data()
-  );
-  push(env, objExact(*rcls));
-  auto const rfunc = env.index.resolve_ctor(env.ctx, *rcls);
-  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
+  ctorHelper(env, name);
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {

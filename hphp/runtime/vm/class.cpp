@@ -299,7 +299,6 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
 
   auto cloneClass = [&] {
     auto const cls = newClass(m_preClass.get(), m_parent.get());
-    cls->setClassHandle(template_cls->m_cachedClass);
     return cls;
   };
 
@@ -341,10 +340,21 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
       ScopedCloneBackref { ClassPtr(template_cls), attrs });
   }
 
+  auto updateClones = [&] {
+    if (template_cls != fermeture.get()) {
+      scopedClones[key] = fermeture;
+      fermeture.get()->setClassHandle(template_cls->m_cachedClass);
+    }
+  };
+
   InstanceBits::ifInitElse(
-    [&] { fermeture->setInstanceBits();
-          if (this != fermeture.get()) scopedClones[key] = fermeture; },
-    [&] { if (this != fermeture.get()) scopedClones[key] = fermeture; }
+    [&] {
+      fermeture->setInstanceBits();
+      updateClones();
+    },
+    [&] {
+      updateClones();
+    }
   );
 
   return fermeture.get();

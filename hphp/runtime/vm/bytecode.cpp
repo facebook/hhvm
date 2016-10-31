@@ -6218,14 +6218,6 @@ TCA iopWrapper(Op op, void(*fn)(ActRec*,PC&,intva_t), PC& pc) {
 }
 
 OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(intva_t,const StringData*), PC& pc) {
-  auto n = decode_intva(pc);
-  auto s = decode_litstr(pc);
-  fn(n, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
 TCA iopWrapper(Op op, void(*fn)(intva_t,const StringData*,Id), PC& pc) {
   auto n = decode_intva(pc);
   auto s = decode_litstr(pc);

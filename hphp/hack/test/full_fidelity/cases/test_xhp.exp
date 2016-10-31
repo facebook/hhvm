@@ -54,7 +54,10 @@
             ((lparen))
             (list
               (list_item
-                (postfix_unary_expression((name))((+)))
+                (binary_expression
+                  (postfix_unary_expression((name))((+)(whitespace)))
+                  ((|)(whitespace))
+                  ((name)))
                 ((,)(whitespace)))
               (list_item
                 (postfix_unary_expression((XHP_category_name))((*)))

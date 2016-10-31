@@ -657,7 +657,7 @@ module WithExpressionAndStatementAndTypeParser
     | Plus
     | Question ->
       let result = make_postfix_unary_expression term (make_token token) in
-      (parser1, result)
+      parse_xhp_children_trailing parser1 result
     | Bar ->
       let (parser, right) = parse_xhp_children_expression parser1 in
       let result = make_binary_expression term (make_token token) right in

@@ -667,9 +667,9 @@ void Vgen::emit(const vasm_opc& i) {   \
   auto adr = M(i.m);                   \
   vixl::Label again;                   \
   a->bind(&again);                     \
-  a->ldxr(rAsm, adr);                  \
+  a->ldaxr(rAsm, adr);                 \
   a->arm_opc(rAsm, rAsm, 1, SetFlags); \
-  a->stxr(rAsm.W(), rAsm, adr);        \
+  a->stlxr(rAsm.W(), rAsm, adr);       \
   a->Cbnz(rAsm.W(), &again);           \
 }
 

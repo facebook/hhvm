@@ -337,6 +337,15 @@ let serve genv env in_fd _ =
   done
 
 let program_init genv =
+  (* Before starting the init make sure we are not in the middle of a
+   * checkout. If this happens, we get that the svn rev of the merge base
+   * to be the old version, whereas, we need the new version so that
+   * we can get a proper saved state. This also affects changed files in
+   * the same way.
+   * This solution is not fully correct. Checkout can still happen between
+   * this call and the next but it minimizes the damage.
+   * *)
+  MercurialUtils.wait_until_stable_repository (ServerArgs.root genv.options);
   let env, init_type =
     (* If we are saving, always start from a fresh state -- just in case
      * incremental mode introduces any errors. *)

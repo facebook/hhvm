@@ -241,7 +241,6 @@ struct Options {
   /*
    * If true, we'll assume that dynamic function calls (like '$f()') do not
    * have effects on unknown locals (i.e. are not extract / compact /...).
-   * See, e.g. __SystemLib\\extract vs extract.
    */
   bool DisallowDynamicVarEnvFuncs = true;
 

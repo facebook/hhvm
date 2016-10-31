@@ -1,0 +1,4 @@
+File "multi_as_invoke_bad.php", line 24, characters 9-12:
+You are trying to access the member Bong but this is not an object, it is a value of generic type T (Typing[4062])
+File "multi_as_invoke_bad.php", line 19, characters 23-23:
+Check this out

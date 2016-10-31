@@ -657,6 +657,7 @@ module Typing                               = struct
   let contravariant_this                    = 4158 (* DONT MODIFY!!!! *)
   let instanceof_always_false               = 4159 (* DONT MODIFY!!!! *)
   let instanceof_always_true                = 4160 (* DONT MODIFY!!!! *)
+  let ambiguous_member                      = 4161 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1930,7 +1931,17 @@ let non_object_member s pos1 ty pos2 =
    ty);
   pos2,
   "Check this out"
-]
+  ]
+
+let ambiguous_member s pos1 ty pos2 =
+  add_list Typing.ambiguous_member [
+  pos1,
+  ("You are trying to access the member "^s^
+   " but there is more than one implementation on "^
+   ty);
+  pos2,
+  "Check this out"
+  ]
 
 let null_container p null_witness =
   add_list Typing.null_container (

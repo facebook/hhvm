@@ -351,17 +351,27 @@ let rec get_doc node =
       equal ^|
       group_doc (type_spec ^^^ semicolon)
     )
-  | EnumDeclaration x ->
-    let en = get_doc x.enum_keyword in
-    let na = get_doc x.enum_name in
-    let co = get_doc x.enum_colon in
-    let ba = get_doc x.enum_base in
-    let ty = get_doc x.enum_type in
-    let lb = get_doc x.enum_left_brace in
-    let es = get_doc x.enum_enumerators in
-    let rb = get_doc x.enum_right_brace in
+  | EnumDeclaration {
+    enum_attribute_spec;
+    enum_keyword;
+    enum_name;
+    enum_colon;
+    enum_base;
+    enum_type;
+    enum_left_brace;
+    enum_enumerators;
+    enum_right_brace } ->
+    let attrs = get_doc enum_attribute_spec in
+    let en = get_doc enum_keyword in
+    let na = get_doc enum_name in
+    let co = get_doc enum_colon in
+    let ba = get_doc enum_base in
+    let ty = get_doc enum_type in
+    let lb = get_doc enum_left_brace in
+    let es = get_doc enum_enumerators in
+    let rb = get_doc enum_right_brace in
     (* TODO: This could be a lot better. Add indentation, etc. *)
-    en ^| na ^| co ^| ba ^| ty ^| lb ^| es ^| rb
+    attrs ^| en ^| na ^| co ^| ba ^| ty ^| lb ^| es ^| rb
   | Enumerator x ->
     let n = get_doc x.enumerator_name in
     let e = get_doc x.enumerator_equal in
@@ -1073,6 +1083,14 @@ let rec get_doc node =
     let expr_list = get_doc x.echo_expressions in
     let semicolon = get_doc x.echo_semicolon in
     echo ^| expr_list ^^^ semicolon
+  | GlobalStatement {
+    global_keyword;
+    global_variables;
+    global_semicolon } ->
+    let g = get_doc global_keyword in
+    let v = get_doc global_variables in
+    let s = get_doc global_semicolon in
+    g ^| v ^^^ s
   | SimpleInitializer
     { simple_initializer_equal; simple_initializer_value } ->
     let e = get_doc simple_initializer_equal in

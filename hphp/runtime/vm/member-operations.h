@@ -165,6 +165,13 @@ void objOffsetUnset(ObjectData* base, TypedValue offset);
 
 [[noreturn]] void unknownBaseType(const TypedValue*);
 
+/**
+ * Elem when base is Null
+ */
+inline const TypedValue* ElemEmptyish() {
+  return init_null_variant.asTypedValue();
+}
+
 template <MOpFlags flags>
 inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
   return (flags & MOpFlags::Warn) ? base->nvTryGet(key) : base->nvGet(key);
@@ -206,7 +213,7 @@ inline const TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(&scratch).toString().data());
     }
-    return init_null_variant.asTypedValue();
+    return ElemEmptyish();
   }
 
   assertx(result->m_type != KindOfUninit);
@@ -242,7 +249,7 @@ inline const TypedValue* ElemVec(ArrayData* base, key_type<keyType> key) {
   assertx(base->isVecArray());
   auto result = ElemVecPre<flags>(base, key);
   if (!(flags & MOpFlags::Warn)) {
-    if (UNLIKELY(!result)) return init_null_variant.asTypedValue();
+    if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(result->m_type != KindOfUninit);
   return result;
@@ -278,7 +285,7 @@ inline const TypedValue* ElemDict(ArrayData* base, key_type<keyType> key) {
   assertx(base->isDict());
   auto result = ElemDictPre<flags>(base, key);
   if (!(flags & MOpFlags::Warn)) {
-    if (UNLIKELY(!result)) return init_null_variant.asTypedValue();
+    if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(result->m_type != KindOfUninit);
   return result;
@@ -314,17 +321,10 @@ inline const TypedValue* ElemKeyset(ArrayData* base, key_type<keyType> key) {
   assertx(base->isKeyset());
   auto result = ElemKeysetPre<flags>(base, key);
   if (!(flags & MOpFlags::Warn)) {
-    if (UNLIKELY(!result)) return init_null_variant.asTypedValue();
+    if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(isIntType(result->m_type) || isStringType(result->m_type));
   return result;
-}
-
-/**
- * Elem when base is Null
- */
-inline const TypedValue* ElemEmptyish() {
-  return init_null_variant.asTypedValue();
 }
 
 /**
@@ -827,7 +827,7 @@ inline TypedValue* ElemUArray(TypedValue* base, key_type<keyType> key) {
 
   // Unset{Elem,Prop} do nothing when the base is InitNull, so this sketchy but
   // should be okay.
-  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  return const_cast<TypedValue*>(ElemEmptyish());
 }
 
 /**
@@ -837,7 +837,7 @@ inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
   ArrayData* oldArr = base->m_data.parr;
   auto const r = PackedArray::LvalSilentIntVec(oldArr, key, oldArr->cowCheck());
   if (UNLIKELY(!r.val)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+    return const_cast<TypedValue*>(ElemEmptyish());
   }
   if (r.array != oldArr) {
     base->m_type = KindOfVec;
@@ -849,7 +849,7 @@ inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* base, StringData* key) {
-  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  return const_cast<TypedValue*>(ElemEmptyish());
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* base, TypedValue key) {
@@ -877,7 +877,7 @@ inline TypedValue* ElemUDictPre(TypedValue* base, int64_t key) {
   ArrayData* oldArr = base->m_data.parr;
   auto const r = MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
   if (UNLIKELY(!r.val)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+    return const_cast<TypedValue*>(ElemEmptyish());
   }
   if (r.array != oldArr) {
     base->m_type = KindOfDict;
@@ -892,7 +892,7 @@ inline TypedValue* ElemUDictPre(TypedValue* base, StringData* key) {
   ArrayData* oldArr = base->m_data.parr;
   auto const r = MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
   if (UNLIKELY(!r.val)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+    return const_cast<TypedValue*>(ElemEmptyish());
   }
   if (r.array != oldArr) {
     base->m_type = KindOfDict;

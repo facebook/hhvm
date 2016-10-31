@@ -462,7 +462,8 @@ TypedValue getMemoKeyHelper(TypedValue tv) {
 
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
                            const Func* func) {
-  raise_param_type_warning(func->name()->data(), argNum, expected, actual);
+  raise_param_type_warning(func->displayName()->data(),
+                           argNum, expected, actual);
 
   throw TVCoercionException(func, argNum, actual, expected);
 }
@@ -965,13 +966,15 @@ void raiseMissingArgument(const Func* func, int got) {
   }
   bool lessNeeded = (variadic || expected < total);
   if (expected == 1) {
-    raise_warning(Strings::MISSING_ARGUMENT, func->name()->data(),
+    raise_warning(Strings::MISSING_ARGUMENT, func->displayName()->data(),
                   lessNeeded ? "at least" : "exactly", got);
   } else {
-    raise_warning(Strings::MISSING_ARGUMENTS, func->name()->data(),
+    raise_warning(Strings::MISSING_ARGUMENTS, func->displayName()->data(),
                   lessNeeded ? "at least" : "exactly", expected, got);
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 Class* lookupClsRDS(const StringData* name) {
   auto const handle = NamedEntity::get(name)->getClassHandle();

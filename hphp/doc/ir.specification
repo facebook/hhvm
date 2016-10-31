@@ -1864,6 +1864,16 @@ To string conversions:
 
   Similar to RaiseMissingThis, but for cases where we know it will fatal.
 
+| RaiseVarEnvDynCall, ND, S(Func), Er
+
+  Indicates that Func, which can access the caller's environment, was called
+  dynamically. Depending on the setting of the `DisallowDynamicVarEnvFuncs`
+  runtime option, this opcode might fatal, raise a warning, or do nothing. Used
+  inside generated wrapper functions for builtins which can modify the caller's
+  frame. These wrapper functions are called instead of the builtin when the
+  builtin is called dynamically. Func should refer to the builtin, not the
+  wrapper itself.
+
 | InitClosureStaticLoc, ND, S(BoxedCell) S(Cell), NF
 
   Assuming S0 is an uninitialized closure static local, initialize it by

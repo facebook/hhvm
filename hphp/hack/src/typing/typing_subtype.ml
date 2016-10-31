@@ -999,10 +999,10 @@ and sub_string p env ty2 =
       env
   | (_, Tabstract _) ->
     begin match TUtils.get_concrete_supertypes env ty2 with
-      | env, None ->
+      | env, [] ->
         fst (Unify.unify env (Reason.Rwitness p, Tprim Nast.Tstring) ty2)
-      | env, Some ty ->
-        sub_string p env ty
+      | env, tyl ->
+        List.fold_left tyl ~f:(sub_string p) ~init:env
     end
   | (r2, Tclass (x, _)) ->
       let class_ = Env.get_class env (snd x) in

@@ -63,17 +63,9 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
 
     FunctionTypeMap["extract"]              = FunType::Extract;
     FunctionTypeMap["parse_str"]            = FunType::Extract;
-    FunctionTypeMap["__systemlib\\extract"] = FunType::Extract;
-    FunctionTypeMap["__systemlib\\parse_str"]
-                                            = FunType::Extract;
-    FunctionTypeMap["__systemlib\\compact_sl"]
-                                            = FunType::Compact;
     FunctionTypeMap["compact"]              = FunType::Compact;
 
     FunctionTypeMap["assert"]               = FunType::Assert;
-    FunctionTypeMap["__systemlib\\assert"]  = FunType::Assert;
-    FunctionTypeMap["__systemlib\\assert_sl"]
-                                            = FunType::Assert;
 
     FunctionTypeMap["shell_exec"]           = FunType::ShellExec;
     FunctionTypeMap["exec"]                 = FunType::ShellExec;
@@ -89,8 +81,6 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["unserialize"]          = FunType::Unserialize;
     FunctionTypeMap["apc_fetch"]            = FunType::Unserialize;
 
-    FunctionTypeMap["__systemlib\\get_defined_vars"]
-                                            = FunType::GetDefinedVars;
     FunctionTypeMap["get_defined_vars"]     = FunType::GetDefinedVars;
 
     FunctionTypeMap["fb_call_user_func_safe"] = FunType::FBCallUserFuncSafe;

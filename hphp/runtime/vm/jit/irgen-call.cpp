@@ -58,8 +58,7 @@ const Func* findCuf(Op op,
   StringData* sclass = nullptr;
   StringData* sname = nullptr;
   if (str) {
-    Func* f = Unit::lookupFunc(str);
-    if (f) return f;
+    if (auto f = Unit::lookupDynCallFunc(str)) return f;
     String name(const_cast<StringData*>(str));
     int pos = name.find("::");
     if (pos <= 0 || pos + 2 >= name.size() ||
@@ -103,6 +102,7 @@ const Func* findCuf(Op op,
   bool magicCall = false;
   const Func* f = lookupImmutableMethod(
     cls, sname, magicCall, /* staticLookup = */ true, ctxFunc, isExact);
+  assertx(!f || !f->dynCallWrapper());
   if (!f || (!isExact && !f->isImmutableFrom(cls))) return nullptr;
   if (forward && !ctx->classof(f->cls())) {
     /*
@@ -1262,11 +1262,8 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
   auto const destroyLocals = callee
-    ? callee->isCPPBuiltin() && builtinFuncDestroysLocals(callee)
-    : callDestroysLocals(
-      *env.currentNormalizedInstruction,
-      curFunc(env)
-    );
+    ? funcDestroysLocals(callee)
+    : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
   auto const needsCallerFrame = callee
     ? callee->isCPPBuiltin() && builtinFuncNeedsCallerFrame(callee)
     : callNeedsCallerFrame(

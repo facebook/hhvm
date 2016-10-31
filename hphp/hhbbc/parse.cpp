@@ -740,6 +740,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isGenerator        = fe.isGenerator;
   ret->isPairGenerator    = fe.isPairGenerator;
   ret->isNative           = fe.isNative;
+  ret->dynCallWrapperId   = fe.dynCallWrapperId;
 
   /*
    * Builtin functions get some extra information.  The returnType flag is only

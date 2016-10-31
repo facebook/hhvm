@@ -1,2 +1,2 @@
 <?hh
-enum fruit : int { Apple = 1; Orange = 2; }
+<<Foo>> enum fruit : int { Apple = 1; TRUE = 2; }

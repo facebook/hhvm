@@ -149,7 +149,7 @@ struct FuncChecker {
 };
 
 bool checkNativeFunc(const Func* func, bool verbose) {
-  auto const funcname = func->name();
+  auto const funcname = func->displayName();
   auto const pc = func->preClass();
   auto const clsname = pc ? pc->name() : nullptr;
   auto const& info = Native::GetBuiltinFunction(funcname, clsname,

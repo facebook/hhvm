@@ -495,7 +495,7 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
          CURLFORM_END);
     } else {
       String val = var_val.toString();
-      const char *postval = val.data();
+      auto postval = val.data();
 
       if (*postval == '@' && strlen(postval) == val.size()) {
         /* Given a string like:
@@ -506,7 +506,12 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
          *   curl_formadd
          * - Revert changes to postval at the end
          */
-        char* mutablePostval = const_cast<char*>(postval) + 1;
+        if (val.get()->isImmutable()) {
+          val = String::attach(
+            StringData::Make(val.data(), val.size(), CopyString));
+        }
+        auto slice = val.bufferSlice();
+        char* mutablePostval = slice.begin() + 1;
         char* type = strstr(mutablePostval, ";type=");
         char* filename = strstr(mutablePostval, ";filename=");
 

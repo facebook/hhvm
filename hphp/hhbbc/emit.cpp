@@ -735,6 +735,7 @@ void emit_finish_func(const php::Func& func,
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
   fe.isNative = func.isNative;
+  fe.dynCallWrapperId = func.dynCallWrapperId;
 
   if (func.nativeInfo) {
     fe.returnType = func.nativeInfo->returnType;

@@ -1291,21 +1291,6 @@ static void compact(PointerSet& seen, VarEnv* v, Array &ret,
 Array HHVM_FUNCTION(compact,
                     const Variant& varname,
                     const Array& args /* = null array */) {
-  raise_disallowed_dynamic_call("compact should not be called dynamically");
-  Array ret = Array::attach(PackedArray::MakeReserve(args.size() + 1));
-  VarEnv* v = g_context->getOrCreateVarEnv();
-  if (v) {
-    PointerSet seen;
-    compact(seen, v, ret, varname);
-    if (!args.empty()) compact(seen, v, ret, args);
-  }
-  return ret;
-}
-
-// __SystemLib\\compact_sl
-Array HHVM_FUNCTION(__SystemLib_compact_sl,
-                    const Variant& varname,
-                    const Array& args /* = null array */) {
   Array ret = Array::attach(PackedArray::MakeReserve(args.size() + 1));
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
@@ -3049,7 +3034,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(array_walk_recursive);
     HHVM_FE(array_walk);
     HHVM_FE(compact);
-    HHVM_FALIAS(__SystemLib\\compact_sl, __SystemLib_compact_sl);
     HHVM_FE(shuffle);
     HHVM_FE(count);
     HHVM_FE(sizeof);

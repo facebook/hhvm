@@ -118,6 +118,7 @@ module WithToken(Token: TokenType) = struct
       pipe_variable_expression: t;
     }
     and enum_declaration = {
+      enum_attribute_spec: t;
       enum_keyword: t;
       enum_name: t;
       enum_colon: t;
@@ -424,6 +425,11 @@ module WithToken(Token: TokenType) = struct
       echo_keyword: t;
       echo_expressions: t;
       echo_semicolon: t;
+    }
+    and global_statement = {
+      global_keyword: t;
+      global_variables: t;
+      global_semicolon: t;
     }
     and simple_initializer = {
       simple_initializer_equal: t;
@@ -785,6 +791,7 @@ module WithToken(Token: TokenType) = struct
     | FunctionStaticStatement of function_static_statement
     | StaticDeclarator of static_declarator
     | EchoStatement of echo_statement
+    | GlobalStatement of global_statement
     | SimpleInitializer of simple_initializer
     | AnonymousFunction of anonymous_function
     | AnonymousFunctionUseClause of anonymous_function_use_clause
@@ -967,6 +974,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.StaticDeclarator
       | EchoStatement _ ->
         SyntaxKind.EchoStatement
+      | GlobalStatement _ ->
+        SyntaxKind.GlobalStatement
       | SimpleInitializer _ ->
         SyntaxKind.SimpleInitializer
       | AnonymousFunction _ ->
@@ -1200,6 +1209,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.StaticDeclarator
     let is_echo_statement node =
       kind node = SyntaxKind.EchoStatement
+    let is_global_statement node =
+      kind node = SyntaxKind.GlobalStatement
     let is_simple_initializer node =
       kind node = SyntaxKind.SimpleInitializer
     let is_anonymous_function node =
@@ -1399,6 +1410,7 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_enum_declaration_children {
+      enum_attribute_spec;
       enum_keyword;
       enum_name;
       enum_colon;
@@ -1408,6 +1420,7 @@ module WithToken(Token: TokenType) = struct
       enum_enumerators;
       enum_right_brace;
     } = (
+      enum_attribute_spec,
       enum_keyword,
       enum_name,
       enum_colon,
@@ -2012,6 +2025,16 @@ module WithToken(Token: TokenType) = struct
       echo_keyword,
       echo_expressions,
       echo_semicolon
+    )
+
+    let get_global_statement_children {
+      global_keyword;
+      global_variables;
+      global_semicolon;
+    } = (
+      global_keyword,
+      global_variables,
+      global_semicolon
     )
 
     let get_simple_initializer_children {
@@ -2663,6 +2686,7 @@ module WithToken(Token: TokenType) = struct
         pipe_variable_expression;
       ]
       | EnumDeclaration {
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;
@@ -2672,6 +2696,7 @@ module WithToken(Token: TokenType) = struct
         enum_enumerators;
         enum_right_brace;
       } -> [
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;
@@ -3229,6 +3254,15 @@ module WithToken(Token: TokenType) = struct
         echo_keyword;
         echo_expressions;
         echo_semicolon;
+      ]
+      | GlobalStatement {
+        global_keyword;
+        global_variables;
+        global_semicolon;
+      } -> [
+        global_keyword;
+        global_variables;
+        global_semicolon;
       ]
       | SimpleInitializer {
         simple_initializer_equal;
@@ -3823,6 +3857,7 @@ module WithToken(Token: TokenType) = struct
         "pipe_variable_expression";
       ]
       | EnumDeclaration {
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;
@@ -3832,6 +3867,7 @@ module WithToken(Token: TokenType) = struct
         enum_enumerators;
         enum_right_brace;
       } -> [
+        "enum_attribute_spec";
         "enum_keyword";
         "enum_name";
         "enum_colon";
@@ -4389,6 +4425,15 @@ module WithToken(Token: TokenType) = struct
         "echo_keyword";
         "echo_expressions";
         "echo_semicolon";
+      ]
+      | GlobalStatement {
+        global_keyword;
+        global_variables;
+        global_semicolon;
+      } -> [
+        "global_keyword";
+        "global_variables";
+        "global_semicolon";
       ]
       | SimpleInitializer {
         simple_initializer_equal;
@@ -5044,6 +5089,7 @@ module WithToken(Token: TokenType) = struct
           pipe_variable_expression;
         }
       | (SyntaxKind.EnumDeclaration, [
+          enum_attribute_spec;
           enum_keyword;
           enum_name;
           enum_colon;
@@ -5054,6 +5100,7 @@ module WithToken(Token: TokenType) = struct
           enum_right_brace;
         ]) ->
         EnumDeclaration {
+          enum_attribute_spec;
           enum_keyword;
           enum_name;
           enum_colon;
@@ -5658,6 +5705,16 @@ module WithToken(Token: TokenType) = struct
           echo_keyword;
           echo_expressions;
           echo_semicolon;
+        }
+      | (SyntaxKind.GlobalStatement, [
+          global_keyword;
+          global_variables;
+          global_semicolon;
+        ]) ->
+        GlobalStatement {
+          global_keyword;
+          global_variables;
+          global_semicolon;
         }
       | (SyntaxKind.SimpleInitializer, [
           simple_initializer_equal;
@@ -6358,6 +6415,7 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_enum_declaration
+      enum_attribute_spec
       enum_keyword
       enum_name
       enum_colon
@@ -6368,6 +6426,7 @@ module WithToken(Token: TokenType) = struct
       enum_right_brace
     =
       from_children SyntaxKind.EnumDeclaration [
+        enum_attribute_spec;
         enum_keyword;
         enum_name;
         enum_colon;
@@ -7019,6 +7078,17 @@ module WithToken(Token: TokenType) = struct
         echo_keyword;
         echo_expressions;
         echo_semicolon;
+      ]
+
+    let make_global_statement
+      global_keyword
+      global_variables
+      global_semicolon
+    =
+      from_children SyntaxKind.GlobalStatement [
+        global_keyword;
+        global_variables;
+        global_semicolon;
       ]
 
     let make_simple_initializer

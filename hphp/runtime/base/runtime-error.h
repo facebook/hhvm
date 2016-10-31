@@ -34,6 +34,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Func;
+
 enum class HackStrictOption;
 
 enum class ErrorMode {
@@ -126,7 +128,7 @@ void raise_typehint_error(const std::string& msg);
  */
 void raise_return_typehint_error(const std::string& msg);
 
-void raise_disallowed_dynamic_call(const std::string& msg);
+void raise_disallowed_dynamic_call(const Func* f);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

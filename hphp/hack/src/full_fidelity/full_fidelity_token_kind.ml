@@ -3,185 +3,198 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * LICENSE file in the "hack" directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
  *
  *)
+(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(**
+  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
+  the binary.
+  buck build hphp/hack/src:generate_full_fidelity
+  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
+*)
 
 type t =
-| Error
-| EndOfFile
-| Name
-| QualifiedName
-| Variable
-(* Keywords *)
-| Abstract
-| Array
-| Arraykey
-| As
-| Async
-| Attribute
-| Await
-| Bool
-| Break
-| Case
-| Catch
-| Category
-| Children
-| Class
-| Classname
-| Clone
-| Const
-| Construct
-| Continue
-| Default
-| Destruct
-| Do
-| Double
-| Echo
-| Else
-| Elseif
-| Empty
-| Enum
-| Extends
-| Float
-| Final
-| Finally
-| For
-| Foreach
-| Function
-| If
-| Implements
-| Include
-| Include_once
-| Instanceof
-| Insteadof
-| Int
-| Interface
-| List
-| Mixed
-| Namespace
-| New
-| Newtype
-| Noreturn
-| Num
-| Object
-| Parent
-| Print
-| Private
-| Protected
-| Public
-| Require
-| Require_once
-| Required
-| Resource
-| Return
-| Self
-| Shape
-| Static
-| String
-| Super
-| Switch
-| This
-| Throw
-| Trait
-| Try
-| Tuple
-| Type
-| Unset
-| Use
-| Var
-| Void
-| While
-| Yield
-(* Punctuation *)
-| LeftBracket
-| RightBracket
-| LeftParen
-| RightParen
-| LeftBrace
-| RightBrace
-| Dot
-| MinusGreaterThan
-| PlusPlus
-| MinusMinus
-| StarStar
-| Star
-| Plus
-| Minus
-| Tilde
-| Exclamation
-| Dollar
-| Slash
-| Percent
-| LessThanLessThan
-| GreaterThanGreaterThan
-| LessThan
-| GreaterThan
-| LessThanEqual
-| GreaterThanEqual
-| EqualEqual
-| EqualEqualEqual
-| ExclamationEqual
-| ExclamationEqualEqual
-| Carat
-| Bar
-| Ampersand
-| AmpersandAmpersand
-| BarBar
-| Question
-| QuestionQuestion
-| Colon
-| Semicolon
-| Equal
-| StarStarEqual
-| StarEqual
-| SlashEqual
-| PercentEqual
-| PlusEqual
-| MinusEqual
-| DotEqual
-| LessThanLessThanEqual
-| GreaterThanGreaterThanEqual
-| AmpersandEqual
-| CaratEqual
-| BarEqual
-| Comma
-| At
-| ColonColon
-| EqualGreaterThan
-| EqualEqualGreaterThan
-| QuestionMinusGreaterThan
-| NamespacePrefix
-| DotDotDot
-| DollarDollar
-| BarGreaterThan
-(* Literals *)
-| DecimalLiteral
-| OctalLiteral
-| HexadecimalLiteral
-| BinaryLiteral
-| FloatingLiteral
-| SingleQuotedStringLiteral
-| DoubleQuotedStringLiteral
-| HeredocStringLiteral
-| NowdocStringLiteral
-| BooleanLiteral
-| NullLiteral
-(* XHP *)
-| XHPCategoryName
-| XHPElementName
-| XHPClassName
-| XHPStringLiteral
-| XHPBody
-| XHPComment
-| SlashGreaterThan
-| LessThanSlash
+  | EndOfFile
+
+  | Abstract
+  | And
+  | Array
+  | Arraykey
+  | As
+  | Async
+  | Attribute
+  | Await
+  | Bool
+  | Break
+  | Case
+  | Catch
+  | Category
+  | Children
+  | Class
+  | Classname
+  | Clone
+  | Const
+  | Construct
+  | Continue
+  | Default
+  | Destruct
+  | Do
+  | Double
+  | Echo
+  | Else
+  | Elseif
+  | Empty
+  | Enum
+  | Extends
+  | Float
+  | Final
+  | Finally
+  | For
+  | Foreach
+  | Function
+  | Global
+  | If
+  | Implements
+  | Include
+  | Include_once
+  | Instanceof
+  | Insteadof
+  | Int
+  | Interface
+  | List
+  | Mixed
+  | Namespace
+  | New
+  | Newtype
+  | Noreturn
+  | Num
+  | Object
+  | Or
+  | Parent
+  | Print
+  | Private
+  | Protected
+  | Public
+  | Require
+  | Require_once
+  | Required
+  | Resource
+  | Return
+  | Self
+  | Shape
+  | Static
+  | String
+  | Super
+  | Switch
+  | This
+  | Throw
+  | Trait
+  | Try
+  | Tuple
+  | Type
+  | Unset
+  | Use
+  | Var
+  | Void
+  | While
+  | Xor
+  | Yield
+  | LeftBracket
+  | RightBracket
+  | LeftParen
+  | RightParen
+  | LeftBrace
+  | RightBrace
+  | Dot
+  | MinusGreaterThan
+  | PlusPlus
+  | MinusMinus
+  | StarStar
+  | Star
+  | Plus
+  | Minus
+  | Tilde
+  | Exclamation
+  | Dollar
+  | Slash
+  | Percent
+  | LessThanLessThan
+  | GreaterThanGreaterThan
+  | LessThan
+  | GreaterThan
+  | LessThanEqual
+  | GreaterThanEqual
+  | EqualEqual
+  | EqualEqualEqual
+  | ExclamationEqual
+  | ExclamationEqualEqual
+  | Carat
+  | Bar
+  | Ampersand
+  | AmpersandAmpersand
+  | BarBar
+  | Question
+  | QuestionQuestion
+  | Colon
+  | Semicolon
+  | Equal
+  | StarStarEqual
+  | StarEqual
+  | SlashEqual
+  | PercentEqual
+  | PlusEqual
+  | MinusEqual
+  | DotEqual
+  | LessThanLessThanEqual
+  | GreaterThanGreaterThanEqual
+  | AmpersandEqual
+  | CaratEqual
+  | BarEqual
+  | Comma
+  | At
+  | ColonColon
+  | EqualGreaterThan
+  | EqualEqualGreaterThan
+  | QuestionMinusGreaterThan
+  | DotDotDot
+  | DollarDollar
+  | BarGreaterThan
+  | NullLiteral
+  | SlashGreaterThan
+  | LessThanSlash
+
+  | ErrorToken
+  | Name
+  | QualifiedName
+  | Variable
+  | NamespacePrefix
+  | DecimalLiteral
+  | OctalLiteral
+  | HexadecimalLiteral
+  | BinaryLiteral
+  | FloatingLiteral
+  | SingleQuotedStringLiteral
+  | DoubleQuotedStringLiteral
+  | HeredocStringLiteral
+  | NowdocStringLiteral
+  | BooleanLiteral
+  | XHPCategoryName
+  | XHPElementName
+  | XHPClassName
+  | XHPStringLiteral
+  | XHPBody
+  | XHPComment
 
 
 let from_string keyword =
   match keyword with
+  | "true" -> Some BooleanLiteral
+  | "false" -> Some BooleanLiteral
   | "abstract" -> Some Abstract
+  | "and" -> Some And
   | "array" -> Some Array
   | "arraykey" -> Some Arraykey
   | "as" -> Some As
@@ -210,13 +223,13 @@ let from_string keyword =
   | "empty" -> Some Empty
   | "enum" -> Some Enum
   | "extends" -> Some Extends
-  | "false" -> Some BooleanLiteral
   | "float" -> Some Float
   | "final" -> Some Final
   | "finally" -> Some Finally
   | "for" -> Some For
   | "foreach" -> Some Foreach
   | "function" -> Some Function
+  | "global" -> Some Global
   | "if" -> Some If
   | "implements" -> Some Implements
   | "include" -> Some Include
@@ -231,17 +244,17 @@ let from_string keyword =
   | "new" -> Some New
   | "newtype" -> Some Newtype
   | "noreturn" -> Some Noreturn
-  | "null" -> Some NullLiteral
   | "num" -> Some Num
   | "object" -> Some Object
+  | "or" -> Some Or
   | "parent" -> Some Parent
   | "print" -> Some Print
   | "private" -> Some Private
   | "protected" -> Some Protected
   | "public" -> Some Public
   | "require" -> Some Require
-  | "required" -> Some Required
   | "require_once" -> Some Require_once
+  | "required" -> Some Required
   | "resource" -> Some Resource
   | "return" -> Some Return
   | "self" -> Some Self
@@ -253,7 +266,6 @@ let from_string keyword =
   | "this" -> Some This
   | "throw" -> Some Throw
   | "trait" -> Some Trait
-  | "true" -> Some BooleanLiteral
   | "try" -> Some Try
   | "tuple" -> Some Tuple
   | "type" -> Some Type
@@ -262,12 +274,79 @@ let from_string keyword =
   | "var" -> Some Var
   | "void" -> Some Void
   | "while" -> Some While
+  | "xor" -> Some Xor
   | "yield" -> Some Yield
+  | "[" -> Some LeftBracket
+  | "]" -> Some RightBracket
+  | "(" -> Some LeftParen
+  | ")" -> Some RightParen
+  | "{" -> Some LeftBrace
+  | "}" -> Some RightBrace
+  | "." -> Some Dot
+  | "->" -> Some MinusGreaterThan
+  | "++" -> Some PlusPlus
+  | "--" -> Some MinusMinus
+  | "**" -> Some StarStar
+  | "*" -> Some Star
+  | "+" -> Some Plus
+  | "-" -> Some Minus
+  | "~" -> Some Tilde
+  | "!" -> Some Exclamation
+  | "$" -> Some Dollar
+  | "/" -> Some Slash
+  | "%" -> Some Percent
+  | "<<" -> Some LessThanLessThan
+  | ">>" -> Some GreaterThanGreaterThan
+  | "<" -> Some LessThan
+  | ">" -> Some GreaterThan
+  | "<=" -> Some LessThanEqual
+  | ">=" -> Some GreaterThanEqual
+  | "==" -> Some EqualEqual
+  | "===" -> Some EqualEqualEqual
+  | "!=" -> Some ExclamationEqual
+  | "!==" -> Some ExclamationEqualEqual
+  | "^" -> Some Carat
+  | "|" -> Some Bar
+  | "&" -> Some Ampersand
+  | "&&" -> Some AmpersandAmpersand
+  | "||" -> Some BarBar
+  | "?" -> Some Question
+  | "??" -> Some QuestionQuestion
+  | ":" -> Some Colon
+  | ";" -> Some Semicolon
+  | "=" -> Some Equal
+  | "**=" -> Some StarStarEqual
+  | "*=" -> Some StarEqual
+  | "/=" -> Some SlashEqual
+  | "%=" -> Some PercentEqual
+  | "+=" -> Some PlusEqual
+  | "-=" -> Some MinusEqual
+  | ".=" -> Some DotEqual
+  | "<<=" -> Some LessThanLessThanEqual
+  | ">>=" -> Some GreaterThanGreaterThanEqual
+  | "&=" -> Some AmpersandEqual
+  | "^=" -> Some CaratEqual
+  | "|=" -> Some BarEqual
+  | "," -> Some Comma
+  | "@" -> Some At
+  | "::" -> Some ColonColon
+  | "=>" -> Some EqualGreaterThan
+  | "==>" -> Some EqualEqualGreaterThan
+  | "?->" -> Some QuestionMinusGreaterThan
+  | "..." -> Some DotDotDot
+  | "$$" -> Some DollarDollar
+  | "|>" -> Some BarGreaterThan
+  | "null" -> Some NullLiteral
+  | "/>" -> Some SlashGreaterThan
+  | "</" -> Some LessThanSlash
+
   | _ -> None
 
 let to_string kind =
-  match kind with
+match kind with
+| EndOfFile -> "end of file"
   | Abstract -> "abstract"
+  | And -> "and"
   | Array -> "array"
   | Arraykey -> "arraykey"
   | As -> "as"
@@ -302,6 +381,7 @@ let to_string kind =
   | For -> "for"
   | Foreach -> "foreach"
   | Function -> "function"
+  | Global -> "global"
   | If -> "if"
   | Implements -> "implements"
   | Include -> "include"
@@ -313,12 +393,12 @@ let to_string kind =
   | List -> "list"
   | Mixed -> "mixed"
   | Namespace -> "namespace"
-  | NamespacePrefix -> "namespace_prefix"
   | New -> "new"
   | Newtype -> "newtype"
   | Noreturn -> "noreturn"
   | Num -> "num"
   | Object -> "object"
+  | Or -> "or"
   | Parent -> "parent"
   | Print -> "print"
   | Private -> "private"
@@ -346,6 +426,7 @@ let to_string kind =
   | Var -> "var"
   | Void -> "void"
   | While -> "while"
+  | Xor -> "xor"
   | Yield -> "yield"
   | LeftBracket -> "["
   | RightBracket -> "]"
@@ -407,11 +488,15 @@ let to_string kind =
   | DotDotDot -> "..."
   | DollarDollar -> "$$"
   | BarGreaterThan -> "|>"
-  | Error -> "error"
-  | EndOfFile -> "end of file"
+  | NullLiteral -> "null"
+  | SlashGreaterThan -> "/>"
+  | LessThanSlash -> "</"
+
+  | ErrorToken -> "error_token"
   | Name -> "name"
   | QualifiedName -> "qualified_name"
   | Variable -> "variable"
+  | NamespacePrefix -> "namespace_prefix"
   | DecimalLiteral -> "decimal_literal"
   | OctalLiteral -> "octal_literal"
   | HexadecimalLiteral -> "hexadecimal_literal"
@@ -422,12 +507,9 @@ let to_string kind =
   | HeredocStringLiteral -> "heredoc_string_literal"
   | NowdocStringLiteral -> "nowdoc_string_literal"
   | BooleanLiteral -> "boolean_literal"
-  | NullLiteral -> "null"
   | XHPCategoryName -> "XHP_category_name"
   | XHPElementName -> "XHP_element_name"
   | XHPClassName -> "XHP_class_name"
   | XHPStringLiteral -> "XHP_string_literal"
   | XHPBody -> "XHP_body"
   | XHPComment -> "XHP_comment"
-  | SlashGreaterThan -> "/>"
-  | LessThanSlash -> "</"

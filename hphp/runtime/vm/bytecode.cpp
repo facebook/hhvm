@@ -2482,6 +2482,14 @@ OPTBLD_INLINE void iopClone() {
   tv->m_data.pobj = newobj;
 }
 
+OPTBLD_INLINE void iopVarEnvDynCall() {
+  auto const func = vmfp()->func();
+  assertx(func->accessesCallerFrame());
+  assertx(func->dynCallTarget());
+  assertx(!func->dynCallWrapper());
+  raise_disallowed_dynamic_call(func->dynCallTarget());
+}
+
 OPTBLD_INLINE void iopExit() {
   int exitCode = 0;
   Cell* c1 = vmStack().topC();

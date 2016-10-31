@@ -404,7 +404,7 @@ private:
    * FuncEmitter tables.
    */
   std::vector<FuncEmitter*> m_fes;
-  hphp_hash_map<const FuncEmitter*, const Func*,
+  hphp_hash_map<const FuncEmitter*, Func*,
                 pointer_hash<FuncEmitter>> m_fMap;
 
   /*

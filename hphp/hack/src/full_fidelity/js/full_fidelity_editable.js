@@ -178,6 +178,8 @@ class EditableSyntax
       return StaticDeclarator.from_json(json, position, source);
     case 'echo_statement':
       return EchoStatement.from_json(json, position, source);
+    case 'global_statement':
+      return GlobalStatement.from_json(json, position, source);
     case 'simple_initializer':
       return SimpleInitializer.from_json(json, position, source);
     case 'anonymous_function':
@@ -583,6 +585,8 @@ class EditableToken extends EditableSyntax
 
     case 'abstract':
        return new AbstractToken(leading, trailing);
+    case 'and':
+       return new AndToken(leading, trailing);
     case 'array':
        return new ArrayToken(leading, trailing);
     case 'arraykey':
@@ -651,6 +655,8 @@ class EditableToken extends EditableSyntax
        return new ForeachToken(leading, trailing);
     case 'function':
        return new FunctionToken(leading, trailing);
+    case 'global':
+       return new GlobalToken(leading, trailing);
     case 'if':
        return new IfToken(leading, trailing);
     case 'implements':
@@ -683,6 +689,8 @@ class EditableToken extends EditableSyntax
        return new NumToken(leading, trailing);
     case 'object':
        return new ObjectToken(leading, trailing);
+    case 'or':
+       return new OrToken(leading, trailing);
     case 'parent':
        return new ParentToken(leading, trailing);
     case 'print':
@@ -737,6 +745,8 @@ class EditableToken extends EditableSyntax
        return new VoidToken(leading, trailing);
     case 'while':
        return new WhileToken(leading, trailing);
+    case 'xor':
+       return new XorToken(leading, trailing);
     case 'yield':
        return new YieldToken(leading, trailing);
     case '[':
@@ -979,6 +989,13 @@ class AbstractToken extends EditableToken
     super('abstract', leading, trailing, 'abstract');
   }
 }
+class AndToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('and', leading, trailing, 'and');
+  }
+}
 class ArrayToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1217,6 +1234,13 @@ class FunctionToken extends EditableToken
     super('function', leading, trailing, 'function');
   }
 }
+class GlobalToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('global', leading, trailing, 'global');
+  }
+}
 class IfToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1327,6 +1351,13 @@ class ObjectToken extends EditableToken
   constructor(leading, trailing)
   {
     super('object', leading, trailing, 'object');
+  }
+}
+class OrToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('or', leading, trailing, 'or');
   }
 }
 class ParentToken extends EditableToken
@@ -1516,6 +1547,13 @@ class WhileToken extends EditableToken
   constructor(leading, trailing)
   {
     super('while', leading, trailing, 'while');
+  }
+}
+class XorToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('xor', leading, trailing, 'xor');
   }
 }
 class YieldToken extends EditableToken
@@ -2700,6 +2738,7 @@ class PipeVariableExpression extends EditableSyntax
 class EnumDeclaration extends EditableSyntax
 {
   constructor(
+    attribute_spec,
     keyword,
     name,
     colon,
@@ -2710,6 +2749,7 @@ class EnumDeclaration extends EditableSyntax
     right_brace)
   {
     super('enum_declaration', {
+      attribute_spec: attribute_spec,
       keyword: keyword,
       name: name,
       colon: colon,
@@ -2719,6 +2759,7 @@ class EnumDeclaration extends EditableSyntax
       enumerators: enumerators,
       right_brace: right_brace });
   }
+  get attribute_spec() { return this.children.attribute_spec; }
   get keyword() { return this.children.keyword; }
   get name() { return this.children.name; }
   get colon() { return this.children.colon; }
@@ -2727,8 +2768,21 @@ class EnumDeclaration extends EditableSyntax
   get left_brace() { return this.children.left_brace; }
   get enumerators() { return this.children.enumerators; }
   get right_brace() { return this.children.right_brace; }
+  with_attribute_spec(attribute_spec){
+    return new EnumDeclaration(
+      attribute_spec,
+      this.keyword,
+      this.name,
+      this.colon,
+      this.base,
+      this.type,
+      this.left_brace,
+      this.enumerators,
+      this.right_brace);
+  }
   with_keyword(keyword){
     return new EnumDeclaration(
+      this.attribute_spec,
       keyword,
       this.name,
       this.colon,
@@ -2740,6 +2794,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_name(name){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       name,
       this.colon,
@@ -2751,6 +2806,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_colon(colon){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       colon,
@@ -2762,6 +2818,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_base(base){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2773,6 +2830,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_type(type){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2784,6 +2842,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_left_brace(left_brace){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2795,6 +2854,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_enumerators(enumerators){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2806,6 +2866,7 @@ class EnumDeclaration extends EditableSyntax
   }
   with_right_brace(right_brace){
     return new EnumDeclaration(
+      this.attribute_spec,
       this.keyword,
       this.name,
       this.colon,
@@ -2821,6 +2882,7 @@ class EnumDeclaration extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var colon = this.colon.rewrite(rewriter, new_parents);
@@ -2830,6 +2892,7 @@ class EnumDeclaration extends EditableSyntax
     var enumerators = this.enumerators.rewrite(rewriter, new_parents);
     var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
+      attribute_spec === this.attribute_spec &&
       keyword === this.keyword &&
       name === this.name &&
       colon === this.colon &&
@@ -2844,6 +2907,7 @@ class EnumDeclaration extends EditableSyntax
     else
     {
       return rewriter(new EnumDeclaration(
+        attribute_spec,
         keyword,
         name,
         colon,
@@ -2856,6 +2920,9 @@ class EnumDeclaration extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let attribute_spec = EditableSyntax.from_json(
+      json.enum_attribute_spec, position, source);
+    position += attribute_spec.width;
     let keyword = EditableSyntax.from_json(
       json.enum_keyword, position, source);
     position += keyword.width;
@@ -2881,6 +2948,7 @@ class EnumDeclaration extends EditableSyntax
       json.enum_right_brace, position, source);
     position += right_brace.width;
     return new EnumDeclaration(
+        attribute_spec,
         keyword,
         name,
         colon,
@@ -2894,6 +2962,7 @@ class EnumDeclaration extends EditableSyntax
   {
     if (EnumDeclaration._children_keys == null)
       EnumDeclaration._children_keys = [
+        'attribute_spec',
         'keyword',
         'name',
         'colon',
@@ -8397,6 +8466,89 @@ class EchoStatement extends EditableSyntax
     return EchoStatement._children_keys;
   }
 }
+class GlobalStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    variables,
+    semicolon)
+  {
+    super('global_statement', {
+      keyword: keyword,
+      variables: variables,
+      semicolon: semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get variables() { return this.children.variables; }
+  get semicolon() { return this.children.semicolon; }
+  with_keyword(keyword){
+    return new GlobalStatement(
+      keyword,
+      this.variables,
+      this.semicolon);
+  }
+  with_variables(variables){
+    return new GlobalStatement(
+      this.keyword,
+      variables,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new GlobalStatement(
+      this.keyword,
+      this.variables,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var variables = this.variables.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      variables === this.variables &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new GlobalStatement(
+        keyword,
+        variables,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.global_keyword, position, source);
+    position += keyword.width;
+    let variables = EditableSyntax.from_json(
+      json.global_variables, position, source);
+    position += variables.width;
+    let semicolon = EditableSyntax.from_json(
+      json.global_semicolon, position, source);
+    position += semicolon.width;
+    return new GlobalStatement(
+        keyword,
+        variables,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (GlobalStatement._children_keys == null)
+      GlobalStatement._children_keys = [
+        'keyword',
+        'variables',
+        'semicolon'];
+    return GlobalStatement._children_keys;
+  }
+}
 class SimpleInitializer extends EditableSyntax
 {
   constructor(
@@ -13571,6 +13723,7 @@ exports.EditableToken = EditableToken;
 exports.EndOfFileToken = EndOfFileToken;
 
 exports.AbstractToken = AbstractToken;
+exports.AndToken = AndToken;
 exports.ArrayToken = ArrayToken;
 exports.ArraykeyToken = ArraykeyToken;
 exports.AsToken = AsToken;
@@ -13605,6 +13758,7 @@ exports.FinallyToken = FinallyToken;
 exports.ForToken = ForToken;
 exports.ForeachToken = ForeachToken;
 exports.FunctionToken = FunctionToken;
+exports.GlobalToken = GlobalToken;
 exports.IfToken = IfToken;
 exports.ImplementsToken = ImplementsToken;
 exports.IncludeToken = IncludeToken;
@@ -13621,6 +13775,7 @@ exports.NewtypeToken = NewtypeToken;
 exports.NoreturnToken = NoreturnToken;
 exports.NumToken = NumToken;
 exports.ObjectToken = ObjectToken;
+exports.OrToken = OrToken;
 exports.ParentToken = ParentToken;
 exports.PrintToken = PrintToken;
 exports.PrivateToken = PrivateToken;
@@ -13648,6 +13803,7 @@ exports.UseToken = UseToken;
 exports.VarToken = VarToken;
 exports.VoidToken = VoidToken;
 exports.WhileToken = WhileToken;
+exports.XorToken = XorToken;
 exports.YieldToken = YieldToken;
 exports.LeftBracketToken = LeftBracketToken;
 exports.RightBracketToken = RightBracketToken;
@@ -13795,6 +13951,7 @@ exports.ContinueStatement = ContinueStatement;
 exports.FunctionStaticStatement = FunctionStaticStatement;
 exports.StaticDeclarator = StaticDeclarator;
 exports.EchoStatement = EchoStatement;
+exports.GlobalStatement = GlobalStatement;
 exports.SimpleInitializer = SimpleInitializer;
 exports.AnonymousFunction = AnonymousFunction;
 exports.AnonymousFunctionUseClause = AnonymousFunctionUseClause;

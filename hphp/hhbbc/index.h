@@ -249,6 +249,16 @@ struct Func {
    */
   bool cantBeMagicCall() const;
 
+  /*
+   * Returns whether this resolved function could possibly read or write to the
+   * caller's frame.
+   */
+  bool mightReadCallerFrame() const;
+  bool mightWriteCallerFrame() const;
+  bool mightAccessCallerFrame() const {
+    return mightReadCallerFrame() || mightWriteCallerFrame();
+  }
+
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {
@@ -395,16 +405,17 @@ struct Index {
    *
    * The name `name' is tried first, and `fallback' is used if this
    * isn't found.  Both names must already be namespace-normalized.
-   * Resolution can fail because there are possible situations where
-   * we don't know which will be called at runtime.
+   * If we don't know which will be called at runtime, both will be
+   * returned.
    *
    * Note: the returned function may or may not be defined at the
    * program point (it could require a function autoload that might
    * fail).
    */
-  folly::Optional<res::Func> resolve_func_fallback(Context,
-                                                   SString name,
-                                                   SString fallback) const;
+  std::pair<res::Func, folly::Optional<res::Func>>
+    resolve_func_fallback(Context,
+                          SString name,
+                          SString fallback) const;
 
   /*
    * Try to resolve a class method named `name' with a given Context

@@ -131,7 +131,7 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
     sigprocmask(SIG_SETMASK, &eset, nullptr);
     execl("/bin/sh", "sh", "-c", cmd, nullptr);
     Logger::Warning("Failed to exec: `%s'", cmd);
-    _exit(1);
+    _Exit(1);
   }
   // parent
 
@@ -510,7 +510,7 @@ bool LightProcess::initShadow(int afdt_lid,
     pid_t sid = setsid();
     if (sid < 0) {
       Logger::Warning("Unable to setsid");
-      exit(HPHP_EXIT_FAILURE);
+      _Exit(HPHP_EXIT_FAILURE);
     }
     afdt_error_t err = AFDT_ERROR_T_INIT;
     auto afdt_fd = afdt_connect(afdt_filename.c_str(), &err);
@@ -518,7 +518,7 @@ bool LightProcess::initShadow(int afdt_lid,
       Logger::Warning("Unable to afdt_connect, filename %s: %d %s",
                       afdt_filename.c_str(),
                       errno, folly::errnoStr(errno).c_str());
-      exit(HPHP_EXIT_FAILURE);
+      _Exit(HPHP_EXIT_FAILURE);
     }
 
     // shadow process doesn't use g_procs

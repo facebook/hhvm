@@ -979,7 +979,9 @@ public:
   void emitPostponedMeths();
   void bindUserAttributes(MethodStatementPtr meth,
                           FuncEmitter *fe);
-  void bindNativeFunc(MethodStatementPtr meth, FuncEmitter *fe);
+  Attr bindNativeFunc(MethodStatementPtr meth,
+                      FuncEmitter *fe,
+                      bool dynCallWrapper);
   int32_t emitNativeOpCodeImpl(MethodStatementPtr meth,
                                const char* funcName,
                                const char* className,
@@ -1024,7 +1026,6 @@ public:
     CallUserFuncForwardArray = CallUserFuncForward | CallUserFuncArray
   };
 
-  bool emitSystemLibVarEnvFunc(Emitter& e, SimpleFunctionCallPtr node);
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
   Func* canEmitBuiltinCall(const std::string& name, int numParams);
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
@@ -5094,7 +5095,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.Gt();
       e.JmpZ(disabled);
 
-      emitFuncCall(e, call, "__SystemLib\\assert", call->getParams());
+      emitFuncCall(e, call, "assert", call->getParams());
       emitConvertToCell(e);
       e.Jmp(after);
 
@@ -5102,8 +5103,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.True();
 
       after.set(e);
-      return true;
-    } else if (emitSystemLibVarEnvFunc(e, call)) {
       return true;
     } else if (call->isCallToFunction("array_slice") &&
                params && params->getCount() == 2 &&
@@ -8017,7 +8016,29 @@ void EmitterVisitor::emitPostponedMeths() {
     }
 
     if (funcScope->isNative()) {
-      bindNativeFunc(meth, fe);
+      auto const attr = bindNativeFunc(meth, fe, false);
+      if (attr & (AttrReadsCallerFrame | AttrWritesCallerFrame)) {
+        // If this is a builtin which may access the caller's frame, generate a
+        // dynamic call wrapper function. Dynamic calls to the builtin will be
+        // routed to this wrapper instead.  This function is identical to the
+        // normal builtin function, except it includes the VarEnvDynCall opcode.
+        if (!meth->is(Statement::KindOfFunctionStatement) ||
+            !p.m_top || fe->pce()) {
+          throw IncludeTimeFatalException(
+            meth,
+            "ReadsCallerFrame or WritesCallerFrame can only "
+            "be applied to top-level functions"
+          );
+        }
+        auto const rewrittenName = makeStaticString(
+          folly::sformat("{}$dyncall_wrapper", fe->name->data()));
+        auto stub = m_ue.newFuncEmitter(rewrittenName);
+        m_curFunc = stub;
+        SCOPE_EXIT { m_curFunc = fe; };
+        bindNativeFunc(meth, stub, true);
+        assert(stub->id() != kInvalidId);
+        fe->dynCallWrapperId = stub->id();
+      }
     } else {
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMethod(meth);
@@ -8061,8 +8082,9 @@ const StaticString s_Void("HH\\void");
 const char* attr_Deprecated = "__Deprecated";
 const StaticString s_attr_Deprecated(attr_Deprecated);
 
-void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
-                                    FuncEmitter *fe) {
+Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
+                                    FuncEmitter *fe,
+                                    bool dynCallWrapper) {
   if (SystemLib::s_inited &&
       !(Option::WholeProgram && meth->isSystem())) {
     throw IncludeTimeFatalException(meth,
@@ -8151,12 +8173,16 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   fe->setBuiltinFunc(attributes, base);
   fillFuncEmitterParams(fe, meth->getParams(), true);
+
+  if (dynCallWrapper) e.VarEnvDynCall();
+
   if (nativeAttrs & Native::AttrOpCodeImpl) {
     ff.setStackPad(emitNativeOpCodeImpl(meth, funcname, classname, fe));
   } else {
     e.NativeImpl();
   }
   emitMethodDVInitializers(e, meth, topOfBody);
+  return attributes;
 }
 
 void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
@@ -8908,39 +8934,6 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
     m_evalStack.setString(
       makeStaticString(node->getOriginalClassName()));
   }
-}
-
-bool EmitterVisitor::emitSystemLibVarEnvFunc(Emitter& e,
-                                             SimpleFunctionCallPtr call) {
-  if (call->isCallToFunction("extract")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\extract", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("parse_str")) {
-    emitFuncCall(e, call, "__SystemLib\\parse_str", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("compact")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\compact_sl", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("get_defined_vars")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\get_defined_vars", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("func_get_args")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\func_get_args_sl", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("func_get_arg")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\func_get_arg_sl", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("func_num_args")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\func_num_arg_", call->getParams());
-    return true;
-  }
-  return false;
 }
 
 bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {

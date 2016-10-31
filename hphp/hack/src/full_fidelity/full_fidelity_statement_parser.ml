@@ -27,8 +27,7 @@ module WithExpressionAndTypeParser
   include Full_fidelity_parser_helpers.WithParser(SimpleParser)
 
   let rec parse_statement parser =
-    let token = peek_token parser in
-    match (Token.kind token) with
+    match peek_token_kind parser with
     | For -> parse_for_statement parser
     | Foreach -> parse_foreach_statement parser
     | Do -> parse_do_statement parser
@@ -46,6 +45,7 @@ module WithExpressionAndTypeParser
     | Static ->
       parse_function_static_declaration_or_expression_statement parser
     | Echo -> parse_echo_statement parser
+    | Global -> parse_global_statement_or_expression_statement parser
     | _ -> parse_expression_statement parser
 
   (* Helper: parses ( expr ) *)
@@ -369,6 +369,26 @@ module WithExpressionAndTypeParser
       if peek_token_kind parser = RightBrace then (parser, make_missing())
       else parse_statement parser in
     (parser, make_case_statement case_token expr colon_token stmt)
+
+  and parse_global_statement_or_expression_statement parser =
+    (* PHP has a statement of the form
+      global comma-separated-variable-list ;
+      This is not supported in Hack, but we parse it anyways so as to give
+      a good error message. However we do not want to disallow legal statements
+      like "global(123);" so we use a heuristic to see if this is a likely
+      global statement. If not, we parse it as an expression statement.
+      TODO: Add an error in a later pass if this statement is found in a
+      Hack file.
+    *)
+    let (parser1, keyword) = assert_token parser Global in
+    if peek_token_kind parser1 = TokenKind.Variable then
+      let (parser, variables) = parse_comma_list
+        parser1 Semicolon SyntaxError.error1008 expect_variable in
+      let (parser, semicolon) = expect_semicolon parser in
+      let result = make_global_statement keyword variables semicolon in
+      (parser, result)
+    else
+      parse_expression_statement parser
 
   and parse_function_static_declaration_or_expression_statement parser =
     (* Determine if the current token is a late-bound static scope to be

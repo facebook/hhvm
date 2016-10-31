@@ -1,0 +1,282 @@
+Running test_compact_dyncall() #1....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_dyncall() #2....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_cuf() #1....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_cuf() #2....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_cuf_array() #1....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_cuf_array() #2....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_map() #1....
+
+Fatal error: compact should not be called dynamically
+Running test_compact_map() #2....
+
+Fatal error: compact should not be called dynamically
+Running test_compact_walk() #1....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_walk() #2....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_errors() #1....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_compact_errors() #2....
+
+Fatal error: compact should not be called dynamically in %s on line %d
+Running test_extract_dyncall() #1....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_extract_dyncall() #2....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_extract_cuf() #1....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_extract_cuf() #2....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_extract_cuf_array() #1....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_extract_cuf_array() #2....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_extract_map() #1....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically
+Running test_extract_map() #2....
+int(100)
+int(200)
+
+Fatal error: extract should not be called dynamically
+Running test_extract_errors() #1....
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_extract_errors() #2....
+
+Fatal error: extract should not be called dynamically in %s on line %d
+Running test_parse_str_dyncall() #1....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_parse_str_dyncall() #2....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_parse_str_cuf() #1....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_parse_str_cuf() #2....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_parse_str_cuf_array() #1....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_parse_str_cuf_array() #2....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_parse_str_map() #1....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically
+Running test_parse_str_map() #2....
+int(100)
+int(200)
+
+Fatal error: parse_str should not be called dynamically
+Running test_parse_str_errors() #1....
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_parse_str_errors() #2....
+
+Fatal error: parse_str should not be called dynamically in %s on line %d
+Running test_framemeta_dyncall() #1....
+int(100)
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_framemeta_dyncall() #2....
+int(100)
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_framemeta_cuf() #1....
+int(100)
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_framemeta_cuf() #2....
+int(100)
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_framemeta_cuf_array() #1....
+int(100)
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_framemeta_cuf_array() #2....
+int(100)
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_framemeta_errors() #1....
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_framemeta_errors() #2....
+
+Fatal error: HH\set_frame_metadata should not be called dynamically in %s on line %d
+Running test_getargs_dyncall() #1....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_getargs_dyncall() #2....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_getargs_cuf() #1....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_getargs_cuf() #2....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_getargs_cuf_array() #1....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_getargs_cuf_array() #2....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_getargs_errors() #1....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_getargs_errors() #2....
+
+Fatal error: func_get_args should not be called dynamically in %s on line %d
+Running test_assert_dyncall_pass() #1....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_dyncall_pass() #2....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_dyncall_pass2() #1....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_dyncall_pass2() #2....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_dyncall_fail() #1....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_dyncall_fail() #2....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_dyncall_fail2() #1....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_dyncall_fail2() #2....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_pass() #1....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_pass() #2....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_pass2() #1....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_pass2() #2....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_fail() #1....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_fail() #2....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_fail2() #1....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_fail2() #2....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_pass() #1....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_pass() #2....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_pass2() #1....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_pass2() #2....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_fail() #1....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_fail() #2....
+int(100)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_fail2() #1....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_cuf_array_fail2() #2....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_chained() #1....
+int(100)
+int(200)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_chained() #2....
+int(100)
+int(200)
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_errors() #1....
+
+Fatal error: assert should not be called dynamically in %s on line %d
+Running test_assert_errors() #2....
+
+Fatal error: assert should not be called dynamically in %s on line %d

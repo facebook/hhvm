@@ -94,10 +94,8 @@ module ExprDepTy = struct
     let env, ty = Env.expand_type env ty in
     match snd ty with
     | Tabstract (AKgeneric _, _) ->
-      begin match Typing_utils.get_concrete_supertypes env ty with
-        | _, None -> true
-        | _, Some ty -> should_apply env ty
-      end
+      let env, tyl = Typing_utils.get_concrete_supertypes env ty in
+      List.exists tyl (should_apply env)
     | Toption ty
     | Tabstract (
         ( AKnewtype _

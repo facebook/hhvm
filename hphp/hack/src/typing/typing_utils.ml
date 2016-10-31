@@ -75,35 +75,38 @@ let get_as_constraints env ak tyopt =
        | _ -> None)
 
 (*****************************************************************************
- * Get the "as" constraint from an abstract type or generic parameter, or
+ * Get the "as" constraints from an abstract type or generic parameter, or
  * return the type itself if there is no "as" constraint.
  * In the case of a generic parameter whose "as" constraint is another
  * generic parameter, repeat the process until a type is reached that is not
- * a generic parameter, or return None if there is a cycle.
+ * a generic parameter. Don't loop on cycles.
  * (For example, functon foo<Tu as Tv, Tv as Tu>(...))
- *
- * TODO: return a list of types if there are multiple constraints.
  *****************************************************************************)
 let get_concrete_supertypes env ty =
-  let rec iter seen env ty =
-    let env, ty = Env.expand_type env ty in
-    match snd ty with
-    | Tabstract (_, Some ty) ->
-      env, Some ty
-    | Tabstract (AKgeneric n, _) ->
-      if SSet.mem n seen
-      then env, None
-      else
-      begin match Env.get_upper_bounds env n with
-      | ty::_ -> iter (SSet.add n seen) env ty
-      | _ -> env, None
-      end
-    | Tabstract (_, tyopt) ->
-      env, tyopt
-    | _ ->
-      env, Some ty
-  in iter SSet.empty env ty
+  let rec iter seen env acc tyl =
+    match tyl with
+    | [] -> env, acc
+    | ty::tyl ->
+      let env, ty = Env.expand_type env ty in
+      match snd ty with
+      (* Don't expand enums or newtype; just return the type itself *)
+      | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty) ->
+        iter seen env (ty::acc) tyl
 
+      | Tabstract (_, Some ty) ->
+        iter seen env acc (ty::tyl)
+
+      | Tabstract (AKgeneric n, _) ->
+        if SSet.mem n seen
+        then iter seen env acc tyl
+        else iter (SSet.add n seen) env acc (Env.get_upper_bounds env n @ tyl)
+
+      | Tabstract (_, None) ->
+        iter seen env acc tyl
+
+      | _ ->
+        iter seen env (ty::acc) tyl
+  in iter SSet.empty env [] [ty]
 
 (*****************************************************************************)
 (* Gets the base type of an abstract type *)
@@ -115,8 +118,8 @@ let rec get_base_type env ty =
       classname = SN.Classes.cClassname -> ty
   | Tabstract _ ->
     begin match get_concrete_supertypes env ty with
-    | _, Some ty -> get_base_type env ty
-    | _, None -> ty
+    | _, ty::_ -> get_base_type env ty
+    | _, [] -> ty
     end
   | _ -> ty
 

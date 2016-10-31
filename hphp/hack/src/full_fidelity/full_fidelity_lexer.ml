@@ -698,6 +698,7 @@ let scan_token in_type lexer =
   | ('&', _, _) -> (advance lexer 1, TokenKind.Ampersand)
   | ('?', '-', '>') -> (advance lexer 3, TokenKind.QuestionMinusGreaterThan)
   | ('?', '?', _) -> (advance lexer 2, TokenKind.QuestionQuestion)
+  | ('?', '>', _) -> (advance lexer 2, TokenKind.QuestionGreaterThan)
   | ('?', _, _) -> (advance lexer 1, TokenKind.Question)
   | (':', ':', _) -> (advance lexer 2, TokenKind.ColonColon)
   | (':', _, _) -> (advance lexer 1, TokenKind.Colon)

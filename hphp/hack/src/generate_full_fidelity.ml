@@ -69,6 +69,11 @@ let schema = List.map from_list [
     "script";
     "header";
     "declarations" ];
+  [ "ScriptFooter";
+    "script_footer";
+    "footer";
+    "footer";
+    "question_greater_than" ];
   [ "SimpleTypeSpecifier";
     "simple_type_specifier";
     "simple_type_specifier";
@@ -1037,6 +1042,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "LeftBrace"; "{" ];
   [ "RightBrace"; "}" ];
   [ "Dot"; "." ];
+  [ "QuestionGreaterThan"; "?>" ];
   [ "MinusGreaterThan"; "->" ];
   [ "PlusPlus"; "++" ];
   [ "MinusMinus"; "--" ];

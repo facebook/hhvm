@@ -601,6 +601,7 @@ module WithStatementAndDeclAndTypeParser
     | MinusEqual
     | MinusGreaterThan
     | Question
+    | QuestionGreaterThan
     | QuestionMinusGreaterThan
     | QuestionQuestion
     | RightBrace

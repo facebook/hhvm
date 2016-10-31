@@ -11,3 +11,5 @@ class foo {
     return $x or $x and $x xor $x; // PHP operators with weird precedence.
   }
 }
+// The closing tag is not supported in Hack but we parse it anyways.
+?>

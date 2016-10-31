@@ -21,6 +21,7 @@ type t =
 | SyntaxList
 | ScriptHeader
 | Script
+| ScriptFooter
 | SimpleTypeSpecifier
 | LiteralExpression
 | VariableExpression
@@ -140,6 +141,7 @@ let to_string kind =
   | SyntaxList -> "list"
   | ScriptHeader -> "header"
   | Script -> "script"
+  | ScriptFooter -> "footer"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | LiteralExpression -> "literal"
   | VariableExpression -> "variable"

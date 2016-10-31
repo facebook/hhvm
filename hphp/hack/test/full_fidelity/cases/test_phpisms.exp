@@ -1,5 +1,6 @@
 (script
   (header((<))((?))((name)(end_of_line)))
+  (list
   (classish_declaration
     (missing)(missing)
     ((single_line_comment)(end_of_line)
@@ -59,4 +60,5 @@
                   ((;)(whitespace)(single_line_comment)(end_of_line))))
               ((whitespace)(})(end_of_line)))
             (missing)))
-      ((})))))
+          ((})(end_of_line))))
+  (footer((single_line_comment)(end_of_line)(?>)))))

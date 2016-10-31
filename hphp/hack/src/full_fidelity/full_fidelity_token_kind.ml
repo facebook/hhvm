@@ -109,6 +109,7 @@ type t =
   | LeftBrace
   | RightBrace
   | Dot
+  | QuestionGreaterThan
   | MinusGreaterThan
   | PlusPlus
   | MinusMinus
@@ -283,6 +284,7 @@ let from_string keyword =
   | "{" -> Some LeftBrace
   | "}" -> Some RightBrace
   | "." -> Some Dot
+  | "?>" -> Some QuestionGreaterThan
   | "->" -> Some MinusGreaterThan
   | "++" -> Some PlusPlus
   | "--" -> Some MinusMinus
@@ -435,6 +437,7 @@ match kind with
   | LeftBrace -> "{"
   | RightBrace -> "}"
   | Dot -> "."
+  | QuestionGreaterThan -> "?>"
   | MinusGreaterThan -> "->"
   | PlusPlus -> "++"
   | MinusMinus -> "--"

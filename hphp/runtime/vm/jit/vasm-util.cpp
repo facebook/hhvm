@@ -29,7 +29,12 @@ bool is_nop(const copy& i) { return i.s == i.d; }
 bool is_nop(const copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
 
 // movb r,r is a nop, however movl is not since it zeros upper bits.
-bool is_nop(const movb& i) { return i.s == i.d; }
+bool is_nop(const movb& i) {
+  // On PPC64 movb r,r cannot be considered a trivial nop since it zeros
+  // upper bits
+  if (arch() == Arch::PPC64) return false;
+  return i.s == i.d;
+}
 
 bool is_nop(const lea& i) {
   if (i.s.disp != 0) return false;

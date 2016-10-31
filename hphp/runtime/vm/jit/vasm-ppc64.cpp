@@ -203,13 +203,14 @@ struct Vgen {
   void emit(const divint& i) { a.divd(i.d,  i.s0, i.s1, false); }
   void emit(const divsd& i) { a.fdiv(i.d, i.s1, i.s0); }
   void emit(const extrb& i ) {
-    int8_t sh = 8;
+    uint8_t sh = 8;
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lower byte
     a.extsb(Reg64(i.d), Reg64(i.d));                // extend sign
   }
   void emit(const extrw& i ) {
-    int8_t sh = 16;
+    uint8_t sh = 16;
     a.rlwinm(i.d, Reg64(i.s), 0, 32-sh, 31); // extract lower 16 bits
+    a.extsh(i.d, i.d);                      // extend sign
   }
   void emit(const extsb& i) { a.extsb(i.d, i.s); }
   void emit(const extsw& i) { a.extsw(i.d, i.s); }
@@ -359,17 +360,15 @@ struct Vgen {
     a.mcrfs(0,5);
   }
   void emit(const movl& i) {
-    int8_t sh = sizeof(int) * CHAR_BIT;
+    uint8_t sh = 32;
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lowest 32 bits
-    a.extsw(Reg64(i.d), Reg64(i.d));                // extend sign
   }
   void emit(const movw& i) {
-    int8_t sh = sizeof(int) * (CHAR_BIT * 2);       // 16 bits
+    int8_t sh = 16;
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lowest 16 bits
-    a.extsh(Reg64(i.d), Reg64(i.d));                // extend sign
   }
   void emit(const movb& i) {
-    int8_t sh = CHAR_BIT;
+    int8_t sh = 8;
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lower byte
   }
   void emit(const orqi& i) {
@@ -1125,12 +1124,26 @@ void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
 
 X(cmpb,  extrb, cmpq,  NONE)
 X(testb, extrb, testq, NONE)
-X(testl, movl, testq, NONE)
-X(subl,  movl, subq,  ONE_R64(d))
-X(xorb,  extrb, xorq,  ONE_R64(d))
+X(xorb,  movb, xorq,  ONE_R64(d))
+X(andb,  movb, andq,  ONE_R64(d))
 X(xorl,  movl, xorq,  ONE_R64(d))
-X(andb,  extrb, andq,  ONE_R64(d))
 X(andl,  movl, andq,  ONE_R64(d))
+
+#undef X
+
+#define X(vasm_src, vasm_mov, vasm_ext, vasm_dst, attr_dest)            \
+void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
+  Vreg tmp1 = v.makeReg(), tmp2 = v.makeReg();                          \
+  Vreg tmp3 = v.makeReg(), tmp4 = v.makeReg();                          \
+  v << vasm_mov{inst.s0, tmp1};                                         \
+  v << vasm_ext{tmp1, tmp3};                                            \
+  v << vasm_mov{inst.s1, tmp2};                                         \
+  v << vasm_ext{tmp2, tmp4};                                            \
+  v << vasm_dst{tmp3, tmp4, attr_dest inst.sf};                         \
+}
+
+X(testl, movl, extsw, testq, NONE)
+X(subl,  movl, extsw, subq,  ONE_R64(d))
 
 #undef X
 
@@ -1145,12 +1158,23 @@ void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
 
 X(cmpbi,  extrb, cmpqi,  NONE)
 X(testbi, extrb, testqi, NONE)
-X(testli, movl, testqi, NONE)
 X(subbi,  extrb, subqi,  ONE_R64(d))
-X(subli,  movl, subqi,  ONE_R64(d))
 X(xorbi,  extrb, xorqi,  ONE_R64(d))
 X(andbi,  extrb, andqi,  ONE_R64(d))
 X(andli,  movl, andqi,  ONE_R64(d))
+
+#undef X
+
+#define X(vasm_src, vasm_mov, vasm_ext, vasm_dst, attr_dest)            \
+void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
+  Vreg tmp = v.makeReg(), tmp1 = v.makeReg();                           \
+  v << vasm_mov{inst.s1, tmp};                                          \
+  v << vasm_ext{tmp, tmp1};                                             \
+  v << vasm_dst{inst.s0, tmp1, attr_dest inst.sf};                      \
+}
+
+X(testli, movl, extsw, testqi, NONE)
+X(subli,  movl, extsw, subqi,  ONE_R64(d))
 
 #undef X
 
@@ -1198,11 +1222,10 @@ void lowerForPPC64(Vout& v, movtql& inst) { v << copy{inst.s, inst.d}; }
 void lowerForPPC64(Vout& v, movtdb& inst) { v << copy{inst.s, inst.d}; }
 void lowerForPPC64(Vout& v, movtdq& inst) { v << copy{inst.s, inst.d}; }
 
-// Lower all movzb* to extrb as ppc64 always sign extend the unused bits of reg.
-void lowerForPPC64(Vout& v, movzbl& i)    { v << extrb{i.s, Reg8(i.d)}; }
-void lowerForPPC64(Vout& v, movzbq& i)    { v << extrb{i.s, Reg8(i.d)}; }
-void lowerForPPC64(Vout& v, movzwl& i)    { v << extrw{i.s, Reg64(i.d)}; }
-void lowerForPPC64(Vout& v, movzwq& i)    { v << extrw{i.s, i.d}; }
+void lowerForPPC64(Vout& v, movzbl& i)    { v << movb{i.s, Reg8(i.d)}; }
+void lowerForPPC64(Vout& v, movzbq& i)    { v << movb{i.s, Reg8(i.d)}; }
+void lowerForPPC64(Vout& v, movzwl& i)    { v << movw{i.s, Reg16(i.d)}; }
+void lowerForPPC64(Vout& v, movzwq& i)    { v << movw{i.s, Reg16(i.d)}; }
 void lowerForPPC64(Vout& v, movzlq& i)    { v << movl{i.s, Reg32(i.d)}; }
 
 void lowerForPPC64(Vout& v, srem& i) {
@@ -1302,8 +1325,8 @@ void lowerForPPC64(Vout& v, cmpli& inst) {
 
 void lowerForPPC64(Vout& v, cmovb& inst) {
   auto t_64 = v.makeReg(), f_64 = v.makeReg();
-  v << extrb{inst.f, f_64};
-  v << extrb{inst.t, t_64};
+  v << movb{inst.f, f_64};
+  v << movb{inst.t, t_64};
   v << cmovq{inst.cc, inst.sf, f_64, t_64, Reg64(inst.d)};
 }
 

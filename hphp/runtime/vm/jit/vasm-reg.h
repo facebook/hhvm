@@ -55,6 +55,7 @@ struct Vreg {
   explicit Vreg(size_t r) : rn(r) {}
   /* implicit */ Vreg(Reg64 r)  : rn(int(r)) {}
   /* implicit */ Vreg(Reg32 r)  : rn(int(r)) {}
+  /* implicit */ Vreg(Reg16 r)  : rn(int(r)) {}
   /* implicit */ Vreg(Reg8 r)   : rn(int(r)) {}
   /* implicit */ Vreg(RegXMM r) : rn(X0+int(r)) {}
   /* implicit */ Vreg(RegSF r)  : rn(S0+int(r)) {}

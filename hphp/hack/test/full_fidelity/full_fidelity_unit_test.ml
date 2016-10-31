@@ -134,6 +134,7 @@ let minimal_tests =
     "test_awaitable_creation";
     "test_phpisms";
     "test_literals";
+    "test_cast";
   ] ~f:mapper
 
 let error_tests =

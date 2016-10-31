@@ -68,10 +68,35 @@ let get_language_and_mode text root =
   | _ -> failwith "unexpected missing script node"
     (* The parser never produces a missing script, even if the file is empty *)
 
+let remove_duplicates errors equals =
+  (* Assumes the list is sorted so that equal items are together. *)
+  let rec aux errors acc =
+    match errors with
+    | [] -> acc
+    | h1 :: t1 ->
+      begin
+        match t1 with
+        | [] -> h1 :: acc
+        | h2 :: t2 ->
+        if equals h1 h2 then
+          aux (h1 :: t2) acc
+        else
+          aux t1 (h1 :: acc)
+      end in
+  let result = aux errors [] in
+  List.rev result
+
 let make text =
   let parser = Parser.make text in
   let (parser, root) = Parser.parse_script parser in
+  (* We've got the lexical errors and the parser errors together, both
+  with lexically later errors earlier in the list. We want to reverse the
+  list so that later errors come later, and then do a stable sort to put the
+  lexical and parser errors together. *)
   let errors = Parser.errors parser in
+  let errors = List.rev errors in
+  let errors = List.stable_sort SyntaxError.compare errors in
+  let errors = remove_duplicates errors SyntaxError.exactly_equal in
   let (language, mode) = get_language_and_mode text root in
   { text; root; errors; language; mode }
 
@@ -81,8 +106,15 @@ let root tree =
 let text tree =
   tree.text
 
-let errors tree =
+let all_errors tree =
   tree.errors
+
+let remove_cascading errors =
+  let equals e1 e2 = (SyntaxError.compare e1 e2) = 0 in
+  remove_duplicates errors equals
+
+let errors tree =
+  remove_cascading tree.errors
 
 let language tree =
   tree.language

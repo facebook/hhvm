@@ -14,6 +14,7 @@
   *
   * --full-fidelity-json
   * --full-fidelity-errors
+  * --full-fidelity-errors-all
   * --full-fidelity-s-expression
   * --original-parser-errors
   * --original-parser-s-expression
@@ -34,6 +35,7 @@ module FullFidelityParseArgs = struct
   {
     full_fidelity_json : bool;
     full_fidelity_errors : bool;
+    full_fidelity_errors_all : bool;
     full_fidelity_s_expr : bool;
     original_parser_errors : bool;
     original_parser_s_expr : bool;
@@ -45,6 +47,7 @@ module FullFidelityParseArgs = struct
   let make
     full_fidelity_json
     full_fidelity_errors
+    full_fidelity_errors_all
     full_fidelity_s_expr
     original_parser_errors
     original_parser_s_expr
@@ -53,6 +56,7 @@ module FullFidelityParseArgs = struct
     files = {
     full_fidelity_json;
     full_fidelity_errors;
+    full_fidelity_errors_all;
     full_fidelity_s_expr;
     original_parser_errors;
     original_parser_s_expr;
@@ -66,6 +70,9 @@ module FullFidelityParseArgs = struct
     let set_full_fidelity_json () = full_fidelity_json := true in
     let full_fidelity_errors = ref false in
     let set_full_fidelity_errors () = full_fidelity_errors := true in
+    let full_fidelity_errors_all = ref false in
+    let set_full_fidelity_errors_all () =
+      full_fidelity_errors_all := true in
     let full_fidelity_s_expr = ref false in
     let set_full_fidelity_s_expr () = full_fidelity_s_expr := true in
     let original_parser_errors = ref false in
@@ -85,7 +92,12 @@ module FullFidelityParseArgs = struct
         "Displays the full-fidelity parse tree in JSON format.";
       "--full-fidelity-errors",
         Arg.Unit set_full_fidelity_errors,
-        "Displays the full-fidelity parser errors, if any.";
+        "Displays the full-fidelity parser errors, if any.
+Some errors may be filtered out.";
+      "--full-fidelity-errors-all",
+        Arg.Unit set_full_fidelity_errors_all,
+        "Displays the full-fidelity parser errors, if any.
+No errors are filtered out.";
       "--full-fidelity-s-expression",
         Arg.Unit set_full_fidelity_s_expr,
         "Displays the full-fidelity parse tree in S-expression format.";
@@ -105,6 +117,7 @@ module FullFidelityParseArgs = struct
     make
       !full_fidelity_json
       !full_fidelity_errors
+      !full_fidelity_errors_all
       !full_fidelity_s_expr
       !original_parser_errors
       !original_parser_s_expr
@@ -148,7 +161,10 @@ let handle_file args filename =
   end;
   if args.full_fidelity_errors then begin
     let errors = (SyntaxTree.errors syntax_tree) in
-    let errors = List.sort SyntaxError.compare errors in
+    List.iter (print_full_fidelity_error source_text) errors
+  end;
+  if args.full_fidelity_errors_all then begin
+    let errors = (SyntaxTree.all_errors syntax_tree) in
     List.iter (print_full_fidelity_error source_text) errors
   end;
   if args.full_fidelity_s_expr then begin

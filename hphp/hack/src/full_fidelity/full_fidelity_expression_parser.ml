@@ -421,9 +421,16 @@ module WithStatementAndDeclAndTypeParser
   and parse_yield_expression parser =
     (* SPEC:
       yield  array-element-initializer
+      TODO: Hack allows "yield break".
+      TODO: Should this be its own production, or can it be a yield expression?
+      TODO: Is this an expression or a statement?
+      TODO: Add it to the specification.
     *)
     let (parser, token) = assert_token parser Yield in
-    let (parser, operand) = parse_array_element_init parser in
+    let (parser, operand) = if peek_token_kind parser = Break then
+      assert_token parser Break
+    else
+      parse_array_element_init parser in
     let result = make_yield_expression token operand in
     (parser, result)
 

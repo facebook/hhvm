@@ -536,44 +536,6 @@ SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
                      uint32_t numNonDefaultArgs) {
-  auto const constAsCell = [] (const SSATmp* tmp) {
-    switch (tmp->type().toDataType()) {
-      case KindOfUninit:
-        return make_tv<KindOfUninit>();
-      case KindOfNull:
-        return make_tv<KindOfNull>();
-      case KindOfBoolean:
-        return make_tv<KindOfBoolean>(tmp->boolVal());
-      case KindOfInt64:
-        return make_tv<KindOfInt64>(tmp->intVal());
-      case KindOfDouble:
-        return make_tv<KindOfDouble>(tmp->dblVal());
-      case KindOfPersistentString:
-        return make_tv<KindOfPersistentString>(tmp->strVal());
-      case KindOfPersistentArray:
-        return make_tv<KindOfPersistentArray>(tmp->arrVal());
-      case KindOfPersistentVec:
-        return make_tv<KindOfPersistentVec>(tmp->vecVal());
-      case KindOfPersistentDict:
-        return make_tv<KindOfPersistentDict>(tmp->dictVal());
-      case KindOfPersistentKeyset:
-        return make_tv<KindOfPersistentKeyset>(tmp->keysetVal());
-
-      case KindOfVec:
-      case KindOfDict:
-      case KindOfKeyset:
-      case KindOfClass:
-      case KindOfString:
-      case KindOfArray:
-      case KindOfObject:
-      case KindOfResource:
-      case KindOfRef:
-        break;
-    }
-    // Other Kinds are not expected to be ConstVal
-    not_reached();
-  };
-
   if (!func->isFoldable()) return nullptr;
 
   // Don't pop the args yet---if the builtin throws at compile time (because
@@ -585,14 +547,14 @@ SSATmp* opt_foldable(IRGS& env,
     if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
       return nullptr;
     } else {
-      args.append(cellAsCVarRef(constAsCell(params[i].value)));
+      args.append(params[i].value->variantVal());
     }
   }
   if (params.size() != func->numNonVariadicParams()) {
     auto const variadic = params.info.back().value;
     if (!variadic->type().hasConstVal()) return nullptr;
 
-    auto const variadicArgs = constAsCell(variadic).m_data.parr;
+    auto const variadicArgs = variadic->variantVal().asCArrRef().get();
     auto const numVariadicArgs = variadicArgs->size();
     for (auto i = 0; i < numVariadicArgs; i++) {
       args.append(variadicArgs->get(i));

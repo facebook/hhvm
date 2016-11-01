@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 
@@ -80,24 +81,31 @@ Variant SSATmp::variantVal() const {
     case KindOfDouble:
       return dblVal();
     case KindOfPersistentString:
-    case KindOfString:
-      return Variant(const_cast<StringData*>(strVal()));
+      return Variant{strVal(), Variant::PersistentStrInit{}};
     case KindOfPersistentVec:
-    case KindOfVec:
+      return Variant{vecVal(), KindOfPersistentVec,
+                     Variant::PersistentArrInit{}};
     case KindOfPersistentDict:
-    case KindOfDict:
+      return Variant{dictVal(), KindOfPersistentDict,
+                     Variant::PersistentArrInit{}};
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
+      return Variant{keysetVal(), KindOfPersistentKeyset,
+                     Variant::PersistentArrInit{}};
     case KindOfPersistentArray:
+      return Variant{arrVal(), KindOfPersistentArray,
+                     Variant::PersistentArrInit{}};
+    case KindOfString:
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfKeyset:
     case KindOfArray:
-      return Variant{const_cast<ArrayData*>(arrVal())};
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
     case KindOfClass:
       break;
   }
-  not_reached();
+  always_assert(false);
 }
 
 std::string SSATmp::toString() const {

@@ -179,14 +179,13 @@ struct Variant : private TypedValue {
   }
 
   enum class PersistentArrInit {};
-  Variant(ArrayData* ad, DataType dt, PersistentArrInit) noexcept {
+  Variant(const ArrayData* ad, DataType dt, PersistentArrInit) noexcept {
     assert(ad->toPersistentDataType() == dt);
     assert(!ad->isRefCounted());
-    m_data.parr = ad;
+    m_data.parr = const_cast<ArrayData*>(ad);
     m_type = dt;
   }
 
-  // for persistent strings only
   enum class PersistentStrInit {};
   explicit Variant(const StringData *s, PersistentStrInit) noexcept {
     assert(!s->isRefCounted());

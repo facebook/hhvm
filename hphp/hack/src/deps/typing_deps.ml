@@ -88,11 +88,14 @@ module DepSet = Reordered_argument_set(Set.Make (Dep))
 module Graph = struct
   external hh_add_dep: int -> unit     = "hh_add_dep"
   external hh_get_dep: int -> int list = "hh_get_dep"
+  external hh_get_dep_sqlite: int -> int list = "hh_get_dep_sqlite"
 
   let add x y = hh_add_dep ((x lsl 31) lor y)
 
+  let union_deps l1 l2 = List.dedup (List.append l1 l2)
+
   let get x =
-    let l = hh_get_dep x in
+    let l = union_deps (hh_get_dep x) (hh_get_dep_sqlite x) in
     List.fold_left l ~f:begin fun acc node ->
       DepSet.add acc node
     end ~init:DepSet.empty

@@ -128,7 +128,11 @@ let load_state root use_sql cmd (_ic, oc) =
       Hh_json.get_bool_exn @@ List.Assoc.find_exn kv "is_cached" in
     let deptable_fn =
       Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
-    let read_deptable_time = SharedMem.load_dep_table deptable_fn in
+    let read_deptable_time =
+      if use_sql
+      then SharedMem.load_dep_table_sqlite deptable_fn
+      else SharedMem.load_dep_table deptable_fn
+    in
     let end_time = Unix.gettimeofday () in
     Daemon.to_channel oc
       @@ Ok (`Fst (state_fn, is_cached, end_time, read_deptable_time));

@@ -83,7 +83,10 @@ let save_state env fn =
   let names = FileInfo.simplify_fast env.files_info in
   Marshal.to_channel chan names [];
   Sys_utils.close_out_no_fail fn chan;
-  SharedMem.save_dep_table (fn^".deptable");
+  let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") in
+  let save_t = SharedMem.save_dep_table (fn^".deptable") in
+  Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;
+  Hh_logger.log "Saving deptable without sqlite took(seconds): %d" save_t;
   ignore @@ Hh_logger.log_duration "Saving" t
 
 let read_json_line ic =

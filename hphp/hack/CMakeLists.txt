@@ -8,8 +8,8 @@ find_package(LibElf)
 
 if (OCAMLC_FOUND)
   # This is totally the wrong way to do this, but I am tired of fighting with
-  # build systems and don't really care to make this work the right way. libelf
-  # and lz4 are all we need right now anyways.
+  # build systems and don't really care to make this work the right way. libelf,
+  # lz4 and sqlite3 all we need right now anyways.
   unset(extra_include_paths)
   unset(extra_lib_paths)
   unset(extra_cc_flags)
@@ -47,6 +47,16 @@ if (OCAMLC_FOUND)
   endif()
   list(APPEND extra_native_libraries "lz4")
 
+  if(PC_SQLITE3_FOUND)
+    list(APPEND extra_include_paths ${LIBSQLITE3_INCLUDE_DIR})
+    get_filename_component(pth ${LIBSQLITE3_LIBRARY} PATH)
+    list(APPEND extra_lib_paths ${pth})
+  else()
+    list(APPEND extra_include_paths "${TP_DIR}/libsqlite3")
+    list(APPEND extra_lib_paths "${TP_BUILD_DIR}/libsqlite3")
+  endif()
+  list(APPEND extra_native_libraries "sqlite3")
+
   # Xcode/Ninja generators undefined MAKE
   if(NOT MAKE)
     set(MAKE make)
@@ -82,6 +92,13 @@ if (OCAMLC_FOUND)
     # gets built
     add_dependencies(hack lz4)
     add_dependencies(hack_test lz4)
+  endif()
+
+  if(NOT PC_SQLITE3_FOUND)
+    # if the system does not have sqlite3, make sure that the one in public_tl
+    # gets built
+    add_dependencies(hack sqlite3)
+    add_dependencies(hack_test sqlite3)
   endif()
 
   install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client

@@ -874,6 +874,14 @@ let schema = List.map from_list [
     "left_paren";
     "fields";
     "right_paren" ];
+  [ "TupleExpression";
+    "tuple_expression";
+    "tuple_expression";
+    "tuple_expression";
+    "keyword";
+    "left_paren";
+    "items";
+    "right_paren" ];
   [ "GenericTypeSpecifier";
     "generic_type_specifier";
     "generic_type_specifier";

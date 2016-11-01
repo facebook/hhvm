@@ -700,6 +700,12 @@ module WithToken(Token: TokenType) = struct
       shape_expression_fields: t;
       shape_expression_right_paren: t;
     }
+    and tuple_expression = {
+      tuple_expression_keyword: t;
+      tuple_expression_left_paren: t;
+      tuple_expression_items: t;
+      tuple_expression_right_paren: t;
+    }
     and generic_type_specifier = {
       generic_class_type: t;
       generic_argument_list: t;
@@ -844,6 +850,7 @@ module WithToken(Token: TokenType) = struct
     | FieldInitializer of field_initializer
     | ShapeTypeSpecifier of shape_type_specifier
     | ShapeExpression of shape_expression
+    | TupleExpression of tuple_expression
     | GenericTypeSpecifier of generic_type_specifier
     | NullableTypeSpecifier of nullable_type_specifier
     | SoftTypeSpecifier of soft_type_specifier
@@ -1078,6 +1085,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ShapeTypeSpecifier
       | ShapeExpression _ ->
         SyntaxKind.ShapeExpression
+      | TupleExpression _ ->
+        SyntaxKind.TupleExpression
       | GenericTypeSpecifier _ ->
         SyntaxKind.GenericTypeSpecifier
       | NullableTypeSpecifier _ ->
@@ -1315,6 +1324,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ShapeTypeSpecifier
     let is_shape_expression node =
       kind node = SyntaxKind.ShapeExpression
+    let is_tuple_expression node =
+      kind node = SyntaxKind.TupleExpression
     let is_generic_type_specifier node =
       kind node = SyntaxKind.GenericTypeSpecifier
     let is_nullable_type_specifier node =
@@ -2583,6 +2594,18 @@ module WithToken(Token: TokenType) = struct
       shape_expression_right_paren
     )
 
+    let get_tuple_expression_children {
+      tuple_expression_keyword;
+      tuple_expression_left_paren;
+      tuple_expression_items;
+      tuple_expression_right_paren;
+    } = (
+      tuple_expression_keyword,
+      tuple_expression_left_paren,
+      tuple_expression_items,
+      tuple_expression_right_paren
+    )
+
     let get_generic_type_specifier_children {
       generic_class_type;
       generic_argument_list;
@@ -3767,6 +3790,17 @@ module WithToken(Token: TokenType) = struct
         shape_expression_fields;
         shape_expression_right_paren;
       ]
+      | TupleExpression {
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
+      } -> [
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
+      ]
       | GenericTypeSpecifier {
         generic_class_type;
         generic_argument_list;
@@ -4942,6 +4976,17 @@ module WithToken(Token: TokenType) = struct
         "shape_expression_left_paren";
         "shape_expression_fields";
         "shape_expression_right_paren";
+      ]
+      | TupleExpression {
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
+      } -> [
+        "tuple_expression_keyword";
+        "tuple_expression_left_paren";
+        "tuple_expression_items";
+        "tuple_expression_right_paren";
       ]
       | GenericTypeSpecifier {
         generic_class_type;
@@ -6277,6 +6322,18 @@ module WithToken(Token: TokenType) = struct
           shape_expression_left_paren;
           shape_expression_fields;
           shape_expression_right_paren;
+        }
+      | (SyntaxKind.TupleExpression, [
+          tuple_expression_keyword;
+          tuple_expression_left_paren;
+          tuple_expression_items;
+          tuple_expression_right_paren;
+        ]) ->
+        TupleExpression {
+          tuple_expression_keyword;
+          tuple_expression_left_paren;
+          tuple_expression_items;
+          tuple_expression_right_paren;
         }
       | (SyntaxKind.GenericTypeSpecifier, [
           generic_class_type;
@@ -7706,6 +7763,19 @@ module WithToken(Token: TokenType) = struct
         shape_expression_left_paren;
         shape_expression_fields;
         shape_expression_right_paren;
+      ]
+
+    let make_tuple_expression
+      tuple_expression_keyword
+      tuple_expression_left_paren
+      tuple_expression_items
+      tuple_expression_right_paren
+    =
+      from_children SyntaxKind.TupleExpression [
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
       ]
 
     let make_generic_type_specifier

@@ -278,6 +278,8 @@ class EditableSyntax
       return ShapeTypeSpecifier.from_json(json, position, source);
     case 'shape_expression':
       return ShapeExpression.from_json(json, position, source);
+    case 'tuple_expression':
+      return TupleExpression.from_json(json, position, source);
     case 'generic_type_specifier':
       return GenericTypeSpecifier.from_json(json, position, source);
     case 'nullable_type_specifier':
@@ -13215,6 +13217,110 @@ class ShapeExpression extends EditableSyntax
     return ShapeExpression._children_keys;
   }
 }
+class TupleExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    items,
+    right_paren)
+  {
+    super('tuple_expression', {
+      keyword: keyword,
+      left_paren: left_paren,
+      items: items,
+      right_paren: right_paren });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get items() { return this.children.items; }
+  get right_paren() { return this.children.right_paren; }
+  with_keyword(keyword){
+    return new TupleExpression(
+      keyword,
+      this.left_paren,
+      this.items,
+      this.right_paren);
+  }
+  with_left_paren(left_paren){
+    return new TupleExpression(
+      this.keyword,
+      left_paren,
+      this.items,
+      this.right_paren);
+  }
+  with_items(items){
+    return new TupleExpression(
+      this.keyword,
+      this.left_paren,
+      items,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new TupleExpression(
+      this.keyword,
+      this.left_paren,
+      this.items,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var items = this.items.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      items === this.items &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new TupleExpression(
+        keyword,
+        left_paren,
+        items,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.tuple_expression_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.tuple_expression_left_paren, position, source);
+    position += left_paren.width;
+    let items = EditableSyntax.from_json(
+      json.tuple_expression_items, position, source);
+    position += items.width;
+    let right_paren = EditableSyntax.from_json(
+      json.tuple_expression_right_paren, position, source);
+    position += right_paren.width;
+    return new TupleExpression(
+        keyword,
+        left_paren,
+        items,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (TupleExpression._children_keys == null)
+      TupleExpression._children_keys = [
+        'keyword',
+        'left_paren',
+        'items',
+        'right_paren'];
+    return TupleExpression._children_keys;
+  }
+}
 class GenericTypeSpecifier extends EditableSyntax
 {
   constructor(
@@ -14060,6 +14166,7 @@ exports.FieldSpecifier = FieldSpecifier;
 exports.FieldInitializer = FieldInitializer;
 exports.ShapeTypeSpecifier = ShapeTypeSpecifier;
 exports.ShapeExpression = ShapeExpression;
+exports.TupleExpression = TupleExpression;
 exports.GenericTypeSpecifier = GenericTypeSpecifier;
 exports.NullableTypeSpecifier = NullableTypeSpecifier;
 exports.SoftTypeSpecifier = SoftTypeSpecifier;

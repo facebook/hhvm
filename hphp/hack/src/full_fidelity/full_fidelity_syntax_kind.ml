@@ -124,6 +124,7 @@ type t =
 | FieldInitializer
 | ShapeTypeSpecifier
 | ShapeExpression
+| TupleExpression
 | GenericTypeSpecifier
 | NullableTypeSpecifier
 | SoftTypeSpecifier
@@ -244,6 +245,7 @@ let to_string kind =
   | FieldInitializer -> "field_initializer"
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | ShapeExpression -> "shape_expression"
+  | TupleExpression -> "tuple_expression"
   | GenericTypeSpecifier -> "generic_type_specifier"
   | NullableTypeSpecifier -> "nullable_type_specifier"
   | SoftTypeSpecifier -> "soft_type_specifier"

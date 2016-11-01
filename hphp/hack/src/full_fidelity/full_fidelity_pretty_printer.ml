@@ -879,6 +879,14 @@ let rec get_doc node =
     let fs = get_doc shape_expression_fields in
     let rp = get_doc shape_expression_right_paren in
     sh ^| lp ^^^ fs ^^^ rp
+  | TupleExpression
+    { tuple_expression_keyword; tuple_expression_left_paren;
+       tuple_expression_items; tuple_expression_right_paren } ->
+    let tu = get_doc tuple_expression_keyword in
+    let lp = get_doc tuple_expression_left_paren in
+    let xs = get_doc tuple_expression_items in
+    let rp = get_doc tuple_expression_right_paren in
+    tu ^| lp ^^^ xs ^^^ rp
   | ArrayCreationExpression x ->
     let left_bracket = get_doc x.array_creation_left_bracket in
     let right_bracket = get_doc x.array_creation_right_bracket in

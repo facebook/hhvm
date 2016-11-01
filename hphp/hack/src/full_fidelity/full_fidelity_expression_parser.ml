@@ -147,6 +147,7 @@ module WithStatementAndDeclAndTypeParser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
     | LeftBracket -> parse_array_creation_expression parser
+    | Tuple -> parse_tuple_expression parser
     | Shape -> parse_shape_expression parser
     | Function -> parse_anon parser
     | DollarDollar ->
@@ -1175,6 +1176,25 @@ module WithStatementAndDeclAndTypeParser
       parse_parenthesized_comma_list_opt_allow_trailing
         parser parse_field_initializer in
     let result = make_shape_expression shape left_paren fields right_paren in
+    (parser, result)
+
+  and parse_tuple_expression parser =
+    (* SPEC
+    tuple-literal:
+      tuple  (  expression-list-one-or-more  )
+
+    expression-list-one-or-more:
+      expression
+      expression-list-one-or-more  ,  expression
+
+    TODO: Can the list be comma-terminated? If so, update the spec.
+    TODO: We need to produce an error in a later pass if the list is empty.
+    *)
+    let (parser, keyword) = assert_token parser Tuple in
+    let (parser, left_paren, items, right_paren) =
+      parse_parenthesized_comma_list_opt_allow_trailing
+        parser parse_expression_with_reset_precedence in
+    let result = make_tuple_expression keyword left_paren items right_paren in
     (parser, result)
 
   and parse_use_variable parser =

@@ -140,6 +140,8 @@ class EditableSyntax
       return CompoundStatement.from_json(json, position, source);
     case 'expression_statement':
       return ExpressionStatement.from_json(json, position, source);
+    case 'unset_statement':
+      return UnsetStatement.from_json(json, position, source);
     case 'while_statement':
       return WhileStatement.from_json(json, position, source);
     case 'if_statement':
@@ -6141,6 +6143,133 @@ class ExpressionStatement extends EditableSyntax
         'expression',
         'semicolon'];
     return ExpressionStatement._children_keys;
+  }
+}
+class UnsetStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    variables,
+    right_paren,
+    semicolon)
+  {
+    super('unset_statement', {
+      keyword: keyword,
+      left_paren: left_paren,
+      variables: variables,
+      right_paren: right_paren,
+      semicolon: semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get variables() { return this.children.variables; }
+  get right_paren() { return this.children.right_paren; }
+  get semicolon() { return this.children.semicolon; }
+  with_keyword(keyword){
+    return new UnsetStatement(
+      keyword,
+      this.left_paren,
+      this.variables,
+      this.right_paren,
+      this.semicolon);
+  }
+  with_left_paren(left_paren){
+    return new UnsetStatement(
+      this.keyword,
+      left_paren,
+      this.variables,
+      this.right_paren,
+      this.semicolon);
+  }
+  with_variables(variables){
+    return new UnsetStatement(
+      this.keyword,
+      this.left_paren,
+      variables,
+      this.right_paren,
+      this.semicolon);
+  }
+  with_right_paren(right_paren){
+    return new UnsetStatement(
+      this.keyword,
+      this.left_paren,
+      this.variables,
+      right_paren,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new UnsetStatement(
+      this.keyword,
+      this.left_paren,
+      this.variables,
+      this.right_paren,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var variables = this.variables.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      variables === this.variables &&
+      right_paren === this.right_paren &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new UnsetStatement(
+        keyword,
+        left_paren,
+        variables,
+        right_paren,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.unset_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.unset_left_paren, position, source);
+    position += left_paren.width;
+    let variables = EditableSyntax.from_json(
+      json.unset_variables, position, source);
+    position += variables.width;
+    let right_paren = EditableSyntax.from_json(
+      json.unset_right_paren, position, source);
+    position += right_paren.width;
+    let semicolon = EditableSyntax.from_json(
+      json.unset_semicolon, position, source);
+    position += semicolon.width;
+    return new UnsetStatement(
+        keyword,
+        left_paren,
+        variables,
+        right_paren,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (UnsetStatement._children_keys == null)
+      UnsetStatement._children_keys = [
+        'keyword',
+        'left_paren',
+        'variables',
+        'right_paren',
+        'semicolon'];
+    return UnsetStatement._children_keys;
   }
 }
 class WhileStatement extends EditableSyntax
@@ -14097,6 +14226,7 @@ exports.InclusionExpression = InclusionExpression;
 exports.InclusionDirective = InclusionDirective;
 exports.CompoundStatement = CompoundStatement;
 exports.ExpressionStatement = ExpressionStatement;
+exports.UnsetStatement = UnsetStatement;
 exports.WhileStatement = WhileStatement;
 exports.IfStatement = IfStatement;
 exports.ElseifClause = ElseifClause;

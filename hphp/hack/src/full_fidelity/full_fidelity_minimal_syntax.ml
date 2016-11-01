@@ -30,7 +30,7 @@ module MinimalSyntax =
   SyntaxWithMinimalToken.WithSyntaxValue(MinimalSyntaxValue)
 
 module MinimalValueBuilder = struct
-  let value_from_children kind nodes =
+  let value_from_children _kind nodes =
     let folder sum node =
       let v = MinimalSyntax.value node in
       let w = MinimalSyntaxValue.full_width v in
@@ -83,7 +83,7 @@ let is_in_body node position =
       if is_compound_statement h1 then
         match t1 with
         | [] -> false
-        | h2 :: t2 ->
+        | h2 :: _ ->
           if ((is_methodish_declaration h2) || is_function_declaration h2) then
             true
           else

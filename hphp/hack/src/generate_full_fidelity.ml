@@ -336,6 +336,15 @@ let schema = List.map from_list [
     "expression_statement";
     "expression";
     "semicolon" ];
+  [ "UnsetStatement";
+    "unset_statement";
+    "unset_statement";
+    "unset";
+    "keyword";
+    "left_paren";
+    "variables";
+    "right_paren";
+    "semicolon" ];
   [ "WhileStatement";
     "while_statement";
     "while_statement";

@@ -536,6 +536,18 @@ let rec get_doc node =
     let semicolon = get_doc expression_statement_semicolon in
     (* semicolon always follows the last line *)
     body ^^^ semicolon |> group_doc |> add_break
+  | UnsetStatement {
+    unset_keyword;
+    unset_left_paren;
+    unset_variables;
+    unset_right_paren;
+    unset_semicolon} ->
+    let u = get_doc unset_keyword in
+    let l = get_doc unset_left_paren in
+    let v = get_doc unset_variables in
+    let r = get_doc unset_right_paren in
+    let s = get_doc unset_semicolon in
+    group_doc (u ^^^ l ^^^ v ^^^ r ^^^ s)
   | WhileStatement
     { while_keyword; while_left_paren; while_condition; while_right_paren;
       while_body } ->

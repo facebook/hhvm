@@ -55,6 +55,7 @@ type t =
 | InclusionDirective
 | CompoundStatement
 | ExpressionStatement
+| UnsetStatement
 | WhileStatement
 | IfStatement
 | ElseifClause
@@ -176,6 +177,7 @@ let to_string kind =
   | InclusionDirective -> "inclusion_directive"
   | CompoundStatement -> "compound_statement"
   | ExpressionStatement -> "expression_statement"
+  | UnsetStatement -> "unset_statement"
   | WhileStatement -> "while_statement"
   | IfStatement -> "if_statement"
   | ElseifClause -> "elseif_clause"

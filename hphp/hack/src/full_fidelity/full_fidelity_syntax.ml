@@ -300,6 +300,13 @@ module WithToken(Token: TokenType) = struct
       expression_statement_expression: t;
       expression_statement_semicolon: t;
     }
+    and unset_statement = {
+      unset_keyword: t;
+      unset_left_paren: t;
+      unset_variables: t;
+      unset_right_paren: t;
+      unset_semicolon: t;
+    }
     and while_statement = {
       while_keyword: t;
       while_left_paren: t;
@@ -781,6 +788,7 @@ module WithToken(Token: TokenType) = struct
     | InclusionDirective of inclusion_directive
     | CompoundStatement of compound_statement
     | ExpressionStatement of expression_statement
+    | UnsetStatement of unset_statement
     | WhileStatement of while_statement
     | IfStatement of if_statement
     | ElseifClause of elseif_clause
@@ -947,6 +955,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.CompoundStatement
       | ExpressionStatement _ ->
         SyntaxKind.ExpressionStatement
+      | UnsetStatement _ ->
+        SyntaxKind.UnsetStatement
       | WhileStatement _ ->
         SyntaxKind.WhileStatement
       | IfStatement _ ->
@@ -1186,6 +1196,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.CompoundStatement
     let is_expression_statement node =
       kind node = SyntaxKind.ExpressionStatement
+    let is_unset_statement node =
+      kind node = SyntaxKind.UnsetStatement
     let is_while_statement node =
       kind node = SyntaxKind.WhileStatement
     let is_if_statement node =
@@ -1792,6 +1804,20 @@ module WithToken(Token: TokenType) = struct
     } = (
       expression_statement_expression,
       expression_statement_semicolon
+    )
+
+    let get_unset_statement_children {
+      unset_keyword;
+      unset_left_paren;
+      unset_variables;
+      unset_right_paren;
+      unset_semicolon;
+    } = (
+      unset_keyword,
+      unset_left_paren,
+      unset_variables,
+      unset_right_paren,
+      unset_semicolon
     )
 
     let get_while_statement_children {
@@ -3059,6 +3085,19 @@ module WithToken(Token: TokenType) = struct
         expression_statement_expression;
         expression_statement_semicolon;
       ]
+      | UnsetStatement {
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
+      } -> [
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
+      ]
       | WhileStatement {
         while_keyword;
         while_left_paren;
@@ -4245,6 +4284,19 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "expression_statement_expression";
         "expression_statement_semicolon";
+      ]
+      | UnsetStatement {
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
+      } -> [
+        "unset_keyword";
+        "unset_left_paren";
+        "unset_variables";
+        "unset_right_paren";
+        "unset_semicolon";
       ]
       | WhileStatement {
         while_keyword;
@@ -5522,6 +5574,20 @@ module WithToken(Token: TokenType) = struct
         ExpressionStatement {
           expression_statement_expression;
           expression_statement_semicolon;
+        }
+      | (SyntaxKind.UnsetStatement, [
+          unset_keyword;
+          unset_left_paren;
+          unset_variables;
+          unset_right_paren;
+          unset_semicolon;
+        ]) ->
+        UnsetStatement {
+          unset_keyword;
+          unset_left_paren;
+          unset_variables;
+          unset_right_paren;
+          unset_semicolon;
         }
       | (SyntaxKind.WhileStatement, [
           while_keyword;
@@ -6894,6 +6960,21 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.ExpressionStatement [
         expression_statement_expression;
         expression_statement_semicolon;
+      ]
+
+    let make_unset_statement
+      unset_keyword
+      unset_left_paren
+      unset_variables
+      unset_right_paren
+      unset_semicolon
+    =
+      from_children SyntaxKind.UnsetStatement [
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
       ]
 
     let make_while_statement

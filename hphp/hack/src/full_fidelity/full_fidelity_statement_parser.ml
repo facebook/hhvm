@@ -46,6 +46,7 @@ module WithExpressionAndTypeParser
       parse_function_static_declaration_or_expression_statement parser
     | Echo -> parse_echo_statement parser
     | Global -> parse_global_statement_or_expression_statement parser
+    | Unset -> parse_unset_statement parser
     | _ -> parse_expression_statement parser
 
   (* Helper: parses ( expr ) *)
@@ -165,6 +166,25 @@ module WithExpressionAndTypeParser
     let syntax = make_while_statement while_keyword_token left_paren_token
       expr_node right_paren_token statement_node in
     (parser, syntax)
+
+  and parse_unset_statement parser =
+    (*
+    TODO: This is listed as unsupported in Hack in the spec; is that true?
+    TODO: If it is formally supported in Hack then update the spec; if not
+    TODO: then should we make it illegal in strict mode?
+    TODO: Can the list be comma-terminated?
+    TODO: Can the list be empty?
+    TODO: The list has to be expressions which evaluate as variables;
+          add an error checking pass.
+    *)
+    let (parser, keyword) = assert_token parser Unset in
+    let (parser, left_paren, variables, right_paren) =
+      parse_parenthesized_comma_list_opt_allow_trailing
+        parser parse_expression in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_unset_statement
+      keyword left_paren variables right_paren semi in
+    (parser, result)
 
   and parse_if_statement parser =
     (* parses the "( expr ) statement" segment of If, Elseif or Else clauses.

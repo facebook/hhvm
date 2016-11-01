@@ -113,9 +113,6 @@ let remove_cascading errors =
   let equals e1 e2 = (SyntaxError.compare e1 e2) = 0 in
   remove_duplicates errors equals
 
-let errors tree =
-  remove_cascading tree.errors
-
 let language tree =
   tree.language
 
@@ -130,6 +127,25 @@ let is_php tree =
 
 let is_strict tree =
   (is_hack tree) && tree.mode = "strict"
+
+let is_decl tree =
+  (is_hack tree) && tree.mode = "decl"
+
+let errors_no_bodies tree =
+  let not_in_body error =
+    not (is_in_body tree.root error.SyntaxError.start_offset) in
+  List.filter not_in_body tree.errors
+
+(* By default we strip out (1) all cascading errors, and (2) in decl mode,
+all errors that happen in a body. *)
+
+let errors tree =
+  let e =
+    if is_decl tree then begin
+      errors_no_bodies tree end
+    else
+      all_errors tree in
+  remove_cascading e
 
 let to_json tree =
   let root = to_json tree.root in

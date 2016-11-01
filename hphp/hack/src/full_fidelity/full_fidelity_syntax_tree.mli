@@ -19,4 +19,5 @@ val mode : t -> string
 val is_hack : t -> bool
 val is_php : t -> bool
 val is_strict : t -> bool
+val is_decl : t -> bool
 val to_json : t -> Hh_json.json

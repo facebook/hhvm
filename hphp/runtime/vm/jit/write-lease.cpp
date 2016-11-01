@@ -213,7 +213,7 @@ bool couldAcquireOptimizeLease(const Func* func) {
   always_assert(false);
 }
 
-LeaseHolder::LeaseHolder(const Func* func, TransKind kind)
+LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
   : m_func{RuntimeOption::EvalJitConcurrently > 0 ? func : nullptr}
 {
   assertx(func || RuntimeOption::EvalJitConcurrently == 0);
@@ -244,9 +244,9 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind)
       // Already owned by another thread.
       return;
     } else {
-      // Unowned. Try to grab it. Only threads with LockLevel::Func count
-      // towards the Eval.JitThreads limit.
-      if (level == LockLevel::Func) {
+      // Unowned. Try to grab it. Only non-worker threads with LockLevel::Func
+      // count towards the Eval.JitThreads limit.
+      if (!isWorker && level == LockLevel::Func) {
         auto threads = s_jittingThreads.load(std::memory_order_relaxed);
         if (threads >= RuntimeOption::EvalJitThreads) return;
 

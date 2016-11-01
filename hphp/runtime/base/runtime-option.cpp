@@ -1119,6 +1119,11 @@ void RuntimeOption::Load(
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);
     }
+    if (!RuntimeOption::ServerExecutionMode()) {
+      // We only allow jit worker threads in server mode to avoid issues with
+      // fork() and the worker threads. This may change in the future.
+      EvalJitWorkerThreads = 0;
+    }
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),

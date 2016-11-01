@@ -2396,6 +2396,7 @@ void hphp_session_exit() {
 
 void hphp_process_exit() {
   Xenon::getInstance().stop();
+  jit::mcgen::processExit();
   PageletServer::Stop();
   XboxServer::Stop();
   // Debugger::Stop() needs an execution context

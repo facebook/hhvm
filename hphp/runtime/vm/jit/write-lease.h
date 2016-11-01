@@ -55,7 +55,7 @@ enum class LockLevel {
 };
 
 struct LeaseHolder {
-  LeaseHolder(const Func* f, TransKind kind);
+  LeaseHolder(const Func* f, TransKind kind, bool isWorker = false);
   ~LeaseHolder();
 
   /*

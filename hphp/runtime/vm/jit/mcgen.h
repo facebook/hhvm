@@ -69,7 +69,7 @@ struct TransEnv {
   TransID transID{kInvalidTransID};
 
   /*
-   * If set regenerate the prologue for this trans rec. This is intended for
+   * If set, regenerate the prologue for this trans rec. This is intended for
    * optimized translations of DV initializers which should always follow their
    * prologues.
    */
@@ -109,7 +109,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx);
 /*
  * Regionize and optimize the given function using profile data.
  *
- * Returns true iff the function was successfully retranslated.
+ * Returns true iff the function has been successfully optimized.
  */
 bool retranslateOpt(FuncId funcId);
 
@@ -123,6 +123,12 @@ void checkRetranslateAll();
  * Called once when the JIT is activated to initialize internal mcgen structures
  */
 void processInit();
+
+/*
+ * Called once before process shutdown. May block to wait for any pending JIT
+ * worker threads.
+ */
+void processExit();
 
 /*
  * True iff mcgen::processInit() has been called

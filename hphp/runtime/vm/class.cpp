@@ -846,7 +846,7 @@ Class::PropLookup<Slot> Class::getDeclPropIndex(
   if (propInd != kInvalidSlot) {
     auto const attrs = m_declProperties[propInd].attrs;
     if ((attrs & (AttrProtected|AttrPrivate)) &&
-        !g_context->debuggerSettings.bypassCheck) {
+        (g_context.isNull() || !g_context->debuggerSettings.bypassCheck)) {
       // Fetch the class in the inheritance tree which first declared the
       // property
       auto const baseClass = m_declProperties[propInd].cls;

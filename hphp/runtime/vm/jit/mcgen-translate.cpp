@@ -35,7 +35,10 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/runtime/base/program-functions.h"
+
 #include "hphp/util/hfsort.h"
+#include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 
@@ -44,6 +47,104 @@ TRACE_SET_MOD(mcg);
 namespace HPHP { namespace jit { namespace mcgen {
 
 namespace {
+
+enum class RetranslateResult {
+  /* Retranslation failed permanently because ProfData has been deleted. */
+  FAIL,
+  /* Retranslation failed for a transient reason like failure to acquire a
+   * write lease. */
+  RETRY,
+  /* The function has been successfully reoptimized, either by this call or a
+   * previous one. */
+  DONE,
+};
+
+RetranslateResult retranslateOptImpl(FuncId funcId, bool isWorker) {
+  VMProtect _;
+
+  if (isDebuggerAttachedProcess()) return RetranslateResult::RETRY;
+
+  auto const func = const_cast<Func*>(Func::fromFuncId(funcId));
+  if (profData() == nullptr) return RetranslateResult::FAIL;
+  if (profData()->optimized(funcId)) return RetranslateResult::DONE;
+
+  LeaseHolder writer(func, TransKind::Optimize, isWorker);
+  if (!writer) return RetranslateResult::RETRY;
+
+  if (profData()->optimized(funcId)) return RetranslateResult::DONE;
+  profData()->setOptimized(funcId);
+
+  func->setFuncBody(tc::ustubs().funcBodyHelperThunk);
+
+  // Invalidate SrcDB's entries for all func's SrcKeys.
+  tc::invalidateFuncProfSrcKeys(func);
+
+  // Regenerate the prologues and DV funclets before the actual function body.
+  auto const includedBody = regeneratePrologues(func);
+
+  // Regionize func and translate all its regions.
+  std::string transCFGAnnot;
+  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
+                                    : regionizeFunc(func, transCFGAnnot);
+
+  for (auto region : regions) {
+    always_assert(!region->empty());
+    auto regionSk = region->start();
+    auto transArgs = TransArgs{regionSk};
+    if (transCFGAnnot.size() > 0) {
+      transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
+    }
+    transArgs.region = region;
+    transArgs.kind = TransKind::Optimize;
+
+    auto const spOff = region->entry()->initialSpOffset();
+    translate(transArgs, spOff);
+    transCFGAnnot = ""; // so we don't annotate it again
+  }
+
+  tc::checkFreeProfData();
+  return RetranslateResult::DONE;
+}
+
+void enqueueRetranslateOptRequest(FuncId funcId);
+
+struct TranslateWorker : JobQueueWorker<FuncId> {
+  void doJob(FuncId id) {
+    hphp_session_init();
+    SCOPE_EXIT {
+      hphp_context_exit();
+      hphp_session_exit();
+    };
+
+    if (!Func::isFuncIdValid(id)) return;
+
+    if (retranslateOptImpl(id, true) == RetranslateResult::RETRY) {
+      enqueueRetranslateOptRequest(id);
+    }
+  }
+};
+
+using WorkerDispatcher = JobQueueDispatcher<TranslateWorker>;
+std::atomic<WorkerDispatcher*> s_dispatcher;
+std::mutex s_dispatcherCreate;
+
+WorkerDispatcher& dispatcher() {
+  if (auto ptr = s_dispatcher.load(std::memory_order_acquire)) return *ptr;
+
+  std::lock_guard<std::mutex> lock{s_dispatcherCreate};
+  if (auto ptr = s_dispatcher.load(std::memory_order_relaxed)) return *ptr;
+
+  auto dispatcher = new WorkerDispatcher(
+    RuntimeOption::EvalJitWorkerThreads, 0, false, nullptr
+  );
+  dispatcher->start();
+  s_dispatcher.store(dispatcher, std::memory_order_release);
+  return *dispatcher;
+}
+
+void enqueueRetranslateOptRequest(FuncId id) {
+  dispatcher().enqueue(id);
+}
 
 /*
  * Returns true iff we already have Eval.JitMaxTranslations translations
@@ -244,6 +345,12 @@ void retranslateAll() {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
+void processExit() {
+  if (auto dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
+    dispatcher->stop();
+  }
+}
+
 TCA translate(TransArgs args, FPInvOffset spOff, ProfTransRec* prologue) {
   INC_TPC(translate);
   assert(args.kind != TransKind::Invalid);
@@ -345,50 +452,15 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   return result;
 }
 
-bool retranslateOpt(FuncId funcID) {
-  VMProtect _;
-
-  if (isDebuggerAttachedProcess()) return false;
-
-  auto const func = const_cast<Func*>(Func::fromFuncId(funcID));
-  if (profData() == nullptr || profData()->optimized(funcID)) return false;
-
-  LeaseHolder writer(func, TransKind::Optimize);
-  if (!writer) return false;
-
-  if (profData()->optimized(funcID)) return false;
-  profData()->setOptimized(funcID);
-
-  func->setFuncBody(tc::ustubs().funcBodyHelperThunk);
-
-  // Invalidate SrcDB's entries for all func's SrcKeys.
-  tc::invalidateFuncProfSrcKeys(func);
-
-  // Regenerate the prologues and DV funclets before the actual function body.
-  auto const includedBody = regeneratePrologues(func);
-
-  // Regionize func and translate all its regions.
-  std::string transCFGAnnot;
-  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
-                                    : regionizeFunc(func, transCFGAnnot);
-
-  for (auto region : regions) {
-    always_assert(!region->empty());
-    auto regionSk = region->start();
-    auto transArgs = TransArgs{regionSk};
-    if (transCFGAnnot.size() > 0) {
-      transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
+bool retranslateOpt(FuncId funcId) {
+  if (RuntimeOption::EvalJitWorkerThreads > 0) {
+    if (profData() && profData()->shouldQueue(funcId)) {
+      enqueueRetranslateOptRequest(funcId);
     }
-    transArgs.region = region;
-    transArgs.kind = TransKind::Optimize;
-
-    auto const spOff = region->entry()->initialSpOffset();
-    translate(transArgs, spOff);
-    transCFGAnnot = ""; // so we don't annotate it again
+    return false;
   }
 
-  tc::checkFreeProfData();
-  return true;
+  return retranslateOptImpl(funcId, false) == RetranslateResult::DONE;
 }
 
 void checkRetranslateAll() {

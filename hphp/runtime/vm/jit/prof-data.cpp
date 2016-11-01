@@ -75,6 +75,7 @@ ProfData::ProfData()
                  : RuntimeOption::EvalJitPGOThreshold)
   , m_profilingFuncs(RuntimeOption::EvalFuncCountHint, false)
   , m_optimizedFuncs(RuntimeOption::EvalFuncCountHint, false)
+  , m_queuedFuncs(RuntimeOption::EvalFuncCountHint, false)
   , m_optimizedSKs(RuntimeOption::EvalPGOFuncCountHint,
                    makeAHMConfig<decltype(m_optimizedSKs)>())
   , m_proflogueDB(RuntimeOption::EvalPGOFuncCountHint * 2,

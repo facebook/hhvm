@@ -101,6 +101,8 @@ struct CurlResource : SweepableResourceData {
   bool setLongOption(long option, long value);
   static bool isStringOption(long option);
   bool setStringOption(long option, const String& value);
+  static bool isNullableStringOption(long option);
+  bool setNullableStringOption(long option, const Variant& value);
   bool setPostFieldsOption(const Variant& value);
   static bool isFileOption(long option);
   bool setFileOption(long option, const req::ptr<File>& fp);

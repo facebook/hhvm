@@ -32,7 +32,7 @@
                     ((;)(whitespace)(single_line_comment)(end_of_line)))
                   (expression_statement
                     (function_call_expression
-                      ((whitespace)(global))
+                      (qualified_name((whitespace)(name)))
                       ((lparen))
                       (literal((decimal_literal)))
                       ((rparen)))

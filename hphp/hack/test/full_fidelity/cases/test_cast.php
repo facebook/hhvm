@@ -86,5 +86,5 @@ function g() {
   $y ? (x) : $y;
   function ( int $x = (x), int $y = 123) {};
   array((x) => 123);
-  for ((x) as y) { }
+  foreach ((x) as y) { }
 }

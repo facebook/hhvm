@@ -99,24 +99,15 @@ module WithStatementAndDeclAndTypeParser
     | BinaryLiteral
     | FloatingLiteral
     | SingleQuotedStringLiteral
-    | HeredocStringLiteral (*TODO: Special? *)
-    | NowdocStringLiteral (* TODO: Special? *)
-    | BooleanLiteral -> (parser1, make_literal_expression (make_token token))
-    | NullLiteral ->
-      (* TODO: Something special about null *)
-      (parser1, make_literal_expression (make_token token))
-
-    | DoubleQuotedStringLiteral
-      (* TODO: Parse interior *)
-      -> (parser1, make_literal_expression (make_token token))
-
+    | HeredocStringLiteral (* TODO: Parse interior *)
+    | NowdocStringLiteral (* TODO: Parse interior *)
+    | DoubleQuotedStringLiteral (* TODO: Parse interior *)
+    | BooleanLiteral
+    | NullLiteral -> (parser1, make_literal_expression (make_token token))
     | Variable -> parse_variable_or_lambda parser
-
     | XHPClassName
     | Name
-    | QualifiedName ->
-        parse_name_or_collection_literal_expression parser1 token
-
+    | QualifiedName -> parse_name_or_collection_literal_expression parser1 token
     | Self
     | Parent
     | Static -> parse_scope_resolution_expression parser1 (make_token token)
@@ -131,18 +122,9 @@ module WithStatementAndDeclAndTypeParser
     | Ampersand
     | Await
     | Clone
-    | At ->
-      parse_prefix_unary_expression parser
-
-    | LeftParen ->
-      parse_cast_or_parenthesized_or_lambda_expression parser
-
-    | LessThan ->
-        parse_possible_xhp_expression parser
-
-    | Class -> (* TODO When is this legal? *)
-      (parser1, make_token token)
-
+    | At -> parse_prefix_unary_expression parser
+    | LeftParen -> parse_cast_or_parenthesized_or_lambda_expression parser
+    | LessThan -> parse_possible_xhp_expression parser
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
@@ -152,26 +134,27 @@ module WithStatementAndDeclAndTypeParser
     | Function -> parse_anon parser
     | DollarDollar ->
       (parser1, make_pipe_variable_expression (make_token token))
-    | Async ->
-      parse_anon_or_lambda_or_awaitable parser
+    | Async -> parse_anon_or_lambda_or_awaitable parser
     | Include
     | Include_once
     | Require
     | Require_once -> parse_inclusion_expression parser
-
-    | Dollar (* TODO: ? *)
-
-    (* TODO: non-lowercased true false null array *)
-    (* TODO: Unsafe *)
-    (* TODO: What keywords are legal as names? *)
-
-    | Final | Abstract | Interface | Trait ->
-      (* TODO: Error *)
-     (parser1, make_token token)
     | EndOfFile
     | _ ->
-      (* TODO: Error, expected expression *)
-      (parser1, make_token token)
+      begin
+        (* TODO: Are there "reserved" keywords that absolutely cannot start
+           an expression? If so, list them above and make them produce an
+           error. *)
+        let (parser1, token) = next_token_as_name parser in
+        match (Token.kind token) with
+        | Name -> parse_name_or_collection_literal_expression parser1 token
+        | _ ->
+          (* ERROR RECOVERY: Eat the offending token.
+          TODO: Create a better error recovery system that does not eat tokens
+          that might be eaten by the outer statement / declaration parser. *)
+          let parser = with_error parser1 SyntaxError.error1015 in
+          (parser, make_token token)
+      end
 
   and parse_inclusion_expression parser =
   (* SPEC:

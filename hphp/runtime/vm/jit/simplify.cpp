@@ -1806,6 +1806,50 @@ SSATmp* simplifyConcatStrStr(State& env, const IRInstruction* inst) {
     return cns(env, makeStaticString(sval.get()));
   }
 
+  // ConcatStrStr consumes a reference to src1 and produces a reference, so
+  // anything we replace it with must do the same thing.
+  if (src1->hasConstVal(staticEmptyString())) {
+    // Produce a reference on src2.
+    gen(env, IncRef, src2);
+    return src2;
+  }
+  if (src2->hasConstVal(staticEmptyString())) {
+    // Forward the reference on src1 from input to output.
+    return src1;
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyConcatIntStr(State& env, const IRInstruction* inst) {
+  auto const lhs = inst->src(0);
+  auto const rhs = inst->src(1);
+
+  if (lhs->hasConstVal()) {
+    auto const lhsStr =
+      cns(env, makeStaticString(folly::to<std::string>(lhs->intVal())));
+    return gen(env, ConcatStrStr, inst->taken(), lhsStr, rhs);
+  }
+  if (rhs->hasConstVal(staticEmptyString())) {
+    return gen(env, ConvIntToStr, lhs);
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyConcatStrInt(State& env, const IRInstruction* inst) {
+  auto const lhs = inst->src(0);
+  auto const rhs = inst->src(1);
+
+  if (rhs->hasConstVal()) {
+    auto const rhsStr =
+      cns(env, makeStaticString(folly::to<std::string>(rhs->intVal())));
+    return gen(env, ConcatStrStr, inst->taken(), lhs, rhsStr);
+  }
+  if (lhs->hasConstVal(staticEmptyString())) {
+    return gen(env, ConvIntToStr, rhs);
+  }
+
   return nullptr;
 }
 
@@ -3211,6 +3255,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CoerceCellToDbl)
   X(CoerceCellToInt)
   X(ConcatStrStr)
+  X(ConcatIntStr)
+  X(ConcatStrInt)
   X(ConvArrToBool)
   X(ConvArrToDbl)
   X(ConvArrToInt)

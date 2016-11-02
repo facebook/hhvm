@@ -66,4 +66,21 @@
             ((rparen)))
           ((*)))
         ((;)(end_of_line))))
-    ((}))))))
+  ((})(end_of_line))))
+  (function_declaration(missing)
+    (function_declaration_header
+      (missing)((function)(whitespace))(missing)((name))(missing)
+      ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
+      (compound_statement
+        (({)(end_of_line))
+        (return_statement
+          ((whitespace)(return)(whitespace))
+          (conditional_expression
+            (variable((variable)(whitespace)))
+            ((?)(whitespace))
+            (scope_resolution_expression
+              (qualified_name((XHP_class_name)))((::))((name)(whitespace)))
+            ((:)(whitespace))
+            (variable((variable))))
+          ((;)(end_of_line)))
+        ((}))))))

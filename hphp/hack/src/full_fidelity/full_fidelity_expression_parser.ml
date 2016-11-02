@@ -959,9 +959,22 @@ module WithStatementAndDeclAndTypeParser
        Interestingly, this is illegal in C and Java, which require parens,
        but legal in C#.
     *)
-    let token = peek_token parser in
-    (* e1 ?: e2 -- where there is no consequence -- is legal *)
-    let (parser, consequence) = if (Token.kind token) = Colon then
+    let kind = peek_token_kind parser in
+    (* e1 ?: e2 -- where there is no consequence -- is legal.
+       However this introduces an ambiguity:
+       x ? :y::m : z
+       is that
+       x   ?:   y::m   :   z
+       or
+       x   ?   :y::m   :   z
+
+       We assume the latter.
+       TODO: Review this decision.
+       TODO: Add this to the XHP draft specification.
+       *)
+    let missing_consequence =
+      kind = Colon && not (is_next_xhp_class_name parser) in
+    let (parser, consequence) = if missing_consequence then
       (parser, make_missing())
     else
       with_reset_precedence parser parse_expression in

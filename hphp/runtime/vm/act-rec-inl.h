@@ -182,7 +182,7 @@ inline Class* ActRec::getClass() const {
 }
 
 inline void ActRec::setThis(ObjectData* val) {
-  assertx(m_func->implCls() && !m_func->isStaticInProlog());
+  assertx(m_func->implCls() && !m_func->isStaticInPrologue());
   m_thisUnsafe = val;
 }
 

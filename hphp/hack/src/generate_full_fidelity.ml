@@ -16,17 +16,31 @@ type schema_node = {
   fields : string list
 }
 
+type token_node = {
+    token_kind : string;
+    token_text : string
+}
+
 type transformation =
 {
   pattern : string;
   func : schema_node -> string
 }
 
+type token_transformation =
+{
+  token_pattern : string;
+  token_func : token_node -> string
+}
+
 type template_file =
 {
   filename : string;
   template : string;
-  transformations : transformation list
+  transformations : transformation list;
+  token_no_text_transformations : token_transformation list;
+  token_variable_text_transformations : token_transformation list;
+  token_given_text_transformations : token_transformation list;
 }
 
 let from_list l =
@@ -34,6 +48,12 @@ let from_list l =
   | kind_name :: type_name :: description :: prefix :: fields ->
     { kind_name; type_name; description; prefix; fields }
   | _ -> failwith "bad schema"
+
+let token_node_from_list l =
+  match l with
+  | [ token_kind; token_text ] ->
+    { token_kind; token_text }
+  | _ -> failwith "bad token schema"
 
 let schema = List.map from_list [
   [ "ScriptHeader";
@@ -78,6 +98,8 @@ let schema = List.map from_list [
     "enum_declaration";
     "enum_declaration";
     "enum";
+    "attribute_spec";
+    (* TODO: Make all uses of attribute_spec consistent in the API. *)
     "keyword";
     "name";
     "colon";
@@ -174,6 +196,7 @@ let schema = List.map from_list [
     "function";
     "async";
     "keyword";
+    "ampersand";
     "name";
     "type_parameter_list";
     "left_paren";
@@ -476,6 +499,13 @@ let schema = List.map from_list [
     "echo";
     "keyword";
     "expressions";
+    "semicolon" ];
+  [ "GlobalStatement";
+    "global_statement";
+    "global_statement";
+    "global";
+    "keyword";
+    "variables";
     "semicolon" ];
   [ "SimpleInitializer";
     "simple_initializer";
@@ -890,7 +920,7 @@ let schema = List.map from_list [
     "item";
     "separator" ]]
 
-let variable_text_tokens = [
+let variable_text_tokens = List.map token_node_from_list [
   [ "ErrorToken"; "error_token" ];
   [ "Name"; "name" ];
   [ "QualifiedName"; "qualified_name" ];
@@ -913,11 +943,12 @@ let variable_text_tokens = [
   [ "XHPBody"; "XHP_body" ];
   [ "XHPComment"; "XHP_comment" ]]
 
-let no_text_tokens = [
+let no_text_tokens = List.map token_node_from_list [
   [ "EndOfFile"; "end_of_file" ]]
 
-let given_text_tokens = [
+let given_text_tokens = List.map token_node_from_list [
   [ "Abstract"; "abstract" ];
+  [ "And"; "and" ];
   [ "Array"; "array" ];
   [ "Arraykey"; "arraykey" ];
   [ "As"; "as" ];
@@ -952,6 +983,7 @@ let given_text_tokens = [
   [ "For"; "for" ];
   [ "Foreach"; "foreach" ];
   [ "Function"; "function" ];
+  [ "Global"; "global" ];
   [ "If"; "if" ];
   [ "Implements"; "implements" ];
   [ "Include"; "include" ];
@@ -968,6 +1000,7 @@ let given_text_tokens = [
   [ "Noreturn"; "noreturn" ];
   [ "Num"; "num" ];
   [ "Object"; "object" ];
+  [ "Or"; "or" ];
   [ "Parent"; "parent" ];
   [ "Print"; "print" ];
   [ "Private"; "private" ];
@@ -995,6 +1028,7 @@ let given_text_tokens = [
   [ "Var"; "var" ];
   [ "Void"; "void" ];
   [ "While"; "while" ];
+  [ "Xor"; "xor" ];
   [ "Yield"; "yield" ];
   [ "LeftBracket"; "[" ];
   [ "RightBracket"; "]" ];
@@ -1060,18 +1094,35 @@ let given_text_tokens = [
   [ "SlashGreaterThan"; "/>" ];
   [ "LessThanSlash"; "</" ]]
 
+let map_and_concat_separated separator f items =
+  String.concat separator (List.map f items)
+
 let map_and_concat f items =
-  String.concat "" (List.map f items)
+  map_and_concat_separated "" f items
 
 let transform_schema f =
   map_and_concat f schema
+
+let transform_tokens token_list f =
+  map_and_concat f token_list
 
 let replace pattern new_text source =
   Str.replace_first (Str.regexp pattern) new_text source
 
 let generate_string template =
-  let folder s x = replace x.pattern (transform_schema x.func) s in
-  List.fold_left folder template.template template.transformations
+  let syntax_folder s x =
+    replace x.pattern (transform_schema x.func) s in
+  let tokens_folder token_list s x =
+    replace x.token_pattern (transform_tokens token_list x.token_func) s in
+  let result = List.fold_left
+    syntax_folder template.template template.transformations in
+  let result = List.fold_left (tokens_folder no_text_tokens)
+    result template.token_no_text_transformations in
+  let result = List.fold_left (tokens_folder variable_text_tokens)
+    result template.token_variable_text_transformations in
+  let result = List.fold_left (tokens_folder given_text_tokens)
+    result template.token_given_text_transformations in
+  result
 
 let generate_file template =
   let file = open_out template.filename in
@@ -1449,7 +1500,10 @@ end (* WithToken *)
       { pattern = "CHILDREN_NAMES"; func = to_children_names };
       { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
-    ]
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = []
   }
 
 end (* GenerateFFSyntax *)
@@ -1500,11 +1554,801 @@ let full_fidelity_syntax_kind =
   transformations = [
     { pattern = "TOKENS"; func = to_tokens };
     { pattern = "TO_STRING"; func = to_to_string };
-  ]
+  ];
+  token_no_text_transformations = [];
+  token_given_text_transformations = [];
+  token_variable_text_transformations = []
 }
 
 end (* GenerateFFSyntaxKind *)
 
+module GenerateFFJavaScript = struct
+
+  let to_from_json x =
+    Printf.sprintf "    case '%s':
+      return %s.from_json(json, position, source);
+" x.description x.kind_name
+
+  let to_editable_syntax x =
+    let ctor_mapper f = f in
+    let ctor = map_and_concat_separated ",\n    " ctor_mapper x.fields in
+    let ctor2 = map_and_concat_separated ",\n        " ctor_mapper x.fields in
+    let children_mapper f = Printf.sprintf "%s: %s" f f in
+    let children =
+      map_and_concat_separated ",\n      " children_mapper x.fields in
+    let props_mapper f =
+      Printf.sprintf "get %s() { return this.children.%s; }" f f in
+    let props = map_and_concat_separated "\n  " props_mapper x.fields in
+    let withs_mapper f =
+      let inner_mapper f_inner =
+        let prefix = if f_inner = f then "" else "this." in
+        Printf.sprintf "%s%s" prefix f_inner in
+      let inner = map_and_concat_separated ",\n      " inner_mapper x.fields in
+      Printf.sprintf "with_%s(%s){\n    return new %s(\n      %s);\n  }"
+        f f x.kind_name inner in
+    let withs = map_and_concat_separated "\n  " withs_mapper x.fields in
+    let rewriter_mapper f =
+      Printf.sprintf "var %s = this.%s.rewrite(rewriter, new_parents);" f f in
+    let rewriter =
+      map_and_concat_separated "\n    " rewriter_mapper x.fields in
+    let condition_mapper f = Printf.sprintf "%s === this.%s" f f in
+    let condition =
+      map_and_concat_separated " &&\n      " condition_mapper x.fields in
+    let json_mapper f = Printf.sprintf
+      "let %s = EditableSyntax.from_json(
+      json.%s_%s, position, source);
+    position += %s.width;" f x.prefix f f in
+    let json = map_and_concat_separated "\n    " json_mapper x.fields in
+    let keys_mapper f = Printf.sprintf "'%s'" f in
+    let keys = map_and_concat_separated ",\n        " keys_mapper x.fields in
+    Printf.sprintf
+"class %s extends EditableSyntax
+{
+  constructor(
+    %s)
+  {
+    super('%s', {
+      %s });
+  }
+  %s
+  %s
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    %s
+    if (
+      %s)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new %s(
+        %s), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    %s
+    return new %s(
+        %s);
+  }
+  get children_keys()
+  {
+    if (%s._children_keys == null)
+      %s._children_keys = [
+        %s];
+    return %s._children_keys;
+  }
+}
+" x.kind_name ctor x.description children props withs rewriter condition
+  x.kind_name ctor2 json x.kind_name ctor2 x.kind_name x.kind_name keys
+  x.kind_name
+
+  let to_exports_syntax x =
+    Printf.sprintf "exports.%s = %s;\n" x.kind_name x.kind_name
+
+  let to_editable_no_text x =
+    Printf.sprintf "class %sToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('%s', leading, trailing, '');
+  }
+}
+" x.token_kind x.token_text
+
+let to_editable_given_text x =
+  Printf.sprintf "class %sToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('%s', leading, trailing, '%s');
+  }
+}
+" x.token_kind x.token_text x.token_text
+
+  let to_editable_variable_text x =
+    Printf.sprintf "class %sToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('%s', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new %sToken(this.leading, this.trailing, text);
+  }
+
+}
+" x.token_kind x.token_text x.token_kind
+
+  let to_factory_no_text x =
+    Printf.sprintf
+"    case '%s':
+       return new %sToken(leading, trailing);
+"
+      x.token_text x.token_kind
+
+  let to_factory_given_text = to_factory_no_text
+
+  let to_factory_variable_text x =
+    Printf.sprintf
+"    case '%s':
+       return new %sToken(leading, trailing, token_text);
+"
+      x.token_text x.token_kind
+
+  let to_export_token x =
+    Printf.sprintf "exports.%sToken = %sToken;\n" x.token_kind x.token_kind
+
+  let full_fidelity_javascript_template =
+"/**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the 'hack' directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
+ *
+ */
+/* THIS FILE IS GENERATED; DO NOT EDIT IT */
+/**
+  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
+  the binary.
+  buck build hphp/hack/src:generate_full_fidelity
+  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
+*/
+
+\"use strict\";
+
+let utils = require('./full_fidelity_utils.js');
+let array_map_reduce = utils.array_map_reduce;
+let array_sum = utils.array_sum;
+
+class EditableSyntax
+{
+  constructor(syntax_kind, children)
+  {
+    this._syntax_kind = syntax_kind;
+    this._children = children;
+    let width = 0;
+    for(let child in children)
+      width += children[child].width;
+    this._children_width = width;
+  }
+  get syntax_kind() { return this._syntax_kind; }
+  get children() { return this._children; }
+  get is_token() { return false; }
+  get is_trivia() { return false; }
+  get is_list() { return false; }
+  get is_missing() { return false; }
+
+  get width() { return this._children_width; }
+
+  get full_text()
+  {
+    let s = '';
+    for(let key of this.children_keys)
+      s += this.children[key].full_text;
+    return s;
+  }
+
+  static from_json(json, position, source)
+  {
+    switch(json.kind)
+    {
+    case 'token':
+      return EditableToken.from_json(json.token, position, source);
+    case 'list':
+      return EditableList.from_json(json, position, source);
+    case 'whitespace':
+      return Whitespace.from_json(json, position, source);
+    case 'end_of_line':
+      return EndOfLine.from_json(json, position, source);
+    case 'delimited_comment':
+      return DelimitedComment.from_json(json, position, source);
+    case 'single_line_comment':
+      return SingleLineComment.from_json(json, position, source);
+    case 'missing':
+      return Missing.missing;
+FROM_JSON_SYNTAX
+    default:
+      throw 'unexpected json kind: ' + json.kind; // TODO: Better exception
+    }
+  }
+
+  reduce(reducer, accumulator, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    for(let key of this.children_keys)
+    {
+      accumulator = this.children[key].reduce(
+        reducer, accumulator, new_parents);
+    }
+    return reducer(this, accumulator, parents);
+  }
+
+  // Returns all the parents (and the node itself) of the first node
+  // that matches a predicate, or [] if there is no such node.
+  find(predicate, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    if (predicate(this))
+      return new_parents;
+    for(let key of this.children_keys)
+    {
+      let result = this.children[key].find(predicate, new_parents);
+      if (result.length != 0)
+        return result;
+    }
+    return [];
+  }
+
+  // Returns a list of nodes that match a predicate.
+  filter(predicate)
+  {
+    let reducer = (node, acc, parents) => {
+      if (predicate(node))
+        acc.push(node);
+      return acc;
+    };
+    return this.reduce(reducer, []);
+  }
+
+  of_syntax_kind(kind)
+  {
+    return this.filter((node) => node.syntax_kind == kind);
+  }
+
+  remove_where(predicate)
+  {
+    return this.rewrite(
+      (node, parents) => predicate(node) ? Missing.missing : node);
+  }
+
+  without(target)
+  {
+    return this.remove_where((node) => node === target);
+  }
+
+  replace(new_node, target)
+  {
+    return this.rewrite((node, parents) => node === target ? new_node : node);
+  }
+
+  pre_order(action, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    action(this, parents);
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    for(let key of this.children_keys)
+      this.children[key].pre_order(action, new_parents);
+  }
+
+  get leftmost_token()
+  {
+    if (this.is_token)
+      return this;
+
+    for(let key of this.children_keys)
+    {
+      if (!this.children[key].is_missing)
+        return this.children[key].leftmost_token;
+    }
+    return null;
+  }
+
+  get rightmost_token()
+  {
+    if (this.is_token)
+      return this;
+
+    for (let i = this.children_keys.length - 1; i >= 0; i--)
+    {
+      if (!this.children[this.children_keys[i]].is_missing)
+        return this.children[key].rightmost_token;
+    }
+    return null;
+  }
+
+  insert_before(new_node, target)
+  {
+    // Inserting before missing is an error.
+    if (target.is_missing)
+      throw 'Target must not be missing in insert_before.';
+
+    // Inserting missing is a no-op
+    if (new_node.is_missing)
+      return this;
+
+    if (new_node.is_trivia && !target.is_trivia)
+    {
+      let token = target.is_token ? target : target.leftmost_token;
+      if (token == null)
+        throw 'Unable to find token to insert trivia.'
+
+      // Inserting trivia before token is inserting to the right end of
+      // the leading trivia.
+      let new_leading = EditableSyntax.concatenate_lists(
+        token.leading, new_node);
+      let new_token = token.with_leading(new_leading);
+      return this.replace(new_token, token);
+    }
+
+    return this.replace(
+      EditableSyntax.concatenate_lists(new_node, target), target);
+  }
+
+  insert_after(new_node, target)
+  {
+    // Inserting after missing is an error.
+    if (target.is_missing)
+      throw 'Target must not be missing in insert_after.';
+
+    // Inserting missing is a no-op
+    if (new_node.is_missing)
+      return this;
+
+    if (new_node.is_trivia && !target.is_trivia)
+    {
+      let token = target.is_token ? target : target.rightmost_token;
+      if (token == null)
+        throw 'Unable to find token to insert trivia.'
+
+      // Inserting trivia after token is inserting to the left end of
+      // the trailing trivia.
+      let new_trailing = EditableSyntax.concatenate_lists(
+        new_node, token.trailing);
+      let new_token = token.with_trailing(new_trailing);
+      return this.replace(new_token, token);
+    }
+
+    return this.replace(
+      EditableSyntax.concatenate_lists(target, new_node), target);
+  }
+
+  static to_list(syntax_list)
+  {
+    if (syntax_list.length == 0)
+      return Missing.missing;
+    else if (syntax_list.length == 1)
+      return syntax_list[0];
+    else
+      return new EditableList(syntax_list);
+  }
+
+  static concatenate_lists(left, right)
+  {
+    if (left.is_missing)
+      return right;
+    if (right.is_missing)
+      return left;
+    if (left.is_list && right.is_list)
+      return new EditableList(left.children.concat(right.children));
+    if (left.is_list)
+      return new EditableList(left.children.splice().push(right));
+    if (right.is_list)
+      return new EditableList([right].concat(left.children));
+    return new EditableList([left, right]);
+  }
+}
+
+class EditableList extends EditableSyntax
+{
+  constructor(children)
+  {
+    super('list', children);
+  }
+  get is_list() { return true; }
+
+  static from_json(json, position, source)
+  {
+    let children = [];
+    let current_position = position;
+    for(let element of json.elements)
+    {
+      let child = EditableSyntax.from_json(element, current_position, source);
+      children.push(child);
+      current_position += child.width;
+    }
+    return new EditableList(children);
+  }
+
+  rewrite(rewriter, parents)
+  {
+    let dirty = false;
+    let new_children = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    for (let key of this.children_keys)
+    {
+      let child = this.children[key];
+      let new_child = child.rewrite(rewriter, new_parents);
+      if (new_child != child)
+        dirty = true;
+      if (new_child != null)
+      {
+        if (new_child.is_list)
+        {
+          for(let n of new_child.children)
+            new_children.push(n);
+        }
+        else
+          new_children.push(new_child);
+      }
+    }
+    let result = this;
+    if (dirty)
+    {
+      if (new_children.length === 0)
+        result = Missing.missing;
+      else if (new_children.length === 1)
+        result = new_children[0];
+      else
+        result = new EditableList(new_children);
+    }
+    return rewriter(result, parents);
+  }
+  get children_keys()
+  {
+    return Object.keys(this.children);
+  }
+}
+
+class EditableToken extends EditableSyntax
+{
+  constructor(token_kind, leading, trailing, text)
+  {
+    super('token', { leading : leading, trailing : trailing });
+    this._token_kind = token_kind;
+    this._text = text;
+  }
+
+  get token_kind() { return this._token_kind; }
+  get text() { return this._text; }
+  get leading() { return this.children.leading; }
+  get trailing() { return this.children.trailing; }
+  get width()
+  {
+    return this.text.length + this.leading.width + this.trailing.width;
+  }
+  get is_token() { return true; }
+  get full_text()
+  {
+    return this.leading.full_text + this.text + this.trailing.full_text;
+  }
+  with_leading(leading)
+  {
+    return EditableToken.factory(
+      this.token_kind, leading, this.trailing, this.text);
+  }
+  with_trailing(trailing)
+  {
+    return EditableToken.factory(
+      this.token_kind, this.leading, trailing, this.text);
+  }
+  static factory(token_kind, leading, trailing, token_text)
+  {
+    switch(token_kind)
+    {
+FACTORY_NO_TEXT_TOKENS
+FACTORY_GIVEN_TEXT_TOKENS
+FACTORY_VARIABLE_TEXT_TOKENS
+      default: throw 'unexpected token kind; ' + token_kind;
+      // TODO: Better error
+    }
+  }
+
+  rewrite(rewriter, parents)
+  {
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    let leading = this.leading.rewrite(rewriter, new_parents);
+    let trailing = this.trailing.rewrite(rewriter, new_parents);
+    if (leading === this.leading && trailing === this.trailing)
+      return rewriter(this, parents);
+    else
+      return rewriter(EditableToken.factory(
+        this.token_kind, leading, trailing, this.text), parents);
+  }
+
+  reduce(reducer, accumulator)
+  {
+    accumulator = this.leading.reduce(reducer, accumulator);
+    accumulator = reducer(this, accumulator);
+    accumulator = this.trailing.reduce(reducer, accumulator);
+    return accumulator;
+  }
+
+  static from_json(json, position, source)
+  {
+    let leading_list = array_map_reduce(
+      json.leading,
+      (json, position) => EditableSyntax.from_json(json, position, source),
+      (json, position) => json.width + position,
+      position);
+    let leading = EditableSyntax.to_list(leading_list);
+    let token_position = position + leading.width;
+    let token_text = source.substring(
+      token_position, token_position + json.width);
+    let trailing_position = token_position + json.width;
+    let trailing_list = array_map_reduce(
+      json.trailing,
+      (json, position) => EditableSyntax.from_json(json, position, source),
+      (json, position) => json.width + position,
+      trailing_position);
+    let trailing = EditableSyntax.to_list(trailing_list);
+    return EditableToken.factory(json.kind, leading, trailing, token_text);
+  }
+
+  get children_keys()
+  {
+    if (EditableToken._children_keys == null)
+      EditableToken._children_keys = ['leading', 'trailing'];
+    return EditableToken._children_keys;
+  }
+}
+
+EDITABLE_NO_TEXT_TOKENS
+EDITABLE_GIVEN_TEXT_TOKENS
+EDITABLE_VARIABLE_TEXT_TOKENS
+
+class EditableTrivia extends EditableSyntax
+{
+  constructor(trivia_kind, text)
+  {
+    super(trivia_kind, {});
+    this._text = text;
+  }
+  get text() { return this._text; }
+  get full_text() { return this.text; }
+  get width() { return this.text.length; }
+  get is_trivia() { return true; }
+
+  static from_json(json, position, source)
+  {
+    let trivia_text = source.substring(position, position + json.width);
+    switch(json.kind)
+    {
+      case 'whitespace': return new Whitespace(trivia_text);
+      case 'end_of_line': return new EndOfLine(trivia_text);
+      case 'single_line_comment': return new SingleLineComment(trivia_text);
+      case 'delimited_comment': return new DelimitedComment(trivia_text);
+      default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
+    }
+  }
+
+  rewrite(rewriter, parents)
+  {
+    return rewriter(this, parents);
+  }
+  get children_keys()
+  {
+    return [];
+  }
+}
+
+class Whitespace extends EditableTrivia
+{
+  constructor(text) { super('whitespace', text); }
+  with_text(text)
+  {
+    return new Whitespace(text);
+  }
+}
+
+class EndOfLine extends EditableTrivia
+{
+  constructor(text) { super('end_of_line', text); }
+  with_text(text)
+  {
+    return new EndOfLine(text);
+  }
+}
+
+class SingleLineComment extends EditableTrivia
+{
+  constructor(text) { super('single_line_comment', text); }
+  with_text(text)
+  {
+    return new SingleLineComment(text);
+  }
+}
+
+class DelimitedComment extends EditableTrivia
+{
+  constructor(text) { super('delimited_comment', text); }
+  with_text(text)
+  {
+    return new DelimitedComment(text);
+  }
+}
+
+class Missing extends EditableSyntax
+{
+  constructor()
+  {
+    super('missing', {});
+  }
+  get is_missing() { return true; }
+  static get missing() { return Missing._missing; }
+  static from_json(json, position, source)
+  {
+    return Missing._missing;
+  }
+  rewrite(rewriter, parents)
+  {
+    return rewriter(this, parents);
+  }
+  get children_keys()
+  {
+    return [];
+  }
+}
+Missing._missing = new Missing();
+
+EDITABLE_SYNTAX
+
+function from_json(json)
+{
+  return EditableSyntax.from_json(json.parse_tree, 0, json.program_text);
+}
+
+exports.from_json = from_json;
+exports.EditableSyntax = EditableSyntax;
+exports.EditableList = EditableList;
+exports.EditableToken = EditableToken;
+EXPORTS_NO_TEXT_TOKENS
+EXPORTS_GIVEN_TEXT_TOKENS
+EXPORTS_VARIABLE_TEXT_TOKENS
+exports.EditableTrivia = EditableTrivia;
+exports.Whitespace = Whitespace;
+exports.EndOfLine = EndOfLine;
+exports.DelimitedComment = DelimitedComment;
+exports.SingleLineComment = SingleLineComment;
+EXPORTS_SYNTAX"
+
+  let full_fidelity_javascript =
+  {
+    filename = "hphp/hack/src/full_fidelity/js/full_fidelity_editable.js";
+    template = full_fidelity_javascript_template;
+    transformations = [
+      { pattern = "FROM_JSON_SYNTAX"; func = to_from_json };
+      { pattern = "EDITABLE_SYNTAX"; func = to_editable_syntax };
+      { pattern = "EXPORTS_SYNTAX"; func = to_exports_syntax };
+    ];
+    token_no_text_transformations = [
+      { token_pattern = "EDITABLE_NO_TEXT_TOKENS";
+        token_func = to_editable_no_text };
+      { token_pattern = "FACTORY_NO_TEXT_TOKENS";
+        token_func = to_factory_no_text };
+      { token_pattern = "EXPORTS_NO_TEXT_TOKENS";
+        token_func = to_export_token }];
+    token_given_text_transformations = [
+      { token_pattern = "EDITABLE_GIVEN_TEXT_TOKENS";
+        token_func = to_editable_given_text };
+      { token_pattern = "FACTORY_GIVEN_TEXT_TOKENS";
+        token_func = to_factory_given_text };
+      { token_pattern = "EXPORTS_GIVEN_TEXT_TOKENS";
+        token_func = to_export_token }];
+    token_variable_text_transformations = [
+      { token_pattern = "EDITABLE_VARIABLE_TEXT_TOKENS";
+        token_func = to_editable_variable_text };
+      { token_pattern = "FACTORY_VARIABLE_TEXT_TOKENS";
+        token_func = to_factory_variable_text };
+      { token_pattern = "EXPORTS_VARIABLE_TEXT_TOKENS";
+        token_func = to_export_token }]
+  }
+
+end (* GenerateFFJavaScript *)
+
+
+module GenerateFFTokenKind = struct
+
+  let to_kind_declaration x =
+    Printf.sprintf "  | %s\n" x.token_kind
+
+  let to_from_string x =
+    Printf.sprintf "  | \"%s\" -> Some %s\n" x.token_text x.token_kind
+
+  let to_to_string x =
+    Printf.sprintf "  | %s -> \"%s\"\n" x.token_kind x.token_text
+
+  let full_fidelity_token_kind_template = "(**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the \"hack\" directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
+ *
+ *)
+(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(**
+  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
+  the binary.
+  buck build hphp/hack/src:generate_full_fidelity
+  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
+*)
+
+type t =
+KIND_DECLARATIONS_NO_TEXT
+KIND_DECLARATIONS_GIVEN_TEXT
+KIND_DECLARATIONS_VARIABLE_TEXT
+
+let from_string keyword =
+  match keyword with
+  | \"true\" -> Some BooleanLiteral
+  | \"false\" -> Some BooleanLiteral
+FROM_STRING_GIVEN_TEXT
+  | _ -> None
+
+let to_string kind =
+match kind with
+| EndOfFile -> \"end of file\"
+TO_STRING_GIVEN_TEXT
+TO_STRING_VARIABLE_TEXT
+"
+  let full_fidelity_token_kind =
+  {
+    filename = "hphp/hack/src/full_fidelity/full_fidelity_token_kind.ml";
+    template = full_fidelity_token_kind_template;
+    transformations = [];
+    token_no_text_transformations = [
+      { token_pattern = "KIND_DECLARATIONS_NO_TEXT";
+        token_func = to_kind_declaration }];
+    token_given_text_transformations = [
+      { token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
+        token_func = to_kind_declaration };
+      { token_pattern = "FROM_STRING_GIVEN_TEXT";
+        token_func = to_from_string };
+      { token_pattern = "TO_STRING_GIVEN_TEXT";
+        token_func = to_to_string }];
+    token_variable_text_transformations = [
+      { token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
+        token_func = to_kind_declaration };
+      { token_pattern = "TO_STRING_VARIABLE_TEXT";
+        token_func = to_to_string }]
+  }
+
+end (* GenerateFFTokenKind *)
+
 let () =
   generate_file GenerateFFSyntax.full_fidelity_syntax;
-  generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind
+  generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
+  generate_file GenerateFFJavaScript.full_fidelity_javascript;
+  generate_file GenerateFFTokenKind.full_fidelity_token_kind

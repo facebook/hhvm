@@ -225,6 +225,10 @@ module WithStatementAndDeclAndTypeParser
     if next_is_lower_precedence parser then (parser, term)
     else match peek_token_kind parser with
     (* Binary operators *)
+    (* TODO Add an error if PHP and / or / xor are used in Hack.  *)
+    | And
+    | Or
+    | Xor
     | Plus
     | Minus
     | Star
@@ -262,7 +266,6 @@ module WithStatementAndDeclAndTypeParser
     | Carat
     | BarGreaterThan
     | QuestionQuestion ->
-    (* TODO: "and" "or" "xor" *)
       parse_remaining_binary_expression parser term
     | Instanceof ->
       parse_instanceof_expression parser term
@@ -385,9 +388,15 @@ module WithStatementAndDeclAndTypeParser
       object-creation-expression:
         new  class-type-designator  (  argument-expression-list-opt  )
     *)
+    (* PHP allows the entire expression list to be omitted. *)
+    (* TODO: Give an error in a later pass if it is omitted in Hack. *)
     let (parser, new_token) = assert_token parser New in
     let (parser, designator) = parse_designator parser in
-    let (parser, left, args, right) = parse_expression_list_opt parser in
+    let (parser, left, args, right) =
+    if peek_token_kind parser = LeftParen then
+      parse_expression_list_opt parser
+    else
+      (parser, make_missing(), make_missing(), make_missing()) in
     let result =
       make_object_creation_expression new_token designator left args right in
     (parser, result)

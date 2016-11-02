@@ -64,11 +64,11 @@ struct DateTimeData {
 
 void HHVM_METHOD(DateTime, __construct,
                  const String& time = "now",
-                 const Variant& timezone = null_variant);
+                 const Variant& timezone = uninit_variant);
 Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
                            const String& format,
                            const String& time,
-                           const Variant& timezone /*= null_variant */);
+                           const Variant& timezone /*= uninit_variant */);
 Variant HHVM_METHOD(DateTime, diff,
                     const Variant& datetime2,
                     const Variant& absolute);
@@ -234,8 +234,8 @@ bool HHVM_FUNCTION(checkdate,
                    int day,
                    int year);
 Variant HHVM_FUNCTION(date_create,
-                      const Variant& time = null_variant,
-                      const Variant& timezone = null_variant);
+                      const Variant& time = uninit_variant,
+                      const Variant& timezone = uninit_variant);
 Variant HHVM_FUNCTION(date_format,
                       const Object& datetime,
                       const String& format);

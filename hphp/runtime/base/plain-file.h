@@ -95,11 +95,6 @@ struct BuiltinFiles final : RequestEventHandler {
 
   void requestInit() override;
   void requestShutdown() override;
-  void vscan(IMarker& mark) const override {
-    mark(m_stdin);
-    mark(m_stdout);
-    mark(m_stderr);
-  }
 
 private:
   Variant m_stdin;

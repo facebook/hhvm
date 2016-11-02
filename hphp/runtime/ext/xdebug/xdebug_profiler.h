@@ -37,7 +37,6 @@ struct FrameData {
   int64_t memory_usage : 63;
   bool is_func_begin : 1; // Whether or not this is an enter event
   // TODO(#3704) need a string field for serialized arguments or return value.
-  template<class F> void scan(F& mark) const {}
 };
 
 // TODO(#3704) Allow user to set maximum buffer size
@@ -239,14 +238,8 @@ private:
   void writeCachegrindFuncName(const Func* func, bool isTopPseudoMain);
 
 public:
-  void vscan(IMarker& mark) const override {
-    if (m_frameBuffer) m_frameBuffer->scan(mark);
-    mark(m_profilingFilename);
-    for (auto& data : m_tracingStartFrameData) {
-      data.scan(mark);
-    }
-    mark(m_tracingFilename);
-    if (m_tracingPrevBegin) m_tracingPrevBegin->scan(mark);
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
 private:

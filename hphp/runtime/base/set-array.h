@@ -176,7 +176,7 @@ private:
   ssize_t getIterBegin() const;
   ssize_t getIterLast() const;
   ssize_t getIterEnd() const { return m_used; }
-  void getElm(ssize_t ei, TypedValue* out) const;
+  Cell getElm(ssize_t ei) const;
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const;
   ssize_t prevElm(Elm* elms, ssize_t ei) const;
@@ -290,7 +290,7 @@ private:
   /*
    * Comparison helper.
    */
-  static bool EqualHelper(const ArrayData*, const ArrayData*);
+  static bool EqualHelper(const ArrayData*, const ArrayData*, bool);
 
 //////////////////////////////////////////////////////////////////////
 // Elements
@@ -465,18 +465,18 @@ public:
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
   static const TypedValue* NvTryGetInt(const ArrayData*, int64_t);
   static const TypedValue* NvTryGetStr(const ArrayData*, const StringData*);
-  static void NvGetKey(const ArrayData*, TypedValue*, ssize_t);
+  static Cell NvGetKey(const ArrayData*, ssize_t);
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static ArrayData* LvalInt(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalIntRef(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStr(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalStrRef(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNew(ArrayData*, Variant*&, bool);
-  static ArrayData* LvalNewRef(ArrayData*, Variant*&, bool);
+  static ArrayLval LvalInt(ArrayData*, int64_t, bool);
+  static ArrayLval LvalIntRef(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStr(ArrayData*, StringData*, bool);
+  static ArrayLval LvalStrRef(ArrayData*, StringData*, bool);
+  static ArrayLval LvalNew(ArrayData*, bool);
+  static ArrayLval LvalNewRef(ArrayData*, bool);
   static ArrayData* SetRefInt(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStr(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell, bool);
@@ -519,7 +519,8 @@ public:
   static ArrayData* ToKeyset(ArrayData*, bool);
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);
-  static constexpr auto Same = &Equal;
+  static bool Same(const ArrayData*, const ArrayData*);
+  static bool NotSame(const ArrayData*, const ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

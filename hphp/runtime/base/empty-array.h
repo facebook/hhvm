@@ -38,6 +38,7 @@ struct RefData;
 struct StringData;
 struct MArrayIter;
 struct MixedArray;
+struct ArrayLval;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -57,7 +58,7 @@ struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
     return nullptr;
   }
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData* ad, int64_t, bool) {
@@ -77,12 +78,11 @@ struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
   static bool ExistsStr(const ArrayData*, const StringData*) {
     return false;
   }
-  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
+  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
   static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
-                            bool copy);
+  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
   static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static ArrayLval LvalNew(ArrayData*, bool copy);
   static constexpr auto LvalNewRef = &LvalNew;
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
@@ -144,10 +144,10 @@ struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
   }
 
 private:
-  static std::pair<ArrayData*,TypedValue*> MakePacked(TypedValue);
-  static std::pair<ArrayData*,TypedValue*> MakePackedInl(TypedValue);
-  static std::pair<ArrayData*,TypedValue*> MakeMixed(StringData*, TypedValue);
-  static std::pair<ArrayData*,TypedValue*> MakeMixed(int64_t, TypedValue);
+  static ArrayLval MakePacked(TypedValue);
+  static ArrayLval MakePackedInl(TypedValue);
+  static ArrayLval MakeMixed(StringData*, TypedValue);
+  static ArrayLval MakeMixed(int64_t, TypedValue);
 
 private:
   struct Initializer;

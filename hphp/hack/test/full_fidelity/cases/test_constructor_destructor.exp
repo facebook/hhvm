@@ -12,6 +12,7 @@
   (function_declaration_header
     (missing)
     ((function)(whitespace))
+    (missing)
     ((__construct))(missing)
     ((lparen))
     (parameter_declaration
@@ -24,6 +25,7 @@
   (function_declaration_header
     (missing)
     ((function)(whitespace))
+    (missing)
     ((__construct))(missing)
     ((lparen))
     (parameter_declaration
@@ -37,6 +39,7 @@
   (public)(whitespace))
   (function_declaration_header(missing)
     ((function)(whitespace))
+    (missing)
     ((__construct))(missing)
     ((lparen))
     (parameter_declaration
@@ -49,6 +52,7 @@
   (private)(whitespace))
   (function_declaration_header(missing)
     ((function)(whitespace))
+    (missing)
     ((__construct))(missing)
     ((lparen))
     (parameter_declaration
@@ -70,6 +74,7 @@
     ((>>)(whitespace)))((public)(whitespace))
   (function_declaration_header(missing)
     ((function)(whitespace))
+    (missing)
     ((__construct)(whitespace))(missing)
     ((lparen))
     (parameter_declaration(missing)(missing)(missing)((variable))(missing))
@@ -84,6 +89,7 @@
     ((>>)(whitespace)))((public)(whitespace))
   (function_declaration_header(missing)
     ((function)(whitespace))
+    (missing)
     ((__construct)(whitespace))(missing)
     ((lparen))
     (parameter_declaration(missing)(missing)(missing)((variable))(missing))
@@ -94,6 +100,7 @@
   (function_declaration_header
     (missing)
     ((function)(whitespace))
+    (missing)
     ((__construct)(whitespace))(missing)
     ((lparen))
     (parameter_declaration(missing)
@@ -108,6 +115,7 @@
   (public)(whitespace))
   (function_declaration_header(missing)
     ((function)(whitespace))
+    (missing)
     ((__destruct)(whitespace))(missing)
     ((lparen))(missing)
     ((rparen)(whitespace))(missing)(missing))
@@ -120,6 +128,7 @@
     ((public)(whitespace))
     (function_declaration_header(missing)
       ((function)(whitespace))
+      (missing)
       ((__destruct)(whitespace))(missing)
       ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
     (compound_statement(({))(missing)((})(end_of_line)))(missing)))((})))))

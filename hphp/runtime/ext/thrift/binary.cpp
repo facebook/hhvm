@@ -15,8 +15,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/thrift/ext_thrift.h"
-
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
 
@@ -94,8 +92,8 @@ void skip_element(long thrift_typeID, PHPInputTransport& transport);
 // Create a PHP object given a typename and call the ctor,
 //optionally passing up to 2 arguments
 Object createObject(const String& obj_typename, int nargs = 0,
-                    const Variant& arg1 = null_variant,
-                    const Variant& arg2 = null_variant) {
+                    const Variant& arg1 = uninit_variant,
+                    const Variant& arg2 = uninit_variant) {
   if (!HHVM_FN(class_exists)(obj_typename)) {
     raise_warning("runtime/ext_thrift: Class %s does not exist",
                   obj_typename.data());

@@ -399,13 +399,16 @@ public:
 
 private:
   struct FunctionContext {
-    FunctionContext()
-      : hasCallToGetArgs(false)
+    explicit FunctionContext(std::string name)
+      : name(std::move(name))
+      , hasCallToGetArgs(false)
       , hasNonEmptyReturn(false)
       , isGenerator(false)
       , isAsync(false)
       , mayCallSetFrameMetadata(false)
     {}
+
+    std::string name;
 
     // Function contains a call to func_num_args, func_get_args or func_get_arg.
     bool hasCallToGetArgs;
@@ -445,8 +448,6 @@ private:
   std::vector<FunctionContext> m_funcContexts;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::stack<ClassContext> m_clsContexts;
-  std::string m_funcName;
-  std::string m_containingFuncName;
 
   // parser output
   StatementListPtr m_tree;
@@ -463,6 +464,16 @@ private:
   void newScope();
   void completeScope(BlockScopePtr inner);
 
+  /*
+   * The name of the containing named function (ie, not including
+   * closures), if any.
+   */
+  const std::string& realFuncName() const;
+  /*
+   * The name of the currently active function, or '{closure}'
+   * if its a closure.
+   */
+  const std::string& funcName() const;
   const std::string& clsName() const;
   bool inTrait() const;
 

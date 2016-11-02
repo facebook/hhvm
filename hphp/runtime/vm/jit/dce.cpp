@@ -136,6 +136,8 @@ bool canDCE(IRInstruction* inst) {
   case NSameDict:
   case EqKeyset:
   case NeqKeyset:
+  case SameKeyset:
+  case NSameKeyset:
   case GtRes:
   case GteRes:
   case LtRes:
@@ -362,6 +364,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckRefInner:
   case CheckCtxThis:
   case CheckFuncStatic:
+  case DefCls:
   case LdClsCtor:
   case LdCls:
   case LdClsCached:
@@ -447,6 +450,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseNotice:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
+  case RaiseVarEnvDynCall:
   case InitClosureStaticLoc:
   case InitStaticLoc:
   case PrintStr:

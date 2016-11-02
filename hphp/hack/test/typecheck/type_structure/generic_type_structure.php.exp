@@ -1,4 +1,4 @@
-App \TypeStructure<[1]intersect(Tint), >
-App \TypeStructure<[2]intersect(shape<FieldsPartiallyKnown(unset fields:)>(x => option(Tint), y => tuple(Tstring, Tbool))), >
-tuple(App \TypeStructure<[3]Tbool, >, App \TypeStructure<[4]Tstring, >)
+TypeStructure<^(int)>
+TypeStructure<^(shape(unset fields:)(x => ?int, y => (string, bool)))>
+(TypeStructure<^bool>, TypeStructure<^string>)
 No errors

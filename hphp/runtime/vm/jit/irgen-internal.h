@@ -47,6 +47,10 @@ inline Offset bcOff(const IRGS& env) {
   return env.bcStateStack.back().offset();
 }
 
+inline bool hasThis(const IRGS& env) {
+  return env.bcStateStack.back().hasThis();
+}
+
 inline bool resumed(const IRGS& env) {
   return env.bcStateStack.back().resumed();
 }
@@ -415,7 +419,7 @@ inline SSATmp* pushIncRef(IRGS& env,
 }
 
 inline Type topType(IRGS& env,
-                    BCSPRelOffset idx,
+                    BCSPRelOffset idx = BCSPRelOffset{0},
                     TypeConstraint constraint = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
   return env.irb->stack(offsetFromIRSP(env, idx), constraint).type;
@@ -470,9 +474,8 @@ inline SSATmp* ldThis(IRGS& env) {
 
 inline SSATmp* ldCtx(IRGS& env) {
   if (!curClass(env))                return cns(env, nullptr);
-  if (!curFunc(env)->mayHaveThis())  return gen(env, LdCctx, fp(env));
-  if (env.irb->fs().thisAvailable()) return ldThis(env);
-  return gen(env, LdCtx, fp(env));
+  if (hasThis(env))                  return ldThis(env);
+  return gen(env, LdCctx, fp(env));
 }
 
 inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {

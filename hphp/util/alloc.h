@@ -415,7 +415,7 @@ struct LowAllocator {
   }
 
   pointer allocate(size_type num, const void* = 0) {
-    pointer ret = (pointer)low_malloc(num * sizeof(T));
+    pointer ret = (pointer)low_malloc_data(num * sizeof(T));
     return ret;
   }
 
@@ -429,7 +429,7 @@ struct LowAllocator {
   }
 
   void deallocate(pointer p, size_type num) {
-    low_free((void*)p);
+    low_free_data((void*)p);
   }
 
   template<class U> bool operator==(const LowAllocator<U>&) const {

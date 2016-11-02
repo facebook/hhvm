@@ -198,26 +198,23 @@ bool removeUnreachable(IRUnit& unit) {
 
   // Walk through the reachable blocks and erase any preds that weren't
   // found.
-  bool modified = false;
-  for (auto* block: blocks) {
-    auto& preds = block->preds();
-    for (auto it = preds.begin(); it != preds.end(); ) {
-      auto* inst = it->inst();
-      ++it;
+  std::vector<IRInstruction*> deadInsts;
+  for (auto* block : blocks) {
+    for (auto &edge : block->preds()) {
+      auto* inst = edge.inst();
       if (!visited.test(inst->block()->id())) {
-        if (it != preds.end() && it->inst() == inst) {
-          ++it;
-        }
-
-        ITRACE(3, "removing unreachable B{}\n", inst->block()->id());
-        inst->setNext(nullptr);
-        inst->setTaken(nullptr);
-        modified = true;
+        deadInsts.push_back(inst);
       }
     }
   }
 
-  return modified;
+  for (auto* inst : deadInsts) {
+    ITRACE(3, "removing unreachable B{}\n", inst->block()->id());
+    inst->setNext(nullptr);
+    inst->setTaken(nullptr);
+  }
+
+  return !deadInsts.empty();
 }
 
 /*

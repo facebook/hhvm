@@ -1,9 +1,9 @@
-[<expr#1>::T][\C::T]Tnum
-[<expr#1>::T][\C::T]Tnum
-[<expr#1>::T][\C::T]Tnum
-App \I<>
-[<expr#1>::T][\I::T]Tnum
-[<expr#2>::T][\C::T]Tnum
+<expr#1>::T as C::T as num
+<expr#1>::T as C::T as num
+<expr#1>::T as C::T as num
+I
+<expr#1>::T as I::T as num
+<expr#2>::T as C::T as num
 File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
 File "lvar_expr_dependent.php", line 13, characters 26-32:

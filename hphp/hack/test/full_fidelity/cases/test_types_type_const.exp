@@ -3,7 +3,7 @@
 (missing)
 (function_declaration_header
 (missing)
-((function)(whitespace))((name))(missing)
+((function)(whitespace))(missing)((name))(missing)
 ((lparen))
 (parameter_declaration(missing)(missing)
 (type_constant(type_constant((self))((::))((name)))((::))((name)(whitespace)))

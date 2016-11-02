@@ -1,2 +1,2 @@
-intersect(App \Bar<>, App \Baz<>)
+(Bar | Baz)
 No errors

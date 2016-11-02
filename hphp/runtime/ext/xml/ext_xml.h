@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Resource HHVM_FUNCTION(xml_parser_create,
-                       const Variant& encoding = null_variant);
+                       const Variant& encoding = uninit_variant);
 bool HHVM_FUNCTION(xml_parser_free,
                    const Resource& parser);
 int64_t HHVM_FUNCTION(xml_parse,
@@ -37,8 +37,8 @@ int64_t HHVM_FUNCTION(xml_parse_into_struct,
                       VRefParam values,
                       VRefParam index = uninit_null());
 Resource HHVM_FUNCTION(xml_parser_create_ns,
-                       const Variant& encoding = null_variant,
-                       const Variant& separator = null_variant);
+                       const Variant& encoding = uninit_variant,
+                       const Variant& separator = uninit_variant);
 Variant HHVM_FUNCTION(xml_parser_get_option,
                       const Resource& parser,
                       int option);

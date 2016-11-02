@@ -237,7 +237,7 @@ Object APCObject::createObject() const {
   auto const apcProp = persistentProps();
 
   if (m_fast_init) {
-    if (UNLIKELY(RuntimeOption::EvalEnableGC)) {
+    if (UNLIKELY(MM().isGCEnabled())) {
       // TODO: t11328828 recursive apc fast-init re-enters vm with uninit objs
       memset(objProp, KindOfUninit, numProps * sizeof(*objProp));
     }

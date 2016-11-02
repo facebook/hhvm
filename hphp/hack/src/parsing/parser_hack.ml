@@ -1960,6 +1960,9 @@ and ignore_body env =
     ignore (xhp env);
     ignore_body env
   | Teof -> error_expect env "}"; ()
+  | Tunsafeexpr ->
+    ignore (L.comment (Buffer.create 256) env.file env.lb);
+    ignore_body env
   | _ -> ignore_body env
 
 and with_ignored_yield env fn =
@@ -3034,12 +3037,15 @@ and expr_arrow env e1 tok =
 and expr_colcol env e1 =
   reduce env e1 Tcolcol begin fun e1 env ->
     (match e1 with
-    | (_, Id cname) ->
+    | _, Id cname ->
         (* XYZ::class is OK ... *)
         expr_colcol_remain ~allow_class:true env e1 cname
-    | pos, Lvar cname  ->
-        (* ... but get_class($x) should be used instead of $x::class *)
+    | _, Lvar cname ->
+        (* ... but get_class($x) should be used instead of $x::class ... *)
         expr_colcol_remain ~allow_class:false env e1 cname
+    | pos, Dollardollar ->
+        (* ... and $$ is a special "variable" that resolves while naming. *)
+        expr_colcol_remain ~allow_class:false env e1 (pos, "$$")
     | pos, _ ->
         error_at env pos "Expected class name";
         e1
@@ -3805,6 +3811,8 @@ and is_xhp env =
   look_ahead env begin fun env ->
     let tok = L.xhpname env.file env.lb in
     tok = Txhpname &&
+    Lexing.lexeme env.lb <> "new" &&
+    Lexing.lexeme env.lb <> "yield" &&
     let tok2 = L.xhpattr env.file env.lb in
     tok2 = Tgt || tok2 = Tword ||
     (tok2 = Tslash && L.xhpattr env.file env.lb = Tgt)

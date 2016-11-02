@@ -165,6 +165,13 @@ void objOffsetUnset(ObjectData* base, TypedValue offset);
 
 [[noreturn]] void unknownBaseType(const TypedValue*);
 
+/**
+ * Elem when base is Null
+ */
+inline const TypedValue* ElemEmptyish() {
+  return init_null_variant.asTypedValue();
+}
+
 template <MOpFlags flags>
 inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
   return (flags & MOpFlags::Warn) ? base->nvTryGet(key) : base->nvGet(key);
@@ -206,7 +213,7 @@ inline const TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
       raise_notice(Strings::UNDEFINED_INDEX,
                    tvAsCVarRef(&scratch).toString().data());
     }
-    return init_null_variant.asTypedValue();
+    return ElemEmptyish();
   }
 
   assertx(result->m_type != KindOfUninit);
@@ -242,7 +249,7 @@ inline const TypedValue* ElemVec(ArrayData* base, key_type<keyType> key) {
   assertx(base->isVecArray());
   auto result = ElemVecPre<flags>(base, key);
   if (!(flags & MOpFlags::Warn)) {
-    if (UNLIKELY(!result)) return init_null_variant.asTypedValue();
+    if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(result->m_type != KindOfUninit);
   return result;
@@ -278,7 +285,7 @@ inline const TypedValue* ElemDict(ArrayData* base, key_type<keyType> key) {
   assertx(base->isDict());
   auto result = ElemDictPre<flags>(base, key);
   if (!(flags & MOpFlags::Warn)) {
-    if (UNLIKELY(!result)) return init_null_variant.asTypedValue();
+    if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(result->m_type != KindOfUninit);
   return result;
@@ -314,17 +321,10 @@ inline const TypedValue* ElemKeyset(ArrayData* base, key_type<keyType> key) {
   assertx(base->isKeyset());
   auto result = ElemKeysetPre<flags>(base, key);
   if (!(flags & MOpFlags::Warn)) {
-    if (UNLIKELY(!result)) return init_null_variant.asTypedValue();
+    if (UNLIKELY(!result)) return ElemEmptyish();
   }
   assertx(isIntType(result->m_type) || isStringType(result->m_type));
   return result;
-}
-
-/**
- * Elem when base is Null
- */
-inline const TypedValue* ElemEmptyish() {
-  return init_null_variant.asTypedValue();
 }
 
 /**
@@ -537,20 +537,18 @@ inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
  */
 template <bool reffy>
 inline TypedValue* ElemDVecPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
 
   if (reffy) throwRefInvalidArrayValueException(oldArr);
 
-  ArrayData* newArr =
-    PackedArray::LvalIntVec(oldArr, key, ret, oldArr->cowCheck());
-  if (newArr != oldArr) {
+  auto const r = PackedArray::LvalIntVec(oldArr, key, oldArr->cowCheck());
+  if (r.array != oldArr) {
     base->m_type = KindOfVec;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 template <bool reffy>
@@ -582,50 +580,46 @@ inline TypedValue* ElemDVec(TypedValue* base, key_type<keyType> key) {
  */
 template <bool reffy>
 inline TypedValue* ElemDDictPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
 
   if (reffy) throwRefInvalidArrayValueException(oldArr);
 
-  ArrayData* newArr =
-    MixedArray::LvalSilentIntDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    assertx(oldArr == newArr);
+  auto const r = MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
+    assertx(oldArr == r.array);
     throwOOBArrayKeyException(key, oldArr);
   }
 
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
 
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 template <bool reffy>
 inline TypedValue* ElemDDictPre(TypedValue* base, StringData* key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
 
   if (reffy) throwRefInvalidArrayValueException(oldArr);
 
-  ArrayData* newArr =
-    MixedArray::LvalSilentStrDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    assertx(oldArr == newArr);
+  auto const r = MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
+    assertx(oldArr == r.array);
     throwOOBArrayKeyException(key, oldArr);
   }
 
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
 
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 template <bool reffy>
@@ -768,7 +762,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
  */
 template <MOpFlags flags, bool reffy, KeyType keyType = KeyType::Any>
 TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
-  assertx(flags & MOpFlags::Define && !(flags & MOpFlags::Unset));
+  assertx((flags & MOpFlags::Define) && !(flags & MOpFlags::Unset));
 
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
@@ -833,31 +827,29 @@ inline TypedValue* ElemUArray(TypedValue* base, key_type<keyType> key) {
 
   // Unset{Elem,Prop} do nothing when the base is InitNull, so this sketchy but
   // should be okay.
-  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  return const_cast<TypedValue*>(ElemEmptyish());
 }
 
 /**
  * ElemU when base is a Vec
  */
 inline TypedValue* ElemUVecPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    PackedArray::LvalSilentIntVec(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  auto const r = PackedArray::LvalSilentIntVec(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
+    return const_cast<TypedValue*>(ElemEmptyish());
   }
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfVec;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* base, StringData* key) {
-  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  return const_cast<TypedValue*>(ElemEmptyish());
 }
 
 inline TypedValue* ElemUVecPre(TypedValue* base, TypedValue key) {
@@ -882,37 +874,33 @@ inline TypedValue* ElemUVec(TypedValue* base, key_type<keyType> key) {
  * ElemU when base is a Dict
  */
 inline TypedValue* ElemUDictPre(TypedValue* base, int64_t key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    MixedArray::LvalSilentIntDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  auto const r = MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
+    return const_cast<TypedValue*>(ElemEmptyish());
   }
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 inline TypedValue* ElemUDictPre(TypedValue* base, StringData* key) {
-  Variant* ret = nullptr;
   ArrayData* oldArr = base->m_data.parr;
-  ArrayData* newArr =
-    MixedArray::LvalSilentStrDict(oldArr, key, ret, oldArr->cowCheck());
-  if (UNLIKELY(!ret)) {
-    return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  auto const r = MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
+  if (UNLIKELY(!r.val)) {
+    return const_cast<TypedValue*>(ElemEmptyish());
   }
-  if (newArr != oldArr) {
+  if (r.array != oldArr) {
     base->m_type = KindOfDict;
-    base->m_data.parr = newArr;
+    base->m_data.parr = r.array;
     assertx(cellIsPlausible(*base));
     decRefArr(oldArr);
   }
-  return ret->asTypedValue();
+  return r.val->asTypedValue();
 }
 
 inline TypedValue* ElemUDictPre(TypedValue* base, TypedValue key) {
@@ -995,7 +983,7 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfResource:
       // Unset on scalar base never modifies the base, but the const_cast is
       // necessary to placate the type system.
-      return const_cast<TypedValue*>(null_variant.asTypedValue());
+      return const_cast<TypedValue*>(uninit_variant.asTypedValue());
     case KindOfPersistentString:
     case KindOfString:
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);
@@ -2734,34 +2722,18 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
  * Returns a pointer to a number of possible places, but does not unbox it.
  * (The returned pointer is never pointing into a RefData.)
  */
-template <MOpFlags flags, bool isObj = false, KeyType keyType = KeyType::Any>
-inline TypedValue* Prop(TypedValue& tvRef,
-                        const Class* ctx,
-                        TypedValue* base,
-                        key_type<keyType> key) {
+template <MOpFlags flags, KeyType keyType = KeyType::Any>
+inline TypedValue* PropObj(TypedValue& tvRef, const Class* ctx,
+                           ObjectData* instance, key_type<keyType> key) {
   auto constexpr warn   = flags & MOpFlags::Warn;
   auto constexpr define = flags & MOpFlags::Define;
   auto constexpr unset  = flags & MOpFlags::Unset;
-
   assertx(!warn || !unset);
-
-  ObjectData* instance;
-  if (isObj) {
-    instance = reinterpret_cast<ObjectData*>(base);
-  } else {
-    auto result = propPre<flags>(tvRef, base);
-    if (result->m_type == KindOfNull) {
-      return result;
-    }
-    assertx(result->m_type == KindOfObject);
-    instance = instanceFromTv(result);
-  }
 
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Get property.
-
   if (warn) {
     assertx(!define);
     return instance->propW(&tvRef, ctx, keySD);
@@ -2769,6 +2741,20 @@ inline TypedValue* Prop(TypedValue& tvRef,
 
   if (define || unset) return instance->propD(&tvRef, ctx, keySD);
   return instance->prop(&tvRef, ctx, keySD);
+}
+
+template <MOpFlags flags, KeyType keyType = KeyType::Any>
+inline TypedValue* Prop(TypedValue& tvRef,
+                        const Class* ctx,
+                        TypedValue* base,
+                        key_type<keyType> key) {
+  auto result = propPre<flags>(tvRef, base);
+  if (result->m_type == KindOfNull) {
+    return result;
+  }
+  assertx(result->m_type == KindOfObject);
+  auto instance = instanceFromTv(result);
+  return PropObj<flags,keyType>(tvRef, ctx, instance, key);
 }
 
 template <bool useEmpty, KeyType kt>
@@ -2782,13 +2768,8 @@ inline bool IssetEmptyPropObj(Class* ctx, ObjectData* instance,
     instance->propIsset(ctx, keySD);
 }
 
-template <bool useEmpty, bool isObj = false, KeyType kt = KeyType::Any>
+template <bool useEmpty, KeyType kt = KeyType::Any>
 bool IssetEmptyProp(Class* ctx, TypedValue* base, key_type<kt> key) {
-  if (isObj) {
-    auto obj = reinterpret_cast<ObjectData*>(base);
-    return IssetEmptyPropObj<useEmpty, kt>(ctx, obj, key);
-  }
-
   base = tvToCell(base);
   if (LIKELY(base->m_type == KindOfObject)) {
     return IssetEmptyPropObj<useEmpty, kt>(ctx, instanceFromTv(base), key);
@@ -2830,14 +2811,9 @@ inline void SetPropObj(Class* ctx, ObjectData* instance,
 }
 
 // $base->$key = $val
-template <bool setResult, bool isObj = false, KeyType keyType = KeyType::Any>
+template <bool setResult, KeyType keyType = KeyType::Any>
 inline void SetProp(Class* ctx, TypedValue* base, key_type<keyType> key,
                     Cell* val) {
-  if (isObj) {
-    SetPropObj<keyType>(ctx, reinterpret_cast<ObjectData*>(base), key, val);
-    return;
-  }
-
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
@@ -2912,17 +2888,10 @@ inline TypedValue* SetOpPropObj(TypedValue& tvRef, Class* ctx,
 }
 
 // $base->$key <op>= $rhs
-template<bool isObj = false>
 inline TypedValue* SetOpProp(TypedValue& tvRef,
                              Class* ctx, SetOpOp op,
                              TypedValue* base, TypedValue key,
                              Cell* rhs) {
-  if (isObj) {
-    return SetOpPropObj(tvRef, ctx, op,
-                        reinterpret_cast<ObjectData*>(base),
-                        key, rhs);
-  }
-
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
@@ -2997,7 +2966,6 @@ inline void IncDecPropObj(Class* ctx,
   base->incDecProp(ctx, op, keySD, dest);
 }
 
-template <bool isObj = false>
 inline void IncDecProp(
   Class* ctx,
   IncDecOp op,
@@ -3005,12 +2973,6 @@ inline void IncDecProp(
   TypedValue key,
   TypedValue& dest
 ) {
-  if (isObj) {
-    auto obj = reinterpret_cast<ObjectData*>(base);
-    IncDecPropObj(ctx, op, obj, key, dest);
-    return;
-  }
-
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
@@ -3053,26 +3015,20 @@ inline void IncDecProp(
   unknownBaseType(base);
 }
 
-template<bool isObj = false>
-inline void UnsetProp(Class* ctx, TypedValue* base, TypedValue key) {
-  ObjectData* instance;
-  if (!isObj) {
-    base = tvToCell(base);
-
-    // Validate base.
-    if (UNLIKELY(base->m_type != KindOfObject)) {
-      // Do nothing.
-      return;
-    }
-    instance = instanceFromTv(base);
-  } else {
-    instance = reinterpret_cast<ObjectData*>(base);
-  }
+inline void UnsetPropObj(Class* ctx, ObjectData* instance, TypedValue key) {
   // Prepare key.
   auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
   // Unset property.
   instance->unsetProp(ctx, keySD);
+}
+
+inline void UnsetProp(Class* ctx, TypedValue* base, TypedValue key) {
+  // Validate base.
+  base = tvToCell(base);
+  if (LIKELY(base->m_type == KindOfObject)) {
+    UnsetPropObj(ctx, instanceFromTv(base), key);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

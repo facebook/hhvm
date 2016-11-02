@@ -97,8 +97,9 @@ static UBool enumCharType_callback(CallCtx* ctx,
   args[0].m_data.num = start;
   args[1].m_data.num = limit;
   args[2].m_data.num = type;
-  Variant retval;
-  g_context->invokeFuncFew(retval.asTypedValue(), *ctx, 3, args);
+  tvRefcountedDecRef(
+    g_context->invokeFuncFew(*ctx, 3, args)
+  );
   return true;
 }
 
@@ -164,8 +165,9 @@ static UBool enumCharNames_callback(CallCtx *ctx,
   Variant charName = String(name, length, CopyString);
   tvCopy(*charName.asTypedValue(), args[2]);
 
-  Variant retval;
-  g_context->invokeFuncFew(retval.asTypedValue(), *ctx, 3, args);
+  tvRefcountedDecRef(
+    g_context->invokeFuncFew(*ctx, 3, args)
+  );
   return true;
 }
 
@@ -352,8 +354,7 @@ void IntlExtension::initUChar() {
   HHVM_RCC_INT(IntlChar, FOLD_CASE_DEFAULT, U_FOLD_CASE_DEFAULT);
   HHVM_RCC_INT(IntlChar, FOLD_CASE_EXCLUDE_SPECIAL_I,
                U_FOLD_CASE_EXCLUDE_SPECIAL_I);
-  Native::registerClassConstant<KindOfDouble>
-  (s_IntlChar.get(), makeStaticString("NO_NUMERIC_VALUE"), U_NO_NUMERIC_VALUE);
+  HHVM_RCC_DBL(IntlChar, NO_NUMERIC_VALUE, U_NO_NUMERIC_VALUE);
 
 /* All enums used by the uchar APIs.  There are a LOT of them,
   * so they're separated out into include files,

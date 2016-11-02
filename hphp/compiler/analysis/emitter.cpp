@@ -840,9 +840,6 @@ private:
   SymbolicStack m_evalStack;
   bool m_evalStackIsUnknown;
   hphp_hash_map<Offset, SymbolicStack> m_jumpTargetEvalStacks;
-  typedef tbb::concurrent_hash_map<const StringData*, int,
-                                   StringDataHashICompare> EmittedClosures;
-  static EmittedClosures s_emittedClosures;
   std::deque<Funclet*> m_funclets;
   std::map<StatementPtr, Funclet*> m_memoizedFunclets;
   std::deque<CatchRegion*> m_catchRegions;
@@ -946,6 +943,7 @@ public:
   void emitClsIfSPropBase(Emitter& e);
   Id emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp);
   Id emitSetUnnamedL(Emitter& e);
+  void emitFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   MaybeDataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
   void emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
@@ -981,7 +979,9 @@ public:
   void emitPostponedMeths();
   void bindUserAttributes(MethodStatementPtr meth,
                           FuncEmitter *fe);
-  void bindNativeFunc(MethodStatementPtr meth, FuncEmitter *fe);
+  Attr bindNativeFunc(MethodStatementPtr meth,
+                      FuncEmitter *fe,
+                      bool dynCallWrapper);
   int32_t emitNativeOpCodeImpl(MethodStatementPtr meth,
                                const char* funcName,
                                const char* className,
@@ -1026,7 +1026,6 @@ public:
     CallUserFuncForwardArray = CallUserFuncForward | CallUserFuncArray
   };
 
-  bool emitSystemLibVarEnvFunc(Emitter& e, SimpleFunctionCallPtr node);
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
   Func* canEmitBuiltinCall(const std::string& name, int numParams);
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
@@ -1041,7 +1040,7 @@ public:
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);
   void emitBuiltinDefaultArg(Emitter& e, Variant& v,
                              MaybeDataType t, int paramId);
-  void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
+  Id emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   Id emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e,
                                  ListAssignmentPtr la,
@@ -2843,8 +2842,6 @@ void EmitterVisitor::unregisterControlTarget(ControlTarget* t) {
 //=============================================================================
 // EmitterVisitor.
 
-EmitterVisitor::EmittedClosures EmitterVisitor::s_emittedClosures;
-
 EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
   : m_ue(ue),
     m_curFunc(ue.getMain()),
@@ -3470,10 +3467,6 @@ void EmitterVisitor::visit(FileScopePtr file) {
     auto region = createRegion(stmts, Region::Kind::Global);
     enterRegion(region);
     SCOPE_EXIT { leaveRegion(region); };
-
-    for (auto cls : m_file->getAnonClasses()) {
-      emitClass(e, cls->getClassScope(), true);
-    }
 
     for (i = 0; i < nk; i++) {
       StatementPtr s = (*stmts)[i];
@@ -4549,7 +4542,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     } else {
       // __FILE__ and __DIR__ are special unary ops that don't
       // have expressions
-      assert(op == T_FILE || op == T_DIR);
+      assert(op == T_FILE || op == T_DIR || op == T_METHOD_C);
     }
     switch (op) {
       case T_INC:
@@ -4610,6 +4603,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       }
       case T_DIR: {
         e.Dir();
+        break;
+      }
+      case T_METHOD_C: {
+        e.Method();
         break;
       }
       default:
@@ -4760,8 +4757,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       visit(b->getExp2());
       emitConvertToCell(e);
       releasePipeLocal(pipeVar);
-      emitPushAndFreeUnnamedL(e, pipeVar, m_ue.bcPos());
-      e.PopC();
+      emitFreeUnnamedL(e, pipeVar, m_ue.bcPos());
       return true;
     }
 
@@ -5099,7 +5095,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.Gt();
       e.JmpZ(disabled);
 
-      emitFuncCall(e, call, "__SystemLib\\assert", call->getParams());
+      emitFuncCall(e, call, "assert", call->getParams());
       emitConvertToCell(e);
       e.Jmp(after);
 
@@ -5107,8 +5103,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       e.True();
 
       after.set(e);
-      return true;
-    } else if (emitSystemLibVarEnvFunc(e, call)) {
       return true;
     } else if (call->isCallToFunction("array_slice") &&
                params && params->getCount() == 2 &&
@@ -5746,42 +5740,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                                    useVars[i].second, false);
     }
 
-    // The parser generated a unique name for the function,
-    // use that for the class
-    std::string clsName = ce->getClosureFunction()->getOriginalName();
-
-    if (m_curFunc->isPseudoMain()) {
-      std::ostringstream oss;
-      oss << clsName << '$' << std::hex <<
-        m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0] << '$';
-      clsName = oss.str();
-    }
-
-    if (Option::WholeProgram) {
-      int my_id;
-      {
-        EmittedClosures::accessor acc;
-        s_emittedClosures.insert(acc, makeStaticString(clsName));
-        my_id = ++acc->second;
-      }
-      if (my_id > 1) {
-        // The closure was from a trait, so we need a unique name in the
-        // implementing class. _ is different from the #, which is used for
-        // many closures in the same func in ParserBase::newClosureName
-        folly::toAppend('_', my_id, &clsName);
-      }
-    }
-
-    auto ssClsName = makeStaticString(clsName);
-    e.CreateCl(useCount, ssClsName);
-
-    // From here on out, we're creating a new class to hold the closure.
-    const static StringData* parentName = makeStaticString("Closure");
+    // Create a new class to hold the closure.
     PreClassEmitter* pce = m_ue.newPreClassEmitter(
-      ssClsName, PreClass::ClosureHoistable);
+      ce->getClosureFunction()->getOriginalName(), PreClass::NotHoistable);
 
     auto const attrs = AttrNoOverride | AttrUnique | AttrPersistent;
 
+    static auto const parentName = makeStaticString("Closure");
     pce->init(ce->line0(), ce->line1(), m_ue.bcPos(),
               attrs, parentName, nullptr);
 
@@ -5796,26 +5761,35 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     // The __invoke method. This is the body of the closure, preceded by
     // code that pulls the object's instance variables into locals.
-    static const StringData* invokeName = makeStaticString("__invoke");
-    FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
+    static auto const invokeName = makeStaticString("__invoke");
+    auto const invoke = m_ue.newMethodEmitter(invokeName, pce);
     invoke->isClosureBody = true;
     pce->addMethod(invoke);
-    auto body = static_pointer_cast<MethodStatement>(ce->getClosureFunction());
+    auto const body =
+      static_pointer_cast<MethodStatement>(ce->getClosureFunction());
     postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
+
+    e.CreateCl(useCount, pce->id());
 
     return true;
   }
   case Construct::KindOfClassExpression: {
     auto ce = static_pointer_cast<ClassExpression>(node);
-    // The parser generated a unique name for the class, use that
-    std::string clsName = ce->getClass()->getOriginalName();
-    auto ssClsName = makeStaticString(clsName);
-    auto fpiStart = m_ue.bcPos();
-    auto params = ce->getParams();
-    int numParams = params ? params->getCount() : 0;
-    e.FPushCtorD(numParams, ssClsName);
-    emitCall(e, ce, ce->getParams(), fpiStart);
-    e.PopR();
+
+    auto save = m_evalStack;
+    auto const id = emitClass(e, ce->getClass()->getClassScope(), false);
+    if (id < 0) {
+      m_evalStackIsUnknown = false;
+      m_evalStack = save;
+      e.Null();
+    } else {
+      auto fpiStart = m_ue.bcPos();
+      auto params = ce->getParams();
+      int numParams = params ? params->getCount() : 0;
+      e.FPushCtorI(numParams, id);
+      emitCall(e, ce, ce->getParams(), fpiStart);
+      e.PopR();
+    }
     return true;
   }
   case Construct::KindOfYieldExpression: {
@@ -6703,6 +6677,15 @@ Id EmitterVisitor::emitSetUnnamedL(Emitter& e) {
   return tempLocal;
 }
 
+void EmitterVisitor::emitFreeUnnamedL(Emitter& e, Id tempLocal, Offset start) {
+  assert(tempLocal >= 0);
+  assert(start != InvalidAbsoluteOffset);
+  newFaultRegionAndFunclet(start, m_ue.bcPos(),
+                           new UnsetUnnamedLocalThunklet(tempLocal));
+  emitUnsetL(e, tempLocal);
+  m_curFunc->freeUnnamedLocal(tempLocal);
+}
+
 void EmitterVisitor::emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal,
                                              Offset start) {
   assert(tempLocal >= 0);
@@ -6770,7 +6753,8 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
     case Expression::KindOfExpressionList: {
       auto el = static_pointer_cast<ExpressionList>(exp);
       if (el->getListKind() != ExpressionList::ListKindParam) {
-        return PassByRefKind::WarnOnCell;
+        return el->getListKind() == ExpressionList::ListKindWrappedNoWarn ?
+          PassByRefKind::AllowCell : PassByRefKind::WarnOnCell;
       }
     } break;
     default:
@@ -8032,7 +8016,29 @@ void EmitterVisitor::emitPostponedMeths() {
     }
 
     if (funcScope->isNative()) {
-      bindNativeFunc(meth, fe);
+      auto const attr = bindNativeFunc(meth, fe, false);
+      if (attr & (AttrReadsCallerFrame | AttrWritesCallerFrame)) {
+        // If this is a builtin which may access the caller's frame, generate a
+        // dynamic call wrapper function. Dynamic calls to the builtin will be
+        // routed to this wrapper instead.  This function is identical to the
+        // normal builtin function, except it includes the VarEnvDynCall opcode.
+        if (!meth->is(Statement::KindOfFunctionStatement) ||
+            !p.m_top || fe->pce()) {
+          throw IncludeTimeFatalException(
+            meth,
+            "ReadsCallerFrame or WritesCallerFrame can only "
+            "be applied to top-level functions"
+          );
+        }
+        auto const rewrittenName = makeStaticString(
+          folly::sformat("{}$dyncall_wrapper", fe->name->data()));
+        auto stub = m_ue.newFuncEmitter(rewrittenName);
+        m_curFunc = stub;
+        SCOPE_EXIT { m_curFunc = fe; };
+        bindNativeFunc(meth, stub, true);
+        assert(stub->id() != kInvalidId);
+        fe->dynCallWrapperId = stub->id();
+      }
     } else {
       emitMethodMetadata(meth, p.m_closureUseVars, p.m_top);
       emitMethod(meth);
@@ -8076,8 +8082,9 @@ const StaticString s_Void("HH\\void");
 const char* attr_Deprecated = "__Deprecated";
 const StaticString s_attr_Deprecated(attr_Deprecated);
 
-void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
-                                    FuncEmitter *fe) {
+Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
+                                    FuncEmitter *fe,
+                                    bool dynCallWrapper) {
   if (SystemLib::s_inited &&
       !(Option::WholeProgram && meth->isSystem())) {
     throw IncludeTimeFatalException(meth,
@@ -8166,12 +8173,16 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   fe->setBuiltinFunc(attributes, base);
   fillFuncEmitterParams(fe, meth->getParams(), true);
+
+  if (dynCallWrapper) e.VarEnvDynCall();
+
   if (nativeAttrs & Native::AttrOpCodeImpl) {
     ff.setStackPad(emitNativeOpCodeImpl(meth, funcname, classname, fe));
   } else {
     e.NativeImpl();
   }
   emitMethodDVInitializers(e, meth, topOfBody);
+  return attributes;
 }
 
 void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
@@ -8925,39 +8936,6 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   }
 }
 
-bool EmitterVisitor::emitSystemLibVarEnvFunc(Emitter& e,
-                                             SimpleFunctionCallPtr call) {
-  if (call->isCallToFunction("extract")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\extract", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("parse_str")) {
-    emitFuncCall(e, call, "__SystemLib\\parse_str", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("compact")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\compact_sl", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("get_defined_vars")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\get_defined_vars", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("func_get_args")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\func_get_args_sl", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("func_get_arg")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\func_get_arg_sl", call->getParams());
-    return true;
-  } else if (call->isCallToFunction("func_num_args")) {
-    emitFuncCall(e, call,
-                 "__SystemLib\\func_num_arg_", call->getParams());
-    return true;
-  }
-  return false;
-}
-
 bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
   static struct {
     const char* name;
@@ -9359,19 +9337,18 @@ Id EmitterVisitor::emitTypedef(Emitter& e, TypedefStatementPtr td) {
   return id;
 }
 
-void EmitterVisitor::emitClass(Emitter& e,
-                               ClassScopePtr cNode,
-                               bool toplevel) {
+Id EmitterVisitor::emitClass(Emitter& e,
+                             ClassScopePtr cNode,
+                             bool toplevel) {
 
   const StringData* fatal_msg = cNode->getFatalMessage();
   if (fatal_msg != nullptr) {
     e.String(fatal_msg);
     e.Fatal(FatalOp::Runtime);
-    return;
+    return -1;
   }
 
   auto is = static_pointer_cast<InterfaceStatement>(cNode->getStmt());
-  StringData* className = makeStaticString(cNode->getOriginalName());
   StringData* parentName = makeStaticString(cNode->getOriginalParent());
   StringData* classDoc = Option::GenerateDocComments ?
     makeStaticString(cNode->getDocComment()) : staticEmptyString();
@@ -9430,7 +9407,8 @@ void EmitterVisitor::emitClass(Emitter& e,
       m_hoistables.insert(cNode->getOriginalName());
     }
   }
-  PreClassEmitter* pce = m_ue.newPreClassEmitter(className, hoistable);
+  PreClassEmitter* pce = m_ue.newPreClassEmitter(cNode->getOriginalName(),
+                                                 hoistable);
   pce->init(is->line0(), is->line1(), m_ue.bcPos(), attr, parentName,
             classDoc);
   auto r = is->getRange();
@@ -9650,6 +9628,8 @@ void EmitterVisitor::emitClass(Emitter& e,
       determine_type_constraint_from_annot(cs->getEnumBaseTy(), true);
     pce->setEnumBaseTy(typeConstraint);
   }
+
+  return pce->id();
 }
 
 namespace {
@@ -11220,6 +11200,11 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
   SCOPE_EXIT {
     if (unit && releaseUnit) *releaseUnit = unit.release();
   };
+
+  // We don't want to invoke the JIT when trying to run PHP code.
+  auto const prevFolding = RID().getJitFolding();
+  RID().setJitFolding(true);
+  SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
   try {
     UnitOrigin unitOrigin = UnitOrigin::File;

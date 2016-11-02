@@ -45,7 +45,7 @@ foreach ($typeMap as $type => $gen) {
     $func = "HH\\Asio\\{$type}{$ktype}";
     $wh = $func($gen($vals), $kgen);
     echo "{$func}() => ";
-    var_dump($wh->join());
+    var_dump(\HH\Asio\join($wh));
   }
 
 }

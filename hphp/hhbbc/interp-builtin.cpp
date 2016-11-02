@@ -104,10 +104,9 @@ folly::Optional<Type> const_fold(ISS& env,
       args[op.arg1 - i - 1] = *tv(topT(env, i));
     }
 
-    Cell retVal;
     auto const func = Unit::lookupFunc(name.get());
     always_assert_flog(func, "func not found for builtin {}\n", name.get());
-    g_context->invokeFuncFew(&retVal, func, nullptr, nullptr,
+    auto retVal = g_context->invokeFuncFew(func, nullptr, nullptr,
       args.size(), args.data(), !env.ctx.unit->useStrictTypes);
 
     // If we got here, we didn't throw, so we can pop the inputs.
@@ -363,7 +362,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   auto const func = env.index.resolve_func(env.ctx, name);
   auto const rt = env.index.lookup_return_type(env.ctx, func);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-  specialFunctionEffects(env, name);
+  specialFunctionEffects(env, func);
   push(env, rt);
 }
 

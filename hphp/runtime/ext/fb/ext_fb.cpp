@@ -779,7 +779,7 @@ int fb_compact_unserialize_from_buffer(
 
 Variant fb_compact_unserialize(const char* str, int len,
                                VRefParam success,
-                               VRefParam errcode /* = null_variant */) {
+                               VRefParam errcode /* = uninit_variant */) {
 
   Variant ret;
   int p = 0;
@@ -796,7 +796,7 @@ Variant fb_compact_unserialize(const char* str, int len,
 
 Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, VRefParam success,
-                      VRefParam errcode /* = null_variant */) {
+                      VRefParam errcode /* = uninit_variant */) {
   if (!thing.isString()) {
     success.assignIfRef(false);
     errcode.assignIfRef(FB_UNSERIALIZE_NONSTRING_VALUE);
@@ -1024,34 +1024,15 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
-                                 const Variant& data /* = null_variant */) {
+                                 const Variant& data /* = uninit_variant */) {
   return register_intercept(name, handler, data);
 }
 
-
-const StaticString s_extract("extract");
-const StaticString s_extract_sl("__SystemLib\\extract");
-const StaticString s_assert("assert");
-const StaticString s_assert_sl("__SystemLib\\assert");
-const StaticString s_parse_str("parse_str");
-const StaticString s_parse_str_sl("__SystemLib\\parse_str");
-const StaticString s_compact("compact");
-const StaticString s_compact_sl("__SystemLib\\compact_sl");
-const StaticString s_get_defined_vars("get_defined_vars");
-const StaticString s_get_defined_vars_sl("__SystemLib\\get_defined_vars");
-
 bool is_dangerous_varenv_function(const StringData* name) {
-  return
-    name->isame(s_extract.get()) ||
-    name->isame(s_extract_sl.get()) ||
-    name->isame(s_assert.get()) ||
-    name->isame(s_assert_sl.get()) ||
-    name->isame(s_parse_str.get()) ||
-    name->isame(s_parse_str_sl.get()) ||
-    name->isame(s_compact.get()) ||
-    name->isame(s_compact_sl.get()) ||
-    name->isame(s_get_defined_vars.get()) ||
-    name->isame(s_get_defined_vars_sl.get());
+  auto const f = Unit::lookupFunc(name);
+  // Functions can which can access the caller's frame are always builtin, so if
+  // its not already defined, we know it can't be one.
+  return f && f->accessesCallerFrame();
 }
 
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
@@ -1116,7 +1097,7 @@ Array HHVM_FUNCTION(fb_call_user_func_array_safe,
   if (is_callable(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }
-  return make_packed_array(false, null_variant);
+  return make_packed_array(false, uninit_variant);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1225,8 +1206,7 @@ struct FBExtension : Extension {
   FBExtension(): Extension("fb", "1.0.0") {}
 
   void moduleInit() override {
-    Native::registerConstant<KindOfBoolean>
-      (makeStaticString("HHVM_FACEBOOK"), HHVM_FACEBOOK);
+    HHVM_RC_BOOL_SAME(HHVM_FACEBOOK);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_NONSTRING_VALUE);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE);

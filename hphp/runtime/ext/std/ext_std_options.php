@@ -37,7 +37,7 @@ function assert_options(int $what,
  * the third argument will contain the expression that failed (if any -
  * literal values such as 1 or "two" will not be passed via this argument)
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame", "WritesCallerFrame")>>
 function assert(mixed $assertion, mixed $message = null): mixed;
 
 /* Loads the PHP extension given by the parameter library.  Use
@@ -399,9 +399,6 @@ function version_compare(string $version1,
 function zend_version(): string;
 
 namespace __SystemLib {
-  <<__Native>>
-  function assert(mixed $assertion, mixed $message = null): ?bool;
-
 
   class PhpInfo {
 

@@ -39,7 +39,7 @@ namespace HPHP {
 // compositions
 
 Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 */,
-                          const Variant& replacement /* = null_variant */,
+                          const Variant& replacement /* = uninit_variant */,
                           Array *removed /* = NULL */) {
   int num_in = input.size();
   if (offset > num_in) {
@@ -488,7 +488,7 @@ static void create_miter_for_walk(folly::Optional<MArrayIter>& miter,
 void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
                      const void *data, bool recursive /* = false */,
                      PointerSet *seen /* = NULL */,
-                     const Variant& userdata /* = null_variant */) {
+                     const Variant& userdata /* = uninit_variant */) {
   assert(walk_function);
 
   // The Optional is just to avoid copy constructing MArrayIter.
@@ -525,7 +525,7 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
 
 Variant ArrayUtil::Reduce(const Array& input, PFUNC_REDUCE reduce_function,
                           const void *data,
-                          const Variant& initial /* = null_variant */) {
+                          const Variant& initial /* = uninit_variant */) {
   Variant result(initial);
   for (ArrayIter iter(input); iter; ++iter) {
     result = reduce_function(result, iter.second(), data);

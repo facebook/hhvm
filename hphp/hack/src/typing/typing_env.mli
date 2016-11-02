@@ -59,9 +59,6 @@ val get_type_unsafe : env -> int -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
 val make_ft : Pos.t -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
-val debugl : ISet.t -> env -> locl ty list -> unit
-val debug : env -> locl ty -> unit
-val debug_tpenv : env -> unit
 val empty_fake_members : fake_members
 val empty_local : tpenv -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->

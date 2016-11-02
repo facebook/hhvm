@@ -182,16 +182,16 @@ inline bool MixedArray::isTombstone(ssize_t pos) const {
 }
 
 ALWAYS_INLINE
-void MixedArray::getElmKey(const Elm& e, TypedValue* out) {
+Cell MixedArray::getElmKey(const Elm& e) {
   if (e.hasIntKey()) {
-    out->m_data.num = e.ikey;
-    out->m_type = KindOfInt64;
-    return;
+    return make_tv<KindOfInt64>(e.ikey);
   }
   auto str = e.skey;
-  out->m_data.pstr = str;
-  out->m_type = KindOfString;
-  str->incRefCount();
+  if (str->isRefCounted()) {
+    str->rawIncRefCount();
+    return make_tv<KindOfString>(str);
+  }
+  return make_tv<KindOfPersistentString>(str);
 }
 
 ALWAYS_INLINE
@@ -200,16 +200,16 @@ void MixedArray::getArrayElm(ssize_t pos,
                             TypedValue* keyOut) const {
   assert(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  TypedValue* cur = tvToCell(&elm.data);
+  auto const cur = tvToCell(&elm.data);
   cellDup(*cur, *valOut);
-  getElmKey(elm, keyOut);
+  cellCopy(getElmKey(elm), *keyOut);
 }
 
 ALWAYS_INLINE
 void MixedArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
   assert(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  TypedValue* cur = tvToCell(&elm.data);
+  auto const cur = tvToCell(&elm.data);
   cellDup(*cur, *valOut);
 }
 
@@ -224,13 +224,10 @@ const TypedValue* MixedArray::getArrayElmPtr(ssize_t pos) const {
 ALWAYS_INLINE
 TypedValue MixedArray::getArrayElmKey(ssize_t pos) const {
   assert(validPos(pos));
-  TypedValue keyOut;
-  tvWriteUninit(&keyOut);
-  if (size_t(pos) >= m_used) return keyOut;
+  if (size_t(pos) >= m_used) return make_tv<KindOfUninit>();
   auto& elm = data()[pos];
-  if (isTombstone(elm.data.m_type)) return keyOut;
-  getElmKey(elm, &keyOut);
-  return keyOut;
+  if (isTombstone(elm.data.m_type)) return make_tv<KindOfUninit>();
+  return getElmKey(elm);
 }
 
 ALWAYS_INLINE
@@ -239,7 +236,7 @@ void MixedArray::dupArrayElmWithRef(ssize_t pos,
                                    TypedValue* keyOut) const {
   auto& elm = data()[pos];
   tvDupWithRef(elm.data, *valOut);
-  getElmKey(elm, keyOut);
+  cellCopy(getElmKey(elm), *keyOut);
 }
 
 ALWAYS_INLINE
@@ -311,12 +308,11 @@ ArrayData* MixedArray::updateRef(K k, Variant& data) {
 }
 
 template <class K>
-ArrayData* MixedArray::addLvalImpl(K k, Variant*& ret) {
+ArrayLval MixedArray::addLvalImpl(K k) {
   assert(!isFull());
   auto p = insert(k);
   if (!p.found) tvWriteNull(&p.tv);
-  ret = &tvAsVariant(&p.tv);
-  return this;
+  return {this, &tvAsVariant(&p.tv)};
 }
 
 //////////////////////////////////////////////////////////////////////

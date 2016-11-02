@@ -105,16 +105,7 @@ void readPerfData(CallGraph& cg, gzFile file, bool computeArcWeight) {
 
   if (!computeArcWeight) return;
 
-  // Normalize incoming arc weights and compute avgCallOffset for each node.
-  for (TargetId f = 0; f < cg.targets.size(); f++) {
-    auto& func = cg.targets[f];
-    for (auto src : func.preds) {
-      auto& arc = *cg.arcs.find(Arc(src, f));
-      arc.normalizedWeight = arc.weight / func.samples;
-      arc.avgCallOffset = arc.avgCallOffset / arc.weight;
-      assert(arc.avgCallOffset < cg.targets[src].size);
-    }
-  }
+  cg.normalizeArcWeights();
 }
 
 void readEdgcntData(CallGraph& cg, FILE* file) {
@@ -189,9 +180,9 @@ void print(CallGraph& cg, const char* filename,
   HFTRACE(1, "============== page 0 ==============\n");
   for (auto& cluster : clusters) {
     HFTRACE(1,
-            "-------- density = %.3lf (%u / %u) arcWeight = %.1lf --------\n",
+            "-------- density = %.3lf (%u / %u) --------\n",
             (double) cluster.samples / cluster.size,
-            cluster.samples, cluster.size, cluster.arcWeight);
+            cluster.samples, cluster.size);
     for (auto fid : cluster.targets) {
       if (cg.targets[fid].samples > 0) {
         hotfuncs++;
@@ -334,7 +325,10 @@ int main(int argc, char* argv[]) {
     readEdgcntData(cg, edgcntFile);
     fclose(edgcntFile);
   }
-  cg.printDot("cg.dot");
+  cg.printDot("cg.dot",
+              [&](TargetId id) {
+                return cg.funcs[id].mangledNames[0].c_str();
+              });
 
   std::vector<Cluster> clusters;
 

@@ -45,8 +45,7 @@ namespace HPHP { namespace HHBBC {
 template<class Pred>
 folly::Optional<Type> eval_cell(Pred p) {
   try {
-    g_context->setThrowAllErrors(true);
-    SCOPE_EXIT { g_context->setThrowAllErrors(false); };
+    ThrowAllErrorsSetter taes;
 
     Cell c = p();
     if (isRefcountedType(c.m_type)) {
@@ -127,6 +126,21 @@ folly::Optional<Type> eval_cell(Pred p) {
     return folly::none;
   } catch (...) {
     always_assert_flog(0, "a non-std::exception was thrown in eval_cell");
+  }
+}
+
+template<typename Pred>
+folly::Optional<typename std::result_of<Pred()>::type>
+eval_cell_value(Pred p) {
+  try {
+    ThrowAllErrorsSetter taes;
+    return p();
+  } catch (const Object&) {
+    return folly::none;
+  } catch (const std::exception&) {
+    return folly::none;
+  } catch (...) {
+    always_assert_flog(0, "a non-std::exception was thrown in eval_cell_value");
   }
 }
 

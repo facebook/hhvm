@@ -196,6 +196,13 @@ struct Class {
    */
   folly::Optional<Class> commonAncestor(const Class& o) const;
 
+  /*
+   * Returns true if we have a ClassInfo for this Class.
+   */
+  bool resolved() const {
+    return val.right() != nullptr;
+  }
+
 private:
   Class(borrowed_ptr<const Index>, Either<SString,borrowed_ptr<ClassInfo>>);
 
@@ -241,6 +248,16 @@ struct Func {
    * be involved, this will say false.
    */
   bool cantBeMagicCall() const;
+
+  /*
+   * Returns whether this resolved function could possibly read or write to the
+   * caller's frame.
+   */
+  bool mightReadCallerFrame() const;
+  bool mightWriteCallerFrame() const;
+  bool mightAccessCallerFrame() const {
+    return mightReadCallerFrame() || mightWriteCallerFrame();
+  }
 
 private:
   friend struct ::HPHP::HHBBC::Index;
@@ -362,12 +379,10 @@ struct Index {
    * Resolve a closure class.
    *
    * Returns both a resolved Class, and the actual php::Class for the
-   * closure.  This function should only be used with class names are
-   * guaranteed to be closures (for example, the name supplied to a
-   * CreateCl opcode).
+   * closure.
    */
   std::pair<res::Class,borrowed_ptr<php::Class>>
-    resolve_closure_class(Context ctx, SString name) const;
+    resolve_closure_class(Context ctx, int32_t idx) const;
 
   /*
    * Return a resolved class for a builtin class.
@@ -390,16 +405,17 @@ struct Index {
    *
    * The name `name' is tried first, and `fallback' is used if this
    * isn't found.  Both names must already be namespace-normalized.
-   * Resolution can fail because there are possible situations where
-   * we don't know which will be called at runtime.
+   * If we don't know which will be called at runtime, both will be
+   * returned.
    *
    * Note: the returned function may or may not be defined at the
    * program point (it could require a function autoload that might
    * fail).
    */
-  folly::Optional<res::Func> resolve_func_fallback(Context,
-                                                   SString name,
-                                                   SString fallback) const;
+  std::pair<res::Func, folly::Optional<res::Func>>
+    resolve_func_fallback(Context,
+                          SString name,
+                          SString fallback) const;
 
   /*
    * Try to resolve a class method named `name' with a given Context

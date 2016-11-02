@@ -66,12 +66,23 @@ struct VariableUnserializer {
    * Optimize for output that is expected to be immortal and immutable.
    */
   void setReadOnly() { m_readOnly = true; }
-  bool readOnly() const { return m_readOnly; }
 
   /*
    * Main API; unserialize the buffer and return as a Variant.
    */
   Variant unserialize();
+
+  void reserialize(StringBuffer& buf);
+
+  const char* head() const;
+
+  /*
+   * Set the beginning and end of internal buffer.
+   */
+  void set(const char* buf, const char* end);
+
+ private:
+  bool readOnly() const { return m_readOnly; }
 
   /*
    * Read the appropriate data type from buffer.
@@ -99,7 +110,6 @@ struct VariableUnserializer {
    */
   Type type() const;
   bool allowUnknownSerializableClass() const;
-  const char* head() const;
   const char* begin() const;
   const char* end() const;
   char peek() const;
@@ -110,11 +120,6 @@ struct VariableUnserializer {
    * True if clsName is allowed to be unserialized.
    */
   bool whitelistCheck(const String& clsName) const;
-
-  /*
-   * Set the beginning and end of internal buffer.
-   */
-  void set(const char* buf, const char* end);
 
   /*
    * Push v onto the vector of refs for future reference.
@@ -190,9 +195,28 @@ private:
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;
-};
 
-void reserialize(VariableUnserializer* uns, StringBuffer& buf);
+  void unserializeVariant(Variant& self,
+                          UnserializeMode mode = UnserializeMode::Value);
+  Array unserializeArray();
+  Array unserializeDict();
+  Array unserializeVec();
+  Array unserializeKeyset();
+  String unserializeString(char delimiter0 = '"', char delimiter1 = '"');
+  void unserializeCollection(ObjectData* obj, int64_t sz, char type);
+  void unserializeVector(ObjectData*, int64_t sz,
+                         char type);
+  void unserializeMap(ObjectData*, int64_t sz, char type);
+  void unserializeSet(ObjectData*, int64_t sz, char type);
+  void unserializePair(ObjectData*, int64_t sz, char type);
+  void unserializePropertyValue(Variant& v, int remainingProps);
+  bool tryUnserializeStrIntMap(struct BaseMap* map, int64_t sz);
+  void unserializeProp(ObjectData* obj, const String& key, Class* ctx,
+                       const String& realKey, int nProp);
+  void unserializeRemainingProps(Object& obj, int remainingProps,
+                                 Variant& serializedNativeData,
+                                 bool& hasSerializedNativeData);
+};
 
 }
 

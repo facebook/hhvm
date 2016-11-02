@@ -738,7 +738,7 @@ static void xml_set_handler(Variant * handler, const Variant& data) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Resource HHVM_FUNCTION(xml_parser_create,
-                       const Variant& encoding /* = null_variant */) {
+                       const Variant& encoding /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();
@@ -746,8 +746,8 @@ Resource HHVM_FUNCTION(xml_parser_create,
 }
 
 Resource HHVM_FUNCTION(xml_parser_create_ns,
-                       const Variant& encoding /* = null_variant */,
-                       const Variant& separator /* = null_variant */) {
+                       const Variant& encoding /* = uninit_variant */,
+                       const Variant& separator /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();

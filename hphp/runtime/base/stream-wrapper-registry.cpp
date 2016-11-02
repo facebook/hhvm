@@ -32,30 +32,32 @@
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
 struct RequestWrappers final : RequestEventHandler {
   void requestInit() override {}
   void requestShutdown() override {
     m_disabled.clear();
     m_wrappers.clear();
   }
-  void vscan(IMarker& mark) const override {
-    for (auto& s : m_disabled) mark(s);
-    for (auto& p : m_wrappers) {
-      mark(p.first);
-      if (p.second) p.second->vscan(mark);
-    }
-  }
 
   std::set<String> m_disabled;
-  std::map<String,std::unique_ptr<Wrapper>> m_wrappers;
-};
-} // empty namespace
+  std::map<String,std::unique_ptr<Wrapper>> m_wrappers; // key & value!
 
-typedef std::map<std::string,Wrapper*> wrapper_map_t;
+  TYPE_SCAN_CUSTOM_FIELD(m_disabled) {
+    for (auto& s : m_disabled) scanner.scan(s);
+  }
+  TYPE_SCAN_CUSTOM_FIELD(m_wrappers) {
+    // Wrapper instances are std-allocated, scan them now even though
+    // we only hold ptrs to them. If they were req-allocated, we could
+    // just scan the ptrs.
+    for (auto& e : m_wrappers) {
+      scanner.scan(e.first);
+      e.second->scan(scanner);
+    }
+  }
+};
 
 // Global registry for wrappers
-static wrapper_map_t s_wrappers;
+static std::map<std::string,Wrapper*> s_wrappers;
 
 // Request local registry for user defined wrappers and disabled builtins
 IMPLEMENT_STATIC_REQUEST_LOCAL(RequestWrappers, s_request_wrappers);

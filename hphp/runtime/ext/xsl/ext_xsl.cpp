@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -517,7 +516,7 @@ static bool HHVM_METHOD(XSLTProcessor, removeParameter,
 }
 
 static void HHVM_METHOD(XSLTProcessor, registerPHPFunctions,
-                        const Variant& funcs /*= null_variant*/) {
+                        const Variant& funcs /*= uninit_variant*/) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   if (funcs.isNull()) {
@@ -546,7 +545,7 @@ static void HHVM_METHOD(XSLTProcessor, registerPHPFunctions,
 static bool HHVM_METHOD(XSLTProcessor, setParameter,
                         const Variant& namespaceURI,
                         const Variant& localName,
-                        const Variant& value /*= null_variant*/) {
+                        const Variant& value /*= uninit_variant*/) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.

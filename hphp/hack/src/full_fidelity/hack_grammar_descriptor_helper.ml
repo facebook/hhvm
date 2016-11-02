@@ -38,8 +38,15 @@ module HackGrammarTypeDef = struct
 end
 
 module HackGrammarHelper = struct
+
+  let is_keyword text =
+    let text = String.lowercase text in
+    match Full_fidelity_token_kind.from_string text with
+    | Some _ -> true
+    | _ -> false
+
   (* generate a random name *)
-  let gen_name () =
+  let rec gen_name () =
     let var_length_max = 8 in
     let alpha_size = 26 in (* 26 English alphabet *)
     let postfix_size = Random.int var_length_max in
@@ -54,7 +61,8 @@ module HackGrammarHelper = struct
       char_of_int (if i = 0 then first_symbol
                    else if i = 1 then second_symbol
                    else generate ()) in
-    String.init (postfix_size + 2) init_fun
+    let result = String.init (postfix_size + 2) init_fun in
+    if is_keyword result then gen_name() else result
 
   (* create the powerset of the given set in lists. For our use case, the
    * original and the resultant sets are ordered and the function should

@@ -297,13 +297,29 @@ void Parser::completeScope(BlockScopePtr inner) {
   }
 }
 
+static const std::string empty = "";
+static const std::string closure = "{closure}";
+
+const std::string& Parser::realFuncName() const {
+  for (auto i = m_funcContexts.size(); i--; ) {
+    auto const& ctx = m_funcContexts[i];
+    if (!ctx.name.empty()) return ctx.name;
+  }
+  return empty;
+}
+
+const std::string& Parser::funcName() const {
+  if (m_funcContexts.empty()) return empty;
+  auto const& name = m_funcContexts.back().name;
+  return name.empty() ? closure : name;
+}
+
 const std::string& Parser::clsName() const {
-  const static std::string empty = "";
-  return m_clsContexts.empty () ? empty : m_clsContexts.top().name;
+  return m_clsContexts.empty() ? empty : m_clsContexts.top().name;
 }
 
 bool Parser::inTrait() const {
-  return m_clsContexts.empty () ? false : m_clsContexts.top().type == T_TRAIT;
+  return m_clsContexts.empty() ? false : m_clsContexts.top().type == T_TRAIT;
 }
 
 LabelScopePtr Parser::getLabelScope() const {
@@ -756,13 +772,16 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     case T_METHOD_C:
       if (inTrait()) {
         exp = NEW_EXP(ScalarExpression, type, scalar->text(),
-                      clsName() + "::" + m_funcName);
+                      clsName() + "::" + realFuncName());
+      } else if (IsAnonymousClassName(clsName())) {
+        onUnaryOpExp(out, scalar, type, true);
+        return;
       } else {
         exp = NEW_EXP(ScalarExpression, type, scalar->text());
       }
       break;
     case T_CLASS_C:
-      if (inTrait()) {
+      if (inTrait() || IsAnonymousClassName(clsName())) {
         // Inside traits we already did the magic for static::class so lets
         // reuse that
         out->exp = NEW_EXP(SimpleFunctionCall, "get_class", true,
@@ -1099,8 +1118,7 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
     pushComment();
   }
   newScope();
-  m_funcContexts.push_back(FunctionContext());
-  m_funcName = name.text();
+  m_funcContexts.push_back(FunctionContext(name.text()));
   m_staticVars.emplace_back();
 }
 
@@ -1207,7 +1225,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
 std::string Parser::getFunctionName(FunctionType type, Token* name) {
   switch (type) {
     case FunctionType::Closure:
-      return newClosureName(m_namespace, clsName(), m_containingFuncName);
+      return newClosureName(m_namespace, clsName(), realFuncName());
     case FunctionType::Function:
       assert(name);
       if (!m_lambdaMode) {
@@ -1540,8 +1558,10 @@ void Parser::onClassExpressionStart() {
   pushClass(false);
   pushComment();
   newScope();
-  auto name = newAnonClassName("class@anonymous", m_namespace, clsName(),
-      m_containingFuncName);
+  auto name = newAnonClassName("class@anonymous",
+                               m_namespace,
+                               clsName(),
+                               realFuncName());
   m_clsContexts.push(ClassContext(T_CLASS, name));
 }
 
@@ -1948,7 +1968,7 @@ void Parser::setIsGenerator() {
     PARSE_ERROR("Yield can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(m_funcName, clsName())) {
+  if (!canBeAsyncOrGenerator(funcName(), clsName())) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                 "magic methods");
@@ -1992,7 +2012,7 @@ void Parser::setIsAsync() {
     PARSE_ERROR("'await' can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(m_funcName, clsName())) {
+  if (!canBeAsyncOrGenerator(funcName(), clsName())) {
     invalidAwait();
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");
@@ -2162,11 +2182,6 @@ void Parser::onThrow(Token &out, Token &expr) {
 }
 
 void Parser::onClosureStart(Token &name) {
-  if (!m_funcName.empty()) {
-    m_containingFuncName = m_funcName;
-  } else {
-    // pseudoMain
-  }
   onFunctionStart(name, true);
 }
 

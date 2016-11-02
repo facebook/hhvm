@@ -28,13 +28,13 @@ async function test5() {
 function main() {
   var_dump(function_exists('genva'));
 
-  var_dump(test0()->join());
-  var_dump(test1()->join());
-  var_dump(test2()->join());
+  var_dump(\HH\Asio\join(test0()));
+  var_dump(\HH\Asio\join(test1()));
+  var_dump(\HH\Asio\join(test2()));
   try {
-    var_dump(test3()->join());
+    var_dump(\HH\Asio\join(test3()));
   } catch (Exception $e) { print $e->getMessage()."\n"; }
-  var_dump(test4()->join());
-  var_dump(test5()->join());
+  var_dump(\HH\Asio\join(test4()));
+  var_dump(\HH\Asio\join(test5()));
 }
 main();

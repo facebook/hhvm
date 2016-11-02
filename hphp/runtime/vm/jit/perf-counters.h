@@ -41,7 +41,8 @@ namespace jit {
   TPC(unser_prop_fast) \
   TPC(thrift_read_slow) \
   TPC(thrift_write_slow) \
-  TPC(thrift_spec_slow)
+  TPC(thrift_spec_slow) \
+  TPC(unit_load)
 
 #define TPC(n) tpc_ ## n,
 enum TransPerfCounter {

@@ -32,22 +32,39 @@ namespace HPHP { namespace jit {
 
 namespace x64 {
 struct ImmFolder {
+  Vunit& unit;
   jit::vector<bool> used;
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
-  explicit ImmFolder(jit::vector<bool>&& used_in)
-  : used(std::move(used_in)) { }
+  explicit ImmFolder(Vunit& u, jit::vector<bool>&& used_in)
+      : unit(u), used(std::move(used_in)) { }
 
-  template <typename T, typename M>
-  void extend_truncate_impl(T& in, Vinstr& out, M match) {
-    int val;
-    if (match(in.s, val)) {
-      out = copy{in.s, in.d};
-      if (in.d.isVirt()) {
-        valid.set(in.d);
-        vals[in.d] = val;
-      }
+  template <typename T>
+  static uint64_t mask(T r) {
+    auto bytes = static_cast<int>(width(r));
+    assertx(bytes && !(bytes & (bytes - 1)) && bytes <= 8);
+    return bytes == 8 ? -1uLL : (1uLL << (bytes * 8)) - 1;
+  }
+
+  template <typename T>
+  void extend_truncate_impl(T& in, Vinstr& out) {
+    if (!valid.test(in.s)) return;
+    auto const val = vals[in.s] & mask(in.s);
+    // For the extend cases, we're done, and val is the value of the
+    // constant that we want.
+    // For the truncate cases, we don't actually care about the upper
+    // bits of the register, but if we choose a signed value, sized to
+    // the destination there's more chance that it will be folded with
+    // a subsequent operation.
+    auto const m = mask(in.d);
+    auto const m1 = m >> 1;
+    auto const top = m ^ m1;
+    auto dval = int64_t(val & m1) - int64_t(val & top);
+    out = copy{unit.makeConst(dval), in.d};
+    if (in.d.isVirt()) {
+      valid.set(in.d);
+      vals[in.d] = dval;
     }
   }
 
@@ -249,24 +266,28 @@ struct ImmFolder {
     }
   }
   void fold(movzbw& in, Vinstr& out) {
-    extend_truncate_impl(
-      in, out, [this](Vreg reg, int& val) { return match_byte(reg, val); }
-    );
+    extend_truncate_impl(in, out);
   }
   void fold(movzbl& in, Vinstr& out) {
-    extend_truncate_impl(
-      in, out, [this](Vreg reg, int& val) { return match_byte(reg, val); }
-    );
+    extend_truncate_impl(in, out);
+  }
+  void fold(movzbq& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
+  }
+  void fold(movzlq& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
+  }
+  void fold(movzwl& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
+  }
+  void fold(movzwq& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
   }
   void fold(movtql& in, Vinstr& out) {
-    extend_truncate_impl(
-      in, out, [this](Vreg reg, int& val) { return match_int(reg, val); }
-    );
+    extend_truncate_impl(in, out);
   }
   void fold(movtqb& in, Vinstr& out) {
-    extend_truncate_impl(
-      in, out, [this](Vreg reg, int& val) { return match_byte(reg, val); }
-    );
+    extend_truncate_impl(in, out);
   }
   void fold(copy& in, Vinstr& out) {
     if (in.d.isVirt() && valid.test(in.s)) {
@@ -310,7 +331,7 @@ struct ImmFolder {
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
-  explicit ImmFolder(jit::vector<bool>&& used_in)
+  explicit ImmFolder(Vunit& unit, jit::vector<bool>&& used_in)
   : used(std::move(used_in)) { }
 
   bool arith_imm(Vreg r, int32_t& out) {
@@ -403,7 +424,7 @@ void foldImms(Vunit& unit) {
     }
   }
 
-  Folder folder(std::move(used));
+  Folder folder(unit, std::move(used));
   folder.vals.resize(unit.next_vr);
   folder.valid.resize(unit.next_vr);
   // figure out which Vregs are constants and stash their values.

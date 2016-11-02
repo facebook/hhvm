@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
@@ -65,24 +64,6 @@ void HHVM_METHOD(WaitHandle, import) {
   assert(obj->instanceof(c_WaitableWaitHandle::classof()));
   auto const ctx_idx = AsioSession::Get()->getCurrentContextIdx();
   asio::enter_context(static_cast<c_WaitableWaitHandle*>(this_), ctx_idx);
-}
-
-Variant HHVM_METHOD(WaitHandle, join) {
-  auto obj = wait_handle<c_WaitHandle>(this_);
-  if (!obj->isFinished()) {
-    // run the full blown machinery
-    assert(obj->instanceof(c_WaitableWaitHandle::classof()));
-    static_cast<c_WaitableWaitHandle*>(obj)->join();
-  }
-  assert(obj->isFinished());
-
-  if (LIKELY(obj->isSucceeded())) {
-    // succeeded? return result
-    return cellAsCVarRef(obj->getResult());
-  } else {
-    // failed? throw exception
-    throw_object(Object{obj->getException()});
-  }
 }
 
 bool HHVM_METHOD(WaitHandle, isFinished) {
@@ -147,7 +128,6 @@ void AsioExtension::initWaitHandle() {
 #define WH_ME(meth) \
   HHVM_MALIAS(HH\\WaitHandle, meth, WaitHandle, meth)
   WH_ME(import);
-  WH_ME(join);
   WH_ME(isFinished);
   WH_ME(isSucceeded);
   WH_ME(isFailed);

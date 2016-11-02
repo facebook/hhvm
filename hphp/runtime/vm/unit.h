@@ -498,29 +498,35 @@ public:
   // Func lookup.                                                      [static]
 
   /*
-   * Look up the defined Func in this request with name `name', or with the
-   * name mapped to the NamedEntity `ne'.
+   * Look up the defined Func in this request with name `name', or with the name
+   * mapped to the NamedEntity `ne'. The `DynCall` variants are used in dynamic
+   * call contexts. They behave the same as the normal functions, but return the
+   * dynamic call wrapper for the function, if present.
    *
    * Return nullptr if the function is not yet defined in this request.
    */
   static Func* lookupFunc(const NamedEntity* ne);
   static Func* lookupFunc(const StringData* name);
+  static Func* lookupDynCallFunc(const StringData* name);
 
   /*
-   * Look up, or autoload and define, the Func in this request with name
-   * `name', or with the name mapped to the NamedEntity `ne'.
+   * Look up, or autoload and define, the Func in this request with name `name',
+   * or with the name mapped to the NamedEntity `ne'. The `DynCall` variants are
+   * used in dynamic call contexts. They behave the same as the normal
+   * functions, but return the dynamic call wrapper for the function, if
+   * present.
    *
    * @requires: NamedEntity::get(name) == ne
    */
   static Func* loadFunc(const NamedEntity* ne, const StringData* name);
   static Func* loadFunc(const StringData* name);
+  static Func* loadDynCallFunc(const StringData* name);
 
   /*
    * Load or reload `func'---i.e., bind (or rebind) it to the NamedEntity
    * corresponding to its name.
    */
   static void loadFunc(const Func* func);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Class lookup.                                                     [static]
@@ -535,6 +541,12 @@ public:
    * same name as that of `preClass', regardless of the value of `failIsFatal'.
    */
   static Class* defClass(const PreClass* preClass, bool failIsFatal = true);
+
+  /*
+   * Define a closure from preClass. Closures have unique names, so unlike
+   * defClass, this is a one time operation.
+   */
+  static Class* defClosure(const PreClass* preClass);
 
   /*
    * Set the NamedEntity for `alias' to refer to the Class `original' in this

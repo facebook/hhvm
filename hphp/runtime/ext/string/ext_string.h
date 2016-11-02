@@ -111,10 +111,10 @@ Variant HHVM_FUNCTION(explode,
                       int limit = 0x7FFFFFFF);
 String HHVM_FUNCTION(implode,
                      const Variant& arg1,
-                     const Variant& arg2 = null_variant);
+                     const Variant& arg2 = uninit_variant);
 String HHVM_FUNCTION(join,
                      const Variant& arg1,
-                     const Variant& arg2 = null_variant);
+                     const Variant& arg2 = uninit_variant);
 TypedValue HHVM_FUNCTION(str_split,
                          const String& str,
                          int64_t split_length = 1);
@@ -124,7 +124,7 @@ TypedValue HHVM_FUNCTION(chunk_split,
                          const String& end = "\r\n");
 TypedValue HHVM_FUNCTION(strtok,
                          const String& str,
-                         const Variant& token = null_variant);
+                         const Variant& token = uninit_variant);
 TypedValue HHVM_FUNCTION(str_replace,
                          const Variant& search,
                          const Variant& replace,
@@ -198,7 +198,7 @@ String HHVM_FUNCTION(sha1,
 Variant HHVM_FUNCTION(strtr,
                       const String& str,
                       const Variant& from,
-                      const Variant& to = null_variant);
+                      const Variant& to = uninit_variant);
 String HHVM_FUNCTION(convert_cyr_string,
                      const String& str,
                      const String& from,

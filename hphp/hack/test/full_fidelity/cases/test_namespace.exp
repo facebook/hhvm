@@ -14,7 +14,7 @@ function_declaration
 (missing)
 (function_declaration_header
 (missing)
-((whitespace)(function)(whitespace))
+((whitespace)(function)(whitespace))(missing)
 ((name)(whitespace))(missing)((lparen))(missing)((rparen)(whitespace))
 (missing)(missing))(compound_statement(({))(missing)((})(end_of_line))))
 (classish_declaration(missing)(missing)((whitespace)
@@ -25,7 +25,7 @@ function_declaration
 (namespace_body(({)(end_of_line))
 (list(
 function_declaration(missing)(function_declaration_header(missing)
-((whitespace)(function)(whitespace))((name)(whitespace))(missing)
+((whitespace)(function)(whitespace))(missing)((name)(whitespace))(missing)
 ((lparen))(missing)((rparen)(whitespace))
 (missing)(missing))(compound_statement(({))(missing)((})(end_of_line))))
 (classish_declaration(missing)(missing)

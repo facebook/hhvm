@@ -38,7 +38,7 @@ struct ArrayUtil final {
    * with supplied array.
    */
   static Variant Splice(const Array& input, int offset, int64_t length = 0,
-                        const Variant& replacement = null_variant,
+                        const Variant& replacement = uninit_variant,
                         Array *removed = nullptr);
 
   /**
@@ -116,7 +116,7 @@ struct ArrayUtil final {
                              const Variant& userdata, const void *data);
   static void Walk(Variant &input, PFUNC_WALK walk_function, const void *data,
                    bool recursive = false, PointerSet *seen = nullptr,
-                   const Variant& userdata = null_variant);
+                   const Variant& userdata = uninit_variant);
 
   /**
    * Iteratively reduce the array to a single value via the callback.
@@ -124,7 +124,7 @@ struct ArrayUtil final {
   typedef Variant (*PFUNC_REDUCE)(const Variant& result, const Variant& operand,
                                   const void *data);
   static Variant Reduce(const Array& input, PFUNC_REDUCE reduce_function,
-                        const void *data, const Variant& initial = null_variant);
+                    const void *data, const Variant& initial = uninit_variant);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

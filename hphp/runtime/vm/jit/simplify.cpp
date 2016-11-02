@@ -621,9 +621,10 @@ SSATmp* simplifyAddIntO(State& env, const IRInstruction* inst) {
   if (src1->hasConstVal() && src2->hasConstVal()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
-    return add_overflow(a, b)
-      ? cns(env, double(a) + double(b))
-      : cns(env, a + b);
+    if (add_overflow(a, b)) {
+      gen(env, Jmp, inst->taken());
+    }
+    return cns(env, a + b);
   }
   return nullptr;
 }
@@ -666,9 +667,10 @@ SSATmp* simplifySubIntO(State& env, const IRInstruction* inst) {
   if (src1->hasConstVal() && src2->hasConstVal()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
-    return sub_overflow(a, b)
-      ? cns(env, double(a) - double(b))
-      : cns(env, a - b);
+    if (sub_overflow(a, b)) {
+      gen(env, Jmp, inst->taken());
+    }
+    return cns(env, a - b);
   }
   return nullptr;
 }
@@ -736,9 +738,10 @@ SSATmp* simplifyMulIntO(State& env, const IRInstruction* inst) {
   if (src1->hasConstVal() && src2->hasConstVal()) {
     int64_t a = src1->intVal();
     int64_t b = src2->intVal();
-    return mul_overflow(a, b)
-      ? cns(env, double(a) * double(b))
-      : cns(env, a * b);
+    if (mul_overflow(a, b)) {
+      gen(env, Jmp, inst->taken());
+    }
+    return cns(env, a * b);
   }
   return nullptr;
 }
@@ -1016,6 +1019,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case SameArr:
   case SameVec:
   case SameDict:
+  case SameKeyset:
   case EqBool:
   case EqInt:
   case EqStr:
@@ -1031,6 +1035,7 @@ static bool cmpOp(Opcode opc, T a, U b) {
   case NSameArr:
   case NSameVec:
   case NSameDict:
+  case NSameKeyset:
   case NeqBool:
   case NeqInt:
   case NeqStr:
@@ -1362,22 +1367,31 @@ SSATmp* cmpKeysetImpl(State& env,
 
   // Unlike other array types, keyset comparisons can never throw or re-enter
   // (because they can only store integers and strings). Therefore we can fully
-  // simplify the comparison if both arrays are constants.
+  // simplify equality comparisons if both arrays are constants.
   if (left->hasConstVal() && right->hasConstVal()) {
     auto const leftVal = left->keysetVal();
     auto const rightVal = right->keysetVal();
     switch (opc) {
       case EqKeyset:
         return cns(env, SetArray::Equal(leftVal, rightVal));
+      case SameKeyset:
+        return cns(env, SetArray::Same(leftVal, rightVal));
       case NeqKeyset:
         return cns(env, SetArray::NotEqual(leftVal, rightVal));
+      case NSameKeyset:
+        return cns(env, SetArray::NotSame(leftVal, rightVal));
       default:
         break;
     }
   }
 
-  // Even if not a constant, we can apply an identity simplification.
-  if (left == right) return cns(env, cmpOp(opc, true, true));
+  // Even if not a constant, we can apply an identity simplification as long as
+  // we're doing an equality comparison.
+  if ((opc == SameKeyset || opc == NSameKeyset ||
+       opc == EqKeyset || opc == NeqKeyset)
+      && left == right) {
+    return cns(env, cmpOp(opc, true, true));
+  }
 
   return nullptr;
 }
@@ -1467,6 +1481,8 @@ X(NSameDict, Dict)
 
 X(EqKeyset, Keyset)
 X(NeqKeyset, Keyset)
+X(SameKeyset, Keyset)
+X(NSameKeyset, Keyset)
 
 X(GtRes, Res)
 X(GteRes, Res)
@@ -3350,6 +3366,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NSameDict)
   X(EqKeyset)
   X(NeqKeyset)
+  X(SameKeyset)
+  X(NSameKeyset)
   X(GtRes)
   X(GteRes)
   X(LtRes)

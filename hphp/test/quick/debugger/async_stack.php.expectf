@@ -56,10 +56,9 @@ switching stack contexts (async->sync) resetting stack state
 #2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
 #3  genFoo (43)
-#4  HH\WaitHandle::join ()
-#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
-#6  main (42)
+#5  main (42)
     at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
@@ -87,10 +86,9 @@ switching stack contexts (async->sync) resetting stack state
 #2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
 #3  genFoo (43)
-#4  HH\WaitHandle::join ()
-#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
-#6  main (42)
+#5  main (42)
     at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
@@ -118,10 +116,9 @@ switching stack contexts (async->sync) resetting stack state
 #2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
 #3  genFoo (43)
-#4  HH\WaitHandle::join ()
-#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
-#6  main (42)
+#5  main (42)
     at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...
@@ -152,10 +149,9 @@ switching stack contexts (async->sync) resetting stack state
 #3  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
 #4  genFoo (43)
-#5  HH\WaitHandle::join ()
-#6  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
-#7  main (42)
+#6  main (42)
     at %s/async_stack.php:%d
 w a
 Fetching async stacktrace...
@@ -178,18 +174,16 @@ switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:%d
 #1  gen1 (45)
-#2  HH\WaitHandle::join ()
-#3  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+#2  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
-#4  gen2 (45)
+#3  gen2 (45)
     at %s/async_stack.php:%d
-#5  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+#4  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
-#6  genFoo (43)
-#7  HH\WaitHandle::join ()
-#8  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
+#5  genFoo (43)
+#6  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:%d
-#9  main (42)
+#7  main (42)
     at %s/async_stack.php:%d
 wa
 Fetching async stacktrace...

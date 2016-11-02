@@ -66,11 +66,10 @@ struct ImagickExtension final : Extension {
     \
     static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
-      TypedValue dummy; \
-      g_context->invokeFunc(&dummy, \
-                              cls->getCtor(), \
-                              make_packed_array(arg), \
-                              ret.get()); \
+      tvRefcountedDecRef(\
+        g_context->invokeFunc(cls->getCtor(), make_packed_array(arg), \
+                              ret.get()) \
+      );\
       return ret; \
     } \
     \

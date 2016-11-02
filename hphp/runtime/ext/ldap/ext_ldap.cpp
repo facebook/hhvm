@@ -46,8 +46,6 @@ const int64_t
 #define LDAP_MODIFY_BATCH_VALUES "values"
 
 static const StaticString
-  s_LDAP_ESCAPE_FILTER("LDAP_ESCAPE_FILTER"),
-  s_LDAP_ESCAPE_DN("LDAP_ESCAPE_DN"),
   s_LDAP_MODIFY_BATCH_ATTRIB(LDAP_MODIFY_BATCH_ATTRIB),
   s_LDAP_MODIFY_BATCH_MODTYPE(LDAP_MODIFY_BATCH_MODTYPE),
   s_LDAP_MODIFY_BATCH_VALUES(LDAP_MODIFY_BATCH_VALUES);
@@ -55,10 +53,8 @@ static const StaticString
 static struct LdapExtension final : Extension {
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_FILTER.get(),
-                                          k_LDAP_ESCAPE_FILTER);
-    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_DN.get(),
-                                          k_LDAP_ESCAPE_DN);
+    HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
+    HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
 
     HHVM_FE(ldap_connect);
     HHVM_FE(ldap_explode_dn);
@@ -725,7 +721,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(ldap_connect,
-                      const Variant& hostname /* = null_variant */,
+                      const Variant& hostname /* = uninit_variant */,
                       int port /* = 389 */) {
   const String& str_hostname = hostname.isNull()
                              ? null_string
@@ -1121,8 +1117,8 @@ bool HHVM_FUNCTION(ldap_modify_batch,
 
 bool HHVM_FUNCTION(ldap_bind,
                    const Resource& link,
-                   const Variant& bind_rdn /* = null_variant */,
-                   const Variant& bind_password /* = null_variant */) {
+                   const Variant& bind_rdn /* = uninit_variant */,
+                   const Variant& bind_password /* = uninit_variant */) {
 
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1493,7 +1489,7 @@ Variant HHVM_FUNCTION(ldap_list,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,
@@ -1506,7 +1502,7 @@ Variant HHVM_FUNCTION(ldap_read,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,
@@ -1519,7 +1515,7 @@ Variant HHVM_FUNCTION(ldap_search,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,

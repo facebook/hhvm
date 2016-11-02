@@ -36,10 +36,7 @@
 
 #define PHP_ZLIB_MODIFIER 1000
 
-
-using namespace HPHP;
-
-namespace {
+namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // compress.zlib:// stream wrapper
@@ -77,11 +74,10 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
     }
     return file;
   }
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
+  }
 } s_zlib_stream_wrapper;
-
-} // nil namespace
-
-namespace HPHP {
 
 const int64_t k_ZLIB_ENCODING_RAW     = -MAX_WBITS;
 const int64_t k_ZLIB_ENCODING_GZIP    = 0x1f;

@@ -98,7 +98,7 @@ function forward_static_call(mixed $function,
  *
  * @return mixed - Returns the specified argument, or FALSE on error.
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame")>>
 function func_get_arg(int $arg_num): mixed;
 
 /**
@@ -109,7 +109,7 @@ function func_get_arg(int $arg_num): mixed;
  *   argument list. Returns false and raises warning when called
  *   from global scope.
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame")>>
 function func_get_args(): mixed;
 
 /**
@@ -118,7 +118,7 @@ function func_get_args(): mixed;
  * @return int - Returns the number of arguments passed into the current
  *   user-defined function.
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame")>>
 function func_num_args(): int;
 
 /**
@@ -179,27 +179,7 @@ namespace __SystemLib {
   *
   * @return mixed
   */
-  <<__Native, __HipHopSpecific>>
+  <<__Native("ReadsCallerFrame"), __HipHopSpecific>>
   function func_slice_args(int $offset): mixed;
-
- /**
-  * @param int $arg_num
-  *
-  * @return mixed
-  */
-  <<__Native, __HipHopSpecific>>
-  function func_get_arg_sl(int $arg_num): mixed;
-
- /**
-  * @return mixed
-  */
-  <<__Native, __HipHopSpecific>>
-  function func_get_args_sl(): mixed;
-
- /**
-  * @return int
-  */
-  <<__Native, __HipHopSpecific>>
-  function func_num_arg_(): int;
 
 }

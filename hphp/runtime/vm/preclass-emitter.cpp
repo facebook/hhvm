@@ -19,6 +19,8 @@
 
 #include <folly/Memory.h>
 
+#include "hphp/parser/parser.h"
+
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -26,6 +28,21 @@
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
+
+namespace {
+
+const StringData* preClassName(const std::string& name) {
+  static std::atomic<uint32_t> next_anon_class;
+  if (ParserBase::IsAnonymousClassName(name)) {
+    if (name.find(';') == std::string::npos) {
+      return makeStaticString(
+        folly::sformat("{};{}", name, next_anon_class.fetch_add(1)));
+    }
+  }
+  return makeStaticString(name);
+}
+
+}
 
 //=============================================================================
 // PreClassEmitter::Prop.
@@ -57,13 +74,13 @@ extern const StaticString s_Closure;
 
 PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
                                  Id id,
-                                 const StringData* n,
+                                 const std::string& n,
                                  PreClass::Hoistable hoistable)
   : m_ue(ue)
-  , m_name(n)
+  , m_name(preClassName(n))
   , m_id(id)
   , m_hoistable(hoistable) {
-  if (n->isame(s_Closure.get())) {
+  if (m_name->isame(s_Closure.get())) {
     setClosurePreClass();
   }
 }
@@ -364,11 +381,15 @@ void PreClassRepoProxy::InsertPreClassStmt
     txn.prepare(*this, ssInsert.str());
   }
 
+  auto n = name->slice();
+  auto const pos = qfind(n, ';');
+  auto const nm = pos == std::string::npos ?
+    n : folly::StringPiece{n.data(), pos};
   BlobEncoder extraBlob;
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@preClassId", preClassId);
-  query.bindStaticString("@name", name);
+  query.bindStringPiece("@name", nm);
   query.bindInt("@hoistable", hoistable);
   const_cast<PreClassEmitter&>(pce).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
@@ -391,7 +412,7 @@ void PreClassRepoProxy::GetPreClassesStmt
     query.step();
     if (query.row()) {
       Id preClassId;          /**/ query.getId(0, preClassId);
-      StringData* name;       /**/ query.getStaticString(1, name);
+      std::string name;       /**/ query.getStdString(1, name);
       int hoistable;          /**/ query.getInt(2, hoistable);
       BlobDecoder extraBlob = /**/ query.getBlob(3);
       PreClassEmitter* pce = ue.newPreClassEmitter(

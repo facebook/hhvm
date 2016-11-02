@@ -89,7 +89,7 @@ struct Debugger {
 
   // Interrupt from VM
   static void InterruptVMHook(int type = BreakPointReached,
-                              const Variant& e = null_variant);
+                              const Variant& e = uninit_variant);
 
   // Surround text with color, if set.
   static void SetTextColors();

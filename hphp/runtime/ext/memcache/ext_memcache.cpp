@@ -22,7 +22,6 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/zend-string.h"
 #include <vector>
 
@@ -724,7 +723,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
                         bool persistent /* = false */,
                         int weight /* = 0 */, int timeout /* = 0 */,
                         int retry_interval /* = 0 */, bool status /* = true */,
-                        const Variant& failure_callback /* = null_variant */,
+                        const Variant& failure_callback /* = uninit_variant */,
                         int timeoutms /* = 0 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
@@ -747,8 +746,6 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
-const StaticString s_MEMCACHE_HAVE_SESSION("MEMCACHE_HAVE_SESSION");
 
 struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
@@ -778,12 +775,8 @@ struct MemcacheExtension final : Extension {
     }
 
     void moduleInit() override {
-      Native::registerConstant<KindOfInt64>(
-        s_MEMCACHE_COMPRESSED.get(), k_MEMCACHE_COMPRESSED
-      );
-      Native::registerConstant<KindOfBoolean>(
-        s_MEMCACHE_HAVE_SESSION.get(), true
-      );
+      HHVM_RC_INT(MEMCACHE_COMPRESSED, k_MEMCACHE_COMPRESSED);
+      HHVM_RC_BOOL(MEMCACHE_HAVE_SESSION, true);
       HHVM_ME(Memcache, connect);
       HHVM_ME(Memcache, add);
       HHVM_ME(Memcache, set);

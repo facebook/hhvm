@@ -63,17 +63,9 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
 
     FunctionTypeMap["extract"]              = FunType::Extract;
     FunctionTypeMap["parse_str"]            = FunType::Extract;
-    FunctionTypeMap["__systemlib\\extract"] = FunType::Extract;
-    FunctionTypeMap["__systemlib\\parse_str"]
-                                            = FunType::Extract;
-    FunctionTypeMap["__systemlib\\compact_sl"]
-                                            = FunType::Compact;
     FunctionTypeMap["compact"]              = FunType::Compact;
 
     FunctionTypeMap["assert"]               = FunType::Assert;
-    FunctionTypeMap["__systemlib\\assert"]  = FunType::Assert;
-    FunctionTypeMap["__systemlib\\assert_sl"]
-                                            = FunType::Assert;
 
     FunctionTypeMap["shell_exec"]           = FunType::ShellExec;
     FunctionTypeMap["exec"]                 = FunType::ShellExec;
@@ -89,8 +81,6 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["unserialize"]          = FunType::Unserialize;
     FunctionTypeMap["apc_fetch"]            = FunType::Unserialize;
 
-    FunctionTypeMap["__systemlib\\get_defined_vars"]
-                                            = FunType::GetDefinedVars;
     FunctionTypeMap["get_defined_vars"]     = FunType::GetDefinedVars;
 
     FunctionTypeMap["fb_call_user_func_safe"] = FunType::FBCallUserFuncSafe;
@@ -714,9 +704,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
           case EXTR_OVERWRITE: {
             auto arr = static_pointer_cast<ExpressionList>(
               static_pointer_cast<UnaryOpExpression>(vars)->getExpression());
-            ExpressionListPtr rep(
-              new ExpressionList(getScope(), getRange(),
-                                 ExpressionList::ListKindWrapped));
+            auto rep = std::make_shared<ExpressionList>(
+              getScope(), getRange(), ExpressionList::ListKindWrappedNoWarn);
             std::string root_name;
             int n = arr ? arr->getCount() : 0;
             int i, j, k;
@@ -814,34 +803,33 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
 
   if (!m_classScope) {
     if (m_type == FunType::Unknown && m_funcScope->isFoldable()) {
-      Array arr;
-      if (m_params) {
-        if (!m_params->isScalar()) return ExpressionPtr();
-        for (int i = 0, n = m_params->getCount(); i < n; ++i) {
-          Variant v;
-          if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
-          arr.set(i, v);
-        }
-        if (m_arrayParams) {
-          arr = arr[0];
-        }
-      }
       try {
-        g_context->setThrowAllErrors(true);
-        Variant v = invoke(m_funcScope->getScopeName().c_str(),
-                           arr, -1, true, true,
-                           !getFileScope()->useStrictTypes());
-        g_context->setThrowAllErrors(false);
-        return makeScalarExpression(ar, v);
+        ThrowAllErrorsSetter taes;
+        Array arr;
+        if (m_params) {
+          if (!m_params->isScalar()) return ExpressionPtr();
+          for (int i = 0, n = m_params->getCount(); i < n; ++i) {
+            Variant v;
+            if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
+            arr.set(i, v);
+          }
+          if (m_arrayParams) {
+            arr = arr[0];
+          }
+        }
+        auto const v = invoke(m_funcScope->getScopeName().c_str(),
+                              arr, -1, true, true,
+                              !getFileScope()->useStrictTypes());
+        return replaceValue(makeScalarExpression(ar, v), true);
       } catch (...) {
-        g_context->setThrowAllErrors(false);
       }
       return ExpressionPtr();
     }
     if (m_funcScope->getOptFunction()) {
-      auto self = static_pointer_cast<SimpleFunctionCall>(shared_from_this());
-      ExpressionPtr e = (m_funcScope->getOptFunction())(0, ar, self, 0);
-      if (e) return e;
+      auto const self =
+        static_pointer_cast<SimpleFunctionCall>(shared_from_this());
+      auto const e = (m_funcScope->getOptFunction())(0, ar, self, 0);
+      if (e) return replaceValue(e, true);
     }
   }
 

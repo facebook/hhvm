@@ -271,7 +271,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   Transport::Method requestMethod = m_serverInfo->getMethod();
   std::string sparams = transport->getParam("params", requestMethod);
   if (!sparams.empty()) {
-    Variant jparams = Variant::attach(
+    auto jparams = Variant::attach(
       HHVM_FN(json_decode)(String(sparams), true)
     );
     if (jparams.isArray()) {
@@ -284,7 +284,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     transport->getArrayParam("p", sparams, requestMethod);
     if (!sparams.empty()) {
       for (unsigned int i = 0; i < sparams.size(); i++) {
-        Variant jparams = Variant::attach(
+        auto jparams = Variant::attach(
           HHVM_FN(json_decode)(String(sparams[i]), true)
         );
         if (same(jparams, false)) {

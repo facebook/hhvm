@@ -27,7 +27,6 @@
 
 #include <folly/String.h>
 #include <folly/portability/Environment.h>
-#include <folly/portability/SysResource.h>
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
@@ -52,7 +51,6 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/base/request-event-handler.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
@@ -710,9 +708,9 @@ Variant HHVM_FUNCTION(proc_open,
                       const String& cmd,
                       const Array& descriptorspec,
                       VRefParam pipesParam,
-                      const Variant& cwd /* = null_variant */,
-                      const Variant& env /* = null_variant */,
-                      const Variant& other_options /* = null_variant */) {
+                      const Variant& cwd /* = uninit_variant */,
+                      const Variant& env /* = uninit_variant */,
+                      const Variant& other_options /* = uninit_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
     return false;
   }

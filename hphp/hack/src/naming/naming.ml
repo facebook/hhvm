@@ -2115,6 +2115,14 @@ module Make (GetLocals : GetLocals) = struct
           N.CI (p, SN.Classes.cUnknown)
         else N.CIstatic
       | x when x = SN.SpecialIdents.this -> N.CIexpr (p, N.This)
+      | x when x = SN.SpecialIdents.dollardollar ->
+          (* We won't reach here for "new $$" because the parser creates a
+           * proper Ast.Dollardollar node, so make_class_id won't be called with
+           * that node. In fact, the parser creates an Ast.Dollardollar for all
+           * "$$" except in positions where a classname is expected, like in
+           * static member access. So, we only reach here for things
+           * like "$$::someMethod()". *)
+          N.CIexpr(p, N.Lvar (Env.found_dollardollar env p))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
       | _ -> N.CI (Env.type_name env cid ~allow_typedef:false)
 

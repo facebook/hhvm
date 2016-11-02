@@ -253,7 +253,7 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   // Look up the generated template class for this particular subclass of
   // Closure.  This class maintains the table of scoped clones of itself, and
   // if we create a new scoped clone, we need to map it there.
-  auto template_cls = is_dynamic ? Unit::lookupClass(name()) : this;
+  auto template_cls = is_dynamic ? preClass()->namedEntity()->clsList() : this;
   auto const invoke = template_cls->m_invoke;
 
   assert(IMPLIES(is_dynamic, m_scoped));
@@ -297,12 +297,16 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
     if (auto cls = try_cache()) return cls;
   }
 
+  auto cloneClass = [&] {
+    auto const cls = newClass(m_preClass.get(), m_parent.get());
+    cls->setClassHandle(template_cls->m_cachedClass);
+    return cls;
+  };
+
   // We use the French for closure because using the English crashes gcc in the
   // implicit lambda capture below.  (This is fixed in gcc 4.8.5.)
   auto fermeture = ClassPtr {
-    template_cls->m_scoped
-      ? newClass(m_preClass.get(), m_parent.get())
-      : template_cls
+    template_cls->m_scoped ? cloneClass() : template_cls
   };
 
   WriteLock l(s_scope_cache_mutex);
@@ -317,7 +321,7 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
     // set when we first check `m_scoped' before acquiring the lock.
     s_scope_cache_mutex.release();
     SCOPE_EXIT { s_scope_cache_mutex.acquireWrite(); };
-    fermeture = ClassPtr { newClass(m_preClass.get(), m_parent.get()) };
+    fermeture = ClassPtr { cloneClass() };
   }
 
   // Check the caches again.
@@ -490,9 +494,11 @@ void Class::releaseRefs() {
           assertx(template_cls->m_extra);
           auto& scopedClones = template_cls->m_extra.raw()->m_scopedClones;
 
-          auto const key = CloneScope { this, attrs };
-          assertx(scopedClones.count(key));
-          scopedClones.erase(key);
+          auto const it = scopedClones.find(CloneScope { this, attrs });
+          assertx(it != scopedClones.end());
+          it->second->m_cachedClass =
+            rds::Link<LowPtr<Class>>(rds::kInvalidHandle);
+          scopedClones.erase(it);
         }
       }
     }
@@ -589,7 +595,7 @@ const Func* Class::getDeclaredCtor() const {
 }
 
 const Func* Class::getCachedInvoke() const {
-  assert(IMPLIES(m_invoke, !m_invoke->isStaticInProlog()));
+  assert(IMPLIES(m_invoke, !m_invoke->isStaticInPrologue()));
   return m_invoke;
 }
 
@@ -649,9 +655,9 @@ void Class::initProps() const {
     // Iteratively invoke 86pinit() methods upward
     // through the inheritance chain.
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
-      TypedValue retval;
-      g_context->invokeFunc(&retval, *it, init_null_variant, nullptr,
-                              const_cast<Class*>(this));
+      DEBUG_ONLY auto retval = g_context->invokeFunc(
+        *it, init_null_variant, nullptr, const_cast<Class*>(this)
+      );
       assert(retval.m_type == KindOfNull);
     }
   } catch (...) {
@@ -718,9 +724,9 @@ void Class::initSProps() const {
   // They will override the KindOfUninit values set by scalar initialization.
   if (hasNonscalarInit) {
     for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
-      TypedValue retval;
-      g_context->invokeFunc(&retval, m_sinitVec[i], init_null_variant,
-                            nullptr, const_cast<Class*>(this));
+      DEBUG_ONLY auto retval = g_context->invokeFunc(
+        m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this)
+      );
       assert(retval.m_type == KindOfNull);
     }
   }
@@ -1058,9 +1064,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     make_tv<KindOfPersistentString>(const_cast<StringData*>(cns.name.get()))
   };
 
-  Cell ret;
-  g_context->invokeFuncFew(
-    &ret,
+  auto ret = g_context->invokeFuncFew(
     meth86cinit,
     ActRec::encodeClass(this),
     nullptr,
@@ -1243,7 +1247,7 @@ const StaticString
   s_clone("__clone");
 
 static Func* markNonStatic(Func* meth) {
-  // Do not use isStaticInProlog here, since that uses the
+  // Do not use isStaticInPrologue here, since that uses the
   // AttrRequiresThis flag.
   if (meth && (!meth->isStatic() || meth->isClosureBody())) {
     meth->setAttrs(meth->attrs() | AttrRequiresThis);
@@ -1272,7 +1276,7 @@ void Class::setSpecial() {
    * the appropriate static context.)
    */
   m_invoke = markNonStatic(this, s_invoke);
-  if (m_invoke && m_invoke->isStaticInProlog()) {
+  if (m_invoke && m_invoke->isStaticInPrologue()) {
     m_invoke = nullptr;
   }
 

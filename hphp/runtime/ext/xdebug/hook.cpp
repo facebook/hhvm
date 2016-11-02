@@ -95,7 +95,7 @@ void add_line_breakpoint(int id, XDebugBreakpoint& bp, const Unit* unit) {
 bool check_func_match(XDebugBreakpoint& bp,
                       const Func* func,
                       hphp_hash_set<int>::iterator& iter) {
-  if (func->fullName()->equal(bp.fullFuncName.get())) {
+  if (bp.fullFuncName == func->fullName()->toCppString()) {
     add_func_breakpoint(*iter, bp, func);
     iter = UNMATCHED.erase(iter);
     return true;
@@ -170,7 +170,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
   switch (bp.type) {
     case BreakType::EXCEPTION: {
       // Remove duplicates then insert the name
-      auto exceptionName = bp.exceptionName.toCppString();
+      auto exceptionName = bp.exceptionName;
       auto iter = EXCEPTION_MAP.find(exceptionName);
       if (iter != EXCEPTION_MAP.end()) {
         XDEBUG_REMOVE_BREAKPOINT(iter->second);
@@ -202,12 +202,14 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
     case BreakType::RETURN: {
       const Class* cls = nullptr;
       const Func* func = nullptr;
-      if (bp.className.isNull()) {
-        func = Unit::lookupFunc(bp.funcName.get());
+      const String funcName(bp.funcName);
+      if (!bp.className.hasValue()) {
+        func = Unit::lookupFunc(funcName.get());
       } else {
-        cls = Unit::lookupClass(bp.className.toString().get());
+        const String className(bp.className.value());
+        cls = Unit::lookupClass(className.get());
         if (cls != nullptr) {
-          func = cls->lookupMethod(bp.funcName.get());
+          func = cls->lookupMethod(funcName.get());
         }
       }
 
@@ -216,7 +218,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
       if (func != nullptr) {
         add_func_breakpoint(id, bp, func);
         bp.resolved = true;
-      } else if (!bp.className.isNull() && cls != nullptr) {
+      } else if (bp.className.hasValue() && cls != nullptr) {
         throw_exn(XDebugError::BreakpointInvalid);
       } else {
         UNMATCHED.insert(id);
@@ -253,7 +255,7 @@ void XDebugThreadBreakpoints::removeBreakpoint(int id) {
         phpRemoveBreakPointFuncExit(Func::fromFuncId(bp.funcId));
         break;
       case BreakType::EXCEPTION:
-        EXCEPTION_MAP.erase(bp.exceptionName.toCppString());
+        EXCEPTION_MAP.erase(bp.exceptionName);
         break;
       case BreakType::LINE: {
         auto filepath = bp.unit->filepath()->toCppString();
@@ -533,7 +535,7 @@ void XDebugHook::onFileLoad(Unit* unit) {
   for (auto iter = UNMATCHED.begin(); iter != UNMATCHED.end();) {
     auto id = *iter;
     auto& bp = BREAKPOINT_MAP.at(id);
-    if (bp.type != BreakType::LINE || bp.fileName != filename) {
+    if (bp.type != BreakType::LINE || bp.fileName != filename.toCppString()) {
       ++iter;
       continue;
     }
@@ -571,8 +573,8 @@ void XDebugHook::onDefClass(const Class* cls) {
     // can specify method bar on class Foo with "Foo::bar"
     auto& bp = BREAKPOINT_MAP.at(*iter);
     if ((bp.type != BreakType::CALL && bp.type != BreakType::RETURN) ||
-        (!bp.className.isNull() &&
-         !className->equal(bp.className.toString().get()))) {
+        (bp.className.hasValue() &&
+         className->toCppString() != bp.className.value())) {
       ++iter;
       continue;
     }

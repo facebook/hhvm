@@ -72,7 +72,8 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
   const int nparams = func->numNonVariadicParams();
   const int paramIndex = argc <= nparams ? argc : nparams + 1;
 
-  auto const funcBody = SrcKey{func, func->getEntryForNumArgs(argc), false};
+  auto const funcBody =
+    SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}};
 
   profileSetHotFuncAttr();
   auto codeLock = lockCode();

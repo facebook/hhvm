@@ -68,15 +68,16 @@ Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
       m_unused(false), m_error(0) {
 }
 
-ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
+ExpressionPtr Expression::replaceValue(ExpressionPtr rep, bool noWarn) {
   if (hasContext(Expression::RefValue) &&
       isRefable(true) && !rep->isRefable(true)) {
     /*
       An assignment isRefable, but the rhs may not be. Need this to
       prevent "bad pass by reference" errors.
     */
-    ExpressionListPtr el(new ExpressionList(getScope(), getRange(),
-                                            ExpressionList::ListKindWrapped));
+    auto el = std::make_shared<ExpressionList>(
+      getScope(), getRange(), noWarn ?
+      ExpressionList::ListKindWrappedNoWarn : ExpressionList::ListKindWrapped);
     el->addElement(rep);
     rep->clearContext(AssignmentRHS);
     rep = el;

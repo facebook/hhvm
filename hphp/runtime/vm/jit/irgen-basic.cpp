@@ -40,25 +40,10 @@ void implAGet(IRGS& env, SSATmp* classSrc) {
 
 const StaticString s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
 bool checkThis(IRGS& env, SSATmp* ctx) {
-  auto fail = [&] {
-    auto const err = cns(env, s_FATAL_NULL_THIS.get());
-    gen(env, RaiseError, err);
-  };
-  if (!ctx->type().maybe(TObj)) {
-    fail();
-    return false;
-  }
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckCtxThis, taken, ctx);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      fail();
-    }
-  );
-  return true;
+  if (hasThis(env)) return true;
+  auto const err = cns(env, s_FATAL_NULL_THIS.get());
+  gen(env, RaiseError, err);
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -233,21 +218,17 @@ void emitSetL(IRGS& env, int32_t id) {
 }
 
 void emitInitThisLoc(IRGS& env, int32_t id) {
-  if (!curFunc(env)->mayHaveThis()) {
+  if (!hasThis(env)) {
     // Do nothing if this is null
     return;
   }
   auto const ldrefExit = makeExit(env);
   auto const ctx       = ldCtx(env);
-  ifElse(env,
-         [&] (Block* skip) { gen(env, CheckCtxThis, skip, ctx); },
-         [&] {
-           auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeCountness);
-           auto const this_  = castCtxThis(env, ctx);
-           gen(env, IncRef, this_);
-           stLocRaw(env, id, fp(env), this_);
-           decRef(env, oldLoc);
-         });
+  auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeCountness);
+  auto const this_  = castCtxThis(env, ctx);
+  gen(env, IncRef, this_);
+  stLocRaw(env, id, fp(env), this_);
+  decRef(env, oldLoc);
 }
 
 void emitPrint(IRGS& env) {
@@ -303,7 +284,7 @@ void emitCheckThis(IRGS& env) {
 
 void emitBareThis(IRGS& env, BareThisOp subop) {
   auto const ctx = ldCtx(env);
-  if (!ctx->type().maybe(TObj)) {
+  if (!hasThis(env)) {
     if (subop == BareThisOp::NoNotice) {
       push(env, cns(env, TInitNull));
       return;
@@ -311,30 +292,6 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
     assertx(subop != BareThisOp::NeverNull);
     interpOne(env, TInitNull, 0); // will raise notice and push null
     return;
-  }
-
-  if (subop == BareThisOp::NoNotice) {
-    auto thiz = cond(env,
-                     [&](Block* taken) {
-                       gen(env, CheckCtxThis, taken, ctx);
-                     },
-                     [&] {
-                       auto t = castCtxThis(env, ctx);
-                       gen(env, IncRef, t);
-                       return t;
-                     },
-                     [&] {
-                       hint(env, Block::Hint::Unlikely);
-                       return cns(env, TInitNull);
-                     });
-    push(env, thiz);
-    return;
-  }
-
-  if (subop == BareThisOp::NeverNull) {
-    env.irb->fs().setThisAvailable();
-  } else {
-    gen(env, CheckCtxThis, makeExitSlow(env), ctx);
   }
 
   pushIncRef(env, castCtxThis(env, ctx));
@@ -528,15 +485,15 @@ void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitPopA(IRGS& env) { popA(env); }
-void emitPopC(IRGS& env) { popDecRef(env, DataTypeGeneric); }
-void emitPopV(IRGS& env) { popDecRef(env, DataTypeGeneric); }
-void emitPopR(IRGS& env) { popDecRef(env, DataTypeGeneric); }
+void emitPopA(IRGS& env)   { popA(env); }
+void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
+void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
+void emitPopR(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 
-void emitDir(IRGS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }
-void emitFile(IRGS& env) { push(env, cns(env, curUnit(env)->filepath())); }
-
-void emitDup(IRGS& env) { pushIncRef(env, topC(env)); }
+void emitDir(IRGS& env)    { push(env, cns(env, curUnit(env)->dirpath())); }
+void emitFile(IRGS& env)   { push(env, cns(env, curUnit(env)->filepath())); }
+void emitMethod(IRGS& env) { push(env, cns(env, curFunc(env)->fullName())); }
+void emitDup(IRGS& env)    { pushIncRef(env, topC(env)); }
 
 //////////////////////////////////////////////////////////////////////
 

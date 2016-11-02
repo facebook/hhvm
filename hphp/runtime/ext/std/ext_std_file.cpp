@@ -85,7 +85,7 @@ namespace fs = boost::filesystem;
 #define CHECK_HANDLE(handle, f) \
   CHECK_HANDLE_BASE(handle, f, false)
 #define CHECK_HANDLE_RET_NULL(handle, f) \
-  CHECK_HANDLE_BASE(handle, f, null_variant)
+  CHECK_HANDLE_BASE(handle, f, uninit_variant)
 
 #define CHECK_PATH_BASE(p, i, ret) \
   if (p.size() != strlen(p.data())) { \
@@ -97,7 +97,7 @@ namespace fs = boost::filesystem;
   }
 
 #define CHECK_PATH(p, i) \
-  CHECK_PATH_BASE(p, i, null_variant)
+  CHECK_PATH_BASE(p, i, uninit_variant)
 #define CHECK_PATH_FALSE(p, i) \
   CHECK_PATH_BASE(p, i, false)
 
@@ -1242,7 +1242,7 @@ Variant HHVM_FUNCTION(lstat,
 
 void HHVM_FUNCTION(clearstatcache,
                    bool clear_realpath_cache /* = false */,
-                   const Variant& filename /* = null_variant */) {
+                   const Variant& filename /* = uninit_variant */) {
   // we are not having a cache for file stats, so do nothing here
 }
 
@@ -1642,7 +1642,7 @@ bool HHVM_FUNCTION(rename,
 }
 
 int64_t HHVM_FUNCTION(umask,
-                      const Variant& mask /* = null_variant */) {
+                      const Variant& mask /* = uninit_variant */) {
   int oldumask = umask(077);
   if (mask.isNull()) {
     umask(oldumask);
@@ -1909,7 +1909,7 @@ bool HHVM_FUNCTION(chdir,
   }
 
 #if ENABLE_EXTENSION_POSIX
-  if (!HHVM_FN(posix_access)(directory, k_POSIX_X_OK)) {
+  if (!HHVM_FN(posix_access)(directory, X_OK)) {
     raise_warning("chdir(): Permission denied (errno 13)");
     return false;
   }
@@ -1935,7 +1935,6 @@ bool HHVM_FUNCTION(chroot,
  * A stack maintains the states of nested structures.
  */
 
-namespace {
 struct DirectoryData final : RequestEventHandler {
   void requestInit() override {
     assert(!defaultDirectory);
@@ -1943,11 +1942,10 @@ struct DirectoryData final : RequestEventHandler {
   void requestShutdown() override {
     defaultDirectory = nullptr;
   }
-  void vscan(IMarker& mark) const override {
-    mark(defaultDirectory);
-  }
   req::ptr<Directory> defaultDirectory;
 };
+
+namespace {
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(DirectoryData, s_directory_data);
 

@@ -23,8 +23,6 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/directory.h"
 
-#include <folly/portability/Unistd.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // phar:// stream wrapper
@@ -49,13 +47,9 @@ static struct PharStreamWrapper final : Stream::Wrapper {
 
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_openPhar.get());
 
-    Variant ret;
-    g_context->invokeFunc(
-      ret.asTypedValue(),
-      f,
-      make_packed_array(filename),
-      nullptr,
-      SystemLib::s_PharClass
+    auto ret = Variant::attach(
+      g_context->invokeFunc(f, make_packed_array(filename), nullptr,
+                            SystemLib::s_PharClass)
     );
 
     if (!ret.isResource()) {
@@ -94,13 +88,9 @@ static struct PharStreamWrapper final : Stream::Wrapper {
 
   req::ptr<Directory> opendir(const String& path) override {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
-    Variant ret;
-    g_context->invokeFunc(
-      ret.asTypedValue(),
-      f,
-      make_packed_array(path),
-      nullptr,
-      SystemLib::s_PharClass
+    auto ret = Variant::attach(
+      g_context->invokeFunc(f, make_packed_array(path), nullptr,
+                            SystemLib::s_PharClass)
     );
     Array files = ret.toArray();
     if (files.empty()) {
@@ -113,15 +103,14 @@ static struct PharStreamWrapper final : Stream::Wrapper {
  private:
   Variant callStat(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_stat.get());
-    Variant ret;
-    g_context->invokeFunc(
-      ret.asTypedValue(),
-      f,
-      make_packed_array(path),
-      nullptr,
-      SystemLib::s_PharClass
+    return Variant::attach(
+      g_context->invokeFunc(f, make_packed_array(path), nullptr,
+                            SystemLib::s_PharClass)
     );
-    return ret;
+  }
+
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
 } s_phar_stream_wrapper;

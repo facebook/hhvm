@@ -36,6 +36,7 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
+
   if (flags & Attribute::IsCollection) {
     // Whatever attribute we need to set, do it via flags and void runtime
     // loading.  These assertions guarantee that `instanceInit(cls)' is not
@@ -204,7 +205,7 @@ inline bool ObjectData::hasInstanceDtor() const {
   return m_hdr.aux & (IsCppBuiltin | HasNativeData);
 }
 
-inline int ObjectData::getId() const {
+inline uint32_t ObjectData::getId() const {
   return o_id;
 }
 

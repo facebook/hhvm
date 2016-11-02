@@ -187,7 +187,7 @@ Variant HHVM_FUNCTION(var_export, const Variant& expression,
   return res;
 }
 
-static ALWAYS_INLINE void do_var_dump(VariableSerializer vs,
+static ALWAYS_INLINE void do_var_dump(VariableSerializer& vs,
                                       const Variant& expression) {
   // manipulate maxCount to match PHP behavior
   if (!expression.isObject()) {
@@ -247,11 +247,15 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     case KindOfPersistentString:
     case KindOfString: {
       StringData *str = value.getStringData();
+      auto const size = str->size();
+      if (size >= RuntimeOption::MaxSerializedStringSize) {
+        throw Exception("Size of serialized string (%d) exceeds max", size);
+      }
       StringBuffer sb;
       sb.append("s:");
-      sb.append(str->size());
+      sb.append(size);
       sb.append(":\"");
-      sb.append(str->data(), str->size());
+      sb.append(str->data(), size);
       sb.append("\";");
       return sb.detach();
     }
@@ -263,8 +267,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       ArrayData* arr = value.getArrayData();
       assert(arr->isVecArray());
       if (arr->empty()) return s_EmptyVecArray;
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
-      return vs.serialize(value, true);
+      break;
     }
 
     case KindOfPersistentDict:
@@ -272,8 +275,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       ArrayData* arr = value.getArrayData();
       assert(arr->isDict());
       if (arr->empty()) return s_EmptyDictArray;
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
-      return vs.serialize(value, true);
+      break;
     }
 
     case KindOfPersistentKeyset:
@@ -281,8 +283,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       ArrayData* arr = value.getArrayData();
       assert(arr->isKeyset());
       if (arr->empty()) return s_EmptyKeysetArray;
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
-      return vs.serialize(value, true);
+      break;
     }
 
     case KindOfPersistentArray:
@@ -290,19 +291,20 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       ArrayData *arr = value.getArrayData();
       assert(arr->isPHPArray());
       if (arr->empty()) return s_EmptyArray;
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
-      return vs.serialize(value, true);
+      break;
     }
     case KindOfDouble:
-    case KindOfObject: {
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
-      return vs.serialize(value, true);
-    }
+    case KindOfObject:
+      break;
+
     case KindOfRef:
     case KindOfClass:
-      break;
+      not_reached();
   }
-  not_reached();
+
+  VariableSerializer vs(VariableSerializer::Type::Serialize);
+  // Keep the count so recursive calls to serialize() embed references properly.
+  return vs.serialize(value, true, true);
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
@@ -313,21 +315,9 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 ///////////////////////////////////////////////////////////////////////////////
 // variable table
 
-ALWAYS_INLINE
-static Array get_defined_vars() {
+Array HHVM_FUNCTION(get_defined_vars) {
   VarEnv* v = g_context->getOrCreateVarEnv();
   return v ? v->getDefinedVariables() : empty_array();
-}
-
-Array HHVM_FUNCTION(get_defined_vars) {
-  raise_disallowed_dynamic_call("get_defined_vars should not be "
-    "called dynamically");
-  return get_defined_vars();
-}
-
-// accessible as __SystemLib\\get_defined_vars
-Array HHVM_FUNCTION(SystemLib_get_defined_vars) {
-  return get_defined_vars();
 }
 
 const StaticString
@@ -415,10 +405,10 @@ static bool modify_extract_name(VarEnv* v,
   return is_valid_var_name(name.get()->data(), name.size());
 }
 
-ALWAYS_INLINE static
-int64_t extract_impl(VRefParam vref_array,
-                     int extract_type /* = EXTR_OVERWRITE */,
-                     const String& prefix /* = "" */) {
+int64_t HHVM_FUNCTION(extract,
+                      VRefParam vref_array,
+                      int64_t extract_type = EXTR_OVERWRITE,
+                      const String& prefix = "") {
   auto arrByRef = false;
   auto arr_tv = vref_array.wrapped().asTypedValue();
   if (arr_tv->m_type == KindOfRef) {
@@ -478,41 +468,16 @@ int64_t extract_impl(VRefParam vref_array,
   return count;
 }
 
-int64_t HHVM_FUNCTION(extract, VRefParam vref_array,
-                      int64_t extract_type /* = EXTR_OVERWRITE */,
-                      const String& prefix /* = "" */) {
-  raise_disallowed_dynamic_call("extract should not be called dynamically");
-  return extract_impl(vref_array, extract_type, prefix);
-}
-
-int64_t HHVM_FUNCTION(SystemLib_extract,
-                      VRefParam vref_array,
-                      int64_t extract_type = EXTR_OVERWRITE,
-                      const String& prefix = "") {
-  return extract_impl(vref_array, extract_type, prefix);
-}
-
-static void parse_str_impl(const String& str, VRefParam arr) {
-  Array result = Array::Create();
-  HttpProtocol::DecodeParameters(result, str.data(), str.size());
-  if (!arr.isReferenced()) {
-    HHVM_FN(SystemLib_extract)(result);
-    return;
-  }
-  arr.assignIfRef(result);
-}
-
 void HHVM_FUNCTION(parse_str,
                    const String& str,
                    VRefParam arr /* = null */) {
-  raise_disallowed_dynamic_call("parse_str should not be called dynamically");
-  parse_str_impl(str, arr);
-}
-
-void HHVM_FUNCTION(SystemLib_parse_str,
-                   const String& str,
-                   VRefParam arr /* = null */) {
-  parse_str_impl(str, arr);
+  Array result = Array::Create();
+  HttpProtocol::DecodeParameters(result, str.data(), str.size());
+  if (!arr.isReferenced()) {
+    HHVM_FN(extract)(result);
+    return;
+  }
+  arr.assignIfRef(result);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -559,11 +524,8 @@ void StandardExtension::initVariable() {
   HHVM_FE(serialize);
   HHVM_FE(unserialize);
   HHVM_FE(get_defined_vars);
-  HHVM_FALIAS(__SystemLib\\get_defined_vars, SystemLib_get_defined_vars);
   HHVM_FE(extract);
   HHVM_FE(parse_str);
-  HHVM_FALIAS(__SystemLib\\extract, SystemLib_extract);
-  HHVM_FALIAS(__SystemLib\\parse_str, SystemLib_parse_str);
 
   loadSystemlib("std_variable");
 }

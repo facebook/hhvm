@@ -114,6 +114,12 @@ TCA retranslate(TransArgs args, const RegionContext& ctx);
 bool retranslateOpt(FuncId funcId);
 
 /*
+ * In JitPGO mode, check whether enough profile data has been collected and,
+ * if we haven't retranslated
+ */
+void checkRetranslateAll();
+
+/*
  * Called once when the JIT is activated to initialize internal mcgen structures
  */
 void processInit();

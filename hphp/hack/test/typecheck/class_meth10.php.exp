@@ -1,2 +1,2 @@
-fun Tint,  -> Tbool
+(function(int $i): bool)
 No errors

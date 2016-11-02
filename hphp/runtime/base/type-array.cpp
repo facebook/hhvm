@@ -34,10 +34,6 @@
 #include "hphp/runtime/base/zend-qsort.h"
 #include "hphp/runtime/base/zend-string.h"
 
-#include "hphp/parser/hphp.tab.hpp"
-
-#include "hphp/util/exception.h"
-
 #include <unicode/coll.h> // icu
 #include <vector>
 
@@ -549,7 +545,7 @@ Variant Array::rvalAt(int key, AccessFlags flags) const {
 
 const Variant& Array::rvalAtRef(int key, AccessFlags flags) const {
   if (m_arr) return m_arr->get((int64_t)key, any(flags & AccessFlags::Error));
-  return null_variant;
+  return uninit_variant;
 }
 
 Variant Array::rvalAt(int64_t key, AccessFlags flags) const {
@@ -559,7 +555,7 @@ Variant Array::rvalAt(int64_t key, AccessFlags flags) const {
 
 const Variant& Array::rvalAtRef(int64_t key, AccessFlags flags) const {
   if (m_arr) return m_arr->get(key, any(flags & AccessFlags::Error));
-  return null_variant;
+  return uninit_variant;
 }
 
 const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
@@ -568,7 +564,8 @@ const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
     if (any(flags & AccessFlags::Key)) return m_arr->get(key, error);
     if (key.isNull()) {
       if (!useWeakKeys()) {
-        throwInvalidArrayKeyException(null_variant.asTypedValue(), m_arr.get());
+        throwInvalidArrayKeyException(uninit_variant.asTypedValue(),
+                                      m_arr.get());
       }
       return m_arr->get(staticEmptyString(), error);
     }
@@ -579,7 +576,7 @@ const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
       return m_arr->get(n, error);
     }
   }
-  return null_variant;
+  return uninit_variant;
 }
 
 Variant Array::rvalAt(const String& key, AccessFlags flags) const {
@@ -587,7 +584,7 @@ Variant Array::rvalAt(const String& key, AccessFlags flags) const {
 }
 
 const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
-  if (!m_arr) return null_variant;
+  if (!m_arr) return uninit_variant;
   auto bad_key = [&] {
     if (!useWeakKeys()) {
       throwInvalidArrayKeyException(key.asTypedValue(), m_arr.get());
@@ -632,7 +629,7 @@ const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
     case KindOfObject:
       bad_key();
       throw_bad_type_exception("Invalid type used as key");
-      return null_variant;
+      return uninit_variant;
 
     case KindOfResource:
       bad_key();
@@ -653,20 +650,18 @@ Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {
 
 Variant &Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  Variant *ret = nullptr;
-  ArrayData *escalated = m_arr->lvalNew(ret, m_arr->cowCheck());
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  assert(ret);
-  return *ret;
+  auto const r = m_arr->lvalNew(m_arr->cowCheck());
+  if (r.array != m_arr) m_arr = Ptr::attach(r.array);
+  assert(r.val);
+  return *r.val;
 }
 
 Variant &Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  Variant *ret = nullptr;
-  ArrayData *escalated = m_arr->lvalNewRef(ret, m_arr->cowCheck());
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  assert(ret);
-  return *ret;
+  auto const r = m_arr->lvalNewRef(m_arr->cowCheck());
+  if (r.array != m_arr) m_arr = Ptr::attach(r.array);
+  assert(r.val);
+  return *r.val;
 }
 
 Variant &Array::lvalAt(const String& key, AccessFlags flags) {

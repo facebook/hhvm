@@ -619,6 +619,21 @@ void Unit::loadFunc(const Func *func) {
   }
 }
 
+Func* Unit::loadDynCallFunc(const StringData* name) {
+  if (auto f = loadFunc(name)) {
+    auto wrapper = f->dynCallWrapper();
+    return LIKELY(!wrapper) ? f : wrapper;
+  }
+  return nullptr;
+}
+
+Func* Unit::lookupDynCallFunc(const StringData* name) {
+  if (auto f = lookupFunc(name)) {
+    auto wrapper = f->dynCallWrapper();
+    return LIKELY(!wrapper) ? f : wrapper;
+  }
+  return nullptr;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -674,6 +689,30 @@ struct FrameRestore {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class lookup.
+
+namespace {
+void setupClass(Class* newClass, NamedEntity* nameList) {
+  bool const isPersistent =
+    (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
+    newClass->verifyPersistent();
+  nameList->m_cachedClass.bind(
+    isPersistent ? rds::Mode::Persistent : rds::Mode::Normal);
+
+  newClass->setClassHandle(nameList->m_cachedClass);
+  newClass->incAtomicCount();
+
+  InstanceBits::ifInitElse(
+    [&] { newClass->setInstanceBits();
+          nameList->pushClass(newClass); },
+    [&] { nameList->pushClass(newClass); }
+  );
+
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    // The corresponding deregister is in NamedEntity::removeClass().
+    data_map::register_start(newClass);
+  }
+}
+}
 
 Class* Unit::defClass(const PreClass* preClass,
                       bool failIsFatal /* = true */) {
@@ -757,26 +796,7 @@ Class* Unit::defClass(const PreClass* preClass,
       continue;
     }
 
-    bool const isPersistent =
-      (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
-      newClass->verifyPersistent();
-    nameList->m_cachedClass.bind(
-      isPersistent ? rds::Mode::Persistent
-                   : rds::Mode::Normal
-    );
-    newClass->setClassHandle(nameList->m_cachedClass);
-    newClass.get()->incAtomicCount();
-
-    InstanceBits::ifInitElse(
-      [&] { newClass->setInstanceBits();
-            nameList->pushClass(newClass.get()); },
-      [&] { nameList->pushClass(newClass.get()); }
-    );
-
-    if (RuntimeOption::EvalEnableReverseDataMap) {
-      // The corresponding deregister is in NamedEntity::removeClass().
-      data_map::register_start(newClass.get());
-    }
+    setupClass(newClass.get(), nameList);
 
     /*
      * call setCached after adding to the class list, otherwise the
@@ -787,6 +807,30 @@ Class* Unit::defClass(const PreClass* preClass,
     DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
     return newClass.get();
   }
+}
+
+Class* Unit::defClosure(const PreClass* preClass) {
+  auto const nameList = preClass->namedEntity();
+
+  if (nameList->clsList()) return nameList->clsList();
+
+  auto const parent = c_Closure::classof();
+
+  assertx(preClass->parent() == parent->name());
+  // Create a new class.
+
+  ClassPtr newClass {
+    Class::newClass(const_cast<PreClass*>(preClass), parent)
+  };
+
+  Lock l(g_classesMutex);
+
+  if (UNLIKELY(nameList->clsList() != nullptr)) return nameList->clsList();
+
+  setupClass(newClass.get(), nameList);
+
+  if (classHasPersistentRDS(newClass.get())) newClass.get()->setCached();
+  return newClass.get();
 }
 
 namespace {
@@ -1215,29 +1259,6 @@ void Unit::initialMerge() {
       PreClass* pre = (PreClass*)m_mergeInfo->mergeableObj(ix++);
       if (pre->attrs() & AttrUnique) {
         needsCompact = true;
-      }
-
-      /*
-       * Closure classes must be defined before anything else in the Unit.  The
-       * ClosureHoistable flag keeps them ahead of any other classes, but in
-       * mergeImpl we're going to define functions before we define classes, so
-       * we do them first here.
-       *
-       * If these functions are persistent, it's possible another thread could
-       * call one of those functions before we define the closures, and try to
-       * use closure classes that don't exist yet.
-       *
-       * Note that this is a special case of a more general race we have in
-       * this unit merging code right now.  For example, if a unit defines
-       * multiple persistent functions, it's possible another thread may call
-       * one of them before we've finished defining the other ones.  In
-       * practice that race is much less likely to cause problems, because the
-       * other thread will generally invoke the autoloader and then find out
-       * its defined by the time that's done.
-       */
-      if (pre->hoistability() == PreClass::ClosureHoistable) {
-        DEBUG_ONLY auto const cls = defClass(pre, false /* failIsFatal */);
-        always_assert(cls != nullptr);
       }
     }
 
@@ -1673,7 +1694,6 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           unit->mergeImpl<debugger>(tcbase, unit->m_mergeInfo);
           if (UNLIKELY(!unit->isMergeOnly())) {
             Stats::inc(Stats::PseudoMain_Reentered);
-            TypedValue ret;
             VarEnv* ve = nullptr;
             ActRec* fp = vmfp();
             if (!fp) {
@@ -1687,10 +1707,11 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
                 // local scope.
               }
             }
-            g_context->invokeFunc(&ret, unit->getMain(nullptr),
-                                  init_null_variant,
-                                  nullptr, nullptr, ve);
-            tvRefcountedDecRef(&ret);
+            tvRefcountedDecRef(
+              g_context->invokeFunc(unit->getMain(nullptr),
+                                    init_null_variant,
+                                    nullptr, nullptr, ve)
+            );
           } else {
             Stats::inc(Stats::PseudoMain_SkipDeep);
           }
@@ -1849,6 +1870,7 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
         out.put('\n');
         funcIt->second->prettyPrint(out);
         ++funcIt;
+        prevLineNum = -1;
       }
     }
 

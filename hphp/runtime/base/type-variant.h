@@ -1171,7 +1171,7 @@ struct Variant : private TypedValue {
 
  private:
   static ALWAYS_INLINE void PromoteToRef(Variant& v) {
-    assert(&v != &null_variant);
+    assert(&v != &uninit_variant);
     if (v.m_type != KindOfRef) {
       auto const ref = RefData::Make(*v.asTypedValue());
       v.m_type = KindOfRef;
@@ -1407,10 +1407,10 @@ private:
     if (debug) varNrFlag() = NR_FLAG;
   }
   const Variant *asVariant() const {
-    return (const Variant*)this;
+    return &tvAsCVarRef(static_cast<const TypedValue*>(this));
   }
-  Variant *asVariant() {
-    return (Variant*)this;
+  Variant* asVariant() {
+    return &tvAsVariant(static_cast<TypedValue*>(this));
   }
   void checkRefCount() {
     assert(m_type != KindOfRef);

@@ -301,7 +301,7 @@ struct ActRec {
    * Encode and set `val' to m_this/m_cls
    *
    * @requires: m_func->implClass() and
-   *            !m_func->isStaticInProlog()
+   *            !m_func->isStaticInPrologue()
    */
   void setThis(ObjectData* val);
   /*

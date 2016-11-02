@@ -148,7 +148,8 @@ void init() {
   // Find the shared object embedded within a custom section.
   embedded_data data;
   if (!get_embedded_data("type_scanners", &data)) {
-    throw InitException{"Unable to find embedded data"};
+    // no embedded data was built; fall back to conservative scan.
+    return;
   }
 
   // Link in the embedded object.

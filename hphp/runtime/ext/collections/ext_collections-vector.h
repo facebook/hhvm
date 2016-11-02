@@ -550,8 +550,8 @@ struct c_Vector : BaseVector {
     return Object{this};
   }
   void php_splice(const Variant& offset,
-                  const Variant& len = null_variant,
-                  const Variant& replacement = null_variant);
+                  const Variant& len = uninit_variant,
+                  const Variant& replacement = uninit_variant);
 
 private:
   template <typename AccessorT>

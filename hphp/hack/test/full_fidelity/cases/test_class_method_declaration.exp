@@ -16,6 +16,7 @@
           (function_declaration_header
             (missing)
             ((function)(whitespace))
+            (missing)
             ((name)(whitespace))
             (missing)((lparen))
             (missing)((rparen)(whitespace))
@@ -33,6 +34,7 @@
             (function_declaration_header
               (missing)
               ((function)(whitespace))
+              (missing)
               ((name)(whitespace))
               (missing)((lparen))
               (missing)((rparen)(whitespace))
@@ -51,6 +53,7 @@
             (function_declaration_header
               (missing)
               ((function)(whitespace))
+              (missing)
               ((name)(whitespace))(missing)
               ((lparen))(missing)
               ((rparen)(whitespace))
@@ -74,6 +77,7 @@
             (function_declaration_header
               (missing)
               ((function)(whitespace))
+              (missing)
               ((name)(whitespace))(missing)
               ((lparen))(missing)
               ((rparen)(whitespace))

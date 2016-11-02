@@ -82,7 +82,15 @@ struct VMSwitchMode : std::exception {
 };
 
 /*
- * Thrown for stack overflow in a jitted prolog.
+ * Similar to VMSwitchMode, but when we were in the middle of a
+ * suspendStack operation.
+ */
+struct VMSuspendStack : std::exception {
+  const char* what() const noexcept override { return "VMSuspendStack"; }
+};
+
+/*
+ * Thrown for stack overflow in a jitted prologue.
  */
 struct VMStackOverflow : std::exception {
   const char* what() const noexcept override {

@@ -38,9 +38,9 @@ UserFSNode::UserFSNode(Class* cls,
 
   m_obj = Object{m_cls};
   m_obj.o_set("context", Variant(context));
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());
-
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(ctor, m_obj.get())
+  );
   m_Call = lookupMethod(s_call.get());
 }
 
@@ -55,8 +55,9 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
   if (func &&
       !(func->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) &&
       !func->hasPrivateAncestor()) {
-    Variant ret;
-    g_context->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
+    auto ret = Variant::attach(
+      g_context->invokeFunc(func, args, m_obj.get())
+    );
     invoked = true;
     return ret;
   }
@@ -72,17 +73,18 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
   switch(lookupObjMethod(func, m_cls, name.get(), ctx)) {
     case LookupResult::MethodFoundWithThis:
     {
-      Variant ret;
-      g_context->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
+      auto ret = Variant::attach(
+        g_context->invokeFunc(func, args, m_obj.get())
+      );
       invoked = true;
       return ret;
     }
 
     case LookupResult::MagicCallFound:
     {
-      Variant ret;
-      g_context->invokeFunc(ret.asTypedValue(), func,
-                              make_packed_array(name, args), m_obj.get());
+      auto ret = Variant::attach(
+        g_context->invokeFunc(func, make_packed_array(name, args), m_obj.get())
+      );
       invoked = true;
       return ret;
     }

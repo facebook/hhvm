@@ -1,2 +1,2 @@
-intersect(Tint, Tstring)
+(int | string)
 No errors

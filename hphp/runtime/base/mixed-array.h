@@ -268,9 +268,9 @@ private:
   static const TypedValue* NvTryGetStrHackArr(const ArrayData*,
                                               const StringData*);
 
-  static ArrayData* LvalIntRefHackArr(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrRefHackArr(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNewRefHackArr(ArrayData*, Variant*&, bool);
+  static ArrayLval LvalIntRefHackArr(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStrRefHackArr(ArrayData*, StringData*, bool);
+  static ArrayLval LvalNewRefHackArr(ArrayData*, bool);
   static ArrayData* SetRefIntHackArr(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStrHackArr(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefHackArr(ArrayData*, Variant&, bool);
@@ -286,7 +286,7 @@ public:
   static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
@@ -294,13 +294,11 @@ public:
   static ssize_t IterRewind(const ArrayData*, ssize_t pos);
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-  static ArrayData* LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                            bool copy);
+  static ArrayLval LvalInt(ArrayData* ad, int64_t k, bool copy);
   static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayData* LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
-                            bool copy);
+  static ArrayLval LvalStr(ArrayData* ad, StringData* k, bool copy);
   static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static ArrayLval LvalNew(ArrayData*, bool copy);
   static constexpr auto LvalNewRef = &LvalNew;
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
@@ -411,9 +409,8 @@ public:
 
   // Like Lval[Int,Str], but silently does nothing if the element does not
   // exist. Not part of the ArrayData interface, but used for member operations.
-  static ArrayData* LvalSilentInt(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalSilentStr(ArrayData*, const StringData*,
-                                  Variant*&, bool);
+  static ArrayLval LvalSilentInt(ArrayData*, int64_t, bool);
+  static ArrayLval LvalSilentStr(ArrayData*, const StringData*, bool);
 
   static constexpr auto LvalSilentIntDict = &LvalSilentInt;
   static constexpr auto LvalSilentStrDict = &LvalSilentStr;
@@ -537,7 +534,7 @@ public:
   }
 
 private:
-  static void getElmKey(const Elm& e, TypedValue* out);
+  static Cell getElmKey(const Elm& e);
 
 private:
   enum class AllocMode : bool { Request, Static };
@@ -641,7 +638,7 @@ private:
 
   Elm& addKeyAndGetElem(StringData* key);
 
-  template <class K> ArrayData* addLvalImpl(K k, Variant*& ret);
+  template <class K> ArrayLval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateRef(K k, Variant& data);
 
@@ -663,9 +660,7 @@ private:
   bool isFull() const;
   Elm& allocElm(int32_t* ei);
 
-  MixedArray* getLval(TypedValue& tv, Variant*& ret);
   MixedArray* initRef(TypedValue& tv, Variant& v);
-  MixedArray* initLval(TypedValue& tv, Variant*& ret);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
 

@@ -195,27 +195,23 @@ void StandardExtension::initMisc() {
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
 
-    Native::registerConstant<KindOfBoolean>(makeStaticString("TRUE"), true);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("true"), true);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("FALSE"), false);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("false"), false);
+    HHVM_RC_BOOL(TRUE, true);
+    HHVM_RC_BOOL(true, true);
+    HHVM_RC_BOOL(FALSE, false);
+    HHVM_RC_BOOL(false, false);
     Native::registerConstant<KindOfNull>(makeStaticString("NULL"));
     Native::registerConstant<KindOfNull>(makeStaticString("null"));
 
-    Native::registerConstant<KindOfBoolean>(
-      makeStaticString("ZEND_THREAD_SAFE"),
-      true
-    );
-    Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
-    Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
+    HHVM_RC_BOOL(ZEND_THREAD_SAFE, true);
+
+    HHVM_RC_DBL(INF, k_INF);
+    HHVM_RC_DBL(NAN, k_NAN);
     HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("PHP_DEBUG"),
-      #if DEBUG
-        true
-      #else
-        false
-      #endif
-     );
+#if DEBUG
+    HHVM_RC_BOOL(PHP_DEBUG, true);
+#else
+    HHVM_RC_BOOL(PHP_DEBUG, false);
+#endif
     bindTokenConstants();
     HHVM_RC_INT(T_PAAMAYIM_NEKUDOTAYIM, get_user_token_id(T_DOUBLE_COLON));
 

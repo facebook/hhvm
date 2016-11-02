@@ -42,7 +42,7 @@ struct BCMarker {
    */
   static BCMarker Dummy() {
     return BCMarker {
-      SrcKey(DummyFuncId, 0, false),
+      SrcKey(DummyFuncId, 0, false, false),
       FPInvOffset{0},
       kInvalidTransID,
       nullptr
@@ -79,6 +79,8 @@ struct BCMarker {
   const Func* func()        const { assertx(hasFunc()); return m_sk.func();    }
   Offset      bcOff()       const { assertx(valid());   return m_sk.offset();  }
   bool        resumed()     const { assertx(valid());   return m_sk.resumed(); }
+  bool        hasThis()     const { assertx(valid());   return m_sk.hasThis(); }
+  bool        prologue()    const { assertx(valid());   return m_sk.prologue();}
   FPInvOffset spOff()       const { assertx(valid());   return m_spOff;        }
   TransID     profTransID() const { assertx(valid());   return m_profTransID;  }
   SSATmp*     fp()          const { assertx(valid());   return m_fp;           }
@@ -106,7 +108,11 @@ struct BCMarker {
     ret.m_fixupSk = sk;
     return ret;
   }
-
+  BCMarker setPrologue() const {
+    auto ret = *this;
+    ret.m_sk = SrcKey{func(), bcOff(), SrcKey::PrologueTag{}};
+    return ret;
+  }
 private:
   SrcKey m_sk;
   FPInvOffset m_spOff{0};

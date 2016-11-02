@@ -80,10 +80,6 @@ struct OptionData final : RequestEventHandler {
     assertCallback.unset();
   }
 
-  void vscan(IMarker& mark) const override {
-    mark(assertCallback);
-  }
-
   int assertActive;
   int assertException;
   int assertWarning;
@@ -194,24 +190,21 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     }
   }
   auto const func = unit->getMain(ctx);
-  TypedValue retVal;
-  g_context->invokeFunc(
-    &retVal,
-    func,
-    init_null_variant,
-    thiz,
-    cls,
-    varEnv,
-    nullptr,
-    ExecutionContext::InvokePseudoMain
+  return Variant::attach(
+    g_context->invokeFunc(
+      func,
+      init_null_variant,
+      thiz,
+      cls,
+      varEnv,
+      nullptr,
+      ExecutionContext::InvokePseudoMain
+    )
   );
-
-  return tvAsVariant(&retVal);
 }
 
-// assert_impl already defined in util/assertions.h
-static Variant impl_assert(const Variant& assertion,
-                           const Variant& message /* = null */) {
+static Variant HHVM_FUNCTION(assert, const Variant& assertion,
+                             const Variant& message /* = null */) {
   if (!s_option_data->assertActive) return true;
 
   CallerFrame cf;
@@ -263,17 +256,6 @@ static Variant impl_assert(const Variant& assertion,
   }
 
   return init_null();
-}
-
-static Variant HHVM_FUNCTION(SystemLib_assert, const Variant& assertion,
-                             const Variant& message = uninit_null()) {
-  return impl_assert(assertion, message);
-}
-
-static Variant HHVM_FUNCTION(assert, const Variant& assertion,
-                                     const Variant& message /* = null */) {
-  raise_disallowed_dynamic_call("assert should not be called dynamically");
-  return impl_assert(assertion, message);
 }
 
 static int64_t HHVM_FUNCTION(dl, const String& library) {
@@ -1292,7 +1274,6 @@ Variant HHVM_FUNCTION(version_compare,
 void StandardExtension::initOptions() {
   HHVM_FE(assert_options);
   HHVM_FE(assert);
-  HHVM_FALIAS(__SystemLib\\assert, SystemLib_assert);
   HHVM_FE(dl);
   HHVM_FE(extension_loaded);
   HHVM_FE(get_loaded_extensions);

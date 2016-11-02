@@ -47,8 +47,6 @@ struct VariableSerializer {
     PHPOutput, //used by compiler to output scalar values into byte code
   };
 
-  enum class ArrayKind { PHP, Dict, Vec, Keyset };
-
   /**
    * Constructor and destructor.
    */
@@ -56,6 +54,8 @@ struct VariableSerializer {
   ~VariableSerializer() {
     if (m_arrayIds) req::destroy_raw(m_arrayIds);
   }
+  VariableSerializer(const VariableSerializer&) = delete;
+  VariableSerializer& operator=(const VariableSerializer&) = delete;
 
   // Use UnlimitSerializationScope to suspend this temporarily.
   static __thread int64_t serializationSizeLimit;
@@ -70,22 +70,28 @@ struct VariableSerializer {
   // It does not work with Serialize, JSON, APCSerialize, DebuggerSerialize.
   String serializeWithLimit(const Variant& v, int limit);
 
+  // for ext_json
+  void setDepthLimit(size_t depthLimit) { m_maxDepth = depthLimit; }
+  // for ext_std_variable
+  void incMaxCount() { m_maxCount++; }
+
+  Type getType() const { return m_type; }
+
+  enum class ArrayKind { PHP, Dict, Vec, Keyset };
+
+private:
   // Generic wrapper around pointers to various countable types. Used instead of
   // void* because it preserves enough type information for the type scanners to
   // understand it.
   union PtrWrapper {
-    PtrWrapper(const StringData* p): pstr{p} {}
     PtrWrapper(const ArrayData* p): parr{p} {}
     PtrWrapper(const ObjectData* p): pobj{p} {}
-    PtrWrapper(const RefData* p): pref{p} {}
     PtrWrapper(const ResourceData* p): pres{p} {}
     PtrWrapper(const Variant* p): pvar{p} {}
     // So pointer_hash<void> works
-    /* implicit */operator const void*() const { return pstr; }
-    const StringData* pstr;
+    /* implicit */operator const void*() const { return parr; }
     const ArrayData* parr;
     const ObjectData* pobj;
-    const RefData* pref;
     const ResourceData* pres;
     const Variant* pvar;
   };
@@ -113,35 +119,30 @@ struct VariableSerializer {
   void writeRefCount(); // for DebugDump only
 
   void writeArrayHeader(int size, bool isVectorData, ArrayKind kind);
-  void writeArrayKey(const Variant& key, VariableSerializer::ArrayKind kind);
+  void writeArrayKey(const Variant& key, ArrayKind kind);
   void writeArrayValue(
     const Variant& value,
-    VariableSerializer::ArrayKind kind
+    ArrayKind kind
   );
   void writeCollectionKey(
     const Variant& key,
-    VariableSerializer::ArrayKind kind
+    ArrayKind kind
   );
-  void writeArrayFooter(VariableSerializer::ArrayKind kind);
+  void writeArrayFooter(ArrayKind kind);
   void writeSerializableObject(const String& clsname, const String& serialized);
 
   /**
    * Helpers.
    */
   void indent();
-  void setDepthLimit(size_t depthLimit) { m_maxDepth = depthLimit; }
   void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
-  void incMaxCount() { m_maxCount++; }
   bool incNestedLevel(PtrWrapper ptr, bool isObject = false);
   void decNestedLevel(PtrWrapper ptr);
   void pushObjectInfo(const String& objClass, int objId, char objCode);
   void popObjectInfo();
   void pushResourceInfo(const String& rsrcName, int rsrcId);
   void popResourceInfo();
-  Type getType() const { return m_type; }
-
-private:
 
   using ReqPtrCtrMap = req::hash_map<PtrWrapper, int, pointer_hash<void>>;
   Type m_type;
@@ -186,6 +187,28 @@ private:
   // Otherwise, writeOverflow will be invoked instead.
   void preventOverflow(const Object& v, const std::function<void()>& func);
   void writePropertyKey(const String& prop);
+
+  void serializeRef(const TypedValue* tv, bool isArrayKey);
+  // Serialize a Variant recursively.
+  // The last param noQuotes indicates to serializer to not put the output in
+  // double quotes (used when printing the output of a __toDebugDisplay() of
+  // an object when it is a string.
+  void serializeVariant(const Variant&,
+                        bool isArrayKey = false,
+                        bool skipNestCheck = false,
+                        bool noQuotes = false);
+  void serializeObject(const Object&);
+  void serializeObject(const ObjectData*);
+  void serializeObjectImpl(const ObjectData* obj);
+  void serializeCollection(ObjectData* obj);
+  void serializeArray(const Array&, bool isObject = false);
+  void serializeArray(const ArrayData*, bool skipNestCheck = false);
+  void serializeArrayImpl(const ArrayData* arr);
+  void serializeResource(const ResourceData*);
+  void serializeResourceImpl(const ResourceData* res);
+  void serializeString(const String&);
+
+  Array getSerializeProps(const ObjectData* obj) const;
 };
 
 // TODO: Move to util/folly?

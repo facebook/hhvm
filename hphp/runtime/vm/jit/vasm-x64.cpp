@@ -198,6 +198,8 @@ struct Vgen {
   void emit(const movzbw& i) { a.movzbl(i.s, Reg32(i.d)); }
   void emit(const movzbl& i) { a.movzbl(i.s, i.d); }
   void emit(const movzbq& i) { a.movzbl(i.s, Reg32(i.d)); }
+  void emit(const movzwl& i) { a.movzwl(i.s, i.d); }
+  void emit(const movzwq& i) { a.movzwl(i.s, Reg32(i.d)); }
   void emit(const movzlq& i) { a.movl(i.s, Reg32(i.d)); }
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
@@ -553,7 +555,8 @@ void Vgen::emit(const phpret& i) {
 }
 
 void Vgen::emit(const callphp& i) {
-  emitSmashableCall(a.code(), env.meta, i.stub);
+  const auto call = emitSmashableCall(a.code(), env.meta, i.stub);
+  setJmpTransID(env, call);
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
 

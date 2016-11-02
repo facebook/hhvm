@@ -1246,6 +1246,9 @@ namespace HH {
     OF_INTERFACE = 16;
     OF_TRAIT = 17;
     OF_ENUM = 18;
+    OF_DICT = 19;
+    OF_VEC = 20;
+    OF_KEYSET = 21;
     OF_UNRESOLVED = 101; // for type aliases only
   }
 

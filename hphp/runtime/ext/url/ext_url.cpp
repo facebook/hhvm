@@ -205,7 +205,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
 const StaticString s_arg_separator_output("arg_separator.output");
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
-                           const String& numeric_prefix /* = null_string */,
+                           const Variant& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */,
                            int enc_type /* = k_PHP_QUERY_RFC1738 */) {
   if (!formdata.isArray() && !formdata.is(KindOfObject)) {
@@ -222,8 +222,13 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
 
   StringBuffer ret(1024);
   std::set<void*> seen_arrs;
+
+  String num_prefix;
+  if (!numeric_prefix.isNull()) {
+    num_prefix = numeric_prefix.toCStrRef();
+  }
   url_encode_array(ret, formdata, seen_arrs,
-                   numeric_prefix, String(), String(), arg_sep,
+                   num_prefix, String(), String(), arg_sep,
                    enc_type != k_PHP_QUERY_RFC3986);
   return ret.detach();
 }

@@ -53,7 +53,7 @@ void handleStackOverflow(ActRec* calleeAR) {
   /*
    * First synchronize registers.
    *
-   * We can't finish setting up the prolog here, so there is no
+   * We can't finish setting up the prologue here, so there is no
    * "correct" vm state. However, we need to mark the registers clean
    * because sync_regstate in unwind-itanium.cpp doesn't know how to
    * clean them.

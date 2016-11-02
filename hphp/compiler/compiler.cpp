@@ -487,7 +487,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   // we always do pre/post opt no matter the opt level
   Option::PreOptimization = true;
-  Option::PostOptimization = true;
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
     Option::ParseTimeOpts = false;

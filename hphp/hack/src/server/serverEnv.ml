@@ -65,13 +65,30 @@ type env = {
     tcopt          : TypecheckerOptions.t;
     popt           : ParserOptions.t;
     errorl         : Errors.t;
-    (* Keeps list of files containing parsing errors in the last iteration. *)
+    (* Sets of files that were known to have errors in corresponding phases.
+     * During full check, we add those files to the set of files to reanalyze
+     * at each stage in order to regenerate their error lists.
+     *
+     * failed_naming is also used as kind of a dependency tracking mechanism:
+     * if files A.php and B.php both define class C, then those files are
+     * mutually depending on each other (edit to one might resolve naming
+     * ambiguity and change the interpretation of the other). Both of those
+     * files being inside failed_naming is how we track the need to
+     * check for this condition.
+     *
+     * See test_naming_errors.ml and test_failed_naming.ml
+     *)
     failed_parsing : Relative_path.Set.t;
+    failed_naming  : Relative_path.Set.t;
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;
     persistent_client : ClientProvider.client option;
     (* Timestamp of last IDE file synchronization command *)
     last_command_time : float;
+    (* Timestamp of last query for disk changes *)
+    last_notifier_check_time : float;
+    (* Timestamp of last ServerIdle.go run *)
+    last_idle_job_time : float;
     (* The map from full path to synchronized file contents *)
     edited_files   : File_content.t Relative_path.Map.t;
     (* Files which parse trees were invalidated (because they changed on disk

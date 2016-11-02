@@ -149,7 +149,10 @@ module WithExpressionAndStatementAndTypeParser
       *)
     (* TODO: Add an error to a later pass that determines the value is
              a constant. *)
-    let (parser, name) = expect_name parser in
+
+    (* TODO: We must allow TRUE to be a legal enum member name; here we allow
+      any keyword.  Consider making this more strict. *)
+    let (parser, name) = expect_name_allow_keywords parser in
     let (parser, equal) = expect_equal parser in
     let (parser, value) = parse_expression parser in
     let (parser, semicolon) = expect_semicolon parser  in
@@ -179,10 +182,11 @@ module WithExpressionAndStatementAndTypeParser
     | RightBrace -> parser, make_missing ()
     | _ -> aux [] parser
 
-  and parse_enum_declaration parser =
+  and parse_enum_declaration parser attrs =
     (*
     enum-declaration:
-      enum  name  enum-base  type-constraint-opt  {  enumerator-list-opt  }
+      attribute-specification-opt enum  name  enum-base  type-constraint-opt /
+        {  enumerator-list-opt  }
     enum-base:
       :  int
       :  string
@@ -201,7 +205,7 @@ module WithExpressionAndStatementAndTypeParser
       parser LeftBrace SyntaxError.error1037 RightBrace SyntaxError.error1006
       parse_enumerator_list_opt in
     let result = make_enum_declaration
-      enum name colon base enum_type left_brace enumerators right_brace in
+      attrs enum name colon base enum_type left_brace enumerators right_brace in
     (parser, result)
 
   and parse_namespace_declaration parser =
@@ -813,11 +817,12 @@ module WithExpressionAndStatementAndTypeParser
         require-implements-clause:
           require  implements  qualified-name  ;
     *)
+    (* We must also parse "require extends :foo;" *)
+    (* TODO: What about "require extends :foo<int>;" ? *)
     (* TODO: The spec is incomplete; we need to be able to parse
        require extends Foo<int>;
        Fix the spec.
        TODO: Check whether we also need to handle
-         require extends :foo ;
          require extends foo::bar
        and so on.
        *)
@@ -829,7 +834,11 @@ module WithExpressionAndStatementAndTypeParser
     | Implements
     | Extends -> (parser1, make_token req_kind_token)
     | _ -> (with_error parser SyntaxError.error1045, make_missing()) in
-    let (parser, name) = parse_qualified_name_type parser in
+    let (parser, name) = if is_next_xhp_class_name parser then
+      let (parser, token) = next_xhp_class_name parser in
+      (parser, make_token token)
+    else
+      parse_qualified_name_type parser in
     let (parser, semi) = expect_semicolon parser in
     let result = make_require_clause req req_kind name semi in
     (parser, result)
@@ -929,11 +938,18 @@ module WithExpressionAndStatementAndTypeParser
     (* TODO Use Eric's helper here to assert length of errors *)
     let before = List.length (errors parser) in
     let (parser1, _) = parse_type_specifier parser in
-    let (parser1, _) = expect_name parser1 in
+    let (parser1, _) = expect_name_allow_keywords parser1 in
     List.length (errors parser1) = before
 
   and parse_constant_declarator parser =
-    let (parser, const_name) = expect_name parser in
+    (* TODO: We allow const names to be keywords here; in particular we
+       require that const string TRUE = "true"; be legal.  Likely this
+       should be more strict. What are the rules for which keywords are
+       legal constant names and which are not?
+       Note that if this logic is changed, it should be changed in
+       is_type_in_const above as well.
+    *)
+    let (parser, const_name) = expect_name_allow_keywords parser in
     let (parser, initializer_) = parse_simple_initializer_opt parser in
     (parser, make_constant_declarator const_name initializer_)
 
@@ -1177,8 +1193,12 @@ module WithExpressionAndStatementAndTypeParser
     *)
     (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
+    (* In non-strict mode we allow an & to appear before the name.
+      TODO: Produce an error if this occurs in strict mode, or if it
+      TODO: appears before a special name like __construct, and so on. *)
     let (parser, async_token) = optional_token parser Async in
     let (parser, function_token) = expect_function parser in
+    let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, label) =
       parse_function_label parser in
     let (parser, generic_type_parameter_list) =
@@ -1188,8 +1208,9 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
     let syntax = make_function_declaration_header async_token
-      function_token label generic_type_parameter_list left_paren_token
-      parameter_list right_paren_token colon_token return_type in
+      function_token ampersand_token label generic_type_parameter_list
+      left_paren_token parameter_list right_paren_token colon_token
+      return_type in
     (parser, syntax)
 
   (* A function label is either a function name, a __construct label, or a
@@ -1286,13 +1307,14 @@ module WithExpressionAndStatementAndTypeParser
     in
     aux [] parser
 
-  and parse_classish_or_function_declaration parser =
-    (* A type alias, function, interface, trait or class may all begin with
-    an attribute. *)
+  and parse_enum_or_classish_or_function_declaration parser =
+    (* An enum, type alias, function, interface, trait or class may all
+      begin with an attribute. *)
     let parser, attribute_specification =
       parse_attribute_specification_opt parser in
     let parser1, token = next_token parser in
     match Token.kind token with
+    | Enum -> parse_enum_declaration parser attribute_specification
     | Type | Newtype ->
       parse_alias_declaration parser attribute_specification
     | Async | Function ->
@@ -1315,7 +1337,7 @@ module WithExpressionAndStatementAndTypeParser
     | Require_once -> parse_inclusion_directive parser
     | Type
     | Newtype -> parse_alias_declaration parser (make_missing())
-    | Enum -> parse_enum_declaration parser
+    | Enum -> parse_enum_declaration parser (make_missing())
     | Namespace -> parse_namespace_declaration parser
     | Use -> parse_namespace_use_declaration parser
     | Trait
@@ -1326,7 +1348,7 @@ module WithExpressionAndStatementAndTypeParser
     | Async
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->
-      parse_classish_or_function_declaration parser
+      parse_enum_or_classish_or_function_declaration parser
       (* TODO figure out what global const differs from class const *)
     | Const -> parse_const_declaration parser1 (make_missing ())
               (make_token token)

@@ -104,7 +104,7 @@ Variant ArrayDirectory::read() {
 }
 
 void ArrayDirectory::rewind() {
-  m_it.setPos(0);
+  m_it.rewind();
 }
 
 bool ArrayDirectory::isEof() const {

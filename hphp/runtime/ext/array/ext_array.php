@@ -43,7 +43,7 @@ function array_chunk(mixed $input,
  * @return mixed - Returns the array column, or FALSE on failure
  *
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function array_column(mixed $arr,
                       mixed $val_key,
                       mixed $idx_key = null): mixed;
@@ -592,7 +592,7 @@ function array_walk(mixed &$input,
  *   it.
  *
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame")>>
 function compact(mixed $varname, ...$argv): array;
 
 /**
@@ -1347,26 +1347,6 @@ function hphp_array_idx(mixed $search, mixed $key, mixed $def): mixed;
 function array_multisort(mixed &$arr1, ...): bool;
 
 namespace __SystemLib {
-  /**
-   * Creates an array containing variables and their values. For each of these,
-   *   compact() looks for a variable with that name in the current symbol table
-   *   and adds it to the output array such that the variable name becomes the
-   *   key and the contents of the variable become the value for that key. In
-   *   short, it does the opposite of extract(). Any strings that are not set
-   *   will simply be skipped.
-   *
-   * @param mixed $varname - compact() takes a variable number of parameters.
-   *   Each parameter can be either a string containing the name of the
-   *   variable, or an array of variable names. The array can contain other
-   *   arrays of variable names inside it; compact() handles it recursively.
-   *
-   * @return array - Returns the output array with all the variables added to
-   *   it.
-   *
-   */
-  <<__Native>>
-  function compact_sl(mixed $varname, ...$argv): array;
-
   /* array_map() returns an array containing all the elements of arr1 after
    * applying the callback function to each one. The number of parameters that
    * the callback function accepts should match the number of arrays passed to

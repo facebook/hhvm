@@ -13,9 +13,18 @@
    [Daemon.check_entry_point]. *)
 let entry = Worker.register_entry_point ~restore:(ServerGlobalState.restore)
 
+(** We use the call_wrapper to classify some exceptions in all calls in the
+ * same way. *)
+let catch_and_classify_exceptions: 'x 'b. ('x -> 'b) -> 'x -> 'b = fun f x ->
+  try f x with
+  | Decl_class.Decl_heap_elems_bug ->
+    Exit_status.(exit Decl_heap_elems_bug)
+  | Not_found ->
+    Exit_status.(exit Worker_not_found_exception)
+
 let make gc_control heap_handle =
   Worker.make
-    ?call_wrapper:None
+    ~call_wrapper:{ Worker.wrap = catch_and_classify_exceptions; }
     ~saved_state:(ServerGlobalState.save ())
     ~entry
     ~nbr_procs: (GlobalConfig.nbr_procs)

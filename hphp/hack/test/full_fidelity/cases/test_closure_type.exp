@@ -1,7 +1,7 @@
 (script(header((<))((?))((name)(whitespace)(single_line_comment)(end_of_line)))
 (function_declaration(missing)
   (function_declaration_header(missing)
-  ((end_of_line)(function)(whitespace))
+  ((end_of_line)(function)(whitespace))(missing)
   ((name)(whitespace))(missing)((lparen))
   (parameter_declaration(missing)(missing)
   (closure_type_specifier

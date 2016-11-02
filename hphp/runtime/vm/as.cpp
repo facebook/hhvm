@@ -2215,7 +2215,7 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
   bool system = pce.attrs() & AttrBuiltin;
 
   if (pce.methods().size() == 1 && pce.methods()[0]->isClosureBody) {
-    return PreClass::ClosureHoistable;
+    return PreClass::NotHoistable;
   }
   if (!system) {
     if (!pce.interfaces().empty() ||
@@ -2275,8 +2275,7 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
-  as.pce = as.ue->newBarePreClassEmitter(makeStaticString(name),
-                                         PreClass::MaybeHoistable);
+  as.pce = as.ue->newBarePreClassEmitter(name, PreClass::MaybeHoistable);
   as.pce->init(as.in.getLineNumber(),
                as.in.getLineNumber() + 1, // XXX
                as.ue->bcPos(),

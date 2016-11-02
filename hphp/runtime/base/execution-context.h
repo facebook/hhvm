@@ -115,11 +115,21 @@ struct DebuggerSettings {
   int printLevel = -1;
 };
 
+struct ThrowAllErrorsSetter {
+  ThrowAllErrorsSetter();
+  ~ThrowAllErrorsSetter();
+
+private:
+  bool m_throwAllErrors;
+};
+
 using InvokeArgs = folly::Range<const TypedValue*>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ExecutionContext {
+  friend ThrowAllErrorsSetter;
+
   enum ShutdownType {
     ShutDown,
     PostSend,
@@ -273,7 +283,6 @@ public:
   void setTimeZone(const String&);
 
   bool getThrowAllErrors() const;
-  void setThrowAllErrors(bool);
 
   Variant getExitCallback();
   void setExitCallback(Variant);
@@ -312,6 +321,7 @@ private:
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(ShutdownType type);
+  void setThrowAllErrors(bool);
 
 public:
   void requestInit();
@@ -360,7 +370,7 @@ public:
   int getLine();
   Array getCallerInfo();
   bool evalUnit(Unit* unit, PC& pc, int funcType);
-  void invokeUnit(TypedValue* retval, const Unit* unit);
+  TypedValue invokeUnit(const Unit* unit);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);
@@ -425,38 +435,33 @@ public:
     InvokePseudoMain
   };
 
-  void invokeFunc(TypedValue* retval,
-                  const Func* f,
-                  const Variant& args_ = init_null_variant,
-                  ObjectData* this_ = nullptr,
-                  Class* class_ = nullptr,
-                  VarEnv* varEnv = nullptr,
-                  StringData* invName = nullptr,
-                  InvokeFlags flags = InvokeNormal,
-                  bool useWeakTypes = false);
+  TypedValue invokeFunc(const Func* f,
+                        const Variant& args_ = init_null_variant,
+                        ObjectData* this_ = nullptr,
+                        Class* class_ = nullptr,
+                        VarEnv* varEnv = nullptr,
+                        StringData* invName = nullptr,
+                        InvokeFlags flags = InvokeNormal,
+                        bool useWeakTypes = false);
 
-  void invokeFunc(TypedValue* retval,
-                  const CallCtx& ctx,
-                  const Variant& args_,
-                  VarEnv* varEnv = nullptr);
+  TypedValue invokeFunc(const CallCtx& ctx,
+                        const Variant& args_,
+                        VarEnv* varEnv = nullptr);
 
-  void invokeFuncFew(TypedValue* retval,
-                     const Func* f,
-                     void* thisOrCls,
-                     StringData* invName,
-                     int argc,
-                     const TypedValue* argv,
-                     bool useWeakTypes = false);
+  TypedValue invokeFuncFew(const Func* f,
+                           void* thisOrCls,
+                           StringData* invName,
+                           int argc,
+                           const TypedValue* argv,
+                           bool useWeakTypes = false);
 
-  void invokeFuncFew(TypedValue* retval,
-                     const Func* f,
-                     void* thisOrCls,
-                     StringData* invName = nullptr);
+  TypedValue invokeFuncFew(const Func* f,
+                           void* thisOrCls,
+                           StringData* invName = nullptr);
 
-  void invokeFuncFew(TypedValue* retval,
-                     const CallCtx& ctx,
-                     int argc,
-                     const TypedValue* argv);
+  TypedValue invokeFuncFew(const CallCtx& ctx,
+                           int argc,
+                           const TypedValue* argv);
 
   TypedValue invokeMethod(
     ObjectData* obj,
@@ -479,12 +484,12 @@ public:
 
 private:
   template<class FStackCheck, class FInitArgs, class FEnterVM>
-  void invokeFuncImpl(TypedValue* retptr, const Func* f,
-                      ObjectData* thiz, Class* cls, uint32_t argc,
-                      StringData* invName, bool useWeakTypes,
-                      FStackCheck doStackCheck,
-                      FInitArgs doInitArgs,
-                      FEnterVM doEnterVM);
+  TypedValue invokeFuncImpl(const Func* f,
+                            ObjectData* thiz, Class* cls, uint32_t argc,
+                            StringData* invName, bool useWeakTypes,
+                            FStackCheck doStackCheck,
+                            FInitArgs doInitArgs,
+                            FEnterVM doEnterVM);
 
 public:
   template<class F> void scan(F& mark) {
@@ -501,7 +506,7 @@ public:
     //mark(m_stdoutData);
     mark(m_stdoutBytesWritten);
     mark(m_rawPostData);
-    mark(m_requestEventHandlers);
+    //mark(m_requestEventHandlers); type_scanned via ThreadLocal<T>
     mark(m_shutdowns);
     mark(m_userErrorHandlers);
     mark(m_userExceptionHandlers);

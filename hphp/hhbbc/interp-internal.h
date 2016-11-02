@@ -34,16 +34,7 @@ namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
-const StaticString s_extract("extract");
-const StaticString s_extract_sl("__SystemLib\\extract");
 const StaticString s_assert("assert");
-const StaticString s_assert_sl("__SystemLib\\assert");
-const StaticString s_parse_str("parse_str");
-const StaticString s_parse_str_sl("__SystemLib\\parse_str");
-const StaticString s_compact("compact");
-const StaticString s_compact_sl("__SystemLib\\compact_sl");
-const StaticString s_get_defined_vars("get_defined_vars");
-const StaticString s_get_defined_vars_sl("__SystemLib\\get_defined_vars");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -194,25 +185,28 @@ void doRet(ISS& env, Type t) {
   env.flags.returned = t;
 }
 
-void specialFunctionEffects(ISS& env, SString name) {
-  auto special_fn = [&] (const StaticString& fn1, const StaticString& fn2) {
-    return name->isame(fn1.get()) ||
-      (!options.DisallowDynamicVarEnvFuncs && name->isame(fn2.get()));
-  };
+void specialFunctionEffects(ISS& env, const res::Func& func) {
+  if (func.name()->isame(s_assert.get())) {
+    /*
+     * Assert is somewhat special. In the most general case, it can read and
+     * write to the caller's frame (and is marked as such). The first parameter,
+     * if a string, will be evaled and can have arbitrary effects. Luckily this
+     * is forbidden in RepoAuthoritative mode, so we can ignore that here. If
+     * the assert fails, it may execute an arbitrary pre-registered callback
+     * which still might try to write to the assert caller's frame. This can't
+     * happen if calling such frame accessing functions dynamically is
+     * forbidden.
+     */
+    if (options.DisallowDynamicVarEnvFuncs) return;
+  }
 
-  // extract() and parse_str() can trash the local variable environment.
-  if (special_fn(s_extract_sl, s_extract) ||
-      special_fn(s_parse_str_sl, s_parse_str)) {
+  if (func.mightWriteCallerFrame()) {
     readUnknownLocals(env);
     killLocals(env);
     return;
   }
-  // assert(), compact() and get_defined_vars() read the local variable
-  // environment.  We could check which locals for compact, but for
-  // now we just include them all.
-  if (special_fn(s_get_defined_vars_sl, s_get_defined_vars) ||
-      special_fn(s_compact_sl, s_compact) ||
-      special_fn(s_assert_sl, s_assert)) {
+
+  if (func.mightReadCallerFrame()) {
     readUnknownLocals(env);
     return;
   }
@@ -230,7 +224,8 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
       }
       return;
     }
-    specialFunctionEffects(env, ar.func->name());
+    specialFunctionEffects(env, *ar.func);
+    if (ar.fallbackFunc) specialFunctionEffects(env, *ar.fallbackFunc);
     break;
   case FPIKind::Ctor:
   case FPIKind::ObjMeth:
@@ -331,7 +326,9 @@ ActRec fpiTop(ISS& env) {
 
 PrepKind prepKind(ISS& env, uint32_t paramId) {
   auto ar = fpiTop(env);
-  if (ar.func) return env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
+  if (ar.func && !ar.fallbackFunc) {
+    return env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
+  }
   return PrepKind::Unknown;
 }
 

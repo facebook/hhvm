@@ -58,8 +58,7 @@ const Func* findCuf(Op op,
   StringData* sclass = nullptr;
   StringData* sname = nullptr;
   if (str) {
-    Func* f = Unit::lookupFunc(str);
-    if (f) return f;
+    if (auto f = Unit::lookupDynCallFunc(str)) return f;
     String name(const_cast<StringData*>(str));
     int pos = name.find("::");
     if (pos <= 0 || pos + 2 >= name.size() ||
@@ -103,6 +102,7 @@ const Func* findCuf(Op op,
   bool magicCall = false;
   const Func* f = lookupImmutableMethod(
     cls, sname, magicCall, /* staticLookup = */ true, ctxFunc, isExact);
+  assertx(!f || !f->dynCallWrapper());
   if (!f || (!isExact && !f->isImmutableFrom(cls))) return nullptr;
   if (forward && !ctx->classof(f->cls())) {
     /*
@@ -204,7 +204,7 @@ void fpushObjMethodExactFunc(
    */
   SSATmp* objOrCls = obj;
   emitIncStat(env, Stats::ObjMethod_known, 1);
-  if (func->isStaticInProlog()) {
+  if (func->isStaticInPrologue()) {
     objOrCls = exactClass ? cns(env, exactClass) : gen(env, LdObjClass, obj);
     decRef(env, obj);
   }
@@ -266,7 +266,7 @@ void fpushObjMethodNonExactFunc(
     cns(env, -(func->methodSlot() + 1))
   );
   SSATmp* objOrCls = obj;
-  if (func->isStaticInProlog()) {
+  if (func->isStaticInPrologue()) {
     decRef(env, obj);
     objOrCls = clsTmp;
   }
@@ -319,7 +319,8 @@ const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
 inline SSATmp* ldCtxForClsMethod(IRGS& env,
                                  const Func* callee,
                                  SSATmp* callCtx,
-                                 const Class* cls) {
+                                 const Class* cls,
+                                 bool exact) {
 
   assertx(callCtx->isA(TCls));
 
@@ -331,31 +332,51 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
   };
 
   if (callee->isStatic()) return callCtx;
-  if (curFunc(env)->isStatic() || !curClass(env)) {
+  if (!hasThis(env)) {
     return gen_missing_this();
   }
 
-  auto const canUseThis = curClass(env)->classof(cls);
-  if (!canUseThis && !cls->classof(curClass(env))) {
+  auto const maybeUseThis = curClass(env)->classof(cls);
+  if (!maybeUseThis && !cls->classof(curClass(env))) {
     return gen_missing_this();
   }
+
+  auto skipAT = [] (SSATmp* val) {
+    while (val->inst()->is(AssertType, CheckType, CheckCtxThis)) {
+      val = val->inst()->src(0);
+    }
+    return val;
+  };
+
+  auto const canUseThis = [&] () -> bool {
+    // A static::foo() call can always pass through a $this
+    // from the caller (if it has one). Match the common patterns
+    auto cc = skipAT(callCtx);
+    if (cc->inst()->is(LdObjClass, LdClsCtx, LdClsCctx)) {
+      cc = skipAT(cc->inst()->src(0));
+      if (cc->inst()->is(LdCtx, LdCctx)) return true;
+    }
+    return maybeUseThis && (exact || cls->attrs() & AttrNoOverride);
+  }();
 
   auto const ctx = gen(env, LdCtx, fp(env));
+  auto thiz = castCtxThis(env, ctx);
+
+  if (canUseThis) {
+    gen(env, IncRef, thiz);
+    return thiz;
+  }
 
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckCtxThis, taken, ctx);
-      auto thiz = castCtxThis(env, ctx);
-      if (!canUseThis) {
-        auto thizCls = gen(env, LdObjClass, thiz);
-        auto flag = gen(env, ExtendsClass,
-                        ExtendsClassData{ cls, true }, thizCls);
-        gen(env, JmpZero, taken, flag);
-      }
-      return thiz;
+      auto thizCls = gen(env, LdObjClass, thiz);
+      auto flag = exact ?
+        gen(env, ExtendsClass, ExtendsClassData{ cls, true }, thizCls) :
+        gen(env, InstanceOf, thizCls, callCtx);
+      gen(env, JmpZero, taken, flag);
     },
-    [&] (SSATmp* thiz) {
+    [&] {
       gen(env, IncRef, thiz);
       return thiz;
     },
@@ -383,7 +404,8 @@ bool optimizeProfiledPushMethod(IRGS& env,
                     SSATmp* ctx,
                     const Class* cls) -> SSATmp* {
     if (isStaticCall) {
-      return ldCtxForClsMethod(env, callee, ctx, cls ? cls : callee->cls());
+      return ldCtxForClsMethod(env, callee, ctx,
+                               cls ? cls : callee->cls(), cls != nullptr);
     }
     if (!callee->isStatic()) return ctx;
     assertx(ctx->type() <= TObj);
@@ -591,53 +613,34 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
   assertx(ctx->type() <= TCtx);
   assertx(funcTmp->type() <= TFunc);
 
-  auto forwardStaticCallee = [&] {
-    return gen(env, FwdCtxStaticCall, ctx);
-  };
-
   auto forwardDynamicCallee = [&] {
-    // CheckCtxThis will assert if used in a context that doesn't
-    // support $this. This check is broader - but we might as well
-    // catch as much as possible.
-    if (!ctx->type().maybe(TObj)) {
+    if (!hasThis(env)) {
       gen(env, RaiseMissingThis, funcTmp);
       return ctx;
     }
 
-    // We don't have control flow opts yet, so nothing will
-    // reduce CheckCtxThis/IncRef back to a plain IncRef,
-    // so we need this upfront optimization. We don't
-    // really need to check for TObj - the simplifier would
-    // deal with it, but again, since we need the optimization
-    // we might as well make it as broad as possible.
-    if (ctx->isA(TObj) ||
-        (funcTmp->hasConstVal() &&
-         !needs_missing_this_check(funcTmp->funcVal()))) {
-      gen(env, IncRef, ctx);
-      return ctx;
-    }
-
-    ifThenElse(env,
-               [&] (Block* taken) {
-                 gen(env, CheckCtxThis, taken, ctx);
-               },
-               [&] {
-                 auto const obj = castCtxThis(env, ctx);
-                 gen(env, IncRef, obj);
-               },
-               [&] {
-                 hint(env, Block::Hint::Unlikely);
-                 gen(env, RaiseMissingThis, funcTmp);
-               });
-    return ctx;
+    auto const obj = castCtxThis(env, ctx);
+    gen(env, IncRef, obj);
+    return obj;
   };
+
+  if (funcTmp->hasConstVal()) {
+    assertx(!funcTmp->funcVal()->isClosureBody());
+    if (funcTmp->funcVal()->isStatic()) {
+      return gen(env, FwdCtxStaticCall, ctx);
+    } else {
+      return forwardDynamicCallee();
+    }
+  }
 
   return cond(env,
               [&](Block* target) {
                 gen(env, CheckFuncStatic, target, funcTmp);
               },
               forwardDynamicCallee,
-              forwardStaticCallee);
+              [&] {
+                return gen(env, FwdCtxStaticCall, ctx);
+              });
 }
 
 void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
@@ -667,7 +670,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
     if (forward) {
       ctx = forwardCtx(env, ldCtx(env), cns(env, callee));
     } else {
-      ctx = ldCtxForClsMethod(env, callee, cns(env, cls), cls);
+      ctx = ldCtxForClsMethod(env, callee, cns(env, cls), cls, true);
     }
   } else {
     ctx = cns(env, TNullptr);
@@ -824,6 +827,51 @@ void emitFPushCtorD(IRGS& env,
   fpushActRec(env, ssaFunc, obj, numParams, nullptr);
 }
 
+void emitFPushCtorI(IRGS& env,
+                    int32_t numParams,
+                    int32_t clsIx) {
+  auto const preClass = curFunc(env)->unit()->lookupPreClassId(clsIx);
+  auto const cls = [&] () -> Class* {
+    auto const c = preClass->namedEntity()->clsList();
+    if (c && (c->attrs() & AttrUnique)) return c;
+    return nullptr;
+  }();
+  bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
+  bool const canInstantiate = canInstantiateClass(cls);
+  bool const fastAlloc =
+    persistentCls &&
+    canInstantiate &&
+    !cls->hasNativePropHandler();
+
+  auto const func = lookupImmutableCtor(cls, curClass(env));
+
+  auto const ssaCls = [&] {
+    if (!persistentCls) {
+      auto const cachedCls = cond(
+        env,
+        [&] (Block* taken) {
+          return gen(env, LdClsCachedSafe, taken, cns(env, preClass->name()));
+        },
+        [&] (SSATmp* val) {
+          return val;
+        },
+        [&] {
+          return gen(env, DefCls, cns(env, clsIx));
+        }
+      );
+      if (!cls) return cachedCls;
+    }
+    return cns(env, cls);
+  }();
+
+  auto const ssaFunc = func ? cns(env, func)
+                            : gen(env, LdClsCtor, ssaCls, fp(env));
+  auto const obj = fastAlloc ? allocObjFast(env, cls)
+                             : gen(env, AllocObj, ssaCls);
+  pushIncRef(env, obj);
+  fpushActRec(env, ssaFunc, obj, numParams, nullptr);
+}
+
 void emitFPushFuncD(IRGS& env, int32_t nargs, const StringData* name) {
   fpushFuncCommon(env, nargs, name, nullptr);
 }
@@ -905,7 +953,7 @@ bool fpushClsMethodKnown(IRGS& env,
                                           exact);
   if (!func) return false;
 
-  auto const objOrCls = ldCtxForClsMethod(env, func, ctx, baseClass);
+  auto const objOrCls = ldCtxForClsMethod(env, func, ctx, baseClass, exact);
   if (check) {
     assertx(exact);
     if (!classIsPersistentOrCtxParent(env, baseClass)) {
@@ -1214,11 +1262,8 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
   auto const destroyLocals = callee
-    ? callee->isCPPBuiltin() && builtinFuncDestroysLocals(callee)
-    : callDestroysLocals(
-      *env.currentNormalizedInstruction,
-      curFunc(env)
-    );
+    ? funcDestroysLocals(callee)
+    : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
   auto const needsCallerFrame = callee
     ? callee->isCPPBuiltin() && builtinFuncNeedsCallerFrame(callee)
     : callNeedsCallerFrame(

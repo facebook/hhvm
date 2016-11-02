@@ -31,7 +31,8 @@ enum class ZendStackMode {
 
 struct ZendStackEntry {
   ZendStackMode mode;
-  void* value;
+  void* value; // union { ActRec*, uintptr, zval** }
+  TYPE_SCAN_CONSERVATIVE_FIELD(value);
 };
 
 struct ZendExecutionStack final : RequestEventHandler {
@@ -50,10 +51,6 @@ struct ZendExecutionStack final : RequestEventHandler {
   void requestShutdown() override {
     clear();
   }
-  void vscan(IMarker& mark) const override {
-    // TODO t7925750 what's in m_stack?
-    if (m_nullArg) mark(m_nullArg);
-  }
 
 private:
   static ZendExecutionStack & getStack();
@@ -65,7 +62,10 @@ private:
     }
   }
   std::vector<ZendStackEntry> m_stack;
-  RefData * m_nullArg;
+  RefData* m_nullArg;
+  TYPE_SCAN_CUSTOM_FIELD(m_stack) {
+    for (auto& e : m_stack) scanner.scan(e);
+  }
 };
 
 }

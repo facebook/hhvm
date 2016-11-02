@@ -28,8 +28,13 @@ struct DataStreamWrapper final : Stream::Wrapper {
   DataStreamWrapper() {
     m_isLocal = true;
   }
+
   req::ptr<File> open(const String& filename, const String& mode, int options,
                       const req::ptr<StreamContext>& context) override;
+
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

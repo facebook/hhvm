@@ -74,6 +74,7 @@ type t =
 | FunctionStaticStatement
 | StaticDeclarator
 | EchoStatement
+| GlobalStatement
 | SimpleInitializer
 | AnonymousFunction
 | AnonymousFunctionUseClause
@@ -192,6 +193,7 @@ let to_string kind =
   | FunctionStaticStatement -> "function_static_statement"
   | StaticDeclarator -> "static_declarator"
   | EchoStatement -> "echo_statement"
+  | GlobalStatement -> "global_statement"
   | SimpleInitializer -> "simple_initializer"
   | AnonymousFunction -> "anonymous_function"
   | AnonymousFunctionUseClause -> "anonymous_function_use_clause"

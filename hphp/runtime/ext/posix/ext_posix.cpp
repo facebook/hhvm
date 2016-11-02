@@ -19,15 +19,15 @@
 #include <memory>
 
 #include <sys/times.h>
-#include <sys/time.h>
+#include <folly/portability/SysTime.h>
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/resource.h>
+#include <folly/portability/SysResource.h>
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #endif
-#include <unistd.h>
+#include <folly/portability/Unistd.h>
 #include <pwd.h>
 
 #include <folly/String.h>
@@ -38,73 +38,38 @@
 
 namespace HPHP {
 
-#define DEFINE_POSIX_CONSTANT(name)                                            \
-  const int64_t k_POSIX_##name = name;                                         \
-  static const StaticString s_POSIX_##name("POSIX_"#name)                      \
-
-DEFINE_POSIX_CONSTANT(S_IFMT);
-DEFINE_POSIX_CONSTANT(S_IFSOCK);
-DEFINE_POSIX_CONSTANT(S_IFLNK);
-DEFINE_POSIX_CONSTANT(S_IFREG);
-DEFINE_POSIX_CONSTANT(S_IFBLK);
-DEFINE_POSIX_CONSTANT(S_IFDIR);
-DEFINE_POSIX_CONSTANT(S_IFCHR);
-DEFINE_POSIX_CONSTANT(S_IFIFO);
-DEFINE_POSIX_CONSTANT(S_ISUID);
-DEFINE_POSIX_CONSTANT(S_ISGID);
-DEFINE_POSIX_CONSTANT(S_ISVTX);
-DEFINE_POSIX_CONSTANT(S_IRWXU);
-DEFINE_POSIX_CONSTANT(S_IRUSR);
-DEFINE_POSIX_CONSTANT(S_IWUSR);
-DEFINE_POSIX_CONSTANT(S_IXUSR);
-DEFINE_POSIX_CONSTANT(S_IRWXG);
-DEFINE_POSIX_CONSTANT(S_IRGRP);
-DEFINE_POSIX_CONSTANT(S_IWGRP);
-DEFINE_POSIX_CONSTANT(S_IXGRP);
-DEFINE_POSIX_CONSTANT(S_IRWXO);
-DEFINE_POSIX_CONSTANT(S_IROTH);
-DEFINE_POSIX_CONSTANT(S_IWOTH);
-DEFINE_POSIX_CONSTANT(S_IXOTH);
-DEFINE_POSIX_CONSTANT(F_OK);
-DEFINE_POSIX_CONSTANT(X_OK);
-DEFINE_POSIX_CONSTANT(W_OK);
-DEFINE_POSIX_CONSTANT(R_OK);
-
 ///////////////////////////////////////////////////////////////////////////////
-
-#define REGISTER_POSIX_CONSTANT(name)                                          \
-  Native::registerConstant<KindOfInt64>(s_POSIX_##name.get(), k_POSIX_##name)  \
 
 static struct POSIXExtension final : Extension {
   POSIXExtension() : Extension("posix", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
-    REGISTER_POSIX_CONSTANT(S_IFMT);
-    REGISTER_POSIX_CONSTANT(S_IFSOCK);
-    REGISTER_POSIX_CONSTANT(S_IFLNK);
-    REGISTER_POSIX_CONSTANT(S_IFREG);
-    REGISTER_POSIX_CONSTANT(S_IFBLK);
-    REGISTER_POSIX_CONSTANT(S_IFDIR);
-    REGISTER_POSIX_CONSTANT(S_IFCHR);
-    REGISTER_POSIX_CONSTANT(S_IFIFO);
-    REGISTER_POSIX_CONSTANT(S_ISUID);
-    REGISTER_POSIX_CONSTANT(S_ISGID);
-    REGISTER_POSIX_CONSTANT(S_ISVTX);
-    REGISTER_POSIX_CONSTANT(S_IRWXU);
-    REGISTER_POSIX_CONSTANT(S_IRUSR);
-    REGISTER_POSIX_CONSTANT(S_IWUSR);
-    REGISTER_POSIX_CONSTANT(S_IXUSR);
-    REGISTER_POSIX_CONSTANT(S_IRWXG);
-    REGISTER_POSIX_CONSTANT(S_IRGRP);
-    REGISTER_POSIX_CONSTANT(S_IWGRP);
-    REGISTER_POSIX_CONSTANT(S_IXGRP);
-    REGISTER_POSIX_CONSTANT(S_IRWXO);
-    REGISTER_POSIX_CONSTANT(S_IROTH);
-    REGISTER_POSIX_CONSTANT(S_IWOTH);
-    REGISTER_POSIX_CONSTANT(S_IXOTH);
-    REGISTER_POSIX_CONSTANT(F_OK);
-    REGISTER_POSIX_CONSTANT(X_OK);
-    REGISTER_POSIX_CONSTANT(W_OK);
-    REGISTER_POSIX_CONSTANT(R_OK);
+    HHVM_RC_INT(POSIX_S_IFMT, S_IFMT);
+    HHVM_RC_INT(POSIX_S_IFSOCK, S_IFSOCK);
+    HHVM_RC_INT(POSIX_S_IFLNK, S_IFLNK);
+    HHVM_RC_INT(POSIX_S_IFREG, S_IFREG);
+    HHVM_RC_INT(POSIX_S_IFBLK, S_IFBLK);
+    HHVM_RC_INT(POSIX_S_IFDIR, S_IFDIR);
+    HHVM_RC_INT(POSIX_S_IFCHR, S_IFCHR);
+    HHVM_RC_INT(POSIX_S_IFIFO, S_IFIFO);
+    HHVM_RC_INT(POSIX_S_ISUID, S_ISUID);
+    HHVM_RC_INT(POSIX_S_ISGID, S_ISGID);
+    HHVM_RC_INT(POSIX_S_ISVTX, S_ISVTX);
+    HHVM_RC_INT(POSIX_S_IRWXU, S_IRWXU);
+    HHVM_RC_INT(POSIX_S_IRUSR, S_IRUSR);
+    HHVM_RC_INT(POSIX_S_IWUSR, S_IWUSR);
+    HHVM_RC_INT(POSIX_S_IXUSR, S_IXUSR);
+    HHVM_RC_INT(POSIX_S_IRWXG, S_IRWXG);
+    HHVM_RC_INT(POSIX_S_IRGRP, S_IRGRP);
+    HHVM_RC_INT(POSIX_S_IWGRP, S_IWGRP);
+    HHVM_RC_INT(POSIX_S_IXGRP, S_IXGRP);
+    HHVM_RC_INT(POSIX_S_IRWXO, S_IRWXO);
+    HHVM_RC_INT(POSIX_S_IROTH, S_IROTH);
+    HHVM_RC_INT(POSIX_S_IWOTH, S_IWOTH);
+    HHVM_RC_INT(POSIX_S_IXOTH, S_IXOTH);
+    HHVM_RC_INT(POSIX_F_OK, F_OK);
+    HHVM_RC_INT(POSIX_X_OK, X_OK);
+    HHVM_RC_INT(POSIX_W_OK, W_OK);
+    HHVM_RC_INT(POSIX_R_OK, R_OK);
 
     HHVM_FE(posix_access);
     HHVM_FE(posix_ctermid);
@@ -212,7 +177,7 @@ const StaticString
   s_shell("shell");
 
 static Variant php_posix_group_to_array(int gid,
-                   const String& gname = null_variant.toString()) {
+                   const String& gname = uninit_variant.toString()) {
   // Don't pass a gid *and* a gname to this.
   assert((gid <  0) || gname.size() == 0);
 
@@ -312,7 +277,7 @@ int64_t HHVM_FUNCTION(posix_getppid) {
 }
 
 static Variant php_posix_passwd_to_array(int uid,
-                   const String& name = null_variant.toString()) {
+                   const String& name = uninit_variant.toString()) {
   // Don't pass a uid *and* a name to this.
   assert((uid <  0) || name.size() == 0);
 

@@ -89,6 +89,7 @@ struct RuntimeOption {
 #ifdef FACEBOOK
   static bool UseThriftLogger;
   static size_t LoggerBatchSize;
+  static size_t LoggerFlushTimeout;
 #endif
   static std::map<std::string, ErrorLogFileData> ErrorLogs;
   static std::string LogFile;
@@ -500,15 +501,16 @@ struct RuntimeOption {
   F(string, ProfileHWEvents,           std::string(""))                 \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
-  F(uint32_t, JitMaxTranslations,      12)                              \
+  F(uint32_t, JitMaxTranslations,      17)                              \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
-  F(uint32_t, JitMaxRegionInstrs,      1000)                            \
+  F(uint32_t, JitMaxRegionInstrs,      1347)                            \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
+  F(uint32_t, JitRetranslateAllRequest, 0)                              \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
@@ -527,8 +529,8 @@ struct RuntimeOption {
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
-  F(uint32_t, HHIRInliningMaxVasmCost, 400)                             \
-  F(uint32_t, HHIRInliningMaxReturnDecRefs, 6)                          \
+  F(uint32_t, HHIRInliningMaxVasmCost, 370)                             \
+  F(uint32_t, HHIRInliningMaxReturnDecRefs, 12)                         \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \
@@ -541,7 +543,7 @@ struct RuntimeOption {
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
-  F(double, HHIRMixedArrayProfileThreshold, 0.8)                        \
+  F(double, HHIRMixedArrayProfileThreshold, 0.8554)                     \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -554,13 +556,14 @@ struct RuntimeOption {
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
   F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
-  F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
-  F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
+  F(uint32_t, JitUnlikelyDecRefPercent, 5)                              \
+  F(uint32_t, JitPGOReleaseVVMinPercent, 8)                             \
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(uint32_t, JitPGOMinBlockCountPercent, 0)                            \
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
+  F(bool,     JitPGODumpCallGraph,     false)                           \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(uint32_t, HotFuncCount,            4100)                            \

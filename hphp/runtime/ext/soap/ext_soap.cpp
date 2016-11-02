@@ -2547,7 +2547,7 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
                     const String& name,
                     const Array& args,
                     const Array& options = null_array,
-                    const Variant& input_headers = null_variant,
+                    const Variant& input_headers = uninit_variant,
                     VRefParam output_headers_ref = init_null()) {
   auto* data = Native::data<SoapClient>(this_);
   SoapClientScope ss(this_);
@@ -2952,7 +2952,7 @@ Variant HHVM_METHOD(SoapClient, __setlocation,
 }
 
 bool HHVM_METHOD(SoapClient, __setsoapheaders,
-                 const Variant& headers /* = null_variant */) {
+                 const Variant& headers /* = uninit_variant */) {
   auto* data = Native::data<SoapClient>(this_);
   if (headers.isNull()) {
     data->m_default_headers.unset();

@@ -217,7 +217,7 @@ struct Generator {
  public:
   // Parse out all the debug information out of the specified file and do the
   // analysis generating the layouts.
-  explicit Generator(const std::string&);
+  explicit Generator(const std::string&, bool skip);
 
   // Turn the layouts into C++ code, writing to the specified ostream.
   void operator()(std::ostream&) const;
@@ -592,13 +592,13 @@ struct Generator::IndexedType {
   folly::Optional<LayoutError> errors;
 };
 
-Generator::Generator(const std::string& filename) {
+Generator::Generator(const std::string& filename, bool skip) {
   // Either this platform has no support for parsing debug information, or the
   // preprocessor symbol to enable actually building scanner isn't
   // enabled. Either way, just bail out. Everything will get a conservative
   // scanner by default if someone actually tries to use the scanners at
   // runtime.
-  if (!HPHP::type_scan::kBuildScanners) return;
+  if (skip) return;
 
   m_parser = TypeParser::make(filename);
 
@@ -2764,6 +2764,17 @@ void Generator::checkForLayoutErrors() const {
       }
       oss << "\t- from type '" << *indexed.type << "'\n\n";
     }
+    // Error if an indexed type had internal linkage.
+    for (const auto& address : indexed.addresses) {
+      HPHP::match<void>(address,
+        [&](const std::string&) { /* ok */ },
+        [&](uintptr_t) {
+          ++error_count;
+          oss << "error: type " << *indexed.type << " has internal linkage.\n"
+                 " Indexed types need external linkage.\n";
+        }
+      );
+    }
   }
   if (error_count > 0) throw Exception{oss.str()};
 }
@@ -2870,7 +2881,17 @@ void Generator::genBuiltinScannerFuncs(std::ostream& os) const {
 
 void Generator::genScannerFuncs(std::ostream& os) const {
   genBuiltinScannerFuncs(os);
+  std::vector<std::vector<std::string>> types(m_layouts.size());
+  for (const auto& indexed : m_indexed_types) {
+    if (indexed.ignore || indexed.conservative) continue;
+    types[indexed.layout_index].push_back(indexed.type->toString());
+  }
   for (size_t i = 0; i < m_layouts.size(); ++i) {
+    auto& type_list = types[i];
+    std::sort(type_list.begin(), type_list.end());
+    for (auto& t : type_list) {
+      os << "// " << t << "\n";
+    }
     os << "void scanner_" << i << "(Scanner& scanner, "
        << "const void* ptr, size_t size) {\n";
     genScannerFunc(os, m_layouts[i]);
@@ -3170,7 +3191,8 @@ int main(int argc, char** argv) {
      "filename to read debug-info from")
     ("output_file",
      po::value<std::string>()->required(),
-     "filename of generated scanners");
+     "filename of generated scanners")
+    ("skip", "do not scan dwarf, generate conservative scanners");
 
   try {
     po::variables_map vm;
@@ -3181,6 +3203,13 @@ int main(int argc, char** argv) {
                 << desc << std::endl;
       return 1;
     }
+
+#ifdef __clang__
+  /* Doesn't work with Clang at the moment. t10336705 */
+  auto skip = true;
+#else
+  auto skip = vm.count("skip") || getenv("HHVM_DISABLE_TYPE_SCANNERS");
+#endif
 
     po::notify(vm);
 
@@ -3196,7 +3225,7 @@ int main(int argc, char** argv) {
 
     try {
       const auto source_executable = vm["source_file"].as<std::string>();
-      Generator generator{source_executable};
+      Generator generator{source_executable, skip};
       std::ofstream output_file{output_filename};
       generator(output_file);
     } catch (const debug_parser::Exception& exn) {

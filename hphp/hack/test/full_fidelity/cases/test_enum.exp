@@ -1,5 +1,9 @@
 (script(header((<))((?))((name)(end_of_line)))
 (enum_declaration
+  (attribute_specification
+    ((<<))
+    (list_item(attribute((name))(missing)(missing)(missing))(missing))
+    ((>>)(whitespace)))    
   ((enum)(whitespace))
   ((name)(whitespace))
   ((:)(whitespace))

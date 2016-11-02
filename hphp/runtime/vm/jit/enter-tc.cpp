@@ -43,7 +43,7 @@ void enterTC(TCA start, ActRec* stashedAR) {
 
   INC_TPC(enter_tc);
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-    auto skData = SrcKey{liveFunc(), vmpc(), liveResumed()}.toAtomicInt();
+    auto const skData = liveSK().toAtomicInt();
     Trace::ringbufferEntry(Trace::RBTypeEnterTC, skData, (uint64_t)start);
   }
 

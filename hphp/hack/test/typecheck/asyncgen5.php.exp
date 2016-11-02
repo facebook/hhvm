@@ -1,7 +1,7 @@
-Tint
-Tstring
-Tint
-Tstring
+int
+string
+int
+string
 File "asyncgen5.php", line 8, characters 3-7:
 Invalid yield (Typing[4110])
 File "asyncgen5.php", line 7, characters 15-28:

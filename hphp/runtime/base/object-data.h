@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/weakref-data.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -36,20 +37,20 @@ struct TypedValue;
 
 #define INVOKE_FEW_ARGS_COUNT 6
 #define INVOKE_FEW_ARGS_DECL3                        \
-  const Variant& a0 = null_variant,                  \
-  const Variant& a1 = null_variant,                  \
-  const Variant& a2 = null_variant
+  const Variant& a0 = uninit_variant,                \
+  const Variant& a1 = uninit_variant,                \
+  const Variant& a2 = uninit_variant
 #define INVOKE_FEW_ARGS_DECL6                        \
   INVOKE_FEW_ARGS_DECL3,                             \
-  const Variant& a3 = null_variant,                  \
-  const Variant& a4 = null_variant,                  \
-  const Variant& a5 = null_variant
+  const Variant& a3 = uninit_variant,                \
+  const Variant& a4 = uninit_variant,                \
+  const Variant& a5 = uninit_variant
 #define INVOKE_FEW_ARGS_DECL10                       \
   INVOKE_FEW_ARGS_DECL6,                             \
-  const Variant& a6 = null_variant,                  \
-  const Variant& a7 = null_variant,                  \
-  const Variant& a8 = null_variant,                  \
-  const Variant& a9 = null_variant
+  const Variant& a6 = uninit_variant,                \
+  const Variant& a7 = uninit_variant,                \
+  const Variant& a8 = uninit_variant,                \
+  const Variant& a9 = uninit_variant
 #define INVOKE_FEW_ARGS_HELPER(kind,num) kind##num
 #define INVOKE_FEW_ARGS(kind,num) \
   INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
@@ -91,7 +92,7 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   };
 
  private:
-  static __thread int os_max_id;
+  static __thread uint32_t os_max_id;
 
  public:
   static void resetMaxId();
@@ -120,6 +121,17 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   template<class F> void scan(F&) const;
 
   size_t heapSize() const;
+
+  // WeakRef control methods.
+  inline void invalidateWeakRef() const {
+    if (UNLIKELY(m_hdr.weak_refed)) {
+      WeakRefData::invalidateWeakRef((uintptr_t)this);
+    }
+  }
+
+  inline void setWeakRefed(bool weak_refed) const {
+    m_hdr.weak_refed = weak_refed;
+  }
 
  public:
 
@@ -158,7 +170,7 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   Class* getVMClass() const;
   void setVMClass(Class* cls);
   StrNR getClassName() const;
-  int getId() const;
+  uint32_t getId() const;
 
   // instanceof() can be used for both classes and interfaces.
   bool instanceof(const String&) const;
@@ -444,12 +456,14 @@ private:
 private:
 #ifdef USE_LOWPTR
   LowPtr<Class> m_cls;
-  int o_id; // Numeric identifier of this object (used for var_dump())
+  // Numeric identifier of this object (used for var_dump(), and WeakRefs)
+  uint32_t o_id;
   HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
 #else
   LowPtr<Class> m_cls;
   HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-  int o_id; // Numeric identifier of this object (used for var_dump())
+  // Numeric identifier of this object (used for var_dump(), and WeakRefs)
+  uint32_t o_id;
 #endif
 };
 #ifdef _MSC_VER

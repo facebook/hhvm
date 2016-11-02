@@ -247,7 +247,8 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
     irgen::gen(irgs, EndGuards);
 
     if (irgs.context.kind == TransKind::Profile) {
-      if (block.func()->isEntry(bcOff)) {
+      if (block.func()->isEntry(bcOff) &&
+          RuntimeOption::EvalJitRetranslateAllRequest == 0) {
         irgen::checkCold(irgs, irgs.context.transID);
       } else {
         irgen::incProfCounter(irgs, irgs.context.transID);
@@ -727,7 +728,9 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         auto returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
         auto returnFuncOff = returnSk.offset() - block.func()->base();
 
-        if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee, returnFuncOff,
+        if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee,
+                                 calleeRegion->start(),
+                                 returnFuncOff,
                                  irgen::ReturnTarget { returnBlock })) {
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
             { return show(*calleeRegion); };
@@ -957,7 +960,8 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irb.startBlock(entry, false /* hasUnprocPred */);
-    if (!irgen::conjureBeginInlining(irgs, func, ctxType, argTypes,
+    if (!irgen::conjureBeginInlining(irgs, func, region.start(),
+                                     ctxType, argTypes,
                                      irgen::ReturnTarget{returnBlock})) {
       return nullptr;
     }

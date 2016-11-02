@@ -200,10 +200,8 @@ void fixupWork(ExecutionContext* ec, ActRec* nextRbp) {
 bool eagerRecord(const Func* func) {
   const char* list[] = {
     "func_get_args",
-    "__SystemLib\\func_get_args_sl",
     "get_called_class",
     "func_num_args",
-    "__SystemLib\\func_num_arg_",
     "array_filter",
     "array_map",
     "__SystemLib\\func_slice_args",
@@ -211,15 +209,14 @@ bool eagerRecord(const Func* func) {
     "thrift_protocol_read_binary_struct",
     "thrift_protocol_read_compact",
     "thrift_protocol_read_compact_struct",
+    "HH\\Asio\\join",
   };
 
   for (auto str : list) {
-    if (!strcmp(func->name()->data(), str)) return true;
+    if (!strcmp(func->displayName()->data(), str)) return true;
   }
 
-  return func->cls() &&
-    !strcmp(func->cls()->name()->data(), "HH\\WaitHandle") &&
-    !strcmp(func->name()->data(), "join");
+  return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

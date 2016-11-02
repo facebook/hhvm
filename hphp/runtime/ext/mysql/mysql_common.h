@@ -253,10 +253,6 @@ struct MySQLRequestData final : RequestEventHandler {
     defaultConn.reset();
     totalRowCount = 0;
   }
-  void vscan(IMarker& mark) const override {
-    // hack around weird template error about req::ptr being final
-    mark(defaultConn.get());
-  }
 
   req::ptr<MySQLResource> defaultConn;
   int readTimeout;

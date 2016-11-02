@@ -222,6 +222,19 @@ void ArrayIter::cellInit(const Cell c) {
   }
 }
 
+void ArrayIter::rewind() {
+  if (LIKELY(hasArrayData())) {
+    if (auto* data = getArrayData())
+      m_pos = data->iter_begin();
+  } else {
+    assert(hasCollection());
+    auto* obj = getObject();
+    auto i = obj->isCollection() ? ctype_index(obj->collectionType()) :
+      MaxCollectionTypes;
+    initFuncTable[i](this, obj);
+  }
+}
+
 void ArrayIter::destruct() {
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
@@ -1489,8 +1502,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   cellSet(*var.asTypedValue(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 
-  Cell key;
-  APCLocalArray::NvGetKey(ad, &key, pos);
+  auto const key = APCLocalArray::NvGetKey(ad, pos);
   auto const keyType  = keyOut->m_type;
   auto const keyDatum = keyOut->m_data.num;
   cellCopy(key, *keyOut);

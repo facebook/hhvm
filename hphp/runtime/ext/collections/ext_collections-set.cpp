@@ -19,8 +19,9 @@ Class* c_ImmSet::s_cls;
 inline
 bool invokeAndCastToBool(const CallCtx& ctx, int argc,
                          const TypedValue* argv) {
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctx, argc, argv);
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(ctx, argc, argv)
+  );
   return ret.toBoolean();
 }
 
@@ -439,17 +440,16 @@ BaseSet::php_map(const Variant& callback) {
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     auto e = iter_elm(pos);
-    TypedValue tvCbRet;
     int32_t pVer = m_version;
     if (useKey) {
       argv[0] = e->data;
     }
     argv[argc-1] = e->data;
-    g_context->invokeFuncFew(&tvCbRet, ctx, argc, argv);
-    // Now that tvCbRet is live, make sure to decref even if we throw.
-    SCOPE_EXIT { tvRefcountedDecRef(&tvCbRet); };
+    auto cbRet = Variant::attach(
+      g_context->invokeFuncFew(ctx, argc, argv)
+    );
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
-    set->addRaw(&tvCbRet);
+    set->addRaw(cbRet.asTypedValue());
   }
   // ... and shrink back if that was incorrect
   set->shrinkIfCapacityTooHigh(oldCap);

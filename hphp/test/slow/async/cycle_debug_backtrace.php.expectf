@@ -1,23 +1,19 @@
-array(4) {
+array(3) {
   [0]=>
   string(28) "Closure$testCycleBackTrace#3"
   [1]=>
-  string(4) "join"
-  [2]=>
   string(12) "HH\Asio\join"
-  [3]=>
+  [2]=>
   string(18) "testCycleBackTrace"
 }
-array(5) {
+array(4) {
   [0]=>
   string(28) "Closure$testCycleBackTrace#5"
   [1]=>
   string(28) "Closure$testCycleBackTrace#3"
   [2]=>
-  string(4) "join"
-  [3]=>
   string(12) "HH\Asio\join"
-  [4]=>
+  [3]=>
   string(18) "testCycleBackTrace"
 }
 string(184) "Encountered dependency cycle.

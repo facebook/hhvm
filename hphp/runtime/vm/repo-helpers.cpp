@@ -257,6 +257,10 @@ void RepoQuery::bindStdString(const char* paramName, const std::string& s) {
   bindText(paramName, s.data(), s.size(), true);
 }
 
+void RepoQuery::bindStringPiece(const char* paramName, folly::StringPiece s) {
+  bindText(paramName, s.data(), s.size(), true);
+}
+
 void RepoQuery::bindDouble(const char* paramName, double val) {
   sqlite3_stmt* stmt = m_stmt.get();
   int rc UNUSED =
@@ -404,7 +408,7 @@ void RepoQuery::getMd5(int iCol, MD5& md5) {
       " (expected 16, got %zu) in '%s'",
       __func__, &m_stmt.repo(), iCol, size, m_stmt.sql().c_str());
   }
-  new (&md5) MD5(blob);
+  new (&md5) MD5(blob, size);
 }
 
 void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {

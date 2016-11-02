@@ -735,6 +735,7 @@ void emit_finish_func(const php::Func& func,
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
   fe.isNative = func.isNative;
+  fe.dynCallWrapperId = func.dynCallWrapperId;
 
   if (func.nativeInfo) {
     fe.returnType = func.nativeInfo->returnType;
@@ -847,7 +848,7 @@ void emit_class(EmitUnitState& state,
                 const php::Class& cls) {
   FTRACE(2, "    class: {}\n", cls.name->data());
   auto const pce = ue.newPreClassEmitter(
-    cls.name,
+    cls.name->toCppString(),
     cls.hoistability
   );
   pce->init(

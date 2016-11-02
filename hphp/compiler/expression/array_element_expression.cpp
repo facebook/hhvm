@@ -223,14 +223,12 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
         if (m_offset->isScalar() && m_offset->getScalarValue(o)) {
           if (v.isArray()) {
             try {
-              g_context->setThrowAllErrors(true);
+              ThrowAllErrorsSetter taes;
               Variant res = v.toArrRef().rvalAt(
                 o, hasContext(ExistContext) ?
                 AccessFlags::None : AccessFlags::Error);
-              g_context->setThrowAllErrors(false);
               return replaceValue(makeScalarExpression(ar, res));
             } catch (...) {
-              g_context->setThrowAllErrors(false);
             }
           }
         }

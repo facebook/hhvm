@@ -38,6 +38,12 @@ struct TypedValue;
 struct MArrayIter;
 struct VariableSerializer;
 
+// tuple-pod result of lval-style apis.
+struct ArrayLval {
+  ArrayData* array; // new array, if cow happened.
+  Variant* val;     // pointer to lval within new array
+};
+
 struct ArrayData {
   // Runtime type tag of possible array types.  This is intentionally
   // not an enum class, since we're using it pretty much as raw bits
@@ -244,16 +250,12 @@ public:
    * Interface for VM helpers.  ArrayData implements generic versions
    * using the other ArrayData api; subclasses may customize methods either
    * by providing a custom static method in g_array_funcs.
-   *
-   * An old comment said: nvGetKey does not touch out->_count, so can
-   * be used for inner or outer cells.  (It's unclear if anything is
-   * relying on this, but try not to in new code.)
    */
   const TypedValue* nvGet(int64_t k) const;
   const TypedValue* nvGet(const StringData* k) const;
   const TypedValue* nvTryGet(int64_t k) const;
   const TypedValue* nvTryGet(const StringData* k) const;
-  void nvGetKey(TypedValue* out, ssize_t pos) const;
+  Cell nvGetKey(ssize_t pos) const;
 
   // wrappers that call getValueRef()
   Variant getValue(ssize_t pos) const;
@@ -263,10 +265,10 @@ public:
    * Getting l-value (that Variant pointer) at specified key. Return this if
    * escalation is not needed, or an escalated array data.
    */
-  ArrayData *lval(int64_t k, Variant *&ret, bool copy);
-  ArrayData *lval(StringData* k, Variant *&ret, bool copy);
-  ArrayData *lvalRef(int64_t k, Variant *&ret, bool copy);
-  ArrayData *lvalRef(StringData* k, Variant *&ret, bool copy);
+  ArrayLval lval(int64_t k, bool copy);
+  ArrayLval lval(StringData* k, bool copy);
+  ArrayLval lvalRef(int64_t k, bool copy);
+  ArrayLval lvalRef(StringData* k, bool copy);
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
@@ -275,8 +277,8 @@ public:
    * available integer key may fail, in which case ret is set to point to
    * the lval blackhole (see lvalBlackHole() for details).
    */
-  ArrayData *lvalNew(Variant *&ret, bool copy);
-  ArrayData *lvalNewRef(Variant *&ret, bool copy);
+  ArrayLval lvalNew(bool copy);
+  ArrayLval lvalNewRef(bool copy);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
@@ -313,8 +315,8 @@ public:
 
   /**
    * Inline accessors that convert keys to StringData* before delegating to
-   * the virtual method.  Helpers that take a const Variant& key dispatch to either
-   * the StringData* or int64_t key-type helpers.
+   * the virtual method.  Helpers that take a const Variant& key dispatch
+   * to either the StringData* or int64_t key-type helpers.
    */
   bool exists(const String& k) const;
   bool exists(const Variant& k) const;
@@ -322,10 +324,10 @@ public:
   const Variant& get(const StringData* k, bool error = false) const;
   const Variant& get(const String& k, bool error = false) const;
   const Variant& get(const Variant& k, bool error = false) const;
-  ArrayData *lval(const String& k, Variant *&ret, bool copy);
-  ArrayData *lval(const Variant& k, Variant *&ret, bool copy);
-  ArrayData *lvalRef(const String& k, Variant *&ret, bool copy);
-  ArrayData *lvalRef(const Variant& k, Variant *&ret, bool copy);
+  ArrayLval lval(const String& k, bool copy);
+  ArrayLval lval(const Variant& k, bool copy);
+  ArrayLval lvalRef(const String& k, bool copy);
+  ArrayLval lvalRef(const Variant& k, bool copy);
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
@@ -599,7 +601,7 @@ struct ArrayFunctions {
   const TypedValue* (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
   const TypedValue* (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   const TypedValue* (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
-  void (*nvGetKey[NK])(const ArrayData*, TypedValue* out, ssize_t pos);
+  Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v,
                            bool copy);
@@ -608,16 +610,12 @@ struct ArrayFunctions {
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
-  ArrayData* (*lvalInt[NK])(ArrayData*, int64_t k, Variant*& ret,
-                            bool copy);
-  ArrayData* (*lvalIntRef[NK])(ArrayData*, int64_t k, Variant*& ret,
-                               bool copy);
-  ArrayData* (*lvalStr[NK])(ArrayData*, StringData* k, Variant*& ret,
-                            bool copy);
-  ArrayData* (*lvalStrRef[NK])(ArrayData*, StringData* k, Variant*& ret,
-                               bool copy);
-  ArrayData* (*lvalNew[NK])(ArrayData*, Variant *&ret, bool copy);
-  ArrayData* (*lvalNewRef[NK])(ArrayData*, Variant *&ret, bool copy);
+  ArrayLval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
+  ArrayLval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
+  ArrayLval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
+  ArrayLval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
+  ArrayLval (*lvalNew[NK])(ArrayData*, bool copy);
+  ArrayLval (*lvalNewRef[NK])(ArrayData*, bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);

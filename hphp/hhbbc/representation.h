@@ -386,6 +386,12 @@ struct Func {
    * with an HNI-based native implementation, this will be nullptr.
    */
   std::unique_ptr<NativeInfo> nativeInfo;
+
+  /*
+   * Associated dynamic call wrapper function. Used to catch dynamic calls to
+   * caller frame affecting functions.
+   */
+  Id dynCallWrapperId;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -456,6 +462,11 @@ struct Class {
    * Which unit defined this class.
    */
   borrowed_ptr<Unit> unit;
+
+  /*
+   * The id used to reference the class within its unit
+   */
+  int32_t id;
 
   /*
    * Hoistability of this class.  See the description in class.h

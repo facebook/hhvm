@@ -1114,6 +1114,8 @@ static int start_server(const std::string &username, int xhprof) {
     Logger::Info("Turning logger batching on, batch size %ld",
                  RuntimeOption::LoggerBatchSize);
     Logger::SetBatchSize(RuntimeOption::LoggerBatchSize);
+    Logger::SetFlushTimeout(
+      std::chrono::milliseconds(RuntimeOption::LoggerFlushTimeout));
   }
 #endif
 
@@ -1705,13 +1707,11 @@ static int execute_program_impl(int argc, char** argv) {
 
   // We want to do this as early as possible because any allocations before-hand
   // will get a generic unknown type type-index.
-  if (RuntimeOption::EvalEnableGC) {
-    try {
-      type_scan::init();
-    } catch (const type_scan::InitException& exn) {
-      Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
-      exit(HPHP_EXIT_FAILURE);
-    }
+  try {
+    type_scan::init();
+  } catch (const type_scan::InitException& exn) {
+    Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
+    exit(HPHP_EXIT_FAILURE);
   }
 
   // It's okay if this fails.
@@ -2363,6 +2363,9 @@ void hphp_session_exit() {
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
+  // In JitPGO mode, check if it's time to schedule the retranslation of all
+  // profiled functions and, if so, schedule it.
+  jit::mcgen::checkRetranslateAll();
   // Similarly, apc strings could be in the ServerNote array, and
   // its possible they are scheduled to be destroyed after this request
   // finishes.

@@ -315,8 +315,9 @@ void in(ISS& env, const bc::ClsCnsD& op) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::File&)  { nothrow(env); push(env, TSStr); }
-void in(ISS& env, const bc::Dir&)   { nothrow(env); push(env, TSStr); }
+void in(ISS& env, const bc::File&)   { nothrow(env); push(env, TSStr); }
+void in(ISS& env, const bc::Dir&)    { nothrow(env); push(env, TSStr); }
+void in(ISS& env, const bc::Method&) { nothrow(env); push(env, TSStr); }
 
 void in(ISS& env, const bc::NameA&) {
   nothrow(env);
@@ -419,8 +420,10 @@ void binOpBoolImpl(ISS& env, Fun fun) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
-    constprop(env);
-    return push(env, fun(*v2, *v1) ? TTrue : TFalse);
+    if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
+      constprop(env);
+      return push(env, *r ? TTrue : TFalse);
+    }
   }
   // TODO_4: evaluate when these can throw, non-constant type stuff.
   push(env, TBool);
@@ -433,8 +436,10 @@ void binOpInt64Impl(ISS& env, Fun fun) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
-    constprop(env);
-    return push(env, ival(fun(*v2, *v1)));
+    if (auto r = eval_cell_value([&]{ return ival(fun(*v2, *v1)); })) {
+      constprop(env);
+      return push(env, *r);
+    }
   }
   // TODO_4: evaluate when these can throw, non-constant type stuff.
   push(env, TInt);
@@ -1340,8 +1345,13 @@ void in(ISS& env, const bc::FPushFunc& op) {
     auto const name = normalizeNS(v1->m_data.pstr);
     // FPushFuncD doesn't support class-method pair strings yet.
     if (isNSNormalized(name) && notClassMethodPair(name)) {
-      return reduce(env, bc::PopC {},
-                         bc::FPushFuncD { op.arg1, name });
+      auto const rfunc = env.index.resolve_func(env.ctx, name);
+      // Don't turn dynamic calls to caller frame affecting functions into
+      // static calls, because they might fatal (whereas the static one won't).
+      if (!rfunc.mightAccessCallerFrame()) {
+        return reduce(env, bc::PopC {},
+                           bc::FPushFuncD { op.arg1, name });
+      }
     }
   }
   popC(env);
@@ -1352,9 +1362,12 @@ void in(ISS& env, const bc::FPushFunc& op) {
 }
 
 void in(ISS& env, const bc::FPushFuncU& op) {
-  auto const rfunc =
+  auto const rfuncPair =
     env.index.resolve_func_fallback(env.ctx, op.str2, op.str3);
-  fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc });
+  fpiPush(
+    env,
+    ActRec { FPIKind::Func, folly::none, rfuncPair.first, rfuncPair.second }
+  );
 }
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
@@ -1425,6 +1438,19 @@ void in(ISS& env, const bc::FPushCtorD& op) {
   push(env, rcls ? objExact(*rcls) : TObj);
   auto const rfunc =
     rcls ? env.index.resolve_ctor(env.ctx, *rcls) : folly::none;
+  fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
+}
+
+void in(ISS& env, const bc::FPushCtorI& op) {
+  auto const name = env.ctx.unit->classes[op.arg2]->name;
+  auto const rcls = env.index.resolve_class(env.ctx, name);
+  always_assert_flog(
+    rcls.hasValue() && rcls->resolved(),
+    "An anonymous class ({}) failed to resolve",
+    name->data()
+  );
+  push(env, objExact(*rcls));
+  auto const rfunc = env.index.resolve_ctor(env.ctx, *rcls);
   fpiPush(env, ActRec { FPIKind::Ctor, rcls, rfunc });
 }
 
@@ -1612,22 +1638,36 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
     CallContext { env.ctx, args },
     *ar.func
   );
-  pushCallReturnType(env, ty);
+  if (!ar.fallbackFunc) {
+    pushCallReturnType(env, ty);
+    return;
+  }
+  auto const ty2 = env.index.lookup_return_type(
+    CallContext { env.ctx, args },
+    *ar.fallbackFunc
+  );
+  pushCallReturnType(env, union_of(ty, ty2));
 }
 
 void in(ISS& env, const bc::FCall& op) {
   auto const ar = fpiTop(env);
-  if (ar.func) {
+  if (ar.func && !ar.fallbackFunc) {
     switch (ar.kind) {
     case FPIKind::Unknown:
     case FPIKind::CallableArr:
     case FPIKind::ObjInvoke:
       not_reached();
     case FPIKind::Func:
-      return reduce(
-        env,
-        bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
-      );
+      // Don't turn dynamic calls into static calls with functions that can
+      // potentially touch the caller's frame. Such functions will fatal if
+      // called dynamically and we want to preserve that behavior.
+      if (!ar.func->mightAccessCallerFrame()) {
+        return reduce(
+          env,
+          bc::FCallD { op.arg1, s_empty.get(), ar.func->name() }
+        );
+      }
+      break;
     case FPIKind::Ctor:
       /*
        * Need to be wary of old-style ctors. We could get into the situation
@@ -1679,7 +1719,12 @@ void fcallArrayImpl(ISS& env) {
   specialFunctionEffects(env, ar);
   if (ar.func) {
     auto const ty = env.index.lookup_return_type(env.ctx, *ar.func);
-    pushCallReturnType(env, ty);
+    if (!ar.fallbackFunc) {
+      pushCallReturnType(env, ty);
+      return;
+    }
+    auto const ty2 = env.index.lookup_return_type(env.ctx, *ar.fallbackFunc);
+    pushCallReturnType(env, union_of(ty, ty2));
     return;
   }
   return push(env, TInitGen);
@@ -2038,7 +2083,7 @@ void in(ISS& env, const bc::Parent&) { push(env, TCls); }
 
 void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;
-  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.str2);
+  auto const clsPair = env.index.resolve_closure_class(env.ctx, op.arg2);
 
   /*
    * Every closure should have a unique allocation site, but we may see it
@@ -2184,6 +2229,8 @@ void in(ISS& env, const bc::Silence& op) {
       break;
   }
 }
+
+void in(ISS& emv, const bc::VarEnvDynCall&) {}
 
 void in(ISS& env, const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
 void in(ISS& env, const bc::HighInvalid&) { always_assert(!"HighInvalid"); }

@@ -46,9 +46,8 @@ struct UserStreamWrapper final : Stream::Wrapper {
   bool chgrp(const String& path, int64_t gid);
   bool chgrp(const String& path, const String& gid);
 
-  void vscan(IMarker& mark) const override {
-    mark(m_name);
-    // m_cls is not in req heap
+  void scan(type_scan::Scanner& scanner) const override {
+    scanner.scan(*this);
   }
 
 private:

@@ -187,9 +187,6 @@ struct MBGlobals final : RequestEventHandler {
   OnigOptionType regex_default_options;
   OnigSyntaxType *regex_default_syntax;
 
-  void vscan(IMarker& mark) const override {
-  }
-
   MBGlobals() :
     language(mbfl_no_language_uni),
     current_language(mbfl_no_language_uni),
@@ -1243,7 +1240,7 @@ Variant HHVM_FUNCTION(mb_convert_case,
 Variant HHVM_FUNCTION(mb_convert_encoding,
                       const String& str,
                       const String& to_encoding,
-                      const Variant& from_encoding /* = null_variant */) {
+                      const Variant& from_encoding /* = uninit_variant */) {
   String encoding = from_encoding.toString();
   if (from_encoding.isArray()) {
     StringBuffer _from_encodings;
@@ -1428,7 +1425,7 @@ Variant HHVM_FUNCTION(mb_convert_variables,
                                         MBSTRG(strict_detection));
     if (identd != nullptr) {
       for (int n = -1; n < args.size(); n++) {
-        if (php_mbfl_encoding_detect(n < 0 ? (Variant&)vars : args[n],
+        if (php_mbfl_encoding_detect(n < 0 ? vars.wrapped() : args[n],
                                      identd, &string)) {
           break;
         }
@@ -1565,8 +1562,8 @@ Variant HHVM_FUNCTION(mb_decode_numericentity,
 
 Variant HHVM_FUNCTION(mb_detect_encoding,
                       const String& str,
-                      const Variant& encoding_list /* = null_variant */,
-                      const Variant& strict /* = null_variant */) {
+                      const Variant& encoding_list /* = uninit_variant */,
+                      const Variant& strict /* = uninit_variant */) {
   mbfl_string string;
   mbfl_encoding *ret;
   mbfl_encoding **elist, **list;
@@ -1607,7 +1604,7 @@ Variant HHVM_FUNCTION(mb_detect_encoding,
 }
 
 Variant HHVM_FUNCTION(mb_detect_order,
-                      const Variant& encoding_list /* = null_variant */) {
+                      const Variant& encoding_list /* = uninit_variant */) {
   int n, size;
   mbfl_encoding **list, **entry;
 
@@ -1696,7 +1693,7 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
 Variant HHVM_FUNCTION(mb_encode_numericentity,
                       const String& str,
                       const Variant& convmap,
-                      const Variant& opt_encoding /* = null_variant */,
+                      const Variant& opt_encoding /* = uninit_variant */,
                       bool is_hex /* = false */) {
   const String encoding = convertArg(opt_encoding);
   return php_mb_numericentity_exec(str, convmap, encoding, is_hex, 0);
@@ -2951,7 +2948,7 @@ Variant HHVM_FUNCTION(mb_strwidth,
 }
 
 Variant HHVM_FUNCTION(mb_substitute_character,
-                      const Variant& substrchar /* = null_variant */) {
+                      const Variant& substrchar /* = uninit_variant */) {
   if (substrchar.isNull()) {
     switch (MBSTRG(current_filter_illegal_mode)) {
     case MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE:

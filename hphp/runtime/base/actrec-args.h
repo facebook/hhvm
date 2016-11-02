@@ -87,7 +87,7 @@ getArg(ActRec *ar, unsigned arg) {
     return 0L;
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     tvCastInPlace(tv, DType);
   }
@@ -110,7 +110,7 @@ getArg(ActRec *ar, unsigned arg,
     return def;
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     tvCastInPlace(tv, DType);
   }
@@ -137,7 +137,7 @@ getArgStrict(ActRec *ar, unsigned arg) {
     throw IncoercibleArgumentException();
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     throw IncoercibleArgumentException();
   }
@@ -163,7 +163,7 @@ getArgStrict(ActRec *ar, unsigned arg,
     return def;
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     throw IncoercibleArgumentException();
   }

@@ -303,14 +303,6 @@ struct Scanner {
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
 };
 
-constexpr bool kBuildScanners =
-  /* Doesn't work with Clang at the moment. t10336705 */
-#if !defined(HHVM_DISABLE_TYPE_SCANNERS) && !defined(__clang__)
-  true;
-#else
-  false;
-#endif
-
 /*
  * Type annotations to change generated function behavior:
  *

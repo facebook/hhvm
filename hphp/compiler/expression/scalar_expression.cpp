@@ -170,9 +170,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
         m_translated.clear();
         if (b && b->is(BlockScope::ClassScope)) {
           auto clsScope = dynamic_pointer_cast<ClassScope>(b);
-          if (!clsScope->isTrait()) {
-            m_translated = clsScope->getOriginalName();
-          }
+          m_translated = clsScope->getOriginalName();
         }
         if (m_type == T_METHOD_C) {
           if (FunctionScopePtr func = getFunctionScope()) {

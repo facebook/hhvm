@@ -125,8 +125,6 @@ struct ImapRequestData final : RequestEventHandler {
     }
   }
 
-  void vscan(IMarker&) const override {}
-
   std::string m_user;
   std::string m_password;
 

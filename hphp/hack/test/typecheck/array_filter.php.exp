@@ -1,10 +1,10 @@
 array
-array<Tstring>
-array<Tarraykey, Tstring>
-X
-X
+array<string>
+array<arraykey, string>
+_
+_
 array
-array<option(Tstring)>
-X
-X
+array<?string>
+_
+_
 No errors

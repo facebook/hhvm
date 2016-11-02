@@ -84,6 +84,9 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
     ServerEnv.notifier = notifier;
   } in
 
+  (* Always pick up disk changes in tests immediately *)
+  let env = ServerEnv.({ env with last_notifier_check_time = 0.0 }) in
+
   let env = ServerMain.serve_one_iteration genv env client_provider in
   env, {
     did_read_disk_changes = !did_read_disk_changes_ref;

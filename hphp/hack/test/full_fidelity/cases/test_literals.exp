@@ -1,0 +1,20 @@
+(script
+  (header((<))((?))((name)(end_of_line)))
+  (function_declaration(missing)
+    (function_declaration_header
+      (missing)((function)(whitespace))(missing)((name))(missing)((lparen))
+      (missing)((rparen)(whitespace))(missing)(missing))
+      (compound_statement
+        (({)(end_of_line))
+        (list
+          (expression_statement
+            (binary_expression
+              (variable((whitespace)(variable)(whitespace)))((=)(end_of_line))
+              (literal((heredoc_string_literal))))
+              ((;)(end_of_line)))
+          (expression_statement
+            (binary_expression
+              (variable((whitespace)(variable)(whitespace)))((=)(end_of_line))
+              (literal((nowdoc_string_literal)(end_of_line))))
+              ((;)(end_of_line))))
+        ((end_of_line)(})))))

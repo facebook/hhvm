@@ -1,12 +1,12 @@
 # test weird characters in names (like those used in closures)
 
 .main {
-  DefCls 0
-
-  FPushClsMethodD 0 "print$foo" "Uh$Foo::Bar;42"
+  FPushCtorI 0 0
   FCall 0
   PopR
-
+  FPushObjMethodD 0 "print$foo" NullThrows
+  FCall 0
+  PopR
   Int 1
   RetC
 }

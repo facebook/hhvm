@@ -38,6 +38,7 @@ struct StringData;
 struct MArrayIter;
 struct MixedArray;
 struct APCArray;
+struct ArrayLval;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -56,7 +57,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
   static constexpr auto NvTryGetStr = &NvGetStr;
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static size_t Vsize(const ArrayData*);
@@ -66,12 +67,11 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
+  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
   static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
-                            bool copy);
+  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
   static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static ArrayLval LvalNew(ArrayData*, bool copy);
   static constexpr auto LvalNewRef = &LvalNew;
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
@@ -126,11 +126,11 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static ArrayData* SetIntVec(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStrVec(ArrayData*, StringData*, Cell, bool);
   static ArrayData* RemoveIntVec(ArrayData*, int64_t, bool);
-  static ArrayData* LvalIntVec(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrVec(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalIntRefVec(ArrayData*, int64_t, Variant*&, bool);
-  static ArrayData* LvalStrRefVec(ArrayData*, StringData*, Variant*&, bool);
-  static ArrayData* LvalNewRefVec(ArrayData*, Variant*&, bool);
+  static ArrayLval LvalIntVec(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStrVec(ArrayData*, StringData*, bool);
+  static ArrayLval LvalIntRefVec(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStrRefVec(ArrayData*, StringData*, bool);
+  static ArrayLval LvalNewRefVec(ArrayData*, bool);
   static ArrayData* SetRefIntVec(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStrVec(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* AppendRefVec(ArrayData*, Variant&, bool);
@@ -182,8 +182,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
 
   // Like LvalInt, but silently does nothing if the element doesn't exist. Not
   // part of the ArrayData interface, but used in member operations.
-  static ArrayData* LvalSilentInt(ArrayData*, int64_t, Variant*&, bool);
-
+  static ArrayLval LvalSilentInt(ArrayData*, int64_t, bool);
   static constexpr auto LvalSilentIntVec = &LvalSilentInt;
 
   /////////////////////////////////////////////////////////////////////

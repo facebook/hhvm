@@ -198,10 +198,6 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     }
   }
 
-  // This is available iff it's available in both states
-  changed |= merge_util(dst.thisAvailable,
-                        dst.thisAvailable && src.thisAvailable);
-
   // The frame may span a call if it could have done so in either state.
   changed |= merge_util(dst.frameMaySpanCall,
                         dst.frameMaySpanCall || src.frameMaySpanCall);
@@ -671,7 +667,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case CheckCtxThis:
-    cur().thisAvailable = true;
     break;
 
   case IterInitK:
@@ -1058,7 +1053,6 @@ void FrameStateMgr::clearForUnprocessedPred() {
   }
 
   // These values must go toward their conservative state.
-  cur().thisAvailable    = false;
   cur().frameMaySpanCall = true;
   cur().mbr = MBRState{};
   cur().mbase = MBaseState{};
@@ -1095,14 +1089,10 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
    * Set up the callee state.
    */
   cur().fpValue          = calleeFP;
-  cur().thisAvailable    = target->cls() != nullptr &&
-                           !target->isStatic() &&
-                           extra->ctx &&
-                           extra->ctx->isA(TObj);
   cur().ctx              = extra->ctx;
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
-  cur().bcSPOff          = FPInvOffset{target->numLocals()};
+  cur().bcSPOff          = FPInvOffset{target->numSlotsInFrame()};
 
   /*
    * To set up irSPOff, we want the FPInvOffset for the new fpValue and
@@ -1581,7 +1571,6 @@ std::string show(const FrameStateMgr& state) {
     "func: {}, spOff: {}{}{}",
     funcName,
     state.irSPOff().offset,
-    state.thisAvailable() ? ", thisAvailable" : "",
     state.frameMaySpanCall() ? ", frameMaySpanCall" : ""
   ).str();
 }

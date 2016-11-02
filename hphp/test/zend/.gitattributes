@@ -544,6 +544,7 @@ good/ext/standard/tests/general_functions/parse_ini_basic.data binary
 good/ext/standard/tests/image/246x247.png binary
 good/ext/standard/tests/image/384x385.png binary
 good/ext/standard/tests/image/bug13213.jpg binary
+good/ext/standard/tests/image/bug72278.jpg binary
 good/ext/standard/tests/image/test-1pix.bmp binary
 good/ext/standard/tests/image/test13pix.swf binary
 good/ext/standard/tests/image/test1pix.jpg binary

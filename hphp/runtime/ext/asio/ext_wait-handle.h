@@ -32,7 +32,6 @@ void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitExitCallback,
 void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
                         const Variant& callback);
 void HHVM_METHOD(WaitHandle, import);
-Variant HHVM_METHOD(WaitHandle, join);
 bool HHVM_METHOD(WaitHandle, isFinished);
 bool HHVM_METHOD(WaitHandle, isSucceeded);
 bool HHVM_METHOD(WaitHandle, isFailed);

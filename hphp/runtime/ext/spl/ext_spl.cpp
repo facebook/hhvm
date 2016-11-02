@@ -259,7 +259,7 @@ Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
 }
 
 bool HHVM_FUNCTION(spl_autoload_register,
-                   const Variant& autoload_function /* = null_variant */,
+                   const Variant& autoload_function /* = uninit_variant */,
                    bool throws /* = true */,
                    bool prepend /* = false */) {
   if (same(autoload_function, s_spl_autoload_call)) {
@@ -301,7 +301,6 @@ void HHVM_FUNCTION(spl_autoload_call, const String& class_name) {
   AutoloadHandler::s_instance->autoloadClass(class_name, true);
 }
 
-namespace {
 struct ExtensionList final : RequestEventHandler {
   void requestInit() override {
     extensions = make_packed_array(String(".inc"), String(".php"));
@@ -309,15 +308,11 @@ struct ExtensionList final : RequestEventHandler {
   void requestShutdown() override {
     extensions.reset();
   }
-  void vscan(IMarker& mark) const override {
-    mark(extensions);
-  }
 
   Array extensions;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
-}
 
 String HHVM_FUNCTION(spl_autoload_extensions,
                      const String& file_extensions /* = null_string */) {

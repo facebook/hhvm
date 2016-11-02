@@ -380,6 +380,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(NameA,           NA,               ONE(AV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
+  O(Method,          NA,               NOV,             ONE(CV),    NF) \
   O(Concat,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ConcatN,         ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(Add,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -500,6 +501,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        NF) \
   O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    NF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
+  O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    NF) \
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        NF) \
   O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        NF) \
   O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
@@ -567,7 +569,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,SA),      CVUMANY,         ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,IVA),     CVUMANY,         ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
@@ -639,6 +641,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
   O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
+  O(VarEnvDynCall,   NA,               NOV,             NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
 enum class Op : uint16_t {
@@ -918,8 +921,15 @@ constexpr bool isFPushClsMethod(Op opcode) {
   return opcode >= OpFPushClsMethod && opcode <= OpFPushClsMethodD;
 }
 
+constexpr bool isFPushObjMethod(Op opcode) {
+  return opcode == OpFPushObjMethod || opcode == OpFPushObjMethodD;
+}
+
 constexpr bool isFPushCtor(Op opcode) {
-  return opcode == OpFPushCtor || opcode == OpFPushCtorD;
+  return
+    opcode == OpFPushCtor ||
+    opcode == OpFPushCtorD ||
+    opcode == OpFPushCtorI;
 }
 
 constexpr bool isFPushFunc(Op opcode) {

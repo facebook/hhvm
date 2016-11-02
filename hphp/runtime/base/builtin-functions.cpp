@@ -56,7 +56,6 @@
 #include <boost/format.hpp>
 
 #include <algorithm>
-#include <limits>
 
 namespace HPHP {
 
@@ -143,7 +142,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     const Variant& clsname = arr.rvalAtRef(int64_t(0));
     const Variant& mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
-        &clsname == &null_variant ||
+        &clsname == &uninit_variant ||
         !mthname.isString()) {
       if (name) *name->var() = array_string;
       return false;
@@ -334,8 +333,9 @@ vm_decode_function(const Variant& function,
         cls = cc;
       }
     }
+
     if (!cls) {
-      HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
+      HPHP::Func* f = HPHP::Unit::loadDynCallFunc(name.get());
       if (!f) {
         if (flags == DecodeFlags::Warn) {
           throw_invalid_argument("function: method '%s' not found",
@@ -390,7 +390,7 @@ vm_decode_function(const Variant& function,
       }
     }
 
-    if (!this_ && !f->isStaticInProlog()) {
+    if (!this_ && !f->isStaticInPrologue()) {
       if (flags == DecodeFlags::Warn) raise_missing_this(f);
       if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
         return nullptr;
@@ -413,13 +413,15 @@ vm_decode_function(const Variant& function,
         cls = fwdCls;
       }
     }
+
+    assertx(!f->dynCallWrapper());
     return f;
   }
   if (function.isObject()) {
     this_ = function.asCObjRef().get();
     cls = nullptr;
     const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());
-    if (f != nullptr && f->isStaticInProlog()) {
+    if (f != nullptr && f->isStaticInPrologue()) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;
@@ -448,9 +450,10 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   if (f == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf);
+  auto ret = Variant::attach(
+    g_context->invokeFunc(f, params, obj, cls,
+                          nullptr, invName, ExecutionContext::InvokeCuf)
+  );
   if (UNLIKELY(ret.getRawType()) == KindOfRef) {
     tvUnbox(ret.asTypedValue());
   }
@@ -475,10 +478,11 @@ static Variant invoke(const String& function, const Variant& params,
                       bool fatal, bool useWeakTypes = false) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
-    Variant ret;
-    g_context->invokeFunc(ret.asTypedValue(), func, params, nullptr, nullptr,
-                          nullptr, nullptr, ExecutionContext::InvokeNormal,
-                          useWeakTypes);
+    auto ret = Variant::attach(
+      g_context->invokeFunc(func, params, nullptr, nullptr,
+                            nullptr, nullptr, ExecutionContext::InvokeNormal,
+                            useWeakTypes)
+    );
     if (UNLIKELY(ret.getRawType()) == KindOfRef) {
       tvUnbox(ret.asTypedValue());
     }
@@ -509,8 +513,9 @@ Variant invoke_static_method(const String& s, const String& method,
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
+  auto ret = Variant::attach(
+    g_context->invokeFunc(f, params, nullptr, class_)
+  );
   if (UNLIKELY(ret.getRawType()) == KindOfRef) {
     tvUnbox(ret.asTypedValue());
   }
@@ -901,7 +906,7 @@ static bool invoke_file_impl(Variant& res, const String& path, bool once,
   auto const u = lookupUnit(path.get(), currentDir, &initial);
   if (u == nullptr) return false;
   if (!once || initial) {
-    g_context->invokeUnit(res.asTypedValue(), u);
+    *res.asTypedValue() = g_context->invokeUnit(u);
   }
   return true;
 }

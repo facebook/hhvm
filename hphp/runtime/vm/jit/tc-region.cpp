@@ -261,8 +261,8 @@ TCA emitTranslation(TransEnv env) {
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
-  TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
-        loc.mainStart(), sk.funcID(), sk.offset());
+  TRACE(1, "newTranslation: %p  sk: %s\n",
+        loc.mainStart(), showShort(sk).c_str());
   srcRec->newTranslation(loc, inProgressTailBranches);
 
   TRACE(1, "mcg: %zd-byte tracelet\n", (ssize_t)loc.mainSize());
@@ -282,6 +282,7 @@ TCA emitTranslation(TransEnv env) {
     auto const regionSk = env.unit->context().srcKey();
     if (env.args.kind == TransKind::Optimize &&
         regionSk.offset() == func->base() &&
+        !func->hasThisVaries() &&
         func->getDVFunclets().size() == 0 &&
         func->getFuncBody() == ustubs().funcBodyHelperThunk) {
       func->setFuncBody(loc.mainStart());
@@ -304,10 +305,9 @@ static void invalidateSrcKeyNoLock(SrcKey sk) {
    * just created some garbage in the TC. We currently have no mechanism
    * to reclaim this.
    */
-  FTRACE_MOD(Trace::reusetc, 1, "Replacing translations from func {} (id = {}) "
-             "@ sk({}) in SrcRec addr={}\n",
-             sk.func()->fullName()->data(), sk.func()->getFuncId(), sk.offset(),
-             (void*)sr);
+  FTRACE_MOD(Trace::reusetc, 1,
+             "Replacing translations from sk: {} " "to SrcRec addr={}\n",
+             showShort(sk), (void*)sr);
   Trace::Indent _i;
   sr->replaceOldTranslations();
 }

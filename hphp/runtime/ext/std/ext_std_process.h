@@ -43,9 +43,9 @@ Variant HHVM_FUNCTION(proc_open,
                       const String& cmd,
                       const Array& descriptorspec,
                       VRefParam pipes,
-                      const Variant& cwd = null_variant,
-                      const Variant& env = null_variant,
-                      const Variant& other_options = null_variant);
+                      const Variant& cwd = uninit_variant,
+                      const Variant& env = uninit_variant,
+                      const Variant& other_options = uninit_variant);
 bool HHVM_FUNCTION(proc_terminate,
                    const Resource& process,
                    int signal = SIGTERM);

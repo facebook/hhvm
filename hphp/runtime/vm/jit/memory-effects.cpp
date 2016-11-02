@@ -1007,6 +1007,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NSameDict:
   case EqKeyset:
   case NeqKeyset:
+  case SameKeyset:
+  case NSameKeyset:
     return may_load_store(AElemAny, AEmpty);
 
   case ArrayIdx:
@@ -1570,6 +1572,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseWarning:
   case RaiseMissingThis:
   case FatalMissingThis:
+  case RaiseVarEnvDynCall:
   case ConvCellToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass
@@ -1606,6 +1609,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitProps:
   case InitSProps:
   case OODeclExists:
+  case DefCls:         // autoload
   case LdCls:          // autoload
   case LdClsCached:    // autoload
   case LdFunc:         // autoload

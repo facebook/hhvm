@@ -854,19 +854,6 @@ MixedArray* MixedArray::initRef(TypedValue& tv, Variant& v) {
 }
 
 ALWAYS_INLINE
-MixedArray* MixedArray::getLval(TypedValue& tv, Variant*& ret) {
-  ret = &tvAsVariant(&tv);
-  return this;
-}
-
-ALWAYS_INLINE
-MixedArray* MixedArray::initLval(TypedValue& tv, Variant*& ret) {
-  tvWriteNull(&tv);
-  ret = &tvAsVariant(&tv);
-  return this;
-}
-
-ALWAYS_INLINE
 MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
@@ -1181,68 +1168,56 @@ ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
   return zInitVal(e.data, data);
 }
 
-ArrayData* MixedArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                               bool copy) {
+ArrayLval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) {
     a = a->copyMixedAndResizeIfNeeded();
   } else {
     a = a->resizeIfNeeded();
   }
-  return a->addLvalImpl(k, ret);
+  return a->addLvalImpl(k);
 }
 
-ArrayData* MixedArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
-                               bool copy) {
+ArrayLval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
-  return a->addLvalImpl(key, ret);
+  return a->addLvalImpl(key);
 }
 
-ArrayData* MixedArray::LvalSilentInt(ArrayData* ad,
-                                     int64_t k,
-                                     Variant*& ret,
-                                     bool copy) {
+ArrayLval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, hashint(k));
-  if (UNLIKELY(!validPos(pos))) return a;
+  if (UNLIKELY(!validPos(pos))) return {a, nullptr};
   if (copy) a = a->copyMixed();
-  ret = &tvAsVariant(&a->data()[pos].data);
-  return a;
+  return {a, &tvAsVariant(&a->data()[pos].data)};
 }
 
-ArrayData* MixedArray::LvalSilentStr(ArrayData* ad,
-                                     const StringData* k,
-                                     Variant*& ret,
+ArrayLval MixedArray::LvalSilentStr(ArrayData* ad, const StringData* k,
                                      bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, k->hash());
-  if (UNLIKELY(!validPos(pos))) return a;
+  if (UNLIKELY(!validPos(pos))) return {a, nullptr};
   if (copy) a = a->copyMixed();
-  ret = &tvAsVariant(&a->data()[pos].data);
-  return a;
+  return {a, &tvAsVariant(&a->data()[pos].data)};
 }
 
-ArrayData* MixedArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
+ArrayLval MixedArray::LvalNew(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
-    ret = &lvalBlackHole();
-    return a;
+    return {a, &lvalBlackHole()};
   }
 
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
   if (UNLIKELY(!a->nextInsert(make_tv<KindOfNull>()))) {
-    ret = &lvalBlackHole();
-    return a;
+    return {a, &lvalBlackHole()};
   }
 
-  ret = &tvAsVariant(&a->data()[a->m_used - 1].data);
-  return a;
+  return {a, &tvAsVariant(&a->data()[a->m_used - 1].data)};
 }
 
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
@@ -1422,11 +1397,11 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
 
 #endif
 
-void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
+Cell MixedArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assert(pos != a->m_used);
   assert(!isTombstone(a->data()[pos].data.m_type));
-  getElmKey(a->data()[pos], out);
+  return getElmKey(a->data()[pos]);
 }
 
 ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
@@ -1656,10 +1631,9 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
     if (key.asTypedValue()->m_type == KindOfInt64) {
       ret->nextInsertWithRef(value);
     } else {
-      Variant* p;
       StringData* sd = key.getStringData();
-      ret->addLvalImpl(sd, p);
-      p->setWithRef(value);
+      auto const r = ret->addLvalImpl(sd);
+      r.val->setWithRef(value);
     }
   }
   return ret;
@@ -1682,9 +1656,8 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
       if (srcElem->hasIntKey()) {
         ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
       } else {
-        Variant* p;
-        ret->addLvalImpl(srcElem->skey, p);
-        p->setWithRef(tvAsCVarRef(&srcElem->data));
+        auto const r = ret->addLvalImpl(srcElem->skey);
+        r.val->setWithRef(tvAsCVarRef(&srcElem->data));
       }
     }
     return ret;
@@ -1887,21 +1860,21 @@ const TypedValue* MixedArray::NvTryGetStrHackArr(const ArrayData* ad,
   return tv;
 }
 
-ArrayData*
-MixedArray::LvalIntRefHackArr(ArrayData* adIn, int64_t, Variant*&, bool) {
+ArrayLval
+MixedArray::LvalIntRefHackArr(ArrayData* adIn, int64_t, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData*
-MixedArray::LvalStrRefHackArr(ArrayData* adIn, StringData*, Variant*&, bool) {
+ArrayLval
+MixedArray::LvalStrRefHackArr(ArrayData* adIn, StringData*, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData* MixedArray::LvalNewRefHackArr(ArrayData* adIn, Variant*&, bool) {
+ArrayLval MixedArray::LvalNewRefHackArr(ArrayData* adIn, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
@@ -1950,24 +1923,69 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   // Prevent circular referenced objects/arrays or deep ones.
   check_recursion_error();
 
-  auto const arr1 = asMixed(ad1);
-  auto elm = arr1->data();
-  for (auto i = arr1->m_used; i--; elm++) {
-    if (UNLIKELY(elm->isTombstone())) continue;
-    const TypedValue* other;
-    if (elm->hasIntKey()) {
-      other = NvGetIntDict(ad2, elm->ikey);
-    } else {
-      assert(elm->hasStrKey());
-      other = NvGetStrDict(ad2, elm->skey);
-    }
-    if (!other) return false;
-    if (strict) {
-      if (!cellSame(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+  if (strict) {
+    auto const arr1 = asMixed(ad1);
+    auto const arr2 = asMixed(ad2);
+    auto elm1 = arr1->data();
+    auto elm2 = arr2->data();
+    auto i1 = arr1->m_used;
+    auto i2 = arr2->m_used;
+    while (i1 > 0 && i2 > 0) {
+      if (UNLIKELY(elm1->isTombstone())) {
+        ++elm1;
+        --i1;
+        continue;
+      }
+      if (UNLIKELY(elm2->isTombstone())) {
+        ++elm2;
+        --i2;
+        continue;
+      }
+      if (elm1->hasIntKey()) {
+        if (!elm2->hasIntKey()) return false;
+        if (elm1->ikey != elm2->ikey) return false;
+      } else {
+        assertx(elm1->hasStrKey());
+        if (!elm2->hasStrKey()) return false;
+        if (!same(elm1->skey, elm2->skey)) return false;
+      }
+      if (!cellSame(*tvAssertCell(&elm1->data), *tvAssertCell(&elm2->data))) {
         return false;
       }
+      ++elm1;
+      ++elm2;
+      --i1;
+      --i2;
+    }
+
+    if (!i1) {
+      while (i2 > 0) {
+        if (UNLIKELY(!elm2->isTombstone())) return false;
+        ++elm2;
+        --i2;
+      }
     } else {
-      if (!cellEqual(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+      assertx(!i2);
+      while (i1 > 0) {
+        if (UNLIKELY(!elm1->isTombstone())) return false;
+        ++elm1;
+        --i1;
+      }
+    }
+  } else {
+    auto const arr1 = asMixed(ad1);
+    auto elm = arr1->data();
+    for (auto i = arr1->m_used; i--; elm++) {
+      if (UNLIKELY(elm->isTombstone())) continue;
+      const TypedValue* other;
+      if (elm->hasIntKey()) {
+        other = NvGetIntDict(ad2, elm->ikey);
+      } else {
+        assertx(elm->hasStrKey());
+        other = NvGetStrDict(ad2, elm->skey);
+      }
+      if (!other ||
+          !cellEqual(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
         return false;
       }
     }

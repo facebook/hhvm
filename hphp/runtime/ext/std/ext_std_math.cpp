@@ -434,7 +434,7 @@ static void randinit(uint32_t seed) {
 #endif
 }
 
-void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
+void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
   if (seed.isNull()) {
     randinit(math_generate_seed());
     return;
@@ -448,7 +448,7 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
 
 int64_t HHVM_FUNCTION(rand,
                       int64_t min /* = 0 */,
-                      const Variant& max /* = null_variant */) {
+                      const Variant& max /* = uninit_variant */) {
 #if defined(__APPLE__) || defined(_MSC_VER)
   if (!s_rand_is_seeded) {
 #else
@@ -477,7 +477,7 @@ int64_t HHVM_FUNCTION(rand,
 int64_t HHVM_FUNCTION(mt_getrandmax) { return MT_RAND_MAX;}
 
 void HHVM_FUNCTION(mt_srand,
-                   const Variant& seed /* = null_variant */) {
+                   const Variant& seed /* = uninit_variant */) {
   if (seed.isNull()) {
     return math_mt_srand(math_generate_seed());
   }
@@ -490,7 +490,7 @@ void HHVM_FUNCTION(mt_srand,
 
 int64_t HHVM_FUNCTION(mt_rand,
                       int64_t min /* = 0 */,
-                      const Variant& max /* = null_variant */) {
+                      const Variant& max /* = uninit_variant */) {
   return math_mt_rand(min, max.isNull() ? RAND_MAX : max.toInt64());
 }
 
@@ -517,32 +517,29 @@ void StandardExtension::requestInitMath() {
 #endif
 }
 
-#define DCONST(nm)                                                       \
-  Native::registerConstant<KindOfDouble>(makeStaticString(#nm), k_##nm)  \
-
 void StandardExtension::initMath() {
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_UP);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_DOWN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_EVEN);
   HHVM_RC_INT_SAME(PHP_ROUND_HALF_ODD);
 
-  DCONST(M_PI);
-  DCONST(M_1_PI);
-  DCONST(M_2_PI);
-  DCONST(M_2_SQRTPI);
-  DCONST(M_E);
-  DCONST(M_EULER);
-  DCONST(M_LN10);
-  DCONST(M_LN2);
-  DCONST(M_LNPI);
-  DCONST(M_LOG10E);
-  DCONST(M_LOG2E);
-  DCONST(M_PI_2);
-  DCONST(M_PI_4);
-  DCONST(M_SQRT1_2);
-  DCONST(M_SQRT2);
-  DCONST(M_SQRT3);
-  DCONST(M_SQRTPI);
+  HHVM_RC_DBL(M_PI, k_M_PI);
+  HHVM_RC_DBL(M_1_PI, k_M_1_PI);
+  HHVM_RC_DBL(M_2_PI, k_M_2_PI);
+  HHVM_RC_DBL(M_2_SQRTPI, k_M_2_SQRTPI);
+  HHVM_RC_DBL(M_E, k_M_E);
+  HHVM_RC_DBL(M_EULER, k_M_EULER);
+  HHVM_RC_DBL(M_LN10, k_M_LN10);
+  HHVM_RC_DBL(M_LN2, k_M_LN2);
+  HHVM_RC_DBL(M_LNPI, k_M_LNPI);
+  HHVM_RC_DBL(M_LOG10E, k_M_LOG10E);
+  HHVM_RC_DBL(M_LOG2E, k_M_LOG2E);
+  HHVM_RC_DBL(M_PI_2, k_M_PI_2);
+  HHVM_RC_DBL(M_PI_4, k_M_PI_4);
+  HHVM_RC_DBL(M_SQRT1_2, k_M_SQRT1_2);
+  HHVM_RC_DBL(M_SQRT2, k_M_SQRT2);
+  HHVM_RC_DBL(M_SQRT3, k_M_SQRT3);
+  HHVM_RC_DBL(M_SQRTPI, k_M_SQRTPI);
 
   HHVM_FE(min);
   HHVM_FE(max);

@@ -190,7 +190,7 @@ LookupResult lookupObjMethod(const Func*& f,
     }
     return LookupResult::MagicCallFound;
   }
-  if (f->isStaticInProlog()) {
+  if (f->isStaticInPrologue()) {
     return LookupResult::MethodFoundNoThis;
   }
   return LookupResult::MethodFoundWithThis;

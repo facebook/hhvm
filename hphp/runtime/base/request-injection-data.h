@@ -74,6 +74,7 @@ private:
 #else
   clockid_t m_clockType;
   timer_t m_timerId;
+  TYPE_SCAN_IGNORE_FIELD(m_timerId); // timer_t is void*
 
   /* Whether we've created our timer yet. */
   bool m_hasTimer{false};
@@ -155,6 +156,12 @@ struct RequestInjectionData {
    */
   bool getJit() const;
   void updateJit();
+
+  /*
+   * Whether the JIT is performing function folding.
+   */
+  bool getJitFolding() const;
+  void setJitFolding(bool);
 
   /*
    * Whether coverage is being collected.
@@ -271,6 +278,7 @@ private:
   bool m_debuggerAttached{false};
   bool m_coverage{false};
   bool m_jit{false};
+  bool m_jitFolding{false};
   bool m_debuggerIntr{false};
 
   bool m_debuggerStepIn{false};

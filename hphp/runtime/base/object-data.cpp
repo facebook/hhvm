@@ -53,7 +53,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
-__thread int ObjectData::os_max_id;
+__thread uint32_t ObjectData::os_max_id;
 
 TRACE_SET_MOD(runtime);
 
@@ -178,6 +178,7 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
   auto& pmax = os_max_id;
   if (o_id && o_id == pmax) --pmax;
 
+  invalidateWeakRef();
   auto const size =
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
   assert(size == sizeForNProps(nProps));
@@ -334,10 +335,9 @@ Variant* ObjectData::realPropImpl(const String& propName, int flags,
   // Property is non-NULL if we reach here.
   if ((lookup.accessible && prop->m_type != KindOfUninit) ||
       (flags & (RealPropUnchecked|RealPropExist))) {
-    return reinterpret_cast<Variant*>(prop);
-  } else {
-    return nullptr;
+    return &tvAsVariant(prop);
   }
+  return nullptr;
 }
 
 Variant* ObjectData::o_realProp(const String& propName, int flags,
@@ -617,8 +617,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
     ssize_t iter = ad->iter_begin();
     auto pos_limit = ad->iter_end();
     while (iter != pos_limit) {
-      TypedValue key;
-      dynProps->get()->nvGetKey(&key, iter);
+      auto const key = dynProps->get()->nvGetKey(iter);
       iter = dynProps->get()->iter_advance(iter);
 
       // You can get this if you cast an array to object. These
@@ -680,7 +679,7 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
   ctx.func = ctx.cls->lookupMethod(s.get());
   if (ctx.func) {
     // Null out this_ for statically called methods
-    if (ctx.func->isStaticInProlog()) {
+    if (ctx.func->isStaticInPrologue()) {
       ctx.this_ = nullptr;
     }
   } else {
@@ -708,9 +707,9 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
       (!isContainer(params) && !params.isNull())) {
     return Variant(Variant::NullInit());
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, ctx, params);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFunc(ctx, params)
+  );
 }
 
 #define INVOKE_FEW_ARGS_IMPL3                        \
@@ -751,9 +750,9 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
     case  0: break;
   }
 
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctx, count, args);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFuncFew(ctx, count, args)
+  );
 }
 
 ObjectData* ObjectData::clone() {
@@ -930,7 +929,7 @@ ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
 // Note: the normal object destruction path does not actually call this
 // destructor.  See ObjectData::release.
 ObjectData::~ObjectData() {
-  int& pmax = os_max_id;
+  auto& pmax = os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
@@ -1587,7 +1586,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
     if (propInd != kInvalidSlot) {
       // Declared property.
-      tvSetIgnoreRef(*null_variant.asTypedValue(), *prop);
+      tvSetIgnoreRef(*uninit_variant.asTypedValue(), *prop);
     } else {
       // Dynamic property.
       dynPropArray().remove(StrNR(key).asString(), true /* isString */);

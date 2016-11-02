@@ -53,29 +53,77 @@ void cgEqCls(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_E, sf, dst};
 }
 
+// Check whether `lhs' is a subclass of `rhs', given that its classvec is
+// at least as long as rhs's.
+template <typename Cls, typename Len>
+Vreg check_clsvec(Vout& v, Vreg d, Vreg lhs, Cls rhs, Len rhsVecLen) {
+  // If it's a subclass, rhs must be at the appropriate index.
+  auto const vecOffset = rhsVecLen * static_cast<int>(sizeof(LowPtr<Class>)) +
+    (Class::classVecOff() - sizeof(LowPtr<Class>));
+  auto const sf = v.makeReg();
+  emitCmpLowPtr<Class>(v, sf, rhs, lhs[vecOffset]);
+  v << setcc{CC_E, sf, d};
+  return d;
+}
+
+// Check whether `lhs' is a subclass of `rhs', given that sf is the result
+// of comparing their classVecLens
+template <typename Cls, typename Len>
+Vreg check_subcls(Vout& v, Vreg sf, Vreg d, Vreg lhs, Cls rhs, Len rhsVecLen) {
+  return cond(v, CC_NB, sf, d,
+       [&] (Vout& v) {
+         return check_clsvec(v, v.makeReg(), lhs, rhs, rhsVecLen);
+       },
+       [&] (Vout& v) { return v.cns(false); }
+      );
+}
+
 void cgInstanceOf(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const rhs = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
   auto const call_classof = [&] (Vreg dst) {
-    cgCallHelper(v, env, CallSpec::method(&Class::classof),
-                 {DestType::Byte, dst}, SyncOptions::None,
-                 argGroup(env, inst).ssa(0).ssa(1));
+    cgCallHelper(v, env,
+                 CallSpec::method(&Class::classof), {DestType::Byte, dst},
+                 SyncOptions::None, argGroup(env, inst).ssa(0).ssa(1));
     return dst;
   };
 
-  if (inst->src(1)->isA(TCls)) {
+  if (!inst->src(1)->isA(TCls)) {
+    auto const sf = v.makeReg();
+    v << testq{rhs, rhs, sf};
+    cond(v, CC_NZ, sf, dst,
+         [&] (Vout& v) { return call_classof(v.makeReg()); },
+         [&] (Vout& v) { return v.cns(false); } // rhs is nullptr
+        );
+    return;
+  }
+
+  auto const spec = inst->src(1)->type().clsSpec();
+  if (!spec.cls() || (spec.cls()->attrs() & AttrInterface)) {
     call_classof(dst);
     return;
   }
 
-  auto const sf = v.makeReg();
-  v << testq{rhs, rhs, sf};
-  cond(v, CC_NZ, sf, dst,
-    [&] (Vout& v) { return call_classof(v.makeReg()); },
-    [&] (Vout& v) { return v.cns(false); } // rhs is nullptr
-  );
+  // This essentially inlines Class::classofNonIFace
+  auto const lhs = srcLoc(env, inst, 0).reg();
+  auto const rhsTmp = v.makeReg();
+  auto const rhsLen = v.makeReg();
+  auto const sfVecLen = v.makeReg();
+  if (sizeof(Class::veclen_t) == 2) {
+    v << loadw{rhs[Class::classVecLenOff()], rhsTmp};
+    v << movzwq{rhsTmp, rhsLen};
+    v << cmpwm{rhsTmp, lhs[Class::classVecLenOff()], sfVecLen};
+  } else if (sizeof(Class::veclen_t) == 4) {
+    v << loadl{rhs[Class::classVecLenOff()], rhsTmp};
+    v << movzlq{rhsTmp, rhsLen};
+    v << cmplm{rhsTmp, lhs[Class::classVecLenOff()], sfVecLen};
+  } else {
+    not_implemented();
+  }
+
+  check_subcls(v, sfVecLen, dst, lhs, rhs, rhsLen);
 }
 
 IMPL_OPCODE_CALL(InstanceOfIface)
@@ -123,25 +171,13 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
 
   assertx(rhsCls != nullptr);
 
-  // Check whether `lhs' is a subclass of `rhsCls', given that its classvec is
-  // at least as long as rhsCls's.
-  auto check_clsvec = [&] (Vout& v, Vreg d) {
-    // If it's a subclass, rhsCls must be at the appropriate index.
-    auto const vecOffset = Class::classVecOff() +
-                           sizeof(LowPtr<Class>) * (rhsCls->classVecLen() - 1);
-    auto const sf = v.makeReg();
-    emitCmpLowPtr(v, sf, rhsCls, lhs[vecOffset]);
-    v << setcc{CC_E, sf, d};
-    return d;
-  };
-
   // Check whether `lhs' points to a subclass of rhsCls, set `d' with the
   // boolean result, and return `d'.
   auto check_subclass = [&](Vreg d) {
     if (rhsCls->classVecLen() == 1) {
       // Every class has at least one entry in its class vec, so there's no
       // need to check the length.
-      return check_clsvec(v, d);
+      return check_clsvec(v, d, lhs, rhsCls, 1);
     }
     assertx(rhsCls->classVecLen() > 1);
 
@@ -150,11 +186,7 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
     auto const sf = v.makeReg();
     emitCmpVecLen(v, sf, static_cast<int32_t>(rhsCls->classVecLen()),
                   lhs[Class::classVecLenOff()]);
-    return cond(
-      v, CC_NB, sf, d,
-      [&] (Vout& v) { return check_clsvec(v, v.makeReg()); },
-      [&] (Vout& v) { return v.cns(false); }
-    );
+    return check_subcls(v, sf, d, lhs, rhsCls, rhsCls->classVecLen());
   };
 
   if (rhsCls->attrs() & AttrAbstract ||

@@ -63,17 +63,6 @@ let oldify_batch {
   Methods.oldify_batch meths;
   StaticMethods.oldify_batch smeths
 
-let shelve_batch {
-  props;
-  sprops;
-  meths;
-  smeths;
-} =
-  Props.shelve_batch props;
-  StaticProps.shelve_batch sprops;
-  Methods.shelve_batch meths;
-  StaticMethods.shelve_batch smeths
-
 let remove_old_batch {
   props;
   sprops;
@@ -84,17 +73,6 @@ let remove_old_batch {
   StaticProps.remove_old_batch sprops;
   Methods.remove_old_batch meths;
   StaticMethods.remove_old_batch smeths
-
-let unshelve_batch {
-  props;
-  sprops;
-  meths;
-  smeths;
-} =
-  Props.unshelve_batch props;
-  StaticProps.unshelve_batch sprops;
-  Methods.unshelve_batch meths;
-  StaticMethods.unshelve_batch smeths
 
 let remove_batch {
   props;
@@ -113,18 +91,6 @@ let oldify_all class_to_elems =
     oldify_batch elems
   end class_to_elems
 
-let shelve_all class_to_elems =
-  SMap.iter begin fun cls elems ->
-    Constructors.shelve_batch (SSet.singleton cls);
-    shelve_batch elems
-  end class_to_elems
-
-let unshelve_all class_to_elems =
-  SMap.iter begin fun cls elems ->
-    Constructors.unshelve_batch (SSet.singleton cls);
-    unshelve_batch elems
-  end class_to_elems
-
 let remove_old_all class_to_elems =
   SMap.iter begin fun cls elems ->
     Constructors.remove_old_batch (SSet.singleton cls);
@@ -136,21 +102,3 @@ let remove_all class_to_elems =
     Constructors.remove_batch (SSet.singleton cls);
     remove_batch elems
   end class_to_elems
-
-let unshelve_removed_elems classes =
-  List.iter ~f:begin fun cls ->
-    if not @@ Constructors.mem cls then
-      Constructors.unshelve_batch (SSet.singleton cls);
-    match Decl_heap.Classes.get_shelved cls with
-    | None -> ()
-    | Some c ->
-      let { props; sprops; meths; smeths } = from_class c in
-      let negate f x = not (f x) in
-      let elems = {
-        props = Props.(KeySet.filter (negate mem) props);
-        sprops = StaticProps.(KeySet.filter (negate mem) sprops);
-        meths = Methods.(KeySet.filter (negate mem) meths);
-        smeths = StaticMethods.(KeySet.filter (negate mem) smeths);
-      } in
-      unshelve_batch elems
-  end classes

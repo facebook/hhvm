@@ -24,6 +24,7 @@
 #include <folly/String.h>
 
 #include "hphp/util/exception.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 
@@ -149,19 +150,21 @@ struct ThreadLocalNode {
   T * m_p;
   void (*m_on_thread_exit_fn)(void * p);
   void * m_next;
-  size_t m_size;
+  uint32_t m_size;
+  type_scan::Index m_tyindex;
 };
 
 struct ThreadLocalManager {
   template<class T>
   static void PushTop(ThreadLocalNode<T>& node) {
-    PushTop(&node, sizeof(T));
+    static_assert(sizeof(T) <= 0xffffffffu, "");
+    PushTop(&node, sizeof(T), type_scan::getIndexForScan<T>());
   }
-  template<class F> void scan(F& mark) const;
+  void scan(type_scan::Scanner&) const;
   static ThreadLocalManager& GetManager();
 
 private:
-  static void PushTop(void* node, size_t size);
+  static void PushTop(void* node, uint32_t size, type_scan::Index);
   struct ThreadLocalList {
     void* head{nullptr};
 #ifdef __APPLE__

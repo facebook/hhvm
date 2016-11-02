@@ -35,9 +35,7 @@ struct TestCppExt : TestCppBase {
 inline void evalCodeForCppExt(const String& code_str) {
   String prefixedCode = concat("<?php ", code_str);
   Unit* unit = g_context->compileEvalString(prefixedCode.get());
-  TypedValue retVal;
-  g_context->invokeUnit(&retVal, unit);
-  tvRefcountedDecRef(&retVal);
+  tvRefcountedDecRef(g_context->invokeUnit(unit));
 }
 
 #define DECLARE_TEST_FUNCTIONS(s)                                       \

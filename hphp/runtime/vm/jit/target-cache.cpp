@@ -104,7 +104,7 @@ void FuncCache::lookup(rds::Handle handle,
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, sd)) {
     // Miss. Does it actually exist?
-    auto const* func = Unit::lookupFunc(sd);
+    auto const* func = Unit::lookupDynCallFunc(sd);
     if (UNLIKELY(!func)) {
       ObjectData *this_ = nullptr;
       Class* self_ = nullptr;
@@ -140,12 +140,13 @@ void FuncCache::lookup(rds::Handle handle,
     }
     assertx(!func->implCls());
     func->validate();
-    pair->m_key = const_cast<StringData*>(func->name()); // use a static name
+    pair->m_key =
+      const_cast<StringData*>(func->displayName()); // use a static name
     pair->m_value = func;
   }
   ar->m_func = pair->m_value;
   ar->trashThis();
-  assertx(stringMatches(pair->m_key, pair->m_value->name()));
+  assertx(stringMatches(pair->m_key, pair->m_value->displayName()));
   pair->m_value->validate();
 }
 
@@ -256,7 +257,7 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
     return;
   }
 
-  auto const isStatic = func->isStaticInProlog();
+  auto const isStatic = func->isStaticInPrologue();
   mce->m_key   = reinterpret_cast<uintptr_t>(cls) | uintptr_t{isStatic} << 1;
   mce->m_value = func;
   ar->m_func   = func;
@@ -364,7 +365,7 @@ void handleSlowPath(rds::Handle mce_handle,
     }
     mceValue = mce->m_value;
   }
-  assertx(!mceValue->isStaticInProlog());
+  assertx(!mceValue->isStaticInPrologue());
 
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
@@ -430,7 +431,7 @@ void handleSlowPath(rds::Handle mce_handle,
       // Bummer.
       ar->m_func   = cand;
       mce->m_value = cand;
-      if (UNLIKELY(cand->isStaticInProlog())) {
+      if (UNLIKELY(cand->isStaticInPrologue())) {
         return readPublicStatic<fatal>(mce, ar, cls, cand);
       }
       mce->m_key = reinterpret_cast<uintptr_t>(cls);
@@ -447,7 +448,7 @@ void handleSlowPath(rds::Handle mce_handle,
     // call the new implementation too.  We also know the new function
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == mceValue->baseCls())) {
-      assertx(!cand->isStaticInProlog());
+      assertx(!cand->isStaticInPrologue());
       ar->m_func   = cand;
       mce->m_value = cand;
       mce->m_key   = reinterpret_cast<uintptr_t>(cls);

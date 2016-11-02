@@ -9,101 +9,59 @@
  *)
 
 open Core
-open Reordered_argument_collections
 
-(*****************************************************************************)
-(* Error. *)
-(*****************************************************************************)
+let make_local_changes () =
+  Fixmes.HH_FIXMES.LocalChanges.push_stack();
+  Parser_heap.ParserHeap.LocalChanges.push_stack();
 
-let canon_set names =
-  names
-  |> SSet.elements
-  |> List.map ~f:NamingGlobal.canon_key
-  |> List.fold_left ~f:SSet.add ~init:SSet.empty
+  Naming_heap.FunPosHeap.LocalChanges.push_stack();
+  Naming_heap.FunCanonHeap.LocalChanges.push_stack();
+  Naming_heap.TypeIdHeap.LocalChanges.push_stack();
+  Naming_heap.TypeCanonHeap.LocalChanges.push_stack();
+  Naming_heap.ConstPosHeap.LocalChanges.push_stack();
 
-let shelve_funs names =
-  Naming_heap.FunPosHeap.shelve_batch names;
-  Naming_heap.FunCanonHeap.shelve_batch @@ canon_set names;
-  Decl_heap.Funs.shelve_batch names;
+  Decl_heap.Funs.LocalChanges.push_stack();
+  Decl_heap.Constructors.LocalChanges.push_stack();
+  Decl_heap.Props.LocalChanges.push_stack();
+  Decl_heap.StaticProps.LocalChanges.push_stack();
+  Decl_heap.Methods.LocalChanges.push_stack();
+  Decl_heap.StaticMethods.LocalChanges.push_stack();
+  Decl_heap.Classes.LocalChanges.push_stack();
+  Decl_heap.Typedefs.LocalChanges.push_stack();
+  Decl_heap.GConsts.LocalChanges.push_stack();
   ()
 
-let shelve_classes names =
-  Naming_heap.TypeIdHeap.shelve_batch names;
-  Naming_heap.TypeCanonHeap.shelve_batch @@ canon_set names;
-  Decl_class_elements.(
-    names |> SSet.elements |> get_for_classes ~old:false |> shelve_all
-  );
-  Decl_heap.Classes.shelve_batch names;
+let revert_local_changes () =
+  Fixmes.HH_FIXMES.LocalChanges.pop_stack();
+  Parser_heap.ParserHeap.LocalChanges.pop_stack();
+
+  Naming_heap.FunPosHeap.LocalChanges.pop_stack();
+  Naming_heap.FunCanonHeap.LocalChanges.pop_stack();
+  Naming_heap.TypeIdHeap.LocalChanges.pop_stack();
+  Naming_heap.TypeCanonHeap.LocalChanges.pop_stack();
+  Naming_heap.ConstPosHeap.LocalChanges.pop_stack();
+
+  Decl_heap.Funs.LocalChanges.pop_stack();
+  Decl_heap.Constructors.LocalChanges.pop_stack();
+  Decl_heap.Props.LocalChanges.pop_stack();
+  Decl_heap.StaticProps.LocalChanges.pop_stack();
+  Decl_heap.Methods.LocalChanges.pop_stack();
+  Decl_heap.StaticMethods.LocalChanges.pop_stack();
+  Decl_heap.Classes.LocalChanges.pop_stack();
+  Decl_heap.Typedefs.LocalChanges.pop_stack();
+  Decl_heap.GConsts.LocalChanges.pop_stack();
   ()
 
-let shelve_typedefs names =
-  Naming_heap.TypeIdHeap.shelve_batch names;
-  Naming_heap.TypeCanonHeap.shelve_batch @@ canon_set names;
-  Decl_heap.Typedefs.shelve_batch names
-
-let shelve_consts names =
-  Naming_heap.ConstPosHeap.shelve_batch names;
-  Decl_heap.GConsts.shelve_batch names
-
-let shelve_file name =
-  Parser_heap.ParserHeap.shelve_batch @@
-    Parser_heap.ParserHeap.KeySet.singleton name
-
-let shelve_file_info path file_info =
-  shelve_file path;
-  let {
-    FileInfo.n_funs; n_classes; n_types; n_consts
-  } = FileInfo.simplify file_info in
-  shelve_funs n_funs;
-  shelve_classes n_classes;
-  shelve_typedefs n_types;
-  shelve_consts n_consts
-
-let unshelve funs classes typedefs consts file_name =
-  Decl_heap.Funs.unshelve_batch funs;
-  Naming_heap.FunPosHeap.unshelve_batch funs;
-  Naming_heap.FunCanonHeap.unshelve_batch @@ canon_set funs;
-
-  (* It is important we unshelve the class elements first before we unshelve
-   * the class itself. We already unshelved all the class elements that were
-   * removed in declare_and_check. To restore the world to the original state
-   * we need to unshelve all the remaining class elements.
-   *)
-  Decl_class_elements.(
-    classes |> SSet.elements |> get_for_classes ~old:false |> unshelve_all
-  );
-  Decl_heap.Classes.unshelve_batch classes;
-  Naming_heap.TypeIdHeap.unshelve_batch classes;
-  Naming_heap.TypeCanonHeap.unshelve_batch @@ canon_set classes;
-
-  Naming_heap.TypeIdHeap.unshelve_batch typedefs;
-  Naming_heap.TypeCanonHeap.unshelve_batch @@ canon_set typedefs;
-  Decl_heap.Typedefs.unshelve_batch typedefs;
-
-  Naming_heap.ConstPosHeap.unshelve_batch consts;
-  Decl_heap.GConsts.unshelve_batch consts;
-
-  Fixmes.HH_FIXMES.unshelve_batch @@
-    Fixmes.HH_FIXMES.KeySet.singleton file_name;
-  Parser_heap.ParserHeap.unshelve_batch @@
-    Parser_heap.ParserHeap.KeySet.singleton file_name
-
-let unshelve_file_info path file_info =
-  let {
-    FileInfo.n_funs; n_classes; n_types; n_consts
-  } = FileInfo.simplify file_info in
-  unshelve n_funs n_classes n_types n_consts path
-
-(** Surrounds f() with shelve and unshelve, but resilient to f throwing. Reraises
- * the exception thrown and ensures unshelve is always done. *)
-let shelve_then_unshelve path file_info f =
-  let () = shelve_file_info path file_info in
+(** Surrounds f() with make and revert, but resilient to f throwing. Reraises
+ * the exception thrown and ensures revert is always done. *)
+let make_then_revert_local_changes f () =
+  make_local_changes ();
   let result = try f () with
-  | e ->
-    let () = unshelve_file_info path file_info in
-    raise e
+    | e ->
+      revert_local_changes ();
+      raise e
   in
-  let () = unshelve_file_info path file_info in
+  revert_local_changes ();
   result
 
 let path = Relative_path.default
@@ -119,66 +77,57 @@ let declare_and_check content ~f tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
   Autocomplete.auto_complete := false;
   Autocomplete.auto_complete_for_global := "";
-  let result =
-    Errors.ignore_ begin fun () ->
-      Fixmes.HH_FIXMES.shelve_batch @@
-        Fixmes.HH_FIXMES.KeySet.singleton path;
-      let {Parser_hack.file_mode = _; comments = _; content = _; ast} =
-        Parser_hack.program tcopt path content
-      in
-      let funs, classes, typedefs, consts =
-        List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
+  Errors.ignore_ @@ make_then_revert_local_changes begin fun () ->
+    Fixmes.HH_FIXMES.(remove_batch @@ KeySet.singleton path);
+    let {Parser_hack.file_mode = _; comments = _; content = _; ast} =
+      Parser_hack.program tcopt path content
+    in
+    let funs, classes, typedefs, consts =
+      List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
         match def with
-          | Ast.Fun { Ast.f_name; _ } ->
-            f_name::funs, classes, typedefs, consts
-          | Ast.Class { Ast.c_name; _ } ->
-            funs, c_name::classes, typedefs, consts
-          | Ast.Typedef { Ast.t_id; _ } ->
-            funs, classes, t_id::typedefs, consts
-          | Ast.Constant { Ast.cst_name; _ } ->
-            funs, classes, typedefs, cst_name::consts
-          | _ -> funs, classes, typedefs, consts
+        | Ast.Fun { Ast.f_name; _ } ->
+          f_name::funs, classes, typedefs, consts
+        | Ast.Class { Ast.c_name; _ } ->
+          funs, c_name::classes, typedefs, consts
+        | Ast.Typedef { Ast.t_id; _ } ->
+          funs, classes, t_id::typedefs, consts
+        | Ast.Constant { Ast.cst_name; _ } ->
+          funs, classes, typedefs, cst_name::consts
+        | _ -> funs, classes, typedefs, consts
       end ~init:([], [], [], []) in
 
-      let file_info = { FileInfo.empty_t with
-        FileInfo.funs; classes; typedefs; consts;
-      } in
+    let file_info = { FileInfo.empty_t with
+                      FileInfo.funs; classes; typedefs; consts;
+                    } in
+    let { FileInfo.n_funs; n_classes; n_types; n_consts; } =
+      FileInfo.simplify file_info in
+    Parser_heap.ParserHeap.add path (ast, Parser_heap.Full);
+    NamingGlobal.remove_decls
+      ~funs:n_funs
+      ~classes:n_classes
+      ~typedefs:n_types
+      ~consts:n_consts;
+    NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
+    let nast = Naming.program tcopt ast in
+    List.iter nast begin function
+      | Nast.Fun f -> Decl.fun_decl f
+      | Nast.Class c -> Decl.class_decl tcopt c
+      | Nast.Typedef t -> Decl.typedef_decl t
+      | Nast.Constant cst -> Decl.const_decl cst
+    end;
 
-      shelve_then_unshelve path file_info begin fun () ->
-        Parser_heap.ParserHeap.add path (ast, Parser_heap.Full);
-        NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
-        let nast = Naming.program tcopt ast in
-        List.iter nast begin function
-          | Nast.Fun f -> Decl.fun_decl f
-          | Nast.Class c -> Decl.class_decl tcopt c
-          | Nast.Typedef t -> Decl.typedef_decl t
-          | Nast.Constant cst -> Decl.const_decl cst
-        end;
-
-        (* If we remove a class member, there may still be child classes that
-         * refer to that member. We can either invalidate all the extends_deps
-         * of the classes we just declared, or unshelve the types of the class
-         * elements back into the new heap. We choose to unshelve since it should
-         * be faster, even though it is technically incorrect.
-         *)
-        classes
-        |> List.map ~f:snd
-        |> Decl_class_elements.unshelve_removed_elems;
-        (* We must run all the declaration steps first to ensure that the
-         * typechecking below sees all the new declarations. Lazy decl
-         * won't work in this case because we haven't put the new ASTs into
-         * the parsing heap. *)
-        List.iter nast begin function
-          | Nast.Fun f -> Typing.fun_def tcopt f;
-          | Nast.Class c -> Typing.class_def tcopt c;
-          | Nast.Typedef t -> Typing.typedef_def tcopt t;
-          | Nast.Constant cst -> Typing.gconst_def cst tcopt;
-        end;
-        f path file_info
-      end
-    end
-  in
-  result
+    (* We must run all the declaration steps first to ensure that the
+     * typechecking below sees all the new declarations. Lazy decl
+     * won't work in this case because we haven't put the new ASTs into
+     * the parsing heap. *)
+    List.iter nast begin function
+      | Nast.Fun f -> Typing.fun_def tcopt f;
+      | Nast.Class c -> Typing.class_def tcopt c;
+      | Nast.Typedef t -> Typing.typedef_def tcopt t;
+      | Nast.Constant cst -> Typing.gconst_def cst tcopt;
+    end;
+    f path file_info
+  end
 
 let declare_and_check content ~f tcopt =
   try

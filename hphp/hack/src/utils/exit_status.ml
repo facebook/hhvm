@@ -27,6 +27,10 @@ type t =
   | Lock_stolen
   | Lost_parent_monitor
   | Interrupted
+  | Worker_oomed
+  | Worker_busy
+  (** An uncaught Not_found exception in the worker. *)
+  | Worker_not_found_exception
   | Socket_error
   | Missing_hhi
   | Dfind_died
@@ -48,6 +52,7 @@ type t =
   | IDE_typechecker_died
   | Redecl_heap_overflow
   | Out_of_shared_memory
+  | Shared_mem_assertion_failure
   | Hash_table_full
   | IDE_persistent_client_already_exists
   | Lazy_decl_bug
@@ -76,10 +81,14 @@ let exit_code = function
   | Unused_server -> 5
   | Lock_stolen -> 11
   | Lost_parent_monitor -> 12
+  | Shared_mem_assertion_failure -> 14
   | Out_of_shared_memory -> 15
   | Hash_table_full -> 16
   | Heap_full -> 17
   | Interrupted -> -6
+  | Worker_oomed -> 30
+  | Worker_busy -> 31
+  | Worker_not_found_exception -> 32
   | Missing_hhi -> 97
   | Socket_error -> 98
   | Dfind_died -> 99
@@ -129,6 +138,9 @@ let to_string = function
   | Lock_stolen -> "Lock_stolen"
   | Lost_parent_monitor -> "Lost_parent_monitor"
   | Interrupted -> "Interrupted"
+  | Worker_oomed -> "Worker_oomed"
+  | Worker_busy -> "Worker_busy"
+  | Worker_not_found_exception -> "Worker_not_found_exception"
   | Socket_error -> "Socket_error"
   | Missing_hhi -> "Missing_hhi"
   | Dfind_died -> "Dfind_died"
@@ -148,6 +160,7 @@ let to_string = function
   | IDE_init_failure -> "IDE_init_failure"
   | IDE_typechecker_died -> "IDE_typechecker_died"
   | Redecl_heap_overflow -> "Redecl_heap_overflow"
+  | Shared_mem_assertion_failure -> "Shared_mem_assertion_failure"
   | Out_of_shared_memory -> "Out_of_shared_memory"
   | Hash_table_full -> "Hash_table_full"
   | IDE_persistent_client_already_exists ->

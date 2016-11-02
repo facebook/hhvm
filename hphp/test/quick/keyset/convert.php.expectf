@@ -384,7 +384,7 @@ object(stdClass)#%d (0) {
 }
 ----------------------------------------------------
 
-Warning: Non-collection object conversion to keyset in %s on line %d
+Warning: Non-iterable object conversion to keyset in %s on line %d
 keyset(0) {
 }
 ====================================================

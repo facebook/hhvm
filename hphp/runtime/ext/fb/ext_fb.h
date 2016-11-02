@@ -33,9 +33,9 @@ Variant HHVM_FUNCTION(fb_unserialize,
 Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing);
 Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, VRefParam success,
-                      VRefParam errcode = null_variant);
+                      VRefParam errcode = uninit_variant);
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
-                    const Variant& data = null_variant);
+                    const Variant& data = uninit_variant);
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                           const String& new_func_name);
 bool HHVM_FUNCTION(fb_utf8ize, VRefParam input);
@@ -78,7 +78,7 @@ String fb_compact_serialize(const Variant& thing,
                             FBCompactSerializeBehavior behavior);
 Variant fb_compact_unserialize(const char* str, int len,
                                VRefParam success,
-                               VRefParam errcode = null_variant);
+                               VRefParam errcode = uninit_variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

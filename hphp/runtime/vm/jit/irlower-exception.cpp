@@ -73,6 +73,23 @@ void cgLdUnwinderValue(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(DebugBacktrace)
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void raiseVarEnvDynCall(const Func* func) {
+  assertx(func->accessesCallerFrame());
+  assertx(func->dynCallWrapper());
+  assertx(!func->dynCallTarget());
+  raise_disallowed_dynamic_call(func);
+}
+
+void cgRaiseVarEnvDynCall(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(raiseVarEnvDynCall),
+               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)
 IMPL_OPCODE_CALL(ZeroErrorLevel)
 IMPL_OPCODE_CALL(RestoreErrorLevel)

@@ -208,6 +208,12 @@ struct UnitEmitter {
   PreClassEmitter* pce(Id preClassId);
 
   /*
+   * The id for the pre-class named clsName, or -1 if
+   * there is no such pre-class
+   */
+  Id pceId(folly::StringPiece clsName);
+
+  /*
    * Add a PreClassEmitter to the hoistability tracking data structures.
    *
    * @see: PreClass::Hoistable
@@ -219,14 +225,14 @@ struct UnitEmitter {
    *
    * @see: PreClass::Hoistable
    */
-  PreClassEmitter* newPreClassEmitter(const StringData* name,
+  PreClassEmitter* newPreClassEmitter(const std::string& name,
                                       PreClass::Hoistable hoistable);
   /*
    * Create a new PreClassEmitter without adding it to the hoistability
    * tracking data structures.
-   * It should be added latter with addPreClassEmitter.
+   * It should be added later with addPreClassEmitter.
    */
-  PreClassEmitter* newBarePreClassEmitter(const StringData* name,
+  PreClassEmitter* newBarePreClassEmitter(const std::string& name,
                                           PreClass::Hoistable hoistable);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -339,8 +345,7 @@ struct UnitEmitter {
    * Is this a Unit for a systemlib?
    */
   bool isASystemLib() const;
-
-private:
+ private:
   /*
    * Bytecode emit implementation.
    */
@@ -399,7 +404,7 @@ private:
    * FuncEmitter tables.
    */
   std::vector<FuncEmitter*> m_fes;
-  hphp_hash_map<const FuncEmitter*, const Func*,
+  hphp_hash_map<const FuncEmitter*, Func*,
                 pointer_hash<FuncEmitter>> m_fMap;
 
   /*

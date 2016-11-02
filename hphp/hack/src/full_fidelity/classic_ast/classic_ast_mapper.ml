@@ -110,13 +110,14 @@ let functionDeclaration env node decl =
   let open Ast in
   match Syntax.syntax decl.function_declaration_header with
   | FunctionDeclarationHeader
-  { function_async; function_keyword; function_name;
+  { function_async; function_keyword; function_ampersand; function_name;
     function_type_parameter_list; function_left_paren; function_parameter_list;
     function_right_paren; function_colon; function_type } ->
     let f_mode = f_mode env.mode in
     let f_tparams = f_tparams env function_type_parameter_list in
     let f_ret = f_ret env function_type in
-    let f_ret_by_ref = f_ret_by_ref env function_type in
+    let f_ret_by_ref = (f_ret_by_ref env function_type) ||
+      not (is_missing function_ampersand) in
     let f_name = f_name env function_name in
     let f_params = f_params env function_parameter_list in
     let f_body = f_body env decl.function_body in

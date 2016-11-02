@@ -3,33 +3,33 @@
 namespace {
 /* Finds whether the given variable is a boolean.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_bool(mixed $var): bool;
 
 /* Finds whether the type of the given variable is integer.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_int(mixed $var): bool;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_integer(mixed $var): bool;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_long(mixed $var): bool;
 
 /* Finds whether the type of the given variable is float.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_float(mixed $var): bool;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_double(mixed $var): bool;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_real(mixed $var): bool;
 
 /* Finds whether the given variable is numeric. Numeric strings consist of
@@ -38,12 +38,12 @@ function is_real(mixed $var): bool;
  * notation (0xFF) is allowed too but only without sign, decimal and
  * exponential part.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function is_numeric(mixed $var): bool;
 
 /* Finds whether the type given variable is string.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_string(mixed $var): bool;
 
 /* Finds whether the given variable is a scalar.  Scalar variables are those
@@ -53,27 +53,27 @@ function is_string(mixed $var): bool;
  * based on integers. This implementation detail should not be relied upon, as
  * it may change.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function is_scalar(mixed $var): bool;
 
 /* Finds whether the given variable is an array.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_array(mixed $var): bool;
 
 /* Finds whether the given variable is an object.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_object(mixed $var): bool;
 
 /* Finds whether the given variable is a resource.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_resource(mixed $var): bool;
 
 /* Finds whether the given variable is NULL.
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__IsFoldable, __Native, __ParamCoerceModeFalse>>
 function is_null(mixed $var): bool;
 
 /* Returns the type of the PHP variable var. Warning Never use gettype() to
@@ -81,34 +81,34 @@ function is_null(mixed $var): bool;
  * in a future version. In addition, it is slow too, as it involves string
  * comparison. Instead, use the is_* functions.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function gettype(mixed $v): string;
 
 /* This function gets the type of the given resource.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function get_resource_type(resource $handle): string;
 
-<<__Native>>
+<<__IsFoldable, __Native>>
 function boolval(mixed $var): bool;
 
 /* Returns the integer value of var, using the specified base for the
  * conversion (the default is base 10). intval() should not be used on
  * objects, as doing so will emit an E_NOTICE level error and return 1.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function intval(mixed $var,
                 int $base = 10): int;
 
 /* Gets the float value of var.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function floatval(mixed $var): float;
 
-<<__Native>>
+<<__IsFoldable, __Native>>
 function doubleval(mixed $var): float;
 
-<<__Native>>
+<<__IsFoldable, __Native>>
 function strval(mixed $var): string;
 
 /* Set the type of variable var to type.
@@ -154,7 +154,7 @@ function debug_zval_dump(mixed $variable): void;
 <<__Native>>
 function serialize(mixed $value): string;
 
-<<__Native>>
+<<__Native, __ParamCoerceModeFalse>>
 function unserialize(string $str,
                      array $options = []): mixed;
 
@@ -162,7 +162,7 @@ function unserialize(string $str,
  * defined variables, be they environment, server or user-defined
  * variables, within the scope in which get_defined_vars() is called.
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame")>>
 function get_defined_vars(): array;
 
 /* Imports GET/POST/Cookie variables into the global scope. It is useful if
@@ -185,7 +185,7 @@ function import_request_variables(string $types,
  * key to see whether it has a valid variable name. It also checks for
  * collisions with existing variables in the symbol table.
  */
-<<__Native>>
+<<__Native("WritesCallerFrame")>>
 function extract(mixed &$var_array,
                  int $extract_type = EXTR_OVERWRITE,
                  string $prefix = ""): int;
@@ -202,30 +202,9 @@ function extract(mixed &$var_array,
  * parse_str() uses the same mechanism that PHP uses to populate the $_GET,
  * $_POST, etc. variables.
  */
-<<__Native>>
+<<__Native("WritesCallerFrame")>>
 function parse_str(string $str, mixed &$arr = null): void;
 
-}
-
-/*
- * Several of the above functions can affect the variable environment of the
- * their caller.  In order to allow the JIT to make more aggressive
- * optimizations, we have an option that disables dynamic calls to these
- * functions---to make that work, non-dynamic calls are rewritten to call these
- * __SystemLib versions, which are still allowed to modify the caller variable
- * environment when the option is enabled.
- */
-namespace __SystemLib {
-  <<__Native>>
-  function extract(mixed &$var_array,
-                   int $extract_type = EXTR_OVERWRITE,
-                   string $prefix = ""): int;
-
-  <<__Native>>
-  function get_defined_vars(): array;
-
-  <<__Native>>
-  function parse_str(string $str, mixed &$arr = null): void;
 }
 
 namespace HH {

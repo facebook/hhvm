@@ -1,4 +1,4 @@
-App \classname<[enum E], >
-App \classname<App \I<>, >
-App \classname<[enum E], >
+classname<enum E>
+classname<I>
+classname<enum E>
 No errors

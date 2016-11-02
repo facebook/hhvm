@@ -237,6 +237,8 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
 
     case EqKeyset:            return NeqKeyset;
     case NeqKeyset:           return EqKeyset;
+    case SameKeyset:          return NSameKeyset;
+    case NSameKeyset:         return SameKeyset;
 
     case GtRes:               return LteRes;
     case GteRes:              return LtRes;

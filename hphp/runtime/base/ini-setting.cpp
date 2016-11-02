@@ -507,7 +507,7 @@ void IniSetting::ParserCallback::onLabel(const std::string &name, void *arg) {
 
 void IniSetting::ParserCallback::onEntry(
     const std::string &key, const std::string &value, void *arg) {
-  Variant *arr = (Variant*)arg;
+  auto arr = static_cast<Variant*>(arg);
   String skey(key);
   Variant sval(value);
   forceToArray(*arr).set(skey, sval);
@@ -518,7 +518,7 @@ void IniSetting::ParserCallback::onPopEntry(
     const std::string &value,
     const std::string &offset,
     void *arg) {
-  Variant *arr = (Variant*)arg;
+  auto arr = static_cast<Variant*>(arg);
   forceToArray(*arr);
 
   bool oEmpty = offset.empty();
@@ -877,7 +877,12 @@ static CallbackMap s_system_ini_callbacks;
 //
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
 
-typedef std::map<std::string, Variant> SettingMap;
+struct SettingMap {
+  std::map<std::string, Variant> settings;
+  TYPE_SCAN_CUSTOM_FIELD(settings) {
+    for (auto& e : settings) scanner.scan(e);
+  }
+};
 
 // Set by a .ini file at the start
 static SettingMap s_system_settings;
@@ -890,19 +895,13 @@ struct IniSettingExtension final : Extension {
 
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
-    assert(s_saved_defaults->empty());
+    assert(s_saved_defaults->settings.empty());
   }
 
   void requestShutdown() override {
     IniSetting::ResetSavedDefaults();
-    assert(s_saved_defaults->empty());
+    assert(s_saved_defaults->settings.empty());
   }
-
-  void vscan(IMarker& mark) const override {
-    for (auto& e : s_system_settings) mark(e);
-    for (auto& e : *s_saved_defaults) mark(e);
-  }
-
 } s_ini_extension;
 
 void IniSetting::Bind(
@@ -1064,13 +1063,13 @@ bool IniSetting::SetSystem(const String& name, const Variant& value) {
   // we need to make them static.
   Variant eval_scalar_variant = value;
   eval_scalar_variant.setEvalScalar();
-  s_system_settings[name.toCppString()] = eval_scalar_variant;
+  s_system_settings.settings[name.toCppString()] = eval_scalar_variant;
   return ini_set(name.toCppString(), value, PHP_INI_SET_EVERY);
 }
 
 bool IniSetting::GetSystem(const String& name, Variant& value) {
-  auto it = s_system_settings.find(name.toCppString());
-  if (it == s_system_settings.end()) {
+  auto it = s_system_settings.settings.find(name.toCppString());
+  if (it == s_system_settings.settings.end()) {
     return false;
   }
   value = it->second;
@@ -1078,38 +1077,39 @@ bool IniSetting::GetSystem(const String& name, Variant& value) {
 }
 
 bool IniSetting::SetUser(const String& name, const Variant& value) {
-  auto it = s_saved_defaults->find(name.toCppString());
-  if (it == s_saved_defaults->end()) {
+  auto it = s_saved_defaults->settings.find(name.toCppString());
+  if (it == s_saved_defaults->settings.end()) {
     Variant def;
     auto success = Get(name, def); // def gets populated here
     if (success) {
-      (*s_saved_defaults)[name.toCppString()] = def;
+      s_saved_defaults->settings[name.toCppString()] = def;
     }
   }
   return ini_set(name.toCppString(), value, PHP_INI_SET_USER);
 }
 
 void IniSetting::RestoreUser(const String& name) {
-  auto it = s_saved_defaults->find(name.toCppString());
-  if (it != s_saved_defaults->end() &&
+  auto& defaults = s_saved_defaults->settings;
+  auto it = defaults.find(name.toCppString());
+  if (it != defaults.end() &&
       ini_set(name.toCppString(), it->second, PHP_INI_SET_USER)) {
-    s_saved_defaults->erase(it);
+    defaults.erase(it);
   }
 };
 
 bool IniSetting::ResetSystemDefault(const std::string& name) {
-  auto it = s_system_settings.find(name);
-  if (it == s_system_settings.end()) {
+  auto it = s_system_settings.settings.find(name);
+  if (it == s_system_settings.settings.end()) {
     return false;
   }
   return ini_set(name, it->second, PHP_INI_SET_EVERY);
 }
 
 void IniSetting::ResetSavedDefaults() {
-  for (auto& item : *s_saved_defaults) {
+  for (auto& item : s_saved_defaults->settings) {
     ini_set(item.first, item.second, PHP_INI_SET_USER);
   }
-  s_saved_defaults->clear();
+  s_saved_defaults->settings.clear();
 }
 
 bool IniSetting::GetMode(const std::string& name, Mode& mode) {

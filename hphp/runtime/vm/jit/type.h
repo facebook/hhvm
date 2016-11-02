@@ -70,7 +70,7 @@ namespace jit {
  * Memb is a number of different locations that result from the more generic
  * types of member operations: Prop, Elem, MIS, MMisc, and Other. MMisc
  * contains something living in a collection instance or object's dynamic
- * property array. Other contains init_null_variant, null_variant, or the
+ * property array. Other contains init_null_variant, uninit_variant, or the
  * lvalBlackHole.
  *
  * ClsInit is a pointer to class property initializer data.  These can never be

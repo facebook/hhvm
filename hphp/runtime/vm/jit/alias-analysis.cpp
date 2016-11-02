@@ -365,7 +365,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
   if (ret.locations.size() == kMaxTrackedALocs) {
     logLowPriPerfWarning(
       "alias-analysis kMaxTrackedALocs",
-      1,
       [&](StructuredLogEntry& cols) {
         auto const func = unit.context().func;
         cols.setStr("func", func->fullName()->slice());

@@ -15,8 +15,6 @@
 */
 #include "hphp/runtime/base/apc-local-array.h"
 
-#include <vector>
-
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
@@ -161,21 +159,22 @@ static inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
   return a2;
 }
 
-ArrayData *APCLocalArray::LvalInt(ArrayData* ad, int64_t k, Variant *&ret,
-                                  bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->lval(k, ret, false));
+ArrayLval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+  auto const escalated = Escalate(ad);
+  auto const r = escalated->lval(k, false);
+  return {releaseIfCopied(escalated, r.array), r.val};
 }
 
-ArrayData *APCLocalArray::LvalStr(ArrayData* ad, StringData* k, Variant *&ret,
-                                  bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->lval(k, ret, false));
+ArrayLval APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+  auto const escalated = Escalate(ad);
+  auto const r = escalated->lval(k, false);
+  return {releaseIfCopied(escalated, r.array), r.val};
 }
 
-ArrayData *APCLocalArray::LvalNew(ArrayData* ad, Variant *&ret, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->lvalNew(ret, false));
+ArrayLval APCLocalArray::LvalNew(ArrayData* ad, bool copy) {
+  auto const escalated = Escalate(ad);
+  auto const r = escalated->lvalNew(false);
+  return {releaseIfCopied(escalated, r.array), r.val};
 }
 
 ArrayData*
@@ -278,16 +277,12 @@ const TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
   return GetValueRef(a, index).asTypedValue();
 }
 
-void APCLocalArray::NvGetKey(const ArrayData* ad,
-                             TypedValue* out,
-                             ssize_t pos) {
+Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
-  TypedValue* tv = k.asTypedValue();
-  // copy w/out clobbering out->_count.
-  out->m_type = tv->m_type;
-  out->m_data.num = tv->m_data.num;
-  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
+  auto const tv = k.asTypedValue();
+  tvRefcountedIncRef(tv);
+  return *tv;
 }
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {

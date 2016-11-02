@@ -97,6 +97,22 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
 
 }
 
+void cgDefCls(IRLS& env, const IRInstruction* inst) {
+  auto unit = inst->marker().func()->unit();
+  auto args = argGroup(env, inst)
+    .immPtr(unit->lookupPreClassId(inst->src(0)->intVal())).
+    imm(true);
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(&Unit::defClass),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    args
+  );
+}
+
 void cgLdCls(IRLS& env, const IRInstruction* inst) {
   implLdMeta<ClassCache>(env, inst);
 }
@@ -369,7 +385,7 @@ void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
       fp->func()->cls(),
       CallType::ObjMethod
     );
-    if (UNLIKELY(!func || func->isStaticInProlog())) {
+    if (UNLIKELY(!func || func->isStaticInPrologue())) {
       return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
     }
 
@@ -401,7 +417,7 @@ void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
       return fpushCufHelperStringSlowPath(sd, preLiveAR, fp);
     }
 
-    auto const func = Unit::loadFunc(sd);
+    auto const func = Unit::loadDynCallFunc(sd);
     preLiveAR->m_func = func;
     if (UNLIKELY(!func)) {
       return fpushStringFail(sd, preLiveAR);

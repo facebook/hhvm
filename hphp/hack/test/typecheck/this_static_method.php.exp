@@ -1,4 +1,4 @@
-[this][1]intersect(App \Foo<>)
+this as ^(Foo)
 File "this_static_method.php", line 11, characters 12-21:
 Invalid return type (Typing[4110])
 File "this_static_method.php", line 7, characters 24-29:

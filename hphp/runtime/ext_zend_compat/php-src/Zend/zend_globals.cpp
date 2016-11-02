@@ -1,6 +1,5 @@
 #include "zend.h"
 #include "zend_globals.h"
-#include "zend_exceptions.h"
 
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -32,11 +31,12 @@ struct ZendExecutorGlobals final : RequestEventHandler {
       zval_ptr_dtor(&exn);
     }
   }
-  void vscan(IMarker& mark) const override {}
 
   ~ZendExecutorGlobals() {}
 
   _zend_executor_globals m_data;
+  TYPE_SCAN_IGNORE_FIELD(m_data);
+  // for now. m_data.exception_op.op1 might be a ptr?
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(ZendExecutorGlobals, s_zend_executor_globals);

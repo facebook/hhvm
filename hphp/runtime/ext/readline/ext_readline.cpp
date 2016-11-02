@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/util/lock.h"
 
 #ifdef USE_EDITLINE
@@ -30,7 +29,6 @@
 
 namespace HPHP {
 
-namespace {
 struct ReadlineVars {
   Variant completion;
   Array array;
@@ -38,10 +36,10 @@ struct ReadlineVars {
 
 IMPLEMENT_THREAD_LOCAL(ReadlineVars, s_readline);
 
-}
-
 static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
-  auto result = readline(prompt.isString() ? prompt.toString().data() : nullptr);
+  auto result = readline(
+    prompt.isString() ? prompt.toString().data() : nullptr
+  );
   if (result == nullptr) {
     return false;
   } else {
@@ -252,7 +250,7 @@ Variant HHVM_FUNCTION(readline_info, const Variant& varnameMixed /* = null */,
       return oldval;
     }
   }
-  return null_variant;
+  return uninit_variant;
 }
 
 

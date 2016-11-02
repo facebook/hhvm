@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -1427,7 +1426,6 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
             prefixedCode += folly::StringPiece{data, full_len - result_len};
             prefixedCode += ";";
             auto const unit = g_context->compileEvalString(prefixedCode.get());
-            Variant v;
             auto const ar = GetCallerFrame();
             auto const ctx = ar->func()->cls();
             auto const func = unit->getMain(ctx);
@@ -1445,9 +1443,11 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
               thiz = nullptr;
               cls = nullptr;
             }
-            g_context->invokeFunc(v.asTypedValue(), func, init_null_variant,
-                                  thiz, cls, nullptr, nullptr,
-                                  ExecutionContext::InvokePseudoMain);
+            auto v = Variant::attach(
+              g_context->invokeFunc(func, init_null_variant,
+                                    thiz, cls, nullptr, nullptr,
+                                    ExecutionContext::InvokePseudoMain)
+            );
             eval_result = v.toString();
 
             result.resize(result_len);

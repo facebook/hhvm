@@ -512,7 +512,7 @@ Variant HHVM_FUNCTION(explode,
 
 String HHVM_FUNCTION(implode,
                      const Variant& arg1,
-                     const Variant& arg2 /* = null_variant */) {
+                     const Variant& arg2 /* = uninit_variant */) {
   Array items;
   String delim;
   if (isContainer(arg1)) {
@@ -531,7 +531,7 @@ String HHVM_FUNCTION(implode,
 
 String HHVM_FUNCTION(join,
                      const Variant& arg1,
-                     const Variant& arg2 /* = null_variant */) {
+                     const Variant& arg2 /* = uninit_variant */) {
   return HHVM_FN(implode)(arg1, arg2);
 }
 
@@ -556,9 +556,6 @@ struct TokenizerData final : RequestEventHandler {
   }
   void requestShutdown() override {
     requestInit();
-  }
-  void vscan(IMarker& mark) const override {
-    mark(str);
   }
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(TokenizerData, s_tokenizer_data);
@@ -1541,7 +1538,7 @@ Array HHVM_FUNCTION(str_getcsv,
                     const String& enclosure /* = "\"" */,
                     const String& escape /* = "\\" */) {
   if (str.empty()) {
-    return Array::Create(null_variant);
+    return Array::Create(uninit_variant);
   }
 
   auto check_arg = [](const String& arg, char default_arg) {
@@ -2060,7 +2057,7 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
     auto const& var = arr->get(arr.convertKey(key));
-    if (&var != &null_variant) {
+    if (&var != &uninit_variant) {
       String replace = var.toString();
       if (!replace.empty()) {
         result.append(replace);
@@ -2127,7 +2124,7 @@ static WuManberCache wuManberCache(10);
 Variant HHVM_FUNCTION(strtr,
                       const String& str,
                       const Variant& from,
-                      const Variant& to /* = null_variant */) {
+                      const Variant& to /* = uninit_variant */) {
   if (str.empty()) {
     return str;
   }

@@ -46,7 +46,10 @@ namespace HPHP { namespace jit { namespace svcreq {
 namespace {
 
 RegionContext getContext(SrcKey sk) {
-  RegionContext ctx { sk.func(), sk.offset(), liveSpOff(), sk.resumed() };
+  RegionContext ctx {
+    sk.func(), sk.offset(), liveSpOff(),
+    sk.resumed(), sk.hasThis()
+  };
 
   auto const fp = vmfp();
   auto const sp = vmsp();
@@ -110,6 +113,11 @@ TCA getTranslation(TransArgs args) {
     return nullptr;
   }
 
+  if (!RID().getJit()) {
+    SKTRACE(2, sk, "punting because jitting was disabled\n");
+    return nullptr;
+  }
+
   if (auto const sr = tc::findSrcRec(sk)) {
     if (auto const tca = sr->getTopTranslation()) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);
@@ -155,10 +163,10 @@ TCA getFuncBody(Func* func) {
   if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
 
   auto const dvs = func->getDVFunclets();
-  if (dvs.size()) {
+  if (dvs.size() || func->hasThisVaries()) {
     tca = tc::emitFuncBodyDispatch(func, dvs);
   } else {
-    SrcKey sk(func, func->base(), false);
+    SrcKey sk(func, func->base(), false, func->mayHaveThis());
     tca = getTranslation(TransArgs{sk});
     if (tca) func->setFuncBody(tca);
   }
@@ -259,7 +267,9 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
     case REQ_RETRANSLATE: {
       INC_TPC(retranslate);
-      sk = SrcKey{liveFunc(), info.args[0].offset, liveResumed()};
+      sk = SrcKey{
+        liveFunc(), info.args[0].offset, liveResumed(), liveHasThis()
+      };
       auto trflags = info.args[1].trflags;
       auto args = TransArgs{sk};
       args.flags = trflags;
@@ -288,7 +298,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       // This is only responsible for the control-flow aspect of the Ret:
       // getting to the destination's translation, if any.
       auto ar = info.args[0].ar;
-      auto caller = info.args[1].ar;
+      auto const caller = info.args[1].ar;
       assertx(caller == vmfp());
       // If caller is a resumable (aka a generator) then whats likely happened
       // here is that we're resuming a yield from. That expression happens to
@@ -321,7 +331,8 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
           break;
         }
       }
-      sk = SrcKey{caller->func(), vmpc(), caller->resumed()};
+      assertx(caller == vmfp());
+      sk = liveSK();
       start = getTranslation(TransArgs{sk});
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
@@ -337,7 +348,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
                                   g_unwind_rds->debuggerReturnOff);
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
              vmpc(), fp->func()->fullName()->data());
-      sk = SrcKey{fp->func(), vmpc(), fp->resumed()};
+      sk = liveSK();
       start = getTranslation(TransArgs{sk});
       break;
     }
@@ -418,7 +429,7 @@ TCA handleResume(bool interpFirst) {
 
   tl_regState = VMRegState::CLEAN;
 
-  auto sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
+  auto sk = liveSK();
   TCA start;
   if (interpFirst) {
     start = nullptr;
@@ -441,7 +452,7 @@ TCA handleResume(bool interpFirst) {
     }
 
     assertx(vmpc());
-    sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
+    sk = liveSK();
     start = getTranslation(TransArgs{sk});
   }
 

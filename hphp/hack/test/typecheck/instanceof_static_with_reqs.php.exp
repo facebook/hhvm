@@ -1,7 +1,7 @@
 object
-[<static>][this]App \BaseField<generic T, >
-App \INeedsFoo<[1]intersect(), >
-[2]intersect(App \INeedsFoo<[3]intersect(X), >, [<static>][this]App \BaseField<generic T, >)
+<static> as this as BaseField<T>
+INeedsFoo<^[unresolved]>
+^(INeedsFoo<^(_)> | <static> as this as BaseField<T>)
 File "instanceof_static_with_reqs.php", line 31, characters 12-17:
 Invalid return type (Typing[4110])
 File "instanceof_static_with_reqs.php", line 7, characters 49-52:

@@ -229,7 +229,6 @@ struct Func final {
    */
   void validate() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // FuncId manipulation.
 
@@ -334,6 +333,20 @@ struct Func final {
    */
   const StringData* fullName() const;
   StrNR fullNameStr() const;
+
+  /*
+   * The function's display name, which is almost always name(), except for
+   * internal functions, like the dynamic call wrappers. In that case, return
+   * the original builtin's name.
+   */
+  const StringData* displayName() const;
+
+  /*
+   * The function's full display name, which is almost always fullName(), except
+   * for internal functions, like the dynamic call wrappers. In that case,
+   * return the original builtin's full name.
+   */
+  const StringData* fullDisplayName() const;
 
   /*
    * The function's named entity.  Only valid for non-methods.
@@ -629,21 +642,29 @@ struct Func final {
    */
   bool isPublic() const;
   bool isStatic() const;
+  bool isAbstract() const;
+
   /*
    * Whether a function is called non-statically. Generally this means
    * isStatic(), but eg static closures are still called with a valid
    * this pointer.
    */
-  bool isStaticInProlog() const;
+  bool isStaticInPrologue() const;
+
   /*
    * Whether a method is guaranteed to have a valid this in the body.
    * A method with AttrRequiresThis is guaranteed to be called with a
    * valid this, but closures swap out the closure object for the
-   * closure context in the prolog, so may not have a this in the
+   * closure context in the prologue, so may not have a this in the
    * body.
    */
   bool requiresThisInBody() const;
-  bool isAbstract() const;
+
+  /*
+   * Whether the function could sometimes have this, and sometimes not
+   * depending on how it's called.
+   */
+  bool hasThisVaries() const;
 
   /*
    * Could this function have a valid $this?
@@ -681,6 +702,27 @@ struct Func final {
   bool isCPPBuiltin() const;
 
   /*
+   * Can this function potentially read from the caller's frame?
+   *
+   * @implies: isBuiltin() && !isMethod()
+   */
+  bool readsCallerFrame() const;
+
+  /*
+   * Can this function potentially write to the caller's frame?
+   *
+   * @implies: isBuiltin() && !isMethod()
+   */
+  bool writesCallerFrame() const;
+
+  /*
+   * Can this function potentially read or write to the caller's frame?
+   *
+   * @implies: readsCallerFrame() || writesCallerFrame()
+   */
+  bool accessesCallerFrame() const;
+
+  /*
    * The builtinFuncPtr takes an ActRec*, unpacks it, and usually dispatches to
    * a nativeFuncPtr.
    *
@@ -703,6 +745,30 @@ struct Func final {
    * (i.e., "Native") functions declared with NeedsActRec.
    */
   BuiltinFunction nativeFuncPtr() const;
+
+  /*
+   * The dynCallWrapper, if present, is a function identical to this one, except
+   * it has an additional opcode which marks that the function has been
+   * dynamically called. Depending on the `DisallowDynamicVarEnvFuncs` option,
+   * this opcde may cause a fatal, a warning to be raised, or nothing. When this
+   * function is dynamically called, we dispatch to the wrapper instead of this
+   * one (the wrapper cannot be called otherwise). If the opcode doesn't fatal,
+   * the operation of the function runs as normal.
+   *
+   * This should only be present for builtins which may access the caller's
+   * frame and is used to optionally forbid dynamic calls to such builtins.
+   *
+   * @implies accessesCallerFrame() && isBuiltin()
+   */
+  Func* dynCallWrapper() const;
+
+  /*
+   * The dynCallTarget is set for dynamic call wrapper functions (see above) and
+   * indicates which builtin they are associated with.
+   *
+   * @implies accessesCallerFrame() && isBuiltin()
+   */
+  Func* dynCallTarget() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Closures.                                                          [const]
@@ -1013,6 +1079,8 @@ struct Func final {
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
 
+  void setDynCallWrapper(Func*);
+  void setDynCallTarget(Func*);
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -1132,6 +1200,8 @@ private:
     BuiltinFunction m_nativeFuncPtr;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
+    Func* m_dynCallWrapper{nullptr};
+    Func* m_dynCallTarget{nullptr};
   };
 
   /*

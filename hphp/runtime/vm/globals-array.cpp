@@ -81,24 +81,24 @@ size_t GlobalsArray::Vsize(const ArrayData* ad) {
   return count;
 }
 
-void GlobalsArray::NvGetKey(const ArrayData* ad, TypedValue* out,
-                                     ssize_t pos) {
+Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   if (iter.valid()) {
     auto k = iter.curKey();
-    out->m_data.pstr = const_cast<StringData*>(k);
-    out->m_type = KindOfString;
-    k->incRefCount();
-  } else {
-    out->m_type = KindOfUninit;
+    if (k->isRefCounted()) {
+      k->incRefCount();
+      return make_tv<KindOfString>(const_cast<StringData*>(k));
+    }
+    return make_tv<KindOfPersistentString>(k);
   }
+  return make_tv<KindOfUninit>();
 }
 
 const Variant& GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
-  return iter.valid() ? tvAsCVarRef(iter.curVal()) : null_variant;
+  return iter.valid() ? tvAsCVarRef(iter.curVal()) : uninit_variant;
 }
 
 bool
@@ -121,15 +121,11 @@ GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }
 
-ArrayData*
-GlobalsArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                               bool copy) {
-  return LvalStr(ad, String(k).get(), ret, copy);
+ArrayLval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+  return LvalStr(ad, String(k).get(), copy);
 }
 
-ArrayData*
-GlobalsArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
-                               bool copy) {
+ArrayLval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   auto a = asGlobals(ad);
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
@@ -137,14 +133,11 @@ GlobalsArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
     tvWriteNull(&nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
-  ret = &tvAsVariant(tv);
-  return a;
+  return {a, &tvAsVariant(tv)};
 }
 
-ArrayData*
-GlobalsArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
-  ret = &lvalBlackHole();
-  return ad;
+ArrayLval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
+  return {ad, &lvalBlackHole()};
 }
 
 ArrayData* GlobalsArray::SetInt(ArrayData* ad,

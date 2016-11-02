@@ -433,7 +433,8 @@ protected:
   int parseDataSource(const char *data_source,
                       int data_source_len,
                       struct pdo_data_src_parser *parsed,
-                      int nparams);
+                      int nparams,
+                      folly::StringPiece separators = ";");
 };
 
 ///////////////////////////////////////////////////////////////////////////////

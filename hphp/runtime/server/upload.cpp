@@ -35,7 +35,6 @@ namespace HPHP {
 
 static void destroy_uploaded_files();
 
-namespace {
 struct Rfc1867Data final : RequestEventHandler {
   std::set<std::string> rfc1867ProtectedVariables;
   std::set<std::string> rfc1867UploadedFiles;
@@ -52,9 +51,7 @@ struct Rfc1867Data final : RequestEventHandler {
   void requestShutdown() override {
     if (!rfc1867UploadedFiles.empty()) destroy_uploaded_files();
   }
-  void vscan(IMarker&) const override {}
 };
-}
 IMPLEMENT_STATIC_REQUEST_LOCAL(Rfc1867Data, s_rfc1867_data);
 
 /*

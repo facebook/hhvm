@@ -221,25 +221,51 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
       return m_exp->getScalarValue(value);
     }
     if (m_op == T_DICT) {
-      if (m_exp->getScalarValue(value)) {
-        value = value.toArray().toDict();
-        return true;
-      }
-      return false;
+      auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (!exp_list) return false;
+      DictInit init(exp_list->getCount());
+      auto const result = exp_list->getListScalars(
+        [&](const Variant& n, const Variant& v) {
+          if (!n.isInitialized()) return false;
+          if (!n.isInteger() && !n.isString()) return false;
+          init.setValidKey(n, v);
+          return true;
+        }
+      );
+      if (!result) return false;
+      value = init.toVariant();
+      return true;
     }
     if (m_op == T_VEC) {
-      if (m_exp->getScalarValue(value)) {
-        value = value.toArray().toVec();
-        return true;
-      }
-      return false;
+      auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (!exp_list) return false;
+      VecArrayInit init(exp_list->getCount());
+      auto const result = exp_list->getListScalars(
+        [&](const Variant& n, const Variant& v) {
+          if (n.isInitialized()) return false;
+          init.append(v);
+          return true;
+        }
+      );
+      if (!result) return false;
+      value = init.toVariant();
+      return true;
     }
     if (m_op == T_KEYSET) {
-      if (m_exp->getScalarValue(value)) {
-        value = value.toArray().toKeyset();
-        return true;
-      }
-      return false;
+      auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
+      if (!exp_list) return false;
+      KeysetInit init(exp_list->getCount());
+      auto const result = exp_list->getListScalars(
+        [&](const Variant& n, const Variant& v) {
+          if (n.isInitialized()) return false;
+          if (!v.isInteger() && !v.isString()) return false;
+          init.add(v);
+          return true;
+        }
+      );
+      if (!result) return false;
+      value = init.toVariant();
+      return true;
     }
     Variant t;
     return m_exp->getScalarValue(t) &&
@@ -287,7 +313,7 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
 bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
   bool ret = true;
   try {
-    g_context->setThrowAllErrors(true);
+    ThrowAllErrorsSetter taes;
     auto add = RuntimeOption::IntsOverflowToInts ? cellAdd : cellAddO;
     auto sub = RuntimeOption::IntsOverflowToInts ? cellSub : cellSubO;
 
@@ -337,7 +363,6 @@ bool UnaryOpExpression::preCompute(const Variant& value, Variant &result) {
   } catch (...) {
     ret = false;
   }
-  g_context->setThrowAllErrors(false);
   return ret;
 }
 
@@ -516,6 +541,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_REQUIRE_ONCE:  cg_printf("require_once "); break;
     case T_FILE:          cg_printf("__FILE__");      break;
     case T_DIR:           cg_printf("__DIR__");       break;
+    case T_METHOD_C:      cg_printf("__METHOD__");    break;
     case T_CLASS:         cg_printf("class ");        break;
     case T_FUNCTION:      cg_printf("function ");     break;
     default:

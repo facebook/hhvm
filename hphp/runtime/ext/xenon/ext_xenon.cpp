@@ -66,7 +66,6 @@ void *s_waitThread(void *arg) {
 // allocated when a web request begins (if Xenon is enabled)
 // grab snapshots of the php and async stack when log is called
 // detach itself from its snapshots when the request is ending.
-namespace {
 struct XenonRequestLocalData final : RequestEventHandler  {
   XenonRequestLocalData();
   ~XenonRequestLocalData();
@@ -76,15 +75,11 @@ struct XenonRequestLocalData final : RequestEventHandler  {
   // implement RequestEventHandler
   void requestInit() override;
   void requestShutdown() override;
-  void vscan(IMarker& mark) const override {
-    mark(m_stackSnapshots);
-  }
 
   // an array of php stacks
   Array m_stackSnapshots;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(XenonRequestLocalData, s_xenonData);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics used by the Xenon classes
@@ -250,8 +245,6 @@ void Xenon::surpriseAll() {
 ///////////////////////////////////////////////////////////////////////////////
 // There is one XenonRequestLocalData per thread, stored in thread local area
 
-namespace {
-
 XenonRequestLocalData::XenonRequestLocalData() {
   TRACE(1, "XenonRequestLocalData\n");
 }
@@ -322,8 +315,6 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
   }
   return empty_array();
 }
-
-} // namespace
 
 struct xenonExtension final : Extension {
   xenonExtension() : Extension("xenon", "1.0") { }

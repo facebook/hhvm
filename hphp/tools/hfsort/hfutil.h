@@ -53,7 +53,6 @@ struct Func {
 struct CallGraph : TargetGraph {
   bool addFunc(std::string name, uint64_t addr, uint32_t size, uint32_t group);
   TargetId addrToTargetId(uint64_t addr) const;
-  void printDot(char* fileName) const;
 
   std::string toString(TargetId id) const;
 

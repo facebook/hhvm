@@ -35,7 +35,10 @@ inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
 inline bool liveResumed() { return liveFrame()->resumed(); }
-
+inline bool liveHasThis() { return liveClass() && liveFrame()->hasThis(); }
+inline SrcKey liveSK() {
+  return { liveFunc(), vmpc(), liveResumed(), liveHasThis() };
+}
 inline jit::FPInvOffset liveSpOff() {
   Cell* fp = reinterpret_cast<Cell*>(vmfp());
   if (liveFrame()->resumed()) {

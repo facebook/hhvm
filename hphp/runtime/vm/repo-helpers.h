@@ -101,6 +101,7 @@ struct RepoQuery {
                 bool isStatic=false);
   void bindStaticString(const char* paramName, const StringData* sd);
   void bindStdString(const char* paramName, const std::string& s);
+  void bindStringPiece(const char* paramName, const folly::StringPiece s);
   void bindDouble(const char* paramName, double val);
   void bindInt(const char* paramName, int val);
   void bindId(const char* paramName, Id id);

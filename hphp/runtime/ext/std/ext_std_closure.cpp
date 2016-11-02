@@ -256,24 +256,23 @@ static Variant HHVM_METHOD(Closure, call,
     return init_null_variant;
   }
 
-  Variant ret;
   // Could call vm_user_func(bound, params) here which goes through a
   // whole decode function process to get a Func*. But we know this
   // is a closure, and we can get a Func* via getInvokeFunc(), so just
   // bypass all that decode process to save time.
-  g_context->invokeFunc((TypedValue*)&ret,
-                        c_Closure::fromObject(this_)->getInvokeFunc(),
-                        params, bound.toObject().get(),
-                        nullptr, nullptr, nullptr,
-                        ExecutionContext::InvokeCuf);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFunc(c_Closure::fromObject(this_)->getInvokeFunc(),
+                          params, bound.toObject().get(),
+                          nullptr, nullptr, nullptr,
+                          ExecutionContext::InvokeCuf)
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // Minified versions of nativeDataInstanceCtor/Dtor
 
-static ObjectData* closureInstanceCtor(Class* cls) {
+static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
   assertx(cls->parent() == c_Closure::classof());
@@ -286,9 +285,21 @@ static ObjectData* closureInstanceCtor(Class* cls) {
   return obj;
 }
 
+static ObjectData* closureInstanceCtor(Class* cls) {
+  /*
+   * We call Unit::defClosure while jitting, so its not allowed to
+   * mark the class as cached unless its persistent. Do it here
+   * instead, but only in non-repo-auth mode.
+   */
+  if (!rds::isHandleInit(cls->classHandle())) {
+    cls->preClass()->namedEntity()->clsList()->setCached();
+  }
+  return closureInstanceCtorRepoAuth(cls);
+}
+
 ObjectData* c_Closure::clone() {
   auto const cls = getVMClass();
-  auto ret = c_Closure::fromObject(closureInstanceCtor(cls));
+  auto ret = c_Closure::fromObject(closureInstanceCtorRepoAuth(cls));
 
   ret->hdr()->ctx = hdr()->ctx;
   if (auto t = getThis()) {
@@ -322,7 +333,8 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
 }
 
 void PreClassEmitter::setClosurePreClass() {
-  m_instanceCtor = closureInstanceCtor;
+  m_instanceCtor = RuntimeOption::RepoAuthoritative ?
+    closureInstanceCtorRepoAuth : closureInstanceCtor;
   m_instanceDtor = closureInstanceDtor;
 }
 

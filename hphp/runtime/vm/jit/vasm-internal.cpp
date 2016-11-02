@@ -155,14 +155,6 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void setJmpTransID(Venv& env, TCA jmp) {
-  if (!env.unit.context) return;
-
-  env.meta.setJmpTransID(
-    jmp, env.unit.context->transID, env.unit.context->kind
-  );
-}
-
 static void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
   auto const incoming = cc == CC_None ? IncomingBranch::jmpFrom(jmp)
                                       : IncomingBranch::jccFrom(jmp);
@@ -306,6 +298,14 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
   *addr = val;
   pending.emplace(val, addr);
   return addr;
+}
+
+void setJmpTransID(Venv& env, TCA jmp) {
+  if (!env.unit.context) return;
+
+  env.meta.setJmpTransID(
+    jmp, env.unit.context->transID, env.unit.context->kind
+  );
 }
 
 }}

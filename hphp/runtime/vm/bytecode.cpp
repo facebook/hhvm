@@ -76,7 +76,6 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
@@ -3510,13 +3509,13 @@ OPTBLD_INLINE void iopIncDecM(intva_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
 
   auto& mstate = vmMInstrState();
-  TypedValue result;
+  Cell result;
   if (mcodeIsProp(mk.mcode)) {
-    IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key, result);
+    result = IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key);
   } else if (mcodeIsElem(mk.mcode)) {
-    IncDecElem(subop, mstate.base, key, result);
+    result = IncDecElem(subop, mstate.base, key);
   } else {
-    IncDecNewElem(mstate.tvRef, subop, mstate.base, result);
+    result = IncDecNewElem(mstate.tvRef, subop, mstate.base);
   }
 
   mFinal(mstate, nDiscard, result);
@@ -3996,7 +3995,7 @@ OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
   } else {
     fr.ptr = tvToCell(fr.ptr);
   }
-  IncDecBody(op, fr.ptr, to);
+  cellCopy(IncDecBody(op, fr.ptr), *to);
 }
 
 OPTBLD_INLINE void iopIncDecN(IncDecOp op) {
@@ -4010,7 +4009,7 @@ OPTBLD_INLINE void iopIncDecN(IncDecOp op) {
     tvRefcountedDecRef(oldNameCell);
   };
   assert(local != nullptr);
-  IncDecBody(op, tvToCell(local), nameCell);
+  cellCopy(IncDecBody(op, tvToCell(local)), *nameCell);
 }
 
 OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
@@ -4024,7 +4023,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
     tvRefcountedDecRef(oldNameCell);
   };
   assert(gbl != nullptr);
-  IncDecBody(op, tvToCell(gbl), nameCell);
+  cellCopy(IncDecBody(op, tvToCell(gbl)), *nameCell);
 }
 
 OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
@@ -4034,7 +4033,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
                 ss.clsref->m_data.pcls->name()->data(),
                 ss.name->data());
   }
-  IncDecBody(op, tvToCell(ss.val), ss.output);
+  cellCopy(IncDecBody(op, tvToCell(ss.val)), *ss.output);
   vmStack().discard();
 }
 

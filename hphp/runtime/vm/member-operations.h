@@ -1925,37 +1925,38 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
   unknownBaseType(base);
 }
 
-// Writes result in *to without decreffing old value
-void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to);
+Cell incDecBodySlow(IncDecOp op, Cell* fr);
 
-// Writes result in *to without decreffing old value
-inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
+inline Cell IncDecBody(IncDecOp op, Cell* fr) {
   assert(cellIsPlausible(*fr));
 
   if (UNLIKELY(fr->m_type != KindOfInt64)) {
-    return incDecBodySlow(op, fr, to);
+    return incDecBodySlow(op, fr);
   }
 
-  auto copy = [&]() { cellCopy(*fr, *to); };
+  auto copy = [&]() {
+    assert(cellIsPlausible(*fr));
+    return *fr;
+  };
 
   // fast cases, assuming integers overflow to ints
   switch (op) {
   case IncDecOp::PreInc:
     ++fr->m_data.num;
-    copy();
-    return;
-  case IncDecOp::PostInc:
-    copy();
+    return copy();
+  case IncDecOp::PostInc: {
+    auto const tmp = copy();
     ++fr->m_data.num;
-    return;
+    return tmp;
+  }
   case IncDecOp::PreDec:
     --fr->m_data.num;
-    copy();
-    return;
-  case IncDecOp::PostDec:
-    copy();
+    return copy();
+  case IncDecOp::PostDec: {
+    auto const tmp = copy();
     --fr->m_data.num;
-    return;
+    return tmp;
+  }
   default: break;
   }
 
@@ -1963,30 +1964,29 @@ inline void IncDecBody(IncDecOp op, Cell* fr, TypedValue* to) {
   switch (op) {
   case IncDecOp::PreIncO:
     cellIncO(*fr);
-    copy();
-    return;
-  case IncDecOp::PostIncO:
-    copy();
+    return copy();
+  case IncDecOp::PostIncO: {
+    auto const tmp = copy();
     cellIncO(*fr);
-    return;
+    return tmp;
+  }
   case IncDecOp::PreDecO:
     cellDecO(*fr);
-    copy();
-    return;
-  case IncDecOp::PostDecO:
-    copy();
+    return copy();
+  case IncDecOp::PostDecO: {
+    auto const tmp = copy();
     cellDecO(*fr);
-    return;
+    return tmp;
+  }
   default: break;
   }
   not_reached();
 }
 
-inline void IncDecElemEmptyish(
+inline Cell IncDecElemEmptyish(
   IncDecOp op,
   TypedValue* base,
-  TypedValue key,
-  TypedValue& dest
+  TypedValue key
 ) {
   auto a = Array::Create();
   auto result = (TypedValue*)&a.lvalAt(tvAsCVarRef(&key));
@@ -1996,19 +1996,18 @@ inline void IncDecElemEmptyish(
                  tvAsCVarRef(&key).toString().data());
   }
   assert(result->m_type == KindOfNull);
-  IncDecBody(op, result, &dest);
+  return IncDecBody(op, result);
 }
 
-inline void IncDecElemScalar(TypedValue& dest) {
+inline Cell IncDecElemScalar() {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&dest);
+  return make_tv<KindOfNull>();
 }
 
-inline void IncDecElem(
+inline Cell IncDecElem(
   IncDecOp op,
   TypedValue* base,
-  TypedValue key,
-  TypedValue& dest
+  TypedValue key
 ) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
@@ -2016,18 +2015,18 @@ inline void IncDecElem(
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecElemEmptyish(op, base, key, dest);
+      return IncDecElemEmptyish(op, base, key);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return IncDecElemScalar(dest);
+        return IncDecElemScalar();
       }
-      return IncDecElemEmptyish(op, base, key, dest);
+      return IncDecElemEmptyish(op, base, key);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return IncDecElemScalar(dest);
+      return IncDecElemScalar();
 
     case KindOfPersistentString:
     case KindOfString:
@@ -2035,18 +2034,18 @@ inline void IncDecElem(
         raise_error("Cannot increment/decrement overloaded objects "
           "nor string offsets");
       }
-      return IncDecElemEmptyish(op, base, key, dest);
+      return IncDecElemEmptyish(op, base, key);
 
     case KindOfPersistentVec:
     case KindOfVec: {
       auto result = ElemDVec<false, KeyType::Any>(base, key);
-      return IncDecBody(op, tvAssertCell(result), &dest);
+      return IncDecBody(op, tvAssertCell(result));
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
       auto result = ElemDDict<false, KeyType::Any>(base, key);
-      return IncDecBody(op, tvAssertCell(result), &dest);
+      return IncDecBody(op, tvAssertCell(result));
     }
 
     case KindOfPersistentKeyset:
@@ -2057,7 +2056,7 @@ inline void IncDecElem(
     case KindOfArray: {
       auto constexpr flags = MoreWarnings ? MOpFlags::Warn : MOpFlags::None;
       auto result = ElemDArray<flags, false, KeyType::Any>(base, key);
-      return IncDecBody(op, tvToCell(result), &dest);
+      return IncDecBody(op, tvToCell(result));
     }
 
     case KindOfObject: {
@@ -2072,9 +2071,9 @@ inline void IncDecElem(
         result = tvToCell(&localTvRef);
       }
 
-      IncDecBody(op, result, &dest);
+      auto const dest = IncDecBody(op, result);
       tvRefcountedDecRef(localTvRef);
-      return;
+      return dest;
     }
 
     case KindOfRef:
@@ -2084,28 +2083,26 @@ inline void IncDecElem(
   unknownBaseType(base);
 }
 
-inline void IncDecNewElemEmptyish(
+inline Cell IncDecNewElemEmptyish(
   IncDecOp op,
-  TypedValue* base,
-  TypedValue& dest
+  TypedValue* base
 ) {
   auto a = Array::Create();
   auto result = (TypedValue*)&a.lvalAt();
   tvAsVariant(base) = a;
   assert(result->m_type == KindOfNull);
-  IncDecBody(op, result, &dest);
+  return IncDecBody(op, result);
 }
 
-inline void IncDecNewElemScalar(TypedValue& dest) {
+inline Cell IncDecNewElemScalar() {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(&dest);
+  return make_tv<KindOfNull>();
 }
 
-inline void IncDecNewElem(
+inline Cell IncDecNewElem(
   TypedValue& tvRef,
   IncDecOp op,
-  TypedValue* base,
-  TypedValue& dest
+  TypedValue* base
 ) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
@@ -2113,25 +2110,25 @@ inline void IncDecNewElem(
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecNewElemEmptyish(op, base, dest);
+      return IncDecNewElemEmptyish(op, base);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return IncDecNewElemScalar(dest);
+        return IncDecNewElemScalar();
       }
-      return IncDecNewElemEmptyish(op, base, dest);
+      return IncDecNewElemEmptyish(op, base);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      return IncDecNewElemScalar(dest);
+      return IncDecNewElemScalar();
 
     case KindOfPersistentString:
     case KindOfString:
       if (base->m_data.pstr->size() != 0) {
         raise_error("[] operator not supported for strings");
       }
-      return IncDecNewElemEmptyish(op, base, dest);
+      return IncDecNewElemEmptyish(op, base);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -2147,20 +2144,17 @@ inline void IncDecNewElem(
     case KindOfArray: {
       TypedValue* result = (TypedValue*)&tvAsVariant(base).asArrRef().lvalAt();
       assert(result->m_type == KindOfNull);
-      return IncDecBody(op, tvToCell(result), &dest);
+      return IncDecBody(op, tvToCell(result));
     }
 
     case KindOfObject: {
       TypedValue* result;
       if (base->m_data.pobj->isCollection()) {
         throw_cannot_use_newelem_for_lval_read_col();
-        result = nullptr;
-      } else {
-        tvRef = objOffsetGet(instanceFromTv(base), make_tv<KindOfNull>());
-        result = tvToCell(&tvRef);
-        IncDecBody(op, result, &dest);
       }
-      return;
+      tvRef = objOffsetGet(instanceFromTv(base), make_tv<KindOfNull>());
+      result = tvToCell(&tvRef);
+      return IncDecBody(op, result);
     }
 
     case KindOfRef:
@@ -2934,13 +2928,13 @@ inline TypedValue* SetOpProp(TypedValue& tvRef,
   unknownBaseType(base);
 }
 
-inline void IncDecPropNull(TypedValue& dest) {
+inline Cell IncDecPropNull() {
   raise_warning("Attempt to increment/decrement property of non-object");
-  tvWriteNull(&dest);
+  return make_tv<KindOfNull>();
 }
 
-inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
-                               TypedValue key, TypedValue& dest) {
+inline Cell IncDecPropStdclass(IncDecOp op, TypedValue* base,
+                               TypedValue key) {
   auto const obj = newInstance(SystemLib::s_stdclassClass);
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
@@ -2951,39 +2945,38 @@ inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
   SCOPE_EXIT { decRefStr(keySD); };
   TypedValue tv;
   tvWriteNull(&tv);
-  IncDecBody(op, &tv, &dest);
+  auto dest = IncDecBody(op, &tv);
   obj->setProp(nullptr, keySD, &dest);
   assert(!isRefcountedType(tv.m_type));
+  return dest;
 }
 
-inline void IncDecPropObj(Class* ctx,
+inline Cell IncDecPropObj(Class* ctx,
                           IncDecOp op,
                           ObjectData* base,
-                          TypedValue key,
-                          TypedValue& dest) {
+                          TypedValue key) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
-  base->incDecProp(ctx, op, keySD, dest);
+  return base->incDecProp(ctx, op, keySD);
 }
 
-inline void IncDecProp(
+inline Cell IncDecProp(
   Class* ctx,
   IncDecOp op,
   TypedValue* base,
-  TypedValue key,
-  TypedValue& dest
+  TypedValue key
 ) {
   base = tvToCell(base);
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecPropStdclass(op, base, key, dest);
+      return IncDecPropStdclass(op, base, key);
 
     case KindOfBoolean:
       if (base->m_data.num) {
-        return IncDecPropNull(dest);
+        return IncDecPropNull();
       }
-      return IncDecPropStdclass(op, base, key, dest);
+      return IncDecPropStdclass(op, base, key);
 
     case KindOfInt64:
     case KindOfDouble:
@@ -2996,17 +2989,17 @@ inline void IncDecProp(
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
-      return IncDecPropNull(dest);
+      return IncDecPropNull();
 
     case KindOfPersistentString:
     case KindOfString:
       if (base->m_data.pstr->size() != 0) {
-        return IncDecPropNull(dest);
+        return IncDecPropNull();
       }
-      return IncDecPropStdclass(op, base, key, dest);
+      return IncDecPropStdclass(op, base, key);
 
     case KindOfObject:
-      return IncDecPropObj(ctx, op, instanceFromTv(base), key, dest);
+      return IncDecPropObj(ctx, op, instanceFromTv(base), key);
 
     case KindOfRef:
     case KindOfClass:

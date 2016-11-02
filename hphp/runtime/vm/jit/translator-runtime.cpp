@@ -43,7 +43,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -1070,8 +1069,7 @@ void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
 }
 
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
-  TypedValue result;
-  HPHP::IncDecElem(op, base, key, result);
+  auto const result = HPHP::IncDecElem(op, base, key);
   assertx(result.m_type != KindOfRef);
   return result;
 }

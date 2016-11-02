@@ -944,7 +944,7 @@ Object ObjectData::FromArray(ArrayData* properties) {
   return retval;
 }
 
-Slot ObjectData::declPropInd(TypedValue* prop) const {
+Slot ObjectData::declPropInd(const TypedValue* prop) const {
   // Do an address range check to determine whether prop physically resides
   // in propVec.
   const TypedValue* pv = propVec();
@@ -1488,9 +1488,7 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   return prop;
 }
 
-// writes result into dest without decreffing old value.
-void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
-                            TypedValue& dest) {
+Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   auto const lookup = getProp(ctx, key);
   auto prop = lookup.prop;
 
@@ -1499,22 +1497,21 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     if (prop->m_type == KindOfUninit && getAttribute(UseGet) &&
         invokeGet(&get_result, key)) {
       SCOPE_EXIT { tvRefcountedDecRef(get_result); };
-      IncDecBody(op, &get_result, &dest);
+      auto const dest = IncDecBody(op, &get_result);
       if (getAttribute(UseSet)) {
         invokeSet(key, &get_result);
-        return;
+        return dest;
       }
       memcpy(prop, &get_result, sizeof(TypedValue));
       get_result.m_type = KindOfNull; // suppress decref
-      return;
+      return dest;
     }
     if (prop->m_type == KindOfUninit) {
       tvWriteNull(prop);
     } else {
       prop = tvToCell(prop);
     }
-    IncDecBody(op, prop, &dest);
-    return;
+    return IncDecBody(op, prop);
   }
 
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
@@ -1525,9 +1522,9 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     if (invokeNativeGetProp(&get_result, key)) {
       SCOPE_EXIT { tvRefcountedDecRef(get_result); };
       tvUnboxIfNeeded(&get_result);
-      IncDecBody(op, &get_result, &dest);
+      auto const dest = IncDecBody(op, &get_result);
       if (invokeNativeSetProp(key, &get_result)) {
-        return;
+        return dest;
       }
     }
   }
@@ -1541,7 +1538,7 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     invokeGet(&get_result, key);
     SCOPE_EXIT { tvRefcountedDecRef(get_result); };
     tvUnboxIfNeeded(&get_result);
-    IncDecBody(op, &get_result, &dest);
+    auto const dest = IncDecBody(op, &get_result);
     if (prop) raise_error("Cannot access protected property");
     prop = reinterpret_cast<TypedValue*>(
       &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
@@ -1552,7 +1549,7 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     // under the recursion into invokeGet above, so we need to do a
     // tvSet here.
     tvSet(get_result, *prop);
-    return;
+    return dest;
   }
 
   if (useGet && useSet) {
@@ -1560,9 +1557,9 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     if (invokeGet(&get_result, key)) {
       SCOPE_EXIT { tvRefcountedDecRef(get_result); };
       tvUnboxIfNeeded(&get_result);
-      IncDecBody(op, &get_result, &dest);
+      auto const dest = IncDecBody(op, &get_result);
       invokeSet(key, &get_result);
-      return;
+      return dest;
     }
   }
 
@@ -1575,7 +1572,7 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
   );
   assert(prop->m_type == KindOfNull); // cannot exist yet
-  IncDecBody(op, prop, &dest);
+  return IncDecBody(op, prop);
 }
 
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {

@@ -136,17 +136,15 @@ static Variant do_eval(Unit* evalUnit, int depth, bool bypassCheck) {
 
   g_context->debuggerSettings.bypassCheck = bypassCheck;
   // Do the eval
-  Variant result;
-  bool failure = g_context->evalPHPDebugger((TypedValue*)&result,
-                                            evalUnit, depth);
+  auto const result = g_context->evalPHPDebugger(evalUnit, depth);
   g_context->debuggerSettings.bypassCheck = false;
 
   // Restore the error reporting level and then either return or throw
   req_data.setErrorReportingLevel(old_level);
-  if (failure) {
+  if (result.first) {
     throw_exn(Error::EvaluatingCode);
   }
-  return result;
+  return result.second;
 }
 
 // Same as do_eval(const Unit*, int) except that this evaluates a string

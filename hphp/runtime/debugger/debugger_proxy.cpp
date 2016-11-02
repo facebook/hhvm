@@ -761,10 +761,10 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
-                                  int frame, bool &failed, int flags) {
+std::pair<bool,Variant>
+DebuggerProxy::ExecutePHP(const std::string &php, String &output,
+                          int frame, int flags) {
   TRACE(2, "DebuggerProxy::ExecutePHP\n");
-  Variant ret;
   // Wire up stdout and stderr to our own string buffer so we can pass
   // any output back to the client.
   StringBuffer sb;
@@ -794,7 +794,7 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
     switchThreadMode(origThreadMode, m_thread);
   };
-  failed = g_context->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
+  auto const ret = g_context->evalPHPDebugger(code.get(), frame);
   g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (flags & ExecutePHPFlagsLog) {

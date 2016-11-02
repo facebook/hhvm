@@ -1077,11 +1077,10 @@ bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
       // Don't hit more breakpoints while attempting to decide if we should stop
       // at this breakpoint.
       EvalBreakControl eval(true);
-      bool failed;
-      Variant ret = proxy.ExecutePHP(m_php, output, 0, failed,
-                                     DebuggerProxy::ExecutePHPFlagsNone);
+      auto const ret = proxy.ExecutePHP(m_php, output, 0,
+                                        DebuggerProxy::ExecutePHPFlagsNone);
       if (m_check) {
-        return ret.toBoolean();
+        return ret.second.toBoolean();
       }
     }
     m_output = std::string(output.data(), output.size());

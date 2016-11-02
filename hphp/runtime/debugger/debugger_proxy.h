@@ -114,8 +114,8 @@ struct DebuggerProxy : Synchronizable,
     ExecutePHPFlagsAtInterrupt = 0x02 // Called when stopped at an interrupt
   };
 
-  Variant ExecutePHP(const std::string &php, String &output, int frame,
-                     bool &failed, int flags);
+  std::pair<bool,Variant>
+  ExecutePHP(const std::string &php, String &output, int frame, int flags);
 
   std::string requestAuthToken();
 

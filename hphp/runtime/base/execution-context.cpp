@@ -2024,32 +2024,26 @@ StrNR ExecutionContext::createFunction(const String& args,
   return lambda->nameStr();
 }
 
-bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
-                                       StringData* code,
-                                       int frame) {
-  assert(retval);
+std::pair<bool,Variant>
+ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?php" prepended already
   auto unit = compile_string(code->data(), code->size());
   if (unit == nullptr) {
     raise_error("Syntax error");
-    tvWriteNull(retval);
-    return true;
+    return {true, init_null_variant};
   }
 
   // Do not JIT this unit, we are using it exactly once.
   unit->setInterpretOnly();
-  return evalPHPDebugger(retval, unit, frame);
+  return evalPHPDebugger(unit, frame);
 }
 
-bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
-                                       Unit* unit,
-                                       int frame) {
-  assert(retval);
+std::pair<bool,Variant>
+ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   always_assert(!RuntimeOption::RepoAuthoritative);
 
   VMRegAnchor _;
 
-  auto failed = true;
   auto fp = vmfp();
   if (fp) {
     for (; frame > 0; --frame) {
@@ -2105,10 +2099,11 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
-    *retval = invokeFunc(unit->getMain(functionClass), init_null_variant,
-               this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
-               InvokePseudoMain);
-    failed = false;
+    return {false, Variant::attach(
+        invokeFunc(unit->getMain(functionClass), init_null_variant,
+                   this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
+                   InvokePseudoMain)
+    )};
   } catch (FatalErrorException &e) {
     g_context->write(s_fatal);
     g_context->write(" : ");
@@ -2139,7 +2134,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
   } catch (...) {
     g_context->write(s_cppException.data());
   }
-  return failed;
+  return {true, init_null_variant};
 }
 
 void ExecutionContext::enterDebuggerDummyEnv() {

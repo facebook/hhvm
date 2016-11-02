@@ -164,6 +164,7 @@ struct FunctionScope : BlockScope,
    */
   bool allowsVariableArguments() const;
   bool hasVariadicParam() const;
+  bool hasRefVariadicParam() const;
   bool usesVariableArgumentFunc() const;
   bool isReferenceVariableArgument() const;
   void setVariableArgument(int reference);

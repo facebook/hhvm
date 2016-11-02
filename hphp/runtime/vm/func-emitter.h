@@ -216,6 +216,7 @@ public:
   bool isPseudoMain() const;
   bool isMethod() const;
   bool isVariadic() const;
+  bool isVariadicByRef() const;
 
   /*
    * @returns: std::make_pair(line1, line2)

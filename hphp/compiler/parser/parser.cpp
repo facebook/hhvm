@@ -1351,11 +1351,6 @@ void Parser::onVariadicParam(Token &out, Token *params,
                 " in non-Hack files",
                 var.text().c_str(), type.text().c_str());
   }
-  if (ref) {
-    PARSE_ERROR("Parameter $%s is both variadic and by reference"
-                "; this is unsupported",
-                var.text().c_str());
-  }
 
   ExpressionPtr expList;
   if (params) {

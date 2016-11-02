@@ -177,7 +177,12 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     // to the interceptee
     attrs |= AttrMayUseVV;
   }
-  if (isVariadic()) { attrs |= AttrVariadicParam; }
+  if (isVariadic()) {
+    attrs |= AttrVariadicParam;
+    if (isVariadicByRef()) {
+      attrs |= AttrVariadicByRef;
+    }
+  }
 
   if (!containsCalls) { attrs |= AttrPhpLeafFn; }
 

@@ -7795,6 +7795,10 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
     attrs = attrs | AttrMayUseVV;
   }
 
+  if (funcScope->hasRefVariadicParam()) {
+    attrs |= AttrVariadicByRef;
+  }
+
   auto fullName = meth->getOriginalFullName();
   auto it = Option::FunctionSections.find(fullName);
   if ((it != Option::FunctionSections.end() && it->second == "hot") ||

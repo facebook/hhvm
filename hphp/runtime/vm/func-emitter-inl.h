@@ -129,6 +129,10 @@ inline bool FuncEmitter::isVariadic() const {
   return params.size() && params[(params.size() - 1)].isVariadic();
 }
 
+inline bool FuncEmitter::isVariadicByRef() const {
+  return isVariadic() && params[(params.size() -1)].byRef;
+}
+
 inline std::pair<int,int> FuncEmitter::getLocation() const {
   return std::make_pair(line1, line2);
 }

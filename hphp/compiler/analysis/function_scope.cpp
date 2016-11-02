@@ -289,6 +289,10 @@ bool FunctionScope::usesVariableArgumentFunc() const {
   return m_attribute & FileScope::VariableArgument;
 }
 
+bool FunctionScope::hasRefVariadicParam() const {
+  return m_attribute & FileScope::RefVariadicArgumentParam;
+}
+
 bool FunctionScope::isReferenceVariableArgument() const {
   bool res = m_attribute & FileScope::ReferenceVariableArgument;
   // If this method returns true, then usesVariableArgumentFunc() must also

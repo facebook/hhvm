@@ -66,6 +66,7 @@ struct FileScope : BlockScope, FunctionContainer,
     NeedsFinallyLocals       = 0x08000,
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
     ContainsAssert           = 0x20000,// contains call to assert()
+    RefVariadicArgumentParam = 0x40000,// &...$ variadicargument by ref
   };
 
 public:

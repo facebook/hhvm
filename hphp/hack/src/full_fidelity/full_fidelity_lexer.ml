@@ -324,10 +324,11 @@ let scan_hexadecimal_escape lexer =
   let ch2 = peek_char lexer 2 in
   let ch3 = peek_char lexer 3 in
   if not (is_hexadecimal_digit ch2) then
-    let lexer = with_error lexer SyntaxError.error0005 in
+    (* TODO: Consider producing an error for a malformed hex escape *)
+    (* let lexer = with_error lexer SyntaxError.error0005 in *)
     advance lexer 2
   else if not (is_hexadecimal_digit ch3) then
-    let lexer = with_error lexer SyntaxError.error0005 in
+    (* let lexer = with_error lexer SyntaxError.error0005 in *)
     advance lexer 3
   else
     advance lexer 4
@@ -335,7 +336,8 @@ let scan_hexadecimal_escape lexer =
 let scan_unicode_escape lexer =
   let ch2 = peek_char lexer 2 in
   if ch2 != '{' then
-    let lexer = with_error lexer SyntaxError.error0005 in
+    (* TODO: Consider producing a warning for a malformed unicode escape *)
+    (* let lexer = with_error lexer SyntaxError.error0005 in *)
     advance lexer 2
   else
     (* TODO: Verify that number is in range. *)
@@ -345,7 +347,8 @@ let scan_unicode_escape lexer =
     let lexer = scan_hexadecimal_digits lexer in
     let ch = peek_char lexer 0 in
     if ch != '}' then
-      let lexer = with_error lexer SyntaxError.error0005 in
+      (* TODO: Consider producing a warning for a malformed unicode escape *)
+      (* let lexer = with_error lexer SyntaxError.error0005 in *)
       lexer
     else
       advance lexer 1

@@ -364,10 +364,18 @@ module WithExpressionAndTypeParser
     TODO: The spec is wrong; it implies that a statement must always follow
           the default:, but in fact
           switch($x) { default: }
-          is legal. Fix the spec. *)
+          is legal. Fix the spec.
+    TODO: PHP allows a default to end in a semi; Hack does not.  We allow a semi
+          here; add an error in a later pass.
+          *)
     (* We detect if we are not inside a switch in a later pass. *)
     let (parser, default_token) = assert_token parser Default in
-    let (parser, colon_token) = expect_colon parser in
+    let (parser, semi_token) = optional_token parser Semicolon in
+    let (parser, colon_token) =
+      if is_missing semi_token then
+        expect_colon parser
+      else
+        (parser, semi_token) in
     let (parser, stmt) =
       if peek_token_kind parser = RightBrace then (parser, make_missing())
       else parse_statement parser in
@@ -381,10 +389,22 @@ module WithExpressionAndTypeParser
     TODO: The spec is wrong; it implies that a statement must always follow
           the case, but in fact
           switch($x) { case 10: }
-          is legal. Fix the spec. *)
+          is legal. Fix the spec.
+    TODO: The whole specification of switch statements is unfortunate; it makes
+          it harder to parse the code, format the code, find defects, etc.
+          Redo the specification to be more like C#, with switch sections, etc.
+    TODO: PHP allows a case to end in a semi; Hack does not.  We allow a semi
+          here; add an error in a later pass.
+          *)
+
     let (parser, case_token) = assert_token parser Case in
     let (parser, expr) = parse_expression parser in
-    let (parser, colon_token) = expect_colon parser in
+    let (parser, semi_token) = optional_token parser Semicolon in
+    let (parser, colon_token) =
+      if is_missing semi_token then
+        expect_colon parser
+      else
+        (parser, semi_token) in
     let (parser, stmt) =
       if peek_token_kind parser = RightBrace then (parser, make_missing())
       else parse_statement parser in

@@ -39,6 +39,7 @@ type genv = {
     options          : ServerArgs.options;
     config           : ServerConfig.t;
     local_config     : ServerLocalConfig.t;
+    recorder         : Recorder.instance;
     workers          : Worker.t list option;
     (* Returns the list of files under .hhconfig, subject to a filter *)
     indexer          : (string -> bool) -> string MultiWorker.nextlist;

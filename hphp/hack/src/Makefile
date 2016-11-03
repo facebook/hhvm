@@ -65,6 +65,7 @@ MODULES=\
   options\
   parsing\
   procs\
+  recorder\
   search\
   server\
   socket\

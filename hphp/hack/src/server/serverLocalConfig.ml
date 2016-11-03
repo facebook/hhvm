@@ -28,6 +28,7 @@ type t = {
   io_priority: int;
   cpu_priority: int;
   shm_dirs: string list;
+  start_with_recorder_on : bool;
   load_script_config: LoadScriptConfig.t;
 }
 
@@ -46,6 +47,7 @@ let default = {
   io_priority = 7;
   cpu_priority = 10;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
+  start_with_recorder_on = false;
   load_script_config = LoadScriptConfig.default;
 }
 
@@ -75,6 +77,9 @@ let load_ fn =
   let lazy_parse = bool_ "lazy_parse" ~default:false config in
   let load_mini_script_timeout =
     int_ "load_mini_script_timeout" ~default:20 config in
+  let start_with_recorder_on =
+    bool_ "start_with_recorder_on"
+    ~default:default.start_with_recorder_on config in
   let type_decl_bucket_size =
     int_ "type_decl_bucket_size" ~default:1000 config in
   (* Buck and hgwatchman use a 10 second timeout too *)
@@ -117,6 +122,7 @@ let load_ fn =
     io_priority;
     cpu_priority;
     shm_dirs;
+    start_with_recorder_on;
     load_script_config;
   }
 

@@ -502,7 +502,8 @@ struct RuntimeOption {
   F(string, ProfileHWEvents,           std::string(""))                 \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
-  F(uint32_t, JitMaxTranslations,      17)                              \
+  F(uint32_t, JitMaxTranslations,      10)                              \
+  F(uint32_t, JitMaxProfileTranslations, 30)                            \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(uint32_t, JitMaxRegionInstrs,      1347)                            \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \

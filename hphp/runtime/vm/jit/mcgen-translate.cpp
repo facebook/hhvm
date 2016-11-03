@@ -150,8 +150,12 @@ void enqueueRetranslateOptRequest(FuncId id) {
  * Returns true iff we already have Eval.JitMaxTranslations translations
  * recorded in srcRec.
  */
-bool reachedTranslationLimit(SrcKey sk, const SrcRec& srcRec) {
-  if (srcRec.translations().size() != RuntimeOption::EvalJitMaxTranslations) {
+bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
+  const auto numTrans = srcRec.translations().size();
+  if ((kind == TransKind::Profile &&
+       numTrans != RuntimeOption::EvalJitMaxProfileTranslations) ||
+      (kind != TransKind::Profile &&
+       numTrans != RuntimeOption::EvalJitMaxTranslations)) {
     return false;
   }
   INC_TPC(max_trans);
@@ -369,7 +373,7 @@ TCA translate(TransArgs args, FPInvOffset spOff, ProfTransRec* prologue) {
                          args.annotations.begin(), args.annotations.end());
 
   // Lower the RegionDesc to an IRUnit, then lower that to a Vunit.
-  if (args.region && !reachedTranslationLimit(args.sk, *srcRec)) {
+  if (args.region && !reachedTranslationLimit(args.kind, args.sk, *srcRec)) {
     if (args.kind == TransKind::Profile || (profData() && transdb::enabled())) {
       env.transID = profData()->allocTransID();
     }
@@ -435,9 +439,15 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
     // writing to it.
     return sr->getTopTranslation();
   }
-  if (sr->translations().size() > RuntimeOption::EvalJitMaxTranslations) {
-    always_assert(sr->translations().size() ==
-                  RuntimeOption::EvalJitMaxTranslations + 1);
+  const auto numTrans = sr->translations().size();
+  if (args.kind == TransKind::Profile) {
+    if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
+      always_assert(numTrans ==
+                    RuntimeOption::EvalJitMaxProfileTranslations + 1);
+      return sr->getTopTranslation();
+    }
+  } else if (numTrans > RuntimeOption::EvalJitMaxTranslations) {
+    always_assert(numTrans == RuntimeOption::EvalJitMaxTranslations + 1);
     return sr->getTopTranslation();
   }
   SKTRACE(1, args.sk, "retranslate\n");

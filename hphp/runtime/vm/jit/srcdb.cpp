@@ -153,7 +153,9 @@ void SrcRec::newTranslation(TransLoc loc,
                             GrowableVector<IncomingBranch>& tailBranches) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
-  assertx(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
+  assertx(m_translations.size() <=
+          std::max(RuntimeOption::EvalJitMaxProfileTranslations,
+                   RuntimeOption::EvalJitMaxTranslations));
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, loc.mainStart());
 

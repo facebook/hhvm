@@ -1010,7 +1010,7 @@ void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
   auto const calleeAROff = frameInst->extra<DefInlineFP>()->spOffset;
   auto const spOff = spInst->extra<DefSP>()->offset;
 
-  InlineReturnNoFrameData data {
+  auto const data = FPRelOffsetData {
     // Offset of the callee's return value relative to the frame pointer.
     calleeAROff.to<FPRelOffset>(spOff) + (AROFF(m_r) / sizeof(TypedValue))
   };

@@ -1495,9 +1495,10 @@ To string conversions:
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
-| InlineReturn, ND, S(FramePtr), NF
+| InlineReturn<callerFPOff>, ND, S(FramePtr), NF
 
-  Unlinks a frame constructed by DefInlineFP.
+  Unlinks a frame constructed by DefInlineFP.  `callerFPOff' is the offset of
+  the caller's frame pointer relative to S0.
 
 | InlineReturnNoFrame<InlineFrameStart>, ND, NA, NF
 

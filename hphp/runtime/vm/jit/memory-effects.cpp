@@ -626,7 +626,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case InlineReturnNoFrame: {
     auto const callee = AliasClass(AStack {
-      inst.extra<InlineReturnNoFrame>()->frameOffset,
+      inst.extra<InlineReturnNoFrame>()->offset,
       std::numeric_limits<int32_t>::max()
     }) | AMIStateAny;
     return may_load_store_kill(AEmpty, callee, callee);

@@ -65,16 +65,17 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
-  auto fp = srcLoc(env, inst, 0).reg();
-  assertx(fp == rvmfp());
-  vmain(env) << load{fp[AROFF(m_sfp)], rvmfp()};
+  auto& v = vmain(env);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const callerFPOff = inst->extra<InlineReturn>()->offset;
+  v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
 }
 
 void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
 
   auto const extra = inst->extra<InlineReturnNoFrame>();
-  auto const offset = cellsToBytes(extra->frameOffset.offset);
+  auto const offset = cellsToBytes(extra->offset.offset);
   for (auto i = 0; i < kNumActRecCells; ++i) {
     trashTV(vmain(env), rvmfp(), offset - cellsToBytes(i), kTVTrashJITFrame);
   }

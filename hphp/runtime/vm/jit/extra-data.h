@@ -336,13 +336,29 @@ struct TransIDData : IRExtraData {
 };
 
 /*
+ * FP-relative offset.
+ */
+struct FPRelOffsetData : IRExtraData {
+  explicit FPRelOffsetData(FPRelOffset offset) : offset(offset) {}
+
+  std::string show() const {
+    return folly::to<std::string>("FPRelOff ", offset.offset);
+  }
+
+  bool equals(FPRelOffsetData o) const { return offset == o.offset; }
+  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
+
+  FPRelOffset offset;
+};
+
+/*
  * Stack pointer offset.
  */
 struct FPInvOffsetData : IRExtraData {
   explicit FPInvOffsetData(FPInvOffset offset) : offset(offset) {}
 
   std::string show() const {
-    return folly::to<std::string>("FPRelOff ", offset.offset);
+    return folly::to<std::string>("FPInvOff ", offset.offset);
   }
 
   bool equals(FPInvOffsetData o) const { return offset == o.offset; }
@@ -572,15 +588,6 @@ struct DefInlineFPData : IRExtraData {
   FPInvOffset retSPOff;
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
   uint32_t numNonDefault;
-};
-
-struct InlineReturnNoFrameData : IRExtraData {
-  explicit InlineReturnNoFrameData(FPRelOffset off) : frameOffset(off) {}
-  std::string show() const {
-    return folly::to<std::string>(frameOffset.offset);
-  }
-
-  FPRelOffset frameOffset;
 };
 
 struct SyncReturnBCData : IRExtraData {
@@ -1187,7 +1194,8 @@ X(LdStkAddr,                    IRSPRelOffsetData);
 X(DefInlineFP,                  DefInlineFPData);
 X(BeginInlining,                IRSPRelOffsetData);
 X(SyncReturnBC,                 SyncReturnBCData);
-X(InlineReturnNoFrame,          InlineReturnNoFrameData);
+X(InlineReturn,                 FPRelOffsetData);
+X(InlineReturnNoFrame,          FPRelOffsetData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);

@@ -259,8 +259,17 @@ void implInlineReturn(IRGS& env) {
   assertx(!curFunc(env)->isPseudoMain());
   assertx(!resumed(env));
 
+  auto const& fs = env.irb->fs();
+
+  // The offset of our caller's FP relative to our own.
+  auto const callerFPOff =
+    // Offset of the (unchanged) vmsp relative to our fp...
+    - fs.irSPOff()
+    // ...plus the offset of our parent's fp relative to vmsp.
+    + FPInvOffset{0}.to<IRSPRelOffset>(fs.callerIRSPOff()).offset;
+
   // Return to the caller function.
-  gen(env, InlineReturn, fp(env));
+  gen(env, InlineReturn, FPRelOffsetData { callerFPOff }, fp(env));
 
   // Pop the inlined frame in our IRGS.  Be careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.

@@ -332,6 +332,21 @@ struct FrameStateMgr final {
   const jit::vector<FPIInfo>& fpiStack() const { return cur().fpiStack; }
 
   /*
+   * Current inlining depth (not including the toplevel frame).
+   */
+  unsigned inlineDepth() const { return m_stack.size() - 1; }
+
+  /*
+   * Get the irSPOff for the parent frame of the most-inlined frame.
+   *
+   * @requires: inlineDepth() > 0
+   */
+  FPInvOffset callerIRSPOff() const {
+    assertx(inlineDepth() > 0);
+    return m_stack.at(m_stack.size() - 2).irSPOff;
+  }
+
+  /*
    * FrameState modifiers.
    *
    * In the presence of inlining, these modify state for the most-inlined
@@ -343,11 +358,6 @@ struct FrameStateMgr final {
   void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
   void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
   void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
-
-  /*
-   * Current inlining depth (not including the toplevel frame).
-   */
-  unsigned inlineDepth() const { return m_stack.size() - 1; }
 
   /*
    * Return the LocationState for local `id' or stack element at `off' in the

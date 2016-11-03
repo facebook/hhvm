@@ -1328,7 +1328,8 @@ and expr_
       Errors.array_cast p;
       env, (Reason.Rwitness p, Tany)
   | Cast (ty, e) ->
-      let env, _ = expr env e in
+      let env, ty2 = expr env e in
+      Async.enforce_not_awaitable env (fst e) ty2;
       Phase.hint_locl env ty
   | InstanceOf (e, cid) ->
       let env, _ = expr env e in

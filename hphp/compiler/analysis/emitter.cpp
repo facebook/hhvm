@@ -10962,6 +10962,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                     = Repo::GlobalData{};
   gd.HardTypeHints            = HHBBC::options.HardTypeHints;
   gd.HardReturnTypeHints      = HHBBC::options.HardReturnTypeHints;
+  gd.ElideAutoloadInvokes     = HHBBC::options.ElideAutoloadInvokes;
   gd.UsedHHBBC                = Option::UseHHBBC;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;

@@ -245,6 +245,13 @@ struct Options {
   bool DisallowDynamicVarEnvFuncs = true;
 
   /*
+   * If true, we'll perform optimizations which can remove invocations of the
+   * autoloader, if it can be proven the invocation would not find a viable
+   * function.
+   */
+  bool ElideAutoloadInvokes = true;
+
+  /*
    * The filepath where to save the stats file.  If the path is empty, then we
    * save the stats file to a temporary file.
    */

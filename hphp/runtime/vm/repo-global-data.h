@@ -73,6 +73,13 @@ struct Repo::GlobalData {
   bool DisallowDynamicVarEnvFuncs = false;
 
   /*
+   * Indicates whether the repo was compiled with ElideAutoloadInvokes. If so,
+   * potential invocations of the autoloader may have been optimized away if it
+   * could be proven the invocation would not find a viable function.
+   */
+  bool ElideAutoloadInvokes = true;
+
+  /*
    * Indicates whether the repo was compiled with PHP7 integer semantics. This
    * slightly changes the way certain arithmetic operations are evaluated, in
    * small enough ways that don't warrant new bytecodes, but in ways that do
@@ -109,6 +116,7 @@ struct Repo::GlobalData {
       (HardPrivatePropInference)
       (arrayTypeTable)
       (DisallowDynamicVarEnvFuncs)
+      (ElideAutoloadInvokes)
       (HardReturnTypeHints)
       (PHP7_IntSemantics)
       (PHP7_ScalarTypes)

@@ -238,6 +238,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
+  gd.ElideAutoloadInvokes     = options.ElideAutoloadInvokes;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
   gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;

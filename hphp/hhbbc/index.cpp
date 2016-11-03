@@ -2103,9 +2103,9 @@ Index::resolve_func_fallback(Context ctx,
       resolve_func_helper(r2, fallbackName)
     );
   }
-  return begin(r1) == end(r1)
-    ? std::make_pair(resolve_func_helper(r2, fallbackName), folly::none)
-    : std::make_pair(resolve_func_helper(r1, nsName), folly::none);
+  return begin(r2) == end(r2)
+    ? std::make_pair(resolve_func_helper(r1, nsName), folly::none)
+    : std::make_pair(resolve_func_helper(r2, fallbackName), folly::none);
 }
 
 Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {

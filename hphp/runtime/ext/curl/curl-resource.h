@@ -94,6 +94,8 @@ struct CurlResource : SweepableResourceData {
   }
 
  private:
+  void setDefaultOptions();
+
   static int64_t minTimeout(int64_t timeout);
   static int64_t minTimeoutMS(int64_t timeout);
 

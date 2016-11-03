@@ -68,7 +68,7 @@ CurlResource::CurlResource(const String& url,
   m_read.method  = PHP_CURL_DIRECT;
   m_write_header.method = PHP_CURL_IGNORE;
 
-  reset();
+  setDefaultOptions();
 
   if (!url.empty()) {
 #if LIBCURL_VERSION_NUM >= 0x071100
@@ -160,7 +160,10 @@ void CurlResource::reseat() {
 
 void CurlResource::reset() {
   curl_easy_reset(m_cp);
+  setDefaultOptions();
+}
 
+void CurlResource::setDefaultOptions() {
   curl_easy_setopt(m_cp, CURLOPT_NOPROGRESS,        1);
   curl_easy_setopt(m_cp, CURLOPT_VERBOSE,           0);
   curl_easy_setopt(m_cp, CURLOPT_WRITEFUNCTION,     curl_write);

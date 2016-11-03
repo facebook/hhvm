@@ -1072,6 +1072,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Dollar"; "$" ];
   [ "Slash"; "/" ];
   [ "Percent"; "%" ];
+  [ "LessThanEqualGreaterThan"; "<=>"];
   [ "LessThanLessThan"; "<<" ];
   [ "GreaterThanGreaterThan"; ">>" ];
   [ "LessThan"; "<" ];

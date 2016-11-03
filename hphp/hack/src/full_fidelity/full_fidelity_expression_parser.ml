@@ -242,6 +242,7 @@ module WithStatementAndDeclAndTypeParser
     | LessThan
     | ExclamationEqualEqual
     | LessThanEqual
+    | LessThanEqualGreaterThan
     | GreaterThanEqual
     | Ampersand
     | Bar
@@ -602,6 +603,7 @@ module WithStatementAndDeclAndTypeParser
     | LeftBracket
     | LessThan
     | LessThanEqual
+    | LessThanEqualGreaterThan
     | LessThanLessThan
     | Percent
     | PercentEqual

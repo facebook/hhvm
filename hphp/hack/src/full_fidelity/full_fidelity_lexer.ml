@@ -671,6 +671,10 @@ let scan_token in_type lexer =
   | ('%', _, _) -> (advance lexer 1, TokenKind.Percent)
   | ('<', '<', '<') -> scan_docstring_literal lexer
   | ('<', '<', '=') -> (advance lexer 3, TokenKind.LessThanLessThanEqual)
+  (* TODO: We lex and parse the spaceship operator.
+     TODO: This is not in the spec at present.  We should either make it an
+     TODO: error, or add it to the specification. *)
+  | ('<', '=', '>') -> (advance lexer 3, TokenKind.LessThanEqualGreaterThan)
   | ('<', '=', _) -> (advance lexer 2, TokenKind.LessThanEqual)
   | ('<', '<', _) -> (advance lexer 2, TokenKind.LessThanLessThan)
   | ('<', _, _) -> (advance lexer 1, TokenKind.LessThan)

@@ -795,6 +795,8 @@ class EditableToken extends EditableSyntax
        return new SlashToken(leading, trailing);
     case '%':
        return new PercentToken(leading, trailing);
+    case '<=>':
+       return new LessThanEqualGreaterThanToken(leading, trailing);
     case '<<':
        return new LessThanLessThanToken(leading, trailing);
     case '>>':
@@ -1709,6 +1711,13 @@ class PercentToken extends EditableToken
   constructor(leading, trailing)
   {
     super('%', leading, trailing, '%');
+  }
+}
+class LessThanEqualGreaterThanToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('<=>', leading, trailing, '<=>');
   }
 }
 class LessThanLessThanToken extends EditableToken
@@ -14118,6 +14127,7 @@ exports.ExclamationToken = ExclamationToken;
 exports.DollarToken = DollarToken;
 exports.SlashToken = SlashToken;
 exports.PercentToken = PercentToken;
+exports.LessThanEqualGreaterThanToken = LessThanEqualGreaterThanToken;
 exports.LessThanLessThanToken = LessThanLessThanToken;
 exports.GreaterThanGreaterThanToken = GreaterThanGreaterThanToken;
 exports.LessThanToken = LessThanToken;

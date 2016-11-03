@@ -8,7 +8,8 @@ class foo {
     global $a; // Only allowed in PHP, not in Hack.
     global(123); // A statement beginning with global should still parse.
     $f = new foo; // PHP allows argument list to be omitted
-    return $x or $x and $x xor $x; // PHP operators with weird precedence.
+    return $x or $x and $x xor $x <=> $x; // PHP operators.
+
   }
 }
 // The closing tag is not supported in Hack but we parse it anyways.

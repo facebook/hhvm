@@ -30,6 +30,7 @@ type t =
 | StrictEqualOperator
 | NotEqualOperator
 | StrictNotEqualOperator
+| SpaceshipOperator
 | LessThanOperator
 | LessThanOrEqualOperator
 | GreaterThanOperator
@@ -115,7 +116,7 @@ let precedence operator =
   | AndOperator -> 13
   | EqualOperator | StrictEqualOperator
   | NotEqualOperator | StrictNotEqualOperator -> 14
-  | LessThanOperator | LessThanOrEqualOperator
+  | SpaceshipOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator -> 15
   | LeftShiftOperator | RightShiftOperator -> 16
   | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 17
@@ -139,7 +140,7 @@ let associativity operator =
   | EqualOperator | StrictEqualOperator | NotEqualOperator
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
-  | NewOperator | CloneOperator | AwaitOperator
+  | NewOperator | CloneOperator | AwaitOperator | SpaceshipOperator
     -> NotAssociative
 
   | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
@@ -218,6 +219,7 @@ let is_trailing_operator_token token =
   | EqualEqualEqual
   | ExclamationEqual
   | ExclamationEqualEqual
+  | LessThanEqualGreaterThan
   | LessThan
   | LessThanEqual
   | GreaterThan
@@ -267,6 +269,7 @@ let trailing_from_token token =
   | ExclamationEqual -> NotEqualOperator
   | ExclamationEqualEqual -> StrictNotEqualOperator
   | LessThan -> LessThanOperator
+  | LessThanEqualGreaterThan -> SpaceshipOperator
   | LessThanEqual -> LessThanOrEqualOperator
   | GreaterThan -> GreaterThanOperator
   | GreaterThanEqual -> GreaterThanOrEqualOperator
@@ -322,6 +325,7 @@ let is_binary_operator_token token =
   | EqualEqualEqual
   | ExclamationEqual
   | ExclamationEqualEqual
+  | LessThanEqualGreaterThan
   | LessThan
   | LessThanEqual
   | GreaterThan
@@ -388,6 +392,7 @@ let to_string kind =
   | NotEqualOperator -> "not_equal"
   | StrictNotEqualOperator -> "strict_not_equal"
   | LessThanOperator -> "less_than"
+  | SpaceshipOperator -> "spaceship"
   | LessThanOrEqualOperator -> "less_than_or_equal"
   | GreaterThanOperator -> "greater_than"
   | GreaterThanOrEqualOperator -> "greater_than_or_equal"

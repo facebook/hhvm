@@ -51,16 +51,11 @@ public:
   enum Attribute {
     ContainsDynamicVariable = 1,
     ContainsLDynamicVariable = ContainsDynamicVariable | 2,
-    ContainsExtract = 4,
-    ContainsCompact = 8,
     InsideStaticStatement = 16,
     InsideGlobalStatement = 32,
     ForceGlobal = 64,
     ContainsUnset = 128,
     ContainsDynamicStatic  = 512,
-    ContainsGetDefinedVars = 1024,
-    ContainsDynamicFunctionCall = 2048,
-    ContainsAssert = 4096,
   };
 
   enum AlteredVarClass {
@@ -113,8 +108,6 @@ public:
   bool isUsed(const std::string &name) const;
   bool isNeeded(const std::string &name) const;
 
-  bool needLocalCopy(const Symbol *sym) const;
-  bool needLocalCopy(const std::string &name) const;
   bool isPseudoMainTable() const;
   bool hasPrivate() const;
   bool hasNonStaticPrivate() const;

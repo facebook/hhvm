@@ -174,21 +174,6 @@ bool VariableTable::isLocal(const Symbol *sym) const {
   return false;
 }
 
-bool VariableTable::needLocalCopy(const std::string &name) const {
-  return needLocalCopy(getSymbol(name));
-}
-
-bool VariableTable::needLocalCopy(const Symbol *sym) const {
-  return sym &&
-    (sym->isGlobal() || sym->isStatic()) &&
-    (sym->isRedeclared() ||
-     sym->isNestedStatic() ||
-     sym->isLocalGlobal() ||
-     getAttribute(ContainsDynamicVariable) ||
-     getAttribute(ContainsExtract) ||
-     getAttribute(ContainsUnset));
-}
-
 bool VariableTable::isInherited(const std::string &name) const {
   const Symbol *sym = getSymbol(name);
   return !sym ||

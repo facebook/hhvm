@@ -37,6 +37,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/func-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -335,6 +336,30 @@ void mark_persistent_static_properties(const Index& index,
   }
 }
 
+void update_mayusevv(Index& index, php::Program& program) {
+  trace_time timer("analyze mayusevv");
+  auto const results = parallel::map(
+    all_function_contexts(program),
+    [&] (Context ctx) {
+      if (is_pseudomain(ctx.func)) {
+        return std::make_tuple(true, ctx.func);
+      }
+      auto info = CollectedInfo { index, ctx, nullptr, nullptr };
+      analyze_func_collect(index, ctx, info);
+      return std::make_tuple(info.mayUseVV, ctx.func);
+    }
+  );
+
+  trace_time update("mark mayusevv");
+  for (auto const& pair : results) {
+    auto const mayUseVV = std::get<0>(pair);
+    auto& func = std::get<1>(pair);
+    func->attrs = mayUseVV
+      ? Attr(func->attrs | AttrMayUseVV)
+      : Attr(func->attrs & ~AttrMayUseVV);
+  }
+}
+
 /*
  * Finally, use the results of all these iterations to perform
  * optimization.  This reanalyzes every function using our
@@ -413,6 +438,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
       analyze_iteratively(index, *program);
     }
     final_pass(index, *program);
+    update_mayusevv(index, *program);
     state_after("optimize", *program);
   }
 

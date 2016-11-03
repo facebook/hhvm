@@ -225,10 +225,6 @@ struct FunctionScope : BlockScope,
   bool isPersistent() const { return m_persistent; }
   void setPersistent(bool p) { m_persistent = p; }
 
-  /* Indicates if a function may need to use a VarEnv or varargs (aka
-   * extraArgs) at run time */
-  bool mayUseVV() const;
-
   typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
     string_eqstri> UserAttributeMap;
 

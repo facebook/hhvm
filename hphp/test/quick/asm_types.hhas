@@ -11,36 +11,36 @@
   RetC
 }
 
-.function [mayusevv] use_class(<"@C" "C" hh_type extended_hint soft> $x) {
+.function use_class(<"@C" "C" hh_type extended_hint soft> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function [mayusevv] use_int_soft(<"@HH\\int" "HH\\int" hh_type extended_hint soft> $x) {
+.function use_int_soft(<"@HH\\int" "HH\\int" hh_type extended_hint soft> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function [mayusevv] use_int_nullable(<"?HH\\int" "HH\\int" nullable hh_type extended_hint> $x) {
+.function use_int_nullable(<"?HH\\int" "HH\\int" nullable hh_type extended_hint> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function [mayusevv] use_int(<"HH\\int" "HH\\int" hh_type> $x) {
+.function use_int(<"HH\\int" "HH\\int" hh_type> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function [mayusevv] use_mixed(<"HH\\mixed" N> $x) {
+.function use_mixed(<"HH\\mixed" N> $x) {
   Null
   RetC
 }
 
-.function [mayusevv] test() {
+.function test() {
   FPushFuncD 1 "use_class"
   FPushCtorD 0 "C"
   FCall 0
@@ -108,11 +108,11 @@
 }
 
 .class C {
-  .method [public mayusevv] 86ctor() {
+  .method [public] 86ctor() {
     Null
     RetC
   }
-  .method [public static mayusevv] <"HH\\int" "HH\\int" hh_type extended_hint> test() {
+  .method [public static] <"HH\\int" "HH\\int" hh_type extended_hint> test() {
     Null
     RetC
   }

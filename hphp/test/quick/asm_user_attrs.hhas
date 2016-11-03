@@ -16,7 +16,7 @@
     Null
     RetC
   }
-  .method [public mayusevv] 86ctor() {
+  .method [public] 86ctor() {
     Null
     RetC
   }

@@ -54,18 +54,14 @@ struct FileScope : BlockScope, FunctionContainer,
     ContainsDynamicVariable  = 0x0001,
     ContainsLDynamicVariable = 0x0002,
     VariableArgument         = 0x0004,
-    ContainsExtract          = 0x0008, // contains call to extract()
-    ContainsCompact          = 0x0010, // contains call to compact()
     ContainsReference        = 0x0020, // returns ref or has ref parameters
     ReferenceVariableArgument = 0x0040, // like sscanf or fscanf
     ContainsUnset            = 0x0080, // need special handling
     NoEffect                 = 0x0100, // does not side effect
     HelperFunction           = 0x0200, // runtime helper function
-    ContainsGetDefinedVars   = 0x0400, // need VariableTable with getDefinedVars
     NoFCallBuiltin           = 0x02000,// function should not use FCallBuiltin
     NeedsFinallyLocals       = 0x08000,
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
-    ContainsAssert           = 0x20000,// contains call to assert()
     RefVariadicArgumentParam = 0x40000,// &...$ variadicargument by ref
   };
 

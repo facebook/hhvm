@@ -47,7 +47,6 @@ public:
   bool isFatalFunction() const {
     return isParseFatalFunction() ||  m_type == FunType::ThrowFatal;
   }
-  int isStaticCompact() const { return m_type == FunType::StaticCompact; }
 
   // define(<literal-string>, <scalar>);
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
@@ -90,7 +89,6 @@ protected:
     Extract,
     Assert,
     Compact,
-    StaticCompact, // compact() with statically known variable names
     ShellExec,
     Constant,
     Defined,

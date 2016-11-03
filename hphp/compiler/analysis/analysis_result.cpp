@@ -536,7 +536,6 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
-  getVariables()->setAttribute(VariableTable::ContainsExtract);
   getVariables()->setAttribute(VariableTable::ForceGlobal);
 
   // Analyze Includes

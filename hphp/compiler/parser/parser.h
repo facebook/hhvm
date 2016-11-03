@@ -401,7 +401,6 @@ private:
   struct FunctionContext {
     explicit FunctionContext(std::string name)
       : name(std::move(name))
-      , hasCallToGetArgs(false)
       , hasNonEmptyReturn(false)
       , isGenerator(false)
       , isAsync(false)
@@ -409,9 +408,6 @@ private:
     {}
 
     std::string name;
-
-    // Function contains a call to func_num_args, func_get_args or func_get_arg.
-    bool hasCallToGetArgs;
 
     // Function contains a non-empty return statement.
     bool hasNonEmptyReturn;

@@ -35,6 +35,7 @@ namespace HPHP { namespace HHBBC {
 TRACE_SET_MOD(hhbbc);
 
 const StaticString s_assert("assert");
+const StaticString s_set_frame_metadata("HH\\set_frame_metadata");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -185,7 +186,21 @@ void doRet(ISS& env, Type t) {
   env.flags.returned = t;
 }
 
+void mayUseVV(ISS& env) {
+  env.collect.mayUseVV = true;
+}
+
 void specialFunctionEffects(ISS& env, const res::Func& func) {
+  if (func.name()->isame(s_set_frame_metadata.get())) {
+    /*
+     * HH\set_frame_metadata can write to the caller's frame, but does not
+     * require a VV.
+     */
+    readUnknownLocals(env);
+    killLocals(env);
+    return;
+  }
+
   if (func.name()->isame(s_assert.get())) {
     /*
      * Assert is somewhat special. In the most general case, it can read and
@@ -203,11 +218,13 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
   if (func.mightWriteCallerFrame()) {
     readUnknownLocals(env);
     killLocals(env);
+    mayUseVV(env);
     return;
   }
 
   if (func.mightReadCallerFrame()) {
     readUnknownLocals(env);
+    mayUseVV(env);
     return;
   }
 }
@@ -221,6 +238,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
       if (!options.DisallowDynamicVarEnvFuncs) {
         readUnknownLocals(env);
         killLocals(env);
+        mayUseVV(env);
       }
       return;
     }

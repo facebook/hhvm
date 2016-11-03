@@ -564,9 +564,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
           stripped == "func_get_args" ||
           stripped == "func_get_arg") {
         funcName = stripped;
-        if (m_funcContexts.size() > 0) {
-          m_funcContexts.back().hasCallToGetArgs = true;
-        }
       }
       // Auto import a few functions from the HH namespace
       // TODO(#4245628): merge those into m_fnAliasTable
@@ -1312,7 +1309,6 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
   // check and set generator/async flags
   FunctionContext funcContext = m_funcContexts.back();
   checkFunctionContext(funcName, funcContext, modifiersExp, ref->num());
-  mth->setHasCallToGetArgs(funcContext.hasCallToGetArgs);
   mth->setMayCallSetFrameMetadata(funcContext.mayCallSetFrameMetadata);
   mth->getFunctionScope()->setGenerator(funcContext.isGenerator);
   mth->getFunctionScope()->setAsync(modifiersExp->isAsync());

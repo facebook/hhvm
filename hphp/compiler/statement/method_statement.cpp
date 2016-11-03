@@ -64,7 +64,6 @@ MethodStatement::MethodStatement
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES)
   , m_method(method)
   , m_ref(ref)
-  , m_hasCallToGetArgs(false)
   , m_mayCallSetFrameMetadata(false)
   , m_attribute(attr)
   , m_cppLength(-1)

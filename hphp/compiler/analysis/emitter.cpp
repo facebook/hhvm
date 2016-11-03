@@ -7797,10 +7797,8 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
   ModifierExpressionPtr mod(meth->getModifiers());
   Attr attrs = buildAttrs(mod, meth->isRef());
 
-  // if hasCallToGetArgs() or if mayUseVV
-  if (meth->hasCallToGetArgs() || funcScope->mayUseVV()) {
-    attrs = attrs | AttrMayUseVV;
-  }
+  // Be conservative by default. HHBBC can clear it where appropriate.
+  attrs |= AttrMayUseVV;
 
   if (funcScope->hasRefVariadicParam()) {
     attrs |= AttrVariadicByRef;

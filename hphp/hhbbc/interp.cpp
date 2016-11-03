@@ -705,6 +705,7 @@ void in(ISS& env, const bc::Catch&) {
 
 void in(ISS& env, const bc::NativeImpl&) {
   killLocals(env);
+  mayUseVV(env);
 
   if (is_collection_method_returning_this(env.ctx.cls, env.ctx.func)) {
     auto const resCls = env.index.builtin_class(env.ctx.cls->name);
@@ -774,6 +775,7 @@ template <typename Op> void common_cgetn(ISS& env) {
     }
   }
   readUnknownLocals(env);
+  mayUseVV(env);
   popC(env); // conversion to string can throw
   push(env, TInitCell);
 }
@@ -847,6 +849,7 @@ void in(ISS& env, const bc::VGetN&) {
   }
   popC(env);
   boxUnknownLocal(env);
+  mayUseVV(env);
   push(env, TRef);
 }
 
@@ -991,6 +994,7 @@ void issetEmptyNImpl(ISS& env) {
     // whether this function can have a VarEnv.
   }
   readUnknownLocals(env);
+  mayUseVV(env);
   popC(env);
   push(env, TBool);
 }
@@ -1106,6 +1110,7 @@ void in(ISS& env, const bc::SetN&) {
     // change whether or not they are boxed or initialized.
     loseNonRefLocalTypes(env);
   }
+  mayUseVV(env);
   push(env, t1);
 }
 
@@ -1174,6 +1179,7 @@ void in(ISS& env, const bc::SetOpN&) {
   popC(env);
   popC(env);
   loseNonRefLocalTypes(env);
+  mayUseVV(env);
   push(env, TInitCell);
 }
 
@@ -1232,6 +1238,7 @@ void in(ISS& env, const bc::IncDecN& op) {
   }
   popC(env);
   loseNonRefLocalTypes(env);
+  mayUseVV(env);
   push(env, TInitCell);
 }
 
@@ -1278,6 +1285,7 @@ void in(ISS& env, const bc::BindN&) {
   } else {
     boxUnknownLocal(env);
   }
+  mayUseVV(env);
   push(env, t1);
 }
 
@@ -1326,6 +1334,7 @@ void in(ISS& env, const bc::UnsetN& op) {
   popC(env);
   if (!t1.couldBe(TObj) && !t1.couldBe(TRes)) nothrow(env);
   unsetUnknownLocal(env);
+  mayUseVV(env);
 }
 
 void in(ISS& env, const bc::UnsetG& op) {
@@ -1508,6 +1517,7 @@ void in(ISS& env, const bc::FPassN& op) {
     // This could change the type of any local.
     popC(env);
     killLocals(env);
+    mayUseVV(env);
     return push(env, TInitGen);
   case PrepKind::Val: return reduce(env, bc::CGetN {},
                                          bc::FPassC { op.arg1 });
@@ -1707,6 +1717,7 @@ void in(ISS& env, const bc::FCallD& op) {
 
 void in(ISS& env, const bc::FCallAwait& op) {
   in(env, bc::FCallD { op.arg1, op.str2, op.str3 });
+  in(env, bc::UnboxRNop { });
   in(env, bc::Await { });
 }
 
@@ -1900,6 +1911,7 @@ void inclOpImpl(ISS& env) {
   killLocals(env);
   killThisProps(env);
   killSelfProps(env);
+  mayUseVV(env);
   push(env, TInitCell);
 }
 

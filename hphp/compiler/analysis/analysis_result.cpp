@@ -287,6 +287,14 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
     // we need someone to hold on to a reference to it
     // even though we're not going to do anything with it
     this->lock()->m_ignoredScopes.push_back(funcScope);
+
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::REDECLARE_BUILTIN,
+      funcScope->getScopeName().c_str()
+    );
+    funcScope->setFatal(msg);
     return false;
   }
 

@@ -3442,6 +3442,9 @@ void EmitterVisitor::visit(FileScopePtr file) {
   for (i = 0; i < nk; i++) {
     StatementPtr s = (*stmts)[i];
     if (auto meth = dynamic_pointer_cast<MethodStatement>(s)) {
+      if (auto msg = s->getFunctionScope()->getFatalMessage()) {
+        throw IncludeTimeFatalException(s, msg->data());
+      }
       // Emit afterwards
       postponeMeth(meth, nullptr, true);
     }
@@ -4419,6 +4422,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     auto m = static_pointer_cast<MethodStatement>(node);
     // Only called for fn defs not on the top level
     assert(!node->getClassScope()); // Handled directly by emitClass().
+    if (auto msg = node->getFunctionScope()->getFatalMessage()) {
+      emitMakeUnitFatal(e, msg->data());
+      return false;
+    }
     StringData* nName = makeStaticString(m->getOriginalName());
     FuncEmitter* fe = m_ue.newFuncEmitter(nName);
     e.DefFunc(fe->id());

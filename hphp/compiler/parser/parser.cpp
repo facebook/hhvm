@@ -1306,9 +1306,6 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
     func->onParse(m_ar, m_file);
     completeScope(func->getFunctionScope());
-    if (func->ignored()) {
-      return NEW_STMT0(StatementList);
-    }
     mth = func;
   }
 

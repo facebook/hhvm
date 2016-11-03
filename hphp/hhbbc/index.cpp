@@ -943,6 +943,23 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     if (is_interceptable_function(nullptr, borrow(f))) {
       f->attrs = f->attrs | AttrInterceptable;
     }
+    /*
+     * A function can be defined with the same name as a builtin in the
+     * repo. Any such attempts will fatal at runtime, so we can safely ignore
+     * any such definitions. This ensures that names referring to builtins are
+     * always fully resolvable.
+     */
+    auto const funcs = index.funcs.equal_range(f->name);
+    if (funcs.first != funcs.second) {
+      auto const& old_func = funcs.first->second;
+      // If there is a builtin, it will always be the first (and only) func on
+      // the list.
+      if (old_func->attrs & AttrBuiltin) {
+        always_assert(!(f->attrs & AttrBuiltin));
+        continue;
+      }
+      if (f->attrs & AttrBuiltin) index.funcs.erase(funcs.first, funcs.second);
+    }
     index.funcs.insert({f->name, borrow(f)});
   }
 

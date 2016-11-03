@@ -28,7 +28,12 @@ ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   auto& funcAddr = rds::handleToRef<LowPtr<Func>>(handle);
 
   if (rds::isPersistentHandle(handle)) {
-    assertx(funcAddr.get() == nullptr || funcAddr.get() == func);
+    auto const oldFunc = funcAddr.get();
+    if (oldFunc == func) return;
+    if (UNLIKELY(oldFunc != nullptr)) {
+      assertx(oldFunc->isBuiltin() && !func->isBuiltin());
+      raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
+    }
   } else {
     assertx(rds::isNormalHandle(handle));
     if (!rds::isHandleInit(handle, rds::NormalTag{})) {

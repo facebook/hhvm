@@ -45,13 +45,9 @@ struct FunctionStatement : MethodStatement {
 
   // implementing IParseHandler
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
-  bool ignored() const { return m_ignored;}
 
   void outputPHPHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputPHPBody(CodeGenerator &cg, AnalysisResultPtr ar);
-
-private:
-  bool m_ignored;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

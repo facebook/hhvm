@@ -92,6 +92,7 @@ const char* const TRAIT_BAD_REQ_IMPLEMENTS =
 const char* const INCONSISTENT_INSTEADOF =
   "Inconsistent insteadof definition. The method %s is to be used from %s, "
   "but %s is also on the exclude list";
+const char* const REDECLARE_BUILTIN = "Cannot redeclare %s()";
 const char* const DISALLOWED_DYNCALL = "%s should not be called dynamically";
 } // namespace Strings
 } // namespace HPHP

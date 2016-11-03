@@ -29,6 +29,8 @@
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/parser/parser.h"
 
+#include "hphp/runtime/base/static-string-table.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -298,6 +300,16 @@ struct FunctionScope : BlockScope,
   static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
   static FunctionInfoPtr GetFunctionInfo(const std::string& fname);
 
+  const StringData* getFatalMessage() const {
+    return m_fatal_error_msg;
+  }
+
+  void setFatal(const std::string& msg) {
+    assert(m_fatal_error_msg == nullptr);
+    m_fatal_error_msg = makeStaticString(msg);
+    assert(m_fatal_error_msg != nullptr);
+  }
+
 private:
   void init(AnalysisResultConstPtr ar);
 
@@ -338,6 +350,9 @@ private:
   ExpressionListPtr m_closureVars;
   ExpressionListPtr m_closureValues;
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
+
+  // holds the fact that defining this function is a fatal error
+  const StringData* m_fatal_error_msg = nullptr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

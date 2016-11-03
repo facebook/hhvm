@@ -324,6 +324,15 @@ let get_all_deps {FileInfo.n_funs; n_classes; n_types; n_consts} =
   let deps = add_deps_of_sset (fun n -> Dep.Class n) n_types deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConst n) n_consts deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
+  (* We need to type check all classes that have extend dependencies on the
+   * classes that have changed
+   *)
+  let deps =
+    SSet.fold ~f:begin fun class_name acc ->
+      let hash = Typing_deps.Dep.make (Dep.Class class_name) in
+      Decl_compare.get_extend_deps hash acc
+    end n_classes ~init:deps
+  in
   deps
 
 (* We start of with a list of files that have changed since the state was saved

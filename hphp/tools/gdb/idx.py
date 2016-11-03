@@ -316,8 +316,12 @@ hash, if valid, will be used instead of the default hash for the key type.
             print('idx: Element not found.')
             return None
 
+        ty = str(value.type.pointer())
+        ty_parts = re.split('([*&])', ty, 1)
+        ty_parts[0] = "'%s'" % ty_parts[0]
+
         gdb.execute('print *(%s)%s' % (
-            str(value.type.pointer()), str(value.address)))
+            ''.join(ty_parts), str(value.address)))
 
 
 class IdxFunction(gdb.Function):

@@ -537,7 +537,7 @@ struct RuntimeOption {
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \
   F(std::string, InlineRegionMode,     "both")                          \
-  F(bool, HHIRGenerateAsserts,         debug)                           \
+  F(bool, HHIRGenerateAsserts,         false)                           \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRGlobalValueNumbering,    true)                            \
   F(bool, HHIRTypeCheckHoisting,       false) /* Task: 7568599 */       \

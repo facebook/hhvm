@@ -475,6 +475,12 @@ end = functor(CheckKind:CheckKindType) -> struct
     let reparse_count =
       Relative_path.Set.(cardinal disk_files + cardinal ide_files) in
     Hh_logger.log "Files to recompute: %d" reparse_count;
+    if reparse_count == 1 then
+      disk_files |>
+      Relative_path.Set.union ide_files |>
+      Relative_path.Set.choose |>
+      Relative_path.to_absolute |>
+      Hh_logger.log "Filename: %s";
 
     (* PARSING *)
 

@@ -100,8 +100,8 @@ type env = {
      * on lazy decl to update them on as-needed basis. Things that require
      * entire global state to be up to date (like global list of errors, build,
      * or find all references) must be preceded by Full_check. *)
-    needs_decl : Relative_path.Set.t;
-    needs_check : Relative_path.Set.t;
+    needs_phase2_redecl : Relative_path.Set.t;
+    needs_recheck : Relative_path.Set.t;
     needs_full_check : bool;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;

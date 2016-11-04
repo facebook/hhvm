@@ -292,9 +292,9 @@ module type CheckKindType = sig
     failed_parsing:Relative_path.Set.t ->
     failed_naming:Relative_path.Set.t ->
     failed_decl:Relative_path.Set.t ->
-    lazy_decl_later:FileInfo.fast ->
     lazy_decl_failed:Relative_path.Set.t ->
     failed_check:Relative_path.Set.t ->
+    lazy_decl_later:FileInfo.fast ->
     lazy_check_later:Relative_path.Set.t ->
     diag_subscribe:Diagnostic_subscription.t option ->
     ServerEnv.env
@@ -324,7 +324,7 @@ module FullCheckKind : CheckKindType = struct
   let get_defs_to_redecl_phase2 ~decl_defs ~files_info ~to_redecl_phase2 ~env =
     let fast = extend_fast decl_defs files_info to_redecl_phase2 in
     (* Add decl fanout that was delayed by previous lazy checks to phase 2 *)
-    let fast = extend_fast fast files_info env.needs_decl in
+    let fast = extend_fast fast files_info env.needs_phase2_redecl in
     fast, Relative_path.Map.empty
 
   let get_defs_to_recheck ~phase_2_decl_defs ~files_info
@@ -332,12 +332,21 @@ module FullCheckKind : CheckKindType = struct
     let to_recheck = Relative_path.Set.union to_redecl_phase2 to_recheck in
     let to_recheck = Relative_path.Set.union env.failed_decl to_recheck in
     let to_recheck = Relative_path.Set.union env.failed_check to_recheck in
-    let to_recheck = Relative_path.Set.union env.needs_check to_recheck in
+    let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
     extend_fast phase_2_decl_defs files_info to_recheck, Relative_path.Set.empty
 
-  let get_new_env ~old_env ~files_info ~errorl ~failed_parsing ~failed_naming
-    ~failed_decl ~lazy_decl_later:_ ~lazy_decl_failed ~failed_check
-    ~lazy_check_later:_ ~diag_subscribe =
+  let get_new_env
+      ~old_env
+      ~files_info
+      ~errorl
+      ~failed_parsing
+      ~failed_naming
+      ~failed_decl
+      ~lazy_decl_failed
+      ~failed_check
+      ~lazy_decl_later:_
+      ~lazy_check_later:_
+      ~diag_subscribe =
     {
       files_info;
       tcopt = old_env.tcopt;
@@ -354,8 +363,8 @@ module FullCheckKind : CheckKindType = struct
       edited_files = old_env.edited_files;
       ide_needs_parsing = Relative_path.Set.empty;
       disk_needs_parsing = Relative_path.Set.empty;
-      needs_decl = Relative_path.Set.empty;
-      needs_check = Relative_path.Set.empty;
+      needs_phase2_redecl = Relative_path.Set.empty;
+      needs_recheck = Relative_path.Set.empty;
       needs_full_check = false;
       diag_subscribe;
       recent_recheck_loop_stats = old_env.recent_recheck_loop_stats;
@@ -417,23 +426,32 @@ module LazyCheckKind : CheckKindType = struct
       Relative_path.Set.filter related_files ~f:is_ide_file in
     extend_fast phase_2_decl_defs files_info to_recheck_now, to_recheck_later
 
-  let get_new_env ~old_env ~files_info ~errorl:_ ~failed_parsing:_
-      ~failed_naming ~failed_decl:_ ~lazy_decl_later ~lazy_decl_failed:_
-      ~failed_check:_ ~lazy_check_later ~diag_subscribe =
+  let get_new_env
+      ~old_env
+      ~files_info
+      ~errorl:_
+      ~failed_parsing:_
+      ~failed_naming
+      ~failed_decl:_
+      ~lazy_decl_failed:_
+      ~failed_check:_
+      ~lazy_decl_later
+      ~lazy_check_later
+      ~diag_subscribe =
 
-    let needs_decl =
+    let needs_phase2_redecl =
       List.fold (Relative_path.Map.keys lazy_decl_later)
         ~f:Relative_path.Set.add
-        ~init:old_env.needs_decl
+        ~init:old_env.needs_phase2_redecl
     in
-    let needs_check =
-      Relative_path.Set.union old_env.needs_check lazy_check_later in
+    let needs_recheck =
+      Relative_path.Set.union old_env.needs_recheck lazy_check_later in
     { old_env with
        files_info;
        failed_naming;
        ide_needs_parsing = Relative_path.Set.empty;
-       needs_decl;
-       needs_check;
+       needs_phase2_redecl;
+       needs_recheck;
        needs_full_check = true;
        diag_subscribe;
      }
@@ -452,7 +470,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     end ~init:FileInfo.empty_names
 
   let get_oldified_defs env =
-    Relative_path.Set.fold env.needs_decl ~f:begin fun path acc ->
+    Relative_path.Set.fold env.needs_phase2_redecl ~f:begin fun path acc ->
       match Relative_path.Map.get env.files_info path with
       | None -> acc
       | Some names -> FileInfo.(merge_names (simplify names) acc)
@@ -595,9 +613,19 @@ end = functor(CheckKind:CheckKindType) -> struct
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
     ServerDebug.info genv "incremental_done";
 
-    let new_env = CheckKind.get_new_env old_env files_info errorl failed_parsing
-       failed_naming failed_decl lazy_decl_later lazy_decl_failed
-        failed_check lazy_check_later diag_subscribe in
+    let new_env = CheckKind.get_new_env
+      old_env
+      files_info
+      errorl
+      failed_parsing
+      failed_naming
+      failed_decl
+      lazy_decl_failed
+      failed_check
+      lazy_decl_later
+      lazy_check_later
+      diag_subscribe
+    in
 
     new_env, reparse_count, total_rechecked_count
 end

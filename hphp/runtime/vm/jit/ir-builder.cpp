@@ -247,17 +247,6 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
   }
 
   auto const oldType = typeOf(l, DataTypeGeneric);
-  auto const typeParam = inst->typeParam();
-
-  if (!oldType.maybe(typeParam)) {
-    // This check will always fail.  It's probably due to an incorrect
-    // prediction.  Generate a Jmp and return the src.  The fact that the type
-    // will be slightly off is ok because all the code after the Jmp is
-    // unreachable.
-    gen(Jmp, inst->taken());
-    return fwdGuardSource(inst);
-  }
-
   auto const newType = oldType & inst->typeParam();
 
   if (oldType <= newType) {
@@ -265,7 +254,6 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
     // is unnecessary.
     return fwdGuardSource(inst);
   }
-
   return nullptr;
 }
 

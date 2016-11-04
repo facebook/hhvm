@@ -307,7 +307,6 @@ bool check_invariants(const FrameState& state) {
  * This maintains the invariant `predicted <= proven'.
  */
 Type updatePrediction(Type predicted, Type proven) {
-  always_assert(predicted != TBottom);
   return predicted < proven ? predicted : proven;
 }
 

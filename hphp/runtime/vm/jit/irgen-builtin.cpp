@@ -1121,11 +1121,14 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 
   assertx(!params.count || callee->attrs() & AttrNumArgs);
 
+  DEBUG_ONLY auto seenBottom = false;
   DEBUG_ONLY auto usedStack = false;
   auto stackIdx = uint32_t{0};
   for (auto paramIdx = uint32_t{0}; paramIdx < params.size(); ++paramIdx) {
     auto& param = params[paramIdx];
     auto const targetTy = param_coerce_type(callee, paramIdx);
+
+    seenBottom |= (param.value->type() == TBottom);
 
     if (param.value->type() <= TPtrToGen) {
       ret[argIdx++] = realize_param(
@@ -1141,18 +1144,10 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             return cns(env, TNullptr);
           }
           if (callee->isParamCoerceMode()) {
-            gen(env,
-                CoerceMem,
-                ty,
-                CoerceMemData { callee, paramIdx + 1 },
-                maker.makeParamCoerceCatch(),
-                param.value);
+            gen(env, CoerceMem, ty, CoerceMemData { callee, paramIdx + 1 },
+                maker.makeParamCoerceCatch(), param.value);
           } else {
-            gen(env,
-                CastMem,
-                ty,
-                maker.makeUnusualCatch(),
-                param.value);
+            gen(env, CastMem, ty, maker.makeUnusualCatch(), param.value);
           }
           return nullptr;
         },
@@ -1183,14 +1178,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         },
         [&] (const Type& ty) {
           if (param.isOutputArg) return cns(env, TNullptr);
-          return coerce_value(
-              env,
-              ty,
-              callee,
-              oldVal,
-              paramIdx,
-              maker
-            );
+          return coerce_value(env, ty, callee, oldVal, paramIdx, maker);
         },
         [&] {
           /*
@@ -1246,7 +1234,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     ++stackIdx;
   }
 
-  assertx(!usedStack || stackIdx == params.numByAddr);
+  assertx(seenBottom || !usedStack || stackIdx == params.numByAddr);
   assertx(argIdx == cbNumArgs);
 
   return ret;

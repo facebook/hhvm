@@ -879,17 +879,17 @@ struct unwind { Vlabel targets[2]; };
 /*
  * Absolute value for a double-precision value.
  */
-struct absdbl { Vreg s, d; };
+struct absdbl { VregDbl s, d; };
 
 /*
  * Modulus of two integers.
  */
-struct srem { Vreg s0, s1, d; };
+struct srem { Vreg64 s0, s1, d; };
 
 /*
  * Integer division.
  */
-struct divint { Vreg s0, s1, d; };
+struct divint { Vreg64 s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

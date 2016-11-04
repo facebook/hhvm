@@ -993,9 +993,9 @@ void IniSetting::Unbind(const std::string& name) {
 }
 
 static IniCallbackData* get_callback(const std::string& name) {
-  CallbackMap::iterator iter = s_system_ini_callbacks.find(name.data());
+  CallbackMap::iterator iter = s_system_ini_callbacks.find(name);
   if (iter == s_system_ini_callbacks.end()) {
-    iter = s_user_callbacks->find(name.data());
+    iter = s_user_callbacks->find(name);
     if (iter == s_user_callbacks->end()) {
       return nullptr;
     }

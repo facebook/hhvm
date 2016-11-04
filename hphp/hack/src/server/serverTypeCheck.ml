@@ -164,8 +164,7 @@ let remove_decls env fast_parsed =
       let typedefs = set_of_idl typel in
       let consts = set_of_idl constl in
       NamingGlobal.remove_decls ~funs ~classes ~typedefs ~consts
-  end;
-  env
+  end
 
 (*****************************************************************************)
 (* Parses the set of modified files *)
@@ -225,7 +224,7 @@ let update_file_info env fast_parsed =
 (*****************************************************************************)
 
 let declare_names env fast_parsed =
-  let env = remove_decls env fast_parsed in
+  remove_decls env fast_parsed;
   let errorl, failed_naming =
     Relative_path.Map.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
       let errorl', failed'= NamingGlobal.ndecl_file k v in
@@ -234,7 +233,7 @@ let declare_names env fast_parsed =
       errorl, failed
     end ~init:(Errors.empty, Relative_path.Set.empty) in
   let fast = FileInfo.simplify_fast fast_parsed in
-  env, errorl, failed_naming, fast
+  errorl, failed_naming, fast
 
 (*****************************************************************************)
 (* Function called after parsing, does nothing by default. *)
@@ -505,8 +504,10 @@ end = functor(CheckKind:CheckKindType) -> struct
     let t = Hh_logger.log_duration "Parsing Hook" t in
 
     (* NAMING *)
-    let env, errorl', failed_naming, fast =
-      declare_names env fast_parsed in
+    let errorl', failed_naming, fast = declare_names env fast_parsed in
+    (* failed_naming can be a superset of keys in fast - see comment in
+     * NamingGlobal.ndecl_file *)
+    let fast = extend_fast fast files_info failed_naming in
 
     (* COMPUTES WHAT MUST BE REDECLARED  *)
     let fast = CheckKind.get_defs_to_redecl fast files_info env in

@@ -242,8 +242,8 @@ void StandardExtension::initMisc() {
 
     HHVM_RC_STR(PHP_BINARY, current_executable_path());
     HHVM_RC_STR(PHP_BINDIR, current_executable_directory());
-    HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString().toCppString());
-    HHVM_RC_STR(PHP_SAPI, RuntimeOption::ExecutionMode);
+    HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
+    HHVM_RC_STR(PHP_SAPI, HHVM_FN(php_sapi_name()));
 
     HHVM_RC_INT(PHP_INT_SIZE, sizeof(int64_t));
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);

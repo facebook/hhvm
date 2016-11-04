@@ -57,11 +57,11 @@ struct RuntimeOption {
     std::vector<std::string>* messages = nullptr);
 
   static bool ServerExecutionMode() {
-    return strcmp(ExecutionMode, "srv") == 0;
+    return ServerMode;
   }
 
   static bool ClientExecutionMode() {
-    return strcmp(ExecutionMode, "cli") == 0;
+    return !ServerMode;
   }
 
   static bool GcSamplingEnabled() {
@@ -80,7 +80,7 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
-  static const char *ExecutionMode;
+  static bool ServerMode;
   static std::string BuildId;
   static std::string InstanceId;
   static std::string DeploymentId; // ID for set of instances deployed at once

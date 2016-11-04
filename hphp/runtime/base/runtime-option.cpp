@@ -75,11 +75,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *RuntimeOption::ExecutionMode = "";
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
 std::string RuntimeOption::DeploymentId;
 std::string RuntimeOption::PidFile = "www.pid";
+
+bool RuntimeOption::ServerMode = false;
 
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;

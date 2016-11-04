@@ -920,8 +920,10 @@ static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
   return MM().stopStatsInterval();
 }
 
+const StaticString s_srv("srv"), s_cli("cli");
+
 String HHVM_FUNCTION(php_sapi_name) {
-  return RuntimeOption::ExecutionMode;
+  return RuntimeOption::ServerMode ? s_srv : s_cli;
 }
 
 #ifdef _WIN32

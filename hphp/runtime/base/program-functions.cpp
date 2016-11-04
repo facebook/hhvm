@@ -882,23 +882,22 @@ static void pagein_self(void) {
   free(buf);
 }
 
-/* Sets RuntimeOption::ExecutionMode according
- * to commandline options prior to config load
+/* Sets RuntimeOption::ExecutionMode according to commandline options prior to
+ * config load.  Returns false upon unrecognized mode.
  */
-static void set_execution_mode(folly::StringPiece mode) {
+static bool set_execution_mode(folly::StringPiece mode) {
   if (mode == "daemon" || mode == "server" || mode == "replay") {
-    RuntimeOption::ExecutionMode = "srv";
+    RuntimeOption::ServerMode = true;
     Logger::Escape = true;
-  } else if (mode == "run" || mode == "debug") {
-    RuntimeOption::ExecutionMode = "cli";
+    return true;
+  } else if (mode == "run" || mode == "debug" || mode == "translate") {
+    // We don't run PHP in "translate" mode, so just treat it like cli mode.
+    RuntimeOption::ServerMode = false;
     Logger::Escape = false;
-  } else if (mode == "translate") {
-    RuntimeOption::ExecutionMode = "";
-    Logger::Escape = false;
-  } else {
-    // Undefined mode
-    always_assert(false);
+    return true;
   }
+  // Invalid mode.
+  return false;
 }
 
 /* Reads a file into the OS page cache, with rate limiting. */
@@ -1498,17 +1497,13 @@ static int execute_program_impl(int argc, char** argv) {
       // Process the options
       store(opts, vm);
       notify(vm);
-      if (vm.count("interactive") /* or -a */) {
-        po.mode = "debug";
-      }
-      if (po.mode == "d") po.mode = "debug";
-      if (po.mode == "s") po.mode = "server";
-      if (po.mode == "t") po.mode = "translate";
-      if (po.mode == "")  po.mode = "run";
-      if (po.mode == "daemon" || po.mode == "server" || po.mode == "replay" ||
-          po.mode == "run" || po.mode == "debug"|| po.mode == "translate") {
-        set_execution_mode(po.mode);
-      } else {
+      if (vm.count("interactive") /* or -a */) po.mode = "debug";
+      else if (po.mode.empty()) po.mode = "run";
+      else if (po.mode == "d") po.mode = "debug";
+      else if (po.mode == "s") po.mode = "server";
+      else if (po.mode == "t") po.mode = "translate";
+
+      if (!set_execution_mode(po.mode)) {
         Logger::Error("Error in command line: invalid mode: %s",
                       po.mode.c_str());
         cout << desc << "\n";

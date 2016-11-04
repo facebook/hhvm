@@ -381,23 +381,28 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
 
 let oldify_type_decl workers file_info ~bucket_size all_oldified_defs defs =
 
-  (* Some defs are already oldified - ignore them *)
-  let _oldified_defs, current_defs =
+  (* Some defs are already oldified, waiting for their recheck *)
+  let oldified_defs, current_defs =
     Decl_utils.split_defs defs all_oldified_defs in
 
-  let current_elems = get_elems workers ~bucket_size current_defs ~old:false in
-
+  let get_elems = get_elems workers ~bucket_size in
+  (* Oldify things that are not oldified yet *)
+  let current_elems = get_elems current_defs ~old:false in
   oldify_defs current_defs current_elems;
 
-  (* Oldifying classes also oldifies their elements (see Decl_class_elements),
-   * which might be shared with other classes. We need to remove all of them too
-   * to avoid dangling references *)
-  let current_classes = current_defs.FileInfo.n_classes in
+  (* For the rest, just invalidate their current versions *)
+  let oldified_elems = get_elems oldified_defs ~old:false in
+  remove_defs oldified_defs oldified_elems;
+
+  (* Oldifying/removing classes also affects their elements
+   * (see Decl_class_elements), which might be shared with other classes. We
+   * need to remove all of them too to avoid dangling references *)
+  let all_classes = defs.FileInfo.n_classes in
   let dependent_classes =
-    get_dependent_classes workers file_info ~bucket_size current_classes in
+    get_dependent_classes workers file_info ~bucket_size all_classes in
 
   let dependent_classes = FileInfo.({ empty_names with
-    n_classes = SSet.diff dependent_classes current_classes
+    n_classes = SSet.diff dependent_classes all_classes
   }) in
 
   remove_defs dependent_classes SMap.empty

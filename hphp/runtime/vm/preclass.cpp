@@ -156,6 +156,9 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
     out << ss.str();
   }
   out << " (RAT = " << show(m_repoAuthType) << ")";
+  if (m_typeConstraint && !m_typeConstraint->empty()) {
+    out << " (tc = " << m_typeConstraint->data() << ")";
+  }
   out << std::endl;
 }
 

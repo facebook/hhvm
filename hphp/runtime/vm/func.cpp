@@ -649,13 +649,21 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 
   const ParamInfoVec& params = shared()->m_params;
   for (uint32_t i = 0; i < params.size(); ++i) {
-    if (params[i].funcletOff != InvalidAbsoluteOffset) {
-      out << " DV for parameter " << i << " at " << params[i].funcletOff;
-      if (params[i].phpCode) {
-        out << " = " << params[i].phpCode->data();
-      }
-      out << std::endl;
+    auto const& param = params[i];
+    out << " Param: " << localVarName(i)->data();
+    if (param.typeConstraint.hasConstraint()) {
+      out << " " << param.typeConstraint.displayName();
     }
+    if (param.userType) {
+      out << " (" << param.userType->data() << ")";
+    }
+    if (param.funcletOff != InvalidAbsoluteOffset) {
+      out << " DV" << " at " << param.funcletOff;
+      if (param.phpCode) {
+        out << " = " << param.phpCode->data();
+      }
+    }
+    out << std::endl;
   }
   out << "maxStackCells: " << maxStackCells() << '\n'
       << "numLocals: " << numLocals() << '\n'

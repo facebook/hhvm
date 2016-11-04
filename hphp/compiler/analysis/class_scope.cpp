@@ -381,7 +381,9 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
 
   // Preserve original filename (as this varies per-function and not per-unit
   // in the case of methods imported from flattened traits)
-  cloneMeth->setOriginalFilename(meth->getFileScope()->getName());
+  auto const& name = meth->getOriginalFilename().empty() ?
+    meth->getFileScope()->getName() : meth->getOriginalFilename();
+  cloneMeth->setOriginalFilename(name);
 
   return cloneMeth;
 }

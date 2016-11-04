@@ -65,7 +65,7 @@ public:
   std::string getName() const override { return m_originalName; }
   void setOriginalName(const std::string name) { m_originalName = name; }
   std::string getOriginalFullName() const;
-  std::string getOriginalFilename() const { return m_originalFilename; }
+  const std::string &getOriginalFilename() const { return m_originalFilename; }
   ExpressionListPtr getParams() { return m_params;}
   const std::string getReturnTypeConstraint() const {
     return m_retTypeAnnotation.get() ? m_retTypeAnnotation->fullName() : "";

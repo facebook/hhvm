@@ -40,6 +40,9 @@ let from_file file =
 let length source_text =
   String.length source_text.text
 
+let get_text t =
+  t.text
+
 let get source_text index =
   String.get source_text.text index
 

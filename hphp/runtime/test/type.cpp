@@ -244,8 +244,8 @@ inline bool fits(Type t, TypeConstraint tc) {
 
 TEST(Type, TypeConstraints) {
   EXPECT_TRUE(fits(TGen, DataTypeGeneric));
-  EXPECT_FALSE(fits(TGen, DataTypeCountness));
-  EXPECT_FALSE(fits(TGen, DataTypeCountnessInit));
+  EXPECT_FALSE(fits(TGen, DataTypeBoxAndCountness));
+  EXPECT_FALSE(fits(TGen, DataTypeBoxAndCountnessInit));
   EXPECT_FALSE(fits(TGen, DataTypeSpecific));
   EXPECT_FALSE(fits(TGen,
                     TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
@@ -265,7 +265,7 @@ TEST(Type, RelaxType) {
   EXPECT_EQ(TGen, relaxType(TBoxedStr, DataTypeGeneric));
   EXPECT_EQ(TBoxedInitCell | TUncounted,
             relaxType(TBoxedObj | TInitNull,
-                      DataTypeCountness));
+                      DataTypeBoxAndCountness));
 
 
   auto tc = TypeConstraint{DataTypeSpecialized};
@@ -276,19 +276,19 @@ TEST(Type, RelaxType) {
   EXPECT_EQ(subIter, relaxType(subIter, tc.category));
 
   EXPECT_EQ(TBoxedInitCell,
-            relaxType(TBoxedInitCell, DataTypeCountnessInit));
+            relaxType(TBoxedInitCell, DataTypeBoxAndCountnessInit));
   EXPECT_EQ(TBoxedInitCell,
-            relaxType(TBoxedInitCell, DataTypeCountness));
+            relaxType(TBoxedInitCell, DataTypeBoxAndCountness));
 }
 
 TEST(Type, RelaxConstraint) {
-  EXPECT_EQ(TypeConstraint(DataTypeCountness),
+  EXPECT_EQ(TypeConstraint(DataTypeBoxAndCountness),
             relaxConstraint(TypeConstraint{DataTypeSpecific},
                             TCell,
                             TArr));
 
   EXPECT_EQ(TypeConstraint(DataTypeGeneric),
-            relaxConstraint(TypeConstraint{DataTypeCountness},
+            relaxConstraint(TypeConstraint{DataTypeBoxAndCountness},
                             TArr,
                             TCell));
 }

@@ -80,7 +80,7 @@ void emitCGetL(IRGS& env, int32_t id) {
     id,
     ldrefExit,
     ldPMExit,
-    DataTypeCountnessInit
+    DataTypeBoxAndCountnessInit
   );
   pushIncRef(env, loc);
 }
@@ -93,7 +93,7 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
     id,
     ldrefExit,
     ldPMExit,
-    DataTypeCountnessInit
+    DataTypeBoxAndCountnessInit
   );
   pushIncRef(env, loc);
 }
@@ -120,7 +120,7 @@ void emitCGetL2(IRGS& env, int32_t id) {
     id,
     ldrefExit,
     ldPMExit,
-    DataTypeCountnessInit
+    DataTypeBoxAndCountnessInit
   );
   pushIncRef(env, val);
   push(env, oldTop);
@@ -159,7 +159,7 @@ SSATmp* boxHelper(IRGS& env, SSATmp* value, F rewrite) {
 }
 
 void emitVGetL(IRGS& env, int32_t id) {
-  auto const value = ldLoc(env, id, makeExit(env), DataTypeCountnessInit);
+  auto const value = ldLoc(env, id, makeExit(env), DataTypeBoxAndCountnessInit);
   auto const boxed = boxHelper(
     env,
     gen(env, AssertType, TCell | TBoxedInitCell, value),
@@ -184,7 +184,7 @@ void emitBoxR(IRGS& env) {
 }
 
 void emitUnsetL(IRGS& env, int32_t id) {
-  auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountness);
+  auto const prev = ldLoc(env, id, makeExit(env), DataTypeBoxAndCountness);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
   decRef(env, prev);
 }
@@ -224,7 +224,7 @@ void emitInitThisLoc(IRGS& env, int32_t id) {
   }
   auto const ldrefExit = makeExit(env);
   auto const ctx       = ldCtx(env);
-  auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeCountness);
+  auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeBoxAndCountness);
   auto const this_  = castCtxThis(env, ctx);
   gen(env, IncRef, this_);
   stLocRaw(env, id, fp(env), this_);

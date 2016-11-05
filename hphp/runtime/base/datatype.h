@@ -194,8 +194,8 @@ constexpr DataType KindOfRefCountThreshold = KindOfPersistentKeyset;
 // These must be kept in order from least to most specific.
 #define DT_CATEGORIES(func)                     \
   func(Generic)                                 \
-  func(Countness)                               \
-  func(CountnessInit)                           \
+  func(BoxAndCountness)                         \
+  func(BoxAndCountnessInit)                     \
   func(Specific)                                \
   func(Specialized)
 

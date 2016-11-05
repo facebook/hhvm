@@ -149,9 +149,10 @@ bool typeFitsConstraint(Type t, TypeConstraint tc);
  *
  * If constrainValue is called with (t24, DataTypeSpecialized), relaxConstraint
  * will be called with (DataTypeSpecialized, Obj<C>|InitNull, Obj). After a few
- * iterations it will determine that constraining Obj with DataTypeCountness
- * will still allow the result type of the AssertType instruction to satisfy
- * DataTypeSpecialized, because relaxType(Obj, DataTypeCountness) == Obj.
+ * iterations it will determine that constraining Obj with
+ * DataTypeBoxAndCountness will still allow the result type of the AssertType
+ * instruction to satisfy DataTypeSpecialized, because relaxType(Obj,
+ * DataTypeBoxAndCountness) == Obj.
  */
 TypeConstraint relaxConstraint(const TypeConstraint origTc,
                                const Type knownType, const Type toRelax);

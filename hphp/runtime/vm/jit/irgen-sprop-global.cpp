@@ -117,7 +117,7 @@ void emitSetS(IRGS& env) {
     PUNT(SetS-PropNameNotString);
   }
 
-  auto const value    = popC(env, DataTypeCountness);
+  auto const value    = popC(env, DataTypeBoxAndCountness);
   auto const ssaCls   = popA(env);
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
   auto const ptr      = gen(env, UnboxPtr, propAddr);
@@ -296,7 +296,7 @@ void emitBindG(IRGS& env) {
 void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
-  auto const value   = popC(env, DataTypeCountness);
+  auto const value   = popC(env, DataTypeBoxAndCountness);
   auto const unboxed = gen(env, UnboxPtr, gen(env, LdGblAddrDef, name));
   destroyName(env, name);
   bindMem(env, unboxed, value);

@@ -48,7 +48,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
     case DataTypeGeneric:
       return true;
 
-    case DataTypeCountness:
+    case DataTypeBoxAndCountness:
       // Consumers using this constraint expect the type to be relaxed to
       // Uncounted or left alone, so something like Arr|Obj isn't specific
       // enough.
@@ -56,8 +56,8 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
              t.subtypeOfAny(TStr, TArr, TVec, TDict, TKeyset, TObj,
                             TRes, TBoxedCell);
 
-    case DataTypeCountnessInit:
-      return typeFitsConstraint(t, DataTypeCountness) &&
+    case DataTypeBoxAndCountnessInit:
+      return typeFitsConstraint(t, DataTypeBoxAndCountness) &&
              (t <= TUninit || !t.maybe(TUninit));
 
     case DataTypeSpecific:

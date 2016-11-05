@@ -524,7 +524,7 @@ SSATmp* opt_set_frame_metadata(IRGS& env, const ParamPrep& params) {
   if (func->isPseudoMain() || (func->attrs() & AttrMayUseVV)) return nullptr;
   auto const local = func->lookupVarId(s_86metadata.get());
   if (local == kInvalidId) return nullptr;
-  auto oldVal = ldLoc(env, local, nullptr, DataTypeCountness);
+  auto oldVal = ldLoc(env, local, nullptr, DataTypeBoxAndCountness);
   auto newVal = params[0].value;
   stLocRaw(env, local, fp(env), newVal);
   decRef(env, oldVal);

@@ -397,7 +397,7 @@ inline void decRef(IRGS& env, SSATmp* tmp, int locId=-1) {
 }
 
 inline void popDecRef(IRGS& env,
-                      TypeConstraint tc = DataTypeCountness) {
+                      TypeConstraint tc = DataTypeBoxAndCountness) {
   auto const val = pop(env, tc);
   decRef(env, val);
 }
@@ -412,7 +412,7 @@ inline SSATmp* push(IRGS& env, SSATmp* tmp) {
 
 inline SSATmp* pushIncRef(IRGS& env,
                           SSATmp* tmp,
-                          TypeConstraint tc = DataTypeCountness) {
+                          TypeConstraint tc = DataTypeBoxAndCountness) {
   env.irb->constrainValue(tmp, tc);
   gen(env, IncRef, tmp);
   return push(env, tmp);
@@ -484,7 +484,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
   auto const inner = exit ? (type & TBoxedCell).inner() : TInitCell;
 
   if (type <= TCell) {
-    env.irb->constrainValue(val, DataTypeCountness);
+    env.irb->constrainValue(val, DataTypeBoxAndCountness);
     return val;
   }
   if (type <= TBoxedCell) {
@@ -498,7 +498,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
       return gen(env, CheckType, TBoxedCell, taken, val);
     },
     [&](SSATmp* box) { // Next: val is a ref
-      env.irb->constrainValue(box, DataTypeCountness);
+      env.irb->constrainValue(box, DataTypeBoxAndCountness);
       gen(env, CheckRefInner, inner, exit, box);
       return gen(env, LdRef, inner, box);
     },
@@ -594,9 +594,9 @@ inline SSATmp* ldLocInner(IRGS& env,
                           Block* ldrefExit,
                           Block* ldPMExit,
                           TypeConstraint constraint) {
-  // We only care if the local is KindOfRef or not. DataTypeCountness
+  // We only care if the local is KindOfRef or not. DataTypeBoxAndCountness
   // gets us that.
-  auto const loc = ldLoc(env, locId, ldPMExit, DataTypeCountness);
+  auto const loc = ldLoc(env, locId, ldPMExit, DataTypeBoxAndCountness);
 
   if (loc->type() <= TCell) {
     env.irb->constrainValue(loc, constraint);
@@ -635,7 +635,7 @@ inline SSATmp* ldLocInnerWarn(IRGS& env,
     return cns(env, TInitNull);
   };
 
-  env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
+  env.irb->constrainLocal(id, DataTypeBoxAndCountnessInit, "ldLocInnerWarn");
 
   if (locVal->type() <= TUninit) return warnUninit();
   if (!locVal->type().maybe(TUninit)) return locVal;
@@ -690,7 +690,7 @@ inline SSATmp* stLocImpl(IRGS& env,
                          bool incRefNew) {
   assertx(!newVal->type().maybe(TBoxedCell));
 
-  auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
+  auto const cat = decRefOld ? DataTypeBoxAndCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
 
   auto unboxed_case = [&] {
@@ -715,7 +715,7 @@ inline SSATmp* stLocImpl(IRGS& env,
     if (incRefNew) gen(env, IncRef, newVal);
     if (decRefOld) {
       decRef(env, innerCell);
-      env.irb->constrainValue(box, DataTypeCountness);
+      env.irb->constrainValue(box, DataTypeBoxAndCountness);
     }
     return newVal;
   };
@@ -770,7 +770,7 @@ inline SSATmp* pushStLoc(IRGS& env,
     incRefNew
   );
 
-  env.irb->constrainValue(ret, DataTypeCountness);
+  env.irb->constrainValue(ret, DataTypeBoxAndCountness);
   return push(env, ret);
 }
 

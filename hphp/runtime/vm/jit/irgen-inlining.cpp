@@ -284,6 +284,15 @@ void implInlineReturn(IRGS& env) {
 }
 
 void endInlining(IRGS& env) {
+  // The IR instructions should be associated with one of the return bytecodes,
+  // which should be one of the predecessors of this block.
+  auto const curBlock = env.irb->curBlock();
+  always_assert(curBlock && !curBlock->preds().empty());
+  auto const bcContext = curBlock->preds().front().inst()->bcctx();
+  env.bcStateStack.back().setOffset(bcContext.marker.sk().offset());
+  updateMarker(env);
+  env.irb->resetCurIROff(bcContext.iroff + 1);
+
   decRefLocalsInline(env);
   decRefThis(env);
 

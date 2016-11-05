@@ -85,7 +85,7 @@ struct IRBuilder {
    * Update the current BCContext.
    */
   void setCurMarker(BCMarker);
-  void resetCurIROff() { m_curBCContext.iroff = 0; }
+  void resetCurIROff(uint16_t off = 0) { m_curBCContext.iroff = off; }
 
   /*
    * Exception handling and IRBuilder.

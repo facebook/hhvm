@@ -112,25 +112,29 @@ let log_env_diff oldEnv newEnv =
     lnewline ()
   end
 
-let log_local_types env =
-  let lenv = env.Env.lenv in
-  let local_types = lenv.Env.local_types in
-  indentEnv "local_types" (fun () ->
-    Local_id.Map.iter begin fun id (_all_types, new_type, _expr_id) ->
-      lnewline();
-      lprintf (Bold Green) "%s: " (Local_id.get_name id);
-      lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env new_type)
-  end local_types)
-
-let log_tpenv env =
-  let rec dump_tys xl =
-    match xl with
+let rec log_type_list env tyl =
+  match tyl with
     | [] -> ()
     | [ty] ->
       lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env ty)
     | ty::tyl ->
-      lprintf (Normal Green) "%s," (Typing_print.debug_with_tvars env ty);
-      dump_tys tyl in
+      lprintf (Normal Green) "%s, " (Typing_print.debug_with_tvars env ty);
+      log_type_list env tyl
+
+let log_local_types env =
+  let lenv = env.Env.lenv in
+  let local_types = lenv.Env.local_types in
+  indentEnv "local_types" (fun () ->
+    Local_id.Map.iter begin fun id (all_types, new_type, expr_id) ->
+      lnewline();
+      lprintf (Bold Green) "%s: " (Local_id.get_name id);
+      lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env new_type);
+      lprintf (Normal Green) " [history: ";
+      log_type_list env all_types;
+      lprintf (Normal Green) "] [eid: %s]" (Ident.debug expr_id) end
+    local_types)
+
+let log_tpenv env =
   let tparams = Env.get_generic_parameters env in
   if tparams != [] then
   indentEnv "tpenv" (fun () ->
@@ -139,27 +143,51 @@ let log_tpenv env =
       let upper = Env.get_upper_bounds env tparam in
       lnewline ();
       (if lower != []
-      then (dump_tys lower; lprintf (Normal Green) " <: "));
+      then (log_type_list env lower; lprintf (Normal Green) " <: "));
       lprintf (Bold Green) "%s" tparam;
       (if upper != []
-      then (lprintf (Normal Green) " <: "; dump_tys upper))
+      then (lprintf (Normal Green) " <: "; log_type_list env upper))
         end tparams)
 
-(* Log the environment: local_types, subst, tenv and tpenv *)
-let hh_show_env p env =
+let log_fake_members env =
+  let lenv = env.Env.lenv in
+  let fakes = lenv.Env.fake_members in
+  indentEnv "fake_members" (fun () ->
+    (match fakes.Env.last_call with
+    | None -> ()
+    | Some p ->
+      begin
+        lprintf (Normal Green) "last_call: %s" (Pos.string (Pos.to_absolute p));
+        lnewline ()
+      end);
+    lprintf (Normal Green) "invalid:";
+    SSet.iter (lprintf (Normal Green) " %s") fakes.Env.invalid ;
+    lnewline ();
+    lprintf (Normal Green) "valid:";
+    SSet.iter (lprintf (Normal Green) " %s") fakes.Env.valid;
+    lnewline ())
+
+let log_position p =
   let n =
     match Pos.Map.get p !iterations with
     | None -> iterations := Pos.Map.add p 1 !iterations; 1
     | Some n -> iterations := Pos.Map.add p (n+1) !iterations; n+1 in
-  indentEnv (Pos.string (Pos.to_absolute p) ^ "[" ^ string_of_int n ^ "]")
+  indentEnv (Pos.string (Pos.to_absolute p)
+    ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]"))
+
+(* Log the environment: local_types, subst, tenv and tpenv *)
+let hh_show_env p env =
+  log_position p
     (fun () ->
-      log_local_types env;
-      log_env_diff (!lastenv) env;
-      log_tpenv env);
+       log_local_types env;
+       log_fake_members env;
+       log_env_diff (!lastenv) env;
+       log_tpenv env);
   lastenv := env
 
 (* Log the type of an expression *)
 let hh_show p env ty =
   let s = Typing_print.debug env ty in
-  lprintf (Normal Yellow) "%s" (Pos.string (Pos.to_absolute p)); lnewline ();
-  lprintf (Normal Green) "  %s" s; lnewline ()
+  log_position p
+    (fun () ->
+       lprintf (Normal Green) "%s" s; lnewline ())

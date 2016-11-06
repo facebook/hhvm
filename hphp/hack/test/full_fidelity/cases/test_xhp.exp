@@ -28,7 +28,7 @@
               (missing))
           ((XHP_body))
           (braced_expression(({))(variable((variable)))((})(end_of_line)))
-          ((XHP_body)))
+          ((whitespace)(XHP_body)))
         (xhp_close
           ((</))
           ((XHP_element_name))

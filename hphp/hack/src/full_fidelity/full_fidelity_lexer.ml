@@ -935,9 +935,12 @@ let next_xhp_body_token lexer =
   (* XHP bodies do not have whitespace, newlines or Hack comments. *)
   let scanner lexer =
     let lexer = start_new_lexeme lexer in
-    let (lexer, kind) = scan_xhp_body lexer in
-    let w = width lexer in
-    (lexer, Token.make kind w [] []) in
+    scan_xhp_body lexer
+  in
+  let scanner lexer = scan_token_and_trivia scanner false lexer in
+  (* This incorrectly scans xhp body text that looks like a php comment
+   * as trivia.
+   * TODO: Only scan whitespace and newline trivia *)
   scan_assert_progress scanner lexer
 
 let next_xhp_class_name lexer =

@@ -18,17 +18,13 @@ let parse_and_print filename =
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
   let syntax_tree = SyntaxTree.make source_text in
-  let str = Debug.dump_full_fidelity syntax_tree in
 
-  Printf.printf "%s\n" (SourceText.get_text source_text);
-  Printf.printf "%s\n" str;
   let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
-  let chunks = Hack_format.run ~debug:true editable in
+  let chunks = Hack_format.run editable in
   let init_state = Solve_state.make chunks (Rule.get_initial_rvm ()) in
   State_queue.add init_state;
   let result = Line_splitter.solve chunks in
-  Printf.printf "%s\n" (Solve_state.__debug result);
-  Printf.printf "Formatting result:\n%s\n" (State_printer.print_state result);
+  Printf.printf "%s\n" (State_printer.print_state result);
   ()
 
 let () =

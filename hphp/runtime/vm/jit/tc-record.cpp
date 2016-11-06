@@ -143,7 +143,7 @@ void reportJitMaturity(const CodeCache& code) {
   }
 }
 
-void logTranslation(const TransEnv& env) {
+void logTranslation(const TransEnv& env, const TransLoc& loc) {
   auto nanos = HPHP::Timer::GetThreadCPUTimeNanos() - env.unit->startNanos();
   auto& cols = *env.unit->logEntry();
   auto& context = env.unit->context();
@@ -188,6 +188,11 @@ void logTranslation(const TransEnv& env) {
     cols.setInt("num_vblocks_cold", num_vblocks[(int)AreaIndex::Cold]);
     cols.setInt("num_vblocks_frozen", num_vblocks[(int)AreaIndex::Frozen]);
   }
+  // x64 stats
+  cols.setInt("main_size", loc.mainSize());
+  cols.setInt("cold_size", loc.coldSize());
+  cols.setInt("frozen_size", loc.frozenSize());
+
   // finish & log
   StructuredLog::log("hhvm_jit", cols);
 }

@@ -61,7 +61,7 @@ void reportJitMaturity(const CodeCache& code);
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */
-void logTranslation(const TransEnv& env);
+void logTranslation(const TransEnv& env, const TransLoc& loc);
 
 /*
  * Record smashed calls in the TC that may need to be re-smashed in the event

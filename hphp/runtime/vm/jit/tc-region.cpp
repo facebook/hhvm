@@ -273,7 +273,7 @@ TCA emitTranslation(TransEnv env) {
   reportJitMaturity(code());
 
   if (env.unit && env.unit->logEntry()) {
-    logTranslation(env);
+    logTranslation(env, loc);
   }
 
   if (env.unit) {

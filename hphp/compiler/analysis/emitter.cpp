@@ -874,9 +874,9 @@ public:
    * final operation.
    */
   struct MInstrOpts {
-    explicit MInstrOpts(MOpFlags flags)
-      : allowW{flags & MOpFlags::Define}
-      , flags{flags}
+    explicit MInstrOpts(MOpMode mode)
+      : allowW{mode == MOpMode::Define}
+      , mode{mode}
     {}
 
     explicit MInstrOpts(int32_t paramId)
@@ -894,7 +894,7 @@ public:
     bool rhsVal{false};
     bool fpass{false};
     union {
-      MOpFlags flags;
+      MOpMode mode;
       int32_t paramId;
     };
   };
@@ -6301,11 +6301,6 @@ int EmitterVisitor::scanStackForLocation(int iLast) {
   return 0;
 }
 
-static MOpFlags makeBaseFlags(MOpFlags f) {
-  auto constexpr mask = uint8_t(MOpFlags::Warn) | uint8_t(MOpFlags::Define);
-  return MOpFlags(uint8_t(f) & mask);
-}
-
 size_t EmitterVisitor::emitMOp(
   int iFirst,
   int& iLast,
@@ -6316,8 +6311,9 @@ size_t EmitterVisitor::emitMOp(
     return m_evalStack.actualSize() - 1 - m_evalStack.getActualPos(i);
   };
 
-  auto const baseFlags = opts.fpass ? MOpFlags::None
-                                    : makeBaseFlags(opts.flags);
+  auto const baseMode = opts.fpass ? MOpMode::None :
+                        opts.mode == MOpMode::Unset ? MOpMode::None :
+                        opts.mode;
 
   // Emit the base location operation.
   auto sym = m_evalStack.get(iFirst);
@@ -6329,14 +6325,14 @@ size_t EmitterVisitor::emitMOp(
           if (opts.fpass) {
             e.FPassBaseNC(opts.paramId, stackIdx(iFirst));
           } else {
-            e.BaseNC(stackIdx(iFirst), baseFlags);
+            e.BaseNC(stackIdx(iFirst), baseMode);
           }
           break;
         case StackSym::L:
           if (opts.fpass) {
             e.FPassBaseNL(opts.paramId, m_evalStack.getLoc(iFirst));
           } else {
-            e.BaseNL(m_evalStack.getLoc(iFirst), baseFlags);
+            e.BaseNL(m_evalStack.getLoc(iFirst), baseMode);
           }
           break;
         default:
@@ -6350,14 +6346,14 @@ size_t EmitterVisitor::emitMOp(
           if (opts.fpass) {
             e.FPassBaseGC(opts.paramId, stackIdx(iFirst));
           } else {
-            e.BaseGC(stackIdx(iFirst), baseFlags);
+            e.BaseGC(stackIdx(iFirst), baseMode);
           }
           break;
         case StackSym::L:
           if (opts.fpass) {
             e.FPassBaseGL(opts.paramId, m_evalStack.getLoc(iFirst));
           } else {
-            e.BaseGL(m_evalStack.getLoc(iFirst), baseFlags);
+            e.BaseGL(m_evalStack.getLoc(iFirst), baseMode);
           }
           break;
         default:
@@ -6395,7 +6391,7 @@ size_t EmitterVisitor::emitMOp(
           if (opts.fpass) {
             e.FPassBaseL(opts.paramId, m_evalStack.getLoc(iFirst));
           } else {
-            e.BaseL(m_evalStack.getLoc(iFirst), baseFlags);
+            e.BaseL(m_evalStack.getLoc(iFirst), baseMode);
           }
           break;
         case StackSym::C:
@@ -6424,7 +6420,7 @@ size_t EmitterVisitor::emitMOp(
     if (opts.fpass) {
       e.FPassDim(opts.paramId, symToMemberKey(e, i, opts.allowW));
     } else {
-      e.Dim(opts.flags, symToMemberKey(e, i, opts.allowW));
+      e.Dim(opts.mode, symToMemberKey(e, i, opts.allowW));
     }
   }
 
@@ -6562,7 +6558,7 @@ void EmitterVisitor::emitAGet(Emitter& e) {
 
 void EmitterVisitor::emitQueryMOp(int iFirst, int iLast, Emitter& e,
                                   QueryMOp op) {
-  auto const flags = getQueryMOpFlags(op);
+  auto const flags = getQueryMOpMode(op);
   auto const stackCount = emitMOp(iFirst, iLast, e, MInstrOpts{flags});
   e.QueryM(stackCount, op, symToMemberKey(e, iLast, false /* allowW */));
 }
@@ -6664,7 +6660,7 @@ bool EmitterVisitor::emitVGet(Emitter& e, bool skipCells) {
     }
   } else {
     auto const stackCount =
-      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define});
+      emitMOp(i, iLast, e, MInstrOpts{MOpMode::Define});
     e.VGetM(stackCount, symToMemberKey(e, iLast, true /* allowW */));
   }
   return false;
@@ -7105,7 +7101,7 @@ void EmitterVisitor::emitUnset(Emitter& e,
       }
     }
   } else {
-    auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Unset});
+    auto const stackCount = emitMOp(i, iLast, e, MInstrOpts{MOpMode::Unset});
     e.UnsetM(stackCount, symToMemberKey(e, iLast, false /* allowW */));
   }
 }
@@ -7144,7 +7140,7 @@ void EmitterVisitor::emitSet(Emitter& e) {
     }
   } else {
     auto const stackCount =
-      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define}.rhs());
+      emitMOp(i, iLast, e, MInstrOpts{MOpMode::Define}.rhs());
     return e.SetM(stackCount, symToMemberKey(e, iLast, true /* allowW */));
   }
 }
@@ -7213,7 +7209,7 @@ void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
     }
   } else {
     auto const stackCount =
-      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define}.rhs());
+      emitMOp(i, iLast, e, MInstrOpts{MOpMode::Define}.rhs());
     e.SetOpM(stackCount, op, symToMemberKey(e, iLast, true /* allowW */));
   }
 }
@@ -7242,7 +7238,7 @@ void EmitterVisitor::emitBind(Emitter& e) {
     }
   } else {
     auto const stackCount =
-      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define}.rhs());
+      emitMOp(i, iLast, e, MInstrOpts{MOpMode::Define}.rhs());
     e.BindM(stackCount, symToMemberKey(e, iLast, true /* allowW */));
   }
 }
@@ -7280,7 +7276,7 @@ void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {
     }
   } else {
     auto const stackCount =
-      emitMOp(i, iLast, e, MInstrOpts{MOpFlags::Define});
+      emitMOp(i, iLast, e, MInstrOpts{MOpMode::Define});
     e.IncDecM(stackCount, op, symToMemberKey(e, iLast, true /* allowW */));
   }
 }

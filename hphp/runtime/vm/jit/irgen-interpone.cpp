@@ -227,7 +227,7 @@ interpOutputLocals(IRGS& env,
            useTy;
   };
 
-  auto const mDefine = static_cast<unsigned char>(MOpFlags::Define);
+  auto const mDefine = static_cast<unsigned char>(MOpMode::Define);
 
   switch (inst.op()) {
     case OpSetN:

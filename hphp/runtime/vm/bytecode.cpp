@@ -206,7 +206,7 @@ inline const char* prettytype(BareThisOp) { return "BareThisOp"; }
 inline const char* prettytype(InitPropOp) { return "InitPropOp"; }
 inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
 inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
-inline const char* prettytype(MOpFlags) { return "MOpFlags"; }
+inline const char* prettytype(MOpMode) { return "MOpMode"; }
 inline const char* prettytype(QueryMOp) { return "QueryMOp"; }
 
 // load a T value from *pc without incrementing
@@ -244,9 +244,9 @@ static inline ActRec* arFromInstr(PC pc) {
   return arAtOffset(fp, -instrFpToArDelta(func, pc));
 }
 
-ALWAYS_INLINE MOpFlags fpass_flags(ActRec* ar, int paramId) {
+ALWAYS_INLINE MOpMode fpass_mode(ActRec* ar, int paramId) {
   assert(paramId < ar->numArgs());
-  return ar->m_func->byRef(paramId) ? MOpFlags::Define : MOpFlags::Warn;
+  return ar->m_func->byRef(paramId) ? MOpMode::Define : MOpMode::Warn;
 }
 
 // wrapper for local variable LA operand
@@ -3148,19 +3148,19 @@ static inline MInstrState& initMState() {
 
 using LookupNameFn = void (*)(ActRec*, StringData*&, TypedValue*, TypedValue*&);
 
-static inline void baseNGImpl(TypedValue* key, MOpFlags flags,
+static inline void baseNGImpl(TypedValue* key, MOpMode mode,
                               LookupNameFn lookupd, LookupNameFn lookup) {
   auto& mstate = initMState();
   StringData* name;
   TypedValue* baseVal;
 
-  if (flags & MOpFlags::Define) lookupd(vmfp(), name, key, baseVal);
-  else                          lookup(vmfp(), name, key, baseVal);
+  if (mode == MOpMode::Define) lookupd(vmfp(), name, key, baseVal);
+  else                         lookup(vmfp(), name, key, baseVal);
   SCOPE_EXIT { decRefStr(name); };
 
   if (baseVal == nullptr) {
-    assert(!(flags & MOpFlags::Define));
-    if (flags & MOpFlags::Warn) {
+    assert(mode != MOpMode::Define);
+    if (mode == MOpMode::Warn) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
     tvWriteNull(&mstate.tvTempBase);
@@ -3171,48 +3171,48 @@ static inline void baseNGImpl(TypedValue* key, MOpFlags flags,
   mstate.base = baseVal;
 }
 
-static inline void baseNImpl(TypedValue* key, MOpFlags flags) {
-  baseNGImpl(key, flags, lookupd_var, lookup_var);
+static inline void baseNImpl(TypedValue* key, MOpMode mode) {
+  baseNGImpl(key, mode, lookupd_var, lookup_var);
 }
 
-OPTBLD_INLINE void iopBaseNC(intva_t idx, MOpFlags flags) {
-  baseNImpl(vmStack().indTV(idx), flags);
+OPTBLD_INLINE void iopBaseNC(intva_t idx, MOpMode mode) {
+  baseNImpl(vmStack().indTV(idx), mode);
 }
 
-OPTBLD_INLINE void iopBaseNL(local_var loc, MOpFlags flags) {
-  baseNImpl(tvToCell(loc.ptr), flags);
+OPTBLD_INLINE void iopBaseNL(local_var loc, MOpMode mode) {
+  baseNImpl(tvToCell(loc.ptr), mode);
 }
 
 OPTBLD_INLINE void iopFPassBaseNC(ActRec* ar, intva_t paramId, intva_t idx) {
-  auto const flags = fpass_flags(ar, paramId);
-  baseNImpl(vmStack().indTV(idx), flags);
+  auto const mode = fpass_mode(ar, paramId);
+  baseNImpl(vmStack().indTV(idx), mode);
 }
 
 OPTBLD_INLINE void iopFPassBaseNL(ActRec* ar, intva_t paramId, local_var loc) {
-  auto const flags = fpass_flags(ar, paramId);
-  baseNImpl(tvToCell(loc.ptr), flags);
+  auto const mode = fpass_mode(ar, paramId);
+  baseNImpl(tvToCell(loc.ptr), mode);
 }
 
-static inline void baseGImpl(TypedValue* key, MOpFlags flags) {
-  baseNGImpl(key, flags, lookupd_gbl, lookup_gbl);
+static inline void baseGImpl(TypedValue* key, MOpMode mode) {
+  baseNGImpl(key, mode, lookupd_gbl, lookup_gbl);
 }
 
-OPTBLD_INLINE void iopBaseGC(intva_t idx, MOpFlags flags) {
-  baseGImpl(vmStack().indTV(idx), flags);
+OPTBLD_INLINE void iopBaseGC(intva_t idx, MOpMode mode) {
+  baseGImpl(vmStack().indTV(idx), mode);
 }
 
-OPTBLD_INLINE void iopBaseGL(local_var loc, MOpFlags flags) {
-  baseGImpl(tvToCell(loc.ptr), flags);
+OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
+  baseGImpl(tvToCell(loc.ptr), mode);
 }
 
 OPTBLD_INLINE void iopFPassBaseGC(ActRec* ar, intva_t paramId, intva_t idx) {
-  auto const flags = fpass_flags(ar, paramId);
-  baseGImpl(vmStack().indTV(idx), flags);
+  auto const mode = fpass_mode(ar, paramId);
+  baseGImpl(vmStack().indTV(idx), mode);
 }
 
 OPTBLD_INLINE void iopFPassBaseGL(ActRec* ar, intva_t paramId, local_var loc) {
-  auto const flags = fpass_flags(ar, paramId);
-  baseGImpl(tvToCell(loc.ptr), flags);
+  auto const mode = fpass_mode(ar, paramId);
+  baseGImpl(tvToCell(loc.ptr), mode);
 }
 
 static inline TypedValue* baseSImpl(int32_t clsIdx, TypedValue* key) {
@@ -3248,23 +3248,23 @@ OPTBLD_INLINE void iopBaseSL(local_var keyLoc, intva_t clsIdx) {
   mstate.base = baseSImpl(clsIdx, tvToCell(keyLoc.ptr));
 }
 
-OPTBLD_INLINE void baseLImpl(local_var loc, MOpFlags flags) {
+OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
   auto& mstate = initMState();
   auto local = tvToCell(loc.ptr);
-  if (flags & MOpFlags::Warn && local->m_type == KindOfUninit) {
+  if (mode == MOpMode::Warn && local->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE,
                  vmfp()->m_func->localVarName(loc.index)->data());
   }
   mstate.base = local;
 }
 
-OPTBLD_INLINE void iopBaseL(local_var loc, MOpFlags flags) {
-  baseLImpl(loc, flags);
+OPTBLD_INLINE void iopBaseL(local_var loc, MOpMode mode) {
+  baseLImpl(loc, mode);
 }
 
 OPTBLD_INLINE void iopFPassBaseL(ActRec* ar, intva_t paramId, local_var loc) {
-  auto flags = fpass_flags(ar, paramId);
-  baseLImpl(loc, flags);
+  auto mode = fpass_mode(ar, paramId);
+  baseLImpl(loc, mode);
 }
 
 OPTBLD_INLINE void iopBaseC(intva_t idx) {
@@ -3282,20 +3282,20 @@ OPTBLD_INLINE void iopBaseH() {
   mstate.base = &mstate.tvTempBase;
 }
 
-static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
+static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
   auto result = [&]{
-    switch (flags) {
-      case MOpFlags::None:
-        return Prop<MOpFlags::None>(mstate.tvRef, ctx, mstate.base, key);
-      case MOpFlags::Warn:
-        return Prop<MOpFlags::Warn>(mstate.tvRef, ctx, mstate.base, key);
-      case MOpFlags::Define:
-        return Prop<MOpFlags::Define>(mstate.tvRef, ctx, mstate.base, key);
-      case MOpFlags::Unset:
-        return Prop<MOpFlags::Unset>(mstate.tvRef, ctx, mstate.base, key);
+    switch (mode) {
+      case MOpMode::None:
+        return Prop<MOpMode::None>(mstate.tvRef, ctx, mstate.base, key);
+      case MOpMode::Warn:
+        return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key);
+      case MOpMode::Define:
+        return Prop<MOpMode::Define>(mstate.tvRef, ctx, mstate.base, key);
+      case MOpMode::Unset:
+        return Prop<MOpMode::Unset>(mstate.tvRef, ctx, mstate.base, key);
     }
     always_assert(false);
   }();
@@ -3303,48 +3303,49 @@ static OPTBLD_INLINE void propDispatch(MOpFlags flags, TypedValue key) {
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
-static OPTBLD_INLINE void propQDispatch(MOpFlags flags, TypedValue key,
+static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key,
                                         bool reffy) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
   TypedValue* result;
-  switch (flags) {
-    case MOpFlags::None:
-    case MOpFlags::Warn:
+  switch (mode) {
+    case MOpMode::None:
+    case MOpMode::Warn:
       assert(key.m_type == KindOfPersistentString);
       result = nullSafeProp(mstate.tvRef, ctx, mstate.base, key.m_data.pstr);
       break;
 
-    case MOpFlags::Define:
+    case MOpMode::Define:
       if (reffy) raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
-    case MOpFlags::Unset:
+    case MOpMode::Unset:
       always_assert(false);
   }
 
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
-static OPTBLD_INLINE void elemDispatch(MOpFlags flags, TypedValue key, bool reffy) {
+static OPTBLD_INLINE
+void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
   auto& mstate = vmMInstrState();
 
   auto result = [&] {
-    switch (flags) {
-      case MOpFlags::None:
+    switch (mode) {
+      case MOpMode::None:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<MOpFlags::None>(mstate.tvRef, mstate.base, key)
+          Elem<MOpMode::None>(mstate.tvRef, mstate.base, key)
         );
-      case MOpFlags::Warn:
+      case MOpMode::Warn:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<MOpFlags::Warn>(mstate.tvRef, mstate.base, key)
+          Elem<MOpMode::Warn>(mstate.tvRef, mstate.base, key)
         );
-      case MOpFlags::Define:
+      case MOpMode::Define:
         return reffy
-          ? ElemD<MOpFlags::Define, true>(mstate.tvRef, mstate.base, key)
-          : ElemD<MOpFlags::Define, false>(mstate.tvRef, mstate.base, key);
-      case MOpFlags::Unset:
+          ? ElemD<MOpMode::Define, true>(mstate.tvRef, mstate.base, key)
+          : ElemD<MOpMode::Define, false>(mstate.tvRef, mstate.base, key);
+      case MOpMode::Unset:
         return ElemU(mstate.tvRef, mstate.base, key);
     }
     always_assert(false);
@@ -3375,17 +3376,17 @@ static inline TypedValue key_tv(MemberKey key) {
   not_reached();
 }
 
-static OPTBLD_INLINE void dimDispatch(MOpFlags flags, MemberKey mk,
+static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk,
                                       bool reffy) {
   auto const key = key_tv(mk);
   if (mk.mcode == MQT) {
-    propQDispatch(flags, key, reffy);
+    propQDispatch(mode, key, reffy);
   } else if (mcodeIsProp(mk.mcode)) {
-    propDispatch(flags, key);
+    propDispatch(mode, key);
   } else if (mcodeIsElem(mk.mcode)) {
-    elemDispatch(flags, key, reffy);
+    elemDispatch(mode, key, reffy);
   } else {
-    if (flags == MOpFlags::Warn) raise_error("Cannot use [] for reading");
+    if (mode == MOpMode::Warn) raise_error("Cannot use [] for reading");
 
     auto& mstate = vmMInstrState();
 
@@ -3402,13 +3403,13 @@ static OPTBLD_INLINE void dimDispatch(MOpFlags flags, MemberKey mk,
   }
 }
 
-OPTBLD_INLINE void iopDim(MOpFlags flags, MemberKey mk) {
-  dimDispatch(flags, mk, false);
+OPTBLD_INLINE void iopDim(MOpMode mode, MemberKey mk) {
+  dimDispatch(mode, mk, false);
 }
 
 OPTBLD_INLINE void iopFPassDim(ActRec* ar, intva_t paramId, MemberKey mk) {
-  auto const flags = fpass_flags(ar, paramId);
-  dimDispatch(flags, mk, false);
+  auto const mode = fpass_mode(ar, paramId);
+  dimDispatch(mode, mk, false);
 }
 
 static OPTBLD_INLINE void mFinal(MInstrState& mstate,
@@ -3430,7 +3431,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
   switch (op) {
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
-      dimDispatch(getQueryMOpFlags(op), mk, false);
+      dimDispatch(getQueryMOpMode(op), mk, false);
       tvDup(*tvToCell(mstate.base), result);
       break;
 
@@ -3460,7 +3461,7 @@ OPTBLD_INLINE void iopQueryM(intva_t nDiscard, QueryMOp subop, MemberKey mk) {
 static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
   auto& mstate = vmMInstrState();
   TypedValue result;
-  dimDispatch(MOpFlags::Define, mk, true);
+  dimDispatch(MOpMode::Define, mk, true);
   if (mstate.base->m_type != KindOfRef) tvBox(mstate.base);
   refDup(*mstate.base, result);
   mFinal(mstate, nDiscard, result);
@@ -3472,8 +3473,8 @@ OPTBLD_INLINE void iopVGetM(intva_t nDiscard, MemberKey mk) {
 
 OPTBLD_INLINE
 void iopFPassM(ActRec* ar, intva_t paramId, intva_t nDiscard, MemberKey mk) {
-  auto const flags = fpass_flags(ar, paramId);
-  if (flags == MOpFlags::Warn) {
+  auto const mode = fpass_mode(ar, paramId);
+  if (mode == MOpMode::Warn) {
     return queryMImpl(mk, nDiscard, QueryMOp::CGet);
   }
   vGetMImpl(mk, nDiscard);
@@ -3546,7 +3547,7 @@ OPTBLD_INLINE void iopBindM(intva_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const rhs = *vmStack().topV();
 
-  dimDispatch(MOpFlags::Define, mk, true);
+  dimDispatch(MOpMode::Define, mk, true);
   tvBind(&rhs, mstate.base);
 
   vmStack().discard();
@@ -3570,8 +3571,8 @@ OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
 static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   auto& mstate = vmMInstrState();
   mstate.base = UNLIKELY(value->m_type == KindOfRef)
-    ? ElemD<MOpFlags::Define, true>(mstate.tvRef, mstate.base, key)
-    : ElemD<MOpFlags::Define, false>(mstate.tvRef, mstate.base, key);
+    ? ElemD<MOpMode::Define, true>(mstate.tvRef, mstate.base, key)
+    : ElemD<MOpMode::Define, false>(mstate.tvRef, mstate.base, key);
   tvAsVariant(mstate.base).setWithRef(tvAsVariant(value));
 
   mFinal(mstate, 0, folly::none);
@@ -6402,18 +6403,18 @@ TCA iopWrapper(Op op, void(*fn)(PC&,PC,int,imm_array<IterBreakElem>),
 }
 
 OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(intva_t,MOpFlags), PC& pc) {
+TCA iopWrapper(Op op, void(*fn)(intva_t,MOpMode), PC& pc) {
   auto n = decode_intva(pc);
-  auto flags = decode<MOpFlags>(pc);
-  fn(n, flags);
+  auto mode = decode<MOpMode>(pc);
+  fn(n, mode);
   return nullptr;
 }
 
 OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(local_var,MOpFlags), PC& pc) {
+TCA iopWrapper(Op op, void(*fn)(local_var,MOpMode), PC& pc) {
   auto local = decode_local(pc);
-  auto flags = decode<MOpFlags>(pc);
-  fn(local, flags);
+  auto mode = decode<MOpMode>(pc);
+  fn(local, mode);
   return nullptr;
 }
 
@@ -6426,10 +6427,10 @@ TCA iopWrapper(Op op, void(*fn)(const StringData*, int32_t), PC& pc) {
 }
 
 OPTBLD_INLINE static
-TCA iopWrapper(Op op, void(*fn)(MOpFlags,MemberKey), PC& pc) {
-  auto flags = decode_oa<MOpFlags>(pc);
+TCA iopWrapper(Op op, void(*fn)(MOpMode,MemberKey), PC& pc) {
+  auto mode = decode_oa<MOpMode>(pc);
   auto mk = decode_member_key(pc, liveUnit());
-  fn(flags, mk);
+  fn(mode, mk);
   return nullptr;
 }
 

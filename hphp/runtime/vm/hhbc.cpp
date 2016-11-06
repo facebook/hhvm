@@ -997,6 +997,12 @@ static const char* QueryMOp_names[] = {
 #undef OP
 };
 
+static const char* MOpMode_names[] = {
+#define MODE(x) #x,
+  M_OP_MODES
+#undef MODE
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1057,40 +1063,9 @@ X(OODeclExistsOp)
 X(ObjMethodOp)
 X(SwitchKind)
 X(QueryMOp)
+X(MOpMode)
 
 #undef X
-
-/*
- * MOpFlags is a bitmask so it doesn't fit into the [0,n) pattern of the other
- * subops above.
- */
-const char* subopToName(MOpFlags f) {
-  switch (f) {
-#define FLAG(name, val) case MOpFlags::name: return #name;
-  M_OP_FLAGS
-#undef FLAG
-  }
-  always_assert_flog(false, "Invalid MOpFlags: {}", uint8_t(f));
-}
-
-template<>
-bool subopValid(MOpFlags f) {
-  switch (f) {
-#define FLAG(name, val) case MOpFlags::name: return true;
-  M_OP_FLAGS
-#undef FLAG
-  }
-  return false;
-}
-
-template<>
-folly::Optional<MOpFlags> nameToSubop<MOpFlags>(const char* str) {
-#define FLAG(name, val) if (!strcmp(str, #name)) return MOpFlags::name;
-  M_OP_FLAGS
-#undef FLAG
-
-  return folly::none;
-}
 
 //////////////////////////////////////////////////////////////////////
 

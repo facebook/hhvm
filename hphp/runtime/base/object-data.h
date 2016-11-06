@@ -369,12 +369,9 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   };
 
  private:
-  template <MOpFlags flags>
-  TypedValue* propImpl(
-    TypedValue* tvRef,
-    const Class* ctx,
-    const StringData* key
-  );
+  template<MOpMode mode>
+  TypedValue* propImpl(TypedValue* tvRef, const Class* ctx,
+                       const StringData* key);
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 

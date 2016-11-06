@@ -45,8 +45,8 @@ TRACE_SET_MOD(irlower);
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgBaseG(IRLS& env, const IRInstruction* inst) {
-  auto const flags = inst->extra<MOpFlagsData>()->flags;
-  BUILD_OPTAB(BASE_G_HELPER_TABLE, flags);
+  auto const mode = inst->extra<MOpModeData>()->mode;
+  BUILD_OPTAB(BASE_G_HELPER_TABLE, mode);
 
   auto const args = argGroup(env, inst).typedValue(0);
 
@@ -73,17 +73,17 @@ ArgGroup propArgs(IRLS& env, const IRInstruction* inst) {
 }
 
 void implProp(IRLS& env, const IRInstruction* inst) {
-  auto const flags   = inst->extra<MOpFlagsData>()->flags;
+  auto const mode    = inst->extra<MOpModeData>()->mode;
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
   void (*helper)();
   if (base->isA(TObj)) {
-    BUILD_OPTAB(PROP_OBJ_HELPER_TABLE, flags, keyType);
+    BUILD_OPTAB(PROP_OBJ_HELPER_TABLE, mode, keyType);
     helper = opFunc;
   } else {
-    BUILD_OPTAB(PROP_HELPER_TABLE, flags, keyType);
+    BUILD_OPTAB(PROP_HELPER_TABLE, mode, keyType);
     helper = opFunc;
   }
 
@@ -139,17 +139,17 @@ void cgPropQ(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCGetProp(IRLS& env, const IRInstruction* inst) {
-  auto const flags   = inst->extra<MOpFlagsData>()->flags;
+  auto const mode    = inst->extra<MOpModeData>()->mode;
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
   void (*helper)();
   if (base->isA(TObj)) {
-    BUILD_OPTAB(CGET_OBJ_PROP_HELPER_TABLE, keyType, flags);
+    BUILD_OPTAB(CGET_OBJ_PROP_HELPER_TABLE, keyType, mode);
     helper = opFunc;
   } else {
-    BUILD_OPTAB(CGET_PROP_HELPER_TABLE, keyType, flags);
+    BUILD_OPTAB(CGET_PROP_HELPER_TABLE, keyType, mode);
     helper = opFunc;
   }
 
@@ -303,9 +303,9 @@ ArgGroup elemArgs(IRLS& env, const IRInstruction* inst) {
 }
 
 void implElem(IRLS& env, const IRInstruction* inst) {
-  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), flags);
+  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode);
 
   auto const args = elemArgs(env, inst).ssa(2);
 
@@ -333,9 +333,9 @@ void cgElemDX(IRLS& env, const IRInstruction* i) { implElem(env, i); }
 void cgElemUX(IRLS& env, const IRInstruction* i) { implElem(env, i); }
 
 void cgCGetElem(IRLS& env, const IRInstruction* inst) {
-  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), flags);
+  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), mode);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
@@ -556,10 +556,10 @@ namespace {
 void implElemArray(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemArrayW ? MOpFlags::Warn : MOpFlags::None;
+  auto const mode = inst->op() == ElemArrayW ? MOpMode::Warn : MOpMode::None;
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
-              keyInfo.type, keyInfo.checkForInt, flags);
+              keyInfo.type, keyInfo.checkForInt, mode);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -774,8 +774,8 @@ namespace {
 
 void implElemDict(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemDictW ? MOpFlags::Warn : MOpFlags::None;
-  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode = inst->op() == ElemDictW ? MOpMode::Warn : MOpMode::None;
+  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -786,9 +786,9 @@ void implElemDict(IRLS& env, const IRInstruction* inst) {
 
 void implDictGet(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags =
-    (inst->op() == DictGetQuiet) ? MOpFlags::None : MOpFlags::Warn;
-  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode =
+    (inst->op() == DictGetQuiet) ? MOpMode::None : MOpMode::Warn;
+  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -911,10 +911,10 @@ namespace {
 
 void implElemKeyset(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemKeysetW
-    ? MOpFlags::Warn
-    : MOpFlags::None;
-  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode = inst->op() == ElemKeysetW
+    ? MOpMode::Warn
+    : MOpMode::None;
+  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -925,10 +925,10 @@ void implElemKeyset(IRLS& env, const IRInstruction* inst) {
 
 void implKeysetGet(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags = inst->op() == KeysetGetQuiet
-    ? MOpFlags::None
-    : MOpFlags::Warn;
-  BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode = inst->op() == KeysetGetQuiet
+    ? MOpMode::None
+    : MOpMode::Warn;
+  BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 

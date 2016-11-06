@@ -1011,12 +1011,12 @@ struct NewKeysetArrayData : IRExtraData {
   uint32_t size;
 };
 
-struct MOpFlagsData : IRExtraData {
-  explicit MOpFlagsData(MOpFlags flags) : flags{flags} {}
+struct MOpModeData : IRExtraData {
+  explicit MOpModeData(MOpMode mode) : mode{mode} {}
 
-  std::string show() const { return subopToName(flags); }
+  std::string show() const { return subopToName(mode); }
 
-  MOpFlags flags;
+  MOpMode mode;
 };
 
 struct SetOpData : IRExtraData {
@@ -1256,14 +1256,14 @@ X(ProfileKeysetOffset,          RDSHandleData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileMethod,                ProfileMethodData);
 X(LdRDSAddr,                    RDSHandleData);
-X(BaseG,                        MOpFlagsData);
-X(PropX,                        MOpFlagsData);
-X(PropDX,                       MOpFlagsData);
-X(ElemX,                        MOpFlagsData);
-X(ElemDX,                       MOpFlagsData);
-X(ElemUX,                       MOpFlagsData);
-X(CGetProp,                     MOpFlagsData);
-X(CGetElem,                     MOpFlagsData);
+X(BaseG,                        MOpModeData);
+X(PropX,                        MOpModeData);
+X(PropDX,                       MOpModeData);
+X(ElemX,                        MOpModeData);
+X(ElemDX,                       MOpModeData);
+X(ElemUX,                       MOpModeData);
+X(CGetProp,                     MOpModeData);
+X(CGetElem,                     MOpModeData);
 X(SetOpProp,                    SetOpData);
 X(SetOpCell,                    SetOpData);
 X(IncDecProp,                   IncDecData);

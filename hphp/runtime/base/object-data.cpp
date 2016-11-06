@@ -1181,12 +1181,9 @@ bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
 
 //////////////////////////////////////////////////////////////////////
 
-template <MOpFlags flags>
-TypedValue* ObjectData::propImpl(
-  TypedValue* tvRef,
-  const Class* ctx,
-  const StringData* key
-) {
+template<MOpMode mode>
+TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
+                                 const StringData* key) {
   auto const lookup = getProp(ctx, key);
   auto const prop = lookup.prop;
 
@@ -1198,9 +1195,8 @@ TypedValue* ObjectData::propImpl(
       // Property is unset, try __get.
       if (getAttribute(UseGet) && invokeGet(tvRef, key)) return tvRef;
 
-      if (flags & MOpFlags::Warn) raiseUndefProp(key);
-
-      if (flags & MOpFlags::Define) return prop;
+      if (mode == MOpMode::Warn) raiseUndefProp(key);
+      if (mode == MOpMode::Define) return prop;
       return const_cast<TypedValue*>(init_null_variant.asTypedValue());
     }
 
@@ -1237,9 +1233,8 @@ TypedValue* ObjectData::propImpl(
     throw_invalid_property_name(StrNR(key));
   }
 
-  if (flags & MOpFlags::Warn) raiseUndefProp(key);
-
-  if (flags & MOpFlags::Define) {
+  if (mode == MOpMode::Warn) raiseUndefProp(key);
+  if (mode == MOpMode::Define) {
     auto& var = reserveProperties().lvalAt(StrNR(key), AccessFlags::Key);
     return var.asTypedValue();
   }
@@ -1252,7 +1247,7 @@ TypedValue* ObjectData::prop(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<MOpFlags::None>(tvRef, ctx, key);
+  return propImpl<MOpMode::None>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propD(
@@ -1260,7 +1255,7 @@ TypedValue* ObjectData::propD(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<MOpFlags::Define>(tvRef, ctx, key);
+  return propImpl<MOpMode::Define>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propW(
@@ -1268,7 +1263,7 @@ TypedValue* ObjectData::propW(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<MOpFlags::Warn>(tvRef, ctx, key);
+  return propImpl<MOpMode::Warn>(tvRef, ctx, key);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

@@ -3395,7 +3395,7 @@ UnsetPropL <local variable id>    [B]  ->  []
 
 Each instruction in this section corresponds to one member operation from the
 previous section. The same bytecode may represent multiple different member
-operations, differentiating between the options using MOpFlags immediates and/or
+operations, differentiating between the options using MOpMode immediates and/or
 the reffiness of parameters (in the case of FPass* bytecodes).
 
 Since they represent member operations, these instructions produced and/or

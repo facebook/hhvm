@@ -263,7 +263,7 @@ SSATmp* ptrToUninit(IRGS& env) {
   return cns(env, Type::cns(&uninit_variant, TPtrToOtherUninit));
 }
 
-bool mightCallMagicPropMethod(MOpFlags flags, PropInfo propInfo) {
+bool mightCallMagicPropMethod(MOpMode mode, PropInfo propInfo) {
   if (!typeFromRAT(propInfo.repoAuthType, nullptr).maybe(TUninit)) {
     return false;
   }
@@ -276,7 +276,7 @@ bool mightCallMagicPropMethod(MOpFlags flags, PropInfo propInfo) {
     // contexts.
     AttrNoOverrideMagicGet |
     // But magic setters are only possible in define contexts.
-    ((flags & MOpFlags::Define) ? AttrNoOverrideMagicSet : AttrNone);
+    (mode == MOpMode::Define ? AttrNoOverrideMagicSet : AttrNone);
   return (cls->attrs() & relevant_attrs) != relevant_attrs;
 }
 
@@ -376,12 +376,12 @@ SSATmp* emitPropSpecialized(
   SSATmp* base,
   SSATmp* key,
   bool nullsafe,
-  MOpFlags flags,
+  MOpMode mode,
   PropInfo propInfo
 ) {
-  assertx(!(flags & MOpFlags::Warn) || !(flags & MOpFlags::Unset));
-  auto const doWarn   = flags & MOpFlags::Warn;
-  auto const doDefine = (flags & MOpFlags::Define) || (flags & MOpFlags::Unset);
+  assertx(mode != MOpMode::Warn || mode != MOpMode::Unset);
+  auto const doWarn   = mode == MOpMode::Warn;
+  auto const doDefine = mode == MOpMode::Define || mode == MOpMode::Unset;
 
   auto const initNull = ptrToInitNull(env);
   auto const baseType = base->type();
@@ -884,14 +884,14 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MOpFlags::None, propInfo) &&
-      !mightCallMagicPropMethod(MOpFlags::Define, propInfo)) {
+      !mightCallMagicPropMethod(MOpMode::None, propInfo) &&
+      !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
 
     // Special case for when the property is known to be an int.
     if (base->isA(TObj) &&
         propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
       base = emitPropSpecialized(env, base, key, false,
-                                 MOpFlags::Define, propInfo);
+                                 MOpMode::Define, propInfo);
       auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
       assertx(result != nullptr);
@@ -905,8 +905,8 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
 
 template<class Finish>
 SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
-                     MOpFlags flags, SimpleOp simpleOp, Finish finish) {
-  assertx(flags & MOpFlags::Warn);
+                     MOpMode mode, SimpleOp simpleOp, Finish finish) {
+  assertx(mode == MOpMode::Warn);
   switch (simpleOp) {
     case SimpleOp::Array:
       return emitArrayGet(env, base, key, finish);
@@ -929,15 +929,15 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Map:
       return gen(env, MapGet, base, key);
     case SimpleOp::None:
-      return gen(env, CGetElem, MOpFlagsData{flags}, base, key);
+      return gen(env, CGetElem, MOpModeData{mode}, base, key);
   }
   always_assert(false);
 }
 
 template<class Finish>
 SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* basePtr, SSATmp* key,
-                          MOpFlags flags, SimpleOp simpleOp, Finish finish) {
-  assertx(!(flags & MOpFlags::Warn));
+                          MOpMode mode, SimpleOp simpleOp, Finish finish) {
+  assertx(mode != MOpMode::Warn);
   switch (simpleOp) {
     case SimpleOp::VecArray:
       return emitVecArrayQuietGet(env, base, key, finish);
@@ -953,7 +953,7 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* basePtr, SSATmp* key,
     case SimpleOp::Pair:
     case SimpleOp::Map:
     case SimpleOp::None:
-      return gen(env, CGetElem, MOpFlagsData{flags}, basePtr, key);
+      return gen(env, CGetElem, MOpModeData{mode}, basePtr, key);
   }
   always_assert(false);
 }
@@ -1124,11 +1124,10 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
   );
 }
 
-void baseGImpl(IRGS& env, SSATmp* name, MOpFlags flags) {
+void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
-
-  auto const flagsData = MOpFlagsData{dropUnset(flags)};
-  auto gblPtr = gen(env, BaseG, flagsData, name);
+  auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
+  auto gblPtr = gen(env, BaseG, MOpModeData{base_mode}, name);
   gen(env, StMBase, gblPtr);
 }
 
@@ -1166,29 +1165,28 @@ void simpleBaseImpl(IRGS& env, SSATmp* base, Type innerTy) {
 
 const StaticString
   s_NULLSAFE_PROP_WRITE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
-SSATmp* propGenericImpl(IRGS& env, MOpFlags flags, SSATmp* base, SSATmp* key,
+SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
                         bool nullsafe) {
-  auto const define = flags & MOpFlags::Define;
-
+  auto const define = mode == MOpMode::Define;
   if (define && nullsafe) {
     gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
     return ptrToInitNull(env);
   }
 
-  auto const flagsData = MOpFlagsData{flags};
+  auto const modeData = MOpModeData{mode};
 
   auto const tvRef = propTvRefPtr(env, base, key);
   return nullsafe
     ? gen(env, PropQ, base, key, tvRef)
-    : gen(env, define ? PropDX : PropX, flagsData, base, key, tvRef);
+    : gen(env, define ? PropDX : PropX, modeData, base, key, tvRef);
 }
 
-SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
+SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
   auto base = env.irb->fs().memberBaseValue();
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
   auto const baseType = base ? base->type() : basePtr->type().deref();
 
-  if ((flags & MOpFlags::Unset) && !baseType.maybe(TObj)) {
+  if (mode == MOpMode::Unset && !baseType.maybe(TObj)) {
     env.irb->constrainValue(base, DataTypeSpecific);
     return ptrToInitNull(env);
   }
@@ -1200,21 +1198,21 @@ SSATmp* propImpl(IRGS& env, MOpFlags flags, SSATmp* key, bool nullsafe) {
   }
 
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
-  if (propInfo.offset == -1 || (flags & MOpFlags::Unset) ||
-      mightCallMagicPropMethod(flags, propInfo)) {
-    return propGenericImpl(env, flags, base, key, nullsafe);
+  if (propInfo.offset == -1 || mode == MOpMode::Unset ||
+      mightCallMagicPropMethod(mode, propInfo)) {
+    return propGenericImpl(env, mode, base, key, nullsafe);
   }
 
-  return emitPropSpecialized(env, base, key, nullsafe, flags, propInfo);
+  return emitPropSpecialized(env, base, key, nullsafe, mode, propInfo);
 }
 
-SSATmp* vecElemImpl(IRGS& env, MOpFlags flags, SSATmp* base,
+SSATmp* vecElemImpl(IRGS& env, MOpMode mode, SSATmp* base,
                     SSATmp* basePtr, SSATmp* key) {
   assertx(base->isA(TVec));
 
-  auto const warn = flags & MOpFlags::Warn;
-  auto const unset = flags & MOpFlags::Unset;
-  auto const define = flags & MOpFlags::Define;
+  auto const warn = mode == MOpMode::Warn;
+  auto const unset = mode == MOpMode::Unset;
+  auto const define = mode == MOpMode::Define;
 
   env.irb->constrainValue(base, DataTypeSpecific);
 
@@ -1263,13 +1261,13 @@ SSATmp* vecElemImpl(IRGS& env, MOpFlags flags, SSATmp* base,
   return cns(env, TBottom);
 }
 
-SSATmp* dictElemImpl(IRGS& env, MOpFlags flags, SSATmp* base,
+SSATmp* dictElemImpl(IRGS& env, MOpMode mode, SSATmp* base,
                      SSATmp* basePtr, SSATmp* key) {
   assertx(base->isA(TDict));
 
-  auto const warn = flags & MOpFlags::Warn;
-  auto const unset = flags & MOpFlags::Unset;
-  auto const define = flags & MOpFlags::Define;
+  auto const warn = mode == MOpMode::Warn;
+  auto const unset = mode == MOpMode::Unset;
+  auto const define = mode == MOpMode::Define;
 
   env.irb->constrainValue(base, DataTypeSpecific);
 
@@ -1294,13 +1292,13 @@ SSATmp* dictElemImpl(IRGS& env, MOpFlags flags, SSATmp* base,
   );
 }
 
-SSATmp* keysetElemImpl(IRGS& env, MOpFlags flags, SSATmp* base,
+SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, SSATmp* base,
                        SSATmp* basePtr, SSATmp* key) {
   assertx(base->isA(TKeyset));
 
-  auto const warn = flags & MOpFlags::Warn;
-  auto const unset = flags & MOpFlags::Unset;
-  auto const define = flags & MOpFlags::Define;
+  auto const warn = mode == MOpMode::Warn;
+  auto const unset = mode == MOpMode::Unset;
+  auto const define = mode == MOpMode::Define;
 
   env.irb->constrainValue(base, DataTypeSpecific);
 
@@ -1332,10 +1330,10 @@ SSATmp* keysetElemImpl(IRGS& env, MOpFlags flags, SSATmp* base,
 }
 
 const StaticString s_OP_NOT_SUPPORTED_STRING(Strings::OP_NOT_SUPPORTED_STRING);
-SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
-  auto const warn = flags & MOpFlags::Warn;
-  auto const unset = flags & MOpFlags::Unset;
-  auto const define = flags & MOpFlags::Define;
+SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
+  auto const warn = mode == MOpMode::Warn;
+  auto const unset = mode == MOpMode::Unset;
+  auto const define = mode == MOpMode::Define;
   auto const base = env.irb->fs().memberBaseValue();
   auto const basePtr = gen(env, LdMBase, TPtrToGen);
   auto const baseType = base ? base->type() : basePtr->type().deref();
@@ -1344,10 +1342,10 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
   assertx(!define || !warn);
 
   if (base) {
-    if (base->isA(TVec)) return vecElemImpl(env, flags, base, basePtr, key);
-    if (base->isA(TDict)) return dictElemImpl(env, flags, base, basePtr, key);
+    if (base->isA(TVec)) return vecElemImpl(env, mode, base, basePtr, key);
+    if (base->isA(TDict)) return dictElemImpl(env, mode, base, basePtr, key);
     if (base->isA(TKeyset)) {
-      return keysetElemImpl(env, flags, base, basePtr, key);
+      return keysetElemImpl(env, mode, base, basePtr, key);
     }
   }
 
@@ -1381,9 +1379,9 @@ SSATmp* elemImpl(IRGS& env, MOpFlags flags, SSATmp* key) {
     }
   }
 
-  auto const flagsData = MOpFlagsData{flags};
+  auto const modeData = MOpModeData{mode};
   auto const op = define ? ElemDX : unset ? ElemUX : ElemX;
-  return gen(env, op, flagsData, basePtr, key, tvRefPtr(env));
+  return gen(env, op, modeData, basePtr, key, tvRefPtr(env));
 }
 
 /*
@@ -1399,13 +1397,13 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
 }
 
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
-                     MOpFlags flags, bool nullsafe) {
+                     MOpMode mode, bool nullsafe) {
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MOpFlags::None, propInfo)) {
+      !mightCallMagicPropMethod(MOpMode::None, propInfo)) {
     auto propAddr = emitPropSpecialized(
-      env, base, key, nullsafe, flags, propInfo
+      env, base, key, nullsafe, mode, propInfo
     );
 
     if (!RuntimeOption::RepoAuthoritative) {
@@ -1426,8 +1424,8 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   }
 
   // No warning takes precedence over nullsafe.
-  if (!nullsafe || !(flags & MOpFlags::Warn)) {
-    return gen(env, CGetProp, MOpFlagsData{flags}, base, key);
+  if (!nullsafe || mode != MOpMode::Warn) {
+    return gen(env, CGetProp, MOpModeData{mode}, base, key);
   }
   return gen(env, CGetPropQ, base, key);
 }
@@ -1488,11 +1486,11 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     base = basePtr;
   }
 
-  auto const flags = MOpFlags::Define;
+  auto const mode = MOpMode::Define;
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), true);
 
-  if (propInfo.offset != -1 && !mightCallMagicPropMethod(flags, propInfo)) {
-    auto propPtr = emitPropSpecialized(env, base, key, false, flags, propInfo);
+  if (propInfo.offset != -1 && !mightCallMagicPropMethod(mode, propInfo)) {
+    auto propPtr = emitPropSpecialized(env, base, key, false, mode, propInfo);
     auto propTy = propPtr->type().deref();
 
     if (propTy.maybe(TBoxedCell)) {
@@ -1730,22 +1728,22 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
   not_reached();
 }
 
-MOpFlags fpassFlags(IRGS& env, int32_t idx) {
+MOpMode fpassFlags(IRGS& env, int32_t idx) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    return MOpFlags::Define;
+    return MOpMode::Define;
   }
-  return MOpFlags::Warn;
+  return MOpMode::Warn;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-void emitBaseNC(IRGS& env, int32_t idx, MOpFlags flags) {
+void emitBaseNC(IRGS& env, int32_t idx, MOpMode mode) {
   interpOne(env, *env.currentNormalizedInstruction);
 }
 
-void emitBaseNL(IRGS& env, int32_t locId, MOpFlags flags) {
+void emitBaseNL(IRGS& env, int32_t locId, MOpMode mode) {
   interpOne(env, *env.currentNormalizedInstruction);
 }
 
@@ -1757,17 +1755,17 @@ void emitFPassBaseNL(IRGS& env, int32_t arg, int32_t locId) {
   emitBaseNL(env, locId, fpassFlags(env, arg));
 }
 
-void emitBaseGC(IRGS& env, int32_t idx, MOpFlags flags) {
+void emitBaseGC(IRGS& env, int32_t idx, MOpMode mode) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{idx});
-  baseGImpl(env, name, flags);
+  baseGImpl(env, name, mode);
 }
 
-void emitBaseGL(IRGS& env, int32_t locId, MOpFlags flags) {
+void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
   initTvRefs(env);
   auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
                          DataTypeSpecific);
-  baseGImpl(env, name, flags);
+  baseGImpl(env, name, mode);
 }
 
 void emitFPassBaseGC(IRGS& env, int32_t arg, int32_t idx) {
@@ -1791,13 +1789,13 @@ void emitBaseSL(IRGS& env, int32_t locId, int32_t clsIdx) {
   baseSImpl(env, name, clsIdx);
 }
 
-void emitBaseL(IRGS& env, int32_t locId, MOpFlags flags) {
+void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
   initTvRefs(env);
   gen(env, StMBase, ldLocAddr(env, locId));
 
   auto base = ldLoc(env, locId, makePseudoMainExit(env), DataTypeGeneric);
 
-  if (base->isA(TUninit) && (flags & MOpFlags::Warn)) {
+  if (base->isA(TUninit) && mode == MOpMode::Warn) {
     env.irb->constrainLocal(locId, DataTypeSpecific,
                             "emitBaseL: Uninit base local");
     gen(env, RaiseUninitLoc, cns(env, curFunc(env)->localVarName(locId)));
@@ -1840,7 +1838,7 @@ void emitBaseH(IRGS& env) {
   env.irb->fs().setMemberBaseValue(base);
 }
 
-void emitDim(IRGS& env, MOpFlags flags, MemberKey mk) {
+void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   // Eagerly mark us as not needing ratchets.  If the intermediate operation
   // ends up calling misLea(), this will be set to true.
   env.irb->fs().setNeedRatchet(false);
@@ -1848,10 +1846,10 @@ void emitDim(IRGS& env, MOpFlags flags, MemberKey mk) {
   auto key = memberKey(env, mk);
   auto newBase = [&] {
     if (mcodeIsProp(mk.mcode)) {
-      return propImpl(env, flags, key, mk.mcode == MQT);
+      return propImpl(env, mode, key, mk.mcode == MQT);
     }
     if (mcodeIsElem(mk.mcode)) {
-      return elemImpl(env, flags, key);
+      return elemImpl(env, mode, key);
     }
     PUNT(DimNewElem);
   }();
@@ -1895,22 +1893,22 @@ void emitQueryM(IRGS& env, int32_t nDiscard, QueryMOp query, MemberKey mk) {
   auto const result = [&] {
     switch (query) {
       case QueryMOp::CGet: {
-        auto const flags = getQueryMOpFlags(query);
+        auto const mode = getQueryMOpMode(query);
         if (mcodeIsProp(mk.mcode)) {
-          return cGetPropImpl(env, objBase, key, flags, mk.mcode == MQT);
+          return cGetPropImpl(env, objBase, key, mode, mk.mcode == MQT);
         }
         auto const realBase = simpleOp == SimpleOp::None ? basePtr : base;
-        return emitCGetElem(env, realBase, key, flags, simpleOp,
+        return emitCGetElem(env, realBase, key, mode, simpleOp,
                             [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
       }
 
       case QueryMOp::CGetQuiet: {
-        auto const flags = getQueryMOpFlags(query);
+        auto const mode = getQueryMOpMode(query);
         if (mcodeIsProp(mk.mcode)) {
-          return cGetPropImpl(env, objBase, key, flags, mk.mcode == MQT);
+          return cGetPropImpl(env, objBase, key, mode, mk.mcode == MQT);
         }
         return emitCGetElemQuiet(
-          env, base, basePtr, key, flags, simpleOp,
+          env, base, basePtr, key, mode, simpleOp,
           [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); }
         );
       }
@@ -1959,7 +1957,7 @@ void emitVGetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
 }
 
 void emitFPassM(IRGS& env, int32_t arg, int32_t nDiscard, MemberKey mk) {
-  if (fpassFlags(env, arg) == MOpFlags::Warn) {
+  if (fpassFlags(env, arg) == MOpMode::Warn) {
     return emitQueryM(env, nDiscard, QueryMOp::CGet, mk);
   }
   emitVGetM(env, nDiscard, mk);
@@ -2044,9 +2042,9 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
   auto const propInfo = getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MOpFlags::Define, propInfo)) {
+      !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
     auto propPtr =
-      emitPropSpecialized(env, base, key, false, MOpFlags::Define, propInfo);
+      emitPropSpecialized(env, base, key, false, MOpMode::Define, propInfo);
     propPtr = gen(env, UnboxPtr, propPtr);
 
     auto const lhs = gen(env, LdMem, propPtr->type().deref(), propPtr);

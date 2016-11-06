@@ -285,33 +285,17 @@ enum class SwitchKind : uint8_t {
 #undef KIND
 };
 
-#define M_OP_FLAGS                                 \
-  FLAG(None,             0)                        \
-  FLAG(Warn,       (1 << 0))                       \
-  FLAG(Define,     (1 << 1))                       \
-  FLAG(Unset,      (1 << 2))
+#define M_OP_MODES                                 \
+  MODE(None)                                       \
+  MODE(Warn)                                       \
+  MODE(Define)                                     \
+  MODE(Unset)
 
-enum class MOpFlags : uint8_t {
-#define FLAG(name, val) name = val,
-  M_OP_FLAGS
-#undef FLAG
+enum class MOpMode : uint8_t {
+#define MODE(name) name,
+  M_OP_MODES
+#undef MODE
 };
-
-inline constexpr bool operator&(MOpFlags a, MOpFlags b) {
-  return uint8_t(a) & uint8_t(b);
-}
-
-inline MOpFlags dropUnset(MOpFlags f) {
-  switch (f) {
-    case MOpFlags::None:
-    case MOpFlags::Warn:
-    case MOpFlags::Define:
-      return f;
-    case MOpFlags::Unset:
-      return MOpFlags::None;
-  }
-  always_assert(false);
-}
 
 #define QUERY_M_OPS                               \
   OP(CGet)                                        \
@@ -599,17 +583,17 @@ constexpr int32_t kMaxConcatN = 4;
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \
-  O(BaseNC,          TWO(IVA, OA(MOpFlags)),                            \
+  O(BaseNC,          TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
-  O(BaseNL,          TWO(LA, OA(MOpFlags)),                             \
+  O(BaseNL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseGC,          TWO(IVA, OA(MOpFlags)),                            \
+  O(BaseGC,          TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
-  O(BaseGL,          TWO(LA, OA(MOpFlags)),                             \
+  O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
   O(BaseSC,          TWO(IVA, IVA),    IDX_A,           IDX_A,      NF) \
   O(BaseSL,          TWO(LA, IVA),     IDX_A,           IDX_A,      NF) \
-  O(BaseL,           TWO(LA, OA(MOpFlags)),                             \
+  O(BaseL,           TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
   O(BaseC,           ONE(IVA),         NOV,             NOV,        NF) \
   O(BaseR,           ONE(IVA),         NOV,             NOV,        NF) \
@@ -624,7 +608,7 @@ constexpr int32_t kMaxConcatN = 4;
                                        NOV,             NOV,        FF) \
   O(FPassBaseL,      TWO(IVA, LA),                                      \
                                        NOV,             NOV,        FF) \
-  O(Dim,             TWO(OA(MOpFlags), KA),                             \
+  O(Dim,             TWO(OA(MOpMode), KA),                              \
                                        NOV,             NOV,        NF) \
   O(FPassDim,        TWO(IVA, KA),     NOV,             NOV,        FF) \
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
@@ -675,12 +659,12 @@ constexpr bool isValidOpcode(Op op) {
   return op > OpLowInvalid && op < OpHighInvalid;
 }
 
-inline MOpFlags getQueryMOpFlags(QueryMOp op) {
+inline MOpMode getQueryMOpMode(QueryMOp op) {
   switch (op) {
-    case QueryMOp::CGet:  return MOpFlags::Warn;
+    case QueryMOp::CGet:  return MOpMode::Warn;
     case QueryMOp::CGetQuiet:
     case QueryMOp::Isset:
-    case QueryMOp::Empty: return MOpFlags::None;
+    case QueryMOp::Empty: return MOpMode::None;
   }
   always_assert(false);
 }
@@ -819,7 +803,7 @@ const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
 const char* subopToName(ObjMethodOp);
 const char* subopToName(SwitchKind);
-const char* subopToName(MOpFlags);
+const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 
 /*

@@ -641,13 +641,13 @@ Base miBaseSProp(ISS& env, Type cls, Type tprop) {
 //////////////////////////////////////////////////////////////////////
 // intermediate ops
 
-void miProp(ISS& env, bool isNullsafe, MOpFlags flags, Type key) {
+void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
   auto const name     = mStringKey(key);
-  auto const isDefine = flags & MOpFlags::Define;
-  auto const isUnset  = flags & MOpFlags::Unset;
+  auto const isDefine = mode == MOpMode::Define;
+  auto const isUnset  = mode == MOpMode::Unset;
 
   /*
-   * MOpFlags::Unset Props doesn't promote "emptyish" things to stdClass, or
+   * MOpMode::Unset Props doesn't promote "emptyish" things to stdClass, or
    * affect arrays, however it can define a property on an object base.  This
    * means we don't need any couldBeInFoo logic, but if the base could actually
    * be $this, and a declared property could be Uninit, we need to merge
@@ -707,7 +707,7 @@ void miProp(ISS& env, bool isNullsafe, MOpFlags flags, Type key) {
 
   /*
    * Otherwise, intermediate props with define can promote a null, false, or ""
-   * to stdClass.  Those cases, and others, if it's MOpFlags::Define, will set
+   * to stdClass.  Those cases, and others, if it's MOpMode::Define, will set
    * the base to a null value in tvScratch.  The base may also legitimately be
    * an object and our next base is in an object property.
    *
@@ -724,12 +724,12 @@ void miProp(ISS& env, bool isNullsafe, MOpFlags flags, Type key) {
   moveBase(env, Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name });
 }
 
-void miElem(ISS& env, MOpFlags flags, Type key) {
-  auto const isDefine = flags & MOpFlags::Define;
-  auto const isUnset  = flags & MOpFlags::Unset;
+void miElem(ISS& env, MOpMode mode, Type key) {
+  auto const isDefine = mode == MOpMode::Define;
+  auto const isUnset  = mode == MOpMode::Unset;
 
   /*
-   * Elem dims with MOpFlags::Unset can change a base from a static array into a
+   * Elem dims with MOpMode::Unset can change a base from a static array into a
    * reference counted array.  It never promotes emptyish types, however.
    *
    * We only need to handle this for self props, because we don't track
@@ -1407,26 +1407,26 @@ void mergePaths(ISS& env, A a, B b) {
 }
 
 /*
- * Helpers to set the MOpFlags immediate of a bytecode struct, whether it's
+ * Helpers to set the MOpMode immediate of a bytecode struct, whether it's
  * subop2 for Base* opcodes or subop1 for a Dim. All users of these functions
  * start with the flags set to Warn.
  */
 template<typename BC>
-void setMOpFlags(BC& op, MOpFlags flags) {
-  assert(op.subop2 == MOpFlags::Warn);
-  op.subop2 = flags;
+void setMOpMode(BC& op, MOpMode mode) {
+  assert(op.subop2 == MOpMode::Warn);
+  op.subop2 = mode;
 }
 
-void setMOpFlags(bc::Dim& op, MOpFlags flags) {
-  assert(op.subop1 == MOpFlags::Warn);
-  op.subop1 = flags;
+void setMOpMode(bc::Dim& op, MOpMode mode) {
+  assert(op.subop1 == MOpMode::Warn);
+  op.subop1 = mode;
 }
 
-folly::Optional<MOpFlags> fpassFlags(ISS& env, int32_t arg) {
+folly::Optional<MOpMode> fpassMode(ISS& env, int32_t arg) {
   switch (prepKind(env, arg)) {
     case PrepKind::Unknown: return folly::none;
-    case PrepKind::Val:     return MOpFlags::Warn;
-    case PrepKind::Ref:     return MOpFlags::Define;
+    case PrepKind::Val:     return MOpMode::Warn;
+    case PrepKind::Ref:     return MOpMode::Define;
   }
   always_assert(false);
 }
@@ -1480,7 +1480,7 @@ void in(ISS& env, const bc::BaseSL& op) {
 
 void in(ISS& env, const bc::BaseL& op) {
   assert(env.state.arrayChain.empty());
-  env.state.base = miBaseLoc(env, op.loc1, op.subop2 & MOpFlags::Define);
+  env.state.base = miBaseLoc(env, op.loc1, op.subop2 == MOpMode::Define);
 }
 
 void in(ISS& env, const bc::BaseC& op) {
@@ -1503,8 +1503,8 @@ void in(ISS& env, const bc::BaseH& op) {
 
 template<typename BC>
 static void fpassImpl(ISS& env, int32_t arg, BC op) {
-  if (auto const flags = fpassFlags(env, arg)) {
-    setMOpFlags(op, *flags);
+  if (auto const mode = fpassMode(env, arg)) {
+    setMOpMode(op, *mode);
     return reduce(env, op);
   }
 
@@ -1512,30 +1512,30 @@ static void fpassImpl(ISS& env, int32_t arg, BC op) {
     env,
     [&] { in(env, op); },
     [&] {
-      setMOpFlags(op, MOpFlags::Define);
+      setMOpMode(op, MOpMode::Define);
       in(env, op);
     }
   );
 }
 
 void in(ISS& env, const bc::FPassBaseNC& op) {
-  fpassImpl(env, op.arg1, bc::BaseNC{op.arg2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseNC{op.arg2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseNL& op) {
-  fpassImpl(env, op.arg1, bc::BaseNL{op.loc2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseNL{op.loc2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseGC& op) {
-  fpassImpl(env, op.arg1, bc::BaseGC{op.arg2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseGC{op.arg2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseGL& op) {
-  fpassImpl(env, op.arg1, bc::BaseGL{op.loc2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseGL{op.loc2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseL& op) {
-  fpassImpl(env, op.arg1, bc::BaseL{op.loc2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseL{op.loc2, MOpMode::Warn});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1553,7 +1553,7 @@ void in(ISS& env, const bc::Dim& op) {
 }
 
 void in(ISS& env, const bc::FPassDim& op) {
-  fpassImpl(env, op.arg1, bc::Dim{MOpFlags::Warn, op.mkey});
+  fpassImpl(env, op.arg1, bc::Dim{MOpMode::Warn, op.mkey});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1681,9 +1681,9 @@ void in(ISS& env, const bc::FPassM& op) {
   auto const cget = bc::QueryM{op.arg2, QueryMOp::CGet, op.mkey};
   auto const vget = bc::VGetM{op.arg2, op.mkey};
 
-  if (auto const flags = fpassFlags(env, op.arg1)) {
-    return flags == MOpFlags::Warn ? reduce(env, cget, bc::FPassC{op.arg1})
-                                   : reduce(env, vget, bc::FPassVNop{op.arg1});
+  if (auto const mode = fpassMode(env, op.arg1)) {
+    return mode == MOpMode::Warn ? reduce(env, cget, bc::FPassC{op.arg1})
+                                 : reduce(env, vget, bc::FPassVNop{op.arg1});
   }
 
   mergePaths(

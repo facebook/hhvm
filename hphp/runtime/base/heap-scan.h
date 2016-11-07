@@ -148,8 +148,13 @@ template<class F> void ObjectData::scan(F& mark) const {
   }
 
   auto props = propVec();
-  for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {
-    mark(props[i]);
+  if (m_hdr.partially_inited) {
+    // we don't know which properties are initialized yet
+    mark(props, m_cls->numDeclProperties() * sizeof(TypedValue));
+  } else {
+    for (size_t i = 0, n = m_cls->numDeclProperties(); i < n; ++i) {
+      mark(props[i]);
+    }
   }
   if (getAttribute(HasDynPropArr)) {
     // nb: dynamic property arrays are in ExecutionContext::dynPropTable,

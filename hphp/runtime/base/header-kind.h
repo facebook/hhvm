@@ -97,7 +97,8 @@ struct HeaderWord {
       T aux;
       HeaderKind kind;
       mutable bool weak_refed:1;
-      mutable GCBits marks:7;
+      mutable bool partially_inited:1;
+      mutable GCBits marks:6;
       mutable RefCount count;
     };
     struct { uint32_t lo32, hi32; };

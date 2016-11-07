@@ -237,21 +237,18 @@ Object APCObject::createObject() const {
   auto const apcProp = persistentProps();
 
   if (m_fast_init) {
-    if (UNLIKELY(MM().isGCEnabled())) {
-      // TODO: t11328828 recursive apc fast-init re-enters vm with uninit objs
-      memset(objProp, KindOfUninit, numProps * sizeof(*objProp));
-    }
+    obj->setPartiallyInited(true);
     unsigned i = 0;
     try {
-      while (i < numProps) {
+      for (; i < numProps; ++i) {
         new (objProp + i) Variant(apcProp[i]->toLocal());
-        ++i;
       }
+      obj->setPartiallyInited(false);
     } catch (...) {
-      while (i < numProps) {
+      for (; i < numProps; ++i) {
         new (objProp + i) Variant();
-        ++i;
       }
+      obj->setPartiallyInited(false);
       throw;
     }
   } else {

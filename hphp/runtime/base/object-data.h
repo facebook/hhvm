@@ -133,6 +133,10 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
     m_hdr.weak_refed = weak_refed;
   }
 
+  inline void setPartiallyInited(bool f) const {
+    m_hdr.partially_inited = f;
+  }
+
  public:
 
   /*

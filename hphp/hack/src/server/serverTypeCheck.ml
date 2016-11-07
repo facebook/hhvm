@@ -72,6 +72,19 @@ let print_fast fast =
   flush stdout;
   ()
 
+let debug_print_path_set genv name set =
+  ServerDebug.log genv begin fun () ->
+    let open Hh_json in
+    let files = Relative_path.Set.fold set ~init:[] ~f:begin fun k acc ->
+      JSON_String (Relative_path.suffix k) :: acc
+    end in
+    JSON_Object [
+      "type", JSON_String "incremental_files";
+      "name", JSON_String name;
+      "files", JSON_Array files;
+    ]
+  end
+
 let debug_print_fast_keys genv name fast =
   ServerDebug.log genv begin fun () ->
     let open Hh_json in
@@ -491,6 +504,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     in
     (* PARSING *)
 
+    debug_print_path_set genv "files_to_parse" files_to_parse;
     let fast_parsed, errorl, failed_parsing =
       parsing genv env files_to_parse ~stop_at_errors in
     let hs = SharedMem.heap_size () in
@@ -553,6 +567,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       fast_redecl_phase2_now stop_at_errors env failed_parsing in
 
     debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
+    debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
 
     let defs_to_oldify = get_defs lazy_decl_later in
     Decl_redecl_service.oldify_type_decl ~bucket_size
@@ -592,6 +607,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
+    debug_print_path_set genv "lazy_check_later" lazy_check_later;
     let errorl', err_info =
       Typing_check_service.go genv.workers env.tcopt fast in
     let { Decl_service.

@@ -39,8 +39,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const int kNumFixedPrologues = 6;
-
 struct ActRec;
 struct Class;
 struct NamedEntity;
@@ -997,18 +995,9 @@ struct Func final {
   void setPrologue(int index, unsigned char* tca);
 
   /*
-   * Actual number of prologues allocated for the function.
-   *
-   * A minimum of kNumFixedPrologues is always allocated.  The result of
-   * numPrologues() will always be either that minimum, or the result of
-   * getMaxNumPrologues().
+   * Number of prologues allocated for the function.
    */
   int numPrologues() const;
-
-  /*
-   * Maximum number of prologues needed by the function.
-   */
-  static int getMaxNumPrologues(int numParams);
 
   /*
    * Reset a specific prologue, or all prologues.
@@ -1331,7 +1320,7 @@ private:
   AtomicAttr m_attrs;
   // This must be the last field declared in this structure, and the Func class
   // should not be inherited from.
-  AtomicLowPtr<uint8_t> m_prologueTable[kNumFixedPrologues];
+  AtomicLowPtr<uint8_t> m_prologueTable[1];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

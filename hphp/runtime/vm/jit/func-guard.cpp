@@ -46,10 +46,7 @@ void clobberFuncGuard(TCA guard, const Func* func) {
 }
 
 void clobberFuncGuards(const Func* func) {
-  int maxNumPrologues = func->getMaxNumPrologues(func->numParams());
-  int numPrologues =
-    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
-                                         : kNumFixedPrologues;
+  auto const numPrologues = func->numPrologues();
 
   for (auto i = 0; i < numPrologues; ++i) {
     auto const guard = funcGuardFromPrologue(func->getPrologue(i), func);

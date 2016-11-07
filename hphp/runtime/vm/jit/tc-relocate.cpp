@@ -395,12 +395,11 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
       if (auto adjusted = rel.adjustedAddressAfter(f->getFuncBody())) {
         f->setFuncBody(adjusted);
       }
-      int num = Func::getMaxNumPrologues(f->numParams());
-      if (num < kNumFixedPrologues) num = kNumFixedPrologues;
-      while (num--) {
-        auto addr = f->getPrologue(num);
+      auto prologueNum = f->numPrologues();
+      while (prologueNum--) {
+        auto addr = f->getPrologue(prologueNum);
         if (auto adjusted = rel.adjustedAddressAfter(addr)) {
-          f->setPrologue(num, adjusted);
+          f->setPrologue(prologueNum, adjusted);
         }
       }
     }

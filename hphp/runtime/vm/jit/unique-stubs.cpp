@@ -224,27 +224,17 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
 
-    // If we passed more args than declared, we might need to dispatch to the
+    // If we passed more args than declared, we need to dispatch to the
     // "too many arguments" prologue.
     ifThen(v, CC_L, sf, [&] (Vout& v) {
-      auto const sf = v.makeReg();
+      auto const dest = v.makeReg();
 
-      // If we passed fewer than kNumFixedPrologues, argc is still a valid
-      // index into the prologue table.
-      v << cmpli{kNumFixedPrologues, argc, sf};
+      auto const nargs = v.makeReg();
+      v << movzlq{nparams, nargs};
 
-      ifThen(v, CC_NL, sf, [&] (Vout& v) {
-        auto const dest = v.makeReg();
-
-        auto const nargs = v.makeReg();
-        v << movzlq{nparams, nargs};
-
-        // Too many gosh-darned arguments passed.  Go to the (nparams + 1)-th
-        // prologue, which is always the "too many args" entry point.
-        emitLdLowPtr(v, func[nargs * ptrSize + (pTabOff + ptrSize)],
-                     dest, sizeof(LowPtr<uint8_t>));
-        v << jmpr{dest};
-      });
+      emitLdLowPtr(v, func[nargs * ptrSize + (pTabOff + ptrSize)],
+                   dest, sizeof(LowPtr<uint8_t>));
+      v << jmpr{dest};
     });
 
     auto const nargs = v.makeReg();

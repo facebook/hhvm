@@ -579,13 +579,6 @@ inline void Func::setPrologue(int index, unsigned char* tca) {
   m_prologueTable[index] = tca;
 }
 
-inline int Func::getMaxNumPrologues(int numParams) {
-  // Maximum number of prologues is numParams + 2. The extra 2 are for the case
-  // where the number of actual params equals numParams and the case where the
-  // number of actual params is greater than numParams.
-  return numParams + 2;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 

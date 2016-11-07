@@ -59,6 +59,8 @@ val status :
 
 val prepend_root: string -> string
 
+val errors_to_string : Pos.absolute Errors.error_ list -> string
+
 (* Helpers for asserting things *)
 
 val fail: string -> unit

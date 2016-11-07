@@ -66,9 +66,19 @@ type env = {
     tcopt          : TypecheckerOptions.t;
     popt           : ParserOptions.t;
     errorl         : Errors.t;
-    (* Sets of files that were known to have errors in corresponding phases.
-     * During full check, we add those files to the set of files to reanalyze
-     * at each stage in order to regenerate their error lists.
+    (* Sets of files that were known to GENERATE errors in corresponding phases.
+     * Note that this is different from HAVING errors - it's possible for
+     * checking of A to generate error in B - in this case failed_check
+     * should contain A, not B.
+     * Conversly, if declaring A will require declaring B, we should put
+     * B in failed_decl. Same if checking A will cause declaring B (via lazy
+     * decl).
+     *
+     * During recheck, we add those files to the set of files to reanalyze
+     * at each stage in order to regenerate their error lists. So those
+     * failed_ sets are the main piece of mutable state that incremental mode
+     * needs to maintain - ServerEnv.errorl is more of a cache, and should
+     * always be possible to be regenerated based on those sets.
      *
      * failed_naming is also used as kind of a dependency tracking mechanism:
      * if files A.php and B.php both define class C, then those files are

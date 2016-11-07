@@ -237,6 +237,11 @@ let diagnostics_to_string x =
   end;
   Buffer.contents buf
 
+let errors_to_string x =
+  let buf = Buffer.create 1024 in
+  errors_to_string buf x;
+  Buffer.contents buf
+
 let assert_diagnostics loop_output expected =
   let diagnostics = match loop_output.push_message with
     | None -> fail "Expected push diagnostics"

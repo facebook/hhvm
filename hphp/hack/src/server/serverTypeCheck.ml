@@ -235,6 +235,16 @@ let declare_names env fast_parsed =
   let fast = FileInfo.simplify_fast fast_parsed in
   errorl, failed_naming, fast
 
+let diff_set_and_map_keys set map =
+  Relative_path.Map.fold map
+    ~init:set
+    ~f:(fun k _ acc  -> Relative_path.Set.remove acc k)
+
+let union_set_and_map_keys set map =
+  Relative_path.Map.fold map
+    ~init:set
+    ~f:(fun k _ acc  -> Relative_path.Set.add acc k)
+
 (*****************************************************************************)
 (* Function called after parsing, does nothing by default. *)
 (*****************************************************************************)
@@ -294,7 +304,7 @@ module type CheckKindType = sig
     failed_decl:Relative_path.Set.t ->
     lazy_decl_failed:Relative_path.Set.t ->
     failed_check:Relative_path.Set.t ->
-    lazy_decl_later:FileInfo.fast ->
+    needs_phase2_redecl:Relative_path.Set.t ->
     lazy_check_later:Relative_path.Set.t ->
     diag_subscribe:Diagnostic_subscription.t option ->
     ServerEnv.env
@@ -344,7 +354,7 @@ module FullCheckKind : CheckKindType = struct
       ~failed_decl
       ~lazy_decl_failed
       ~failed_check
-      ~lazy_decl_later:_
+      ~needs_phase2_redecl:_
       ~lazy_check_later:_
       ~diag_subscribe =
     {
@@ -435,15 +445,9 @@ module LazyCheckKind : CheckKindType = struct
       ~failed_decl:_
       ~lazy_decl_failed:_
       ~failed_check:_
-      ~lazy_decl_later
+      ~needs_phase2_redecl
       ~lazy_check_later
       ~diag_subscribe =
-
-    let needs_phase2_redecl =
-      List.fold (Relative_path.Map.keys lazy_decl_later)
-        ~f:Relative_path.Set.add
-        ~init:old_env.needs_phase2_redecl
-    in
     let needs_recheck =
       Relative_path.Set.union old_env.needs_recheck lazy_check_later in
     { old_env with
@@ -560,16 +564,24 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
 
+    let defs_to_oldify = get_defs lazy_decl_later in
+    Decl_redecl_service.oldify_type_decl ~bucket_size
+      genv.workers files_info oldified_defs defs_to_oldify;
+    let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
+
     let defs_to_redecl_phase2 = get_defs fast_redecl_phase2_now in
     let errorl', failed_decl, _to_redecl2, to_recheck2 =
       Decl_redecl_service.redo_type_decl ~bucket_size genv.workers
         env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
-    let oldified_defs =
-      snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl_phase2 in
+
+    let needs_phase2_redecl = diff_set_and_map_keys
+      (* Redaclaration delayed before and now. *)
+      (union_set_and_map_keys env.needs_phase2_redecl lazy_decl_later)
+      (* Redeclarations completed now. *)
+      fast_redecl_phase2_now
+    in
 
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
-    Decl_redecl_service.oldify_type_decl ~bucket_size
-      genv.workers files_info oldified_defs (get_defs lazy_decl_later);
     let errorl = Errors.merge errorl' errorl in
 
     (* DECLARING TYPES: merging results of the 2 phases *)
@@ -622,7 +634,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       failed_decl
       lazy_decl_failed
       failed_check
-      lazy_decl_later
+      needs_phase2_redecl
       lazy_check_later
       diag_subscribe
     in

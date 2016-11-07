@@ -164,7 +164,7 @@ let script env tree = match Syntax.syntax tree with
     end
   | _ -> (** TODO: errors *) assert false
 
-let from_tree minimal_tree: Ast.program =
+let from_tree : Relative_path.t -> SyntaxTree.t -> Ast.program = fun file minimal_tree ->
   let tree = Syntax.from_tree minimal_tree in
     let env = { language = (SyntaxTree.language minimal_tree);
       mode = (SyntaxTree.mode minimal_tree) } in

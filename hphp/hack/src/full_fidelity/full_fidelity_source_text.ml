@@ -37,6 +37,9 @@ let from_file file =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   make content
 
+let text source_text =
+  source_text.text
+
 let length source_text =
   String.length source_text.text
 

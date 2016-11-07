@@ -41,7 +41,8 @@ let sanity_test_classic_parser source =
 let full_fidelity_to_classic source =
   let source = SourceText.make source in
   let syntax_tree = SyntaxTree.make source in
-  let classic_ast = Classic_ast_mapper.from_tree syntax_tree in
+  let path = Relative_path.create Relative_path.Dummy "<inline>" in
+  let classic_ast = Classic_ast_mapper.from_tree path syntax_tree in
   let str = Debug.dump_ast (Ast.AProgram classic_ast) in
   str
 

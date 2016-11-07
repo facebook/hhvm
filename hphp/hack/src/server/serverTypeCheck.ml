@@ -177,12 +177,14 @@ let parsing genv env disk_files ide_files ~stop_at_errors =
 
   let to_check = Relative_path.Set.union disk_files ide_files in
 
+  Parser_heap.ParserHeap.remove_batch disk_files;
+  Fixmes.HH_FIXMES.remove_batch disk_files;
   if stop_at_errors then begin
     Parser_heap.ParserHeap.LocalChanges.push_stack ();
     Fixmes.HH_FIXMES.LocalChanges.push_stack ();
   end;
-  Parser_heap.ParserHeap.remove_batch to_check;
-  Fixmes.HH_FIXMES.remove_batch to_check;
+  Parser_heap.ParserHeap.remove_batch ide_files;
+  Fixmes.HH_FIXMES.remove_batch ide_files;
   HackSearchService.MasterApi.clear_shared_memory to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
@@ -190,15 +192,20 @@ let parsing genv env disk_files ide_files ~stop_at_errors =
   let (fast, errors, failed_parsing) as res =
     Parsing_service.go genv.workers files_map ~get_next env.popt in
   if stop_at_errors then begin
-    (* Revert changes and ignore results for files that failed parsing *)
+    (* Revert changes and ignore results for IDE files that failed parsing *)
+    let ide_failed_parsing =
+      Relative_path.Set.inter failed_parsing ide_files in
     let fast = Relative_path.Map.filter fast
-      (fun x _ -> not @@ Relative_path.Set.mem failed_parsing x) in
-    let success_parsing = Relative_path.Set.diff to_check failed_parsing in
+      (fun x _ -> not @@ Relative_path.Set.mem ide_failed_parsing x) in
+    let ide_success_parsing =
+      Relative_path.Set.diff ide_files ide_failed_parsing in
 
-    Parser_heap.ParserHeap.LocalChanges.revert_batch failed_parsing;
-    Fixmes.HH_FIXMES.LocalChanges.revert_batch failed_parsing;
-    Parser_heap.ParserHeap.LocalChanges.commit_batch success_parsing;
-    Fixmes.HH_FIXMES.LocalChanges.commit_batch success_parsing;
+    Parser_heap.ParserHeap.LocalChanges.revert_batch ide_failed_parsing;
+    Fixmes.HH_FIXMES.LocalChanges.revert_batch ide_failed_parsing;
+    Parser_heap.ParserHeap.LocalChanges.commit_batch ide_success_parsing;
+    Fixmes.HH_FIXMES.LocalChanges.commit_batch ide_success_parsing;
+    Parser_heap.ParserHeap.LocalChanges.commit_batch disk_files;
+    Fixmes.HH_FIXMES.LocalChanges.commit_batch disk_files;
 
     Parser_heap.ParserHeap.LocalChanges.pop_stack ();
     Fixmes.HH_FIXMES.LocalChanges.pop_stack ();

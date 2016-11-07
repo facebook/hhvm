@@ -291,11 +291,15 @@ module type CheckKindType = sig
     env:ServerEnv.env ->
     FileInfo.fast * FileInfo.fast
 
+  val get_to_recheck2_approximation :
+    to_redecl_phase2_deps:Typing_deps.DepSet.t ->
+    env:ServerEnv.env ->
+    Relative_path.Set.t
+
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
     phase_2_decl_defs:FileInfo.fast ->
     files_info:FileInfo.t Relative_path.Map.t ->
-    to_redecl_phase2_deps:Typing_deps.DepSet.t ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
     FileInfo.fast * Relative_path.Set.t
@@ -343,8 +347,12 @@ module FullCheckKind : CheckKindType = struct
     let fast = extend_fast fast files_info env.needs_phase2_redecl in
     fast, Relative_path.Map.empty
 
-  let get_defs_to_recheck ~phase_2_decl_defs ~files_info
-      ~to_redecl_phase2_deps:_ ~to_recheck ~env =
+  let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ =
+    (* Full check is computing to_recheck2 set accurately, so there is no need
+     * to approximate anything *)
+    Relative_path.Set.empty
+
+  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_recheck ~env =
     let to_recheck = Relative_path.Set.union env.failed_decl to_recheck in
     let to_recheck = Relative_path.Set.union env.failed_check to_recheck in
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
@@ -412,33 +420,28 @@ module LazyCheckKind : CheckKindType = struct
   let get_related_files dep =
     Typing_deps.get_ideps_from_hash dep |> Typing_deps.get_files
 
-  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_redecl_phase2_deps
-      ~to_recheck ~env =
+  let has_errors_in_ide env = match env.diag_subscribe with
+    | Some ds ->  Diagnostic_subscription.file_has_errors_in_ide ds
+    | None -> (fun _ -> false)
 
-    let has_errors_in_ide = match env.diag_subscribe with
-      | Some ds ->  Diagnostic_subscription.file_has_errors_in_ide ds
-      | None -> (fun _ -> false)
-    in
+  let is_ide_file env x =
+    Relative_path.Map.mem env.edited_files x || has_errors_in_ide env x
 
-    let is_ide_file x =
-      Relative_path.Map.mem env.edited_files x || has_errors_in_ide x
-    in
-
-    let to_recheck_now, to_recheck_later =
-      Relative_path.Set.partition is_ide_file to_recheck in
-
+  let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env =
     (* We didn't do the full fan-out from to_redecl_phase2_deps, so the
-     * to_recheck set might not be complete. We approximate it by taking all the
+     * to_recheck2 set might not be complete. We would recompute it during next
+     * full check, but if it contains files open in editor, we would like to
+     * recheck them sooner than that. We approximate it by taking all the
      * possible dependencies of dependencies and preemptively rechecking them
      * if they are open in the editor *)
-    let related_files = Typing_deps.DepSet.fold to_redecl_phase2_deps
-      ~init:to_recheck_now
+    Typing_deps.DepSet.fold to_redecl_phase2_deps
+      ~init:Relative_path.Set.empty
       ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
-    in
+    |> Relative_path.Set.filter ~f:(is_ide_file env)
 
-    (* Add only fanout related to open IDE files *)
-    let to_recheck_now =
-      Relative_path.Set.filter related_files ~f:is_ide_file in
+  let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_recheck ~env =
+    let to_recheck_now, to_recheck_later =
+      Relative_path.Set.partition (is_ide_file env) to_recheck in
     extend_fast phase_2_decl_defs files_info to_recheck_now, to_recheck_later
 
   let get_new_env
@@ -587,6 +590,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     in
 
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
+    let to_recheck2 = Relative_path.Set.union to_recheck2
+      (CheckKind.get_to_recheck2_approximation to_redecl_phase2_deps env) in
     let errorl = Errors.merge errorl' errorl in
 
     (* DECLARING TYPES: merging results of the 2 phases *)
@@ -600,7 +605,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
-      fast files_info to_redecl_phase2_deps to_recheck env in
+      fast files_info to_recheck env in
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     let errorl', err_info =

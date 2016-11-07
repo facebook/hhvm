@@ -296,7 +296,6 @@ module type CheckKindType = sig
     phase_2_decl_defs:FileInfo.fast ->
     files_info:FileInfo.t Relative_path.Map.t ->
     to_redecl_phase2_deps:Typing_deps.DepSet.t ->
-    to_redecl_phase2:Relative_path.Set.t ->
     to_recheck:Relative_path.Set.t ->
     env:ServerEnv.env ->
     FileInfo.fast * Relative_path.Set.t
@@ -345,8 +344,7 @@ module FullCheckKind : CheckKindType = struct
     fast, Relative_path.Map.empty
 
   let get_defs_to_recheck ~phase_2_decl_defs ~files_info
-      ~to_redecl_phase2_deps:_ ~to_redecl_phase2 ~to_recheck ~env =
-    let to_recheck = Relative_path.Set.union to_redecl_phase2 to_recheck in
+      ~to_redecl_phase2_deps:_ ~to_recheck ~env =
     let to_recheck = Relative_path.Set.union env.failed_decl to_recheck in
     let to_recheck = Relative_path.Set.union env.failed_check to_recheck in
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
@@ -415,7 +413,7 @@ module LazyCheckKind : CheckKindType = struct
     Typing_deps.get_ideps_from_hash dep |> Typing_deps.get_files
 
   let get_defs_to_recheck ~phase_2_decl_defs ~files_info ~to_redecl_phase2_deps
-      ~to_redecl_phase2:_ ~to_recheck ~env =
+      ~to_recheck ~env =
 
     let has_errors_in_ide = match env.diag_subscribe with
       | Some ds ->  Diagnostic_subscription.file_has_errors_in_ide ds
@@ -594,6 +592,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     (* DECLARING TYPES: merging results of the 2 phases *)
     let fast = Relative_path.Map.union fast fast_redecl_phase2_now in
     let to_recheck = Relative_path.Set.union to_recheck1 to_recheck2 in
+    let to_recheck = Relative_path.Set.union to_recheck to_redecl_phase2 in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.second_redecl_end t hs;
@@ -601,7 +600,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
-      fast files_info to_redecl_phase2_deps to_redecl_phase2 to_recheck env in
+      fast files_info to_redecl_phase2_deps to_recheck env in
     ServerCheckpoint.process_updates fast;
     debug_print_fast_keys genv "to_recheck" fast;
     let errorl', err_info =

@@ -346,15 +346,112 @@ X64Assembler& prefix(X64Assembler& a, const Vptr& ptr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Returns true iff the status flags necessary to take a j<a> imply that a j<b>
+ * will also be taken.
+ */
+bool ccImplies(ConditionCode a, ConditionCode b) {
+  if (a == b) return true;
+
+  switch (a) {
+    case CC_None:
+    case CC_O:  case CC_NO:
+    case CC_AE: case CC_BE:
+    case CC_NE:
+    case CC_S:  case CC_NS:
+    case CC_P:  case CC_NP:
+    case CC_GE: case CC_LE:
+      return false;
+
+    case CC_B: return b == CC_BE;
+    case CC_E: return b == CC_BE || b == CC_LE;
+    case CC_A: return b == CC_AE || b == CC_NE;
+    case CC_L: return b == CC_LE;
+    case CC_G: return b == CC_NE || b == CC_GE;
+  }
+  always_assert(false);
+}
+
+/*
+ * When two jccs go to the same destination, the cc of the first is compatible
+ * with the cc of the second, and they're within a one-byte offset of each
+ * other, retarget the first to jump to the second. This will allow the
+ * relocator to shrink the first one, and the extra jmp shouldn't matter since
+ * we try to only do this to rarely taken jumps.
+ */
+void retargetJumps(Venv& env,
+                   const jit::hash_map<TCA, jit::vector<TCA>>& jccs) {
+  jit::hash_set<TCA> retargeted;
+  for (auto& pair : jccs) {
+    auto const& jmps = pair.second;
+    if (jmps.size() < 2) continue;
+
+    for (size_t i = 0; i < jmps.size(); ++i) {
+      DecodedInstruction di(jmps[i]);
+      // Don't bother if the jump is already a short jump.
+      if (di.size() != 6) continue;
+
+      for (size_t j = jmps.size() - 1; j > i; --j) {
+        auto const delta = jmps[j] - jmps[i] + 2;
+        // Backwards jumps are probably not guards, and don't retarget to a
+        // dest that's more than a one-byte offset away.
+        if (delta < 0 || !deltaFits(delta, sz::byte)) continue;
+
+        DecodedInstruction dj(jmps[j]);
+        if (!ccImplies(di.jccCondCode(), dj.jccCondCode())) continue;
+
+        di.setPicAddress(jmps[j]);
+        retargeted.insert(jmps[i]);
+
+        // We might've converted a smashable jump to a regular in-unit jump, so
+        // remove any smashable alignments.
+        auto range = env.meta.alignments.equal_range(jmps[i]);
+        while (range.first != range.second) {
+          auto iter = range.first;
+          ++range.first;
+
+          auto& align = iter->second;
+          if (align.first == Alignment::SmashJcc &&
+              align.second == AlignContext::Live) {
+            env.meta.alignments.erase(iter);
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  // Finally, remove any retargeted jmps from inProgressTailJumps.
+  if (!retargeted.empty()) {
+    GrowableVector<IncomingBranch> newTailJumps;
+    for (auto& jmp : env.meta.inProgressTailJumps) {
+      if (retargeted.count(jmp.toSmash()) == 0) {
+        newTailJumps.push_back(jmp);
+      }
+    }
+    env.meta.inProgressTailJumps.swap(newTailJumps);
+  }
+}
+
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
     X64Assembler::patchJmp(p.instr, env.addrs[p.target]);
   }
+
+  auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
+  jit::hash_map<TCA, jit::vector<TCA>> jccs;
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
     X64Assembler::patchJcc(p.instr, env.addrs[p.target]);
+    if (optLevel >= 2 ||
+        (optLevel == 1 && p.target >= env.unit.blocks.size())) {
+      jccs[env.addrs[p.target]].emplace_back(p.instr);
+    }
   }
+
+  if (!jccs.empty()) retargetJumps(env, jccs);
 }
 
 void Vgen::pad(CodeBlock& cb) {

@@ -526,6 +526,7 @@ struct RuntimeOption {
   F(bool, JitPseudomain,               true)                            \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
+  F(int, JitRetargetJumps,             1)                               \
   F(bool, HHIRLICM,                    false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \

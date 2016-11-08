@@ -1369,10 +1369,12 @@ and expr_
         env, (namepstr, (valp, valty))
       end in
       let env, _body = List.map_env env el expr in
-      let env, class_ = class_id_for_new p env cid in
-      (match class_ with
-      | None -> env, (Reason.Runknown_class p, Tobject)
-      | Some (_, class_, _) ->
+      let env, classes = class_id_for_new p env cid in
+      (match classes with
+       | [] -> env, (Reason.Runknown_class p, Tobject)
+         (* OK to ignore rest of list; class_info only used for errors, and
+          * cid = CI sid cannot produce a union of classes anyhow *)
+       | (_, class_info, _)::_ ->
         if TypecheckerOptions.unsafe_xhp (Env.get_options env) then
           env, obj
         else begin
@@ -1387,7 +1389,7 @@ and expr_
             let env, declty =
               obj_get ~is_method:false ~nullsafe:None env obj cid
                 (fst namepstr, name) (fun x -> x) in
-            let ureason = Reason.URxhp (class_.tc_name, snd namepstr) in
+            let ureason = Reason.URxhp (class_info.tc_name, snd namepstr) in
             Type.sub_type valp ureason env valty declty
           end ~init:env in
           env, obj
@@ -1535,33 +1537,41 @@ and requires_consistent_construct = function
   | CIself -> false
   | CI _ -> false
 
-and new_object ~check_not_abstract p env c el uel =
-  let env, class_ = instantiable_cid p env c in
-  (match class_ with
-  | None ->
-      let _ = List.map_env env el expr in
-      let _ = List.map_env env el expr in
-      env, (Reason.Runknown_class p, Tobject)
-  | Some (cname, class_, c_ty) ->
-      if check_not_abstract && class_.tc_abstract
-        && not (requires_consistent_construct c) then
-        uninstantiable_error p c class_.tc_pos class_.tc_name p c_ty;
-      let env, params = List.map_env env class_.tc_tparams begin fun env _ ->
-        Env.fresh_unresolved_type env
-      end in
-      let env = call_construct p env class_ params el uel c in
+and new_object ~check_not_abstract p env cid el uel =
+  (* Obtain class info from the cid expression. We get multiple
+   * results with a CIexpr that has a union type *)
+  let env, classes = instantiable_cid p env cid in
+  let rec gather env res classes =
+    match classes with
+    | [] ->
+      begin
+        match res with
+        | [] ->
+          let _ = List.map_env env el expr in
+          env, (Reason.Runknown_class p, Tobject)
+        | [ty] -> env, ty
+        | tyl -> env, (Reason.Rwitness p, Tunresolved tyl)
+      end
+
+    | (cname, class_info, c_ty)::classes ->
+      if check_not_abstract && class_info.tc_abstract
+        && not (requires_consistent_construct cid) then
+        uninstantiable_error p cid class_info.tc_pos class_info.tc_name p c_ty;
+      let env, params = List.map_env env class_info.tc_tparams
+        (fun env _ ->Env.fresh_unresolved_type env) in
+      let env = call_construct p env class_info params el uel cid in
       let r_witness = Reason.Rwitness p in
       let obj_ty = r_witness, Tclass (cname, params) in
-      if not (snd class_.tc_construct) then
-        (match c with
+      if not (snd class_info.tc_construct) then
+        (match cid with
           | CIstatic -> Errors.new_inconsistent_construct p cname `static
           | CIexpr _ -> Errors.new_inconsistent_construct p cname `classname
           | _ -> ());
-      match c with
+      match cid with
         | CIstatic ->
-          env, (r_witness, TUtils.this_of obj_ty)
+          gather env ((r_witness, TUtils.this_of obj_ty)::res) classes
         | CIparent ->
-          (match (fst class_.tc_construct) with
+          (match (fst class_info.tc_construct) with
             | Some {ce_type = lazy ty; _ } ->
               let ety_env = {
                 type_expansions = [];
@@ -1572,8 +1582,8 @@ and new_object ~check_not_abstract p env c el uel =
               let _, ce_type = Phase.localize ~ety_env env ty in
               ignore (check_abstract_parent_meth SN.Members.__construct p ce_type)
             | None -> ());
-          env, obj_ty
-        | CI _ | CIself -> env, obj_ty
+          gather env (obj_ty::res) classes
+        | CI _ | CIself -> gather env (obj_ty::res) classes
         | CIexpr _ ->
           let c_ty = r_witness, snd c_ty in
           (* When constructing from a (classname) variable, the variable
@@ -1582,8 +1592,9 @@ and new_object ~check_not_abstract p env c el uel =
            * through the 'new $foo()' iff the constructed obj_ty is a
            * supertype of the variable-dictated c_ty *)
           let env = SubType.sub_type env c_ty obj_ty in
-          env, c_ty
-  )
+          gather env (c_ty::res) classes
+  in
+  gather env [] classes
 
 (* FIXME: we need to separate our instantiability into two parts. Currently,
  * all this function is doing is checking if a given type is inhabited --
@@ -1595,21 +1606,21 @@ and new_object ~check_not_abstract p env c el uel =
  * concrete_classname<T>, where T cannot be an interface.
  * *)
 and instantiable_cid p env cid =
-  let env, class_id = class_id_for_new p env cid in
-  (match class_id with
-    | Some ((pos, name), class_, c_ty) when
-           class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cenum ->
-      (match cid with
-        | CIexpr _ | CI _ ->
-          uninstantiable_error p cid class_.tc_pos name pos c_ty;
-          env, None
-        | CIstatic | CIparent | CIself -> env, class_id
-      )
-    | Some ((pos, name), class_, c_ty) when
-           class_.tc_kind = Ast.Cabstract && class_.tc_final ->
-      uninstantiable_error p cid class_.tc_pos name pos c_ty;
-      env, None
-    | None | Some _ -> env, class_id)
+  let env, classes = class_id_for_new p env cid in
+  begin
+    List.iter classes begin fun ((pos, name), class_info, c_ty) ->
+      if class_info.tc_kind = Ast.Ctrait || class_info.tc_kind = Ast.Cenum
+      then
+         match cid with
+          | CIexpr _ | CI _ ->
+            uninstantiable_error p cid class_info.tc_pos name pos c_ty
+          | CIstatic | CIparent | CIself -> ()
+      else if class_info.tc_kind = Ast.Cabstract && class_info.tc_final
+      then
+        uninstantiable_error p cid class_info.tc_pos name pos c_ty
+      else () end;
+    env, classes
+  end
 
 and uninstantiable_error reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   let reason_msgl = match cid with
@@ -3064,19 +3075,30 @@ and type_could_be_null env ty1 =
 
 and class_id_for_new p env cid =
   let env, ty = static_class_id p env cid in
-  (* Instantiation on an abstract class (e.g. from classname<T>) is via the
-   * base type (to check constructor args), but the actual type `ty` must be
-   * preserved. *)
-  match TUtils.get_base_type env ty with
-    | _, Tclass (sid, _) ->
-      let class_ = Env.get_class env (snd sid) in
-      env, (match class_ with
-        | None -> None
-        | Some class_ -> Some (sid, class_, ty)
-      )
-    | _, (Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
-      | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
-      | Tunresolved _ | Tobject | Tshape _) -> env, None
+  (* Need to deal with union case *)
+  let rec get_info res tyl =
+    match tyl with
+    | [] -> env, res
+    | ty::tyl ->
+      match snd ty with
+      | Tunresolved tyl' ->
+        get_info res (tyl' @ tyl)
+      | _ ->
+        (* Instantiation on an abstract class (e.g. from classname<T>) is
+         * via the base type (to check constructor args), but the actual
+         * type `ty` must be preserved. *)
+        match TUtils.get_base_type env ty with
+        | _, Tclass (sid, _) ->
+          begin
+            let class_ = Env.get_class env (snd sid) in
+            match class_ with
+            | None -> get_info res tyl
+            | Some class_info -> get_info ((sid, class_info, ty)::res) tyl
+          end
+        | _, (Tany | Tmixed | Tarraykind _ | Toption _ | Tprim _
+        | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
+             | Tunresolved _ | Tobject | Tshape _) -> get_info res tyl in
+  get_info [] [ty]
 
 (* To be a valid trait declaration, all of its 'require extends' must
  * match; since there's no multiple inheritance, it follows that all of

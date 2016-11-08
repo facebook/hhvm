@@ -69,7 +69,7 @@ SetArray* keysetReqAllocSet(uint32_t scale) {
 
 SetArray* keysetStaticAllocSet(uint32_t scale) {
   auto const allocBytes = SetArray::ComputeAllocBytes(scale);
-  return static_cast<SetArray*>(std::malloc(allocBytes));
+  return static_cast<SetArray*>(low_malloc_data(allocBytes));
 }
 
 } // namespace

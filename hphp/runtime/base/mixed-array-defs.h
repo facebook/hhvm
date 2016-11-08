@@ -418,7 +418,7 @@ MixedArray* reqAllocArray(uint32_t scale) {
 ALWAYS_INLINE
 MixedArray* staticAllocArray(uint32_t scale) {
   auto const allocBytes = computeAllocBytes(scale);
-  return static_cast<MixedArray*>(std::malloc(allocBytes));
+  return static_cast<MixedArray*>(low_malloc_data(allocBytes));
 }
 
 ALWAYS_INLINE

@@ -378,7 +378,7 @@ ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
   auto const fpcap = CapCode::ceil(adIn->m_size);
   auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = adIn->m_sizeAndPos;
   ad->m_hdr.init(fpcap, adIn->m_hdr.kind, StaticValue);
@@ -398,7 +398,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
     // arrays are not mutable.
     auto const cap = adIn->m_size;
     ad = static_cast<ArrayData*>(
-      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+      low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = adIn->m_sizeAndPos;
@@ -423,7 +423,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   if (LIKELY(arr->m_size <= CapCode::Threshold)) {
     auto const cap = arr->m_size;
     ad = static_cast<ArrayData*>(
-      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+      low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = arr->m_sizeAndPos;
@@ -451,7 +451,7 @@ ArrayData* PackedArray::ConvertStaticHelper(const ArrayData* arr) {
   auto const fpcap = CapCode::ceil(arr->m_size);
   auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = arr->m_sizeAndPos;
   ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticValue);

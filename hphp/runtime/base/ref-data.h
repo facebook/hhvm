@@ -266,7 +266,6 @@ private:
   }
 
 private:
-  int64_t pad;
   HeaderWord<RefBits> m_hdr;
   TypedValue m_tv;
 };

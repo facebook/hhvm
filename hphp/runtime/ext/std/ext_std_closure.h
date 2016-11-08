@@ -32,8 +32,8 @@ extern const StaticString s_Closure;
 // native data for closures. Memory layout looks like this:
 // [ClosureHdr][ObjectData, kind=Closure][captured vars]
 struct ClosureHdr {
-  void* ctx;
   HeaderWord<> hdr;
+  void* ctx;
   uint32_t& size() { return hdr.hi32; }
   uint32_t size() const { return hdr.hi32; }
 };

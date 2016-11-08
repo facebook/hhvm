@@ -182,42 +182,4 @@ ETCH_LABEL(csuend):
 ETCH_LABEL(FE803):
         ETCH_SIZE(hash_string_cs_unaligned_crc)
 
-
-/* The following is the asm version of HPHP::StringData::hashHelper */
-ETCH_SECTION(g_hashHelper_crc)
-.globl	ETCH_NAME(g_hashHelper_crc)
-ETCH_TYPE(ETCH_NAME(g_hashHelper_crc), @function)
-ETCH_ALIGN16
-ETCH_NAME(g_hashHelper_crc):
-ETCH_LABEL(FB804):
-        CFI(startproc)
-        mov     (%rdi), %ecx
-        or      $-1, %eax
-        lea     0x10(%rdi, %rcx), %rdx
-        neg     %rcx
-        jz      ETCH_LABEL(hend)
-        movabs  $0xdfdfdfdfdfdfdfdf, %r8
-        jmp     ETCH_LABEL(hheader)
-
-ETCH_LABEL(hloop):
-        crc32q  %rsi, %rax
-ETCH_LABEL(hheader):
-        mov     %r8, %rsi
-        and     (%rdx, %rcx), %rsi
-        add     $8, %rcx
-        jnc     ETCH_LABEL(hloop)
-
-        shl     $3, %ecx
-        shl     %cl, %rsi
-        crc32q  %rsi, %rax
-
-ETCH_LABEL(hend):
-        shr     %eax
-        or      %eax, 0x4(%rdi)
-        ret
-        CFI(endproc)
-
-ETCH_LABEL(FE804):
-        ETCH_SIZE(g_hashHelper_crc)
-
 #endif

@@ -342,8 +342,8 @@ static_assert(std::numeric_limits<type_scan::Index>::max() <=
 // so they can be auto-freed in MemoryManager::reset(), as well as large/small
 // req::malloc()'d blocks, which must track their size internally.
 struct MallocNode {
-  size_t nbytes;
   HeaderWord<> hdr;
+  size_t nbytes;
   uint32_t& index() { return hdr.hi32; }
   uint16_t& typeIndex() { return hdr.aux; }
   uint16_t typeIndex() const { return hdr.aux; }
@@ -351,8 +351,8 @@ struct MallocNode {
 
 // all FreeList entries are parsed by inspecting this header.
 struct FreeNode {
-  FreeNode* next;
   HeaderWord<> hdr;
+  FreeNode* next;
   uint32_t& size() { return hdr.hi32; }
   uint32_t size() const { return hdr.hi32; }
   static FreeNode* InitFrom(void* addr, uint32_t size, HeaderKind);
@@ -362,9 +362,9 @@ struct FreeNode {
 // header for HNI objects with NativeData payloads. see native-data.h
 // for details about memory layout.
 struct NativeNode {
+  HeaderWord<> hdr;
   uint32_t sweep_index; // index in MM::m_natives
   uint32_t obj_offset; // byte offset from this to ObjectData*
-  HeaderWord<> hdr;
 };
 
 // POD type for tracking arbitrary memory ranges

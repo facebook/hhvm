@@ -449,22 +449,14 @@ private:
   int64_t toInt64Impl() const noexcept;
   double toDoubleImpl() const noexcept;
 
-// offset:  0    4   8       12     16   20          32
-// 64bit:   cls      header  count  id   [subclass]  [props...]
-// lowptr:  cls  id  header  count  [subclass][props...]
+// offset:  0        8       12   16   20          32
+// 64bit:   header   cls          id   [subclass]  [props...]
+// lowptr:  header   cls     id   [subclass][props...]
 
 private:
-#ifdef USE_LOWPTR
-  LowPtr<Class> m_cls;
-  // Numeric identifier of this object (used for var_dump(), and WeakRefs)
-  uint32_t o_id;
   HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-#else
   LowPtr<Class> m_cls;
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-  // Numeric identifier of this object (used for var_dump(), and WeakRefs)
-  uint32_t o_id;
-#endif
+  uint32_t o_id; // id of this object (used for var_dump(), and WeakRefs)
 };
 #ifdef _MSC_VER
 #pragma pack(pop)

@@ -126,8 +126,8 @@ struct Header {
 public:
   union {
     struct {
-      uint64_t q;
       HeaderWord<> hdr_;
+      uint64_t q;
     };
     StringData str_;
     ArrayData arr_;

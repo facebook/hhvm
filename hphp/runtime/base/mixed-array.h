@@ -127,6 +127,9 @@ struct MixedArray final : private ArrayData,
     static constexpr ptrdiff_t dataOff() {
       return offsetof(Elm, data);
     }
+    static constexpr ptrdiff_t hashOff() {
+      return offsetof(Elm, data) + offsetof(TypedValue, m_aux);
+    }
   };
 
   static constexpr ptrdiff_t dataOff() {
@@ -134,6 +137,9 @@ struct MixedArray final : private ArrayData,
   }
   static constexpr ptrdiff_t usedOff() {
     return offsetof(MixedArray, m_used);
+  }
+  static constexpr ptrdiff_t scaleOff() {
+    return offsetof(MixedArray, m_scale);
   }
 
   static constexpr ptrdiff_t elmOff(uint32_t pos) {

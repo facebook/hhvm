@@ -536,6 +536,7 @@ protected:
   friend struct BaseMap;
   friend struct c_Map;
   friend struct c_ImmMap;
+  HeaderWord<CapCode,Counted::Maybe> m_hdr;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)
@@ -546,7 +547,6 @@ protected:
     };
     uint64_t m_sizeAndPos; // careful, m_pos is signed
   };
-  HeaderWord<CapCode,Counted::Maybe> m_hdr;
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");

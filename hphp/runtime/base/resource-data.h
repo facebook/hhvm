@@ -102,9 +102,9 @@ private:
   static_assert(sizeof(type_scan::Index) <= 4,
                 "type_scan::Index cannot be greater than 32-bits");
 
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores heap size
   int32_t m_id;
   type_scan::Index m_type_index;
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores heap size
 };
 
 /**

@@ -45,6 +45,11 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 
+#if defined(__x86_64__) && defined(FACEBOOK) && !defined(NO_SSE42) &&\
+    defined(NO_M_DATA)
+#include "hphp/runtime/base/mixed-array-x64.h"
+#endif
+
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
@@ -1394,7 +1399,17 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
   }
   return nullptr;
 }
-
+#else
+  // mixed-array-x64.S depends on StringData and MixedArray layout.
+  // If these fail, update the constants
+  static_assert(sizeof(StringData) == SD_DATA, "");
+  static_assert(StringData::sizeOff() == SD_LEN, "");
+  static_assert(StringData::hashOff() == SD_HASH, "");
+  static_assert(MixedArray::dataOff() == MA_DATA, "");
+  static_assert(MixedArray::scaleOff() == MA_SCALE, "");
+  static_assert(MixedArray::Elm::keyOff() == ELM_KEY, "");
+  static_assert(MixedArray::Elm::hashOff() == ELM_HASH, "");
+  static_assert(MixedArray::Elm::dataOff() == ELM_DATA, "");
 #endif
 
 Cell MixedArray::NvGetKey(const ArrayData* ad, ssize_t pos) {

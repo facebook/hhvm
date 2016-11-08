@@ -14,16 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_DATA_MACROS_H_
-#define incl_HPHP_STRING_DATA_MACROS_H_
+#ifndef incl_HPHP_MIXED_ARRAY_X64_H_
+#define incl_HPHP_MIXED_ARRAY_X64_H_
 
-#ifdef USE_LOWPTR
-#define NO_M_DATA 1
-#endif
-
-// Offsets of fields in StringData
-#define SD_LEN    8
-#define SD_DATA   16
-#define SD_HASH   12
+// Offsets of fields in MixedArray
+#define MA_SCALE  16
+#define MA_DATA   32
+#define ELM_HASH  20
+#define ELM_KEY   0
+#define ELM_DATA  8
 
 #endif

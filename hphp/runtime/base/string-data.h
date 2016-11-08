@@ -167,6 +167,7 @@ struct StringData final: type_scan::MarkCountable<StringData> {
   static constexpr ptrdiff_t dataOff() { return offsetof(StringData, m_data); }
 #endif
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
+  static constexpr ptrdiff_t hashOff() { return offsetof(StringData, m_hash); }
 
   /*
    * Proxy StringData's have a sweep list running through them for
@@ -492,19 +493,11 @@ private:
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
 private:
-#ifdef NO_M_DATA
-  union {
-    struct {
-      uint32_t m_len;
-      mutable strhash_t m_hash;   // precomputed for persistent strings
-    };
-    uint64_t m_lenAndHash;
-  };
   HeaderWord<CapCode,Counted::Maybe> m_hdr;
-#else
+#ifndef NO_M_DATA
   // TODO(5601154): Add KindOfApcString and remove StringData m_data field.
   char* m_data;
-  HeaderWord<CapCode,Counted::Maybe> m_hdr;
+#endif
   union {
     struct {
       uint32_t m_len;
@@ -512,7 +505,6 @@ private:
     };
     uint64_t m_lenAndHash;
   };
-#endif
 };
 
 //////////////////////////////////////////////////////////////////////

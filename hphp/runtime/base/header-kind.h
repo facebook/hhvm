@@ -134,7 +134,7 @@ struct HeaderWord {
   bool decReleaseCheck();
 };
 
-constexpr auto HeaderOffset = sizeof(void*);
+constexpr auto HeaderOffset = 0;
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
 constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
                                       offsetof(HeaderWord<>, count);

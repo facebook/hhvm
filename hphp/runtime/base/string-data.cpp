@@ -651,13 +651,13 @@ StringData* StringData::reserve(size_t cap) {
   // Request-allocated StringData are always aligned at 16 bytes, thus it is
   // safe to copy in 16-byte groups.
 #ifdef NO_M_DATA
-  // layout: [m_lenAndHash][header][...data]
+  // layout: [header][m_lenAndHash][...data]
   sd->m_lenAndHash = m_lenAndHash;
   // This copies the characters (m_len bytes), and the trailing zero (1 byte)
   memcpy16_inline(sd+1, this+1, (m_len + 1 + 15) & ~0xF);
   assertx(reinterpret_cast<uintptr_t>(this+1) % 16 == 0);
 #else
-  // layout: [m_data][header][m_lenAndHash][...data]
+  // layout: [header][m_data][m_lenAndHash][...data]
   // This copies m_lenAndHash (8 bytes), the characters (m_len bytes),
   // and the trailing zero (1 byte).
   memcpy16_inline(&sd->m_lenAndHash, &m_lenAndHash,
@@ -844,6 +844,12 @@ void StringData::preCompute() {
 }
 
 NEVER_INLINE strhash_t StringData::hashHelper() const {
+#ifdef NO_M_DATA
+  // this function will be overwritten by g_hashHelper_crc()
+  static_assert(sizeof(StringData) == SD_DATA, "");
+  static_assert(offsetof(StringData, m_len) == SD_LEN, "");
+  static_assert(offsetof(StringData, m_hash) == SD_HASH, "");
+#endif
   assert(!isProxy());
   strhash_t h = hash_string_i_unsafe(data(), m_len);
   assert(h >= 0);

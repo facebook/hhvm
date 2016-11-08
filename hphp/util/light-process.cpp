@@ -21,16 +21,17 @@
 #include <boost/scoped_array.hpp>
 #include <boost/thread/barrier.hpp>
 
-#include <sys/resource.h>
-#include <sys/socket.h>
+#include <folly/portability/SysMman.h>
+#include <folly/portability/SysResource.h>
+#include <folly/portability/Sockets.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #include <afdt.h>
 #include <grp.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <poll.h>
+#include <folly/portability/Unistd.h>
+
 #include <pwd.h>
 #include <signal.h>
 
@@ -40,6 +41,7 @@
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
@@ -113,7 +115,7 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
   int child_pipe = read ? 1 : 0;
   if (pid == 0) {
     // child
-
+    mprotect_huge1g_pages(PROT_READ);
     // replace stdin or stdout with the appropriate end
     // of the pipe
     if (p[child_pipe] == child_pipe) {
@@ -307,6 +309,7 @@ pid_t do_proc_open_helper(int afdt_fd) {
   // now ready to start the child process
   pid_t child = fork();
   if (child == 0) {
+    mprotect_huge1g_pages(PROT_READ);
     for (int i = 0; i < pvals.size(); i++) {
       dup2(pkeys[i], pvals[i]);
     }
@@ -503,6 +506,7 @@ bool LightProcess::initShadow(int afdt_lid,
   pid_t child = fork();
   if (child == 0) {
     // child
+    mprotect_huge1g_pages(PROT_READ);
     if (s_trackProcessTimes) {
       HardwareCounter::RecordSubprocessTimes();
     }

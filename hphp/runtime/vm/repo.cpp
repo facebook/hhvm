@@ -24,6 +24,7 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
@@ -70,6 +71,11 @@ SimpleMutex Repo::s_lock;
 unsigned Repo::s_nRepos = 0;
 
 bool Repo::prefork() {
+  if (num_huge1g_pages() > 0) {
+    // We put data on the 1G huge pages, and we don't want to do COW upon
+    // fork().  If you need to fork(), configure HHVM not to use 1G pages.
+    return true;
+  }
   if (!t_dh.isNull()) {
     t_dh.destroy();
   }

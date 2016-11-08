@@ -41,6 +41,10 @@ inline void ActRec::setReturnVMExit() {
   m_sfp = nullptr;
   m_savedRip = reinterpret_cast<uintptr_t>(jit::tc::ustubs().callToExit);
   m_soff = 0;
+#ifdef __powerpc64__
+  // Save the TOC value, as it will need to be restored when unwinding.
+  asm ("mr %0, 2" : "=r" (m_savedToc));
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

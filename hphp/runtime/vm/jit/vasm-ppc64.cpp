@@ -488,6 +488,7 @@ private:
     a.addi(rsfp(), rsp(), -min_frame_size);
     a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
   }
+
   Venv& env;
   Vtext& text;
   Assembler a;

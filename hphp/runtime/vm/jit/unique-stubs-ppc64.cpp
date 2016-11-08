@@ -255,10 +255,8 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
   // Reinitialize r1 for the external code found after enterTCExit's stubret
   a.addi(rsfp(), rsp(), 8);
 
-  // r31 should have the same value as caller's r1. Loading it soon on stubret.
-  // (this corrupts the backchain, but it's not relevant as this frame will be
-  // destroyed soon)
-  a.std(rsfp(), rsp()[8]);
+  // Restore the rvmfp when leaving the VM, which must be the same of rsfp.
+  a.mr(rvmfp(), rsfp());
 
   // Emulate a ret to enterTCExit without actually doing one to avoid
   // unbalancing the return stack buffer.

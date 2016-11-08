@@ -1088,7 +1088,10 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     storeReturnRegs(v);
 
     // Perform a native return.
-    v << stubret{RegSet(), true};
+
+    // On PPC64, as there is no new frame created when entering the VM, the FP
+    // must not be saved.
+    v << stubret{RegSet(), arch() != Arch::PPC64};
   });
 }
 
@@ -1108,11 +1111,11 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 #endif
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
-    // Native func prologue.
-    v << stublogue{true};
-
     // Architecture-specific setup for entering the TC.
     v << inittc{};
+
+    // Native func prologue.
+    v << stublogue{arch() != Arch::PPC64};
 
 #if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
     // Windows hates argument registers.

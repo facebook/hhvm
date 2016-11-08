@@ -34,8 +34,8 @@ extern const StaticString s_Closure;
 struct ClosureHdr {
   HeaderWord<> hdr;
   void* ctx;
-  uint32_t& size() { return hdr.hi32; }
-  uint32_t size() const { return hdr.hi32; }
+  uint32_t& size() { return hdr.lo32; }
+  uint32_t size() const { return hdr.lo32; }
 };
 
 struct c_Closure final : ObjectData {

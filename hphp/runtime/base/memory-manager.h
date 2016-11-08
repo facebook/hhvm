@@ -344,7 +344,7 @@ static_assert(std::numeric_limits<type_scan::Index>::max() <=
 struct MallocNode {
   HeaderWord<> hdr;
   size_t nbytes;
-  uint32_t& index() { return hdr.hi32; }
+  uint32_t& index() { return hdr.lo32; }
   uint16_t& typeIndex() { return hdr.aux; }
   uint16_t typeIndex() const { return hdr.aux; }
 };
@@ -353,8 +353,8 @@ struct MallocNode {
 struct FreeNode {
   HeaderWord<> hdr;
   FreeNode* next;
-  uint32_t& size() { return hdr.hi32; }
-  uint32_t size() const { return hdr.hi32; }
+  uint32_t& size() { return hdr.lo32; }
+  uint32_t size() const { return hdr.lo32; }
   static FreeNode* InitFrom(void* addr, uint32_t size, HeaderKind);
   static FreeNode* UninitFrom(void* addr, FreeNode* next);
 };

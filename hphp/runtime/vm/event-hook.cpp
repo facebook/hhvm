@@ -365,6 +365,14 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                bool unwind, ObjectData* phpException,
                                size_t flags, bool isSuspend) {
+  // Inlined calls normally skip the function enter and exit events. If we
+  // side exit in an inlined callee, we short-circuit here in order to skip
+  // exit events that could unbalance the call stack.
+  if (RuntimeOption::EvalJit &&
+      ((jit::TCA) ar->m_savedRip == jit::tc::ustubs().retInlHelper)) {
+    return;
+  }
+
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
@@ -384,15 +392,6 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     if (flags & IntervalTimerFlag) {
       IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
     }
-  }
-
-
-  // Inlined calls normally skip the function enter and exit events. If we
-  // side exit in an inlined callee, we short-circuit here in order to skip
-  // exit events that could unbalance the call stack.
-  if (RuntimeOption::EvalJit &&
-      ((jit::TCA) ar->m_savedRip == jit::tc::ustubs().retInlHelper)) {
-    return;
   }
 
   // User profiler

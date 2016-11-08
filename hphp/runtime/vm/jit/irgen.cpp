@@ -190,6 +190,8 @@ Type predictedType(const IRGS& env, const Location& loc) {
       return fs.stack(offsetFromIRSP(env, loc.stackIdx())).predictedType;
     case LTag::Local:
       return fs.local(loc.localId()).predictedType;
+    case LTag::MBase:
+      return fs.mbase().predictedType;
   }
   not_reached();
 }
@@ -202,6 +204,8 @@ Type provenType(const IRGS& env, const Location& loc) {
       return fs.stack(offsetFromIRSP(env, loc.stackIdx())).type;
     case LTag::Local:
       return fs.local(loc.localId()).type;
+    case LTag::MBase:
+      return fs.mbase().type;
   }
   not_reached();
 }

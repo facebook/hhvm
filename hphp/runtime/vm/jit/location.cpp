@@ -31,6 +31,8 @@ std::string show(Location loc) {
       return folly::format("Local{{{}}}", loc.localId()).str();
     case LTag::Stack:
       return folly::format("Stack{{{}}}", loc.stackIdx().offset).str();
+    case LTag::MBase:
+      return "MBase{}";
   }
   not_reached();
 }

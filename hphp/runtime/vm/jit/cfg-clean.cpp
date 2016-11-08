@@ -41,6 +41,7 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
                CheckTypeMem,
                CheckLoc,
                CheckStk,
+               CheckMBase,
                CheckInit,
                CheckInitMem,
                CheckInitProps,

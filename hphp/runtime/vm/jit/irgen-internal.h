@@ -343,6 +343,11 @@ inline SSATmp* assertType(SSATmp* tmp, Type type) {
   return tmp;
 }
 
+inline FPInvOffset offsetFromFP(const IRGS& env, IRSPRelOffset irSPRel) {
+  auto const irSPOff = env.irb->fs().irSPOff();
+  return irSPRel.to<FPInvOffset>(irSPOff);
+}
+
 inline IRSPRelOffset offsetFromIRSP(const IRGS& env, FPInvOffset fpRel) {
   auto const irSPOff = env.irb->fs().irSPOff();
   return fpRel.to<IRSPRelOffset>(irSPOff);

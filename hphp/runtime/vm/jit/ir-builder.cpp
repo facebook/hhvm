@@ -55,7 +55,9 @@ const typename M::mapped_type& get_required(const M& m,
 SSATmp* fwdGuardSource(IRInstruction* inst) {
   if (inst->is(AssertType, CheckType)) return inst->src(0);
 
-  assertx(inst->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
+  assertx(inst->is(AssertLoc,   CheckLoc,
+                   AssertStk,   CheckStk,
+                   AssertMBase, CheckMBase));
   inst->convertToNop();
   return nullptr;
 }
@@ -162,6 +164,10 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
         case LdStk:
           return stk(inst->extra<IRSPRelOffsetData>()->offset);
 
+        case AssertMBase:
+        case CheckMBase:
+          return folly::make_optional<Location>(Location::MBase{});
+
         default:
           return folly::none;
       }
@@ -265,6 +271,10 @@ SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
   return preOptimizeCheckLocation(inst, stk(inst->extra<CheckStk>()->offset));
 }
 
+SSATmp* IRBuilder::preOptimizeCheckMBase(IRInstruction* inst) {
+  return preOptimizeCheckLocation(inst, Location::MBase{});
+}
+
 SSATmp* IRBuilder::preOptimizeHintInner(IRInstruction* inst, Location l) {
   if (!(typeOf(l, DataTypeGeneric) <= TBoxedCell) ||
       predictedInnerType(l).box() <= inst->typeParam()) {
@@ -275,6 +285,10 @@ SSATmp* IRBuilder::preOptimizeHintInner(IRInstruction* inst, Location l) {
 
 SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
   return preOptimizeHintInner(inst, loc(inst->extra<HintLocInner>()->locId));
+}
+
+SSATmp* IRBuilder::preOptimizeHintMBaseInner(IRInstruction* inst) {
+  return preOptimizeHintInner(inst, Location::MBase{});
 }
 
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
@@ -504,11 +518,13 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
   X(HintLocInner)
+  X(HintMBaseInner)
   X(AssertType)
   X(AssertLoc)
   X(AssertStk)
-  X(CheckStk)
   X(CheckLoc)
+  X(CheckStk)
+  X(CheckMBase)
   X(LdLoc)
   X(LdStk)
   X(CastStk)
@@ -767,7 +783,9 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc) {
   assertx(typeSrc.isGuard());
   auto const guard = typeSrc.guard;
 
-  always_assert(guard->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
+  always_assert(guard->is(AssertLoc,   CheckLoc,
+                          AssertStk,   CheckStk,
+                          AssertMBase, CheckMBase));
 
   // If the dest of the Assert/Check doesn't fit `tc', there's no point in
   // continuing.
@@ -820,7 +838,7 @@ bool IRBuilder::constrainAssert(const IRInstruction* inst,
  */
 bool IRBuilder::constrainCheck(const IRInstruction* inst,
                                TypeConstraint tc, Type srcType) {
-  assertx(inst->is(CheckType, CheckLoc, CheckStk));
+  assertx(inst->is(CheckType, CheckLoc, CheckStk, CheckMBase));
 
   auto changed = false;
   auto const typeParam = inst->typeParam();
@@ -874,6 +892,12 @@ Type IRBuilder::predictedLocalInnerType(uint32_t id) const {
 
 Type IRBuilder::predictedStackInnerType(IRSPRelOffset offset) const {
   return predictedInnerType(stk(offset));
+}
+
+Type IRBuilder::predictedMBaseInnerType() const {
+  auto const ty = m_state.mbase().predictedType;
+  assertx(ty <= TBoxedCell);
+  return ldRefReturn(ty.unbox());
 }
 
 /*

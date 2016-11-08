@@ -41,7 +41,6 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(region);
 
-
 //////////////////////////////////////////////////////////////////////
 
 extern RegionDescPtr selectMethod(const RegionContext&);
@@ -705,6 +704,7 @@ void RegionDesc::Block::checkMetadata() const {
           assertx(loc.localId() < m_func->numLocals());
           break;
         case LTag::Stack:
+        case LTag::MBase:
           break;
       }
     }
@@ -720,6 +720,7 @@ void RegionDesc::Block::checkMetadata() const {
           assertx(loc.localId() < m_func->numLocals());
           break;
         case LTag::Stack:
+        case LTag::MBase:
           break;
       }
     }

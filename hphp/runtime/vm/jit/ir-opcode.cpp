@@ -168,6 +168,7 @@ bool isGuardOp(Opcode opc) {
     case CheckLoc:
     case CheckStk:
     case CheckType:
+    case CheckMBase:
       return true;
 
     default:

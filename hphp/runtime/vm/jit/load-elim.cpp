@@ -368,6 +368,7 @@ Flags handle_general_effects(Local& env,
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckMBase:
   case CheckRefInner:
     if (auto flags = handleCheck(inst.typeParam())) return *flags;
     break;
@@ -682,6 +683,7 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckMBase:
   case CheckRefInner:
     reduce_to(CheckType, inst.typeParam());
     break;

@@ -45,6 +45,8 @@ namespace HPHP { namespace jit { namespace svcreq {
 
 namespace {
 
+///////////////////////////////////////////////////////////////////////////////
+
 RegionContext getContext(SrcKey sk) {
   RegionContext ctx {
     sk.func(), sk.offset(), liveSpOff(),
@@ -88,6 +90,27 @@ RegionContext getContext(SrcKey sk) {
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
     }
   );
+
+  // Get the bytecode for `ctx', skipping Asserts.
+  auto const op = [&] {
+    auto pc = ctx.func->unit()->at(ctx.bcOffset);
+    while (isTypeAssert(peek_op(pc))) {
+      pc += instrLen(pc);
+    }
+    return peek_op(pc);
+  }();
+  assertx(!isTypeAssert(op));
+
+  // Track the mbase type.  The member base register is only valid after a
+  // member base op and before a member final op---and only AssertRAT*'s are
+  // allowed to intervene in a sequence of bytecode member operations.
+  if (isMemberDimOp(op) || isMemberFinalOp(op)) {
+    auto const mbase = vmMInstrState().base;
+    assertx(mbase != nullptr);
+
+    ctx.liveTypes.push_back({ Location::MBase{}, typeFromTV(mbase, ctxClass) });
+    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
+  }
 
   return ctx;
 }
@@ -221,6 +244,7 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 TCA funcBodyHelper(ActRec* fp) {
@@ -464,5 +488,7 @@ TCA handleResume(bool interpFirst) {
   tl_regState = VMRegState::DIRTY;
   return start;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

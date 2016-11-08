@@ -38,6 +38,8 @@ inline bool Location::operator==(const Location& other) const {
       return localId() == other.localId();
     case LTag::Stack:
       return stackIdx() == other.stackIdx();
+    case LTag::MBase:
+      return true;
   }
   not_reached();
   return false;
@@ -55,6 +57,8 @@ inline bool Location::operator<(const Location& other) const {
       return localId() < other.localId();
     case LTag::Stack:
       return stackIdx() < other.stackIdx();
+    case LTag::MBase:
+      return false;
   }
   not_reached();
   return false;

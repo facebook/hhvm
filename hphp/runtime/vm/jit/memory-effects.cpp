@@ -1021,6 +1021,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Member instructions
 
+  case CheckMBase:
+    return may_load_store(pointee(inst.src(0)), AEmpty);
+
   /*
    * Various minstr opcodes that take a PtrToGen in src 0, which may or may not
    * point to a frame local or the evaluation stack. Some may read or write to
@@ -1222,15 +1225,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Instructions that never read or write memory locations tracked by this
   // module.
 
-  case AssertStk:
-  case HintStkInner:
   case AbsDbl:
   case AddDbl:
   case AddInt:
   case AddIntO:
   case AndInt:
-  case AssertLoc:
   case AssertType:
+  case AssertLoc:
+  case AssertStk:
+  case AssertMBase:
   case DefFP:
   case DefSP:
   case EndGuards:
@@ -1245,6 +1248,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GtBool:
   case GtInt:
   case HintLocInner:
+  case HintStkInner:
+  case HintMBaseInner:
   case Jmp:
   case JmpNZero:
   case JmpZero:

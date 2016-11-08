@@ -94,7 +94,6 @@ struct Env {
   RefDeps refDeps;
   uint32_t numJmps;
   int32_t numBCInstrs;
-  SrcKey minstrStart;
   // This map memoizes reachability of IR blocks during tracelet
   // formation.  A block won't have it's reachability stored in this
   // map until it's been computed.
@@ -152,8 +151,8 @@ bool consumeInput(Env& env, const InputInfo& input) {
 
   if (!input.dontBreak && !type.isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
-    FTRACE(1, "selectTracelet: {} tried to consume {}\n",
-           env.inst.toString(), show(input.loc));
+    FTRACE(1, "selectTracelet: {} tried to consume {}, type {}\n",
+           env.inst.toString(), show(input.loc), type.toString());
     return false;
   }
 
@@ -375,6 +374,11 @@ void visitGuards(IRUnit& unit, F func) {
                inst.is(HintStkInner));
           break;
         }
+        case HintMBaseInner:
+        case CheckMBase:
+          func(&inst, Location::MBase{}, inst.typeParam(),
+               inst.is(HintMBaseInner));
+          break;
         default: break;
       }
     }
@@ -531,16 +535,6 @@ RegionDescPtr form_region(Env& env) {
 
     if (!prepareInstruction(env)) break;
 
-    // Until the rest of the pipeline can handle it without regressing, try to
-    // not break tracelets in the middle of new minstr sequences. Note that
-    // this is just an optimization; we can generate correct code regardless of
-    // how the minstrs are chopped up.
-    if (!firstInst && isMemberBaseOp(env.inst.op())) {
-      env.minstrStart = env.sk;
-    } else if (isMemberFinalOp(env.inst.op())) {
-      env.minstrStart = SrcKey{};
-    }
-
     env.curBlock->setKnownFunc(env.sk, env.inst.funcd);
 
     if (traceThroughJmp(env)) continue;
@@ -598,12 +592,6 @@ RegionDescPtr form_region(Env& env) {
     }
 
     if (isFCallStar(env.inst.op())) env.arStates.back().pop();
-  }
-
-  // Return an empty region to restart region formation at env.minstrStart.
-  if (env.minstrStart.valid()) {
-    env.breakAt = env.minstrStart;
-    env.region.reset();
   }
 
   if (env.region && !env.region->empty()) {

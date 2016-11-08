@@ -64,12 +64,22 @@ template<LTag tag>
 struct LocationState {
   static_assert(tag == LTag::Stack ||
                 tag == LTag::Local ||
+                tag == LTag::MBase ||
                 false,
                 "invalid LTag for LocationState");
 
   static constexpr Type default_type() {
-    return tag == LTag::Stack ? TStkElem :
-        /* tag == LTag::Local */ TGen;
+    return tag == LTag::Stack ? TStkElem : TGen;
+  }
+
+  template<LTag other>
+  LocationState<tag>& operator=(const LocationState<other>& o) {
+    value = o.value;
+    type = o.type;
+    predictedType = o.predictedType;
+    typeSrcs = o.typeSrcs;
+    maybeChanged = o.maybeChanged;
+    return *this;
   }
 
   /*
@@ -114,10 +124,7 @@ struct LocationState {
 
 using LocalState = LocationState<LTag::Local>;
 using StackState = LocationState<LTag::Stack>;
-
-struct MBaseState {
-  SSATmp* value{nullptr};
-};
+using MBaseState = LocationState<LTag::MBase>;
 
 /*
  * MBRState tracks the value and type of the member base register pointer.
@@ -127,7 +134,7 @@ struct MBaseState {
  */
 struct MBRState {
   SSATmp* ptr{nullptr};
-  AliasClass pointee{AUnknownTV};
+  AliasClass pointee{AEmpty}; // defaults to "invalid", not "Top"
   Type ptrType{TPtrToGen};
 };
 
@@ -325,7 +332,6 @@ struct FrameStateMgr final {
   SSATmp*     ctx()               const { return cur().ctx; }
   FPInvOffset irSPOff()           const { return cur().irSPOff; }
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
-  SSATmp*     memberBaseValue()   const { return cur().mbase.value; }
   bool        needRatchet()       const { return cur().needRatchet; }
   bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
   bool        stackModified()     const { return cur().stackModified; }
@@ -352,7 +358,6 @@ struct FrameStateMgr final {
    * In the presence of inlining, these modify state for the most-inlined
    * frame.
    */
-  void setMemberBaseValue(SSATmp* base) { cur().mbase.value = base; }
   void setNeedRatchet(bool b)           { cur().needRatchet = b; }
   void resetStackModified()             { cur().stackModified = false; }
   void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
@@ -379,6 +384,13 @@ struct FrameStateMgr final {
    * Return tracked state for the member base register.
    */
   const MBRState& mbr()     const { return cur().mbr; }
+  const MBaseState& mbase() const { return cur().mbase; }
+
+  /*
+   * Set the value, type, and (optionally) predicted type for mbase().
+   */
+  void setMemberBase(SSATmp* base,
+                     folly::Optional<Type> predicted = folly::none);
 
   /*
    * Update the predicted type for `l'.
@@ -412,6 +424,7 @@ private:
    */
   bool checkInvariants() const;
   void updateMInstr(const IRInstruction*);
+  void updateMBase(const IRInstruction*);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
   void trackCall(bool destroyLocals);

@@ -767,6 +767,9 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
         break;
     }
   }
+  if (flags & MBase) {
+    inputs.emplace_back(Location::MBase{});
+  }
 
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackOff.offset);
   TRACE(1, "%s\n", Trace::prettyNode("Inputs", inputs).c_str());

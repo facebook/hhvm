@@ -435,6 +435,19 @@ let init ?load_mini_script genv =
     let updates = genv.notifier_async () in
     let open ServerNotifierTypes in
     let updates = match updates with
+      | Notifier_state_enter (name, _) ->
+        (** We ignore the returned debut port result. This is unfortunate but
+         * harmless (since we should be using write_opt everywhere and it is
+         * crash-resilient and handles the Option for us anyway).
+         *
+         * We can't easily use the returned result and set the env.debug_port
+         * without making it a mutable reference (gross), and we can't return
+         * a new genv in this function because we're in the Error/Result
+         * monad for the state. *)
+        let _ = Debug_port.write_opt
+        (Debug_event.Fresh_vcs_state name) genv.debug_port in
+        SSet.empty
+      | Notifier_state_leave _
       | Notifier_unavailable -> SSet.empty
       | Notifier_synchronous_changes updates
       | Notifier_async_changes updates -> updates in

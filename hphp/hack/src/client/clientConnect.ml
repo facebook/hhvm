@@ -210,6 +210,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           no_load = env.no_load;
           silent = false;
           ai_mode = env.ai_mode;
+          debug_port = None;
         };
         connect env retries start_time tail_env
       end else begin

@@ -33,3 +33,4 @@ val max_procs           : options -> int
 val no_load             : options -> bool
 val save_filename       : options -> string option
 val waiting_client      : options -> Unix.file_descr option
+val debug_client        : options -> Handle.handle option

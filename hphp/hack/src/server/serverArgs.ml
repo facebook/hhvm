@@ -23,6 +23,7 @@ type options = {
   no_load          : bool;
   save_filename    : string option;
   waiting_client   : Unix.file_descr option;
+  debug_client     : Handle.handle option;
 }
 
 (*****************************************************************************)
@@ -50,6 +51,7 @@ module Messages = struct
   let no_load       = " don't load from a saved state"
   let waiting_client= " send message to fd/handle when server has begun \
                       \ starting and again when it's done starting"
+  let debug_client  = " send significant server events to this file descriptor"
 end
 
 let print_json_version () =
@@ -81,12 +83,14 @@ let parse_options () =
   let no_load       = ref false in
   let version       = ref false in
   let waiting_client= ref None in
+  let debug_client  = ref None in
   let cdir          = fun s -> convert_dir := Some s in
   let set_ai        = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs = fun s -> max_procs := min !max_procs s in
   let set_save ()   = Printf.eprintf "DEPRECATED\n"; exit 1 in
   let set_save_mini = fun s -> save := Some s in
   let set_wait      = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
+  let set_debug = fun fd -> debug_client := Some fd in
   let options =
     ["--debug"         , Arg.Set debug         , Messages.debug;
      "--ai"            , Arg.String set_ai     , Messages.ai;
@@ -104,6 +108,7 @@ let parse_options () =
      "--no-load"       , Arg.Set no_load       , Messages.no_load;
      "--version"       , Arg.Set version       , "";
      "--waiting-client", Arg.Int set_wait      , Messages.waiting_client;
+     "--debug-client"  , Arg.Int set_debug     , Messages.debug_client;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -139,6 +144,7 @@ let parse_options () =
     no_load       = !no_load;
     save_filename = !save;
     waiting_client= !waiting_client;
+    debug_client  = !debug_client;
   }
 
 (* useful in testing code *)
@@ -153,6 +159,7 @@ let default_options ~root = {
   no_load = true;
   save_filename = None;
   waiting_client = None;
+  debug_client = None;
 }
 
 (*****************************************************************************)
@@ -169,3 +176,4 @@ let max_procs options = options.max_procs
 let no_load options = options.no_load
 let save_filename options = options.save_filename
 let waiting_client options = options.waiting_client
+let debug_client options = options.debug_client

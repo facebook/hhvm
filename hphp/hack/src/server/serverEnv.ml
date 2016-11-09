@@ -39,6 +39,7 @@ type genv = {
     options          : ServerArgs.options;
     config           : ServerConfig.t;
     local_config     : ServerLocalConfig.t;
+    debug_port       : Debug_port.out_port option;
     recorder         : Recorder.instance;
     workers          : Worker.t list option;
     (* Returns the list of files under .hhconfig, subject to a filter *)

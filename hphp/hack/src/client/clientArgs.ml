@@ -13,12 +13,6 @@ open ClientCommand
 open ClientEnv
 open Utils
 
-let rec guess_root config start recursion_limit : Path.t option =
-  if start = Path.parent start then None (* Reach fs root, nothing to do. *)
-  else if Wwwroot.is_www_directory ~config start then Some start
-  else if recursion_limit <= 0 then None
-  else guess_root config (Path.parent start) (recursion_limit - 1)
-
 let parse_command () =
   if Array.length Sys.argv < 2
   then CKNone
@@ -38,17 +32,6 @@ let parse_without_command options usage command =
   match List.rev !args with
   | x::rest when (String.lowercase x) = (String.lowercase command) -> rest
   | args -> args
-
-let get_root ?(config=".hhconfig") path_opt =
-  let start_str = match path_opt with
-    | None -> "."
-    | Some s -> s in
-  let start_path = Path.make start_str in
-  let root = match guess_root config start_path 50 with
-    | None -> start_path
-    | Some r -> r in
-  Wwwroot.assert_www_directory ~config root;
-  root
 
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
@@ -312,8 +295,8 @@ let parse_check_args cmd =
   (* fixups *)
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1;
@@ -370,8 +353,8 @@ let parse_start_env command =
   let args = parse_without_command options usage command in
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
         Printf.fprintf stderr
           "Error: please provide at most one www directory\n%!";
@@ -381,6 +364,7 @@ let parse_start_env command =
     no_load = !no_load;
     ai_mode = !ai_mode;
     silent = false;
+    debug_port = None;
   }
 
 let parse_start_args () =
@@ -400,8 +384,8 @@ let parse_stop_args () =
   let args = parse_without_command options usage "stop" in
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
         Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
         exit 1
@@ -462,7 +446,7 @@ let parse_build_args () =
   let args = parse_without_command options usage "build" in
   let root =
     match args with
-    | [x] -> get_root (Some x)
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
   CBuild { ClientBuild.
@@ -496,8 +480,8 @@ let parse_ide_args () =
   let args = parse_without_command options usage "ide" in
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2 in
   CIde { ClientIde.
     root = root
@@ -510,8 +494,8 @@ let parse_debug_args () =
   let args = parse_without_command options usage "debug" in
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2 in
   CDebug { ClientDebug.
     root

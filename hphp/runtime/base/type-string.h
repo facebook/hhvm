@@ -517,7 +517,7 @@ struct StringDataHashICompare {
   }
 };
 
-typedef hphp_hash_set<String, hphp_string_hash, hphp_string_isame> StringISet;
+using StringISet = hphp_hash_set<String,hphp_string_hash,hphp_string_isame>;
 
 template<typename T>
 using StringIMap =
@@ -527,6 +527,12 @@ using StringSet = hphp_hash_set<String, hphp_string_hash, hphp_string_same>;
 
 template<typename T>
 using StringMap = hphp_hash_map<String, T, hphp_string_hash, hphp_string_same>;
+
+namespace req {
+using StringISet = req::hash_set<String,hphp_string_hash,hphp_string_isame>;
+template<typename T> using StringIMap =
+  req::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR

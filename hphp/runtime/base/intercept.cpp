@@ -43,14 +43,9 @@ namespace HPHP {
 TRACE_SET_MOD(intercept);
 
 struct InterceptRequestData final : RequestEventHandler {
-  InterceptRequestData()
-      : m_use_allowed_functions(false) {
-  }
+  InterceptRequestData() {}
 
   void clear() {
-    m_use_allowed_functions = false;
-    m_allowed_functions.clear();
-    m_renamed_functions.clear();
     m_global_handler.releaseForSweep();
     m_intercept_handlers.clear();
   }
@@ -58,22 +53,15 @@ struct InterceptRequestData final : RequestEventHandler {
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
 
-public:
-  bool m_use_allowed_functions;
-  StringISet m_allowed_functions;
-  StringIMap<String> m_renamed_functions;
-  Variant m_global_handler;
-  StringIMap<Variant> m_intercept_handlers;
+  Variant& global_handler() { return m_global_handler; }
+  req::StringIMap<Variant>& intercept_handlers() {
+    if (!m_intercept_handlers) m_intercept_handlers.emplace();
+    return *m_intercept_handlers;
+  }
 
-  TYPE_SCAN_CUSTOM_FIELD(m_allowed_functions) {
-    for (auto& s : m_allowed_functions) scanner.scan(s);
-  }
-  TYPE_SCAN_CUSTOM_FIELD(m_renamed_functions) {
-    for (auto& e : m_renamed_functions) scanner.scan(e);
-  }
-  TYPE_SCAN_CUSTOM_FIELD(m_intercept_handlers) {
-    for (auto& e : m_intercept_handlers) scanner.scan(e);
-  }
+private:
+  Variant m_global_handler;
+  folly::Optional<req::StringIMap<Variant>> m_intercept_handlers;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 
@@ -99,11 +87,11 @@ static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
 
 bool register_intercept(const String& name, const Variant& callback,
                         const Variant& data) {
-  StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
+  auto& handlers = s_intercept_data->intercept_handlers();
   if (!callback.toBoolean()) {
     if (name.empty()) {
-      s_intercept_data->m_global_handler.unset();
-      StringIMap<Variant> empty;
+      s_intercept_data->global_handler().unset();
+      req::StringIMap<Variant> empty;
       handlers.swap(empty);
     } else {
       auto tmp = handlers[name];
@@ -121,8 +109,8 @@ bool register_intercept(const String& name, const Variant& callback,
   Array handler = make_packed_array(callback, data);
 
   if (name.empty()) {
-    s_intercept_data->m_global_handler = handler;
-    StringIMap<Variant> empty;
+    s_intercept_data->global_handler() = handler;
+    req::StringIMap<Variant> empty;
     handlers.swap(empty);
   } else {
     handlers[name] = handler;
@@ -148,12 +136,12 @@ bool register_intercept(const String& name, const Variant& callback,
 
 static Variant *get_enabled_intercept_handler(const String& name) {
   Variant *handler = nullptr;
-  StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
-  StringIMap<Variant>::iterator iter = handlers.find(name);
+  auto& handlers = s_intercept_data->intercept_handlers();
+  auto iter = handlers.find(name);
   if (iter != handlers.end()) {
     handler = &iter->second;
   } else {
-    handler = &s_intercept_data->m_global_handler;
+    handler = &s_intercept_data->global_handler();
     if (handler->isNull()) {
       return nullptr;
     }

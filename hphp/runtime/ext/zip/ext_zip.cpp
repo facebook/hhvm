@@ -120,9 +120,6 @@ struct ZipStreamWrapper final : Stream::Wrapper {
 
     return req::make<ZipStream>(z, file);
   }
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
 };
 
 struct ZipEntry : SweepableResourceData {

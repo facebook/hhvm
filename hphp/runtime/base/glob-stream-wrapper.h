@@ -27,9 +27,6 @@ struct GlobStreamWrapper final : Stream::Wrapper {
   req::ptr<File> open(const String& filename, const String& mode, int options,
                       const req::ptr<StreamContext>& context) override;
   req::ptr<Directory> opendir(const String& path) override;
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

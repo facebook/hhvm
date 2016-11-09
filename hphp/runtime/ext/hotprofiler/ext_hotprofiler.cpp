@@ -53,9 +53,6 @@
 
 namespace HPHP {
 
-using std::vector;
-using std::string;
-
 const StaticString s_hotprofiler("hotprofiler");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -572,10 +569,6 @@ public:
     return m_flags & NoTrackBuiltins;
   }
 
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
-
 private:
   uint32_t m_flags;
 };
@@ -748,8 +741,8 @@ struct TraceWalker {
     incStats(m_arcBuff, tIt, callee, stats);
   }
 
-  vector<std::pair<char*, int>> m_recursion;
-  vector<Frame> m_stack;
+  std::vector<std::pair<char*, int>> m_recursion;
+  std::vector<Frame> m_stack;
   int m_arcBuffLen;
   char *m_arcBuff;
   int m_badArcCount;
@@ -972,10 +965,6 @@ struct TraceProfiler final : Profiler {
     return m_flags & NoTrackBuiltins;
   }
 
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
-
   TraceEntry* m_traceBuffer;
   TraceEntry m_finalEntry;
   int m_traceBufferSize;
@@ -1054,10 +1043,6 @@ public:
 
       ret.set(String(timestr), String(sample.second));
     }
-  }
-
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
   }
 
 private:
@@ -1290,7 +1275,7 @@ struct MemoProfiler final : Profiler {
     TypedValue m_ret_tv;
     int m_count{0};
   };
-  using MemberMemoMap = hphp_hash_map<std::string, MemberMemoInfo, string_hash>;
+  using MemberMemoMap = req::hash_map<std::string,MemberMemoInfo,string_hash>;
 
   struct MemoInfo {
     MemberMemoMap m_member_memos; // Keyed by serialized args
@@ -1300,11 +1285,8 @@ struct MemoProfiler final : Profiler {
     bool m_ignore{false};
     bool m_has_this{false};
     bool m_ret_tv_same{true};
-    TYPE_SCAN_CUSTOM_FIELD(m_member_memos) {
-      for (auto& e : m_member_memos) scanner.scan(e.second);
-    }
   };
-  using MemoMap = hphp_hash_map<std::string, MemoInfo, string_hash>;
+  using MemoMap = req::hash_map<std::string, MemoInfo, string_hash>;
 
   struct Frame {
     explicit Frame(const char* symbol) : m_symbol(symbol) {}
@@ -1312,19 +1294,9 @@ struct MemoProfiler final : Profiler {
     String m_args;
   };
 
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
-
 public:
   MemoMap m_memos; // Keyed by function name
-  vector<Frame> m_stack;
-  TYPE_SCAN_CUSTOM_FIELD(m_memos) {
-    for (auto& e : m_memos) scanner.scan(e.second);
-  }
-  TYPE_SCAN_CUSTOM_FIELD(m_stack) {
-    for (auto& e : m_stack) scanner.scan(e);
-  }
+  req::vector<Frame> m_stack;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1339,19 +1311,19 @@ bool ProfilerFactory::start(ProfilerKind kind,
 
   switch (kind) {
   case ProfilerKind::Hierarchical:
-    m_profiler = new HierarchicalProfiler(flags);
+    m_profiler = req::make_raw<HierarchicalProfiler>(flags);
     break;
   case ProfilerKind::Sample:
-    m_profiler = new SampleProfiler();
+    m_profiler = req::make_raw<SampleProfiler>();
     break;
   case ProfilerKind::Trace:
-    m_profiler = new TraceProfiler(flags);
+    m_profiler = req::make_raw<TraceProfiler>(flags);
     break;
   case ProfilerKind::Memo:
-    m_profiler = new MemoProfiler(flags);
+    m_profiler = req::make_raw<MemoProfiler>(flags);
     break;
   case ProfilerKind::XDebug:
-    m_profiler = new XDebugProfiler();
+    m_profiler = req::make_raw<XDebugProfiler>();
     break;
   case ProfilerKind::External:
     if (g_system_profiler) {
@@ -1376,11 +1348,10 @@ bool ProfilerFactory::start(ProfilerKind kind,
       m_profiler->beginFrame("main()");
     }
     return true;
-  } else {
-    delete m_profiler;
-    m_profiler = nullptr;
-    return false;
   }
+  req::destroy_raw(m_profiler);
+  m_profiler = nullptr;
+  return false;
 }
 
 Variant ProfilerFactory::stop() {
@@ -1389,7 +1360,7 @@ Variant ProfilerFactory::stop() {
 
     Array ret;
     m_profiler->writeStats(ret);
-    delete m_profiler;
+    req::destroy_raw(m_profiler);
     m_profiler = nullptr;
     ThreadInfo::s_threadInfo->m_profiler = nullptr;
 

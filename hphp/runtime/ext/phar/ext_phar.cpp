@@ -108,11 +108,6 @@ static struct PharStreamWrapper final : Stream::Wrapper {
                             SystemLib::s_PharClass)
     );
   }
-
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
-
 } s_phar_stream_wrapper;
 
 struct pharExtension final : Extension {

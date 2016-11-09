@@ -18,8 +18,6 @@
 #define incl_HPHP_ZEND_REQUEST_LOCAL
 
 #include "hphp/runtime/base/request-local.h"
-#include <unordered_map>
-#include <vector>
 #include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
@@ -43,29 +41,29 @@ template <class T, class F>
 struct ZendRequestLocalVector final : RequestEventHandler {
   static_assert(std::is_pointer<T>::value,
                 "ZendRequestLocalVector only stores pointers");
-  using container = std::vector<T>;
+  using container = req::vector<T>;
   container& get() { return m_container; }
-  void requestInit() override { clear(); }
-  void requestShutdown() override { clear(); }
+  void requestInit() override {
+    clear();
+    m_container.push_back(nullptr); // don't give out id 0
+  }
+  void requestShutdown() override {
+    clear();
+  }
 private:
   void clear() {
-    for (size_t i = 0; i < m_container.size(); ++i) {
-      if (m_container[i]) {
-        auto element = m_container[i];
-        m_container[i] = nullptr;
+    for (auto& e : m_container) {
+      if (e) {
+        auto element = e;
+        e = nullptr;
         m_destroy_callback(element);
       }
     }
-    m_container.clear();
-    m_container.push_back(nullptr); // don't give out id 0
+    m_container = container{};
   }
 
   container m_container;
   F m_destroy_callback;
-
-  TYPE_SCAN_CUSTOM_FIELD(m_container) {
-    for (auto& e : m_container) scanner.scan(e);
-  }
 };
 
 #define ZEND_REQUEST_LOCAL_MAP(K, V, N)                 \
@@ -75,15 +73,15 @@ private:
 
 template <class K, class V>
 struct ZendRequestLocalMap final : RequestEventHandler {
-  using container = std::unordered_map<K, V>;
-  container& get() { return m_map; }
+  using container = req::hash_map<K, V>;
+  container& get() {
+    if (!m_map) m_map.emplace();
+    return *m_map;
+  }
   void requestInit() override { m_map.clear(); }
   void requestShutdown() override { m_map.clear(); }
 private:
-  container m_map;
-  TYPE_SCAN_CUSTOM_FIELD(m_map) {
-    for (auto& e : m_map) scanner.scan(e);
-  }
+  folly::Optional<container> m_map;
 };
 
 }

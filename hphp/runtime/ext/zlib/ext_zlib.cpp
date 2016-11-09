@@ -74,9 +74,6 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
     }
     return file;
   }
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
 } s_zlib_stream_wrapper;
 
 const int64_t k_ZLIB_ENCODING_RAW     = -MAX_WBITS;

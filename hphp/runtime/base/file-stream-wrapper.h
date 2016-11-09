@@ -65,10 +65,6 @@ struct FileStreamWrapper final : Stream::Wrapper {
 
   req::ptr<Directory> opendir(const String& path) override;
 
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
-
  private:
   int mkdir_recursive(const String& path, int mode);
 };

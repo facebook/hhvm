@@ -576,8 +576,9 @@ bool HHVM_FUNCTION(stream_wrapper_register,
     return false;
   }
 
-  auto wrapper = std::unique_ptr<Stream::Wrapper>(
-    new UserStreamWrapper(protocol, cls, flags));
+  auto wrapper = req::unique_ptr<Stream::Wrapper>(
+      req::make_raw<UserStreamWrapper>(protocol, cls, flags)
+  );
   if (!Stream::registerRequestWrapper(protocol, std::move(wrapper))) {
     raise_warning("Unable to register protocol: %s\n", protocol.data());
     return false;

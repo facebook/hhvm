@@ -322,6 +322,11 @@ struct Scanner {
 // function. It is the custom scanner's responsibility to scan/enqueue all
 // members. Note that the generated function will still attempt to scan any
 // bases normally.
+//
+// Warning: these functions will not be called unless exact scanners were
+// generated and are being used. Conservative-scan will not call them,
+// so the underlying fields must be conservative-scannable to start with.
+// Importantly, std containers are not conservatively scannable.
 #define TYPE_SCAN_CUSTOM(...)                                           \
   static constexpr const                                                \
   HPHP::type_scan::detail::Custom<__VA_ARGS__>                          \

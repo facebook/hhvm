@@ -26,9 +26,10 @@ let make_genv options config local_config handle =
   let check_mode   = ServerArgs.check_mode options in
   Typing_deps.trace :=
     not check_mode || ServerArgs.convert options <> None ||
-    ServerArgs.save_filename options <> None;
+      ServerArgs.save_filename options <> None;
+  let nbr_procs = ServerArgs.max_procs options in
   let gc_control = ServerConfig.gc_control config in
-  let workers = Some (ServerWorker.make gc_control handle) in
+  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle) in
   let watchman_env =
     if check_mode || not local_config.SLC.use_watchman
     then None

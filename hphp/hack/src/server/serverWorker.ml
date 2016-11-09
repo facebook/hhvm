@@ -22,11 +22,14 @@ let catch_and_classify_exceptions: 'x 'b. ('x -> 'b) -> 'x -> 'b = fun f x ->
   | Not_found ->
     Exit_status.(exit Worker_not_found_exception)
 
-let make gc_control heap_handle =
+let make ?nbr_procs gc_control heap_handle =
+  let nbr_procs = match nbr_procs with
+    | None -> GlobalConfig.nbr_procs
+    | Some x -> x in
   Worker.make
     ~call_wrapper:{ Worker.wrap = catch_and_classify_exceptions; }
     ~saved_state:(ServerGlobalState.save ())
     ~entry
-    ~nbr_procs: (GlobalConfig.nbr_procs)
+    ~nbr_procs
     ~gc_control
     ~heap_handle

@@ -19,6 +19,7 @@ type options = {
   root             : Path.t;
   should_detach    : bool;
   convert          : Path.t option;
+  max_procs        : int;
   no_load          : bool;
   save_filename    : string option;
   waiting_client   : Unix.file_descr option;
@@ -45,6 +46,7 @@ module Messages = struct
   let convert       = " adds type annotations automatically"
   let save          = " DEPRECATED"
   let save_mini     = " save mini server state to file"
+  let max_procs     = " max numbers of workers"
   let no_load       = " don't load from a saved state"
   let waiting_client= " send message to fd/handle when server has begun \
                       \ starting and again when it's done starting"
@@ -75,11 +77,13 @@ let parse_options () =
   let should_detach = ref false in
   let convert_dir   = ref None  in
   let save          = ref None in
+  let max_procs     = ref GlobalConfig.nbr_procs in
   let no_load       = ref false in
   let version       = ref false in
   let waiting_client= ref None in
   let cdir          = fun s -> convert_dir := Some s in
   let set_ai        = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
+  let set_max_procs = fun s -> max_procs := min !max_procs s in
   let set_save ()   = Printf.eprintf "DEPRECATED\n"; exit 1 in
   let set_save_mini = fun s -> save := Some s in
   let set_wait      = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
@@ -96,6 +100,7 @@ let parse_options () =
      "--convert"       , Arg.String cdir       , Messages.convert;
      "--save"          , Arg.Unit set_save     , Messages.save;
      "--save-mini"     , Arg.String set_save_mini, Messages.save_mini;
+     "--max-procs"     , Arg.Int set_max_procs , Messages.max_procs;
      "--no-load"       , Arg.Set no_load       , Messages.no_load;
      "--version"       , Arg.Set version       , "";
      "--waiting-client", Arg.Int set_wait      , Messages.waiting_client;
@@ -130,6 +135,7 @@ let parse_options () =
     root          = root_path;
     should_detach = !should_detach;
     convert       = convert;
+    max_procs     = !max_procs;
     no_load       = !no_load;
     save_filename = !save;
     waiting_client= !waiting_client;
@@ -143,6 +149,7 @@ let default_options ~root = {
   root = Path.make root;
   should_detach = false;
   convert = None;
+  max_procs = GlobalConfig.nbr_procs;
   no_load = true;
   save_filename = None;
   waiting_client = None;
@@ -158,6 +165,7 @@ let json_mode options = options.json_mode
 let root options = options.root
 let should_detach options = options.should_detach
 let convert options = options.convert
+let max_procs options = options.max_procs
 let no_load options = options.no_load
 let save_filename options = options.save_filename
 let waiting_client options = options.waiting_client

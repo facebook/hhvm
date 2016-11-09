@@ -63,6 +63,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const extra = inst->extra<LdObjMethodData>();
   auto& v = vmain(env);
+  auto& vc = vcold(env);
 
   // Allocate the request-local one-way method cache for this lookup.
   auto const handle = rds::alloc<Entry, sizeof(Entry)>().handle();
@@ -73,10 +74,6 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
 
   auto const mc_handler = extra->fatal ? handlePrimeCacheInit<true>
                                        : handlePrimeCacheInit<false>;
-
-  auto const fast_path = v.makeBlock();
-  auto const slow_path = v.makeBlock();
-  auto const done = v.makeBlock();
 
   /*
    * The `mcprep' instruction here creates a smashable move, which serves as
@@ -107,31 +104,27 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
   // Check the inline cache.
   auto const sf = v.makeReg();
   v << cmpq{classptr, cls, sf};
-  v << jcc{CC_NE, sf, {fast_path, slow_path}};
 
-  // Inline cache hit; store the value in the AR.
-  v = fast_path;
-  auto funcptr = v.makeReg();
-  v << shrqi{32, func_class, funcptr, v.makeReg()};
-  v << store{funcptr, fp[cellsToBytes(extra->offset.offset) + AROFF(m_func)]};
-  v << jmp{done};
+  unlikelyIfThenElse(
+    v, vc, CC_NE, sf,
+    [&] (Vout& v) { // then block (unlikely)
+      auto const args = argGroup(env, inst)
+        .imm(safe_cast<int32_t>(handle))
+        .addr(fp, cellsToBytes(extra->offset.offset))
+        .immPtr(extra->method)
+        .ssa(0 /* cls */)
+        .immPtr(inst->marker().func()->cls())
+        .reg(func_class);
 
-  // Initialize the inline cache, or do a lookup in the out-of-line cache if
-  // we've finished initialization and have smashed this call.
-  v = slow_path;
-
-  auto const args = argGroup(env, inst)
-    .imm(safe_cast<int32_t>(handle))
-    .addr(fp, cellsToBytes(extra->offset.offset))
-    .immPtr(extra->method)
-    .ssa(0 /* cls */)
-    .immPtr(inst->marker().func()->cls())
-    .reg(func_class);
-
-  cgCallHelper(v, env, CallSpec::smashable(mc_handler),
-               kVoidDest, SyncOptions::Sync, args);
-  v << jmp{done};
-  v = done;
+      cgCallHelper(v, env, CallSpec::smashable(mc_handler),
+                   kVoidDest, SyncOptions::Sync, args);
+    },
+    [&] (Vout& v) { // else block (likely)
+      auto const funcptr = v.makeReg();
+      v << shrqi{32, func_class, funcptr, v.makeReg()};
+      v << store{funcptr,
+                 fp[cellsToBytes(extra->offset.offset) + AROFF(m_func)]};
+    });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

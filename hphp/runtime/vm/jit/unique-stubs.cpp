@@ -1321,7 +1321,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   TCA inner_stub;
   ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(main, data, &inner_stub));
-  ADD(asyncRetCtrl,     emitAsyncRetCtrl(main, data, inner_stub));
+  ADD(asyncRetCtrl,     emitAsyncRetCtrl(hot(), data, inner_stub));
 
   ADD(bindCallStub,           emitBindCallStub<false>(cold, data));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold, data));

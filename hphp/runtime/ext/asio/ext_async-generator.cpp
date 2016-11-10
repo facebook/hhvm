@@ -56,7 +56,7 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   assert(fp->func()->isAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(AsyncGenerator), frameSz);
-  auto const obj = BaseGenerator::Alloc(s_class, genSz);
+  auto const obj = BaseGenerator::Alloc<AsyncGenerator>(s_class, genSz);
   auto const genData = new (Native::data<AsyncGenerator>(obj)) AsyncGenerator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,

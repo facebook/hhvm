@@ -365,6 +365,9 @@ struct NativeNode {
   HeaderWord<> hdr;
   uint32_t sweep_index; // index in MM::m_natives
   uint32_t obj_offset; // byte offset from this to ObjectData*
+  uint16_t& typeIndex() { return hdr.aux; }
+  uint16_t typeIndex() const { return hdr.aux; }
+  uint32_t arOff() const { return hdr.count; } // from this to ActRec, or 0
 };
 
 // POD type for tracking arbitrary memory ranges

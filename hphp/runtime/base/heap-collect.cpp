@@ -470,6 +470,9 @@ NEVER_INLINE void Marker::init() {
         // Pointers to either the native data or the object will be mapped to
         // the native data.
         ptrs_.insert(h);
+        if (typeIndexIsUnknown(h->native_.typeIndex())) {
+          unknown_objects_.emplace_back(h);
+        }
         auto obj = reinterpret_cast<const Header*>(h->nativeObj());
         obj->hdr_.marks = GCBits::Unmarked;
         break;

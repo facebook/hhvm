@@ -92,6 +92,7 @@ struct Header {
     assert(kind() == HeaderKind::NativeData);
     auto obj = Native::obj(&native_);
     assert(isObjectKind(obj->headerKind()));
+    assert(obj->getAttribute(ObjectData::HasNativeData));
     return obj;
   }
   ObjectData* nativeObj() {

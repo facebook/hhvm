@@ -22,12 +22,14 @@ struct c_Pair : ObjectData {
   DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
 
   enum class NoInit {};
-  static ObjectData* instanceCtor(Class* cls) { \
-    assert(cls); \
-    assert(cls->isCollectionClass()); \
-    assert(cls->classof(c_Pair::classof())); \
-    assert(cls->attrs() & AttrFinal); \
-    return new (MM().objMalloc(sizeof(c_Pair))) c_Pair(NoInit{}, cls); \
+  static ObjectData* instanceCtor(Class* cls) {
+    assert(cls);
+    assert(cls->isCollectionClass());
+    assert(cls->classof(c_Pair::classof()));
+    assert(cls->attrs() & AttrFinal);
+    // ensure c_Pair* ptrs are scanned inside other types
+    (void)type_scan::getIndexForMalloc<c_Pair>();
+    return new (MM().objMalloc(sizeof(c_Pair))) c_Pair(NoInit{}, cls);
   }
 
   explicit c_Pair(Class* cls = c_Pair::classof())

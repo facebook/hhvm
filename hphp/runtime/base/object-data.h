@@ -512,6 +512,7 @@ typename std::enable_if<
   req::ptr<T>
 >::type make(Args&&... args) {
   auto const mem = MM().mallocSmallSize(sizeof(T));
+  (void)type_scan::getIndexForMalloc<T>(); // ensure T* ptrs are interesting
   try {
     auto t = new (mem) T(std::forward<Args>(args)...);
     assert(t->hasExactlyOneRef());

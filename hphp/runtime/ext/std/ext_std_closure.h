@@ -36,6 +36,13 @@ struct ClosureHdr {
   void* ctx;
   uint32_t& size() { return hdr.lo32; }
   uint32_t size() const { return hdr.lo32; }
+  static constexpr uintptr_t kClassBit = 0x1;
+  bool ctxIsClass() const {
+    return reinterpret_cast<uintptr_t>(ctx) & kClassBit;
+  }
+  TYPE_SCAN_CUSTOM_FIELD(ctx) {
+    if (!ctxIsClass()) scanner.scan(static_cast<ObjectData*>(ctx));
+  }
 };
 
 struct c_Closure final : ObjectData {
@@ -107,22 +114,19 @@ struct c_Closure final : ObjectData {
   void* getThisOrClass() const { return hdr()->ctx; }
   void setThisOrClass(void* p) { hdr()->ctx = p; }
   ObjectData* getThisUnchecked() const {
-    assertx(!ctxIsClass());
+    assertx(!hdr()->ctxIsClass());
     return reinterpret_cast<ObjectData*>(hdr()->ctx);
   }
   ObjectData* getThis() const {
-    if (UNLIKELY(ctxIsClass())) {
-      return nullptr;
-    }
-    return getThisUnchecked();
+    return UNLIKELY(hdr()->ctxIsClass()) ? nullptr : getThisUnchecked();
   }
   void setThis(ObjectData* od) { hdr()->ctx = od; }
-  bool hasThis() const { return hdr()->ctx && !ctxIsClass(); }
+  bool hasThis() const { return hdr()->ctx && !hdr()->ctxIsClass(); }
 
   Class* getClass() const {
-    if (LIKELY(ctxIsClass())) {
+    if (LIKELY(hdr()->ctxIsClass())) {
       return reinterpret_cast<Class*>(
-        reinterpret_cast<uintptr_t>(hdr()->ctx) & ~kClassBit
+        reinterpret_cast<uintptr_t>(hdr()->ctx) & ~ClosureHdr::kClassBit
       );
     } else {
       return nullptr;
@@ -131,10 +135,10 @@ struct c_Closure final : ObjectData {
   void setClass(Class* cls) {
     assertx(cls);
     hdr()->ctx = reinterpret_cast<void*>(
-      reinterpret_cast<uintptr_t>(cls) | kClassBit
+      reinterpret_cast<uintptr_t>(cls) | ClosureHdr::kClassBit
     );
   }
-  bool hasClass() const { return ctxIsClass(); }
+  bool hasClass() const { return hdr()->ctxIsClass(); }
 
   ObjectData* clone();
 
@@ -153,11 +157,6 @@ private:
 
   static Class* cls_Closure;
   static void setAllocators(Class* cls);
-
-  static constexpr uintptr_t kClassBit = 0x1;
-  bool ctxIsClass() const {
-    return reinterpret_cast<uintptr_t>(hdr()->ctx) & kClassBit;
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

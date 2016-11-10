@@ -162,6 +162,7 @@ struct alignas(16) Resumable {
 private:
   // ActRec of the resumed frame.
   ActRec m_actRec;
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_actRec);
 
   // Resume address.
   jit::TCA m_resumeAddr;

@@ -39,7 +39,7 @@ void ZendObject::registerNativeData() {
         nullptr /* sweep */,
         nullptr /* sleep */,
         nullptr /* wakeup */,
-        &Native::nativeDataInfoScan<ZendObject> /* scan */);
+        Native::nativeTyindex<ZendObject>());
   }
 }
 

@@ -36,6 +36,8 @@ namespace HPHP {
 req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto size = c_AwaitAllWaitHandle::heapSize(cnt);
   auto mem = MM().objMalloc(size);
+  // ensure AAWH* ptrs are scanned when found in other types.
+  (void)type_scan::getIndexForMalloc<c_AwaitAllWaitHandle>();
   auto handle = new (mem) c_AwaitAllWaitHandle(cnt);
   assert(handle->hasExactlyOneRef());
   return req::ptr<c_AwaitAllWaitHandle>::attach(handle);

@@ -60,7 +60,6 @@ const Class* SimpleXMLIterator_classof() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // NativeData definitions
-namespace {
 
 struct SimpleXMLElement {
   SimpleXMLElement() {
@@ -134,8 +133,6 @@ struct SimpleXMLElementIterator {
 };
 
 using SimpleXMLIterator = SimpleXMLElement;
-
-} // anon namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helpers

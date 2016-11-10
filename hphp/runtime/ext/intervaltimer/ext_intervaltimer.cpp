@@ -34,9 +34,6 @@ struct TimerPool final : RequestEventHandler {
 
   void requestInit() override {
     m_timers.emplace();
-    // ensure IntervalTimer* are followed by scanner. not needed
-    // once NativeData types are auto-scanned.
-    (void)type_scan::getIndexForMalloc<IntervalTimer*>();
   }
 
   void requestShutdown() override {

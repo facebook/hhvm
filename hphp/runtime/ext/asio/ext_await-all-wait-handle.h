@@ -130,6 +130,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
   Node m_children[0]; // allocated off the end
+  TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_children);
 
  public:
   static const int8_t STATE_BLOCKED = 2;

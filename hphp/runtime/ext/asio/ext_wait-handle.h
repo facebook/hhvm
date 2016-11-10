@@ -201,6 +201,7 @@ struct c_WaitHandle : ObjectData {
   }
 
  protected:
+  TYPE_SCAN_IGNORE_ALL;
   union {
     // STATE_SUCCEEDED || STATE_FAILED
     Cell m_resultOrException;

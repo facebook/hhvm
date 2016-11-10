@@ -57,8 +57,6 @@
 
 namespace HPHP {
 
-namespace {
-
 struct PDOData {
   sp_PDOResource m_dbh;
 };
@@ -71,7 +69,6 @@ struct PDOStatementData {
   Variant m_row;
   int m_rowIndex;
 };
-}
 
 using std::string;
 ///////////////////////////////////////////////////////////////////////////////

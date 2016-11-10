@@ -559,6 +559,7 @@ and stmt env = function
       let env = LEnv.fully_integrate env parent_lenv in
       condition env false e2
   | Switch (e, cl) ->
+      let cl = List.map ~f:drop_dead_code_after_break cl in
       Nast_terminality.SafeCase.check (fst e) env cl;
       let env, ty = expr env e in
       Async.enforce_not_awaitable env (fst e) ty;
@@ -651,6 +652,30 @@ and try_catch (tb, cl) env =
   let term_lenv_l =
     (Nast_terminality.Terminal.block env tb, after_try) :: term_lenv_l in
   LEnv.intersect_list env parent_lenv term_lenv_l
+
+and drop_dead_code_after_break_block = function
+  | [] -> [], false
+  | Break x :: _ -> [Break x], true
+  | x :: rest ->
+    let x', drop =
+      match x with
+      | If (_, [], []) as if_stmt -> if_stmt, false
+      | If (cond, b1, b2) ->
+        let b1, drop1 = if b1 = [] then [], true
+                        else drop_dead_code_after_break_block b1 in
+        let b2, drop2 = if b2 = [] then [], true
+                        else drop_dead_code_after_break_block b2 in
+        If (cond, b1, b2), drop1 && drop2
+      | x -> x, false
+    in
+    if drop then ([x'], true) else begin
+      let rest', drop = drop_dead_code_after_break_block rest in
+      x'::rest', drop
+    end
+
+and drop_dead_code_after_break = function
+  | Default b -> Default (fst (drop_dead_code_after_break_block b))
+  | Case (e, b) -> Case (e, fst (drop_dead_code_after_break_block b))
 
 and case_list_ parent_lenv ty env = function
   | [] -> env, []

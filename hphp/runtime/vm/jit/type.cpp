@@ -734,6 +734,7 @@ static Type relaxCell(Type t, DataTypeCategory cat) {
     case DataTypeGeneric:
       return TGen;
 
+    case DataTypeCountness:
     case DataTypeBoxAndCountness:
       return !t.maybe(TCounted) ? TUncounted : t.unspecialize();
 

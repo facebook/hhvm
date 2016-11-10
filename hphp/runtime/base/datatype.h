@@ -192,8 +192,13 @@ constexpr DataType KindOfRefCountThreshold = KindOfPersistentKeyset;
 // DataTypeCategory
 
 // These must be kept in order from least to most specific.
+//
+// Note that Countness can be relaxed to Generic in optimizeProfiledGuards(), so
+// it should only be used to constrain values used by instructions that work
+// even in the absence of type information.
 #define DT_CATEGORIES(func)                     \
   func(Generic)                                 \
+  func(Countness)                               \
   func(BoxAndCountness)                         \
   func(BoxAndCountnessInit)                     \
   func(Specific)                                \

@@ -48,6 +48,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
     case DataTypeGeneric:
       return true;
 
+    case DataTypeCountness:
     case DataTypeBoxAndCountness:
       // Consumers using this constraint expect the type to be relaxed to
       // Uncounted or left alone, so something like Arr|Obj isn't specific
@@ -129,7 +130,15 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
       newDstType, newTc);
     incCategory(newTc.category);
   }
-
+  // DataTypeCountness can be relaxed to DataTypeGeneric in
+  // optimizeProfiledGuards, so we can't rely on this category to give type
+  // information through guards.  Since relaxConstraint is used to relax the
+  // DataTypeCategory for guards, we cannot return DataTypeCountness unless we
+  // already had it to start with.  Instead, we return DataTypeBoxCountness,
+  // which won't be further relaxed by optimizeProfiledGuards.
+  if (newTc.category == DataTypeCountness && origTc != DataTypeCountness) {
+    newTc.category = DataTypeBoxAndCountness;
+  }
   ITRACE(4, "Returning {}\n", newTc);
   // newTc shouldn't be any more specific than origTc.
   always_assert(newTc.category <= origTc.category);

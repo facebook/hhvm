@@ -402,7 +402,7 @@ inline void decRef(IRGS& env, SSATmp* tmp, int locId=-1) {
 }
 
 inline void popDecRef(IRGS& env,
-                      TypeConstraint tc = DataTypeBoxAndCountness) {
+                      TypeConstraint tc = DataTypeCountness) {
   auto const val = pop(env, tc);
   decRef(env, val);
 }
@@ -417,7 +417,7 @@ inline SSATmp* push(IRGS& env, SSATmp* tmp) {
 
 inline SSATmp* pushIncRef(IRGS& env,
                           SSATmp* tmp,
-                          TypeConstraint tc = DataTypeBoxAndCountness) {
+                          TypeConstraint tc = DataTypeCountness) {
   env.irb->constrainValue(tmp, tc);
   gen(env, IncRef, tmp);
   return push(env, tmp);

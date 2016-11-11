@@ -24,7 +24,7 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
             hh_client,
             'check',
             '--retries',
-            '30',
+            '60',
             '--no-load',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),

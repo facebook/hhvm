@@ -102,7 +102,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             hh_client,
             'check',
             '--retries',
-            '20',
+            '60',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
             stdin=stdin)

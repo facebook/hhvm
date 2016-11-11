@@ -52,16 +52,10 @@ struct MInstrState {
   }
 
   // type-scan driven scanner
-  //TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
-  //TYPE_SCAN_CONSERVATIVE_FIELD(tvRef);
-  //TYPE_SCAN_CONSERVATIVE_FIELD(tvRef2);
-  //TYPE_SCAN_IGNORE_FIELD(base);
-
-  // fixme - #11145696 full custom scanner to work around unnamed union
-  TYPE_SCAN_CUSTOM() {
-    // Workaroun
-    scanner.conservative(this, uintptr_t(&base) - uintptr_t(this));
-  }
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvRef);
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvRef2);
+  TYPE_SCAN_IGNORE_FIELD(base);
 };
 
 }

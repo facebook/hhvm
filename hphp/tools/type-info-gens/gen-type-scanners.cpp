@@ -244,6 +244,7 @@ struct Generator {
 
   static void sanityCheckTemplateParams(const Object&);
 
+  bool findMemberHelper(const std::string& field, const Object &a_object) const;
   void genAllLayouts();
   void checkForLayoutErrors() const;
   void assignUniqueLayouts();
@@ -261,6 +262,8 @@ struct Generator {
   void genLayout(const Type&, Layout&, size_t) const;
   void genLayout(const Object&, Layout&, size_t,
                  bool do_forbidden_check = true) const;
+  bool genObjectMemberLayout(const Object::Member& member, const Object& object,
+                       Layout& layout, Action action, size_t offset) const;
 
   IndexedType getIndexedType(const Object&) const;
   std::vector<IndexedType> getIndexedTypes(
@@ -1517,6 +1520,23 @@ const Generator::Action& Generator::getAction(const Object& object) const {
   return m_actions.emplace(&object, inferAction(object)).first->second;
 }
 
+bool Generator::findMemberHelper(const std::string& field,
+                                 const Object &a_object) const {
+  return std::any_of(
+    a_object.members.begin(),
+    a_object.members.end(),
+    [&](const Object::Member& m) {
+      if (m.type.isObject()) {
+        const Object &inner_object = getObject(*m.type.asObject());
+        if (inner_object.kind == Object::Kind::k_union) {
+          return findMemberHelper(field, inner_object);
+        }
+      }
+      return m.offset && m.name == field;
+    }
+  );
+}
+
 // Given an object type, examine it to infer all the needed actions for that
 // type. The actions are inferred by looking for member functions with special
 // names, and static members with special names.
@@ -1555,11 +1575,7 @@ Generator::Action Generator::inferAction(const Object& object) const {
   }
 
   const auto find_member = [&](const std::string& field) {
-    return std::any_of(
-      object.members.begin(),
-      object.members.end(),
-      [&](const Object::Member& m) { return m.offset && m.name == field; }
-    );
+    return findMemberHelper(field, object);
   };
 
   const auto find_base = [&](const Object& base) {
@@ -2223,6 +2239,77 @@ void Generator::genLayout(const Type& type,
   );
 }
 
+bool Generator::genObjectMemberLayout(const Object::Member& member,
+                                const Object& object, Layout& layout,
+                                Action action, size_t offset) const {
+    // Only non-static members.
+    if (!member.offset) return false;
+
+    if (member.type.isObject()) {
+      const Object &inner_object = getObject(*member.type.asObject());
+      if (inner_object.kind == Object::Kind::k_union) {
+        for (auto &i_member : inner_object.members) {
+          // Treat members of an unnamed union as members
+          // of the enclosing struct.
+          // Recurse: the unions themselves might contain unnamed unions.
+          if (!i_member.offset) {
+            continue;
+          }
+          if (genObjectMemberLayout(i_member, object, layout, action,
+                              offset + *i_member.offset)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    if (action.ignore_fields.count(member.name) > 0) return true;
+
+    if (action.conservative_fields.count(member.name) > 0) {
+      layout.addConservative(offset + *member.offset,
+                             determineSize(member.type));
+      return true;
+    }
+    auto custom_iter = action.custom_fields.find(member.name);
+    if (custom_iter != action.custom_fields.end()) {
+      if (custom_iter->second.empty()) {
+        throw LayoutError{
+          folly::sformat(
+            "'{}' needs to have external linkage (not in anonymous namespace)"
+            " to use custom field scanner. If a template, template parameters"
+            " must have external linkage as well.",
+            object.name.name
+          )
+        };
+      }
+      layout.addCustom(offset, custom_iter->second);
+      return true;
+    }
+
+    // The sole purpose of marking the flexible array member is so we know where
+    // the suffix begins. The suffix sometimes begins at the end of the object,
+    // but sometimes within it.
+    if (member.type.isArr() && action.flexible_array_field == member.name) {
+      layout.suffix_begin = *member.offset;
+      return false;
+    }
+
+    try {
+      // if member is a union, handle
+      genLayout(member.type, layout, offset + *member.offset);
+    } catch (LayoutError& exn) {
+      exn.addContext(
+        folly::sformat(
+          "from member '{}' of type '{}'",
+          member.name,
+          member.type.toString()
+        )
+      );
+      throw;
+    }
+    return false;
+}
+
 // Given an object type representation, fill the given Layout (starting at
 // specified offset) with the appropriate layout for that object
 // type. LayoutError will be thrown if an ambiguous construct is encountered.
@@ -2398,55 +2485,8 @@ void Generator::genLayout(const Object& object,
     return;
   }
 
-  // Per-member field actions:
   for (const auto& member : object.members) {
-    // Only non-static members.
-    if (!member.offset) continue;
-
-    if (action.ignore_fields.count(member.name) > 0) continue;
-
-    if (action.conservative_fields.count(member.name) > 0) {
-      layout.addConservative(offset + *member.offset,
-                             determineSize(member.type));
-      continue;
-    }
-
-    auto custom_iter = action.custom_fields.find(member.name);
-    if (custom_iter != action.custom_fields.end()) {
-      if (custom_iter->second.empty()) {
-        throw LayoutError{
-          folly::sformat(
-            "'{}' needs to have external linkage (not in anonymous namespace)"
-            " to use custom field scanner. If a template, template parameters"
-            " must have external linkage as well.",
-            object.name.name
-          )
-        };
-      }
-      layout.addCustom(offset, custom_iter->second);
-      continue;
-    }
-
-    // The sole purpose of marking the flexible array member is so we know where
-    // the suffix begins. The suffix sometimes begins at the end of the object,
-    // but sometimes within it.
-    if (member.type.isArr() && action.flexible_array_field == member.name) {
-      layout.suffix_begin = *member.offset;
-      continue;
-    }
-
-    try {
-      genLayout(member.type, layout, offset + *member.offset);
-    } catch (LayoutError& exn) {
-      exn.addContext(
-        folly::sformat(
-          "from member '{}' of type '{}'",
-          member.name,
-          member.type.toString()
-        )
-      );
-      throw;
-    }
+    genObjectMemberLayout(member, object, layout, action, offset);
   }
 }
 

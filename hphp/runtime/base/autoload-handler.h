@@ -150,7 +150,11 @@ private:
   union {
     req::deque<HandlerBundle> m_handlers;
   };
+  bool m_handlers_valid{false};
   Array m_loading;
+  TYPE_SCAN_CUSTOM_FIELD(m_handlers) {
+    if (m_handlers_valid) { scanner.scan(m_handlers); }
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

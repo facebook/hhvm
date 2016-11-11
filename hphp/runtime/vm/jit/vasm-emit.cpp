@@ -135,7 +135,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   CodeBlock cold;
   CodeBlock* frozen = &code.frozen();
 
-  auto const do_relocate = arch() == Arch::X64 &&
+  auto const do_relocate = arch_any(Arch::X64, Arch::PPC64) &&
     !RuntimeOption::EvalEnableReusableTC &&
     RuntimeOption::EvalJitRelocationSize &&
     cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3);
@@ -145,7 +145,17 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
     // Allocate enough space that the relocated cold code doesn't overlap the
     // emitted cold code.
     static unsigned seed = 42;
-    auto off = rand_r(&seed) & (cache_line_size() - 1);
+    auto code_alignment = [](void) -> uint8_t {
+      switch (arch()) {
+        case Arch::X64:
+          return 1;
+        case Arch::PPC64:
+        case Arch::ARM:
+          return 4;
+      }
+      not_reached();
+    }();
+    auto off = rand_r(&seed) & (cache_line_size() - code_alignment);
 
     cold.init(cold_in.frontier() +
               RuntimeOption::EvalJitRelocationSize + off,

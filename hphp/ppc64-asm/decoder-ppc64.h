@@ -359,6 +359,12 @@ enum class OpcodeNames {
 // appropriate cast for array manipulation
 constexpr size_t kTotalOpcodes = static_cast<size_t>(OpcodeNames::op_last);
 
+enum class AllowCond {
+  OnlyUncond,
+  Any,
+  OnlyCond
+};
+
 struct DecoderInfo {
   DecoderInfo(OpcodeNames opn, PPC64Instr op, Form form,
       std::string mnemonic, std::initializer_list<Operands> oper)
@@ -383,12 +389,10 @@ struct DecoderInfo {
   inline OpcodeNames opcode_name() const      { return m_opn; }
   inline PPC64Instr opcode() const            { return m_op; }
   inline std::string mnemonic() const         { return m_mnemonic; }
+  std::string toString() const;
+
   const PPC64Instr instruction_image() const  { return m_image; }
   void instruction_image(const PPC64Instr i)  { m_image = i; }
-  void setIp(const uint8_t* const ip)         { m_ip = ip; }
-  void setIp(const PPC64Instr* const ip) {
-    setIp(reinterpret_cast<const uint8_t* const>(ip));
-  }
 
   inline bool operator==(const DecoderInfo& i) {
     return (i.form() == m_form &&
@@ -402,14 +406,33 @@ struct DecoderInfo {
             i.mnemonic() != m_mnemonic);
   }
 
+  bool isInvalid() const {
+    return m_opn == OpcodeNames::op_invalid;
+  }
+  bool isException() const;
   bool isNop() const;
-  bool isBranch(bool allowCond = true) const;
+  bool isOffsetBranch(AllowCond ac = AllowCond::Any) const;
+  bool isRegisterBranch(AllowCond ac = AllowCond::Any) const;
+  bool isBranchWithLR() const;
   bool isClearSignBit() const;
   bool isSpOffsetInstr() const;
   int32_t offset() const;
-  std::string toString();
+  int32_t branchOffset() const;
+  PPC64Instr setBranchOffset(int32_t offset) const;
+  void setIp(const uint8_t* const ip)     { m_ip = ip; }
+  void setIp(const PPC64Instr* const ip) {
+    setIp(reinterpret_cast<const uint8_t* const>(ip));
+  }
+  bool isAddis(bool toc = false) const;
+  bool isLd(bool toc = false) const;
+  bool isLwz(bool toc = false) const;
+  int16_t offsetDS() const;
+  int16_t offsetD() const;
 
 private:
+  // Auxiliary function for isLd and isLwz
+  bool isDformOp(OpcodeNames opn, bool toc) const;
+
   // opcode enumeration identifier
   OpcodeNames m_opn;
   // pointer to the decoded instruction in the memory

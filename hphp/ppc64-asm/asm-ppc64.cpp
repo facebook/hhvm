@@ -15,6 +15,7 @@
 */
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
+#include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/trace.h"
@@ -28,22 +29,22 @@ VMTOC::~VMTOC() {
 }
 
 int64_t VMTOC::pushElem(int64_t elem) {
-  if (m_map.find(elem) != m_map.end()) {
-    return m_map[elem];
-  }
+  auto& map_elem = m_map[elem];
+  if (map_elem) return map_elem;
+
   auto offset = allocTOC(static_cast<int32_t>(elem & 0xffffffff), true);
-  m_map.insert( { elem, offset });
+  map_elem = offset;
   allocTOC(static_cast<int32_t>((elem & 0xffffffff00000000) >> 32));
   m_last_elem_pos += 2;
   return offset;
 }
 
 int64_t VMTOC::pushElem(int32_t elem) {
-  if (m_map.find(elem) != m_map.end()) {
-    return m_map[elem];
-  }
+  auto& map_elem = m_map[elem];
+  if (map_elem) return map_elem;
+
   auto offset = allocTOC(elem);
-  m_map.insert( { elem, offset });
+  map_elem = offset;
   m_last_elem_pos++;
   return offset;
 }
@@ -464,106 +465,32 @@ void Assembler::unimplemented(){
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Auxiliaries for Assembler::patchBranch
- */
-static void patchOffset(CodeAddress jmp, ssize_t diff) {
-  // Used for a relative branch
-  PPC64Instr* instr = reinterpret_cast<PPC64Instr*>(jmp);
-
-  DecoderInfo dinfo = Decoder::GetDecoder().decode(instr);
-  OpcodeNames opn = dinfo.opcode_name();
-  switch (opn) {
-    case OpcodeNames::op_b:
-    case OpcodeNames::op_bl:
-      assert(dinfo.form() == Form::kI);
-      I_form_t iform;
-      iform.instruction = dinfo.instruction_image();
-
-      // relative branch. Branch offset can be up to 26 bits
-      always_assert(HPHP::jit::deltaFitsBits(diff, 26) &&
-          "Patching offset is too big");
-
-      // address is 4 bytes aligned and it optimizes these 2 bits.
-      iform.LI = static_cast<uint32_t>(diff >> 2);
-      *instr = iform.instruction;
-      break;
-    case OpcodeNames::op_bc:
-      assert(dinfo.form() == Form::kB);
-      B_form_t bform;
-      bform.instruction = dinfo.instruction_image();
-
-      // relative branch
-      always_assert(HPHP::jit::deltaFits(diff, HPHP::sz::word) &&
-          "Patching offset is too big");
-
-      // address is 4 bytes aligned and it optimizes these 2 bits.
-      bform.BD = static_cast<uint32_t>(diff >> 2);
-      *instr = bform.instruction;
-      break;
-    default:
-      always_assert(false && "tried to patch not-expected-branch instruction");
-      break;
-  }
-}
-
-static void patchAbsolute(CodeAddress jmp, CodeAddress dest) {
+void Assembler::patchAbsolute(CodeAddress jmp, CodeAddress dest) {
   // Initialize code block cb pointing to li64
   HPHP::CodeBlock cb;
-  cb.init(jmp, Assembler::kLi64InstrLen, "patched bctr");
+  cb.init(jmp, Assembler::kLimmLen, "patched bctr");
   Assembler a{ cb };
-  a.li64(reg::r12, ssize_t(dest));
+  a.limmediate(reg::r12, ssize_t(dest),
+#ifdef USE_TOC_ON_BRANCH
+      ImmType::TocOnly
+#else
+      ImmType::AnyFixed
+#endif
+      );
 }
 
 void Assembler::patchBranch(CodeAddress jmp, CodeAddress dest) {
-  // Detecting absolute branching: if it's an bcctr or bcctrl
-  {
-    // skips the li64, 2*nop and a mtctr instruction
-    CodeAddress bctr_addr =
-      jmp + Assembler::kLi64InstrLen + 3 * instr_size_in_bytes;
+  auto di = DecodedInstruction(jmp);
 
-    // check for instruction opcode
-    DecoderInfo dinfo = Decoder::GetDecoder().decode(bctr_addr);
-    OpcodeNames opn = dinfo.opcode_name();
-    if ((opn == OpcodeNames::op_bcctr) || (opn == OpcodeNames::op_bcctrl)) {
-      patchAbsolute(jmp, dest);
-      return;
-    }
+  // Detect Far branch
+  if (di.isFarBranch()) {
+    patchAbsolute(jmp, dest);
+    return;
   }
 
-  // Now analyses if the offset fits by checking how big is the difference to
-  // be patched
-  auto new_target = reinterpret_cast<int64_t>(dest);
-
-  // Define the branch as the origin of the branch offset calculation
-  auto base = reinterpret_cast<int64_t>(jmp);
-  auto diff = new_target - base;
-
-  // There are 2 flavors of offset branching. (See BranchType for more info)
-  DecoderInfo dinfo = Decoder::GetDecoder().decode(jmp);
-  OpcodeNames opn = dinfo.opcode_name();
-
-  // checks if @opn is 'b', 'bl' or 'bc' and if the offset @diff fits it
-  auto branch_fits_offset = [](OpcodeNames opn, int64_t diff) -> bool {
-    auto is_and_fits_b = [](OpcodeNames opn, int64_t diff) -> bool {
-      return ((opn == OpcodeNames::op_b) || (opn == OpcodeNames::op_bl)) &&
-              HPHP::jit::deltaFitsBits(diff, 26);
-    };
-
-    auto is_and_fits_bc = [](OpcodeNames opn, int64_t diff) -> bool {
-      return opn == OpcodeNames::op_bc &&
-              HPHP::jit::deltaFits(diff, HPHP::sz::word);
-    };
-
-    return is_and_fits_b(opn, diff) || is_and_fits_bc(opn, diff);
-  };
-
-  if (!branch_fits_offset(opn, diff)) {
+  // Regular patch for branch by offset type
+  if (!di.setNearBranchTarget(dest))
     assert(false && "Can't patch a branch with such a big offset");
-  } else {
-    // Regular patch for branch by offset type
-    patchOffset(jmp, diff);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -583,9 +510,9 @@ void Assembler::li64 (const Reg64& rt, int64_t imm64, bool fixedSize) {
       // clear extended sign that should not be set
       // (32bits number. Sets the 16th bit but not the 17th, it's not negative!)
       clrldi(rt, rt, 48);
-      missing = kLi64InstrLen - 2 * instr_size_in_bytes;
+      missing = kLi64Len - 2 * instr_size_in_bytes;
     } else {
-      missing = kLi64InstrLen - 1 * instr_size_in_bytes;
+      missing = kLi64Len - 1 * instr_size_in_bytes;
     }
   } else if (HPHP::jit::deltaFits(imm64, HPHP::sz::dword)) {
     // immediate has only low 32 bits set
@@ -595,9 +522,9 @@ void Assembler::li64 (const Reg64& rt, int64_t imm64, bool fixedSize) {
       // clear extended sign
       // (64bits number. Sets the 32th bit but not the 33th, it's not negative!)
       clrldi(rt, rt, 32);
-      missing = kLi64InstrLen - 3 * instr_size_in_bytes;
+      missing = kLi64Len - 3 * instr_size_in_bytes;
     } else {
-      missing = kLi64InstrLen - 2 * instr_size_in_bytes;
+      missing = kLi64Len - 2 * instr_size_in_bytes;
     }
   } else if (imm64 >> 48 == 0) {
     // immediate has only low 48 bits set
@@ -609,7 +536,7 @@ void Assembler::li64 (const Reg64& rt, int64_t imm64, bool fixedSize) {
       // clear extended sign
       clrldi(rt, rt, 16);
     } else {
-      missing = kLi64InstrLen - 4 * instr_size_in_bytes;
+      missing = kLi64Len - 4 * instr_size_in_bytes;
     }
   } else {
     // load all 64 bits
@@ -619,95 +546,12 @@ void Assembler::li64 (const Reg64& rt, int64_t imm64, bool fixedSize) {
     oris(rt, rt, static_cast<int16_t>((imm64 >> 16) & UINT16_MAX));
     ori(rt, rt, static_cast<int16_t>(imm64 & UINT16_MAX));
   }
-  if(fixedSize){
+
+  if (fixedSize) {
     emitNop(missing);
-    // guarantee our math with kLi64InstrLen is working
-    assert(kLi64InstrLen == frontier() - li64StartPos);
+    // guarantee our math with kLi64Len is working
+    assert(kLi64Len == frontier() - li64StartPos);
   }
-}
-
-int64_t Assembler::getLi64(PPC64Instr* pinstr) {
-  // @pinstr should be pointing to the beginning of the li64 block
-  //
-  // It's easier to know how many 16bits of data the immediate uses
-  // by counting how many nops there are inside of the code
-  uint8_t nops = [&]() {
-    uint8_t nNops = 0;
-    auto total_li64_instr = kLi64InstrLen/instr_size_in_bytes;
-    for (PPC64Instr* i = pinstr; i < pinstr + total_li64_instr; i++) {
-      if (Decoder::GetDecoder().decode(i).isNop()) nNops++;
-    }
-    return nNops;
-  }();
-
-  auto hasClearSignBit = [&](PPC64Instr* i) -> bool {
-    return Decoder::GetDecoder().decode(i).isClearSignBit();
-  };
-
-  auto getImm = [&](PPC64Instr* i) -> uint16_t {
-    return Decoder::GetDecoder().decode(i).offset();
-  };
-
-  uint8_t immParts = 0;
-  switch (nops) {
-    case 4:
-      immParts = 1;                                   // 16bits, sign bit = 0
-      break;
-    case 3:
-      if (hasClearSignBit(pinstr + 1)) immParts = 1;  // 16bits, sign bit = 1
-      else immParts = 2;                              // 32bits, sign bit = 0
-      break;
-    case 2:
-      immParts = 2;                                   // 32bits, sign bit = 1
-      break;
-    case 1:
-      immParts = 3;                                   // 48bits, sign bit = 0
-      break;
-    case 0:
-      if (hasClearSignBit(pinstr + 4)) immParts = 3;  // 48bits, sign bit = 1
-      else immParts = 4;                              // 64bits, sign bit = 0
-      break;
-    default:
-      assert(false && "Unexpected number of nops in getLi64");
-      break;
-  }
-
-  // first getImm is suppose to get the sign
-  uint64_t imm64 = static_cast<uint64_t>(getImm(pinstr));
-  switch (immParts) {
-    case 1:
-      break;
-    case 2:
-      imm64 <<= 16;
-      imm64 |= getImm(pinstr + 1);
-      break;
-    case 3:
-      imm64 <<= 16;
-      imm64 |= getImm(pinstr + 1);
-      imm64 <<= 16;
-      imm64 |= getImm(pinstr + 3);  // jumps the sldi
-      break;
-    case 4:
-      imm64 <<= 16;
-      imm64 |= getImm(pinstr + 1);
-      imm64 <<= 16;
-      imm64 |= getImm(pinstr + 3);  // jumps the sldi
-      imm64 <<= 16;
-      imm64 |= getImm(pinstr + 4);
-      break;
-    default:
-      assert(false && "No immediate detected on getLi64");
-      break;
-  }
-
-  return static_cast<int64_t>(imm64);
-}
-
-Reg64 Assembler::getLi64Reg(PPC64Instr* instr) {
-  // First instruction is always either li or lis, both are D-form
-  D_form_t d_instr;
-  d_instr.instruction = *instr;
-  return Reg64(d_instr.RT);
 }
 
 void Assembler::li32 (const Reg64& rt, int32_t imm32) {
@@ -727,43 +571,6 @@ void Assembler::li32 (const Reg64& rt, int32_t imm32) {
     lis(rt, static_cast<int16_t>(imm32 >> 16));
     ori(rt, rt, static_cast<int16_t>(imm32 & UINT16_MAX));
   }
-}
-
-int32_t Assembler::getLi32(PPC64Instr* pinstr) {
-  // @pinstr should be pointing to the beginning of the li32 block
-
-  auto getImm = [&](PPC64Instr* i) -> uint32_t {
-    return Decoder::GetDecoder().decode(i).offset();
-  };
-
-  // if first instruction is a li, it's using 16bits only
-  bool is_16b_only = [&](PPC64Instr* i) -> bool {
-    auto opn = Decoder::GetDecoder().decode(i).opcode_name();
-    return OpcodeNames::op_addi == opn;
-  }(pinstr);
-
-  uint32_t imm32 = 0;
-  if (is_16b_only) {
-    imm32 |= static_cast<int16_t>(getImm(pinstr));
-  } else {
-    imm32 |= getImm(pinstr)     << 16;  // lis
-    imm32 |= getImm(pinstr + 1);        // ori
-  }
-  return static_cast<int32_t>(imm32);
-}
-
-void Assembler::loadTOC(const Reg64& rt, const Reg64& rttoc,  int64_t imm64,
-      uint64_t offset, bool fixedSize, bool fits32) {
-  if (fits32) {
-    Assembler::lwz(rt,rttoc[offset]);
-  }
-  else {
-    Assembler::ld(rt, rttoc[offset]);
-  }
-  if (fixedSize) {
-    emitNop(3 * instr_size_in_bytes);
-  }
-  return;
 }
 
 void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
@@ -789,29 +596,30 @@ void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
   if (fits32) {
     TOCoffset = VMTOC::getInstance().pushElem(
         static_cast<int32_t>(UINT32_MAX & imm64));
-  }
-  else {
+  } else {
     TOCoffset = VMTOC::getInstance().pushElem(imm64);
   }
 
+  auto const toc_start = frontier();
   if (TOCoffset > INT16_MAX) {
     int16_t complement = 0;
     // If last four bytes is still bigger than a signed 16bits, uses as two
     // complement.
     if ((TOCoffset & UINT16_MAX) > INT16_MAX) complement = 1;
     addis(rt, reg::r2, static_cast<int16_t>((TOCoffset >> 16) + complement));
-    loadTOC(rt, rt, imm64, TOCoffset & UINT16_MAX,
-        immt == ImmType::AnyFixed, fits32);
+    if (fits32) lwz(rt, rt[TOCoffset & UINT16_MAX]);
+    else        ld (rt, rt[TOCoffset & UINT16_MAX]);
+  } else {
+    if (fits32) lwz(rt, reg::r2[TOCoffset]);
+    else        ld (rt, reg::r2[TOCoffset]);
   }
-  else {
-    loadTOC(rt, reg::r2, imm64, TOCoffset, immt == ImmType::AnyFixed, fits32);
-    bool toc_may_grow = HPHP::RuntimeOption::EvalJitRelocationSize != 0;
-    if ((immt != ImmType::AnyCompact) || toc_may_grow) {
-      emitNop(1 * instr_size_in_bytes);
-    }
+  bool toc_may_grow = HPHP::RuntimeOption::EvalJitRelocationSize != 0;
+  auto const toc_max_size = (immt == ImmType::AnyFixed) ? kLi64Len
+    : ((immt == ImmType::TocOnly) || toc_may_grow) ? kTocLen
+    : 0;
+  if (toc_max_size) {
+    emitNop(toc_max_size - (frontier() - toc_start));
   }
-
-  return;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -866,23 +674,28 @@ void Label::branch(Assembler& a, BranchConditions bc, LinkReg lr) {
   branchFar(a, bc, lr);
 }
 
-void Label::branchFar(Assembler& a, BranchConditions bc, LinkReg lr) {
+void Label::branchFar(Assembler& a,
+                  BranchConditions bc,
+                  LinkReg lr,
+                  ImmType immt) {
   // Marking current address for patchAbsolute
   addJump(&a);
 
   // Use reserved function linkage register
   const ssize_t address = ssize_t(m_address);
-  a.li64(reg::r12, address);
+  a.limmediate(reg::r12, address, immt);
 
   // When branching to another context, r12 need to keep the target address
   // to correctly set r2 (TOC reference).
   a.mtctr(reg::r12);
 
   // Special code for overflow handling
+  bool cond = (BranchConditions::Always != bc);
   if (bc == BranchConditions::Overflow || bc == BranchConditions::NoOverflow) {
     a.xor(reg::r0, reg::r0, reg::r0,false);
     a.mtspr(Assembler::SpecialReg::XER, reg::r0);
-  } else {
+  } else if (cond && immt != ImmType::AnyCompact) {
+    // Unconditional branch (jmp or call) doesn't need this reserve bytes
     a.emitNop(2 * instr_size_in_bytes);
   }
 

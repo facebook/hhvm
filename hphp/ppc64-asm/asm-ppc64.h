@@ -23,14 +23,9 @@
 
 #include "hphp/util/data-block.h"
 
-#include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/types.h"
-
 #include "hphp/ppc64-asm/branch-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
-
-#include "hphp/runtime/base/runtime-option.h"
 
 
 namespace ppc64_asm {
@@ -200,7 +195,10 @@ struct Label {
   Label& operator=(const Label&) = delete;
 
   void branch(Assembler& a, BranchConditions bc, LinkReg lr);
-  void branchFar(Assembler& a, BranchConditions bc, LinkReg lr);
+  void branchFar(Assembler& a,
+                  BranchConditions bc,
+                  LinkReg lr,
+                  ImmType immt = ImmType::TocOnly);
   void asm_label(Assembler& a);
 
 private:
@@ -376,60 +374,27 @@ struct Assembler {
     CR7      = 7,
   };
 
-  // Prologue size of call function (mflr, std, std, addi, std)
-  static const uint8_t kCallPrologueLen = instr_size_in_bytes * 5;
+  // Total amount of bytes that a li64 function emits as fixed size
+  static const uint8_t kLi64Len = instr_size_in_bytes * 5;
+  // TOC emit length: (ld/lwz + nop) or (addis + ld/lwz)
+  static const uint8_t kTocLen = instr_size_in_bytes * 2;
 
-  // Epilogue size of call function after the return address.
-  // ld, addi, ld, mtlr
-  static const uint8_t kCallEpilogueLen = instr_size_in_bytes * 4;
+  // Compile time switch for using TOC or not on branches
+  static const uint8_t kLimmLen =
+#ifdef USE_TOC_ON_BRANCH
+    kTocLen
+#else
+    kLi64Len
+#endif
+    ;
 
-  // Jcc length
-  static const uint8_t kJccLen = instr_size_in_bytes * 9;
+  // Jcc using TOC length: toc/li64 + mtctr + nop + nop + bcctr
+  static const uint8_t kJccLen = kLimmLen + instr_size_in_bytes * 4;
 
-  // Call length prologue + jcc
-  static const uint8_t kCallLen = instr_size_in_bytes * 9;
+  // Call using TOC length: toc/li64 + mtctr + bctr
+  static const uint8_t kCallLen = kLimmLen + instr_size_in_bytes * 2;
 
-  // Total ammount of bytes that a li64 function emits
-  static const uint8_t kLi64InstrLen = 5 * instr_size_in_bytes;
-
-  // TODO(rcardoso): Must create a macro for these similar instructions.
-  // This will make code more clean.
-
-  // #define CC_ARITH_REG_OP(name, opcode, x_opcode)
-  //   void name##c
-  //   void name##co
-  //   ...
-  // #define CC_ARITH_IMM_OP(name, opcode)
-
-  // #define LOAD_STORE_OP(name)
-  // void #name(const Reg64& rt, MemoryRef m);
-  // void #name##u(const Reg64& rt, MemoryRef m);
-  // void #name##x(const Reg64& rt, MemoryRef m);
-  // void #name##ux(const Reg64& rt, MemoryRef m);
-
-  // #define LOAD_STORE_OP_BYTE_REVERSED(name)
-  // void #name##brx(const Reg64& rt, MemoryRef m);
-
-  // LOAD_STORE_OP(lbz)
-  // LOAD_STORE_OP(lh)
-  // LOAD_STORE_OP(lha)
-  // LOAD_STORE_OP_BYTE_REVERSED(lh)
-  // LOAD_STORE_OP(lwz)
-  // LOAD_STORE_OP(lwa)
-  // LOAD_STORE_OP(ld)
-  // LOAD_STORE_OP_BYTE_REVERSED(ld)
-  // LOAD_STORE_OP(stb)
-  // LOAD_STORE_OP(sth)
-  // LOAD_STORE_OP_BYTE_REVERSED(sth)
-  // LOAD_STORE_OP(stw)
-  // LOAD_STORE_OP_BYTE_REVERSED(stw)
-  // LOAD_STORE_OP(std)
-  // LOAD_STORE_OP_BYTE_REVERSED(std)
-
-  // #undef LOAD_STORE_OP
-  // #undef LOAD_STORE_OP_BYTE_REVERSED
-
-  //PPC64 Instructions
+  // PPC64 Instructions
   void add(const Reg64& rt, const Reg64& ra, const Reg64& rb, bool rc = 0);
   void addi(const Reg64& rt, const Reg64& ra, Immed imm);
   void addis(const Reg64& rt, const Reg64& ra, Immed imm);
@@ -731,7 +696,6 @@ struct Assembler {
 
   // Simplify to conditional branch that always branch
   void b(Label& l)  { bc(l, BranchConditions::Always); }
-  void bl(Label& l)  { bcl(l, BranchConditions::Always); }
 
   void bc(Label& l, BranchConditions bc) {
     l.branch(*this, bc, LinkReg::DoNotTouch);
@@ -739,8 +703,8 @@ struct Assembler {
   void bc(Label& l, ConditionCode cc) {
     l.branch(*this, BranchParams::convertCC(cc), LinkReg::DoNotTouch);
   }
-  void bcl(Label& l, BranchConditions bc) {
-    l.branch(*this, bc, LinkReg::Save);
+  void bl(Label& l) {
+    l.branch(*this, BranchConditions::Always, LinkReg::Save);
   }
 
   void branchAuto(Label& l,
@@ -764,21 +728,30 @@ struct Assembler {
 
   void branchFar(Label& l,
                  BranchConditions bc = BranchConditions::Always,
-                 LinkReg lr = LinkReg::DoNotTouch) {
-    l.branchFar(*this, bc, lr);
+                 LinkReg lr = LinkReg::DoNotTouch,
+                 ImmType immt = ImmType::TocOnly) {
+    l.branchFar(*this, bc, lr, immt);
   }
 
   void branchFar(CodeAddress c,
                  BranchConditions bc = BranchConditions::Always,
-                 LinkReg lr = LinkReg::DoNotTouch) {
+                 LinkReg lr = LinkReg::DoNotTouch,
+                 ImmType immt = ImmType::TocOnly) {
     Label l(c);
-    l.branchFar(*this, bc, lr);
+    l.branchFar(*this, bc, lr, immt);
   }
 
   void branchFar(CodeAddress c,
                  ConditionCode cc,
-                 LinkReg lr = LinkReg::DoNotTouch) {
-    branchFar(c, BranchParams::convertCC(cc), lr);
+                 LinkReg lr = LinkReg::DoNotTouch,
+                 ImmType immt = ImmType::TocOnly) {
+    branchFar(c, BranchParams::convertCC(cc), lr, immt);
+  }
+
+  void branchFar(CodeAddress c, BranchParams bp,
+                 ImmType immt = ImmType::TocOnly) {
+    LinkReg lr = (bp.savesLR()) ? LinkReg::Save : LinkReg::DoNotTouch;
+    branchFar(c, static_cast<BranchConditions>(bp), lr, immt);
   }
 
   // ConditionCode variants
@@ -794,23 +767,22 @@ struct Assembler {
                 // --------------------------
     Internal,   // No            | No
     External,   // Yes           | No
-    Smashable,  // No (internal) | Yes
+    SmashInt,   // No            | Yes
+    SmashExt,   // Yes           | Yes
   };
 
   void callEpilogue(CallArg ca) {
     // Several vasms like nothrow, unwind and syncpoint will skip one
     // instruction after call and use it as expected return address. Use a nop
     // to guarantee this consistency even if toc doesn't need to be saved
-    if (CallArg::External != ca) nop();
+    if ((CallArg::SmashInt == ca) || (CallArg::Internal == ca)) nop();
     else ld(reg::r2, reg::r1[toc_position_on_frame]);
   }
 
   // generic template, for CodeAddress and Label
   template <typename T>
   void call(T& target, CallArg ca = CallArg::Internal) {
-    if (CallArg::Smashable == ca) {
-      // To make a branch smashable, the most conservative method needs to be
-      // used so the target can be changed later or on bindCall.
+    if ((CallArg::SmashInt == ca) || (CallArg::SmashExt == ca)) {
       branchFar(target, BranchConditions::Always, LinkReg::Save);
     } else {
       // tries best performance possible
@@ -827,56 +799,18 @@ struct Assembler {
     callEpilogue(ca);
   }
 
-  // checks if the @inst is pointing to a call
-  static inline bool isCall(HPHP::jit::TCA inst) {
-    DecodedInstruction di(inst);
-    return di.isCall();
-  }
-
 //////////////////////////////////////////////////////////////////////
 // Auxiliary for loading immediates in the best way
 
-private:
-  void loadTOC(const Reg64& rt, const Reg64& rttoc, int64_t imm64,
-      uint64_t offset, bool fixedSize, bool fits32);
-
-public:
   void limmediate(const Reg64& rt,
                   int64_t imm64,
                   ImmType immt = ImmType::AnyCompact);
 
   // Auxiliary for loading a complete 64bits immediate into a register
-  void li64(const Reg64& rt, int64_t imm64, bool fixedSize = true);
-
-  // Retrieve the target defined by li64 instruction
-  static int64_t getLi64(PPC64Instr* pinstr);
-  static int64_t getLi64(CodeAddress pinstr) {
-    return getLi64(reinterpret_cast<PPC64Instr*>(pinstr));
-  }
-
-  // Retrieve the register used by li64 instruction
-  static Reg64 getLi64Reg(PPC64Instr* instr);
-  static Reg64 getLi64Reg(CodeAddress instr) {
-    return getLi64Reg(reinterpret_cast<PPC64Instr*>(instr));
-  }
+  void li64(const Reg64& rt, int64_t imm64, bool fixedSize = false);
 
   // Auxiliary for loading a 32bits immediate into a register
   void li32 (const Reg64& rt, int32_t imm32);
-
-  // Retrieve the target defined by li32 instruction
-  static int32_t getLi32(PPC64Instr* pinstr);
-  static int32_t getLi32(CodeAddress pinstr) {
-    return getLi32(reinterpret_cast<PPC64Instr*>(pinstr));
-  }
-
-  // Retrieve the register used by li32 instruction
-  static Reg64 getLi32Reg(PPC64Instr* instr) {
-    // it also starts with li or lis, so the same as getLi64
-    return getLi64Reg(instr);
-  }
-  static Reg64 getLi32Reg(CodeAddress instr) {
-    return getLi32Reg(reinterpret_cast<PPC64Instr*>(instr));
-  }
 
   void emitNop(int nbytes) {
     assert((nbytes % 4 == 0) && "This arch supports only 4 bytes alignment");
@@ -902,6 +836,7 @@ public:
    * offset branch and patches it properly.
    */
   static void patchBranch(CodeAddress jmp, CodeAddress dest);
+  static void patchAbsolute(CodeAddress jmp, CodeAddress dest);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -58,16 +58,25 @@ void RelocationInfo::rewind(TCA start, TCA end) {
   }
   auto it = m_adjustedAddresses.lower_bound(start);
   if (it == m_adjustedAddresses.end()) return;
+
+  // convenience function for erasing a m_smashableRelocations entry
+  auto eraseSmashableRelocation = [this](TCA addr) {
+    auto it = m_smashableRelocations.find(addr);
+    if (it != m_smashableRelocations.end()) m_smashableRelocations.erase(it);
+  };
+
   if (it->first == start) {
     // if it->second.first is set, start is also the end
     // of an existing region. Don't erase it in that case
     if (it->second.first) {
+      eraseSmashableRelocation(it->second.second);
       it++->second.second = 0;
     } else {
       m_adjustedAddresses.erase(it++);
     }
   }
   while (it != m_adjustedAddresses.end() && it->first < end) {
+    eraseSmashableRelocation(it->second.second);
     m_adjustedAddresses.erase(it++);
   }
   if (it == m_adjustedAddresses.end()) return;
@@ -75,6 +84,7 @@ void RelocationInfo::rewind(TCA start, TCA end) {
     // Similar to start above, end could be the start of an
     // existing region.
     if (it->second.second) {
+      eraseSmashableRelocation(it->second.second);
       it++->second.first = 0;
     } else {
       m_adjustedAddresses.erase(it++);

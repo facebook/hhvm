@@ -615,8 +615,16 @@ struct RuntimeOption {
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
   F(double, InitialLoadFactor, 1.0)                                     \
-  /* PPC64 Option: Minimum immediate size to use TOC */                 \
+  /******************                                                   \
+   | PPC64 Options. |                                                   \
+   *****************/                                                   \
+  /* Minimum immediate size to use TOC */                               \
   F(uint16_t, PPC64MinTOCImmSize, 64)                                   \
+  /* Relocation features. Use with care on production */                \
+  /*  Allow a Far branch be converted to a Near branch. */              \
+  F(bool, PPC64RelocationShrinkFarBranches, false)                      \
+  /*  Remove nops from a Far branch. */                                 \
+  F(bool, PPC64RelocationRemoveFarBranchesNops, true)                   \
   /********************                                                 \
    | Profiling flags. |                                                 \
    ********************/                                                \

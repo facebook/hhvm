@@ -37,21 +37,15 @@ namespace ppc64 {
 
 constexpr uint8_t kStdIns = ppc64_asm::instr_size_in_bytes;
 
-// li64
-constexpr size_t smashableMovqLen() { return kStdIns * 5; }
+// limmediate
+constexpr size_t smashableMovqLen() { return ppc64_asm::Assembler::kLimmLen; }
 
-// li64 + cmpd
-constexpr size_t smashableCmpqLen() { return kStdIns * 6; }
+// limmediate + lwz + extsw + cmpd
+constexpr size_t smashableCmpqLen() { return smashableMovqLen() + 3*kStdIns; }
 
 // The following instruction size is from the beginning of the smashableCall
-// to the address the LR saves upon branching with bctrl (so the following)
-// Currently this calculation considers:
-// prologue, li64 (5 instr), mtctr, nop, nop, bctrl
-constexpr size_t smashableCallLen() {
-  return ppc64_asm::Assembler::kCallLen;
-}
-
-// li64 + mtctr + nop + nop + bcctr
+// to the address the LR saves upon branching with bctrl
+constexpr size_t smashableCallLen() { return ppc64_asm::Assembler::kCallLen; }
 constexpr size_t smashableJccLen()  { return ppc64_asm::Assembler::kJccLen; }
 
 // Same length as Jcc.
@@ -61,7 +55,9 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
 TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
                       PhysReg r, int8_t disp);
-TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
+TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target,
+                      ppc64_asm::Assembler::CallArg ca =
+                        ppc64_asm::Assembler::CallArg::SmashInt);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
                      ConditionCode cc);

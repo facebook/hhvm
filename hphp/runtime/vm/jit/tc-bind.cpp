@@ -65,7 +65,7 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
 
       case Arch::PPC64:
         ppc64_asm::DecodedInstruction di(toSmash);
-        return (di.isBranch() && !di.isJmp());
+        return di.isBranch(ppc64_asm::AllowCond::OnlyCond);
     }
     not_reached();
   }();

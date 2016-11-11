@@ -134,7 +134,7 @@ struct CurlResource : SweepableResourceData {
   char m_error_str[CURL_ERROR_SIZE + 1];
   CURLcode m_error_no;
 
-  std::shared_ptr<ToFree> m_to_free;
+  req::shared_ptr<ToFree> m_to_free;
 
   String m_url;
   String m_header;

@@ -51,7 +51,7 @@ CurlMultiAwait::CurlMultiAwait(req::ptr<CurlMultiResource> multi,
   int64_t timeout_ms = timeout * 1000;
   if (timeout_ms > 0) {
     auto asio_event_base = getSingleton<AsioEventBase>();
-    m_timeout = std::make_shared<CurlTimeoutHandler>(asio_event_base.get(),
+    m_timeout = req::make_shared<CurlTimeoutHandler>(asio_event_base.get(),
                                                      this);
 
     asio_event_base->runInEventBaseThreadAndWait([this,timeout_ms] {
@@ -92,7 +92,7 @@ void CurlMultiAwait::setFinished(int fd) {
 void CurlMultiAwait::addHandle(int fd, int events) {
   auto asio_event_base = getSingleton<AsioEventBase>();
   auto handler =
-    std::make_shared<CurlEventHandler>(asio_event_base.get(), fd, this);
+    req::make_shared<CurlEventHandler>(asio_event_base.get(), fd, this);
   handler->registerHandler(events);
   m_handlers.push_back(handler);
 }

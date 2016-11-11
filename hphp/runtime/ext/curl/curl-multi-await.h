@@ -25,8 +25,8 @@ struct CurlMultiAwait : AsioExternalThreadEvent {
   int addLowHandles(req::ptr<CurlMultiResource> multi);
   int addHighHandles(req::ptr<CurlMultiResource> multi);
 
-  std::shared_ptr<CurlTimeoutHandler> m_timeout;
-  std::vector<std::shared_ptr<CurlEventHandler>> m_handlers;
+  req::shared_ptr<CurlTimeoutHandler> m_timeout;
+  req::vector<req::shared_ptr<CurlEventHandler>> m_handlers;
   int m_result{-1};
   bool m_finished{false};
 };

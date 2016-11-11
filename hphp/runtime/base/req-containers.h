@@ -54,7 +54,7 @@ namespace HPHP { namespace req {
  */
 
 /*
- * All these replacements purposefully derive from standard types and
+ * Most of these replacements purposefully derive from standard types and
  * containers, which is normally not recommended. This is needed so we can add
  * GC type-scanner annotations. This is safe because we don't add any members,
  * nor change any functionality.
@@ -87,11 +87,34 @@ unique_ptr<T> make_unique(Args&&... args) {
   );
 }
 
+template <typename T> struct weak_ptr;
+
+/*
+ * req::shared_ptr does not derive from std::shared_ptr.
+ * 1) They have different scopes (req::shared_ptr is per-request)
+ * 2) Guaranteeing req::shared_ptr's can only be instantiated via make_shared
+ *    makes type scanning easier.
+ */
+
 template <typename T>
-struct shared_ptr final : std::shared_ptr<T> {
-  using Base = std::shared_ptr<T>;
-  using Base::Base;
-  TYPE_SCAN_IGNORE_BASES(Base);
+struct shared_ptr final  {
+  shared_ptr() = default;
+  explicit shared_ptr(std::nullptr_t) :
+    m_std_ptr(nullptr) {
+  }
+  template<class Y>
+  shared_ptr( const shared_ptr<Y>& r )
+    : m_std_ptr(r.m_std_ptr) {
+  }
+  template <class Y>
+  shared_ptr(shared_ptr<Y>&& r)
+    : m_std_ptr(std::move(r.m_std_ptr)) {
+  }
+  template<class Y>
+  explicit shared_ptr(const weak_ptr<Y>& r)
+    : m_std_ptr(r) {
+  }
+
   TYPE_SCAN_CUSTOM(T) {
     // FIXME: This will cause T to get conservative scanned (because get() might
     // be an interior pointer). We can't just eagerly scan the pointer as a T
@@ -99,22 +122,73 @@ struct shared_ptr final : std::shared_ptr<T> {
     // T. See t10336778.
     scanner.enqueue(this->get());
   }
+
+  T* get() const {
+    return m_std_ptr.get();
+  }
+  T& operator*() const {
+    return *get();
+  }
+  T* operator->() const {
+    return get();
+  }
+  explicit operator bool() const {
+    return get() != nullptr;
+  }
+  template <class U>
+  bool operator==(const shared_ptr<U>& rhs) {
+    return m_std_ptr == rhs.m_std_ptr;
+  }
+  template<class Y>
+  shared_ptr& operator=(const shared_ptr<Y>& r) {
+    m_std_ptr = r.m_std_ptr;
+    return *this;
+  }
+  template<class Y>
+  shared_ptr& operator=(shared_ptr<Y>&& r) {
+    m_std_ptr = std::move(r.m_std_ptr);
+    return *this;
+  }
+  void reset() {
+    m_std_ptr.reset();
+  }
+  void swap(shared_ptr& r)  {
+    m_std_ptr.swap(r.m_std_ptr);
+  }
+  void swap(T& t)  {
+    m_std_ptr.swap(t);
+  }
+
+  template<class U, class... Args>
+  friend shared_ptr<U> make_shared(Args&&... args);
+  friend struct weak_ptr<T>;
+
+  private:
+    std::shared_ptr<T> m_std_ptr;
+    template<class Y>
+    /* implicit */ shared_ptr( const std::shared_ptr<Y>& r )
+      : m_std_ptr(r) {
+    }
 };
+
 
 template<class T, class... Args>
 shared_ptr<T> make_shared(Args&&... args) {
-  return static_cast<shared_ptr<T>>(
-    std::allocate_shared<T>(
-      ConservativeAllocator<T>(),
-      std::forward<Args>(args)...
-    )
-  );
+  return shared_ptr<T>(std::make_shared<T>(std::forward<Args>(args)...));
+}
+
+template <class T>
+void swap( shared_ptr<T>& lhs, shared_ptr<T>& rhs ) {
+  lhs.swap(rhs);
 }
 
 template <typename T>
 struct weak_ptr final : std::weak_ptr<T> {
   using Base = std::weak_ptr<T>;
-  using Base::Base;
+  template <class Y>
+    explicit weak_ptr ( const shared_ptr<Y>& r ) :
+    Base(r.m_std_ptr) {
+  }
   shared_ptr<T> lock() const {
     return shared_ptr<T>(Base::lock());
   }

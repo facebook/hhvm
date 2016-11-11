@@ -50,7 +50,7 @@ typedef struct _zend_object_store_bucket {
   // bucket.obj.object is a void* that typically points to an
   // extension custom object, which can contain zval* (RefData*),
   // HashTable* (ArrayData*), etc.
-  TYPE_SCAN_CONSERVATIVE_FIELD(bucket);
+  TYPE_SCAN_CONSERVATIVE_FIELD(obj);
 } zend_object_store_bucket;
 
 typedef struct _zend_objects_store {

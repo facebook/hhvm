@@ -851,7 +851,7 @@ let source_extent_lfun file source f =
 let rec find_should_ignore_stmt (stmt : Ast.stmt) : bool =
   match stmt with
   | Ast.Unsafe | Ast.Fallthrough | Ast.Expr _ | Ast.Break _ | Ast.Continue _
-  | Ast.Return (_, _) | Ast.Static_var _ | Ast.Noop -> true
+  | Ast.Return (_, _) | Ast.Noop -> true
   | Ast.Block sl -> begin
      match sl with
      | [] -> true

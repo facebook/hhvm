@@ -82,8 +82,7 @@ end = struct
     | Foreach _
     | Noop
     | Fallthrough
-    | Expr _
-    | Static_var _ -> ()
+    | Expr _ -> ()
 
   and terminal_catchl env inside_case = function
     | [] -> raise Exit
@@ -160,8 +159,7 @@ end = struct
     | For _
     | Foreach _
     | Noop
-    | Expr _
-    | Static_var _ -> ()
+    | Expr _ -> ()
 
   and terminal_catchl env = function
     | [] -> raise Exit

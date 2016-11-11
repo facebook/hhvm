@@ -107,8 +107,6 @@ object(this)
     | Try     (b, cl, fb)     ->
        Try (this#on_block env b, handle_list this#on_catch env cl,
             this#on_block env fb)
-    | Static_var el           ->
-       Static_var (handle_list_list this#on_expr env el)
     | Unsafe | Noop | Fallthrough -> s) |>
       function stm -> [stm]
 

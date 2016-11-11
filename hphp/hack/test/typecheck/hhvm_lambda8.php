@@ -1,9 +1,9 @@
 <?hh
 class C {
+  private static $k = 0;
   private function bar() {
-    static $k = 0;
-    ++$k;
-    echo "$k\n";
+    ++self::$k;
+    echo self::$k . "\n";
     var_dump($this);
   }
   public function foo1() {

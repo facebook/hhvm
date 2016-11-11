@@ -417,5 +417,3 @@ and emit_stmt env stmt =
     let env = opt_fold (emit_fault_cleanup ~cleanup:cleanup) env opt_faultlet in
 
     env, false
-
-  | N.Static_var _ -> unimpl "static variables"

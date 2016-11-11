@@ -65,15 +65,3 @@ end = struct
   let ty x = try ty x; None with Found x -> Some x
 
 end
-
-(* Function making sure that a type can be generalized, in our case it just
- * means the type should be monomorphic
-*)
-let no_generic p local_var_id env =
-  let env, ty = Env.get_local env local_var_id in
-  let ty = Typing_expand.fully_expand env ty in
-  match IsGeneric.ty ty with
-  | None -> env
-  | Some x ->
-      Errors.generic_static p x;
-      env

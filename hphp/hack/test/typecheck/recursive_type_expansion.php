@@ -12,5 +12,5 @@
 function test(): void {
   $x = new Vector();
   $x[0] = $x;
-  static $y = $x;
+  return $x;
 }

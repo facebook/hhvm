@@ -357,12 +357,27 @@ static void exit_on_timeout(int sig) {
   abort();
 }
 
+// Tell OOM killer to kill this process if it has to.  This is used during
+// server shutdown.  If we are dying anyway, let's try to protect others.
+static void oom_sacrifice() {
+#ifdef __linux__
+  // Use open() instead of fopen() here to avoid additional buffering and
+  // allocation, which could go wrong if memory is really limited.
+  int fd = open("/proc/self/oom_score_adj", O_WRONLY, 0);
+  if (fd >= 0) {
+    write(fd, "800", 3);
+    close(fd);
+  }
+#endif
+}
+
 void HttpServer::stop(const char* stopReason) {
   if (m_stopped) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
+  oom_sacrifice();
 
   if (RuntimeOption::ServerKillOnTimeout) {
     int totalWait =
@@ -404,6 +419,7 @@ void HttpServer::stopOnSignal(int sig) {
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
+  oom_sacrifice();
 
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM

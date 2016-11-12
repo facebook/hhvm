@@ -208,7 +208,8 @@ const RegionDesc::BlockVec& RegionDesc::blocks() const {
 
 RegionDesc::BlockData& RegionDesc::data(BlockId id) {
   auto it = m_data.find(id);
-  always_assert_flog(it != m_data.end(), "BlockId {} doesn't exist in m_data");
+  always_assert_flog(it != m_data.end(),
+                     "BlockId {} doesn't exist in m_data", id);
   return it->second;
 }
 

@@ -569,7 +569,7 @@ SetArray* SetArray::grow(uint32_t newScale) {
   assert(ad->kind() == kind());
   assert(ad->m_size == m_size);
   assert(ad->m_scale == newScale);
-  assert(ad->m_used = oldUsed);
+  assert(ad->m_used == oldUsed);
   assert(ad->checkInvariants());
   return ad;
 }

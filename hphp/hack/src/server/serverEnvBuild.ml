@@ -16,11 +16,6 @@ open ServerEnv
 
 module SLC = ServerLocalConfig
 
-(** Returns a random filepath within given dir with the given file extension. *)
-let random_filepath dir extension =
-  let name = Random_id.(short_string_with_alphabet alphanumeric_alphabet) in
-  Filename.concat dir (Printf.sprintf "%s.%s" name extension)
-
 let make_genv options config local_config handle =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
@@ -43,13 +38,6 @@ let make_genv options config local_config handle =
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
   let debug_port = Option.map (ServerArgs.debug_client options)
     ~f:(fun handle -> Debug_port.out_port_of_handle handle)
-  in
-  let recorder = if local_config.SLC.start_with_recorder_on
-    then Recorder.start {
-      Recorder.transcriber = Recorder.Transcribe_to_file
-        (random_filepath GlobalConfig.tmp_dir Recorder.file_extension);
-    }
-    else Recorder.default_instance
   in
   let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with
@@ -124,7 +112,6 @@ let make_genv options config local_config handle =
     config;
     local_config;
     debug_port;
-    recorder;
     workers;
     indexer;
     notifier_async;
@@ -139,7 +126,6 @@ let default_genv =
     config           = ServerConfig.default_config;
     local_config     = ServerLocalConfig.default;
     debug_port       = None;
-    recorder         = Recorder.default_instance;
     workers          = None;
     indexer          = (fun _ -> fun () -> []);
     notifier_async   = (fun () ->

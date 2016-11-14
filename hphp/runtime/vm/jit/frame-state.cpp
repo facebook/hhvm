@@ -601,7 +601,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case CufIterSpillFrame:
     spillFrameStack(inst->extra<CufIterSpillFrame>()->spOffset,
-                    cur().irSPOff, inst);
+                    cur().bcSPOff, inst);
     break;
   case SpillFrame:
     spillFrameStack(inst->extra<SpillFrame>()->spOffset,
@@ -613,7 +613,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     auto const& extra = *inst->extra<InterpOneData>();
     if (isFPush(extra.opcode)) {
       cur().fpiStack.push_back(FPIInfo { cur().spValue,
-                                         cur().irSPOff,
+                                         cur().bcSPOff - extra.cellsPopped,
                                          TCtx,
                                          nullptr,
                                          extra.opcode,

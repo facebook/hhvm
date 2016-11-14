@@ -4160,5 +4160,10 @@ let from_file ?(quick = false) popt file =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   program ~quick popt file content
 
+let get_file_mode popt file content =
+  let lb = Lexing.from_string content in
+  let env = init_env file lb popt false in
+  snd (get_header env)
+
 let from_file_with_default_popt ?(quick = false) file =
   from_file ~quick ParserOptions.default file

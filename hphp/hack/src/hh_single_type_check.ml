@@ -444,7 +444,7 @@ let with_named_body opts n_fun =
   { n_fun with Nast.f_body = Nast.NamedBody n_f_body }
 
 let n_fun_fold opts fn acc (_, fun_name) =
-  match Parser_heap.find_fun_in_file_full opts fn fun_name with
+  match Parser_heap.find_fun_in_file ~full:true opts fn fun_name with
   | None -> acc
   | Some f ->
     let n_fun = Naming.fun_ opts f in

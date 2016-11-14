@@ -29,7 +29,11 @@ let get_contents fn =
   match FileHeap.get fn with
   | Some Ide f -> Some f.File_content.content
   | Some Disk contents -> Some contents
-  | None -> None
+  | None ->
+      let contents =
+      try Sys_utils.cat (Relative_path.to_absolute fn) with _ -> "" in
+      FileHeap.add fn (Disk contents);
+      Some contents
 
 let get_ide_contents_unsafe fn =
   match FileHeap.get fn with

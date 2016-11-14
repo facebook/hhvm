@@ -31,7 +31,7 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     let description = "ParserLocal"
   end)
 
-let get_from_local_cache popt file_name =
+let get_from_local_cache ~full popt file_name =
   match LocalParserCache.get file_name with
   | Some ast -> ast
   | None ->
@@ -39,9 +39,15 @@ let get_from_local_cache popt file_name =
         match File_heap.get_contents file_name with
         | Some contents -> contents
         | None -> "" in
+        let contents = let fn = (Relative_path.to_absolute file_name) in
+          if (FindUtils.is_php fn
+          && not (FilesToIgnore.should_ignore fn))
+          && Parser_hack.get_file_mode popt file_name contents <> None then
+          contents else "" in
         let { Parser_hack.ast;
-          _ } = Parser_hack.program popt file_name contents in
-        LocalParserCache.add file_name ast;
+          _ } = Parser_hack.program popt ~quick:(not full) file_name contents in
+        if full then
+          LocalParserCache.add file_name ast;
         ast
 
 let get_class defs class_name =
@@ -72,34 +78,30 @@ let get_const defs name =
     | _ -> acc
   end
 
-let get_from_parser_heap ?(full = false) ?popt file_name name get_element =
+(* Get an AST directly from the parser heap. Will return empty AProgram
+   if the file does not exist
+*)
+let get_from_parser_heap ?(full = false) popt file_name =
   match ParserHeap.get file_name with
-    | None -> None
+    | None ->
+      let ast = get_from_local_cache ~full popt file_name in
+      (* Only store decl asts *)
+      if not full then
+      ParserHeap.add file_name (ast, Decl);
+      ast
     | Some (_, Decl) when full ->
-      let ast = get_from_local_cache (Utils.unsafe_opt popt) file_name in
-      get_element ast name
-    | Some (defs, _) -> get_element defs name
+      let ast = get_from_local_cache ~full popt file_name in
+      ast
+    | Some (defs, _) -> defs
 
-let find_class_in_file file_name class_name =
-  get_from_parser_heap file_name class_name get_class
+let find_class_in_file ?(full = false) popt file_name class_name =
+  get_class (get_from_parser_heap ~full popt file_name) class_name
 
-let find_class_in_file_full popt file_name class_name =
-  get_from_parser_heap ~full:true ~popt file_name class_name get_class
+let find_fun_in_file ?(full = false) popt file_name fun_name =
+  get_fun (get_from_parser_heap ~full popt file_name) fun_name
 
-let find_fun_in_file file_name fun_name =
-  get_from_parser_heap file_name fun_name get_fun
+let find_typedef_in_file ?(full = false) popt file_name name =
+  get_typedef (get_from_parser_heap ~full popt file_name) name
 
-let find_fun_in_file_full popt file_name fun_name =
-  get_from_parser_heap ~full:true ~popt file_name fun_name get_fun
-
-let find_typedef_in_file file_name name =
-  get_from_parser_heap file_name name get_typedef
-
-let find_typedef_in_file_full popt file_name name =
-  get_from_parser_heap ~full:true ~popt file_name name get_typedef
-
-let find_const_in_file file_name name =
-  get_from_parser_heap file_name name get_const
-
-let find_const_in_file_full popt file_name name =
-  get_from_parser_heap ~full:true ~popt file_name name get_const
+let find_const_in_file ?(full = false) popt file_name name =
+  get_const (get_from_parser_heap ~full popt file_name) name

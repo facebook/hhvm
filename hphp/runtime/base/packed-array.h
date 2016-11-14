@@ -213,6 +213,10 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
+  /*
+   * Like MakePacked, but with `values' array in natural (not reversed) order.
+   */
+  static ArrayData* MakePackedNatural(uint32_t size, const TypedValue* values);
 
   static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
@@ -253,6 +257,7 @@ private:
   static ArrayData* MakeReserveImpl(uint32_t, HeaderKind);
   static ArrayData* MakeReserveSlow(uint32_t, HeaderKind);
 
+  template<bool reverse>
   static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
 
   static ArrayData* MakeUninitializedImpl(uint32_t, HeaderKind);

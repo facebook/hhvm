@@ -193,6 +193,59 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
   return ad;
 }
 
+MixedArray* MixedArray::MakeMixed(uint32_t size,
+                                  const TypedValue* keysAndValues) {
+  assert(size > 0);
+
+  auto const scale = computeScaleFromSize(size);
+  auto const ad    = reqAllocArray(scale);
+
+  auto const data = mixedData(ad);
+  auto const hash = mixedHash(data, scale);
+  ad->initHash(hash, scale);
+
+  ad->m_sizeAndPos       = size; // pos=0
+  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
+  ad->m_nextKI           = 0;
+
+
+  // Append values by moving -- Caller assumes we update refcount.
+  for (uint32_t i = 0; i < size; i++) {
+    hash_t h;
+    auto& kTv = keysAndValues[i * 2];
+    if (kTv.m_type == KindOfString) {
+      auto k = kTv.m_data.pstr;
+      h = k->hash();
+      auto ei = ad->findForInsert(k, h);
+      if (validPos(*ei)) return nullptr;
+      data[i].setStrKey(k, h);
+      *ei = i;
+    } else {
+      assert(kTv.m_type == KindOfInt64);
+      auto k = kTv.m_data.num;
+      h = hashint(k);
+      auto ei = ad->findForInsert(k, h);
+      if (validPos(*ei)) return nullptr;
+      data[i].setIntKey(k, h);
+      *ei = i;
+    }
+    const auto& tv = keysAndValues[(i * 2) + 1];
+    data[i].data.m_data = tv.m_data;
+    data[i].data.m_type = tv.m_type;
+  }
+
+  assert(ad->m_size == size);
+  assert(ad->m_pos == 0);
+  assert(ad->kind() == kMixedKind);
+  assert(ad->m_scale == scale);
+  assert(ad->hasExactlyOneRef());
+  assert(ad->m_used == size);
+  assert(ad->m_nextKI == 0);
+  assert(ad->checkInvariants());
+  return ad;
+}
+
 // for internal use by copyStatic() and copyMixed()
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,

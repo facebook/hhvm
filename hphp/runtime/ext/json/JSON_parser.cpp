@@ -313,16 +313,176 @@ enum class ContainerType {
 
 namespace {
 
+NEVER_INLINE
+static void tvDecRefRange(TypedValue* begin, TypedValue* end) {
+  assert(begin <= end);
+  for (auto tv = begin; tv != end; ++tv) {
+    tvRefcountedDecRef(tv);
+  }
+}
+
 /*
- * Malloc'ed string buffer that does NOT check its capacity in release mode.
- * The user must ensure to never append past the given allocation.
+ * Parses a subset of JSON. Currently unsupported:
+ * - Non-ASCII
+ * - Superfluous whitespace
+ * - Character escape sequences
+ * - Non-string array keys
+ * - Numbers that are not integers in [0..9e18)
+ * - True/false/null
+ * - Arrays nested > 255 levels
+ */
+struct SimpleParser {
+  static constexpr int kMaxArrayDepth = 255;
+
+  /*
+   * Returns buffer size in bytes needed to handle any input up to given length.
+   */
+  static size_t BufferBytesForLength(int length) {
+    return (length + 1) * sizeof(TypedValue) / 2;  // Worst case: "[0,0,...,0]"
+  }
+
+  /*
+   * Returns false for unsupported or malformed input (does not distinguish).
+   */
+  static bool TryParse(const char* inp, int length,
+                       TypedValue* buf,
+                       Variant& out) {
+    SimpleParser parser(inp, length, buf);
+    if (!parser.parseValue() || parser.p != inp + length) {
+      // Unsupported, malformed, or trailing garbage. Release entire stack.
+      tvDecRefRange(buf, parser.top);
+      return false;
+    }
+    out = Variant::attach(*--parser.top);
+    return true;
+  }
+
+ private:
+  SimpleParser(const char* input, int length, TypedValue* buffer)
+      : p(input),
+        top(buffer),
+        array_depth(-kMaxArrayDepth) /* Start negative to simplify check. */ {
+    assert(input[length] == 0);  // Parser relies on sentinel to avoid checks.
+  }
+
+  bool parseValue() {
+    auto const ch = *p++;
+    if (ch == '{') return parseMixed();
+    else if (ch == '[') return parsePacked();
+    else if (ch == '\"') return parseString();
+    else if (ch >= '0' && ch <= '9') return parseNumber(ch - '0');
+    else return false;
+  }
+
+  bool parseString() {
+    int len = 0;
+    auto const charTop = reinterpret_cast<signed char*>(top);
+    for (signed char ch = *p++; ch != '\"'; ch = *p++) {
+      charTop[len++] = ch;
+      // Signed char means less than ' ' also catches non-ASCII.
+      if (ch < ' ' || ch == '\\' || ch == '\'') return false;
+    }
+    pushStringData(StringData::Make(
+      reinterpret_cast<char*>(charTop), len, CopyString));
+    return true;
+  }
+
+  bool parsePacked() {
+    auto const fp = top;
+    if (*p == ']') {
+      ++p;
+    } else {
+      if (++array_depth >= 0) return false;
+      do {
+        if (!parseValue()) return false;
+      } while (*p++ == ',');
+      --array_depth;
+      if (p[-1] != ']') return false;  // Trailing ',' not supported.
+    }
+    auto arr = top == fp ? staticEmptyArray() :
+                           PackedArray::MakePackedNatural(top - fp, fp);
+    if (!arr) return false;
+    top = fp;
+    pushArrayData(arr);
+    return true;
+  }
+
+  bool parseMixed() {
+    auto const fp = top;
+    if (*p == '}') {
+      ++p;  // Empty array.
+    } else {
+      if (++array_depth >= 0) return false;
+      do {
+        if (*p++ != '\"') return false;  // Only support string keys.
+        if (!parseString()) return false;
+        TypedValue& tv = top[-1];
+        // PHP array semantics: integer-like keys are converted.
+        if (tv.m_data.pstr->isStrictlyInteger(tv.m_data.num)) {
+          tv.m_type = KindOfInt64;
+        }
+        // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
+        if (*p++ != ':') return false;
+        if (!parseValue()) return false;
+      } while (*p++ == ',');
+      --array_depth;
+      if (p[-1] != '}') return false;  // Trailing ',' not supported.
+    }
+    auto const arr = top == fp ?
+      staticEmptyArray() :
+      MixedArray::MakeMixed((top - fp) >> 1, fp)->asArrayData();
+    if (!arr) return false;
+    top = fp;
+    pushArrayData(arr);
+    return true;
+  }
+
+  // Parse remainder of integer in [0..9e18) after initial digit 'init'.
+  bool parseNumber(int64_t init) {
+    int len = 0;
+    auto n = init;
+    if (n > 0) {
+      while (*p >= '0' && *p <= '9') {
+        n = n * 10 + (*p++ - '0');
+        ++len;
+      }
+    }
+    pushInt64(n);
+    return len < 19 || (len == 19 && init <= 8);
+  }
+
+  void pushInt64(int64_t data) {
+    auto const tv = top++;
+    tv->m_type = KindOfInt64;
+    tv->m_data.num = data;
+  }
+
+  void pushStringData(StringData* data) {
+    auto const tv = top++;
+    tv->m_type = KindOfString;
+    tv->m_data.pstr = data;
+  }
+
+  void pushArrayData(ArrayData* data) {
+    auto const tv = top++;
+    tv->m_type = KindOfArray;
+    tv->m_data.parr = data;
+  }
+
+  const char* p;
+  TypedValue* top;
+  int array_depth;
+};
+
+/*
+ * String buffer wrapper that does NOT check its capacity in release mode. User
+ * supplies the allocation and must ensure to never append past the end.
  */
 struct UncheckedBuffer {
   void clear() { p = begin; }
-  // Clear and allocate a buffer with space for 'cap' chars, including '\0'.
-  void clearResize(int cap) {
-    free(begin);
-    begin = p = cap > 0 ? (char*)malloc(cap) : (char*)nullptr;
+  // Use given buffer with space for 'cap' chars, including '\0'.
+  void setBuf(char* buf, size_t cap) {
+    begin = p = buf;
 #ifdef DEBUG
     end = begin + cap;
 #endif
@@ -367,26 +527,41 @@ struct json_parser {
   int mark; // the watermark
   int depth;
   json_error_codes error_code;
-  // Thread-local buffers; reset on each call. Since JSON parsing cannot lead
-  // to code execution, we need not be re-entrant.
+  // Thread-local buffer; reused on each call. JSON parsing cannot lead to code
+  // execution and is not re-entrant. SimpleParser assumes no surprise checks.
+  union {
+    TypedValue* tv{nullptr};  // SimpleParser's stack.
+    char* raw;                // sb_buf/key
+  } tl_buffer;
+  TYPE_SCAN_IGNORE_FIELD(tv);
   UncheckedBuffer sb_buf;
   UncheckedBuffer sb_key;
-  int sb_cap{0};
+  int sb_cap{0};  // Capacity of each of sb_buf/key.
+
   void initSb(int length) {
     if (UNLIKELY(length >= sb_cap)) {
       // No decoded string in the output can use more bytes than input size.
       sb_cap = length + 1;
-      sb_buf.clearResize(sb_cap);
-      sb_key.clearResize(sb_cap);
+      size_t bufSize = length <= RuntimeOption::EvalSimpleJsonMaxLength ?
+        SimpleParser::BufferBytesForLength(length) :
+        sb_cap * 2;
+      if (tl_buffer.raw) delete[] tl_buffer.raw;
+      tl_buffer.raw = new char[bufSize];
+      sb_buf.setBuf(tl_buffer.raw, sb_cap);
+      sb_key.setBuf(tl_buffer.raw + sb_cap, sb_cap);
     } else {
       sb_buf.clear();
       sb_key.clear();
     }
   }
   void flushSb() {
+    if (tl_buffer.raw) {
+      delete[] tl_buffer.raw;
+      tl_buffer.raw = nullptr;
+    }
     sb_cap = 0;
-    sb_buf.clearResize(0);
-    sb_key.clearResize(0);
+    sb_buf.setBuf(nullptr, 0);
+    sb_key.setBuf(nullptr, 0);
   }
 };
 
@@ -691,10 +866,26 @@ ContainerType get_container_type_from_options(int64_t options) {
  */
 bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                  int depth, int64_t options) {
+  json_parser *json = s_json_parser.get(); /* the parser state */
+  // Clear and reuse the thread-local string buffers. They are only freed if
+  // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
+  // is explicitly flushed (e.g., due to being idle).
+  json->initSb(length);
+
+  // SimpleParser only handles the most common set of options. Also, only use it
+  // if its array nesting depth check is *more* restrictive than what the user
+  // asks for, to ensure that the precise semantics of the general case is
+  // applied for all nesting overflows.
+  if (assoc && options == k_JSON_FB_LOOSE &&
+      depth >= SimpleParser::kMaxArrayDepth &&
+      length <= RuntimeOption::EvalSimpleJsonMaxLength &&
+      SimpleParser::TryParse(p, length, json->tl_buffer.tv, z)) {
+    return true;
+  }
+
   int b;  /* the next character */
   int c;  /* the next character class */
   int s;  /* the next state */
-  json_parser *json = s_json_parser.get(); /* the parser state */
   int state = 0;
 
   /*<fb>*/
@@ -712,10 +903,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   }
   /*</fb>*/
 
-  // Clear and reuse the thread-local string buffers. They are only freed if
-  // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
-  // is explicitly flushed (e.g., due to being idle).
-  json->initSb(length);
   UncheckedBuffer *buf = &json->sb_buf;
   UncheckedBuffer *key = &json->sb_key;
   static const int kMaxPersistentStringBufferCapacity = 256 * 1024;

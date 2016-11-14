@@ -516,6 +516,7 @@ ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
   return ad;
 }
 
+template<bool reverse>
 ALWAYS_INLINE
 ArrayData* PackedArray::MakePackedImpl(uint32_t size,
                                        const TypedValue* values,
@@ -544,11 +545,9 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   }
 
   // Append values by moving -- Caller assumes we update refcount.
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
   auto ptr = reinterpret_cast<TypedValue*>(ad + 1);
   for (auto i = uint32_t{0}; i < size; ++i) {
-    auto const& src = values[size - i - 1];
+    auto const& src = values[reverse ? size - i - 1 : i];
     assert(hk != HeaderKind::VecArray || src.m_type != KindOfRef);
     ptr->m_type = src.m_type;
     ptr->m_data = src.m_data;
@@ -562,14 +561,25 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
 }
 
 ArrayData* PackedArray::MakePacked(uint32_t size, const TypedValue* values) {
-  auto ad = MakePackedImpl(size, values, HeaderKind::Packed);
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
   assert(ad->isPacked());
   return ad;
 }
 
 ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
-  auto ad = MakePackedImpl(size, values, HeaderKind::VecArray);
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  auto ad = MakePackedImpl<true>(size, values, HeaderKind::VecArray);
   assert(ad->isVecArray());
+  return ad;
+}
+
+ArrayData* PackedArray::MakePackedNatural(uint32_t size,
+                                          const TypedValue* values) {
+  auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed);
+  assert(ad->isPacked());
   return ad;
 }
 

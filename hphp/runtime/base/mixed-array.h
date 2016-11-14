@@ -200,6 +200,13 @@ struct MixedArray final : private ArrayData,
   static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
 
   /*
+   * Allocates a new request-local array with given key,value,key,value,... in
+   * natural order. Returns nullptr if there are duplicate keys. Does not check
+   * for integer-like keys. Takes ownership of keys and values iff successful.
+   */
+  static MixedArray* MakeMixed(uint32_t size, const TypedValue* keysAndValues);
+
+  /*
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */

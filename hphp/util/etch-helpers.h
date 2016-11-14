@@ -53,9 +53,9 @@
 #define CFI(x)          .cfi_##x
 #define CFI2(x, y)      .cfi_##x y
 #define CFI3C(x, y, z)  .cfi_##x y##, z
-#define ETCH_ALIGN16    .align 16
-#define ETCH_ALIGN8     .align 8
-#define ETCH_ALIGN4     .align 4
+#define ETCH_ALIGN16    .align 4
+#define ETCH_ALIGN8     .align 3
+#define ETCH_ALIGN4     .align 2
 #define ETCH_SECTION(x) .section .text.x,"ax"
 #define ETCH_SIZE(x)    .size x, .-x
 #define ETCH_NAME(x)    x

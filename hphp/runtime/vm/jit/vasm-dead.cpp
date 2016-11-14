@@ -70,7 +70,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cmpqim:
     case Vinstr::cmpqm:
     case Vinstr::cmpsd:
-    case Vinstr::cmpsds:
     case Vinstr::cmpwim:
     case Vinstr::cmpwm:
     case Vinstr::copy:
@@ -149,8 +148,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::nop:
     case Vinstr::not:
     case Vinstr::notb:
-    case Vinstr::orsw:
-    case Vinstr::orswi:
     case Vinstr::orq:
     case Vinstr::orqi:
     case Vinstr::psllq:
@@ -168,12 +165,12 @@ bool effectful(Vinstr& inst) {
     case Vinstr::shrqi:
     case Vinstr::sqrtsd:
     case Vinstr::srem:
+    case Vinstr::subb:
     case Vinstr::subbi:
     case Vinstr::subl:
     case Vinstr::subli:
     case Vinstr::subq:
     case Vinstr::subqi:
-    case Vinstr::subsb:
     case Vinstr::subsd:
     case Vinstr::testb:
     case Vinstr::testbi:
@@ -188,7 +185,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::testwim:
     case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
-    case Vinstr::uxth:
     case Vinstr::xorb:
     case Vinstr::xorbi:
     case Vinstr::xorl:

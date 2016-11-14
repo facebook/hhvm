@@ -176,6 +176,7 @@ struct Vunit;
   O(shrqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
+  O(subb, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(subbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subl, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(subli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
@@ -299,8 +300,6 @@ struct Vunit;
   O(asrxi, I(s0), UH(s1,d), DH(d,s1))\
   O(asrxis, I(s0), U(s1) U(d), D(df) D(sf))\
   O(cmplims, I(s0), U(s1), D(sf))\
-  O(cmpsds, I(pred), UA(s0) U(s1), D(d))\
-  O(fabs, Inone, U(s), D(d))\
   O(fcvtzs, Inone, U(s), D(d))\
   O(lslwi, I(s0), UH(s1,d), DH(d,s1))\
   O(lslwis, I(s0), U(s1) U(d), D(df) D(sf))\
@@ -312,15 +311,12 @@ struct Vunit;
   O(lsrxis, I(s0), U(s1) U(d), D(df) D(sf))\
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
-  O(orswi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(orsw, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
-  O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
   O(extrb, Inone, UH(s,d), DH(d,s))\
   O(extrw, Inone, UH(s,d), DH(d,s))\
   O(extsb, Inone, UH(s,d), DH(d,s))\
   O(extsw, Inone, UH(s,d), DH(d,s))\
+  O(fabs, Inone, U(s), D(d))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
   O(fctidz, Inone, U(s), D(d) D(sf))\
@@ -966,6 +962,7 @@ struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct psllq { Immed s0; VregDbl s1, d; };
 struct psrlq { Immed s0; VregDbl s1, d; };
 // sub: s1 - s0 => d, sf
+struct subb { Vreg8 s0; Vreg8 s1, d; VregSF sf; };
 struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
@@ -1142,9 +1139,7 @@ struct addxi { Immed s0; Vreg64 s1, d; };
 struct asrxi { Immed s0; Vreg64 s1, d; };
 struct asrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct cmplims { Immed s0; Vptr s1; VregSF sf; };
-struct cmpsds { ComparisonPred pred; VregDbl s0, s1, d; VregSF sf; };
-struct fabs { VregDbl s, d; };
-struct fcvtzs { VregDbl s; Vreg64 d;};
+struct fcvtzs { VregDbl s; Vreg64 d; };
 struct lslwi { Immed s0; Vreg32 s1, d; };
 struct lslwis { Immed s0; Vreg32 s1, d, df; VregSF sf; };
 struct lslxi { Immed s0; Vreg64 s1, d; };
@@ -1155,10 +1150,6 @@ struct lsrxi { Immed s0; Vreg64 s1, d; };
 struct lsrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
-struct orswi { Immed s0; Vreg32 s1, d; VregSF sf; };
-struct orsw { Vreg32 s0, s1, d; VregSF sf; };
-struct subsb { Vreg8 s0, s1, d; VregSF sf; };
-struct uxth { Vreg16 s; Vreg32 d; };
 
 /*
  * ppc64 intrinsics.
@@ -1167,6 +1158,7 @@ struct extrb { Vreg8 s; Vreg8 d; };   // Extract and zeros the upper bits
 struct extrw { Vreg16 s; Vreg64 d; }; // Extract and zeros the upper bits
 struct extsb { Vreg64 s; Vreg64 d; }; // Extend byte sign
 struct extsw { Vreg64 s; Vreg64 d; }; // Extend word sign
+struct fabs { VregDbl s, d; };
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };

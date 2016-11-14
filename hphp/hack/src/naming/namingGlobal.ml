@@ -27,6 +27,29 @@ module SN = Naming_special_names
 let canon_key = String.lowercase
 
 module GEnv = struct
+  let get_full_pos popt (pos, name) =
+    try
+    match pos with
+      | FileInfo.Full p -> p, name
+      | FileInfo.File (FileInfo.Class, fn) ->
+        let res = unsafe_opt (Parser_heap.find_class_in_file popt fn name) in
+        let (p', _) = res.Ast.c_name in
+        p', name
+      | FileInfo.File (FileInfo.Typedef, fn) ->
+        let res = unsafe_opt (Parser_heap.find_typedef_in_file popt fn name) in
+        let (p', _) = res.Ast.t_id in
+        p', name
+      | FileInfo.File (FileInfo.Const, fn) ->
+        let res = unsafe_opt (Parser_heap.find_const_in_file popt fn name) in
+        let (p', _) = res.Ast.cst_name in
+        p', name
+      | FileInfo.File (FileInfo.Fun, fn) ->
+        let res = unsafe_opt (Parser_heap.find_fun_in_file popt fn name) in
+        let (p', _) = res.Ast.f_name in
+        p', name
+    with Not_found ->
+      assert_false_log_backtrace(
+        Some "Expected position to exist on disk, found none")
 
   let type_pos name = match TypeIdHeap.get name with
     | Some (p, _k) -> Some p
@@ -47,11 +70,28 @@ module GEnv = struct
 
   let gconst_pos name = ConstPosHeap.get name
 
+
+  let compare_pos p q =
+    let open FileInfo in
+    match p, q with
+    | Full p', Full q' -> Pos.compare p' q' = 0
+    | Full q', File(_, fn)
+    | File (_, fn), Full q' ->
+      let qf = Pos.filename q' in
+      if fn = qf then
+        assert_false_log_backtrace(
+          Some "Compared file with full pos in same file"
+        )
+      else false
+    | File (x, fn1), File (y, fn2) ->
+      fn1 = fn2 && x = y
+
+
 end
 
 (* The primitives to manipulate the naming environment *)
 module Env = struct
-  let check_not_typehint (p, name) =
+  let check_not_typehint popt (p, name) =
     let x = canon_key (Utils.strip_all_ns name) in
     match x with
     | x when (
@@ -70,44 +110,55 @@ module Env = struct
         x = SN.Typehints.boolean ||
         x = SN.Typehints.double ||
         x = SN.Typehints.real
-      ) -> Errors.name_is_reserved name p; false
+      ) ->
+        let p, name = GEnv.get_full_pos popt (p, name) in
+        Errors.name_is_reserved name p; false
     | _ -> true
 
-  let new_fun (p, name) =
+  let new_fun popt (p, name) =
     let name_key = canon_key name in
     match FunCanonHeap.get name_key with
     | Some canonical ->
       let p' = FunPosHeap.find_unsafe canonical in
-      if not (Pos.compare p p' = 0)
-      then Errors.error_name_already_bound name canonical p p'
+      if not @@ GEnv.compare_pos (FileInfo.Full p') p
+      then
+        let p, name = GEnv.get_full_pos popt (p, name) in
+        Errors.error_name_already_bound name canonical p p'
     | None ->
+      let p, name = GEnv.get_full_pos popt (p, name) in
       FunPosHeap.add name p;
       FunCanonHeap.add name_key name;
       ()
 
-  let new_cid cid_kind (p, name) =
-    if not (check_not_typehint (p, name)) then () else
+  let new_cid popt cid_kind (p, name) =
+    if not (check_not_typehint popt (p, name)) then () else
     let name_key = canon_key name in
     match TypeCanonHeap.get name_key with
     | Some canonical ->
       let p' = unsafe_opt @@ GEnv.type_pos canonical in
-      if not (Pos.compare p p' = 0)
-      then Errors.error_name_already_bound name canonical p p'
+      if not @@ GEnv.compare_pos (FileInfo.Full p') p
+      then
+      let p, name = GEnv.get_full_pos popt (p, name) in
+      Errors.error_name_already_bound name canonical p p'
     | None ->
+      let p, name = GEnv.get_full_pos popt (p, name) in
       TypeIdHeap.write_through name (p, cid_kind);
       TypeCanonHeap.add name_key name;
       ()
 
-  let new_class = new_cid `Class
+  let new_class popt = new_cid popt `Class
 
-  let new_typedef = new_cid `Typedef
+  let new_typedef popt = new_cid popt `Typedef
 
-  let new_global_const (p, x) =
+  let new_global_const popt (p, x) =
     match ConstPosHeap.get x with
     | Some p' ->
-      if not (Pos.compare p p' = 0)
-      then Errors.error_name_already_bound x x p p';
+      if not @@ GEnv.compare_pos (FileInfo.Full p') p
+      then
+      let p, x = GEnv.get_full_pos popt (p, x) in
+      Errors.error_name_already_bound x x p p';
     | None ->
+      let p, x = GEnv.get_full_pos popt (p, x) in
       ConstPosHeap.add x p;
       ()
 end
@@ -132,11 +183,11 @@ let remove_decls ~funs ~classes ~typedefs ~consts =
 (* The entry point to build the naming environment *)
 (*****************************************************************************)
 
-let make_env ~funs ~classes ~typedefs ~consts =
-  List.iter funs Env.new_fun;
-  List.iter classes Env.new_class;
-  List.iter typedefs Env.new_typedef;
-  List.iter consts Env.new_global_const
+let make_env popt ~funs ~classes ~typedefs ~consts =
+  List.iter funs (Env.new_fun popt);
+  List.iter classes (Env.new_class popt);
+  List.iter typedefs (Env.new_typedef popt);
+  List.iter consts (Env.new_global_const popt)
 
 (*****************************************************************************)
 (* Declaring the names in a list of files *)
@@ -151,12 +202,13 @@ let add_files_to_rename failed defl defs_in_env =
       Relative_path.Set.add failed filename
   end ~init:failed defl
 
-let ndecl_file fn { FileInfo.file_mode = _; funs; classes; typedefs; consts;
+let ndecl_file popt fn
+              { FileInfo.file_mode = _; funs; classes; typedefs; consts;
                     consider_names_just_for_autoload; comments = _} =
   let errors, _, _ = Errors.do_ begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
     if not consider_names_just_for_autoload then
-      make_env ~funs ~classes ~typedefs ~consts
+      make_env popt ~funs ~classes ~typedefs ~consts
   end in
   if Errors.is_empty errors
   then errors, Relative_path.Set.empty

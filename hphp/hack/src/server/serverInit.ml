@@ -253,7 +253,7 @@ let update_files genv files_info t =
 let naming env t =
   let env =
     Relative_path.Map.fold env.files_info ~f:begin fun k v env ->
-      let errorl, failed = NamingGlobal.ndecl_file k v in
+      let errorl, failed = NamingGlobal.ndecl_file env.tcopt k v in
       { env with
         errorl = Errors.merge errorl env.errorl;
         failed_naming = Relative_path.Set.union env.failed_naming failed;

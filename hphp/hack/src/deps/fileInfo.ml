@@ -33,11 +33,21 @@ type mode =
   | Mstrict  (* check everthing! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
 
+
+(*****************************************************************************)
+(* We define two types of positions establishing the location of a given name:
+ * a Full position contains the exact position of a name in a file, and a
+ * File position contains just the file and the type of toplevel entity,
+ * allowing us to lazily retrieve the name's exact location if necessary.
+ *)
+(*****************************************************************************)
+type name_type = Fun | Class | Typedef | Const
+type pos = Full of Pos.t | File of name_type * Relative_path.t
+type id = pos  * string
+
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
-
-type id = Pos.t * string
 
 type t = {
   file_mode : mode option;
@@ -58,6 +68,9 @@ let empty_t = {
   comments = [];
   consider_names_just_for_autoload = false;
 }
+
+let pos_full (p, name) =
+  Full p, name
 
 (*****************************************************************************)
 (* The simplified record used after parsing. *)

@@ -36,10 +36,11 @@ val canon_key: String.t -> String.t
  * It all the entities passed as parameters and adds them to the shared heap.
 *)
 val make_env:
-      funs:Ast.id list ->
-      classes:Ast.id list ->
-      typedefs:Ast.id list ->
-      consts:Ast.id list -> unit
+      ParserOptions.t ->
+      funs:FileInfo.id list ->
+      classes:FileInfo.id list ->
+      typedefs:FileInfo.id list ->
+      consts:FileInfo.id list -> unit
 
 (* Removing declarations *)
 val remove_decls:
@@ -49,5 +50,6 @@ val remove_decls:
       consts: SSet.t -> unit
 
 val ndecl_file:
+  ParserOptions.t ->
   Relative_path.t -> FileInfo.t ->
   Errors.t * Relative_path.Set.t

@@ -261,7 +261,7 @@ let declare_names env fast_parsed =
   remove_decls env fast_parsed;
   let errorl, failed_naming =
     Relative_path.Map.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
-      let errorl', failed'= NamingGlobal.ndecl_file k v in
+      let errorl', failed'= NamingGlobal.ndecl_file env.tcopt k v in
       let errorl = Errors.merge errorl' errorl in
       let failed = Relative_path.Set.union failed' failed in
       errorl, failed

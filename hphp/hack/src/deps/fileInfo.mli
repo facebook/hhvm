@@ -35,7 +35,10 @@ type mode =
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-type id = Pos.t * string
+type name_type = Fun | Class | Typedef | Const
+type pos = Full of Pos.t | File of name_type * Relative_path.t
+type id = pos  * string
+val pos_full : (Pos.t * string) -> id
 
 type t = {
   file_mode : mode option;

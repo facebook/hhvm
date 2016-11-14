@@ -2905,7 +2905,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
     vmStack().ret();
     *vmStack().topTV() = retval;
-    assert(vmStack().topTV() == &vmfp()->m_r);
+    assert(vmStack().topTV() == vmfp()->retSlot());
     // In case we were called by a jitted FCallAwait, let it know
     // that we finished eagerly.
     vmStack().topTV()->m_aux.u_fcallAwaitFlag = 0;
@@ -5402,7 +5402,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
   vmStack().ndiscard(numSlots);
   vmStack().ret();
   tvCopy(make_tv<KindOfObject>(obj), *vmStack().topTV());
-  assert(vmStack().topTV() == &fp->m_r);
+  assert(vmStack().topTV() == fp->retSlot());
 
   // Return control to the caller.
   vmfp() = sfp;
@@ -5785,7 +5785,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
   vmStack().ndiscard(vmfp()->m_func->numSlotsInFrame());
   vmStack().ret();
   tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
-  assert(vmStack().topTV() == &vmfp()->m_r);
+  assert(vmStack().topTV() == vmfp()->retSlot());
   // In case we were called by a jitted FCallAwait, let it know
   // that we suspended.
   vmStack().topTV()->m_aux.u_fcallAwaitFlag = 1;

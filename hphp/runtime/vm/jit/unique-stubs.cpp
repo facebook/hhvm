@@ -453,7 +453,7 @@ TCA emitInterpRet(CodeBlock& cb, DataBlock& data) {
     storeReturnRegs(v);
     assertNativeStackAligned(v);
 
-    v << lea{rvmsp()[-AROFF(m_r)], r_svcreq_arg(0)};
+    v << lea{rvmsp()[-kArRetOff], r_svcreq_arg(0)};
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
   svcreq::emit_persistent(cb, data, folly::none, REQ_POST_INTERP_RET);
@@ -485,7 +485,7 @@ TCA emitDebuggerInterpRet(CodeBlock& cb, DataBlock& data) {
     assertNativeStackAligned(v);
 
     auto const ar = v.makeReg();
-    v << lea{rvmsp()[-AROFF(m_r)], ar};
+    v << lea{rvmsp()[-kArRetOff], ar};
     debuggerRetImpl(v, ar);
   });
 }

@@ -422,8 +422,8 @@ TypedValue* functionWrapper(ActRec* ar) {
 
   assert(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
-  tvCopy(rv, ar->m_r);
-  return &ar->m_r;
+  tvCopy(rv, *ar->retSlot());
+  return ar->retSlot();
 }
 
 template<bool usesDoubles>
@@ -469,8 +469,8 @@ TypedValue* methodWrapper(ActRec* ar) {
   } else {
     frame_free_locals_inl(ar, func->numLocals(), &rv);
   }
-  tvCopy(rv, ar->m_r);
-  return &ar->m_r;
+  tvCopy(rv, *ar->retSlot());
+  return ar->retSlot();
 }
 
 TypedValue* unimplementedWrapper(ActRec* ar) {
@@ -479,19 +479,19 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
-    ar->m_r.m_type = KindOfNull;
+    tvWriteNull(ar->retSlot());
     if (func->isStatic()) {
-      frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
+      frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
     } else {
-      frame_free_locals_inl(ar, func->numParams(), &ar->m_r);
+      frame_free_locals_inl(ar, func->numParams(), ar->retSlot());
     }
   } else {
     raise_error("Call to unimplemented native function %s()",
                 func->displayName()->data());
-    ar->m_r.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
+    tvWriteNull(ar->retSlot());
+    frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
   }
-  return &ar->m_r;
+  return ar->retSlot();
 }
 
 void getFunctionPointers(const BuiltinFunctionInfo& info,

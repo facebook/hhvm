@@ -51,7 +51,7 @@
 #ifdef __powerpc64__
 #define SAVED_TOC() m_savedToc
 #else
-#define SAVED_TOC() _dummyA
+#define SAVED_TOC() m_savedRip
 #endif
 
 TRACE_SET_MOD(vasm);

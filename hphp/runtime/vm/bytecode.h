@@ -274,8 +274,8 @@ void frame_free_locals_no_hook(ActRec* fp);
     TypedValue val_;                            \
     new (&val_) Variant(x);                     \
     frame_free_locals_no_hook(ar_);             \
-    ar_->m_r = val_;                            \
-    return &ar_->m_r;                           \
+    tvCopy(val_, *ar_->retSlot());              \
+    return ar_->retSlot();                      \
   }())
 
 #define tvReturn(x)                                                     \

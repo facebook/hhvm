@@ -273,7 +273,7 @@ void implRet(IRGS& env) {
 }
 
 IRSPRelOffset offsetToReturnSlot(IRGS& env) {
-  auto const retOff = FPRelOffset { AROFF(m_r) / int32_t{sizeof(Cell)} };
+  auto const retOff = FPRelOffset { kArRetOff / int32_t{sizeof(Cell)} };
   return retOff.to<IRSPRelOffset>(env.irb->fs().irSPOff());
 }
 

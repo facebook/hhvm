@@ -1818,7 +1818,6 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   Stats::inc(Stats::PseudoMain_Executed);
 
   ActRec* ar = vmStack().allocA();
-  assertx(AROFF(m_func) < AROFF(m_r));
   auto const cls = vmfp()->func()->cls();
   auto const func = unit->getMain(cls);
   assert(!func->isCPPBuiltin());

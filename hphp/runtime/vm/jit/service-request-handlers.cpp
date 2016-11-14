@@ -349,8 +349,8 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       if (ar->isFCallAwait()) {
         // If there was an interped FCallAwait, and we return via the
         // jit, we need to deal with the suspend case here.
-        assert(ar->m_r.m_aux.u_fcallAwaitFlag < 2);
-        if (ar->m_r.m_aux.u_fcallAwaitFlag) {
+        assert(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
+        if (ar->retSlot()->m_aux.u_fcallAwaitFlag) {
           start = tc::ustubs().fcallAwaitSuspendHelper;
           break;
         }

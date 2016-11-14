@@ -78,9 +78,17 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   proxygen::HTTPTransaction *getOrCreateTransaction(
     proxygen::HTTPTransaction *clientTxn, HTTPMessage** msg, bool newPushOk) {
     if (!m_pushTxn && newPushOk) {
+      if (!clientTxn) {
+        *msg = nullptr;
+        return nullptr;
+      }
       m_pushTxn = clientTxn->newPushedTransaction(this);
       *msg = &m_pushPromise;
     } else {
+      if (m_egressError) {
+        *msg = nullptr;
+        return nullptr;
+      }
       *msg = &m_response;
     }
     return m_pushTxn;
@@ -107,6 +115,8 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
     noexcept override {
     Logger::Error("HPHP push txn transport error: %s",
                   error.describe().c_str());
+    // Pushed transactions can't really have ingress errors
+    m_egressError = true;
   }
 
   void onEgressPaused() noexcept override {}
@@ -148,6 +158,7 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   proxygen::HTTPTransaction *m_pushTxn{nullptr};
   proxygen::HTTPMessage m_pushPromise;
   proxygen::HTTPMessage m_response;
+  bool m_egressError{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -285,7 +296,9 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
   if (bufferRequest()) {
     CHECK(!m_enqueued);
     if (m_repost) {
-      m_clientTxn->sendBody(std::move(chain));
+      if (m_clientTxn && !m_egressError) {
+        m_clientTxn->sendBody(std::move(chain));
+      }
     } else {
       m_bodyData.append(std::move(chain));
     }
@@ -305,7 +318,9 @@ void ProxygenTransport::onEOM() noexcept {
   if (bufferRequest()) {
     CHECK(!m_enqueued);
     if (m_repost) {
-      m_clientTxn->sendEOM();
+      if (m_clientTxn && !m_egressError) {
+        m_clientTxn->sendEOM();
+      }
       return;
     }
     if (!m_bodyData.empty()) {
@@ -504,6 +519,10 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
   m_responseCode = code;
   m_responseCodeInfo = response.getStatusMessage();
   m_server->onRequestError(this);
+  // sendErrorResponse is only called from onHeadersComplete now, so the txn
+  // should always be there and we shouldn't be in error.  If I'm wrong we
+  // were going to crash anyways.
+  CHECK(m_clientTxn && !m_egressError);
   m_clientTxn->sendHeaders(response);
   m_clientTxn->sendEOM();
 }
@@ -513,6 +532,10 @@ void ProxygenTransport::onError(const HTTPException& err) noexcept {
   unlink();
   // For now, just send a naked RST.  It's closer to the LibEventServer behavior
   m_clientTxn->sendAbort();
+  // We could also check err.getDirection() to see if it's an egress error,
+  // but sending abort here guarantees than any subsequent send* calls are going
+  // to abort.
+  m_egressError = true;
   requestDoneLocking();
 }
 
@@ -524,6 +547,10 @@ HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
                                                    HTTPMessage **msg,
                                                    bool newPushOk) {
   if (id == 0) {
+    if (m_egressError) {
+      *msg = nullptr;
+      return nullptr;
+    }
     *msg = &m_response;
     return m_clientTxn;
   }
@@ -533,7 +560,10 @@ HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
     *msg = nullptr;
     return nullptr;
   }
-  return it->second->getOrCreateTransaction(m_clientTxn, msg, newPushOk);
+  // If the current transaction has already terminated in error, don't allow
+  // a new push, but additional egress on an already created txn is OK.
+  return it->second->getOrCreateTransaction(m_clientTxn, msg,
+                                            newPushOk && !m_egressError);
 }
 
 void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
@@ -723,7 +753,7 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
 }
 
 void ProxygenTransport::beginPartialPostEcho() {
-  if (!bufferRequest() || m_repost) {
+  if (!bufferRequest() || m_repost || !m_clientTxn || m_egressError) {
     return;
   }
   CHECK(!m_enqueued);

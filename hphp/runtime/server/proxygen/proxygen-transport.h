@@ -345,6 +345,7 @@ struct ProxygenTransport final
   uint16_t m_localPort{0};
   int64_t m_nextPushId{1};
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
+  bool m_egressError{false};
 
  public:
   // List of ProxygenTransport not yet handed to the server will sit

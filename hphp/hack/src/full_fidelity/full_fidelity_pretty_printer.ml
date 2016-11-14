@@ -682,7 +682,7 @@ let rec get_doc node =
     foreach_keyword;
     foreach_left_paren;
     foreach_collection;
-    foreach_await;
+    foreach_await_keyword;
     foreach_as;
     foreach_key;
     foreach_arrow;
@@ -693,7 +693,7 @@ let rec get_doc node =
     let left = get_doc foreach_left_paren in
     let right = get_doc foreach_right_paren in
     let collection_name = get_doc foreach_collection in
-    let await_keyword = get_doc foreach_await in
+    let await_keyword = get_doc foreach_await_keyword in
     let as_keyword = get_doc foreach_as in
     let key = get_doc foreach_key in
     let arrow = get_doc foreach_arrow in

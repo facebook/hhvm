@@ -9,6 +9,7 @@
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -376,7 +377,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword: t;
       foreach_left_paren: t;
       foreach_collection: t;
-      foreach_await: t;
+      foreach_await_keyword: t;
       foreach_as: t;
       foreach_key: t;
       foreach_arrow: t;
@@ -1954,7 +1955,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword;
       foreach_left_paren;
       foreach_collection;
-      foreach_await;
+      foreach_await_keyword;
       foreach_as;
       foreach_key;
       foreach_arrow;
@@ -1965,7 +1966,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword,
       foreach_left_paren,
       foreach_collection,
-      foreach_await,
+      foreach_await_keyword,
       foreach_as,
       foreach_key,
       foreach_arrow,
@@ -3223,7 +3224,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;
@@ -3234,7 +3235,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;
@@ -4423,7 +4424,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;
@@ -4434,7 +4435,7 @@ module WithToken(Token: TokenType) = struct
         "foreach_keyword";
         "foreach_left_paren";
         "foreach_collection";
-        "foreach_await";
+        "foreach_await_keyword";
         "foreach_as";
         "foreach_key";
         "foreach_arrow";
@@ -5723,7 +5724,7 @@ module WithToken(Token: TokenType) = struct
           foreach_keyword;
           foreach_left_paren;
           foreach_collection;
-          foreach_await;
+          foreach_await_keyword;
           foreach_as;
           foreach_key;
           foreach_arrow;
@@ -5735,7 +5736,7 @@ module WithToken(Token: TokenType) = struct
           foreach_keyword;
           foreach_left_paren;
           foreach_collection;
-          foreach_await;
+          foreach_await_keyword;
           foreach_as;
           foreach_key;
           foreach_arrow;
@@ -7120,7 +7121,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword
       foreach_left_paren
       foreach_collection
-      foreach_await
+      foreach_await_keyword
       foreach_as
       foreach_key
       foreach_arrow
@@ -7132,7 +7133,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;

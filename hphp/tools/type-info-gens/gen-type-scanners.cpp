@@ -662,7 +662,7 @@ Generator::Generator(const std::string& filename, bool skip) {
 
   // Before beginning the actual layout generation, we can speed things up a bit
   // by marking any types which we know are always pointer followable. This will
-  // let us reach the fixed point in less iterations.
+  // let us reach the fixed point in fewer iterations.
   for (const auto& indexed : m_indexed_types) {
     // Indexed types just for scanning are never pointer followable (because
     // they're not actually heap allocated).
@@ -691,7 +691,7 @@ Generator::Generator(const std::string& filename, bool skip) {
 
     // If this indexed type is always going to be a complete conservative scan,
     // than we're always going to have a non-trivial action for its scanner, so
-    // its always pointer followable.
+    // it's always pointer followable.
     if (indexed.conservative && indexed.conservative_guards.empty()) {
       makePtrFollowable(*indexed.type);
     }

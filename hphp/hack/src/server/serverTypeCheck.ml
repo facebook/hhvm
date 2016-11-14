@@ -188,24 +188,24 @@ let remove_decls env fast_parsed =
 let remove_failed_parsing fast ~stop_at_errors env failed_parsing =
   if stop_at_errors then Relative_path.Map.filter fast
     ~f:(fun k _ -> not @@ Relative_path.(Set.mem failed_parsing k &&
-                                         Map.mem env.edited_files k))
+                                         Set.mem env.edited_files k))
   else fast
 
 let parsing genv env to_check ~stop_at_errors =
 
   let ide_files, disk_files  =
-    Relative_path.Set.partition (Relative_path.Map.mem env.edited_files)
+    Relative_path.Set.partition (Relative_path.Set.mem env.edited_files)
       to_check in
 
-  let files_map = Relative_path.Map.filter env.edited_files
-     (fun path _ -> Relative_path.Set.mem ide_files path) in
-
+  File_heap.FileHeap.remove_batch disk_files;
   Parser_heap.ParserHeap.remove_batch disk_files;
   Fixmes.HH_FIXMES.remove_batch disk_files;
   if stop_at_errors then begin
+    File_heap.FileHeap.LocalChanges.push_stack ();
     Parser_heap.ParserHeap.LocalChanges.push_stack ();
     Fixmes.HH_FIXMES.LocalChanges.push_stack ();
   end;
+  (* Do not remove ide files from file heap *)
   Parser_heap.ParserHeap.remove_batch ide_files;
   Fixmes.HH_FIXMES.remove_batch ide_files;
   HackSearchService.MasterApi.clear_shared_memory to_check;
@@ -213,7 +213,7 @@ let parsing genv env to_check ~stop_at_errors =
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
   let (fast, errors, failed_parsing) as res =
-    Parsing_service.go genv.workers files_map ~get_next env.popt in
+    Parsing_service.go genv.workers ide_files ~get_next env.popt in
   if stop_at_errors then begin
     (* Revert changes and ignore results for IDE files that failed parsing *)
     let ide_failed_parsing =
@@ -223,13 +223,17 @@ let parsing genv env to_check ~stop_at_errors =
     let ide_success_parsing =
       Relative_path.Set.diff ide_files ide_failed_parsing in
 
+    File_heap.FileHeap.LocalChanges.revert_batch failed_parsing;
     Parser_heap.ParserHeap.LocalChanges.revert_batch ide_failed_parsing;
     Fixmes.HH_FIXMES.LocalChanges.revert_batch ide_failed_parsing;
+
+    File_heap.FileHeap.LocalChanges.commit_batch ide_success_parsing;
     Parser_heap.ParserHeap.LocalChanges.commit_batch ide_success_parsing;
     Fixmes.HH_FIXMES.LocalChanges.commit_batch ide_success_parsing;
     Parser_heap.ParserHeap.LocalChanges.commit_batch disk_files;
     Fixmes.HH_FIXMES.LocalChanges.commit_batch disk_files;
 
+    File_heap.FileHeap.LocalChanges.pop_stack ();
     Parser_heap.ParserHeap.LocalChanges.pop_stack ();
     Fixmes.HH_FIXMES.LocalChanges.pop_stack ();
     (fast, errors, failed_parsing)
@@ -413,7 +417,7 @@ module LazyCheckKind : CheckKindType = struct
     | None -> (fun _ -> false)
 
   let is_ide_file env x =
-    Relative_path.Map.mem env.edited_files x || has_errors_in_ide env x
+    Relative_path.Set.mem env.edited_files x || has_errors_in_ide env x
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env =
     (* We didn't do the full fan-out from to_redecl_phase2_deps, so the

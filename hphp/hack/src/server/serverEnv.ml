@@ -102,7 +102,7 @@ type env = {
     (* Timestamp of last ServerIdle.go run *)
     last_idle_job_time : float;
     (* The map from full path to synchronized file contents *)
-    edited_files   : File_content.t Relative_path.Map.t;
+    edited_files   : Relative_path.Set.t;
     (* Files which parse trees were invalidated (because they changed on disk
      * or in editor) and need to be re-parsed *)
     ide_needs_parsing : Relative_path.Set.t;

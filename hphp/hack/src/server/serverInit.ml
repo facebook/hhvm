@@ -227,7 +227,7 @@ let parsing ~lazy_parse genv env ~get_next t =
     Parsing_service.go
       ~quick
       genv.workers
-      Relative_path.Map.empty
+      Relative_path.Set.empty
       ~get_next
       env.popt in
   let files_info = Relative_path.Map.union files_info env.files_info in

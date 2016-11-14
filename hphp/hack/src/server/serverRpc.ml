@@ -13,6 +13,7 @@ open Option.Monad_infix
 open ServerEnv
 open File_content
 open ServerCommandTypes
+open File_heap
 
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   fun genv env ~is_stale -> function
@@ -91,8 +92,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_AUTOCOMPLETE (path, pos) ->
         let fc =
           begin ServerFileSync.try_relativize_path path >>= fun path ->
-            match Relative_path.Map.get env.edited_files path with
-            | Some x -> Some x (* File is open in IDE *)
+            match File_heap.FileHeap.get path with
+            | Some (Ide f) -> Some f
+            | Some (Disk c) -> Some (of_content c)
             | None -> Option.try_with (fun () -> (* Use the disk version *)
               of_content (Sys_utils.cat (Relative_path.to_absolute path)))
           end
@@ -106,9 +108,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_HIGHLIGHT_REF (path, {line; column}) ->
         let content =
           ServerFileSync.try_relativize_path path >>= fun relative_path ->
-          Relative_path.Map.get env.edited_files relative_path >>= fun fc ->
-          Some (File_content.get_content fc)
-        in
+          (* This checks if the file is open in IDE already *)
+          File_heap.get_contents relative_path in
         let content = match content with
           | Some c -> c
           | None -> try Sys_utils.cat path with _ -> ""
@@ -117,8 +118,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_IDENTIFY_FUNCTION (path, {line; column}) ->
         let content =
           ServerFileSync.try_relativize_path path >>= fun relative_path ->
-          Relative_path.Map.get env.edited_files relative_path >>= fun fc ->
-          Some (File_content.get_content fc)
+          File_heap.get_contents relative_path
         in
         let content = match content with
           | Some c -> c

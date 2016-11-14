@@ -23,5 +23,5 @@ val file_has_errors_in_ide : t -> Relative_path.t -> bool
 (* Errors ready for sending to client *)
 val pop_errors :
   t ->
-  'a Relative_path.Map.t -> (* edited files, so we can prioritize them *)
+  Relative_path.Set.t -> (* edited files, so we can prioritize them *)
   t * (Pos.absolute Errors.error_ list) SMap.t

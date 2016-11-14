@@ -11,6 +11,7 @@
 open File_content
 open Option.Monad_infix
 open ServerEnv
+open File_heap
 
 let try_relativize_path x =
   Option.try_with (fun () -> Relative_path.(create Root x))
@@ -18,7 +19,9 @@ let try_relativize_path x =
 let open_file env path content =
   let new_env = try_relativize_path path >>= fun path ->
     let fc = of_content ~content in
-    let edited_files = Relative_path.Map.add env.edited_files path fc in
+    let edited_files = Relative_path.Set.add env.edited_files path in
+    FileHeap.remove_batch (Relative_path.Set.singleton path);
+    FileHeap.add path (Ide fc);
     let ide_needs_parsing =
       Relative_path.Set.add env.ide_needs_parsing path in
     let last_command_time = Unix.gettimeofday () in
@@ -28,7 +31,12 @@ let open_file env path content =
   Option.value new_env ~default:env
 
 let close_relative_path env path =
-  let edited_files = Relative_path.Map.remove env.edited_files path in
+  let edited_files = Relative_path.Set.remove env.edited_files path in
+  let contents = (match (FileHeap.find_unsafe path) with
+  | Ide f -> f.content
+  | _ -> assert false) in
+  FileHeap.remove_batch (Relative_path.Set.singleton path);
+  FileHeap.add path (Disk contents);
   let ide_needs_parsing =
     Relative_path.Set.add env.ide_needs_parsing path in
   let last_command_time = Unix.gettimeofday () in
@@ -42,8 +50,10 @@ let close_file env path =
 
 let edit_file env path edits =
   let new_env = try_relativize_path path >>= fun path ->
-    let fc = try Relative_path.Map.find_unsafe env.edited_files path
-    with Not_found ->
+    let fc = match FileHeap.get path with
+    | Some Ide f -> f
+    | Some Disk content -> of_content ~content
+    | None ->
       let content =
         try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
       of_content ~content in
@@ -55,7 +65,9 @@ let edit_file env path edits =
         assert false
     in
     let edited_files =
-      Relative_path.Map.add env.edited_files path edited_fc in
+      Relative_path.Set.add env.edited_files path in
+    FileHeap.remove_batch (Relative_path.Set.singleton path);
+    FileHeap.add path (Ide edited_fc);
     let ide_needs_parsing =
       Relative_path.Set.add env.ide_needs_parsing path in
     let last_command_time = Unix.gettimeofday () in
@@ -65,9 +77,9 @@ let edit_file env path edits =
   Option.value new_env ~default:env
 
 let clear_sync_data env =
-  let env = Relative_path.Map.fold env.edited_files
+  let env = Relative_path.Set.fold env.edited_files
     ~init:env
-    ~f:(fun x _ env -> close_relative_path env x)
+    ~f:(fun x env -> close_relative_path env x)
   in
 { env with
   persistent_client = None;

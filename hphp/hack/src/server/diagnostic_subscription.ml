@@ -56,9 +56,6 @@ let pop_key k (ds, acc) =
   | Some v -> (mark_as_pushed ds k v), (Relative_path.Map.add acc k v)
   | None -> ds, acc
 
-let pop_if_in_map map acc =
-  Relative_path.Map.fold map ~init:acc ~f:(fun k _ acc -> pop_key k acc)
-
 let pop_if_in_set set acc =
   Relative_path.Set.fold set ~init:acc ~f:(fun k acc -> pop_key k acc)
 
@@ -74,7 +71,7 @@ let rec pop_while_less_than_limit (ds, acc) =
 let pop_errors ds edited_files =
   let ds, acc =
     (* Always push errors for files open in editor...*)
-    pop_if_in_map edited_files (ds, Relative_path.Map.empty)
+    pop_if_in_set edited_files (ds, Relative_path.Map.empty)
     (* ... and for files which editor is aware of having errors. *)
     |> pop_if_in_set ds.pushed_errors
     (* Push the remaining errors as long as editor doesn't have to display too

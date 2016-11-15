@@ -51,6 +51,7 @@ bool            inclusiveStats  = false;
 bool            verboseStats    = false;
 folly::Optional<MD5> md5Filter;
 PerfEventType   sortBy          = SPECIAL_PROF_COUNTERS;
+bool            sortByDensity   = false;
 double          helpersMinPercentage = 0;
 ExtOpcode       filterByOpcode  = 0;
 std::string     kindFilter      = "all";
@@ -101,6 +102,8 @@ void usage() {
   printf("Usage: tc-print [OPTIONS]\n"
          "  Options:\n"
          "    -c <FILE>       : uses the given config file\n"
+         "    -D              : used along with -t, this option sorts the top "
+         "translations by density (count / size) of the selected perf event\n"
          "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
          "(default: /tmp)\n"
          "    -f <FUNC_ID>    : prints the translations for the given "
@@ -159,7 +162,7 @@ void printValidEventTypes() {
 void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
-  while ((c = getopt (argc, argv, "hc:d:f:g:ip:st:u:T:o:e:bB:v:k:a:A:n:"))
+  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:T:o:e:bB:v:k:a:A:n:"))
          != -1) {
     switch (c) {
       case 'A':
@@ -225,6 +228,9 @@ void parseOptions(int argc, char *argv[]) {
         break;
       case 'k':
         kindFilter = optarg;
+        break;
+      case 'D':
+        sortByDensity = true;
         break;
       case 'e':
         if (!strcmp(optarg, kListKeyword)) {
@@ -602,8 +608,14 @@ public:
     transPerfEvents(_transPerfEvents), etype(_etype) {}
 
   bool operator()(TransID t1, TransID t2) const {
-    return transPerfEvents.getEventCount(t1, etype) >
-           transPerfEvents.getEventCount(t2, etype);
+    const auto count1 = transPerfEvents.getEventCount(t1, etype);
+    const auto count2 = transPerfEvents.getEventCount(t2, etype);
+    if (sortByDensity) {
+      const auto size1 = TREC(t1)->aLen;
+      const auto size2 = TREC(t2)->aLen;
+      return count1 * size2 > count2 * size1;
+    }
+    return count1 > count2;
   }
 };
 
@@ -612,7 +624,9 @@ void printTopTrans() {
 
   // The summary currently includes all translations, so it's misleading
   // if we're filtering a specific kind of translations or address range.
-  if (kindFilter == "all" && minAddr == 0 && maxAddr == (TCA)-1) {
+  // It also doesn't sort by density, so do print it if sortByDensity is set.
+  if (kindFilter == "all" && minAddr == 0 && maxAddr == (TCA)-1 &&
+      !sortByDensity) {
     transPerfEvents.printEventsSummary(sortBy,
                                        "TransId",
                                        nTopTrans,

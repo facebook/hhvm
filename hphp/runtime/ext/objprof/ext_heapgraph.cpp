@@ -236,8 +236,8 @@ std::string getNodesConnectionName(
   int from,
   int to
 ) {
-  // For non Ambiguous pointers, try to drill down and resolve the edge name
-  if (from != -1 && to != -1 && g.ptrs[ptr].ptr_kind != HeapGraph::Ambiguous) {
+  // Try to drill down and resolve the edge name
+  if (from != -1 && to != -1) {
     auto h = g.nodes[from].h;
     auto th = g.nodes[to].h;
 

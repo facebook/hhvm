@@ -118,7 +118,7 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   IMPLEMENT_COUNTABLE_METHODS
   bool kindIsValid() const { return isObjectKind(headerKind()); }
 
-  template<class F> void scan(F&) const;
+  void scan(type_scan::Scanner&) const;
 
   size_t heapSize() const;
 

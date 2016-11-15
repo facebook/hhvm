@@ -117,6 +117,7 @@ struct PtrFilter: F {
   void operator()(const ResourceHdr* p) { if (p) F::counted(p); }
   void operator()(const RefData* p) { if (p && !inRds(p)) F::counted(p); }
 
+  void implicit(const void* p) { if (p) F::implicit(p); }
   void implicit(const ObjectData* p) { if (p) F::implicit(p); }
   void implicit(const ResourceHdr* p) { if (p) F::implicit(p); }
   void implicit(const Array& p) {
@@ -305,7 +306,9 @@ HeapGraph makeHeapGraph(bool include_free) {
   type_scanner.finish(
     [&](const void* p) {
       // definitely a ptr, but maybe interior, and maybe not counted
-      rmark.ambig(p);
+      if (blocks.region(p)) {
+        rmark.implicit(p);
+      }
     },
     [&](const void* p, std::size_t size) {
       // scan the range conservatively
@@ -321,7 +324,9 @@ HeapGraph makeHeapGraph(bool include_free) {
     type_scanner.finish(
       [&](const void* p) {
         // definitely a ptr, but maybe interior, and maybe not counted
-        omark.ambig(p);
+        if (blocks.region(p)) {
+          omark.implicit(p);
+        }
       },
       [&](const void* p, std::size_t size) {
         // scan the range conservatively

@@ -66,9 +66,12 @@ struct Block {
    *
    * See also runtime/vm/jit/code-cache.h for comment on the 'hot' and 'prof'
    * sections.
+   *
+   * IMPORTANT NOTE: These hints are sorted in increasing order or likelihood.
+   * This order is used in fixBlockHints().
    */
 
-  enum class Hint { Neither, Likely, Unlikely, Unused };
+  enum class Hint { Unused, Unlikely, Neither, Likely };
 
   explicit Block(unsigned id, uint64_t profCount)
     : m_id(id)
@@ -375,6 +378,16 @@ inline void Edge::setTo(Block* to) {
 
 inline Block* Edge::from() const {
   return inst() != nullptr ? inst()->block() : nullptr;
+}
+
+inline const char* blockHintName(Block::Hint hint) {
+  switch (hint) {
+    case Block::Hint::Unused:   return "Unused";
+    case Block::Hint::Unlikely: return "Unlikely";
+    case Block::Hint::Neither:  return "Neither";
+    case Block::Hint::Likely:   return "Likely";
+  }
+  not_reached();
 }
 
 }}

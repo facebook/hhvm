@@ -22,15 +22,6 @@ function execute(string $command) : array<string> {
   return $results;
 }
 
-// TODO: This is a library function; why can't I use it without
-// TODO: putting a definition here?
-function firstx<T>(Traversable<T> $t): T {
-  foreach ($t as $v) {
-    return $v;
-  }
-  invariant_violation('Expected non-empty collection');
-}
-
 function fold_map<TInput, TOutput, TAccumulation>(
     Traversable<TInput> $items,
     (function (TInput, TAccumulation): TOutput) $mapper,

@@ -260,15 +260,17 @@ let add_files_to_rename failed defl defs_in_env =
       Relative_path.Set.add failed filename
   end ~init:failed defl
 
-
 let ndecl_file_fast fn ~funs ~classes ~typedefs ~consts =
   make_env_from_fast fn ~funs ~classes ~typedefs ~consts
 
 let ndecl_file popt fn
               { FileInfo.file_mode = _; funs; classes; typedefs; consts;
                     consider_names_just_for_autoload; comments = _} =
+  (* XXX: Just here to get the typechecker
+  to stop complaining until the diff above *)
   ndecl_file_fast
-    (Relative_path.default) SSet.empty SSet.empty SSet.empty SSet.empty;
+    (Relative_path.default)
+    SSet.empty SSet.empty SSet.empty SSet.empty;
   let errors, _, _ = Errors.do_ begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
     if not consider_names_just_for_autoload then

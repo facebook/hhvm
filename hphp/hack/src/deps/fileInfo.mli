@@ -64,13 +64,17 @@ type names = {
 }
 
 type fast = names Relative_path.Map.t
+type fast_with_modes = (names * mode option) Relative_path.Map.t
+
 
 val empty_names: names
 
 (*****************************************************************************)
 (* Functions simplifying the file information. *)
 (*****************************************************************************)
-
+val modes_to_info : fast_with_modes -> t Relative_path.Map.t
+val modes_to_fast: fast_with_modes -> fast
+val info_to_modes : t Relative_path.Map.t -> fast_with_modes
 val simplify: t -> names
 val merge_names: names -> names -> names
 val simplify_fast: t Relative_path.Map.t -> fast

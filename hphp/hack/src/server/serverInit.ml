@@ -80,7 +80,7 @@ let save_state env fn =
   if not (Errors.is_empty env.errorl)
   then failwith "--save-mini only works if there are no type errors!";
   let chan = Sys_utils.open_out_no_fail fn in
-  let names = FileInfo.simplify_fast env.files_info in
+  let names = FileInfo.info_to_modes env.files_info in
   Marshal.to_channel chan names [];
   Sys_utils.close_out_no_fail fn chan;
   let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") in

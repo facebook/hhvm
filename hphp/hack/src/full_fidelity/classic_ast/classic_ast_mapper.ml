@@ -259,6 +259,9 @@ let cStatic_var  x  = Static_var   x
 
 
 
+let mpStripNoop pThing node env = match pThing node env with
+  | [Noop] -> []
+  | stmtl -> stmtl
 let mpOptional : ('a, 'a option) metaparser = fun p ->
   cSome <$> p <|> ppConst None
 
@@ -439,15 +442,13 @@ let tTraitReqKind : trait_req_kind terminal_spec =
   | TK.Extends    -> MustExtend
 
 (* TODO: Clean up string escaping *)
-let mkString : string -> string = fun content ->
+let unesc_dbl = Php_escaping.unescape_double
+let unesc_sgl = Php_escaping.unescape_single
+let mkString : (string -> string) -> string -> string = fun unescaper content ->
   let no_quotes = String.sub content 1 (String.length content - 2) in
-  let unescaped = begin
-    try Php_escaping.unescape_double no_quotes with
-    | Php_escaping.Invalid_string error -> raise @@
-        Failure (Printf.sprintf "Malformed string literal <<%s>>" no_quotes)
-  end in
-  (* Printf.eprintf "\n\nno_quotes:%s\nunescaped:%s\n\n" no_quotes unescaped; *)
-  unescaped
+  try unescaper no_quotes with
+  | Php_escaping.Invalid_string error -> raise @@
+      Failure (Printf.sprintf "Malformed string literal <<%s>>" no_quotes)
 let tLiteral : (Pos.t -> string -> expr_) terminal_spec =
   "Literal", fun token_kind -> fun p text -> match token_kind with
   | TK.DecimalLiteral
@@ -455,10 +456,10 @@ let tLiteral : (Pos.t -> string -> expr_) terminal_spec =
   | TK.HexadecimalLiteral
   | TK.BinaryLiteral             -> Int   (p, text)
   | TK.FloatingLiteral           -> Float (p, text)
-  | TK.SingleQuotedStringLiteral
+  | TK.SingleQuotedStringLiteral -> String (p, mkString unesc_sgl text)
   | TK.DoubleQuotedStringLiteral
   | TK.HeredocStringLiteral
-  | TK.NowdocStringLiteral       -> String (p, mkString text)
+  | TK.NowdocStringLiteral       -> String (p, mkString unesc_dbl text)
   | TK.NullLiteral               -> Null
   | TK.BooleanLiteral            ->
       (match text with "false" -> False | "true" -> True)
@@ -494,7 +495,7 @@ let pExpr_LiteralExpression' : expr_ parser' = fun [ lit ] env ->
 
 let mpShapeField : ('a, (shape_field_name * 'a)) metaparser = fun pThing ->
   fun node env ->
-    let pSFlit n e = let p, n = pos_name n e in SFlit (p, mkString n) in
+    let pSFlit n e = let p, n = pos_name n e in SFlit (p, mkString unesc_dbl n) in
     let pSFclass_const =
       single K.ScopeResolutionExpression @@
         fun [ qual; _op; name ] env ->
@@ -802,7 +803,12 @@ and pStmt_WhileStatement' : stmt parser' =
 and pStmt_ForStatement' : stmt parser' =
   fun [ _kw; _lp; init; _semi; ctrl; _semi'; eol; _rp; body ] env ->
     let pExprL = positional (cExpr_list <$> couldMap ~f:pExpr) in
-      For (pExprL init env, pExprL eol env, pExprL ctrl env, pBlock body env)
+      For
+      ( pExprL init env
+      , pExprL ctrl env
+      , pExprL eol env
+      , [Block (pBlock body env)]
+      )
 and pStmt_SwitchStatement' : stmt parser' =
   fun [ _kw; _lp; expr; _rp; body ] env ->
     Switch (pExpr expr env, pSwitch body env)
@@ -819,10 +825,14 @@ and pStmt_TryStatement' : stmt parser' =
     ( [(cBlock <$> pBlock) body env]
     , couldMap catches env ~f:begin
         single K.CatchClause @@ fun [ _kw; _lp; ty; var; _rp; body ] env ->
-          pos_name ty env, pos_name var env, pBlock body env
+            pos_name ty env
+          , pos_name var env
+          , [(cBlock <$> mpStripNoop pBlock) body env]
       end
-    , (single K.FinallyClause (fun [ _kw; body ] -> pBlock body) <|> ppConst [])
-        finally env
+    , (single K.FinallyClause
+        (fun [ _kw; body ] env -> [(cBlock <$> pBlock) body env])
+      <|> ppConst []
+      ) finally env
     )
 and pStmt_BreakStatement' : stmt parser' =
   fun [ _kw; _level; _semi ] -> cBreak <.| where_am_I

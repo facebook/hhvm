@@ -90,9 +90,11 @@ let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
     then Relative_path.Set.add failed fn
     else failed in
   let decl_failed =
-    if lazy_decl_err
-    then Relative_path.Set.add decl_failed fn
-    else decl_failed in
+    match lazy_decl_err with
+    | Some file ->  Relative_path.Set.add
+                      (Relative_path.Set.add decl_failed fn)
+                      file
+    | None -> decl_failed in
   errors, failed, decl_failed
 
 let check_files opts (errors, err_info) fnl =

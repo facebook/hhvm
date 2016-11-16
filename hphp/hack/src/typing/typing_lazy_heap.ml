@@ -18,7 +18,7 @@ let get_class tcopt x =
     match Naming_heap.TypeIdHeap.get x with
     | Some (p, `Class) ->
       let filename = Pos.filename p in
-      Errors.run_in_decl_mode
+      Errors.run_in_decl_mode filename
         (fun () -> Decl.declare_class_in_file tcopt filename x);
       Classes.get x
     | _ -> None
@@ -30,7 +30,7 @@ let get_fun tcopt x =
     match Naming_heap.FunPosHeap.get x with
     | Some p ->
       let filename = Pos.filename p in
-      Errors.run_in_decl_mode
+      Errors.run_in_decl_mode filename
         (fun () -> Decl.declare_fun_in_file tcopt filename x);
       Funs.get x
     | None -> None
@@ -42,7 +42,7 @@ let get_gconst tcopt cst_name =
     match Naming_heap.ConstPosHeap.get cst_name with
     | Some p ->
       let filename = Pos.filename p in
-        Errors.run_in_decl_mode
+        Errors.run_in_decl_mode filename
           (fun () -> Decl.declare_const_in_file tcopt filename cst_name);
       GConsts.get cst_name
     | None -> None
@@ -54,7 +54,7 @@ let get_typedef tcopt x =
     match NamingGlobal.GEnv.typedef_pos x with
     | Some p ->
       let filename = Pos.filename p in
-        Errors.run_in_decl_mode
+        Errors.run_in_decl_mode filename
         (fun () -> Decl.declare_typedef_in_file tcopt filename x);
       Typedefs.get x
     | None -> None

@@ -21,7 +21,7 @@ type 'a message = 'a * string
 
 module Common = struct
   type error_flags = {
-    lazy_decl_err: bool;
+    lazy_decl_err: Relative_path.t option;
   }
   let try_with_result f1 f2 error_list accumulate_errors =
     let error_list_copy = !error_list in
@@ -44,7 +44,7 @@ module Common = struct
     error_list := [];
     applied_fixmes := [];
     accumulate_errors := true;
-    has_lazy_decl_error := false;
+    has_lazy_decl_error := None;
     let result = f () in
     let out_errors = !error_list in
     let out_applied_fixmes = !applied_fixmes in
@@ -108,7 +108,7 @@ module type Errors_modes = sig
 
   val try_with_result: (unit -> 'a) -> ('a -> error -> 'a) -> 'a
   val do_: (unit -> 'a) -> (error list * applied_fixme list) * 'a * error_flags
-  val run_in_decl_mode: (unit -> 'a) -> 'a
+  val run_in_decl_mode: Relative_path.t -> (unit -> 'a) -> 'a
   val add_error: error -> unit
   val make_error: error_code -> (Pos.t message) list -> error
 
@@ -133,8 +133,10 @@ module NonTracingErrors: Errors_modes = struct
   let applied_fixmes: applied_fixme list ref = ref []
   let (error_list: error list ref) = ref []
   let accumulate_errors = ref false
-  let in_lazy_decl = ref false
-  let has_lazy_decl_error = ref false
+  (* Some filename when declaring *)
+  let in_lazy_decl = ref None
+  (* Some filename = in_lazy_decl if there's an error in the file *)
+  let has_lazy_decl_error = ref None
 
   let try_with_result f1 f2 =
     Common.try_with_result f1 f2 error_list accumulate_errors
@@ -147,10 +149,11 @@ module NonTracingErrors: Errors_modes = struct
      This runs without returning the original state,
      since we collect it later in do_with_lazy_decls_
   *)
-  let run_in_decl_mode f =
-    in_lazy_decl := true;
+  let run_in_decl_mode filename f =
+    let old_in_lazy_decl = !in_lazy_decl in
+    in_lazy_decl := Some filename;
     let result = f () in
-    in_lazy_decl := false;
+    in_lazy_decl := old_in_lazy_decl;
     result
 
   and make_error code (x: (Pos.t * string) list) = ((code, x): error)
@@ -196,14 +199,17 @@ module NonTracingErrors: Errors_modes = struct
     if !accumulate_errors then
       begin
         error_list := error :: !error_list;
-        has_lazy_decl_error := !has_lazy_decl_error || !in_lazy_decl
+        has_lazy_decl_error := match !in_lazy_decl with
+        | Some fn -> Some fn
+        | None -> !has_lazy_decl_error
       end
     else
       (* We have an error, but haven't handled it in any way *)
       let msg = error |> to_absolute |> to_string in
-      if !in_lazy_decl then
+      match !in_lazy_decl with
+      | Some _ ->
         Common.lazy_decl_error_logging msg error_list to_absolute to_string
-      else assert_false_log_backtrace (Some msg)
+      | None -> assert_false_log_backtrace (Some msg)
 
 end
 
@@ -218,8 +224,8 @@ module TracingErrors: Errors_modes = struct
   let (error_list: error list ref) = ref []
 
   let accumulate_errors = ref false
-  let in_lazy_decl = ref false
-  let has_lazy_decl_error = ref false
+  let in_lazy_decl = ref None
+  let has_lazy_decl_error = ref None
 
   let try_with_result f1 f2 =
     Common.try_with_result f1 f2 error_list accumulate_errors
@@ -231,10 +237,10 @@ module TracingErrors: Errors_modes = struct
      This runs without returning the original state,
      since we collect it later in do_with_lazy_decls_
   *)
-  let run_in_decl_mode f =
-    in_lazy_decl := true;
+  let run_in_decl_mode filename f =
+    in_lazy_decl := Some filename;
     let result = f () in
-    in_lazy_decl := false;
+    in_lazy_decl := None;
     result
 
 
@@ -283,14 +289,17 @@ module TracingErrors: Errors_modes = struct
     if !accumulate_errors then
       begin
         error_list := error :: !error_list;
-        has_lazy_decl_error := !has_lazy_decl_error || !in_lazy_decl
+        has_lazy_decl_error := match !in_lazy_decl with
+        | Some fn -> Some fn
+        | None -> !has_lazy_decl_error
       end
     else
     (* We have an error, but haven't handled it in any way *)
       let msg = error |> to_absolute |> to_string in
-      if !in_lazy_decl then
+      match !in_lazy_decl with
+      | Some _ ->
         Common.lazy_decl_error_logging msg error_list to_absolute to_string
-      else assert_false_log_backtrace (Some msg)
+      | None -> assert_false_log_backtrace (Some msg)
 
   let get_sorted_error_list (err,_) =
     List.sort ~cmp:begin fun x y ->

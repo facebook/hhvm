@@ -972,6 +972,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         # ide connection cannot exit with code 0 if there is no server exists)
         ide_con.close_stdin()
 
+        time.sleep(1)
+
         # Test the exit status of ide call when normally exit
         ide_con = self.connect_ide()
         ide_con.write_cmd(ide_con.disconnect())

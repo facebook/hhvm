@@ -56,11 +56,6 @@ struct VMState {
   TypedValue* sp;
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
-
-  template<class F> void scan(F& mark) const {
-    mInstrState.scan(mark);
-    mark(&jitCalledFrame, sizeof(jitCalledFrame));
-  }
 };
 
 enum class InclOpFlags {
@@ -310,11 +305,6 @@ private:
     Variant handler;
     int chunk_size;
     OBFlags flags;
-    template<class F> void scan(F& mark) {
-      mark(oss);
-      mark(handler);
-      mark(chunk_size);
-    }
   };
 
 private:
@@ -490,61 +480,6 @@ private:
                             FStackCheck doStackCheck,
                             FInitArgs doInitArgs,
                             FEnterVM doEnterVM);
-
-public:
-  template<class F> void scan(F& mark) {
-    //mark(m_transport); Transport &subclasses must not contain heap ptrs.
-    mark(m_cwd);
-    //mark(m_sb); // points into m_buffers
-    //mark(m_out); // points into m_buffers
-    mark(m_remember_chunk);
-    for (auto& b : m_buffers) b.scan(mark);
-    mark(m_insideOBHandler);
-    mark(m_implicitFlush);
-    mark(m_protectedLevel);
-    //mark(m_stdout);
-    //mark(m_stdoutData);
-    mark(m_stdoutBytesWritten);
-    mark(m_rawPostData);
-    //mark(m_requestEventHandlers); type_scanned via ThreadLocal<T>
-    mark(m_shutdowns);
-    mark(m_userErrorHandlers);
-    mark(m_userExceptionHandlers);
-    //mark(m_errorState);
-    mark(m_lastError);
-    mark(m_errorPage);
-    mark(m_envs);
-    mark(m_timezone);
-    mark(m_throwAllErrors);
-    //mark(m_streamContext);
-    mark(m_shutdownsBackup);
-    mark(m_userErrorHandlersBackup);
-    mark(m_userExceptionHandlersBackup);
-    mark(m_exitCallback);
-    mark(m_sandboxId);
-    //mark(m_vhost); // VirtualHost* not allocated in php request heap
-    //mark(debuggerSettings);
-    mark.implicit(m_liveBCObjs); // exact ptrs, but not refcounted.
-    mark(m_apcMemSize);
-    //mark(m_apcHandles);
-    //mark(dynPropTable); // don't root objects with dyn props
-    mark(m_globalVarEnv);
-    for (auto& e : m_evaledFiles) { mark(e.first); mark(e.second.unit); }
-    mark(m_evaledFilesOrder);
-    mark(m_createdFuncs);
-    //for (auto& f : m_faults) mark(f);
-    mark(m_lambdaCounter);
-    for (auto& vmstate : m_nestedVMs) vmstate.scan(mark);
-    mark(m_nesting);
-    mark(m_dbgNoBreak);
-    mark(m_evaledArgs);
-    mark(m_lastErrorPath);
-    mark(m_lastErrorLine);
-    mark(m_setprofileCallback);
-    mark(m_memThresholdCallback);
-    mark(m_executingSetprofileCallback);
-    mark(m_headerCallback);
-  }
 
 ///////////////////////////////////////////////////////////////////////////////
 // only fields past here, please.

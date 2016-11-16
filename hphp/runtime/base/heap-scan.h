@@ -315,11 +315,6 @@ template<class F> void scanRoots(F& mark, type_scan::Scanner& scanner) {
   if (auto rds = rds::header()) {
     scanRds(mark, rds, scanner);
   }
-  // ExecutionContext
-  if (!g_context.isNull()) {
-    mark.where(RootKind::ExecutionContext);
-    g_context->scan(mark);
-  }
   // ThreadInfo
   mark.where(RootKind::ThreadInfo);
   if (!ThreadInfo::s_threadInfo.isNull()) {

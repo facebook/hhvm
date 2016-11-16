@@ -31,7 +31,6 @@ enum class RootKind : uint8_t {
   RdsLocal,
   RdsPersistent,
   PhpStack,
-  ExecutionContext,
   ThreadInfo,
   CppStack,
   CppTls,

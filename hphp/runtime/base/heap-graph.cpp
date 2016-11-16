@@ -35,7 +35,6 @@ const char* root_kind_names[] = {
   "RdsLocal",
   "RdsPersistent",
   "PhpStack",
-  "ExecutionContext",
   "ThreadInfo",
   "CppStack",
   "CppTls",

@@ -51,7 +51,6 @@ async function my_script_main(): Awaitable<void> {
   $text = "<?hh\nfunction foo() {}\nfunction bar() {}";
   $root = parse_text_to_editable($text);
   $printer = ($s) ==> { print $s; };
-  var_dump ($root->declarations()->children());
   dump($root, '', $printer);
 }
 Asio::enterAsyncEntryPoint(() ==> my_script_main());

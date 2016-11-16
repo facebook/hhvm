@@ -2342,7 +2342,7 @@ module GenerateFFHack = struct
       Printf.sprintf "$%s = $this->%s()->rewrite($rewriter, $new_parents);" f f in
     let rewriter =
       map_and_concat_separated "\n    " rewriter_mapper x.fields in
-    let condition_mapper f = Printf.sprintf "$%s == $this->%s()" f f in
+    let condition_mapper f = Printf.sprintf "$%s === $this->%s()" f f in
     let condition =
       map_and_concat_separated " &&\n      " condition_mapper x.fields in
     let json_mapper f = Printf.sprintf
@@ -2503,7 +2503,7 @@ abstract class EditableSyntax implements ArrayAccess {
   }
 
   public function offsetExists (mixed $offset): bool {
-    return $offset == 0;
+    return $offset === 0;
   }
 
   public function offsetGet (mixed $offset): mixed {
@@ -2569,7 +2569,7 @@ abstract class EditableSyntax implements ArrayAccess {
   }
 
   public function width(): int {
-    if ($this->_width == null) {
+    if ($this->_width === null) {
       $width = 0;
       /* TODO: Make an accumulation sequence operator */
       foreach ($this->children() as $name => $node) {
@@ -2635,7 +2635,7 @@ FROM_JSON_SYNTAX
 
   // Returns all the parents (and the node itself) of the first node
   // that matches a predicate, or [] if there is no such node.
-  public function find(
+  public function find_with_parents(
     (function(EditableSyntax):bool) $predicate,
     ?array<EditableSyntax> $parents = null): array<EditableSyntax> {
     $new_parents = $parents ?? [];
@@ -2643,7 +2643,7 @@ FROM_JSON_SYNTAX
     if ($predicate($this))
       return $new_parents;
     foreach($this->children() as $child) {
-      $result = $child->find($predicate, $new_parents);
+      $result = $child->find_with_parents($predicate, $new_parents);
       if (count($result) != 0)
         return $result;
     }
@@ -2664,7 +2664,7 @@ FROM_JSON_SYNTAX
 
   public function of_syntax_kind(string $kind): Continuation<EditableSyntax> {
     foreach($this->preorder() as $child)
-      if ($child->syntax_kind() == $kind)
+      if ($child->syntax_kind() === $kind)
         yield $child;
   }
 
@@ -2677,14 +2677,14 @@ FROM_JSON_SYNTAX
   }
 
   public function without(EditableSyntax $target): EditableSyntax {
-    return $this->remove_where(($node, $parents) ==> $node == $target);
+    return $this->remove_where(($node, $parents) ==> $node === $target);
   }
 
   public function replace(
     EditableSyntax $new_node,
     EditableSyntax $target): EditableSyntax {
     return $this->rewrite(
-      ($node, $parents) ==> $node == $target ? $new_node : $node);
+      ($node, $parents) ==> $node === $target ? $new_node : $node);
   }
 
   public function leftmost_token(): ?EditableSyntax {
@@ -2723,7 +2723,7 @@ FROM_JSON_SYNTAX
 
     if ($new_node->is_trivia() && !$target->is_trivia()) {
       $token = $target->is_token() ? $target : $target->leftmost_token();
-      if ($token == null)
+      if ($token === null)
         throw new Exception('Unable to find token to insert trivia.');
 
       // Inserting trivia before token is inserting to the right end of
@@ -2752,7 +2752,7 @@ FROM_JSON_SYNTAX
 
     if ($new_node->is_trivia() && !$target->is_trivia()) {
       $token = $target->is_token() ? $target : $target->rightmost_token();
-      if ($token == null)
+      if ($token === null)
         throw new Exception('Unable to find token to insert trivia.');
 
       // Inserting trivia after token is inserting to the left end of
@@ -2806,9 +2806,9 @@ final class EditableList extends EditableSyntax implements ArrayAccess {
 
   public static function to_list(
     array<EditableSyntax> $syntax_list): EditableSyntax {
-    if (count($syntax_list) == 0)
+    if (count($syntax_list) === 0)
       return Missing::missing();
-    else if (count($syntax_list) == 1)
+    else if (count($syntax_list) === 1)
       return $syntax_list[0];
     else
       return new EditableList($syntax_list);
@@ -2864,9 +2864,9 @@ final class EditableList extends EditableSyntax implements ArrayAccess {
     }
     $result = $this;
     if ($dirty) {
-      if (count($new_children) == 0)
+      if (count($new_children) === 0)
         $result = Missing::missing();
-      else if (count($new_children) == 1)
+      else if (count($new_children) === 1)
         $result = $new_children[0];
       else
         $result = new EditableList($new_children);
@@ -2954,7 +2954,7 @@ FACTORY_VARIABLE_TEXT_TOKENS
     array_push($new_parents, $this);
     $leading = $this->leading()->rewrite($rewriter, $new_parents);
     $trailing = $this->trailing()->rewrite($rewriter, $new_parents);
-    if ($leading == $this->leading() && $trailing == $this->trailing())
+    if ($leading === $this->leading() && $trailing === $this->trailing())
       return $rewriter($this, $parents ?? []);
     else
       return $rewriter(EditableToken::factory(
@@ -3107,7 +3107,7 @@ final class Missing extends EditableSyntax {
   }
 
   public static function missing(): Missing {
-    if (Missing::$_missing == null) {
+    if (Missing::$_missing === null) {
       $m = new Missing();
       Missing::$_missing = $m;
       return $m;

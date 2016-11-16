@@ -28,7 +28,7 @@ abstract class EditableSyntax implements ArrayAccess {
   }
 
   public function offsetExists (mixed $offset): bool {
-    return $offset == 0;
+    return $offset === 0;
   }
 
   public function offsetGet (mixed $offset): mixed {
@@ -94,7 +94,7 @@ abstract class EditableSyntax implements ArrayAccess {
   }
 
   public function width(): int {
-    if ($this->_width == null) {
+    if ($this->_width === null) {
       $width = 0;
       /* TODO: Make an accumulation sequence operator */
       foreach ($this->children() as $name => $node) {
@@ -390,7 +390,7 @@ abstract class EditableSyntax implements ArrayAccess {
 
   // Returns all the parents (and the node itself) of the first node
   // that matches a predicate, or [] if there is no such node.
-  public function find(
+  public function find_with_parents(
     (function(EditableSyntax):bool) $predicate,
     ?array<EditableSyntax> $parents = null): array<EditableSyntax> {
     $new_parents = $parents ?? [];
@@ -398,7 +398,7 @@ abstract class EditableSyntax implements ArrayAccess {
     if ($predicate($this))
       return $new_parents;
     foreach($this->children() as $child) {
-      $result = $child->find($predicate, $new_parents);
+      $result = $child->find_with_parents($predicate, $new_parents);
       if (count($result) != 0)
         return $result;
     }
@@ -419,7 +419,7 @@ abstract class EditableSyntax implements ArrayAccess {
 
   public function of_syntax_kind(string $kind): Continuation<EditableSyntax> {
     foreach($this->preorder() as $child)
-      if ($child->syntax_kind() == $kind)
+      if ($child->syntax_kind() === $kind)
         yield $child;
   }
 
@@ -432,14 +432,14 @@ abstract class EditableSyntax implements ArrayAccess {
   }
 
   public function without(EditableSyntax $target): EditableSyntax {
-    return $this->remove_where(($node, $parents) ==> $node == $target);
+    return $this->remove_where(($node, $parents) ==> $node === $target);
   }
 
   public function replace(
     EditableSyntax $new_node,
     EditableSyntax $target): EditableSyntax {
     return $this->rewrite(
-      ($node, $parents) ==> $node == $target ? $new_node : $node);
+      ($node, $parents) ==> $node === $target ? $new_node : $node);
   }
 
   public function leftmost_token(): ?EditableSyntax {
@@ -478,7 +478,7 @@ abstract class EditableSyntax implements ArrayAccess {
 
     if ($new_node->is_trivia() && !$target->is_trivia()) {
       $token = $target->is_token() ? $target : $target->leftmost_token();
-      if ($token == null)
+      if ($token === null)
         throw new Exception('Unable to find token to insert trivia.');
 
       // Inserting trivia before token is inserting to the right end of
@@ -507,7 +507,7 @@ abstract class EditableSyntax implements ArrayAccess {
 
     if ($new_node->is_trivia() && !$target->is_trivia()) {
       $token = $target->is_token() ? $target : $target->rightmost_token();
-      if ($token == null)
+      if ($token === null)
         throw new Exception('Unable to find token to insert trivia.');
 
       // Inserting trivia after token is inserting to the left end of
@@ -561,9 +561,9 @@ final class EditableList extends EditableSyntax implements ArrayAccess {
 
   public static function to_list(
     array<EditableSyntax> $syntax_list): EditableSyntax {
-    if (count($syntax_list) == 0)
+    if (count($syntax_list) === 0)
       return Missing::missing();
-    else if (count($syntax_list) == 1)
+    else if (count($syntax_list) === 1)
       return $syntax_list[0];
     else
       return new EditableList($syntax_list);
@@ -619,9 +619,9 @@ final class EditableList extends EditableSyntax implements ArrayAccess {
     }
     $result = $this;
     if ($dirty) {
-      if (count($new_children) == 0)
+      if (count($new_children) === 0)
         $result = Missing::missing();
-      else if (count($new_children) == 1)
+      else if (count($new_children) === 1)
         $result = $new_children[0];
       else
         $result = new EditableList($new_children);
@@ -1049,7 +1049,7 @@ abstract class EditableToken extends EditableSyntax {
     array_push($new_parents, $this);
     $leading = $this->leading()->rewrite($rewriter, $new_parents);
     $trailing = $this->trailing()->rewrite($rewriter, $new_parents);
-    if ($leading == $this->leading() && $trailing == $this->trailing())
+    if ($leading === $this->leading() && $trailing === $this->trailing())
       return $rewriter($this, $parents ?? []);
     else
       return $rewriter(EditableToken::factory(
@@ -3857,7 +3857,7 @@ final class Missing extends EditableSyntax {
   }
 
   public static function missing(): Missing {
-    if (Missing::$_missing == null) {
+    if (Missing::$_missing === null) {
       $m = new Missing();
       Missing::$_missing = $m;
       return $m;
@@ -3936,9 +3936,9 @@ final class ScriptHeader extends EditableSyntax {
     $question = $this->question()->rewrite($rewriter, $new_parents);
     $language = $this->language()->rewrite($rewriter, $new_parents);
     if (
-      $less_than == $this->less_than() &&
-      $question == $this->question() &&
-      $language == $this->language()) {
+      $less_than === $this->less_than() &&
+      $question === $this->question() &&
+      $language === $this->language()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ScriptHeader(
@@ -4006,8 +4006,8 @@ final class Script extends EditableSyntax {
     $header = $this->header()->rewrite($rewriter, $new_parents);
     $declarations = $this->declarations()->rewrite($rewriter, $new_parents);
     if (
-      $header == $this->header() &&
-      $declarations == $this->declarations()) {
+      $header === $this->header() &&
+      $declarations === $this->declarations()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new Script(
@@ -4056,7 +4056,7 @@ final class ScriptFooter extends EditableSyntax {
     array_push($new_parents, $this);
     $question_greater_than = $this->question_greater_than()->rewrite($rewriter, $new_parents);
     if (
-      $question_greater_than == $this->question_greater_than()) {
+      $question_greater_than === $this->question_greater_than()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ScriptFooter(
@@ -4099,7 +4099,7 @@ final class SimpleTypeSpecifier extends EditableSyntax {
     array_push($new_parents, $this);
     $specifier = $this->specifier()->rewrite($rewriter, $new_parents);
     if (
-      $specifier == $this->specifier()) {
+      $specifier === $this->specifier()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new SimpleTypeSpecifier(
@@ -4142,7 +4142,7 @@ final class LiteralExpression extends EditableSyntax {
     array_push($new_parents, $this);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     if (
-      $expression == $this->expression()) {
+      $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new LiteralExpression(
@@ -4185,7 +4185,7 @@ final class VariableExpression extends EditableSyntax {
     array_push($new_parents, $this);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     if (
-      $expression == $this->expression()) {
+      $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new VariableExpression(
@@ -4228,7 +4228,7 @@ final class QualifiedNameExpression extends EditableSyntax {
     array_push($new_parents, $this);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     if (
-      $expression == $this->expression()) {
+      $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new QualifiedNameExpression(
@@ -4271,7 +4271,7 @@ final class PipeVariableExpression extends EditableSyntax {
     array_push($new_parents, $this);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     if (
-      $expression == $this->expression()) {
+      $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new PipeVariableExpression(
@@ -4474,15 +4474,15 @@ final class EnumDeclaration extends EditableSyntax {
     $enumerators = $this->enumerators()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
-      $attribute_spec == $this->attribute_spec() &&
-      $keyword == $this->keyword() &&
-      $name == $this->name() &&
-      $colon == $this->colon() &&
-      $base == $this->base() &&
-      $type == $this->type() &&
-      $left_brace == $this->left_brace() &&
-      $enumerators == $this->enumerators() &&
-      $right_brace == $this->right_brace()) {
+      $attribute_spec === $this->attribute_spec() &&
+      $keyword === $this->keyword() &&
+      $name === $this->name() &&
+      $colon === $this->colon() &&
+      $base === $this->base() &&
+      $type === $this->type() &&
+      $left_brace === $this->left_brace() &&
+      $enumerators === $this->enumerators() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new EnumDeclaration(
@@ -4618,10 +4618,10 @@ final class Enumerator extends EditableSyntax {
     $value = $this->value()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $equal == $this->equal() &&
-      $value == $this->value() &&
-      $semicolon == $this->semicolon()) {
+      $name === $this->name() &&
+      $equal === $this->equal() &&
+      $value === $this->value() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new Enumerator(
@@ -4815,14 +4815,14 @@ final class AliasDeclaration extends EditableSyntax {
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $attribute_spec == $this->attribute_spec() &&
-      $keyword == $this->keyword() &&
-      $name == $this->name() &&
-      $generic_parameter == $this->generic_parameter() &&
-      $constraint == $this->constraint() &&
-      $equal == $this->equal() &&
-      $type == $this->type() &&
-      $semicolon == $this->semicolon()) {
+      $attribute_spec === $this->attribute_spec() &&
+      $keyword === $this->keyword() &&
+      $name === $this->name() &&
+      $generic_parameter === $this->generic_parameter() &&
+      $constraint === $this->constraint() &&
+      $equal === $this->equal() &&
+      $type === $this->type() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new AliasDeclaration(
@@ -4952,10 +4952,10 @@ final class PropertyDeclaration extends EditableSyntax {
     $declarators = $this->declarators()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $modifiers == $this->modifiers() &&
-      $type == $this->type() &&
-      $declarators == $this->declarators() &&
-      $semicolon == $this->semicolon()) {
+      $modifiers === $this->modifiers() &&
+      $type === $this->type() &&
+      $declarators === $this->declarators() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new PropertyDeclaration(
@@ -5029,8 +5029,8 @@ final class PropertyDeclarator extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $initializer = $this->initializer()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $initializer == $this->initializer()) {
+      $name === $this->name() &&
+      $initializer === $this->initializer()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new PropertyDeclarator(
@@ -5107,9 +5107,9 @@ final class NamespaceDeclaration extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $name == $this->name() &&
-      $body == $this->body()) {
+      $keyword === $this->keyword() &&
+      $name === $this->name() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new NamespaceDeclaration(
@@ -5192,9 +5192,9 @@ final class NamespaceBody extends EditableSyntax {
     $declarations = $this->declarations()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
-      $left_brace == $this->left_brace() &&
-      $declarations == $this->declarations() &&
-      $right_brace == $this->right_brace()) {
+      $left_brace === $this->left_brace() &&
+      $declarations === $this->declarations() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new NamespaceBody(
@@ -5294,10 +5294,10 @@ final class NamespaceUseDeclaration extends EditableSyntax {
     $clauses = $this->clauses()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $kind == $this->kind() &&
-      $clauses == $this->clauses() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $kind === $this->kind() &&
+      $clauses === $this->clauses() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new NamespaceUseDeclaration(
@@ -5466,13 +5466,13 @@ final class NamespaceGroupUseDeclaration extends EditableSyntax {
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $kind == $this->kind() &&
-      $prefix == $this->prefix() &&
-      $left_brace == $this->left_brace() &&
-      $clauses == $this->clauses() &&
-      $right_brace == $this->right_brace() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $kind === $this->kind() &&
+      $prefix === $this->prefix() &&
+      $left_brace === $this->left_brace() &&
+      $clauses === $this->clauses() &&
+      $right_brace === $this->right_brace() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new NamespaceGroupUseDeclaration(
@@ -5596,10 +5596,10 @@ final class NamespaceUseClause extends EditableSyntax {
     $as = $this->as()->rewrite($rewriter, $new_parents);
     $alias = $this->alias()->rewrite($rewriter, $new_parents);
     if (
-      $clause_kind == $this->clause_kind() &&
-      $name == $this->name() &&
-      $as == $this->as() &&
-      $alias == $this->alias()) {
+      $clause_kind === $this->clause_kind() &&
+      $name === $this->name() &&
+      $as === $this->as() &&
+      $alias === $this->alias()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new NamespaceUseClause(
@@ -5688,9 +5688,9 @@ final class FunctionDeclaration extends EditableSyntax {
     $declaration_header = $this->declaration_header()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $attribute_spec == $this->attribute_spec() &&
-      $declaration_header == $this->declaration_header() &&
-      $body == $this->body()) {
+      $attribute_spec === $this->attribute_spec() &&
+      $declaration_header === $this->declaration_header() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FunctionDeclaration(
@@ -5934,16 +5934,16 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     if (
-      $async == $this->async() &&
-      $keyword == $this->keyword() &&
-      $ampersand == $this->ampersand() &&
-      $name == $this->name() &&
-      $type_parameter_list == $this->type_parameter_list() &&
-      $left_paren == $this->left_paren() &&
-      $parameter_list == $this->parameter_list() &&
-      $right_paren == $this->right_paren() &&
-      $colon == $this->colon() &&
-      $type == $this->type()) {
+      $async === $this->async() &&
+      $keyword === $this->keyword() &&
+      $ampersand === $this->ampersand() &&
+      $name === $this->name() &&
+      $type_parameter_list === $this->type_parameter_list() &&
+      $left_paren === $this->left_paren() &&
+      $parameter_list === $this->parameter_list() &&
+      $right_paren === $this->right_paren() &&
+      $colon === $this->colon() &&
+      $type === $this->type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FunctionDeclarationHeader(
@@ -6104,11 +6104,11 @@ final class MethodishDeclaration extends EditableSyntax {
     $function_body = $this->function_body()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $attribute == $this->attribute() &&
-      $modifiers == $this->modifiers() &&
-      $function_decl_header == $this->function_decl_header() &&
-      $function_body == $this->function_body() &&
-      $semicolon == $this->semicolon()) {
+      $attribute === $this->attribute() &&
+      $modifiers === $this->modifiers() &&
+      $function_decl_header === $this->function_decl_header() &&
+      $function_body === $this->function_body() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new MethodishDeclaration(
@@ -6364,16 +6364,16 @@ final class ClassishDeclaration extends EditableSyntax {
     $implements_list = $this->implements_list()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $attribute == $this->attribute() &&
-      $modifiers == $this->modifiers() &&
-      $keyword == $this->keyword() &&
-      $name == $this->name() &&
-      $type_parameters == $this->type_parameters() &&
-      $extends_keyword == $this->extends_keyword() &&
-      $extends_list == $this->extends_list() &&
-      $implements_keyword == $this->implements_keyword() &&
-      $implements_list == $this->implements_list() &&
-      $body == $this->body()) {
+      $attribute === $this->attribute() &&
+      $modifiers === $this->modifiers() &&
+      $keyword === $this->keyword() &&
+      $name === $this->name() &&
+      $type_parameters === $this->type_parameters() &&
+      $extends_keyword === $this->extends_keyword() &&
+      $extends_list === $this->extends_list() &&
+      $implements_keyword === $this->implements_keyword() &&
+      $implements_list === $this->implements_list() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ClassishDeclaration(
@@ -6498,9 +6498,9 @@ final class ClassishBody extends EditableSyntax {
     $elements = $this->elements()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
-      $left_brace == $this->left_brace() &&
-      $elements == $this->elements() &&
-      $right_brace == $this->right_brace()) {
+      $left_brace === $this->left_brace() &&
+      $elements === $this->elements() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ClassishBody(
@@ -6583,9 +6583,9 @@ final class TraitUse extends EditableSyntax {
     $names = $this->names()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $names == $this->names() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $names === $this->names() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TraitUse(
@@ -6685,10 +6685,10 @@ final class RequireClause extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $kind == $this->kind() &&
-      $name == $this->name() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $kind === $this->kind() &&
+      $name === $this->name() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new RequireClause(
@@ -6813,11 +6813,11 @@ final class ConstDeclaration extends EditableSyntax {
     $declarators = $this->declarators()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $abstract == $this->abstract() &&
-      $keyword == $this->keyword() &&
-      $type_specifier == $this->type_specifier() &&
-      $declarators == $this->declarators() &&
-      $semicolon == $this->semicolon()) {
+      $abstract === $this->abstract() &&
+      $keyword === $this->keyword() &&
+      $type_specifier === $this->type_specifier() &&
+      $declarators === $this->declarators() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ConstDeclaration(
@@ -6897,8 +6897,8 @@ final class ConstantDeclarator extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $initializer = $this->initializer()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $initializer == $this->initializer()) {
+      $name === $this->name() &&
+      $initializer === $this->initializer()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ConstantDeclarator(
@@ -7080,14 +7080,14 @@ final class TypeConstDeclaration extends EditableSyntax {
     $type_specifier = $this->type_specifier()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $abstract == $this->abstract() &&
-      $keyword == $this->keyword() &&
-      $type_keyword == $this->type_keyword() &&
-      $name == $this->name() &&
-      $type_constraint == $this->type_constraint() &&
-      $equal == $this->equal() &&
-      $type_specifier == $this->type_specifier() &&
-      $semicolon == $this->semicolon()) {
+      $abstract === $this->abstract() &&
+      $keyword === $this->keyword() &&
+      $type_keyword === $this->type_keyword() &&
+      $name === $this->name() &&
+      $type_constraint === $this->type_constraint() &&
+      $equal === $this->equal() &&
+      $type_specifier === $this->type_specifier() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TypeConstDeclaration(
@@ -7185,8 +7185,8 @@ final class DecoratedExpression extends EditableSyntax {
     $decorator = $this->decorator()->rewrite($rewriter, $new_parents);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     if (
-      $decorator == $this->decorator() &&
-      $expression == $this->expression()) {
+      $decorator === $this->decorator() &&
+      $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new DecoratedExpression(
@@ -7299,11 +7299,11 @@ final class ParameterDeclaration extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $default_value = $this->default_value()->rewrite($rewriter, $new_parents);
     if (
-      $attribute == $this->attribute() &&
-      $visibility == $this->visibility() &&
-      $type == $this->type() &&
-      $name == $this->name() &&
-      $default_value == $this->default_value()) {
+      $attribute === $this->attribute() &&
+      $visibility === $this->visibility() &&
+      $type === $this->type() &&
+      $name === $this->name() &&
+      $default_value === $this->default_value()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ParameterDeclaration(
@@ -7398,9 +7398,9 @@ final class AttributeSpecification extends EditableSyntax {
     $attributes = $this->attributes()->rewrite($rewriter, $new_parents);
     $right_double_angle = $this->right_double_angle()->rewrite($rewriter, $new_parents);
     if (
-      $left_double_angle == $this->left_double_angle() &&
-      $attributes == $this->attributes() &&
-      $right_double_angle == $this->right_double_angle()) {
+      $left_double_angle === $this->left_double_angle() &&
+      $attributes === $this->attributes() &&
+      $right_double_angle === $this->right_double_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new AttributeSpecification(
@@ -7500,10 +7500,10 @@ final class Attribute extends EditableSyntax {
     $values = $this->values()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $left_paren == $this->left_paren() &&
-      $values == $this->values() &&
-      $right_paren == $this->right_paren()) {
+      $name === $this->name() &&
+      $left_paren === $this->left_paren() &&
+      $values === $this->values() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new Attribute(
@@ -7577,8 +7577,8 @@ final class InclusionExpression extends EditableSyntax {
     $require = $this->require()->rewrite($rewriter, $new_parents);
     $filename = $this->filename()->rewrite($rewriter, $new_parents);
     if (
-      $require == $this->require() &&
-      $filename == $this->filename()) {
+      $require === $this->require() &&
+      $filename === $this->filename()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new InclusionExpression(
@@ -7640,8 +7640,8 @@ final class InclusionDirective extends EditableSyntax {
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $expression == $this->expression() &&
-      $semicolon == $this->semicolon()) {
+      $expression === $this->expression() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new InclusionDirective(
@@ -7718,9 +7718,9 @@ final class CompoundStatement extends EditableSyntax {
     $statements = $this->statements()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
-      $left_brace == $this->left_brace() &&
-      $statements == $this->statements() &&
-      $right_brace == $this->right_brace()) {
+      $left_brace === $this->left_brace() &&
+      $statements === $this->statements() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new CompoundStatement(
@@ -7788,8 +7788,8 @@ final class ExpressionStatement extends EditableSyntax {
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $expression == $this->expression() &&
-      $semicolon == $this->semicolon()) {
+      $expression === $this->expression() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ExpressionStatement(
@@ -7902,11 +7902,11 @@ final class UnsetStatement extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $variables == $this->variables() &&
-      $right_paren == $this->right_paren() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $variables === $this->variables() &&
+      $right_paren === $this->right_paren() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new UnsetStatement(
@@ -8037,11 +8037,11 @@ final class WhileStatement extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $condition == $this->condition() &&
-      $right_paren == $this->right_paren() &&
-      $body == $this->body()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $condition === $this->condition() &&
+      $right_paren === $this->right_paren() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new WhileStatement(
@@ -8216,13 +8216,13 @@ final class IfStatement extends EditableSyntax {
     $elseif_clauses = $this->elseif_clauses()->rewrite($rewriter, $new_parents);
     $else_clause = $this->else_clause()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $condition == $this->condition() &&
-      $right_paren == $this->right_paren() &&
-      $statement == $this->statement() &&
-      $elseif_clauses == $this->elseif_clauses() &&
-      $else_clause == $this->else_clause()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $condition === $this->condition() &&
+      $right_paren === $this->right_paren() &&
+      $statement === $this->statement() &&
+      $elseif_clauses === $this->elseif_clauses() &&
+      $else_clause === $this->else_clause()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new IfStatement(
@@ -8365,11 +8365,11 @@ final class ElseifClause extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $statement = $this->statement()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $condition == $this->condition() &&
-      $right_paren == $this->right_paren() &&
-      $statement == $this->statement()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $condition === $this->condition() &&
+      $right_paren === $this->right_paren() &&
+      $statement === $this->statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ElseifClause(
@@ -8449,8 +8449,8 @@ final class ElseClause extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $statement = $this->statement()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $statement == $this->statement()) {
+      $keyword === $this->keyword() &&
+      $statement === $this->statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ElseClause(
@@ -8544,10 +8544,10 @@ final class TryStatement extends EditableSyntax {
     $catch_clauses = $this->catch_clauses()->rewrite($rewriter, $new_parents);
     $finally_clause = $this->finally_clause()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $compound_statement == $this->compound_statement() &&
-      $catch_clauses == $this->catch_clauses() &&
-      $finally_clause == $this->finally_clause()) {
+      $keyword === $this->keyword() &&
+      $compound_statement === $this->compound_statement() &&
+      $catch_clauses === $this->catch_clauses() &&
+      $finally_clause === $this->finally_clause()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TryStatement(
@@ -8693,12 +8693,12 @@ final class CatchClause extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $type == $this->type() &&
-      $variable == $this->variable() &&
-      $right_paren == $this->right_paren() &&
-      $body == $this->body()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $type === $this->type() &&
+      $variable === $this->variable() &&
+      $right_paren === $this->right_paren() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new CatchClause(
@@ -8784,8 +8784,8 @@ final class FinallyClause extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $body == $this->body()) {
+      $keyword === $this->keyword() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FinallyClause(
@@ -8942,13 +8942,13 @@ final class DoStatement extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $body == $this->body() &&
-      $while_keyword == $this->while_keyword() &&
-      $left_paren == $this->left_paren() &&
-      $condition == $this->condition() &&
-      $right_paren == $this->right_paren() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $body === $this->body() &&
+      $while_keyword === $this->while_keyword() &&
+      $left_paren === $this->left_paren() &&
+      $condition === $this->condition() &&
+      $right_paren === $this->right_paren() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new DoStatement(
@@ -9187,15 +9187,15 @@ final class ForStatement extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $initializer == $this->initializer() &&
-      $first_semicolon == $this->first_semicolon() &&
-      $control == $this->control() &&
-      $second_semicolon == $this->second_semicolon() &&
-      $end_of_loop == $this->end_of_loop() &&
-      $right_paren == $this->right_paren() &&
-      $body == $this->body()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $initializer === $this->initializer() &&
+      $first_semicolon === $this->first_semicolon() &&
+      $control === $this->control() &&
+      $second_semicolon === $this->second_semicolon() &&
+      $end_of_loop === $this->end_of_loop() &&
+      $right_paren === $this->right_paren() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ForStatement(
@@ -9475,16 +9475,16 @@ final class ForeachStatement extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $collection == $this->collection() &&
-      $await_keyword == $this->await_keyword() &&
-      $as == $this->as() &&
-      $key == $this->key() &&
-      $arrow == $this->arrow() &&
-      $value == $this->value() &&
-      $right_paren == $this->right_paren() &&
-      $body == $this->body()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $collection === $this->collection() &&
+      $await_keyword === $this->await_keyword() &&
+      $as === $this->as() &&
+      $key === $this->key() &&
+      $arrow === $this->arrow() &&
+      $value === $this->value() &&
+      $right_paren === $this->right_paren() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ForeachStatement(
@@ -9645,11 +9645,11 @@ final class SwitchStatement extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $expression == $this->expression() &&
-      $right_paren == $this->right_paren() &&
-      $body == $this->body()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $expression === $this->expression() &&
+      $right_paren === $this->right_paren() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new SwitchStatement(
@@ -9761,10 +9761,10 @@ final class CaseStatement extends EditableSyntax {
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $statement = $this->statement()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $expression == $this->expression() &&
-      $colon == $this->colon() &&
-      $statement == $this->statement()) {
+      $keyword === $this->keyword() &&
+      $expression === $this->expression() &&
+      $colon === $this->colon() &&
+      $statement === $this->statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new CaseStatement(
@@ -9853,9 +9853,9 @@ final class DefaultStatement extends EditableSyntax {
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $statement = $this->statement()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $colon == $this->colon() &&
-      $statement == $this->statement()) {
+      $keyword === $this->keyword() &&
+      $colon === $this->colon() &&
+      $statement === $this->statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new DefaultStatement(
@@ -9938,9 +9938,9 @@ final class ReturnStatement extends EditableSyntax {
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $expression == $this->expression() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $expression === $this->expression() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ReturnStatement(
@@ -10023,9 +10023,9 @@ final class ThrowStatement extends EditableSyntax {
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $expression == $this->expression() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $expression === $this->expression() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ThrowStatement(
@@ -10108,9 +10108,9 @@ final class BreakStatement extends EditableSyntax {
     $level = $this->level()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $level == $this->level() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $level === $this->level() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new BreakStatement(
@@ -10193,9 +10193,9 @@ final class ContinueStatement extends EditableSyntax {
     $level = $this->level()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $level == $this->level() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $level === $this->level() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ContinueStatement(
@@ -10278,9 +10278,9 @@ final class FunctionStaticStatement extends EditableSyntax {
     $declarations = $this->declarations()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $static_keyword == $this->static_keyword() &&
-      $declarations == $this->declarations() &&
-      $semicolon == $this->semicolon()) {
+      $static_keyword === $this->static_keyword() &&
+      $declarations === $this->declarations() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FunctionStaticStatement(
@@ -10348,8 +10348,8 @@ final class StaticDeclarator extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $initializer = $this->initializer()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $initializer == $this->initializer()) {
+      $name === $this->name() &&
+      $initializer === $this->initializer()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new StaticDeclarator(
@@ -10426,9 +10426,9 @@ final class EchoStatement extends EditableSyntax {
     $expressions = $this->expressions()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $expressions == $this->expressions() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $expressions === $this->expressions() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new EchoStatement(
@@ -10511,9 +10511,9 @@ final class GlobalStatement extends EditableSyntax {
     $variables = $this->variables()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $variables == $this->variables() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $variables === $this->variables() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new GlobalStatement(
@@ -10581,8 +10581,8 @@ final class SimpleInitializer extends EditableSyntax {
     $equal = $this->equal()->rewrite($rewriter, $new_parents);
     $value = $this->value()->rewrite($rewriter, $new_parents);
     if (
-      $equal == $this->equal() &&
-      $value == $this->value()) {
+      $equal === $this->equal() &&
+      $value === $this->value()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new SimpleInitializer(
@@ -10791,15 +10791,15 @@ final class AnonymousFunction extends EditableSyntax {
     $use = $this->use()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $async_keyword == $this->async_keyword() &&
-      $function_keyword == $this->function_keyword() &&
-      $left_paren == $this->left_paren() &&
-      $parameters == $this->parameters() &&
-      $right_paren == $this->right_paren() &&
-      $colon == $this->colon() &&
-      $type == $this->type() &&
-      $use == $this->use() &&
-      $body == $this->body()) {
+      $async_keyword === $this->async_keyword() &&
+      $function_keyword === $this->function_keyword() &&
+      $left_paren === $this->left_paren() &&
+      $parameters === $this->parameters() &&
+      $right_paren === $this->right_paren() &&
+      $colon === $this->colon() &&
+      $type === $this->type() &&
+      $use === $this->use() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new AnonymousFunction(
@@ -10935,10 +10935,10 @@ final class AnonymousFunctionUseClause extends EditableSyntax {
     $variables = $this->variables()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $variables == $this->variables() &&
-      $right_paren == $this->right_paren()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $variables === $this->variables() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new AnonymousFunctionUseClause(
@@ -11044,10 +11044,10 @@ final class LambdaExpression extends EditableSyntax {
     $arrow = $this->arrow()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
-      $async == $this->async() &&
-      $signature == $this->signature() &&
-      $arrow == $this->arrow() &&
-      $body == $this->body()) {
+      $async === $this->async() &&
+      $signature === $this->signature() &&
+      $arrow === $this->arrow() &&
+      $body === $this->body()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new LambdaExpression(
@@ -11172,11 +11172,11 @@ final class LambdaSignature extends EditableSyntax {
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     if (
-      $left_paren == $this->left_paren() &&
-      $parameters == $this->parameters() &&
-      $right_paren == $this->right_paren() &&
-      $colon == $this->colon() &&
-      $type == $this->type()) {
+      $left_paren === $this->left_paren() &&
+      $parameters === $this->parameters() &&
+      $right_paren === $this->right_paren() &&
+      $colon === $this->colon() &&
+      $type === $this->type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new LambdaSignature(
@@ -11288,10 +11288,10 @@ final class CastExpression extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $operand = $this->operand()->rewrite($rewriter, $new_parents);
     if (
-      $left_paren == $this->left_paren() &&
-      $type == $this->type() &&
-      $right_paren == $this->right_paren() &&
-      $operand == $this->operand()) {
+      $left_paren === $this->left_paren() &&
+      $type === $this->type() &&
+      $right_paren === $this->right_paren() &&
+      $operand === $this->operand()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new CastExpression(
@@ -11380,9 +11380,9 @@ final class ScopeResolutionExpression extends EditableSyntax {
     $operator = $this->operator()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
     if (
-      $qualifier == $this->qualifier() &&
-      $operator == $this->operator() &&
-      $name == $this->name()) {
+      $qualifier === $this->qualifier() &&
+      $operator === $this->operator() &&
+      $name === $this->name()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ScopeResolutionExpression(
@@ -11465,9 +11465,9 @@ final class MemberSelectionExpression extends EditableSyntax {
     $operator = $this->operator()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
     if (
-      $object == $this->object() &&
-      $operator == $this->operator() &&
-      $name == $this->name()) {
+      $object === $this->object() &&
+      $operator === $this->operator() &&
+      $name === $this->name()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new MemberSelectionExpression(
@@ -11550,9 +11550,9 @@ final class SafeMemberSelectionExpression extends EditableSyntax {
     $operator = $this->operator()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
     if (
-      $object == $this->object() &&
-      $operator == $this->operator() &&
-      $name == $this->name()) {
+      $object === $this->object() &&
+      $operator === $this->operator() &&
+      $name === $this->name()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new SafeMemberSelectionExpression(
@@ -11620,8 +11620,8 @@ final class YieldExpression extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $operand = $this->operand()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $operand == $this->operand()) {
+      $keyword === $this->keyword() &&
+      $operand === $this->operand()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new YieldExpression(
@@ -11683,8 +11683,8 @@ final class PrintExpression extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $expression == $this->expression()) {
+      $keyword === $this->keyword() &&
+      $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new PrintExpression(
@@ -11746,8 +11746,8 @@ final class PrefixUnaryExpression extends EditableSyntax {
     $operator = $this->operator()->rewrite($rewriter, $new_parents);
     $operand = $this->operand()->rewrite($rewriter, $new_parents);
     if (
-      $operator == $this->operator() &&
-      $operand == $this->operand()) {
+      $operator === $this->operator() &&
+      $operand === $this->operand()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new PrefixUnaryExpression(
@@ -11809,8 +11809,8 @@ final class PostfixUnaryExpression extends EditableSyntax {
     $operand = $this->operand()->rewrite($rewriter, $new_parents);
     $operator = $this->operator()->rewrite($rewriter, $new_parents);
     if (
-      $operand == $this->operand() &&
-      $operator == $this->operator()) {
+      $operand === $this->operand() &&
+      $operator === $this->operator()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new PostfixUnaryExpression(
@@ -11887,9 +11887,9 @@ final class BinaryExpression extends EditableSyntax {
     $operator = $this->operator()->rewrite($rewriter, $new_parents);
     $right_operand = $this->right_operand()->rewrite($rewriter, $new_parents);
     if (
-      $left_operand == $this->left_operand() &&
-      $operator == $this->operator() &&
-      $right_operand == $this->right_operand()) {
+      $left_operand === $this->left_operand() &&
+      $operator === $this->operator() &&
+      $right_operand === $this->right_operand()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new BinaryExpression(
@@ -11972,9 +11972,9 @@ final class InstanceofExpression extends EditableSyntax {
     $operator = $this->operator()->rewrite($rewriter, $new_parents);
     $right_operand = $this->right_operand()->rewrite($rewriter, $new_parents);
     if (
-      $left_operand == $this->left_operand() &&
-      $operator == $this->operator() &&
-      $right_operand == $this->right_operand()) {
+      $left_operand === $this->left_operand() &&
+      $operator === $this->operator() &&
+      $right_operand === $this->right_operand()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new InstanceofExpression(
@@ -12093,11 +12093,11 @@ final class ConditionalExpression extends EditableSyntax {
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $alternative = $this->alternative()->rewrite($rewriter, $new_parents);
     if (
-      $test == $this->test() &&
-      $question == $this->question() &&
-      $consequence == $this->consequence() &&
-      $colon == $this->colon() &&
-      $alternative == $this->alternative()) {
+      $test === $this->test() &&
+      $question === $this->question() &&
+      $consequence === $this->consequence() &&
+      $colon === $this->colon() &&
+      $alternative === $this->alternative()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ConditionalExpression(
@@ -12209,10 +12209,10 @@ final class FunctionCallExpression extends EditableSyntax {
     $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $receiver == $this->receiver() &&
-      $left_paren == $this->left_paren() &&
-      $argument_list == $this->argument_list() &&
-      $right_paren == $this->right_paren()) {
+      $receiver === $this->receiver() &&
+      $left_paren === $this->left_paren() &&
+      $argument_list === $this->argument_list() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FunctionCallExpression(
@@ -12301,9 +12301,9 @@ final class ParenthesizedExpression extends EditableSyntax {
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $left_paren == $this->left_paren() &&
-      $expression == $this->expression() &&
-      $right_paren == $this->right_paren()) {
+      $left_paren === $this->left_paren() &&
+      $expression === $this->expression() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ParenthesizedExpression(
@@ -12386,9 +12386,9 @@ final class BracedExpression extends EditableSyntax {
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
-      $left_brace == $this->left_brace() &&
-      $expression == $this->expression() &&
-      $right_brace == $this->right_brace()) {
+      $left_brace === $this->left_brace() &&
+      $expression === $this->expression() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new BracedExpression(
@@ -12488,10 +12488,10 @@ final class ListExpression extends EditableSyntax {
     $members = $this->members()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $members == $this->members() &&
-      $right_paren == $this->right_paren()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $members === $this->members() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ListExpression(
@@ -12597,10 +12597,10 @@ final class CollectionLiteralExpression extends EditableSyntax {
     $initializers = $this->initializers()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $left_brace == $this->left_brace() &&
-      $initializers == $this->initializers() &&
-      $right_brace == $this->right_brace()) {
+      $name === $this->name() &&
+      $left_brace === $this->left_brace() &&
+      $initializers === $this->initializers() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new CollectionLiteralExpression(
@@ -12725,11 +12725,11 @@ final class ObjectCreationExpression extends EditableSyntax {
     $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $new_keyword == $this->new_keyword() &&
-      $type == $this->type() &&
-      $left_paren == $this->left_paren() &&
-      $argument_list == $this->argument_list() &&
-      $right_paren == $this->right_paren()) {
+      $new_keyword === $this->new_keyword() &&
+      $type === $this->type() &&
+      $left_paren === $this->left_paren() &&
+      $argument_list === $this->argument_list() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ObjectCreationExpression(
@@ -12824,9 +12824,9 @@ final class ArrayCreationExpression extends EditableSyntax {
     $members = $this->members()->rewrite($rewriter, $new_parents);
     $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
     if (
-      $left_bracket == $this->left_bracket() &&
-      $members == $this->members() &&
-      $right_bracket == $this->right_bracket()) {
+      $left_bracket === $this->left_bracket() &&
+      $members === $this->members() &&
+      $right_bracket === $this->right_bracket()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ArrayCreationExpression(
@@ -12926,10 +12926,10 @@ final class ArrayIntrinsicExpression extends EditableSyntax {
     $members = $this->members()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $members == $this->members() &&
-      $right_paren == $this->right_paren()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $members === $this->members() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ArrayIntrinsicExpression(
@@ -13018,9 +13018,9 @@ final class ElementInitializer extends EditableSyntax {
     $arrow = $this->arrow()->rewrite($rewriter, $new_parents);
     $value = $this->value()->rewrite($rewriter, $new_parents);
     if (
-      $key == $this->key() &&
-      $arrow == $this->arrow() &&
-      $value == $this->value()) {
+      $key === $this->key() &&
+      $arrow === $this->arrow() &&
+      $value === $this->value()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ElementInitializer(
@@ -13120,10 +13120,10 @@ final class SubscriptExpression extends EditableSyntax {
     $index = $this->index()->rewrite($rewriter, $new_parents);
     $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
     if (
-      $receiver == $this->receiver() &&
-      $left_bracket == $this->left_bracket() &&
-      $index == $this->index() &&
-      $right_bracket == $this->right_bracket()) {
+      $receiver === $this->receiver() &&
+      $left_bracket === $this->left_bracket() &&
+      $index === $this->index() &&
+      $right_bracket === $this->right_bracket()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new SubscriptExpression(
@@ -13197,8 +13197,8 @@ final class AwaitableCreationExpression extends EditableSyntax {
     $async = $this->async()->rewrite($rewriter, $new_parents);
     $compound_statement = $this->compound_statement()->rewrite($rewriter, $new_parents);
     if (
-      $async == $this->async() &&
-      $compound_statement == $this->compound_statement()) {
+      $async === $this->async() &&
+      $compound_statement === $this->compound_statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new AwaitableCreationExpression(
@@ -13275,9 +13275,9 @@ final class XHPChildrenDeclaration extends EditableSyntax {
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $expression == $this->expression() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $expression === $this->expression() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPChildrenDeclaration(
@@ -13360,9 +13360,9 @@ final class XHPCategoryDeclaration extends EditableSyntax {
     $categories = $this->categories()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $categories == $this->categories() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $categories === $this->categories() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPCategoryDeclaration(
@@ -13462,10 +13462,10 @@ final class XHPEnumType extends EditableSyntax {
     $values = $this->values()->rewrite($rewriter, $new_parents);
     $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_brace == $this->left_brace() &&
-      $values == $this->values() &&
-      $right_brace == $this->right_brace()) {
+      $keyword === $this->keyword() &&
+      $left_brace === $this->left_brace() &&
+      $values === $this->values() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPEnumType(
@@ -13539,8 +13539,8 @@ final class XHPRequired extends EditableSyntax {
     $at = $this->at()->rewrite($rewriter, $new_parents);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     if (
-      $at == $this->at() &&
-      $keyword == $this->keyword()) {
+      $at === $this->at() &&
+      $keyword === $this->keyword()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPRequired(
@@ -13617,9 +13617,9 @@ final class XHPClassAttributeDeclaration extends EditableSyntax {
     $attributes = $this->attributes()->rewrite($rewriter, $new_parents);
     $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $attributes == $this->attributes() &&
-      $semicolon == $this->semicolon()) {
+      $keyword === $this->keyword() &&
+      $attributes === $this->attributes() &&
+      $semicolon === $this->semicolon()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPClassAttributeDeclaration(
@@ -13719,10 +13719,10 @@ final class XHPClassAttribute extends EditableSyntax {
     $initializer = $this->initializer()->rewrite($rewriter, $new_parents);
     $required = $this->required()->rewrite($rewriter, $new_parents);
     if (
-      $type == $this->type() &&
-      $name == $this->name() &&
-      $initializer == $this->initializer() &&
-      $required == $this->required()) {
+      $type === $this->type() &&
+      $name === $this->name() &&
+      $initializer === $this->initializer() &&
+      $required === $this->required()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPClassAttribute(
@@ -13811,9 +13811,9 @@ final class XHPAttribute extends EditableSyntax {
     $equal = $this->equal()->rewrite($rewriter, $new_parents);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $equal == $this->equal() &&
-      $expression == $this->expression()) {
+      $name === $this->name() &&
+      $equal === $this->equal() &&
+      $expression === $this->expression()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPAttribute(
@@ -13896,9 +13896,9 @@ final class XHPOpen extends EditableSyntax {
     $attributes = $this->attributes()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $attributes == $this->attributes() &&
-      $right_angle == $this->right_angle()) {
+      $name === $this->name() &&
+      $attributes === $this->attributes() &&
+      $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPOpen(
@@ -13981,9 +13981,9 @@ final class XHPExpression extends EditableSyntax {
     $body = $this->body()->rewrite($rewriter, $new_parents);
     $close = $this->close()->rewrite($rewriter, $new_parents);
     if (
-      $open == $this->open() &&
-      $body == $this->body() &&
-      $close == $this->close()) {
+      $open === $this->open() &&
+      $body === $this->body() &&
+      $close === $this->close()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPExpression(
@@ -14066,9 +14066,9 @@ final class XHPClose extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $left_angle == $this->left_angle() &&
-      $name == $this->name() &&
-      $right_angle == $this->right_angle()) {
+      $left_angle === $this->left_angle() &&
+      $name === $this->name() &&
+      $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPClose(
@@ -14151,9 +14151,9 @@ final class TypeConstant extends EditableSyntax {
     $separator = $this->separator()->rewrite($rewriter, $new_parents);
     $right_type = $this->right_type()->rewrite($rewriter, $new_parents);
     if (
-      $left_type == $this->left_type() &&
-      $separator == $this->separator() &&
-      $right_type == $this->right_type()) {
+      $left_type === $this->left_type() &&
+      $separator === $this->separator() &&
+      $right_type === $this->right_type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TypeConstant(
@@ -14253,10 +14253,10 @@ final class VectorTypeSpecifier extends EditableSyntax {
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $array == $this->array() &&
-      $left_angle == $this->left_angle() &&
-      $type == $this->type() &&
-      $right_angle == $this->right_angle()) {
+      $array === $this->array() &&
+      $left_angle === $this->left_angle() &&
+      $type === $this->type() &&
+      $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new VectorTypeSpecifier(
@@ -14345,9 +14345,9 @@ final class TypeParameter extends EditableSyntax {
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $constraints = $this->constraints()->rewrite($rewriter, $new_parents);
     if (
-      $variance == $this->variance() &&
-      $name == $this->name() &&
-      $constraints == $this->constraints()) {
+      $variance === $this->variance() &&
+      $name === $this->name() &&
+      $constraints === $this->constraints()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TypeParameter(
@@ -14415,8 +14415,8 @@ final class TypeConstraint extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $type == $this->type()) {
+      $keyword === $this->keyword() &&
+      $type === $this->type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TypeConstraint(
@@ -14550,12 +14550,12 @@ final class MapTypeSpecifier extends EditableSyntax {
     $value = $this->value()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $array == $this->array() &&
-      $left_angle == $this->left_angle() &&
-      $key == $this->key() &&
-      $comma == $this->comma() &&
-      $value == $this->value() &&
-      $right_angle == $this->right_angle()) {
+      $array === $this->array() &&
+      $left_angle === $this->left_angle() &&
+      $key === $this->key() &&
+      $comma === $this->comma() &&
+      $value === $this->value() &&
+      $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new MapTypeSpecifier(
@@ -14761,14 +14761,14 @@ final class ClosureTypeSpecifier extends EditableSyntax {
     $return_type = $this->return_type()->rewrite($rewriter, $new_parents);
     $outer_right_paren = $this->outer_right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $outer_left_paren == $this->outer_left_paren() &&
-      $function_keyword == $this->function_keyword() &&
-      $inner_left_paren == $this->inner_left_paren() &&
-      $parameter_types == $this->parameter_types() &&
-      $inner_right_paren == $this->inner_right_paren() &&
-      $colon == $this->colon() &&
-      $return_type == $this->return_type() &&
-      $outer_right_paren == $this->outer_right_paren()) {
+      $outer_left_paren === $this->outer_left_paren() &&
+      $function_keyword === $this->function_keyword() &&
+      $inner_left_paren === $this->inner_left_paren() &&
+      $parameter_types === $this->parameter_types() &&
+      $inner_right_paren === $this->inner_right_paren() &&
+      $colon === $this->colon() &&
+      $return_type === $this->return_type() &&
+      $outer_right_paren === $this->outer_right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ClosureTypeSpecifier(
@@ -14898,10 +14898,10 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_angle == $this->left_angle() &&
-      $type == $this->type() &&
-      $right_angle == $this->right_angle()) {
+      $keyword === $this->keyword() &&
+      $left_angle === $this->left_angle() &&
+      $type === $this->type() &&
+      $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ClassnameTypeSpecifier(
@@ -14990,9 +14990,9 @@ final class FieldSpecifier extends EditableSyntax {
     $arrow = $this->arrow()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $arrow == $this->arrow() &&
-      $type == $this->type()) {
+      $name === $this->name() &&
+      $arrow === $this->arrow() &&
+      $type === $this->type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FieldSpecifier(
@@ -15075,9 +15075,9 @@ final class FieldInitializer extends EditableSyntax {
     $arrow = $this->arrow()->rewrite($rewriter, $new_parents);
     $value = $this->value()->rewrite($rewriter, $new_parents);
     if (
-      $name == $this->name() &&
-      $arrow == $this->arrow() &&
-      $value == $this->value()) {
+      $name === $this->name() &&
+      $arrow === $this->arrow() &&
+      $value === $this->value()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FieldInitializer(
@@ -15177,10 +15177,10 @@ final class ShapeTypeSpecifier extends EditableSyntax {
     $fields = $this->fields()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $fields == $this->fields() &&
-      $right_paren == $this->right_paren()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $fields === $this->fields() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ShapeTypeSpecifier(
@@ -15286,10 +15286,10 @@ final class ShapeExpression extends EditableSyntax {
     $fields = $this->fields()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $fields == $this->fields() &&
-      $right_paren == $this->right_paren()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $fields === $this->fields() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ShapeExpression(
@@ -15395,10 +15395,10 @@ final class TupleExpression extends EditableSyntax {
     $items = $this->items()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $keyword == $this->keyword() &&
-      $left_paren == $this->left_paren() &&
-      $items == $this->items() &&
-      $right_paren == $this->right_paren()) {
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $items === $this->items() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TupleExpression(
@@ -15472,8 +15472,8 @@ final class GenericTypeSpecifier extends EditableSyntax {
     $class_type = $this->class_type()->rewrite($rewriter, $new_parents);
     $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
     if (
-      $class_type == $this->class_type() &&
-      $argument_list == $this->argument_list()) {
+      $class_type === $this->class_type() &&
+      $argument_list === $this->argument_list()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new GenericTypeSpecifier(
@@ -15535,8 +15535,8 @@ final class NullableTypeSpecifier extends EditableSyntax {
     $question = $this->question()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     if (
-      $question == $this->question() &&
-      $type == $this->type()) {
+      $question === $this->question() &&
+      $type === $this->type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new NullableTypeSpecifier(
@@ -15598,8 +15598,8 @@ final class SoftTypeSpecifier extends EditableSyntax {
     $at = $this->at()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     if (
-      $at == $this->at() &&
-      $type == $this->type()) {
+      $at === $this->at() &&
+      $type === $this->type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new SoftTypeSpecifier(
@@ -15676,9 +15676,9 @@ final class TypeArguments extends EditableSyntax {
     $types = $this->types()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $left_angle == $this->left_angle() &&
-      $types == $this->types() &&
-      $right_angle == $this->right_angle()) {
+      $left_angle === $this->left_angle() &&
+      $types === $this->types() &&
+      $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TypeArguments(
@@ -15761,9 +15761,9 @@ final class TypeParameters extends EditableSyntax {
     $parameters = $this->parameters()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $left_angle == $this->left_angle() &&
-      $parameters == $this->parameters() &&
-      $right_angle == $this->right_angle()) {
+      $left_angle === $this->left_angle() &&
+      $parameters === $this->parameters() &&
+      $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TypeParameters(
@@ -15846,9 +15846,9 @@ final class TupleTypeSpecifier extends EditableSyntax {
     $types = $this->types()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
-      $left_paren == $this->left_paren() &&
-      $types == $this->types() &&
-      $right_paren == $this->right_paren()) {
+      $left_paren === $this->left_paren() &&
+      $types === $this->types() &&
+      $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new TupleTypeSpecifier(
@@ -15903,7 +15903,7 @@ final class ErrorSyntax extends EditableSyntax {
     array_push($new_parents, $this);
     $error = $this->error()->rewrite($rewriter, $new_parents);
     if (
-      $error == $this->error()) {
+      $error === $this->error()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ErrorSyntax(
@@ -15959,8 +15959,8 @@ final class ListItem extends EditableSyntax {
     $item = $this->item()->rewrite($rewriter, $new_parents);
     $separator = $this->separator()->rewrite($rewriter, $new_parents);
     if (
-      $item == $this->item() &&
-      $separator == $this->separator()) {
+      $item === $this->item() &&
+      $separator === $this->separator()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new ListItem(

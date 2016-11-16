@@ -628,7 +628,7 @@ and pLambda : fun_ parser' = fun [ async; signature; _arrow; body ] env ->
   ; f_params          = paraml
   ; f_body            = pLambdaBody body env
   ; f_user_attributes = []
-  ; f_fun_kind        = FSync
+  ; f_fun_kind        = ifExists FAsync FSync async env
   ; f_namespace       = Namespace_env.empty_with_default_popt (*TODO*)
   ; f_span            = p
   }
@@ -683,7 +683,11 @@ and pExpr : expr parser = fun eta -> eta |>
       let args = couldMap ~f:pExpr expr env in
       Call ((pos, Id (pos, "echo")), args, [])
     )
-  ; (K.YieldExpression, fun [ _kw; arg ] env -> Yield (pAField arg env))
+  ; (K.YieldExpression, fun [ _kw; arg ] env ->
+      if P.text arg = "break"
+      then Yield_break
+      else Yield (pAField arg env)
+    )
   ; (K.ListExpression, fun [ _kw; _lp; members; _rp ] env ->
       List (couldMap ~f:pExpr members env))
   ; (K.CastExpression, fun [ _lp; ty; _rp; arg ] env ->
@@ -698,7 +702,11 @@ and pExpr : expr parser = fun eta -> eta |>
       Eif (pExpr test env, Some (pExpr then_ env), pExpr else_ env)
     )
   ; (K.InstanceofExpression, fun [ thing; _op; ty ] env ->
-      InstanceOf (pExpr thing env, pExpr ty env)
+      let ty = match pExpr ty env with
+        | p, Class_const (pid, (_,"")) -> p, Id pid
+        | ty -> ty
+      in
+      InstanceOf (pExpr thing env, ty)
     )
   ; (K.ArrayCreationExpression, fun [ _lb; members; _rb ] env ->
       Array (couldMap ~f:pAField members env))
@@ -1075,9 +1083,9 @@ let pDef_Class' : def parser' =
     List.concat (couldMap ~f:pClassElt elts env)
   in
   let p2ClassKind : class_kind parser2 = fun kind abs env ->
-    match mkTP tClassKind kind env with
-    | Cnormal -> ifExists Cabstract Cnormal abs env
-    | k -> k
+    match mkTP tClassKind kind env, P.text abs with
+    | Cnormal, "abstract" -> Cabstract
+    | k, _ -> k
   in
   fun [ attr; mods; kw; name; tparaml; _ext; exts; _impl; impls; body ] env ->
     Class

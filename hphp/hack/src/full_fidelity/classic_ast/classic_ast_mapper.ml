@@ -80,7 +80,6 @@ let where_am_I : env -> Pos.t = fun env -> ppPos (parent env) env
 
 
 
-
 (* For debugging *)
 let pDbg : string -> string -> unit parser = fun context name node env ->
   match P.kind node with
@@ -257,6 +256,11 @@ let cReturn  (p, x) = Return   (p, x)
 let cExpr_list   x  = Expr_list    x
 let cStatic_var  x  = Static_var   x
 
+
+let rec hint_to_fun_kind : hint -> fun_kind = fun (pos, hint) -> match hint with
+  | Hfun (_,_,h) -> hint_to_fun_kind h
+  | Happly ((_, "Generator"), _) -> FGenerator
+  | _ -> FSync
 
 
 let mpStripNoop pThing node env = match pThing node env with
@@ -788,10 +792,12 @@ and pStmt_ThrowStatement' : stmt parser' = fun [ _kw; expr; _semi ] env ->
   Throw (pExpr expr env)
 and pStmt_IfStatement' : stmt parser' =
   fun [ _kw; _lparen; cond; _rparen; then_; elseif; else_ ] env ->
-    let pElseClause = single K.ElseClause @@ mpArgKOfN 1 2 pCompoundStatement in
+    let pElseClause = single K.ElseClause @@
+      mpArgKOfN 1 2 (pCompoundStatement <|> pStmt)
+    in
     If
     ( pExpr cond env
-    , [pCompoundStatement then_ env]
+    , [(pCompoundStatement <|> pStmt) then_ env]
     , [(pElseClause <|> ppConst Noop) else_ env]
     )
 and pStmt_DoStatement' : stmt parser' =
@@ -874,11 +880,7 @@ let pFunHdr :
     [ async; _kw; _amp; name; tparaml; _lparen; paraml; _rparen; _colon; ret ] env ->
       let is_constructor = P.text name = "__construct" in
       let paraml = couldMap ~f:(pFunParam is_constructor) paraml env in
-      ifExists FAsync FSync async env
-      , pos_name name env
-      , pTParaml tparaml env
-      , paraml
-      , begin match mpOptional pHint ret env with
+      let ret = match mpOptional pHint ret env with
         | Some x -> Some x
         | None ->
             let pos = ppPos ret env in
@@ -886,7 +888,17 @@ let pFunHdr :
             | "__construct"
             | "__destruct" -> Some (pos, Happly ((pos, "void"), []))
             | _            -> None
-        end
+      in
+      (match ret with
+        | None -> FSync
+        | Some ret -> match hint_to_fun_kind ret with
+          | FSync -> ifExists FAsync FSync async env
+          | FGenerator -> ifExists FAsyncGenerator FGenerator async env
+      )
+      , pos_name name env
+      , pTParaml tparaml env
+      , paraml
+      , ret
       , List.filter (fun p -> Option.is_some p.param_modifier) paraml
     )
   ; (K.LambdaSignature, fun [ _lparen; paraml; _rparen; _colon; ret ] env ->

@@ -495,15 +495,18 @@ let pExpr_LiteralExpression' : expr_ parser' = fun [ lit ] env ->
 
 let mpShapeField : ('a, (shape_field_name * 'a)) metaparser = fun pThing ->
   fun node env ->
-    let p2NamedThing = fun name thing env ->
-      pDbgl "p2NamedThing" [ "name"; "thing" ] [ name; thing ] env;
-      let p, n = pos_name name env in
-      SFlit (p, mkString n), pThing thing env
+    let pSFlit n e = let p, n = pos_name n e in SFlit (p, mkString n) in
+    let pSFclass_const =
+      single K.ScopeResolutionExpression @@
+        fun [ qual; _op; name ] env ->
+          SFclass_const (pos_name qual env, pos_name name env)
     in
-    pDbg "ShapeField" "node" node env;
+    let pNamedThing' = fun [name; _arr; thing] env ->
+      (pSFclass_const <|> pSFlit) name env, pThing thing env
+    in
     mkP
-    [ (K.FieldSpecifier,   fun [ name; _arr; thing ] -> p2NamedThing name thing)
-    ; (K.FieldInitializer, fun [ name; _arr; thing ] -> p2NamedThing name thing)
+    [ (K.FieldSpecifier,   pNamedThing')
+    ; (K.FieldInitializer, pNamedThing')
     ] node env
 
 
@@ -775,7 +778,7 @@ and pStmt_EchoStatement' : stmt parser' = fun [ kw; exprs; _semi ] ->
   in
   cExpr <.| (where_am_I <&> pEcho)
 and pStmt_ExpressionStatement' : stmt parser' = fun [ expr; _semi ] env ->
-  Expr (pExpr expr env)
+  ifExists (fun () -> Expr (pExpr expr env)) (fun () -> Noop) expr env ()
 and pStmt_CompoundStatement' : stmt parser' = fun [ _lb; stmts; _rb ] env ->
   Block (couldMap ~f:pStmt stmts env)
 and pCompoundStatement : stmt parser = fun node env -> 
@@ -796,9 +799,7 @@ and pStmt_DoStatement' : stmt parser' =
     Do (pBlock body env, pExpr cond env)
 and pStmt_WhileStatement' : stmt parser' =
   fun [ _kw; _lp; cond; _rp; body ] env ->
-    (* While (pExpr cond env, pBlock body env) *)
-    Unsafe
-
+    While (pExpr cond env, [(pCompoundStatement <|> pStmt) body env])
 and pStmt_ForStatement' : stmt parser' =
   fun [ _kw; _lp; init; _semi; ctrl; _semi'; eol; _rp; body ] env ->
     let pExprL = positional (cExpr_list <$> couldMap ~f:pExpr) in

@@ -370,6 +370,19 @@ let is_assignment operator =
   | RightShiftAssignmentOperator -> true
   | _ -> false
 
+let is_comparison operator =
+  match operator with
+  | EqualOperator
+  | StrictEqualOperator
+  | NotEqualOperator
+  | StrictNotEqualOperator
+  | LessThanOperator
+  | LessThanOrEqualOperator
+  | GreaterThanOperator
+  | GreaterThanOrEqualOperator
+  | SpaceshipOperator -> true
+  | _ -> false
+
 let to_string kind =
   match kind with
   | PHPAndOperator -> "php_and"

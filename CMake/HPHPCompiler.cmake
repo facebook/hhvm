@@ -79,6 +79,9 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       # issue. (SSE4.2 has been available on processors for quite some time now.)
       "msse4.2"
     )
+    # Also need to pass the right option to ASM files to avoid inconsistencies 
+    # in CRC hash function handling
+    set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
     list(APPEND GENERAL_CXX_OPTIONS
       "Qunused-arguments"
     )

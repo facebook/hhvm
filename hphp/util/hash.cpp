@@ -20,7 +20,7 @@ namespace HPHP {
 
 bool IsSSEHashSupported() {
 #ifdef USE_SSECRC
-#if defined FACEBOOK || defined __SSE4_2__
+#ifdef __SSE4_2__
   return true;
 #else
   static folly::CpuId cpuid;
@@ -31,6 +31,7 @@ bool IsSSEHashSupported() {
 #endif
 }
 
+#if !defined(USE_SSECRC) || !defined(__SSE4_2__)
 NEVER_INLINE
 strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength) {
 #ifdef USE_SSECRC
@@ -53,28 +54,6 @@ strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength) {
   uint64_t h[2];
   MurmurHash3::hash128<false>(arKey, nKeyLength, 0, h);
   return strhash_t(h[0] & STRHASH_MASK);
-}
-
-#if FACEBOOK && defined USE_SSECRC
-
-NEVER_INLINE
-strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_cs_fallback(arKey, nKeyLength);
-}
-
-NEVER_INLINE
-strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_fallback(arKey, nKeyLength);
-}
-
-NEVER_INLINE
-strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_cs(arKey, nKeyLength);
-}
-
-NEVER_INLINE
-strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i(arKey, nKeyLength);
 }
 
 #endif

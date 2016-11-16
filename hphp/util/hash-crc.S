@@ -1,14 +1,28 @@
 #include "hphp/util/etch-helpers.h"
-#if defined(__x86_64__)
+
+#if defined(__x86_64__) && !defined(NO_SSECRC) && \
+    !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
 
 .file	"hphp/util/hash-crc.S"
 
-ETCH_SECTION(hash_string_i_crc)
-.globl	ETCH_NAME(hash_string_i_crc)
-ETCH_TYPE(ETCH_NAME(hash_string_i_crc), @function)
-ETCH_ALIGN16
-ETCH_NAME(hash_string_i_crc):
-ETCH_LABEL(FB800):
+/*
+ * If SSE4.2 is explicitly specified, we define the HPHP::hash_string* funcitons
+ * here, otherwise those functions are the same as the 'fallback' version, which
+ * check CPUID and possibly jumps here.   Thus the function name is different
+ * depending on whether __SSE4_2__ is defined.
+ */
+#ifdef __SSE4_2__
+#define IF_SSE42(x, y) ETCH_NAME(x)
+#else
+#define IF_SSE42(x, y) ETCH_NAME(y)
+#endif
+
+#define HASH_FUNC_NAME IF_SSE42(_ZN4HPHP20hash_string_i_unsafeEPKcj, hash_string_i_crc)
+
+ETCH_SECTION(HASH_FUNC_NAME)
+.globl    HASH_FUNC_NAME
+ETCH_TYPE(HASH_FUNC_NAME, @function)
+HASH_FUNC_NAME:
         CFI(startproc)
         or      $-1, %eax
         neg     %esi
@@ -35,16 +49,16 @@ ETCH_LABEL(iend):
         ret
         CFI(endproc)
 
-ETCH_LABEL(FE800):
-        ETCH_SIZE(hash_string_i_crc)
+ETCH_SIZE(HASH_FUNC_NAME)
+#undef HASH_FUNC_NAME
 
 
-ETCH_SECTION(hash_string_i_unaligned_crc)
-.globl	ETCH_NAME(hash_string_i_unaligned_crc)
-ETCH_TYPE(ETCH_NAME(hash_string_i_unaligned_crc), @function)
-ETCH_ALIGN16
-ETCH_NAME(hash_string_i_unaligned_crc):
-ETCH_LABEL(FB801):
+#define HASH_FUNC_NAME IF_SSE42(_ZN4HPHP13hash_string_iEPKcj, hash_string_i_unaligned_crc)
+
+ETCH_SECTION(HASH_FUNC_NAME)
+.globl    HASH_FUNC_NAME
+ETCH_TYPE(HASH_FUNC_NAME, @function)
+HASH_FUNC_NAME:
         CFI(startproc)
         xor     %ecx, %ecx
         or      $-1, %eax
@@ -104,17 +118,16 @@ ETCH_LABEL(iuend):
         ret
 
         CFI(endproc)
+ETCH_SIZE(HASH_FUNC_NAME)
+#undef HASH_FUNC_NAME
 
-ETCH_LABEL(FE801):
-        ETCH_SIZE(hash_string_i_unaligned_crc)
 
+#define HASH_FUNC_NAME IF_SSE42(_ZN4HPHP21hash_string_cs_unsafeEPKcj, hash_string_cs_crc)
 
-ETCH_SECTION(hash_string_cs_crc)
-.globl	ETCH_NAME(hash_string_cs_crc)
-ETCH_TYPE(ETCH_NAME(hash_string_cs_crc), @function)
-ETCH_ALIGN16
-ETCH_NAME(hash_string_cs_crc):
-ETCH_LABEL(FB802):
+ETCH_SECTION(HASH_FUNC_NAME)
+.globl    HASH_FUNC_NAME
+ETCH_TYPE(HASH_FUNC_NAME, @function)
+HASH_FUNC_NAME:
         CFI(startproc)
         or      $-1, %eax
         neg     %esi
@@ -138,17 +151,16 @@ ETCH_LABEL(csend):
         shr     %eax
         ret
         CFI(endproc)
+ETCH_SIZE(HASH_FUNC_NAME)
+#undef HASH_FUNC_NAME
 
-ETCH_LABEL(FE802):
-        ETCH_SIZE(hash_string_cs_crc)
 
+#define HASH_FUNC_NAME IF_SSE42(_ZN4HPHP14hash_string_csEPKcj, hash_string_cs_unaligned_crc)
 
-ETCH_SECTION(hash_string_cs_unaligned_crc)
-.globl	ETCH_NAME(hash_string_cs_unaligned_crc)
-ETCH_TYPE(ETCH_NAME(hash_string_cs_unaligned_crc), @function)
-ETCH_ALIGN16
-ETCH_NAME(hash_string_cs_unaligned_crc):
-ETCH_LABEL(FB803):
+ETCH_SECTION(HASH_FUNC_NAME)
+.globl    HASH_FUNC_NAME
+ETCH_TYPE(HASH_FUNC_NAME, @function)
+HASH_FUNC_NAME:
         CFI(startproc)
         or      $-1, %eax
         sub     $8, %esi
@@ -180,6 +192,8 @@ ETCH_LABEL(csuend):
         CFI(endproc)
 
 ETCH_LABEL(FE803):
-        ETCH_SIZE(hash_string_cs_unaligned_crc)
+ETCH_SIZE(HASH_FUNC_NAME)
+#undef HASH_FUNC_NAME
+
 
 #endif

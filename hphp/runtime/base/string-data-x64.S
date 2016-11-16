@@ -1,44 +1,45 @@
-#include "hphp/runtime/base/string-data-macros.h"  // NO_M_DATA
+#include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__x86_64__)
+#if defined(__SSE4_2__) && !defined(NO_SSECRC) && defined(NO_M_DATA) && \
+    !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
 
         .file     "hphp/runtime/base/string-data-x64.S"
 
-/* The following is the asm version of HPHP::StringData::hashHelper */
-ETCH_SECTION(g_hashHelper_crc)
-.globl	ETCH_NAME(g_hashHelper_crc)
-ETCH_TYPE(ETCH_NAME(g_hashHelper_crc), @function)
-ETCH_ALIGN16
-ETCH_NAME(g_hashHelper_crc):
-ETCH_LABEL(FB804):
+/*
+ * HPHP::StringData::hashHelper() is defined here only when SSE4.2 is explicitly
+ * specified, and NO_M_DATA is used in StringData.
+ */
+
+ETCH_SECTION(_ZNK4HPHP10StringData10hashHelperEv)
+.globl    _ZNK4HPHP10StringData10hashHelperEv
+ETCH_TYPE(_ZNK4HPHP10StringData10hashHelperEv, @function)
+_ZNK4HPHP10StringData10hashHelperEv:
         CFI(startproc)
         mov     SD_LEN(%rdi), %ecx
         or      $-1, %eax
         lea     SD_DATA(%rdi, %rcx), %rdx
         neg     %rcx
-        jnz     ETCH_LABEL(hashHelper_crc_header)
-        jmp     ETCH_LABEL(hashHelper_crc_end)
+        jnz     ETCH_LABEL(hheader)
+        jmp     ETCH_LABEL(hend)
 
-ETCH_LABEL(hashHelper_crc_loop):
+ETCH_LABEL(hloop):
         crc32q  %rsi, %rax
-ETCH_LABEL(hashHelper_crc_header):
+ETCH_LABEL(hheader):
         movabs  $0xdfdfdfdfdfdfdfdf, %rsi
         and     (%rdx, %rcx), %rsi
         add     $8, %rcx
-        jnc     ETCH_LABEL(hashHelper_crc_loop)
+        jnc     ETCH_LABEL(hloop)
 
         shl     $3, %ecx
         shl     %cl, %rsi
         crc32q  %rsi, %rax
 
-ETCH_LABEL(hashHelper_crc_end):
+ETCH_LABEL(hend):
         shr     %eax
         or      %eax, SD_HASH(%rdi)
         ret
         CFI(endproc)
-
-ETCH_LABEL(FE804):
-        ETCH_SIZE(g_hashHelper_crc)
+ETCH_SIZE(_ZNK4HPHP10StringData10hashHelperEv)
 
 #endif

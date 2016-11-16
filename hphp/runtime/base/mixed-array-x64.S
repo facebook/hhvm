@@ -1,8 +1,9 @@
 #include "hphp/runtime/base/mixed-array-x64.h"
+#include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/etch-helpers.h"
-#include "hphp/runtime/base/string-data-macros.h"  // NO_M_DATA
 
-#if defined(__x86_64__) && defined(FACEBOOK) && !defined(NO_SSE42) && defined(NO_M_DATA)
+#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_SSECRC) && \
+    !defined(__CYGWIN__) && !defined(__MINGW__)&& !defined(_MSC_VER)
 
         .file     "hphp/runtime/base/mixed-array-x64.S"
 
@@ -15,7 +16,7 @@ ETCH_NAME(hashHelper_NvGetStr):
 
         mov       SD_LEN(%rsi), %ecx       // key->size()
         lea       SD_DATA(%rsi, %rcx), %r9 // key->data() + key->size()
-        not       %edx                  // initialize to -1 (assert: it was 0)
+        not       %edx                     // initialize to -1 (assert: it was 0)
         movabs    $0xdfdfdfdfdfdfdfdf, %r8
         neg       %rcx
         jnz       ETCH_LABEL(hheader)

@@ -22,7 +22,8 @@
 
 #include "hphp/util/portability.h"
 
-#if defined __x86_64__
+#if defined(__x86_64__) && !defined __CYGWIN__ && !defined __MINGW__ && \
+  !defined _MSC_VER
 #  if (!defined USE_SSECRC)
 #    define USE_SSECRC
 #  endif
@@ -67,7 +68,7 @@ inline long long hash_int64_pair(long long k1, long long k2) {
 // int64->int32 hash function to use for MixedArrays
 ALWAYS_INLINE inthash_t hashint(int64_t k) {
   static_assert(sizeof(inthash_t) == sizeof(strhash_t), "");
-#if defined(USE_SSECRC) && (defined(FACEBOOK) || defined(__SSE4_2__))
+#if defined(USE_SSECRC) && defined(__SSE4_2__)
   int64_t h = 0;
   __asm("crc32 %1, %0\n" : "+r"(h) : "r"(k));
   return h;
@@ -199,12 +200,9 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 //   i: case-insensitive;
 //   unsafe: safe for strings aligned at 8-byte boundary;
 
-// Fallback versions uses CRC hash when supported, and use MurmurHash otherwise.
-strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength);
-strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength);
+#if defined USE_SSECRC && defined __SSE4_2__
 
-#if FACEBOOK && defined USE_SSECRC
-
+// We will surely use CRC32, these are implemented directly in hash-crc.S
 strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength);
@@ -212,6 +210,11 @@ strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength);
 
 #else
 
+strhash_t hash_string_cs_fallback(const char*, uint32_t);
+strhash_t hash_string_i_fallback(const char*, uint32_t);
+
+// We may need to do CPUID checks in the fallback versions, only when we are not
+// sure CRC hash is used.
 inline strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
   return hash_string_cs_fallback(arKey, nKeyLength);
 }
@@ -314,14 +317,15 @@ struct StringData;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#ifdef USE_SSECRC
+#if defined(USE_SSECRC) && !defined(__SSE4_2__) && \
+  !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
+
 // The following functions are implemented in ASM directly for x86_64.
 extern "C" {
   HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);
   HPHP::strhash_t hash_string_i_crc(const char*, uint32_t);
   HPHP::strhash_t hash_string_cs_unaligned_crc(const char*, uint32_t);
   HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t);
-  HPHP::strhash_t g_hashHelper_crc(const HPHP::StringData*);
 }
 #endif
 

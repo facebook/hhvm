@@ -21,9 +21,11 @@
 #define NO_M_DATA 1
 #endif
 
-// Offsets of fields in StringData
+#ifdef NO_M_DATA
+// Offsets of fields in StringData, when NO_M_DATA
 #define SD_LEN    8
 #define SD_DATA   16
 #define SD_HASH   12
+#endif
 
 #endif

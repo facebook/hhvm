@@ -843,19 +843,17 @@ void StringData::preCompute() {
   }
 }
 
+#if !defined(__SSE4_2__) || defined(NO_SSECRC) || !defined(NO_M_DATA) || \
+  defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+// This function is implemented directly in ASM in hash-crc.S otherwise.
 NEVER_INLINE strhash_t StringData::hashHelper() const {
-#ifdef NO_M_DATA
-  // this function will be overwritten by g_hashHelper_crc()
-  static_assert(sizeof(StringData) == SD_DATA, "");
-  static_assert(offsetof(StringData, m_len) == SD_LEN, "");
-  static_assert(offsetof(StringData, m_hash) == SD_HASH, "");
-#endif
   assert(!isProxy());
   strhash_t h = hash_string_i_unsafe(data(), m_len);
   assert(h >= 0);
   m_hash |= h;
   return h;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
@@ -1058,7 +1056,11 @@ bool StringData::checkSane() const {
                 "StringData size changed---update assertion if you mean it");
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
   static_assert(offsetof(StringData, m_hdr) == HeaderOffset, "");
-
+#ifdef NO_M_DATA
+  static_assert(sizeof(StringData) == SD_DATA, "");
+  static_assert(offsetof(StringData, m_len) == SD_LEN, "");
+  static_assert(offsetof(StringData, m_hash) == SD_HASH, "");
+#endif
   assert(uint32_t(size()) <= MaxSize);
   assert(capacity() <= MaxSize);
   assert(size() >= 0);

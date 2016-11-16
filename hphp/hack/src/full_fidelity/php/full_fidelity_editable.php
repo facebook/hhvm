@@ -553,8 +553,8 @@ final class EditableList extends EditableSyntax implements ArrayAccess {
   }
 
   public function children(): Generator<string, EditableSyntax, void> {
-    foreach($this->_children as $node)
-      yield '' => $node; /* TODO: Fix this */
+    foreach($this->_children as $key => $node)
+      yield $key => $node;
   }
 
   /* TODO: Getter by index? */

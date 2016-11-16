@@ -476,14 +476,6 @@ let tLiteral : (Pos.t -> string -> expr_) terminal_spec =
 let pAwait : Pos.t parser =
   fst <$> positional (mkTP ("await", function TK.Await -> ()))
 
-let pUserAttribute : user_attribute parser =
-  single K.AttributeSpecification @@ mpArgKOfN 1 3 begin
-    List.hd <$> couldMap ~f:begin
-      single K.Attribute @@ fun [ name; _lp; vals; _rp ] env ->
-        { ua_name = pos_name name env; ua_params = [] }
-    end
-  end
-
 let pTParaml : tparam list parser =
   let pTParam : tparam parser = single K.TypeParameter @@
     fun [ var; name; cstrl ] env -> Covariant, pos_name name env, []
@@ -515,8 +507,6 @@ let mpShapeField : ('a, (shape_field_name * 'a)) metaparser = fun pThing ->
     ; (K.FieldInitializer, pNamedThing')
     ] node env
 
-
-
 let rec pHint : hint parser = fun eta env ->
   let pTypeArguments : hint list parser =
     single K.TypeArguments @@ mpArgKOfN 1 3 (couldMap ~f:pHint)
@@ -537,8 +527,8 @@ let rec pHint : hint parser = fun eta env ->
         cHapply (pos_name kw env, List.map (fun x -> pHint x env) [key; value]))
     ; (K.ClassnameTypeSpecifier, fun [ name; _la; ty; _ra ] ->
         cHapply <.| (pos_name name <&> mpSingleton pHint ty))
-    ; (K.TypeConstant,           fun [ base; _sep; child ] ->
-        cHapply <.| (pos_name base <&> mpSingleton pHint child))
+    ; (K.TypeConstant,           fun [ base; _sep; child ] env ->
+        Haccess (pos_name base env, pos_name child env, []))
     ; (K.GenericTypeSpecifier,   fun [class_type; arguments] ->
         cHapply <.| (pos_name class_type <&> pTypeArguments arguments))
     ; (K.NullableTypeSpecifier,  fun [ question; ty ] env ->
@@ -588,7 +578,7 @@ and pFunParam : bool -> fun_param parser = fun is_constructor node -> mkP
           end in
           go (couldMap ~f:(mkTP tKind) vis env)
         end
-      ; param_user_attributes = couldMap ~f:pUserAttribute attrs env
+      ; param_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attrs env
       }
     )
   ; (K.Token, fun [t] env -> pToken ~f:(fun "..." _ ->
@@ -634,6 +624,15 @@ and pLambda : fun_ parser' = fun [ async; signature; _arrow; body ] env ->
   ; f_namespace       = Namespace_env.empty_with_default_popt (*TODO*)
   ; f_span            = p
   }
+and pUserAttribute : user_attribute list parser = fun eta -> eta |>
+  single K.AttributeSpecification @@ mpArgKOfN 1 3 begin
+    couldMap ~f:begin
+      single K.Attribute @@ fun [ name; _lp; vals; _rp ] env ->
+        { ua_name = pos_name name env
+        ; ua_params = couldMap ~f:pExpr vals env
+        }
+    end
+  end
 and pAField : afield parser = fun node env ->
   let pElemInit = single K.ElementInitializer @@ fun [ key; _arr; value ] env ->
     AFkvalue (pExpr key env, pExpr value env)
@@ -653,10 +652,34 @@ and pExpr_ScopeResolutionExpression' : expr_ parser' =
      then cClass_get
      else cClass_const
     ) (pos_name qual env, name)
+and pXHPAttribute : (id * expr) parser = fun eta -> eta |>
+  single K.XHPAttribute @@ fun [ name; _eq; expr ] env ->
+    let expr_pos = ppPos expr env in
+    let expr = mkString unesc_dbl (P.text expr) in
+    (pos_name name env, (expr_pos, String (expr_pos, expr)))
+and pXHPOpen : (id * (id * expr) list)  parser' = fun [ name; attrs; _ra ] env ->
+  let (pos, name) = pos_name name env in
+  let trim_name = String.trim name in
+  let name = String.sub trim_name 1 (String.length trim_name - 1) in
+  ((pos, ":" ^ name), couldMap ~f:pXHPAttribute attrs env)
+and pXHPExpr : (id * (id * expr) list * expr list) parser' = fun [ op; body; _cl ] env ->
+  let name, attrs = single K.XHPOpen pXHPOpen op env in
+  let pEx = mkP
+    [ (K.Token, fun [str] env -> let pos = where_am_I env in pos, String (pos, P.text str))
+    ; (K.XHPExpression, fun nodel env ->
+        where_am_I env, pExpr_XHPExpression' nodel env
+      )
+    ]
+  in
+  name, attrs, couldMap ~f:pEx body env
+and pExpr_XHPExpression' : expr_ parser' = fun nodel env ->
+  let (x1, x2, x3) = pXHPExpr nodel env in
+  Xml (x1, x2, x3)
 and pExpr : expr parser = fun eta -> eta |>
   positional @@ mkP
   [ (K.ParenthesizedExpression,     fun [ _lp; expr; _rp ] ->
       (snd <$> pExpr) expr)
+  ; (K.BracedExpression,            mpArgKOfN 1 3 (snd <$> pExpr))
   ; (K.InclusionExpression,         snd <$> pExpr_InclusionExpression')
   ; (K.ArrayIntrinsicExpression,    fun [ _kw; _lp; members; _rp ] env ->
       Array (couldMap ~f:pAField members env))
@@ -746,7 +769,7 @@ and pExpr : expr parser = fun eta -> eta |>
           } in
         Efun (fun_, (pUse <|> ppConst []) use env)
     )
-  ; (K.XHPExpression, fun nodel env -> List.iter dbg nodel; Dollardollar)
+  ; (K.XHPExpression, pExpr_XHPExpression')
   ; (K.LambdaExpression, fun node env -> Lfun (pLambda node env))
   ; (K.AwaitableCreationExpression, fun [ _async; blk ] env ->
       let body =
@@ -1031,11 +1054,14 @@ let pClassElt_PropertyDeclaration' : class_elt parser' =
           where_am_I env, (p, n), mpOptional pSimpleInitializer init env
       end
     )
-let pClassElt_XHPClassAttributeDeclaration' : class_elt parser' =
+let pClassElt_XHPClassAttributeDeclaration' : class_elt list parser' =
   fun [ _kw; attrs; _semi ] env ->
-    let attrl = couldMap ~f:begin mkP
+    couldMap ~f:begin mkP
       [ (K.XHPClassAttribute, fun [ ty; name; init; req ] env ->
-          XhpAttrUse (pHint ty env)
+          let hint = mpOptional pHint ty env in
+          let (pos, name) = pos_name name env in
+          let init = mpOptional pSimpleInitializer init env in
+          XhpAttr (hint, (Pos.none, (pos, ":" ^ name), init), false, None)
         )
       ; (K.Token, fun [ tok ] -> pToken ~f:begin function
           | _ -> fun env ->
@@ -1043,8 +1069,6 @@ let pClassElt_XHPClassAttributeDeclaration' : class_elt parser' =
           end tok
         )
       ] end attrs env
-    in
-    List.hd attrl
 let pClassElt_MethodishDeclaration' : class_elt list parser' =
   let classvar_init : fun_param -> stmt * (kind list * hint option * class_var list) = fun p ->
     let pos, name = p.param_id in
@@ -1060,7 +1084,7 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
                      (pos, Lvar p.param_id))),
     (Option.to_list p.param_modifier, p.param_hint, [span, cvname, None])
   in
-  fun [attr; mods; hdr; body; _semi] env ->
+  fun [attrs; mods; hdr; body; _semi] env ->
     let async, name, tparaml, paraml, ret, clsvl = pFunHdr hdr env in
     let member_init, member_def = List.split (List.map classvar_init clsvl) in
     let body = member_init @ match pCompoundStatement body env with
@@ -1076,7 +1100,7 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     ; m_name            = name
     ; m_params          = paraml
     ; m_body            = body
-    ; m_user_attributes = []
+    ; m_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attrs env
     ; m_ret             = ret
     ; m_ret_by_ref      = false
     ; m_fun_kind        = async
@@ -1084,7 +1108,8 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     }]
 let pClassElt_XHPCategoryDeclaration' : class_elt parser' =
   fun [ _kw; cats; _semi ] env ->
-    XhpCategory (couldMap ~f:pos_name cats env)
+    let stripPercent (p, s) = (p, String.sub s 1 (String.length s - 1)) in
+    XhpCategory (List.map stripPercent @@ couldMap ~f:pos_name cats env)
 
 let pClassElt : class_elt list parser = mkP
   [ (K.ConstDeclaration,             mpSingleton pClassElt_ConstDeclaration')
@@ -1092,8 +1117,8 @@ let pClassElt : class_elt list parser = mkP
   ; (K.TraitUse,                     mpSingleton pClassElt_TraitUse')
   ; (K.RequireClause,                mpSingleton pClassElt_RequireClause')
   ; (K.PropertyDeclaration,          mpSingleton pClassElt_PropertyDeclaration')
-  ; (K.XHPClassAttributeDeclaration, mpSingleton pClassElt_XHPClassAttributeDeclaration')
   ; (K.MethodishDeclaration,         pClassElt_MethodishDeclaration')
+  ; (K.XHPClassAttributeDeclaration, pClassElt_XHPClassAttributeDeclaration')
   ; (K.XHPCategoryDeclaration,       mpSingleton pClassElt_XHPCategoryDeclaration')
   ]
 
@@ -1112,7 +1137,7 @@ let pDef_Class' : def parser' =
   fun [ attr; mods; kw; name; tparaml; _ext; exts; _impl; impls; body ] env ->
     Class
     { c_mode            = env.mode
-    ; c_user_attributes = couldMap ~f:pUserAttribute attr env
+    ; c_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attr env
     ; c_final           = List.mem Final @@  couldMap ~f:(mkTP tKind) mods env
     ; c_is_xhp          = begin
         let is_xhp = mkTP tIsXHP name env in
@@ -1141,7 +1166,7 @@ let pDef_Typedef' : def parser' =
     ; t_tparams         = pTParaml tparams env
     ; t_constraint      = Option.map ~f:snd (mpOptional pTConstraint constr env)
     ; t_kind            = mkTP tTypedefKind kw env (pHint hint env)
-    ; t_user_attributes = couldMap ~f:pUserAttribute attr env
+    ; t_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attr env
     ; t_namespace       = Namespace_env.empty_with_default_popt
     ; t_mode            = env.mode
     }

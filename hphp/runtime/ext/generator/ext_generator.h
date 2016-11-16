@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseGenerator
 
-struct BaseGenerator {
+struct BaseGenerator : Resumable {
   enum class State : uint8_t {
     Created = 0,  // generator was created but never iterated
     Started = 1,  // generator was iterated but not currently running
@@ -41,7 +41,7 @@ struct BaseGenerator {
   };
 
   static constexpr ptrdiff_t resumableOff() {
-    return offsetof(BaseGenerator, m_resumable);
+    return 0;
   }
   static constexpr ptrdiff_t arOff() {
     return resumableOff() + Resumable::arOff();
@@ -96,7 +96,9 @@ struct BaseGenerator {
   }
 
   Resumable* resumable() const {
-    return const_cast<Resumable*>(&m_resumable);
+    return const_cast<Resumable*>(
+        static_cast<const Resumable*>(this)
+    );
   }
 
   ActRec* actRec() const {
@@ -149,12 +151,11 @@ struct BaseGenerator {
     }
   }
 
-  Resumable m_resumable;
   State m_state;
 };
 
 // Resumable stores function locals and iterators in front of it
-static_assert(offsetof(BaseGenerator, m_resumable) == 0,
+static_assert(BaseGenerator::resumableOff() == 0,
               "Resumable must be the first member of the Generator");
 
 ///////////////////////////////////////////////////////////////////////////////

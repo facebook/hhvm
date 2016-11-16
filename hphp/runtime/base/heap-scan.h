@@ -72,15 +72,12 @@ inline void scanNative(const NativeNode* node, type_scan::Scanner& scanner) {
   }
 }
 
-inline void scanResumable(const Resumable* r, type_scan::Scanner& scanner) {
-  scanFrameSlots(r->actRec(), scanner);
-  scanner.scan(*r);
-}
-
 inline void scanAFWH(const ObjectData* obj, type_scan::Scanner& scanner) {
   assert(!obj->getAttribute(ObjectData::HasNativeData));
   // scan ResumableHeader before object
-  scanResumable(Resumable::FromObj(obj), scanner);
+  auto r = Resumable::FromObj(obj);
+  scanFrameSlots(r->actRec(), scanner);
+  scanner.scan(*r);
   // scan C++ properties after [ObjectData] header. should pick up
   // unioned and bit-packed fields
   scanner.conservative(obj + 1,

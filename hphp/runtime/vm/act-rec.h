@@ -85,6 +85,9 @@ struct ActRec {
     StringData* m_invName;  // Invoked name, used for __call(), when pre-live
   };
 
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_thisUnsafe);
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_varEnv);
+
   /////////////////////////////////////////////////////////////////////////////
 
   enum Flags : uint32_t {

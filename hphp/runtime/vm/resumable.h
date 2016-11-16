@@ -58,7 +58,7 @@ namespace HPHP {
  *                    | Parent object                  |
  *                    +--------------------------------+ high address
  */
-struct alignas(16) Resumable {
+struct alignas(16) Resumable : ActRec {
   // This function is used only by AFWH, temporary till AFWH is converted to HNI
   static Resumable* FromObj(ObjectData* obj) {
     return reinterpret_cast<Resumable*>(obj) - 1;
@@ -67,7 +67,7 @@ struct alignas(16) Resumable {
     return reinterpret_cast<const Resumable*>(obj) - 1;
   }
   static constexpr ptrdiff_t arOff() {
-    return offsetof(Resumable, m_actRec);
+    return 0;
   }
   static constexpr ptrdiff_t resumeAddrOff() {
     return offsetof(Resumable, m_resumeAddr);
@@ -144,26 +144,22 @@ struct alignas(16) Resumable {
     MM().objFree(base, size);
   }
 
-  ActRec* actRec() { return &m_actRec; }
-  const ActRec* actRec() const { return &m_actRec; }
+  ActRec* actRec() { return static_cast<ActRec*>(this); }
+  const ActRec* actRec() const { return static_cast<const ActRec*>(this); }
   jit::TCA resumeAddr() const { return m_resumeAddr; }
   Offset resumeOffset() const {
-    assert(m_actRec.func()->contains(m_resumeOffset));
+    assert(ActRec::func()->contains(m_resumeOffset));
     return m_resumeOffset;
   }
   size_t size() const { return m_size; }
 
   void setResumeAddr(jit::TCA resumeAddr, Offset resumeOffset) {
-    assert(m_actRec.func()->contains(resumeOffset));
+    assert(ActRec::func()->contains(resumeOffset));
     m_resumeAddr = resumeAddr;
     m_resumeOffset = resumeOffset;
   }
 
 private:
-  // ActRec of the resumed frame.
-  ActRec m_actRec;
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_actRec);
-
   // Resume address.
   jit::TCA m_resumeAddr;
 

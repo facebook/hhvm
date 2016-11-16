@@ -17,7 +17,6 @@
 open Core
 open Utils
 open Naming_heap
-
 module SN = Naming_special_names
 
 (*****************************************************************************)
@@ -51,24 +50,48 @@ module GEnv = struct
       assert_false_log_backtrace(
         Some "Expected position to exist on disk, found none")
 
-  let type_pos name = match TypeIdHeap.get name with
-    | Some (p, _k) -> Some p
+  let type_pos popt name = match TypeIdHeap.get name with
+    | Some (pos, `Class) ->
+        let p, _ = get_full_pos popt (pos, name) in
+        Some p
+    | Some (pos, `Typedef) ->
+        let p, _ = get_full_pos popt (pos, name) in
+        Some p
     | None -> None
 
   let type_canon_name name = TypeCanonHeap.get (canon_key name)
 
-  let type_info = TypeIdHeap.get
+  let type_info popt name = match TypeIdHeap.get name with
+    | Some (pos, `Class) ->
+        let p, _ = get_full_pos popt (pos, name) in
+        Some (p, `Class)
+    | Some (pos, `Typedef) ->
+        let p, _ = get_full_pos popt (pos, name) in
+        Some (p, `Typedef)
+    | None -> None
 
-  let fun_pos name = FunPosHeap.get name
+  let fun_pos popt name =
+    match FunPosHeap.get name with
+    | Some pos ->
+        let p, _ = get_full_pos popt (pos, name) in
+        Some p
+    | None -> None
 
   let fun_canon_name name = FunCanonHeap.get (canon_key name)
 
-  let typedef_pos name = match TypeIdHeap.get name with
-    | Some (p, `Typedef) -> Some p
+  let typedef_pos popt name = match TypeIdHeap.get name with
+    | Some (pos, `Typedef) ->
+        let p, _ = get_full_pos popt (pos, name) in
+        Some p
     | Some (_, `Class)
     | None -> None
 
-  let gconst_pos name = ConstPosHeap.get name
+  let gconst_pos popt name =
+    match ConstPosHeap.get name with
+    | Some pos ->
+      let p, _ = get_full_pos popt (pos, name) in
+      Some p
+    | None -> None
 
 
   let compare_pos p q =
@@ -115,17 +138,45 @@ module Env = struct
         Errors.name_is_reserved name p; false
     | _ -> true
 
+  (* Dont check for errors, just add to canonical heap *)
+  let new_fun_fast fn name =
+    let name_key = canon_key name in
+    match FunCanonHeap.get name_key with
+      | Some _ -> ()
+      | None ->
+        FunCanonHeap.add name_key name;
+        FunPosHeap.add name (FileInfo.File (FileInfo.Fun, fn))
+
+  let new_cid_fast fn name cid_kind =
+    let name_key = canon_key name in
+    let mode = match cid_kind with
+    | `Class -> FileInfo.Class
+    | `Typedef -> FileInfo.Typedef in
+    match TypeCanonHeap.get name_key with
+      | Some _ -> ()
+      | None ->
+        TypeCanonHeap.add name_key name;
+        (* We store redundant info in this case, but if the position is a *)
+        (* Full position, we don't store the kind, so this is necessary *)
+        TypeIdHeap.write_through name ((FileInfo.File (mode, fn)), cid_kind)
+
+  let new_class_fast fn name = new_cid_fast fn name `Class
+  let new_typedef_fast fn name = new_cid_fast fn name `Typedef
+
+  let new_global_const_fast fn name =
+    ConstPosHeap.add name (FileInfo.File (FileInfo.Const, fn))
+
   let new_fun popt (p, name) =
     let name_key = canon_key name in
     match FunCanonHeap.get name_key with
     | Some canonical ->
       let p' = FunPosHeap.find_unsafe canonical in
-      if not @@ GEnv.compare_pos (FileInfo.Full p') p
+      if not @@ GEnv.compare_pos p' p
       then
         let p, name = GEnv.get_full_pos popt (p, name) in
+        let p', name = GEnv.get_full_pos popt (p', name) in
         Errors.error_name_already_bound name canonical p p'
     | None ->
-      let p, name = GEnv.get_full_pos popt (p, name) in
       FunPosHeap.add name p;
       FunCanonHeap.add name_key name;
       ()
@@ -135,13 +186,13 @@ module Env = struct
     let name_key = canon_key name in
     match TypeCanonHeap.get name_key with
     | Some canonical ->
-      let p' = unsafe_opt @@ GEnv.type_pos canonical in
-      if not @@ GEnv.compare_pos (FileInfo.Full p') p
+      let (p', _) = unsafe_opt @@ TypeIdHeap.get canonical in
+      if not @@ GEnv.compare_pos p' p
       then
       let p, name = GEnv.get_full_pos popt (p, name) in
+      let p', name = GEnv.get_full_pos popt (p', name) in
       Errors.error_name_already_bound name canonical p p'
     | None ->
-      let p, name = GEnv.get_full_pos popt (p, name) in
       TypeIdHeap.write_through name (p, cid_kind);
       TypeCanonHeap.add name_key name;
       ()
@@ -153,14 +204,13 @@ module Env = struct
   let new_global_const popt (p, x) =
     match ConstPosHeap.get x with
     | Some p' ->
-      if not @@ GEnv.compare_pos (FileInfo.Full p') p
+      if not @@ GEnv.compare_pos p' p
       then
       let p, x = GEnv.get_full_pos popt (p, x) in
-      Errors.error_name_already_bound x x p p';
+      let p', x = GEnv.get_full_pos popt (p', x) in
+      Errors.error_name_already_bound x x p p'
     | None ->
-      let p, x = GEnv.get_full_pos popt (p, x) in
-      ConstPosHeap.add x p;
-      ()
+      ConstPosHeap.add x p
 end
 
 (*****************************************************************************)
@@ -189,6 +239,14 @@ let make_env popt ~funs ~classes ~typedefs ~consts =
   List.iter typedefs (Env.new_typedef popt);
   List.iter consts (Env.new_global_const popt)
 
+
+let make_env_from_fast fn ~funs ~classes ~typedefs ~consts =
+  SSet.iter (Env.new_fun_fast fn) funs;
+  SSet.iter (Env.new_class_fast fn) classes;
+  SSet.iter (Env.new_typedef_fast fn) typedefs;
+  SSet.iter (Env.new_global_const_fast fn) consts
+
+
 (*****************************************************************************)
 (* Declaring the names in a list of files *)
 (*****************************************************************************)
@@ -202,9 +260,15 @@ let add_files_to_rename failed defl defs_in_env =
       Relative_path.Set.add failed filename
   end ~init:failed defl
 
+
+let ndecl_file_fast fn ~funs ~classes ~typedefs ~consts =
+  make_env_from_fast fn ~funs ~classes ~typedefs ~consts
+
 let ndecl_file popt fn
               { FileInfo.file_mode = _; funs; classes; typedefs; consts;
                     consider_names_just_for_autoload; comments = _} =
+  ndecl_file_fast
+    (Relative_path.default) SSet.empty SSet.empty SSet.empty SSet.empty;
   let errors, _, _ = Errors.do_ begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
     if not consider_names_just_for_autoload then
@@ -245,8 +309,8 @@ let ndecl_file popt fn
    * were actually duplicates?
    *)
   let failed = Relative_path.Set.singleton fn in
-  let failed = add_files_to_rename failed funs FunPosHeap.get in
-  let failed = add_files_to_rename failed classes GEnv.type_pos in
-  let failed = add_files_to_rename failed typedefs GEnv.type_pos in
-  let failed = add_files_to_rename failed consts ConstPosHeap.get in
+  let failed = add_files_to_rename failed funs (GEnv.fun_pos popt) in
+  let failed = add_files_to_rename failed classes (GEnv.type_pos popt) in
+  let failed = add_files_to_rename failed typedefs (GEnv.type_pos popt) in
+  let failed = add_files_to_rename failed consts (GEnv.gconst_pos popt) in
   errors, failed

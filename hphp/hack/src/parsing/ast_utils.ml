@@ -35,6 +35,7 @@ let get_defs ast =
       | Ast.Stmt _ -> acc
     end
 
+
 let class_elt_type_to_string = function
   | Ast.Const _ -> "const"
   | Ast.AbsConst _ -> "absConst"

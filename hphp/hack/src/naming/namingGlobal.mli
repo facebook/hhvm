@@ -14,16 +14,17 @@
  *)
 
 module GEnv: sig
-  val type_pos: string -> Pos.t option
+  val type_pos: ParserOptions.t -> string -> Pos.t option
   val type_canon_name: string -> string option
-  val type_info: string -> (Pos.t * [`Class | `Typedef]) option
+  val type_info:
+    ParserOptions.t -> string -> (Pos.t * [`Class | `Typedef]) option
 
-  val fun_pos: string -> Pos.t option
+  val fun_pos: ParserOptions.t ->  string -> Pos.t option
   val fun_canon_name: string -> string option
 
-  val typedef_pos: string -> Pos.t option
+  val typedef_pos: ParserOptions.t -> string -> Pos.t option
 
-  val gconst_pos: string -> Pos.t option
+  val gconst_pos: ParserOptions.t -> string -> Pos.t option
 end
 
 (* Canonicalizes a key *)

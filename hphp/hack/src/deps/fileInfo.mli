@@ -39,7 +39,7 @@ type name_type = Fun | Class | Typedef | Const
 type pos = Full of Pos.t | File of name_type * Relative_path.t
 type id = pos  * string
 val pos_full : (Pos.t * string) -> id
-
+val get_pos_filename : pos -> Relative_path.t
 type t = {
   file_mode : mode option;
   funs : id list;

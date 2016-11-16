@@ -115,7 +115,8 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
         | None ->
           let () = output_string oc "Missing from naming env\n" in qual_name
         | Some canon ->
-          let p = unsafe_opt @@ NamingGlobal.GEnv.type_pos canon in
+          let p = unsafe_opt
+            @@ NamingGlobal.GEnv.type_pos env.ServerEnv.tcopt canon in
           let () = output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
@@ -132,7 +133,8 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
         | None ->
           let () = output_string oc "Missing from naming env\n" in qual_name
         | Some canon ->
-          let p = unsafe_opt @@ NamingGlobal.GEnv.fun_pos canon in
+          let p = unsafe_opt
+            @@ NamingGlobal.GEnv.fun_pos env.ServerEnv.tcopt canon in
           let () = output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
@@ -145,7 +147,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           output_string oc (fun_str^"\n")
       );
       output_string oc "\nglobal const:\n";
-      (match NamingGlobal.GEnv.gconst_pos qual_name with
+      (match NamingGlobal.GEnv.gconst_pos env.ServerEnv.tcopt qual_name with
       | Some p -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
       | None -> output_string oc "Missing from naming env\n");
       let gconst_ty = TLazyHeap.get_gconst env.ServerEnv.tcopt qual_name in
@@ -156,7 +158,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           output_string oc ("ty: "^gconst_str^"\n")
       );
       output_string oc "typedef:\n";
-      (match NamingGlobal.GEnv.typedef_pos qual_name with
+      (match NamingGlobal.GEnv.typedef_pos env.ServerEnv.tcopt qual_name with
       | Some p -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
       | None -> output_string oc "Missing from naming env\n");
       let tdef = TLazyHeap.get_typedef env.ServerEnv.tcopt qual_name in

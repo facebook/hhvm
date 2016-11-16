@@ -72,6 +72,10 @@ let empty_t = {
 let pos_full (p, name) =
   Full p, name
 
+let get_pos_filename = function
+| Full p -> Pos.filename p
+| File (_, fn) -> fn
+
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)

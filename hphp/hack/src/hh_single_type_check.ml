@@ -651,7 +651,7 @@ let decl_and_run_mode {filename; mode; no_builtins} popt tcopt =
 
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
       let {FileInfo.funs; classes; typedefs; consts; _} = fileinfo in
-      NamingGlobal.make_env tcopt ~funs ~classes ~typedefs ~consts
+      NamingGlobal.make_env popt ~funs ~classes ~typedefs ~consts
     end;
 
     Relative_path.Map.iter files_info begin fun fn _ ->

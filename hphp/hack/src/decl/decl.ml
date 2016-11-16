@@ -288,9 +288,9 @@ and class_hint_decl class_env hint =
   match hint with
   | _, Happly ((_, cid), _) ->
     begin match Naming_heap.TypeIdHeap.get cid with
-      | Some (p, `Class) when not (Decl_heap.Classes.mem cid) ->
+      | Some (pos, `Class) when not (Decl_heap.Classes.mem cid) ->
+        let fn = FileInfo.get_pos_filename pos in
         (* We are supposed to redeclare the class *)
-        let fn = Pos.filename p in
         let class_opt = Parser_heap.find_class_in_file class_env.tcopt fn cid in
         Option.iter class_opt (class_decl_if_missing class_env)
       | _ -> ()
@@ -754,8 +754,8 @@ and method_pos opt ~is_static class_id meth  =
   | None ->
     try
       match Naming_heap.TypeIdHeap.get class_id with
-      | Some (p, `Class) ->
-        let fn = Pos.filename p in
+      | Some (pos, `Class) ->
+        let fn = FileInfo.get_pos_filename pos in
         begin match Parser_heap.find_class_in_file opt fn class_id with
           | None -> raise Not_found
           | Some { Ast.c_body; _ } ->

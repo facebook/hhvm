@@ -26,16 +26,19 @@ and class_element_ =
 | Typeconst
 
 let get_class_by_name opt x =
-  Naming_heap.TypeIdHeap.get x >>= fun (p, _) ->
-  Parser_heap.find_class_in_file opt (Pos.filename p) x
+  Naming_heap.TypeIdHeap.get x >>= fun (pos, _) ->
+  let fn = FileInfo.get_pos_filename pos in
+  Parser_heap.find_class_in_file opt fn x
 
 let get_function_by_name opt x =
-  Naming_heap.FunPosHeap.get x >>= fun p ->
-  Parser_heap.find_fun_in_file opt (Pos.filename p) x
+  Naming_heap.FunPosHeap.get x >>= fun pos ->
+  let fn = FileInfo.get_pos_filename pos in
+  Parser_heap.find_fun_in_file opt fn x
 
 let get_gconst_by_name opt x =
-  Naming_heap.ConstPosHeap.get x >>= fun p ->
-  Parser_heap.find_const_in_file opt (Pos.filename p) x
+  Naming_heap.ConstPosHeap.get x >>= fun pos ->
+  let fn = FileInfo.get_pos_filename pos in
+  Parser_heap.find_const_in_file opt fn x
 
 (* Span information is stored only in parsing AST *)
 let get_member_def opt (x : class_element) =

@@ -472,14 +472,14 @@ end = struct
       (* Same idea as Dep.FunName, see below. *)
       (fun x -> Typing_deps.Dep.GConstName x)
       genv
-      GEnv.gconst_pos
+      (GEnv.gconst_pos genv.tcopt)
       x
 
   let type_name (genv, _) x ~allow_typedef =
     (* Generic names are not allowed to shadow class names *)
     check_no_runtime_generic genv x;
     let (pos, name) as x = Namespaces.elaborate_id genv.namespace NSClass x in
-    match GEnv.type_info name with
+    match GEnv.type_info genv.tcopt name with
     | Some (_def_pos, `Class) ->
       (* Don't let people use strictly internal classes
        * (except when they are being declared in .hhi files) *)
@@ -492,7 +492,9 @@ end = struct
       pos, name
     | Some (_def_pos, `Typedef) -> pos, name
     | None ->
-      handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x `cls
+      handle_unbound_name genv
+        (GEnv.type_pos genv.tcopt)
+        GEnv.type_canon_name x `cls
 
   let fun_id (genv, _) x =
     elaborate_and_get_name_with_canonicalized_fallback
@@ -503,7 +505,7 @@ end = struct
        * to retypecheck. *)
       (fun x -> Typing_deps.Dep.FunName x)
       genv
-      GEnv.fun_pos
+      (GEnv.fun_pos genv.tcopt)
       GEnv.fun_canon_name
       x
 
@@ -1771,7 +1773,7 @@ module Make (GetLocals : GetLocals) = struct
     | Class_const (x1, x2) ->
       let (genv, _) = env in
       let (_, name) = Namespaces.elaborate_id genv.namespace NSClass x1 in
-      if GEnv.typedef_pos name <> None && (snd x2) = "class" then
+      if GEnv.typedef_pos (genv.tcopt) name <> None && (snd x2) = "class" then
         N.Typename (Env.type_name env x1 ~allow_typedef:true)
       else
         N.Class_const (make_class_id env x1, x2)

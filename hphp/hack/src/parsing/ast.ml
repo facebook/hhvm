@@ -296,7 +296,7 @@ and stmt =
   | Unsafe
   | Fallthrough
   | Expr of expr
-  | Block of stmt list
+  | Block of block
   | Break of Pos.t
   | Continue of Pos.t
   | Throw of expr

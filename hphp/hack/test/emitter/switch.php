@@ -4,6 +4,7 @@ function do_switch_1(int $x): void {
   switch ($x+0) {
   default:
     echo "default\n";
+    $x = 2;
     break;
   case 0:
     echo "i equals 0\n";

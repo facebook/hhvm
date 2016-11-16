@@ -117,8 +117,8 @@ struct shared_ptr final  {
   template<class Y>
   explicit shared_ptr(const weak_ptr<Y>& r)
     : m_std_ptr(r),
-      m_scan_size(sizeof(*r)),
-      m_scan_index(type_scan::getIndexForScan<Y>()) {
+      m_scan_size(r.m_scan_size),
+      m_scan_index(r.m_scan_index) {
   }
 
   TYPE_SCAN_CUSTOM(T) {
@@ -200,18 +200,26 @@ void swap(shared_ptr<T>& lhs, shared_ptr<T>& rhs) {
 }
 
 template <typename T>
-struct weak_ptr final : std::weak_ptr<T> {
+struct weak_ptr final : private std::weak_ptr<T> {
   using Base = std::weak_ptr<T>;
   template <class Y>
     explicit weak_ptr (const shared_ptr<Y>& r) :
-    Base(r.m_std_ptr) {
+    Base(r.m_std_ptr),
+    m_scan_size(r.m_scan_size),
+    m_scan_index(r.m_scan_index) {
   }
+
   shared_ptr<T> lock() const {
     std::shared_ptr<T> r = Base::lock();
     return shared_ptr<T>(r, sizeof(*r), type_scan::getIndexForScan<T>());
   }
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_IGNORE_ALL;
+
+  friend struct shared_ptr<T>;
+  private:
+    std::size_t m_scan_size = 0;
+    type_scan::Index m_scan_index = type_scan::kIndexUnknownNoPtrs;
 };
 
 #ifndef __APPLE__ // XXX: this affects codegen quality but not correctness

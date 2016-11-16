@@ -104,23 +104,27 @@ struct shared_ptr final  {
   }
   template<class Y>
   shared_ptr( const shared_ptr<Y>& r )
-    : m_std_ptr(r.m_std_ptr) {
+    : m_std_ptr(r.m_std_ptr),
+      m_scan_size(r.m_scan_size),
+      m_scan_index(r.m_scan_index) {
   }
   template <class Y>
   shared_ptr(shared_ptr<Y>&& r)
-    : m_std_ptr(std::move(r.m_std_ptr)) {
+    : m_std_ptr(std::move(r.m_std_ptr)),
+      m_scan_size(std::move(r.m_scan_size)),
+      m_scan_index(std::move(r.m_scan_index)) {
   }
   template<class Y>
   explicit shared_ptr(const weak_ptr<Y>& r)
-    : m_std_ptr(r) {
+    : m_std_ptr(r),
+      m_scan_size(sizeof(*r)),
+      m_scan_index(type_scan::getIndexForScan<Y>()) {
   }
 
   TYPE_SCAN_CUSTOM(T) {
-    // FIXME: This will cause T to get conservative scanned (because get() might
-    // be an interior pointer). We can't just eagerly scan the pointer as a T
-    // here because it might be actually be pointing to something derived from
-    // T. See t10336778.
-    scanner.enqueue(this->get());
+    if (this->get() != nullptr) {
+      scanner.scanByIndex(m_scan_index, this->get(), m_scan_size);
+    }
   }
 
   T* get() const {
@@ -142,21 +146,31 @@ struct shared_ptr final  {
   template<class Y>
   shared_ptr& operator=(const shared_ptr<Y>& r) {
     m_std_ptr = r.m_std_ptr;
+    m_scan_size = r.m_scan_size;
+    m_scan_index = r.m_scan_index;
     return *this;
   }
   template<class Y>
   shared_ptr& operator=(shared_ptr<Y>&& r) {
     m_std_ptr = std::move(r.m_std_ptr);
+    m_scan_size = std::move(r.m_scan_size);
+    m_scan_index = std::move(r.m_scan_index);
     return *this;
   }
   void reset() {
     m_std_ptr.reset();
+    m_scan_size = 0;
+    m_scan_index = type_scan::kIndexUnknownNoPtrs;
   }
   void swap(shared_ptr& r)  {
     m_std_ptr.swap(r.m_std_ptr);
+    std::swap(m_scan_index, r.m_scan_index);
+    std::swap(m_scan_size, r.m_scan_size);
   }
   void swap(T& t)  {
     m_std_ptr.swap(t);
+    m_scan_size = sizeof(t);
+    m_scan_index = type_scan::getIndexForScan<T>();
   }
 
   template<class U, class... Args>
@@ -165,20 +179,23 @@ struct shared_ptr final  {
 
   private:
     std::shared_ptr<T> m_std_ptr;
+    std::size_t m_scan_size = 0;
+    type_scan::Index m_scan_index = type_scan::kIndexUnknownNoPtrs;
     template<class Y>
-    /* implicit */ shared_ptr( const std::shared_ptr<Y>& r )
-      : m_std_ptr(r) {
+    shared_ptr(const std::shared_ptr<Y>& r, std::size_t size,
+        type_scan::Index index)
+      : m_std_ptr(r), m_scan_size(size), m_scan_index(index) {
     }
 };
 
-
 template<class T, class... Args>
 shared_ptr<T> make_shared(Args&&... args) {
-  return shared_ptr<T>(std::make_shared<T>(std::forward<Args>(args)...));
+  std::shared_ptr<T> r = std::make_shared<T>(std::forward<Args>(args)...);
+  return shared_ptr<T>(r, sizeof(*r), type_scan::getIndexForScan<T>());
 }
 
 template <class T>
-void swap( shared_ptr<T>& lhs, shared_ptr<T>& rhs ) {
+void swap(shared_ptr<T>& lhs, shared_ptr<T>& rhs) {
   lhs.swap(rhs);
 }
 
@@ -186,11 +203,12 @@ template <typename T>
 struct weak_ptr final : std::weak_ptr<T> {
   using Base = std::weak_ptr<T>;
   template <class Y>
-    explicit weak_ptr ( const shared_ptr<Y>& r ) :
+    explicit weak_ptr (const shared_ptr<Y>& r) :
     Base(r.m_std_ptr) {
   }
   shared_ptr<T> lock() const {
-    return shared_ptr<T>(Base::lock());
+    std::shared_ptr<T> r = Base::lock();
+    return shared_ptr<T>(r, sizeof(*r), type_scan::getIndexForScan<T>());
   }
   TYPE_SCAN_IGNORE_BASES(Base);
   TYPE_SCAN_IGNORE_ALL;

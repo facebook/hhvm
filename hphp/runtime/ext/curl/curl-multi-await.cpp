@@ -16,6 +16,8 @@ struct CurlEventHandler : AsioEventHandler {
     m_curlMultiAwait->setFinished(m_fd);
   }
 
+  TYPE_SCAN_IGNORE_BASES(folly::EventHandler);
+
  private:
   CurlMultiAwait* m_curlMultiAwait;
   int m_fd;
@@ -32,6 +34,7 @@ struct CurlTimeoutHandler : AsioTimeoutHandler {
     m_curlMultiAwait->setFinished(-1);
   }
 
+  TYPE_SCAN_IGNORE_BASES(folly::AsyncTimeout);
  private:
   CurlMultiAwait* m_curlMultiAwait;
 };

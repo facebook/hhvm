@@ -188,7 +188,6 @@ let runP : 'a parser -> P.t -> env -> 'a = fun pThing thing env ->
 
 let pError' : 'a parser' = fun [ err ] -> raise @@ Parser_fail (P.text err)
 
-
 let mkP : 'a . 'a parser_spec -> 'a parser = fun specl -> fun node env ->
     let env = ppDescend node env in
     let k = P.kind node in
@@ -198,7 +197,7 @@ let mkP : 'a . 'a parser_spec -> 'a parser = fun specl -> fun node env ->
       in
       (* Ugly little wrapper trick for token parsers (children -> []) *)
       p (if k = K.Token then [node] else P.children node) env
-    with 
+    with
     | Not_found -> fail (List.map fst specl) node env
     | Match_failure _ -> raise @@ Parser_fail begin Printf.sprintf
         "Failed to parse Full Fidelity tree; this probably means classic_ast \
@@ -781,7 +780,7 @@ and pStmt_ExpressionStatement' : stmt parser' = fun [ expr; _semi ] env ->
   ifExists (fun () -> Expr (pExpr expr env)) (fun () -> Noop) expr env ()
 and pStmt_CompoundStatement' : stmt parser' = fun [ _lb; stmts; _rb ] env ->
   Block (couldMap ~f:pStmt stmts env)
-and pCompoundStatement : stmt parser = fun node env -> 
+and pCompoundStatement : stmt parser = fun node env ->
   ifExists (single K.CompoundStatement pStmt_CompoundStatement' node env) Noop
     node env
 and pStmt_ThrowStatement' : stmt parser' = fun [ _kw; expr; _semi ] env ->
@@ -833,6 +832,9 @@ and pStmt_ReturnStatement' : stmt parser' =
   fun [ _kw; expr; _semi ] -> cReturn <.| positional (mpOptional pExpr) expr
 and pStmt_FunctionStaticStatement' : stmt parser' = fun [ _kw; decls; _semi ] ->
   cStatic_var <.| couldMap ~f:pStaticDeclarator decls
+and pStmt_UnsetStatement' : stmt parser' = fun [ kw; _lp; vars; _rp; _semi ] env ->
+  let (kw_pos, _) as kw = pos_name kw env in
+  Expr (where_am_I env, Call ((kw_pos, Id kw), couldMap ~f:pExpr vars env, []))
 and pStmt : stmt parser = fun eta -> eta |> mkP
   [ (K.EchoStatement,           pStmt_EchoStatement')
   ; (K.ExpressionStatement,     pStmt_ExpressionStatement')
@@ -849,6 +851,7 @@ and pStmt : stmt parser = fun eta -> eta |> mkP
   ; (K.SwitchStatement,         pStmt_SwitchStatement')
   ; (K.ForeachStatement,        pStmt_ForeachStatement')
   ; (K.TryStatement,            pStmt_TryStatement')
+  ; (K.UnsetStatement,          pStmt_UnsetStatement')
   ]
 
 

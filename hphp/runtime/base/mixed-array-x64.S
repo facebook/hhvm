@@ -17,15 +17,14 @@ ETCH_NAME(hashHelper_NvGetStr):
         mov       SD_LEN(%rsi), %ecx       // key->size()
         lea       SD_DATA(%rsi, %rcx), %r9 // key->data() + key->size()
         not       %edx                     // initialize to -1 (assert: it was 0)
-        movabs    $0xdfdfdfdfdfdfdfdf, %r8
         neg       %rcx
         jnz       ETCH_LABEL(hheader)
         jmp       ETCH_LABEL(hend)
 ETCH_LABEL(hloop):
         crc32q    %r11, %rdx
 ETCH_LABEL(hheader):
-        mov       (%r9, %rcx), %r11
-        and       %r8, %r11
+        movabs    $0xdfdfdfdfdfdfdfdf, %r11
+        and       (%r9, %rcx), %r11
         add       $8, %rcx
         js        ETCH_LABEL(hloop)
 

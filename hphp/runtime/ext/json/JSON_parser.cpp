@@ -371,7 +371,39 @@ struct SimpleParser {
     else if (ch == '[') return parsePacked();
     else if (ch == '\"') return parseString();
     else if (ch >= '0' && ch <= '9') return parseNumber(ch - '0');
+    else if (ch == 't') return parseRue();
+    else if (ch == 'f') return parseAlse();
+    else if (ch == 'n') return parseUll();
     else return false;
+  }
+
+  bool parseRue() {
+    if (*p++ != 'r') return false;
+    if (*p++ != 'u') return false;
+    if (*p++ != 'e') return false;
+    auto const tv = top++;
+    tv->m_type = KindOfBoolean;
+    tv->m_data.num = true;
+    return true;
+  }
+
+  bool parseAlse() {
+    if (*p++ != 'a') return false;
+    if (*p++ != 'l') return false;
+    if (*p++ != 's') return false;
+    if (*p++ != 'e') return false;
+    auto const tv = top++;
+    tv->m_type = KindOfBoolean;
+    tv->m_data.num = false;
+    return true;
+  }
+
+  bool parseUll() {
+    if (*p++ != 'u') return false;
+    if (*p++ != 'l') return false;
+    if (*p++ != 'l') return false;
+    top++->m_type = KindOfNull;
+    return true;
   }
 
   bool parseString() {

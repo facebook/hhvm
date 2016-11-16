@@ -237,24 +237,26 @@ open Ast
  * Naming scheme;
  *   c<constructor> x = <constructor> x
  *)
-let cStmt        x  = Stmt         x
-let cExpr        x  = Expr         x
-let cId          x  = Id           x
-let cDo      (b, c) = Do       (b, c)
-let cWhile   (c, b) = While    (c, b)
-let cLvar        x  = Lvar         x
-let cSome        x  = Some         x
-let cHapply  (p, x) = Happly   (p, x)
-let cHoption     x  = Hoption      x
-let cHtuple      x  = Htuple       x
-let cHshape      x  = Hshape       x
-let cBlock       x  = Block        x
-let cBreak       x  = Break        x
-let cThrow       x  = Throw        x
-let cContinue    x  = Continue     x
-let cReturn  (p, x) = Return   (p, x)
-let cExpr_list   x  = Expr_list    x
-let cStatic_var  x  = Static_var   x
+let cStmt            x  = Stmt         x
+let cExpr            x  = Expr         x
+let cId              x  = Id           x
+let cDo          (b, c) = Do       (b, c)
+let cWhile       (c, b) = While    (c, b)
+let cLvar            x  = Lvar         x
+let cSome            x  = Some         x
+let cHapply      (p, x) = Happly   (p, x)
+let cHoption         x  = Hoption      x
+let cHtuple          x  = Htuple       x
+let cHshape          x  = Hshape       x
+let cBlock           x  = Block        x
+let cBreak           x  = Break        x
+let cThrow           x  = Throw        x
+let cContinue        x  = Continue     x
+let cReturn      (p, x) = Return   (p, x)
+let cExpr_list       x  = Expr_list    x
+let cStatic_var      x  = Static_var   x
+let cClass_get   (p, x) = Class_get (p, x)
+let cClass_const (p, x) = Class_const (p, x)
 
 
 let rec hint_to_fun_kind : hint -> fun_kind = fun (pos, hint) -> match hint with
@@ -646,7 +648,11 @@ and pExpr_ParenthesizedExpression' : expr parser' = fun [ _lp; expr; _rp ] ->
   pExpr expr
 and pExpr_ScopeResolutionExpression' : expr_ parser' =
   fun [ qual; _op; name ] env ->
-    Class_const (pos_name qual env, pos_name name env)
+    let (_,n) as name = pos_name name env in
+    (if n.[0] = '$'
+     then cClass_get
+     else cClass_const
+    ) (pos_name qual env, name)
 and pExpr : expr parser = fun eta -> eta |>
   positional @@ mkP
   [ (K.ParenthesizedExpression,     fun [ _lp; expr; _rp ] ->
@@ -662,6 +668,12 @@ and pExpr : expr parser = fun eta -> eta |>
   ; (K.Token,                       fun [ t ] env -> Id (pos_name t env))
   ; (K.QualifiedNameExpression,     fun [ n ] env -> Id (pos_name n env))
   ; (K.VariableExpression,          fun [ v ] env -> Lvar (pos_name v env))
+  ; (K.TupleExpression,             fun [ kw; _lp; items; _rp ] env -> Call
+      ( (ppPos kw env, Id (pos_name kw env))
+      , couldMap ~f:pExpr items env
+      , []
+      )
+    )
   ; (K.PipeVariableExpression,      ppConst Dollardollar)
   ; (K.MemberSelectionExpression,   fun [ obj; op; name ] env ->
       let lhs = pExpr obj env in
@@ -762,27 +774,37 @@ and pBlock : block parser = fun node -> pStmt node |.> function
   | Block block -> block
   | stmt -> [stmt]
 and pSwitch : case list parser = fun node env ->
-  let pCaseLine = oneOf [ (fun x -> `Stmt x) <$> pStmt; (fun x -> `Func x) <$>
-    mkP
-    [ (K.DefaultStatement, fun [ _kw; _col; stmt ]       env -> fun x ->
-        Default (match mpOptional pStmt stmt env with
-          | None -> x
-          | Some s -> s :: x
-        )
+  let pTaggedStmt : [< `Stmt of stmt | `Func of block -> case ] parser =
+    (fun x -> `Stmt x) <$> pStmt in
+  let pTaggedFunc : [< `Stmt of stmt | `Func of block -> case ] parser =
+    let optStmt stmt env block = match mpOptional pStmt stmt env with
+      | None -> block
+      | Some s -> s :: block
+    in
+    (fun x -> `Func x) <$> mkP
+    [ (K.DefaultStatement, fun [ _kw; _col; stmt ] env -> fun x ->
+        Default (optStmt stmt env x)
       )
-    ; (K.CaseStatement,    fun [ _kw; expr; _col; stmt ] env -> fun x ->
-        Case (pExpr expr env, match mpOptional pStmt stmt env with
-          | None -> x
-          | Some s -> s :: x
-        )
+    ; (K.CaseStatement, fun [ _kw; expr; _col; stmt ] env -> fun x ->
+        Case (pExpr expr env, optStmt stmt env x)
       )
     ]
-  ] in
+  in
+  let pCaseLine : [< `Stmt of stmt | `Func of block -> case ] parser
+      = oneOf [ pTaggedStmt ; pTaggedFunc ]
+  in
   let merge thing acc = match thing, acc with
     | `Func f, (stmtl, casel) -> ([], f stmtl :: casel)
     | `Stmt x, (stmtl, casel) -> x::stmtl, casel
   in
-  snd @@ List.fold_right merge (couldMap ~f:pCaseLine node env) ([],[])
+  let inner : [< `Func of block -> case | `Stmt of stmt] list
+    = single
+        K.CompoundStatement
+        (fun [ _lb; stmts; _rb ] -> couldMap ~f:pCaseLine stmts)
+        node
+        env
+  in
+  snd @@ List.fold_right merge inner ([],[])
 
 and pStmt_EchoStatement' : stmt parser' = fun [ kw; exprs; _semi ] ->
   let pEcho : env -> expr_ = fun env ->
@@ -1006,7 +1028,7 @@ let pClassElt_PropertyDeclaration' : class_elt parser' =
             then drop_fst n
             else n
           in
-          where_am_I env, (p, n), mpOptional pExpr init env
+          where_am_I env, (p, n), mpOptional pSimpleInitializer init env
       end
     )
 let pClassElt_XHPClassAttributeDeclaration' : class_elt parser' =

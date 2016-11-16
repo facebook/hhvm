@@ -905,12 +905,12 @@ struct IniSettingExtension final : Extension {
 
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
-    assert(s_saved_defaults->empty());
+    assert(!s_saved_defaults->settings.hasValue());
   }
 
   void requestShutdown() override {
     IniSetting::ResetSavedDefaults();
-    assert(s_saved_defaults->empty());
+    assert(!s_saved_defaults->settings.hasValue());
   }
 } s_ini_extension;
 
@@ -1123,8 +1123,9 @@ void IniSetting::ResetSavedDefaults() {
     for (auto& item : s_saved_defaults->settings.value()) {
       ini_set(item.first, item.second, PHP_INI_SET_USER);
     }
-    s_saved_defaults->clear();
   }
+  // destroy the local settings hashtable even if it's empty
+  s_saved_defaults->clear();
 }
 
 bool IniSetting::GetMode(const std::string& name, Mode& mode) {

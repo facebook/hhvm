@@ -266,17 +266,40 @@ let naming env t =
   env, (Hh_logger.log_duration "Naming" t)
 
 let naming_with_fast fast t =
-    Relative_path.Map.iter fast ~f:begin fun k info ->
-    let { FileInfo.n_classes=classes;
-         n_types=typedefs;
-         n_funs=funs;
-         n_consts=consts} = info in
-    NamingGlobal.ndecl_file_fast k ~funs ~classes ~typedefs ~consts
-    end;
-  let hs = SharedMem.heap_size () in
-  Hh_logger.log "Heap size: %d" hs;
-  (Hh_logger.log_duration "Naming fast" t)
+  Relative_path.Map.iter fast ~f:begin fun k info ->
+  let { FileInfo.n_classes=classes;
+       n_types=typedefs;
+       n_funs=funs;
+       n_consts=consts} = info in
+  NamingGlobal.ndecl_file_fast k ~funs ~classes ~typedefs ~consts
+  end;
+let hs = SharedMem.heap_size () in
+Hh_logger.log "Heap size: %d" hs;
+(Hh_logger.log_duration "Naming fast" t)
 
+let update_search genv fast t =
+  let fast = Relative_path.Map.filter fast
+    ~f:(fun s _ ->
+        let fn = (Relative_path.to_absolute s) in
+        not (FilesToIgnore.should_ignore fn)
+        && FindUtils.is_php fn) in
+  let update_single_search _ fast_list =
+    List.iter fast_list
+    (fun (fn, fast) ->
+       HackSearchService.WorkerApi.update_from_fast fn fast
+    ) in
+  let next_fast_files =
+    MultiWorker.next genv.workers (Relative_path.Map.elements fast) in
+  MultiWorker.call
+      genv.workers
+      ~job:update_single_search
+      ~neutral:()
+      ~merge:(fun _ _ -> ())
+      ~next:next_fast_files;
+
+  HackSearchService.MasterApi.update_search_index
+    ~fuzzy:false (Relative_path.Map.keys fast);
+  Hh_logger.log_duration "Updating search indices" t
 
 let type_decl genv env fast t =
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
@@ -500,9 +523,8 @@ let init ?load_mini_script genv =
       let env = { env with
        files_info=Relative_path.Map.union env.files_info old_info;
       } in
-      (* Update the fileinfo object's
-         dependencies now that we have a full fast *)
       let t = update_files genv env.files_info t in
+      let t = update_search genv old_fast t in
       type_check_dirty genv env old_fast fast dirty_files t
     | Error err ->
       (* Fall back to type-checking everything *)

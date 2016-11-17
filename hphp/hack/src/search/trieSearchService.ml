@@ -19,7 +19,7 @@ module Make(S : SearchUtils.Searchable) = struct
     * of our index. Indexed on file name. Cached because we read from here
     * every time the user searches *)
   module SearchUpdates = SharedMem.WithCache (Relative_path.S) (struct
-    type t = (string * (Pos.t, S.t) term) list
+    type t = (string * (FileInfo.pos, S.t) term) list
     let prefix = Prefix.make()
     let description = "SearchUpdates"
   end)
@@ -243,11 +243,12 @@ module Make(S : SearchUtils.Searchable) = struct
       !results
 
     let search_query input type_ =
-
       let input = String.lowercase input in
+      (* We allow all None classes through the filter *)
       let compute_score str key res =
         match type_ with
-        | Some x when x <> res.result_type -> None
+        | Some x when S.compare_result_type x res.result_type <> 0 ->
+          None
         | _ -> begin
           let score =
             if string_starts_with (String.lowercase res.name) str
@@ -257,6 +258,7 @@ module Make(S : SearchUtils.Searchable) = struct
         end
       in
       let results = query input ~filter_map:(compute_score) ~limit:None in
+
       let res = List.sort begin fun a b ->
         (snd a) - (snd b)
       end results in

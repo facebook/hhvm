@@ -14,6 +14,7 @@
  *)
 
 module GEnv: sig
+  val get_full_pos : ParserOptions.t -> FileInfo.pos * string -> Pos.t * string
   val type_pos: ParserOptions.t -> string -> Pos.t option
   val type_canon_name: string -> string option
   val type_info:

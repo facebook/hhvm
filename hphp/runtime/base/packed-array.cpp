@@ -662,7 +662,7 @@ void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
     });
   }
 
-  std::free(reinterpret_cast<char*>(ad) - extra);
+  free_huge(reinterpret_cast<char*>(ad) - extra);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1306,7 +1306,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
     // once it's uncounted.
     auto const cap = size;
     auto const mem = static_cast<char*>(
-      std::malloc(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
+      malloc_huge(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     ad = reinterpret_cast<ArrayData*>(mem + extra);
     assert(cap == CapCode::ceil(cap).code);
@@ -1338,7 +1338,7 @@ ArrayData* PackedArray::MakeUncountedHelper(ArrayData* array, size_t extra) {
   auto const fpcap = CapCode::ceil(array->m_size);
   auto const cap = fpcap.decode();
   auto const mem = static_cast<char*>(
-    std::malloc(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
+    malloc_huge(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   auto const ad = reinterpret_cast<ArrayData*>(mem + extra);
   ad->m_sizeAndPos = array->m_sizeAndPos;

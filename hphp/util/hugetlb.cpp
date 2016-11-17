@@ -42,8 +42,6 @@
 
 namespace HPHP {
 
-constexpr size_t size1g = 1 << 30;
-
 static char s_hugePath[256];
 constexpr size_t maxErrorMsgLen = 256;
 static char s_errorMsg[maxErrorMsgLen];

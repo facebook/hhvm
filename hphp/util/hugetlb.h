@@ -17,7 +17,11 @@
 #ifndef incl_HPHP_UTIL_HUGETLB_H_
 #define incl_HPHP_UTIL_HUGETLB_H_
 
+#include <cstddef>
+
 namespace HPHP {
+
+constexpr size_t size1g = 1u << 30;
 
 // Note: these functions for managing 1GB huge pages are not designed to be
 // thread-safe.  They should execute during program initialization where only

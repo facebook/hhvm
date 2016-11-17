@@ -21,14 +21,15 @@
 #include <string>
 #include <iostream>
 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <unistd.h>
+#include <folly/portability/SysTime.h>
+#include <folly/portability/SysResource.h>
+#include <folly/portability/Unistd.h>
 #include <fcntl.h>
 #include <signal.h>
 
 #include <folly/String.h>
 
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"

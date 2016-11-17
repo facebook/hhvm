@@ -428,7 +428,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
   auto a = asMixed(array);
   assertx(!a->empty());
   auto const scale = a->scale();
-  char* mem = static_cast<char*>(std::malloc(extra + computeAllocBytes(scale)));
+  char* mem = static_cast<char*>(malloc_huge(extra + computeAllocBytes(scale)));
   auto const ad = reinterpret_cast<MixedArray*>(mem + extra);
   auto const used = a->m_used;
   // Do a raw copy first, without worrying about counted types or refcount
@@ -527,7 +527,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
     }
   }
 
-  std::free(reinterpret_cast<char*>(ad) - extra);
+  free_huge(reinterpret_cast<char*>(ad) - extra);
 }
 
 //=============================================================================

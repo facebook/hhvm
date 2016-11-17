@@ -73,7 +73,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   auto const numRealProps = propInfo.size();
   auto const numApcProps = numRealProps + hasDynProps;
   auto size = sizeof(APCObject) + sizeof(APCHandle*) * numApcProps;
-  auto const apcObj = new (std::malloc(size)) APCObject(clsOrName, numApcProps);
+  auto const apcObj = new (malloc_huge(size)) APCObject(clsOrName, numApcProps);
   apcObj->m_persistent = 1;
 
   // Set a few more flags for faster fetching: whether or not the object has a
@@ -130,7 +130,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
   auto const propCount = odProps.size();
 
   auto size = sizeof(APCObject) + sizeof(Prop) * propCount;
-  auto const apcObj = new (std::malloc(size)) APCObject(name, propCount);
+  auto const apcObj = new (malloc_huge(size)) APCObject(name, propCount);
   if (!propCount) return {apcObj->getHandle(), size};
 
   auto prop = apcObj->props();
@@ -196,7 +196,7 @@ void APCObject::Delete(APCHandle* handle) {
   auto const obj = fromHandle(handle);
   obj->~APCObject();
   // No need to run Prop destructors.
-  std::free(obj);
+  free_huge(obj);
 }
 
 //////////////////////////////////////////////////////////////////////

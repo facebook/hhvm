@@ -80,8 +80,8 @@ let save_state env fn =
   if not (Errors.is_empty env.errorl)
   then failwith "--save-mini only works if there are no type errors!";
   let chan = Sys_utils.open_out_no_fail fn in
-  let names = FileInfo.info_to_modes env.files_info in
-  Marshal.to_channel chan names [];
+  let modes = FileInfo.info_to_modes env.files_info in
+  Marshal.to_channel chan modes [];
   Sys_utils.close_out_no_fail fn chan;
   let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") in
   let save_t = SharedMem.save_dep_table (fn^".deptable") in
@@ -193,11 +193,10 @@ let mk_state_future root use_sql cmd =
           assert (status = Unix.WEXITED 0);
           let chan = open_in fn in
           let old_modes = Marshal.from_channel chan in
-          let old_fast = FileInfo.modes_to_fast old_modes in
           let dirty_files = List.map dirty_files Relative_path.(concat Root) in
           HackEventLogger.vcs_changed_files_end t;
           let _ = Hh_logger.log_duration "Finding changed files" t in
-          Result.Ok (Relative_path.set_of_list dirty_files, old_fast)
+          Result.Ok (Relative_path.set_of_list dirty_files, old_modes)
       end in
       Result.Ok get_dirty_files
   with e ->
@@ -208,6 +207,7 @@ let mk_state_future root use_sql cmd =
      * through *)
     (try Daemon.kill daemon with e -> Hh_logger.exc e);
     raise e
+
 
 let is_check_mode options =
   ServerArgs.check_mode options &&
@@ -264,6 +264,19 @@ let naming env t =
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   env, (Hh_logger.log_duration "Naming" t)
+
+let naming_with_fast fast t =
+    Relative_path.Map.iter fast ~f:begin fun k info ->
+    let { FileInfo.n_classes=classes;
+         n_types=typedefs;
+         n_funs=funs;
+         n_consts=consts} = info in
+    NamingGlobal.ndecl_file_fast k ~funs ~classes ~typedefs ~consts
+    end;
+  let hs = SharedMem.heap_size () in
+  Hh_logger.log "Heap size: %d" hs;
+  (Hh_logger.log_duration "Naming fast" t)
+
 
 let type_decl genv env fast t =
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
@@ -410,27 +423,14 @@ let init ?load_mini_script genv =
   let load_mini_script = Result.of_option load_mini_script ~error:No_loader in
   let state_future =
     load_mini_script >>= mk_state_future root use_sql in
-
-  let get_next, t = indexing genv in
-  let env, t = parsing ~lazy_parse genv env ~get_next t in
-
   let timeout = genv.local_config.SLC.load_mini_script_timeout in
   let state_future = state_future >>=
     with_loader_timeout timeout "wait_for_state"
   in
 
-  let t = update_files genv env.files_info t in
-  let env, t = naming env t in
-  let fast = FileInfo.simplify_fast env.files_info in
-  let fast = Relative_path.Set.fold env.failed_parsing
-    ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
-  let env, t =
-    if lazy_decl then env, t
-    else type_decl genv env fast t in
-
   let state = state_future
     >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun (dirty_files, old_fast) ->
+    >>= fun (dirty_files, old_modes) ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -460,24 +460,49 @@ let init ?load_mini_script genv =
      * it's much slower. *)
     let dirty_files =
       Relative_path.Set.union dirty_files (get_build_targets env) in
-    Ok (dirty_files, changed_while_parsing, old_fast)
+    Ok (dirty_files, changed_while_parsing, old_modes)
   in
+
 
   let env, t =
     match state with
-    | Ok (dirty_files, changed_while_parsing, old_fast) ->
+    | Ok (dirty_files, changed_while_parsing, old_modes) ->
       Hh_logger.log "Successfully loaded mini-state";
-      (* If a file has changed while we were parsing, we may have parsed the
-       * new version, so we must treat it as possibly creating new type
-       * errors. *)
+      let t = Unix.gettimeofday () in
       let dirty_files =
-        Relative_path.Set.union dirty_files changed_while_parsing in
-      (* But we still want to keep it in the set of things that need to be
-       * reparsed in the next round of incremental updates. *)
+       Relative_path.Set.union dirty_files changed_while_parsing in
+
+      let dirty_files_list = Relative_path.Set.elements dirty_files in
+      let old_fast = FileInfo.modes_to_fast old_modes in
+      let old_info = FileInfo.modes_to_info old_modes in
+      (* Parse dirty files only *)
+      let next = MultiWorker.next genv.workers dirty_files_list in
+      let env, t = parsing genv env ~lazy_parse:true ~get_next:next t in
+
+      let t = update_files genv env.files_info t in
+      (* Name all the files from the old fast (except dirty) *)
+      let old_fast_names = Relative_path.Map.filter old_fast (fun k _v ->
+         not (Relative_path.Set.mem dirty_files k)
+       ) in
+      let t = naming_with_fast old_fast_names t in
+      (* Do global naming on all dirty files *)
+      let env, t = naming env t in
+      (* Add all files from fast to the files_info object *)
+      let fast = FileInfo.simplify_fast env.files_info in
+
+      let fast = Relative_path.Set.fold env.failed_parsing
+       ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
+
       let env = { env with
-        failed_parsing =
-          Relative_path.Set.union env.failed_parsing changed_while_parsing;
+       failed_parsing =
+         Relative_path.Set.union env.failed_parsing changed_while_parsing;
       } in
+      let env = { env with
+       files_info=Relative_path.Map.union env.files_info old_info;
+      } in
+      (* Update the fileinfo object's
+         dependencies now that we have a full fast *)
+      let t = update_files genv env.files_info t in
       type_check_dirty genv env old_fast fast dirty_files t
     | Error err ->
       (* Fall back to type-checking everything *)
@@ -485,6 +510,16 @@ let init ?load_mini_script genv =
         HackEventLogger.load_mini_exn err;
         Hh_logger.exc ~prefix:"Could not load mini state: " err;
       end;
+      let get_next, t = indexing genv in
+      let env, t = parsing ~lazy_parse genv env ~get_next t in
+      let t = update_files genv env.files_info t in
+      let env, t = naming env t in
+      let fast = FileInfo.simplify_fast env.files_info in
+      let fast = Relative_path.Set.fold env.failed_parsing
+        ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
+      let env, t =
+        if lazy_decl then env, t
+        else type_decl genv env fast t in
       type_check genv env fast t
   in
 

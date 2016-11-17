@@ -50,6 +50,13 @@ val remove_decls:
       typedefs: SSet.t ->
       consts: SSet.t -> unit
 
+val ndecl_file_fast:
+  Relative_path.t ->
+  funs: SSet.t ->
+  classes: SSet.t ->
+  typedefs: SSet.t ->
+  consts: SSet.t -> unit
+
 val ndecl_file:
   ParserOptions.t ->
   Relative_path.t -> FileInfo.t ->

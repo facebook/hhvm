@@ -106,6 +106,7 @@ int64_t MSKTOP(int64_t value) {
 vixl::MemOperand M(Vptr p) {
   assertx(p.base.isValid());
   if (p.index.isValid()) {
+    assertx(p.disp == 0);
     return MemOperand(X(p.base), X(p.index), LSL, Log2(p.scale));
   }
   return MemOperand(X(p.base), p.disp);

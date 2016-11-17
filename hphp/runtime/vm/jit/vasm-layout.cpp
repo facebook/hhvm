@@ -310,6 +310,10 @@ void Clusterizer::clusterize() {
   for (auto& arcInfo : arcInfos) {
     auto src = arcInfo.src;
     auto dst = arcInfo.dst;
+
+    // Only merge blocks in the same area.
+    if (m_unit.blocks[src].area_idx != m_unit.blocks[dst].area_idx) continue;
+
     auto srcCid = m_blockCluster[src];
     auto dstCid = m_blockCluster[dst];
     if (srcCid == dstCid) continue;

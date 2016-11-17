@@ -192,7 +192,8 @@ let mk_state_future root use_sql cmd =
           let _, status = Unix.waitpid [] pid in
           assert (status = Unix.WEXITED 0);
           let chan = open_in fn in
-          let old_fast = Marshal.from_channel chan in
+          let old_modes = Marshal.from_channel chan in
+          let old_fast = FileInfo.modes_to_fast old_modes in
           let dirty_files = List.map dirty_files Relative_path.(concat Root) in
           HackEventLogger.vcs_changed_files_end t;
           let _ = Hh_logger.log_duration "Finding changed files" t in

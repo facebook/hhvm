@@ -48,14 +48,13 @@ type id = pos  * string
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
-
 type t = {
   file_mode : mode option;
   funs : id list;
   classes : id list;
   typedefs : id list;
   consts : id list;
-  comments : (Pos.t * string) list;
+  comments : (Pos.t * string) list option; (* None if loaded from saved state *)
   consider_names_just_for_autoload: bool;
 }
 
@@ -65,7 +64,7 @@ let empty_t = {
   classes = [];
   typedefs = [];
   consts = [];
-  comments = [];
+  comments = Some [];
   consider_names_just_for_autoload = false;
 }
 
@@ -127,7 +126,7 @@ let modes_to_info fast =
       classes;
       typedefs;
       consts;
-      comments = [];
+      comments = None;
       consider_names_just_for_autoload = false
     } in
     Relative_path.Map.add acc fn fileinfo

@@ -25,7 +25,7 @@ let empty_file_info : FileInfo.t = {
   classes = [];
   typedefs = [];
   consts = [];
-  comments = [];
+  comments = Some [];
   consider_names_just_for_autoload = false;
 }
 
@@ -52,6 +52,7 @@ let process_parse_result
     File_heap.FileHeap.write_through fn (File_heap.Disk content);
     let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
     Parser_heap.ParserHeap.write_through fn (ast, mode);
+    let comments = Some comments in
     let defs =
       {FileInfo.funs; classes; typedefs; consts; comments; file_mode;
        consider_names_just_for_autoload = false}

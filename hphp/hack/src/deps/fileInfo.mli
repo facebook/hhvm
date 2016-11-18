@@ -46,7 +46,7 @@ type t = {
   classes : id list;
   typedefs : id list;
   consts : id list;
-  comments : (Pos.t * string) list;
+  comments : (Pos.t * string) list option;
   consider_names_just_for_autoload: bool;
 }
 

@@ -45,9 +45,8 @@ let get_from_local_cache ~full popt file_name =
           && Parser_hack.get_file_mode popt file_name contents <> None then
           contents else "" in
         let { Parser_hack.ast;
-          _ } = Parser_hack.program popt ~quick:(not full) file_name contents in
-        if full then
-          LocalParserCache.add file_name ast;
+          _ } = Parser_hack.program ~quick:(not full) popt file_name contents in
+        if full then LocalParserCache.add file_name ast;
         ast
 
 let get_class defs class_name =

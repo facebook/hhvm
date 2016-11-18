@@ -12,6 +12,7 @@ open Core
 
 let make_local_changes () =
   Fixmes.HH_FIXMES.LocalChanges.push_stack();
+  File_heap.FileHeap.LocalChanges.push_stack();
   Parser_heap.ParserHeap.LocalChanges.push_stack();
 
   Naming_heap.FunPosHeap.LocalChanges.push_stack();
@@ -33,6 +34,7 @@ let make_local_changes () =
 
 let revert_local_changes () =
   Fixmes.HH_FIXMES.LocalChanges.pop_stack();
+  File_heap.FileHeap.LocalChanges.pop_stack();
   Parser_heap.ParserHeap.LocalChanges.pop_stack();
 
   Naming_heap.FunPosHeap.LocalChanges.pop_stack();

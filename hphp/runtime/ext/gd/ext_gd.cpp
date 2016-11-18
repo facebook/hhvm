@@ -7354,9 +7354,12 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
                   if (fgot < ImageInfo->Thumbnail.size) {
                     raise_warning("Thumbnail goes IFD boundary or "
                                     "end of file reached");
+                    IM_FREE(ImageInfo->Thumbnail.data);
+                    ImageInfo->Thumbnail.data = nullptr;
+                  } else {
+                    memcpy(ImageInfo->Thumbnail.data, str.c_str(), fgot);
+                    exif_thumbnail_build(ImageInfo);
                   }
-                  memcpy(ImageInfo->Thumbnail.data, str.c_str(), fgot);
-                  exif_thumbnail_build(ImageInfo);
                 }
               }
             }
@@ -7389,9 +7392,12 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
             if (fgot < ImageInfo->Thumbnail.size) {
               raise_warning("Thumbnail goes IFD boundary or "
                               "end of file reached");
+              IM_FREE(ImageInfo->Thumbnail.data);
+              ImageInfo->Thumbnail.data = nullptr;
+            } else {
+              memcpy(ImageInfo->Thumbnail.data, str.c_str(), fgot);
+              exif_thumbnail_build(ImageInfo);
             }
-            memcpy(ImageInfo->Thumbnail.data, str.c_str(), fgot);
-            exif_thumbnail_build(ImageInfo);
           }
         }
         return 1;

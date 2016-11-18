@@ -46,9 +46,20 @@ module GEnv = struct
         let res = unsafe_opt (Parser_heap.find_fun_in_file popt fn name) in
         let (p', _) = res.Ast.f_name in
         p', name
-    with Not_found ->
-      assert_false_log_backtrace(
-        Some "Expected position to exist on disk, found none")
+    with Invalid_argument _ ->
+      (* We looked for a file in the file heap, but it was deleted
+        before we could get it. This occurs with highest probability when we
+        have multiple large rebases in quick succession, and the typechecker
+         doesn't get updates from watchman while checking. For now, we restart
+        gracefully, but in future versions we'll be restarting the server on
+        large rebases anyhow, so this is sufficient behavior.
+
+        TODO(jjwu): optimize this. Instead of forcing a server restart,
+        catch the exception in the recheck look and start another recheck cycle
+        by adding more files to the unprocessed/partially-processed set in
+        the previous loop.
+      *)
+      raise File_heap.File_heap_stale
 
   let type_pos popt name = match TypeIdHeap.get name with
     | Some (pos, `Class) ->

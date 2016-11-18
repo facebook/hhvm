@@ -19,6 +19,8 @@
 
 type disk_type = Disk of string | Ide of File_content.t
 
+exception File_heap_stale
+
 module FileHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = disk_type
     let prefix = Prefix.make()

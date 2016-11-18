@@ -55,9 +55,9 @@ void optimizePPC64(Vunit&, const Abi&, bool regalloc);
  * Emit code for the given unit using the given code areas. The unit must have
  * already been through the corresponding optimizeArch() function.
  */
-void emitX64(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
-void emitARM(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
-void emitPPC64(const Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emitX64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emitARM(Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emitPPC64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
 
 /*
  * Emit code for the given Vunit, which must already be register-allocated, to

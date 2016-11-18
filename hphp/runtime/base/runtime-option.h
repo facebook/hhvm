@@ -513,6 +513,9 @@ struct RuntimeOption {
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
   F(uint32_t, JitRetranslateAllRequest, 0)                              \
+  F(double,   JitLayoutHotThreshold,   0.05)                            \
+  F(int32_t,  JitLayoutMainFactor,     1000)                            \
+  F(int32_t,  JitLayoutColdFactor,     5)                               \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \

@@ -1624,7 +1624,7 @@ void optimizePPC64(Vunit& unit, const Abi& abi, bool regalloc) {
   }
 }
 
-void emitPPC64(const Vunit& unit, Vtext& text, CGMeta& fixups,
+void emitPPC64(Vunit& unit, Vtext& text, CGMeta& fixups,
                AsmInfo* asmInfo) {
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }

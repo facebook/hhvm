@@ -106,7 +106,7 @@ void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   });
 }
 
-void emit(const Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
+void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
   switch (arch()) {
     case Arch::X64:
       emitX64(vunit, vtext, meta, ai);

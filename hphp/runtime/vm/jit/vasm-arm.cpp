@@ -1596,7 +1596,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   }
 }
 
-void emitARM(const Vunit& unit, Vtext& text, CGMeta& fixups,
+void emitARM(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }

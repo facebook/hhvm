@@ -141,7 +141,7 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit);
  * e.g., Main and Cold blocks in the same partition if their actual code areas
  * in `text' are the same.
  */
-jit::vector<Vlabel> layoutBlocks(const Vunit& unit, const Vtext& text);
+jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text);
 
 /*
  * Return a bitset, keyed by Vlabel, indicating which blocks are targets of

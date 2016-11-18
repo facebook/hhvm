@@ -44,10 +44,10 @@ bool IsSSEHashSupported();
 
 using strhash_t = int32_t;
 using inthash_t = int32_t;
-const strhash_t STRHASH_MASK = 0x7fffffff;
-const strhash_t STRHASH_MSB  = 0x80000000;
+constexpr strhash_t STRHASH_MASK = 0x7fffffff;
+constexpr strhash_t STRHASH_MSB  = 0x80000000;
 
-inline long long hash_int64(long long key) {
+inline size_t hash_int64_fallback(int64_t key) {
   // "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
   // http://www.concentric.net/~ttwang/tech/inthash.htm
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
@@ -56,25 +56,30 @@ inline long long hash_int64(long long key) {
   key = key ^ ((unsigned long long)key >> 14);
   key = (key + (key << 2)) + (key << 4); // key * 21
   key = key ^ ((unsigned long long)key >> 28);
-  key = key + (key << 31);
-  return key < 0 ? -key : key;
+  return static_cast<size_t>(static_cast<uint32_t>(key));
 }
 
-inline long long hash_int64_pair(long long k1, long long k2) {
-  // Shift the first key, so (a,b) hashes somewhere other than (b,a)
-  return (hash_int64(k1) << 1) ^ hash_int64(k2);
-}
-
-// int64->int32 hash function to use for MixedArrays
-ALWAYS_INLINE inthash_t hashint(int64_t k) {
-  static_assert(sizeof(inthash_t) == sizeof(strhash_t), "");
+ALWAYS_INLINE size_t hash_int64(int64_t k) {
 #if defined(USE_SSECRC) && defined(__SSE4_2__)
-  int64_t h = 0;
-  __asm("crc32 %1, %0\n" : "+r"(h) : "r"(k));
+  size_t h = 0;
+  __asm("crc32q %1, %0\n" : "+r"(h) : "rm"(k));
   return h;
 #else
-  return hash_int64(k);
+  return hash_int64_fallback(k);
 #endif
+}
+
+inline size_t hash_int64_pair(int64_t k1, int64_t k2) {
+#if defined(USE_SSECRC) && defined(__SSE4_2__)
+  // crc32 is commutative, so we need to perturb k1 so that (k1, k2) hashes
+  // differently from (k2, k1).
+  k1 += k1;
+  __asm("crc32q %1, %0\n" : "+r" (k1) : "rm"(k2));
+  return k1;
+#else
+  return (hash_int64(k1) << 1) ^ hash_int64(k2);
+#endif
+
 }
 
 namespace MurmurHash3 {

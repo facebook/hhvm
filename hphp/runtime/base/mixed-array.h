@@ -105,9 +105,10 @@ struct MixedArray final : private ArrayData,
 
     void setIntKey(int64_t k, inthash_t h) {
       ikey = k;
-      data.hash() = h | STRHASH_MSB;
+      data.hash() = static_cast<int32_t>(h) | STRHASH_MSB;
       assert(hasIntKey());
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
+      static_assert(static_cast<int32_t>(STRHASH_MSB) < 0,
+                    "high bit indicates int key");
     }
 
     bool isTombstone() const {
@@ -155,11 +156,10 @@ struct MixedArray final : private ArrayData,
       StringData* skey;
       int64_t ikey;
     };
-    hash_t hash;
+    int32_t hash;
 
     TYPE_SCAN_CUSTOM() {
       if (hash < 0) scanner.enqueue(skey);
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
     }
   };
 

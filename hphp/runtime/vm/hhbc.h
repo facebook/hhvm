@@ -1047,7 +1047,7 @@ namespace std {
 template<>
 struct hash<HPHP::Op> {
   size_t operator()(HPHP::Op op) const {
-    return HPHP::hash_int64(uint8_t(op));
+    return HPHP::hash_int64(size_t(op));
   }
 };
 }

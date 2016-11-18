@@ -87,8 +87,7 @@ struct MD5 : private boost::totally_ordered<MD5> {
   }
 
   uint64_t hash() const {
-    // hash_int64_pair does way more work than necessary; all the bits here
-    // are fantastically good.
+    // All the bits here are fantastically good.
     return q[0];
   }
 };

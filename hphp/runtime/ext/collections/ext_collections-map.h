@@ -149,7 +149,7 @@ struct BaseMap : HashCollection {
 
   template<bool throwOnError>
   TypedValue* atImpl(int64_t key) const {
-    auto p = find(key, hashint(key));
+    auto p = find(key, hash_int64(key));
     if (UNLIKELY(p == Empty)) {
       if (throwOnError) {
         collections::throwUndef(key);

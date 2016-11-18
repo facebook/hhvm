@@ -1017,11 +1017,9 @@ ObjectData::PropLookup<const TypedValue*> ObjectData::getProp(
 
 struct ObjectData::PropAccessInfo::Hash {
   size_t operator()(PropAccessInfo const& info) const {
-    return folly::hash::hash_combine(
-      hash_int64(reinterpret_cast<intptr_t>(info.obj)),
-      info.key->hash(),
-      static_cast<uint32_t>(info.attr)
-    );
+    return hash_int64_pair(reinterpret_cast<intptr_t>(info.obj),
+                           info.key->hash() |
+                           (static_cast<int64_t>(info.attr) << 32));
   }
 };
 

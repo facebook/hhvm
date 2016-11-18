@@ -263,7 +263,7 @@ void BaseMap::setImpl(int64_t k, const TypedValue* val) {
   }
   assert(val->m_type != KindOfRef);
   assert(canMutateBuffer());
-  auto h = hashint(k);
+  auto h = hash_int64(k);
 retry:
   auto p = findForInsert(k, h);
   assert(p);

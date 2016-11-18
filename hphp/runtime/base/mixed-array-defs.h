@@ -257,7 +257,7 @@ inline size_t MixedArray::hashSize() const {
 inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   assert(!exists(ki));
   assert(!isFull());
-  auto h = hashint(ki);
+  auto h = hash_int64(ki);
   auto ei = findForNewInsert(h);
   auto& e = allocElm(ei);
   e.setIntKey(ki, h);

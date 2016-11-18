@@ -120,7 +120,7 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
 
   ad->initHash(dstHash, ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
-    auto h = hashint(i);
+    auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
     tvCopy(srcData[i], dstData->data);
@@ -152,7 +152,7 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
 
   ad->initHash(dstHash, ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
-    auto h = hashint(i);
+    auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
     tvDupFlattenVars(&srcData[i], &dstData->data, old);
@@ -182,7 +182,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
 
   ad->initHash(dstHash, ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
-    auto h = hashint(i);
+    auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
     tvDupFlattenVars(&srcData[i], &dstData->data, old);
@@ -923,7 +923,7 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
     // TODO(#2606310): if we're removing the /last/ element, we
     // probably could stay packed, but this needs to be verified.
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    auto pos = mixed->findForRemove(k, hashint(k), false);
+    auto pos = mixed->findForRemove(k, hash_int64(k), false);
     if (validPos(pos)) mixed->erase(pos);
     return mixed;
   }

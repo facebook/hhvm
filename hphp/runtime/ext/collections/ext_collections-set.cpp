@@ -115,7 +115,7 @@ void BaseSet::addImpl(int64_t k) {
   if (!raw) {
     mutate();
   }
-  auto h = hashint(k);
+  auto h = hash_int64(k);
   auto p = findForInsert(k, h);
   assert(p);
   if (validPos(*p)) {
@@ -185,7 +185,7 @@ void BaseSet::add(StringData *key) {
 
 void BaseSet::addFront(int64_t k) {
   mutate();
-  auto h = hashint(k);
+  auto h = hash_int64(k);
   auto p = findForInsert(k, h);
   assert(p);
   if (validPos(*p)) {

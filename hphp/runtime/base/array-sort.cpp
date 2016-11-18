@@ -100,7 +100,7 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.skey);
-      auto h = hashint(pos);
+      auto h = hash_int64(pos);
       e.setIntKey(pos, h);
       *findForNewInsert(ht, mask, h) = pos;
     }

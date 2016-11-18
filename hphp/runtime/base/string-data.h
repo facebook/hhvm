@@ -501,7 +501,7 @@ private:
   union {
     struct {
       uint32_t m_len;
-      mutable strhash_t m_hash;   // precomputed for persistent strings
+      mutable int32_t m_hash;           // precomputed for persistent strings
     };
     uint64_t m_lenAndHash;
   };

@@ -352,7 +352,6 @@ public:
       tv.hash() = h | STRHASH_MSB;
       assert(!isInvalid());
       assert(hasIntKey());
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
     }
 
     void setTombstone() {

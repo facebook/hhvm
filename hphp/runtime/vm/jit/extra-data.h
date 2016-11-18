@@ -155,7 +155,7 @@ struct ExtendsClassData : IRExtraData {
   }
 
   size_t hash() const {
-    return hash_int64(reinterpret_cast<intptr_t>(cls));
+    return pointer_hash<Class>()(cls);
   }
 
   const Class* cls;
@@ -182,7 +182,7 @@ struct ClsMethodData : IRExtraData {
     return clsName == o.clsName && methodName == o.methodName;
   }
   size_t hash() const {
-    return hash_int64_pair((uintptr_t)clsName, (uintptr_t)methodName);
+    return hash_int64_pair((intptr_t)clsName, (intptr_t)methodName);
   }
 
   const StringData* clsName;
@@ -806,7 +806,7 @@ struct LdFuncCachedUData : IRExtraData {
   }
 
   size_t hash() const {
-    return hash_int64_pair(name->hash(), fallback->hash());
+    return hash_int64_pair((uint32_t)name->hash(), (uint32_t)fallback->hash());
   }
   bool equals(const LdFuncCachedUData& o) const {
     return name == o.name && fallback == o.fallback;

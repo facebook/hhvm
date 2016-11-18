@@ -396,6 +396,7 @@ let setup_server options handle =
     enable_on_nfs;
     lazy_decl;
     lazy_parse;
+    lazy_init;
     load_script_config;
     _
   } as local_config = local_config in
@@ -411,6 +412,7 @@ let setup_server options handle =
     (Unix.gettimeofday ())
     lazy_decl
     lazy_parse
+    lazy_init
     saved_state_load_type
     use_sql;
   let root_s = Path.to_string root in

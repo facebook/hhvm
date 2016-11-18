@@ -108,7 +108,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
    ServerConfig.(load filename options) in
   HackEventLogger.set_lazy_levels
    (local_config.ServerLocalConfig.lazy_decl)
-   (local_config.ServerLocalConfig.lazy_parse);
+   (local_config.ServerLocalConfig.lazy_parse)
+   (local_config.ServerLocalConfig.lazy_init);
 
   Parsing_hooks.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
   if ServerArgs.check_mode options then

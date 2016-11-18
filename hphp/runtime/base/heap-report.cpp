@@ -105,7 +105,7 @@ std::string describePtr(const HeapGraph& g, const HeapGraph::Ptr& ptr) {
   std::ostringstream out;
   out << " " << ptrSym[(unsigned)ptr.ptr_kind];
   if (ptr.from != -1) out << describe(g, ptr.from);
-  else out << root_kind_names[(unsigned)ptr.root_kind];
+  else if (ptr.description) out << ptr.description;
   return out.str();
 }
 

@@ -511,8 +511,12 @@ NEVER_INLINE void Marker::init() {
 
 void Marker::finish_typescan() {
   type_scanner_.finish(
-    [this](const void* p){ checkedEnqueue(p, GCBits::Mark); },
-    [this](const void* p, std::size_t size){ (*this)(p, size); }
+    [this](const void* p, const char*) {
+      checkedEnqueue(p, GCBits::Mark);
+    },
+    [this](const void* p, std::size_t size, const char*) {
+      (*this)(p, size);
+    }
   );
 }
 

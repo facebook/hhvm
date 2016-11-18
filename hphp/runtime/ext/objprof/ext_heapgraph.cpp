@@ -305,7 +305,7 @@ std::string getNodesConnectionName(
         break;
     }
   } else if (from == -1 && to != -1) {
-    return root_kind_names[(unsigned)g.ptrs[ptr].root_kind];
+    return g.ptrs[ptr].description;
   }
 
   return getEdgeKindName(g.ptrs[ptr].ptr_kind);
@@ -348,7 +348,7 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
     s_kind, Variant(getEdgeKindName(ptr.ptr_kind)),
     s_from, Variant(ptr.from),
     s_to, Variant(ptr.to),
-    s_seat, Variant(root_kind_names[(unsigned)ptr.root_kind]),
+    s_seat, Variant(ptr.description),
     s_name, Variant(cptr.edgename)
   );
 

@@ -74,7 +74,7 @@ struct HeapGraph {
     int from, to; // node ids. if root, from == -1
     int next_out, next_in; // from's next out-ptr, to's next in-ptr
     PtrKind ptr_kind;
-    RootKind root_kind;
+    const char* description;
   };
   std::vector<Node> nodes;
   std::vector<Ptr> ptrs;

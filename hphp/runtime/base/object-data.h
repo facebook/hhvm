@@ -59,6 +59,17 @@ struct TypedValue;
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
+struct InvokeResult {
+  TypedValue val;
+  InvokeResult() {}
+  InvokeResult(bool ok, TypedValue v) : val(v) {
+    val.m_aux.u_ok = ok;
+  }
+  InvokeResult(bool ok, Variant&& v);
+  bool ok() const { return val.m_aux.u_ok; }
+  explicit operator bool() const { return ok(); }
+};
+
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
@@ -379,13 +390,13 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
-  bool invokeSet(const StringData* key, TypedValue* val);
-  bool invokeGet(TypedValue* retval, const StringData* key);
-  bool invokeIsset(TypedValue* retval, const StringData* key);
+  bool invokeSet(const StringData* key, const TypedValue* val);
+  InvokeResult invokeGet(const StringData* key);
+  InvokeResult invokeIsset(const StringData* key);
   bool invokeUnset(const StringData* key);
-  bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
+  InvokeResult invokeNativeGetProp(const StringData* key);
   bool invokeNativeSetProp(const StringData* key, TypedValue* val);
-  bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
+  InvokeResult invokeNativeIssetProp(const StringData* key);
   bool invokeNativeUnsetProp(const StringData* key);
 
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,

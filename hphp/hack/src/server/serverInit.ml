@@ -52,7 +52,6 @@ module ServerInitCommon = struct
       | [] -> next_files_root ()
       | x -> x
 
-
   let read_json_line ic =
     let output = input_line ic in
     try Hh_json.json_of_string output
@@ -92,14 +91,18 @@ module ServerInitCommon = struct
         Hh_json.get_bool_exn @@ List.Assoc.find_exn kv "is_cached" in
       let deptable_fn =
         Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
+      (* The sql deptable needs to be loaded in the master process, so
+       * defer that to later, give dummy result for read time
+       *)
       let read_deptable_time =
         if use_sql
-        then SharedMem.load_dep_table_sqlite deptable_fn
+        then 0
         else SharedMem.load_dep_table deptable_fn
       in
       let end_time = Unix.gettimeofday () in
       Daemon.to_channel oc
-        @@ Ok (`Fst (state_fn, is_cached, end_time, read_deptable_time));
+        @@ Ok (
+        `Fst (state_fn, is_cached, end_time, deptable_fn, read_deptable_time));
       let json = read_json_line ic in
       assert (Unix.close_process_in ic = Unix.WEXITED 0);
       let kv = Hh_json.get_object_exn json in
@@ -116,7 +119,6 @@ module ServerInitCommon = struct
     Result.join @@ Result.try_with @@ fun () ->
     Timeout.with_timeout ~timeout ~do_:(fun _ -> f ())
       ~on_timeout:(fun _ -> raise @@ Loader_timeout stage)
-
 
   (* This generator-like function first runs the load script to download state
    * and loads the downloaded dependency table into shared memory. It then
@@ -141,7 +143,15 @@ module ServerInitCommon = struct
     try
       Daemon.from_channel ic >>= function
       | `Snd _ -> assert false
-      | `Fst (fn, is_cached, end_time, read_deptable_time) ->
+      | `Fst (fn, is_cached, end_time, deptable_fn, read_deptable_time) ->
+        (* As promised, the sql deptable is being loaded in the master process
+         * if we are in the sql mode
+         *)
+        let read_deptable_time =
+          if use_sql
+          then SharedMem.load_dep_table_sqlite deptable_fn
+          else read_deptable_time
+        in
         Hh_logger.log
           "Reading the dependency file took (sec): %d" read_deptable_time;
         HackEventLogger.load_deptable_end read_deptable_time;

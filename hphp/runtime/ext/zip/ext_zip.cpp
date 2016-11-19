@@ -913,6 +913,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
   StringBuffer sb(length);
   auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
+  zip_fclose(zipFile);
   if (n > 0) {
     sb.resize(n);
     return sb.detach();
@@ -950,6 +951,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
   StringBuffer sb(length);
   auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
+  zip_fclose(zipFile);
   if (n > 0) {
     sb.resize(n);
     return sb.detach();

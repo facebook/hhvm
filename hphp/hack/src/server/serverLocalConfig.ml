@@ -107,7 +107,7 @@ let load_ fn =
   |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
   let saved_state_load_type =
     LoadScriptConfig.saved_state_load_type_ config in
-  let use_sql = bool_ "use_sql" ~default:false config in
+  let use_sql = bool_ "use_sql2" ~default:false config in
   let load_script_config =
     LoadScriptConfig.createLoadScriptConfig saved_state_load_type use_sql in
   {

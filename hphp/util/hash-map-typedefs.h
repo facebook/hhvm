@@ -35,18 +35,28 @@ namespace HPHP {
  * cheap, although they may be convenient.
  */
 
+#if (defined(__GNUC__) && __GNUC__ >= 5) ||\
+    (defined(__clang) && (__clang_major__ > 3 ||\
+                           __clang_major__ == 3 && __clang_minor__ >= 4))
+// default constructors of unordered containers do not allocate
+#define GOOD_UNORDERED_CTOR ()
+#else
+// minimize allocation when default constructed
+#define GOOD_UNORDERED_CTOR (0)
+#endif
+
 template <class T, class U,
           class V = std::hash<T>,
           class W = std::equal_to<T> >
 struct hphp_hash_map : std::unordered_map<T,U,V,W> {
-  hphp_hash_map() : std::unordered_map<T,U,V,W>(0) {}
+  hphp_hash_map() : std::unordered_map<T,U,V,W> GOOD_UNORDERED_CTOR {}
 };
 
 template <class T,
           class V = std::hash<T>,
           class W = std::equal_to<T> >
 struct hphp_hash_set : std::unordered_set<T,V,W> {
-  hphp_hash_set() : std::unordered_set<T,V,W>(0) {}
+  hphp_hash_set() : std::unordered_set<T,V,W> GOOD_UNORDERED_CTOR {}
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -41,6 +41,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/type-scan.h"
+#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP { namespace req {
 
@@ -415,10 +416,9 @@ struct hash_map final : std::unordered_map<
   ConservativeAllocator<std::pair<const T,U>>
 > {
   hash_map()
-    : std::unordered_map<
-        T, U, V, W,
-      ConservativeAllocator<std::pair<const T,U>>
-      >(0)
+    : std::unordered_map<T, U, V, W,
+      ConservativeAllocator<std::pair<const T,U>>>
+      GOOD_UNORDERED_CTOR
   {}
 
   using Base = std::unordered_map<
@@ -440,10 +440,9 @@ struct hash_multimap final : std::unordered_multimap<
   ConservativeAllocator<std::pair<const T,U>>
 > {
   hash_multimap()
-    : std::unordered_multimap<
-        T, U, V, W,
-      ConservativeAllocator<std::pair<const T,U>>
-      >(0)
+    : std::unordered_multimap<T, U, V, W,
+      ConservativeAllocator<std::pair<const T,U>>>
+      GOOD_UNORDERED_CTOR
   {}
 
   using Base = std::unordered_multimap<
@@ -461,7 +460,8 @@ template <class T,
           class W = std::equal_to<T>>
 struct hash_set final : std::unordered_set<T,V,W,ConservativeAllocator<T> > {
   hash_set()
-      : std::unordered_set<T,V,W,ConservativeAllocator<T>>(0)
+    : std::unordered_set<T,V,W,ConservativeAllocator<T>>
+      GOOD_UNORDERED_CTOR
   {}
 
   using Base = std::unordered_set<T,V,W,ConservativeAllocator<T>>;

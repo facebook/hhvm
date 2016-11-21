@@ -58,7 +58,7 @@ namespace HPHP {
  *                    | Parent object                  |
  *                    +--------------------------------+ high address
  */
-struct alignas(16) Resumable : ActRec {
+struct alignas(16) Resumable {
   // This function is used only by AFWH, temporary till AFWH is converted to HNI
   static Resumable* FromObj(ObjectData* obj) {
     return reinterpret_cast<Resumable*>(obj) - 1;
@@ -67,7 +67,7 @@ struct alignas(16) Resumable : ActRec {
     return reinterpret_cast<const Resumable*>(obj) - 1;
   }
   static constexpr ptrdiff_t arOff() {
-    return 0;
+    return offsetof(Resumable, m_actRec);
   }
   static constexpr ptrdiff_t resumeAddrOff() {
     return offsetof(Resumable, m_resumeAddr);
@@ -85,6 +85,7 @@ struct alignas(16) Resumable : ActRec {
   // This function is temporary till we move AFWH to HNI
   static Resumable* Create(size_t frameSize, size_t totalSize) {
     // Allocate memory.
+    (void)type_scan::getIndexForMalloc<ActRec>();
     auto node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
     auto frame = reinterpret_cast<char*>(node + 1);
     auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
@@ -144,22 +145,26 @@ struct alignas(16) Resumable : ActRec {
     MM().objFree(base, size);
   }
 
-  ActRec* actRec() { return static_cast<ActRec*>(this); }
-  const ActRec* actRec() const { return static_cast<const ActRec*>(this); }
+  ActRec* actRec() { return &m_actRec; }
+  const ActRec* actRec() const { return &m_actRec; }
   jit::TCA resumeAddr() const { return m_resumeAddr; }
   Offset resumeOffset() const {
-    assert(ActRec::func()->contains(m_resumeOffset));
+    assert(m_actRec.func()->contains(m_resumeOffset));
     return m_resumeOffset;
   }
   size_t size() const { return m_size; }
 
   void setResumeAddr(jit::TCA resumeAddr, Offset resumeOffset) {
-    assert(ActRec::func()->contains(resumeOffset));
+    assert(m_actRec.func()->contains(resumeOffset));
     m_resumeAddr = resumeAddr;
     m_resumeOffset = resumeOffset;
   }
 
 private:
+  // ActRec of the resumed frame.
+  ActRec m_actRec;
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_actRec);
+
   // Resume address.
   jit::TCA m_resumeAddr;
 

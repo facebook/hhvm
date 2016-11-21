@@ -198,7 +198,7 @@ bool removeUnreachable(IRUnit& unit) {
 
   // Walk through the reachable blocks and erase any preds that weren't
   // found.
-  std::vector<IRInstruction*> deadInsts;
+  jit::vector<IRInstruction*> deadInsts;
   for (auto* block : blocks) {
     for (auto &edge : block->preds()) {
       auto* inst = edge.inst();

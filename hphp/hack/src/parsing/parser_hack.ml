@@ -2347,7 +2347,10 @@ and statement_try env =
   let st = statement env in
   let cl = catch_list env in
   let fin = finally env in
-  Try ([st], cl, fin)
+  (* At least one catch or finally block must be provided after every try *)
+  match cl, fin with
+  | [], [] -> error_expect env "catch or finally"; Try([st], [], [])
+  | _ -> Try ([st], cl, fin)
 
 and catch_list env =
   match L.token env.file env.lb with

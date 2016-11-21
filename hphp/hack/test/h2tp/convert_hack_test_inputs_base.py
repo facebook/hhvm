@@ -545,6 +545,7 @@ UNPARSEABLE_OUTPUT = set([
     'test_to_sort_test2.php',
     'this_forbid.php',
     'trait_require_inherit.php',
+    'try_catch_bad3.php',
     'typedef14.php',
     'typing_fail_implement_abstract.php',
     'typing_fail_inherit1.php',

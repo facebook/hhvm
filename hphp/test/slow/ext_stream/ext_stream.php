@@ -118,7 +118,10 @@ function test_stream_get_meta_data() {
 }
 
 function test_stream_misc() {
-  VERIFY(count(stream_get_transports()) > 0);
+  $transports = stream_get_transports();
+  VERIFY(count($transports) > 0);
+  VS(in_array("ssl", $transports), true);
+  VS(in_array("tls", $transports), true);
 
   $w = stream_get_wrappers();
   VS(in_array("file", $w), true);

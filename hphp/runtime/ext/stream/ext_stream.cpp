@@ -407,7 +407,7 @@ Variant HHVM_FUNCTION(stream_get_meta_data,
 }
 
 Array HHVM_FUNCTION(stream_get_transports) {
-  return make_packed_array("tcp", "udp", "unix", "udg");
+  return make_packed_array("tcp", "udp", "unix", "udg", "ssl", "tls");
 }
 
 Variant HHVM_FUNCTION(stream_resolve_include_path,

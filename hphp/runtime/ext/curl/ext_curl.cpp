@@ -629,7 +629,7 @@ struct CurlExtension final : Extension {
     HHVM_RC_INT_SAME(CURLOPT_SERVICE_NAME);
 #endif
 
-    /* See http://curl.haxx.se/lxr/source/docs/libcurl/symbols-in-versions
+    /* See https://curl.haxx.se/libcurl/c/symbols-in-versions.html
        or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list
        of options and which version they were introduced */
 

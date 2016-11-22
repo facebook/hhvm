@@ -796,8 +796,9 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   StoreValue *sval;
   auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
   auto keyLen = key.size();
-  ReadLock l(m_lock);
   char* const kcp = strdup(key.data());
+  {
+  ReadLock l(m_lock);
   bool present;
   time_t expiry = 0;
   bool overwritePrime = false;
@@ -867,7 +868,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       }
     }
   }
-
+  }  // m_lock
   if (apcExtension::ExpireOnSets) {
     purgeExpired();
   }

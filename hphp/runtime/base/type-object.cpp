@@ -83,6 +83,15 @@ const char* Object::classname_cstr() const {
 }
 
 void Object::setToDefaultObject() {
+  if (!RuntimeOption::EvalPromoteEmptyObject) {
+    if (RuntimeOption::PHP7_EngineExceptions) {
+      SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
+    } else {
+      SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
+    }
+    not_reached();
+  }
+
   raise_warning(Strings::CREATING_DEFAULT_OBJECT);
   operator=(SystemLib::AllocStdClassObject());
 }

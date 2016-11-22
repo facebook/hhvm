@@ -209,6 +209,9 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   Repo::get().loadGlobalData();
   SCOPE_EXIT { Repo::shutdown(); };
 
+  RuntimeOption::EvalPromoteEmptyObject =
+    Repo::get().global().PromoteEmptyObject;
+
   if (Repo::get().global().UsedHHBBC) {
     throw std::runtime_error(
       "This hhbc repo has already been optimized by hhbbc.\n"
@@ -243,6 +246,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
   gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
+  gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
 
   gd.arrayTypeTable.repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.

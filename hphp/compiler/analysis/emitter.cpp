@@ -10965,6 +10965,8 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
   gd.HardPrivatePropInference = true;
+  gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
+
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));
   }

@@ -191,6 +191,8 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     HHBBC::options.HardTypeHints = s_globalData.HardTypeHints;
     HHBBC::options.HardReturnTypeHints = s_globalData.HardReturnTypeHints;
     HHBBC::options.ElideAutoloadInvokes = s_globalData.ElideAutoloadInvokes;
+    RuntimeOption::EvalPromoteEmptyObject = s_globalData.PromoteEmptyObject;
+
     return;
   }
 

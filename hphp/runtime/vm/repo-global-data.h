@@ -108,6 +108,11 @@ struct Repo::GlobalData {
    */
   bool AutoprimeGenerators = true;
 
+  /*
+   * Should emptyish in lval context be promoted to a stdclass object?
+   */
+  bool PromoteEmptyObject = true;
+
   std::vector<const StringData*> APCProfile;
 
   template<class SerDe> void serde(SerDe& sd) {
@@ -123,6 +128,7 @@ struct Repo::GlobalData {
       (PHP7_Substr)
       (AutoprimeGenerators)
       (APCProfile)
+      (PromoteEmptyObject)
       ;
   }
 };

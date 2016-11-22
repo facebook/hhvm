@@ -2607,22 +2607,74 @@ inline TypedValue* propPreNull(TypedValue& tvRef) {
   return &tvRef;
 }
 
+template <class F>
+inline void promoteToStdClass(TypedValue* base, bool warn, F fun) {
+  if (!RuntimeOption::EvalPromoteEmptyObject) {
+    // note that the whole point here is to guarantee that the property
+    // never auto updates to a stdclass - so we must do this before
+    // calling promote, and we don't want the try catch below around
+    // this call.
+    if (RuntimeOption::PHP7_EngineExceptions) {
+      SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
+    } else {
+      SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
+    }
+    not_reached();
+  }
+
+  auto promote = [&] {
+    auto const obj = ObjectData::newInstance(SystemLib::s_stdclassClass);
+    auto const old = *base;
+    base->m_type = KindOfObject;
+    base->m_data.pobj = obj;
+    fun(obj);
+    tvRefcountedDecRef(old);
+  };
+
+  if (warn) {
+    // Behavior here is observable.
+    // In PHP 5.6, raise_warning is called before updating base, so
+    // the error_handler sees the original base; but if an exception
+    // is thrown from the error handler, any catch block will see the
+    // updated base.
+    // In PHP 7+, raise_warning is called after updating base, but before
+    // doing the work of fun, and again, if an exception is thrown, fun
+    // still gets called before reaching the catch block.
+    // For now, just match 5.6, because both orders have the potential for
+    // surprising side effects, and there doesn't seem to be any pressing
+    // need to handle both.
+    // For posterity, the 5.6 order means that the error handler can overwrite
+    // base with something whose destructor (which could be called by the
+    // tvRefcountedDecRef above) can overwrite it again; meaning that we end
+    // up with something other than an object in base (or an object that isn't
+    // an instance of stdclass). The 7+ order means that the error handler
+    // can directly overwrite the newly written stdclass object, with the
+    // same effective result.
+    try {
+      raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+    } catch (const Object&) {
+      promote();
+      throw;
+    }
+  }
+
+  promote();
+}
+
 template<MOpMode mode>
 TypedValue* propPreStdclass(TypedValue& tvRef, TypedValue* base) {
   if (mode != MOpMode::Define) {
     return propPreNull<mode>(tvRef);
   }
 
-  // TODO(#1124706): We don't want to do this anymore.
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-
-  // In PHP5, $undef->foo should warn, but $undef->foo['bar'] shouldn't.  This
-  // is crazy, so warn for both if EnableHipHopSyntax is on.
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  promoteToStdClass(base, RuntimeOption::EnableHipHopSyntax,
+                    [] (ObjectData*) {});
+  if (UNLIKELY(base->m_type != KindOfObject)) {
+    // See the comments above. Although promoteToStdClass will have
+    // either thrown an exception, or promoted base to an object, an
+    // installed error handler might have caused it to be overwritten
+    tvWriteNull(&tvRef);
+    return &tvRef;
   }
 
   return base;
@@ -2780,16 +2832,15 @@ inline void SetPropNull(Cell* val) {
   }
 }
 
-inline void SetPropStdclass(TypedValue* base, TypedValue key,
-                            Cell* val) {
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  StringData* keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
-  obj->setProp(nullptr, keySD, (TypedValue*)val);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+inline void SetPropStdclass(TypedValue* base, TypedValue key, Cell* val) {
+  promoteToStdClass(
+    base,
+    true,
+    [&] (ObjectData* obj) {
+      auto const keySD = prepareKey(key);
+      SCOPE_EXIT { decRefStr(keySD); };
+      obj->setProp(nullptr, keySD, (TypedValue*)val);
+    });
 }
 
 template <KeyType keyType>
@@ -2853,20 +2904,21 @@ inline TypedValue* SetOpPropNull(TypedValue& tvRef) {
   tvWriteNull(&tvRef);
   return &tvRef;
 }
+
 inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                      TypedValue* base, TypedValue key,
                                      Cell* rhs) {
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  promoteToStdClass(
+    base,
+    true,
+    [&] (ObjectData* obj) {
+      StringData* keySD = prepareKey(key);
+      SCOPE_EXIT { decRefStr(keySD); };
+      tvWriteNull(&tvRef);
+      setopBody(tvToCell(&tvRef), op, rhs);
+      obj->setProp(nullptr, keySD, &tvRef);
+    });
 
-  StringData* keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
-  tvWriteNull(&tvRef);
-  setopBody(tvToCell(&tvRef), op, rhs);
-  obj->setProp(nullptr, keySD, &tvRef);
   return &tvRef;
 }
 
@@ -2933,19 +2985,20 @@ inline Cell IncDecPropNull() {
 
 inline Cell IncDecPropStdclass(IncDecOp op, TypedValue* base,
                                TypedValue key) {
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  Cell dest;
+  promoteToStdClass(
+    base,
+    true,
+    [&] (ObjectData* obj) {
+      StringData* keySD = prepareKey(key);
+      SCOPE_EXIT { decRefStr(keySD); };
+      TypedValue tv;
+      tvWriteNull(&tv);
+      dest = IncDecBody(op, &tv);
+      obj->setProp(nullptr, keySD, &dest);
+      assert(!isRefcountedType(tv.m_type));
+    });
 
-  StringData* keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
-  TypedValue tv;
-  tvWriteNull(&tv);
-  auto dest = IncDecBody(op, &tv);
-  obj->setProp(nullptr, keySD, &dest);
-  assert(!isRefcountedType(tv.m_type));
   return dest;
 }
 

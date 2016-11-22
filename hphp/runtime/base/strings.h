@@ -51,6 +51,8 @@ const char* const CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
 const char* const CREATING_DEFAULT_OBJECT =
   "Creating default object from empty value";
+const char* const SET_PROP_NON_OBJECT =
+  "Setting a property on a non-object";
 const char* const NULLSAFE_PROP_WRITE_ERROR =
   "?-> is not allowed in write context";
 const char* const NULLSAFE_THIS_BASE_ERROR = "?-> is not allowed with $this";

@@ -230,6 +230,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
                ini, config, "EnableHipHopSyntax",
                RuntimeOption::EnableHipHopSyntax);
+  Config::Bind(RuntimeOption::EvalPromoteEmptyObject,
+               ini, config, "PromoteEmptyObject",
+               RuntimeOption::EvalPromoteEmptyObject);
   Config::Bind(RuntimeOption::EnableZendCompat, ini, config, "EnableZendCompat",
                RuntimeOption::EnableZendCompat);
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,

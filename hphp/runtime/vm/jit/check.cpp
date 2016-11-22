@@ -28,6 +28,8 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/base/perf-warning.h"
+
 #include <folly/Format.h>
 
 #include <bitset>
@@ -292,6 +294,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
 
   StateVector<Block,IdSet<SSATmp>> livein(unit, IdSet<SSATmp>());
   bool isValid = true;
+  std::string failures;
   postorderWalk(unit, [&](Block* block) {
     auto& live = livein[block];
     if (auto taken = block->taken()) live = livein[taken];
@@ -303,17 +306,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
       }
       if (isCallOp(inst.op())) {
         live.forEach([&](uint32_t tmp) {
-          auto msg = folly::sformat("checkTmpsSpanningCalls failed\n"
-                                    "  instruction: {}\n"
-                                    "  src:         t{}\n"
-                                    "\n"
-                                    "Unit:\n"
-                                    "{}\n",
-                                    inst.toString(),
-                                    tmp,
-                                    show(unit));
-          std::cerr << msg;
-          FTRACE(1, "{}", msg);
+          folly::format(&failures, "t{} is live across `{}`\n", tmp, inst);
           isValid = false;
         });
       }
@@ -323,6 +316,15 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
     }
   });
 
+  if (!isValid) {
+    logLowPriPerfWarning(
+      "checkTmpsSpanningCalls",
+      [&](StructuredLogEntry& cols) {
+        cols.setStr("live_tmps", failures);
+        cols.setStr("hhir_unit", show(unit));
+      }
+    );
+  }
   return isValid;
 }
 
@@ -565,9 +567,9 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 
 bool checkEverything(const IRUnit& unit) {
   assertx(checkCfg(unit));
-  assertx(checkTmpsSpanningCalls(unit));
   assertx(checkInitCtxInvariants(unit));
   if (debug) {
+    checkTmpsSpanningCalls(unit);
     forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
       assertx(checkOperandTypes(inst, &unit));
     });

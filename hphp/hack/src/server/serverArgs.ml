@@ -13,7 +13,7 @@
 (*****************************************************************************)
 
 type options = {
-  ai_mode          : Ai_options.prepared option;
+  ai_mode          : Ai_options.t option;
   check_mode       : bool;
   json_mode        : bool;
   root             : Path.t;

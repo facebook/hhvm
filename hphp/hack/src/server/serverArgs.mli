@@ -23,7 +23,7 @@ val print_json_version: unit -> unit
 (* Accessors *)
 (*****************************************************************************)
 
-val ai_mode             : options -> Ai_options.prepared option
+val ai_mode             : options -> Ai_options.t option
 val check_mode          : options -> bool
 val json_mode           : options -> bool
 val root                : options -> Path.t

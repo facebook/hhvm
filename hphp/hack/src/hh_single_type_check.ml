@@ -20,7 +20,7 @@ module TNBody       = Typing_naming_body
 (*****************************************************************************)
 
 type mode =
-  | Ai of Ai_options.prepared
+  | Ai of Ai_options.t
   | Autocomplete
   | Color
   | Coverage

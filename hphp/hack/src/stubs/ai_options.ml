@@ -8,6 +8,6 @@
  *
  *)
 
-type prepared = unit
+type t = unit
 
 let prepare ~server:_ _ = ()

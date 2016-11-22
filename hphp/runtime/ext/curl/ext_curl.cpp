@@ -625,9 +625,6 @@ static std::string s_namedPools;
 struct CurlExtension final : Extension {
   CurlExtension() : Extension("curl") {}
   void moduleInit() override {
-#ifdef FACEBOOK
-    HHVM_RC_INT_SAME(CURLOPT_SERVICE_NAME);
-#endif
 
     /* See https://curl.haxx.se/libcurl/c/symbols-in-versions.html
        or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list
@@ -1240,7 +1237,50 @@ struct CurlExtension final : Extension {
     HHVM_RC_INT_SAME(CURL_SSLVERSION_TLSv1_2);
 #endif
 
-#if LIBCURL_VERSION_NUM >= 0x072B00 /* Available since 7.43.0 */
+#if LIBCURL_VERSION_NUM >= 0x072400 /* Available since 7.36.0 */
+    HHVM_RC_INT_SAME(CURLOPT_EXPECT_100_TIMEOUT_MS);
+    HHVM_RC_INT_SAME(CURLOPT_SSL_ENABLE_ALPN);
+    HHVM_RC_INT_SAME(CURLOPT_SSL_ENABLE_NPN);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072500 /* Available since 7.37.0 */
+    HHVM_RC_INT_SAME(CURLHEADER_SEPARATE);
+    HHVM_RC_INT_SAME(CURLHEADER_UNIFIED);
+    HHVM_RC_INT_SAME(CURLOPT_HEADEROPT);
+    HHVM_RC_INT_SAME(CURLOPT_PROXYHEADER);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072600 /* Available since 7.38.0 */
+    HHVM_RC_INT_SAME(CURLAUTH_NEGOTIATE);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072700 /* Available since 7.39.0 */
+    HHVM_RC_INT_SAME(CURLOPT_PINNEDPUBLICKEY);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072800 /* Available since 7.40.0 */
+    HHVM_RC_INT_SAME(CURLOPT_UNIX_SOCKET_PATH);
+
+    HHVM_RC_INT_SAME(CURLPROTO_SMB);
+    HHVM_RC_INT_SAME(CURLPROTO_SMBS);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072900 /* Available since 7.41.0 */
+    HHVM_RC_INT_SAME(CURLOPT_SSL_VERIFYSTATUS);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072a00 /* Available since 7.42.0 */
+    HHVM_RC_INT_SAME(CURLOPT_PATH_AS_IS);
+    HHVM_RC_INT_SAME(CURLOPT_SSL_FALSESTART);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072b00 /* Available since 7.43.0 */
+    HHVM_RC_INT_SAME(CURL_HTTP_VERSION_2);
+
+    HHVM_RC_INT_SAME(CURLOPT_PIPEWAIT);
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SERVICE_NAME);
+    HHVM_RC_INT_SAME(CURLOPT_SERVICE_NAME);
+
     HHVM_RC_INT_SAME(CURLPIPE_NOTHING);
     HHVM_RC_INT_SAME(CURLPIPE_HTTP1);
     HHVM_RC_INT_SAME(CURLPIPE_MULTIPLEX);
@@ -1257,14 +1297,6 @@ struct CurlExtension final : Extension {
 #endif
 #if CURLOPT_SAFE_UPLOAD != 0
     HHVM_RC_INT_SAME(CURLOPT_SAFE_UPLOAD);
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x072500  /* Available since 7.37.0,
-                                        PHP doesn't currently support these */
-    HHVM_RC_INT_SAME(CURLOPT_PROXYHEADER);
-    HHVM_RC_INT_SAME(CURLOPT_HEADEROPT);
-    HHVM_RC_INT_SAME(CURLHEADER_UNIFIED);
-    HHVM_RC_INT_SAME(CURLHEADER_SEPARATE);
 #endif
 
     HHVM_RC_INT(CURLOPT_FB_TLS_VER_MAX,

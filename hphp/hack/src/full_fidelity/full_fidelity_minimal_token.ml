@@ -45,6 +45,9 @@ let full_width token =
 let kind token =
   token.kind
 
+let with_kind token kind =
+  { token with kind }
+
 let leading token =
   token.leading
 

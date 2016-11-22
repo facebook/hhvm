@@ -205,7 +205,12 @@ let rec get_doc node =
 
   | SyntaxList x -> get_from_children x
   | ErrorSyntax { error_error } -> get_doc error_error
-  | LiteralExpression x -> get_doc x.literal_expression
+  | LiteralExpression x ->
+    begin
+    match syntax x.literal_expression with
+    | SyntaxList l -> get_from_children_no_space l
+    | _ -> get_doc x.literal_expression
+    end
   | VariableExpression x -> get_doc x.variable_expression
   | QualifiedNameExpression x -> get_doc x.qualified_name_expression
   | PipeVariableExpression x -> get_doc x.pipe_variable_expression
@@ -1120,6 +1125,9 @@ let rec get_doc node =
     group_doc (e ^| v)
 
 (* sep is the compulsory separator separating the children in the list *)
+and get_from_children_no_space children =
+  let fold_fun acc el = acc ^^^ get_doc el in
+  group_doc (List.fold_left fold_fun (make_simple nil) children)
 and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in
   group_doc (List.fold_left fold_fun (make_simple nil) children)

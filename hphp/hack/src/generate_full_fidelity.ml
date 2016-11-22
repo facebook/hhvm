@@ -955,6 +955,9 @@ let variable_text_tokens = List.map token_node_from_list [
   [ "FloatingLiteral"; "floating_literal" ];
   [ "SingleQuotedStringLiteral"; "single_quoted_string_literal" ];
   [ "DoubleQuotedStringLiteral"; "double_quoted_string_literal" ];
+  [ "DoubleQuotedStringLiteralHead"; "double_quoted_string_literal_head" ];
+  [ "DoubleQuotedStringLiteralBody"; "double_quoted_string_literal_body" ];
+  [ "DoubleQuotedStringLiteralTail"; "double_quoted_string_literal_tail" ];
   [ "HeredocStringLiteral"; "heredoc_string_literal" ];
   [ "NowdocStringLiteral"; "nowdoc_string_literal" ];
   [ "BooleanLiteral"; "boolean_literal" ];

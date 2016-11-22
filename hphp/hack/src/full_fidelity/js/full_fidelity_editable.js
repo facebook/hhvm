@@ -911,6 +911,12 @@ class EditableToken extends EditableSyntax
        return new SingleQuotedStringLiteralToken(leading, trailing, token_text);
     case 'double_quoted_string_literal':
        return new DoubleQuotedStringLiteralToken(leading, trailing, token_text);
+    case 'double_quoted_string_literal_head':
+       return new DoubleQuotedStringLiteralHeadToken(leading, trailing, token_text);
+    case 'double_quoted_string_literal_body':
+       return new DoubleQuotedStringLiteralBodyToken(leading, trailing, token_text);
+    case 'double_quoted_string_literal_tail':
+       return new DoubleQuotedStringLiteralTailToken(leading, trailing, token_text);
     case 'heredoc_string_literal':
        return new HeredocStringLiteralToken(leading, trailing, token_text);
     case 'nowdoc_string_literal':
@@ -2171,6 +2177,42 @@ class DoubleQuotedStringLiteralToken extends EditableToken
   with_text(text)
   {
     return new DoubleQuotedStringLiteralToken(this.leading, this.trailing, text);
+  }
+
+}
+class DoubleQuotedStringLiteralHeadToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('double_quoted_string_literal_head', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new DoubleQuotedStringLiteralHeadToken(this.leading, this.trailing, text);
+  }
+
+}
+class DoubleQuotedStringLiteralBodyToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('double_quoted_string_literal_body', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new DoubleQuotedStringLiteralBodyToken(this.leading, this.trailing, text);
+  }
+
+}
+class DoubleQuotedStringLiteralTailToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('double_quoted_string_literal_tail', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new DoubleQuotedStringLiteralTailToken(this.leading, this.trailing, text);
   }
 
 }
@@ -14186,6 +14228,9 @@ exports.BinaryLiteralToken = BinaryLiteralToken;
 exports.FloatingLiteralToken = FloatingLiteralToken;
 exports.SingleQuotedStringLiteralToken = SingleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralToken = DoubleQuotedStringLiteralToken;
+exports.DoubleQuotedStringLiteralHeadToken = DoubleQuotedStringLiteralHeadToken;
+exports.DoubleQuotedStringLiteralBodyToken = DoubleQuotedStringLiteralBodyToken;
+exports.DoubleQuotedStringLiteralTailToken = DoubleQuotedStringLiteralTailToken;
 exports.HeredocStringLiteralToken = HeredocStringLiteralToken;
 exports.NowdocStringLiteralToken = NowdocStringLiteralToken;
 exports.BooleanLiteralToken = BooleanLiteralToken;

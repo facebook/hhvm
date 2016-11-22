@@ -1016,6 +1016,12 @@ abstract class EditableToken extends EditableSyntax {
        return new SingleQuotedStringLiteralToken($leading, $trailing, $token_text);
     case 'double_quoted_string_literal':
        return new DoubleQuotedStringLiteralToken($leading, $trailing, $token_text);
+    case 'double_quoted_string_literal_head':
+       return new DoubleQuotedStringLiteralHeadToken($leading, $trailing, $token_text);
+    case 'double_quoted_string_literal_body':
+       return new DoubleQuotedStringLiteralBodyToken($leading, $trailing, $token_text);
+    case 'double_quoted_string_literal_tail':
+       return new DoubleQuotedStringLiteralTailToken($leading, $trailing, $token_text);
     case 'heredoc_string_literal':
        return new HeredocStringLiteralToken($leading, $trailing, $token_text);
     case 'nowdoc_string_literal':
@@ -3571,6 +3577,66 @@ final class DoubleQuotedStringLiteralToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): DoubleQuotedStringLiteralToken {
     return new DoubleQuotedStringLiteralToken($this->leading(), $trailing, $this->text());
+  }
+}
+final class DoubleQuotedStringLiteralHeadToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('double_quoted_string_literal_head', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): DoubleQuotedStringLiteralHeadToken {
+    return new DoubleQuotedStringLiteralHeadToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): DoubleQuotedStringLiteralHeadToken {
+    return new DoubleQuotedStringLiteralHeadToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): DoubleQuotedStringLiteralHeadToken {
+    return new DoubleQuotedStringLiteralHeadToken($this->leading(), $trailing, $this->text());
+  }
+}
+final class DoubleQuotedStringLiteralBodyToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('double_quoted_string_literal_body', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): DoubleQuotedStringLiteralBodyToken {
+    return new DoubleQuotedStringLiteralBodyToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): DoubleQuotedStringLiteralBodyToken {
+    return new DoubleQuotedStringLiteralBodyToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): DoubleQuotedStringLiteralBodyToken {
+    return new DoubleQuotedStringLiteralBodyToken($this->leading(), $trailing, $this->text());
+  }
+}
+final class DoubleQuotedStringLiteralTailToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('double_quoted_string_literal_tail', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): DoubleQuotedStringLiteralTailToken {
+    return new DoubleQuotedStringLiteralTailToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): DoubleQuotedStringLiteralTailToken {
+    return new DoubleQuotedStringLiteralTailToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): DoubleQuotedStringLiteralTailToken {
+    return new DoubleQuotedStringLiteralTailToken($this->leading(), $trailing, $this->text());
   }
 }
 final class HeredocStringLiteralToken extends EditableToken {

@@ -1549,7 +1549,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       AliasClass effects = AStack {
         inst.src(2),
-        inst.extra<LookupClsMethod>()->offset,
+        inst.extra<LookupClsMethod>()->calleeAROffset,
         int32_t{kNumActRecCells}
       };
       return may_raise(inst, may_load_store(effects, effects));

@@ -131,6 +131,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
 
 IMPL_OPCODE_CALL(LdClsCtor)
 
+template<bool forward>
 void lookupClsMethodHelper(Class* cls, StringData* meth,
                            ActRec* ar, ActRec* fp) {
   try {
@@ -145,6 +146,13 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
         res == LookupResult::MagicCallStaticFound) {
       if (!f->isStaticInPrologue()) {
         raise_missing_this(f);
+      }
+      if (forward && ctx) {
+        if (fp->hasThis()) {
+          cls = fp->getThis()->getVMClass();
+        } else {
+          cls = fp->getClass();
+        }
       }
       ar->setClass(cls);
     } else {
@@ -173,11 +181,18 @@ void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0)
     .ssa(1)
-    .addr(sp, cellsToBytes(extra->offset.offset))
+    .addr(sp, cellsToBytes(extra->calleeAROffset.offset))
     .ssa(3);
 
-  cgCallHelper(vmain(env), env, CallSpec::direct(lookupClsMethodHelper),
-               callDest(env, inst), SyncOptions::Sync, args);
+  if (extra->forward) {
+    cgCallHelper(vmain(env), env,
+                 CallSpec::direct(lookupClsMethodHelper<true>),
+                 callDest(env, inst), SyncOptions::Sync, args);
+  } else {
+    cgCallHelper(vmain(env), env,
+                 CallSpec::direct(lookupClsMethodHelper<false>),
+                 callDest(env, inst), SyncOptions::Sync, args);
+  }
 }
 
 void cgProfileMethod(IRLS& env, const IRInstruction* inst) {

@@ -1202,12 +1202,16 @@ To string conversions:
   Load a Func* off of the class method table for S0, at offset S1 (in method
   slots).
 
-| LookupClsMethod<offset>, ND, S(Cls) S(Str) S(StkPtr) S(FramePtr), Er
+| LookupClsMethod<calleeAROffset,forward>,
+|   ND,
+|   S(Cls) S(Str) S(StkPtr) S(FramePtr),
+|   Er
 
   Store a pointer to a class method into an activation record. S0 points to the
   class, S1 is the method name, S2 is a stack pointer that has an activation
-  record to modify at `offset', and S3 is a pointer to the current frame (used
-  to get the context). May throw or fatal if method is not accessible.
+  record to modify at `spToActRecOffset', and S3 is a pointer to the current
+  frame (used to get the context). `forward` indicates if we should forward the
+  current context. May throw or fatal if method is not accessible.
 
 | LdPropAddr<T,offset>, DParamPtr(Prop), S(Obj), NF
 

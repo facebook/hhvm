@@ -940,10 +940,11 @@ void emitFPushObjMethodD(IRGS& env,
 bool fpushClsMethodKnown(IRGS& env,
                          int32_t numParams,
                          const StringData* methodName,
-                         SSATmp* ctx,
+                         SSATmp* ctxTmp,
                          const Class *baseClass,
                          bool exact,
-                         bool check) {
+                         bool check,
+                         bool forward) {
   bool magicCall = false;
   auto const func = lookupImmutableMethod(baseClass,
                                           methodName,
@@ -953,7 +954,9 @@ bool fpushClsMethodKnown(IRGS& env,
                                           exact);
   if (!func) return false;
 
-  auto const objOrCls = ldCtxForClsMethod(env, func, ctx, baseClass, exact);
+  auto const objOrCls = forward ?
+                        ldCtx(env) :
+                        ldCtxForClsMethod(env, func, ctxTmp, baseClass, exact);
   if (check) {
     assertx(exact);
     if (!classIsPersistentOrCtxParent(env, baseClass)) {
@@ -962,11 +965,14 @@ bool fpushClsMethodKnown(IRGS& env,
   }
   auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
     cns(env, func) :
-    gen(env, LdClsMethod, ctx, cns(env, -(func->methodSlot() + 1)));
+    gen(env, LdClsMethod, ctxTmp, cns(env, -(func->methodSlot() + 1)));
 
+  auto const ctx = forward ?
+                   forwardCtx(env, objOrCls, funcTmp) :
+                   objOrCls;
   fpushActRec(env,
               funcTmp,
-              objOrCls,
+              ctx,
               numParams,
               magicCall ? methodName : nullptr);
   return true;
@@ -980,7 +986,7 @@ void emitFPushClsMethodD(IRGS& env,
       Unit::lookupUniqueClassInContext(className, curClass(env))) {
     if (fpushClsMethodKnown(env, numParams,
                             methodName, cns(env, baseClass), baseClass,
-                            true, true)) {
+                            true, true, false)) {
       return;
     }
   }
@@ -1014,7 +1020,9 @@ void emitFPushClsMethodD(IRGS& env,
               nullptr);
 }
 
-void emitFPushClsMethod(IRGS& env, int32_t numParams) {
+
+template<bool forward>
+ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
   TransFlags trFlags;
   trFlags.noProfiledFPush = true;
   auto sideExit = makeExit(env, trFlags);
@@ -1039,12 +1047,14 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
 
     if (cls) {
       if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
-                              exact, false)) {
+                              exact, false, forward)) {
         return;
       }
     }
 
-    if (RuntimeOption::RepoAuthoritative && !clsVal->hasConstVal()) {
+    if (RuntimeOption::RepoAuthoritative &&
+        !clsVal->hasConstVal() &&
+        !forward) {
       profile.emplace(env.context, env.irb->curMarker(), methProfileKey.get());
 
       if (optimizeProfiledPushMethod(env, *profile,
@@ -1068,7 +1078,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   env.irb->exceptionStackBoundary();
 
   gen(env, LookupClsMethod,
-      IRSPRelOffsetData { bcSPOffset(env) },
+      LookupClsMethodData { bcSPOffset(env), forward },
       clsVal, methVal, sp(env), fp(env));
   decRef(env, methVal);
 
@@ -1083,71 +1093,12 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   }
 }
 
+void emitFPushClsMethod(IRGS& env, int32_t numParams) {
+  fpushClsMethodCommon<false>(env, numParams);
+}
+
 void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
-  auto const exitBlock = makeExitSlow(env);
-
-  auto classTmp = top(env);
-  auto methodTmp = topC(env, BCSPRelOffset{1}, DataTypeGeneric);
-  assertx(classTmp->isA(TCls));
-  if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(TStr)) {
-    PUNT(FPushClsMethodF-unknownClassOrMethod);
-  }
-  env.irb->constrainValue(methodTmp, DataTypeSpecific);
-
-  auto const cls = classTmp->clsVal();
-
-  if (!curClass(env)->classof(cls)) {
-    PUNT(FPushClsMethodF-notAnInstanceOf);
-  }
-
-  auto const methName = methodTmp->strVal();
-
-  bool magicCall = false;
-  auto const vmfunc = lookupImmutableMethod(cls,
-                                            methName,
-                                            magicCall,
-                                            true /* staticLookup */,
-                                            curFunc(env),
-                                            true /* isExact */);
-  discard(env, 2);
-
-  auto const curCtxTmp = ldCtx(env);
-  if (vmfunc) {
-    auto const funcTmp = cns(env, vmfunc);
-    auto const newCtxTmp = forwardCtx(env, curCtxTmp, funcTmp);
-    fpushActRec(env, funcTmp, newCtxTmp, numParams,
-                magicCall ? methName : nullptr);
-    return;
-  }
-
-  auto const data = ClsMethodData{cls->name(), methName};
-  auto const funcTmp = cond(
-    env,
-    [&](Block* taken) {
-      return gen(env, LdClsMethodFCacheFunc, data, taken);
-    },
-    [&](SSATmp* func) { // next
-      return func;
-    },
-    [&] { // taken
-      hint(env, Block::Hint::Unlikely);
-      auto const result = gen(
-        env,
-        LookupClsMethodFCache,
-        data,
-        cns(env, cls),
-        fp(env)
-      );
-      return gen(env, CheckNonNull, exitBlock, result);
-    }
-  );
-
-  auto const ctx = forwardCtx(env, curCtxTmp, funcTmp);
-  fpushActRec(env,
-              funcTmp,
-              ctx,
-              numParams,
-              magicCall ? methName : nullptr);
+  fpushClsMethodCommon<true>(env, numParams);
 }
 
 //////////////////////////////////////////////////////////////////////

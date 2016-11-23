@@ -95,20 +95,13 @@ private:
 
   using CounterMap = hphp_shared_string_map<int64_t>;
 
-  struct PageStats {
-    std::string m_url; // which page
-    int m_code;        // response code
-    int m_hit;         // page hits
-    CounterMap m_values; // name value pairs
-  };
-  using PageStatsMap = hphp_shared_string_map<PageStats>;
   struct TimeSlot {
     int64_t m_time;
-    PageStatsMap m_pages;
+    int m_hits;
+    CounterMap m_values;
   };
 
   static void Merge(CounterMap &dest, const CounterMap &src);
-  static void Merge(PageStatsMap &dest, const PageStatsMap &src);
   static void Merge(std::list<TimeSlot*> &dest,
                     const std::list<TimeSlot*> &src);
   static void Filter(std::list<TimeSlot*> &slots, const std::string &keys,

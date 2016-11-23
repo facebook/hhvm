@@ -68,24 +68,6 @@ void ServerStats::Merge(CounterMap &dest, const CounterMap &src) {
   }
 }
 
-void ServerStats::Merge(PageStatsMap &dest, const PageStatsMap &src) {
-  for (auto const& iter : src) {
-    auto const& key = iter.first;
-    auto const& s = iter.second;
-
-    auto diter = dest.find(key);
-    if (diter == dest.end()) {
-      dest[key] = s;
-    } else {
-      auto& d = diter->second;
-      assert(d.m_url == s.m_url);
-      assert(d.m_code == s.m_code);
-      d.m_hit += s.m_hit;
-      Merge(d.m_values, s.m_values);
-    }
-  }
-}
-
 void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
   auto diter = dest.begin();
   for (auto const& s : src) {
@@ -98,7 +80,8 @@ void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
         break;
       }
       if (d->m_time == s->m_time) {
-        Merge(d->m_pages, s->m_pages);
+        d->m_hits += s->m_hits;
+        Merge(d->m_values, s->m_values);
         break;
       }
     }
@@ -115,10 +98,8 @@ void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
 void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
                              const std::list<TimeSlot*> &slots) {
   for (auto& slot : slots) {
-    for (auto const& page : slot->m_pages) {
-      for (auto const& kvpair : page.second.m_values) {
-        allKeys.insert(kvpair.first->getString());
-      }
+    for (auto const& kvpair : slot->m_values) {
+      allKeys.insert(kvpair.first->getString());
     }
   }
 
@@ -132,72 +113,67 @@ void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
 
 void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
                          std::map<std::string, int> &wantedKeys) {
-  if (!keys.empty()) {
-    folly::fbvector<std::string> rules0;
-    split(',', keys.c_str(), rules0, true);
-    if (!rules0.empty()) {
+  // no keys to filter
+  if (keys.empty()) {
+    return;
+  }
 
-      // prepare rules
-      std::map<std::string, int> rules;
-      for (unsigned int i = 0; i < rules0.size(); i++) {
-        auto const& rule = rules0[i];
-        assert(!rule.empty());
-        int len = rule.length();
-        std::string suffix;
-        if (len > 4) {
-          len -= 4;
-          suffix = rule.substr(len);
-        }
-        if (suffix == "/hit") {
-          rules[rule.substr(0, len)] |= UDF_HIT;
-        } else if (suffix == "/sec") {
-          rules[rule.substr(0, len)] |= UDF_SEC;
-        } else {
-          rules[rule] |= UDF_NONE;
-        }
+  folly::fbvector<std::string> rules0;
+  split(',', keys.c_str(), rules0, true);
+  if (!rules0.empty()) {
+
+    // prepare rules
+    std::map<std::string, int> rules;
+    for (unsigned int i = 0; i < rules0.size(); i++) {
+      auto const& rule = rules0[i];
+      assert(!rule.empty());
+      int len = rule.length();
+      std::string suffix;
+      if (len > 4) {
+        len -= 4;
+        suffix = rule.substr(len);
       }
+      if (suffix == "/hit") {
+        rules[rule.substr(0, len)] |= UDF_HIT;
+      } else if (suffix == "/sec") {
+        rules[rule.substr(0, len)] |= UDF_SEC;
+      } else {
+        rules[rule] |= UDF_NONE;
+      }
+    }
 
-      // prepare all keys
-      std::set<std::string> allKeys;
-      GetAllKeys(allKeys, slots);
+    // prepare all keys
+    std::set<std::string> allKeys;
+    GetAllKeys(allKeys, slots);
 
-      // prepare wantedKeys
-      for (auto const& key : allKeys) {
-        for (auto const& riter : rules) {
-          const string &rule = riter.first;
-          if (rule[0] == ':') {
-            Variant ret = preg_match(String(rule.c_str(), rule.size(),
-                  CopyString),
-                String(key.c_str(), key.size(), CopyString));
-            if (!same(ret, false) && more(ret, 0)) {
-              wantedKeys[key] |= riter.second;
-            }
-          } else if (rule == key) {
+    // prepare wantedKeys
+    for (auto const& key : allKeys) {
+      for (auto const& riter : rules) {
+        const string &rule = riter.first;
+        if (rule[0] == ':') {
+          Variant ret = preg_match(String(rule.c_str(), rule.size(),
+                CopyString),
+              String(key.c_str(), key.size(), CopyString));
+          if (!same(ret, false) && more(ret, 0)) {
             wantedKeys[key] |= riter.second;
           }
+        } else if (rule == key) {
+          wantedKeys[key] |= riter.second;
         }
       }
     }
   }
 
-  bool keysEmpty = keys.empty();
   for (auto const& s : slots) {
-    for (auto piter = s->m_pages.begin(); piter != s->m_pages.end();) {
-      auto &ps = piter->second;
-
-      if (!keysEmpty) {
-        auto &values = ps.m_values;
-        for (auto viter = values.begin(); viter != values.end();) {
-          if (wantedKeys.find(viter->first->getString()) == wantedKeys.end()) {
-            auto iterTemp = viter;
-            ++viter;
-            values.erase(iterTemp);
-          } else {
-            ++viter;
-          }
-        }
+    auto &values = s->m_values;
+    for (auto viter = values.begin(); viter != values.end();) {
+      if (wantedKeys.find(viter->first->getString()) == wantedKeys.end()) {
+        auto iterTemp = viter;
+        ++viter;
+        values.erase(iterTemp);
+      } else {
+        ++viter;
       }
-      ++piter;
     }
   }
 }
@@ -209,16 +185,8 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots,
   auto const ts = new TimeSlot();
   ts->m_time = 0;
   for (auto const& s : slots) {
-    for (auto const& page : s->m_pages) {
-      auto const& ps = page.second;
-      const string url = "";
-      const int code = 0;
-      auto &psDest = ts->m_pages[url + folly::to<string>(code)];
-      psDest.m_hit += ps.m_hit;
-      psDest.m_url = url;
-      psDest.m_code = code;
-      Merge(psDest.m_values, ps.m_values);
-    }
+    ts->m_hits += s->m_hits;
+    Merge(ts->m_values, s->m_values);
   }
   FreeSlots(slots);
   slots.push_back(ts);
@@ -239,42 +207,39 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots,
   for (auto const& s : slots) {
     int sec = (s->m_time == 0 ? slotCount : 1) *
       RuntimeOption::StatsSlotDuration;
-    for (auto &page : s->m_pages) {
-      auto &ps = page.second;
-      auto &values = ps.m_values;
+    auto &values = s->m_values;
 
-      // special keys
-      if (wantedKeys.find("hit") != wantedKeys.end()) {
-        values["hit"] = ps.m_hit;
-      }
-      if (wantedKeys.find("load") != wantedKeys.end()) {
-        values["load"] = load;
-      }
-      if (wantedKeys.find("idle") != wantedKeys.end()) {
-        values["idle"] = idle;
-      }
-      if (wantedKeys.find("queued") != wantedKeys.end()) {
-        values["queued"] = queued;
-      }
+    // special keys
+    if (wantedKeys.find("hit") != wantedKeys.end()) {
+      values["hit"] = s->m_hits;
+    }
+    if (wantedKeys.find("load") != wantedKeys.end()) {
+      values["load"] = load;
+    }
+    if (wantedKeys.find("idle") != wantedKeys.end()) {
+      values["idle"] = idle;
+    }
+    if (wantedKeys.find("queued") != wantedKeys.end()) {
+      values["queued"] = queued;
+    }
 
-      if (wantedKeys.find("health_level") != wantedKeys.end()) {
-        values["health_level"] = health_level;
-      }
+    if (wantedKeys.find("health_level") != wantedKeys.end()) {
+      values["health_level"] = health_level;
+    }
 
-      for (auto const& iter : udfKeys) {
-        const string &key = iter.first;
-        int udf = iter.second;
-        auto viter = values.find(key);
-        if (viter != values.end()) {
-          if ((udf & UDF_HIT) && ps.m_hit) {
-            values[key + "/hit"] = viter->second * PRECISION / ps.m_hit;
-          }
-          if ((udf & UDF_SEC) && sec) {
-            values[key + "/sec"] = viter->second * PRECISION / sec;
-          }
-          if ((wantedKeys[key] & UDF_NONE) == 0) {
-            values.erase(viter);
-          }
+    for (auto const& iter : udfKeys) {
+      const string &key = iter.first;
+      int udf = iter.second;
+      auto viter = values.find(key);
+      if (viter != values.end()) {
+        if ((udf & UDF_HIT) && s->m_hits) {
+          values[key + "/hit"] = viter->second * PRECISION / s->m_hits;
+        }
+        if ((udf & UDF_SEC) && sec) {
+          values[key + "/sec"] = viter->second * PRECISION / sec;
+        }
+        if ((wantedKeys[key] & UDF_NONE) == 0) {
+          values.erase(viter);
         }
       }
     }
@@ -399,34 +364,21 @@ void ServerStats::Report(string &output,
     } else {
       out << ",\n";
     }
-    if (s->m_time) {
-      out << s->m_time << ": ";
-    }
     out << "{";
-    for (auto const& page : s->m_pages) {
-      auto const& ps = page.second;
-      string key = prefix;
-      if (!ps.m_url.empty()) {
-        key += ps.m_url;
+    string key = prefix;
+    if (!key.empty()) {
+      key += ".";
+    }
+    bool firstKey = true;
+    for (auto const& kvpair : s->m_values) {
+      if (firstKey) {
+        firstKey = false;
+      } else {
+        out << ", ";
       }
-      if (ps.m_code) {
-        key += "$";
-        key += folly::to<string>(ps.m_code);
-      }
-      if (!key.empty()) {
-        key += ".";
-      }
-      bool firstKey = true;
-      for (auto const& kvpair : ps.m_values) {
-        if (firstKey) {
-          firstKey = false;
-        } else {
-          out << ", ";
-        }
-        out << Writer::escape_for_json(
-                (key + kvpair.first->getString()).c_str())
-            << ": " << kvpair.second;
-      }
+      out << Writer::escape_for_json(
+              (key + kvpair.first->getString()).c_str())
+          << ": " << kvpair.second;
     }
     out << "}\n";
   }
@@ -681,13 +633,11 @@ void ServerStats::logPage(const string &url, int code) {
         m_min = ts.m_time + 1;
       }
       ts.m_time = now;
-      ts.m_pages.clear();
+      ts.m_hits = 0;
+      ts.m_values.clear();
     }
-    auto &ps = ts.m_pages[url + folly::to<string>(code)];
-    ps.m_url = url;
-    ps.m_code = code;
-    ps.m_hit++;
-    Merge(ps.m_values, m_values);
+    ts.m_hits++;
+    Merge(ts.m_values, m_values);
   }
 
   m_last = now;

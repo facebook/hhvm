@@ -517,16 +517,38 @@ bool CurlResource::setLongOption(long option, long value) {
   return m_error_no == CURLE_OK;
 }
 
+bool CurlResource::isStringFilePathOption(long option) {
+  switch (option) {
+    case CURLOPT_COOKIEFILE:
+    case CURLOPT_COOKIEJAR:
+    case CURLOPT_RANDOM_FILE:
+    case CURLOPT_SSLCERT:
+#if LIBCURL_VERSION_NUM >= 0x070b00 /* Available since 7.11.0 */
+    case CURLOPT_NETRC_FILE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
+    case CURLOPT_SSH_PRIVATE_KEYFILE:
+    case CURLOPT_SSH_PUBLIC_KEYFILE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
+    case CURLOPT_CRLFILE:
+    case CURLOPT_ISSUERCERT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071306 /* Available since 7.19.6 */
+    case CURLOPT_SSH_KNOWNHOSTS:
+#endif
+      return true;
+    default:
+      return false;
+  }
+}
+
 bool CurlResource::isStringOption(long option) {
   switch (option) {
     // Not in PHP's main string case
     case CURLOPT_PRIVATE:
     case CURLOPT_URL:
     case CURLOPT_KRB4LEVEL:
-    case CURLOPT_COOKIEJAR:
-    case CURLOPT_SSLCERT:
-    case CURLOPT_RANDOM_FILE:
-    case CURLOPT_COOKIEFILE:
 
     // Everything else
     case CURLOPT_CAINFO:
@@ -601,12 +623,27 @@ bool CurlResource::isStringOption(long option) {
 #endif
       return true;
     default:
-      return false;
+      return isStringFilePathOption(option);
   }
 }
 
 bool CurlResource::setStringOption(long option, const String& value) {
   assertx(isStringOption(option));
+
+  // the following options deal with files, therefore the open_basedir check
+  // is required.
+  if (isStringFilePathOption(option) && !value.empty()) {
+    String filename = File::TranslatePath(value);
+    if (filename.empty()) {
+      raise_warning(
+        "open_basedir restriction in effect. File(%s) is not within "
+        "the allowed paths",
+        value.data()
+      );
+      return false;
+    }
+  }
+
   if (option == CURLOPT_URL) m_url = value;
 
 #if LIBCURL_VERSION_NUM >= 0x071100

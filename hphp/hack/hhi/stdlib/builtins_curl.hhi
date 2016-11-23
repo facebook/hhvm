@@ -352,6 +352,36 @@ const int CURL_VERSION_KERBEROS4 = 0;
 const int CURL_VERSION_LIBZ = 0;
 const int CURL_VERSION_SSL = 0;
 
+const int CURLPROTO_ALL = 0;
+const int CURLPROTO_DICT = 0;
+const int CURLPROTO_FILE = 0;
+const int CURLPROTO_FTP = 0;
+const int CURLPROTO_FTPS = 0;
+const int CURLPROTO_GOPHER = 0;
+const int CURLPROTO_HTTP = 0;
+const int CURLPROTO_HTTPS = 0;
+const int CURLPROTO_IMAP = 0;
+const int CURLPROTO_IMAPS = 0;
+const int CURLPROTO_LDAP = 0;
+const int CURLPROTO_LDAPS = 0;
+const int CURLPROTO_POP3 = 0;
+const int CURLPROTO_POP3S = 0;
+const int CURLPROTO_RTMP = 0;
+const int CURLPROTO_RTMPE = 0;
+const int CURLPROTO_RTMPS = 0;
+const int CURLPROTO_RTMPT = 0;
+const int CURLPROTO_RTMPTE = 0;
+const int CURLPROTO_RTMPTS = 0;
+const int CURLPROTO_RTSP = 0;
+const int CURLPROTO_SCP = 0;
+const int CURLPROTO_SFTP = 0;
+const int CURLPROTO_SMB = 0;
+const int CURLPROTO_SMBS = 0;
+const int CURLPROTO_SMTP = 0;
+const int CURLPROTO_SMTPS = 0;
+const int CURLPROTO_TELNET = 0;
+const int CURLPROTO_TFTP = 0;
+
 const int CURLPROXY_HTTP = 0;
 const int CURLPROXY_SOCKS5 = 0;
 

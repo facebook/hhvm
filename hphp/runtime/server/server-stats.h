@@ -29,7 +29,6 @@
 #include "hphp/util/health-monitor-types.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
-#include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/execution-profiler.h"
 #include "hphp/runtime/server/writer.h"
 
@@ -93,7 +92,7 @@ private:
   static std::vector<ServerStats*> s_loggers;
   static DECLARE_THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
 
-  using CounterMap = hphp_shared_string_map<int64_t>;
+  using CounterMap = std::unordered_map<std::string, int64_t>;
 
   struct TimeSlot {
     int64_t m_time;

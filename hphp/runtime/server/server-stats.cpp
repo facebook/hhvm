@@ -99,7 +99,7 @@ void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
                              const std::list<TimeSlot*> &slots) {
   for (auto& slot : slots) {
     for (auto const& kvpair : slot->m_values) {
-      allKeys.insert(kvpair.first->getString());
+      allKeys.insert(kvpair.first);
     }
   }
 
@@ -167,7 +167,7 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
   for (auto const& s : slots) {
     auto &values = s->m_values;
     for (auto viter = values.begin(); viter != values.end();) {
-      if (wantedKeys.find(viter->first->getString()) == wantedKeys.end()) {
+      if (wantedKeys.find(viter->first) == wantedKeys.end()) {
         auto iterTemp = viter;
         ++viter;
         values.erase(iterTemp);
@@ -377,7 +377,7 @@ void ServerStats::Report(string &output,
         out << ", ";
       }
       out << Writer::escape_for_json(
-              (key + kvpair.first->getString()).c_str())
+              (key + kvpair.first).c_str())
           << ": " << kvpair.second;
     }
     out << "}\n";

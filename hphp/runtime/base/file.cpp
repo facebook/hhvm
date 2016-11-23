@@ -447,6 +447,20 @@ bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
   return true;
 }
 
+bool File::setBlocking(bool mode) {
+  int flags = fcntl(fd(), F_GETFL, 0);
+  if (mode) {
+    flags &= ~O_NONBLOCK;
+  } else {
+    flags |= O_NONBLOCK;
+  }
+  return fcntl(fd(), F_SETFL, flags) != -1;
+}
+
+bool File::setTimeout(uint64_t usecs) {
+  return false;
+}
+
 int64_t File::tell() {
   throw_not_supported(__func__, "cannot tell");
 }

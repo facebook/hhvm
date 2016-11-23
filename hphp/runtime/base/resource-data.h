@@ -278,9 +278,12 @@ ALWAYS_INLINE void decRefRes(ResourceHdr* res) {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                       \
   void sweep() override;
 
-#define IMPLEMENT_RESOURCE_ALLOCATION(T) \
-  static_assert(std::is_base_of<ResourceData,T>::value, ""); \
-  void HPHP::T::sweep() { this->~T(); }
+#define IMPLEMENT_RESOURCE_ALLOCATION_NS(NS, T)                          \
+  static_assert(std::is_base_of<HPHP::ResourceData,NS::T>::value, ""); \
+  void NS::T::sweep() { this->~T(); }
+
+#define IMPLEMENT_RESOURCE_ALLOCATION(T)  \
+  IMPLEMENT_RESOURCE_ALLOCATION_NS(HPHP, T)
 
 namespace req {
 // allocate and construct a resource subclass type T,

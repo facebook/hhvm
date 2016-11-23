@@ -811,7 +811,7 @@ bool HHVM_FUNCTION(socket_set_option,
       }
       optlen = sizeof(tv);
       opt_ptr = &tv;
-      sock->setTimeout(tv);
+      sock->internalSetTimeout(tv);
     }
     break;
 

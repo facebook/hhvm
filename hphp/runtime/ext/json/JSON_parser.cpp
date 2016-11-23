@@ -898,6 +898,9 @@ ContainerType get_container_type_from_options(int64_t options) {
  */
 bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                  int depth, int64_t options) {
+  // No GC safepoints during JSON parsing, please. Code is not re-entrant.
+  NoHandleSurpriseScope no_surprise(SafepointFlags);
+
   json_parser *json = s_json_parser.get(); /* the parser state */
   // Clear and reuse the thread-local string buffers. They are only freed if
   // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread

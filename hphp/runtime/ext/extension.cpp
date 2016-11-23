@@ -108,10 +108,7 @@ static const char* dlerror() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Extension::Extension(litstr name, const char *version /* = "" */)
-    : m_hhvmAPIVersion(HHVM_API_VERSION)
-    , m_name(name)
-    , m_version(version ? version : "") {
+void Extension::registerExtension(litstr name) {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
   }
@@ -228,6 +225,15 @@ void Extension::LoadModules(const IniSetting::Map& ini, Hdf hdf) {
     if (!ptr) {
       throw Exception("Could not open extension %s: %s",
                       extFile.c_str(), dlerror());
+    }
+    auto getModuleBuildInfo =
+      (ExtensionBuildInfo *(*)())dlsym(ptr, "getModuleBuildInfo");
+    if (!getModuleBuildInfo) {
+      throw Exception("Could not load extension %s: %s %s (%s)",
+                      extFile.c_str(),
+                      "getModuleBuildInfo() symbol not defined.",
+                      "The HHVM binary version does not match the extension",
+                      dlerror());
     }
     auto getModule = (Extension *(*)())dlsym(ptr, "getModule");
     if (!getModule) {

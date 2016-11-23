@@ -44,7 +44,6 @@ const char* root_kind_names[] = {
   "SweepLists",
   "AsioSession",
   "GetServerNote",
-  "EzcResources"
 };
 
 namespace {

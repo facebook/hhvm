@@ -188,13 +188,6 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
   }
 }
 
-template<class F> void scan_ezc_resources(F& mark) {
-#ifdef ENABLE_ZEND_COMPAT
-  ExtMarker<F> bridge(mark);
-  ts_scan_resources(bridge);
-#endif
-}
-
 //   [<-stack[iters[locals[params[ActRec[stack[iters[locals[ActRec...
 //   ^m_top                      ^fp                       ^firstAR
 //
@@ -361,8 +354,10 @@ template<class F> void scanRoots(F& mark, type_scan::Scanner& scanner) {
   }
   mark.where(RootKind::GetServerNote);
   get_server_note()->scan(mark);
-  mark.where(RootKind::EzcResources);
-  scan_ezc_resources(mark);
+#ifdef ENABLE_ZEND_COMPAT
+  scanner.where("EzcResources");
+  ts_scan_resources(scanner);
+#endif
 }
 
 template <typename T, typename F>

@@ -40,7 +40,6 @@ enum class RootKind : uint8_t {
   SweepLists,
   AsioSession,
   GetServerNote,
-  EzcResources
 };
 
 // Graph representation of the heap. The heap consists of some objects

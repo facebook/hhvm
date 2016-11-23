@@ -358,6 +358,10 @@ const int CURLPROXY_SOCKS5 = 0;
 const int CURL_HTTP_VERSION_1_0 = 0;
 const int CURL_HTTP_VERSION_1_1 = 0;
 const int CURL_HTTP_VERSION_NONE = 0;
+const int CURL_HTTP_VERSION_2 = 0;
+const int CURL_HTTP_VERSION_2_0 = 0;
+const int CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE = 0;
+const int CURL_HTTP_VERSION_2TLS = 0;
 
 const int CURL_IPRESOLVE_V4 = 0;
 const int CURL_IPRESOLVE_V6 = 0;

@@ -12,8 +12,12 @@ const int CURLAUTH_ANY = 0;
 const int CURLAUTH_ANYSAFE = 0;
 const int CURLAUTH_BASIC = 0;
 const int CURLAUTH_DIGEST = 0;
+const int CURLAUTH_DIGEST_IE = 0;
 const int CURLAUTH_GSSNEGOTIATE = 0;
+const int CURLAUTH_NEGOTIATE = 0;
+const int CURLAUTH_NONE = 0;
 const int CURLAUTH_NTLM = 0;
+const int CURLAUTH_ONLY = 0;
 
 const int CURLCLOSEPOLICY_CALLBACK = 0;
 const int CURLCLOSEPOLICY_LEAST_RECENTLY_USED = 0;
@@ -346,7 +350,28 @@ const int CURLE_URL_MALFORMAT = 0;
 const int CURLE_URL_MALFORMAT_USER = 0;
 const int CURLE_WRITE_ERROR = 0;
 
+const int CURLFTPAUTH_DEFAULT = 0;
+const int CURLFTPAUTH_SSL = 0;
+const int CURLFTPAUTH_TLS = 0;
+
+const int CURLFTPMETHOD_MULTICWD = 0;
+const int CURLFTPMETHOD_NOCWD = 0;
+const int CURLFTPMETHOD_SINGLECWD = 0;
+
+const int CURLFTPSSL_CCC_ACTIVE = 0;
+const int CURLFTPSSL_CCC_NONE = 0;
+const int CURLFTPSSL_CCC_PASSIVE = 0;
+
+const int CURLFTPSSL_ALL = 0;
+const int CURLFTPSSL_CONTROL = 0;
+const int CURLFTPSSL_NONE = 0;
+const int CURLFTPSSL_TRY = 0;
+
+const int CURLGSSAPI_DELEGATION_FLAG = 0;
+const int CURLGSSAPI_DELEGATION_POLICY_FLAG = 0;
+
 const int CURLVERSION_NOW = 0;
+const int CURL_VERSION_HTTP2 = 0;
 const int CURL_VERSION_IPV6 = 0;
 const int CURL_VERSION_KERBEROS4 = 0;
 const int CURL_VERSION_LIBZ = 0;
@@ -383,7 +408,27 @@ const int CURLPROTO_TELNET = 0;
 const int CURLPROTO_TFTP = 0;
 
 const int CURLPROXY_HTTP = 0;
+const int CURLPROXY_SOCKS4 = 0;
+const int CURLPROXY_SOCKS4A = 0;
 const int CURLPROXY_SOCKS5 = 0;
+const int CURLPROXY_SOCKS5_HOSTNAME = 0;
+
+const int CURLSSH_AUTH_AGENT = 0;
+const int CURLSSH_AUTH_ANY = 0;
+const int CURLSSH_AUTH_DEFAULT = 0;
+const int CURLSSH_AUTH_HOST = 0;
+const int CURLSSH_AUTH_KEYBOARD = 0;
+const int CURLSSH_AUTH_NONE = 0;
+const int CURLSSH_AUTH_PASSWORD = 0;
+const int CURLSSH_AUTH_PUBLICKEY = 0;
+
+const int CURLSSLOPT_ALLOW_BEAST = 0;
+const int CURLSSLOPT_NO_REVOKE = 0;
+
+const int CURLUSESSL_ALL = 0;
+const int CURLUSESSL_CONTROL = 0;
+const int CURLUSESSL_NONE = 0;
+const int CURLUSESSL_TRY = 0;
 
 const int CURL_HTTP_VERSION_1_0 = 0;
 const int CURL_HTTP_VERSION_1_1 = 0;
@@ -401,6 +446,20 @@ const int CURL_NETRC_IGNORED = 0;
 const int CURL_NETRC_OPTIONAL = 0;
 const int CURL_NETRC_REQUIRED = 0;
 
+const int CURL_REDIR_POST_303 = 0;
+
+const int CURL_RTSPREQ_ANNOUNCE = 0;
+const int CURL_RTSPREQ_DESCRIBE = 0;
+const int CURL_RTSPREQ_GET_PARAMETER = 0;
+const int CURL_RTSPREQ_OPTIONS = 0;
+const int CURL_RTSPREQ_PAUSE = 0;
+const int CURL_RTSPREQ_PLAY = 0;
+const int CURL_RTSPREQ_RECEIVE = 0;
+const int CURL_RTSPREQ_RECORD = 0;
+const int CURL_RTSPREQ_SET_PARAMETER = 0;
+const int CURL_RTSPREQ_SETUP = 0;
+const int CURL_RTSPREQ_TEARDOWN = 0;
+
 const int CURL_SSLVERSION_DEFAULT = 0;
 const int CURL_SSLVERSION_SSLv2 = 0;
 const int CURL_SSLVERSION_SSLv3 = 0;
@@ -412,6 +471,9 @@ const int CURL_SSLVERSION_TLSv1_2 = 0;
 const int CURL_TIMECOND_IFMODSINCE = 0;
 const int CURL_TIMECOND_IFUNMODSINCE = 0;
 const int CURL_TIMECOND_LASTMOD = 0;
+const int CURL_TIMECOND_NONE = 0;
+
+const int CURL_TLSAUTH_SRP = 0;
 
 const int CURLOPT_HEADEROPT = 0;
 const int CURLOPT_PROXYHEADER = 0;

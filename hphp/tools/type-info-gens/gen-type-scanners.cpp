@@ -262,8 +262,12 @@ struct Generator {
   void genLayout(const Type&, Layout&, size_t) const;
   void genLayout(const Object&, Layout&, size_t,
                  bool do_forbidden_check = true) const;
-  bool genObjectMemberLayout(const Object::Member& member, const Object& object,
-                       Layout& layout, Action action, size_t offset) const;
+  bool checkMemberSpecialAction(const Object& base_object,
+                                const Object::Member& member,
+                                const Action& action,
+                                Layout& layout,
+                                size_t base_obj_offset,
+                                size_t offset) const;
 
   IndexedType getIndexedType(const Object&) const;
   std::vector<IndexedType> getIndexedTypes(
@@ -2239,75 +2243,65 @@ void Generator::genLayout(const Type& type,
   );
 }
 
-bool Generator::genObjectMemberLayout(const Object::Member& member,
-                                const Object& object, Layout& layout,
-                                Action action, size_t offset) const {
-    // Only non-static members.
-    if (!member.offset) return false;
-
-    if (member.type.isObject()) {
-      const Object &inner_object = getObject(*member.type.asObject());
-      if (inner_object.kind == Object::Kind::k_union) {
-        for (auto &i_member : inner_object.members) {
-          // Treat members of an unnamed union as members
-          // of the enclosing struct.
-          // Recurse: the unions themselves might contain unnamed unions.
-          if (!i_member.offset) {
-            continue;
-          }
-          if (genObjectMemberLayout(i_member, object, layout, action,
-                              offset + *i_member.offset)) {
-            return true;
-          }
+// Check if the given object member is associated with a special action,
+// recording it into the given Layout as needed. Unnamed unions are recursed
+// into with their members being treated as members of the enclosing
+// object. Returns true if the layout was modified, false otherwise.
+bool Generator::checkMemberSpecialAction(const Object& base_object,
+                                         const Object::Member& member,
+                                         const Action& action,
+                                         Layout& layout,
+                                         size_t base_obj_offset,
+                                         size_t offset) const {
+  if (member.type.isObject()) {
+    auto const& object = getObject(*member.type.asObject());
+    // Treat members of an unnamed union as members
+    // of the enclosing struct.
+    if (object.kind == Object::Kind::k_union) {
+      for (auto const& obj_member : object.members) {
+        if (!obj_member.offset) continue;
+        // Recurse: the unions themselves might contain unnamed unions.
+        if (checkMemberSpecialAction(base_object, obj_member, action,
+                                     layout, base_obj_offset,
+                                     offset + *obj_member.offset)) {
+          return true;
         }
       }
     }
+  }
 
-    if (action.ignore_fields.count(member.name) > 0) return true;
+  // The sole purpose of marking the flexible array member is so we know
+  // where the suffix begins. The suffix usually begins at the end of the
+  // object, but sometimes within it.
+  if (member.type.isArr() && action.flexible_array_field == member.name) {
+    layout.suffix_begin = offset;
+    return true;
+  }
 
-    if (action.conservative_fields.count(member.name) > 0) {
-      layout.addConservative(offset + *member.offset,
-                             determineSize(member.type));
-      return true;
-    }
-    auto custom_iter = action.custom_fields.find(member.name);
-    if (custom_iter != action.custom_fields.end()) {
-      if (custom_iter->second.empty()) {
-        throw LayoutError{
-          folly::sformat(
-            "'{}' needs to have external linkage (not in anonymous namespace)"
-            " to use custom field scanner. If a template, template parameters"
-            " must have external linkage as well.",
-            object.name.name
-          )
-        };
-      }
-      layout.addCustom(offset, custom_iter->second);
-      return true;
-    }
+  if (action.ignore_fields.count(member.name) > 0) return true;
 
-    // The sole purpose of marking the flexible array member is so we know where
-    // the suffix begins. The suffix sometimes begins at the end of the object,
-    // but sometimes within it.
-    if (member.type.isArr() && action.flexible_array_field == member.name) {
-      layout.suffix_begin = *member.offset;
-      return false;
-    }
+  if (action.conservative_fields.count(member.name) > 0) {
+    layout.addConservative(offset, determineSize(member.type));
+    return true;
+  }
 
-    try {
-      // if member is a union, handle
-      genLayout(member.type, layout, offset + *member.offset);
-    } catch (LayoutError& exn) {
-      exn.addContext(
+  auto custom_iter = action.custom_fields.find(member.name);
+  if (custom_iter != action.custom_fields.end()) {
+    if (custom_iter->second.empty()) {
+      throw LayoutError{
         folly::sformat(
-          "from member '{}' of type '{}'",
-          member.name,
-          member.type.toString()
+          "'{}' needs to have external linkage (not in unnamed namespace)"
+          " to use custom field scanner. If a template, template parameters"
+          " must have external linkage as well.",
+          base_object.name.name
         )
-      );
-      throw;
+      };
     }
-    return false;
+    layout.addCustom(base_obj_offset, custom_iter->second);
+    return true;
+  }
+
+  return false;
 }
 
 // Given an object type representation, fill the given Layout (starting at
@@ -2392,7 +2386,7 @@ void Generator::genLayout(const Object& object,
     if (action.custom_bases_scanner->empty()) {
       throw LayoutError{
         folly::sformat(
-          "'{}' needs to have external linkage (not in anonymous namespace)"
+          "'{}' needs to have external linkage (not in unnamed namespace)"
           " to use custom base scanner. If a template, template parameters"
           " must have external linkage as well.",
           object.name.name
@@ -2421,7 +2415,7 @@ void Generator::genLayout(const Object& object,
       if (action.custom_all->empty()) {
         throw LayoutError{
           folly::sformat(
-            "'{}' needs to have external linkage (not in anonymous namespace)"
+            "'{}' needs to have external linkage (not in unnamed namespace)"
             " to use custom scanner. If a template, template parameters must"
             " have external linkage as well.",
             object.name.name
@@ -2486,7 +2480,30 @@ void Generator::genLayout(const Object& object,
   }
 
   for (const auto& member : object.members) {
-    genObjectMemberLayout(member, object, layout, action, offset);
+    // Only non-static members.
+    if (!member.offset) continue;
+
+    // Check if this member has a special action. If it does, we're done
+    // processing it.
+    if (checkMemberSpecialAction(object, member, action,
+                                 layout, offset,
+                                 offset + *member.offset)) {
+      continue;
+    }
+
+    // Otherwise generate its layout recursively.
+    try {
+      genLayout(member.type, layout, offset + *member.offset);
+    } catch (LayoutError& exn) {
+      exn.addContext(
+        folly::sformat(
+          "from member '{}' of type '{}'",
+          member.name,
+          member.type.toString()
+        )
+      );
+      throw;
+    }
   }
 }
 

@@ -149,6 +149,7 @@ const int CURLOPT_SSLVERSION = 0;
 const int CURLOPT_CAINFO = 0;
 const int CURLOPT_CAPATH = 0;
 const int CURLOPT_RANDOM_FILE = 0;
+const int CURLOPT_SAFE_UPLOAD = 0;
 const int CURLOPT_SSL_CIPHER_LIST = 0;
 const int CURLOPT_SSLCERT = 0;
 const int CURLOPT_SSLCERTPASSWD = 0;

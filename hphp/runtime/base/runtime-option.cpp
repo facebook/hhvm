@@ -418,6 +418,7 @@ bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_Substr = false;
 bool RuntimeOption::PHP7_InfNanFloatParse = false;
 bool RuntimeOption::PHP7_UVS = false;
+bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
 std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
 
@@ -1304,6 +1305,8 @@ void RuntimeOption::Load(
     Config::Bind(PHP7_InfNanFloatParse, ini, config, "PHP7.InfNanFloatParse",
                  s_PHP7_master);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
+    Config::Bind(PHP7_DisallowUnsafeCurlUploads, ini, config,
+                 "PHP7.DisallowUnsafeCurlUploads", s_PHP7_master);
   }
   {
     // Server

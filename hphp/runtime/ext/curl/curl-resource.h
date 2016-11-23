@@ -146,6 +146,7 @@ struct CurlResource : SweepableResourceData {
   Variant      m_progress_callback;
 
   bool m_emptyPost;
+  bool m_safeUpload;
   CurlHandlePoolPtr m_connPool;
   PooledCurlHandle* m_pooledHandle;
 };

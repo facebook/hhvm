@@ -413,6 +413,7 @@ struct RuntimeOption {
   static bool PHP7_Substr;
   static bool PHP7_InfNanFloatParse;
   static bool PHP7_UVS;
+  static bool PHP7_DisallowUnsafeCurlUploads;
 
   static int64_t HeapSizeMB;
   static int64_t HeapResetCountBase;

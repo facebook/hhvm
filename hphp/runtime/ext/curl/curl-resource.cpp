@@ -50,7 +50,8 @@ CurlResource::ToFree::~ToFree() {
 
 CurlResource::CurlResource(const String& url,
                            CurlHandlePoolPtr pool /*=nullptr */)
-: m_emptyPost(true), m_connPool(pool), m_pooledHandle(nullptr) {
+: m_emptyPost(true), m_safeUpload(true), m_connPool(pool),
+  m_pooledHandle(nullptr) {
   if (m_connPool) {
     m_pooledHandle = m_connPool->fetch();
     m_cp = m_pooledHandle->useHandle();
@@ -114,6 +115,7 @@ CurlResource::CurlResource(req::ptr<CurlResource> src)
 
   m_to_free = src->m_to_free;
   m_emptyPost = src->m_emptyPost;
+  m_safeUpload = src->m_safeUpload;
 }
 
 void CurlResource::sweep() {
@@ -725,7 +727,10 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
       String val = var_val.toString();
       auto postval = val.data();
 
-      if (*postval == '@' && strlen(postval) == val.size()) {
+      if (!RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+          !m_safeUpload &&
+          *postval == '@' &&
+          strlen(postval) == val.size()) {
         /* Given a string like:
          *   "@/foo/bar;type=herp/derp;filename=ponies\0"
          * - Temporarily convert to:
@@ -734,6 +739,11 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
          *   curl_formadd
          * - Revert changes to postval at the end
          */
+        raise_deprecated(
+          "curl_setopt(): The usage of the @filename API for file uploading "
+          "is deprecated. Please use the CURLFile class instead"
+        );
+
         if (val.get()->isImmutable()) {
           val = String::attach(
             StringData::Make(val.data(), val.size(), CopyString));
@@ -897,7 +907,8 @@ bool CurlResource::isNonCurlOption(long option) {
          (option == CURLOPT_HEADERFUNCTION) ||
          (option == CURLOPT_PROGRESSFUNCTION) ||
          (option == CURLOPT_FB_TLS_VER_MAX) ||
-         (option == CURLOPT_FB_TLS_CIPHER_SPEC);
+         (option == CURLOPT_FB_TLS_CIPHER_SPEC) ||
+         (option == CURLOPT_SAFE_UPLOAD);
 }
 
 bool CurlResource::setNonCurlOption(long option, const Variant& value) {
@@ -946,6 +957,16 @@ bool CurlResource::setNonCurlOption(long option, const Variant& value) {
         raise_warning("CURLOPT_FB_TLS_CIPHER_SPEC requires a non-empty string");
       }
       return false;
+    case CURLOPT_SAFE_UPLOAD:
+      if (RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+          value.toInt64() == 0) {
+        raise_warning(
+          "curl_setopt(): Disabling safe uploads is no longer supported"
+        );
+        return false;
+      }
+      m_safeUpload = value.toBoolean();
+      return true;
   }
   return false;
 }

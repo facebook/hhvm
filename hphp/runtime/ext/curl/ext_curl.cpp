@@ -1324,9 +1324,7 @@ struct CurlExtension final : Extension {
 #if CURLOPT_PASSWDFUNCTION != 0
     HHVM_RC_INT_SAME(CURLOPT_PASSWDFUNCTION);
 #endif
-#if CURLOPT_SAFE_UPLOAD != 0
     HHVM_RC_INT_SAME(CURLOPT_SAFE_UPLOAD);
-#endif
 
     HHVM_RC_INT(CURLOPT_FB_TLS_VER_MAX,
                 CurlResource::fb_specific_options::CURLOPT_FB_TLS_VER_MAX);

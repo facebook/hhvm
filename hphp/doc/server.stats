@@ -1,45 +1,28 @@
 
 <h2>Server Stats</h2>
 
-For each page, we collect stats by time slots. Each time slot is configured as
-StatsSlotDuration seconds and server internally keeps StatsMaxSlot number of
-slots. Inside each slot, we keep a set of stats by page or URL. These stats
-include 3 built-in ones ("url", "code" and "hit") and many key-value pairs
-defined by different parts of the system.
+HHVM collects stats by time slots. Each time slot is configured as
+StatsSlotDuration seconds and server internally keeps StatsMaxSlot number
+of slots. Inside each slot, we keep a set of stats. These stats include 
+one built-in ("hit") and many key-value pairs defined by different parts
+of the system.
 
   slot:
     time:
-    pages:
-      page:
-        url:   original URL
-        code:  return code
-        hit:   total counts
-        details:
-          key-value pair
-          key-value pair
-          key-value pair
-          ...
+    hit:   total counts
+    details:
+      key-value pair
+      key-value pair
+      key-value pair
+      ...
 
 
 <h2>Stats Query</h2>
 
-To query stats, hit admin port with a URL like this,
+To query stats aggregated into one list of key value pairs encoded in JSON
+format, hit admin port with a URL like this,
 
-  http://[server]:8088/stats.[fmt]?from=[t1]&to=[t2]...
-
-from: (optional) starting time's timestamp (e.g. 1251927393),
-        - use -n for n seconds ago
-        - when omitted or 0, it will be the earliest possible time server keeps
-
-to:   (optional) ending time's timestamp,
-        - use -n for n seconds ago
-        - when omitted or 0, it will be "now"
-
-agg:  (optional) aggregation, can be any one of these,
-        *          aggregate all data into one list of key value pairs
-        url        aggregate all data by URLs
-        code       aggregate all data by response code
-        (omitted)  default by time slots
+  http://[server]:8088/stats.kvp?keys=...&to=[t2]...
 
 keys: (optional) comma delimited keys to query, each of which can be decorated
         [key]      just the key's value, e.g. "sql.conn"
@@ -48,15 +31,7 @@ keys: (optional) comma delimited keys to query, each of which can be decorated
         #[regex]#  keys matching the regular expression
         (omitted)  all available keys
 
-url:  (optional) only output stats matching the specified URL
-
-code: (optional) only output stats of pages that have response code
-
-[fmt]: can be one of these:
-
-        xml        XML format
-        json       JSON format
-        kvp        simple key-value pairs in JSON format, assuming agg=*
+prefix: (optional) adds a prefix and '.' delimiter to all key names
 
 
 <h2>Available Keys</h2>
@@ -172,7 +147,7 @@ idle:  number of idle worker threads
 
 <h2>Example URL</h2>
 
-  GET "http://localhost:8088/stats.kvp?prefix=hphp&agg=*" \
+  GET "http://localhost:8088/stats.kvp?prefix=hphp" \
     "&keys=apc.hit/sec,hit,load,:sql.query..*.select:," \
     "network.compressed/hit,hit/sec"
 

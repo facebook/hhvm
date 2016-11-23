@@ -904,16 +904,11 @@ static bool toggle_switch(Transport *transport, bool &setting) {
 }
 
 static bool send_report(Transport *transport) {
-  int64_t  from   = transport->getInt64Param ("from");
-  int64_t  to     = transport->getInt64Param ("to");
-  std::string agg    = transport->getParam      ("agg");
   std::string keys   = transport->getParam      ("keys");
-  std::string url    = transport->getParam      ("url");
-  int    code   = transport->getIntParam   ("code");
   std::string prefix = transport->getParam      ("prefix");
 
   std::string out;
-  ServerStats::Report(out, from, to, agg, keys, url, code, prefix);
+  ServerStats::Report(out, keys, prefix);
 
   transport->replaceHeader("Content-Type", "text/plain");
   transport->sendString(out);
@@ -1127,10 +1122,8 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   }
 
   if (cmd == "stats.keys") {
-    int64_t from = transport->getInt64Param("from");
-    int64_t to = transport->getInt64Param("to");
     string out;
-    ServerStats::GetKeys(out, from, to);
+    ServerStats::GetKeys(out);
     transport->sendString(out);
     return true;
   }

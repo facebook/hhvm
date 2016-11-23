@@ -51,11 +51,9 @@ public:
   static void LogPage(const std::string &url, int code);
   static void Reset();
   static void Clear();
-  static void GetKeys(std::string &out, int64_t from, int64_t to);
+  static void GetKeys(std::string &out);
   static void Report(std::string &out,
-                     int64_t from, int64_t to,
-                     const std::string &agg, const std::string &keys,
-                     const std::string &url, int code,
+                     const std::string &keys,
                      const std::string &prefix);
 
   // thread status functions
@@ -114,12 +112,11 @@ private:
   static void Merge(std::list<TimeSlot*> &dest,
                     const std::list<TimeSlot*> &src);
   static void Filter(std::list<TimeSlot*> &slots, const std::string &keys,
-                     const std::string &url, int code,
                      std::map<std::string, int> &wantedKeys);
-  static void Aggregate(std::list<TimeSlot*> &slots, const std::string &agg,
+  static void Aggregate(std::list<TimeSlot*> &slots,
                         std::map<std::string, int> &wantedKeys);
 
-  static void CollectSlots(std::list<TimeSlot*> &slots, int64_t from, int64_t to);
+  static void CollectSlots(std::list<TimeSlot*> &slots);
   static void FreeSlots(std::list<TimeSlot*> &slots);
 
   static void GetAllKeys(std::set<std::string> &allKeys,
@@ -143,7 +140,7 @@ private:
   void logPage(const std::string &url, int code);
   void reset();
   void clear();
-  void collect(std::list<TimeSlot*> &slots, int64_t from, int64_t to);
+  void collect(std::list<TimeSlot*> &slots);
 
   /**
    * Live status, instead of historical statistics.

@@ -131,7 +131,6 @@ void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
 }
 
 void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
-                         const std::string &url, int code,
                          std::map<std::string, int> &wantedKeys) {
   if (!keys.empty()) {
     folly::fbvector<std::string> rules0;
@@ -181,17 +180,10 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
     }
   }
 
-  bool urlEmpty = url.empty();
   bool keysEmpty = keys.empty();
   for (auto const& s : slots) {
     for (auto piter = s->m_pages.begin(); piter != s->m_pages.end();) {
       auto &ps = piter->second;
-      if ((code && ps.m_code != code) || (!urlEmpty && ps.m_url != url)) {
-        auto piterTemp = piter;
-        ++piter;
-        s->m_pages.erase(piterTemp);
-        continue;
-      }
 
       if (!keysEmpty) {
         auto &values = ps.m_values;
@@ -210,34 +202,26 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
   }
 }
 
-void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
+void ServerStats::Aggregate(list<TimeSlot*> &slots,
                             std::map<std::string, int> &wantedKeys) {
   int slotCount = slots.size();
 
-  if (!agg.empty()) {
-    auto const ts = new TimeSlot();
-    ts->m_time = 0;
-    for (auto const& s : slots) {
-      for (auto const& page : s->m_pages) {
-        auto const& ps = page.second;
-        string url = ps.m_url;
-        int code = ps.m_code;
-        if (agg != "url") {
-          url.clear();
-        }
-        if (agg != "code") {
-          code = 0;
-        }
-        auto &psDest = ts->m_pages[url + folly::to<string>(code)];
-        psDest.m_hit += ps.m_hit;
-        psDest.m_url = url;
-        psDest.m_code = code;
-        Merge(psDest.m_values, ps.m_values);
-      }
+  auto const ts = new TimeSlot();
+  ts->m_time = 0;
+  for (auto const& s : slots) {
+    for (auto const& page : s->m_pages) {
+      auto const& ps = page.second;
+      const string url = "";
+      const int code = 0;
+      auto &psDest = ts->m_pages[url + folly::to<string>(code)];
+      psDest.m_hit += ps.m_hit;
+      psDest.m_url = url;
+      psDest.m_code = code;
+      Merge(psDest.m_values, ps.m_values);
     }
-    FreeSlots(slots);
-    slots.push_back(ts);
   }
+  FreeSlots(slots);
+  slots.push_back(ts);
 
   std::map<std::string, int> udfKeys;
   for (auto const& iter : wantedKeys) {
@@ -374,25 +358,16 @@ void ServerStats::Clear() {
   }
 }
 
-void ServerStats::CollectSlots(list<TimeSlot*> &slots, int64_t from, int64_t to) {
-  if (from < 0 || to <= 0) {
-    time_t now = time(nullptr);
-    if (from < 0) from = now + from;
-    if (to <= 0) to = now + to;
-  }
-
-  int tp1 = from / RuntimeOption::StatsSlotDuration;
-  int tp2 = to / RuntimeOption::StatsSlotDuration;
-
+void ServerStats::CollectSlots(list<TimeSlot*> &slots) {
   Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
-    s_loggers[i]->collect(slots, tp1, tp2);
+    s_loggers[i]->collect(slots);
   }
 }
 
-void ServerStats::GetKeys(string &out, int64_t from, int64_t to) {
+void ServerStats::GetKeys(string &out) {
   list<TimeSlot*> slots;
-  CollectSlots(slots, from, to);
+  CollectSlots(slots);
   set<string> allKeys;
   GetAllKeys(allKeys, slots);
   for (auto const& iter : allKeys) {
@@ -402,15 +377,13 @@ void ServerStats::GetKeys(string &out, int64_t from, int64_t to) {
 }
 
 void ServerStats::Report(string &out,
-                         int64_t from, int64_t to,
-                         const std::string &agg, const std::string &keys,
-                         const std::string &url, int code,
+                         const std::string &keys,
                          const std::string &prefix) {
   list<TimeSlot*> slots;
-  CollectSlots(slots, from, to);
+  CollectSlots(slots);
   map<string, int> wantedKeys;
-  Filter(slots, keys, url, code, wantedKeys);
-  Aggregate(slots, agg, wantedKeys);
+  Filter(slots, keys, wantedKeys);
+  Aggregate(slots, wantedKeys);
   Report(out, slots, prefix);
   FreeSlots(slots);
 }
@@ -740,18 +713,10 @@ void ServerStats::clear() {
   }
 }
 
-void ServerStats::collect(std::list<TimeSlot*> &slots, int64_t from, int64_t to) {
-  if (from > to) {
-    int64_t tmp = from;
-    from = to;
-    to = tmp;
-  }
-  if (from < m_min) from = m_min;
-  if (to > m_max) to = m_max;
-
+void ServerStats::collect(std::list<TimeSlot*> &slots) {
   Lock lock(m_lock, false);
   list<TimeSlot*> collected;
-  for (int64_t t = from; t <= to; t++) {
+  for (int64_t t = m_min; t <= m_max; t++) {
     int slot = t % RuntimeOption::StatsMaxSlot;
     if (m_slots[slot].m_time == t) {
       collected.push_back(&m_slots[slot]);

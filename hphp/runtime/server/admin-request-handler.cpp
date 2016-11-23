@@ -282,19 +282,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/stats.keys:      list all available keys\n"
         "    from          optional, <timestamp>, or <-n> second ago\n"
         "    to            optional, <timestamp>, or <-n> second ago\n"
-        "/stats.xml:       show server stats in XML\n"
+        "/stats.kvp:       show server stats in key-value pairs\n"
         "    from          optional, <timestamp>, or <-n> second ago\n"
         "    to            optional, <timestamp>, or <-n> second ago\n"
         "    agg           optional, aggragation: *, url, code\n"
         "    keys          optional, <key>,<key/hit>,<key/sec>,<:regex:>\n"
         "    url           optional, only stats of this page or URL\n"
         "    code          optional, only stats of pages returning this code\n"
-        "/stats.json:      show server stats in JSON\n"
-        "    (same as /stats.xml)\n"
-        "/stats.kvp:       show server stats in key-value pairs\n"
-        "    (same as /stats.xml)\n"
-        "/stats.html:      show server stats in HTML\n"
-        "    (same as /stats.xml)\n"
 
         "/xenon-snap:      generate a Xenon snapshot, which is logged later\n"
 
@@ -909,8 +903,7 @@ static bool toggle_switch(Transport *transport, bool &setting) {
   return true;
 }
 
-static bool send_report(Transport *transport, Writer::Format format,
-                        const char *mime) {
+static bool send_report(Transport *transport) {
   int64_t  from   = transport->getInt64Param ("from");
   int64_t  to     = transport->getInt64Param ("to");
   std::string agg    = transport->getParam      ("agg");
@@ -920,9 +913,9 @@ static bool send_report(Transport *transport, Writer::Format format,
   std::string prefix = transport->getParam      ("prefix");
 
   std::string out;
-  ServerStats::Report(out, format, from, to, agg, keys, url, code, prefix);
+  ServerStats::Report(out, from, to, agg, keys, url, code, prefix);
 
-  transport->replaceHeader("Content-Type", mime);
+  transport->replaceHeader("Content-Type", "text/plain");
   transport->sendString(out);
   return true;
 }
@@ -1141,18 +1134,8 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
     transport->sendString(out);
     return true;
   }
-  if (cmd == "stats.xml") {
-    return send_report(transport, Writer::Format::XML, "application/xml");
-  }
-  if (cmd == "stats.json") {
-    return send_report(transport, Writer::Format::JSON,
-                       "application/json");
-  }
   if (cmd == "stats.kvp") {
-    return send_report(transport, Writer::Format::KVP, "text/plain");
-  }
-  if (cmd == "stats.html" || cmd == "stats.htm") {
-    return send_report(transport, Writer::Format::HTML, "text/html");
+    return send_report(transport);
   }
 
   if (cmd == "stats.xsl") {

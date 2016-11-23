@@ -401,7 +401,7 @@ void ServerStats::GetKeys(string &out, int64_t from, int64_t to) {
   }
 }
 
-void ServerStats::Report(string &out, Writer::Format format,
+void ServerStats::Report(string &out,
                          int64_t from, int64_t to,
                          const std::string &agg, const std::string &keys,
                          const std::string &url, int code,
@@ -411,117 +411,54 @@ void ServerStats::Report(string &out, Writer::Format format,
   map<string, int> wantedKeys;
   Filter(slots, keys, url, code, wantedKeys);
   Aggregate(slots, agg, wantedKeys);
-  Report(out, format, slots, prefix);
+  Report(out, slots, prefix);
   FreeSlots(slots);
 }
 
-void ServerStats::Report(string &output, Writer::Format format,
+void ServerStats::Report(string &output,
                          const list<TimeSlot*> &slots,
                          const std::string &prefix) {
   std::ostringstream out;
-  if (format == Writer::Format::KVP) {
-    bool first = true;
-    for (auto const& s : slots) {
-      if (first) {
-        first = false;
-      } else {
-        out << ",\n";
-      }
-      if (s->m_time) {
-        out << s->m_time << ": ";
-      }
-      out << "{";
-      for (auto const& page : s->m_pages) {
-        auto const& ps = page.second;
-        string key = prefix;
-        if (!ps.m_url.empty()) {
-          key += ps.m_url;
-        }
-        if (ps.m_code) {
-          key += "$";
-          key += folly::to<string>(ps.m_code);
-        }
-        if (!key.empty()) {
-          key += ".";
-        }
-        bool firstKey = true;
-        for (auto const& kvpair : ps.m_values) {
-          if (firstKey) {
-            firstKey = false;
-          } else {
-            out << ", ";
-          }
-          out << Writer::escape_for_json(
-                  (key + kvpair.first->getString()).c_str())
-              << ": " << kvpair.second;
-        }
-      }
-      out << "}\n";
-    }
-
-  } else {
-    Writer *w;
-    if (format == Writer::Format::XML) {
-      w = new XMLWriter(out);
-    } else if (format == Writer::Format::HTML) {
-      w = new HTMLWriter(out);
+  bool first = true;
+  for (auto const& s : slots) {
+    if (first) {
+      first = false;
     } else {
-      assert(format == Writer::Format::JSON);
-      w = new JSONWriter(out);
+      out << ",\n";
     }
-
-    w->writeFileHeader();
-    w->beginObject("stats");
-
-    if (format != Writer::Format::JSON) {
-      // In JSON, this would create multiple entries with the same 'slot' key.
-      // This isn't valid, and most implementations can't read it.
-      //   https://github.com/facebook/hhvm/issues/3331
-      ReportSlots(w, slots);
-    } else {
-      assert(format == Writer::Format::JSON);
-      // Create a list instead :)
-      w->beginList("slots");
-      ReportSlots(w, slots);
-      w->endList("slots");
+    if (s->m_time) {
+      out << s->m_time << ": ";
     }
-
-    w->endObject("stats");
-    w->writeFileFooter();
-
-    delete w;
+    out << "{";
+    for (auto const& page : s->m_pages) {
+      auto const& ps = page.second;
+      string key = prefix;
+      if (!ps.m_url.empty()) {
+        key += ps.m_url;
+      }
+      if (ps.m_code) {
+        key += "$";
+        key += folly::to<string>(ps.m_code);
+      }
+      if (!key.empty()) {
+        key += ".";
+      }
+      bool firstKey = true;
+      for (auto const& kvpair : ps.m_values) {
+        if (firstKey) {
+          firstKey = false;
+        } else {
+          out << ", ";
+        }
+        out << Writer::escape_for_json(
+                (key + kvpair.first->getString()).c_str())
+            << ": " << kvpair.second;
+      }
+    }
+    out << "}\n";
   }
 
   output = out.str();
-}
-
-void ServerStats::ReportSlots(Writer* w, const std::list<TimeSlot*> &slots) {
-  for (auto const& s : slots) {
-    if (s->m_time) {
-      w->beginObject("slot");
-      w->writeEntry("time", s->m_time * RuntimeOption::StatsSlotDuration);
-    }
-    w->beginList("pages");
-    for (auto const& page : s->m_pages) {
-      auto const& ps = page.second;
-      w->beginObject("page");
-      w->writeEntry("url", ps.m_url);
-      w->writeEntry("code", ps.m_code);
-      w->writeEntry("hit", ps.m_hit);
-
-      w->beginObject("details");
-      for (auto const& kvpair : ps.m_values) {
-        w->writeEntry(kvpair.first->getString().c_str(), kvpair.second);
-      }
-      w->endObject("details");
-
-      w->endObject("page");
-    }
-    w->endList("pages");
-    if (s->m_time) {
-      w->endObject("slot");
-    }
-  }
 }
 
 static std::string format_duration(timeval &duration) {

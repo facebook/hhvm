@@ -38,10 +38,7 @@ This is a list of available URLs:
 /stats.keys:      list all available keys
     from          optional, <timestamp>, or <-n> second ago
     to            optional, <timestamp>, or <-n> second ago
-/stats.xml:       show server stats in XML
-/stats.json:      show server stats in JSON
 /stats.kvp:       show server stats in key-value pairs
-/stats.html:      show server stats in HTML
     from          optional, <timestamp>, or <-n> second ago
     to            optional, <timestamp>, or <-n> second ago
     agg           optional, aggragation: *, url, code

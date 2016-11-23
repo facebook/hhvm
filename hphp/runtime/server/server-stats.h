@@ -52,7 +52,7 @@ public:
   static void Reset();
   static void Clear();
   static void GetKeys(std::string &out, int64_t from, int64_t to);
-  static void Report(std::string &out, Writer::Format format,
+  static void Report(std::string &out,
                      int64_t from, int64_t to,
                      const std::string &agg, const std::string &keys,
                      const std::string &url, int code,
@@ -124,10 +124,9 @@ private:
 
   static void GetAllKeys(std::set<std::string> &allKeys,
                          const std::list<TimeSlot*> &slots);
-  static void Report(std::string &out, Writer::Format format,
+  static void Report(std::string &out,
                      const std::list<TimeSlot*> &slots,
                      const std::string &prefix);
-  static void ReportSlots(Writer* writer, const std::list<TimeSlot*> &slots);
 
   Mutex m_lock;
   std::vector<TimeSlot> m_slots;

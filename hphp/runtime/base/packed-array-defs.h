@@ -55,13 +55,10 @@ size_t PackedArray::heapSize(const ArrayData* ad) {
   return sizeof(ArrayData) + sizeof(TypedValue) * ad->cap();
 }
 
-template<class Marker>
-void PackedArray::scan(const ArrayData* a, Marker& mark) {
+inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
   assert(checkInvariants(a));
   auto data = packedData(a);
-  for (unsigned i = 0, n = a->getSize(); i < n; ++i) {
-    mark(data[i]);
-  }
+  scanner.scan(*data, a->getSize() * sizeof(*data));
 }
 
 template <class F, bool inc>

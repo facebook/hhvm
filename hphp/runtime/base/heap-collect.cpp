@@ -71,8 +71,6 @@ struct Marker {
   void operator()(const RefData*);
   void operator()(const TypedValue&);
   void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
-  void operator()(const NameValueTable*);
-  void operator()(const VarEnv*);
 
   // mark ambiguous pointers in the range [start,start+len)
   void operator()(const void* start, size_t len);
@@ -89,8 +87,6 @@ struct Marker {
   void operator()(const Resource&);
   void operator()(const Variant&);
   void operator()(const StringBuffer&);
-  void operator()(const NameValueTable&);
-  void operator()(const VarEnv& venv) { (*this)(&venv); }
 
   // treat implicit pointers the same as real pointers
   void implicit(const ObjectData* p) { (*this)(p); }
@@ -284,16 +280,6 @@ void Marker::operator()(const StringData* p) {
   }
 }
 
-// NVTs live inside VarEnv, and GlobalsArray has an interior ptr to one.
-// ignore the interior pointer; NVT should be scanned by VarEnv::scan.
-void Marker::operator()(const NameValueTable* p) {}
-
-// VarEnvs are allocated with req::make, so they aren't first-class heap
-// objects. assume a VarEnv* is a unique ptr, and scan it eagerly.
-void Marker::operator()(const VarEnv* p) {
-  if (p) p->scan(*this);
-}
-
 void Marker::operator()(const String& p)    { (*this)(p.get()); }
 void Marker::operator()(const Array& p)     { (*this)(p.get()); }
 void Marker::operator()(const ArrayNoDtor& p) { (*this)(p.arr()); }
@@ -302,7 +288,6 @@ void Marker::operator()(const Resource& p)  { (*this)(p.hdr()); }
 void Marker::operator()(const Variant& p)   { (*this)(*p.asTypedValue()); }
 
 void Marker::operator()(const StringBuffer& p) { p.scan(*this); }
-void Marker::operator()(const NameValueTable& p) { p.scan(*this); }
 
 // mark a TypedValue or TypedValueAux. taking tv by value would exclude aux.
 void Marker::operator()(const TypedValue& tv) {
@@ -523,7 +508,7 @@ void Marker::finish_typescan() {
 NEVER_INLINE void Marker::traceRoots() {
   auto const t0 = cpu_micros();
   SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
-  scanRoots(*this, type_scanner_);
+  scanRoots(type_scanner_);
   finish_typescan();
   cscanned_roots_ = cscanned_;
   xscanned_roots_ = xscanned_;
@@ -536,7 +521,7 @@ NEVER_INLINE void Marker::trace() {
     while (!work_.empty()) {
       auto h = work_.back();
       work_.pop_back();
-      scanHeader(h, *this, type_scanner_);
+      scanHeader(h, type_scanner_);
       finish_typescan();
     }
   };

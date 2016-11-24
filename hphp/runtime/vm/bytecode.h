@@ -929,17 +929,6 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class F> void VarEnv::scan(F& mark) const {
-  mark(m_nvTable);
-  if (m_extraArgs) {
-    if (const auto ar = m_nvTable.getFP()) {
-      const int numExtra =
-        ar->numArgs() - ar->m_func->numNonVariadicParams();
-      m_extraArgs->scan(mark, numExtra);
-    }
-  }
-}
-
 }
 
 #endif

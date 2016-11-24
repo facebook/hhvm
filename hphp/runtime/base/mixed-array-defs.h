@@ -46,12 +46,10 @@ ALWAYS_INLINE int32_t* mixedHash(MixedArray::Elm* data, uint32_t scale) {
   return reinterpret_cast<int32_t*>(data + static_cast<size_t>(scale) * 3);
 }
 
-template<class F> void MixedArray::scan(F& mark) const {
+inline void MixedArray::scan(type_scan::Scanner& scanner) const {
   if (isZombie()) return;
   auto data = this->data();
-  for (unsigned i = 0, n = m_used; i < n; i++) {
-    data[i].scan(mark);
-  }
+  scanner.scan(*data, m_used * sizeof(*data));
 }
 
 inline ArrayData::~ArrayData() {

@@ -200,7 +200,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static uint32_t getMaxCapInPlaceFast(uint32_t cap);
 
   static size_t heapSize(const ArrayData*);
-  template<class Marker> static void scan(const ArrayData*, Marker&);
+  static void scan(const ArrayData*, type_scan::Scanner&);
 
   static ArrayData* MakeReserve(uint32_t capacity);
   static ArrayData* MakeReserveVec(uint32_t capacity);

@@ -115,10 +115,10 @@ struct MixedArray final : private ArrayData,
       return MixedArray::isTombstone(data.m_type);
     }
 
-    template<class F> void scan(F& mark) const {
+    TYPE_SCAN_CUSTOM() {
       if (!isTombstone()) {
-        if (hasStrKey()) mark(skey);
-        mark(data);
+        if (hasStrKey()) scanner.scan(skey);
+        scanner.scan(data);
       }
     }
 
@@ -158,8 +158,8 @@ struct MixedArray final : private ArrayData,
     };
     int32_t hash;
 
-    TYPE_SCAN_CUSTOM() {
-      if (hash < 0) scanner.enqueue(skey);
+    TYPE_SCAN_CUSTOM_FIELD(skey) {
+      if (hash < 0) scanner.scan(skey);
     }
   };
 
@@ -739,7 +739,7 @@ private:
   void setZombie() { m_used = -uint32_t{1}; }
 
 public:
-  template<class F> void scan(F&) const; // in mixed-array-defs.h
+  void scan(type_scan::Scanner&) const; // in mixed-array-defs.h
 
 private:
   struct Initializer;

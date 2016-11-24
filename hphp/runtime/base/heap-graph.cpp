@@ -64,8 +64,6 @@ struct PtrFilter: F {
   void operator()(const Resource& p) { (*this)(p.hdr()->data()); }
   void operator()(const Variant& p) { (*this)(*p.asTypedValue()); }
   void operator()(const StringBuffer& p) { p.scan(*this); }
-  void operator()(const NameValueTable& p) { p.scan(*this); }
-  void operator()(const VarEnv& venv) { (*this)(&venv); }
 
   // mark a TypedValue or TypedValueAux. taking tv by value would exclude aux.
   void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
@@ -145,8 +143,6 @@ struct PtrFilter: F {
     for (auto& e : c) (*this)(e); // each element is pair<T,U>
   }
 
-  void operator()(const VarEnv* p) { if (p) p->scan(*this); }
-
   // Explicitly ignored field types.
   void operator()(const LowPtr<Class>&) {}
   void operator()(const Unit*) {}
@@ -154,10 +150,6 @@ struct PtrFilter: F {
   void operator()(const Class*) {}
   void operator()(const std::string&) {}
   void operator()(int) {}
-
-  // NVTs live inside VarEnv, and GlobalsArray has an interior ptr to one.
-  // ignore the interior pointer; NVT should be scanned by VarEnv::scan.
-  void operator()(const NameValueTable* p) {}
 
   // mark ambigous pointers in the range [start,start+len). If the start or
   // end is a partial word, don't scan that word.
@@ -303,7 +295,7 @@ HeapGraph makeHeapGraph(bool include_free) {
 
   // find roots
   PtrFilter<RootMarker> rmark(g, blocks);
-  scanRoots(rmark, type_scanner);
+  scanRoots(type_scanner);
   type_scanner.finish(
     [&](const void* p, const char* description) {
       // definitely a ptr, but maybe interior, and maybe not counted
@@ -323,7 +315,7 @@ HeapGraph makeHeapGraph(bool include_free) {
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
     auto h = g.nodes[i].h;
     PtrFilter<ObjMarker> omark(g, blocks, h);
-    scanHeader(h, omark, type_scanner);
+    scanHeader(h, type_scanner);
     type_scanner.finish(
       [&](const void* p, const char*) {
         // definitely a ptr, but maybe interior, and maybe not counted

@@ -700,10 +700,9 @@ struct HashCollection : ObjectData {
 
   static bool instanceof(const ObjectData*);
 
-  template<typename F>
-  void scan(F& mark) const {
-    mark(m_arr);
-    mark(m_immCopy);
+  void scan(type_scan::Scanner& scanner) const {
+    scanner.scan(m_arr);
+    scanner.scan(m_immCopy);
   }
 
  protected:

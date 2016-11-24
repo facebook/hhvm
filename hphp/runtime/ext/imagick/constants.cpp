@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/imagick/constants.h"
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
+#include "hphp/util/safe-cast.h"
 
 namespace HPHP {
 

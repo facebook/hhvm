@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/heap-graph.h"
@@ -336,10 +335,6 @@ template<class F> void scanRoots(F& mark, type_scan::Scanner& scanner) {
   // ThreadLocal nodes (but skip MemoryManager)
   mark.where(RootKind::ThreadLocalManager);
   ThreadLocalManager::GetManager().scan(scanner);
-  // Extension thread locals
-  mark.where(RootKind::Extensions);
-  ExtMarker<F> xm(mark);
-  ExtensionRegistry::scanExtensions(xm);
   // Root maps
   mark.where(RootKind::RootMaps);
   MM().scanRootMaps(mark, scanner);

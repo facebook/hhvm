@@ -269,10 +269,6 @@ void json_parser_flush_caches() {
     // Nop
 }
 
-void json_parser_scan(IMarker& imarker) {
-    // No-op for now?
-}
-
 }
 
 #endif /* HAVE_JSONC */

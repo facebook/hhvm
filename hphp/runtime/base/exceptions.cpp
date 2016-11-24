@@ -18,7 +18,6 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"

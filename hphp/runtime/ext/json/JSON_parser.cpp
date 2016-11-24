@@ -555,6 +555,8 @@ struct json_parser {
     Variant val;
   };
   std::vector<json_state> stack;
+  // check_non_safepoint_surprise() above will not trigger gc
+  TYPE_SCAN_IGNORE_FIELD(stack);
   int top;
   int mark; // the watermark
   int depth;
@@ -1334,16 +1336,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
 
   s_json_parser->error_code = JSON_ERROR_SYNTAX;
   return false;
-}
-
-void json_parser_scan(IMarker& mark) {
-  if (s_json_parser.isNull()) return;
-  auto json = s_json_parser.get();
-  if (json->mark < 0 || json->stack.empty()) return;
-  for (int i = 0; i <= json->mark; ++i) {
-    mark(json->stack[i].key);
-    mark(json->stack[i].val);
-  }
 }
 }
 

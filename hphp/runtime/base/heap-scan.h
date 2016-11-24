@@ -28,6 +28,8 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/apc-local-array-defs.h"
+#include "hphp/runtime/base/apcu-local-array.h"
+#include "hphp/runtime/base/apcu-local-array-defs.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/imarker.h"
@@ -105,6 +107,8 @@ template<class F> void scanHeader(const Header* h, F& mark,
       return h->set_.scan(mark);
     case HeaderKind::Apc:
       return h->apc_.scan(mark);
+    case HeaderKind::Apcu:
+      return h->apcu_.scan(mark);
     case HeaderKind::Globals:
       return h->globals_.scan(mark);
     case HeaderKind::Closure:

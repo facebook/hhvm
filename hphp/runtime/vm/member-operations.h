@@ -2622,14 +2622,14 @@ inline void promoteToStdClass(TypedValue* base, bool warn, F fun) {
     not_reached();
   }
 
-  auto promote = [&] {
-    auto const obj = ObjectData::newInstance(SystemLib::s_stdclassClass);
-    auto const old = *base;
-    base->m_type = KindOfObject;
-    base->m_data.pobj = obj;
-    fun(obj);
-    tvRefcountedDecRef(old);
-  };
+  Object obj { ObjectData::newInstance(SystemLib::s_stdclassClass) };
+  if (base->m_type == KindOfString) {
+    decRefStr(base->m_data.pstr);
+  } else {
+    assert(!isRefcountedType(base->m_type));
+  }
+  base->m_type = KindOfObject;
+  base->m_data.pobj = obj.get();
 
   if (warn) {
     // Behavior here is observable.
@@ -2640,25 +2640,22 @@ inline void promoteToStdClass(TypedValue* base, bool warn, F fun) {
     // In PHP 7+, raise_warning is called after updating base, but before
     // doing the work of fun, and again, if an exception is thrown, fun
     // still gets called before reaching the catch block.
-    // For now, just match 5.6, because both orders have the potential for
-    // surprising side effects, and there doesn't seem to be any pressing
-    // need to handle both.
-    // For posterity, the 5.6 order means that the error handler can overwrite
-    // base with something whose destructor (which could be called by the
-    // tvRefcountedDecRef above) can overwrite it again; meaning that we end
-    // up with something other than an object in base (or an object that isn't
-    // an instance of stdclass). The 7+ order means that the error handler
-    // can directly overwrite the newly written stdclass object, with the
-    // same effective result.
+    // We'll match PHP7, because we have no way of ensuring that base survives
+    // across a call to the error_handler: eg $a[0][0][0]->foo = 0; if $a
+    // started out null, and the error handler resets it to null, base is
+    // left dangling.
+    // Note that this means that the error handler can overwrite the object
+    // so there is no guarantee that we have an object on return from
+    // promoteToStdClass.
     try {
       raise_warning(Strings::CREATING_DEFAULT_OBJECT);
     } catch (const Object&) {
-      promote();
+      fun(obj.get());
       throw;
     }
   }
 
-  promote();
+  fun(obj.get());
 }
 
 template<MOpMode mode>

@@ -868,7 +868,7 @@ void Vgen::emit(const stubret& i) {
   if (i.saveframe) a.ld(rvmfp(), rsp()[AROFF(m_sfp)]);
 
   // restore r1 appropriately
-  a.mr(ppc64_asm::reg::r1, rvmfp());
+  a.mr(rsfp(), rvmfp());
 
   // restore return address.
   a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);

@@ -2876,9 +2876,104 @@ Variant HHVM_FUNCTION(mb_strstr,
   return false;
 }
 
+const StaticString s_utf_8("utf-8");
+
+/**
+ * Fast check for the most common form of the UTF-8 encoding identifier.
+ */
+ALWAYS_INLINE
+static bool isUtf8(const Variant& encoding) {
+  return encoding.getStringDataOrNull() == s_utf_8.get();
+}
+
+/**
+ * Given a byte sequence, return
+ *    0 if it contains bytes >= 128 (thus non-ASCII), else
+ *   -1 if it contains any upper-case character ('A'-'Z'), else
+ *    1 (and thus is a lower-case ASCII string).
+ */
+ALWAYS_INLINE
+static int isUtf8AsciiLower(folly::StringPiece s) {
+  const auto bytelen = s.size();
+  bool caseOK = true;
+  for (uint32_t i = 0; i < bytelen; ++i) {
+    uint8_t byte = s[i];
+    if (byte >= 128) {
+      return 0;
+    } else if (byte <= 'Z' && byte >= 'A') {
+      caseOK = false;
+    }
+  }
+  return caseOK ? 1 : -1;
+}
+
+/**
+ * Return a string containing the lower-case of a given ASCII string.
+ */
+ALWAYS_INLINE
+static StringData* asciiToLower(const StringData* s) {
+  const auto size = s->size();
+  auto ret = StringData::Make(s, CopyString);
+  auto output = ret->mutableData();
+  for (int i = 0; i < size; ++i) {
+    auto& c = output[i];
+    if (c <= 'Z' && c >= 'A') {
+      c |= 0x20;
+    }
+  }
+  ret->invalidateHash(); // We probably modified it.
+  return ret;
+}
+
+/* Like isUtf8AsciiLower, but with upper/lower swapped. */
+ALWAYS_INLINE
+static int isUtf8AsciiUpper(folly::StringPiece s) {
+  const auto bytelen = s.size();
+  bool caseOK = true;
+  for (uint32_t i = 0; i < bytelen; ++i) {
+    uint8_t byte = s[i];
+    if (byte >= 128) {
+      return 0;
+    } else if (byte >= 'a' && byte <= 'z') {
+      caseOK = false;
+    }
+  }
+  return caseOK ? 1 : -1;
+}
+
+/* Like asciiToLower, but with upper/lower swapped. */
+ALWAYS_INLINE
+static StringData* asciiToUpper(const StringData* s) {
+  const auto size = s->size();
+  auto ret = StringData::Make(s, CopyString);
+  auto output = ret->mutableData();
+  for (int i = 0; i < size; ++i) {
+    auto& c = output[i];
+    if (c >= 'a' && c <= 'z') {
+      c -= (char)0x20;
+    }
+  }
+  ret->invalidateHash(); // We probably modified it.
+  return ret;
+}
+
 Variant HHVM_FUNCTION(mb_strtolower,
                       const String& str,
                       const Variant& opt_encoding) {
+  /* Fast-case for empty static string without dereferencing any pointers. */
+  if (str.get() == staticEmptyString()) return empty_string_variant();
+  if (LIKELY(isUtf8(opt_encoding))) {
+    /* Fast-case for ASCII. */
+    if (auto sd = str.get()) {
+      auto sl = sd->slice();
+      auto r = isUtf8AsciiLower(sl);
+      if (r > 0) {
+        return str;
+      } else if (r < 0) {
+        return String::attach(asciiToLower(sd));
+      }
+    }
+  }
   const String encoding = convertArg(opt_encoding);
 
   const char *from_encoding;
@@ -2901,6 +2996,20 @@ Variant HHVM_FUNCTION(mb_strtolower,
 Variant HHVM_FUNCTION(mb_strtoupper,
                       const String& str,
                       const Variant& opt_encoding) {
+  /* Fast-case for empty static string without dereferencing any pointers. */
+  if (str.get() == staticEmptyString()) return empty_string_variant();
+  if (LIKELY(isUtf8(opt_encoding))) {
+    /* Fast-case for ASCII. */
+    if (auto sd = str.get()) {
+      auto sl = sd->slice();
+      auto r = isUtf8AsciiUpper(sl);
+      if (r > 0) {
+        return str;
+      } else if (r < 0) {
+        return String::attach(asciiToUpper(sd));
+      }
+    }
+  }
   const String encoding = convertArg(opt_encoding);
 
   const char *from_encoding;

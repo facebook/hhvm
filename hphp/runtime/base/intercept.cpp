@@ -58,6 +58,13 @@ struct InterceptRequestData final : RequestEventHandler {
     if (!m_intercept_handlers) m_intercept_handlers.emplace();
     return *m_intercept_handlers;
   }
+  bool empty() const {
+    return !m_intercept_handlers.hasValue() ||
+            m_intercept_handlers->empty();
+  }
+  void clearHandlers() {
+    m_intercept_handlers.clear();
+  }
 
 private:
   Variant m_global_handler;
@@ -87,18 +94,18 @@ static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
 
 bool register_intercept(const String& name, const Variant& callback,
                         const Variant& data) {
-  auto& handlers = s_intercept_data->intercept_handlers();
   if (!callback.toBoolean()) {
     if (name.empty()) {
       s_intercept_data->global_handler().unset();
-      req::StringIMap<Variant> empty;
-      handlers.swap(empty);
+      s_intercept_data->clear();
     } else {
-      auto tmp = handlers[name];
-      auto it = handlers.find(name);
-      if (it != handlers.end()) {
-        auto tmp = it->second;
-        handlers.erase(it);
+      if (!s_intercept_data->empty()) {
+        auto& handlers = s_intercept_data->intercept_handlers();
+        auto it = handlers.find(name);
+        if (it != handlers.end()) {
+          auto tmp = it->second;
+          handlers.erase(it);
+        }
       }
     }
     return true;
@@ -110,9 +117,9 @@ bool register_intercept(const String& name, const Variant& callback,
 
   if (name.empty()) {
     s_intercept_data->global_handler() = handler;
-    req::StringIMap<Variant> empty;
-    handlers.swap(empty);
+    s_intercept_data->clearHandlers();
   } else {
+    auto& handlers = s_intercept_data->intercept_handlers();
     handlers[name] = handler;
   }
 
@@ -135,16 +142,16 @@ bool register_intercept(const String& name, const Variant& callback,
 }
 
 static Variant *get_enabled_intercept_handler(const String& name) {
-  Variant *handler = nullptr;
-  auto& handlers = s_intercept_data->intercept_handlers();
-  auto iter = handlers.find(name);
-  if (iter != handlers.end()) {
-    handler = &iter->second;
-  } else {
-    handler = &s_intercept_data->global_handler();
-    if (handler->isNull()) {
-      return nullptr;
+  if (!s_intercept_data->empty()) {
+    auto& handlers = s_intercept_data->intercept_handlers();
+    auto iter = handlers.find(name);
+    if (iter != handlers.end()) {
+      return &iter->second;
     }
+  }
+  auto handler = &s_intercept_data->global_handler();
+  if (handler->isNull()) {
+    return nullptr;
   }
   return handler;
 }

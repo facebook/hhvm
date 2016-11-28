@@ -1,6 +1,6 @@
 string(80) "O:1:"A":3:{s:1:"a";i:1;s:4:"%r\x00%rA%r\x00%rb";s:5:"hello";s:4:"%r\x00%r*%r\x00%rc";a:2:{i:0;i:1;i:1;i:2;}}"
 
-Warning: The object being unserialized with class name 'A' is not in the given whitelist. See http://fburl.com/SafeSerializable for more detail in %s on line 73
+Warning: The object being unserialized with class name 'A' is not in the given whitelist in %s on line %d
 object(A)#2 (3) {
   ["a"]=>
   int(1)
@@ -44,14 +44,14 @@ object(C)#4 (3) {
   ["c"]=>
   float(-INF)
 }
-C has a safe destrcutor.
-C has a safe destrcutor.
+C has a safe destructor.
+C has a safe destructor.
 ========================
 I have dangerous constructor.
 I sleep dangerously.
 string(62) "O:14:"DangerousClass":1:{s:6:"danger";s:15:"DangerousString";}"
 
-Warning: The object being unserialized with class name 'DangerousClass' is not in the given whitelist. See http://fburl.com/SafeSerializable for more detail in %s on line 73
+Warning: The object being unserialized with class name 'DangerousClass' is not in the given whitelist in %s on line %d
 I wake up dangerously.
 object(DangerousClass)#5 (1) {
   ["danger"]=>
@@ -64,7 +64,7 @@ I have dangerous constructor.
 I sleep dangerously.
 string(96) "O:1:"E":1:{s:14:"dangerousClass";O:14:"DangerousClass":1:{s:6:"danger";s:15:"DangerousString";}}"
 
-Warning: The object being unserialized with class name 'DangerousClass' is not in the given whitelist. See http://fburl.com/SafeSerializable for more detail in %s on line 73
+Warning: The object being unserialized with class name 'DangerousClass' is not in the given whitelist in %s on line %d
 I wake up dangerously.
 object(E)#7 (1) {
   ["dangerousClass"]=>
@@ -77,14 +77,15 @@ I have dangerous destructor.
 I have dangerous destructor.
 ========================
 string(27) "C:1:"F":14:{SerializedData}"
-SerializedDataobject(F)#9 (0) {
+unserialize: SerializedData
+object(F)#8 (0) {
 }
 ========================
 I have dangerous constructor.
 I sleep dangerously.
 string(48) "O:1:"G":1:{s:6:"danger";s:15:"DangerousString";}"
 I wake up dangerously.
-object(G)#10 (1) {
+object(G)#9 (1) {
   ["danger"]=>
   string(15) "DangerousString"
 }
@@ -108,13 +109,14 @@ I have dangerous constructor.
 C sleeps safely.
 I sleep dangerously.
 string(412) "a:2:{i:0;O:1:"A":3:{s:1:"a";i:1;s:4:"%r\x00%rA%r\x00%rb";s:5:"hello";s:4:"%r\x00%r*%r\x00%rc";a:2:{i:0;i:1;i:1;i:2;}}i:1;a:2:{i:0;O:1:"B":4:{s:1:"b";i:0;s:1:"a";i:1;s:4:"%r\x00%rA%r\x00%rb";s:5:"hello";s:4:"%r\x00%r*%r\x00%rc";a:2:{i:0;i:1;i:1;i:2;}}i:1;a:2:{i:0;O:1:"C":3:{s:1:"a";N;s:1:"b";d:NAN;s:1:"c";d:-INF;}i:1;a:2:{i:0;O:1:"E":1:{s:14:"dangerousClass";O:14:"DangerousClass":1:{s:6:"danger";s:15:"DangerousString";}}i:1;a:1:{i:0;C:1:"F":14:{SerializedData}}}}}}"
-C wakes up safely.
 
-Warning: The object being unserialized with class name 'DangerousClass' is not in the given whitelist. See http://fburl.com/SafeSerializable for more detail in %s on line 73
+Warning: The object being unserialized with class name 'DangerousClass' is not in the given whitelist in %s on line %d
+unserialize: SerializedData
+C wakes up safely.
 I wake up dangerously.
-SerializedDataarray(2) {
+array(2) {
   [0]=>
-  object(A)#16 (3) {
+  object(A)#15 (3) {
     ["a"]=>
     int(1)
     ["b":"A":private]=>
@@ -130,7 +132,7 @@ SerializedDataarray(2) {
   [1]=>
   array(2) {
     [0]=>
-    object(B)#17 (4) {
+    object(B)#16 (4) {
       ["b"]=>
       int(0)
       ["a"]=>
@@ -148,7 +150,7 @@ SerializedDataarray(2) {
     [1]=>
     array(2) {
       [0]=>
-      object(C)#18 (3) {
+      object(C)#17 (3) {
         ["a"]=>
         NULL
         ["b"]=>
@@ -159,9 +161,9 @@ SerializedDataarray(2) {
       [1]=>
       array(2) {
         [0]=>
-        object(E)#19 (1) {
+        object(E)#18 (1) {
           ["dangerousClass"]=>
-          object(DangerousClass)#20 (1) {
+          object(DangerousClass)#19 (1) {
             ["danger"]=>
             string(15) "DangerousString"
           }
@@ -169,15 +171,15 @@ SerializedDataarray(2) {
         [1]=>
         array(1) {
           [0]=>
-          object(F)#21 (0) {
+          object(F)#20 (0) {
           }
         }
       }
     }
   }
 }
-C has a safe destrcutor.
+C has a safe destructor.
 I have dangerous destructor.
-C has a safe destrcutor.
+C has a safe destructor.
 I have dangerous destructor.
 ========================

@@ -19,7 +19,7 @@ class C {
     echo "C has a safe constructor.\n";
   }
   function __destruct() {
-    echo "C has a safe destrcutor.\n";
+    echo "C has a safe destructor.\n";
   }
   function __wakeup() {
     echo "C wakes up safely.\n";
@@ -59,7 +59,7 @@ class F implements Serializable {
     return "SerializedData";
   }
   public function unserialize($serialized) {
-    echo $serialized;
+    echo "unserialize: $serialized\n";
     return $this;
   }
 }
@@ -77,21 +77,19 @@ function test_serialization($obj, $class_whitelist) {
   echo "========================\n";
 }
 
-function main(int $argc, array $argv) {
-  // null will be automatically translated into empty array (see idl definition)
-  // So it should still not allow any class.
-  test_serialization(new A, null);
-  test_serialization(new B, array('A'));
+function main() {
+  test_serialization(new A, []);
+  test_serialization(new B, array('A', 'B'));
   test_serialization(new C, array('C'));
   test_serialization(new DangerousClass, array());
   test_serialization(new E, array('E'));
-  test_serialization(new F, array());
+  test_serialization(new F, array('F'));
   test_serialization(new G, array('G'));
   test_serialization(array("Hello World<>$%", acos(1.01), log(0), 50), array());
   test_serialization(
     array( new A, array(new B, array(new C, array(new E, array(new F))))),
-    array('abc' => 'A', 5 => 'C', 'E')
+    array('abc' => 'A', 5 => 'C', 'E', 'B', 'F')
   );
 }
 
-exit(main($argc, $argv));
+main();

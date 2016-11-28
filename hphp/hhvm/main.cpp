@@ -26,7 +26,11 @@
 #include "hphp/util/embedded-vfs.h"
 #include "hphp/util/text-util.h"
 
+#include <folly/Singleton.h>
+
 int main(int argc, char** argv) {
+  folly::SingletonVault::singleton()->registrationComplete();
+
   if (!argc) {
     return 0;
   }

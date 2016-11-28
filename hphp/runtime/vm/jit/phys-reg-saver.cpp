@@ -50,7 +50,7 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
       // Push r0 twice to avoid vasm-check failures
       v << pushp{r0, r0};
     } else {
-      v << pushp{r1, r0};
+      v << pushp{r0, r1};
     }
   });
 }

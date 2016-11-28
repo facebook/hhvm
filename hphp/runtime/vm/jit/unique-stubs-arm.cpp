@@ -66,7 +66,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                             PhysReg tv, PhysReg type, RegSet live) {
   return vwrap(cb, data, fixups, [&] (Vout& v) {
     // Set up frame linkage to avoid an indirect fixup.
-    v << pushp{rfp(), rlr()};
+    v << pushp{rlr(), rfp()};
     v << copy{rsp(), rfp()};
 
     // We use the first argument register for the TV data because we might pass
@@ -175,7 +175,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
   // Create a table of branches
   us.freeManyLocalsHelper = vwrap(cb, data, [&] (Vout& v) {
-    v << pushp{rfp(), rlr()};
+    v << pushp{rlr(), rfp()};
 
     // rvmfp() is needed by the freeManyLocalsHelper stub above, so frame
     // linkage setup is deferred until after its use in freeManyLocalsHelper.
@@ -184,7 +184,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
     us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
       // We set up frame linkage to avoid an indirect fixup.
-      v << pushp{rfp(), rlr()};
+      v << pushp{rlr(), rfp()};
       v << copy{rsp(), rfp()};
       v << jmpi{freeLocalsHelpers[i]};
     });

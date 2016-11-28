@@ -499,7 +499,7 @@ void Vgen::emit(const calls& i) {
 
 void Vgen::emit(const stublogue& i) {
   // Push FP, LR always regardless of i.saveframe (makes SP 16B aligned)
-  emit(pushp{rfp(), rlr()});
+  emit(pushp{rlr(), rfp()});
 }
 
 void Vgen::emit(const stubret& i) {
@@ -1021,7 +1021,7 @@ void Vgen::emit(const popp& i) {
 }
 
 void Vgen::emit(const pushp& i) {
-  a->Stp(X(i.s0), X(i.s1), MemOperand(sp, -16, PreIndex));
+  a->Stp(X(i.s1), X(i.s0), MemOperand(sp, -16, PreIndex));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1349,15 +1349,15 @@ void lower(Vunit& u, calltc& i, Vlabel b, size_t z) {
     // Push FP, LR for callToExit(..)
     auto r0 = v.makeReg();
     auto r1 = v.makeReg();
-    v << load{i.fp[AROFF(m_savedRip)], r0};
-    v << ldimmq{i.exittc, r1};
+    v << ldimmq{i.exittc, r0};
+    v << load{i.fp[AROFF(m_savedRip)], r1};
     v << pushp{r0, r1};
 
     // Emit call to next instruction to balance predictor's stack
     v << bln{};
 
     // Set the return address to savedRip and jump to target
-    v << copy{r0, rlr()};
+    v << copy{r1, rlr()};
     v << jmpr{i.target, i.args};
   });
 }
@@ -1367,7 +1367,7 @@ void lower(Vunit& u, resumetc& i, Vlabel b, size_t z) {
     // Push FP, LR for callToExit(..)
     auto r = v.makeReg();
     v << ldimmq{i.exittc, r};
-    v << pushp{rfp(), r};
+    v << pushp{r, rfp()};
 
     // Call the helper
     v << callr{i.target, i.args};

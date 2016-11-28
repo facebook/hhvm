@@ -1102,7 +1102,7 @@ struct poppm { Vptr d0, d1; };
 struct push { Vreg64 s; };
 struct pushf { VregSF s; };
 struct pushm { Vptr s; };
-// pushp[m]{s0, s1} -> push[m]{s1}, push[m]{s0}
+// pushp[m]{s0, s1} -> push[m]{s0}, push[m]{s1}
 struct pushp { Vreg64 s0, s1; };
 struct pushpm { Vptr s0, s1; };
 

@@ -332,7 +332,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     // (because of fb_intercept).  If that happens, we need to return to the
     // caller, but the handler will have already popped the callee's frame.
     // So, we need to save these values for later.
-    v << pushpm{ar[AROFF(m_sfp)], ar[AROFF(m_savedRip)]};
+    v << pushpm{ar[AROFF(m_savedRip)], ar[AROFF(m_sfp)]};
 
     v << copy2{ar, v.cns(EventHook::NormalFunc), rarg(0), rarg(1)};
 
@@ -1185,9 +1185,9 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
       case Arch::ARM:
         assertx(!(svcreq::kMaxArgs & 1));
         for (auto i = svcreq::kMaxArgs - 1; i > 0; i -= 2) {
-          v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i)};
+          v << pushp{r_svcreq_arg(i), r_svcreq_arg(i - 1)};
         }
-        v << pushp{r_svcreq_req(), r_svcreq_stub()};
+        v << pushp{r_svcreq_stub(), r_svcreq_req()};
         break;
     }
 

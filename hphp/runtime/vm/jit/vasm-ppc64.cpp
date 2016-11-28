@@ -1169,13 +1169,13 @@ void lowerForPPC64(Vout& v, poppm& inst) {
 }
 
 void lowerForPPC64(Vout& v, pushp& inst) {
-  v << push{inst.s1};
   v << push{inst.s0};
+  v << push{inst.s1};
 }
 
 void lowerForPPC64(Vout& v, pushpm& inst) {
-  v << pushm{inst.s1};
   v << pushm{inst.s0};
+  v << pushm{inst.s1};
 }
 
 /////////////////////////////////////////////////////////////////////////////

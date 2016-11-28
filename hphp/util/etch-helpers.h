@@ -68,10 +68,6 @@
 #define ETCH_ARG4       %x3
 #define ETCH_ARG5       %x4
 #define ETCH_ARG6       %x5
-#define ETCH_ARG7       %x6
-#define ETCH_ARG8       %x7
-#define ETCH_GET_ARG5   /* not used */
-#define ETCH_GET_ARG6   /* not used */
 
 #else /* Other x86 (e.g. linux) */
 #define CFI(x)            .cfi_##x

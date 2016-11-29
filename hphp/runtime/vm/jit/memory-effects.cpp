@@ -157,7 +157,7 @@ AliasClass pointee(
     }
 
     // The result of ElemArray{,W,U} is either the address of an array element,
-    // or &init_null_variant().
+    // or &immutable_null_base.
     if (typeNR <= TPtrToMembGen) {
       if (sinst->is(ElemArray, ElemArrayW, ElemDict,
                     ElemDictW, ElemKeyset, ElemKeysetW)) return elem();
@@ -170,7 +170,7 @@ AliasClass pointee(
 
       // These instructions can only get at tvRef when given it as a
       // src. Otherwise they can only return pointers to properties or
-      // &init_null_variant().
+      // &immutable_null_base.
       if (sinst->is(PropX, PropDX, PropQ)) {
         assertx(sinst->srcs().back()->isA(TPtrToMISGen));
         return APropAny | pointee(sinst->srcs().back(), visited_labels);

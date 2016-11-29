@@ -266,13 +266,13 @@ SSATmp* tvRef2Ptr(IRGS& env) {
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
-  return cns(env, Type::cns(&init_null_variant, TPtrToOtherInitNull));
+  return cns(env, Type::cns(&immutable_null_base, TPtrToOtherInitNull));
 }
 
 SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(env, Type::cns(&uninit_variant, TPtrToOtherUninit));
+  return cns(env, Type::cns(&immutable_uninit_base, TPtrToOtherUninit));
 }
 
 bool mightCallMagicPropMethod(MOpMode mode, PropInfo propInfo) {
@@ -335,7 +335,7 @@ PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
 
 /*
  * Helper for emitPropSpecialized to check if a property is Uninit. It returns
- * a pointer to the property's address, or init_null_variant if the property
+ * a pointer to the property's address, or &immutable_null_base if the property
  * was Uninit and doWarn is true.
  *
  * We can omit the uninit check for properties that we know may not be uninit
@@ -363,8 +363,8 @@ SSATmp* checkInitProp(IRGS& env,
     [&] { // Next: Property isn't Uninit. Do nothing.
       return propAddr;
     },
-    [&] { // Taken: Property is Uninit. Raise a warning and return a pointer to
-          // init_null_variant.
+    [&] { // Taken: Property is Uninit. Raise a warning and return
+          // &immutable_null_base.
       hint(env, Block::Hint::Unlikely);
       if (wantPropSpecializedWarnings()) {
         gen(env, RaiseUndefProp, baseAsObj, key);
@@ -413,8 +413,8 @@ SSATmp* emitPropSpecialized(
    * (so every object-holding object property can also be null).
    *
    * After a null check, if it's actually an object we can just do LdPropAddr,
-   * otherwise we just give out a pointer to the init_null_variant (after
-   * raising the appropriate warnings).
+   * otherwise we just give out &immutable_null_base (after raising the
+   * appropriate warnings).
    */
   return cond(
     env,

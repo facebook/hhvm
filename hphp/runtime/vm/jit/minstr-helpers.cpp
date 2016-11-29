@@ -22,17 +22,13 @@ namespace HPHP { namespace jit { namespace MInstrHelpers {
 NEVER_INLINE
 TypedValue arrayGetNotFound(int64_t k) {
   raise_notice("Undefined index: %" PRId64, k);
-  TypedValue v;
-  tvWriteNull(&v);
-  return v;
+  return make_tv<KindOfNull>();
 }
 
 NEVER_INLINE
 TypedValue arrayGetNotFound(const StringData* k) {
   raise_notice("Undefined index: %s", k->data());
-  TypedValue v;
-  tvWriteNull(&v);
-  return v;
+  return make_tv<KindOfNull>();
 }
 
 //////////////////////////////////////////////////////////////////////

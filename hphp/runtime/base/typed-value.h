@@ -324,6 +324,13 @@ typename std::enable_if<
            (tv->m_data.pstr);
 }
 
+/*
+ * Unlike init_null_variant and uninit_variant, these should be placed
+ * in .rodata and cause a segfault if written to.
+ */
+extern const Cell immutable_null_base;
+extern const Cell immutable_uninit_base;
+
 //////////////////////////////////////////////////////////////////////
 
 }

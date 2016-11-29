@@ -1197,7 +1197,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 
       if (mode == MOpMode::Warn) raiseUndefProp(key);
       if (mode == MOpMode::Define) return prop;
-      return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+      return const_cast<TypedValue*>(&immutable_null_base);
     }
 
     // Property is not accessible, try __get.
@@ -1248,7 +1248,7 @@ TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
     return var.asTypedValue();
   }
 
-  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
 
 TypedValue* ObjectData::prop(

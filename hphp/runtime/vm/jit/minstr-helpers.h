@@ -47,7 +47,7 @@ TypedValue* baseGImpl(TypedValue key) {
       varEnv->set(name, &tv);
       base = varEnv->lookup(name);
     } else {
-      return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+      return const_cast<TypedValue*>(&immutable_null_base);
     }
   }
   return tvToCell(base);
@@ -504,7 +504,7 @@ const TypedValue* elemArrayNotFound(int64_t k) {
   if (mode == MOpMode::Warn) {
     raise_notice("Undefined index: %" PRId64, k);
   }
-  return uninit_variant.asTypedValue();
+  return &immutable_uninit_base;
 }
 
 template<MOpMode mode>
@@ -513,7 +513,7 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
   if (mode == MOpMode::Warn) {
     raise_notice("Undefined index: %s", k->data());
   }
-  return uninit_variant.asTypedValue();
+  return &immutable_uninit_base;
 }
 
 template<KeyType keyType, bool checkForInt, MOpMode mode>

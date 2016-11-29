@@ -169,7 +169,7 @@ void objOffsetUnset(ObjectData* base, TypedValue offset);
  * Elem when base is Null
  */
 inline const TypedValue* ElemEmptyish() {
-  return init_null_variant.asTypedValue();
+  return &immutable_null_base;
 }
 
 template<MOpMode mode>
@@ -983,7 +983,7 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfResource:
       // Unset on scalar base never modifies the base, but the const_cast is
       // necessary to placate the type system.
-      return const_cast<TypedValue*>(uninit_variant.asTypedValue());
+      return const_cast<TypedValue*>(&immutable_uninit_base);
     case KindOfPersistentString:
     case KindOfString:
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);

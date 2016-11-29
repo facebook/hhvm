@@ -387,6 +387,7 @@ struct RuntimeOption {
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;
+  static bool EnableContextInErrorHandler;
   static bool EnableZendCompat;
   static bool EnableZendSorting;
   static bool EnableZendIniCompat;

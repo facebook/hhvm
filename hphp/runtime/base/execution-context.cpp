@@ -849,7 +849,9 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       auto const ar = g_context->getFrameAtDepth(0);
-      auto const context = getDefinedVariables(ar);
+      auto const context = RuntimeOption::EnableContextInErrorHandler
+        ? getDefinedVariables(ar)
+        : empty_array();
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()),

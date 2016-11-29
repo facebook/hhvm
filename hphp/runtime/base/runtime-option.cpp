@@ -92,6 +92,7 @@ bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
+bool RuntimeOption::EnableContextInErrorHandler = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::EnableZendSorting = false;
 bool RuntimeOption::EnableZendIniCompat = true;
@@ -1152,6 +1153,8 @@ void RuntimeOption::Load(
     // NB: after we know the value of RepoAuthoritative.
     Config::Bind(EnableArgsInBacktraces, ini, config,
                  "Eval.EnableArgsInBacktraces", !RepoAuthoritative);
+    Config::Bind(EnableContextInErrorHandler, ini, config,
+                 "Eval.EnableContextInErrorHandler", !RepoAuthoritative);
     Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
                  false);
     if (RepoAuthoritative) {

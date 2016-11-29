@@ -318,7 +318,11 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
 GeneralEffects may_raise(const IRInstruction& inst, GeneralEffects x) {
   return may_reenter(
     inst,
-    GeneralEffects { x.loads | AFrameAny, x.stores, x.moves, x.kills }
+    GeneralEffects {
+      x.loads |
+        (RuntimeOption::EnableContextInErrorHandler ? AFrameAny : AEmpty),
+      x.stores, x.moves, x.kills
+    }
   );
 }
 

@@ -77,9 +77,9 @@ static bool use_arch_timestamp;
 /* On most newer Linux kernels CLOCK_MONOTONIC is defined in <bits/time.h> */
 /* <time.h> includes <bits/time.h> */
 #if defined(CLOCK_MONOTONIC)
-static int perf_clk_id = CLOCK_MONOTONIC;
+static clockid_t perf_clk_id = CLOCK_MONOTONIC;
 #else
-static int perf_clk_id = CLOCK_REALTIME;
+static clockid_t perf_clk_id = CLOCK_REALTIME;
 #endif
 #define NSEC_PER_SEC    1000000000
 

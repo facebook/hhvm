@@ -282,12 +282,6 @@ struct FuncInfo {
   bool thisAvailable = false;
 
   /*
-   * Whether this function can potentially read or write to the caller's frame.
-   */
-  bool readsCallerFrame = false;
-  bool writesCallerFrame = false;
-
-  /*
    * Call-context sensitive return types are cached here.  This is not
    * an optimization.
    *
@@ -600,10 +594,12 @@ bool Func::mightReadCallerFrame() const {
     val,
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->readsCallerFrame; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->func->attrs & AttrReadsCallerFrame;
+    },
     [&] (borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->readsCallerFrame) return true;
+        if (finfo->func->attrs & AttrReadsCallerFrame) return true;
       }
       return false;
     }
@@ -615,12 +611,32 @@ bool Func::mightWriteCallerFrame() const {
     val,
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->writesCallerFrame; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->func->attrs & AttrWritesCallerFrame;
+    },
     [&] (borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->writesCallerFrame) return true;
+        if (finfo->func->attrs & AttrWritesCallerFrame) return true;
       }
       return false;
+    }
+  );
+}
+
+bool Func::isFoldable() const {
+  return match<bool>(
+    val,
+    [&] (FuncName s)                  { return false; },
+    [&] (MethodName s)                { return false; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->func->attrs & AttrIsFoldable;
+    },
+    [&] (borrowed_ptr<FuncFamily> fa) {
+      if (fa->possibleFuncs.empty()) return false;
+      for (auto const& finfo : fa->possibleFuncs) {
+        if (!(finfo->func->attrs & AttrIsFoldable)) return false;
+      }
+      return true;
     }
   );
 }
@@ -756,8 +772,6 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
     // here saves on whole-program iterations.
     ret.returnTy = native_function_return_type(f);
   }
-  if (f->attrs & AttrReadsCallerFrame) ret.readsCallerFrame = true;
-  if (f->attrs & AttrWritesCallerFrame) ret.writesCallerFrame = true;
   ret.thisAvailable = false;
   return &ret;
 }

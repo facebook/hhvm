@@ -30,176 +30,59 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-#define X(x) const StaticString s_##x(#x);
-
-X(array_combine)
-X(array_fill)
-X(array_fill_keys)
-X(array_flip)
-X(array_reverse)
-X(array_search)
-X(array_slice)
-X(array_sum)
-X(array_values)
-X(base64decode)
-X(base64_encode)
-X(base_convert)
-X(bindec)
-X(ceil)
-X(chr)
-X(count)
-X(decbin)
-X(dechex)
-X(decoct)
-X(explode)
-X(floor)
-X(getrandmax)
-X(gettype)
-X(hexdec)
-X(implode)
-X(in_array)
-X(log)
-X(log10)
-X(max)
-X(mt_rand)
-X(mt_getrandmax)
-X(octdec)
-X(ord)
-X(pow)
-X(preg_quote)
-X(range)
-X(rawurldecode)
-X(rawurlencode)
-X(round)
-X(serialize)
-X(sha1)
-X(strlen)
-X(str_repeat)
-X(str_split)
-X(substr)
-X(trim)
-X(urldecode)
-X(urlencode)
-X(utf8_encode)
-X(version_compare)
-X(sqrt)
-X(abs)
-
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 folly::Optional<Type> const_fold(ISS& env,
                                  const bc::FCallBuiltin& op,
-                                 const StaticString& name) {
-  FTRACE(1, "invoking: {}\n", name.get()->data());
+                                 const res::Func& rfunc) {
+  assert(rfunc.isFoldable());
 
-  assert(!RuntimeOption::EvalJit);
-  return eval_cell([&] {
-    // Don't pop the args yet---if the builtin throws at compile time (because
-    // it would raise a warning or something at runtime) we're going to leave
-    // the call alone.
-    std::vector<Cell> args(op.arg1);
-    for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-      args[op.arg1 - i - 1] = *tv(topT(env, i));
-    }
-
-    auto const func = Unit::lookupFunc(name.get());
-    always_assert_flog(func, "func not found for builtin {}\n", name.get());
-    auto retVal = g_context->invokeFuncFew(func, nullptr, nullptr,
-      args.size(), args.data(), !env.ctx.unit->useStrictTypes);
-
-    // If we got here, we didn't throw, so we can pop the inputs.
-    for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-
-    assert(cellIsPlausible(retVal));
-    return retVal;
-  });
-}
-
-//////////////////////////////////////////////////////////////////////
-
-folly::Optional<Type> const_fold(ISS& env, const bc::FCallBuiltin& op) {
+  // Don't pop the args yet---if the builtin throws at compile time (because
+  // it would raise a warning or something at runtime) we're going to leave
+  // the call alone.
+  std::vector<Cell> args(op.arg1);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
     auto const val = tv(topT(env, i));
     if (!val || val->m_type == KindOfUninit) return folly::none;
+    args[op.arg1 - i - 1] = *val;
   }
 
-#define X(x) if (op.str3->isame(x.get())) return const_fold(env, op, x);
+  auto const func = Unit::lookupFunc(rfunc.name());
+  always_assert_flog(
+    func,
+    "func not found for builtin {}\n",
+    rfunc.name()->data()
+  );
 
-  X(s_array_combine)
-  X(s_array_fill)
-  X(s_array_flip)
-  X(s_array_reverse)
-  X(s_array_search)
-  X(s_array_slice)
-  X(s_array_sum)
-  X(s_array_values)
-  X(s_base64decode)
-  X(s_base64_encode)
-  X(s_base_convert)
-  X(s_bindec)
-  X(s_ceil)
-  X(s_chr)
-  X(s_count)
-  X(s_decbin)
-  X(s_dechex)
-  X(s_decoct)
-  X(s_explode)
-  X(s_floor)
-  X(s_getrandmax)
-  X(s_gettype)
-  X(s_hexdec)
-  X(s_implode)
-  X(s_in_array)
-  X(s_log)
-  X(s_log10)
-  X(s_mt_getrandmax)
-  X(s_octdec)
-  X(s_ord)
-  X(s_pow)
-  X(s_preg_quote)
-  X(s_range)
-  X(s_rawurldecode)
-  X(s_rawurlencode)
-  X(s_round)
-  X(s_sha1)
-  X(s_strlen)
-  X(s_str_repeat)
-  X(s_str_split)
-  X(s_substr)
-  X(s_trim)
-  X(s_urldecode)
-  X(s_urlencode)
-  X(s_utf8_encode)
-  X(s_version_compare)
-  X(s_sqrt)
-  X(s_abs)
+  // If the function is variadic, all the variadic parameters are already packed
+  // into an array as the last parameter. invokeFuncFew, however, expects them
+  // to be unpacked, so do so here.
+  if (func->hasVariadicCaptureParam()) {
+    if (args.empty()) return folly::none;
+    if (!isArrayType(args.back().m_type)) return folly::none;
+    auto const variadic = args.back();
+    args.pop_back();
+    IterateV(
+      variadic.m_data.parr,
+      [&](const TypedValue* v) { args.emplace_back(*v); }
+    );
+  }
 
-  // Note serialize can only run user-defined code if its argument is an
-  // object, which will never be a constant type, so this is safe.
-  X(s_serialize)
+  FTRACE(1, "invoking: {}\n", func->fullName()->data());
 
-  // We turn this on in case we'd be omitting a warning after constant-folding
-  // array_fill_keys.  Even if at runtime this option will be off, it's fine to
-  // compile as if it were on: we just won't fold the calls that could've
-  // raised this error.
-  RuntimeOption::StrictArrayFillKeys = HackStrictOption::ON;
-  X(s_array_fill_keys)
+  assert(!RuntimeOption::EvalJit);
+  return eval_cell(
+    [&] {
+      auto retVal = g_context->invokeFuncFew(
+        func, nullptr, nullptr,
+        args.size(), args.data(), !env.ctx.unit->useStrictTypes
+      );
 
-  // A few that you can't do:
+      // If we got here, we didn't throw, so we can pop the inputs.
+      for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
 
-  // These read the current locale, so they can't be constant folded:
-  // X(s_ucfirst)
-  // X(s_ucwords)
-  // X(s_strtolower)
-
-  // This sets the last json error code, so it has observable effects:
-  // X(s_json_encode)
-
-#undef X
-
-  return folly::none;
+      assert(cellIsPlausible(retVal));
+      return retVal;
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -321,8 +204,13 @@ bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 const StaticString
+  s_abs("abs"),
+  s_ceil("ceil"),
+  s_floor("floor"),
   s_max2("__SystemLib\\max2"),
-  s_min2("__SystemLib\\min2");
+  s_min2("__SystemLib\\min2"),
+  s_mt_rand("mt_rand"),
+  s_strlen("mt_strlen");
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
@@ -348,8 +236,11 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 namespace interp_step {
 
 void in(ISS& env, const bc::FCallBuiltin& op) {
-  if (options.ConstantFoldBuiltins) {
-    if (auto const val = const_fold(env, op)) {
+  auto const name = op.str3;
+  auto const func = env.index.resolve_func(env.ctx, name);
+
+  if (options.ConstantFoldBuiltins && func.isFoldable()) {
+    if (auto const val = const_fold(env, op, func)) {
       constprop(env);
       return push(env, *val);
     }
@@ -358,8 +249,6 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   // Try to handle the builtin at the type level.
   if (handle_builtin(env, op)) return;
 
-  auto const name = op.str3;
-  auto const func = env.index.resolve_func(env.ctx, name);
   auto const rt = env.index.lookup_return_type(env.ctx, func);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
   specialFunctionEffects(env, func);

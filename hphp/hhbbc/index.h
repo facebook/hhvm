@@ -259,6 +259,11 @@ struct Func {
     return mightReadCallerFrame() || mightWriteCallerFrame();
   }
 
+  /*
+   * Returns whether this resolved function is definitely safe to constant fold.
+   */
+  bool isFoldable() const;
+
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {

@@ -387,7 +387,7 @@ function sys_get_temp_dir(): string;
  * only versions with different levels like '4.1' and '4.1.2' can be compared
  * but also any PHP specific version containing development state.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function version_compare(string $version1,
                          string $version2,
                          string $sop = ""): mixed;

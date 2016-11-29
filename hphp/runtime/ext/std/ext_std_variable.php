@@ -150,8 +150,11 @@ function debug_zval_dump(mixed $variable): void;
 /* Generates a storable representation of a value  This is useful for storing
  * or passing PHP values around without losing their type and structure.  To
  * make the serialized string into a PHP value again, use unserialize().
+ *
+ * Calls to serialize are foldable because only objects can invoke user-defined
+ * code.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function serialize(mixed $value): string;
 
 <<__Native, __ParamCoerceModeFalse>>

@@ -112,15 +112,33 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
 
   if (!options.InsertStackAssertions) return;
 
+  auto const assert_stack = [&] (size_t idx) {
+    assert(idx < state.stack.size());
+    auto const realT = state.stack[state.stack.size() - idx - 1];
+    auto const flav  = stack_flav(realT);
+
+    if (flav.subtypeOf(TCls)) return;
+    if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
+      return;
+    }
+
+    auto const op =
+      makeAssert<bc::AssertRATStk>(
+        arrTable,
+        static_cast<int32_t>(idx),
+        realT
+      );
+    if (op) gen(*op);
+  };
+
   // Skip asserting the top of the stack if it just came immediately
   // out of an 'obvious' instruction (see hasObviousStackOutput), or
   // if this instruction ignoresStackInput.
   assert(state.stack.size() >= bcode.numPop());
   auto i = size_t{0};
-  auto stackIdx = state.stack.size() - 1;
   if (options.FilterAssertions) {
     if (lastStackOutputObvious || ignoresStackInput(bcode.op)) {
-      ++i, --stackIdx;
+      ++i;
     }
   }
 
@@ -129,22 +147,19 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
    * no instruction in an FPI region can ever consume a stack value
    * from above the pre-live ActRec.
    */
-  for (; i < bcode.numPop(); ++i, --stackIdx) {
-    auto const realT = state.stack[stackIdx];
-    auto const flav  = stack_flav(realT);
+  for (; i < bcode.numPop(); ++i) assert_stack(i);
 
-    if (flav.subtypeOf(TCls)) continue;
-    if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
-      continue;
-    }
-
-    auto const op =
-      makeAssert<bc::AssertRATStk>(
-        arrTable,
-        static_cast<int32_t>(i),
-        realT
-      );
-    if (op) gen(*op);
+  // The base instructions are special in that they don't pop anything, but do
+  // read from the stack. We want type assertions on the stack slots they'll
+  // read.
+  switch (bcode.op) {
+    case Op::BaseC:       assert_stack(bcode.BaseC.arg1);       break;
+    case Op::BaseNC:      assert_stack(bcode.BaseNC.arg1);      break;
+    case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
+    case Op::BaseR:       assert_stack(bcode.BaseR.arg1);       break;
+    case Op::FPassBaseNC: assert_stack(bcode.FPassBaseNC.arg2); break;
+    case Op::FPassBaseGC: assert_stack(bcode.FPassBaseGC.arg2); break;
+    default:                                                    break;
   }
 }
 

@@ -63,9 +63,9 @@ bool beginInlining(IRGS& env,
                 !isFPushCuf(info.fpushOpc) &&
                 !info.interp);
 
-  auto const prevSP    = fpiStack.back().returnSP;
-  auto const prevSPOff = fpiStack.back().returnSPOff;
-  auto const calleeSP  = sp(env);
+  auto const prevSP = fpiStack.back().returnSP;
+  auto const prevBCSPOff = fpiStack.back().returnSPOff;
+  auto const calleeSP = sp(env);
 
   always_assert_flog(
     prevSP == calleeSP,
@@ -74,7 +74,7 @@ bool beginInlining(IRGS& env,
 
   // The VM stack-pointer is conceptually pointing to the last
   // parameter, so we need to add numParams to get to the ActRec
-  IRSPRelOffset calleeAROff = bcSPOffset(env) + numParams;
+  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + numParams;
 
   auto ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {
@@ -144,7 +144,7 @@ bool beginInlining(IRGS& env,
   data.target        = target;
   data.retBCOff      = returnBcOffset;
   data.ctx           = target->isClosureBody() ? nullptr : ctx;
-  data.retSPOff      = prevSPOff;
+  data.retSPOff      = prevBCSPOff;
   data.spOffset      = calleeAROff;
   data.numNonDefault = numParams;
 
@@ -184,7 +184,7 @@ bool beginInlining(IRGS& env,
         ReqBindJmpData {
           sk,
           FPInvOffset { startSk.func()->numSlotsInFrame() },
-          bcSPOffset(env),
+          spOffBCFromIRSP(env),
           TransFlags{}
         },
         sp(env),

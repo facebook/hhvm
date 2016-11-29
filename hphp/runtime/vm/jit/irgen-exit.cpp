@@ -52,8 +52,8 @@ bool branchesToItself(SrcKey sk) {
  */
 void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   auto const curBCOff = bcOff(env);
-  auto const irSP = bcSPOffset(env);
-  auto const invSP = invSPOff(env);
+  auto const irSP = spOffBCFromIRSP(env);
+  auto const invSP = spOffBCFromFP(env);
   if (env.firstBcInst && target.offset() == curBCOff) {
     gen(
       env,
@@ -131,7 +131,7 @@ Block* makeExitOpt(IRGS& env) {
   always_assert(!isInlining(env));
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, bcOff(env)), exit);
-  auto const data = IRSPRelOffsetData{bcSPOffset(env)};
+  auto const data = IRSPRelOffsetData{spOffBCFromIRSP(env)};
   gen(env, ReqRetranslateOpt, data, sp(env), fp(env));
   return exit;
 }

@@ -125,7 +125,7 @@ void emitAsyncRetSlow(IRGS& env, SSATmp* retVal) {
   gen(env, FreeActRec, fp(env));
   decRef(env, resumableObj);
 
-  gen(env, AsyncRetCtrl, RetCtrlData { bcSPOffset(env), false },
+  gen(env, AsyncRetCtrl, RetCtrlData { spOffBCFromIRSP(env), false },
       sp(env), fp(env), ret);
 }
 
@@ -228,7 +228,7 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   gen(
     env,
     RetCtrl,
-    RetCtrlData { bcSPOffset(env), true },
+    RetCtrlData { spOffBCFromIRSP(env), true },
     sp(env),
     fp(env),
     retVal

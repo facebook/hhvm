@@ -129,7 +129,7 @@ Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
     decRef(env, params[i].value);
   }
   gen(env, EndCatch,
-      IRSPRelOffsetData { bcSPOffset(env) },
+      IRSPRelOffsetData { spOffBCFromIRSP(env) },
       fp(env), sp(env));
   return exit;
 }
@@ -852,7 +852,7 @@ struct CatchMaker {
     decRefForUnwind();
     prepareForCatch();
     gen(env, EndCatch,
-        IRSPRelOffsetData { bcSPOffset(env) },
+        IRSPRelOffsetData { spOffBCFromIRSP(env) },
         fp(env), sp(env));
     return exit;
   }
@@ -875,7 +875,7 @@ struct CatchMaker {
         decRefForUnwind();
         prepareForCatch();
         gen(env, EndCatch,
-          IRSPRelOffsetData { bcSPOffset(env) },
+          IRSPRelOffsetData { spOffBCFromIRSP(env) },
           fp(env), sp(env));
       }
     );
@@ -926,7 +926,7 @@ private:
      * So before we leave, update the marker to placate EndCatch assertions,
      * which is trying to detect failure to do this properly.
      */
-    auto const spOff = IRSPRelOffsetData { bcSPOffset(env) };
+    auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
   }
@@ -1348,7 +1348,7 @@ SSATmp* builtinCall(IRGS& env,
     CallBuiltin,
     retType,
     CallBuiltinData {
-      bcSPOffset(env),
+      spOffBCFromIRSP(env),
       callee,
       params.count ? -1 : numNonDefault,
       funcDestroysLocals(callee),

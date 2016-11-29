@@ -274,7 +274,7 @@ void emitNewKeysetArray(IRGS& env, int32_t numArgs) {
     env,
     NewKeysetArray,
     NewKeysetArrayData {
-      bcSPOffset(env),
+      spOffBCFromIRSP(env),
       static_cast<uint32_t>(numArgs)
     },
     sp(env)
@@ -317,7 +317,7 @@ void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
       env,
       InitPackedLayoutArrayLoop,
       InitPackedArrayLoopData {
-        bcSPOffset(env),
+        spOffBCFromIRSP(env),
         static_cast<uint32_t>(numArgs)
       },
       array,
@@ -355,7 +355,7 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   auto const ids = immVec.vec32();
 
   NewStructData extra;
-  extra.offset  = bcSPOffset(env);
+  extra.offset  = spOffBCFromIRSP(env);
   extra.numKeys = numArgs;
   extra.keys    = new (env.unit.arena()) StringData*[numArgs];
   for (auto i = size_t{0}; i < numArgs; ++i) {

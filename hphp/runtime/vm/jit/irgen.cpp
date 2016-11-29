@@ -37,7 +37,7 @@ Block* create_catch_block(IRGS& env) {
   env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
 
   gen(env, BeginCatch);
-  gen(env, EndCatch, IRSPRelOffsetData { bcSPOffset(env) },
+  gen(env, EndCatch, IRSPRelOffsetData { spOffBCFromIRSP(env) },
       fp(env), sp(env));
   return catchBlock;
 }
@@ -135,7 +135,7 @@ void prepareEntry(IRGS& env) {
    * C++ function that checks the state of everything.
    */
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const data = IRSPRelOffsetData { bcSPOffset(env) };
+    auto const data = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, DbgTraceCall, data, fp(env), sp(env));
   }
 
@@ -164,8 +164,8 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   }
   auto const data = ReqBindJmpData {
     nextSk,
-    invSPOff(env),
-    bcSPOffset(env),
+    spOffBCFromFP(env),
+    spOffBCFromIRSP(env),
     TransFlags{}
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));

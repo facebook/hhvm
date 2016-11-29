@@ -201,7 +201,7 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
 
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
-    .addr(sp, cellsToBytes(extra->spOffset.offset))
+    .addr(sp, cellsToBytes(extra->bcSPOff.offset))
     .ssa(1);
 
   cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),

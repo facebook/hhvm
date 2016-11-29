@@ -45,12 +45,32 @@ namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FPIInfo {
+  /*
+   * Value of IRSP after the call returns.
+   */
   SSATmp* returnSP;
-  FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
-  Type ctxType; // tracked separately as a union of observed ctx types
+
+  /*
+   * BCSP offset after the call returns.
+   */
+  FPInvOffset returnSPOff;
+
+  /*
+   * Union of observed context Class* types, and its value if known.
+   */
+  Type ctxType;
   SSATmp* ctx;
-  Op fpushOpc; // bytecode for FPush*
+
+  /*
+   * Bytecode for the FPush* of the call.
+   */
+  Op fpushOpc;
+
+  /*
+   * Function being called.
+   */
   const Func* func;
+
   bool interp;
   bool spansCall;
 };

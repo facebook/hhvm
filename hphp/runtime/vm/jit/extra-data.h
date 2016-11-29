@@ -309,20 +309,6 @@ struct RDSHandleData : IRExtraData {
 };
 
 /*
- * ProfileMethod
- */
-struct ProfileMethodData : IRExtraData {
-  explicit ProfileMethodData(
-    IRSPRelOffset spOffset, rds::Handle handle) :
-      spOffset(spOffset), handle(handle) {}
-
-  std::string show() const { return folly::to<std::string>(handle); }
-
-  IRSPRelOffset spOffset;
-  rds::Handle handle;
-};
-
-/*
  * Translation ID.
  *
  * Used with profiling-related instructions.
@@ -403,15 +389,15 @@ struct IsAsyncData : IRExtraData {
 };
 
 struct LdBindAddrData : IRExtraData {
-  explicit LdBindAddrData(SrcKey sk, FPInvOffset spOff)
+  explicit LdBindAddrData(SrcKey sk, FPInvOffset bcSPOff)
     : sk(sk)
-    , spOff(spOff)
+    , bcSPOff(bcSPOff)
   {}
 
   std::string show() const { return showShort(sk); }
 
   SrcKey sk;
-  FPInvOffset spOff;
+  FPInvOffset bcSPOff;
 };
 
 struct LdSSwitchData : IRExtraData {
@@ -429,19 +415,19 @@ struct LdSSwitchData : IRExtraData {
     target->numCases   = numCases;
     target->defaultSk  = defaultSk;
     target->cases      = new (arena) Elm[numCases];
-    target->spOff      = spOff;
+    target->bcSPOff    = bcSPOff;
     std::copy(cases, cases + numCases, const_cast<Elm*>(target->cases));
     return target;
   }
 
   std::string show() const {
-    return folly::to<std::string>(spOff.offset);
+    return folly::to<std::string>(bcSPOff.offset);
   }
 
   int64_t     numCases;
   const Elm*  cases;
   SrcKey      defaultSk;
-  FPInvOffset spOff;
+  FPInvOffset bcSPOff;
 };
 
 struct ProfileSwitchData : IRExtraData {
@@ -463,10 +449,10 @@ struct ProfileSwitchData : IRExtraData {
 struct JmpSwitchData : IRExtraData {
   JmpSwitchData* clone(Arena& arena) const {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
-    sd->cases      = cases;
-    sd->targets    = new (arena) SrcKey[cases];
-    sd->invSPOff   = invSPOff;
-    sd->irSPOff    = irSPOff;
+    sd->cases = cases;
+    sd->targets = new (arena) SrcKey[cases];
+    sd->spOffBCFromFP = spOffBCFromFP;
+    sd->spOffBCFromIRSP = spOffBCFromIRSP;
     std::copy(targets, targets + cases, const_cast<SrcKey*>(sd->targets));
     return sd;
   }
@@ -477,8 +463,8 @@ struct JmpSwitchData : IRExtraData {
 
   int32_t cases;       // number of cases
   SrcKey* targets;     // srckeys for all targets
-  FPInvOffset invSPOff;
-  IRSPRelOffset irSPOff;
+  FPInvOffset spOffBCFromFP;
+  IRSPRelOffset spOffBCFromIRSP;
 };
 
 struct FPushCufData : IRExtraData {
@@ -1141,6 +1127,18 @@ struct LookupClsMethodData : IRExtraData {
   bool forward;
 };
 
+
+struct ProfileMethodData : IRExtraData {
+  ProfileMethodData(IRSPRelOffset bcSPOff, rds::Handle handle)
+    : bcSPOff(bcSPOff)
+    , handle(handle)
+  {}
+
+  std::string show() const { return folly::to<std::string>(handle); }
+
+  IRSPRelOffset bcSPOff;
+  rds::Handle handle;
+};
 
 //////////////////////////////////////////////////////////////////////
 

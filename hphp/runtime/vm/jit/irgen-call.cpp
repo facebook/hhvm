@@ -147,7 +147,7 @@ void fpushObjMethodUnknown(IRGS& env,
   gen(env,
       LdObjMethod,
       LdObjMethodData {
-        bcSPOffset(env), methodName, shouldFatal
+        spOffBCFromIRSP(env), methodName, shouldFatal
       },
       objCls,
       sp(env));
@@ -532,7 +532,7 @@ void fpushObjMethod(IRGS& env,
     gen(env,
         ProfileMethod,
         ProfileMethodData {
-          bcSPOffset(env), profile->handle()
+          spOffBCFromIRSP(env), profile->handle()
         },
         sp(env),
         cns(env, TNullptr));
@@ -566,7 +566,7 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
   env.irb->exceptionStackBoundary();
 
   gen(env, LdArrFuncCtx,
-      IRSPRelOffsetData { bcSPOffset(env) },
+      IRSPRelOffsetData { spOffBCFromIRSP(env) },
       arr, sp(env), thisAR);
   decRef(env, arr);
 }
@@ -604,7 +604,7 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
 
   auto const opcode = callable->isA(TArr) ? LdArrFPushCuf : LdStrFPushCuf;
   gen(env, opcode,
-      IRSPRelOffsetData { bcSPOffset(env) },
+      IRSPRelOffsetData { spOffBCFromIRSP(env) },
       callable, sp(env), fp(env));
   decRef(env, callable);
 }
@@ -902,7 +902,7 @@ void emitFPushFunc(IRGS& env, int32_t numParams) {
   env.irb->exceptionStackBoundary();
 
   gen(env, LdFunc,
-      IRSPRelOffsetData { bcSPOffset(env) },
+      IRSPRelOffsetData { spOffBCFromIRSP(env) },
       funcName, sp(env), fp(env));
 
   decRef(env, funcName);
@@ -1078,7 +1078,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
   env.irb->exceptionStackBoundary();
 
   gen(env, LookupClsMethod,
-      LookupClsMethodData { bcSPOffset(env), forward },
+      LookupClsMethodData { spOffBCFromIRSP(env), forward },
       clsVal, methVal, sp(env), fp(env));
   decRef(env, methVal);
 
@@ -1086,7 +1086,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
     gen(env,
         ProfileMethod,
         ProfileMethodData {
-          bcSPOffset(env), profile->handle()
+          spOffBCFromIRSP(env), profile->handle()
         },
         sp(env),
         clsVal);
@@ -1179,7 +1179,7 @@ void emitFPassCW(IRGS& env, int32_t argNum) {
 
 void emitFCallArray(IRGS& env) {
   auto const data = CallArrayData {
-    bcSPOffset(env),
+    spOffBCFromIRSP(env),
     0,
     bcOff(env),
     nextBcOff(env),
@@ -1191,7 +1191,7 @@ void emitFCallArray(IRGS& env) {
 
 void emitFCallUnpack(IRGS& env, int32_t numParams) {
   auto const data = CallArrayData {
-    bcSPOffset(env),
+    spOffBCFromIRSP(env),
     numParams,
     bcOff(env),
     nextBcOff(env),
@@ -1228,7 +1228,7 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
     env,
     Call,
     CallData {
-      bcSPOffset(env),
+      spOffBCFromIRSP(env),
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
@@ -1265,7 +1265,7 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
     env,
     Call,
     CallData {
-      bcSPOffset(env),
+      spOffBCFromIRSP(env),
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,

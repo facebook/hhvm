@@ -178,7 +178,7 @@ void checkRefs(IRGS& env,
                const std::vector<bool>& mask,
                const std::vector<bool>& vals,
                Offset dest) {
-  auto const actRecOff = entryArDelta + bcSPOffset(env);
+  auto const actRecOff = entryArDelta + spOffBCFromIRSP(env);
   auto const funcPtr = gen(env, LdARFuncPtr,
                            IRSPRelOffsetData { actRecOff }, sp(env));
   SSATmp* nParams = nullptr;

@@ -359,6 +359,9 @@ struct Vunit;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Service requests.
+//
+// `spOff' is the bytecode eval stack pointer's offset from rvmfp(); we use it
+// to sync rvmsp().
 
 struct bindjmp {
   explicit bindjmp(SrcKey target,

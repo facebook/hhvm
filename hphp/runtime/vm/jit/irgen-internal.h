@@ -81,10 +81,6 @@ inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
 }
 
-inline FPInvOffset invSPOff(const IRGS& env) {
-  return env.irb->fs().bcSPOff();
-}
-
 //////////////////////////////////////////////////////////////////////
 // Control-flow helpers.
 
@@ -316,26 +312,6 @@ void ifElse(IRGS& env, Branch branch, Next next) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
-  auto const stackOff = invSPOff(env);
-
-  FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
-         bcOff, stackOff.offset, curFunc(env)->fullName()->data());
-
-  return BCMarker {
-    SrcKey(curSrcKey(env), bcOff),
-    stackOff,
-    env.profTransID,
-    env.irb->fs().fp()
-  };
-}
-
-inline void updateMarker(IRGS& env) {
-  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
-}
-
-//////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
 inline SSATmp* assertType(SSATmp* tmp, Type type) {
@@ -369,9 +345,12 @@ inline BCSPRelOffset offsetFromBCSP(const IRGS& env, IRSPRelOffset irSPRel) {
 }
 
 /*
- * Offset of the bytecode stack pointer relative to the IR stack pointer.
+ * Offset of the bytecode stack pointer.
  */
-inline IRSPRelOffset bcSPOffset(const IRGS& env) {
+inline FPInvOffset spOffBCFromFP(const IRGS& env) {
+  return env.irb->fs().bcSPOff();
+}
+inline IRSPRelOffset spOffBCFromIRSP(const IRGS& env) {
   return offsetFromIRSP(env, BCSPRelOffset { 0 });
 }
 
@@ -460,6 +439,26 @@ inline SSATmp* topR(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
 
 inline SSATmp* topA(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
   return assertType(top(env, i), TCls);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
+  auto const stackOff = spOffBCFromFP(env);
+
+  FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
+         bcOff, stackOff.offset, curFunc(env)->fullName()->data());
+
+  return BCMarker {
+    SrcKey(curSrcKey(env), bcOff),
+    stackOff,
+    env.profTransID,
+    env.irb->fs().fp()
+  };
+}
+
+inline void updateMarker(IRGS& env) {
+  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
 }
 
 //////////////////////////////////////////////////////////////////////

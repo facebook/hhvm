@@ -354,7 +354,7 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
          stackType.hasValue() ? stackType->toString() : "<none>",
          popped, pushed);
 
-  InterpOneData idata { bcSPOffset(env) };
+  InterpOneData idata { spOffBCFromIRSP(env) };
   auto locals = interpOutputLocals(env, inst, idata.smashesAllLocals,
     stackType);
   idata.nChangedLocals = locals.size();
@@ -374,12 +374,12 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
 }
 
 void interpOne(IRGS& env, int popped) {
-  InterpOneData idata { bcSPOffset(env) };
+  InterpOneData idata { spOffBCFromIRSP(env) };
   interpOne(env, folly::none, popped, 0, idata);
 }
 
 void interpOne(IRGS& env, Type outType, int popped) {
-  InterpOneData idata { bcSPOffset(env) };
+  InterpOneData idata { spOffBCFromIRSP(env) };
   interpOne(env, outType, popped, 1, idata);
 }
 

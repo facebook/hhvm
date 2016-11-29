@@ -1510,7 +1510,7 @@ Block* makeCatchSet(IRGS& env, bool isSetWithRef = false) {
     [&] {
       hint(env, Block::Hint::Unused);
       gen(env, EndCatch,
-          IRSPRelOffsetData { bcSPOffset(env) },
+          IRSPRelOffsetData { spOffBCFromIRSP(env) },
           fp(env), sp(env));
     }
   );

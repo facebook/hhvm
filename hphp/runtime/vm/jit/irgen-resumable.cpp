@@ -76,7 +76,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // copying local variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true, hasThis(env));
-  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const waitHandle =
     gen(env,
@@ -124,7 +124,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
   // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true, hasThis(env));
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StAsyncArResume, ResumeOffset { resumeOffset }, fp(env),
       resumeAddr);
@@ -137,7 +137,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   auto const retVal = cns(env, TInitNull);
   push(env, retVal);
 
-  gen(env, AsyncSwitchFast, RetCtrlData { bcSPOffset(env), true },
+  gen(env, AsyncSwitchFast, RetCtrlData { spOffBCFromIRSP(env), true },
       sp(env), fp(env), retVal);
 }
 
@@ -145,7 +145,7 @@ void yieldReturnControl(IRGS& env) {
   auto const retVal = cns(env, TInitNull);
   push(env, retVal);
 
-  gen(env, RetCtrl, RetCtrlData { bcSPOffset(env), true },
+  gen(env, RetCtrl, RetCtrlData { spOffBCFromIRSP(env), true },
       sp(env), fp(env), retVal);
 }
 
@@ -154,7 +154,7 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true, hasThis(env));
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) };
+  auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StContArResume, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
 
@@ -308,7 +308,7 @@ void emitCreateCont(IRGS& env) {
   // variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true, hasThis(env));
-  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const cont =
     gen(env,
@@ -359,7 +359,7 @@ void emitContEnter(IRGS& env) {
   gen(
     env,
     ContEnter,
-    ContEnterData { bcSPOffset(env), returnBcOffset },
+    ContEnterData { spOffBCFromIRSP(env), returnBcOffset },
     sp(env),
     fp(env),
     genFp,

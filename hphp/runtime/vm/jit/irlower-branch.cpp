@@ -257,11 +257,11 @@ void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
   auto const marker = inst->marker();
   auto& v = vmain(env);
 
-  maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->irSPOff);
+  maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->spOffBCFromIRSP);
 
   auto const table = v.allocData<TCA>(extra->cases);
   for (int i = 0; i < extra->cases; i++) {
-    v << bindaddr{&table[i], extra->targets[i], extra->invSPOff};
+    v << bindaddr{&table[i], extra->targets[i], extra->spOffBCFromFP};
   }
 
   auto const t = v.makeReg();
@@ -311,12 +311,12 @@ void cgLdSSwitchDestFast(IRLS& env, const IRInstruction* inst) {
     // VdataPtrs, so bind them here.
     VdataPtr<TCA> dataPtr{nullptr};
     dataPtr.bind(addr);
-    v << bindaddr{dataPtr, extra->cases[i].dest, extra->spOff};
+    v << bindaddr{dataPtr, extra->cases[i].dest, extra->bcSPOff};
   }
 
   // Bind the default case target.
   auto const def = v.allocData<TCA>();
-  v << bindaddr{def, extra->defaultSk, extra->spOff};
+  v << bindaddr{def, extra->defaultSk, extra->bcSPOff};
 
   auto const args = argGroup(env, inst)
     .ssa(0)
@@ -336,9 +336,9 @@ void cgLdSSwitchDestSlow(IRLS& env, const IRInstruction* inst) {
 
   for (int64_t i = 0; i < extra->numCases; ++i) {
     strtab[i] = extra->cases[i].str;
-    v << bindaddr{&jmptab[i], extra->cases[i].dest, extra->spOff};
+    v << bindaddr{&jmptab[i], extra->cases[i].dest, extra->bcSPOff};
   }
-  v << bindaddr{&jmptab[extra->numCases], extra->defaultSk, extra->spOff};
+  v << bindaddr{&jmptab[extra->numCases], extra->defaultSk, extra->bcSPOff};
 
   auto const args = argGroup(env, inst)
     .typedValue(0)
@@ -409,7 +409,7 @@ void cgLdBindAddr(IRLS& env, const IRInstruction* inst) {
 
   // Emit service request to smash address of SrcKey into 'addr'.
   auto const addrPtr = v.allocData<TCA>();
-  v << bindaddr{addrPtr, extra->sk, extra->spOff};
+  v << bindaddr{addrPtr, extra->sk, extra->bcSPOff};
   v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dst};
 }
 

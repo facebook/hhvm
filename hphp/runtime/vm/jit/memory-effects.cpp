@@ -460,7 +460,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return ExitEffects {
       AUnknown,
       *stack_below(inst.src(1),
-                   inst.extra<JmpSwitchDest>()->irSPOff - 1).
+                   inst.extra<JmpSwitchDest>()->spOffBCFromIRSP - 1).
         precise_union(AMIStateAny)
     };
   case JmpSSwitchDest:
@@ -1562,7 +1562,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       AliasClass effects = AStack {
         inst.src(0),
-        inst.extra<ProfileMethod>()->spOffset,
+        inst.extra<ProfileMethod>()->bcSPOff,
         int32_t{kNumActRecCells}
       };
       return may_load_store(effects, AEmpty);

@@ -244,11 +244,6 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
     m_tv.m_data.num = 0;
   }
 
-public:
-  template<class F> void scan(F& mark) const {
-    mark(m_tv);
-  }
-
 private:
   RefData(DataType t, int64_t datum) {
     // Initialize this value by laundering uninitNull -> Null.

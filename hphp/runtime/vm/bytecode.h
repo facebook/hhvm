@@ -113,11 +113,6 @@ struct ExtraArgs {
    */
   TypedValue* getExtraArg(unsigned argInd) const;
 
-  template<class F> void scan(F& mark, unsigned int nargs) const {
-    for (unsigned i = 0; i < nargs; ++i) {
-      mark(*(m_extraArgs + i));
-    }
-  }
 private:
   ExtraArgs();
   ~ExtraArgs();
@@ -153,9 +148,6 @@ struct VarEnv {
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
   const bool m_global;
-
- public:
-  template<class F> void scan(F& mark) const;
 
  public:
   explicit VarEnv();
@@ -338,10 +330,6 @@ struct Fault {
       m_raiseFrame(nullptr),
       m_raiseOffset(kInvalidOffset),
       m_handledCount(0) {}
-
-  template<class F> void scan(F& mark) const {
-    mark(m_userException);
-  }
 
   ObjectData* m_userException;
 

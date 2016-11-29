@@ -50,106 +50,29 @@ struct Counter {
 };
 
 struct Marker {
-  explicit Marker()
-    : rds_{folly::Range<const char*>((char*)rds::header(),
-                                     RuntimeOption::EvalJitTargetCacheSize)}
-  {}
+  explicit Marker() {}
   void init();
   void traceRoots();
   void trace();
   void sweep();
 
-  // scanners can tell us where the pointers are seated.
-  void where(RootKind) {}
-
-  // mark exact pointers
-  void operator()(const StringData*);
-  void operator()(const ArrayData*);
-  void operator()(const ObjectData*);
-  void operator()(const ResourceData*);
-  void operator()(const ResourceHdr*);
-  void operator()(const RefData*);
-  void operator()(const TypedValue&);
-  void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
+  // drain the scanner, enqueue pointers
+  void finish_scan();
 
   // mark ambiguous pointers in the range [start,start+len)
-  void operator()(const void* start, size_t len);
-  void operator()(const void* start, const void* end) {
-    assert(uintptr_t(end) >= uintptr_t(start));
-    return (*this)(start, uintptr_t(end) - uintptr_t(start));
-  }
-
-  // classes containing exact pointers
-  void operator()(const String&);
-  void operator()(const Array&);
-  void operator()(const ArrayNoDtor&);
-  void operator()(const Object&);
-  void operator()(const Resource&);
-  void operator()(const Variant&);
-  void operator()(const StringBuffer&);
-
-  // treat implicit pointers the same as real pointers
-  void implicit(const ObjectData* p) { (*this)(p); }
-  void implicit(const ResourceHdr* p) { (*this)(p); }
-  void implicit(const Array& p) { (*this)(p); }
-
-  template<class T> void operator()(const req::ptr<T>& p) {
-    (*this)(p.get());
-  }
-  template<class T> void operator()(const req::vector<T>& c) {
-    for (auto& e : c) (*this)(e);
-  }
-  template<class T> void operator()(const req::set<T>& c) {
-    for (auto& e : c) (*this)(e);
-  }
-  template<class T> void implicit(const req::set<T>& c) {
-    for (auto& e : c) implicit(e);
-  }
-  template<class T,class U> void operator()(const std::pair<T,U>& p) {
-    (*this)(p.first);
-    (*this)(p.second);
-  }
-  template<class T,class U,class V,class W>
-  void operator()(const req::hash_map<T,U,V,W>& c) {
-    for (auto& e : c) (*this)(e); // each element is pair<T,U>
-  }
-
-  template <typename T>
-  void operator()(const LowPtr<T>& p) {
-    (*this)(p.get());
-  }
-
-  // TODO: these need to be implemented.
-  void operator()(const ActRec&) { }
-  void operator()(const Stack&) { }
-
-  // Explicitly ignored field types.
-  void operator()(const LowPtr<Class>&) {}
-  void operator()(const Func*) {}
-  void operator()(const Class*) {}
-  void operator()(const Unit*) {}
-  void operator()(const std::string&) {}
-  void operator()(int) {}
+  void conservativeScan(const void* start, size_t len);
 
 private:
-  template<class T> static bool counted(T* p) {
-    return p && p->isRefCounted();
-  }
   bool mark(const void*, GCBits = GCBits::Mark);
-  bool inRds(const void* vp) {
-    auto p = reinterpret_cast<const char*>(vp);
-    return p >= rds_.begin() && p < rds_.end();
-  }
-
   void checkedEnqueue(const void* p, GCBits bits);
   void finish_typescan();
 
-  template<class T> void enqueue(const T* p) {
-    auto h = reinterpret_cast<const Header*>(p);
+  void enqueue(const Header* h) {
     assert(h &&
            h->kind() <= HeaderKind::BigMalloc &&
            h->kind() != HeaderKind::AsyncFuncFrame &&
-           h->kind() != HeaderKind::NativeData);
+           h->kind() != HeaderKind::NativeData &&
+           h->kind() != HeaderKind::ClosureHdr);
     work_.push_back(h);
     max_worklist_ = std::max(max_worklist_, work_.size());
   }
@@ -170,7 +93,6 @@ private:
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
-  folly::Range<const char*> rds_; // full mmap'd rds section.
   std::vector<const Header*> unknown_objects_; // objs w/ unknown typescan id
 };
 
@@ -185,138 +107,7 @@ inline bool Marker::mark(const void* p, GCBits marks) {
   return old_marks == GCBits::Unmarked;
 }
 
-// Utility to just extract the kind field from an arbitrary Header ptr.
-inline DEBUG_ONLY HeaderKind kind(const void* p) {
-  return static_cast<const Header*>(p)->kind();
-}
-
-void Marker::operator()(const ObjectData* p) {
-  xscanned_ += sizeof(p);
-  if (!p) return;
-  assert(isObjectKind(p->headerKind()));
-  auto kind = p->headerKind();
-  if (kind == HeaderKind::AsyncFuncWH) {
-    // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
-    auto r = Resumable::FromObj(p);
-    auto frame = reinterpret_cast<const TypedValue*>(r) -
-                 r->actRec()->func()->numSlotsInFrame();
-    auto node = reinterpret_cast<const NativeNode*>(frame) - 1;
-    assert(node->hdr.kind == HeaderKind::AsyncFuncFrame);
-    if (mark(node)) {
-      // mark the AsyncFuncFrame prefix, but enqueue the ObjectData* to scan
-      enqueue(p);
-    }
-    assert(!p->getVMClass()->getNativeDataInfo());
-  } else if (kind == HeaderKind::Closure) {
-    auto closure_hdr = static_cast<const c_Closure*>(p)->hdr();
-    if (mark(closure_hdr)) {
-      enqueue(p);
-    }
-  } else if (p->getAttribute(ObjectData::HasNativeData)) {
-    // HNI style native object; mark the NativeNode header, queue the object.
-    // [NativeNode][NativeData][ObjectData][props] is one allocation.
-    // For generators -
-    // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
-    assert(p->getVMClass()->getNativeDataInfo() != nullptr);
-    auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
-    assert(h->hdr.kind == HeaderKind::NativeData);
-    if (mark(h)) {
-      enqueue(p);
-    }
-  } else {
-    // Ordinary non-builtin object subclass, or IDL-style native object.
-    if (mark(p)) {
-      enqueue(p);
-    }
-  }
-}
-
-void Marker::operator()(const ResourceHdr* p) {
-  xscanned_ += sizeof(p);
-  if (p && mark(p)) {
-    assert(kind(p) == HeaderKind::Resource);
-    enqueue(p);
-  }
-}
-
-void Marker::operator()(const ResourceData* r) {
-  xscanned_ += sizeof(r);
-  if (r && mark(r->hdr())) {
-    assert(kind(r->hdr()) == HeaderKind::Resource);
-    enqueue(r->hdr());
-  }
-}
-
-// ArrayData objects could be static
-void Marker::operator()(const ArrayData* p) {
-  xscanned_ += sizeof(p);
-  if (p && counted(p) && mark(p)) {
-    assert(isArrayKind(kind(p)));
-    enqueue(p);
-  }
-}
-
-// RefData objects contain at most one ptr, scan it eagerly.
-void Marker::operator()(const RefData* p) {
-  xscanned_ += sizeof(p);
-  if (!p) return;
-  if (inRds(p)) {
-    // p is a static local, initialized by RefData::initInRDS().
-    // we already scanned p's body as part of scanning RDS.
-    return;
-  }
-  if (mark(p)) {
-    assert(kind(p) == HeaderKind::Ref);
-    enqueue(p);
-  }
-}
-
-// The only thing interesting in a string is a possible APCString*,
-// which is not a request-local allocation.
-void Marker::operator()(const StringData* p) {
-  if (p && counted(p)) {
-    assert(kind(p) == HeaderKind::String);
-    mark(p);
-  }
-}
-
-void Marker::operator()(const String& p)    { (*this)(p.get()); }
-void Marker::operator()(const Array& p)     { (*this)(p.get()); }
-void Marker::operator()(const ArrayNoDtor& p) { (*this)(p.arr()); }
-void Marker::operator()(const Object& p)    { (*this)(p.get()); }
-void Marker::operator()(const Resource& p)  { (*this)(p.hdr()); }
-void Marker::operator()(const Variant& p)   { (*this)(*p.asTypedValue()); }
-
-void Marker::operator()(const StringBuffer& p) { p.scan(*this); }
-
-// mark a TypedValue or TypedValueAux. taking tv by value would exclude aux.
-void Marker::operator()(const TypedValue& tv) {
-  switch (tv.m_type) {
-    case KindOfString:    return (*this)(tv.m_data.pstr);
-    case KindOfVec:       return (*this)(tv.m_data.parr);
-    case KindOfDict:      return (*this)(tv.m_data.parr);
-    case KindOfKeyset:    return (*this)(tv.m_data.parr);
-    case KindOfArray:     return (*this)(tv.m_data.parr);
-    case KindOfObject:    return (*this)(tv.m_data.pobj);
-    case KindOfResource:  return (*this)(tv.m_data.pres);
-    case KindOfRef:       return (*this)(tv.m_data.pref);
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfPersistentString:
-    case KindOfPersistentVec:
-    case KindOfPersistentDict:
-    case KindOfPersistentKeyset:
-    case KindOfPersistentArray:
-    case KindOfClass: // only in eval stack
-      return;
-  }
-}
-
 void Marker::checkedEnqueue(const void* p, GCBits bits) {
-  if (bits == GCBits::Mark) xscanned_ += sizeof(p);
   auto h = ptrs_.header(p);
   if (!h) return;
   // mark p if it's an interesting kind. since we have metadata for it,
@@ -354,13 +145,13 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
       enqueue(h);
       break;
     case HeaderKind::AsyncFuncFrame:
-      enqueue(h->asyncFuncWH());
+      enqueue(reinterpret_cast<const Header*>(h->asyncFuncWH()));
       break;
     case HeaderKind::NativeData:
-      enqueue(h->nativeObj());
+      enqueue(reinterpret_cast<const Header*>(h->nativeObj()));
       break;
     case HeaderKind::ClosureHdr:
-      enqueue(h->closureObj());
+      enqueue(reinterpret_cast<const Header*>(h->closureObj()));
       break;
     case HeaderKind::String:
       // nothing to queue since strings don't have pointers
@@ -381,7 +172,7 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
 // mark ambigous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 void FOLLY_DISABLE_ADDRESS_SANITIZER
-Marker::operator()(const void* start, size_t len) {
+Marker::conservativeScan(const void* start, size_t len) {
   constexpr uintptr_t M{7}; // word size - 1
   auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
@@ -497,10 +288,11 @@ NEVER_INLINE void Marker::init() {
 void Marker::finish_typescan() {
   type_scanner_.finish(
     [this](const void* p, const char*) {
+      xscanned_ += sizeof(p);
       checkedEnqueue(p, GCBits::Mark);
     },
     [this](const void* p, std::size_t size, const char*) {
-      (*this)(p, size);
+      conservativeScan(p, size);
     }
   );
 }

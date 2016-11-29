@@ -75,21 +75,6 @@ struct AsioContext final {
   static constexpr uint32_t QUEUE_DEFAULT       = 0;
   static constexpr uint32_t QUEUE_NO_PENDING_IO = 1;
 
-  template<class F> void scan(F& mark) const {
-    // m_savedFP is a pointer to a frame on the stack that represents
-    // a \HH\Asio\join() call; it's guaranteed to be on the stack
-    mark(m_runnableQueue);
-    mark(m_fastRunnableQueue);
-    for (auto& p : m_priorityQueueDefault) {
-      for (auto wh : p.second) mark(wh);
-    }
-    for (auto& p : m_priorityQueueNoPendingIO) {
-      for (auto wh : p.second) mark(wh);
-    }
-    mark(m_sleepEvents);
-    mark(m_externalThreadEvents);
-  }
-
 private:
   typedef req::map<int64_t, req::deque<c_RescheduleWaitHandle*>>
     reschedule_priority_queue_t;

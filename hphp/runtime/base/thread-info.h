@@ -74,13 +74,6 @@ struct ThreadInfo {
   ThreadInfo();
   ~ThreadInfo();
 
-  template<class F> void scan(F& mark) const {
-    //if (m_profiler) m_profiler->scan(mark);
-
-    // m_pendingException, if present, will register itself as a root, so no
-    // need to scan it here.
-  }
-
   ////////////////////////////////////////////////////////////////////
 
   RequestInjectionData m_reqInjectionData;

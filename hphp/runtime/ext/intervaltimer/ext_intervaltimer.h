@@ -56,10 +56,6 @@ struct IntervalTimer final {
   void stop();
   void run();
 
-  template<class F> void scan(F& mark) const {
-    mark(m_callback);
-  }
-
 private:
   double m_interval;
   double m_initial;

@@ -60,21 +60,6 @@ void for_each_strong_iterator(Fn fn) {
   }
 }
 
-template<typename F> void ArrayIter::scan(F& mark) const {
-  if (hasArrayData()) {
-    mark(getArrayData());
-  } else {
-    mark(getObject());
-  }
-}
-
-template<typename F> void MArrayIter::scan(F& mark) const {
-  mark(getArray());
-  mark(getContainer());
-}
-
 //////////////////////////////////////////////////////////////////////
-
 }
-
 #endif

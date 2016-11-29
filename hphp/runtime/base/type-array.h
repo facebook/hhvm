@@ -71,11 +71,6 @@ private:
   Array(ArrayData* ad, NoIncRef) : m_arr(ad, NoIncRef{}) {}
 
 public:
-  template<class F> void scan(F& mark) const {
-    mark(m_arr);
-  }
-
-public:
   /*
    * Create an empty array or an array with one element. Note these are
    * different than those copying constructors that also take one value.

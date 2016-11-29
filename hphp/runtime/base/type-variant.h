@@ -1251,10 +1251,6 @@ struct Variant : private TypedValue {
     setWithRefHelper(v, false);
   }
 
-  template<class F> void scan(F& mark) const {
-    mark(*asTypedValue());
-  }
-
 private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;

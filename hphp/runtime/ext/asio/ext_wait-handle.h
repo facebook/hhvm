@@ -190,15 +190,7 @@ struct c_WaitHandle : ObjectData {
     static_assert(offsetof(c_WaitHandle, m_ctxVecIndex) == aux, "");
   }
 
- public:
-  template<class F> void scan(F& mark) const {
-    if (isFinished()) {
-      mark(m_resultOrException);
-    } else {
-      m_parentChain.scan(mark);
-    }
-    // TODO: t7925088 switch on kind and handle subclasses
-  }
+  // TODO: t7925088 switch on kind and handle subclasses
 
  protected:
   TYPE_SCAN_IGNORE_ALL;

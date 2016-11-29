@@ -74,11 +74,6 @@ protected:
   String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
 public:
-  template<class F> void scan(F& mark) const {
-    mark(m_str);
-  }
-
-public:
   static const int MinPrecomputedInteger = SCHAR_MIN;
   static const int MaxPrecomputedInteger = 4095 + SCHAR_MIN;
   static StringData const **converted_integers_raw;

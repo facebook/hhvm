@@ -88,17 +88,6 @@ namespace HPHP {
         raw_ptr_is_resource{true} { ptr->incRefCount(); }
     ~ZendResourceWrapper();
 
-    template <typename M> void scan(M& mark) const {
-      if (raw_ptr_is_resource) {
-        // We know exactly what it is, so mark exactly.
-        mark(static_cast<ResourceData*>(raw_ptr));
-      } else {
-        // Otherwise, we don't know, and raw_ptr could point to an arbitrary
-        // type, counted or not, so scan it conservatively.
-        mark(&raw_ptr, sizeof(void*));
-      }
-    }
-
     void* raw_ptr;
     TYPE_SCAN_CONSERVATIVE_FIELD(raw_ptr);
     int id;

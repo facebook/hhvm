@@ -31,13 +31,5 @@ void c_AwaitAllWaitHandle::forEachChild(T fn) {
   }
 }
 
-template<class F>
-void c_AwaitAllWaitHandle::scanChildren(F& mark) const {
-  if (isFinished()) return;
-  for (uint32_t i = 0; i < m_cap; ++i) {
-    mark(m_children[i].m_child);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

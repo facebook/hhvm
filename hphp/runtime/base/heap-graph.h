@@ -24,24 +24,6 @@ namespace HPHP {
 
 struct Header;
 
-// some labels for different kinds of root pointers
-enum class RootKind : uint8_t {
-  NotARoot,
-  RdsNormal,
-  RdsLocal,
-  RdsPersistent,
-  PhpStack,
-  ThreadInfo,
-  CppStack,
-  CppTls,
-  ThreadLocalManager,
-  Extensions,
-  RootMaps,
-  SweepLists,
-  AsioSession,
-  GetServerNote,
-};
-
 // Graph representation of the heap. The heap consists of some objects
 // (Nodes), and directed pointers (Ptrs) from Node to Node. For each
 // node, we maintain two singly linked lists:
@@ -111,9 +93,6 @@ struct HeapCycles {
   using NodeList = std::vector<int>;
   std::vector<NodeList> live_cycles, leaked_cycles;
 };
-
-// descriptors indexable by RootKind
-extern const char* root_kind_names[];
 
 // Make a snapshot of the heap. It will contain pointers to objects
 // in the heap so their properties or contents can be inspected.

@@ -1026,18 +1026,63 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         (stdout, _, exit_code) = ide_con.get_return()
         self.assertEqual(
             stdout,
-            '{"protocol":"service_framework3_rpc","type":"response","id":987,'
-            '"result":[{"name":"\\\\Foo::__construct","result_type":"method",'
-            '"pos":{"filename":"","line":11,"char_start":18,"char_end":26},'
-            '"definition_pos":{"filename":"","line":7,"char_start":15,'
-            '"char_end":17},"definition_span":{"filename":"","line_start":7,'
-            '"char_start":9,"line_end":7,"char_end":20},"definition_id":'
-            '"type_id::Foo"},{"name":"\\\\Foo","result_type":"class",'
-            '"pos":{"filename":"","line":11,"char_start":22,"char_end":24},'
-            '"definition_pos":{"filename":"","line":7,"char_start":15,'
-            '"char_end":17},"definition_span":{"filename":"","line_start":7,'
-            '"char_start":9,"line_end":7,"char_end":20},"definition_id":'
-            '"type_id::Foo"}]}\n',
+            '''
+                {
+                  "protocol": "service_framework3_rpc",
+                  "type": "response",
+                  "id": 987,
+                  "result": [
+                    {
+                      "name": "\\\\Foo",
+                      "result_type": "class",
+                      "pos": {
+                        "filename": "",
+                        "line": 11,
+                        "char_start": 22,
+                        "char_end": 24
+                      },
+                      "definition_pos": {
+                        "filename": "",
+                        "line": 7,
+                        "char_start": 15,
+                        "char_end": 17
+                      },
+                      "definition_span": {
+                        "filename": "",
+                        "line_start": 7,
+                        "char_start": 9,
+                        "line_end": 7,
+                        "char_end": 20
+                      },
+                      "definition_id": "type_id::Foo"
+                    },
+                    {
+                      "name": "\\\\Foo::__construct",
+                      "result_type": "method",
+                      "pos": {
+                        "filename": "",
+                        "line": 11,
+                        "char_start": 18,
+                        "char_end": 26
+                      },
+                      "definition_pos": {
+                        "filename": "",
+                        "line": 7,
+                        "char_start": 15,
+                        "char_end": 17
+                      },
+                      "definition_span": {
+                        "filename": "",
+                        "line_start": 7,
+                        "char_start": 9,
+                        "line_end": 7,
+                        "char_end": 20
+                      },
+                      "definition_id": "type_id::Foo"
+                    }
+                  ]
+                }
+            '''.replace(" ", "").replace("\n", "") + "\n",
             msg="Identify function result does not match"
         )
         self.assertEqual(

@@ -72,8 +72,9 @@ PhysRegSaver::~PhysRegSaver() {
 }
 
 size_t PhysRegSaver::dwordsPushed() const {
-  // Round up the number of regs pushed to an even number.
-  return (m_regs.size() + 1) ^ 0x1;
+  auto const gpr = m_regs & abi().gp();
+  auto const xmm = m_regs & abi().simd();
+  return 2 * xmm.size() + gpr.size() + (gpr.size() & 0x1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

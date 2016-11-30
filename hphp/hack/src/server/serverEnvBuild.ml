@@ -39,6 +39,17 @@ let make_genv options config local_config handle =
   let debug_port = Option.map (ServerArgs.debug_client options)
     ~f:(fun handle -> Debug_port.out_port_of_handle handle)
   in
+  let debug_port = match debug_port,
+    local_config.SLC.start_with_recorder_on with
+    | Some _, _ ->
+      debug_port
+    | None, true ->
+      let daemon = Recorder_daemon.start_daemon
+        (ServerFiles.recorder_out_link root)
+        (ServerFiles.recorder_log_link root) in
+      Some (Debug_port.out_port_of_out_channel @@ snd @@ daemon.Daemon.channels)
+    | _ -> None
+  in
   let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with
     | Some watchman_env ->

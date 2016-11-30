@@ -44,7 +44,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         err_msg = "See also hh_record stderr: " + stderr_data + "\n"
         sys.stderr.flush()
         # TODO: Make hh_record output JSON instead.
-        self.assertRegexpMatches(
+        self.assertRegex(
             output.strip(),
             '(Loaded_saved_state /tmp/.........../foo with 0 dirtied files)',
             err_msg)

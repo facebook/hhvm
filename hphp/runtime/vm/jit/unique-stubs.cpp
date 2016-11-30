@@ -322,8 +322,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     // (because of fb_intercept).  If that happens, we need to return to the
     // caller, but the handler will have already popped the callee's frame.
     // So, we need to save these values for later.
-    v << pushm{ar[AROFF(m_savedRip)]};
-    v << pushm{ar[AROFF(m_sfp)]};
+    v << pushpm{ar[AROFF(m_savedRip)], ar[AROFF(m_sfp)]};
 
     v << copy2{ar, v.cns(EventHook::NormalFunc), rarg(0), rarg(1)};
 
@@ -361,8 +360,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
       // callee's frame, so we're ready to continue from the original call
       // site.  We just need to grab the fp/rip of the original frame that we
       // saved earlier, and sync rvmsp().
-      v << pop{rvmfp()};
-      v << pop{saved_rip};
+      v << popp{rvmfp(), saved_rip};
 
       // Drop our call frame; the stublogue{} instruction guarantees that this
       // is exactly 16 bytes.
@@ -1168,23 +1166,11 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
     storeVMRegs(v);
 
     // Pack the service request args into a svcreq::ReqInfo on the stack.
-    switch (arch()) {
-      case Arch::X64:
-      case Arch::PPC64:
-        for (auto i = svcreq::kMaxArgs; i-- > 0; ) {
-          v << push{r_svcreq_arg(i)};
-        }
-        v << push{r_svcreq_stub()};
-        v << push{r_svcreq_req()};
-        break;
-      case Arch::ARM:
-        assertx(!(svcreq::kMaxArgs & 1));
-        for (auto i = svcreq::kMaxArgs - 1; i > 0; i -= 2) {
-          v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i)};
-        }
-        v << pushp{r_svcreq_req(), r_svcreq_stub()};
-        break;
+    assertx(!(svcreq::kMaxArgs & 1));
+    for (auto i = svcreq::kMaxArgs; i >= 2; i -= 2) {
+      v << pushp{r_svcreq_arg(i - 1), r_svcreq_arg(i - 2)};
     }
+    v << pushp{r_svcreq_stub(), r_svcreq_req()};
 
     // Call mcg->handleServiceRequest(rsp()).
     auto const sp = v.makeReg();

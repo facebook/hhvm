@@ -46,13 +46,11 @@ struct PhysRegSaver {
   PhysRegSaver& operator=(const PhysRegSaver&) = delete;
   PhysRegSaver& operator=(PhysRegSaver&&) = default;
 
-  size_t rspAdjustment() const;
   size_t dwordsPushed() const;
 
 private:
   Vout& m_v;
   RegSet m_regs;
-  int m_adjust;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

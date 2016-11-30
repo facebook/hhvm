@@ -166,11 +166,15 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::jmpi:
     // push/pop
     case Vinstr::pop:
-    case Vinstr::popm:
     case Vinstr::popf:
+    case Vinstr::popm:
+    case Vinstr::popp:
+    case Vinstr::poppm:
     case Vinstr::push:
-    case Vinstr::pushm:
     case Vinstr::pushf:
+    case Vinstr::pushm:
+    case Vinstr::pushp:
+    case Vinstr::pushpm:
     // floating-point conversions
     case Vinstr::cvttsd2siq:
     case Vinstr::cvtsi2sd:
@@ -201,8 +205,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::msr:
     case Vinstr::orsw:
     case Vinstr::orswi:
-    case Vinstr::popp:
-    case Vinstr::pushp:
     case Vinstr::subsb:
     case Vinstr::uxth:
     // ppc64 instructions

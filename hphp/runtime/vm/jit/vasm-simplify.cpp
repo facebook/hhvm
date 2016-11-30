@@ -416,6 +416,16 @@ bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
   });
 }
 
+bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
+  if (env.use_counts[inst.d]) return false;
+
+  // Convert to an lea when popping to a reg without any uses.
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << lea{reg::rsp[8], reg::rsp};
+    return 1;
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

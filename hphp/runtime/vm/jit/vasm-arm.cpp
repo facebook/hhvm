@@ -269,9 +269,11 @@ struct Vgen {
   void emit(const orq& i);
   void emit(const orqi& i);
   void emit(const pop& i);
+  void emit(const popp& i);
   void emit(const psllq& i);
   void emit(const psrlq& i);
   void emit(const push& i);
+  void emit(const pushp& i);
   void emit(const roundsd& i);
   void emit(const sar& i);
   void emit(const setcc& i) { a->Cset(W(i.d), C(i.cc)); }
@@ -323,8 +325,6 @@ struct Vgen {
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
   void emit(const orsw& i);
   void emit(const orswi& i);
-  void emit(const popp& i);
-  void emit(const pushp& i);
   void emit(const subsb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), SetFlags); }
   void emit(const uxth& i) { a->Uxth(W(i.d), W(i.s)); }
 
@@ -501,7 +501,7 @@ void Vgen::emit(const calls& i) {
 
 void Vgen::emit(const stublogue& i) {
   // Push FP, LR always regardless of i.saveframe (makes SP 16B aligned)
-  emit(pushp{rfp(), rlr()});
+  emit(pushp{rlr(), rfp()});
 }
 
 void Vgen::emit(const stubret& i) {
@@ -1023,7 +1023,7 @@ void Vgen::emit(const popp& i) {
 }
 
 void Vgen::emit(const pushp& i) {
-  a->Stp(X(i.s0), X(i.s1), MemOperand(sp, -16, PreIndex));
+  a->Stp(X(i.s1), X(i.s0), MemOperand(sp, -16, PreIndex));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1351,15 +1351,15 @@ void lower(Vunit& u, calltc& i, Vlabel b, size_t z) {
     // Push FP, LR for callToExit(..)
     auto r0 = v.makeReg();
     auto r1 = v.makeReg();
-    v << load{i.fp[AROFF(m_savedRip)], r0};
-    v << ldimmq{i.exittc, r1};
+    v << ldimmq{i.exittc, r0};
+    v << load{i.fp[AROFF(m_savedRip)], r1};
     v << pushp{r0, r1};
 
     // Emit call to next instruction to balance predictor's stack
     v << bln{};
 
     // Set the return address to savedRip and jump to target
-    v << copy{r0, rlr()};
+    v << copy{r1, rlr()};
     v << jmpr{i.target, i.args};
   });
 }
@@ -1369,7 +1369,7 @@ void lower(Vunit& u, resumetc& i, Vlabel b, size_t z) {
     // Push FP, LR for callToExit(..)
     auto r = v.makeReg();
     v << ldimmq{i.exittc, r};
-    v << pushp{rfp(), r};
+    v << pushp{r, rfp()};
 
     // Call the helper
     v << callr{i.target, i.args};
@@ -1386,12 +1386,36 @@ void lower(Vunit& u, popm& i, Vlabel b, size_t z) {
   });
 }
 
+void lower(Vunit& u, poppm& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto r0 = v.makeReg();
+    auto r1 = v.makeReg();
+    v << popp{r0, r1};
+    lowerVptr(i.d0, v);
+    lowerVptr(i.d1, v);
+    v << store{r0, i.d0};
+    v << store{r1, i.d1};
+  });
+}
+
 void lower(Vunit& u, pushm& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
     auto r = v.makeReg();
     lowerVptr(i.s, v);
     v << load{i.s, r};
     v << push{r};
+  });
+}
+
+void lower(Vunit& u, pushpm& i, Vlabel b, size_t z) {
+  lower_impl(u, b, z, [&] (Vout& v) {
+    auto r0 = v.makeReg();
+    auto r1 = v.makeReg();
+    lowerVptr(i.s0, v);
+    lowerVptr(i.s1, v);
+    v << load{i.s0, r0};
+    v << load{i.s1, r1};
+    v << pushp{r0, r1};
   });
 }
 

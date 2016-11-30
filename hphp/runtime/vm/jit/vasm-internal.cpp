@@ -143,13 +143,12 @@ bool is_empty_catch(const Vblock& block) {
 }
 
 void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
-  bool const is_empty = is_empty_catch(env.unit.blocks[p.target]);
+  // If the catch block is empty, we can just let tc_unwind_resume() and
+  // tc_unwind_personality() skip over our frame.
+  if (is_empty_catch(env.unit.blocks[p.target])) return;
 
-  auto const catch_target = is_empty
-    ? tc::ustubs().endCatchHelper
-    : env.addrs[p.target];
+  auto const catch_target = env.addrs[p.target];
   assertx(catch_target);
-
   env.meta.catches.emplace_back(p.instr, catch_target);
 }
 

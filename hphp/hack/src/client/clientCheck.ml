@@ -333,13 +333,6 @@ let main args =
       then print_patches_json file_map
       else apply_patches file_map;
       Exit_status.No_error
-    | MODE_FIND_LVAR_REFS arg ->
-      let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
-      let results =
-        rpc args @@ Rpc.FIND_LVAR_REFS (content, line, char) in
-      ClientFindLocals.go results args.output_json;
-      Exit_status.No_error
     | MODE_GET_METHOD_NAME arg ->
       let line, char = parse_position_string arg in
       let content = Sys_utils.read_stdin_to_string () in

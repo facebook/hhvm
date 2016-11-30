@@ -41,7 +41,6 @@ type _ t =
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | KILL : unit t
-  | FIND_LVAR_REFS : string * int * int -> ServerFindLocals.result t
   | FORMAT : string * int * int -> string Format_hack.return t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t

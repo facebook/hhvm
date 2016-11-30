@@ -69,8 +69,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DELETE_CHECKPOINT x -> env, ServerCheckpoint.delete_checkpoint x
     | STATS -> env, Stats.get_stats ()
     | KILL -> env, ()
-    | FIND_LVAR_REFS (content, line, char) ->
-        env, ServerFindLocals.go env.tcopt content line char
     | FORMAT (content, from, to_) ->
         env, ServerFormat.go content from to_
     | TRACE_AI action ->
@@ -162,7 +160,6 @@ let to_string : type a. a t -> _ = function
   | DELETE_CHECKPOINT _ -> "DELETE_CHECKPOINT"
   | STATS -> "STATS"
   | KILL -> "KILL"
-  | FIND_LVAR_REFS _ -> "FIND_LVAR_REFS"
   | FORMAT _ -> "FORMAT"
   | TRACE_AI _ -> "TRACE_AI"
   | IDE_FIND_REFS _ -> "IDE_FIND_REFS"

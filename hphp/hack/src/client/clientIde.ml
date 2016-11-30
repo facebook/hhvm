@@ -105,7 +105,7 @@ let write_response res =
 
 let get_ready_message server_in_fd =
   if not @@ Queue.is_empty pending_push_messages then `Server else
-  if Buffered_line_reader.has_pending_line stdin_reader then `Stdin else
+  if Buffered_line_reader.has_buffered_content stdin_reader then `Stdin else
   let readable, _, _ = Unix.select
     [server_in_fd; Buffered_line_reader.get_fd stdin_reader] [] [] 1.0 in
   if readable = [] then `None

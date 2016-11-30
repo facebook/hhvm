@@ -49,36 +49,36 @@ namespace arm { struct ImmFolder; }
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-vixl::Register X(Vreg64 r) {
+vixl::Register X(const Vreg64& r) {
   PhysReg pr(r.asReg());
   return x2a(pr);
 }
 
-vixl::Register W(Vreg64 r) {
+vixl::Register W(const Vreg64& r) {
   PhysReg pr(r.asReg());
   return x2a(pr).W();
 }
 
-vixl::Register W(Vreg32 r) {
+vixl::Register W(const Vreg32& r) {
   PhysReg pr(r.asReg());
   return x2a(pr).W();
 }
 
-vixl::Register W(Vreg16 r) {
+vixl::Register W(const Vreg16& r) {
   PhysReg pr(r.asReg());
   return x2a(pr).W();
 }
 
-vixl::Register W(Vreg8 r) {
+vixl::Register W(const Vreg8& r) {
   PhysReg pr(r.asReg());
   return x2a(pr).W();
 }
 
-vixl::FPRegister D(Vreg r) {
+vixl::FPRegister D(const Vreg& r) {
   return x2f(r);
 }
 
-vixl::VRegister V(Vreg r) {
+vixl::VRegister V(const Vreg& r) {
   return x2v(r);
 }
 
@@ -103,7 +103,7 @@ int64_t MSKTOP(int64_t value) {
   return value & ~0u;
 }
 
-vixl::MemOperand M(Vptr p) {
+vixl::MemOperand M(const Vptr& p) {
   assertx(p.base.isValid());
   if (p.index.isValid()) {
     assertx(p.disp == 0);
@@ -113,7 +113,7 @@ vixl::MemOperand M(Vptr p) {
   return MemOperand(X(p.base), p.disp);
 }
 
-vixl::Condition C(ConditionCode cc) {
+vixl::Condition C(const ConditionCode& cc) {
   return arm::convertCC(cc);
 }
 
@@ -401,7 +401,7 @@ void Vgen::emit(const copy2& i) {
   }
 }
 
-void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
+void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, const Vreg& d) {
   // Assembler::fmov emits a ldr from a literal pool if IsImmFP64 is false.
   // In that case, emit the raw bits into a GPR first and then move them
   // unmodified into destination SIMD

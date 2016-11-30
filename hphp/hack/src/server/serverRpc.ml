@@ -78,8 +78,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, Ai.QueryService.go json
     | DUMP_FULL_FIDELITY_PARSE file ->
         env, FullFidelityParseService.go file
-    | ECHO_FOR_TEST msg ->
-        env, msg
     | OPEN_FILE (path, contents) ->
         ServerFileSync.open_file env path contents, ()
     | CLOSE_FILE path ->
@@ -102,26 +100,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let edited_fc = edit_file_unsafe fc edits in
         let content = get_content edited_fc in
         env, ServerAutoComplete.auto_complete env.tcopt content
-    | IDE_HIGHLIGHT_REF (path, {line; column}) ->
-        let content =
-          ServerFileSync.try_relativize_path path >>= fun relative_path ->
-          (* This checks if the file is open in IDE already *)
-          File_heap.get_contents relative_path in
-        let content = match content with
-          | Some c -> c
-          | None -> try Sys_utils.cat path with _ -> ""
-        in
-        env, ServerHighlightRefs.go (content, line, column) env.tcopt
-    | IDE_IDENTIFY_FUNCTION (path, {line; column}) ->
-        let content =
-          ServerFileSync.try_relativize_path path >>= fun relative_path ->
-          File_heap.get_contents relative_path
-        in
-        let content = match content with
-          | Some c -> c
-          | None -> try Sys_utils.cat path with _ -> ""
-        in
-        env, ServerIdentifyFunction.go_absolute content line column env.tcopt
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()
     | SUBSCRIBE_DIAGNOSTIC id ->
@@ -167,13 +145,10 @@ let to_string : type a. a t -> _ = function
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
   | AI_QUERY _ -> "AI_QUERY"
   | DUMP_FULL_FIDELITY_PARSE _ -> "DUMP_FULL_FIDELITY_PARSE"
-  | ECHO_FOR_TEST _ -> "ECHO_FOR_TEST"
   | OPEN_FILE _ -> "OPEN_FILE"
   | CLOSE_FILE _ -> "CLOSE_FILE"
   | EDIT_FILE _ -> "EDIT_FILE"
   | IDE_AUTOCOMPLETE _ -> "IDE_AUTOCOMPLETE"
-  | IDE_HIGHLIGHT_REF _ -> "IDE_HIGHLIGHT_REF"
-  | IDE_IDENTIFY_FUNCTION _ -> "IDE_IDENTIFY_FUNCTION"
   | DISCONNECT -> "DISCONNECT"
   | SUBSCRIBE_DIAGNOSTIC _ -> "SUBSCRIBE_DIAGNOSTIC"
   | UNSUBSCRIBE_DIAGNOSTIC _ -> "UNSUBSCRIBE_DIAGNOSTIC"

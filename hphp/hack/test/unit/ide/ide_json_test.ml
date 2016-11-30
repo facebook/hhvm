@@ -235,32 +235,6 @@ let test_unsubscribe_call () =
     {|{"protocol":"service_framework3_rpc","id":4,"type":"unsubscribe"}|} in
   expect_call msg (Unsubscribe_diagnostic_call)
 
-let test_highlight_ref_call () =
-  let msg = build_call_msg "\"getSourceHighlights\"" [
-    {|"filename" : "test.php"|};
-    {|"position" : |} ^ (build_position_msg "2" "3")
-  ] in
-  expect_call msg (Highlight_ref_call ("test.php", {line = 2; column = 3}))
-
-let test_highlight_ref_response () =
-  let id = 4 in
-  let response = Highlight_ref_response (JSON_Array []) in
-  (json_string_of_response id response) =
-  {|{"protocol":"service_framework3_rpc","type":"response","id":4,"result":[]}|}
-
-let test_identify_funtion_call () =
-  let msg = build_call_msg "\"getDefinition\"" [
-    {|"filename" : "test.php"|};
-    {|"position" : |} ^ (build_position_msg "2" "3")
-  ] in
-  expect_call msg (Identify_function_call ("test.php", {line = 2; column = 3}))
-
-let test_identify_funtion_response () =
-  let id = 4 in
-  let response = Idetify_function_response (JSON_Array []) in
-  (json_string_of_response id response) =
-  {|{"protocol":"service_framework3_rpc","type":"response","id":4,"result":[]}|}
-
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;
@@ -288,10 +262,6 @@ let tests = [
   "test_subscribe_call", test_subscribe_call;
   "test_diagnostic_response", test_diagnostic_response;
   "test_unsubscribe_call", test_unsubscribe_call;
-  "test_highlight_ref_call", test_highlight_ref_call;
-  "test_highlight_ref_response", test_highlight_ref_response;
-  "test_identify_funtion_call", test_identify_funtion_call;
-  "test_identify_funtion_response", test_identify_funtion_response;
 ]
 
 let () =

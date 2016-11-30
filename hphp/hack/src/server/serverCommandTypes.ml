@@ -45,15 +45,10 @@ type _ t =
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
-  | ECHO_FOR_TEST : string -> string t
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t
   | EDIT_FILE : string * (code_edit list) -> unit t
   | IDE_AUTOCOMPLETE : string * content_pos -> AutocompleteService.result t
-  | IDE_HIGHLIGHT_REF : string * content_pos ->
-      ServerHighlightRefsTypes.result t
-  | IDE_IDENTIFY_FUNCTION : string * content_pos ->
-      IdentifySymbolService.result t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t

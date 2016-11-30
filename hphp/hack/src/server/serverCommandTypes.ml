@@ -21,7 +21,6 @@ type _ t =
   | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t
   | AUTOCOMPLETE : string -> AutocompleteService.result t
   | IDENTIFY_FUNCTION : string * int * int -> IdentifySymbolService.result t
-  | OUTLINE : string -> FileOutline.outline t
   | GET_DEFINITION_BY_ID : string -> string SymbolDefinition.t option t
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t

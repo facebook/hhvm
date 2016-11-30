@@ -172,6 +172,8 @@ let parse_check_args cmd =
       " (mode) fuzzy search constant definitions";
     "--outline", Arg.Unit (set_mode MODE_OUTLINE),
       " (mode) prints an outline of the text on stdin";
+    "--ide-outline",
+      Arg.Unit (set_mode (MODE_OUTLINE2)), "";
     "--inheritance-children", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x) ()),
       " (mode) prints a list of all related classes or methods to the given class";
     "--inheritance-ancestors", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
@@ -240,8 +242,6 @@ let parse_check_args cmd =
       ]), "";
     "--ide-get-definition",
       Arg.String (fun x -> set_mode (MODE_GET_DEFINITION x) ()), "";
-    "--ide-outline",
-      Arg.Unit (set_mode (MODE_OUTLINE2)), "";
     "--ide-find-refs",
       Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x) ()), "";
     "--ide-highlight-refs",

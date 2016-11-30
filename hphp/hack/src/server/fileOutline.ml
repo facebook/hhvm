@@ -259,45 +259,6 @@ let outline_ast ast =
   end in
   List.map outline SymbolDefinition.to_absolute
 
-let to_json_legacy input =
-  let entries = List.map input begin fun (pos, name, type_) ->
-    let line, start, end_ = Pos.info_pos pos in
-    Hh_json.JSON_Object [
-        "name",  Hh_json.JSON_String name;
-        "type", Hh_json.JSON_String type_;
-        "line",  Hh_json.int_ line;
-        "char_start", Hh_json.int_ start;
-        "char_end", Hh_json.int_ end_;
-    ]
-  end in
-  Hh_json.JSON_Array entries
-
-(* Transforms the outline type to format that existing --outline command
- * expects *)
-let rec to_legacy prefix acc defs =
-  List.fold_left defs ~init:acc ~f:begin fun acc def ->
-    match def.kind with
-    | Function -> (def.pos, def.name, "function") :: acc
-    | Class | Enum | Interface | Trait ->
-      let acc = (def.pos, def.name, "class") :: acc in
-      Option.value_map def.children
-        ~f:(to_legacy (prefix ^ def.name ^ "::") acc)
-        ~default:acc
-    | Method ->
-      let desc =
-        if List.mem def.modifiers Static
-        then "static method" else "method"
-      in
-      (def.pos, prefix ^ def.name, desc) :: acc
-    | Param
-    | Typeconst
-    | LocalVar
-    | Property
-    | Const -> acc
-  end
-
-let to_legacy outline = to_legacy "" [] outline
-
 let should_add_docblock = function
   | Function| Class | Method | Property | Const | Enum
   | Interface | Trait | Typeconst -> true
@@ -346,9 +307,6 @@ let outline popt content =
   in
   let result = outline_ast ast in
   add_docblocks result comments
-
-let outline_legacy popt content =
-  to_legacy @@ outline popt content
 
 let rec definition_to_json def =
   Hh_json.JSON_Object ([

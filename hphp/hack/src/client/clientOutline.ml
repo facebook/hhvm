@@ -8,25 +8,6 @@
  *
  *)
 
-open Core
-
-let print_json_legacy res =
-  print_endline (Hh_json.json_to_string (FileOutline.to_json_legacy res));
-  ()
-
-let print_readable_legacy res =
-  List.iter res begin fun (pos, name, type_) ->
-    print_endline ((Pos.string pos)^" "^name^" ("^type_^")")
-  end;
-  ()
-
-let go_legacy res output_json =
-  let res = FileOutline.to_legacy res in
-  if output_json then
-    print_json_legacy res
-  else
-    print_readable_legacy res
-
 let print_json res =
   print_endline (Hh_json.json_to_string (FileOutline.to_json res));
   ()

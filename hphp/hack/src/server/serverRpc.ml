@@ -29,8 +29,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerAutoComplete.auto_complete env.tcopt content
     | IDENTIFY_FUNCTION (content, line, char) ->
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
-    | OUTLINE content ->
-        env, FileOutline.outline env.popt content
     | GET_DEFINITION_BY_ID id ->
         env, Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
           SymbolDefinition.to_absolute
@@ -147,7 +145,6 @@ let to_string : type a. a t -> _ = function
   | COVERAGE_LEVELS _ -> "COVERAGE_LEVELS"
   | AUTOCOMPLETE _ -> "AUTOCOMPLETE"
   | IDENTIFY_FUNCTION _ -> "IDENTIFY_FUNCTION"
-  | OUTLINE _ -> "OUTLINE"
   | METHOD_JUMP _ -> "METHOD_JUMP"
   | FIND_DEPENDENT_FILES _ -> "FIND_DEPENDENT_FILES"
   | FIND_REFS _ -> "FIND_REFS"

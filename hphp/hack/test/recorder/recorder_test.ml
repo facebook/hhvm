@@ -3,11 +3,6 @@ open Core
 
 module DE = Debug_event
 
-let transcriber_consumer list_ref =
-  Recorder.Transcribe_to_consumer (fun events ->
-    list_ref := events
-  )
-
 let verify_result actual expected =
   let zipped = List.zip actual expected in
   match zipped with
@@ -27,11 +22,8 @@ let verify_result actual expected =
       result)
 
 let ignore_events_before_loading_saved_state () =
-  let result = ref [] in
-  let recorder = Recorder.start {
-    Recorder.transcriber = transcriber_consumer result;
-  } in
-  let _recorder = recorder
+  let recorder = Recorder.start () in
+  let recorder = recorder
     (** First typecheck is ignored. *)
     |> Recorder.add_event DE.Typecheck
     |> Recorder.add_event (DE.Loaded_saved_state
@@ -42,7 +34,7 @@ let ignore_events_before_loading_saved_state () =
     |> Recorder.add_event (DE.Fresh_vcs_state "abcdefg")
     |> Recorder.add_event DE.Stop_recording
   in
-  if (verify_result !result [
+  if (verify_result (Recorder.get_events recorder) [
     Loaded_saved_state {
       filename = "abcde.sqlite";
       dirty_files = Relative_path.Map.empty;

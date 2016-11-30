@@ -26,7 +26,7 @@ let verify_result actual expected =
         ();
       result)
 
-let ignore_events_before_fresh_state () =
+let ignore_events_before_loading_saved_state () =
   let result = ref [] in
   let recorder = Recorder.start {
     Recorder.transcriber = transcriber_consumer result;
@@ -34,17 +34,32 @@ let ignore_events_before_fresh_state () =
   let _recorder = recorder
     (** First typecheck is ignored. *)
     |> Recorder.add_event DE.Typecheck
+    |> Recorder.add_event (DE.Loaded_saved_state
+      { DE.filename = "abcde.sqlite";
+        dirty_files = Relative_path.Set.empty;
+        changed_while_parsing = Relative_path.Set.empty;
+        build_targets = Relative_path.Set.empty; })
     |> Recorder.add_event (DE.Fresh_vcs_state "abcdefg")
     |> Recorder.add_event DE.Stop_recording
   in
-  if (verify_result !result [Fresh_vcs_state "abcdefg"]) then
+  if (verify_result !result [
+    Loaded_saved_state {
+      filename = "abcde.sqlite";
+      dirty_files = Relative_path.Map.empty;
+      changed_while_parsing = Relative_path.Map.empty;
+      build_targets = Relative_path.Map.empty;
+      };
+    Fresh_vcs_state "abcdefg";
+  ])
+  then
     true
   else
     let () = Printf.eprintf "Actual and expected differ.\n" in
     false
 
 let tests = [
-  "ignore_events_before_fresh_state", ignore_events_before_fresh_state
+  "ignore_events_before_loading_saved_state",
+    ignore_events_before_loading_saved_state
 ]
 
 let () =

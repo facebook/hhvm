@@ -172,7 +172,7 @@ module ServerInitCommon = struct
             List.map dirty_files Relative_path.(concat Root) in
             HackEventLogger.vcs_changed_files_end t;
             let _ = Hh_logger.log_duration "Finding changed files" t in
-            Result.Ok (Relative_path.set_of_list dirty_files, old_modes)
+            Result.Ok (fn, Relative_path.set_of_list dirty_files, old_modes)
         end in
         Result.Ok get_dirty_files
     with e ->
@@ -335,10 +335,10 @@ module ServerInitCommon = struct
       List.map (BuildMain.get_live_targets env) (Relative_path.(concat Root)) in
     Relative_path.set_of_list targets
 
-  let get_state_future genv env root state_future timeout =
+  let get_state_future genv root state_future timeout =
     let state = state_future
     >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun (dirty_files, old_modes) ->
+    >>= fun (saved_state_fn, dirty_files, old_modes) ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -363,18 +363,16 @@ module ServerInitCommon = struct
     let updates = SSet.filter updates (fun p ->
       string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
-    (* Build targets are untracked by version control, so we must always
-     * recheck them. While we could query hg / git for the untracked files,
-     * it's much slower. *)
-    let dirty_files =
-      Relative_path.Set.union dirty_files (get_build_targets env) in
-    Ok (dirty_files, changed_while_parsing, old_modes)
-    in
-    state
+    Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes)
+  in
+  state
 end
 
+type saved_state_fn = string
+
 type state_result =
- (Relative_path.Set.t * Relative_path.Set.t * FileInfo.fast_with_modes, exn)
+ (saved_state_fn * Relative_path.Set.t
+   * Relative_path.Set.t * FileInfo.fast_with_modes, exn)
  Result.t
 
 (* Laziness *)
@@ -442,11 +440,24 @@ module ServerEagerInit : InitKind = struct
       if lazy_level <> Off then env, t
       else type_decl genv env fast t in
 
-    let state = get_state_future genv env root state_future timeout in
+    let state = get_state_future genv root state_future timeout in
     match state with
-    | Ok (dirty_files, changed_while_parsing, old_modes) ->
+    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes) ->
       let old_fast = FileInfo.modes_to_fast old_modes in
+      let build_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
+      let loaded_event = Debug_event.Loaded_saved_state {
+        Debug_event.filename = saved_state_fn;
+        dirty_files;
+        changed_while_parsing;
+        build_targets;
+      } in
+      let _ = Debug_port.write_opt loaded_event genv.debug_port in
+      (* Build targets are untracked by version control, so we must always
+       * recheck them. While we could query hg / git for the untracked files,
+       * it's much slower. *)
+      let dirty_files =
+        Relative_path.Set.union dirty_files build_targets in
       (* If a file has changed while we were parsing, we may have parsed the
        * new version, so we must treat it as possibly creating new type
        * errors. *)
@@ -534,12 +545,25 @@ module ServerLazyInit : InitKind = struct
       with_loader_timeout timeout "wait_for_state" f
     in
 
-    let state = get_state_future genv env root state_future timeout in
+    let state = get_state_future genv root state_future timeout in
 
     match state with
-    | Ok (dirty_files, changed_while_parsing, old_modes) ->
+    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes) ->
+      let build_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
+      let loaded_event = Debug_event.Loaded_saved_state {
+        Debug_event.filename = saved_state_fn;
+        dirty_files;
+        changed_while_parsing;
+        build_targets;
+      } in
+      let _ = Debug_port.write_opt loaded_event genv.debug_port in
       let t = Unix.gettimeofday () in
+      (* Build targets are untracked by version control, so we must always
+       * recheck them. While we could query hg / git for the untracked files,
+       * it's much slower. *)
+      let dirty_files =
+        Relative_path.Set.union dirty_files build_targets in
       let dirty_files =
         Relative_path.Set.union dirty_files changed_while_parsing in
       let dirty_files_list = Relative_path.Set.elements dirty_files in

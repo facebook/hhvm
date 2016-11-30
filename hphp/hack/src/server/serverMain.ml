@@ -71,11 +71,6 @@ module Program =
 
     (* filter and relativize updated file paths *)
     let process_updates genv _env updates =
-      let genv = {
-        genv with
-        debug_port = Debug_port.write_opt (Debug_event.Disk_files_modified
-          (SSet.elements updates)) genv.debug_port
-      } in
       let root = Path.to_string @@ ServerArgs.root genv.options in
       (* Because of symlinks, we can have updates from files that aren't in
        * the .hhconfig directory *)
@@ -85,6 +80,11 @@ module Program =
         Relative_path.Set.filter updates begin fun update ->
           ServerEnv.file_filter (Relative_path.suffix update)
         end in
+      let genv = if Relative_path.Set.is_empty to_recheck then genv else {
+        genv with
+        debug_port = Debug_port.write_opt (Debug_event.Disk_files_modified
+          (Relative_path.Set.elements to_recheck)) genv.debug_port
+      } in
       let config_in_updates =
         Relative_path.Set.mem updates ServerConfig.filename in
       if config_in_updates then begin

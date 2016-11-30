@@ -1180,16 +1180,16 @@ class Assembler {
 
   // FP instructions.
   // Move immediate to FP register.
-  void fmov(FPRegister fd, double imm);
+  void fmov(const FPRegister& fd, double imm);
 
   // Move FP register to register.
-  void fmov(Register rd, FPRegister fn);
+  void fmov(const Register& rd, const FPRegister& fn);
 
   // Move register to FP register.
-  void fmov(FPRegister fd, Register rn);
+  void fmov(const FPRegister& fd, const Register& rn);
 
   // Move FP register to FP register.
-  void fmov(FPRegister fd, FPRegister fn);
+  void fmov(const FPRegister& fd, const FPRegister& fn);
 
   // Move register to FP register 1
   void fmov(const FPRegister& fd, int index, const Register& rn);

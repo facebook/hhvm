@@ -1197,7 +1197,7 @@ void Assembler::hint(SystemHint code) {
 }
 
 
-void Assembler::fmov(FPRegister fd, double imm) {
+void Assembler::fmov(const FPRegister& fd, double imm) {
   if (fd.Is64Bits() && IsImmFP64(imm)) {
     Emit(FMOV_d_imm | Rd(fd) | ImmFP64(imm));
   } else if (fd.Is32Bits() && IsImmFP32(imm)) {
@@ -1211,21 +1211,21 @@ void Assembler::fmov(FPRegister fd, double imm) {
 }
 
 
-void Assembler::fmov(Register rd, FPRegister fn) {
+void Assembler::fmov(const Register& rd, const FPRegister& fn) {
   assert(rd.size() == fn.size());
   FPIntegerConvertOp op = rd.Is32Bits() ? FMOV_ws : FMOV_xd;
   Emit(op | Rd(rd) | Rn(fn));
 }
 
 
-void Assembler::fmov(FPRegister fd, Register rn) {
+void Assembler::fmov(const FPRegister& fd, const Register& rn) {
   assert(fd.size() == rn.size());
   FPIntegerConvertOp op = fd.Is32Bits() ? FMOV_sw : FMOV_dx;
   Emit(op | Rd(fd) | Rn(rn));
 }
 
 
-void Assembler::fmov(FPRegister fd, FPRegister fn) {
+void Assembler::fmov(const FPRegister& fd, const FPRegister& fn) {
   assert(fd.size() == fn.size());
   Emit(FPType(fd) | FMOV | Rd(fd) | Rn(fn));
 }

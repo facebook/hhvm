@@ -57,12 +57,20 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   SCOPE_EXIT { unit.freeScratchBlock(scratch); };
   Vout v(unit, scratch, vinstr.irctx());
 
-  int32_t const adjust = (vargs.stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
-  if (adjust) v << lea{rsp()[-adjust], rsp()};
-
-  // Push stack arguments, in reverse order.
-  for (int i = vargs.stkArgs.size() - 1; i >= 0; --i) {
-    v << push{vargs.stkArgs[i]};
+  // Push stack arguments, in reverse order. Push in pairs without padding
+  // except for the last argument (pushed first) which should be padded if
+  // there are an odd number of arguments.
+  int numArgs = vargs.stkArgs.size();
+  int32_t const adjust = (numArgs & 0x1) ? sizeof(uintptr_t) : 0;
+  if (adjust) {
+    // Using InvalidReg below fails SSA checks and simplify pass, so just
+    // push the arg twice. It's on the same cacheline and will actually
+    // perform faster than an explicit lea.
+    v << pushp{vargs.stkArgs[numArgs-1], vargs.stkArgs[numArgs-1]};
+    numArgs--;
+  }
+  for (int i = numArgs - 1; i >= 0; i -= 2) {
+    v << pushp{vargs.stkArgs[i], vargs.stkArgs[i-1]};
   }
 
   // Get the arguments in the proper registers.

@@ -270,11 +270,15 @@ struct Vunit;
   O(jmpi, I(target), U(args), Dn)\
   /* push/pop */\
   O(pop, Inone, Un, D(d))\
-  O(popm, Inone, U(d), Dn)\
   O(popf, Inone, Un, D(d))\
+  O(popm, Inone, U(d), Dn)\
+  O(popp, Inone, Un, D(d0) D(d1))\
+  O(poppm, Inone, U(d0) U(d1), Dn)\
   O(push, Inone, U(s), Dn)\
-  O(pushm, Inone, U(s), Dn)\
   O(pushf, Inone, U(s), Dn)\
+  O(pushm, Inone, U(s), Dn)\
+  O(pushp, Inone, U(s0) U(s1), Dn)\
+  O(pushpm, Inone, U(s0) U(s1), Dn)\
   /* floating-point conversions */\
   O(cvttsd2siq, Inone, U(s), D(d))\
   O(cvtsi2sd, Inone, U(s), D(d))\
@@ -311,8 +315,6 @@ struct Vunit;
   O(msr, I(s), U(r), Dn)\
   O(orswi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(orsw, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(popp, Inone, Un, D(d0) D(d1))\
-  O(pushp, Inone, U(s0) U(s1), Dn)\
   O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
@@ -1096,11 +1098,17 @@ struct jmpi { TCA target; RegSet args; };
  * Push/pop to rsp().
  */
 struct pop { Vreg64 d; };
-struct popm { Vptr d; };
 struct popf { VregSF d; };
+struct popm { Vptr d; };
+// popp[m]{d0, d1} -> pop[m]{d0}, pop[m]{d1}
+struct popp { Vreg64 d0, d1; };
+struct poppm { Vptr d0, d1; };
 struct push { Vreg64 s; };
-struct pushm { Vptr s; };
 struct pushf { VregSF s; };
+struct pushm { Vptr s; };
+// pushp[m]{s0, s1} -> push[m]{s0}, push[m]{s1}
+struct pushp { Vreg64 s0, s1; };
+struct pushpm { Vptr s0, s1; };
 
 /*
  * Integer-float conversions.
@@ -1151,8 +1159,6 @@ struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
 struct orswi { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct orsw { Vreg32 s0, s1, d; VregSF sf; };
-struct popp { Vreg64 d0, d1; };
-struct pushp { Vreg64 s0, s1; };
 struct subsb { Vreg8 s0, s1, d; VregSF sf; };
 struct uxth { Vreg16 s; Vreg32 d; };
 

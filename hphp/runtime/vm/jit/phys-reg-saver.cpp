@@ -35,8 +35,6 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
   auto xmm = m_regs & abi().simd();
   auto const sp = rsp();
 
-  m_adjust = gpr.size() & 0x1 ? 8 : 0;
-
   if (!xmm.empty()) {
     v << lea{sp[-16 * xmm.size()], sp};
 
@@ -47,57 +45,31 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
     });
   }
 
-  switch (arch()) {
-    case Arch::X64:
-    case Arch::PPC64:
-      gpr.forEach([&] (PhysReg r) {
-        v << push{r};
-      });
-      break;
-    case Arch::ARM:
-      gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
-        if (r1 == InvalidReg) {
-          v << push{r0};
-        } else {
-          v << pushp{r1, r0};
-        }
-      });
-      break;
-  }
-
-  if (m_adjust) {
-    v << lea{sp[-m_adjust], sp};
-  }
+  gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
+    if (r1 == InvalidReg) {
+      // Push r0 twice to avoid vasm-check failures
+      v << pushp{r0, r0};
+    } else {
+      v << pushp{r0, r1};
+    }
+  });
 }
 
 PhysRegSaver::~PhysRegSaver() {
   auto& v = m_v;
   auto const sp = rsp();
 
-  if (m_adjust) {
-    v << lea{sp[m_adjust], sp};
-  }
-
   auto gpr = m_regs & abi().gp();
   auto xmm = m_regs & abi().simd();
 
-  switch (arch()) {
-    case Arch::X64:
-    case Arch::PPC64:
-      gpr.forEachR([&] (PhysReg r) {
-        v << pop{r};
-      });
-      break;
-    case Arch::ARM:
-      gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
-        if (r1 == InvalidReg) {
-          v << pop{r0};
-        } else {
-          v << popp{r0, r1};
-        }
-      });
-      break;
-  }
+  gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
+    if (r0 == InvalidReg) {
+      // Pop second value into new virtual to avoid vasm-check failures
+      v << popp{v.makeReg(), r1};
+    } else {
+      v << popp{r0, r1};
+    }
+  });
 
   if (!xmm.empty()) {
     int offset = 0;
@@ -109,13 +81,9 @@ PhysRegSaver::~PhysRegSaver() {
   }
 }
 
-size_t PhysRegSaver::rspAdjustment() const {
-  return m_adjust;
-}
-
 size_t PhysRegSaver::dwordsPushed() const {
-  assertx((m_adjust % sizeof(int64_t)) == 0);
-  return m_regs.size() + m_adjust / sizeof(int64_t);
+  // Round up the number of regs pushed to an even number
+  return (m_regs.size() + 1) ^ 0x1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -901,6 +901,36 @@ void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void lower(Vunit& unit, popp& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << pop{inst.d0};
+    v << pop{inst.d1};
+  });
+}
+
+void lower(Vunit& unit, poppm& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << popm{inst.d0};
+    v << popm{inst.d1};
+  });
+}
+
+void lower(Vunit& unit, pushp& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << push{inst.s0};
+    v << push{inst.s1};
+  });
+}
+
+void lower(Vunit& unit, pushpm& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << pushm{inst.s0};
+    v << pushm{inst.s1};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   if (inst.saveframe) {
     unit.blocks[b].code[i] = push{rvmfp()};

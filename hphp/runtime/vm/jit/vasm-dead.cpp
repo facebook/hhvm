@@ -258,10 +258,12 @@ bool effectful(Vinstr& inst) {
     case Vinstr::popm:
     case Vinstr::popf:
     case Vinstr::popp:
+    case Vinstr::poppm:
     case Vinstr::push:
     case Vinstr::pushm:
     case Vinstr::pushf:
     case Vinstr::pushp:
+    case Vinstr::pushpm:
     case Vinstr::resumetc:
     case Vinstr::ret:
     case Vinstr::retransopt:

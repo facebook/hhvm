@@ -165,10 +165,12 @@ class EditableSyntax
       return ForeachStatement.from_json(json, position, source);
     case 'switch_statement':
       return SwitchStatement.from_json(json, position, source);
-    case 'case_statement':
-      return CaseStatement.from_json(json, position, source);
-    case 'default_statement':
-      return DefaultStatement.from_json(json, position, source);
+    case 'switch_section':
+      return SwitchSection.from_json(json, position, source);
+    case 'case_label':
+      return CaseLabel.from_json(json, position, source);
+    case 'default_label':
+      return DefaultLabel.from_json(json, position, source);
     case 'return_statement':
       return ReturnStatement.from_json(json, position, source);
     case 'throw_statement':
@@ -7866,27 +7868,35 @@ class SwitchStatement extends EditableSyntax
     left_paren,
     expression,
     right_paren,
-    body)
+    left_brace,
+    sections,
+    right_brace)
   {
     super('switch_statement', {
       keyword: keyword,
       left_paren: left_paren,
       expression: expression,
       right_paren: right_paren,
-      body: body });
+      left_brace: left_brace,
+      sections: sections,
+      right_brace: right_brace });
   }
   get keyword() { return this.children.keyword; }
   get left_paren() { return this.children.left_paren; }
   get expression() { return this.children.expression; }
   get right_paren() { return this.children.right_paren; }
-  get body() { return this.children.body; }
+  get left_brace() { return this.children.left_brace; }
+  get sections() { return this.children.sections; }
+  get right_brace() { return this.children.right_brace; }
   with_keyword(keyword){
     return new SwitchStatement(
       keyword,
       this.left_paren,
       this.expression,
       this.right_paren,
-      this.body);
+      this.left_brace,
+      this.sections,
+      this.right_brace);
   }
   with_left_paren(left_paren){
     return new SwitchStatement(
@@ -7894,7 +7904,9 @@ class SwitchStatement extends EditableSyntax
       left_paren,
       this.expression,
       this.right_paren,
-      this.body);
+      this.left_brace,
+      this.sections,
+      this.right_brace);
   }
   with_expression(expression){
     return new SwitchStatement(
@@ -7902,7 +7914,9 @@ class SwitchStatement extends EditableSyntax
       this.left_paren,
       expression,
       this.right_paren,
-      this.body);
+      this.left_brace,
+      this.sections,
+      this.right_brace);
   }
   with_right_paren(right_paren){
     return new SwitchStatement(
@@ -7910,15 +7924,39 @@ class SwitchStatement extends EditableSyntax
       this.left_paren,
       this.expression,
       right_paren,
-      this.body);
+      this.left_brace,
+      this.sections,
+      this.right_brace);
   }
-  with_body(body){
+  with_left_brace(left_brace){
     return new SwitchStatement(
       this.keyword,
       this.left_paren,
       this.expression,
       this.right_paren,
-      body);
+      left_brace,
+      this.sections,
+      this.right_brace);
+  }
+  with_sections(sections){
+    return new SwitchStatement(
+      this.keyword,
+      this.left_paren,
+      this.expression,
+      this.right_paren,
+      this.left_brace,
+      sections,
+      this.right_brace);
+  }
+  with_right_brace(right_brace){
+    return new SwitchStatement(
+      this.keyword,
+      this.left_paren,
+      this.expression,
+      this.right_paren,
+      this.left_brace,
+      this.sections,
+      right_brace);
   }
   rewrite(rewriter, parents)
   {
@@ -7930,13 +7968,17 @@ class SwitchStatement extends EditableSyntax
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var expression = this.expression.rewrite(rewriter, new_parents);
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
-    var body = this.body.rewrite(rewriter, new_parents);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var sections = this.sections.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       expression === this.expression &&
       right_paren === this.right_paren &&
-      body === this.body)
+      left_brace === this.left_brace &&
+      sections === this.sections &&
+      right_brace === this.right_brace)
     {
       return rewriter(this, parents);
     }
@@ -7947,7 +7989,9 @@ class SwitchStatement extends EditableSyntax
         left_paren,
         expression,
         right_paren,
-        body), parents);
+        left_brace,
+        sections,
+        right_brace), parents);
     }
   }
   static from_json(json, position, source)
@@ -7964,15 +8008,23 @@ class SwitchStatement extends EditableSyntax
     let right_paren = EditableSyntax.from_json(
       json.switch_right_paren, position, source);
     position += right_paren.width;
-    let body = EditableSyntax.from_json(
-      json.switch_body, position, source);
-    position += body.width;
+    let left_brace = EditableSyntax.from_json(
+      json.switch_left_brace, position, source);
+    position += left_brace.width;
+    let sections = EditableSyntax.from_json(
+      json.switch_sections, position, source);
+    position += sections.width;
+    let right_brace = EditableSyntax.from_json(
+      json.switch_right_brace, position, source);
+    position += right_brace.width;
     return new SwitchStatement(
         keyword,
         left_paren,
         expression,
         right_paren,
-        body);
+        left_brace,
+        sections,
+        right_brace);
   }
   get children_keys()
   {
@@ -7982,55 +8034,108 @@ class SwitchStatement extends EditableSyntax
         'left_paren',
         'expression',
         'right_paren',
-        'body'];
+        'left_brace',
+        'sections',
+        'right_brace'];
     return SwitchStatement._children_keys;
   }
 }
-class CaseStatement extends EditableSyntax
+class SwitchSection extends EditableSyntax
+{
+  constructor(
+    labels,
+    statements)
+  {
+    super('switch_section', {
+      labels: labels,
+      statements: statements });
+  }
+  get labels() { return this.children.labels; }
+  get statements() { return this.children.statements; }
+  with_labels(labels){
+    return new SwitchSection(
+      labels,
+      this.statements);
+  }
+  with_statements(statements){
+    return new SwitchSection(
+      this.labels,
+      statements);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var labels = this.labels.rewrite(rewriter, new_parents);
+    var statements = this.statements.rewrite(rewriter, new_parents);
+    if (
+      labels === this.labels &&
+      statements === this.statements)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new SwitchSection(
+        labels,
+        statements), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let labels = EditableSyntax.from_json(
+      json.switch_section_labels, position, source);
+    position += labels.width;
+    let statements = EditableSyntax.from_json(
+      json.switch_section_statements, position, source);
+    position += statements.width;
+    return new SwitchSection(
+        labels,
+        statements);
+  }
+  get children_keys()
+  {
+    if (SwitchSection._children_keys == null)
+      SwitchSection._children_keys = [
+        'labels',
+        'statements'];
+    return SwitchSection._children_keys;
+  }
+}
+class CaseLabel extends EditableSyntax
 {
   constructor(
     keyword,
     expression,
-    colon,
-    statement)
+    colon)
   {
-    super('case_statement', {
+    super('case_label', {
       keyword: keyword,
       expression: expression,
-      colon: colon,
-      statement: statement });
+      colon: colon });
   }
   get keyword() { return this.children.keyword; }
   get expression() { return this.children.expression; }
   get colon() { return this.children.colon; }
-  get statement() { return this.children.statement; }
   with_keyword(keyword){
-    return new CaseStatement(
+    return new CaseLabel(
       keyword,
       this.expression,
-      this.colon,
-      this.statement);
+      this.colon);
   }
   with_expression(expression){
-    return new CaseStatement(
+    return new CaseLabel(
       this.keyword,
       expression,
-      this.colon,
-      this.statement);
+      this.colon);
   }
   with_colon(colon){
-    return new CaseStatement(
+    return new CaseLabel(
       this.keyword,
       this.expression,
-      colon,
-      this.statement);
-  }
-  with_statement(statement){
-    return new CaseStatement(
-      this.keyword,
-      this.expression,
-      this.colon,
-      statement);
+      colon);
   }
   rewrite(rewriter, parents)
   {
@@ -8041,22 +8146,19 @@ class CaseStatement extends EditableSyntax
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var expression = this.expression.rewrite(rewriter, new_parents);
     var colon = this.colon.rewrite(rewriter, new_parents);
-    var statement = this.statement.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       expression === this.expression &&
-      colon === this.colon &&
-      statement === this.statement)
+      colon === this.colon)
     {
       return rewriter(this, parents);
     }
     else
     {
-      return rewriter(new CaseStatement(
+      return rewriter(new CaseLabel(
         keyword,
         expression,
-        colon,
-        statement), parents);
+        colon), parents);
     }
   }
   static from_json(json, position, source)
@@ -8070,58 +8172,42 @@ class CaseStatement extends EditableSyntax
     let colon = EditableSyntax.from_json(
       json.case_colon, position, source);
     position += colon.width;
-    let statement = EditableSyntax.from_json(
-      json.case_statement, position, source);
-    position += statement.width;
-    return new CaseStatement(
+    return new CaseLabel(
         keyword,
         expression,
-        colon,
-        statement);
+        colon);
   }
   get children_keys()
   {
-    if (CaseStatement._children_keys == null)
-      CaseStatement._children_keys = [
+    if (CaseLabel._children_keys == null)
+      CaseLabel._children_keys = [
         'keyword',
         'expression',
-        'colon',
-        'statement'];
-    return CaseStatement._children_keys;
+        'colon'];
+    return CaseLabel._children_keys;
   }
 }
-class DefaultStatement extends EditableSyntax
+class DefaultLabel extends EditableSyntax
 {
   constructor(
     keyword,
-    colon,
-    statement)
+    colon)
   {
-    super('default_statement', {
+    super('default_label', {
       keyword: keyword,
-      colon: colon,
-      statement: statement });
+      colon: colon });
   }
   get keyword() { return this.children.keyword; }
   get colon() { return this.children.colon; }
-  get statement() { return this.children.statement; }
   with_keyword(keyword){
-    return new DefaultStatement(
+    return new DefaultLabel(
       keyword,
-      this.colon,
-      this.statement);
+      this.colon);
   }
   with_colon(colon){
-    return new DefaultStatement(
+    return new DefaultLabel(
       this.keyword,
-      colon,
-      this.statement);
-  }
-  with_statement(statement){
-    return new DefaultStatement(
-      this.keyword,
-      this.colon,
-      statement);
+      colon);
   }
   rewrite(rewriter, parents)
   {
@@ -8131,20 +8217,17 @@ class DefaultStatement extends EditableSyntax
     new_parents.push(this);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var colon = this.colon.rewrite(rewriter, new_parents);
-    var statement = this.statement.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
-      colon === this.colon &&
-      statement === this.statement)
+      colon === this.colon)
     {
       return rewriter(this, parents);
     }
     else
     {
-      return rewriter(new DefaultStatement(
+      return rewriter(new DefaultLabel(
         keyword,
-        colon,
-        statement), parents);
+        colon), parents);
     }
   }
   static from_json(json, position, source)
@@ -8155,22 +8238,17 @@ class DefaultStatement extends EditableSyntax
     let colon = EditableSyntax.from_json(
       json.default_colon, position, source);
     position += colon.width;
-    let statement = EditableSyntax.from_json(
-      json.default_statement, position, source);
-    position += statement.width;
-    return new DefaultStatement(
+    return new DefaultLabel(
         keyword,
-        colon,
-        statement);
+        colon);
   }
   get children_keys()
   {
-    if (DefaultStatement._children_keys == null)
-      DefaultStatement._children_keys = [
+    if (DefaultLabel._children_keys == null)
+      DefaultLabel._children_keys = [
         'keyword',
-        'colon',
-        'statement'];
-    return DefaultStatement._children_keys;
+        'colon'];
+    return DefaultLabel._children_keys;
   }
 }
 class ReturnStatement extends EditableSyntax
@@ -14324,8 +14402,9 @@ exports.DoStatement = DoStatement;
 exports.ForStatement = ForStatement;
 exports.ForeachStatement = ForeachStatement;
 exports.SwitchStatement = SwitchStatement;
-exports.CaseStatement = CaseStatement;
-exports.DefaultStatement = DefaultStatement;
+exports.SwitchSection = SwitchSection;
+exports.CaseLabel = CaseLabel;
+exports.DefaultLabel = DefaultLabel;
 exports.ReturnStatement = ReturnStatement;
 exports.ThrowStatement = ThrowStatement;
 exports.BreakStatement = BreakStatement;

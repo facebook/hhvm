@@ -228,10 +228,12 @@ abstract class EditableSyntax implements ArrayAccess {
       return ForeachStatement::from_json($json, $position, $source);
     case 'switch_statement':
       return SwitchStatement::from_json($json, $position, $source);
-    case 'case_statement':
-      return CaseStatement::from_json($json, $position, $source);
-    case 'default_statement':
-      return DefaultStatement::from_json($json, $position, $source);
+    case 'switch_section':
+      return SwitchSection::from_json($json, $position, $source);
+    case 'case_label':
+      return CaseLabel::from_json($json, $position, $source);
+    case 'default_label':
+      return DefaultLabel::from_json($json, $position, $source);
     case 'return_statement':
       return ReturnStatement::from_json($json, $position, $source);
     case 'throw_statement':
@@ -9673,19 +9675,25 @@ final class SwitchStatement extends EditableSyntax {
   private EditableSyntax $_left_paren;
   private EditableSyntax $_expression;
   private EditableSyntax $_right_paren;
-  private EditableSyntax $_body;
+  private EditableSyntax $_left_brace;
+  private EditableSyntax $_sections;
+  private EditableSyntax $_right_brace;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_paren,
     EditableSyntax $expression,
     EditableSyntax $right_paren,
-    EditableSyntax $body) {
+    EditableSyntax $left_brace,
+    EditableSyntax $sections,
+    EditableSyntax $right_brace) {
     parent::__construct('switch_statement');
     $this->_keyword = $keyword;
     $this->_left_paren = $left_paren;
     $this->_expression = $expression;
     $this->_right_paren = $right_paren;
-    $this->_body = $body;
+    $this->_left_brace = $left_brace;
+    $this->_sections = $sections;
+    $this->_right_brace = $right_brace;
   }
   public function keyword(): EditableSyntax {
     return $this->_keyword;
@@ -9699,8 +9707,14 @@ final class SwitchStatement extends EditableSyntax {
   public function right_paren(): EditableSyntax {
     return $this->_right_paren;
   }
-  public function body(): EditableSyntax {
-    return $this->_body;
+  public function left_brace(): EditableSyntax {
+    return $this->_left_brace;
+  }
+  public function sections(): EditableSyntax {
+    return $this->_sections;
+  }
+  public function right_brace(): EditableSyntax {
+    return $this->_right_brace;
   }
   public function with_keyword(EditableSyntax $keyword): SwitchStatement {
     return new SwitchStatement(
@@ -9708,7 +9722,9 @@ final class SwitchStatement extends EditableSyntax {
       $this->_left_paren,
       $this->_expression,
       $this->_right_paren,
-      $this->_body);
+      $this->_left_brace,
+      $this->_sections,
+      $this->_right_brace);
   }
   public function with_left_paren(EditableSyntax $left_paren): SwitchStatement {
     return new SwitchStatement(
@@ -9716,7 +9732,9 @@ final class SwitchStatement extends EditableSyntax {
       $left_paren,
       $this->_expression,
       $this->_right_paren,
-      $this->_body);
+      $this->_left_brace,
+      $this->_sections,
+      $this->_right_brace);
   }
   public function with_expression(EditableSyntax $expression): SwitchStatement {
     return new SwitchStatement(
@@ -9724,7 +9742,9 @@ final class SwitchStatement extends EditableSyntax {
       $this->_left_paren,
       $expression,
       $this->_right_paren,
-      $this->_body);
+      $this->_left_brace,
+      $this->_sections,
+      $this->_right_brace);
   }
   public function with_right_paren(EditableSyntax $right_paren): SwitchStatement {
     return new SwitchStatement(
@@ -9732,15 +9752,39 @@ final class SwitchStatement extends EditableSyntax {
       $this->_left_paren,
       $this->_expression,
       $right_paren,
-      $this->_body);
+      $this->_left_brace,
+      $this->_sections,
+      $this->_right_brace);
   }
-  public function with_body(EditableSyntax $body): SwitchStatement {
+  public function with_left_brace(EditableSyntax $left_brace): SwitchStatement {
     return new SwitchStatement(
       $this->_keyword,
       $this->_left_paren,
       $this->_expression,
       $this->_right_paren,
-      $body);
+      $left_brace,
+      $this->_sections,
+      $this->_right_brace);
+  }
+  public function with_sections(EditableSyntax $sections): SwitchStatement {
+    return new SwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_left_brace,
+      $sections,
+      $this->_right_brace);
+  }
+  public function with_right_brace(EditableSyntax $right_brace): SwitchStatement {
+    return new SwitchStatement(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_expression,
+      $this->_right_paren,
+      $this->_left_brace,
+      $this->_sections,
+      $right_brace);
   }
 
   public function rewrite(
@@ -9753,13 +9797,17 @@ final class SwitchStatement extends EditableSyntax {
     $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
-    $body = $this->body()->rewrite($rewriter, $new_parents);
+    $left_brace = $this->left_brace()->rewrite($rewriter, $new_parents);
+    $sections = $this->sections()->rewrite($rewriter, $new_parents);
+    $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_paren === $this->left_paren() &&
       $expression === $this->expression() &&
       $right_paren === $this->right_paren() &&
-      $body === $this->body()) {
+      $left_brace === $this->left_brace() &&
+      $sections === $this->sections() &&
+      $right_brace === $this->right_brace()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new SwitchStatement(
@@ -9767,7 +9815,9 @@ final class SwitchStatement extends EditableSyntax {
         $left_paren,
         $expression,
         $right_paren,
-        $body), $parents ?? []);
+        $left_brace,
+        $sections,
+        $right_brace), $parents ?? []);
     }
   }
 
@@ -9784,40 +9834,110 @@ final class SwitchStatement extends EditableSyntax {
     $right_paren = EditableSyntax::from_json(
       $json->switch_right_paren, $position, $source);
     $position += $right_paren->width();
-    $body = EditableSyntax::from_json(
-      $json->switch_body, $position, $source);
-    $position += $body->width();
+    $left_brace = EditableSyntax::from_json(
+      $json->switch_left_brace, $position, $source);
+    $position += $left_brace->width();
+    $sections = EditableSyntax::from_json(
+      $json->switch_sections, $position, $source);
+    $position += $sections->width();
+    $right_brace = EditableSyntax::from_json(
+      $json->switch_right_brace, $position, $source);
+    $position += $right_brace->width();
     return new SwitchStatement(
         $keyword,
         $left_paren,
         $expression,
         $right_paren,
-        $body);
+        $left_brace,
+        $sections,
+        $right_brace);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_paren;
     yield $this->_expression;
     yield $this->_right_paren;
-    yield $this->_body;
+    yield $this->_left_brace;
+    yield $this->_sections;
+    yield $this->_right_brace;
     yield break;
   }
 }
-final class CaseStatement extends EditableSyntax {
+final class SwitchSection extends EditableSyntax {
+  private EditableSyntax $_labels;
+  private EditableSyntax $_statements;
+  public function __construct(
+    EditableSyntax $labels,
+    EditableSyntax $statements) {
+    parent::__construct('switch_section');
+    $this->_labels = $labels;
+    $this->_statements = $statements;
+  }
+  public function labels(): EditableSyntax {
+    return $this->_labels;
+  }
+  public function statements(): EditableSyntax {
+    return $this->_statements;
+  }
+  public function with_labels(EditableSyntax $labels): SwitchSection {
+    return new SwitchSection(
+      $labels,
+      $this->_statements);
+  }
+  public function with_statements(EditableSyntax $statements): SwitchSection {
+    return new SwitchSection(
+      $this->_labels,
+      $statements);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $labels = $this->labels()->rewrite($rewriter, $new_parents);
+    $statements = $this->statements()->rewrite($rewriter, $new_parents);
+    if (
+      $labels === $this->labels() &&
+      $statements === $this->statements()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new SwitchSection(
+        $labels,
+        $statements), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $labels = EditableSyntax::from_json(
+      $json->switch_section_labels, $position, $source);
+    $position += $labels->width();
+    $statements = EditableSyntax::from_json(
+      $json->switch_section_statements, $position, $source);
+    $position += $statements->width();
+    return new SwitchSection(
+        $labels,
+        $statements);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_labels;
+    yield $this->_statements;
+    yield break;
+  }
+}
+final class CaseLabel extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_expression;
   private EditableSyntax $_colon;
-  private EditableSyntax $_statement;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $expression,
-    EditableSyntax $colon,
-    EditableSyntax $statement) {
-    parent::__construct('case_statement');
+    EditableSyntax $colon) {
+    parent::__construct('case_label');
     $this->_keyword = $keyword;
     $this->_expression = $expression;
     $this->_colon = $colon;
-    $this->_statement = $statement;
   }
   public function keyword(): EditableSyntax {
     return $this->_keyword;
@@ -9828,36 +9948,23 @@ final class CaseStatement extends EditableSyntax {
   public function colon(): EditableSyntax {
     return $this->_colon;
   }
-  public function statement(): EditableSyntax {
-    return $this->_statement;
-  }
-  public function with_keyword(EditableSyntax $keyword): CaseStatement {
-    return new CaseStatement(
+  public function with_keyword(EditableSyntax $keyword): CaseLabel {
+    return new CaseLabel(
       $keyword,
       $this->_expression,
-      $this->_colon,
-      $this->_statement);
+      $this->_colon);
   }
-  public function with_expression(EditableSyntax $expression): CaseStatement {
-    return new CaseStatement(
+  public function with_expression(EditableSyntax $expression): CaseLabel {
+    return new CaseLabel(
       $this->_keyword,
       $expression,
-      $this->_colon,
-      $this->_statement);
+      $this->_colon);
   }
-  public function with_colon(EditableSyntax $colon): CaseStatement {
-    return new CaseStatement(
+  public function with_colon(EditableSyntax $colon): CaseLabel {
+    return new CaseLabel(
       $this->_keyword,
       $this->_expression,
-      $colon,
-      $this->_statement);
-  }
-  public function with_statement(EditableSyntax $statement): CaseStatement {
-    return new CaseStatement(
-      $this->_keyword,
-      $this->_expression,
-      $this->_colon,
-      $statement);
+      $colon);
   }
 
   public function rewrite(
@@ -9869,19 +9976,16 @@ final class CaseStatement extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $expression = $this->expression()->rewrite($rewriter, $new_parents);
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
-    $statement = $this->statement()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $expression === $this->expression() &&
-      $colon === $this->colon() &&
-      $statement === $this->statement()) {
+      $colon === $this->colon()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new CaseStatement(
+      return $rewriter(new CaseLabel(
         $keyword,
         $expression,
-        $colon,
-        $statement), $parents ?? []);
+        $colon), $parents ?? []);
     }
   }
 
@@ -9895,35 +9999,27 @@ final class CaseStatement extends EditableSyntax {
     $colon = EditableSyntax::from_json(
       $json->case_colon, $position, $source);
     $position += $colon->width();
-    $statement = EditableSyntax::from_json(
-      $json->case_statement, $position, $source);
-    $position += $statement->width();
-    return new CaseStatement(
+    return new CaseLabel(
         $keyword,
         $expression,
-        $colon,
-        $statement);
+        $colon);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_expression;
     yield $this->_colon;
-    yield $this->_statement;
     yield break;
   }
 }
-final class DefaultStatement extends EditableSyntax {
+final class DefaultLabel extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_colon;
-  private EditableSyntax $_statement;
   public function __construct(
     EditableSyntax $keyword,
-    EditableSyntax $colon,
-    EditableSyntax $statement) {
-    parent::__construct('default_statement');
+    EditableSyntax $colon) {
+    parent::__construct('default_label');
     $this->_keyword = $keyword;
     $this->_colon = $colon;
-    $this->_statement = $statement;
   }
   public function keyword(): EditableSyntax {
     return $this->_keyword;
@@ -9931,26 +10027,15 @@ final class DefaultStatement extends EditableSyntax {
   public function colon(): EditableSyntax {
     return $this->_colon;
   }
-  public function statement(): EditableSyntax {
-    return $this->_statement;
-  }
-  public function with_keyword(EditableSyntax $keyword): DefaultStatement {
-    return new DefaultStatement(
+  public function with_keyword(EditableSyntax $keyword): DefaultLabel {
+    return new DefaultLabel(
       $keyword,
-      $this->_colon,
-      $this->_statement);
+      $this->_colon);
   }
-  public function with_colon(EditableSyntax $colon): DefaultStatement {
-    return new DefaultStatement(
+  public function with_colon(EditableSyntax $colon): DefaultLabel {
+    return new DefaultLabel(
       $this->_keyword,
-      $colon,
-      $this->_statement);
-  }
-  public function with_statement(EditableSyntax $statement): DefaultStatement {
-    return new DefaultStatement(
-      $this->_keyword,
-      $this->_colon,
-      $statement);
+      $colon);
   }
 
   public function rewrite(
@@ -9961,17 +10046,14 @@ final class DefaultStatement extends EditableSyntax {
     array_push($new_parents, $this);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
-    $statement = $this->statement()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
-      $colon === $this->colon() &&
-      $statement === $this->statement()) {
+      $colon === $this->colon()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new DefaultStatement(
+      return $rewriter(new DefaultLabel(
         $keyword,
-        $colon,
-        $statement), $parents ?? []);
+        $colon), $parents ?? []);
     }
   }
 
@@ -9982,18 +10064,13 @@ final class DefaultStatement extends EditableSyntax {
     $colon = EditableSyntax::from_json(
       $json->default_colon, $position, $source);
     $position += $colon->width();
-    $statement = EditableSyntax::from_json(
-      $json->default_statement, $position, $source);
-    $position += $statement->width();
-    return new DefaultStatement(
+    return new DefaultLabel(
         $keyword,
-        $colon,
-        $statement);
+        $colon);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_colon;
-    yield $this->_statement;
     yield break;
   }
 }

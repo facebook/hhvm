@@ -286,37 +286,6 @@ let methodish_abstract_conflict_with_final node =
   let has_final = methodish_contains_final node in
   is_abstract && has_final
 
-let statement_directly_in_switch parents =
-  match parents with
-  | l :: c :: s :: _ when (is_compound_statement c) && (is_list l) &&
-    (is_switch_statement s) ->
-    true
-  | c :: s :: _ when (is_compound_statement c) && (is_switch_statement s) ->
-    true
-  | _ -> false
-
-let first_statement compound =
-  match syntax compound with
-  | CompoundStatement { compound_statements; _ } ->
-    begin
-      match syntax compound_statements with
-      | Missing -> None (* Empty block *)
-      | SyntaxList (first :: _ ) -> Some first
-      | _ -> Some compound_statements (* Singleton statement in a block *)
-    end
-  | _ -> None
-
-let switch_first_is_label compound =
-  match first_statement compound with
-  | None -> true
-  | Some statement ->
-    begin
-      match syntax statement with
-      | DefaultStatement _
-      | CaseStatement _ -> true
-      | _ -> false
-    end
-
 let rec parameter_type_is_required parents =
   match parents with
   | h :: _ when is_function_declaration h -> true
@@ -492,13 +461,6 @@ let function_errors node _parents is_strict =
 
 let statement_errors node parents =
   let result = match syntax node with
-  | CaseStatement _
-    when not (statement_directly_in_switch parents) ->
-    Some (node, SyntaxError.error2003)
-  | DefaultStatement _
-    when not (statement_directly_in_switch parents) ->
-    Some (node, SyntaxError.error2004)
-    (* TODO: Detect when there is more than one default. *)
   | BreakStatement _
     when not (break_is_legal parents) ->
     Some (node, SyntaxError.error2005)
@@ -508,9 +470,6 @@ let statement_errors node parents =
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
     Some (node, SyntaxError.error2007)
-  | SwitchStatement { switch_body; _ }
-    when not (switch_first_is_label switch_body) ->
-    Some (switch_body, SyntaxError.error2008)
   | _ -> None in
   match result with
   | None -> [ ]

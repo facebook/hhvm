@@ -26,10 +26,6 @@
  *  4. unary operators must be on the same line as the argument
  *  5. semicolons have to be on the same line as the last line of the statement
  *     that it ends
- *  6. Switch statements are specially treated since case label is only a label
- *     and not a block in the grammar. Cases are broken up into blocks in the
- *     printer and each case is grouped together to have individual layout
- *     options
  *)
 
 (* The main data type that is used in the pretty printer is a 5 tuple:
@@ -711,15 +707,32 @@ let rec get_doc node =
     let middle_part = group_doc (as_part ^| arrow_part) in
     let start_block = indent_block_no_space left_part middle_part right indt in
     handle_compound_brace_prefix_indent start_block statement indt |> add_break
-  | SwitchStatement x ->
-    let keyword = get_doc x.switch_keyword in
-    let left = get_doc x.switch_left_paren in
-    let right = get_doc x.switch_right_paren in
-    let expr = get_doc x.switch_expression in
-    let left_part = group_doc (keyword ^^| left) in
-    let start_block = indent_block_no_space left_part expr right indt in
-    handle_switch start_block x
-    (* group_doc (start_block ^| statement) *)
+  | SwitchStatement {
+    switch_keyword;
+    switch_left_paren;
+    switch_expression;
+    switch_right_paren;
+    switch_left_brace;
+    switch_sections;
+    switch_right_brace } ->
+    let keyword = get_doc switch_keyword in
+    let lparen= get_doc switch_left_paren in
+    let expr = get_doc switch_expression in
+    let rparen = get_doc switch_right_paren in
+    let lbrace = get_doc switch_left_brace in
+    let sections = get_doc switch_sections in
+    let rbrace = get_doc switch_right_brace in
+    (* TODO Fix this *)
+    let h = keyword ^| lparen ^| expr ^| rparen ^| space ^| lbrace in
+    let h = add_break h in
+    h ^| sections ^| rbrace
+  | SwitchSection {
+    switch_section_labels;
+    switch_section_statements } ->
+    (* TODO Fix this *)
+    let labels = get_doc switch_section_labels in
+    let statements = get_doc switch_section_statements in
+    (add_break labels) ^| (add_break statements)
   | ScopeResolutionExpression x ->
     let q = get_doc x.scope_resolution_qualifier in
     let o = get_doc x.scope_resolution_operator in
@@ -1055,19 +1068,20 @@ let rec get_doc node =
     let right = get_doc x.tuple_right_paren in
     indent_block_no_space left types right indt
   (* this ideally should never be called *)
-  | CaseStatement x ->
-    let keyword = get_doc x.case_keyword in
-    let expr = get_doc x.case_expression in
-    let colon = get_doc x.case_colon in
-    let statement = x.case_statement in
-    let front_part = keyword ^^^ space ^^^ expr ^^^ colon in
-    handle_compound_brace_prefix_indent front_part statement indt
-  | DefaultStatement x ->
-    let keyword = get_doc x.default_keyword in
-    let colon = get_doc x.default_colon in
-    let statement = x.default_statement in
-    let front_part = keyword ^^^ colon in
-    handle_compound_brace_prefix_indent front_part statement indt
+  | CaseLabel {
+    case_keyword;
+    case_expression;
+    case_colon } ->
+    let keyword = get_doc case_keyword in
+    let expr = get_doc case_expression in
+    let colon = get_doc case_colon in
+    keyword ^^^ space ^^^ expr ^^^ colon
+  | DefaultLabel {
+      default_keyword;
+      default_colon } ->
+    let keyword = get_doc default_keyword in
+    let colon = get_doc default_colon in
+    keyword ^^^ colon
   | ReturnStatement x ->
     let keyword = get_doc x.return_keyword in
     let expr = get_doc x.return_expression in
@@ -1137,58 +1151,6 @@ and peek_and_decide_indent x default =
   match syntax x with
   | CompoundStatement _ -> 0
   | _ -> default
-(* Generate documents for a switch statement *)
-and handle_switch prefix switch =
-  match syntax switch.switch_body with
-  | CompoundStatement x ->
-    let left = get_doc x.compound_left_brace in
-    let left = group_doc (prefix ^| left) in
-    let right = get_doc x.compound_right_brace in
-    let body =
-      let compound_body = x.compound_statements in
-      match syntax compound_body with
-      | SyntaxList lst -> handle_switch_lists lst
-      | _ -> get_doc compound_body
-    in
-    indent_block_no_space left body right indt |> add_break
-  | _ -> prefix ^| get_doc switch.switch_body |> add_break
-(* specifically identify case chunks and generate docs from the list of
- * statements inside the compound statement of the switch statements *)
-and handle_switch_lists lst =
-  (* fold on a reversed statement list, if the element is not a case or default
-   * label, then add the element to the [current] chunk. Otherwise, group the
-   * current chunks together with the label, resulting in an indented block *)
-  let fold_fun (current, docs) node =
-    match syntax node with
-    | CaseStatement x ->
-      let keyword = get_doc x.case_keyword in
-      let expr = get_doc x.case_expression in
-      let colon = get_doc x.case_colon in
-      let front_part = keyword ^^^ space ^^^ expr ^^^ colon |> add_break in
-      let case_chunk = SyntaxList (x.case_statement :: current) in
-      let new_list = make case_chunk (value node) in
-      let end_part = get_doc new_list in
-      let new_chunk = group_doc (indent_doc front_part end_part indt) in
-      ([], new_chunk :: docs)
-    | DefaultStatement x ->
-      let keyword =  get_doc x.default_keyword in
-      let colon = get_doc x.default_colon in
-      let front_part = keyword ^^^ colon |> add_break in
-      let default_chunk = SyntaxList (x.default_statement :: current) in
-      let new_list = make default_chunk (value node) in
-      let end_part = get_doc new_list in
-      let new_chunk = group_doc (indent_doc front_part end_part indt) in
-      ([], new_chunk :: docs)
-    (* if this is not a case statement, add it to current *)
-    | _ -> (node :: current, docs)
-  in
-  let (rest, docs) = List.fold_left fold_fun ([], []) (List.rev lst) in
-  let rest_list = SyntaxList rest in
-  (* TODO better interface to do this? *)
-  let rest_node = make rest_list Syntax.EditableSyntaxValue.NoValue in
-  let rest_doc = get_doc rest_node in
-  let all_docs = rest_doc :: docs in
-  List.fold_left (^|) (make_simple nil) all_docs
 (* puts [prefix] on the same line as a compound brace. If the statement is not
  * compound, put an optional newline and group the result *)
 and handle_compound_inline_brace prefix statement postfix =

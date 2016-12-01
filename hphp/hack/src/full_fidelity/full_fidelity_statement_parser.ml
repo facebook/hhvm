@@ -39,14 +39,24 @@ module WithExpressionAndTypeParser
     | Continue -> parse_continue_statement parser
     | Return -> parse_return_statement parser
     | Throw -> parse_throw_statement parser
-    | Default -> parse_default_label_statement parser
-    | Case -> parse_case_label_statement parser
     | LeftBrace -> parse_compound_statement parser
     | Static ->
       parse_function_static_declaration_or_expression_statement parser
     | Echo -> parse_echo_statement parser
     | Global -> parse_global_statement_or_expression_statement parser
     | Unset -> parse_unset_statement parser
+    | Case ->
+      let (parser, result) = parse_case_label parser in
+      (* TODO: This puts the error in the wrong place. We should highlight
+      the entire label, not the trailing colon. *)
+      let parser = with_error parser SyntaxError.error2003 in
+      (parser, result)
+    | Default ->
+      let (parser, result) = parse_default_label parser in
+      (* TODO: This puts the error in the wrong place. We should highlight
+      the entire label, not the trailing colon. *)
+      let parser = with_error parser SyntaxError.error2004 in
+      (parser, result)
     | _ -> parse_expression_statement parser
 
   (* Helper: parses ( expr ) *)
@@ -245,15 +255,144 @@ module WithExpressionAndTypeParser
       if_right_paren if_consequence elseif_syntax else_syntax in
     (parser, syntax)
   and parse_switch_statement parser =
+    (* SPEC:
+
+    The spec for switches is very simple:
+
+    switch-statement:
+      switch  (  expression  )  compound-statement
+    labeled-statement:
+      case-label
+      default-label
+    case-label:
+      case   expression  :  statement
+    default-label:
+      default  :  statement
+
+    where the compound statement, if not empty, must consist of only labeled
+    statements.
+
+    These rules give a nice simple parse but it has some unfortunate properties.
+    Consider:
+
+    switch (foo)
+    {
+      case 1:
+      case 2:
+        break;
+      default:
+        break;
+    }
+
+    What's the parse of the compound statement contents based on that grammar?
+
+    case 1:
+        case 2:
+            break;
+    default:
+        break;
+
+    That is, the second case is a child of the first. That makes it harder
+    to write analyzers, it makes it harder to write pretty printers, and so on.
+
+    What do we really want here? We want a switch to be a collection of
+    *sections* where each section has one or more *labels* and zero or more
+    *statements*.
+
+    switch-statement:
+      switch  (  expression  )  { switch-sections-opt }
+
+    switch-sections:
+      switch-section
+      switch-sections switch-section
+
+    switch-section:
+      section-labels
+      section-statements-opt
+
+    section-labels:
+      section-label
+      section-labels section-label
+
+    section-statements:
+      statement
+      section-statements statement
+
+    The parsing of course has to be greedy; we never want to say that there
+    are zero statements *between* two sections.
+
+    TODO: Update the specification with these rules.
+    *)
+
     let (parser, switch_keyword_token) =
       assert_token parser Switch in
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
-    let (parser, statement_node) =
-      parse_compound_statement parser in
+    let (parser, left_brace_token) = expect_left_brace parser in
+    let (parser, section_list) = parse_switch_section_list_opt parser in
+    let (parser, right_brace_token) = expect_right_brace parser in
     let syntax = make_switch_statement switch_keyword_token left_paren_token
-      expr_node right_paren_token statement_node in
+      expr_node right_paren_token left_brace_token section_list
+      right_brace_token in
     (parser, syntax)
+
+  and parse_switch_section_list_opt parser =
+    let rec aux parser acc =
+      match peek_token_kind parser with
+      | EndOfFile
+      | RightBrace -> (parser, acc)
+      | Case
+      | Default ->
+        let (parser, section) = parse_switch_section parser in
+        aux parser (section :: acc)
+      | _ ->
+        (* ERROR RECOVERY: Try parsing a list of statements. *)
+        (* TODO: Are we guaranteed that this makes progress? *)
+        (* TODO: Change this error to "expected case or default" *)
+        let parser = with_error parser SyntaxError.error2008 in
+        let (parser, statements) = parse_switch_statement_list_opt parser in
+        let section = make_switch_section (make_missing()) statements in
+        aux parser (section :: acc) in
+    let (parser, sections) = aux parser [] in
+    (parser, make_list (List.rev sections))
+
+  and parse_switch_section parser =
+    (* See parse_switch_statement for grammar *)
+    let (parser, labels) = parse_switch_section_labels parser in
+    let (parser, statements) = parse_switch_statement_list_opt parser in
+    let result = make_switch_section labels statements in
+    (parser, result)
+
+  and parse_switch_statement_list_opt parser =
+    (* See parse_switch_statement for grammar *)
+     let rec aux parser acc =
+       let token = peek_token parser in
+       match (Token.kind token) with
+       | Default
+       | Case
+       | RightBrace
+       | EndOfFile -> (parser, acc)
+       | _ ->
+         let (parser, statement) = parse_statement parser in
+         aux parser (statement :: acc) in
+     let (parser, statements) = aux parser [] in
+     let statements = List.rev statements in
+     (parser, make_list statements)
+
+  and parse_switch_section_labels parser =
+  (* See the grammar under parse_switch_statement *)
+    let rec aux parser acc =
+      match peek_token_kind parser with
+      | Case ->
+        let (parser, label) = parse_case_label parser in
+        aux parser (label :: acc)
+      | Default ->
+        let (parser, label) = parse_default_label parser in
+        aux parser (label :: acc)
+      | _ -> (parser, acc) in
+    let (parser, labels) = aux parser [] in
+    let result = make_list (List.rev labels) in
+    (parser, result)
 
   and parse_try_statement parser =
     let parse_catch_clause_opt parser_catch =
@@ -357,18 +496,17 @@ module WithExpressionAndTypeParser
     let (parser, semi_token) = expect_semicolon parser in
     (parser, make_throw_statement throw_token expr semi_token)
 
-  and parse_default_label_statement parser =
-    (* SPEC:
-      default-label:
-        default  :  statement
+  and parse_default_label parser =
+    (*
+    See comments under parse_switch_statement for the grammar.
+    TODO: Update the spec.
     TODO: The spec is wrong; it implies that a statement must always follow
           the default:, but in fact
           switch($x) { default: }
           is legal. Fix the spec.
     TODO: PHP allows a default to end in a semi; Hack does not.  We allow a semi
           here; add an error in a later pass.
-          *)
-    (* We detect if we are not inside a switch in a later pass. *)
+    *)
     let (parser, default_token) = assert_token parser Default in
     let (parser, semi_token) = optional_token parser Semicolon in
     let (parser, colon_token) =
@@ -376,23 +514,16 @@ module WithExpressionAndTypeParser
         expect_colon parser
       else
         (parser, semi_token) in
-    let (parser, stmt) =
-      if peek_token_kind parser = RightBrace then (parser, make_missing())
-      else parse_statement parser in
-    (parser, make_default_statement default_token colon_token stmt)
+    let result = make_default_label default_token colon_token in
+    (parser, result)
 
-  and parse_case_label_statement parser =
-    (* We detect if we are not inside a switch in a later pass. *)
+  and parse_case_label parser =
     (* SPEC:
-      case-label:
-        case expression  :  statement
+      See comments under parse_switch_statement for the grammar.
     TODO: The spec is wrong; it implies that a statement must always follow
           the case, but in fact
           switch($x) { case 10: }
           is legal. Fix the spec.
-    TODO: The whole specification of switch statements is unfortunate; it makes
-          it harder to parse the code, format the code, find defects, etc.
-          Redo the specification to be more like C#, with switch sections, etc.
     TODO: PHP allows a case to end in a semi; Hack does not.  We allow a semi
           here; add an error in a later pass.
           *)
@@ -405,10 +536,8 @@ module WithExpressionAndTypeParser
         expect_colon parser
       else
         (parser, semi_token) in
-    let (parser, stmt) =
-      if peek_token_kind parser = RightBrace then (parser, make_missing())
-      else parse_statement parser in
-    (parser, make_case_statement case_token expr colon_token stmt)
+    let result = make_case_label case_token expr colon_token in
+    (parser, result)
 
   and parse_global_statement_or_expression_statement parser =
     (* PHP has a statement of the form

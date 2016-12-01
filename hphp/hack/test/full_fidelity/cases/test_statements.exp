@@ -18,19 +18,19 @@
                 ((lparen))
                 (variable((variable)))
                 ((rparen)(whitespace))
-                (compound_statement
-                  (({)(end_of_line))
-                    (list
-                      (case_statement
-                        ((whitespace)(case)(whitespace))
-                        (literal((decimal_literal)))
-                        ((:)(whitespace))
-                        (break_statement((break))(missing)((;)(end_of_line))))
-                      (default_statement
-                        ((whitespace)(default))
-                        ((:)(whitespace))
-                        (break_statement((break))(missing)((;)(end_of_line)))))
-                    ((whitespace)(})(end_of_line))))
+                (({)(end_of_line))
+                (list
+                  (switch_section
+                    (case_label
+                      ((whitespace)(case)(whitespace))
+                      (literal((decimal_literal)))
+                      ((:)(whitespace)))
+                    (break_statement((break))(missing)((;)(end_of_line))))
+                  (switch_section
+                    (default_label
+                      ((whitespace)(default))((:)(whitespace)))
+                    (break_statement((break))(missing)((;)(end_of_line)))))
+                ((whitespace)(})(end_of_line)))
               (missing)
               (else_clause
                 ((whitespace)(else)(end_of_line))

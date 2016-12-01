@@ -369,7 +369,6 @@ and p_type_constraint = "TypeConstraint", fun () ->
 and p_statement = "Statement", fun () -> [
   [NonTerm p_function_static_declaration];
   [NonTerm p_compound_statement];
-  [NonTerm p_labeled_statement];
   [NonTerm p_expression_statement];
   [NonTerm p_if_statement];
   [NonTerm p_switch_statement];
@@ -393,6 +392,17 @@ and p_static_declarator = "StaticDeclarator", fun () -> [
 
 and p_variable_name = "VariableName", fun () -> [[dollar]]
 
+and p_switch_section_labels = "SwitchSectionLabels", fun () -> [
+  [NonTerm p_switch_section_label];
+  [NonTerm p_switch_section_labels; NonTerm p_switch_section_label]]
+
+and p_switch_section = "SwitchSection", fun () -> [
+  [NonTerm p_switch_section_labels; NonTerm p_statement_list]]
+
+and p_switch_sections = "SwitchSections", fun () -> [
+  [NonTerm p_switch_section];
+  [NonTerm p_switch_sections; NonTerm p_switch_section]]
+
 and p_compound_statement = "CompoundStatement", fun () -> [
   [left_brace; right_brace];
   [left_brace; NonTerm p_statement_list; right_brace]]
@@ -401,9 +411,9 @@ and p_statement_list = "StatementList", fun () -> [
   [NonTerm p_statement];
   [NonTerm p_statement_list; NonTerm p_statement]]
 
-and p_labeled_statement = "LabeledStatement", fun () -> [
-  [case; NonTerm p_expression; colon; NonTerm p_statement];
-  [default; colon; NonTerm p_statement]]
+and p_switch_section_label = "SwitchSectionLabel", fun () -> [
+  [case; NonTerm p_expression; colon];
+  [default; colon]]
 
 and p_jump_statement = "JumpStatement", fun () -> [
   [continue; semicolon]; [break; semicolon];
@@ -445,7 +455,7 @@ and p_elseif_clause = "ElseifClause", fun () -> [
 
 and p_switch_statement = "SwitchStatement", fun () -> [
   [switch; left_paren; NonTerm p_expression; right_paren;
-    NonTerm p_compound_statement]]
+    left_brace; NonTerm p_switch_sections; right_brace ]]
 
 and p_while_statement = "WhileStatement", fun () -> [
   [term_while; left_paren; NonTerm p_expression; right_paren;

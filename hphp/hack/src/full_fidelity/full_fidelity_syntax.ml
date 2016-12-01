@@ -390,18 +390,22 @@ module WithToken(Token: TokenType) = struct
       switch_left_paren: t;
       switch_expression: t;
       switch_right_paren: t;
-      switch_body: t;
+      switch_left_brace: t;
+      switch_sections: t;
+      switch_right_brace: t;
     }
-    and case_statement = {
+    and switch_section = {
+      switch_section_labels: t;
+      switch_section_statements: t;
+    }
+    and case_label = {
       case_keyword: t;
       case_expression: t;
       case_colon: t;
-      case_statement: t;
     }
-    and default_statement = {
+    and default_label = {
       default_keyword: t;
       default_colon: t;
-      default_statement: t;
     }
     and return_statement = {
       return_keyword: t;
@@ -801,8 +805,9 @@ module WithToken(Token: TokenType) = struct
     | ForStatement of for_statement
     | ForeachStatement of foreach_statement
     | SwitchStatement of switch_statement
-    | CaseStatement of case_statement
-    | DefaultStatement of default_statement
+    | SwitchSection of switch_section
+    | CaseLabel of case_label
+    | DefaultLabel of default_label
     | ReturnStatement of return_statement
     | ThrowStatement of throw_statement
     | BreakStatement of break_statement
@@ -878,6 +883,12 @@ module WithToken(Token: TokenType) = struct
 
     let value node =
       node.value
+
+    let syntax_node_to_list node =
+      match syntax node with
+      | SyntaxList x -> x
+      | Missing -> []
+      | _ -> [node]
 
     let to_kind syntax =
       match syntax with
@@ -980,10 +991,12 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ForeachStatement
       | SwitchStatement _ ->
         SyntaxKind.SwitchStatement
-      | CaseStatement _ ->
-        SyntaxKind.CaseStatement
-      | DefaultStatement _ ->
-        SyntaxKind.DefaultStatement
+      | SwitchSection _ ->
+        SyntaxKind.SwitchSection
+      | CaseLabel _ ->
+        SyntaxKind.CaseLabel
+      | DefaultLabel _ ->
+        SyntaxKind.DefaultLabel
       | ReturnStatement _ ->
         SyntaxKind.ReturnStatement
       | ThrowStatement _ ->
@@ -1221,10 +1234,12 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ForeachStatement
     let is_switch_statement node =
       kind node = SyntaxKind.SwitchStatement
-    let is_case_statement node =
-      kind node = SyntaxKind.CaseStatement
-    let is_default_statement node =
-      kind node = SyntaxKind.DefaultStatement
+    let is_switch_section node =
+      kind node = SyntaxKind.SwitchSection
+    let is_case_label node =
+      kind node = SyntaxKind.CaseLabel
+    let is_default_label node =
+      kind node = SyntaxKind.DefaultLabel
     let is_return_statement node =
       kind node = SyntaxKind.ReturnStatement
     let is_throw_statement node =
@@ -1980,35 +1995,43 @@ module WithToken(Token: TokenType) = struct
       switch_left_paren;
       switch_expression;
       switch_right_paren;
-      switch_body;
+      switch_left_brace;
+      switch_sections;
+      switch_right_brace;
     } = (
       switch_keyword,
       switch_left_paren,
       switch_expression,
       switch_right_paren,
-      switch_body
+      switch_left_brace,
+      switch_sections,
+      switch_right_brace
     )
 
-    let get_case_statement_children {
+    let get_switch_section_children {
+      switch_section_labels;
+      switch_section_statements;
+    } = (
+      switch_section_labels,
+      switch_section_statements
+    )
+
+    let get_case_label_children {
       case_keyword;
       case_expression;
       case_colon;
-      case_statement;
     } = (
       case_keyword,
       case_expression,
-      case_colon,
-      case_statement
+      case_colon
     )
 
-    let get_default_statement_children {
+    let get_default_label_children {
       default_keyword;
       default_colon;
-      default_statement;
     } = (
       default_keyword,
-      default_colon,
-      default_statement
+      default_colon
     )
 
     let get_return_statement_children {
@@ -3248,33 +3271,40 @@ module WithToken(Token: TokenType) = struct
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       } -> [
         switch_keyword;
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       ]
-      | CaseStatement {
+      | SwitchSection {
+        switch_section_labels;
+        switch_section_statements;
+      } -> [
+        switch_section_labels;
+        switch_section_statements;
+      ]
+      | CaseLabel {
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       } -> [
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       ]
-      | DefaultStatement {
+      | DefaultLabel {
         default_keyword;
         default_colon;
-        default_statement;
       } -> [
         default_keyword;
         default_colon;
-        default_statement;
       ]
       | ReturnStatement {
         return_keyword;
@@ -4448,33 +4478,40 @@ module WithToken(Token: TokenType) = struct
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       } -> [
         "switch_keyword";
         "switch_left_paren";
         "switch_expression";
         "switch_right_paren";
-        "switch_body";
+        "switch_left_brace";
+        "switch_sections";
+        "switch_right_brace";
       ]
-      | CaseStatement {
+      | SwitchSection {
+        switch_section_labels;
+        switch_section_statements;
+      } -> [
+        "switch_section_labels";
+        "switch_section_statements";
+      ]
+      | CaseLabel {
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       } -> [
         "case_keyword";
         "case_expression";
         "case_colon";
-        "case_statement";
       ]
-      | DefaultStatement {
+      | DefaultLabel {
         default_keyword;
         default_colon;
-        default_statement;
       } -> [
         "default_keyword";
         "default_colon";
-        "default_statement";
       ]
       | ReturnStatement {
         return_keyword;
@@ -5749,36 +5786,44 @@ module WithToken(Token: TokenType) = struct
           switch_left_paren;
           switch_expression;
           switch_right_paren;
-          switch_body;
+          switch_left_brace;
+          switch_sections;
+          switch_right_brace;
         ]) ->
         SwitchStatement {
           switch_keyword;
           switch_left_paren;
           switch_expression;
           switch_right_paren;
-          switch_body;
+          switch_left_brace;
+          switch_sections;
+          switch_right_brace;
         }
-      | (SyntaxKind.CaseStatement, [
+      | (SyntaxKind.SwitchSection, [
+          switch_section_labels;
+          switch_section_statements;
+        ]) ->
+        SwitchSection {
+          switch_section_labels;
+          switch_section_statements;
+        }
+      | (SyntaxKind.CaseLabel, [
           case_keyword;
           case_expression;
           case_colon;
-          case_statement;
         ]) ->
-        CaseStatement {
+        CaseLabel {
           case_keyword;
           case_expression;
           case_colon;
-          case_statement;
         }
-      | (SyntaxKind.DefaultStatement, [
+      | (SyntaxKind.DefaultLabel, [
           default_keyword;
           default_colon;
-          default_statement;
         ]) ->
-        DefaultStatement {
+        DefaultLabel {
           default_keyword;
           default_colon;
-          default_statement;
         }
       | (SyntaxKind.ReturnStatement, [
           return_keyword;
@@ -7147,38 +7192,47 @@ module WithToken(Token: TokenType) = struct
       switch_left_paren
       switch_expression
       switch_right_paren
-      switch_body
+      switch_left_brace
+      switch_sections
+      switch_right_brace
     =
       from_children SyntaxKind.SwitchStatement [
         switch_keyword;
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       ]
 
-    let make_case_statement
+    let make_switch_section
+      switch_section_labels
+      switch_section_statements
+    =
+      from_children SyntaxKind.SwitchSection [
+        switch_section_labels;
+        switch_section_statements;
+      ]
+
+    let make_case_label
       case_keyword
       case_expression
       case_colon
-      case_statement
     =
-      from_children SyntaxKind.CaseStatement [
+      from_children SyntaxKind.CaseLabel [
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       ]
 
-    let make_default_statement
+    let make_default_label
       default_keyword
       default_colon
-      default_statement
     =
-      from_children SyntaxKind.DefaultStatement [
+      from_children SyntaxKind.DefaultLabel [
         default_keyword;
         default_colon;
-        default_statement;
       ]
 
     let make_return_statement

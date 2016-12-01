@@ -45,21 +45,21 @@
                         (qualified_name((name)))
                         (missing)(missing)(missing)))
                     ((;)(whitespace)(single_line_comment)(end_of_line)))
-                (switch_statement
+               (switch_statement
                   ((whitespace)(switch))
                   ((lparen))
                   (variable((variable)))
                   ((rparen)(whitespace))
-                  (compound_statement
-                    (({)(whitespace))
-                    (case_statement
-                      ((case)(whitespace))
-                      (literal((decimal_literal)))
-                      ((;)(whitespace))
-                      (default_statement
-                        ((default))
-                        ((;)(whitespace))(missing)))
-                    ((})(whitespace)(single_line_comment)(end_of_line))))
+                  (({)(whitespace))
+                  (switch_section
+                    (list
+                      (case_label
+                        ((case)(whitespace))
+                        (literal((decimal_literal)))
+                        ((;)(whitespace)))
+                      (default_label((default))((;)(whitespace))))
+                    (missing))
+                  ((})(whitespace)(single_line_comment)(end_of_line)))
                   (return_statement
                     ((whitespace)(return)(whitespace))
                     (binary_expression

@@ -796,6 +796,8 @@ and pBlock : block parser = fun node -> pStmt node |.> function
   | Block [] -> [Noop]
   | Block block -> block
   | stmt -> [stmt]
+(* TODO
+
 and pSwitch : case list parser = fun node env ->
   let pTaggedStmt : [< `Stmt of stmt | `Func of block -> case ] parser =
     (fun x -> `Stmt x) <$> pStmt in
@@ -828,6 +830,8 @@ and pSwitch : case list parser = fun node env ->
         env
   in
   snd @@ List.fold_right merge inner ([],[])
+
+  *)
 
 and pStmt_EchoStatement' : stmt parser' = fun [ kw; exprs; _semi ] ->
   let pEcho : env -> expr_ = fun env ->
@@ -868,9 +872,11 @@ and pStmt_ForStatement' : stmt parser' =
       , pExprL eol env
       , [Block (pBlock body env)]
       )
+(* TODO
 and pStmt_SwitchStatement' : stmt parser' =
   fun [ _kw; _lp; expr; _rp; body ] env ->
     Switch (pExpr expr env, pSwitch body env)
+*)
 and pStmt_ForeachStatement' : stmt parser' =
   fun [ _kw; _lp; collection; await; _as; key; _arrow; value; _rp; body ] env ->
     Foreach
@@ -917,7 +923,7 @@ and pStmt : stmt parser = fun eta -> eta |> mkP
   ; (K.DoStatement,             pStmt_DoStatement')
   ; (K.WhileStatement,          pStmt_WhileStatement')
   ; (K.ForStatement,            pStmt_ForStatement')
-  ; (K.SwitchStatement,         pStmt_SwitchStatement')
+(* TODO ; (K.SwitchStatement,         pStmt_SwitchStatement') *)
   ; (K.ForeachStatement,        pStmt_ForeachStatement')
   ; (K.TryStatement,            pStmt_TryStatement')
   ; (K.UnsetStatement,          pStmt_UnsetStatement')

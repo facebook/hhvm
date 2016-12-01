@@ -90,7 +90,9 @@ let test_errors source =
   let syntax_tree = SyntaxTree.make source_text in
   let is_strict = SyntaxTree.is_strict syntax_tree in
   let root = PositionedSyntax.from_tree syntax_tree in
-  let errors = ParserErrors.find_syntax_errors root is_strict in
+  let errors1 = SyntaxTree.errors syntax_tree in
+  let errors2 = ParserErrors.find_syntax_errors root is_strict in
+  let errors = errors1 @ errors2 in
   let mapper err = SyntaxError.to_positioned_string err offset_to_position in
   let errors = List.map errors ~f:mapper in
   Printf.sprintf "%s" (String.concat "\n" errors)

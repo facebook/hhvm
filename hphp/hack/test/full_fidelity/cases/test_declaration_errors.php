@@ -1,7 +1,7 @@
 <?hh
 interface I { }
 class B { }
-class D : B
+class D extends B
 {
   require extends B; // error
   require implements I; // error

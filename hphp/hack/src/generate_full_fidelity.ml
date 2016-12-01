@@ -450,22 +450,28 @@ let schema = List.map from_list [
     "left_paren";
     "expression";
     "right_paren";
-    "body" ];
-  [ "CaseStatement";
-    "case_statement";
-    "case_statement";
+    "left_brace";
+    "sections";
+    "right_brace"];
+  [ "SwitchSection";
+    "switch_section";
+    "switch_section";
+    "switch_section";
+    "labels";
+    "statements"];
+  [ "CaseLabel";
+    "case_label";
+    "case_label";
     "case";
     "keyword";
     "expression";
-    "colon";
-    "statement" ];
-  [ "DefaultStatement";
-    "default_statement";
-    "default_statement";
+    "colon" ];
+  [ "DefaultLabel";
+    "default_label";
+    "default_label";
     "default";
     "keyword";
-    "colon";
-    "statement" ];
+    "colon" ];
   [ "ReturnStatement";
     "return_statement";
     "return_statement";
@@ -1336,6 +1342,12 @@ SYNTAX
 
     let value node =
       node.value
+
+    let syntax_node_to_list node =
+      match syntax node with
+      | SyntaxList x -> x
+      | Missing -> []
+      | _ -> [node]
 
     let to_kind syntax =
       match syntax with

@@ -68,8 +68,9 @@ type t =
 | ForStatement
 | ForeachStatement
 | SwitchStatement
-| CaseStatement
-| DefaultStatement
+| SwitchSection
+| CaseLabel
+| DefaultLabel
 | ReturnStatement
 | ThrowStatement
 | BreakStatement
@@ -190,8 +191,9 @@ let to_string kind =
   | ForStatement -> "for_statement"
   | ForeachStatement -> "foreach_statement"
   | SwitchStatement -> "switch_statement"
-  | CaseStatement -> "case_statement"
-  | DefaultStatement -> "default_statement"
+  | SwitchSection -> "switch_section"
+  | CaseLabel -> "case_label"
+  | DefaultLabel -> "default_label"
   | ReturnStatement -> "return_statement"
   | ThrowStatement -> "throw_statement"
   | BreakStatement -> "break_statement"

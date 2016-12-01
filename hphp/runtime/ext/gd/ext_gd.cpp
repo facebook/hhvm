@@ -3142,7 +3142,7 @@ Variant HHVM_FUNCTION(imagetruecolortopalette, const Resource& image,
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
 
-  if (ncolors <= 0) {
+  if (ncolors <= 0 || ncolors >= INT_MAX) {
     raise_warning("Number of colors has to be greater than zero");
     return false;
   }

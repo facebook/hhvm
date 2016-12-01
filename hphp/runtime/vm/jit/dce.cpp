@@ -265,6 +265,7 @@ bool canDCE(IRInstruction* inst) {
   case KeysetIsset:
   case KeysetEmptyElem:
   case KeysetIdx:
+  case GetTime:
     assertx(!inst->isControlFlow());
     return true;
 

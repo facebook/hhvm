@@ -1337,6 +1337,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdARInvName:
   case StARInvName:
   case MethodExists:
+  case GetTime:
   case ProfileInstanceCheck:
     return IrrelevantEffects {};
 

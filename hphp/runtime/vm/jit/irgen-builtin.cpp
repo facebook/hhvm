@@ -89,6 +89,7 @@ const StaticString
   s_get_called_class("get_called_class"),
   s_sqrt("sqrt"),
   s_strlen("strlen"),
+  s_microtime("microtime"),
   s_max2("__SystemLib\\max2"),
   s_min2("__SystemLib\\min2"),
   s_ceil("ceil"),
@@ -443,6 +444,18 @@ SSATmp* opt_strlen(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* opt_microtime(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+
+  auto const val = params[0].value;
+
+  if (val->hasConstVal(true)) {
+    return gen(env, GetTime);
+  }
+
+  return nullptr;
+}
+
 SSATmp* minmax(IRGS& env, const ParamPrep& params, const bool is_max) {
   auto const val1 = params[1].value;
   auto const ty1 = val1->type();
@@ -675,6 +688,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(method_exists)
     X(sqrt)
     X(strlen)
+    X(microtime)
     X(max2)
     X(ceil)
     X(floor)

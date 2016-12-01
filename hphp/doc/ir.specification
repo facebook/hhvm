@@ -2066,6 +2066,9 @@ To string conversions:
 
   Performs S0 <op>= S1.
 
+| GetTime, D(Dbl), NA, NF
+
+  Returns a double of the current time in seconds.
 
 15. Generators & Closures
 

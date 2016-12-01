@@ -316,8 +316,6 @@ struct Vunit;
   O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
-  O(extrb, Inone, UH(s,d), DH(d,s))\
-  O(extrw, Inone, UH(s,d), DH(d,s))\
   O(extsb, Inone, UH(s,d), DH(d,s))\
   O(extsw, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
@@ -1156,10 +1154,8 @@ struct uxth { Vreg16 s; Vreg32 d; };
 /*
  * ppc64 intrinsics.
  */
-struct extrb { Vreg8 s; Vreg8 d; };   // Extract and zeros the upper bits
-struct extrw { Vreg16 s; Vreg64 d; }; // Extract and zeros the upper bits
-struct extsb { Vreg64 s; Vreg64 d; }; // Extend byte sign
-struct extsw { Vreg64 s; Vreg64 d; }; // Extend word sign
+struct extsb { Vreg8 s; Vreg64 d; };  // Extend byte sign
+struct extsw { Vreg32 s; Vreg64 d; }; // Extend word sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };

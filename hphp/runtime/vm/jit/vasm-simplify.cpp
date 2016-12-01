@@ -398,7 +398,6 @@ bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
-  if (!arch_any(Arch::X64, Arch::ARM)) return false;
   auto const def_op = env.def_insts[inst.s];
 
   // Check if `inst.s' was defined by an instruction with Vreg32 operands, or

@@ -3286,9 +3286,94 @@ TO_STRING_VARIABLE_TEXT
 
 end (* GenerateFFTokenKind *)
 
+module GenerateFFJSONSchema = struct
+  let to_json_given_text x =
+    Printf.sprintf
+"    { \"token_kind\" : \"%s\",
+      \"token_text\" : \"%s\" },
+"
+    x.token_kind x.token_text
+
+  let to_json_variable_text x =
+    Printf.sprintf
+"    { \"token_kind\" : \"%s\",
+      \"token_text\" : null },
+"
+    x.token_kind
+
+  let to_json_ast_nodes x =
+    let mapper f = Printf.sprintf
+"{ \"field_name\" : \"%s\" }" f in
+    let fields = String.concat ",\n        " (List.map mapper x.fields) in
+    Printf.sprintf
+"    { \"kind_name\" : \"%s\",
+      \"type_name\" : \"%s\",
+      \"description\" : \"%s\",
+      \"prefix\" : \"%s\",
+      \"fields\" : [
+        %s
+      ] },
+"  x.kind_name x.type_name x.description x.prefix fields
+
+  let full_fidelity_json_schema_template =
+"{ \"description\" :
+  \"Auto-generated JSON schema of the Hack Full Fidelity Parser AST\",
+  \"trivia\" : [
+    { \"trivia_kind_name\" : \"Whitespace\",
+      \"trivia_type_name\" : \"whitespace\" },
+    { \"trivia_kind_name\" : \"EndOfLine\",
+      \"trivia_type_name\" : \"end_of_line\" },
+    { \"trivia_kind_name\" : \"DelimitedComment\",
+      \"trivia_type_name\" : \"delimited_comment\" },
+    { \"trivia_kind_name\" : \"SingleLineComment\",
+      \"trivia_type_name\" : \"single_line_comment\" } ],
+  \"tokens\" : [
+GIVEN_TEXT_TOKENS
+VARIABLE_TEXT_TOKENS
+    { \"token_kind\" : \"EndOfFile\",
+      \"token_text\" : null } ],
+  \"AST\" : [
+AST_NODES
+    { \"kind_name\" : \"Token\",
+      \"type_name\" : \"token\",
+      \"description\" : \"token\",
+      \"prefix\" : \"\",
+      \"fields\" : [
+        { \"field_name\" : \"leading\" },
+        { \"field_name\" : \"trailing\" } ] },
+    { \"kind_name\" : \"Missing\",
+      \"type_name\" : \"missing\",
+      \"description\" : \"missing\",
+      \"prefix\" : \"\",
+      \"fields\" : [ ] },
+    { \"kind_name\" : \"SyntaxList\",
+      \"type_name\" : \"syntax_list\",
+      \"description\" : \"syntax_list\",
+      \"prefix\" : \"\",
+      \"fields\" : [ ] } ] }"
+
+  let full_fidelity_json_schema =
+  {
+    filename = "hphp/hack/src/full_fidelity/js/full_fidelity_schema.json";
+    template = full_fidelity_json_schema_template;
+    transformations = [
+      { pattern = "AST_NODES"; func = to_json_ast_nodes }
+    ];
+    token_no_text_transformations = [ ];
+    token_given_text_transformations = [
+      { token_pattern = "GIVEN_TEXT_TOKENS";
+        token_func = to_json_given_text } ];
+    token_variable_text_transformations = [
+      { token_pattern = "VARIABLE_TEXT_TOKENS";
+        token_func = to_json_variable_text }]
+  }
+
+end (* GenerateFFJSONSchema *)
+
 let () =
   generate_file GenerateFFSyntax.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFJavaScript.full_fidelity_javascript;
   generate_file GenerateFFHack.full_fidelity_hack;
-  generate_file GenerateFFTokenKind.full_fidelity_token_kind
+  generate_file GenerateFFTokenKind.full_fidelity_token_kind;
+  generate_file GenerateFFJSONSchema.full_fidelity_json_schema

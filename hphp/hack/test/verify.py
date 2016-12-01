@@ -112,9 +112,9 @@ def files_with_ext(files, ext):
             result.add(prefix)
     return result
 
-def list_test_files(root, disabled_ext):
+def list_test_files(root, disabled_ext, test_ext):
     if os.path.isfile(root):
-        if root.endswith('.php'):
+        if root.endswith(test_ext):
             return [root]
         else:
             return []
@@ -124,8 +124,11 @@ def list_test_files(root, disabled_ext):
         disabled = files_with_ext(children, disabled_ext)
         for child in children:
             if child != 'disabled' and child not in disabled:
-                result.extend(list_test_files(os.path.join(root, child),
-                    disabled_ext))
+                result.extend(
+                    list_test_files(
+                        os.path.join(root, child),
+                        disabled_ext,
+                        test_ext))
         return result
     elif os.path.islink(root):
         # Some editors create broken symlinks as part of their locking scheme,
@@ -143,6 +146,7 @@ if __name__ == '__main__':
     parser.add_argument('--program', type=os.path.abspath)
     parser.add_argument('--out-extension', type=str, default='.out')
     parser.add_argument('--expect-extension', type=str, default='.exp')
+    parser.add_argument('--in-extension', type=str, default='.php')
     parser.add_argument('--disabled-extension', type=str,
             default='.no_typecheck')
     parser.add_argument('--verbose', action='store_true')
@@ -164,7 +168,10 @@ if __name__ == '__main__':
     if not os.path.isfile(args.program):
         raise Exception('Could not find program at %s' % args.program)
 
-    files = list_test_files(args.test_path, args.disabled_extension)
+    files = list_test_files(
+        args.test_path,
+        args.disabled_extension,
+        args.in_extension)
 
     flags_cache = {}
 

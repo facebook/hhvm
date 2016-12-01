@@ -922,11 +922,48 @@ let rec get_doc node =
     let right_bracket = get_doc x.array_creation_right_bracket in
     let members = get_doc x.array_creation_members in
     indent_block_no_space left_bracket members right_bracket indt
-  | ArrayIntrinsicExpression x ->
-    let keyword = get_doc x.array_intrinsic_keyword in
-    let left = get_doc x.array_intrinsic_left_paren in
-    let right = get_doc x.array_intrinsic_right_paren in
-    let members = get_doc x.array_intrinsic_members in
+  | ArrayIntrinsicExpression {
+    array_intrinsic_keyword;
+    array_intrinsic_left_paren;
+    array_intrinsic_members;
+    array_intrinsic_right_paren } ->
+    let keyword = get_doc array_intrinsic_keyword in
+    let left = get_doc array_intrinsic_left_paren in
+    let members = get_doc array_intrinsic_members in
+    let right = get_doc array_intrinsic_right_paren in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
+  | DictionaryIntrinsicExpression {
+    dictionary_intrinsic_keyword;
+    dictionary_intrinsic_left_bracket;
+    dictionary_intrinsic_members;
+    dictionary_intrinsic_right_bracket } ->
+    let keyword = get_doc dictionary_intrinsic_keyword in
+    let left = get_doc dictionary_intrinsic_left_bracket in
+    let members = get_doc dictionary_intrinsic_members in
+    let right = get_doc dictionary_intrinsic_right_bracket in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
+  | KeysetIntrinsicExpression {
+    keyset_intrinsic_keyword;
+    keyset_intrinsic_left_bracket;
+    keyset_intrinsic_members;
+    keyset_intrinsic_right_bracket } ->
+    let keyword = get_doc keyset_intrinsic_keyword in
+    let left = get_doc keyset_intrinsic_left_bracket in
+    let members = get_doc keyset_intrinsic_members in
+    let right = get_doc keyset_intrinsic_right_bracket in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
+  | VectorIntrinsicExpression {
+    vector_intrinsic_keyword;
+    vector_intrinsic_left_bracket;
+    vector_intrinsic_members;
+    vector_intrinsic_right_bracket } ->
+    let keyword = get_doc vector_intrinsic_keyword in
+    let left = get_doc vector_intrinsic_left_bracket in
+    let members = get_doc vector_intrinsic_members in
+    let right = get_doc vector_intrinsic_right_bracket in
     let left_part = group_doc (keyword ^^| left) in
     indent_block_no_space left_part members right indt
   | ElementInitializer x ->

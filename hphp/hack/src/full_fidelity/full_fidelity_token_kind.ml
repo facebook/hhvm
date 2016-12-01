@@ -42,6 +42,7 @@ type t =
   | Continue
   | Default
   | Destruct
+  | Dict
   | Do
   | Double
   | Echo
@@ -65,6 +66,7 @@ type t =
   | Insteadof
   | Int
   | Interface
+  | Keyset
   | List
   | Mixed
   | Namespace
@@ -99,6 +101,7 @@ type t =
   | Unset
   | Use
   | Var
+  | Vec
   | Void
   | While
   | Xor
@@ -223,6 +226,7 @@ let from_string keyword =
   | "continue" -> Some Continue
   | "default" -> Some Default
   | "__destruct" -> Some Destruct
+  | "dict" -> Some Dict
   | "do" -> Some Do
   | "double" -> Some Double
   | "echo" -> Some Echo
@@ -246,6 +250,7 @@ let from_string keyword =
   | "insteadof" -> Some Insteadof
   | "int" -> Some Int
   | "interface" -> Some Interface
+  | "keyset" -> Some Keyset
   | "list" -> Some List
   | "mixed" -> Some Mixed
   | "namespace" -> Some Namespace
@@ -280,6 +285,7 @@ let from_string keyword =
   | "unset" -> Some Unset
   | "use" -> Some Use
   | "var" -> Some Var
+  | "vec" -> Some Vec
   | "void" -> Some Void
   | "while" -> Some While
   | "xor" -> Some Xor
@@ -377,6 +383,7 @@ match kind with
   | Continue -> "continue"
   | Default -> "default"
   | Destruct -> "__destruct"
+  | Dict -> "dict"
   | Do -> "do"
   | Double -> "double"
   | Echo -> "echo"
@@ -400,6 +407,7 @@ match kind with
   | Insteadof -> "insteadof"
   | Int -> "int"
   | Interface -> "interface"
+  | Keyset -> "keyset"
   | List -> "list"
   | Mixed -> "mixed"
   | Namespace -> "namespace"
@@ -434,6 +442,7 @@ match kind with
   | Unset -> "unset"
   | Use -> "use"
   | Var -> "var"
+  | Vec -> "vec"
   | Void -> "void"
   | While -> "while"
   | Xor -> "xor"

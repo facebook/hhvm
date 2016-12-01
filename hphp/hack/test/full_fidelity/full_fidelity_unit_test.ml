@@ -104,7 +104,7 @@ let minimal_tests =
       ~preprocess_exp:remove_whitespace testname test_minimal in
   List.map
   [
-    "test_simple";
+    "test_collections";
     "test_simple";
     "test_conditional";
     "test_statements";

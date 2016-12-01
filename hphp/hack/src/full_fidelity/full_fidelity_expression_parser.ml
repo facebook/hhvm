@@ -135,6 +135,9 @@ module WithStatementAndDeclAndTypeParser
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
+    | Vec -> parse_vector_intrinsic_expression parser
+    | Dict -> parse_dictionary_intrinsic_expression parser
+    | Keyset -> parse_keyset_intrinsic_expression parser
     | LeftBracket -> parse_array_creation_expression parser
     | Tuple -> parse_tuple_expression parser
     | Shape -> parse_shape_expression parser
@@ -685,6 +688,7 @@ module WithStatementAndDeclAndTypeParser
     | Const
     | Construct
     | Continue
+    | Dict
     | Default
     | Destruct
     | Do
@@ -709,6 +713,7 @@ module WithStatementAndDeclAndTypeParser
     | Insteadof
     | Int
     | Interface
+    | Keyset
     | List
     | Mixed
     | Namespace
@@ -742,6 +747,7 @@ module WithStatementAndDeclAndTypeParser
     | Unset
     | Use
     | Var
+    | Vec
     | Void
     | While
     | Yield -> true
@@ -1300,6 +1306,42 @@ module WithStatementAndDeclAndTypeParser
       members right_paren in
     (parser, syntax)
 
+  and parse_dictionary_intrinsic_expression parser =
+    (* TODO: Create the grammar and add it to the spec. *)
+    (* TODO: Can the list have a trailing comma? *)
+    let (parser, dict_keyword) = assert_token parser Dict in
+    let (parser, left_bracket) = expect_left_bracket parser in
+    let (parser, members) = parse_comma_list_allow_trailing parser
+      RightBracket SyntaxError.error1015 parse_keyed_element_initializer in
+    let (parser, right_bracket) = expect_right_bracket parser in
+    let result = make_dictionary_intrinsic_expression dict_keyword left_bracket
+      members right_bracket in
+    (parser, result)
+
+  and parse_keyset_intrinsic_expression parser =
+    (* TODO: Create the grammar and add it to the spec. *)
+    (* TODO: Can the list have a trailing comma? *)
+    let (parser, keyset_keyword) = assert_token parser Keyset in
+    let (parser, left_bracket) = expect_left_bracket parser in
+    let (parser, members) = parse_comma_list_allow_trailing parser RightBracket
+      SyntaxError.error1015 parse_expression_with_reset_precedence in
+    let (parser, right_bracket) = expect_right_bracket parser in
+    let result = make_keyset_intrinsic_expression keyset_keyword left_bracket
+      members right_bracket in
+    (parser, result)
+
+  and parse_vector_intrinsic_expression parser =
+    (* TODO: Create the grammar and add it to the spec. *)
+    (* TODO: Can the list have a trailing comma? *)
+    let (parser, vec_keyword) = assert_token parser Vec in
+    let (parser, left_bracket) = expect_left_bracket parser in
+    let (parser, members) = parse_comma_list_allow_trailing parser RightBracket
+      SyntaxError.error1015 parse_expression_with_reset_precedence in
+    let (parser, right_bracket) = expect_right_bracket parser in
+    let result = make_vector_intrinsic_expression vec_keyword left_bracket
+      members right_bracket in
+    (parser, result)
+
   (* array_creation_expression := [ array-initializer-opt ] *)
   and parse_array_creation_expression parser =
     let (parser, left_bracket) = expect_left_bracket parser in
@@ -1319,6 +1361,7 @@ module WithStatementAndDeclAndTypeParser
    * array-element-initializer
    * array-element-initializer , array-initializer-list *)
   and parse_array_init_list parser is_intrinsic =
+    (* TODO: use comma separated list helpers *)
     let rec aux parser acc =
       let parser, element = parse_array_element_init parser in
       let parser1, token = next_token parser in

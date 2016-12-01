@@ -580,6 +580,24 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_members: t;
       array_intrinsic_right_paren: t;
     }
+    and dictionary_intrinsic_expression = {
+      dictionary_intrinsic_keyword: t;
+      dictionary_intrinsic_left_bracket: t;
+      dictionary_intrinsic_members: t;
+      dictionary_intrinsic_right_bracket: t;
+    }
+    and keyset_intrinsic_expression = {
+      keyset_intrinsic_keyword: t;
+      keyset_intrinsic_left_bracket: t;
+      keyset_intrinsic_members: t;
+      keyset_intrinsic_right_bracket: t;
+    }
+    and vector_intrinsic_expression = {
+      vector_intrinsic_keyword: t;
+      vector_intrinsic_left_bracket: t;
+      vector_intrinsic_members: t;
+      vector_intrinsic_right_bracket: t;
+    }
     and element_initializer = {
       element_key: t;
       element_arrow: t;
@@ -840,6 +858,9 @@ module WithToken(Token: TokenType) = struct
     | ObjectCreationExpression of object_creation_expression
     | ArrayCreationExpression of array_creation_expression
     | ArrayIntrinsicExpression of array_intrinsic_expression
+    | DictionaryIntrinsicExpression of dictionary_intrinsic_expression
+    | KeysetIntrinsicExpression of keyset_intrinsic_expression
+    | VectorIntrinsicExpression of vector_intrinsic_expression
     | ElementInitializer of element_initializer
     | SubscriptExpression of subscript_expression
     | AwaitableCreationExpression of awaitable_creation_expression
@@ -1061,6 +1082,12 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression _ ->
         SyntaxKind.ArrayIntrinsicExpression
+      | DictionaryIntrinsicExpression _ ->
+        SyntaxKind.DictionaryIntrinsicExpression
+      | KeysetIntrinsicExpression _ ->
+        SyntaxKind.KeysetIntrinsicExpression
+      | VectorIntrinsicExpression _ ->
+        SyntaxKind.VectorIntrinsicExpression
       | ElementInitializer _ ->
         SyntaxKind.ElementInitializer
       | SubscriptExpression _ ->
@@ -1304,6 +1331,12 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression node =
       kind node = SyntaxKind.ArrayIntrinsicExpression
+    let is_dictionary_intrinsic_expression node =
+      kind node = SyntaxKind.DictionaryIntrinsicExpression
+    let is_keyset_intrinsic_expression node =
+      kind node = SyntaxKind.KeysetIntrinsicExpression
+    let is_vector_intrinsic_expression node =
+      kind node = SyntaxKind.VectorIntrinsicExpression
     let is_element_initializer node =
       kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
@@ -2378,6 +2411,42 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_left_paren,
       array_intrinsic_members,
       array_intrinsic_right_paren
+    )
+
+    let get_dictionary_intrinsic_expression_children {
+      dictionary_intrinsic_keyword;
+      dictionary_intrinsic_left_bracket;
+      dictionary_intrinsic_members;
+      dictionary_intrinsic_right_bracket;
+    } = (
+      dictionary_intrinsic_keyword,
+      dictionary_intrinsic_left_bracket,
+      dictionary_intrinsic_members,
+      dictionary_intrinsic_right_bracket
+    )
+
+    let get_keyset_intrinsic_expression_children {
+      keyset_intrinsic_keyword;
+      keyset_intrinsic_left_bracket;
+      keyset_intrinsic_members;
+      keyset_intrinsic_right_bracket;
+    } = (
+      keyset_intrinsic_keyword,
+      keyset_intrinsic_left_bracket,
+      keyset_intrinsic_members,
+      keyset_intrinsic_right_bracket
+    )
+
+    let get_vector_intrinsic_expression_children {
+      vector_intrinsic_keyword;
+      vector_intrinsic_left_bracket;
+      vector_intrinsic_members;
+      vector_intrinsic_right_bracket;
+    } = (
+      vector_intrinsic_keyword,
+      vector_intrinsic_left_bracket,
+      vector_intrinsic_members,
+      vector_intrinsic_right_bracket
     )
 
     let get_element_initializer_children {
@@ -3620,6 +3689,39 @@ module WithToken(Token: TokenType) = struct
         array_intrinsic_members;
         array_intrinsic_right_paren;
       ]
+      | DictionaryIntrinsicExpression {
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      } -> [
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      ]
+      | KeysetIntrinsicExpression {
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      } -> [
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      ]
+      | VectorIntrinsicExpression {
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
+      } -> [
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
+      ]
       | ElementInitializer {
         element_key;
         element_arrow;
@@ -4826,6 +4928,39 @@ module WithToken(Token: TokenType) = struct
         "array_intrinsic_left_paren";
         "array_intrinsic_members";
         "array_intrinsic_right_paren";
+      ]
+      | DictionaryIntrinsicExpression {
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      } -> [
+        "dictionary_intrinsic_keyword";
+        "dictionary_intrinsic_left_bracket";
+        "dictionary_intrinsic_members";
+        "dictionary_intrinsic_right_bracket";
+      ]
+      | KeysetIntrinsicExpression {
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      } -> [
+        "keyset_intrinsic_keyword";
+        "keyset_intrinsic_left_bracket";
+        "keyset_intrinsic_members";
+        "keyset_intrinsic_right_bracket";
+      ]
+      | VectorIntrinsicExpression {
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
+      } -> [
+        "vector_intrinsic_keyword";
+        "vector_intrinsic_left_bracket";
+        "vector_intrinsic_members";
+        "vector_intrinsic_right_bracket";
       ]
       | ElementInitializer {
         element_key;
@@ -6170,6 +6305,42 @@ module WithToken(Token: TokenType) = struct
           array_intrinsic_left_paren;
           array_intrinsic_members;
           array_intrinsic_right_paren;
+        }
+      | (SyntaxKind.DictionaryIntrinsicExpression, [
+          dictionary_intrinsic_keyword;
+          dictionary_intrinsic_left_bracket;
+          dictionary_intrinsic_members;
+          dictionary_intrinsic_right_bracket;
+        ]) ->
+        DictionaryIntrinsicExpression {
+          dictionary_intrinsic_keyword;
+          dictionary_intrinsic_left_bracket;
+          dictionary_intrinsic_members;
+          dictionary_intrinsic_right_bracket;
+        }
+      | (SyntaxKind.KeysetIntrinsicExpression, [
+          keyset_intrinsic_keyword;
+          keyset_intrinsic_left_bracket;
+          keyset_intrinsic_members;
+          keyset_intrinsic_right_bracket;
+        ]) ->
+        KeysetIntrinsicExpression {
+          keyset_intrinsic_keyword;
+          keyset_intrinsic_left_bracket;
+          keyset_intrinsic_members;
+          keyset_intrinsic_right_bracket;
+        }
+      | (SyntaxKind.VectorIntrinsicExpression, [
+          vector_intrinsic_keyword;
+          vector_intrinsic_left_bracket;
+          vector_intrinsic_members;
+          vector_intrinsic_right_bracket;
+        ]) ->
+        VectorIntrinsicExpression {
+          vector_intrinsic_keyword;
+          vector_intrinsic_left_bracket;
+          vector_intrinsic_members;
+          vector_intrinsic_right_bracket;
         }
       | (SyntaxKind.ElementInitializer, [
           element_key;
@@ -7611,6 +7782,45 @@ module WithToken(Token: TokenType) = struct
         array_intrinsic_left_paren;
         array_intrinsic_members;
         array_intrinsic_right_paren;
+      ]
+
+    let make_dictionary_intrinsic_expression
+      dictionary_intrinsic_keyword
+      dictionary_intrinsic_left_bracket
+      dictionary_intrinsic_members
+      dictionary_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.DictionaryIntrinsicExpression [
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      ]
+
+    let make_keyset_intrinsic_expression
+      keyset_intrinsic_keyword
+      keyset_intrinsic_left_bracket
+      keyset_intrinsic_members
+      keyset_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.KeysetIntrinsicExpression [
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      ]
+
+    let make_vector_intrinsic_expression
+      vector_intrinsic_keyword
+      vector_intrinsic_left_bracket
+      vector_intrinsic_members
+      vector_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.VectorIntrinsicExpression [
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
       ]
 
     let make_element_initializer

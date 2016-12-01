@@ -235,6 +235,12 @@ class EditableSyntax
       return ArrayCreationExpression.from_json(json, position, source);
     case 'array_intrinsic_expression':
       return ArrayIntrinsicExpression.from_json(json, position, source);
+    case 'dictionary_intrinsic_expression':
+      return DictionaryIntrinsicExpression.from_json(json, position, source);
+    case 'keyset_intrinsic_expression':
+      return KeysetIntrinsicExpression.from_json(json, position, source);
+    case 'vector_intrinsic_expression':
+      return VectorIntrinsicExpression.from_json(json, position, source);
     case 'element_initializer':
       return ElementInitializer.from_json(json, position, source);
     case 'subscript_expression':
@@ -636,6 +642,8 @@ class EditableToken extends EditableSyntax
        return new DefaultToken(leading, trailing);
     case '__destruct':
        return new DestructToken(leading, trailing);
+    case 'dict':
+       return new DictToken(leading, trailing);
     case 'do':
        return new DoToken(leading, trailing);
     case 'double':
@@ -682,6 +690,8 @@ class EditableToken extends EditableSyntax
        return new IntToken(leading, trailing);
     case 'interface':
        return new InterfaceToken(leading, trailing);
+    case 'keyset':
+       return new KeysetToken(leading, trailing);
     case 'list':
        return new ListToken(leading, trailing);
     case 'mixed':
@@ -750,6 +760,8 @@ class EditableToken extends EditableSyntax
        return new UseToken(leading, trailing);
     case 'var':
        return new VarToken(leading, trailing);
+    case 'vec':
+       return new VecToken(leading, trailing);
     case 'void':
        return new VoidToken(leading, trailing);
     case 'while':
@@ -1159,6 +1171,13 @@ class DestructToken extends EditableToken
     super('__destruct', leading, trailing, '__destruct');
   }
 }
+class DictToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('dict', leading, trailing, 'dict');
+  }
+}
 class DoToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1318,6 +1337,13 @@ class InterfaceToken extends EditableToken
   constructor(leading, trailing)
   {
     super('interface', leading, trailing, 'interface');
+  }
+}
+class KeysetToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('keyset', leading, trailing, 'keyset');
   }
 }
 class ListToken extends EditableToken
@@ -1556,6 +1582,13 @@ class VarToken extends EditableToken
   constructor(leading, trailing)
   {
     super('var', leading, trailing, 'var');
+  }
+}
+class VecToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('vec', leading, trailing, 'vec');
   }
 }
 class VoidToken extends EditableToken
@@ -11228,6 +11261,318 @@ class ArrayIntrinsicExpression extends EditableSyntax
     return ArrayIntrinsicExpression._children_keys;
   }
 }
+class DictionaryIntrinsicExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_bracket,
+    members,
+    right_bracket)
+  {
+    super('dictionary_intrinsic_expression', {
+      keyword: keyword,
+      left_bracket: left_bracket,
+      members: members,
+      right_bracket: right_bracket });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_bracket() { return this.children.left_bracket; }
+  get members() { return this.children.members; }
+  get right_bracket() { return this.children.right_bracket; }
+  with_keyword(keyword){
+    return new DictionaryIntrinsicExpression(
+      keyword,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_left_bracket(left_bracket){
+    return new DictionaryIntrinsicExpression(
+      this.keyword,
+      left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_members(members){
+    return new DictionaryIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      members,
+      this.right_bracket);
+  }
+  with_right_bracket(right_bracket){
+    return new DictionaryIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      this.members,
+      right_bracket);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_bracket === this.left_bracket &&
+      members === this.members &&
+      right_bracket === this.right_bracket)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new DictionaryIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.dictionary_intrinsic_keyword, position, source);
+    position += keyword.width;
+    let left_bracket = EditableSyntax.from_json(
+      json.dictionary_intrinsic_left_bracket, position, source);
+    position += left_bracket.width;
+    let members = EditableSyntax.from_json(
+      json.dictionary_intrinsic_members, position, source);
+    position += members.width;
+    let right_bracket = EditableSyntax.from_json(
+      json.dictionary_intrinsic_right_bracket, position, source);
+    position += right_bracket.width;
+    return new DictionaryIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket);
+  }
+  get children_keys()
+  {
+    if (DictionaryIntrinsicExpression._children_keys == null)
+      DictionaryIntrinsicExpression._children_keys = [
+        'keyword',
+        'left_bracket',
+        'members',
+        'right_bracket'];
+    return DictionaryIntrinsicExpression._children_keys;
+  }
+}
+class KeysetIntrinsicExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_bracket,
+    members,
+    right_bracket)
+  {
+    super('keyset_intrinsic_expression', {
+      keyword: keyword,
+      left_bracket: left_bracket,
+      members: members,
+      right_bracket: right_bracket });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_bracket() { return this.children.left_bracket; }
+  get members() { return this.children.members; }
+  get right_bracket() { return this.children.right_bracket; }
+  with_keyword(keyword){
+    return new KeysetIntrinsicExpression(
+      keyword,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_left_bracket(left_bracket){
+    return new KeysetIntrinsicExpression(
+      this.keyword,
+      left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_members(members){
+    return new KeysetIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      members,
+      this.right_bracket);
+  }
+  with_right_bracket(right_bracket){
+    return new KeysetIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      this.members,
+      right_bracket);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_bracket === this.left_bracket &&
+      members === this.members &&
+      right_bracket === this.right_bracket)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new KeysetIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.keyset_intrinsic_keyword, position, source);
+    position += keyword.width;
+    let left_bracket = EditableSyntax.from_json(
+      json.keyset_intrinsic_left_bracket, position, source);
+    position += left_bracket.width;
+    let members = EditableSyntax.from_json(
+      json.keyset_intrinsic_members, position, source);
+    position += members.width;
+    let right_bracket = EditableSyntax.from_json(
+      json.keyset_intrinsic_right_bracket, position, source);
+    position += right_bracket.width;
+    return new KeysetIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket);
+  }
+  get children_keys()
+  {
+    if (KeysetIntrinsicExpression._children_keys == null)
+      KeysetIntrinsicExpression._children_keys = [
+        'keyword',
+        'left_bracket',
+        'members',
+        'right_bracket'];
+    return KeysetIntrinsicExpression._children_keys;
+  }
+}
+class VectorIntrinsicExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_bracket,
+    members,
+    right_bracket)
+  {
+    super('vector_intrinsic_expression', {
+      keyword: keyword,
+      left_bracket: left_bracket,
+      members: members,
+      right_bracket: right_bracket });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_bracket() { return this.children.left_bracket; }
+  get members() { return this.children.members; }
+  get right_bracket() { return this.children.right_bracket; }
+  with_keyword(keyword){
+    return new VectorIntrinsicExpression(
+      keyword,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_left_bracket(left_bracket){
+    return new VectorIntrinsicExpression(
+      this.keyword,
+      left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_members(members){
+    return new VectorIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      members,
+      this.right_bracket);
+  }
+  with_right_bracket(right_bracket){
+    return new VectorIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      this.members,
+      right_bracket);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_bracket === this.left_bracket &&
+      members === this.members &&
+      right_bracket === this.right_bracket)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new VectorIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.vector_intrinsic_keyword, position, source);
+    position += keyword.width;
+    let left_bracket = EditableSyntax.from_json(
+      json.vector_intrinsic_left_bracket, position, source);
+    position += left_bracket.width;
+    let members = EditableSyntax.from_json(
+      json.vector_intrinsic_members, position, source);
+    position += members.width;
+    let right_bracket = EditableSyntax.from_json(
+      json.vector_intrinsic_right_bracket, position, source);
+    position += right_bracket.width;
+    return new VectorIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket);
+  }
+  get children_keys()
+  {
+    if (VectorIntrinsicExpression._children_keys == null)
+      VectorIntrinsicExpression._children_keys = [
+        'keyword',
+        'left_bracket',
+        'members',
+        'right_bracket'];
+    return VectorIntrinsicExpression._children_keys;
+  }
+}
 class ElementInitializer extends EditableSyntax
 {
   constructor(
@@ -14195,6 +14540,7 @@ exports.ConstructToken = ConstructToken;
 exports.ContinueToken = ContinueToken;
 exports.DefaultToken = DefaultToken;
 exports.DestructToken = DestructToken;
+exports.DictToken = DictToken;
 exports.DoToken = DoToken;
 exports.DoubleToken = DoubleToken;
 exports.EchoToken = EchoToken;
@@ -14218,6 +14564,7 @@ exports.InstanceofToken = InstanceofToken;
 exports.InsteadofToken = InsteadofToken;
 exports.IntToken = IntToken;
 exports.InterfaceToken = InterfaceToken;
+exports.KeysetToken = KeysetToken;
 exports.ListToken = ListToken;
 exports.MixedToken = MixedToken;
 exports.NamespaceToken = NamespaceToken;
@@ -14252,6 +14599,7 @@ exports.TypeToken = TypeToken;
 exports.UnsetToken = UnsetToken;
 exports.UseToken = UseToken;
 exports.VarToken = VarToken;
+exports.VecToken = VecToken;
 exports.VoidToken = VoidToken;
 exports.WhileToken = WhileToken;
 exports.XorToken = XorToken;
@@ -14437,6 +14785,9 @@ exports.CollectionLiteralExpression = CollectionLiteralExpression;
 exports.ObjectCreationExpression = ObjectCreationExpression;
 exports.ArrayCreationExpression = ArrayCreationExpression;
 exports.ArrayIntrinsicExpression = ArrayIntrinsicExpression;
+exports.DictionaryIntrinsicExpression = DictionaryIntrinsicExpression;
+exports.KeysetIntrinsicExpression = KeysetIntrinsicExpression;
+exports.VectorIntrinsicExpression = VectorIntrinsicExpression;
 exports.ElementInitializer = ElementInitializer;
 exports.SubscriptExpression = SubscriptExpression;
 exports.AwaitableCreationExpression = AwaitableCreationExpression;

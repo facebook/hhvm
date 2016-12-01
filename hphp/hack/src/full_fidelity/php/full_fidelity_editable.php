@@ -298,6 +298,12 @@ abstract class EditableSyntax implements ArrayAccess {
       return ArrayCreationExpression::from_json($json, $position, $source);
     case 'array_intrinsic_expression':
       return ArrayIntrinsicExpression::from_json($json, $position, $source);
+    case 'dictionary_intrinsic_expression':
+      return DictionaryIntrinsicExpression::from_json($json, $position, $source);
+    case 'keyset_intrinsic_expression':
+      return KeysetIntrinsicExpression::from_json($json, $position, $source);
+    case 'vector_intrinsic_expression':
+      return VectorIntrinsicExpression::from_json($json, $position, $source);
     case 'element_initializer':
       return ElementInitializer::from_json($json, $position, $source);
     case 'subscript_expression':
@@ -741,6 +747,8 @@ abstract class EditableToken extends EditableSyntax {
        return new DefaultToken($leading, $trailing);
     case '__destruct':
        return new DestructToken($leading, $trailing);
+    case 'dict':
+       return new DictToken($leading, $trailing);
     case 'do':
        return new DoToken($leading, $trailing);
     case 'double':
@@ -787,6 +795,8 @@ abstract class EditableToken extends EditableSyntax {
        return new IntToken($leading, $trailing);
     case 'interface':
        return new InterfaceToken($leading, $trailing);
+    case 'keyset':
+       return new KeysetToken($leading, $trailing);
     case 'list':
        return new ListToken($leading, $trailing);
     case 'mixed':
@@ -855,6 +865,8 @@ abstract class EditableToken extends EditableSyntax {
        return new UseToken($leading, $trailing);
     case 'var':
        return new VarToken($leading, $trailing);
+    case 'vec':
+       return new VecToken($leading, $trailing);
     case 'void':
        return new VoidToken($leading, $trailing);
     case 'while':
@@ -1454,6 +1466,21 @@ final class DestructToken extends EditableToken {
     return new DestructToken($this->leading(), $trailing);
   }
 }
+final class DictToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('dict', $leading, $trailing, 'dict');
+  }
+
+  public function with_leading(EditableSyntax $leading): DictToken {
+    return new DictToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): DictToken {
+    return new DictToken($this->leading(), $trailing);
+  }
+}
 final class DoToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
@@ -1797,6 +1824,21 @@ final class InterfaceToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): InterfaceToken {
     return new InterfaceToken($this->leading(), $trailing);
+  }
+}
+final class KeysetToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('keyset', $leading, $trailing, 'keyset');
+  }
+
+  public function with_leading(EditableSyntax $leading): KeysetToken {
+    return new KeysetToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): KeysetToken {
+    return new KeysetToken($this->leading(), $trailing);
   }
 }
 final class ListToken extends EditableToken {
@@ -2307,6 +2349,21 @@ final class VarToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): VarToken {
     return new VarToken($this->leading(), $trailing);
+  }
+}
+final class VecToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('vec', $leading, $trailing, 'vec');
+  }
+
+  public function with_leading(EditableSyntax $leading): VecToken {
+    return new VecToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): VecToken {
+    return new VecToken($this->leading(), $trailing);
   }
 }
 final class VoidToken extends EditableToken {
@@ -13151,6 +13208,333 @@ final class ArrayIntrinsicExpression extends EditableSyntax {
     yield $this->_left_paren;
     yield $this->_members;
     yield $this->_right_paren;
+    yield break;
+  }
+}
+final class DictionaryIntrinsicExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_bracket;
+  private EditableSyntax $_members;
+  private EditableSyntax $_right_bracket;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_bracket,
+    EditableSyntax $members,
+    EditableSyntax $right_bracket) {
+    parent::__construct('dictionary_intrinsic_expression');
+    $this->_keyword = $keyword;
+    $this->_left_bracket = $left_bracket;
+    $this->_members = $members;
+    $this->_right_bracket = $right_bracket;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_bracket(): EditableSyntax {
+    return $this->_left_bracket;
+  }
+  public function members(): EditableSyntax {
+    return $this->_members;
+  }
+  public function right_bracket(): EditableSyntax {
+    return $this->_right_bracket;
+  }
+  public function with_keyword(EditableSyntax $keyword): DictionaryIntrinsicExpression {
+    return new DictionaryIntrinsicExpression(
+      $keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_left_bracket(EditableSyntax $left_bracket): DictionaryIntrinsicExpression {
+    return new DictionaryIntrinsicExpression(
+      $this->_keyword,
+      $left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_members(EditableSyntax $members): DictionaryIntrinsicExpression {
+    return new DictionaryIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $members,
+      $this->_right_bracket);
+  }
+  public function with_right_bracket(EditableSyntax $right_bracket): DictionaryIntrinsicExpression {
+    return new DictionaryIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $right_bracket);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_bracket = $this->left_bracket()->rewrite($rewriter, $new_parents);
+    $members = $this->members()->rewrite($rewriter, $new_parents);
+    $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_bracket === $this->left_bracket() &&
+      $members === $this->members() &&
+      $right_bracket === $this->right_bracket()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new DictionaryIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->dictionary_intrinsic_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_bracket = EditableSyntax::from_json(
+      $json->dictionary_intrinsic_left_bracket, $position, $source);
+    $position += $left_bracket->width();
+    $members = EditableSyntax::from_json(
+      $json->dictionary_intrinsic_members, $position, $source);
+    $position += $members->width();
+    $right_bracket = EditableSyntax::from_json(
+      $json->dictionary_intrinsic_right_bracket, $position, $source);
+    $position += $right_bracket->width();
+    return new DictionaryIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_bracket;
+    yield $this->_members;
+    yield $this->_right_bracket;
+    yield break;
+  }
+}
+final class KeysetIntrinsicExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_bracket;
+  private EditableSyntax $_members;
+  private EditableSyntax $_right_bracket;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_bracket,
+    EditableSyntax $members,
+    EditableSyntax $right_bracket) {
+    parent::__construct('keyset_intrinsic_expression');
+    $this->_keyword = $keyword;
+    $this->_left_bracket = $left_bracket;
+    $this->_members = $members;
+    $this->_right_bracket = $right_bracket;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_bracket(): EditableSyntax {
+    return $this->_left_bracket;
+  }
+  public function members(): EditableSyntax {
+    return $this->_members;
+  }
+  public function right_bracket(): EditableSyntax {
+    return $this->_right_bracket;
+  }
+  public function with_keyword(EditableSyntax $keyword): KeysetIntrinsicExpression {
+    return new KeysetIntrinsicExpression(
+      $keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_left_bracket(EditableSyntax $left_bracket): KeysetIntrinsicExpression {
+    return new KeysetIntrinsicExpression(
+      $this->_keyword,
+      $left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_members(EditableSyntax $members): KeysetIntrinsicExpression {
+    return new KeysetIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $members,
+      $this->_right_bracket);
+  }
+  public function with_right_bracket(EditableSyntax $right_bracket): KeysetIntrinsicExpression {
+    return new KeysetIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $right_bracket);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_bracket = $this->left_bracket()->rewrite($rewriter, $new_parents);
+    $members = $this->members()->rewrite($rewriter, $new_parents);
+    $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_bracket === $this->left_bracket() &&
+      $members === $this->members() &&
+      $right_bracket === $this->right_bracket()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new KeysetIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->keyset_intrinsic_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_bracket = EditableSyntax::from_json(
+      $json->keyset_intrinsic_left_bracket, $position, $source);
+    $position += $left_bracket->width();
+    $members = EditableSyntax::from_json(
+      $json->keyset_intrinsic_members, $position, $source);
+    $position += $members->width();
+    $right_bracket = EditableSyntax::from_json(
+      $json->keyset_intrinsic_right_bracket, $position, $source);
+    $position += $right_bracket->width();
+    return new KeysetIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_bracket;
+    yield $this->_members;
+    yield $this->_right_bracket;
+    yield break;
+  }
+}
+final class VectorIntrinsicExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_bracket;
+  private EditableSyntax $_members;
+  private EditableSyntax $_right_bracket;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_bracket,
+    EditableSyntax $members,
+    EditableSyntax $right_bracket) {
+    parent::__construct('vector_intrinsic_expression');
+    $this->_keyword = $keyword;
+    $this->_left_bracket = $left_bracket;
+    $this->_members = $members;
+    $this->_right_bracket = $right_bracket;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_bracket(): EditableSyntax {
+    return $this->_left_bracket;
+  }
+  public function members(): EditableSyntax {
+    return $this->_members;
+  }
+  public function right_bracket(): EditableSyntax {
+    return $this->_right_bracket;
+  }
+  public function with_keyword(EditableSyntax $keyword): VectorIntrinsicExpression {
+    return new VectorIntrinsicExpression(
+      $keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_left_bracket(EditableSyntax $left_bracket): VectorIntrinsicExpression {
+    return new VectorIntrinsicExpression(
+      $this->_keyword,
+      $left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_members(EditableSyntax $members): VectorIntrinsicExpression {
+    return new VectorIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $members,
+      $this->_right_bracket);
+  }
+  public function with_right_bracket(EditableSyntax $right_bracket): VectorIntrinsicExpression {
+    return new VectorIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $right_bracket);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_bracket = $this->left_bracket()->rewrite($rewriter, $new_parents);
+    $members = $this->members()->rewrite($rewriter, $new_parents);
+    $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_bracket === $this->left_bracket() &&
+      $members === $this->members() &&
+      $right_bracket === $this->right_bracket()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new VectorIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->vector_intrinsic_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_bracket = EditableSyntax::from_json(
+      $json->vector_intrinsic_left_bracket, $position, $source);
+    $position += $left_bracket->width();
+    $members = EditableSyntax::from_json(
+      $json->vector_intrinsic_members, $position, $source);
+    $position += $members->width();
+    $right_bracket = EditableSyntax::from_json(
+      $json->vector_intrinsic_right_bracket, $position, $source);
+    $position += $right_bracket->width();
+    return new VectorIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_bracket;
+    yield $this->_members;
+    yield $this->_right_bracket;
     yield break;
   }
 }

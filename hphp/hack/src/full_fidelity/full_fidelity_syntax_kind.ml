@@ -103,6 +103,9 @@ type t =
 | ObjectCreationExpression
 | ArrayCreationExpression
 | ArrayIntrinsicExpression
+| DictionaryIntrinsicExpression
+| KeysetIntrinsicExpression
+| VectorIntrinsicExpression
 | ElementInitializer
 | SubscriptExpression
 | AwaitableCreationExpression
@@ -226,6 +229,9 @@ let to_string kind =
   | ObjectCreationExpression -> "object_creation_expression"
   | ArrayCreationExpression -> "array_creation_expression"
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
+  | DictionaryIntrinsicExpression -> "dictionary_intrinsic_expression"
+  | KeysetIntrinsicExpression -> "keyset_intrinsic_expression"
+  | VectorIntrinsicExpression -> "vector_intrinsic_expression"
   | ElementInitializer -> "element_initializer"
   | SubscriptExpression -> "subscript_expression"
   | AwaitableCreationExpression -> "awaitable_creation_expression"

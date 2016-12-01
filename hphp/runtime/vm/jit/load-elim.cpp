@@ -463,14 +463,16 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
 }
 
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
-  for (auto i = uint32_t{0}; i < kMaxTrackedALocs; ++i) {
-    if (!env.state.avail[i]) continue;
-    auto& tracked = env.state.tracked[i];
-    if (tracked.knownValue != oldVal) continue;
-    FTRACE(4, "       refining {} to {}\n", i, newVal->toString());
-    tracked.knownValue = newVal;
-    tracked.knownType  = newVal->type();
-  }
+  bitset_for_each_set(
+    env.state.avail,
+    [&](size_t i) {
+      auto& tracked = env.state.tracked[i];
+      if (tracked.knownValue != oldVal) return;
+      FTRACE(4, "       refining {} to {}\n", i, newVal->toString());
+      tracked.knownValue = newVal;
+      tracked.knownType  = newVal->type();
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -843,14 +845,15 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
 
   dst.avail &= src.avail;
 
-  for (auto idx = uint32_t{0}; idx < kMaxTrackedALocs; ++idx) {
-    if (!src.avail[idx]) continue;
-    dst.avail &= ~genv.ainfo.locations_inv[idx].conflicts;
-
-    if (dst.avail[idx]) {
-      merge_into(target, dst.tracked[idx], src.tracked[idx]);
+  bitset_for_each_set(
+    src.avail,
+    [&](size_t idx) {
+      dst.avail &= ~genv.ainfo.locations_inv[idx].conflicts;
+      if (dst.avail[idx]) {
+        merge_into(target, dst.tracked[idx], src.tracked[idx]);
+      }
     }
-  }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

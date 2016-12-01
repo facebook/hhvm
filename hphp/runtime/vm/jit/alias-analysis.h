@@ -20,10 +20,11 @@
 #include <string>
 #include <cstdint>
 
-#include "hphp/util/sparse-id-containers.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+
+#include "hphp/util/sparse-id-containers.h"
 
 namespace HPHP { namespace jit {
 
@@ -38,7 +39,7 @@ struct IRUnit;
  * using information from this module must be conservative about locations that
  * aren't assigned an id.  (E.g. via calls to may_alias in AliasAnalysis.)
  */
-constexpr uint32_t kMaxTrackedALocs = 128;
+constexpr uint32_t kMaxTrackedALocs = 256;
 using ALocBits = std::bitset<kMaxTrackedALocs>;
 
 //////////////////////////////////////////////////////////////////////

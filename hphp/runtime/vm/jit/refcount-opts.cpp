@@ -1439,12 +1439,10 @@ DEBUG_ONLY bool check_state(const RCState& state) {
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
-    if (set.memory_support.any()) {
-      for (auto id = uint32_t{0}; id < set.memory_support.size(); ++id) {
-        if (!set.memory_support[id]) continue;
-        always_assert(state.support_map[id] == asetID);
-      }
-    }
+    bitset_for_each_set(
+      set.memory_support,
+      [&](size_t id) { always_assert(state.support_map[id] == asetID); }
+    );
 
     if (set.pessimized) {
       always_assert(set.lower_bound == 0);
@@ -1589,13 +1587,13 @@ bool merge_into(Env& env, RCState& dst, const RCState& src) {
       changed = true;
     }
 
-    auto const& mem = dst.asets[asetID].memory_support;
-    if (mem.none()) continue;
-    for (auto loc = uint32_t{0}; loc < mem.size(); ++loc) {
-      if (!mem[loc]) continue;
-      assertx(dst.support_map[loc] == -1);
-      dst.support_map[loc] = asetID;
-    }
+    bitset_for_each_set(
+      dst.asets[asetID].memory_support,
+      [&](size_t loc) {
+        assertx(dst.support_map[loc] == -1);
+        dst.support_map[loc] = asetID;
+      }
+    );
   }
 
   assertx(check_state(dst));
@@ -1613,14 +1611,6 @@ void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
   fn(asetID);
 }
 
-template<class Fn>
-void for_each_bit(ALocBits bits, Fn fn) {
-  for (auto i = uint32_t{0}; i < bits.size(); ++i) {
-    if (!bits[i]) continue;
-    fn(i);
-  }
-}
-
 void reduce_lower_bound(Env& env, RCState& state, uint32_t asetID) {
   FTRACE(5, "      reduce_lower_bound {}\n", asetID);
   auto& aset = state.asets[asetID];
@@ -1633,13 +1623,11 @@ void pessimize_one(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   if (aset.pessimized) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
-  if (aset.memory_support.any()) {
-    for (auto id = uint32_t{0}; id < aset.memory_support.size(); ++id) {
-      if (!aset.memory_support[id]) continue;
-      state.support_map[id] = -1;
-    }
-    aset.memory_support.reset();
-  }
+  bitset_for_each_set(
+    aset.memory_support,
+    [&](size_t id) { state.support_map[id] = -1; }
+  );
+  aset.memory_support.reset();
   aset.pessimized = true;
   add_node(asetID, NHalt{});
 }
@@ -1777,9 +1765,12 @@ bool reduce_support_bits(Env& env,
                          NAdder add_node) {
   FTRACE(2, "    remove: {}\n", show(set));
   auto ret = true;
-  for_each_bit(set, [&] (uint32_t locID) {
-    if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
-  });
+  bitset_for_each_set(
+    set,
+    [&](uint32_t locID) {
+      if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
+    }
+  );
   return ret;
 }
 
@@ -1808,9 +1799,12 @@ void drop_support_bit(Env& env, RCState& state, uint32_t bit) {
 
 void drop_support_bits(Env& env, RCState& state, ALocBits bits) {
   FTRACE(3, "    drop support {}\n", show(bits));
-  for_each_bit(bits, [&] (uint32_t bit) {
-    drop_support_bit(env, state, bit);
-  });
+  bitset_for_each_set(
+    bits,
+    [&] (uint32_t bit) {
+      drop_support_bit(env, state, bit);
+    }
+  );
 }
 
 template<class NAdder>

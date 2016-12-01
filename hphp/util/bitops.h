@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_BITOPS_H_
 #define incl_HPHP_BITOPS_H_
 
+#include <bitset>
+
 #if !defined(__x86_64__) && !defined(__aarch64__)
 #include <folly/Bits.h>
 #endif
@@ -111,6 +113,50 @@ inline bool fls64(I64 input, J64 &out) {
   retval = input != 0;
 #endif
   return retval;
+}
+
+// Return the index of the first set bit in a bitset, or bitset.size() if none.
+template <size_t N>
+inline size_t bitset_find_first(const std::bitset<N>& bitset) {
+#if defined(__GNUC__) && !defined(__APPLE__)
+  // GNU provides non-standard (its a hold over from the original SGI
+  // implementation) _Find_first(), which efficiently returns the index of the
+  // first set bit.
+  return bitset._Find_first();
+#else
+  for (size_t i = 0; i < bitset.size(); ++i) {
+    if (bitset[i]) return i;
+  }
+  return bitset.size();
+#endif
+}
+
+// Return the index of the first set bit in a bitset after the given index, or
+// bitset.size() if none.
+template <size_t N>
+inline size_t bitset_find_next(const std::bitset<N>& bitset, size_t prev) {
+  assert(prev < bitset.size());
+#if defined(__GNUC__) && !defined(__APPLE__)
+  // GNU provides non-standard (its a hold over from the original SGI
+  // implementation) _Find_next(), which given an index, efficiently returns
+  // the index of the first set bit after the index.
+  return bitset._Find_next(prev);
+#else
+  for (size_t i = prev+1; i < bitset.size(); ++i) {
+    if (bitset[i]) return i;
+  }
+  return bitset.size();
+#endif
+}
+
+// Invoke the given callable on the indices of all the set bits in a bitset.
+template <typename F, size_t N>
+inline void bitset_for_each_set(const std::bitset<N>& bitset, F f) {
+  for (auto i = bitset_find_first(bitset);
+       i < bitset.size();
+       i = bitset_find_next(bitset, i)) {
+    f(i);
+  }
 }
 
 } // HPHP

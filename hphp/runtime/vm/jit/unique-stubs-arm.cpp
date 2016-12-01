@@ -95,6 +95,12 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       // The refcount is exactly 1; release the value.
       // Avoid 'this' pointer overwriting by reserving it as an argument.
       v << callm{lookupDestructor(v, type), arg_regs(1)};
+
+      // Between where %rsp is now and the saved RIP of the call into the
+      // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
+      // saved RIP of the call from the stub to this helper.
+      v << syncpoint{makeIndirectFixup(prs.dwordsPushed())};
+      // fallthru
     });
 
     // Either we did a decref, or the value was static.
@@ -206,9 +212,6 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
   vixl::MacroAssembler a { cb };
   vixl::Label target_data;
   auto const start = cb.frontier();
-
-  // Emulating the return to enterTCExit. Pop off the FP, LR pair
-  a.Add(vixl::sp, vixl::sp, 16);
 
   // Jump to enterTCExit
   a.Ldr(rAsm, &target_data);

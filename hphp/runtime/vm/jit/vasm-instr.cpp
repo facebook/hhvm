@@ -207,7 +207,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::uxth:
     // ppc64 instructions
     case Vinstr::extsb:
-    case Vinstr::extsw:
+    case Vinstr::extsl:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
     case Vinstr::fctidz:

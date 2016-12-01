@@ -29,9 +29,7 @@ bool is_nop(const copy& i) { return i.s == i.d; }
 bool is_nop(const copy2& i) { return i.s0 == i.d0 && i.s1 == i.d1; }
 
 // movb r,r is a nop, however movl is not since it zeros upper bits.
-bool is_nop(const movb& i) {
-  return i.s == i.d;
-}
+bool is_nop(const movb& i) { return i.s == i.d; }
 
 bool is_nop(const lea& i) {
   if (i.s.disp != 0) return false;

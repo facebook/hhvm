@@ -182,9 +182,11 @@ type t =
   | SingleQuotedStringLiteral
   | DoubleQuotedStringLiteral
   | DoubleQuotedStringLiteralHead
-  | DoubleQuotedStringLiteralBody
+  | StringLiteralBody
   | DoubleQuotedStringLiteralTail
   | HeredocStringLiteral
+  | HeredocStringLiteralHead
+  | HeredocStringLiteralTail
   | NowdocStringLiteral
   | BooleanLiteral
   | XHPCategoryName
@@ -515,9 +517,11 @@ match kind with
   | SingleQuotedStringLiteral -> "single_quoted_string_literal"
   | DoubleQuotedStringLiteral -> "double_quoted_string_literal"
   | DoubleQuotedStringLiteralHead -> "double_quoted_string_literal_head"
-  | DoubleQuotedStringLiteralBody -> "double_quoted_string_literal_body"
+  | StringLiteralBody -> "string_literal_body"
   | DoubleQuotedStringLiteralTail -> "double_quoted_string_literal_tail"
   | HeredocStringLiteral -> "heredoc_string_literal"
+  | HeredocStringLiteralHead -> "heredoc_string_literal_head"
+  | HeredocStringLiteralTail -> "heredoc_string_literal_tail"
   | NowdocStringLiteral -> "nowdoc_string_literal"
   | BooleanLiteral -> "boolean_literal"
   | XHPCategoryName -> "XHP_category_name"
@@ -526,3 +530,4 @@ match kind with
   | XHPStringLiteral -> "XHP_string_literal"
   | XHPBody -> "XHP_body"
   | XHPComment -> "XHP_comment"
+

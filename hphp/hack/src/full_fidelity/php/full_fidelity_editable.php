@@ -1018,12 +1018,16 @@ abstract class EditableToken extends EditableSyntax {
        return new DoubleQuotedStringLiteralToken($leading, $trailing, $token_text);
     case 'double_quoted_string_literal_head':
        return new DoubleQuotedStringLiteralHeadToken($leading, $trailing, $token_text);
-    case 'double_quoted_string_literal_body':
-       return new DoubleQuotedStringLiteralBodyToken($leading, $trailing, $token_text);
+    case 'string_literal_body':
+       return new StringLiteralBodyToken($leading, $trailing, $token_text);
     case 'double_quoted_string_literal_tail':
        return new DoubleQuotedStringLiteralTailToken($leading, $trailing, $token_text);
     case 'heredoc_string_literal':
        return new HeredocStringLiteralToken($leading, $trailing, $token_text);
+    case 'heredoc_string_literal_head':
+       return new HeredocStringLiteralHeadToken($leading, $trailing, $token_text);
+    case 'heredoc_string_literal_tail':
+       return new HeredocStringLiteralTailToken($leading, $trailing, $token_text);
     case 'nowdoc_string_literal':
        return new NowdocStringLiteralToken($leading, $trailing, $token_text);
     case 'boolean_literal':
@@ -3599,24 +3603,24 @@ final class DoubleQuotedStringLiteralHeadToken extends EditableToken {
     return new DoubleQuotedStringLiteralHeadToken($this->leading(), $trailing, $this->text());
   }
 }
-final class DoubleQuotedStringLiteralBodyToken extends EditableToken {
+final class StringLiteralBodyToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
     EditableSyntax $trailing,
     string $text) {
-    parent::__construct('double_quoted_string_literal_body', $leading, $trailing, $text);
+    parent::__construct('string_literal_body', $leading, $trailing, $text);
   }
 
-  public function with_text(string $text): DoubleQuotedStringLiteralBodyToken {
-    return new DoubleQuotedStringLiteralBodyToken($this->leading(), $this->trailing(), $text);
+  public function with_text(string $text): StringLiteralBodyToken {
+    return new StringLiteralBodyToken($this->leading(), $this->trailing(), $text);
   }
 
-  public function with_leading(EditableSyntax $leading): DoubleQuotedStringLiteralBodyToken {
-    return new DoubleQuotedStringLiteralBodyToken($leading, $this->trailing(), $this->text());
+  public function with_leading(EditableSyntax $leading): StringLiteralBodyToken {
+    return new StringLiteralBodyToken($leading, $this->trailing(), $this->text());
   }
 
-  public function with_trailing(EditableSyntax $trailing): DoubleQuotedStringLiteralBodyToken {
-    return new DoubleQuotedStringLiteralBodyToken($this->leading(), $trailing, $this->text());
+  public function with_trailing(EditableSyntax $trailing): StringLiteralBodyToken {
+    return new StringLiteralBodyToken($this->leading(), $trailing, $this->text());
   }
 }
 final class DoubleQuotedStringLiteralTailToken extends EditableToken {
@@ -3657,6 +3661,46 @@ final class HeredocStringLiteralToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): HeredocStringLiteralToken {
     return new HeredocStringLiteralToken($this->leading(), $trailing, $this->text());
+  }
+}
+final class HeredocStringLiteralHeadToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('heredoc_string_literal_head', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): HeredocStringLiteralHeadToken {
+    return new HeredocStringLiteralHeadToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): HeredocStringLiteralHeadToken {
+    return new HeredocStringLiteralHeadToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): HeredocStringLiteralHeadToken {
+    return new HeredocStringLiteralHeadToken($this->leading(), $trailing, $this->text());
+  }
+}
+final class HeredocStringLiteralTailToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('heredoc_string_literal_tail', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): HeredocStringLiteralTailToken {
+    return new HeredocStringLiteralTailToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): HeredocStringLiteralTailToken {
+    return new HeredocStringLiteralTailToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): HeredocStringLiteralTailToken {
+    return new HeredocStringLiteralTailToken($this->leading(), $trailing, $this->text());
   }
 }
 final class NowdocStringLiteralToken extends EditableToken {

@@ -913,12 +913,16 @@ class EditableToken extends EditableSyntax
        return new DoubleQuotedStringLiteralToken(leading, trailing, token_text);
     case 'double_quoted_string_literal_head':
        return new DoubleQuotedStringLiteralHeadToken(leading, trailing, token_text);
-    case 'double_quoted_string_literal_body':
-       return new DoubleQuotedStringLiteralBodyToken(leading, trailing, token_text);
+    case 'string_literal_body':
+       return new StringLiteralBodyToken(leading, trailing, token_text);
     case 'double_quoted_string_literal_tail':
        return new DoubleQuotedStringLiteralTailToken(leading, trailing, token_text);
     case 'heredoc_string_literal':
        return new HeredocStringLiteralToken(leading, trailing, token_text);
+    case 'heredoc_string_literal_head':
+       return new HeredocStringLiteralHeadToken(leading, trailing, token_text);
+    case 'heredoc_string_literal_tail':
+       return new HeredocStringLiteralTailToken(leading, trailing, token_text);
     case 'nowdoc_string_literal':
        return new NowdocStringLiteralToken(leading, trailing, token_text);
     case 'boolean_literal':
@@ -2192,15 +2196,15 @@ class DoubleQuotedStringLiteralHeadToken extends EditableToken
   }
 
 }
-class DoubleQuotedStringLiteralBodyToken extends EditableToken
+class StringLiteralBodyToken extends EditableToken
 {
   constructor(leading, trailing, text)
   {
-    super('double_quoted_string_literal_body', leading, trailing, text);
+    super('string_literal_body', leading, trailing, text);
   }
   with_text(text)
   {
-    return new DoubleQuotedStringLiteralBodyToken(this.leading, this.trailing, text);
+    return new StringLiteralBodyToken(this.leading, this.trailing, text);
   }
 
 }
@@ -2225,6 +2229,30 @@ class HeredocStringLiteralToken extends EditableToken
   with_text(text)
   {
     return new HeredocStringLiteralToken(this.leading, this.trailing, text);
+  }
+
+}
+class HeredocStringLiteralHeadToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('heredoc_string_literal_head', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new HeredocStringLiteralHeadToken(this.leading, this.trailing, text);
+  }
+
+}
+class HeredocStringLiteralTailToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('heredoc_string_literal_tail', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new HeredocStringLiteralTailToken(this.leading, this.trailing, text);
   }
 
 }
@@ -14229,9 +14257,11 @@ exports.FloatingLiteralToken = FloatingLiteralToken;
 exports.SingleQuotedStringLiteralToken = SingleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralToken = DoubleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralHeadToken = DoubleQuotedStringLiteralHeadToken;
-exports.DoubleQuotedStringLiteralBodyToken = DoubleQuotedStringLiteralBodyToken;
+exports.StringLiteralBodyToken = StringLiteralBodyToken;
 exports.DoubleQuotedStringLiteralTailToken = DoubleQuotedStringLiteralTailToken;
 exports.HeredocStringLiteralToken = HeredocStringLiteralToken;
+exports.HeredocStringLiteralHeadToken = HeredocStringLiteralHeadToken;
+exports.HeredocStringLiteralTailToken = HeredocStringLiteralTailToken;
 exports.NowdocStringLiteralToken = NowdocStringLiteralToken;
 exports.BooleanLiteralToken = BooleanLiteralToken;
 exports.XHPCategoryNameToken = XHPCategoryNameToken;

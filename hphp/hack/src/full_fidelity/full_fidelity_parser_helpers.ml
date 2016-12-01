@@ -31,9 +31,15 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
-  let next_token_in_string parser =
+  let next_docstring_header parser =
     let lexer = Parser.lexer parser in
-    let (lexer, token) = Parser.Lexer.next_token_in_string lexer in
+    let (lexer, token, name) = Parser.Lexer.next_docstring_header lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token, name)
+
+  let next_token_in_string parser name =
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_token_in_string lexer name in
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 

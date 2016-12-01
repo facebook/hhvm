@@ -44,7 +44,7 @@ let start_new_lexeme lexer =
 
 let peek_char lexer index =
   let i = lexer.offset + index in
-  if i >= SourceText.length lexer.text then invalid
+  if i >= SourceText.length lexer.text || i < 0 then invalid
   else SourceText.get lexer.text i
 
 let peek_string lexer size =
@@ -406,23 +406,67 @@ let scan_double_quote_string_literal_from_start lexer =
       (lexer, TokenKind.DoubleQuotedStringLiteralHead) in
   aux (advance lexer 1)
 
-let scan_double_quote_string_literal_in_progress lexer =
+let is_heredoc_tail lexer name =
+  (* A heredoc tail is the identifier immediately preceded by a newline
+  and immediately followed by an optional semi and then a newline.
+
+  Note that the newline and optional semi are not part of the literal;
+  the literal's lexeme ends at the end of the name. Either there is
+  no trivia and the next token is a semi-with-trailing-newline, or
+  the trailing trivia is a newline.
+
+  This odd rule is to ensure that both
+  $x = <<<HERE
+  something
+  HERE;
+
+  and
+
+  $x = <<<HERE
+  something
+  HERE
+  . "something else";
+
+  are legal.
+  *)
+
+  if not (is_newline (peek_char lexer (-1))) then
+    false
+  else
+    let len = String.length name in
+    let ch0 = peek_char lexer len in
+    let ch1 = peek_char lexer (len + 1) in
+    ((is_newline ch0) || ch0 = ';' && (is_newline ch1)) &&
+      (peek_string lexer len) = name
+
+let scan_string_literal_in_progress lexer name =
+  let is_heredoc = (String.length name) != 0 in
   let ch0 = peek_char lexer 0 in
   if is_name_nondigit ch0 then
-    (scan_name_impl lexer, TokenKind.Name)
+    if is_heredoc && (is_heredoc_tail lexer name) then
+      (scan_name_impl lexer, TokenKind.HeredocStringLiteralTail)
+    else
+      (scan_name_impl lexer, TokenKind.Name)
   else
     let ch1 = peek_char lexer 1 in
     match (ch0, ch1) with
     | ('\000', _) ->
       if at_end lexer then
         let lexer = with_error lexer SyntaxError.error0012 in
-        (lexer, TokenKind.DoubleQuotedStringLiteralTail)
+        let kind =
+          if is_heredoc then TokenKind.HeredocStringLiteralTail
+          else TokenKind.DoubleQuotedStringLiteralTail in
+        (lexer, kind)
       else
         let lexer = with_error lexer SyntaxError.error0006 in
         let lexer = advance lexer 1 in
         let lexer = skip_uninteresting_double_quote_string_characters lexer in
-        (lexer, TokenKind.DoubleQuotedStringLiteralBody)
-    | ('"', _) -> (advance lexer 1, TokenKind.DoubleQuotedStringLiteralTail)
+        (lexer, TokenKind.StringLiteralBody)
+    | ('"', _) ->
+      let kind =
+        if is_heredoc then TokenKind.StringLiteralBody
+        else TokenKind.DoubleQuotedStringLiteralTail in
+      (advance lexer 1, kind)
     | ('$', _) ->
       if is_name_nondigit ch1 then scan_variable lexer
       else (advance lexer 1, TokenKind.Dollar)
@@ -451,15 +495,15 @@ let scan_double_quote_string_literal_in_progress lexer =
     | ('\\', '7') ->
       let lexer = advance lexer 2 in
       let lexer = skip_uninteresting_double_quote_string_characters lexer in
-      (lexer, TokenKind.DoubleQuotedStringLiteralBody)
+      (lexer, TokenKind.StringLiteralBody)
     | ('\\', 'x') ->
       let lexer = scan_hexadecimal_escape lexer in
       let lexer = skip_uninteresting_double_quote_string_characters lexer in
-      (lexer, TokenKind.DoubleQuotedStringLiteralBody)
+      (lexer, TokenKind.StringLiteralBody)
     | ('\\', 'u') ->
       let lexer = scan_unicode_escape lexer in
       let lexer = skip_uninteresting_double_quote_string_characters lexer in
-      (lexer, TokenKind.DoubleQuotedStringLiteralBody)
+      (lexer, TokenKind.StringLiteralBody)
     | ('\\', '{') ->
       (* Bizarrely, even though { is meaningful inside a
       double-quoted string literal, it cannot be escaped with a
@@ -468,7 +512,7 @@ let scan_double_quote_string_literal_in_progress lexer =
       (* TODO: This seems deeply wrong. Consider fixing that. *)
       (* Eat the backslash. *)
       let lexer = advance lexer 1 in
-      (lexer, TokenKind.DoubleQuotedStringLiteralBody)
+      (lexer, TokenKind.StringLiteralBody)
     | ('\\', _) ->
       (* TODO: A backslash followed by something other than an escape sequence
          is legal in hack, and treated as though it was just the backslash
@@ -482,7 +526,7 @@ let scan_double_quote_string_literal_in_progress lexer =
          *)
          let lexer = advance lexer 1 in
          let lexer = skip_uninteresting_double_quote_string_characters lexer in
-         (lexer, TokenKind.DoubleQuotedStringLiteralBody)
+         (lexer, TokenKind.StringLiteralBody)
     | ('[', _) ->
       let lexer = advance lexer 1 in
       (lexer, TokenKind.LeftBracket)
@@ -508,7 +552,7 @@ let scan_double_quote_string_literal_in_progress lexer =
          interesting character. *)
       let lexer = advance lexer 1 in
       let lexer = skip_uninteresting_double_quote_string_characters lexer in
-      (lexer, TokenKind.DoubleQuotedStringLiteralBody)
+      (lexer, TokenKind.StringLiteralBody)
 
 (*  A heredoc string literal has the form
 
@@ -535,10 +579,8 @@ the trailer.
 
 The body may contain embedded expressions.
 
-TODO: parse the embedded expressions
-
 A nowdoc string literal has the same form except that the first name is
-enclosed in single quotes.
+enclosed in single quotes, and it may not contain embedded expressions.
 
 *)
 
@@ -602,8 +644,8 @@ let scan_docstring_remainder name lexer =
 
 let scan_docstring_literal lexer =
   let (lexer, name, kind) = scan_docstring_header lexer in
-  let lexer = scan_docstring_remainder name lexer in
-  (lexer, kind)
+    let lexer = scan_docstring_remainder name lexer in
+    (lexer, kind)
 
 let scan_xhp_label lexer =
   (* An XHP label has the same grammar as a Hack name. *)
@@ -1012,19 +1054,29 @@ let scan_next_token_as_keyword = scan_next_token false
 let next_token lexer =
   scan_next_token_as_keyword scan_token_outside_type lexer
 
-let next_token_in_string lexer =
+let next_token_in_string lexer name =
   let lexer = start_new_lexeme lexer in
   (* We're inside a string. Do not scan leading trivia. *)
-  let (lexer, kind) = scan_double_quote_string_literal_in_progress lexer in
+  let (lexer, kind) = scan_string_literal_in_progress lexer name in
   let w = width lexer in
   (* Only scan trailing trivia if we've finished the string. *)
   let (lexer, trailing) =
-    if kind = TokenKind.DoubleQuotedStringLiteralTail then
-      scan_trailing_trivia lexer
-    else
-      (lexer, []) in
+    match kind with
+    | TokenKind.DoubleQuotedStringLiteralTail
+    | TokenKind.HeredocStringLiteralTail -> scan_trailing_trivia lexer
+    | _ -> (lexer, []) in
   let token = Token.make kind w [] trailing in
   (lexer, token)
+
+let next_docstring_header lexer =
+  (* We're at the beginning of a heredoc string literal. Scan leading
+     trivia but not trailing trivia. *)
+  let (lexer, leading) = scan_leading_trivia lexer in
+  let lexer = start_new_lexeme lexer in
+  let (lexer, name, _) = scan_docstring_header lexer in
+  let w = width lexer in
+  let token = Token.make TokenKind.HeredocStringLiteralHead w leading [] in
+  (lexer, token, name)
 
 let next_token_as_name lexer =
   scan_next_token_as_name scan_token_outside_type lexer

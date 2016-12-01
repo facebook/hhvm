@@ -99,11 +99,16 @@ module WithStatementAndDeclAndTypeParser
     | BinaryLiteral
     | FloatingLiteral
     | SingleQuotedStringLiteral
-    | HeredocStringLiteral (* TODO: Parse interior *)
-    | NowdocStringLiteral (* TODO: Parse interior *)
+    | NowdocStringLiteral
     | DoubleQuotedStringLiteral
     | BooleanLiteral
     | NullLiteral -> (parser1, make_literal_expression (make_token token))
+    | HeredocStringLiteral ->
+      (* We have a heredoc string literal but it might contain embedded
+         expressions. Start over. *)
+      let (parser, token, name) = next_docstring_header parser in
+      parse_heredoc_string parser (make_token token) name
+    | HeredocStringLiteralHead
     | DoubleQuotedStringLiteralHead ->
       parse_double_quoted_string parser1 (make_token token)
     | Variable -> parse_variable_or_lambda parser
@@ -159,7 +164,18 @@ module WithStatementAndDeclAndTypeParser
       end
 
   and parse_double_quoted_string parser head =
+    parse_string_literal parser head ""
+
+  and parse_heredoc_string parser head name =
+    parse_string_literal parser head name
+
+  and parse_string_literal parser head name =
     (* SPEC
+
+    Double-quoted string literals and heredoc string literals use basically
+    the same rules; here we have just the grammar for double-quoted string
+    literals.
+
     string-variable::
       variable-name   offset-or-property-opt
 
@@ -221,13 +237,21 @@ module WithStatementAndDeclAndTypeParser
          the string. That is, something like "a${b}c${d}e" is at present
          represented as head, expr, body, expr, tail.  It could be instead
          head, dollar, left brace, expr, right brace, body, dollar, left
-         brace, expr, right brace, tail. Is that better? *)
+         brace, expr, right brace, tail. Is that better?
+
+         TODO: Similarly we might want to preserve the structure of
+         heredoc strings in the parse: that there is a header consisting of
+         an identifier, and so on, and then body text, etc. *)
       let k = match (Token.kind head, Token.kind token) with
       | (DoubleQuotedStringLiteralHead, DoubleQuotedStringLiteralTail) ->
         DoubleQuotedStringLiteral
+      | (HeredocStringLiteralHead, HeredocStringLiteralTail) ->
+        HeredocStringLiteral
       | (DoubleQuotedStringLiteralHead, _) -> DoubleQuotedStringLiteralHead
+      | (HeredocStringLiteralHead, _) -> HeredocStringLiteralHead
       | (_, DoubleQuotedStringLiteralTail) -> DoubleQuotedStringLiteralTail
-      | _ -> DoubleQuotedStringLiteralBody in
+      | (_, HeredocStringLiteralTail) -> HeredocStringLiteralTail
+      | _ -> StringLiteralBody in
       let w = (Token.width head) + (Token.width token) in
       let l = Token.leading head in
       let t = Token.trailing token in
@@ -242,9 +266,10 @@ module WithStatementAndDeclAndTypeParser
         | None ->
           let k = Token.kind token in
           let token = match k with
-            | DoubleQuotedStringLiteralBody
+            | StringLiteralBody
+            | HeredocStringLiteralTail
             | DoubleQuotedStringLiteralTail -> token
-            | _ -> Token.with_kind token DoubleQuotedStringLiteralBody in
+            | _ -> Token.with_kind token StringLiteralBody in
           (make_token token) :: acc
         | Some head -> (merge token head) :: t
         end
@@ -252,9 +277,9 @@ module WithStatementAndDeclAndTypeParser
 
     let parse_embedded_expression parser token =
       let var_expr = make_variable_expression (make_token token) in
-      let (parser1, token1) = next_token_in_string parser in
-      let (parser2, token2) = next_token_in_string parser1 in
-      let (parser3, token3) = next_token_in_string parser2 in
+      let (parser1, token1) = next_token_in_string parser name in
+      let (parser2, token2) = next_token_in_string parser1 name in
+      let (parser3, token3) = next_token_in_string parser2 name in
       match (Token.kind token1, Token.kind token2, Token.kind token3) with
       | (MinusGreaterThan, Name, _) ->
         let expr = make_member_selection_expression var_expr
@@ -279,7 +304,7 @@ module WithStatementAndDeclAndTypeParser
       | _ -> (parser, var_expr) in
 
     let rec handle_left_brace parser token acc =
-      let (parser1, token1) = next_token_in_string parser in
+      let (parser1, token1) = next_token_in_string parser name in
       match Token.kind token1 with
       | Dollar ->
         (* We do not support {$ inside a string unless the $ begins a
@@ -307,7 +332,7 @@ module WithStatementAndDeclAndTypeParser
     and handle_dollar parser token acc =
       (* We need to parse ${x} as though it was {$x} *)
       (* TODO: This should be an error in strict mode. *)
-      let (parser1, token1) = next_token_in_string parser in
+      let (parser1, token1) = next_token_in_string parser name in
       match Token.kind token1 with
       | LeftBrace ->
         (* The thing in the braces has to be an expression that begins
@@ -333,8 +358,9 @@ module WithStatementAndDeclAndTypeParser
         aux parser (merge_head token acc)
 
     and aux parser acc =
-      let (parser, token) = next_token_in_string parser in
+      let (parser, token) = next_token_in_string parser name in
       match Token.kind token with
+      | HeredocStringLiteralTail
       | DoubleQuotedStringLiteralTail -> (parser, (merge_head token acc))
       | LeftBrace -> handle_left_brace parser token acc
       | Variable ->
@@ -740,10 +766,12 @@ module WithStatementAndDeclAndTypeParser
     | DecimalLiteral
     | DoubleQuotedStringLiteral
     | DoubleQuotedStringLiteralHead
-    | DoubleQuotedStringLiteralBody
+    | StringLiteralBody
     | DoubleQuotedStringLiteralTail
     | FloatingLiteral
     | HeredocStringLiteral
+    | HeredocStringLiteralHead
+    | HeredocStringLiteralTail
     | HexadecimalLiteral
     | NowdocStringLiteral
     | NullLiteral

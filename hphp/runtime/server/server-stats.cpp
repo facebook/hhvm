@@ -62,13 +62,13 @@ void ServerStats::GetLogger() {
   s_logger.getCheck();
 }
 
-void ServerStats::Merge(CounterMap &dest, const CounterMap &src) {
+void ServerStats::Merge(CounterMap& dest, const CounterMap& src) {
   for (auto const& iter : src) {
     dest[iter.first] += iter.second;
   }
 }
 
-void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
+void ServerStats::Merge(list<TimeSlot*>& dest, const list<TimeSlot*>& src) {
   auto diter = dest.begin();
   for (auto const& s : src) {
     for (; diter != dest.end(); ++diter) {
@@ -95,8 +95,8 @@ void ServerStats::Merge(list<TimeSlot*> &dest, const list<TimeSlot*> &src) {
   }
 }
 
-void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
-                             const std::list<TimeSlot*> &slots) {
+void ServerStats::GetAllKeys(std::set<std::string>& allKeys,
+                             const std::list<TimeSlot*>& slots) {
   for (auto& slot : slots) {
     for (auto const& kvpair : slot->m_values) {
       allKeys.insert(kvpair.first);
@@ -111,8 +111,8 @@ void ServerStats::GetAllKeys(std::set<std::string> &allKeys,
   allKeys.insert("health_level");
 }
 
-void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
-                         std::map<std::string, int> &wantedKeys) {
+void ServerStats::Filter(list<TimeSlot*>& slots, const std::string& keys,
+                         std::map<std::string, int>& wantedKeys) {
   // no keys to filter
   if (keys.empty()) {
     return;
@@ -149,7 +149,7 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
     // prepare wantedKeys
     for (auto const& key : allKeys) {
       for (auto const& riter : rules) {
-        const string &rule = riter.first;
+        const string& rule = riter.first;
         if (rule[0] == ':') {
           Variant ret = preg_match(String(rule.c_str(), rule.size(),
                 CopyString),
@@ -165,7 +165,7 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
   }
 
   for (auto const& s : slots) {
-    auto &values = s->m_values;
+    auto& values = s->m_values;
     for (auto viter = values.begin(); viter != values.end();) {
       if (wantedKeys.find(viter->first) == wantedKeys.end()) {
         auto iterTemp = viter;
@@ -178,8 +178,8 @@ void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
   }
 }
 
-void ServerStats::Aggregate(list<TimeSlot*> &slots,
-                            std::map<std::string, int> &wantedKeys) {
+void ServerStats::Aggregate(list<TimeSlot*>& slots,
+                            std::map<std::string, int>& wantedKeys) {
   int slotCount = slots.size();
 
   auto const ts = new TimeSlot();
@@ -207,7 +207,7 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots,
   for (auto const& s : slots) {
     int sec = (s->m_time == 0 ? slotCount : 1) *
       RuntimeOption::StatsSlotDuration;
-    auto &values = s->m_values;
+    auto& values = s->m_values;
 
     // special keys
     if (wantedKeys.find("hit") != wantedKeys.end()) {
@@ -228,7 +228,7 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots,
     }
 
     for (auto const& iter : udfKeys) {
-      const string &key = iter.first;
+      const string& key = iter.first;
       int udf = iter.second;
       auto viter = values.find(key);
       if (viter != values.end()) {
@@ -246,7 +246,7 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots,
   }
 }
 
-void ServerStats::FreeSlots(list<TimeSlot*> &slots) {
+void ServerStats::FreeSlots(list<TimeSlot*>& slots) {
   for (auto const& slot : slots) {
     delete slot;
   }
@@ -262,13 +262,13 @@ bool ServerStats::s_profile_network = false;
 HealthLevel ServerStats::m_ServerHealthLevel = HealthLevel::Bold;
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
-void ServerStats::LogPage(const string &url, int code) {
+void ServerStats::LogPage(const string& url, int code) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     ServerStats::s_logger->logPage(url, code);
   }
 }
 
-void ServerStats::Log(const string &name, int64_t value) {
+void ServerStats::Log(const string& name, int64_t value) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
     ServerStats::s_logger->log(name, value);
   }
@@ -308,7 +308,7 @@ Array ServerStats::GetThreadIOStatuses() {
   return ServerStats::s_logger->getThreadIOStatuses();
 }
 
-int64_t ServerStats::Get(const string &name) {
+int64_t ServerStats::Get(const string& name) {
   return ServerStats::s_logger->get(name);
 }
 
@@ -323,14 +323,14 @@ void ServerStats::Clear() {
   }
 }
 
-void ServerStats::CollectSlots(list<TimeSlot*> &slots) {
+void ServerStats::CollectSlots(list<TimeSlot*>& slots) {
   Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     s_loggers[i]->collect(slots);
   }
 }
 
-void ServerStats::GetKeys(string &out) {
+void ServerStats::GetKeys(string& out) {
   list<TimeSlot*> slots;
   CollectSlots(slots);
   set<string> allKeys;
@@ -341,9 +341,9 @@ void ServerStats::GetKeys(string &out) {
   }
 }
 
-void ServerStats::Report(string &out,
-                         const std::string &keys,
-                         const std::string &prefix) {
+void ServerStats::Report(string& out,
+                         const std::string& keys,
+                         const std::string& prefix) {
   list<TimeSlot*> slots;
   CollectSlots(slots);
   map<string, int> wantedKeys;
@@ -353,9 +353,9 @@ void ServerStats::Report(string &out,
   FreeSlots(slots);
 }
 
-void ServerStats::Report(string &output,
-                         const list<TimeSlot*> &slots,
-                         const std::string &prefix) {
+void ServerStats::Report(string& output,
+                         const list<TimeSlot*>& slots,
+                         const std::string& prefix) {
   std::ostringstream out;
   bool first = true;
   for (auto const& s : slots) {
@@ -386,7 +386,7 @@ void ServerStats::Report(string &output,
   output = out.str();
 }
 
-static std::string format_duration(timeval &duration) {
+static std::string format_duration(timeval& duration) {
   string ret;
   if (duration.tv_sec > 0 || duration.tv_usec > 0) {
     int milliseconds = duration.tv_usec / 1000;
@@ -412,7 +412,7 @@ static std::string format_duration(timeval &duration) {
   return ret;
 }
 
-void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
+void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
   std::ostringstream out;
   Writer *w;
   if (format == Writer::Format::XML) {
@@ -456,7 +456,7 @@ void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
   w->beginList("threads");
   Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
-    ThreadStatus &ts = s_loggers[i]->m_threadStatus;
+    ThreadStatus& ts = s_loggers[i]->m_threadStatus;
 
     timeval duration;
     if (ts.m_start.tv_sec > 0 && ts.m_done.tv_sec > 0) {
@@ -545,7 +545,7 @@ Array ServerStats::EndNetworkProfile() {
     ServerStats *ss = s_loggers[i];
     Lock lock(ss->m_lock, false);
 
-    IOStatusMap &status = ss->m_ioProfiles;
+    IOStatusMap& status = ss->m_ioProfiles;
     for (auto const& iter : status) {
       ret.set(String(iter.first),
               make_map_array(s_ct, iter.second.count,
@@ -602,11 +602,11 @@ ServerStats::~ServerStats() {
   }
 }
 
-void ServerStats::log(const string &name, int64_t value) {
+void ServerStats::log(const string& name, int64_t value) {
   m_values[name] += value;
 }
 
-int64_t ServerStats::get(const std::string &name) {
+int64_t ServerStats::get(const std::string& name) {
   CounterMap::const_iterator iter = m_values.find(name);
   if (iter != m_values.end()) {
     return iter->second;
@@ -614,7 +614,7 @@ int64_t ServerStats::get(const std::string &name) {
   return 0;
 }
 
-void ServerStats::logPage(const string &url, int code) {
+void ServerStats::logPage(const string& url, int code) {
   int64_t now = time(nullptr) / RuntimeOption::StatsSlotDuration;
   int slot = now % RuntimeOption::StatsMaxSlot;
 
@@ -627,7 +627,7 @@ void ServerStats::logPage(const string &url, int code) {
         break; // we have cleared all slots, good enough
       }
     }
-    auto &ts = m_slots[slot];
+    auto& ts = m_slots[slot];
     if (ts.m_time != now) {
       if (ts.m_time && m_min <= ts.m_time) {
         m_min = ts.m_time + 1;
@@ -663,7 +663,7 @@ void ServerStats::clear() {
   }
 }
 
-void ServerStats::collect(std::list<TimeSlot*> &slots) {
+void ServerStats::collect(std::list<TimeSlot*>& slots) {
   Lock lock(m_lock, false);
   list<TimeSlot*> collected;
   for (int64_t t = m_min; t <= m_max; t++) {
@@ -755,7 +755,7 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
         if (*addr) {
           key += ' '; key += addr;
         }
-        IOStatus &io = m_threadStatus.m_ioStatuses[key];
+        IOStatus& io = m_threadStatus.m_ioStatuses[key];
         ++io.count;
         io.wall_time += wt;
       }
@@ -771,12 +771,12 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
         }
 
         Lock lock(m_lock, false);
-        { IOStatus &io = m_ioProfiles[key0]; ++io.count; io.wall_time += wt;}
-        { IOStatus &io = m_ioProfiles[key1]; ++io.count; io.wall_time += wt;}
-        { IOStatus &io = m_ioProfiles[key2]; ++io.count; io.wall_time += wt;}
-        { IOStatus &io = m_ioProfiles[key3]; ++io.count; io.wall_time += wt;}
+        { IOStatus& io = m_ioProfiles[key0]; ++io.count; io.wall_time += wt;}
+        { IOStatus& io = m_ioProfiles[key1]; ++io.count; io.wall_time += wt;}
+        { IOStatus& io = m_ioProfiles[key2]; ++io.count; io.wall_time += wt;}
+        { IOStatus& io = m_ioProfiles[key3]; ++io.count; io.wall_time += wt;}
         if (*addr) {
-          IOStatus &io = m_ioProfiles[key4]; ++io.count; io.wall_time += wt;
+          IOStatus& io = m_ioProfiles[key4]; ++io.count; io.wall_time += wt;
         }
       }
 
@@ -786,7 +786,7 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
 }
 
 Array ServerStats::getThreadIOStatuses() {
-  IOStatusMap &status = m_threadStatus.m_ioStatuses;
+  IOStatusMap& status = m_threadStatus.m_ioStatuses;
   ArrayInit ret(status.size(), ArrayInit::Map{});
   for (auto const& iter : status) {
     ret.set(String(iter.first),
@@ -841,13 +841,13 @@ ServerStatsHelper::~ServerStatsHelper() {
   }
 }
 
-void ServerStatsHelper::logTime(const std::string &prefix,
-                                const timespec &start, const timespec &end) {
+void ServerStatsHelper::logTime(const std::string& prefix,
+                                const timespec& start, const timespec& end) {
   ServerStats::Log(prefix + m_section, gettime_diff_us(start, end));
 }
 
-void ServerStatsHelper::logTime(const std::string &prefix,
-                                const int64_t &start, const int64_t &end) {
+void ServerStatsHelper::logTime(const std::string& prefix,
+                                const int64_t& start, const int64_t& end) {
   ServerStats::Log(prefix + m_section, end - start);
 }
 
@@ -900,7 +900,7 @@ void set_curl_statuses(CURL *cp, const char *url) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void server_stats_log_mutex(const std::string &stack, int64_t elapsed_us) {
+void server_stats_log_mutex(const std::string& stack, int64_t elapsed_us) {
   auto const prefix = folly::to<string>("mutex.", stack);
   ServerStats::Log(prefix + ".hit", 1);
   ServerStats::Log(prefix + ".time", elapsed_us);

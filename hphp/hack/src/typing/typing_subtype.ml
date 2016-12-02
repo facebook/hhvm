@@ -708,6 +708,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
 
   | (_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum) -> env
   | (_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey) -> env
+  | (_, Tabstract ((AKenum _), _)), (_, Tprim Nast.Tarraykey) -> env
   | (r, Tarraykind akind), (_, Tclass ((_, coll), [tv_super]))
     when (coll = SN.Collections.cTraversable ||
         coll = SN.Collections.cContainer) ->

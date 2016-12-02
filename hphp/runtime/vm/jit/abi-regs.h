@@ -36,6 +36,7 @@ struct Abi {
   bool   canSpill;       // are we allowed to spill values to the stack?
 
   // convenience methods
+  RegSet reserved() const { return gpReserved | simdReserved; }
   RegSet unreserved() const { return gpUnreserved | simdUnreserved | sf; }
   RegSet gp() const { return gpUnreserved | gpReserved; }
   RegSet simd() const { return simdUnreserved | simdReserved; }

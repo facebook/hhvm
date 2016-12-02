@@ -59,6 +59,9 @@ module GEnv = struct
         by adding more files to the unprocessed/partially-processed set in
         the previous loop.
       *)
+      let fn = FileInfo.get_pos_filename pos in
+      Hh_logger.log "File missing: %s" (Relative_path.to_absolute fn);
+      Hh_logger.log "Name missing: %s" (name);
       raise File_heap.File_heap_stale
 
   let type_pos popt name = match TypeIdHeap.get name with

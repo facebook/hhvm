@@ -151,6 +151,10 @@ inline vixl::Register svcReqArgReg(unsigned index) {
   return x2a(rarg(index + 1));
 }
 
+// x16 and x17 are vixl macroassembler temporaries
+const vixl::Register rVixlScratch0(vixl::x16);
+const vixl::Register rVixlScratch1(vixl::x17);
+
 // x18 is used as assembler temporary
 const vixl::Register rAsm(vixl::x18);
 

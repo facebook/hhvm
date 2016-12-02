@@ -190,8 +190,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::asrxi:
     case Vinstr::asrxis:
     case Vinstr::cmplims:
-    case Vinstr::cmpsds:
-    case Vinstr::fabs:
+    case Vinstr::fcvtzs:
     case Vinstr::lslwi:
     case Vinstr::lslwis:
     case Vinstr::lslxi:
@@ -202,19 +201,15 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::lsrxis:
     case Vinstr::mrs:
     case Vinstr::msr:
-    case Vinstr::orsw:
-    case Vinstr::orswi:
-    case Vinstr::subsb:
-    case Vinstr::uxth:
     // ppc64 instructions
     case Vinstr::extrb:
     case Vinstr::extrw:
     case Vinstr::extsb:
     case Vinstr::extsw:
+    case Vinstr::fabs:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
     case Vinstr::fctidz:
-    case Vinstr::fcvtzs:
     case Vinstr::ldarx:
     case Vinstr::mfcr:
     case Vinstr::mflr:
@@ -233,6 +228,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::andbim:
     case Vinstr::notb:
     case Vinstr::orbim:
+    case Vinstr::subb:
     case Vinstr::subbi:
     case Vinstr::xorb:
     case Vinstr::xorbi:

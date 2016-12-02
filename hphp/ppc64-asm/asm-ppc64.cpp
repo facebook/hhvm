@@ -270,11 +270,11 @@ void Assembler::extsb(const Reg64& ra, const Reg64& rs, bool rc) {
 }
 
 void Assembler::extsh(const Reg64& ra, const Reg64& rs, bool rc) {
-  EmitXForm(31, rn(rs), rn(ra), rn(0), 922);
+  EmitXForm(31, rn(rs), rn(ra), rn(0), 922, rc);
 }
 
 void Assembler::extsw(const Reg64& ra, const Reg64& rs, bool rc) {
-  EmitXForm(31, rn(rs), rn(ra), rn(0), 986);
+  EmitXForm(31, rn(rs), rn(ra), rn(0), 986, rc);
 }
 
 void Assembler::isel(const Reg64& rt, const Reg64& ra, const Reg64& rb,

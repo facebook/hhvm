@@ -85,10 +85,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::defvmsp:
     case Vinstr::divint:
     case Vinstr::divsd:
-    case Vinstr::extrb:
-    case Vinstr::extrw:
     case Vinstr::extsb:
-    case Vinstr::extsw:
+    case Vinstr::extsl:
     case Vinstr::fabs:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:

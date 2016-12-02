@@ -394,7 +394,6 @@ let setup_server options handle =
     cpu_priority;
     io_priority;
     enable_on_nfs;
-    lazy_decl;
     lazy_parse;
     lazy_init;
     load_script_config;
@@ -410,7 +409,6 @@ let setup_server options handle =
     root
     init_id
     (Unix.gettimeofday ())
-    lazy_decl
     lazy_parse
     lazy_init
     saved_state_load_type

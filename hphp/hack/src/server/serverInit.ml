@@ -677,8 +677,7 @@ let save_state env fn =
 
 
 let get_lazy_level genv =
-  let lazy_decl = genv.local_config.SLC.lazy_decl &&
-    Option.is_none (ServerArgs.ai_mode genv.options) in
+  let lazy_decl = Option.is_none (ServerArgs.ai_mode genv.options) in
   let lazy_parse = genv.local_config.SLC.lazy_parse in
   let lazy_initialize = genv.local_config.SLC.lazy_init in
   match lazy_decl, lazy_parse, lazy_initialize with

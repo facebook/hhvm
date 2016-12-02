@@ -107,7 +107,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
   let config, local_config  =
    ServerConfig.(load filename options) in
   HackEventLogger.set_lazy_levels
-   (local_config.ServerLocalConfig.lazy_decl)
    (local_config.ServerLocalConfig.lazy_parse)
    (local_config.ServerLocalConfig.lazy_init);
 

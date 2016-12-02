@@ -238,6 +238,7 @@ module ServerInitCommon = struct
     in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
+    HackEventLogger.global_naming_end t;
     env, (Hh_logger.log_duration "Naming" t)
 
   let type_decl genv env fast t =
@@ -502,6 +503,7 @@ module ServerLazyInit : InitKind = struct
          n_consts=consts} = info in
     NamingGlobal.ndecl_file_fast k ~funs ~classes ~typedefs ~consts
     end;
+    HackEventLogger.fast_naming_end t;
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     (Hh_logger.log_duration "Naming fast" t)
@@ -532,6 +534,7 @@ module ServerLazyInit : InitKind = struct
         ~next:next_fast_files;
     HackSearchService.MasterApi.update_search_index
       ~fuzzy:false (Relative_path.Map.keys fast);
+    HackEventLogger.update_search_end t;
     Hh_logger.log_duration "Updating search indices" t
 
 

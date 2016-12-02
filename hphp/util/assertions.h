@@ -179,8 +179,19 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+# if !defined __GNUC__ || defined __STRICT_ANSI__
 #define assert_impl(cond, fail) \
   ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
+#else
+/*
+ * This is preferred, because "cond" is not over-parenthesized, and
+ * thus -Wparentheses can warn about errors like "always_assert(a=1)".
+ * With -pedantic, we cannot use "({...})" statement expressions,
+ * so must resort to the old way, above.
+ */
+#define assert_impl(cond, fail) \
+  ({ if (cond) ; else { fail; } static_cast<void>(0); })
+#endif
 
 #define assert_fail_impl(e, msg) \
   ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)

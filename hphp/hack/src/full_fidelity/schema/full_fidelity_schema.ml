@@ -8,6 +8,14 @@
  *
  *)
 
+(* If you make changes to the schema that cause it to serialize / deserialize
+differently, please update this version number *)
+let full_fidelity_schema_version_number = "2016-12-01-0001"
+(* TODO: Consider basing the version number on an auto-generated
+hash of a file rather than relying on people remembering to update it. *)
+(* TODO: It may be worthwhile to investigate how Thrift describes data types
+and use that standard. *)
+
 type schema_node = {
   kind_name : string;
   type_name : string;
@@ -1225,6 +1233,7 @@ module GenerateFFJSONSchema = struct
   let full_fidelity_json_schema_template =
 "{ \"description\" :
   \"Auto-generated JSON schema of the Hack Full Fidelity Parser AST\",
+  \"version\" : \"" ^ full_fidelity_schema_version_number ^ "\",
   \"trivia\" : [
     { \"trivia_kind_name\" : \"Whitespace\",
       \"trivia_type_name\" : \"whitespace\" },
@@ -1276,8 +1285,6 @@ AST_NODES
   }
 
 end (* GenerateFFJSONSchema *)
-
-
 
 let schema_as_json () =
   generate_string GenerateFFJSONSchema.full_fidelity_json_schema

@@ -284,10 +284,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
 static void getFuncScopesSet(BlockScopeRawPtrQueue &v,
                              const StringToFunctionScopePtrMap &funcMap) {
   for (const auto& iter : funcMap) {
-    FunctionScopePtr f = iter.second;
-    if (!f->isBuiltin()) {
-      v.push_back(f);
-    }
+    v.push_back(iter.second);
   }
 }
 

@@ -1027,7 +1027,10 @@ public:
   };
 
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
-  Func* canEmitBuiltinCall(const std::string& name, int numParams);
+  Func* canEmitBuiltinCall(const std::string& name,
+                           int numParams,
+                           AnalysisResultConstPtr ar,
+                           ExpressionListPtr& params);
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
@@ -9022,7 +9025,9 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
 }
 
 Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
-                                         int numParams) {
+                                         int numParams,
+                                         AnalysisResultConstPtr ar,
+                                         ExpressionListPtr& funcParams) {
   if (RuntimeOption::EvalJitEnableRenameFunction ||
       !RuntimeOption::EvalEnableCallBuiltin) {
     return nullptr;
@@ -9053,6 +9058,17 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
     assertx(concrete_params > 0);
     --concrete_params;
   }
+
+  auto params = [&]{
+    auto funcScope = ar->findFunction(name);
+    if (!funcScope) return ExpressionListPtr();
+    auto stmt = funcScope->getStmt();
+    if (!stmt) return ExpressionListPtr();
+    auto methStmt = dynamic_pointer_cast<MethodStatement>(stmt);
+    if (!methStmt) return ExpressionListPtr();
+    return methStmt->getParams();
+  }();
+
   for (int i = 0; i < concrete_params; i++) {
     if ((!allowDoubleArgs) &&
         (f->params()[i].builtinType == KindOfDouble)) {
@@ -9065,12 +9081,19 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
         return nullptr;
       }
       if (pi.defaultValue.m_type == KindOfUninit) {
-        // TODO: Resolve persistent constants
-        return nullptr;
+        if (!params || i >= params->getCount()) return nullptr;
+        auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+        if (!param) return nullptr;
+        auto value = param->defaultValue();
+        if (!value || !value->isScalar()) return nullptr;
+        Variant scalarValue;
+        if (!value->getScalarValue(scalarValue) ||
+            !scalarValue.isAllowedAsConstantValue()) return nullptr;
       }
     }
   }
 
+  funcParams = params;
   return f;
 }
 
@@ -9087,6 +9110,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   assert(!paramsOverride || !unpack);
 
   Func* fcallBuiltin = nullptr;
+  ExpressionListPtr funcParams;
   StringData* nLiteral = nullptr;
   Offset fpiStart = 0;
   if (node->getClass() || node->hasStaticClass()) {
@@ -9123,7 +9147,12 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = makeStaticString(nameStr);
-    fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    fcallBuiltin = canEmitBuiltinCall(
+      nameStr,
+      numParams,
+      node->getFileScope()->getContainingProgram(),
+      funcParams
+    );
     if (unpack &&
         fcallBuiltin &&
         (!fcallBuiltin->hasVariadicCaptureParam() ||
@@ -9185,8 +9214,22 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       auto &pi = fcallBuiltin->params()[i];
       assert(pi.hasDefaultValue());
       auto &def = pi.defaultValue;
-      emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
-                            pi.builtinType, i);
+      if (def.m_type == KindOfUninit) {
+        assert(funcParams && i < funcParams->getCount());
+        auto param =
+          dynamic_pointer_cast<ParameterExpression>((*funcParams)[i]);
+        assert(param &&
+               param->defaultValue() &&
+               param->defaultValue()->isScalar());
+        Variant scalarValue;
+        DEBUG_ONLY bool success =
+          param->defaultValue()->getScalarValue(scalarValue);
+        assert(success && scalarValue.isAllowedAsConstantValue());
+        emitBuiltinDefaultArg(e, scalarValue, pi.builtinType, i);
+      } else {
+        emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
+                              pi.builtinType, i);
+      }
     }
 
     if (variadic) {

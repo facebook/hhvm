@@ -30,11 +30,11 @@ struct RefBits {
   // and assigning all field members at the same time causes causes
   // gcc and clang to coalesce mutations into byte-sized ops.
   union {
+    uint16_t bits;
     struct {
       mutable uint8_t cow:1;
       mutable uint8_t z:7;
     };
-    uint16_t bits;
   };
   explicit operator uint16_t() const { return bits; }
 };
@@ -74,7 +74,7 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
    * change how initialization works it keep that up to date.
    */
   void initInRDS() {
-    m_hdr.init({0,0}, HeaderKind::Ref, 1); // cow=z=0, count=1
+    m_hdr.init({{0}}, HeaderKind::Ref, 1); // cow=z=0, count=1
   }
 
   /*
@@ -153,7 +153,7 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
   // Default constructor, provided so that the PHP extension compatibility
   // layer can stack-allocate RefDatas when needed
   RefData() {
-    m_hdr.init({0,0}, HeaderKind::Ref, 0); // cow=z=0, count=0
+    m_hdr.init({{0}}, HeaderKind::Ref, 0); // cow=z=0, count=0
     m_tv.m_type = KindOfNull;
     assert(!m_hdr.aux.cow && !m_hdr.aux.z);
   }
@@ -247,7 +247,7 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
 private:
   RefData(DataType t, int64_t datum) {
     // Initialize this value by laundering uninitNull -> Null.
-    m_hdr.init({0,0}, HeaderKind::Ref, 1); // cow=z=0, count=1
+    m_hdr.init({{0}}, HeaderKind::Ref, 1); // cow=z=0, count=1
     if (!isNullType(t)) {
       m_tv.m_type = t;
       m_tv.m_data.num = datum;

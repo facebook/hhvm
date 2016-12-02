@@ -41,7 +41,6 @@ type env = {
   decl_env : Decl_env.env;
   todo : tfun list;
   in_loop : bool;
-  grow_super : bool;
 }
 and genv
 and anon = env -> locl fun_params -> env * locl ty
@@ -85,8 +84,6 @@ val get_return : env -> locl ty
 val set_return : env -> locl ty -> env
 val with_return : env -> (env -> env) -> env
 val is_static : env -> bool
-val grow_super : env -> bool
-val invert_grow_super : env -> (env -> env) -> env
 val get_self : env -> locl ty
 val get_self_id : env -> string
 val is_outside_class : env -> bool

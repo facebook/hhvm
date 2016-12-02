@@ -57,10 +57,6 @@ type env = {
   decl_env: Decl_env.env;
   todo    : tfun list  ;
   in_loop : bool       ;
-  (* when encountering Tunresolved in the supertype, do we allow it to grow?
-   * if false, this allows the opposite, i.e. Tunresolved can grow in the
-   * subtype. *)
-  grow_super : bool      ;
 }
 
 and genv = {
@@ -285,7 +281,6 @@ let empty tcopt file ~droot = {
   lenv    = empty_local SMap.empty;
   todo    = [];
   in_loop = false;
-  grow_super = true;
   decl_env = {
     mode = FileInfo.Mstrict;
     droot;
@@ -437,16 +432,6 @@ let get_construct env class_ =
 
 let get_todo env =
   env.todo
-
-let grow_super env =
-  env.grow_super
-
-let invert_grow_super env f =
-  let old = env.grow_super in
-  let env = { env with grow_super = not old } in
-  let env = f env in
-  let env = { env with grow_super = old } in
-  env
 
 let get_return env =
   env.genv.return

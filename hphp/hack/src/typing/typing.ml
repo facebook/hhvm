@@ -1054,21 +1054,17 @@ and expr_
         | reason, Tfun fty ->
             check_deprecated p fty;
             (* We are creating a fake closure:
-             * function<T as Class>(T $x): return_type_of(Class:meth_name)
+             * function(Class $x, arg_types_of(Class::meth_name))
+                 : return_type_of(Class::meth_name)
              *)
-            let tparam = Ast.Invariant, pos_cname,
-              [(Ast.Constraint_as, obj_type)] in
-            let env, tvar = TUtils.unresolved_tparam env tparam in
-            let param = Reason.Rwitness pos, Tgeneric class_name in
-            let tparams = tparam :: class_.tc_tparams in
             let ety_env = {
-              ety_env with
-              substs = Subst.make tparams (tvar :: tvarl)
+              ety_env with substs = Subst.make class_.tc_tparams tvarl
             } in
-            let env = Phase.check_tparams_constraints ~ety_env env tparams in
-            let env, param = Phase.localize ~ety_env env param in
+            let env =
+              Phase.check_tparams_constraints ~ety_env env class_.tc_tparams in
+            let env, local_obj_ty = Phase.localize ~ety_env env obj_type in
             let fty = { fty with
-                        ft_params = (None, param) :: fty.ft_params } in
+                        ft_params = (None, local_obj_ty) :: fty.ft_params } in
             let fun_arity = match fty.ft_arity with
               | Fstandard (min, max) -> Fstandard (min + 1, max + 1)
               | Fvariadic (min, x) -> Fvariadic (min + 1, x)

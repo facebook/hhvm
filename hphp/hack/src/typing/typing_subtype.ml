@@ -343,8 +343,7 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
     (* Right now this is true only for function types; hence var_opt=None *)
     if contravariant_arguments
     then
-      Env.invert_grow_super env (fun env ->
-       subtype_params env ft_super.ft_params ft_sub.ft_params)
+      subtype_params env ft_super.ft_params ft_sub.ft_params
     else
       fst (Unify.unify_params env ft_super.ft_params ft_sub.ft_params var_opt)
   in
@@ -465,8 +464,7 @@ and subtype_tparam env c_name variance child (r_super, _ as super) =
   | Ast.Covariant -> sub_type env child super
   | Ast.Contravariant ->
       Errors.try_
-        (fun () ->
-          Env.invert_grow_super env (fun env -> sub_type env super child))
+        (fun () -> sub_type env super child)
         (fun err ->
           let pos = Reason.to_pos r_super in
           Errors.explain_contravariance pos c_name err; env)
@@ -509,7 +507,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       env
 (****************************************************************************)
 (* ### Begin Tunresolved madness ###
- * If grow_super is true (the common case), then if the supertype is a
+ * If the supertype is a
  * Tunresolved, we allow it to keep growing, which is the desired behavior for
  * e.g. figuring out the type of a generic, but if the subtype is a
  * Tunresolved, then we check that all the members are indeed subtypes of the
@@ -530,14 +528,14 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
  * arguments had been swapped.
  *)
 (****************************************************************************)
-  | (r_sub, _), (_, Tunresolved _) when Env.grow_super env ->
+  | (r_sub, _), (_, Tunresolved _) ->
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
       let env, _ =
         Unify.unify_unwrapped
           env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
               ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub in
       env
-  | (_, Tunresolved _), (_, Tany) when Env.grow_super env ->
+  | (_, Tunresolved _), (_, Tany) ->
       (* This branch is necessary in the following case:
        * function foo<T as I>(T $x)
        * if I call foo with an intersection type, T is a Tvar,
@@ -550,34 +548,10 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     fst (Unify.unify_unwrapped
         env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
             ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
-  |  (_, Tunresolved tyl), _ when Env.grow_super env ->
+  |  (_, Tunresolved tyl), _ ->
       List.fold_left tyl ~f:begin fun env x ->
         sub_type_with_uenv env (uenv_sub, x) (uenv_super, ty_super)
       end ~init:env
-(****************************************************************************)
-(* Repeat the previous 3 cases but with the super / sub order reversed *)
-(****************************************************************************)
-  | (_, Tunresolved _), (r_super, _) when not (Env.grow_super env) ->
-      let ty_super = (r_super, Tunresolved [ty_super]) in
-      let env, _ =
-        Unify.unify_unwrapped
-          env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
-              ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub in
-      env
-  | (_, Tany), (_, Tunresolved _) when not (Env.grow_super env) ->
-    fst (Unify.unify_unwrapped
-        env ~unwrappedToption1:uenv_super.TUEnv.non_null ty_super
-            ~unwrappedToption2:uenv_sub.TUEnv.non_null ty_sub)
-  | _, (_, Tunresolved tyl) when not (Env.grow_super env) ->
-      List.fold_left tyl ~f:begin fun env x ->
-        sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, x)
-      end ~init:env
-(****************************************************************************)
-(* OCaml doesn't inspect `when` clauses when checking pattern matching
- * exhaustiveness, so just assert false here *)
-(****************************************************************************)
-  | (_, Tunresolved _), _
-  | _, (_, Tunresolved _) -> assert false
 (****************************************************************************)
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)

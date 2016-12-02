@@ -84,7 +84,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::divsd:
     case Vinstr::extsb:
     case Vinstr::extsl:
-    case Vinstr::fabs:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
     case Vinstr::fctidz:
@@ -93,7 +92,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::incl:
     case Vinstr::incq:
     case Vinstr::incw:
-    case Vinstr::ldarx:
     case Vinstr::ldimmb:
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
@@ -113,9 +111,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::loadzbl:
     case Vinstr::loadzbq:
     case Vinstr::loadzlq:
-    case Vinstr::mfcr:
     case Vinstr::mflr:
-    case Vinstr::mfvsrd:
     case Vinstr::movb:
     case Vinstr::movl:
     case Vinstr::movtqb:
@@ -175,10 +171,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::xorl:
     case Vinstr::xorq:
     case Vinstr::xorqi:
-    case Vinstr::xscvdpsxds:
-    case Vinstr::xscvsxddp:
-    case Vinstr::xxlxor:
-    case Vinstr::xxpermdi:
       return false;
 
     case Vinstr::addlm:
@@ -223,7 +215,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::mcprep:
     case Vinstr::msr:
     case Vinstr::mtlr:
-    case Vinstr::mtvsrd:
     case Vinstr::nothrow:
     case Vinstr::orbim:
     case Vinstr::orqim:
@@ -246,7 +237,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::resumetc:
     case Vinstr::ret:
     case Vinstr::retransopt:
-    case Vinstr::stdcx:
     case Vinstr::store:
     case Vinstr::storeb:
     case Vinstr::storebi:

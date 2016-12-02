@@ -299,21 +299,11 @@ struct Vunit;
   /* ppc64 instructions */\
   O(extsb, Inone, UH(s,d), DH(d,s))\
   O(extsl, Inone, UH(s,d), DH(d,s))\
-  O(fabs, Inone, U(s), D(d))\
-  O(fcmpo, I(fl), U(s0) U(s1), D(sf))\
-  O(fcmpu, I(fl), U(s0) U(s1), D(sf))\
-  O(fctidz, I(fl), U(s), D(d) D(sf))\
-  O(ldarx, Inone, U(s), D(d))\
-  O(mfcr, Inone, Un, D(d))\
+  O(fcmpo, Inone, U(s0) U(s1), D(sf))\
+  O(fcmpu, Inone, U(s0) U(s1), D(sf))\
+  O(fctidz, Inone, U(s), D(d) D(sf))\
   O(mflr, Inone, Un, D(d))\
-  O(mfvsrd, Inone, U(s), D(d))\
   O(mtlr, Inone, U(s), Dn)\
-  O(mtvsrd, Inone, U(s), D(d))\
-  O(stdcx, Inone, U(s) U(d), Dn)\
-  O(xscvdpsxds, Inone, U(s), D(d))\
-  O(xscvsxddp, Inone, U(s), D(d))\
-  O(xxlxor, Inone, U(s0) U(s1), D(d))\
-  O(xxpermdi, Inone, U(s0) U(s1), D(d))\
   /* */
 
 /*
@@ -1111,21 +1101,11 @@ struct msr { Vreg64 r; Immed s; };
  */
 struct extsb { Vreg8 s; Vreg64 d; };  // Extend byte sign
 struct extsl { Vreg32 s; Vreg64 d; }; // Extend word sign
-struct fabs { VregDbl s, d; };
-struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; Vflags fl; };
-struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; Vflags fl; };
-struct fctidz { VregDbl s; VregDbl d; VregSF sf; Vflags fl; };
-struct ldarx { Vptr s; Vreg64 d; };
-struct mfcr { Vreg64 d; };
+struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
+struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
+struct fctidz { VregDbl s; VregDbl d; VregSF sf; };
 struct mflr { Vreg64 d; };
-struct mfvsrd { Vreg128 s; Vreg64 d; };
-struct xscvdpsxds { Vreg128 s, d; };
 struct mtlr { Vreg64 s; };
-struct mtvsrd { Vreg64 s; Vreg128 d; };
-struct stdcx { Vreg64 s; Vptr d; };
-struct xscvsxddp { Vreg128 s, d; };
-struct xxlxor { Vreg128 s0, s1, d; };
-struct xxpermdi { Vreg128 s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -497,6 +497,9 @@ let daemon_main (state, options) (ic, oc) =
   | SharedMem.C_assertion_failure _ as e ->
     Hh_logger.exc e;
     Exit_status.(exit Shared_mem_assertion_failure)
+  | SharedMem.Sql_assertion_failure as e ->
+    Hh_logger.exc e;
+    Exit_status.(exit Sql_assertion_failure)
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

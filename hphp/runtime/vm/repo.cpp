@@ -551,20 +551,31 @@ void Repo::initCentral() {
     return true;
   };
 
-  // Try Repo.Central.Path
-  if (!RuntimeOption::RepoCentralPath.empty()) {
-    if (tryPath(RuntimeOption::RepoCentralPath.c_str())) {
-      return;
+  auto fail_no_repo = [&error] {
+    error = "Failed to initialize central HHBC repository:\n" + error;
+    // Database initialization failed; this is an unrecoverable state.
+    Logger::Error("%s", error.c_str());
+
+    if (Process::IsInMainThread()) {
+      exit(1);
     }
+    always_assert_flog(false, "{}", error);
+  };
+
+  // Try Repo.Central.Path
+  if (!RuntimeOption::RepoCentralPath.empty() &&
+      tryPath(RuntimeOption::RepoCentralPath.c_str())) {
+    return;
   }
 
   // Try HHVM_REPO_CENTRAL_PATH
   const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
-  if (HHVM_REPO_CENTRAL_PATH != nullptr) {
-    if (tryPath(HHVM_REPO_CENTRAL_PATH)) {
-      return;
-    }
+  if (HHVM_REPO_CENTRAL_PATH != nullptr &&
+      tryPath(HHVM_REPO_CENTRAL_PATH)) {
+    return;
   }
+
+  if (!RuntimeOption::RepoAllowFallbackPath) fail_no_repo();
 
   // Try "$HOME/.hhvm.hhbc".
   char* HOME = getenv("HOME");
@@ -611,14 +622,7 @@ void Repo::initCentral() {
   }
 #endif
 
-  error = "Failed to initialize central HHBC repository:\n" + error;
-  // Database initialization failed; this is an unrecoverable state.
-  Logger::Error("%s", error.c_str());
-
-  if (Process::IsInMainThread()) {
-    exit(1);
-  }
-  always_assert_log(false, [&error] { return error; });
+  fail_no_repo();
 }
 
 static int busyHandler(void* opaque, int nCalls) {
@@ -839,7 +843,7 @@ void Repo::initLocal() {
 
     if (!RuntimeOption::RepoLocalPath.empty()) {
       attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable);
-    } else {
+    } else if (RuntimeOption::RepoAllowFallbackPath) {
       if (RuntimeOption::ClientExecutionMode()) {
         std::string cliRepo = s_cliFile;
         if (!cliRepo.empty()) {

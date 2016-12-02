@@ -539,6 +539,7 @@ std::string RuntimeOption::RepoCentralPath;
 int32_t RuntimeOption::RepoCentralFileMode;
 std::string RuntimeOption::RepoCentralFileUser;
 std::string RuntimeOption::RepoCentralFileGroup;
+bool RuntimeOption::RepoAllowFallbackPath = true;
 std::string RuntimeOption::RepoEvalMode;
 std::string RuntimeOption::RepoJournal = "delete";
 bool RuntimeOption::RepoCommit = true;
@@ -1023,52 +1024,52 @@ void RuntimeOption::Load(
   }
   {
     // Repo
-    {
-      // Local Repo
-      Config::Bind(RepoLocalMode, ini, config, "Repo.Local.Mode");
-      if (RepoLocalMode.empty()) {
-        const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
-        if (HHVM_REPO_LOCAL_MODE != nullptr) {
-          RepoLocalMode = HHVM_REPO_LOCAL_MODE;
-        }
-        RepoLocalMode = "r-";
+    // Local Repo
+    Config::Bind(RepoLocalMode, ini, config, "Repo.Local.Mode");
+    if (RepoLocalMode.empty()) {
+      const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
+      if (HHVM_REPO_LOCAL_MODE != nullptr) {
+        RepoLocalMode = HHVM_REPO_LOCAL_MODE;
       }
-      if (RepoLocalMode.compare("rw")
-          && RepoLocalMode.compare("r-")
-          && RepoLocalMode.compare("--")) {
-        Logger::Error("Bad config setting: Repo.Local.Mode=%s",
-                      RepoLocalMode.c_str());
-        RepoLocalMode = "rw";
-      }
-      // Repo.Local.Path.
-      Config::Bind(RepoLocalPath, ini, config, "Repo.Local.Path");
-      if (RepoLocalPath.empty()) {
-        const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
-        if (HHVM_REPO_LOCAL_PATH != nullptr) {
-          RepoLocalPath = HHVM_REPO_LOCAL_PATH;
-        }
-      }
-      Config::Bind(RepoCentralFileMode, ini, config, "Repo.Central.FileMode");
-      Config::Bind(RepoCentralFileUser, ini, config, "Repo.Central.FileUser");
-      Config::Bind(RepoCentralFileGroup, ini, config, "Repo.Central.FileGroup");
+      RepoLocalMode = "r-";
     }
-    {
-      // Central Repo
-      Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
+    if (RepoLocalMode.compare("rw")
+        && RepoLocalMode.compare("r-")
+        && RepoLocalMode.compare("--")) {
+      Logger::Error("Bad config setting: Repo.Local.Mode=%s",
+                    RepoLocalMode.c_str());
+      RepoLocalMode = "rw";
     }
-    {
-      // Repo - Eval
-      Config::Bind(RepoEvalMode, ini, config, "Repo.Eval.Mode");
-      if (RepoEvalMode.empty()) {
-        RepoEvalMode = "readonly";
-      } else if (RepoEvalMode.compare("local")
-                 && RepoEvalMode.compare("central")
-                 && RepoEvalMode.compare("readonly")) {
-        Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
-                      RepoEvalMode.c_str());
-        RepoEvalMode = "readonly";
+    // Repo.Local.Path
+    Config::Bind(RepoLocalPath, ini, config, "Repo.Local.Path");
+    if (RepoLocalPath.empty()) {
+      const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
+      if (HHVM_REPO_LOCAL_PATH != nullptr) {
+        RepoLocalPath = HHVM_REPO_LOCAL_PATH;
       }
     }
+
+    // Central Repo
+    Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
+    Config::Bind(RepoCentralFileMode, ini, config, "Repo.Central.FileMode");
+    Config::Bind(RepoCentralFileUser, ini, config, "Repo.Central.FileUser");
+    Config::Bind(RepoCentralFileGroup, ini, config, "Repo.Central.FileGroup");
+
+    Config::Bind(RepoAllowFallbackPath, ini, config, "Repo.AllowFallbackPath",
+                 RepoAllowFallbackPath);
+
+    // Repo - Eval
+    Config::Bind(RepoEvalMode, ini, config, "Repo.Eval.Mode");
+    if (RepoEvalMode.empty()) {
+      RepoEvalMode = "readonly";
+    } else if (RepoEvalMode.compare("local")
+               && RepoEvalMode.compare("central")
+               && RepoEvalMode.compare("readonly")) {
+      Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
+                    RepoEvalMode.c_str());
+      RepoEvalMode = "readonly";
+    }
+
     Config::Bind(RepoJournal, ini, config, "Repo.Journal", "delete");
     Config::Bind(RepoCommit, ini, config, "Repo.Commit", true);
     Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", true);

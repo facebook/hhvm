@@ -452,6 +452,7 @@ module ServerEagerInit : InitKind = struct
         changed_while_parsing;
         build_targets;
       } in
+      let () = Printf.eprintf "Sending Loaded_saved_state debug event\n%!" in
       let _ = Debug_port.write_opt loaded_event genv.debug_port in
       (* Build targets are untracked by version control, so we must always
        * recheck them. While we could query hg / git for the untracked files,
@@ -557,6 +558,7 @@ module ServerLazyInit : InitKind = struct
         changed_while_parsing;
         build_targets;
       } in
+      Hh_logger.log "Sending Loaded_saved_state debug event\n";
       let _ = Debug_port.write_opt loaded_event genv.debug_port in
       let t = Unix.gettimeofday () in
       (* Build targets are untracked by version control, so we must always

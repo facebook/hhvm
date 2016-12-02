@@ -24,7 +24,7 @@ type env = {
   no_load : bool;
   silent : bool;
   ai_mode : string option;
-  debug_port: Debug_port.out_port option;
+  debug_port: Unix.file_descr option;
 }
 
 let start_server env =
@@ -52,8 +52,8 @@ let start_server env =
       [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
       match env.debug_port with
         | None -> [| |]
-        | Some port ->
-          [| "--debug-client"; string_of_int @@ Debug_port.handle_of_out port |]
+        | Some fd ->
+          [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]
     ] in
   if not env.silent then
     Printf.eprintf "Server launched with the following command:\n\t%s\n%!"

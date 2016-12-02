@@ -42,6 +42,7 @@ let make_genv options config local_config handle =
   let debug_port = match debug_port,
     local_config.SLC.start_with_recorder_on with
     | Some _, _ ->
+      Hh_logger.log "Using debug-client pre-fork fd";
       debug_port
     | None, true ->
       let daemon = Recorder_daemon.start_daemon

@@ -8,7 +8,7 @@ import signal
 import sys
 import time
 
-from hh_paths import hh_record
+from hh_paths import hh_client, hh_record
 
 # Use the MiniStateTestDriver to set up the custom saved mini state
 # Note: We don't use this driver to drive any of the CommonTests since
@@ -36,10 +36,14 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         time.sleep(2)
         # This check blocks until server initialization is finished
         self.run_check()
-        # Interrupt recorder, which sends all events to stdout
-        recorder.send_signal(signal.SIGINT)
+        # Stopping the server results in the recorder stopping itself
+        (_, _, retcode) = self.proc_call([
+            hh_client,
+            'stop',
+            self.repo_dir
+        ])
+        self.assertEqual(0, retcode)
         (output, stderr_data) = recorder.communicate(timeout=5)
-        recorder.wait()
         sys.stderr.write(output)
         err_msg = "See also hh_record stderr: " + stderr_data + "\n"
         sys.stderr.flush()

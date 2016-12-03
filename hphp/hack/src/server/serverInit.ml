@@ -480,6 +480,7 @@ module ServerEagerInit : InitKind = struct
       type_check_dirty genv env old_fast fast dirty_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)
+      if use_sql then SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
         HackEventLogger.load_mini_exn err;
         Hh_logger.exc ~prefix:"Could not load mini state: " err;
@@ -621,6 +622,7 @@ module ServerLazyInit : InitKind = struct
       type_check_dirty genv env old_fast fast dirty_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)
+      if use_sql then SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
         HackEventLogger.load_mini_exn err;
         Hh_logger.exc ~prefix:"Could not load mini state: " err;

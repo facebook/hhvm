@@ -332,9 +332,12 @@ module ServerInitCommon = struct
     type_check genv env fast t
 
   let get_build_targets env =
-    let targets =
-      List.map (BuildMain.get_live_targets env) (Relative_path.(concat Root)) in
-    Relative_path.set_of_list targets
+    let untracked, tracked = BuildMain.get_live_targets env in
+    let untracked =
+      List.map untracked (Relative_path.(concat Root)) in
+    let tracked =
+      List.map tracked (Relative_path.(concat Root)) in
+    Relative_path.set_of_list untracked, Relative_path.set_of_list tracked
 
   let get_state_future genv root state_future timeout =
     let state = state_future
@@ -445,7 +448,10 @@ module ServerEagerInit : InitKind = struct
     match state with
     | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes) ->
       let old_fast = FileInfo.modes_to_fast old_modes in
-      let build_targets = get_build_targets env in
+      (* During eager init, we don't need to worry about tracked targets since
+         they we end up parsing everything anyways
+      *)
+      let build_targets, _ = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let loaded_event = Debug_event.Loaded_saved_state {
         Debug_event.filename = saved_state_fn;
@@ -553,7 +559,7 @@ module ServerLazyInit : InitKind = struct
 
     match state with
     | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes) ->
-      let build_targets = get_build_targets env in
+      let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let loaded_event = Debug_event.Loaded_saved_state {
         Debug_event.filename = saved_state_fn;
@@ -571,16 +577,26 @@ module ServerLazyInit : InitKind = struct
         Relative_path.Set.union dirty_files build_targets in
       let dirty_files =
         Relative_path.Set.union dirty_files changed_while_parsing in
-      let dirty_files_list = Relative_path.Set.elements dirty_files in
+      (*
+        Tracked targets are build files that are tracked by version control.
+        We don't need to typecheck them, but we do need to parse them to load
+        them into memory, since arc rebuild deletes them before running.
+        This avoids build step dependencies and file_heap_stale errors crashing
+        the server when build fails and the deleted files aren't properly
+        regenerated.
+      *)
+      let parsing_files =
+        Relative_path.Set.union dirty_files tracked_targets in
+      let parsing_files_list = Relative_path.Set.elements parsing_files in
       let old_fast = FileInfo.modes_to_fast old_modes in
       let old_info = FileInfo.modes_to_info old_modes in
       (* Parse dirty files only *)
-      let next = MultiWorker.next genv.workers dirty_files_list in
+      let next = MultiWorker.next genv.workers parsing_files_list in
       let env, t = parsing genv env ~lazy_parse:true ~get_next:next t in
       let t = update_files genv env.files_info t in
-      (* Name all the files from the old fast (except dirty) *)
+      (* Name all the files from the old fast (except the new ones we parsed) *)
       let old_fast_names = Relative_path.Map.filter old_fast (fun k _v ->
-          not (Relative_path.Set.mem dirty_files k)
+          not (Relative_path.Set.mem parsing_files k)
         ) in
 
       let t = naming_with_fast old_fast_names t in

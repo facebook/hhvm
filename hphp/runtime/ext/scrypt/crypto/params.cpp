@@ -162,7 +162,7 @@ checkparams(size_t maxmem, double maxmemfrac, double maxtime,
   return 0;
 }
 
-static clock_t clocktouse;
+static clockid_t clocktouse;
 
 static int
 getclockres(double * resd)

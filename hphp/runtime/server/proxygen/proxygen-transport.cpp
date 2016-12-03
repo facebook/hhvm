@@ -759,6 +759,8 @@ void ProxygenTransport::beginPartialPostEcho() {
   CHECK(!m_enqueued);
   m_repost = true;
   HTTPMessage response;
+  response.setHTTPVersion(1,1);
+  response.setIsChunked(true);
   response.setStatusCode(RuntimeOption::ServerPartialPostStatusCode);
   response.setStatusMessage("Partial post");
 
@@ -776,7 +778,11 @@ void ProxygenTransport::beginPartialPostEcho() {
 void ProxygenTransport::abort() {
   unlink();
   if (m_clientTxn) {
-    m_clientTxn->sendAbort();
+    if (m_repost) {
+      m_clientTxn->sendEOM();
+    } else {
+      m_clientTxn->sendAbort();
+    }
   }
   s_requestErrorCount->addValue(1);
 }

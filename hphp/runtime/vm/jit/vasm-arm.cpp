@@ -162,7 +162,6 @@ struct Vgen {
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
-  void emit(const ldimmqs& i);
   void emit(const ldimmw& i);
   void emit(const load& i);
   void emit(const store& i);
@@ -223,7 +222,6 @@ struct Vgen {
   void emit(const imul& i);
   void emit(const incl& i) { a->Add(W(i.d), W(i.s), 1, SetFlags); }
   void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1, SetFlags); }
-  void emit(const incqmlock& i);
   void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, SetFlags); }
   void emit(const jcc& i);
   void emit(const jcci& i);
@@ -261,8 +259,6 @@ struct Vgen {
   void emit(const orqi& i);
   void emit(const pop& i);
   void emit(const popp& i);
-  void emit(const psllq& i);
-  void emit(const psrlq& i);
   void emit(const push& i);
   void emit(const pushp& i);
   void emit(const roundsd& i);
@@ -418,10 +414,6 @@ Y(ldimml, l, 32, W, MSKTOP(i.s.l()))
 Y(ldimmq, q, 64, X, i.s.q())
 
 #undef Y
-
-void Vgen::emit(const ldimmqs& i) {
-  emitSmashableMovq(a->code(), env.meta, i.s.q(), i.d);
-}
 
 void Vgen::emit(const load& i) {
   if (i.d.isGP()) {
@@ -635,7 +627,6 @@ void Vgen::emit(const vasm_opc& i) {   \
   a->Cbnz(rAsm.W(), &again);           \
 }
 
-Y(incqmlock, Add)
 Y(decqmlock, Sub)
 
 #undef Y
@@ -755,20 +746,6 @@ void Vgen::emit(const pop& i) {
   a->Mov(rAsm, sp);
   a->Ldr(X(i.d), MemOperand(rAsm, 8, PostIndex));
   a->Mov(sp, rAsm);
-}
-
-void Vgen::emit(const psllq& i) {
-  // TODO: Add simd shift support in vixl
-  a->Fmov(rAsm, D(i.s1));
-  a->Lsl(rAsm, rAsm, i.s0.l());
-  a->Fmov(D(i.d), rAsm);
-}
-
-void Vgen::emit(const psrlq& i) {
-  // TODO: Needs simd shift support in vixl
-  a->Fmov(rAsm, D(i.s1));
-  a->Lsr(rAsm, rAsm, i.s0.l());
-  a->Fmov(D(i.d), rAsm);
 }
 
 void Vgen::emit(const push& i) {
@@ -1085,7 +1062,6 @@ void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
 }
 
 Y(decqmlock, m)
-Y(incqmlock, m)
 Y(lea, s)
 Y(load, s)
 Y(loadb, s)

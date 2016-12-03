@@ -1061,7 +1061,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
 
 TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   return vwrap(cb, data, [&] (Vout& v) {
-    // Eagerly save VM regs and realign the native stack.
+    // Eagerly save VM regs.
     storeVMRegs(v);
 
     // Realign the native stack.
@@ -1079,14 +1079,15 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // a return value out of a function (either a RetC, or a Yield, or an Await
     // that's suspending, etc), and moreover, we must be executing the return
     // that leaves this level of VM reentry (i.e. the only way we get here is
-    // by coming from the callToExit stub).
+    // by coming from the callToExit stub or by a phpret{} or leavetc{} that
+    // undoes the calltc{} or resumetc{} in enterTCHelper).
     //
     // Either way, we have a live PHP return value in the return registers,
     // which we need to put on the top of the evaluation stack.
     storeReturnRegs(v);
 
     // Perform a native return.
-
+    //
     // On PPC64, as there is no new frame created when entering the VM, the FP
     // must not be saved.
     v << stubret{RegSet(), arch() != Arch::PPC64};

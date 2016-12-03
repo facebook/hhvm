@@ -93,7 +93,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::ldimmw:
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
-    case Vinstr::ldimmqs:
     case Vinstr::load:
     case Vinstr::store:
     case Vinstr::mcprep:
@@ -139,10 +138,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::nothrow:
     case Vinstr::syncpoint:
     case Vinstr::unwind:
-    // arithmetic intrinsics
-    case Vinstr::absdbl:
-    case Vinstr::srem:
-    case Vinstr::divint:
     // nop and trap
     case Vinstr::nop:
     case Vinstr::ud2:
@@ -299,8 +294,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::decqmlock:
     case Vinstr::incq:
     case Vinstr::incqm:
-    case Vinstr::incqmlock:
     case Vinstr::imul:
+    case Vinstr::divint:
+    case Vinstr::srem:
     case Vinstr::neg:
     case Vinstr::not:
     case Vinstr::orq:
@@ -340,13 +336,12 @@ Width width(Vinstr::Opcode op) {
       return Width::Octa;
 
     case Vinstr::addsd:
-    case Vinstr::psllq:
-    case Vinstr::psrlq:
     case Vinstr::subsd:
     case Vinstr::cmpsd:
     case Vinstr::ucomisd:
     case Vinstr::loadsd:
     case Vinstr::storesd:
+    case Vinstr::absdbl:
     case Vinstr::divsd:
     case Vinstr::mulsd:
     case Vinstr::roundsd:

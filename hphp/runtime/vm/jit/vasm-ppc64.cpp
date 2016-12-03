@@ -155,9 +155,6 @@ struct Vgen {
     a.addo(Reg64(i.d), Reg64(i.s1), Reg64(i.s0), true);
     copyCR0toCR1(a, rAsm);
   }
-  void emit(const ldimmqs& i) {
-    emitSmashableMovq(a.code(), env.meta, i.s.q(), i.d);
-  }
   void emit(const nothrow& i) {
     // skip the "ld 2,24(1)" or "nop" emitted by "Assembler::call" at the end
     TCA saved_pc = a.frontier() - call_skip_bytes_for_ret;

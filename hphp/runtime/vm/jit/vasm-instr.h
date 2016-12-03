@@ -75,7 +75,6 @@ struct Vunit;
   O(ldimmw, I(s), Un, D(d))\
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
-  O(ldimmqs, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) U(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -123,10 +122,6 @@ struct Vunit;
   O(nothrow, Inone, Un, Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
-  /* arithmetic intrinsics */\
-  O(absdbl, Inone, U(s), D(d))\
-  O(srem, Inone, U(s0) U(s1), D(d))\
-  O(divint, Inone, U(s0) U(s1), D(d))\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
   O(ud2, Inone, Un, Dn)\
@@ -157,8 +152,9 @@ struct Vunit;
   O(inclm, Inone, U(m), D(sf))\
   O(incq, Inone, UH(s,d), DH(d,s) D(sf))\
   O(incqm, Inone, U(m), D(sf))\
-  O(incqmlock, Inone, U(m), D(sf))\
   O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
+  O(divint, Inone, U(s0) U(s1), D(d))\
+  O(srem, Inone, U(s0) U(s1), D(d))\
   O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
   O(not, Inone, UH(s,d), DH(d,s))\
@@ -174,8 +170,6 @@ struct Vunit;
   O(shlqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shrli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(shrqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(psllq, I(s0), UH(s1,d), DH(d,s1))\
-  O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(subb, Inone, UA(s0) U(s1), D(d) D(sf))\
   O(subbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(subl, Inone, UA(s0) U(s1), D(d) D(sf))\
@@ -286,6 +280,7 @@ struct Vunit;
   O(cvtsi2sdm, Inone, U(s), D(d))\
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
   /* other floating-point */\
+  O(absdbl, Inone, UH(s,d), DH(d,s))\
   O(divsd, Inone, UA(s0) U(s1), D(d))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
   O(roundsd, I(dir), U(s), D(d))\
@@ -499,7 +494,6 @@ struct ldimmb { Immed s; Vreg d; };
 struct ldimmw { Immed s; Vreg16 d; };
 struct ldimml { Immed s; Vreg d; };
 struct ldimmq { Immed64 s; Vreg d; };
-struct ldimmqs { Immed64 s; Vreg d; };
 
 /*
  * Memory operand load and store.
@@ -872,24 +866,6 @@ struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Arithmetic intrinsics.
-
-/*
- * Absolute value for a double-precision value.
- */
-struct absdbl { VregDbl s, d; };
-
-/*
- * Modulus of two integers.
- */
-struct srem { Vreg64 s0, s1, d; };
-
-/*
- * Integer division.
- */
-struct divint { Vreg64 s0, s1, d; };
-
-///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Unless specifically noted otherwise, instructions with Vreg{8,16,32} dsts
@@ -935,9 +911,11 @@ struct incl { Vreg32 s, d; VregSF sf; };
 struct inclm { Vptr m; VregSF sf; };
 struct incq { Vreg64 s, d; VregSF sf; };
 struct incqm { Vptr m; VregSF sf; };
-struct incqmlock { Vptr m; VregSF sf; };
 // mul: s0 * s1 => d, sf
 struct imul { Vreg64 s0, s1, d; VregSF sf; };
+// div/mod: s0 / s1 => d, sf
+struct divint { Vreg64 s0, s1, d; };
+struct srem { Vreg64 s0, s1, d; };
 // neg: 0 - s => d, sf
 struct neg { Vreg64 s, d; VregSF sf; };
 // not: ~s => d
@@ -957,8 +935,6 @@ struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; };
 struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct psllq { Immed s0; VregDbl s1, d; };
-struct psrlq { Immed s0; VregDbl s1, d; };
 // sub: s1 - s0 => d, sf
 struct subb { Vreg8 s0; Vreg8 s1, d; VregSF sf; };
 struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; };
@@ -1115,6 +1091,7 @@ struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
 /*
  * Undocumented floating-point instructions.
  */
+struct absdbl { VregDbl s, d; };
 struct divsd { VregDbl s0, s1, d; };
 struct mulsd  { VregDbl s0, s1, d; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };

@@ -130,6 +130,15 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
       s.setSize(len);
       return s;
     }
+  } catch (const HPHP::serialize::KeysetSerializeError&) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Keysets cannot be serialized with fb_serialize"
+    );
+  } catch (const HPHP::serialize::HackArraySerializeError&) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS "
+      "option to be provided"
+    );
   } catch (const HPHP::serialize::SerializeError&) {
     return init_null();
   }

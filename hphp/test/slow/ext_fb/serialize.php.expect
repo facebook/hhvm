@@ -50,8 +50,7 @@ bool(true)
 bool(false)
 
 *** vec serialize-and-unserialize ***
-bool(false)
-bool(false)
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
 vec(2) {
   string(3) "foo"
   int(42)
@@ -59,8 +58,7 @@ vec(2) {
 bool(true)
 
 *** dict serialize-and-unserialize ***
-bool(false)
-bool(false)
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
 dict(2) {
   ["foo"]=>
   string(1) "f"

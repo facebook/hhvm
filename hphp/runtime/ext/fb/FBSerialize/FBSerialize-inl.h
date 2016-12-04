@@ -30,6 +30,11 @@ struct SerializeError : std::runtime_error {
   }
 };
 
+struct HackArraySerializeError : SerializeError {
+  HackArraySerializeError() : SerializeError{""} {}
+};
+struct KeysetSerializeError : HackArraySerializeError {};
+
 struct UnserializeError : std::runtime_error {
   explicit UnserializeError(const std::string& msg)
       : std::runtime_error(msg) {

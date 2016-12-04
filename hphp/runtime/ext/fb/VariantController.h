@@ -57,19 +57,18 @@ struct VariantControllerImpl {
         if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::MAP;
         }
-        throw HPHP::serialize::SerializeError(
-          "don't know how to serialize HPHP Variant");
+        throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentVec:
       case KindOfVec: {
         if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::LIST;
         }
-        throw HPHP::serialize::SerializeError(
-          "don't know how to serialize HPHP Variant");
+        throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+        throw HPHP::serialize::KeysetSerializeError{};
       case KindOfResource:
       case KindOfRef:
         throw HPHP::serialize::SerializeError(

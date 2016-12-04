@@ -1,0 +1,136 @@
+bool(true)
+vec(0) {
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+vec(4) {
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  int(100)
+  string(3) "abc"
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+vec(4) {
+  dict(3) {
+    [1]=>
+    string(3) "abc"
+    [2]=>
+    string(3) "def"
+    [3]=>
+    string(3) "ghi"
+  }
+  dict(3) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+  int(100)
+  string(3) "abc"
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+vec(4) {
+  dict(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  dict(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+  }
+  int(100)
+  string(3) "abc"
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+vec(1) {
+  dict(2) {
+    ["1"]=>
+    int(100)
+    [1]=>
+    int(200)
+  }
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+string(46) "Keysets cannot be serialized with fb_serialize"
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  [3]=>
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  [4]=>
+  vec(0) {
+  }
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"
+bool(true)
+dict(5) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["d"]=>
+  vec(3) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+  }
+  ["e"]=>
+  vec(0) {
+  }
+}
+string(83) "Serializing Hack arrays requires the FB_SERIALIZE_HACK_ARRAYS option to be provided"

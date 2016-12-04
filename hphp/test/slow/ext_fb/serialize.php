@@ -60,9 +60,14 @@ fb_unserialize("\t\374\003\310\001\270", $ret);
 var_dump($ret);
 
 echo("\n*** vec serialize-and-unserialize ***\n");
-$ret = null;
-var_dump(fb_unserialize(fb_serialize(vec['foo', 42]), $ret));
-var_dump($ret);
+try {
+  $ret = null;
+  var_dump(fb_unserialize(fb_serialize(vec['foo', 42]), $ret));
+  var_dump($ret);
+} catch (Exception $e) {
+  var_dump($e->getMessage());
+}
+
 $ret = null;
 var_dump(
   fb_unserialize(fb_serialize(
@@ -75,9 +80,14 @@ var_dump(
 var_dump($ret);
 
 echo("\n*** dict serialize-and-unserialize ***\n");
-$ret = null;
-var_dump(fb_unserialize(fb_serialize(dict['foo' => 'f', 42 => '42val']), $ret));
-var_dump($ret);
+try {
+  $ret = null;
+  var_dump(fb_unserialize(fb_serialize(dict['foo' => 'f', 42 => '42val']), $ret));
+  var_dump($ret);
+} catch (Exception $e) {
+  var_dump($e->getMessage());
+}
+
 $ret = null;
 var_dump(
   fb_unserialize(

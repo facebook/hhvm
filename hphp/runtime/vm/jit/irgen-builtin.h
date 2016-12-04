@@ -16,9 +16,14 @@
 #ifndef incl_HPHP_JIT_IRGEN_BUILTIN_H_
 #define incl_HPHP_JIT_IRGEN_BUILTIN_H_
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+
+struct Func;
+
+namespace jit {
 
 struct SSATmp;
+struct Type;
 
 namespace irgen {
 
@@ -27,6 +32,11 @@ struct IRGS;
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedCallIsObject(IRGS&, SSATmp*);
+
+// The builtin's inferred return type (without taking into account coercion
+// failures). Appropriate for CallBuiltin. For regular PHP calls to a builtin,
+// use callReturnType() instead.
+Type builtinReturnType(const Func* builtin);
 
 //////////////////////////////////////////////////////////////////////
 

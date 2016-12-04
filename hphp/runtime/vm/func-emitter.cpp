@@ -52,7 +52,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , name(n)
   , top(false)
   , maxStackCells(0)
-  , returnType(folly::none)
+  , hniReturnType(folly::none)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -75,7 +75,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , name(n)
   , top(false)
   , maxStackCells(0)
-  , returnType(folly::none)
+  , hniReturnType(folly::none)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
@@ -224,7 +224,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     f->appendParam(params[i].byRef, pi, fParams);
   }
 
-  f->shared()->m_returnType = returnType;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
@@ -241,9 +240,13 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_retUserType = retUserType;
   f->shared()->m_originalFilename = originalFilename;
   f->shared()->m_isGenerated = isGenerated;
+  f->shared()->m_repoReturnType = repoReturnType;
+  f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
 
   if (isNative) {
     auto const ex = f->extShared();
+
+    ex->m_hniReturnType = hniReturnType;
 
     auto const& info = Native::GetBuiltinFunction(
       name,
@@ -299,7 +302,9 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (base)
     (past)
     (attrs)
-    (returnType)
+    (hniReturnType)
+    (repoReturnType)
+    (repoAwaitedReturnType)
     (docComment)
     (m_numLocals)
     (m_numIterators)

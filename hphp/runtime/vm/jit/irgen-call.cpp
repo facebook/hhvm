@@ -24,8 +24,9 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-builtin.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
@@ -1178,24 +1179,38 @@ void emitFPassCW(IRGS& env, int32_t argNum) {
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallArray(IRGS& env) {
+  auto const callee = env.currentNormalizedInstruction->funcd;
+
+  auto const destroyLocals = callee
+    ? funcDestroysLocals(callee)
+    : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
+
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
     0,
     bcOff(env),
     nextBcOff(env),
-    callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
+    callee,
+    destroyLocals
   };
   auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
   push(env, retVal);
 }
 
 void emitFCallUnpack(IRGS& env, int32_t numParams) {
+  auto const callee = env.currentNormalizedInstruction->funcd;
+
+  auto const destroyLocals = callee
+    ? funcDestroysLocals(callee)
+    : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
+
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
     numParams,
     bcOff(env),
     nextBcOff(env),
-    callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env))
+    callee,
+    destroyLocals
   };
   auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
   push(env, retVal);
@@ -1223,7 +1238,6 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
     );
 
   auto op = curFunc(env)->unit()->getOp(bcOff(env));
-
   auto const retVal = gen(
     env,
     Call,
@@ -1239,6 +1253,7 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
     sp(env),
     fp(env)
   );
+
   push(env, retVal);
   return retVal;
 }
@@ -1269,14 +1284,38 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
-      false,
-      false,
+      funcDestroysLocals(callee),
+      callee->isCPPBuiltin() && builtinFuncNeedsCallerFrame(callee),
       false
     },
     sp(env),
     fp(env)
   );
+
   push(env, retVal);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type callReturnType(const Func* callee) {
+  // Don't make any assumptions about functions which can be intercepted. The
+  // interception functions can return arbitrary types.
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      callee->attrs() & AttrInterceptable) {
+    return TInitGen;
+  }
+
+  if (callee->isCPPBuiltin()) {
+    // If the function is builtin, use the builtin's return type, then take into
+    // account coercion failures.
+    auto type = builtinReturnType(callee);
+    if (callee->attrs() & AttrParamCoerceModeNull) type |= TInitNull;
+    if (callee->attrs() & AttrParamCoerceModeFalse) type |= Type::cns(false);
+    return type;
+  }
+
+  // Otherwise use HHBBC's analysis if present
+  return typeFromRAT(callee->repoReturnType(), callee->cls());
 }
 
 //////////////////////////////////////////////////////////////////////

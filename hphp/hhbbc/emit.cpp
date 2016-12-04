@@ -712,76 +712,6 @@ void emit_ehent_tree(FuncEmitter& fe,
   fe.setEHTabIsSorted();
 }
 
-void emit_finish_func(const php::Func& func,
-                      FuncEmitter& fe,
-                      const EmitBcInfo& info) {
-  if (info.containsCalls) fe.containsCalls = true;;
-
-  for (auto& fpi : info.fpiRegions) {
-    auto& e = fe.addFPIEnt();
-    e.m_fpushOff = fpi.fpushOff;
-    e.m_fcallOff = fpi.fcallOff;
-    e.m_fpOff    = fpi.fpDelta;
-  }
-
-  emit_locals_and_params(fe, func, info);
-  emit_ehent_tree(fe, func, info);
-
-  fe.userAttributes = func.userAttributes;
-  fe.retUserType = func.returnUserType;
-  fe.originalFilename = func.originalFilename;
-  fe.isClosureBody = func.isClosureBody;
-  fe.isAsync = func.isAsync;
-  fe.isGenerator = func.isGenerator;
-  fe.isPairGenerator = func.isPairGenerator;
-  fe.isNative = func.isNative;
-  fe.dynCallWrapperId = func.dynCallWrapperId;
-
-  if (func.nativeInfo) {
-    fe.returnType = func.nativeInfo->returnType;
-  }
-  fe.retTypeConstraint = func.retTypeConstraint;
-
-  fe.maxStackCells = info.maxStackDepth +
-                     fe.numLocals() +
-                     fe.numIterators() * kNumIterCells +
-                     info.maxFpiDepth * kNumActRecCells;
-
-  fe.finish(fe.ue().bcPos(), false /* load */);
-  fe.ue().recordFunction(&fe);
-}
-
-void emit_init_func(FuncEmitter& fe, const php::Func& func) {
-  fe.init(
-    std::get<0>(func.srcInfo.loc),
-    std::get<1>(func.srcInfo.loc),
-    fe.ue().bcPos(),
-    func.attrs,
-    func.top,
-    func.srcInfo.docComment
-  );
-}
-
-void emit_func(EmitUnitState& state, UnitEmitter& ue, const php::Func& func) {
-  FTRACE(2,  "    func {}\n", func.name->data());
-  auto const fe = ue.newFuncEmitter(func.name);
-  emit_init_func(*fe, func);
-  auto const info = emit_bytecode(state, ue, func);
-  emit_finish_func(func, *fe, info);
-}
-
-void emit_pseudomain(EmitUnitState& state,
-                     UnitEmitter& ue,
-                     const php::Unit& unit) {
-  FTRACE(2,  "    pseudomain\n");
-  auto& pm = *unit.pseudomain;
-  ue.initMain(std::get<0>(pm.srcInfo.loc),
-              std::get<1>(pm.srcInfo.loc));
-  auto const fe = ue.getMain();
-  auto const info = emit_bytecode(state, ue, pm);
-  emit_finish_func(pm, *fe, info);
-}
-
 void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
 
@@ -843,6 +773,97 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   }
 }
 
+void emit_finish_func(EmitUnitState& state,
+                      const php::Func& func,
+                      FuncEmitter& fe,
+                      const EmitBcInfo& info) {
+  if (info.containsCalls) fe.containsCalls = true;;
+
+  for (auto& fpi : info.fpiRegions) {
+    auto& e = fe.addFPIEnt();
+    e.m_fpushOff = fpi.fpushOff;
+    e.m_fcallOff = fpi.fcallOff;
+    e.m_fpOff    = fpi.fpDelta;
+  }
+
+  emit_locals_and_params(fe, func, info);
+  emit_ehent_tree(fe, func, info);
+
+  fe.userAttributes = func.userAttributes;
+  fe.retUserType = func.returnUserType;
+  fe.originalFilename = func.originalFilename;
+  fe.isClosureBody = func.isClosureBody;
+  fe.isAsync = func.isAsync;
+  fe.isGenerator = func.isGenerator;
+  fe.isPairGenerator = func.isPairGenerator;
+  fe.isNative = func.isNative;
+  fe.dynCallWrapperId = func.dynCallWrapperId;
+
+  auto const retTy = state.index.lookup_return_type_raw(&func);
+  if (!retTy.subtypeOf(TBottom)) {
+    auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
+    merge_repo_auth_type(fe.ue(), rat);
+    fe.repoReturnType = rat;
+  }
+
+  if (is_specialized_wait_handle(retTy)) {
+    auto const awaitedTy = wait_handle_inner(retTy);
+    if (!awaitedTy.subtypeOf(TBottom)) {
+      auto const rat = make_repo_type(
+        *state.index.array_table_builder(),
+        awaitedTy
+      );
+      merge_repo_auth_type(fe.ue(), rat);
+      fe.repoAwaitedReturnType = rat;
+    }
+  }
+
+  if (func.isNative) {
+    assert(func.nativeInfo);
+    fe.hniReturnType = func.nativeInfo->returnType;
+  }
+  fe.retTypeConstraint = func.retTypeConstraint;
+
+  fe.maxStackCells = info.maxStackDepth +
+                     fe.numLocals() +
+                     fe.numIterators() * kNumIterCells +
+                     info.maxFpiDepth * kNumActRecCells;
+
+  fe.finish(fe.ue().bcPos(), false /* load */);
+  fe.ue().recordFunction(&fe);
+}
+
+void emit_init_func(FuncEmitter& fe, const php::Func& func) {
+  fe.init(
+    std::get<0>(func.srcInfo.loc),
+    std::get<1>(func.srcInfo.loc),
+    fe.ue().bcPos(),
+    func.attrs,
+    func.top,
+    func.srcInfo.docComment
+  );
+}
+
+void emit_func(EmitUnitState& state, UnitEmitter& ue, const php::Func& func) {
+  FTRACE(2,  "    func {}\n", func.name->data());
+  auto const fe = ue.newFuncEmitter(func.name);
+  emit_init_func(*fe, func);
+  auto const info = emit_bytecode(state, ue, func);
+  emit_finish_func(state, func, *fe, info);
+}
+
+void emit_pseudomain(EmitUnitState& state,
+                     UnitEmitter& ue,
+                     const php::Unit& unit) {
+  FTRACE(2,  "    pseudomain\n");
+  auto& pm = *unit.pseudomain;
+  ue.initMain(std::get<0>(pm.srcInfo.loc),
+              std::get<1>(pm.srcInfo.loc));
+  auto const fe = ue.getMain();
+  auto const info = emit_bytecode(state, ue, pm);
+  emit_finish_func(state, pm, *fe, info);
+}
+
 void emit_class(EmitUnitState& state,
                 UnitEmitter& ue,
                 const php::Class& cls) {
@@ -876,7 +897,7 @@ void emit_class(EmitUnitState& state,
     emit_init_func(*fe, *m);
     pce->addMethod(fe);
     auto const info = emit_bytecode(state, ue, *m);
-    emit_finish_func(*m, *fe, info);
+    emit_finish_func(state, *m, *fe, info);
   }
 
   std::vector<Type> useVars;

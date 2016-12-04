@@ -37,6 +37,10 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 #include "hphp/util/text-util.h"
@@ -1345,22 +1349,12 @@ SSATmp* builtinCall(IRGS& env,
     env.irb->exceptionStackBoundary();
   }
 
-  auto const retType = [&]() -> Type {
-    auto const retDT = callee->returnType();
-    auto const ret = retDT ? Type(*retDT) : TCell;
-    if (callee->attrs() & AttrReference) {
-      return ret.box() & TBoxedInitCell;
-    }
-    return ret;
-  }();
-
   // Make the actual call.
   auto realized = realize_params(env, callee, params, catchMaker);
   SSATmp** const decayedPtr = &realized[0];
   auto const ret = gen(
     env,
     CallBuiltin,
-    retType,
     CallBuiltinData {
       spOffBCFromIRSP(env),
       callee,
@@ -1513,14 +1507,15 @@ void emitFCallBuiltin(IRGS& env,
 void emitNativeImpl(IRGS& env) {
   if (isInlining(env)) return nativeImplInlined(env);
 
+  auto const callee = curFunc(env);
+
   auto genericNativeImpl = [&]() {
     gen(env, NativeImpl, fp(env), sp(env));
-    auto const retVal = gen(env, LdRetVal, fp(env));
+    auto const retVal = gen(env, LdRetVal, callReturnType(callee), fp(env));
     auto const data = RetCtrlData { offsetToReturnSlot(env), false };
     gen(env, RetCtrl, data, sp(env), fp(env), retVal);
   };
 
-  auto callee = curFunc(env);
   if (!callee->nativeFuncPtr() || callee->builtinFuncPtr() == zend_wrap_func) {
     genericNativeImpl();
     return;
@@ -1611,6 +1606,98 @@ void emitNativeImpl(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+namespace {
+
+const StaticString s_add("add");
+const StaticString s_addall("addall");
+const StaticString s_append("append");
+const StaticString s_clear("clear");
+const StaticString s_remove("remove");
+const StaticString s_removeall("removeall");
+const StaticString s_removekey("removekey");
+const StaticString s_set("set");
+const StaticString s_setall("setall");
+
+// Whitelist of known collection methods that always return $this (ignoring
+// parameter coercion failure issues).
+bool collectionMethodReturnsThis(const Func* callee) {
+  auto const cls = callee->implCls();
+
+  if (cls == c_Vector::classof()) {
+    return
+      callee->name()->isame(s_add.get()) ||
+      callee->name()->isame(s_addall.get()) ||
+      callee->name()->isame(s_append.get()) ||
+      callee->name()->isame(s_clear.get()) ||
+      callee->name()->isame(s_removekey.get()) ||
+      callee->name()->isame(s_set.get()) ||
+      callee->name()->isame(s_setall.get());
+  }
+
+  if (cls == c_Map::classof()) {
+    return
+      callee->name()->isame(s_add.get()) ||
+      callee->name()->isame(s_addall.get()) ||
+      callee->name()->isame(s_clear.get()) ||
+      callee->name()->isame(s_remove.get()) ||
+      callee->name()->isame(s_set.get()) ||
+      callee->name()->isame(s_setall.get());
+  }
+
+  if (cls == c_Set::classof()) {
+    return
+      callee->name()->isame(s_add.get()) ||
+      callee->name()->isame(s_addall.get()) ||
+      callee->name()->isame(s_clear.get()) ||
+      callee->name()->isame(s_remove.get()) ||
+      callee->name()->isame(s_removeall.get());
+  }
+
+  return false;
+}
+
+}
+
+Type builtinReturnType(const Func* builtin) {
+  // Why do we recalculate the type here than just using HHBBC's inferred type?
+  // Unlike for regular PHP functions, we have access to all the same
+  // information that HHBBC does, and the JIT type-system is slightly more
+  // expressive. So, by doing it ourself, we can derive a slightly more precise
+  // type.
+  assertx(builtin->isCPPBuiltin());
+
+  // NB: It is *not* safe to be pessimistic here and return TGen (or any other
+  // approximation). The builtin's return type inferred here is used to control
+  // code-gen when lowering the builtin call to vasm and must be no more general
+  // than the HNI declaration (if present).
+  auto type = [&]{
+    // If this is a collection method which returns $this, use that fact to
+    // infer the exact returning type. Otherwise try to use HNI declaration.
+    if (collectionMethodReturnsThis(builtin)) {
+      assertx(builtin->hniReturnType() == KindOfObject);
+      return Type::ExactObj(builtin->implCls());
+    }
+    auto const hniType = builtin->hniReturnType();
+    return hniType ? Type{*hniType} : TInitCell;
+  }();
+
+  // "Reference" types (not boxed, types represented by a pointer) can always be
+  // null.
+  if (type.isReferenceType()) {
+    type |= TInitNull;
+  } else {
+    assertx(type == TInitCell || type.isSimpleType());
+  }
+
+  // Functions which return by ref can always return null.
+  if (builtin->isReturnRef()) {
+    return (type.box() & TBoxedInitCell) | TInitNull;
+  }
+  return type & TInitCell;
+}
+
+/////////////////////////////////////////////////////////////////////
 
 namespace {
 

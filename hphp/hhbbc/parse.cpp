@@ -749,7 +749,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
    */
   if (fe.attrs & AttrBuiltin) {
     ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
-    ret->nativeInfo->returnType = fe.returnType;
+    ret->nativeInfo->returnType = fe.hniReturnType;
   }
 
   add_frame_variables(*ret, fe);

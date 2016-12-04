@@ -276,7 +276,7 @@ public:
   SVInfoVec staticVars;
   int maxStackCells;
 
-  MaybeDataType returnType;
+  MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
 
@@ -300,6 +300,8 @@ public:
 
   StringData *memoizePropName;
   int memoizeSharedPropIndex;
+  RepoAuthType repoReturnType;
+  RepoAuthType repoAwaitedReturnType;
 
   Id dynCallWrapperId{kInvalidId};
 

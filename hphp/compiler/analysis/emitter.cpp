@@ -8137,7 +8137,7 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
   assert(retType ||
          meth->isNamed("__construct") ||
          meth->isNamed("__destruct"));
-  fe->returnType = retType ? retType->dataType() : KindOfNull;
+  fe->hniReturnType = retType ? retType->dataType() : KindOfNull;
   fe->retUserType = makeStaticString(meth->getReturnTypeConstraint());
 
   FunctionScopePtr funcScope = meth->getFunctionScope();
@@ -9049,7 +9049,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   // Only allowed to overrun the signature if we have somewhere to put it
   if ((numParams > f->numParams()) && !variadic) return nullptr;
 
-  if ((f->returnType() == KindOfDouble) &&
+  if ((f->hniReturnType() == KindOfDouble) &&
        !Native::allowFCallBuiltinDoubles()) return nullptr;
 
   bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();

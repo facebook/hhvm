@@ -594,23 +594,31 @@ struct CallArrayData : IRExtraData {
                          int32_t numParams,
                          Offset pcOffset,
                          Offset after,
+                         const Func* callee,
                          bool destroyLocals)
     : spOffset(spOffset)
     , numParams(numParams)
     , pc(pcOffset)
     , after(after)
+    , callee(callee)
     , destroyLocals(destroyLocals)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(pc, ",", after,
-                                  destroyLocals ? ",destroyLocals" : "");
+    return folly::to<std::string>(
+      pc, ",",
+      after,
+      callee
+        ? folly::sformat(",{}", callee->fullName())
+        : std::string{},
+      destroyLocals ? ",destroyLocals" : "");
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
   int32_t numParams;
   Offset pc;     // XXX why isn't this available in the marker?
   Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
+  const Func* callee; // nullptr if not statically known
   bool destroyLocals;
 };
 

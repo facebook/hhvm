@@ -239,6 +239,11 @@ struct Func {
   SString name() const;
 
   /*
+   * If this resolved function represents exactly one php::Func, return it.
+   */
+  borrowed_ptr<const php::Func> exactFunc() const;
+
+  /*
    * Returns whether this resolved function could possibly be going through a
    * magic call, in the magic way.
    *

@@ -214,7 +214,7 @@ bool isInlinableCPPBuiltin(const Func* f) {
   }
 
   // ARM currently can't handle floating point returns.
-  if (f->returnType() == KindOfDouble &&
+  if (f->hniReturnType() == KindOfDouble &&
       !Native::allowFCallBuiltinDoubles()) {
     return false;
   }

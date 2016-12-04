@@ -93,6 +93,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 #define DMulti         return true;  // DefLabel; value could be anything
 #define DSetElem       return false; // fixed type
 #define DBuiltin       return false; // from immutable typeParam
+#define DCall          return false; // fixed from static analysis
 #define DSubtract(n,t) DofS(n)
 #define DCns           return false; // fixed type
 

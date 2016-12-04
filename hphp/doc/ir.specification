@@ -1525,8 +1525,8 @@ To string conversions:
   dead. InlineFrameStart is the caller FP-relative offset of the start of the
   callee frame. Everything below InlineFrameStart is dead.
 
-| CallArray<spOffset,numParams,callOff,after,destroyLocals>,
-|                       D(Gen),
+| CallArray<spOffset,numParams,callOff,after,funcd,destroyLocals>,
+|                       DCall,
 |                       S(StkPtr) S(FramePtr),
 |                       Er
 
@@ -1542,7 +1542,7 @@ To string conversions:
   Stores bcOffset into the frame at spOffset from S0 as the return bytecode
   address and the frame S1 as the return frame.
 
-| Call<offset,numParams,returnOff,funcd,destroyLocals>, D(Gen),
+| Call<offset,numParams,returnOff,funcd,destroyLocals>, DCall,
 |                                                       S(StkPtr) S(FramePtr),
 |                                                       Er
 
@@ -1556,7 +1556,7 @@ To string conversions:
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
 
-| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen,Cls,Nullptr), Er|PRc
+| CallBuiltin, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen,Cls,Nullptr), Er|PRc
 
   Call builtin function with N arguments. S0 and S1 should be the current vmfp
   and vmsp, respectively.
@@ -1612,7 +1612,7 @@ To string conversions:
   Pass control to any pending fast resumable wait handles, bypassing the
   scheduler.  If no fast resumables are pending, behave like AsyncRetCtrl.
 
-| LdRetVal, D(Gen), S(FramePtr), NF
+| LdRetVal<T>, DParam, S(FramePtr), NF
 
   Load the return value from the already-returned-from ActRec pointed to by S0
   into the dest.  This is used by NativeImpl.  TODO(#7150575): We want to make

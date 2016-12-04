@@ -170,6 +170,18 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
       fp(env));
 }
 
+Type returnTypeAwaited(SSATmp* retVal) {
+  while (retVal->inst()->isPassthrough()) {
+    retVal = retVal->inst()->getPassthroughValue();
+  }
+  auto const inst = retVal->inst();
+  if (!inst->is(Call)) return TInitCell;
+  auto const callee = inst->extra<Call>()->callee;
+  return callee
+    ? typeFromRAT(callee->repoAwaitedReturnType(), inst->func()->cls())
+    : TInitCell;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -186,7 +198,7 @@ void emitWHResult(IRGS& env) {
     "we test state for non-zero, success must be zero"
   );
   gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
-  auto const res = gen(env, LdWHResult, TInitCell, child);
+  auto const res = gen(env, LdWHResult, returnTypeAwaited(child), child);
   gen(env, IncRef, res);
   decRef(env, child);
   push(env, res);
@@ -198,7 +210,7 @@ void emitAwait(IRGS& env) {
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
 
-  auto const exitSlow   = makeExitSlow(env);
+  auto const exitSlow = makeExitSlow(env);
 
   if (!topC(env)->isA(TObj)) PUNT(Await-NonObject);
 
@@ -226,10 +238,10 @@ void emitAwait(IRGS& env) {
     auto pc = curUnit(env)->at(resumeOffset);
     if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
     auto const stkLoc = decode_iva(pc);
-    if (stkLoc != 0) return TInitCell;
+    if (stkLoc != 0) return returnTypeAwaited(child);
     auto const rat = decodeRAT(curUnit(env), pc);
     auto const ty = ratToAssertType(env, rat);
-    return ty ? *ty : TInitCell;
+    return ty ? *ty : returnTypeAwaited(child);
   }();
 
   ifThenElse(
@@ -263,7 +275,7 @@ void emitFCallAwait(IRGS& env,
   auto const resumeOffset = nextBcOff(env);
 
   auto const ret = implFCall(env, numParams);
-  assertTypeStack(env, BCSPRelOffset{0}, TCell);
+  assertTypeStack(env, BCSPRelOffset{0}, TInitCell);
   ifThen(
     env,
     [&] (Block* taken) {
@@ -293,6 +305,7 @@ void emitFCallAwait(IRGS& env,
       }
     }
   );
+  assertTypeStack(env, BCSPRelOffset{0}, returnTypeAwaited(ret));
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -80,7 +80,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cvttsd2siq:
     case Vinstr::decl:
     case Vinstr::decq:
-    case Vinstr::defvmret:
+    case Vinstr::defvmretdata:
+    case Vinstr::defvmrettype:
     case Vinstr::defvmsp:
     case Vinstr::divint:
     case Vinstr::divsd:

@@ -37,7 +37,8 @@ bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
  * ParamCoerceMode, this will either be a nullable or falsable version
  * of the declared return type.
  */
-Type native_function_return_type(borrowed_ptr<const php::Func> func);
+Type native_function_return_type(borrowed_ptr<const php::Func> func,
+                                 bool include_coercion_failures = true);
 
 //////////////////////////////////////////////////////////////////////
 

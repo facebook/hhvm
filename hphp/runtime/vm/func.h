@@ -441,14 +441,15 @@ struct Func final {
   // Return type.                                                       [const]
 
   /*
-   * The function's return type.
+   * CPP builtin's return type. Returns folly::none if function is not a CPP
+   * builtin.
    *
    * There are a number of caveats regarding this value:
    *
-   *    - If the returnType() is folly::none, the return is a Variant.
+   *    - If the return type is folly::none, the return is a Variant.
    *
-   *    - If the returnType() is KindOfString, KindOfArray, or KindOfObject,
-   *      null may also be returned.
+   *    - If the return type is a string, array-like, object, ref, or resource
+   *      type, null may also be returned.
    *
    *    - If the function is marked with AttrParamCoerceModeFalse, then the
    *      function can also return bool in addition to this type.
@@ -458,7 +459,19 @@ struct Func final {
    *
    *    - This list of caveats may be incorrect and/or incomplete.
    */
-  MaybeDataType returnType() const;
+  MaybeDataType hniReturnType() const;
+
+  /*
+   * Return type inferred by HHBBC's static analysis. TGen if no data is
+   * available.
+   */
+  RepoAuthType repoReturnType() const;
+
+  /*
+   * For async functions, the statically inferred inner type of the returned
+   * WH based on HHBBC's analysis.
+   */
+  RepoAuthType repoAwaitedReturnType() const;
 
   /*
    * For builtins, whether the return value is returned in registers (as
@@ -1151,11 +1164,12 @@ private:
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
 
-    MaybeDataType m_returnType;
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
     TypeConstraint m_retTypeConstraint;
     LowStringPtr m_originalFilename;
+    RepoAuthType m_repoReturnType;
+    RepoAuthType m_repoAwaitedReturnType; // async return type
 
     /*
      * The `past' offset and `line2' are likely to be small, particularly
@@ -1185,6 +1199,7 @@ private:
     ExtendedSharedData(const ExtendedSharedData&) = delete;
     ExtendedSharedData(ExtendedSharedData&&) = delete;
 
+    MaybeDataType m_hniReturnType;
     BuiltinFunction m_builtinFuncPtr;
     BuiltinFunction m_nativeFuncPtr;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit

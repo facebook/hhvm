@@ -75,6 +75,8 @@ struct SSATmp;
  *                    sources
  *     DBuiltin     single dst for CallBuiltin. This can return complex data
  *                    types such as (TStr | TNull)
+ *     DCall        single dst for non-builtin calls. This can return different
+ *                     types depending on static analysis.
  *     DSubtract(N,t) single dest has type of src N with t removed
  *     DCns         single dst's type is the union of legal types for PHP
  *                    constants

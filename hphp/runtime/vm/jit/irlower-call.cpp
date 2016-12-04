@@ -178,7 +178,14 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
-  v << defvmret{dst.reg(0), dst.reg(1)};
+  auto const type = inst->dst()->type();
+  if (!type.hasConstVal() &&
+      !type.subtypeOfAny(TNullptr, TInitNull, TUninit)) {
+    v << defvmretdata{dst.reg(0)};
+  }
+  if (type.needsReg()) {
+    v << defvmrettype{dst.reg(1)};
+  }
 }
 
 void cgCallArray(IRLS& env, const IRInstruction* inst) {
@@ -207,18 +214,35 @@ void cgCallArray(IRLS& env, const IRInstruction* inst) {
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
-  v << defvmret{dst.reg(0), dst.reg(1)};
+  auto const type = inst->dst()->type();
+  if (!type.hasConstVal() &&
+      !type.subtypeOfAny(TNullptr, TInitNull, TUninit)) {
+    v << defvmretdata{dst.reg(0)};
+  }
+  if (type.needsReg()) {
+    v << defvmrettype{dst.reg(1)};
+  }
 }
 
 void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallBuiltin>();
   auto const callee = extra->callee;
-  auto const returnType = inst->typeParam();
-  auto const funcReturnType = callee->returnType();
+  auto const funcReturnType = callee->hniReturnType();
   auto const returnByValue = callee->isReturnByValue();
 
   auto const dstData = dstLoc(env, inst, 0).reg(0);
   auto const dstType = dstLoc(env, inst, 0).reg(1);
+
+  auto returnType = inst->dst()->type();
+  // Subtract out the null possibility from the return type if it would be a
+  // reference type otherwise. Don't do this if the type is nothing but a null
+  // (which would give us TBottom. This makes it easier to test what kind of
+  // return we need to generate below.
+  if (returnType.maybe(TNull) && !(returnType <= TNull)) {
+    if ((returnType - TNull).isReferenceType()) {
+      returnType -= TNull;
+    }
+  }
 
   auto& v = vmain(env);
 

@@ -230,8 +230,17 @@ inline bool Func::contains(Offset offset) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 
-inline MaybeDataType Func::returnType() const {
-  return shared()->m_returnType;
+inline MaybeDataType Func::hniReturnType() const {
+  auto const ex = extShared();
+  return ex ? ex->m_hniReturnType : folly::none;
+}
+
+inline RepoAuthType Func::repoReturnType() const {
+  return shared()->m_repoReturnType;
+}
+
+inline RepoAuthType Func::repoAwaitedReturnType() const {
+  return shared()->m_repoAwaitedReturnType;
 }
 
 inline bool Func::isReturnByValue() const {

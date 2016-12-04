@@ -175,7 +175,7 @@ void callFunc(const Func* func, void *ctx,
   int GP_count = 0, SIMD_count = 0;
 
   auto const numArgs = func->numParams();
-  auto retType = func->returnType();
+  auto retType = func->hniReturnType();
 
   if (ctx) {
     GP_args[GP_count++] = (int64_t)ctx;

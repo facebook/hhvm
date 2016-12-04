@@ -75,21 +75,41 @@ bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
   return false;
 }
 
-Type native_function_return_type(borrowed_ptr<const php::Func> f) {
-  if (!f->nativeInfo->returnType) {
-    if (f->attrs & AttrReference) {
-      return TRef;
+Type native_function_return_type(borrowed_ptr<const php::Func> f,
+                                 bool include_coercion_failures) {
+  assert(f->nativeInfo);
+
+  // If the function returns by ref, we can't say much about it. It can be a ref
+  // or null.
+  if (f->attrs & AttrReference) {
+    return union_of(TRef, TInitNull);
+  }
+
+  // Infer the type from the HNI declaration
+  auto const hni = f->nativeInfo->returnType;
+  auto t = hni ? from_DataType(*hni) : TInitCell;
+  // Non-simple types (ones that are represented by pointers) can always
+  // possibly be null.
+  if (t.subtypeOfAny(TStr, TArr, TVec, TDict,
+                     TKeyset, TObj, TRes)) {
+    t = union_of(t, TInitNull);
+  } else {
+    // Otherwise it should be a simple type or possibly everything.
+    assert(t == TInitCell || t.subtypeOfAny(TBool, TInt, TDbl, TNull));
+  }
+
+  if (include_coercion_failures) {
+    // If parameter coercion fails, we can also get null or false depending on
+    // the function.
+    if (f->attrs & AttrParamCoerceModeNull) {
+      t = union_of(t, TInitNull);
     }
-    return TInitCell;
+    if (f->attrs & AttrParamCoerceModeFalse) {
+      t = union_of(t, TFalse);
+    }
   }
-  auto t = from_DataType(*f->nativeInfo->returnType);
-  // Regardless of ParamCoerceMode, native functions can return null if
-  // too many arguments are passed.
-  t = union_of(t, TInitNull);
-  if (f->attrs & AttrParamCoerceModeFalse) {
-    t = union_of(t, TFalse);
-  }
-  return t;
+
+  return remove_uninit(t);
 }
 
 }}

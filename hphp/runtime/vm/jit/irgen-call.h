@@ -25,6 +25,7 @@ struct Func;
 
 namespace jit {
 
+struct Type;
 struct SSATmp;
 
 namespace irgen {
@@ -43,6 +44,8 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
                     SSATmp* const* const args);
 
 SSATmp* implFCall(IRGS& env, int32_t numParams);
+
+Type callReturnType(const Func* callee);
 
 //////////////////////////////////////////////////////////////////////
 

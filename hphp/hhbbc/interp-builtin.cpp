@@ -249,8 +249,38 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   // Try to handle the builtin at the type level.
   if (handle_builtin(env, op)) return;
 
-  auto const rt = env.index.lookup_return_type(env.ctx, func);
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
+  auto const num_args = op.arg1;
+  auto const rt = [&]{
+    // If we know they'll be no parameter coercions, we can provide a slightly
+    // more precise type by ignoring AttrParamCoerceNull and
+    // AttrParamCoerceFalse. Since this is a FCallBuiltin, we already know the
+    // parameter count is exactly what the builtin expects.
+    auto const precise_ty = [&]() -> folly::Optional<Type> {
+      auto const exact = func.exactFunc();
+      if (!exact) return folly::none;
+      if (exact->attrs & (AttrVariadicParam | AttrVariadicByRef)) {
+        return folly::none;
+      }
+      assert(num_args == exact->params.size());
+      // Check to see if all provided arguments are sub-types of what the
+      // builtin expects. If so, we know there won't be any coercions.
+      for (auto i = uint32_t{0}; i < num_args; ++i) {
+        auto const& param = exact->params[i];
+        if (!param.builtinType || param.builtinType == KindOfUninit) {
+          return folly::none;
+        }
+        auto const param_ty = from_DataType(*param.builtinType);
+        if (!topT(env, num_args - i - 1).subtypeOf(param_ty)) {
+          return folly::none;
+        }
+      }
+      return native_function_return_type(exact, false);
+    }();
+    if (!precise_ty) return env.index.lookup_return_type(env.ctx, func);
+    return *precise_ty;
+  }();
+
+  for (auto i = uint32_t{0}; i < num_args; ++i) popT(env);
   specialFunctionEffects(env, func);
   push(env, rt);
 }

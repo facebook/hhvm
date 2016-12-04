@@ -296,9 +296,11 @@ void endInlining(IRGS& env) {
   decRefLocalsInline(env);
   decRefThis(env);
 
+  auto const retTy = callReturnType(curFunc(env));
   auto const retVal = pop(env, DataTypeGeneric);
+
   implInlineReturn(env);
-  push(env, retVal);
+  push(env, gen(env, AssertType, retTy, retVal));
 }
 
 void conjureEndInlining(IRGS& env, bool builtin) {

@@ -544,7 +544,7 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
     ad->m_sizeAndPos = size; // pos=0
   }
 
-  // Append values by moving -- Caller assumes we update refcount.
+  // Append values by moving; this function takes ownership of them.
   auto ptr = reinterpret_cast<TypedValue*>(ad + 1);
   for (auto i = uint32_t{0}; i < size; ++i) {
     auto const& src = values[reverse ? size - i - 1 : i];

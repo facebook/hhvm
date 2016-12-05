@@ -236,6 +236,11 @@ StackTrace::StackTrace(bool trace) {
   }
 }
 
+StackTrace::StackTrace(StackTrace::Force) {
+  m_frames.resize(kMaxFrame);
+  m_frames.resize(get_backtrace<false>(m_frames.data(), kMaxFrame));
+}
+
 StackTrace::StackTrace(void* const* ips, size_t count) {
   m_frames.resize(count);
   m_frames.assign(ips, ips + count);

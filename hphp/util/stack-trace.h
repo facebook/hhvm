@@ -97,10 +97,16 @@ struct StackTrace : StackTraceBase {
   //////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Construct the curent stacktrace if `trace' is true, else an empty
-   * stacktrace.
+   * Construct the current stacktrace if `trace' and Enabled are true,
+   * else an empty stacktrace.
    */
   explicit StackTrace(bool trace = true);
+
+  /*
+   * Construct the current stacktrace even when Enabled is false.
+   */
+  enum Force {};
+  explicit StackTrace(Force);
 
   /*
    * Construct a stacktrace from a list of instruction pointers.

@@ -169,18 +169,6 @@ private:
  */
 
 /*
- * Structure representing the various parts of the TC available to the JIT. The
- * code lock must be acquired before attempting to write into code.
- */
-CodeCache& code();
-
-/*
- * Structure containing records for each SrcKey present in the TC. The metadata
- * lock must be acquired before reading or writing the srcdb.
- */
-SrcDB& srcDB();
-
-/*
  * Acquire a lock on this object's code cache.
  *
  * Must be held even if the current thread owns the global write lease.
@@ -199,6 +187,25 @@ std::unique_lock<SimpleMutex> lockMetadata();
  * translation will not exceed the global translation limit.
  */
 bool newTranslation();
+
+/*
+ * Structure representing the various parts of the TC available to the JIT. The
+ * code lock must be acquired before attempting to write into code.
+ */
+ALWAYS_INLINE CodeCache& code() {
+  extern CodeCache* g_code;
+  assert(g_code);
+  return *g_code;
+}
+
+/*
+ * Structure containing records for each SrcKey present in the TC. The metadata
+ * lock must be acquired before reading or writing the srcdb.
+ */
+ALWAYS_INLINE SrcDB& srcDB() {
+  extern SrcDB g_srcDB;
+  return g_srcDB;
+}
 
 }}}
 

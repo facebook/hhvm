@@ -507,11 +507,6 @@ Id Func::lookupVarId(const StringData* name) const {
   return shared()->m_localNames.findIndex(name);
 }
 
-int Func::numSlotsInFrame() const {
-  return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // Persistence.
 

@@ -16,9 +16,7 @@
 
 #include "hphp/util/compilation-flags.h"
 
-#ifndef NDEBUG
 #include "hphp/runtime/vm/func.h"
-#endif
 
 namespace HPHP {
 
@@ -26,6 +24,18 @@ namespace HPHP {
 
 inline const Func* ActRec::func() const {
   return m_func;
+}
+
+inline const Unit* ActRec::unit() const {
+  func()->validate();
+  return func()->unit();
+}
+
+inline ActRec* ActRec::sfp() const {
+  if (UNLIKELY(((uintptr_t)m_sfp - s_stackLimit) < s_stackSize)) {
+    return nullptr;
+  }
+  return m_sfp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -54,10 +54,10 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-std::aligned_storage<
-  computeAllocBytes(1),
-  folly::constexpr_max(alignof(MixedArray), size_t(16))
->::type s_theEmptyDictArray;
+static_assert(computeAllocBytes(MixedArray::SmallScale) ==
+              kEmptyMixedArraySize, "");
+
+std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 
 struct MixedArray::Initializer {
   Initializer() {

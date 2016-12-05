@@ -37,10 +37,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-std::aligned_storage<
-  sizeof(ArrayData),
-  alignof(ArrayData)
->::type s_theEmptyVecArray;
+std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
 
 struct PackedArray::VecInitializer {
   VecInitializer() {

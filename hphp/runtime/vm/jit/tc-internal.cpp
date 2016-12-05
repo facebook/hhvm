@@ -47,17 +47,18 @@ TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
+CodeCache* g_code{nullptr};
+SrcDB g_srcDB;
+UniqueStubs g_ustubs;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
 std::atomic<uint64_t> s_numTrans;
-CodeCache* s_code{nullptr};
 SimpleMutex s_codeLock{false, RankCodeCache};
 SimpleMutex s_metadataLock{false, RankCodeMetadata};
 __thread size_t s_initialTCSize;
-UniqueStubs s_ustubs;
-SrcDB s_srcDB;
 
 bool shouldPGOFunc(const Func* func) {
   if (profData() == nullptr) return false;
@@ -182,7 +183,7 @@ void requestInit() {
   memset(&tl_perf_counters, 0, sizeof(tl_perf_counters));
   Stats::init();
   requestInitProfData();
-  s_initialTCSize = s_code->totalUsed();
+  s_initialTCSize = g_code->totalUsed();
   assert(!g_unwind_rds.isInit());
   memset(g_unwind_rds.get(), 0, sizeof(UnwindRDS));
   g_unwind_rds.markInit();
@@ -210,37 +211,27 @@ void requestExit() {
 
 void codeEmittedThisRequest(size_t& requestEntry, size_t& now) {
   requestEntry = s_initialTCSize;
-  now = s_code->totalUsed();
+  now = g_code->totalUsed();
 }
 
 void processInit() {
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  s_code = new CodeCache();
-  s_ustubs.emitAll(*s_code, *Debug::DebugInfo::Get());
+  g_code = new(low_malloc_data(sizeof(CodeCache))) CodeCache();
+  g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
 
   // Write an .eh_frame section that covers the whole TC.
-  initUnwinder(s_code->base(), s_code->codeSize());
-  Disasm::ExcludedAddressRange(s_code->base(), s_code->codeSize());
+  initUnwinder(g_code->base(), g_code->codeSize());
+  Disasm::ExcludedAddressRange(g_code->base(), g_code->codeSize());
 }
-
-CodeCache& code() {
-  assert(s_code);
-  return *s_code;
-}
-const UniqueStubs& ustubs() { return s_ustubs; }
-SrcDB& srcDB() { return s_srcDB; }
-
-TCA offsetToAddr(uint32_t off) { return s_code->toAddr(off); }
-uint32_t addrToOffset(CTCA addr) { return s_code->toOffset(addr); }
 
 bool isValidCodeAddress(TCA addr) {
-  return s_code->isValidCodeAddress(addr);
+  return g_code->isValidCodeAddress(addr);
 }
 
 bool isProfileCodeAddress(TCA addr) {
-  return s_code->prof().contains(addr);
+  return g_code->prof().contains(addr);
 }
 
 void freeTCStub(TCA stub) {

@@ -132,13 +132,15 @@ inline void ObjectData::instanceInit(Class* cls) {
       assert(propInitVec != nullptr);
       assert(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
-        memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
+        memcpy16_inline(propVec(),
+                        &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {
         deepInitHelper(propVec(), &(*propInitVec)[0], nProps);
       }
     } else {
       assert(nProps == cls->declPropInit().size());
-      memcpy(propVec(), &cls->declPropInit()[0], nProps * sizeof(TypedValue));
+      memcpy16_inline(propVec(),
+                      &cls->declPropInit()[0], nProps * sizeof(TypedValue));
     }
   }
 }

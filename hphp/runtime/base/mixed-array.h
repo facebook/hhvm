@@ -757,24 +757,14 @@ private:
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 
-inline constexpr size_t MixedArray::computeMaxElms(uint32_t mask) {
-  return size_t(mask) - size_t(mask) / LoadScale;
+ALWAYS_INLINE constexpr size_t MixedArray::computeMaxElms(uint32_t mask) {
+  return mask - mask / LoadScale;
 }
 
 ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
   return sizeof(MixedArray) +
          MixedArray::HashSize(scale) * sizeof(int32_t) +
          MixedArray::Capacity(scale) * sizeof(MixedArray::Elm);
-}
-
-extern std::aligned_storage<
-  computeAllocBytes(1),
-  folly::constexpr_max(alignof(MixedArray), size_t(16))
->::type s_theEmptyDictArray;
-
-ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
-  void* vp = &s_theEmptyDictArray;
-  return static_cast<ArrayData*>(vp);
 }
 
 ALWAYS_INLINE Array empty_dict_array() {

@@ -534,20 +534,7 @@ private:
     uint64_t m_scale_used;
   };
   uint64_t m_padding;
-
 };
-
-//////////////////////////////////////////////////////////////////////
-
-extern std::aligned_storage<
-  SetArray::ComputeAllocBytes(SetArray::SmallScale),
-  folly::constexpr_max(alignof(SetArray), size_t(16))
->::type s_theEmptySetArray;
-
-ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
-  void* vp = &s_theEmptySetArray;
-  return static_cast<ArrayData*>(vp);
-}
 
 //////////////////////////////////////////////////////////////////////
 

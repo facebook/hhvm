@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -242,7 +241,10 @@ void assertOwnsMetadataLock();
  *
  * Pre: processInit()
  */
-const UniqueStubs& ustubs();
+ALWAYS_INLINE const UniqueStubs& ustubs() {
+  extern UniqueStubs g_ustubs;
+  return g_ustubs;
+}
 
 /*
  * Perform one time process initialization for the structures associated with
@@ -370,8 +372,13 @@ std::vector<TCMemInfo> getTCMemoryUsage();
 /*
  * Convert between TC addresses and offsets.
  */
-TCA offsetToAddr(uint32_t off);
-uint32_t addrToOffset(CTCA addr);
+extern CodeCache* g_code;
+ALWAYS_INLINE TCA offsetToAddr(uint32_t off) {
+  return g_code->toAddr(off);
+}
+ALWAYS_INLINE uint32_t addrToOffset(CTCA addr) {
+  return g_code->toOffset(addr);
+}
 
 /*
  * Check if `addr' is an address within the TC.

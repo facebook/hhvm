@@ -34,10 +34,10 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-std::aligned_storage<
-  SetArray::ComputeAllocBytes(SetArray::SmallScale),
-  folly::constexpr_max(alignof(SetArray), size_t(16))
->::type s_theEmptySetArray;
+static_assert(SetArray::ComputeAllocBytes(SetArray::SmallScale) ==
+              kEmptySetArraySize, "");
+
+std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 struct SetArray::Initializer {
   Initializer() {

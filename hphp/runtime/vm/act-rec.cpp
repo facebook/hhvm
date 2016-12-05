@@ -53,18 +53,6 @@ bool isDebuggerReturnHelper(void* address) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ActRec* ActRec::sfp() const {
-  if (UNLIKELY(((uintptr_t)m_sfp - s_stackLimit) < s_stackSize)) {
-    return nullptr;
-  }
-  return m_sfp;
-}
-
-const Unit* ActRec::unit() const {
-  func()->validate();
-  return func()->unit();
-}
-
 void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
   assert(fp->func()->contains(pc));
   assert(isReturnHelper(retAddr));

@@ -33,10 +33,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-std::aligned_storage<
-  sizeof(ArrayData),
-  alignof(ArrayData)
->::type s_theEmptyArray;
+std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyArray;
 
 struct EmptyArray::Initializer {
   Initializer() {

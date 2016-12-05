@@ -560,15 +560,12 @@ static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
 
 //////////////////////////////////////////////////////////////////////
 
-extern std::aligned_storage<
-  sizeof(ArrayData),
-  alignof(ArrayData)
->::type s_theEmptyArray;
-
-extern std::aligned_storage<
-  sizeof(ArrayData),
-  alignof(ArrayData)
->::type s_theEmptyVecArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
+constexpr size_t kEmptyMixedArraySize = 120;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
+constexpr size_t kEmptySetArraySize = 96;
+extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 /*
  * Return the "static empty array".  This is a singleton static array
@@ -583,6 +580,32 @@ ALWAYS_INLINE ArrayData* staticEmptyArray() {
 ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
   void* vp = &s_theEmptyVecArray;
   return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
+  void* vp = &s_theEmptyDictArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
+  void* vp = &s_theEmptySetArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::Create() {
+  return staticEmptyArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateVec() {
+  return staticEmptyVecArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateDict() {
+  return staticEmptyDictArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateKeyset() {
+  return staticEmptyKeysetArray();
 }
 
 //////////////////////////////////////////////////////////////////////

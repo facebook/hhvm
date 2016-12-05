@@ -318,6 +318,11 @@ inline int Func::maxStackCells() const {
   return m_maxStackCells;
 }
 
+inline int Func::numSlotsInFrame() const {
+  return shared()->m_numLocals +
+    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell));
+}
+
 inline bool Func::hasForeignThis() const {
   return attrs() & AttrHasForeignThis;
 }

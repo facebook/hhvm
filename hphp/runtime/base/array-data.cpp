@@ -727,22 +727,6 @@ bool ArrayData::IsValidKey(const Variant& k) {
          (k.isString() && IsValidKey(k.getStringData()));
 }
 
-ArrayData *ArrayData::Create() {
-  return staticEmptyArray();
-}
-
-ArrayData* ArrayData::CreateVec() {
-  return staticEmptyVecArray();
-}
-
-ArrayData* ArrayData::CreateDict() {
-  return staticEmptyDictArray();
-}
-
-ArrayData* ArrayData::CreateKeyset() {
-  return staticEmptyKeysetArray();
-}
-
 ArrayData *ArrayData::Create(const Variant& value) {
   PackedArrayInit pai(1);
   pai.append(value);

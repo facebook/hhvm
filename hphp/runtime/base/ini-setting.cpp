@@ -907,11 +907,6 @@ struct IniSettingExtension final : Extension {
   void requestInit() override {
     assert(!s_saved_defaults->settings.hasValue());
   }
-
-  void requestShutdown() override {
-    IniSetting::ResetSavedDefaults();
-    assert(!s_saved_defaults->settings.hasValue());
-  }
 } s_ini_extension;
 
 void IniSetting::Bind(

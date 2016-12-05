@@ -2314,9 +2314,10 @@ void hphp_memory_cleanup() {
 
 void hphp_session_exit() {
   assert(s_sessionInitialized);
-  // Server note has to live long enough for the access log to fire.
+  // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
+  IniSetting::ResetSavedDefaults();
   // In JitPGO mode, check if it's time to schedule the retranslation of all
   // profiled functions and, if so, schedule it.
   jit::mcgen::checkRetranslateAll();

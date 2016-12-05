@@ -832,6 +832,8 @@ ServerStatsHelper::~ServerStatsHelper() {
       ServerStats::Log(string("mem.") + m_section, stats.peakUsage);
       ServerStats::Log(string("mem.allocated.") + m_section,
                        stats.peakCap);
+      ServerStats::Log(string("mem.cumulative.") + m_section,
+                       stats.totalAlloc);
     }
 
     if (m_track & TRACK_HWINST) {

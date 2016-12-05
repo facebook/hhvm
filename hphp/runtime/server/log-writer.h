@@ -81,6 +81,14 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
   case 'B':
     out = folly::to<T>(responseSize);
     break;
+  case 'c':
+    {
+      if (arg.empty()) return false;
+      std::string config = IniSetting::Get(arg);
+      if (config.empty()) return false;
+      out = folly::to<T>(config);
+    }
+    break;
   case 'C':
     {
       if (arg.empty()) return false;
@@ -113,6 +121,10 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
        if (host.empty()) host = transport->getRemoteAddr();
        out = folly::to<T>(host);
     }
+    break;
+  case 'H':
+    if (arg.empty()) return false;
+    out = folly::to<T>(ServerStats::Get(arg));
     break;
   case 'i':
     {

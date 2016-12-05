@@ -380,6 +380,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
   if (smashed && info.stub) {
     auto const stub = info.stub;
+    FTRACE(3, "Freeing stub {} on treadmill\n", stub);
     Treadmill::enqueue([stub] { tc::freeTCStub(stub); });
   }
 

@@ -81,7 +81,6 @@ private:
 void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   if (vunit.dataBlocks.empty()) return;
 
-  tc::assertOwnsCodeLock();
   Timer timer(Timer::vasm_bind_ptrs);
   FTRACE(1, "{:-^80}\n", "binding VdataPtrs");
 
@@ -89,7 +88,7 @@ void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   for (auto& dataBlock : vunit.dataBlocks) {
     auto oldPtr = dataBlock.data.get();
     auto newPtr = data.allocRaw(dataBlock.size, dataBlock.align);
-    std::memcpy(newPtr, oldPtr, dataBlock.size);
+    std::memcpy(data.toDestAddress((TCA)newPtr), oldPtr, dataBlock.size);
     FTRACE(2, "  allocated {} bytes at {:#x}, moving from {:#x}\n",
            dataBlock.size, (uintptr_t)newPtr, (uintptr_t)oldPtr);
     blocks.emplace((uintptr_t)oldPtr,
@@ -126,7 +125,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
   Timer _t(Timer::vasm_emit);
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
-  tc::assertOwnsCodeLock();
+  tc::assertOwnsCodeLock(code);
 
   CodeBlock& main_in = code.main();
   CodeBlock& cold_in = code.cold();
@@ -138,7 +137,9 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   auto const do_relocate = arch_any(Arch::X64, Arch::PPC64) &&
     !RuntimeOption::EvalEnableReusableTC &&
     RuntimeOption::EvalJitRelocationSize &&
-    cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3);
+    cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3) &&
+    (!RuntimeOption::EvalEnableOptTCBuffer ||
+     unit.context().kind != TransKind::Optimize);
 
   // If code relocation is supported and enabled, set up temporary code blocks.
   if (do_relocate) {
@@ -167,8 +168,12 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
     // Use separate code blocks, so that attempts to use code's blocks
     // directly will fail (e.g., by overwriting the same memory being written
     // through these locals).
-    cold.init(cold_in.frontier(), cold_in.available(), cold_in.name().c_str());
-    main.init(main_in.frontier(), main_in.available(), main_in.name().c_str());
+    auto const coldStart = cold_in.frontier();
+    cold.init(coldStart, cold_in.toDestAddress(coldStart), cold_in.available(),
+              cold_in.name().c_str());
+    auto const mainStart = main_in.frontier();
+    main.init(mainStart, main_in.toDestAddress(mainStart), main_in.available(),
+              main_in.name().c_str());
   }
 
   if (frozen == &cold_in) frozen = &cold;

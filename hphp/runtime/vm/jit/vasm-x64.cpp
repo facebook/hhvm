@@ -369,6 +369,19 @@ bool ccImplies(ConditionCode a, ConditionCode b) {
   always_assert(false);
 }
 
+static CodeAddress toReal(Venv& env, CodeAddress a) {
+  if (env.text.main().code.contains(a)) {
+    return env.text.main().code.toDestAddress(a);
+  }
+  if (env.text.cold().code.contains(a)) {
+    return env.text.cold().code.toDestAddress(a);
+  }
+  if (env.text.frozen().code.contains(a)) {
+    return env.text.frozen().code.toDestAddress(a);
+  }
+  return a;
+}
+
 /*
  * When two jccs go to the same destination, the cc of the first is compatible
  * with the cc of the second, and they're within a one-byte offset of each
@@ -384,7 +397,7 @@ void retargetJumps(Venv& env,
     if (jmps.size() < 2) continue;
 
     for (size_t i = 0; i < jmps.size(); ++i) {
-      DecodedInstruction di(jmps[i]);
+      DecodedInstruction di(toReal(env, jmps[i]), jmps[i]);
       // Don't bother if the jump is already a short jump.
       if (di.size() != 6) continue;
 
@@ -394,7 +407,7 @@ void retargetJumps(Venv& env,
         // dest that's more than a one-byte offset away.
         if (delta < 0 || !deltaFits(delta, sz::byte)) continue;
 
-        DecodedInstruction dj(jmps[j]);
+        DecodedInstruction dj(toReal(env, jmps[j]), jmps[j]);
         if (!ccImplies(di.jccCondCode(), dj.jccCondCode())) continue;
 
         di.setPicAddress(jmps[j]);
@@ -434,14 +447,14 @@ void retargetJumps(Venv& env,
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJmp(p.instr, env.addrs[p.target]);
+    X64Assembler::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
   }
 
   auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
   jit::hash_map<TCA, jit::vector<TCA>> jccs;
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJcc(p.instr, env.addrs[p.target]);
+    X64Assembler::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
     if (optLevel >= 2 ||
         (optLevel == 1 && p.target >= env.unit.blocks.size())) {
       jccs[env.addrs[p.target]].emplace_back(p.instr);
@@ -580,7 +593,7 @@ void Vgen::emit(const mcprep& i) {
    */
   auto const mov_addr = emitSmashableMovq(a.code(), env.meta, 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
-  smashMovq(mov_addr, (imm << 1) | 1);
+  smashMovq(a.toDestAddress(mov_addr), (imm << 1) | 1);
 
   env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }

@@ -179,7 +179,7 @@ bool emit(Venv& env, const bindjcc& i) {
 bool emit(Venv& env, const bindaddr& i) {
   env.stubs.push_back({nullptr, nullptr, i});
   setJmpTransID(env, TCA(i.addr.get()));
-  env.meta.codePointers.insert(i.addr.get());
+  env.meta.codePointers.emplace(i.addr.get());
   return true;
 }
 
@@ -233,7 +233,12 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
         stub = svcreq::emit_bindaddr_stub(frozen, env.text.data(),
                                           env.meta, i.spOff, i.addr.get(),
                                           i.target, TransFlags{});
-        *i.addr.get() = stub;
+        // The bound pointer may not belong to the data segment, as is the case
+        // with SSwitchMap (see #10347945)
+        auto realAddr = env.text.data().contains((TCA)i.addr.get())
+          ? (TCA*)env.text.data().toDestAddress((TCA)i.addr.get())
+          : (TCA*)i.addr.get();
+        *realAddr = stub;
       } break;
 
     case Vinstr::fallback:
@@ -289,12 +294,16 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
   auto& pending = env.meta.literals;
   auto it = pending.find(val);
   if (it != pending.end()) {
-    assertx(*it->second == val);
+    DEBUG_ONLY auto realAddr =
+      (uint64_t*)env.text.data().toDestAddress((TCA)it->second);
+    assertx(*realAddr == val);
     return it->second;
   }
 
   auto addr = env.text.data().alloc<uint64_t>(alignof(uint64_t));
-  *addr = val;
+  auto realAddr = (uint64_t*)env.text.data().toDestAddress((TCA)addr);
+  *realAddr = val;
+
   pending.emplace(val, addr);
   return addr;
 }

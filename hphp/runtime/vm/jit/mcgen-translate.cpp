@@ -48,6 +48,40 @@ namespace HPHP { namespace jit { namespace mcgen {
 
 namespace {
 
+tc::FuncMetaInfo optimize(Func* func, TCA localBuf) {
+  tc::FuncMetaInfo info(func, tc::ThreadTCBuffer(localBuf));
+  folly::Optional<UseThreadLocalTC> useLocal;
+  if (localBuf) useLocal.emplace(info.tcBuf);
+
+  // Regenerate the prologues and DV funclets before the actual function body.
+  auto const includedBody = regeneratePrologues(func, info);
+
+  // Regionize func and translate all its regions.
+  std::string transCFGAnnot;
+  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
+                                    : regionizeFunc(func, transCFGAnnot);
+
+  for (auto region : regions) {
+    always_assert(!region->empty());
+    auto regionSk = region->start();
+    auto transArgs = TransArgs{regionSk};
+    if (transCFGAnnot.size() > 0) {
+      transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
+    }
+    transArgs.region = region;
+    transArgs.kind = TransKind::Optimize;
+
+    auto const spOff = region->entry()->initialSpOffset();
+    auto data = translate(transArgs, spOff, info.tcBuf.view());
+    if (data) {
+      info.translations.emplace_back(std::move(*data));
+      transCFGAnnot = ""; // so we don't annotate it again
+    }
+  }
+
+  return info;
+}
+
 enum class RetranslateResult {
   /* Retranslation failed permanently because ProfData has been deleted. */
   FAIL,
@@ -76,33 +110,16 @@ RetranslateResult retranslateOptImpl(FuncId funcId, bool isWorker) {
 
   func->setFuncBody(tc::ustubs().funcBodyHelperThunk);
 
+  auto buf = RuntimeOption::EvalEnableOptTCBuffer
+    ? cachedLocalTCBuffer()
+    : nullptr;
+
   // Invalidate SrcDB's entries for all func's SrcKeys.
   tc::invalidateFuncProfSrcKeys(func);
 
-  // Regenerate the prologues and DV funclets before the actual function body.
-  auto const includedBody = regeneratePrologues(func);
-
-  // Regionize func and translate all its regions.
-  std::string transCFGAnnot;
-  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
-                                    : regionizeFunc(func, transCFGAnnot);
-
-  for (auto region : regions) {
-    always_assert(!region->empty());
-    auto regionSk = region->start();
-    auto transArgs = TransArgs{regionSk};
-    if (transCFGAnnot.size() > 0) {
-      transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
-    }
-    transArgs.region = region;
-    transArgs.kind = TransKind::Optimize;
-
-    auto const spOff = region->entry()->initialSpOffset();
-    translate(transArgs, spOff);
-    transCFGAnnot = ""; // so we don't annotate it again
-  }
-
+  tc::publishOptFunction(optimize(func, buf));
   tc::checkFreeProfData();
+
   return RetranslateResult::DONE;
 }
 
@@ -144,49 +161,6 @@ WorkerDispatcher& dispatcher() {
 
 void enqueueRetranslateOptRequest(FuncId id) {
   dispatcher().enqueue(id);
-}
-
-/*
- * Returns true iff we already have Eval.JitMaxTranslations translations
- * recorded in srcRec.
- */
-bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
-  const auto numTrans = srcRec.translations().size();
-  if ((kind == TransKind::Profile &&
-       numTrans != RuntimeOption::EvalJitMaxProfileTranslations) ||
-      (kind != TransKind::Profile &&
-       numTrans != RuntimeOption::EvalJitMaxTranslations)) {
-    return false;
-  }
-  INC_TPC(max_trans);
-
-  if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
-    const auto& tns = srcRec.translations();
-    TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
-          tns.size(), sk.unit()->filepath()->data(),
-          sk.offset());
-    SKTRACE(2, sk, "{\n");
-    TCA topTrans = srcRec.getTopTranslation();
-    for (size_t i = 0; i < tns.size(); ++i) {
-      auto const rec = transdb::getTransRec(tns[i].mainStart());
-      assertx(rec);
-      SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
-      if (tns[i].mainStart() == topTrans) {
-        SKTRACE(2, sk, "%zd: *Top*\n", i);
-      }
-      if (rec->kind == TransKind::Anchor) {
-        SKTRACE(2, sk, "%zd: Anchor\n", i);
-      } else {
-        SKTRACE(2, sk, "%zd: guards {\n", i);
-        for (unsigned j = 0; j < rec->guards.size(); ++j) {
-          FTRACE(2, "{}\n", rec->guards[j]);
-        }
-        SKTRACE(2, sk, "%zd } guards\n", i);
-      }
-    }
-    SKTRACE(2, sk, "} /* Too many translations */\n");
-  }
-  return true;
 }
 
 hfsort::TargetGraph
@@ -355,11 +329,13 @@ void processExit() {
   }
 }
 
-TCA translate(TransArgs args, FPInvOffset spOff, ProfTransRec* prologue) {
+folly::Optional<tc::TransMetaInfo>
+translate(TransArgs args, FPInvOffset spOff,
+          folly::Optional<CodeCache::View> optView) {
   INC_TPC(translate);
   assert(args.kind != TransKind::Invalid);
 
-  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
+  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return folly::none;
 
   Timer timer(Timer::mcg_translate);
 
@@ -367,13 +343,13 @@ TCA translate(TransArgs args, FPInvOffset spOff, ProfTransRec* prologue) {
   always_assert(srcRec);
 
   TransEnv env{args};
-  env.prologue = prologue;
   env.initSpOffset = spOff;
   env.annotations.insert(env.annotations.end(),
                          args.annotations.begin(), args.annotations.end());
 
   // Lower the RegionDesc to an IRUnit, then lower that to a Vunit.
-  if (args.region && !reachedTranslationLimit(args.kind, args.sk, *srcRec)) {
+  if (args.region &&
+      !tc::reachedTranslationLimit(args.kind, args.sk, *srcRec)) {
     if (args.kind == TransKind::Profile || (profData() && transdb::enabled())) {
       env.transID = profData()->allocTransID();
     }
@@ -389,7 +365,7 @@ TCA translate(TransArgs args, FPInvOffset spOff, ProfTransRec* prologue) {
   }
 
   timer.stop();
-  return tc::emitTranslation(std::move(env));
+  return tc::emitTranslation(std::move(env), optView);
 }
 
 TCA retranslate(TransArgs args, const RegionContext& ctx) {
@@ -456,7 +432,14 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   if (!writer.checkKind(args.kind)) return nullptr;
 
   args.region = selectRegion(ctx, args.kind);
-  auto result = translate(args, ctx.spOffset);
+  auto data = translate(args, ctx.spOffset);
+
+  TCA result = nullptr;
+  if (data) {
+    if (auto loc = tc::publishTranslation(std::move(*data))) {
+      result = loc->mainStart();
+    }
+  }
 
   tc::checkFreeProfData();
   return result;

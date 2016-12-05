@@ -428,13 +428,15 @@ int32_t DecodedInstruction::offset() const {
 uint8_t* DecodedInstruction::picAddress() const {
   assert(hasPicOffset());
   uint8_t* addr = m_ip + m_size;
-  return addr + readValue(addr - m_immSz - m_offSz, m_offSz);
+  uint8_t* rel = m_base + m_size;
+  return rel + readValue(addr - m_immSz - m_offSz, m_offSz);
 }
 
 bool DecodedInstruction::setPicAddress(uint8_t* target) {
   assert(hasPicOffset());
   uint8_t* addr = m_ip + m_size;
-  ptrdiff_t diff = target - addr;
+  uint8_t* rel = m_base + m_size;
+  ptrdiff_t diff = target - rel;
 
   return writeValue(addr - m_offSz - m_immSz, m_offSz, diff);
 }

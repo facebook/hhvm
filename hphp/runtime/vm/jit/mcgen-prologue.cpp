@@ -93,7 +93,7 @@ void withThis(const Func* func, F f) {
  * Returns true iff the prologue had an associated dvInit funclet that was
  * successfully retranslated as an Optimize translation.
  */
-bool regeneratePrologue(TransID prologueTransId) {
+bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   auto rec = profData()->transRec(prologueTransId);
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
@@ -104,6 +104,16 @@ bool regeneratePrologue(TransID prologueTransId) {
   // but ignore the code size limits.  We still want to respect the global
   // translation limit and other restrictions, though.
   if (!tc::shouldTranslateNoSizeLimit(func)) return false;
+
+  // Double check the prologue array now that we have the write lease
+  // in case another thread snuck in and set the prologue already.
+  if (checkCachedPrologue(func, nArgs)) return false;
+
+  if (RuntimeOption::EvalEnableOptTCBuffer) {
+    info.prologues.emplace_back(rec);
+  } else {
+    tc::emitFuncPrologueOpt(rec);
+  }
 
   // If this prologue has a DV funclet, then invalidate it and return its SrcKey
   // and TransID
@@ -122,7 +132,7 @@ bool regeneratePrologue(TransID prologueTransId) {
         args.kind = TransKind::Optimize;
         args.region = selectHotRegion(funcletTransId);
         auto const spOff = args.region->entry()->initialSpOffset();
-        if (translate(args, spOff, rec)) {
+        if (translate(args, spOff, info.tcBuf.view())) {
           // Flag that this translation has been retranslated, so that
           // it's not retranslated again along with the function body.
           profData()->setOptimized(funcletSK);
@@ -134,14 +144,13 @@ bool regeneratePrologue(TransID prologueTransId) {
     }
   }
 
-  tc::emitFuncPrologueOpt(rec);
   return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-bool regeneratePrologues(Func* func) {
+bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   std::vector<TransID> prologTransIDs;
 
   VMProtect _;
@@ -194,7 +203,7 @@ bool regeneratePrologues(Func* func) {
 
   bool emittedAnyDVInit = false;
   for (TransID tid : prologTransIDs) {
-    emittedAnyDVInit |= regeneratePrologue(tid);
+    emittedAnyDVInit |= regeneratePrologue(tid, info);
   }
 
   // If we tried to include the function body along with a DV init, but didn't

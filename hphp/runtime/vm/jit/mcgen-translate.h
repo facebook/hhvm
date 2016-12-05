@@ -17,13 +17,18 @@
 #ifndef incl_HPHP_JIT_MCGEN_TRANSLATE_H_
 #define incl_HPHP_JIT_MCGEN_TRANSLATE_H_
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
+
+#include <folly/Optional.h>
 
 namespace HPHP { namespace jit {
 
 struct FPInvOffset;
 struct ProfTransRec;
 struct TransArgs;
+
+namespace tc { struct TransMetaInfo; };
 
 namespace mcgen {
 
@@ -37,8 +42,11 @@ namespace mcgen {
  * Should the region be absent, an appropriate region for the designated kind
  * will be selected.
  */
-TCA translate(TransArgs args, FPInvOffset spOff,
-              ProfTransRec* prologue = nullptr);
+folly::Optional<tc::TransMetaInfo> translate(
+  TransArgs args,
+  FPInvOffset spOff,
+  folly::Optional<CodeCache::View> optView = folly::none
+);
 
 }}}
 

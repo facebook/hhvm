@@ -83,6 +83,7 @@ void findFixups(TCA start, TCA end, CGMeta& fixups);
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
+                DataBlock& srcBlock,
                 CGMeta& fixups,
                 TCA* exitAddr);
 

@@ -109,7 +109,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
 
   TCA start = genFuncPrologue(transID, kind, func, argc, codeView, fixups);
 
-  auto loc = maker.markEnd();
+  auto loc = maker.markEnd().loc();
   auto metaLock = lockMetadata();
 
   if (RuntimeOption::EvalEnableReusableTC) {

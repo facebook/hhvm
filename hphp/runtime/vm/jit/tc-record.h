@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_TC_RECORD_H_
 
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/growable-vector.h"
@@ -61,7 +62,7 @@ void reportJitMaturity(const CodeCache& code);
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */
-void logTranslation(const TransEnv& env, const TransLoc& loc);
+void logTranslation(const TransEnv& env, const TransRange& range);
 
 /*
  * Record smashed calls in the TC that may need to be re-smashed in the event

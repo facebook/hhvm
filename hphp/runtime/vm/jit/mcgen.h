@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_MCGEN_H_
 #define incl_HPHP_JIT_MCGEN_H_
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -31,6 +32,8 @@ namespace jit {
 
 struct IRUnit;
 struct Vunit;
+
+namespace tc { struct ThreadTCBuffer; }
 
 /*
  * Arguments for the translate() entry points in Translator.
@@ -69,13 +72,6 @@ struct TransEnv {
   TransID transID{kInvalidTransID};
 
   /*
-   * If set, regenerate the prologue for this trans rec. This is intended for
-   * optimized translations of DV initializers which should always follow their
-   * prologues.
-   */
-  ProfTransRec* prologue{nullptr};
-
-  /*
    * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
    * successful (hhir -> vasm lowering never fails).
    */
@@ -92,6 +88,36 @@ struct TransEnv {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace mcgen {
+
+struct UseThreadLocalTC {
+  UseThreadLocalTC(UseThreadLocalTC&&) = delete;
+  UseThreadLocalTC& operator=(UseThreadLocalTC&&) = delete;
+
+#ifdef NDEBUG
+  explicit UseThreadLocalTC(tc::ThreadTCBuffer&) {}
+#else
+  explicit UseThreadLocalTC(tc::ThreadTCBuffer& buf);
+  ~UseThreadLocalTC();
+
+private:
+  tc::ThreadTCBuffer& m_buf;
+#endif
+};
+
+struct ReadThreadLocalTC {
+  ReadThreadLocalTC(ReadThreadLocalTC&&) = delete;
+  ReadThreadLocalTC& operator=(ReadThreadLocalTC&&) = delete;
+
+#ifdef NDEBUG
+  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer&) {}
+#else
+  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer& m_buf);
+  ~ReadThreadLocalTC();
+
+private:
+  const tc::ThreadTCBuffer& m_buf;
+#endif
+};
 
 /*
  * Look up or translate a func prologue or func body.
@@ -145,6 +171,21 @@ int64_t jitInitTime();
  * `transKind'.
  */
 bool dumpTCAnnotation(const Func& func, TransKind transKind);
+
+/*
+ * Is the thread local TC in use
+ */
+bool isLocalTCEnabled();
+
+/*
+ * Expected size of all thread local TC buffers
+ */
+size_t localTCSize();
+
+/*
+ * Per-thread cached TC buffer
+ */
+TCA cachedLocalTCBuffer();
 
 }}}
 

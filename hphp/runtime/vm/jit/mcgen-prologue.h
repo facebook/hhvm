@@ -24,7 +24,15 @@ namespace HPHP {
 struct Func;
 struct SrcKey;
 
-namespace jit { namespace mcgen {
+namespace jit {
+
+namespace tc {
+
+struct FuncMetaInfo;
+
+}
+
+namespace mcgen {
 
 /*
  * Regenerate all prologues of func that were previously generated.  The
@@ -37,7 +45,7 @@ namespace jit { namespace mcgen {
  * Returns true iff the body of the function was included in at least one
  * dvInit translation.
  */
-bool regeneratePrologues(Func* func);
+bool regeneratePrologues(Func* func, tc::FuncMetaInfo&);
 
 }}}
 

@@ -558,6 +558,7 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& dest_block,
                 TCA start, TCA end,
+                CodeBlock&,
                 CGMeta& fixups,
                 TCA* exit_addr) {
   JmpSet far_jmps, near_jmps;

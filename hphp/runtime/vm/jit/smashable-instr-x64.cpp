@@ -55,8 +55,9 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
   auto const start = EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
 
+  auto frontier = cb.toDestAddress(cb.frontier());
   auto immp = reinterpret_cast<uint64_t*>(
-    cb.frontier() - smashableMovqLen() + kSmashMovqImmOff
+    frontier - smashableMovqLen() + kSmashMovqImmOff
   );
   *immp = imm;
 
@@ -101,7 +102,7 @@ void smashCall(TCA inst, TCA target) {
   /*
    * TODO(#7889486): We'd like this just to be:
    *
-   *    X64Assembler::patchCall(inst, target);
+   *    X64Assembler::patchCall(inst, inst, target);
    *
    * but presently this causes asserts to fire in MCGenerator because of a bug
    * with PGO and relocation.
@@ -130,7 +131,7 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   always_assert(is_aligned(inst, Alignment::SmashJcc));
 
   if (cc == CC_None) {
-    X64Assembler::patchJcc(inst, target);
+    X64Assembler::patchJcc(inst, inst, target);
   } else {
     auto& cb = tc::code().blockFor(inst);
     CodeCursor cursor { cb, inst };

@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/debugger.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -41,6 +42,8 @@
 #include "hphp/util/trace.h"
 
 #include <atomic>
+
+TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
@@ -68,6 +71,18 @@ bool shouldPGOFunc(const Func* func) {
   return func->attrs() & AttrHot;
 }
 
+}
+
+TransLoc TransRange::loc() const {
+  TransLoc loc;
+  loc.setMainStart(main.begin());
+  loc.setColdStart(cold.begin() - sizeof(uint32_t));
+  loc.setFrozenStart(frozen.begin() - sizeof(uint32_t));
+  loc.setMainSize(main.size());
+
+  assertx(loc.coldCodeSize() == cold.size());
+  assertx(loc.frozenCodeSize() == frozen.size());
+  return loc;
 }
 
 bool canTranslate() {
@@ -156,7 +171,9 @@ std::unique_lock<SimpleMutex> lockMetadata() {
   return std::unique_lock<SimpleMutex>{s_metadataLock};
 }
 
-void assertOwnsCodeLock() { s_codeLock.assertOwnedBySelf(); }
+void assertOwnsCodeLock(OptView v) {
+  if (!v || !v->isLocal()) s_codeLock.assertOwnedBySelf();
+}
 void assertOwnsMetadataLock() { s_metadataLock.assertOwnedBySelf(); }
 
 void requestInit() {
@@ -300,5 +317,80 @@ bool profileFunc(const Func* func) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+ThreadTCBuffer::ThreadTCBuffer(TCA start) : m_start(start) {
+  if (!start) return;
+
+  TCA fakeStart = code().threadLocalStart();
+  size_t off = 0;
+  auto initBlock = [&] (DataBlock& block, size_t sz, const char* nm) {
+    block.init(&fakeStart[off], &start[off], sz, nm);
+    off += sz;
+  };
+  initBlock(m_main, RuntimeOption::EvalThreadTCMainBufferSize,
+            "thread local main");
+  initBlock(m_cold, RuntimeOption::EvalThreadTCColdBufferSize,
+            "thread local cold");
+  initBlock(m_frozen, RuntimeOption::EvalThreadTCFrozenBufferSize,
+            "thread local frozen");
+  initBlock(m_data, RuntimeOption::EvalThreadTCDataBufferSize,
+            "thread local data");
+
+#ifndef NDEBUG
+  mprotect(m_start, mcgen::localTCSize(), PROT_NONE);
+#endif
+}
+
+#ifndef NDEBUG
+ThreadTCBuffer::~ThreadTCBuffer() {
+  mprotect(m_start, mcgen::localTCSize(), PROT_READ | PROT_WRITE);
+}
+#endif
+
+OptView ThreadTCBuffer::view() {
+  if (!valid()) return folly::none;
+  return CodeCache::View(m_main, m_cold, m_frozen, m_data, true);
+}
+
+bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
+  const auto numTrans = srcRec.translations().size();
+  if ((kind == TransKind::Profile &&
+       numTrans != RuntimeOption::EvalJitMaxProfileTranslations) ||
+      (kind != TransKind::Profile &&
+       numTrans != RuntimeOption::EvalJitMaxTranslations)) {
+    return false;
+  }
+  INC_TPC(max_trans);
+
+  if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
+    const auto& tns = srcRec.translations();
+    TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
+          tns.size(), sk.unit()->filepath()->data(),
+          sk.offset());
+    SKTRACE(2, sk, "{\n");
+    TCA topTrans = srcRec.getTopTranslation();
+    for (size_t i = 0; i < tns.size(); ++i) {
+      auto const rec = transdb::getTransRec(tns[i].mainStart());
+      assertx(rec);
+      SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
+      if (tns[i].mainStart() == topTrans) {
+        SKTRACE(2, sk, "%zd: *Top*\n", i);
+      }
+      if (rec->kind == TransKind::Anchor) {
+        SKTRACE(2, sk, "%zd: Anchor\n", i);
+      } else {
+        SKTRACE(2, sk, "%zd: guards {\n", i);
+        for (unsigned j = 0; j < rec->guards.size(); ++j) {
+          FTRACE(2, "{}\n", rec->guards[j]);
+        }
+        SKTRACE(2, sk, "%zd } guards\n", i);
+      }
+    }
+    SKTRACE(2, sk, "} /* Too many translations */\n");
+  }
+  return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 }}}

@@ -42,13 +42,61 @@ TransEnv::~TransEnv() {}
 
 namespace mcgen {
 
+struct TCBufferCache {
+  TCBufferCache() : m_buffer((TCA)::malloc(localTCSize())) {}
+  ~TCBufferCache() { ::free(m_buffer); }
+
+  TCA buf() { return m_buffer; }
+
+private:
+  TCA m_buffer;
+};
+
 namespace {
+
+IMPLEMENT_THREAD_LOCAL(TCBufferCache, tl_tcBuffer);
+bool __thread tl_useLocal{false};
 
 int64_t s_startTime;
 bool s_inited{false};
 
 ////////////////////////////////////////////////////////////////////////////////
 }
+
+bool isLocalTCEnabled() { return tl_useLocal; }
+
+size_t localTCSize() {
+  return
+    RuntimeOption::EvalThreadTCMainBufferSize +
+    RuntimeOption::EvalThreadTCColdBufferSize +
+    RuntimeOption::EvalThreadTCFrozenBufferSize +
+    RuntimeOption::EvalThreadTCDataBufferSize;
+}
+
+TCA cachedLocalTCBuffer() {
+  assertx(RuntimeOption::EvalEnableOptTCBuffer);
+  return tl_tcBuffer->buf();
+}
+
+#ifndef NDEBUG
+ReadThreadLocalTC::ReadThreadLocalTC(const tc::ThreadTCBuffer& buf)
+  : m_buf(buf)
+{
+  mprotect(m_buf.start(), localTCSize(), PROT_READ);
+}
+ReadThreadLocalTC::~ReadThreadLocalTC() {
+  mprotect(m_buf.start(), localTCSize(), PROT_NONE);
+}
+UseThreadLocalTC::UseThreadLocalTC(tc::ThreadTCBuffer& buf) : m_buf(buf) {
+  assertx(!tl_useLocal);
+  tl_useLocal = true;
+  mprotect(m_buf.start(), localTCSize(), PROT_READ | PROT_WRITE);
+}
+UseThreadLocalTC::~UseThreadLocalTC() {
+  tl_useLocal = false;
+  mprotect(m_buf.start(), localTCSize(), PROT_NONE);
+}
+#endif
 
 void processInit() {
   TRACE(1, "mcgen startup\n");

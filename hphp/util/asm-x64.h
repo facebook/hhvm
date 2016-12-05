@@ -744,6 +744,10 @@ public:
     return codeBlock.frontier();
   }
 
+  CodeAddress toDestAddress(CodeAddress addr) const {
+    return codeBlock.toDestAddress(addr);
+  }
+
   void setFrontier(CodeAddress newFrontier) {
     codeBlock.setFrontier(newFrontier);
   }
@@ -1149,33 +1153,33 @@ public:
     movq (imm.q(), dest);
   }
 
-  static void patchJcc(CodeAddress jmp, CodeAddress dest) {
+  static void patchJcc(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
-    ssize_t diff = dest - (jmp + 6);
+    ssize_t diff = dest - (from + 6);
     *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
   }
 
-  static void patchJcc8(CodeAddress jmp, CodeAddress dest) {
+  static void patchJcc8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert((jmp[0] & 0xF0) == 0x70);
-    ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
+    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  static void patchJmp(CodeAddress jmp, CodeAddress dest) {
+  static void patchJmp(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert(jmp[0] == 0xE9);
-    ssize_t diff = dest - (jmp + 5);
+    ssize_t diff = dest - (from + 5);
     *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
   }
 
-  static void patchJmp8(CodeAddress jmp, CodeAddress dest) {
+  static void patchJmp8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert(jmp[0] == 0xEB);
-    ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
+    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  static void patchCall(CodeAddress call, CodeAddress dest) {
+  static void patchCall(CodeAddress call, CodeAddress from, CodeAddress dest) {
     assert(call[0] == 0xE8);
-    ssize_t diff = dest - (call + 5);
+    ssize_t diff = dest - (from + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
   }
 
@@ -2108,12 +2112,13 @@ struct Label {
       assert(m_a && m_address && "Label had jumps but was never set");
     }
     for (auto& ji : m_toPatch) {
+      auto realSrc = ji.a->toDestAddress(ji.addr);
       switch (ji.type) {
-      case Branch::Jmp:   ji.a->patchJmp(ji.addr, m_address);  break;
-      case Branch::Jmp8:  ji.a->patchJmp8(ji.addr, m_address); break;
-      case Branch::Jcc:   ji.a->patchJcc(ji.addr, m_address);  break;
-      case Branch::Jcc8:  ji.a->patchJcc8(ji.addr, m_address); break;
-      case Branch::Call:  ji.a->patchCall(ji.addr, m_address); break;
+      case Branch::Jmp:   ji.a->patchJmp(realSrc, ji.addr, m_address);  break;
+      case Branch::Jmp8:  ji.a->patchJmp8(realSrc, ji.addr, m_address); break;
+      case Branch::Jcc:   ji.a->patchJcc(realSrc, ji.addr, m_address);  break;
+      case Branch::Jcc8:  ji.a->patchJcc8(realSrc, ji.addr, m_address); break;
+      case Branch::Call:  ji.a->patchCall(realSrc, ji.addr, m_address); break;
       }
     }
   }
@@ -2240,7 +2245,12 @@ CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {
 namespace x64 {
 
 struct DecodedInstruction {
-  explicit DecodedInstruction(uint8_t* ip) { decode(ip); }
+  DecodedInstruction(uint8_t* ip, uint8_t* base)
+    : m_base(base)
+  { decode(ip); }
+
+  explicit DecodedInstruction(uint8_t* ip) : DecodedInstruction(ip, ip) {}
+
   std::string toString();
   size_t size() { return m_size; }
 
@@ -2274,6 +2284,10 @@ private:
   void determineOperandsMap3(uint8_t* ip);
   int decodeModRm(uint8_t* ip);
   int decodeImm(uint8_t* ip);
+
+  // We may wish to decode an instruction whose address is m_ip, but treat all
+  // PIC references as relative to m_base.
+  uint8_t* m_base;
 
   uint8_t*   m_ip;
   uint32_t   m_size;

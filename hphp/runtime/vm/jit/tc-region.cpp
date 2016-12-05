@@ -81,6 +81,62 @@ bool mcGenUnit(TransEnv& env, CodeCache::View codeView, CGMeta& fixups) {
   return true;
 }
 
+TransLocMaker relocateLocalTranslation(TransRange range, TransKind kind,
+                                       CodeCache::View srcView,
+                                       CGMeta& fixups) {
+  auto reloc = [&] () -> folly::Optional<TransLocMaker> {
+    auto view = code().view(kind);
+    TransLocMaker tlm(view);
+    tlm.markStart();
+
+    try {
+      RelocationInfo rel;
+
+      auto origin = range.data;
+      if (!origin.empty()) {
+        view.data().bytes(origin.size(),
+                          srcView.data().toDestAddress(origin.begin()));
+
+        auto dest = tlm.dataRange();
+        auto oAddr = origin.begin();
+        auto dAddr = dest.begin();
+        while (oAddr != origin.end()) {
+          assertx(dAddr != dest.end());
+          rel.recordAddress(oAddr++, dAddr++, 0);
+        }
+      }
+
+      relocate(rel, view.main(), range.main.begin(), range.main.end(),
+               srcView.main(), fixups, nullptr);
+      relocate(rel, view.cold(), range.cold.begin(), range.cold.end(),
+               srcView.cold(), fixups, nullptr);
+      if (&srcView.cold() != &srcView.frozen()) {
+        relocate(rel, view.frozen(), range.frozen.begin(),
+                 range.frozen.end(), srcView.frozen(), fixups, nullptr);
+      }
+
+      adjustForRelocation(rel);
+      adjustMetaDataForRelocation(rel, nullptr, fixups);
+      adjustCodeForRelocation(rel, fixups);
+    } catch (const DataBlockFull& dbFull) {
+      if (dbFull.name == "hot") {
+        code().disableHot();
+        tlm.rollback();
+        return folly::none;
+      }
+      always_assert_flog(0, "data block = {}\nmessage: {}\n",
+                         dbFull.name, dbFull.what());
+    }
+    return tlm;
+  };
+
+  if (auto tlm = reloc()) return *tlm;
+
+  auto tlm = reloc();
+  always_assert(tlm);
+  return *tlm;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -163,23 +219,23 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TCA emitTranslation(TransEnv env) {
+folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
   Timer timer(Timer::mcg_finishTranslation);
 
   VMProtect _;
-
-  if (env.prologue) {
-    assertx(env.args.kind == TransKind::Optimize);
-    emitFuncPrologueOpt(env.prologue);
-  }
 
   auto& args = env.args;
   auto const sk = args.sk;
 
   profileSetHotFuncAttr();
 
-  auto codeLock = lockCode();
-  auto codeView = code().view(args.kind);
+  std::unique_lock<SimpleMutex> codeLock;
+  if (!optDst) {
+    codeLock = lockCode();
+  }
+
+  auto codeView = optDst ? *optDst : code().view(args.kind);
+  auto viewKind = args.kind;
 
   CGMeta fixups;
   TransLocMaker maker{codeView};
@@ -199,7 +255,7 @@ TCA emitTranslation(TransEnv env) {
 
   if (env.vunit) {
     if (!newTranslation()) {
-      return nullptr;
+      return folly::none;
     }
   } else {
     args.kind = TransKind::Interp;
@@ -211,10 +267,89 @@ TCA emitTranslation(TransEnv env) {
   }
 
   Timer metaTimer(Timer::mcg_finishTranslation_metadata);
-  auto metaLock = lockMetadata();
-  auto loc = maker.markEnd();
+  auto range = maker.markEnd();
 
-  tryRelocateNewTranslation(sk, loc, codeView, fixups);
+  if (args.kind == TransKind::Profile) {
+    always_assert(args.region);
+    auto metaLock = lockMetadata();
+    profData()->addTransProfile(env.transID, args.region, env.pconds);
+  }
+
+  TransRec tr;
+  if (RuntimeOption::EvalJitUseVtuneAPI ||
+      Trace::moduleEnabledRelease(Trace::trans, 1) ||
+      transdb::enabled()) {
+    tr = maker.rec(sk, env.transID, args.kind, args.region, fixups.bcMap,
+                   std::move(env.annotations),
+                   env.unit && cfgHasLoop(*env.unit));
+  }
+
+  if (env.unit && env.unit->logEntry()) {
+    auto metaLock = lockMetadata();
+    logTranslation(env, range);
+  }
+
+  return TransMetaInfo{sk, viewKind, args.kind, range, std::move(fixups),
+                       std::move(tr)};
+}
+
+folly::Optional<TransLoc>
+publishTranslation(TransMetaInfo info, OptView optSrcView) {
+  auto const sk = info.sk;
+  auto range = info.range;
+  auto& fixups = info.meta;
+  auto& tr = info.transRec;
+  bool needsRelocate = RuntimeOption::EvalEnableOptTCBuffer &&
+    !code().isValidCodeAddress(info.range.main.begin());
+
+  auto const srcRec = srcDB().find(sk);
+  always_assert(srcRec);
+
+  auto checkLimit = [&] {
+    auto const limit = info.viewKind == TransKind::Profile
+      ? RuntimeOption::EvalJitMaxProfileTranslations
+      : RuntimeOption::EvalJitMaxTranslations;
+
+    auto const numTrans = srcRec->translations().size();
+
+    // Once numTrans has reached limit + 1 we know that an interp translation
+    // has already been emitted. Prior to that if numTrans == limit only allow
+    // interp translations to avoid a race where multiple threads believe there
+    // are still available translations.
+    if (numTrans == limit + 1) return false;
+    if (numTrans == limit && info.transKind != TransKind::Interp) return false;
+    return true;
+  };
+
+  if (!checkLimit()) return folly::none;
+
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
+
+  // Check again now that we have the lock, the first check is racy but may
+  // prevent unnecessarily acquiring the lock.
+  if (!checkLimit()) return folly::none;
+
+  // 1) If we are currently in a thread local TC we need to relocate into the
+  //    end of the real TC.
+  // 2) If reusable TC is enabled we need to relocate to an inner allocation if
+  //    sufficiently sized free blocks can be found
+  //
+  // Ideally we can combine (1) and (2), however, currently thread-local TC is
+  // only useful in production environments where we may want to emit optimize
+  // translations in parallel, while reusable TC is only meaningful in sandboxes
+  // where translations may be invalidates by source modifications.
+  auto view = [&] {
+    if (!needsRelocate) return code().view(info.viewKind);
+
+    auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
+                                        fixups);
+    range = tlm.markEnd();
+    return tlm.view();
+  }();
+
+  auto loc = range.loc();
+  tryRelocateNewTranslation(sk, loc, view, fixups);
 
   // Finally, record various metadata about the translation and add it to the
   // SrcRec.
@@ -235,21 +370,21 @@ TCA emitTranslation(TransEnv env) {
     }
   }
 
-  auto const srcRec = srcDB().find(args.sk);
-  always_assert(srcRec);
   recordRelocationMetaData(sk, *srcRec, loc, fixups);
-  recordGdbTranslation(sk, sk.func(), codeView.main(), loc.mainStart(),
+  recordGdbTranslation(sk, sk.func(), view.main(), loc.mainStart(),
                        false, false);
-  recordGdbTranslation(sk, sk.func(), codeView.cold(), loc.coldStart(),
+  recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldStart(),
                        false, false);
-  if (args.kind == TransKind::Profile) {
-    always_assert(args.region);
-    profData()->addTransProfile(env.transID, args.region, env.pconds);
+
+  if (tr.isValid()) {
+    tr.aStart = loc.mainStart();
+    tr.acoldStart = loc.coldCodeStart();
+    tr.afrozenStart = loc.frozenCodeStart();
+    tr.aLen = loc.mainSize();
+    tr.acoldLen = loc.coldSize();
+    tr.afrozenLen = loc.frozenSize();
   }
 
-  auto tr = maker.rec(sk, env.transID, args.kind, args.region, fixups.bcMap,
-                      std::move(env.annotations),
-                      env.unit && cfgHasLoop(*env.unit));
   transdb::addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
@@ -272,24 +407,28 @@ TCA emitTranslation(TransEnv env) {
 
   reportJitMaturity(code());
 
-  if (env.unit && env.unit->logEntry()) {
-    logTranslation(env, loc);
+  return loc;
+}
+
+void publishOptFunction(FuncMetaInfo info) {
+  auto const func = info.func;
+
+  for (auto const rec : info.prologues) {
+    emitFuncPrologueOpt(rec);
   }
 
-  if (env.unit) {
-    auto func = const_cast<Func*>(env.unit->context().func);
-
-    auto const regionSk = env.unit->context().srcKey();
-    if (env.args.kind == TransKind::Optimize &&
+  mcgen::ReadThreadLocalTC localTC(info.tcBuf);
+  for (auto& trans : info.translations) {
+    auto const regionSk = trans.sk;
+    auto const loc = publishTranslation(std::move(trans), info.tcBuf.view());
+    if (loc &&
         regionSk.offset() == func->base() &&
         !func->hasThisVaries() &&
         func->getDVFunclets().size() == 0 &&
         func->getFuncBody() == ustubs().funcBodyHelperThunk) {
-      func->setFuncBody(loc.mainStart());
+      func->setFuncBody(loc->mainStart());
     }
   }
-
-  return loc.mainStart();
 }
 
 static void invalidateSrcKeyNoLock(SrcKey sk) {

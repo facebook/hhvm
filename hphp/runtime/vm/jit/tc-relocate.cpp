@@ -218,7 +218,7 @@ struct TransRelocInfoHelper {
       tri.fixups.addressImmediates.insert(ai + code.base());
     }
     for (auto& cp : codePointers) {
-      tri.fixups.codePointers.insert((TCA*)cp);
+      tri.fixups.codePointers.emplace((TCA*)cp);
     }
     for (auto v : alignments) {
       tri.fixups.alignments.emplace(v.first + code.base(), v.second);
@@ -238,7 +238,7 @@ void relocateStubs(TransLoc& loc, TCA frozenStart, TCA frozenEnd,
 
     CodeBlock dest;
     dest.init(cache.frozen().frontier(), stubSize, "New Stub");
-    relocate(rel, dest, addr, addr + stubSize, fixups, nullptr);
+    relocate(rel, dest, addr, addr + stubSize, cache.frozen(), fixups, nullptr);
     cache.frozen().skip(stubSize);
     if (addr != frozenStart) {
       rel.recordRange(frozenStart, addr, frozenStart, addr);
@@ -333,8 +333,9 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     if (ignoreEntry(reloc.sk)) continue;
     auto start DEBUG_ONLY = dest.frontier();
     try {
+      auto& srcBlock = code().blockFor(reloc.start);
       relocate(rel, dest,
-               reloc.start, reloc.end, reloc.fixups, nullptr);
+               reloc.start, reloc.end, srcBlock, reloc.fixups, nullptr);
     } catch (const DataBlockFull& dbf) {
       break;
     }
@@ -442,7 +443,8 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
 
 //////////////////////////////////////////////////////////////////////
 
-bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
+bool relocateNewTranslation(TransLoc& loc,
+                            CodeCache::View cache,
                             CGMeta& fixups,
                             TCA* adjust /* = nullptr */) {
   auto& mainCode = cache.main();
@@ -450,8 +452,8 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
   auto& frozenCode = cache.frozen();
 
   CodeBlock dest;
-  RelocationInfo rel;
   size_t asm_count{0};
+  RelocationInfo rel;
 
   TCA mainStartRel, coldStartRel, frozenStartRel;
 
@@ -472,11 +474,11 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
     mainSize += pad;
 
     dest.init(mainStartRel, mainSize, "New Main");
-    asm_count += relocate(rel, dest, mainStart, loc.mainEnd(),
-                               fixups, nullptr);
+    asm_count += relocate(rel, dest, mainStart, loc.mainEnd(), cache.main(),
+                          fixups, nullptr);
     mainEndRel = dest.frontier();
 
-    mainCode.setFrontier(loc.mainStart());
+    mainCode.free(loc.mainStart(), mainSize - pad);
   } else {
     mainStartRel = loc.mainStart();
     rel.recordRange(mainStart, loc.mainEnd(), mainStart, loc.mainEnd());
@@ -487,10 +489,10 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
 
     dest.init(frozenStartRel + sizeof(uint32_t), frozenSize, "New Frozen");
     asm_count += relocate(rel, dest, frozenStart, loc.frozenEnd(),
-                               fixups, nullptr);
+                          cache.frozen(), fixups, nullptr);
     frozenEndRel = dest.frontier();
 
-    frozenCode.setFrontier(loc.frozenStart());
+    frozenCode.free(loc.frozenStart(), frozenSize - pad);
   } else {
     frozenStartRel = loc.frozenStart();
     rel.recordRange(frozenStart, loc.frozenEnd(), frozenStart, loc.frozenEnd());
@@ -502,10 +504,10 @@ bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
 
       dest.init(coldStartRel + sizeof(uint32_t), coldSize, "New Cold");
       asm_count += relocate(rel, dest, coldStart, loc.coldEnd(),
-                                 fixups, nullptr);
+                            cache.cold(), fixups, nullptr);
       coldEndRel = dest.frontier();
 
-      coldCode.setFrontier(loc.coldStart());
+      coldCode.free(loc.coldStart(), coldSize - pad);
     } else {
       coldStartRel = loc.coldStart();
       rel.recordRange(coldStart, loc.coldEnd(), coldStart, loc.coldEnd());
@@ -726,10 +728,10 @@ void relocateTranslation(
   size_t asm_count{0};
 
   asm_count += relocate(rel, main_in,
-                        main.base(), main.frontier(),
+                        main.base(), main.frontier(), main,
                         meta, nullptr);
   asm_count += relocate(rel, cold_in,
-                        cold.base(), cold.frontier(),
+                        cold.base(), cold.frontier(), cold,
                         meta, nullptr);
 
   TRACE(1, "asm %ld\n", asm_count);

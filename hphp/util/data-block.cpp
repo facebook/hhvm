@@ -48,10 +48,12 @@ void* DataBlock::allocInner(size_t len) {
 
   if (freeList->second.empty()) m_freeLists.erase(freeList);
 
-  return m_base + off;
+  return m_destBase + off;
 }
 
-void DataBlock::free(void* addr, size_t len) {
+void DataBlock::free(void* vaddr, size_t len) {
+  auto addr = static_cast<void*>(((char*)vaddr - (char*)m_destBase) + m_base);
+
   assert(len < std::numeric_limits<uint32_t>::max() &&
          (CodeAddress)addr + len <= m_frontier);
 

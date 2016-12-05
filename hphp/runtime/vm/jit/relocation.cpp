@@ -118,10 +118,11 @@ void findFixups(TCA start, TCA end, CGMeta& fixups) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
+                CodeBlock& srcBlock,
                 CGMeta& fixups,
                 TCA* exitAddr) {
-  return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, fixups,
-      exitAddr);
+  return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, srcBlock,
+                          fixups, exitAddr);
 }
 
 //////////////////////////////////////////////////////////////////////

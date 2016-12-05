@@ -1561,7 +1561,7 @@ CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
   If the local variable is not defined, this instruction raises a warning,
   pushes null onto the stack, and then pushes $1 onto the stack.
 
-CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T1> <F1>:<T1>]
+CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T2> <F1>:<T1>]
 
   Get local as cell. If the local variable given by %1 is defined, this
   instruction gets the value of the local variable, pushes it onto the stack as

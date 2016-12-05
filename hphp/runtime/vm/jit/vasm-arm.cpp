@@ -109,6 +109,7 @@ vixl::MemOperand M(Vptr p) {
     assertx(p.disp == 0);
     return MemOperand(X(p.base), X(p.index), LSL, Log2(p.scale));
   }
+  assertx(p.disp >= -256 && p.disp <= 255);
   return MemOperand(X(p.base), p.disp);
 }
 
@@ -743,6 +744,7 @@ void Vgen::emit(const lea& i) {
     assertx(p.disp == 0);
     a->Add(X(i.d), X(p.base), Operand(X(p.index), LSL, Log2(p.scale)));
   } else {
+    assertx(p.disp >= -256 && p.disp <= 255);
     a->Add(X(i.d), X(p.base), p.disp);
   }
 }

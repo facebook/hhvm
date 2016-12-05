@@ -74,15 +74,22 @@ class CommonTestDriver(object):
     def setUp(self):
         shutil.copytree(self.template_repo, self.repo_dir)
 
-    def tearDown(self):
+    def tearDownWithRetries(self, retries=3):
         (_, _, exit_code) = self.proc_call([
             hh_client,
             'stop',
             self.repo_dir
         ])
-        self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
+        if exit_code == 0:
+            shutil.rmtree(self.repo_dir)
+            return
+        elif retries > 0 and exit_code != 0:
+            self.tearDownWithRetries(retries=retries - 1)
+        else:
+            self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
 
-        shutil.rmtree(self.repo_dir)
+    def tearDown(self):
+        self.tearDownWithRetries()
 
     @classmethod
     def proc_create(cls, args, env):

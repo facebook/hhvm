@@ -116,7 +116,6 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
 
   auto const catchBlock = label(env, inst->taken());
   emitCheckSurpriseFlagsEnter(vmain(env), vcold(env), fp, fixup, catchBlock);
-  env.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
 void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
@@ -140,7 +139,6 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
                  {done, label(env, inst->taken())}, fixup };
     v = done;
   });
-  env.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
 IMPL_OPCODE_CALL(SuspendHookE)

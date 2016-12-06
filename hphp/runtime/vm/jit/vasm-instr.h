@@ -119,7 +119,7 @@ struct Vunit;
   O(inittc, Inone, Un, Dn)\
   O(leavetc, Inone, U(args), Dn)\
   /* exception intrinsics */\
-  O(landingpad, I(fromPHPCall), Un, Dn)\
+  O(landingpad, Inone, Un, Dn)\
   O(nothrow, Inone, Un, Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
@@ -844,7 +844,7 @@ struct leavetc { RegSet args; };
 /*
  * Header for catch blocks.
  */
-struct landingpad { bool fromPHPCall; };
+struct landingpad {};
 
 /*
  * Register a null catch trace at this position.

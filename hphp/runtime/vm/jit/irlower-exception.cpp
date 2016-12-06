@@ -41,13 +41,9 @@ TRACE_SET_MOD(irlower);
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgBeginCatch(IRLS& env, const IRInstruction* inst) {
-  auto const callType = env.catch_calls[inst->block()];
-  always_assert(callType != CatchCall::Uninit &&
-                "Tried to emit BeginCatch with Uninit call type.\n"
-                "Catch blocks must be emitted after their predecessors.");
   auto& v = vmain(env);
 
-  v << landingpad{callType == CatchCall::PHP};
+  v << landingpad{};
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 

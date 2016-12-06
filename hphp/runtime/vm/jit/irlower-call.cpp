@@ -135,7 +135,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     auto const done = v.makeBlock();
     v << vinvoke{CallSpec::direct(builtinFuncPtr), v.makeVcallArgs({{rvmfp()}}),
                  v.makeTuple({}), {done, catchBlock}, Fixup(0, argc)};
-    env.catch_calls[inst->taken()] = CatchCall::CPP;
 
     v = done;
     // The native implementation already put the return value on the stack for
@@ -174,7 +173,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   auto const done = v.makeBlock();
   v << callphp{target, php_call_regs(), {{done, catchBlock}}};
-  env.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
@@ -210,7 +208,6 @@ void cgCallArray(IRLS& env, const IRInstruction* inst) {
   auto const done = v.makeBlock();
   v << vcallarray{target, fcall_array_regs(), args,
                   {done, label(env, inst->taken())}};
-  env.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
@@ -405,7 +402,6 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
     {label(env, inst->next()), label(env, inst->taken())},
     makeFixup(inst->marker(), SyncOptions::Sync)
   };
-  env.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
 static void traceCallback(ActRec* fp, Cell* sp, Offset bcOff) {

@@ -107,7 +107,6 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
 
   v << contenter{fp, target, cross_trace_regs_resumed(),
                  {next, label(env, inst->taken())}};
-  env.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
 }
 

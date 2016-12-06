@@ -374,6 +374,7 @@ let program_init genv =
       let env, _ = ServerInit.init genv in
       env, "fresh"
   in
+  EventLogger.set_init_type init_type;
   HackEventLogger.init_end init_type;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();

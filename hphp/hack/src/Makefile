@@ -51,6 +51,7 @@ MODULES=\
   find\
   format\
 	full_fidelity\
+	full_fidelity/schema\
   globals\
   h2tp/common\
   h2tp/mapper\

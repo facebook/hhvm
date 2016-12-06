@@ -30,12 +30,12 @@ vec [
 ]
 
 vec [
-'foo',
+  'foo',
 ]
 
 vec [
-'foo',
-'bar',
+  'foo',
+  'bar',
 ]
 
 ** dict **
@@ -61,11 +61,10 @@ keyset [
 ]
 
 keyset [
-'foo',
+  'foo',
 ]
 
 keyset [
-'foo',
-'bar',
+  'foo',
+  'bar',
 ]
-

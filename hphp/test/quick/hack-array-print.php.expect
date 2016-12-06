@@ -1,0 +1,83 @@
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+
+dict(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+
+vec [
+  'a',
+  'b',
+  'c',
+]
+keyset [
+  'a',
+  'b',
+  'c',
+]
+dict [
+  0 => 'a',
+  1 => 'b',
+  2 => 'c',
+]
+Vec
+(
+    [0] => a
+    [1] => b
+    [2] => c
+)
+
+Keyset
+(
+    a
+    b
+    c
+)
+
+Dict
+(
+    [0] => a
+    [1] => b
+    [2] => c
+)
+
+vec(0) {
+}
+
+keyset(0) {
+}
+
+dict(0) {
+}
+
+vec [
+]
+keyset [
+]
+dict [
+]
+Vec
+(
+)
+
+Keyset
+(
+)
+
+Dict
+(
+)

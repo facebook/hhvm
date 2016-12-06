@@ -1000,6 +1000,7 @@ void VariableSerializer::writeArrayKey(
   const Variant& key,
   VariableSerializer::ArrayKind kind
 ) {
+  using AK = VariableSerializer::ArrayKind;
   auto const keyCell = tvAssertCell(key.asTypedValue());
   bool const skey = isStringType(keyCell->m_type);
 
@@ -1009,6 +1010,7 @@ void VariableSerializer::writeArrayKey(
   case Type::DebuggerDump:
   case Type::PrintR: {
     indent();
+    if (kind == AK::Keyset) return;
     m_buf->append('[');
     if (info.is_object && skey) {
       writePropertyKey(String{keyCell->m_data.pstr});
@@ -1022,12 +1024,14 @@ void VariableSerializer::writeArrayKey(
   case Type::VarExport:
   case Type::PHPOutput:
     indent();
+    if (kind == AK::Vec || kind == AK::Keyset) return;
     write(key, true);
     m_buf->append(" => ");
     break;
 
   case Type::VarDump:
   case Type::DebugDump:
+    if (kind == AK::Vec || kind == AK::Keyset) return;
     indent();
     m_buf->append('[');
     if (!skey) {
@@ -1045,6 +1049,7 @@ void VariableSerializer::writeArrayKey(
     break;
 
   case Type::APCSerialize:
+    if (kind == AK::Vec || kind == AK::Keyset) return;
     if (skey) {
       write(StrNR(keyCell->m_data.pstr).asString());
       return;
@@ -1052,6 +1057,7 @@ void VariableSerializer::writeArrayKey(
 
   case Type::Serialize:
   case Type::DebuggerSerialize:
+    if (kind == AK::Vec || kind == AK::Keyset) return;
     write(key);
     break;
 
@@ -1444,32 +1450,14 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
     kind
   );
 
-  if (kind == AK::Vec) {
-    PackedArray::IterateV(
-      arr,
-      [&](const TypedValue* v) {
-        writeArrayValue(tvAsCVarRef(v), kind);
-        return false;
-      }
-    );
-  } else if (kind == AK::Keyset) {
-    SetArray::Iterate(
-      SetArray::asSet(arr),
-      [&](const TypedValue* v) {
-        writeArrayValue(tvAsCVarRef(v), kind);
-        return false;
-      }
-    );
-  } else {
-    IterateKV(
-      arr,
-      [&](const TypedValue* k, const TypedValue* v) {
-        writeArrayKey(tvAsCVarRef(k), kind);
-        writeArrayValue(tvAsCVarRef(v), kind);
-        return false;
-      }
-    );
-  }
+  IterateKV(
+    arr,
+    [&](const TypedValue* k, const TypedValue* v) {
+      writeArrayKey(tvAsCVarRef(k), kind);
+      writeArrayValue(tvAsCVarRef(v), kind);
+    }
+  );
+
   writeArrayFooter(kind);
 }
 

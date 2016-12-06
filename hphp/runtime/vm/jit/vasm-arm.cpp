@@ -604,7 +604,7 @@ void Vgen::emit(const andli& i) {
 }
 
 void Vgen::emit(const testbi& i) {
-  a->And(vixl::wzr, W(i.s1), MSKTOP(0xff), SetFlags);
+  a->Tst(W(i.s1), MSKTOP(0xff));
 }
 
 void Vgen::emit(const testli& i) {

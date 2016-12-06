@@ -356,13 +356,16 @@ let program_init genv =
    * This solution is not fully correct. Checkout can still happen between
    * this call and the next but it minimizes the damage.
    * *)
-  MercurialUtils.wait_until_stable_repository (ServerArgs.root genv.options);
+  let repo_wait_success =
+    MercurialUtils.wait_until_stable_repository (ServerArgs.root genv.options)
+  in
   let env, init_type =
     (* If we are saving, always start from a fresh state -- just in case
      * incremental mode introduces any errors. *)
     if genv.local_config.ServerLocalConfig.use_mini_state &&
       not (ServerArgs.no_load genv.options) &&
-      ServerArgs.save_filename genv.options = None then
+      ServerArgs.save_filename genv.options = None &&
+      repo_wait_success then
       match ServerConfig.load_mini_script genv.config with
       | None ->
         let env, _ = ServerInit.init genv in

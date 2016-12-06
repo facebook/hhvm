@@ -116,6 +116,22 @@ class CommonTestDriver(object):
         retcode = proc.wait()
         return (stdout_data, stderr_data, retcode)
 
+    @classmethod
+    def wait_pid_with_timeout(cls, pid, timeout):
+        """
+        Like os.waitpid but with a timeout in seconds.
+        """
+        waited_time = 0
+        while True:
+            pid_expected, _ = os.waitpid(pid, os.WNOHANG)
+            if pid_expected == pid:
+                break
+            elif waited_time >= timeout:
+                raise subprocess.TimeoutExpired
+            else:
+                time.sleep(1)
+                waited_time += 1
+
     # Runs `hh_client check` asserting the stdout is equal the expected.
     # Returns stderr.
     def check_cmd(self, expected_output, stdin=None, options=None):

@@ -3,12 +3,14 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 import mini_state_test_driver
+import os
 import unittest
+import re
 import signal
 import sys
 import time
 
-from hh_paths import hh_client, hh_record
+from hh_paths import hh_client, recorder_cat
 
 # Use the MiniStateTestDriver to set up the custom saved mini state
 # Note: We don't use this driver to drive any of the CommonTests since
@@ -18,37 +20,50 @@ from hh_paths import hh_client, hh_record
 
 class HhRecordTestDriver(mini_state_test_driver.MiniStateTestDriver):
 
-    def start_hh_record(self):
-        return self.proc_create([
-            hh_record,
-            self.repo_dir
-        ], env={})
-
+    def write_local_conf(self):
+        with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+            f.write(r"""
+# some comment
+use_mini_state = true
+use_watchman = true
+start_with_recorder_on = true
+""")
 
 class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
     template_repo = 'hphp/hack/test/integration/data/simple_repo'
 
     def test_record_with_no_dirty_files(self):
         self.write_load_config()
-        recorder = self.start_hh_record()
-        # We don't want hh_client to start a new server instance. Give
-        # hh_record a little bit of time to start a server.
-        time.sleep(2)
-        # This check blocks until server initialization is finished
         self.run_check()
-        # Stopping the server results in the recorder stopping itself
+        logs = self.get_server_logs()
+        self.assertIn('start_with_recorder_on = true', logs)
+        self.assertIn('About to spawn recorder daemon', logs)
+        self.assertIn('Successfully loaded mini-state', logs)
+        self.assertIn('Sending Loaded_saved_state debug event', logs)
+        recording_matcher = re.search(
+            'About to spawn recorder daemon. Output will go to (.+)\. Logs to (.+)\.',
+            logs)
+        self.assertIsNotNone(recording_matcher)
+        self.assertIn('recorder_out', recording_matcher.group(1))
+        self.assertIn('recorder_log', recording_matcher.group(2))
         (_, _, retcode) = self.proc_call([
             hh_client,
             'stop',
             self.repo_dir
         ])
-        self.assertEqual(0, retcode)
-        (output, stderr_data) = recorder.communicate(timeout=5)
-        sys.stderr.write(output)
-        err_msg = "See also hh_record stderr: " + stderr_data + "\n"
-        sys.stderr.flush()
-        # TODO: Make hh_record output JSON instead.
+        self.assertEqual(retcode, 0)
+        # We can't wait for grandchild pids, i.e. the recorder daemon,
+        # so just give it a little time.
+        time.sleep(5)
+        out, err, retcode = self.proc_call([
+            recorder_cat,
+            recording_matcher.group(1)
+        ])
+        with open(recording_matcher.group(2)) as f:
+            recorder_log = f.read()
+        self.assertEqual(retcode, 0, "See also recorder_cat stderr:\n" + err)
         self.assertRegex(
-            output.strip(),
+            out.strip(),
             '(Loaded_saved_state /tmp/.........../foo with 0 dirtied files)',
-            err_msg)
+            "See also recorder daemon logs:\n=============\n" +
+            recorder_log + "\n===========\n")

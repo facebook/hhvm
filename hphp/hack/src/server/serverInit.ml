@@ -453,12 +453,13 @@ module ServerEagerInit : InitKind = struct
       *)
       let build_targets, _ = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
-      let loaded_event = Debug_event.Loaded_saved_state {
+      let global_state = ServerGlobalState.save () in
+      let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
         dirty_files;
         changed_while_parsing;
         build_targets;
-      } in
+      }, global_state) in
       let () = Printf.eprintf "Sending Loaded_saved_state debug event\n%!" in
       let _ = Debug_port.write_opt loaded_event genv.debug_port in
       (* Build targets are untracked by version control, so we must always
@@ -562,12 +563,13 @@ module ServerLazyInit : InitKind = struct
     | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
-      let loaded_event = Debug_event.Loaded_saved_state {
+      let global_state = ServerGlobalState.save () in
+      let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
         dirty_files;
         changed_while_parsing;
         build_targets;
-      } in
+      }, global_state) in
       Hh_logger.log "Sending Loaded_saved_state debug event\n";
       let _ = Debug_port.write_opt loaded_event genv.debug_port in
       let t = Unix.gettimeofday () in

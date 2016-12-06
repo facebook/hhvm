@@ -11,3 +11,6 @@
 type t
 val save : unit -> t
 val restore : t -> unit
+val get_hhi_path : t -> Path.t
+val get_root_path : t -> Path.t
+val fake_state : t

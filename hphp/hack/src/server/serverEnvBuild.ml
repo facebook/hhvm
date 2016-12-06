@@ -48,8 +48,11 @@ let make_genv options config local_config handle =
       let daemon = Recorder_daemon.start_daemon
         (ServerFiles.recorder_out_link root)
         (ServerFiles.recorder_log_link root) in
+      Hh_logger.log "Spawned recorder daemon with pid: %d." daemon.Daemon.pid;
       Some (Debug_port.out_port_of_out_channel @@ snd @@ daemon.Daemon.channels)
-    | _ -> None
+    | _ ->
+      Hh_logger.log "No debug port attached";
+      None
   in
   let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with

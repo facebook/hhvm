@@ -53,6 +53,14 @@ type _ t =
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
 
+let is_disconnect_rpc : type a. a t -> bool = function
+  | DISCONNECT -> true
+  | _ -> false
+
+let is_kill_rpc : type a. a t -> bool = function
+  | KILL -> true
+  | _ -> false
+
 type 'a command =
   | Rpc of 'a t
   | Stream of streamed

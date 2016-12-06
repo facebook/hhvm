@@ -209,10 +209,10 @@ let handle genv env client =
       let cmd_string = ServerRpc.to_string cmd in
       HackEventLogger.handled_command cmd_string t;
       ClientProvider.send_response_to_client client response;
-      if cmd = ServerCommandTypes.DISCONNECT ||
+      if ServerCommandTypes.is_disconnect_rpc cmd ||
           not @@ (ClientProvider.is_persistent client)
         then ClientProvider.shutdown_client client;
-      if cmd = ServerCommandTypes.KILL then ServerUtils.die_nicely ();
+      if ServerCommandTypes.is_kill_rpc cmd then ServerUtils.die_nicely ();
       new_env
   | Stream cmd ->
       let ic, oc = ClientProvider.get_channels client in

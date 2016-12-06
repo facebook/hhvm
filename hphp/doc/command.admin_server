@@ -36,18 +36,9 @@ This is a list of available URLs:
 /stats-mutex:     turn on/off mutex statistics
     sampling      optional, default 1000
 /stats.keys:      list all available keys
-    from          optional, <timestamp>, or <-n> second ago
-    to            optional, <timestamp>, or <-n> second ago
-/stats.xml:       show server stats in XML
-/stats.json:      show server stats in JSON
 /stats.kvp:       show server stats in key-value pairs
-/stats.html:      show server stats in HTML
-    from          optional, <timestamp>, or <-n> second ago
-    to            optional, <timestamp>, or <-n> second ago
-    agg           optional, aggragation: *, url, code
     keys          optional, <key>,<key/hit>,<key/sec>,<:regex:>
-    url           optional, only stats of this page or URL
-    code          optional, only stats of pages returning this code
+    prefix        optional, a prefix to add to key names
 /pcre-cache-size: get pcre cache map size
 /dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache
 

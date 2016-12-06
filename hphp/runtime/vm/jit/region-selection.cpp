@@ -41,7 +41,6 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(region);
 
-
 //////////////////////////////////////////////////////////////////////
 
 extern RegionDescPtr selectMethod(const RegionContext&);
@@ -209,7 +208,8 @@ const RegionDesc::BlockVec& RegionDesc::blocks() const {
 
 RegionDesc::BlockData& RegionDesc::data(BlockId id) {
   auto it = m_data.find(id);
-  always_assert_flog(it != m_data.end(), "BlockId {} doesn't exist in m_data");
+  always_assert_flog(it != m_data.end(),
+                     "BlockId {} doesn't exist in m_data", id);
   return it->second;
 }
 
@@ -705,6 +705,7 @@ void RegionDesc::Block::checkMetadata() const {
           assertx(loc.localId() < m_func->numLocals());
           break;
         case LTag::Stack:
+        case LTag::MBase:
           break;
       }
     }
@@ -720,6 +721,7 @@ void RegionDesc::Block::checkMetadata() const {
           assertx(loc.localId() < m_func->numLocals());
           break;
         case LTag::Stack:
+        case LTag::MBase:
           break;
       }
     }

@@ -22,6 +22,7 @@
 #include <memory>
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/req-containers.h"
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,8 @@ struct Wrapper;
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper);
 bool disableWrapper(const String& scheme);
 bool restoreWrapper(const String& scheme);
-bool registerRequestWrapper(const String& scheme, std::unique_ptr<Wrapper> wrapper);
+bool registerRequestWrapper(const String& scheme,
+                            req::unique_ptr<Wrapper> wrapper);
 Array enumWrappers();
 
 String getWrapperProtocol(const char* url, int* pathIndex = nullptr);

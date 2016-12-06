@@ -2607,22 +2607,71 @@ inline TypedValue* propPreNull(TypedValue& tvRef) {
   return &tvRef;
 }
 
+template <class F>
+inline void promoteToStdClass(TypedValue* base, bool warn, F fun) {
+  if (!RuntimeOption::EvalPromoteEmptyObject) {
+    // note that the whole point here is to guarantee that the property
+    // never auto updates to a stdclass - so we must do this before
+    // calling promote, and we don't want the try catch below around
+    // this call.
+    if (RuntimeOption::PHP7_EngineExceptions) {
+      SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
+    } else {
+      SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
+    }
+    not_reached();
+  }
+
+  Object obj { ObjectData::newInstance(SystemLib::s_stdclassClass) };
+  if (base->m_type == KindOfString) {
+    decRefStr(base->m_data.pstr);
+  } else {
+    assert(!isRefcountedType(base->m_type));
+  }
+  base->m_type = KindOfObject;
+  base->m_data.pobj = obj.get();
+
+  if (warn) {
+    // Behavior here is observable.
+    // In PHP 5.6, raise_warning is called before updating base, so
+    // the error_handler sees the original base; but if an exception
+    // is thrown from the error handler, any catch block will see the
+    // updated base.
+    // In PHP 7+, raise_warning is called after updating base, but before
+    // doing the work of fun, and again, if an exception is thrown, fun
+    // still gets called before reaching the catch block.
+    // We'll match PHP7, because we have no way of ensuring that base survives
+    // across a call to the error_handler: eg $a[0][0][0]->foo = 0; if $a
+    // started out null, and the error handler resets it to null, base is
+    // left dangling.
+    // Note that this means that the error handler can overwrite the object
+    // so there is no guarantee that we have an object on return from
+    // promoteToStdClass.
+    try {
+      raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+    } catch (const Object&) {
+      fun(obj.get());
+      throw;
+    }
+  }
+
+  fun(obj.get());
+}
+
 template<MOpMode mode>
 TypedValue* propPreStdclass(TypedValue& tvRef, TypedValue* base) {
   if (mode != MOpMode::Define) {
     return propPreNull<mode>(tvRef);
   }
 
-  // TODO(#1124706): We don't want to do this anymore.
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-
-  // In PHP5, $undef->foo should warn, but $undef->foo['bar'] shouldn't.  This
-  // is crazy, so warn for both if EnableHipHopSyntax is on.
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  promoteToStdClass(base, RuntimeOption::EnableHipHopSyntax,
+                    [] (ObjectData*) {});
+  if (UNLIKELY(base->m_type != KindOfObject)) {
+    // See the comments above. Although promoteToStdClass will have
+    // either thrown an exception, or promoted base to an object, an
+    // installed error handler might have caused it to be overwritten
+    tvWriteNull(&tvRef);
+    return &tvRef;
   }
 
   return base;
@@ -2780,16 +2829,15 @@ inline void SetPropNull(Cell* val) {
   }
 }
 
-inline void SetPropStdclass(TypedValue* base, TypedValue key,
-                            Cell* val) {
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  StringData* keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
-  obj->setProp(nullptr, keySD, (TypedValue*)val);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+inline void SetPropStdclass(TypedValue* base, TypedValue key, Cell* val) {
+  promoteToStdClass(
+    base,
+    true,
+    [&] (ObjectData* obj) {
+      auto const keySD = prepareKey(key);
+      SCOPE_EXIT { decRefStr(keySD); };
+      obj->setProp(nullptr, keySD, (TypedValue*)val);
+    });
 }
 
 template <KeyType keyType>
@@ -2853,20 +2901,21 @@ inline TypedValue* SetOpPropNull(TypedValue& tvRef) {
   tvWriteNull(&tvRef);
   return &tvRef;
 }
+
 inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                      TypedValue* base, TypedValue key,
                                      Cell* rhs) {
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  promoteToStdClass(
+    base,
+    true,
+    [&] (ObjectData* obj) {
+      StringData* keySD = prepareKey(key);
+      SCOPE_EXIT { decRefStr(keySD); };
+      tvWriteNull(&tvRef);
+      setopBody(tvToCell(&tvRef), op, rhs);
+      obj->setProp(nullptr, keySD, &tvRef);
+    });
 
-  StringData* keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
-  tvWriteNull(&tvRef);
-  setopBody(tvToCell(&tvRef), op, rhs);
-  obj->setProp(nullptr, keySD, &tvRef);
   return &tvRef;
 }
 
@@ -2933,19 +2982,20 @@ inline Cell IncDecPropNull() {
 
 inline Cell IncDecPropStdclass(IncDecOp op, TypedValue* base,
                                TypedValue key) {
-  auto const obj = newInstance(SystemLib::s_stdclassClass);
-  tvRefcountedDecRef(base);
-  base->m_type = KindOfObject;
-  base->m_data.pobj = obj;
-  raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  Cell dest;
+  promoteToStdClass(
+    base,
+    true,
+    [&] (ObjectData* obj) {
+      StringData* keySD = prepareKey(key);
+      SCOPE_EXIT { decRefStr(keySD); };
+      TypedValue tv;
+      tvWriteNull(&tv);
+      dest = IncDecBody(op, &tv);
+      obj->setProp(nullptr, keySD, &dest);
+      assert(!isRefcountedType(tv.m_type));
+    });
 
-  StringData* keySD = prepareKey(key);
-  SCOPE_EXIT { decRefStr(keySD); };
-  TypedValue tv;
-  tvWriteNull(&tv);
-  auto dest = IncDecBody(op, &tv);
-  obj->setProp(nullptr, keySD, &dest);
-  assert(!isRefcountedType(tv.m_type));
   return dest;
 }
 

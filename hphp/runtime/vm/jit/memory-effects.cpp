@@ -318,7 +318,11 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
 GeneralEffects may_raise(const IRInstruction& inst, GeneralEffects x) {
   return may_reenter(
     inst,
-    GeneralEffects { x.loads | AFrameAny, x.stores, x.moves, x.kills }
+    GeneralEffects {
+      x.loads |
+        (RuntimeOption::EnableContextInErrorHandler ? AFrameAny : AEmpty),
+      x.stores, x.moves, x.kills
+    }
   );
 }
 
@@ -1021,6 +1025,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Member instructions
 
+  case CheckMBase:
+    return may_load_store(pointee(inst.src(0)), AEmpty);
+
   /*
    * Various minstr opcodes that take a PtrToGen in src 0, which may or may not
    * point to a frame local or the evaluation stack. Some may read or write to
@@ -1222,15 +1229,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Instructions that never read or write memory locations tracked by this
   // module.
 
-  case AssertStk:
-  case HintStkInner:
   case AbsDbl:
   case AddDbl:
   case AddInt:
   case AddIntO:
   case AndInt:
-  case AssertLoc:
   case AssertType:
+  case AssertLoc:
+  case AssertStk:
+  case AssertMBase:
   case DefFP:
   case DefSP:
   case EndGuards:
@@ -1245,6 +1252,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GtBool:
   case GtInt:
   case HintLocInner:
+  case HintStkInner:
+  case HintMBaseInner:
   case Jmp:
   case JmpNZero:
   case JmpZero:
@@ -1544,7 +1553,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       AliasClass effects = AStack {
         inst.src(2),
-        inst.extra<LookupClsMethod>()->offset,
+        inst.extra<LookupClsMethod>()->calleeAROffset,
         int32_t{kNumActRecCells}
       };
       return may_raise(inst, may_load_store(effects, effects));

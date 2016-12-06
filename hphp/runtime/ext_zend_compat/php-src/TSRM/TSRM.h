@@ -122,13 +122,13 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 #endif
 
 #include "hphp/util/thread-local.h"
-#include "hphp/runtime/base/imarker.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 using TSRMStorageVector = std::vector<void*>;
 extern DECLARE_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
 void * ts_init_resource(int id);
-void ts_scan_resources(IMarker&);
+void ts_scan_resources(type_scan::Scanner&);
 
 static inline
 void* ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {

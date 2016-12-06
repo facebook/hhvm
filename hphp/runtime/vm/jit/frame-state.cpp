@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include <boost/range/adaptor/reversed.hpp>
@@ -36,7 +37,7 @@
 
 #include <algorithm>
 
-TRACE_SET_MOD(hhir);
+TRACE_SET_MOD(hhir_fsm);
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -72,8 +73,8 @@ bool merge_into(TypeSourceSet& dst, const TypeSourceSet& src) {
 /*
  * Merge LocationStates, returning whether anything changed.
  */
-template<LTag tag>
-bool merge_into(LocationState<tag>& dst, const LocationState<tag>& src) {
+template<LTag lt, LTag rt>
+bool merge_into(LocationState<lt>& dst, const LocationState<rt>& src) {
   auto changed = false;
 
   changed |= merge_util(dst.type, dst.type | src.type);
@@ -96,7 +97,7 @@ bool merge_into(LocationState<tag>& dst, const LocationState<tag>& src) {
   }
 
   changed |= merge_util(dst.predictedType,
-                       dst.predictedType | src.predictedType);
+                        dst.predictedType | src.predictedType);
   return changed;
 }
 
@@ -143,17 +144,14 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     changed = true;
   }
 
-  if (dst.mbase.value != src.mbase.value) {
-    dst.mbase.value = nullptr;
-    changed = true;
-  }
-
   if (dst.mbr.ptr != src.mbr.ptr) {
     dst.mbr.ptr = nullptr;
     changed = true;
   }
   changed |= merge_util(dst.mbr.pointee, dst.mbr.pointee | src.mbr.pointee);
   changed |= merge_util(dst.mbr.ptrType, dst.mbr.ptrType | src.mbr.ptrType);
+
+  changed |= merge_into(dst.mbase, src.mbase);
 
   // The tracked FPI state must always be the same, notice that the size of the
   // FPI stacks may differ as the FPush associated with one of the merged blocks
@@ -460,6 +458,13 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().irSPOff = inst->extra<DefSP>()->offset;
     break;
 
+  case LdMem:
+    if (inst->src(0) == cur().mbr.ptr) {
+      refinePredictedTmpType(inst->dst(), cur().mbase.predictedType);
+      setValue(Location::MBase{}, inst->dst());
+    }
+    break;
+
   case StMem:
     // If we ever start using StMem to store to pointers that might be
     // stack/locals, we have to update tracked state here.
@@ -495,14 +500,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       for (auto& state : frame.stack) {
         refineValue(state, inst->src(0), inst->dst());
       }
+      refineValue(frame.mbase, inst->src(0), inst->dst());
     }
-    break;
-
-  case CheckStk:
-  case AssertStk:
-    refineType(stk(inst->extra<IRSPRelOffsetData>()->offset),
-               inst->typeParam(),
-               TypeSource::makeGuard(inst));
     break;
 
   case AssertLoc:
@@ -515,6 +514,19 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
   } break;
 
+  case AssertStk:
+  case CheckStk:
+    refineType(stk(inst->extra<IRSPRelOffsetData>()->offset),
+               inst->typeParam(),
+               TypeSource::makeGuard(inst));
+    break;
+
+  case AssertMBase:
+  case CheckMBase:
+    refineType(Location::MBase{}, inst->typeParam(),
+               TypeSource::makeGuard(inst));
+    break;
+
   case HintStkInner:
     setBoxedPrediction(stk(inst->extra<HintStkInner>()->offset),
                        inst->typeParam());
@@ -523,6 +535,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case HintLocInner:
     setBoxedPrediction(loc(inst->extra<HintLocInner>()->locId),
                        inst->typeParam());
+    break;
+
+  case HintMBaseInner:
+    setBoxedPrediction(Location::MBase{}, inst->typeParam());
     break;
 
   case StLoc:
@@ -585,7 +601,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case CufIterSpillFrame:
     spillFrameStack(inst->extra<CufIterSpillFrame>()->spOffset,
-                    cur().irSPOff, inst);
+                    cur().bcSPOff, inst);
     break;
   case SpillFrame:
     spillFrameStack(inst->extra<SpillFrame>()->spOffset,
@@ -597,7 +613,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     auto const& extra = *inst->extra<InterpOneData>();
     if (isFPush(extra.opcode)) {
       cur().fpiStack.push_back(FPIInfo { cur().spValue,
-                                         cur().irSPOff,
+                                         cur().bcSPOff - extra.cellsPopped,
                                          TCtx,
                                          nullptr,
                                          extra.opcode,
@@ -657,7 +673,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().bcSPOff += extra.cellsPushed;
     cur().bcSPOff -= extra.cellsPopped;
 
-    if (isMemberBaseOp(extra.opcode) || isMemberDimOp(extra.opcode) ||
+    if (isMemberBaseOp(extra.opcode) ||
+        isMemberDimOp(extra.opcode) ||
         isMemberFinalOp(extra.opcode)) {
       cur().mbr = MBRState{};
       cur().mbase = MBaseState{};
@@ -698,17 +715,25 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     killIterLocals({inst->extra<IterData>()->valId});
     break;
 
+  case LdMBase: {
+    auto const mbr = inst->dst();
+    cur().mbr.ptr = mbr;
+    cur().mbr.pointee = pointee(mbr);
+    cur().mbr.ptrType = mbr->type();
+  } break;
+
   case StMBase: {
     auto const mbr = inst->src(0);
     cur().mbr.ptr = mbr;
-    cur().mbr.pointee = mbr ? pointee(mbr) : AUnknownTV;
+    cur().mbr.pointee = pointee(mbr);
     cur().mbr.ptrType = mbr->type();
-    cur().mbase.value = nullptr;
+    setValue(Location::MBase{}, nullptr);
+    setType(Location::MBase{}, mbr->type().deref());
   } break;
 
   case FinishMemberOp:
     cur().mbr = MBRState{};
-    cur().mbase = MBaseState{};
+    setValue(Location::MBase{}, nullptr);
     break;
 
   case VerifyRetFail:
@@ -733,10 +758,16 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   default:
-    if (MInstrEffects::supported(inst)) {
-      updateMInstr(inst);
-    }
     break;
+  }
+
+  if (MInstrEffects::supported(inst)) {
+    updateMInstr(inst);
+  } else {
+    // Update the mbase state according to the memory effects of `inst'.  We
+    // only call this for instructions without minstr effects; those are
+    // handled more precisely as part of updateMInstr().
+    updateMBase(inst);
   }
 }
 
@@ -749,6 +780,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   if (!baseTmp->type().maybe(TPtrToGen)) return;
 
   auto const base = pointee(baseTmp);
+  auto const mbase = cur().mbr.pointee;
 
   auto const effect_on = [&] (Type ty) -> folly::Optional<Type> {
     auto const effects = MInstrEffects(inst->op(), ty);
@@ -756,6 +788,30 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       return effects.baseType;
     }
     return folly::none;
+  };
+
+  // If we don't know exactly where the base is, we have to be conservative and
+  // apply the operation to all locals/stack slots that could be affected.
+  auto const apply = [&] (Location l) {
+    auto const oldType = typeOf(l);
+    auto const maxType = [&] {
+      switch (l.tag()) {
+        case LTag::Local: return LocalState::default_type();
+        case LTag::Stack: return StackState::default_type();
+        case LTag::MBase: return MBaseState::default_type();
+      }
+      not_reached();
+    }();
+
+    if (maxType <= oldType) {
+      // Drop the value and don't bother with precise effects.
+      return setType(l, oldType);
+    }
+    if (oldType <= TBoxedCell) return;
+
+    if (auto const baseType = effect_on(oldType)) {
+      widenType(l, oldType | *baseType);
+    }
   };
 
   if (base.isSingleLocation()) {
@@ -772,12 +828,16 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       return folly::none;
     };
 
+    auto const apply_one_with_inner = [&] (Location l, Ptr kind) {
+      if (auto const ty = apply_one(l, kind)) {
+        if (*ty <= TBoxedCell) setBoxedPrediction(l, *ty);
+      }
+    };
+
     if (auto const bframe = base.frame()) {
       if (!isPM) {
         auto const l = loc(bframe->ids.singleValue());
-        if (auto const ty = apply_one(l, Ptr::Frame)) {
-          if (*ty <= TBoxedCell) setBoxedPrediction(l, *ty);
-        }
+        apply_one_with_inner(l, Ptr::Frame);
       }
     }
     if (auto const bstack = base.stack()) {
@@ -786,32 +846,18 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       apply_one(l, Ptr::Stk);
     }
 
+    if (base.maybe(mbase)) {
+      if (mbase.isSingleLocation()) {
+        auto const ptr = cur().mbr.ptrType.ptrKind();
+        apply_one_with_inner(Location::MBase{}, ptr);
+      } else {
+        apply(Location::MBase{});
+      }
+    }
+
     // We don't track anything else.
     return;
   }
-
-  // If we don't know exactly where the base is, we have to be conservative and
-  // apply the operation to all locals/stack slots that could be affected.
-  auto const apply = [&] (Location l) {
-    auto const oldType = typeOf(l);
-    auto const maxType = [&] {
-      switch (l.tag()) {
-        case LTag::Local: return LocationState<LTag::Local>::default_type();
-        case LTag::Stack: return LocationState<LTag::Stack>::default_type();
-      }
-      not_reached();
-    }();
-
-    if (maxType <= oldType) {
-      // Drop the value and don't bother with precise effects.
-      return setType(l, oldType);
-    }
-    if (oldType <= TBoxedCell) return;
-
-    if (auto const baseType = effect_on(oldType)) {
-      widenType(l, oldType | *baseType);
-    }
-  };
 
   if (base.maybe(AFrameAny) && !isPM) {
     for (auto i = 0; i < cur().locals.size(); ++i) {
@@ -820,7 +866,6 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       }
     }
   }
-
   if (base.maybe(AStackAny)) {
     for (auto i = 0; i < cur().stack.size(); ++i) {
       // The FPInvOffset of the stack slot is just its 1-indexed slot.
@@ -830,6 +875,94 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       }
     }
   }
+  if (base.maybe(mbase)) {
+    apply(Location::MBase{});
+  }
+}
+
+void FrameStateMgr::updateMBase(const IRInstruction* inst) {
+  auto const base = cur().mbr.pointee;
+
+  auto const pessimize_mbase = [&] {
+    setValue(Location::MBase{}, nullptr);
+  };
+
+  auto const handle_stores = [&] (AliasClass stores) {
+    if (!base.maybe(stores)) return;
+
+#define UNTRACKED_ALIAS_CLASSES \
+    X(IterPos)  \
+    X(IterBase) \
+    X(Prop)     \
+    X(ElemI)    \
+    X(ElemS)    \
+    X(Ref)      \
+    X(MIState)
+#define X(Mem)  \
+    (base.maybe(A##Mem##Any) && stores.maybe(A##Mem##Any)) ||
+
+    if (UNTRACKED_ALIAS_CLASSES false) {
+      // AliasClass doesn't support intersection yet, so if `base' and `stores'
+      // might intersect outside of frame locals and stack slots, we pessimize.
+      // FrameState only tracks type information for AFrame and AStack anyway,
+      // so we aren't actually losing any information.
+      return pessimize_mbase();
+    }
+
+#undef X
+#undef UNTRACKED_ALIAS_CLASSES
+
+    auto updated = false;
+
+    if (base.maybe(AFrameAny) && stores.maybe(AFrameAny)) {
+      for (auto i = 0; i < cur().locals.size(); ++i) {
+        auto const aloc = AFrame { fp(), i };
+        if (base.maybe(aloc) && stores.maybe(aloc)) {
+          if (!updated) {
+            cur().mbase = local(i);
+            cur().mbase.maybeChanged = true;
+            updated = true;
+          } else {
+            merge_into(cur().mbase, local(i));
+          }
+        }
+      }
+    }
+
+    if (base.maybe(AStackAny) && stores.maybe(AStackAny)) {
+      for (auto i = 0; i < cur().stack.size(); ++i) {
+        auto const fpRel = -FPInvOffset{i + 1};
+        auto const astk = AStack { fpRel, 1 };
+
+        if (base.maybe(astk) && stores.maybe(astk)) {
+          if (!updated) {
+            cur().mbase = stack(-fpRel);
+            cur().mbase.maybeChanged = true;
+            updated = true;
+          } else {
+            merge_into(cur().mbase, stack(-fpRel));
+          }
+        }
+      }
+    }
+  };
+
+  auto const effects = memory_effects(*inst);
+  match<void>(
+    effects,
+    [&] (GeneralEffects m)  { handle_stores(m.stores); },
+    [&] (PureStore m)       { handle_stores(m.dst); },
+    [&] (PureSpillFrame m)  { handle_stores(m.stk); },
+    [&] (CallEffects x) {
+      if (x.destroys_locals) handle_stores(AFrameAny);
+      handle_stores(x.stack);
+    },
+    [&] (PureLoad m)        {},
+    [&] (ReturnEffects)     {},
+    [&] (ExitEffects)       {},
+    [&] (IrrelevantEffects) {},
+    [&] (UnknownEffects)    { pessimize_mbase(); }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -908,8 +1041,8 @@ void FrameStateMgr::collectPostConds(Block* block) {
 
   if (fp() != nullptr) {
     for (unsigned i = 0; i < func()->numLocals(); i++) {
-      auto t = local(i).type;
-      const bool changed = local(i).maybeChanged;
+      auto const t = local(i).type;
+      auto const changed = local(i).maybeChanged;
       if (changed || t < TGen) {
         FTRACE(1, "Local {}: {} ({})\n", i, t.toString(),
                changed ? "changed" : "refined");
@@ -917,6 +1050,14 @@ void FrameStateMgr::collectPostConds(Block* block) {
         vec.push_back({ Location::Local{i}, t });
       }
     }
+  }
+
+  auto const ty = mbase().type;
+  auto const changed = mbase().maybeChanged;
+  if (changed || ty < TGen) {
+    FTRACE(1, "MBase{{}}: {} ({})\n", ty, changed ? "changed" : "refined");
+    auto& vec = changed ? pConds.changed : pConds.refined;
+    vec.push_back({ Location::MBase{}, ty });
   }
 }
 
@@ -1227,6 +1368,7 @@ const StackState& FrameStateMgr::stack(FPInvOffset offset) const {
       switch (l.tag()) {                                    \
         case LTag::Local: return local(l.localId()).name;   \
         case LTag::Stack: return stack(l.stackIdx()).name;  \
+        case LTag::MBase: return mbase().name;              \
       }                                                     \
       not_reached();                                        \
     }();                                                    \
@@ -1314,6 +1456,8 @@ void FrameStateMgr::setValue(Location l, SSATmp* value) {
     case LTag::Stack:
       cur().stackModified = true;
       return setValueImpl(l, stackState(l), value);
+    case LTag::MBase:
+      return setValueImpl(l, cur().mbase, value);
   }
   not_reached();
 }
@@ -1342,6 +1486,8 @@ void FrameStateMgr::setType(Location l, Type type) {
     case LTag::Stack:
       cur().stackModified = true;
       return setTypeImpl(l, stackState(l), type);
+    case LTag::MBase:
+      return setTypeImpl(l, cur().mbase, type);
   }
   not_reached();
 }
@@ -1369,6 +1515,8 @@ void FrameStateMgr::widenType(Location l, Type type) {
     case LTag::Stack:
       cur().stackModified = true;
       return widenTypeImpl(l, stackState(l), type);
+    case LTag::MBase:
+      return widenTypeImpl(l, cur().mbase, type);
   }
   not_reached();
 }
@@ -1400,6 +1548,7 @@ void FrameStateMgr::refineType(Location l, Type type, TypeSource typeSrc) {
   switch (l.tag()) {
     case LTag::Local: return refineTypeImpl(l, localState(l), type, typeSrc);
     case LTag::Stack: return refineTypeImpl(l, stackState(l), type, typeSrc);
+    case LTag::MBase: return refineTypeImpl(l, cur().mbase, type, typeSrc);
   }
   not_reached();
 }
@@ -1422,6 +1571,7 @@ void FrameStateMgr::refinePredictedType(Location l, Type type) {
   switch (l.tag()) {
     case LTag::Local: return refinePredictedTypeImpl(localState(l), type);
     case LTag::Stack: return refinePredictedTypeImpl(stackState(l), type);
+    case LTag::MBase: return refinePredictedTypeImpl(cur().mbase, type);
   }
   not_reached();
 }
@@ -1438,6 +1588,7 @@ void FrameStateMgr::setBoxedPrediction(Location l, Type type) {
   switch (l.tag()) {
     case LTag::Local: return setBoxedPredictionImpl(localState(l), type);
     case LTag::Stack: return setBoxedPredictionImpl(stackState(l), type);
+    case LTag::MBase: return setBoxedPredictionImpl(cur().mbase, type);
   }
   not_reached();
 }
@@ -1558,6 +1709,13 @@ void FrameStateMgr::clearLocals() {
   for (auto i = uint32_t{0}; i < cur().locals.size(); ++i) {
     setValue(loc(i), nullptr);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void FrameStateMgr::setMemberBase(SSATmp* base,
+                                  folly::Optional<Type> predicted) {
+  setValueImpl(Location::MBase{}, cur().mbase, base, predicted);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

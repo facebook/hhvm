@@ -47,7 +47,8 @@ struct XMLReader {
   req::ptr<File> m_stream; // input stream
   xmlTextReaderPtr m_ptr;
   xmlParserInputBufferPtr m_input;
-  void* m_schema;
+  void* m_schema; // really xmlRelaxNG*.
+  TYPE_SCAN_IGNORE_FIELD(m_schema);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

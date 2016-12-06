@@ -36,6 +36,8 @@ val from_file_with_default_popt :
   ?quick:bool -> Relative_path.t -> parser_return
 val from_file :
   ?quick:bool -> ParserOptions.t -> Relative_path.t -> parser_return
+val get_file_mode :
+  ParserOptions.t -> Relative_path.t -> string -> FileInfo.mode option
 
 type saved_lb
 type assoc

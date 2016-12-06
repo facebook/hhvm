@@ -276,10 +276,6 @@ struct JsonExtension final : Extension {
     json_parser_init();
   }
 
-  void vscan(IMarker& mark) const override {
-    json_parser_scan(mark);
-  }
-
 } s_json_extension;
 
 }

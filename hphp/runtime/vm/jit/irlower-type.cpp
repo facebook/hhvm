@@ -177,6 +177,10 @@ void cgCheckRefInner(IRLS& env, const IRInstruction* inst) {
                 base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
 }
 
+void cgCheckMBase(IRLS& env, const IRInstruction* inst) {
+  cgCheckTypeMem(env, inst);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -308,8 +312,10 @@ void cgAssertType(IRLS& env, const IRInstruction* inst) {
 
 void cgAssertLoc(IRLS&, const IRInstruction*) {}
 void cgAssertStk(IRLS&, const IRInstruction*) {}
+void cgAssertMBase(IRLS&, const IRInstruction*) {}
 void cgHintLocInner(IRLS&, const IRInstruction*) {}
 void cgHintStkInner(IRLS&, const IRInstruction*) {}
+void cgHintMBaseInner(IRLS&, const IRInstruction*) {}
 
 void cgProfileType(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RDSHandleData>();

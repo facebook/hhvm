@@ -55,6 +55,7 @@ const StaticString s_MemcacheData("MemcacheData");
 
 struct MemcacheData {
   memcached_st m_memcache;
+  TYPE_SCAN_IGNORE_FIELD(m_memcache);
   int m_compress_threshold;
   double m_min_compress_savings;
 

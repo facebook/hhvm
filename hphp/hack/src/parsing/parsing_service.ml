@@ -25,7 +25,7 @@ let empty_file_info : FileInfo.t = {
   classes = [];
   typedefs = [];
   consts = [];
-  comments = [];
+  comments = Some [];
   consider_names_just_for_autoload = false;
 }
 
@@ -38,14 +38,21 @@ let legacy_php_file_info = ref (fun fn ->
  * errorl is a list of errors
  * error_files is Relative_path.Set.t of files that we failed to parse
  *)
-let process_parse_result ~quick (acc, errorl, error_files) fn res =
+let process_parse_result
+  ?(ide = false) ~quick (acc, errorl, error_files) fn res =
   let errorl', {Parser_hack.file_mode; comments; ast; content;}, _ = res in
   Parsing_hooks.dispatch_file_parsed_hook fn ast;
 
   if file_mode <> None then begin
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
-    let mode = if quick then Parser_heap.Decl content else Parser_heap.Full in
+    (* We only have to write to the disk heap on initialization, and only *)
+    (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
+    (* never use the DiskHeap, and the Ide services update DiskHeap directly *)
+    if quick then
+    File_heap.FileHeap.write_through fn (File_heap.Disk content);
+    let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
     Parser_heap.ParserHeap.write_through fn (ast, mode);
+    let comments = Some comments in
     let defs =
       {FileInfo.funs; classes; typedefs; consts; comments; file_mode;
        consider_names_just_for_autoload = false}
@@ -136,20 +143,22 @@ let parse_sequential ~quick fn content acc popt =
       Parser_hack.program popt fn content
     end
   in
-  process_parse_result ~quick acc fn res
+  process_parse_result ~ide:true ~quick acc fn res
 
 (*****************************************************************************)
 (* Main entry points *)
 (*****************************************************************************)
 
-let go ?(quick = false) workers files_map ~get_next popt =
+let go ?(quick = false) workers files_set ~get_next popt =
   let acc = parse_parallel ~quick workers get_next popt in
   let fast, errorl, failed_parsing =
-    Relative_path.Map.fold files_map ~init:acc ~f:(
-      fun fn content (acc, errorl, error_files) ->
+    Relative_path.Set.fold files_set ~init:acc ~f:(
+      fun fn (acc, errorl, error_files) ->
+        let content = File_heap.get_ide_contents_unsafe fn in
         if FindUtils.is_php (Relative_path.suffix fn) then
           let content = File_content.get_content content in
-          parse_sequential ~quick fn content (acc, errorl, error_files) popt
+          parse_sequential ~quick fn content
+            (acc, errorl, error_files) popt
         else
           let info = empty_file_info in
           let acc = Relative_path.Map.add acc ~key:fn ~data:info in

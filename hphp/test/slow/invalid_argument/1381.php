@@ -4,7 +4,7 @@
 error_reporting(error_reporting() & ~E_NOTICE);
 
 $ch = curl_init();
-var_dump(curl_setopt($ch, -1, 'http://www.example.com/'));
+var_dump(curl_setopt($ch, -1337, 'http://www.example.com/'));
 curl_close($ch);
 var_dump(iconv_set_encoding('internal_encoding',  str_pad('invalid-charset', 64)));
 var_dump(iconv_mime_decode(  'Subject: =?UTF-8?B?UHLDvGZ1bmcgUHLDvGZ1bmc=?=',  0, str_pad('invalid-charset', 64)));

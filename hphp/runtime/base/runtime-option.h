@@ -387,6 +387,7 @@ struct RuntimeOption {
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;
+  static bool EnableContextInErrorHandler;
   static bool EnableZendCompat;
   static bool EnableZendSorting;
   static bool EnableZendIniCompat;
@@ -413,6 +414,7 @@ struct RuntimeOption {
   static bool PHP7_Substr;
   static bool PHP7_InfNanFloatParse;
   static bool PHP7_UVS;
+  static bool PHP7_DisallowUnsafeCurlUploads;
 
   static int64_t HeapSizeMB;
   static int64_t HeapResetCountBase;
@@ -451,6 +453,7 @@ struct RuntimeOption {
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(uint64_t, JitMatureSize,           25 << 20)                        \
+  F(double, JitMaturityExponent,       1.)                              \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
@@ -484,6 +487,7 @@ struct RuntimeOption {
          with Option::HardReturnTypeHints). */                          \
   F(int32_t, CheckReturnTypeHints,     2)                               \
   F(bool, SoftClosureReturnTypeHints,  false)                           \
+  F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
@@ -513,6 +517,9 @@ struct RuntimeOption {
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
   F(uint32_t, JitRetranslateAllRequest, 0)                              \
+  F(double,   JitLayoutHotThreshold,   0.05)                            \
+  F(int32_t,  JitLayoutMainFactor,     1000)                            \
+  F(int32_t,  JitLayoutColdFactor,     5)                               \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
@@ -526,6 +533,7 @@ struct RuntimeOption {
   F(bool, JitPseudomain,               true)                            \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
+  F(int, JitRetargetJumps,             1)                               \
   F(bool, HHIRLICM,                    false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
@@ -565,6 +573,8 @@ struct RuntimeOption {
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \
+  F(uint32_t, JitPGORelaxUncountedToGenPercent, 20)                     \
+  F(uint32_t, JitPGORelaxCountedToGenPercent, 75)                       \
   F(bool,     JitPGODumpCallGraph,     false)                           \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
@@ -594,6 +604,7 @@ struct RuntimeOption {
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(uint32_t, GCSampleRate,            0)                               \
   F(uint32_t, SerDesSampleRate,            0)                           \
+  F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \
   F(uint32_t, JitFilterLease,              1)                           \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
@@ -612,8 +623,16 @@ struct RuntimeOption {
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
   F(double, InitialLoadFactor, 1.0)                                     \
-  /* PPC64 Option: Minimum immediate size to use TOC */                 \
+  /******************                                                   \
+   | PPC64 Options. |                                                   \
+   *****************/                                                   \
+  /* Minimum immediate size to use TOC */                               \
   F(uint16_t, PPC64MinTOCImmSize, 64)                                   \
+  /* Relocation features. Use with care on production */                \
+  /*  Allow a Far branch be converted to a Near branch. */              \
+  F(bool, PPC64RelocationShrinkFarBranches, false)                      \
+  /*  Remove nops from a Far branch. */                                 \
+  F(bool, PPC64RelocationRemoveFarBranchesNops, true)                   \
   /********************                                                 \
    | Profiling flags. |                                                 \
    ********************/                                                \

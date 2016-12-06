@@ -205,7 +205,12 @@ let rec get_doc node =
 
   | SyntaxList x -> get_from_children x
   | ErrorSyntax { error_error } -> get_doc error_error
-  | LiteralExpression x -> get_doc x.literal_expression
+  | LiteralExpression x ->
+    begin
+    match syntax x.literal_expression with
+    | SyntaxList l -> get_from_children_no_space l
+    | _ -> get_doc x.literal_expression
+    end
   | VariableExpression x -> get_doc x.variable_expression
   | QualifiedNameExpression x -> get_doc x.qualified_name_expression
   | PipeVariableExpression x -> get_doc x.pipe_variable_expression
@@ -682,7 +687,7 @@ let rec get_doc node =
     foreach_keyword;
     foreach_left_paren;
     foreach_collection;
-    foreach_await;
+    foreach_await_keyword;
     foreach_as;
     foreach_key;
     foreach_arrow;
@@ -693,7 +698,7 @@ let rec get_doc node =
     let left = get_doc foreach_left_paren in
     let right = get_doc foreach_right_paren in
     let collection_name = get_doc foreach_collection in
-    let await_keyword = get_doc foreach_await in
+    let await_keyword = get_doc foreach_await_keyword in
     let as_keyword = get_doc foreach_as in
     let key = get_doc foreach_key in
     let arrow = get_doc foreach_arrow in
@@ -1120,6 +1125,9 @@ let rec get_doc node =
     group_doc (e ^| v)
 
 (* sep is the compulsory separator separating the children in the list *)
+and get_from_children_no_space children =
+  let fold_fun acc el = acc ^^^ get_doc el in
+  group_doc (List.fold_left fold_fun (make_simple nil) children)
 and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in
   group_doc (List.fold_left fold_fun (make_simple nil) children)

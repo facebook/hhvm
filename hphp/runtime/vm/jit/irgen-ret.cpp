@@ -79,7 +79,7 @@ void freeLocalsAndThis(IRGS& env) {
   if (shouldFreeInline) {
     decRefLocalsInline(env);
     for (unsigned i = 0; i < localCount; ++i) {
-      env.irb->constrainLocal(i, DataTypeBoxAndCountness, "inlined RetC/V");
+      env.irb->constrainLocal(i, DataTypeCountness, "inlined RetC/V");
     }
   } else {
     gen(env, GenericRetDecRefs, fp(env));
@@ -273,7 +273,7 @@ void implRet(IRGS& env) {
 }
 
 IRSPRelOffset offsetToReturnSlot(IRGS& env) {
-  auto const retOff = FPRelOffset { AROFF(m_r) / int32_t{sizeof(Cell)} };
+  auto const retOff = FPRelOffset { kArRetOff / int32_t{sizeof(Cell)} };
   return retOff.to<IRSPRelOffset>(env.irb->fs().irSPOff());
 }
 

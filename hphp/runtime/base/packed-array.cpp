@@ -120,7 +120,7 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
 
   ad->initHash(dstHash, ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
-    auto h = hashint(i);
+    auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
     tvCopy(srcData[i], dstData->data);
@@ -152,7 +152,7 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
 
   ad->initHash(dstHash, ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
-    auto h = hashint(i);
+    auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
     tvDupFlattenVars(&srcData[i], &dstData->data, old);
@@ -182,7 +182,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
 
   ad->initHash(dstHash, ad->scale());
   for (uint32_t i = 0; i < oldSize; ++i) {
-    auto h = hashint(i);
+    auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
     tvDupFlattenVars(&srcData[i], &dstData->data, old);
@@ -378,7 +378,7 @@ ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
   auto const fpcap = CapCode::ceil(adIn->m_size);
   auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = adIn->m_sizeAndPos;
   ad->m_hdr.init(fpcap, adIn->m_hdr.kind, StaticValue);
@@ -398,7 +398,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
     // arrays are not mutable.
     auto const cap = adIn->m_size;
     ad = static_cast<ArrayData*>(
-      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+      low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = adIn->m_sizeAndPos;
@@ -423,7 +423,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   if (LIKELY(arr->m_size <= CapCode::Threshold)) {
     auto const cap = arr->m_size;
     ad = static_cast<ArrayData*>(
-      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+      low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = arr->m_sizeAndPos;
@@ -451,7 +451,7 @@ ArrayData* PackedArray::ConvertStaticHelper(const ArrayData* arr) {
   auto const fpcap = CapCode::ceil(arr->m_size);
   auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = arr->m_sizeAndPos;
   ad->m_hdr.init(fpcap, HeaderKind::Packed, StaticValue);
@@ -516,6 +516,7 @@ ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
   return ad;
 }
 
+template<bool reverse>
 ALWAYS_INLINE
 ArrayData* PackedArray::MakePackedImpl(uint32_t size,
                                        const TypedValue* values,
@@ -544,11 +545,9 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   }
 
   // Append values by moving -- Caller assumes we update refcount.
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
   auto ptr = reinterpret_cast<TypedValue*>(ad + 1);
   for (auto i = uint32_t{0}; i < size; ++i) {
-    auto const& src = values[size - i - 1];
+    auto const& src = values[reverse ? size - i - 1 : i];
     assert(hk != HeaderKind::VecArray || src.m_type != KindOfRef);
     ptr->m_type = src.m_type;
     ptr->m_data = src.m_data;
@@ -562,14 +561,25 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
 }
 
 ArrayData* PackedArray::MakePacked(uint32_t size, const TypedValue* values) {
-  auto ad = MakePackedImpl(size, values, HeaderKind::Packed);
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
   assert(ad->isPacked());
   return ad;
 }
 
 ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
-  auto ad = MakePackedImpl(size, values, HeaderKind::VecArray);
+  // Values are in reverse order since they come from the stack, which
+  // grows down.
+  auto ad = MakePackedImpl<true>(size, values, HeaderKind::VecArray);
   assert(ad->isVecArray());
+  return ad;
+}
+
+ArrayData* PackedArray::MakePackedNatural(uint32_t size,
+                                          const TypedValue* values) {
+  auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed);
+  assert(ad->isPacked());
   return ad;
 }
 
@@ -652,7 +662,7 @@ void PackedArray::ReleaseUncounted(ArrayData* ad, size_t extra) {
     });
   }
 
-  std::free(reinterpret_cast<char*>(ad) - extra);
+  free_huge(reinterpret_cast<char*>(ad) - extra);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -913,7 +923,7 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
     // TODO(#2606310): if we're removing the /last/ element, we
     // probably could stay packed, but this needs to be verified.
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    auto pos = mixed->findForRemove(k, hashint(k), false);
+    auto pos = mixed->findForRemove(k, hash_int64(k), false);
     if (validPos(pos)) mixed->erase(pos);
     return mixed;
   }
@@ -1296,7 +1306,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array, size_t extra) {
     // once it's uncounted.
     auto const cap = size;
     auto const mem = static_cast<char*>(
-      std::malloc(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
+      malloc_huge(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     ad = reinterpret_cast<ArrayData*>(mem + extra);
     assert(cap == CapCode::ceil(cap).code);
@@ -1328,7 +1338,7 @@ ArrayData* PackedArray::MakeUncountedHelper(ArrayData* array, size_t extra) {
   auto const fpcap = CapCode::ceil(array->m_size);
   auto const cap = fpcap.decode();
   auto const mem = static_cast<char*>(
-    std::malloc(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
+    malloc_huge(extra + sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   auto const ad = reinterpret_cast<ArrayData*>(mem + extra);
   ad->m_sizeAndPos = array->m_sizeAndPos;

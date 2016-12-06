@@ -595,6 +595,14 @@ const Class* Class::commonAncestor(const Class* cls) const {
   return nullptr;
 }
 
+const Class* Class::getClassDependency(const StringData* name) const {
+  for (auto idx = m_classVecLen; idx--; ) {
+    auto cls = m_classVec[idx];
+    if (cls->name()->isame(name)) return cls;
+  }
+
+  return m_interfaces.lookupDefault(name, nullptr);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Magic methods.

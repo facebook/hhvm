@@ -435,7 +435,7 @@ let schema = List.map from_list [
     "keyword";
     "left_paren";
     "collection";
-    "await";
+    "await_keyword";
     "as";
     "key";
     "arrow";
@@ -955,6 +955,9 @@ let variable_text_tokens = List.map token_node_from_list [
   [ "FloatingLiteral"; "floating_literal" ];
   [ "SingleQuotedStringLiteral"; "single_quoted_string_literal" ];
   [ "DoubleQuotedStringLiteral"; "double_quoted_string_literal" ];
+  [ "DoubleQuotedStringLiteralHead"; "double_quoted_string_literal_head" ];
+  [ "DoubleQuotedStringLiteralBody"; "double_quoted_string_literal_body" ];
+  [ "DoubleQuotedStringLiteralTail"; "double_quoted_string_literal_tail" ];
   [ "HeredocStringLiteral"; "heredoc_string_literal" ];
   [ "NowdocStringLiteral"; "nowdoc_string_literal" ];
   [ "BooleanLiteral"; "boolean_literal" ];
@@ -1231,6 +1234,7 @@ module GenerateFFSyntax = struct
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @" ^ "generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -1552,6 +1556,7 @@ module GenerateFFSyntaxKind = struct
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @" ^ "generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -1741,6 +1746,7 @@ let to_editable_given_text x =
  *
  */
 /* THIS FILE IS GENERATED; DO NOT EDIT IT */
+/* @" ^ "generated */
 /**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -1922,7 +1928,7 @@ FROM_JSON_SYNTAX
     {
       let token = target.is_token ? target : target.leftmost_token;
       if (token == null)
-        throw 'Unable to find token to insert trivia.'
+        throw 'Unable to find token to insert trivia.';
 
       // Inserting trivia before token is inserting to the right end of
       // the leading trivia.
@@ -1950,7 +1956,7 @@ FROM_JSON_SYNTAX
     {
       let token = target.is_token ? target : target.rightmost_token;
       if (token == null)
-        throw 'Unable to find token to insert trivia.'
+        throw 'Unable to find token to insert trivia.';
 
       // Inserting trivia after token is inserting to the left end of
       // the trailing trivia.
@@ -2299,6 +2305,873 @@ EXPORTS_SYNTAX"
 
 end (* GenerateFFJavaScript *)
 
+module GenerateFFHack = struct
+
+  let to_from_json x =
+    Printf.sprintf "    case '%s':
+      return %s::from_json($json, $position, $source);
+" x.description x.kind_name
+
+  let to_editable_syntax x =
+    let ctor_mapper f = Printf.sprintf "EditableSyntax $%s" f in
+    let ctor = map_and_concat_separated ",\n    " ctor_mapper x.fields in
+    let ctor2_mapper f = Printf.sprintf "$%s" f in
+    let ctor2 = map_and_concat_separated ",\n        " ctor2_mapper x.fields in
+    let props_mapper f =
+      Printf.sprintf "private EditableSyntax $_%s;" f in
+    let props = map_and_concat_separated "\n  " props_mapper x.fields in
+    let getters_mapper f =
+      Printf.sprintf "public function %s(): EditableSyntax {
+    return $this->_%s;
+  }" f f in
+    let getters = map_and_concat_separated "\n  " getters_mapper x.fields in
+
+    let assignments_mapper f =
+      Printf.sprintf "$this->_%s = $%s;" f f in
+    let assignments = map_and_concat_separated
+      "\n    " assignments_mapper x.fields in
+    let withs_mapper f =
+      let inner_mapper f_inner =
+        let prefix = if f_inner = f then "$" else "$this->_" in
+        Printf.sprintf "%s%s" prefix f_inner in
+      let inner = map_and_concat_separated ",\n      " inner_mapper x.fields in
+      Printf.sprintf "public function with_%s(EditableSyntax $%s): %s {
+    return new %s(
+      %s);
+  }"
+        f f x.kind_name x.kind_name inner in
+    let withs = map_and_concat_separated "\n  " withs_mapper x.fields in
+    let rewriter_mapper f =
+      Printf.sprintf "$%s = $this->%s()->rewrite($rewriter, $new_parents);" f f in
+    let rewriter =
+      map_and_concat_separated "\n    " rewriter_mapper x.fields in
+    let condition_mapper f = Printf.sprintf "$%s === $this->%s()" f f in
+    let condition =
+      map_and_concat_separated " &&\n      " condition_mapper x.fields in
+    let json_mapper f = Printf.sprintf
+      "$%s = EditableSyntax::from_json(
+      $json->%s_%s, $position, $source);
+    $position += $%s->width();" f x.prefix f f in
+    let json = map_and_concat_separated "\n    " json_mapper x.fields in
+    let children_mapper f = Printf.sprintf "yield $this->_%s;" f in
+    let children =
+      map_and_concat_separated "\n    " children_mapper x.fields in
+    Printf.sprintf
+"final class %s extends EditableSyntax {
+  %s
+  public function __construct(
+    %s) {
+    parent::__construct('%s');
+    %s
+  }
+  %s
+  %s
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    %s
+    if (
+      %s) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new %s(
+        %s), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    %s
+    return new %s(
+        %s);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    %s
+    yield break;
+  }
+}
+" x.kind_name props ctor x.description assignments getters withs rewriter
+  condition x.kind_name ctor2 json x.kind_name ctor2 children
+
+  let to_editable_no_text x =
+    Printf.sprintf "final class %sToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('%s', $leading, $trailing, '');
+  }
+
+  public function with_leading(EditableSyntax $leading): %sToken {
+    return new %sToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): %sToken {
+    return new %sToken($this->leading(), $trailing);
+  }
+}
+" x.token_kind x.token_text x.token_kind x.token_kind x.token_kind x.token_kind
+
+let to_editable_given_text x =
+  Printf.sprintf "final class %sToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('%s', $leading, $trailing, '%s');
+  }
+
+  public function with_leading(EditableSyntax $leading): %sToken {
+    return new %sToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): %sToken {
+    return new %sToken($this->leading(), $trailing);
+  }
+}
+" x.token_kind x.token_text x.token_text x.token_kind x.token_kind
+  x.token_kind x.token_kind
+
+  let to_editable_variable_text x =
+    Printf.sprintf "final class %sToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('%s', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): %sToken {
+    return new %sToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): %sToken {
+    return new %sToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): %sToken {
+    return new %sToken($this->leading(), $trailing, $this->text());
+  }
+}
+" x.token_kind x.token_text
+  x.token_kind x.token_kind
+  x.token_kind x.token_kind
+  x.token_kind x.token_kind
+
+  let to_factory_no_text x =
+    Printf.sprintf
+"    case '%s':
+       return new %sToken($leading, $trailing);
+"
+      x.token_text x.token_kind
+
+  let to_factory_given_text = to_factory_no_text
+
+  let to_factory_variable_text x =
+    Printf.sprintf
+"    case '%s':
+       return new %sToken($leading, $trailing, $token_text);
+"
+      x.token_text x.token_kind
+
+  let full_fidelity_hack_template =
+"<?hh // strict
+/**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the 'hack' directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
+ *
+ */
+/* THIS FILE IS GENERATED; DO NOT EDIT IT */
+/* @" ^ "generated */
+/**
+  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
+  the binary.
+  buck build hphp/hack/src:generate_full_fidelity
+  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
+*/
+
+require_once 'full_fidelity_parser.php';
+
+abstract class EditableSyntax implements ArrayAccess {
+  private string $_syntax_kind;
+  protected ?int $_width;
+  public function __construct(string $syntax_kind) {
+    $this->_syntax_kind = $syntax_kind;
+  }
+
+  public function offsetExists (mixed $offset): bool {
+    return $offset === 0;
+  }
+
+  public function offsetGet (mixed $offset): mixed {
+    return $this;
+  }
+
+  public function offsetSet (mixed $offset, mixed $value): void {
+  }
+
+  public function offsetUnset (mixed $offset): void {
+  }
+
+  public function syntax_kind(): string {
+    return $this->_syntax_kind;
+  }
+
+  public abstract function children():
+    Generator<string, EditableSyntax, void>;
+
+  public function preorder(): Continuation<EditableSyntax> {
+    yield $this;
+    foreach($this->children() as $name => $child)
+      foreach($child->preorder() as $descendant)
+        yield $descendant;
+  }
+
+  private function _parented_preorder(array<EditableSyntax> $parents):
+    Continuation<(EditableSyntax, array<EditableSyntax>)> {
+    $new_parents = $parents;
+    array_push($new_parents, $this);
+    yield tuple($this, $parents);
+    foreach($this->children() as $name => $child)
+      foreach($child->_parented_preorder($new_parents) as $descendant)
+        yield $descendant;
+  }
+
+  public function parented_preorder():
+    Continuation<(EditableSyntax, array<EditableSyntax>)> {
+    return $this->_parented_preorder([]);
+  }
+
+  public function postorder(): Continuation<EditableSyntax> {
+    foreach($this->children() as $name => $child)
+      foreach($child->preorder() as $descendant)
+        yield $descendant;
+    yield $this;
+  }
+
+  public function is_token(): bool {
+    return false;
+  }
+
+  public function is_trivia(): bool {
+    return false;
+  }
+
+  public function is_list(): bool {
+    return false;
+  }
+
+  public function is_missing(): bool {
+    return false;
+  }
+
+  public function width(): int {
+    if ($this->_width === null) {
+      $width = 0;
+      /* TODO: Make an accumulation sequence operator */
+      foreach ($this->children() as $name => $node) {
+        $width += $node->width();
+      }
+      $this->_width = $width;
+      return $width;
+    } else {
+      return $this->_width;
+    }
+  }
+
+  public function full_text(): string {
+    /* TODO: Make an accumulation sequence operator */
+    $s = '';
+    foreach ($this->children() as $name => $node) {
+      $s .= $node->full_text();
+    }
+    return $s;
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    switch($json->kind) {
+    case 'token':
+      return EditableToken::from_json($json->token, $position, $source);
+    case 'list':
+      return EditableList::from_json($json, $position, $source);
+    case 'whitespace':
+      return Whitespace::from_json($json, $position, $source);
+    case 'end_of_line':
+      return EndOfLine::from_json($json, $position, $source);
+    case 'delimited_comment':
+      return DelimitedComment::from_json($json, $position, $source);
+    case 'single_line_comment':
+      return SingleLineComment::from_json($json, $position, $source);
+    case 'missing':
+      return Missing::missing();
+FROM_JSON_SYNTAX
+    default:
+      throw new Exception('unexpected json kind: ' . $json->kind);
+      // TODO: Better exception
+    }
+  }
+
+  public function to_array(): array<EditableSyntax> {
+    return [$this];
+  }
+
+  public function reduce<TAccumulator>(
+    (function
+      ( EditableSyntax,
+        TAccumulator,
+        array<EditableSyntax>): TAccumulator) $reducer,
+    TAccumulator $accumulator,
+    ?array<EditableSyntax> $parents = null): TAccumulator {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    foreach($this->children() as $child) {
+      $accumulator = $child->reduce($reducer, $accumulator, $new_parents);
+    }
+    return $reducer($this, $accumulator, $parents ?? []);
+  }
+
+  // Returns all the parents (and the node itself) of the first node
+  // that matches a predicate, or [] if there is no such node.
+  public function find_with_parents(
+    (function(EditableSyntax):bool) $predicate,
+    ?array<EditableSyntax> $parents = null): array<EditableSyntax> {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    if ($predicate($this))
+      return $new_parents;
+    foreach($this->children() as $child) {
+      $result = $child->find_with_parents($predicate, $new_parents);
+      if (count($result) != 0)
+        return $result;
+    }
+    return [];
+  }
+
+  // Returns a list of nodes that match a predicate.
+  public function filter(
+    (function(EditableSyntax, ?array<EditableSyntax>):bool) $predicate):
+      array<EditableSyntax> {
+    $reducer = ($node, $acc, $parents) ==> {
+      if ($predicate($node, $parents))
+        array_push($acc, $node);
+      return $acc;
+    };
+    return $this->reduce($reducer, []);
+  }
+
+  public function of_syntax_kind(string $kind): Continuation<EditableSyntax> {
+    foreach($this->preorder() as $child)
+      if ($child->syntax_kind() === $kind)
+        yield $child;
+  }
+
+  public function remove_where(
+    (function(EditableSyntax, ?array<EditableSyntax>):bool) $predicate):
+      array<EditableSyntax> {
+    return $this->rewrite(
+      ($node, $parents) ==>
+        $predicate($node, $parents) ? Missing::missing() : $node);
+  }
+
+  public function without(EditableSyntax $target): EditableSyntax {
+    return $this->remove_where(($node, $parents) ==> $node === $target);
+  }
+
+  public function replace(
+    EditableSyntax $new_node,
+    EditableSyntax $target): EditableSyntax {
+    return $this->rewrite(
+      ($node, $parents) ==> $node === $target ? $new_node : $node);
+  }
+
+  public function leftmost_token(): ?EditableSyntax {
+    if ($this->is_token())
+      return $this;
+    foreach($this->children() as $child)
+    {
+      if (!$child->is_missing())
+        return $child->leftmost_token();
+    }
+    return null;
+  }
+
+  public function rightmost_token(): ?EditableSyntax {
+    if ($this->is_token())
+      return $this;
+
+    // TODO: Better way to reverse a sequence?
+    foreach (array_reverse(iterator_to_array($this->children())) as $child) {
+      if (!$child->is_missing())
+        return $child->rightmost_token();
+    }
+    return null;
+  }
+
+  public function insert_before(
+    EditableSyntax $new_node,
+    EditableSyntax $target): EditableSyntax {
+    // Inserting before missing is an error.
+    if ($target->is_missing())
+      throw new Exception('Target must not be missing in insert_before.');
+
+    // Inserting missing is a no-op
+    if ($new_node->is_missing())
+      return $this;
+
+    if ($new_node->is_trivia() && !$target->is_trivia()) {
+      $token = $target->is_token() ? $target : $target->leftmost_token();
+      if ($token === null)
+        throw new Exception('Unable to find token to insert trivia.');
+
+      // Inserting trivia before token is inserting to the right end of
+      // the leading trivia.
+      $new_leading = EditableList::concatenate_lists(
+        $token->leading(), $new_node);
+      $new_token = $token->with_leading($new_leading);
+      return $this->replace($new_token, $token);
+    }
+
+    return $this->replace(
+      EditableList::concatenate_lists($new_node, $target), $target);
+  }
+
+  public function insert_after(
+    EditableSyntax $new_node,
+    EditableSyntax $target): EditableSyntax {
+
+    // Inserting after missing is an error.
+    if ($target->is_missing())
+      throw new Exception('Target must not be missing in insert_after.');
+
+    // Inserting missing is a no-op
+    if ($new_node->is_missing())
+      return $this;
+
+    if ($new_node->is_trivia() && !$target->is_trivia()) {
+      $token = $target->is_token() ? $target : $target->rightmost_token();
+      if ($token === null)
+        throw new Exception('Unable to find token to insert trivia.');
+
+      // Inserting trivia after token is inserting to the left end of
+      // the trailing trivia.
+      $new_trailing = EditableList::concatenate_lists(
+        $new_node, $token->trailing());
+      $new_token = $token->with_trailing($new_trailing);
+      return $this->replace($new_token, $token);
+    }
+
+    return $this->replace(
+      EditableSyntax::concatenate_lists($target, $new_node), $target);
+  }
+}
+
+final class EditableList extends EditableSyntax implements ArrayAccess {
+  private array<EditableSyntax> $_children;
+  public function __construct(array<EditableSyntax> $children) {
+    parent::__construct('list');
+    $this->_children = $children;
+  }
+
+  public function offsetExists(mixed $offset): bool {
+    return array_key_exists($offset, $this->_children);
+  }
+
+  public function offsetGet(mixed $offset): mixed {
+    return $this->_children[$offset];
+  }
+
+  public function offsetSet(mixed $offset, mixed $value): void {
+  }
+
+  public function offsetUnset(mixed $offset): void {
+  }
+
+  public function is_list(): bool {
+    return true;
+  }
+
+  public function to_array(): array<EditableSyntax> {
+    return $this->_children;
+  }
+
+  public function children(): Generator<string, EditableSyntax, void> {
+    foreach($this->_children as $key => $node)
+      yield $key => $node;
+  }
+
+  /* TODO: Getter by index? */
+
+  public static function to_list(
+    array<EditableSyntax> $syntax_list): EditableSyntax {
+    if (count($syntax_list) === 0)
+      return Missing::missing();
+    else if (count($syntax_list) === 1)
+      return $syntax_list[0];
+    else
+      return new EditableList($syntax_list);
+  }
+
+  public static function concatenate_lists(
+    EditableSyntax $left,
+    EditableSyntax $right): EditableSyntax {
+    if ($left->is_missing())
+      return $right;
+    if ($right->is_missing())
+      return $left;
+    return new EditableList(
+      array_merge($left->to_array(), $right->to_array()));
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    // TODO Implement array map
+    $children = [];
+    $current_position = $position;
+    foreach($json->elements as $element)
+    {
+      $child = EditableSyntax::from_json($element, $current_position, $source);
+      array_push($children, $child);
+      $current_position += $child->width();
+    }
+    return new EditableList($children);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): EditableSyntax {
+    $dirty = false;
+    $new_children = [];
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    foreach ($this->children() as $child)
+    {
+      $new_child = $child->rewrite($rewriter, $new_parents);
+      if ($new_child != $child)
+        $dirty = true;
+      if ($new_child != null)
+      {
+        if ($new_child->is_list())
+        {
+          foreach($new_child->children() as $n)
+            array_push($new_children, $n);
+        }
+        else
+          array_push($new_children, $new_child);
+      }
+    }
+    $result = $this;
+    if ($dirty) {
+      if (count($new_children) === 0)
+        $result = Missing::missing();
+      else if (count($new_children) === 1)
+        $result = $new_children[0];
+      else
+        $result = new EditableList($new_children);
+    }
+    return $rewriter($result, $parents ?? []);
+  }
+}
+
+abstract class EditableToken extends EditableSyntax {
+  private string $_token_kind;
+  private EditableSyntax $_leading;
+  private EditableSyntax $_trailing;
+
+  public function __construct(
+    string $token_kind,
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('token');
+    $this->_token_kind = $token_kind;
+    $this->_text = $text;
+    $this->_leading = $leading;
+    $this->_trailing = $trailing;
+    $this->_width = strlen($text) +
+      $leading->width() + $trailing->width();
+  }
+
+  public function token_kind(): string {
+    return $this->_token_kind;
+  }
+
+  public function text(): string {
+    return $this->_text;
+  }
+
+  public function leading(): EditableSyntax {
+    return $this->_leading;
+  }
+
+  public function trailing(): EditableSyntax {
+    return $this->_trailing;
+  }
+
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield 'leading' => $this->leading();
+    yield 'trailing' => $this->trailing();
+  }
+
+  public function is_token(): bool {
+    return true;
+  }
+
+  public function full_text(): string {
+    return $this->leading()->full_text() .
+      $this->text() .
+      $this->trailing()->full_text();
+  }
+
+  public abstract function with_leading(
+    EditableSyntax $leading): EditableToken;
+
+  public abstract function with_trailing(
+    EditableSyntax $trailing): EditableToken;
+
+  private static function factory(
+    string $token_kind,
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $token_text) {
+    switch($token_kind) {
+FACTORY_NO_TEXT_TOKENS
+FACTORY_GIVEN_TEXT_TOKENS
+FACTORY_VARIABLE_TEXT_TOKENS
+      default:
+        throw new Exception('unexpected token kind: ' . $token_kind);
+        // TODO: Better error
+    }
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $leading = $this->leading()->rewrite($rewriter, $new_parents);
+    $trailing = $this->trailing()->rewrite($rewriter, $new_parents);
+    if ($leading === $this->leading() && $trailing === $this->trailing())
+      return $rewriter($this, $parents ?? []);
+    else
+      return $rewriter(EditableToken::factory(
+        $this->token_kind(), $leading, $trailing,
+        $this->text()), $parents ?? []);
+  }
+
+  public function reduce<TAccumulator>(
+    (function
+      ( EditableSyntax,
+        TAccumulator,
+        array<EditableSyntax>): TAccumulator) $reducer,
+    TAccumulator $accumulator,
+    ?array<EditableSyntax> $parents = null): TAccumulator {
+    $accumulator = $this->leading()->reduce($reducer, $accumulator);
+    $accumulator = $reducer($this, $accumulator, $parents ?? []);
+    $accumulator = $this->trailing()->reduce($reducer, $accumulator);
+    return $accumulator;
+  }
+
+  public static function from_json(
+    mixed $json,
+    int $position,
+    string $source): EditableToken {
+    $leading_list = fold_map(
+      $json->leading,
+      ($j, $p) ==> EditableSyntax::from_json($j, $p, $source),
+      ($j, $p) ==> $j->width + $p,
+      $position);
+
+    $leading = EditableList::to_list($leading_list);
+    $token_position = $position + $leading->width();
+    $token_width = $json->width;
+    $token_text = substr($source, $token_position, $token_width);
+    $trailing_position = $token_position + $token_width;
+    $trailing_list = fold_map(
+      $json->trailing,
+      ($j, $p) ==> EditableSyntax::from_json($j, $p, $source),
+      ($j, $p) ==> $j->width + $p,
+      $trailing_position);
+    $trailing = EditableList::to_list($trailing_list);
+    return EditableToken::factory(
+      $json->kind, $leading, $trailing, $token_text);
+  }
+}
+
+EDITABLE_NO_TEXT_TOKENS
+EDITABLE_GIVEN_TEXT_TOKENS
+EDITABLE_VARIABLE_TEXT_TOKENS
+
+abstract class EditableTrivia extends EditableSyntax {
+  private string $_text;
+  public function __construct(string $trivia_kind , string $text) {
+    parent::__construct($trivia_kind);
+    $this->_text = $text;
+  }
+
+  public function text(): string {
+    return $this->_text;
+  }
+
+  public function full_text() {
+    return $this->_text;
+  }
+
+  public function width() {
+    return strlen($this->_text);
+  }
+
+  public function is_trivia() {
+    return true;
+  }
+
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield break;
+  }
+
+  public static function from_json(
+    mixed $json,
+    int $position,
+    string $source) {
+    $trivia_text = substr($source, $position, $json->width);
+    switch($json->kind) {
+      case 'whitespace': return new Whitespace($trivia_text);
+      case 'end_of_line': return new EndOfLine($trivia_text);
+      case 'single_line_comment': return new SingleLineComment($trivia_text);
+      case 'delimited_comment': return new DelimitedComment($trivia_text);
+      default:
+        throw new Exception('unexpected json kind: ' . $json->kind);
+        // TODO: Better error
+    }
+  }
+
+public function rewrite(
+  ( function
+    (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+  ?array<EditableSyntax> $parents = null): EditableSyntax {
+    return $rewriter($this, $parents ?? []);
+  }
+}
+class Whitespace extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('whitespace', $text);
+  }
+  public function with_text(string $text): Whitespace {
+    return new Whitespace($text);
+  }
+}
+
+class EndOfLine extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('end_of_line', $text);
+  }
+  public function with_text(string $text): Whitespace {
+    return new EndOfLine($text);
+  }
+}
+
+class SingleLineComment extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('single_line_comment', $text);
+  }
+  public function with_text(string $text): Whitespace {
+    return new SingleLineComment($text);
+  }
+}
+
+class DelimitedComment extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('delimited_comment', $text);
+  }
+  public function with_text(string $text): Whitespace {
+    return new DelimitedComment($text);
+  }
+}
+
+final class Missing extends EditableSyntax {
+  private static ?Missing $_missing = null;
+
+  public function __construct() {
+    parent::__construct('missing');
+  }
+
+  public function is_missing(): bool {
+    return true;
+  }
+
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield break;
+  }
+
+  public static function missing(): Missing {
+    if (Missing::$_missing === null) {
+      $m = new Missing();
+      Missing::$_missing = $m;
+      return $m;
+    } else {
+      return Missing::$_missing;
+    }
+  }
+
+  public static function from_json(
+    mixed $json,
+    int $position,
+    string $source) {
+    return Missing::missing();
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): EditableSyntax {
+      return $rewriter($this, $parents ?? []);
+  }
+
+  public function to_array(): array<EditableSyntax> {
+    return [];
+  }
+}
+
+EDITABLE_SYNTAX
+
+function from_json(mixed $json): EditableSyntax {
+  return EditableSyntax::from_json($json->parse_tree, 0, $json->program_text);
+}
+/* End full_fidelity_editable.php */"
+
+  let full_fidelity_hack =
+  {
+    filename = "hphp/hack/src/full_fidelity/php/full_fidelity_editable.php";
+    template = full_fidelity_hack_template;
+    transformations = [
+      { pattern = "FROM_JSON_SYNTAX"; func = to_from_json };
+      { pattern = "EDITABLE_SYNTAX"; func = to_editable_syntax };
+    ];
+    token_no_text_transformations = [
+      { token_pattern = "EDITABLE_NO_TEXT_TOKENS";
+        token_func = to_editable_no_text };
+      { token_pattern = "FACTORY_NO_TEXT_TOKENS";
+        token_func = to_factory_no_text }];
+    token_given_text_transformations = [
+      { token_pattern = "EDITABLE_GIVEN_TEXT_TOKENS";
+        token_func = to_editable_given_text };
+      { token_pattern = "FACTORY_GIVEN_TEXT_TOKENS";
+        token_func = to_factory_given_text }];
+    token_variable_text_transformations = [
+      { token_pattern = "EDITABLE_VARIABLE_TEXT_TOKENS";
+        token_func = to_editable_variable_text };
+      { token_pattern = "FACTORY_VARIABLE_TEXT_TOKENS";
+        token_func = to_factory_variable_text }]
+  }
+
+end (* GenerateFFHack *)
+
 
 module GenerateFFTokenKind = struct
 
@@ -2322,6 +3195,7 @@ module GenerateFFTokenKind = struct
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @" ^ "generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -2375,4 +3249,5 @@ let () =
   generate_file GenerateFFSyntax.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFJavaScript.full_fidelity_javascript;
+  generate_file GenerateFFHack.full_fidelity_hack;
   generate_file GenerateFFTokenKind.full_fidelity_token_kind

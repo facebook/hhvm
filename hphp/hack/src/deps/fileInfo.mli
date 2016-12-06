@@ -35,15 +35,18 @@ type mode =
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-type id = Pos.t * string
-
+type name_type = Fun | Class | Typedef | Const
+type pos = Full of Pos.t | File of name_type * Relative_path.t
+type id = pos  * string
+val pos_full : (Pos.t * string) -> id
+val get_pos_filename : pos -> Relative_path.t
 type t = {
   file_mode : mode option;
   funs : id list;
   classes : id list;
   typedefs : id list;
   consts : id list;
-  comments : (Pos.t * string) list;
+  comments : (Pos.t * string) list option;
   consider_names_just_for_autoload: bool;
 }
 
@@ -61,13 +64,17 @@ type names = {
 }
 
 type fast = names Relative_path.Map.t
+type fast_with_modes = (names * mode option) Relative_path.Map.t
+
 
 val empty_names: names
 
 (*****************************************************************************)
 (* Functions simplifying the file information. *)
 (*****************************************************************************)
-
+val modes_to_info : fast_with_modes -> t Relative_path.Map.t
+val modes_to_fast: fast_with_modes -> fast
+val info_to_modes : t Relative_path.Map.t -> fast_with_modes
 val simplify: t -> names
 val merge_names: names -> names -> names
 val simplify_fast: t Relative_path.Map.t -> fast

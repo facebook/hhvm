@@ -105,19 +105,20 @@ struct MixedArray final : private ArrayData,
 
     void setIntKey(int64_t k, inthash_t h) {
       ikey = k;
-      data.hash() = h | STRHASH_MSB;
+      data.hash() = static_cast<int32_t>(h) | STRHASH_MSB;
       assert(hasIntKey());
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
+      static_assert(static_cast<int32_t>(STRHASH_MSB) < 0,
+                    "high bit indicates int key");
     }
 
     bool isTombstone() const {
       return MixedArray::isTombstone(data.m_type);
     }
 
-    template<class F> void scan(F& mark) const {
+    TYPE_SCAN_CUSTOM() {
       if (!isTombstone()) {
-        if (hasStrKey()) mark(skey);
-        mark(data);
+        if (hasStrKey()) scanner.scan(skey);
+        scanner.scan(data);
       }
     }
 
@@ -127,6 +128,9 @@ struct MixedArray final : private ArrayData,
     static constexpr ptrdiff_t dataOff() {
       return offsetof(Elm, data);
     }
+    static constexpr ptrdiff_t hashOff() {
+      return offsetof(Elm, data) + offsetof(TypedValue, m_aux);
+    }
   };
 
   static constexpr ptrdiff_t dataOff() {
@@ -134,6 +138,9 @@ struct MixedArray final : private ArrayData,
   }
   static constexpr ptrdiff_t usedOff() {
     return offsetof(MixedArray, m_used);
+  }
+  static constexpr ptrdiff_t scaleOff() {
+    return offsetof(MixedArray, m_scale);
   }
 
   static constexpr ptrdiff_t elmOff(uint32_t pos) {
@@ -149,11 +156,10 @@ struct MixedArray final : private ArrayData,
       StringData* skey;
       int64_t ikey;
     };
-    hash_t hash;
+    int32_t hash;
 
-    TYPE_SCAN_CUSTOM() {
-      if (hash < 0) scanner.enqueue(skey);
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
+    TYPE_SCAN_CUSTOM_FIELD(skey) {
+      if (hash < 0) scanner.scan(skey);
     }
   };
 
@@ -192,6 +198,13 @@ struct MixedArray final : private ArrayData,
    */
   static ArrayData* MakeReserveSame(const ArrayData* other, uint32_t capacity);
   static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
+
+  /*
+   * Allocates a new request-local array with given key,value,key,value,... in
+   * natural order. Returns nullptr if there are duplicate keys. Does not check
+   * for integer-like keys. Takes ownership of keys and values iff successful.
+   */
+  static MixedArray* MakeMixed(uint32_t size, const TypedValue* keysAndValues);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
@@ -726,7 +739,7 @@ private:
   void setZombie() { m_used = -uint32_t{1}; }
 
 public:
-  template<class F> void scan(F&) const; // in mixed-array-defs.h
+  void scan(type_scan::Scanner&) const; // in mixed-array-defs.h
 
 private:
   struct Initializer;

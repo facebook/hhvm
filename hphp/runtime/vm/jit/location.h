@@ -27,8 +27,9 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class LTag : uint32_t {
-  Local,
-  Stack,
+  Local,  // local variable
+  Stack,  // stack slot
+  MBase,  // pointee of the member base
 };
 
 /*
@@ -42,9 +43,11 @@ enum class LTag : uint32_t {
 struct Location {
   struct Local { uint32_t locId; };
   struct Stack { FPInvOffset stackIdx; };
+  struct MBase { uint32_t unused; };
 
   /* implicit */ Location(Local l) : m_tag{LTag::Local}, m_local(l) {}
   /* implicit */ Location(Stack s) : m_tag{LTag::Stack}, m_stack(s) {}
+  /* implicit */ Location(MBase m) : m_tag{LTag::MBase}, m_mbase(m) {}
 
   LTag tag() const { return m_tag; };
 
@@ -69,6 +72,7 @@ private:
   union {
     Local m_local;
     Stack m_stack;
+    MBase m_mbase;
   };
 };
 

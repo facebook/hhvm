@@ -286,21 +286,43 @@ struct Scanner {
     }
   }
 
+  struct WhereIndex { uint32_t ptr, cons; const char* description; };
+
   // Called once all the scanning is done. Reports enqueued pointers via the
   // first passed callback, and conservative ranges via the second passed
   // callback. Afterwards, all the state is cleared. The Scanner can be re-used
   // after this.
   template <typename F1, typename F2> void finish(F1&& f1, F2&& f2) {
-    for (const auto& p : m_ptrs) if (p) { f1(p); }
-    for (const auto& p : m_conservative) f2(p.first, p.second);
+    where(""); // sentinel
+    auto description = "";
+    size_t i = 0, j = 0;
+    for (auto& w : m_where) {
+      for (; i < w.ptr; ++i) {
+        if (auto p = m_ptrs[i]) f1(p, description);
+      }
+      for (; j < w.cons; ++j) {
+        auto& r = m_conservative[j];
+        f2(r.first, r.second, description);
+      }
+      description = w.description;
+    }
     m_ptrs.clear();
     m_conservative.clear();
+    m_where.clear();
+  }
+
+  // record where we are in root scanning now.
+  void where(const char* description) {
+    m_where.push_back(
+      {uint32_t(m_ptrs.size()), uint32_t(m_conservative.size()), description}
+    );
   }
 
   // These are logically private, but they're public so that the generated
   // functions can manipulate them directly.
   std::vector<const void*> m_ptrs;
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
+  std::vector<WhereIndex> m_where;
 };
 
 /*
@@ -322,6 +344,11 @@ struct Scanner {
 // function. It is the custom scanner's responsibility to scan/enqueue all
 // members. Note that the generated function will still attempt to scan any
 // bases normally.
+//
+// Warning: these functions will not be called unless exact scanners were
+// generated and are being used. Conservative-scan will not call them,
+// so the underlying fields must be conservative-scannable to start with.
+// Importantly, std containers are not conservatively scannable.
 #define TYPE_SCAN_CUSTOM(...)                                           \
   static constexpr const                                                \
   HPHP::type_scan::detail::Custom<__VA_ARGS__>                          \

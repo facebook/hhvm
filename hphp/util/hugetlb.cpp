@@ -42,11 +42,13 @@
 
 namespace HPHP {
 
-constexpr size_t size1g = 1 << 30;
-
 static char s_hugePath[256];
 constexpr size_t maxErrorMsgLen = 256;
 static char s_errorMsg[maxErrorMsgLen];
+
+static unsigned g_numHugePages;
+constexpr unsigned maxNum1GPages = 16;  // maximum number of 1G pages to use
+static void* g_hugePages[maxNum1GPages];
 
 // Record error message based on errno, with an optional message.
 static void record_err_msg(const char* msg = nullptr) {
@@ -238,8 +240,7 @@ inline void* mmap_1g_impl(void* addr) {
       return nullptr;
     }
 
-    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE,
-               MAP_PRIVATE, fd, 0);
+    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (ret == MAP_FAILED) {
       snprintf(s_errorMsg, maxErrorMsgLen,
                "mmap() for hugetlbfs file failed: ");
@@ -255,7 +256,7 @@ inline void* mmap_1g_impl(void* addr) {
 #ifndef MAP_HUGE_1GB
 #define MAP_HUGE_1GB (30 << 26)
 #endif
-      int flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB;
+      int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB;
       ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, 0, 0);
       if (ret == MAP_FAILED) {
         record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
@@ -293,6 +294,7 @@ inline void* mmap_1g_impl(void* addr) {
 
 void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
 #ifdef __linux__
+  if (g_numHugePages >= maxNum1GPages) return nullptr;
 #ifdef HAVE_NUMA
   bitmask* memMask = nullptr;
   bitmask* interleaveMask = nullptr;
@@ -306,6 +308,9 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
   }
 #endif
   void* ret = mmap_1g_impl(addr);
+  if (ret != nullptr) {
+    g_hugePages[g_numHugePages++] = ret;
+  }
 #ifdef HAVE_NUMA
   if (node >= 0) {
     numa_set_membind(memMask);
@@ -318,6 +323,26 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
 #else
   return nullptr;
 #endif
+}
+
+unsigned num_huge1g_pages() {
+  return g_numHugePages;
+}
+
+int mprotect_huge1g_pages(int prot) {
+#ifdef __linux__
+  for (unsigned i = 0; i < g_numHugePages; ++i) {
+    void* p = g_hugePages[i];
+    assert(p != nullptr &&
+           (reinterpret_cast<uintptr_t>(p) & (size1g - 1)) == 0);
+    if (auto ret = mprotect(p, size1g, prot)) {
+      // mprotect() failed for this page, callers should check errno if they
+      // care.
+      return ret;
+    }
+  }
+#endif
+  return 0;
 }
 
 }

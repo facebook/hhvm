@@ -127,8 +127,13 @@ void reportJitMaturity(const CodeCache& code) {
     // code that will give us full performance, so recover the "fully mature"
     // size with some math.
     auto const fullSize = RuntimeOption::EvalJitMatureSize * 5;
-    auto const after = codeSize >= fullSize ? 100
-                                            : (codeSize * 100 / fullSize);
+    auto const after = codeSize >= fullSize
+        ? 100
+        : (static_cast<int64_t>(
+              std::pow(
+                  static_cast<double>(codeSize) / static_cast<double>(fullSize),
+                  RuntimeOption::EvalJitMaturityExponent) *
+              100));
     auto const before = jitMaturityCounter->getValue();
     if (after > before) jitMaturityCounter->setValue(after);
   }

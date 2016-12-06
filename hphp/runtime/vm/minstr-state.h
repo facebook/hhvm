@@ -43,25 +43,11 @@ struct MInstrState {
   TypedValue tvRef2;
   TypedValue* base;
 
-  // legacy-style scanner
-  template<class F> void scan(F& mark) const {
-    // tvBuiltinReturn sometimes holds live references across safepoints.
-    // Base can point to objects but shouldn't keep them alive (weak ptr).
-    // Conservatively scan things for now. TODO t9853106
-    mark(this, uintptr_t(&base) - uintptr_t(this));
-  }
-
   // type-scan driven scanner
-  //TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
-  //TYPE_SCAN_CONSERVATIVE_FIELD(tvRef);
-  //TYPE_SCAN_CONSERVATIVE_FIELD(tvRef2);
-  //TYPE_SCAN_IGNORE_FIELD(base);
-
-  // fixme - #11145696 full custom scanner to work around unnamed union
-  TYPE_SCAN_CUSTOM() {
-    // Workaroun
-    scanner.conservative(this, uintptr_t(&base) - uintptr_t(this));
-  }
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvRef);
+  TYPE_SCAN_CONSERVATIVE_FIELD(tvRef2);
+  TYPE_SCAN_IGNORE_FIELD(base);
 };
 
 }

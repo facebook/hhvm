@@ -855,6 +855,7 @@ interface XHPChild {}
  * objects: that is, objects that provide the __toString method
  */
 interface Stringish {
+  <<__Deprecated('Use string coercion syntax `(string) <expression>` instead.')>>
   public function __toString(): string;
 }
 

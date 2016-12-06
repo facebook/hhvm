@@ -277,11 +277,14 @@ bool canDCE(IRInstruction* inst) {
   case CheckNullptr:
   case CheckTypeMem:
   case HintLocInner:
-  case CheckLoc:
-  case AssertLoc:
   case HintStkInner:
+  case HintMBaseInner:
+  case CheckLoc:
   case CheckStk:
+  case CheckMBase:
+  case AssertLoc:
   case AssertStk:
+  case AssertMBase:
   case CastStk:
   case CastMem:
   case CoerceStk:
@@ -1012,7 +1015,7 @@ void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
 
   auto const data = FPRelOffsetData {
     // Offset of the callee's return value relative to the frame pointer.
-    calleeAROff.to<FPRelOffset>(spOff) + (AROFF(m_r) / sizeof(TypedValue))
+    calleeAROff.to<FPRelOffset>(spOff) + (kArRetOff / sizeof(TypedValue))
   };
   unit.replace(&inst, InlineReturnNoFrame, data);
 }

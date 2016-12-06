@@ -23,7 +23,7 @@ module TMap = MyMap.Make (struct
   let compare = S.compare_result_type
 end)
 
-type type_to_key_to_term_list = (Pos.t, S.t) term list SMap.t TMap.t
+type type_to_key_to_term_list = (FileInfo.pos, S.t) term list SMap.t TMap.t
 type type_to_keyset = SSet.t TMap.t
 
 (* Note only shared memory is modified within workers - and the keys are files

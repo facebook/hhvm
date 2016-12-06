@@ -11,6 +11,7 @@
 module Env = Typing_env
 
 open Tty
+open Core
 
 (*****************************************************************************)
 (* Logging type inference environment                                        *)
@@ -127,7 +128,8 @@ let log_local_types env =
   indentEnv "local_types" (fun () ->
     Local_id.Map.iter begin fun id (all_types, new_type, expr_id) ->
       lnewline();
-      lprintf (Bold Green) "%s: " (Local_id.get_name id);
+      lprintf (Bold Green) "%s[#%d]: "
+        (Local_id.get_name id) (Local_id.to_int id);
       lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env new_type);
       lprintf (Normal Green) " [history: ";
       log_type_list env all_types;
@@ -138,7 +140,7 @@ let log_tpenv env =
   let tparams = Env.get_generic_parameters env in
   if tparams != [] then
   indentEnv "tpenv" (fun () ->
-    List.iter begin fun tparam ->
+    List.iter tparams ~f:begin fun tparam ->
       let lower = Env.get_lower_bounds env tparam in
       let upper = Env.get_upper_bounds env tparam in
       lnewline ();
@@ -147,7 +149,7 @@ let log_tpenv env =
       lprintf (Bold Green) "%s" tparam;
       (if upper != []
       then (lprintf (Normal Green) " <: "; log_type_list env upper))
-        end tparams)
+        end)
 
 let log_fake_members env =
   let lenv = env.Env.lenv in
@@ -191,3 +193,20 @@ let hh_show p env ty =
   log_position p
     (fun () ->
        lprintf (Normal Green) "%s" s; lnewline ())
+
+let log_type p env message ty =
+  let s = Typing_print.debug_with_tvars env ty in
+  log_position p
+    (fun () ->
+       lprintf (Bold Green) "%s: " message;
+       lprintf (Normal Green) "%s" s;
+       lnewline ())
+
+let log_types p env pairs =
+  log_position p
+    (fun () ->
+       List.iter pairs ~f:(fun (message, ty) ->
+         let s = Typing_print.debug_with_tvars env ty in
+         lprintf (Bold Green) "%s: " message;
+         lprintf (Normal Green) "%s"  s;
+         lnewline ()))

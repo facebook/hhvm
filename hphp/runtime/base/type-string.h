@@ -74,18 +74,10 @@ protected:
   String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
 public:
-  template<class F> void scan(F& mark) const {
-    mark(m_str);
-  }
-
-public:
-  typedef hphp_hash_map<int64_t, const StringData *, int64_hash>
-    IntegerStringDataMap;
   static const int MinPrecomputedInteger = SCHAR_MIN;
   static const int MaxPrecomputedInteger = 4095 + SCHAR_MIN;
   static StringData const **converted_integers_raw;
   static StringData const **converted_integers;
-  static IntegerStringDataMap integer_string_data_map;
 
   static bool HasConverted(int64_t n) {
     return MinPrecomputedInteger <= n && n <= MaxPrecomputedInteger;
@@ -93,7 +85,6 @@ public:
   static bool HasConverted(int n) {
     return HasConverted((int64_t)n);
   }
-  static void PreConvertInteger(int64_t n);
 
   // create a string from a character
   static String FromChar(char ch) {
@@ -106,15 +97,8 @@ public:
   static const StringData *ConvertInteger(int64_t n);
   static const StringData *GetIntegerStringData(int64_t n) {
     if (HasConverted(n)) {
-      const StringData *sd = *(converted_integers + n);
-      if (UNLIKELY(sd == nullptr)) {
-        return ConvertInteger(n);
-      }
-      return sd;
+      return *(converted_integers + n);
     }
-    IntegerStringDataMap::const_iterator it =
-      integer_string_data_map.find(n);
-    if (it != integer_string_data_map.end()) return it->second;
     return nullptr;
   }
 
@@ -517,7 +501,7 @@ struct StringDataHashICompare {
   }
 };
 
-typedef hphp_hash_set<String, hphp_string_hash, hphp_string_isame> StringISet;
+using StringISet = hphp_hash_set<String,hphp_string_hash,hphp_string_isame>;
 
 template<typename T>
 using StringIMap =
@@ -527,6 +511,12 @@ using StringSet = hphp_hash_set<String, hphp_string_hash, hphp_string_same>;
 
 template<typename T>
 using StringMap = hphp_hash_map<String, T, hphp_string_hash, hphp_string_same>;
+
+namespace req {
+using StringISet = req::hash_set<String,hphp_string_hash,hphp_string_isame>;
+template<typename T> using StringIMap =
+  req::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // StrNR

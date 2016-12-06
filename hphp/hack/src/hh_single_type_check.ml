@@ -20,7 +20,7 @@ module TNBody       = Typing_naming_body
 (*****************************************************************************)
 
 type mode =
-  | Ai of Ai_options.prepared
+  | Ai of Ai_options.t
   | Autocomplete
   | Color
   | Coverage
@@ -444,7 +444,7 @@ let with_named_body opts n_fun =
   { n_fun with Nast.f_body = Nast.NamedBody n_f_body }
 
 let n_fun_fold opts fn acc (_, fun_name) =
-  match Parser_heap.find_fun_in_file_full opts fn fun_name with
+  match Parser_heap.find_fun_in_file ~full:true opts fn fun_name with
   | None -> acc
   | Some f ->
     let n_fun = Naming.fun_ opts f in
@@ -645,13 +645,13 @@ let decl_and_run_mode {filename; mode; no_builtins} popt tcopt =
         Parser_heap.ParserHeap.add fn (ast, Parser_heap.Full);
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.
-          file_mode; funs; classes; typedefs; consts; comments;
+          file_mode; funs; classes; typedefs; consts; comments = Some comments;
           consider_names_just_for_autoload = false }
       end parsed_files in
 
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
       let {FileInfo.funs; classes; typedefs; consts; _} = fileinfo in
-      NamingGlobal.make_env ~funs ~classes ~typedefs ~consts
+      NamingGlobal.make_env popt ~funs ~classes ~typedefs ~consts
     end;
 
     Relative_path.Map.iter files_info begin fun fn _ ->

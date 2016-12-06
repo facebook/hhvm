@@ -78,13 +78,18 @@ struct BaseGenerator {
       sizeof(ObjectData);
   }
 
+  template<class T>
   static ObjectData* Alloc(Class* cls, size_t totalSize) {
     auto const node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
-    const size_t objOff = totalSize - sizeof(ObjectData);
-    node->obj_offset = objOff;
-    node->hdr.kind = HeaderKind::NativeData;
-    auto const obj = new (reinterpret_cast<char*>(node) + objOff)
-                     ObjectData(cls, ObjectData::HasNativeData);
+    auto const obj_offset = totalSize - sizeof(ObjectData);
+    auto const objmem = reinterpret_cast<char*>(node) + obj_offset;
+    auto const datamem = objmem - sizeof(T);
+    auto const ar_off = (char*)((T*)datamem)->actRec() - (char*)node;
+    auto const tyindex = type_scan::getIndexForMalloc<T>();
+    node->obj_offset = obj_offset;
+    node->hdr.init(tyindex, HeaderKind::NativeData, ar_off);
+    auto const obj = new (objmem) ObjectData(cls, ObjectData::HasNativeData);
+    assert((void*)obj == (void*)objmem);
     assert(obj->hasExactlyOneRef());
     assert(obj->noDestruct());
     return obj;
@@ -175,8 +180,9 @@ struct Generator final : BaseGenerator {
   static ObjectData* allocClone(ObjectData *obj) {
     auto const genDataSz = Native::getNativeNode(
                              obj, getClass()->getNativeDataInfo())->obj_offset;
-    auto const clone = BaseGenerator::Alloc(getClass(),
-                         genDataSz + sizeof(ObjectData));
+    auto const clone = BaseGenerator::Alloc<Generator>(
+        getClass(), genDataSz + sizeof(ObjectData)
+    );
     UNUSED auto const genData = new (Native::data<Generator>(clone))
                                 Generator();
     return clone;
@@ -212,7 +218,7 @@ ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
   assert(fp->func()->isNonAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(Generator), frameSz);
-  auto const obj = BaseGenerator::Alloc(s_class, genSz);
+  auto const obj = BaseGenerator::Alloc<Generator>(s_class, genSz);
   auto const genData = new (Native::data<Generator>(obj)) Generator();
   genData->resumable()->initialize<clone>(fp,
                                           resumeAddr,

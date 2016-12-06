@@ -9,15 +9,18 @@
  *
  */
 
-class X<T> {
-  public function foo(T $x): T { return $x; }
-}
+function f(): int {
+  $x = 1;
+  switch (1) {
+    default:
+      if (true) {
+        hh_show($x);
+        $x = "derp";
+        hh_show($x);
+        break;
+      }
+  }
+  hh_show($x);
 
-function use_with_ints((function(X<int>, int): int) $caller): void {
-}
-
-function test(): (function(X<bool>, bool): bool) {
-  $caller = meth_caller('X', 'foo');
-  use_with_ints($caller);
-  return $caller;
+  return $x;
 }

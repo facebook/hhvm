@@ -120,9 +120,6 @@ struct ZipStreamWrapper final : Stream::Wrapper {
 
     return req::make<ZipStream>(z, file);
   }
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
 };
 
 struct ZipEntry : SweepableResourceData {
@@ -916,6 +913,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
   StringBuffer sb(length);
   auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
+  zip_fclose(zipFile);
   if (n > 0) {
     sb.resize(n);
     return sb.detach();
@@ -953,6 +951,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
   StringBuffer sb(length);
   auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
+  zip_fclose(zipFile);
   if (n > 0) {
     sb.resize(n);
     return sb.detach();

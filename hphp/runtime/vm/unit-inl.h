@@ -288,22 +288,17 @@ inline Class* Unit::lookupClass(const StringData* name) {
   return lookupClass(NamedEntity::get(name));
 }
 
-inline Class* Unit::lookupUniqueClassInContext(const NamedEntity* ne,
-                                               const Class* ctx) {
+inline const Class* Unit::lookupUniqueClassInContext(const NamedEntity* ne,
+                                                     const Class* ctx) {
   Class* cls = ne->clsList();
-  if (LIKELY(cls != nullptr)) {
-    if (cls->attrs() & AttrUnique) {
-      return cls;
-    }
-    if (!ctx) return nullptr;
-    cls = cls->getCached();
-    if (cls && ctx->classof(cls)) return cls;
-  }
-  return nullptr;
+  if (UNLIKELY(cls == nullptr)) return nullptr;
+  if (cls->attrs() & AttrUnique) return cls;
+  if (!ctx) return nullptr;
+  return ctx->getClassDependency(cls->name());
 }
 
-inline Class* Unit::lookupUniqueClassInContext(const StringData* name,
-                                               const Class* ctx) {
+inline const Class* Unit::lookupUniqueClassInContext(const StringData* name,
+                                                     const Class* ctx) {
   return lookupUniqueClassInContext(NamedEntity::get(name), ctx);
 }
 

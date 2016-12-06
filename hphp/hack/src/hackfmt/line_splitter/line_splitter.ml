@@ -10,50 +10,49 @@
 
 open Core
 
-let expand_state state =
-  let rule_ids = List.map state.Solve_state.chunks ~f:(
-    fun c -> c.Chunk.rule
+let expand_state state_queue state =
+  let chunk_group = state.Solve_state.chunk_group in
+  let rule_ids = Chunk_group.get_rules chunk_group in
+
+  let next_rvms = List.map rule_ids ~f:(fun rule_id ->
+    if Solve_state.is_rule_bound state rule_id then []
+    else
+    List.filter_map (Rule.get_possible_values rule_id) ~f:(fun v ->
+      let next_rvm = IMap.add rule_id v state.Solve_state.rvm in
+      if Chunk_group.is_rule_value_map_valid chunk_group next_rvm
+      then Some next_rvm
+      else None
+    )
   ) in
-  let rule_id_set = (ISet.of_list rule_ids) in
+  let next_rvms = List.concat next_rvms in
 
-  let next_rvms = ISet.fold (fun rule_id acc ->
-    if IMap.mem rule_id state.Solve_state.rvm then
-      acc
+  List.fold_left next_rvms ~init:state_queue ~f:(fun q rvm ->
+    let st = Solve_state.make state.Solve_state.chunk_group rvm in
+    State_queue.add q st
+  )
+
+let find_best_state queue =
+  let queue, best = State_queue.get_next queue in
+  let queue = expand_state queue best in
+  let rec aux count acc queue =
+    if State_queue.is_empty queue || count > 50 || acc.Solve_state.overflow = 0
+    then acc
     else
-      List.fold_left (Rule.get_possible_values rule_id) ~init:acc ~f:(
-        fun acc v ->
-          let next_rmv = IMap.add rule_id v state.Solve_state.rvm in
-          if Rule.is_rule_value_map_valid next_rmv then
-            next_rmv :: acc
-          else
-            acc
-      )
-  ) rule_id_set [] in
-
-  List.iter next_rvms ~f:(fun rvm ->
-    State_queue.add (Solve_state.make state.Solve_state.chunks rvm)
-  );
-  ()
-
-let solve chunks =
-  let count = ref 0 in
-  let rec aux acc =
-    count := !count + 1;
-    if State_queue.is_empty () then
-      acc
-    else
-
-    let state = State_queue.get_next () in
-    let best =
-      if Solve_state.compare state acc < 0 then state
-      else acc
-    in
-    if best.Solve_state.overflow = 0 || !count > 50 then
-      best
-    else begin
-      expand_state state;
-      aux best;
-    end
+      let queue, state = State_queue.get_next queue in
+      let best = Solve_state.pick_best_state state acc in
+      let queue = expand_state queue state in
+      aux (count + 1) best queue;
   in
+  aux 0 best queue
 
-  aux (State_queue.peek ())
+let solve chunk_groups =
+  let best_states = List.map chunk_groups ~f:(fun chunk_group ->
+    let rvm = Chunk_group.get_initial_rule_value_map chunk_group in
+    let init_state = Solve_state.make chunk_group rvm in
+    let state_queue = State_queue.make [init_state] in
+    find_best_state state_queue
+  ) in
+  let strings = List.map best_states ~f:(fun ss ->
+    Printf.sprintf "%s" (State_printer.print_state ss)
+  ) in
+  String.concat "" strings ^ "\n"

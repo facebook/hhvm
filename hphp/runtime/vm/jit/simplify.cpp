@@ -287,6 +287,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
   assertx(inst->is(CheckTypeMem,
                    CheckLoc,
                    CheckStk,
+                   CheckMBase,
                    CheckInit,
                    CheckInitMem,
                    CheckInitProps,
@@ -2437,6 +2438,10 @@ SSATmp* simplifyCheckStk(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyCheckMBase(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
 SSATmp* simplifyCheckClosureStaticLocInit(State& env,
                                           const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
@@ -3243,6 +3248,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckInitProps)
   X(CheckInitSProps)
   X(CheckLoc)
+  X(CheckMBase)
   X(CheckRefs)
   X(CheckRefInner)
   X(CheckStk)

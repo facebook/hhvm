@@ -113,11 +113,6 @@ struct ExtraArgs {
    */
   TypedValue* getExtraArg(unsigned argInd) const;
 
-  template<class F> void scan(F& mark, unsigned int nargs) const {
-    for (unsigned i = 0; i < nargs; ++i) {
-      mark(*(m_extraArgs + i));
-    }
-  }
 private:
   ExtraArgs();
   ~ExtraArgs();
@@ -153,9 +148,6 @@ struct VarEnv {
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
   const bool m_global;
-
- public:
-  template<class F> void scan(F& mark) const;
 
  public:
   explicit VarEnv();
@@ -274,8 +266,8 @@ void frame_free_locals_no_hook(ActRec* fp);
     TypedValue val_;                            \
     new (&val_) Variant(x);                     \
     frame_free_locals_no_hook(ar_);             \
-    ar_->m_r = val_;                            \
-    return &ar_->m_r;                           \
+    tvCopy(val_, *ar_->retSlot());              \
+    return ar_->retSlot();                      \
   }())
 
 #define tvReturn(x)                                                     \
@@ -338,10 +330,6 @@ struct Fault {
       m_raiseFrame(nullptr),
       m_raiseOffset(kInvalidOffset),
       m_handledCount(0) {}
-
-  template<class F> void scan(F& mark) const {
-    mark(m_userException);
-  }
 
   ObjectData* m_userException;
 
@@ -928,17 +916,6 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       TypedValue* retval);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-template<class F> void VarEnv::scan(F& mark) const {
-  mark(m_nvTable);
-  if (m_extraArgs) {
-    if (const auto ar = m_nvTable.getFP()) {
-      const int numExtra =
-        ar->numArgs() - ar->m_func->numNonVariadicParams();
-      m_extraArgs->scan(mark, numExtra);
-    }
-  }
-}
 
 }
 

@@ -285,13 +285,6 @@ void requestShutdown() {
 
 bool modulesInitialised() { return s_initialized; }
 
-void scanExtensions(IMarker& mark) {
-  assert(s_sorted);
-  for (auto& ext : s_ordered) {
-    ext->vscan(mark);
-  }
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
 static

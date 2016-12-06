@@ -37,7 +37,6 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/logger.h"
 
-#include <folly/Singleton.h>
 #include <folly/portability/Libgen.h>
 
 #include <string>
@@ -176,8 +175,6 @@ void ProcessInit() {
   Option::WholeProgram = wp;
 
   tweak_variant_dtors();
-
-  folly::SingletonVault::singleton()->registrationComplete();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

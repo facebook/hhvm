@@ -177,7 +177,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
   auto const cc = CapCode::ceil(sl.size());
   auto const need = cc.decode() + kCapOverhead;
   auto const sd = static_cast<StringData*>(
-    trueStatic ? low_malloc_data(need) : malloc(need)
+    trueStatic ? low_malloc_data(need) : malloc_huge(need)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
@@ -241,7 +241,7 @@ void StringData::destructStatic() {
 void StringData::destructUncounted() {
   assert(checkSane() && isUncounted());
   assert(isFlat());
-  free(this);
+  free_huge(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -651,13 +651,13 @@ StringData* StringData::reserve(size_t cap) {
   // Request-allocated StringData are always aligned at 16 bytes, thus it is
   // safe to copy in 16-byte groups.
 #ifdef NO_M_DATA
-  // layout: [m_lenAndHash][header][...data]
+  // layout: [header][m_lenAndHash][...data]
   sd->m_lenAndHash = m_lenAndHash;
   // This copies the characters (m_len bytes), and the trailing zero (1 byte)
   memcpy16_inline(sd+1, this+1, (m_len + 1 + 15) & ~0xF);
   assertx(reinterpret_cast<uintptr_t>(this+1) % 16 == 0);
 #else
-  // layout: [m_data][header][m_lenAndHash][...data]
+  // layout: [header][m_data][m_lenAndHash][...data]
   // This copies m_lenAndHash (8 bytes), the characters (m_len bytes),
   // and the trailing zero (1 byte).
   memcpy16_inline(&sd->m_lenAndHash, &m_lenAndHash,
@@ -843,6 +843,9 @@ void StringData::preCompute() {
   }
 }
 
+#if !defined(__SSE4_2__) || defined(NO_SSECRC) || !defined(NO_M_DATA) || \
+  defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+// This function is implemented directly in ASM in hash-crc.S otherwise.
 NEVER_INLINE strhash_t StringData::hashHelper() const {
   assert(!isProxy());
   strhash_t h = hash_string_i_unsafe(data(), m_len);
@@ -850,6 +853,7 @@ NEVER_INLINE strhash_t StringData::hashHelper() const {
   m_hash |= h;
   return h;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
@@ -1052,7 +1056,11 @@ bool StringData::checkSane() const {
                 "StringData size changed---update assertion if you mean it");
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
   static_assert(offsetof(StringData, m_hdr) == HeaderOffset, "");
-
+#ifdef NO_M_DATA
+  static_assert(sizeof(StringData) == SD_DATA, "");
+  static_assert(offsetof(StringData, m_len) == SD_LEN, "");
+  static_assert(offsetof(StringData, m_hash) == SD_HASH, "");
+#endif
   assert(uint32_t(size()) <= MaxSize);
   assert(capacity() <= MaxSize);
   assert(size() >= 0);

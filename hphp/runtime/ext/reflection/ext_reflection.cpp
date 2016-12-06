@@ -1225,7 +1225,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
-  StringISet visitedMethods;
+  req::StringISet visitedMethods;
   auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 

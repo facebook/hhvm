@@ -64,9 +64,15 @@ bool mustBeEmptyish(Type ty) {
 }
 
 bool elemCouldPromoteToArr(Type ty) { return couldBeEmptyish(ty); }
-bool propCouldPromoteToObj(Type ty) { return couldBeEmptyish(ty); }
 bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
-bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
+
+bool propCouldPromoteToObj(Type ty) {
+  return RuntimeOption::EvalPromoteEmptyObject && couldBeEmptyish(ty);
+}
+
+bool propMustPromoteToObj(Type ty)  {
+  return RuntimeOption::EvalPromoteEmptyObject && mustBeEmptyish(ty);
+}
 
 bool keyCouldBeWeird(Type key) {
   return key.couldBe(TObj) || key.couldBe(TArr) || key.couldBe(TVec) ||
@@ -246,9 +252,11 @@ void handleInThisPropD(ISS& env, bool isNullsafe) {
     return;
   }
 
-  mergeEachThisPropRaw(env, [&] (Type t) {
-    return propCouldPromoteToObj(t) ? TObj : TBottom;
-  });
+  if (RuntimeOption::EvalPromoteEmptyObject) {
+    mergeEachThisPropRaw(env, [&] (Type t) {
+      return propCouldPromoteToObj(t) ? TObj : TBottom;
+    });
+  }
 }
 
 void handleInSelfPropD(ISS& env, bool isNullsafe) {

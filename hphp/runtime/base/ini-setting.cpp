@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -877,30 +878,39 @@ static CallbackMap s_system_ini_callbacks;
 //
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
 
-struct SettingMap {
-  std::map<std::string, Variant> settings;
-  TYPE_SCAN_CUSTOM_FIELD(settings) {
-    for (auto& e : settings) scanner.scan(e);
+struct SystemSettings {
+  std::unordered_map<std::string,Variant> settings;
+  TYPE_SCAN_IGNORE_ALL; // the variants are always static
+};
+
+struct LocalSettings {
+  using Map = req::hash_map<std::string,Variant>;
+  folly::Optional<Map> settings;
+  Map& init() {
+    if (!settings) settings.emplace();
+    return settings.value();
   }
+  void clear() { settings.clear(); }
+  bool empty() { return !settings.hasValue() || settings.value().empty(); }
 };
 
 // Set by a .ini file at the start
-static SettingMap s_system_settings;
+static SystemSettings s_system_settings;
 
 // Changed during the course of the request
-static IMPLEMENT_THREAD_LOCAL(SettingMap, s_saved_defaults);
+static IMPLEMENT_THREAD_LOCAL(LocalSettings, s_saved_defaults);
 
 struct IniSettingExtension final : Extension {
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
 
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
-    assert(s_saved_defaults->settings.empty());
+    assert(!s_saved_defaults->settings.hasValue());
   }
 
   void requestShutdown() override {
     IniSetting::ResetSavedDefaults();
-    assert(s_saved_defaults->settings.empty());
+    assert(!s_saved_defaults->settings.hasValue());
   }
 } s_ini_extension;
 
@@ -1077,23 +1087,26 @@ bool IniSetting::GetSystem(const String& name, Variant& value) {
 }
 
 bool IniSetting::SetUser(const String& name, const Variant& value) {
-  auto it = s_saved_defaults->settings.find(name.toCppString());
-  if (it == s_saved_defaults->settings.end()) {
+  auto& defaults = s_saved_defaults->init();
+  auto it = defaults.find(name.toCppString());
+  if (it == defaults.end()) {
     Variant def;
     auto success = Get(name, def); // def gets populated here
     if (success) {
-      s_saved_defaults->settings[name.toCppString()] = def;
+      defaults[name.toCppString()] = def;
     }
   }
   return ini_set(name.toCppString(), value, PHP_INI_SET_USER);
 }
 
 void IniSetting::RestoreUser(const String& name) {
-  auto& defaults = s_saved_defaults->settings;
-  auto it = defaults.find(name.toCppString());
-  if (it != defaults.end() &&
-      ini_set(name.toCppString(), it->second, PHP_INI_SET_USER)) {
-    defaults.erase(it);
+  if (!s_saved_defaults->empty()) {
+    auto& defaults = s_saved_defaults->settings.value();
+    auto it = defaults.find(name.toCppString());
+    if (it != defaults.end() &&
+        ini_set(name.toCppString(), it->second, PHP_INI_SET_USER)) {
+      defaults.erase(it);
+    }
   }
 };
 
@@ -1106,10 +1119,13 @@ bool IniSetting::ResetSystemDefault(const std::string& name) {
 }
 
 void IniSetting::ResetSavedDefaults() {
-  for (auto& item : s_saved_defaults->settings) {
-    ini_set(item.first, item.second, PHP_INI_SET_USER);
+  if (!s_saved_defaults->empty()) {
+    for (auto& item : s_saved_defaults->settings.value()) {
+      ini_set(item.first, item.second, PHP_INI_SET_USER);
+    }
   }
-  s_saved_defaults->settings.clear();
+  // destroy the local settings hashtable even if it's empty
+  s_saved_defaults->clear();
 }
 
 bool IniSetting::GetMode(const std::string& name, Mode& mode) {

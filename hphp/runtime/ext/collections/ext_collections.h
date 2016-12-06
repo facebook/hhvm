@@ -48,6 +48,8 @@ extern const StaticString
     assertx(cls->isCollectionClass());                            \
     assertx(cls->classof(c_##name::classof()));                   \
     assertx(cls->attrs() & AttrFinal);                            \
+    /* ensure c_##name* ptrs are scanned inside other types */    \
+    (void)type_scan::getIndexForMalloc<c_##name>();               \
     return new (MM().objMalloc(sizeof(c_##name))) c_##name(cls);  \
   }
 
@@ -104,6 +106,8 @@ template<class T, class... Args> T* newCollectionObj(Args&&... args) {
                 std::is_convertible<T*,HashCollection*>::value ||
                 std::is_convertible<T*,c_Pair*>::value, "");
   auto const mem = MM().mallocSmallSize(sizeof(T));
+  // ensure T* ptrs are scanned inside other types
+  (void)type_scan::getIndexForMalloc<T>();
   auto col = new (mem) T(std::forward<Args>(args)...);
   assert(col->hasExactlyOneRef());
   return col;

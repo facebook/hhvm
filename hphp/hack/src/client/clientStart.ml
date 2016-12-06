@@ -24,6 +24,7 @@ type env = {
   no_load : bool;
   silent : bool;
   ai_mode : string option;
+  debug_port: Debug_port.out_port option;
 }
 
 let start_server env =
@@ -48,7 +49,11 @@ let start_server env =
        *
        * Note: Yes, the FD is available in the monitor process as well, but
        * it doesn't, and shouldn't, use it. *)
-      [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |]
+      [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
+      match env.debug_port with
+        | None -> [| |]
+        | Some port ->
+          [| "--debug-client"; string_of_int @@ Debug_port.handle_of_out port |]
     ] in
   if not env.silent then
     Printf.eprintf "Server launched with the following command:\n\t%s\n%!"

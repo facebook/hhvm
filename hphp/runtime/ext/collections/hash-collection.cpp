@@ -183,7 +183,7 @@ Array HashCollection::toValuesArray() {
 
 void HashCollection::remove(int64_t key) {
   mutateAndBump();
-  auto p = findForRemove(key, hashint(key));
+  auto p = findForRemove(key, hash_int64(key));
   if (validPos(p)) {
     erase(p);
   }

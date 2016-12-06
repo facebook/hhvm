@@ -101,9 +101,11 @@ module WithStatementAndDeclAndTypeParser
     | SingleQuotedStringLiteral
     | HeredocStringLiteral (* TODO: Parse interior *)
     | NowdocStringLiteral (* TODO: Parse interior *)
-    | DoubleQuotedStringLiteral (* TODO: Parse interior *)
+    | DoubleQuotedStringLiteral
     | BooleanLiteral
     | NullLiteral -> (parser1, make_literal_expression (make_token token))
+    | DoubleQuotedStringLiteralHead ->
+      parse_double_quoted_string parser1 (make_token token)
     | Variable -> parse_variable_or_lambda parser
     | XHPClassName
     | Name
@@ -155,6 +157,195 @@ module WithStatementAndDeclAndTypeParser
           let parser = with_error parser1 SyntaxError.error1015 in
           (parser, make_token token)
       end
+
+  and parse_double_quoted_string parser head =
+    (* SPEC
+    string-variable::
+      variable-name   offset-or-property-opt
+
+    offset-or-property::
+      offset-in-string
+      property-in-string
+
+    offset-in-string::
+      [   name   ]
+      [   variable-name   ]
+      [   integer-literal   ]
+
+    property-in-string::
+      ->   name
+
+    TODO: What about ?->
+
+    The actual situation is considerably more complex than indicated
+    in the specification.
+
+    TODO: Consider updating the specification.
+
+    * The tokens in the grammar above have no leading or trailing trivia.
+
+    * An embedded variable expression may also be enclosed in curly braces;
+      however, the $ of the variable expression must follow immediately after
+      the left brace.
+
+    * An embedded variable expression inside braces allows trivia between
+      the tokens and before the right brace.
+
+    * An embedded variable expression inside braces can be a much more complex
+      expression than indicated by the grammar above.  For example,
+      {$c->x->y[0]} is good, and {$c[$x instanceof foo ? 0 : 1]} is good,
+      but {$c instanceof foo ? $x : $y} is not.  It is not clear to me what
+      the legal grammar here is; it seems best in this situation to simply
+      parse any expression and do an error pass later.
+
+    * Note that the braced expressions can include double-quoted strings.
+      {$c["abc"]} is good, for instance.
+
+    * ${ is illegal in strict mode. In non-strict mode, ${varname is treated
+      the same as {$varname, and may be an arbitrary expression.
+
+    * TODO: We need to produce errors if there are unbalanced brackets,
+      example: "$x[0" is illegal.
+
+    * TODO: Similarly for any non-valid thing following the left bracket,
+      including trivia. example: "$x[  0]" is illegal.
+
+    *)
+
+    let merge token head =
+      (* TODO: Assert that new head has no leading trivia, old head has no
+      trailing trivia. *)
+      (* Invariant: A token inside a list of string fragments is always a head,
+      body or tail. *)
+      (* TODO: Is this invariant what we want? We could preserve the parse of
+         the string. That is, something like "a${b}c${d}e" is at present
+         represented as head, expr, body, expr, tail.  It could be instead
+         head, dollar, left brace, expr, right brace, body, dollar, left
+         brace, expr, right brace, tail. Is that better? *)
+      let k = match (Token.kind head, Token.kind token) with
+      | (DoubleQuotedStringLiteralHead, DoubleQuotedStringLiteralTail) ->
+        DoubleQuotedStringLiteral
+      | (DoubleQuotedStringLiteralHead, _) -> DoubleQuotedStringLiteralHead
+      | (_, DoubleQuotedStringLiteralTail) -> DoubleQuotedStringLiteralTail
+      | _ -> DoubleQuotedStringLiteralBody in
+      let w = (Token.width head) + (Token.width token) in
+      let l = Token.leading head in
+      let t = Token.trailing token in
+      let result = Token.make k w l t in
+      make_token result in
+
+    let merge_head token acc =
+      match acc with
+      | h :: t ->
+        begin
+        match MinimalSyntax.get_token h with
+        | None ->
+          let k = Token.kind token in
+          let token = match k with
+            | DoubleQuotedStringLiteralBody
+            | DoubleQuotedStringLiteralTail -> token
+            | _ -> Token.with_kind token DoubleQuotedStringLiteralBody in
+          (make_token token) :: acc
+        | Some head -> (merge token head) :: t
+        end
+      | _ -> (make_token token) :: acc in
+
+    let parse_embedded_expression parser token =
+      let var_expr = make_variable_expression (make_token token) in
+      let (parser1, token1) = next_token_in_string parser in
+      let (parser2, token2) = next_token_in_string parser1 in
+      let (parser3, token3) = next_token_in_string parser2 in
+      match (Token.kind token1, Token.kind token2, Token.kind token3) with
+      | (MinusGreaterThan, Name, _) ->
+        let expr = make_member_selection_expression var_expr
+          (make_token token1) (make_token token2) in
+        (parser2, expr)
+      | (LeftBracket, Name, RightBracket) ->
+        let expr = make_subscript_expression var_expr (make_token token1)
+          (make_qualified_name_expression (make_token token2))
+          (make_token token3) in
+        (parser3, expr)
+      | (LeftBracket, Variable, RightBracket) ->
+        let expr = make_subscript_expression var_expr (make_token token1)
+          (make_variable_expression (make_token token2)) (make_token token3) in
+        (parser3, expr)
+      | (LeftBracket, DecimalLiteral, RightBracket)
+      | (LeftBracket, OctalLiteral, RightBracket)
+      | (LeftBracket, HexadecimalLiteral, RightBracket)
+      | (LeftBracket, BinaryLiteral, RightBracket) ->
+        let expr = make_subscript_expression var_expr (make_token token1)
+          (make_literal_expression (make_token token2)) (make_token token3) in
+        (parser3, expr)
+      | _ -> (parser, var_expr) in
+
+    let rec handle_left_brace parser token acc =
+      let (parser1, token1) = next_token_in_string parser in
+      match Token.kind token1 with
+      | Dollar ->
+        (* We do not support {$ inside a string unless the $ begins a
+        variable name. Append the { and start again on the $. *)
+        (* TODO: Is this right? Suppose we have "{${x}".  Is that the same
+        as "{"."${x}" ? Double check this. *)
+        (* TODO: Give an error. *)
+        aux parser (merge_head token acc)
+      | Variable ->
+        (* Parse any expression followed by a close brace.
+           TODO: We do not actually support all possible expressions;
+                 see above. Do we want to (1) catch this at parse time,
+                 (2) catch it in a later pass, or (3) just allow any
+                 expression here? *)
+        let (parser, expr) =
+          parse_expression_with_reset_precedence parser in
+        (* TODO: Eat the close brace, if there is one.  *)
+        (* TODO: Give an error if there is not? *)
+        aux parser (expr :: (merge_head token acc))
+      | _ ->
+        (* We got a { not followed by a $. Ignore it. *)
+        (* TODO: Give a warning? *)
+        aux parser (merge_head token acc)
+
+    and handle_dollar parser token acc =
+      (* We need to parse ${x} as though it was {$x} *)
+      (* TODO: This should be an error in strict mode. *)
+      let (parser1, token1) = next_token_in_string parser in
+      match Token.kind token1 with
+      | LeftBrace ->
+        (* The thing in the braces has to be an expression that begins
+        with a variable, and the variable does *not* begin with a $. It's
+        just the word. Unlike the {$var} case, there *can* be trivia before
+        the expression. *)
+        (* TODO: Enforce these rules by producing an error if they are
+        violated. *)
+        (* TODO: Make the parse tree for the leading word in the expression
+        a variable expression, not a qualified name expression. *)
+
+        let (parser, expr) =
+          parse_expression_with_reset_precedence parser1 in
+        (* TODO: Eat the close brace, if there is one.  *)
+        (* TODO: Give an error if there is not? *)
+        let acc = merge_head token acc in
+        let acc = merge_head token1 acc in
+        let acc = expr :: acc in
+        aux parser acc
+      | _ ->
+        (* We got a $ not followed by a { or variable name. Ignore it. *)
+        (* TODO: Give a warning? *)
+        aux parser (merge_head token acc)
+
+    and aux parser acc =
+      let (parser, token) = next_token_in_string parser in
+      match Token.kind token with
+      | DoubleQuotedStringLiteralTail -> (parser, (merge_head token acc))
+      | LeftBrace -> handle_left_brace parser token acc
+      | Variable ->
+        let (parser, expr) = parse_embedded_expression parser token in
+        aux parser (expr :: acc)
+      | Dollar ->  handle_dollar parser token acc
+      | _ -> aux parser (merge_head token acc) in
+
+    let (parser, results) = aux parser [head] in
+    let result = make_literal_expression (make_list (List.rev results)) in
+    (parser, result)
 
   and parse_inclusion_expression parser =
   (* SPEC:
@@ -548,6 +739,9 @@ module WithStatementAndDeclAndTypeParser
     | BooleanLiteral
     | DecimalLiteral
     | DoubleQuotedStringLiteral
+    | DoubleQuotedStringLiteralHead
+    | DoubleQuotedStringLiteralBody
+    | DoubleQuotedStringLiteralTail
     | FloatingLiteral
     | HeredocStringLiteral
     | HexadecimalLiteral

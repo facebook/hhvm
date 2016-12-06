@@ -29,7 +29,6 @@
 #include "hphp/util/health-monitor-types.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
-#include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/execution-profiler.h"
 #include "hphp/runtime/server/writer.h"
 
@@ -51,11 +50,9 @@ public:
   static void LogPage(const std::string &url, int code);
   static void Reset();
   static void Clear();
-  static void GetKeys(std::string &out, int64_t from, int64_t to);
-  static void Report(std::string &out, Writer::Format format,
-                     int64_t from, int64_t to,
-                     const std::string &agg, const std::string &keys,
-                     const std::string &url, int code,
+  static void GetKeys(std::string &out);
+  static void Report(std::string &out,
+                     const std::string &keys,
                      const std::string &prefix);
 
   // thread status functions
@@ -95,39 +92,30 @@ private:
   static std::vector<ServerStats*> s_loggers;
   static DECLARE_THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
 
-  using CounterMap = hphp_shared_string_map<int64_t>;
+  using CounterMap = std::unordered_map<std::string, int64_t>;
 
-  struct PageStats {
-    std::string m_url; // which page
-    int m_code;        // response code
-    int m_hit;         // page hits
-    CounterMap m_values; // name value pairs
-  };
-  using PageStatsMap = hphp_shared_string_map<PageStats>;
   struct TimeSlot {
     int64_t m_time;
-    PageStatsMap m_pages;
+    int m_hits;
+    CounterMap m_values;
   };
 
   static void Merge(CounterMap &dest, const CounterMap &src);
-  static void Merge(PageStatsMap &dest, const PageStatsMap &src);
   static void Merge(std::list<TimeSlot*> &dest,
                     const std::list<TimeSlot*> &src);
   static void Filter(std::list<TimeSlot*> &slots, const std::string &keys,
-                     const std::string &url, int code,
                      std::map<std::string, int> &wantedKeys);
-  static void Aggregate(std::list<TimeSlot*> &slots, const std::string &agg,
+  static void Aggregate(std::list<TimeSlot*> &slots,
                         std::map<std::string, int> &wantedKeys);
 
-  static void CollectSlots(std::list<TimeSlot*> &slots, int64_t from, int64_t to);
+  static void CollectSlots(std::list<TimeSlot*> &slots);
   static void FreeSlots(std::list<TimeSlot*> &slots);
 
   static void GetAllKeys(std::set<std::string> &allKeys,
                          const std::list<TimeSlot*> &slots);
-  static void Report(std::string &out, Writer::Format format,
+  static void Report(std::string &out,
                      const std::list<TimeSlot*> &slots,
                      const std::string &prefix);
-  static void ReportSlots(Writer* writer, const std::list<TimeSlot*> &slots);
 
   Mutex m_lock;
   std::vector<TimeSlot> m_slots;
@@ -144,7 +132,7 @@ private:
   void logPage(const std::string &url, int code);
   void reset();
   void clear();
-  void collect(std::list<TimeSlot*> &slots, int64_t from, int64_t to);
+  void collect(std::list<TimeSlot*> &slots);
 
   /**
    * Live status, instead of historical statistics.

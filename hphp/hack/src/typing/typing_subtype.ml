@@ -240,8 +240,27 @@ let add_constraint_with_fail env ck ty_sub ty_super fail =
 let add_constraint env ck ty_sub ty_super =
   add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
 
+let rec subtype_params env subl superl =
+  match subl, superl with
+  | [], _ | _, [] -> env
+  | (_, sub) :: subl, (_, super) :: superl ->
+    let env = { env with Env.pos = Reason.to_pos (fst sub) } in
+    let env = sub_type env sub super in
+    let env = subtype_params env subl superl in
+    env
+
 (* This function checks that the method ft_sub can be used to replace
- * (is a subtype of) ft_super. The rules must take account of arity,
+ * (is a subtype of) ft_super.
+ *
+ * It's used for two purposes:
+ * (1) checking that one method can validly override another
+ * (2) checking that one function type is a subtype of another
+ * For (1) there are a number of features (generics, bounds, Fvariadic)
+ * that don't apply in (2)
+ * For (2) we apply contravariance on function parameter types, for (1)
+ * we treat them invariantly (because of runtime restrictions)
+ *
+ * The rules must take account of arity,
  * generic parameters and their constraints, parameter types, and return type.
  *
  * Suppose ft_super is of the form
@@ -269,9 +288,10 @@ let add_constraint env ck ty_sub ty_super =
  *   Decl_instantiate.instantiate_ce)
  *
  * Then for ft_sub to be a subtype of ft_super it must be the case that
- * (1) tsub1 = tsuper1, ..., tsubn = tsupern.
- *     This is invariant subtyping on parameter types.
- *     (See D3834381 where this is relaxed to contravariant subtyping.)
+ * (1) tsuper1 <: tsub1, ..., tsupern <: tsubn (under constraints
+ *     T1 csuper1, ..., Tn csupern and wsuper).
+ *
+ *     This is contravariant subtyping on parameter types.
  *
  * (2) tsub <: tsuper (under constraints T1 csuper1, ..., Tn csupern and wsuper)
  *     This is covariant subtyping on result type. For constraints consider
@@ -286,7 +306,8 @@ let add_constraint env ck ty_sub ty_super =
  *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
  *     and that wsub holds under those assumptions.
  *)
-let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
+and subtype_funs_generic ~check_return ~contravariant_arguments env
+    r_sub ft_sub r_super ft_super =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
@@ -306,16 +327,27 @@ let rec subtype_funs_generic ~check_return env r_sub ft_sub r_super ft_super =
     | _, _ -> ()
   );
 
+  (* We support contravariance on arguments only for function type subtyping,
+   * and not for compatibility of signatures when overriding, as this is
+   * not supported by the runtime *)
+  (* However, if we are polymorphic in the superclass we have to be
+   * polymorphic in the subclass. *)
   let env, var_opt = match ft_sub.ft_arity, ft_super.ft_arity with
     | Fvariadic (_, (n_super, var_super)), Fvariadic (_, (_, var_sub)) ->
       let env, var = Unify.unify env var_super var_sub in
       env, Some (n_super, var)
     | _ -> env, None
   in
-
   (* This is (1) above *)
-  let env, _ =
-    Unify.unify_params env ft_super.ft_params ft_sub.ft_params var_opt in
+  let env =
+    (* Right now this is true only for function types; hence var_opt=None *)
+    if contravariant_arguments
+    then
+      Env.invert_grow_super env (fun env ->
+       subtype_params env ft_super.ft_params ft_sub.ft_params)
+    else
+      fst (Unify.unify_params env ft_super.ft_params ft_sub.ft_params var_opt)
+  in
 
   (* We check constraint entailment and invariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better
@@ -404,6 +436,7 @@ and subtype_method ~check_return env r_sub ft_sub r_super ft_super =
 
   subtype_funs_generic
     ~check_return env
+    ~contravariant_arguments:false
     r_sub ft_sub_no_tvars
     r_super ft_super_no_tvars
 
@@ -771,7 +804,8 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     when List.length tyl_super = List.length tyl_sub ->
     wfold_left2 sub_type env tyl_sub tyl_super
   | (r_sub, Tfun ft_sub), (r_super, Tfun ft_super) ->
-      subtype_funs_generic ~check_return:true env r_sub ft_sub r_super ft_super
+    subtype_funs_generic ~contravariant_arguments:true ~check_return:true
+      env r_sub ft_sub r_super ft_super
   | (r_sub, Tanon (anon_arity, id)), (r_super, Tfun ft)  ->
       (match Env.get_anonymous env id with
       | None ->

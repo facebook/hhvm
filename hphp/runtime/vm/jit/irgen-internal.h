@@ -343,6 +343,11 @@ inline SSATmp* assertType(SSATmp* tmp, Type type) {
   return tmp;
 }
 
+inline FPInvOffset offsetFromFP(const IRGS& env, IRSPRelOffset irSPRel) {
+  auto const irSPOff = env.irb->fs().irSPOff();
+  return irSPRel.to<FPInvOffset>(irSPOff);
+}
+
 inline IRSPRelOffset offsetFromIRSP(const IRGS& env, FPInvOffset fpRel) {
   auto const irSPOff = env.irb->fs().irSPOff();
   return fpRel.to<IRSPRelOffset>(irSPOff);
@@ -397,7 +402,7 @@ inline void decRef(IRGS& env, SSATmp* tmp, int locId=-1) {
 }
 
 inline void popDecRef(IRGS& env,
-                      TypeConstraint tc = DataTypeBoxAndCountness) {
+                      TypeConstraint tc = DataTypeCountness) {
   auto const val = pop(env, tc);
   decRef(env, val);
 }
@@ -412,7 +417,7 @@ inline SSATmp* push(IRGS& env, SSATmp* tmp) {
 
 inline SSATmp* pushIncRef(IRGS& env,
                           SSATmp* tmp,
-                          TypeConstraint tc = DataTypeBoxAndCountness) {
+                          TypeConstraint tc = DataTypeCountness) {
   env.irb->constrainValue(tmp, tc);
   gen(env, IncRef, tmp);
   return push(env, tmp);

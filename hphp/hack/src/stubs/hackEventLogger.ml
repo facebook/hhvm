@@ -9,10 +9,10 @@
  *)
 
 let set_use_watchman _ = ()
-let set_lazy_levels _ _ = ()
+let set_lazy_levels _ _ _ = ()
 let set_lazy_incremental _ = ()
 let bad_exit _ _ _ ~is_oom:_ = ()
-let init _ _ _ _ _ _ _ = ()
+let init _ _ _ _ _ _ _ _ = ()
 let init_monitor _ _ _ = ()
 let init_end _ = ()
 let init_really_end _ = ()

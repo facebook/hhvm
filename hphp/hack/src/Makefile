@@ -47,6 +47,7 @@ MODULES=\
   deps\
   dfind\
   emitter\
+  debug\
   find\
   format\
 	full_fidelity\

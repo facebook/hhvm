@@ -99,7 +99,7 @@ struct BaseSet : HashCollection {
     auto set = static_cast<BaseSet*>(obj);
     ssize_t p;
     if (key->m_type == KindOfInt64) {
-      p = set->find(key->m_data.num, hashint(key->m_data.num));
+      p = set->find(key->m_data.num, hash_int64(key->m_data.num));
     } else if (isStringType(key->m_type)) {
       p = set->find(key->m_data.pstr, key->m_data.pstr->hash());
     } else {

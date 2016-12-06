@@ -71,6 +71,11 @@ module Program =
 
     (* filter and relativize updated file paths *)
     let process_updates genv _env updates =
+      let genv = {
+        genv with
+        debug_port = Debug_port.write_opt (Debug_event.Disk_files_modified
+          (SSet.elements updates)) genv.debug_port
+      } in
       let root = Path.to_string @@ ServerArgs.root genv.options in
       (* Because of symlinks, we can have updates from files that aren't in
        * the .hhconfig directory *)
@@ -201,13 +206,19 @@ let rec recheck_loop acc genv env new_client =
   | None ->
     env, Notifier_async_changes SSet.empty
   in
-  let acc, raw_updates = match raw_updates with
+  let genv, acc, raw_updates = match raw_updates with
   | Notifier_unavailable ->
+    genv, { acc with updates_stale = true; }, SSet.empty
+  | Notifier_state_enter (name, _) ->
+    let event = (Debug_event.Fresh_vcs_state name) in
+    { genv with debug_port = Debug_port.write_opt event genv.debug_port },
     { acc with updates_stale = true; }, SSet.empty
+  | Notifier_state_leave _ ->
+    genv, { acc with updates_stale = true; }, SSet.empty
   | Notifier_async_changes updates ->
-    { acc with updates_stale = true; }, updates
+    genv, { acc with updates_stale = true; }, updates
   | Notifier_synchronous_changes updates ->
-    { acc with updates_stale = false; }, updates
+    genv, { acc with updates_stale = false; }, updates
   in
   let updates = Program.process_updates genv env raw_updates in
 
@@ -385,6 +396,7 @@ let setup_server options handle =
     enable_on_nfs;
     lazy_decl;
     lazy_parse;
+    lazy_init;
     load_script_config;
     _
   } as local_config = local_config in
@@ -400,6 +412,7 @@ let setup_server options handle =
     (Unix.gettimeofday ())
     lazy_decl
     lazy_parse
+    lazy_init
     saved_state_load_type
     use_sql;
   let root_s = Path.to_string root in
@@ -476,6 +489,9 @@ let daemon_main (state, options) (ic, oc) =
     Hh_logger.exc e;
     (** Exit with the same exit code that that worker used. *)
     exit i
+  | Worker.Worker_failed_to_send_job _ as e->
+    Hh_logger.exc e;
+    Exit_status.(exit Worker_failed_to_send_job)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
   | SharedMem.C_assertion_failure _ as e ->

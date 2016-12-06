@@ -441,6 +441,11 @@ public:
    */
   const Class* commonAncestor(const Class* cls) const;
 
+  /*
+   * Given that this class exists, return a class named "name" that is
+   * also guaranteed to exist, or nullptr if there is none.
+   */
+  const Class* getClassDependency(const StringData* name) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic info.                                                        [const]

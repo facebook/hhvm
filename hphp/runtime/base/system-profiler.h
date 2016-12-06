@@ -52,7 +52,9 @@ struct SystemProfiler {
   virtual void fileLoadCallBack(const std::string &name) = 0;
 
   /*
-   * Called once to get the hotprofiler.
+   * Called once to get the hotprofiler. The profiler should have
+   * been allocated with req::make_raw<T>; ProfilerFactory will
+   * destroy it with req::destroy_raw().
    */
   virtual Profiler *getHotProfiler() = 0;
 };

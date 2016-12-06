@@ -106,7 +106,7 @@ struct Venv {
  * };
  */
 template<class Vemit>
-void vasm_emit(const Vunit& u, Vtext& text, CGMeta& fixups,
+void vasm_emit(Vunit& u, Vtext& text, CGMeta& fixups,
                AsmInfo* asm_info);
 
 /*

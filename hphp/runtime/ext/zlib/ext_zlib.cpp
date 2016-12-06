@@ -74,9 +74,6 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
     }
     return file;
   }
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
 } s_zlib_stream_wrapper;
 
 const int64_t k_ZLIB_ENCODING_RAW     = -MAX_WBITS;
@@ -437,7 +434,6 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Chunk-based API
-namespace {
 
 const StaticString s_SystemLib_ChunkedInflator("__SystemLib\\ChunkedInflator");
 
@@ -497,6 +493,9 @@ struct ChunkedInflator {
  private:
   ::z_stream m_zstream;
   bool m_eof;
+
+  // z_stream contains void* that we don't care about.
+  TYPE_SCAN_IGNORE_FIELD(m_zstream);
 };
 
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
@@ -514,8 +513,6 @@ String HHVM_METHOD(ChunkedInflator,
   FETCH_CHUNKED_INFLATOR(data, this_);
   assert(data);
   return data->inflateChunk(chunk);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

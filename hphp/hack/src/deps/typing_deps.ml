@@ -161,8 +161,8 @@ let get_files deps =
     with Not_found -> acc
   end deps ~init:Relative_path.Set.empty
 
-let update_files fast =
-  Relative_path.Map.iter fast begin fun filename info ->
+let update_files fileInfo =
+  Relative_path.Map.iter fileInfo begin fun filename info ->
     let {FileInfo.funs; classes; typedefs;
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;

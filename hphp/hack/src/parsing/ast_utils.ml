@@ -19,10 +19,14 @@ let get_defs ast =
   List.fold_right ast ~init:([], [], [], [])
     ~f:begin fun def (acc1, acc2, acc3, acc4 as acc) ->
       match def with
-      | Ast.Fun f -> f.Ast.f_name :: acc1, acc2, acc3, acc4
-      | Ast.Class c -> acc1, c.Ast.c_name :: acc2, acc3, acc4
-      | Ast.Typedef t -> acc1, acc2, t.Ast.t_id :: acc3, acc4
-      | Ast.Constant cst -> acc1, acc2, acc3, cst.Ast.cst_name :: acc4
+      | Ast.Fun f ->
+        (FileInfo.pos_full f.Ast.f_name) :: acc1, acc2, acc3, acc4
+      | Ast.Class c ->
+        acc1, (FileInfo.pos_full c.Ast.c_name) :: acc2, acc3, acc4
+      | Ast.Typedef t ->
+        acc1, acc2, (FileInfo.pos_full t.Ast.t_id) :: acc3, acc4
+      | Ast.Constant cst ->
+        acc1, acc2, acc3, (FileInfo.pos_full cst.Ast.cst_name) :: acc4
       (* namespace nodes will never appear as long as elaborate_namespaces is
        * set to true when the parser is invoked *)
       | Ast.Namespace _
@@ -30,6 +34,7 @@ let get_defs ast =
        (* toplevel statements are ignored *)
       | Ast.Stmt _ -> acc
     end
+
 
 let class_elt_type_to_string = function
   | Ast.Const _ -> "const"

@@ -1,0 +1,6 @@
+string(0) ""
+bool(true)
+bool(true)
+
+Warning: open_basedir restriction in effect. File(/xxx/bar) is not within the allowed paths in %s on line %d
+bool(false)

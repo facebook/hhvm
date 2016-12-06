@@ -200,7 +200,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static uint32_t getMaxCapInPlaceFast(uint32_t cap);
 
   static size_t heapSize(const ArrayData*);
-  template<class Marker> static void scan(const ArrayData*, Marker&);
+  static void scan(const ArrayData*, type_scan::Scanner&);
 
   static ArrayData* MakeReserve(uint32_t capacity);
   static ArrayData* MakeReserveVec(uint32_t capacity);
@@ -213,6 +213,10 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
+  /*
+   * Like MakePacked, but with `values' array in natural (not reversed) order.
+   */
+  static ArrayData* MakePackedNatural(uint32_t size, const TypedValue* values);
 
   static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
@@ -253,6 +257,7 @@ private:
   static ArrayData* MakeReserveImpl(uint32_t, HeaderKind);
   static ArrayData* MakeReserveSlow(uint32_t, HeaderKind);
 
+  template<bool reverse>
   static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
 
   static ArrayData* MakeUninitializedImpl(uint32_t, HeaderKind);

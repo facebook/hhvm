@@ -92,6 +92,7 @@ bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
+bool RuntimeOption::EnableContextInErrorHandler = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::EnableZendSorting = false;
 bool RuntimeOption::EnableZendIniCompat = true;
@@ -418,6 +419,7 @@ bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_Substr = false;
 bool RuntimeOption::PHP7_InfNanFloatParse = false;
 bool RuntimeOption::PHP7_UVS = false;
+bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
 std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
 
@@ -1151,6 +1153,8 @@ void RuntimeOption::Load(
     // NB: after we know the value of RepoAuthoritative.
     Config::Bind(EnableArgsInBacktraces, ini, config,
                  "Eval.EnableArgsInBacktraces", !RepoAuthoritative);
+    Config::Bind(EnableContextInErrorHandler, ini, config,
+                 "Eval.EnableContextInErrorHandler", !RepoAuthoritative);
     Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
                  false);
     if (RepoAuthoritative) {
@@ -1304,6 +1308,8 @@ void RuntimeOption::Load(
     Config::Bind(PHP7_InfNanFloatParse, ini, config, "PHP7.InfNanFloatParse",
                  s_PHP7_master);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
+    Config::Bind(PHP7_DisallowUnsafeCurlUploads, ini, config,
+                 "PHP7.DisallowUnsafeCurlUploads", s_PHP7_master);
   }
   {
     // Server

@@ -150,7 +150,7 @@ struct Vgen {
 
   /////////////////////////////////////////////////////////////////////////////
 
-  template<class Inst> void emit(Inst& i) {
+  template<class Inst> void emit(const Inst& i) {
     always_assert_flog(false, "unimplemented instruction: {} in B{}\n",
                        vinst_names[Vinstr(i).op], size_t(current));
   }
@@ -289,6 +289,7 @@ struct Vgen {
   void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), SetFlags); }
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
+  void emit(const testbi& i);
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testli& i);
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
@@ -600,6 +601,10 @@ void Vgen::emit(const andbi& i) {
 
 void Vgen::emit(const andli& i) {
   a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), SetFlags);
+}
+
+void Vgen::emit(const testbi& i) {
+  a->And(vixl::wzr, W(i.s1), MSKTOP(0xff), SetFlags);
 }
 
 void Vgen::emit(const testli& i) {
@@ -1446,11 +1451,15 @@ Y(cmpwm, uxth, loadw, cmpl)
 
 void lower(Vunit& u, testb& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
-    auto s0 = v.makeReg();
-    auto s1 = v.makeReg();
-    v << movzbl{i.s0, s0};
-    v << movzbl{i.s1, s1};
-    v << testl{s0, s1, i.sf};
+    if (i.s0 == i.s1) {
+      v << testbi{(int8_t)0xff, i.s1, i.sf};
+    } else {
+      auto s0 = v.makeReg();
+      auto s1 = v.makeReg();
+      v << movzbl{i.s0, s0};
+      v << movzbl{i.s1, s1};
+      v << testl{s0, s1, i.sf};
+    }
   });
 }
 
@@ -1596,7 +1605,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   }
 }
 
-void emitARM(const Vunit& unit, Vtext& text, CGMeta& fixups,
+void emitARM(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }

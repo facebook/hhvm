@@ -31,6 +31,12 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
+  let next_token_in_string parser =
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_token_in_string lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token)
+
   let peek_token ?(lookahead=0) parser =
     let rec lex_ahead lexer n =
       let (next_lexer, token) = Parser.Lexer.next_token lexer in

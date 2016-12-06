@@ -212,13 +212,19 @@ loaded, using a separate CheckRefInner instruction.
 
   Hint that the inner type of a BoxedCell in localId is likely type T, where T
   is a subtype of BoxedCell. The type must be guarded on before it is known to
-  be true (via LdRef).
+  be true (via CheckRefInner).
 
 | HintStkInner<T,offset>, ND, S(StkPtr), NF
 
   Hint that the inner type of the BoxedInitCell on the stack pointed to by S0
   at offset (in cells) is T. The type must be guarded on before it is known to
-  be true (via LdRef).
+  be true (via CheckRefInner).
+
+| HintMBaseInner<T>, ND, NA, NF
+
+  Hint that the inner type of the BoxedInitCell pointed to by the member base
+  register is T.  The type must be guarded on before it is known to be true
+  (via CheckRefInner).
 
 | CheckLoc<T,localId>, ND, S(FramePtr), B
 
@@ -230,6 +236,11 @@ loaded, using a separate CheckRefInner instruction.
   Check that the type of the cell on the stack pointed to by S0 at offset (in
   cells) is T; if not, branch to block B.
 
+| CheckMBase<T>, ND, S(PtrToGen), B
+
+  Check that the value pointed to by the member base register S0 has type T; if
+  not, branch to block B.  This is functionally the same as CheckTypeMem.
+
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 
   Asserts that type of the supplied local on the frame S0 is T. This is used
@@ -237,14 +248,17 @@ loaded, using a separate CheckRefInner instruction.
   imply a runtime check (the assertion must've already been proven to be true)
   and cannot cause control flow.
 
-  Returns a new frame pointer representing the same frame as S0 but with the
-  knowledge that the asserted local has type T.
-
 | AssertStk<T,offset>, ND, S(StkPtr), NF
 
   Assert that stack element at `offset' (in cells) from S0 has type T. This is
   similar to a CheckStk except that it does not imply a runtime check and
   cannot cause control flow.
+
+| AssertMBase<T>, ND, NA, NF
+
+  Assert that the value pointed to by the member base register has type T.
+  This is similar to a CheckMBase except that it does not imply a runtime check
+  and cannot cause control flow.
 
 | CastStk<T,offset>, ND, S(StkPtr), Er
 
@@ -1188,12 +1202,16 @@ To string conversions:
   Load a Func* off of the class method table for S0, at offset S1 (in method
   slots).
 
-| LookupClsMethod<offset>, ND, S(Cls) S(Str) S(StkPtr) S(FramePtr), Er
+| LookupClsMethod<calleeAROffset,forward>,
+|   ND,
+|   S(Cls) S(Str) S(StkPtr) S(FramePtr),
+|   Er
 
   Store a pointer to a class method into an activation record. S0 points to the
   class, S1 is the method name, S2 is a stack pointer that has an activation
-  record to modify at `offset', and S3 is a pointer to the current frame (used
-  to get the context). May throw or fatal if method is not accessible.
+  record to modify at `spToActRecOffset', and S3 is a pointer to the current
+  frame (used to get the context). `forward` indicates if we should forward the
+  current context. May throw or fatal if method is not accessible.
 
 | LdPropAddr<T,offset>, DParamPtr(Prop), S(Obj), NF
 

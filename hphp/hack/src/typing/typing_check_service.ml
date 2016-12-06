@@ -32,21 +32,21 @@ let neutral = Errors.empty,
 (*****************************************************************************)
 
 let type_fun opts fn x =
-  match Parser_heap.find_fun_in_file_full opts fn x with
+  match Parser_heap.find_fun_in_file ~full:true opts fn x with
   | Some f ->
     let fun_ = Naming.fun_ opts f in
     Typing.fun_def opts fun_
   | None -> ()
 
 let type_class opts fn x =
-  match Parser_heap.find_class_in_file_full opts fn x with
+  match Parser_heap.find_class_in_file ~full:true opts fn x with
   | Some cls ->
     let class_ = Naming.class_ opts cls in
     Typing.class_def opts class_
   | None -> ()
 
 let check_typedef opts fn x =
-  match Parser_heap.find_typedef_in_file_full opts fn x with
+  match Parser_heap.find_typedef_in_file ~full:true opts fn x with
   | Some t ->
     let typedef = Naming.typedef opts t in
     Typing.typedef_def opts typedef;
@@ -54,7 +54,7 @@ let check_typedef opts fn x =
   | None -> ()
 
 let check_const opts fn x =
-  match Parser_heap.find_const_in_file_full opts fn x with
+  match Parser_heap.find_const_in_file ~full:true opts fn x with
   | None -> ()
   | Some cst ->
     let cst = Naming.global_const opts cst in
@@ -90,9 +90,11 @@ let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
     then Relative_path.Set.add failed fn
     else failed in
   let decl_failed =
-    if lazy_decl_err
-    then Relative_path.Set.add decl_failed fn
-    else decl_failed in
+    match lazy_decl_err with
+    | Some file ->  Relative_path.Set.add
+                      (Relative_path.Set.add decl_failed fn)
+                      file
+    | None -> decl_failed in
   errors, failed, decl_failed
 
 let check_files opts (errors, err_info) fnl =

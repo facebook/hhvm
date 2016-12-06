@@ -69,7 +69,7 @@ SetArray* keysetReqAllocSet(uint32_t scale) {
 
 SetArray* keysetStaticAllocSet(uint32_t scale) {
   auto const allocBytes = SetArray::ComputeAllocBytes(scale);
-  return static_cast<SetArray*>(std::malloc(allocBytes));
+  return static_cast<SetArray*>(low_malloc_data(allocBytes));
 }
 
 } // namespace
@@ -166,7 +166,8 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
   assertx(!a->empty());
   auto const scale = a->scale();
   auto const used = a->m_used;
-  char* mem = static_cast<char*>(std::malloc(extra + ComputeAllocBytes(scale)));
+  char* mem =
+    static_cast<char*>(malloc_huge(extra + ComputeAllocBytes(scale)));
   auto const ad = reinterpret_cast<SetArray*>(mem + extra);
 
   assert((extra % 16) == 0);
@@ -341,7 +342,7 @@ void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
       });
     }
   }
-  std::free(reinterpret_cast<char*>(ad) - extra);
+  free_huge(reinterpret_cast<char*>(ad) - extra);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -456,7 +457,7 @@ void SetArray::insert(int64_t k, inthash_t h) {
     elm->setIntKey(k, h);
   }
 }
-void SetArray::insert(int64_t k) { return insert(k, hashint(k)); }
+void SetArray::insert(int64_t k) { return insert(k, hash_int64(k)); }
 
 void SetArray::insert(StringData* k, strhash_t h) {
   assert(!isFull());
@@ -569,7 +570,7 @@ SetArray* SetArray::grow(uint32_t newScale) {
   assert(ad->kind() == kind());
   assert(ad->m_size == m_size);
   assert(ad->m_scale == newScale);
-  assert(ad->m_used = oldUsed);
+  assert(ad->m_used == oldUsed);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -737,7 +738,7 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
 
 const TypedValue* SetArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   auto a = asSet(ad);
-  auto i = a->find(ki, hashint(ki));
+  auto i = a->find(ki, hash_int64(ki));
   if (LIKELY(i >= 0)) {
     return a->tvOfPos(i);
   } else {
@@ -792,7 +793,7 @@ bool SetArray::IsVectorData(const ArrayData*) {
 
 bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {
   auto a = asSet(ad);
-  return a->find(k, hashint(k)) != -1;
+  return a->find(k, hash_int64(k)) != -1;
 }
 
 bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
@@ -853,7 +854,7 @@ ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell, bool) {
 ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asSet(ad);
   if (copy) a = a->copySet();
-  auto const h = hashint(k);
+  auto const h = hash_int64(k);
   if (auto const loc = a->findHash<FindType::Remove>(k, h)) {
     a->erase(loc);
   }
@@ -1042,7 +1043,7 @@ ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool copy) {
   Elm e;
   assert(ClearElms(&e, 1));
   if (isIntType(v.m_type)) {
-    e.setIntKey(v.m_data.num, hashint(v.m_data.num));
+    e.setIntKey(v.m_data.num, hash_int64(v.m_data.num));
   } else if (isStringType(v.m_type)) {
     e.setStrKey(v.m_data.pstr, v.m_data.pstr->hash());
   } else {

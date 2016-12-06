@@ -1113,7 +1113,7 @@ void VariableSerializer::writeArrayValue(
   case Type::Serialize:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
-  // Do not count referenced values after the first
+    // Do not count referenced values after the first
     if (!(value.isReferenced() &&
           m_arrayIds->find(value.getRefData()) != m_arrayIds->end())) {
       m_valueCount++;
@@ -1253,7 +1253,10 @@ void VariableSerializer::indent() {
     m_buf->append(' ');
   }
   if (m_referenced) {
-    if (m_indent > 0 && m_type == Type::VarDump) m_buf->append('&');
+    if (m_indent > 0 && (m_type == Type::VarDump ||
+                         m_type == Type::DebugDump)) {
+      m_buf->append('&');
+    }
     m_referenced = false;
   }
 }

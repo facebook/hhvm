@@ -9,6 +9,7 @@
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.

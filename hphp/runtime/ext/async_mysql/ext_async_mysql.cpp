@@ -1250,7 +1250,7 @@ const StaticString AsyncMysqlRowBlock::s_className("AsyncMysqlRowBlock");
 IMPLEMENT_GET_CLASS(AsyncMysqlRowBlock)
 
 Object AsyncMysqlRowBlock::newInstance(am::RowBlock* row_block,
-    std::shared_ptr<FieldIndex> indexer) {
+    req::shared_ptr<FieldIndex> indexer) {
   Object ret{AsyncMysqlRowBlock::getClass()};
   auto* data = Native::data<AsyncMysqlRowBlock>(ret);
   data->m_row_block.reset(new am::RowBlock(std::move(*row_block)));

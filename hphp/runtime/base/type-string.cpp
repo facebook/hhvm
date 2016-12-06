@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -41,20 +42,11 @@ const StaticString empty_string_ref("");
 StringData const **String::converted_integers_raw;
 StringData const **String::converted_integers;
 
-String::IntegerStringDataMap String::integer_string_data_map;
-
 static const StringData* convert_integer_helper(int64_t n) {
   char tmpbuf[21];
   tmpbuf[20] = '\0';
   auto sl = conv_10(n, &tmpbuf[20]);
   return makeStaticString(sl);
-}
-
-void String::PreConvertInteger(int64_t n) {
-  IntegerStringDataMap::const_iterator it =
-    integer_string_data_map.find(n);
-  if (it != integer_string_data_map.end()) return;
-  integer_string_data_map[n] = convert_integer_helper(n);
 }
 
 const StringData *String::ConvertInteger(int64_t n) {
@@ -70,18 +62,18 @@ static int precompute_integers() {
     (StringData const **)calloc(NUM_CONVERTED_INTEGERS, sizeof(StringData*));
   String::converted_integers = String::converted_integers_raw
     - String::MinPrecomputedInteger;
-  if (RuntimeOption::ServerExecutionMode()) {
-    // Proactively populate, in order to increase cache locality for sequential
-    // access patterns.
-    for (int n = String::MinPrecomputedInteger;
-         n <= String::MaxPrecomputedInteger; n++) {
-      String::ConvertInteger(n);
-    }
-  }
   return NUM_CONVERTED_INTEGERS;
 }
 
 static int ATTRIBUTE_UNUSED initIntegers = precompute_integers();
+static InitFiniNode prepopulate_integers([] {
+  // Proactively populate, in order to increase cache locality for sequential
+  // access patterns.
+  for (int n = String::MinPrecomputedInteger;
+       n <= String::MaxPrecomputedInteger; n++) {
+    String::ConvertInteger(n);
+  }
+}, InitFiniNode::When::PostRuntimeOptions);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors

@@ -17,7 +17,11 @@
 #ifndef incl_HPHP_UTIL_HUGETLB_H_
 #define incl_HPHP_UTIL_HUGETLB_H_
 
+#include <cstddef>
+
 namespace HPHP {
+
+constexpr size_t size1g = 1u << 30;
 
 // Note: these functions for managing 1GB huge pages are not designed to be
 // thread-safe.  They should execute during program initialization where only
@@ -29,7 +33,7 @@ namespace HPHP {
 bool set_hugetlbfs_path(const char* path);
 
 // Try to find a mount point for the 1G hugetlbfs automatically.  Return whether
-// we find one.
+// we found one.
 bool find_hugetlbfs_path();
 
 // Try to create a temporary directory and mount a hugetlbfs with 1G page size
@@ -54,6 +58,14 @@ Huge1GPageInfo get_huge1g_info(int node = -1);
 
 // Get error message for hugetlb mapping.
 const char* get_hugetlb_err_msg();
+
+// Get number of 1G huge pages that has been mapped in this process.
+unsigned num_huge1g_pages();
+
+// Call mprotect() on all 1G huge pages.  Useful in limiting access in child
+// processes.
+int mprotect_huge1g_pages(int prot);
+
 }
 
 #endif

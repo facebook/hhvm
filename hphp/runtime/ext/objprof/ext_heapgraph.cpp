@@ -236,8 +236,8 @@ std::string getNodesConnectionName(
   int from,
   int to
 ) {
-  // For non Ambiguous pointers, try to drill down and resolve the edge name
-  if (from != -1 && to != -1 && g.ptrs[ptr].ptr_kind != HeapGraph::Ambiguous) {
+  // Try to drill down and resolve the edge name
+  if (from != -1 && to != -1) {
     auto h = g.nodes[from].h;
     auto th = g.nodes[to].h;
 
@@ -305,7 +305,7 @@ std::string getNodesConnectionName(
         break;
     }
   } else if (from == -1 && to != -1) {
-    return root_kind_names[(unsigned)g.ptrs[ptr].root_kind];
+    return g.ptrs[ptr].description;
   }
 
   return getEdgeKindName(g.ptrs[ptr].ptr_kind);
@@ -348,7 +348,7 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
     s_kind, Variant(getEdgeKindName(ptr.ptr_kind)),
     s_from, Variant(ptr.from),
     s_to, Variant(ptr.to),
-    s_seat, Variant(root_kind_names[(unsigned)ptr.root_kind]),
+    s_seat, Variant(ptr.description),
     s_name, Variant(cptr.edgename)
   );
 

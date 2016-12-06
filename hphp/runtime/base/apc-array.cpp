@@ -112,7 +112,7 @@ APCArray::MakeSharedKeyset(ArrayData* keyset, APCHandleLevel level,
 }
 
 APCHandle::Pair APCArray::MakeSharedEmptyArray() {
-  void* p = malloc(sizeof(APCArray));
+  void* p = malloc_huge(sizeof(APCArray));
   APCArray* arr = new (p) APCArray(PackedCtor{},
                                    APCKind::SharedPackedArray,
                                    0);
@@ -125,7 +125,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   auto cap = num > 2 ? folly::nextPowTwo(num) : 2;
 
   auto size = sizeof(APCArray) + sizeof(int) * cap + sizeof(Bucket) * num;
-  auto p = std::malloc(size);
+  auto p = malloc_huge(size);
   APCArray* ret = new (p) APCArray(HashedCtor{}, kind, cap);
 
   for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
@@ -146,7 +146,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
     );
   } catch (...) {
     ret->~APCArray();
-    std::free(p);
+    free_huge(p);
     throw;
   }
 
@@ -201,7 +201,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
                                      bool unserializeObj) {
   auto num_elems = arr->size();
   auto size = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
-  auto p = std::malloc(size);
+  auto p = malloc_huge(size);
   auto ret = new (p) APCArray(PackedCtor{}, kind, num_elems);
 
   size_t i = 0;
@@ -221,7 +221,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
   } catch (...) {
     ret->m_size = i;
     ret->~APCArray();
-    std::free(p);
+    free_huge(p);
     throw;
   }
 
@@ -231,7 +231,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
 void APCArray::Delete(APCHandle* handle) {
   auto const arr = APCArray::fromHandle(handle);
   arr->~APCArray();
-  std::free(arr);
+  free_huge(arr);
 }
 
 APCArray::~APCArray() {

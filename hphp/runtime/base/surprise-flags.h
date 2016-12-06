@@ -98,12 +98,34 @@ enum SurpriseFlag : size_t {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Code within this scope must never handle any of the specified flags, and is
+ * furthermore not even allowed to check for them using, e.g. `getSurpriseFlag',
+ * regardess of whether they actually are set.
+ */
+struct NoHandleSurpriseScope {
+#ifdef DEBUG
+  static void AssertNone(SurpriseFlag flags);
+  explicit NoHandleSurpriseScope(SurpriseFlag flags);
+  ~NoHandleSurpriseScope();
+ private:
+  SurpriseFlag m_flags;
+#else
+  // Compiles to nothing in release mode.
+  static void AssertNone(SurpriseFlag flags) {}
+  explicit NoHandleSurpriseScope(SurpriseFlag flags) {}
+  ~NoHandleSurpriseScope() {}
+#endif
+};
+
 inline std::atomic<size_t>& stackLimitAndSurprise() {
   return rds::header()->stackLimitAndSurprise;
 }
 
 inline bool checkSurpriseFlags() {
   auto const val = stackLimitAndSurprise().load(std::memory_order_acquire);
+  auto constexpr all = static_cast<SurpriseFlag>(kSurpriseFlagMask);
+  NoHandleSurpriseScope::AssertNone(all);
   return val & kSurpriseFlagMask;
 }
 
@@ -114,6 +136,7 @@ inline void setSurpriseFlag(SurpriseFlag flag) {
 
 inline bool getSurpriseFlag(SurpriseFlag flag) {
   assertx(flag >= 1ull << 48);
+  NoHandleSurpriseScope::AssertNone(flag);
   return stackLimitAndSurprise().load() & flag;
 }
 

@@ -144,7 +144,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // register so the trace we are returning to has it where it expects.
     // TODO(#1273094): We should probably modify the actual builtins to return
     // values via registers using the C ABI and do a reg-to-reg move.
-    loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmfp()[AROFF(m_r)], true);
+    loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmfp()[kArRetOff], true);
     v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
     emitRB(v, Trace::RBTypeFuncExit, callee->fullName()->data());
     return;

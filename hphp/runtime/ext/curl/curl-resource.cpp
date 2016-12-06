@@ -50,7 +50,8 @@ CurlResource::ToFree::~ToFree() {
 
 CurlResource::CurlResource(const String& url,
                            CurlHandlePoolPtr pool /*=nullptr */)
-: m_emptyPost(true), m_connPool(pool), m_pooledHandle(nullptr) {
+: m_emptyPost(true), m_safeUpload(true), m_connPool(pool),
+  m_pooledHandle(nullptr) {
   if (m_connPool) {
     m_pooledHandle = m_connPool->fetch();
     m_cp = m_pooledHandle->useHandle();
@@ -114,6 +115,7 @@ CurlResource::CurlResource(req::ptr<CurlResource> src)
 
   m_to_free = src->m_to_free;
   m_emptyPost = src->m_emptyPost;
+  m_safeUpload = src->m_safeUpload;
 }
 
 void CurlResource::sweep() {
@@ -515,16 +517,38 @@ bool CurlResource::setLongOption(long option, long value) {
   return m_error_no == CURLE_OK;
 }
 
+bool CurlResource::isStringFilePathOption(long option) {
+  switch (option) {
+    case CURLOPT_COOKIEFILE:
+    case CURLOPT_COOKIEJAR:
+    case CURLOPT_RANDOM_FILE:
+    case CURLOPT_SSLCERT:
+#if LIBCURL_VERSION_NUM >= 0x070b00 /* Available since 7.11.0 */
+    case CURLOPT_NETRC_FILE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
+    case CURLOPT_SSH_PRIVATE_KEYFILE:
+    case CURLOPT_SSH_PUBLIC_KEYFILE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
+    case CURLOPT_CRLFILE:
+    case CURLOPT_ISSUERCERT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071306 /* Available since 7.19.6 */
+    case CURLOPT_SSH_KNOWNHOSTS:
+#endif
+      return true;
+    default:
+      return false;
+  }
+}
+
 bool CurlResource::isStringOption(long option) {
   switch (option) {
     // Not in PHP's main string case
     case CURLOPT_PRIVATE:
     case CURLOPT_URL:
     case CURLOPT_KRB4LEVEL:
-    case CURLOPT_COOKIEJAR:
-    case CURLOPT_SSLCERT:
-    case CURLOPT_RANDOM_FILE:
-    case CURLOPT_COOKIEFILE:
 
     // Everything else
     case CURLOPT_CAINFO:
@@ -599,12 +623,27 @@ bool CurlResource::isStringOption(long option) {
 #endif
       return true;
     default:
-      return false;
+      return isStringFilePathOption(option);
   }
 }
 
 bool CurlResource::setStringOption(long option, const String& value) {
   assertx(isStringOption(option));
+
+  // the following options deal with files, therefore the open_basedir check
+  // is required.
+  if (isStringFilePathOption(option) && !value.empty()) {
+    String filename = File::TranslatePath(value);
+    if (filename.empty()) {
+      raise_warning(
+        "open_basedir restriction in effect. File(%s) is not within "
+        "the allowed paths",
+        value.data()
+      );
+      return false;
+    }
+  }
+
   if (option == CURLOPT_URL) m_url = value;
 
 #if LIBCURL_VERSION_NUM >= 0x071100
@@ -725,7 +764,10 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
       String val = var_val.toString();
       auto postval = val.data();
 
-      if (*postval == '@' && strlen(postval) == val.size()) {
+      if (!RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+          !m_safeUpload &&
+          *postval == '@' &&
+          strlen(postval) == val.size()) {
         /* Given a string like:
          *   "@/foo/bar;type=herp/derp;filename=ponies\0"
          * - Temporarily convert to:
@@ -734,6 +776,11 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
          *   curl_formadd
          * - Revert changes to postval at the end
          */
+        raise_deprecated(
+          "curl_setopt(): The usage of the @filename API for file uploading "
+          "is deprecated. Please use the CURLFile class instead"
+        );
+
         if (val.get()->isImmutable()) {
           val = String::attach(
             StringData::Make(val.data(), val.size(), CopyString));
@@ -897,7 +944,8 @@ bool CurlResource::isNonCurlOption(long option) {
          (option == CURLOPT_HEADERFUNCTION) ||
          (option == CURLOPT_PROGRESSFUNCTION) ||
          (option == CURLOPT_FB_TLS_VER_MAX) ||
-         (option == CURLOPT_FB_TLS_CIPHER_SPEC);
+         (option == CURLOPT_FB_TLS_CIPHER_SPEC) ||
+         (option == CURLOPT_SAFE_UPLOAD);
 }
 
 bool CurlResource::setNonCurlOption(long option, const Variant& value) {
@@ -946,6 +994,16 @@ bool CurlResource::setNonCurlOption(long option, const Variant& value) {
         raise_warning("CURLOPT_FB_TLS_CIPHER_SPEC requires a non-empty string");
       }
       return false;
+    case CURLOPT_SAFE_UPLOAD:
+      if (RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+          value.toInt64() == 0) {
+        raise_warning(
+          "curl_setopt(): Disabling safe uploads is no longer supported"
+        );
+        return false;
+      }
+      m_safeUpload = value.toBoolean();
+      return true;
   }
   return false;
 }

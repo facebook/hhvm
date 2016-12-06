@@ -66,9 +66,12 @@ struct Block {
    *
    * See also runtime/vm/jit/code-cache.h for comment on the 'hot' and 'prof'
    * sections.
+   *
+   * IMPORTANT NOTE: These hints are sorted in increasing order or likelihood.
+   * This order is used in fixBlockHints().
    */
 
-  enum class Hint { Neither, Likely, Unlikely, Unused };
+  enum class Hint { Unused, Unlikely, Neither, Likely };
 
   explicit Block(unsigned id, uint64_t profCount)
     : m_id(id)
@@ -175,8 +178,13 @@ struct Block {
   reverse_iterator rend()         { return m_instrs.rend(); }
   const_reverse_iterator rbegin() const { return m_instrs.rbegin(); }
   const_reverse_iterator rend()   const { return m_instrs.rend(); }
+
+  // Erase the given instruction from this block and unlinks any outgoing edges.
+  // These methods don't delete the instruction, so it may be reused after
+  // calling erase().
   iterator         erase(iterator pos);
   iterator         erase(IRInstruction* inst);
+
   iterator insert(iterator pos, IRInstruction* inst);
   void splice(iterator pos, Block* from, iterator begin, iterator end);
   void push_back(std::initializer_list<IRInstruction*> insts);
@@ -227,6 +235,7 @@ inline Block::const_reference Block::back() const {
 }
 
 inline Block::iterator Block::erase(iterator pos) {
+  if (pos->hasEdges()) pos->clearEdges();
   pos->setBlock(nullptr);
   return m_instrs.erase(pos);
 }
@@ -375,6 +384,16 @@ inline void Edge::setTo(Block* to) {
 
 inline Block* Edge::from() const {
   return inst() != nullptr ? inst()->block() : nullptr;
+}
+
+inline const char* blockHintName(Block::Hint hint) {
+  switch (hint) {
+    case Block::Hint::Unused:   return "Unused";
+    case Block::Hint::Unlikely: return "Unlikely";
+    case Block::Hint::Neither:  return "Neither";
+    case Block::Hint::Likely:   return "Likely";
+  }
+  not_reached();
 }
 
 }}

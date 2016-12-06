@@ -18,18 +18,8 @@ def hash_id(key):
     return key.cast(T('size_t'))
 
 def hash_int64(key):
-    ull = T('unsigned long long')
     key = key.cast(T('long long'))
-
-    key = (~key) + (key << 21)
-    key = key ^ (key >> 24).cast(ull);
-    key = (key + (key << 3)) + (key << 8)
-    key = key ^ (key >> 14).cast(ull);
-    key = (key + (key << 2)) + (key << 4)
-    key = key ^ (key >> 28).cast(ull);
-    key = key + (key << 31);
-
-    return -key if key < 0 else key;
+    return crc32q(0, key)
 
 def hash_ctca(ctca):
     return ctca.cast(T('uintptr_t'))

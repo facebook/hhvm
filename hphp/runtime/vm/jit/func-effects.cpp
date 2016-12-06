@@ -385,12 +385,13 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
     case OpFPushClsMethodD:
     case OpFPushCtor:
     case OpFPushCtorD:
+    case OpFPushCtorI:
       // None of these touch the caller's frame because they all call methods,
       // not top-level functions.
       return false;
 
     default:
-      return true;
+      always_assert("Unhandled FPush type in callDestroysLocals" && 0);
   }
 }
 

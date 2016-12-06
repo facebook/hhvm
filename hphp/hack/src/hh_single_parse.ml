@@ -100,9 +100,9 @@ let compare_parsers file =
   if ast_sexpr = ffp_sexpr
   then Result ast
   else
-    let unsafe = Str.regexp_string "Unsafe" in
-    if try Str.search_forward unsafe ast_sexpr 0 >= 0 with | _ -> false
-    then Unsupported ("Unsafe", ast)
+    let unsupported = Str.regexp "Fallthrough\\|Unsafe" in
+    if try Str.search_forward unsupported ast_sexpr 0 >= 0 with | _ -> false
+    then Unsupported ("pragma", ast)
     else CmpDifferent (file, ast_sexpr, ffp_sexpr)
 
 let parse_and_print parser run_diff filename =

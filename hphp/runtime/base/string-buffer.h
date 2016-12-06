@@ -205,9 +205,6 @@ struct StringBuffer {
   void read(FILE *in, int page_size = 1024);
   void read(File *in, int page_size = 1024);
 
-  template<class F> void scan(F& mark) const {
-    mark(m_str);
-  }
 private:
   void appendHelper(const char* s, int len);
   void appendHelper(char c);

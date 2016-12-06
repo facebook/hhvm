@@ -63,7 +63,8 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   a.  cmpd   (tmp1, tmp2);
 
   a.  branchFar(tc::ustubs().funcPrologueRedispatch,
-                  ppc64_asm::BranchConditions::NotEqual);
+                  ppc64_asm::BranchConditions::NotEqual,
+                  ppc64_asm::ImmType::TocOnly);
 
   DEBUG_ONLY auto guard = funcGuardFromPrologue(a.frontier(), func);
   assertx(funcGuardMatches(guard, func));
@@ -77,8 +78,9 @@ TCA funcGuardFromPrologue(TCA prologue, const Func* func) {
 bool funcGuardMatches(TCA guard, const Func* func) {
   if (isPrologueStub(guard)) return false;
 
+  const ppc64_asm::DecodedInstruction di(guard);
   auto const ifunc = reinterpret_cast<uintptr_t>(func);
-  return static_cast<uintptr_t>(ppc64_asm::Assembler::getLi64(guard)) == ifunc;
+  return static_cast<uintptr_t>(di.immediate()) == ifunc;
 }
 
 void clobberFuncGuard(TCA guard, const Func* func) {

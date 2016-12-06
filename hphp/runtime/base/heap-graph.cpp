@@ -29,160 +29,21 @@
 
 namespace HPHP {
 
-const char* root_kind_names[] = {
-  "NotARoot",
-  "RdsNormal",
-  "RdsLocal",
-  "RdsPersistent",
-  "PhpStack",
-  "ExecutionContext",
-  "ThreadInfo",
-  "CppStack",
-  "CppTls",
-  "ThreadLocalManager",
-  "Extensions",
-  "RootMaps",
-  "SweepLists",
-  "AsioSession",
-  "GetServerNote",
-  "EzcResources"
-};
+template<class Fn>
+void conservativeScan(const void* start, size_t len, Fn fn) {
+  const uintptr_t M{7}; // word size - 1
+  auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
+  auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
+  for (; s < e; s++) fn(*s);
+}
 
 namespace {
 template<class F>
 struct PtrFilter: F {
   template <class... Args> explicit PtrFilter(Args&&... args)
-    : F(std::forward<Args>(args)...)
-  {
-    rds_ = folly::Range<const char*>((char*)rds::header(),
-                                   RuntimeOption::EvalJitTargetCacheSize);
-  }
+    : F(std::forward<Args>(args)...) {}
 
-  // classes containing counted pointers
-  void operator()(const String& p) { (*this)(p.get()); }
-  void operator()(const Array& p) { (*this)(p.get()); }
-  void operator()(const ArrayNoDtor& p) { (*this)(p.arr()); }
-  void operator()(const Object& p) { (*this)(p.get()); }
-  void operator()(const Resource& p) { (*this)(p.hdr()->data()); }
-  void operator()(const Variant& p) { (*this)(*p.asTypedValue()); }
-  void operator()(const StringBuffer& p) { p.scan(*this); }
-  void operator()(const NameValueTable& p) { p.scan(*this); }
-  void operator()(const VarEnv& venv) { (*this)(&venv); }
-
-  // mark a TypedValue or TypedValueAux. taking tv by value would exclude aux.
-  void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
-  void operator()(const TypedValue& tv) {
-    switch (tv.m_type) {
-      case KindOfString: // never null, sometimes counted
-        if (tv.m_data.pstr->isRefCounted()) F::counted(tv.m_data.pstr);
-        break;
-      case KindOfVec:
-      case KindOfDict:
-      case KindOfKeyset:
-      case KindOfArray: // never null, sometimes counted
-        if (tv.m_data.parr->isRefCounted()) F::counted(tv.m_data.parr);
-        break;
-      case KindOfRef: // sometimes points into rds
-        if (!inRds(tv.m_data.pref)) F::counted(tv.m_data.pref);
-        break;
-      case KindOfObject:    return F::counted(tv.m_data.pobj);
-      case KindOfResource:  return F::counted(tv.m_data.pres);
-      case KindOfUninit:
-      case KindOfNull:
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-      case KindOfPersistentString:
-      case KindOfPersistentVec:
-      case KindOfPersistentDict:
-      case KindOfPersistentKeyset:
-      case KindOfPersistentArray:
-      case KindOfClass: // only in eval stack
-        return;
-    }
-  }
-
-  // todo: implement me
-  void operator()(const ActRec&) {}
-  void operator()(const Stack&) {}
-
-  void operator()(const StringData* p) {
-    if (p && p->isRefCounted()) F::counted(p);
-  }
-  void operator()(const ArrayData* p) {
-    if (p && p->isRefCounted()) F::counted(p);
-  }
-  void operator()(const ObjectData* p) { if (p) F::counted(p); }
-  void operator()(const ResourceData* p) { if (p) F::counted(p->hdr()); }
-  void operator()(const ResourceHdr* p) { if (p) F::counted(p); }
-  void operator()(const RefData* p) { if (p && !inRds(p)) F::counted(p); }
-
-  void implicit(const ObjectData* p) { if (p) F::implicit(p); }
-  void implicit(const ResourceHdr* p) { if (p) F::implicit(p); }
-  void implicit(const Array& p) {
-    if (!p.isNull() && p.get()->isRefCounted()) F::implicit(p.get());
-  }
-
-  template<class T> void operator()(const req::ptr<T>& p) {
-    (*this)(p.get());
-  }
-
-  // collections of scannable fields
-  template<class T> void operator()(const req::vector<T>& c) {
-    for (auto& e : c) (*this)(e);
-  }
-  template<class T> void operator()(const req::set<T>& c) {
-    for (auto& e : c) (*this)(e);
-  }
-  template<class T> void implicit(const req::set<T>& c) {
-    for (auto& e : c) implicit(e);
-  }
-  template<class T,class U> void operator()(const std::pair<T,U>& p) {
-    (*this)(p.first);
-    (*this)(p.second);
-  }
-  template<class T,class U,class V,class W>
-  void operator()(const req::hash_map<T,U,V,W>& c) {
-    for (auto& e : c) (*this)(e); // each element is pair<T,U>
-  }
-
-  void operator()(const VarEnv* p) { if (p) p->scan(*this); }
-
-  // Explicitly ignored field types.
-  void operator()(const LowPtr<Class>&) {}
-  void operator()(const Unit*) {}
-  void operator()(const Func*) {}
-  void operator()(const Class*) {}
-  void operator()(const std::string&) {}
-  void operator()(int) {}
-
-  // NVTs live inside VarEnv, and GlobalsArray has an interior ptr to one.
-  // ignore the interior pointer; NVT should be scanned by VarEnv::scan.
-  void operator()(const NameValueTable* p) {}
-
-  // mark ambigous pointers in the range [start,start+len). If the start or
   // end is a partial word, don't scan that word.
-  void FOLLY_DISABLE_ADDRESS_SANITIZER
-  operator()(const void* start, size_t len) {
-    const uintptr_t M{7}; // word size - 1
-    auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
-    auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
-    for (; s < e; s++) F::ambig(*s);
-  }
-
-  void operator()(const void* start, const void* end) {
-    assert(uintptr_t(end) >= uintptr_t(start));
-    return (*this)(start, uintptr_t(end) - uintptr_t(start));
-  }
-
- private:
-  bool inRds(const void* vp) {
-    auto p = reinterpret_cast<const char*>(vp);
-    return p >= rds_.begin() && p < rds_.end();
-  }
-
- private:
-  folly::Range<const char*> rds_; // full mmap'd rds section.
 };
 
 void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
@@ -190,77 +51,21 @@ void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
   auto& to_node = g.nodes[to];
   auto e = g.ptrs.size();
   g.ptrs.push_back(
-    HeapGraph::Ptr{from, to, from_node.first_out, to_node.first_in, kind}
+    HeapGraph::Ptr{from, to, from_node.first_out, to_node.first_in, kind, ""}
   );
   from_node.first_out = to_node.first_in = e;
 }
 
 void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
-             RootKind root_kind) {
+             const char* description) {
   auto& to_node = g.nodes[to];
   auto e = g.ptrs.size();
   g.ptrs.push_back(
-    HeapGraph::Ptr{-1, to, -1, to_node.first_in, ptr_kind, root_kind}
+    HeapGraph::Ptr{-1, to, -1, to_node.first_in, ptr_kind, description}
   );
   to_node.first_in = e;
   g.roots.push_back(e);
 }
-
-struct ObjMarker {
-  explicit ObjMarker(HeapGraph& g, PtrMap& blocks, const Header* h)
-    : g_(g), blocks_(blocks), from_(blocks.index(h)) {
-    assert(h);
-  }
-  void counted(const void* p) { mark(p, HeapGraph::Counted); }
-  void implicit(const void* p) { mark(p, HeapGraph::Implicit); }
-  void ambig(const void* p) {
-    if (auto r = blocks_.region(p)) {
-      addPtr(g_, from_, blocks_.index(r), HeapGraph::Ambiguous);
-    }
-  }
-  void where(RootKind) {}
-
- private:
-  void mark(const void* p, HeapGraph::PtrKind kind) {
-    assert(blocks_.header(p));
-    auto r = blocks_.region(p);
-    addPtr(g_, from_, blocks_.index(r), kind);
-  }
-
- private:
-  HeapGraph& g_;
-  PtrMap& blocks_;
-  int from_;
-};
-
-struct RootMarker {
-  explicit RootMarker(HeapGraph& g, PtrMap& blocks)
-    : g_(g), blocks_(blocks), root_kind_(RootKind::NotARoot)
-  {}
-  void counted(const void* p) { mark(p, HeapGraph::Counted); }
-  void implicit(const void* p) { mark(p, HeapGraph::Implicit); }
-  void ambig(const void* p) {
-    if (auto r = blocks_.region(p)) {
-      addRoot(g_, blocks_.index(r), HeapGraph::Ambiguous, root_kind_);
-    }
-  }
-  void where(RootKind k) {
-    root_kind_ = k;
-  }
-
- private:
-  void mark(const void* p, HeapGraph::PtrKind kind) {
-    assert(blocks_.header(p));
-    auto r = blocks_.region(p);
-    addRoot(g_, blocks_.index(r), kind, root_kind_);
-  }
-
- private:
-  HeapGraph& g_;
-  PtrMap& blocks_;
-  RootKind root_kind_;
-};
-
 } // anon namespace
 
 // Run a DFS over the heap, remember the first pointer id to each
@@ -300,32 +105,41 @@ HeapGraph makeHeapGraph(bool include_free) {
   type_scan::Scanner type_scanner;
 
   // find roots
-  PtrFilter<RootMarker> rmark(g, blocks);
-  scanRoots(rmark, type_scanner);
+  scanRoots(type_scanner);
   type_scanner.finish(
-    [&](const void* p) {
+    [&](const void* p, const char* description) {
       // definitely a ptr, but maybe interior, and maybe not counted
-      rmark.ambig(p);
+      if (auto r = blocks.region(p)) {
+        addRoot(g, blocks.index(r), HeapGraph::Implicit, description);
+      }
     },
-    [&](const void* p, std::size_t size) {
-      // scan the range conservatively
-      rmark(p, size);
+    [&](const void* p, std::size_t size, const char* description) {
+      conservativeScan(p, size, [&](const void* ptr) {
+        if (auto r = blocks.region(ptr)) {
+          addRoot(g, blocks.index(r), HeapGraph::Ambiguous, description);
+        }
+      });
     }
   );
 
   // find heap->heap pointers
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
     auto h = g.nodes[i].h;
-    PtrFilter<ObjMarker> omark(g, blocks, h);
-    scanHeader(h, omark, type_scanner);
+    scanHeader(h, type_scanner);
+    auto from = blocks.index(h);
     type_scanner.finish(
-      [&](const void* p) {
+      [&](const void* p, const char*) {
         // definitely a ptr, but maybe interior, and maybe not counted
-        omark.ambig(p);
+        if (auto r = blocks.region(p)) {
+          addPtr(g, from, blocks.index(r), HeapGraph::Implicit);
+        }
       },
-      [&](const void* p, std::size_t size) {
-        // scan the range conservatively
-        omark(p, size);
+      [&](const void* p, std::size_t size, const char*) {
+        conservativeScan(p, size, [&](const void* ptr) {
+          if (auto r = blocks.region(ptr)) {
+            addPtr(g, from, blocks.index(r), HeapGraph::Ambiguous);
+          }
+        });
       }
     );
   }

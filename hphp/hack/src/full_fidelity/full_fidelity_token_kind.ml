@@ -9,6 +9,7 @@
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -180,6 +181,9 @@ type t =
   | FloatingLiteral
   | SingleQuotedStringLiteral
   | DoubleQuotedStringLiteral
+  | DoubleQuotedStringLiteralHead
+  | DoubleQuotedStringLiteralBody
+  | DoubleQuotedStringLiteralTail
   | HeredocStringLiteral
   | NowdocStringLiteral
   | BooleanLiteral
@@ -510,6 +514,9 @@ match kind with
   | FloatingLiteral -> "floating_literal"
   | SingleQuotedStringLiteral -> "single_quoted_string_literal"
   | DoubleQuotedStringLiteral -> "double_quoted_string_literal"
+  | DoubleQuotedStringLiteralHead -> "double_quoted_string_literal_head"
+  | DoubleQuotedStringLiteralBody -> "double_quoted_string_literal_body"
+  | DoubleQuotedStringLiteralTail -> "double_quoted_string_literal_tail"
   | HeredocStringLiteral -> "heredoc_string_literal"
   | NowdocStringLiteral -> "nowdoc_string_literal"
   | BooleanLiteral -> "boolean_literal"

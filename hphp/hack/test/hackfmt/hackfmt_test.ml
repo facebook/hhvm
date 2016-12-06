@@ -20,11 +20,9 @@ let parse_and_print filename =
   let syntax_tree = SyntaxTree.make source_text in
 
   let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
-  let chunks = Hack_format.run editable in
-  let init_state = Solve_state.make chunks (Rule.get_initial_rvm ()) in
-  State_queue.add init_state;
-  let result = Line_splitter.solve chunks in
-  Printf.printf "%s\n" (State_printer.print_state result);
+  let chunk_groups = Hack_format.run editable in
+  let result = Line_splitter.solve chunk_groups in
+  Printf.printf "%s" result;
   ()
 
 let () =

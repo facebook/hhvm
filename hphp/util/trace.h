@@ -124,6 +124,8 @@ namespace Trace {
       TM(hhir_cfg)      \
       TM(hhir_checkhoist) \
       TM(hhir_dce)      \
+      TM(hhir_fixhint)  \
+      TM(hhir_fsm)      \
       TM(hhir_gvn)      \
       TM(hhir_licm)     \
       TM(hhir_load)     \

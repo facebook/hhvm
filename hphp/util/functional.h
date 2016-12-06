@@ -82,7 +82,7 @@ struct stringHashCompare {
 
 struct int64_hash {
   size_t operator() (const int64_t v) const {
-    return (size_t)hash_int64(v);
+    return hash_int64(v);
   }
   size_t hash(const int64_t v) const {
     return operator()(v);
@@ -95,7 +95,7 @@ struct int64_hash {
 template<typename T>
 struct pointer_hash {
   size_t operator() (const T *const p) const {
-    return (size_t)hash_int64(intptr_t(p));
+    return hash_int64(intptr_t(p));
   }
   size_t hash(const T *const p) const {
     return operator()(p);

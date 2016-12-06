@@ -9,6 +9,7 @@
  *
  */
 /* THIS FILE IS GENERATED; DO NOT EDIT IT */
+/* @generated */
 /**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -420,7 +421,7 @@ class EditableSyntax
     {
       let token = target.is_token ? target : target.leftmost_token;
       if (token == null)
-        throw 'Unable to find token to insert trivia.'
+        throw 'Unable to find token to insert trivia.';
 
       // Inserting trivia before token is inserting to the right end of
       // the leading trivia.
@@ -448,7 +449,7 @@ class EditableSyntax
     {
       let token = target.is_token ? target : target.rightmost_token;
       if (token == null)
-        throw 'Unable to find token to insert trivia.'
+        throw 'Unable to find token to insert trivia.';
 
       // Inserting trivia after token is inserting to the left end of
       // the trailing trivia.
@@ -910,6 +911,12 @@ class EditableToken extends EditableSyntax
        return new SingleQuotedStringLiteralToken(leading, trailing, token_text);
     case 'double_quoted_string_literal':
        return new DoubleQuotedStringLiteralToken(leading, trailing, token_text);
+    case 'double_quoted_string_literal_head':
+       return new DoubleQuotedStringLiteralHeadToken(leading, trailing, token_text);
+    case 'double_quoted_string_literal_body':
+       return new DoubleQuotedStringLiteralBodyToken(leading, trailing, token_text);
+    case 'double_quoted_string_literal_tail':
+       return new DoubleQuotedStringLiteralTailToken(leading, trailing, token_text);
     case 'heredoc_string_literal':
        return new HeredocStringLiteralToken(leading, trailing, token_text);
     case 'nowdoc_string_literal':
@@ -2170,6 +2177,42 @@ class DoubleQuotedStringLiteralToken extends EditableToken
   with_text(text)
   {
     return new DoubleQuotedStringLiteralToken(this.leading, this.trailing, text);
+  }
+
+}
+class DoubleQuotedStringLiteralHeadToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('double_quoted_string_literal_head', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new DoubleQuotedStringLiteralHeadToken(this.leading, this.trailing, text);
+  }
+
+}
+class DoubleQuotedStringLiteralBodyToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('double_quoted_string_literal_body', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new DoubleQuotedStringLiteralBodyToken(this.leading, this.trailing, text);
+  }
+
+}
+class DoubleQuotedStringLiteralTailToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('double_quoted_string_literal_tail', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new DoubleQuotedStringLiteralTailToken(this.leading, this.trailing, text);
   }
 
 }
@@ -7522,7 +7565,7 @@ class ForeachStatement extends EditableSyntax
     keyword,
     left_paren,
     collection,
-    await,
+    await_keyword,
     as,
     key,
     arrow,
@@ -7534,7 +7577,7 @@ class ForeachStatement extends EditableSyntax
       keyword: keyword,
       left_paren: left_paren,
       collection: collection,
-      await: await,
+      await_keyword: await_keyword,
       as: as,
       key: key,
       arrow: arrow,
@@ -7545,7 +7588,7 @@ class ForeachStatement extends EditableSyntax
   get keyword() { return this.children.keyword; }
   get left_paren() { return this.children.left_paren; }
   get collection() { return this.children.collection; }
-  get await() { return this.children.await; }
+  get await_keyword() { return this.children.await_keyword; }
   get as() { return this.children.as; }
   get key() { return this.children.key; }
   get arrow() { return this.children.arrow; }
@@ -7557,7 +7600,7 @@ class ForeachStatement extends EditableSyntax
       keyword,
       this.left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       this.as,
       this.key,
       this.arrow,
@@ -7570,7 +7613,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       this.as,
       this.key,
       this.arrow,
@@ -7583,7 +7626,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       this.left_paren,
       collection,
-      this.await,
+      this.await_keyword,
       this.as,
       this.key,
       this.arrow,
@@ -7591,12 +7634,12 @@ class ForeachStatement extends EditableSyntax
       this.right_paren,
       this.body);
   }
-  with_await(await){
+  with_await_keyword(await_keyword){
     return new ForeachStatement(
       this.keyword,
       this.left_paren,
       this.collection,
-      await,
+      await_keyword,
       this.as,
       this.key,
       this.arrow,
@@ -7609,7 +7652,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       this.left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       as,
       this.key,
       this.arrow,
@@ -7622,7 +7665,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       this.left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       this.as,
       key,
       this.arrow,
@@ -7635,7 +7678,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       this.left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       this.as,
       this.key,
       arrow,
@@ -7648,7 +7691,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       this.left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       this.as,
       this.key,
       this.arrow,
@@ -7661,7 +7704,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       this.left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       this.as,
       this.key,
       this.arrow,
@@ -7674,7 +7717,7 @@ class ForeachStatement extends EditableSyntax
       this.keyword,
       this.left_paren,
       this.collection,
-      this.await,
+      this.await_keyword,
       this.as,
       this.key,
       this.arrow,
@@ -7691,7 +7734,7 @@ class ForeachStatement extends EditableSyntax
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var collection = this.collection.rewrite(rewriter, new_parents);
-    var await = this.await.rewrite(rewriter, new_parents);
+    var await_keyword = this.await_keyword.rewrite(rewriter, new_parents);
     var as = this.as.rewrite(rewriter, new_parents);
     var key = this.key.rewrite(rewriter, new_parents);
     var arrow = this.arrow.rewrite(rewriter, new_parents);
@@ -7702,7 +7745,7 @@ class ForeachStatement extends EditableSyntax
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       collection === this.collection &&
-      await === this.await &&
+      await_keyword === this.await_keyword &&
       as === this.as &&
       key === this.key &&
       arrow === this.arrow &&
@@ -7718,7 +7761,7 @@ class ForeachStatement extends EditableSyntax
         keyword,
         left_paren,
         collection,
-        await,
+        await_keyword,
         as,
         key,
         arrow,
@@ -7738,9 +7781,9 @@ class ForeachStatement extends EditableSyntax
     let collection = EditableSyntax.from_json(
       json.foreach_collection, position, source);
     position += collection.width;
-    let await = EditableSyntax.from_json(
-      json.foreach_await, position, source);
-    position += await.width;
+    let await_keyword = EditableSyntax.from_json(
+      json.foreach_await_keyword, position, source);
+    position += await_keyword.width;
     let as = EditableSyntax.from_json(
       json.foreach_as, position, source);
     position += as.width;
@@ -7763,7 +7806,7 @@ class ForeachStatement extends EditableSyntax
         keyword,
         left_paren,
         collection,
-        await,
+        await_keyword,
         as,
         key,
         arrow,
@@ -7778,7 +7821,7 @@ class ForeachStatement extends EditableSyntax
         'keyword',
         'left_paren',
         'collection',
-        'await',
+        'await_keyword',
         'as',
         'key',
         'arrow',
@@ -14185,6 +14228,9 @@ exports.BinaryLiteralToken = BinaryLiteralToken;
 exports.FloatingLiteralToken = FloatingLiteralToken;
 exports.SingleQuotedStringLiteralToken = SingleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralToken = DoubleQuotedStringLiteralToken;
+exports.DoubleQuotedStringLiteralHeadToken = DoubleQuotedStringLiteralHeadToken;
+exports.DoubleQuotedStringLiteralBodyToken = DoubleQuotedStringLiteralBodyToken;
+exports.DoubleQuotedStringLiteralTailToken = DoubleQuotedStringLiteralTailToken;
 exports.HeredocStringLiteralToken = HeredocStringLiteralToken;
 exports.NowdocStringLiteralToken = NowdocStringLiteralToken;
 exports.BooleanLiteralToken = BooleanLiteralToken;

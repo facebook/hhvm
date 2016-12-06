@@ -195,7 +195,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   // logically finished and we're unwinding for some internal reason (timeout
   // or user profiler, most likely). More importantly, fp->m_this may have
   // already been destructed and/or overwritten due to sharing space with
-  // fp->m_r.
+  // the return value via fp->retSlot().
   if (curOp != OpRetC &&
       !fp->localsDecRefd() &&
       fp->m_func->cls() &&
@@ -258,8 +258,8 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       phpException = nullptr;
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
-      assert(stack.topTV() == &fp->m_r);
-      cellCopy(make_tv<KindOfObject>(waitHandle), fp->m_r);
+      assert(stack.topTV() == fp->retSlot());
+      cellCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
     } else {
       // Free ActRec.
       stack.ndiscard(func->numSlotsInFrame());

@@ -89,9 +89,7 @@ struct Socket : File {
 
   // This is only for updating a local copy of timeouts set by setsockopt()
   // outside of this class.
-  void setTimeout(struct timeval &tv);
-
-  bool setBlocking(bool blocking);
+  void internalSetTimeout(struct timeval &tv);
 
   std::string getAddress() const { return m_data->m_address; }
   int         getPort() const    { return m_data->m_port; }

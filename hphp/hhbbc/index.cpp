@@ -40,6 +40,7 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 
+#include "hphp/util/algorithm.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/match.h"
 
@@ -279,12 +280,6 @@ struct FuncInfo {
    * to method and it's always false for functions.
    */
   bool thisAvailable = false;
-
-  /*
-   * Whether this function can potentially read or write to the caller's frame.
-   */
-  bool readsCallerFrame = false;
-  bool writesCallerFrame = false;
 
   /*
    * Call-context sensitive return types are cached here.  This is not
@@ -599,10 +594,12 @@ bool Func::mightReadCallerFrame() const {
     val,
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->readsCallerFrame; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->func->attrs & AttrReadsCallerFrame;
+    },
     [&] (borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->readsCallerFrame) return true;
+        if (finfo->func->attrs & AttrReadsCallerFrame) return true;
       }
       return false;
     }
@@ -614,12 +611,32 @@ bool Func::mightWriteCallerFrame() const {
     val,
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->writesCallerFrame; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->func->attrs & AttrWritesCallerFrame;
+    },
     [&] (borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->writesCallerFrame) return true;
+        if (finfo->func->attrs & AttrWritesCallerFrame) return true;
       }
       return false;
+    }
+  );
+}
+
+bool Func::isFoldable() const {
+  return match<bool>(
+    val,
+    [&] (FuncName s)                  { return false; },
+    [&] (MethodName s)                { return false; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->func->attrs & AttrIsFoldable;
+    },
+    [&] (borrowed_ptr<FuncFamily> fa) {
+      if (fa->possibleFuncs.empty()) return false;
+      for (auto const& finfo : fa->possibleFuncs) {
+        if (!(finfo->func->attrs & AttrIsFoldable)) return false;
+      }
+      return true;
     }
   );
 }
@@ -755,8 +772,6 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
     // here saves on whole-program iterations.
     ret.returnTy = native_function_return_type(f);
   }
-  if (f->attrs & AttrReadsCallerFrame) ret.readsCallerFrame = true;
-  if (f->attrs & AttrWritesCallerFrame) ret.writesCallerFrame = true;
   ret.thisAvailable = false;
   return &ret;
 }
@@ -1334,14 +1349,18 @@ void compute_iface_vtables(IndexData& index) {
     slot_uses[slot] += iface_uses[iface];
   }
 
+  // Make sure we have an initialized entry for each slot for the sort below.
+  for (Slot slot = 0; slot < max_slot; ++slot) {
+    assert(slot_uses.count(slot));
+  }
+
   // Finally, sort and reassign slots so the most frequently used slots come
   // first. This slightly reduces the number of wasted vtable vector entries at
   // runtime.
-  std::vector<Slot> slots;
-  slots.reserve(max_slot + 1);
-  for (Slot i = 0; i <= max_slot; ++i) slots.emplace_back(i);
-  auto slot_cmp = [&](Slot a, Slot b) { return slot_uses[a] > slot_uses[b]; };
-  std::sort(begin(slots), end(slots), slot_cmp);
+  auto const slots = sort_keys_by_value(
+    slot_uses,
+    [&] (int a, int b) { return a > b; }
+  );
 
   std::vector<Slot> slots_permute(max_slot + 1, 0);
   for (size_t i = 0; i <= max_slot; ++i) slots_permute[slots[i]] = i;

@@ -128,6 +128,7 @@ struct IRBuilder {
   Type predictedInnerType(Location l) const;
   Type predictedLocalInnerType(uint32_t id) const;
   Type predictedStackInnerType(IRSPRelOffset) const;
+  Type predictedMBaseInnerType() const;
 
   /////////////////////////////////////////////////////////////////////////////
   /*
@@ -289,8 +290,10 @@ private:
   SSATmp* preOptimizeCheckLocation(IRInstruction*, Location);
   SSATmp* preOptimizeCheckLoc(IRInstruction*);
   SSATmp* preOptimizeCheckStk(IRInstruction*);
+  SSATmp* preOptimizeCheckMBase(IRInstruction*);
   SSATmp* preOptimizeHintInner(IRInstruction*, Location);
   SSATmp* preOptimizeHintLocInner(IRInstruction*);
+  SSATmp* preOptimizeHintMBaseInner(IRInstruction*);
   SSATmp* preOptimizeAssertTypeOp(IRInstruction* inst,
                                   Type oldType,
                                   SSATmp* oldVal,

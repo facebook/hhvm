@@ -39,6 +39,7 @@ namespace {
 struct State {
   bool initialized{false};
   std::vector<Type> locals;
+  Type mbase{TGen};
 };
 
 struct BlockInfo {
@@ -57,6 +58,8 @@ std::string DEBUG_ONLY show(const State& state) {
     auto const ty = state.locals[locID];
     if (ty < TGen) folly::format(&ret, "  L{}: {}\n", locID, ty.toString());
   }
+  auto const ty = state.mbase;
+  if (ty < TGen) folly::format(&ret, "  M{{}}: {}\n", ty.toString());
   return ret;
 }
 
@@ -89,10 +92,23 @@ bool merge_into(State& dst, const State& src) {
     changed |= merge_type(dst.locals[i], src.locals[i]);
   }
 
+  changed |= merge_type(dst.mbase, src.mbase);
+
   return changed;
 }
 
 //////////////////////////////////////////////////////////////////////
+
+bool is_tracked(Location l) {
+  switch (l.tag()) {
+    case LTag::Local:
+    case LTag::MBase:
+      return true;
+    case LTag::Stack:
+      return false;
+  }
+  not_reached();
+}
 
 Type& type_of(State& state, Location l) {
   switch (l.tag()) {
@@ -103,6 +119,8 @@ Type& type_of(State& state, Location l) {
     }
     case LTag::Stack:
       always_assert(false);
+    case LTag::MBase:
+      return state.mbase;
   }
   not_reached();
 }
@@ -121,7 +139,7 @@ bool preconds_may_pass(const RegionDesc::Block& block,
   auto const& preConds = block.typePreConditions();
 
   for (auto const& p : preConds) {
-    if (p.location.tag() != LTag::Local) continue;
+    if (!is_tracked(p.location)) continue;
     auto const ty = type_of(state, p.location);
     if (!ty.maybe(p.type)) {
       FTRACE(6, "  x B{}'s precond {} fails ({} is {})\n",
@@ -140,12 +158,12 @@ bool preconds_may_pass(const RegionDesc::Block& block,
  */
 void apply_transfer_function(State& dst, const PostConditions& postConds) {
   for (auto& p : postConds.refined) {
-    if (p.location.tag() != LTag::Local) continue;
+    if (!is_tracked(p.location)) continue;
     auto& ty = type_of(dst, p.location);
     ty &= p.type;
   }
   for (auto& p : postConds.changed) {
-    if (p.location.tag() != LTag::Local) continue;
+    if (!is_tracked(p.location)) continue;
     auto& ty = type_of(dst, p.location);
     ty = p.type;
   }

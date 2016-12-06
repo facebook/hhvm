@@ -126,7 +126,7 @@ inline int low_mallocx_flags() {
   // Allocate from low_arena, and bypass the implicit tcache to assure that the
   // result actually comes from low_arena.
 #ifdef MALLOCX_TCACHE_NONE
-  return MALLOCX_ARENA(low_arena)|MALLOCX_TCACHE_NONE;
+  return MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 #else
   return MALLOCX_ARENA(low_arena);
 #endif
@@ -145,27 +145,25 @@ inline int low_dallocx_flags() {
 
 #ifdef USE_JEMALLOC_CHUNK_HOOKS
 extern unsigned low_huge1g_arena;
+extern unsigned high_huge1g_arena;
 
 inline int low_mallocx_huge1g_flags() {
-  // Allocate from low_arena, and bypass the implicit tcache to assure that the
-  // result actually comes from low_arena.
-#ifdef MALLOCX_TCACHE_NONE
+  // MALLOCX_TCACHE_NONE is introduced earlier than the chunk hook API
   return MALLOCX_ARENA(low_huge1g_arena) | MALLOCX_TCACHE_NONE;
-#else
-  return MALLOCX_ARENA(low_huge1g_arena);
-#endif
 }
 
 inline int low_dallocx_huge1g_flags() {
-#ifdef MALLOCX_TCACHE_NONE
-  // Bypass the implicit tcache for this deallocation.
   return MALLOCX_TCACHE_NONE;
-#else
-  // Prior to the introduction of MALLOCX_TCACHE_NONE, explicitly specifying
-  // MALLOCX_ARENA(a) caused jemalloc to bypass tcache.
-  return MALLOCX_ARENA(low_huge1g_arena);
-#endif
 }
+
+inline int mallocx_huge1g_flags() {
+  return MALLOCX_ARENA(high_huge1g_arena) | MALLOCX_TCACHE_NONE;
+}
+
+inline int dallocx_huge1g_flags() {
+  return MALLOCX_TCACHE_NONE;
+}
+
 #endif
 
 #endif
@@ -199,11 +197,8 @@ inline void* low_malloc_data(size_t size) {
 #ifndef USE_JEMALLOC_CHUNK_HOOKS
   return low_malloc(size);
 #else
-  if (low_huge1g_arena == 0) return low_malloc(size);
   extern void* low_malloc_huge1g_impl(size_t);
-  auto ret = low_malloc_huge1g_impl(size);
-  if (ret != nullptr) return ret;
-  return low_malloc(size);
+  return low_malloc_huge1g_impl(size);
 #endif
 }
 
@@ -211,14 +206,26 @@ inline void low_free_data(void* ptr) {
 #ifndef USE_JEMALLOC_CHUNK_HOOKS
   low_free(ptr);
 #else
-  if (ptr) {
-    if (low_huge1g_arena != 0) {
-      dallocx(ptr, low_dallocx_huge1g_flags());
-    } else {
-      low_free(ptr);
-    }
-  }
+  if (ptr) dallocx(ptr, low_dallocx_huge1g_flags());
 #endif
+}
+
+inline void* malloc_huge(size_t size) {
+#ifndef USE_JEMALLOC_CHUNK_HOOKS
+  return malloc(size);
+#else
+  extern void* malloc_huge1g_impl(size_t);
+  return malloc_huge1g_impl(size);
+#endif
+}
+
+inline void free_huge(void* ptr) {
+#ifndef USE_JEMALLOC_CHUNK_HOOKS
+  free(ptr);
+#else
+  if (ptr) dallocx(ptr, dallocx_huge1g_flags());
+#endif
+
 }
 
 /**
@@ -414,7 +421,7 @@ struct LowAllocator {
     return std::numeric_limits<std::size_t>::max() / sizeof(T);
   }
 
-  pointer allocate(size_type num, const void* = 0) {
+  pointer allocate(size_type num, const void* = nullptr) {
     pointer ret = (pointer)low_malloc_data(num * sizeof(T));
     return ret;
   }
@@ -430,6 +437,61 @@ struct LowAllocator {
 
   void deallocate(pointer p, size_type num) {
     low_free_data((void*)p);
+  }
+
+  template<class U> bool operator==(const LowAllocator<U>&) const {
+    return true;
+  }
+
+  template<class U> bool operator!=(const LowAllocator<U>&) const {
+    return false;
+  }
+};
+
+template <class T>
+struct HugeAllocator {
+  using value_type = T;
+  using pointer = T *;
+  using const_pointer = const T *;
+  using reference = T &;
+  using const_reference = const T &;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+
+  template <class U>
+  struct rebind { using other = HugeAllocator<U>; };
+
+  pointer address(reference value) {
+    return &value;
+  }
+  const_pointer address(const_reference value) const {
+    return &value;
+  }
+
+  HugeAllocator() noexcept {}
+  template<class U> explicit HugeAllocator(const HugeAllocator<U>&) noexcept {}
+  ~HugeAllocator() noexcept {}
+
+  size_type max_size() const {
+    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  }
+
+  pointer allocate(size_type num, const void* = nullptr) {
+    pointer ret = (pointer)malloc_huge(num * sizeof(T));
+    return ret;
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  void deallocate(pointer p, size_type num) {
+    free_huge((void*)p);
   }
 
   template<class U> bool operator==(const LowAllocator<U>&) const {

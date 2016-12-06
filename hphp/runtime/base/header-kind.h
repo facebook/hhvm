@@ -94,30 +94,31 @@ template<class T = uint16_t, Counted CNT = Counted::Always>
 struct HeaderWord {
   union {
     struct {
-      T aux;
+      mutable RefCount count;
       HeaderKind kind;
       mutable bool weak_refed:1;
-      mutable GCBits marks:7;
-      mutable RefCount count;
+      mutable bool partially_inited:1;
+      mutable GCBits marks:6;
+      T aux;
     };
     struct { uint32_t lo32, hi32; };
     uint64_t q;
   };
 
   void init(HeaderKind kind, RefCount count) {
-    q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
-        uint64_t(count) << 32;
+    q = uint64_t(kind) << (8 * offsetof(HeaderWord, kind)) |
+        uint32_t(count) << (8 * offsetof(HeaderWord, count));
   }
 
   void init(T aux, HeaderKind kind, RefCount count) {
-    q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
-        static_cast<uint16_t>(aux) |
-        uint64_t(count) << 32;
+    q = uint64_t(kind)  << (8 * offsetof(HeaderWord, kind)) |
+        uint64_t(uint16_t(aux))   << (8 * offsetof(HeaderWord, aux)) |
+        uint32_t(count) << (8 * offsetof(HeaderWord, count));
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
   void init(const HeaderWord<T,CNT>& h, RefCount count) {
-    q = h.lo32 | uint64_t(count) << 32;
+    q = uint64_t(h.hi32) << 32 | uint32_t(count);
   }
 
   bool checkCount() const;
@@ -133,7 +134,7 @@ struct HeaderWord {
   bool decReleaseCheck();
 };
 
-constexpr auto HeaderOffset = sizeof(void*);
+constexpr auto HeaderOffset = 0;
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
 constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
                                       offsetof(HeaderWord<>, count);

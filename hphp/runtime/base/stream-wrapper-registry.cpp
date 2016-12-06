@@ -39,21 +39,21 @@ struct RequestWrappers final : RequestEventHandler {
     m_wrappers.clear();
   }
 
-  std::set<String> m_disabled;
-  std::map<String,std::unique_ptr<Wrapper>> m_wrappers; // key & value!
+  using DisabledSet = req::set<String>;
+  using WrapperMap = req::map<String,req::unique_ptr<Wrapper>>;
 
-  TYPE_SCAN_CUSTOM_FIELD(m_disabled) {
-    for (auto& s : m_disabled) scanner.scan(s);
+  DisabledSet& disabled() {
+    if (!m_disabled) m_disabled.emplace();
+    return m_disabled.value();
   }
-  TYPE_SCAN_CUSTOM_FIELD(m_wrappers) {
-    // Wrapper instances are std-allocated, scan them now even though
-    // we only hold ptrs to them. If they were req-allocated, we could
-    // just scan the ptrs.
-    for (auto& e : m_wrappers) {
-      scanner.scan(e.first);
-      e.second->scan(scanner);
-    }
+  WrapperMap& wrappers() {
+    if (!m_wrappers) m_wrappers.emplace();
+    return m_wrappers.value();
   }
+
+private:
+  folly::Optional<DisabledSet> m_disabled;
+  folly::Optional<WrapperMap> m_wrappers;
 };
 
 // Global registry for wrappers
@@ -78,9 +78,9 @@ bool disableWrapper(const String& scheme) {
   bool ret = false;
 
   // Unregister request-specific wrappers entirely
-  if (s_request_wrappers->m_wrappers.find(lscheme) !=
-      s_request_wrappers->m_wrappers.end()) {
-    s_request_wrappers->m_wrappers.erase(lscheme);
+  auto& wrappers = s_request_wrappers->wrappers();
+  if (wrappers.find(lscheme) != wrappers.end()) {
+    wrappers.erase(lscheme);
     ret = true;
   }
 
@@ -90,14 +90,14 @@ bool disableWrapper(const String& scheme) {
     return ret;
   }
 
-  if (s_request_wrappers->m_disabled.find(lscheme) !=
-      s_request_wrappers->m_disabled.end()) {
+  auto& disabled = s_request_wrappers->disabled();
+  if (disabled.find(lscheme) != disabled.end()) {
     // Already disabled
     return ret;
   }
 
   // Disable it
-  s_request_wrappers->m_disabled.insert(lscheme);
+  disabled.insert(lscheme);
   return true;
 }
 
@@ -106,42 +106,42 @@ bool restoreWrapper(const String& scheme) {
   bool ret = false;
 
   // Unregister request-specific wrapper
-  if (s_request_wrappers->m_wrappers.find(lscheme) !=
-    s_request_wrappers->m_wrappers.end()) {
-    s_request_wrappers->m_wrappers.erase(lscheme);
+  auto& wrappers = s_request_wrappers->wrappers();
+  if (wrappers.find(lscheme) != wrappers.end()) {
+    wrappers.erase(lscheme);
     ret = true;
   }
 
   // Un-disable builtin wrapper
-  if (s_request_wrappers->m_disabled.find(lscheme) ==
-      s_request_wrappers->m_disabled.end()) {
+  auto& disabled = s_request_wrappers->disabled();
+  if (disabled.find(lscheme) == disabled.end()) {
     // Not disabled
     return ret;
   }
 
   // Perform action un-disable
-  s_request_wrappers->m_disabled.erase(lscheme);
+  disabled.erase(lscheme);
   return true;
 }
 
 bool registerRequestWrapper(const String& scheme,
-                            std::unique_ptr<Wrapper> wrapper) {
+                            req::unique_ptr<Wrapper> wrapper) {
   String lscheme = HHVM_FN(strtolower)(scheme);
 
   // Global, non-disabled wrapper
+  auto& disabled = s_request_wrappers->disabled();
   if ((s_wrappers.find(lscheme.data()) != s_wrappers.end()) &&
-      (s_request_wrappers->m_disabled.find(lscheme) ==
-       s_request_wrappers->m_disabled.end())) {
+      (disabled.find(lscheme) == disabled.end())) {
     return false;
   }
 
   // A wrapper has already been registered for that scheme
-  if (s_request_wrappers->m_wrappers.find(lscheme) !=
-      s_request_wrappers->m_wrappers.end()) {
+  auto& wrappers = s_request_wrappers->wrappers();
+  if (wrappers.find(lscheme) != wrappers.end()) {
     return false;
   }
 
-  s_request_wrappers->m_wrappers[lscheme] = std::move(wrapper);
+  wrappers[lscheme] = std::move(wrapper);
   return true;
 }
 
@@ -149,17 +149,16 @@ Array enumWrappers() {
   Array ret = Array::Create();
 
   // Enum global wrappers which are not disabled
-  for (auto it = s_wrappers.begin(); it != s_wrappers.end(); ++it) {
-    if (s_request_wrappers->m_disabled.find(it->first) ==
-        s_request_wrappers->m_disabled.end()) {
-      ret.append(it->first);
+  auto& disabled = s_request_wrappers->disabled();
+  for (auto& e : s_wrappers) {
+    if (disabled.find(e.first) == disabled.end()) {
+      ret.append(e.first);
     }
   }
 
   // Enum request local wrappers
-  for (auto it = s_request_wrappers->m_wrappers.begin();
-       it != s_request_wrappers->m_wrappers.end(); ++it) {
-    ret.append(it->first);
+  for (auto& e : s_request_wrappers->wrappers()) {
+    ret.append(e.first);
   }
   return ret;
 }
@@ -185,19 +184,20 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 
   // Request local wrapper?
   if (have_request_wrappers) {
-    auto it = s_request_wrappers->m_wrappers.find(lscheme);
-    if (it != s_request_wrappers->m_wrappers.end()) {
+    auto& wrappers = s_request_wrappers->wrappers();
+    auto it = wrappers.find(lscheme);
+    if (it != wrappers.end()) {
       return it->second.get();
     }
   }
 
   // Global, non-disabled wrapper?
   {
+    auto& disabled = s_request_wrappers->disabled();
     auto it = s_wrappers.find(lscheme.data());
     if ((it != s_wrappers.end()) &&
         (!have_request_wrappers ||
-        (s_request_wrappers->m_disabled.find(lscheme) ==
-         s_request_wrappers->m_disabled.end()))) {
+        (disabled.find(lscheme) == disabled.end()))) {
       return it->second;
     }
   }

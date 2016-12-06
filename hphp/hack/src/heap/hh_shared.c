@@ -408,6 +408,8 @@ static char** heap;
 static pid_t* master_pid;
 static pid_t my_pid;
 
+static char *db_filename = NULL;
+
 #ifndef NO_SQLITE3
 // SQLite DB pointer
 static sqlite3 *db = NULL;
@@ -733,7 +735,10 @@ static void memfd_reserve(char *mem, size_t sz) {
 
 #endif
 
-
+// DON'T WRITE TO THE SHARED MEMORY IN THIS FUNCTION!!!  This function just
+// calculates where the memory is and sets local globals. The shared memory
+// might not be ready for writing yet! If you want to initialize a bit of
+// shared memory, check out init_shared_globals
 static void define_globals(char * shared_mem_init) {
   size_t page_size = getpagesize();
   char *mem = shared_mem_init;
@@ -779,6 +784,12 @@ static void define_globals(char * shared_mem_init) {
   mem += page_size;
   // Just checking that the page is large enough.
   assert(page_size > 6*CACHE_LINE_SIZE + (int)sizeof(int));
+
+  /* File name we get in hh_load_dep_table_sqlite needs to be smaller than
+   * page_size - it should be since page_size is quite big for a string
+   */
+  db_filename = (char*)mem;
+  mem += page_size;
   /* END OF THE SMALL OBJECTS PAGE */
 
   /* Global storage initialization */
@@ -811,6 +822,14 @@ static void define_globals(char * shared_mem_init) {
 
 }
 
+/* The total size of the shared memory.  Most of it is going to remain
+ * virtual. */
+static size_t get_shared_mem_size() {
+  size_t page_size = getpagesize();
+  return (global_size_b + dep_size_b + bindings_size_b + hashtbl_size_b +
+          heap_size + 2 * page_size);
+}
+
 static void init_shared_globals(size_t config_log_level) {
   // Initial size is zero for global storage is zero
   global_storage[0] = 0;
@@ -821,15 +840,10 @@ static void init_shared_globals(size_t config_log_level) {
   *log_level = config_log_level;
   // Initialize top heap pointers
   *heap = heap_init;
-}
 
-
-/* The total size of the shared memory.  Most of it is going to remain
- * virtual. */
-static size_t get_shared_mem_size() {
+  // Zero out this shared memory for a string
   size_t page_size = getpagesize();
-  return (global_size_b + dep_size_b + bindings_size_b + hashtbl_size_b +
-          heap_size + page_size);
+  memset(db_filename, 0, page_size);
 }
 
 static void set_sizes(
@@ -2068,7 +2082,21 @@ CAMLprim value hh_load_dep_table_sqlite(value in_filename) {
   struct timeval tv2;
   gettimeofday(&tv, NULL);
 
-  assert(sqlite3_open(String_val(in_filename), &db) == SQLITE_OK);
+  // This can only happen in the master
+  assert_master();
+
+  const char *filename = String_val(in_filename);
+  size_t filename_len = strlen(filename);
+
+  /* Since we save the filename on the heap, and have allocated only
+   * getpagesize() space
+   */
+  assert(filename_len < getpagesize());
+
+  memcpy(db_filename, filename, filename_len);
+  db_filename[filename_len] = '\0';
+
+  assert(sqlite3_open(filename, &db) == SQLITE_OK);
 
   // Verify the header
   verify_sqlite_header(db);
@@ -2092,9 +2120,16 @@ CAMLprim value hh_get_dep_sqlite(value ocaml_key) {
   result = Val_int(0); // The empty list
 
   // Make sure db connection is made
-  // If not then return empty list
+  // If not the master process, then try to connect
+  // Otherwise return empty list
   if(db == NULL) {
-    CAMLreturn(result);
+    if (my_pid != *master_pid && db_filename != NULL && *db_filename != '\0') {
+      assert(sqlite3_open(db_filename, &db) == SQLITE_OK);
+    }
+    // If db is still NULL, then we must quit
+    if (db == NULL) {
+      CAMLreturn(result);
+    }
   }
 
   uint32_t *values;

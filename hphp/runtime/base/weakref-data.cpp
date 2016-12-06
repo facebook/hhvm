@@ -43,8 +43,9 @@ req::shared_ptr<WeakRefData> WeakRefData::forObject(Object obj) {
     wr_data = req::make_shared<WeakRefData>(make_tv<KindOfObject>(obj.get()));
 
     obj->setWeakRefed(true);
+    req::weak_ptr<WeakRefData> weak_data = req::weak_ptr<WeakRefData>(wr_data);
     if (!(s_weakref_data.get()->insert(
-            {(uintptr_t)obj.get(), wr_data}).second)) {
+            {(uintptr_t)obj.get(), weak_data}).second)) {
       // Failure. Key should be unique.  We just checked.
       assert(false);
     }

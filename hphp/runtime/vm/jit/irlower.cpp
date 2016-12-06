@@ -168,7 +168,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
     // vasm-xls can fail if it tries to allocate too many spill slots.
     logLowPriPerfWarning(
       "vasm-optimize punt",
-      250,
+      1000,
       [&](StructuredLogEntry& cols) {
         cols.setStr("punt_type", e.what());
         cols.setStr("vasm_unit", show(*vunit));

@@ -197,6 +197,7 @@ static bool callbacksOk() {
 }
 
 size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
+  NoHandleSurpriseScope::AssertNone(static_cast<SurpriseFlag>(mask));
   auto& info = TI();
   auto& p = info.m_reqInjectionData;
 

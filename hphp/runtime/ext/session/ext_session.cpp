@@ -40,7 +40,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/php-globals.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -81,10 +80,6 @@ struct Session {
     None,
     Active
   };
-
-  template<class F> void scan(F& mark) const {
-    mark(ps_session_handler);
-  }
 
   std::string save_path;
   bool        reset_save_path{false};
@@ -148,16 +143,11 @@ struct SessionRequestData final : Session {
 
   void requestShutdownImpl();
 
-  template<class F> void scan(F& mark) const {
-    Session::scan(mark);
-    mark(id);
-  }
-
 public:
   String id;
 };
 
-static __thread SessionRequestData* s_session;
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(SessionRequestData, s_session);
 
 void SessionRequestData::requestShutdownImpl() {
   if (mod_is_open()) {
@@ -1892,8 +1882,8 @@ static struct SessionExtension final : Extension {
   void threadInit() override {
     // TODO: t5226715 We shouldn't need to check s_session here, but right now
     // this is called for every request.
-    if (s_session) return;
-    s_session = new SessionRequestData;
+    if (!s_session.isNull()) return;
+    s_session.getCheck();
     Extension* ext = ExtensionRegistry::get(s_session_ext_name);
     assert(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
@@ -1983,16 +1973,11 @@ static struct SessionExtension final : Extension {
   }
 
   void threadShutdown() override {
-    delete s_session;
-    s_session = nullptr;
+    s_session.destroy();
   }
 
   void requestInit() override {
     s_session->init();
-  }
-
-  void vscan(IMarker& mark) const override {
-    if (s_session) s_session->scan(mark);
   }
 
   /*

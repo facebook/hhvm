@@ -13,7 +13,7 @@ open Core
 let _LINE_WIDTH = 80
 
 type t = {
-  chunks: Chunk.t list;
+  chunk_group: Chunk_group.t;
   rvm: int IMap.t;
   nesting_set: ISet.t;
   cost: int;
@@ -25,7 +25,8 @@ let has_split_before_chunk c rvm =
   let value = IMap.get rule_id rvm in
   Rule.is_split rule_id value
 
-let make chunks rvm =
+let make chunk_group rvm =
+  let { Chunk_group.chunks; block_indentation; _ } = chunk_group in
   let len = 0 in
   let cost = 0 in
   let overflow = 0 in
@@ -54,6 +55,7 @@ let make chunks rvm =
       let len, cost, overflow = if has_split_before_chunk c rvm then
         let overflow = overflow + (get_overflow len) in
         let len = Nesting.get_indent c.Chunk.nesting nesting_set in
+        let len = len + block_indentation in
         let cost = cost + Chunk.get_span_split_cost c in
         len, cost, overflow
       else
@@ -72,26 +74,29 @@ let make chunks rvm =
   let cost = cost + (
     IMap.fold (fun r_id v acc ->
       if (Rule.is_split r_id (Some v)) then
-        acc + (Rule.get_cost r_id)
+        acc + (Rule.get_cost (Chunk_group.get_rule_kind chunk_group r_id))
       else
         acc
     ) rvm 0
   ) in
 
-  { chunks; rvm; cost; overflow; nesting_set; }
+  { chunk_group; rvm; cost; overflow; nesting_set; }
+
+let is_rule_bound t rule_id =
+  IMap.mem rule_id t.rvm
+
+let pick_best_state s1 s2 =
+  let cmp = Pervasives.compare (s1.overflow, s1.cost) (s2.overflow, s2.cost) in
+  if cmp < 0 then s1 else s2
 
 let compare s1 s2 =
-  let cmp = Pervasives.compare s1.overflow s2.overflow in
-  if cmp <> 0 then
-    cmp
-  else
-    Pervasives.compare s1.cost s2.cost
+  Pervasives.compare (s1.cost, s1.overflow) (s2.cost, s2.overflow)
 
-let __debug s =
+let __debug t =
   (* TODO: make a new rule strings string *)
-  let rule_strings = IMap.fold (fun k v acc ->
-    (string_of_int k ^ ": " ^ string_of_int v) :: acc
-  ) s.rvm [] in
-  let rule_count = string_of_int (Rule.get_rule_count ()) in
+  let rule_strings = List.map (IMap.bindings t.rvm) (fun (k, v) ->
+    string_of_int k ^ ": " ^ string_of_int v
+  ) in
+  let rule_count = string_of_int (Chunk_group.get_rule_count t.chunk_group) in
   let rule_str = rule_count ^ " [" ^ (String.concat "," rule_strings) ^ "]" in
-  (string_of_int s.overflow) ^ "," ^ (string_of_int s.cost) ^ " " ^ rule_str
+  (string_of_int t.overflow) ^ "," ^ (string_of_int t.cost) ^ " " ^ rule_str

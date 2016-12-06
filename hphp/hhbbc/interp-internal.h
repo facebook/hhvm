@@ -396,19 +396,6 @@ Type derefLoc(ISS& env, borrowed_ptr<const php::Local> l) {
   return v.couldBe(TUninit) ? TCell : TInitCell;
 }
 
-void ensureInit(ISS& env, borrowed_ptr<const php::Local> l) {
-  auto t = locRaw(env, l);
-  if (is_volatile_local(env.ctx.func, l)) {
-    always_assert_flog(t == TGen, "volatile local was not TGen");
-    return;
-  }
-  if (t.couldBe(TUninit)) {
-    if (t.subtypeOf(TUninit)) return setLocRaw(env, l, TInitNull);
-    if (t.subtypeOf(TCell))   return setLocRaw(env, l, remove_uninit(t));
-    setLocRaw(env, l, TInitGen);
-  }
-}
-
 bool locCouldBeUninit(ISS& env, borrowed_ptr<const php::Local> l) {
   return locRaw(env, l).couldBe(TUninit);
 }

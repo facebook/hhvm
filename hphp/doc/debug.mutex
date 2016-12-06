@@ -11,7 +11,7 @@ Hit admin port with /stats-mutex to turn on mutex stats:
 
 Get mutex stats like this,
 
-   GET "http://localhost:8088/stats.kvp?agg=*&keys=:mutex.*:"
+   GET "http://localhost:8088/stats.kvp?keys=:mutex.*:"
 
 3. Pre-written script
 

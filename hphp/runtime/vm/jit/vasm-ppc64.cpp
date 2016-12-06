@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/runtime-option.h"
+
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
@@ -49,7 +51,7 @@
 #ifdef __powerpc64__
 #define SAVED_TOC() m_savedToc
 #else
-#define SAVED_TOC() _dummyA
+#define SAVED_TOC() m_savedRip
 #endif
 
 TRACE_SET_MOD(vasm);
@@ -261,8 +263,15 @@ struct Vgen {
     }
     a.lxvd2x(i.d, p);
   }
-  void emit(const leap& i) { a.li64(i.d, i.s.r.disp, false); }
-  void emit(const lead& i) { a.li64(i.d, (int64_t)i.s.get(), false); }
+  void emit(const leap& i) {
+    // It can happen that when rellocating, the TOC will need to store the new
+    // pointer and it doesn't fit on a single instruction as the TOC is too big
+    // now. Therefore, emit this limmediate as fixed_size to avoid overlapping.
+    bool toc_may_grow = RuntimeOption::EvalJitRelocationSize != 0;
+    auto imm_type = toc_may_grow ? ImmType::TocOnly : ImmType::AnyCompact;
+    a.limmediate(i.d, i.s.r.disp, imm_type);
+  }
+  void emit(const lead& i) { a.limmediate(i.d, (int64_t)i.s.get()); }
   void emit(const mfcr& i) { a.mfcr(i.d); }
   void emit(const mflr& i) { a.mflr(i.d); }
   void emit(const mfvsrd& i) { a.mfvsrd(i.d, i.s); }
@@ -373,7 +382,7 @@ struct Vgen {
     a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 32-sh, 31); // extract lower byte
   }
   void emit(const orqi& i) {
-    a.li64(rAsm, i.s0.l(), false);
+    a.limmediate(rAsm, i.s0.l());
     a.or(i.d, i.s1, rAsm, true /** or. implies Rc = 1 **/);
     copyCR0toCR1(a, rAsm);
   }
@@ -423,7 +432,7 @@ struct Vgen {
     }
   }
   void emit(const xorqi& i) {
-    a.li64(rAsm, i.s0.l(), false);
+    a.limmediate(rAsm, i.s0.l());
     a.xor(i.d, i.s1, rAsm, true /** xor. implies Rc = 1 **/);
     copyCR0toCR1(a, rAsm);
   }
@@ -488,6 +497,7 @@ private:
     a.addi(rsfp(), rsp(), -min_frame_size);
     a.std(rvmfp(), rsfp()[AROFF(m_sfp)]);
   }
+
   Venv& env;
   Vtext& text;
   Assembler a;
@@ -525,7 +535,7 @@ void Vgen::emit(const ucomisd& i) {
   a.bc(notNAN, BranchConditions::CR0_NoOverflow);
   {
     // Set "negative" bit if "Overflow" bit is set. Also, keep overflow bit set
-    a.li64(rAsm, 0x99000000, false);
+    a.limmediate(rAsm, 0x99000000);
     a.mtcrf(0xC0, rAsm);
     copyCR0toCR1(a, rAsm);
   }
@@ -545,29 +555,25 @@ void Vgen::emit(const ldimmb& i) {
 
 void Vgen::emit(const ldimml& i) {
   if (i.d.isGP()) {
-    a.li32(i.d, i.s.l());
+    a.limmediate(i.d, i.s.l());
   } else {
     assertx(i.d.isSIMD());
-    a.li32(rAsm, i.s.l());
+    a.limmediate(rAsm, i.s.l());
     // no conversion necessary. The i.s already comes converted to FP
     emit(copy{rAsm, i.d});
   }
 }
 
 void Vgen::emit(const ldimmq& i) {
+  // See leap to better understand the necessity of toc_may_grow
+  bool toc_may_grow = RuntimeOption::EvalJitRelocationSize != 0;
+  auto imm_type = toc_may_grow ? ImmType::TocOnly : ImmType::AnyCompact;
   auto val = i.s.q();
   if (i.d.isGP()) {
-    if (val == 0) {
-      a.xor(i.d, i.d, i.d);
-      // emit nops to fill a standard li64 instruction block
-      // this will be useful on patching and smashable operations
-      a.emitNop(Assembler::kLi64InstrLen - 1 * instr_size_in_bytes);
-    } else {
-      a.li64(i.d, val);
-    }
+    a.limmediate(i.d, val, imm_type);
   } else {
     assertx(i.d.isSIMD());
-    a.li64(rAsm, i.s.q());
+    a.limmediate(rAsm, val, imm_type);
     // no conversion necessary. The i.s already comes converted to FP
     emit(copy{rAsm, i.d});
   }
@@ -620,7 +626,7 @@ void Vgen::emit(const load& i) {
       a.ldx(i.d, i.s);
     } else if (i.s.disp & 0x3) {     // Unaligned memory access
       Vptr p = i.s;
-      a.li64(rAsm, (int64_t)p.disp); // Load disp to reg
+      a.limmediate(rAsm, (int64_t)p.disp); // Load disp to reg
       p.disp = 0;                    // Remove disp
       p.index = rAsm;                // Set disp reg as index
       a.ldx(i.d, p);                 // Use ldx for unaligned memory access
@@ -635,7 +641,7 @@ void Vgen::emit(const load& i) {
 
 // This function can't be lowered as i.get() may not be bound that early.
 void Vgen::emit(const loadqd& i) {
-  a.li64(rAsm, (int64_t)i.s.get());
+  a.limmediate(rAsm, (int64_t)i.s.get());
   a.ld(i.d, rAsm[0]);
 }
 
@@ -651,7 +657,7 @@ void Vgen::emit(const jmp& i) {
   jmps.push_back({a.frontier(), i.target});
 
   // offset to be determined by a.patchBranch
-  a.branchAuto(a.frontier());
+  a.branchAuto(reinterpret_cast<CodeAddress>(-1));
 }
 
 void Vgen::emit(const jmpr& i) {
@@ -669,7 +675,7 @@ void Vgen::emit(const jcc& i) {
     jccs.push_back({a.frontier(), taken});
 
     // offset to be determined by a.patchBranch
-    a.branchAuto(a.frontier(), i.cc);
+    a.branchAuto(reinterpret_cast<CodeAddress>(-1), i.cc);
   }
   emit(jmp{i.targets[0]});
 }
@@ -723,6 +729,15 @@ void Vgen::emit(const mcprep& i) {
 void Vgen::emit(const inittc&) {
   // initialize our rone register
   a.li(ppc64::rone(), 1);
+
+  // Set DataBlock on VMTOC
+  VMTOC::getInstance().setTOCDataBlock(&(env.text.data()));
+
+  // Save TOC pointer in r2
+  // First, assert the PPC64MinTOCImmSize.
+  always_assert(RuntimeOption::EvalPPC64MinTOCImmSize >= 0 &&
+    RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
+  a.li64(ppc64::rtoc(), VMTOC::getInstance().getPtrVector(), false);
 }
 
 void Vgen::emit(const leavetc&) {
@@ -738,7 +753,7 @@ void Vgen::emit(const calltc& i) {
   a.bl(instr_size_in_bytes);  // jump to next instruction
 
   // this will be verified by emitCallToExit
-  a.li64(rAsm, reinterpret_cast<int64_t>(i.exittc), false);
+  a.limmediate(rAsm, reinterpret_cast<int64_t>(i.exittc));
   emit(push{rAsm});
 
   // keep the return address as initialized by the vm frame
@@ -757,7 +772,7 @@ void Vgen::emit(const resumetc& i) {
   a.bl(instr_size_in_bytes);  // jump to next instruction
 
   // this will be verified by emitCallToExit
-  a.li64(rAsm, reinterpret_cast<int64_t>(i.exittc), false);
+  a.limmediate(rAsm, reinterpret_cast<int64_t>(i.exittc));
   emit(push{rAsm});
 
   // and jump. When it returns, it'll be to enterTCExit
@@ -805,7 +820,9 @@ void Vgen::emit(const calls& i) {
   // r1 pointer to a valid frame in order to allow LR save by callee's
   // prologue.
   emitCallPrologue();
-  emitSmashableCall(a.code(), env.meta, i.target);
+  a.std(rtoc(), rsfp()[AROFF(SAVED_TOC())]);
+  emitSmashableCall(a.code(), env.meta, i.target,
+                    Assembler::CallArg::SmashExt);
 }
 
 void Vgen::emit(const callphp& i) {
@@ -850,6 +867,9 @@ void Vgen::emit(const stubret& i) {
   // rvmfp, if necessary.
   if (i.saveframe) a.ld(rvmfp(), rsp()[AROFF(m_sfp)]);
 
+  // restore r1 appropriately
+  a.mr(rsfp(), rvmfp());
+
   // restore return address.
   a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);
   a.mtlr(rfuncln());
@@ -872,7 +892,7 @@ void Vgen::emit(const testqi& i) {
   if (i.s0.fits(sz::word)) {
     a.li(rAsm, i.s0);
   } else {
-    a.li32(rAsm, i.s0.l());
+    a.limmediate(rAsm, i.s0.l());
   }
   emit(testq{rAsm, i.s1, i.sf});
 }
@@ -1604,7 +1624,7 @@ void optimizePPC64(Vunit& unit, const Abi& abi, bool regalloc) {
   }
 }
 
-void emitPPC64(const Vunit& unit, Vtext& text, CGMeta& fixups,
+void emitPPC64(Vunit& unit, Vtext& text, CGMeta& fixups,
                AsmInfo* asmInfo) {
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }

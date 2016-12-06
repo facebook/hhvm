@@ -13,16 +13,16 @@ open Core
 let newline = "\n"
 let print_state state =
   let b = Buffer.create 200 in
+  let {Solve_state.rvm; nesting_set; chunk_group; _} = state in
+  let {Chunk_group.chunks; block_indentation; _} = chunk_group in
 
-  List.iter state.Solve_state.chunks ~f:(fun c ->
-    if Solve_state.has_split_before_chunk c state.Solve_state.rvm then begin
+  List.iter chunks ~f:(fun c ->
+    if Solve_state.has_split_before_chunk c rvm then begin
       Buffer.add_string b newline;
-      let indent = Nesting.get_indent
-        c.Chunk.nesting state.Solve_state.nesting_set in
+      let indent = Nesting.get_indent c.Chunk.nesting nesting_set in
+      let indent = indent + block_indentation in
       Buffer.add_string b (String.make indent ' ')
-    end else begin
-      if c.Chunk.space_if_not_split then Buffer.add_string b " "
-    end;
+    end else if c.Chunk.space_if_not_split then Buffer.add_string b " ";
     Buffer.add_string b c.Chunk.text;
     ()
   );

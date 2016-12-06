@@ -3415,16 +3415,16 @@ described in the "Instruction set" introduction section.
 10.1 Base Operations
 ---------------------
 
-BaseNC <stack index> <member op flags>    []  ->  []
-BaseNL <local id>    <member op flags>    []  ->  []
+BaseNC <stack index> <member op mode>    []  ->  []
+BaseNL <local id>    <member op mode>    []  ->  []
 
 FPassBaseNC <param id> <stack index>    []  ->  []
 FPassBaseNL <param id> <local id>       []  ->  []
 
   BaseN{C,L}{,W,D} member operation.
 
-BaseGC <stack index> <member op flags>    []  ->  []
-BaseGL <local id>    <member op flags>    []  ->  []
+BaseGC <stack index> <member op mode>    []  ->  []
+BaseGL <local id>    <member op mode>    []  ->  []
 
 FPassBaseGC <param id> <stack index>    []  ->  []
 FPassBaseGL <param id> <local id>       []  ->  []
@@ -3438,7 +3438,7 @@ BaseSL <local id>    <stack index>    [A CV?]  ->  [CV?]
   name, and %2 gives the index of the class input. The class is consumed from
   the stack, leaving an optional cell or var above the class undisturbed.
 
-BaseL <local id> <member op flags>    []  ->  []
+BaseL <local id> <member op mode>    []  ->  []
 
 FPassBaseL <param id> <local id>    []  ->  []
 
@@ -3456,13 +3456,13 @@ BaseH    []  ->  []
 10.2 Intermediate operations
 -----------------------------
 
-Dim   <member key>    <prop/elem op> <member op flags>    []  ->  []
+Dim   <member key>    <prop/elem op> <member op mode>    []  ->  []
 
 FPassDim   <param id> <member key> <prop/elem op>    []  ->  []
 
   {Prop,Elem}{L,C,I,T}{W,D,U} member operation.
 
-DimNewElem <member op flags>    []  ->  []
+DimNewElem <member op mode>    []  ->  []
 
 FPassDimNewElem <param id>    []  ->  []
 

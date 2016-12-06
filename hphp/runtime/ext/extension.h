@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/version.h"
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/imarker.h"
 
 #include <set>
 #include <string>
@@ -80,7 +79,6 @@ public:
   virtual void threadShutdown() {}
   virtual void requestInit() {}
   virtual void requestShutdown() {}
-  virtual void vscan(IMarker&) const {} // TODO 6495061 pure virtual
 
   // override this to control extension_loaded() return value
   virtual bool moduleEnabled() const { return true; }

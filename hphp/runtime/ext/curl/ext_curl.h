@@ -25,6 +25,8 @@
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914
 
+#define CURLOPT_SAFE_UPLOAD -1
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

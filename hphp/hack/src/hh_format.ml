@@ -285,7 +285,7 @@ let () =
         match root with
         | None ->
             Printf.eprintf "No root specified, trying to guess one\n";
-            let root = ClientArgs.get_root None in
+            let root = ClientArgsUtils.get_root None in
             Printf.eprintf "Guessed root: %a\n%!" Path.output root;
             root
         | Some root -> Path.make root

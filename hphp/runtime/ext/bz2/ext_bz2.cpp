@@ -65,9 +65,6 @@ struct BZ2StreamWrapper final : Stream::Wrapper {
     }
     return file;
   }
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
 };
 
 static BZ2StreamWrapper s_bzip2_stream_wrapper;

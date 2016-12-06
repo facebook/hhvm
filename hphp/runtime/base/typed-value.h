@@ -77,6 +77,8 @@ union AuxUnion {
   int32_t u_rdsHandle;
   // Used by Class::Const.
   ConstModifiers u_constModifiers;
+  // Used by InvokeResult
+  bool u_ok;
 };
 
 /*

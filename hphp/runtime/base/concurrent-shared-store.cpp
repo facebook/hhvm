@@ -216,30 +216,17 @@ struct HotCache {
   // Allocates keys on successful insertion. They are never erased/freed.
   struct KeyConverter {
     const char* operator()(const StringData* sd) const {
+      if (sd->isStatic()) return sd->data();
       auto const nbytes = sd->size() + 1;
-      auto const dst = reinterpret_cast<char*>(apcExtension::HotKeyAllocLow ?
-                                               low_malloc_data(nbytes) :
-                                               malloc(nbytes));
+      auto const dst = malloc_huge(nbytes);
       assert((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
       memcpy(dst, sd->data(), nbytes);
-      return dst;
+      return reinterpret_cast<const char*>(dst);
     }
   };
-  // A char-allocator for HotMap's single array allocation.
-  struct HotMapAllocator {
-    char* allocate(size_t nbytes, const void* hint = nullptr) {
-      return reinterpret_cast<char*>(apcExtension::HotMapAllocLow ?
-                                     low_malloc_data(nbytes) :
-                                     malloc(nbytes));
-    }
-    void deallocate(char* p, size_t nbytes) {
-      apcExtension::HotMapAllocLow ? low_free_data(p) : free(p);
-    }
-  };
-
   using HotMap = folly::AtomicHashArray<const char*, std::atomic<HotValueRaw>,
                                         Hasher, EqualityTester,
-                                        HotMapAllocator,
+                                        HugeAllocator<char>,
                                         folly::AtomicHashArrayLinearProbeFcn,
                                         KeyConverter>;
 
@@ -809,8 +796,9 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   StoreValue *sval;
   auto svar = APCHandle::Create(value, false, APCHandleLevel::Outer, false);
   auto keyLen = key.size();
-  ReadLock l(m_lock);
   char* const kcp = strdup(key.data());
+  {
+  ReadLock l(m_lock);
   bool present;
   time_t expiry = 0;
   bool overwritePrime = false;
@@ -880,7 +868,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
       }
     }
   }
-
+  }  // m_lock
   if (apcExtension::ExpireOnSets) {
     purgeExpired();
   }

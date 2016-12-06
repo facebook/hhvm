@@ -144,7 +144,7 @@ void check_nop_interval(Venv& env, const Vinstr& inst,
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Vemit>
-void vasm_emit(const Vunit& unit, Vtext& text, CGMeta& fixups,
+void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
                AsmInfo* asm_info) {
   using namespace vasm_detail;
 

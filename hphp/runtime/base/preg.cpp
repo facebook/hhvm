@@ -750,7 +750,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
          RuntimeOption::EvalJitUseVtuneAPI ||
          RuntimeOption::EvalPerfPidMap) &&
         extra->executable_jit != nullptr) {
-      unsigned int size;
+      size_t size;
       pcre_fullinfo(re, extra, PCRE_INFO_JITSIZE, &size);
 
       TCA start = *(TCA *)(extra->executable_jit);

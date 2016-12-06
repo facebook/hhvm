@@ -46,10 +46,6 @@ struct UserStreamWrapper final : Stream::Wrapper {
   bool chgrp(const String& path, int64_t gid);
   bool chgrp(const String& path, const String& gid);
 
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
-
 private:
   String m_name;
   LowPtr<Class> m_cls;

@@ -2347,7 +2347,10 @@ and statement_try env =
   let st = statement env in
   let cl = catch_list env in
   let fin = finally env in
-  Try ([st], cl, fin)
+  (* At least one catch or finally block must be provided after every try *)
+  match cl, fin with
+  | [], [] -> error_expect env "catch or finally"; Try([st], [], [])
+  | _ -> Try ([st], cl, fin)
 
 and catch_list env =
   match L.token env.file env.lb with
@@ -4159,6 +4162,11 @@ let from_file ?(quick = false) popt file =
   let content =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   program ~quick popt file content
+
+let get_file_mode popt file content =
+  let lb = Lexing.from_string content in
+  let env = init_env file lb popt false in
+  snd (get_header env)
 
 let from_file_with_default_popt ?(quick = false) file =
   from_file ~quick ParserOptions.default file

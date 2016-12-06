@@ -1,0 +1,6 @@
+File "while_break2.php", line 20, characters 10-11:
+Invalid return type (Typing[4110])
+File "while_break2.php", line 12, characters 15-17:
+This is an int
+File "while_break2.php", line 15, characters 10-15:
+It is incompatible with a string

@@ -453,7 +453,7 @@ TCA emitInterpRet(CodeBlock& cb, DataBlock& data) {
     storeReturnRegs(v);
     assertNativeStackAligned(v);
 
-    v << lea{rvmsp()[-AROFF(m_r)], r_svcreq_arg(0)};
+    v << lea{rvmsp()[-kArRetOff], r_svcreq_arg(0)};
     v << copy{rvmfp(), r_svcreq_arg(1)};
   });
   svcreq::emit_persistent(cb, data, folly::none, REQ_POST_INTERP_RET);
@@ -485,7 +485,7 @@ TCA emitDebuggerInterpRet(CodeBlock& cb, DataBlock& data) {
     assertNativeStackAligned(v);
 
     auto const ar = v.makeReg();
-    v << lea{rvmsp()[-AROFF(m_r)], ar};
+    v << lea{rvmsp()[-kArRetOff], ar};
     debuggerRetImpl(v, ar);
   });
 }
@@ -1088,7 +1088,10 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     storeReturnRegs(v);
 
     // Perform a native return.
-    v << stubret{RegSet(), true};
+
+    // On PPC64, as there is no new frame created when entering the VM, the FP
+    // must not be saved.
+    v << stubret{RegSet(), arch() != Arch::PPC64};
   });
 }
 
@@ -1108,11 +1111,11 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 #endif
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
-    // Native func prologue.
-    v << stublogue{true};
-
     // Architecture-specific setup for entering the TC.
     v << inittc{};
+
+    // Native func prologue.
+    v << stublogue{arch() != Arch::PPC64};
 
 #if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
     // Windows hates argument registers.
@@ -1318,7 +1321,7 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   TCA inner_stub;
   ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(main, data, &inner_stub));
-  ADD(asyncRetCtrl,     emitAsyncRetCtrl(main, data, inner_stub));
+  ADD(asyncRetCtrl,     emitAsyncRetCtrl(hot(), data, inner_stub));
 
   ADD(bindCallStub,           emitBindCallStub<false>(cold, data));
   ADD(immutableBindCallStub,  emitBindCallStub<true>(cold, data));

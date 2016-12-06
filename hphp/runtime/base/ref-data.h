@@ -25,6 +25,20 @@ namespace HPHP {
 
 struct Variant;
 
+struct RefBits {
+  // only need 1 bit each for cow and z, but filling out the bitfield
+  // and assigning all field members at the same time causes causes
+  // gcc and clang to coalesce mutations into byte-sized ops.
+  union {
+    struct {
+      mutable uint8_t cow:1;
+      mutable uint8_t z:7;
+    };
+    uint16_t bits;
+  };
+  explicit operator uint16_t() const { return bits; }
+};
+
 /*
  * We heap allocate a RefData when we make a reference to something.
  * A Variant or TypedValue can be KindOfRef and point to a RefData,
@@ -60,9 +74,7 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
    * change how initialization works it keep that up to date.
    */
   void initInRDS() {
-    m_hdr.kind = HeaderKind::Ref;
-    m_hdr.count = 1;
-    m_hdr.aux.cow = m_hdr.aux.z = 0;
+    m_hdr.init({0,0}, HeaderKind::Ref, 1); // cow=z=0, count=1
   }
 
   /*
@@ -117,9 +129,7 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
 
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
   static constexpr int cowZOffset() {
-    return offsetof(RefData, m_hdr) +
-      offsetof(HeaderWord<Flags>, aux) +
-      sizeof(DataType);
+    return offsetof(RefData, m_hdr) + offsetof(HeaderWord<RefBits>, aux);
   }
 
   void assertValid() const { assert(kindIsValid()); }
@@ -143,10 +153,8 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
   // Default constructor, provided so that the PHP extension compatibility
   // layer can stack-allocate RefDatas when needed
   RefData() {
+    m_hdr.init({0,0}, HeaderKind::Ref, 0); // cow=z=0, count=0
     m_tv.m_type = KindOfNull;
-    m_hdr.kind = HeaderKind::Ref;
-    m_hdr.count = 0;
-    m_hdr.aux.cow = m_hdr.aux.z = 0;
     assert(!m_hdr.aux.cow && !m_hdr.aux.z);
   }
 
@@ -236,17 +244,10 @@ struct RefData final : type_scan::MarkScannableCountable<RefData> {
     m_tv.m_data.num = 0;
   }
 
-public:
-  template<class F> void scan(F& mark) const {
-    mark(m_tv);
-  }
-
 private:
   RefData(DataType t, int64_t datum) {
     // Initialize this value by laundering uninitNull -> Null.
-    m_hdr.kind = HeaderKind::Ref;
-    m_hdr.count = 1;
-    m_hdr.aux.cow = m_hdr.aux.z = 0;
+    m_hdr.init({0,0}, HeaderKind::Ref, 1); // cow=z=0, count=1
     if (!isNullType(t)) {
       m_tv.m_type = t;
       m_tv.m_data.num = datum;
@@ -257,34 +258,11 @@ private:
 
   static void compileTimeAsserts() {
     static_assert(offsetof(RefData, m_hdr) == HeaderOffset, "");
-    static_assert(offsetof(HeaderWord<Flags>, aux) == offsetof(Flags, type),"");
   }
 
 private:
-  struct Flags {
-    union {
-      struct {
-        DataType type;
-        // only need 1 bit each for cow and z, but filling out the bitfield
-        // and assigning all field members at the same time causes causes
-        // gcc and clang to coalesce mutations into byte-sized ops.
-        mutable uint8_t cow:1;
-        mutable uint8_t z:7;
-      };
-      uint16_t bits;
-    };
-    explicit operator uint16_t() const { return bits; }
-  };
-  // header overlaps TypedValue.m_type and m_aux
-  union {
-    TypedValue m_tv;
-    struct {
-      Value m_value;
-      HeaderWord<Flags> m_hdr;
-    };
-  };
-
-  TYPE_SCAN_CUSTOM() { scanner.scan(m_tv); }
+  HeaderWord<RefBits> m_hdr;
+  TypedValue m_tv;
 };
 
 ALWAYS_INLINE void decRefRef(RefData* ref) {

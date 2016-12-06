@@ -25,6 +25,7 @@ type t = {
   enable_fuzzy_search: bool;
   lazy_decl: bool;
   lazy_parse: bool;
+  lazy_init: bool;
   io_priority: int;
   cpu_priority: int;
   shm_dirs: string list;
@@ -44,6 +45,7 @@ let default = {
   enable_fuzzy_search = true;
   lazy_decl = false;
   lazy_parse = false;
+  lazy_init = false;
   io_priority = 7;
   cpu_priority = 10;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
@@ -75,6 +77,7 @@ let load_ fn =
   let enable_fuzzy_search = bool_ "enable_fuzzy_search" ~default:true config in
   let lazy_decl = bool_ "lazy_decl" ~default:false config in
   let lazy_parse = bool_ "lazy_parse" ~default:false config in
+  let lazy_init = bool_ "lazy_init" ~default:false config in
   let load_mini_script_timeout =
     int_ "load_mini_script_timeout" ~default:20 config in
   let start_with_recorder_on =
@@ -104,7 +107,7 @@ let load_ fn =
   |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
   let saved_state_load_type =
     LoadScriptConfig.saved_state_load_type_ config in
-  let use_sql = bool_ "use_sql" ~default:false config in
+  let use_sql = bool_ "use_sql2" ~default:false config in
   let load_script_config =
     LoadScriptConfig.createLoadScriptConfig saved_state_load_type use_sql in
   {
@@ -119,6 +122,7 @@ let load_ fn =
     enable_fuzzy_search;
     lazy_decl;
     lazy_parse;
+    lazy_init;
     io_priority;
     cpu_priority;
     shm_dirs;

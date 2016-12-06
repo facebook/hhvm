@@ -92,6 +92,7 @@ struct Header {
     assert(kind() == HeaderKind::NativeData);
     auto obj = Native::obj(&native_);
     assert(isObjectKind(obj->headerKind()));
+    assert(obj->getAttribute(ObjectData::HasNativeData));
     return obj;
   }
   ObjectData* nativeObj() {
@@ -126,8 +127,8 @@ struct Header {
 public:
   union {
     struct {
-      uint64_t q;
       HeaderWord<> hdr_;
+      uint64_t q;
     };
     StringData str_;
     ArrayData arr_;

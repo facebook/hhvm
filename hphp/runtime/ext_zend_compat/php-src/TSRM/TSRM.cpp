@@ -9,9 +9,9 @@
    | Authors:  Zeev Suraski <zeev@zend.com>                               |
    +----------------------------------------------------------------------+
 */
+#include "TSRM.h"
 #include <stdlib.h>
 #include <pthread.h>
-#include "TSRM.h"
 
 struct tsrm_resource_type {
   tsrm_resource_type() {}
@@ -74,14 +74,16 @@ void* ts_init_resource(int id) {
   return vec[index];
 }
 
-void ts_scan_resources(IMarker& mark) {
+void ts_scan_resources(type_scan::Scanner& scanner) {
   HPHP::TSRMStorageVector& vec = *HPHP::tsrm_thread_resources;
   auto ntypes = resource_types_table.size();
   auto nres = vec.size();
   for (size_t i = 0, n = std::min(ntypes, nres); i < n; ++i) {
-    if (!vec[i]) continue;
-    mark(vec[i], resource_types_table[i].size);
-    // maybe add scan() to tsrm_resource_type in addition to ctor/dtor
+    if (auto data = vec[i]) {
+      scanner.conservative(data, resource_types_table[i].size);
+      // maybe add type_scan::Index to tsrm_resource_type in addition to
+      // ctor/dtor, then we could scan exactly.
+    }
   }
 }
 

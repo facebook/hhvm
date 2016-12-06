@@ -49,14 +49,9 @@ struct AsioExternalThreadEventQueue final {
   void receiveSome();
   void send(c_ExternalThreadEventWaitHandle* wait_handle);
 
-  template<class F> void scan(F& mark) const {
-    mark(m_received);
-    // TODO: t7930461 if other threads have ptrs to our heap stashed in their
-    // thread-local or stack, we need to also scan them, or track them
-    // as roots somewhere. and if they're allowed to mutate our heap
-    // asyncronously, we need to rethink the single-threaded-gc
-    mark(m_queue.load());
-  }
+  // TODO: t7930461 if other threads have ptrs to our heap stashed in their
+  // thread-local or stack, we need to also scan them, or track them
+  // as roots somewhere.
 
 private:
   c_ExternalThreadEventWaitHandle* m_received;

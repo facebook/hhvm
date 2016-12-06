@@ -139,13 +139,8 @@ private:
 
 public:
   void reap();
-  template<class F> void scan(F& mark) const {
-    //mark(m_arr);
-    if (m_localCache) {
-      for (unsigned i = 0, n = m_arr->capacity(); i < n; ++i) {
-        mark(m_localCache[i]);
-      }
-    }
+  void scan(type_scan::Scanner& scanner) const {
+    scanner.scan(m_localCache);
   }
 
 private:

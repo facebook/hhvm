@@ -85,6 +85,7 @@ struct alignas(16) Resumable {
   // This function is temporary till we move AFWH to HNI
   static Resumable* Create(size_t frameSize, size_t totalSize) {
     // Allocate memory.
+    (void)type_scan::getIndexForMalloc<ActRec>();
     auto node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
     auto frame = reinterpret_cast<char*>(node + 1);
     auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
@@ -162,6 +163,7 @@ struct alignas(16) Resumable {
 private:
   // ActRec of the resumed frame.
   ActRec m_actRec;
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_actRec);
 
   // Resume address.
   jit::TCA m_resumeAddr;

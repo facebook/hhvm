@@ -159,9 +159,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     }
   }
 
-  /*
-   * Fill the first block predictions with the live types.
-   */
+  // Fill the first block predictions with the live types.
   assertx(!ret->empty());
   for (auto& lt : context.liveTypes) {
     switch (lt.location.tag()) {
@@ -173,6 +171,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
         }
         break;
       case LTag::Stack:
+      case LTag::MBase:
         break;
     }
   }

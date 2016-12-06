@@ -81,8 +81,32 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
   auto const innerType = env.irb->predictedStackInnerType(soff.offset);
   if (!outerOnly && innerType < TInitCell) {
     env.irb->constrainStack(soff.offset, DataTypeSpecific);
-    auto stk = gen(env, LdStk, TBoxedInitCell, soff, sp(env));
+    auto const stk = gen(env, LdStk, TBoxedInitCell, soff, sp(env));
     gen(env, CheckRefInner, innerType, exit, stk);
+  }
+}
+
+void checkTypeMBase(IRGS& env, Type type, Offset dest, bool outerOnly) {
+  auto exit = env.irb->guardFailBlock();
+  if (exit == nullptr) exit = makeExit(env, dest);
+
+  auto const mbr = gen(env, LdMBase, TPtrToGen);
+
+  if (type <= TCell) {
+    gen(env, CheckMBase, type, exit, mbr);
+    return;
+  }
+  assertx(type <= TBoxedInitCell);
+
+  gen(env, CheckMBase, TBoxedInitCell, exit, mbr);
+  gen(env, HintMBaseInner, type);
+
+  auto const innerType = env.irb->predictedMBaseInnerType();
+  if (!outerOnly && innerType < TInitCell) {
+    env.irb->constrainLocation(Location::MBase{}, DataTypeSpecific);
+    auto const basePtr = gen(env, LdMBase, TPtrToGen);
+    auto const base = gen(env, LdMem, TBoxedInitCell, basePtr);
+    gen(env, CheckRefInner, innerType, exit, base);
   }
 }
 
@@ -99,6 +123,10 @@ void assertTypeStack(IRGS& env, BCSPRelOffset idx, Type type) {
       IRSPRelOffsetData { offsetFromIRSP(env, idx) }, sp(env));
 }
 
+static void assertTypeMBase(IRGS& env, Type type) {
+  gen(env, AssertMBase, type);
+}
+
 void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
   assertx(type <= TStkElem);
 
@@ -108,6 +136,9 @@ void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
       break;
     case LTag::Local:
       assertTypeLocal(env, loc.localId(), type);
+      break;
+    case LTag::MBase:
+      assertTypeMBase(env, type);
       break;
   }
 }
@@ -123,6 +154,9 @@ void checkType(IRGS& env, const Location& loc,
       break;
     case LTag::Local:
       checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
+      break;
+    case LTag::MBase:
+      checkTypeMBase(env, type, dest, outerOnly);
       break;
   }
 }

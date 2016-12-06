@@ -849,7 +849,9 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       auto const ar = g_context->getFrameAtDepth(0);
-      auto const context = getDefinedVariables(ar);
+      auto const context = RuntimeOption::EnableContextInErrorHandler
+        ? getDefinedVariables(ar)
+        : empty_array();
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()),
@@ -1818,7 +1820,6 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   Stats::inc(Stats::PseudoMain_Executed);
 
   ActRec* ar = vmStack().allocA();
-  assertx(AROFF(m_func) < AROFF(m_r));
   auto const cls = vmfp()->func()->cls();
   auto const func = unit->getMain(cls);
   assert(!func->isCPPBuiltin());

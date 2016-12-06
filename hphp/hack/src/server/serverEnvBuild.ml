@@ -16,19 +16,15 @@ open ServerEnv
 
 module SLC = ServerLocalConfig
 
-(** Returns a random filepath within given dir with the given file extension. *)
-let random_filepath dir extension =
-  let name = Random_id.(short_string_with_alphabet alphanumeric_alphabet) in
-  Filename.concat dir (Printf.sprintf "%s.%s" name extension)
-
 let make_genv options config local_config handle =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
   Typing_deps.trace :=
     not check_mode || ServerArgs.convert options <> None ||
-    ServerArgs.save_filename options <> None;
+      ServerArgs.save_filename options <> None;
+  let nbr_procs = ServerArgs.max_procs options in
   let gc_control = ServerConfig.gc_control config in
-  let workers = Some (ServerWorker.make gc_control handle) in
+  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle) in
   let watchman_env =
     if check_mode || not local_config.SLC.use_watchman
     then None
@@ -40,12 +36,8 @@ let make_genv options config local_config handle =
     }
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
-  let recorder = if local_config.SLC.start_with_recorder_on
-    then Recorder.start {
-      Recorder.transcriber = Recorder.Transcribe_to_file
-        (random_filepath GlobalConfig.tmp_dir Recorder.file_extension);
-    }
-    else Recorder.default_instance
+  let debug_port = Option.map (ServerArgs.debug_client options)
+    ~f:(fun handle -> Debug_port.out_port_of_handle handle)
   in
   let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with
@@ -68,9 +60,10 @@ let make_genv options config local_config handle =
         match changes with
         | Watchman.Watchman_unavailable -> Notifier_unavailable
         | Watchman.Watchman_pushed changes -> begin match changes with
-          | Watchman.State_enter _
-          | Watchman.State_leave _ ->
-            Notifier_async_changes SSet.empty
+          | Watchman.State_enter (name, metadata) ->
+            Notifier_state_enter (name, metadata)
+          | Watchman.State_leave (name, metadata) ->
+            Notifier_state_leave (name, metadata)
           | Watchman.Files_changed changes ->
             Notifier_async_changes changes
           end
@@ -118,7 +111,7 @@ let make_genv options config local_config handle =
   { options;
     config;
     local_config;
-    recorder;
+    debug_port;
     workers;
     indexer;
     notifier_async;
@@ -132,7 +125,7 @@ let default_genv =
   { options          = ServerArgs.default_options "";
     config           = ServerConfig.default_config;
     local_config     = ServerLocalConfig.default;
-    recorder         = Recorder.default_instance;
+    debug_port       = None;
     workers          = None;
     indexer          = (fun _ -> fun () -> []);
     notifier_async   = (fun () ->
@@ -155,7 +148,7 @@ let make_env config =
     last_command_time = 0.0;
     last_notifier_check_time = 0.0;
     last_idle_job_time = 0.0;
-    edited_files   = Relative_path.Map.empty;
+    edited_files   = Relative_path.Set.empty;
     ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;
     needs_phase2_redecl = Relative_path.Set.empty;

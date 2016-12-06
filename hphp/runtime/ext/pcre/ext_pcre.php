@@ -132,7 +132,7 @@ function preg_match(string $pattern,
  *
  * @return string - Returns the quoted (escaped) string.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function preg_quote(string $str,
                     ?string $delimiter = NULL): string;
 

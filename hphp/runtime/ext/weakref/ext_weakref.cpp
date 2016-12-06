@@ -26,8 +26,6 @@
 
 namespace HPHP {
 
-namespace {
-
 const StaticString s_WeakRefDataHandle("WeakRefDataHandle");
 struct WeakRefDataHandle final {
   // We share the general validity and pointer between WeakRefHandles.
@@ -60,6 +58,8 @@ struct WeakRefDataHandle final {
     }
   }
 };
+
+namespace {
 
 void HHVM_METHOD(WeakRef, __construct, const Variant& pointee) {
   if (UNLIKELY(!pointee.isObject())) {

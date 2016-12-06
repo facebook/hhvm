@@ -144,8 +144,8 @@ private:
   static const GlobalsArray* asGlobals(const ArrayData* ad);
 
 public:
-  template<class F> void scan(F& mark) const {
-    mark(m_tab);
+  void scan(type_scan::Scanner& scanner) const {
+    scanner.scan(m_tab);
   }
 
 private:

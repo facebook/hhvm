@@ -2308,6 +2308,7 @@ void hphp_memory_cleanup() {
   // cleanup, so destroy it before its too late
   g_context.destroy();
 
+  weakref_cleanup();
   mm.resetAllocator();
   mm.resetCouldOOM();
 }

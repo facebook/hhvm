@@ -25,26 +25,33 @@ namespace HPHP {
 using weakref_data_map = req::hash_map<uintptr_t, req::weak_ptr<WeakRefData>>;
 IMPLEMENT_THREAD_LOCAL(weakref_data_map, s_weakref_data);
 
+void weakref_cleanup() {
+  s_weakref_data.destroy();
+}
+
 void WeakRefData::invalidateWeakRef(uintptr_t ptr) {
-  auto map_entry = s_weakref_data.get()->find(ptr);
-  if (map_entry != s_weakref_data.get()->end()) {
+  auto weakmap = s_weakref_data.get();
+  auto map_entry = weakmap->find(ptr);
+  if (map_entry != weakmap->end()) {
     map_entry->second.lock()->pointee = make_tv<KindOfUninit>();
-    s_weakref_data.get()->erase(map_entry);
+    weakmap->erase(map_entry);
   }
 }
 
 req::shared_ptr<WeakRefData> WeakRefData::forObject(Object obj) {
   req::shared_ptr<WeakRefData> wr_data;
 
-  auto map_entry = s_weakref_data.get()->find((uintptr_t)obj.get());
-  if (map_entry != s_weakref_data.get()->end()) {
+  auto weakmap = s_weakref_data.get();
+
+  auto map_entry = weakmap->find((uintptr_t)obj.get());
+  if (map_entry != weakmap->end()) {
     wr_data = map_entry->second.lock();
   } else {
     wr_data = req::make_shared<WeakRefData>(make_tv<KindOfObject>(obj.get()));
 
     obj->setWeakRefed(true);
     req::weak_ptr<WeakRefData> weak_data = req::weak_ptr<WeakRefData>(wr_data);
-    if (!(s_weakref_data.get()->insert(
+    if (!(weakmap->insert(
             {(uintptr_t)obj.get(), weak_data}).second)) {
       // Failure. Key should be unique.  We just checked.
       assert(false);

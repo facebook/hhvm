@@ -43,5 +43,7 @@ struct WeakRefData {
   explicit WeakRefData(const TypedValue& tv): pointee(tv) {}
 };
 
+void weakref_cleanup();
+
 } // namespace HPHP
 #endif // incl_HPHP_WEAKREF_DATA_H_

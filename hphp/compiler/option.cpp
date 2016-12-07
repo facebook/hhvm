@@ -113,7 +113,7 @@ int Option::GetScannerType() {
 
 bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
-bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC2");
+bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC");
 bool Option::RecordErrors = true;
 
 bool Option::AllVolatile = false;

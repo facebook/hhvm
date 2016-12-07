@@ -42,24 +42,10 @@ struct ZendUserIniData : UserIniData {
 
   virtual ~ZendUserIniData () {
     if (p) {
-      /*
-       * The string p->value was allocated by estrndup, which calls
-       * req::malloc.
-       * As such, the string will be freed at the end of the request.
-       *
-       * This destructor is called, for example, in the course
-       * of deleting the CallbackMap s_system_ini_callbacks,
-       * which happens after the end of the request.
-       * So at this point we may not actually own p->value,
-       * and its referent may already have been freed.
-       *
-       * Just be overly fussy here and have us forget about p->value.
-       */
-      p->value = nullptr;
-      p->value_length = -1;
+      free(p->value);
+      delete p;
+      p = nullptr;
     }
-    delete p;
-    p = nullptr;
   }
 
 public:
@@ -91,7 +77,7 @@ static int hhvm_register_ini_entries_do_work(
      */
     zend_ini_entry *p = new zend_ini_entry();
     *p = *constp;
-    p->value = estrndup(p->value, p->value_length);
+    p->value = strndup(p->value, p->value_length);
 
     /*
      * A factory to generate a unique instance of a UserIniData
@@ -104,16 +90,13 @@ static int hhvm_register_ini_entries_do_work(
 
     auto updateCallback = [p](const std::string& value) -> bool {
       TSRMLS_FETCH();
-      char* data = estrndup(value.data(), value.size());
+      char* data = strndup(value.data(), value.size());
       int ret = FAILURE;
       /*
-       * Store the data as the current value of this extension's ini setting.
-       *
-       * It should be safe to free the string we previously allocated,
-       * since we have not got to the end of the request when the
-       * MemoryManager will free these strings.
+       * Store the data as the current value of this extension's ini
+       * setting, and free the old one
        */
-      efree(p->value);
+      free(p->value);
       p->value = data;
       p->value_length = value.size();
       if (p->on_modify) {

@@ -471,7 +471,7 @@ struct SimpleParser {
 
   // Parse remainder of integer in [0..9e18) after initial digit 'init'.
   bool parseNumber(int64_t init) {
-    int len = 0;
+    int len = 1;  // Initial digit already read.
     auto n = init;
     if (n > 0) {
       while (*p >= '0' && *p <= '9') {

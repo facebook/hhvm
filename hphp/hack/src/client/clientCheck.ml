@@ -381,6 +381,10 @@ let main args =
         Hh_json.json_to_string json in
       ClientFullFidelityParse.go results;
       Exit_status.No_error
+    | MODE_FULL_FIDELITY_SCHEMA ->
+      let schema = Full_fidelity_schema.schema_as_json() in
+      print_string schema;
+      Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   exit_status

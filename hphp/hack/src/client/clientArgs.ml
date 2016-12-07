@@ -247,6 +247,8 @@ let parse_check_args cmd =
     "--dump-full-fidelity-parse",
         Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x) ()),
         "";
+    "--full-fidelity-schema",
+      Arg.Unit (set_mode MODE_FULL_FIDELITY_SCHEMA), "";
     (* flags *)
     "--json", Arg.Set output_json,
       " output json for machine consumption. (default: false)";

@@ -604,7 +604,7 @@ void Vgen::emit(const andli& i) {
 }
 
 void Vgen::emit(const testbi& i) {
-  a->Tst(W(i.s1), MSKTOP(i.s0.l()));
+  a->Tst(W(i.s1), i.s0.ub());
 }
 
 void Vgen::emit(const testli& i) {

@@ -34,6 +34,7 @@ type t = {
 
 let default = {
   use_watchman = false;
+  (* Buck and hgwatchman use a 10 second timeout too *)
   watchman_init_timeout = 10;
   watchman_subscribe = false;
   watchman_sync_directory = "";
@@ -69,23 +70,28 @@ let load_ fn =
   let contents = Sys_utils.cat fn in
   Printf.eprintf "%s:\n%s\n" fn contents;
   let config = Config_file.parse_contents contents in
-  let use_watchman = bool_ "use_watchman" ~default:false config in
-  let use_mini_state = bool_ "use_mini_state" ~default:false config in
-  let enable_on_nfs = bool_ "enable_on_nfs" ~default:false config in
-  let enable_fuzzy_search = bool_ "enable_fuzzy_search" ~default:true config in
-  let lazy_parse = bool_ "lazy_parse" ~default:false config in
-  let lazy_init = bool_ "lazy_init" ~default:false config in
-  let load_mini_script_timeout =
-    int_ "load_mini_script_timeout" ~default:20 config in
-  let start_with_recorder_on =
-    bool_ "start_with_recorder_on"
+  let use_watchman = bool_ "use_watchman"
+    ~default:default.use_watchman config in
+  let use_mini_state = bool_ "use_mini_state"
+    ~default:default.use_mini_state config in
+  let enable_on_nfs = bool_ "enable_on_nfs"
+    ~default:default.enable_on_nfs config in
+  let enable_fuzzy_search = bool_ "enable_fuzzy_search"
+    ~default:default.enable_fuzzy_search config in
+  let lazy_parse = bool_ "lazy_parse"
+    ~default:default.lazy_parse config in
+  let lazy_init = bool_ "lazy_init"
+    ~default:default.lazy_init config in
+  let load_mini_script_timeout = int_ "load_mini_script_timeout"
+    ~default:default.load_mini_script_timeout config in
+  let start_with_recorder_on = bool_ "start_with_recorder_on"
     ~default:default.start_with_recorder_on config in
-  let type_decl_bucket_size =
-    int_ "type_decl_bucket_size" ~default:1000 config in
-  (* Buck and hgwatchman use a 10 second timeout too *)
-  let watchman_init_timeout =
-    int_ "watchman_init_timeout" ~default:10 config in
-  let watchman_subscribe = bool_ "watchman_subscribe" ~default:false config in
+  let type_decl_bucket_size = int_ "type_decl_bucket_size"
+    ~default:default.type_decl_bucket_size config in
+  let watchman_init_timeout = int_ "watchman_init_timeout"
+    ~default:default.watchman_init_timeout config in
+  let watchman_subscribe = bool_ "watchman_subscribe"
+    ~default:default.watchman_subscribe config in
   let watchman_sync_directory_opt =
     string_opt "watchman_sync_directory" config in
   let watchman_sync_directory =
@@ -94,8 +100,10 @@ let load_ fn =
     else
       ""
   in
-  let io_priority = int_ "io_priority" ~default:7 config in
-  let cpu_priority = int_ "cpu_priority" ~default:10 config in
+  let io_priority = int_ "io_priority"
+    ~default:default.io_priority config in
+  let cpu_priority = int_ "cpu_priority"
+    ~default:default.cpu_priority config in
   let shm_dirs = string_list
     ~delim:(Str.regexp ",")
     "shm_dirs"
@@ -104,7 +112,8 @@ let load_ fn =
   |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
   let saved_state_load_type =
     LoadScriptConfig.saved_state_load_type_ config in
-  let use_sql = bool_ "use_sql2" ~default:false config in
+  let use_sql = bool_ "use_sql2"
+    ~default:(LoadScriptConfig.use_sql LoadScriptConfig.default) config in
   let load_script_config =
     LoadScriptConfig.createLoadScriptConfig saved_state_load_type use_sql in
   {

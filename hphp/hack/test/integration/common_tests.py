@@ -970,6 +970,53 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         }
 """)
 
+    def test_refactor_typedefs(self):
+        with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
+            f.write("""
+            <?hh
+            newtype NewType = int;
+            type Type = int;
+
+            class MyClass {
+                public function myFunc(Type $x): NewType {
+                    return $x;
+                }
+            }
+            """)
+        self.write_load_config('foo_4.php')
+
+        self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
+        ['[{{"filename":"{root}foo_4.php","patches":[{{'
+        '"char_start":38,"char_end":45,"line":3,"col_start":21,'
+        '"col_end":27,"patch_type":"replace","replacement":"NewTypeX"}},'
+        '{{"char_start":160,"char_end":167,"line":7,"col_start":50,'
+        '"col_end":56,"patch_type":"replace","replacement":"NewTypeX"}}]'
+        '}}]'],
+        options=['--refactor', 'Class', 'NewType', 'NewTypeX'])
+
+        self.check_cmd_and_json_cmd(['Rewrote 1 files.'],
+        ['[{{"filename":"{root}foo_4.php","patches":[{{'
+        '"char_start":71,"char_end":75,"line":4,"col_start":18,'
+        '"col_end":21,"patch_type":"replace","replacement":"TypeX"}},'
+        '{{"char_start":151,"char_end":155,"line":7,"col_start":40,'
+        '"col_end":43,"patch_type":"replace","replacement":"TypeX"}}]'
+        '}}]'],
+        options=['--refactor', 'Class', 'Type', 'TypeX'])
+
+        with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
+            out = f.read()
+            self.assertEqual(out, """
+            <?hh
+            newtype NewTypeX = int;
+            type TypeX = int;
+
+            class MyClass {
+                public function myFunc(TypeX $x): NewTypeX {
+                    return $x;
+                }
+            }
+            """)
+
     def test_ide_exit_status(self):
         """
         Test multiple exit status of "hh_client ide"

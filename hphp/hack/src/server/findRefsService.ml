@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Option.Monad_infix
 open Reordered_argument_collections
 open Typing_defs
 
@@ -160,17 +161,21 @@ let get_child_classes_files tcopt class_name =
     Relative_path.Set.empty
 
 let get_deps_set tcopt classes =
-  SSet.fold classes ~f:begin fun class_name acc ->
-    match Typing_lazy_heap.get_class tcopt class_name with
-    | Some class_ ->
-        (* Get all files with dependencies on this class *)
-        let fn = Pos.filename class_.tc_pos in
-        let dep = Typing_deps.Dep.Class class_.tc_name in
-        let bazooka = Typing_deps.get_bazooka dep in
-        let files = Typing_deps.get_files bazooka in
-        let files = Relative_path.Set.add files fn in
-        Relative_path.Set.union files acc
+  let get_filename tcopt class_name =
+    Naming_heap.TypeIdHeap.get class_name >>= function
+      (_, `Class) -> Typing_lazy_heap.get_class tcopt class_name >>=
+        fun class_ -> Some(Pos.filename class_.tc_pos)
+    | (_, `Typedef) -> Typing_lazy_heap.get_typedef tcopt class_name >>=
+        fun type_ -> Some(Pos.filename type_.td_pos)
+  in SSet.fold classes ~f:begin fun class_name acc ->
+    match get_filename tcopt class_name with
     | None -> acc
+    | Some fn ->
+      let dep = Typing_deps.Dep.Class class_name in
+      let bazooka = Typing_deps.get_bazooka dep in
+      let files = Typing_deps.get_files bazooka in
+      let files = Relative_path.Set.add files fn in
+      Relative_path.Set.union files acc
   end ~init:Relative_path.Set.empty
 
 let get_deps_set_function tcopt f_name =
@@ -230,9 +235,11 @@ let get_definitions tcopt = function
       | None -> acc
     end
   | IClass class_name ->
-    begin match Typing_lazy_heap.get_class tcopt class_name with
-      | Some class_ -> [(class_name, class_.tc_pos)]
-      | None -> []
+    Option.value ~default:[] begin Naming_heap.TypeIdHeap.get class_name >>=
+    function (_, `Class) -> Typing_lazy_heap.get_class tcopt class_name >>=
+      fun class_ -> Some([(class_name, class_.tc_pos)])
+    | (_, `Typedef) -> Typing_lazy_heap.get_typedef tcopt class_name >>=
+      fun type_ -> Some([class_name, type_.td_pos])
     end
   | IFunction fun_name ->
     begin match Typing_lazy_heap.get_fun tcopt fun_name with

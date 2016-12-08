@@ -90,6 +90,20 @@ module WithStatementAndDeclAndTypeParser
     let new_errors = List.length(errors parser) in
     old_errors = new_errors
 
+  and parse_as_name_or_error parser =
+    (* TODO: Are there "reserved" keywords that absolutely cannot start
+       an expression? If so, list them above and make them produce an
+       error. *)
+    let (parser1, token) = next_token_as_name parser in
+    match (Token.kind token) with
+    | Name -> parse_name_or_collection_literal_expression parser1 token
+    | _ ->
+      (* ERROR RECOVERY: Eat the offending token.
+      TODO: Create a better error recovery system that does not eat tokens
+      that might be eaten by the outer statement / declaration parser. *)
+      let parser = with_error parser1 SyntaxError.error1015 in
+      (parser, make_token token)
+
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other parser in
     match (Token.kind token) with
@@ -150,21 +164,7 @@ module WithStatementAndDeclAndTypeParser
     | Require
     | Require_once -> parse_inclusion_expression parser
     | EndOfFile
-    | _ ->
-      begin
-        (* TODO: Are there "reserved" keywords that absolutely cannot start
-           an expression? If so, list them above and make them produce an
-           error. *)
-        let (parser1, token) = next_token_as_name parser in
-        match (Token.kind token) with
-        | Name -> parse_name_or_collection_literal_expression parser1 token
-        | _ ->
-          (* ERROR RECOVERY: Eat the offending token.
-          TODO: Create a better error recovery system that does not eat tokens
-          that might be eaten by the outer statement / declaration parser. *)
-          let parser = with_error parser1 SyntaxError.error1015 in
-          (parser, make_token token)
-      end
+    | _ -> parse_as_name_or_error parser
 
   and parse_double_quoted_string parser head =
     parse_string_literal parser head ""
@@ -1309,38 +1309,55 @@ module WithStatementAndDeclAndTypeParser
   and parse_dictionary_intrinsic_expression parser =
     (* TODO: Create the grammar and add it to the spec. *)
     (* TODO: Can the list have a trailing comma? *)
-    let (parser, dict_keyword) = assert_token parser Dict in
-    let (parser, left_bracket) = expect_left_bracket parser in
-    let (parser, members) = parse_comma_list_allow_trailing parser
-      RightBracket SyntaxError.error1015 parse_keyed_element_initializer in
-    let (parser, right_bracket) = expect_right_bracket parser in
-    let result = make_dictionary_intrinsic_expression dict_keyword left_bracket
-      members right_bracket in
-    (parser, result)
+    let (parser1, dict_keyword) = assert_token parser Dict in
+    let (parser1, left_bracket) = optional_token parser1 LeftBracket in
+    if is_missing left_bracket then
+      (* Fall back to dict being an ordinary name. Perhaps we're calling a
+         function dict() for example. *)
+      parse_as_name_or_error parser
+    else
+      let (parser, members) = parse_comma_list_allow_trailing parser1
+        RightBracket SyntaxError.error1015 parse_keyed_element_initializer in
+      let (parser, right_bracket) = expect_right_bracket parser in
+      let result = make_dictionary_intrinsic_expression dict_keyword
+        left_bracket members right_bracket in
+      (parser, result)
 
   and parse_keyset_intrinsic_expression parser =
     (* TODO: Create the grammar and add it to the spec. *)
     (* TODO: Can the list have a trailing comma? *)
-    let (parser, keyset_keyword) = assert_token parser Keyset in
-    let (parser, left_bracket) = expect_left_bracket parser in
-    let (parser, members) = parse_comma_list_allow_trailing parser RightBracket
-      SyntaxError.error1015 parse_expression_with_reset_precedence in
-    let (parser, right_bracket) = expect_right_bracket parser in
-    let result = make_keyset_intrinsic_expression keyset_keyword left_bracket
-      members right_bracket in
-    (parser, result)
+    let (parser1, keyset_keyword) = assert_token parser Keyset in
+    let (parser1, left_bracket) = optional_token parser1 LeftBracket in
+    if is_missing left_bracket then
+      (* Fall back to keyset being an ordinary name. Perhaps we're calling a
+         function keyset() for example. *)
+      parse_as_name_or_error parser
+    else
+      let (parser, members) = parse_comma_list_allow_trailing parser1
+        RightBracket SyntaxError.error1015
+        parse_expression_with_reset_precedence in
+      let (parser, right_bracket) = expect_right_bracket parser in
+      let result = make_keyset_intrinsic_expression keyset_keyword left_bracket
+        members right_bracket in
+      (parser, result)
 
   and parse_vector_intrinsic_expression parser =
     (* TODO: Create the grammar and add it to the spec. *)
     (* TODO: Can the list have a trailing comma? *)
-    let (parser, vec_keyword) = assert_token parser Vec in
-    let (parser, left_bracket) = expect_left_bracket parser in
-    let (parser, members) = parse_comma_list_allow_trailing parser RightBracket
-      SyntaxError.error1015 parse_expression_with_reset_precedence in
-    let (parser, right_bracket) = expect_right_bracket parser in
-    let result = make_vector_intrinsic_expression vec_keyword left_bracket
-      members right_bracket in
-    (parser, result)
+    let (parser1, vec_keyword) = assert_token parser Vec in
+    let (parser1, left_bracket) = optional_token parser1 LeftBracket in
+    if is_missing left_bracket then
+      (* Fall back to vec being an ordinary name. Perhaps we're calling a
+         function vec() for example. *)
+      parse_as_name_or_error parser
+    else
+      let (parser, members) =
+        parse_comma_list_allow_trailing parser1 RightBracket
+        SyntaxError.error1015 parse_expression_with_reset_precedence in
+      let (parser, right_bracket) = expect_right_bracket parser in
+      let result = make_vector_intrinsic_expression vec_keyword left_bracket
+        members right_bracket in
+      (parser, result)
 
   (* array_creation_expression := [ array-initializer-opt ] *)
   and parse_array_creation_expression parser =

@@ -121,7 +121,7 @@ bool CacheManager::addEmptyEntry(const std::string& name) {
 template<class F>
 bool CacheManager::existsHelper(const std::string& name, F fn) const {
   auto it = m_cache_map.find(name);
-  if (it == m_cache_map.end()) return nullptr;
+  if (it == m_cache_map.end()) return false;
 
   auto cd = it->second.get();
 

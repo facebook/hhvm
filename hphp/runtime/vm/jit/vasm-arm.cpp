@@ -289,7 +289,7 @@ struct Vgen {
   void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), SetFlags); }
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), SetFlags); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
-  void emit(const testbi& i);
+  void emit(const testbi& i){ a->Tst(W(i.s1), i.s0.ub()); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testli& i);
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
@@ -601,10 +601,6 @@ void Vgen::emit(const andbi& i) {
 
 void Vgen::emit(const andli& i) {
   a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), SetFlags);
-}
-
-void Vgen::emit(const testbi& i) {
-  a->Tst(W(i.s1), i.s0.ub());
 }
 
 void Vgen::emit(const testli& i) {

@@ -70,17 +70,16 @@ module ServerInitCommon = struct
    * The second line is a list of the files that have changed since the state
    * was built
    *)
-  let load_state root use_sql cmd (_ic, oc) =
+  let load_state root cmd (_ic, oc) =
     try
       let load_script_log_file = ServerFiles.load_log root in
       let cmd =
         Printf.sprintf
-          "%s %s %s %s %s"
+          "%s %s %s %s"
           (Filename.quote (Path.to_string cmd))
           (Filename.quote (Path.to_string root))
           (Filename.quote Build_id.build_revision)
-          (Filename.quote load_script_log_file)
-          (Filename.quote (string_of_bool use_sql)) in
+          (Filename.quote load_script_log_file) in
       Hh_logger.log "Running load_mini script: %s\n%!" cmd;
       let ic = Unix.open_process_in cmd in
       let json = read_json_line ic in
@@ -91,18 +90,10 @@ module ServerInitCommon = struct
         Hh_json.get_bool_exn @@ List.Assoc.find_exn kv "is_cached" in
       let deptable_fn =
         Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
-      (* The sql deptable needs to be loaded in the master process, so
-       * defer that to later, give dummy result for read time
-       *)
-      let read_deptable_time =
-        if use_sql
-        then 0
-        else SharedMem.load_dep_table deptable_fn
-      in
       let end_time = Unix.gettimeofday () in
       Daemon.to_channel oc
         @@ Ok (
-        `Fst (state_fn, is_cached, end_time, deptable_fn, read_deptable_time));
+        `Fst (state_fn, is_cached, end_time, deptable_fn));
       let json = read_json_line ic in
       assert (Unix.close_process_in ic = Unix.WEXITED 0);
       let kv = Hh_json.get_object_exn json in
@@ -120,38 +111,27 @@ module ServerInitCommon = struct
     Timeout.with_timeout ~timeout ~do_:(fun _ -> f ())
       ~on_timeout:(fun _ -> raise @@ Loader_timeout stage)
 
-  (* This generator-like function first runs the load script to download state
-   * and loads the downloaded dependency table into shared memory. It then
-   * waits for the load script to send it the list of files that have changed
-   * since the state was downloaded.
-   *
-   * The loading of the dependency table must not run concurrently with any
-   * operations that might write to the deptable. *)
-  let mk_state_future root use_sql cmd =
+  (* This generator-like function first runs the load script to download state.
+   * It then waits for the load script to send it the list of files that
+   * have changed since the state was downloaded.
+   *)
+  let mk_state_future root cmd =
     let start_time = Unix.gettimeofday () in
     Result.try_with @@ fun () ->
     let log_file =
       Sys_utils.make_link_of_timestamped (ServerFiles.load_log root) in
     let log_fd = Daemon.fd_of_path log_file in
     let {Daemon.channels = (ic, _oc); pid} as daemon =
-      Daemon.fork (log_fd, log_fd)
-                  (load_state root use_sql)
-                  cmd
+      Daemon.fork (log_fd, log_fd) (load_state root) cmd
     (** The first generator in the future, which gets the results from the
      * process. *)
     in fun () ->
     try
       Daemon.from_channel ic >>= function
       | `Snd _ -> assert false
-      | `Fst (fn, is_cached, end_time, deptable_fn, read_deptable_time) ->
-        (* As promised, the sql deptable is being loaded in the master process
-         * if we are in the sql mode
-         *)
-        let read_deptable_time =
-          if use_sql
-          then SharedMem.load_dep_table_sqlite deptable_fn
-          else read_deptable_time
-        in
+      | `Fst (fn, is_cached, end_time, deptable_fn) ->
+        (* The sql deptable must be loaded in the master process *)
+        let read_deptable_time = SharedMem.load_dep_table_sqlite deptable_fn in
         Hh_logger.log
           "Reading the dependency file took (sec): %d" read_deptable_time;
         HackEventLogger.load_deptable_end read_deptable_time;
@@ -389,7 +369,6 @@ module type InitKind = sig
     lazy_level ->
     ServerEnv.env ->
     Path.t ->
-    use_sql: bool ->
     (ServerEnv.env * float) * state_result
 end
 
@@ -418,14 +397,14 @@ end
 *)
 module ServerEagerInit : InitKind = struct
   open ServerInitCommon
-  let init ~load_mini_script genv lazy_level env root ~use_sql =
+  let init ~load_mini_script genv lazy_level env root =
     (* Spawn this first so that it can run in the background while parsing is
      * going on. The script can fail in a variety of ways, but the resolution
      * is always the same -- we fall back to rechecking everything. Running it
      * in the Result monad provides a convenient way to locate the error
      * handling code in one place. *)
     let state_future =
-     load_mini_script >>= mk_state_future root use_sql in
+     load_mini_script >>= mk_state_future root in
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     let env, t = parsing ~lazy_parse genv env ~get_next t in
@@ -481,7 +460,7 @@ module ServerEagerInit : InitKind = struct
       type_check_dirty genv env old_fast fast dirty_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)
-      if use_sql then SharedMem.cleanup_sqlite ();
+      SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
         HackEventLogger.load_mini_exn err;
         Hh_logger.exc ~prefix:"Could not load mini state: " err;
@@ -547,10 +526,10 @@ module ServerLazyInit : InitKind = struct
 
 
 
-  let init ~load_mini_script genv lazy_level env root ~use_sql =
+  let init ~load_mini_script genv lazy_level env root =
     assert (lazy_level = Init);
     let state_future =
-      load_mini_script >>= mk_state_future root use_sql in
+      load_mini_script >>= mk_state_future root in
 
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>= fun f ->
@@ -624,7 +603,7 @@ module ServerLazyInit : InitKind = struct
       type_check_dirty genv env old_fast fast dirty_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)
-      if use_sql then SharedMem.cleanup_sqlite ();
+      SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
         HackEventLogger.load_mini_exn err;
         Hh_logger.exc ~prefix:"Could not load mini state: " err;
@@ -690,9 +669,7 @@ let save_state env fn =
   Marshal.to_channel chan modes [];
   Sys_utils.close_out_no_fail fn chan;
   let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") in
-  let save_t = SharedMem.save_dep_table (fn^".deptable") in
   Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;
-  Hh_logger.log "Saving deptable without sqlite took(seconds): %d" save_t;
   ignore @@ Hh_logger.log_duration "Saving" t
 
 
@@ -713,12 +690,12 @@ let init ?load_mini_script genv =
   let load_mini_script = Result.of_option load_mini_script ~error:No_loader in
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
-  let use_sql = LSC.use_sql genv.local_config.SLC.load_script_config in
   let (env, t), state =
     if lazy_lev = Init then
-      ServerLazyInit.init ~load_mini_script genv lazy_lev env root ~use_sql
+      ServerLazyInit.init ~load_mini_script genv lazy_lev env root
     else
-      ServerEagerInit.init ~load_mini_script genv lazy_lev env root ~use_sql in
+      ServerEagerInit.init ~load_mini_script genv lazy_lev env root
+  in
   let env, _t = ai_check genv env.files_info env t in
   SharedMem.init_done ();
   print_hash_stats ();

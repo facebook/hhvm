@@ -23,10 +23,7 @@ let get_sqlite = hh_get_dep_sqlite
 
 (* Function to save and load deptable *)
 
-external save_dep_table: string -> int = "hh_save_dep_table"
 external save_dep_table_sqlite: string -> int = "hh_save_dep_table_sqlite"
-
-external load_dep_table: string -> int = "hh_load_dep_table"
 external load_dep_table_sqlite: string -> int = "hh_load_dep_table_sqlite"
 
 let expect ~msg bool =
@@ -110,14 +107,12 @@ let run_daemon fn =
   ignore @@ Unix.waitpid [] (handle.Daemon.pid)
 
 
-let save_in_daemon filename is_sql =
+let save_in_daemon filename =
   run_daemon
     begin fun () _ ->
       init_shared_mem ();
       populate_deptable ();
-      if is_sql
-      then ignore @@ save_dep_table_sqlite filename
-      else ignore @@ save_dep_table filename
+      ignore @@ save_dep_table_sqlite filename
     end
 
 let test_deps_in_memory () =
@@ -127,19 +122,9 @@ let test_deps_in_memory () =
     (List.append data data_empty)
     ~f:(fun (key, values) -> expect_equals_list key (get key) values)
 
-let test_deptable () =
-  let deptable_name = Filename.temp_file "test_deptable" ".deptable" in
-  save_in_daemon deptable_name false;
-  init_shared_mem ();
-  ignore @@ load_dep_table deptable_name;
-  List.iter
-    (List.append data data_empty)
-    ~f:(fun (key, values) -> expect_equals_list key (get key) values);
-  Sys.remove deptable_name
-
 let test_deptable_sql () =
   let deptable_name = Filename.temp_file "test_deptable" ".sql" in
-  save_in_daemon deptable_name true;
+  save_in_daemon deptable_name;
   init_shared_mem ();
   ignore @@ load_dep_table_sqlite deptable_name;
   List.iter
@@ -150,7 +135,6 @@ let test_deptable_sql () =
 let tests handle =
   let test_list = [
     "test_in_memory", test_deps_in_memory;
-    "test_regular", test_deptable;
     "test_sql", test_deptable_sql
   ] in
   let setup_test (name, test) = name, fun () ->

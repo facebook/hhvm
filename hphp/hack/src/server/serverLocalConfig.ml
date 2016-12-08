@@ -110,12 +110,7 @@ let load_ fn =
     ~default:default.shm_dirs
     config
   |> List.map ~f:(fun(dir) -> Path.(to_string @@ make dir)) in
-  let saved_state_load_type =
-    LoadScriptConfig.saved_state_load_type_ config in
-  let use_sql = bool_ "use_sql2"
-    ~default:(LoadScriptConfig.use_sql LoadScriptConfig.default) config in
-  let load_script_config =
-    LoadScriptConfig.createLoadScriptConfig saved_state_load_type use_sql in
+  let load_script_config = LoadScriptConfig.default in
   {
     use_watchman;
     watchman_init_timeout;

@@ -64,6 +64,6 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         self.assertEqual(retcode, 0, "See also recorder_cat stderr:\n" + err)
         self.assertRegex(
             out.strip(),
-            '(Loaded_saved_state /tmp/.........../foo with 0 dirtied files)',
+            '(Loaded_saved_state /tmp/.+/foo with 0 dirtied files)',
             "See also recorder daemon logs:\n=============\n" +
             recorder_log + "\n===========\n")

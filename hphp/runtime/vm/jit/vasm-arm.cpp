@@ -482,6 +482,16 @@ void Vgen::emit(const callfaststub& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Vgen::emit(const phpret& i) {
+  // prefer load-pair instruction
+  if (!i.noframe) {
+    a->ldp(X(i.d), X(rlr()), X(i.fp)[AROFF(m_sfp)]);
+  } else {
+    a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
+  }
+  emit(ret{});
+}
+
 void Vgen::emit(const callphp& i) {
   emitSmashableCall(a->code(), env.meta, i.stub);
   emit(unwind{{i.targets[0], i.targets[1]}});

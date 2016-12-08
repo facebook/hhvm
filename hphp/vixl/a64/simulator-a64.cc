@@ -824,9 +824,6 @@ void Simulator::VisitLoadStorePairNonTemporal(Instruction* instr) {
   LoadStorePairHelper(instr, Offset);
 }
 
-void Simulator::VisitLoadStoreExclusive(Instruction* instr) {
-  VisitUnimplemented(instr);
-}
 
 void Simulator::LoadStorePairHelper(Instruction* instr,
                                     AddrMode addrmode) {

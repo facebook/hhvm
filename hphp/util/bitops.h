@@ -23,6 +23,8 @@
 #include <folly/Bits.h>
 #endif
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP {
 
 // GLIBC doesn't provide an fls primitive. Since we're rolling our own
@@ -135,7 +137,7 @@ inline size_t bitset_find_first(const std::bitset<N>& bitset) {
 // bitset.size() if none.
 template <size_t N>
 inline size_t bitset_find_next(const std::bitset<N>& bitset, size_t prev) {
-  assert(prev < bitset.size());
+  assertx(prev < bitset.size());
 #if defined(__GNUC__) && !defined(__APPLE__)
   // GNU provides non-standard (its a hold over from the original SGI
   // implementation) _Find_next(), which given an index, efficiently returns

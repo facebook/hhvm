@@ -39,6 +39,20 @@ uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   return retval;
 }
 
+// If its known that the location doesn't contain a boxed value, then everything
+// after the check should be unreachable. Bail out now to avoid asserting on
+// incompatible types. This can happen if we're inlining and one of the
+// arguments has a type which doesn't match what we previously profiled (the
+// guard will always fail).
+bool haltIfNotBoxed(IRGS& env, const Location& loc) {
+  auto const knownType = env.irb->fs().typeOf(loc);
+  if (!knownType.maybe(TBoxedInitCell)) {
+    gen(env, Halt);
+    return true;
+  }
+  return false;
+}
+
 void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
                     Offset dest, bool outerOnly) {
   auto exit = env.irb->guardFailBlock();
@@ -51,6 +65,9 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckLoc, TBoxedInitCell, LocalId(locId), exit, fp(env));
+
+  if (haltIfNotBoxed(env, Location::Local{locId})) return;
+
   gen(env, HintLocInner, type, LocalId { locId }, fp(env));
 
   auto const innerType = env.irb->predictedLocalInnerType(locId);
@@ -76,6 +93,11 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckStk, TBoxedInitCell, soff, exit, sp(env));
+
+  if (haltIfNotBoxed(env, Location::Stack{offsetFromFP(env, soff.offset)})) {
+    return;
+  }
+
   gen(env, HintStkInner, type, soff, sp(env));
 
   auto const innerType = env.irb->predictedStackInnerType(soff.offset);
@@ -99,6 +121,9 @@ void checkTypeMBase(IRGS& env, Type type, Offset dest, bool outerOnly) {
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckMBase, TBoxedInitCell, exit, mbr);
+
+  if (haltIfNotBoxed(env, Location::MBase{})) return;
+
   gen(env, HintMBaseInner, type);
 
   auto const innerType = env.irb->predictedMBaseInnerType();

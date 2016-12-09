@@ -375,7 +375,7 @@ let program_init genv =
         env, if did_load then "mini_load" else "mini_load_fail"
     else
       let env, _ = ServerInit.init genv in
-      env, "fresh"
+      env, if repo_wait_success then "fresh" else "fresh_repo_wait_fail"
   in
   EventLogger.set_init_type init_type;
   HackEventLogger.init_end init_type;

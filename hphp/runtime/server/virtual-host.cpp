@@ -356,7 +356,7 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
 
 bool VirtualHost::match(const String &host) const {
   if (m_pattern) {
-    Variant ret = preg_match(StrNR(m_pattern), host);
+    Variant ret = preg_match(m_pattern, host.get());
     return ret.toInt64() > 0;
   } else if (!m_prefix.empty()) {
     return strncasecmp(host.c_str(), m_prefix.c_str(), m_prefix.size()) == 0;
@@ -397,7 +397,7 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
       } else {
         subject = host;
       }
-      Variant ret = preg_match(StrNR(it->pattern), subject);
+      Variant ret = preg_match(it->pattern, subject.get());
       if (!same(ret, it->negate ? 0 : 1)) {
         passed = false;
         break;
@@ -405,8 +405,8 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
     }
     if (!passed) continue;
     Variant matches;
-    int count = preg_match(StrNR(rule.pattern),
-                           normalized,
+    int count = preg_match(rule.pattern,
+                           normalized.get(),
                            &matches).toInt64();
     if (count > 0) {
       Logger::Verbose("Matched pattern %s", rule.pattern->data());
@@ -477,9 +477,9 @@ std::string VirtualHost::serverName(const std::string &host) const {
   if (!RuntimeOption::DefaultServerNameSuffix.empty()) {
     if (m_pattern) {
       Variant matches;
-      Variant ret = preg_match(StrNR(m_pattern),
+      Variant ret = preg_match(m_pattern,
                                String(host.c_str(), host.size(),
-                                      CopyString),
+                                      CopyString).get(),
                                &matches);
       if (ret.toInt64() > 0) {
         String prefix = matches.toArray()[1].toString();

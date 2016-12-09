@@ -108,7 +108,15 @@ Variant preg_match(const String& pattern, const String& subject,
                    Variant* matches = nullptr,
                    int flags = 0, int offset = 0);
 
+Variant preg_match(const StringData* pattern, const StringData* subject,
+                   Variant* matches = nullptr,
+                   int flags = 0, int offset = 0);
+
 Variant preg_match_all(const String& pattern, const String& subject,
+                       Variant* matches = nullptr,
+                       int flags = 0, int offset = 0);
+
+Variant preg_match_all(const StringData* pattern, const StringData* subject,
                        Variant* matches = nullptr,
                        int flags = 0, int offset = 0);
 

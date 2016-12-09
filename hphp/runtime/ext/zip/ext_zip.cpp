@@ -542,7 +542,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     }
 
     if (!glob) {
-      auto var = preg_match(pattern, source);
+      auto var = preg_match(pattern.get(), source.get());
       if (var.isInteger()) {
         if (var.asInt64Val() == 0) {
           continue;

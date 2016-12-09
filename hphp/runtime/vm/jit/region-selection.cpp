@@ -270,6 +270,20 @@ void RegionDesc::addMerged(BlockId fromId, BlockId intoId) {
   data(intoId).merged.insert(fromId);
 }
 
+int64_t RegionDesc::blockProfCount(RegionDesc::BlockId bid) const {
+  const auto pd = profData();
+  if (pd == nullptr) return 1;
+  if (bid < 0) return 1;
+  assertx(bid < pd->numTransRecs());
+  const auto tr = pd->transRec(bid);
+  if (tr->kind() != TransKind::Profile) return 1;
+  int64_t total = pd->transCounter(bid);
+  for (auto mid : merged(bid)) {
+    total += pd->transCounter(mid);
+  }
+  return total;
+}
+
 void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   assertx( hasBlock(oldId));
   assertx(!hasBlock(newId));
@@ -1236,7 +1250,7 @@ std::string show(const RegionDesc& region) {
     if (!profData) return 0;
     auto tid = b->profTransID();
     if (tid == kInvalidTransID) return 0;
-    return profData->transCounter(tid);
+    return region.blockProfCount(tid);
   };
 
   uint64_t maxBlockWgt = 1; // avoid div by 0

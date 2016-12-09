@@ -286,6 +286,11 @@ struct ProfData {
    */
   TransID allocTransID();
 
+  size_t numTransRecs() {
+    ReadLock lock{m_transLock};
+    return m_transRecs.size();
+  }
+
   ProfTransRec* transRec(TransID id) {
     ReadLock lock{m_transLock};
     return m_transRecs.at(id).get();

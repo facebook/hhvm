@@ -57,9 +57,10 @@ void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
 
 uint64_t curProfCount(const IRGS& env) {
   auto tid = env.profTransID;
-  assertx(tid == kInvalidTransID || profData());
+  assertx(tid == kInvalidTransID ||
+          (env.region != nullptr && profData() != nullptr));
   return env.profFactor *
-         (tid != kInvalidTransID ? profData()->transCounter(tid) : 1);
+         (tid != kInvalidTransID ? env.region->blockProfCount(tid) : 1);
 }
 
 //////////////////////////////////////////////////////////////////////

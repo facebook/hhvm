@@ -84,7 +84,7 @@ BlockIdToIRBlockMap createBlockMap(irgen::IRGS& irgs,
     // block jump to this block.
     assertx(!hasTransID(id) || profData());
     auto transCount = hasTransID(id)
-      ? profData()->transCounter(getTransID(id))
+      ? region.blockProfCount(id)
       : 1;
     uint64_t profCount = transCount * irgs.profFactor;
     auto const iBlock = irb.unit().defBlock(profCount);
@@ -543,9 +543,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 double profFactor,
                                 Annotations* annotations) {
   const Timer irGenTimer(Timer::irGenRegionAttempt);
+  auto prevRegion      = irgs.region;      irgs.region      = &region;
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
   auto prevProfTransID = irgs.profTransID; irgs.profTransID = kInvalidTransID;
   SCOPE_EXIT {
+    irgs.region      = prevRegion;
     irgs.profFactor  = prevProfFactor;
     irgs.profTransID = prevProfTransID;
   };
@@ -747,7 +749,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           if (hasTransID(calleeEntryBID)) {
             assertx(profData());
             auto const calleeTID = getTransID(calleeEntryBID);
-            auto calleeProfCount = profData()->transCounter(calleeTID);
+            auto calleeProfCount = calleeRegion->blockProfCount(calleeTID);
             if (calleeProfCount == 0) calleeProfCount = 1; // avoid div by zero
             calleeProfFactor /= calleeProfCount;
             assert_flog(calleeProfFactor >= 0, "calleeProfFactor = {:.5}\n",
@@ -873,7 +875,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   while (result == TranslateResult::Retry) {
     unit = folly::make_unique<IRUnit>(context);
     unit->initLogEntry(context.func);
-    irgen::IRGS irgs{*unit};
+    irgen::IRGS irgs{*unit, &region};
 
     // Set up inlining context, but disable it for profiling mode.
     InliningDecider inl(region.entry()->func());
@@ -886,7 +888,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
       auto entryBID = region.entry()->id();
       assertx(hasTransID(entryBID));
       auto entryTID = getTransID(entryBID);
-      auto entryProfCount = profData()->transCounter(entryTID);
+      auto entryProfCount = region.blockProfCount(entryTID);
       irgs.unit.entry()->setProfCount(entryProfCount);
     }
 
@@ -945,7 +947,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
   while (result == TranslateResult::Retry) {
     unit = folly::make_unique<IRUnit>(ctx);
-    irgen::IRGS irgs{*unit};
+    irgen::IRGS irgs{*unit, &region};
     auto& irb = *irgs.irb;
     InliningDecider inl{caller};
     auto const& argTypes = region.inlineInputTypes();

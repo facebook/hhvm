@@ -117,6 +117,13 @@ struct RegionDesc {
    */
   SrcKey            lastSrcKey() const;
 
+  /*
+   * Returns the profile count associated with block `bid'.  In case other
+   * blocks have been merged into this block, the returned count includes the
+   * counts of these other blocks as well.
+   */
+  int64_t           blockProfCount(BlockId bid) const;
+
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
   void              replaceBlock(BlockId bid, BlockPtr newBlock);
   void              deleteBlock(BlockId bid);

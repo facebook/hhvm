@@ -56,10 +56,11 @@ struct ReturnTarget {
  * required to determine high-level compilation strategy.
  */
 struct IRGS {
-  explicit IRGS(IRUnit& unit);
+  explicit IRGS(IRUnit& unit, const RegionDesc* region);
 
   TransContext context;
   TransFlags transFlags;
+  const RegionDesc* region;
   IRUnit& unit;
   std::unique_ptr<IRBuilder> irb;
 

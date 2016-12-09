@@ -37,10 +37,30 @@ let multi_worker_bucket workers () =
   Printf.printf "Got %d\n" result;
   result = expected
 
+let multi_worker_of_n_buckets workers () =
+  let buckets = 20 in
+  let split ~bucket = bucket + 1 in
+  let expected = buckets * (buckets + 1) / 2 in
+  let open Bucket in
+  let do_work _ bucket =
+    assert (bucket.work = bucket.bucket + 1);
+    bucket.work
+  in
+  let result =
+    MultiWorker.call_dynamic (Some workers)
+      ~job:do_work
+      ~merge:(+)
+      ~neutral:0
+      ~next:(make_n_buckets ~buckets ~split)
+  in
+  Printf.printf "Got %d\n" result;
+  result = expected
+
 let tests =
   [
     "multi_worker_list", multi_worker_list;
     "multi_worker_bucket", multi_worker_bucket;
+    "multi_worker_of_n_buckets", multi_worker_of_n_buckets;
   ]
 
 let try_finalize f x finally y =

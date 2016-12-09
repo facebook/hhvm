@@ -381,8 +381,8 @@ publishTranslation(TransMetaInfo info, OptView optSrcView) {
     tr.acoldStart = loc.coldCodeStart();
     tr.afrozenStart = loc.frozenCodeStart();
     tr.aLen = loc.mainSize();
-    tr.acoldLen = loc.coldSize();
-    tr.afrozenLen = loc.frozenSize();
+    tr.acoldLen = loc.coldCodeSize();
+    tr.afrozenLen = loc.frozenCodeSize();
   }
 
   transdb::addTranslation(tr);

@@ -17,12 +17,19 @@
 #ifndef incl_HPHP_TCPRINT_H_
 #define incl_HPHP_TCPRINT_H_
 
-#include <string>
-
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
 
-[[noreturn]] void error(const std::string& msg);
+#include <folly/Format.h>
+
+#include <iostream>
+#include <string>
+
+template<typename... Args>
+[[noreturn]] void error(Args&&... args) {
+  std::cerr << "Error: " << folly::format(std::forward<Args>(args)...) << '\n';
+  exit(1);
+}
 
 extern HPHP::jit::RepoWrapper* g_repo;
 extern HPHP::jit::OfflineTransData* g_transData;

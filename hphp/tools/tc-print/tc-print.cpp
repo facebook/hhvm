@@ -76,11 +76,6 @@ PerfEventsMap<TransID> transPerfEvents;
 #define NFUNCS        (g_transData->getNumFuncs())
 #define TREC(TID)     (g_transData->getTransRec(TID))
 
-void error(const std::string& msg) {
-  fprintf(stderr, "Error: %s\n", msg.c_str());
-  exit(1);
-}
-
 void warnTooFew(const std::string& name,
                 uint32_t requested,
                 uint32_t available) {

@@ -221,12 +221,16 @@ void OfflineX86Code::disasm(FILE* file,
 
   if (codeLen == 0) return;
 
-  if (fseek(file, codeStartAddr - fileStartAddr, SEEK_SET)) {
+  auto const offset = codeStartAddr - fileStartAddr;
+  if (fseek(file, offset, SEEK_SET)) {
     error("disasm error: seeking file");
   }
 
   size_t readLen = fread(code, codeLen, 1, file);
-  if (readLen != 1) error("disasm error: reading file");
+  if (readLen != 1) {
+    error("Failed to read {} bytes at offset {} from code file due to {}",
+          codeLen, offset, feof(file) ? "EOF" : "read error");
+  }
 
   xed_decoded_inst_t xedd;
 

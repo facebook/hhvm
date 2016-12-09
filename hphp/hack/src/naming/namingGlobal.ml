@@ -188,7 +188,7 @@ module Env = struct
       if not @@ GEnv.compare_pos p' p
       then
         let p, name = GEnv.get_full_pos popt (p, name) in
-        let p', name = GEnv.get_full_pos popt (p', name) in
+        let p', canonical = GEnv.get_full_pos popt (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
     | None ->
       FunPosHeap.add name p;
@@ -204,7 +204,7 @@ module Env = struct
       if not @@ GEnv.compare_pos p' p
       then
       let p, name = GEnv.get_full_pos popt (p, name) in
-      let p', name = GEnv.get_full_pos popt (p', name) in
+      let p', canonical = GEnv.get_full_pos popt (p', canonical) in
       Errors.error_name_already_bound name canonical p p'
     | None ->
       TypeIdHeap.write_through name (p, cid_kind);

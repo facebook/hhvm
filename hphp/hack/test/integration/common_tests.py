@@ -378,6 +378,30 @@ class CommonTests(object):
             '  {root}foo_4.php:4:24,26: It is incompatible with a string',
         ])
 
+    def test_new_naming_error(self):
+        """
+        Add a new file which contains a naming collisions with an old file
+        """
+        with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
+            f.write("""
+            <?hh
+            class FOO {}
+            function H () {}
+            """)
+
+        self.write_load_config('foo_4.php')
+
+        self.check_cmd([
+            '{root}foo_4.php:3:19,21: Could not find FOO (Naming[2006])',
+            '  {root}foo_3.php:7:15,17: Did you mean Foo?',
+            '{root}foo_4.php:3:19,21: Name already bound: FOO (Naming[2012])',
+            '  {root}foo_3.php:7:15,17: Previous definition Foo differs only in capitalization ',
+            '{root}foo_4.php:4:22,22: Could not find H (Naming[2006])',
+            '  {root}foo_3.php:3:18,18: Did you mean h?',
+            '{root}foo_4.php:4:22,22: Name already bound: H (Naming[2012])',
+            '  {root}foo_3.php:3:18,18: Previous definition h differs only in capitalization ',
+        ])
+
     def test_deleted_file(self):
         """
         Delete a file that still has dangling references before restoring from

@@ -48,8 +48,8 @@ struct Variant;
  * This assumes isRefcountedType() is true.
  */
 #define TV_GENERIC_DISPATCH_FAST(exp, func)                     \
-  reinterpret_cast<HPHP::HeaderWord<uint16_t,HPHP::Counted::Maybe>*>(\
-      (exp).m_data.num + HPHP::HeaderOffset                     \
+  reinterpret_cast<HPHP::MaybeCountable*>(                      \
+      (exp).m_data.num                                          \
   )->func()
 
 #define TV_GENERIC_DISPATCH_SLOW(exp, func) \
@@ -817,9 +817,7 @@ private:
 // predicates defined in countable.h
 ALWAYS_INLINE RefCount tvGetCount(const TypedValue* tv) {
   assert(isRefcountedType(tv->m_type));
-  return reinterpret_cast<const HeaderWord<>*>(
-    reinterpret_cast<const char*>(tv->m_data.parr) + HeaderOffset
-  )->count;
+  return tv->m_data.pcnt->count();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

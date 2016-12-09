@@ -86,12 +86,11 @@ struct alignas(16) Resumable {
   static Resumable* Create(size_t frameSize, size_t totalSize) {
     // Allocate memory.
     (void)type_scan::getIndexForMalloc<ActRec>();
-    auto node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
+    auto node = new (MM().objMalloc(totalSize))
+                NativeNode(HeaderKind::AsyncFuncFrame,
+                           sizeof(NativeNode) + frameSize + sizeof(Resumable));
     auto frame = reinterpret_cast<char*>(node + 1);
-    auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
-    node->obj_offset = sizeof(NativeNode) + frameSize + sizeof(Resumable);
-    node->hdr.kind = HeaderKind::AsyncFuncFrame;
-    return resumable;
+    return reinterpret_cast<Resumable*>(frame + frameSize);
   }
 
   template<bool clone,

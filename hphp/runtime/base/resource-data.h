@@ -41,7 +41,7 @@ make(Args&&... args);
 /*
  * De-virtualized header for Resource objects. The memory layout is:
  *
- * [ResourceHdr] { m_id, m_hdr; }
+ * [ResourceHdr] { HeapObject, m_id; }
  * [ResourceData] { vtbl, subclass fields; }
  *
  * Historically, we only had ResourceData. To ease refactoring, we have
@@ -63,15 +63,19 @@ make(Args&&... args);
  *
  * In the JIT, SSATmps of type Res are ResourceHdr pointers.
  */
-struct ResourceHdr final : type_scan::MarkCountable<ResourceHdr> {
+struct ResourceHdr final : Countable, // aux stores heap size
+                           type_scan::MarkCountable<ResourceHdr> {
   static void resetMaxId();
 
-  IMPLEMENT_COUNTABLE_METHODS
-  bool kindIsValid() const { return m_hdr.kind == HeaderKind::Resource; }
+  ALWAYS_INLINE void decRefAndRelease() {
+    assert(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
+  bool kindIsValid() const { return m_kind == HeaderKind::Resource; }
   void release() noexcept;
 
-  void init(size_t size, type_scan::Index tyindex) {
-    m_hdr.init(size, HeaderKind::Resource, 1);
+  void init(uint16_t size, type_scan::Index tyindex) {
+    initHeader(size, HeaderKind::Resource, 1);
     m_type_index = tyindex;
   }
 
@@ -86,8 +90,8 @@ struct ResourceHdr final : type_scan::MarkCountable<ResourceHdr> {
 
   size_t heapSize() const {
     assert(kindIsValid());
-    assert(m_hdr.aux != 0);
-    return m_hdr.aux;
+    assert(m_aux16 != 0);
+    return m_aux16;
   }
 
   type_scan::Index typeIndex() const { return m_type_index; }
@@ -97,12 +101,9 @@ struct ResourceHdr final : type_scan::MarkCountable<ResourceHdr> {
   void setId(int32_t id); // only for BuiltinFiles
 
 private:
-  static void compileTimeAssertions();
-private:
   static_assert(sizeof(type_scan::Index) <= 4,
                 "type_scan::Index cannot be greater than 32-bits");
 
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores heap size
   int32_t m_id;
   type_scan::Index m_type_index;
 };
@@ -294,10 +295,10 @@ typename std::enable_if<
   req::ptr<T>
 >::type make(Args&&... args) {
   constexpr auto size = sizeof(ResourceHdr) + sizeof(T);
-  static_assert(size <= 0xffff && size < kMaxSmallSize, "");
+  static_assert(uint16_t(size) == size && size < kMaxSmallSize, "");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
   auto const b = static_cast<ResourceHdr*>(MM().mallocSmallSize(size));
-  // initialize HeaderWord
+  // initialize HeapObject
   b->init(size, type_scan::getIndexForMalloc<T>());
   try {
     auto r = new (b->data()) T(std::forward<Args>(args)...);

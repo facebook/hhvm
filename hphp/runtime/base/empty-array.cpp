@@ -39,7 +39,7 @@ struct EmptyArray::Initializer {
   Initializer() {
     auto const ad   = reinterpret_cast<ArrayData*>(&s_theEmptyArray);
     ad->m_sizeAndPos = 0;
-    ad->m_hdr.init(HeaderKind::Empty, StaticValue);
+    ad->initHeader(HeaderKind::Empty, StaticValue);
   }
 };
 EmptyArray::Initializer EmptyArray::s_initializer;
@@ -125,7 +125,7 @@ ArrayLval EmptyArray::MakePackedInl(TypedValue tv) {
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = 1; // size=1, pos=0
-  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+  ad->initHeader(CapCode::exact(cap), HeaderKind::Packed, 1);
 
   auto const lval = reinterpret_cast<TypedValue*>(ad + 1);
   lval->m_data = tv.m_data;

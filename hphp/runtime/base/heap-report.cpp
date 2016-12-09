@@ -37,7 +37,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
   std::ostringstream out;
   auto h = g.nodes[n].h;
   out << n;
-  if (haveCount(h->kind())) out << "#" << h->hdr_.count;
+  if (haveCount(h->kind())) out << "#" << h->hdr_.count();
   out << ":" << header_names[int(h->kind())];
   switch (h->kind()) {
     case HeaderKind::Packed:
@@ -218,7 +218,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
   for (size_t n = 0; n < g.nodes.size(); ++n) {
     auto& node = g.nodes[n];
     if (!haveCount(node.h->kind())) continue;
-    auto count = node.h->hdr_.count;
+    auto count = node.h->hdr_.count();
     assert(count >= 0); // static things shouldn't be in the heap.
     unsigned num_counted{0}, num_implicit{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {

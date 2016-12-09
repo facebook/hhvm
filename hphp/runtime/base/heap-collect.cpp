@@ -102,9 +102,7 @@ inline bool Marker::mark(const void* p, GCBits marks) {
   auto h = static_cast<const Header*>(p);
   assert(h->kind() <= HeaderKind::BigMalloc &&
          h->kind() != HeaderKind::AsyncFuncWH);
-  auto old_marks = h->hdr_.marks;
-  h->hdr_.marks = old_marks | marks;
-  return old_marks == GCBits::Unmarked;
+  return h->hdr_.mark(marks) == GCBits::Unmarked;
 }
 
 void Marker::checkedEnqueue(const void* p, GCBits bits) {
@@ -199,7 +197,7 @@ NEVER_INLINE void Marker::init() {
   initfree_us_ = cpu_micros() - t0;
   MM().iterate([&](Header* h) {
     if (h->kind() == HeaderKind::Free) return;
-    h->hdr_.marks = GCBits::Unmarked;
+    h->hdr_.clearMarks();
     allocd_ += h->size();
     switch (h->kind()) {
       case HeaderKind::Apc:
@@ -239,7 +237,7 @@ NEVER_INLINE void Marker::init() {
         // Pointers to either the frame or object will be mapped to the frame.
         ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->asyncFuncWH());
-        obj->hdr_.marks = GCBits::Unmarked;
+        obj->hdr_.clearMarks();
         break;
       }
       case HeaderKind::NativeData: {
@@ -250,7 +248,7 @@ NEVER_INLINE void Marker::init() {
           unknown_objects_.emplace_back(h);
         }
         auto obj = reinterpret_cast<const Header*>(h->nativeObj());
-        obj->hdr_.marks = GCBits::Unmarked;
+        obj->hdr_.clearMarks();
         break;
       }
       case HeaderKind::ClosureHdr: {
@@ -258,7 +256,7 @@ NEVER_INLINE void Marker::init() {
         // be mapped to the closure header.
         ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->closureObj());
-        obj->hdr_.marks = GCBits::Unmarked;
+        obj->hdr_.clearMarks();
         break;
       }
       case HeaderKind::SmallMalloc:
@@ -395,7 +393,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       break;
     case HeaderKind::Free:
       // free memory; these should not be marked.
-      assert(!(h->hdr_.marks & GCBits::Mark));
+      assert(!(h->hdr_.marks() & GCBits::Mark));
       break;
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Closure:
@@ -421,9 +419,9 @@ NEVER_INLINE void Marker::sweep() {
   std::deque<Header*> defer;
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
     assert(check_sweep_header(hdr));
-    if (hdr->hdr_.marks != GCBits::Unmarked) {
-      if (hdr->hdr_.marks & GCBits::Mark) marked_ += h_size;
-      else if (hdr->hdr_.marks & GCBits::CMark) ambig_ += h_size;
+    if (hdr->hdr_.marks() != GCBits::Unmarked) {
+      if (hdr->hdr_.marks() & GCBits::Mark) marked_ += h_size;
+      else if (hdr->hdr_.marks() & GCBits::CMark) ambig_ += h_size;
       return; // continue foreach loop
     }
     // when freeing objects below, do not run their destructors! we don't

@@ -174,7 +174,7 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {
   auto props = propVec();
-  if (m_hdr.partially_inited) {
+  if (m_partially_inited) {
     // we don't know which properties are initialized yet
     scanner.conservative(props, m_cls->numDeclProperties() * sizeof(*props));
   } else {

@@ -70,7 +70,7 @@ static_assert(kSmallIndex2Size[sizeClass] == maxSimpleAlloc,
 }
 
 // Allocate a string with length <= kMaxStringSimpleLen, initialize `m_data'
-// and `m_hdr', but not `m_lenAndHash'.
+// and HeapObject, but not `m_lenAndHash'.
 ALWAYS_INLINE StringData* allocFlatSmallImpl(size_t len) {
   assertx(len <= kMaxStringSimpleLen);
   static_assert(kMaxStringSimpleLen + kCapOverhead <= kMaxSmallSizeLookup, "");
@@ -88,13 +88,13 @@ ALWAYS_INLINE StringData* allocFlatSmallImpl(size_t len) {
   sd->m_data = reinterpret_cast<char*>(sd + 1);
 #endif
   // Refcount initialized to 1.
-  sd->m_hdr.init(CapCode::exact(cap), HeaderKind::String, 1);
+  sd->initHeader(CapCode::exact(cap), HeaderKind::String, 1);
   return sd;
 }
 
 // Allocate a string with length > kMaxStringSimpleLen, initialize `m_data'
-// and `m_hdr', but not `m_lenAndHash'.  We sometimes want to inline this slow
-// path, too.
+// and HeapObject, but not `m_lenAndHash'. We sometimes want to inline this
+// slow path, too.
 ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
   // Slow path when length is large enough to need the real CapCode encoding.
   if (UNLIKELY(len > StringData::MaxSize)) {
@@ -125,7 +125,7 @@ ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
   sd->m_data = reinterpret_cast<char*>(sd + 1);
 #endif
   // Refcount initialized to 1.
-  sd->m_hdr.init(cc, HeaderKind::String, 1);
+  sd->initHeader(cc, HeaderKind::String, 1);
   return sd;
 }
 
@@ -185,7 +185,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
   sd->m_data = data;
 #endif
   auto const count = trueStatic ? StaticValue : UncountedValue;
-  sd->m_hdr.init(cc, HeaderKind::String, count);
+  sd->initHeader(cc, HeaderKind::String, count);
   sd->m_len = sl.size(); // m_hash is computed soon.
 
   data[sl.size()] = 0;
@@ -218,14 +218,14 @@ StringData* StringData::MakeEmpty() {
 #ifndef NO_M_DATA
   sd->m_data        = data;
 #endif
-  sd->m_hdr.init(HeaderKind::String, StaticValue);
+  sd->initHeader(HeaderKind::String, StaticValue);
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
   sd->preCompute();
 
   assert(sd->m_len == 0);
   assert(sd->capacity() == 0);
-  assert(sd->m_hdr.kind == HeaderKind::String);
+  assert(sd->m_kind == HeaderKind::String);
   assert(sd->isFlat());
   assert(sd->isStatic());
   assert(sd->checkSane());
@@ -437,15 +437,15 @@ StringData* StringData::MakeProxySlowPath(const APCString* apcstr) {
   );
   auto const data = apcstr->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_hdr.init(data->m_hdr, 1);
+  sd->initHeader(*data, 1);
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->proxy()->apcstr = apcstr;
   sd->enlist();
   apcstr->reference();
 
   assert(sd->m_len == data->size());
-  assert(sd->m_hdr.aux == data->m_hdr.aux);
-  assert(sd->m_hdr.kind == HeaderKind::String);
+  assert(sd->m_aux16 == data->m_aux16);
+  assert(sd->m_kind == HeaderKind::String);
   assert(sd->hasExactlyOneRef());
   assert(sd->m_hash == data->m_hash);
   assert(sd->isProxy());
@@ -502,8 +502,8 @@ void StringData::release() noexcept {
   // In CapCode encoding, we always minimize the exponent.  Thus if the
   // encoded value is above Threshold, the value after decoding is also
   // above Threshold.
-  if (LIKELY(m_hdr.aux.code <= kMaxStringSimpleLen)) {
-    auto const size = kCapOverhead + m_hdr.aux.code;
+  if (LIKELY(aux<CapCode>().code <= kMaxStringSimpleLen)) {
+    auto const size = kCapOverhead + aux<CapCode>().code;
     auto const sizeClass = MemoryManager::lookupSmallSize2Index(size);
     MM().freeSmallIndex(this, sizeClass, size);
     return;
@@ -715,7 +715,7 @@ StringData* StringData::escalate(size_t cap) {
 void StringData::dump() const {
   auto s = slice();
 
-  printf("StringData(%d) (%s%s%s%d): [", m_hdr.count,
+  printf("StringData(%d) (%s%s%s%d): [", m_count,
          isProxy() ? "proxy " : "",
          isStatic() ? "static " : "",
          isUncounted() ? "uncounted " : "",
@@ -1055,7 +1055,6 @@ bool StringData::checkSane() const {
   static_assert(sizeof(StringData) == use_lowptr ? 16 : 24,
                 "StringData size changed---update assertion if you mean it");
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
-  static_assert(offsetof(StringData, m_hdr) == HeaderOffset, "");
 #ifdef NO_M_DATA
   static_assert(sizeof(StringData) == SD_DATA, "");
   static_assert(offsetof(StringData, m_len) == SD_LEN, "");

@@ -403,22 +403,56 @@ static void fb_compact_serialize_array_as_list_map(
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
+static void fb_compact_serialize_vec(
+  StringBuffer& sb, const Array& arr, int depth,
+  FBCompactSerializeBehavior behavior) {
+  fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
+  PackedArray::IterateV(
+    arr.get(),
+    [&](const TypedValue* v) {
+      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1, behavior);
+    }
+  );
+  fb_compact_serialize_code(sb, FB_CS_STOP);
+}
+
 static void fb_compact_serialize_array_as_map(
     StringBuffer& sb, const Array& arr, int depth,
     FBCompactSerializeBehavior behavior) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
-  for (ArrayIter it(arr); it; ++it) {
-    Variant key = it.first();
-    if (key.isNumeric()) {
-      fb_compact_serialize_int64(sb, key.toInt64());
-    } else {
-      fb_compact_serialize_string(sb, key.toString());
+  IterateKV(
+    arr.get(),
+    [&](const TypedValue* k, const TypedValue* v) {
+      if (tvIsString(k)) {
+        fb_compact_serialize_string(sb, StrNR{k->m_data.pstr});
+      } else {
+        assertx(k->m_type == KindOfInt64);
+        fb_compact_serialize_int64(sb, k->m_data.num);
+      }
+      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1, behavior);
     }
-    fb_compact_serialize_variant(sb, it.second(), depth + 1, behavior);
-  }
+  );
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
+static void fb_compact_serialize_keyset(
+  StringBuffer& sb, const Array& arr, FBCompactSerializeBehavior behavior) {
+  fb_compact_serialize_code(sb, FB_CS_MAP);
+  SetArray::Iterate(
+    SetArray::asSet(arr.get()),
+    [&](const TypedValue* v) {
+      if (tvIsString(v)) {
+        fb_compact_serialize_string(sb, StrNR{v->m_data.pstr});
+        fb_compact_serialize_string(sb, StrNR{v->m_data.pstr});
+      } else {
+        assertx(v->m_type == KindOfInt64);
+        fb_compact_serialize_int64(sb, v->m_data.num);
+        fb_compact_serialize_int64(sb, v->m_data.num);
+      }
+    }
+  );
+  fb_compact_serialize_code(sb, FB_CS_STOP);
+}
 
 static int fb_compact_serialize_variant(StringBuffer& sb,
                                         const Variant& var,
@@ -467,9 +501,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
     case KindOfVec: {
       Array arr = var.toArray();
       assert(arr->isVecArray());
-      fb_compact_serialize_array_as_list_map(
-        sb, std::move(arr), arr.size(), depth, behavior
-      );
+      fb_compact_serialize_vec(sb, std::move(arr), depth, behavior);
       return 0;
     }
 
@@ -485,9 +517,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
     case KindOfKeyset: {
       Array arr = var.toArray();
       assert(arr->isKeyset());
-      fb_compact_serialize_array_as_list_map(
-        sb, std::move(arr), arr.size(), depth, behavior
-      );
+      fb_compact_serialize_keyset(sb, std::move(arr), behavior);
       return 0;
     }
 

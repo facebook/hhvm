@@ -1339,6 +1339,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MethodExists:
   case GetTime:
   case ProfileInstanceCheck:
+  case Select:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
@@ -1389,9 +1390,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContStartedCheck:
   case ConvArrToBool:
   case ConvArrToDbl:
-  case ConvArrToInt:
   case NewColFromArray:
-  case ConvBoolToStr:
   case CountArray:
   case CountArrayFast:
   case CountVec:

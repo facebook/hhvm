@@ -251,7 +251,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvIntToDbl:
   case ConvBoolToInt:
   case ConvDblToInt:
-  case ConvBoolToStr:
   case ConvClsToCctx:
   case GtInt:
   case GteInt:
@@ -364,6 +363,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case CountVec:
   case CountDict:
   case CountKeyset:
+  case Select:
     return true;
   default:
     return false;

@@ -944,6 +944,10 @@ SSATmp* simplifyXorBool(State& env, const IRInstruction* inst) {
 
   // X^1 => simplify "not" logic
   if (src2->hasConstVal(true)) return xorTrueImpl(env, src1);
+
+  // X^X => false
+  if (src1 == src2) return cns(env, false);
+
   return nullptr;
 }
 
@@ -2061,15 +2065,6 @@ SSATmp* simplifyConvStrToDbl(State& env, const IRInstruction* inst) {
   return src->hasConstVal() ? cns(env, src->strVal()->toDouble()) : nullptr;
 }
 
-SSATmp* simplifyConvArrToInt(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    if (src->arrVal()->empty()) return cns(env, 0);
-    return cns(env, 1);
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyConvBoolToInt(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) return cns(env, static_cast<int>(src->boolVal()));
@@ -2085,15 +2080,6 @@ SSATmp* simplifyConvDblToInt(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvStrToInt(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   return src->hasConstVal() ? cns(env, src->strVal()->toInt64()) : nullptr;
-}
-
-SSATmp* simplifyConvBoolToStr(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    if (src->boolVal()) return cns(env, s_1.get());
-    return cns(env, s_empty.get());
-  }
-  return nullptr;
 }
 
 SSATmp* simplifyConvDblToStr(State& env, const IRInstruction* inst) {
@@ -2162,7 +2148,15 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
   auto const srcType    = src->type();
   auto const catchTrace = inst->taken();
 
-  if (srcType <= TBool)   return gen(env, ConvBoolToStr, src);
+  if (srcType <= TBool) {
+    return gen(
+      env,
+      Select,
+      src,
+      cns(env, s_1.get()),
+      cns(env, s_empty.get())
+    );
+  }
   if (srcType <= TNull)   return cns(env, s_empty.get());
   if (srcType <= TArr)  {
     gen(env, RaiseNotice, catchTrace,
@@ -2202,18 +2196,21 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
 
   if (srcType <= TInt)  return src;
   if (srcType <= TNull) return cns(env, 0);
-  if (srcType <= TArr)  return gen(env, ConvArrToInt, src);
+  if (srcType <= TArr)  {
+    auto const length = gen(env, Count, src);
+    return gen(env, Select, length, cns(env, 1), cns(env, 0));
+  }
   if (srcType <= TVec) {
     auto const length = gen(env, CountVec, src);
-    return gen(env, ConvBoolToInt, gen(env, ConvIntToBool, length));
+    return gen(env, Select, length, cns(env, 1), cns(env, 0));
   }
   if (srcType <= TDict) {
     auto const length = gen(env, CountDict, src);
-    return gen(env, ConvBoolToInt, gen(env, ConvIntToBool, length));
+    return gen(env, Select, length, cns(env, 1), cns(env, 0));
   }
   if (srcType <= TKeyset) {
     auto const length = gen(env, CountKeyset, src);
-    return gen(env, ConvBoolToInt, gen(env, ConvIntToBool, length));
+    return gen(env, Select, length, cns(env, 1), cns(env, 0));
   }
   if (srcType <= TBool) return gen(env, ConvBoolToInt, src);
   if (srcType <= TDbl)  return gen(env, ConvDblToInt, src);
@@ -2558,6 +2555,9 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
   if (srcInst->is(ConvIntToBool)) {
     return absorb();
   }
+  if (srcInst->is(ConvBoolToInt)) {
+    return absorb();
+  }
 
   // Absorb boolean comparisons.
   if (srcInst->is(EqBool) && srcInst->src(1)->hasConstVal()) {
@@ -2586,6 +2586,108 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
 }
 
+SSATmp* simplifySelect(State& env, const IRInstruction* inst) {
+  auto const cond = inst->src(0);
+  auto const tval = inst->src(1);
+  auto const fval = inst->src(2);
+
+  // Simplifications based on condition:
+
+  if (cond->hasConstVal()) {
+    auto const cval = cond->isA(TBool)
+      ? cond->boolVal()
+      : static_cast<bool>(cond->intVal());
+    return cval ? tval : fval;
+  }
+
+  // The condition isn't statically known, but could be computed from a
+  // different operation we can absorb.
+  auto const condInst = cond->inst();
+  auto const absorb = [&]{
+    return gen(env, Select, condInst->src(0), tval, fval);
+  };
+  auto const absorbOpp = [&]{
+    return gen(env, Select, condInst->src(0), fval, tval);
+  };
+
+  // Conversions between int and bool can't change which value is selected.
+  if (condInst->is(ConvIntToBool)) return absorb();
+  if (condInst->is(ConvBoolToInt)) return absorb();
+
+  // Condition is negated, so check the pre-negated condition with flipped
+  // values.
+  if (condInst->is(XorBool) && condInst->src(1)->hasConstVal(true)) {
+    return absorbOpp();
+  }
+
+  // Condition comes from comparisons against true/false or 0, which is
+  // equivalent to selecting on original value (possibly with values flipped).
+  if (condInst->is(EqBool) && condInst->src(1)->hasConstVal()) {
+    return condInst->src(1)->boolVal() ? absorb() : absorbOpp();
+  }
+  if (condInst->is(NeqBool) && condInst->src(1)->hasConstVal()) {
+    return condInst->src(1)->boolVal() ? absorbOpp() : absorb();
+  }
+  if (condInst->is(EqInt) && condInst->src(1)->hasConstVal(0)) {
+    return absorbOpp();
+  }
+  if (condInst->is(NeqInt) && condInst->src(1)->hasConstVal(0)) {
+    return absorb();
+  }
+
+  // Condition comes from Select C, X, 0 or Select C, 0, X (where X != 0), which
+  // is equivalent to selecting on C directly.
+  if (condInst->is(Select)) {
+    auto const condInstT = condInst->src(1);
+    auto const condInstF = condInst->src(2);
+    if (condInstT->hasConstVal(TInt) &&
+        condInstT->intVal() != 0 &&
+        condInstF->hasConstVal(0)) {
+      return absorb();
+    }
+    if (condInstT->hasConstVal(0) &&
+        condInstF->hasConstVal(TInt) &&
+        condInstF->intVal() != 0) {
+      return absorbOpp();
+    }
+  }
+
+  // Simplifications based on known value choices:
+
+  // If the two values are the same tmp, or if they're both constants with the
+  // same value, no need to do a select, as we'll always get the same value.
+  if (tval == fval) return tval;
+  if ((tval->type() == fval->type()) &&
+      (tval->type().hasConstVal() ||
+       tval->type().subtypeOfAny(TUninit, TInitNull, TNullptr))) {
+    return tval;
+  }
+
+  // If either value isn't satisfiable, assume it comes from unreachable code.
+  if (tval->isA(TBottom)) return fval;
+  if (fval->isA(TBottom)) return tval;
+
+  // If the values are true and false (and vice-versa), then its equal to the
+  // value of the condition itself (or inverted).
+  if (tval->hasConstVal(true) && fval->hasConstVal(false)) {
+    if (cond->isA(TBool)) return cond;
+    if (cond->isA(TInt)) return gen(env, NeqInt, cond, cns(env, 0));
+  }
+  if (tval->hasConstVal(false) && fval->hasConstVal(true)) {
+    if (cond->isA(TBool)) return gen(env, XorBool, cond, cns(env, true));
+    if (cond->isA(TInt)) return gen(env, EqInt, cond, cns(env, 0));
+  }
+
+  // Select C, 0, 1 or Select C, 1, 0 is the same as a bool -> int conversion.
+  if (tval->hasConstVal(1) && fval->hasConstVal(0) && cond->isA(TBool)) {
+    return gen(env, ConvBoolToInt, cond);
+  }
+  if (tval->hasConstVal(0) && fval->hasConstVal(1) && cond->isA(TBool)) {
+    return gen(env, ConvBoolToInt, gen(env, XorBool, cond, cns(env, true)));
+  }
+
+  return nullptr;
+}
 
 SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
   if (!inst->src(0)->type().maybe(TNullptr)) {
@@ -3269,11 +3371,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConcatStrInt)
   X(ConvArrToBool)
   X(ConvArrToDbl)
-  X(ConvArrToInt)
   X(ConvBoolToArr)
   X(ConvBoolToDbl)
   X(ConvBoolToInt)
-  X(ConvBoolToStr)
   X(ConvCellToBool)
   X(ConvCellToDbl)
   X(ConvCellToInt)
@@ -3348,6 +3448,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(UnboxPtr)
   X(JmpZero)
   X(JmpNZero)
+  X(Select)
   X(OrInt)
   X(AddInt)
   X(SubInt)

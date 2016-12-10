@@ -133,6 +133,61 @@ void cgJmp(IRLS& env, const IRInstruction* inst) {
   v << phijmp{target, v.makeTuple(std::move(args))};
 }
 
+void cgSelect(IRLS& env, const IRInstruction* inst) {
+  auto const condReg  = srcLoc(env, inst, 0).reg();
+  auto const trueTy   = inst->src(1)->type();
+  auto const falseTy  = inst->src(2)->type();
+  auto const tloc     = srcLoc(env, inst, 1);
+  auto const floc     = srcLoc(env, inst, 2);
+  auto const dloc     = dstLoc(env, inst, 0);
+  auto& v             = vmain(env);
+
+  auto const sf = v.makeReg();
+  if (inst->src(0)->isA(TBool)) {
+    v << testb{condReg, condReg, sf};
+  } else {
+    v << testq{condReg, condReg, sf};
+  }
+
+  // First copy the type if the destination needs one. This should only apply to
+  // types <= TGen.
+  if (dloc.hasReg(1)) {
+    assertx(trueTy.isKnownDataType() || tloc.hasReg(1));
+    assertx(falseTy.isKnownDataType() || floc.hasReg(1));
+
+    auto const trueTyReg = trueTy.isKnownDataType()
+      ? v.cns(trueTy.toDataType())
+      : tloc.reg(1);
+    auto const falseTyReg = falseTy.isKnownDataType()
+      ? v.cns(falseTy.toDataType())
+      : floc.reg(1);
+
+    v << cmovb{CC_NZ, sf, falseTyReg, trueTyReg, dloc.reg(1)};
+  }
+
+  // If the value is statically known (IE, its one of the types with a singleton
+  // value), don't bother copying it (this also applies to Bottom).
+  if (!inst->dst(0)->type().subtypeOfAny(TNull, TNullptr)) {
+    if (trueTy <= TBool && falseTy <= TBool) {
+      v << cmovb{CC_NZ, sf, floc.reg(0), tloc.reg(0), dloc.reg(0)};
+    } else {
+      auto const t = zeroExtendIfBool(v, trueTy, tloc.reg(0));
+      auto const f = zeroExtendIfBool(v, falseTy, floc.reg(0));
+
+      if (trueTy <= TDbl || falseTy <= TDbl) {
+        cond(
+          v, v, CC_NZ, sf, dloc.reg(0),
+          [&](Vout&){ return tloc.reg(0); },
+          [&](Vout&){ return floc.reg(0); },
+          ""
+        );
+      } else {
+        v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
+      }
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

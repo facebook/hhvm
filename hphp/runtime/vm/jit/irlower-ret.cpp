@@ -99,7 +99,7 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
     v << orq{extended, v.cns(mask()), result, v.makeReg()};
     return result;
   }();
-  auto const data = zeroExtendIfBool(v, retVal, retLoc.reg(0));
+  auto const data = zeroExtendIfBool(v, retVal->type(), retLoc.reg(0));
 
   v << syncvmret{data, type};
 }

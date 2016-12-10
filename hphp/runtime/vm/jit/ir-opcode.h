@@ -80,6 +80,8 @@ struct SSATmp;
  *     DSubtract(N,t) single dest has type of src N with t removed
  *     DCns         single dst's type is the union of legal types for PHP
  *                    constants
+ *     DUnion(N1,...) single dest has type that is the union of the specified
+ *                      N srcs.
  *
  * srcinfo:
  *

@@ -119,7 +119,6 @@ int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);
 int64_t convResToDblHelper(const ResourceHdr* r);
 int64_t convCellToDblHelper(TypedValue tv);
-int64_t convArrToIntHelper(ArrayData* a);
 ObjectData* convCellToObjHelper(TypedValue tv);
 StringData* convDblToStrHelper(int64_t i);
 StringData* convIntToStrHelper(int64_t i);

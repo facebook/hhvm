@@ -92,8 +92,8 @@ void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
   v << unpcklpd{prep(s1), prep(s0), d0}; // s0,s1 -> d0[0],d0[1]
 }
 
-Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
-  if (!src->isA(TBool)) return reg;
+Vreg zeroExtendIfBool(Vout& v, Type ty, Vreg reg) {
+  if (!(ty <= TBool)) return reg;
 
   // Zero-extend the bool from a byte to a quad.
   auto extended = v.makeReg();
@@ -129,7 +129,7 @@ void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src) {
     v << store{v.cns(src->rawVal()), dst + TVOFF(m_data)};
   } else {
     assertx(srcLoc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, src, srcLoc.reg(0));
+    auto const extended = zeroExtendIfBool(v, src->type(), srcLoc.reg(0));
     v << store{extended, dst + TVOFF(m_data)};
   }
 }
@@ -180,7 +180,7 @@ void copyTV(Vout& v, Vreg data, Vreg type, Vloc srcLoc, const SSATmp* src) {
     v << copy{v.cns(src->rawVal()), data};
   } else {
     assertx(srcLoc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, src, srcLoc.reg(0));
+    auto const extended = zeroExtendIfBool(v, src->type(), srcLoc.reg(0));
     v << copy{extended, data};
   }
 }

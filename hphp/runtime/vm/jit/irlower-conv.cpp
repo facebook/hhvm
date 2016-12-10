@@ -259,7 +259,6 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(ConvStrToInt);
-IMPL_OPCODE_CALL(ConvArrToInt);
 IMPL_OPCODE_CALL(ConvObjToInt);
 IMPL_OPCODE_CALL(ConvResToInt);
 IMPL_OPCODE_CALL(ConvCellToInt);
@@ -280,7 +279,7 @@ void implConvBoolOrIntToDbl(IRLS& env, const IRInstruction* inst) {
   // cvtsi2sd doesn't modify the high bits of its target, which can cause false
   // dependencies to prevent register renaming from kicking in.  Break the
   // dependency chain by zeroing out the XMM reg.
-  auto const src_zext = zeroExtendIfBool(v, val, src);
+  auto const src_zext = zeroExtendIfBool(v, val->type(), src);
   v << cvtsi2sd{src_zext, dst};
 }
 
@@ -302,20 +301,6 @@ IMPL_OPCODE_CALL(ConvCellToDbl);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToStr
-
-static const StaticString s_1("1");
-
-void cgConvBoolToStr(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const f = v.cns(staticEmptyString());
-  auto const t = v.cns(s_1.get());
-  auto const sf = v.makeReg();
-  v << testb{src, src, sf};
-  v << cmovq{CC_NZ, sf, f, t, dst};
-}
 
 IMPL_OPCODE_CALL(ConvIntToStr);
 IMPL_OPCODE_CALL(ConvDblToStr);

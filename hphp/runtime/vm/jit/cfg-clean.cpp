@@ -169,6 +169,65 @@ bool foldJmp(IRUnit& unit, Block* block) {
   return false;
 }
 
+/*
+ * Convert a diamond where each branch only forwards SSATmps to the join point
+ * into some number of Select instructions. The instructions are inserted at the
+ * head of the diamond, along with a jump to the join point. The diamond
+ * branches will be later dead code eliminated if they are now dead. If this is
+ * the only predecessor of the join point, it will be merged into the diamond
+ * head.
+ */
+bool collapseDiamond(IRUnit& unit, Block* block) {
+  auto& term = block->back();
+
+  // Is this block the head of a suitable diamond?
+
+  if (!term.is(JmpZero, JmpNZero)) return false;
+
+  auto const next = block->next();
+  auto const taken = block->taken();
+  if (next == taken) return false;
+
+  // Both sides of the diamond must consist of nothing but a Jmp to a common
+  // join point and must forward at least one value to the join point.
+  auto const nextJmp = next->begin();
+  if (!nextJmp->is(Jmp) || !nextJmp->numSrcs()) return false;
+  auto const takenJmp = taken->begin();
+  if (!takenJmp->is(Jmp) || !takenJmp->numSrcs()) return false;
+
+  if (next->taken() != taken->taken()) return false;
+
+  assertx(nextJmp->numSrcs() == takenJmp->numSrcs());
+
+  auto const join = next->taken();
+  assertx(join->begin()->is(DefLabel));
+  assertx(join->begin()->numDsts() == nextJmp->numSrcs());
+
+  // For every value forwarded to the join point, generate a Select at the head
+  // of the diamond. Each Select chooses between the value provided on the left
+  // or right side of the diamond.
+  std::vector<SSATmp*> newSrcs{nextJmp->numSrcs()};
+  for (uint32_t i = 0; i < nextJmp->numSrcs(); ++i) {
+    auto const t = term.is(JmpZero) ? nextJmp->src(i) : takenJmp->src(i);
+    auto const f = term.is(JmpZero) ? takenJmp->src(i) : nextJmp->src(i);
+    auto select = unit.gen(Select, term.bcctx(), term.src(0), t, f);
+    block->insert(block->backIter(), select);
+    newSrcs[i] = select->dst();
+  }
+
+  // Instead of conditionally jumping into either branch in the diamond, now
+  // forward the selected values into the join point.
+  auto newJmp = unit.gen(Jmp, term.bcctx(), join,
+                         std::make_pair(newSrcs.size(), newSrcs.data()));
+  term.convertToNop();
+  block->push_back(newJmp);
+
+  FTRACE(1, "Collapsed B{} -> B{}/B{} -> B{} diamond.\n",
+         block->id(), next->id(), taken->id(), join->id());
+
+  return true;
+}
+
 }
 
 /*
@@ -199,6 +258,7 @@ void cleanCfg(IRUnit& unit) {
         if (convertCondBranchToJmp(unit, block)) continue;
         if (absorbDstBlock(unit, block)) continue;
         if (foldJmp(unit, block)) continue;
+        if (collapseDiamond(unit, block)) continue;
         break;
       }
     }

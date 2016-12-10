@@ -414,10 +414,6 @@ int64_t convCellToDblHelper(TypedValue tv) {
   return reinterpretDblAsInt(tvCastToDouble(&tv));
 }
 
-int64_t convArrToIntHelper(ArrayData* a) {
-  return a->empty() ? 0 : 1;
-}
-
 ObjectData* convCellToObjHelper(TypedValue tv) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will

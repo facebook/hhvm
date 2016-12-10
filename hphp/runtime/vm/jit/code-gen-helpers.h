@@ -63,9 +63,9 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size);
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0);
 
 /*
- * Zero-extend `reg' if `src' might be a bool, returning the dest Vreg.
+ * Zero-extend `reg' if `type' is a bool, returning the dest Vreg.
  */
-Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg);
+Vreg zeroExtendIfBool(Vout& v, Type type, Vreg reg);
 
 ///////////////////////////////////////////////////////////////////////////////
 // TypedValue manipulations.

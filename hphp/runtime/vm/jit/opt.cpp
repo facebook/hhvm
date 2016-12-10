@@ -214,6 +214,12 @@ void optimize(IRUnit& unit, TransKind kind) {
   // Perform final cleanup passes to collapse any critical edges that were
   // split, and simplify our instructions before shipping off to codegen.
   doPass(unit, cleanCfg, DCE::None);
+
+  if (kind != TransKind::Profile &&
+      RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    doPass(unit, gvn, DCE::Full);
+  }
+
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
     doPass(unit, simplifyPass, DCE::Full);
   }

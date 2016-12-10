@@ -173,10 +173,40 @@ bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
   });
 }
 
+// Fold a cmov of a certain width into a copy if both values are the same
+// register or have the same known constant value.
+template <typename Inst>
+bool cmov_fold_impl(Env& env, const Inst& inst, Vlabel b, size_t i) {
+  auto const equivalent = [&]{
+    if (inst.t == inst.f) return true;
+
+    auto const t_it = env.unit.regToConst.find(inst.t);
+    if (t_it == env.unit.regToConst.end()) return false;
+    auto const f_it = env.unit.regToConst.find(inst.f);
+    if (f_it == env.unit.regToConst.end()) return false;
+
+    auto const t_const = t_it->second;
+    auto const f_const = f_it->second;
+    if (t_const.isUndef || f_const.isUndef) return false;
+    if (t_const.kind != f_const.kind) return false;
+    return t_const.val == f_const.val;
+  }();
+  if (!equivalent) return false;
+
+  return simplify_impl(
+    env, b, i,
+    [&] (Vout& v) {
+      v << copy{inst.t, inst.d};
+      return 1;
+    }
+  );
+}
+
 // Turn a cmov of a certain width into a matching setcc instruction if the
 // conditions are correct (both sources are constants of value 0 or 1).
 template <typename Inst, typename Extend>
-bool cmov_impl(Env& env, const Inst& inst, Vlabel b, size_t i, Extend extend) {
+bool cmov_setcc_impl(Env& env, const Inst& inst, Vlabel b,
+                     size_t i, Extend extend) {
   auto const t_it = env.unit.regToConst.find(inst.t);
   if (t_it == env.unit.regToConst.end()) return false;
   auto const f_it = env.unit.regToConst.find(inst.f);
@@ -223,28 +253,32 @@ bool cmov_impl(Env& env, const Inst& inst, Vlabel b, size_t i, Extend extend) {
 }
 
 bool simplify(Env& env, const cmovb& inst, Vlabel b, size_t i) {
-  return cmov_impl(
+  if (cmov_fold_impl(env, inst, b, i)) return true;
+  return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << copy{src, dest}; }
   );
 }
 
 bool simplify(Env& env, const cmovw& inst, Vlabel b, size_t i) {
-  return cmov_impl(
+  if (cmov_fold_impl(env, inst, b, i)) return true;
+  return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << movzbw{src, dest}; }
   );
 }
 
 bool simplify(Env& env, const cmovl& inst, Vlabel b, size_t i) {
-  return cmov_impl(
+  if (cmov_fold_impl(env, inst, b, i)) return true;
+  return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << movzbl{src, dest}; }
   );
 }
 
 bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
-  return cmov_impl(
+  if (cmov_fold_impl(env, inst, b, i)) return true;
+  return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << movzbq{src, dest}; }
   );

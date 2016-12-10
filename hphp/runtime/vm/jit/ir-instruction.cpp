@@ -406,6 +406,16 @@ Type callReturn(const IRInstruction* inst) {
   not_reached();
 }
 
+template <uint32_t...> struct IdxSeq {};
+
+inline Type unionReturn(const IRInstruction* inst, IdxSeq<>) { return TBottom; }
+
+template <uint32_t Idx, uint32_t... Rest>
+inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
+  assertx(Idx < inst->numSrcs());
+  return inst->src(Idx)->type() | unionReturn(inst, IdxSeq<Rest...>{});
+}
+
 } // namespace
 
 Type outputType(const IRInstruction* inst, int dstId) {
@@ -444,6 +454,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DSubtract(n, t) return inst->src(n)->type() - t;
 #define DCns            return TUninit | TInitNull | TBool | \
                                TInt | TDbl | TStr | TRes;
+#define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -479,6 +490,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
+#undef DUnion
 }
 
 }}

@@ -514,8 +514,6 @@ To double conversions:
 
 To int conversions:
 
-| ConvArrToInt,                 D(Int), S(Arr),                           NF
-
 | ConvBoolToInt,                D(Int), S(Bool),                          NF
 
 | ConvDblToInt,                 D(Int), S(Dbl),                           NF
@@ -535,8 +533,6 @@ To object conversions:
 
 
 To string conversions:
-
-| ConvBoolToStr,          D(StaticStr), S(Bool),                          NF
 
 | ConvDblToStr,                 D(Str), S(Dbl),                          PRc
 
@@ -933,6 +929,10 @@ To string conversions:
   in Jmp. A DefLabel with one or more destinations may only be reached by a Jmp
   instruction with the same number of sources. Ordinary branch instructions may
   not pass values to a DefLabel.
+
+| Select, DUnion(1,2), S(Bool,Int) S(Top) S(Top), NF
+
+  If S0 is true/non-zero, return S1, otherwise return S2.
 
 
 6. Reference manipulation

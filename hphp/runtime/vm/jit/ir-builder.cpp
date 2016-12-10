@@ -62,6 +62,20 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
   return nullptr;
 }
 
+template <uint32_t...> struct IdxSeq {};
+
+inline bool unionTypeMightRelax(const IRInstruction* inst, IdxSeq<>) {
+  return false;
+}
+
+template <uint32_t Idx, uint32_t... Rest>
+inline bool unionTypeMightRelax(const IRInstruction* inst,
+                                IdxSeq<Idx, Rest...>) {
+  assertx(Idx < inst->numSrcs());
+  return typeMightRelax(inst->src(Idx)) ||
+    unionTypeMightRelax(inst, IdxSeq<Rest...>{});
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -96,6 +110,7 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
 #define DCall          return false; // fixed from static analysis
 #define DSubtract(n,t) DofS(n)
 #define DCns           return false; // fixed type
+#define DUnion(...)    return unionTypeMightRelax(inst, IdxSeq<__VA_ARGS__>{});
 
 bool typeMightRelax(const SSATmp* tmp) {
   if (tmp == nullptr) return true;

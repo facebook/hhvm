@@ -87,7 +87,7 @@ struct HardwareCounterImpl {
     inited = true;
     m_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (m_fd < 0) {
-      Logger::Verbose("perf_event_open failed with: %s",
+      Logger::Warning("perf_event_open failed with: %s",
                       folly::errnoStr(errno).c_str());
       m_err = -1;
       return;

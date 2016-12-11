@@ -717,6 +717,10 @@ function hhvm_cmd_impl() {
     mode_cmd($options),
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
+
+    // load/store counters don't work on Ivy Bridge so disable for tests
+    '-vEval.ProfileHWEnable=false',
+
     extra_args($options),
   );
 
@@ -2168,7 +2172,10 @@ function start_server_proc($options, $config, $port) {
     // The default test config uses a small TC but we'll be running thousands
     // of tests against the same process:
     '-vEval.JitASize=100000000',
-    '-vEval.JitGlobalDataSize=32000000'
+    '-vEval.JitGlobalDataSize=32000000',
+
+    // load/store counters don't work on Ivy Bridge so disable for tests
+    '-vEval.ProfileHWEnable=false'
   );
   if (getenv('HHVM_TEST_SERVER_LOG')) {
     echo "Starting server '$command'\n";

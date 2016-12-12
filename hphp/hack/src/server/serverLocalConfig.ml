@@ -80,7 +80,7 @@ let load_ fn =
     ~default:default.enable_fuzzy_search config in
   let lazy_parse = bool_ "lazy_parse"
     ~default:default.lazy_parse config in
-  let lazy_init = bool_ "lazy_init"
+  let lazy_init = bool_ "lazy_init2"
     ~default:default.lazy_init config in
   let load_mini_script_timeout = int_ "load_mini_script_timeout"
     ~default:default.load_mini_script_timeout config in

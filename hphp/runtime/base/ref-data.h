@@ -64,7 +64,7 @@ struct RefBits {
  * For more info on the PHP extension compatibility layer, check out
  * the documentation at "doc/php.extension.compat.layer".
  */
-struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
+struct RefData final : type_scan::MarkScannableCountable<RefData> {
   /*
    * Some RefData's (static locals) are allocated in RDS, and
    * live until the end of the request.  In this case, we start with a
@@ -74,7 +74,7 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
    * change how initialization works it keep that up to date.
    */
   void initInRDS() {
-    initHeader<RefBits>({{0}}, HeaderKind::Ref, 1); // cow=z=0, count=1
+    m_hdr.init({{0}}, HeaderKind::Ref, 1); // cow=z=0, count=1
   }
 
   /*
@@ -92,10 +92,9 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
    */
   void release() noexcept {
     assert(kindIsValid());
-    auto& bits = aux<RefBits>();
-    if (UNLIKELY(bits.cow)) {
-      m_count = 1;
-      bits.cow = bits.z = 0;
+    if (UNLIKELY(m_hdr.aux.cow)) {
+      m_hdr.count = 1;
+      m_hdr.aux.cow = m_hdr.aux.z = 0;
       return;
     }
     this->~RefData();
@@ -106,11 +105,8 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
     MM().freeSmallSize(const_cast<RefData*>(this), sizeof(RefData));
   }
 
-  ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
-    if (decReleaseCheck()) release();
-  }
-  bool kindIsValid() const { return m_kind == HeaderKind::Ref; }
+  IMPLEMENT_COUNTABLE_METHODS
+  bool kindIsValid() const { return m_hdr.kind == HeaderKind::Ref; }
 
   /*
    * Note, despite the name, this can never return a non-Cell.
@@ -132,22 +128,22 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
   }
 
   static constexpr int tvOffset() { return offsetof(RefData, m_tv); }
-  static constexpr int cowZOffset() { return offsetof(RefData, m_aux16); }
+  static constexpr int cowZOffset() {
+    return offsetof(RefData, m_hdr) + offsetof(HeaderWord<RefBits>, aux);
+  }
 
   void assertValid() const { assert(kindIsValid()); }
 
   int32_t getRealCount() const {
-    auto bits = aux<RefBits>();
     assert(kindIsValid());
-    assert(bits.cow == 0 || (bits.cow == 1 && m_count >= 1));
-    return m_count + bits.cow;
+    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
+    return m_hdr.count + m_hdr.aux.cow;
   }
 
   bool isReferenced() const {
     assert(kindIsValid());
-    auto bits = aux<RefBits>();
-    assert(bits.cow == 0 || (bits.cow == 1 && m_count >= 1));
-    return m_count >= 2 && !bits.cow;
+    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
+    return m_hdr.count >= 2 && !m_hdr.aux.cow;
   }
 
   /**
@@ -157,41 +153,38 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
   // Default constructor, provided so that the PHP extension compatibility
   // layer can stack-allocate RefDatas when needed
   RefData() {
-    initHeader<RefBits>({{0}}, HeaderKind::Ref, 0); // cow=z=0, count=0
+    m_hdr.init({{0}}, HeaderKind::Ref, 0); // cow=z=0, count=0
     m_tv.m_type = KindOfNull;
-    assert(!aux<RefBits>().cow && !aux<RefBits>().z);
+    assert(!m_hdr.aux.cow && !m_hdr.aux.z);
   }
 
   bool zIsRef() const {
     assert(kindIsValid());
-    auto bits = aux<RefBits>();
-    assert(bits.cow == 0 || (bits.cow == 1 && m_count >= 1));
-    return !bits.cow && (m_count >= 2 || bits.z);
+    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
+    return !m_hdr.aux.cow && (m_hdr.count >= 2 || m_hdr.aux.z);
   }
 
   void zSetIsRef() const {
-    auto& bits = aux<RefBits>();
     auto realCount = getRealCount();
     if (realCount >= 2) {
-      m_count = realCount;
-      bits.cow = bits.z = 0;
+      m_hdr.count = realCount;
+      m_hdr.aux.cow = m_hdr.aux.z = 0;
     } else {
-      assert(!bits.cow);
-      bits.cow = 0;
-      bits.z = 1;
+      assert(!m_hdr.aux.cow);
+      m_hdr.aux.cow = 0;
+      m_hdr.aux.z = 1;
     }
   }
 
   void zUnsetIsRef() const {
-    auto& bits = aux<RefBits>();
     auto realCount = getRealCount();
     if (realCount >= 2) {
-      m_count = realCount - 1;
-      bits.cow = 1;
-      bits.z = 0;
+      m_hdr.count = realCount - 1;
+      m_hdr.aux.cow = 1;
+      m_hdr.aux.z = 0;
     } else {
-      assert(!bits.cow);
-      bits.cow = bits.z = 0;
+      assert(!m_hdr.aux.cow);
+      m_hdr.aux.cow = m_hdr.aux.z = 0;
     }
   }
 
@@ -209,27 +202,25 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
 
   void zAddRef() {
     if (getRealCount() != 1) {
-      ++m_count;
+      ++m_hdr.count;
       return;
     }
-    auto& bits = aux<RefBits>();
-    assert(!bits.cow);
-    assert(bits.z < 2);
-    m_count = bits.z + 1;
-    bits.cow = !bits.z;
-    bits.z = 0;
+    assert(!m_hdr.aux.cow);
+    assert(m_hdr.aux.z < 2);
+    m_hdr.count = m_hdr.aux.z + 1;
+    m_hdr.aux.cow = !m_hdr.aux.z;
+    m_hdr.aux.z = 0;
   }
 
   void zDelRef() {
     if (getRealCount() != 2) {
       assert(getRealCount() != 0);
-      --m_count;
+      --m_hdr.count;
       return;
     }
-    auto& bits = aux<RefBits>();
-    m_count = 1;
-    bits.z = !bits.cow;
-    bits.cow = 0;
+    m_hdr.count = 1;
+    m_hdr.aux.z = !m_hdr.aux.cow;
+    m_hdr.aux.cow = 0;
   }
 
   void zSetRefcount(int val) {
@@ -239,18 +230,16 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
     }
     bool zeroOrOne = (val <= 1);
     bool isRef = zIsRef();
-    auto& bits = aux<RefBits>();
-    bits.cow = !zeroOrOne && !isRef;
-    bits.z = zeroOrOne && isRef;
-    m_count = val - bits.cow;
+    m_hdr.aux.cow = !zeroOrOne && !isRef;
+    m_hdr.aux.z = zeroOrOne && isRef;
+    m_hdr.count = val - m_hdr.aux.cow;
     assert(zRefcount() == val);
     assert(zIsRef() == isRef);
   }
 
   void zInit() {
-    auto& bits = aux<RefBits>();
-    m_count = 1;
-    bits.cow = bits.z = 0;
+    m_hdr.count = 1;
+    m_hdr.aux.cow = m_hdr.aux.z = 0;
     m_tv.m_type = KindOfNull;
     m_tv.m_data.num = 0;
   }
@@ -258,7 +247,7 @@ struct RefData final : Countable, type_scan::MarkScannableCountable<RefData> {
 private:
   RefData(DataType t, int64_t datum) {
     // Initialize this value by laundering uninitNull -> Null.
-    initHeader<RefBits>({{0}}, HeaderKind::Ref, 1); // cow=z=0, count=1
+    m_hdr.init({{0}}, HeaderKind::Ref, 1); // cow=z=0, count=1
     if (!isNullType(t)) {
       m_tv.m_type = t;
       m_tv.m_data.num = datum;
@@ -267,7 +256,12 @@ private:
     }
   }
 
+  static void compileTimeAsserts() {
+    static_assert(offsetof(RefData, m_hdr) == HeaderOffset, "");
+  }
+
 private:
+  HeaderWord<RefBits> m_hdr;
   TypedValue m_tv;
 };
 

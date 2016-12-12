@@ -31,7 +31,7 @@ APCString::MakeSharedString(APCKind kind, StringData* data) {
 #ifndef NO_M_DATA
   apcStr->m_str.m_data = chars;
 #endif
-  apcStr->m_str.initHeader(cc, HeaderKind::String, UncountedValue);
+  apcStr->m_str.m_hdr.init(cc, HeaderKind::String, UncountedValue);
   apcStr->m_str.m_len         = len; // don't store hash
 
   assert(apcStr == reinterpret_cast<APCString*>(chars) - 1);

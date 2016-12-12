@@ -43,16 +43,16 @@ namespace HPHP {
 // union of all the possible header types, and some utilities
 struct Header {
   HeaderKind kind() const {
-    assert(unsigned(hdr_.kind()) <= NumHeaderKinds);
-    return hdr_.kind();
+    assert(unsigned(hdr_.kind) <= NumHeaderKinds);
+    return hdr_.kind;
   }
 
   size_t size() const;
 
   size_t allocSize() const {
     // Hole and Free have exact sizes, so don't round them.
-    auto const sz = hdr_.kind() == HeaderKind::Hole ||
-                    hdr_.kind() == HeaderKind::Free
+    auto const sz = hdr_.kind == HeaderKind::Hole ||
+                    hdr_.kind == HeaderKind::Free
       ? free_.size()
       : MemoryManager::smallSizeClass(size());
 
@@ -126,7 +126,10 @@ struct Header {
 
 public:
   union {
-    MaybeCountable hdr_;
+    struct {
+      HeaderWord<> hdr_;
+      uint64_t q;
+    };
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;

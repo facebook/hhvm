@@ -98,7 +98,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     MM().objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
-  node->initHeader(ndi->tyindex, HeaderKind::NativeData, 0);
+  node->hdr.init(ndi->tyindex, HeaderKind::NativeData, 0);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
   assert(obj->hasExactlyOneRef());

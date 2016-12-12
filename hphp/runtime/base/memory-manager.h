@@ -296,7 +296,7 @@ constexpr unsigned kLgSizeClassesPerDoubling = 2;
  */
 constexpr uint32_t kNumSmallSizes = 63;
 static_assert(kNumSmallSizes <= (1 << 6),
-              "only 6 bits available in HeapObject");
+              "only 6 bits available in HeaderWord");
 
 constexpr uint32_t kMaxSmallSize = kSmallIndex2Size[kNumSmallSizes-1];
 static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
@@ -336,38 +336,38 @@ struct StringDataNode {
 static_assert(std::numeric_limits<type_scan::Index>::max() <=
               std::numeric_limits<uint16_t>::max(),
               "type_scan::Index must be no greater than 16-bits "
-              "to fit into HeapObject");
+              "to fit into HeaderWord");
 
 // This is the header MemoryManager uses to remember large allocations
 // so they can be auto-freed in MemoryManager::reset(), as well as large/small
 // req::malloc()'d blocks, which must track their size internally.
-struct MallocNode : HeapObject {
+struct MallocNode {
+  HeaderWord<> hdr;
   size_t nbytes;
-  uint32_t& index() { return m_aux32; }
-  uint16_t& typeIndex() { return m_aux16; }
-  uint16_t typeIndex() const { return m_aux16; }
+  uint32_t& index() { return hdr.lo32; }
+  uint16_t& typeIndex() { return hdr.aux; }
+  uint16_t typeIndex() const { return hdr.aux; }
 };
 
 // all FreeList entries are parsed by inspecting this header.
-struct FreeNode : HeapObject {
+struct FreeNode {
+  HeaderWord<> hdr;
   FreeNode* next;
-  uint32_t& size() { return m_aux32; }
-  uint32_t size() const { return m_aux32; }
+  uint32_t& size() { return hdr.lo32; }
+  uint32_t size() const { return hdr.lo32; }
   static FreeNode* InitFrom(void* addr, uint32_t size, HeaderKind);
   static FreeNode* UninitFrom(void* addr, FreeNode* next);
 };
 
 // header for HNI objects with NativeData payloads. see native-data.h
 // for details about memory layout.
-struct NativeNode : HeapObject {
-  NativeNode(HeaderKind k, uint32_t off) : obj_offset(off) {
-    initHeader(k, 0);
-  }
+struct NativeNode {
+  HeaderWord<> hdr;
   uint32_t sweep_index; // index in MM::m_natives
   uint32_t obj_offset; // byte offset from this to ObjectData*
-  uint16_t& typeIndex() { return m_aux16; }
-  uint16_t typeIndex() const { return m_aux16; }
-  uint32_t arOff() const { return m_count; } // from this to ActRec, or 0
+  uint16_t& typeIndex() { return hdr.aux; }
+  uint16_t typeIndex() const { return hdr.aux; }
+  uint32_t arOff() const { return hdr.count; } // from this to ActRec, or 0
 };
 
 // POD type for tracking arbitrary memory ranges
@@ -968,9 +968,11 @@ private:
   mutable std::vector<req::root_handle*> m_root_handles;
 
   bool m_exiting{false};
+  bool m_sweeping{false};
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
+
   bool m_gc_enabled{RuntimeOption::EvalEnableGC};
 
   ReqProfContext m_profctx;

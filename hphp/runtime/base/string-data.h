@@ -70,8 +70,7 @@ enum CopyStringMode { CopyString };
  *   Flat   |   X    |     X    |    X
  *   Proxy  |        |          |    X
  */
-struct StringData final : MaybeCountable,
-                          type_scan::MarkCountable<StringData> {
+struct StringData final: type_scan::MarkCountable<StringData> {
   friend struct APCString;
   friend StringData* allocFlatSmallImpl(size_t len);
   friend StringData* allocFlatSlowImpl(size_t len);
@@ -200,12 +199,9 @@ struct StringData final : MaybeCountable,
   /*
    * Reference-counting related.
    */
-  ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
-    if (decReleaseCheck()) release();
-  }
+  IMPLEMENT_COUNTABLE_METHODS
 
-  bool kindIsValid() const { return m_kind == HeaderKind::String; }
+  bool kindIsValid() const { return m_hdr.kind == HeaderKind::String; }
 
   /*
    * Append the supplied range to this string.  If there is not sufficient
@@ -497,6 +493,7 @@ private:
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
 private:
+  HeaderWord<CapCode,Counted::Maybe> m_hdr;
 #ifndef NO_M_DATA
   // TODO(5601154): Add KindOfApcString and remove StringData m_data field.
   char* m_data;

@@ -44,7 +44,7 @@ struct ArrayLval {
   Variant* val;     // pointer to lval within new array
 };
 
-struct ArrayData : MaybeCountable {
+struct ArrayData {
   // Runtime type tag of possible array types.  This is intentionally
   // not an enum class, since we're using it pretty much as raw bits
   // (these tag values are not private), which avoids boilerplate
@@ -79,10 +79,10 @@ protected:
    */
   explicit ArrayData(ArrayKind kind, RefCount initial_count = 1)
     : m_sizeAndPos(uint32_t(-1)) {
-    initHeader(static_cast<HeaderKind>(kind), initial_count);
+    m_hdr.init(static_cast<HeaderKind>(kind), initial_count);
     assert(m_size == -1);
     assert(m_pos == 0);
-    assert(m_kind == static_cast<HeaderKind>(kind));
+    assert(m_hdr.kind == static_cast<HeaderKind>(kind));
   }
 
   /*
@@ -95,14 +95,9 @@ protected:
   ~ArrayData();
 
 public:
-  ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
-    if (decReleaseCheck()) release();
-  }
+  IMPLEMENT_COUNTABLE_METHODS
 
-  bool kindIsValid() const {
-    return isArrayKind(m_kind);
-  }
+  bool kindIsValid() const { return isArrayKind(m_hdr.kind); }
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -136,7 +131,7 @@ public:
    */
   ArrayKind kind() const {
     assert(kindIsValid());
-    return static_cast<ArrayKind>(m_kind);
+    return static_cast<ArrayKind>(m_hdr.kind);
   }
 
   /*
@@ -152,7 +147,7 @@ public:
    * with MixedArray::capacity
    */
   uint32_t cap() const {
-    return aux<CapCode>().decode();
+    return m_hdr.aux.decode();
   }
 
   /**
@@ -510,6 +505,9 @@ public:
 
 private:
   friend size_t getMemSize(const ArrayData*);
+  static void compileTimeAssertions() {
+    static_assert(offsetof(ArrayData, m_hdr) == HeaderOffset, "");
+  }
 
   static bool EqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t CompareHelper(const ArrayData*, const ArrayData*);
@@ -538,6 +536,7 @@ protected:
   friend struct BaseMap;
   friend struct c_Map;
   friend struct c_ImmMap;
+  HeaderWord<CapCode,Counted::Maybe> m_hdr;
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)

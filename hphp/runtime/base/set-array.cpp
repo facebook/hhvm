@@ -46,7 +46,7 @@ struct SetArray::Initializer {
     InitHash(hash, SetArray::SmallScale);
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = SetArray::SmallScale;
-    ad->initHeader(HeaderKind::Keyset, StaticValue);
+    ad->m_hdr.init(HeaderKind::Keyset, StaticValue);
   }
 };
 SetArray::Initializer SetArray::s_initializer;
@@ -122,7 +122,7 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   assert(ClearElms(SetData(ad), Capacity(scale)));
   InitHash(hash, scale);
 
-  ad->initHeader(HeaderKind::Keyset, 1);
+  ad->m_hdr.init(HeaderKind::Keyset, 1);
   ad->m_sizeAndPos   = 0;                   // size = 0, pos = 0
   ad->m_scale_used   = scale;               // scale = scale, used = 0
 
@@ -176,7 +176,7 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
   memcpy16_inline(ad, a, sizeof(SetArray) + sizeof(Elm) * used);
   assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
   CopyHash(SetHashTab(ad, scale), a->hashTab(), scale);
-  ad->m_count = UncountedValue;
+  ad->m_hdr.count = UncountedValue;
 
   // Make sure all strings are uncounted.
   auto const elms = a->data();
@@ -210,7 +210,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
   CopyHash(SetHashTab(ad, scale), other.hashTab(), scale);
   RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
-  ad->initHeader(HeaderKind::Keyset, count);
+  ad->m_hdr.init(HeaderKind::Keyset, count);
 
   // Bump refcounts.
   auto const elms = other.data();
@@ -221,7 +221,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
     tvRefcountedIncRef(&elm.tv);
   }
 
-  assert(ad->m_kind == HeaderKind::Keyset);
+  assert(ad->m_hdr.kind == HeaderKind::Keyset);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(mode == AllocMode::Request ?
@@ -550,7 +550,7 @@ SetArray* SetArray::grow(uint32_t newScale) {
   auto const oldUsed = m_used;
   ad->m_sizeAndPos   = m_sizeAndPos;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
-  ad->initHeader(*this, 1);
+  ad->m_hdr.init(m_hdr, 1);
   assert(reinterpret_cast<uintptr_t>(SetData(ad)) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
   memcpy16_inline(SetData(ad), data(), sizeof(Elm) * oldUsed);

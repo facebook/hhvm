@@ -109,8 +109,8 @@ NEVER_INLINE bool ObjectData::destructImpl() {
   // when count == 1. This difference only matters for objects that
   // resurrect themselves in their destructors, so make sure count is
   // consistent here.
-  assert(m_count == 0 || m_count == 1);
-  m_count = 0;
+  assert(m_hdr.count == 0 || m_hdr.count == 1);
+  m_hdr.count = 0;
 
   // We raise the refcount around the call to __destruct(). This is to
   // prevent the refcount from going to zero when the destructor returns.
@@ -1739,6 +1739,10 @@ bool ObjectData::hasToString() {
 
 const char* ObjectData::classname_cstr() const {
   return getClassName().data();
+}
+
+void ObjectData::compileTimeAssertions() {
+  static_assert(offsetof(ObjectData, m_hdr) == HeaderOffset, "");
 }
 
 } // HPHP

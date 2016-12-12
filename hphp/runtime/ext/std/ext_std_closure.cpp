@@ -281,7 +281,8 @@ static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
   (void)type_scan::getIndexForMalloc<ClosureHdr>();
   auto const nProps = cls->numDeclProperties();
   auto const size = sizeof(ClosureHdr) + ObjectData::sizeForNProps(nProps);
-  auto hdr = new (MM().objMalloc(size)) ClosureHdr(size);
+  auto hdr = static_cast<ClosureHdr*>(MM().objMalloc(size));
+  hdr->hdr.init(HeaderKind::ClosureHdr, size);
   auto obj = new (hdr + 1) c_Closure(cls);
   assertx(obj->hasExactlyOneRef());
   return obj;

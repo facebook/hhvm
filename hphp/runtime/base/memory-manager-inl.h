@@ -114,7 +114,7 @@ inline void* MemoryManager::FreeList::maybePop() {
 inline FreeNode*
 FreeNode::InitFrom(void* addr, uint32_t size, HeaderKind kind) {
   auto node = static_cast<FreeNode*>(addr);
-  node->initHeader(kind, size);
+  node->hdr.init(kind, size);
   return node;
 }
 
@@ -384,7 +384,7 @@ inline Header* MemoryManager::find(const void* p) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool MemoryManager::sweeping() {
-  return !TlsWrapper::isNull() && tl_sweeping;
+  return !TlsWrapper::isNull() && MM().m_sweeping;
 }
 
 inline bool MemoryManager::exiting() {

@@ -78,5 +78,9 @@ const String& ResourceData::o_getResourceName() const {
   return o_getClassName();
 }
 
+void ResourceHdr::compileTimeAssertions() {
+  static_assert(offsetof(ResourceHdr, m_hdr) == HeaderOffset, "");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

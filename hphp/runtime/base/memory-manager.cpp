@@ -46,7 +46,6 @@
 namespace HPHP {
 
 const unsigned kInvalidSweepIndex = 0xffffffff;
-__thread bool tl_sweeping;
 
 TRACE_SET_MOD(mm);
 
@@ -450,7 +449,7 @@ template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 
 void MemoryManager::sweep() {
   assert(!sweeping());
-  tl_sweeping = true;
+  m_sweeping = true;
   DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
 
   // iterate until both sweep lists are empty. Entries can be added or
@@ -495,7 +494,7 @@ void MemoryManager::sweep() {
 }
 
 void MemoryManager::resetAllocator() {
-  assert(m_natives.empty() && m_sweepables.empty() && tl_sweeping);
+  assert(m_natives.empty() && m_sweepables.empty() && m_sweeping);
   // decref apc strings referenced by this request
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
 
@@ -508,7 +507,7 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
-  tl_sweeping = false;
+  m_sweeping = false;
   m_exiting = false;
   resetStatsImpl(true);
   setGCEnabled(RuntimeOption::EvalEnableGC);
@@ -585,7 +584,9 @@ const std::array<char*,NumHeaderKinds> header_names = {
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole(void* ptr, uint32_t size) {
-  FreeNode::InitFrom(ptr, size, HeaderKind::Hole);
+  auto hdr = static_cast<FreeNode*>(ptr);
+  hdr->hdr.kind = HeaderKind::Hole;
+  hdr->size() = size;
 }
 
 void MemoryManager::initHole() {
@@ -600,13 +601,13 @@ void MemoryManager::initFree() {
   for (auto i = 0; i < kNumSmallSizes; i++) {
     auto size = smallIndex2Size(i);
     auto n = m_freelists[i].head;
-    for (; n && n->kind() != HeaderKind::Free; n = n->next) {
-      n->initHeader(HeaderKind::Free, size);
+    for (; n && n->hdr.kind != HeaderKind::Free; n = n->next) {
+      n->hdr.init(HeaderKind::Free, size);
     }
     if (debug) {
       // ensure the freelist tail is already initialized.
       for (; n; n = n->next) {
-        assert(n->kind() == HeaderKind::Free && n->size() == size);
+        assert(n->hdr.kind == HeaderKind::Free && n->size() == size);
       }
     }
   }
@@ -622,7 +623,7 @@ void MemoryManager::endQuarantine() {
     auto size = smallIndex2Size(i);
     while (auto n = m_freelists[i].maybePop()) {
       memset(n, 0x8a, size);
-      initHole(n, size);
+      static_cast<FreeNode*>(n)->hdr.init(HeaderKind::Hole, size);
     }
   }
   std::swap(m_freelists, m_quarantine);
@@ -947,7 +948,7 @@ static void* allocate(size_t nbytes, type_scan::Index ty) {
   if (LIKELY(npadded <= kMaxSmallSize)) {
     auto const ptr = static_cast<MallocNode*>(MM().mallocSmallSize(npadded));
     ptr->nbytes = npadded;
-    ptr->initHeader(ty, HeaderKind::SmallMalloc, 0);
+    ptr->hdr.init(ty, HeaderKind::SmallMalloc, 0);
     return zero ? memset(ptr + 1, 0, nbytes) : ptr + 1;
   }
   auto constexpr mode = zero ? MemoryManager::ZeroFreeActual :
@@ -1182,8 +1183,10 @@ MemBlock BigHeap::allocSlab(size_t size) {
 
 void BigHeap::enlist(MallocNode* n, HeaderKind kind,
                      size_t size, type_scan::Index tyindex) {
-  n->initHeader(tyindex, kind, m_bigs.size());
   n->nbytes = size;
+  n->hdr.kind = kind;
+  n->index() = m_bigs.size();
+  n->typeIndex() = tyindex;
   m_bigs.push_back(n);
 }
 

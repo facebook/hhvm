@@ -94,7 +94,7 @@ void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
   reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
 #endif
   a->m_sizeAndPos = size; // pos=0
-  a->initHeader(HeaderKind::Mixed, count);
+  a->m_hdr.init(HeaderKind::Mixed, count);
   a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
   a->m_nextKI = nextIntKey;
 }

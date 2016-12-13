@@ -39,6 +39,8 @@ using folly::IOBuf;
 using std::shared_ptr;
 using std::unique_ptr;
 
+using namespace proxygen;
+
 namespace {
 static std::set<std::string> s_post_methods{
   "OPTIONS",
@@ -513,15 +515,14 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
   response.setStatusCode(code);
   response.setStatusMessage(HTTPMessage::getDefaultReason(code));
   response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
+
   CHECK(!m_sendStarted);
   m_sendStarted = true;
   m_sendEnded = true;
   m_responseCode = code;
   m_responseCodeInfo = response.getStatusMessage();
   m_server->onRequestError(this);
-  // sendErrorResponse is only called from onHeadersComplete now, so the txn
-  // should always be there and we shouldn't be in error.  If I'm wrong we
-  // were going to crash anyways.
+
   CHECK(m_clientTxn && !m_egressError);
   m_clientTxn->sendHeaders(response);
   m_clientTxn->sendEOM();
@@ -529,13 +530,24 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
 
 void ProxygenTransport::onError(const HTTPException& err) noexcept {
   Logger::Error("HPHP transport error: %s", err.describe().c_str());
-  unlink();
-  // For now, just send a naked RST.  It's closer to the LibEventServer behavior
-  m_clientTxn->sendAbort();
-  // We could also check err.getDirection() to see if it's an egress error,
-  // but sending abort here guarantees than any subsequent send* calls are going
-  // to abort.
-  m_egressError = true;
+
+  if (err.hasProxygenError() &&
+        err.getProxygenError() == ProxygenError::kErrorTimeout &&
+        !m_egressError && m_clientTxn && m_clientTxn->canSendHeaders()) {
+    sendErrorResponse(408 /* Request Timeout */);
+  } else {
+    // We either have an error here that we are not mapping to a http response
+    // or m_clientTxn is in a state where it is not able to send response
+    // headers (as part of a well formed response) and so we simply abort the
+    // connection
+    this->abort();
+
+    // We could also check err.getDirection() to see if it's an egress error,
+    // but sending abort here guarantees than any subsequent send* calls are
+    // going to abort.
+    m_egressError = true;
+  }
+
   requestDoneLocking();
 }
 

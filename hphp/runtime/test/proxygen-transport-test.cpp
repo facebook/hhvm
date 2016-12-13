@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <ostream>
@@ -16,6 +16,10 @@ using proxygen::MockHTTPTransaction;
 using proxygen::TransportDirection;
 using proxygen::HTTPCodec;
 using proxygen::WheelTimerInstance;
+
+MATCHER_P(IsResponseStatusCode, statusCode, "") {
+  return arg.getStatusCode() == statusCode;
+}
 
 namespace boost {
 /*
@@ -42,6 +46,8 @@ struct MockProxygenServer : ProxygenServer {
 
   MockProxygenServer()
       : ProxygenServer(s_options) {}
+
+  MOCK_METHOD1(onRequestError, void(Transport*));
 
   MOCK_METHOD1(onRequest, void(std::shared_ptr<ProxygenTransport>));
   virtual void putResponseMessage(ResponseMessage&& message) {
@@ -164,7 +170,6 @@ struct ProxygenTransportTest : testing::Test {
 };
 
 struct ProxygenTransportRepostTest : ProxygenTransportTest {
-
   // Initiates a simple GET request to the transport
   void SetUp() override {
   }
@@ -177,9 +182,6 @@ struct ProxygenTransportRepostTest : ProxygenTransportTest {
     transport->detachTransaction();
     EXPECT_EQ(m_transport.use_count(), 1);
   }
-
-
-
 };
 
 TEST_F(ProxygenTransportTest, basic) {
@@ -291,6 +293,39 @@ TEST_F(ProxygenTransportTest, push_abort) {
   m_transport->pushResourceBody(id, nullptr, 0, true);
   m_server.deliverMessages();
   sendResponse("12345");
+}
+
+TEST_F(ProxygenTransportTest, client_timeout) {
+  // Verify a Http 408 response would be returned on client request timeout
+  HTTPException ex(HTTPException::Direction::INGRESS,
+      folly::to<std::string>("ingress timeout, requestId=test"));
+  ex.setProxygenError(proxygen::kErrorTimeout);
+  ex.setCodecStatusCode(proxygen::ErrorCode::CANCEL);
+
+  // Setting up the expectation that canSendHeaders returns true is required
+  // due to the fact that most of the methods that control internal state
+  // within the MockHTTPTransaction are mocked and thus its internal state is
+  // invalid
+  EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(true));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(408)));
+  m_transport->onError(ex);
+}
+
+TEST_F(ProxygenTransportTest, client_timeout_incomplete_reply) {
+  // Verify the connection is aborted in case where there is a client timeout
+  // but we are in a mid reply
+  HTTPException ex(HTTPException::Direction::INGRESS,
+      folly::to<std::string>("ingress timeout, requestId=test"));
+  ex.setProxygenError(proxygen::kErrorTimeout);
+  ex.setCodecStatusCode(proxygen::ErrorCode::CANCEL);
+
+  // Setting up the expectation that canSendHeaders returns false is required
+  // due to the fact that most of the methods that control internal state
+  // within the MockHTTPTransaction are mocked and thus its internal state is
+  // invalid
+  EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(false));
+  EXPECT_CALL(m_txn, sendAbort());
+  m_transport->onError(ex);
 }
 
 TEST_F(ProxygenTransportRepostTest, no_body) {

@@ -86,7 +86,7 @@ struct Either {
    * Post: left() == nullptr && right() == nullptr
    *       isNull()
    */
-  Either() : bits{0} {}
+  Either() noexcept : bits{0} {}
 
   /*
    * Create an Either that isNull.

@@ -59,7 +59,7 @@ bool check_noTTL(const char* key, size_t keyLen) {
 
 #ifdef HPHP_TRACE
 std::string show(const StoreValue& sval) {
-  return sval.data.left() ?
+  return sval.data().left() ?
     folly::sformat("size {} kind {}", sval.dataSize, (int)sval.getKind()) :
     folly::sformat("size {} serialized", std::abs(sval.dataSize));
 }
@@ -389,7 +389,7 @@ bool ConcurrentTableSharedStore::clear() {
   for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
        ++iter) {
     s_hotCache.clearValue(iter->second);
-    iter->second.data.match(
+    iter->second.data().match(
       [&] (APCHandle* handle) {
         handle->unreferenceRoot(iter->second.dataSize);
       },
@@ -433,7 +433,7 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
   auto& storeVal = acc->second;
   bool wasCached = s_hotCache.clearValue(storeVal);
 
-  if (auto const var = storeVal.data.left()) {
+  if (auto const var = storeVal.data().left()) {
     APCStats::getAPCStats().removeAPCValue(storeVal.dataSize, var,
                                            storeVal.expire == 0, expired);
     /*
@@ -538,7 +538,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   // Our handle may not be same as `svar' here because some other thread may
   // have updated it already, check before updating.
   auto& sval = acc->second;
-  auto const handle = sval.data.left();
+  auto const handle = sval.data().left();
   if (handle == svar && handle->kind() == APCKind::SerializedObject) {
     sval.setHandle(converted);
     APCStats::getAPCStats().updateAPCValue(
@@ -554,8 +554,17 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
 
 APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
                                                    StoreValue* sval) {
-  auto const sAddr = sval->data.right();
+  auto const sAddr = sval->data().right();
   assert(sAddr != nullptr);
+  /*
+    This method is special, since another thread T may concurrently
+    attempt to 'get' this entry while we're unserializing it. If T
+    observes sval->data with a cleared tag, it will proceed without
+    any further locking (it only has a const_accessor).
+
+    Thus, this method must ensure that the tag of sval->data is cleared
+    only *after* sval is in a fully consistent unserialized state.
+   */
 
   try {
     auto const sType =
@@ -568,8 +577,8 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
     Variant v = vu.unserialize();
     auto const pair = APCHandle::Create(v, sval->isSerializedObj(),
       APCHandleLevel::Outer, false);
-    sval->setHandle(pair.handle);
     sval->dataSize = pair.size;
+    sval->setHandle(pair.handle);  // Publish unserialized value (see 'get').
     APCStats::getAPCStats().addAPCValue(pair.handle, pair.size, true);
     return pair.handle;
   } catch (ResourceExceededException&) {
@@ -602,12 +611,12 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
       // expiration has to happen after the lock is released
       expired = true;
     } else {
-      if (auto const handle = sval->data.left()) {
+      if (auto const handle = sval->data().left()) {
         svar = handle;
       } else {
         std::lock_guard<SmallLock> sval_lock(sval->lock);
 
-        if (auto const handle = sval->data.left()) {
+        if (auto const handle = sval->data().left()) {
           svar = handle;
         } else {
           /*
@@ -621,7 +630,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
           if (!svar) return false;
         }
       }
-      assert(sval->data.left() == svar);
+      assert(sval->data().left() == svar);
       APCKind kind = sval->getKind();
       if (apcExtension::AllowObj &&
           (kind == APCKind::SerializedObject ||
@@ -675,7 +684,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
    * file-backed storage from priming.  So we don't need to try to deserialize
    * anything or handle the case that sval.data is file-backed.
    */
-  auto const oldHandle = sval.data.left();
+  auto const oldHandle = sval.data().left();
   if (oldHandle == nullptr) return 0;
   if (oldHandle->kind() != APCKind::Int &&
       oldHandle->kind() != APCKind::Double) {
@@ -711,7 +720,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   auto& sval = acc->second;
   if (sval.expired()) return false;
   s_hotCache.clearValue(sval);
-  auto const oldHandle = sval.data.match(
+  auto const oldHandle = sval.data().match(
     [&] (APCHandle* h) {
       return h;
     },
@@ -818,7 +827,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
        * 'get' will soon update the entry with the new value.
        */
       s_hotCache.clearValue(*sval);
-      sval->data.match(
+      sval->data().match(
         [&] (APCHandle* handle) {
           current = handle;
           // If ApcTTLLimit is set, then only primed keys can have
@@ -827,7 +836,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
         },
         [&] (char*) {
           // Was inFile, but won't be anymore.
-          sval->data = nullptr;
+          sval->clearData();
           sval->dataSize = 0;
           overwritePrime = true;
         }
@@ -891,13 +900,13 @@ void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
 
       // We're going to overwrite what was there.
       auto& sval = acc->second;
-      sval.data.match(
+      sval.data().match(
         [&] (APCHandle* handle) {
           handle->unreferenceRoot(sval.dataSize);
         },
         [&] (char*) {}
       );
-      sval.data     = nullptr;
+      sval.clearData();
       sval.dataSize = 0;
       sval.expire   = 0;
     }
@@ -908,7 +917,7 @@ void ConcurrentTableSharedStore::prime(std::vector<KeyValuePair>&& vars) {
       acc->second.set(item.value, 0);
       acc->second.dataSize = item.sSize;
     } else {
-      acc->second.data     = item.sAddr;
+      acc->second.tagged_data.store(item.sAddr, std::memory_order_release);
       acc->second.dataSize = item.sSize;
       APCStats::getAPCStats().addInFileValue(std::abs(acc->second.dataSize));
     }
@@ -1025,7 +1034,7 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
                                                     int64_t curr_time) {
   int32_t size;
   auto type = EntryInfo::Type::Unknown;
-  auto const inMem = sval->data.match(
+  auto const inMem = sval->data().match(
       [&](APCHandle* handle) {
         size = sval->dataSize;
         type = EntryInfo::getAPCType(handle);
@@ -1075,7 +1084,7 @@ void ConcurrentTableSharedStore::dumpKeyAndValue(std::ostream & out) {
     if (!sval->expired()) {
       VariableSerializer vs(VariableSerializer::Type::Serialize);
 
-      auto const value = sval->data.match(
+      auto const value = sval->data().match(
         [&] (APCHandle* handle) {
           return handle->toLocal();
         },

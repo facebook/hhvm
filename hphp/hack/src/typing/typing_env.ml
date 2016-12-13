@@ -8,6 +8,7 @@
  *
  *)
 
+include Typing_env_types
 open Core
 open Decl_env
 open Typing_defs
@@ -16,72 +17,6 @@ open Nast
 module SN = Naming_special_names
 module Dep = Typing_deps.Dep
 module TLazyHeap = Typing_lazy_heap
-
-type fake_members = {
-  last_call : Pos.t option;
-  invalid   : SSet.t;
-  valid     : SSet.t;
-}
-(* Along with a type, each local variable has a expression id associated with
- * it. This is used when generating expression dependent types for the 'this'
- * type. The idea is that if two local variables have the same expression_id
- * then they refer to the same late bound type, and thus have compatible
- * 'this' types.
- *)
-type expression_id = Ident.t
-type local = locl ty * expression_id
-type local_history = locl ty list
-type old_local = locl ty list * locl ty * expression_id
-type tparam_bounds = locl ty list
-type tparam_info = {
-  lower_bounds : tparam_bounds;
-  upper_bounds : tparam_bounds;
-}
-type tpenv = tparam_info SMap.t
-
-(* Local environment incldues types of locals and bounds on type parameters. *)
-type local_env = {
-  fake_members       : fake_members;
-  local_types        : local Local_id.Map.t;
-  local_type_history : local_history Local_id.Map.t;
-  (* Lower and upper bounds on generic type parameters and abstract types
-   * For constraints of the form Tu <: Tv where both Tu and Tv are type
-   * parameters, we store an upper bound for Tu and a lower bound for Tv
-   *)
-  tpenv              : tpenv;
-}
-
-type env = {
-  pos     : Pos.t      ;
-  tenv    : locl ty IMap.t ;
-  subst   : int IMap.t ;
-  lenv    : local_env  ;
-  genv    : genv       ;
-  decl_env: Decl_env.env;
-  todo    : tfun list  ;
-  in_loop : bool       ;
-}
-
-and genv = {
-  tcopt   : TypecheckerOptions.t;
-  return  : locl ty;
-  parent_id : string;
-  parent  : decl ty;
-  (* Identifier of the enclosing class *)
-  self_id : string;
-  (* Type of the enclosing class, instantiated at its generic parameters *)
-  self    : locl ty;
-  static  : bool;
-  fun_kind : Ast.fun_kind;
-  anons   : anon IMap.t;
-  file    : Relative_path.t;
-}
-
-(* An anonymous function
- * the environment + the fun parameters + the captured identifiers
-*)
-and anon = env -> locl fun_params -> env * locl ty
-and tfun = env -> env
 
 let get_tcopt env = env.genv.tcopt
 let fresh () =

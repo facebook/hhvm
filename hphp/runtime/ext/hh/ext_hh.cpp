@@ -70,32 +70,37 @@ bool HHVM_FUNCTION(could_include, const String& file) {
   return lookupUnit(file.get(), "", nullptr /* initial_opt */) != nullptr;
 }
 
-Variant HHVM_FUNCTION(serialize_memoize_param, const Variant& param) {
+TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   // Memoize throws in the emitter if any function parameters are references, so
   // we can just assert that the param is cell here
-  const auto& cell_param = *tvAssertCell(param.asTypedValue());
-  auto type = param.getType();
+  assertx(param.m_type != KindOfRef);
+  auto const type = param.m_type;
 
   if (type == KindOfInt64) {
     return param;
   } else if (type == KindOfUninit || type == KindOfNull) {
-    return s_empty;
+    return make_tv<KindOfPersistentString>(s_empty.get());
   } else if (type == KindOfBoolean) {
-    return param.asBooleanVal() ? s_true : s_false;
-  } else if (type == KindOfString) {
-    auto str = param.asCStrRef();
-    if (str.empty()) {
-      return s_emptyStr;
-    } else if (str.charAt(0) > '9') {
-      // If it doesn't start with a number, then we know it can never collide
-      // with an int or any of our constants, so it's fine as is
+    return make_tv<KindOfPersistentString>(param.m_data.num ?
+                                 s_true.get() : s_false.get());
+  } else if (isStringType(type)) {
+    auto const str = param.m_data.pstr;
+    if (str->empty()) {
+      return make_tv<KindOfPersistentString>(s_emptyStr.get());
+    } else if ((unsigned char)str->data()[0] > '9') {
+      // If it's > '9' then its not strictly integer, and it doesn't
+      // start with '$', so we know it won't collide with an integer
+      // key or with any of our constants, so it's fine as is
+      str->incRefCount();
       return param;
     }
-  } else if (isContainer(cell_param) && getContainerSize(cell_param) == 0) {
-    return s_emptyArr;
+  } else if (isContainer(param) && getContainerSize(param) == 0) {
+    return make_tv<KindOfPersistentString>(s_emptyArr.get());
   }
 
-  return fb_compact_serialize(param, FBCompactSerializeBehavior::MemoizeParam);
+  return tvReturn(
+    fb_compact_serialize(tvAsCVarRef(&param),
+                         FBCompactSerializeBehavior::MemoizeParam));
 }
 
 void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {

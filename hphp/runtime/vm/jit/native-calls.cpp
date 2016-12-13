@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -548,7 +549,7 @@ static CallMap s_callMap {
     /* method_exists($obj, $meth) */
     {MethodExists, methodExistsHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
 
-    {GetMemoKey, getMemoKeyHelper, DTV, SSync, {{TV, 0}}},
+    {GetMemoKey, HHVM_FN(serialize_memoize_param), DTV, SSync, {{TV, 0}}},
 
     /* microtime(true) */
     {GetTime, TimeStamp::CurrentSecond, DDbl, SNone, {}},

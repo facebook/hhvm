@@ -448,13 +448,6 @@ StringData* convResToStrHelper(ResourceHdr* r) {
   return r->data()->o_toString().detach();
 }
 
-TypedValue getMemoKeyHelper(TypedValue tv) {
-  auto var = HHVM_FN(serialize_memoize_param)(tvAsCVarRef(&tv));
-  auto res = var.asTypedValue();
-  tvRefcountedIncRef(res);
-  return *res;
-}
-
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
                            const Func* func) {
   raise_param_type_warning(func->displayName()->data(),

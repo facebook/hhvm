@@ -3808,10 +3808,8 @@ OPTBLD_INLINE void iopAKExists() {
 
 OPTBLD_INLINE void iopGetMemoKey() {
   auto obj = vmStack().topTV();
-  auto var = HHVM_FN(serialize_memoize_param)(tvAsCVarRef(obj));
-  auto res = var.asTypedValue();
-  tvRefcountedIncRef(res);
-  vmStack().replaceTV(*res);
+  auto var = HHVM_FN(serialize_memoize_param)(*obj);
+  vmStack().replaceTV(var);
 }
 
 namespace {

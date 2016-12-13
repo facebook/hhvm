@@ -165,8 +165,6 @@ TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
 
 TypedValue mapIdx(ObjectData*, StringData*, TypedValue);
 
-TypedValue getMemoKeyHelper(TypedValue tv);
-
 int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrDefHelper(StringData* name);

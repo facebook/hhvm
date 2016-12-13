@@ -14,6 +14,13 @@ type t =
 | SingleLineComment
 | DelimitedComment
 
+let is_comment kind =
+  match kind with
+  | WhiteSpace -> false
+  | EndOfLine -> false
+  | SingleLineComment -> true
+  | DelimitedComment -> true
+
 let to_string kind =
   match kind with
   | WhiteSpace -> "whitespace"

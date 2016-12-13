@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 $a = $long_long_long_long_long_long_long_long_long_long_name_1 +
   $long_long_long_long_long_long_long_long_long_long_name_2;
@@ -50,3 +50,4 @@ if (
   $aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa === $bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ||
   $cccccccccccccccccccccccccccccc === $dddddddddddddddddddddddddddddd
 ) {
+}

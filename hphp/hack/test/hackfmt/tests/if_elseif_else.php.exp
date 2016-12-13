@@ -1,3 +1,4 @@
+<?hh
 if ($var == 0) {
   overly_long_func(
     $longlongparam1 + $longparam2,

@@ -59,6 +59,7 @@
   V(LoadStorePreIndex)              \
   V(LoadStoreRegisterOffset)        \
   V(LoadStoreUnsignedOffset)        \
+  V(LoadStoreExclusive)             \
   V(LogicalShifted)                 \
   V(AddSubShifted)                  \
   V(AddSubExtended)                 \

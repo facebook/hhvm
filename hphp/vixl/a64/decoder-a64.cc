@@ -280,8 +280,7 @@ void Decoder::DecodeLoadStore(Instruction* instr) {
     if (instr->Bit(28) == 0) {
       if (instr->Bit(29) == 0) {
         if (instr->Bit(26) == 0) {
-          // TODO: VisitLoadStoreExclusive.
-          VisitUnimplemented(instr);
+          VisitLoadStoreExclusive(instr);
         } else {
           DecodeAdvSIMDLoadStore(instr);
         }

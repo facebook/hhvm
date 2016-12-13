@@ -154,7 +154,6 @@ HttpServer::HttpServer()
   }
 
   StaticContentCache::TheCache.load();
-  hphp_process_init();
 
   signal(SIGTERM, on_kill);
   signal(SIGUSR1, on_kill);

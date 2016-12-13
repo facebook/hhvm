@@ -660,14 +660,18 @@ void MemoryManager::requestEagerGC() {
 
 void MemoryManager::requestGC() {
   if (this->isGCEnabled() && rds::header()) {
-    if (m_stats.usage() > m_nextGc) {
+    if (m_stats.mmUsage > m_nextGc) {
       setSurpriseFlag(PendingGCFlag);
     }
   }
 }
 
 void MemoryManager::updateNextGc() {
-  m_nextGc = m_stats.usage() + (m_stats.limit - m_stats.usage()) / 2;
+  constexpr int64_t min_delta = 64L << 20;
+  auto mm_limit = m_stats.limit - m_stats.auxUsage;
+  auto delta = (mm_limit - m_stats.mmUsage) / 2;
+  delta = std::max(delta, min_delta);
+  m_nextGc = m_stats.mmUsage + delta;
 }
 
 void MemoryManager::collect(const char* phase) {

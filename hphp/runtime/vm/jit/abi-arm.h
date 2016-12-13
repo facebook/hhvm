@@ -81,17 +81,17 @@ inline vixl::Register x2a(PhysReg x64reg) {
   return vixl::Register(vixl::CPURegister(x64reg));
 }
 
-inline vixl::FPRegister x2f(PhysReg x64reg) {
+inline vixl::FPRegister x2f(const PhysReg& x64reg) {
   always_assert(x64reg.isSIMD());
   return vixl::FPRegister(vixl::CPURegister(x64reg));
 }
 
-inline vixl::VRegister x2v(PhysReg x64reg) {
+inline vixl::VRegister x2v(const PhysReg& x64reg) {
   always_assert(x64reg.isSIMD());
   return vixl::VRegister(vixl::CPURegister(x64reg));
 }
 
-inline vixl::Condition convertCC(jit::ConditionCode cc) {
+inline vixl::Condition convertCC(const jit::ConditionCode& cc) {
   assertx(cc >= 0 && cc <= 0xF);
 
   using namespace vixl;
@@ -119,7 +119,7 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
   return mapping[cc];
 }
 
-inline jit::ConditionCode convertCC(vixl::Condition cc) {
+inline jit::ConditionCode convertCC(const vixl::Condition& cc) {
   using namespace vixl;
 
   // We'll index into this array by the arm64 condition code.

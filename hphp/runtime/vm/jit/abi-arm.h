@@ -91,6 +91,27 @@ inline vixl::VRegister x2v(PhysReg x64reg) {
   return vixl::VRegister(vixl::CPURegister(x64reg));
 }
 
+/*
+ * ARM    int meaning                   fp meaning                         JIT mapping        JIT meaning
+ * ------------------------------------------------------------------------------------------------------------------
+ * eq     equal                         equal                              CC_E/CC_Z          equal
+ * ne     not equal                     not equal or unordered             CC_NE/CC_NZ        not equal
+ * cs/hs  carry set                     greater than, equal, or unordered  CC_AE/CC_NB/CC_NC  unsigned higher or same
+ * cc/lo  carry clear                   less than                          CC_B/CC_NAE        unsigned lower
+ * mi     minus, negative               less than                          CC_S               minus (sign set)
+ * pl     plus, positive, or zero       greater than, equal, or unordered  CC_NS              plus (sign clear)
+ * vs     overflow                      unordered                          CC_O               overflow set
+ * vc     no overflow                   ordered                            CC_NO              overflow clear
+ * hi     unsigned higher               greater than, or unordered         CC_A/CC_NBE        unsigned higher
+ * ls     unsigned lower or same        less than or equal                 CC_BE/CC_NA        unsigned lower or same
+ * ge     signed greater than or equal  greater than or equal              CC_GE/CC_NL        signed greater or equal
+ * lt     signed less than              less than, or unordered            CC_L/CC_NGE        signed less than
+ * gt     signed greater than           greater than                       CC_G/CC_NLE        signed greater than
+ * le     signed less than or equal     less than, equal, or unordered     CC_LE/CC_NG        signed less or equal
+ * al     always (not used)             always (not used)                  CC_P               parity
+ * nv     not valid                                                        CC_NP              no parity
+ */
+
 inline vixl::Condition convertCC(jit::ConditionCode cc) {
   assertx(cc >= 0 && cc <= 0xF);
 
@@ -98,47 +119,52 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
 
   // We'll index into this array by the x64 condition code.
   constexpr vixl::Condition mapping[] = {
-    vs,  // overflow set
-    vc,  // overflow clear
-    lo,  // unsigned lower
-    hs,  // unsigned higher or same
-    eq,  // equal
-    ne,  // not equal
-    ls,  // unsigned lower or same
-    hi,  // unsigned higher
-    mi,  // minus (N set)
-    pl,  // plus (N clear)
-    vs,  // FIXME: parity = 1, valid for 'ucomisd' based jumps only
-    vc,  // FIXME: parity = 0
-    lt,  // signed less than
-    ge,  // signed greater or equal
-    le,  // signed less or equal
-    gt,  // signed greater than
+    vs,     // CC_O
+    vc,     // CC_NO
+    lo,     // CC_B, CC_NAE
+    hs,     // CC_AE, CC_NB, CC_NC
+    eq,     // CC_E, CC_Z
+    ne,     // CC_NE, CC_NZ
+    ls,     // CC_BE, CC_NA
+    hi,     // CC_A, CC_NBE
+    mi,     // CC_S
+    pl,     // CC_NS
+    nv, nv, // CC_P, CC_NP (invalid)
+    lt,     // CC_L, CC_NGE
+    ge,     // CC_GE, CC_NL
+    le,     // CC_LE, CC_NG
+    gt,     // CC_G, CC_NLE
   };
 
   return mapping[cc];
 }
 
 inline jit::ConditionCode convertCC(vixl::Condition cc) {
+  if (cc == vixl::nv || cc == vixl::al) {
+    // nv and al are invalid on ARM
+    always_assert(false);
+  }
+  assertx(cc >= 0 && cc <= 0xF);
+
   using namespace vixl;
 
   // We'll index into this array by the arm64 condition code.
   constexpr jit::ConditionCode mapping[] = {
-    jit::CC_E,   // equal
-    jit::CC_NE,  // not equal
-    jit::CC_AE,  // unsigned higher or same
-    jit::CC_B,   // unsigned lower
-    jit::CC_S,   // minus (N set)
-    jit::CC_NS,  // plus (N clear)
-    jit::CC_O,   // overflow set
-    jit::CC_NO,  // overflow clear
-    jit::CC_A,   // unsigned higher
-    jit::CC_NA,  // unsigned lower or same
-    jit::CC_GE,  // signed greater or equal
-    jit::CC_L,   // signed less than
-    jit::CC_G,   // signed greater than
-    jit::CC_LE,  // signed less or equal
-    jit::CC_P, jit::CC_NP, // invalid. These are the parity flags.
+    CC_E,        // eq
+    CC_NE,       // ne
+    CC_AE,       // hs
+    CC_B,        // lo
+    CC_S,        // mi
+    CC_NS,       // pl
+    CC_O,        // vs
+    CC_NO,       // vc
+    CC_A,        // hi
+    CC_BE,       // ls
+    CC_GE,       // ge
+    CC_L,        // lt
+    CC_G,        // gt
+    CC_LE,       // le
+    CC_P, CC_NP, // nv, al (invalid)
   };
 
   return mapping[cc];

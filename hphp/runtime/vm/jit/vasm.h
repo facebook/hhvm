@@ -106,6 +106,7 @@ bool checkBlockEnd(const Vunit& v, Vlabel b);
  * Passes.
  */
 void allocateRegisters(Vunit&, const Abi&);
+void annotateSFUses(Vunit&);
 void fuseBranches(Vunit&);
 void optimizeCopies(Vunit&, const Abi&);
 void optimizeExits(Vunit&);

@@ -201,6 +201,19 @@ inline std::string areaAsString(AreaIndex area) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Generalization of Status Flag bits encoded in Vinstr and used by the
+ * annotateSFUses() pass and platform-specific lowerers/emitters.
+ *
+ * In order for a platform to utilize the pass, they'll need to implement
+ * mappings between ConditionCodes and an operator|-able bit sequence held in a
+ * Vflags byte.  This implies that the platform will need to define their
+ * status flag bits as well.  See required_flags() in abi-arm.h for an example.
+ */
+using Vflags = uint8_t;
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

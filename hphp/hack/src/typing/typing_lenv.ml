@@ -15,11 +15,14 @@ open Env
 module TUtils = Typing_utils
 module Type = Typing_ops
 module Reason = Typing_reason
-
 module LMap = Local_id.Map
 
 (*****************************************************************************)
 (* Module dealing with local environments. *)
+(*****************************************************************************)
+
+(*****************************************************************************)
+(* Functions dealing with old style local environment *)
 (*****************************************************************************)
 
 (* Intersects the set of valid fake_members.

@@ -631,21 +631,7 @@ static void mysql_set_ssl_options(
   if (!ssl_provider || !mySQL || mySQL->get() == nullptr) {
     return;
   }
-  auto ssl_context = ssl_provider->getSSLContext();
-  if (!ssl_context) {
-    return; // shouldn't happen
-  }
-
-  MYSQL* conn = mySQL->get();
-  mysql_options(conn, MYSQL_OPT_SSL_CONTEXT, ssl_context->getSSLCtx());
-  auto ssl_session = ssl_provider->getSSLSession();
-  if (ssl_session) {
-    mysql_options4(
-        conn,
-        MYSQL_OPT_SSL_SESSION,
-        ssl_session,
-        (void*)1 /* take ownership */);
-  }
+  ssl_provider->setMysqlSSLOptions(mySQL->get());
 }
 
 static void mysql_store_ssl_session(
@@ -654,14 +640,7 @@ static void mysql_store_ssl_session(
   if (!ssl_provider || !mySQL || mySQL->get() == nullptr) {
     return;
   }
-  MYSQL* conn = mySQL->get();
-  // if we reused the session it means we already have it, no need to store
-  if (!mysql_get_ssl_session_reused(conn)) {
-    wangle::SSLSessionPtr session((SSL_SESSION*)mysql_get_ssl_session(conn));
-    if (session) {
-      ssl_provider->storeSSLSession(std::move(session));
-    }
-  }
+  ssl_provider->storeMysqlSSLSession(mySQL->get());
 }
 
 Variant php_mysql_do_connect_on_link(

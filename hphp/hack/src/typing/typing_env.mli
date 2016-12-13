@@ -17,19 +17,22 @@ type fake_members = {
   valid : SSet.t;
 }
 type expression_id = Ident.t
-type local = locl ty list * locl ty * expression_id
+type local = locl ty * expression_id
+type local_history = locl ty list
+type old_local = locl ty list * locl ty * expression_id
 type tpenv
 type tparam_bounds = locl ty list
 
 (* Local environment incldues types of locals and bounds on type parameters. *)
 type local_env = {
-  fake_members  : fake_members;
-  local_types   : local Local_id.Map.t;
+  fake_members       : fake_members;
+  local_types        : local Local_id.Map.t;
+  local_type_history : local_history Local_id.Map.t;
   (* Type parameter environment, assigning lower and upper bounds to type
-   * parameters.  Contraasting with tenv and subst, bounds are
+   * parameters.  Contrasting with tenv and subst, bounds are
    * *assumptions* for type inference, not conclusions.
    *)
-  tpenv         : tpenv;
+  tpenv              : tpenv;
 }
 
 type env = {
@@ -139,6 +142,11 @@ val get_generic_parameters : env -> string list
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
 val freeze_local_env : env -> env
-val env_with_locals : env -> local Local_id.Map.t -> env
+val env_with_locals :
+  env -> local Local_id.Map.t -> local_history Local_id.Map.t -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
 val in_loop : env -> (env -> env) -> env
+val merge_locals_and_history : local_env -> old_local Local_id.Map.t
+val seperate_locals_and_history :
+  old_local Local_id.Map.t ->
+  (local Local_id.Map.t * local_history Local_id.Map.t)

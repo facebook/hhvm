@@ -4310,7 +4310,7 @@ and method_def env m =
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
   Typing_hooks.dispatch_enter_method_def_hook m;
-  let env = Env.env_with_locals env Local_id.Map.empty in
+  let env = Env.env_with_locals env Local_id.Map.empty Local_id.Map.empty in
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env = Phase.localize_generic_parameters_with_bounds env m.m_tparams

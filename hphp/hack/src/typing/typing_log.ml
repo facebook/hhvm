@@ -123,8 +123,7 @@ let rec log_type_list env tyl =
       log_type_list env tyl
 
 let log_local_types env =
-  let lenv = env.Env.lenv in
-  let local_types = lenv.Env.local_types in
+  let local_types_with_history = Env.merge_locals_and_history env.Env.lenv in
   indentEnv "local_types" (fun () ->
     Local_id.Map.iter begin fun id (all_types, new_type, expr_id) ->
       lnewline();
@@ -134,7 +133,7 @@ let log_local_types env =
       lprintf (Normal Green) " [history: ";
       log_type_list env all_types;
       lprintf (Normal Green) "] [eid: %s]" (Ident.debug expr_id) end
-    local_types)
+    local_types_with_history)
 
 let log_tpenv env =
   let tparams = Env.get_generic_parameters env in

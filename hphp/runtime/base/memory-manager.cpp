@@ -1251,12 +1251,12 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
   auto const newNode = static_cast<MallocNode*>(
     rallocx(n, newsize + sizeof(MallocNode), 0)
   );
-  n->nbytes = sallocx(newNode, 0);
+  newNode->nbytes = sallocx(newNode, 0);
 #else
   auto const newNode = static_cast<MallocNode*>(
     safe_realloc(n, newsize + sizeof(MallocNode))
   );
-  n->nbytes = newsize + sizeof(MallocNode);
+  newNode->nbytes = newsize + sizeof(MallocNode);
 #endif
   if (newNode != n) {
     m_bigs[newNode->index()] = newNode;

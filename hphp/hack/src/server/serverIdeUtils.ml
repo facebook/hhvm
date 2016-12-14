@@ -110,18 +110,14 @@ let declare_and_check content ~f tcopt =
       ~typedefs:n_types
       ~consts:n_consts;
     NamingGlobal.make_env tcopt ~funs ~classes ~typedefs ~consts;
-    let nast = Naming.program tcopt ast in
-    List.iter nast begin function
-      | Nast.Fun f -> Decl.fun_decl f
-      | Nast.Class c -> Decl.class_decl tcopt c
-      | Nast.Typedef t -> Decl.typedef_decl t
-      | Nast.Constant cst -> Decl.const_decl cst
-    end;
 
-    (* We must run all the declaration steps first to ensure that the
-     * typechecking below sees all the new declarations. Lazy decl
-     * won't work in this case because we haven't put the new ASTs into
-     * the parsing heap. *)
+    (* Decl is not necessary to run typing, since typing would get
+     * whatever it needs using lazy decl, but we run it anyway in order to
+     * ensure that hooks attached to decl phase are executed. *)
+    Decl.name_and_declare_types_program tcopt ast;
+
+    let nast = Naming.program tcopt ast in
+
     List.iter nast begin function
       | Nast.Fun f -> Typing.fun_def tcopt f;
       | Nast.Class c -> Typing.class_def tcopt c;

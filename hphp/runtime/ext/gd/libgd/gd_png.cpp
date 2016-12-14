@@ -42,10 +42,15 @@ const char * gdPngGetVersionString()
 }
 
 #ifdef PNG_SETJMP_SUPPORTED
+
+namespace {
+
 typedef struct _jmpbuf_wrapper
 {
   jmp_buf jmpbuf;
 } jmpbuf_wrapper;
+
+}
 
 static void gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
 {

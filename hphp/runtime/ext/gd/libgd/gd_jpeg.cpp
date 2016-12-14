@@ -40,11 +40,15 @@
 
 static const char *const GD_JPEG_VERSION = "1.0";
 
+namespace {
+
 typedef struct _jmpbuf_wrapper
 {
   jmp_buf jmpbuf;
   int ignore_warning;
 } jmpbuf_wrapper;
+
+}
 
 static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 {

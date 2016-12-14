@@ -2055,6 +2055,8 @@ static bool generic_stmt_attr_get(sp_PDOStatement stmt, Variant &ret,
 ///////////////////////////////////////////////////////////////////////////////
 // SQL parser
 
+namespace {
+
 #define PDO_PARSER_TEXT 1
 #define PDO_PARSER_BIND 2
 #define PDO_PARSER_BIND_POS 3
@@ -2322,6 +2324,8 @@ yy27:
 yy28:
   ++YYCURSOR;
   { RET(PDO_PARSER_TEXT); }
+}
+
 }
 
 }

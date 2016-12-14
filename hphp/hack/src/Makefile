@@ -61,6 +61,7 @@ MODULES=\
   hh_matcher\
   hh_matcher/test\
   hhi\
+  ide_rpc\
   injection/default_injector\
   libancillary\
   naming\

@@ -1454,20 +1454,27 @@ and anon_bind_param params env (param_name, ty as pname_ty) =
       params := paraml;
       match param.param_hint with
       | Some h ->
-          let env, h = Phase.hint_locl env h in
-          let pos = Reason.to_pos (fst ty) in
-          let env = Type.sub_type pos Reason.URparam env ty h in
-          (* Closures are allowed to have explicit type-hints. When
-           * that is the case we should check that the argument passed
-           * is compatible with the type-hint.
-           * The body of the function should be type-checked with the
-           * hint and not the type of the argument passed.
-           * Otherwise it leads to strange results where
-           * foo(?string $x = null) is called with a string and fails to
-           * type-check. If $x is a string instead of ?string, null is not
-           * subtype of string ...
-           *)
-          bind_param env (param_name, h) param
+
+        let h = Decl_hint.hint env.Env.decl_env h in
+        (* When creating a closure, the 'this' type will mean the
+         * late bound type of the current enclosing class
+         *)
+        let ety_env =
+          { (Phase.env_with_self env) with from_class = Some CIstatic } in
+        let env, h = Phase.localize ~ety_env env h in
+        let pos = Reason.to_pos (fst ty) in
+        let env = Type.sub_type pos Reason.URparam env ty h in
+        (* Closures are allowed to have explicit type-hints. When
+         * that is the case we should check that the argument passed
+         * is compatible with the type-hint.
+         * The body of the function should be type-checked with the
+         * hint and not the type of the argument passed.
+         * Otherwise it leads to strange results where
+         * foo(?string $x = null) is called with a string and fails to
+         * type-check. If $x is a string instead of ?string, null is not
+         * subtype of string ...
+        *)
+        bind_param env (param_name, h) param
       | None -> bind_param env pname_ty param
 
 and anon_bind_opt_param env param =

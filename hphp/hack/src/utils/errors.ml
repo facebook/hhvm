@@ -1627,11 +1627,15 @@ let classname_abstract_call cname meth_name call_pos decl_pos =
     decl_pos, "Declaration is here"
   ]
 
-let isset_empty_in_strict pos name =
-  let name = Utils.strip_ns name in
+let empty_in_strict pos =
   add Typing.isset_empty_in_strict pos
-    (name^" cannot be used in a completely type safe way and so is banned in "
+    ("empty cannot be used in a completely type safe way and so is banned in "
      ^"strict mode")
+
+let isset_in_strict pos =
+  add Typing.isset_empty_in_strict pos
+    ("isset cannot be used in a completely type safe way and so is banned in "
+     ^"strict mode; try using array_key_exists instead")
 
 let unset_nonidx_in_strict pos msgs =
   add_list Typing.unset_nonidx_in_strict

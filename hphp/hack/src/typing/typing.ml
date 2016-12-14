@@ -2021,15 +2021,19 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
   | Id (_, pseudo_func) when pseudo_func = SN.SpecialFunctions.echo ->
       let env, _ = List.map_env env el expr in
       env, (Reason.Rwitness p, Tprim Tvoid)
-  | Id (_, pseudo_func)
-      when
-        pseudo_func = SN.PseudoFunctions.isset
-        || pseudo_func = SN.PseudoFunctions.empty ->
+  | Id (_, pseudo_func) when pseudo_func = SN.PseudoFunctions.empty ->
     let env, _ = List.map_env env el expr in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     if Env.is_strict env then
-      Errors.isset_empty_in_strict p pseudo_func;
+      Errors.empty_in_strict p;
+    env, (Reason.Rwitness p, Tprim Tbool)
+  | Id (_, pseudo_func) when pseudo_func = SN.PseudoFunctions.isset ->
+    let env, _ = List.map_env env el expr in
+    if uel <> [] then
+      Errors.unpacking_disallowed_builtin_function p pseudo_func;
+    if Env.is_strict env then
+      Errors.isset_in_strict p;
     env, (Reason.Rwitness p, Tprim Tbool)
   | Id (_, pseudo_func) when pseudo_func = SN.PseudoFunctions.unset ->
      let env, _ = List.map_env env el expr in

@@ -8,7 +8,8 @@
  *
 *)
 open Core
-open IdeJson
+open Ide_message
+open Ide_rpc_protocol_parser_types
 
 module Cmd = ServerCommand
 module Rpc = ServerCommandTypes
@@ -17,6 +18,10 @@ module SMUtils = ServerMonitorUtils
 type env = {
   root: Path.t;
 }
+
+(* Configuration to use before / in absence of init request *)
+let default_version = Ide_rpc_protocol_parser_types.V0
+let default_protocol = Ide_rpc_protocol_parser_types.Nuclide_rpc
 
 let rec connect_persistent env retries start_time =
   if retries < 0 then raise Exit_status.(Exit_with Out_of_retries);
@@ -110,68 +115,98 @@ let get_ready_message server_in_fd =
   else if List.mem readable server_in_fd then `Server
   else `Stdin
 
-let handle conn id call =
-match call with
-| Auto_complete_call (path, pos) ->
-  let raw_result =
-    rpc conn (Rpc.IDE_AUTOCOMPLETE (path, pos)) in
-  let result =
-    List.map raw_result AutocompleteService.autocomplete_result_to_json in
-  let result_field = (Hh_json.JSON_Array result) in
-  print_endline @@ IdeJsonUtils.json_string_of_response id
-    (Auto_complete_response result_field)
-| Open_file_call (path, contents) ->
-  rpc conn (Rpc.OPEN_FILE (path, contents))
-| Close_file_call path ->
-  rpc conn (Rpc.CLOSE_FILE path)
-| Edit_file_call (path, edits) ->
-  rpc conn (Rpc.EDIT_FILE (path, edits))
-| Disconnect_call ->
-  rpc conn (Rpc.DISCONNECT);
-  server_disconnected ()
-| Subscribe_diagnostic_call ->
-  rpc conn (Rpc.SUBSCRIBE_DIAGNOSTIC id)
-| Unsubscribe_diagnostic_call ->
-  rpc conn (Rpc.UNSUBSCRIBE_DIAGNOSTIC id)
-| Sleep_for_test ->
-  Unix.sleep 1
+let print_response id protocol response =
+  Ide_message_printer.to_json
+    ~id ~protocol ~response ~version:default_version |>
+  Hh_json.json_to_string |>
+  write_response
+
+let print_push_message =
+  (* Push notifications are responses without ID field *)
+  print_response None
+
+let handle_push_message = function
+  | ServerCommandTypes.DIAGNOSTIC (subscription_id, errors) ->
+    SMap.iter begin fun diagnostics_notification_filename diagnostics ->
+      print_push_message default_protocol @@
+      Diagnostics_notification {
+        subscription_id;
+        diagnostics_notification_filename;
+        diagnostics;
+      }
+    end errors
+  | ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+    Printf.eprintf "Another persistent client have connected. Exiting.\n";
+    raise Exit_status.(Exit_with IDE_new_client_connected)
+
+let handle_error _id _protocol e =
+  (* TODO: implement "real" error messages *)
+  Printf.eprintf "%s" (Ide_rpc_protocol_parser.error_t_to_string e)
+
+let with_id_required id protocol f =
+  match id with
+  | Some id -> f id
+  | None -> handle_error id protocol
+      (Internal_error "Id field is required for this request")
+
+let handle_request conn id protocol = function
+  | Autocomplete { filename; position; } ->
+    rpc conn (Rpc.IDE_AUTOCOMPLETE (filename, position)) |>
+    AutocompleteService.autocomplete_result_to_ide_response |>
+    print_response id protocol
+  | Did_open_file { did_open_file_filename; did_open_file_text; } ->
+    rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))
+  | Did_close_file { did_close_file_filename; } ->
+    rpc conn (Rpc.CLOSE_FILE did_close_file_filename)
+  | Did_change_file { did_change_file_filename; changes; } ->
+    rpc conn (Rpc.EDIT_FILE (did_change_file_filename, changes))
+  | Disconnect ->
+    rpc conn (Rpc.DISCONNECT);
+    server_disconnected ()
+  | Subscribe_diagnostics ->
+    with_id_required id protocol (fun id ->
+      rpc conn (Rpc.SUBSCRIBE_DIAGNOSTIC id)
+    )
+  | Ide_message.Unsubscribe_call ->
+    with_id_required id protocol (fun id ->
+      rpc conn (Rpc.UNSUBSCRIBE_DIAGNOSTIC id)
+    )
+  | Sleep_for_test ->
+    Unix.sleep 1
+
+let handle_stdin conn =
+  let { id; result; protocol } = Ide_message_parser.parse
+    ~message:(read_request ())
+    ~version:default_version
+  in
+  let protocol = match protocol with
+    | Result.Ok protocol -> protocol
+    | Result.Error _ -> default_protocol
+  in
+  let id = match id with
+    | Result.Ok x -> x
+    | Result.Error _ -> None
+  in
+  match result with
+  | Result.Ok request -> handle_request conn id protocol request
+  | Result.Error e -> handle_error id protocol e
+
+let handle_server fd =
+  begin try get_next_push_message fd with
+    | Marshal_tools.Reading_Preamble_Exception
+    | Unix.Unix_error _ -> server_disconnected ()
+  end
+  |> handle_push_message
 
 let main env =
   Printexc.record_backtrace true;
-  let ic, oc = connect_persistent env ~retries:800 in
-  let fd = Unix.descr_of_out_channel oc in
+  let conn = connect_persistent env ~retries:800 in
+  let fd = Unix.descr_of_out_channel (snd conn) in
   read_connection_response fd;
   while true do
     match get_ready_message fd with
     | `None -> ()
-    | `Stdin ->
-      let request = read_request () in
-      begin
-      match IdeJsonUtils.call_of_string request with
-      | Call (id, call) ->
-        handle (ic, oc) id call
-      | Invalid_call (id, msg) ->
-        print_endline msg
-      | Parsing_error msg ->
-        print_endline msg
-      end
-    | `Server ->
-      let res = try get_next_push_message fd with
-        | Marshal_tools.Reading_Preamble_Exception
-        | Unix.Unix_error _ -> server_disconnected ()
-      in
-      match res with
-      | ServerCommandTypes.DIAGNOSTIC (id, errors) ->
-        SMap.iter begin fun path errors ->
-          let diagnostic = {
-            path;
-            diagnostics = errors;
-          } in
-          write_response @@ IdeJsonUtils.json_string_of_response 0
-            (Diagnostic_response (id, diagnostic))
-        end errors
-      | ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-        Printf.eprintf "Another persistent client have connected. Exiting.\n";
-        raise Exit_status.(Exit_with IDE_new_client_connected)
+    | `Stdin -> handle_stdin conn
+    | `Server -> handle_server fd
   done;
   Exit_status.exit Exit_status.No_error

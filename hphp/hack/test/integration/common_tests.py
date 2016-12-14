@@ -1053,20 +1053,22 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
 
         # Test the exit status of ide call when another ide client exists
         self.check_cmd(['No errors!'])
-        ide_con = self.connect_ide()
+        first_ide_con = self.connect_ide()
         time.sleep(1)
-        (_, _, exit_code) = self.proc_call([hh_client, 'ide', self.repo_dir])
-        self.assertEqual(
-            exit_code,
-            207,
-            msg="Test IDE_persistent_client_already_exists status failed")
+        second_ide_con = self.connect_ide()
 
         # Test ide abnormally exit. It make sure exit ide connection with EOF
         # does not crash the server. (This is assured by the test below since
         # ide connection cannot exit with code 0 if there is no server exists)
-        ide_con.close_stdin()
+        second_ide_con.close_stdin()
 
         time.sleep(1)
+
+        (_, _, exit_code) = first_ide_con.get_return()
+        self.assertEqual(
+            exit_code,
+            207,
+            msg="Test IDE_new_client_connected status failed")
 
         # Test the exit status of ide call when normally exit
         ide_con = self.connect_ide()

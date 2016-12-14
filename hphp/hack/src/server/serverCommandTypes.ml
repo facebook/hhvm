@@ -5,8 +5,7 @@ type connection_type =
   | Non_persistent
 
 type connection_response =
-  | Persistent_client_connected
-  | Persistent_client_alredy_exists
+  | Connected
 
 type status_liveness =
   | Stale_status
@@ -74,6 +73,7 @@ and streamed =
 
 type push =
   | DIAGNOSTIC of int * (Pos.absolute Errors.error_ list) SMap.t
+  | NEW_CLIENT_CONNECTED
 
 type 'a persistent_connection_message_type =
   | Push of push

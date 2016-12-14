@@ -44,10 +44,10 @@ let baz_contents =
 let create_bar i = bar_name i, bar_contents i
 
 let get_diagnostics_map loop_output = match loop_output.push_message with
-  | None ->
+  | Some (ServerCommandTypes.DIAGNOSTIC (_, s)) -> s
+  | _ ->
     Test.fail "Expected push diagnostics";
     assert false
-  | Some (ServerCommandTypes.DIAGNOSTIC (_, s)) -> s
 
 let get_files_with_errors diagnostics_map =
   SSet.of_list (SMap.keys diagnostics_map)

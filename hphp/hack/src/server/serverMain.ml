@@ -101,6 +101,10 @@ module Program =
       to_recheck
   end
 
+let shutdown_persistent_client env client =
+  ClientProvider.shutdown_client client;
+  ServerFileSync.clear_sync_data env
+
 (*****************************************************************************)
 (* The main loop *)
 (*****************************************************************************)
@@ -110,16 +114,16 @@ let handle_connection_ genv env client =
   try
     match ClientProvider.read_connection_type client with
     | Persistent ->
-      (match env.persistent_client with
-      | Some _ ->
-        ClientProvider.send_response_to_client client
-          Persistent_client_alredy_exists;
-        env
-      | None ->
-        ClientProvider.send_response_to_client client
-          Persistent_client_connected;
-        { env with persistent_client =
-            Some (ClientProvider.make_persistent client)})
+      let env = match env.persistent_client with
+        | Some old_client ->
+          ClientProvider.send_push_message_to_client old_client
+            NEW_CLIENT_CONNECTED;
+          shutdown_persistent_client env old_client
+        | None -> env
+      in
+      ClientProvider.send_response_to_client client Connected;
+      { env with persistent_client =
+          Some (ClientProvider.make_persistent client)}
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
@@ -146,10 +150,6 @@ let handle_connection_ genv env client =
     Printexc.print_backtrace stderr;
     ClientProvider.shutdown_client client;
     env
-
-let shutdown_persistent_client env client =
-  ClientProvider.shutdown_client client;
-  ServerFileSync.clear_sync_data env
 
 let handle_persistent_connection_ genv env client =
    try

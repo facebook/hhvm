@@ -211,11 +211,15 @@ let assert_no_diagnostics loop_output =
   match loop_output.push_message with
   | Some (DIAGNOSTIC _) ->
     fail "Did not expect to receive push diagnostics."
-  | None -> ()
+  | Some NEW_CLIENT_CONNECTED ->
+    fail "Unexpected push message"
+  | _ -> ()
 
 let assert_has_diagnostics loop_output =
   match loop_output.push_message with
   | Some (DIAGNOSTIC _) -> ()
+  | Some NEW_CLIENT_CONNECTED ->
+    fail "Unexpected push message"
   | None -> fail "Expected to receive push diagnostics."
 
 let errors_to_string buf x =
@@ -244,8 +248,8 @@ let errors_to_string x =
 
 let assert_diagnostics loop_output expected =
   let diagnostics = match loop_output.push_message with
-    | None -> fail "Expected push diagnostics"
     | Some (DIAGNOSTIC (_, m)) -> m
+    | _ -> fail "Expected push diagnostics"
   in
 
   let diagnostics_as_string = diagnostics_to_string diagnostics in

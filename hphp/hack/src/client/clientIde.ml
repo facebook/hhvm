@@ -88,9 +88,7 @@ let get_next_push_message fd =
 let read_connection_response fd =
   let res = Marshal_tools.from_fd_with_preamble fd in
   match res with
-  | ServerCommandTypes.Persistent_client_alredy_exists ->
-    raise Exit_status.(Exit_with IDE_persistent_client_already_exists)
-  | ServerCommandTypes.Persistent_client_connected -> ()
+  | ServerCommandTypes.Connected -> ()
 
 let server_disconnected () =
   raise Exit_status.(Exit_with No_error)
@@ -172,5 +170,8 @@ let main env =
           write_response @@ IdeJsonUtils.json_string_of_response 0
             (Diagnostic_response (id, diagnostic))
         end errors
+      | ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+        Printf.eprintf "Another persistent client have connected. Exiting.\n";
+        raise Exit_status.(Exit_with IDE_new_client_connected)
   done;
   Exit_status.exit Exit_status.No_error

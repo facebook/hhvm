@@ -172,18 +172,9 @@ let main args =
       let conn = connect args in
       ClientRefactor.go conn args ref_mode before after;
       Exit_status.No_error
-    | MODE_IDENTIFY_FUNCTION arg ->
-      let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
-      let result =
-        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
-      let result = match List.hd result with
-        | Some (result, _) -> Utils.strip_ns result.SymbolOccurrence.name
-        | _ -> ""
-      in
-      print_endline result;
-      Exit_status.No_error
-    | MODE_GET_DEFINITION arg ->
+    | MODE_IDENTIFY_SYMBOL1 arg
+    | MODE_IDENTIFY_SYMBOL2 arg
+    | MODE_IDENTIFY_SYMBOL3 arg ->
       let line, char = parse_position_string arg in
       let content = Sys_utils.read_stdin_to_string () in
       let result =
@@ -332,13 +323,6 @@ let main args =
       if args.output_json
       then print_patches_json file_map
       else apply_patches file_map;
-      Exit_status.No_error
-    | MODE_GET_METHOD_NAME arg ->
-      let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
-      let result =
-        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
-      ClientGetMethodName.go (List.hd result) args.output_json;
       Exit_status.No_error
     | MODE_FORMAT (from, to_) ->
       let content = Sys_utils.read_stdin_to_string () in

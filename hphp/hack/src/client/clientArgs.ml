@@ -137,8 +137,16 @@ let parse_check_args cmd =
         set_mode (MODE_DUMP_AI_INFO files) ()),
         (* Just like --dump-symbol-info, but uses the AI to obtain info *)
         "";
-    "--identify-function", Arg.String (fun x -> set_mode (MODE_IDENTIFY_FUNCTION x) ()),
-      " (mode) print the full function name at the position [line:character] of the text on stdin";
+    "--identify-function",
+      Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x) ()),
+      " (mode) print the full function name at the position " ^
+      "[line:character] of the text on stdin";
+    "--ide-get-definition",
+      Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL2 x) ()),
+      (* alias for --identify-function *) "";
+    "--get-method-name",
+      Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL3 x) ()),
+      (* alias for --identify-function *) "";
     "--get-definition-by-id",
       Arg.String (fun x -> set_mode (MODE_GET_DEFINITION_BY_ID x) ()),
       "";
@@ -226,16 +234,11 @@ let parse_check_args cmd =
     "--stats",
       Arg.Unit (set_mode MODE_STATS),
       " display some server statistics";
-    "--get-method-name",
-      Arg.String (fun x -> set_mode (MODE_GET_METHOD_NAME x) ()),
-      (* (mode) same as --identify-function, but returns more information *) "";
     "--format",
       Arg.Tuple ([
         Arg.Int (fun x -> format_from := x);
         Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)) ())
       ]), "";
-    "--ide-get-definition",
-      Arg.String (fun x -> set_mode (MODE_GET_DEFINITION x) ()), "";
     "--ide-find-refs",
       Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x) ()), "";
     "--ide-highlight-refs",

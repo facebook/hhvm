@@ -11,6 +11,18 @@
 open Core
 open Hh_json
 
+let get_result_type res =
+  let open SymbolOccurrence in
+  match res.type_ with
+  | Class -> "class"
+  | Method _ -> "method"
+  | Function -> "function"
+  | LocalVar -> "local"
+  | Property _ -> "property"
+  | ClassConst _ -> "class_const"
+  | Typeconst _ -> "typeconst"
+  | GConst -> "global_const"
+
 let to_json x =
   JSON_Array (List.map x begin function (symbol, definition) ->
     let definition_pos, definition_span, definition_id =
@@ -26,7 +38,7 @@ let to_json x =
     JSON_Object [
       "name",           JSON_String symbol.SymbolOccurrence.name;
       "result_type",    JSON_String
-        (ClientGetMethodName.get_result_type symbol);
+        (get_result_type symbol);
       "pos",            Pos.json (symbol.SymbolOccurrence.pos);
       "definition_pos", definition_pos;
       "definition_span", definition_span;
@@ -41,7 +53,7 @@ let print_readable x =
   List.iter x begin function (symbol, definition) ->
     Printf.printf "Name: %s, type: %s, position: %s"
       symbol.SymbolOccurrence.name
-      (ClientGetMethodName.get_result_type symbol)
+      (get_result_type symbol)
       (Pos.string_no_file symbol.SymbolOccurrence.pos);
     Option.iter definition begin fun x ->
       Printf.printf ", defined: %s" (Pos.string_no_file x.SymbolDefinition.pos);

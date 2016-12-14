@@ -617,7 +617,7 @@ class CommonTests(object):
 
     def test_misc_ide_tools(self):
         """
-        Test hh_client --type-at-pos and --identify-function
+        Test hh_client --type-at-pos
         """
         self.write_load_config()
 
@@ -626,18 +626,6 @@ class CommonTests(object):
             ], [
             '{{"type":"string","pos":{{"filename":"{root}foo_3.php","line":3,"char_start":23,"char_end":28}}}}'
             ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
-
-        self.check_cmd_and_json_cmd([
-            'Foo::bar'
-            ], [
-            # looks like identify-function doesn't support JSON -
-            # but still be careful changing this, since tools
-            # may just call everything with --json flag and it would
-            # be a breaking change
-            'Foo::bar'
-            ],
-            options=['--identify-function', '1:51'],
-            stdin='<?hh class Foo { private function bar() { $this->bar() }}')
 
     def test_ide_get_definition(self):
         """
@@ -717,32 +705,6 @@ class CommonTests(object):
             options=['--ide-get-definition', '1:50'],
             stdin='<?hh function test() { '
                   'ClassToBeIdentified::methodToBeIdentified () }')
-
-    def test_get_method_name(self):
-        """
-        Test --get-method-name
-        """
-        os.remove(os.path.join(self.repo_dir, 'foo_2.php'))
-        self.write_load_config('foo_2.php')
-
-        self.check_cmd_and_json_cmd([
-            'Name: \\C::foo, type: method, position: line 8, characters 7-9'
-            ], [
-            '{{"name":"\\\\C::foo","result_type":"method",'
-            '"pos":{{"filename":"","line":8,"char_start":7,"char_end":9}},'
-            '"internal_error":false}}'
-            ],
-            options=['--get-method-name', '8:7'],
-            stdin='''<?hh
-
-class C {
-  public function foo() {}
-}
-
-function test(C $c) {
-  $c->foo();
-}
-''')
 
     def test_ide_get_definition_by_id(self):
         self.write_load_config()

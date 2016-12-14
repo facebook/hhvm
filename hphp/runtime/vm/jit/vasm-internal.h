@@ -109,8 +109,10 @@ template<class Vemit>
 void vasm_emit(Vunit& u, Vtext& text, CGMeta& fixups,
                AsmInfo* asm_info);
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
- * Allocate memory to hold the given value and return a pointer to it. If a
+ * Allocate memory to hold the given value and return a pointer to it.  If a
  * previous translation allocated the same literal, a pointer to that may be
  * returned instead.
  */

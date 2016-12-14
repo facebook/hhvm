@@ -28,9 +28,18 @@ struct Vunit;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Architecture-independent lowering pass.
+ * Toplevel vasm-to-vasm lowering pass.
+ *
+ * The `lower_impl' callback should have the signature:
+ *
+ *    void lower_impl(Vinstr& inst, Vlabel b, size_t i);
+ *
+ * where `b' and `i' are the block and code index of `inst' in `unit'.  This
+ * callback is responsible for any architecture-specific lowering that is
+ * needed for `inst'.
  */
-void vlower(Vunit& unit);
+template<class Vlower>
+void vasm_lower(Vunit& unit, Vlower lower_impl);
 
 /*
  * Lower a single instruction.
@@ -43,5 +52,7 @@ void vlower(Vunit& unit, Vlabel b, size_t i);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
+
+#include "hphp/runtime/vm/jit/vasm-lower-inl.h"
 
 #endif

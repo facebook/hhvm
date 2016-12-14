@@ -1019,65 +1019,21 @@ void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower_vcallarray(Vunit& unit, Vlabel b) {
-  auto& code = unit.blocks[b].code;
-  // vcallarray can only appear at the end of a block.
-  auto const inst = code.back().get<vcallarray>();
-  auto const irctx = code.back().irctx();
-
-  auto argRegs = inst.args;
-  auto const& srcs = unit.tuples[inst.extraArgs];
-  jit::vector<Vreg> dsts;
-  for (int i = 0; i < srcs.size(); ++i) {
-    dsts.emplace_back(rarg(i));
-    argRegs |= rarg(i);
-  }
-
-  code.back() = copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
-  code.emplace_back(callarray{inst.target, argRegs}, irctx);
-  code.emplace_back(unwind{{inst.targets[0], inst.targets[1]}}, irctx);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
 void lowerForX64(Vunit& unit) {
-  Timer timer(Timer::vasm_lower, unit.log_entry);
+  vasm_lower(unit, [&] (Vinstr& inst, Vlabel b, size_t i) {
+    switch (inst.op) {
+#define O(name, ...)                      \
+      case Vinstr::name:                  \
+        lower(unit, inst.name##_, b, i);  \
+        break;
 
-  // This pass relies on having no critical edges in the unit.
-  splitCriticalEdges(unit);
-
-  // Scratch block can change blocks allocation, hence cannot use regular
-  // iterators.
-  auto& blocks = unit.blocks;
-
-  PostorderWalker{unit}.dfs([&] (Vlabel ib) {
-    assertx(!blocks[ib].code.empty());
-
-    auto& back = blocks[ib].code.back();
-    if (back.op == Vinstr::vcallarray) {
-      lower_vcallarray(unit, Vlabel{ib});
-    }
-
-    for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
-      vlower(unit, ib, ii);
-
-      auto& inst = blocks[ib].code[ii];
-      switch (inst.op) {
-#define O(name, ...)                          \
-        case Vinstr::name:                    \
-          lower(unit, inst.name##_, ib, ii);  \
-          break;
-
-        VASM_OPCODES
+      VASM_OPCODES
 #undef O
-      }
     }
   });
-
-  printUnit(kVasmLowerLevel, "after lower for X64", unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1355,25 +1355,6 @@ void lowerForPPC64(Vout& v, decqmlock& inst) {
   v << decqmlock{p, inst.sf};
 }
 
-void lower_vcallarray(Vunit& unit, Vlabel b) {
-  auto& code = unit.blocks[b].code;
-  // vcallarray can only appear at the end of a block.
-  auto const inst = code.back().get<vcallarray>();
-  auto const irctx = code.back().irctx();
-
-  auto argRegs = inst.args;
-  auto const& srcs = unit.tuples[inst.extraArgs];
-  jit::vector<Vreg> dsts;
-  for (int i = 0; i < srcs.size(); ++i) {
-    dsts.emplace_back(rarg(i));
-    argRegs |= rarg(i);
-  }
-
-  code.back() = copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
-  code.emplace_back(callarray{inst.target, argRegs}, irctx);
-  code.emplace_back(unwind{{inst.targets[0], inst.targets[1]}}, irctx);
-}
-
 /*
  * Lower a few abstractions to facilitate straightforward PPC64 codegen.
  * PPC64 doesn't have instructions for operating on less than 64 bits data
@@ -1381,58 +1362,20 @@ void lower_vcallarray(Vunit& unit, Vlabel b) {
  * that intend to deal with smaller data will actually operate on 64bits
  */
 void lowerForPPC64(Vunit& unit) {
-  Timer _t(Timer::vasm_lower);
-
-  // This pass relies on having no critical edges in the unit.
-  splitCriticalEdges(unit);
-
-  // Scratch block can change blocks allocation, hence cannot use regular
-  // iterators.
-  auto& blocks = unit.blocks;
-
-  PostorderWalker{unit}.dfs([&] (Vlabel ib) {
-    assertx(!blocks[ib].code.empty());
-    auto& back = blocks[ib].code.back();
-    if (back.op == Vinstr::vcallarray) {
-      lower_vcallarray(unit, Vlabel{ib});
-    }
-
-    for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
-
-      vlower(unit, ib, ii);
-
-      auto scratch = unit.makeScratchBlock();
-      auto& inst = blocks[ib].code[ii];
-      SCOPE_EXIT {unit.freeScratchBlock(scratch);};
-      Vout v(unit, scratch, inst.irctx());
-
+  vasm_lower(unit, [&] (Vinstr& inst, Vlabel b, size_t i) {
+    vmodify(unit, b, i, [&] (Vout& v) {
       switch (inst.op) {
-        /*
-         * Call every lowering and provide only what is necessary:
-         * Vout& v : the Vout instance so vasms can be emitted
-         * <Type> inst : the current vasm to be lowered
-         *
-         * If any vasm is emitted inside of the lower, then the current vasm
-         * will be replaced by the vector_splice call below.
-         */
-
 #define O(name, imms, uses, defs)                         \
         case Vinstr::name:                                \
           lowerForPPC64(v, inst.name##_);                 \
-          if (!v.empty()) {                               \
-            vector_splice(unit.blocks[ib].code, ii, 1,    \
-                          unit.blocks[scratch].code);     \
-          }                                               \
           break;
 
-          VASM_OPCODES
+        VASM_OPCODES
 #undef O
-
       }
-    }
+      return v.empty() ? 0 : 1;
+    });
   });
-
-  printUnit(kVasmLowerLevel, "after lower for PPC64", unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

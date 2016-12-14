@@ -37,6 +37,11 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<typename Lower>
+void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
+  vmodify(unit, b, i, [&] (Vout& v) { lower(v); return 1; });
+}
+
 template<class Inst>
 void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   auto& blocks = unit.blocks;
@@ -207,6 +212,26 @@ void lower(Vunit& unit, vinvoke& inst, Vlabel b, size_t i) {
   lower_vcall(unit, inst, b, i);
 }
 
+void lower(Vunit& unit, vcallarray& inst, Vlabel b, size_t i) {
+  // vcallarray can only appear at the end of a block.
+  assertx(i == unit.blocks[b].code.size() - 1);
+
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    auto const& srcs = unit.tuples[inst.extraArgs];
+    auto args = inst.args;
+    auto dsts = jit::vector<Vreg>{};
+
+    for (auto i = 0; i < srcs.size(); ++i) {
+      dsts.emplace_back(rarg(i));
+      args |= rarg(i);
+    }
+
+    v << copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
+    v << callarray{inst.target, args};
+    v << unwind{{inst.targets[0], inst.targets[1]}};
+  });
+}
+
 void lower(Vunit& unit, defvmsp& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{rvmsp(), inst.d};
 }
@@ -243,24 +268,6 @@ void vlower(Vunit& unit, Vlabel b, size_t i) {
     VASM_OPCODES
 #undef O
   }
-}
-
-void vlower(Vunit& unit) {
-  Timer timer(Timer::vasm_lower);
-
-  // This pass relies on having no critical edges in the unit.
-  splitCriticalEdges(unit);
-
-  auto& blocks = unit.blocks;
-
-  // The vlower() implementations may allocate scratch blocks and modify
-  // instruction streams, so we cannot use standard iterators here.
-  PostorderWalker{unit}.dfs([&] (Vlabel b) {
-    assertx(!blocks[b].code.empty());
-    for (size_t i = 0; i < blocks[b].code.size(); ++i) {
-      vlower(unit, b, i);
-    }
-  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

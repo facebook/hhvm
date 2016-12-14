@@ -43,7 +43,12 @@ let command_needs_full_check = function
   | _ -> false
 
 let full_recheck_if_needed genv env msg =
-  if not env.ServerEnv.needs_full_check then env else
+  if
+    (not env.ServerEnv.needs_full_check) &&
+    (Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing)
+  then
+    env
+  else
   if not @@ command_needs_full_check msg then env else
   let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
   env

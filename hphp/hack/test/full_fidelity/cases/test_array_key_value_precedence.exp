@@ -14,11 +14,10 @@ prefix_unary_expression((whitespace)
 (array_intrinsic_expression(
 (array)(whitespace))
 ((lparen))
-(list_item
 (element_initializer(variable((variable)(whitespace)))
 ((=>)(whitespace))
 (binary_expression(
 qualified_name((name)(whitespace)))
 ((*=)(whitespace))
 (literal((decimal_literal)))))
-(missing))((rparen)))))((;)(end_of_line)))((})))))
+((rparen)))))((;)(end_of_line)))((})))))

@@ -440,4 +440,14 @@ module WithParser(Parser : ParserType) = struct
         parser TokenKind.RightBrace SyntaxError.error1006 parse_item in
     parse_braced_list parser parse_items
 
+  let parse_bracketted_list parser parse_items =
+    parse_delimited_list parser TokenKind.LeftBracket SyntaxError.error1026
+      TokenKind.RightBracket SyntaxError.error1031 parse_items
+
+  let parse_bracketted_comma_list_opt_allow_trailing parser parse_item =
+    let parse_items parser =
+      parse_comma_list_opt_allow_trailing
+        parser TokenKind.RightBracket SyntaxError.error1031 parse_item in
+    parse_bracketted_list parser parse_items
+
 end

@@ -33,7 +33,7 @@ namespace HPHP { namespace hfsort {
   }
 
 // Supported code layout algorithms
-enum class Algorithm { Hfsort, PettisHansen, Invalid };
+enum class Algorithm { Hfsort, HfsortPlus, PettisHansen, Invalid };
 
 constexpr uint64_t InvalidAddr = std::numeric_limits<uint64_t>::max();
 

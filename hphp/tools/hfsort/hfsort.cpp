@@ -17,10 +17,8 @@
 #include "hphp/tools/hfsort/hfutil.h"
 
 #include <stdio.h>
-#include <assert.h>
 #include <zlib.h>
 #include <ctype.h>
-#include <stdarg.h>
 #include <cxxabi.h>
 #include <unordered_map>
 
@@ -254,6 +252,7 @@ Algorithm checkAlgorithm(const char* algorithm) {
   auto a = HPHP::toLower(algorithm);
 
   if (a == "hfsort") return Algorithm::Hfsort;
+  if (a == "hfsortplus") return Algorithm::HfsortPlus;
   if (a == "pettishansen") return Algorithm::PettisHansen;
 
   return Algorithm::Invalid;
@@ -281,10 +280,13 @@ int main(int argc, char* argv[]) {
   extern char* optarg;
   extern int optind;
   int c;
-  while ((c = getopt(argc, argv, "pe:w")) != -1) {
+  while ((c = getopt(argc, argv, "pae:w")) != -1) {
     switch (c) {
       case 'p':
         algorithm = Algorithm::PettisHansen;
+        break;
+      case 'a':
+        algorithm = Algorithm::HfsortPlus;
         break;
       case 'e':
         edgcntFileName = optarg;
@@ -301,6 +303,7 @@ int main(int argc, char* argv[]) {
     error(
       "Usage: hfsort [-p] [-e <EDGCNT_FILE>] [-w] <SYMBOL_FILE> <PERF_DATA_FILE>\n"
       "   -p,               use pettis-hansen algorithm for code layout\n"
+      "   -a,               use hfsort-plus algorithm for code layout\n"
       "   -e <EDGCNT_FILE>, use edge profile result to build the call graph\n"
       "   -w                use wildcards instead of suffixes in function names"
     );
@@ -337,11 +340,16 @@ int main(int argc, char* argv[]) {
     HFTRACE(1, "=== algorithm : hfsort\n\n");
     clusters = clusterize(cg);
     filename = "hotfuncs.txt";
-  } else {
+  } else if (algorithm == Algorithm::HfsortPlus) {
+    HFTRACE(1, "=== algorithm : hfsort-plus\n\n");
+    clusters = hfsortPlus(cg);
+    filename = "hotfuncs.txt";
+  } else if (algorithm == Algorithm::PettisHansen) {
     HFTRACE(1, "=== algorithm : pettis-hansen\n\n");
-    assert(algorithm == Algorithm::PettisHansen);
     clusters = pettisAndHansen(cg);
     filename = "hotfuncs-pettis.txt";
+  } else {
+    error("Unknown layout algorithm\n");
   }
 
   sort(clusters.begin(), clusters.end(), compareClustersDensity);

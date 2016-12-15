@@ -101,6 +101,10 @@ std::string Cluster::toString() const {
   return folly::sformat("funcs = [{}]", folly::join(", ", targets));
 }
 
+double Cluster::density() const {
+  return (double)samples / size;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 bool compareClustersDensity(const Cluster& c1, const Cluster& c2) {

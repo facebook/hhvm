@@ -84,6 +84,7 @@ struct Cluster {
   Cluster(TargetId id, const Target& f);
 
   std::string toString() const;
+  double density() const;
 
   std::vector<TargetId> targets;
   uint32_t samples;
@@ -95,6 +96,11 @@ struct Cluster {
 
 bool compareClustersDensity(const Cluster& c1, const Cluster& c2);
 std::vector<Cluster> clusterize(const TargetGraph& cg);
+
+/*
+ * HFSortPlus - layout of hot functions with iTLB cache optimization
+ */
+std::vector<Cluster> hfsortPlus(const TargetGraph& cg);
 
 /*
  * Pettis-Hansen code layout algorithm

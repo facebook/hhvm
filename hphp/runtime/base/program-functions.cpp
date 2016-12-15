@@ -1090,6 +1090,14 @@ static int start_server(const std::string &username, int xhprof) {
   return 0;
 }
 
+static void logSettings() {
+  if (RuntimeOption::ServerLogSettingsOnStartup) {
+    Logger::Info("Settings: %s\n", IniSetting::GetAllAsJSON().c_str());
+  }
+}
+
+static InitFiniNode s_logSettings(logSettings, InitFiniNode::When::ServerInit);
+
 std::string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   if (!hexencoded || !*hexencoded) {
     return "";

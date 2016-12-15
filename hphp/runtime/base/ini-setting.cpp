@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 
 #include "hphp/util/lock.h"
 #include "hphp/util/portability.h"
@@ -1022,8 +1023,21 @@ bool IniSetting::Get(const String& name, String& value) {
   return ret;
 }
 
+static bool shouldHideSetting(const std::string& name) {
+  for (auto& sub : RuntimeOption::EvalIniGetHide) {
+    if (name.find(sub) != std::string::npos) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool IniSetting::Get(const String& name, Variant& value) {
-  auto cb = get_callback(name.toCppString());
+  auto nameStr = name.toCppString();
+  if (shouldHideSetting(nameStr)) {
+    return false;
+  }
+  auto cb = get_callback(nameStr);
   if (!cb) {
     return false;
   }
@@ -1153,6 +1167,9 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     if (ext && ext != iter.second.extension) {
       continue;
     }
+    if (shouldHideSetting(iter.first)) {
+      continue;
+    }
 
     auto value = iter.second.getCallback();
     // Cast all non-arrays to strings since that is what everything used ot be
@@ -1179,6 +1196,12 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
   return r;
+}
+
+std::string IniSetting::GetAllAsJSON() {
+  Array settings = GetAll(empty_string(), true);
+  String out = Variant::attach(HHVM_FN(json_encode)(settings)).toString();
+  return std::string(out.c_str());
 }
 
 void add_default_config_files_globbed(

@@ -148,6 +148,7 @@ struct RuntimeOption {
   static bool ServerStatCache;
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
+  static bool ServerLogSettingsOnStartup;
   static std::vector<std::string> ServerWarmupRequests;
   static std::string ServerCleanupRequest;
   static int ServerInternalWarmupThreads;
@@ -629,6 +630,7 @@ struct RuntimeOption {
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
   F(double, InitialLoadFactor, 1.0)                                     \
+  F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   /******************                                                   \
    | PPC64 Options. |                                                   \
    *****************/                                                   \

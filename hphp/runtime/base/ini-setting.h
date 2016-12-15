@@ -235,6 +235,7 @@ public:
   static bool Get(const String& name, String& value);
   static std::string Get(const std::string& name);
   static Array GetAll(const String& extension, bool details);
+  static std::string GetAllAsJSON();
 
   /**
    * Change an INI setting as if it was in the php.ini file

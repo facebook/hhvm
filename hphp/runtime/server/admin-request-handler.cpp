@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -249,6 +250,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/instance-id:     instance id that's passed in from command line\n"
         "/compiler-id:     returns the compiler id that built this app\n"
         "/repo-schema:     return the repo schema id used by this app\n"
+        "/ini-get-all:     dump all settings as JSON\n"
         "/check-load:      how many threads are actively handling requests\n"
         "/check-queued:    how many http requests are queued waiting to be\n"
         "                  handled\n"
@@ -655,7 +657,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleRandomApcRequest(cmd, transport)) {
       break;
     }
-
     if (cmd == "load-factor") {
       auto const factorStr = transport->getParam("set");
       if (factorStr.empty()) {
@@ -675,6 +676,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       transport->sendString(folly::sformat("Load factor updated to {}\n",
                                            factor));
       Logger::Info("Load factor updated to %lf", factor);
+      break;
+    }
+    if (cmd == "ini-get-all") {
+      auto out = IniSetting::GetAllAsJSON();
+      transport->sendString(out.c_str());
       break;
     }
 

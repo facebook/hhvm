@@ -31,10 +31,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(apache_note, const String& note_name,
-                      const String& note_value /* = null_string */) {
+                      const Variant& note_value /* = empty_string */) {
   String prev = ServerNote::Get(note_name);
-  if (!note_value.empty()) {
-    ServerNote::Add(note_name, note_value);
+  if (note_value.isNull()) {
+    ServerNote::Delete(note_name);
+  } else if (!note_value.isString()) {
+    raise_warning("apache_note() expects parameter 2 to be a nullable string");
+    return false;
+  } else {
+    auto const& value = note_value.toCStrRef();
+    if (!value.empty()) {
+      ServerNote::Add(note_name, value);
+    }
   }
   if (!prev.isNull()) {
     return prev;

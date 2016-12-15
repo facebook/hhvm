@@ -24,6 +24,7 @@ namespace HPHP {
 struct ServerNote  {
   static void Add(const String& name, const String& value);
   static String Get(const String& name);
+  static void Delete(const String& name);
   static void Reset();
 private:
   Array m_notes;

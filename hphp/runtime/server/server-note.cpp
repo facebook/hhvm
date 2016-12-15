@@ -39,6 +39,10 @@ String ServerNote::Get(const String& name) {
   return ret;
 }
 
+void ServerNote::Delete(const String& name) {
+  s_note->m_notes.remove(name);
+}
+
 void ServerNote::Reset() {
    s_note->m_notes.reset();
 }

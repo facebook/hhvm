@@ -181,6 +181,7 @@ struct Vgen {
   void emit(const callphp& i);
   void emit(const callarray& i);
   void emit(const contenter& i);
+  void emit(const phpret& i);
 
   // vm entry abi
   void emit(const calltc& i);
@@ -1314,18 +1315,6 @@ void lower(Vunit& u, loadstubret& i, Vlabel b, size_t z) {
 void lower(Vunit& u, phplogue& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
     v << store{rlr(), i.fp[AROFF(m_savedRip)]};
-  });
-}
-
-void lower(Vunit& u, phpret& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
-    v << load{i.fp[AROFF(m_savedRip)], rlr()};
-
-    if (!i.noframe) {
-      v << load{i.fp[AROFF(m_sfp)], i.d};
-    }
-
-    v << ret{i.args};
   });
 }
 

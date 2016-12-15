@@ -70,7 +70,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | STATS -> env, Stats.get_stats ()
     | KILL -> env, ()
     | FORMAT (content, from, to_) ->
-        env, ServerFormat.go content from to_
+        env, ServerFormat.go genv content from to_
     | TRACE_AI action ->
         env, Ai.TraceService.go action Typing_check_utils.check_defs
            (ServerArgs.ai_mode genv.options) env.tcopt

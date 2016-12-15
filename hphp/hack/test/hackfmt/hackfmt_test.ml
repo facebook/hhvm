@@ -20,7 +20,7 @@ let parse_and_print filename =
   let syntax_tree = SyntaxTree.make source_text in
 
   let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
-  let chunk_groups = Hack_format.run editable in
+  let chunk_groups = Hack_format.format_node editable in
   let result = Line_splitter.solve chunk_groups in
   Printf.printf "%s" result;
   ()

@@ -19,6 +19,7 @@ type t = {
    * meant for synchronized watchman queries. *)
   watchman_sync_directory: string;
   use_mini_state: bool;
+  use_hackfmt: bool;
   load_mini_script_timeout: int; (* in seconds *)
   type_decl_bucket_size: int;
   enable_on_nfs: bool;
@@ -39,6 +40,7 @@ let default = {
   watchman_subscribe = false;
   watchman_sync_directory = "";
   use_mini_state = false;
+  use_hackfmt = false;
   load_mini_script_timeout = 20;
   type_decl_bucket_size = 1000;
   enable_on_nfs = false;
@@ -84,6 +86,8 @@ let load_ fn =
     ~default:default.lazy_init config in
   let load_mini_script_timeout = int_ "load_mini_script_timeout"
     ~default:default.load_mini_script_timeout config in
+  let use_hackfmt = bool_ "use_hackfmt"
+    ~default:default.use_hackfmt config in
   let start_with_recorder_on = bool_ "start_with_recorder_on"
     ~default:default.start_with_recorder_on config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
@@ -117,6 +121,7 @@ let load_ fn =
     watchman_subscribe;
     watchman_sync_directory;
     use_mini_state;
+    use_hackfmt;
     load_mini_script_timeout;
     type_decl_bucket_size;
     enable_on_nfs;

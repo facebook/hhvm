@@ -24,6 +24,7 @@ type t = {
   sharedmem_config : SharedMem.config;
   tc_options       : TypecheckerOptions.t;
   parser_options   : ParserOptions.t;
+  formatter_override : Path.t option;
 }
 
 let filename = Relative_path.concat Relative_path.Root ".hhconfig"
@@ -151,6 +152,8 @@ let load config_filename options =
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
   let load_mini_script =
     Option.map (SMap.get config "load_mini_script") maybe_relative_path in
+  let formatter_override =
+    Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let global_opts = GlobalOptions.make
     (bool_ "assume_php" ~default:true config)
     (bool_ "unsafe_xhp" ~default:false config)
@@ -166,6 +169,7 @@ let load config_filename options =
     sharedmem_config = make_sharedmem_config config options local_config;
     tc_options = global_opts;
     parser_options = global_opts;
+    formatter_override = formatter_override;
   }, local_config
 
 (* useful in testing code *)
@@ -177,6 +181,7 @@ let default_config = {
   sharedmem_config = GlobalConfig.default_sharedmem_config;
   tc_options = TypecheckerOptions.default;
   parser_options = ParserOptions.default;
+  formatter_override = None;
 }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -188,3 +193,4 @@ let gc_control config = config.gc_control
 let sharedmem_config config = config.sharedmem_config
 let typechecker_options config = config.tc_options
 let parser_options config = config.parser_options
+let formatter_override config = config.formatter_override

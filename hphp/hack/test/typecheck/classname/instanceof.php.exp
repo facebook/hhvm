@@ -2,4 +2,5 @@ File "instanceof.php", line 8, characters 5-23:
   I
 File "instanceof.php", line 21, characters 7-19:
   T
-No errors
+File "instanceof.php", line 20, characters 9-29:
+'instanceof' cannot be used on a generic classname because types are erased at runtime (Typing[4162])

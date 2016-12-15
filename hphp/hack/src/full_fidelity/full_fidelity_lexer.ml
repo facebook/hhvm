@@ -1098,7 +1098,9 @@ let next_xhp_element_token lexer =
     match kind with
     | TokenKind.GreaterThan
     | TokenKind.SlashGreaterThan ->
-      (lexer, Token.make kind w leading [])
+      (* TODO: this should capture only EndOfLine trivia and maybe WhiteSpace *)
+      let (lexer, trailing) = scan_trailing_trivia lexer in
+      (lexer, Token.make kind w leading trailing)
     | _ ->
       let (lexer, trailing) = scan_trailing_trivia lexer in
       (lexer, Token.make kind w leading trailing) in

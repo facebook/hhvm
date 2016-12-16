@@ -450,6 +450,16 @@ module WithParser(Parser : ParserType) = struct
         parser TokenKind.RightBracket SyntaxError.error1031 parse_item in
     parse_bracketted_list parser parse_items
 
+  let parse_double_angled_list parser parse_items =
+    parse_delimited_list parser TokenKind.LessThanLessThan SyntaxError.error1029
+      TokenKind.GreaterThanGreaterThan SyntaxError.error1029 parse_items
+
+  let parse_double_angled_comma_list_allow_trailing parser parse_item =
+    let parse_items parser =
+      parse_comma_list_allow_trailing parser
+        TokenKind.GreaterThanGreaterThan SyntaxError.error1029 parse_item in
+    parse_double_angled_list parser parse_items
+
   (* Parse with parse_item while a condition is met. *)
   let parse_list_while parser parse_item predicate =
     let rec aux parser acc =

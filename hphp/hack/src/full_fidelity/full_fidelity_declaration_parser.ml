@@ -602,7 +602,6 @@ module WithExpressionAndStatementAndTypeParser
     parse_terminated_list parser parse_classish_element RightBrace
 
   and parse_xhp_children_paren parser =
-    (* TODO: Allow trailing comma? *)
     let (parser, left, exprs, right) =
       parse_parenthesized_comma_list parser parse_xhp_children_expression in
     let result = make_parenthesized_expression left exprs right in
@@ -614,7 +613,16 @@ module WithExpressionAndStatementAndTypeParser
       name
       xhp-class-name
       xhp-category-name
-      ( xhp-children-expressions )  /// TODO: allow trailing comma?
+      ( xhp-children-expressions )
+
+    xhp-children-expressions:
+      xhp-children-expression
+      xhp-children-expressions , xhp-children-expression
+
+    TODO: The parenthesized list of children expressions is NOT allowed
+    to be comma-terminated. Is this intentional? It is inconsistent with
+    practice throughout the rest of Hack. There is no syntactic difficulty
+    in allowing a comma before the close paren. Consider allowing it.
     *)
     let (parser1, token) = next_xhp_children_name_or_other parser in
     let name = make_token token in
@@ -694,8 +702,15 @@ module WithExpressionAndStatementAndTypeParser
   and parse_xhp_type_specifier parser =
     (* SPEC (Draft)
       xhp-type-specifier:
-        enum { xhp-attribute-enum-list-opt }
+        enum { xhp-attribute-enum-list  ,-opt  }
         type-specifier
+
+      The list of enum values must have at least one value and can be
+      comma-terminated.
+
+      xhp-enum-list:
+        xhp-attribute-enum-value
+        xhp-enum-list , xhp-attribute-enum-value
 
       xhp-attribute-enum-value:
         any integer literal
@@ -704,11 +719,10 @@ module WithExpressionAndStatementAndTypeParser
 
       TODO: What are the semantics of encapsulated expressions in double-quoted
             string literals here?
-      TODO: Write the grammar for the comma-separated list
-      TODO: Can the list end in a trailing comma?
-      TODO: Can it be empty?
       ERROR RECOVERY: We parse any expressions here;
       TODO: give an error in a later pass if the expressions are not literals.
+
+      TODO: We allow an empty list of enums; add an error for that.
     *)
     if peek_token_kind parser = Enum then
       let (parser, enum_token) = assert_token parser Enum in
@@ -768,9 +782,17 @@ module WithExpressionAndStatementAndTypeParser
     (* SPEC: (Draft)
     xhp-class-attribute-declaration :
       attribute xhp-attribute-declaration-list ;
+
+    xhp-attribute-declaration-list:
+      xhp-attribute-declaration
+      xhp-attribute-declaration-list , xhp-attribute-declaration
+
+    TODO: The list of attributes may NOT be terminated with a trailing comma
+    before the semicolon. This is inconsistent with the rest of Hack.
+    Allowing a comma before the semi does not introduce any syntactic
+    difficulty; consider allowing it.
     *)
     let (parser, attr_token) = assert_token parser TokenKind.Attribute in
-    (* TODO: Can this list be terminated with a trailing comma? *)
     (* TODO: Better error message. *)
     let (parser, attrs) = parse_comma_list parser Semicolon
       SyntaxError.error1004 parse_xhp_class_attribute in
@@ -974,41 +996,14 @@ module WithExpressionAndStatementAndTypeParser
       attribute_values , attribute_value
     attribute_value := expression
    *)
+   (* TODO: This list can be comma-terminated; update the spec. *)
   and parse_attribute_specification_opt parser =
-    let (parser1, token) = next_token parser in
-    if (Token.kind token) = LessThanLessThan then
-      let (parser, attr_list) = parse_attribute_list_opt parser1 in
-      let (parser, right) = expect_right_double_angle parser in
-      (parser, make_attribute_specification (make_token token) attr_list right)
+    if peek_token_kind parser = LessThanLessThan then
+      let (parser, left, items, right) =
+        parse_double_angled_comma_list_allow_trailing parser parse_attribute in
+      (parser, make_attribute_specification left items right)
     else
       (parser, make_missing())
-
-  and parse_attribute_list_opt parser =
-    let token = peek_token parser in
-    if (Token.kind token) = GreaterThanGreaterThan then
-      let parser = with_error parser SyntaxError.error1034 in
-      (parser, make_missing())
-    else
-      (* TODO use Eric's generic comma list parse once it lands *)
-      let rec aux parser acc =
-        let parser, attr = parse_attribute parser in
-        let parser1, token = next_token parser in
-        match Token.kind token with
-        | Comma ->
-          let comma = make_token token in
-          let item = make_list_item attr comma in
-          aux parser1 (item :: acc)
-        | GreaterThanGreaterThan ->
-          let comma = make_missing () in
-          let item = make_list_item attr comma in
-          parser, make_list (List.rev (item :: acc))
-        | _ ->
-          (* ERROR RECOVERY: assume closing bracket is missing. Caller will
-           * report an error. Do not eat token.
-           * TODO better ways to recover *)
-          parser, make_list (List.rev acc)
-      in
-      aux parser []
 
   and parse_attribute parser =
     let (parser, name) = expect_name parser in

@@ -68,9 +68,8 @@
 (methodish_declaration
   (attribute_specification
     ((whitespace)(<<))
-    (list_item
       (attribute((name))
-      (missing)(missing)(missing))(missing))
+      (missing)(missing)(missing))
     ((>>)(whitespace)))((public)(whitespace))
   (function_declaration_header(missing)
     ((function)(whitespace))
@@ -83,9 +82,8 @@
 (methodish_declaration
   (attribute_specification
     ((whitespace)(<<))
-    (list_item(
-      attribute
-        ((name))(missing)(missing)(missing))(missing))
+      (attribute
+        ((name))(missing)(missing)(missing))
     ((>>)(whitespace)))((public)(whitespace))
   (function_declaration_header(missing)
     ((function)(whitespace))
@@ -123,7 +121,7 @@
   (methodish_declaration
     (attribute_specification
       ((whitespace)(<<))
-      (list_item(attribute((name))(missing)(missing)(missing))(missing))
+      (attribute((name))(missing)(missing)(missing))
       ((>>)(whitespace)))
     ((public)(whitespace))
     (function_declaration_header(missing)

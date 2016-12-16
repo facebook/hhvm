@@ -44,10 +44,8 @@
           (methodish_declaration
             (attribute_specification
               ((whitespace)(<<))
-              (list_item
                 (attribute
                   ((name))(missing)(missing)(missing))
-                  (missing))
               ((>>)(whitespace)))
             ((public)(whitespace))
             (function_declaration_header
@@ -64,11 +62,9 @@
           (methodish_declaration
             (attribute_specification
               ((whitespace)(<<))
-              (list_item
                 (attribute((name))
                 (missing)
                 (missing)
-                (missing))
                 (missing))
               ((>>)(whitespace)))
             (list

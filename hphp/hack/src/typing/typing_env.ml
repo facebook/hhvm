@@ -17,6 +17,8 @@ open Nast
 module SN = Naming_special_names
 module Dep = Typing_deps.Dep
 module TLazyHeap = Typing_lazy_heap
+module LEnvC = Typing_lenv_cont
+module Cont = Typing_continuations
 
 let get_tcopt env = env.genv.tcopt
 let fresh () =
@@ -209,7 +211,7 @@ let empty_fake_members = {
 let empty_local tpenv = {
   tpenv = tpenv;
   fake_members = empty_fake_members;
-  local_types = Local_id.Map.empty;
+  local_types = Typing_continuations.Map.empty;
   local_type_history = Local_id.Map.empty;
 }
 
@@ -610,11 +612,12 @@ let unbind = unbind []
  * the last assignment to this local.
  *)
 let set_local env x new_type =
-  let {fake_members; local_types; local_type_history; tpenv} = env.lenv in
+  let {fake_members; local_types ; local_type_history; tpenv} = env.lenv in
   let env, new_type = unbind env new_type in
+  let next_cont = LEnvC.get_cont Cont.Next local_types in
   let all_types, expr_id =
     match
-      (Local_id.Map.get x local_types, Local_id.Map.get x local_type_history)
+      (Local_id.Map.get x next_cont, Local_id.Map.get x local_type_history)
       with
     | None, None -> [], Ident.tmp()
     | Some (_, y), Some x -> x, y
@@ -626,7 +629,7 @@ let set_local env x new_type =
     else new_type :: all_types
   in
   let local = new_type, expr_id in
-  let local_types = Local_id.Map.add x local local_types in
+  let local_types = LEnvC.add_to_cont Cont.Next x local local_types in
   let local_type_history = Local_id.Map.add x all_types local_type_history in
   let env = { env with
     lenv = {fake_members; local_types; local_type_history; tpenv} }
@@ -634,17 +637,19 @@ let set_local env x new_type =
   env
 
 let get_local env x =
-  let lcl = Local_id.Map.get x env.lenv.local_types in
+  let next_cont = LEnvC.get_cont Cont.Next env.lenv.local_types in
+  let lcl = Local_id.Map.get x next_cont in
   match lcl with
   | None -> env, (Reason.Rnone, Tany)
   | Some (x, _) -> env, x
 
 let set_local_expr_id env x new_eid =
   let {fake_members; local_types; local_type_history; tpenv} = env.lenv in
-  match Local_id.Map.get x local_types with
+  let next_cont = LEnvC.get_cont Cont.Next local_types in
+  match Local_id.Map.get x next_cont with
   | Some (type_, eid) when eid <> new_eid ->
       let local = type_, new_eid in
-      let local_types = Local_id.Map.add x local local_types in
+      let local_types = LEnvC.add_to_cont Cont.Next x local local_types in
       let env ={ env with
         lenv = {fake_members; local_types; local_type_history; tpenv} }
       in
@@ -652,7 +657,8 @@ let set_local_expr_id env x new_eid =
   | _ -> env
 
 let get_local_expr_id env x =
-  let lcl = Local_id.Map.get x env.lenv.local_types in
+  let next_cont = LEnvC.get_cont Cont.Next env.lenv.local_types in
+  let lcl = Local_id.Map.get x next_cont in
   Option.map lcl ~f:(fun (_, x) -> x)
 
 (*****************************************************************************)
@@ -687,9 +693,10 @@ let get_local_expr_id env x =
 
 let freeze_local_env env =
   let local_types = env.lenv.local_types in
+  let next_cont = LEnvC.get_cont Cont.Next local_types in
   let local_type_history = Local_id.Map.map
     (fun (type_, _) -> [type_])
-    local_types
+    next_cont
   in
   env_with_locals env local_types local_type_history
 
@@ -728,12 +735,22 @@ let merge_locals_and_history lenv =
       | Some (type_, exp_id), Some hist -> Some (hist, type_, exp_id)
       | _ -> Exit_status.(exit Local_type_env_stale)
   in
+  let next_cont = LEnvC.get_cont Cont.Next lenv.local_types in
   Local_id.Map.merge
-    merge_fn lenv.local_types lenv.local_type_history
+    merge_fn next_cont lenv.local_type_history
 
+(* TODO: Right now the only continuation we have is next
+ * so I'm putting everything in next *)
 let seperate_locals_and_history locals_and_history =
-  let locals = Local_id.Map.map
+  let conts = Typing_continuations.Map.empty in
+  let next_cont = Local_id.Map.map
     (fun (_, type_, exp_id) -> type_, exp_id) locals_and_history
+  in
+  let locals =
+    Typing_continuations.Map.add
+      Cont.Next
+      next_cont
+      conts
   in
   let history = Local_id.Map.map
     (fun (hist, _, _) -> hist) locals_and_history

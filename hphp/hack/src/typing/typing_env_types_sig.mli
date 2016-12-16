@@ -33,11 +33,12 @@ type tparam_info = {
   upper_bounds : tparam_bounds;
 }
 type tpenv = tparam_info SMap.t
+type local_types = (local Local_id.Map.t) Typing_continuations.Map.t
 
 (* Local environment includes types of locals and bounds on type parameters. *)
 type local_env = {
   fake_members       : fake_members;
-  local_types        : local Local_id.Map.t;
+  local_types        : local_types;
   local_type_history : local_history Local_id.Map.t;
   (* Type parameter environment
    * Lower and upper bounds on generic type parameters and abstract types

@@ -499,130 +499,107 @@ module WithExpressionAndStatementAndTypeParser
       left_brace_token classish_element_list right_brace_token in
     (parser, syntax)
 
+  and parse_classish_element parser =
+  (*We need to identify an element of a class, trait, etc. Possibilities
+    are:
+
+     // constant-declaration:
+     const T $x = v ;
+     abstract const T $x ;
+
+     // type-constant-declaration
+     const type T = X;
+     abstract const type T;
+
+     // property-declaration:
+     public/private/protected/static T $x;
+     TODO: We may wish to parse "T $x" and give an error indicating
+     TODO: that we were expecting either const or public.
+     Note that a visibility modifier is required; static is optional;
+     any order is allowed.
+     TODO: The spec indicates that abstract is disallowed, but Hack allows
+     TODO: it; resolve this disagreement.
+
+     // method-declaration
+     <<attr>> public/private/protected/abstract/final/static async function
+     Note that a modifier is required, the attr and async are optional.
+     TODO: Hack requires a visibility modifier, unless "static" is supplied,
+     TODO: in which case the method is considered to be public.  Is this
+     TODO: desired? Resolve this disagreement with the spec.
+
+     // constructor-declaration
+     <<attr>> public/private/protected/abstract/final function __construct
+     TODO: Hack allows static constructors and requires a visibility modifier,
+     TODO: as with regular methods. Resolve this disagreement with the spec.
+
+     // destructor-declaration
+     <<attr>> public/private/protected function __destruct
+     TODO: Hack allows static, final and abstract destructors
+     TODO: as with regular methods. Resolve this disagreement with the spec.
+
+     // trait clauses
+    require  extends  qualified-name
+    require  implements  qualified-name
+
+    // XHP class attribute declaration
+    attribute ... ;
+
+    // XHP category declaration
+    category ... ;
+
+    // XHP children declaration
+    children ... ;
+
+  *)
+    let token = peek_token parser in
+    match (Token.kind token) with
+    | Children -> parse_xhp_children_declaration parser
+    | Category -> parse_xhp_category_declaration parser
+    | Use -> parse_trait_use parser
+    | Const -> parse_const_or_type_const_declaration parser (make_missing ())
+    | Abstract -> parse_methodish_or_const_or_type_const parser
+    | Static
+    | Public
+    | Protected
+    | Private
+    | Final ->
+      (* Parse methods, constructors, destructors or properties.
+      TODO: const can also start with these tokens *)
+      parse_methodish_or_property parser (make_missing())
+    | LessThanLessThan ->
+      (* Parse "methodish" declarations: methods, ctors and dtors *)
+      (* TODO: Consider whether properties ought to allow attributes. *)
+      let (parser, attr) = parse_attribute_specification_opt parser in
+      let (parser, modifiers) = parse_modifiers parser in
+      parse_methodish parser attr modifiers
+    | Require ->
+      (* We give an error if these are found where they should not be,
+         in a later pass. *)
+      parse_require_clause parser
+    | TokenKind.Attribute -> parse_xhp_class_attribute_declaration parser
+    | Function ->
+      (* ERROR RECOVERY
+      Hack requires that a function inside a class be marked
+      with a visibility modifier, but PHP does not have this requirement.
+      TODO: Add an error in a later pass for Hack files. *)
+      parse_methodish parser (make_missing()) (make_missing())
+    | Var ->
+      (* TODO: We allow "var" as a synonym for "public" in a property; this
+      is a PHP-ism that we do not support in Hack, but we parse anyways
+      so as to give an error later.  Write an error detection pass. *)
+      let (parser, var) = assert_token parser Var in
+      parse_property_declaration parser var
+    | _ ->
+        (* TODO ERROR RECOVERY could be improved here. *)
+      let (parser, token) = next_token parser in
+      let parser = with_error parser SyntaxError.error1033 in
+      let result = make_error (make_token token) in
+      (parser, result)
+
   and parse_classish_element_list_opt parser =
-    (* TODO: Refactor this method so that it uses list parsing helpers. *)
-    (* We need to identify an element of a class, trait, etc. Possibilities
-       are:
-
-       // constant-declaration:
-       const T $x = v ;
-       abstract const T $x ;
-
-       // type-constant-declaration
-       const type T = X;
-       abstract const type T;
-
-       // property-declaration:
-       public/private/protected/static T $x;
-       TODO: We may wish to parse "T $x" and give an error indicating
-       TODO: that we were expecting either const or public.
-       Note that a visibility modifier is required; static is optional;
-       any order is allowed.
-       TODO: The spec indicates that abstract is disallowed, but Hack allows
-       TODO: it; resolve this disagreement.
-
-       // method-declaration
-       <<attr>> public/private/protected/abstract/final/static async function
-       Note that a modifier is required, the attr and async are optional.
-       TODO: Hack requires a visibility modifier, unless "static" is supplied,
-       TODO: in which case the method is considered to be public.  Is this
-       TODO: desired? Resolve this disagreement with the spec.
-
-       // constructor-declaration
-       <<attr>> public/private/protected/abstract/final function __construct
-       TODO: Hack allows static constructors and requires a visibility modifier,
-       TODO: as with regular methods. Resolve this disagreement with the spec.
-
-       // destructor-declaration
-       <<attr>> public/private/protected function __destruct
-       TODO: Hack allows static, final and abstract destructors
-       TODO: as with regular methods. Resolve this disagreement with the spec.
-
-       // trait clauses
-      require  extends  qualified-name
-      require  implements  qualified-name
-
-      // XHP class attribute declaration
-      attribute ... ;
-
-      // XHP category declaration
-      category ... ;
-
-      // XHP children declaration
-      children ... ;
-
-    *)
-    let rec aux parser acc =
-      let token = peek_token parser in
-      match (Token.kind token) with
-      | RightBrace
-      | EndOfFile -> (parser, acc)
-      | Children ->
-        let (parser, children) = parse_xhp_children_declaration parser in
-        aux parser (children :: acc)
-      | Category ->
-        let (parser, category) = parse_xhp_category_declaration parser in
-        aux parser (category :: acc)
-      | Use ->
-          let (parser, classish_use) = parse_trait_use parser in
-          aux parser (classish_use :: acc)
-      | Const ->
-          let (parser, element) =
-            parse_const_or_type_const_declaration parser (make_missing ()) in
-          aux parser (element :: acc)
-      | Abstract ->
-          let (parser, element) =
-            parse_methodish_or_const_or_type_const parser in
-          aux parser (element :: acc)
-      | Static
-      | Public
-      | Protected
-      | Private
-      | Final ->
-        (* Parse methods, constructors, destructors or properties.
-        TODO: const can also start with these tokens *)
-        let attr_spec = make_missing() in
-        let (parser, syntax) = parse_methodish_or_property parser attr_spec in
-        aux parser (syntax :: acc)
-      | LessThanLessThan ->
-        (* Parse "methodish" declarations: methods, ctors and dtors *)
-        (* TODO: Consider whether properties ought to allow attributes. *)
-        let (parser, attr) = parse_attribute_specification_opt parser in
-        let (parser, modifiers) = parse_modifiers parser in
-        let (parser, syntax) = parse_methodish parser attr modifiers in
-        aux parser (syntax :: acc)
-      | Require ->
-          (* We give an error if these are found where they should not be,
-             in a later pass. *)
-         let (parser, require) = parse_require_clause parser in
-         aux parser (require :: acc)
-      | TokenKind.Attribute -> let (parser, attr) =
-        parse_xhp_class_attribute_declaration parser in
-        aux parser (attr :: acc)
-      | Function ->
-        (* ERROR RECOVERY
-        Hack requires that a function inside a class be marked
-        with a visibility modifier, but PHP does not have this requirement.
-        TODO: Add an error in a later pass for Hack files. *)
-        let (parser, result) =
-          parse_methodish parser (make_missing()) (make_missing()) in
-        aux parser (result :: acc)
-      | Var ->
-        (* TODO: We allow "var" as a synonym for "public" in a property; this
-        is a PHP-ism that we do not support in Hack, but we parse anyways
-        so as to give an error later.  Write an error detection pass. *)
-        let (parser, var) = assert_token parser Var in
-        let (parser, prop) = parse_property_declaration parser var in
-        aux parser (prop :: acc)
-      | _ ->
-          (* TODO *)
-        let (parser, token) = next_token parser in
-        let parser = with_error parser SyntaxError.error1033 in
-        aux parser (make_error (make_token token) :: acc)
-    in
-    let (parser, classish_elements) = aux parser [] in
-    let classish_elements = List.rev classish_elements in
-    (parser, make_list classish_elements)
+    (* TODO: ERROR RECOVERY: consider bailing if the token cannot possibly
+             start a classish element. *)
+    parse_terminated_list parser parse_classish_element RightBrace
 
   and parse_xhp_children_paren parser =
     (* TODO: Allow trailing comma? *)

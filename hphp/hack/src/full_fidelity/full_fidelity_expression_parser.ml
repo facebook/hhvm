@@ -1541,15 +1541,10 @@ module WithStatementAndDeclAndTypeParser
     (parser, result)
 
   and parse_braced_expression parser =
-    let (parser, left_brace) = next_token parser in
-    (* TODO: Rewrite this to use helper methods. *)
-    let precedence = parser.precedence in
-    let parser = with_precedence parser 0 in
-    let (parser, expression) = parse_expression parser in
+    let (parser, left_brace) = assert_token parser LeftBrace in
+    let (parser, expression) = parse_expression_with_reset_precedence parser in
     let (parser, right_brace) = expect_right_brace parser in
-    let parser = with_precedence parser precedence in
-    let node =
-      make_braced_expression (make_token left_brace) expression right_brace in
+    let node = make_braced_expression left_brace expression right_brace in
     (parser, node)
 
   and parse_xhp_attribute parser name =

@@ -450,4 +450,19 @@ module WithParser(Parser : ParserType) = struct
         parser TokenKind.RightBracket SyntaxError.error1031 parse_item in
     parse_bracketted_list parser parse_items
 
+  (* Parse with parse_item while a condition is met. *)
+  let parse_list_while parser parse_item predicate =
+    let rec aux parser acc =
+      if peek_token_kind parser = TokenKind.EndOfFile || not (predicate parser) then
+        (parser, acc)
+      else
+        let (parser, result) = parse_item parser in
+        aux parser (result :: acc) in
+    let (parser, items) = aux parser [] in
+    (parser, make_list (List.rev items))
+
+  let parse_terminated_list parser parse_item terminator =
+    let predicate parser = peek_token_kind parser != terminator in
+    parse_list_while parser parse_item predicate
+
 end

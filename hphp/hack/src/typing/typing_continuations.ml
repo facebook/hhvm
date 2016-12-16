@@ -16,6 +16,12 @@ module Continuations = struct
     | Catch
 
   let compare = Pervasives.compare
+
+  let to_string = function
+    | Next -> "Next"
+    | Continue -> "Continue"
+    | Break -> "Break"
+    | Catch -> "Catch"
 end
 
 include Continuations

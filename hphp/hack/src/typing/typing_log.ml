@@ -122,18 +122,32 @@ let rec log_type_list env tyl =
       lprintf (Normal Green) "%s, " (Typing_print.debug_with_tvars env ty);
       log_type_list env tyl
 
-let log_local_types env =
-  let local_types_with_history = Env.merge_locals_and_history env.Env.lenv in
-  indentEnv "local_types" (fun () ->
-    Local_id.Map.iter begin fun id (all_types, new_type, expr_id) ->
+let log_continuation env name cont =
+  indentEnv (Typing_continuations.to_string name) (fun () ->
+    Local_id.Map.iter begin fun id (type_, expr_id) ->
       lnewline();
       lprintf (Bold Green) "%s[#%d]: "
         (Local_id.get_name id) (Local_id.to_int id);
-      lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env new_type);
-      lprintf (Normal Green) " [history: ";
+      lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env type_);
+      lprintf (Normal Green) " [eid: %s]" (Ident.debug expr_id) end
+    cont)
+
+let log_history env =
+  indentEnv "history" (fun () ->
+    Local_id.Map.iter begin fun id all_types ->
+      lnewline();
+      lprintf (Bold Green) "%s[#%d]: "
+        (Local_id.get_name id) (Local_id.to_int id);
       log_type_list env all_types;
-      lprintf (Normal Green) "] [eid: %s]" (Ident.debug expr_id) end
-    local_types_with_history)
+      lprintf (Normal Green) "]" end
+    env.Env.lenv.Env.local_type_history)
+
+let log_local_types env =
+  indentEnv "local_types" (fun () ->
+    Typing_continuations.Map.iter
+      (log_continuation env)
+      env.Env.lenv.Env.local_types;
+    log_history env)
 
 let log_tpenv env =
   let tparams = Env.get_generic_parameters env in

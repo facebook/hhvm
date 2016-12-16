@@ -67,7 +67,7 @@ namespace HH {
       }
       throw new \InvalidArgumentException(\sprintf(
         'Parameter must be an array or an instance of Traversable, got %s',
-        is_object($it) ? get_class($it) : gettype($it),
+        is_object($it) ? get_class($it) : gettype($it)
       ));
    }
 
@@ -97,7 +97,7 @@ namespace HH {
       }
       throw new \InvalidArgumentException(\sprintf(
         'Parameter must be a container (array or collection), got %s',
-        is_object($it) ? get_class($it) : gettype($it),
+        is_object($it) ? get_class($it) : gettype($it)
       ));
    }
 
@@ -155,7 +155,7 @@ namespace HH {
     public function reserve($sz) {
       if ($sz < 0) {
         throw new \InvalidArgumentException(
-          'Parameter sz must be a non-negative integer, got '. $sz,
+          'Parameter sz must be a non-negative integer, got '. $sz
         );
       }
       if ($sz > self::MAX_SIZE) {
@@ -188,13 +188,13 @@ namespace HH {
       if (!is_int($offset)) {
         throw new \InvalidArgumentException(\sprintf(
           'Parameter offset must be an integer, got %s',
-          is_object($object) ? get_class($object) : gettype($object),
-        );
+          is_object($object) ? get_class($object) : gettype($object)
+        ));
       }
       if (!is_null($len) && !is_int($len)) {
         throw new \InvalidArgumentException(\sprintf(
           'Parameter len must be null or an integer, got %s',
-          is_object($len) ? get_class($len) : gettype($len),
+          is_object($len) ? get_class($len) : gettype($len)
         ));
       }
       $removed = is_null($len) ? array_splice($this->container, $offset) :

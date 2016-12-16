@@ -86,7 +86,7 @@ namespace HH {
       }
       throw new \InvalidArgumentException(\sprintf(
         'Parameter must be a container (array or collection), got %s',
-        is_object($it) ? get_class($it) : gettype($it),
+        is_object($it) ? get_class($it) : gettype($it)
       ));
     }
 

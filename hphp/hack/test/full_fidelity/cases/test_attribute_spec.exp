@@ -5,9 +5,9 @@
 (list_item(attribute((name))
 ((lparen))(missing)((rparen)))((,)(whitespace)))
 (list_item(attribute((name))((lparen))
-(list_item(binary_expression(
+(binary_expression(
 literal((decimal_literal)))((+))(literal((decimal_literal))))
-(missing))((rparen)))
+((rparen)))
 ((,)(whitespace)))
 (attribute((name))
 ((lparen))
@@ -15,7 +15,7 @@ literal((decimal_literal)))((+))(literal((decimal_literal))))
 (list_item(literal((decimal_literal)))((,)(whitespace)))
 (list_item(literal((decimal_literal)))((,)(whitespace)))
 (list_item(literal((decimal_literal)))((,)(whitespace)))
-(list_item(literal((decimal_literal)))(missing)))
+(literal((decimal_literal))))
 ((rparen))))
 ((>>)(whitespace)))
 (function_declaration_header

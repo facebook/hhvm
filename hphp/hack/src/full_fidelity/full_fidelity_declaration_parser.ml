@@ -996,7 +996,8 @@ module WithExpressionAndStatementAndTypeParser
       attribute_values , attribute_value
     attribute_value := expression
    *)
-   (* TODO: This list can be comma-terminated; update the spec. *)
+   (* TODO: The list of attrs can have a trailing comma. Update the spec. *)
+   (* TODO: The list of values can have a trailing comma. Update the spec. *)
   and parse_attribute_specification_opt parser =
     if peek_token_kind parser = LessThanLessThan then
       let (parser, left, items, right) =
@@ -1007,44 +1008,13 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_attribute parser =
     let (parser, name) = expect_name parser in
-    let (parser1, token) = next_token parser in
-    match Token.kind token with
-    | LeftParen ->
-      let left = make_token token in
-      let parser, values = parse_attribute_values_opt parser1 in
-      let parser, right = expect_right_paren parser in
-      parser, make_attribute name left values right
-    | _ ->
-      let left = make_missing () in
-      let values = make_missing () in
-      let right = make_missing () in
-      parser, make_attribute name left values right
-
-  and parse_attribute_values_opt parser =
-    let token = peek_token parser in
-    if (Token.kind token) = RightParen then
-      (parser, make_missing())
-    else
-      (* TODO replace with generic comma list parsing *)
-      let rec aux parser acc =
-        let parser, expr = parse_expression parser in
-        let parser1, token = next_token parser in
-        match Token.kind token with
-        | Comma ->
-          let comma = make_token token in
-          let item = make_list_item expr comma in
-          aux parser1 (item :: acc)
-        | RightParen ->
-          let comma = make_missing () in
-          let item = make_list_item expr comma in
-          parser, make_list (List.rev (item :: acc))
-        | _ ->
-          (* ERROR RECOVERY: assume right paren is missing. Caller will
-           * report an error. Do not eat token.
-           * TODO better ways to recover *)
-          parser, make_list (List.rev acc)
-      in
-      aux parser []
+    let (parser, left, items, right) =
+      if peek_token_kind parser = LeftParen then
+        parse_parenthesized_comma_list_opt_allow_trailing
+          parser parse_expression
+      else
+        (parser, make_missing(), make_missing(), make_missing()) in
+    (parser, make_attribute name left items right)
 
   and parse_generic_type_parameter_list_opt parser =
     let (parser1, open_angle) = next_token parser in

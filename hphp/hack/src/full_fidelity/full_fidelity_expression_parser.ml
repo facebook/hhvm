@@ -75,7 +75,8 @@ module WithStatementAndDeclAndTypeParser
     with_operator_precedence parser operator parse_expression
 
   (* try to parse an expression. If parser cannot make progress, return None *)
-  and parse_expression_optional parser ~reset_prec =
+  (* TODO: Not currently used; can we delete this? *)
+  and _parse_expression_optional parser ~reset_prec =
     let module Lexer = PrecedenceParser.Lexer in
     let offset = Lexer.start_offset (lexer parser) in
     let (parser, expr) =
@@ -1254,46 +1255,66 @@ module WithStatementAndDeclAndTypeParser
     (parser, syntax)
 
   and parse_list_expression parser =
-    let parser, keyword_token = next_token parser in
-    let parser, left_paren = expect_left_paren parser in
-    let parser, members =
-      with_reset_precedence parser parse_list_expression_list in
-    let parser, right_paren = expect_right_paren parser in
-    let syntax = make_list_expression
-      (make_token keyword_token) left_paren members right_paren in
-    (parser, syntax)
+    (* SPEC:
+      list-intrinsic:
+        list  (  list-expression-list-opt  )
+      list-expression-list:
+        expression
+        ,
+        list-expression-list  ,  expression-opt
 
-  and parse_list_expression_list parser =
-    let rec aux parser acc =
-      let (parser1, token) = next_token parser in
-      match Token.kind token with
-      | Comma ->
-        let missing_expr = make_missing () in
-        let item = make_list_item missing_expr (make_token token) in
-        aux parser1 (item :: acc)
-      | RightParen
-      | Equal -> (* list intrinsic appears only on LHS of equal sign *)
-        (parser, make_list (List.rev acc))
-      | _ -> begin
-        match parse_expression_optional parser ~reset_prec:false with
-        | None ->
-          (* ERROR RECOVERY if parser makes no progress, make an error *)
-          let parser = with_error parser SyntaxError.error1015 in
-          (parser, make_missing () :: acc |> List.rev |> make_list)
-        | Some (parser, expr) ->
-          let (parser1, token) = next_token parser in
-          let parser, trailing = begin
-            match Token.kind token with
-            | Comma -> parser1, make_list_item expr (make_token token)
-            | RightParen -> parser, make_list_item expr (make_missing ())
-            | _ ->
-              (* ERROR RECOVERY: require a comma or right paren *)
-              let parser = with_error parser SyntaxError.error1009 in
-              parser, make_list_item expr (make_missing ())
-          end in
-          aux parser (trailing :: acc)
-    end in
-    aux parser []
+      list-intrinsic must be used as the left-hand operand in a
+      simple-assignment-expression of which the right-hand operand
+      must be an expression that designates a vector-like array or
+      an instance of the class types Vector, ImmVector, or Pair
+      (the "source").
+
+      TODO: Produce an error later if the list is not on the left side of
+      an assignment.
+
+      TODO: Produce an error later if the expressions in the list destructuring
+      are not lvalues.
+      *)
+
+    (* TODO: Spec problems
+       https://github.com/hhvm/hack-langspec/issues/82
+       Note that the grammar of the list destructuring operator is a little
+       weird. The grammar above implies that we can have lists
+       () (,) (,,) (,$x,,) and so on. However, the spec also says
+       "Only the right-most list-or-variable can be omitted."  But HHVM
+       does not enforce that rule, and if we want that rule, then we should
+       simply say that we have an optional list of expressions that may be
+       comma terminated.
+
+       For now we will parse what it says in the spec, but if that is wrong
+       then come back and replace all this code with the helper method that
+       parses a parenthensized, optional, comma-separated, comma-terminated
+       list of expressions.
+    *)
+    let (parser, keyword) = assert_token parser List in
+    let (parser, left) = expect_left_paren parser in
+    (* TODO: ERROR RECOVERY
+    It might be better to bail out when we encounter a token
+    that cannot begin an expression, rather than going until
+    we find the matching right paren. *)
+    let (parser, items) = parse_terminated_list
+      parser parse_list_expression_item RightParen in
+    let (parser, right) = expect_right_paren parser in
+    let result = make_list_expression keyword left items right in
+    (parser, result)
+
+  and parse_list_expression_item parser =
+    match peek_token_kind parser with
+    | Comma ->
+      let expr = make_missing () in
+      let (parser, comma) = assert_token parser Comma in
+      let result = make_list_item expr comma in
+      (parser, result)
+    | _ ->
+      let (parser, expr) = parse_expression_with_reset_precedence parser in
+      let (parser, comma) = optional_token parser Comma in
+      let result = make_list_item expr comma in
+      (parser, result)
 
   (* grammar:
    * array_intrinsic := array ( array-initializer-opt )

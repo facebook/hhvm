@@ -28,6 +28,17 @@
 
 #include <folly/Singleton.h>
 
+/*
+ * These are here to work around a gcc-5 lto bug. Without them,
+ * certain symbols don't get defined, even though they're referenced, but
+ * the build succeeds, and the references get set to nullptr (so get
+ * calls to vector<string>::~vector() end up as a call to 0.
+ *
+ * See t15096405
+ */
+std::vector<std::string> dummy_vec { "hello" };
+std::set<std::string> dummy_set { std::string("hel") + "lo" };
+
 int main(int argc, char** argv) {
   if (!argc) {
     return 0;

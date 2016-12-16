@@ -196,7 +196,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
             with exn ->
               let msg = Printexc.to_string exn in
               Printf.printf "Exn in build_hook: %s" msg;
-              EventLogger.master_exception msg;
+              EventLogger.master_exception exn;
             );
             ServerTypeCheck.hook_after_parsing := None
           )

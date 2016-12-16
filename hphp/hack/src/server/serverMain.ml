@@ -145,7 +145,7 @@ let handle_connection_ genv env client =
   | e ->
     HackEventLogger.handle_connection_exception e;
     let msg = Printexc.to_string e in
-    EventLogger.master_exception msg;
+    EventLogger.master_exception e;
     Printf.fprintf stderr "Error: %s\n%!" msg;
     Printexc.print_backtrace stderr;
     ClientProvider.shutdown_client client;
@@ -163,7 +163,7 @@ let handle_persistent_connection_ genv env client =
      shutdown_persistent_client env client
    | e ->
      let msg = Printexc.to_string e in
-     EventLogger.master_exception msg;
+     EventLogger.master_exception e;
      Printf.fprintf stderr "Error: %s\n%!" msg;
      Printexc.print_backtrace stderr;
      shutdown_persistent_client env client

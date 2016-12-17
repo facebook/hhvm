@@ -377,8 +377,9 @@ let program_init genv =
       let env, _ = ServerInit.init genv in
       env, if repo_wait_success then "fresh" else "fresh_repo_wait_fail"
   in
+  let timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
   EventLogger.set_init_type init_type;
-  HackEventLogger.init_end init_type;
+  HackEventLogger.init_end init_type timeout;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();

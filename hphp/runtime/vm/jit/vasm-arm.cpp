@@ -1575,7 +1575,7 @@ Y(cmpwm, movzwl, loadw, cmpl)
 void lower(Vunit& u, testb& i, Vlabel b, size_t z) {
   lower_impl(u, b, z, [&] (Vout& v) {
     if (i.s0 == i.s1) {
-      v << testbi{(int8_t)0xff, i.s1, i.sf};
+      v << testbi{(uint8_t)0xff, i.s1, i.sf};
     } else {
       auto s0 = v.makeReg();
       auto s1 = v.makeReg();

@@ -66,8 +66,6 @@ constexpr ObjectData::Attribute objectFlags =
     ObjectData::IsCppBuiltin
   );
 
-size_t heapSize(HeaderKind kind);
-
 template<class T>
 T* coll_cast(ObjectData* obj) {
   assertx(obj->isCollection());

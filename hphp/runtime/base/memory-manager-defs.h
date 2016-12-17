@@ -28,8 +28,17 @@
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
@@ -153,7 +162,86 @@ public:
 };
 
 inline size_t Header::size() const {
-  switch (kind()) {
+  // Ordering depends on ext_wait-handle.h.
+  static const uint32_t waithandle_sizes[] = {
+    sizeof(c_StaticWaitHandle),
+    0, /* AsyncFunction */
+    sizeof(c_AsyncGeneratorWaitHandle),
+    0, /* AwaitAll */
+    sizeof(c_ConditionWaitHandle),
+    sizeof(c_RescheduleWaitHandle),
+    sizeof(c_SleepWaitHandle),
+    sizeof(c_ExternalThreadEventWaitHandle),
+  };
+
+  // Ordering depends on header-kind.h.
+  static constexpr uint32_t kind_sizes[] = {
+    0, /* Packed */
+    0, /* Mixed */
+    sizeof(ArrayData), /* Empty */
+    sizeof(APCLocalArray),
+    sizeof(GlobalsArray),
+    sizeof(ProxyArray),
+    0, /* Dict */
+    0, /* VecArray */
+    0, /* KeySet */
+    0, /* String */
+    0, /* Resource */
+    sizeof(RefData),
+    0, /* Object */
+    0, /* WaitHandle */
+    sizeof(c_AsyncFunctionWaitHandle),
+    0, /* AwaitAllWH */
+    0, /* Closure */
+    sizeof(c_Vector),
+    sizeof(c_Map),
+    sizeof(c_Set),
+    sizeof(c_Pair),
+    sizeof(c_ImmVector),
+    sizeof(c_ImmMap),
+    sizeof(c_ImmSet),
+    0, /* AsyncFuncFrame */
+    0, /* NativeData */
+    0, /* ClosureHdr */
+    0, /* SmallMalloc */
+    0, /* BigMalloc */
+    0, /* BigObj */
+    0, /* Free */
+    0, /* Hole */
+  };
+#define CHECKSIZE(knd, size) \
+  static_assert(kind_sizes[(int)HeaderKind::knd] == size, #knd);
+  CHECKSIZE(Empty, sizeof(ArrayData))
+  CHECKSIZE(Apc, sizeof(APCLocalArray))
+  CHECKSIZE(Globals, sizeof(GlobalsArray))
+  CHECKSIZE(AsyncFuncWH, sizeof(c_AsyncFunctionWaitHandle))
+  CHECKSIZE(Vector, sizeof(c_Vector))
+  CHECKSIZE(Map, sizeof(c_Map))
+  CHECKSIZE(Set, sizeof(c_Set))
+  CHECKSIZE(Pair, sizeof(c_Pair))
+  CHECKSIZE(ImmVector, sizeof(c_ImmVector))
+  CHECKSIZE(ImmMap, sizeof(c_ImmMap))
+  CHECKSIZE(ImmSet, sizeof(c_ImmSet))
+  CHECKSIZE(Ref, sizeof(RefData))
+  CHECKSIZE(AsyncFuncFrame, 0)
+  CHECKSIZE(AwaitAllWH, 0)
+  CHECKSIZE(Closure, 0)
+  CHECKSIZE(WaitHandle, 0)
+  CHECKSIZE(Resource, 0)
+  CHECKSIZE(NativeData, 0)
+  CHECKSIZE(ClosureHdr, 0)
+  CHECKSIZE(SmallMalloc, 0)
+  CHECKSIZE(BigMalloc, 0)
+  CHECKSIZE(BigObj, 0)
+  CHECKSIZE(Object, 0)
+  CHECKSIZE(Hole, 0)
+  CHECKSIZE(Free, 0)
+#undef CHECKSIZE
+
+  HeaderKind kindVar = kind();
+  if (auto size = kind_sizes[(int)kindVar]) return size;
+
+  switch (kindVar) {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
       return PackedArray::heapSize(&arr_);
@@ -162,45 +250,28 @@ inline size_t Header::size() const {
       return mixed_.heapSize();
     case HeaderKind::Keyset:
       return set_.heapSize();
-    case HeaderKind::Empty:
-      return sizeof(ArrayData);
-    case HeaderKind::Apc:
-      return sizeof(APCLocalArray);
-    case HeaderKind::Globals:
-      return sizeof(GlobalsArray);
-    case HeaderKind::Proxy:
-      return sizeof(ProxyArray);
     case HeaderKind::String:
       return str_.heapSize();
     case HeaderKind::Closure:
     case HeaderKind::Object:
       // [ObjectData][props]
       return obj_.heapSize();
-    case HeaderKind::AsyncFuncWH:
-      return sizeof(c_AsyncFunctionWaitHandle);
     case HeaderKind::ClosureHdr:
       // [ClosureHdr][ObjectData][use vars]
       return closure_hdr_.size();
-    case HeaderKind::Vector:
-    case HeaderKind::Map:
-    case HeaderKind::Set:
-    case HeaderKind::Pair:
-    case HeaderKind::ImmVector:
-    case HeaderKind::ImmMap:
-    case HeaderKind::ImmSet:
-      // [ObjectData][subclass]
-      return collections::heapSize(kind());
     case HeaderKind::WaitHandle:
+    {
       // [ObjectData][subclass]
+      auto whKind = wait_handle<c_WaitHandle>(&obj_)->getKind();
+      if (auto whSize = waithandle_sizes[(int)whKind]) return whSize;
       return asio_object_size(&obj_);
+    }
     case HeaderKind::AwaitAllWH:
       // [ObjectData][children...]
       return awaitall_.heapSize();
     case HeaderKind::Resource:
       // [ResourceHdr][ResourceData subclass]
       return res_.heapSize();
-    case HeaderKind::Ref:
-      return sizeof(RefData);
     case HeaderKind::SmallMalloc: // [MallocNode][bytes...]
     case HeaderKind::BigMalloc:   // [MallocNode][bytes...]
     case HeaderKind::BigObj:      // [MallocNode][Header...]
@@ -216,6 +287,21 @@ inline size_t Header::size() const {
     case HeaderKind::Free:
     case HeaderKind::Hole:
       return free_.size();
+    case HeaderKind::AsyncFuncWH:
+    case HeaderKind::Empty:
+    case HeaderKind::Apc:
+    case HeaderKind::Globals:
+    case HeaderKind::Proxy:
+    case HeaderKind::Vector:
+    case HeaderKind::Map:
+    case HeaderKind::Set:
+    case HeaderKind::Pair:
+    case HeaderKind::ImmVector:
+    case HeaderKind::ImmMap:
+    case HeaderKind::ImmSet:
+    case HeaderKind::Ref:
+      assertx(false &&
+              "Constant header sizes should be handled by the lookup table.");
   }
   return 0;
 }

@@ -3925,6 +3925,10 @@ bool HHVM_FUNCTION(imagegammacorrect, const Resource& image,
     double inputgamma, double outputgamma) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
+  if (inputgamma <= 0.0 || outputgamma <= 0.0) {
+    raise_warning("Gamma values should be positive");
+    return false;
+  }
   if (gdImageTrueColor(im))   {
     int x, y, c;
 

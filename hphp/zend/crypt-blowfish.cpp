@@ -394,6 +394,10 @@ static int BF_decode(BF_word *dst, const char *src, int size)
   const unsigned char *sptr = (const unsigned char *)src;
   unsigned int tmp, c1, c2, c3, c4;
 
+  if (size <= 0) {
+    return -1;
+  }
+
   do {
     BF_safe_atoi64(c1, *sptr++);
     BF_safe_atoi64(c2, *sptr++);

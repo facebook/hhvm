@@ -178,8 +178,13 @@ struct Block {
   reverse_iterator rend()         { return m_instrs.rend(); }
   const_reverse_iterator rbegin() const { return m_instrs.rbegin(); }
   const_reverse_iterator rend()   const { return m_instrs.rend(); }
+
+  // Erase the given instruction from this block and unlinks any outgoing edges.
+  // These methods don't delete the instruction, so it may be reused after
+  // calling erase().
   iterator         erase(iterator pos);
   iterator         erase(IRInstruction* inst);
+
   iterator insert(iterator pos, IRInstruction* inst);
   void splice(iterator pos, Block* from, iterator begin, iterator end);
   void push_back(std::initializer_list<IRInstruction*> insts);
@@ -230,6 +235,7 @@ inline Block::const_reference Block::back() const {
 }
 
 inline Block::iterator Block::erase(iterator pos) {
+  if (pos->hasEdges()) pos->clearEdges();
   pos->setBlock(nullptr);
   return m_instrs.erase(pos);
 }

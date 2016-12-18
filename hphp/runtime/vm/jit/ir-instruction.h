@@ -364,6 +364,11 @@ struct IRInstruction {
   bool isBlockEnd() const;
   bool isRawLoad() const;
 
+  /*
+   * Clear any outgoing edges this instruction has, if any.
+   */
+  void clearEdges();
+
 private:
   /*
    * Block/edge implementations.
@@ -371,7 +376,6 @@ private:
   Block* succ(int i) const;
   Edge* succEdge(int i);
   void setSucc(int i, Block* b);
-  void clearEdges();
 
 
   /////////////////////////////////////////////////////////////////////////////

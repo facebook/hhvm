@@ -365,11 +365,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
   if (ret.locations.size() == kMaxTrackedALocs) {
     logLowPriPerfWarning(
       "alias-analysis kMaxTrackedALocs",
+      25000,
       [&](StructuredLogEntry& cols) {
         auto const func = unit.context().func;
         cols.setStr("func", func->fullName()->slice());
         cols.setStr("filename", func->unit()->filepath()->slice());
-        cols.setStr("ir_unit", show(unit));
+        cols.setStr("hhir_unit", show(unit));
       }
     );
     FTRACE(1, "max locations limit was reached\n");

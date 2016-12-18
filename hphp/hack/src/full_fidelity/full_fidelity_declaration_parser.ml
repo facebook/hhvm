@@ -165,22 +165,7 @@ module WithExpressionAndStatementAndTypeParser
         enumerator
         enumerator-list   enumerator
     *)
-    let rec aux acc parser =
-      let token = peek_token parser in
-      match Token.kind token with
-      | RightBrace -> (parser, make_list (List.rev acc))
-      | EndOfFile ->
-        (* ERROR RECOVERY: reach end of file, expect brace of enumerator *)
-        let parser = with_error parser SyntaxError.error1040 in
-        (parser, make_error (make_token token))
-      | _ ->
-        let (parser, enumerator) = parse_enumerator parser in
-        aux (enumerator :: acc) parser
-    in
-    let token = peek_token parser in
-    match Token.kind token with
-    | RightBrace -> parser, make_missing ()
-    | _ -> aux [] parser
+    parse_terminated_list parser parse_enumerator RightBrace
 
   and parse_enum_declaration parser attrs =
     (*
@@ -201,9 +186,8 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, colon) = expect_colon parser in
     let (parser, base) = parse_type_specifier parser in
     let (parser, enum_type) = parse_type_constraint_opt parser in
-    let (parser, left_brace, enumerators, right_brace) = parse_delimited_list
-      parser LeftBrace SyntaxError.error1037 RightBrace SyntaxError.error1006
-      parse_enumerator_list_opt in
+    let (parser, left_brace, enumerators, right_brace) = parse_braced_list
+      parser parse_enumerator_list_opt in
     let result = make_enum_declaration
       attrs enum name colon base enum_type left_brace enumerators right_brace in
     (parser, result)

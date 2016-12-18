@@ -226,7 +226,8 @@ module WithExpressionAndStatementAndTypeParser
     | Semicolon -> (parser, make_token token)
     | LeftBrace ->
       let left = make_token token in
-      let (parser, body) = parse_declarations parser true in
+      let (parser, body) =
+        parse_terminated_list parser parse_declaration RightBrace in
       let (parser, right) = expect_right_brace parser in
       let result = make_namespace_body left body right in
       (parser, result)
@@ -1270,21 +1271,6 @@ module WithExpressionAndStatementAndTypeParser
     | _ ->
       parse_statement parser
 
-  and parse_declarations parser expect_brace =
-    let rec aux parser declarations =
-      let token = peek_token parser in
-      match (Token.kind token) with
-      | EndOfFile -> (parser, declarations)
-      | RightBrace when expect_brace ->
-        (parser, declarations)
-      (* TODO: ?> tokens *)
-      | _ ->
-        let (parser, declaration) = parse_declaration parser in
-        aux parser (declaration :: declarations) in
-    let (parser, declarations) = aux parser [] in
-    let syntax = make_list (List.rev declarations) in
-    (parser, syntax)
-
   let parse_script_header parser =
     (* TODO: Detect if there is trivia before or after any token. *)
     let (parser1, less_than) = next_token parser in
@@ -1311,8 +1297,10 @@ module WithExpressionAndStatementAndTypeParser
       (parser, script_header )
 
   let parse_script parser =
+    (* TODO: We don't deal with the (unsupported) ?> closing token. *)
     let (parser, script_header) = parse_script_header parser in
-    let (parser, declarations) = parse_declarations parser false in
+    let (parser, declarations) =
+      parse_terminated_list parser parse_declaration EndOfFile in
     (* TODO: ERROR_RECOVERY:
       If we are not at the end of the file, something is wrong. *)
     (parser, make_script script_header declarations)

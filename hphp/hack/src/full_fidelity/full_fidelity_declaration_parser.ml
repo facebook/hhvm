@@ -417,6 +417,35 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, implements_list) = parse_special_type_list parser1 in
     (parser, make_token implements_token, implements_list)
 
+  and parse_special_type parser =
+    let (parser1, token) = next_xhp_class_name_or_other parser in
+    match (Token.kind token) with
+    | Comma ->
+      (* ERROR RECOVERY. We expected a type but we got a comma.
+      Give the error that we expected a type, not a name, even though
+      not every type is legal here. *)
+      let parser = with_error parser1 SyntaxError.error1007 in
+      let item = make_missing() in
+      let comma = make_token token in
+      let list_item = make_list_item item comma in
+      (parser, list_item)
+    | Name
+    | XHPClassName
+    | QualifiedName ->
+      let (parser, item) = parse_type_specifier parser in
+      let (parser, comma) = optional_token parser Comma in
+      if is_missing comma then
+        (parser, item)
+      else
+        let list_item = make_list_item item comma in
+        (parser, list_item)
+    | _ ->
+      (* ERROR RECOVERY: We are expecting a type; give an error as above.
+      Don't eat the offending token.
+      *)
+      let parser = with_error parser SyntaxError.error1007 in
+      (parser, (make_missing()))
+
   and parse_special_type_list parser =
     (*
       An extends / implements list is a comma-separated list of types, but
@@ -436,43 +465,8 @@ module WithExpressionAndStatementAndTypeParser
       oversight when the trailing comma rules were added?  If possible we
       should keep the rule as-is, and disallow the trailing comma; it makes
       parsing and error recovery easier.
-   *)
-    let rec aux parser acc =
-      let (parser1, token) = next_xhp_class_name_or_other parser in
-      match (Token.kind token) with
-      | Comma ->
-          (* ERROR RECOVERY. We expected a type but we got a comma.
-          Give the error that we expected a type, not a name, even though
-          not every type is legal here. *)
-          let parser = with_error parser1 SyntaxError.error1007 in
-          let item = make_missing() in
-          let separator = make_token token in
-          let list_item = make_list_item item separator  in
-          aux parser (list_item :: acc)
-      | Name
-      | XHPClassName
-      | QualifiedName ->
-          (* We got the start of a type. Back up to the start and parse it.  *)
-          let (parser, item) = parse_type_specifier parser in
-          (* If what follows is a comma then keep on going. Otherwise,
-          we're done. *)
-          if peek_token_kind parser = Comma then
-            let (parser, separator) = assert_token parser Comma in
-            let list_item = make_list_item item separator  in
-            aux parser (list_item :: acc)
-          else
-            (parser, (item :: acc))
-      | _ ->
-        (* We expected a type but we got neither a type nor a comma. *)
-        (* ERROR RECOVERY: Give the error that we expected a type. Do not
-           eat the offending token.
-           TODO: Is this the right thing to do? Suppose the offending token
-           is "int"? That's a bad user experience. *)
-         let parser = with_error parser SyntaxError.error1007 in
-         (parser, acc) in
-    let (parser, qualified_name_list) = aux parser [] in
-    let qualified_name_list = List.rev qualified_name_list in
-    (parser, make_list qualified_name_list)
+    *)
+    parse_list_until_no_comma parser parse_special_type
 
   and parse_classish_body parser =
     let (parser, left_brace_token) = expect_left_brace parser in

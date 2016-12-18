@@ -484,4 +484,21 @@ module WithParser(Parser : ParserType) = struct
       | Some item -> aux parser (item :: acc) in
     let (parser, items) = aux parser [] in
     (parser, make_list (List.rev items))
+
+  (* Parse a comma-separated list of items until there is an item that
+  does not end in a comma. *)
+  let parse_list_until_no_comma parser parse_item =
+    let rec aux parser acc =
+      let (parser, item) = parse_item parser in
+      match syntax item with
+      | ListItem { list_item; list_separator } ->
+        if is_missing list_separator then
+          (parser, item :: acc)
+        else
+          aux parser (item :: acc)
+      | _ ->
+        (parser, item :: acc) in
+    let (parser, items) = aux parser [] in
+    (parser, make_list (List.rev items))
+
 end

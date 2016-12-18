@@ -463,7 +463,8 @@ module WithParser(Parser : ParserType) = struct
   (* Parse with parse_item while a condition is met. *)
   let parse_list_while parser parse_item predicate =
     let rec aux parser acc =
-      if peek_token_kind parser = TokenKind.EndOfFile || not (predicate parser) then
+      if peek_token_kind parser = TokenKind.EndOfFile ||
+        not (predicate parser) then
         (parser, acc)
       else
         let (parser, result) = parse_item parser in
@@ -475,4 +476,12 @@ module WithParser(Parser : ParserType) = struct
     let predicate parser = peek_token_kind parser != terminator in
     parse_list_while parser parse_item predicate
 
+  let parse_list_until_none parser parse_item =
+    let rec aux parser acc =
+      let (parser, maybe_item) = parse_item parser in
+      match maybe_item with
+      | None -> (parser, acc)
+      | Some item -> aux parser (item :: acc) in
+    let (parser, items) = aux parser [] in
+    (parser, make_list (List.rev items))
 end

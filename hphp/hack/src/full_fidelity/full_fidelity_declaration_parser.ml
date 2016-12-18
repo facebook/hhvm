@@ -1209,29 +1209,19 @@ module WithExpressionAndStatementAndTypeParser
       let parser = with_error parser1 SyntaxError.error1041 in
       (parser, syntax)
 
+  and parse_modifier parser =
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Abstract
+    | Static
+    | Public
+    | Protected
+    | Private
+    | Final -> (parser1, Some (make_token token))
+    | _ -> (parser, None)
+
   and parse_modifiers parser =
-    let rec aux acc parser =
-      (* In reality some modifiers cannot occur together, check this in a later
-       * pass *)
-      let (parser1, token) = next_token parser in
-      match Token.kind token with
-      | EndOfFile ->
-        (* ERROR RECOVERY it is likely that the function header is missing *)
-        let parser = with_error parser SyntaxError.error1043 in
-        (parser, make_list (List.rev acc))
-      | Abstract
-      | Static
-      | Public
-      | Protected
-      | Private
-      | Final ->
-        let modifier = make_token token in
-        aux (modifier :: acc) parser1
-      | _ ->
-        (* Not a modifier, end parsing modifiers *)
-        (parser, make_list (List.rev acc))
-    in
-    aux [] parser
+    parse_list_until_none parser parse_modifier
 
   and parse_enum_or_classish_or_function_declaration parser =
     (* An enum, type alias, function, interface, trait or class may all

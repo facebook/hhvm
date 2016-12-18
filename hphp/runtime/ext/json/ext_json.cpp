@@ -135,6 +135,10 @@ Variant HHVM_FUNCTION(json_decode, const String& json, bool assoc /* = false */,
     json_set_last_error_code(json_error_codes::JSON_ERROR_DEPTH);
     return init_null();
   }
+  if (depth < 0 || depth > INT_MAX) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_DEPTH);
+    return init_null();
+  }
 
   const int64_t supported_options =
     k_JSON_FB_LOOSE |

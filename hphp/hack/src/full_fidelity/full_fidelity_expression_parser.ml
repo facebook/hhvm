@@ -1568,43 +1568,37 @@ module WithStatementAndDeclAndTypeParser
     let node = make_braced_expression left_brace expression right_brace in
     (parser, node)
 
-  and parse_xhp_attribute parser name =
+  and parse_xhp_attribute parser =
     let (parser1, token, _) = next_xhp_element_token parser in
-    if (Token.kind token) != Equal then
-      let node = make_xhp_attribute name (make_missing()) (make_missing()) in
-      let parser = with_error parser SyntaxError.error1016 in
-      (* ERROR RECOVERY: The = is missing; assume that the name belongs
-         to the attribute, but that the remainder is missing, and start
-         looking for the next attribute. *)
-      (parser, node)
+    if (Token.kind token) != XHPElementName then
+      (parser, None)
     else
-      let equal = make_token token in
-      let (parser2, token, text) = next_xhp_element_token parser1 in
-      match (Token.kind token) with
-      | XHPStringLiteral ->
-        let node = make_xhp_attribute name equal (make_token token) in
-        (parser2, node)
-      | LeftBrace ->
-        let (parser, expr) = parse_braced_expression parser1 in
-        let node = make_xhp_attribute name equal expr in
-        (parser, node)
-      | _ ->
+      let name = make_token token in
+      let (parser, token, _) = next_xhp_element_token parser1 in
+      if (Token.kind token) != Equal then
+        let node = make_xhp_attribute name (make_missing()) (make_missing()) in
+        let parser = with_error parser SyntaxError.error1016 in
+        (* ERROR RECOVERY: The = is missing; assume that the name belongs
+           to the attribute, but that the remainder is missing, and start
+           looking for the next attribute. *)
+        (parser, Some node)
+      else
+        let equal = make_token token in
+        let (parser2, token, text) = next_xhp_element_token parser in
+        match (Token.kind token) with
+        | XHPStringLiteral ->
+          let node = make_xhp_attribute name equal (make_token token) in
+          (parser2, Some node)
+        | LeftBrace ->
+          let (parser, expr) = parse_braced_expression parser in
+          let node = make_xhp_attribute name equal expr in
+          (parser, Some node)
+        | _ ->
         (* ERROR RECOVERY: The expression is missing; assume that the "name ="
            belongs to the attribute and start looking for the next attribute. *)
-        let node = make_xhp_attribute name equal (make_missing()) in
-        let parser = with_error parser1 SyntaxError.error1017 in
-        (parser, node)
-
-  and parse_xhp_attributes parser =
-    let rec aux parser acc =
-      let (parser1, token, _) = next_xhp_element_token parser in
-      if (Token.kind token) = XHPElementName then
-        let (parser, attr) = parse_xhp_attribute parser1 (make_token token) in
-        aux parser (attr :: acc)
-      else
-        (parser, acc) in
-    let (parser, attrs) = aux parser [] in
-    (parser, make_list (List.rev attrs))
+          let node = make_xhp_attribute name equal (make_missing()) in
+          let parser = with_error parser SyntaxError.error1017 in
+          (parser, Some node)
 
   and parse_xhp_body parser =
     let rec aux acc parser =
@@ -1651,7 +1645,7 @@ module WithStatementAndDeclAndTypeParser
         (make_token less_than_slash) (make_missing()) (make_missing()))
 
   and parse_xhp_expression parser name name_text =
-    let (parser, attrs) = parse_xhp_attributes parser in
+    let (parser, attrs) = parse_list_until_none parser parse_xhp_attribute in
     let (parser1, token, _) = next_xhp_element_token parser in
     match (Token.kind token) with
     | SlashGreaterThan ->

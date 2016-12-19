@@ -1600,21 +1600,18 @@ module WithStatementAndDeclAndTypeParser
           let parser = with_error parser SyntaxError.error1017 in
           (parser, Some node)
 
-  and parse_xhp_body parser =
-    let rec aux acc parser =
-      let (parser1, token) = next_xhp_body_token parser in
-      match Token.kind token with
-      | XHPComment
-      | XHPBody -> aux ((make_token token) :: acc) parser1
-      | LeftBrace ->
-        let (parser, expr) = parse_braced_expression parser in
-        aux (expr :: acc) parser
-      | XHPElementName ->
-        let (parser, expr) = parse_possible_xhp_expression parser in
-        aux (expr :: acc) parser
-      | _ -> (parser, acc) in
-    let (parser, body_elements) = aux [] parser in
-    (parser, make_list (List.rev body_elements))
+  and parse_xhp_body_element parser =
+    let (parser1, token) = next_xhp_body_token parser in
+    match Token.kind token with
+    | XHPComment
+    | XHPBody -> (parser1, Some (make_token token))
+    | LeftBrace ->
+      let (parser, expr) = parse_braced_expression parser in
+      (parser, Some expr)
+    | XHPElementName ->
+      let (parser, expr) = parse_possible_xhp_expression parser in
+      (parser, Some expr)
+    | _ -> (parser, None)
 
   and parse_xhp_close parser _ =
     let (parser1, less_than_slash, _) = next_xhp_element_token parser in
@@ -1655,7 +1652,8 @@ module WithStatementAndDeclAndTypeParser
       (parser1, xhp)
     | GreaterThan ->
       let xhp_open = make_xhp_open name attrs (make_token token) in
-      let (parser, xhp_body) = parse_xhp_body parser1 in
+      let (parser, xhp_body) =
+        parse_list_until_none parser1 parse_xhp_body_element in
       let (parser, xhp_close) = parse_xhp_close parser name_text in
       let xhp = make_xhp_expression xhp_open xhp_body xhp_close in
       (parser, xhp)

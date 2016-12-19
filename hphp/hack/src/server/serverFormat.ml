@@ -9,8 +9,8 @@
  *)
 
 (* TODO t14922604: Further improve error handling *)
-let call_external_formatter path content _from _to_ =
-  let args = [|"hackfmt"|] in
+let call_external_formatter path content from to_ =
+  let args = [|"hackfmt"; "--range"; string_of_int from; string_of_int to_|] in
   let lines = ref [] in
   let reader timeout ic oc =
     output_string oc content;
@@ -26,10 +26,14 @@ let call_external_formatter path content _from _to_ =
       path
       args;
     Format_hack.Success (String.concat "\n" @@ List.rev !lines)
-  with Timeout.Timeout -> Format_hack.Internal_error
+  with Timeout.Timeout -> begin
+    Hh_logger.log "Formatter timeout";
+    Format_hack.Internal_error
+  end
 
 let go genv content from to_ =
-  if genv.ServerEnv.local_config.ServerLocalConfig.use_hackfmt then
+  if genv.ServerEnv.local_config.ServerLocalConfig.use_hackfmt then begin
+    Hh_logger.log "--range %d %d" from to_;
     let path = match ServerConfig.formatter_override genv.ServerEnv.config with
       | None -> Path.make "/usr/local/bin/hackfmt"
       | Some p -> p
@@ -37,7 +41,10 @@ let go genv content from to_ =
     let path = Path.to_string path in
     if Sys.file_exists path
     then call_external_formatter path content from to_
-    else Format_hack.Internal_error
-  else
+    else begin
+      Hh_logger.log "Formatter not found";
+      Format_hack.Internal_error
+    end
+  end else
     let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
     Format_hack.region modes Path.dummy_path from to_ content

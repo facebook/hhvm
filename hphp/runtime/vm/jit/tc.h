@@ -64,6 +64,7 @@ struct TransRange {
 
 struct TransMetaInfo {
   SrcKey sk;
+  CodeCache::View emitView; // View code was emitted into (may be thread local)
   TransKind viewKind; // TransKind used to select code view
   TransKind transKind; // TransKind used for translation
   TransRange range;

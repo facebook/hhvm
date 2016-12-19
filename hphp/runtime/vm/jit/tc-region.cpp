@@ -289,8 +289,8 @@ folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
     logTranslation(env, range);
   }
 
-  return TransMetaInfo{sk, viewKind, args.kind, range, std::move(fixups),
-                       std::move(tr)};
+  return TransMetaInfo{sk, codeView, viewKind, args.kind, range,
+                       std::move(fixups), std::move(tr)};
 }
 
 folly::Optional<TransLoc>
@@ -340,7 +340,9 @@ publishTranslation(TransMetaInfo info, OptView optSrcView) {
   // translations in parallel, while reusable TC is only meaningful in sandboxes
   // where translations may be invalidates by source modifications.
   auto view = [&] {
-    if (!needsRelocate) return code().view(info.viewKind);
+    // If we emitted into Ahot and it subsequently filled up then the view
+    // returned by code().view(info.viewKind) will be incorrect.
+    if (!needsRelocate) return info.emitView;
 
     auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
                                         fixups);

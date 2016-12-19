@@ -324,75 +324,53 @@ module WithExpressionAndTypeParser
     TODO: Update the specification with these rules.
     *)
 
-    let (parser, switch_keyword_token) =
-      assert_token parser Switch in
+    let (parser, switch_keyword_token) = assert_token parser Switch in
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
     let (parser, left_brace_token) = expect_left_brace parser in
-    let (parser, section_list) = parse_switch_section_list_opt parser in
+    (* TODO: I'm not convinced that this always terminates in some cases.
+    Check that. *)
+    let (parser, section_list) =
+      parse_terminated_list parser parse_switch_section RightBrace in
     let (parser, right_brace_token) = expect_right_brace parser in
     let syntax = make_switch_statement switch_keyword_token left_paren_token
       expr_node right_paren_token left_brace_token section_list
       right_brace_token in
     (parser, syntax)
 
-  and parse_switch_section_list_opt parser =
-    let rec aux parser acc =
-      match peek_token_kind parser with
-      | EndOfFile
-      | RightBrace -> (parser, acc)
-      | Case
-      | Default ->
-        let (parser, section) = parse_switch_section parser in
-        aux parser (section :: acc)
-      | _ ->
-        (* ERROR RECOVERY: Try parsing a list of statements. *)
-        (* TODO: Are we guaranteed that this makes progress? *)
-        (* TODO: Change this error to "expected case or default" *)
-        let parser = with_error parser SyntaxError.error2008 in
-        let (parser, statements) = parse_switch_statement_list_opt parser in
-        let section = make_switch_section (make_missing()) statements in
-        aux parser (section :: acc) in
-    let (parser, sections) = aux parser [] in
-    (parser, make_list (List.rev sections))
-
   and parse_switch_section parser =
     (* See parse_switch_statement for grammar *)
-    let (parser, labels) = parse_switch_section_labels parser in
-    let (parser, statements) = parse_switch_statement_list_opt parser in
+    let (parser, labels) =
+      parse_list_until_none parser parse_switch_section_label in
+    let parser = if is_missing labels then
+        with_error parser SyntaxError.error2008
+      else
+        parser in
+    let (parser, statements) =
+      parse_list_until_none parser parse_switch_section_statement in
     let result = make_switch_section labels statements in
     (parser, result)
 
-  and parse_switch_statement_list_opt parser =
-    (* See parse_switch_statement for grammar *)
-     let rec aux parser acc =
-       let token = peek_token parser in
-       match (Token.kind token) with
-       | Default
-       | Case
-       | RightBrace
-       | EndOfFile -> (parser, acc)
-       | _ ->
-         let (parser, statement) = parse_statement parser in
-         aux parser (statement :: acc) in
-     let (parser, statements) = aux parser [] in
-     let statements = List.rev statements in
-     (parser, make_list statements)
+  and parse_switch_section_statement parser =
+    match peek_token_kind parser with
+    | Default
+    | Case
+    | RightBrace
+    | EndOfFile -> (parser, None)
+    | _ ->
+      let (parser, statement) = parse_statement parser in
+      (parser, Some statement)
 
-  and parse_switch_section_labels parser =
-  (* See the grammar under parse_switch_statement *)
-    let rec aux parser acc =
-      match peek_token_kind parser with
-      | Case ->
-        let (parser, label) = parse_case_label parser in
-        aux parser (label :: acc)
-      | Default ->
-        let (parser, label) = parse_default_label parser in
-        aux parser (label :: acc)
-      | _ -> (parser, acc) in
-    let (parser, labels) = aux parser [] in
-    let result = make_list (List.rev labels) in
-    (parser, result)
+  and parse_switch_section_label parser =
+    (* See the grammar under parse_switch_statement *)
+    match peek_token_kind parser with
+    | Case ->
+      let (parser, label) = parse_case_label parser in
+      (parser, Some label)
+    | Default ->
+      let (parser, label) = parse_default_label parser in
+      (parser, Some label)
+    | _ -> (parser, None)
 
   and parse_try_statement parser =
     let parse_catch_clause_opt parser_catch =

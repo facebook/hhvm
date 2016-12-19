@@ -23,6 +23,7 @@ namespace HPHP {
 struct Array;
 struct VMParserFrame;
 struct c_WaitableWaitHandle;
+struct StructuredLogEntry;
 
 struct BacktraceArgs {
 
@@ -137,6 +138,7 @@ private:
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
+void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash();
 
 } // HPHP

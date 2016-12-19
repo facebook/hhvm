@@ -753,6 +753,8 @@ public:
   // Xenon options
   static double XenonPeriodSeconds;
   static bool XenonForceAlwaysOn;
+  static bool XenonTraceUnitLoad;
+  static std::string XenonStructLogDest;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 

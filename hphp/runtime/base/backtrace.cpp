@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/struct-log.h"
 
 #include <folly/small_vector.h>
 
@@ -370,6 +371,21 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
 
   return bt;
+}
+
+void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
+  std::vector<folly::StringPiece> files;
+  std::vector<folly::StringPiece> functions;
+  std::vector<folly::StringPiece> lines;
+  for (ArrayIter it(bt.get()); it; ++it) {
+    Array frame = it.second().toArray();
+    files.emplace_back(frame[s_file].toString().data());
+    functions.emplace_back(frame[s_function].toString().data());
+    lines.emplace_back(frame[s_line].toString().data());
+  }
+  cols.setVec("php_files", files);
+  cols.setVec("php_functions", functions);
+  cols.setVec("php_lines", lines);
 }
 
 int64_t createBacktraceHash() {

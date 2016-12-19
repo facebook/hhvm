@@ -204,6 +204,8 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
 
 let handle genv env client =
   let msg = ClientProvider.read_client_msg client in
+  let d_event = Debug_event.HandleServerCommand msg in
+  let _ = Debug_port.write_opt d_event genv.ServerEnv.debug_port in
   let env = full_recheck_if_needed genv env msg in
   match msg with
   | Rpc cmd ->

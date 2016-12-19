@@ -372,48 +372,47 @@ module WithExpressionAndTypeParser
       (parser, Some label)
     | _ -> (parser, None)
 
+  and parse_catch_clause_opt parser =
+    (* SPEC
+      catch  (  type-specification variable-name  )  compound-statement
+    *)
+    if peek_token_kind parser = Catch then
+      let (parser, catch_token) = assert_token parser Catch in
+      let (parser, left_paren) = expect_left_paren parser in
+      let (parser, catch_type) = parse_type_specifier parser in
+      let (parser, catch_var) = expect_variable parser in
+      let (parser, right_paren) = expect_right_paren parser in
+      let (parser, compound_stmt) = parse_compound_statement parser in
+      let catch_clause = make_catch_clause catch_token left_paren
+        catch_type catch_var right_paren compound_stmt in
+      (parser, Some catch_clause)
+    else
+      (parser, None)
+
+  and parse_finally_clause_opt parser =
+    (* SPEC
+    finally-clause:
+      finally   compound-statement
+    *)
+    if peek_token_kind parser = Finally then
+      let (parser, finally_token) = assert_token parser Finally in
+      let (parser, compound_stmt) = parse_compound_statement parser in
+      let finally_clause = make_finally_clause finally_token compound_stmt in
+      (parser, finally_clause)
+    else
+      (parser, (make_missing()))
+
   and parse_try_statement parser =
-    let parse_catch_clause_opt parser_catch =
-      let (parser_catch, catch_token) = optional_token parser_catch Catch in
-      match syntax catch_token with
-      | Missing -> (parser_catch, catch_token)
-      | _ ->
-      (* SPEC
-        catch  (  type-specification variable-name  )  compound-statement
-      *)
-        let (parser_catch, left_paren) = expect_left_paren parser_catch in
-        let (parser_catch, catch_type) = parse_type_specifier parser_catch in
-        let (parser_catch, catch_var) = expect_variable parser_catch in
-        let (parser_catch, right_paren) = expect_right_paren parser_catch in
-        let (parser_catch, compound_stmt) =
-          parse_compound_statement parser_catch in
-        let catch_clause = make_catch_clause catch_token left_paren
-          catch_type catch_var right_paren compound_stmt in
-        (parser_catch, catch_clause)
-    in
-    let parse_finally_clause_opt parser_f =
-      let (parser_f, finally_token) = optional_token parser_f Finally in
-      match syntax finally_token with
-      | Missing -> (parser_f, finally_token)
-      | _ ->
-        let (parser_f, compound_stmt) = parse_compound_statement parser_f in
-        let finally_clause = make_finally_clause finally_token compound_stmt in
-        (parser_f, finally_clause)
-    in
-    let parse_catch_clauses parser_catch =
-      let rec aux acc parser_catch =
-        let (parser_catch, catch_clause) =
-          parse_catch_clause_opt parser_catch in
-        match (syntax catch_clause, acc) with
-        | Missing, [] -> (parser_catch, catch_clause)
-        | Missing, _ -> (parser_catch, acc |> List.rev |> make_list)
-        | _, _ -> aux (catch_clause :: acc) parser_catch
-      in
-      aux [] parser_catch
-    in
+    (* SPEC:
+    try-statement:
+      try  compound-statement   catch-clauses
+      try  compound-statement   finally-clause
+      try  compound-statement   catch-clauses   finally-clause
+    *)
     let (parser, try_keyword_token) = assert_token parser Try in
     let (parser, try_compound_stmt) = parse_compound_statement parser in
-    let (parser, catch_clauses) = parse_catch_clauses parser in
+    let (parser, catch_clauses) =
+      parse_list_until_none parser parse_catch_clause_opt in
     let (parser, finally_clause) = parse_finally_clause_opt parser in
     (* If the catch and finally are both missing then we give an error in
        a later pass. *)

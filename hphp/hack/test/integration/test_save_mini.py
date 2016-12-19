@@ -29,7 +29,7 @@ class LazyInitTestDriver(MiniStateTestDriver):
 # some comment
 use_mini_state = true
 use_watchman = true
-watchman_subscribe = true
+watchman_subscribe = false
 lazy_decl = true
 lazy_parse = true
 lazy_init = true

@@ -163,6 +163,10 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       list(APPEND DISABLED_NAMED_WARNINGS "bool-compare")
       list(APPEND GENERAL_OPTIONS "DFOLLY_HAVE_MALLOC_H")
     endif()
+    
+    if(GCC_VERSION VERSION_GREATER 6.0 OR GCC_VERSION VERSION_EQUAL 6.0)
+      list(APPEND GENERAL_CXX_OPTIONS "Wno-misleading-indentation")
+    endif()
 
     # Enabled GCC/LLVM stack-smashing protection
     if(ENABLE_SSP)

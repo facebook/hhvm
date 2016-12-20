@@ -90,12 +90,11 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
             '(Loaded_saved_state /tmp/.........../foo with 0 dirtied files)',
             "See also recorder daemon logs:" + boxed_string(recorder_log))
 
-    # Start up a hack server and run `server_driver --test-case <case_num>` on it.
-    # Returns the subprocess, path to the recording file, and recorder logs
-    # This doesn't kill the server_driver process, so its persistent connection
-    # with the Hack server is intentionally left alive maintaining the server's
-    # IDE state.
-    def run_server_driver_case(self, case_num):
+    def fresh_start_with_recorder_on(self):
+        """
+        Writes the load config that will have recorder on when server starts,
+        starts the hack server, returns paths of recording and recorder's log
+        """
         self.write_load_config()
         self.run_check()
         logs = self.get_server_logs()
@@ -107,6 +106,17 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         self.assertIsNotNone(recording_matcher)
         self.assertIn('recorder_out', recording_matcher.group(1))
         self.assertIn('recorder_log', recording_matcher.group(2))
+        return (
+            os.path.realpath(recording_matcher.group(1)),
+            os.path.realpath(recording_matcher.group(2)))
+
+    # Start up a hack server and run `server_driver --test-case <case_num>` on it.
+    # Returns the subprocess, path to the recording file, and recorder logs
+    # This doesn't kill the server_driver process, so its persistent connection
+    # with the Hack server is intentionally left alive maintaining the server's
+    # IDE state.
+    def run_server_driver_case(self, case_num):
+        recording_path, recorder_log_path = self.fresh_start_with_recorder_on()
         proc = self.proc_create([
             server_driver,
             '--test-case',
@@ -122,12 +132,12 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
                 finished.strip(),
                 "Finished",
                 "See also server_driver stderr: " + boxed_string(driver_err))
-        with open(recording_matcher.group(2)) as f:
+        with open(recorder_log_path) as f:
             recorder_log = f.read()
         # Running a new server instance after shutting down the current one
         # will overwrite the recording's, So we want to return the real
         # absolute path here.
-        recording = os.path.realpath(recording_matcher.group(1))
+        recording = os.path.realpath(recording_path)
         return proc, recording, recorder_log
 
     # Run the entire record on the repo using the turntable.
@@ -200,4 +210,28 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         # the errors introduced by the record.
         self.check_cmd(["{root}foo_1.php:3:26,37: Undefined "
                         "variable: $missing_var (Naming[2050])"])
+        turntable_proc.send_signal(signal.SIGINT)
+
+    def test_modified_file_playback(self):
+        recording_path, recorder_log_path = self.fresh_start_with_recorder_on()
+        with open(os.path.join(self.repo_dir, 'foo_2.php'), 'w') as f:
+            f.write("""
+            <?hh
+            function g(): int {
+                return 'a';
+            }
+            """)
+        self.check_cmd([
+            "{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])",
+            "  {root}foo_2.php:3:27,29: This is an int",
+            "  {root}foo_2.php:4:24,26: It is incompatible with a string"])
+        # Stop the server to end the recorder daemon, give it a couple seconds
+        self.stop_server()
+        time.sleep(2)
+        self.check_cmd(["No errors!"])
+        turntable_proc = self.spin_record(recording_path)
+        self.check_cmd([
+            "{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])",
+            "  {root}foo_2.php:3:27,29: This is an int",
+            "  {root}foo_2.php:4:24,26: It is incompatible with a string"])
         turntable_proc.send_signal(signal.SIGINT)

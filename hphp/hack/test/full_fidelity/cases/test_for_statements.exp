@@ -111,7 +111,10 @@
     (for_statement
       ((whitespace)(for))
       ((lparen))
-      (list(variable((variable)))((,)(whitespace))(variable((variable))))
+      (list
+        (list_item(variable((variable)))((,)(whitespace)))
+        (variable((variable)))
+      )
       ((;))
       (missing)
       ((;))
@@ -125,10 +128,8 @@
       (missing)
       ((;))
       (list
-        (variable((variable)))
-        ((,)(whitespace))
-        (variable((variable)))
-        ((,)(whitespace))
+        (list_item(variable((variable)))((,)(whitespace)))
+        (list_item(variable((variable)))((,)(whitespace)))
         (variable((variable)))
       )
       ((;))

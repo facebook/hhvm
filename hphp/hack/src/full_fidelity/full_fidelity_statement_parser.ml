@@ -66,52 +66,31 @@ module WithExpressionAndTypeParser
     let (parser, right_paren) = expect_right_paren parser in
     (parser, left_paren, expr_syntax, right_paren)
 
-  (* List of expressions and commas. No trailing comma. *)
-  and parse_for_expr_group parser is_last =
-    let rec aux parser acc =
-      let (parser, expr) = parse_expression parser in
-      let acc = expr :: acc in
-      let (parser1, token) = next_token parser in
-      match (Token.kind token) with
-      | Comma -> aux parser1 ((make_token token) :: acc)
-      | RightParen when is_last -> (parser, acc)
-      | Semicolon when not is_last -> (parser, acc)
-      (* TODO a similar error is reported by caller, should we duplicate? *)
-      | _ when is_last ->
-        let parser = with_error parser SyntaxError.error1009 in
-        (parser, acc)
-      | _ ->
-        let parser = with_error parser SyntaxError.error1024 in
-        (parser, acc)
-    in
-    let (parser, expressions_and_commas) = aux parser [] in
-    (parser, make_list (List.rev expressions_and_commas))
-
-  and parse_for_expr parser =
-    let token = peek_token parser in
-    let parser, for_expr_group = match Token.kind token with
-      | Semicolon -> parser, make_missing ()
-      | _ -> parse_for_expr_group parser false
-    in
-    let parser, semicolon = expect_semicolon parser in
-    parser, for_expr_group, semicolon
-
-  and parse_last_for_expr parser =
-    let token = peek_token parser in
-    let parser, for_expr_group = match Token.kind token with
-      | RightParen -> parser, make_missing ()
-      | _ -> parse_for_expr_group parser true
-    in
-    (parser, for_expr_group)
-
   and parse_for_statement parser =
+    (* SPEC
+    for-statement:
+      for   (   for-initializer-opt   ;   for-control-opt   ;    \
+        for-end-of-loop-opt   )   statement
+
+    Each clause is an optional, comma-separated list of expressions.
+    Note that unlike most such lists in Hack, it may *not* have a trailing
+    comma.
+    TODO: There is no compelling reason to not allow a trailing comma
+    from the grammatical point of view. Each clause unambiguously ends in
+    either a semi or a paren, so we can allow a trailing comma without
+    difficulty.
+
+    *)
     let parser, for_keyword_token = assert_token parser For in
     let parser, for_left_paren = expect_left_paren parser in
-    let parser, for_initializer_expr, for_first_semicolon =
-      parse_for_expr parser in
-    let parser, for_control_expr, for_second_semicolon =
-      parse_for_expr parser in
-    let parser, for_end_of_loop_expr = parse_last_for_expr parser in
+    let parser, for_initializer_expr = parse_comma_list_opt
+      parser Semicolon SyntaxError.error1015 parse_expression in
+    let parser, for_first_semicolon = expect_semicolon parser in
+    let parser, for_control_expr = parse_comma_list_opt
+      parser Semicolon SyntaxError.error1015 parse_expression in
+    let parser, for_second_semicolon = expect_semicolon parser in
+    let parser, for_end_of_loop_expr = parse_comma_list_opt
+      parser RightParen SyntaxError.error1015 parse_expression in
     let parser, for_right_paren = expect_right_paren parser in
     let parser, for_statement = parse_statement parser in
     let syntax = make_for_statement for_keyword_token for_left_paren

@@ -108,7 +108,10 @@ def tbb_chm_at(chm, key, hasher=None):
     h -= 1 << s & ~1                            # segment_base
 
     # bucket_accessor b(this, h & m) <=> this->get_bucket(h & m).
-    seg = chm['my_table'][s]
+    try:
+        seg = chm['my_table'][s]
+    except:
+        return None
     b = seg[h].address
 
     if b['node_list'] == V('tbb::interface5::internal::rehash_req'):

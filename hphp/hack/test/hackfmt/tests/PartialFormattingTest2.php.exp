@@ -1,4 +1,4 @@
     $nonsensical_maplike_array = array(
       "A Very Long Key Value For This Map" =>
-        "Here's a value of an appropriate length"
+        "Here's a value of an appropriate length",
     );

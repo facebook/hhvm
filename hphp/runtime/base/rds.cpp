@@ -40,6 +40,7 @@
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 
 namespace HPHP { namespace rds {
@@ -678,13 +679,26 @@ void threadExit(bool shouldUnregister) {
       (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
       "-rds");
   }
+
+  auto const base = tl_base;
+  auto do_unmap = [base] {
 #if defined(__CYGWIN__) || defined(_MSC_VER)
-  munmap(tl_base, s_persistent_base);
-  munmap((char*)tl_base + s_persistent_base,
-         RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
+    munmap(base, s_persistent_base);
+    munmap((char*)base + s_persistent_base,
+           RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
 #else
-  munmap(tl_base, RuntimeOption::EvalJitTargetCacheSize);
+    munmap(base, RuntimeOption::EvalJitTargetCacheSize);
 #endif
+  };
+
+  // Other requests may be reading from this rds section via the s_tlBaseList,
+  // we just removed ourself from the list now, but defer the unmap until after
+  // any outstanding requests have completed.
+  if (shouldUnregister) {
+    Treadmill::enqueue(std::move(do_unmap));
+  } else {
+    do_unmap();
+  }
 }
 
 void recordRds(Handle h, size_t size,

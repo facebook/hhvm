@@ -1264,6 +1264,23 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
   return {newNode + 1, newsize};
 }
 
+void BigHeap::sortSlabs() {
+  std::sort(std::begin(m_slabs), std::end(m_slabs),
+    [] (const MemBlock& l, const MemBlock& r) {
+      assertx(static_cast<char*>(l.ptr) + l.size <= r.ptr ||
+              static_cast<char*>(r.ptr) + r.size <= l.ptr);
+      return l.ptr < r.ptr;
+    }
+  );
+}
+
+void BigHeap::sortBigs() {
+  std::sort(std::begin(m_bigs), std::end(m_bigs));
+  for (size_t i = 0, n = m_bigs.size(); i < n; ++i) {
+    m_bigs[i]->index() = i;
+  }
+}
+
 /*
  * To find `p', we sort the slabs, bisect them, then iterate the slab
  * containing `p'.  If there is no such slab, we bisect the bigs to try to find
@@ -1272,14 +1289,7 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
  * If that fails, we return nullptr.
  */
 Header* BigHeap::find(const void* p) {
-  std::sort(std::begin(m_slabs), std::end(m_slabs),
-    [] (const MemBlock& l, const MemBlock& r) {
-      assertx(static_cast<char*>(l.ptr) + l.size <= r.ptr ||
-              static_cast<char*>(r.ptr) + r.size <= l.ptr);
-      return l.ptr < r.ptr;
-    }
-  );
-
+  sortSlabs();
   auto const slab = std::lower_bound(
     std::begin(m_slabs), std::end(m_slabs), p,
     [] (const MemBlock& slab, const void* p) {
@@ -1304,7 +1314,7 @@ Header* BigHeap::find(const void* p) {
     always_assert(false);
   }
 
-  std::sort(std::begin(m_bigs), std::end(m_bigs));
+  sortBigs();
 
   auto const big = std::lower_bound(
     std::begin(m_bigs), std::end(m_bigs), p,

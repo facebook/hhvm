@@ -433,6 +433,12 @@ struct BigHeap {
    */
   Header* find(const void* p);
 
+  /*
+   * Sorting helpers
+   */
+  void sortSlabs();
+  void sortBigs();
+
  protected:
   void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 

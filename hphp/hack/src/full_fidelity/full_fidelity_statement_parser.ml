@@ -618,22 +618,10 @@ module WithExpressionAndTypeParser
       let (parser, token) = expect_semicolon parser in
       (parser, make_expression_statement expression token)
 
-  and parse_statement_list_opt parser =
-     let rec aux parser acc =
-       let token = peek_token parser in
-       match (Token.kind token) with
-       | RightBrace
-       | EndOfFile -> (parser, acc)
-       | _ ->
-         let (parser, statement) = parse_statement parser in
-         aux parser (statement :: acc) in
-     let (parser, statements) = aux parser [] in
-     let statements = List.rev statements in
-     (parser, make_list statements)
-
   and parse_compound_statement parser =
     let (parser, left_brace_token) = expect_left_brace parser in
-    let (parser, statement_list) = parse_statement_list_opt parser in
+    let (parser, statement_list) =
+      parse_terminated_list parser parse_statement RightBrace in
     let (parser, right_brace_token) = expect_right_brace parser in
     let syntax = make_compound_statement
       left_brace_token statement_list right_brace_token in

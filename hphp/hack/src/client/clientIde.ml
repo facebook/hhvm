@@ -56,12 +56,18 @@ let rec connect_persistent env retries start_time =
        * separately with hh start or similar. *)
       raise Exit_status.(Exit_with IDE_no_server)
 
+let read_connection_response fd =
+  let res = Marshal_tools.from_fd_with_preamble fd in
+  match res with
+  | ServerCommandTypes.Connected -> ()
+
 let connect_persistent env ~retries =
   let start_time = Unix.time () in
   try
     let (ic, oc) = connect_persistent env retries start_time in
     HackEventLogger.client_established_connection start_time;
     Cmd.send_connection_type oc ServerCommandTypes.Persistent;
+    read_connection_response (Unix.descr_of_out_channel oc);
     (ic, oc)
   with
   | e ->
@@ -89,11 +95,6 @@ let get_next_push_message fd =
   if Queue.is_empty pending_push_messages
     then read_push_message_from_server fd
     else Queue.take pending_push_messages
-
-let read_connection_response fd =
-  let res = Marshal_tools.from_fd_with_preamble fd in
-  match res with
-  | ServerCommandTypes.Connected -> ()
 
 let server_disconnected () =
   raise Exit_status.(Exit_with No_error)
@@ -202,7 +203,6 @@ let main env =
   Printexc.record_backtrace true;
   let conn = connect_persistent env ~retries:800 in
   let fd = Unix.descr_of_out_channel (snd conn) in
-  read_connection_response fd;
   while true do
     match get_ready_message fd with
     | `None -> ()

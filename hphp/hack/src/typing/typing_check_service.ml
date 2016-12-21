@@ -66,7 +66,7 @@ let check_const opts fn x =
       let env =
         Typing_env.empty opts filename (Some dep) in
       let env = Typing_env.set_mode env cst.Nast.cst_mode in
-      let env, value_type = Typing.expr env v in
+      let env, _et, value_type = Typing.expr env v in
       match cst.Nast.cst_type with
       | Some h ->
         let declared_type = Decl_hint.hint env.Typing_env.decl_env h in

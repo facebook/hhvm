@@ -25,7 +25,7 @@ val gconst_def:
 
 val expr:
   Typing_env.env -> Nast.expr ->
-  Typing_env.env * Typing_defs.locl Typing_defs.ty
+  Typing_env.env * Tast.expr * Typing_defs.locl Typing_defs.ty
 
 val get_self_from_c:
   Nast.class_ ->

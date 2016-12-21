@@ -835,12 +835,13 @@ and lvalue env e =
 
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
+(* TODO TAST: type refinement should be made explicit in the typed AST *)
 and eif env ~coalesce ~in_cond p c e1 e2 =
-  let env, _tc, tyc = raw_expr in_cond env c in
+  let env, tc, tyc = raw_expr in_cond env c in
   let parent_lenv = env.Env.lenv in
   let c = if coalesce then (p, Binop (Ast.Diff2, c, (p, Null))) else c in
   let env = condition env true c in
-  let env, _te, ty1 = match e1 with
+  let env, te1, ty1 = match e1 with
     | None ->
         non_null env tyc
     | Some e1 ->
@@ -849,7 +850,7 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let lenv1 = env.Env.lenv in
   let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false c in
-  let env, _te2, ty2 = expr env e2 in
+  let env, te2, ty2 = expr env e2 in
   let lenv2 = env.Env.lenv in
   let fake_members =
     LEnv.intersect_fake lenv1.Env.fake_members lenv2.Env.fake_members in
@@ -863,7 +864,7 @@ and eif env ~coalesce ~in_cond p c e1 e2 =
   let env, ty1 = TUtils.unresolved env ty1 in
   let env, ty2 = TUtils.unresolved env ty2 in
   let env, ty = Unify.unify env ty1 ty2 in
-  env, T.Any, ty
+  env, T.Eif(tc, te1, te2, ty), ty
 
 and exprs env el =
   match el with

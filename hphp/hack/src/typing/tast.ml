@@ -100,8 +100,8 @@ and expr =
   | Binop of Ast.bop * expr * expr
   (** The ID of the $$ that is implicitly declared by this pipe. *)
   | Pipe of Local_id.t * expr * expr
-  | Eif of expr * expr option * expr
-  | NullCoalesce of expr * expr
+  (* Explicit type must be a supertype of the types of the branches. *)
+  | Eif of expr * expr * expr * ty
   | InstanceOf of expr * class_id
   | New of class_id * expr list * expr list
   (*  | Efun of fun_ * id list*)

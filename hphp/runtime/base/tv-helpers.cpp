@@ -646,6 +646,13 @@ void tvCastToArrayInPlace(TypedValue* tv) {
   assert(cellIsPlausible(*tv));
 }
 
+static Array arrayFromCollection(ObjectData* obj) {
+  if (auto ad = collections::asArray(obj)) {
+    return ArrNR{ad}.asArray();
+  }
+  return collections::toArray(obj);
+}
+
 void tvCastToVecInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
@@ -724,7 +731,7 @@ void tvCastToVecInPlace(TypedValue* tv) {
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
-          a = collections::toArray(obj).toVec().detach();
+          a = arrayFromCollection(obj).toVec().detach();
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateVec();
           for (ArrayIter iter(obj); iter; ++iter) {
@@ -830,7 +837,7 @@ void tvCastToDictInPlace(TypedValue* tv) {
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
-          a = collections::toArray(obj).toDict().detach();
+          a = arrayFromCollection(obj).toDict().detach();
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateDict();
           for (ArrayIter iter(obj); iter; ++iter) {
@@ -936,7 +943,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
-          a = collections::toArray(obj).toKeyset().detach();
+          a = arrayFromCollection(obj).toKeyset().detach();
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateKeyset();
           for (ArrayIter iter(obj); iter; ++iter) {

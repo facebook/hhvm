@@ -2889,6 +2889,9 @@ Array HHVM_FUNCTION(HH_dict, const Variant& input) {
     return ArrNR{inputCell->m_data.parr}.asArray().toDict();
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
+    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
+      return ArrNR{ad}.asArray().toDict();
+    }
     return HHVM_FN(HH_dict)(toArray(inputCell->m_data.pobj));
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
@@ -2912,6 +2915,9 @@ Array HHVM_FUNCTION(HH_keyset, const Variant& input) {
     return ArrNR{inputCell->m_data.parr}.asArray().toKeyset();
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
+    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
+      return ArrNR{ad}.asArray().toKeyset();
+    }
     return HHVM_FN(HH_keyset)(toArray(inputCell->m_data.pobj));
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
@@ -2935,6 +2941,9 @@ Array HHVM_FUNCTION(HH_vec, const Variant& input) {
     return ArrNR{inputCell->m_data.parr}.asArray().toVec();
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
+    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
+      return ArrNR{ad}.asArray().toVec();
+    }
     return HHVM_FN(HH_vec)(toArray(inputCell->m_data.pobj));
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {

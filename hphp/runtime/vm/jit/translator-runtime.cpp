@@ -287,9 +287,16 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
   return a;
 }
 
+static Array arrayFromCollection(ObjectData* obj) {
+  if (auto ad = collections::asArray(obj)) {
+    return ArrNR{ad}.asArray();
+  }
+  return collections::toArray(obj);
+}
+
 ArrayData* convObjToVecHelper(ObjectData* obj) {
   if (obj->isCollection()) {
-    auto a = collections::toArray(obj).toVec();
+    auto a = arrayFromCollection(obj).toVec();
     decRefObj(obj);
     return a.detach();
   }
@@ -332,7 +339,7 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 
 ArrayData* convObjToDictHelper(ObjectData* obj) {
   if (obj->isCollection()) {
-    auto a = collections::toArray(obj).toDict();
+    auto a = arrayFromCollection(obj).toDict();
     decRefObj(obj);
     return a.detach();
   }
@@ -375,7 +382,7 @@ ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
 
 ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   if (obj->isCollection()) {
-    auto a = collections::toArray(obj).toKeyset();
+    auto a = arrayFromCollection(obj).toKeyset();
     decRefObj(obj);
     return a.detach();
   }

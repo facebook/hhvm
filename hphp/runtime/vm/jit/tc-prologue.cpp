@@ -172,7 +172,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
 
 
   recordGdbTranslation(funcBody, func, codeView.main(), loc.mainStart(),
-                       false, true);
+                       loc.mainEnd(), false, true);
   recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
 
   return start;

@@ -374,9 +374,9 @@ publishTranslation(TransMetaInfo info, OptView optSrcView) {
 
   recordRelocationMetaData(sk, *srcRec, loc, fixups);
   recordGdbTranslation(sk, sk.func(), view.main(), loc.mainStart(),
-                       false, false);
-  recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldStart(),
-                       false, false);
+                       loc.mainEnd(), false, false);
+  recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldCodeStart(),
+                       loc.coldEnd(), false, false);
 
   if (tr.isValid()) {
     tr.aStart = loc.mainStart();

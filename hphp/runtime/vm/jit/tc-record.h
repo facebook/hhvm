@@ -47,7 +47,8 @@ void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
  * Record translation for gdb debugging of the tc.
  */
 void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
-                          const TCA start, bool exit, bool inPrologue);
+                          const TCA start, const TCA end, bool exit,
+                          bool inPrologue);
 
 /*
  * Record BC instruction ranges in the tc for the perf map.

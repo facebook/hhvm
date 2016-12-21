@@ -66,19 +66,15 @@ void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
                      fixups);
 }
 
-static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
-                                bool isAcold) {
-  assertx(cb.contains(addr));
-  return Debug::TCRange(addr, cb.frontier(), isAcold);
-}
-
 void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
-                          const TCA start, bool exit, bool inPrologue) {
-  if (start != cb.frontier()) {
+                          const TCA start, const TCA end, bool exit,
+                          bool inPrologue) {
+  assertx(cb.contains(start) && cb.contains(end));
+  if (start != end) {
     assertOwnsCodeLock();
     if (!RuntimeOption::EvalJitNoGdb) {
       Debug::DebugInfo::Get()->recordTracelet(
-        rangeFrom(cb, start, &cb == &code().cold()),
+        Debug::TCRange(start, end, &cb == &code().cold()),
         srcFunc,
         srcFunc->unit() ? srcFunc->unit()->at(sk.offset()) : nullptr,
         exit, inPrologue
@@ -86,7 +82,7 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
     }
     if (RuntimeOption::EvalPerfPidMap) {
       Debug::DebugInfo::Get()->recordPerfMap(
-        rangeFrom(cb, start, &cb == &code().cold()),
+        Debug::TCRange(start, end, &cb == &code().cold()),
         sk,
         srcFunc,
         exit,

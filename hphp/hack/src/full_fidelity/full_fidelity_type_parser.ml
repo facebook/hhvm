@@ -123,56 +123,56 @@ and parse_possible_generic_specifier parser =
     (parser, make_generic_type_specifier (make_token name) arguments)
 
 (* SPEC
-    generic-type-constraint-listopt:
+    generic-type-constraint-list:
       generic-type-constraint
-      generic-type-constraint generic-type-constraint-listopt
+      generic-type-constraint generic-type-constraint-list
+
     generic-type-constraint:
-      constraint-token matched-type
-    constraint-token:
-      as
-      super
-    matched-type:
-      type-specifier
+      as type-specifier
+      super type-specifier
+
+    TODO: SPEC ISSUES:
+    https://github.com/hhvm/hack-langspec/issues/83
+
+    TODO: Do we also need to allow "= type-specifier" here?
 *)
-and parse_generic_type_constraints parser =
-  let rec aux parser acc =
-    let (parser1, token) = next_token parser in
-      match (Token.kind token) with
-      | As
-      | Super ->
-        let constraint_token = make_token token in
-        let (parser, matched_type) = parse_type_specifier parser1 in
-        let type_constraint =
-          make_type_constraint constraint_token matched_type in
-        aux parser (type_constraint::acc)
-      | _ -> (* If it's correct, this is either a comma or a GreaterThan
-                If it's an error, we catch it upstream in parse_comma_list *)
-        (* Note that parser still preserves the last token *)
-        (parser, acc) in
-  let (parser, types) = aux parser [] in
-  if types = [] then (parser, make_missing()) else
-  (parser, make_list (List.rev types))
+
+and parse_generic_type_constraint_opt parser =
+  let (parser1, token) = next_token parser in
+  match (Token.kind token) with
+  | As
+  | Super ->
+    let constraint_token = make_token token in
+    let (parser, matched_type) = parse_type_specifier parser1 in
+    let type_constraint = make_type_constraint constraint_token matched_type in
+    (parser, Some type_constraint)
+  | _ -> (parser, None)
+
+and parse_variance_opt parser =
+  match peek_token_kind parser with
+  | Plus | Minus ->
+    let (parser, token) = next_token parser in
+    let variance = (make_token token) in
+    (parser, variance)
+  | _ -> (parser, make_missing())
 
 (* SPEC
   generic-type-parameter:
-    type-parameter-varianceopt type-parameter-name type-constraint-listopt
-  type-parameter-varianceopt:
+    generic-type-parameter-variance-opt  name  generic-type-constraint-list-opt
+
+  generic-type-parameter-variance:
     +
     -
-  type-parameter-name:
-    name
+
+  TODO: SPEC ISSUE: We allow any number of type constraints, not just zero
+  or one as indicated in the spec.
+  https://github.com/hhvm/hack-langspec/issues/83
 *)
 and parse_type_parameter parser =
-  let token = peek_token parser in
-  let parser, variance =
-    if (Token.kind token) = Plus || (Token.kind token) = Minus then
-      let (parser, _) = next_token parser in
-      let variance = (make_token token) in
-      (parser, variance)
-    else
-      (parser, make_missing()) in
+  let parser, variance = parse_variance_opt parser in
   let (parser, type_name) = expect_name_allow_keywords parser in
-  let (parser, constraints) = parse_generic_type_constraints parser in
+  let (parser, constraints) =
+    parse_list_until_none parser parse_generic_type_constraint_opt in
   (parser, make_type_parameter variance type_name constraints)
 
 (* SPEC
@@ -235,6 +235,7 @@ and parse_generic_type_argument_list parser =
       generic-type-arguments  ,  generic-type-argument
   *)
   (* TODO: SPEC ISSUE
+    https://github.com/hhvm/hack-langspec/issues/84
     The specification indicates that "noreturn" is only syntactically valid
     as a return type hint, but this is plainly wrong because
     Awaitable<noreturn> is a legal type. Likely the correct rule will be to
@@ -294,7 +295,7 @@ and parse_array_type_specifier parser =
     end
 
 and parse_tuple_or_closure_type_specifier parser =
-  let (parser1, _) = next_token parser in
+  let (parser1, _) = assert_token parser LeftParen in
   let token = peek_token parser1 in
   if (Token.kind token) = Function then
     parse_closure_type_specifier parser
@@ -330,20 +331,21 @@ and parse_closure_type_specifier parser =
   (parser, result)
 
 and parse_tuple_type_specifier parser =
-
   (* SPEC
       tuple-type-specifier:
         ( type-specifier  ,  type-specifier-list  )
+      type-specifier-list:
+        type-specifiers  ,opt
+      type-specifiers
+        type-specifier
+        type-specifiers , type-specifier
   *)
 
   (* TODO: Here we parse a type list with one or more items, but the grammar
      actually requires a type list with two or more items. Give an error in
      a later pass if there is only one item here. *)
 
-  (* TODO: Should we allow trailing commas? If so, update the spec. *)
-
-  let (parser, left_paren) = next_token parser in
-  let left_paren = make_token left_paren in
+  let (parser, left_paren) = assert_token parser LeftParen in
   let (parser, args) = parse_type_list parser RightParen in
   let (parser1, right_paren) = next_token parser in
   if (Token.kind right_paren) = RightParen then
@@ -432,34 +434,22 @@ and parse_field_specifier parser =
   let result = make_field_specifier name arrow field_type in
   (parser, result)
 
-and parse_field_list parser =
-  (* SPEC
-    field-specifier-list:
-      field-specifier
-      field-specifier-list  ,  field-specifier
-    NOTE: trailing comma is allowed
-    TODO: Update the specification accordingly.
-  *)
-  parse_comma_list_allow_trailing parser RightParen SyntaxError.error1025
-    parse_field_specifier
-
-and parse_field_list_opt parser =
-  let token = peek_token parser in
-  if Token.kind token = RightParen then
-    (parser, (make_missing()))
-  else
-    parse_field_list parser
-
 and parse_shape_specifier parser =
   (* SPEC
     shape-specifier:
       shape ( field-specifier-list-opt )
+    field-specifier-list:
+      field-specifiers  ,-opt
+    field-specifiers:
+      field-specifier
+      field-specifiers  ,  field-specifier
   *)
   (* TODO: ERROR RECOVERY is not very sophisticated here. *)
   let (parser, shape) = next_token parser in
   let shape = make_token shape in
   let (parser, lparen) = expect_left_paren parser in
-  let (parser, fields) = parse_field_list_opt parser in
+  let (parser, fields) = parse_comma_list_opt_allow_trailing
+    parser RightParen SyntaxError.error1025 parse_field_specifier in
   let (parser, rparen) = expect_right_paren parser in
   let result = make_shape_type_specifier shape lparen fields rparen in
   (parser, result)
@@ -468,6 +458,8 @@ and parse_type_constraint_opt parser =
   (* SPEC
     type-constraint:
       as  type-specifier
+    TODO: Is this correct? Or do we need to allow "super" as well?
+    TODO: What about = ?
   *)
   let (parser1, constraint_as) = next_token parser in
   if (Token.kind constraint_as) = As then

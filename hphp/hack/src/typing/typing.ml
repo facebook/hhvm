@@ -978,18 +978,24 @@ and expr_
     let env = condition env true e in
       env, T.Any, (Reason.Rwitness p, Tprim Tvoid)
   | True ->
-      env, T.Any, (Reason.Rwitness p, Tprim Tbool)
+      env, T.Bool_literal true, (Reason.Rwitness p, Tprim Tbool)
   | False ->
-      env, T.Any, (Reason.Rwitness p, Tprim Tbool)
-  | Int _ ->
-      env, T.Any, (Reason.Rwitness p, Tprim Tint)
-  | Float _ ->
-      env, T.Any, (Reason.Rwitness p, Tprim Tfloat)
+      env, T.Bool_literal false, (Reason.Rwitness p, Tprim Tbool)
+    (* TODO TAST: consider checking that the integer is in range. Right now
+     * it's possible for HHVM to fail on well-typed Hack code
+     *)
+  | Int s ->
+      env, T.Int_literal s, (Reason.Rwitness p, Tprim Tint)
+  | Float s ->
+      env, T.Float_literal s, (Reason.Rwitness p, Tprim Tfloat)
+    (* TODO TAST: consider introducing a "null" type, and defining ?t to
+     * be null | t
+     *)
   | Null ->
       let ty = Env.fresh_type() in
-      env, T.Any, (Reason.Rwitness p, Toption ty)
-  | String _ ->
-      env, T.Any, (Reason.Rwitness p, Tprim Tstring)
+      env, T.Null_literal ty, (Reason.Rwitness p, Toption ty)
+  | String s ->
+      env, T.String_literal s, (Reason.Rwitness p, Tprim Tstring)
   | String2 idl ->
       let env = string2 env idl in
       env, T.Any, (Reason.Rwitness p, Tprim Tstring)

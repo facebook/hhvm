@@ -81,12 +81,12 @@ and expr =
     * expr (* function *)
     * expr list (* positional args *)
     * expr list (* unpacked args *)
-  | True
-  | False
-  | Int of pstring
-  | Float of pstring
-  | Null
-  | String of pstring
+  | Bool_literal of bool
+  | Int_literal of pstring
+  | Float_literal of pstring
+  (* This has type ?ty *)
+  | Null_literal of ty
+  | String_literal of pstring
   | String2 of expr list
   | Special_func of special_func
   | Yield_break

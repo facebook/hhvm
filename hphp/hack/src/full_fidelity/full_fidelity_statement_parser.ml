@@ -176,6 +176,22 @@ module WithExpressionAndTypeParser
     (parser, result)
 
   and parse_if_statement parser =
+    (* SPEC:
+  if-statement:
+    if   (   expression   )   statement   elseif-clauses-opt   else-clause-opt
+
+  elseif-clauses:
+    elseif-clause
+    elseif-clauses   elseif-clause
+
+  elseif-clause:
+    elseif   (   expression   )   statement
+
+  else-clause:
+    else   statement
+
+    *)
+
     (* parses the "( expr ) statement" segment of If, Elseif or Else clauses.
      * Return a tuple of 5 elements, the first one being the resultant parser
      *)
@@ -186,20 +202,17 @@ module WithExpressionAndTypeParser
         (parser_body, left_paren_token, expr_node, right_paren_token,
         statement_node)
     in
-    (* Parse a elseif clause. Do not eat token and return Missing if the
-     * first keyword is not elseif
-     *)
     let parse_elseif_opt parser_elseif =
-      let (parser_elseif, elseif_token) = optional_token parser_elseif Elseif in
-      match syntax elseif_token with
-      | Missing -> (parser_elseif, elseif_token)  (* return original parser *)
-      | _ ->
+      if peek_token_kind parser_elseif = Elseif then
+        let (parser_elseif, elseif_token) = assert_token parser_elseif Elseif in
         let (parser_elseif, elseif_left_paren, elseif_condition_expr,
           elseif_right_paren, elseif_statement) =
           parse_if_body_helper parser_elseif in
         let elseif_syntax = make_elseif_clause elseif_token elseif_left_paren
           elseif_condition_expr elseif_right_paren elseif_statement in
-        (parser_elseif, elseif_syntax)
+        (parser_elseif, Some elseif_syntax)
+      else
+        (parser_elseif, None)
     in
     (* do not eat token and return Missing if first token is not Else *)
     let parse_else_opt parser_else =
@@ -211,28 +224,16 @@ module WithExpressionAndTypeParser
         let else_syntax = make_else_clause else_token else_consequence in
         (parser_else, else_syntax)
     in
-    (* keep parsing until there is no else if clause
-     * return the new parser and a syntax list of all else if statements
-     * return Missing if there is no Elseif, with parser unchanged
-     *)
-    let parse_elseif_clauses parser_elseif =
-      let rec parse_clauses_helper acc parser_elseif =
-        let (parser_elseif, elseif_syntax) = parse_elseif_opt parser_elseif in
-        match (syntax elseif_syntax, acc) with
-        | Missing, [] -> (parser_elseif, elseif_syntax)
-        | Missing, _ -> (parser_elseif, make_list (List.rev acc))
-        | _, _ -> parse_clauses_helper (elseif_syntax :: acc) parser_elseif
-      in
-      parse_clauses_helper [] parser_elseif
-    in
     let (parser, if_keyword_token) = assert_token parser If in
     let (parser, if_left_paren, if_expr, if_right_paren, if_consequence) =
       parse_if_body_helper parser in
-    let (parser, elseif_syntax) = parse_elseif_clauses parser in
+    let (parser, elseif_syntax) =
+      parse_list_until_none parser parse_elseif_opt in
     let (parser, else_syntax) = parse_else_opt parser in
     let syntax = make_if_statement if_keyword_token if_left_paren if_expr
       if_right_paren if_consequence elseif_syntax else_syntax in
     (parser, syntax)
+
   and parse_switch_statement parser =
     (* SPEC:
 

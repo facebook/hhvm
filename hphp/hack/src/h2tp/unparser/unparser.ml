@@ -632,8 +632,6 @@ let rec u_program v = u_of_list_spc u_def v
       | Return (_pos, exprOpt) ->
           let exprStr = u_of_option u_expr exprOpt in
           StrWords [ Str "return"; exprStr]
-      | Static_var exprList ->
-          StrWords [Str "static"; u_of_list_comma u_expr exprList;]
       | If (cond, thenExpr, elseExpr) ->
           let condStr = StrParens (u_expr cond)
           and thenStr = u_block thenExpr
@@ -702,8 +700,7 @@ let rec u_program v = u_of_list_spc u_def v
       | Break _
       | Continue _
       | Throw _
-      | Return _
-      | Static_var _ -> StrStatement [stmtStr]
+      | Return _ -> StrStatement [stmtStr]
 
   and u_catch (hint, var, block) =
     StrWords [

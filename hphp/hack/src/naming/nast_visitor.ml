@@ -38,7 +38,6 @@ class type ['a] nast_visitor_type = object
   method on_noop : 'a -> 'a
   method on_fallthrough : 'a -> 'a
   method on_return : 'a -> Pos.t -> Nast.expr option -> 'a
-  method on_static_var : 'a -> Nast.expr list -> 'a
   method on_stmt : 'a -> Nast.stmt -> 'a
   method on_switch : 'a -> Nast.expr -> Nast.case list -> 'a
   method on_throw : 'a -> Nast.is_terminal -> Nast.expr -> 'a
@@ -115,8 +114,6 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
     match eopt with
     | None -> acc
     | Some e -> this#on_expr acc e
-
-  method on_static_var acc el = List.fold_left this#on_expr acc el
 
   method on_if acc e b1 b2 =
     let acc = this#on_expr acc e in
@@ -198,7 +195,6 @@ class virtual ['a] nast_visitor: ['a] nast_visitor_type = object(this)
     | Try     (b, cl, fb)     -> this#on_try acc b cl fb
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
-    | Static_var el           -> this#on_static_var acc el
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e

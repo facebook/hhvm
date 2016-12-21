@@ -65,7 +65,6 @@ module NastToAst = struct
       | Return
       | Throw | While | If
       | For | Switch | Foreach
-      | Static_var
       | Do | Try
       | Noop | Fallthrough
 
@@ -81,7 +80,6 @@ module NastToAst = struct
       | Nast.For _ -> For
       | Nast.Switch _ -> Switch
       | Nast.Foreach _ -> Foreach
-      | Nast.Static_var _ -> Static_var
       | Nast.Do _ -> Do
       | Nast.Try _ -> Try
       | Nast.Noop -> Noop

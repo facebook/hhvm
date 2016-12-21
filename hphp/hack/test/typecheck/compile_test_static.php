@@ -14,16 +14,3 @@ function foo(): int {
   $x++;
   return $x;
 }
-
-function main(): void {
-  $acc = 0;
-  $acc += foo();
-  $acc += foo();
-  $acc += foo();
-  if($acc === 6) {
-    echo 'OK';
-  }
-  else {
-    echo 'Failure: test_static.1';
-  }
-}

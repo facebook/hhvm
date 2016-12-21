@@ -301,7 +301,6 @@ and stmt =
   | Continue of Pos.t
   | Throw of expr
   | Return of Pos.t * expr option
-  | Static_var of expr list
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block

@@ -57,7 +57,6 @@ module CheckFunctionType = struct
     | _, Noop
     | _, Fallthrough
     | _, Break _ | _, Continue _ -> ()
-    | _, Static_var _ -> ()
     | _, If (_, b1, b2) ->
         block f_type b1;
         block f_type b2;
@@ -693,8 +692,6 @@ and stmt env = function
   | Return (_, Some e)
   | Expr e | Throw (_, e) ->
     expr env e
-  | Static_var el ->
-    List.iter el (expr env)
   | If (e, b1, b2) ->
     expr env e;
     block env b1;

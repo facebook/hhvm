@@ -467,43 +467,6 @@ class local_finding_visitor = object(this)
      let localmap = this#on_fun_ localmap fn in
      LocalMap.pop_scopechain localmap
 
-   method on_static_variable localmap static =
-     (**
-       * Introducing a static variable hides any existing variable in this
-       * scope of the same name. We model this by simply replacing the existing
-       * scope entry with the new one. See commentary to force_add, above.
-       *
-       * There are two forms we are concerned with:
-       *
-       * static $x;
-       * static $x = 123;
-       *
-       * If we have neither expected form then we do not attempt to add a
-       * local to the map.
-       *
-       * Note that in the second form we do scan the initializer looking for
-       * locals; if the program has one then it is an error because the
-       * initializer must be a constant. But we should look for the use of a
-       * local because that is still a usage of the local! One imagines that
-       * the IDE could for instance detect something like
-       *
-       * static $a = 123;
-       * static $b = $a;
-       *
-       * and fix up the error appropriately. We cannot do that if we cannot
-       * find the local inside the initializer.
-       *)
-     match static with
-     | _, Lvar (pos, name) -> LocalMap.force_add name pos localmap
-     | _, Binop(Eq None, (_, Lvar (pos, name)), init) ->
-       let localmap = LocalMap.force_add name pos localmap in
-       this#on_expr localmap init
-     | _ -> localmap
-
-  method! on_static_var localmap statics =
-    List.fold_left statics ~init:localmap
-      ~f:begin fun l s -> this#on_static_variable l s end
-
   method! on_catch localmap (_, (pos, name), body) =
     (**
       * A catch block creates a local which is only in scope for the

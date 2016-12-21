@@ -1605,8 +1605,6 @@ and match_stmt
        if fst opt_res == dummy_success_res
        then (Matches [(DummyNode, Pos.pos_start loc)], env)
        else opt_res
-    | Static_var t_el, Static_var p_el ->
-       match_expr_list t_el p_el env
     | If (t_e, t_b1, t_b2), If (p_e, p_b1, p_b2) ->
        LM.match_attributes
          [match_expr t_e p_e;

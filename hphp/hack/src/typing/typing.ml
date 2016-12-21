@@ -589,15 +589,6 @@ and stmt env = function
     let env = try_catch (tb, cl) env in
     let env = block env fb in
     env
-  | Static_var el ->
-    let env = List.fold_left el ~f:begin fun env e ->
-      match e with
-        | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
-          Env.add_todo env (TGen.no_generic p x)
-        | _ -> env
-    end ~init:env in
-    let env, _ = List.map_env env el expr in
-    env
   | Throw (_, e) ->
     let p = fst e in
     let env, ty = expr env e in

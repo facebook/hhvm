@@ -553,7 +553,7 @@ module Typing                               = struct
   let fun_variadicity_hh_vs_php56           = 4043 (* DONT MODIFY!!!! *)
   let gena_expects_array                    = 4044 (* DONT MODIFY!!!! *)
   let generic_array_strict                  = 4045 (* DONT MODIFY!!!! *)
-  let generic_static                        = 4046 (* DONT MODIFY!!!! *)
+  (* DEPRECATED generic_static              = 4046 *)
   let implement_abstract                    = 4047 (* DONT MODIFY!!!! *)
   let interface_final                       = 4048 (* DONT MODIFY!!!! *)
   let invalid_shape_field_const             = 4049 (* DONT MODIFY!!!! *)
@@ -1816,11 +1816,6 @@ let implement_abstract ~is_final pos1 pos2 kind x =
     pos1, msg1;
     pos2, "Declaration is here";
   ]
-
-let generic_static pos x =
-  add Typing.generic_static pos (
-  "This static variable cannot use the type parameter "^x^"."
- )
 
 let fun_too_many_args pos1 pos2 =
   add_list Typing.fun_too_many_args [

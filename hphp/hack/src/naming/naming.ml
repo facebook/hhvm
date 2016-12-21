@@ -1529,7 +1529,6 @@ module Make (GetLocals : GetLocals) = struct
     | Throw e              -> let terminal = not (fst env).in_try in
                               N.Throw (terminal, expr env e)
     | Return (p, e)        -> N.Return (p, oexpr env e)
-    | Static_var el        -> N.Static_var (static_varl env el)
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b
@@ -1686,11 +1685,6 @@ module Make (GetLocals : GetLocals) = struct
     Env.scope_all env begin fun env ->
       List.map stmt_l (stmt env)
     end
-
-  and static_varl env l = List.map l (static_var env)
-  and static_var env = function
-    | p, Lvar _ as lv -> expr env (p, Binop(Eq None, lv, (p, Null)))
-    | e -> expr env e
 
   and expr_obj_get_name env = function
     | p, Id x -> p, N.Id x

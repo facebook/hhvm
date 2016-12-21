@@ -186,7 +186,6 @@ module type S = sig
   val trait_final : Pos.t -> unit
   val implement_abstract :
     is_final:bool -> Pos.t -> Pos.t -> string -> string -> unit
-  val generic_static : Pos.t -> string -> unit
   val fun_too_many_args : Pos.t -> Pos.t -> unit
   val fun_too_few_args : Pos.t -> Pos.t -> unit
   val fun_unexpected_nonvariadic : Pos.t -> Pos.t -> unit

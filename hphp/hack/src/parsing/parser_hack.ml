@@ -2030,7 +2030,6 @@ and statement_word env = function
   | "continue" -> statement_continue env
   | "throw"    -> statement_throw env
   | "return"   -> statement_return env
-  | "static"   -> statement_static env
   | "print"    -> statement_echo env
   | "echo"     -> statement_echo env
   | "if"       -> statement_if env
@@ -2102,55 +2101,6 @@ and return_value env =
       let e = expr env in
       expect env Tsc;
       Some e
-
-(*****************************************************************************)
-(* Static variables *)
-(*****************************************************************************)
-
-and statement_static env =
-  let pos = Pos.make env.file env.lb in
-  match L.token env.file env.lb with
-  | Tlvar ->
-      L.back env.lb;
-      let el = static_var_list env in
-      Static_var el
-  | _ ->
-      L.back env.lb;
-      let id = pos, Id (pos, "static") in
-      let e = expr_remain env id in
-      Expr e
-
-and static_var_list env =
-  let error_state = !(env.errors) in
-  let cst = static_var env in
-  match L.token env.file env.lb with
-  | Tsc ->
-      [cst]
-  | Tcomma ->
-      if !(env.errors) != error_state
-      then [cst]
-      else cst :: static_var_list_remain env
-  | _ -> error_expect env ";"; [cst]
-
-and static_var_list_remain env =
-  match L.token env.file env.lb with
-  | Tsc -> []
-  | _ ->
-      L.back env.lb;
-      let error_state = !(env.errors) in
-      let cst = static_var env in
-      match L.token env.file env.lb with
-      | Tsc ->
-          [cst]
-      | Tcomma ->
-          if !(env.errors) != error_state
-          then [cst]
-          else cst :: static_var_list_remain env
-      | _ ->
-          error_expect env ";"; [cst]
-
-and static_var env =
-  expr env
 
 (*****************************************************************************)
 (* Switch statement *)

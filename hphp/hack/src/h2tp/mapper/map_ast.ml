@@ -497,7 +497,6 @@ let mk_mapper = fun m_in ->
           let v1 = map_pos_t v1
           and v2 = map_of_option map_expr v2
           in Return ((v1, v2))
-      | Static_var v1 -> let v1 = map_of_list map_expr v1 in Static_var ((v1))
       | If ((v1, v2, v3)) ->
           let v1 = map_expr v1
           and v2 = map_block v2

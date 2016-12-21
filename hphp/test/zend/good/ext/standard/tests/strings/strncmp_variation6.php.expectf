@@ -771,6 +771,6 @@ int(0)
 int(0)
 
 -- Checking with out of character's range, given in binary format --
-int(1)
+bool(true)
 
 *** Done ***

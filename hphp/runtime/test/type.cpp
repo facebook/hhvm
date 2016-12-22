@@ -98,7 +98,7 @@ TEST(Type, KnownDataType) {
       << t.toString() << ".isKnownDataType()";
   }
   auto falseTypes = {
-    // TNull, // TODO(#3390819)
+    TNull,
     TCell,
     TGen,
     TInt | TDbl,

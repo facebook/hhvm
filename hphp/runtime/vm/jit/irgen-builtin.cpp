@@ -969,14 +969,6 @@ private:
     assertx(!m_params.forNativeImpl);
     int32_t stackIdx = safe_cast<int32_t>(m_params.numByAddr);
 
-    // Make sure we have loads for all of the stack elements.  We need to do
-    // this in forward order before we decref in backward order because
-    // extendStack will end up with values that are of type StkElem
-    // TODO(#6156498).
-    for (auto i = 0; i < stackIdx; ++i) {
-      top(env, BCSPRelOffset{i}, DataTypeGeneric);
-    }
-
     for (auto i = m_params.size(); i-- > 0;) {
       if (m_params[i].passByAddr) {
         --stackIdx;

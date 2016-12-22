@@ -1,0 +1,3 @@
+len($orig_bytes) = 10000
+stream_get_contents($fh, 9000) on zip stream = 9000
+stream_get_contents($fh) on zip stream = 10000

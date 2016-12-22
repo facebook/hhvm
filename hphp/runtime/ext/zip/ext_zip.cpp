@@ -41,7 +41,8 @@ static zip* _zip_open(const String& filename, int _flags, int* zep) {
 struct ZipStream : File {
   DECLARE_RESOURCE_ALLOCATION(ZipStream);
 
-  ZipStream(zip* z, const String& name) : m_zipFile(nullptr) {
+  ZipStream(zip* z, const String& name)
+  : File(false), m_zipFile(nullptr) {
     if (name.empty()) {
       return;
     }

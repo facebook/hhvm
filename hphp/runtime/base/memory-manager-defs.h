@@ -59,14 +59,18 @@ struct Header {
   size_t size() const;
 
   size_t allocSize() const {
-    // Hole and Free have exact sizes, so don't round them.
-    auto const sz = hdr_.kind == HeaderKind::Hole ||
-                    hdr_.kind == HeaderKind::Free
-      ? free_.size()
-      : MemoryManager::smallSizeClass(size());
-
-    assertx(sz % 16 == 0);
-    return sz;
+    auto const sz = size();
+    switch (hdr_.kind) {
+      case HeaderKind::Hole:
+      case HeaderKind::Free:
+      case HeaderKind::BigObj:
+      case HeaderKind::BigMalloc:
+        // these don't need rounding up to size classes.
+        assertx(sz % 16 == 0);
+        return sz;
+      default:
+        return MemoryManager::smallSizeClass(sz);
+    }
   }
 
   const Resumable* resumable() const {
@@ -309,49 +313,33 @@ inline size_t Header::size() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Fn> void BigHeap::iterate(Fn fn) {
-  auto in_slabs = !m_slabs.empty();
+  // slabs and bigs are sorted; walk through both in address order
+  const auto SENTINEL = (Header*) ~0LL;
   auto slab = std::begin(m_slabs);
   auto big = std::begin(m_bigs);
-
-  auto const bounds_from_slab = [] (const MemBlock& slab) {
-    return std::make_pair(
-      reinterpret_cast<Header*>(slab.ptr),
-      reinterpret_cast<Header*>(static_cast<char*>(slab.ptr) + slab.size)
-    );
-  };
-
-  Header* hdr;
-  Header* slab_end;
-
-  if (in_slabs) {
-    std::tie(hdr, slab_end) = bounds_from_slab(*slab);
-  } else {
-    hdr = slab_end = nullptr;
-    if (big != std::end(m_bigs)) hdr = reinterpret_cast<Header*>(*big);
-  }
-  while (in_slabs || big != end(m_bigs)) {
-    auto const h = hdr;
-
-    if (in_slabs) {
-      // Move to the next header in the slab.
-      hdr = reinterpret_cast<Header*>(reinterpret_cast<char*>(hdr) +
-                                      hdr->allocSize());
-      if (hdr >= slab_end) {
-        assert(hdr == slab_end && "hdr > slab_end indicates corruption");
-        // move to next slab
-        if (++slab != m_slabs.end()) {
-          std::tie(hdr, slab_end) = bounds_from_slab(*slab);
-        } else {
-          // move to first big block
-          in_slabs = false;
-          if (big != std::end(m_bigs)) hdr = reinterpret_cast<Header*>(*big);
-        }
-      }
+  auto slabend = std::end(m_slabs);
+  auto bigend = std::end(m_bigs);
+  while (slab != slabend || big != bigend) {
+    Header* slab_hdr = slab != slabend ? (Header*)slab->ptr : SENTINEL;
+    Header* big_hdr = big != bigend ? (Header*)*big : SENTINEL;
+    assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
+    Header *h, *end;
+    if (slab_hdr < big_hdr) {
+      h = slab_hdr;
+      end = (Header*)((char*)h + slab->size);
+      ++slab;
+      assert(end <= big_hdr); // otherwise slab overlaps next big
     } else {
-      // move to next big block
-      if (++big != std::end(m_bigs)) hdr = reinterpret_cast<Header*>(*big);
+      h = big_hdr;
+      end = nullptr; // ensure we don't loop below
+      ++big;
     }
-    fn(h);
+    do {
+      auto size = h->allocSize();
+      fn(h);
+      h = (Header*)((char*)h + size);
+    } while (h < end);
+    assert(!end || h == end); // otherwise, last object was truncated
   }
 }
 
@@ -436,7 +424,7 @@ struct PtrMap {
   static constexpr auto Mask = 0xffffffffffffULL; // 48 bit address space
 
   void insert(const Header* h) {
-    assert(!sorted_);
+    sorted_ &= regions_.empty() || h > regions_.back().first;
     regions_.emplace_back(h, h->size());
   }
 
@@ -478,10 +466,11 @@ struct PtrMap {
   }
 
   void prepare() {
-    assert(!sorted_);
-    std::sort(regions_.begin(), regions_.end());
+    if (!sorted_) {
+      std::sort(regions_.begin(), regions_.end());
+      sorted_ = true;
+    }
     assert(sanityCheck());
-    sorted_ = true;
   }
 
   size_t size() const {
@@ -497,19 +486,16 @@ struct PtrMap {
 private:
   bool sanityCheck() const {
     // Verify that all the regions are in increasing and non-overlapping order.
-    void* last = nullptr;
+    DEBUG_ONLY void* last = nullptr;
     for (const auto& region : regions_) {
-      if (!last || last <= region.first) {
-        last = (void*)(uintptr_t(region.first) + region.second);
-      } else {
-        return false;
-      }
+      assert(!last || last <= region.first);
+      last = (void*)(uintptr_t(region.first) + region.second);
     }
     return true;
   }
 
   std::vector<std::pair<const Header*, std::size_t>> regions_;
-  bool sorted_ = false;
+  bool sorted_{true};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

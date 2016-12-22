@@ -611,6 +611,8 @@ void MemoryManager::initFree() {
       }
     }
   }
+  m_heap.sortSlabs();
+  m_heap.sortBigs();
 }
 
 void MemoryManager::beginQuarantine() {

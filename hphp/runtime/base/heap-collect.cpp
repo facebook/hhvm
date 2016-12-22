@@ -201,6 +201,7 @@ NEVER_INLINE void Marker::init() {
     if (h->kind() == HeaderKind::Free) return;
     h->hdr_.marks = GCBits::Unmarked;
     allocd_ += h->size();
+    ptrs_.insert(h);
     switch (h->kind()) {
       case HeaderKind::Apc:
       case HeaderKind::Globals:
@@ -213,10 +214,8 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Keyset:
       case HeaderKind::String:
       case HeaderKind::Ref:
-        ptrs_.insert(h);
         break;
       case HeaderKind::Resource:
-        ptrs_.insert(h);
         if (typeIndexIsUnknown(h->res_.typeIndex())) {
           unknown_objects_.emplace_back(h);
         }
@@ -233,11 +232,9 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::WaitHandle:
         assert(!h->obj_.getAttribute(ObjectData::HasNativeData) &&
                "object with NativeData from forEachHeader");
-        ptrs_.insert(h);
         break;
       case HeaderKind::AsyncFuncFrame: {
         // Pointers to either the frame or object will be mapped to the frame.
-        ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->asyncFuncWH());
         obj->hdr_.marks = GCBits::Unmarked;
         break;
@@ -245,7 +242,6 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::NativeData: {
         // Pointers to either the native data or the object will be mapped to
         // the native data.
-        ptrs_.insert(h);
         if (typeIndexIsUnknown(h->native_.typeIndex())) {
           unknown_objects_.emplace_back(h);
         }
@@ -256,14 +252,12 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::ClosureHdr: {
         // Pointers to either the closure header or the closure object will
         // be mapped to the closure header.
-        ptrs_.insert(h);
         auto obj = reinterpret_cast<const Header*>(h->closureObj());
         obj->hdr_.marks = GCBits::Unmarked;
         break;
       }
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
-        ptrs_.insert(h);
         if (typeIndexIsUnknown(h->malloc_.typeIndex())) {
           unknown_objects_.emplace_back(h);
         }
@@ -278,7 +272,7 @@ NEVER_INLINE void Marker::init() {
       case HeaderKind::Hole:
       case HeaderKind::BigObj:
         // Hole and BigObj are skipped in ForEachHeader. Free is skipped above.
-        assert(false && "skipped by forEachHeader()");
+        always_assert(false && "skipped by forEachHeader()");
         break;
     }
   });
@@ -560,22 +554,18 @@ void logCollection(const char* phase, const Marker& mkr) {
   // log stuff
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     Trace::traceRelease(
-      "gc mmUsage %luM trigger %luM max %luM init %lums mark %lums "
-      "allocd %luM exact %.1f%% ambig %.1f%% free %.1fM "
-      "cscan-root %.1fM cscan-heap %.1fM "
-      "xscan-root %.1fM xscan-heap %.1fM\n",
+      "gc mmUsage %luM trigger %luM init %lums mark %lums "
+      "allocd %luM allocd-count %lu free %.1fM "
+      "cscan-heap %.1fM "
+      "xscan-heap %.1fM\n",
       t_pre_stats.mmUsage/1024/1024,
       t_trigger/1024/1024,
-      t_pre_stats.limit/1024/1024,
       mkr.init_us_/1000,
       mkr.mark_us_/1000,
       mkr.allocd_.bytes/1024/1024,
-      100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
-      100.0 * mkr.ambig_.bytes / mkr.allocd_.bytes,
+      mkr.allocd_.count,
       mkr.freed_.bytes/1024.0/1024.0,
-      mkr.cscanned_roots_.bytes/1024.0/1024.0,
       (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0,
-      mkr.xscanned_roots_.bytes/1024.0/1024.0,
       (mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes)/1024.0/1024.0
     );
   }
@@ -593,6 +583,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("sweep_micros", mkr.sweep_us_);
   // size metrics gathered during gc
   sample.setInt("allocd_bytes", mkr.allocd_.bytes);
+  sample.setInt("allocd_objects", mkr.allocd_.count);
   sample.setInt("marked_bytes", mkr.marked_.bytes);
   sample.setInt("ambig_bytes", mkr.ambig_.bytes);
   sample.setInt("unknown_bytes", mkr.unknown_.bytes);

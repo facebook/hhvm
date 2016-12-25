@@ -744,7 +744,11 @@ Func::SharedData::~SharedData() {
 }
 
 void Func::SharedData::atomicRelease() {
-  delete this;
+  if (UNLIKELY(m_hasExtendedSharedData)) {
+    delete (ExtendedSharedData*)this;
+  } else {
+    delete this;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

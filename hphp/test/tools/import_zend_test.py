@@ -1368,7 +1368,7 @@ def walk(filename, dest_subdir):
         test = test.replace('dummy.txt', 'dummy-lcfirst.txt')
     if 'ext/standard/tests/strings/strncmp_variation6.php' in full_dest_filename:
         test = re.sub(r'^var_dump\( strncmp\(\$str1, \$str2, 8\) \)', 'var_dump( strncmp($str1, $str2, 8) > 0)', test)
-        exp  = re.sub(r'range, given in binary format --\nint\(1\)', 'range, given in binary format --\nbool(true)', exp)
+        exp = re.sub(r'range, given in binary format --\nint\(1\)', 'range, given in binary format --\nbool(true)', exp)
         open(full_dest_filename + '.expectf', 'w').write(exp)
     if 'ext/standard/tests/strings/ucfirst.php' in full_dest_filename:
         test = test.replace('dummy.txt', 'dummy-ucfirst.txt')

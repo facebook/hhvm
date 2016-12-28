@@ -57,9 +57,9 @@ foreach ($schemes as $i => $scheme) {
   $server = $servers[$i];
   $port = $ports[$i];
 
+  echo "Testing $scheme://\n";
   $pid = pcntl_fork();
   if( $pid ) {
-    echo "Testing $scheme://\n";
     test_server($server);
     pcntl_wait($status);
     exit;

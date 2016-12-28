@@ -81,6 +81,9 @@ no_import = (
     # Zend's "run-tests" uses the cgi-fcgi sapi to run tests
     # our implementation is simply different by design
     '/ext/standard/versioning/php_sapi_name_variation001.phpt',
+
+    # bad assumption about system call effect
+    'zend/good/ext/standard/tests/general_functions/proc_nice_basic.php',
 )
 
 # For marking tests as always failing. Used to keep flaky tests in flaky/.

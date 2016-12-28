@@ -82,8 +82,6 @@ no_import = (
     # our implementation is simply different by design
     '/ext/standard/versioning/php_sapi_name_variation001.phpt',
 
-    # bad assumption about system call effect
-    'zend/good/ext/standard/tests/general_functions/proc_nice_basic.php',
 )
 
 # For marking tests as always failing. Used to keep flaky tests in flaky/.
@@ -337,6 +335,9 @@ flaky_tests = (
     '/ext/standard/tests/general_functions/getservbyname_variation9.php',
     '/ext/standard/tests/general_functions/getservbyname_variation10.php',
     '/ext/standard/tests/general_functions/getservbyport_variation1.php',
+
+    # bad assumption about system call effect
+    '/ext/standard/tests/general_functions/proc_nice_basic.php',
 )
 
 # Tests that work but not in repo mode

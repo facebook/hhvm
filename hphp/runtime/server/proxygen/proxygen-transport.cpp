@@ -625,8 +625,11 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
       // mechanism
       {
         Lock lock(this);
-        for (auto& it: m_pushHandlers) {
-          auto pushTxn = it.second->getTransaction();
+        // Note that pushTxn->sendAbort() can remove pushTxn from
+        // m_pushHandlers, so we need to be careful about how we
+        // iterate m_pushHandlers.
+        for (auto it = m_pushHandlers.begin(); it != m_pushHandlers.end(); ) {
+          auto pushTxn = it++->second->getTransaction();
           if (pushTxn && !pushTxn->isEgressEOMSeen()) {
             LOG(ERROR) << "Aborting unfinished push txn=" << *pushTxn;
             pushTxn->sendAbort();

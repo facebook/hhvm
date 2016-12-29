@@ -36,9 +36,8 @@ namespace detail {
  * The dominating restriction is used initially for the block and then updated
  * whenever a vregrestrict/vregunrestrict is encountered.
  *
- *   INT_MAX: uninitialized
- *      >= 0: new vregs allowed
- *      <  0: new vregs restricted
+ *   >= 0: new vregs allowed
+ *    < 0: new vregs restricted
  *
  * vregrestrict and vregunrestrict can be nested for scoping purposes. Each
  * nested vregrestrict decreases the constraint. vregunrestrict increases it.

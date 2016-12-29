@@ -35,8 +35,10 @@ namespace HPHP { namespace jit {
 
 namespace detail {
 
+constexpr auto kInvalidConstraint = std::numeric_limits<int>::max();
+
 jit::vector<int> computeDominatingConstraints(Vunit& unit) {
-  jit::vector<int> vregConstraints(unit.blocks.size(), INT_MAX);
+  jit::vector<int> vregConstraints(unit.blocks.size(), kInvalidConstraint);
 
   // Build reverse postorder list of blocks
   auto const rpo = sortBlocks(unit);
@@ -45,25 +47,24 @@ jit::vector<int> computeDominatingConstraints(Vunit& unit) {
   // this as the initial vreg constraint for each block, adjusting as they
   // encounter vregrestrict/vregunrestrict during lowering.
   vregConstraints[rpo[0]] = 0;
-  for (auto b : rpo) {
+  for (auto const b : rpo) {
     // Iterate through the instructions updating the constraint accordingly.
     auto con = vregConstraints[b];
-    for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
-      auto& inst = unit.blocks[b].code[i];
+    for (auto const& inst : unit.blocks[b].code) {
       if (inst.op == Vinstr::vregrestrict) {
         con--;
       } else if (inst.op == Vinstr::vregunrestrict) {
         con++;
       }
     }
-    assert_flog(con != INT_MAX,
+    assert_flog(con != kInvalidConstraint,
                 "Dominating constraint can't be uninitialized.");
 
     // Pass the contraint to each of the successors, enforcing that a block
     // isn't passed conflicting contraints from predecessors. i.e. A successor
     // must be pass all restrict or all allow/none.
-    for (auto s : succs(unit.blocks[b])) {
-      if (vregConstraints[s] == INT_MAX) {
+    for (auto const s : succs(unit.blocks[b])) {
+      if (vregConstraints[s] == kInvalidConstraint) {
         vregConstraints[s] = con;
       } else {
         assert_flog(vregConstraints[s] == con,

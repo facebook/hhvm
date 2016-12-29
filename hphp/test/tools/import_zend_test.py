@@ -334,6 +334,9 @@ flaky_tests = (
     '/ext/standard/tests/general_functions/getservbyname_variation9.php',
     '/ext/standard/tests/general_functions/getservbyname_variation10.php',
     '/ext/standard/tests/general_functions/getservbyport_variation1.php',
+
+    # bad assumption about system call effect
+    '/ext/standard/tests/general_functions/proc_nice_basic.php',
 )
 
 # Tests that work but not in repo mode

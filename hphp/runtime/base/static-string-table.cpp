@@ -27,6 +27,8 @@
 
 #include <folly/AtomicHashMap.h>
 
+#include <type_traits>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -104,25 +106,32 @@ using StringDataMap = folly::AtomicHashMap<
 >;
 
 struct EmbeddedStringMap {
-  EmbeddedStringMap() {}
-  ~EmbeddedStringMap() {}
-
   explicit operator bool() const { return inited; }
-  StringDataMap& operator*() { assert(inited); return value; }
-  StringDataMap* operator->() { assert(inited); return &value; }
+
+  StringDataMap* operator->() {
+    assert(inited);
+    return reinterpret_cast<StringDataMap*>(&data);
+  }
+  StringDataMap& operator*() { assert(inited); return *operator->(); }
+
   void emplace(uint32_t size, const StringDataMap::Config& config) {
     assert(!inited);
-    new (&value) StringDataMap(size, config);
+    new (&data) StringDataMap(size, config);
     inited = true;
   }
+
   void clear() {
     if (inited) {
-      value.~StringDataMap();
+      operator*().~StringDataMap();
       inited = false;
     }
   }
+
  private:
-  union { StringDataMap value; };
+  typename std::aligned_storage<
+    sizeof(StringDataMap),
+    alignof(StringDataMap)
+  >::type data;
   bool inited;
 };
 

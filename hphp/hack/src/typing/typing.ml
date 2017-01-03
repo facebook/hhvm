@@ -1258,11 +1258,12 @@ and expr_
       then Typing_equality_check.assert_nullable p bop env ty;
       env, T.Any, (Reason.Rcomp p, Tprim Tbool)
   | Binop (bop, e1, e2) ->
-      let env, _te1, ty1 = raw_expr in_cond env e1 in
-      let env, _te2, ty2 = raw_expr in_cond env e2 in
-      let env, _te3, ty = binop in_cond p env bop (fst e1) ty1 (fst e2) ty2 in
+      let env, te1, ty1 = raw_expr in_cond env e1 in
+      let env, te2, ty2 = raw_expr in_cond env e2 in
+      let env, te3, ty =
+        binop in_cond p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
       Typing_hooks.dispatch_binop_hook p bop ty1 ty2;
-      env, T.Any, ty
+      env, te3, ty
   | Pipe ((_, id), e1, e2) ->
       let env, _te1, ty = expr env e1 in
       (** id is the ID of the $$ that is implicitly declared by the pipe.
@@ -1283,8 +1284,8 @@ and expr_
        *)
       env, T.Any, ty2
   | Unop (uop, e) ->
-      let env, _te, ty = raw_expr in_cond env e in
-      unop p env uop ty
+      let env, te, ty = raw_expr in_cond env e in
+      unop p env uop te ty
   | Eif (c, e1, e2) -> eif env ~coalesce:false ~in_cond p c e1 e2
   | NullCoalesce (e1, e2) -> eif env ~coalesce:true ~in_cond p e1 None e2
   | Typename sid ->
@@ -3512,17 +3513,19 @@ and call_param todos env (name, x) ((pos, _ as e), arg_ty) =
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)
 
-and unop p env uop ty =
+and unop p env uop te ty =
+  let make_result env te result_ty =
+    env, T.Unop(uop, te, result_ty), result_ty in
   match uop with
   | Ast.Unot ->
       Async.enforce_not_awaitable env p ty;
       (* !$x (logical not) works with any type, so we just return Tbool *)
-      env, T.Any, (Reason.Rlogic_ret p, Tprim Tbool)
+      make_result env te (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Utild ->
       (* ~$x (bitwise not) only works with int *)
       let env = Type.sub_type p Reason.URnone env ty
         (Reason.Rarith p, Tprim Tint) in
-      env, T.Any, (Reason.Rarith p, Tprim Tint)
+      make_result env te (Reason.Rarith p, Tprim Tint)
   | Ast.Uincr
   | Ast.Upincr
   | Ast.Updecr
@@ -3532,14 +3535,14 @@ and unop p env uop ty =
       (* math operators work with int or floats, so we call sub_type *)
       let env = Type.sub_type p Reason.URnone env ty
         (Reason.Rarith p, Tprim Tnum) in
-      env, T.Any, ty
+      make_result env te ty
   | Ast.Uref ->
       (* We basically just ignore references in non-strict files *)
       if Env.is_strict env then
         Errors.reference_expr p;
-      env, T.Any, ty
+      make_result env te ty
 
-and binop in_cond p env bop p1 ty1 p2 ty2 =
+and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   let rec is_any ty =
     match Env.expand_type env ty with
     | (_, (_, Tany)) -> true
@@ -3563,6 +3566,8 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
   let enforce_sub_ty env ty1 ty2 =
     let env = Type.sub_type p Reason.URnone env ty1 ty2 in
     Env.expand_type env ty1 in
+  let make_result env te1 te2 ty =
+    env, T.Binop(bop, te1, te2, ty), ty in
   match bop with
   | Ast.Plus ->
       let env, ty1 = TUtils.fold_unresolved env ty1 in
@@ -3574,6 +3579,11 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
        * the addition to produce a supertype. (We could also handle
        * when they have mismatching annotations, but we get better error
        * messages if we just let those get unified in the next case. *)
+      (* The general types are:
+       *   function<Tk,Tv>(array<Tk,Tv>, array<Tk,Tv>): array<Tk,Tv>
+       *   function<T>(array<T>, array<T>): array<T>
+       * and subtyping on the arguments deals with everything
+       *)
       | (_, Tarraykind (AKmap _ as ak)), (_, Tarraykind (AKmap _))
       | (_, Tarraykind (AKvec _ as ak)), (_, Tarraykind (AKvec _)) ->
           let env, a_sup = Env.fresh_unresolved_type env in
@@ -3586,40 +3596,53 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
           ) in
           let env = Type.sub_type p1 Reason.URnone env ety1 res_ty in
           let env = Type.sub_type p2 Reason.URnone env ety2 res_ty in
-          env, T.Any, res_ty
+          make_result env te1 te2 res_ty
       | (_, Tarraykind _), (_, Tarraykind (AKshape _)) ->
         let env, ty2 = Typing_arrays.downcast_aktypes env ty2 in
-        binop in_cond p env bop p1 ty1 p2 ty2
+        binop in_cond p env bop p1 te1 ty1 p2 te2 ty2
       | (_, Tarraykind (AKshape _)), (_, Tarraykind _) ->
         let env, ty1 = Typing_arrays.downcast_aktypes env ty1 in
-        binop in_cond p env bop p1 ty1 p2 ty2
+        binop in_cond p env bop p1 te1 ty1 p2 te2 ty2
       | (_, Tarraykind _), (_, Tarraykind _)
       | (_, Tany), (_, Tarraykind _)
       | (_, Tarraykind _), (_, Tany) ->
           let env, ty = Type.unify p Reason.URnone env ty1 ty2 in
-          env, T.Any, ty
+          make_result env te1 te2 ty
       | (_, (Tany | Tmixed | Tarraykind _ | Toption _
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
             )
-        ), _ -> binop in_cond p env Ast.Minus p1 ty1 p2 ty2
+        ), _ -> binop in_cond p env Ast.Minus p1 te1 ty1 p2 te2 ty2
       )
   | Ast.Minus | Ast.Star ->
     begin
       let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
       let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
-      (* if either side is a float then float: 1.0 - 1 -> float *)
+      (* If either side is a float then float: 1.0 - 1 -> float *)
+      (* These have types
+       *   function(float, num): float
+       *   function(num, float): float
+       *)
       match is_sub_prim env ty1 Tfloat, is_sub_prim env ty2 Tfloat with
-      | (Some r, _) | (_, Some r) -> env, T.Any, (r, Tprim Tfloat)
+      | (Some r, _) | (_, Some r) ->
+        make_result env te1 te2 (r, Tprim Tfloat)
       | _, _ ->
       (* Both sides are integers, then integer: 1 - 1 -> int *)
+      (* This has type
+       *   function(int, int): int
+       *)
         match is_sub_prim env ty1 Tint, is_sub_prim env ty2 Tint with
-        | (Some _, Some _) -> env, T.Any, (Reason.Rarith_ret p, Tprim Tint)
+        | (Some _, Some _) ->
+          make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
         | _, _ ->
           (* Either side is a non-int num then num *)
+          (* This has type
+           *   function(num, num): num
+           *)
           match is_sub_num_not_sub_int env ty1,
                 is_sub_num_not_sub_int env ty2 with
-          | (Some r, _) | (_, Some r) -> env, T.Any, (r, Tprim Tnum)
+          | (Some r, _) | (_, Some r) ->
+            make_result env te1 te2 (r, Tprim Tnum)
           (* Otherwise? *)
           | _, _ -> env, T.Any, ty1
     end
@@ -3628,39 +3651,61 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
       let env, ty1 = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tnum) in
       let env, ty2 = enforce_sub_ty env ty2 (Reason.Rarith p2, Tprim Tnum) in
       (* If either side is a float then float *)
+      (* These have types
+       *   function(float, num) : float
+       *   function(num, float) : float
+       * [Actually, for division result can be false if second arg is zero]
+       *)
       match is_sub_prim env ty1 Tfloat, is_sub_prim env ty2 Tfloat with
-      | (Some r, _) | (_, Some r) -> env, T.Any, (r, Tprim Tfloat)
-      (* Otherwise num *)
+      | (Some r, _) | (_, Some r) ->
+        make_result env te1 te2 (r, Tprim Tfloat)
+      (* Otherwise it has type
+       *   function(num, num) : num
+       * [Actually, for division result can be false if second arg is zero]
+       *)
       | _, _ ->
       let r = match bop with
         | Ast.Slash -> Reason.Rret_div p
         | _ -> Reason.Rarith_ret p in
-      env, T.Any, (r, Tprim Tnum)
+      make_result env te1 te2 (r, Tprim Tnum)
     end
   | Ast.Percent ->
+     (* Integer remainder function has type
+      *   function(int, int) : int
+      * [Actually, result can be false if second arg is zero]
+      *)
       let env, _ = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
       let env, _ = enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
-      env, T.Any, (Reason.Rarith_ret p, Tprim Tint)
+      make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
   | Ast.Xor ->
     begin
       match is_sub_prim env ty1 Tbool, is_sub_prim env ty2 Tbool with
       | (Some _, _) | (_, Some _) ->
+        (* Logical xor:
+         *   function(bool, bool) : bool
+         *)
         let env, _ =
           enforce_sub_ty env ty1 (Reason.Rlogic_ret p1, Tprim Tbool) in
         let env, _ =
           enforce_sub_ty env ty2 (Reason.Rlogic_ret p1, Tprim Tbool) in
-        env, T.Any, (Reason.Rlogic_ret p, Tprim Tbool)
+        make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
       | _, _ ->
+        (* Arithmetic xor:
+         *   function(int, int) : int
+         *)
         let env, _ = enforce_sub_ty env ty1 (Reason.Rarith p1, Tprim Tint) in
         let env, _ = enforce_sub_ty env ty2 (Reason.Rarith p1, Tprim Tint) in
-        env, T.Any, (Reason.Rarith_ret p, Tprim Tint)
+        make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tint)
     end
+  (* Equality and disequality:
+   *   function<T>(T, T): bool
+   *)
   | Ast.Eqeq  | Ast.Diff  ->
-      env, T.Any, (Reason.Rcomp p, Tprim Tbool)
+      make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.EQeqeq | Ast.Diff2 ->
       if not in_cond
       then Typing_equality_check.assert_nontrivial p bop env ty1 ty2;
-      env, T.Any, (Reason.Rcomp p, Tprim Tbool)
+      make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte ->
       let ty_num = (Reason.Rcomp p, Tprim Nast.Tnum) in
       let ty_string = (Reason.Rcomp p, Tprim Nast.Tstring) in
@@ -3668,24 +3713,35 @@ and binop in_cond p env bop p1 ty1 p2 ty2 =
         (Reason.Rcomp p, Tclass ((p, SN.Classes.cDateTime), [])) in
       let both_sub ty =
         SubType.is_sub_type env ty1 ty && SubType.is_sub_type env ty2 ty in
+      (* So we have three different types here:
+       *   function(num, num): bool
+       *   function(string, string): bool
+       *   function(DateTime, DateTime): bool
+       *)
       if both_sub ty_num || both_sub ty_string || both_sub ty_datetime
-      then env, T.Any, (Reason.Rcomp p, Tprim Tbool)
+      then make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
       else
         (* TODO this is questionable; PHP's semantics for conversions with "<"
          * are pretty crazy and we may want to just disallow this? *)
+        (* This is universal:
+         *   function<T>(T, T): bool
+         *)
         let env, _ = Type.unify p Reason.URnone env ty1 ty2 in
-        env, T.Any, (Reason.Rcomp p, Tprim Tbool)
+        make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.Dot ->
+    (* A bit weird, this one:
+     *   function(Stringish | string, Stringish | string) : string)
+     *)
       let env = SubType.sub_string p1 env ty1 in
       let env = SubType.sub_string p2 env ty2 in
-      env, T.Any, (Reason.Rconcat_ret p, Tprim Tstring)
+      make_result env te1 te2 (Reason.Rconcat_ret p, Tprim Tstring)
   | Ast.AMpamp
   | Ast.BArbar ->
-      env, T.Any, (Reason.Rlogic_ret p, Tprim Tbool)
+      make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Amp | Ast.Bar | Ast.Ltlt | Ast.Gtgt ->
       let env, _ = enforce_sub_ty env ty1 (Reason.Rbitwise p1, Tprim Tint) in
       let env, _ = enforce_sub_ty env ty2 (Reason.Rbitwise p2, Tprim Tint) in
-      env, T.Any, (Reason.Rbitwise_ret p, Tprim Tint)
+      make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)
   | Ast.Eq _ ->
       assert false
 

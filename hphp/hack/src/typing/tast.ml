@@ -96,8 +96,11 @@ and expr =
   | Pair of expr * expr
   | Expr_list of expr list
   | Cast of ty * expr
-  | Unop of Ast.uop * expr
-  | Binop of Ast.bop * expr * expr
+  (* TODO TAST: use an "instrinsic" to precisely describe the
+   * overloaded operation that we have resolved for unop and binop
+   *)
+  | Unop of Ast.uop * expr * ty
+  | Binop of Ast.bop * expr * expr * ty
   (** The ID of the $$ that is implicitly declared by this pipe. *)
   | Pipe of Local_id.t * expr * expr
   (* Explicit type must be a supertype of the types of the branches. *)

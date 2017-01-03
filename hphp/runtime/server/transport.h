@@ -260,7 +260,9 @@ public:
    * Attempt to push the resource identified by host/path on this transport
    *
    * @param priority (3 bit priority, 0 = highest, 7 = lowest),
-   * @param headers HTTP headers for this resource
+   * @param promiseHeaders HTTP request headers for this resource
+   *        (for PUSH_PROMISE)
+   * @param responseHeaders HTTP response headers for this resource
    * @param body body bytes (optional)
    * @param size length of @p body or 0
    * @param eom true if no more body bytes are expected
@@ -270,8 +272,9 @@ public:
    *         immediately.
    */
   virtual int64_t pushResource(const char *host, const char *path,
-                               uint8_t priority, const Array& headers,
-                                const void *data, int size, bool eom) {
+                               uint8_t priority, const Array& promiseHeaders,
+                               const Array& responseHeaders,
+                               const void *data, int size, bool eom) {
     return 0;
   };
 

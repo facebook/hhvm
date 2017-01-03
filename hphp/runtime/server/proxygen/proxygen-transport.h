@@ -183,7 +183,8 @@ struct ProxygenTransport final
   bool supportsServerPush() override;
 
   int64_t pushResource(const char *host, const char *path,
-                       uint8_t priority, const Array &headers,
+                       uint8_t priority, const Array &promiseHeaders,
+                       const Array &responseHeaders,
                        const void *data, int size, bool eom) override;
 
   void pushResourceBody(int64_t id,

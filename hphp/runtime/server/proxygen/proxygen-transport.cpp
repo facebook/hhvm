@@ -70,11 +70,14 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
   PushTxnHandler(uint64_t pushId,
                  const std::shared_ptr<ProxygenTransport>& transport,
                  const char *host, const char *path,
-                 uint8_t priority, const Array &headers, bool isSecure)
+                 uint8_t priority, const Array &promiseHeaders,
+                 const Array &responseHeaders,
+                 bool isSecure)
       : m_pushId(pushId),
         m_transport(transport) {
-    createPushPromise(host, path, priority, headers, isSecure);
+    createPushPromise(host, path, priority, promiseHeaders, isSecure);
     m_response.setStatusCode(200);
+    addHeadersToMessage(m_response, responseHeaders);
   }
 
   proxygen::HTTPTransaction *getOrCreateTransaction(
@@ -135,24 +138,27 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
     m_pushPromise.setIsChunked(true); // implicitly chunked
     m_pushPromise.setPriority(priority);
 
+    addHeadersToMessage(m_pushPromise, headers);
+    m_pushPromise.getHeaders().set(HTTP_HEADER_HOST, host);
+  }
+
+  void addHeadersToMessage(HTTPMessage& message, const Array &headers) {
     for (ArrayIter iter(headers); iter; ++iter) {
       Variant key = iter.first();
       auto header = iter.second().toString();
       if (key.isString() && !key.toString().empty()) {
-        m_pushPromise.getHeaders().add(key.toString().data(), header.data());
+        message.getHeaders().add(key.toString().data(), header.data());
       } else {
         int pos = header.find(": ");
         if (pos >= 0) {
           std::string name = header.substr(0, pos).data();
           std::string value = header.substr(pos + 2).data();
-          m_pushPromise.getHeaders().add(name, value);
+          message.getHeaders().add(name, value);
         } else {
           Logger::Error("throwing away bad header: %s", header.data());
         }
       }
     }
-
-    m_pushPromise.getHeaders().set(HTTP_HEADER_HOST, host);
   }
 
   uint64_t m_pushId;
@@ -728,7 +734,9 @@ bool ProxygenTransport::supportsServerPush() {
 }
 
 int64_t ProxygenTransport::pushResource(const char *host, const char *path,
-                                        uint8_t priority, const Array &headers,
+                                        uint8_t priority,
+                                        const Array &promiseHeaders,
+                                        const Array &responseHeaders,
                                         const void *data, int size,
                                         bool eom) {
   if (!supportsServerPush()) {
@@ -738,7 +746,7 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   int64_t pushId = m_nextPushId++;
   PushTxnHandler *handler = new PushTxnHandler(
     pushId, shared_from_this(),
-    host, path, priority, headers,
+    host, path, priority, promiseHeaders, responseHeaders,
     m_request && m_request->isSecure());
   {
     Lock lock(this);

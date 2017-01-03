@@ -22,6 +22,9 @@ let expect_id_error expected got = expect_error_helper expected got.id
 let expect_method_name expected got = expect_value
   (fun got -> got.method_name) expected got
 
+let expect_params expected got = expect_value
+  (fun got -> got.params) expected got
+
 let test_invalid_json () = test
   "NOT A VALID JSON STRING"
   (expect_error @@
@@ -84,6 +87,16 @@ let test_unsubscribe_call () = test
   {|{"protocol":"service_framework3_rpc","id":4,"type":"unsubscribe"}|}
   (expect_method_name Unsubscribe_call)
 
+let test_jsonrpc_method_name () = test
+  {|{"jsonrpc":"2.0","method":"method_name"}|}
+  (expect_method_name @@ Method_name "method_name")
+
+let test_jsonrpc_params_name () = test
+  {|{"jsonrpc":"2.0","method":"x","params":{"aaa": "bbb"}}|}
+  (expect_params @@ Some Hh_json.(JSON_Object [
+    "aaa", JSON_String "bbb"
+  ]))
+
 let tests = [
   "test_invalid_json", test_invalid_json;
   "test_non_object", test_non_object;
@@ -98,6 +111,8 @@ let tests = [
   "test_args_not_object", test_args_not_object;
   "test_method_name", test_method_name;
   "test_unsubscribe_call", test_unsubscribe_call;
+  "test_jsonrpc_method_name", test_jsonrpc_method_name;
+  "test_jsonrpc_params_name", test_jsonrpc_params_name;
 ]
 
 let () =

@@ -14,19 +14,7 @@ open Ide_rpc_protocol_parser_types
 
 (* Test suite for Nuclide-rpc version of the API responses  *)
 
-let test_response response expected =
-  (* "Canonicalize" expected string, by parsing and unparsing it *)
-  let expected = Hh_json.(json_to_string (json_of_string expected)) in
-  let response = Hh_json.json_to_string  (
-    Ide_message_printer.to_json
-      ~id:(Some 4)
-      ~protocol:Nuclide_rpc
-      ~version:V0
-      ~response
-    )
-  in
-  assert_equal expected response;
-  true
+let test_response = test_response Nuclide_rpc V0
 
 let test_autocomplete_response () =
   let response = Autocomplete_response [{

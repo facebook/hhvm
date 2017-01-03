@@ -140,9 +140,17 @@ let handle_push_message = function
     Printf.eprintf "Another persistent client have connected. Exiting.\n";
     raise Exit_status.(Exit_with IDE_new_client_connected)
 
-let handle_error _id _protocol e =
-  (* TODO: implement "real" error messages *)
-  Printf.eprintf "%s" (Ide_rpc_protocol_parser.error_t_to_string e)
+let handle_error id protocol error =
+  match protocol with
+  | Nuclide_rpc ->
+    (* We never got to implementing "real" error handling for Nuclide-rpc,
+     * and there is no point now *)
+    Printf.eprintf "%s\n" (Ide_rpc_protocol_parser.error_t_to_string error);
+    flush stderr
+  | JSON_RPC2 ->
+    Json_rpc_message_printer.response_to_json ~id ~result:(`Error error) |>
+    Hh_json.json_to_string |>
+    write_response
 
 let with_id_required id protocol f =
   match id with

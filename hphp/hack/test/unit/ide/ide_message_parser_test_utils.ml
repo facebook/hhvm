@@ -36,3 +36,20 @@ let expect_value get_fun expected got : unit = match got.result with
   | Result.Ok got ->
     (* TODO: without struct printing, this error is not very useful *)
     if expected <> (get_fun got) then fail "Got unexpected result"
+
+let assert_json_equal expected got =
+  let open Hh_json in
+  (* "Canonicalize" expected string, by parsing and unparsing it *)
+  let expected = json_to_string (json_of_string expected) in
+  let got = json_to_string got in
+  assert_equal expected got
+
+let test_response protocol version response expected =
+  let response = Ide_message_printer.to_json
+    ~id:(Some 4)
+    ~protocol
+    ~version
+    ~response
+  in
+  assert_json_equal expected response;
+  true

@@ -904,13 +904,13 @@ bool SetArray::AdvanceMArrayIter(ArrayData*, MArrayIter&) {
   );
 }
 
-void SetArray::SortThrow(ArrayData*, int, bool) {
+void SetArray::Sort(ArrayData*, int, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (sort)"
   );
 }
 
-bool SetArray::USortThrow(ArrayData*, const Variant&) {
+bool SetArray::Usort(ArrayData*, const Variant&) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (usort)"
   );

@@ -501,6 +501,8 @@ private:
   enum class CloneMixed {};
 
   friend size_t getMemSize(const ArrayData*);
+  template <typename AccessorT, class ArrayT>
+  friend SortFlavor genericPreSort(ArrayT&, const AccessorT&, bool);
 
 public:
   // Safe downcast helpers

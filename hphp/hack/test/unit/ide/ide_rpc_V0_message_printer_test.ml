@@ -8,8 +8,9 @@
  *
  *)
 
- open Ide_message_parser_test_utils
- open Ide_rpc_protocol_parser_types
+open Ide_message
+open Ide_message_parser_test_utils
+open Ide_rpc_protocol_parser_types
 
 (* Test suite for V0 version of the API responses  *)
 
@@ -35,8 +36,42 @@ let test_method_not_found () =
     }
   }|}
 
+let test_autocomplete_response () =
+  let response = Autocomplete_response [{
+    autocomplete_item_text = "aaa";
+    autocomplete_item_type = "bbb";
+    callable_details = Some {
+      return_type = "ccc";
+      Ide_message.params = [{
+          name  = "ddd";
+          type_ = "eee";
+      }]
+    }
+  }] in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "name": "aaa",
+        "type": "bbb",
+        "callable_details": {
+          "return_type": "ccc",
+          "params": [
+            {
+              "name": "ddd",
+              "type": "eee"
+            }
+          ]
+        }
+      }
+    ]
+  }|}
+
 let tests = [
   "test_method_not_found", test_method_not_found;
+  "test_autocomplete_response", test_autocomplete_response;
 ]
 
 let () =

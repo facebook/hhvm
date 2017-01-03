@@ -15,13 +15,6 @@ open Ide_rpc_protocol_parser_types
 
 (* Test suite for Nuclide-rpc version of the API methods *)
 
-let expect_api_message expected got = expect_value
-  (fun got -> got) expected got
-
-let test message check_function =
-  check_function (Ide_message_parser.parse ~version:V0 ~message);
-  true
-
 let build_call_message = Printf.sprintf
   {|{
     "protocol" : "service_framework3_rpc",

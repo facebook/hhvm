@@ -44,6 +44,13 @@ let assert_json_equal expected got =
   let got = json_to_string got in
   assert_equal expected got
 
+let expect_api_message expected got = expect_value
+  (fun got -> got) expected got
+
+let test message check_function =
+  check_function (Ide_message_parser.parse ~version:V0 ~message);
+  true
+
 let test_response protocol version response expected =
   let response = Ide_message_printer.to_json
     ~id:(Some 4)

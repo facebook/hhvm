@@ -500,9 +500,15 @@ let daemon_main (state, options) (ic, oc) =
   | SharedMem.C_assertion_failure _ as e ->
     Hh_logger.exc e;
     Exit_status.(exit Shared_mem_assertion_failure)
-  | SharedMem.Sql_assertion_failure as e ->
+  | SharedMem.Sql_assertion_failure err_num as e ->
     Hh_logger.exc e;
-    Exit_status.(exit Sql_assertion_failure)
+    let exit_code = match err_num with
+      | 11 -> Exit_status.Sql_corrupt
+      | 14 -> Exit_status.Sql_cantopen
+      | 21 -> Exit_status.Sql_misuse
+      | _ -> Exit_status.Sql_assertion_failure
+    in
+    Exit_status.exit exit_code
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

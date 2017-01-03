@@ -91,7 +91,7 @@ and expr =
   | Special_func of special_func
   | Yield_break
   | Yield of afield
-  | Await of expr
+  | Await of ty * expr
   | List of expr list
   | Pair of expr * expr
   | Expr_list of expr list

@@ -957,8 +957,11 @@ and expr_
       in
       env, T.Any, (Reason.Rwitness p, ty)
   | Clone e ->
-    let env, _te, ty = expr env e in
-    env, T.Any, ty
+    let env, te, ty = expr env e in
+    (* TODO TAST: consider whether clone deserves its own node type.
+     * Perhaps better as an intrinsic.
+     *)
+    env, T.Clone te, ty
   | This when Env.is_static env ->
       Errors.this_in_static p;
       expr_error env (Reason.Rwitness p)
@@ -1369,9 +1372,9 @@ and expr_
       let env = Env.forget_members env p in
       env, T.Any, (Reason.Ryield_send p, Toption send)
   | Await e ->
-      let env, _te, rty = expr env e in
+      let env, te, rty = expr env e in
       let env, ty = Async.overload_extract_from_awaitable env p rty in
-      env, T.Any, ty
+      env, T.Await(ty, te), ty
   | Special_func func -> special_func env p func
   | New (c, el, uel) ->
       Typing_hooks.dispatch_new_id_hook c env p;

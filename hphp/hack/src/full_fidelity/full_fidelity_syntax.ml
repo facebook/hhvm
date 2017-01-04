@@ -6723,10 +6723,11 @@ module WithToken(Token: TokenType) = struct
       let make_missing () =
         from_children SyntaxKind.Missing []
 
+      (* An empty list is represented by Missing; everything else is a
+        SyntaxList, even if the list has only one item. *)
       let make_list items =
         match items with
         | [] -> make_missing()
-        | h :: [] -> h
         | _ -> from_children SyntaxKind.SyntaxList items
 
     let make_script_header

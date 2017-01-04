@@ -1,4 +1,5 @@
 (script(header((<))((?))((name)(end_of_line)))
+(list
 (function_declaration
 (missing)
 (function_declaration_header
@@ -23,10 +24,10 @@
     ((=>)(whitespace))(variable((variable)))((rparen))
     (compound_statement(
       ({)(end_of_line))
-        (expression_statement(
+        (list(expression_statement(
           postfix_unary_expression
           (variable((whitespace)(variable)))
-          ((++)))((;)(end_of_line)))
+          ((++)))((;)(end_of_line))))
           ((whitespace)
       (})(end_of_line))))
   (foreach_statement((whitespace)
@@ -44,4 +45,4 @@
     (variable((variable)(whitespace)))((=>)(whitespace))(variable((variable)))
     ((rparen))
     (compound_statement(
-      ({)(end_of_line))(missing)((whitespace)(})(end_of_line)))))((})))))
+      ({)(end_of_line))(missing)((whitespace)(})(end_of_line)))))((}))))))

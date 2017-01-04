@@ -360,10 +360,11 @@ SYNTAX_FROM_CHILDREN      | (SyntaxKind.Missing, []) -> Missing
       let make_missing () =
         from_children SyntaxKind.Missing []
 
+      (* An empty list is represented by Missing; everything else is a
+        SyntaxList, even if the list has only one item. *)
       let make_list items =
         match items with
         | [] -> make_missing()
-        | h :: [] -> h
         | _ -> from_children SyntaxKind.SyntaxList items
 
 CONSTRUCTOR_METHODS
@@ -833,8 +834,6 @@ FROM_JSON_SYNTAX
   {
     if (syntax_list.length == 0)
       return Missing.missing;
-    else if (syntax_list.length == 1)
-      return syntax_list[0];
     else
       return new EditableList(syntax_list);
   }
@@ -1670,8 +1669,6 @@ final class EditableList extends EditableSyntax implements ArrayAccess {
     array<EditableSyntax> $syntax_list): EditableSyntax {
     if (count($syntax_list) === 0)
       return Missing::missing();
-    else if (count($syntax_list) === 1)
-      return $syntax_list[0];
     else
       return new EditableList($syntax_list);
   }

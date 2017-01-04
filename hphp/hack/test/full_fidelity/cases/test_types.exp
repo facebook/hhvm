@@ -1,5 +1,6 @@
 (script
   (header((<))((?))((name)(end_of_line)))
+  (list
   (function_declaration
     (missing)
     (function_declaration_header
@@ -29,7 +30,9 @@
                           (list_item
                             (simple_type_specifier((double)))
                             ((,)(whitespace)))
-                            (simple_type_specifier((string))))
+                          (list_item
+                            (simple_type_specifier((string)))
+                            (missing)))
                       ((rparen)))
                     ((>)))
                   ((>)))
@@ -48,13 +51,15 @@
           (shape_type_specifier
             ((whitespace)(shape))
             ((lparen))
-            (field_specifier
+            (list
+            (list_item(field_specifier
               (qualified_name((name)(whitespace)))
               ((=>)(whitespace))
-              (simple_type_specifier((int))))
+              (simple_type_specifier((int))))(missing)))
             ((rparen)(whitespace)))
             ((variable))(missing))
           ((,)(end_of_line)))
+      (list_item
         (parameter_declaration
           (missing)(missing)
           (soft_type_specifier((whitespace)(@))
@@ -63,12 +68,17 @@
               ((<))
               (generic_type_specifier
                 ((name))
-                (type_arguments((<))(simple_type_specifier((name)))((>))))
+                (type_arguments
+                  ((<))
+                  (list
+                  (list_item
+                  (simple_type_specifier((name)))(missing)))
+                  ((>))))
               ((>)(whitespace))))
             ((variable)(end_of_line))
-            (missing)))
+            (missing))(missing)))
         ((rparen)(whitespace))
         ((:)(whitespace))
         (simple_type_specifier
           ((void)(whitespace))))
-        (compound_statement(({))(missing)((})))))
+        (compound_statement(({))(missing)((}))))))

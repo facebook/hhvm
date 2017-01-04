@@ -7,15 +7,17 @@
   (missing)((lparen))(missing)((rparen)(whitespace))(missing)(missing))
   (compound_statement
     (({)(end_of_line))
+    (list
     (return_statement
       ((whitespace)(return)(whitespace))
       (xhp_expression
         (xhp_open
           ((XHP_element_name)(whitespace))
+          (list
           (xhp_attribute
             ((XHP_element_name)(whitespace))
             ((=)(whitespace))
-            ((XHP_string_literal)))
+            ((XHP_string_literal))))
           ((>)))
         (list
           ((XHP_comment))
@@ -33,7 +35,7 @@
           ((</))
           ((XHP_element_name))
           ((>))))
-    ((;)(end_of_line)))
+    ((;)(end_of_line))))
 ((})(end_of_line))))
 (classish_declaration
   (missing)(missing)((class)(whitespace))((XHP_class_name)(whitespace))
@@ -62,7 +64,9 @@
               (list_item
                 (postfix_unary_expression((XHP_category_name))((*)))
                 ((,)(whitespace)))
-              (postfix_unary_expression((XHP_class_name))((?))))
+              (list_item
+                (postfix_unary_expression((XHP_class_name))((?)))
+                (missing)))
             ((rparen)))
           ((*)))
         ((;)(end_of_line))))
@@ -73,6 +77,7 @@
       ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
       (compound_statement
         (({)(end_of_line))
+        (list
         (return_statement
           ((whitespace)(return)(whitespace))
           (conditional_expression
@@ -82,5 +87,5 @@
               (qualified_name((XHP_class_name)))((::))((name)(whitespace)))
             ((:)(whitespace))
             (variable((variable))))
-          ((;)(end_of_line)))
+          ((;)(end_of_line))))
         ((}))))))

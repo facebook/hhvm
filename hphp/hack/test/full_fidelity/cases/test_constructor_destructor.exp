@@ -1,4 +1,5 @@
 (script(header((<))((?))((name)(end_of_line)))
+(list
 (classish_declaration(missing)(missing)
 ((end_of_line)
 (class)(whitespace))((name)(whitespace))
@@ -7,60 +8,67 @@
 (({)(end_of_line))
 (list
 (methodish_declaration(missing)
-  ((whitespace)
-  (private)(whitespace))
+  (list((whitespace)(private)(whitespace)))
   (function_declaration_header
     (missing)
     ((function)(whitespace))
     (missing)
     ((__construct))(missing)
     ((lparen))
+    (list
+    (list_item
     (parameter_declaration
       (missing)(missing)(missing)
-      ((variable))(missing))
+      ((variable))(missing))(missing)))
     ((rparen)(whitespace))(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
-(methodish_declaration(missing)((whitespace)
-  (public)(whitespace))
+(methodish_declaration(missing)
+  (list((whitespace)(public)(whitespace)))
   (function_declaration_header
     (missing)
     ((function)(whitespace))
     (missing)
     ((__construct))(missing)
     ((lparen))
+    (list
+    (list_item
     (parameter_declaration
       (missing)(missing)(missing)
       ((variable)(whitespace))
       (simple_initializer((=)(whitespace))
-      (literal((null)))))
+      (literal((null)))))(missing)))
     ((rparen)(whitespace))(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
-(methodish_declaration(missing)((whitespace)
-  (public)(whitespace))
+(methodish_declaration(missing)
+  (list((whitespace)(public)(whitespace)))
   (function_declaration_header(missing)
     ((function)(whitespace))
     (missing)
     ((__construct))(missing)
     ((lparen))
+    (list
+    (list_item
     (parameter_declaration
       (missing)(missing)(missing)
-      ((variable))(missing))
+      ((variable))(missing))(missing)))
     ((rparen)(whitespace))
     (missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
-(methodish_declaration(missing)((whitespace)
-  (private)(whitespace))
+(methodish_declaration(missing)
+  (list((whitespace)(private)(whitespace)))
   (function_declaration_header(missing)
     ((function)(whitespace))
     (missing)
     ((__construct))(missing)
     ((lparen))
+    (list
+    (list_item
     (parameter_declaration
       (missing)(missing)(missing)
       ((variable)(whitespace))
       (simple_initializer
         ((=)(whitespace))
-        (literal((null)))))
+        (literal((null)))))(missing)))
     ((rparen)(whitespace))
     (missing)(missing))
   (compound_statement
@@ -68,49 +76,64 @@
 (methodish_declaration
   (attribute_specification
     ((whitespace)(<<))
-      (attribute((name))
-      (missing)(missing)(missing))
-    ((>>)(whitespace)))((public)(whitespace))
+      (list
+      (list_item
+      (attribute((name))(missing)(missing)(missing))
+      (missing)))
+    ((>>)(whitespace)))
+    (list((public)(whitespace)))
   (function_declaration_header(missing)
     ((function)(whitespace))
     (missing)
     ((__construct)(whitespace))(missing)
     ((lparen))
+    (list
+    (list_item
     (parameter_declaration(missing)(missing)(missing)((variable))(missing))
+    (missing)))
     ((rparen))(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration
   (attribute_specification
     ((whitespace)(<<))
-      (attribute
-        ((name))(missing)(missing)(missing))
-    ((>>)(whitespace)))((public)(whitespace))
+      (list
+      (list_item
+      (attribute((name))(missing)(missing)(missing))
+      (missing)))
+    ((>>)(whitespace)))
+    (list((public)(whitespace)))
   (function_declaration_header(missing)
     ((function)(whitespace))
     (missing)
     ((__construct)(whitespace))(missing)
     ((lparen))
+    (list
+    (list_item
     (parameter_declaration(missing)(missing)(missing)((variable))(missing))
+    (missing)))
     ((rparen)(whitespace))(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
-(methodish_declaration(missing)((whitespace)
-  (public)(whitespace))
+(methodish_declaration(missing)
+  (list((whitespace)(public)(whitespace)))
   (function_declaration_header
     (missing)
     ((function)(whitespace))
     (missing)
     ((__construct)(whitespace))(missing)
     ((lparen))
+    (list
+    (list_item
     (parameter_declaration(missing)
       ((public)(whitespace))(missing)
       ((variable)(whitespace))
       (simple_initializer
         ((=)(whitespace))
         (literal((null)))))
+    (missing)))
     ((rparen)(whitespace))(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
-(methodish_declaration(missing)((whitespace)
-  (public)(whitespace))
+(methodish_declaration(missing)
+  (list((whitespace)(public)(whitespace)))
   (function_declaration_header(missing)
     ((function)(whitespace))
     (missing)
@@ -121,12 +144,15 @@
   (methodish_declaration
     (attribute_specification
       ((whitespace)(<<))
+      (list
+      (list_item
       (attribute((name))(missing)(missing)(missing))
+      (missing)))
       ((>>)(whitespace)))
-    ((public)(whitespace))
+    (list((public)(whitespace)))
     (function_declaration_header(missing)
       ((function)(whitespace))
       (missing)
       ((__destruct)(whitespace))(missing)
       ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
-    (compound_statement(({))(missing)((})(end_of_line)))(missing)))((})))))
+    (compound_statement(({))(missing)((})(end_of_line)))(missing)))((}))))))

@@ -475,8 +475,6 @@ class EditableSyntax
   {
     if (syntax_list.length == 0)
       return Missing.missing;
-    else if (syntax_list.length == 1)
-      return syntax_list[0];
     else
       return new EditableList(syntax_list);
   }

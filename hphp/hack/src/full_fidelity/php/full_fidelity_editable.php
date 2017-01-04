@@ -571,8 +571,6 @@ final class EditableList extends EditableSyntax implements ArrayAccess {
     array<EditableSyntax> $syntax_list): EditableSyntax {
     if (count($syntax_list) === 0)
       return Missing::missing();
-    else if (count($syntax_list) === 1)
-      return $syntax_list[0];
     else
       return new EditableList($syntax_list);
   }

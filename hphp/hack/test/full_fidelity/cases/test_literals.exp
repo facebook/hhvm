@@ -1,5 +1,6 @@
 (script
   (header((<))((?))((name)(end_of_line)))
+  (list
   (function_declaration(missing)
     (function_declaration_header
       (missing)((function)(whitespace))(missing)((name))(missing)((lparen))
@@ -17,4 +18,4 @@
               (variable((whitespace)(variable)(whitespace)))((=)(end_of_line))
               (literal((nowdoc_string_literal)(end_of_line))))
               ((;)(end_of_line))))
-        ((end_of_line)(})))))
+        ((end_of_line)(}))))))

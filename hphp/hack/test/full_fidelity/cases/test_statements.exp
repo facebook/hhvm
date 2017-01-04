@@ -1,9 +1,11 @@
 (script(header((<))((?))((name)(end_of_line)))
+  (list
     (function_declaration(missing)(function_declaration_header
     (missing)((function)(whitespace))(missing)((name))
     (missing)((lparen))(missing)((rparen)(whitespace))(missing)(missing))
     (compound_statement
       (({)(end_of_line))
+        (list
           (if_statement
             ((whitespace)(if)(whitespace))
             ((lparen))(variable((variable)))
@@ -21,15 +23,15 @@
                 (({)(end_of_line))
                 (list
                   (switch_section
-                    (case_label
+                    (list(case_label
                       ((whitespace)(case)(whitespace))
                       (literal((decimal_literal)))
-                      ((:)(whitespace)))
-                    (break_statement((break))(missing)((;)(end_of_line))))
+                      ((:)(whitespace))))
+                    (list(break_statement((break))(missing)((;)(end_of_line)))))
                   (switch_section
-                    (default_label
-                      ((whitespace)(default))((:)(whitespace)))
-                    (break_statement((break))(missing)((;)(end_of_line)))))
+                    (list(default_label
+                      ((whitespace)(default))((:)(whitespace))))
+                    (list(break_statement((break))(missing)((;)(end_of_line))))))
                 ((whitespace)(})(end_of_line)))
               (missing)
               (else_clause
@@ -38,7 +40,7 @@
                   ((whitespace)(return)(whitespace))
                   (variable((variable)))
                   ((;)(end_of_line)))))
-              (elseif_clause
+              (list(elseif_clause
                 ((whitespace)(elseif))
                 ((lparen))
                 (variable((variable)))
@@ -65,6 +67,6 @@
                   ((lparen))
                   (variable((variable)))
                   ((rparen))
-                  ((;)(end_of_line))))
-            (missing))
-      ((})))))
+                  ((;)(end_of_line)))))
+            (missing)))
+      ((}))))))

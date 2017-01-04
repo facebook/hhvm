@@ -1,8 +1,11 @@
 (script(header((<))((?))((name)(end_of_line)))
+(list
 (enum_declaration
   (attribute_specification
     ((<<))
-    (attribute((name))(missing)(missing)(missing))
+    (list
+    (list_item
+    (attribute((name))(missing)(missing)(missing))(missing)))
     ((>>)(whitespace)))
   ((enum)(whitespace))
   ((name)(whitespace))
@@ -21,4 +24,4 @@
       ((=)(whitespace))
       (literal((decimal_literal)))
       ((;)(whitespace))))
-  ((}))))
+  ((})))))

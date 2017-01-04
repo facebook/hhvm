@@ -1,5 +1,6 @@
 (script
   (header((<))((?))((name)(end_of_line)))
+  (list
   (classish_declaration
     (missing)(missing)
     ((class)(whitespace))
@@ -44,10 +45,13 @@
           (methodish_declaration
             (attribute_specification
               ((whitespace)(<<))
+              (list
+                (list_item
                 (attribute
                   ((name))(missing)(missing)(missing))
+                (missing)))
               ((>>)(whitespace)))
-            ((public)(whitespace))
+            (list((public)(whitespace)))
             (function_declaration_header
               (missing)
               ((function)(whitespace))
@@ -62,10 +66,13 @@
           (methodish_declaration
             (attribute_specification
               ((whitespace)(<<))
+                (list
+                (list_item
                 (attribute((name))
                 (missing)
                 (missing)
                 (missing))
+                (missing)))
               ((>>)(whitespace)))
             (list
               ((public)(whitespace))
@@ -82,4 +89,4 @@
             (compound_statement
               (({))(missing)((})(end_of_line)))
             (missing)))
-        ((})))))
+        ((}))))))

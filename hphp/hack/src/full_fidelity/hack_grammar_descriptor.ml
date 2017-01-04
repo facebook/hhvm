@@ -700,10 +700,12 @@ and p_list_intrinsic = "ListIntrinsic", fun () -> [
   [term_list; left_paren; NonTerm p_list_expression_list; right_paren]]
 
 and p_list_expression_list = "ListExpressionList", fun () -> [
+  [NonTerm p_expressions];
+  [NonTerm p_expressions; comma]]
+
+and p_expressions = "Expressions", fun () -> [
   [NonTerm p_expression];
-  [comma];
-  [NonTerm p_list_expression_list; comma];
-  [NonTerm p_list_expression_list; comma; NonTerm p_expression]]
+  [NonTerm p_expressions; comma; NonTerm p_expression]]
 
 and p_literal = "Literal", fun () -> [
   [boolean_literal];

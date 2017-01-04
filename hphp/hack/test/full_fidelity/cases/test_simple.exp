@@ -1,5 +1,6 @@
 (script
   (header((<))((?))((name)(end_of_line)))
+    (list
     (function_declaration
       (missing)
       (function_declaration_header
@@ -14,6 +15,7 @@
       )
     (compound_statement
       (({)(end_of_line))
+        (list
         (expression_statement(
           binary_expression(variable((whitespace)(variable)(whitespace)))
           ((=)(whitespace))
@@ -27,5 +29,5 @@
               ((rparen)(whitespace)))
               ((*)(whitespace))
               (variable((variable)))))
-            ((;)(end_of_line)))
-          ((})))))
+            ((;)(end_of_line))))
+          ((}))))))

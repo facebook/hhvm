@@ -435,17 +435,15 @@ module WithExpressionAndStatementAndTypeParser
     | QualifiedName ->
       let (parser, item) = parse_type_specifier parser in
       let (parser, comma) = optional_token parser Comma in
-      if is_missing comma then
-        (parser, item)
-      else
-        let list_item = make_list_item item comma in
-        (parser, list_item)
+      let list_item = make_list_item item comma in
+      (parser, list_item)
     | _ ->
       (* ERROR RECOVERY: We are expecting a type; give an error as above.
       Don't eat the offending token.
       *)
       let parser = with_error parser SyntaxError.error1007 in
-      (parser, (make_missing()))
+      let list_item = make_list_item (make_missing()) (make_missing()) in
+      (parser, list_item)
 
   and parse_special_type_list parser =
     (*

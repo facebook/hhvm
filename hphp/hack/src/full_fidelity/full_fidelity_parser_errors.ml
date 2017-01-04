@@ -153,7 +153,7 @@ let methodish_modifier_contains_helper p node =
   match syntax node with
   | MethodishDeclaration syntax ->
     let node = syntax.methodish_modifiers in
-    (list_contains_predicate p node || p node)
+    list_contains_predicate p node
   | _ -> false
 
 (* tests whether the methodish contains > 1 modifier that satisfies [p] *)
@@ -202,17 +202,15 @@ let class_constructor_has_static node parents =
  * and that the header containing it has visibility modifiers in parameters
  *)
 let class_non_constructor_has_visibility_param node parents =
-  let label = node.function_name in
-  let params = node.function_parameter_list in
   let has_visibility node =
     match syntax node with
     | ParameterDeclaration { parameter_visibility; _ } ->
       parameter_visibility |> is_missing |> not
     | _ -> false
   in
-  ( not (is_construct label)) &&
-  ( list_contains_predicate has_visibility params ||
-    has_visibility params)
+  let label = node.function_name in
+  let params = syntax_to_list_no_separators node.function_parameter_list in
+  (not (is_construct label)) && (List.exists has_visibility params)
 
 (* Given a function declaration header, confirm that it is a destructor
  * and that the methodish containing it has non-empty parameters *)

@@ -1,4 +1,5 @@
 (script(header((<))((?))((name)(end_of_line)))
+(list
 (function_declaration
 (missing)
 (function_declaration_header
@@ -15,10 +16,12 @@ variable((variable)(whitespace)))
 ((+)(whitespace))
 (list_expression((list)(whitespace))
 ((lparen))
+(list
 (list_item(binary_expression(variable((variable)(whitespace)))
 ((=)(whitespace))
 (literal((decimal_literal))))
-(missing))((rparen)))))
+(missing)))
+((rparen)))))
 ((;)(end_of_line)))
 (expression_statement(
 binary_expression(
@@ -29,8 +32,8 @@ variable((whitespace)(variable)(whitespace)))
 (list_expression(
 (list)(whitespace))
 ((lparen))
-(list(
-list_item(
+(list
+(list_item(
 binary_expression(
 variable((variable)(whitespace)))
 ((=)(whitespace))
@@ -46,4 +49,4 @@ variable((variable)(whitespace)))
 (missing)))
 ((rparen)))))
 ((;)(end_of_line))))
-((})))))
+((}))))))

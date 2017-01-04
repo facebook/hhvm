@@ -320,10 +320,11 @@ module WithParser(Parser : ParserType) = struct
       let kind = Token.kind token in
       if kind = close_kind || kind = TokenKind.EndOfFile then
         (* ERROR RECOVERY: We expected an item but we found a close or
-           the end of the file. Make the item "missing" and give an error. *)
+           the end of the file. Make the item and separator both
+           "missing" and give an error. *)
         let parser = with_error parser error in
-        let item = make_missing() in
-        (parser, (item :: acc))
+        let list_item = make_list_item (make_missing()) (make_missing()) in
+        (parser, (list_item :: acc))
       else if kind = separator_kind then
 
         (* ERROR RECOVERY: We expected an item but we got a separator.
@@ -349,7 +350,9 @@ module WithParser(Parser : ParserType) = struct
         let (parser1, token) = next_token parser in
         let kind = Token.kind token in
         if kind = close_kind then
-          (parser, (item :: acc))
+          let separator = make_missing() in
+          let list_item = make_list_item item separator in
+          (parser, (list_item :: acc))
         else if kind = separator_kind then
           let separator = make_token token in
           let list_item = make_list_item item separator in
@@ -363,7 +366,9 @@ module WithParser(Parser : ParserType) = struct
         else
           (* ERROR RECOVERY: We were expecting a close or separator, but
              got neither. Bail out. Caller will give an error. *)
-          (parser, (item :: acc)) in
+          let separator = make_missing() in
+          let list_item = make_list_item item separator in
+          (parser, (list_item :: acc)) in
     let (parser, items) = aux parser [] in
     (parser, make_list (List.rev items))
 

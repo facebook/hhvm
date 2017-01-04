@@ -1,11 +1,13 @@
 (script
   (header((<))((?))((name)(end_of_line)))
+  (list
   (function_declaration
     (missing)(function_declaration_header(missing)((function)(whitespace))
     (missing)((name))(missing)((lparen))(missing)((rparen)(whitespace))
     (missing)(missing))
     (compound_statement
-      (({)(end_of_line))(list
+      (({)(end_of_line))
+      (list
         (expression_statement
           (function_call_expression
             (qualified_name((whitespace)(name)))((lparen))(missing)((rparen)))
@@ -15,25 +17,29 @@
             (variable((whitespace)(variable)(whitespace)))
             ((=)(whitespace))
             (vector_intrinsic_expression
-              ((vec))(([))(list
+              ((vec))(([))
+              (list
                 (list_item(literal((decimal_literal)))((,)(whitespace)))
-                (literal((decimal_literal))))((]))))((;)(end_of_line)))
+                (list_item(literal((decimal_literal)))(missing)))
+              ((]))))((;)(end_of_line)))
         (expression_statement
           (binary_expression
             (variable((whitespace)(variable)(whitespace)))
             ((=)(whitespace))
             (dictionary_intrinsic_expression
               ((dict))(([))
-                (element_initializer
+                (list(list_item(element_initializer
                   (literal((double_quoted_string_literal)(whitespace)))
                   ((=>)(whitespace))
-                  (variable((variable))))((]))))((;)(end_of_line)))
+                  (variable((variable))))(missing)))((]))))((;)(end_of_line)))
         (expression_statement
           (binary_expression
             (variable((whitespace)(variable)(whitespace)))
             ((=)(whitespace))
             (keyset_intrinsic_expression
-              ((keyset))(([))(list
+              ((keyset))(([))
+              (list
                 (list_item(literal((decimal_literal)))((,)(whitespace)))
-                (literal((decimal_literal))))((]))))((;)(end_of_line))))
-    ((})))))
+                (list_item(literal((decimal_literal)))(missing)))
+              ((]))))((;)(end_of_line))))
+    ((}))))))

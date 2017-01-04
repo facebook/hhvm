@@ -1,4 +1,5 @@
 (script(header((<))((?))((name)(whitespace)(single_line_comment)(end_of_line)))
+(list
 (classish_declaration
   (missing)(missing)((end_of_line)
   (class)(whitespace))
@@ -11,18 +12,22 @@
         (missing)
         ((whitespace)(const)(whitespace))
         (missing)
+        (list
+        (list_item
         (constant_declarator((name)(whitespace))
           (simple_initializer((=)(whitespace))
-          (literal((double_quoted_string_literal)))))
+          (literal((double_quoted_string_literal)))))(missing)))
       ((;)(end_of_line)))
       (const_declaration
         (missing)
         ((whitespace)(const)(whitespace))
         (simple_type_specifier((string)(whitespace)))
+        (list
+        (list_item
         (constant_declarator
           ((name)(whitespace))
           (simple_initializer((=)(whitespace))
-          (literal((double_quoted_string_literal)))))
+          (literal((double_quoted_string_literal)))))(missing)))
       ((;)(end_of_line)))
       (const_declaration
         (missing)
@@ -31,9 +36,14 @@
           ((name))
           (type_arguments
             ((<))
-            (simple_type_specifier((string)))
+            (list
+            (list_item
+            (simple_type_specifier((string)))(missing)))
             ((>)(whitespace))))
+        (list
+        (list_item
         (constant_declarator((name)(whitespace))
           (simple_initializer((=)(whitespace))
-          (literal((double_quoted_string_literal)))))((;)(end_of_line))))
-    ((})))))
+          (literal((double_quoted_string_literal)))))(missing)))
+      ((;)(end_of_line))))
+    ((}))))))

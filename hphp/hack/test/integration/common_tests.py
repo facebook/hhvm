@@ -311,6 +311,30 @@ class IdeConnection(object):
             '}}}\n'
         )
 
+    def json_rpc_init(self):
+        return '''{ \
+            "jsonrpc" : "2.0", \
+            "id" : 234, \
+            "method" : "init", \
+            "params" : { \
+                "client_name" : "python_test", \
+                "client_api_version" : 4 \
+            }   \
+        }\n'''
+
+    def json_rpc_open(self, file, contents):
+        file = self.make_absolute(file)
+        contents = json.dumps(contents)
+        return '''{ \
+            "jsonrpc" : "2.0", \
+            "id" : 654, \
+            "method" : "didOpenFile", \
+            "params" : { \
+                "filename" : "%s", \
+                "text" : %s \
+            }   \
+        }\n''' % (file, contents)
+
 
 class CommonTests(object):
 
@@ -1057,3 +1081,26 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             """)
 
         self.check_cmd(['No errors!'])
+
+    def test_json_rpc(self):
+        self.write_load_config()
+        self.check_cmd(['No errors!'])
+        ide_con = self.connect_ide()
+        cmd = (
+            ide_con.json_rpc_init() +
+            ide_con.json_rpc_open("a.php", "<?hh // strict\n {") +
+            ide_con.sleep()
+        )
+        ide_con.write_cmd(cmd)
+
+        (stdout, _, _) = ide_con.get_return()
+
+        self.assertEqualString(
+            stdout,
+            '{{"jsonrpc":"2.0","id":234,"result":' +
+            '{{"server_api_version":0}}}}\n' +
+            '{{"jsonrpc":"2.0","id":null,"result":{{"filename":' +
+            '"{root}a.php","errors":[{{"message":[{{"descr":"Expected }}",' +
+            '"path":"{root}a.php","line":3,"start":1,"end":0,' +
+            '"code":1002}}]}}]}}}}\n'
+        )

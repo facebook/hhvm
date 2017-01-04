@@ -22,6 +22,20 @@ let build_request_message = Printf.sprintf
     "params" : {%s}
   }|}
 
+let test_init () =
+  let msg = build_request_message "init"
+  {|
+    "client_name" : "test_client",
+    "client_api_version" : 4
+  |} in
+  test msg @@
+  expect_api_message (
+    Init {
+      client_name = "test_client";
+      client_api_version = 4;
+    }
+  )
+
 let test_did_open_file () =
   let msg = build_request_message "didOpenFile"
     {|
@@ -54,6 +68,7 @@ let test_autocomplete_call () =
   )
 
 let tests = [
+  "test_init", test_init;
   "test_did_open_file", test_did_open_file;
   "test_autocomplete_call", test_autocomplete_call;
 ]

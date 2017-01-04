@@ -36,6 +36,19 @@ let test_method_not_found () =
     }
   }|}
 
+let test_init_response () =
+  let response = Init_response {
+    server_api_version = 4;
+  } in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": {
+      "server_api_version": 4
+    }
+  }|}
+
 let test_autocomplete_response () =
   let response = Autocomplete_response [{
     autocomplete_item_text = "aaa";
@@ -71,6 +84,7 @@ let test_autocomplete_response () =
 
 let tests = [
   "test_method_not_found", test_method_not_found;
+  "test_init_response", test_init_response;
   "test_autocomplete_response", test_autocomplete_response;
 ]
 

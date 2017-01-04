@@ -20,8 +20,9 @@ type env = {
 }
 
 (* Configuration to use before / in absence of init request *)
-let default_version = Ide_rpc_protocol_parser_types.V0
-let default_protocol = Ide_rpc_protocol_parser_types.Nuclide_rpc
+let did_init = ref false
+let init_version = ref Ide_rpc_protocol_parser_types.V0
+let init_protocol = ref Ide_rpc_protocol_parser_types.Nuclide_rpc
 
 let rec connect_persistent env retries start_time =
   if retries < 0 then raise Exit_status.(Exit_with Out_of_retries);
@@ -118,7 +119,7 @@ let get_ready_message server_in_fd =
 
 let print_response id protocol response =
   Ide_message_printer.to_json
-    ~id ~protocol ~response ~version:default_version |>
+    ~id ~protocol ~response ~version:!init_version |>
   Hh_json.json_to_string |>
   write_response
 
@@ -129,7 +130,7 @@ let print_push_message =
 let handle_push_message = function
   | ServerCommandTypes.DIAGNOSTIC (subscription_id, errors) ->
     SMap.iter begin fun diagnostics_notification_filename diagnostics ->
-      print_push_message default_protocol @@
+      print_push_message !init_protocol @@
       Diagnostics_notification {
         subscription_id;
         diagnostics_notification_filename;
@@ -158,7 +159,27 @@ let with_id_required id protocol f =
   | None -> handle_error id protocol
       (Internal_error "Id field is required for this request")
 
+let handle_init conn id protocol { client_name; client_api_version; } =
+  if !did_init then
+    handle_error id protocol (Server_error "init was already called")
+  else begin
+    (* Nuclide-rpc allows you to subscribe/unsubscribe from diagnostics at
+     * any moment. Not sure if this is useful, so for now just keeping everyone
+     * subscribed from the start *)
+    rpc conn (Rpc.SUBSCRIBE_DIAGNOSTIC 0);
+    did_init := true;
+    (* The only version there is at the moment *)
+    init_version := V0;
+    init_protocol := protocol;
+    Init_response {
+      server_api_version = Ide_rpc_protocol_parser.version_to_int !init_version;
+    } |>
+    print_response id protocol
+  end
+
 let handle_request conn id protocol = function
+  | Init init_params ->
+    handle_init conn id protocol init_params
   | Autocomplete { filename; position; } ->
     rpc conn (Rpc.IDE_AUTOCOMPLETE (filename, position)) |>
     AutocompleteService.autocomplete_result_to_ide_response |>
@@ -186,11 +207,11 @@ let handle_request conn id protocol = function
 let handle_stdin conn =
   let { id; result; protocol } = Ide_message_parser.parse
     ~message:(read_request ())
-    ~version:default_version
+    ~version:!init_version
   in
   let protocol = match protocol with
     | Result.Ok protocol -> protocol
-    | Result.Error _ -> default_protocol
+    | Result.Error _ -> !init_protocol
   in
   let id = match id with
     | Result.Ok x -> x

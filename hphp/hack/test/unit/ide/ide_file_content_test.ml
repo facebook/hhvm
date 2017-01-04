@@ -8,6 +8,7 @@
  *
 *)
 
+open Core
 open File_content
 
 let expect_has_content fc content =
@@ -128,6 +129,54 @@ let test_end_of_line_edit () =
   let edited_fc = edit_file_unsafe fc [edit] in
   expect_has_content edited_fc "aa"
 
+let utf8 x =
+  String.concat "" (List.map x ~f:(fun x -> String.make 1 (Char.chr x)))
+
+let delete_nth x =
+  {
+    range = Some {
+      st = { line = 1; column = x};
+      ed = { line = 1; column = x+1};
+    };
+    text = "";
+  }
+
+let test_utf8 () =
+  let c1 = "a" in
+  (* 'INVERTED EXCLAMATION MARK' (U+00A1) *)
+  let c2 = utf8 [0xC2; 0xA1;] in
+  (* TELUGU LETTER GHA' (U+0C18) *)
+  let c3 = utf8 [0xE0; 0xB0; 0x98;] in
+  (* Unicode Han Character 'U+26604' *)
+  let c4 = utf8 [0xF0; 0xA6; 0x98; 0x84;] in
+
+  let content = of_content ~content:(c1^c2^c3^c4) in
+
+  let edit = delete_nth 1 in
+  let edited_content = edit_file_unsafe content [edit] in
+  let r1 = expect_has_content edited_content (c2^c3^c4) in
+
+  let edit = delete_nth 2 in
+  let edited_content = edit_file_unsafe content [edit] in
+  let r2 = expect_has_content edited_content (c1^c3^c4) in
+
+  let edit = delete_nth 3 in
+  let edited_content = edit_file_unsafe content [edit] in
+  let r3 = expect_has_content edited_content (c1^c2^c4) in
+
+  let edit = delete_nth 4 in
+  let edited_content = edit_file_unsafe content [edit] in
+  let r4 = expect_has_content edited_content (c1^c2^c3) in
+  r1 && r2 && r3 && r4
+
+let test_large () =
+  let len = 100000000 in
+  let content = String.make len 'c' in
+  let fc = of_content ~content:(content ^ "c") in
+  let edit = delete_nth (len/2) in
+  let edited_content = edit_file_unsafe fc [edit] in
+  expect_has_content edited_content content
+
 let tests = [
   "test_create", test_create;
   "test_basic_edit", test_basic_edit;
@@ -139,6 +188,8 @@ let tests = [
   "test_invalid_edit", test_invalid_edit;
   "test_empty_edit", test_empty_edit;
   "test_end_of_line_edit", test_end_of_line_edit;
+  "test-utf8", test_utf8;
+  "test_large", test_large;
 ]
 
 let () =

@@ -102,7 +102,6 @@ struct Vgen {
 
   // php function abi
   void emit(const phpret& i);
-  void emit(const callphp& i);
   void emit(const tailcallphp& i);
   void emit(const callarray& i);
   void emit(const contenter& i);
@@ -655,12 +654,6 @@ void Vgen::emit(const phpret& i) {
     a.loadq(i.fp[AROFF(m_sfp)], i.d);
   }
   a.ret();
-}
-
-void Vgen::emit(const callphp& i) {
-  const auto call = emitSmashableCall(a.code(), env.meta, i.stub);
-  setJmpTransID(env, call);
-  emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 void Vgen::emit(const tailcallphp& i) {

@@ -434,7 +434,6 @@ struct Vgen {
   void emit(const call& i);
   void emit(const callarray& i);
   void emit(const callfaststub& i);
-  void emit(const callphp&);
   void emit(const callr& i);
   void emit(const calls& i);
   void emit(const callstub& i);
@@ -810,11 +809,6 @@ void Vgen::emit(const calls& i) {
   a.std(rtoc(), rsfp()[AROFF(SAVED_TOC())]);
   emitSmashableCall(a.code(), env.meta, i.target,
                     Assembler::CallArg::SmashExt);
-}
-
-void Vgen::emit(const callphp& i) {
-  emitSmashableCall(a.code(), env.meta, i.stub);
-  emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 void Vgen::emit(const callarray& i) {

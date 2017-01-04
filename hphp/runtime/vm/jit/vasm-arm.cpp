@@ -215,7 +215,6 @@ struct Vgen {
   void emit(const callfaststub& i);
 
   // php function abi
-  void emit(const callphp& i);
   void emit(const callarray& i);
   void emit(const contenter& i);
   void emit(const phpret& i);
@@ -523,11 +522,6 @@ void Vgen::emit(const phpret& i) {
     a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
   }
   emit(ret{});
-}
-
-void Vgen::emit(const callphp& i) {
-  emitSmashableCall(a->code(), env.meta, i.stub);
-  emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 void Vgen::emit(const callarray& i) {

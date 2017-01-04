@@ -103,6 +103,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p);
  * Return true if the instruction was supported.
  */
 template<class Inst> bool emit(Venv& env, const Inst&) { return false; }
+bool emit(Venv& env, const callphp& i);
 bool emit(Venv& env, const bindjmp& i);
 bool emit(Venv& env, const bindjcc& i);
 bool emit(Venv& env, const bindaddr& i);
@@ -134,6 +135,21 @@ void check_nop_interval(Venv& env, const Vinstr& inst,
         nop_counter = nop_interval;
       }
       break;
+  }
+}
+
+/*
+ * Perform miscellaneous postprocessing for architecture-independent emitters.
+ */
+template<class Vemit>
+void postprocess(Venv& env, const Vinstr& inst) {
+  if (inst.op == Vinstr::callphp) {
+    auto const& i = inst.callphp_;
+    // The body of callphp{} is arch-independent, but the unwind information is
+    // not.  We could do this in the emitter for callphp{}, but then we'd have
+    // to thread Vemit through all the emitters and implement them all in the
+    // header... so instead we have this.
+    Vemit(env).emit(unwind{i.targets[0], i.targets[1]});
   }
 }
 
@@ -204,6 +220,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
         VASM_OPCODES
 #undef O
       }
+      postprocess<Vemit>(env, inst);
     }
 
     irmu.register_block_end();

@@ -64,16 +64,21 @@ module GEnv = struct
       Hh_logger.log "Name missing: %s" (name);
       raise File_heap.File_heap_stale
 
-  let type_pos popt name = match TypeIdHeap.get name with
-    | Some (pos, `Class) ->
-        let p, _ = get_full_pos popt (pos, name) in
-        Some p
-    | Some (pos, `Typedef) ->
-        let p, _ = get_full_pos popt (pos, name) in
-        Some p
-    | None -> None
-
   let type_canon_name name = TypeCanonHeap.get (canon_key name)
+  let type_pos popt name =
+    let name = Option.value (type_canon_name name) ~default:name in
+    match TypeIdHeap.get name with
+      | Some (pos, `Class) ->
+          let p, _ = get_full_pos popt (pos, name) in
+          Some p
+      | Some (pos, `Typedef) ->
+          let p, _ = get_full_pos popt (pos, name) in
+          Some p
+      | None -> None
+
+  let type_canon_pos popt name =
+    let name = Option.value (type_canon_name name) ~default:name in
+    type_pos popt name
 
   let type_info popt name = match TypeIdHeap.get name with
     | Some (pos, `Class) ->
@@ -84,6 +89,8 @@ module GEnv = struct
         Some (p, `Typedef)
     | None -> None
 
+  let fun_canon_name name = FunCanonHeap.get (canon_key name)
+
   let fun_pos popt name =
     match FunPosHeap.get name with
     | Some pos ->
@@ -91,7 +98,9 @@ module GEnv = struct
         Some p
     | None -> None
 
-  let fun_canon_name name = FunCanonHeap.get (canon_key name)
+  let fun_canon_pos popt name =
+    let name = Option.value (fun_canon_name name) ~default:name in
+    fun_pos popt name
 
   let typedef_pos popt name = match TypeIdHeap.get name with
     | Some (pos, `Typedef) ->
@@ -320,8 +329,8 @@ let ndecl_file popt fn
    * were actually duplicates?
    *)
   let failed = Relative_path.Set.singleton fn in
-  let failed = add_files_to_rename failed funs (GEnv.fun_pos popt) in
-  let failed = add_files_to_rename failed classes (GEnv.type_pos popt) in
-  let failed = add_files_to_rename failed typedefs (GEnv.type_pos popt) in
+  let failed = add_files_to_rename failed funs (GEnv.fun_canon_pos popt) in
+  let failed = add_files_to_rename failed classes (GEnv.type_canon_pos popt) in
+  let failed = add_files_to_rename failed typedefs (GEnv.type_canon_pos popt) in
   let failed = add_files_to_rename failed consts (GEnv.gconst_pos popt) in
   errors, failed

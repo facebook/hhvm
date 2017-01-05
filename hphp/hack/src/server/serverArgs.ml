@@ -132,6 +132,9 @@ let parse_options () =
       Exit_status.(exit Input_error)
   | _ -> ());
   let root_path = Path.make !root in
+  ai_mode := (match !ai_mode with
+    | Some (ai) -> Some(Ai_options.set_json_mode ai !json_mode)
+    | None -> None);
   Wwwroot.assert_www_directory root_path;
   {
     json_mode     = !json_mode;

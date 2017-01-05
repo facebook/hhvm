@@ -358,6 +358,14 @@ Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params) {
   return invoke(name.data(), params);
 }
 
+static const StaticString s_invoke_not_instanceof_error(
+  "Given object is not an instance of the class this method was declared in"
+);
+
+static const StaticString s_invoke_non_object(
+  "Non-object passed to Invoke()"
+);
+
 Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
                                           const String& cls,
                                           const String& name,
@@ -366,19 +374,35 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
     return invoke_static_method(cls, name, params);
   }
 
+  if (!obj.is(KindOfObject)) {
+    Reflection::ThrowReflectionExceptionObject(s_invoke_non_object);
+  }
+
+  auto const providedClass = Unit::loadClass(cls.get());
+  if (!providedClass) {
+    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+  }
+  auto const selectedFunc = providedClass->lookupMethod(name.get());
+  if (!selectedFunc) {
+    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+  }
+
+  auto const objData = obj.toCObjRef().get();
+  auto const implementingClass = selectedFunc->implCls();
+  if (!objData->instanceof(implementingClass)) {
+    Reflection::ThrowReflectionExceptionObject(s_invoke_not_instanceof_error);
+  }
+
   // Get the CallCtx this way instead of using vm_decode_function() because
   // vm_decode_function() has no way to specify a class independent from the
   // class::function being called.
   // Note that this breaks the rules for name lookup (for protected and private)
   // but that's okay because so does Zend's implementation.
   CallCtx ctx;
-  ctx.cls = Unit::loadClass(cls.get());
-  ctx.this_ = obj.toObject().get();
+  ctx.cls = providedClass;
+  ctx.this_ = objData;
   ctx.invName = nullptr;
-  ctx.func = ctx.cls->lookupMethod(name.get());
-  if (!ctx.func) {
-    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
-  }
+  ctx.func = selectedFunc;
 
   return Variant::attach(
     g_context->invokeFunc(ctx, params)

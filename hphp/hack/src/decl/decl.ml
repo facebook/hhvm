@@ -27,6 +27,7 @@ module Attrs = Attributes
 
 module SN = Naming_special_names
 
+exception Decl_not_found of string
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -866,24 +867,33 @@ let make_env tcopt fn =
   let ast = Parser_heap.get_from_parser_heap tcopt fn in
   name_and_declare_types_program tcopt ast
 
+let err_not_found file name =
+  let err_str =
+    Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file) in
+raise (Decl_not_found err_str)
+
 let declare_class_in_file tcopt file name =
   match Parser_heap.find_class_in_file tcopt file name with
   | Some cls ->
     let class_env = { tcopt; stack = SSet.empty; } in
     class_decl_if_missing class_env cls
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name
 
 let declare_fun_in_file tcopt file name =
   match Parser_heap.find_fun_in_file tcopt file name with
   | Some f -> ifun_decl tcopt f
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name
 
 let declare_typedef_in_file tcopt file name =
   match Parser_heap.find_typedef_in_file tcopt file name with
   | Some t -> type_typedef_naming_and_decl tcopt t
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name
 
 let declare_const_in_file tcopt file name =
   match Parser_heap.find_const_in_file tcopt file name with
   | Some cst -> iconst_decl tcopt cst
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name

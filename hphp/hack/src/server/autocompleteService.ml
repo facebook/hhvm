@@ -424,7 +424,7 @@ let result_compare a b =
   else 1
 
 let get_results tcopt funs classes =
-  Errors.ignore_ begin fun() ->
+  Errors.ignore_ begin fun () ->
     let completion_type = !Autocomplete.argument_global_type in
     if completion_type = Some Autocomplete.Acid ||
        completion_type = Some Autocomplete.Acnew ||

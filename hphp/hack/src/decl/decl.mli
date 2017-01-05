@@ -9,6 +9,11 @@
  *)
 
 (*
+  Exception representing not finding a class during decl
+*)
+exception Decl_not_found of string
+
+(*
  * This function works by side effects. It is adding in the
  * Naming_heap the nast produced from the ast passed as a parameter
  * (the SharedMem must thus have been initialized via SharedMem.init

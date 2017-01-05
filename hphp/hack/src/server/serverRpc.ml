@@ -26,7 +26,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | INFER_TYPE (fn, line, char) ->
         env, ServerInferType.go env (fn, line, char)
     | AUTOCOMPLETE content ->
-        env, ServerAutoComplete.auto_complete env.tcopt content
+        let result = try
+          ServerAutoComplete.auto_complete env.tcopt content
+          with Decl.Decl_not_found s ->
+            let s = s ^ "-- Autocomplete File contents: " ^ content in
+            Printexc.print_backtrace stderr;
+            raise (Decl.Decl_not_found s)
+        in
+        env, result
     | IDENTIFY_FUNCTION (content, line, char) ->
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | GET_DEFINITION_BY_ID id ->

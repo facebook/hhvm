@@ -130,6 +130,16 @@ abstract class EditableSyntax implements ArrayAccess {
       return DelimitedComment::from_json($json, $position, $source);
     case 'single_line_comment':
       return SingleLineComment::from_json($json, $position, $source);
+    case 'unsafe':
+      return Unsafe::from_json($json, $position, $source);
+    case 'unsafe_expression':
+      return UnsafeExpression::from_json($json, $position, $source);
+    case 'fix_me':
+      return FixMe::from_json($json, $position, $source);
+    case 'ignore_error':
+      return IgnoreError::from_json($json, $position, $source);
+    case 'fall_through':
+      return FallThrough::from_json($json, $position, $source);
 
     case 'missing':
       return Missing::missing();
@@ -3964,6 +3974,16 @@ abstract class EditableTrivia extends EditableSyntax {
         return new DelimitedComment($trivia_text);
       case 'single_line_comment':
         return new SingleLineComment($trivia_text);
+      case 'unsafe':
+        return new Unsafe($trivia_text);
+      case 'unsafe_expression':
+        return new UnsafeExpression($trivia_text);
+      case 'fix_me':
+        return new FixMe($trivia_text);
+      case 'ignore_error':
+        return new IgnoreError($trivia_text);
+      case 'fall_through':
+        return new FallThrough($trivia_text);
 
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
@@ -4012,6 +4032,51 @@ class SingleLineComment extends EditableTrivia {
   }
   public function with_text(string $text): SingleLineComment {
     return new SingleLineComment($text);
+  }
+}
+
+class Unsafe extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('unsafe', $text);
+  }
+  public function with_text(string $text): Unsafe {
+    return new Unsafe($text);
+  }
+}
+
+class UnsafeExpression extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('unsafe_expression', $text);
+  }
+  public function with_text(string $text): UnsafeExpression {
+    return new UnsafeExpression($text);
+  }
+}
+
+class FixMe extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('fix_me', $text);
+  }
+  public function with_text(string $text): FixMe {
+    return new FixMe($text);
+  }
+}
+
+class IgnoreError extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('ignore_error', $text);
+  }
+  public function with_text(string $text): IgnoreError {
+    return new IgnoreError($text);
+  }
+}
+
+class FallThrough extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('fall_through', $text);
+  }
+  public function with_text(string $text): FallThrough {
+    return new FallThrough($text);
   }
 }
 

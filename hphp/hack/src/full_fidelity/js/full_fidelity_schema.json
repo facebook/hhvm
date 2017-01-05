@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2016-12-01-0001",
+  "version" : "2016-12-22-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -9,7 +9,17 @@
     { "trivia_kind_name" : "DelimitedComment",
       "trivia_type_name" : "delimited_comment" },
     { "trivia_kind_name" : "SingleLineComment",
-      "trivia_type_name" : "single_line_comment" } ],
+      "trivia_type_name" : "single_line_comment" },
+    { "trivia_kind_name" : "Unsafe",
+      "trivia_type_name" : "unsafe" },
+    { "trivia_kind_name" : "UnsafeExpression",
+      "trivia_type_name" : "unsafe_expression" },
+    { "trivia_kind_name" : "FixMe",
+      "trivia_type_name" : "fix_me" },
+    { "trivia_kind_name" : "IgnoreError",
+      "trivia_type_name" : "ignore_error" },
+    { "trivia_kind_name" : "FallThrough",
+      "trivia_type_name" : "fall_through" } ],
   "tokens" : [
     { "token_kind" : "Abstract",
       "token_text" : "abstract" },

@@ -397,6 +397,56 @@ end (* WithToken *)
 
 end (* GenerateFFSyntax *)
 
+module GenerateFFTriviaKind = struct
+
+  let to_trivia { trivia_kind; trivia_text } =
+    Printf.sprintf "| %s\n" trivia_kind
+
+  let to_to_string { trivia_kind; trivia_text } =
+    Printf.sprintf "  | %s -> \"%s\"\n" trivia_kind trivia_text
+
+  let full_fidelity_trivia_kind_template =
+"(**
+ * Copyright (c) 2016, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the \"hack\" directory of this source tree. An additional
+ * grant of patent rights can be found in the PATENTS file in the same
+ * directory.
+ *
+ *)
+(* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @" ^ "generated *)
+(**
+  To regenerate this file build hphp/hack/src:generate_full_fidelity and run
+  the binary.
+  buck build hphp/hack/src:generate_full_fidelity
+  buck-out/bin/hphp/hack/src/generate_full_fidelity/generate_full_fidelity.opt
+*)
+type t =
+TRIVIA
+let to_string kind =
+  match kind with
+TO_STRING"
+
+let full_fidelity_trivia_kind =
+{
+  filename = "hphp/hack/src/full_fidelity/full_fidelity_trivia_kind.ml";
+  template = full_fidelity_trivia_kind_template;
+  transformations = [];
+  token_no_text_transformations = [];
+  token_given_text_transformations = [];
+  token_variable_text_transformations = [];
+  trivia_transformations = [
+    { trivia_pattern = "TRIVIA";
+      trivia_func = map_and_concat to_trivia };
+    { trivia_pattern = "TO_STRING";
+      trivia_func = map_and_concat to_to_string }]
+}
+
+end (* GenerateFFSyntaxKind *)
+
 module GenerateFFSyntaxKind = struct
 
   let to_tokens x =
@@ -451,7 +501,7 @@ let full_fidelity_syntax_kind =
   trivia_transformations = []
 }
 
-end (* GenerateFFSyntaxKind *)
+end (* GenerateFFTriviaKind *)
 
 module GenerateFFJavaScript = struct
 
@@ -2080,6 +2130,7 @@ TO_STRING_VARIABLE_TEXT
 end (* GenerateFFTokenKind *)
 
 let () =
+  generate_file GenerateFFTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFSyntax.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFJavaScript.full_fidelity_javascript;

@@ -123,13 +123,14 @@ abstract class EditableSyntax implements ArrayAccess {
     case 'list':
       return EditableList::from_json($json, $position, $source);
     case 'whitespace':
-      return Whitespace::from_json($json, $position, $source);
+      return WhiteSpace::from_json($json, $position, $source);
     case 'end_of_line':
       return EndOfLine::from_json($json, $position, $source);
     case 'delimited_comment':
       return DelimitedComment::from_json($json, $position, $source);
     case 'single_line_comment':
       return SingleLineComment::from_json($json, $position, $source);
+
     case 'missing':
       return Missing::missing();
     case 'header':
@@ -3955,10 +3956,15 @@ abstract class EditableTrivia extends EditableSyntax {
     string $source) {
     $trivia_text = substr($source, $position, $json->width);
     switch($json->kind) {
-      case 'whitespace': return new Whitespace($trivia_text);
-      case 'end_of_line': return new EndOfLine($trivia_text);
-      case 'single_line_comment': return new SingleLineComment($trivia_text);
-      case 'delimited_comment': return new DelimitedComment($trivia_text);
+      case 'whitespace':
+        return new WhiteSpace($trivia_text);
+      case 'end_of_line':
+        return new EndOfLine($trivia_text);
+      case 'delimited_comment':
+        return new DelimitedComment($trivia_text);
+      case 'single_line_comment':
+        return new SingleLineComment($trivia_text);
+
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
         // TODO: Better error
@@ -3972,12 +3978,13 @@ public function rewrite(
     return $rewriter($this, $parents ?? []);
   }
 }
-class Whitespace extends EditableTrivia {
+
+class WhiteSpace extends EditableTrivia {
   public function __construct(string $text) {
     parent::__construct('whitespace', $text);
   }
-  public function with_text(string $text): Whitespace {
-    return new Whitespace($text);
+  public function with_text(string $text): WhiteSpace {
+    return new WhiteSpace($text);
   }
 }
 
@@ -3985,17 +3992,8 @@ class EndOfLine extends EditableTrivia {
   public function __construct(string $text) {
     parent::__construct('end_of_line', $text);
   }
-  public function with_text(string $text): Whitespace {
+  public function with_text(string $text): EndOfLine {
     return new EndOfLine($text);
-  }
-}
-
-class SingleLineComment extends EditableTrivia {
-  public function __construct(string $text) {
-    parent::__construct('single_line_comment', $text);
-  }
-  public function with_text(string $text): Whitespace {
-    return new SingleLineComment($text);
   }
 }
 
@@ -4003,10 +4001,21 @@ class DelimitedComment extends EditableTrivia {
   public function __construct(string $text) {
     parent::__construct('delimited_comment', $text);
   }
-  public function with_text(string $text): Whitespace {
+  public function with_text(string $text): DelimitedComment {
     return new DelimitedComment($text);
   }
 }
+
+class SingleLineComment extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('single_line_comment', $text);
+  }
+  public function with_text(string $text): SingleLineComment {
+    return new SingleLineComment($text);
+  }
+}
+
+
 
 final class Missing extends EditableSyntax {
   private static ?Missing $_missing = null;

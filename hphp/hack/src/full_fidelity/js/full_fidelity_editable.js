@@ -60,13 +60,14 @@ class EditableSyntax
     case 'list':
       return EditableList.from_json(json, position, source);
     case 'whitespace':
-      return Whitespace.from_json(json, position, source);
+      return WhiteSpace.from_json(json, position, source);
     case 'end_of_line':
       return EndOfLine.from_json(json, position, source);
     case 'delimited_comment':
       return DelimitedComment.from_json(json, position, source);
     case 'single_line_comment':
       return SingleLineComment.from_json(json, position, source);
+
     case 'missing':
       return Missing.missing;
     case 'header':
@@ -2404,10 +2405,15 @@ class EditableTrivia extends EditableSyntax
     let trivia_text = source.substring(position, position + json.width);
     switch(json.kind)
     {
-      case 'whitespace': return new Whitespace(trivia_text);
-      case 'end_of_line': return new EndOfLine(trivia_text);
-      case 'single_line_comment': return new SingleLineComment(trivia_text);
-      case 'delimited_comment': return new DelimitedComment(trivia_text);
+      case 'whitespace':
+        return new WhiteSpace(trivia_text);
+      case 'end_of_line':
+        return new EndOfLine(trivia_text);
+      case 'delimited_comment':
+        return new DelimitedComment(trivia_text);
+      case 'single_line_comment':
+        return new SingleLineComment(trivia_text);
+
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
   }
@@ -2422,41 +2428,43 @@ class EditableTrivia extends EditableSyntax
   }
 }
 
-class Whitespace extends EditableTrivia
+class WhiteSpace extends EditableTrivia
 {
-  constructor(text) { super('whitespace', text); }
+  constructor(text) { super(whitespace, text); }
   with_text(text)
   {
-    return new Whitespace(text);
+    return new WhiteSpace(text);
   }
 }
 
 class EndOfLine extends EditableTrivia
 {
-  constructor(text) { super('end_of_line', text); }
+  constructor(text) { super(end_of_line, text); }
   with_text(text)
   {
     return new EndOfLine(text);
   }
 }
 
+class DelimitedComment extends EditableTrivia
+{
+  constructor(text) { super(delimited_comment, text); }
+  with_text(text)
+  {
+    return new DelimitedComment(text);
+  }
+}
+
 class SingleLineComment extends EditableTrivia
 {
-  constructor(text) { super('single_line_comment', text); }
+  constructor(text) { super(single_line_comment, text); }
   with_text(text)
   {
     return new SingleLineComment(text);
   }
 }
 
-class DelimitedComment extends EditableTrivia
-{
-  constructor(text) { super('delimited_comment', text); }
-  with_text(text)
-  {
-    return new DelimitedComment(text);
-  }
-}
+
 
 class Missing extends EditableSyntax
 {
@@ -14696,10 +14704,11 @@ exports.XHPBodyToken = XHPBodyToken;
 exports.XHPCommentToken = XHPCommentToken;
 
 exports.EditableTrivia = EditableTrivia;
-exports.Whitespace = Whitespace;
+exports.WhiteSpace = WhiteSpace;
 exports.EndOfLine = EndOfLine;
 exports.DelimitedComment = DelimitedComment;
 exports.SingleLineComment = SingleLineComment;
+
 exports.ScriptHeader = ScriptHeader;
 exports.Script = Script;
 exports.ScriptFooter = ScriptFooter;

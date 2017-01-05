@@ -460,6 +460,28 @@ module GenerateFFJavaScript = struct
       return %s.from_json(json, position, source);
 " x.description x.kind_name
 
+  let trivia_from_json { trivia_kind; trivia_text } =
+    Printf.sprintf "    case '%s':
+      return %s.from_json(json, position, source);
+" trivia_text trivia_kind
+
+  let trivia_static_from_json { trivia_kind; trivia_text } =
+    Printf.sprintf "      case '%s':
+        return new %s(trivia_text);
+" trivia_text trivia_kind
+
+  let trivia_classes { trivia_kind; trivia_text } =
+    Printf.sprintf "class %s extends EditableTrivia
+{
+  constructor(text) { super(%s, text); }
+  with_text(text)
+  {
+    return new %s(text);
+  }
+}
+
+" trivia_kind trivia_text trivia_kind
+
   let to_editable_syntax x =
     let ctor_mapper f = f in
     let ctor = map_and_concat_separated ",\n    " ctor_mapper x.fields in
@@ -596,6 +618,9 @@ let to_editable_given_text x =
   let to_export_token x =
     Printf.sprintf "exports.%sToken = %sToken;\n" x.token_kind x.token_kind
 
+  let to_export_trivia x =
+    Printf.sprintf "exports.%s = %s;\n" x.trivia_kind x.trivia_kind
+
   let full_fidelity_javascript_template =
 "/**
  * Copyright (c) 2016, Facebook, Inc.
@@ -658,14 +683,7 @@ class EditableSyntax
       return EditableToken.from_json(json.token, position, source);
     case 'list':
       return EditableList.from_json(json, position, source);
-    case 'whitespace':
-      return Whitespace.from_json(json, position, source);
-    case 'end_of_line':
-      return EndOfLine.from_json(json, position, source);
-    case 'delimited_comment':
-      return DelimitedComment.from_json(json, position, source);
-    case 'single_line_comment':
-      return SingleLineComment.from_json(json, position, source);
+FROM_JSON_TRIVIA
     case 'missing':
       return Missing.missing;
 FROM_JSON_SYNTAX
@@ -1033,10 +1051,7 @@ class EditableTrivia extends EditableSyntax
     let trivia_text = source.substring(position, position + json.width);
     switch(json.kind)
     {
-      case 'whitespace': return new Whitespace(trivia_text);
-      case 'end_of_line': return new EndOfLine(trivia_text);
-      case 'single_line_comment': return new SingleLineComment(trivia_text);
-      case 'delimited_comment': return new DelimitedComment(trivia_text);
+STATIC_FROM_JSON_TRIVIA
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
   }
@@ -1051,41 +1066,7 @@ class EditableTrivia extends EditableSyntax
   }
 }
 
-class Whitespace extends EditableTrivia
-{
-  constructor(text) { super('whitespace', text); }
-  with_text(text)
-  {
-    return new Whitespace(text);
-  }
-}
-
-class EndOfLine extends EditableTrivia
-{
-  constructor(text) { super('end_of_line', text); }
-  with_text(text)
-  {
-    return new EndOfLine(text);
-  }
-}
-
-class SingleLineComment extends EditableTrivia
-{
-  constructor(text) { super('single_line_comment', text); }
-  with_text(text)
-  {
-    return new SingleLineComment(text);
-  }
-}
-
-class DelimitedComment extends EditableTrivia
-{
-  constructor(text) { super('delimited_comment', text); }
-  with_text(text)
-  {
-    return new DelimitedComment(text);
-  }
-}
+TRIVIA_CLASSES
 
 class Missing extends EditableSyntax
 {
@@ -1125,10 +1106,7 @@ EXPORTS_NO_TEXT_TOKENS
 EXPORTS_GIVEN_TEXT_TOKENS
 EXPORTS_VARIABLE_TEXT_TOKENS
 exports.EditableTrivia = EditableTrivia;
-exports.Whitespace = Whitespace;
-exports.EndOfLine = EndOfLine;
-exports.DelimitedComment = DelimitedComment;
-exports.SingleLineComment = SingleLineComment;
+EXPORTS_TRIVIA
 EXPORTS_SYNTAX"
 
   let full_fidelity_javascript =
@@ -1161,7 +1139,16 @@ EXPORTS_SYNTAX"
         token_func = map_and_concat to_factory_variable_text };
       { token_pattern = "EXPORTS_VARIABLE_TEXT_TOKENS";
         token_func = map_and_concat to_export_token }];
-    trivia_transformations = []
+    trivia_transformations = [
+      { trivia_pattern = "FROM_JSON_TRIVIA";
+        trivia_func = map_and_concat trivia_from_json };
+      { trivia_pattern = "STATIC_FROM_JSON_TRIVIA";
+        trivia_func = map_and_concat trivia_static_from_json };
+      { trivia_pattern = "TRIVIA_CLASSES";
+        trivia_func = map_and_concat trivia_classes };
+      { trivia_pattern = "EXPORTS_TRIVIA";
+        trivia_func = map_and_concat to_export_trivia }
+    ]
   }
 
 end (* GenerateFFJavaScript *)
@@ -1172,6 +1159,29 @@ module GenerateFFHack = struct
     Printf.sprintf "    case '%s':
       return %s::from_json($json, $position, $source);
 " x.description x.kind_name
+
+  let to_from_json_trivia { trivia_kind; trivia_text } =
+    Printf.sprintf "    case '%s':
+      return %s::from_json($json, $position, $source);
+" trivia_text trivia_kind
+
+  let to_static_from_json_trivia { trivia_kind; trivia_text } =
+    Printf.sprintf "      case '%s':
+        return new %s($trivia_text);
+" trivia_text trivia_kind
+
+  let to_classes_trivia { trivia_kind; trivia_text } =
+    Printf.sprintf "class %s extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('%s', $text);
+  }
+  public function with_text(string $text): %s {
+    return new %s($text);
+  }
+}
+
+" trivia_kind trivia_text trivia_kind trivia_kind
+
 
   let to_editable_syntax x =
     let ctor_mapper f = Printf.sprintf "EditableSyntax $%s" f in
@@ -1461,14 +1471,7 @@ abstract class EditableSyntax implements ArrayAccess {
       return EditableToken::from_json($json->token, $position, $source);
     case 'list':
       return EditableList::from_json($json, $position, $source);
-    case 'whitespace':
-      return Whitespace::from_json($json, $position, $source);
-    case 'end_of_line':
-      return EndOfLine::from_json($json, $position, $source);
-    case 'delimited_comment':
-      return DelimitedComment::from_json($json, $position, $source);
-    case 'single_line_comment':
-      return SingleLineComment::from_json($json, $position, $source);
+FROM_JSON_TRIVIA
     case 'missing':
       return Missing::missing();
 FROM_JSON_SYNTAX
@@ -1900,10 +1903,7 @@ abstract class EditableTrivia extends EditableSyntax {
     string $source) {
     $trivia_text = substr($source, $position, $json->width);
     switch($json->kind) {
-      case 'whitespace': return new Whitespace($trivia_text);
-      case 'end_of_line': return new EndOfLine($trivia_text);
-      case 'single_line_comment': return new SingleLineComment($trivia_text);
-      case 'delimited_comment': return new DelimitedComment($trivia_text);
+STATIC_FROM_JSON_TRIVIA
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
         // TODO: Better error
@@ -1917,41 +1917,8 @@ public function rewrite(
     return $rewriter($this, $parents ?? []);
   }
 }
-class Whitespace extends EditableTrivia {
-  public function __construct(string $text) {
-    parent::__construct('whitespace', $text);
-  }
-  public function with_text(string $text): Whitespace {
-    return new Whitespace($text);
-  }
-}
 
-class EndOfLine extends EditableTrivia {
-  public function __construct(string $text) {
-    parent::__construct('end_of_line', $text);
-  }
-  public function with_text(string $text): Whitespace {
-    return new EndOfLine($text);
-  }
-}
-
-class SingleLineComment extends EditableTrivia {
-  public function __construct(string $text) {
-    parent::__construct('single_line_comment', $text);
-  }
-  public function with_text(string $text): Whitespace {
-    return new SingleLineComment($text);
-  }
-}
-
-class DelimitedComment extends EditableTrivia {
-  public function __construct(string $text) {
-    parent::__construct('delimited_comment', $text);
-  }
-  public function with_text(string $text): Whitespace {
-    return new DelimitedComment($text);
-  }
-}
+TRIVIA_CLASSES
 
 final class Missing extends EditableSyntax {
   private static ?Missing $_missing = null;
@@ -2027,7 +1994,13 @@ function from_json(mixed $json): EditableSyntax {
         token_func = map_and_concat to_editable_variable_text };
       { token_pattern = "FACTORY_VARIABLE_TEXT_TOKENS";
         token_func = map_and_concat to_factory_variable_text }];
-    trivia_transformations = []
+    trivia_transformations = [
+      { trivia_pattern = "FROM_JSON_TRIVIA";
+        trivia_func = map_and_concat to_from_json_trivia };
+      { trivia_pattern = "STATIC_FROM_JSON_TRIVIA";
+        trivia_func = map_and_concat to_static_from_json_trivia };
+      { trivia_pattern = "TRIVIA_CLASSES";
+        trivia_func = map_and_concat to_classes_trivia }]
   }
 
 end (* GenerateFFHack *)
@@ -2105,8 +2078,6 @@ TO_STRING_VARIABLE_TEXT
   }
 
 end (* GenerateFFTokenKind *)
-
-
 
 let () =
   generate_file GenerateFFSyntax.full_fidelity_syntax;

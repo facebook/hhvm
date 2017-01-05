@@ -24,6 +24,11 @@ type schema_node = {
   fields : string list
 }
 
+type trivia_node = {
+  trivia_kind : string;
+  trivia_text : string
+}
+
 type token_node = {
     token_kind : string;
     token_text : string
@@ -38,7 +43,13 @@ type transformation =
 type token_transformation =
 {
   token_pattern : string;
-  token_func : token_node -> string
+  token_func : token_node list -> string
+}
+
+type trivia_transformation =
+{
+  trivia_pattern : string;
+  trivia_func : trivia_node list -> string
 }
 
 type template_file =
@@ -49,6 +60,7 @@ type template_file =
   token_no_text_transformations : token_transformation list;
   token_variable_text_transformations : token_transformation list;
   token_given_text_transformations : token_transformation list;
+  trivia_transformations : trivia_transformation list;
 }
 
 let from_list l =
@@ -62,6 +74,12 @@ let token_node_from_list l =
   | [ token_kind; token_text ] ->
     { token_kind; token_text }
   | _ -> failwith "bad token schema"
+
+let trivia_node_from_list l =
+  match l with
+  | [ trivia_kind; trivia_text ] ->
+    { trivia_kind; trivia_text }
+  | _ -> failwith "bad trivia schema"
 
 let schema = List.map from_list [
   [ "ScriptHeader";
@@ -1164,6 +1182,12 @@ let given_text_tokens = List.map token_node_from_list [
   [ "SlashGreaterThan"; "/>" ];
   [ "LessThanSlash"; "</" ]]
 
+let trivia_kinds = List.map trivia_node_from_list [
+  [ "WhiteSpace"; "whitespace" ];
+  [ "EndOfLine"; "end_of_line" ];
+  [ "DelimitedComment"; "delimited_comment" ];
+  [ "SingleLineComment"; "single_line_comment" ]]
+
 let map_and_concat_separated separator f items =
   String.concat separator (List.map f items)
 
@@ -1176,6 +1200,9 @@ let transform_schema f =
 let transform_tokens token_list f =
   map_and_concat f token_list
 
+let transform_trivia trivia_list f =
+  map_and_concat f trivia_list
+
 let replace pattern new_text source =
   Str.replace_first (Str.regexp pattern) new_text source
 
@@ -1183,15 +1210,21 @@ let generate_string template =
   let syntax_folder s x =
     replace x.pattern (transform_schema x.func) s in
   let tokens_folder token_list s x =
-    replace x.token_pattern (transform_tokens token_list x.token_func) s in
+    replace x.token_pattern (x.token_func token_list) s in
+  let trivia_folder trivia_list s x =
+    replace x.trivia_pattern (x.trivia_func trivia_list) s in
   let result = List.fold_left
     syntax_folder template.template template.transformations in
+
   let result = List.fold_left (tokens_folder no_text_tokens)
     result template.token_no_text_transformations in
   let result = List.fold_left (tokens_folder variable_text_tokens)
     result template.token_variable_text_transformations in
   let result = List.fold_left (tokens_folder given_text_tokens)
     result template.token_given_text_transformations in
+  let result = List.fold_left (trivia_folder trivia_kinds)
+    result template.trivia_transformations in
+
   result
 
 let generate_file template =
@@ -1202,6 +1235,12 @@ let generate_file template =
 
 
 module GenerateFFJSONSchema = struct
+  let to_json_trivia { trivia_kind; trivia_text } =
+    Printf.sprintf
+"    { \"trivia_kind_name\" : \"%s\",
+      \"trivia_type_name\" : \"%s\" }"
+    trivia_kind trivia_text
+
   let to_json_given_text x =
     Printf.sprintf
 "    { \"token_kind\" : \"%s\",
@@ -1235,14 +1274,7 @@ module GenerateFFJSONSchema = struct
   \"Auto-generated JSON schema of the Hack Full Fidelity Parser AST\",
   \"version\" : \"" ^ full_fidelity_schema_version_number ^ "\",
   \"trivia\" : [
-    { \"trivia_kind_name\" : \"Whitespace\",
-      \"trivia_type_name\" : \"whitespace\" },
-    { \"trivia_kind_name\" : \"EndOfLine\",
-      \"trivia_type_name\" : \"end_of_line\" },
-    { \"trivia_kind_name\" : \"DelimitedComment\",
-      \"trivia_type_name\" : \"delimited_comment\" },
-    { \"trivia_kind_name\" : \"SingleLineComment\",
-      \"trivia_type_name\" : \"single_line_comment\" } ],
+TRIVIA_KINDS ],
   \"tokens\" : [
 GIVEN_TEXT_TOKENS
 VARIABLE_TEXT_TOKENS
@@ -1278,10 +1310,14 @@ AST_NODES
     token_no_text_transformations = [ ];
     token_given_text_transformations = [
       { token_pattern = "GIVEN_TEXT_TOKENS";
-        token_func = to_json_given_text } ];
+        token_func = map_and_concat to_json_given_text } ];
     token_variable_text_transformations = [
       { token_pattern = "VARIABLE_TEXT_TOKENS";
-        token_func = to_json_variable_text }]
+        token_func = map_and_concat to_json_variable_text }];
+    trivia_transformations = [
+      { trivia_pattern = "TRIVIA_KINDS";
+        trivia_func = map_and_concat_separated ",\n" to_json_trivia }
+    ]
   }
 
 end (* GenerateFFJSONSchema *)

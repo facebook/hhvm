@@ -391,7 +391,8 @@ end (* WithToken *)
     ];
     token_no_text_transformations = [];
     token_given_text_transformations = [];
-    token_variable_text_transformations = []
+    token_variable_text_transformations = [];
+    trivia_transformations = []
   }
 
 end (* GenerateFFSyntax *)
@@ -446,7 +447,8 @@ let full_fidelity_syntax_kind =
   ];
   token_no_text_transformations = [];
   token_given_text_transformations = [];
-  token_variable_text_transformations = []
+  token_variable_text_transformations = [];
+  trivia_transformations = []
 }
 
 end (* GenerateFFSyntaxKind *)
@@ -1140,25 +1142,26 @@ EXPORTS_SYNTAX"
     ];
     token_no_text_transformations = [
       { token_pattern = "EDITABLE_NO_TEXT_TOKENS";
-        token_func = to_editable_no_text };
+        token_func = map_and_concat to_editable_no_text };
       { token_pattern = "FACTORY_NO_TEXT_TOKENS";
-        token_func = to_factory_no_text };
+        token_func = map_and_concat to_factory_no_text };
       { token_pattern = "EXPORTS_NO_TEXT_TOKENS";
-        token_func = to_export_token }];
+        token_func = map_and_concat to_export_token }];
     token_given_text_transformations = [
       { token_pattern = "EDITABLE_GIVEN_TEXT_TOKENS";
-        token_func = to_editable_given_text };
+        token_func = map_and_concat to_editable_given_text };
       { token_pattern = "FACTORY_GIVEN_TEXT_TOKENS";
-        token_func = to_factory_given_text };
+        token_func = map_and_concat to_factory_given_text };
       { token_pattern = "EXPORTS_GIVEN_TEXT_TOKENS";
-        token_func = to_export_token }];
+        token_func = map_and_concat to_export_token }];
     token_variable_text_transformations = [
       { token_pattern = "EDITABLE_VARIABLE_TEXT_TOKENS";
-        token_func = to_editable_variable_text };
+        token_func = map_and_concat to_editable_variable_text };
       { token_pattern = "FACTORY_VARIABLE_TEXT_TOKENS";
-        token_func = to_factory_variable_text };
+        token_func = map_and_concat to_factory_variable_text };
       { token_pattern = "EXPORTS_VARIABLE_TEXT_TOKENS";
-        token_func = to_export_token }]
+        token_func = map_and_concat to_export_token }];
+    trivia_transformations = []
   }
 
 end (* GenerateFFJavaScript *)
@@ -2011,19 +2014,20 @@ function from_json(mixed $json): EditableSyntax {
     ];
     token_no_text_transformations = [
       { token_pattern = "EDITABLE_NO_TEXT_TOKENS";
-        token_func = to_editable_no_text };
+        token_func = map_and_concat to_editable_no_text };
       { token_pattern = "FACTORY_NO_TEXT_TOKENS";
-        token_func = to_factory_no_text }];
+        token_func = map_and_concat to_factory_no_text }];
     token_given_text_transformations = [
       { token_pattern = "EDITABLE_GIVEN_TEXT_TOKENS";
-        token_func = to_editable_given_text };
+        token_func = map_and_concat to_editable_given_text };
       { token_pattern = "FACTORY_GIVEN_TEXT_TOKENS";
-        token_func = to_factory_given_text }];
+        token_func = map_and_concat to_factory_given_text }];
     token_variable_text_transformations = [
       { token_pattern = "EDITABLE_VARIABLE_TEXT_TOKENS";
-        token_func = to_editable_variable_text };
+        token_func = map_and_concat to_editable_variable_text };
       { token_pattern = "FACTORY_VARIABLE_TEXT_TOKENS";
-        token_func = to_factory_variable_text }]
+        token_func = map_and_concat to_factory_variable_text }];
+    trivia_transformations = []
   }
 
 end (* GenerateFFHack *)
@@ -2084,19 +2088,20 @@ TO_STRING_VARIABLE_TEXT
     transformations = [];
     token_no_text_transformations = [
       { token_pattern = "KIND_DECLARATIONS_NO_TEXT";
-        token_func = to_kind_declaration }];
+        token_func = map_and_concat to_kind_declaration }];
     token_given_text_transformations = [
       { token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
-        token_func = to_kind_declaration };
+        token_func = map_and_concat to_kind_declaration };
       { token_pattern = "FROM_STRING_GIVEN_TEXT";
-        token_func = to_from_string };
+        token_func = map_and_concat to_from_string };
       { token_pattern = "TO_STRING_GIVEN_TEXT";
-        token_func = to_to_string }];
+        token_func = map_and_concat to_to_string }];
     token_variable_text_transformations = [
       { token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
-        token_func = to_kind_declaration };
+        token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_VARIABLE_TEXT";
-        token_func = to_to_string }]
+        token_func = map_and_concat to_to_string }];
+    trivia_transformations = []
   }
 
 end (* GenerateFFTokenKind *)

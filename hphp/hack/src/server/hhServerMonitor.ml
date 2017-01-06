@@ -117,10 +117,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
     SharedMem.connect handle ~is_master:true;
     ServerMain.run_once options handle
   else
-    let hh_server_monitor_starter = begin fun () ->
-      let typechecker = start_hh_server options in
-      [typechecker]
-    end in
+    let hh_server_monitor_starter = (fun () -> start_hh_server options) in
     let waiting_client = ServerArgs.waiting_client options in
     ServerMonitor.start_monitoring ~waiting_client ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;

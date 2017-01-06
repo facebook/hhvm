@@ -34,3 +34,9 @@ val no_load             : options -> bool
 val save_filename       : options -> string option
 val waiting_client      : options -> Unix.file_descr option
 val debug_client        : options -> Handle.handle option
+
+(*****************************************************************************)
+(* Setters *)
+(*****************************************************************************)
+
+val set_no_load         : options -> bool -> options

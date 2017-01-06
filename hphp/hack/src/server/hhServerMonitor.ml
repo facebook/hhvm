@@ -117,7 +117,17 @@ let monitor_daemon_main (options: ServerArgs.options) =
     SharedMem.connect handle ~is_master:true;
     ServerMain.run_once options handle
   else
-    let hh_server_monitor_starter = (fun () -> start_hh_server options) in
+    let hh_server_monitor_starter =
+      begin function
+        | Some c
+          when c = Exit_status.(exit_code Sql_assertion_failure) ||
+               c = Exit_status.(exit_code Sql_cantopen) ||
+               c = Exit_status.(exit_code Sql_corrupt) ||
+               c = Exit_status.(exit_code Sql_misuse) ->
+          start_hh_server (ServerArgs.set_no_load options true)
+        | _ -> start_hh_server options
+      end
+    in
     let waiting_client = ServerArgs.waiting_client options in
     ServerMonitor.start_monitoring ~waiting_client ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;

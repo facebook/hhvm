@@ -180,3 +180,9 @@ let no_load options = options.no_load
 let save_filename options = options.save_filename
 let waiting_client options = options.waiting_client
 let debug_client options = options.debug_client
+
+(*****************************************************************************)
+(* Setters *)
+(*****************************************************************************)
+
+let set_no_load options is_no_load = {options with no_load = is_no_load}

@@ -63,7 +63,7 @@ namespace HH {
 
       throw new \InvalidArgumentException(\sprintf(
         'Parameter must be a container (array or collection), got %s',
-        is_object($it) ? get_class($it) : gettype($it),
+        is_object($it) ? get_class($it) : gettype($it)
       ));
    }
 
@@ -86,7 +86,7 @@ namespace HH {
       }
       throw new \InvalidArgumentException(\sprintf(
         'Parameter must be an array or an instance of Traversable, got %s',
-        is_object($it) ? get_class($it) : gettype($it),
+        is_object($it) ? get_class($it) : gettype($it)
       ));
     }
 
@@ -130,7 +130,7 @@ namespace HH {
     public function reserve($sz) {
       if ($sz < 0) {
         throw new \InvalidArgumentException(
-          'Parameter sz must be a non-negative integer, got '. $sz,
+          'Parameter sz must be a non-negative integer, got '. $sz
         );
       }
       if ($sz > self::MAX_SIZE) {

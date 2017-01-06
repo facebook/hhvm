@@ -1329,30 +1329,40 @@ and expr_
         let env, ty = Env.lost_info fake_name env ty in
         env, T.Any, ty
       else env, T.Any, ty
+    (* Fake member property access. For example:
+     *   if ($x->f !== null) { ...$x->f... }
+     *)
   | Obj_get (e, (_, Id (_, y)), _)
       when Env.FakeMembers.get env e y <> None ->
         let env, local = Env.FakeMembers.make p env e y in
         let local = p, Lvar (p, local) in
         expr env local
+    (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (_, Id m), nullflavor) ->
       let nullsafe =
         (match nullflavor with
           | OG_nullthrows -> None
           | OG_nullsafe -> Some p
         ) in
-      let env, _te1, ty1 = expr env e1 in
+      let env, te1, ty1 = expr env e1 in
       let env, result =
         obj_get ~is_method:false ~nullsafe env ty1 (CIexpr e1) m (fun x -> x) in
       let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
-      if has_lost_info
-      then
-        let name = "the member "^snd m in
-        let env, result = Env.lost_info name env result in
-        env, T.Any, result
-      else env, T.Any, result
-  | Obj_get (e1, _, _) ->
-      let env, _te1, _ = expr env e1 in
-      env, T.Any, (Reason.Rwitness p, Tany)
+      let env, result =
+        if has_lost_info
+        then
+          let name = "the member " ^ snd m in
+          Env.lost_info name env result
+        else
+          env, result
+      in
+      env, T.Obj_get(result, te1, m, nullflavor), result
+    (* Dynamic instance property access e.g. $x->$f *)
+  | Obj_get (e1, e2, nullflavor) ->
+    let env, te1, _ = expr env e1 in
+    let env, te2, _ = expr env e2 in
+    let ty = (Reason.Rwitness p, Tany) in
+    env, T.Obj_dynamic_get(te1, te2, nullflavor), ty
   | Yield_break ->
       env, T.Any, (Reason.Rwitness p, Tany)
   | Yield af ->
@@ -3791,6 +3801,7 @@ and condition_var_non_null env = function
       let env = Env.set_local env local ty in
       let local = p, Lvar (p, local) in
       condition_var_non_null env local
+    (* TODO TAST: generate an assignment to the fake local in the TAST *)
   | p, Obj_get ((_, This | _, Lvar _ as obj),
                 (_, Id (_, member_name)),
                 _) as e ->

@@ -73,7 +73,10 @@ and expr =
   (* meth_caller('Class name', 'method name') *)
   | Method_caller of sid * pstring
   | Smethod_id of sid * pstring
-  | Obj_get of expr * expr * Nast.og_null_flavor
+  (* Dynamic instance property access e.g. $x->$f; not legal in strict files *)
+  | Obj_dynamic_get of expr * expr * Nast.og_null_flavor
+  (* Statically-known instance property access e.g. $x->f *)
+  | Obj_get of ty * expr * sid * Nast.og_null_flavor
   | Array_get of expr * expr option
   | Class_get of class_id * pstring
   | Class_const of class_id * pstring

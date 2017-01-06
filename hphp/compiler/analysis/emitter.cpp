@@ -11288,6 +11288,12 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
           ue.reset(assemble_string(code, codeLen, filename, md5));
+          if (BuiltinSymbols::s_systemAr) {
+            ue->m_filepath = makeStaticString(
+              "/:" + ue->m_filepath->toCppString());
+            BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+            ue.reset(assemble_string(code, codeLen, filename, md5));
+          }
         }
       }
     }

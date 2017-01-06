@@ -120,8 +120,8 @@ void ProcessInit() {
   }
 
   if (!hhas.empty()) {
-    SystemLib::s_hhas_unit = compile_string(hhas.c_str(), hhas.size(),
-                                            "systemlib.hhas");
+    SystemLib::s_hhas_unit = compile_systemlib_string(
+      hhas.c_str(), hhas.size(), "systemlib.hhas");
     if (SystemLib::s_hhas_unit->compileTimeFatal(msg, line)) {
       Logger::Error("An error has been introduced in the hhas portion of "
                     "systemlib.");

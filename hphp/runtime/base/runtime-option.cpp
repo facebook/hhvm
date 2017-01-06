@@ -506,7 +506,7 @@ uint64_t ahotDefault() {
 }
 
 const uint64_t kEvalVMStackElmsDefault =
-#ifdef VALGRIND
+#if defined(VALGRIND) && !defined(FOLLY_SANITIZE_ADDRESS)
  0x800
 #else
  0x4000

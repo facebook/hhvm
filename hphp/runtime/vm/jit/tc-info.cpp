@@ -38,11 +38,11 @@ namespace HPHP { namespace jit { namespace tc {
 
 namespace {
 
-bool dumpTCCode(const char* filename) {
-#define OPEN_FILE(F, SUFFIX)                                    \
-  std::string F ## name = std::string(filename).append(SUFFIX); \
-  FILE* F = fopen(F ## name .c_str(),"wb");                     \
-  if (F == nullptr) return false;                               \
+bool dumpTCCode(folly::StringPiece filename) {
+#define OPEN_FILE(F, SUFFIX)                                            \
+  auto const F ## name = folly::to<std::string>(filename, SUFFIX);      \
+  FILE* F = fopen(F ## name .c_str(),"wb");                             \
+  if (F == nullptr) return false;                                       \
   SCOPE_EXIT{ fclose(F); };
 
   OPEN_FILE(ahotFile,       "_ahot");
@@ -72,7 +72,8 @@ bool dumpTCCode(const char* filename) {
 }
 
 bool dumpTCData() {
-  gzFile tcDataFile = gzopen("/tmp/tc_data.txt.gz", "w");
+  auto const dataPath = RuntimeOption::EvalDumpTCPath + "/tc_data.txt.gz";
+  gzFile tcDataFile = gzopen(dataPath.c_str(), "w");
   if (!tcDataFile) return false;
 
   if (!gzprintf(tcDataFile,
@@ -138,7 +139,8 @@ bool dump(bool ignoreLease /* = false */) {
     codeLock = lockCode();
     metaLock = lockMetadata();
   }
-  return dumpTCData() && dumpTCCode("/tmp/tc_dump");
+  return dumpTCData() &&
+    dumpTCCode(RuntimeOption::EvalDumpTCPath + "/tc_dump");
 }
 
 std::vector<UsageInfo> getUsageInfo() {

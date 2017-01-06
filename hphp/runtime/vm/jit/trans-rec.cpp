@@ -99,7 +99,9 @@ TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   static std::unordered_map<std::string, bool> fileWritten;
   SavedAnnotation saved = {
-    folly::sformat("/tmp/tc_annotations.txt{}", compress ? ".gz" : ""),
+    folly::sformat("{}/tc_annotations.txt{}",
+                   RuntimeOption::EvalDumpTCPath,
+                   compress ? ".gz" : ""),
     0,
     0
   };

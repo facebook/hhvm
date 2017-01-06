@@ -350,7 +350,8 @@ std::string getTCSpace();
 std::string getTCAddrs();
 
 /*
- * Dump the translation cache to files in /tmp, returning success.
+ * Dump the translation cache to files in RuntimeOption::EvalDumpTCPath
+ * (default: /tmp), returning success.
  */
 bool dump(bool ignoreLease = false);
 

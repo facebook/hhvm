@@ -1542,6 +1542,26 @@ module WithStatementAndDeclAndTypeParser
     let node = make_braced_expression left_brace expression right_brace in
     (parser, node)
 
+  and expect_right_brace_xhp parser =
+    let (parser1, token) = next_xhp_body_token parser in
+    if (Token.kind token) = TokenKind.RightBrace then
+      (parser1, make_token token)
+    else
+      (* ERROR RECOVERY: Create a missing token for the expected token,
+         and continue on from the current token. Don't skip it. *)
+      (with_error parser SyntaxError.error1006, (make_missing()))
+
+  and parse_xhp_body_braced_expression parser =
+    (* The difference between a regular braced expression and an
+       XHP body braced expression is:
+       <foo bar={$x}/*this_is_a_comment*/>{$y}/*this_is_body_text!*/</foo>
+    *)
+    let (parser, left_brace) = assert_token parser LeftBrace in
+    let (parser, expression) = parse_expression_with_reset_precedence parser in
+    let (parser, right_brace) = expect_right_brace_xhp parser in
+    let node = make_braced_expression left_brace expression right_brace in
+    (parser, node)
+
   and parse_xhp_attribute parser =
     let (parser1, token, _) = next_xhp_element_token parser in
     if (Token.kind token) != XHPElementName then
@@ -1580,7 +1600,7 @@ module WithStatementAndDeclAndTypeParser
     | XHPComment
     | XHPBody -> (parser1, Some (make_token token))
     | LeftBrace ->
-      let (parser, expr) = parse_braced_expression parser in
+      let (parser, expr) = parse_xhp_body_braced_expression parser in
       (parser, Some expr)
     | XHPElementName ->
       let (parser, expr) = parse_possible_xhp_expression parser in

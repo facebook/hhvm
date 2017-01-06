@@ -736,6 +736,21 @@ let scan_xhp_comment lexer =
   aux (advance lexer 4)
 
 let scan_xhp_body lexer =
+  (* Naively you might think that an XHP body is just a bunch of characters,
+     terminated by an embedded { } expression or a tag.  However, whitespace
+     and newlines are relevant in XHP bodies because they are "soft".
+     That is, any section of contiguous trivia has the same semantics as a
+     single space or newline -- just as in HTML.
+
+     Obviously this is of relevance to code formatters.
+
+     Therefore we detect whitespace and newlines within XHP bodies and treat
+     it as trivia surrounding the tokens within the body.
+
+     TODO: Is this also true of whitespace within XHP comments? If so then
+     we need to make XHP comments a sequence of tokens, rather than a
+     single token as they are now.
+  *)
   let rec aux lexer =
     let ch = peek_char lexer 0 in
     match ch with
@@ -746,8 +761,7 @@ let scan_xhp_body lexer =
         else
           let lexer = with_error lexer SyntaxError.error0006 in
           aux (advance lexer 1)
-      | '{'
-      | '<' -> lexer
+      | '\t' | ' ' | '\r' | '\n' | '{' | '}' | '<' -> lexer
       | _ -> aux (advance lexer 1) in
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
@@ -756,6 +770,7 @@ let scan_xhp_body lexer =
   match (ch0, ch1, ch2, ch3) with
   | ('\000', _, _, _) when at_end lexer -> (lexer, TokenKind.EndOfFile)
   | ('{', _, _, _) -> (advance lexer 1, TokenKind.LeftBrace)
+  | ('}', _, _, _) -> (advance lexer 1, TokenKind.RightBrace)
   | ('<', '!', '-', '-') -> (scan_xhp_comment lexer, TokenKind.XHPComment)
   | ('<', '/', _, _) -> (advance lexer 2, TokenKind.LessThanSlash)
   | ('<', _, _, _) ->
@@ -928,7 +943,7 @@ let scan_delimited_comment lexer =
   let c = Trivia.make_delimited_comment (width lexer) in
   (lexer, c)
 
-let scan_trivia lexer =
+let scan_php_trivia lexer =
   let lexer = start_new_lexeme lexer in
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
@@ -951,18 +966,41 @@ let scan_trivia lexer =
     (lexer, Some e)
   | _ -> (* Not trivia *) (lexer, None)
 
-let scan_leading_trivia lexer =
+let scan_xhp_trivia lexer =
+  (* TODO: Should XHP comments <!-- --> be their own thing, or a kind of
+  trivia associated with a token? Right now they are the former. *)
+  let lexer = start_new_lexeme lexer in
+  let ch0 = peek_char lexer 0 in
+  let ch1 = peek_char lexer 1 in
+  match (ch0, ch1) with
+  | (' ', _)
+  | ('\t', _) ->
+    let (lexer, w) = scan_whitespace lexer in
+    (lexer, Some w)
+  | ('\r', _)
+  | ('\n', _) ->
+    let (lexer, e) = scan_end_of_line lexer in
+    (lexer, Some e)
+  | _ -> (* Not trivia *) (lexer, None)
+
+let scan_leading_trivia scanner lexer =
   let rec aux lexer acc =
-    let (lexer, trivia) = scan_trivia lexer in
+    let (lexer, trivia) = scanner lexer in
     match trivia with
     | None -> (lexer, acc)
     | Some t -> aux lexer (t :: acc) in
   let (lexer, trivia_list) = aux lexer [] in
   (lexer, List.rev trivia_list)
 
-let scan_trailing_trivia lexer =
+let scan_leading_php_trivia lexer =
+  scan_leading_trivia scan_php_trivia lexer
+
+let scan_leading_xhp_trivia lexer =
+  scan_leading_trivia scan_xhp_trivia lexer
+
+let scan_trailing_trivia scanner lexer  =
   let rec aux lexer acc =
-    let (lexer, trivia) = scan_trivia lexer in
+    let (lexer, trivia) = scanner lexer in
     match trivia with
     | None -> (lexer, acc)
     | Some t ->
@@ -971,12 +1009,18 @@ let scan_trailing_trivia lexer =
   let (lexer, trivia_list) = aux lexer [] in
   (lexer, List.rev trivia_list)
 
+let scan_trailing_php_trivia lexer =
+  scan_trailing_trivia scan_php_trivia lexer
+
+let scan_trailing_xhp_trivia lexer =
+  scan_trailing_trivia scan_xhp_trivia lexer
+
 let is_next_name lexer =
-  let (lexer, _) = scan_leading_trivia lexer in
+  let (lexer, _) = scan_leading_php_trivia lexer in
   is_name_nondigit (peek_char lexer 0)
 
 let is_next_xhp_class_name lexer =
-  let (lexer, _) = scan_leading_trivia lexer in
+  let (lexer, _) = scan_leading_php_trivia lexer in
   is_xhp_class_name lexer
 
 let as_case_insensitive_keyword text =
@@ -1002,7 +1046,7 @@ let as_keyword kind lexer =
 (* scanner takes a lexer, returns a lexer and a kind *)
 let scan_token_and_leading_trivia scanner as_name lexer  =
   (* Get past the leading trivia *)
-  let (lexer, leading) = scan_leading_trivia lexer in
+  let (lexer, leading) = scan_leading_php_trivia lexer in
   (* Remember where we were when we started this token *)
   let lexer = start_new_lexeme lexer in
   let (lexer, kind) = scanner lexer in
@@ -1021,7 +1065,7 @@ let scan_token_and_trivia scanner as_name lexer  =
     scan_token_and_leading_trivia scanner as_name lexer in
   let (lexer, trailing) =
     if suppress_trailing_trivia kind then (lexer, [])
-    else scan_trailing_trivia lexer in
+    else scan_trailing_php_trivia lexer in
   (lexer, Token.make kind w leading trailing)
 
 (* tokenizer takes a lexer, returns a lexer and a token *)
@@ -1063,7 +1107,7 @@ let next_token_in_string lexer name =
   let (lexer, trailing) =
     match kind with
     | TokenKind.DoubleQuotedStringLiteralTail
-    | TokenKind.HeredocStringLiteralTail -> scan_trailing_trivia lexer
+    | TokenKind.HeredocStringLiteralTail -> scan_trailing_php_trivia lexer
     | _ -> (lexer, []) in
   let token = Token.make kind w [] trailing in
   (lexer, token)
@@ -1071,7 +1115,7 @@ let next_token_in_string lexer name =
 let next_docstring_header lexer =
   (* We're at the beginning of a heredoc string literal. Scan leading
      trivia but not trailing trivia. *)
-  let (lexer, leading) = scan_leading_trivia lexer in
+  let (lexer, leading) = scan_leading_php_trivia lexer in
   let lexer = start_new_lexeme lexer in
   let (lexer, name, _) = scan_docstring_header lexer in
   let w = width lexer in
@@ -1089,20 +1133,19 @@ let next_xhp_element_token lexer =
   let tokenizer lexer =
     let (lexer, kind, w, leading) =
       scan_token_and_leading_trivia scan_xhp_token true lexer in
-    (* We cannot scan trivia after a > or /> because the next thing
-       might be part of an XHP body, and that's not trivia, it's body
-       text.
-
+    (* We do not scan trivia after a > or />. If that is the beginning of
+       an XHP body then we want any whitespace or newlines to be leading trivia
+       of the body token.
        TODO: If we are at the outermost > or /> in an XHP expression then the
-       trailing trivia *should* be associated with the token. *)
+       trailing trivia *should* be associated with the token. But we don't know
+       at lex time that we're in the outermost XHP block. We would have to
+       maintain that state in the parser and pass it in to the lexer. *)
     match kind with
     | TokenKind.GreaterThan
     | TokenKind.SlashGreaterThan ->
-      (* TODO: this should capture only EndOfLine trivia and maybe WhiteSpace *)
-      let (lexer, trailing) = scan_trailing_trivia lexer in
-      (lexer, Token.make kind w leading trailing)
+      (lexer, Token.make kind w leading [])
     | _ ->
-      let (lexer, trailing) = scan_trailing_trivia lexer in
+      let (lexer, trailing) = scan_trailing_php_trivia lexer in
       (lexer, Token.make kind w leading trailing) in
   let (lexer, token) = scan_assert_progress tokenizer lexer in
   let token_width = Token.width token in
@@ -1112,15 +1155,13 @@ let next_xhp_element_token lexer =
   (lexer, token, token_text)
 
 let next_xhp_body_token lexer =
-  (* XHP bodies do not have whitespace, newlines or Hack comments. *)
-  let scanner lexer =
+  let scanner lexer  =
+    let (lexer, leading) = scan_leading_xhp_trivia lexer in
     let lexer = start_new_lexeme lexer in
-    scan_xhp_body lexer
-  in
-  let scanner lexer = scan_token_and_trivia scanner false lexer in
-  (* This incorrectly scans xhp body text that looks like a php comment
-   * as trivia.
-   * TODO: Only scan whitespace and newline trivia *)
+    let (lexer, kind) = scan_xhp_body lexer in
+    let w = width lexer in
+    let (lexer, trailing) = scan_trailing_xhp_trivia lexer in
+    (lexer, Token.make kind w leading trailing) in
   scan_assert_progress scanner lexer
 
 let next_xhp_class_name lexer =
@@ -1130,7 +1171,7 @@ let next_xhp_name lexer =
   scan_token_and_trivia scan_xhp_element_name false lexer
 
 let is_next_xhp_category_name lexer =
-  let (lexer, _) = scan_leading_trivia lexer in
+  let (lexer, _) = scan_leading_php_trivia lexer in
   (* An XHP category is an xhp element name preceded by a %. *)
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in

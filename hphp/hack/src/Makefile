@@ -151,7 +151,7 @@ all: build-hhi-archive build-hack copy-hack-files
 all-ocp: build-hhi-archive build-hack-with-ocp copy-hack-files-ocp
 
 clean:
-	ocamlbuild -clean
+	$(OCAMLBUILD) -clean
 	find ../bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f utils/get_build_id.gen.c
 
@@ -160,6 +160,11 @@ build-hack: $(TARGETS) build-hhi-archive
 build-hack-with-ocp: build-hhi-archive _build/utils/get_build_id.gen.o
 	[ -d ${ROOT}/../_obuild ] || ( cd ${ROOT}/.. && ocp-build init )
 	ocp-build build
+
+# These are needed so we can turn OCAMLBUILD from 'a,b,c' into 'a b c' below
+comma := ,
+space :=
+space +=
 
 # All targets are built in one time, so no parallelization is necessary
 .NOTPARALLEL: $(TARGETS)
@@ -170,7 +175,7 @@ $(TARGETS): $(ALL_SRC_FILES)
 	# build-hack-native-deps is a dependency of $(TARGETS) but as it is phony
 	# we place it here to avoid unnecessary rebuilds
 	$(MAKE) build-hack-native-deps build-hhi-archive
-	ocamlbuild -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
 		-lflags "-g $(LINKER_FLAGS)" -tag custom \
 		$(patsubst _build/%,%,$(TARGETS))
 	# Touching the targets is necessary because the ocaml build
@@ -179,7 +184,7 @@ $(TARGETS): $(ALL_SRC_FILES)
 	touch $(TARGETS)
 
 build-hack-native-deps: $(NATIVE_C_FILES) _build/utils/get_build_id.gen.o
-	ocamlbuild -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(OBJECT_FILES_TO_BUILD)
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(OBJECT_FILES_TO_BUILD)
 
 .PHONY: _build/utils/get_build_id.gen.c # run every time, depends on git commit
 _build/utils/get_build_id.gen.c:
@@ -188,7 +193,7 @@ _build/utils/get_build_id.gen.c:
         ocaml -I scripts -w -3 unix.cma scripts/gen_build_id.ml src/_build/utils/get_build_id.gen.c
 
 _build/utils/get_build_id.gen.o: _build/utils/get_build_id.gen.c
-	cd $(dir $@) && ocamlopt $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
+	cd $(dir $@) && $(OCAMLC) $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
 
 build-hhi-archive:
 	mkdir -p ../bin

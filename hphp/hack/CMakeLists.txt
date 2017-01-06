@@ -2,11 +2,16 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../CMake" ${CMAKE_MODULE_PATH})
 
-find_package(OCaml)
-find_package(LZ4)
-find_package(LibElf)
+if (NOT DEFINED BUILD_HACK)
+  set(BUILD_HACK TRUE)
+endif()
 
-if (OCAMLC_FOUND)
+if (BUILD_HACK)
+  message(STATUS "Building hack")
+
+  find_package(LZ4)
+  find_package(LibElf)
+
   # This is totally the wrong way to do this, but I am tired of fighting with
   # build systems and don't really care to make this work the right way. libelf,
   # lz4 and sqlite3 all we need right now anyways.
@@ -66,26 +71,32 @@ if (OCAMLC_FOUND)
     hack
     ALL
     COMMAND
-      env OPTBIN="${OCAMLC_OPT_SUFFIX}"
           $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
           EXTRA_LIB_PATHS="${extra_lib_paths}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
           EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
           BYTECODE="${EMIT_OCAML_BYTECODE}"
+          OCAMLC="${OCAMLC_EXECUTABLE}"
+          OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
+          OCAMLBUILD_FLAGS="-ocamlc=${OCAMLC_EXECUTABLE},-ocamlopt=${OCAMLOPT_EXECUTABLE}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
+  add_dependencies(hack ocaml)
 
   add_custom_target(
     hack_test
     COMMAND
-      env OPTBIN="${OCAMLC_OPT_SUFFIX}"
           $(MAKE) test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
           EXTRA_LIB_PATHS="${extra_lib_paths}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
           EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
           BYTECODE="${EMIT_OCAML_BYTECODE}"
+          OCAMLC="${OCAMLC_EXECUTABLE}"
+          OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
+          OCAMLBUILD_FLAGS="-ocamlc=${OCAMLC_EXECUTABLE},-ocamlopt=${OCAMLOPT_EXECUTABLE}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src"
   )
+  add_dependencies(hack_test ocaml)
 
   if(NOT LZ4_FOUND)
     # if the system does not have lz4, make sure that the one in public_tl
@@ -120,4 +131,6 @@ if (OCAMLC_FOUND)
   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/h2tp/resources/
     DESTINATION share/hhvm/hack/hacklib
     COMPONENT dev)
+else()
+  message(STATUS "Skipping hack")
 endif()

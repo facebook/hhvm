@@ -90,8 +90,11 @@ State entry_state(const Index& index,
     // a function takes a param by ref, it might come in as a Cell
     // still if FPassC was used.
     if (knownArgs) {
-      ret.locals[locId] = locId < knownArgs->size() ? (*knownArgs)[locId]
-                                                    : TUninit;
+      if (locId < knownArgs->size()) {
+        ret.locals[locId] = (*knownArgs)[locId];
+      } else {
+        ret.locals[locId] = ctx.func->params[locId].isVariadic ? TArr : TUninit;
+      }
       continue;
     }
     ret.locals[locId] = ctx.func->params[locId].byRef ? TGen : TCell;
@@ -152,10 +155,12 @@ State entry_state(const Index& index,
  * (i.e. each dv init and the main entry), and all of them count as places the
  * function could be entered, so they all must be visited at least once.
  *
- * If we're entering at a DV-init, all higher parameter locals must be Uninit.
- * It is also possible that the DV-init is reachable from within the function
- * with these parameter locals already initialized (although the normal php
- * emitter can't do this), but that case will be discovered when iterating.
+ * If we're entering at a DV-init, all higher parameter locals must be
+ * Uninit, with the possible exception of a final variadic param
+ * (which will be an array). It is also possible that the DV-init is
+ * reachable from within the function with these parameter locals
+ * already initialized (although the normal php emitter can't do
+ * this), but that case will be discovered when iterating.
  */
 dataflow_worklist<uint32_t>
 prepare_incompleteQ(const Index& index,
@@ -204,7 +209,8 @@ prepare_incompleteQ(const Index& index,
       ai.bdata[dv->id].stateIn = entryState;
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
-        ai.bdata[dv->id].stateIn.locals[locId] = TUninit;
+        ai.bdata[dv->id].stateIn.locals[locId] =
+          ctx.func->params[locId].isVariadic ? TArr : TUninit;
       }
     }
   }

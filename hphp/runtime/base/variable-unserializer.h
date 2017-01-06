@@ -202,6 +202,8 @@ private:
   Array unserializeDict();
   Array unserializeVec();
   Array unserializeKeyset();
+  folly::StringPiece unserializeStringPiece(char delimiter0 = '"',
+                                            char delimiter1 = '"');
   String unserializeString(char delimiter0 = '"', char delimiter1 = '"');
   void unserializeCollection(ObjectData* obj, int64_t sz, char type);
   void unserializeVector(ObjectData*, int64_t sz,

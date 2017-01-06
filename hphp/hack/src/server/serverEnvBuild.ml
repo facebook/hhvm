@@ -59,7 +59,7 @@ let make_genv options config local_config handle =
     | Some watchman_env ->
       let indexer filter =
         let files = Watchman.get_all_files watchman_env in
-        Bucket.make
+        Bucket.make_list
           ~num_workers:GlobalConfig.nbr_procs
           ~max_size:1000
           (List.filter filter files)

@@ -116,7 +116,7 @@ let debug () fnl =
 let debug_directory ~handle dir =
   let path = Path.make dir in
   let next = compose
-    (List.map ~f:Path.make)
+    (fun paths -> paths |> List.map ~f:Path.make |> Bucket.of_list)
     (Find.make_next_files ~filter:FindUtils.is_php path) in
   let workers = ServerWorker.make GlobalConfig.gc_control handle in
   MultiWorker.call
@@ -218,7 +218,7 @@ let job_in_place modes acc fnl =
 let directory modes ~handle dir =
   let path = Path.make dir in
   let next = compose
-    (List.map ~f:Path.make)
+    (fun paths -> paths |> List.map ~f:Path.make |> Bucket.of_list)
     (Find.make_next_files ~filter:FindUtils.is_php path) in
   let workers = ServerWorker.make GlobalConfig.gc_control handle in
   let messages =

@@ -48,9 +48,11 @@ module ServerInitCommon = struct
       (Find.make_next_files
          ~name:"hhi" ~filter:hhi_filter hhi_root) in
     fun () ->
-      match next_files_hhi () with
+      let next = match next_files_hhi () with
       | [] -> next_files_root ()
       | x -> x
+      in
+      Bucket.of_list next
 
   let read_json_line ic =
     let output = input_line ic in

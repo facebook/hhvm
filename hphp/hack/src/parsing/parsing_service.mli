@@ -13,7 +13,7 @@ val go:
   ?quick: bool ->
   Worker.t list option ->
   Relative_path.Set.t ->
-  get_next:(unit -> Relative_path.t list) ->
+  get_next: Relative_path.t list Bucket.next ->
   ParserOptions.t ->
   FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t
 

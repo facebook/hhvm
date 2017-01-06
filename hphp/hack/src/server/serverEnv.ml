@@ -42,7 +42,7 @@ type genv = {
     debug_port       : Debug_port.out_port option;
     workers          : Worker.t list option;
     (* Returns the list of files under .hhconfig, subject to a filter *)
-    indexer          : (string -> bool) -> string MultiWorker.nextlist;
+    indexer          : (string -> bool) -> (unit -> string list);
     (* Each time this is called, it should return the files that have changed
      * since the last invocation *)
     notifier_async   : unit -> ServerNotifierTypes.notifier_changes;

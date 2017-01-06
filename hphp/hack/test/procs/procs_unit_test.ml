@@ -28,7 +28,7 @@ let multi_worker_bucket workers () =
   in
   let expected = buckets * (buckets + 1) / 2 in
   let result =
-    MultiWorker.call_dynamic (Some workers)
+    MultiWorker.call (Some workers)
       ~job:(+)
       ~merge:(+)
       ~neutral:0
@@ -47,7 +47,7 @@ let multi_worker_of_n_buckets workers () =
     bucket.work
   in
   let result =
-    MultiWorker.call_dynamic (Some workers)
+    MultiWorker.call (Some workers)
       ~job:do_work
       ~merge:(+)
       ~neutral:0

@@ -55,7 +55,7 @@ let lint_and_filter tcopt code acc fnl =
 
 let lint_all genv env code =
   let next = compose
-    (List.map ~f:(RP.create RP.Root))
+    (fun lst -> lst |> List.map ~f:(RP.create RP.Root) |> Bucket.of_list)
     (genv.indexer FindUtils.is_php) in
   let errs = MultiWorker.call
     genv.workers

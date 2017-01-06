@@ -882,30 +882,36 @@ and expr_
   env (p, e) =
   match e with
   | Any -> expr_error env (Reason.Rwitness p)
-  | Array [] -> env, T.Any, (Reason.Rwitness p, Tarraykind AKempty)
+  | Array [] ->
+    env, T.New_tuple_array [], (Reason.Rwitness p, Tarraykind AKempty)
   | Array l when Typing_arrays.is_shape_like_array env l ->
-      let env, fdm = List.fold_left_env env l ~init:ShapeMap.empty
-        ~f:begin fun env fdm x ->
-          let env, (key, value) = akshape_field env x in
-          env, Nast.ShapeMap.add key value fdm
+      let env, (pairs, fdm) = List.fold_left_env env l
+        ~init:([], ShapeMap.empty)
+        ~f:begin fun env (pairs,fdm) x ->
+          let env, tev, (key, value) = akshape_field env x in
+          env, ((key,tev)::pairs, Nast.ShapeMap.add key value fdm)
         end in
-      env, T.Any, (Reason.Rwitness p, Tarraykind (AKshape fdm))
+      env, T.New_shape_array(List.rev pairs),
+        (Reason.Rwitness p, Tarraykind (AKshape fdm))
   | Array (x :: rl as l) ->
       let fields_consistent = check_consistent_fields x rl in
       let is_vec = match x with
         | Nast.AFvalue _ -> true
         | Nast.AFkvalue _ -> false in
       if fields_consistent && is_vec then
-        let env, fields = List.foldi l ~f:begin fun index (env, acc) e ->
-            let env, ty = aktuple_field env e in
-            env, IMap.add index ty acc
-          end ~init:(env, IMap.empty) in
-         env, T.Any, (Reason.Rwitness p, Tarraykind (AKtuple fields))
+        let env, tel, fields =
+          List.foldi l ~f:begin fun index (env, tel, acc) e ->
+            let env, te, ty = aktuple_field env e in
+            env, te::tel, IMap.add index ty acc
+          end ~init:(env, [], IMap.empty) in
+         env, T.New_tuple_array (List.rev tel),
+           (Reason.Rwitness p, Tarraykind (AKtuple fields))
       else
       let env, value = Env.fresh_unresolved_type env in
-      let env, values = List.rev_map_env env l array_field_value in
-      let has_unknown = List.exists values (fun (_, ty) -> ty = Tany) in
-      let env, values = List.rev_map_env env values TUtils.unresolved in
+      let env, pairs = List.rev_map_env env l array_field_value in
+      let (tvl, tyl) = List.unzip pairs in
+      let has_unknown = List.exists tyl (fun (_, ty) -> ty = Tany) in
+      let env, tyl = List.rev_map_env env tyl TUtils.unresolved in
       let subtype_value env ty =
         Type.sub_type p Reason.URarray_value env ty value in
       let env, value =
@@ -914,17 +920,20 @@ and expr_
                         * we don't know what the type of the values are.
                         *)
         then env, (Reason.Rnone, Tany)
-        else List.fold_left values ~init:env ~f:subtype_value, value in
+        else List.fold_left tyl ~init:env ~f:subtype_value, value in
       if is_vec then
-        env, T.Any, (Reason.Rwitness p, Tarraykind (AKvec value))
+        env, T.New_vec_array(value, tvl),
+          (Reason.Rwitness p, Tarraykind (AKvec value))
       else
         let env, key = Env.fresh_unresolved_type env in
-        let env, keys = List.rev_map_env env l array_field_key in
+        let env, pairs = List.rev_map_env env l array_field_key in
+        let (tkl, keys) = List.unzip pairs in
         let env, keys = List.rev_map_env env keys TUtils.unresolved in
         let subtype_key env ty =
           Type.sub_type p Reason.URarray_key env ty key in
         let env = List.fold_left keys ~init:env ~f:subtype_key in
-        env, T.Any, (Reason.Rwitness p, Tarraykind (AKmap (key, value)))
+        env, T.New_map_array(key, value, List.zip_exn tkl tvl),
+          (Reason.Rwitness p, Tarraykind (AKmap (key, value)))
   | ValCollection (kind, el) ->
       let env, x = Env.fresh_unresolved_type env in
       let env, _tel, tyl = exprs env el in
@@ -1182,10 +1191,11 @@ and expr_
       (** Can't easily track any typing information for variable variable. *)
       env, T.Any, (Reason.Rnone, Tany)
   | List el ->
-      let env, _tel, tyl = exprs env el in
+      let env, tel, tyl = exprs env el in
+      (* TODO TAST: figure out role of unbind here *)
       let env, tyl = List.map_env env tyl Typing_env.unbind in
       let ty = Reason.Rwitness p, Ttuple tyl in
-      env, T.Any, ty
+      env, T.New_tuple tel, ty
   | Pair (e1, e2) ->
       let env, _te1, ty1 = expr env e1 in
       let env, ty1 = Typing_env.unbind env ty1 in
@@ -1194,9 +1204,9 @@ and expr_
       let ty = Reason.Rwitness p, Tclass ((p, SN.Collections.cPair), [ty1; ty2]) in
       env, T.Any, ty
   | Expr_list el ->
-      let env, _tel, tyl = exprs env el in
+      let env, tel, tyl = exprs env el in
       let ty = Reason.Rwitness p, Ttuple tyl in
-      env, T.Any, ty
+      env, T.New_tuple tel, ty
   | Array_get (e, None) ->
       let env, ty1 = update_array_type p env e None valkind in
       array_append p env ty1
@@ -1367,7 +1377,7 @@ and expr_
       env, T.Any, (Reason.Rwitness p, Tany)
   | Yield af ->
       let env, _tk, key = yield_field_key env af in
-      let env, value = yield_field_value env af in
+      let env, (_tv, value) = yield_field_value env af in
       let send = Env.fresh_type () in
       let rty = match Env.get_fn_kind env with
         | Ast.FGenerator ->
@@ -1398,10 +1408,10 @@ and expr_
       Errors.array_cast p;
       expr_error env (Reason.Rwitness p)
   | Cast (ty, e) ->
-      let env, _te, ty2 = expr env e in
+      let env, te, ty2 = expr env e in
       Async.enforce_not_awaitable env (fst e) ty2;
       let env, ty = Phase.hint_locl env ty in
-      env, T.Any, ty
+      env, T.Cast(ty, te), ty
   | InstanceOf (e, cid) ->
       let env, _te, _ = expr env e in
       TUtils.process_class_id cid;
@@ -1972,17 +1982,20 @@ and assign_simple pos env e1 ty2 =
 and array_field_value env = function
   | Nast.AFvalue x
   | Nast.AFkvalue (_, x) ->
-      let env, _tx, ty = expr env x in
-      Typing_env.unbind env ty
+      let env, te, ty = expr env x in
+      let env, ty = Typing_env.unbind env ty in
+      env, (te, ty)
 
 and yield_field_value env x = array_field_value env x
 
 and array_field_key env = function
+  (* This shouldn't happen *)
   | Nast.AFvalue (p, _) ->
-      env, (Reason.Rwitness p, Tprim Tint)
+      env, (T.Any, (Reason.Rwitness p, Tprim Tint))
   | Nast.AFkvalue (x, _) ->
-      let env, _tx, ty = expr env x in
-      Typing_env.unbind env ty
+      let env, tk, ty = expr env x in
+      let env, ty = Typing_env.unbind env ty in
+      env, (tk, ty)
 
 and yield_field_key env = function
   | Nast.AFvalue (p, _) ->
@@ -2000,24 +2013,29 @@ and yield_field_key env = function
 
 and akshape_field env = function
   | Nast.AFkvalue (k, v) ->
-      let env, _tek, tk = expr env k in
+      (* The typed expression isn't relevant because k should resolve
+       * to a static shape field name
+       *)
+      let env, _, tk = expr env k in
       let env, tk = Typing_env.unbind env tk in
       let env, tk = TUtils.unresolved env tk in
-      let env, _tev, tv = expr env v in
+      let env, tev, tv = expr env v in
       let env, tv = Typing_env.unbind env tv in
       let env, tv = TUtils.unresolved env tv in
-      let field_name = match TUtils.shape_field_name env Pos.none (snd k) with
+      let field_name =
+        match TUtils.shape_field_name env Pos.none (snd k) with
         | Some field_name -> field_name
         | None -> assert false in  (* Typing_arrays.is_shape_like_array
                                     * should have prevented this *)
-      env, (field_name, (tk, tv))
+      env, tev, (field_name, (tk, tv))
   | Nast.AFvalue _ -> assert false (* Typing_arrays.is_shape_like_array
                                     * should have prevented this *)
 and aktuple_field env = function
   | Nast.AFvalue v ->
-      let env, _te, tv = expr env v in
+      let env, tev, tv = expr env v in
       let env, tv = Typing_env.unbind env tv in
-      TUtils.unresolved env tv
+      let env, ty = TUtils.unresolved env tv in
+      env, tev, ty
   | Nast.AFkvalue _ -> assert false (* check_consistent_fields
                                      * should have prevented this *)
 and check_parent_construct pos env el uel env_parent =

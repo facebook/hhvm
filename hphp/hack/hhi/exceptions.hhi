@@ -29,7 +29,7 @@ class Exception {
     protected ?Exception $previous = null,
   );
   public function getMessage(): string;
-  final public function getPrevious(): Exception;
+  final public function getPrevious(): ?Exception;
   public final function setPrevious(Exception $previous): void;
   public function getCode(): int;
   final public function getFile(): string;

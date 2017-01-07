@@ -14,11 +14,11 @@ from lookup import lookup_litstr
 
 
 #------------------------------------------------------------------------------
-# HPHP::Op -> int8_t table helpers.
+# HPHP::Op -> int16_t table helpers.
 
 def as_idx(op):
-    """Cast an HPHP::Op to a uint8_t."""
-    return op.cast(T('uint8_t'))
+    """Cast an HPHP::Op to a uint16_t."""
+    return op.cast(T('uint16_t'))
 
 @memoized
 def op_table(name):

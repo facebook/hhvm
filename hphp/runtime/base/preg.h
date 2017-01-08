@@ -55,10 +55,10 @@ struct Array;
 struct Variant;
 
 struct pcre_literal_data {
-  pcre_literal_data(const StringData* pattern, int coptions);
+  pcre_literal_data(const char* pattern, int coptions);
 
   bool isLiteral() const;
-  bool matches(const StringData* subject, int* offsets) const;
+  bool matches(const StringData* subject, int pos, int* offsets) const;
 
   folly::Optional<std::string> literal_str;
   bool match_start{false};

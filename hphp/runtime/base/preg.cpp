@@ -259,22 +259,19 @@ pcre_cache_entry::~pcre_cache_entry() {
   pcre_free(re);
 }
 
-pcre_literal_data::pcre_literal_data(const StringData* pattern, int coptions) {
+pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
   if (coptions & ~PCRE_CASELESS) {
     return;
   }
 
-  auto p_piece = pattern->slice();
-  auto p = p_piece.begin();
+  auto p = pattern;
   if (*p == '^') {
     match_start = true;
     p++;
   }
 
   std::string pattern_buffer;
-  // p_piece is null-terminated (source is a StringData),
-  // don't need to check p < p_piece.end()
-  while (isalnum((unsigned char)*p) || strchr("/\\ :-_", *p) != nullptr) {
+  while (isalnum((unsigned char)*p) || (*p && strchr("/\\ :-_", *p))) {
     // backslash + alphanumeric character --> not a literal (i.e. \d).
     // backslash + non-alphanumeric character --> literal symbol (i.e. \.)
     if (*p == '\\') {
@@ -290,7 +287,7 @@ pcre_literal_data::pcre_literal_data(const StringData* pattern, int coptions) {
     match_end = true;
     p++;
   }
-  if (p == p_piece.end()) {
+  if (!*p) {
     /* This is an encoding of a literal string. */
     case_insensitive = coptions & PCRE_CASELESS;
     literal_str = std::move(pattern_buffer);
@@ -301,11 +298,15 @@ bool pcre_literal_data::isLiteral() const {
   return literal_str.hasValue();
 }
 
-bool pcre_literal_data::matches(const StringData* subject, int* offsets) const {
+bool pcre_literal_data::matches(const StringData* subject,
+                                int pos,
+                                int* offsets) const {
   assertx(isLiteral());
-  // Literal pattern must be at least as long as the subject
+  assertx(pos >= 0);
+
+  // Subject must be at least as long as the literal pattern
   // for a match to occur.
-  if (subject->size() < literal_str->length()) {
+  if (subject->size() < literal_str->length() + pos) {
     return false;
   }
 
@@ -314,7 +315,7 @@ bool pcre_literal_data::matches(const StringData* subject, int* offsets) const {
   auto const literal_c = literal_str->c_str();
   if (match_start) {
     // Make sure an exact match has the right length.
-    if (match_end && subject->size() != literal_strlen) {
+    if (pos || (match_end && subject->size() != literal_strlen)) {
       return false;
     }
     // If only matching the start (^), compare the strings
@@ -336,10 +337,12 @@ bool pcre_literal_data::matches(const StringData* subject, int* offsets) const {
       offsets[1] = subject->size() * sizeof(char);
       return true;
     }
-  } else if (literal_strlen > 0) {
+  } else {
+    if (!literal_strlen) return true;
     // Check if the literal pattern occurs as a substring of the subject.
-    auto subject_str = StrNR(subject).asString();
-    auto find_response = subject_str.find(*literal_str, 0, !case_insensitive);
+    auto const subject_str = StrNR(subject);
+    auto const find_response = subject_str.asString().find(
+      *literal_str, pos, !case_insensitive);
     if (find_response >= 0) {
       offsets[0] = find_response * sizeof(char);
       offsets[1] = offsets[0] + literal_strlen * sizeof(char);
@@ -820,7 +823,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
 
   // TODO(t14969501): enable literal_data everywhere and skip the
   // pcre_compile above.
-  auto const literal_data = pcre_literal_data(StrNR(pattern).get(), coptions);
+  auto const literal_data = pcre_literal_data(pattern, coptions);
 
   /* If study option was specified, study the pattern and
      store the result in extra for passing to pcre_exec. */
@@ -1123,7 +1126,7 @@ static Variant preg_match_impl(const StringData* pattern,
       assertx(pce->literal_data->isLiteral());
       /* TODO(t13140878): compare literal against multiple substrings
        * in the preg_match_all (global == true) case. */
-      count = pce->literal_data->matches(subject, offsets) ? 1
+      count = pce->literal_data->matches(subject, start_offset, offsets) ? 1
         : PCRE_ERROR_NOMATCH;
     } else {
       /* Execute the regular expression. */

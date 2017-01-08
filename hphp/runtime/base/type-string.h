@@ -530,6 +530,7 @@ public:
   explicit StrNR(StringData *sd) : m_px(sd) {}
   explicit StrNR(const StringData *sd) : m_px(const_cast<StringData*>(sd)) {}
   explicit StrNR(const String &s) : m_px(s.get()) {} // XXX
+  explicit StrNR(const char*) = delete;
 
   ~StrNR() {
     if (debug) {

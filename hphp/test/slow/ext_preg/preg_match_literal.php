@@ -73,3 +73,13 @@ var_dump(preg_match('/abc\\\\/', 'abc\\'));
 
 // Empty pattern should match everything.
 var_dump(preg_match('//', 'abc'));
+
+// Offsets
+var_dump(preg_match('/def/', 'abcdef', $matches, PREG_OFFSET_CAPTURE, 2));
+var_dump($matches);
+var_dump(preg_match('/def/', 'abcdef', $matches, PREG_OFFSET_CAPTURE, 4));
+var_dump($matches);
+var_dump(preg_match('/^def/', 'abcdef', $matches, PREG_OFFSET_CAPTURE, 3));
+var_dump($matches);
+var_dump(preg_match('/def$/', 'abcdef', $matches, PREG_OFFSET_CAPTURE, 3));
+var_dump($matches);

@@ -293,6 +293,12 @@ abstract class EditableSyntax implements ArrayAccess {
       return InstanceofExpression::from_json($json, $position, $source);
     case 'conditional_expression':
       return ConditionalExpression::from_json($json, $position, $source);
+    case 'eval_expression':
+      return EvalExpression::from_json($json, $position, $source);
+    case 'empty_expression':
+      return EmptyExpression::from_json($json, $position, $source);
+    case 'isset_expression':
+      return IssetExpression::from_json($json, $position, $source);
     case 'function_call_expression':
       return FunctionCallExpression::from_json($json, $position, $source);
     case 'parenthesized_expression':
@@ -772,6 +778,8 @@ abstract class EditableToken extends EditableSyntax {
        return new EmptyToken($leading, $trailing);
     case 'enum':
        return new EnumToken($leading, $trailing);
+    case 'eval':
+       return new EvalToken($leading, $trailing);
     case 'extends':
        return new ExtendsToken($leading, $trailing);
     case 'float':
@@ -804,6 +812,8 @@ abstract class EditableToken extends EditableSyntax {
        return new IntToken($leading, $trailing);
     case 'interface':
        return new InterfaceToken($leading, $trailing);
+    case 'isset':
+       return new IssetToken($leading, $trailing);
     case 'keyset':
        return new KeysetToken($leading, $trailing);
     case 'list':
@@ -1595,6 +1605,21 @@ final class EnumToken extends EditableToken {
     return new EnumToken($this->leading(), $trailing);
   }
 }
+final class EvalToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('eval', $leading, $trailing, 'eval');
+  }
+
+  public function with_leading(EditableSyntax $leading): EvalToken {
+    return new EvalToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): EvalToken {
+    return new EvalToken($this->leading(), $trailing);
+  }
+}
 final class ExtendsToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
@@ -1833,6 +1858,21 @@ final class InterfaceToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): InterfaceToken {
     return new InterfaceToken($this->leading(), $trailing);
+  }
+}
+final class IssetToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('isset', $leading, $trailing, 'isset');
+  }
+
+  public function with_leading(EditableSyntax $leading): IssetToken {
+    return new IssetToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): IssetToken {
+    return new IssetToken($this->leading(), $trailing);
   }
 }
 final class KeysetToken extends EditableToken {
@@ -12454,6 +12494,333 @@ final class ConditionalExpression extends EditableSyntax {
     yield $this->_consequence;
     yield $this->_colon;
     yield $this->_alternative;
+    yield break;
+  }
+}
+final class EvalExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_argument;
+  private EditableSyntax $_right_paren;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $argument,
+    EditableSyntax $right_paren) {
+    parent::__construct('eval_expression');
+    $this->_keyword = $keyword;
+    $this->_left_paren = $left_paren;
+    $this->_argument = $argument;
+    $this->_right_paren = $right_paren;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function argument(): EditableSyntax {
+    return $this->_argument;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function with_keyword(EditableSyntax $keyword): EvalExpression {
+    return new EvalExpression(
+      $keyword,
+      $this->_left_paren,
+      $this->_argument,
+      $this->_right_paren);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): EvalExpression {
+    return new EvalExpression(
+      $this->_keyword,
+      $left_paren,
+      $this->_argument,
+      $this->_right_paren);
+  }
+  public function with_argument(EditableSyntax $argument): EvalExpression {
+    return new EvalExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $argument,
+      $this->_right_paren);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): EvalExpression {
+    return new EvalExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_argument,
+      $right_paren);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $argument = $this->argument()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $argument === $this->argument() &&
+      $right_paren === $this->right_paren()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EvalExpression(
+        $keyword,
+        $left_paren,
+        $argument,
+        $right_paren), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->eval_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->eval_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $argument = EditableSyntax::from_json(
+      $json->eval_argument, $position, $source);
+    $position += $argument->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->eval_right_paren, $position, $source);
+    $position += $right_paren->width();
+    return new EvalExpression(
+        $keyword,
+        $left_paren,
+        $argument,
+        $right_paren);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_paren;
+    yield $this->_argument;
+    yield $this->_right_paren;
+    yield break;
+  }
+}
+final class EmptyExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_argument;
+  private EditableSyntax $_right_paren;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $argument,
+    EditableSyntax $right_paren) {
+    parent::__construct('empty_expression');
+    $this->_keyword = $keyword;
+    $this->_left_paren = $left_paren;
+    $this->_argument = $argument;
+    $this->_right_paren = $right_paren;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function argument(): EditableSyntax {
+    return $this->_argument;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function with_keyword(EditableSyntax $keyword): EmptyExpression {
+    return new EmptyExpression(
+      $keyword,
+      $this->_left_paren,
+      $this->_argument,
+      $this->_right_paren);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): EmptyExpression {
+    return new EmptyExpression(
+      $this->_keyword,
+      $left_paren,
+      $this->_argument,
+      $this->_right_paren);
+  }
+  public function with_argument(EditableSyntax $argument): EmptyExpression {
+    return new EmptyExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $argument,
+      $this->_right_paren);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): EmptyExpression {
+    return new EmptyExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_argument,
+      $right_paren);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $argument = $this->argument()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $argument === $this->argument() &&
+      $right_paren === $this->right_paren()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EmptyExpression(
+        $keyword,
+        $left_paren,
+        $argument,
+        $right_paren), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->empty_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->empty_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $argument = EditableSyntax::from_json(
+      $json->empty_argument, $position, $source);
+    $position += $argument->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->empty_right_paren, $position, $source);
+    $position += $right_paren->width();
+    return new EmptyExpression(
+        $keyword,
+        $left_paren,
+        $argument,
+        $right_paren);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_paren;
+    yield $this->_argument;
+    yield $this->_right_paren;
+    yield break;
+  }
+}
+final class IssetExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_argument_list;
+  private EditableSyntax $_right_paren;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_paren,
+    EditableSyntax $argument_list,
+    EditableSyntax $right_paren) {
+    parent::__construct('isset_expression');
+    $this->_keyword = $keyword;
+    $this->_left_paren = $left_paren;
+    $this->_argument_list = $argument_list;
+    $this->_right_paren = $right_paren;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function argument_list(): EditableSyntax {
+    return $this->_argument_list;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function with_keyword(EditableSyntax $keyword): IssetExpression {
+    return new IssetExpression(
+      $keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $this->_right_paren);
+  }
+  public function with_left_paren(EditableSyntax $left_paren): IssetExpression {
+    return new IssetExpression(
+      $this->_keyword,
+      $left_paren,
+      $this->_argument_list,
+      $this->_right_paren);
+  }
+  public function with_argument_list(EditableSyntax $argument_list): IssetExpression {
+    return new IssetExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $argument_list,
+      $this->_right_paren);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): IssetExpression {
+    return new IssetExpression(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_argument_list,
+      $right_paren);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $argument_list = $this->argument_list()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_paren === $this->left_paren() &&
+      $argument_list === $this->argument_list() &&
+      $right_paren === $this->right_paren()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new IssetExpression(
+        $keyword,
+        $left_paren,
+        $argument_list,
+        $right_paren), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->isset_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_paren = EditableSyntax::from_json(
+      $json->isset_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $argument_list = EditableSyntax::from_json(
+      $json->isset_argument_list, $position, $source);
+    $position += $argument_list->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->isset_right_paren, $position, $source);
+    $position += $right_paren->width();
+    return new IssetExpression(
+        $keyword,
+        $left_paren,
+        $argument_list,
+        $right_paren);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_paren;
+    yield $this->_argument_list;
+    yield $this->_right_paren;
     yield break;
   }
 }

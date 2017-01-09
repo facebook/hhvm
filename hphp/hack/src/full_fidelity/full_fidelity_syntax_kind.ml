@@ -95,6 +95,9 @@ type t =
 | BinaryExpression
 | InstanceofExpression
 | ConditionalExpression
+| EvalExpression
+| EmptyExpression
+| IssetExpression
 | FunctionCallExpression
 | ParenthesizedExpression
 | BracedExpression
@@ -221,6 +224,9 @@ let to_string kind =
   | BinaryExpression -> "binary_expression"
   | InstanceofExpression -> "instanceof_expression"
   | ConditionalExpression -> "conditional_expression"
+  | EvalExpression -> "eval_expression"
+  | EmptyExpression -> "empty_expression"
+  | IssetExpression -> "isset_expression"
   | FunctionCallExpression -> "function_call_expression"
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"

@@ -857,6 +857,36 @@ let rec get_doc node =
     let args = get_doc function_call_argument_list in
     let rparen = get_doc function_call_right_paren in
     receiver ^^^ lparen ^^^ args ^^^ rparen
+  | EvalExpression {
+    eval_keyword;
+    eval_left_paren;
+    eval_argument;
+    eval_right_paren } ->
+    let keyword = get_doc eval_keyword in
+    let lparen = get_doc eval_left_paren in
+    let arg = get_doc eval_argument in
+    let rparen = get_doc eval_right_paren in
+    keyword ^^^ lparen ^^^ arg ^^^ rparen
+  | EmptyExpression {
+    empty_keyword;
+    empty_left_paren;
+    empty_argument;
+    empty_right_paren } ->
+    let keyword = get_doc empty_keyword in
+    let lparen = get_doc empty_left_paren in
+    let arg = get_doc empty_argument in
+    let rparen = get_doc empty_right_paren in
+    keyword ^^^ lparen ^^^ arg ^^^ rparen
+  | IssetExpression {
+    isset_keyword;
+    isset_left_paren;
+    isset_argument_list;
+    isset_right_paren } ->
+    let keyword = get_doc isset_keyword in
+    let lparen = get_doc isset_left_paren in
+    let args = get_doc isset_argument_list in
+    let rparen = get_doc isset_right_paren in
+    keyword ^^^ lparen ^^^ args ^^^ rparen
   | ParenthesizedExpression {
     parenthesized_expression_left_paren;
     parenthesized_expression_expression;

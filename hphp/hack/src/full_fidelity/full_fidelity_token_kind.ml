@@ -50,6 +50,7 @@ type t =
   | Elseif
   | Empty
   | Enum
+  | Eval
   | Extends
   | Float
   | Final
@@ -66,6 +67,7 @@ type t =
   | Insteadof
   | Int
   | Interface
+  | Isset
   | Keyset
   | List
   | Mixed
@@ -234,6 +236,7 @@ let from_string keyword =
   | "elseif" -> Some Elseif
   | "empty" -> Some Empty
   | "enum" -> Some Enum
+  | "eval" -> Some Eval
   | "extends" -> Some Extends
   | "float" -> Some Float
   | "final" -> Some Final
@@ -250,6 +253,7 @@ let from_string keyword =
   | "insteadof" -> Some Insteadof
   | "int" -> Some Int
   | "interface" -> Some Interface
+  | "isset" -> Some Isset
   | "keyset" -> Some Keyset
   | "list" -> Some List
   | "mixed" -> Some Mixed
@@ -391,6 +395,7 @@ match kind with
   | Elseif -> "elseif"
   | Empty -> "empty"
   | Enum -> "enum"
+  | Eval -> "eval"
   | Extends -> "extends"
   | Float -> "float"
   | Final -> "final"
@@ -407,6 +412,7 @@ match kind with
   | Insteadof -> "insteadof"
   | Int -> "int"
   | Interface -> "interface"
+  | Isset -> "isset"
   | Keyset -> "keyset"
   | List -> "list"
   | Mixed -> "mixed"

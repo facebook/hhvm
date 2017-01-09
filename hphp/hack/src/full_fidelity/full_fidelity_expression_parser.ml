@@ -164,8 +164,58 @@ module WithStatementAndDeclAndTypeParser
     | Include_once
     | Require
     | Require_once -> parse_inclusion_expression parser
+    | Empty -> parse_empty_expression parser
+    | Isset -> parse_isset_expression parser
+    | Eval -> parse_eval_expression parser
     | EndOfFile
     | _ -> parse_as_name_or_error parser
+
+  and parse_empty_expression parser =
+    (* TODO: This is a PHP-ism. Open questions:
+      * Should we allow a trailing comma? it is not a function call and
+        never has more than one argument. See D4273242 for discussion.
+      * Is there any restriction on the kind of expression this can be?
+      * Is "empty" case-insensitive?
+      * Should this be an error in strict mode?
+      * Should this be in the specification?
+    *)
+    let (parser, keyword) = assert_token parser Empty in
+    let (parser, left) = expect_left_paren parser in
+    let (parser, arg) = parse_expression_with_reset_precedence parser in
+    let (parser, right) = expect_right_paren parser in
+    let result = make_empty_expression keyword left arg right in
+    (parser, result)
+
+  and parse_eval_expression parser =
+    (* TODO: This is a PHP-ism. Open questions:
+      * Should we allow a trailing comma? it is not a function call and
+        never has more than one argument. See D4273242 for discussion.
+      * Is there any restriction on the kind of expression this can be?
+      * Is "eval" case-insensitive?
+      * Should this be an error in strict mode?
+      * Should this be in the specification?
+    *)
+    let (parser, keyword) = assert_token parser Eval in
+    let (parser, left) = expect_left_paren parser in
+    let (parser, arg) = parse_expression_with_reset_precedence parser in
+    let (parser, right) = expect_right_paren parser in
+    let result = make_eval_expression keyword left arg right in
+    (parser, result)
+
+  and parse_isset_expression parser =
+    (* TODO: This is a PHP-ism. Open questions:
+      * Should we allow a trailing comma? See D4273242 for discussion.
+      * Is there any restriction on the kind of expression the arguments can be?
+      * Is "isset" case-insensitive?
+      * Should this be an error in strict mode?
+      * Should this be in the specification?
+      * PHP requires that there be at least one argument; should we require
+        that? if so, should we give the error in the parser or a later pass?
+    *)
+    let (parser, keyword) = assert_token parser Isset in
+    let (parser, left, args, right) = parse_expression_list_opt parser in
+    let result = make_isset_expression keyword left args right in
+    (parser, result)
 
   and parse_double_quoted_string parser head =
     parse_string_literal parser head ""
@@ -704,6 +754,7 @@ module WithStatementAndDeclAndTypeParser
     | Elseif
     | Empty
     | Enum
+    | Eval
     | Extends
     | Float
     | Final
@@ -719,6 +770,7 @@ module WithStatementAndDeclAndTypeParser
     | Insteadof
     | Int
     | Interface
+    | Isset
     | Keyset
     | List
     | Mixed

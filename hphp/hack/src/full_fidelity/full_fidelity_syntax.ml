@@ -534,6 +534,24 @@ module WithToken(Token: TokenType) = struct
       conditional_colon: t;
       conditional_alternative: t;
     }
+    and eval_expression = {
+      eval_keyword: t;
+      eval_left_paren: t;
+      eval_argument: t;
+      eval_right_paren: t;
+    }
+    and empty_expression = {
+      empty_keyword: t;
+      empty_left_paren: t;
+      empty_argument: t;
+      empty_right_paren: t;
+    }
+    and isset_expression = {
+      isset_keyword: t;
+      isset_left_paren: t;
+      isset_argument_list: t;
+      isset_right_paren: t;
+    }
     and function_call_expression = {
       function_call_receiver: t;
       function_call_left_paren: t;
@@ -850,6 +868,9 @@ module WithToken(Token: TokenType) = struct
     | BinaryExpression of binary_expression
     | InstanceofExpression of instanceof_expression
     | ConditionalExpression of conditional_expression
+    | EvalExpression of eval_expression
+    | EmptyExpression of empty_expression
+    | IssetExpression of isset_expression
     | FunctionCallExpression of function_call_expression
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
@@ -1066,6 +1087,12 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.InstanceofExpression
       | ConditionalExpression _ ->
         SyntaxKind.ConditionalExpression
+      | EvalExpression _ ->
+        SyntaxKind.EvalExpression
+      | EmptyExpression _ ->
+        SyntaxKind.EmptyExpression
+      | IssetExpression _ ->
+        SyntaxKind.IssetExpression
       | FunctionCallExpression _ ->
         SyntaxKind.FunctionCallExpression
       | ParenthesizedExpression _ ->
@@ -1315,6 +1342,12 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.InstanceofExpression
     let is_conditional_expression node =
       kind node = SyntaxKind.ConditionalExpression
+    let is_eval_expression node =
+      kind node = SyntaxKind.EvalExpression
+    let is_empty_expression node =
+      kind node = SyntaxKind.EmptyExpression
+    let is_isset_expression node =
+      kind node = SyntaxKind.IssetExpression
     let is_function_call_expression node =
       kind node = SyntaxKind.FunctionCallExpression
     let is_parenthesized_expression node =
@@ -2319,6 +2352,42 @@ module WithToken(Token: TokenType) = struct
       conditional_consequence,
       conditional_colon,
       conditional_alternative
+    )
+
+    let get_eval_expression_children {
+      eval_keyword;
+      eval_left_paren;
+      eval_argument;
+      eval_right_paren;
+    } = (
+      eval_keyword,
+      eval_left_paren,
+      eval_argument,
+      eval_right_paren
+    )
+
+    let get_empty_expression_children {
+      empty_keyword;
+      empty_left_paren;
+      empty_argument;
+      empty_right_paren;
+    } = (
+      empty_keyword,
+      empty_left_paren,
+      empty_argument,
+      empty_right_paren
+    )
+
+    let get_isset_expression_children {
+      isset_keyword;
+      isset_left_paren;
+      isset_argument_list;
+      isset_right_paren;
+    } = (
+      isset_keyword,
+      isset_left_paren,
+      isset_argument_list,
+      isset_right_paren
     )
 
     let get_function_call_expression_children {
@@ -3605,6 +3674,39 @@ module WithToken(Token: TokenType) = struct
         conditional_colon;
         conditional_alternative;
       ]
+      | EvalExpression {
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      } -> [
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      ]
+      | EmptyExpression {
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      } -> [
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      ]
+      | IssetExpression {
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
+      } -> [
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
+      ]
       | FunctionCallExpression {
         function_call_receiver;
         function_call_left_paren;
@@ -4844,6 +4946,39 @@ module WithToken(Token: TokenType) = struct
         "conditional_consequence";
         "conditional_colon";
         "conditional_alternative";
+      ]
+      | EvalExpression {
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      } -> [
+        "eval_keyword";
+        "eval_left_paren";
+        "eval_argument";
+        "eval_right_paren";
+      ]
+      | EmptyExpression {
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      } -> [
+        "empty_keyword";
+        "empty_left_paren";
+        "empty_argument";
+        "empty_right_paren";
+      ]
+      | IssetExpression {
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
+      } -> [
+        "isset_keyword";
+        "isset_left_paren";
+        "isset_argument_list";
+        "isset_right_paren";
       ]
       | FunctionCallExpression {
         function_call_receiver;
@@ -6213,6 +6348,42 @@ module WithToken(Token: TokenType) = struct
           conditional_consequence;
           conditional_colon;
           conditional_alternative;
+        }
+      | (SyntaxKind.EvalExpression, [
+          eval_keyword;
+          eval_left_paren;
+          eval_argument;
+          eval_right_paren;
+        ]) ->
+        EvalExpression {
+          eval_keyword;
+          eval_left_paren;
+          eval_argument;
+          eval_right_paren;
+        }
+      | (SyntaxKind.EmptyExpression, [
+          empty_keyword;
+          empty_left_paren;
+          empty_argument;
+          empty_right_paren;
+        ]) ->
+        EmptyExpression {
+          empty_keyword;
+          empty_left_paren;
+          empty_argument;
+          empty_right_paren;
+        }
+      | (SyntaxKind.IssetExpression, [
+          isset_keyword;
+          isset_left_paren;
+          isset_argument_list;
+          isset_right_paren;
+        ]) ->
+        IssetExpression {
+          isset_keyword;
+          isset_left_paren;
+          isset_argument_list;
+          isset_right_paren;
         }
       | (SyntaxKind.FunctionCallExpression, [
           function_call_receiver;
@@ -7683,6 +7854,45 @@ module WithToken(Token: TokenType) = struct
         conditional_consequence;
         conditional_colon;
         conditional_alternative;
+      ]
+
+    let make_eval_expression
+      eval_keyword
+      eval_left_paren
+      eval_argument
+      eval_right_paren
+    =
+      from_children SyntaxKind.EvalExpression [
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      ]
+
+    let make_empty_expression
+      empty_keyword
+      empty_left_paren
+      empty_argument
+      empty_right_paren
+    =
+      from_children SyntaxKind.EmptyExpression [
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      ]
+
+    let make_isset_expression
+      isset_keyword
+      isset_left_paren
+      isset_argument_list
+      isset_right_paren
+    =
+      from_children SyntaxKind.IssetExpression [
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
       ]
 
     let make_function_call_expression

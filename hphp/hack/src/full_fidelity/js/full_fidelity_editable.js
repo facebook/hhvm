@@ -230,6 +230,12 @@ class EditableSyntax
       return InstanceofExpression.from_json(json, position, source);
     case 'conditional_expression':
       return ConditionalExpression.from_json(json, position, source);
+    case 'eval_expression':
+      return EvalExpression.from_json(json, position, source);
+    case 'empty_expression':
+      return EmptyExpression.from_json(json, position, source);
+    case 'isset_expression':
+      return IssetExpression.from_json(json, position, source);
     case 'function_call_expression':
       return FunctionCallExpression.from_json(json, position, source);
     case 'parenthesized_expression':
@@ -667,6 +673,8 @@ class EditableToken extends EditableSyntax
        return new EmptyToken(leading, trailing);
     case 'enum':
        return new EnumToken(leading, trailing);
+    case 'eval':
+       return new EvalToken(leading, trailing);
     case 'extends':
        return new ExtendsToken(leading, trailing);
     case 'float':
@@ -699,6 +707,8 @@ class EditableToken extends EditableSyntax
        return new IntToken(leading, trailing);
     case 'interface':
        return new InterfaceToken(leading, trailing);
+    case 'isset':
+       return new IssetToken(leading, trailing);
     case 'keyset':
        return new KeysetToken(leading, trailing);
     case 'list':
@@ -1236,6 +1246,13 @@ class EnumToken extends EditableToken
     super('enum', leading, trailing, 'enum');
   }
 }
+class EvalToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('eval', leading, trailing, 'eval');
+  }
+}
 class ExtendsToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1346,6 +1363,13 @@ class InterfaceToken extends EditableToken
   constructor(leading, trailing)
   {
     super('interface', leading, trailing, 'interface');
+  }
+}
+class IssetToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('isset', leading, trailing, 'isset');
   }
 }
 class KeysetToken extends EditableToken
@@ -10540,6 +10564,318 @@ class ConditionalExpression extends EditableSyntax
     return ConditionalExpression._children_keys;
   }
 }
+class EvalExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    argument,
+    right_paren)
+  {
+    super('eval_expression', {
+      keyword: keyword,
+      left_paren: left_paren,
+      argument: argument,
+      right_paren: right_paren });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get argument() { return this.children.argument; }
+  get right_paren() { return this.children.right_paren; }
+  with_keyword(keyword){
+    return new EvalExpression(
+      keyword,
+      this.left_paren,
+      this.argument,
+      this.right_paren);
+  }
+  with_left_paren(left_paren){
+    return new EvalExpression(
+      this.keyword,
+      left_paren,
+      this.argument,
+      this.right_paren);
+  }
+  with_argument(argument){
+    return new EvalExpression(
+      this.keyword,
+      this.left_paren,
+      argument,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new EvalExpression(
+      this.keyword,
+      this.left_paren,
+      this.argument,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument = this.argument.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      argument === this.argument &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new EvalExpression(
+        keyword,
+        left_paren,
+        argument,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.eval_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.eval_left_paren, position, source);
+    position += left_paren.width;
+    let argument = EditableSyntax.from_json(
+      json.eval_argument, position, source);
+    position += argument.width;
+    let right_paren = EditableSyntax.from_json(
+      json.eval_right_paren, position, source);
+    position += right_paren.width;
+    return new EvalExpression(
+        keyword,
+        left_paren,
+        argument,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (EvalExpression._children_keys == null)
+      EvalExpression._children_keys = [
+        'keyword',
+        'left_paren',
+        'argument',
+        'right_paren'];
+    return EvalExpression._children_keys;
+  }
+}
+class EmptyExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    argument,
+    right_paren)
+  {
+    super('empty_expression', {
+      keyword: keyword,
+      left_paren: left_paren,
+      argument: argument,
+      right_paren: right_paren });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get argument() { return this.children.argument; }
+  get right_paren() { return this.children.right_paren; }
+  with_keyword(keyword){
+    return new EmptyExpression(
+      keyword,
+      this.left_paren,
+      this.argument,
+      this.right_paren);
+  }
+  with_left_paren(left_paren){
+    return new EmptyExpression(
+      this.keyword,
+      left_paren,
+      this.argument,
+      this.right_paren);
+  }
+  with_argument(argument){
+    return new EmptyExpression(
+      this.keyword,
+      this.left_paren,
+      argument,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new EmptyExpression(
+      this.keyword,
+      this.left_paren,
+      this.argument,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument = this.argument.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      argument === this.argument &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new EmptyExpression(
+        keyword,
+        left_paren,
+        argument,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.empty_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.empty_left_paren, position, source);
+    position += left_paren.width;
+    let argument = EditableSyntax.from_json(
+      json.empty_argument, position, source);
+    position += argument.width;
+    let right_paren = EditableSyntax.from_json(
+      json.empty_right_paren, position, source);
+    position += right_paren.width;
+    return new EmptyExpression(
+        keyword,
+        left_paren,
+        argument,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (EmptyExpression._children_keys == null)
+      EmptyExpression._children_keys = [
+        'keyword',
+        'left_paren',
+        'argument',
+        'right_paren'];
+    return EmptyExpression._children_keys;
+  }
+}
+class IssetExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    argument_list,
+    right_paren)
+  {
+    super('isset_expression', {
+      keyword: keyword,
+      left_paren: left_paren,
+      argument_list: argument_list,
+      right_paren: right_paren });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get argument_list() { return this.children.argument_list; }
+  get right_paren() { return this.children.right_paren; }
+  with_keyword(keyword){
+    return new IssetExpression(
+      keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_left_paren(left_paren){
+    return new IssetExpression(
+      this.keyword,
+      left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_argument_list(argument_list){
+    return new IssetExpression(
+      this.keyword,
+      this.left_paren,
+      argument_list,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new IssetExpression(
+      this.keyword,
+      this.left_paren,
+      this.argument_list,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      argument_list === this.argument_list &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new IssetExpression(
+        keyword,
+        left_paren,
+        argument_list,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.isset_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.isset_left_paren, position, source);
+    position += left_paren.width;
+    let argument_list = EditableSyntax.from_json(
+      json.isset_argument_list, position, source);
+    position += argument_list.width;
+    let right_paren = EditableSyntax.from_json(
+      json.isset_right_paren, position, source);
+    position += right_paren.width;
+    return new IssetExpression(
+        keyword,
+        left_paren,
+        argument_list,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (IssetExpression._children_keys == null)
+      IssetExpression._children_keys = [
+        'keyword',
+        'left_paren',
+        'argument_list',
+        'right_paren'];
+    return IssetExpression._children_keys;
+  }
+}
 class FunctionCallExpression extends EditableSyntax
 {
   constructor(
@@ -14619,6 +14955,7 @@ exports.ElseToken = ElseToken;
 exports.ElseifToken = ElseifToken;
 exports.EmptyToken = EmptyToken;
 exports.EnumToken = EnumToken;
+exports.EvalToken = EvalToken;
 exports.ExtendsToken = ExtendsToken;
 exports.FloatToken = FloatToken;
 exports.FinalToken = FinalToken;
@@ -14635,6 +14972,7 @@ exports.InstanceofToken = InstanceofToken;
 exports.InsteadofToken = InsteadofToken;
 exports.IntToken = IntToken;
 exports.InterfaceToken = InterfaceToken;
+exports.IssetToken = IssetToken;
 exports.KeysetToken = KeysetToken;
 exports.ListToken = ListToken;
 exports.MixedToken = MixedToken;
@@ -14854,6 +15192,9 @@ exports.PostfixUnaryExpression = PostfixUnaryExpression;
 exports.BinaryExpression = BinaryExpression;
 exports.InstanceofExpression = InstanceofExpression;
 exports.ConditionalExpression = ConditionalExpression;
+exports.EvalExpression = EvalExpression;
+exports.EmptyExpression = EmptyExpression;
+exports.IssetExpression = IssetExpression;
 exports.FunctionCallExpression = FunctionCallExpression;
 exports.ParenthesizedExpression = ParenthesizedExpression;
 exports.BracedExpression = BracedExpression;

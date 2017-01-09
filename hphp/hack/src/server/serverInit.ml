@@ -133,10 +133,17 @@ module ServerInitCommon = struct
       | `Snd _ -> assert false
       | `Fst (fn, is_cached, end_time, deptable_fn) ->
         (* The sql deptable must be loaded in the master process *)
-        let read_deptable_time = SharedMem.load_dep_table_sqlite deptable_fn in
-        Hh_logger.log
-          "Reading the dependency file took (sec): %d" read_deptable_time;
-        HackEventLogger.load_deptable_end read_deptable_time;
+        (try
+          let read_deptable_time =
+            SharedMem.load_dep_table_sqlite deptable_fn
+          in
+          Hh_logger.log
+            "Reading the dependency file took (sec): %d" read_deptable_time;
+          HackEventLogger.load_deptable_end read_deptable_time;
+        with SharedMem.Sql_assertion_failure 11 as e -> (* SQL_corrupt *)
+          LoadScriptUtils.delete_corrupted_saved_state deptable_fn;
+          raise e);
+
         HackEventLogger.load_mini_worker_end ~is_cached start_time end_time;
         let time_taken = end_time -. start_time in
         Hh_logger.log "Loading mini-state took %.2fs" time_taken;

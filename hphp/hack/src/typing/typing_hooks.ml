@@ -29,11 +29,15 @@ let (id_hooks: (Pos.t * string -> Typing_env.env -> unit) list ref) = ref []
  * any new information. It's here to keep the signature of smethod_hooks and
  * cmethod_hooks the same, since more often than not people want to use the
  * same hook for both *)
-let (smethod_hooks: (Typing_defs.class_type -> Pos.t * string ->
+let (smethod_hooks: (Typing_defs.class_type ->
+                     targs:Typing_defs.locl Typing_defs.ty list ->
+                     Pos.t * string ->
                      Typing_env.env -> Nast.class_id option -> is_method:bool ->
                      is_const:bool -> unit) list ref) = ref []
 
-let (cmethod_hooks: (Typing_defs.class_type -> Pos.t * string ->
+let (cmethod_hooks: (Typing_defs.class_type ->
+                     targs:Typing_defs.locl Typing_defs.ty list ->
+                     Pos.t * string ->
                      Typing_env.env -> Nast.class_id option -> is_method:bool ->
                      is_const:bool -> unit) list ref) = ref []
 
@@ -57,6 +61,7 @@ let (parent_construct_hooks: (Typing_env.env ->
                     Pos.t -> unit) list ref) = ref []
 
 let (constructor_hooks: (Typing_defs.class_type ->
+                         targs:Typing_defs.locl Typing_defs.ty list ->
                          Typing_env.env -> Pos.t -> unit) list ref) = ref []
 
 let (infer_ty_hooks: (Typing_defs.locl Typing_defs.ty -> Pos.t ->
@@ -160,13 +165,13 @@ let dispatch_assign_hook p ty2 env =
 let dispatch_id_hook id env =
   List.iter !id_hooks begin fun hook -> hook id env end
 
-let dispatch_smethod_hook class_ id env cid ~is_method ~is_const=
+let dispatch_smethod_hook class_ targs id env cid ~is_method ~is_const=
   List.iter !smethod_hooks
-    (fun hook -> hook class_ id env cid ~is_method ~is_const)
+    (fun hook -> hook class_ ~targs id env cid ~is_method ~is_const)
 
-let dispatch_cmethod_hook class_ id env cid ~is_method =
+let dispatch_cmethod_hook class_ targs id env cid ~is_method =
   List.iter !cmethod_hooks
-    (fun hook -> hook class_ id env cid ~is_method ~is_const:false)
+    (fun hook -> hook class_ ~targs id env cid ~is_method ~is_const:false)
 
 let dispatch_taccess_hook class_ typeconst pos =
   List.iter !taccess_hooks (fun hook -> hook class_ typeconst pos)
@@ -189,8 +194,8 @@ let dispatch_global_const_hook id =
 let dispatch_parent_construct_hook env p =
   List.iter !parent_construct_hooks begin fun hook -> hook env p end
 
-let dispatch_constructor_hook c env p =
-  List.iter !constructor_hooks begin fun hook -> hook c env p end
+let dispatch_constructor_hook c targs env p =
+  List.iter !constructor_hooks begin fun hook -> hook c ~targs env p end
 
 let dispatch_infer_ty_hook ty pos env =
   List.iter !infer_ty_hooks begin fun hook -> hook ty pos env end

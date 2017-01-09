@@ -2873,8 +2873,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(incl_tc=false) env cid cty
       (match class_ with
       | None -> env, (Reason.Rnone, Tany), None
       | Some class_ ->
-        Typing_hooks.dispatch_smethod_hook
-          class_ (p, mid) env ety_env.from_class ~is_method ~is_const;
+        Typing_hooks.dispatch_smethod_hook class_ paraml (p, mid) env
+          ety_env.from_class ~is_method ~is_const;
         (* We need to instantiate generic parameters in the method signature *)
         let ety_env =
           { ety_env with
@@ -3024,7 +3024,8 @@ and obj_get_concrete_ty ~is_method env concrete_ty class_id
               (fun _ -> Reason.Rwitness id_pos, Tany)
           else paraml in
         let member_info = Env.get_member is_method env class_info id_str in
-        Typing_hooks.dispatch_cmethod_hook class_info id env None ~is_method;
+        Typing_hooks.dispatch_cmethod_hook class_info paraml id env None
+          ~is_method;
 
         match member_info with
         | None when not is_method ->
@@ -3359,7 +3360,7 @@ and call_construct p env class_ params el uel cid =
   if SSet.mem "XHP" class_.tc_extends then env else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
-  Typing_hooks.dispatch_constructor_hook class_ env p;
+  Typing_hooks.dispatch_constructor_hook class_ params env p;
   match (fst cstr) with
     | None ->
       if el <> [] &&

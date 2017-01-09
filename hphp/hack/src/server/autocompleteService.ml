@@ -162,7 +162,8 @@ let get_class_elt_types env class_ cid elts =
   end in
   SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
 
-let autocomplete_method is_static class_ id env cid ~is_method:_ ~is_const:_ =
+let autocomplete_method is_static class_ ~targs:_ id env cid
+    ~is_method:_ ~is_const:_ =
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;

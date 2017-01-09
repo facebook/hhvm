@@ -38,7 +38,7 @@ let process_fun_id result_map cur_class cur_caller id =
   } !result_map
 
 let process_method_id result_map cur_class cur_caller
-    target_type class_def id _ _ ~is_method ~is_const:_ =
+    target_type class_def ~targs:_ id _ _ ~is_method ~is_const:_ =
   if is_method then begin
     let caller_str = combine_name cur_class cur_caller in
     let class_name = class_def.Typing_defs.tc_name in
@@ -52,9 +52,10 @@ let process_method_id result_map cur_class cur_caller
       } !result_map
   end
 
-let process_constructor result_map cur_class cur_caller class_def _ pos =
+let process_constructor result_map cur_class cur_caller
+    class_def ~targs _ pos =
   process_method_id result_map cur_class cur_caller Constructor
-    class_def (pos, "__construct") () () ~is_method:true ~is_const:false
+    class_def ~targs (pos, "__construct") () () ~is_method:true ~is_const:false
 
 let process_enter_class_def cur_class cls _ =
   cur_class := Some (Utils.strip_ns (snd cls.Nast.c_name))

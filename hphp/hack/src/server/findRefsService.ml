@@ -60,8 +60,8 @@ let is_target_class tcopt target_classes class_name =
   | Subclasses_of s ->
     s = class_name || check_if_extends_class tcopt s class_name
 
-let process_member_id tcopt results_acc target_classes  target_member
-    class_ id _ _ ~is_method ~is_const =
+let process_member_id tcopt results_acc target_classes target_member
+    class_ ~targs:_ id _ _ ~is_method ~is_const =
   let member_name = snd id in
   let is_target = match target_member with
     | Method target_name  -> is_method && (member_name = target_name)
@@ -78,10 +78,10 @@ let process_member_id tcopt results_acc target_classes  target_member
       Pos.Map.add (fst id) (class_name ^ "::" ^ (snd id)) !results_acc
 
 let process_constructor tcopt results_acc
-    target_classes target_member class_ _ p =
+    target_classes target_member class_ ~targs _ p =
   process_member_id
-    tcopt results_acc target_classes target_member class_ (p, "__construct")
-    () () ~is_method:true ~is_const:false
+    tcopt results_acc target_classes target_member class_ ~targs
+    (p, "__construct") () () ~is_method:true ~is_const:false
 
 let process_class_id results_acc target_classes cid mid_option =
    if (SSet.mem target_classes (snd cid))

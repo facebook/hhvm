@@ -258,6 +258,23 @@ let update_file_info env fast_parsed =
 (*****************************************************************************)
 
 let declare_names env fast_parsed =
+  (* We need to do naming phase for files that failed naming before, even
+   * if they were not re-parsed in this iteration, so we are extending
+   * fast_parsed with them. *)
+  let fast_parsed = Relative_path.Set.fold env.failed_naming
+    ~init:fast_parsed
+    ~f:begin fun k acc ->
+      match Relative_path.Map.get acc k with
+      | Some _ -> acc (* the file was re-parsed already *)
+      | None ->
+        (* The file was not re-parsed, so it's correct to look up its contents
+         * in (old) env. *)
+        match Relative_path.Map.get env.files_info k with
+        | None -> acc (* this should not happen - failed_naming should be
+                         a subset of keys in files_info *)
+        | Some v -> Relative_path.Map.add acc k v
+    end
+  in
   remove_decls env fast_parsed;
   let errorl, failed_naming =
     Relative_path.Map.fold fast_parsed ~f:begin fun k v (errorl, failed) ->
@@ -502,10 +519,8 @@ end = functor(CheckKind:CheckKindType) -> struct
       Relative_path.to_absolute |>
       Hh_logger.log "Filename: %s";
 
-    let files_to_parse = files_to_parse |>
-      Relative_path.Set.union env.failed_parsing |>
-      Relative_path.Set.union env.failed_naming
-    in
+    let files_to_parse =
+      Relative_path.Set.union files_to_parse env.failed_parsing in
     (* PARSING *)
 
     debug_print_path_set genv "files_to_parse" files_to_parse;

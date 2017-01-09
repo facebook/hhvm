@@ -42,6 +42,14 @@ T InstantStatic<T, TInit, init>::value(init());
     return InstantStatic<const StaticString, const char*, GetClassName> \
       ::value;                                                          \
   }
+
+#define RESOURCENAME_IS(str)                                            \
+  static const char *GetResourceName() { return str; }                  \
+  static const StaticString& resourcenameof() {                         \
+    return InstantStatic<const StaticString, const char*, GetResourceName> \
+      ::value;                                                          \
+  }
+
 }
 
 #endif

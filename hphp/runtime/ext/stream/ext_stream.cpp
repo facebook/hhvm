@@ -620,7 +620,7 @@ static Variant socket_accept_impl(
   } else {
     auto sock = cast<Socket>(socket);
     auto new_fd = accept(sock->fd(), addr, addrlen);
-    new_sock = req::make<Socket>(new_fd, sock->getType());
+    new_sock = req::make<StreamSocket>(new_fd, sock->getType());
   }
 
   if (!new_sock->valid()) {
@@ -834,7 +834,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
                       int type,
                       int protocol) {
   Variant fd;
-  if (!HHVM_FN(socket_create_pair)(domain, type, protocol, ref(fd))) {
+  if (!socket_create_pair_impl(domain, type, protocol, ref(fd), true)) {
     return false;
   }
   return fd;

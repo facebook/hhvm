@@ -50,7 +50,7 @@ private:
   static DebuggerServer s_debugger_server;
 
   req::ptr<Socket> nthSocket(unsigned i) const {
-    return req::make<Socket>(m_socks[i]);
+    return req::make<StreamSocket>(m_socks[i]);
   }
 
   AsyncFunc<DebuggerServer> m_serverThread;

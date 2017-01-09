@@ -1,4 +1,4 @@
-resource(4) of type (stream)
+resource(4) of type (Socket)
 bool(true)
 bool(true)
 resource(5) of type (stream)

@@ -35,7 +35,7 @@ struct DebuggerThriftBuffer : ThriftBuffer {
     : ThriftBuffer(BUFFER_SIZE, VariableSerializer::Type::DebuggerSerialize) {}
 
   req::ptr<Socket> getSocket() {
-    return req::make<Socket>(m_socket);
+    return req::make<StreamSocket>(m_socket);
   }
 
   void create(req::ptr<Socket> socket) {

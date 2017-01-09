@@ -568,8 +568,8 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  auto socket1 = req::make<Socket>(fds[0], AF_UNIX);
-  auto socket2 = req::make<Socket>(fds[1], AF_UNIX);
+  auto socket1 = req::make<StreamSocket>(fds[0], AF_UNIX);
+  auto socket2 = req::make<StreamSocket>(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -639,7 +639,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = cur->ai_next) {
-    auto sock = req::make<Socket>(
+    auto sock = req::make<StreamSocket>(
       socket(cur->ai_family, cur->ai_socktype, 0),
       cur->ai_family,
       cur->ai_addr->sa_data,

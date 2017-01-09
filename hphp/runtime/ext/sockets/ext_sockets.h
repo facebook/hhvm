@@ -25,6 +25,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
+                             bool asStream);
+
 Variant HHVM_FUNCTION(socket_create,
                       int domain,
                       int type,

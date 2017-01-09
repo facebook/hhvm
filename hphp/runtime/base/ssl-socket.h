@@ -33,7 +33,7 @@ struct SSLSocketData;
 /**
  * TCP sockets running SSL protocol.
  */
-struct SSLSocket : Socket {
+struct SSLSocket final : Socket {
   enum class CryptoMethod {
     ClientSSLv2,
     ClientSSLv3,

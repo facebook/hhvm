@@ -104,7 +104,7 @@ bool DebuggerServer::start() {
     if (s_fd < 0 && errno == EAFNOSUPPORT) {
       continue;
     }
-    auto m_sock = req::make<Socket>(
+    auto m_sock = req::make<StreamSocket>(
       s_fd, cur->ai_family, cur->ai_addr->sa_data, port);
 
     int yes = 1;
@@ -171,7 +171,7 @@ void DebuggerServer::accept() {
         socklen_t salen = sizeof(sa);
         try {
           auto sock = nthSocket(i);
-          auto new_sock = req::make<Socket>(
+          auto new_sock = req::make<StreamSocket>(
             ::accept(sock->fd(), &sa, &salen), sock->getType());
           if (new_sock->valid()) {
             Debugger::CreateProxy(new_sock, false);

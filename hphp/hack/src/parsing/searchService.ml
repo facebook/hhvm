@@ -143,9 +143,9 @@ module WorkerApi = struct
       first_char := false
     end str;
     let i = ref (List.length !result) in
-    let filtered_str = String.create !i in
+    let filtered_str = Bytes.create !i in
     List.iter begin fun c ->
-      String.set filtered_str (!i - 1) c;
+      Bytes.set filtered_str (!i - 1) c;
       decr i
     end !result;
     filtered_str

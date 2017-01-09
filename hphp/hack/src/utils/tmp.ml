@@ -14,7 +14,7 @@
 (*****************************************************************************)
 
 let temp_dir_name =
-  let dir = Filename.temp_dir_name in
+  let dir = Filename.get_temp_dir_name () in
   if dir.[String.length dir - 1] <> '/' then dir ^ "/" else dir
 
 let get_dir ?user:(user=None) () =

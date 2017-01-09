@@ -87,7 +87,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         self.assertEqual(retcode, 0, "See also recorder_cat stderr:\n" + err)
         self.assertRegex(
             out.strip(),
-            '(Loaded_saved_state /tmp/.........../foo with 0 dirtied files)',
+            '(Loaded_saved_state /tmp.*/foo with 0 dirtied files)',
             "See also recorder daemon logs:" + boxed_string(recorder_log))
 
     def fresh_start_with_recorder_on(self):
@@ -184,7 +184,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         self.assert_match_regexes(
             out.strip(),
             [
-                '(Loaded_saved_state /tmp/.........../foo with 0 dirtied files)',
+                '(Loaded_saved_state /tmp.*/foo with 0 dirtied files)',
                 '(HandleServerCommand STATUS)',
                 '(HandleServerCommand INFER_TYPE)'
             ],

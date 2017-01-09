@@ -324,11 +324,8 @@ static void tvDecRefRange(TypedValue* begin, TypedValue* end) {
 /*
  * Parses a subset of JSON. Currently unsupported:
  * - Non-ASCII
- * - Superfluous whitespace
  * - Character escape sequences
  * - Non-string array keys
- * - Numbers that are not integers in [0..9e18)
- * - True/false/null
  * - Arrays nested > 255 levels
  */
 struct SimpleParser {
@@ -348,7 +345,9 @@ struct SimpleParser {
                        TypedValue* buf,
                        Variant& out) {
     SimpleParser parser(inp, length, buf);
-    if (!parser.parseValue() || parser.p != inp + length) {
+    bool ok = parser.parseValue();
+    parser.skipSpace();
+    if (!ok || parser.p != inp + length) {
       // Unsupported, malformed, or trailing garbage. Release entire stack.
       tvDecRefRange(buf, parser.top);
       return false;
@@ -365,15 +364,41 @@ struct SimpleParser {
     assert(input[length] == 0);  // Parser relies on sentinel to avoid checks.
   }
 
+  /*
+   * Skip whitespace, then if next char is 'ch', consume it and return true,
+   * otherwise let it be and return false.
+   */
+  bool matchSeparator(char ch) {
+    if (LIKELY(*p++ == ch)) return true;
+    return matchSeparatorSlow(ch);
+  }
+  NEVER_INLINE
+  bool matchSeparatorSlow(char ch) {
+    --p;
+    skipSpace();
+    if (LIKELY(*p++ == ch)) return true;
+    --p;
+    return false;
+  }
+  NEVER_INLINE
+  void skipSpace() { while (isSpace(*p)) p++; }
+  bool isSpace(char ch) const {
+    return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\f';
+  }
+
   bool parseValue() {
     auto const ch = *p++;
     if (ch == '{') return parseMixed();
     else if (ch == '[') return parsePacked();
     else if (ch == '\"') return parseString();
-    else if (ch >= '0' && ch <= '9') return parseNumber(ch - '0');
+    else if ((ch >= '0' && ch <= '9') || ch == '-') return parseNumber(ch);
     else if (ch == 't') return parseRue();
     else if (ch == 'f') return parseAlse();
     else if (ch == 'n') return parseUll();
+    else if (isSpace(ch)) {
+      skipSpace();
+      return parseValue();
+    }
     else return false;
   }
 
@@ -421,15 +446,13 @@ struct SimpleParser {
 
   bool parsePacked() {
     auto const fp = top;
-    if (*p == ']') {
-      ++p;
-    } else {
+    if (!matchSeparator(']')) {
       if (++array_depth >= 0) return false;
       do {
         if (!parseValue()) return false;
-      } while (*p++ == ',');
+      } while (matchSeparator(','));
       --array_depth;
-      if (p[-1] != ']') return false;  // Trailing ',' not supported.
+      if (!matchSeparator(']')) return false;  // Trailing ',' not supported.
     }
     auto arr = top == fp ? staticEmptyArray() :
                            PackedArray::MakePackedNatural(top - fp, fp);
@@ -441,12 +464,10 @@ struct SimpleParser {
 
   bool parseMixed() {
     auto const fp = top;
-    if (*p == '}') {
-      ++p;  // Empty array.
-    } else {
+    if (!matchSeparator('}')) {
       if (++array_depth >= 0) return false;
       do {
-        if (*p++ != '\"') return false;  // Only support string keys.
+        if (!matchSeparator('\"')) return false;  // Only support string keys.
         if (!parseString()) return false;
         TypedValue& tv = top[-1];
         // PHP array semantics: integer-like keys are converted.
@@ -454,11 +475,11 @@ struct SimpleParser {
           tv.m_type = KindOfInt64;
         }
         // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
-        if (*p++ != ':') return false;
+        if (!matchSeparator(':')) return false;
         if (!parseValue()) return false;
-      } while (*p++ == ',');
+      } while (matchSeparator(','));
       --array_depth;
-      if (p[-1] != '}') return false;  // Trailing ',' not supported.
+      if (!matchSeparator('}')) return false;  // Trailing ',' not supported.
     }
     auto const arr = top == fp ?
       staticEmptyArray() :
@@ -469,18 +490,60 @@ struct SimpleParser {
     return true;
   }
 
-  // Parse remainder of integer in [0..9e18) after initial digit 'init'.
-  bool parseNumber(int64_t init) {
-    int len = 1;  // Initial digit already read.
-    auto n = init;
-    if (n > 0) {
-      while (*p >= '0' && *p <= '9') {
-        n = n * 10 + (*p++ - '0');
-        ++len;
-      }
+  /*
+   * Parse remainder of number after initial character firstChar (maybe '-').
+   */
+  bool parseNumber(char firstChar) {
+    uint64_t x = 0;
+    bool neg = false;
+    const char* begin = p - 1;
+    if (firstChar == '-') {
+      neg = true;
+    } else {
+      x = firstChar - '0';  // first digit
     }
-    pushInt64(n);
-    return len < 19 || (len == 19 && init <= 8);
+    // Parse maximal digit sequence into x (non-negative).
+    while (*p >= '0' && *p <= '9') {
+      x = (x * 10) + (*p - '0');
+      ++p;
+    }
+    if (*p == '.' || *p == 'e' || *p == 'E') {
+      pushDouble(zend_strtod(begin, &p));
+      return true;
+    }
+    // Now 'x' is the usigned absolute value of a naively parsed integer, but
+    // potentially overflowed mod 2^64.
+    auto len = p - begin;
+    if (LIKELY(len < 19) || (len == 19 && firstChar <= '8')) {
+      int64_t sx = x;
+      pushInt64(neg ? -sx : sx);
+    } else {
+      parseBigInt(len);
+    }
+    return true;
+  }
+
+  /*
+   * Assuming 'len' characters ('0'-'9', maybe prefix '-') have been read,
+   * re-parse and push as an int64_t if possible, otherwise as a double.
+   */
+  void parseBigInt(int len) {
+    assertx(*p > '9' || *p < '0');  // Aleady read maximal digit sequence.
+    errno = 0;
+    const int64_t sx = strtoll(p - len, nullptr, 10);
+    if (errno == ERANGE) {
+      const double dval = zend_strtod(p - len, nullptr);
+      assertx(dval == floor(dval));
+      pushDouble(dval);
+    } else {
+      pushInt64(sx);
+    }
+  }
+
+  void pushDouble(double data) {
+    auto const tv = top++;
+    tv->m_type = KindOfDouble;
+    tv->m_data.dbl = data;
   }
 
   void pushInt64(int64_t data) {

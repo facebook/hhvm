@@ -20,6 +20,7 @@
             ((XHP_string_literal))))
           ((>)))
         (list
+          ((XHP_body))
           ((XHP_comment))
           (xhp_expression
             (xhp_open
@@ -29,7 +30,8 @@
               (missing)
               (missing))
           ((XHP_body))
-          (braced_expression(({))(variable((variable)))((})(end_of_line)))
+          (braced_expression(({))(variable((variable)))((})))
+          ((XHP_body)(end_of_line))
           ((whitespace)(XHP_body)))
         (xhp_close
           ((</))

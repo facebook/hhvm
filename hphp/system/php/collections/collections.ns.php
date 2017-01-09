@@ -58,6 +58,10 @@ interface MapAccess extends ConstMapAccess,
 interface Indexish extends \HH\KeyedContainer {
 }
 
+interface MutableKeyedContainer extends \HH\KeyedContainer,
+                                        IndexAccess {
+}
+
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
                               \HH\KeyedIterable,
@@ -66,7 +70,7 @@ interface ConstVector extends ConstCollection,
 
 interface MutableVector extends ConstVector,
                                 \HH\Collection,
-                                IndexAccess {
+                                MutableKeyedContainer {
 }
 
 interface ConstMap extends ConstCollection,
@@ -77,6 +81,7 @@ interface ConstMap extends ConstCollection,
 
 interface MutableMap extends ConstMap,
                              \HH\Collection,
+                             MutableKeyedContainer,
                              MapAccess {
 }
 

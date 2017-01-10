@@ -99,8 +99,6 @@ let parse_check_args cmd =
       " (mode) show a human readable list of errors (default)";
     "--type-at-pos", Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
       " (mode) show type at a given position in file [line:character]";
-    "--args-at-pos", Arg.String (fun x -> set_mode (MODE_ARGUMENT_INFO x) ()),
-      "";
     "--list-files", Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";
     "--list-modes", Arg.Unit (set_mode MODE_LIST_MODES),

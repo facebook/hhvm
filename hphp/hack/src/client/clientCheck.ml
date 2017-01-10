@@ -206,23 +206,6 @@ let main args =
       let pos, ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
       ClientTypeAtPos.go pos ty args.output_json;
       Exit_status.No_error
-    | MODE_ARGUMENT_INFO arg ->
-      let tpos = Str.split (Str.regexp ":") arg in
-      let line, char =
-        try
-          match tpos with
-          | [line; char] ->
-              int_of_string line, int_of_string char
-          | _ -> raise Exit
-        with _ ->
-          Printf.eprintf "Invalid position\n";
-          raise Exit_status.(Exit_with Input_error)
-      in
-      let content = Sys_utils.read_stdin_to_string () in
-      let results =
-        rpc args @@ Rpc.ARGUMENT_INFO (content, line, char) in
-      ClientArgumentInfo.go results args.output_json;
-      Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
       let results = rpc args @@ Rpc.AUTOCOMPLETE content in

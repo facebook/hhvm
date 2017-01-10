@@ -16,7 +16,6 @@ let debug_describe_t : type a. a t -> string = function
   | DUMP_SYMBOL_INFO         _ -> "DUMP_SYMBOL_INFO"
   | DUMP_AI_INFO             _ -> "DUMP_AI_INFO"
   | REMOVE_DEAD_FIXMES       _ -> "REMOVE_DEAD_FIXMES"
-  | ARGUMENT_INFO            _ -> "ARGUMENT_INFO"
   | SEARCH                   _ -> "SEARCH"
   | COVERAGE_COUNTS          _ -> "COVERAGE_COUNTS"
   | LINT                     _ -> "LINT"

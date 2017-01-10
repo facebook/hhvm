@@ -58,6 +58,9 @@ let rec parse_type_specifier parser =
   | XHPClassName
   | QualifiedName -> parse_possible_generic_specifier parser
   | Array -> parse_array_type_specifier parser
+  | Vec -> parse_vec_type_specifier parser
+  | Dict -> parse_dictionary_type_specifier parser
+  | Keyset -> parse_keyset_type_specifier parser
   | LeftParen -> parse_tuple_or_closure_type_specifier parser
   | Shape -> parse_shape_specifier parser
   | Question -> parse_nullable_type_specifier parser
@@ -262,8 +265,17 @@ and parse_generic_type_argument_list parser =
     (parser, result)
 
 and parse_array_type_specifier parser =
-  let (parser, array_token) = next_token parser in
-  let array_token = make_token array_token in
+  (* We allow
+     array
+     array<type>
+     array<type, type>
+     TODO: Put a proper reference to the specification in here.
+     TODO: Can we have a comma termination in either case?  This list
+     never has more than two elements.
+     TODO: Should we just parse a comma-separated list here and give an
+     error in a later pass?
+  *)
+  let (parser, array_token) = assert_token parser Array in
   if peek_token_kind parser <> LessThan then
     (parser, make_simple_type_specifier array_token)
   else begin
@@ -293,6 +305,44 @@ and parse_array_type_specifier parser =
         left_angle key_type right_angle in
       (parser, result)
     end
+
+  and parse_vec_type_specifier parser =
+    (*
+      vec < type-specifier >
+    *)
+    let (parser, keyword) = assert_token parser Vec in
+    let (parser, left) = expect_left_angle parser in
+    let (parser, t) = parse_type_specifier parser in
+    let (parser, right) = expect_right_angle parser in
+    let result = make_vector_type_specifier keyword left t right in
+    (parser, result)
+
+  and parse_keyset_type_specifier parser =
+    (*
+      keyset < type-specifier >
+    *)
+    let (parser, keyword) = assert_token parser Keyset in
+    let (parser, left) = expect_left_angle parser in
+    let (parser, t) = parse_type_specifier parser in
+    let (parser, right) = expect_right_angle parser in
+    let result = make_keyset_type_specifier keyword left t right in
+    (parser, result)
+
+  and parse_dictionary_type_specifier parser =
+    (*
+      dict < type-specifier , type-specifier >
+      TODO: Should we allow a trailing comma?
+      TODO: Consider parsing this as a series of list-items, rather than
+      key comma value.
+    *)
+    let (parser, keyword) = assert_token parser Dict in
+    let (parser, left) = expect_left_angle parser in
+    let (parser, k) = parse_type_specifier parser in
+    let (parser, comma) = expect_comma parser in
+    let (parser, v) = parse_type_specifier parser in
+    let (parser, right) = expect_right_angle parser in
+    let result = make_dictionary_type_specifier keyword left k comma v right in
+    (parser, result)
 
 and parse_tuple_or_closure_type_specifier parser =
   let (parser1, _) = assert_token parser LeftParen in

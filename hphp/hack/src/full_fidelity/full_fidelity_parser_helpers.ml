@@ -235,6 +235,9 @@ module WithParser(Parser : ParserType) = struct
   let expect_while parser =
     expect_token parser TokenKind.While SyntaxError.error1018
 
+  let expect_comma parser =
+    expect_token parser TokenKind.Comma SyntaxError.error1054
+
   let expect_coloncolon parser =
     expect_token parser TokenKind.ColonColon SyntaxError.error1047
 

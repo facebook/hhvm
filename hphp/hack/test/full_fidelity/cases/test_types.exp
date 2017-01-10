@@ -75,8 +75,22 @@
                   (simple_type_specifier((name)))(missing)))
                   ((>))))
               ((>)(whitespace))))
-            ((variable)(end_of_line))
-            (missing))(missing)))
+              ((variable))(missing))((,)(end_of_line)))
+      (list_item
+        (parameter_declaration
+          (missing)(missing)
+            (vector_type_specifier
+              ((whitespace)(vec))
+              ((<))
+              (dictionary_type_specifier
+                ((dict))
+                ((<))
+                (simple_type_specifier((int)))
+                ((,)(whitespace))
+                (keyset_type_specifier
+                  ((keyset))((<))(simple_type_specifier((string)))((>)))
+                ((>)))
+              ((>)(whitespace)))((variable))(missing))((,)(end_of_line))))
         ((rparen)(whitespace))
         ((:)(whitespace))
         (simple_type_specifier

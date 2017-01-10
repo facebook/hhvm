@@ -9,6 +9,7 @@ class foo {
     global(123); // A statement beginning with global should still parse.
     $f = new foo; // PHP allows argument list to be omitted
     switch($a) { case 1; default; } // PHP allows semis as well as colons
+    UNSET($y); // "unset" is case-insensitive
     return $x or $x and $x xor $x <=> $x; // PHP operators.
 
   }

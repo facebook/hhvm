@@ -1024,13 +1024,14 @@ let is_next_xhp_class_name lexer =
   is_xhp_class_name lexer
 
 let as_case_insensitive_keyword text =
-  (* Keywords true, false, null and array are case-insensitive in Hack. *)
+  (* Some keywords are case-insensitive in Hack. *)
   (* TODO: Consider making non-lowercase versions of these keywords errors
      in strict mode. *)
   (* TODO: Should these be case-insensitive only when we are parsing the
      interior of an expression? *)
   let lower = String.lowercase text in
   match lower with
+  | "eval" | "isset" | "unset" | "empty"
   | "true" | "false" | "null" | "array" -> lower
   | _ -> text
 

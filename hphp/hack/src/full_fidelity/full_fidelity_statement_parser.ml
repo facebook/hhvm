@@ -165,6 +165,7 @@ module WithExpressionAndTypeParser
     TODO: Can the list be empty?
     TODO: The list has to be expressions which evaluate as variables;
           add an error checking pass.
+    TODO: Unset is case-insentive. Should non-lowercase be an error?
     *)
     let (parser, keyword) = assert_token parser Unset in
     let (parser, left_paren, variables, right_paren) =

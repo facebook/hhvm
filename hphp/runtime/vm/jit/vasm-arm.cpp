@@ -1587,20 +1587,24 @@ void lower(Vunit& u, testbi& i, Vlabel b, size_t z) {
   });
 }
 
-#define Y(vasm_opc, lower_opc, load_opc, imm)           \
+#define Y(vasm_opc, lower_opc, load_opc, imm, zr, sz)   \
 void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(u, b, z, [&] (Vout& v) {                   \
     lowerVptr(i.m, v);                                  \
-    auto r = v.makeReg();                               \
-    v << load_opc{imm, r};                              \
-    v << lower_opc{r, i.m};                             \
+    if (imm.sz() == 0u) {                               \
+      v << lower_opc{PhysReg(vixl::zr), i.m};           \
+    } else {                                            \
+      auto r = v.makeReg();                             \
+      v << load_opc{imm, r};                            \
+      v << lower_opc{r, i.m};                           \
+    }                                                   \
   });                                                   \
 }
 
-Y(storebi, storeb, ldimmb, i.s)
-Y(storeli, storel, ldimml, i.s)
-Y(storeqi, store, ldimmq, Immed64(i.s.q()))
-Y(storewi, storew, ldimmw, i.s)
+Y(storebi, storeb, ldimmb, i.s, wzr, b)
+Y(storeli, storel, ldimml, i.s, wzr, l)
+Y(storeqi, store, ldimmq, Immed64(i.s.q()), wzr, q)
+Y(storewi, storew, ldimmw, i.s, xzr, w)
 
 #undef Y
 

@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-01-04-0001"
+let full_fidelity_schema_version_number = "2017-01-04-0002"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -882,6 +882,22 @@ let schema = List.map from_list [
     "left_type";
     "separator";
     "right_type" ];
+  [ "VectorTypeSpecifier";
+    "vector_type_specifier";
+    "vector_type_specifier";
+    "vector_type";
+    "keyword";
+    "left_angle";
+    "type";
+    "right_angle" ];
+  [ "KeysetTypeSpecifier";
+    "keyset_type_specifier";
+    "keyset_type_specifier";
+    "keyset_type";
+    "keyword";
+    "left_angle";
+    "type";
+    "right_angle" ];
   [ "VectorArrayTypeSpecifier";
     "vector_array_type_specifier";
     "vector_array_type_specifier";
@@ -907,6 +923,16 @@ let schema = List.map from_list [
     "map_array_type_specifier";
     "map_array_type_specifier";
     "map_array";
+    "keyword";
+    "left_angle";
+    "key";
+    "comma";
+    "value";
+    "right_angle" ];
+  [ "DictionaryTypeSpecifier";
+    "dictionary_type_specifier";
+    "dictionary_type_specifier";
+    "dictionary_type";
     "keyword";
     "left_angle";
     "key";

@@ -1078,6 +1078,43 @@ let rec get_doc node =
     let ty = get_doc vector_array_type in
     let ra = get_doc vector_array_right_angle in
     ar ^^^ la ^^^ ty ^^^ ra
+  | VectorTypeSpecifier {
+      vector_type_keyword;
+      vector_type_left_angle;
+      vector_type_type;
+      vector_type_right_angle
+    } ->
+    let ar = get_doc vector_type_keyword in
+    let la = get_doc vector_type_left_angle in
+    let ty = get_doc vector_type_type in
+    let ra = get_doc vector_type_right_angle in
+    ar ^^^ la ^^^ ty ^^^ ra
+  | KeysetTypeSpecifier {
+      keyset_type_keyword;
+      keyset_type_left_angle;
+      keyset_type_type;
+      keyset_type_right_angle
+    } ->
+    let ar = get_doc keyset_type_keyword in
+    let la = get_doc keyset_type_left_angle in
+    let ty = get_doc keyset_type_type in
+    let ra = get_doc keyset_type_right_angle in
+    ar ^^^ la ^^^ ty ^^^ ra
+  | DictionaryTypeSpecifier {
+      dictionary_type_keyword;
+      dictionary_type_left_angle;
+      dictionary_type_key;
+      dictionary_type_comma;
+      dictionary_type_value;
+      dictionary_type_right_angle
+    } ->
+    let ar = get_doc dictionary_type_keyword in
+    let la = get_doc dictionary_type_left_angle in
+    let kt = get_doc dictionary_type_key in
+    let co = get_doc dictionary_type_comma in
+    let vt = get_doc dictionary_type_value in
+    let ra = get_doc dictionary_type_right_angle in
+    ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
   | MapArrayTypeSpecifier {
       map_array_keyword;
       map_array_left_angle;

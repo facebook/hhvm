@@ -123,10 +123,13 @@ type t =
 | XHPExpression
 | XHPClose
 | TypeConstant
+| VectorTypeSpecifier
+| KeysetTypeSpecifier
 | VectorArrayTypeSpecifier
 | TypeParameter
 | TypeConstraint
 | MapArrayTypeSpecifier
+| DictionaryTypeSpecifier
 | ClosureTypeSpecifier
 | ClassnameTypeSpecifier
 | FieldSpecifier
@@ -252,10 +255,13 @@ let to_string kind =
   | XHPExpression -> "xhp_expression"
   | XHPClose -> "xhp_close"
   | TypeConstant -> "type_constant"
+  | VectorTypeSpecifier -> "vector_type_specifier"
+  | KeysetTypeSpecifier -> "keyset_type_specifier"
   | VectorArrayTypeSpecifier -> "vector_array_type_specifier"
   | TypeParameter -> "type_parameter"
   | TypeConstraint -> "type_constraint"
   | MapArrayTypeSpecifier -> "map_array_type_specifier"
+  | DictionaryTypeSpecifier -> "dictionary_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | FieldSpecifier -> "field_specifier"

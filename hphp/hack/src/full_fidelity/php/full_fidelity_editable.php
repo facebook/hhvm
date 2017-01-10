@@ -349,6 +349,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return XHPClose::from_json($json, $position, $source);
     case 'type_constant':
       return TypeConstant::from_json($json, $position, $source);
+    case 'vector_type_specifier':
+      return VectorTypeSpecifier::from_json($json, $position, $source);
+    case 'keyset_type_specifier':
+      return KeysetTypeSpecifier::from_json($json, $position, $source);
     case 'vector_array_type_specifier':
       return VectorArrayTypeSpecifier::from_json($json, $position, $source);
     case 'type_parameter':
@@ -357,6 +361,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return TypeConstraint::from_json($json, $position, $source);
     case 'map_array_type_specifier':
       return MapArrayTypeSpecifier::from_json($json, $position, $source);
+    case 'dictionary_type_specifier':
+      return DictionaryTypeSpecifier::from_json($json, $position, $source);
     case 'closure_type_specifier':
       return ClosureTypeSpecifier::from_json($json, $position, $source);
     case 'classname_type_specifier':
@@ -15195,6 +15201,224 @@ final class TypeConstant extends EditableSyntax {
     yield break;
   }
 }
+final class VectorTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_angle;
+  private EditableSyntax $_type;
+  private EditableSyntax $_right_angle;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_angle,
+    EditableSyntax $type,
+    EditableSyntax $right_angle) {
+    parent::__construct('vector_type_specifier');
+    $this->_keyword = $keyword;
+    $this->_left_angle = $left_angle;
+    $this->_type = $type;
+    $this->_right_angle = $right_angle;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
+  }
+  public function type(): EditableSyntax {
+    return $this->_type;
+  }
+  public function right_angle(): EditableSyntax {
+    return $this->_right_angle;
+  }
+  public function with_keyword(EditableSyntax $keyword): VectorTypeSpecifier {
+    return new VectorTypeSpecifier(
+      $keyword,
+      $this->_left_angle,
+      $this->_type,
+      $this->_right_angle);
+  }
+  public function with_left_angle(EditableSyntax $left_angle): VectorTypeSpecifier {
+    return new VectorTypeSpecifier(
+      $this->_keyword,
+      $left_angle,
+      $this->_type,
+      $this->_right_angle);
+  }
+  public function with_type(EditableSyntax $type): VectorTypeSpecifier {
+    return new VectorTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $type,
+      $this->_right_angle);
+  }
+  public function with_right_angle(EditableSyntax $right_angle): VectorTypeSpecifier {
+    return new VectorTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_type,
+      $right_angle);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
+    $type = $this->type()->rewrite($rewriter, $new_parents);
+    $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_angle === $this->left_angle() &&
+      $type === $this->type() &&
+      $right_angle === $this->right_angle()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new VectorTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $type,
+        $right_angle), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->vector_type_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_angle = EditableSyntax::from_json(
+      $json->vector_type_left_angle, $position, $source);
+    $position += $left_angle->width();
+    $type = EditableSyntax::from_json(
+      $json->vector_type_type, $position, $source);
+    $position += $type->width();
+    $right_angle = EditableSyntax::from_json(
+      $json->vector_type_right_angle, $position, $source);
+    $position += $right_angle->width();
+    return new VectorTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $type,
+        $right_angle);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_angle;
+    yield $this->_type;
+    yield $this->_right_angle;
+    yield break;
+  }
+}
+final class KeysetTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_angle;
+  private EditableSyntax $_type;
+  private EditableSyntax $_right_angle;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_angle,
+    EditableSyntax $type,
+    EditableSyntax $right_angle) {
+    parent::__construct('keyset_type_specifier');
+    $this->_keyword = $keyword;
+    $this->_left_angle = $left_angle;
+    $this->_type = $type;
+    $this->_right_angle = $right_angle;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
+  }
+  public function type(): EditableSyntax {
+    return $this->_type;
+  }
+  public function right_angle(): EditableSyntax {
+    return $this->_right_angle;
+  }
+  public function with_keyword(EditableSyntax $keyword): KeysetTypeSpecifier {
+    return new KeysetTypeSpecifier(
+      $keyword,
+      $this->_left_angle,
+      $this->_type,
+      $this->_right_angle);
+  }
+  public function with_left_angle(EditableSyntax $left_angle): KeysetTypeSpecifier {
+    return new KeysetTypeSpecifier(
+      $this->_keyword,
+      $left_angle,
+      $this->_type,
+      $this->_right_angle);
+  }
+  public function with_type(EditableSyntax $type): KeysetTypeSpecifier {
+    return new KeysetTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $type,
+      $this->_right_angle);
+  }
+  public function with_right_angle(EditableSyntax $right_angle): KeysetTypeSpecifier {
+    return new KeysetTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_type,
+      $right_angle);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
+    $type = $this->type()->rewrite($rewriter, $new_parents);
+    $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_angle === $this->left_angle() &&
+      $type === $this->type() &&
+      $right_angle === $this->right_angle()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new KeysetTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $type,
+        $right_angle), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->keyset_type_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_angle = EditableSyntax::from_json(
+      $json->keyset_type_left_angle, $position, $source);
+    $position += $left_angle->width();
+    $type = EditableSyntax::from_json(
+      $json->keyset_type_type, $position, $source);
+    $position += $type->width();
+    $right_angle = EditableSyntax::from_json(
+      $json->keyset_type_right_angle, $position, $source);
+    $position += $right_angle->width();
+    return new KeysetTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $type,
+        $right_angle);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_angle;
+    yield $this->_type;
+    yield $this->_right_angle;
+    yield break;
+  }
+}
 final class VectorArrayTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
@@ -15598,6 +15822,169 @@ final class MapArrayTypeSpecifier extends EditableSyntax {
       $json->map_array_right_angle, $position, $source);
     $position += $right_angle->width();
     return new MapArrayTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $key,
+        $comma,
+        $value,
+        $right_angle);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_angle;
+    yield $this->_key;
+    yield $this->_comma;
+    yield $this->_value;
+    yield $this->_right_angle;
+    yield break;
+  }
+}
+final class DictionaryTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_angle;
+  private EditableSyntax $_key;
+  private EditableSyntax $_comma;
+  private EditableSyntax $_value;
+  private EditableSyntax $_right_angle;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_angle,
+    EditableSyntax $key,
+    EditableSyntax $comma,
+    EditableSyntax $value,
+    EditableSyntax $right_angle) {
+    parent::__construct('dictionary_type_specifier');
+    $this->_keyword = $keyword;
+    $this->_left_angle = $left_angle;
+    $this->_key = $key;
+    $this->_comma = $comma;
+    $this->_value = $value;
+    $this->_right_angle = $right_angle;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
+  }
+  public function key(): EditableSyntax {
+    return $this->_key;
+  }
+  public function comma(): EditableSyntax {
+    return $this->_comma;
+  }
+  public function value(): EditableSyntax {
+    return $this->_value;
+  }
+  public function right_angle(): EditableSyntax {
+    return $this->_right_angle;
+  }
+  public function with_keyword(EditableSyntax $keyword): DictionaryTypeSpecifier {
+    return new DictionaryTypeSpecifier(
+      $keyword,
+      $this->_left_angle,
+      $this->_key,
+      $this->_comma,
+      $this->_value,
+      $this->_right_angle);
+  }
+  public function with_left_angle(EditableSyntax $left_angle): DictionaryTypeSpecifier {
+    return new DictionaryTypeSpecifier(
+      $this->_keyword,
+      $left_angle,
+      $this->_key,
+      $this->_comma,
+      $this->_value,
+      $this->_right_angle);
+  }
+  public function with_key(EditableSyntax $key): DictionaryTypeSpecifier {
+    return new DictionaryTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $key,
+      $this->_comma,
+      $this->_value,
+      $this->_right_angle);
+  }
+  public function with_comma(EditableSyntax $comma): DictionaryTypeSpecifier {
+    return new DictionaryTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_key,
+      $comma,
+      $this->_value,
+      $this->_right_angle);
+  }
+  public function with_value(EditableSyntax $value): DictionaryTypeSpecifier {
+    return new DictionaryTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_key,
+      $this->_comma,
+      $value,
+      $this->_right_angle);
+  }
+  public function with_right_angle(EditableSyntax $right_angle): DictionaryTypeSpecifier {
+    return new DictionaryTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_key,
+      $this->_comma,
+      $this->_value,
+      $right_angle);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
+    $key = $this->key()->rewrite($rewriter, $new_parents);
+    $comma = $this->comma()->rewrite($rewriter, $new_parents);
+    $value = $this->value()->rewrite($rewriter, $new_parents);
+    $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_angle === $this->left_angle() &&
+      $key === $this->key() &&
+      $comma === $this->comma() &&
+      $value === $this->value() &&
+      $right_angle === $this->right_angle()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new DictionaryTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $key,
+        $comma,
+        $value,
+        $right_angle), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->dictionary_type_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_angle = EditableSyntax::from_json(
+      $json->dictionary_type_left_angle, $position, $source);
+    $position += $left_angle->width();
+    $key = EditableSyntax::from_json(
+      $json->dictionary_type_key, $position, $source);
+    $position += $key->width();
+    $comma = EditableSyntax::from_json(
+      $json->dictionary_type_comma, $position, $source);
+    $position += $comma->width();
+    $value = EditableSyntax::from_json(
+      $json->dictionary_type_value, $position, $source);
+    $position += $value->width();
+    $right_angle = EditableSyntax::from_json(
+      $json->dictionary_type_right_angle, $position, $source);
+    $position += $right_angle->width();
+    return new DictionaryTypeSpecifier(
         $keyword,
         $left_angle,
         $key,

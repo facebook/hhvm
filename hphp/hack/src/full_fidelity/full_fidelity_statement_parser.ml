@@ -336,7 +336,7 @@ module WithExpressionAndTypeParser
     | Default
     | Case
     | RightBrace
-    | EndOfFile -> (parser, None)
+    | TokenKind.EndOfFile -> (parser, None)
     | _ ->
       let (parser, statement) = parse_statement parser in
       (parser, Some statement)

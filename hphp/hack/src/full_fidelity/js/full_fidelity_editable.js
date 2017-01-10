@@ -80,6 +80,8 @@ class EditableSyntax
 
     case 'missing':
       return Missing.missing;
+    case 'end_of_file':
+      return EndOfFile.from_json(json, position, source);
     case 'header':
       return ScriptHeader.from_json(json, position, source);
     case 'script':
@@ -2584,6 +2586,53 @@ class Missing extends EditableSyntax
 }
 Missing._missing = new Missing();
 
+class EndOfFile extends EditableSyntax
+{
+  constructor(
+    token)
+  {
+    super('end_of_file', {
+      token: token });
+  }
+  get token() { return this.children.token; }
+  with_token(token){
+    return new EndOfFile(
+      token);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var token = this.token.rewrite(rewriter, new_parents);
+    if (
+      token === this.token)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new EndOfFile(
+        token), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let token = EditableSyntax.from_json(
+      json.end_of_file_token, position, source);
+    position += token.width;
+    return new EndOfFile(
+        token);
+  }
+  get children_keys()
+  {
+    if (EndOfFile._children_keys == null)
+      EndOfFile._children_keys = [
+        'token'];
+    return EndOfFile._children_keys;
+  }
+}
 class ScriptHeader extends EditableSyntax
 {
   constructor(
@@ -15483,6 +15532,7 @@ exports.FixMe = FixMe;
 exports.IgnoreError = IgnoreError;
 exports.FallThrough = FallThrough;
 
+exports.EndOfFile = EndOfFile;
 exports.ScriptHeader = ScriptHeader;
 exports.Script = Script;
 exports.ScriptFooter = ScriptFooter;

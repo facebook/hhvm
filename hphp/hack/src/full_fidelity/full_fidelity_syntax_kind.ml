@@ -20,6 +20,7 @@ type t =
 | Token
 | Missing
 | SyntaxList
+| EndOfFile
 | ScriptHeader
 | Script
 | ScriptFooter
@@ -152,6 +153,7 @@ let to_string kind =
   | Missing -> "missing"
   | Token -> "token"
   | SyntaxList -> "list"
+  | EndOfFile -> "end_of_file"
   | ScriptHeader -> "header"
   | Script -> "script"
   | ScriptFooter -> "footer"

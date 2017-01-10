@@ -216,6 +216,7 @@ let rec get_doc node =
   | QualifiedNameExpression x -> get_doc x.qualified_name_expression
   | PipeVariableExpression x -> get_doc x.pipe_variable_expression
   | ListItem x -> (get_doc x.list_item) ^^^ (get_doc x.list_separator)
+  | EndOfFile { end_of_file_token } -> get_doc end_of_file_token
   | ScriptHeader x -> get_doc x.header_less_than ^^^
                       get_doc x.header_question ^^^
                       (x.header_language |> get_doc |> add_break)

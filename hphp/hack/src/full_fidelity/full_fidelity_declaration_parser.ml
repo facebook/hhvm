@@ -1234,12 +1234,15 @@ module WithExpressionAndStatementAndTypeParser
     | Trait
     | Class -> parse_classish_declaration parser attribute_specification
     | _ ->
-      (* TODO *)
+      (* ERROR RECOVERY TODO: Produce an error here. *)
+      (* TODO: This is wrong; we have lost the attribute specification
+      from the tree. *)
       (parser1, make_error (make_token token))
 
   and parse_declaration parser =
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
+    | TokenKind.EndOfFile -> (parser1, make_end_of_file (make_token token))
     | Include
     | Include_once
     | Require
@@ -1268,6 +1271,8 @@ module WithExpressionAndStatementAndTypeParser
        (parser1, make_script_footer (make_token token))
     | _ ->
       parse_statement parser
+      (* TODO: What if it's not a legal statement? Do we still make progress
+      here? *)
 
   let parse_script_header parser =
     (* TODO: Detect if there is trivia before or after any token. *)
@@ -1295,13 +1300,25 @@ module WithExpressionAndStatementAndTypeParser
       (parser, script_header )
 
   let parse_script parser =
-    (* TODO: We don't deal with the (unsupported) ?> closing token. *)
     let (parser, script_header) = parse_script_header parser in
-    let (parser, declarations) =
-      parse_terminated_list parser parse_declaration EndOfFile in
-    (* TODO: ERROR_RECOVERY:
-      If we are not at the end of the file, something is wrong. *)
-    (parser, make_script script_header declarations)
-
+    let rec aux parser acc =
+      let (parser, declaration) = parse_declaration parser in
+      (* TODO: Assert that we either made progress, or we're at the end of
+      the file. *)
+      if kind declaration = SyntaxKind.EndOfFile then
+        (* The only time an end-of-file node is useful is when there is
+           leading trivia in the end-of-file token. *)
+        match leading_token declaration with
+        | Some token ->
+          if Token.leading token = [] then (parser, acc)
+          else (parser, declaration :: acc)
+        | _ -> (parser, acc)
+      else aux parser (declaration :: acc) in
+    let (parser, declarations) = aux parser [] in
+    let declarations = make_list (List.rev declarations) in
+    let result = make_script script_header declarations in
+    (* If we are not at the end of the file, something is wrong. *)
+    assert ((peek_token_kind parser) = TokenKind.EndOfFile);
+    (parser, result)
 
 end

@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-01-04-0002"
+let full_fidelity_schema_version_number = "2017-01-05-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -82,6 +82,11 @@ let trivia_node_from_list l =
   | _ -> failwith "bad trivia schema"
 
 let schema = List.map from_list [
+  [ "EndOfFile";
+    "end_of_file";
+    "end_of_file";
+    "end_of_file";
+    "token" ];
   [ "ScriptHeader";
     "script_header";
     "header";

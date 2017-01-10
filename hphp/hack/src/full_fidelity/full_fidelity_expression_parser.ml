@@ -167,7 +167,7 @@ module WithStatementAndDeclAndTypeParser
     | Empty -> parse_empty_expression parser
     | Isset -> parse_isset_expression parser
     | Eval -> parse_eval_expression parser
-    | EndOfFile
+    | TokenKind.EndOfFile
     | _ -> parse_as_name_or_error parser
 
   and parse_empty_expression parser =
@@ -904,7 +904,7 @@ module WithStatementAndDeclAndTypeParser
     | StarStarEqual -> false
     (* Misc *)
     | ErrorToken
-    | EndOfFile -> false
+    | TokenKind.EndOfFile -> false
     (* TODO: Sort out rules for interactions between casts and XHP. *)
     | LessThanSlash
     | XHPCategoryName

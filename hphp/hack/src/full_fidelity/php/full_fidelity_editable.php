@@ -143,6 +143,8 @@ abstract class EditableSyntax implements ArrayAccess {
 
     case 'missing':
       return Missing::missing();
+    case 'end_of_file':
+      return EndOfFile::from_json($json, $position, $source);
     case 'header':
       return ScriptHeader::from_json($json, $position, $source);
     case 'script':
@@ -4172,6 +4174,49 @@ final class Missing extends EditableSyntax {
   }
 }
 
+final class EndOfFile extends EditableSyntax {
+  private EditableSyntax $_token;
+  public function __construct(
+    EditableSyntax $token) {
+    parent::__construct('end_of_file');
+    $this->_token = $token;
+  }
+  public function token(): EditableSyntax {
+    return $this->_token;
+  }
+  public function with_token(EditableSyntax $token): EndOfFile {
+    return new EndOfFile(
+      $token);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $token = $this->token()->rewrite($rewriter, $new_parents);
+    if (
+      $token === $this->token()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EndOfFile(
+        $token), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $token = EditableSyntax::from_json(
+      $json->end_of_file_token, $position, $source);
+    $position += $token->width();
+    return new EndOfFile(
+        $token);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_token;
+    yield break;
+  }
+}
 final class ScriptHeader extends EditableSyntax {
   private EditableSyntax $_less_than;
   private EditableSyntax $_question;

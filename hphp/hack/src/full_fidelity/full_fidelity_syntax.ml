@@ -94,6 +94,9 @@ module WithToken(Token: TokenType) = struct
       syntax : syntax ;
       value : SyntaxValue.t
     }
+    and end_of_file = {
+      end_of_file_token: t;
+    }
     and script_header = {
       header_less_than: t;
       header_question: t;
@@ -813,6 +816,7 @@ module WithToken(Token: TokenType) = struct
     | Token of Token.t
     | Missing
     | SyntaxList of t list
+    | EndOfFile of end_of_file
     | ScriptHeader of script_header
     | Script of script
     | ScriptFooter of script_footer
@@ -960,6 +964,8 @@ module WithToken(Token: TokenType) = struct
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
       | SyntaxList _ -> SyntaxKind.SyntaxList
+      | EndOfFile _ ->
+        SyntaxKind.EndOfFile
       | ScriptHeader _ ->
         SyntaxKind.ScriptHeader
       | Script _ ->
@@ -1221,6 +1227,8 @@ module WithToken(Token: TokenType) = struct
     let is_list node =
       kind node = SyntaxKind.SyntaxList
 
+    let is_end_of_file node =
+      kind node = SyntaxKind.EndOfFile
     let is_script_header node =
       kind node = SyntaxKind.ScriptHeader
     let is_script node =
@@ -1508,6 +1516,12 @@ module WithToken(Token: TokenType) = struct
     let is_ellipsis = is_specific_token Full_fidelity_token_kind.DotDotDot
     let is_comma = is_specific_token Full_fidelity_token_kind.Comma
     let is_array = is_specific_token Full_fidelity_token_kind.Array
+
+    let get_end_of_file_children {
+      end_of_file_token;
+    } = (
+      end_of_file_token
+    )
 
     let get_script_header_children {
       header_less_than;
@@ -2944,6 +2958,11 @@ module WithToken(Token: TokenType) = struct
       | Missing -> []
       | Token _ -> []
       | SyntaxList x -> x
+      | EndOfFile {
+        end_of_file_token;
+      } -> [
+        end_of_file_token;
+      ]
       | ScriptHeader {
         header_less_than;
         header_question;
@@ -4254,6 +4273,11 @@ module WithToken(Token: TokenType) = struct
       | Missing -> []
       | Token _ -> []
       | SyntaxList _ -> []
+      | EndOfFile {
+        end_of_file_token;
+      } -> [
+        "end_of_file_token";
+      ]
       | ScriptHeader {
         header_less_than;
         header_question;
@@ -5618,6 +5642,12 @@ module WithToken(Token: TokenType) = struct
 
     let syntax_from_children kind ts =
       match kind, ts with
+      | (SyntaxKind.EndOfFile, [
+          end_of_file_token;
+        ]) ->
+        EndOfFile {
+          end_of_file_token;
+        }
       | (SyntaxKind.ScriptHeader, [
           header_less_than;
           header_question;
@@ -7089,6 +7119,13 @@ module WithToken(Token: TokenType) = struct
         match items with
         | [] -> make_missing()
         | _ -> from_children SyntaxKind.SyntaxList items
+
+    let make_end_of_file
+      end_of_file_token
+    =
+      from_children SyntaxKind.EndOfFile [
+        end_of_file_token;
+      ]
 
     let make_script_header
       header_less_than

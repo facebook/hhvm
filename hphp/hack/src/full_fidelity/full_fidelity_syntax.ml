@@ -687,11 +687,11 @@ module WithToken(Token: TokenType) = struct
       type_constant_separator: t;
       type_constant_right_type: t;
     }
-    and vector_type_specifier = {
-      vector_array: t;
-      vector_left_angle: t;
-      vector_type: t;
-      vector_right_angle: t;
+    and vector_array_type_specifier = {
+      vector_array_keyword: t;
+      vector_array_left_angle: t;
+      vector_array_type: t;
+      vector_array_right_angle: t;
     }
     and type_parameter = {
       type_variance: t;
@@ -702,13 +702,13 @@ module WithToken(Token: TokenType) = struct
       constraint_keyword: t;
       constraint_type: t;
     }
-    and map_type_specifier = {
-      map_array: t;
-      map_left_angle: t;
-      map_key: t;
-      map_comma: t;
-      map_value: t;
-      map_right_angle: t;
+    and map_array_type_specifier = {
+      map_array_keyword: t;
+      map_array_left_angle: t;
+      map_array_key: t;
+      map_array_comma: t;
+      map_array_value: t;
+      map_array_right_angle: t;
     }
     and closure_type_specifier = {
       closure_outer_left_paren: t;
@@ -896,10 +896,10 @@ module WithToken(Token: TokenType) = struct
     | XHPExpression of xhp_expression
     | XHPClose of xhp_close
     | TypeConstant of type_constant
-    | VectorTypeSpecifier of vector_type_specifier
+    | VectorArrayTypeSpecifier of vector_array_type_specifier
     | TypeParameter of type_parameter
     | TypeConstraint of type_constraint
-    | MapTypeSpecifier of map_type_specifier
+    | MapArrayTypeSpecifier of map_array_type_specifier
     | ClosureTypeSpecifier of closure_type_specifier
     | ClassnameTypeSpecifier of classname_type_specifier
     | FieldSpecifier of field_specifier
@@ -1143,14 +1143,14 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.XHPClose
       | TypeConstant _ ->
         SyntaxKind.TypeConstant
-      | VectorTypeSpecifier _ ->
-        SyntaxKind.VectorTypeSpecifier
+      | VectorArrayTypeSpecifier _ ->
+        SyntaxKind.VectorArrayTypeSpecifier
       | TypeParameter _ ->
         SyntaxKind.TypeParameter
       | TypeConstraint _ ->
         SyntaxKind.TypeConstraint
-      | MapTypeSpecifier _ ->
-        SyntaxKind.MapTypeSpecifier
+      | MapArrayTypeSpecifier _ ->
+        SyntaxKind.MapArrayTypeSpecifier
       | ClosureTypeSpecifier _ ->
         SyntaxKind.ClosureTypeSpecifier
       | ClassnameTypeSpecifier _ ->
@@ -1398,14 +1398,14 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.XHPClose
     let is_type_constant node =
       kind node = SyntaxKind.TypeConstant
-    let is_vector_type_specifier node =
-      kind node = SyntaxKind.VectorTypeSpecifier
+    let is_vector_array_type_specifier node =
+      kind node = SyntaxKind.VectorArrayTypeSpecifier
     let is_type_parameter node =
       kind node = SyntaxKind.TypeParameter
     let is_type_constraint node =
       kind node = SyntaxKind.TypeConstraint
-    let is_map_type_specifier node =
-      kind node = SyntaxKind.MapTypeSpecifier
+    let is_map_array_type_specifier node =
+      kind node = SyntaxKind.MapArrayTypeSpecifier
     let is_closure_type_specifier node =
       kind node = SyntaxKind.ClosureTypeSpecifier
     let is_classname_type_specifier node =
@@ -2660,16 +2660,16 @@ module WithToken(Token: TokenType) = struct
       type_constant_right_type
     )
 
-    let get_vector_type_specifier_children {
-      vector_array;
-      vector_left_angle;
-      vector_type;
-      vector_right_angle;
+    let get_vector_array_type_specifier_children {
+      vector_array_keyword;
+      vector_array_left_angle;
+      vector_array_type;
+      vector_array_right_angle;
     } = (
-      vector_array,
-      vector_left_angle,
-      vector_type,
-      vector_right_angle
+      vector_array_keyword,
+      vector_array_left_angle,
+      vector_array_type,
+      vector_array_right_angle
     )
 
     let get_type_parameter_children {
@@ -2690,20 +2690,20 @@ module WithToken(Token: TokenType) = struct
       constraint_type
     )
 
-    let get_map_type_specifier_children {
-      map_array;
-      map_left_angle;
-      map_key;
-      map_comma;
-      map_value;
-      map_right_angle;
+    let get_map_array_type_specifier_children {
+      map_array_keyword;
+      map_array_left_angle;
+      map_array_key;
+      map_array_comma;
+      map_array_value;
+      map_array_right_angle;
     } = (
-      map_array,
-      map_left_angle,
-      map_key,
-      map_comma,
-      map_value,
-      map_right_angle
+      map_array_keyword,
+      map_array_left_angle,
+      map_array_key,
+      map_array_comma,
+      map_array_value,
+      map_array_right_angle
     )
 
     let get_closure_type_specifier_children {
@@ -3952,16 +3952,16 @@ module WithToken(Token: TokenType) = struct
         type_constant_separator;
         type_constant_right_type;
       ]
-      | VectorTypeSpecifier {
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+      | VectorArrayTypeSpecifier {
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
       } -> [
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
       ]
       | TypeParameter {
         type_variance;
@@ -3979,20 +3979,20 @@ module WithToken(Token: TokenType) = struct
         constraint_keyword;
         constraint_type;
       ]
-      | MapTypeSpecifier {
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+      | MapArrayTypeSpecifier {
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
       } -> [
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
@@ -5225,16 +5225,16 @@ module WithToken(Token: TokenType) = struct
         "type_constant_separator";
         "type_constant_right_type";
       ]
-      | VectorTypeSpecifier {
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+      | VectorArrayTypeSpecifier {
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
       } -> [
-        "vector_array";
-        "vector_left_angle";
-        "vector_type";
-        "vector_right_angle";
+        "vector_array_keyword";
+        "vector_array_left_angle";
+        "vector_array_type";
+        "vector_array_right_angle";
       ]
       | TypeParameter {
         type_variance;
@@ -5252,20 +5252,20 @@ module WithToken(Token: TokenType) = struct
         "constraint_keyword";
         "constraint_type";
       ]
-      | MapTypeSpecifier {
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+      | MapArrayTypeSpecifier {
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
       } -> [
-        "map_array";
-        "map_left_angle";
-        "map_key";
-        "map_comma";
-        "map_value";
-        "map_right_angle";
+        "map_array_keyword";
+        "map_array_left_angle";
+        "map_array_key";
+        "map_array_comma";
+        "map_array_value";
+        "map_array_right_angle";
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
@@ -6655,17 +6655,17 @@ module WithToken(Token: TokenType) = struct
           type_constant_separator;
           type_constant_right_type;
         }
-      | (SyntaxKind.VectorTypeSpecifier, [
-          vector_array;
-          vector_left_angle;
-          vector_type;
-          vector_right_angle;
+      | (SyntaxKind.VectorArrayTypeSpecifier, [
+          vector_array_keyword;
+          vector_array_left_angle;
+          vector_array_type;
+          vector_array_right_angle;
         ]) ->
-        VectorTypeSpecifier {
-          vector_array;
-          vector_left_angle;
-          vector_type;
-          vector_right_angle;
+        VectorArrayTypeSpecifier {
+          vector_array_keyword;
+          vector_array_left_angle;
+          vector_array_type;
+          vector_array_right_angle;
         }
       | (SyntaxKind.TypeParameter, [
           type_variance;
@@ -6685,21 +6685,21 @@ module WithToken(Token: TokenType) = struct
           constraint_keyword;
           constraint_type;
         }
-      | (SyntaxKind.MapTypeSpecifier, [
-          map_array;
-          map_left_angle;
-          map_key;
-          map_comma;
-          map_value;
-          map_right_angle;
+      | (SyntaxKind.MapArrayTypeSpecifier, [
+          map_array_keyword;
+          map_array_left_angle;
+          map_array_key;
+          map_array_comma;
+          map_array_value;
+          map_array_right_angle;
         ]) ->
-        MapTypeSpecifier {
-          map_array;
-          map_left_angle;
-          map_key;
-          map_comma;
-          map_value;
-          map_right_angle;
+        MapArrayTypeSpecifier {
+          map_array_keyword;
+          map_array_left_angle;
+          map_array_key;
+          map_array_comma;
+          map_array_value;
+          map_array_right_angle;
         }
       | (SyntaxKind.ClosureTypeSpecifier, [
           closure_outer_left_paren;
@@ -8190,17 +8190,17 @@ module WithToken(Token: TokenType) = struct
         type_constant_right_type;
       ]
 
-    let make_vector_type_specifier
-      vector_array
-      vector_left_angle
-      vector_type
-      vector_right_angle
+    let make_vector_array_type_specifier
+      vector_array_keyword
+      vector_array_left_angle
+      vector_array_type
+      vector_array_right_angle
     =
-      from_children SyntaxKind.VectorTypeSpecifier [
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+      from_children SyntaxKind.VectorArrayTypeSpecifier [
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
       ]
 
     let make_type_parameter
@@ -8223,21 +8223,21 @@ module WithToken(Token: TokenType) = struct
         constraint_type;
       ]
 
-    let make_map_type_specifier
-      map_array
-      map_left_angle
-      map_key
-      map_comma
-      map_value
-      map_right_angle
+    let make_map_array_type_specifier
+      map_array_keyword
+      map_array_left_angle
+      map_array_key
+      map_array_comma
+      map_array_value
+      map_array_right_angle
     =
-      from_children SyntaxKind.MapTypeSpecifier [
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+      from_children SyntaxKind.MapArrayTypeSpecifier [
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
       ]
 
     let make_closure_type_specifier

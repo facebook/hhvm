@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-01-03-0001",
+  "version" : "2017-01-04-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1389,12 +1389,12 @@
         { "field_name" : "separator" },
         { "field_name" : "right_type" }
       ] },
-    { "kind_name" : "VectorTypeSpecifier",
-      "type_name" : "vector_type_specifier",
-      "description" : "vector_type_specifier",
-      "prefix" : "vector",
+    { "kind_name" : "VectorArrayTypeSpecifier",
+      "type_name" : "vector_array_type_specifier",
+      "description" : "vector_array_type_specifier",
+      "prefix" : "vector_array",
       "fields" : [
-        { "field_name" : "array" },
+        { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "type" },
         { "field_name" : "right_angle" }
@@ -1416,12 +1416,12 @@
         { "field_name" : "keyword" },
         { "field_name" : "type" }
       ] },
-    { "kind_name" : "MapTypeSpecifier",
-      "type_name" : "map_type_specifier",
-      "description" : "map_type_specifier",
-      "prefix" : "map",
+    { "kind_name" : "MapArrayTypeSpecifier",
+      "type_name" : "map_array_type_specifier",
+      "description" : "map_array_type_specifier",
+      "prefix" : "map_array",
       "fields" : [
-        { "field_name" : "array" },
+        { "field_name" : "keyword" },
         { "field_name" : "left_angle" },
         { "field_name" : "key" },
         { "field_name" : "comma" },

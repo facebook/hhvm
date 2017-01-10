@@ -349,14 +349,14 @@ abstract class EditableSyntax implements ArrayAccess {
       return XHPClose::from_json($json, $position, $source);
     case 'type_constant':
       return TypeConstant::from_json($json, $position, $source);
-    case 'vector_type_specifier':
-      return VectorTypeSpecifier::from_json($json, $position, $source);
+    case 'vector_array_type_specifier':
+      return VectorArrayTypeSpecifier::from_json($json, $position, $source);
     case 'type_parameter':
       return TypeParameter::from_json($json, $position, $source);
     case 'type_constraint':
       return TypeConstraint::from_json($json, $position, $source);
-    case 'map_type_specifier':
-      return MapTypeSpecifier::from_json($json, $position, $source);
+    case 'map_array_type_specifier':
+      return MapArrayTypeSpecifier::from_json($json, $position, $source);
     case 'closure_type_specifier':
       return ClosureTypeSpecifier::from_json($json, $position, $source);
     case 'classname_type_specifier':
@@ -15195,24 +15195,24 @@ final class TypeConstant extends EditableSyntax {
     yield break;
   }
 }
-final class VectorTypeSpecifier extends EditableSyntax {
-  private EditableSyntax $_array;
+final class VectorArrayTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_type;
   private EditableSyntax $_right_angle;
   public function __construct(
-    EditableSyntax $array,
+    EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $type,
     EditableSyntax $right_angle) {
-    parent::__construct('vector_type_specifier');
-    $this->_array = $array;
+    parent::__construct('vector_array_type_specifier');
+    $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_type = $type;
     $this->_right_angle = $right_angle;
   }
-  public function array(): EditableSyntax {
-    return $this->_array;
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
   }
   public function left_angle(): EditableSyntax {
     return $this->_left_angle;
@@ -15223,30 +15223,30 @@ final class VectorTypeSpecifier extends EditableSyntax {
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
   }
-  public function with_array(EditableSyntax $array): VectorTypeSpecifier {
-    return new VectorTypeSpecifier(
-      $array,
+  public function with_keyword(EditableSyntax $keyword): VectorArrayTypeSpecifier {
+    return new VectorArrayTypeSpecifier(
+      $keyword,
       $this->_left_angle,
       $this->_type,
       $this->_right_angle);
   }
-  public function with_left_angle(EditableSyntax $left_angle): VectorTypeSpecifier {
-    return new VectorTypeSpecifier(
-      $this->_array,
+  public function with_left_angle(EditableSyntax $left_angle): VectorArrayTypeSpecifier {
+    return new VectorArrayTypeSpecifier(
+      $this->_keyword,
       $left_angle,
       $this->_type,
       $this->_right_angle);
   }
-  public function with_type(EditableSyntax $type): VectorTypeSpecifier {
-    return new VectorTypeSpecifier(
-      $this->_array,
+  public function with_type(EditableSyntax $type): VectorArrayTypeSpecifier {
+    return new VectorArrayTypeSpecifier(
+      $this->_keyword,
       $this->_left_angle,
       $type,
       $this->_right_angle);
   }
-  public function with_right_angle(EditableSyntax $right_angle): VectorTypeSpecifier {
-    return new VectorTypeSpecifier(
-      $this->_array,
+  public function with_right_angle(EditableSyntax $right_angle): VectorArrayTypeSpecifier {
+    return new VectorArrayTypeSpecifier(
+      $this->_keyword,
       $this->_left_angle,
       $this->_type,
       $right_angle);
@@ -15258,19 +15258,19 @@ final class VectorTypeSpecifier extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
-    $array = $this->array()->rewrite($rewriter, $new_parents);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $array === $this->array() &&
+      $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $type === $this->type() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new VectorTypeSpecifier(
-        $array,
+      return $rewriter(new VectorArrayTypeSpecifier(
+        $keyword,
         $left_angle,
         $type,
         $right_angle), $parents ?? []);
@@ -15278,26 +15278,26 @@ final class VectorTypeSpecifier extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
-    $array = EditableSyntax::from_json(
-      $json->vector_array, $position, $source);
-    $position += $array->width();
+    $keyword = EditableSyntax::from_json(
+      $json->vector_array_keyword, $position, $source);
+    $position += $keyword->width();
     $left_angle = EditableSyntax::from_json(
-      $json->vector_left_angle, $position, $source);
+      $json->vector_array_left_angle, $position, $source);
     $position += $left_angle->width();
     $type = EditableSyntax::from_json(
-      $json->vector_type, $position, $source);
+      $json->vector_array_type, $position, $source);
     $position += $type->width();
     $right_angle = EditableSyntax::from_json(
-      $json->vector_right_angle, $position, $source);
+      $json->vector_array_right_angle, $position, $source);
     $position += $right_angle->width();
-    return new VectorTypeSpecifier(
-        $array,
+    return new VectorArrayTypeSpecifier(
+        $keyword,
         $left_angle,
         $type,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_array;
+    yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
     yield $this->_right_angle;
@@ -15452,30 +15452,30 @@ final class TypeConstraint extends EditableSyntax {
     yield break;
   }
 }
-final class MapTypeSpecifier extends EditableSyntax {
-  private EditableSyntax $_array;
+final class MapArrayTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
   private EditableSyntax $_key;
   private EditableSyntax $_comma;
   private EditableSyntax $_value;
   private EditableSyntax $_right_angle;
   public function __construct(
-    EditableSyntax $array,
+    EditableSyntax $keyword,
     EditableSyntax $left_angle,
     EditableSyntax $key,
     EditableSyntax $comma,
     EditableSyntax $value,
     EditableSyntax $right_angle) {
-    parent::__construct('map_type_specifier');
-    $this->_array = $array;
+    parent::__construct('map_array_type_specifier');
+    $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
     $this->_key = $key;
     $this->_comma = $comma;
     $this->_value = $value;
     $this->_right_angle = $right_angle;
   }
-  public function array(): EditableSyntax {
-    return $this->_array;
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
   }
   public function left_angle(): EditableSyntax {
     return $this->_left_angle;
@@ -15492,54 +15492,54 @@ final class MapTypeSpecifier extends EditableSyntax {
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
   }
-  public function with_array(EditableSyntax $array): MapTypeSpecifier {
-    return new MapTypeSpecifier(
-      $array,
+  public function with_keyword(EditableSyntax $keyword): MapArrayTypeSpecifier {
+    return new MapArrayTypeSpecifier(
+      $keyword,
       $this->_left_angle,
       $this->_key,
       $this->_comma,
       $this->_value,
       $this->_right_angle);
   }
-  public function with_left_angle(EditableSyntax $left_angle): MapTypeSpecifier {
-    return new MapTypeSpecifier(
-      $this->_array,
+  public function with_left_angle(EditableSyntax $left_angle): MapArrayTypeSpecifier {
+    return new MapArrayTypeSpecifier(
+      $this->_keyword,
       $left_angle,
       $this->_key,
       $this->_comma,
       $this->_value,
       $this->_right_angle);
   }
-  public function with_key(EditableSyntax $key): MapTypeSpecifier {
-    return new MapTypeSpecifier(
-      $this->_array,
+  public function with_key(EditableSyntax $key): MapArrayTypeSpecifier {
+    return new MapArrayTypeSpecifier(
+      $this->_keyword,
       $this->_left_angle,
       $key,
       $this->_comma,
       $this->_value,
       $this->_right_angle);
   }
-  public function with_comma(EditableSyntax $comma): MapTypeSpecifier {
-    return new MapTypeSpecifier(
-      $this->_array,
+  public function with_comma(EditableSyntax $comma): MapArrayTypeSpecifier {
+    return new MapArrayTypeSpecifier(
+      $this->_keyword,
       $this->_left_angle,
       $this->_key,
       $comma,
       $this->_value,
       $this->_right_angle);
   }
-  public function with_value(EditableSyntax $value): MapTypeSpecifier {
-    return new MapTypeSpecifier(
-      $this->_array,
+  public function with_value(EditableSyntax $value): MapArrayTypeSpecifier {
+    return new MapArrayTypeSpecifier(
+      $this->_keyword,
       $this->_left_angle,
       $this->_key,
       $this->_comma,
       $value,
       $this->_right_angle);
   }
-  public function with_right_angle(EditableSyntax $right_angle): MapTypeSpecifier {
-    return new MapTypeSpecifier(
-      $this->_array,
+  public function with_right_angle(EditableSyntax $right_angle): MapArrayTypeSpecifier {
+    return new MapArrayTypeSpecifier(
+      $this->_keyword,
       $this->_left_angle,
       $this->_key,
       $this->_comma,
@@ -15553,14 +15553,14 @@ final class MapTypeSpecifier extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
-    $array = $this->array()->rewrite($rewriter, $new_parents);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $key = $this->key()->rewrite($rewriter, $new_parents);
     $comma = $this->comma()->rewrite($rewriter, $new_parents);
     $value = $this->value()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
-      $array === $this->array() &&
+      $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
       $key === $this->key() &&
       $comma === $this->comma() &&
@@ -15568,8 +15568,8 @@ final class MapTypeSpecifier extends EditableSyntax {
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
-      return $rewriter(new MapTypeSpecifier(
-        $array,
+      return $rewriter(new MapArrayTypeSpecifier(
+        $keyword,
         $left_angle,
         $key,
         $comma,
@@ -15579,26 +15579,26 @@ final class MapTypeSpecifier extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
-    $array = EditableSyntax::from_json(
-      $json->map_array, $position, $source);
-    $position += $array->width();
+    $keyword = EditableSyntax::from_json(
+      $json->map_array_keyword, $position, $source);
+    $position += $keyword->width();
     $left_angle = EditableSyntax::from_json(
-      $json->map_left_angle, $position, $source);
+      $json->map_array_left_angle, $position, $source);
     $position += $left_angle->width();
     $key = EditableSyntax::from_json(
-      $json->map_key, $position, $source);
+      $json->map_array_key, $position, $source);
     $position += $key->width();
     $comma = EditableSyntax::from_json(
-      $json->map_comma, $position, $source);
+      $json->map_array_comma, $position, $source);
     $position += $comma->width();
     $value = EditableSyntax::from_json(
-      $json->map_value, $position, $source);
+      $json->map_array_value, $position, $source);
     $position += $value->width();
     $right_angle = EditableSyntax::from_json(
-      $json->map_right_angle, $position, $source);
+      $json->map_array_right_angle, $position, $source);
     $position += $right_angle->width();
-    return new MapTypeSpecifier(
-        $array,
+    return new MapArrayTypeSpecifier(
+        $keyword,
         $left_angle,
         $key,
         $comma,
@@ -15606,7 +15606,7 @@ final class MapTypeSpecifier extends EditableSyntax {
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_array;
+    yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_key;
     yield $this->_comma;

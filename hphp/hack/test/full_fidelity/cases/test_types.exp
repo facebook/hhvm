@@ -16,12 +16,12 @@
             ((lparen))
             (list
               (list_item
-                (map_type_specifier
+                (map_array_type_specifier
                   ((array))
                   ((<))
                   (simple_type_specifier((int)))
                   ((,)(whitespace))
-                  (vector_type_specifier
+                  (vector_array_type_specifier
                     ((array))
                     ((<))
                     (tuple_type_specifier

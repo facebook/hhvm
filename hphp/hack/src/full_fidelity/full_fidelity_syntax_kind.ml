@@ -123,10 +123,10 @@ type t =
 | XHPExpression
 | XHPClose
 | TypeConstant
-| VectorTypeSpecifier
+| VectorArrayTypeSpecifier
 | TypeParameter
 | TypeConstraint
-| MapTypeSpecifier
+| MapArrayTypeSpecifier
 | ClosureTypeSpecifier
 | ClassnameTypeSpecifier
 | FieldSpecifier
@@ -252,10 +252,10 @@ let to_string kind =
   | XHPExpression -> "xhp_expression"
   | XHPClose -> "xhp_close"
   | TypeConstant -> "type_constant"
-  | VectorTypeSpecifier -> "vector_type_specifier"
+  | VectorArrayTypeSpecifier -> "vector_array_type_specifier"
   | TypeParameter -> "type_parameter"
   | TypeConstraint -> "type_constraint"
-  | MapTypeSpecifier -> "map_type_specifier"
+  | MapArrayTypeSpecifier -> "map_array_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | FieldSpecifier -> "field_specifier"

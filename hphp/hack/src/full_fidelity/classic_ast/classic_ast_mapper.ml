@@ -521,9 +521,9 @@ let rec pHint : hint parser = fun eta env ->
         couldMap ~f:(mpShapeField pHint))
     ; (K.TupleTypeSpecifier,     cHtuple <$> mpArgKOfN 1 3 @@
         couldMap ~f:pHint)
-    ; (K.VectorTypeSpecifier,    mpArgKOfN 2 4 @@ fun n env ->
+    ; (K.VectorArrayTypeSpecifier, mpArgKOfN 2 4 @@ fun n env ->
         Happly ((where_am_I env, "array"), couldMap ~f:pHint n env))
-    ; (K.MapTypeSpecifier,       fun [ kw; _la; key; _comma; value; _ra ] env ->
+    ; (K.MapArrayTypeSpecifier,  fun [ kw; _la; key; _comma; value; _ra ] env ->
         cHapply (pos_name kw env, List.map (fun x -> pHint x env) [key; value]))
     ; (K.ClassnameTypeSpecifier, fun [ name; _la; ty; _ra ] ->
         cHapply <.| (pos_name name <&> mpSingleton pHint ty))

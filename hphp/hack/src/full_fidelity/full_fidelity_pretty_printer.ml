@@ -1067,19 +1067,31 @@ let rec get_doc node =
     let name = get_doc generic_class_type in
     let argument = get_doc generic_argument_list in
     group_doc (indent_doc_no_space name argument indt)
-  | VectorTypeSpecifier x ->
-    let ar = get_doc x.vector_array in
-    let la = get_doc x.vector_left_angle in
-    let ty = get_doc x.vector_type in
-    let ra = get_doc x.vector_right_angle in
+  | VectorArrayTypeSpecifier {
+      vector_array_keyword;
+      vector_array_left_angle;
+      vector_array_type;
+      vector_array_right_angle
+    } ->
+    let ar = get_doc vector_array_keyword in
+    let la = get_doc vector_array_left_angle in
+    let ty = get_doc vector_array_type in
+    let ra = get_doc vector_array_right_angle in
     ar ^^^ la ^^^ ty ^^^ ra
-  | MapTypeSpecifier x ->
-    let ar = get_doc x.map_array in
-    let la = get_doc x.map_left_angle in
-    let kt = get_doc x.map_key in
-    let co = get_doc x.map_comma in
-    let vt = get_doc x.map_value in
-    let ra = get_doc x.map_right_angle in
+  | MapArrayTypeSpecifier {
+      map_array_keyword;
+      map_array_left_angle;
+      map_array_key;
+      map_array_comma;
+      map_array_value;
+      map_array_right_angle
+    } ->
+    let ar = get_doc map_array_keyword in
+    let la = get_doc map_array_left_angle in
+    let kt = get_doc map_array_key in
+    let co = get_doc map_array_comma in
+    let vt = get_doc map_array_value in
+    let ra = get_doc map_array_right_angle in
     ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
   | ClosureTypeSpecifier
   { closure_outer_left_paren;

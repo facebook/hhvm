@@ -275,7 +275,7 @@ and parse_array_type_specifier parser =
     if kind = GreaterThan then
       let (parser, right_angle) = next_token parser in
       let right_angle = make_token right_angle in
-      let result = make_vector_type_specifier array_token
+      let result = make_vector_array_type_specifier array_token
         left_angle key_type right_angle in
       (parser, result)
     else if kind = Comma then
@@ -283,13 +283,13 @@ and parse_array_type_specifier parser =
       let comma = make_token comma in
       let (parser, value_type) = parse_type_specifier parser in
       let (parser, right_angle) = expect_right_angle parser in
-      let result = make_map_type_specifier array_token left_angle key_type
+      let result = make_map_array_type_specifier array_token left_angle key_type
         comma value_type right_angle in
       (parser, result)
     else
       (* ERROR RECOVERY: Assume that the > is missing and keep going. *)
       let right_angle = make_missing() in
-      let result = make_vector_type_specifier array_token
+      let result = make_vector_array_type_specifier array_token
         left_angle key_type right_angle in
       (parser, result)
     end

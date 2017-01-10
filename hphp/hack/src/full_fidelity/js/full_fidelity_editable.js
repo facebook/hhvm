@@ -2482,7 +2482,7 @@ class EditableTrivia extends EditableSyntax
 
 class WhiteSpace extends EditableTrivia
 {
-  constructor(text) { super(whitespace, text); }
+  constructor(text) { super('whitespace', text); }
   with_text(text)
   {
     return new WhiteSpace(text);
@@ -2491,7 +2491,7 @@ class WhiteSpace extends EditableTrivia
 
 class EndOfLine extends EditableTrivia
 {
-  constructor(text) { super(end_of_line, text); }
+  constructor(text) { super('end_of_line', text); }
   with_text(text)
   {
     return new EndOfLine(text);
@@ -2500,7 +2500,7 @@ class EndOfLine extends EditableTrivia
 
 class DelimitedComment extends EditableTrivia
 {
-  constructor(text) { super(delimited_comment, text); }
+  constructor(text) { super('delimited_comment', text); }
   with_text(text)
   {
     return new DelimitedComment(text);
@@ -2509,7 +2509,7 @@ class DelimitedComment extends EditableTrivia
 
 class SingleLineComment extends EditableTrivia
 {
-  constructor(text) { super(single_line_comment, text); }
+  constructor(text) { super('single_line_comment', text); }
   with_text(text)
   {
     return new SingleLineComment(text);
@@ -2518,7 +2518,7 @@ class SingleLineComment extends EditableTrivia
 
 class Unsafe extends EditableTrivia
 {
-  constructor(text) { super(unsafe, text); }
+  constructor(text) { super('unsafe', text); }
   with_text(text)
   {
     return new Unsafe(text);
@@ -2527,7 +2527,7 @@ class Unsafe extends EditableTrivia
 
 class UnsafeExpression extends EditableTrivia
 {
-  constructor(text) { super(unsafe_expression, text); }
+  constructor(text) { super('unsafe_expression', text); }
   with_text(text)
   {
     return new UnsafeExpression(text);
@@ -2536,7 +2536,7 @@ class UnsafeExpression extends EditableTrivia
 
 class FixMe extends EditableTrivia
 {
-  constructor(text) { super(fix_me, text); }
+  constructor(text) { super('fix_me', text); }
   with_text(text)
   {
     return new FixMe(text);
@@ -2545,7 +2545,7 @@ class FixMe extends EditableTrivia
 
 class IgnoreError extends EditableTrivia
 {
-  constructor(text) { super(ignore_error, text); }
+  constructor(text) { super('ignore_error', text); }
   with_text(text)
   {
     return new IgnoreError(text);
@@ -2554,7 +2554,7 @@ class IgnoreError extends EditableTrivia
 
 class FallThrough extends EditableTrivia
 {
-  constructor(text) { super(fall_through, text); }
+  constructor(text) { super('fall_through', text); }
   with_text(text)
   {
     return new FallThrough(text);

@@ -55,7 +55,7 @@ struct ArrayUtil final {
    */
   static Variant Range(unsigned char low, unsigned char high, int64_t step = 1);
   static Variant Range(double low, double high, double step = 1.0);
-  static Variant Range(double low, double high, int64_t step = 1);
+  static Variant Range(int64_t low, int64_t high, int64_t step = 1);
 
   /////////////////////////////////////////////////////////////////////////////
   // Information and calculations.

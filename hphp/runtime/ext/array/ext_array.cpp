@@ -1628,7 +1628,7 @@ TypedValue HHVM_FUNCTION(range,
       if (type1 == KindOfInt64 || type2 == KindOfInt64) {
         if (type1 != KindOfInt64) n1 = slow.toInt64();
         if (type2 != KindOfInt64) n2 = shigh.toInt64();
-        return tvReturn(ArrayUtil::Range((double)n1, (double)n2, lstep));
+        return tvReturn(ArrayUtil::Range(n1, n2, lstep));
       }
 
       return tvReturn(ArrayUtil::Range((unsigned char)slow.charAt(0),
@@ -1641,7 +1641,7 @@ TypedValue HHVM_FUNCTION(range,
   }
 
   int64_t lstep = toInt64(dstep);
-  return tvReturn(ArrayUtil::Range(low.toDouble(), high.toDouble(), lstep));
+  return tvReturn(ArrayUtil::Range(toInt64(low), toInt64(high), lstep));
 }
 ///////////////////////////////////////////////////////////////////////////////
 // diff/intersect helpers

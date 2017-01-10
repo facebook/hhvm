@@ -188,14 +188,17 @@ void rangeCheckAlloc(double estNumSteps) {
 
 Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   Array ret;
+  double element;
+  int64_t i;
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
     rangeCheckAlloc((low - high) / step);
-    for (; low >= (high - DOUBLE_DRIFT_FIX); low -= step) {
-      ret.append(low);
+    for (i = 0, element = low; element >= (high - DOUBLE_DRIFT_FIX);
+         i++, element = low - (i * step)) {
+      ret.append(element);
     }
   } else if (high > low) { // Positive steps
     if (high - low < step || step <= 0) {
@@ -203,8 +206,9 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
       return false;
     }
     rangeCheckAlloc((high - low) / step);
-    for (; low <= (high + DOUBLE_DRIFT_FIX); low += step) {
-      ret.append(low);
+    for (i = 0, element = low; element <= (high + DOUBLE_DRIFT_FIX);
+         i++, element = low + (i * step)) {
+      ret.append(element);
     }
   } else {
     ret.append(low);
@@ -212,7 +216,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   return ret;
 }
 
-Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
+Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
   Array ret;
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {

@@ -43,6 +43,10 @@ int dprintf(int fd, ATTRIBUTE_PRINTF_STRING const char *format, ...)
 int pipe2(int pipefd[2], int flags);
 #endif
 
+#if defined(__FreeBSD__)
+typedef int clockid_t;
+#endif
+
 /*
  * Drop the cached pages associated with the file from the file system
  * cache, if supported on our build target.

@@ -2577,7 +2577,7 @@ PropLW <local variable id>    [B]  ->  [B]
       y->x is accessible
        y has eligible __get method
         y->x has been unset previously
-    -----+----------------------------------------------------------------------
+    ------+---------------------------------------------------------------------
     0XXXX | raise warning; null
     10X0X | raise warning; null
     10X1X | y->__get(x)
@@ -2608,7 +2608,7 @@ PropLD <local variable id>    [B]  ->  [B]
        y->x is accessible
         y has eligible __get method
          y->x has been unset previously
-    ------+---------------------------------------------------------------------
+    -------+--------------------------------------------------------------------
     00XXXX | null
     01XXXX | y = new stdclass; create property y->x; y->x
     1X0X0X | create property y->x; y->x
@@ -2629,22 +2629,21 @@ PropLU <local variabld id>    [B]  ->  [B]
 
        operation    x    y
        ----------+----+-----
-         PropCW  | $2 | $1
-         PropLW  | %1 | $1
+         PropCU  | $2 | $1
+         PropLU  | %1 | $1
 
   Next, produce a base pointing to:
 
     y is an object
      y->x is visible
       y->x is accessible
-       y has eligible __get method
-        y->x has been unset previously
+       y->x has been unset previously
     -----+----------------------------------------------------------------------
-    0XXXX | null
-    10XXX | create property y->x; y->x
-    110XX | throw fatal error
-    111X0 | y->x
-    111X1 | re-create property y->x; y->x
+    0XXX | null
+    10XX | create property y->x; y->x
+    110X | throw fatal error
+    1110 | y->x
+    1111 | re-create property y->x; y->x
 
 9.3 Final member operations
 ---------------------------
@@ -3608,7 +3607,7 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
   location specified by %2.
 
   If $1 is an object that is an instance of an extension class that implements
-  the Traversable interface, these instructions raise a fatal error.
+  the Traversable interface, these instructions throw a fatal error.
 
   If $1 is an object that implements the Iterator interface, these instructions
   throw a fatal error.
@@ -3826,7 +3825,7 @@ DefTypeAlias <litstr id>   []  ->  []
   aliases it was compiled with. This instruction looks up the type alias given
   by %1 in the table. If there is an existing class or type alias defined with
   the same name as %1, this function checks whether it is compatible with the
-  type alias given by %1, and if it isn't it raises a fatal error.
+  type alias given by %1, and if it isn't it throws a fatal error.
 
 
 13. Miscellaneous instructions
@@ -4058,7 +4057,7 @@ ContRaise   [C:Obj]  ->  [C]
   This instruction may only appear in non-static methods of the Generator
   class. It transfers control flow to the saved resume offset of a function
   associated with $this Generator object. The Exception stored at $1 is
-  raised instead of invoking code at the resume offset. Once the control is
+  thrown instead of invoking code at the resume offset. Once the control is
   transferred back, a value determined by suspending opcode (Await, Yield,
   YieldK or RetC) will be pushed on the stack. This value corresponds to
   the raise() return value -- null for non-async generators, and WaitHandle
@@ -4194,7 +4193,7 @@ ContUnsetDelegate <free iterator> [] -> []
 
 WHResult [C:Obj] -> [C]
 
-  If $1 is not a subclass of WaitHandle, raises a fatal error. If $1 succeeded,
+  If $1 is not a subclass of WaitHandle, throws a fatal error. If $1 succeeded,
   this instruction pushes the result value from the WaitHandle. If $1 failed,
   this instruction throws the exception stored in the WaitHandle. If $1 is not
   finished, throws an Exception.
@@ -4208,7 +4207,7 @@ Await    [C]  ->  [C]
   The $1 argument is allowed to be a legacy user space Awaitable, in which case
   a ->getWaitHandle() method is called first to obtain a WaitHandle object.
 
-  If $1 is not a subclass of WaitHandle, raises a fatal error. If $1 succeeded,
+  If $1 is not a subclass of WaitHandle, throws a fatal error. If $1 succeeded,
   this instruction pushes the result value from the WaitHandle. If $1 failed,
   this instruction throws the exception from the WaitHandle. Otherwise the
   execution needs to be suspended:
@@ -4317,7 +4316,7 @@ Certain syntactically correct source code may cause warnings or errors to be
 raised when the source file is parsed. Examples of this include using "$this"
 on the left hand side of the assignment, using "$this" with binding assignment,
 using "$a[]" in an r-value context, and doing "unset($a[])". HHBC handles these
-cases by generating Raise or Fatal instructions at the beginning of the body
+cases by generating Throw or Fatal instructions at the beginning of the body
 for the pseudo-main function.
 
 

@@ -102,71 +102,61 @@ data" in an arbitrary C++ struct (see extra-data.h).
 Each instruction has a signature which describes its effect, parameter types,
 and return type, for example:
 
-  r:Bool = IsType<T> s:Gen
+  IsType<T>, D(Bool), S(Cell), NF
 
-By convention we use infix; destinations on the left, = represents assignment,
-then the opcode name, and source parameters. Types are to the right of the
-entities they modify, separated by : for results, sources, and variables, or
-delimited by <> for instruction modifiers.
+The first column is the instruction name (and optional Type parameter in <>).
 
-Instruction flags further describe their behavior:
+The second column describes the result (destination) using one of the D*
+macros documented in hphp/runtime/vm/jit/ir-opcode.h, or ND for no destination.
 
-HasDest
-NaryDest
+The third column describes the sources, separated by whitespace, using macros
+documented in hphp/runtime/vm/jit/ir-opcode.h, or NA if there are no sources.
 
-  The instruction defines exactly one destination variable (HasDest) or a
-  varying number of destination variables (NaryDest). These flags are mutually
-  exclusive. An instruction with neither of these flags set has zero
-  destination variables.
+The fourth column contains the flags, described below. The short name of the
+flag (used in this file) is given first, with the long name that it expands to 
+in hphp/runtime/vm/jit/ir-opcode.cpp in parentheses after it.
 
-  Note that an instruction's destination variable may sometimes be a copy of
-  one of the input variables. (For example, AddElem returns the array it took
-  as an input.)
+NF
 
-CallsNative
+  The instruction has no flags.
 
-  Indicates that the instruction will call a native helper.
+Er (MayRaiseError)
 
-  The register allocator uses this to optimize register spills around native
-  calls and to bias register allocation toward arguments and return values.
+  The instruction may raise an error, and must have an edge to a catch block.
 
-ConsumesRC
-
-  The instruction consumes a reference to one or more of its sources, either by
-  decreasing its refcount or storing the reference to memory.
-
-ProducesRC
+PRc (ProducesRC)
 
   The instruction produces a value with an unconsumed reference that must be
   consumed, either by DecRefing it or storing it somewhere in memory.
 
-MayRaiseError
+CRc (ConsumesRC)
 
-  The instruction may raise an error, and must have an edge to a catch block.
+  The instruction consumes a reference to one or more of its sources, either by
+  decreasing its refcount or storing the reference to memory.
 
-Terminal
+T (Terminal)
 
   The instruction has no next instruction; it either jumps, returns, or throws.
 
-Branch
+B (Branch)
 
   The instruction has a (sometimes optional) taken edge. Instructions that are
   conditional branches (i.e. a Branch that is not Terminal) will also have a
   next edge.
 
-Passthrough
+P (Passthrough)
 
   The value of the instruction's dest is the same as one of its inputs; it
   differs only in the refcount of the underlying object, the type of the
   variable, or some other property that doesn't affect the value of the
   variable itself.
 
-MInstrProp
+MProp (MInstrProp)
 
   The instruction may affect the type and/or value of its base operand,
   operating on object properties.
 
-MInstrElem
+MElem (MInstrElem)
 
   The instruction may affect the type and/or value of its base operand,
   operating on array elements.
@@ -1641,7 +1631,7 @@ To string conversions:
 
 | StMem, ND, S(PtrToGen) S(Gen), CRc
 
-  Store S2 into the location pointed to by S0.
+  Store S1 into the location pointed to by S0.
 
 | StElem, ND, S(PtrToCell) S(Int) S(Cell), CRc
 

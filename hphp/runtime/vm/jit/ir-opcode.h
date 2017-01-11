@@ -112,7 +112,6 @@ struct SSATmp;
  *      T     isTerminal
  *      B     isBranch
  *      P     passthrough
- *      K     killsSource
  *      MProp MInstrProp
  *      MElem MInstrElem
  */

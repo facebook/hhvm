@@ -93,7 +93,7 @@ static inline uint64_t perfGetTimestamp(void) {
   /* cpuCycles returns arch TS, rdtsc value */
   if (use_arch_timestamp)  return cpuCycles();
 
-  if (clock_gettime(perf_clk_id, &ts))  return 0;
+  if (clock_gettime((clockid_t)perf_clk_id, &ts))  return 0;
 
   return timespec_to_ns(&ts);
 }

@@ -200,7 +200,7 @@ static int
 getclocktime(struct timespec * ts)
 {
 
-  if (clock_gettime(clocktouse, ts))
+  if (clock_gettime((clockid_t)clocktouse, ts))
     return -1;
 
   return 0;

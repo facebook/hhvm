@@ -40,8 +40,11 @@ std::shared_ptr<T> getSingleton() {
 char *strndup(const char* str, size_t len);
 int dprintf(int fd, ATTRIBUTE_PRINTF_STRING const char *format, ...)
   ATTRIBUTE_PRINTF(2,3);
-typedef int clockid_t;
 int pipe2(int pipefd[2], int flags);
+#endif
+
+#if defined(__FreeBSD__)
+typedef int clockid_t;
 #endif
 
 /*

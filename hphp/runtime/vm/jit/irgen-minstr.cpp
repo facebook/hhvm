@@ -507,7 +507,7 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
   auto doLdElem = [&] {
     auto const type = packedArrayElemType(
       base, key, curClass(env)).ptr(Ptr::Elem);
-    auto addr = gen(env, LdPackedArrayElemAddr, type, base, key);
+    auto addr = gen(env, LdPackedArrayDataElemAddr, type, base, key);
     auto res = gen(env, LdMem, type.deref(), addr);
     auto pres = profiledType(env, res, [&] { finish(finishMe(res)); });
     return finishMe(pres);
@@ -539,7 +539,7 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayBounds, taken, base, key);
+      gen(env, CheckPackedArrayDataBounds, taken, base, key);
     },
     [&] { // Next:
       return doLdElem();
@@ -743,7 +743,7 @@ SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
     case PackedBounds::In: {
       if (!type.maybe(TNull)) return cns(env, true);
 
-      auto const elemAddr = gen(env, LdPackedArrayElemAddr,
+      auto const elemAddr = gen(env, LdPackedArrayDataElemAddr,
                                 type.ptr(Ptr::Elem), base, key);
       return gen(env, IsNTypeMem, TNull, elemAddr);
     }
@@ -757,10 +757,10 @@ SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayBounds, taken, base, key);
+      gen(env, CheckPackedArrayDataBounds, taken, base, key);
     },
     [&] { // Next:
-      auto const elemAddr = gen(env, LdPackedArrayElemAddr,
+      auto const elemAddr = gen(env, LdPackedArrayDataElemAddr,
                                 type.ptr(Ptr::Elem), base, key);
       return gen(env, IsNTypeMem, TNull, elemAddr);
     },
@@ -1309,7 +1309,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       auto const elemType = vecElemType(base, key).ptr(Ptr::Elem);
       auto const length = gen(env, CountVec, base);
       checkBounds(env, base, key, length);
-      return gen(env, LdVecElemAddr, elemType, base, key);
+      return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
     }
     return invalid_key();
   }
@@ -1324,7 +1324,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         auto const cmp = gen(env, CheckRange, key, length);
         gen(env, JmpZero, taken, cmp);
       },
-      [&] { return gen(env, LdVecElemAddr, elemType, base, key); },
+      [&] { return gen(env, LdPackedArrayDataElemAddr, elemType, base, key); },
       [&] { return ptrToInitNull(env); }
     );
   }

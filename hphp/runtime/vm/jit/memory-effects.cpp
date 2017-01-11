@@ -152,7 +152,7 @@ AliasClass pointee(
     };
 
     if (typeNR <= TPtrToElemGen) {
-      if (sinst->is(LdPackedArrayElemAddr, LdVecElemAddr)) return elem();
+      if (sinst->is(LdPackedArrayDataElemAddr)) return elem();
       return AElemAny;
     }
 
@@ -1259,8 +1259,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case JmpZero:
   case LdPropAddr:
   case LdStkAddr:
-  case LdPackedArrayElemAddr:
-  case LdVecElemAddr:
+  case LdPackedArrayDataElemAddr:
   case LteBool:
   case LteDbl:
   case LteInt:
@@ -1504,7 +1503,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountCollection:
   case LdVectorSize:
   case VectorHasImmCopy:
-  case CheckPackedArrayBounds:
+  case CheckPackedArrayDataBounds:
   case LdColArray:
   case EnterFrame:
     return may_load_store(AEmpty, AEmpty);

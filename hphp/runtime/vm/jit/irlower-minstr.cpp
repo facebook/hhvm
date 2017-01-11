@@ -738,14 +738,7 @@ void implVecSet(IRLS& env, const IRInstruction* inst) {
 
 }
 
-void cgLdPackedArrayElemAddr(IRLS& env, const IRInstruction* inst) {
-  auto const arrLoc = srcLoc(env, inst, 0);
-  auto const idxLoc = srcLoc(env, inst, 1);
-  auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
-  vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
-}
-
-void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
+void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
   auto const idxLoc = srcLoc(env, inst, 1);
   auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));

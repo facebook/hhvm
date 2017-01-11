@@ -292,7 +292,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckInitMem,
                    CheckInitProps,
                    CheckInitSProps,
-                   CheckPackedArrayBounds,
+                   CheckPackedArrayDataBounds,
                    CheckMixedArrayOffset,
                    CheckDictOffset,
                    CheckKeysetOffset,
@@ -2696,7 +2696,8 @@ SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCheckPackedArrayDataBounds(State& env,
+                                           const IRInstruction* inst) {
   auto const array = inst->src(0);
   auto const idx   = inst->src(1);
   if (!idx->hasConstVal()) return mergeBranchDests(env, inst);
@@ -3362,7 +3363,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckType)
   X(CheckTypeMem)
   X(AssertType)
-  X(CheckPackedArrayBounds)
+  X(CheckPackedArrayDataBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
   X(CoerceCellToInt)

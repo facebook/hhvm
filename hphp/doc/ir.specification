@@ -2537,7 +2537,7 @@ fields of that struct for holding intermediate values.
 
   Profile the offset of the element keyed by S1 in S0.
 
-| CheckMixedArrayOffset<pos>, ND, AK(Mixed) S(Int,Str), B
+| CheckMixedArrayOffset<pos>, ND, S(AK(Mixed)) S(Int,Str), B
 
   Check that `pos' is within the usage bounds of S0 (including tombstones), and
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
@@ -2583,7 +2583,7 @@ fields of that struct for holding intermediate values.
   ElemArray{D,U} both take a PtrToGen for the base operand, but expect it to be
   a PtrToArr or PtrToBoxedArr.  T is the type of the base array.
 
-| ElemMixedArrayK<pos>, D(PtrToElemGen), AK(Mixed) S(Int,Str), NF
+| ElemMixedArrayK<pos>, D(PtrToElemGen), S(AK(Mixed)) S(Int,Str), NF
 
   Like ElemArray, but the element for S1 is at a known position `pos' in S0.
 
@@ -2647,7 +2647,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| MixedArrayGetK<pos>, DArrElem, AK(Mixed) S(Int,Str), NF
+| MixedArrayGetK<pos>, DArrElem, S(AK(Mixed)) S(Int,Str), NF
 
   Like ArrayGet, but the element for S1 is at a known position `pos' in S0.
 
@@ -2867,26 +2867,22 @@ fields of that struct for holding intermediate values.
 
   Profile the Func in the ActRec that was just pushed onto the stack.
 
-| CheckPackedArrayBounds, ND, AK(Packed) S(Int), B
+| CheckPackedArrayDataBounds, ND, S(AK(Packed),Vec) S(Int), B
 
-  Checks that the index in S1 is within the bounds of the packed array in S0.
-  Branches to B if the index is out of bounds.
+  Checks that the index in S1 is within the bounds of the packed array or
+  vector array in S0. Branches to B if the index is out of bounds.
 
-| LdPackedArrayElemAddr<T>, DParamPtr(Elem), AK(Packed) S(Int), NF
+| LdPackedArrayDataElemAddr<T>, DParamPtr(Elem), S(AK(Packed),Vec) S(Int), NF
 
-  Load the address of the element at index S1 of the packed array in S0.
+  Loads the address of the element at index S1 of the packed array or vec array
+  in S0. This instruction assumes the array actually contains an element at
+  that offset (IE, the array has the proper length).
 
 | LdVecElem, DVecElem, S(Vec) S(Int), NF
 
   Loads the element of the vec array in S0 at offset S1. This instruction
   assumes that the vec actually contains an element at that offset (IE, the vec
   has the proper length).
-
-| LdVecElemAddr<T>, DParamPtr(Elem), S(Vec) S(Int), NF
-
-  Loads the address of the element at index S1 of the vec array in S0. This
-  instruction assumes the vec actually contains an element at that offset (IE,
-  the vec has the proper length).
 
 | LdVectorSize, D(Int), S(Obj), NF
 

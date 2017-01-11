@@ -31,6 +31,9 @@ let make_eol width =
 let make_single_line_comment width =
   { kind = SingleLineComment; width }
 
+let make_fallthrough width =
+  { kind = FallThrough; width }
+
 let make_delimited_comment width =
   { kind = DelimitedComment; width }
 

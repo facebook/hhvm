@@ -930,6 +930,23 @@ let scan_whitespace lexer =
   let lexer = skip_whitespace lexer in
   (lexer, Trivia.make_whitespace (width lexer))
 
+let scan_single_line_comment lexer =
+  (* A fallthrough comment is two slashes, any amount of whitespace,
+    FALLTHROUGH, and the end of the line.
+    TODO: Consider allowing trailing space.
+    TODO: Consider allowing lowercase fallthrough.
+  *)
+  let lexer = advance lexer 2 in
+  let lexer_ws = skip_whitespace lexer in
+  let lexer = skip_to_end_of_line lexer_ws in
+  let w = width lexer in
+  let c = if lexer.offset - lexer_ws.offset = 11 &&
+    peek_string lexer_ws 11 = "FALLTHROUGH" then
+      Trivia.make_fallthrough w
+    else
+      Trivia.make_single_line_comment w in
+  (lexer, c)
+
 let scan_delimited_comment lexer =
   let rec aux lexer =
     let ch0 = peek_char lexer 0 in
@@ -950,8 +967,7 @@ let scan_php_trivia lexer =
   match (ch0, ch1) with
   | ('#', _)
   | ('/', '/') ->
-    let lexer = skip_to_end_of_line lexer in
-    let c = Trivia.make_single_line_comment (width lexer) in
+    let (lexer, c) = scan_single_line_comment lexer in
     (lexer, Some c)
   | ('/', '*') ->
     let (lexer, c) = scan_delimited_comment lexer in

@@ -34,6 +34,9 @@ let make_single_line_comment width =
 let make_fallthrough width =
   { kind = FallThrough; width }
 
+let make_unsafe width =
+  { kind = Unsafe; width }
+
 let make_delimited_comment width =
   { kind = DelimitedComment; width }
 

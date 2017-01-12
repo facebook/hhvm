@@ -888,6 +888,16 @@ let rec get_doc node =
     let args = get_doc isset_argument_list in
     let rparen = get_doc isset_right_paren in
     keyword ^^^ lparen ^^^ args ^^^ rparen
+  | DefineExpression {
+    define_keyword;
+    define_left_paren;
+    define_argument_list;
+    define_right_paren } ->
+    let keyword = get_doc define_keyword in
+    let lparen = get_doc define_left_paren in
+    let args = get_doc define_argument_list in
+    let rparen = get_doc define_right_paren in
+    keyword ^^^ lparen ^^^ args ^^^ rparen
   | ParenthesizedExpression {
     parenthesized_expression_left_paren;
     parenthesized_expression_expression;

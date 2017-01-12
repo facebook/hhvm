@@ -549,6 +549,12 @@ module WithToken(Token: TokenType) = struct
       empty_argument: t;
       empty_right_paren: t;
     }
+    and define_expression = {
+      define_keyword: t;
+      define_left_paren: t;
+      define_argument_list: t;
+      define_right_paren: t;
+    }
     and isset_expression = {
       isset_keyword: t;
       isset_left_paren: t;
@@ -894,6 +900,7 @@ module WithToken(Token: TokenType) = struct
     | ConditionalExpression of conditional_expression
     | EvalExpression of eval_expression
     | EmptyExpression of empty_expression
+    | DefineExpression of define_expression
     | IssetExpression of isset_expression
     | FunctionCallExpression of function_call_expression
     | ParenthesizedExpression of parenthesized_expression
@@ -1120,6 +1127,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.EvalExpression
       | EmptyExpression _ ->
         SyntaxKind.EmptyExpression
+      | DefineExpression _ ->
+        SyntaxKind.DefineExpression
       | IssetExpression _ ->
         SyntaxKind.IssetExpression
       | FunctionCallExpression _ ->
@@ -1383,6 +1392,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.EvalExpression
     let is_empty_expression node =
       kind node = SyntaxKind.EmptyExpression
+    let is_define_expression node =
+      kind node = SyntaxKind.DefineExpression
     let is_isset_expression node =
       kind node = SyntaxKind.IssetExpression
     let is_function_call_expression node =
@@ -2425,6 +2436,18 @@ module WithToken(Token: TokenType) = struct
       empty_left_paren,
       empty_argument,
       empty_right_paren
+    )
+
+    let get_define_expression_children {
+      define_keyword;
+      define_left_paren;
+      define_argument_list;
+      define_right_paren;
+    } = (
+      define_keyword,
+      define_left_paren,
+      define_argument_list,
+      define_right_paren
     )
 
     let get_isset_expression_children {
@@ -3790,6 +3813,17 @@ module WithToken(Token: TokenType) = struct
         empty_argument;
         empty_right_paren;
       ]
+      | DefineExpression {
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
+      } -> [
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
+      ]
       | IssetExpression {
         isset_keyword;
         isset_left_paren;
@@ -5104,6 +5138,17 @@ module WithToken(Token: TokenType) = struct
         "empty_left_paren";
         "empty_argument";
         "empty_right_paren";
+      ]
+      | DefineExpression {
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
+      } -> [
+        "define_keyword";
+        "define_left_paren";
+        "define_argument_list";
+        "define_right_paren";
       ]
       | IssetExpression {
         isset_keyword;
@@ -6551,6 +6596,18 @@ module WithToken(Token: TokenType) = struct
           empty_left_paren;
           empty_argument;
           empty_right_paren;
+        }
+      | (SyntaxKind.DefineExpression, [
+          define_keyword;
+          define_left_paren;
+          define_argument_list;
+          define_right_paren;
+        ]) ->
+        DefineExpression {
+          define_keyword;
+          define_left_paren;
+          define_argument_list;
+          define_right_paren;
         }
       | (SyntaxKind.IssetExpression, [
           isset_keyword;
@@ -8106,6 +8163,19 @@ module WithToken(Token: TokenType) = struct
         empty_left_paren;
         empty_argument;
         empty_right_paren;
+      ]
+
+    let make_define_expression
+      define_keyword
+      define_left_paren
+      define_argument_list
+      define_right_paren
+    =
+      from_children SyntaxKind.DefineExpression [
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
       ]
 
     let make_isset_expression

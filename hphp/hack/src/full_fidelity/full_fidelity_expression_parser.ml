@@ -746,6 +746,7 @@ module WithStatementAndDeclAndTypeParser
     | Continue
     | Dict
     | Default
+    | Define
     | Destruct
     | Do
     | Double

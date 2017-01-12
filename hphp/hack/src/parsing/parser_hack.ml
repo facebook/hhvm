@@ -3352,7 +3352,7 @@ and is_cast env =
       (* We cannot be making a cast if the next token is a binary / ternary
        * operator, or if it's the end of a statement (i.e. a semicolon.) *)
       | Tqm | Tsc | Tstar | Tslash | Txor | Tpercent | Tlt | Tgt | Tltlt | Tgtgt
-      | Tlb | Trb | Tdot | Tlambda -> false
+      | Tlb | Trb | Tdot | Tlambda | Trp -> false
       | _ -> true
     end
   end

@@ -39,9 +39,6 @@ let with_error lexer message =
 let start_new_lexeme lexer =
   { lexer with start = lexer.offset }
 
-(* let restart_lexeme lexer =
-  { lexer with offset = lexer.start } *)
-
 let peek_char lexer index =
   let i = lexer.offset + index in
   if i >= SourceText.length lexer.text || i < 0 then invalid
@@ -52,6 +49,9 @@ let peek_string lexer size =
   if r < 0 then ""
   else if r < size then SourceText.sub lexer.text lexer.offset r
   else SourceText.sub lexer.text lexer.offset size
+
+let match_string lexer s =
+  s = peek_string lexer (String.length s)
 
 let advance lexer index =
   { lexer with offset = lexer.offset + index }
@@ -952,17 +952,44 @@ let scan_single_line_comment lexer =
       Trivia.make_single_line_comment w in
   (lexer, c)
 
+let rec skip_to_end_of_delimited_comment lexer =
+  let ch0 = peek_char lexer 0 in
+  let ch1 = peek_char lexer 1 in
+  if ch0 = invalid && at_end lexer then
+    with_error lexer SyntaxError.error0007
+  else if ch0 = '*' && ch1 = '/' then
+    advance lexer 2
+  else skip_to_end_of_delimited_comment (advance lexer 1)
+
 let scan_delimited_comment lexer =
-  let rec aux lexer =
-    let ch0 = peek_char lexer 0 in
-    let ch1 = peek_char lexer 1 in
-    if ch0 = invalid && at_end lexer then
-      with_error lexer SyntaxError.error0007
-    else if ch0 = '*' && ch1 = '/' then
-      advance lexer 2
-    else aux (advance lexer 1) in
-  let lexer = aux (advance lexer 2) in
-  let c = Trivia.make_delimited_comment (width lexer) in
+  (* An unsafe expression comment is a delimited comment that begins with any
+    whitespace, followed by UNSAFE_EXPR, followed by any text.
+
+    The original lexer lexes a fixme / ignore error as:
+
+    slash star [whitespace]* HH_FIXME [whitespace or newline]* leftbracket
+    [whitespace or newline]* integer [any text]* star slash
+
+    Notice that the original lexer oddly enough does not verify that there
+    is a right bracket.
+
+    For our purposes we will just check for HH_FIXME / HH_IGNORE_ERROR;
+    a later pass can try to parse out the integer if there is one,
+    give a warning if there is not, and so on. *)
+
+  let lexer = advance lexer 2 in
+  let lexer_ws = skip_whitespace lexer in
+  let lexer = skip_to_end_of_delimited_comment lexer_ws in
+  let w = width lexer in
+  let c =
+    if match_string lexer_ws "UNSAFE_EXPR" then
+      Trivia.make_unsafe_expression w
+    else if match_string lexer_ws "HH_FIXME" then
+      Trivia.make_fix_me w
+    else if match_string lexer_ws "HH_IGNORE_ERROR" then
+      Trivia.make_ignore_error w
+    else
+      Trivia.make_delimited_comment w in
   (lexer, c)
 
 let scan_php_trivia lexer =

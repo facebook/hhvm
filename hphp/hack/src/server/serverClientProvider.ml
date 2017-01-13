@@ -97,10 +97,12 @@ let send_push_message_to_client client response =
       raise Client_went_away
 
 let read_client_msg ic =
-  Timeout.with_timeout
+  try
+    Timeout.with_timeout
     ~timeout:1
     ~on_timeout: (fun _ -> raise Read_command_timeout)
     ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
+  with End_of_file -> raise Client_went_away
 
 let read_client_msg = function
   | Non_persistent_client (ic, _) -> read_client_msg ic

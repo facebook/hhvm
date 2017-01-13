@@ -108,5 +108,9 @@ void throw_exn(XDebugError error) {
   throw XDebugExn(error);
 }
 
+void throw_exn(XDebugError error, const std::string& errorMsg) {
+  throw XDebugExn(error, errorMsg);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 }

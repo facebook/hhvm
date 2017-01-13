@@ -801,7 +801,7 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     Logger::SetThreadHook(nullptr, nullptr);
   }
   output = sb.detach();
-  return ret;
+  return {ret.failed, ret.result};
 }
 
 std::string DebuggerProxy::requestAuthToken() {

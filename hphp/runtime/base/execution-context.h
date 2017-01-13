@@ -365,13 +365,17 @@ public:
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);
 
+  struct EvaluationResult {
+    bool failed;
+    Variant result;
+    std::string error;
+  };
+
   // Compiles the passed string and evaluates it in the given frame.
-  // Returns true on failure.
-  std::pair<bool,Variant> evalPHPDebugger(StringData* code, int frame);
+  EvaluationResult evalPHPDebugger(StringData* code, int frame);
 
   // Evaluates the a unit compiled via compile_string in the given frame.
-  // Returns true on failure.
-  std::pair<bool,Variant> evalPHPDebugger(Unit* unit, int frame);
+  EvaluationResult evalPHPDebugger(Unit* unit, int frame);
 
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();

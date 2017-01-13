@@ -5,26 +5,26 @@ string(5) "09:37"
 
 -- Testing date_sunrise() function by passing two parameters --
 string(5) "09:37"
-float(9.622663104669)
+float(9.6227)
 int(1356496641)
 
 -- Testing date_sunrise() function by passing two parameters --
 string(5) "09:54"
-float(9.9142368079326)
+float(9.9142)
 int(1356497691)
 
 -- Testing date_sunrise() function by passing three  parameters --
 string(5) "12:51"
-float(12.863799485848)
+float(12.8638)
 int(1356508309)
 
 -- Testing date_sunrise() function by passing four parameters --
 string(5) "12:55"
-float(12.921003983007)
+float(12.921)
 int(1356508515)
 
 -- Testing date_sunrise() function by passing five parameters --
 string(5) "08:55"
-float(8.9210039830067)
+float(8.921)
 int(1356508515)
 ===DONE===

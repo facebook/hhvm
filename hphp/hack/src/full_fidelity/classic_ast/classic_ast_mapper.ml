@@ -759,6 +759,7 @@ and pExpr_XHPExpression' : expr_ parser' = fun [ op; body; _cl ] env ->
   let name, attrs = single K.XHPOpen pXHPOpen op env in
   let is_token x = P.kind x = K.Token in
   let flatten_tokens = function
+  | [t] -> t
   | (t::_) as ts ->
     let token =
       match P.syntax t with
@@ -772,9 +773,7 @@ and pExpr_XHPExpression' : expr_ parser' = fun [ op; body; _cl ] env ->
     let kind = PT.kind token in
     let source_text = PT.source_text token in
     let offset = PT.leading_start_offset token in
-    let width =
-      PT.leading_start_offset l + PT.width l - offset - PT.leading_width token
-    in
+    let width = PT.start_offset l - PT.start_offset token + PT.width l in
     let leading = PT.leading token in
     let trailing = PT.trailing l in
     syntax_of_token @@ PT.make kind source_text offset width leading trailing
@@ -1358,23 +1357,24 @@ and pDef : def parser = fun node -> mkP
    *)
   ; (K.ExpressionStatement,          fun _ env -> Stmt (pStmt node env))
   ] node
-and pProgram : program parser = fun eta -> eta |>
-  couldMap ~f:(oneOf [cStmt <$> pStmt; pDef])
+and pProgram : program parser = fun node env ->
+  List.filter (fun x -> x <> Stmt Noop) @@
+    couldMap ~f:(oneOf [cStmt <$> pStmt; pDef]) node env
 
 
 
-let pScript : program parser =
-  Printexc.record_backtrace true;
-  single K.Script @@ fun [ _hdr; prog ] -> pProgram prog
 
 let from_tree : Relative_path.t -> P.SyntaxTree.t -> Ast.program =
   fun file minimal_tree ->
     let module ST = Full_fidelity_syntax_tree in
-    let env =
+    Printexc.record_backtrace true;
+    let script = P.from_tree minimal_tree in
+    runP (single K.Script @@ fun [ _hdr; prog ] -> pProgram prog) script
       { language = ST.language minimal_tree
       ; ancestry = []
       ; filePath = Relative_path.suffix file
       ; mode     = match ST.mode minimal_tree with
+                     | _ when ST.is_php minimal_tree -> FileInfo.Mdecl
                      | "strict"  -> FileInfo.Mstrict
                      | "decl"    -> FileInfo.Mdecl
                      | "partial" -> FileInfo.Mpartial
@@ -1382,5 +1382,4 @@ let from_tree : Relative_path.t -> P.SyntaxTree.t -> Ast.program =
                      | s ->
                          Printf.eprintf "Unknown hh mode '%s'\n" s;
                          raise (Failure s)
-      } in
-    runP pScript (P.from_tree minimal_tree) env
+      }

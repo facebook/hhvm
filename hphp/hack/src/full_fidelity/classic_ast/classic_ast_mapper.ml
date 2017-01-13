@@ -13,8 +13,9 @@ module P = Full_fidelity_positioned_syntax
 module TK = Full_fidelity_token_kind
 module PT = Full_fidelity_positioned_token
 
-let showThing thing =
+let string_of_expr thing =
    Sexp.to_string_hum @@ Sof.sexp_of_expr thing
+let string_of_stmt x = Sexp.to_string_hum (Sof.sexp_of_stmt x)
 
 (* For debugging *)
 let treeDBG =
@@ -278,6 +279,13 @@ let rec hint_to_fun_kind : hint -> fun_kind = fun (pos, hint) -> match hint with
   | _ -> FSync
 
 
+let stmt_list_of_stmt = function
+  | Block [] -> [Noop]
+  | Block block -> begin match List.filter (fun x -> x <> Noop) block with
+    | [] -> [Noop]
+    | stmts -> stmts
+    end
+  | stmt -> [stmt]
 let mpStripNoop pThing node env = match pThing node env with
   | [Noop] -> []
   | stmtl -> stmtl
@@ -914,10 +922,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
   ]
 
 
-and pBlock : block parser = fun node -> pStmt node |.> function
-  | Block [] -> [Noop]
-  | Block block -> block
-  | stmt -> [stmt]
+and pBlock : block parser = fun node env -> stmt_list_of_stmt (pStmt node env)
 and pSwitch : case list parser = fun node env ->
   let pTaggedStmt : [< `Stmt of stmt | `Func of block -> case ] parser =
     (fun x -> `Stmt x) <$> pStmt in
@@ -1208,12 +1213,7 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
   fun [attrs; mods; hdr; body; _semi] env ->
     let async, name, tparaml, paraml, ret, clsvl = pFunHdr hdr env in
     let member_init, member_def = List.split (List.map classvar_init clsvl) in
-    let body = member_init @ match pCompoundStatement body env with
-      (* Filthy, filthy hack to match inconsistend parser_hack behaviour *)
-      | Block [] -> [Noop]
-      | Block stmtl -> stmtl (* Unwrap statement blocks *)
-      | stmt -> [stmt]
-    in
+    let body = member_init @ stmt_list_of_stmt (pCompoundStatement body env) in
     List.map (fun (k,h,v) -> ClassVars (k,h,v)) member_def @ [Method
     { m_kind            = couldMap ~f:(mkTP tKind) mods env
     ; m_tparams         = tparaml

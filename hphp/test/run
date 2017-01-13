@@ -4,6 +4,8 @@
 * Run the test suites in various configurations.
 */
 
+const NO_PCNTL = !function_exists("fork");
+
 function is_testing_dso_extension() {
   // detecting if we're running outside of the hhvm codebase.
   return !is_file(__DIR__ . "/../../hphp/test/run");
@@ -342,8 +344,8 @@ function read_opts_file($file) {
 
 // http://stackoverflow.com/questions/2637945/
 function rel_path($to) {
-  $from     = explode('/', getcwd().'/');
-  $to       = explode('/', $to);
+  $from     = explode(DIRECTORY_SEPARATOR, getcwd().DIRECTORY_SEPARATOR);
+  $to       = explode(DIRECTORY_SEPARATOR, $to);
   $relPath  = $to;
 
   foreach ($from as $depth => $dir) {
@@ -360,11 +362,11 @@ function rel_path($to) {
         $relPath = array_pad($relPath, $padLength, '..');
         break;
       } else {
-        $relPath[0] = './' . $relPath[0];
+        $relPath[0] = '.' . DIRECTORY_SEPARATOR . $relPath[0];
       }
     }
   }
-  return implode('/', $relPath);
+  return implode(DIRECTORY_SEPARATOR, $relPath);
 }
 
 function get_options($argv) {
@@ -523,12 +525,14 @@ function find_tests($files, array $options = null) {
     $ft = array_merge($ft, find_test_files($file));
   }
   $files = $ft;
-  foreach ($files as &$file) {
-    if (!@stat($file)) {
-      error("Not valid file or directory: '$file'");
+  if (substr(PHP_OS, 0, 3) != "WIN") {
+    foreach ($files as &$file) {
+      if (!@stat($file)) {
+        error("Not valid file or directory: '$file'");
+      }
+      $file = preg_replace(',//+,', '/', realpath($file));
+      $file = preg_replace(',^'.getcwd().'/,', '', $file);
     }
-    $file = preg_replace(',//+,', '/', realpath($file));
-    $file = preg_replace(',^'.getcwd().'/,', '', $file);
   }
   $files = array_map('escapeshellarg', $files);
   $files = implode(' ', $files);
@@ -1028,15 +1032,20 @@ class Status {
   }
 
   public static function fail($test, $time, $stime, $etime) {
-    array_push(self::$results, array(
+    $dat = array(
       'name' => $test,
       'status' => 'failed',
       'details' => self::utf8Sanitize(@file_get_contents("$test.diff")),
       'start_time' => $stime,
       'end_time' => $etime,
       'time' => $time
-    ));
-    self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
+    );
+    array_push(self::$results, $dat);
+    if (NO_PCNTL) {
+      self::send(self::MSG_TEST_FAIL, $dat);
+    } else {
+      self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
+    }
   }
 
   public static function serverRestarted() {
@@ -1045,6 +1054,30 @@ class Status {
 
   private static function send($type, $msg) {
     if (self::$killed) {
+      return;
+    }
+    if (NO_PCNTL) {
+      switch ($type) {
+        case self::MSG_STARTED:
+          echo "Started\n";
+          break;
+        case self::MSG_FINISHED:
+          echo "Finished\n";
+          break;
+        case self::MSG_TEST_PASS:
+          echo "Passed\n";
+          break;
+        case self::MSG_TEST_FAIL:
+          echo "Failed\n";
+          break;
+        case self::MSG_TEST_SKIP:
+          echo "Skipped\n";
+          break;
+        case self::MSG_SERVER_RESTARTED:
+          echo "Restarted\n";
+          break;
+      }
+      var_dump($msg);
       return;
     }
     msg_send(self::getQueue(), $type, $msg);
@@ -1517,7 +1550,8 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
       "$cmd 2>/dev/null", $descriptorspec, $pipes, null, $cmd_env
     );
   } else {
-    $process = proc_open("$cmd 2>&1", $descriptorspec, $pipes, null, $cmd_env);
+    $process = proc_open("$cmd 2>&1", $descriptorspec, $pipes, null, $cmd_env,
+      array('suppress_errors' => true, 'binary_pipes' => true));
   }
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $cmd");
@@ -1710,7 +1744,7 @@ function run_typechecker_test($options, $test) {
   list($hh_server, $hh_server_env, $temp_dir) = hh_server_cmd($options, $test);
   if (is_executable('/usr/bin/timeout')) {
     $hh_server = '/usr/bin/timeout 300 ' . $hh_server;
-  } else {
+  } else if (substr(PHP_OS, 0, 3) != "WIN") {
     $hh_server = __DIR__.'/../tools/timeout.sh -t 300 '. $hh_server;
   }
   $result =  run_one_config($options, $test, $hh_server, $hh_server_env);
@@ -1733,7 +1767,7 @@ function run_test($options, $test) {
 
   if (is_executable('/usr/bin/timeout')) {
     $hhvm = '/usr/bin/timeout 300 '.$hhvm;
-  } else {
+  } else if (substr(PHP_OS, 0, 3) != "WIN") {
     $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
   }
 
@@ -2451,6 +2485,12 @@ function main($argv) {
   }
   if (isset($options['testpilot'])) {
     Status::setMode(Status::MODE_TESTPILOT);
+  }
+  if (NO_PCNTL) {
+    Status::setUseColor(true);
+    Status::started();
+    $bad_test_file = tempnam('/tmp', 'test-run-');
+    run($options, $test_buckets[0], $bad_test_file);
   }
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
 

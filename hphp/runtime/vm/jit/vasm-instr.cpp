@@ -142,6 +142,9 @@ Width width(Vinstr::Opcode op) {
     // nop and trap
     case Vinstr::nop:
     case Vinstr::ud2:
+    // restrict/unrestrict new virtuals
+    case Vinstr::vregrestrict:
+    case Vinstr::vregunrestrict:
     // zero-extending/truncating copies
     case Vinstr::movzbw:
     case Vinstr::movzbl:
@@ -182,7 +185,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::sarq:
     case Vinstr::shlq:
     // arm instructions
-    case Vinstr::cmplims:
     case Vinstr::fcvtzs:
     case Vinstr::mrs:
     case Vinstr::msr:

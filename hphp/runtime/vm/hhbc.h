@@ -37,6 +37,16 @@ struct Unit;
 struct UnitEmitter;
 struct Func;
 
+// A contiguous range of locals. The range always includes at least a single
+// local (first), plus some number of additional locals immediately after
+// (restCount).
+struct LocalRange {
+  uint32_t first;
+  uint32_t restCount;
+};
+
+std::string show(const LocalRange&);
+
 /*
  * Variable-size immediates are implemented as follows: To determine which size
  * the immediate is, examine the first byte where the immediate is expected,
@@ -66,6 +76,7 @@ struct Func;
   ARGTYPE(BA,     Offset)        /* Bytecode offset */                    \
   ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                \
   ARGTYPE(KA,     MemberKey)     /* Member key: local, stack, int, str */ \
+  ARGTYPE(LAR,    LocalRange)    /* Contiguous range of locals */         \
   ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
 
 enum ArgType {

@@ -549,6 +549,15 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
   return ok;
 }
 
+bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
+  auto ok = true;
+  auto const range = decodeLocalRange(pc);
+  for (auto i = uint32_t{0}; i < range.restCount+1; ++i) {
+    ok &= checkLocal(instr, range.first + i);
+  }
+  return ok;
+}
+
 /**
  * Check instruction and its immediates. Returns false if we can't continue
  * because we don't know the length of this instruction or one of the

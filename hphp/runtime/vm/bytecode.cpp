@@ -6165,6 +6165,14 @@ TCA iopWrapper(Op, void(*fn)(intva_t,intva_t), PC& pc) {
   return nullptr;
 }
 
+OPTBLD_INLINE UNUSED static
+TCA iopWrapper(Op, void(*fn)(intva_t,LocalRange), PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto n2 = decodeLocalRange(pc);
+  fn(n1, n2);
+  return nullptr;
+}
+
 OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(int32_t), PC& pc) {
   auto n = decode<int32_t>(pc);

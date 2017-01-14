@@ -319,6 +319,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
                      subopToName(static_cast<ty>(decode<uint8_t>(pc))));
 #define IMM_VSA    print_stringvec();
 #define IMM_KA     out.fmt(" {}", show(decode_member_key(pc, finfo.unit)));
+#define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x
@@ -359,6 +360,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 
   out.nl();
 }

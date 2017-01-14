@@ -313,6 +313,7 @@ struct Emitter {
 #define IMM_OA(type) type
 #define IMM_VSA std::vector<std::string>&
 #define IMM_KA MemberKey
+#define IMM_LAR LocalRange
 #define O(name, imm, pop, push, flags) void name(imm);
   OPCODES
 #undef O
@@ -337,6 +338,7 @@ struct Emitter {
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 
 private:
   ConstructPtr m_node;
@@ -1295,6 +1297,7 @@ private:
 #define DEC_OA(type) type
 #define DEC_VSA std::vector<std::string>&
 #define DEC_KA MemberKey
+#define DEC_LAR LocalRange
 
 #define POP_NOV
 #define POP_ONE(t) \
@@ -1371,6 +1374,7 @@ private:
 #define POP_LA_OA(i) POP_LA_IMPL
 #define POP_LA_VSA(i)
 #define POP_LA_KA(i)
+#define POP_LA_LAR(i)
 
 #define POP_LA_LA(i) \
   getEmitterVisitor().popSymbolicLocal(opcode)
@@ -1557,6 +1561,12 @@ private:
 #define IMPL3_KA IMPL_KA(a3)
 #define IMPL4_KA IMPL_KA(a4)
 
+#define IMPL_LAR(var) encodeLocalRange(getUnitEmitter(), var)
+#define IMPL1_LAR IMPL_LAR(a1)
+#define IMPL2_LAR IMPL_LAR(a2)
+#define IMPL3_LAR IMPL_LAR(a3)
+#define IMPL4_LAR IMPL_LAR(a4)
+
  OPCODES
 
 #undef O
@@ -1576,6 +1586,7 @@ private:
 #undef DEC_BA
 #undef DEC_OA
 #undef DEC_KA
+#undef DEC_LAR
 #undef POP_NOV
 #undef POP_ONE
 #undef POP_TWO
@@ -1614,6 +1625,7 @@ private:
 #undef POP_LA_OA
 #undef POP_LA_LA
 #undef POP_LA_KA
+#undef POP_LA_LAR
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
@@ -1701,6 +1713,11 @@ private:
 #undef IMPL2_KA
 #undef IMPL3_KA
 #undef IMPL4_KA
+#undef IMPL_LAR
+#undef IMPL1_LAR
+#undef IMPL2_LAR
+#undef IMPL3_LAR
+#undef IMPL4_LAR
 
 static void checkJmpTargetEvalStack(const SymbolicStack& source,
                                     const SymbolicStack& dest) {

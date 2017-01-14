@@ -306,6 +306,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       euState.defClsMap[id] = startOffset;
     };
 
+    UNUSED auto emit_lar = [&](const LocalRange& range) {
+      always_assert(range.first->id + range.restCount < func.locals.size());
+      encodeLocalRange(ue, HPHP::LocalRange{range.first->id, range.restCount});
+    };
+
 #define IMM_BLA(n)     emit_switch(data.targets);
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_ILA(n)     emit_itertab(data.iterTab);
@@ -322,6 +327,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_BA(n)      emit_branch(*data.target);
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
+#define IMM_LAR(n)     emit_lar(data.locrange);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -391,6 +397,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 
 #undef IMM_NA
 #undef IMM_ONE

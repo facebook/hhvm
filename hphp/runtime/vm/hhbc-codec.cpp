@@ -67,4 +67,18 @@ void encode_member_key(MemberKey mk, UnitEmitter& ue) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void encodeLocalRange(UnitEmitter& ue, const LocalRange& range) {
+  ue.emitIVA(range.first);
+  ue.emitIVA(range.restCount);
+}
+
+LocalRange decodeLocalRange(const unsigned char*& pc) {
+  auto const first = decode_iva(pc);
+  auto const restCount = decode_iva(pc);
+  return LocalRange{uint32_t(first), uint32_t(restCount)};
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

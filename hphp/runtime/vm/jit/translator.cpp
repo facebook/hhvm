@@ -501,7 +501,7 @@ namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
     DontGuardStack1 | IgnoreInnerType | DontGuardAny | This |
-    MBase | StackI | IdxA | MKey;
+    MBase | StackI | IdxA | MKey | LocalRange;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -619,6 +619,7 @@ bool isAlwaysNop(Op op) {
 #define OA(op) BA
 #define VSA(n)
 #define KA(n)
+#define LAR(n)
 #define O(name, imm, ...) case Op::name: imm break;
 
 size_t localImmIdx(Op op) {
@@ -663,6 +664,7 @@ size_t memberKeyImmIdx(Op op) {
 #undef OA
 #undef VSA
 #undef KA
+#undef LAR
 #undef O
 
 /*
@@ -741,6 +743,16 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
     inputs.emplace_back(Location::Local { uint32_t(loc) });
+  }
+  if (flags & LocalRange) {
+    auto const& range = ni.imm[1].u_LAR;
+    SKTRACE(1, sk, "getInputs: localRange %d+%d\n",
+            range.first, range.restCount);
+    for (int i = 0; i < range.restCount+1; ++i) {
+      inputs.emplace_back(Location::Local { uint32_t(range.first + i) });
+      inputs.back().dontGuard = true;
+      inputs.back().dontBreak = true;
+    }
   }
   if (flags & AllLocals) ni.ignoreInnerType = true;
 
@@ -1110,6 +1122,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_OA_IMPL(n) ni.imm[n].u_OA
 #define IMM_OA(subop)  (subop)IMM_OA_IMPL
 #define IMM_KA(n)      ni.imm[n].u_KA
+#define IMM_LAR(n)     ni.imm[n].u_LAR
 
 #define ONE(x0)           , IMM_##x0(0)
 #define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
@@ -1146,6 +1159,7 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 
 //////////////////////////////////////////////////////////////////////
 

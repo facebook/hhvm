@@ -1198,6 +1198,17 @@ MemberKey read_member_key(AsmState& as) {
   not_reached();
 }
 
+UNUSED LocalRange read_local_range(AsmState& as) {
+  auto const first = read_opcode_arg<std::string>(as);
+  auto const firstLoc = as.getLocalId(first);
+  as.in.expect('+');
+  auto const restCount = read_opcode_arg<uint32_t>(as);
+  if (firstLoc + restCount > as.maxUnnamed) {
+    as.maxUnnamed = firstLoc + restCount;
+  }
+  return LocalRange{uint32_t(firstLoc), restCount};
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::map<std::string,ParserFunc> opcode_parsers;
@@ -1233,6 +1244,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
                      read_opcode_arg<int32_t>(as)))
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_AA     as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
+#define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
 
 /*
  * There can currently be no more than one immvector per instruction,
@@ -1368,6 +1380,7 @@ OPCODES
 #undef IMM_AA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 
 #undef NUM_PUSH_NOV
 #undef NUM_PUSH_ONE

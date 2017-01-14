@@ -333,6 +333,11 @@ std::string show(const Bytecode& bc) {
     }
   };
 
+  UNUSED auto append_lar = [&](const LocalRange& range) {
+    folly::toAppend("L:{}+{}", local_string(range.first),
+                    range.restCount, &ret);
+  };
+
 #define IMM_BLA(n)     ret += " "; append_switch(data.targets);
 #define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
 #define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
@@ -349,6 +354,7 @@ std::string show(const Bytecode& bc) {
 #define IMM_OA(type)   IMM_OA_IMPL
 #define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
 #define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
+#define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -385,6 +391,7 @@ std::string show(const Bytecode& bc) {
 #undef IMM_OA_IMPL
 #undef IMM_OA
 #undef IMM_KA
+#undef IMM_LAR
 
 #undef IMM_NA
 #undef IMM_ONE

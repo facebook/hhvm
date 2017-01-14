@@ -41,13 +41,13 @@ template<class T> uint64_t test_const(T val) {
     .sf = x64::abi().sf
   };
   static uint8_t code[1000];
-  // None of these tests should use any data.
-  static uint8_t data_buffer[0];
+  // None of these tests should use much data.
+  static uint8_t data_buffer[100];
 
   CodeBlock main;
   main.init(code, sizeof(code), "test");
   DataBlock data;
-  data.init(data_buffer, sizeof(data), "data");
+  data.init(data_buffer, sizeof(data_buffer), "data");
 
   Vunit unit;
   Vasm vasm{unit};

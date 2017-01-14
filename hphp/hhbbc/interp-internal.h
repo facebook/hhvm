@@ -178,6 +178,8 @@ void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);
   for (auto& l : env.state.locals) l = TGen;
+  for (auto& e : env.state.stack) e.equivLocal = nullptr;
+  env.state.equivLocals.clear();
 }
 
 void doRet(ISS& env, Type t) {
@@ -259,7 +261,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
 
 Type popT(ISS& env) {
   assert(!env.state.stack.empty());
-  auto const ret = env.state.stack.back();
+  auto const ret = env.state.stack.back().type;
   FTRACE(2, "    pop:  {}\n", show(ret));
   env.state.stack.pop_back();
   return ret;
@@ -307,7 +309,7 @@ void discard(ISS& env, int n) {
 
 Type topT(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
-  return env.state.stack[env.state.stack.size() - idx - 1];
+  return env.state.stack[env.state.stack.size() - idx - 1].type;
 }
 
 Type topA(ISS& env, uint32_t i = 0) {
@@ -327,9 +329,10 @@ Type topV(ISS& env, uint32_t i = 0) {
   return topT(env, i);
 }
 
-void push(ISS& env, Type t) {
+void push(ISS& env, Type t, borrowed_ptr<php::Local> l = nullptr) {
   FTRACE(2, "    push: {}\n", show(t));
-  env.state.stack.push_back(t);
+  always_assert(!l || !is_volatile_local(env.ctx.func, l));
+  env.state.stack.push_back(StackElem {t, l});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -370,6 +373,57 @@ void mayReadLocal(ISS& env, uint32_t id) {
   }
 }
 
+// Find a local which is equivalent to the given local
+borrowed_ptr<php::Local> findLocEquiv(ISS& env,
+                                      borrowed_ptr<const php::Local> l) {
+  if (l->id >= env.state.equivLocals.size()) return nullptr;
+  assert(!env.state.equivLocals[l->id] ||
+         !is_volatile_local(env.ctx.func, l));
+  return env.state.equivLocals[l->id];
+}
+
+// Record an equivalency between two locals.
+void addLocEquiv(ISS& env,
+                 borrowed_ptr<const php::Local> from,
+                 borrowed_ptr<php::Local> to) {
+  always_assert(!is_volatile_local(env.ctx.func, from));
+  always_assert(!is_volatile_local(env.ctx.func, to));
+  if (env.state.equivLocals.size() <= from->id) {
+    env.state.equivLocals.resize(from->id + 1);
+  }
+  env.state.equivLocals[from->id] = to;
+}
+
+// Kill all equivalencies involving the given local to other locals
+void killLocEquiv(ISS& env, borrowed_ptr<const php::Local> l) {
+  for (auto& to : env.state.equivLocals) {
+    if (to == l) to = nullptr;
+  }
+  if (l->id >= env.state.equivLocals.size()) return;
+  env.state.equivLocals[l->id] = nullptr;
+}
+
+void killAllLocEquiv(ISS& env) {
+  env.state.equivLocals.clear();
+}
+
+// Obtain a local which is equivalent to the given stack value
+borrowed_ptr<php::Local> topStkEquiv(ISS& env, uint32_t idx = 0) {
+  assert(idx < env.state.stack.size());
+  return env.state.stack[env.state.stack.size() - idx - 1].equivLocal;
+}
+
+// Kill all equivalencies involving the given local to stack values
+void killStkEquiv(ISS& env, borrowed_ptr<const php::Local> l) {
+  for (auto& e : env.state.stack) {
+    if (e.equivLocal == l) e.equivLocal = nullptr;
+  }
+}
+
+void killAllStkEquiv(ISS& env) {
+  for (auto& e : env.state.stack) e.equivLocal = nullptr;
+}
+
 Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
   mayReadLocal(env, l->id);
   auto ret = env.state.locals[l->id];
@@ -381,6 +435,8 @@ Type locRaw(ISS& env, borrowed_ptr<const php::Local> l) {
 
 void setLocRaw(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
   mayReadLocal(env, l->id);
+  killLocEquiv(env, l);
+  killStkEquiv(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     auto current = env.state.locals[l->id];
     always_assert_flog(current == TGen, "volatile local was not TGen");
@@ -411,12 +467,18 @@ bool locCouldBeUninit(ISS& env, borrowed_ptr<const php::Local> l) {
   return locRaw(env, l).couldBe(TUninit);
 }
 
+bool locCouldBeRef(ISS& env, borrowed_ptr<const php::Local> l) {
+  return locRaw(env, l).couldBe(TRef);
+}
+
 /*
  * Set a local type in the sense of tvSet.  If the local is boxed or
  * not known to be not boxed, we can't change the type.  May be used
  * to set locals to types that include Uninit.
  */
 void setLoc(ISS& env, borrowed_ptr<const php::Local> l, Type t) {
+  killLocEquiv(env, l);
+  killStkEquiv(env, l);
   auto v = locRaw(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     always_assert_flog(v == TGen, "volatile local was not TGen");
@@ -443,6 +505,8 @@ void loseNonRefLocalTypes(ISS& env) {
   for (auto& l : env.state.locals) {
     if (l.subtypeOf(TCell)) l = TCell;
   }
+  killAllLocEquiv(env);
+  killAllStkEquiv(env);
 }
 
 void boxUnknownLocal(ISS& env) {
@@ -451,12 +515,16 @@ void boxUnknownLocal(ISS& env) {
   for (auto& l : env.state.locals) {
     if (!l.subtypeOf(TRef)) l = TGen;
   }
+  killAllLocEquiv(env);
+  killAllStkEquiv(env);
 }
 
 void unsetUnknownLocal(ISS& env) {
   readUnknownLocals(env);
   FTRACE(2, "  unsetUnknownLocal\n");
   for (auto& l : env.state.locals) l = union_of(l, TUninit);
+  killAllLocEquiv(env);
+  killAllStkEquiv(env);
 }
 
 //////////////////////////////////////////////////////////////////////

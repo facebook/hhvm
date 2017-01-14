@@ -120,7 +120,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
 
   auto const assert_stack = [&] (size_t idx) {
     assert(idx < state.stack.size());
-    auto const realT = state.stack[state.stack.size() - idx - 1];
+    auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
     if (flav.subtypeOf(TCls)) return;
@@ -320,7 +320,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   // All outputs of the instruction must have constant types for this
   // to be allowed.
   for (auto i = size_t{0}; i < numPush; ++i) {
-    if (!tv(state.stack[stkSize - i - 1])) return false;
+    if (!tv(state.stack[stkSize - i - 1].type)) return false;
   }
 
   // Pop the inputs, and push the constants.
@@ -350,7 +350,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   }
 
   for (auto i = size_t{0}; i < numPush; ++i) {
-    auto const v = tv(state.stack[stkSize - i - 1]);
+    auto const v = tv(state.stack[stkSize - i - 1].type);
     switch (v->m_type) {
     case KindOfUninit:        not_reached();          break;
     case KindOfNull:          gen(bc::Null {});       break;

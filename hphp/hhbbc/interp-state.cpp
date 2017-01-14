@@ -237,10 +237,14 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   }
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
-    auto newT = join(dst.stack[i], src.stack[i]);
-    if (dst.stack[i] != newT) {
+    auto newT = join(dst.stack[i].type, src.stack[i].type);
+    if (dst.stack[i].type != newT) {
       changed = true;
-      dst.stack[i] = std::move(newT);
+      dst.stack[i].type = std::move(newT);
+    }
+    if (dst.stack[i].equivLocal != src.stack[i].equivLocal) {
+      changed = true;
+      dst.stack[i].equivLocal = nullptr;
     }
   }
 
@@ -261,6 +265,20 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   for (auto i = size_t{0}; i < dst.fpiStack.size(); ++i) {
     if (merge_into(dst.fpiStack[i], src.fpiStack[i])) {
       changed = true;
+    }
+  }
+
+  dst.equivLocals.resize(
+    std::max(dst.equivLocals.size(), src.equivLocals.size())
+  );
+  for (auto i = size_t{0}; i < dst.equivLocals.size(); ++i) {
+    auto const dstLoc = dst.equivLocals[i];
+    auto const srcLoc =
+      (i < src.equivLocals.size()) ? src.equivLocals[i] : nullptr;
+    auto const newLoc = (dstLoc == srcLoc) ? dstLoc : nullptr;
+    if (newLoc != dstLoc) {
+      changed = true;
+      dst.equivLocals[i] = newLoc;
     }
   }
 
@@ -328,10 +346,18 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {
-    folly::format(&ret, "stk[{:02}] :: {}\n",
+    folly::format(&ret, "stk[{:02}] :: {} [{}]\n",
       i,
-      show(st.stack[i])
+      show(st.stack[i].type),
+      st.stack[i].equivLocal ? local_string(st.stack[i].equivLocal) : ""
     );
+  }
+
+  for (auto i = size_t{0}; i < st.equivLocals.size(); ++i) {
+    if (!st.equivLocals[i]) continue;
+    folly::format(&ret, "{: <8} == {}\n",
+                  local_string(borrow(f.locals[i])),
+                  local_string(st.equivLocals[i]));
   }
 
   return ret;

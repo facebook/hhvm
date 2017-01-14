@@ -1701,11 +1701,40 @@ void in(ISS& env, const bc::FPassM& op) {
   );
 }
 
+namespace {
+
+// Find a contiguous local range which is equivalent to the given range and has
+// a smaller starting id. Only returns the equivalent first local because the
+// size doesn't change.
+borrowed_ptr<php::Local> equivLocalRange(ISS& env,
+                                         const LocalRange& range) {
+  auto const equivFirst = findLocEquiv(env, range.first);
+  if (!equivFirst || equivFirst->id >= range.first->id) return nullptr;
+
+  for (uint32_t i = 0; i < range.restCount; ++i) {
+    auto const equiv =
+      findLocEquiv(env, borrow(env.ctx.func->locals[range.first->id + i + 1]));
+    if (!equiv || equiv->id != equivFirst->id + i + 1) return nullptr;
+  }
+
+  return equivFirst;
+}
+
+}
+
 void in(ISS& env, const bc::MemoGet& op) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   always_assert(env.state.arrayChain.empty());
   always_assert(op.locrange.first->id + op.locrange.restCount
                 < env.ctx.func->locals.size());
+
+  // If we can use an equivalent, earlier range, then use that instead.
+  if (auto const equiv = equivLocalRange(env, op.locrange)) {
+    return reduce(
+      env,
+      bc::MemoGet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
+    );
+  }
 
   nothrow(env);
   for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
@@ -1722,6 +1751,14 @@ void in(ISS& env, const bc::MemoSet& op) {
   always_assert(env.state.arrayChain.empty());
   always_assert(op.locrange.first->id + op.locrange.restCount
                 < env.ctx.func->locals.size());
+
+  // If we can use an equivalent, earlier range, then use that instead.
+  if (auto const equiv = equivLocalRange(env, op.locrange)) {
+    return reduce(
+      env,
+      bc::MemoSet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
+    );
+  }
 
   nothrow(env);
   for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {

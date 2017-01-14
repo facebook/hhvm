@@ -330,7 +330,7 @@ void pop(Env& env) { pop(env, Use::Used, InstrIdSet{}); }
 
 Type topT(Env& env, uint32_t idx = 0) {
   assert(idx < env.stateBefore.stack.size());
-  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1];
+  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1].type;
 }
 
 Type topC(Env& env, uint32_t idx = 0) {
@@ -732,7 +732,7 @@ dce_visit(const Index& index,
       [&] {
         using namespace folly::gen;
         return from(states[idx].first.stack)
-          | map([&] (const Type& t) { return show(t); })
+          | map([&] (const StackElem& e) { return show(e.type); })
           | unsplit<std::string>(" ");
       }()
     );

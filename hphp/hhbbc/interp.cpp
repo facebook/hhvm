@@ -862,8 +862,18 @@ void in(ISS& env, const bc::NativeImpl&) {
 }
 
 void in(ISS& env, const bc::CGetL& op) {
-  if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
-  push(env, locAsCell(env, op.loc1));
+  borrowed_ptr<php::Local> equivLocal = nullptr;
+  // If the local could be Uninit or a Ref, don't record equality because the
+  // value on the stack won't the same as in the local.
+  if (!locCouldBeUninit(env, op.loc1)) {
+    nothrow(env);
+    constprop(env);
+    if (!locCouldBeRef(env, op.loc1) &&
+        !is_volatile_local(env.ctx.func, op.loc1)) {
+      equivLocal = op.loc1;
+    }
+  }
+  push(env, locAsCell(env, op.loc1), equivLocal);
 }
 
 void in(ISS& env, const bc::CGetQuietL& op) {
@@ -1328,9 +1338,17 @@ void in(ISS& env, const bc::InstanceOf& op) {
 
 void in(ISS& env, const bc::SetL& op) {
   nothrow(env);
+  auto const equivLoc = topStkEquiv(env);
   auto const val = popC(env);
   setLoc(env, op.loc1, val);
-  push(env, val);
+  // If the local could be a Ref, don't record equality because the stack
+  // element and the local won't actually have the same type.
+  if (equivLoc &&
+      !locCouldBeRef(env, op.loc1) &&
+      !is_volatile_local(env.ctx.func, op.loc1)) {
+    addLocEquiv(env, op.loc1, equivLoc);
+  }
+  push(env, val, equivLoc);
 }
 
 void in(ISS& env, const bc::SetN&) {
@@ -2618,7 +2636,7 @@ StepFlags interpOps(Interp& interp,
     auto outputs_constant = [&] {
       auto const size = interp.state.stack.size();
       for (auto i = size_t{0}; i < numPushed; ++i) {
-        if (!tv(interp.state.stack[size - i - 1])) return false;
+        if (!tv(interp.state.stack[size - i - 1].type)) return false;
       }
       return true;
     };

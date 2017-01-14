@@ -506,3 +506,27 @@ function curl_multi_close($mh);
 namespace HH\Asio {
   function curl_exec(mixed $url_or_handle): Awaitable<string>;
 }
+
+class CURLFile {
+  public string $name = '';
+  public string $mime = '';
+  public string $postname = '';
+
+  public function __construct(
+    string $name,
+    string $mime = '',
+    string $postname = '',
+  ): void;
+
+  public function getFilename(): string;
+  public function getMimeType(): string;
+  public function getPostFilename(): string;
+  public function setMimeType(string $mime): void;
+  public function setPostFilename(string $postname): void;
+}
+
+function curl_file_create(
+  string $name,
+  string $mime = '',
+  string $postname = '',
+): CURLFile;

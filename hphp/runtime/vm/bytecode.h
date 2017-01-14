@@ -441,6 +441,14 @@ public:
   }
 
   ALWAYS_INLINE
+  void popU() {
+    assert(m_top != m_base);
+    assert(m_top->m_type == KindOfUninit);
+    tvDebugTrash(m_top);
+    ++m_top;
+  }
+
+  ALWAYS_INLINE
   void popTV() {
     assert(m_top != m_base);
     assert(m_top->m_type == KindOfClass || tvIsPlausible(*m_top));

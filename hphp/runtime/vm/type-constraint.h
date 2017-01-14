@@ -274,6 +274,33 @@ operator|(TypeConstraint::Flags a, TypeConstraint::Flags b) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Its possible to use type constraints on function parameters to devise better
+ * memoization key generation schemes. For example, if we know the
+ * type-constraint limits the parameter to only ever being an integer or string,
+ * then the memoization key scheme can just be the identity. This is because
+ * integers and strings won't collide with each other, and we know it won't ever
+ * be anything else. Without such a constraint, the string would need escaping.
+ *
+ * This function takes a type-constraint and returns the suitable "memo-key
+ * constraint" if it corresponds to one. Note: HHBBC, the interpreter, and the
+ * JIT all need to agree exactly on the scheme for each constraint. It is the
+ * caller's responsibility to actually verify that type-hints are being
+ * enforced. If they are not, then none of this information can be used.
+ */
+enum class MemoKeyConstraint {
+  Null,
+  Int,
+  IntOrNull,
+  Bool,
+  BoolOrNull,
+  Str,
+  StrOrNull,
+  IntOrStr,
+  None
+};
+MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
+
 }
 
 #endif

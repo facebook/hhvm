@@ -349,6 +349,13 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         }
       }
     }
+
+    if (op == Op::GetMemoKeyL || op == Op::MemoGet || op == Op::MemoSet) {
+      if (!m_func->isMemoizeWrapper()) {
+        error("%s can only appear within memoize wrappers\n", opcodeToName(op));
+        ok = false;
+      }
+    }
   }
   // Check each branch target lands on a valid instruction boundary
   // within this region.
@@ -686,12 +693,14 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPassM:
   case Op::IncDecM:
   case Op::UnsetM:
+  case Op::MemoGet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
     return m_tmp_sig;
   case Op::SetM:
   case Op::SetOpM:
+  case Op::MemoSet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
     }

@@ -347,6 +347,9 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assert(numParams() == fParams.size());
 }
 
+const StringData* Func::genMemoizeImplName(const StringData* origName) {
+  return makeStaticString(folly::sformat("{}$memoize_impl", origName->data()));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // FuncId manipulation.
@@ -664,6 +667,25 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     }
     out << std::endl;
   }
+
+  if (returnTypeConstraint().hasConstraint() ||
+      (returnUserType() && !returnUserType()->empty())) {
+    out << " Ret: ";
+    if (returnTypeConstraint().hasConstraint()) {
+      out << " " << returnTypeConstraint().displayName();
+    }
+    if (returnUserType() && !returnUserType()->empty()) {
+      out << " (" << returnUserType()->data() << ")";
+    }
+    out << std::endl;
+  }
+
+  if (repoReturnType().tag() != RepoAuthType::Tag::Gen) {
+    out << "repoReturnType: " << show(repoReturnType()) << '\n';
+  }
+  if (repoAwaitedReturnType().tag() != RepoAuthType::Tag::Gen) {
+    out << "repoAwaitedReturnType: " << show(repoAwaitedReturnType()) << '\n';
+  }
   out << "maxStackCells: " << maxStackCells() << '\n'
       << "numLocals: " << numLocals() << '\n'
       << "numIterators: " << numIterators() << '\n';
@@ -733,6 +755,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_isGenerated(false)
   , m_hasExtendedSharedData(false)
   , m_returnByValue(false)
+  , m_isMemoizeWrapper(false)
   , m_originalFilename(nullptr)
 {
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);

@@ -406,6 +406,16 @@ Type callReturn(const IRInstruction* inst) {
   not_reached();
 }
 
+// Integers get mapped to integer memo keys, everything else gets mapped to
+// strings.
+Type memoKeyReturn(const IRInstruction* inst) {
+  assertx(inst->is(GetMemoKey));
+  auto const srcType = inst->src(0)->type();
+  if (srcType <= TInt) return TInt;
+  if (!srcType.maybe(TInt)) return TStr;
+  return TInt | TStr;
+}
+
 template <uint32_t...> struct IdxSeq {};
 
 inline Type unionReturn(const IRInstruction* inst, IdxSeq<>) { return TBottom; }
@@ -455,6 +465,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DCns            return TUninit | TInitNull | TBool | \
                                TInt | TDbl | TStr | TRes;
 #define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
+#define DMemoKey        return memoKeyReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -491,6 +502,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DSubtract
 #undef DCns
 #undef DUnion
+#undef DMemoKey
 }
 
 }}

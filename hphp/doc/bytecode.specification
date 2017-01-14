@@ -951,6 +951,7 @@ PopA    [A]  ->  []
 PopC    [C]  ->  []
 PopV    [V]  ->  []
 PopR    [R]  ->  []
+PopU    [U]  ->  []
 
   Pop. Discards the value on the top of the stack.
 
@@ -995,6 +996,16 @@ RGetCNop    [C:<T>]  ->  [R:<T>]
 
   Convert a cell to an R, no op.  This is a flavor-safety only opcode.
 
+CGetCUNop   [C|U:<T>]  ->  [C:<T>]
+
+  Convert a cell or uninit value to a cell, no op. This is a flavor-safety only
+  opcode and should only be used when $1 is statically known to be a cell.
+
+UGetCUNop   [C|U:<T>]  ->  [U:<T>]
+
+ Convert a cell or uninit value to an uninit, no op. This is a flavor-safety
+ only opcode and should only be used when $1 is statically known to be an
+ uninit.
 
 2. Literal and constant instructions
 ------------------------------------
@@ -1789,6 +1800,26 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
   If the local variable given by %1 is not defined, this instruction raises a
   warning and pushes x onto the stack.
 
+IsUninit                        [C|U:<T>]  ->  [C|U:<T> C:Bool]
+
+  Check if $1 is Uninit, pushing true onto the stack, false otherwise. $1 is
+  not popped.
+
+MaybeMemoType                   [C]  ->  [C:Bool]
+
+  Only allowed inside memoize wrapper functions. If $1 has a type which might
+  be the return type of the function being memoized, push true, false
+  otherwise. This op exists for static HHBBC optimizations and will usually be
+  optimized away. If actually run, it will always push true (the conservative
+  result).
+
+IsMemoType                      [C]  ->  [C:Bool]
+
+  Only allowed inside memoize wrapper functions. If $1 has a type which
+  definitely is the return type of the function being memoized, push true,
+  false otherwise. This op exists for static HHBBC optimizations and will
+  usually be optimized away. If actually run, it will always push false (the
+  conservative result).
 
 7. Mutator instructions
 -----------------------
@@ -3515,6 +3546,22 @@ SetWithRefRML <local id>    [R]  ->  []
 
   Set member %1, preserving reffiness of stack input.
 
+MemoGet <stack count> <local range>   [...]  ->  [C|U]
+
+  Perform a memoize cache lookup on the current base. The current base must be
+  a dict being used as a memoize cache (or a boxed version). The values of the
+  specified range of locals is used for the cache keys. If the element isn't
+  present, Uninit is pushed. This function should only be used within a
+  function marked as a memoize wrapper.
+
+MemoSet <stack count> <local range>   [... C:<T>]  ->  [C:<T>]
+
+  Store $1 into the memoize cache as the current base. The current base must be
+  a dict being used as a memoize cache (or a boxed version). The values of the
+  specified range of locals is used for the cache keys. $1 is pushed back onto
+  the stack afterwards. This function should only be used within a function
+  marked as a memoize wrapper.
+
 11. Iterator instructions
 -------------------------
 
@@ -4013,11 +4060,15 @@ Silence  <local id> <Start|End>   []  ->  []
   reporting level to the previous value (stored in local variable %1); if the
   error reporting level is not 0, does nothing.
 
-GetMemoKey    [C] ->  [C]
+GetMemoKeyL  <local id>  [] ->  [C:<Int/String>]
 
-  Given a cell, produces a cell that can be used as a cache key. Valid values
-  for the input include all basic types, arrays and collections, and objects
-  that implement IMemozieParam. Any other type will cause GetMemoKey to throw.
+  Push an int or string which is an appropriate memoize cache key for the
+  specified local. The local should be one of the function's parameters. The
+  exact scheme for the cache key generation depends on whether the parameter is
+  constrained by an appropriate type constraint. This op may throw if the input
+  value is one that cannot be converted to a cache key (IE, an object that does
+  not implement IMemoizeParam). This op can only be used within a function
+  marked as being a memoize wrapper.
 
 VarEnvDynCall   []  ->  []
 

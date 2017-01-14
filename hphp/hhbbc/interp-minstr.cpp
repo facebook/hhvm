@@ -1701,6 +1701,67 @@ void in(ISS& env, const bc::FPassM& op) {
   );
 }
 
+void in(ISS& env, const bc::MemoGet& op) {
+  always_assert(env.ctx.func->isMemoizeWrapper);
+  always_assert(env.state.arrayChain.empty());
+  always_assert(op.locrange.first->id + op.locrange.restCount
+                < env.ctx.func->locals.size());
+
+  nothrow(env);
+  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+    mayReadLocal(env, op.locrange.first->id + i);
+  }
+  discard(env, op.arg1);
+  // The pushed value is always the return type of the wrapped function with
+  // TUninit unioned in, but that's always going to result in TCell right now.
+  push(env, TCell);
+}
+
+void in(ISS& env, const bc::MemoSet& op) {
+  always_assert(env.ctx.func->isMemoizeWrapper);
+  always_assert(env.state.arrayChain.empty());
+  always_assert(op.locrange.first->id + op.locrange.restCount
+                < env.ctx.func->locals.size());
+
+  nothrow(env);
+  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+    mayReadLocal(env, op.locrange.first->id + i);
+  }
+
+  auto const t1 = popC(env);
+  discard(env, op.arg1);
+
+  // The cache set always writes a counted non-empty dict to the base.
+  env.state.base.type = TCDictN;
+
+  if (couldBeInThis(env, env.state.base)) {
+    if (auto const name = env.state.base.locName) {
+      mergeThisProp(env, name, env.state.base.type);
+    } else {
+      mergeEachThisPropRaw(env, [&](Type){ return env.state.base.type; });
+    }
+  }
+
+  if (couldBeInSelf(env, env.state.base)) {
+    if (auto const name = env.state.base.locName) {
+      mergeSelfProp(env, name, env.state.base.type);
+    } else {
+      mergeEachSelfPropRaw(env, [&](Type){ return env.state.base.type; });
+    }
+  }
+
+  if (couldBeInPublicStatic(env, env.state.base)) {
+    if (auto const indexer = env.collect.publicStatics) {
+      auto const name = baseLocNameType(env.state.base);
+      indexer->merge(env.ctx, env.state.base.locTy, name, env.state.base.type);
+    }
+  }
+
+  if (mustBeInFrame(env.state.base)) setLocalForBase(env, env.state.base.type);
+
+  push(env, t1);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////

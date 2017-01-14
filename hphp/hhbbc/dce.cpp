@@ -479,6 +479,7 @@ void dce(Env& env, const bc::PopC&)       { discardNonDtors(env); }
 // For PopV and PopR currently we never know if can't run a
 // destructor.
 void dce(Env& env, const bc::PopA&)       { discard(env); }
+void dce(Env& env, const bc::PopU&)       { discard(env); }
 void dce(Env& env, const bc::Int&)        { pushRemovable(env); }
 void dce(Env& env, const bc::String&)     { pushRemovable(env); }
 void dce(Env& env, const bc::Array&)      { pushRemovable(env); }

@@ -264,6 +264,7 @@ bool canDCE(IRInstruction* inst) {
   case KeysetIdx:
   case GetTime:
   case Select:
+  case MemoGet:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -641,6 +642,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
   case ProfileInstanceCheck:
+  case MemoSet:
     return false;
   }
   not_reached();

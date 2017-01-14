@@ -2172,4 +2172,36 @@ void emitSetWithRefRML(IRGS& env, int32_t keyLoc) {
 
 //////////////////////////////////////////////////////////////////////
 
+void emitMemoGet(IRGS& env, int32_t ndiscard, LocalRange locals) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  assertx(!curFunc(env)->isReturnRef());
+  assertx(locals.first + locals.restCount < curFunc(env)->numLocals());
+
+  auto const base = ldMBase(env);
+  auto const ret = gen(env, MemoGet, MemoData { locals }, fp(env), base);
+
+  // The returned type is always the return type of the wrapped function, plus
+  // TUninit. HHBBC should always derive the same return type for the wrapper
+  // (this function) and the wrapped function, so for simplicity just use our
+  // own return type. Even without HHBBC inference, we know the return type will
+  // be at least TInitCell (memoize invariant).
+  auto const retTy =
+    (typeFromRAT(curFunc(env)->repoReturnType(), curClass(env)) & TInitCell) |
+    TUninit;
+
+  mFinalImpl(env, ndiscard, gen(env, AssertType, retTy, ret));
+}
+
+void emitMemoSet(IRGS& env, int32_t ndiscard, LocalRange locals) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  assertx(locals.first + locals.restCount < curFunc(env)->numLocals());
+
+  auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
+  gen(env, MemoSet, MemoData { locals }, fp(env), ldMBase(env), value);
+  popC(env, DataTypeGeneric);
+  mFinalImpl(env, ndiscard, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}}

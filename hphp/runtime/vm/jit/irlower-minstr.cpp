@@ -24,13 +24,14 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-internal.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
-#include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/immed.h"
 #include "hphp/util/trace.h"
@@ -1062,6 +1063,39 @@ IMPL_OPCODE_CALL(MapIdx);
 
 IMPL_OPCODE_CALL(MapAddElemC);
 IMPL_OPCODE_CALL(ColAddNewElemC);
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgMemoGet(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<MemoGet>();
+  auto const fp    = srcLoc(env, inst, 0).reg();
+  auto& v          = vmain(env);
+
+  auto const args = argGroup(env, inst)
+    .ssa(1)
+    .addr(fp, localOffset(extra->locals.first))
+    .imm(extra->locals.restCount + 1);
+  cgCallHelper(
+    v, env, CallSpec::direct(MixedArray::MemoGet),
+    callDestTV(env, inst), SyncOptions::None, args
+  );
+}
+
+void cgMemoSet(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<MemoSet>();
+  auto const fp    = srcLoc(env, inst, 0).reg();
+  auto& v          = vmain(env);
+
+  auto const args = argGroup(env, inst)
+    .ssa(1)
+    .addr(fp, localOffset(extra->locals.first))
+    .imm(extra->locals.restCount + 1)
+    .typedValue(2);
+  cgCallHelper(
+    v, env, CallSpec::direct(MixedArray::MemoSet),
+    kVoidDest, SyncOptions::Sync, args
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

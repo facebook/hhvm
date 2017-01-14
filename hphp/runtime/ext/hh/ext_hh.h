@@ -28,6 +28,14 @@ bool HHVM_FUNCTION(autoload_set_paths,
 bool HHVM_FUNCTION(could_include, const String& file);
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param);
 void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata);
+
+extern const StaticString
+  s_nullMemoKey,
+  s_trueMemoKey,
+  s_falseMemoKey,
+  s_emptyArrMemoKey,
+  s_emptyStrMemoKey;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

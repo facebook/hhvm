@@ -697,6 +697,25 @@ struct Func final {
    */
   bool isPreFunc() const;
 
+  /*
+   * Is this func a memoization wrapper?
+   */
+  bool isMemoizeWrapper() const;
+
+  /*
+   * Assuming this func is a memoization wrapper, the name of the function it is
+   * wrapping.
+   *
+   * Pre: isMemoizeWrapper()
+   */
+  const StringData* memoizeImplName() const;
+
+  /*
+   * Given the name of a memoization wrapper function, return the generated name
+   * of the function it wraps. This is static so it can be used in contexts
+   * where the actual Func* is not available.
+   */
+  static const StringData* genMemoizeImplName(const StringData*);
 
   /////////////////////////////////////////////////////////////////////////////
   // Builtins.                                                          [const]
@@ -1164,6 +1183,7 @@ private:
     bool m_isGenerated : 1;
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
+    bool m_isMemoizeWrapper : 1;
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;

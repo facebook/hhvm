@@ -245,6 +245,23 @@ struct MixedArray final : private ArrayData,
   static bool DictSame(const ArrayData*, const ArrayData*);
   static bool DictNotSame(const ArrayData*, const ArrayData*);
 
+  /*
+   * Memoization interface.
+   *
+   * Both functions take a current base (which should either be a memoization
+   * cache, or a RefData pointing to one), a pointer to a contiguous range of
+   * keys to use for the lookup, and the length of the range. The length should
+   * always be at least one.
+   *
+   * MemoGet will return the stored value corresponding to the keys, or
+   * KindOfUninit if not found.
+   *
+   * MemoSet will store the given Cell at the location corresponding to the
+   * keys, updating the base if the underlying dicts are mutated.
+   */
+  static Cell MemoGet(const TypedValue*, const Cell*, uint32_t);
+  static void MemoSet(TypedValue*, const Cell*, uint32_t, Cell);
+
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;

@@ -40,6 +40,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
@@ -2020,24 +2021,104 @@ void emitAKExists(IRGS& env) {
   decRef(env, key);
 }
 
-void emitGetMemoKey(IRGS& env) {
-  auto const inTy = topC(env)->type();
-  if (inTy <= TInt) {
-    // An int is already a valid key. No-op.
-    return;
-  }
-  if (inTy <= TNull) {
-    auto input = popC(env);
-    push(env, cns(env, s_empty.get()));
-    decRef(env, input);
-    return;
-  }
+//////////////////////////////////////////////////////////////////////
 
-  auto const obj = popC(env);
-  auto const key = gen(env, GetMemoKey, obj);
-  push(env, key);
-  decRef(env, obj);
+void emitGetMemoKeyL(IRGS& env, int32_t locId) {
+  auto const func = curFunc(env);
+  assertx(func->isMemoizeWrapper());
+  assertx(!func->anyByRef());
+
+  // If this local corresponds to a function's parameter, and that parameter has
+  // an enforced type-constraint, we may be able to use a more specific
+  // memoization key scheme. These schemes need to agree with HHBBC and the
+  // interpreter.
+  using MK = MemoKeyConstraint;
+  auto const mkc = [&]{
+    if (!RuntimeOption::RepoAuthoritative || !Repo::global().HardTypeHints) {
+      return MK::None;
+    }
+    if (locId >= func->numParams()) return MK::None;
+    return memoKeyConstraintFromTC(func->params()[locId].typeConstraint);
+  }();
+
+  auto const value = ldLocInnerWarn(
+    env,
+    locId,
+    makeExit(env),
+    nullptr,
+    DataTypeSpecific
+  );
+
+  switch (mkc) {
+    case MK::Null:
+      // Null values are always mapped to 0
+      assertx(value->isA(TNull));
+      push(env, cns(env, 0));
+      break;
+    case MK::Int:
+    case MK::IntOrNull:
+      // Integers are always identity mappings, while null gets mapped to a
+      // static string.
+      assertx(value->isA(TInt | TNull));
+      push(
+        env,
+        gen(
+          env,
+          Select,
+          gen(env, IsType, TNull, value),
+          cns(env, s_nullMemoKey.get()),
+          value
+        )
+      );
+      break;
+    case MK::Bool:
+    case MK::BoolOrNull:
+      // Booleans are just converted to integers, while null gets mapped to 2
+      // (since bool will only ever be 0 or 1).
+      assertx(value->isA(TBool | TNull));
+      push(
+        env,
+        cond(
+          env,
+          [&](Block* taken) { gen(env, CheckType, TNull, taken, value); },
+          [&] { return cns(env, 2); },
+          [&] {
+            auto const refined = gen(env, AssertType, TBool, value);
+            return gen(env, ConvBoolToInt, refined);
+          }
+        )
+      );
+      return;
+    case MK::Str:
+    case MK::StrOrNull:
+      // Strings are identity mapped, while null is mapped to 0.
+      assertx(value->isA(TStr | TNull));
+      pushIncRef(
+        env,
+        gen(
+          env,
+          Select,
+          gen(env, IsType, TNull, value),
+          cns(env, 0),
+          value
+        )
+      );
+      return;
+    case MK::IntOrStr:
+      // Integers and strings can never collide, so they're just identity
+      // mappings.
+      assertx(value->isA(TInt | TStr));
+      pushIncRef(env, value);
+      break;
+    case MK::None:
+      // Otherwise just use the generic scheme, which is implemented by
+      // GetMemoKey. The simplifier will catch any additional special cases.
+      push(env, gen(env, GetMemoKey, value));
+      break;
+  }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
   // We can't generate direct StLoc and LdLocs in pseudomains (violates an IR

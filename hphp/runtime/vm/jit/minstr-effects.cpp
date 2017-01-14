@@ -32,6 +32,7 @@ Opcode canonicalOp(Opcode op) {
   if (op == SetWithRefElem) {
     return SetWithRefElem;
   }
+  if (op == MemoSet) return MemoSet;
   return opcodeHasFlags(op, MInstrProp) ? SetProp
        : opcodeHasFlags(op, MInstrElem) ? SetElem
        : bad_value<Opcode>();
@@ -87,6 +88,11 @@ void getBaseType(Opcode rawOp, bool predict,
     if (baseType.maybe(TDict)) baseType |= TCountedDict;
     if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
     if (baseType.maybe(TStr)) baseType |= TCountedStr;
+  }
+
+  if (op == MemoSet) {
+    baseValChanged = true;
+    baseType = TCountedDict;
   }
 }
 

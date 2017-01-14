@@ -270,7 +270,8 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
             MIterNextK,
             IterFree,
             ABCUnblock,
-            GenericRetDecRefs);
+            GenericRetDecRefs,
+            MemoSet);
   always_assert_flog(
     may_reenter_is_ok,
     "instruction {} claimed may_reenter, but it isn't allowed to say that",
@@ -958,6 +959,42 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
+  case MemoGet: {
+    auto const extra = inst.extra<MemoGet>();
+    auto const frame = AFrame {
+      inst.src(0),
+      AliasIdSet{
+        AliasIdSet::IdRange{
+          extra->locals.first,
+          extra->locals.first + extra->locals.restCount + 1
+        }
+      }
+    };
+    auto const base = pointee(inst.src(1));
+    return may_load_store(AElemAny | frame | base, AEmpty);
+  }
+  case MemoSet: {
+    auto const extra = inst.extra<MemoSet>();
+    auto const frame = AFrame {
+      inst.src(0),
+      AliasIdSet{
+        AliasIdSet::IdRange{
+          extra->locals.first,
+          extra->locals.first + extra->locals.restCount + 1
+        }
+      }
+    };
+    auto const base = pointee(inst.src(1));
+    // May re-enter when decrementing previously stored value
+    return may_reenter(
+      inst,
+      may_load_store(
+        AElemAny | frame | base,
+        AElemAny | base
+      )
+    );
+  }
+
   case MixedArrayGetK:
   case DictGetK:
   case KeysetGetK: {
@@ -1532,6 +1569,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return effect;
     }
 
+  case GetMemoKey: {
+    auto const src = inst.src(0);
+    if (src->type().maybe(TArr | TVec | TDict | TKeyset | TObj | TRes)) {
+      return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+    }
+    return IrrelevantEffects{};
+  }
+
   case LdArrFPushCuf:  // autoloads
   case LdArrFuncCtx:   // autoloads
   case LdObjMethod:    // can't autoload, but can decref $this right now
@@ -1653,7 +1698,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemDictW:
   case ElemKeyset:
   case ElemKeysetW:
-  case GetMemoKey:     // re-enters to call getInstanceKey() in some cases
   case LdClsCtor:
   case ConcatStrStr:
   case PrintStr:

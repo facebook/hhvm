@@ -270,11 +270,6 @@ enum FbCompactSerializeCode {
   FB_CS_MAX_CODE   = 16,
 };
 
-static_assert(FB_CS_MAX_CODE <= '$',
-  "FB_CS_MAX_CODE must be less than ASCII '$' or serialize_memoize_param() "
-  "could produce strings that when used as array keys could collide with  "
-  "keys it produces.");
-
 // 1 byte: 0<7 bits>
 const uint64_t kInt7Mask            = 0x7f;
 const uint64_t kInt7Prefix          = 0x00;
@@ -301,6 +296,10 @@ const uint64_t kInt54Prefix         = kInt54PrefixMsb << (6 * 8);
 const uint64_t kCodeMask            = 0x0f;
 const uint64_t kCodePrefix          = 0xf0;
 
+static_assert(kCodePrefix > '~',
+  "kCodePrefix must be greater than ASCII '~' or serialize_memoize_param() "
+  "could produce strings that when used as array keys could collide with  "
+  "keys it produces.");
 
 static void fb_compact_serialize_code(StringBuffer& sb,
                                       FbCompactSerializeCode code) {

@@ -267,7 +267,7 @@ Type popT(ISS& env) {
 
 Type popC(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(TInitCell)); // or it would be popU, which doesn't exist
+  assert(v.subtypeOf(TInitCell));
   return v;
 }
 
@@ -283,10 +283,21 @@ Type popA(ISS& env) {
   return v;
 }
 
+Type popU(ISS& env) {
+  auto const v = popT(env);
+  assert(v.subtypeOf(TUninit));
+  return v;
+}
+
+Type popCU(ISS& env) {
+  auto const v = popT(env);
+  assert(v.subtypeOf(TCell));
+  return v;
+}
+
 Type popR(ISS& env)  { return popT(env); }
 Type popF(ISS& env)  { return popT(env); }
 Type popCV(ISS& env) { return popT(env); }
-Type popU(ISS& env)  { return popT(env); }
 
 void discard(ISS& env, int n) {
   for (auto i = 0; i < n; ++i) {

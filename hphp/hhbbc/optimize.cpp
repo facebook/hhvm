@@ -61,8 +61,11 @@ bool ignoresStackInput(Op op) {
   switch (op) {
   case Op::UnboxRNop:
   case Op::BoxRNop:
+  case Op::UGetCUNop:
+  case Op::CGetCUNop:
   case Op::FPassVNop:
   case Op::FPassC:
+  case Op::PopU:
     return true;
   default:
     return false;
@@ -97,6 +100,9 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
 
   for (size_t i = 0; i < state.locals.size(); ++i) {
     if (options.FilterAssertions) {
+      // MemoGet and MemoSet read from a range of locals, but don't gain any
+      // benefit from knowing their types.
+      if (bcode.op == Op::MemoGet || bcode.op == Op::MemoSet) continue;
       if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
         continue;
       }
@@ -241,6 +247,7 @@ bool hasObviousStackOutput(Op op) {
   case Op::EmptyS:
   case Op::IsTypeC:
   case Op::IsTypeL:
+  case Op::IsUninit:
   case Op::OODeclExists:
     return true;
 
@@ -329,6 +336,10 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
     case Flavor::CR: not_reached();    break;
+    case Flavor::CUV:
+      // We only support C's for CUV right now.
+      gen(bc::PopC {});
+      break;
     case Flavor::CVU:
       // Note that we only support C's for CVU so far (this only comes up with
       // FCallBuiltin)---we'll fail the verifier if something changes to send

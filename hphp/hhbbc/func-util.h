@@ -47,6 +47,12 @@ bool is_pseudomain(borrowed_ptr<const php::Func>);
 bool is_volatile_local(borrowed_ptr<const php::Func>,
                        borrowed_ptr<const php::Local>);
 
+/*
+ * Given a function which is a memoize wrapper, return the name of the function
+ * that the wrapper is wrapping.
+ */
+SString memoize_impl_name(borrowed_ptr<const php::Func>);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

@@ -320,6 +320,10 @@ public:
     assert(m_fatal_error_msg != nullptr);
   }
 
+  const std::vector<FunctionScopePtr>& allFunctions() const {
+    return m_functionsVec;
+  }
+
 private:
   void informClosuresAboutScopeClone(ConstructPtr root,
                                      FunctionScopePtr outerScope,

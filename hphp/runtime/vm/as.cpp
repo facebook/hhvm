@@ -1198,7 +1198,7 @@ MemberKey read_member_key(AsmState& as) {
   not_reached();
 }
 
-UNUSED LocalRange read_local_range(AsmState& as) {
+LocalRange read_local_range(AsmState& as) {
   auto const first = read_opcode_arg<std::string>(as);
   auto const firstLoc = as.getLocalId(first);
   as.in.expect('+');

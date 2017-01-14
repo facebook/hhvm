@@ -326,6 +326,7 @@ enum Operands {
                              // optional C on top of it
   MKey            = 1 << 20, // member lookup key
   LocalRange      = 1 << 21, // read range of locals given in imm[1].u_LAR
+  DontGuardBase   = 1 << 22, // Dont force a guard for the base
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };

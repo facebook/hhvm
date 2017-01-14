@@ -333,8 +333,8 @@ std::string show(const Bytecode& bc) {
     }
   };
 
-  UNUSED auto append_lar = [&](const LocalRange& range) {
-    folly::toAppend("L:{}+{}", local_string(range.first),
+  auto append_lar = [&](const LocalRange& range) {
+    folly::toAppend("L:", local_string(range.first), "+",
                     range.restCount, &ret);
   };
 

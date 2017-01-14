@@ -173,6 +173,7 @@ inline bool isIncDecO(IncDecOp op) {
 }
 
 #define ISTYPE_OPS                             \
+  ISTYPE_OP(Uninit)                            \
   ISTYPE_OP(Null)                              \
   ISTYPE_OP(Bool)                              \
   ISTYPE_OP(Int)                               \
@@ -332,6 +333,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   O(PopR,            NA,               ONE(RV),         NOV,        NF) \
+  O(PopU,            NA,               ONE(UV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(Box,             NA,               ONE(CV),         ONE(VV),    NF) \
   O(Unbox,           NA,               ONE(VV),         ONE(CV),    NF) \
@@ -340,6 +342,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
   O(UnboxRNop,       NA,               ONE(RV),         ONE(CV),    NF) \
   O(RGetCNop,        NA,               ONE(CV),         ONE(RV),    NF) \
+  O(CGetCUNop,       NA,               ONE(CUV),        ONE(CV),    NF) \
+  O(UGetCUNop,       NA,               ONE(CUV),        ONE(UV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
   O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
@@ -447,7 +451,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(VGetS,           NA,               TWO(AV,CV),      ONE(VV),    NF) \
   O(AGetC,           NA,               ONE(CV),         ONE(AV),    NF) \
   O(AGetL,           ONE(LA),          NOV,             ONE(AV),    NF) \
-  O(GetMemoKey,      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
@@ -460,6 +464,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(LA,                                            \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
+  O(IsUninit,        NA,               ONE(CUV),        TWO(CUV,CV),NF) \
   O(AssertRATL,      TWO(LA,RATA),     NOV,             NOV,        NF) \
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
@@ -636,6 +641,10 @@ constexpr int32_t kMaxConcatN = 4;
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
   O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
+  O(MemoGet,         TWO(IVA, LAR),    MFINAL,          ONE(CUV),   NF) \
+  O(MemoSet,         TWO(IVA, LAR),    C_MFINAL,        ONE(CV),    NF) \
+  O(MaybeMemoType,   NA,               ONE(CV),         ONE(CV),    NF) \
+  O(IsMemoType,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(VarEnvDynCall,   NA,               NOV,             NOV,        NF) \
   O(HighInvalid,     NA,               NOV,             NOV,        NF)
 
@@ -1025,6 +1034,8 @@ inline bool isMemberFinalOp(Op op) {
     case Op::UnsetM:
     case Op::SetWithRefLML:
     case Op::SetWithRefRML:
+    case Op::MemoGet:
+    case Op::MemoSet:
       return true;
 
     default:

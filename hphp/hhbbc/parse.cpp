@@ -748,6 +748,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isGenerator        = fe.isGenerator;
   ret->isPairGenerator    = fe.isPairGenerator;
   ret->isNative           = fe.isNative;
+  ret->isMemoizeWrapper   = fe.isMemoizeWrapper;
   ret->dynCallWrapperId   = fe.dynCallWrapperId;
 
   /*

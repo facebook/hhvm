@@ -153,6 +153,9 @@ public:
   /* implicit */ String(const std::string &s)
   : m_str(StringData::Make(s.data(), s.size(), CopyString), NoIncRef{}) { }
 
+  /* implicit */ String(folly::StringPiece s)
+  : m_str(StringData::Make(s), NoIncRef{}) {}
+
   // attach to null terminated malloc'ed string, maybe free it now.
   String(char* s, AttachStringMode mode)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, mode) : nullptr, NoIncRef{}) {}

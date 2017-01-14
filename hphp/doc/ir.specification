@@ -1971,11 +1971,13 @@ To string conversions:
   Has the effects of array_key_exists(S0, S1) on an object S0. This either does
   collection accesses, or uses the ArrayAccess API.
 
-| GetMemoKey, D(Cell), S(Cell), Er|PRc
+| GetMemoKey, DMemoKey, S(Cell), Er|PRc
 
-  Given a cell, produces a cell that can be used as a cache key. Valid values
-  for the input include all basic types, arrays and collections, and objects
-  that implement IMemozieParam. Any other type will cause GetMemoKey to throw.
+  Given a cell, produces a string or an int that can be used as a memoize cache
+  key. Valid values for the input include all basic types, arrays and
+  collections, and objects that implement IMemozieParam. Any other type will
+  cause GetMemoKey to throw. This op can only be used within functions marked
+  as memoize wrappers.
 
 | ArrayIdx, D(Gen), S(Arr) S(Int,Str) S(Cell), NF
 
@@ -2683,6 +2685,25 @@ fields of that struct for holding intermediate values.
 | VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell), MElem|PRc|Er
 
   Get element with key S1 from base S0 as a reference.
+
+| MemoGet<loc-begin, loc-count>, D(Cell), S(FramePtr) S(PtrToGen), PRc
+
+  Perform a memoize cache lookup using S1. S1 must point to a dict serving as a
+  memoize cache, or point to a RefData containing such a dict. The keys used
+  are read from the exclusive local range [loc_begin, loc_begin+loc_count]
+  (where S0 is the pointer to the frame containing the locals). If the lookup
+  is successful, the element is returned (already inc-refd). If the element
+  is not found, Uninit is returned. This op can only be used inside a function
+  marked as a memoize wrapper.
+
+| MemoSet<loc-begin, loc-count>, ND, S(FramePtr) S(PtrToGen) S(Cell), MElem
+
+  Store S2 in the memoize cache given by S1. S1 must point to a dict serving as
+  a memoize cache or point to a RefData containing such a dict. They keys used
+  as read from the exclusive local range [loc_begin, loc_begin+loc_count]
+  (where S0 is the pointer to the frame containing the locals). S2 must not be
+  Uninit and will be inc-refd by the operation internally. This op can only be
+  used inside a function marked as a memoize wrapper.
 
 | BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell), MElem|Er
 

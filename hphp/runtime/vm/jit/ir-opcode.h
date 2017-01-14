@@ -82,6 +82,8 @@ struct SSATmp;
  *                    constants
  *     DUnion(N1,...) single dest has type that is the union of the specified
  *                      N srcs.
+ *     DMemoKey     single dst for memoization key generation. Type depends on
+ *                    source type.
  *
  * srcinfo:
  *

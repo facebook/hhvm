@@ -389,6 +389,15 @@ inline bool Func::isPreFunc() const {
   return m_isPreFunc;
 }
 
+inline bool Func::isMemoizeWrapper() const {
+  return shared()->m_isMemoizeWrapper;
+}
+
+inline const StringData* Func::memoizeImplName() const {
+  assertx(isMemoizeWrapper());
+  return genMemoizeImplName(name());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Builtins.
 

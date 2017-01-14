@@ -306,7 +306,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       euState.defClsMap[id] = startOffset;
     };
 
-    UNUSED auto emit_lar = [&](const LocalRange& range) {
+    auto emit_lar = [&](const LocalRange& range) {
       always_assert(range.first->id + range.restCount < func.locals.size());
       encodeLocalRange(ue, HPHP::LocalRange{range.first->id, range.restCount});
     };
@@ -804,6 +804,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
   fe.isNative = func.isNative;
+  fe.isMemoizeWrapper = func.isMemoizeWrapper;
   fe.dynCallWrapperId = func.dynCallWrapperId;
 
   auto const retTy = state.index.lookup_return_type_raw(&func);

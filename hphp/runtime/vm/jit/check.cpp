@@ -532,6 +532,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DCtx
 #define DCtxCls
 #define DCns
+#define DMemoKey
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -576,6 +577,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DCtxCls
 #undef DCns
 #undef DUnion
+#undef DMemoKey
 
   return true;
 }

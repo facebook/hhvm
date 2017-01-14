@@ -35,13 +35,12 @@ namespace HPHP {
 const StaticString
   s_86metadata("86metadata"),
   // The following are used in serialize_memoize_param(), and to not collide
-  // with optimizations there, must be empty or start with a characther >=
-  // FB_CS_MAX_CODE && < '0'
-  s_empty(""),
-  s_emptyArr("$array()"),
-  s_emptyStr("$"),
-  s_true("$true"),
-  s_false("$false");
+  // with optimizations there, must be empty or start with ~.
+  s_nullMemoKey(""),
+  s_emptyArrMemoKey("~array()"),
+  s_emptyStrMemoKey("~"),
+  s_trueMemoKey("~true"),
+  s_falseMemoKey("~false");
 
 ///////////////////////////////////////////////////////////////////////////////
 bool HHVM_FUNCTION(autoload_set_paths,
@@ -76,26 +75,29 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   assertx(param.m_type != KindOfRef);
   auto const type = param.m_type;
 
-  if (type == KindOfInt64) {
-    return param;
-  } else if (type == KindOfUninit || type == KindOfNull) {
-    return make_tv<KindOfPersistentString>(s_empty.get());
-  } else if (type == KindOfBoolean) {
-    return make_tv<KindOfPersistentString>(param.m_data.num ?
-                                 s_true.get() : s_false.get());
-  } else if (isStringType(type)) {
+  if (isStringType(type)) {
     auto const str = param.m_data.pstr;
     if (str->empty()) {
-      return make_tv<KindOfPersistentString>(s_emptyStr.get());
-    } else if ((unsigned char)str->data()[0] > '9') {
-      // If it's > '9' then its not strictly integer, and it doesn't
-      // start with '$', so we know it won't collide with an integer
-      // key or with any of our constants, so it's fine as is
+      return make_tv<KindOfPersistentString>(s_emptyStrMemoKey.get());
+    } else if ((unsigned char)str->data()[0] < '~') {
+      // fb_compact_serialize always returns a string with the high-bit set in
+      // the first character. Furthermore, we use ~ to begin all our special
+      // constants, so anything less than ~ can't collide. There's no worry
+      // about int-like strings because we use dicts (which don't perform key
+      // coercion) to store the memoized values.
       str->incRefCount();
       return param;
     }
   } else if (isContainer(param) && getContainerSize(param) == 0) {
-    return make_tv<KindOfPersistentString>(s_emptyArr.get());
+    return make_tv<KindOfPersistentString>(s_emptyArrMemoKey.get());
+  } else if (type == KindOfUninit || type == KindOfNull) {
+    return make_tv<KindOfPersistentString>(s_nullMemoKey.get());
+  } else if (type == KindOfBoolean) {
+    return make_tv<KindOfPersistentString>(
+      param.m_data.num ? s_trueMemoKey.get() : s_falseMemoKey.get()
+    );
+  } else if (type == KindOfInt64) {
+    return param;
   }
 
   return tvReturn(

@@ -1798,6 +1798,10 @@ OPTBLD_INLINE void iopPopR() {
   }
 }
 
+OPTBLD_INLINE void iopPopU() {
+  vmStack().popU();
+}
+
 OPTBLD_INLINE void iopDup() {
   vmStack().dup();
 }
@@ -1832,6 +1836,12 @@ OPTBLD_INLINE void iopUnboxRNop() {
 }
 
 OPTBLD_INLINE void iopRGetCNop() {
+}
+
+OPTBLD_INLINE void iopCGetCUNop() {
+}
+
+OPTBLD_INLINE void iopUGetCUNop() {
 }
 
 OPTBLD_INLINE void iopNull() {
@@ -3589,6 +3599,35 @@ OPTBLD_INLINE void iopSetWithRefRML(local_var local) {
   vmStack().popTV();
 }
 
+OPTBLD_INLINE void iopMemoGet(intva_t nDiscard,
+                              LocalRange locals) {
+  assertx(vmfp()->m_func->isMemoizeWrapper());
+  assertx(locals.first + locals.restCount < vmfp()->m_func->numLocals());
+  auto mstate = vmMInstrState();
+  auto const res = MixedArray::MemoGet(
+    mstate.base,
+    frame_local(vmfp(), locals.first),
+    locals.restCount + 1
+  );
+  mFinal(mstate, nDiscard, res);
+}
+
+OPTBLD_INLINE void iopMemoSet(intva_t nDiscard,
+                              LocalRange locals) {
+  assertx(vmfp()->m_func->isMemoizeWrapper());
+  assertx(locals.first + locals.restCount < vmfp()->m_func->numLocals());
+  auto const value = *vmStack().topC();
+  auto mstate = vmMInstrState();
+  MixedArray::MemoSet(
+    mstate.base,
+    frame_local(vmfp(), locals.first),
+    locals.restCount + 1,
+    value
+  );
+  vmStack().discard();
+  mFinal(mstate, nDiscard, value);
+}
+
 static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
   if (fr->m_type != KindOfRef) {
     tvBox(fr);
@@ -3679,6 +3718,7 @@ OPTBLD_FLT_INLINE void iopIssetL(local_var tv) {
 
 OPTBLD_INLINE static bool isTypeHelper(TypedValue* tv, IsTypeOp op) {
   switch (op) {
+  case IsTypeOp::Uninit: return tv->m_type == KindOfUninit;
   case IsTypeOp::Null:   return is_null(tvAsCVarRef(tv));
   case IsTypeOp::Bool:   return is_bool(tvAsCVarRef(tv));
   case IsTypeOp::Int:    return is_int(tvAsCVarRef(tv));
@@ -3710,6 +3750,22 @@ OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
   tvRefcountedDecRef(topTv);
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
+}
+
+OPTBLD_INLINE void iopIsUninit() {
+  auto const* cell = vmStack().topC();
+  assertx(cellIsPlausible(*cell));
+  vmStack().pushBool(cell->m_type == KindOfUninit);
+}
+
+OPTBLD_INLINE void iopMaybeMemoType() {
+  assertx(vmfp()->m_func->isMemoizeWrapper());
+  vmStack().replaceTV(make_tv<KindOfBoolean>(true));
+}
+
+OPTBLD_INLINE void iopIsMemoType() {
+  assertx(vmfp()->m_func->isMemoizeWrapper());
+  vmStack().replaceTV(make_tv<KindOfBoolean>(false));
 }
 
 OPTBLD_FLT_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
@@ -3806,10 +3862,72 @@ OPTBLD_INLINE void iopAKExists() {
   vmStack().replaceTV<KindOfBoolean>(result);
 }
 
-OPTBLD_INLINE void iopGetMemoKey() {
-  auto obj = vmStack().topTV();
-  auto var = HHVM_FN(serialize_memoize_param)(*obj);
-  vmStack().replaceTV(var);
+OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
+  auto const func = vmfp()->m_func;
+  assertx(func->isMemoizeWrapper());
+  assertx(!func->anyByRef());
+
+  // If this local corresponds to one of the function's parameters, and there's
+  // a useful type-hint (which is being enforced), we can use a more efficient
+  // memoization scheme based on the range of types we know this local can
+  // have. This scheme needs to agree with HHBBC and the JIT.
+  using MK = MemoKeyConstraint;
+  auto const mkc = [&]{
+    if (!RuntimeOption::RepoAuthoritative || !Repo::global().HardTypeHints) {
+      return MK::None;
+    }
+    if (loc.index >= func->numParams()) return MK::None;
+    return memoKeyConstraintFromTC(func->params()[loc.index].typeConstraint);
+  }();
+
+  if (UNLIKELY(loc.ptr->m_type == KindOfUninit)) {
+    tvWriteNull(loc.ptr);
+    raise_undefined_local(vmfp(), loc.index);
+  }
+
+  auto const key = [&](){
+    switch (mkc) {
+      case MK::Null:
+        assertx(loc.ptr->m_type == KindOfNull);
+        return make_tv<KindOfInt64>(0);
+      case MK::Int:
+      case MK::IntOrNull:
+        if (loc.ptr->m_type == KindOfInt64) {
+          return *loc.ptr;
+        } else {
+          assertx(loc.ptr->m_type == KindOfNull);
+          return make_tv<KindOfPersistentString>(s_nullMemoKey.get());
+        }
+      case MK::Bool:
+      case MK::BoolOrNull:
+        if (loc.ptr->m_type == KindOfBoolean) {
+          return make_tv<KindOfInt64>(loc.ptr->m_data.num);
+        } else {
+          assertx(loc.ptr->m_type == KindOfNull);
+          return make_tv<KindOfInt64>(2);
+        }
+      case MK::Str:
+      case MK::StrOrNull:
+        if (tvIsString(loc.ptr)) {
+          tvRefcountedIncRef(loc.ptr);
+          return *loc.ptr;
+        } else {
+          assertx(loc.ptr->m_type == KindOfNull);
+          return make_tv<KindOfInt64>(0);
+        }
+      case MK::IntOrStr:
+        assertx(tvIsString(loc.ptr) || loc.ptr->m_type == KindOfInt64);
+        tvRefcountedIncRef(loc.ptr);
+        return *loc.ptr;
+      case MK::None:
+        // Use the generic scheme, which is performed by
+        // serialize_memoize_param.
+        return HHVM_FN(serialize_memoize_param)(*loc.ptr);
+    }
+    not_reached();
+  }();
+
+  cellCopy(key, *vmStack().allocC());
 }
 
 namespace {
@@ -6165,7 +6283,7 @@ TCA iopWrapper(Op, void(*fn)(intva_t,intva_t), PC& pc) {
   return nullptr;
 }
 
-OPTBLD_INLINE UNUSED static
+OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(intva_t,LocalRange), PC& pc) {
   auto n1 = decode_intva(pc);
   auto n2 = decodeLocalRange(pc);

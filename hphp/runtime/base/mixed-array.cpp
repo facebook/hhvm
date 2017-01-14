@@ -2078,4 +2078,116 @@ bool MixedArray::DictNotSame(const ArrayData* ad1, const ArrayData* ad2) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+Cell MixedArray::MemoGet(const TypedValue* base,
+                         const TypedValue* keys,
+                         uint32_t nkeys) {
+  assertx(nkeys > 0);
+
+  auto const getPos = [&](const Cell& key, const MixedArray* a) {
+    if (key.m_type == KindOfInt64) {
+      auto const idx = key.m_data.num;
+      return a->find(idx, hash_int64(idx));
+    } else {
+      assertx(tvIsString(&key));
+      auto const str = key.m_data.pstr;
+      return a->find(str, str->hash());
+    }
+  };
+
+  auto const arr = tvToCell(base);
+  assertx(cellIsPlausible(*arr));
+  assertx(tvIsDict(arr));
+
+  // Consume all but the last key, walking through the chain of nested
+  // dictionaries.
+  auto current = asMixed(arr->m_data.parr);
+  assertx(current->isDict());
+  for (auto i = uint32_t{0}; i < nkeys - 1; ++i) {
+    auto const pos = getPos(*tvAssertCell(keys - i), current);
+    if (UNLIKELY(!validPos(pos))) return make_tv<KindOfUninit>();
+    auto const& tv = current->data()[pos].data;
+    assertx(cellIsPlausible(tv));
+    assertx(tvIsDict(&tv));
+    current = asMixed(tv.m_data.parr);
+    assertx(current->isDict());
+  }
+
+  // Consume the last key, which should result in the actual value (or Uninit if
+  // not present).
+  auto const pos = getPos(*tvAssertCell(keys - nkeys + 1), current);
+  if (UNLIKELY(!validPos(pos))) return make_tv<KindOfUninit>();
+  Cell out;
+  cellDup(current->data()[pos].data, out);
+  assertx(cellIsPlausible(out));
+  return out;
+}
+
+void MixedArray::MemoSet(TypedValue* startBase,
+                         const Cell* keys, uint32_t nkeys,
+                         Cell val) {
+  assertx(nkeys > 0);
+  assertx(cellIsPlausible(val));
+
+  auto const getInsert = [](const Cell& key, MixedArray* a) {
+    if (key.m_type == KindOfInt64) {
+      return a->insert(key.m_data.num);
+    } else {
+      assertx(tvIsString(&key));
+      return a->insert(key.m_data.pstr);
+    }
+  };
+
+  // If the given dict can't be updated in place, create a new copy, store it in
+  // the base, and return that. For the vast majority of cases, the dict can be
+  // updated in place because the only reference to it will be the memo
+  // cache. However reflection can get copies of it, so its not guaranteed to
+  // always have a ref-count of 1.
+  auto const cow = [](bool copy, MixedArray* a, Cell& base) {
+    auto copied = copy
+      ? a->copyMixedAndResizeIfNeeded()
+      : a->resizeIfNeeded();
+    if (a != copied) {
+      a = copied;
+      cellMove(make_tv<KindOfDict>(a), base);
+    }
+    return a;
+  };
+
+  auto base = tvToCell(startBase);
+  assertx(cellIsPlausible(*base));
+  assertx(tvIsDict(base));
+
+  // Consume all but the last key, walking through the chain of nested
+  // dictionaries, cowing them as necessary.
+  auto current = asMixed(base->m_data.parr);
+  assertx(current->isDict());
+  for (auto i = uint32_t{0}; i < nkeys - 1; ++i) {
+    current = cow(current->cowCheck(), current, *base);
+    auto const p = getInsert(*tvAssertCell(keys - i), current);
+    if (!p.found) {
+      // Extend the chain
+      p.tv.m_type = KindOfDict;
+      p.tv.m_data.parr = MakeReserveDict(0);
+    }
+    assertx(cellIsPlausible(p.tv));
+    assertx(tvIsDict(&p.tv));
+    current = asMixed(p.tv.m_data.parr);
+    assertx(current->isDict());
+    base = tvAssertCell(&p.tv);
+  }
+
+  current = cow(
+    current->cowCheck() || (tvIsDict(&val) && val.m_data.parr == current),
+    current,
+    *base
+  );
+  // Consume the last key, storing the actual value (and overwriting a previous
+  // value if present).
+  auto const p = getInsert(*tvAssertCell(keys - nkeys + 1), current);
+  p.found ? cellSet(val, *tvAssertCell(&p.tv)) : cellDup(val, p.tv);
+}
+
+/////////////////////////////////////////////////////////////////////
+
 }

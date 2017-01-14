@@ -805,6 +805,7 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
 }
 
 std::string DebuggerProxy::requestAuthToken() {
+  Lock lock(m_signalMutex);
   TRACE_RB(2, "DebuggerProxy::requestauthToken: sending auth request\n");
   CmdAuth cmd;
   if (!cmd.onServer(*this)) {

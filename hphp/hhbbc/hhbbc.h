@@ -56,7 +56,7 @@ std::pair<
   std::vector<std::unique_ptr<UnitEmitter>>,
   std::unique_ptr<ArrayTypeTable::Builder>
 >
-whole_program(std::vector<std::unique_ptr<UnitEmitter>>);
+whole_program(std::vector<std::unique_ptr<UnitEmitter>>, int num_threads = 0);
 
 //////////////////////////////////////////////////////////////////////
 

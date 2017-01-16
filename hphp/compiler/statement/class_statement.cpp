@@ -242,9 +242,10 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("trait %s", m_originalName.c_str());
   } else {
     switch (m_type) {
-      case T_CLASS:                              break;
-      case T_ABSTRACT: cg_printf("abstract ");   break;
-      case T_FINAL:    cg_printf("final ");      break;
+      case T_CLASS:                                  break;
+      case T_ABSTRACT: cg_printf("abstract ");       break;
+      case T_FINAL:    cg_printf("final ");          break;
+      case T_STATIC:   cg_printf("abstract final "); break;
       default:
         assert(false);
     }

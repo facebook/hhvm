@@ -2534,7 +2534,7 @@ bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
   auto changed = false;
   for (auto i = uint32_t{0}; i < vars.size(); ++i) {
     always_assert(vars[i].subtypeOf(current[i]));
-    if (current[i].strictSubtypeOf(vars[i])) {
+    if (vars[i].strictSubtypeOf(current[i])) {
       changed = true;
       current[i] = vars[i];
     }

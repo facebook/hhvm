@@ -371,6 +371,7 @@ inline SSATmp* popA(IRGS& env) { return assertType(pop(env), TCls); }
 inline SSATmp* popV(IRGS& env) { return assertType(pop(env), TBoxedInitCell); }
 inline SSATmp* popR(IRGS& env) { return assertType(pop(env), TGen); }
 inline SSATmp* popF(IRGS& env) { return assertType(pop(env), TGen); }
+inline SSATmp* popU(IRGS& env) { return assertType(pop(env), TUninit); }
 
 inline void discard(IRGS& env, uint32_t n) {
   env.irb->fs().decBCSPDepth(n);

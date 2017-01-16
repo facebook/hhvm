@@ -1005,6 +1005,15 @@ struct NewKeysetArrayData : IRExtraData {
   uint32_t size;
 };
 
+struct MemoData : IRExtraData {
+  explicit MemoData(LocalRange locals)
+    : locals(locals) {}
+
+  std::string show() const { return HPHP::show(locals); }
+
+  LocalRange locals;
+};
+
 struct MOpModeData : IRExtraData {
   explicit MOpModeData(MOpMode mode) : mode{mode} {}
 
@@ -1285,6 +1294,8 @@ X(ElemDX,                       MOpModeData);
 X(ElemUX,                       MOpModeData);
 X(CGetProp,                     MOpModeData);
 X(CGetElem,                     MOpModeData);
+X(MemoGet,                      MemoData);
+X(MemoSet,                      MemoData);
 X(SetOpProp,                    SetOpData);
 X(SetOpCell,                    SetOpData);
 X(IncDecProp,                   IncDecData);

@@ -95,6 +95,8 @@ static const struct {
   { OpPopR,        {Stack1|
                     DontGuardStack1|
                     IgnoreInnerType,  None,         OutNone         }},
+  { OpPopU,        {Stack1|
+                    DontGuardStack1,  None,         OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
   { OpBox,         {Stack1,           Stack1,       OutVInput       }},
   { OpUnbox,       {Stack1,           Stack1,       OutCInput       }},
@@ -256,6 +258,7 @@ static const struct {
   { OpIsTypeC,     {Stack1|
                     DontGuardStack1,  Stack1,       OutBoolean      }},
   { OpIsTypeL,     {Local,            Stack1,       OutIsTypeL      }},
+  { OpIsUninit,    {Stack1,           StackTop2,    OutBoolean      }},
 
   /*** 7. Mutator instructions ***/
 
@@ -399,7 +402,7 @@ static const struct {
   { OpAssertRATL,  {None,             None,         OutNone         }},
   { OpAssertRATStk,{None,             None,         OutNone         }},
   { OpBreakTraceHint,{None,           None,         OutNone         }},
-  { OpGetMemoKey,  {Stack1,           Stack1,       OutUnknown      }},
+  { OpGetMemoKeyL, {Local,            Stack1,       OutUnknown      }},
 
   /*** 14. Generator instructions ***/
 
@@ -469,6 +472,15 @@ static const struct {
                    {MBase,            None,         OutNone         }},
   { OpSetWithRefRML,
                    {Stack1|MBase,     None,         OutNone         }},
+  { OpMemoGet,     {BStackN|MBase|DontGuardBase|LocalRange,
+                                      Stack1,       OutUnknown      }},
+  { OpMemoSet,     {Stack1|BStackN|MBase|DontGuardBase|LocalRange,
+                                      Stack1,       OutSameAsInput1 }},
+  { OpMaybeMemoType, {Stack1|DontGuardStack1,
+                                      Stack1,       OutBoolean      }},
+  { OpIsMemoType,  {Stack1|DontGuardStack1,
+                                      Stack1,       OutBoolean      }},
+
 };
 
 namespace {
@@ -501,7 +513,7 @@ namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = FuncdRef | Local | Iter | AllLocals |
     DontGuardStack1 | IgnoreInnerType | DontGuardAny | This |
-    MBase | StackI | IdxA | MKey;
+    MBase | StackI | IdxA | MKey | LocalRange | DontGuardBase;
   mask &= ~ignore;
 
   static const uint64_t counts[][2] = {
@@ -537,6 +549,7 @@ int64_t getStackPopped(PC pc) {
     case Op::VGetM:
     case Op::IncDecM:
     case Op::UnsetM:
+    case Op::MemoGet:
     case Op::NewPackedArray:
     case Op::NewVecArray:
     case Op::NewKeysetArray:
@@ -552,6 +565,7 @@ int64_t getStackPopped(PC pc) {
     case Op::SetM:
     case Op::SetOpM:
     case Op::BindM:
+    case Op::MemoSet:
       return getImm(pc, 0).u_IVA + 1;
 
     case Op::NewStructArray: return getImmVector(pc).size();
@@ -586,6 +600,8 @@ bool isAlwaysNop(Op op) {
   case Op::Nop:
   case Op::UnboxRNop:
   case Op::RGetCNop:
+  case Op::CGetCUNop:
+  case Op::UGetCUNop:
   case Op::EntryNop:
     return true;
   case Op::VerifyRetTypeC:
@@ -619,6 +635,7 @@ bool isAlwaysNop(Op op) {
 #define OA(op) BA
 #define VSA(n)
 #define KA(n)
+#define LAR(n)
 #define O(name, imm, ...) case Op::name: imm break;
 
 size_t localImmIdx(Op op) {
@@ -663,6 +680,7 @@ size_t memberKeyImmIdx(Op op) {
 #undef OA
 #undef VSA
 #undef KA
+#undef LAR
 #undef O
 
 /*
@@ -742,6 +760,16 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     SKTRACE(1, sk, "getInputs: local %d\n", loc);
     inputs.emplace_back(Location::Local { uint32_t(loc) });
   }
+  if (flags & LocalRange) {
+    auto const& range = ni.imm[1].u_LAR;
+    SKTRACE(1, sk, "getInputs: localRange %d+%d\n",
+            range.first, range.restCount);
+    for (int i = 0; i < range.restCount+1; ++i) {
+      inputs.emplace_back(Location::Local { uint32_t(range.first + i) });
+      inputs.back().dontGuard = true;
+      inputs.back().dontBreak = true;
+    }
+  }
   if (flags & AllLocals) ni.ignoreInnerType = true;
 
   if (flags & MKey) {
@@ -769,6 +797,10 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   }
   if (flags & MBase) {
     inputs.emplace_back(Location::MBase{});
+    if (flags & DontGuardBase) {
+      inputs.back().dontGuard = true;
+      inputs.back().dontBreak = true;
+    }
   }
 
   SKTRACE(1, sk, "stack args: virtual sfo now %d\n", stackOff.offset);
@@ -826,6 +858,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::BreakTraceHint:
   case Op::IsTypeL:
   case Op::IsTypeC:
+  case Op::IsUninit:
   case Op::IncDecL:
   case Op::DefCls:
   case Op::FPushCuf:
@@ -926,7 +959,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::FPushObjMethodD:
   case Op::False:
   case Op::File:
-  case Op::GetMemoKey:
+  case Op::GetMemoKeyL:
   case Op::Idx:
   case Op::InitThisLoc:
   case Op::InstanceOf:
@@ -959,6 +992,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::PopC:
   case Op::PopR:
   case Op::PopV:
+  case Op::PopU:
   case Op::Print:
   case Op::PushL:
   case Op::RetC:
@@ -1013,6 +1047,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::SetWithRefLML:
   case Op::SetWithRefRML:
   case Op::VarEnvDynCall:
+  case Op::MemoGet:
+  case Op::MemoSet:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
@@ -1024,6 +1060,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::BoxRNop:
   case Op::UnboxRNop:
   case Op::RGetCNop:
+  case Op::CGetCUNop:
+  case Op::UGetCUNop:
   case Op::AddElemV:
   case Op::AddNewElemV:
   case Op::ClsCns:
@@ -1069,6 +1107,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::YieldFromDelegate:
   case Op::ContUnsetDelegate:
   case Op::NewKeysetArray:
+  case Op::MaybeMemoType:
+  case Op::IsMemoType:
     return true;
   }
 
@@ -1110,6 +1150,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_OA_IMPL(n) ni.imm[n].u_OA
 #define IMM_OA(subop)  (subop)IMM_OA_IMPL
 #define IMM_KA(n)      ni.imm[n].u_KA
+#define IMM_LAR(n)     ni.imm[n].u_LAR
 
 #define ONE(x0)           , IMM_##x0(0)
 #define TWO(x0,x1)        , IMM_##x0(0), IMM_##x1(1)
@@ -1146,6 +1187,7 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 
 //////////////////////////////////////////////////////////////////////
 

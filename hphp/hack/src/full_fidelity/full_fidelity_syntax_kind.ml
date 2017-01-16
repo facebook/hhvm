@@ -98,6 +98,7 @@ type t =
 | ConditionalExpression
 | EvalExpression
 | EmptyExpression
+| DefineExpression
 | IssetExpression
 | FunctionCallExpression
 | ParenthesizedExpression
@@ -231,6 +232,7 @@ let to_string kind =
   | ConditionalExpression -> "conditional_expression"
   | EvalExpression -> "eval_expression"
   | EmptyExpression -> "empty_expression"
+  | DefineExpression -> "define_expression"
   | IssetExpression -> "isset_expression"
   | FunctionCallExpression -> "function_call_expression"
   | ParenthesizedExpression -> "parenthesized_expression"

@@ -111,6 +111,8 @@ inline bool unionTypeMightRelax(const IRInstruction* inst,
 #define DSubtract(n,t) DofS(n)
 #define DCns           return false; // fixed type
 #define DUnion(...)    return unionTypeMightRelax(inst, IdxSeq<__VA_ARGS__>{});
+#define DMemoKey       assertx(inst->is(GetMemoKey)); \
+                         return typeMightRelax(inst->src(0));
 
 bool typeMightRelax(const SSATmp* tmp) {
   if (tmp == nullptr) return true;

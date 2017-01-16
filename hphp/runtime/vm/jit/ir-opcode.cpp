@@ -70,6 +70,7 @@ TRACE_SET_MOD(hhir);
 #define DSubtract(n,t) HasDest
 #define DCns           HasDest
 #define DUnion(...)    HasDest
+#define DMemoKey       HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -133,6 +134,7 @@ OpInfo g_opInfo[] = {
 #undef DSubtract
 #undef DCns
 #undef DUnion
+#undef DMemoKey
 
 ///////////////////////////////////////////////////////////////////////////////
 

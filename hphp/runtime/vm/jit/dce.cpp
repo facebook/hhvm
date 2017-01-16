@@ -200,14 +200,13 @@ bool canDCE(IRInstruction* inst) {
   case LdFuncNumParams:
   case LdStrLen:
   case LdVecElem:
-  case LdVecElemAddr:
+  case LdPackedArrayDataElemAddr:
   case LdClosureStaticLoc:
   case NewInstanceRaw:
   case NewArray:
   case NewMixedArray:
   case NewDictArray:
   case NewLikeArray:
-  case LdPackedArrayElemAddr:
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
@@ -265,6 +264,7 @@ bool canDCE(IRInstruction* inst) {
   case KeysetIdx:
   case GetTime:
   case Select:
+  case MemoGet:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -602,7 +602,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileArrayKind:
   case ProfileType:
   case ProfileMethod:
-  case CheckPackedArrayBounds:
+  case CheckPackedArrayDataBounds:
   case LdVectorSize:
   case VectorDoCow:
   case VectorHasImmCopy:
@@ -642,6 +642,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
   case ProfileInstanceCheck:
+  case MemoSet:
     return false;
   }
   not_reached();

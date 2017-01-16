@@ -141,10 +141,10 @@ static Variant do_eval(Unit* evalUnit, int depth, bool bypassCheck) {
 
   // Restore the error reporting level and then either return or throw
   req_data.setErrorReportingLevel(old_level);
-  if (result.first) {
-    throw_exn(Error::EvaluatingCode);
+  if (result.failed) {
+    throw_exn(Error::EvaluatingCode, result.error);
   }
-  return result.second;
+  return result.result;
 }
 
 // Same as do_eval(const Unit*, int) except that this evaluates a string

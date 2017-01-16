@@ -45,6 +45,7 @@ namespace HPHP { namespace HHBBC {
 template<class Pred>
 folly::Optional<Type> eval_cell(Pred p) {
   try {
+    assert(!RuntimeOption::EvalJit);
     ThrowAllErrorsSetter taes;
 
     Cell c = p();

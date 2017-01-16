@@ -489,11 +489,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                         check(src()->isA(t), t, nullptr); \
                         ++curSrc;                         \
                       }
-#define AK(kind)      {                                                 \
-                        Type t = Type::Array(ArrayData::k##kind##Kind); \
-                        check(src()->isA(t), t, nullptr);               \
-                        ++curSrc;                                       \
-                      }
+#define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
 #define C(T)          check(src()->hasConstVal(T) ||     \
                             src()->isA(TBottom),    \
                             Type(),                      \
@@ -536,6 +532,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DCtx
 #define DCtxCls
 #define DCns
+#define DMemoKey
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -580,6 +577,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DCtxCls
 #undef DCns
 #undef DUnion
+#undef DMemoKey
 
   return true;
 }

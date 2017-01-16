@@ -164,6 +164,27 @@ class HHBC(object):
 
             info['value'] = str(tag)[len('HPHP::RepoAuthType::Tag::'):]
 
+        elif immtype == V('HPHP::LAR'):
+            first = ptr.cast(T('unsigned char').pointer()).dereference()
+            if first & 0x1:
+                first_type = T('int32_t')
+            else:
+                first_type = T('unsigned char')
+
+            count = (ptr.cast(T('unsigned char').pointer())
+                     + first_type.sizeof).dereference()
+            if count & 0x1:
+                count_type = T('int32_t')
+            else:
+                count_type = T('unsigned char')
+
+            first = ptr.cast(first_type.pointer()).dereference()
+            count = (ptr.cast(T('unsigned char').pointer())
+                     + first_type.sizeof).cast(count_type.pointer()).dereference()
+
+            info['size'] = first_type.sizeof + count_type.sizeof
+            info['value'] = 'L:' + str(first >> 1) + '+' + str(count >> 1)
+
         else:
             table_name = 'HPHP::immSize(unsigned char const*, int)::argTypeToSizes'
             if immtype >= 0:

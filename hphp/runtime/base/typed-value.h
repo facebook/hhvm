@@ -98,7 +98,7 @@ union AuxUnion {
  */
 
 /*
- * A TypedValue is a descriminated PHP Value.  m_tag describes the contents
+ * A TypedValue is a descriminated PHP Value.  m_type describes the contents
  * of m_data.  m_aux is described above, and must only be read or written
  * in specialized contexts.
  */

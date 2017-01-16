@@ -236,6 +236,8 @@ class EditableSyntax
       return EvalExpression.from_json(json, position, source);
     case 'empty_expression':
       return EmptyExpression.from_json(json, position, source);
+    case 'define_expression':
+      return DefineExpression.from_json(json, position, source);
     case 'isset_expression':
       return IssetExpression.from_json(json, position, source);
     case 'function_call_expression':
@@ -663,6 +665,8 @@ class EditableToken extends EditableSyntax
        return new ContinueToken(leading, trailing);
     case 'default':
        return new DefaultToken(leading, trailing);
+    case 'define':
+       return new DefineToken(leading, trailing);
     case '__destruct':
        return new DestructToken(leading, trailing);
     case 'dict':
@@ -1189,6 +1193,13 @@ class DefaultToken extends EditableToken
   constructor(leading, trailing)
   {
     super('default', leading, trailing, 'default');
+  }
+}
+class DefineToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('define', leading, trailing, 'define');
   }
 }
 class DestructToken extends EditableToken
@@ -2482,7 +2493,7 @@ class EditableTrivia extends EditableSyntax
 
 class WhiteSpace extends EditableTrivia
 {
-  constructor(text) { super(whitespace, text); }
+  constructor(text) { super('whitespace', text); }
   with_text(text)
   {
     return new WhiteSpace(text);
@@ -2491,7 +2502,7 @@ class WhiteSpace extends EditableTrivia
 
 class EndOfLine extends EditableTrivia
 {
-  constructor(text) { super(end_of_line, text); }
+  constructor(text) { super('end_of_line', text); }
   with_text(text)
   {
     return new EndOfLine(text);
@@ -2500,7 +2511,7 @@ class EndOfLine extends EditableTrivia
 
 class DelimitedComment extends EditableTrivia
 {
-  constructor(text) { super(delimited_comment, text); }
+  constructor(text) { super('delimited_comment', text); }
   with_text(text)
   {
     return new DelimitedComment(text);
@@ -2509,7 +2520,7 @@ class DelimitedComment extends EditableTrivia
 
 class SingleLineComment extends EditableTrivia
 {
-  constructor(text) { super(single_line_comment, text); }
+  constructor(text) { super('single_line_comment', text); }
   with_text(text)
   {
     return new SingleLineComment(text);
@@ -2518,7 +2529,7 @@ class SingleLineComment extends EditableTrivia
 
 class Unsafe extends EditableTrivia
 {
-  constructor(text) { super(unsafe, text); }
+  constructor(text) { super('unsafe', text); }
   with_text(text)
   {
     return new Unsafe(text);
@@ -2527,7 +2538,7 @@ class Unsafe extends EditableTrivia
 
 class UnsafeExpression extends EditableTrivia
 {
-  constructor(text) { super(unsafe_expression, text); }
+  constructor(text) { super('unsafe_expression', text); }
   with_text(text)
   {
     return new UnsafeExpression(text);
@@ -2536,7 +2547,7 @@ class UnsafeExpression extends EditableTrivia
 
 class FixMe extends EditableTrivia
 {
-  constructor(text) { super(fix_me, text); }
+  constructor(text) { super('fix_me', text); }
   with_text(text)
   {
     return new FixMe(text);
@@ -2545,7 +2556,7 @@ class FixMe extends EditableTrivia
 
 class IgnoreError extends EditableTrivia
 {
-  constructor(text) { super(ignore_error, text); }
+  constructor(text) { super('ignore_error', text); }
   with_text(text)
   {
     return new IgnoreError(text);
@@ -2554,7 +2565,7 @@ class IgnoreError extends EditableTrivia
 
 class FallThrough extends EditableTrivia
 {
-  constructor(text) { super(fall_through, text); }
+  constructor(text) { super('fall_through', text); }
   with_text(text)
   {
     return new FallThrough(text);
@@ -10827,6 +10838,110 @@ class EmptyExpression extends EditableSyntax
     return EmptyExpression._children_keys;
   }
 }
+class DefineExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_paren,
+    argument_list,
+    right_paren)
+  {
+    super('define_expression', {
+      keyword: keyword,
+      left_paren: left_paren,
+      argument_list: argument_list,
+      right_paren: right_paren });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_paren() { return this.children.left_paren; }
+  get argument_list() { return this.children.argument_list; }
+  get right_paren() { return this.children.right_paren; }
+  with_keyword(keyword){
+    return new DefineExpression(
+      keyword,
+      this.left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_left_paren(left_paren){
+    return new DefineExpression(
+      this.keyword,
+      left_paren,
+      this.argument_list,
+      this.right_paren);
+  }
+  with_argument_list(argument_list){
+    return new DefineExpression(
+      this.keyword,
+      this.left_paren,
+      argument_list,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new DefineExpression(
+      this.keyword,
+      this.left_paren,
+      this.argument_list,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var argument_list = this.argument_list.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_paren === this.left_paren &&
+      argument_list === this.argument_list &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new DefineExpression(
+        keyword,
+        left_paren,
+        argument_list,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.define_keyword, position, source);
+    position += keyword.width;
+    let left_paren = EditableSyntax.from_json(
+      json.define_left_paren, position, source);
+    position += left_paren.width;
+    let argument_list = EditableSyntax.from_json(
+      json.define_argument_list, position, source);
+    position += argument_list.width;
+    let right_paren = EditableSyntax.from_json(
+      json.define_right_paren, position, source);
+    position += right_paren.width;
+    return new DefineExpression(
+        keyword,
+        left_paren,
+        argument_list,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (DefineExpression._children_keys == null)
+      DefineExpression._children_keys = [
+        'keyword',
+        'left_paren',
+        'argument_list',
+        'right_paren'];
+    return DefineExpression._children_keys;
+  }
+}
 class IssetExpression extends EditableSyntax
 {
   constructor(
@@ -15361,6 +15476,7 @@ exports.ConstToken = ConstToken;
 exports.ConstructToken = ConstructToken;
 exports.ContinueToken = ContinueToken;
 exports.DefaultToken = DefaultToken;
+exports.DefineToken = DefineToken;
 exports.DestructToken = DestructToken;
 exports.DictToken = DictToken;
 exports.DoToken = DoToken;
@@ -15610,6 +15726,7 @@ exports.InstanceofExpression = InstanceofExpression;
 exports.ConditionalExpression = ConditionalExpression;
 exports.EvalExpression = EvalExpression;
 exports.EmptyExpression = EmptyExpression;
+exports.DefineExpression = DefineExpression;
 exports.IssetExpression = IssetExpression;
 exports.FunctionCallExpression = FunctionCallExpression;
 exports.ParenthesizedExpression = ParenthesizedExpression;

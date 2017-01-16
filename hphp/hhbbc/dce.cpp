@@ -330,7 +330,7 @@ void pop(Env& env) { pop(env, Use::Used, InstrIdSet{}); }
 
 Type topT(Env& env, uint32_t idx = 0) {
   assert(idx < env.stateBefore.stack.size());
-  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1];
+  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1].type;
 }
 
 Type topC(Env& env, uint32_t idx = 0) {
@@ -479,6 +479,7 @@ void dce(Env& env, const bc::PopC&)       { discardNonDtors(env); }
 // For PopV and PopR currently we never know if can't run a
 // destructor.
 void dce(Env& env, const bc::PopA&)       { discard(env); }
+void dce(Env& env, const bc::PopU&)       { discard(env); }
 void dce(Env& env, const bc::Int&)        { pushRemovable(env); }
 void dce(Env& env, const bc::String&)     { pushRemovable(env); }
 void dce(Env& env, const bc::Array&)      { pushRemovable(env); }
@@ -731,7 +732,7 @@ dce_visit(const Index& index,
       [&] {
         using namespace folly::gen;
         return from(states[idx].first.stack)
-          | map([&] (const Type& t) { return show(t); })
+          | map([&] (const StackElem& e) { return show(e.type); })
           | unsplit<std::string>(" ");
       }()
     );

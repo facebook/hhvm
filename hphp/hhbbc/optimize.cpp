@@ -61,8 +61,11 @@ bool ignoresStackInput(Op op) {
   switch (op) {
   case Op::UnboxRNop:
   case Op::BoxRNop:
+  case Op::UGetCUNop:
+  case Op::CGetCUNop:
   case Op::FPassVNop:
   case Op::FPassC:
+  case Op::PopU:
     return true;
   default:
     return false;
@@ -97,6 +100,9 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
 
   for (size_t i = 0; i < state.locals.size(); ++i) {
     if (options.FilterAssertions) {
+      // MemoGet and MemoSet read from a range of locals, but don't gain any
+      // benefit from knowing their types.
+      if (bcode.op == Op::MemoGet || bcode.op == Op::MemoSet) continue;
       if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
         continue;
       }
@@ -114,7 +120,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
 
   auto const assert_stack = [&] (size_t idx) {
     assert(idx < state.stack.size());
-    auto const realT = state.stack[state.stack.size() - idx - 1];
+    auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
     if (flav.subtypeOf(TCls)) return;
@@ -241,6 +247,7 @@ bool hasObviousStackOutput(Op op) {
   case Op::EmptyS:
   case Op::IsTypeC:
   case Op::IsTypeL:
+  case Op::IsUninit:
   case Op::OODeclExists:
     return true;
 
@@ -313,7 +320,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   // All outputs of the instruction must have constant types for this
   // to be allowed.
   for (auto i = size_t{0}; i < numPush; ++i) {
-    if (!tv(state.stack[stkSize - i - 1])) return false;
+    if (!tv(state.stack[stkSize - i - 1].type)) return false;
   }
 
   // Pop the inputs, and push the constants.
@@ -329,6 +336,10 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     case Flavor::F:  not_reached();    break;
     case Flavor::U:  not_reached();    break;
     case Flavor::CR: not_reached();    break;
+    case Flavor::CUV:
+      // We only support C's for CUV right now.
+      gen(bc::PopC {});
+      break;
     case Flavor::CVU:
       // Note that we only support C's for CVU so far (this only comes up with
       // FCallBuiltin)---we'll fail the verifier if something changes to send
@@ -339,7 +350,7 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   }
 
   for (auto i = size_t{0}; i < numPush; ++i) {
-    auto const v = tv(state.stack[stkSize - i - 1]);
+    auto const v = tv(state.stack[stkSize - i - 1].type);
     switch (v->m_type) {
     case KindOfUninit:        not_reached();          break;
     case KindOfNull:          gen(bc::Null {});       break;

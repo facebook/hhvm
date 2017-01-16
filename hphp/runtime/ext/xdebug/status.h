@@ -76,10 +76,14 @@ enum class XDebugError {
 /* An exception wrapper over XDebugError. */
 struct XDebugExn : std::exception {
   explicit XDebugExn(XDebugError error) : error(error) {}
+  XDebugExn(XDebugError error,
+            const std::string& errorMsg) : error(error),
+                                           errorMsg(errorMsg) {}
 
   const char* what() const noexcept override;
 
   XDebugError error;
+  const std::string errorMsg;
 };
 
 /*
@@ -101,6 +105,7 @@ const char* xdebug_error_str(XDebugError);
 
 /* Helper for throwing XDebug errors. */
 void throw_exn(XDebugError);
+void throw_exn(XDebugError, const std::string&);
 
 ////////////////////////////////////////////////////////////////////////////////
 }

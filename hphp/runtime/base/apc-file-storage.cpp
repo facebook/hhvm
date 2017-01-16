@@ -45,14 +45,8 @@ void APCFileStorage::enable(const std::string& prefix, size_t chunkSize) {
   if (chunkSize <= PaddingSize) return;
   m_prefix = prefix;
   m_chunkSize = chunkSize;
+  assert(m_chunkSize < ~uint32_t(0));  // Must fit in low 32 bits of m_current.
   if (m_state != StorageState::Invalid) {
-    return;
-  }
-  if (!addFile()) {
-    Logger::Error(
-        "Failed to open initial file for file-backed APC storage, "
-        "falling back to in-memory mode");
-    m_state = StorageState::Full;
     return;
   }
   m_state = StorageState::Open;
@@ -63,10 +57,11 @@ char* APCFileStorage::put(const char* data, uint32_t len) {
   if (m_state != StorageState::Open || totalLen > m_chunkSize) {
     return nullptr;
   }
-  assert(!m_chunks.empty());
 
   auto maxOffset = m_chunkSize - totalLen;
   auto current = m_current.load(std::memory_order_relaxed);
+  // m_current is intialized to -1 to postpone allocation to first 'put'.
+  assert(!m_chunks.empty() || current == ~0ull);
   do {
     if (UNLIKELY(static_cast<uint32_t>(current) > maxOffset)) {
       std::lock_guard<std::mutex> lock(m_lock);

@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -292,7 +293,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckInitMem,
                    CheckInitProps,
                    CheckInitSProps,
-                   CheckPackedArrayBounds,
+                   CheckPackedArrayDataBounds,
                    CheckMixedArrayOffset,
                    CheckDictOffset,
                    CheckKeysetOffset,
@@ -2696,7 +2697,8 @@ SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCheckPackedArrayDataBounds(State& env,
+                                           const IRInstruction* inst) {
   auto const array = inst->src(0);
   auto const idx   = inst->src(1);
   if (!idx->hasConstVal()) return mergeBranchDests(env, inst);
@@ -3331,6 +3333,45 @@ SSATmp* simplifyCheckRange(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (mightRelax(env, src)) return nullptr;
+
+  // Note: this all uses the fully generic memo key scheme. If we used a more
+  // specific scheme, then the GetMemoKey op wouldn't have been emitted.
+
+  if (src->hasConstVal()) {
+    try {
+      ThrowAllErrorsSetter taes;
+      auto const key =
+        HHVM_FN(serialize_memoize_param)(*src->variantVal().asTypedValue());
+      SCOPE_EXIT { tvRefcountedDecRef(key); };
+      assertx(cellIsPlausible(key));
+      if (tvIsString(&key)) {
+        return cns(env, makeStaticString(key.m_data.pstr));
+      } else {
+        assertx(key.m_type == KindOfInt64);
+        return cns(env, key.m_data.num);
+      }
+    } catch (...) {
+    }
+  }
+
+  if (src->isA(TInt)) return src;
+  if (src->isA(TBool)) {
+    return gen(
+      env,
+      Select,
+      src,
+      cns(env, s_trueMemoKey.get()),
+      cns(env, s_falseMemoKey.get())
+    );
+  }
+  if (src->isA(TNull)) return cns(env, s_nullMemoKey.get());
+
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3362,7 +3403,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckType)
   X(CheckTypeMem)
   X(AssertType)
-  X(CheckPackedArrayBounds)
+  X(CheckPackedArrayDataBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
   X(CoerceCellToInt)
@@ -3562,6 +3603,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(JmpSwitchDest)
   X(CheckRange)
   X(SpillFrame)
+  X(GetMemoKey)
   default: break;
   }
 #undef X

@@ -228,6 +228,9 @@ struct PreClassEmitter {
     return std::make_pair(m_line1, m_line2);
   }
 
+  bool areMemoizeCacheKeysAllocated() const {
+    return m_memoizeInstanceSerial > 0;
+  }
   int getNextMemoizeCacheKey() {
     return m_memoizeInstanceSerial++;
   }

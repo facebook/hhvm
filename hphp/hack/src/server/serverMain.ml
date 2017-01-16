@@ -159,7 +159,8 @@ let handle_persistent_connection_ genv env client =
    | Unix.Unix_error (Unix.EPIPE, _, _)
    | Sys_error("Connection reset by peer")
    | Sys_error("Broken pipe")
-   | ServerCommandTypes.Read_command_timeout ->
+   | ServerCommandTypes.Read_command_timeout
+   | ServerClientProvider.Client_went_away ->
      shutdown_persistent_client env client
    | e ->
      let msg = Printexc.to_string e in

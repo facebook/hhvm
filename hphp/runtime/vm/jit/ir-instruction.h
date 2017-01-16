@@ -126,7 +126,6 @@ struct IRInstruction {
   bool hasDst() const;
   bool naryDst() const;
   bool consumesReferences() const;
-  bool killsSources() const;
   bool mayRaiseError() const;
   bool isTerminal() const;
   bool hasEdges() const;

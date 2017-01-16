@@ -489,6 +489,7 @@ void emitPopA(IRGS& env)   { popA(env); }
 void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopR(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
+void emitPopU(IRGS& env)   { popU(env); }
 
 void emitDir(IRGS& env)    { push(env, cns(env, curUnit(env)->dirpath())); }
 void emitFile(IRGS& env)   { push(env, cns(env, curUnit(env)->filepath())); }
@@ -535,6 +536,14 @@ void emitBoxRNop(IRGS& env) {
 }
 void emitUnboxRNop(IRGS& env) {
   assertTypeStack(env, BCSPRelOffset{0}, TCell);
+}
+void emitCGetCUNop(IRGS& env) {
+  auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
+  auto const knownType = env.irb->stack(offset, DataTypeSpecific).type;
+  assertTypeStack(env, BCSPRelOffset{0}, knownType & TInitCell);
+}
+void emitUGetCUNop(IRGS& env) {
+  assertTypeStack(env, BCSPRelOffset{0}, TUninit);
 }
 void emitRGetCNop(IRGS&)           {}
 void emitFPassC(IRGS&, int32_t)    {}

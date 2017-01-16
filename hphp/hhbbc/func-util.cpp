@@ -18,6 +18,8 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
 
+#include "hphp/runtime/vm/func.h"
+
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
@@ -47,6 +49,11 @@ bool is_volatile_local(borrowed_ptr<const php::Func> func,
   return l->name->same(s_http_response_header.get()) ||
          l->name->same(s_php_errormsg.get()) ||
          l->name->same(s_86metadata.get());
+}
+
+SString memoize_impl_name(borrowed_ptr<const php::Func> func) {
+  always_assert(func->isMemoizeWrapper);
+  return Func::genMemoizeImplName(func->name);
 }
 
 //////////////////////////////////////////////////////////////////////

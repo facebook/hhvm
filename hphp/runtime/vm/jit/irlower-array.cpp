@@ -67,7 +67,7 @@ void cgProfileArrayKind(IRLS& env, const IRInstruction* inst) {
                SyncOptions::None, argGroup(env, inst).reg(profile).ssa(0));
 }
 
-void cgCheckPackedArrayBounds(IRLS& env, const IRInstruction* inst) {
+void cgCheckPackedArrayDataBounds(IRLS& env, const IRInstruction* inst) {
   static_assert(ArrayData::sizeofSize() == 4, "");
 
   // We may check packed array bounds on profiled arrays that we do not

@@ -437,6 +437,65 @@ void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
       "You can't change accessibility in Whole Program mode"
     );
   }
+
+  /*
+   * This interface can be used to clear memo caches, but we don't want to allow
+   * setting the memo cache values to arbitrary values. HHBBC and the JIT make
+   * aggressive assumptions about the layout and values of the caches to improve
+   * performance. So, if the property being set is a memo cache, we'll allow
+   * resetting it to an empty value, but nothing else.
+   *
+   * Furthermore, existing PHP code assumes that the memo cache stores arrays,
+   * not dicts, so for backwards compatibility, we'll allow null or any empty
+   * array-like value to mean clear.
+   */
+  auto const isMultiMemo = prop.slice().endsWith("$multi$memoize_cache");
+  auto const isSingleMemo = prop.slice().endsWith("$single$memoize_cache");
+  auto const isGuardedSingleMemo =
+    prop.slice().endsWith("$guarded_single$memoize_cache");
+  auto const isGuard =
+    prop.slice().endsWith("$guarded_single$memoize_cache$guard");
+
+  if (isGuard) {
+    // Allow setting the guard to false only. Clear out the associated cache at
+    // the same time.
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfBoolean || tv->m_data.num) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    obj->o_set(prop, false_varNR, cls);
+    obj->o_set(
+      prop.slice().subpiece(0, prop.length() - 6),
+      init_null_variant,
+      cls
+    );
+    return;
+  }
+
+  if (isMultiMemo || isSingleMemo || isGuardedSingleMemo) {
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfNull &&
+        (!isArrayLikeType(tv->m_type) || tv->m_data.parr->size() != 0)) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    // Reset to empty value. Depending on the type of the memo cache, this might
+    // be null or an empty dict.
+    if (isMultiMemo) {
+      obj->o_set(
+        prop,
+        cellAsCVarRef(make_tv<KindOfPersistentDict>(staticEmptyDictArray())),
+        cls
+      );
+    } else if (isSingleMemo || isGuardedSingleMemo) {
+      obj->o_set(prop, init_null_variant, cls);
+      if (isGuardedSingleMemo) {
+        // If there's a guard, reset it to false as well.
+        obj->o_set(folly::sformat("{}$guard", prop), false_varNR, cls);
+      }
+    }
+    return;
+  }
+
   obj->o_set(prop, value, cls);
 }
 
@@ -492,6 +551,74 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
+
+  /*
+   * Like in hphp_set_property(), this interface can be used to clear memo
+   * caches, but we don't want to allow setting the memo cache values to
+   * arbitrary values. HHBBC and the JIT make aggressive assumptions about the
+   * layout and values of the caches to improve performance. So, if the property
+   * being set is a memo cache, we'll allow resetting it to an empty value, but
+   * nothing else.
+   *
+   * Furthermore, existing PHP code assumes that the memo cache stores arrays,
+   * not dicts, so for backwards compatibility, we'll allow null or any empty
+   * array-like value to mean clear.
+   */
+  auto const isMultiMemo = prop.slice().endsWith("$multi$memoize_cache");
+  auto const isSingleMemo = prop.slice().endsWith("$single$memoize_cache");
+  auto const isGuardedSingleMemo =
+    prop.slice().endsWith("$guarded_single$memoize_cache");
+  auto const isGuard =
+    prop.slice().endsWith("$guarded_single$memoize_cache$guard");
+
+  if (isGuard) {
+    // Allow setting the guard to false only. Clear out the associated cache at
+    // the same time.
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfBoolean || tv->m_data.num) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    cellSet(make_tv<KindOfBoolean>(false), *lookup.prop);
+
+    auto const cacheLookup = class_->getSProp(
+      force ? class_ : arGetContextClass(vmfp()),
+      String{prop.slice().subpiece(0, prop.length() - 6)}.get()
+    );
+    if (cacheLookup.prop) {
+      cellSet(make_tv<KindOfNull>(), *cacheLookup.prop);
+    }
+    return;
+  }
+
+  if (isMultiMemo || isSingleMemo || isGuardedSingleMemo) {
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfNull &&
+        (!isArrayLikeType(tv->m_type) || tv->m_data.parr->size() != 0)) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    // Reset to empty value. Depending on the type of the memo cache, this might
+    // be null or an empty dict.
+    if (isMultiMemo) {
+      cellSet(
+        make_tv<KindOfPersistentDict>(staticEmptyDictArray()),
+        *lookup.prop
+      );
+    } else if (isSingleMemo || isGuardedSingleMemo) {
+      cellSet(make_tv<KindOfNull>(), *lookup.prop);
+      if (isGuardedSingleMemo) {
+        // If there's a guard, reset it to false as well.
+        auto const guardLookup = class_->getSProp(
+          force ? class_ : arGetContextClass(vmfp()),
+          String{folly::sformat("{}$guard", prop)}.get()
+        );
+        if (guardLookup.prop) {
+          cellSet(make_tv<KindOfBoolean>(false), *guardLookup.prop);
+        }
+      }
+    }
+    return;
+  }
+
   tvAsVariant(lookup.prop) = value;
 }
 

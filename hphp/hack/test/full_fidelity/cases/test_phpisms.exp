@@ -61,6 +61,12 @@
                       (default_label((default))((;)(whitespace))))
                     (missing)))
                   ((})(whitespace)(single_line_comment)(end_of_line)))
+                  (unset_statement
+                    ((whitespace)(unset))
+                    ((lparen))
+                    (list(list_item(variable((variable)))(missing)))
+                    ((rparen))
+                    ((;)(whitespace)(single_line_comment)(end_of_line)))
                   (return_statement
                     ((whitespace)(return)(whitespace))
                     (binary_expression

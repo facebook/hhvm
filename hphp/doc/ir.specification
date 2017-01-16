@@ -102,71 +102,61 @@ data" in an arbitrary C++ struct (see extra-data.h).
 Each instruction has a signature which describes its effect, parameter types,
 and return type, for example:
 
-  r:Bool = IsType<T> s:Gen
+  IsType<T>, D(Bool), S(Cell), NF
 
-By convention we use infix; destinations on the left, = represents assignment,
-then the opcode name, and source parameters. Types are to the right of the
-entities they modify, separated by : for results, sources, and variables, or
-delimited by <> for instruction modifiers.
+The first column is the instruction name (and optional Type parameter in <>).
 
-Instruction flags further describe their behavior:
+The second column describes the result (destination) using one of the D*
+macros documented in hphp/runtime/vm/jit/ir-opcode.h, or ND for no destination.
 
-HasDest
-NaryDest
+The third column describes the sources, separated by whitespace, using macros
+documented in hphp/runtime/vm/jit/ir-opcode.h, or NA if there are no sources.
 
-  The instruction defines exactly one destination variable (HasDest) or a
-  varying number of destination variables (NaryDest). These flags are mutually
-  exclusive. An instruction with neither of these flags set has zero
-  destination variables.
+The fourth column contains the flags, described below. The short name of the
+flag (used in this file) is given first, with the long name that it expands to 
+in hphp/runtime/vm/jit/ir-opcode.cpp in parentheses after it.
 
-  Note that an instruction's destination variable may sometimes be a copy of
-  one of the input variables. (For example, AddElem returns the array it took
-  as an input.)
+NF
 
-CallsNative
+  The instruction has no flags.
 
-  Indicates that the instruction will call a native helper.
+Er (MayRaiseError)
 
-  The register allocator uses this to optimize register spills around native
-  calls and to bias register allocation toward arguments and return values.
+  The instruction may raise an error, and must have an edge to a catch block.
 
-ConsumesRC
-
-  The instruction consumes a reference to one or more of its sources, either by
-  decreasing its refcount or storing the reference to memory.
-
-ProducesRC
+PRc (ProducesRC)
 
   The instruction produces a value with an unconsumed reference that must be
   consumed, either by DecRefing it or storing it somewhere in memory.
 
-MayRaiseError
+CRc (ConsumesRC)
 
-  The instruction may raise an error, and must have an edge to a catch block.
+  The instruction consumes a reference to one or more of its sources, either by
+  decreasing its refcount or storing the reference to memory.
 
-Terminal
+T (Terminal)
 
   The instruction has no next instruction; it either jumps, returns, or throws.
 
-Branch
+B (Branch)
 
   The instruction has a (sometimes optional) taken edge. Instructions that are
   conditional branches (i.e. a Branch that is not Terminal) will also have a
   next edge.
 
-Passthrough
+P (Passthrough)
 
   The value of the instruction's dest is the same as one of its inputs; it
   differs only in the refcount of the underlying object, the type of the
   variable, or some other property that doesn't affect the value of the
   variable itself.
 
-MInstrProp
+MProp (MInstrProp)
 
   The instruction may affect the type and/or value of its base operand,
   operating on object properties.
 
-MInstrElem
+MElem (MInstrElem)
 
   The instruction may affect the type and/or value of its base operand,
   operating on array elements.
@@ -1641,7 +1631,7 @@ To string conversions:
 
 | StMem, ND, S(PtrToGen) S(Gen), CRc
 
-  Store S2 into the location pointed to by S0.
+  Store S1 into the location pointed to by S0.
 
 | StElem, ND, S(PtrToCell) S(Int) S(Cell), CRc
 
@@ -1981,11 +1971,13 @@ To string conversions:
   Has the effects of array_key_exists(S0, S1) on an object S0. This either does
   collection accesses, or uses the ArrayAccess API.
 
-| GetMemoKey, D(Cell), S(Cell), Er|PRc
+| GetMemoKey, DMemoKey, S(Cell), Er|PRc
 
-  Given a cell, produces a cell that can be used as a cache key. Valid values
-  for the input include all basic types, arrays and collections, and objects
-  that implement IMemozieParam. Any other type will cause GetMemoKey to throw.
+  Given a cell, produces a string or an int that can be used as a memoize cache
+  key. Valid values for the input include all basic types, arrays and
+  collections, and objects that implement IMemozieParam. Any other type will
+  cause GetMemoKey to throw. This op can only be used within functions marked
+  as memoize wrappers.
 
 | ArrayIdx, D(Gen), S(Arr) S(Int,Str) S(Cell), NF
 
@@ -2537,7 +2529,7 @@ fields of that struct for holding intermediate values.
 
   Profile the offset of the element keyed by S1 in S0.
 
-| CheckMixedArrayOffset<pos>, ND, AK(Mixed) S(Int,Str), B
+| CheckMixedArrayOffset<pos>, ND, S(AK(Mixed)) S(Int,Str), B
 
   Check that `pos' is within the usage bounds of S0 (including tombstones), and
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
@@ -2583,7 +2575,7 @@ fields of that struct for holding intermediate values.
   ElemArray{D,U} both take a PtrToGen for the base operand, but expect it to be
   a PtrToArr or PtrToBoxedArr.  T is the type of the base array.
 
-| ElemMixedArrayK<pos>, D(PtrToElemGen), AK(Mixed) S(Int,Str), NF
+| ElemMixedArrayK<pos>, D(PtrToElemGen), S(AK(Mixed)) S(Int,Str), NF
 
   Like ElemArray, but the element for S1 is at a known position `pos' in S0.
 
@@ -2647,7 +2639,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| MixedArrayGetK<pos>, DArrElem, AK(Mixed) S(Int,Str), NF
+| MixedArrayGetK<pos>, DArrElem, S(AK(Mixed)) S(Int,Str), NF
 
   Like ArrayGet, but the element for S1 is at a known position `pos' in S0.
 
@@ -2693,6 +2685,25 @@ fields of that struct for holding intermediate values.
 | VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell), MElem|PRc|Er
 
   Get element with key S1 from base S0 as a reference.
+
+| MemoGet<loc-begin, loc-count>, D(Cell), S(FramePtr) S(PtrToGen), PRc
+
+  Perform a memoize cache lookup using S1. S1 must point to a dict serving as a
+  memoize cache, or point to a RefData containing such a dict. The keys used
+  are read from the exclusive local range [loc_begin, loc_begin+loc_count]
+  (where S0 is the pointer to the frame containing the locals). If the lookup
+  is successful, the element is returned (already inc-refd). If the element
+  is not found, Uninit is returned. This op can only be used inside a function
+  marked as a memoize wrapper.
+
+| MemoSet<loc-begin, loc-count>, ND, S(FramePtr) S(PtrToGen) S(Cell), MElem
+
+  Store S2 in the memoize cache given by S1. S1 must point to a dict serving as
+  a memoize cache or point to a RefData containing such a dict. They keys used
+  as read from the exclusive local range [loc_begin, loc_begin+loc_count]
+  (where S0 is the pointer to the frame containing the locals). S2 must not be
+  Uninit and will be inc-refd by the operation internally. This op can only be
+  used inside a function marked as a memoize wrapper.
 
 | BindElem, ND, S(PtrToGen) S(Cell) S(BoxedCell), MElem|Er
 
@@ -2867,26 +2878,22 @@ fields of that struct for holding intermediate values.
 
   Profile the Func in the ActRec that was just pushed onto the stack.
 
-| CheckPackedArrayBounds, ND, AK(Packed) S(Int), B
+| CheckPackedArrayDataBounds, ND, S(AK(Packed),Vec) S(Int), B
 
-  Checks that the index in S1 is within the bounds of the packed array in S0.
-  Branches to B if the index is out of bounds.
+  Checks that the index in S1 is within the bounds of the packed array or
+  vector array in S0. Branches to B if the index is out of bounds.
 
-| LdPackedArrayElemAddr<T>, DParamPtr(Elem), AK(Packed) S(Int), NF
+| LdPackedArrayDataElemAddr<T>, DParamPtr(Elem), S(AK(Packed),Vec) S(Int), NF
 
-  Load the address of the element at index S1 of the packed array in S0.
+  Loads the address of the element at index S1 of the packed array or vec array
+  in S0. This instruction assumes the array actually contains an element at
+  that offset (IE, the array has the proper length).
 
 | LdVecElem, DVecElem, S(Vec) S(Int), NF
 
   Loads the element of the vec array in S0 at offset S1. This instruction
   assumes that the vec actually contains an element at that offset (IE, the vec
   has the proper length).
-
-| LdVecElemAddr<T>, DParamPtr(Elem), S(Vec) S(Int), NF
-
-  Loads the address of the element at index S1 of the vec array in S0. This
-  instruction assumes the vec actually contains an element at that offset (IE,
-  the vec has the proper length).
 
 | LdVectorSize, D(Int), S(Obj), NF
 

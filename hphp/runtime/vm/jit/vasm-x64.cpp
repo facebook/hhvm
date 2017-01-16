@@ -1016,7 +1016,7 @@ void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
 void lowerForX64(Vunit& unit) {
-  vasm_lower(unit, [&] (Vinstr& inst, Vlabel b, size_t i) {
+  vasm_lower(unit, [&] (const VLS& env, Vinstr& inst, Vlabel b, size_t i) {
     switch (inst.op) {
 #define O(name, ...)                      \
       case Vinstr::name:                  \

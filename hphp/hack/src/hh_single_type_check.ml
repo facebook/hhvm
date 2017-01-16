@@ -595,27 +595,8 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       if errors <> []
       then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
-  | Dump_tast ->
-      let pos_ty_map = ref Pos.Map.empty in
-      Typing_hooks.attach_infer_ty_hook (Typed_ast.save_ty pos_ty_map);
-      let errors = check_errors opts errors files_info in
-      Typing_hooks.remove_all_hooks ();
-      let nasts = Relative_path.Map.fold files_info
-        ~f:begin fun fn fileinfo nasts ->
-          Relative_path.Map.add nasts ~key:fn
-          ~data:(nast_for_file opts fn fileinfo)
-        end ~init:Relative_path.Map.empty
-      in
-      if errors <> []
-      then (error (List.hd_exn errors); exit 2);
-      Relative_path.Map.iter nasts ~f:begin fun fn nast ->
-        if (Relative_path.S.compare fn builtins_filename) = 0 then ()
-        else begin
-          Printf.eprintf "%s:\n%s\n"
-            (Relative_path.S.to_string fn)
-            (Typed_ast_printer.print_string !pos_ty_map nast)
-        end
-      end
+  | Dump_tast -> Printf.printf "no typed AST to dump, yet\n"
+
 
 (*****************************************************************************)
 (* Main entry point *)

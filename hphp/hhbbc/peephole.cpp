@@ -105,8 +105,8 @@ void ConcatPeephole::append(const Bytecode& op,
     auto ind2 = nstack - 2;
 
     // Non-string concat; just append, squashing if this terminates a stream.
-    if (!state.stack[ind1].subtypeOf(TStr) ||
-        !state.stack[ind2].subtypeOf(TStr)) {
+    if (!state.stack[ind1].type.subtypeOf(TStr) ||
+        !state.stack[ind2].type.subtypeOf(TStr)) {
       if (nstack == prevsz) {
         squash();
       }

@@ -523,7 +523,7 @@ module GenerateFFJavaScript = struct
   let trivia_classes { trivia_kind; trivia_text } =
     Printf.sprintf "class %s extends EditableTrivia
 {
-  constructor(text) { super(%s, text); }
+  constructor(text) { super('%s', text); }
   with_text(text)
   {
     return new %s(text);

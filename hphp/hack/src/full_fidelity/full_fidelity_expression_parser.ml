@@ -175,9 +175,9 @@ module WithStatementAndDeclAndTypeParser
       * Should we allow a trailing comma? it is not a function call and
         never has more than one argument. See D4273242 for discussion.
       * Is there any restriction on the kind of expression this can be?
-      * Is "empty" case-insensitive?
       * Should this be an error in strict mode?
       * Should this be in the specification?
+      * Empty is case-insensitive; should use of non-lowercase be an error?
     *)
     let (parser, keyword) = assert_token parser Empty in
     let (parser, left) = expect_left_paren parser in
@@ -191,9 +191,9 @@ module WithStatementAndDeclAndTypeParser
       * Should we allow a trailing comma? it is not a function call and
         never has more than one argument. See D4273242 for discussion.
       * Is there any restriction on the kind of expression this can be?
-      * Is "eval" case-insensitive?
       * Should this be an error in strict mode?
       * Should this be in the specification?
+      * Eval is case-insensitive. Should use of non-lowercase be an error?
     *)
     let (parser, keyword) = assert_token parser Eval in
     let (parser, left) = expect_left_paren parser in
@@ -206,11 +206,11 @@ module WithStatementAndDeclAndTypeParser
     (* TODO: This is a PHP-ism. Open questions:
       * Should we allow a trailing comma? See D4273242 for discussion.
       * Is there any restriction on the kind of expression the arguments can be?
-      * Is "isset" case-insensitive?
       * Should this be an error in strict mode?
       * Should this be in the specification?
       * PHP requires that there be at least one argument; should we require
         that? if so, should we give the error in the parser or a later pass?
+      * Isset is case-insensitive. Should use of non-lowercase be an error?
     *)
     let (parser, keyword) = assert_token parser Isset in
     let (parser, left, args, right) = parse_expression_list_opt parser in
@@ -746,6 +746,7 @@ module WithStatementAndDeclAndTypeParser
     | Continue
     | Dict
     | Default
+    | Define
     | Destruct
     | Do
     | Double

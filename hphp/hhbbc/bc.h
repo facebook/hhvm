@@ -104,6 +104,21 @@ inline bool operator!=(MKey a, MKey b) {
   return !(a == b);
 }
 
+// Represents a non-empty range of locals. There's always a first local,
+// followed by a count of additional ones.
+struct LocalRange {
+  borrowed_ptr<php::Local> first;
+  uint32_t restCount;
+};
+
+inline bool operator==(const LocalRange& a, const LocalRange& b) {
+  return a.first == b.first && a.restCount == b.restCount;
+}
+
+inline bool operator!=(const LocalRange& a, const LocalRange& b) {
+  return !(a == b);
+}
+
 struct BCHashHelper {
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
   static size_t hash(SString s) { return s->hash(); }
@@ -119,6 +134,10 @@ struct BCHashHelper {
 
   static size_t hash(std::pair<IterKind,borrowed_ptr<php::Iter>> kv) {
     return std::hash<decltype(kv.second)>()(kv.second);
+  }
+
+  static size_t hash(LocalRange range) {
+    return HPHP::hash_int64_pair((uintptr_t)range.first, range.restCount);
   }
 
   template<class T>
@@ -166,6 +185,7 @@ namespace bc {
 #define IMM_TY_OA(type) type
 #define IMM_TY_VSA      std::vector<SString>
 #define IMM_TY_KA       MKey
+#define IMM_TY_LAR      LocalRange
 
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
@@ -183,6 +203,7 @@ namespace bc {
 #define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
 #define IMM_NAME_VSA(n)     keys
 #define IMM_NAME_KA(n)      mkey
+#define IMM_NAME_LAR(n)     locrange
 
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
@@ -199,6 +220,7 @@ namespace bc {
 #define IMM_EXTRA_OA(x)
 #define IMM_EXTRA_VSA
 #define IMM_EXTRA_KA
+#define IMM_EXTRA_LAR
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
@@ -265,6 +287,7 @@ namespace bc {
 #define POP_VV  if (i == 0) return Flavor::V
 #define POP_FV  if (i == 0) return Flavor::F
 #define POP_RV  if (i == 0) return Flavor::R
+#define POP_CUV if (i == 0) return Flavor::CUV;
 
 #define POP_NOV             uint32_t numPop() const { return 0; } \
                             Flavor popFlavor(uint32_t) const { not_reached(); }
@@ -408,6 +431,7 @@ OPCODES
 #undef IMM_TY_OA
 #undef IMM_TY_VSA
 #undef IMM_TY_KA
+#undef IMM_TY_LAR
 
 // These are deliberately not undefined, so they can be used in other
 // places.
@@ -425,6 +449,7 @@ OPCODES
 // #undef IMM_NAME_BA
 // #undef IMM_NAME_OA
 // #undef IMM_NAME_OA_IMPL
+// #undef IMM_NAME_LAR
 
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
@@ -440,6 +465,7 @@ OPCODES
 #undef IMM_EXTRA_BA
 #undef IMM_EXTRA_OA
 #undef IMM_EXTRA_KA
+#undef IMM_EXTRA_LAR
 
 #undef IMM_MEM
 #undef IMM_MEM_NA

@@ -31,6 +31,21 @@ let make_eol width =
 let make_single_line_comment width =
   { kind = SingleLineComment; width }
 
+let make_fallthrough width =
+  { kind = FallThrough; width }
+
+let make_unsafe width =
+  { kind = Unsafe; width }
+
+let make_unsafe_expression width =
+  { kind = UnsafeExpression; width }
+
+let make_fix_me width =
+  { kind = FixMe; width}
+
+let make_ignore_error width =
+  { kind = IgnoreError; width }
+
 let make_delimited_comment width =
   { kind = DelimitedComment; width }
 

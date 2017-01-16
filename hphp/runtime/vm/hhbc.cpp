@@ -130,6 +130,14 @@ int immSize(PC origPC, int idx) {
     return encodedRATSize(pc);
   }
 
+  if (immType(op, idx) == LAR) {
+    if (idx >= 1) pc += immSize(origPC, 0);
+    if (idx >= 2) pc += immSize(origPC, 1);
+    if (idx >= 3) pc += immSize(origPC, 2);
+    return encoded_iva_size(decode_raw<uint8_t>(pc)) +
+      encoded_iva_size(decode_raw<uint8_t>(pc));
+  }
+
   if (immIsVector(op, idx)) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
@@ -184,6 +192,8 @@ ArgUnion getImm(PC const origPC, int idx, const Unit* unit) {
   } else if (type == KA) {
     assert(unit != nullptr);
     retval.u_KA = decode_member_key(pc, unit);
+  } else if (type == LAR) {
+    retval.u_LAR = decodeLocalRange(pc);
   } else if (!immIsVector(op, cursor)) {
     always_assert(type != RATA);  // Decode RATAs with a different function.
     memcpy(&retval.bytes, pc, immSize(origPC, idx));
@@ -251,6 +261,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #define IMM_OA(x) 0
 #define IMM_VSA 0
 #define IMM_KA 0
+#define IMM_LAR 0
 #define ONE(a) IMM_##a
 #define TWO(a, b) (IMM_##a + 2 * IMM_##b)
 #define THREE(a, b, c) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c)
@@ -273,6 +284,7 @@ Offset* instrJumpOffset(PC const origPC) {
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 #undef ONE
 #undef TWO
 #undef THREE
@@ -879,6 +891,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   out << " >";                                          \
 } while (false)
 #define H_KA out << ' ' << show(decode_member_key(it, u))
+#define H_LAR out << ' ' << show(decodeLocalRange(it))
 
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
@@ -1131,6 +1144,14 @@ int instrFpToArDelta(const Func* func, PC opcode) {
   auto const fpi = func->findFPI(func->unit()->offsetOf(opcode));
   assert(fpi != nullptr);
   return fpi->m_fpOff;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string show(const LocalRange& range) {
+  return folly::sformat(
+    "L:{}+{}", range.first, range.restCount
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

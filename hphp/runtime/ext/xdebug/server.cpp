@@ -349,7 +349,7 @@ void XDebugServer::pollSocketLoop() {
       m_requestThread->m_reqInjectionData.setFlag(DebuggerSignalFlag);
     } catch (const XDebugExn& exn) {
       log("Polling thread got invalid command: %s\n", m_bufferCur);
-      sendErrorMessage(cmd, exn.error);
+      sendErrorMessage(cmd, exn);
     }
   }
 }
@@ -522,13 +522,22 @@ void XDebugServer::addStatus(xdebug_xml_node& node) {
   xdebug_xml_add_attribute(&node, "reason", reason);
 }
 
-void XDebugServer::addError(xdebug_xml_node& node, XDebugError code) {
+void XDebugServer::addError(xdebug_xml_node& node, const XDebugExn& ex) {
   auto error = xdebug_xml_node_init("error");
-  xdebug_xml_add_attribute(error, "code", static_cast<int>(code));
+  xdebug_xml_add_attribute(error, "code", static_cast<int>(ex.error));
   xdebug_xml_add_child(&node, error);
 
   auto message = xdebug_xml_node_init("message");
-  xdebug_xml_add_text(message, const_cast<char*>(xdebug_error_str(code)), 0);
+  if (ex.errorMsg.empty()) {
+    xdebug_xml_add_text(message,
+                        const_cast<char*>(xdebug_error_str(ex.error)), 0);
+
+  } else {
+    xdebug_xml_add_text(message, xdebug_sprintf("%s\n%s",
+                                                xdebug_error_str(ex.error),
+                                                ex.errorMsg.c_str()));
+  }
+
   xdebug_xml_add_child(error, message);
 }
 
@@ -643,7 +652,7 @@ void XDebugServer::addLastCommandIfAvailable(xdebug_xml_node& node) {
 
 void XDebugServer::sendErrorMessage(
   const std::shared_ptr<XDebugCommand>& cmd,
-  XDebugError code
+  const XDebugExn& error
 ) {
   auto response = xdebug_xml_node_init("response");
   SCOPE_EXIT { xdebug_xml_node_dtor(response); };
@@ -651,7 +660,7 @@ void XDebugServer::sendErrorMessage(
   if (cmd != nullptr) {
     addCommand(*response, *cmd);
   }
-  addError(*response, code);
+  addError(*response, error);
   sendResponse(*response);
 }
 
@@ -813,7 +822,7 @@ bool XDebugServer::doCommandLoop() {
       cmd = parseCommand();
       should_continue = processCommand(cmd);
     } catch (const XDebugExn& exn) {
-      sendErrorMessage(cmd, exn.error);
+      sendErrorMessage(cmd, exn);
     }
   } while (!should_continue);
 

@@ -349,6 +349,13 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         }
       }
     }
+
+    if (op == Op::GetMemoKeyL || op == Op::MemoGet || op == Op::MemoSet) {
+      if (!m_func->isMemoizeWrapper()) {
+        error("%s can only appear within memoize wrappers\n", opcodeToName(op));
+        ok = false;
+      }
+    }
   }
   // Check each branch target lands on a valid instruction boundary
   // within this region.
@@ -549,6 +556,15 @@ bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
   return ok;
 }
 
+bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
+  auto ok = true;
+  auto const range = decodeLocalRange(pc);
+  for (auto i = uint32_t{0}; i < range.restCount+1; ++i) {
+    ok &= checkLocal(instr, range.first + i);
+  }
+  return ok;
+}
+
 /**
  * Check instruction and its immediates. Returns false if we can't continue
  * because we don't know the length of this instruction or one of the
@@ -677,12 +693,14 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPassM:
   case Op::IncDecM:
   case Op::UnsetM:
+  case Op::MemoGet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
     return m_tmp_sig;
   case Op::SetM:
   case Op::SetOpM:
+  case Op::MemoSet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
     }

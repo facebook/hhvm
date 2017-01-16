@@ -2025,13 +2025,13 @@ StrNR ExecutionContext::createFunction(const String& args,
   return lambda->nameStr();
 }
 
-std::pair<bool,Variant>
+ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?php" prepended already
   auto unit = compile_string(code->data(), code->size());
   if (unit == nullptr) {
     raise_error("Syntax error");
-    return {true, init_null_variant};
+    return {true, init_null_variant, "Syntax error"};
   }
 
   // Do not JIT this unit, we are using it exactly once.
@@ -2039,7 +2039,7 @@ ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   return evalPHPDebugger(unit, frame);
 }
 
-std::pair<bool,Variant>
+ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   always_assert(!RuntimeOption::RepoAuthoritative);
 
@@ -2086,6 +2086,9 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   const static StaticString s_phpException("Hit a php exception");
   const static StaticString s_exit("Hit exit");
   const static StaticString s_fatal("Hit fatal");
+  std::ostringstream errorString;
+  std::string stack;
+
   try {
     // Start with the correct parent FP so that VarEnv can properly exitFP().
     // Note that if the same VarEnv is used across multiple frames, the most
@@ -2104,38 +2107,42 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
         invokeFunc(unit->getMain(functionClass), init_null_variant,
                    this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
                    InvokePseudoMain)
-    )};
+    ), ""};
   } catch (FatalErrorException &e) {
-    g_context->write(s_fatal);
-    g_context->write(" : ");
-    g_context->write(e.getMessage().c_str());
-    g_context->write("\n");
-    g_context->write(ExtendedLogger::StringOfStackTrace(e.getBacktrace()));
+    errorString << s_fatal.data();
+    errorString << " : ";
+    errorString << e.getMessage().c_str();
+    errorString << "\n";
+    stack = ExtendedLogger::StringOfStackTrace(e.getBacktrace());
   } catch (ExitException &e) {
-    g_context->write(s_exit.data());
-    g_context->write(" : ");
-    std::ostringstream os;
-    os << ExitException::ExitCode;
-    g_context->write(os.str());
+    errorString << s_exit.data();
+    errorString << " : ";
+    errorString << ExitException::ExitCode;
   } catch (Eval::DebuggerException &e) {
   } catch (Exception &e) {
-    g_context->write(s_cppException.data());
-    g_context->write(" : ");
-    g_context->write(e.getMessage().c_str());
+    errorString << s_cppException.data();
+    errorString << " : ";
+    errorString << e.getMessage().c_str();
     ExtendedException* ee = dynamic_cast<ExtendedException*>(&e);
     if (ee) {
-      g_context->write("\n");
-      g_context->write(
-        ExtendedLogger::StringOfStackTrace(ee->getBacktrace()));
+      errorString << "\n";
+      stack = ExtendedLogger::StringOfStackTrace(ee->getBacktrace());
     }
   } catch (Object &e) {
-    g_context->write(s_phpException.data());
-    g_context->write(" : ");
-    g_context->write(e->invokeToString().data());
+    errorString << s_phpException.data();
+    errorString << " : ";
+    errorString << e->invokeToString().data();
   } catch (...) {
-    g_context->write(s_cppException.data());
+    errorString << s_cppException.data();
   }
-  return {true, init_null_variant};
+
+  auto errorStr = errorString.str();
+  g_context->write(errorStr);
+  if (!stack.empty()) {
+    g_context->write(stack.c_str());
+  }
+
+  return {true, init_null_variant, errorStr};
 }
 
 void ExecutionContext::enterDebuggerDummyEnv() {

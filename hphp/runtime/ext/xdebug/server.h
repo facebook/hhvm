@@ -114,14 +114,14 @@ struct XDebugServer {
   /* Send xml response message for input error to the client. */
   void sendErrorMessage(
     const std::shared_ptr<XDebugCommand>& cmd,
-    XDebugError code
+    const XDebugExn& error
   );
 
   /* Adds the xdebug xmlns to the node. */
   void addXmlns(xdebug_xml_node& node);
 
-  /* Add the error with the passed error code to the given node. */
-  void addError(xdebug_xml_node& node, XDebugError code);
+  /* Add the specified error to the given node. */
+  void addError(xdebug_xml_node& node, const XDebugExn& ex);
 
   //////////////////////////////////////////////////////////////////////////////
 

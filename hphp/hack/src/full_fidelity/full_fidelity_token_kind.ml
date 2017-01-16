@@ -41,6 +41,7 @@ type t =
   | Construct
   | Continue
   | Default
+  | Define
   | Destruct
   | Dict
   | Do
@@ -227,6 +228,7 @@ let from_string keyword =
   | "__construct" -> Some Construct
   | "continue" -> Some Continue
   | "default" -> Some Default
+  | "define" -> Some Define
   | "__destruct" -> Some Destruct
   | "dict" -> Some Dict
   | "do" -> Some Do
@@ -386,6 +388,7 @@ match kind with
   | Construct -> "__construct"
   | Continue -> "continue"
   | Default -> "default"
+  | Define -> "define"
   | Destruct -> "__destruct"
   | Dict -> "dict"
   | Do -> "do"

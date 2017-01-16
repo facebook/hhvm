@@ -87,170 +87,33 @@ and tprim =
   | Tarraykey
   | Tnoreturn
 
-and class_ = {
-  c_mode           : FileInfo.mode    ;
-  c_final          : bool             ;
-  c_is_xhp         : bool;
-  c_kind           : Ast.class_kind   ;
-  c_name           : sid              ;
-  (* The type parameters of a class A<T> (T is the parameter) *)
-  c_tparams :
-    tparam list *
-    (* keeping around the ast version of the constraint only
-     * for the purposes of Naming.class_meth_bodies *)
-    ((Ast.constraint_kind * Ast.hint) list SMap.t);
-  c_extends        : hint list        ;
-  c_uses           : hint list        ;
-  c_xhp_attr_uses  : hint list        ;
-  c_xhp_category   : pstring list     ;
-  c_req_extends    : hint list        ;
-  c_req_implements : hint list        ;
-  c_implements     : hint list        ;
-  c_consts         : class_const list ;
-  c_typeconsts     : class_typeconst list   ;
-  c_static_vars    : class_var list   ;
-  c_vars           : class_var list   ;
-  c_constructor    : method_ option   ;
-  c_static_methods : method_ list     ;
-  c_methods        : method_ list     ;
-  c_user_attributes : user_attribute list;
-  c_enum           : enum_ option     ;
-}
-
-and enum_ = {
-  e_base       : hint;
-  e_constraint : hint option;
-}
-
-and user_attribute = {
-  ua_name: sid;
-  ua_params: expr list (* user attributes are restricted to scalar values *)
-}
-
-and tparam = Ast.variance * sid * (Ast.constraint_kind * hint) list
-
-and where_constraint = hint * Ast.constraint_kind * hint
-
-(* expr = None indicates an abstract const *)
-and class_const = hint option * sid * expr option
-
-(* This represents a type const definition. If a type const is abstract then
- * then the type hint acts as a constraint. Any concrete definition of the
- * type const must satisfy the constraint.
- *
- * If the type const is not abstract then a type must be specified.
- *)
-and class_typeconst = {
-  c_tconst_name : sid;
-  c_tconst_constraint : hint option;
-  c_tconst_type : hint option;
-}
-
-and class_var = {
-  cv_final      : bool        ;
-  cv_is_xhp     : bool        ;
-  cv_visibility : visibility  ;
-  cv_type       : hint option ;
-  cv_id         : sid         ;
-  cv_expr       : expr option ;
-}
-
-and method_ = {
-  m_final           : bool                ;
-  m_abstract        : bool                ;
-  m_visibility      : visibility          ;
-  m_name            : sid                 ;
-  m_tparams         : tparam list         ;
-  m_where_constraints : where_constraint list;
-  m_variadic        : fun_variadicity     ;
-  m_params          : fun_param list      ;
-  m_body            : func_body           ;
-  m_fun_kind        : Ast.fun_kind        ;
-  m_user_attributes : user_attribute list ;
-  m_ret             : hint option         ;
-}
-
-and visibility =
-  | Private
-  | Public
-  | Protected
-
-and og_null_flavor =
+type og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
 
-and is_reference = bool
-and is_variadic = bool
-and fun_param = {
-  param_hint : hint option;
-  param_is_reference : is_reference;
-  param_is_variadic : is_variadic;
-  param_pos : Pos.t;
-  param_name : string;
-  param_expr : expr option;
-}
+type kvc_kind = [
+  | `Map
+  | `ImmMap
+  | `Dict ]
 
-and fun_variadicity = (* does function take varying number of args? *)
-  | FVvariadicArg of fun_param (* PHP5.6 ...$args finishes the func declaration *)
-  | FVellipsis    (* HH ... finishes the declaration; deprecate for ...$args? *)
-  | FVnonVariadic (* standard non variadic function *)
+type vc_kind = [
+  | `Vector
+  | `ImmVector
+  | `Vec
+  | `Set
+  | `ImmSet
+  | `Pair
+  | `Keyset ]
 
-and fun_ = {
-  f_mode     : FileInfo.mode;
-  f_ret      : hint option;
-  f_name     : sid;
-  f_tparams  : tparam list;
-  f_variadic : fun_variadicity;
-  f_params   : fun_param list;
-  f_body     : func_body;
-  f_fun_kind : Ast.fun_kind;
-  f_user_attributes : user_attribute list;
-}
+type tparam = Ast.variance * sid * (Ast.constraint_kind * hint) list
 
-and typedef_visibility = Transparent | Opaque
+module type AnnotationType = sig
+  type t
+end
 
-and typedef = {
-  t_mode : FileInfo.mode;
-  t_name : sid;
-  t_tparams : tparam list;
-  t_constraint : hint option;
-  t_vis : typedef_visibility;
-  t_kind : hint;
-  t_user_attributes : user_attribute list;
-}
+module AnnotatedAST(Annotation: AnnotationType) = struct
 
-and gconst = {
-  cst_mode: FileInfo.mode;
-  cst_name: Ast.id;
-  cst_type: hint option;
-  cst_value: expr option;
-}
-
-and func_body =
-  | UnnamedBody of func_unnamed_body
-  | NamedBody of func_named_body
-
-and func_unnamed_body = {
-  (* Unnamed AST for the function body *)
-  fub_ast       : Ast.block;
-  (* Unnamed AST for the function type params *)
-  fub_tparams   : Ast.tparam list;
-  (* Namespace info *)
-  fub_namespace : Namespace_env.env;
-}
-
-and func_named_body = {
-  (* Named AST for the function body *)
-  fnb_nast     : block;
-  (* True if there are any UNSAFE blocks; the presence of any unsafe
-   * block in the function makes comparing the function body to the
-   * declared return type impossible, since that block could return;
-   * functions declared in Mdecl are by definition UNSAFE
-   *)
-  fnb_unsafe   : bool;
-}
-
-and stmt =
+type stmt =
   | Expr of expr
   | Break of Pos.t
   | Continue of Pos.t
@@ -282,21 +145,7 @@ and class_id =
   | CIexpr of expr
   | CI of sid
 
-and kvc_kind = [
-  | `Map
-  | `ImmMap
-  | `Dict ]
-
-and vc_kind = [
-  | `Vector
-  | `ImmVector
-  | `Vec
-  | `Set
-  | `ImmSet
-  | `Pair
-  | `Keyset ]
-
-and expr = Pos.t * expr_
+and expr = Annotation.t * expr_
 and expr_ =
   | Any
   | Array of afield list
@@ -375,6 +224,169 @@ and special_func =
   | Gena of expr
   | Genva of expr list
   | Gen_array_rec of expr
+
+and is_reference = bool
+and is_variadic = bool
+and fun_param = {
+  param_hint : hint option;
+  param_is_reference : is_reference;
+  param_is_variadic : is_variadic;
+  param_pos : Pos.t;
+  param_name : string;
+  param_expr : expr option;
+}
+
+and fun_variadicity = (* does function take varying number of args? *)
+  | FVvariadicArg of fun_param (* PHP5.6 ...$args finishes the func declaration *)
+  | FVellipsis    (* HH ... finishes the declaration; deprecate for ...$args? *)
+  | FVnonVariadic (* standard non variadic function *)
+
+and fun_ = {
+  f_mode     : FileInfo.mode;
+  f_ret      : hint option;
+  f_name     : sid;
+  f_tparams  : tparam list;
+  f_variadic : fun_variadicity;
+  f_params   : fun_param list;
+  f_body     : func_body;
+  f_fun_kind : Ast.fun_kind;
+  f_user_attributes : user_attribute list;
+}
+
+and func_body =
+  | UnnamedBody of func_unnamed_body
+  | NamedBody of func_named_body
+
+and func_unnamed_body = {
+  (* Unnamed AST for the function body *)
+  fub_ast       : Ast.block;
+  (* Unnamed AST for the function type params *)
+  fub_tparams   : Ast.tparam list;
+  (* Namespace info *)
+  fub_namespace : Namespace_env.env;
+}
+
+and func_named_body = {
+  (* Named AST for the function body *)
+  fnb_nast     : block;
+  (* True if there are any UNSAFE blocks; the presence of any unsafe
+   * block in the function makes comparing the function body to the
+   * declared return type impossible, since that block could return;
+   * functions declared in Mdecl are by definition UNSAFE
+   *)
+  fnb_unsafe   : bool;
+}
+
+and user_attribute = {
+  ua_name: sid;
+  ua_params: expr list (* user attributes are restricted to scalar values *)
+}
+
+end
+
+module PosAnnotatedAST = AnnotatedAST(struct type t = Pos.t end)
+include PosAnnotatedAST
+
+type class_ = {
+  c_mode           : FileInfo.mode    ;
+  c_final          : bool             ;
+  c_is_xhp         : bool;
+  c_kind           : Ast.class_kind   ;
+  c_name           : sid              ;
+  (* The type parameters of a class A<T> (T is the parameter) *)
+  c_tparams :
+    tparam list *
+    (* keeping around the ast version of the constraint only
+     * for the purposes of Naming.class_meth_bodies *)
+    ((Ast.constraint_kind * Ast.hint) list SMap.t);
+  c_extends        : hint list        ;
+  c_uses           : hint list        ;
+  c_xhp_attr_uses  : hint list        ;
+  c_xhp_category   : pstring list     ;
+  c_req_extends    : hint list        ;
+  c_req_implements : hint list        ;
+  c_implements     : hint list        ;
+  c_consts         : class_const list ;
+  c_typeconsts     : class_typeconst list   ;
+  c_static_vars    : class_var list   ;
+  c_vars           : class_var list   ;
+  c_constructor    : method_ option   ;
+  c_static_methods : method_ list     ;
+  c_methods        : method_ list     ;
+  c_user_attributes : user_attribute list;
+  c_enum           : enum_ option     ;
+}
+
+and enum_ = {
+  e_base       : hint;
+  e_constraint : hint option;
+}
+
+and where_constraint = hint * Ast.constraint_kind * hint
+
+(* expr = None indicates an abstract const *)
+and class_const = hint option * sid * expr option
+
+(* This represents a type const definition. If a type const is abstract then
+ * then the type hint acts as a constraint. Any concrete definition of the
+ * type const must satisfy the constraint.
+ *
+ * If the type const is not abstract then a type must be specified.
+ *)
+and class_typeconst = {
+  c_tconst_name : sid;
+  c_tconst_constraint : hint option;
+  c_tconst_type : hint option;
+}
+
+and class_var = {
+  cv_final      : bool        ;
+  cv_is_xhp     : bool        ;
+  cv_visibility : visibility  ;
+  cv_type       : hint option ;
+  cv_id         : sid         ;
+  cv_expr       : expr option ;
+}
+
+and method_ = {
+  m_final           : bool                ;
+  m_abstract        : bool                ;
+  m_visibility      : visibility          ;
+  m_name            : sid                 ;
+  m_tparams         : tparam list         ;
+  m_where_constraints : where_constraint list;
+  m_variadic        : fun_variadicity     ;
+  m_params          : fun_param list      ;
+  m_body            : func_body           ;
+  m_fun_kind        : Ast.fun_kind        ;
+  m_user_attributes : user_attribute list ;
+  m_ret             : hint option         ;
+}
+
+and visibility =
+  | Private
+  | Public
+  | Protected
+
+
+and typedef_visibility = Transparent | Opaque
+
+and typedef = {
+  t_mode : FileInfo.mode;
+  t_name : sid;
+  t_tparams : tparam list;
+  t_constraint : hint option;
+  t_vis : typedef_visibility;
+  t_kind : hint;
+  t_user_attributes : user_attribute list;
+}
+
+and gconst = {
+  cst_mode: FileInfo.mode;
+  cst_name: Ast.id;
+  cst_type: hint option;
+  cst_value: expr option;
+}
 
 type def =
   | Fun of fun_

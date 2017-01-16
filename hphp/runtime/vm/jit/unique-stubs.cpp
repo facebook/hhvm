@@ -1022,6 +1022,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
   CGMeta meta;
 
   auto const start = vwrap(cb, data, meta, [] (Vout& v) {
+    v << vregrestrict{};
     v << stublogue{};
 
     auto const rdata = rarg(0);

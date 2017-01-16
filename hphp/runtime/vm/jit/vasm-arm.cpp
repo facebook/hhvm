@@ -336,7 +336,6 @@ struct Vgen {
   void emit(const xorqi& i);
 
   // arm intrinsics
-  void emit(const cmplims& i);
   void emit(const fcvtzs& i) { a->Fcvtzs(X(i.d), D(i.s)); }
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
@@ -840,42 +839,6 @@ void Vgen::emit(const unpcklpd& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * 'cmplims' instruction is intended for use where temporary Vregs can't be
- * allocated, E.g., in stubs called via callfaststub{}. As the memory
- * operand is not lowered, make sure that it is in one of the following
- * formats
- *  [base]
- *  [base, index]
- *  [base, #imm] where #imm is in the range [-256, 255]
- */
-void Vgen::emit(const cmplims& i) {
-  enum {
-    BASE = 1,
-    INDEX = 2,
-    DISP = 4
-  };
-
-  // TODO: Allow TLS addresses if possible
-  assertx(i.s1.seg == Vptr::DS);
-
-  uint8_t mode = (((i.s1.base.isValid()  & 0x1) << 0) |
-                  ((i.s1.index.isValid() & 0x1) << 1) |
-                  (((i.s1.disp != 0)     & 0x1) << 2));
-  switch (mode) {
-    case BASE:
-    case BASE | INDEX:
-      break;
-    case BASE | DISP:
-      assertx(i.s1.disp >= -256 && i.s1.disp <= 255);
-      break;
-    default:
-      always_assert(false);
-  }
-  a->Ldr(rAsm.W(), M(i.s1));
-  a->Cmp(rAsm.W(), i.s0.l());
-}
-
 void Vgen::emit(const cmpsd& i) {
   /*
    * cmpsd doesn't update SD, so read the flags into a temp.
@@ -1097,7 +1060,7 @@ void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
 }
 
 template<typename Inst>
-void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
+void lower(const VLS& env, Inst& inst, Vlabel b, size_t i) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1197,12 +1160,12 @@ void lowerVptr(Vptr& p, Vout& v) {
   }
 }
 
-#define Y(vasm_opc, m)                                  \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(u, b, z, [&] (Vout& v) {                   \
-    lowerVptr(i.m, v);                                  \
-    v << i;                                             \
-  });                                                   \
+#define Y(vasm_opc, m)                                      \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v);                                      \
+    v << i;                                                 \
+  });                                                       \
 }
 
 Y(decqmlock, m)
@@ -1230,18 +1193,18 @@ Y(storew, m)
 #define ISLG(w) vixl::Assembler::IsImmLogical(value, w)
 #define U2(v0, v1) v0, v1
 
-#define Y(vasm_opc, lower_opc, load_opc, chk, imm, use) \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(u, b, z, [&] (Vout& v) {                   \
-    auto value = safe_cast<int64_t>(i.s0.q());          \
-    if (chk) {                                          \
-      v << i;                                           \
-    } else {                                            \
-      auto s0 = v.makeReg();                            \
-      v << load_opc{imm, s0};                           \
-      v << lower_opc{s0, use, i.sf};                    \
-    }                                                   \
-  });                                                   \
+#define Y(vasm_opc, lower_opc, load_opc, chk, imm, use)     \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    auto value = safe_cast<int64_t>(i.s0.q());              \
+    if (chk) {                                              \
+      v << i;                                               \
+    } else {                                                \
+      auto s0 = v.makeReg();                                \
+      v << load_opc{imm, s0};                               \
+      v << lower_opc{s0, use, i.sf};                        \
+    }                                                       \
+  });                                                       \
 }
 
 Y(addli, addl, ldimml, ISAR, i.s0, U2(i.s1, i.d))
@@ -1266,15 +1229,15 @@ Y(xorqi, xorq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
 #undef ISLG
 #undef ISAR
 
-#define Y(vasm_opc, lower_opc, load_opc, store_opc, s0, m) \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) {    \
-  lower_impl(u, b, z, [&] (Vout& v) {                      \
-    lowerVptr(i.m, v);                                     \
-    auto r0 = v.makeReg(), r1 = v.makeReg();               \
-    v << load_opc{i.m, r0};                                \
-    v << lower_opc{i.s0, r0, r1, i.sf};                    \
-    v << store_opc{r1, i.m};                               \
-  });                                                      \
+#define Y(vasm_opc, lower_opc, load_opc, store_opc, s0, m)  \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    lowerVptr(i.m, v);                                      \
+    auto r0 = v.makeReg(), r1 = v.makeReg();                \
+    v << load_opc{i.m, r0};                                 \
+    v << lower_opc{i.s0, r0, r1, i.sf};                     \
+    v << store_opc{r1, i.m};                                \
+  });                                                       \
 }
 
 Y(addlim, addli, loadl, storel, s0, m)
@@ -1287,14 +1250,14 @@ Y(orwim, orqi, loadw, storew, s0, m)
 
 #undef Y
 
-#define Y(vasm_opc, lower_opc, load_opc)                \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(u, b, z, [&] (Vout& v) {                   \
-    lowerVptr(i.s1, v);                                 \
-    auto r = v.makeReg();                               \
-    v << load_opc{i.s1, r};                             \
-    v << lower_opc{i.s0, r, i.sf};                      \
-  });                                                   \
+#define Y(vasm_opc, lower_opc, load_opc)                         \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {      \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                       \
+    lowerVptr(i.s1, v);                                          \
+    auto r = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
+    v << load_opc{i.s1, r};                                      \
+    v << lower_opc{i.s0, r, i.sf};                               \
+  });                                                            \
 }
 
 Y(cmpbim, cmpli, loadb)
@@ -1311,8 +1274,8 @@ Y(testwim, testli, loadw)
 
 #undef Y
 
-void lower(Vunit& u, cvtsi2sdm& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, cvtsi2sdm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     lowerVptr(i.s, v);
     auto r = v.makeReg();
     v << load{i.s, r};
@@ -1320,15 +1283,16 @@ void lower(Vunit& u, cvtsi2sdm& i, Vlabel b, size_t z) {
   });
 }
 
-#define Y(vasm_opc, lower_opc, load_opc, store_opc, m)  \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(u, b, z, [&] (Vout& v) {                   \
-    lowerVptr(i.m, v);                                  \
-    auto r0 = v.makeReg(), r1 = v.makeReg();            \
-    v << load_opc{i.m, r0};                             \
-    v << lower_opc{r0, r1, i.sf};                       \
-    v << store_opc{r1, i.m};                            \
-  });                                                   \
+#define Y(vasm_opc, lower_opc, load_opc, store_opc, m)            \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {       \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                        \
+    lowerVptr(i.m, v);                                            \
+    auto r0 = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
+    auto r1 = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
+    v << load_opc{i.m, r0};                                       \
+    v << lower_opc{r0, r1, i.sf};                                 \
+    v << store_opc{r1, i.m};                                      \
+  });                                                             \
 }
 
 Y(declm, decl, loadl, storel, m)
@@ -1339,8 +1303,8 @@ Y(incwm, incw, loadw, storew, m)
 
 #undef Y
 
-void lower(Vunit& unit, cvttsd2siq& i, Vlabel b, size_t idx) {
-  lower_impl(unit, b, idx, [&] (Vout& v) {
+void lower(const VLS& e, cvttsd2siq& i, Vlabel b, size_t idx) {
+  lower_impl(e.unit, b, idx, [&] (Vout& v) {
     // Clear FPSR IOC flag.
     auto const tmp1 = v.makeReg();
     auto const tmp2 = v.makeReg();
@@ -1367,8 +1331,8 @@ void lower(Vunit& unit, cvttsd2siq& i, Vlabel b, size_t idx) {
   });
 }
 
-void lower(Vunit& u, callm& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, callm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     lowerVptr(i.target, v);
 
     auto const scratch = v.makeReg();
@@ -1379,8 +1343,8 @@ void lower(Vunit& u, callm& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, jmpm& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, jmpm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     lowerVptr(i.target, v);
 
     auto const scratch = v.makeReg();
@@ -1392,15 +1356,15 @@ void lower(Vunit& u, jmpm& i, Vlabel b, size_t z) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower(Vunit& u, stublogue& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, stublogue& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Push both the LR and FP regardless of i.saveframe to align SP.
     v << pushp{rlr(), rvmfp()};
   });
 }
 
-void lower(Vunit& u, stubret& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, stubret& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop LR and (optionally) FP.
     if (i.saveframe) {
       v << popp{rvmfp(), rlr()};
@@ -1412,8 +1376,8 @@ void lower(Vunit& u, stubret& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, tailcallstub& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, tailcallstub& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Restore LR from native stack and adjust SP.
     v << popp{PhysReg(rAsm), rlr()};
 
@@ -1422,22 +1386,22 @@ void lower(Vunit& u, tailcallstub& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, stubunwind& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, stubunwind& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame.
     v << lea{rsp()[16], rsp()};
   });
 }
 
-void lower(Vunit& u, stubtophp& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, stubtophp& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame
     v << lea{rsp()[16], rsp()};
   });
 }
 
-void lower(Vunit& u, loadstubret& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, loadstubret& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Load the LR to the destination.
     v << load{rsp()[AROFF(m_savedRip)], i.d};
   });
@@ -1445,14 +1409,14 @@ void lower(Vunit& u, loadstubret& i, Vlabel b, size_t z) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower(Vunit& u, phplogue& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, phplogue& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << store{rlr(), i.fp[AROFF(m_savedRip)]};
   });
 }
 
-void lower(Vunit& u, tailcallphp& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, tailcallphp& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Undoes the prologue by restoring LR from saved RIP.
     v << load{i.fp[AROFF(m_savedRip)], rlr()};
 
@@ -1462,8 +1426,8 @@ void lower(Vunit& u, tailcallphp& i, Vlabel b, size_t z) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower(Vunit& u, resumetc& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, resumetc& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Call the translation target.
     v << callr{i.target, i.args};
 
@@ -1474,8 +1438,8 @@ void lower(Vunit& u, resumetc& i, Vlabel b, size_t z) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower(Vunit& u, popm& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, popm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto r = v.makeReg();
     v << pop{r};
     lowerVptr(i.d, v);
@@ -1483,8 +1447,8 @@ void lower(Vunit& u, popm& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, poppm& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, poppm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto r0 = v.makeReg();
     auto r1 = v.makeReg();
     v << popp{r0, r1};
@@ -1495,8 +1459,8 @@ void lower(Vunit& u, poppm& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, pushm& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, pushm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto r = v.makeReg();
     lowerVptr(i.s, v);
     v << load{i.s, r};
@@ -1504,8 +1468,8 @@ void lower(Vunit& u, pushm& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, pushpm& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, pushpm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto r0 = v.makeReg();
     auto r1 = v.makeReg();
     lowerVptr(i.s0, v);
@@ -1516,22 +1480,22 @@ void lower(Vunit& u, pushpm& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, movtdb& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, movtdb& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto d = v.makeReg();
     v << copy{i.s, d};
     v << movtqb{d, i.d};
   });
 }
 
-void lower(Vunit& u, movtdq& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, movtdq& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << copy{i.s, i.d};
   });
 }
 
-void lower(Vunit& u, cmpb& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, cmpb& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto s0 = v.makeReg();
     auto s1 = v.makeReg();
     v << movzbl{i.s0, s0};
@@ -1540,24 +1504,24 @@ void lower(Vunit& u, cmpb& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, cmpbi& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, cmpbi& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto s1 = v.makeReg();
     v << movzbl{i.s1, s1};
     v << cmpli{i.s0, s1, i.sf};
   });
 }
 
-#define Y(vasm_opc, conv_opc, load_opc, cmp_opc)        \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(u, b, z, [&] (Vout& v) {                   \
-    auto s0 = v.makeReg();                              \
-    v << conv_opc{i.s0, s0};                            \
-    lowerVptr(i.s1, v);                                 \
-    auto s1 = v.makeReg();                              \
-    v << load_opc{i.s1, s1};                            \
-    v << cmp_opc{s0, s1, i.sf};                         \
-  });                                                   \
+#define Y(vasm_opc, conv_opc, load_opc, cmp_opc)            \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
+    auto s0 = v.makeReg();                                  \
+    v << conv_opc{i.s0, s0};                                \
+    lowerVptr(i.s1, v);                                     \
+    auto s1 = v.makeReg();                                  \
+    v << load_opc{i.s1, s1};                                \
+    v << cmp_opc{s0, s1, i.sf};                             \
+  });                                                       \
 }
 
 Y(cmpbm, movzbl, loadzbl, cmpl)
@@ -1565,8 +1529,8 @@ Y(cmpwm, movzwl, loadw, cmpl)
 
 #undef Y
 
-void lower(Vunit& u, testb& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, testb& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     if (i.s0 == i.s1) {
       v << testbi{(uint8_t)0xff, i.s1, i.sf};
     } else {
@@ -1579,8 +1543,8 @@ void lower(Vunit& u, testb& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, testbi& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, testbi& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto s1 = v.makeReg();
     v << movzbl{i.s1, s1};
     v << testli{i.s0, s1, i.sf};
@@ -1588,8 +1552,8 @@ void lower(Vunit& u, testbi& i, Vlabel b, size_t z) {
 }
 
 #define Y(vasm_opc, lower_opc, load_opc, imm, zr, sz)   \
-void lower(Vunit& u, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(u, b, z, [&] (Vout& v) {                   \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
+  lower_impl(e.unit, b, z, [&] (Vout& v) {                   \
     lowerVptr(i.m, v);                                  \
     if (imm.sz() == 0u) {                               \
       v << lower_opc{PhysReg(vixl::zr), i.m};           \
@@ -1608,8 +1572,8 @@ Y(storewi, storew, ldimmw, i.s, xzr, w)
 
 #undef Y
 
-void lower(Vunit& u, cloadq& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, cloadq& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto const scratch = v.makeReg();
 
     lowerVptr(i.t, v);
@@ -1619,8 +1583,8 @@ void lower(Vunit& u, cloadq& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, loadqp& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, loadqp& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto const scratch = v.makeReg();
 
     v << leap{i.s, scratch};
@@ -1628,8 +1592,8 @@ void lower(Vunit& u, loadqp& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(Vunit& u, loadqd& i, Vlabel b, size_t z) {
-  lower_impl(u, b, z, [&] (Vout& v) {
+void lower(const VLS& e, loadqd& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto const scratch = v.makeReg();
 
     v << lead{i.s.getRaw(), scratch};
@@ -1640,11 +1604,11 @@ void lower(Vunit& u, loadqd& i, Vlabel b, size_t z) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void lowerForARM(Vunit& unit) {
-  vasm_lower(unit, [&] (Vinstr& inst, Vlabel b, size_t i) {
+  vasm_lower(unit, [&] (const VLS& env, Vinstr& inst, Vlabel b, size_t i) {
     switch (inst.op) {
 #define O(name, ...)                      \
       case Vinstr::name:                  \
-        lower(unit, inst.name##_, b, i);  \
+        lower(env, inst.name##_, b, i);   \
         break;
 
       VASM_OPCODES

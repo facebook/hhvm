@@ -320,6 +320,8 @@ struct Func {
    */
   bool isNative : 1;
 
+  bool isMemoizeWrapper : 1;
+
   /*
    * All owning pointers to blocks are in this vector, which has the
    * blocks in an unspecified order.  Blocks have borrowed pointers to

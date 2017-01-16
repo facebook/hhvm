@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-01-05-0001"
+let full_fidelity_schema_version_number = "2017-01-11-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -694,6 +694,14 @@ let schema = List.map from_list [
     "left_paren";
     "argument";
     "right_paren" ];
+  [ "DefineExpression";
+    "define_expression";
+    "define_expression";
+    "define";
+    "keyword";
+    "left_paren";
+    "argument_list";
+    "right_paren" ];
   [ "IssetExpression";
     "isset_expression";
     "isset_expression";
@@ -1106,6 +1114,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Construct"; "__construct" ];
   [ "Continue"; "continue" ];
   [ "Default"; "default" ];
+  [ "Define"; "define"];
   [ "Destruct"; "__destruct" ];
   [ "Dict"; "dict" ];
   [ "Do"; "do" ];

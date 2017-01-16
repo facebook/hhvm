@@ -298,7 +298,8 @@ public:
 
   UserAttributeMap userAttributes;
 
-  StringData *memoizePropName;
+  StringData* memoizePropName;
+  StringData* memoizeGuardPropName;
   int memoizeSharedPropIndex;
   RepoAuthType repoReturnType;
   RepoAuthType repoAwaitedReturnType;

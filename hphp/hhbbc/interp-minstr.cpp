@@ -1410,6 +1410,17 @@ void mergePaths(ISS& env, A a, B b) {
   env.state = start;
   b();
   merge_into(env.state, aState);
+  // The bases must match. The types could be different because the
+  // Define side could have promoted the base, or at least removed
+  // Uninit.
+  assert(env.state.base.loc == aState.base.loc);
+  assert(env.state.base.locTy == aState.base.locTy);
+  assert(env.state.base.locName == aState.base.locName);
+  assert(env.state.base.local == aState.base.local);
+  auto newT = union_of(env.state.base.type, aState.base.type);
+  if (newT != env.state.base.type) {
+    env.state.base.type = newT;
+  }
   assert(env.flags.wasPEI);
   assert(!env.flags.canConstProp);
 }

@@ -152,6 +152,7 @@ namespace Trace {
       TM(pgo)           \
       TM(printir)       \
       TM(prof_branch)   \
+      TM(prof_array)    \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \

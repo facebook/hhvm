@@ -16,8 +16,11 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/unit.h"
@@ -34,6 +37,8 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/immed.h"
+#include "hphp/util/stack-trace.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
 // This file does ugly things with macros so include last.
@@ -737,11 +742,65 @@ void implVecSet(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
+/*
+ * Thread-local RDS packed array access sampling counter.
+ */
+rds::Link<uint32_t> s_counter{rds::kInvalidHandle};
+
+}
+
+void record_packed_access(const ArrayData* ad) {
+  assertx(s_counter.bound());
+  *s_counter = RuntimeOption::EvalProfPackedArraySampleFreq;
+
+  auto record = StructuredLogEntry{};
+  record.setInt("size", ad->size());
+
+  auto const st = StackTrace(StackTrace::Force{});
+  auto frames = std::vector<folly::StringPiece>{};
+  folly::split("\n", st.toString(), frames);
+  record.setVec("stacktrace", frames);
+
+  FTRACE_MOD(Trace::prof_array, 1,
+             "prof_array: {}\n", show(record).c_str());
+  StructuredLog::log("hhvm_arrays", record);
 }
 
 void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
   auto const idxLoc = srcLoc(env, inst, 1);
+  auto& v = vmain(env);
+  auto& vc = vcold(env);
+
+  if (UNLIKELY(RuntimeOption::EvalProfPackedArraySampleFreq > 0)) {
+    auto const arrTy = inst->src(0)->type();
+    auto const packedTy = Type::Array(ArrayData::kPackedKind);
+
+    if (arrTy.maybe(packedTy)) {
+      s_counter.bind(rds::Mode::Local);
+
+      auto const profile = [&] (Vout& v) {
+        auto const handle = s_counter.handle();
+        auto const sf = v.makeReg();
+        v << declm{rvmtl()[handle], sf};
+
+        unlikelyIfThen(v, vc, CC_LE, sf, [&] (Vout& v) {
+          // Log this array access.
+          v << vcall{CallSpec::direct(record_packed_access),
+                     v.makeVcallArgs({{arrLoc.reg()}}), v.makeTuple({})};
+        });
+      };
+
+      if (arrTy <= packedTy) {
+        profile(v);
+      } else {
+        auto const sf = v.makeReg();
+        v << cmpbim{ArrayData::kPackedKind, arrLoc.reg()[HeaderKindOffset], sf};
+        ifThen(v, CC_E, sf, profile);
+      }
+    }
+  }
+
   auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
   vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
 }

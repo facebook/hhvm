@@ -1428,7 +1428,7 @@ void mergePaths(ISS& env, A a, B b) {
   if (newT != env.state.base.type) {
     env.state.base.type = newT;
   }
-  assert(env.flags.wasPEI);
+  // an FPass instruction can have side effects if it ends up by-ref
   assert(!env.flags.canConstProp);
 }
 

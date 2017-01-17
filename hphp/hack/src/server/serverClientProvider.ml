@@ -47,7 +47,9 @@ let sleep_and_check in_fd persistent_client_opt =
   in
   let ready_fd_l, _, _ = Unix.select l [] [] (0.1) in
   match ready_fd_l with
-    | [_; _] -> accept_client_opt in_fd, true
+    | [_; _] ->
+        (* Prioritize persistent client requests over command line ones *)
+        None, true
     | [fd] when fd = in_fd -> accept_client_opt in_fd, false
     | [fd] when fd <> in_fd -> None, true
     | _ -> None, false

@@ -1984,6 +1984,9 @@ void in(ISS& env, const bc::FCallAwait& op) {
   in(env, bc::FCallD { op.arg1, op.str2, op.str3 });
   in(env, bc::UnboxRNop { });
   in(env, bc::Await { });
+
+  env.flags.wasPEI = true;
+  env.flags.canConstProp = false;
 }
 
 void fcallArrayImpl(ISS& env) {

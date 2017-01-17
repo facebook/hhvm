@@ -8399,7 +8399,9 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   }
 
   for (uint32_t i = 0; i < m_curFunc->params.size(); i++) {
-    const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
+    auto const &param = m_curFunc->params[i];
+    if (param.isVariadic()) continue;
+    auto const& tc = param.typeConstraint;
     if (!tc.hasConstraint()) continue;
     emitVirtualLocal(i);
     e.VerifyParamType(i);

@@ -1080,14 +1080,7 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
-    StringData*& skey = elm.tv.m_data.pstr;
-    if (elm.hasStrKey() && !skey->isStatic()) {
-      if (auto const st = lookupStaticString(skey)) {
-        skey = st;
-      } else {
-        skey = StringData::MakeUncounted(skey->slice());
-      }
-    }
+    tvAsVariant(&elm.tv).setEvalScalar();
   }
 }
 

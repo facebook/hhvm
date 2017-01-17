@@ -447,7 +447,7 @@ Type resolveArrayChain(ISS& env, Type val) {
   return val;
 }
 
-void moveBase(ISS& env, folly::Optional<Base> base) {
+void moveBase(ISS& env, folly::Optional<Base> base, bool updateLocal) {
   SCOPE_EXIT { if (base) env.state.base = *base; };
 
   // Note: these miThrows probably can be left out if base is folly::none
@@ -461,17 +461,23 @@ void moveBase(ISS& env, folly::Optional<Base> base) {
        * update the type of the local for new minstrs, and for the exception
        * edge of old minstrs.
        */
-      setLocalForBase(env, currentChainType(env, base->type));
+      if (updateLocal) {
+        setLocalForBase(env, currentChainType(env, base->type));
+      }
       miThrow(env);
     } else {
-      setLocalForBase(env, resolveArrayChain(env, env.state.base.type));
+      if (updateLocal) {
+        setLocalForBase(env, resolveArrayChain(env, env.state.base.type));
+      }
     }
 
     return;
   }
 
   if (mustBeInFrame(env.state.base)) {
-    setLocalForBase(env, env.state.base.type);
+    if (updateLocal) {
+      setLocalForBase(env, env.state.base.type);
+    }
     miThrow(env);
   }
 }
@@ -653,7 +659,9 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
   auto const name     = mStringKey(key);
   auto const isDefine = mode == MOpMode::Define;
   auto const isUnset  = mode == MOpMode::Unset;
-
+  // PHP5 doesn't modify an unset local if you unset a property or
+  // array elem on it, but hhvm does (it promotes it to init-null).
+  auto const updateLocal = isDefine || isUnset;
   /*
    * MOpMode::Unset Props doesn't promote "emptyish" things to stdClass, or
    * affect arrays, however it can define a property on an object base.  This
@@ -694,22 +702,28 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
       auto const propTy = thisPropAsCell(env, name);
-      moveBase(env, Base { propTy ? *propTy : TInitCell,
-                           BaseLoc::PostProp,
-                           thisTy,
-                           name });
+      moveBase(env,
+               Base { propTy ? *propTy : TInitCell,
+                      BaseLoc::PostProp,
+                      thisTy,
+                      name },
+              updateLocal);
     } else {
-      moveBase(env, Base { TInitCell, BaseLoc::PostProp, thisTy });
+      moveBase(env,
+               Base { TInitCell, BaseLoc::PostProp, thisTy },
+               updateLocal);
     }
     return;
   }
 
   // We know for sure we're going to be in an object property.
   if (env.state.base.type.subtypeOf(TObj)) {
-    moveBase(env, Base { TInitCell,
-                         BaseLoc::PostProp,
-                         env.state.base.type,
-                         name });
+    moveBase(env,
+             Base { TInitCell,
+                    BaseLoc::PostProp,
+                    env.state.base.type,
+                    name },
+             updateLocal);
     return;
   }
 
@@ -729,12 +743,16 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
       ? objExact(env.index.builtin_class(s_stdClass.get()))
       : TTop;
 
-  moveBase(env, Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name });
+  moveBase(env,
+           Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name },
+           updateLocal);
 }
 
 void miElem(ISS& env, MOpMode mode, Type key) {
   auto const isDefine = mode == MOpMode::Define;
   auto const isUnset  = mode == MOpMode::Unset;
+
+  auto const updateLocal = isDefine || isUnset;
 
   /*
    * Elem dims with MOpMode::Unset can change a base from a static array into a
@@ -776,7 +794,7 @@ void miElem(ISS& env, MOpMode mode, Type key) {
                            BaseLoc::LocalArrChain,
                            TBottom,
                            env.state.base.locName,
-                           env.state.base.local });
+                           env.state.base.local }, true);
       return;
     }
   }
@@ -784,17 +802,17 @@ void miElem(ISS& env, MOpMode mode, Type key) {
   if (env.state.base.type.subtypeOf(TArr)) {
     moveBase(env, Base { array_elem(env.state.base.type, key),
                          BaseLoc::PostElem,
-                         env.state.base.type });
+                         env.state.base.type }, updateLocal);
     return;
   }
   if (auto ty = hack_array_do(env, elem, key)) {
     moveBase(env, Base { *ty,
                          BaseLoc::PostElem,
-                         env.state.base.type });
+                         env.state.base.type }, updateLocal);
     return;
   }
   if (env.state.base.type.subtypeOf(TStr)) {
-    moveBase(env, Base { TStr, BaseLoc::PostElem });
+    moveBase(env, Base { TStr, BaseLoc::PostElem }, updateLocal);
     return;
   }
 
@@ -806,7 +824,7 @@ void miElem(ISS& env, MOpMode mode, Type key) {
    * init_null_variant, or inside tvScratch.  We represent this with the
    * PostElem base location with locType TTop.
    */
-  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop });
+  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop }, updateLocal);
 }
 
 void miNewElem(ISS& env) {
@@ -833,16 +851,18 @@ void miNewElem(ISS& env) {
                          BaseLoc::LocalArrChain,
                          TBottom,
                          env.state.base.locName,
-                         env.state.base.local });
+                         env.state.base.local }, true);
     return;
   }
 
   if (env.state.base.type.subtypeOf(TArr) || isvec || isdict || iskeyset) {
-    moveBase(env, Base { TInitNull, BaseLoc::PostElem, env.state.base.type });
+    moveBase(env,
+             Base { TInitNull, BaseLoc::PostElem, env.state.base.type },
+             true);
     return;
   }
 
-  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop });
+  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop }, true);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1383,7 +1403,7 @@ void miFinalSetWithRef(ISS& env) {
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
   auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
   if (!isvec && !isdict && !iskeyset) {
     killLocals(env);
     killThisProps(env);
@@ -1629,7 +1649,7 @@ void in(ISS& env, const bc::VGetM& op) {
   } else {
     miFinalVGetNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::SetM& op) {
@@ -1641,7 +1661,7 @@ void in(ISS& env, const bc::SetM& op) {
   } else {
     miFinalSetNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::IncDecM& op) {
@@ -1653,7 +1673,7 @@ void in(ISS& env, const bc::IncDecM& op) {
   } else {
     miFinalIncDecNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::SetOpM& op) {
@@ -1665,7 +1685,7 @@ void in(ISS& env, const bc::SetOpM& op) {
   } else {
     miFinalSetOpNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::BindM& op) {
@@ -1677,7 +1697,7 @@ void in(ISS& env, const bc::BindM& op) {
   } else {
     miFinalBindNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::UnsetM& op) {
@@ -1688,7 +1708,7 @@ void in(ISS& env, const bc::UnsetM& op) {
     assert(mcodeIsElem(op.mkey.mcode));
     miFinalUnsetElem(env, op.arg1, key);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::SetWithRefLML& op) {

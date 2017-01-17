@@ -1413,10 +1413,17 @@ void mergePaths(ISS& env, A a, B b) {
   // The bases must match. The types could be different because the
   // Define side could have promoted the base, or at least removed
   // Uninit.
+  if (env.state.base.loc == BaseLoc::LocalArrChain) {
+    resolveArrayChain(env, env.state.base.type);
+    env.state.base.loc = BaseLoc::PostElem;
+  }
   assert(env.state.base.loc == aState.base.loc);
-  assert(env.state.base.locTy == aState.base.locTy);
-  assert(env.state.base.locName == aState.base.locName);
-  assert(env.state.base.local == aState.base.local);
+  if (aState.base.loc == BaseLoc::Frame) {
+    assert(env.state.base.loc == aState.base.loc);
+    assert(env.state.base.locTy == aState.base.locTy);
+    assert(env.state.base.locName == aState.base.locName);
+    assert(env.state.base.local == aState.base.local);
+  }
   auto newT = union_of(env.state.base.type, aState.base.type);
   if (newT != env.state.base.type) {
     env.state.base.type = newT;

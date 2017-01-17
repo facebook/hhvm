@@ -111,17 +111,19 @@ inline void bcopy32_inline(void* dst, const void* src, uint32_t len) {
                        :: "xmm0", "xmm1"
                       );
 #elif defined(__aarch64__)
-  int64_t t3, t4, t5, t6;
+  int64_t t3, t4, t5, t6, t7;
   __asm__ __volatile__("lsr    %x0, %x0, #5\n"
                        ".LBCP32%=:\n"
+                       "add    %x7, %x2, #16\n"
                        "ldp    %x3, %x4, [%x1], #16\n"
                        "ldp    %x5, %x6, [%x1], #16\n"
+                       "stp    %x3, %x4, [%x2]\n"
+                       "stp    %x5, %x6, [%x7]\n"
+                       "add    %x2, %x2, #32\n"
                        "subs   %x0, %x0, #1\n"
-                       "stp    %x3, %x4, [%x2], #16\n"
-                       "stp    %x5, %x6, [%x2], #16\n"
                        "bgt    .LBCP32%=\n"
                        : "+r"(len), "+r"(src), "+r"(dst),
-                         "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6)
+                         "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6), "=r"(t7)
                       );
 #else
   bcopy32(dst, src, len);
@@ -149,7 +151,7 @@ inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
                        :: "xmm0", "xmm1"
                       );
 #elif defined(__aarch64__)
-  int64_t t3, t4, t5, t6, s1, d1;
+  int64_t t3, t4, t5, t6, s1, d1, d2;
   __asm__ __volatile__("mov    %x7, %x1\n"
                        "add    %x1, %x1, %x0\n"
                        "ldp    %x3, %x4, [%x1, #-16]!\n"
@@ -159,16 +161,18 @@ inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
                        "lsr    %x0, %x0, #5\n"
                        "cbz    %x0, .LEND%=\n"
                        ".LR32%=:\n"
+                       "add    %x9, %x8, #16\n"
                        "ldp    %x3, %x4, [%x7], #16\n"
                        "ldp    %x5, %x6, [%x7], #16\n"
+                       "stp    %x3, %x4, [%x8]\n"
+                       "stp    %x5, %x6, [%x9]\n"
+                       "add    %x8, %x8, #32\n"
                        "subs   %x0, %x0, #1\n"
-                       "stp    %x3, %x4, [%x8], #16\n"
-                       "stp    %x5, %x6, [%x8], #16\n"
                        "bgt    .LR32%=\n"
                        ".LEND%=:\n"
                        : "+r"(len), "+r"(src), "+r"(dst),
                          "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6),
-                         "=r"(s1), "=r"(d1)
+                         "=r"(s1), "=r"(d1), "=r"(d2)
                       );
 #else
   memcpy16(dst, src, len);

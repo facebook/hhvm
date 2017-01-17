@@ -134,8 +134,8 @@ inline void MixedArray::initHash(int32_t* hash, uint32_t scale) {
   auto hash2 = hash;
   __asm__ __volatile__(
     ".l%=:\n"
-    "subs       %x0, %x0, #16\n"
     "stp        %x2, %x2, [%x1], #16\n"
+    "subs       %x0, %x0, #16\n"
     "bhi        .l%=\n"
     : "+r"(offset), "+r"(hash2) : "r"(ones)
   );

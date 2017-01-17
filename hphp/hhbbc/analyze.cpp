@@ -416,21 +416,19 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     if (it == end(propState)) return;
 
     /*
-     * When HardTypeHints isn't on, AllFuncsInterceptable is on, or any
-     * InterceptableFunctions are listed, we don't require the constraints to
-     * actually match, and relax all the HNI types to Gen.
+     * When HardTypeHints isn't on, or any functions are
+     * interceptable, we don't require the constraints to actually
+     * match, and relax all the HNI types to Gen.
      *
-     * This is because extensions may wish to assign to properties after a
-     * typehint guard, which is going to fail without HardTypeHints.  Or, with
-     * AllFuncsInterceptable or InterceptableFunctions, it's quite possible
-     * that some function calls in systemlib might not be known to return
-     * things matching the property type hints for some properties, or not to
-     * take their arguments by reference.
+     * This is because extensions may wish to assign to properties
+     * after a typehint guard, which is going to fail without
+     * HardTypeHints.  Or, with any interceptable functions, it's
+     * quite possible that some function calls in systemlib might not
+     * be known to return things matching the property type hints for
+     * some properties, or not to take their arguments by reference.
      */
     auto const hniTy =
-      !options.HardTypeHints ||
-          options.AllFuncsInterceptable ||
-          !options.InterceptableFunctions.empty()
+      !options.HardTypeHints || clsAnalysis.anyInterceptable
         ? TGen
         : from_hni_constraint(prop.typeConstraint);
     if (it->second.subtypeOf(hniTy)) {
@@ -502,7 +500,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   assert(ctx.cls && !ctx.func);
   FTRACE(2, "{:#^70}\n", "Class");
 
-  ClassAnalysis clsAnalysis(ctx);
+  ClassAnalysis clsAnalysis(ctx, index.any_interceptable_functions());
   auto const associatedClosures = index.lookup_closures(ctx.cls);
   auto const isHNIBuiltin       = ctx.cls->attrs & AttrBuiltin;
 

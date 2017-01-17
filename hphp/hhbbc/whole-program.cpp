@@ -341,7 +341,7 @@ void update_mayusevv(Index& index, php::Program& program) {
   auto const results = parallel::map(
     all_function_contexts(program),
     [&] (Context ctx) {
-      if (is_pseudomain(ctx.func)) {
+      if (is_pseudomain(ctx.func) || ctx.func->attrs & AttrInterceptable) {
         return std::make_tuple(true, ctx.func);
       }
       auto info = CollectedInfo { index, ctx, nullptr, nullptr };

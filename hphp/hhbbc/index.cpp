@@ -677,6 +677,7 @@ struct IndexData {
   ~IndexData() = default;
 
   bool frozen{false};
+  bool any_interceptable_functions{false};
 
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
@@ -954,9 +955,8 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
-
-      if (is_interceptable_function(borrow(c), borrow(m))) {
-        m->attrs = m->attrs | AttrInterceptable;
+      if (m->attrs & AttrInterceptable) {
+        index.any_interceptable_functions = true;
       }
     }
 
@@ -966,9 +966,6 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   }
 
   for (auto& f : unit.funcs) {
-    if (is_interceptable_function(nullptr, borrow(f))) {
-      f->attrs = f->attrs | AttrInterceptable;
-    }
     /*
      * A function can be defined with the same name as a builtin in the
      * repo. Any such attempts will fatal at runtime, so we can safely ignore
@@ -986,6 +983,7 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
       }
       if (f->attrs & AttrBuiltin) index.funcs.erase(funcs.first, funcs.second);
     }
+    if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
     index.funcs.insert({f->name, borrow(f)});
   }
 
@@ -1697,7 +1695,8 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
      * Or if we've got AllFuncsInterceptable we need to assume someone could
      * rename a function to the new name.
      */
-    return options.AllFuncsInterceptable ? PrepKind::Unknown : PrepKind::Val;
+    return RuntimeOption::EvalJitEnableRenameFunction ?
+      PrepKind::Unknown : PrepKind::Val;
   }
 
   struct FuncFind {
@@ -2313,6 +2312,10 @@ bool Index::is_async_func(res::Func rfunc) const {
       return true;
     }
   );
+}
+
+bool Index::any_interceptable_functions() const {
+  return m_data->any_interceptable_functions;
 }
 
 Type Index::lookup_class_constant(Context ctx,

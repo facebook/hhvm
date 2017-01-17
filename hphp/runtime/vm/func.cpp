@@ -289,7 +289,8 @@ void Func::setFullName(int numParams) {
     }
   }
 
-  if (RuntimeOption::DynamicInvokeFunctions.count(m_fullName->data())) {
+  if (!RuntimeOption::RepoAuthoritative &&
+      RuntimeOption::DynamicInvokeFunctions.count(m_fullName->data())) {
     m_attrs = Attr(m_attrs | AttrInterceptable);
   }
 }

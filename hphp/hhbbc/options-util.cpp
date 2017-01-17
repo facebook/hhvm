@@ -35,12 +35,6 @@ bool is_trace_function(borrowed_ptr<const php::Class> cls,
   return method_map_contains(options.TraceFunctions, cls, func);
 }
 
-bool is_interceptable_function(borrowed_ptr<const php::Class> cls,
-                               borrowed_ptr<const php::Func> func) {
-  if (options.AllFuncsInterceptable) return true;
-  return method_map_contains(options.InterceptableFunctions, cls, func);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }}

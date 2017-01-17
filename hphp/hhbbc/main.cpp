@@ -94,9 +94,6 @@ void parse_options(int argc, char** argv) {
     ("parallel-work-size",
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")
-    ("interceptable",
-      po::value(&interceptable_fns)->composing(),
-      "Add an interceptable function")
     ("trace",
       po::value(&trace_fns)->composing(),
       "Add a function to increase tracing level on (for debugging)")
@@ -132,7 +129,6 @@ void parse_options(int argc, char** argv) {
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
-    ("all-funcs-interceptable", po::value(&options.AllFuncsInterceptable))
     ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
     ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))
     ;
@@ -171,7 +167,6 @@ void parse_options(int argc, char** argv) {
     std::exit(0);
   }
 
-  options.InterceptableFunctions = make_method_map(interceptable_fns);
   options.TraceFunctions         = make_method_map(trace_fns);
   logging = !no_logging;
 }
@@ -212,6 +207,9 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   RuntimeOption::EvalPromoteEmptyObject =
     Repo::get().global().PromoteEmptyObject;
 
+  RuntimeOption::EvalJitEnableRenameFunction =
+    Repo::get().global().EnableRenameFunction;
+
   if (Repo::get().global().UsedHHBBC) {
     throw std::runtime_error(
       "This hhbc repo has already been optimized by hhbbc.\n"
@@ -247,6 +245,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
   gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
+  gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
 
   gd.arrayTypeTable.repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.

@@ -113,6 +113,11 @@ struct Repo::GlobalData {
    */
   bool PromoteEmptyObject = true;
 
+  /*
+   * Should all functions be interceptable?
+   */
+  bool EnableRenameFunction = false;
+
   std::vector<const StringData*> APCProfile;
 
   template<class SerDe> void serde(SerDe& sd) {
@@ -129,6 +134,7 @@ struct Repo::GlobalData {
       (AutoprimeGenerators)
       (APCProfile)
       (PromoteEmptyObject)
+      (EnableRenameFunction)
       ;
   }
 };

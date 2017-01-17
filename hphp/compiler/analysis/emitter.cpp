@@ -7837,6 +7837,10 @@ static Attr buildMethodAttrs(MethodStatementPtr meth, FuncEmitter* fe,
   if (funcScope->hasRefVariadicParam()) {
     attrs |= AttrVariadicByRef;
   }
+  if (funcScope->isDynamicInvoke() ||
+      RuntimeOption::EvalJitEnableRenameFunction) {
+    attrs |= AttrInterceptable;
+  }
 
   auto fullName = meth->getOriginalFullName();
   auto it = Option::FunctionSections.find(fullName);
@@ -8211,6 +8215,13 @@ Attr EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   if (meth->getFunctionScope()->userAttributes().count(attr_Deprecated)) {
     emitDeprecationWarning(e, meth);
+  }
+
+  if (!(attributes & (AttrReadsCallerFrame | AttrWritesCallerFrame))) {
+    if (meth->getFunctionScope()->isDynamicInvoke() ||
+        RuntimeOption::EvalJitEnableRenameFunction) {
+      attributes |= AttrInterceptable;
+    }
   }
 
   fe->setBuiltinFunc(attributes, base);
@@ -11246,6 +11257,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
   gd.HardPrivatePropInference = true;
   gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
+  gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

@@ -85,7 +85,8 @@ struct FuncAnalysis {
  * The result of a class-at-a-time analysis.
  */
 struct ClassAnalysis {
-  explicit ClassAnalysis(Context ctx) : ctx(ctx) {}
+  ClassAnalysis(Context ctx, bool anyInterceptable) :
+      ctx(ctx), anyInterceptable(anyInterceptable) {}
 
   ClassAnalysis(ClassAnalysis&&) = default;
   ClassAnalysis& operator=(ClassAnalysis&&) = default;
@@ -101,6 +102,7 @@ struct ClassAnalysis {
   // Inferred types for private instance and static properties.
   PropState privateProperties;
   PropState privateStatics;
+  bool anyInterceptable;
 };
 
 //////////////////////////////////////////////////////////////////////

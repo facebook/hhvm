@@ -158,10 +158,17 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (preClass && preClass->attrs() & AttrInterface) {
     attrs |= AttrAbstract;
   }
-  if (attrs & AttrPersistent &&
-      ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
-       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) ||
-       attrs & AttrInterceptable)) {
+  if (!RuntimeOption::RepoAuthoritative) {
+    if (RuntimeOption::EvalJitEnableRenameFunction) {
+      attrs |= AttrInterceptable;
+    } else {
+      attrs = Attr(attrs & ~AttrInterceptable);
+    }
+  }
+  if (attrs & AttrPersistent && !preClass &&
+      (RuntimeOption::EvalJitEnableRenameFunction ||
+       attrs & AttrInterceptable ||
+       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
     if (attrs & AttrBuiltin) {
       SystemLib::s_anyNonPersistentBuiltins = true;
     }
@@ -171,10 +178,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     // In non-RepoAuthoritative mode, any function could get a VarEnv because
     // of evalPHPDebugger.
     attrs |= AttrMayUseVV;
-  } else if (RuntimeOption::EvalJitEnableRenameFunction &&
-      !name->empty() &&
-      !Func::isSpecial(name) &&
-      !isClosureBody) {
+  } else if ((attrs & AttrInterceptable) &&
+             !name->empty() &&
+             !Func::isSpecial(name) &&
+             !isClosureBody) {
     // intercepted functions need to pass all args through
     // to the interceptee
     attrs |= AttrMayUseVV;

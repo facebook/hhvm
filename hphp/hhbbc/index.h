@@ -623,6 +623,10 @@ struct Index {
    */
   bool is_async_func(res::Func rfunc) const;
 
+  /*
+   * Return true if there are any interceptable functions
+   */
+  bool any_interceptable_functions() const;
 private:
   Index(const Index&) = delete;
   Index& operator=(Index&&) = delete;

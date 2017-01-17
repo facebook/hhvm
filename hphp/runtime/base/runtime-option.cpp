@@ -1983,7 +1983,6 @@ void RuntimeOption::Load(
   Config::Bind(RuntimeOption::DynamicExtensions, ini,
                config, "DynamicExtensions");
 
-
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();
 }

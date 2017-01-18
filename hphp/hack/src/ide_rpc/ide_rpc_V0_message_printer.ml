@@ -18,13 +18,13 @@ let init_response_to_json { server_api_version } = JSON_Object [
 
 let autocomplete_response_to_json x =
   let param_to_json x = JSON_Object [
-    ("name", JSON_String x.name);
-    ("type", JSON_String x.type_);
+    ("name", JSON_String x.callable_param_name);
+    ("type", JSON_String x.callable_param_type);
   ] in
 
   let callable_details_to_json x = JSON_Object [
     ("return_type", JSON_String x.return_type);
-    ("params", JSON_Array (List.map x.params ~f:param_to_json));
+    ("params", JSON_Array (List.map x.callable_params ~f:param_to_json));
   ] in
 
   let callable_details_to_json = function

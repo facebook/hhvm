@@ -22,9 +22,9 @@ let test_autocomplete_response () =
     autocomplete_item_type = "bbb";
     callable_details = Some {
       return_type = "ccc";
-      Ide_message.params = [{
-          name  = "ddd";
-          type_ = "eee";
+      Ide_message.callable_params = [{
+          callable_param_name  = "ddd";
+          callable_param_type = "eee";
       }]
     }
   }] in

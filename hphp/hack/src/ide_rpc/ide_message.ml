@@ -77,12 +77,12 @@ and infer_type_response = string option
 
 and callable_details = {
   return_type : string;
-  params : callable_param list;
+  callable_params : callable_param list;
 }
 
 and callable_param = {
-  name : string;
-  type_ : string;
+  callable_param_name : string;
+  callable_param_type : string;
 }
 
 and diagnostics_notification = {

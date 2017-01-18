@@ -95,13 +95,13 @@ let autocomplete_result_to_json res =
 
 let autocomplete_result_to_ide_response res =
   let param_to_ide_response x = {
-    Ide_message.name = x.param_name;
-    type_ = x.param_ty;
+    Ide_message.callable_param_name = x.param_name;
+    callable_param_type = x.param_ty;
   } in
 
   let callable_details_to_ide_response res = {
     Ide_message.return_type = res.return_ty;
-    params = List.map res.params param_to_ide_response;
+    callable_params = List.map res.params param_to_ide_response;
   } in
 
   let callable_details_to_ide_response =

@@ -856,6 +856,8 @@ offending text is '%s'." (text node)));
     raise (Failure "CaseLabel should be handled by handle_switch_body")
   | DefaultLabel x ->
     raise (Failure "DefaultLabel should be handled by handle_switch_body")
+  | SwitchFallthrough x ->
+    raise (Failure "SwitchFallthrough should be handled by handle_switch_body")
   | ReturnStatement x ->
     let (kw, expr, semi) = get_return_statement_children x in
     transform_keyword_expression_statement kw expr semi;
@@ -1502,6 +1504,15 @@ and handle_switch_body left_b sections right_b =
   builder#end_chunks ();
   builder#start_block_nest ();
   tl_with ~f:(fun () ->
+    let handle_fallthrough fallthrough =
+      match syntax fallthrough with
+      | SwitchFallthrough x ->
+        let (kw, semi) = get_switch_fallthrough_children x in
+        transform kw;
+        transform semi;
+        ()
+      | _ -> ()
+    in
     let handle_label label =
       match syntax label with
       | CaseLabel x ->
@@ -1535,6 +1546,7 @@ and handle_switch_body left_b sections right_b =
           (syntax_node_to_list s.switch_section_labels) ~f:handle_label;
         List.iter
           (syntax_node_to_list s.switch_section_statements) ~f:handle_statement;
+        handle_fallthrough s.switch_section_fallthrough;
         ()
       | _ -> ()
     in

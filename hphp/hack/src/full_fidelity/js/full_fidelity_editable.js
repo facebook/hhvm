@@ -180,6 +180,8 @@ class EditableSyntax
       return SwitchStatement.from_json(json, position, source);
     case 'switch_section':
       return SwitchSection.from_json(json, position, source);
+    case 'switch_fallthrough':
+      return SwitchFallthrough.from_json(json, position, source);
     case 'case_label':
       return CaseLabel.from_json(json, position, source);
     case 'default_label':
@@ -689,6 +691,8 @@ class EditableToken extends EditableSyntax
        return new EvalToken(leading, trailing);
     case 'extends':
        return new ExtendsToken(leading, trailing);
+    case 'fallthrough':
+       return new FallthroughToken(leading, trailing);
     case 'float':
        return new FloatToken(leading, trailing);
     case 'final':
@@ -1277,6 +1281,13 @@ class ExtendsToken extends EditableToken
   constructor(leading, trailing)
   {
     super('extends', leading, trailing, 'extends');
+  }
+}
+class FallthroughToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('fallthrough', leading, trailing, 'fallthrough');
   }
 }
 class FloatToken extends EditableToken
@@ -8238,23 +8249,34 @@ class SwitchSection extends EditableSyntax
 {
   constructor(
     labels,
-    statements)
+    statements,
+    fallthrough)
   {
     super('switch_section', {
       labels: labels,
-      statements: statements });
+      statements: statements,
+      fallthrough: fallthrough });
   }
   get labels() { return this.children.labels; }
   get statements() { return this.children.statements; }
+  get fallthrough() { return this.children.fallthrough; }
   with_labels(labels){
     return new SwitchSection(
       labels,
-      this.statements);
+      this.statements,
+      this.fallthrough);
   }
   with_statements(statements){
     return new SwitchSection(
       this.labels,
-      statements);
+      statements,
+      this.fallthrough);
+  }
+  with_fallthrough(fallthrough){
+    return new SwitchSection(
+      this.labels,
+      this.statements,
+      fallthrough);
   }
   rewrite(rewriter, parents)
   {
@@ -8264,9 +8286,11 @@ class SwitchSection extends EditableSyntax
     new_parents.push(this);
     var labels = this.labels.rewrite(rewriter, new_parents);
     var statements = this.statements.rewrite(rewriter, new_parents);
+    var fallthrough = this.fallthrough.rewrite(rewriter, new_parents);
     if (
       labels === this.labels &&
-      statements === this.statements)
+      statements === this.statements &&
+      fallthrough === this.fallthrough)
     {
       return rewriter(this, parents);
     }
@@ -8274,7 +8298,8 @@ class SwitchSection extends EditableSyntax
     {
       return rewriter(new SwitchSection(
         labels,
-        statements), parents);
+        statements,
+        fallthrough), parents);
     }
   }
   static from_json(json, position, source)
@@ -8285,17 +8310,86 @@ class SwitchSection extends EditableSyntax
     let statements = EditableSyntax.from_json(
       json.switch_section_statements, position, source);
     position += statements.width;
+    let fallthrough = EditableSyntax.from_json(
+      json.switch_section_fallthrough, position, source);
+    position += fallthrough.width;
     return new SwitchSection(
         labels,
-        statements);
+        statements,
+        fallthrough);
   }
   get children_keys()
   {
     if (SwitchSection._children_keys == null)
       SwitchSection._children_keys = [
         'labels',
-        'statements'];
+        'statements',
+        'fallthrough'];
     return SwitchSection._children_keys;
+  }
+}
+class SwitchFallthrough extends EditableSyntax
+{
+  constructor(
+    keyword,
+    semicolon)
+  {
+    super('switch_fallthrough', {
+      keyword: keyword,
+      semicolon: semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get semicolon() { return this.children.semicolon; }
+  with_keyword(keyword){
+    return new SwitchFallthrough(
+      keyword,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new SwitchFallthrough(
+      this.keyword,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new SwitchFallthrough(
+        keyword,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.fallthrough_keyword, position, source);
+    position += keyword.width;
+    let semicolon = EditableSyntax.from_json(
+      json.fallthrough_semicolon, position, source);
+    position += semicolon.width;
+    return new SwitchFallthrough(
+        keyword,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (SwitchFallthrough._children_keys == null)
+      SwitchFallthrough._children_keys = [
+        'keyword',
+        'semicolon'];
+    return SwitchFallthrough._children_keys;
   }
 }
 class CaseLabel extends EditableSyntax
@@ -15488,6 +15582,7 @@ exports.EmptyToken = EmptyToken;
 exports.EnumToken = EnumToken;
 exports.EvalToken = EvalToken;
 exports.ExtendsToken = ExtendsToken;
+exports.FallthroughToken = FallthroughToken;
 exports.FloatToken = FloatToken;
 exports.FinalToken = FinalToken;
 exports.FinallyToken = FinallyToken;
@@ -15698,6 +15793,7 @@ exports.ForStatement = ForStatement;
 exports.ForeachStatement = ForeachStatement;
 exports.SwitchStatement = SwitchStatement;
 exports.SwitchSection = SwitchSection;
+exports.SwitchFallthrough = SwitchFallthrough;
 exports.CaseLabel = CaseLabel;
 exports.DefaultLabel = DefaultLabel;
 exports.ReturnStatement = ReturnStatement;

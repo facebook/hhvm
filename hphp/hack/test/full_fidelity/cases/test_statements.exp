@@ -27,11 +27,14 @@
                       ((whitespace)(case)(whitespace))
                       (literal((decimal_literal)))
                       ((:)(whitespace))))
-                    (list(break_statement((break))(missing)((;)(end_of_line)))))
+                      (missing)
+                      (switch_fallthrough((fallthrough))((;)(whitespace)
+                        (single_line_comment)(end_of_line))))
                   (switch_section
                     (list(default_label
                       ((whitespace)(default))((:)(whitespace))))
-                    (list(break_statement((break))(missing)((;)(end_of_line))))))
+                    (list(break_statement((break))(missing)((;)(end_of_line))))
+                    (missing)))
                 ((whitespace)(})(end_of_line)))
               (missing)
               (else_clause

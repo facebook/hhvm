@@ -70,6 +70,7 @@ type t =
 | ForeachStatement
 | SwitchStatement
 | SwitchSection
+| SwitchFallthrough
 | CaseLabel
 | DefaultLabel
 | ReturnStatement
@@ -204,6 +205,7 @@ let to_string kind =
   | ForeachStatement -> "foreach_statement"
   | SwitchStatement -> "switch_statement"
   | SwitchSection -> "switch_section"
+  | SwitchFallthrough -> "switch_fallthrough"
   | CaseLabel -> "case_label"
   | DefaultLabel -> "default_label"
   | ReturnStatement -> "return_statement"

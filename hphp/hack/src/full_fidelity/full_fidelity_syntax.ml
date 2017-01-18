@@ -400,6 +400,11 @@ module WithToken(Token: TokenType) = struct
     and switch_section = {
       switch_section_labels: t;
       switch_section_statements: t;
+      switch_section_fallthrough: t;
+    }
+    and switch_fallthrough = {
+      fallthrough_keyword: t;
+      fallthrough_semicolon: t;
     }
     and case_label = {
       case_keyword: t;
@@ -872,6 +877,7 @@ module WithToken(Token: TokenType) = struct
     | ForeachStatement of foreach_statement
     | SwitchStatement of switch_statement
     | SwitchSection of switch_section
+    | SwitchFallthrough of switch_fallthrough
     | CaseLabel of case_label
     | DefaultLabel of default_label
     | ReturnStatement of return_statement
@@ -1071,6 +1077,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.SwitchStatement
       | SwitchSection _ ->
         SyntaxKind.SwitchSection
+      | SwitchFallthrough _ ->
+        SyntaxKind.SwitchFallthrough
       | CaseLabel _ ->
         SyntaxKind.CaseLabel
       | DefaultLabel _ ->
@@ -1336,6 +1344,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.SwitchStatement
     let is_switch_section node =
       kind node = SyntaxKind.SwitchSection
+    let is_switch_fallthrough node =
+      kind node = SyntaxKind.SwitchFallthrough
     let is_case_label node =
       kind node = SyntaxKind.CaseLabel
     let is_default_label node =
@@ -2137,9 +2147,19 @@ module WithToken(Token: TokenType) = struct
     let get_switch_section_children {
       switch_section_labels;
       switch_section_statements;
+      switch_section_fallthrough;
     } = (
       switch_section_labels,
-      switch_section_statements
+      switch_section_statements,
+      switch_section_fallthrough
+    )
+
+    let get_switch_fallthrough_children {
+      fallthrough_keyword;
+      fallthrough_semicolon;
+    } = (
+      fallthrough_keyword,
+      fallthrough_semicolon
     )
 
     let get_case_label_children {
@@ -3541,9 +3561,18 @@ module WithToken(Token: TokenType) = struct
       | SwitchSection {
         switch_section_labels;
         switch_section_statements;
+        switch_section_fallthrough;
       } -> [
         switch_section_labels;
         switch_section_statements;
+        switch_section_fallthrough;
+      ]
+      | SwitchFallthrough {
+        fallthrough_keyword;
+        fallthrough_semicolon;
+      } -> [
+        fallthrough_keyword;
+        fallthrough_semicolon;
       ]
       | CaseLabel {
         case_keyword;
@@ -4867,9 +4896,18 @@ module WithToken(Token: TokenType) = struct
       | SwitchSection {
         switch_section_labels;
         switch_section_statements;
+        switch_section_fallthrough;
       } -> [
         "switch_section_labels";
         "switch_section_statements";
+        "switch_section_fallthrough";
+      ]
+      | SwitchFallthrough {
+        fallthrough_keyword;
+        fallthrough_semicolon;
+      } -> [
+        "fallthrough_keyword";
+        "fallthrough_semicolon";
       ]
       | CaseLabel {
         case_keyword;
@@ -6296,10 +6334,20 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.SwitchSection, [
           switch_section_labels;
           switch_section_statements;
+          switch_section_fallthrough;
         ]) ->
         SwitchSection {
           switch_section_labels;
           switch_section_statements;
+          switch_section_fallthrough;
+        }
+      | (SyntaxKind.SwitchFallthrough, [
+          fallthrough_keyword;
+          fallthrough_semicolon;
+        ]) ->
+        SwitchFallthrough {
+          fallthrough_keyword;
+          fallthrough_semicolon;
         }
       | (SyntaxKind.CaseLabel, [
           case_keyword;
@@ -7835,10 +7883,21 @@ module WithToken(Token: TokenType) = struct
     let make_switch_section
       switch_section_labels
       switch_section_statements
+      switch_section_fallthrough
     =
       from_children SyntaxKind.SwitchSection [
         switch_section_labels;
         switch_section_statements;
+        switch_section_fallthrough;
+      ]
+
+    let make_switch_fallthrough
+      fallthrough_keyword
+      fallthrough_semicolon
+    =
+      from_children SyntaxKind.SwitchFallthrough [
+        fallthrough_keyword;
+        fallthrough_semicolon;
       ]
 
     let make_case_label

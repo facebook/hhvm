@@ -775,6 +775,7 @@ module WithStatementAndDeclAndTypeParser
     | Enum
     | Eval
     | Extends
+    | Fallthrough
     | Float
     | Final
     | Finally

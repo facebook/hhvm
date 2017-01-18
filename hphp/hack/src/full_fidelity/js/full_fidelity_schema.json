@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-01-11-0001",
+  "version" : "2017-01-12-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -87,6 +87,8 @@
       "token_text" : "eval" },
     { "token_kind" : "Extends",
       "token_text" : "extends" },
+    { "token_kind" : "Fallthrough",
+      "token_text" : "fallthrough" },
     { "token_kind" : "Float",
       "token_text" : "float" },
     { "token_kind" : "Final",
@@ -891,7 +893,16 @@
       "prefix" : "switch_section",
       "fields" : [
         { "field_name" : "labels" },
-        { "field_name" : "statements" }
+        { "field_name" : "statements" },
+        { "field_name" : "fallthrough" }
+      ] },
+    { "kind_name" : "SwitchFallthrough",
+      "type_name" : "switch_fallthrough",
+      "description" : "switch_fallthrough",
+      "prefix" : "fallthrough",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "CaseLabel",
       "type_name" : "case_label",

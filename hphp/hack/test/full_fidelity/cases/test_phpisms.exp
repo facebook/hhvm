@@ -59,7 +59,7 @@
                         (literal((decimal_literal)))
                         ((;)(whitespace)))
                       (default_label((default))((;)(whitespace))))
-                    (missing)))
+                    (missing)(missing)))
                   ((})(whitespace)(single_line_comment)(end_of_line)))
                   (unset_statement
                     ((whitespace)(unset))

@@ -53,6 +53,7 @@ type t =
   | Enum
   | Eval
   | Extends
+  | Fallthrough
   | Float
   | Final
   | Finally
@@ -240,6 +241,7 @@ let from_string keyword =
   | "enum" -> Some Enum
   | "eval" -> Some Eval
   | "extends" -> Some Extends
+  | "fallthrough" -> Some Fallthrough
   | "float" -> Some Float
   | "final" -> Some Final
   | "finally" -> Some Finally
@@ -400,6 +402,7 @@ match kind with
   | Enum -> "enum"
   | Eval -> "eval"
   | Extends -> "extends"
+  | Fallthrough -> "fallthrough"
   | Float -> "float"
   | Final -> "final"
   | Finally -> "finally"

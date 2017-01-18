@@ -59,8 +59,8 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
-  let peek_token_kind parser =
-    Token.kind (peek_token parser)
+  let peek_token_kind ?(lookahead=0) parser =
+    Token.kind (peek_token ~lookahead parser)
 
   let skip_token parser =
     let (parser, _) = next_token parser in

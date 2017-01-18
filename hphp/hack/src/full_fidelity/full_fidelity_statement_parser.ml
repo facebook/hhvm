@@ -28,6 +28,7 @@ module WithExpressionAndTypeParser
 
   let rec parse_statement parser =
     match peek_token_kind parser with
+    | Fallthrough -> parse_possible_erroneous_fallthrough parser
     | For -> parse_for_statement parser
     | Foreach -> parse_foreach_statement parser
     | Do -> parse_do_statement parser
@@ -290,6 +291,10 @@ module WithExpressionAndTypeParser
     switch-section:
       section-labels
       section-statements-opt
+      section-fallthrough-opt
+
+    section-fallthrough:
+      fallthrough  ;
 
     section-labels:
       section-label
@@ -303,6 +308,7 @@ module WithExpressionAndTypeParser
     are zero statements *between* two sections.
 
     TODO: Update the specification with these rules.
+
     *)
 
     let (parser, switch_keyword_token) = assert_token parser Switch in
@@ -319,6 +325,33 @@ module WithExpressionAndTypeParser
       right_brace_token in
     (parser, syntax)
 
+  and is_switch_fallthrough parser =
+    peek_token_kind parser = Fallthrough &&
+    peek_token_kind ~lookahead:1 parser = Semicolon
+
+  and parse_possible_erroneous_fallthrough parser =
+    if is_switch_fallthrough parser then
+      let (parser, result) = parse_switch_fallthrough parser in
+      (* TODO: This puts the error on the semi; it should be on
+      the whole thing. *)
+      let parser = with_error parser SyntaxError.error1055 in
+      (parser, result)
+    else
+      parse_expression_statement parser
+
+  and parse_switch_fallthrough parser =
+    (* We don't get here unless we have fallthrough ; *)
+    let (parser, keyword) = assert_token parser Fallthrough in
+    let (parser, semi) = assert_token parser Semicolon in
+    let result = make_switch_fallthrough keyword semi in
+    (parser, result)
+
+  and parse_switch_fallthrough_opt parser =
+    if is_switch_fallthrough parser then
+      parse_switch_fallthrough parser
+    else
+      (parser, (make_missing()))
+
   and parse_switch_section parser =
     (* See parse_switch_statement for grammar *)
     let (parser, labels) =
@@ -329,11 +362,13 @@ module WithExpressionAndTypeParser
         parser in
     let (parser, statements) =
       parse_list_until_none parser parse_switch_section_statement in
-    let result = make_switch_section labels statements in
+    let (parser, fallthrough) = parse_switch_fallthrough_opt parser in
+    let result = make_switch_section labels statements fallthrough in
     (parser, result)
 
   and parse_switch_section_statement parser =
-    match peek_token_kind parser with
+    if is_switch_fallthrough parser then (parser, None)
+    else match peek_token_kind parser with
     | Default
     | Case
     | RightBrace

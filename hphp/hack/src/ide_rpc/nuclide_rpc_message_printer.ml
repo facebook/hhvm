@@ -9,6 +9,7 @@
  *)
 open Core
 open Ide_message
+open Ide_parser_utils
 open Hh_json
 
 (* There are fields that Nuclide doesn't use anymore, but the RPC framework
@@ -59,6 +60,73 @@ let infer_type_response_to_json x =
     ("pos", deprecated_pos_field);
   ]
 
+let identify_symbol_response_to_json results =
+
+  let get_definition_data = function
+    | Some x ->
+        let open SymbolDefinition in
+        let pos = Pos.json x.pos in
+        let span = Pos.multiline_json x.span in
+        let id = match x.id with
+          | Some id -> JSON_String id
+          | None -> JSON_Null
+        in
+        pos, span, id
+    | None -> (JSON_Null, JSON_Null, JSON_Null)
+  in
+
+  let symbol_to_json { occurrence; definition; } =
+    let definition_pos, definition_span, definition_id =
+      get_definition_data definition in
+    let open SymbolOccurrence in
+    JSON_Object [
+      "name", JSON_String occurrence.name;
+      "result_type",
+        JSON_String SymbolOccurrence.(kind_to_string occurrence.type_);
+      "pos", Pos.json occurrence.pos;
+      "definition_pos", definition_pos;
+      "definition_span", definition_span;
+      "definition_id", definition_id;
+    ]
+  in
+  JSON_Array (List.map results ~f:symbol_to_json)
+
+let opt_string_to_json = function
+  | Some x -> JSON_String x
+  | None -> JSON_Null
+
+let rec definition_to_json def =
+  let open SymbolDefinition in
+
+  let modifiers = JSON_Array (List.map def.modifiers
+    ~f:(fun x -> JSON_String (string_of_modifier x))) in
+  let children =
+    opt_field def.children "children" outline_response_to_json in
+  let params =
+    opt_field def.params "params" outline_response_to_json in
+  let docblock =
+    opt_field def.docblock "docblock" (fun x -> JSON_String x) in
+
+  JSON_Object ([
+    "kind", JSON_String (string_of_kind def.kind);
+    "name", JSON_String def.name;
+    "id", (opt_string_to_json def.id);
+    "position", Pos.json def.pos;
+    "span", Pos.multiline_json def.span;
+    "modifiers", modifiers;
+  ] @
+    children @
+    params @
+    docblock
+  )
+
+and outline_response_to_json x =
+  Hh_json.JSON_Array (List.map x ~f:definition_to_json)
+
+let symbol_by_id_response_to_json = function
+  | Some def -> definition_to_json def
+  | None -> JSON_Null
+
 let diagnostics_to_json x =
   JSON_Object [
     ("filename", JSON_String x.diagnostics_notification_filename);
@@ -90,7 +158,15 @@ let to_json ~response = match response with
   | Init_response _ -> should_not_happen
   | Autocomplete_response x -> autocomplete_response_to_json x
   | Infer_type_response x -> infer_type_response_to_json x
+  | Identify_symbol_response x -> identify_symbol_response_to_json x
+  | Outline_response x -> outline_response_to_json x
+  | Symbol_by_id_response x -> symbol_by_id_response_to_json x
   | Diagnostics_notification x -> diagnostics_to_json x
+
+let print_json ~response =
+  to_json ~response |>
+  Hh_json.json_to_string |>
+  print_endline
 
 let to_message_json ~id ~response =
   to_json ~response |>

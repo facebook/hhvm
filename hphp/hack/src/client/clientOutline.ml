@@ -9,8 +9,8 @@
  *)
 
 let print_json res =
-  print_endline (Hh_json.json_to_string (FileOutline.to_json res));
-  ()
+  Nuclide_rpc_message_printer.print_json
+    ~response:(Ide_message.Outline_response res)
 
 let go res output_json =
   if output_json then
@@ -19,11 +19,8 @@ let go res output_json =
     FileOutline.print res
 
 let print_json_definition res =
-  let json = match res with
-    | Some res -> FileOutline.definition_to_json res
-    | None -> Hh_json.JSON_Null
-  in
-  print_endline (Hh_json.json_to_string json)
+  Nuclide_rpc_message_printer.print_json
+    ~response:(Ide_message.Symbol_by_id_response res)
 
 let print_readable_definition res =
   match res with

@@ -9,33 +9,10 @@
 *)
 
 open Core
-open Hh_json
-
-let to_json x =
-  JSON_Array (List.map x begin function (symbol, definition) ->
-    let definition_pos, definition_span, definition_id =
-      Option.value_map definition
-      ~f:(fun x -> Pos.json x.SymbolDefinition.pos,
-                   Pos.multiline_json x.SymbolDefinition.span,
-                   x.SymbolDefinition.id)
-      ~default:(JSON_Null, JSON_Null, None)
-    in
-    let definition_id = Option.value_map definition_id
-      ~f:(fun x -> JSON_String x) ~default:JSON_Null
-    in
-    JSON_Object [
-      "name",           JSON_String symbol.SymbolOccurrence.name;
-      "result_type",    JSON_String
-        (SymbolOccurrence.(kind_to_string symbol.type_));
-      "pos",            Pos.json (symbol.SymbolOccurrence.pos);
-      "definition_pos", definition_pos;
-      "definition_span", definition_span;
-      "definition_id", definition_id;
-    ]
-  end)
 
 let print_json res =
-  print_endline (Hh_json.json_to_string (to_json res))
+  let response = IdentifySymbolService.result_to_ide_message res in
+  Nuclide_rpc_message_printer.print_json ~response
 
 let print_readable ?short_pos:(short_pos=false) x =
   List.iter x begin function (occurrence, definition) ->

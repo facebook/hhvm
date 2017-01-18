@@ -15,8 +15,13 @@ open Typing_defs
 type result =
   ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) list
 
-type cache = (Relative_path.t * FileInfo.t * Ast.def list *
-  Relative_path.t SymbolOccurrence.t list) SMap.t
+let result_to_ide_message x =
+  let open Ide_message in
+  Identify_symbol_response (
+    List.map x begin fun (occurrence, definition) ->
+      {occurrence; definition}
+    end
+  )
 
 let is_target target_line target_char pos =
   let l, start, end_ = Pos.info_pos pos in

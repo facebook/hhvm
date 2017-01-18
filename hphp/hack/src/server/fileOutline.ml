@@ -308,32 +308,6 @@ let outline popt content =
   let result = outline_ast ast in
   add_docblocks result comments
 
-let rec definition_to_json def =
-  Hh_json.JSON_Object ([
-    "kind", Hh_json.JSON_String (string_of_kind def.kind);
-    "name", Hh_json.JSON_String def.name;
-    "id", Option.value_map def.id
-      ~f:(fun x -> Hh_json.JSON_String x) ~default:Hh_json.JSON_Null;
-    "position", Pos.json def.pos;
-    "span", Pos.multiline_json def.span;
-    "modifiers", Hh_json.JSON_Array
-      (List.map def.modifiers
-      (fun x -> Hh_json.JSON_String (string_of_modifier x)));
-  ] @
-  (Option.value_map def.children
-    ~f:(fun x -> [("children", to_json x)]) ~default:[])
-    @
-  (Option.value_map def.params
-    ~f:(fun x -> [("params", to_json x)]) ~default:[])
-    @
-  (Option.value_map def.docblock
-    ~f:(fun x -> [("docblock", Hh_json.JSON_String x)]) ~default:[]))
-
-and to_json outline =
-  Hh_json.JSON_Array begin
-    List.map outline ~f:definition_to_json
-  end
-
 let rec print_def ~short_pos indent def =
   let
     {name; kind; id; pos; span; modifiers; children; params; docblock} = def

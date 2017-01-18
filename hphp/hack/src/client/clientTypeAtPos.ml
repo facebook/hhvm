@@ -12,9 +12,7 @@ let go pos ty output_json =
   if output_json
   then begin
     let response = Ide_message.Infer_type_response ty in
-    Nuclide_rpc_message_printer.to_json response |>
-    Hh_json.json_to_string |>
-    print_endline
+    Nuclide_rpc_message_printer.print_json ~response
   end else begin
     match ty with
       | Some ty -> print_endline ty

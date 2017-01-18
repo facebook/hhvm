@@ -35,5 +35,12 @@ val get_number_field :
 val get_array_field :
   string -> json -> (json list, error_t) Result.t
 
+(* Map optional value v to [("label", f v)] or [] *)
+val opt_field:
+  v_opt:'a option ->
+  label:string ->
+  f:('a -> Hh_json.json) ->
+  (string * Hh_json.json) list
+
 val not_implemented :
   ('a, error_t) Result.t

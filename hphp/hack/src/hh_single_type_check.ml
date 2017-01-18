@@ -524,8 +524,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     end;
   | Identify_symbol (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    let result = ServerIdentifyFunction.go_absolute file line column opts in
-    begin match result with
+    begin match ServerIdentifyFunction.go_absolute file line column opts with
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end

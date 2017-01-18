@@ -13,6 +13,10 @@ val to_json :
   response:Ide_message.response ->
   Hh_json.json
 
+val print_json :
+  response:Ide_message.response ->
+  unit
+
 (* Constructs the entire response message, ready to be sent to client *)
 val to_message_json :
   id:int option ->

@@ -59,6 +59,9 @@ type response =
   | Init_response of init_response
   | Autocomplete_response of autocomplete_response
   | Infer_type_response of infer_type_response
+  | Identify_symbol_response of identify_symbol_response
+  | Symbol_by_id_response of symbol_by_id_response
+  | Outline_response of outline_response
   | Diagnostics_notification of diagnostics_notification
 
 and init_response = {
@@ -84,6 +87,17 @@ and callable_param = {
   callable_param_name : string;
   callable_param_type : string;
 }
+
+and identify_symbol_response = identify_symbol_item list
+
+and identify_symbol_item = {
+  occurrence : string SymbolOccurrence.t;
+  definition : string SymbolDefinition.t option;
+}
+
+and outline_response = string SymbolDefinition.t list
+
+and symbol_by_id_response = string SymbolDefinition.t option
 
 and diagnostics_notification = {
   subscription_id : int; (* Nuclide-rpc specific *)

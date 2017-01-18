@@ -88,4 +88,9 @@ let get_array_field =
     ~getter:Hh_json.Access.get_array
     ~transform:no_transform
 
+let opt_field ~v_opt ~label ~f =
+  Option.value_map v_opt
+    ~f:(fun x -> [label, f x])
+    ~default:[]
+
 let not_implemented = Result.Error (Internal_error "Not implemented")

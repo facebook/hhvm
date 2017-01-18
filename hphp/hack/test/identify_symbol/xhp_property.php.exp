@@ -1,5 +1,9 @@
-\C:::xhp_string
-Property
-line 8, characters 12-22
-defined: line 5, characters 12-21
-definition span: line 5, character 12 - line 5, character 29
+name: \C:::xhp_string, kind: property, span: line 8, characters 12-22, definition: 
+ :xhp_string
+   kind: property
+   id: property::C:::xhp_string
+   position: line 5, characters 12-21
+   span: line 5, character 12 - line 5, character 29
+   modifiers: 
+
+

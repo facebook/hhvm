@@ -334,22 +334,26 @@ and to_json outline =
     List.map outline ~f:definition_to_json
   end
 
-let rec print_def indent def =
+let rec print_def ~short_pos indent def =
   let
     {name; kind; id; pos; span; modifiers; children; params; docblock} = def
+  in
+  let print_pos, print_span = if short_pos
+    then Pos.string_no_file, Pos.multiline_string_no_file
+    else Pos.string, Pos.multiline_string
   in
   Printf.printf "%s%s\n" indent name;
   Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
   Option.iter id (fun id -> Printf.printf "%s  id: %s\n" indent id);
-  Printf.printf "%s  position: %s\n" indent (Pos.string pos);
-  Printf.printf "%s  span: %s\n" indent (Pos.multiline_string span);
+  Printf.printf "%s  position: %s\n" indent (print_pos pos);
+  Printf.printf "%s  span: %s\n" indent (print_span span);
   Printf.printf "%s  modifiers: " indent;
   List.iter modifiers
     (fun x -> Printf.printf "%s " (string_of_modifier x));
     Printf.printf "\n";
   Option.iter params (fun x ->
     Printf.printf "%s  params:\n" indent;
-    print (indent ^ "    ") x;
+    print ~short_pos (indent ^ "    ") x;
   );
   Option.iter docblock (fun x ->
     Printf.printf "%s  docblock:\n" indent;
@@ -357,10 +361,11 @@ let rec print_def indent def =
   );
   Printf.printf "\n";
   Option.iter children (fun x ->
-    print (indent ^ "  ") x
+    print ~short_pos (indent ^ "  ") x
   );
 
-and print indent defs  =
-  List.iter defs ~f:(print_def indent)
+and print ~short_pos indent defs =
+  List.iter defs ~f:(print_def ~short_pos indent)
 
-let print  = print ""
+let print_def ?short_pos:(short_pos = false) = print_def ~short_pos
+let print ?short_pos:(short_pos = false) = print ~short_pos ""

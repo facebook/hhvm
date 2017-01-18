@@ -1,8 +1,8 @@
 foo
   kind: function
   id: function::foo
-  position: File "", line 4, characters 10-12:
-  span: File "", line 3, character 1 - line 7, character 1:
+  position: line 4, characters 10-12
+  span: line 3, character 1 - line 7, character 1
   modifiers: 
   params:
 

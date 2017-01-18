@@ -659,9 +659,17 @@ class CommonTests(object):
         self.write_load_config()
 
         self.check_cmd_and_json_cmd([
-            'Name: \\bar, type: function, position: line 1, '
-            'characters 42-44, defined: line 1, characters 15-17, '
-            'definition span: line 1, character 15 - line 1, character 17'
+            'name: \\bar, kind: function, span: line 1, characters 42-44, '
+            'definition: ',
+            ' bar',
+            '   kind: function',
+            '   id: function::bar',
+            '   position: File "", line 1, characters 15-17:',
+            '   span: File "", line 1, character 6 - line 1, character 22:',
+            '   modifiers: ',
+            '   params:',
+            '',
+            ''
             ], [
             '[{{"name":"\\\\bar","result_type":"function",'
             '"pos":{{"filename":"","line":1,"char_start":42,"char_end":44}},'
@@ -713,10 +721,18 @@ class CommonTests(object):
         self.write_load_config()
 
         self.check_cmd_and_json_cmd([
-            'Name: \\ClassToBeIdentified::methodToBeIdentified, type: method, '
-            'position: line 1, characters 45-64, defined: line 4, '
-            'characters 26-45, definition span: line 4, character 26 - line 4, '
-            'character 45'
+            'name: \\ClassToBeIdentified::methodToBeIdentified, kind: method,'
+            ' span: line 1, characters 45-64, definition: ',
+            ' methodToBeIdentified',
+            '   kind: method',
+            '   id: method::ClassToBeIdentified::methodToBeIdentified',
+            '   position: File "{root}foo_5.php", line 4, characters 26-45:',
+            '   span: File "{root}foo_5.php", line 4, character 3 - line 4,'
+            ' character 50:',
+            '   modifiers: public static ',
+            '   params:',
+            '',
+            '',
             ], [
             '[{{"name":"\\\\ClassToBeIdentified::methodToBeIdentified",'
             '"result_type":"method","pos":{{"filename":"","line":1,'

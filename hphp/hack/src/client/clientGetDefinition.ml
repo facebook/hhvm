@@ -11,18 +11,6 @@
 open Core
 open Hh_json
 
-let get_result_type res =
-  let open SymbolOccurrence in
-  match res.type_ with
-  | Class -> "class"
-  | Method _ -> "method"
-  | Function -> "function"
-  | LocalVar -> "local"
-  | Property _ -> "property"
-  | ClassConst _ -> "class_const"
-  | Typeconst _ -> "typeconst"
-  | GConst -> "global_const"
-
 let to_json x =
   JSON_Array (List.map x begin function (symbol, definition) ->
     let definition_pos, definition_span, definition_id =
@@ -38,7 +26,7 @@ let to_json x =
     JSON_Object [
       "name",           JSON_String symbol.SymbolOccurrence.name;
       "result_type",    JSON_String
-        (get_result_type symbol);
+        (SymbolOccurrence.(kind_to_string symbol.type_));
       "pos",            Pos.json (symbol.SymbolOccurrence.pos);
       "definition_pos", definition_pos;
       "definition_span", definition_span;
@@ -49,16 +37,17 @@ let to_json x =
 let print_json res =
   print_endline (Hh_json.json_to_string (to_json res))
 
-let print_readable x =
-  List.iter x begin function (symbol, definition) ->
-    Printf.printf "Name: %s, type: %s, position: %s"
-      symbol.SymbolOccurrence.name
-      (get_result_type symbol)
-      (Pos.string_no_file symbol.SymbolOccurrence.pos);
-    Option.iter definition begin fun x ->
-      Printf.printf ", defined: %s" (Pos.string_no_file x.SymbolDefinition.pos);
-      Printf.printf ", definition span: %s"
-        (Pos.multiline_string_no_file x.SymbolDefinition.pos)
+let print_readable ?short_pos:(short_pos=false) x =
+  List.iter x begin function (occurrence, definition) ->
+    let open SymbolOccurrence in
+    let {name; type_; pos;} = occurrence in
+    Printf.printf "name: %s, kind: %s, span: %s, definition: "
+      name (kind_to_string type_) (Pos.string_no_file pos);
+    begin match definition with
+    | None ->  Printf.printf "None\n"
+    | Some definition ->
+      print_newline ();
+      FileOutline.print_def ~short_pos " " definition
     end;
     print_newline ()
   end

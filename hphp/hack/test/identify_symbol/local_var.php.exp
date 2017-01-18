@@ -1,5 +1,8 @@
-$foo
-LocalVar
-line 4, characters 3-6
-defined: line 3, characters 15-18
-definition span: line 3, character 15 - line 3, character 18
+name: $foo, kind: local, span: line 4, characters 3-6, definition: 
+ $foo
+   kind: local
+   position: line 3, characters 15-18
+   span: line 3, character 15 - line 3, character 18
+   modifiers: 
+
+

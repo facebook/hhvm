@@ -1,5 +1,9 @@
-\C::foo
-Property
-line 8, characters 6-9
-defined: line 4, characters 22-25
-definition span: line 4, character 22 - line 4, character 25
+name: \C::foo, kind: property, span: line 8, characters 6-9, definition: 
+ foo
+   kind: property
+   id: property::C::foo
+   position: line 4, characters 22-25
+   span: line 4, character 22 - line 4, character 25
+   modifiers: public static 
+
+

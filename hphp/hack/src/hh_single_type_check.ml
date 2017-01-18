@@ -406,30 +406,6 @@ let print_coverage fn type_acc =
   let counts = ServerCoverageMetric.count_exprs fn type_acc in
   ClientCoverageMetric.go ~json:false (Some (Leaf counts))
 
-let print_symbol (symbol, definition) =
-  let open SymbolOccurrence in
-  Printf.printf "%s\n%s\n%s\n"
-    symbol.name
-    begin match symbol.type_ with
-    | Class -> "Class"
-    | Function -> "Function"
-    | Method _ -> "Method"
-    | LocalVar -> "LocalVar"
-    | Property _ -> "Property"
-    | ClassConst _ -> "ClassConst"
-    | Typeconst _ -> "Typeconst"
-    | GConst -> "GlobalConst"
-    end
-    (Pos.string_no_file symbol.pos);
-  Printf.printf "defined: %s\n"
-    (Option.value_map definition
-      ~f:(fun x -> Pos.string_no_file x.SymbolDefinition.pos)
-      ~default:"None");
-  Printf.printf "definition span: %s\n"
-    (Option.value_map definition
-      ~f:(fun x -> Pos.multiline_string_no_file x.SymbolDefinition.span)
-      ~default:"None")
-
 let check_errors opts errors files_info =
   Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->
     errors @ Errors.get_error_list
@@ -548,16 +524,17 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     end;
   | Identify_symbol (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
-    let result = ServerIdentifyFunction.go file line column opts in
+    let result = ServerIdentifyFunction.go_absolute file line column opts in
     begin match result with
       | [] -> print_endline "None"
-      | _ -> List.iter result print_symbol
+      | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
   | Symbol_definition_by_id id ->
     let result = ServerSymbolDefinition.from_symbol_id opts id in
     begin match result with
       | None -> print_endline "None"
-      | Some s -> FileOutline.print [SymbolDefinition.to_absolute s]
+      | Some s ->
+        FileOutline.print ~short_pos:true [SymbolDefinition.to_absolute s]
     end
   | Find_local (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
@@ -567,7 +544,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
   | Outline ->
     let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline popt file in
-    FileOutline.print results;
+    FileOutline.print ~short_pos:true results
   | Find_refs (line, column) ->
     Typing_deps.update_files files_info;
     let genv = ServerEnvBuild.default_genv in

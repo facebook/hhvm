@@ -26,3 +26,5 @@ touch($file, strtotime("@100200300"), strtotime("@100400500"));
 $fileInfo = new SplFileInfo($file);
 print($fileInfo->getMTime()."\n");
 print($fileInfo->getATime()."\n");
+
+@unlink($file);

@@ -54,6 +54,29 @@ let test_autocomplete_response () =
     ]
   }|}
 
+let test_infer_type_response () =
+  test_response (Infer_type_response (Some "hello"))
+  {|{
+    "protocol": "service_framework3_rpc",
+    "type": "response",
+    "id": 4,
+    "result": {
+      "type": "hello",
+      "pos": {"filename":"","line":0,"char_start":0,"char_end":-1}
+    }
+  }|}
+  &&
+  test_response (Infer_type_response None)
+  {|{
+    "protocol": "service_framework3_rpc",
+    "type": "response",
+    "id": 4,
+    "result": {
+      "type": null,
+      "pos": {"filename":"","line":0,"char_start":0,"char_end":-1}
+    }
+  }|}
+
 let test_diagnostics_notification () =
   let response = Diagnostics_notification {
     subscription_id = 4;
@@ -74,6 +97,7 @@ let test_diagnostics_notification () =
 let tests = [
   "test_autocomplete_response", test_autocomplete_response;
   "test_diagnostics_notification", test_diagnostics_notification;
+  "test_infer_type_response", test_infer_type_response;
 ]
 
 let () =

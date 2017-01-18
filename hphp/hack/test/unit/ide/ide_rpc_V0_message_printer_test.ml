@@ -82,10 +82,29 @@ let test_autocomplete_response () =
     ]
   }|}
 
+let test_infer_type_response () =
+  let response = Infer_type_response (Some "foo") in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": "foo"
+  }|}
+  &&
+  let response = Infer_type_response None in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": null
+  }|}
+
+
 let tests = [
   "test_method_not_found", test_method_not_found;
   "test_init_response", test_init_response;
   "test_autocomplete_response", test_autocomplete_response;
+  "test_infer_type_response", test_infer_type_response;
 ]
 
 let () =

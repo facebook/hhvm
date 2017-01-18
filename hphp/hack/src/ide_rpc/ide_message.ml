@@ -26,6 +26,7 @@ type file_position = {
 type request =
   | Init of init_params
   | Autocomplete of file_position
+  | Infer_type of file_position
   | Did_open_file of did_open_file_params
   | Did_close_file of did_close_file_params
   | Did_change_file of did_change_file_params
@@ -57,6 +58,7 @@ and did_change_file_params = {
 type response =
   | Init_response of init_response
   | Autocomplete_response of autocomplete_response
+  | Infer_type_response of infer_type_response
   | Diagnostics_notification of diagnostics_notification
 
 and init_response = {
@@ -71,6 +73,8 @@ and autocomplete_item = {
   callable_details : callable_details option;
 }
 
+and infer_type_response = string option
+
 and callable_details = {
   return_type : string;
   params : callable_param list;
@@ -82,7 +86,7 @@ and callable_param = {
 }
 
 and diagnostics_notification = {
-  subscription_id : int; (* Nuclide-rpc spcific *)
+  subscription_id : int; (* Nuclide-rpc specific *)
   diagnostics_notification_filename : string;
   diagnostics : error list;
 }

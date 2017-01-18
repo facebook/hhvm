@@ -8,14 +8,36 @@
  *
  *)
 
+open Ide_message
 open Ide_parser_utils
 open Ide_rpc_protocol_parser_types
+open Result.Monad_infix
 
 let assert_params_required method_name params =
   Result.of_option params
     ~error:(Invalid_params
       (Printf.sprintf "%s request requires params" method_name))
 
+let get_line_field = get_int_field "line"
+
+let get_column_field = get_int_field "column"
+
 let get_text_field = get_string_field "text"
 
 let get_filename_filed = get_string_field "filename"
+
+let parse_position position =
+  get_line_field position >>= fun line ->
+  get_column_field position >>= fun column ->
+  Result.Ok { File_content.line; column; }
+
+let get_start_field obj = get_obj_field "start" obj >>= parse_position
+
+let get_end_field obj = get_obj_field "end" obj >>= parse_position
+
+let get_position_filed obj = get_obj_field "position" obj >>= parse_position
+
+let get_file_position_field obj =
+  get_filename_filed obj >>= fun filename ->
+  get_position_filed obj >>= fun position ->
+  Result.Ok { filename; position; }

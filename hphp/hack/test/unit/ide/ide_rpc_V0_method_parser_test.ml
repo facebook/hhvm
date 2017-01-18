@@ -67,10 +67,28 @@ let test_autocomplete_call () =
     }
   )
 
+let test_infer_type_call () =
+  let msg = build_request_message "inferType"
+    {|
+      "filename" : "test.php",
+      "position" : {
+        "line" : 11,
+        "column" : 12
+      }
+    |} in
+  test msg @@
+  expect_api_message (
+    Infer_type {
+      filename = "test.php";
+      position = {line = 11; column = 12};
+    }
+  )
+
 let tests = [
   "test_init", test_init;
   "test_did_open_file", test_did_open_file;
   "test_autocomplete_call", test_autocomplete_call;
+  "test_infer_type_call", test_infer_type_call;
 ]
 
 let () =

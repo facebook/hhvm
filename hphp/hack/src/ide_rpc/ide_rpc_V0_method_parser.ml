@@ -43,10 +43,16 @@ let parse_did_open_file method_name params =
   parse_did_open_file_params >>= fun params ->
   Result.Ok (Did_open_file params)
 
+let parse_infer_type method_name params =
+  assert_params_required method_name params >>=
+  get_file_position_field >>= fun file_position ->
+  Result.Ok (Infer_type file_position)
+
 let parse_method method_name params = match method_name with
   | "init" -> parse_init method_name params
   | "didOpenFile" -> parse_did_open_file method_name params
   | "autocomplete" -> delegate_to_previous_version "getCompletions" params
+  | "inferType" -> parse_infer_type method_name params
   | _ -> delegate_to_previous_version method_name params
 
 let parse ~method_name ~params =

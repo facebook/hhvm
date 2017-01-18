@@ -49,6 +49,16 @@ let autocomplete_response_to_json x =
 
   JSON_Array (List.map x ~f:autocomplete_response_to_json)
 
+let infer_type_response_to_json x =
+  let ty_json = match x with
+    | Some x -> Hh_json.JSON_String x
+    | None -> Hh_json.JSON_Null
+  in
+  Hh_json.JSON_Object [
+    ("type", ty_json);
+    ("pos", deprecated_pos_field);
+  ]
+
 let diagnostics_to_json x =
   JSON_Object [
     ("filename", JSON_String x.diagnostics_notification_filename);
@@ -79,6 +89,7 @@ let to_json ~response = match response with
   (* Init request is not part of Nuclide protocol *)
   | Init_response _ -> should_not_happen
   | Autocomplete_response x -> autocomplete_response_to_json x
+  | Infer_type_response x -> infer_type_response_to_json x
   | Diagnostics_notification x -> diagnostics_to_json x
 
 let to_message_json ~id ~response =

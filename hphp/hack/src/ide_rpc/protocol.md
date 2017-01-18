@@ -269,3 +269,17 @@ where DiagnosticsParams is defined as:
      */
     type : string;
   }
+
+
+#### Infer type request
+
+What Hack thinks is the type of the expression at this position. Displayed in editor on mouse-hover over an expression.
+
+*Client request:*
+
+  method : "inferType"
+  params : FilePosition
+
+*Server response:*
+
+  string

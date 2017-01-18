@@ -8,7 +8,11 @@
  *
  *)
 
+open Ide_message
+
 type result = Pos.absolute option * string option
+
+let infer_result_to_ide_response (_, typename) = Infer_type_response typename
 
 (* Remember (when we care) the type found at a position *)
 let save_infer result_ty result_pos target_line target_column ty pos env =

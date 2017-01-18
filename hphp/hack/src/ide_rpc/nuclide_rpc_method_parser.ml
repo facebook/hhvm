@@ -15,28 +15,13 @@ open Ide_rpc_method_parser_utils
 open Ide_rpc_protocol_parser_types
 open Result.Monad_infix
 
-let get_position_filed = get_obj_field "position"
-
-let get_line_field = get_int_field "line"
-
-let get_column_field = get_int_field "column"
-
 let get_contents_field = get_string_field "contents"
-
-let get_start_field = get_obj_field "start"
-
-let get_end_field = get_obj_field "end"
 
 let get_changes_field = get_array_field "changes"
 
-let parse_position position =
-  get_line_field position >>= fun line ->
-  get_column_field position >>= fun column ->
-  Result.Ok { File_content.line; column; }
-
 let parse_autocomplete_params params =
   get_filename_filed params >>= fun filename ->
-  get_position_filed params >>= parse_position >>= fun position ->
+  get_position_filed params >>= fun position ->
   Result.Ok { filename; position; }
 
 let parse_did_open_file_params params =
@@ -49,8 +34,8 @@ let parse_did_close_file_params params =
   Result.Ok { did_close_file_filename; }
 
 let parse_range range =
-  get_start_field range >>= parse_position >>= fun st ->
-  get_end_field range >>= parse_position >>= fun ed ->
+  get_start_field range >>= fun st ->
+  get_end_field range >>= fun ed ->
   Result.Ok (Some { File_content.st; ed; })
 
 let parse_edit edit =

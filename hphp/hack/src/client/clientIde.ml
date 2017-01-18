@@ -184,6 +184,12 @@ let handle_request conn id protocol = function
     rpc conn (Rpc.IDE_AUTOCOMPLETE (filename, position)) |>
     AutocompleteService.autocomplete_result_to_ide_response |>
     print_response id protocol
+  | Infer_type { filename; position; } ->
+    let filename = ServerUtils.FileName filename in
+    let { File_content.line; column; } = position in
+    rpc conn (Rpc.INFER_TYPE (filename, line, column)) |>
+    InferAtPosService.infer_result_to_ide_response |>
+    print_response id protocol
   | Did_open_file { did_open_file_filename; did_open_file_text; } ->
     rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))
   | Did_close_file { did_close_file_filename; } ->

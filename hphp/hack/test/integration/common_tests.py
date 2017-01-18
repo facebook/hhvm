@@ -648,7 +648,8 @@ class CommonTests(object):
         self.check_cmd_and_json_cmd([
             'string'
             ], [
-            '{{"type":"string","pos":{{"filename":"{root}foo_3.php","line":3,"char_start":23,"char_end":28}}}}'
+            '{{"type":"string",' +
+            '"pos":{{"filename":"","line":0,"char_start":0,"char_end":-1}}}}'
             ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
 
     def test_ide_get_definition(self):

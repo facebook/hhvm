@@ -166,6 +166,7 @@ module WithStatementAndDeclAndTypeParser
     | Require_once -> parse_inclusion_expression parser
     | Empty -> parse_empty_expression parser
     | Isset -> parse_isset_expression parser
+    | Define -> parse_define_expression parser
     | Eval -> parse_eval_expression parser
     | TokenKind.EndOfFile
     | _ -> parse_as_name_or_error parser
@@ -215,6 +216,23 @@ module WithStatementAndDeclAndTypeParser
     let (parser, keyword) = assert_token parser Isset in
     let (parser, left, args, right) = parse_expression_list_opt parser in
     let result = make_isset_expression keyword left args right in
+    (parser, result)
+
+  and parse_define_expression parser =
+    (* TODO: This is a PHP-ism. Open questions:
+      * Should we allow a trailing comma? See D4273242 for discussion.
+      * Is there any restriction on the kind of expression the arguments can be?
+        They must be string, value, bool, but do they have to be compile-time
+        constants, for instance?
+      * Should this be an error in strict mode? You should use const instead.
+      * Should this be in the specification?
+      * PHP requires that there be at least two arguments; should we require
+        that? if so, should we give the error in the parser or a later pass?
+      * is define case-insensitive?
+    *)
+    let (parser, keyword) = assert_token parser Define in
+    let (parser, left, args, right) = parse_expression_list_opt parser in
+    let result = make_define_expression keyword left args right in
     (parser, result)
 
   and parse_double_quoted_string parser head =

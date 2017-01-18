@@ -659,24 +659,6 @@ let ai_check genv files_info env t =
     env, (Hh_logger.log_duration "Ai" t)
   | None -> env, t
 
-let print_hash_stats () =
-  let { SharedMem.
-    used_slots;
-    slots;
-    nonempty_slots = _ } = SharedMem.dep_stats () in
-  let load_factor = float_of_int used_slots /. float_of_int slots in
-  Hh_logger.log "Dependency table load factor: %d / %d (%.02f)"
-    used_slots slots load_factor;
-  let { SharedMem.
-    used_slots;
-    slots;
-    nonempty_slots } = SharedMem.hash_stats () in
-  let load_factor = float_of_int used_slots /. float_of_int slots in
-  Hh_logger.log
-    "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"
-    used_slots slots load_factor nonempty_slots;
-  ()
-
 let save_state env fn =
   let t = Unix.gettimeofday () in
   if not (Errors.is_empty env.errorl)
@@ -715,5 +697,5 @@ let init ?load_mini_script genv =
   in
   let env, _t = ai_check genv env.files_info env t in
   SharedMem.init_done ();
-  print_hash_stats ();
+  ServerUtils.print_hash_stats ();
   env, Result.is_ok state

@@ -692,6 +692,10 @@ let type_check genv env kind =
     | Lazy_check -> LC.type_check genv env
   end
 
+let type_check genv env kind =
+  ServerUtils.with_exit_on_exception @@ fun () ->
+  type_check genv env kind
+
 (*****************************************************************************)
 (* Checks that the working directory is clean *)
 (*****************************************************************************)

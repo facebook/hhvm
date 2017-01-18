@@ -474,43 +474,9 @@ let daemon_main (state, options) (ic, oc) =
     in case the tmp folder changes *)
   ignore (Hhi.get_hhi_root());
 
-  try daemon_main_exn options (ic, oc)
-  with
-  | SharedMem.Out_of_shared_memory ->
-    ServerInit.print_hash_stats ();
-    Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
-    Exit_status.(exit Out_of_shared_memory)
-  | SharedMem.Hash_table_full ->
-    ServerInit.print_hash_stats ();
-    Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
-    Exit_status.(exit Hash_table_full)
-  | Worker.Worker_oomed as e->
-    Hh_logger.exc e;
-    Exit_status.(exit Worker_oomed)
-  | Worker.Worker_busy as e ->
-    Hh_logger.exc e;
-    Exit_status.(exit Worker_busy)
-  | (Worker.Worker_exited_abnormally i) as e ->
-    Hh_logger.exc e;
-    (** Exit with the same exit code that that worker used. *)
-    exit i
-  | Worker.Worker_failed_to_send_job _ as e->
-    Hh_logger.exc e;
-    Exit_status.(exit Worker_failed_to_send_job)
-  | Decl_class.Decl_heap_elems_bug ->
-    Exit_status.(exit Decl_heap_elems_bug)
-  | SharedMem.C_assertion_failure _ as e ->
-    Hh_logger.exc e;
-    Exit_status.(exit Shared_mem_assertion_failure)
-  | SharedMem.Sql_assertion_failure err_num as e ->
-    Hh_logger.exc e;
-    let exit_code = match err_num with
-      | 11 -> Exit_status.Sql_corrupt
-      | 14 -> Exit_status.Sql_cantopen
-      | 21 -> Exit_status.Sql_misuse
-      | _ -> Exit_status.Sql_assertion_failure
-    in
-    Exit_status.exit exit_code
+  ServerUtils.with_exit_on_exception @@ fun () ->
+  daemon_main_exn options (ic, oc)
+
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

@@ -55,7 +55,6 @@ val empty_t: t
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)
-
 type names = {
   n_funs    : SSet.t;
   n_classes : SSet.t;
@@ -64,7 +63,13 @@ type names = {
 }
 
 type fast = names Relative_path.Map.t
-type fast_with_modes = (names * mode option) Relative_path.Map.t
+
+
+(*****************************************************************************)
+(* The record used in our saved state. *)
+(*****************************************************************************)
+type saved
+type saved_state_info = saved Relative_path.Map.t
 
 
 val empty_names: names
@@ -72,9 +77,9 @@ val empty_names: names
 (*****************************************************************************)
 (* Functions simplifying the file information. *)
 (*****************************************************************************)
-val modes_to_info : fast_with_modes -> t Relative_path.Map.t
-val modes_to_fast: fast_with_modes -> fast
-val info_to_modes : t Relative_path.Map.t -> fast_with_modes
+val saved_to_info : saved_state_info -> t Relative_path.Map.t
+val saved_to_fast: saved_state_info -> fast
+val info_to_saved : t Relative_path.Map.t -> saved_state_info
 val simplify: t -> names
 val merge_names: names -> names -> names
 val simplify_fast: t Relative_path.Map.t -> fast

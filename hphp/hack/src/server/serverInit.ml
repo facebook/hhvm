@@ -156,12 +156,12 @@ module ServerInitCommon = struct
             let _, status = Unix.waitpid [] pid in
             assert (status = Unix.WEXITED 0);
             let chan = open_in fn in
-            let old_modes = Marshal.from_channel chan in
+            let old_saved = Marshal.from_channel chan in
             let dirty_files =
             List.map dirty_files Relative_path.(concat Root) in
             HackEventLogger.vcs_changed_files_end t;
             let _ = Hh_logger.log_duration "Finding changed files" t in
-            Result.Ok (fn, Relative_path.set_of_list dirty_files, old_modes)
+            Result.Ok (fn, Relative_path.set_of_list dirty_files, old_saved)
         end in
         Result.Ok get_dirty_files
     with e ->
@@ -331,7 +331,7 @@ module ServerInitCommon = struct
   let get_state_future genv root state_future timeout =
     let state = state_future
     >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun (saved_state_fn, dirty_files, old_modes) ->
+    >>= fun (saved_state_fn, dirty_files, old_saved) ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -356,7 +356,7 @@ module ServerInitCommon = struct
     let updates = SSet.filter updates (fun p ->
       string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
-    Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes)
+    Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved)
   in
   state
 end
@@ -365,7 +365,7 @@ type saved_state_fn = string
 
 type state_result =
  (saved_state_fn * Relative_path.Set.t
-   * Relative_path.Set.t * FileInfo.fast_with_modes, exn)
+   * Relative_path.Set.t * FileInfo.saved_state_info, exn)
  Result.t
 
 (* Laziness *)
@@ -434,8 +434,8 @@ module ServerEagerInit : InitKind = struct
 
     let state = get_state_future genv root state_future timeout in
     match state with
-    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes) ->
-      let old_fast = FileInfo.modes_to_fast old_modes in
+    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved) ->
+      let old_fast = FileInfo.saved_to_fast old_saved in
       (* During eager init, we don't need to worry about tracked targets since
          they we end up parsing everything anyways
       *)
@@ -548,7 +548,7 @@ module ServerLazyInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
 
     match state with
-    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_modes) ->
+    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let global_state = ServerGlobalState.save () in
@@ -579,8 +579,8 @@ module ServerLazyInit : InitKind = struct
       let parsing_files =
         Relative_path.Set.union dirty_files tracked_targets in
       let parsing_files_list = Relative_path.Set.elements parsing_files in
-      let old_fast = FileInfo.modes_to_fast old_modes in
-      let old_info = FileInfo.modes_to_info old_modes in
+      let old_fast = FileInfo.saved_to_fast old_saved in
+      let old_info = FileInfo.saved_to_info old_saved in
       (* Parse dirty files only *)
       let next = MultiWorker.next genv.workers parsing_files_list in
       let env, t = parsing genv env ~lazy_parse:true ~get_next:next t in
@@ -674,8 +674,8 @@ let save_state env fn =
   if not (Errors.is_empty env.errorl)
   then failwith "--save-mini only works if there are no type errors!";
   let chan = Sys_utils.open_out_no_fail fn in
-  let modes = FileInfo.info_to_modes env.files_info in
-  Marshal.to_channel chan modes [];
+  let saved = FileInfo.info_to_saved env.files_info in
+  Marshal.to_channel chan saved [];
   Sys_utils.close_out_no_fail fn chan;
   let sqlite_save_t = SharedMem.save_dep_table_sqlite (fn^".sql") in
   Hh_logger.log "Saving deptable using sqlite took(seconds): %d" sqlite_save_t;

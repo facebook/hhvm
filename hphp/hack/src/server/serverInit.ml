@@ -509,12 +509,16 @@ module ServerLazyInit : InitKind = struct
    * parsing hooks. During lazy init, need to do it manually from the fast
    * instead since we aren't parsing the codebase.
    *)
-  let update_search genv fast t =
+  let update_search genv saved t =
+    (* Only look at Hack files *)
+    let fast = FileInfo.saved_to_hack_files saved in
+    (* Filter out non php files *)
     let fast = Relative_path.Map.filter fast
       ~f:(fun s _ ->
           let fn = (Relative_path.to_absolute s) in
           not (FilesToIgnore.should_ignore fn)
           && FindUtils.is_php fn) in
+
     let update_single_search _ fast_list =
       List.iter fast_list
       (fun (fn, fast) ->
@@ -580,19 +584,23 @@ module ServerLazyInit : InitKind = struct
         Relative_path.Set.union dirty_files tracked_targets in
       let parsing_files_list = Relative_path.Set.elements parsing_files in
       let old_fast = FileInfo.saved_to_fast old_saved in
+
+      (* Get only the hack files for global naming *)
+      let old_hack_files = FileInfo.saved_to_hack_files old_saved in
       let old_info = FileInfo.saved_to_info old_saved in
       (* Parse dirty files only *)
       let next = MultiWorker.next genv.workers parsing_files_list in
       let env, t = parsing genv env ~lazy_parse:true ~get_next:next t in
       let t = update_files genv env.files_info t in
       (* Name all the files from the old fast (except the new ones we parsed) *)
-      let old_fast_names = Relative_path.Map.filter old_fast (fun k _v ->
+      let old_hack_names = Relative_path.Map.filter old_hack_files (fun k _v ->
           not (Relative_path.Set.mem parsing_files k)
         ) in
 
-      let t = naming_with_fast old_fast_names t in
+      let t = naming_with_fast old_hack_names t in
       (* Do global naming on all dirty files *)
       let env, t = naming env t in
+
       (* Add all files from fast to the files_info object *)
       let fast = FileInfo.simplify_fast env.files_info in
       let fast = Relative_path.Set.fold env.failed_parsing
@@ -608,7 +616,7 @@ module ServerLazyInit : InitKind = struct
       (* Update the fileinfo object's dependencies now that we have full fast *)
       let t = update_files genv env.files_info t in
 
-      let t = update_search genv old_fast t in
+      let t = update_search genv old_saved t in
       type_check_dirty genv env old_fast fast dirty_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)

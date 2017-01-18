@@ -117,6 +117,13 @@ let saved_to_fast fast =
   Relative_path.Map.map fast
   begin fun saved -> saved.s_names end
 
+(* Filter out all PHP files from saved fileInfo object. *)
+let saved_to_hack_files fast =
+  let fast = Relative_path.Map.filter fast
+    (fun _ {s_autoload; _} -> not s_autoload) in
+  saved_to_fast fast
+
+
 let saved_to_info fast =
   Relative_path.Map.fold fast ~init:Relative_path.Map.empty
   ~f:(fun fn saved acc ->

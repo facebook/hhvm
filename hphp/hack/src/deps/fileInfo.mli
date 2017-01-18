@@ -79,6 +79,7 @@ val empty_names: names
 (*****************************************************************************)
 val saved_to_info : saved_state_info -> t Relative_path.Map.t
 val saved_to_fast: saved_state_info -> fast
+val saved_to_hack_files: saved_state_info -> fast
 val info_to_saved : t Relative_path.Map.t -> saved_state_info
 val simplify: t -> names
 val merge_names: names -> names -> names

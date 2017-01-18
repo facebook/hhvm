@@ -24,7 +24,7 @@ let get_column_field = get_int_field "column"
 
 let get_text_field = get_string_field "text"
 
-let get_filename_filed = get_string_field "filename"
+let get_filename_field = get_string_field "filename"
 
 let parse_position position =
   get_line_field position >>= fun line ->
@@ -35,9 +35,9 @@ let get_start_field obj = get_obj_field "start" obj >>= parse_position
 
 let get_end_field obj = get_obj_field "end" obj >>= parse_position
 
-let get_position_filed obj = get_obj_field "position" obj >>= parse_position
+let get_position_field obj = get_obj_field "position" obj >>= parse_position
 
 let get_file_position_field obj =
-  get_filename_filed obj >>= fun filename ->
-  get_position_filed obj >>= fun position ->
+  get_filename_field obj >>= fun filename ->
+  get_position_field obj >>= fun position ->
   Result.Ok { filename; position; }

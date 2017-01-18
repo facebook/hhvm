@@ -20,17 +20,17 @@ let get_contents_field = get_string_field "contents"
 let get_changes_field = get_array_field "changes"
 
 let parse_autocomplete_params params =
-  get_filename_filed params >>= fun filename ->
-  get_position_filed params >>= fun position ->
+  get_filename_field params >>= fun filename ->
+  get_position_field params >>= fun position ->
   Result.Ok { filename; position; }
 
 let parse_did_open_file_params params =
-  get_filename_filed params >>= fun did_open_file_filename ->
+  get_filename_field params >>= fun did_open_file_filename ->
   get_contents_field params >>= fun did_open_file_text ->
   Result.Ok { did_open_file_filename; did_open_file_text; }
 
 let parse_did_close_file_params params =
-  get_filename_filed params >>= fun did_close_file_filename ->
+  get_filename_field params >>= fun did_close_file_filename ->
   Result.Ok { did_close_file_filename; }
 
 let parse_range range =
@@ -52,7 +52,7 @@ let accumulate_edits edit acc =
   Result.Ok (edit::acc)
 
 let parse_did_change_file_params params =
-  get_filename_filed params >>= fun did_change_file_filename ->
+  get_filename_field params >>= fun did_change_file_filename ->
   get_changes_field params >>= List.fold_right
     ~f:accumulate_edits
     ~init:(Result.Ok []) >>= fun changes ->

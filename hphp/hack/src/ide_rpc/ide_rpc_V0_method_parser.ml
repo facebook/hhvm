@@ -34,7 +34,7 @@ let parse_init method_name params =
   Result.Ok (Init params)
 
 let parse_did_open_file_params params =
-  get_filename_filed params >>= fun did_open_file_filename ->
+  get_filename_field params >>= fun did_open_file_filename ->
   get_text_field params >>= fun did_open_file_text ->
   Result.Ok { did_open_file_filename; did_open_file_text; }
 

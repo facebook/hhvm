@@ -24,10 +24,10 @@ val get_column_field :
 val get_text_field :
   json -> (string, error_t) Result.t
 
-val get_filename_filed :
+val get_filename_field :
   json -> (string, error_t) Result.t
 
-val get_position_filed :
+val get_position_field :
   json -> (position, error_t) Result.t
 
 val get_file_position_field :

@@ -49,6 +49,120 @@ let test_init_response () =
     }
   }|}
 
+let test_identify_symbol_response () =
+  let occurrence =
+    let open SymbolOccurrence in
+    {
+      name = "aaa";
+      type_ = Class;
+      pos = Pos.(to_absolute none)
+    }
+  in
+  let definition =
+    let open SymbolDefinition in
+    Some {
+      kind = Trait;
+      name = "bbb";
+      SymbolDefinition.id = None;
+      pos = Pos.(to_absolute none);
+      span = Pos.(to_absolute none);
+      modifiers = [];
+      children = None;
+      params = None;
+      docblock  = None
+    }
+  in
+  let response = Identify_symbol_response [
+    {occurrence; definition}
+  ] in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "name": "aaa",
+        "kind": "type_id",
+        "span": {
+          "start": {
+            "line": 0,
+            "column": 0
+          },
+          "end": {
+            "line": 0,
+            "column": 0
+          }
+        },
+        "definition": {
+          "name": "bbb",
+          "kind": "trait",
+          "position": {
+            "line": 0,
+            "column": -1
+          },
+          "span": {
+            "start": {
+              "line": 0,
+              "column": 0
+            },
+            "end": {
+              "line": 0,
+              "column": 0
+            }
+          },
+          "modifiers": [
+
+          ],
+          "filename": ""
+        }
+      }
+    ]
+  }|}
+
+let test_outline_response () =
+  let open SymbolDefinition in
+  let response = Outline_response [
+    {
+      kind = Function;
+      name = "bbb";
+      SymbolDefinition.id = None;
+      pos = Pos.(to_absolute none);
+      span = Pos.(to_absolute none);
+      modifiers = [];
+      children = None;
+      params = None;
+      docblock  = None
+    }
+  ] in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "name": "bbb",
+        "kind": "function",
+        "position": {
+          "line": 0,
+          "column": -1
+        },
+        "span": {
+          "start": {
+            "line": 0,
+            "column": 0
+          },
+          "end": {
+            "line": 0,
+            "column": 0
+          }
+        },
+        "modifiers": [
+
+        ]
+      }
+    ]
+  }|}
+
 let test_autocomplete_response () =
   let response = Autocomplete_response [{
     autocomplete_item_text = "aaa";
@@ -103,6 +217,8 @@ let test_infer_type_response () =
 let tests = [
   "test_method_not_found", test_method_not_found;
   "test_init_response", test_init_response;
+  "test_identify_symbol_response", test_identify_symbol_response;
+  "test_outline_response", test_outline_response;
   "test_autocomplete_response", test_autocomplete_response;
   "test_infer_type_response", test_infer_type_response;
 ]

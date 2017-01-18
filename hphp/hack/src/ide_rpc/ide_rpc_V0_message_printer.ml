@@ -10,7 +10,41 @@
 
 open Core
 open Ide_message
+open Ide_parser_utils
 open Hh_json
+
+let pos_to_range x =
+  let st_line, st_column, ed_line, ed_column = Pos.destruct_range x in
+  let open File_content in
+  {
+    st = {
+      line = st_line;
+      column = st_column;
+    };
+    ed = {
+      line = ed_line;
+      column = ed_column;
+    }
+  }
+
+let pos_to_content_pos x =
+  let open File_content in
+  {
+    line = Pos.line x;
+    column = Pos.start_cnum x;
+  }
+
+let pos_to_json {File_content.line; column} =
+  JSON_Object [
+    ("line", JSON_Number (string_of_int line));
+    ("column", JSON_Number (string_of_int column));
+  ]
+
+let range_to_json {File_content.st; ed} =
+  JSON_Object [
+    ("start", pos_to_json st);
+    ("end", pos_to_json ed);
+  ]
 
 let init_response_to_json { server_api_version } = JSON_Object [
   ("server_api_version", int_ server_api_version);
@@ -42,10 +76,59 @@ let infer_type_response = function
   | None -> JSON_Null
   | Some x -> JSON_String x
 
+let rec symbol_definition_to_json ?include_filename def =
+  let open SymbolDefinition in
+  let modifiers = JSON_Array (List.map def.modifiers
+    ~f:(fun x -> JSON_String (string_of_modifier x))) in
+  let children =
+    opt_field def.children "children" outline_response_to_json  in
+  let params =
+    opt_field def.params "params" outline_response_to_json in
+  let docblock =
+    opt_field def.docblock "docblock" (fun x -> JSON_String x) in
+
+  let filename =
+    if Option.value include_filename ~default:false
+    then [("filename", JSON_String (Pos.filename def.pos))] else []
+  in
+
+  JSON_Object ([
+    "name", JSON_String def.name;
+    "kind", JSON_String (string_of_kind def.kind);
+    "position", def.pos |> pos_to_content_pos |> pos_to_json;
+    "span", def.span |> pos_to_range |> range_to_json;
+    "modifiers", modifiers;
+  ] @
+    filename @
+    children @
+    params @
+    docblock
+  )
+
+and outline_response_to_json x =
+  JSON_Array (List.map x ~f:symbol_definition_to_json)
+
+let identify_symbol_response_to_json results =
+  JSON_Array (List.map results ~f:begin fun { occurrence; definition } ->
+    let definition = Option.value_map definition
+      ~f:(symbol_definition_to_json ~include_filename:true)
+      ~default:JSON_Null
+    in
+    let open SymbolOccurrence in
+    JSON_Object [
+      ("name", JSON_String occurrence.name);
+      ("kind", JSON_String (kind_to_string occurrence.type_));
+      ("span", occurrence.pos |> pos_to_range |> range_to_json);
+      ("definition", definition);
+    ]
+  end)
+
 let to_json ~id:_ ~response =
   match response with
   | Init_response x -> init_response_to_json x
   | Autocomplete_response x -> autocomplete_response_to_json x
   | Infer_type_response x -> infer_type_response x
+  | Identify_symbol_response x -> identify_symbol_response_to_json x
+  | Outline_response x -> outline_response_to_json x
   (* Delegate unhandled messages to previous version of API *)
   | _ -> Nuclide_rpc_message_printer.to_json ~response

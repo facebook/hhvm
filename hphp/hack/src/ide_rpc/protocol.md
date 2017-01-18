@@ -63,6 +63,80 @@ All of the string typed members are intended only to be displayed in editor - th
       position : Position;
     }
 
+`SymbolDefinition`:
+
+    {
+      /**
+       * Display name of the symbol
+       */
+      name : string;
+      /**
+       * Kind of the symbol
+       */
+      kind: SymbolDefinitionKind;
+      /**
+       * Canonical position of the symbol (place where "go to
+       * definition" for this symbol should bring the cursor).
+       * Usually the definition symbol name.
+       */
+      position : Position;
+      /**
+       * Entire span of symbol declaration.
+       */
+      span :  Range;
+      /**
+       * Filename that position and span refer to, if it's not implied
+       * otherwise (by request type, by enclosing symbol, etc.)
+       */
+      filename? : string;
+      /**
+       * Symbol definition modifiers, e.g. "static", "async", "private"
+       */
+      modifiers : SymbolDefinitionModifier[];  
+      /**
+       * For symbols that can contain other symbols
+       * (like classes, interfaces, traits, namespaces), symbols contained
+       * within.
+       */
+      children? : SymbolDefinition[];
+      /**
+       * For callable symbols (functions, methods), callable parameters
+       */
+      params? : SymbolDefinition[];
+      /**
+       * Docblock of the symbol, if present
+       */
+      docblock? : string;
+    }
+
+where `SymbolDefinitionKind` is defined as:
+
+    string enum {
+      function,
+      class,
+      method,
+      property,
+      const,
+      enum,
+      interface,
+      trait,
+      typeconst,
+      local,
+      param,
+    }
+
+and `SymbolDefinitionModifier`:
+
+    string enum {
+      final,
+      static,
+      abstract,
+      private,
+      public,
+      protected,
+      async,
+    }
+
 ## Requests and notifications
 
 ### Initialization request

@@ -15,6 +15,7 @@
  *)
 
 type position = File_content.content_pos
+type range = File_content.content_range
 type text_edit = File_content.code_edit
 type error = Pos.absolute Errors.error_
 

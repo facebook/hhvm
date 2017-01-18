@@ -75,14 +75,26 @@ let identify_symbol_response_to_json results =
     | None -> (JSON_Null, JSON_Null, JSON_Null)
   in
 
+  let result_type x =
+    let open SymbolOccurrence in
+    match x.type_ with
+    | Class -> "class"
+    | Method _ -> "method"
+    | Function -> "function"
+    | LocalVar -> "local"
+    | Property _ -> "property"
+    | ClassConst _ -> "class_const"
+    | Typeconst _ -> "typeconst"
+    | GConst -> "global_const"
+  in
+
   let symbol_to_json { occurrence; definition; } =
     let definition_pos, definition_span, definition_id =
       get_definition_data definition in
     let open SymbolOccurrence in
     JSON_Object [
       "name", JSON_String occurrence.name;
-      "result_type",
-        JSON_String SymbolOccurrence.(kind_to_string occurrence.type_);
+      "result_type", JSON_String (result_type occurrence);
       "pos", Pos.json occurrence.pos;
       "definition_pos", definition_pos;
       "definition_span", definition_span;

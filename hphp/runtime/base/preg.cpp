@@ -338,7 +338,10 @@ bool pcre_literal_data::matches(const StringData* subject,
       return true;
     }
   } else {
-    if (!literal_strlen) return true;
+    if (!literal_strlen) {
+      offsets[0] = offsets[1] = pos;
+      return true;
+    }
     // Check if the literal pattern occurs as a substring of the subject.
     auto const subject_str = StrNR(subject);
     auto const find_response = subject_str.asString().find(

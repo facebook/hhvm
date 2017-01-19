@@ -284,6 +284,8 @@ class EditableSyntax
       return XHPClassAttributeDeclaration.from_json(json, position, source);
     case 'xhp_class_attribute':
       return XHPClassAttribute.from_json(json, position, source);
+    case 'xhp_simple_class_attribute':
+      return XHPSimpleClassAttribute.from_json(json, position, source);
     case 'xhp_attribute':
       return XHPAttribute.from_json(json, position, source);
     case 'xhp_open':
@@ -13065,6 +13067,53 @@ class XHPClassAttribute extends EditableSyntax
     return XHPClassAttribute._children_keys;
   }
 }
+class XHPSimpleClassAttribute extends EditableSyntax
+{
+  constructor(
+    type)
+  {
+    super('xhp_simple_class_attribute', {
+      type: type });
+  }
+  get type() { return this.children.type; }
+  with_type(type){
+    return new XHPSimpleClassAttribute(
+      type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var type = this.type.rewrite(rewriter, new_parents);
+    if (
+      type === this.type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new XHPSimpleClassAttribute(
+        type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let type = EditableSyntax.from_json(
+      json.xhp_simple_class_attribute_type, position, source);
+    position += type.width;
+    return new XHPSimpleClassAttribute(
+        type);
+  }
+  get children_keys()
+  {
+    if (XHPSimpleClassAttribute._children_keys == null)
+      XHPSimpleClassAttribute._children_keys = [
+        'type'];
+    return XHPSimpleClassAttribute._children_keys;
+  }
+}
 class XHPAttribute extends EditableSyntax
 {
   constructor(
@@ -15894,6 +15943,7 @@ exports.XHPEnumType = XHPEnumType;
 exports.XHPRequired = XHPRequired;
 exports.XHPClassAttributeDeclaration = XHPClassAttributeDeclaration;
 exports.XHPClassAttribute = XHPClassAttribute;
+exports.XHPSimpleClassAttribute = XHPSimpleClassAttribute;
 exports.XHPAttribute = XHPAttribute;
 exports.XHPOpen = XHPOpen;
 exports.XHPExpression = XHPExpression;

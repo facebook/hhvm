@@ -679,6 +679,9 @@ module WithToken(Token: TokenType) = struct
       xhp_attribute_decl_initializer: t;
       xhp_attribute_decl_required: t;
     }
+    and xhp_simple_class_attribute = {
+      xhp_simple_class_attribute_type: t;
+    }
     and xhp_attribute = {
       xhp_attribute_name: t;
       xhp_attribute_equal: t;
@@ -932,6 +935,7 @@ module WithToken(Token: TokenType) = struct
     | XHPRequired of xhp_required
     | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
     | XHPClassAttribute of xhp_class_attribute
+    | XHPSimpleClassAttribute of xhp_simple_class_attribute
     | XHPAttribute of xhp_attribute
     | XHPOpen of xhp_open
     | XHPExpression of xhp_expression
@@ -1185,6 +1189,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.XHPClassAttributeDeclaration
       | XHPClassAttribute _ ->
         SyntaxKind.XHPClassAttribute
+      | XHPSimpleClassAttribute _ ->
+        SyntaxKind.XHPSimpleClassAttribute
       | XHPAttribute _ ->
         SyntaxKind.XHPAttribute
       | XHPOpen _ ->
@@ -1454,6 +1460,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.XHPClassAttributeDeclaration
     let is_xhp_class_attribute node =
       kind node = SyntaxKind.XHPClassAttribute
+    let is_xhp_simple_class_attribute node =
+      kind node = SyntaxKind.XHPSimpleClassAttribute
     let is_xhp_attribute node =
       kind node = SyntaxKind.XHPAttribute
     let is_xhp_open node =
@@ -2714,6 +2722,12 @@ module WithToken(Token: TokenType) = struct
       xhp_attribute_decl_name,
       xhp_attribute_decl_initializer,
       xhp_attribute_decl_required
+    )
+
+    let get_xhp_simple_class_attribute_children {
+      xhp_simple_class_attribute_type;
+    } = (
+      xhp_simple_class_attribute_type
     )
 
     let get_xhp_attribute_children {
@@ -4083,6 +4097,11 @@ module WithToken(Token: TokenType) = struct
         xhp_attribute_decl_initializer;
         xhp_attribute_decl_required;
       ]
+      | XHPSimpleClassAttribute {
+        xhp_simple_class_attribute_type;
+      } -> [
+        xhp_simple_class_attribute_type;
+      ]
       | XHPAttribute {
         xhp_attribute_name;
         xhp_attribute_equal;
@@ -5422,6 +5441,11 @@ module WithToken(Token: TokenType) = struct
         "xhp_attribute_decl_name";
         "xhp_attribute_decl_initializer";
         "xhp_attribute_decl_required";
+      ]
+      | XHPSimpleClassAttribute {
+        xhp_simple_class_attribute_type;
+      } -> [
+        "xhp_simple_class_attribute_type";
       ]
       | XHPAttribute {
         xhp_attribute_name;
@@ -6918,6 +6942,12 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_decl_name;
           xhp_attribute_decl_initializer;
           xhp_attribute_decl_required;
+        }
+      | (SyntaxKind.XHPSimpleClassAttribute, [
+          xhp_simple_class_attribute_type;
+        ]) ->
+        XHPSimpleClassAttribute {
+          xhp_simple_class_attribute_type;
         }
       | (SyntaxKind.XHPAttribute, [
           xhp_attribute_name;
@@ -8525,6 +8555,13 @@ module WithToken(Token: TokenType) = struct
         xhp_attribute_decl_name;
         xhp_attribute_decl_initializer;
         xhp_attribute_decl_required;
+      ]
+
+    let make_xhp_simple_class_attribute
+      xhp_simple_class_attribute_type
+    =
+      from_children SyntaxKind.XHPSimpleClassAttribute [
+        xhp_simple_class_attribute_type;
       ]
 
     let make_xhp_attribute

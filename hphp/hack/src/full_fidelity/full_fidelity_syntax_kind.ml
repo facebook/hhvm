@@ -122,6 +122,7 @@ type t =
 | XHPRequired
 | XHPClassAttributeDeclaration
 | XHPClassAttribute
+| XHPSimpleClassAttribute
 | XHPAttribute
 | XHPOpen
 | XHPExpression
@@ -258,6 +259,7 @@ let to_string kind =
   | XHPRequired -> "xhp_required"
   | XHPClassAttributeDeclaration -> "xhp_class_attribute_declaration"
   | XHPClassAttribute -> "xhp_class_attribute"
+  | XHPSimpleClassAttribute -> "xhp_simple_class_attribute"
   | XHPAttribute -> "xhp_attribute"
   | XHPOpen -> "xhp_open"
   | XHPExpression -> "xhp_expression"

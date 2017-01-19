@@ -347,6 +347,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return XHPClassAttributeDeclaration::from_json($json, $position, $source);
     case 'xhp_class_attribute':
       return XHPClassAttribute::from_json($json, $position, $source);
+    case 'xhp_simple_class_attribute':
+      return XHPSimpleClassAttribute::from_json($json, $position, $source);
     case 'xhp_attribute':
       return XHPAttribute::from_json($json, $position, $source);
     case 'xhp_open':
@@ -15095,6 +15097,49 @@ final class XHPClassAttribute extends EditableSyntax {
     yield $this->_name;
     yield $this->_initializer;
     yield $this->_required;
+    yield break;
+  }
+}
+final class XHPSimpleClassAttribute extends EditableSyntax {
+  private EditableSyntax $_type;
+  public function __construct(
+    EditableSyntax $type) {
+    parent::__construct('xhp_simple_class_attribute');
+    $this->_type = $type;
+  }
+  public function type(): EditableSyntax {
+    return $this->_type;
+  }
+  public function with_type(EditableSyntax $type): XHPSimpleClassAttribute {
+    return new XHPSimpleClassAttribute(
+      $type);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $type = $this->type()->rewrite($rewriter, $new_parents);
+    if (
+      $type === $this->type()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new XHPSimpleClassAttribute(
+        $type), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $type = EditableSyntax::from_json(
+      $json->xhp_simple_class_attribute_type, $position, $source);
+    $position += $type->width();
+    return new XHPSimpleClassAttribute(
+        $type);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_type;
     yield break;
   }
 }

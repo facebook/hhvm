@@ -315,6 +315,8 @@ let rec get_doc node =
     let i = get_doc xhp_attribute_decl_initializer in
     let r = get_doc xhp_attribute_decl_required in
     group_doc (t ^| n ^| i ^| r)
+  | XHPSimpleClassAttribute { xhp_simple_class_attribute_type } ->
+    get_doc xhp_simple_class_attribute_type
   | TraitUse {
     trait_use_keyword;
     trait_use_names;

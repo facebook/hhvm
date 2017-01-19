@@ -750,7 +750,10 @@ module WithExpressionAndStatementAndTypeParser
       let (parser1, class_name) = expect_class_name parser in
       match peek_token_kind parser1 with
       | Comma
-      | Semicolon -> (parser1, class_name)
+      | Semicolon ->
+        let type_specifier = make_simple_type_specifier class_name in
+        let result = make_xhp_simple_class_attribute type_specifier in
+        (parser1, result)
       | _ -> parse_xhp_class_attribute_typed parser
     else
       parse_xhp_class_attribute_typed parser

@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-01-18-0001",
+  "version" : "2017-01-18-0002",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1380,6 +1380,13 @@
         { "field_name" : "name" },
         { "field_name" : "initializer" },
         { "field_name" : "required" }
+      ] },
+    { "kind_name" : "XHPSimpleClassAttribute",
+      "type_name" : "xhp_simple_class_attribute",
+      "description" : "xhp_simple_class_attribute",
+      "prefix" : "xhp_simple_class_attribute",
+      "fields" : [
+        { "field_name" : "type" }
       ] },
     { "kind_name" : "XHPAttribute",
       "type_name" : "xhp_attribute",

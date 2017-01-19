@@ -1175,6 +1175,9 @@ offending text is '%s'." (text node)));
     t init;
     if not (is_missing req) then pending_space ();
     t req;
+  | XHPSimpleClassAttribute x ->
+    let attr_type = get_xhp_simple_class_attribute_children x in
+    t attr_type;
   | XHPAttribute x ->
     let (name, eq, expr) = get_xhp_attribute_children x in
     tl_with ~span ~f:(fun () ->

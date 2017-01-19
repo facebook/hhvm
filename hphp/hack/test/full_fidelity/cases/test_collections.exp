@@ -41,5 +41,11 @@
               (list
                 (list_item(literal((decimal_literal)))((,)(whitespace)))
                 (list_item(literal((decimal_literal)))(missing)))
-              ((]))))((;)(end_of_line))))
+              ((]))))((;)(end_of_line)))
+        (expression_statement
+          (binary_expression
+            (variable((whitespace)(variable)(whitespace)))
+            ((=)(whitespace))
+            (vector_intrinsic_expression
+              ((vec))(([))(missing)((]))))((;)(end_of_line))))
     ((}))))))

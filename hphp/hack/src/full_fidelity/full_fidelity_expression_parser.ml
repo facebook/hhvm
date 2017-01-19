@@ -1384,7 +1384,7 @@ module WithStatementAndDeclAndTypeParser
          function dict() for example. *)
       parse_as_name_or_error parser
     else
-      let (parser, members) = parse_comma_list_allow_trailing parser1
+      let (parser, members) = parse_comma_list_opt_allow_trailing parser1
         RightBracket SyntaxError.error1015 parse_keyed_element_initializer in
       let (parser, right_bracket) = expect_right_bracket parser in
       let result = make_dictionary_intrinsic_expression dict_keyword
@@ -1401,7 +1401,7 @@ module WithStatementAndDeclAndTypeParser
          function keyset() for example. *)
       parse_as_name_or_error parser
     else
-      let (parser, members) = parse_comma_list_allow_trailing parser1
+      let (parser, members) = parse_comma_list_opt_allow_trailing parser1
         RightBracket SyntaxError.error1015
         parse_expression_with_reset_precedence in
       let (parser, right_bracket) = expect_right_bracket parser in
@@ -1420,7 +1420,7 @@ module WithStatementAndDeclAndTypeParser
       parse_as_name_or_error parser
     else
       let (parser, members) =
-        parse_comma_list_allow_trailing parser1 RightBracket
+        parse_comma_list_opt_allow_trailing parser1 RightBracket
         SyntaxError.error1015 parse_expression_with_reset_precedence in
       let (parser, right_bracket) = expect_right_bracket parser in
       let result = make_vector_intrinsic_expression vec_keyword left_bracket

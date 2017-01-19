@@ -40,9 +40,6 @@ Foo has a non-<?hh grandparent; this is not allowed in strict mode because " ^
 
 File \"/foo.php\", line 3, characters 19-27:
 Unbound name: FooParent (an object type) (Naming[2049])
-
-File \"/foo.php\", line 3, characters 19-27:
-Unbound name: FooParent (an object type) (Naming[2049])
 "
 
 let clear_foo_diagnostics = "

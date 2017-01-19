@@ -92,6 +92,12 @@ module Common = struct
     let error_number = Printf.sprintf "%04d" error_code in
     error_kind^"["^error_number^"]"
 
+  let get_sorted_error_list get_pos (err,_) =
+    List.sort ~cmp:begin fun x y ->
+      Pos.compare (get_pos x) (get_pos y)
+    end err
+    |> List.remove_consecutive_duplicates ~equal:(=)
+
 end
 
 (** The mode abstracts away the underlying errors type so errors can be
@@ -190,10 +196,7 @@ module NonTracingErrors: Errors_modes = struct
     );
     Buffer.contents buf
 
-  let get_sorted_error_list (err,_) =
-    List.sort ~cmp:begin fun x y ->
-      Pos.compare (get_pos x) (get_pos y)
-    end err
+  let get_sorted_error_list = Common.get_sorted_error_list get_pos
 
   let add_error error =
     if !accumulate_errors then
@@ -301,10 +304,7 @@ module TracingErrors: Errors_modes = struct
         Common.lazy_decl_error_logging msg error_list to_absolute to_string
       | None -> assert_false_log_backtrace (Some msg)
 
-  let get_sorted_error_list (err,_) =
-    List.sort ~cmp:begin fun x y ->
-      Pos.compare (get_pos x) (get_pos y)
-    end err
+  let get_sorted_error_list = Common.get_sorted_error_list get_pos
 
 end
 

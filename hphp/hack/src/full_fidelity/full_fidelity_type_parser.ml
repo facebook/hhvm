@@ -225,7 +225,7 @@ and parse_type_or_ellipsis_list parser close_kind =
 and parse_type_or_ellipsis parser =
   let (parser1, token) = next_token parser in
   match Token.kind token with
-  | DotDotDot -> parser1, make_token token
+  | DotDotDot -> (parser1, make_variadic_parameter (make_token token))
   | _ -> parse_type_specifier parser
 
 and parse_generic_type_argument_list parser =

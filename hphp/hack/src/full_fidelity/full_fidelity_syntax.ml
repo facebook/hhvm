@@ -276,6 +276,9 @@ module WithToken(Token: TokenType) = struct
       parameter_name: t;
       parameter_default_value: t;
     }
+    and variadic_parameter = {
+      variadic_parameter_ellipsis: t;
+    }
     and attribute_specification = {
       attribute_specification_left_double_angle: t;
       attribute_specification_attributes: t;
@@ -858,6 +861,7 @@ module WithToken(Token: TokenType) = struct
     | TypeConstDeclaration of type_const_declaration
     | DecoratedExpression of decorated_expression
     | ParameterDeclaration of parameter_declaration
+    | VariadicParameter of variadic_parameter
     | AttributeSpecification of attribute_specification
     | Attribute of attribute
     | InclusionExpression of inclusion_expression
@@ -1039,6 +1043,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.DecoratedExpression
       | ParameterDeclaration _ ->
         SyntaxKind.ParameterDeclaration
+      | VariadicParameter _ ->
+        SyntaxKind.VariadicParameter
       | AttributeSpecification _ ->
         SyntaxKind.AttributeSpecification
       | Attribute _ ->
@@ -1306,6 +1312,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.DecoratedExpression
     let is_parameter_declaration node =
       kind node = SyntaxKind.ParameterDeclaration
+    let is_variadic_parameter node =
+      kind node = SyntaxKind.VariadicParameter
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
     let is_attribute node =
@@ -1900,6 +1908,12 @@ module WithToken(Token: TokenType) = struct
       parameter_type,
       parameter_name,
       parameter_default_value
+    )
+
+    let get_variadic_parameter_children {
+      variadic_parameter_ellipsis;
+    } = (
+      variadic_parameter_ellipsis
     )
 
     let get_attribute_specification_children {
@@ -3334,6 +3348,11 @@ module WithToken(Token: TokenType) = struct
         parameter_name;
         parameter_default_value;
       ]
+      | VariadicParameter {
+        variadic_parameter_ellipsis;
+      } -> [
+        variadic_parameter_ellipsis;
+      ]
       | AttributeSpecification {
         attribute_specification_left_double_angle;
         attribute_specification_attributes;
@@ -4668,6 +4687,11 @@ module WithToken(Token: TokenType) = struct
         "parameter_type";
         "parameter_name";
         "parameter_default_value";
+      ]
+      | VariadicParameter {
+        variadic_parameter_ellipsis;
+      } -> [
+        "variadic_parameter_ellipsis";
       ]
       | AttributeSpecification {
         attribute_specification_left_double_angle;
@@ -6088,6 +6112,12 @@ module WithToken(Token: TokenType) = struct
           parameter_type;
           parameter_name;
           parameter_default_value;
+        }
+      | (SyntaxKind.VariadicParameter, [
+          variadic_parameter_ellipsis;
+        ]) ->
+        VariadicParameter {
+          variadic_parameter_ellipsis;
         }
       | (SyntaxKind.AttributeSpecification, [
           attribute_specification_left_double_angle;
@@ -7618,6 +7648,13 @@ module WithToken(Token: TokenType) = struct
         parameter_type;
         parameter_name;
         parameter_default_value;
+      ]
+
+    let make_variadic_parameter
+      variadic_parameter_ellipsis
+    =
+      from_children SyntaxKind.VariadicParameter [
+        variadic_parameter_ellipsis;
       ]
 
     let make_attribute_specification

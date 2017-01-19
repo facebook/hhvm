@@ -205,6 +205,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return DecoratedExpression::from_json($json, $position, $source);
     case 'parameter_declaration':
       return ParameterDeclaration::from_json($json, $position, $source);
+    case 'variadic_parameter':
+      return VariadicParameter::from_json($json, $position, $source);
     case 'attribute_specification':
       return AttributeSpecification::from_json($json, $position, $source);
     case 'attribute':
@@ -7714,6 +7716,49 @@ final class ParameterDeclaration extends EditableSyntax {
     yield $this->_type;
     yield $this->_name;
     yield $this->_default_value;
+    yield break;
+  }
+}
+final class VariadicParameter extends EditableSyntax {
+  private EditableSyntax $_ellipsis;
+  public function __construct(
+    EditableSyntax $ellipsis) {
+    parent::__construct('variadic_parameter');
+    $this->_ellipsis = $ellipsis;
+  }
+  public function ellipsis(): EditableSyntax {
+    return $this->_ellipsis;
+  }
+  public function with_ellipsis(EditableSyntax $ellipsis): VariadicParameter {
+    return new VariadicParameter(
+      $ellipsis);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $ellipsis = $this->ellipsis()->rewrite($rewriter, $new_parents);
+    if (
+      $ellipsis === $this->ellipsis()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new VariadicParameter(
+        $ellipsis), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $ellipsis = EditableSyntax::from_json(
+      $json->variadic_parameter_ellipsis, $position, $source);
+    $position += $ellipsis->width();
+    return new VariadicParameter(
+        $ellipsis);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_ellipsis;
     yield break;
   }
 }

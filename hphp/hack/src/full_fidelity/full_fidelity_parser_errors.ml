@@ -59,7 +59,7 @@ let assert_last_in_list assert_fun node =
 (* If an ellipsis appears in a position other than the last element in the
    list then return it. *)
 let misplaced_ellipsis params =
-  assert_last_in_list is_ellipsis params
+  assert_last_in_list is_variadic_parameter params
 
 let is_variadic node =
   begin match syntax node with
@@ -86,7 +86,7 @@ let ends_with_ellipsis_comma params =
   let rec aux params =
     match params with
     | [] -> None
-    | x :: y :: [] when is_ellipsis x && is_comma y -> Some y
+    | x :: y :: [] when is_variadic_parameter x && is_comma y -> Some y
     | _ :: t -> aux t in
   aux (syntax_to_list_with_separators params)
 

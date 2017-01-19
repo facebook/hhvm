@@ -12,7 +12,7 @@
     ((lparen))
     ((function)(whitespace))
     ((lparen))
-    (list(list_item((...))(missing)))
+    (list(list_item(variadic_parameter((...)))(missing)))
     ((rparen)(whitespace))((:)(whitespace))
     (simple_type_specifier((int)))
     ((rparen)(whitespace)))

@@ -685,6 +685,9 @@ offending text is '%s'." (text node)));
     (* TODO: span and split, figure out attr and vis rules *)
     t name;
     t default;
+  | VariadicParameter x ->
+    let ellipsis = get_variadic_parameter_children x in
+    t ellipsis;
   | AttributeSpecification x ->
     let (left_da, attrs, right_da) = get_attribute_specification_children x in
     transform_argish left_da attrs right_da;

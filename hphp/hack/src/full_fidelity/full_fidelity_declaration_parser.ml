@@ -1032,13 +1032,12 @@ module WithExpressionAndStatementAndTypeParser
       parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =
-
     let (parser1, token) = next_token parser in
     match (Token.kind token) with
     | DotDotDot ->
       let next_kind = peek_token_kind parser1 in
       if next_kind = Variable then parse_parameter_declaration parser
-      else (parser1, make_token token)
+      else (parser1, make_variadic_parameter (make_token token))
     | _ -> parse_parameter_declaration parser
 
   (* SPEC

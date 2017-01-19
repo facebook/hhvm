@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-01-12-0001"
+let full_fidelity_schema_version_number = "2017-01-18-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -327,6 +327,11 @@ let schema = List.map from_list [
     "type";
     "name";
     "default_value" ];
+  [ "VariadicParameter";
+    "variadic_parameter";
+    "variadic_parameter";
+    "variadic_parameter";
+    "ellipsis" ];
   [ "AttributeSpecification";
     "attribute_specification";
     "attribute_specification";

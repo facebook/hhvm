@@ -51,6 +51,7 @@ type t =
 | TypeConstDeclaration
 | DecoratedExpression
 | ParameterDeclaration
+| VariadicParameter
 | AttributeSpecification
 | Attribute
 | InclusionExpression
@@ -186,6 +187,7 @@ let to_string kind =
   | TypeConstDeclaration -> "type_const_declaration"
   | DecoratedExpression -> "decorated_expression"
   | ParameterDeclaration -> "parameter_declaration"
+  | VariadicParameter -> "variadic_parameter"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"
   | InclusionExpression -> "inclusion_expression"

@@ -142,6 +142,8 @@ class EditableSyntax
       return DecoratedExpression.from_json(json, position, source);
     case 'parameter_declaration':
       return ParameterDeclaration.from_json(json, position, source);
+    case 'variadic_parameter':
+      return VariadicParameter.from_json(json, position, source);
     case 'attribute_specification':
       return AttributeSpecification.from_json(json, position, source);
     case 'attribute':
@@ -5968,6 +5970,53 @@ class ParameterDeclaration extends EditableSyntax
         'name',
         'default_value'];
     return ParameterDeclaration._children_keys;
+  }
+}
+class VariadicParameter extends EditableSyntax
+{
+  constructor(
+    ellipsis)
+  {
+    super('variadic_parameter', {
+      ellipsis: ellipsis });
+  }
+  get ellipsis() { return this.children.ellipsis; }
+  with_ellipsis(ellipsis){
+    return new VariadicParameter(
+      ellipsis);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var ellipsis = this.ellipsis.rewrite(rewriter, new_parents);
+    if (
+      ellipsis === this.ellipsis)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new VariadicParameter(
+        ellipsis), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let ellipsis = EditableSyntax.from_json(
+      json.variadic_parameter_ellipsis, position, source);
+    position += ellipsis.width;
+    return new VariadicParameter(
+        ellipsis);
+  }
+  get children_keys()
+  {
+    if (VariadicParameter._children_keys == null)
+      VariadicParameter._children_keys = [
+        'ellipsis'];
+    return VariadicParameter._children_keys;
   }
 }
 class AttributeSpecification extends EditableSyntax
@@ -15774,6 +15823,7 @@ exports.ConstantDeclarator = ConstantDeclarator;
 exports.TypeConstDeclaration = TypeConstDeclaration;
 exports.DecoratedExpression = DecoratedExpression;
 exports.ParameterDeclaration = ParameterDeclaration;
+exports.VariadicParameter = VariadicParameter;
 exports.AttributeSpecification = AttributeSpecification;
 exports.Attribute = Attribute;
 exports.InclusionExpression = InclusionExpression;

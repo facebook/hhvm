@@ -489,17 +489,24 @@ void RegionDesc::chainRetransBlocks() {
 
   // 5. For each block with multiple successors in the same chain,
   //    only keep the successor that first appears in the chain.
+  BlockIdSet erased_ids;
   for (auto b : blocks()) {
     auto& succSet = data(b->id()).succs;
     for (auto s : succSet) {
+      if (erased_ids.count(s)) continue;
       auto& c = chains[block2chain[s]];
       auto selectedSucc = findFirstInSet(c, succSet);
       for (auto other : c.blocks) {
         if (other == selectedSucc) continue;
-        succSet.erase(other);
-        data(other).preds.erase(b->id());
+        // You can't erase from a flat_set while iterating it, so track
+        // the ids we erased here.
+        if (erased_ids.insert(other).second) {
+          data(other).preds.erase(b->id());
+        }
       }
     }
+    for (auto id : erased_ids) succSet.erase(id);
+    erased_ids.clear();
   }
 
   // 6. Reorder the blocks in the region in topological order (if

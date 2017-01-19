@@ -176,7 +176,8 @@ let main args =
     | MODE_IDENTIFY_SYMBOL2 arg
     | MODE_IDENTIFY_SYMBOL3 arg ->
       let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
+      let content =
+        ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
       let result = rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       ClientGetDefinition.go result args.output_json;
       Exit_status.No_error

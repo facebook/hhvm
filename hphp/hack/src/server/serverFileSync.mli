@@ -19,3 +19,5 @@ val close_file : ServerEnv.env -> string -> ServerEnv.env
 val clear_sync_data : ServerEnv.env -> ServerEnv.env
 
 val try_relativize_path : string -> Relative_path.t option
+
+val get_file_content : ServerUtils.file_input -> File_content.t

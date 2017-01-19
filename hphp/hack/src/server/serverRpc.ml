@@ -9,11 +9,9 @@
  *)
 
 open Core
-open Option.Monad_infix
 open ServerEnv
 open File_content
 open ServerCommandTypes
-open File_heap
 
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   fun genv env ~is_stale -> function
@@ -34,7 +32,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             raise (Decl.Decl_not_found s)
         in
         env, result
-    | IDENTIFY_FUNCTION (content, line, char) ->
+    | IDENTIFY_FUNCTION (file_input, line, char) ->
+        let content =
+          ServerFileSync.get_file_content file_input |>
+          File_content.get_content
+        in
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | GET_DEFINITION_BY_ID id ->
         env, Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
@@ -90,17 +92,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | EDIT_FILE (path, edits) ->
         ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
-        let fc =
-          begin ServerFileSync.try_relativize_path path >>= fun path ->
-            match File_heap.FileHeap.get path with
-            | Some (Ide f) -> Some f
-            | Some (Disk c) -> Some (of_content c)
-            | None -> Option.try_with (fun () -> (* Use the disk version *)
-              of_content (Sys_utils.cat (Relative_path.to_absolute path)))
-          end
-            (* In case of errors, proceed with empty file contents *)
-            |> Option.value ~default:(of_content "")
-        in
+        let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
         let edited_fc = edit_file_unsafe fc edits in
         let content = get_content edited_fc in
@@ -119,3 +111,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         in
         let new_env = { env with diag_subscribe } in
         new_env, ()
+    | OUTLINE path ->
+      env, ServerUtils.FileName path |>
+      ServerFileSync.get_file_content |>
+      File_content.get_content |>
+      FileOutline.outline env.popt

@@ -85,3 +85,16 @@ let clear_sync_data env =
   persistent_client = None;
   diag_subscribe = None;
 }
+
+let get_file_content = function
+  | ServerUtils.FileContent s -> of_content s
+  | ServerUtils.FileName path ->
+    begin try_relativize_path path >>= fun path ->
+      match File_heap.FileHeap.get path with
+        | Some (Ide f) -> Some f
+        | Some (Disk c) -> Some (of_content c)
+        | None -> Option.try_with (fun () -> (* Use the disk version *)
+          of_content (Sys_utils.cat (Relative_path.to_absolute path)))
+    end
+      (* In case of errors, proceed with empty file contents *)
+      |> Option.value ~default:(of_content "")

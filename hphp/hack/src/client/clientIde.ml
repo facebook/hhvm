@@ -190,6 +190,16 @@ let handle_request conn id protocol = function
     rpc conn (Rpc.INFER_TYPE (filename, line, column)) |>
     InferAtPosService.infer_result_to_ide_response |>
     print_response id protocol
+  | Identify_symbol { filename; position; } ->
+    let filename = ServerUtils.FileName filename in
+    let { File_content.line; column; } = position in
+    rpc conn (Rpc.IDENTIFY_FUNCTION (filename, line, column)) |>
+    IdentifySymbolService.result_to_ide_message |>
+    print_response id protocol
+  | Outline filename ->
+    let result = rpc conn (Rpc.OUTLINE filename) in
+    Ide_message.Outline_response result |>
+    print_response id protocol
   | Did_open_file { did_open_file_filename; did_open_file_text; } ->
     rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))
   | Did_close_file { did_close_file_filename; } ->

@@ -356,3 +356,66 @@ What Hack thinks is the type of the expression at this position. Displayed in ed
 *Server response:*
 
     string
+
+### Identify Symbol request
+
+Identify name and kind of symbol at position, locate its definition.
+
+*Client request:*
+
+    method : "identifySymbol"
+    params : FilePosition
+
+*Server response:*
+
+    {
+      /**
+       * Name of the identified symbol.
+       */
+      name : string;    
+      /**
+       * Kind of the identified symbol.
+       */
+      kind : SymbolOccurrenceKind;    
+      /**
+       * Span of the identified symbol occurrence.
+       */
+      span : Range;    
+      /**
+       * Symbol definition, if it has one.
+       */
+      definition : ?SymbolDefinition;
+    }
+
+where `SymbolOccurrenceKind` is defined as:
+
+    string enum {
+      type_id, /* class or trait or interface or enum -
+                  use definition.kind to disambiguate */
+      method,
+      function,
+      local,
+      property,
+      member_const, (* class constant or enum member *)
+      typeconst,
+      global_const,
+    }
+
+### File Outline request
+
+List all symbols defined in the file.
+
+*Client request:*
+
+    method : "outline"
+    params : OutlineParams
+
+where `OutlineParams` is defined as:
+
+    {
+      filename : string
+    }
+
+*Server response:*
+
+    SymbolDefinition[]

@@ -28,6 +28,8 @@ type request =
   | Init of init_params
   | Autocomplete of file_position
   | Infer_type of file_position
+  | Identify_symbol of file_position
+  | Outline of string
   | Did_open_file of did_open_file_params
   | Did_close_file of did_close_file_params
   | Did_change_file of did_change_file_params

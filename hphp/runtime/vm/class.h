@@ -201,10 +201,16 @@ struct Class : AtomicCountable {
   private:
     PropInitVec(const PropInitVec&);
 
+    bool reqAllocated() const;
+
     TypedValueAux* m_data;
-    unsigned m_size;
-    bool m_req_allocated;
+    uint32_t m_size;
+    // m_capacity > 0, allocated on global huge heap
+    // m_capacity = 0, not request allocated, m_data is nullptr
+    // m_capacity < 0, request allocated, with '~m_capacity' slots
+    int32_t m_capacity;
   };
+  static_assert(sizeof(PropInitVec) <= 16, "");
 
   /*
    * A slot in a Class vtable vector, pointing to the vtable for an interface

@@ -31,6 +31,11 @@ inline bool Class::isZombie() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 
+inline Class::PropInitVec::PropInitVec() : m_data(nullptr),
+                                           m_size(0),
+                                           m_capacity(0) {
+}
+
 inline Class::PropInitVec::iterator Class::PropInitVec::begin() {
   return m_data;
 }
@@ -51,6 +56,10 @@ inline TypedValueAux& Class::PropInitVec::operator[](size_t i) {
 inline const TypedValueAux& Class::PropInitVec::operator[](size_t i) const {
   assert(i < m_size);
   return m_data[i];
+}
+
+inline bool Class::PropInitVec::reqAllocated() const {
+  return m_capacity < 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

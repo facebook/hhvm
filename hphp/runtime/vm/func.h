@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/fixed-vector.h"
-#include "hphp/util/hash-map-typedefs.h"
 
 #include <atomic>
 #include <utility>
@@ -163,7 +162,7 @@ struct Func final {
   typedef FixedVector<ParamInfo> ParamInfoVec;
   typedef FixedVector<SVInfo> SVInfoVec;
   typedef FixedVector<EHEnt> EHEntVec;
-  typedef FixedVector<FPIEnt> FPIEntVec;
+  typedef FixedVector<FPIEnt, HugeAllocator<FPIEnt>> FPIEntVec;
 
 
   /////////////////////////////////////////////////////////////////////////////

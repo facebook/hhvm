@@ -681,6 +681,7 @@ static void low_malloc_hugify(void* ptr) {
 }
 
 void* low_malloc_impl(size_t size) {
+  if (size == 0) return nullptr;
   void* ptr = mallocx(size, low_mallocx_flags());
   low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
@@ -697,6 +698,7 @@ void low_malloc_skip_huge(void* start, void* end) {
 
 #ifdef USE_JEMALLOC_CHUNK_HOOKS
 void* low_malloc_huge1g_impl(size_t size) {
+  if (size == 0) return nullptr;
   if (low_huge1g_arena == 0) return low_malloc(size);
   auto ret = mallocx(size, low_mallocx_huge1g_flags());
   if (ret) return ret;
@@ -704,6 +706,7 @@ void* low_malloc_huge1g_impl(size_t size) {
 }
 
 void* malloc_huge1g_impl(size_t size) {
+  if (size == 0) return nullptr;
   if (high_huge1g_arena == 0) return malloc(size);
   auto ret = mallocx(size, mallocx_huge1g_flags());
   if (ret) return ret;

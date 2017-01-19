@@ -85,49 +85,49 @@ const Class* getOwningClassForFunc(const Func* f) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 
-Class::PropInitVec::PropInitVec()
-  : m_data(nullptr)
-  , m_size(0)
-  , m_req_allocated(false)
-{}
-
 Class::PropInitVec::~PropInitVec() {
-  if (!m_req_allocated) free(m_data);
+  if (m_capacity > 0) {
+    free_huge(m_data);
+  }
 }
 
 Class::PropInitVec*
 Class::PropInitVec::allocWithReqAllocator(const PropInitVec& src) {
   PropInitVec* p = req::make_raw<PropInitVec>();
-  p->m_size = src.size();
-  p->m_data = req::make_raw_array<TypedValueAux>(src.size());
-  memcpy(p->m_data, src.m_data, src.size() * sizeof(*p->m_data));
-  p->m_req_allocated = true;
+  uint32_t sz = src.m_size;
+  p->m_size = sz;
+  p->m_capacity = ~sz;
+  p->m_data = req::make_raw_array<TypedValueAux>(sz);
+  memcpy(p->m_data, src.m_data, sz * sizeof(*p->m_data));
   return p;
 }
 
 const Class::PropInitVec&
 Class::PropInitVec::operator=(const PropInitVec& piv) {
-  assert(!m_req_allocated);
+  assert(!reqAllocated());
   if (this != &piv) {
-    unsigned sz = m_size = piv.size();
-    if (sz) sz = folly::nextPowTwo(sz);
-    free(m_data);
-    m_data = (TypedValueAux*)malloc(sz * sizeof(*m_data));
+    if (UNLIKELY(m_capacity)) {
+      free_huge(m_data);
+      m_data = nullptr;
+    }
+    unsigned sz = m_size = m_capacity = piv.size();
+    if (sz == 0) return *this;
+    m_data = (TypedValueAux*)malloc_huge(sz * sizeof(*m_data));
     assert(m_data);
-    memcpy(m_data, piv.m_data, piv.size() * sizeof(*m_data));
+    memcpy(m_data, piv.m_data, sz * sizeof(*m_data));
   }
   return *this;
 }
 
 void Class::PropInitVec::push_back(const TypedValue& v) {
-  assert(!m_req_allocated);
-  /*
-   * the allocated size is always the next power of two (or zero)
-   * so we just need to reallocate when we hit a power of two
-   */
-  if (!m_size || folly::isPowTwo(m_size)) {
-    unsigned size = m_size ? m_size * 2 : 1;
-    m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
+  assert(!reqAllocated());
+  if (m_size == m_capacity) {
+    unsigned newCap = folly::nextPowTwo(m_size + 1);
+    m_capacity = static_cast<int32_t>(newCap);
+    auto newData = malloc_huge(newCap * sizeof(TypedValue));
+    memcpy(newData, m_data, m_size * sizeof(*m_data));
+    if (m_data) free_huge(m_data);
+    m_data = reinterpret_cast<TypedValueAux*>(newData);
     assert(m_data);
   }
   cellDup(v, m_data[m_size++]);
@@ -406,7 +406,7 @@ Class::~Class() {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
       m_sPropCache[i].~Link();
     }
-    free(m_sPropCache);
+    free_huge(m_sPropCache);
   }
 
   for (auto i = size_t{}, n = numMethods(); i < n; i++) {
@@ -2193,7 +2193,7 @@ void Class::setProperties() {
   m_staticProperties.create(curSPropMap);
 
   m_sPropCache = (rds::Link<TypedValue>*)
-    malloc(numStaticProperties() * sizeof(*m_sPropCache));
+    malloc_huge(numStaticProperties() * sizeof(*m_sPropCache));
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
     new (&m_sPropCache[i]) rds::Link<TypedValue>(rds::kInvalidHandle);
   }

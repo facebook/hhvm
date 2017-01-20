@@ -111,26 +111,30 @@ bool shouldTranslate(const Func* func, TransKind kind) {
   auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
 
-  // Otherwise, follow the Eval.JitAMaxUsage limits.  However, we do allow PGO
-  // translations past that limit if there's still space in code.hot.
+  // Otherwise, follow the Eval.JitAMaxUsage limits.
   if (main_under && cold_under && froz_under) return true;
 
-  switch (kind) {
-    case TransKind::ProfPrologue:
-    case TransKind::Profile:
-    case TransKind::OptPrologue:
-    case TransKind::Optimize:
-      return code().hotEnabled();
-    default:
-      break;
+  // We use cold and frozen for all kinds of translations, but we allow PGO
+  // translations past the limit for main if there's still space in code.hot.
+  if (cold_under && froz_under) {
+    switch (kind) {
+      case TransKind::ProfPrologue:
+      case TransKind::Profile:
+      case TransKind::OptPrologue:
+      case TransKind::Optimize:
+        return code().hotEnabled();
+      default:
+        break;
+    }
   }
 
-  if (main_under && !s_did_log.test_and_set()) {
+  if (main_under && !s_did_log.test_and_set() &&
+      RuntimeOption::EvalProfBranchSampleFreq == 0) {
     // If we ran out of TC space in cold or frozen but not in main, something
-    // unexpected is happening and we should take note of it.
-    if (!cold_under && RuntimeOption::EvalProfBranchSampleFreq == 0) {
-      // We skip logging cold-full if TC branch profiling is on, since it
-      // causes us to fill up cold code at a much higher rate.
+    // unexpected is happening and we should take note of it.  We skip this
+    // logging if TC branch profiling is on, since it fills up code and frozen
+    // at a much higher rate.
+    if (!cold_under) {
       logPerfWarning("cold_full", 1, [] (StructuredLogEntry&) {});
     }
     if (!froz_under) {

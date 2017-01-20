@@ -54,7 +54,7 @@ module Tempfile = struct
     let () = Unix.mkdir (Path.to_string tmp_dir) 0o740 in
     tmp_dir
 
-end
+end;;
 
 
 module Test_harness = struct
@@ -74,10 +74,25 @@ module Test_harness = struct
   let get_server_logs harness =
     let process = exec_hh_client ["--logname"] harness in
     let log_path = Process.read_and_close_pid process in
-    Sys_utils.cat (String.trim log_path)
+    let log_path = Path.make (String.trim log_path) in
+    Sys_utils.cat (Path.to_string log_path)
+
+  let get_recording_path harness =
+    let recording_re = Str.regexp
+      ("^.+ About to spawn recorder daemon\\. " ^
+      "Output will go to \\(.+\\)\\. Logs to \\(.+\\)\\.$") in
+    let logs = get_server_logs harness in
+    try begin
+      let _ = Str.search_forward recording_re logs 0 in
+      Some (Str.matched_group 1 logs)
+    end with
+    | Not_found ->
+      Printf.eprintf "recorder path not found\n%!";
+      Printf.eprintf "See also server logs: %s\n%!" logs;
+      None
 
   let check_cmd harness =
-    let process = exec_hh_client [] harness in
+    let process = exec_hh_client ["check"] harness in
     let result = Process.read_and_close_pid process in
     Sys_utils.split_lines result
 
@@ -100,33 +115,48 @@ module Test_harness = struct
     else
 
       (** Where the hhi files, socket, etc get extracted *)
-      let hh_tmp_dir = Tempfile.mkdtemp () in
+      (** TODO: Get HH_TMPDIR working; currently this is commented out.
+       *
+       * Right now, we will have to pollute the system's main tmp directory
+       * for HH_TMPDIR instead of using a custom one for testing.
+       *
+       * The problem is that we look for a server's socket file in
+       * GlobalConfig.tmp_dir, which is a static constant. So, when we
+       * start a server by forking hh_client (with a custom HH_TMPDIR env
+       * variable), it puts the socket file in that custom directory. But
+       * when we try to open a connection inside this existing process,
+       * it looks for the socket file in the default directory.
+       *
+       * Globals suck. *)
+      (** let hh_tmpdir = Tempfile.mkdtemp () in *)
       let bin_dir = Tempfile.mkdtemp () in
       let hh_server_dir = Path.parent args.Args.hh_server in
       let test_env = [
-        "HH_TEST_MODE=1";
-        "HH_TMPDIR=" ^ (Path.to_string hh_tmp_dir);
-        "PATH=" ^ (Printf.sprintf "'%s:%s:/bin:/usr/bin:/usr/local/bin"
-          (Path.to_string hh_server_dir) (Path.to_string bin_dir));
-        "OCAMLRUNPARAM=b";
-        "HH_LOCALCONF_PATH=" ^ (Path.to_string repo_dir);
+        ("HH_TEST_MODE","1");
+        (** ("HH_TMPDIR", (Path.to_string hh_tmpdir)); *)
+        ("PATH", (Printf.sprintf "'%s:%s:/bin:/usr/bin:/usr/local/bin"
+          (Path.to_string hh_server_dir) (Path.to_string bin_dir)));
+        ("OCAMLRUNPARAM","b");
+        ("HH_LOCALCONF_PATH", Path.to_string repo_dir);
       ] in
+      let test_env = List.map test_env ~f:(fun (k,v) ->
+        Printf.sprintf "%s=%s" k v) in
       let harness = {
         repo_dir;
         test_env;
         hh_client_path = Path.to_string args.Args.hh_client;
         hh_server_path = Path.to_string args.Args.hh_server;
       } in
-      let () = Printf.eprintf "Repo_dir: %s; bin_dir: %s; hh_tmp_dir: %s;"
+      let () = Printf.eprintf "Repo_dir: %s; bin_dir: %s;\n%!"
         (Path.to_string repo_dir)
-        (Path.to_string bin_dir)
-        (Path.to_string hh_tmp_dir) in
+        (Path.to_string bin_dir) in
       let tear_down () =
+        let () = Printf.eprintf
+          "Tearing down test, deleting temp directories\n%!" in
         let _ = stop_server harness in
         let () = Sys_utils.rm_dir_tree (Path.to_string bin_dir) in
-        let () = Sys_utils.rm_dir_tree (Path.to_string hh_tmp_dir) in
-        let () = Sys_utils.rm_dir_tree (Path.to_string base_tmp_dir) in
         let () = Sys_utils.rm_dir_tree (Path.to_string repo_dir) in
+        let () = Sys_utils.rm_dir_tree (Path.to_string base_tmp_dir) in
         ()
       in
       Utils.try_finally ~f:(fun () -> test_case harness) ~finally:tear_down
@@ -138,12 +168,39 @@ module Test_harness = struct
     let () = Pervasives.close_out oc in
     test_case harness
 
+end;;
+
+
+module type Comparator = sig
+  type t
+  val to_string : t -> string
+  val is_equal : t -> t -> bool
+end;;
+
+
+module String_comparator = struct
+  type t = string
+  let to_string x = x
+  let is_equal x y = x = y
+end;;
+
+
+module Recorder_event_comparator = struct
+  type t = Recorder_types.event
+  let to_string x = Recorder_types.to_string x
+  let is_equal x y = x = y
+end;;
+
+
+module Asserter (Comp : Comparator) = struct
+
   let assert_equals exp actual harness =
-    if exp = actual then
+    if Comp.is_equal exp actual then
       ()
     else
-      let () = Printf.eprintf "Expected: %s; But Found: %s\n" exp actual in
-      let logs = get_server_logs harness in
+      let () = Printf.eprintf "Expected: %s; But Found: %s\n"
+        (Comp.to_string exp) (Comp.to_string actual) in
+      let logs = Test_harness.get_server_logs harness in
       let () = Printf.eprintf "See also server logs:\n%s\n" logs in
       assert false
 
@@ -154,28 +211,91 @@ module Test_harness = struct
     else
       let () = Printf.eprintf
         "assert_list_equals failed. Counts not equal\n" in
+      let exp_strs = List.map exp ~f:Comp.to_string in
+      let actual_strs = List.map actual ~f:Comp.to_string in
       let () = Printf.eprintf
         "Expected:\n%s\n\n But Found:\n%s\n"
-        (String.concat "\n" exp) (String.concat "\n" actual) in
-      let logs = get_server_logs harness in
+        (String.concat "\n" exp_strs) (String.concat "\n" actual_strs) in
+      let logs = Test_harness.get_server_logs harness in
       let () = Printf.eprintf "See also server logs:\n%s\n" logs in
       assert false
 
-end
+end;;
+
+
+module String_asserter = Asserter (String_comparator);;
+module Recorder_event_asserter = Asserter (Recorder_event_comparator);;
+
 
 let test_check_cmd harness =
   let results = Test_harness.check_cmd harness in
-  let () = Test_harness.assert_list_equals ["No errors!"] results harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
   let _ = Test_harness.stop_server harness in
   true
 
+let rec read_recording_rec ic acc =
+  try begin
+    let item = Marshal.from_channel ic in
+    read_recording_rec ic (item :: acc)
+  end with
+  | End_of_file ->
+    acc
+  | Failure s when s = "input_value: truncated object" ->
+    acc
+
+let read_recording recording_path =
+  let ic = Pervasives.open_in recording_path in
+  Utils.try_finally ~f:(fun () ->
+    let items_rev = read_recording_rec ic [] in
+    List.rev items_rev
+  ) ~finally:(fun () -> Pervasives.close_in ic)
+
+let assert_recording_matches expected actual harness =
+  let actual = List.map actual ~f:Recorder_types.to_string in
+  String_asserter.assert_list_equals expected actual harness
+
+let test_server_driver_case_0 harness =
+  let results = Test_harness.check_cmd harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
+  let () = Printf.eprintf "Finished check on: %s\n%!"
+    (Path.to_string harness.Test_harness.repo_dir) in
+  let _ = Server_driver.connect_and_run_case 0 harness.Test_harness.repo_dir in
+  let results = Test_harness.check_cmd harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
+  let _ = Test_harness.stop_server harness in
+  (** After stopping the server, eventually the recorder daemon will
+   * stop, but it could take some time. *)
+  let _ = Unix.select [] [] [] 4.0 in
+  match Test_harness.get_recording_path harness with
+  | None ->
+    Printf.eprintf "Could not find recording\n%!";
+    false
+  | Some recording_path ->
+    let recording = read_recording recording_path in
+    let expected = [
+      "Start_recording";
+      "(HandleServerCommand STATUS)";
+      "(HandleServerCommand STATUS)";
+      "(HandleServerCommand INFER_TYPE)";
+      "(HandleServerCommand STATUS)";
+    ] in
+    let () = assert_recording_matches expected recording harness in
+    true
+
 let tests args = [
-  "test_check_cmd", fun () -> Test_harness.run_test args (
+  ("test_check_cmd", fun () -> Test_harness.run_test args (
     Test_harness.with_local_conf
     "use_mini_state = true\nuse_watchman = true\n"
-    test_check_cmd);
+    test_check_cmd));
+  ("test_server_driver_case_0", fun () -> Test_harness.run_test args (
+    Test_harness.with_local_conf
+      ("use_mini_state = false\n" ^
+      "use_watchman = true\n" ^
+      "start_with_recorder_on = true\n")
+    test_server_driver_case_0));
 ]
 
 let () =
   let args = Args.parse () in
+  let () = HackEventLogger.client_init (args.Args.template_repo) in
   Unit_test.run_all (tests args)

@@ -10,7 +10,7 @@ import signal
 import sys
 import time
 
-from hh_paths import hh_client, recorder_cat, server_driver, turntable
+from hh_paths import hh_client, recorder_cat, server_driver_bin, turntable
 
 
 def boxed_string(content):
@@ -110,15 +110,15 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
             os.path.realpath(recording_matcher.group(1)),
             os.path.realpath(recording_matcher.group(2)))
 
-    # Start up a hack server and run `server_driver --test-case <case_num>` on it.
+    # Start up a hack server and run `server_driver_bin --test-case <case_num>` on it.
     # Returns the subprocess, path to the recording file, and recorder logs
-    # This doesn't kill the server_driver process, so its persistent connection
+    # This doesn't kill the server_driver_bin process, so its persistent connection
     # with the Hack server is intentionally left alive maintaining the server's
     # IDE state.
     def run_server_driver_case(self, case_num):
         recording_path, recorder_log_path = self.fresh_start_with_recorder_on()
         proc = self.proc_create([
-            server_driver,
+            server_driver_bin,
             '--test-case',
             str(case_num),
             self.repo_dir
@@ -131,7 +131,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
             self.assertEqual(
                 finished.strip(),
                 "Finished",
-                "See also server_driver stderr: " + boxed_string(driver_err))
+                "See also server_driver_bin stderr: " + boxed_string(driver_err))
         with open(recorder_log_path) as f:
             recorder_log = f.read()
         # Running a new server instance after shutting down the current one
@@ -161,34 +161,6 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         else:
             self.fail("Read no lines from turntable stderr")
         return proc
-
-    def test_server_driver_case_zero(self):
-        server_driver, recording, recorder_log = self.run_server_driver_case(0)
-        (_, _, retcode) = self.proc_call([
-            hh_client,
-            'stop',
-            self.repo_dir
-        ])
-        self.assertEqual(retcode, 0)
-        # We can't wait for grandchild pids, i.e. the recorder daemon,
-        # so just give it a little time.
-        time.sleep(4)
-        out, err, retcode = self.proc_call([
-            recorder_cat,
-            recording
-        ])
-        self.assertEqual(
-            retcode,
-            0,
-            "See also recorder_cat stderr:" + boxed_string(err))
-        self.assert_match_regexes(
-            out.strip(),
-            [
-                '(Loaded_saved_state /tmp.*/foo with 0 dirtied files)',
-                '(HandleServerCommand STATUS)',
-                '(HandleServerCommand INFER_TYPE)'
-            ],
-            "See also recorder daemon logs:" + boxed_string(recorder_log))
 
     # Creates a recoridng using server_driver case 1, then spins the recording
     # on a new Hack instance with the turntable

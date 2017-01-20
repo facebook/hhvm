@@ -21,32 +21,6 @@
 
 module SCT = ServerCommandTypes
 
-module Args = struct
-
-  type t = {
-    root : Path.t;
-    test_case : int;
-  }
-
-  let usage = Printf.sprintf "Usage: %s [WWW DIRECTORY]\n" Sys.argv.(0)
-
-  let parse () =
-    let root = ref None in
-    let test_case = ref 0 in
-    let options = [
-      "--test-case", Arg.Int (fun x -> test_case := x),
-      "The test case to run. See also cmd_responses_case_[n]";
-    ] in
-    let () = Arg.parse options (fun s -> root := (Some s)) usage in
-    let root = ClientArgsUtils.get_root !root in
-    {
-      root = root;
-      test_case = !test_case;
-    }
-
-  let root args = args.root
-
-end
 
 type response_matcher =
   | StringMatcher of string
@@ -70,18 +44,18 @@ type command_response =
   (** A pair of the cmd and the expected result as a string. *)
   | RpcCommand : ('a SCT.t * response_matcher) -> command_response
 
-let cmd_responses_case_0 args = [
+let cmd_responses_case_0 root = [
   (RpcCommand ((SCT.STATUS), StringMatcher ""));
   (RpcCommand ((SCT.INFER_TYPE
     (ServerUtils.FileName
-      ((Path.concat (Args.root args) "foo_1.php") |> Path.to_string), 4, 20 )),
+      ((Path.concat root "foo_1.php") |> Path.to_string), 4, 20 )),
       StringMatcher "line 3, character 23 - line 3, character 25, int"));
   ]
 
-let cmd_responses_case_1 args = [
+let cmd_responses_case_1 root = [
   (RpcCommand (
     (SCT.OPEN_FILE (
-      ((Path.concat (Args.root args) "foo_1.php") |> Path.to_string),
+      ((Path.concat root "foo_1.php") |> Path.to_string),
     (* "foo_1.php", *)
     {|<?hh
         function f() {
@@ -94,9 +68,9 @@ let cmd_responses_case_1 args = [
 
 exception Invalid_test_case
 
-let get_test_case args = match args.Args.test_case with
-  | 0 -> cmd_responses_case_0 args
-  | 1 -> cmd_responses_case_1 args
+let get_test_case case_number root = match case_number with
+  | 0 -> cmd_responses_case_0 root
+  | 1 -> cmd_responses_case_1 root
   | _ -> raise Invalid_test_case
 
 exception Response_doesnt_match_expected of string * response_matcher
@@ -128,10 +102,6 @@ let response_to_string : type a. a SCT.t -> a -> string = begin
     | _, _ -> "Some other response"
   end
 
-let rec sleep_and_wait () =
-  let _, _, _ = Unix.select [] [] [] 999999.999 in
-  sleep_and_wait ()
-
 let send_command_and_read_response conn cmd_response = match cmd_response with
   | RpcCommand (cmd, expected) ->
     let response = ClientIde.rpc conn cmd in
@@ -142,20 +112,17 @@ let send_command_and_read_response conn cmd_response = match cmd_response with
     else
       raise (Response_doesnt_match_expected (response, expected))
 
-let () =
-  Daemon.check_entry_point (); (* this call might not return *)
-  Sys_utils.set_signal Sys.sigint (Sys.Signal_handle (fun _ ->
-    exit 0));
-  let args = Args.parse () in
-  HackEventLogger.client_init @@ Args.root args;
-  let conn = ClientIde.connect_persistent { ClientIde.root = Args.root args }
+(** Runs the given case number on the server running on root.
+ * Returns the persistent connection so that the server's IDE
+ * session state is kept alive. *)
+let connect_and_run_case case_number root =
+  let test_case = get_test_case case_number root in
+  let conn = ClientIde.connect_persistent { ClientIde.root = root }
     ~retries:800 in
-  let test_case = get_test_case args in
   let () = try List.iter (send_command_and_read_response conn) test_case with
   | Response_doesnt_match_expected (actual, expected) ->
-    Printf.eprintf "Failed case %d\n%!" args.Args.test_case;
+    Printf.eprintf "Failed case %d\n%!" case_number;
     Printf.eprintf "Expected: %s. Found: %s" (describe_matcher expected) actual;
     exit 1
   in
-  Printf.eprintf "Finished\n%!";
-  sleep_and_wait ()
+  conn

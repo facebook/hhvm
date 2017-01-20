@@ -241,6 +241,41 @@ module WithStatementAndDeclAndTypeParser
   and parse_heredoc_string parser head name =
     parse_string_literal parser head name
 
+  and parse_braced_expression_in_string parser =
+    (*
+    We are parsing something like "abc{$x}def" or "abc${x}def", and we
+    are at the left brace.
+
+    We know that the left brace will not be preceded by trivia. However in the
+    second of the two cases mentioned above it is legal for there to be trivia
+    following the left brace.  If we are in the first case, we've already
+    verified that there is no trailing trivia after the left brace.
+
+    The expression may be followed by arbitrary trivia, including
+    newlines and comments. That means that the closing brace may have
+    leading trivia. But under no circumstances does the closing brace have
+    trailing trivia.
+
+    It's an error for the closing brace to be missing.
+
+    Therefore we lex the left brace normally, parse the expression normally,
+    but require that there be a right brace. We do not lex the trailing trivia
+    on the right brace.
+
+    ERROR RECOVERY: If the right brace is missing, treat the remainder as
+    string text. *)
+
+    let (parser, left_brace) = assert_token parser LeftBrace in
+    let (parser, expr) = parse_expression_with_reset_precedence parser in
+    let (parser1, token) = next_token_no_trailing parser in
+    let (parser, right_brace) =
+      if (Token.kind token) = RightBrace then
+        (parser1, make_token token)
+      else
+        (with_error parser SyntaxError.error1006, (make_missing())) in
+    let node = make_braced_expression left_brace expr right_brace in
+    (parser, node)
+
   and parse_string_literal parser head name =
     (* SPEC
 
@@ -375,71 +410,72 @@ module WithStatementAndDeclAndTypeParser
         (parser3, expr)
       | _ -> (parser, var_expr) in
 
-    let rec handle_left_brace parser token acc =
-      let (parser1, token1) = next_token_in_string parser name in
-      match Token.kind token1 with
+    let rec handle_left_brace parser acc =
+      (* Note that here we use next_token_in_string because we need to know
+      whether there is trivia between the left brace and the $x which follows.*)
+      let (parser1, left_brace) = next_token_in_string parser name in
+      let (_, token) = next_token_in_string parser1 name in
+      (* TODO: What about "{$$}" ? *)
+      match Token.kind token with
       | Dollar ->
         (* We do not support {$ inside a string unless the $ begins a
         variable name. Append the { and start again on the $. *)
         (* TODO: Is this right? Suppose we have "{${x}".  Is that the same
         as "{"."${x}" ? Double check this. *)
         (* TODO: Give an error. *)
-        aux parser (merge_head token acc)
+        aux parser1 (merge_head left_brace acc)
       | Variable ->
         (* Parse any expression followed by a close brace.
            TODO: We do not actually support all possible expressions;
                  see above. Do we want to (1) catch this at parse time,
                  (2) catch it in a later pass, or (3) just allow any
                  expression here? *)
-        let (parser, expr) =
-          parse_expression_with_reset_precedence parser in
-        (* TODO: Eat the close brace, if there is one.  *)
-        (* TODO: Give an error if there is not? *)
-        aux parser (expr :: (merge_head token acc))
+        let (parser, expr) = parse_braced_expression_in_string parser in
+        aux parser (expr :: acc)
       | _ ->
         (* We got a { not followed by a $. Ignore it. *)
         (* TODO: Give a warning? *)
-        aux parser (merge_head token acc)
+        aux parser1 (merge_head left_brace acc)
 
-    and handle_dollar parser token acc =
+    and handle_dollar parser dollar acc =
       (* We need to parse ${x} as though it was {$x} *)
       (* TODO: This should be an error in strict mode. *)
-      let (parser1, token1) = next_token_in_string parser name in
-      match Token.kind token1 with
+      (* We must not have trivia between the $ and the {, but we can have
+      trivia after the {. That's why we use next_token_in_string here. *)
+      let (_, token) = next_token_in_string parser name in
+      match Token.kind token with
       | LeftBrace ->
         (* The thing in the braces has to be an expression that begins
         with a variable, and the variable does *not* begin with a $. It's
-        just the word. Unlike the {$var} case, there *can* be trivia before
-        the expression. *)
+        just the word.
+
+        Unlike the {$var} case, there *can* be trivia before the expression,
+        which means that trivia is likely the trailing trivia of the brace,
+        not leading trivia of the expression. *)
         (* TODO: Enforce these rules by producing an error if they are
         violated. *)
         (* TODO: Make the parse tree for the leading word in the expression
         a variable expression, not a qualified name expression. *)
 
-        let (parser, expr) =
-          parse_expression_with_reset_precedence parser1 in
-        (* TODO: Eat the close brace, if there is one.  *)
-        (* TODO: Give an error if there is not? *)
-        let acc = merge_head token acc in
-        let acc = merge_head token1 acc in
-        let acc = expr :: acc in
-        aux parser acc
+        let (parser, expr) = parse_braced_expression_in_string parser in
+        aux parser (expr :: (make_token dollar) :: acc)
+
       | _ ->
         (* We got a $ not followed by a { or variable name. Ignore it. *)
         (* TODO: Give a warning? *)
-        aux parser (merge_head token acc)
+        aux parser (merge_head dollar acc)
 
     and aux parser acc =
-      let (parser, token) = next_token_in_string parser name in
+      let (parser1, token) = next_token_in_string parser name in
       match Token.kind token with
       | HeredocStringLiteralTail
-      | DoubleQuotedStringLiteralTail -> (parser, (merge_head token acc))
-      | LeftBrace -> handle_left_brace parser token acc
+      | DoubleQuotedStringLiteralTail -> (parser1, (merge_head token acc))
+      | LeftBrace -> handle_left_brace parser acc
       | Variable ->
-        let (parser, expr) = parse_embedded_expression parser token in
+        let (parser, expr) = parse_embedded_expression parser1 token in
         aux parser (expr :: acc)
-      | Dollar ->  handle_dollar parser token acc
-      | _ -> aux parser (merge_head token acc) in
+      | Dollar ->  handle_dollar parser1 token acc
+      | _ -> aux parser1 (merge_head token acc) in
 
     let (parser, results) = aux parser [head] in
     (* If we've ended up with a single string literal with no internal

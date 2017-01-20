@@ -1147,6 +1147,13 @@ let scan_next_token_as_keyword = scan_next_token false
 let next_token lexer =
   scan_next_token_as_keyword scan_token_outside_type lexer
 
+let next_token_no_trailing lexer =
+  let tokenizer lexer =
+    let (lexer, kind, w, leading) =
+      scan_token_and_leading_trivia scan_token_outside_type false lexer in
+    (lexer, Token.make kind w leading []) in
+  scan_assert_progress tokenizer lexer
+
 let next_token_in_string lexer name =
   let lexer = start_new_lexeme lexer in
   (* We're inside a string. Do not scan leading trivia. *)

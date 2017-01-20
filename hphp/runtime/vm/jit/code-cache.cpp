@@ -249,7 +249,7 @@ CodeCache::View CodeCache::view(TransKind kind) {
   assertx(!mcgen::isLocalTCEnabled());
 
   auto view = [&] {
-    if (kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
+    if (isProfiling(kind)) {
       return View{m_prof, m_frozen, m_frozen, m_data, false};
     }
 

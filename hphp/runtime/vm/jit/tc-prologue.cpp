@@ -160,9 +160,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
         func->fullName()->data(), argc, start);
   func->setPrologue(paramIndex, start);
 
-  assertx(kind == TransKind::LivePrologue ||
-          kind == TransKind::ProfPrologue ||
-          kind == TransKind::OptPrologue);
+  assertx(isPrologue(kind));
 
   auto tr = maker.rec(funcBody, transID, kind);
   transdb::addTranslation(tr);

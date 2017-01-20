@@ -806,7 +806,16 @@ DebuggerProxy::ExecutePHP(const std::string &php, String &output,
 
 std::string DebuggerProxy::requestAuthToken() {
   TRACE_RB(2, "DebuggerProxy::requestauthToken: sending auth request\n");
+
+  // Try to use the current sandbox's path, defaulting to the path from
+  // DebuggerDefaultSandboxPath if the current sandbox path is empty.
+  auto sandboxPath = getSandbox().m_path;
+  if (sandboxPath.empty()) {
+    sandboxPath = RuntimeOption::DebuggerDefaultSandboxPath;
+  }
+
   CmdAuth cmd;
+  cmd.setSandboxPath(sandboxPath);
   if (!cmd.onServer(*this)) {
     TRACE_RB(2, "DebuggerProxy::requestAuthToken: "
              "Failed to send CmdAuth to client\n");

@@ -1,5 +1,8 @@
 open Core
 
+(** The exit status and stderr from the process. *)
+exception Process_exited_abnormally of Unix.process_status * string
+
 module Args = struct
 
   type t = {
@@ -73,9 +76,13 @@ module Test_harness = struct
 
   let get_server_logs harness =
     let process = exec_hh_client ["--logname"] harness in
-    let log_path = Process.read_and_close_pid process in
-    let log_path = Path.make (String.trim log_path) in
-    Sys_utils.cat (Path.to_string log_path)
+    let status, log_path, err = Process.read_and_close_pid process in
+    match status with
+    | Unix.WEXITED 0 ->
+      let log_path = Path.make (String.trim log_path) in
+      Sys_utils.cat (Path.to_string log_path)
+    | _ ->
+      raise (Process_exited_abnormally (status, err))
 
   let get_recording_path harness =
     let recording_re = Str.regexp
@@ -93,12 +100,22 @@ module Test_harness = struct
 
   let check_cmd harness =
     let process = exec_hh_client ["check"] harness in
-    let result = Process.read_and_close_pid process in
-    Sys_utils.split_lines result
+    let status, result, err = Process.read_and_close_pid process in
+    match status with
+    | Unix.WEXITED _ ->
+      Sys_utils.split_lines result
+    | _ ->
+      raise (Process_exited_abnormally (status, err))
 
   let stop_server harness =
     let process = exec_hh_client ["stop"] harness in
-    Process.read_and_close_pid process
+    let status, result, err = Process.read_and_close_pid process in
+    match status with
+    | Unix.WEXITED 0 ->
+      result
+    | _ ->
+      Printf.eprintf "Stop server failed\n%!";
+      raise (Process_exited_abnormally (status, err))
 
   let run_test args test_case =
     let base_tmp_dir = Tempfile.mkdtemp () in
@@ -182,6 +199,54 @@ module String_comparator = struct
   type t = string
   let to_string x = x
   let is_equal x y = x = y
+end;;
+
+
+module type Pattern_substitutions = sig
+  (** List of key-value pairs. We perform these key to value
+   * substitutions in-order.
+   *
+   * For example, consider the substitions:
+   *   [ ("foo", "bar"); ("bar", "world"); ]
+   *
+   * being appied to the string:
+   *   "hello {{foo}}"
+   *
+   * which gets transformed to:
+   *   "hello {bar}"
+   *
+   * then finally to:
+   *   "hello world"
+   *
+   * Note: in actuality, the keys and values aren't treated as string literals
+   * but as a pattern for regex and a template for replacement.
+   *)
+  val substitutions : (string * string) list
+end;;
+
+
+(** Comparison between an expected pattern and an actual string. *)
+module Pattern_comparator(Substitutions : Pattern_substitutions) = struct
+  type t = string
+
+  let apply_substitutions s =
+    List.fold_left Substitutions.substitutions ~init:s ~f:(fun acc (k, v) ->
+      let re = Str.regexp ("{" ^ k ^ "}") in
+      Str.global_replace re v acc
+    )
+
+  (** Argh, due to the signature of Comparator, the "expected" and
+   * "actual" have the same type, even though for this Pattern_comparator
+   * we would really like them to be different. We'd like "actual" to
+   * be type string, and "epxected" to be type "pattern", and
+   * so we can apply the substitutions to only the pattern. But splitting
+   * them out into different types for all the modules only because this module
+   * needs it isn't really worth it. Oh well. So we treat actual as a pattern
+   * as well and apply substitutions - oh well. *)
+  let to_string s = apply_substitutions s
+  let is_equal expected actual =
+    let expected = apply_substitutions expected in
+    expected = actual
 end;;
 
 
@@ -282,6 +347,27 @@ let test_server_driver_case_0 harness =
     let () = assert_recording_matches expected recording harness in
     true
 
+let test_server_driver_case_1 harness =
+  let results = Test_harness.check_cmd harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
+  let () = Printf.eprintf "Finished check on: %s\n%!"
+    (Path.to_string harness.Test_harness.repo_dir) in
+  let _ = Server_driver.connect_and_run_case 1 harness.Test_harness.repo_dir in
+  let results = Test_harness.check_cmd harness in
+  let substitutions = (module struct
+    let substitutions = [
+      ("repo", (Path.to_string harness.Test_harness.repo_dir));
+    ]
+  end : Pattern_substitutions) in
+  let module MySubstitutions = (val substitutions : Pattern_substitutions) in
+  let module MyPatternComparator = Pattern_comparator (MySubstitutions) in
+  let module MyAsserter = Asserter (MyPatternComparator) in
+  let () = MyAsserter.assert_list_equals [
+    "{repo}/foo_1.php:3:26,37: Undefined variable: $missing_var (Naming[2050])"
+    ] results harness in
+  let _ = Test_harness.stop_server harness in
+  true
+
 let tests args = [
   ("test_check_cmd", fun () -> Test_harness.run_test args (
     Test_harness.with_local_conf
@@ -293,6 +379,12 @@ let tests args = [
       "use_watchman = true\n" ^
       "start_with_recorder_on = true\n")
     test_server_driver_case_0));
+  ("test_server_driver_case_1", fun () -> Test_harness.run_test args (
+    Test_harness.with_local_conf
+      ("use_mini_state = false\n" ^
+      "use_watchman = true\n" ^
+      "start_with_recorder_on = true\n")
+    test_server_driver_case_1));
 ]
 
 let () =

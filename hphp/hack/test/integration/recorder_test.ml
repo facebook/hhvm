@@ -1,4 +1,5 @@
 open Core
+open Asserter
 
 (** The exit status and stderr from the process. *)
 exception Process_exited_abnormally of Unix.process_status * string
@@ -80,7 +81,10 @@ module Test_harness = struct
     match status with
     | Unix.WEXITED 0 ->
       let log_path = Path.make (String.trim log_path) in
-      Sys_utils.cat (Path.to_string log_path)
+      (try Some (Sys_utils.cat (Path.to_string log_path)) with
+      | Sys_error(m)
+        when Sys_utils.string_contains m "No such file or directory" ->
+        None)
     | _ ->
       raise (Process_exited_abnormally (status, err))
 
@@ -88,7 +92,9 @@ module Test_harness = struct
     let recording_re = Str.regexp
       ("^.+ About to spawn recorder daemon\\. " ^
       "Output will go to \\(.+\\)\\. Logs to \\(.+\\)\\.$") in
+    let open Option in
     let logs = get_server_logs harness in
+    logs >>= fun logs ->
     try begin
       let _ = Str.search_forward recording_re logs 0 in
       Some (Str.matched_group 1 logs)
@@ -187,114 +193,22 @@ module Test_harness = struct
 
 end;;
 
+let boxed_string content =
+  Printf.sprintf "%s%s%s"
+  "\n============================\n"
+  content
+  "\n============================\n"
 
-module type Comparator = sig
-  type t
-  val to_string : t -> string
-  val is_equal : t -> t -> bool
-end;;
-
-
-module String_comparator = struct
-  type t = string
-  let to_string x = x
-  let is_equal x y = x = y
-end;;
-
-
-module type Pattern_substitutions = sig
-  (** List of key-value pairs. We perform these key to value
-   * substitutions in-order.
-   *
-   * For example, consider the substitions:
-   *   [ ("foo", "bar"); ("bar", "world"); ]
-   *
-   * being appied to the string:
-   *   "hello {{foo}}"
-   *
-   * which gets transformed to:
-   *   "hello {bar}"
-   *
-   * then finally to:
-   *   "hello world"
-   *
-   * Note: in actuality, the keys and values aren't treated as string literals
-   * but as a pattern for regex and a template for replacement.
-   *)
-  val substitutions : (string * string) list
-end;;
-
-
-(** Comparison between an expected pattern and an actual string. *)
-module Pattern_comparator(Substitutions : Pattern_substitutions) = struct
-  type t = string
-
-  let apply_substitutions s =
-    List.fold_left Substitutions.substitutions ~init:s ~f:(fun acc (k, v) ->
-      let re = Str.regexp ("{" ^ k ^ "}") in
-      Str.global_replace re v acc
-    )
-
-  (** Argh, due to the signature of Comparator, the "expected" and
-   * "actual" have the same type, even though for this Pattern_comparator
-   * we would really like them to be different. We'd like "actual" to
-   * be type string, and "epxected" to be type "pattern", and
-   * so we can apply the substitutions to only the pattern. But splitting
-   * them out into different types for all the modules only because this module
-   * needs it isn't really worth it. Oh well. So we treat actual as a pattern
-   * as well and apply substitutions - oh well. *)
-  let to_string s = apply_substitutions s
-  let is_equal expected actual =
-    let expected = apply_substitutions expected in
-    expected = actual
-end;;
-
-
-module Recorder_event_comparator = struct
-  type t = Recorder_types.event
-  let to_string x = Recorder_types.to_string x
-  let is_equal x y = x = y
-end;;
-
-
-module Asserter (Comp : Comparator) = struct
-
-  let assert_equals exp actual harness =
-    if Comp.is_equal exp actual then
-      ()
-    else
-      let () = Printf.eprintf "Expected: %s; But Found: %s\n"
-        (Comp.to_string exp) (Comp.to_string actual) in
-      let logs = Test_harness.get_server_logs harness in
-      let () = Printf.eprintf "See also server logs:\n%s\n" logs in
-      assert false
-
-  let assert_list_equals exp actual harness =
-    if (List.length exp) = (List.length actual) then
-      List.iter2_exn exp actual ~f:(fun exp actual ->
-        assert_equals exp actual harness)
-    else
-      let () = Printf.eprintf
-        "assert_list_equals failed. Counts not equal\n" in
-      let exp_strs = List.map exp ~f:Comp.to_string in
-      let actual_strs = List.map actual ~f:Comp.to_string in
-      let () = Printf.eprintf
-        "Expected:\n%s\n\n But Found:\n%s\n"
-        (String.concat "\n" exp_strs) (String.concat "\n" actual_strs) in
-      let logs = Test_harness.get_server_logs harness in
-      let () = Printf.eprintf "See also server logs:\n%s\n" logs in
-      assert false
-
-end;;
-
-
-module String_asserter = Asserter (String_comparator);;
-module Recorder_event_asserter = Asserter (Recorder_event_comparator);;
-
+let see_also_logs harness =
+  let logs = Test_harness.get_server_logs harness in
+  let logs = Option.value logs ~default:"" in
+  Printf.sprintf "See also server logs:%s"
+  (boxed_string logs)
 
 let test_check_cmd harness =
   let results = Test_harness.check_cmd harness in
-  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results
+    (see_also_logs harness) in
   let _ = Test_harness.stop_server harness in
   true
 
@@ -317,16 +231,19 @@ let read_recording recording_path =
 
 let assert_recording_matches expected actual harness =
   let actual = List.map actual ~f:Recorder_types.to_string in
-  String_asserter.assert_list_equals expected actual harness
+  String_asserter.assert_list_equals expected actual
+    (see_also_logs harness)
 
 let test_server_driver_case_0 harness =
   let results = Test_harness.check_cmd harness in
-  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results
+    (see_also_logs harness) in
   let () = Printf.eprintf "Finished check on: %s\n%!"
     (Path.to_string harness.Test_harness.repo_dir) in
   let _ = Server_driver.connect_and_run_case 0 harness.Test_harness.repo_dir in
   let results = Test_harness.check_cmd harness in
-  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results
+    (see_also_logs harness) in
   let _ = Test_harness.stop_server harness in
   (** After stopping the server, eventually the recorder daemon will
    * stop, but it could take some time. *)
@@ -349,7 +266,8 @@ let test_server_driver_case_0 harness =
 
 let test_server_driver_case_1 harness =
   let results = Test_harness.check_cmd harness in
-  let () = String_asserter.assert_list_equals ["No errors!"] results harness in
+  let () = String_asserter.assert_list_equals ["No errors!"] results
+    (see_also_logs harness) in
   let () = Printf.eprintf "Finished check on: %s\n%!"
     (Path.to_string harness.Test_harness.repo_dir) in
   let _ = Server_driver.connect_and_run_case 1 harness.Test_harness.repo_dir in
@@ -361,10 +279,10 @@ let test_server_driver_case_1 harness =
   end : Pattern_substitutions) in
   let module MySubstitutions = (val substitutions : Pattern_substitutions) in
   let module MyPatternComparator = Pattern_comparator (MySubstitutions) in
-  let module MyAsserter = Asserter (MyPatternComparator) in
+  let module MyAsserter = Make_asserter (MyPatternComparator) in
   let () = MyAsserter.assert_list_equals [
     "{repo}/foo_1.php:3:26,37: Undefined variable: $missing_var (Naming[2050])"
-    ] results harness in
+    ] results (see_also_logs harness) in
   let _ = Test_harness.stop_server harness in
   true
 

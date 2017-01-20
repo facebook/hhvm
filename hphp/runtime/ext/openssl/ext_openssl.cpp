@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -3101,6 +3102,28 @@ Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases /* = false */) {
   return ret;
 }
 
+Variant HHVM_FUNCTION(openssl_get_curve_names) {
+#ifdef EVP_PKEY_EC
+  const size_t len = EC_get_builtin_curves(nullptr, 0);
+  std::unique_ptr<EC_builtin_curve[]> curves(new EC_builtin_curve[len]);
+  if (!EC_get_builtin_curves(curves.get(), len)) {
+    return false;
+  }
+
+  PackedArrayInit ret(len);
+  for (size_t i = 0; i < len; ++i) {
+    auto const sname = OBJ_nid2sn(curves[i].nid);
+    if (sname != nullptr) {
+      ret.append(String(sname, CopyString));
+    }
+  }
+
+  return ret.toArray();
+#else
+  return false;
+#endif
+}
+
 Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
   Array ret = Array::Create();
   OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_MD_METH,
@@ -3211,6 +3234,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_decrypt);
     HHVM_FE(openssl_digest);
     HHVM_FE(openssl_get_cipher_methods);
+    HHVM_FE(openssl_get_curve_names);
     HHVM_FE(openssl_get_md_methods);
 
     loadSystemlib();

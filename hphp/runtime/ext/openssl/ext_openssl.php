@@ -746,6 +746,12 @@ function openssl_digest(string $data,
 <<__Native>>
 function openssl_get_cipher_methods(bool $aliases = false): array<string>;
 
+/**
+ * Return array of available elliptic curves or FALSE on failure.
+ */
+<<__Native>>
+function openssl_get_curve_names(): mixed;
+
 /* Gets a list of available digest methods.
  * @param bool $aliases - Set to TRUE if digest aliases should be included
  * within the returned array.

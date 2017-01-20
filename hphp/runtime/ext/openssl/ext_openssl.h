@@ -214,6 +214,7 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
 Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
                                       bool raw_output = false);
 Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases = false);
+Variant HHVM_FUNCTION(openssl_get_curve_names);
 Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases = false);
 
 ///////////////////////////////////////////////////////////////////////////////

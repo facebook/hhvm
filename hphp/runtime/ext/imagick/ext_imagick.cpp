@@ -328,6 +328,11 @@ void ImagickExtension::moduleInit() {
   loadImagickPixelClass();
   loadImagickPixelIteratorClass();
   loadSystemlib();
+  MagickWandGenesis();
+}
+
+void ImagickExtension::moduleShutdown() {
+  MagickWandTerminus();
 }
 
 void ImagickExtension::threadInit() {

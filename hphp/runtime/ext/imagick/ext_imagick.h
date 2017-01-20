@@ -38,6 +38,7 @@ namespace HPHP {
 struct ImagickExtension final : Extension {
   ImagickExtension();
   void moduleInit() override;
+  void moduleShutdown() override;
   void threadInit() override;
 
   static bool hasLocaleFix();

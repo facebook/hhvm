@@ -104,6 +104,24 @@ inline std::string show(TransKind k) {
   not_reached();
 }
 
+inline bool isProfiling(TransKind k) {
+  switch (k) {
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+      return true;
+
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Live:
+    case TransKind::LivePrologue:
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
+}
+
 inline bool isPrologue(TransKind k) {
   switch (k) {
     case TransKind::LivePrologue:

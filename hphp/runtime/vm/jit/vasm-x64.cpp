@@ -1067,11 +1067,12 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   assertx(checkWidths(unit));
 
-  if (abi.canSpill && RuntimeOption::EvalProfBranchSampleFreq > 0) {
-    // Only profile branches if we're allowed to spill (and if branch profiling
-    // is on, of course).  This is not only for the freedom to generate
-    // arbitrary code, but also because we don't want to profile unique stubs
-    // and such.
+  if (unit.context && isProfiling(unit.context->kind) && abi.canSpill &&
+      RuntimeOption::EvalProfBranchSampleFreq > 0) {
+    // Even when branch profiling is on, we still only want to profile
+    // non-profiling translations of PHP functions.  We also require that we
+    // can spill, so that we can generate arbitrary profiling code, and also to
+    // ensure we don't profile unique stubs and such.
     profile_branches(unit);
   }
 

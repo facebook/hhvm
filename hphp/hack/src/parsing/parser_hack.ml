@@ -403,7 +403,7 @@ let identifier env =
 (* $variable *)
 let variable env =
   match L.token env.file env.lb with
-  | Tlvar | Tdollardollar ->
+  | Tlvar  ->
       Pos.make env.file env.lb, Lexing.lexeme env.lb
   | _ ->
       error_expect env "variable";

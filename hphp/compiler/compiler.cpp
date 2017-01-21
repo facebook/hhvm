@@ -63,6 +63,8 @@
 
 #include <exception>
 
+#include <folly/portability/SysStat.h>
+
 using namespace boost::program_options;
 using std::cout;
 

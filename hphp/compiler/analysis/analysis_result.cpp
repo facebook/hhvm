@@ -17,6 +17,7 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 
 #include <folly/Conv.h>
+#include <folly/portability/SysStat.h>
 
 #include <algorithm>
 #include <fstream>

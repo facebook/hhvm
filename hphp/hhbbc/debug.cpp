@@ -27,6 +27,8 @@
 #include <memory>
 #include <vector>
 
+#include <folly/portability/Stdlib.h>
+
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
 

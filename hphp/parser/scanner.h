@@ -24,6 +24,9 @@
 #include <cstdlib>
 #include <limits.h>
 
+#include <folly/portability/String.h>
+#include <folly/portability/Unistd.h>
+
 #include "hphp/util/exception.h"
 #include "hphp/util/portability.h"
 #include "hphp/parser/location.h"

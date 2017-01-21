@@ -958,7 +958,6 @@ struct StackGetCmd : XDebugCommand {
   bool isValidInStatus(Status status) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
-    int oldestEvalFrameDepth = findOldestEvalFrameDepth();
     // Iterate up the stack. We need to keep track of both the frame actrec and
     // our current depth in case the client passed us a depth
     Offset offset;
@@ -968,36 +967,19 @@ struct StackGetCmd : XDebugCommand {
          fp = g_context->getPrevVMState(fp, &offset), depth++) {
       // If a depth was provided, we're only interested in that depth
       if (m_clientDepth < 0 || depth == m_clientDepth) {
-        auto frame = getFrame(fp, offset, depth, oldestEvalFrameDepth);
+        auto frame = getFrame(fp, offset, depth);
         xdebug_xml_add_child(&xml, frame);
       }
     }
   }
 
 private:
-  // Returns -1 if there are no eval frames on the stack, otherwise
-  // returns the index of the first eval frame.
-  int findOldestEvalFrameDepth() {
-    int oldestEvalFrameDepth = -1;
-    int depth = 0;
-    for (auto fp = g_context->getStackFrame();
-         fp != nullptr;
-         fp = g_context->getPrevVMState(fp), depth++) {
-      const auto func = fp->func();
-      if (func->isPseudoMain() && g_context->getPrevVMState(fp) != nullptr) {
-        oldestEvalFrameDepth = depth;
-      }
-    }
-    return oldestEvalFrameDepth;
-  }
-
   // Returns the xml node for the given stack frame. If level is non-zero,
   // offset is the current offset within the frame
   xdebug_xml_node* getFrame(
     const ActRec* fp,
     Offset offset,
-    int level,
-    int oldestEvalFrameDepth
+    int level
   ) {
     const auto func = fp->func();
     const auto unit = fp->unit();
@@ -1013,11 +995,7 @@ private:
     auto node = xdebug_xml_node_init("stack");
     xdebug_xml_add_attribute(node, "where", func_name);
     xdebug_xml_add_attribute(node, "level", level);
-    if (level <= oldestEvalFrameDepth) {
-      xdebug_xml_add_attribute(node, "type", "eval");
-    } else {
-      xdebug_xml_add_attribute(node, "type", "file");
-    }
+    xdebug_xml_add_attribute(node, "type", "file");
 
     // Grab the file/line for the frame. For level 0, this is the current
     // file/line, for all other frames this is the stored file/line #

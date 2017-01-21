@@ -108,13 +108,6 @@ final class Generator<Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
 
 abstract class WaitHandle<+T> implements Awaitable<T> {
   public function getWaitHandle(): this {}
-  public function import(): void {}
-  public function isFinished(): bool {}
-  public function isSucceeded(): bool {}
-  public function isFailed(): bool {}
-  public function getID(): int {}
-  public function getName(): string {}
-  public function result() : T {}
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
@@ -124,9 +117,6 @@ final class StaticWaitHandle<+T> extends WaitHandle<T> {
 }
 
 abstract class WaitableWaitHandle<+T> extends WaitHandle<T> {
-  public function getContextIdx(): int {}
-  public function getCreator(): /*AsyncFunction*/WaitHandle<mixed> {}
-  public function getParents(): array<WaitableWaitHandle<mixed>> {}
 }
 
 abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {

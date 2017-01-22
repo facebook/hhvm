@@ -143,6 +143,14 @@ struct Key : SweepableResourceData {
       }
       break;
 #endif
+#ifdef EVP_PKEY_EC
+    case EVP_PKEY_EC:
+      assert(m_key->pkey.ec);
+      if (EC_KEY_get0_private_key(m_key->pkey.ec) == nullptr) {
+        return false;
+      }
+      break;
+#endif
     default:
       raise_warning("key type not supported in this PHP build!");
       break;
@@ -1765,17 +1773,22 @@ const StaticString
   s_rsa("rsa"),
   s_dsa("dsa"),
   s_dh("dh"),
+  s_ec("ec"),
   s_n("n"),
   s_e("e"),
   s_d("d"),
   s_p("p"),
   s_q("q"),
   s_g("g"),
+  s_x("x"),
+  s_y("y"),
   s_dmp1("dmp1"),
   s_dmq1("dmq1"),
   s_iqmp("iqmp"),
   s_priv_key("priv_key"),
-  s_pub_key("pub_key");
+  s_pub_key("pub_key"),
+  s_curve_name("curve_name"),
+  s_curve_oid("curve_oid");
 
 static void add_bignum_as_string(Array &arr,
                                  StaticString key,
@@ -1844,7 +1857,56 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     ret.set(s_dh, details);
     break;
 #ifdef EVP_PKEY_EC
-  case EVP_PKEY_EC:      ktype = OPENSSL_KEYTYPE_EC;    break;
+  case EVP_PKEY_EC:
+    {
+      ktype = OPENSSL_KEYTYPE_EC;
+      auto const ec = pkey->pkey.ec;
+      assert(ec);
+
+      auto const ec_group = EC_KEY_get0_group(ec);
+      auto const nid = EC_GROUP_get_curve_name(ec_group);
+      if (nid == NID_undef) {
+        break;
+      }
+
+      auto const crv_sn = OBJ_nid2sn(nid);
+      if (crv_sn != nullptr) {
+        details.set(s_curve_name, String(crv_sn, CopyString));
+      }
+
+      auto const obj = OBJ_nid2obj(nid);
+      if (obj != nullptr) {
+        SCOPE_EXIT {
+          ASN1_OBJECT_free(obj);
+        };
+        char oir_buf[256];
+        OBJ_obj2txt(oir_buf, sizeof(oir_buf) - 1, obj, 1);
+        details.set(s_curve_oid, String(oir_buf, CopyString));
+      }
+
+      auto x = BN_new();
+      auto y = BN_new();
+      SCOPE_EXIT {
+        BN_free(x);
+        BN_free(y);
+      };
+      auto const pub = EC_KEY_get0_public_key(ec);
+      if (EC_POINT_get_affine_coordinates_GFp(ec_group, pub, x, y, nullptr)) {
+        add_bignum_as_string(details, s_x, x);
+        add_bignum_as_string(details, s_y, y);
+      }
+
+      auto d = BN_dup(EC_KEY_get0_private_key(ec));
+      SCOPE_EXIT {
+        BN_free(d);
+      };
+      if (d != nullptr) {
+        add_bignum_as_string(details, s_d, d);
+      }
+
+      ret.set(s_ec, details);
+    }
+    break;
 #endif
   }
   ret.set(s_type, ktype);

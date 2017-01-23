@@ -720,6 +720,15 @@ and pAField : afield parser = fun node env ->
   match mpOptional pElemInit node env with
   | None   -> AFvalue (pExpr node env)
   | Some x -> x
+and pExpr_EvalExpression' : expr_ parser' = fun [ _kw; _lp; arg; _rp ] env ->
+  let (p, kw) as f = pos_name _kw env in
+  Call ((p, Id f), [pExpr arg env], [])
+and pExpr_EmptyExpression' : expr_ parser' = fun [_kw; _lp; arg; _rp ] env ->
+  let (p, kw) as f = pos_name _kw env in
+  Call ((p, Id f), [pExpr arg env], [])
+and pExpr_IssetExpression' : expr_ parser' = fun [_kw; _lp; args; _rp ] env ->
+  let (p, kw) as f = pos_name _kw env in
+  Call ((p, Id f), couldMap ~f:pExpr args env, [])
 and pExpr_LiteralExpression' : expr parser' = fun [lit] env -> where_am_I env,
   mkP
   [ (K.Token, fun [t] env -> mkTP tLiteral t env (where_am_I env) (P.text t))
@@ -807,6 +816,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
   [ (K.ParenthesizedExpression,     fun [ _lp; expr; _rp ] ->
       (snd <$> pExpr) expr)
   ; (K.BracedExpression,            mpArgKOfN 1 3 (snd <$> pExpr))
+  ; (K.EvalExpression,              pExpr_EvalExpression')
+  ; (K.EmptyExpression,             pExpr_EmptyExpression')
+  ; (K.IssetExpression,             pExpr_IssetExpression')
   ; (K.InclusionExpression,         snd <$> pExpr_InclusionExpression')
   ; (K.ArrayIntrinsicExpression,    fun [ _kw; _lp; members; _rp ] env ->
       Array (couldMap ~f:pAField members env))

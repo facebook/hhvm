@@ -82,7 +82,7 @@ function foo(int $a, int $b): void {
 let simple_expected_2 = "(AProgram
  ((Fun
    ((f_mode: Mpartial) (f_tparams: ()) (f_ret_by_ref: false)
-    (f_ret: ((p (Happly (p void) ())))) (f_name: (p foo))
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\"))
     (f_params:
      (((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $a)) (param_expr: ())

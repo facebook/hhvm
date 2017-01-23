@@ -19,6 +19,8 @@
 #include <cstring>
 #include <string>
 
+#include <folly/portability/String.h>
+
 #include "hphp/util/hash.h"
 
 namespace HPHP {

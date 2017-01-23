@@ -27,6 +27,8 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
+#include <folly/portability/Malloc.h>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

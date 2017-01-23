@@ -22,6 +22,7 @@
 #include <cstring>
 
 #include <folly/Bits.h>
+#include <folly/portability/PThread.h>
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/assertions.h"

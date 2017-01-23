@@ -34,6 +34,7 @@
 #endif
 #include <sqlite3ext.h>
 
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Unistd.h>
 
 namespace HPHP {

@@ -22,6 +22,7 @@
 #include <atomic>
 
 #include <folly/Portability.h>
+#include <folly/portability/PThread.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"

@@ -34,6 +34,8 @@
 #include <stdarg.h>
 #include <string>
 
+#include <folly/portability/PThread.h>
+
 #include "hphp/util/ringbuffer.h"
 
 namespace HPHP {

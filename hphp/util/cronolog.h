@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <mutex>
 
+#include <folly/portability/Stdlib.h>
+
 #include "hphp/util/cronoutils.h"
 #include "hphp/util/log-file-flusher.h"
 

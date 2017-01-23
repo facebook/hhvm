@@ -25,7 +25,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
+
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,7 +108,7 @@ int advise_out(const std::string& fileName) {
 
 // since we only support win 7+
 // capturestackbacktrace is always available in kernel
-int backtrace (void **buffer, int size) {
+int backtrace(void **buffer, int size) {
   USHORT frames;
 
   if (size <= 0) {

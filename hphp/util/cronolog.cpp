@@ -21,6 +21,9 @@
 #include <pwd.h>
 #endif
 
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/SysStat.h>
+
 /* Default permissions for files and directories that are created */
 
 #ifndef FILE_MODE

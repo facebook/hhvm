@@ -18,6 +18,8 @@
 
 #include <mutex>
 
+#include <folly/portability/String.h>
+
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP {

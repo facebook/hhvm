@@ -25,6 +25,7 @@
 
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Unistd.h>
 #include "hphp/util/cache/cache-saver.h"
 #include "hphp/util/cache/magic-numbers.h"

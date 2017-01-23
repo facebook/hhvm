@@ -36,7 +36,11 @@ let dbg ?msg:(s="") n = match P.kind n with
 let dbg_ ?msg:(s="") n = PT.(
   Printf.eprintf "Debugging %s '%s':<%s>\n" s (text n) (kind n |> TK.to_string)
 )
-
+let string_of_fun_kind = function
+  | Ast.FAsync -> "FAsync"
+  | Ast.FSync  -> "FSync"
+  | Ast.FGenerator -> "FGenerator"
+  | Ast.FAsyncGenerator -> "FAsyncGenerator"
 
 
 
@@ -46,11 +50,12 @@ let drop_fst : string -> string = fun n -> String.sub n 1 (String.length n - 1)
 
 type env = {
   (* Context of the file being parsed. *)
-  mode     : FileInfo.mode;
-  language : string;
-  filePath : string;
+  mode      : FileInfo.mode;
+  language  : string;
+  filePath  : string;
   (* "Local" context. *)
-  ancestry : P.t list;
+  ancestry  : P.t list;
+  saw_yield : bool ref;
 }
 
 type +'a parser      = P.t        -> env -> 'a
@@ -275,8 +280,16 @@ let cClass_const (p, x) = Class_const (p, x)
 let rec hint_to_fun_kind : hint -> fun_kind = fun (pos, hint) -> match hint with
   | Hfun (_,_,h) -> hint_to_fun_kind h
   | Happly ((_, "Generator"), _) -> FGenerator
+  | Happly ((_, "AsyncGenerator"), _) -> FAsyncGenerator
   | _ -> FSync
 
+let async_fun_kind : fun_kind -> fun_kind = function
+  | FAsyncGenerator | FGenerator -> FAsyncGenerator
+  | FAsync          | FSync      -> FAsync
+
+let sync_fun_kind : fun_kind -> fun_kind = function
+  | FAsyncGenerator | FGenerator -> FGenerator
+  | FAsync          | FSync      -> FSync
 
 let stmt_list_of_stmt = function
   | Block [] -> [Noop]
@@ -539,15 +552,6 @@ let tLiteral : (Pos.t -> string -> expr_) terminal_spec =
 
 let pAwait : Pos.t parser =
   fst <$> positional (mkTP ("await", function TK.Await -> ()))
-
-let pTParaml : tparam list parser =
-  let pTParam : tparam parser = single K.TypeParameter @@
-    fun [ var; name; cstrl ] env -> Covariant, pos_name name env, []
-  in
-  mkP
-  [ (K.Missing,        ppConst [])
-  ; (K.TypeParameters, mpArgKOfN 1 3 (couldMap ~f:pTParam))
-  ]
 
 
 let mpShapeField : ('a, (shape_field_name * 'a)) metaparser = fun pThing ->
@@ -847,6 +851,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
       Call ((pos, Id (pos, "echo")), args, [])
     )
   ; (K.YieldExpression, fun [ _kw; arg ] env ->
+      env.saw_yield := true;
       if P.text arg = "break"
       then Yield_break
       else Yield (pAField arg env)
@@ -882,6 +887,11 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
           fun [ _kw; _lp; vars; _rp ] ->
             couldMap ~f:((fun x -> x, false) <$> pos_name) vars
         in
+        let previous_saw_yield = !(env.saw_yield) in
+        env.saw_yield := false;
+        let body = pBlock body env in
+        let body_has_yield = !(env.saw_yield) in
+        env.saw_yield := previous_saw_yield;
         let fun_ =
           { f_mode            = env.mode
           ; f_tparams         = []
@@ -889,17 +899,24 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
           ; f_ret_by_ref      = false
           ; f_name            = where_am_I env, ";anonymous"
           ; f_params          = couldMap ~f:(pFunParam false) params env
-          ; f_body            = pBlock body env
+          ; f_body            = body
           ; f_user_attributes = []
-          ; f_fun_kind        = ifExists FAsync FSync async env
+          ; f_fun_kind        = ifExists async_fun_kind sync_fun_kind async env
+              @@ if body_has_yield then FGenerator else FSync
           ; f_namespace       = Namespace_env.empty_with_default_popt
           ; f_span            = where_am_I env
-          } in
+          }
+        in
         Efun (fun_, (pUse <|> ppConst []) use env)
     )
   ; (K.XHPExpression, pExpr_XHPExpression')
   ; (K.LambdaExpression, fun node env -> Lfun (pLambda node env))
   ; (K.AwaitableCreationExpression, fun [ _async; blk ] env ->
+      let previous_saw_yield = !(env.saw_yield) in
+      env.saw_yield := false;
+      let block = pBlock blk env in
+      let blk_has_yield = !(env.saw_yield) in
+      env.saw_yield := previous_saw_yield;
       let body =
         { f_mode            = env.mode
         ; f_tparams         = []
@@ -907,9 +924,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
         ; f_ret_by_ref      = false
         ; f_name            = where_am_I env, ";anonymous"
         ; f_params          = []
-        ; f_body            = pBlock blk env
+        ; f_body            = block
         ; f_user_attributes = []
-        ; f_fun_kind        = FAsync
+        ; f_fun_kind        = if blk_has_yield then FAsyncGenerator else FAsync
         ; f_namespace       = Namespace_env.empty_with_default_popt
         ; f_span            = where_am_I env
         }
@@ -1047,14 +1064,24 @@ and pStmt : stmt parser = fun eta -> eta |> mkP
   ; (K.UnsetStatement,          pStmt_UnsetStatement')
   ]
 
+let pTConstraint : (constraint_kind * hint) parser =
+  single K.TypeConstraint @@ fun [ kind; hint ] env ->
+    mkTP tConstraintKind kind env, pHint hint env
 
+let pTParaml : tparam list parser =
+  let pTParam : tparam parser = single K.TypeParameter @@
+    fun [ var; name; cstrl ] env ->
+      Covariant, pos_name name env, couldMap ~f:pTConstraint cstrl env
+  in
+  mkP
+  [ (K.Missing,        ppConst [])
+  ; (K.TypeParameters, mpArgKOfN 1 3 (couldMap ~f:pTParam))
+  ]
 
-let pFunHdr (*:
-  ?ns:(bool ->
+let pFunHdr :
   (fun_kind * id * tparam list * fun_param list * hint option * fun_param list)
   parser
-  *)
-= fun ?ns:(ns0 = false) -> mkP
+= mkP
   [ (K.FunctionDeclarationHeader, fun
     [ async; _kw; _amp; name; tparaml; _lparen; paraml; _rparen; _colon; ret ]
     env ->
@@ -1101,7 +1128,12 @@ let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
     try Str.search_forward re (P.full_text node) 0 >= 0 with
     | Not_found -> false
   in
-  let async, name, tparaml, paraml, ret, clsvs = pFunHdr ~ns:true hdr env in
+  let async, name, tparaml, paraml, ret, clsvs = pFunHdr hdr env in
+  let previous_saw_yield = !(env.saw_yield) in
+  env.saw_yield := false;
+  let block = mpOptional pBlock body env in
+  let body_has_yield = !(env.saw_yield) in
+  env.saw_yield := previous_saw_yield;
   Fun
   { f_mode            = env.mode
   ; f_tparams         = tparaml
@@ -1111,13 +1143,18 @@ let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
   ; f_params          = paraml
   ; f_body            = begin
       (* FIXME: Filthy hack to catch UNSAFE *)
-      match mpOptional pBlock body env with
+      match block with
       | Some [Noop] when containsUNSAFE body -> [Unsafe]
       | None -> []
       | Some b -> b
     end
   ; f_user_attributes = []
-  ; f_fun_kind        = async
+  ; f_fun_kind        = if not body_has_yield then async else begin
+      match async with
+      | FAsync -> FAsyncGenerator
+      | FSync -> FGenerator
+      | _ -> async
+    end
   ; f_namespace       = Namespace_env.empty_with_default_popt
   ; f_span            = where_am_I env
   }
@@ -1138,10 +1175,6 @@ let pConstDeclaration' : (hint option * (id * expr option) list) parser' =
 
 
 
-let pTConstraint : (constraint_kind * hint) parser =
-  single K.TypeConstraint @@ fun [ kind; hint ] env ->
-    mkTP tConstraintKind kind env, pHint hint env
-
 let pXHPEnumDecl : (Pos.t * Ast.expr list) parser = positional @@
   single K.XHPEnumType @@ fun [ _kw; _lb; values; _rb ] ->
     couldMap ~f:pExpr values
@@ -1153,8 +1186,14 @@ let pClassElt_ConstDeclaration' : class_elt list parser' = fun ns env ->
     | Some x -> x
     | None -> raise @@ Parser_fail "The impossible happened"
   in
-  Const (ty, List.map (fun (id, opt_x) -> id, flatten opt_x) concrs) ::
-    List.map (fun (id, _) -> AbsConst (ty, id)) absts
+  let absts = List.map (fun (id, _) -> AbsConst (ty, id)) absts in
+  if concrs = [] then absts else
+    Const
+    ( ty
+    , List.map (fun (id, opt_x) -> id, flatten opt_x) concrs
+    ) :: absts
+
+
 let pClassElt_TypeConst' : class_elt parser' =
   fun [ abs; _kw; _tykw; name; constr; _eq; ty; _semi ] env ->
     TypeConst
@@ -1217,9 +1256,13 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     (Option.to_list p.param_modifier, p.param_hint, [span, cvname, None])
   in
   fun [attrs; mods; hdr; body; _semi] env ->
-    let async, name, tparaml, paraml, ret, clsvl = pFunHdr ~ns:false hdr env in
+    let async, name, tparaml, paraml, ret, clsvl = pFunHdr hdr env in
     let member_init, member_def = List.split (List.map classvar_init clsvl) in
+    let previous_saw_yield = !(env.saw_yield) in
+    env.saw_yield := false;
     let body = member_init @ stmt_list_of_stmt (pCompoundStatement body env) in
+    let body_has_yield = !(env.saw_yield) in
+    env.saw_yield := previous_saw_yield;
     List.map (fun (k,h,v) -> ClassVars (k,h,v)) member_def @ [Method
     { m_kind            = couldMap ~f:(mkTP tKind) mods env
     ; m_tparams         = tparaml
@@ -1230,7 +1273,12 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     ; m_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attrs env
     ; m_ret             = ret
     ; m_ret_by_ref      = false
-    ; m_fun_kind        = async
+    ; m_fun_kind        = if not body_has_yield then async else begin
+        match async with
+        | FSync      -> FGenerator
+        | FAsync     -> FAsyncGenerator
+        | FGenerator | FAsyncGenerator -> async
+      end
     ; m_span            = where_am_I env
     }]
 let pClassElt_XHPCategoryDeclaration' : class_elt parser' =
@@ -1386,8 +1434,9 @@ let from_tree : Relative_path.t -> P.SyntaxTree.t -> Ast.program =
     let script = P.from_tree minimal_tree in
     runP (single K.Script @@ fun [ _hdr; prog ] -> pProgram prog) script
       { language  = ST.language minimal_tree
-      ; ancestry  = []
       ; filePath  = Relative_path.suffix file
+      ; ancestry  = []
+      ; saw_yield = ref false
       ; mode      = match ST.mode minimal_tree with
                      | _ when ST.is_php minimal_tree -> FileInfo.Mdecl
                      | "strict"  -> FileInfo.Mstrict

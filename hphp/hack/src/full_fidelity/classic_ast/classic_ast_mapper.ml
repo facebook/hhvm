@@ -503,14 +503,15 @@ let mkString : (string -> string) -> string -> string = fun unescaper content ->
   | Php_escaping.Invalid_string error -> raise @@
       Failure (Printf.sprintf "Malformed string literal <<%s>>" no_quotes)
 (* TODO: Clean up string escaping *)
-let unesc_dbl = Php_escaping.unescape_double
-let unesc_sgl s =
-  let s = Php_escaping.unescape_single s in
-  if s = "''" then "" else s
+let unempty_str = function
+  | "''" | "\"\"" -> ""
+  | s -> s
+let unesc_dbl s = unempty_str @@ Php_escaping.unescape_double s
+let unesc_sgl s = unempty_str @@ Php_escaping.unescape_single s
 let unesc_xhp s =
   let whitespace = Str.regexp "[ \t\n\r\012]+" in
   let s = Str.global_replace whitespace " " s in
-  let quotes = Str.regexp " ?\"\\([^ \t\n\r\012]*\\)\" ?" in
+  let quotes = Str.regexp " ?\"\\([^\"]*\\)\" ?" in
   if Str.string_match quotes s 0
   then Str.matched_group 1 s
   else s
@@ -1141,8 +1142,9 @@ let pTConstraint : (constraint_kind * hint) parser =
   single K.TypeConstraint @@ fun [ kind; hint ] env ->
     mkTP tConstraintKind kind env, pHint hint env
 
-
-
+let pXHPEnumDecl : (Pos.t * Ast.expr list) parser = positional @@
+  single K.XHPEnumType @@ fun [ _kw; _lb; values; _rb ] ->
+    couldMap ~f:pExpr values
 
 let pClassElt_ConstDeclaration' : class_elt list parser' = fun ns env ->
   let ty, res = pConstDeclaration' ns env in
@@ -1188,9 +1190,10 @@ let pClassElt_XHPClassAttributeDeclaration' : class_elt list parser' =
     couldMap ~f:begin mkP
       [ (K.XHPClassAttribute, fun [ ty; name; init; req ] env ->
           let hint = mpOptional pHint ty env in
+          let enum = mpOptional pXHPEnumDecl ty env in
           let (pos, name) = pos_name name env in
           let init = mpOptional pSimpleInitializer init env in
-          XhpAttr (hint, (Pos.none, (pos, ":" ^ name), init), false, None)
+          XhpAttr (hint, (Pos.none, (pos, ":" ^ name), init), false, enum)
         )
       ; (K.Token, fun [ tok ] -> pToken ~f:begin function
           | _ -> fun env ->

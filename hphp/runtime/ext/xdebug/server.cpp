@@ -32,11 +32,9 @@
 
 #include <folly/FileUtil.h>
 #include <folly/Range.h>
+#include <folly/portability/Sockets.h>
 
 #include <fcntl.h>
-#include <netinet/tcp.h>
-#include <poll.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <thread>
 

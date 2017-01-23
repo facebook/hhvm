@@ -21,8 +21,8 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include <sys/mman.h>
-#include <unistd.h>
+#include <folly/portability/SysMman.h>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP { namespace jit {
 

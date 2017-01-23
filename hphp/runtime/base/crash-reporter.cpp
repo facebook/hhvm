@@ -36,6 +36,9 @@
 
 #include <signal.h>
 
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Stdio.h>
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

@@ -17,13 +17,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <memory>
 #include <string>
 #include <cstdlib>
 #include <thread>
 
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Fcntl.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/rank.h"

@@ -26,6 +26,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Stdlib.h>
 #include <folly/portability/Unistd.h>
 
 namespace HPHP {

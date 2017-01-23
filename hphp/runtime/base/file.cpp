@@ -40,6 +40,7 @@
 #include "hphp/util/process.h"
 
 #include <folly/String.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/SysFile.h>
 
 #include <algorithm>

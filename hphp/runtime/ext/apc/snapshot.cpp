@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <folly/String.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/SysMman.h>
 
 #include "hphp/runtime/base/comparisons.h"

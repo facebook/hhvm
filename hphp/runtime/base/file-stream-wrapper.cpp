@@ -28,6 +28,9 @@
 
 #include <memory>
 
+#include <folly/portability/Stdlib.h>
+#include <folly/portability/SysStat.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

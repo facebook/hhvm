@@ -18,12 +18,12 @@
 #define HPHP_FILE_STREAM_WRAPPER_H
 
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include <folly/String.h>
+#include <folly/portability/SysStat.h>
 #include <folly/portability/Unistd.h>
 
 #define ERROR_RAISE_WARNING(exp)        \

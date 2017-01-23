@@ -25,6 +25,8 @@
 
 #include <sqlite3.h>
 
+#include <folly/portability/Stdio.h>
+
 namespace HPHP {
 
 // Forward declaration.

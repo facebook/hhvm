@@ -568,6 +568,7 @@ way than to complicate the main pass further.
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/Conv.h>
+#include <folly/portability/Stdlib.h>
 
 #include <boost/dynamic_bitset.hpp>
 

@@ -41,6 +41,7 @@
 #include <zlib.h>
 #include <set>
 
+#include <folly/portability/Stdlib.h>
 #include <folly/portability/Unistd.h>
 
 /* Section Filters Declarations */

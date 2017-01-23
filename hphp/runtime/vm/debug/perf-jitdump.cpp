@@ -30,10 +30,10 @@
 
 #include <folly/portability/SysSyscall.h>
 #include <folly/portability/Time.h>
+#include <folly/portability/Unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>

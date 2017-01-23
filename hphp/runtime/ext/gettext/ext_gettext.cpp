@@ -24,6 +24,8 @@
 
 #include <libintl.h>
 
+#include <folly/portability/Stdlib.h>
+
 #define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
 #define PHP_GETTEXT_MAX_MSGID_LENGTH 4096
 

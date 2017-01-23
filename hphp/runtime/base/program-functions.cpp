@@ -100,6 +100,7 @@
 #include <folly/Portability.h>
 #include <folly/Singleton.h>
 #include <folly/portability/Environment.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
 
 #include <boost/algorithm/string/replace.hpp>

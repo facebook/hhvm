@@ -82,7 +82,6 @@ let parent : env -> P.t = fun env -> List.hd env.ancestry
 let where_am_I : env -> Pos.t = fun env -> ppPos (parent env) env
 
 
-
 (* For debugging *)
 let pDbg : string -> string -> unit parser = fun context name node env ->
   match P.kind node with
@@ -303,7 +302,6 @@ let mpPos' : ('a, Pos.t * 'a) metaparser' = fun p n ->
 let mpArgKOfN : int -> int -> 'a parser -> 'a parser' = fun k n p -> function
   | nodel when List.length nodel = n -> p (List.nth nodel k)
   | nodel -> raise @@ Match_failure ("mpArgKOfN", n, List.length nodel)
-
 
 
 
@@ -1050,10 +1048,12 @@ and pStmt : stmt parser = fun eta -> eta |> mkP
 
 
 
-let pFunHdr :
+let pFunHdr (*:
+  ?ns:(bool ->
   (fun_kind * id * tparam list * fun_param list * hint option * fun_param list)
   parser
-= mkP
+  *)
+= fun ?ns:(ns0 = false) -> mkP
   [ (K.FunctionDeclarationHeader, fun
     [ async; _kw; _amp; name; tparaml; _lparen; paraml; _rparen; _colon; ret ]
     env ->
@@ -1100,7 +1100,7 @@ let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
     try Str.search_forward re (P.full_text node) 0 >= 0 with
     | Not_found -> false
   in
-  let async, name, tparaml, paraml, ret, clsvs = pFunHdr hdr env in
+  let async, name, tparaml, paraml, ret, clsvs = pFunHdr ~ns:true hdr env in
   Fun
   { f_mode            = env.mode
   ; f_tparams         = tparaml
@@ -1117,7 +1117,7 @@ let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
     end
   ; f_user_attributes = []
   ; f_fun_kind        = async
-  ; f_namespace       = Namespace_env.empty_with_default_popt (*TODO*)
+  ; f_namespace       = Namespace_env.empty_with_default_popt
   ; f_span            = where_am_I env
   }
 
@@ -1214,7 +1214,7 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     (Option.to_list p.param_modifier, p.param_hint, [span, cvname, None])
   in
   fun [attrs; mods; hdr; body; _semi] env ->
-    let async, name, tparaml, paraml, ret, clsvl = pFunHdr hdr env in
+    let async, name, tparaml, paraml, ret, clsvl = pFunHdr ~ns:false hdr env in
     let member_init, member_def = List.split (List.map classvar_init clsvl) in
     let body = member_init @ stmt_list_of_stmt (pCompoundStatement body env) in
     List.map (fun (k,h,v) -> ClassVars (k,h,v)) member_def @ [Method
@@ -1330,11 +1330,13 @@ let pDef_NamespaceGroupUseDeclaration' : def parser' =
 
 let rec pDef_NamespaceDeclaration' : def parser' =
   fun [ _kw; name; body ] env ->
-    let pBody = mkP
-      [ (K.NamespaceBody, fun [ _lb; decls; _rb ] -> pProgram decls)
-      ; (K.Token,         fun [ _ ] -> const [])
-      ] in
-    Namespace (pos_name name env, pBody body env)
+    let body = mkP
+      [ (K.NamespaceBody, fun [ _lb; decls; _rb ] ->
+          couldMap ~f:(oneOf [cStmt <$> pStmt; pDef]) decls
+        )
+      ; (K.Token,         fun [ _ ] _ -> [])
+      ] body env in
+    Namespace ((ppPos name env, P.text name), body)
 and pDef : def parser = fun node -> mkP
   [ (K.FunctionDeclaration,          pDef_Fun')
   ; (K.ClassishDeclaration,          pDef_Class')
@@ -1350,7 +1352,26 @@ and pDef : def parser = fun node -> mkP
   ; (K.ExpressionStatement,          fun _ env -> Stmt (pStmt node env))
   ] node
 and pProgram : program parser = fun node env ->
-  List.filter (fun x -> x <> Stmt Noop) @@
+  let rec post_process program =
+    let span (p : 'a -> bool) =
+      let rec go yes = function
+      | (x::xs) when p x -> go (x::yes) xs
+      | xs -> (List.rev yes, xs)
+      in go []
+    in
+    let not_namespace = function
+    | Namespace _ -> false
+    | _ -> true
+    in
+    match program with
+    | [] -> []
+    | (Namespace (n, [])::el) ->
+      let body, remainder = span not_namespace el in
+      Namespace (n, body) :: post_process remainder
+    | (Stmt Noop::el) -> post_process el
+    | (e::el) -> e :: post_process el
+  in
+  Namespaces.elaborate_defs ParserOptions.default @@ post_process @@
     couldMap ~f:(oneOf [cStmt <$> pStmt; pDef]) node env
 
 
@@ -1362,10 +1383,10 @@ let from_tree : Relative_path.t -> P.SyntaxTree.t -> Ast.program =
     Printexc.record_backtrace true;
     let script = P.from_tree minimal_tree in
     runP (single K.Script @@ fun [ _hdr; prog ] -> pProgram prog) script
-      { language = ST.language minimal_tree
-      ; ancestry = []
-      ; filePath = Relative_path.suffix file
-      ; mode     = match ST.mode minimal_tree with
+      { language  = ST.language minimal_tree
+      ; ancestry  = []
+      ; filePath  = Relative_path.suffix file
+      ; mode      = match ST.mode minimal_tree with
                      | _ when ST.is_php minimal_tree -> FileInfo.Mdecl
                      | "strict"  -> FileInfo.Mstrict
                      | "decl"    -> FileInfo.Mdecl

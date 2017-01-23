@@ -65,8 +65,7 @@ let run_ffp : Relative_path.t -> Parser_hack.parser_return = fun file ->
   Parser_hack.(
     { file_mode = Option.some_if (Tree.language syntax_tree = "hh") mode
     ; comments  = []
-    ; ast       = Namespaces.elaborate_defs ParserOptions.default @@
-                    Classic_ast_mapper.from_tree file syntax_tree
+    ; ast       = Classic_ast_mapper.from_tree file syntax_tree
     ; content   = Text.text source_text
     })
 
@@ -125,7 +124,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
         exit_with CmpDifferent
     end
   | Benchmark ->
-    let filename = Relative_path.S.to_string file in 
+    let filename = Relative_path.S.to_string file in
     let (ast_result, ast_duration), (ffp_result, ffp_duration) =
       try (measure run_ast file, measure run_ffp file)
       with _ -> begin
@@ -151,6 +150,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
 
 
 let () =
+  Printexc.record_backtrace true;
   let use_parser = ref "ast"  in
   let use_diff   = ref "diff" in
   let filename   = ref ""     in
@@ -176,4 +176,3 @@ let () =
     let file = Relative_path.create Relative_path.Dummy fn in
     run_parsers file parse_function
   ) !filename
-

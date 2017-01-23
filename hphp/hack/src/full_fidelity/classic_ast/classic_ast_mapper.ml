@@ -1144,11 +1144,15 @@ let pTConstraint : (constraint_kind * hint) parser =
 
 
 
-let pClassElt_ConstDeclaration' : class_elt parser' = fun ns env ->
+let pClassElt_ConstDeclaration' : class_elt list parser' = fun ns env ->
   let ty, res = pConstDeclaration' ns env in
-  match List.hd res with
-  | id, None      -> AbsConst (ty,  id       )
-  | id, Some expr -> Const    (ty, [id, expr])
+  let absts, concrs = List.partition (fun (_, x) -> Option.is_none x) res in
+  let flatten : Ast.expr option -> Ast.expr = function
+    | Some x -> x
+    | None -> raise @@ Parser_fail "The impossible happened"
+  in
+  Const (ty, List.map (fun (id, opt_x) -> id, flatten opt_x) concrs) ::
+    List.map (fun (id, _) -> AbsConst (ty, id)) absts
 let pClassElt_TypeConst' : class_elt parser' =
   fun [ abs; _kw; _tykw; name; constr; _eq; ty; _semi ] env ->
     TypeConst
@@ -1232,7 +1236,7 @@ let pClassElt_XHPCategoryDeclaration' : class_elt parser' =
     XhpCategory (List.map stripPercent @@ couldMap ~f:pos_name cats env)
 
 let pClassElt : class_elt list parser = mkP
-  [ (K.ConstDeclaration,             mpSingleton pClassElt_ConstDeclaration')
+  [ (K.ConstDeclaration,             pClassElt_ConstDeclaration')
   ; (K.TypeConstDeclaration,         mpSingleton pClassElt_TypeConst')
   ; (K.TraitUse,                     mpSingleton pClassElt_TraitUse')
   ; (K.RequireClause,                mpSingleton pClassElt_RequireClause')
@@ -1313,17 +1317,6 @@ let pDef_Enum' : def parser' =
 let pDef_InclusionDirective' : def parser' = fun [ expr; _semi ] env ->
   Stmt (Expr (single K.InclusionExpression pExpr_InclusionExpression' expr env))
 
-let pDef_ConstDeclaration' : def parser' = fun ps env ->
-  let h, ds = pConstDeclaration' ps env in
-  Constant
-  { cst_mode      = env.mode
-  ; cst_kind      = Cst_const
-  ; cst_name      = Pos.none, ""
-  ; cst_type      = h
-  ; cst_value     = Pos.none, False
-  ; cst_namespace = Namespace_env.empty_with_default_popt
-  }
-
 let pDef_NamespaceUseDeclaration' : def parser' =
   fun [ _kw; kind; clauses; _semi ] env ->
     NamespaceUse []
@@ -1348,7 +1341,6 @@ and pDef : def parser = fun node -> mkP
   ; (K.AliasDeclaration,             pDef_Typedef')
   ; (K.EnumDeclaration,              pDef_Enum')
   ; (K.InclusionDirective,           pDef_InclusionDirective')
-  ; (K.ConstDeclaration,             pDef_ConstDeclaration')
   ; (K.NamespaceDeclaration,         pDef_NamespaceDeclaration')
   ; (K.NamespaceUseDeclaration,      pDef_NamespaceUseDeclaration')
   ; (K.NamespaceGroupUseDeclaration, pDef_NamespaceGroupUseDeclaration')

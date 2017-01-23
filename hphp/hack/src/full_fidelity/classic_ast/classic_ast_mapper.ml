@@ -291,12 +291,12 @@ let sync_fun_kind : fun_kind -> fun_kind = function
   | FAsyncGenerator | FGenerator -> FGenerator
   | FAsync          | FSync      -> FSync
 
+let mk_noop : stmt list -> stmt list = function
+  | [] -> [Noop]
+  | s -> s
+
 let stmt_list_of_stmt = function
-  | Block [] -> [Noop]
-  | Block block -> begin match List.filter (fun x -> x <> Noop) block with
-    | [] -> [Noop]
-    | stmts -> stmts
-    end
+  | Block block -> List.filter (fun x -> x <> Noop) block
   | stmt -> [stmt]
 let mpStripNoop pThing node env = match pThing node env with
   | [Noop] -> []
@@ -899,7 +899,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
           ; f_ret_by_ref      = false
           ; f_name            = where_am_I env, ";anonymous"
           ; f_params          = couldMap ~f:(pFunParam false) params env
-          ; f_body            = body
+          ; f_body            = mk_noop body
           ; f_user_attributes = []
           ; f_fun_kind        = ifExists async_fun_kind sync_fun_kind async env
               @@ if body_has_yield then FGenerator else FSync
@@ -924,7 +924,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
         ; f_ret_by_ref      = false
         ; f_name            = where_am_I env, ";anonymous"
         ; f_params          = []
-        ; f_body            = block
+        ; f_body            = mk_noop block
         ; f_user_attributes = []
         ; f_fun_kind        = if blk_has_yield then FAsyncGenerator else FAsync
         ; f_namespace       = Namespace_env.empty_with_default_popt
@@ -1128,7 +1128,7 @@ let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
     try Str.search_forward re (P.full_text node) 0 >= 0 with
     | Not_found -> false
   in
-  let async, name, tparaml, paraml, ret, clsvs = pFunHdr hdr env in
+  let async, name, tparaml, paraml, ret, _clsvs = pFunHdr hdr env in
   let previous_saw_yield = !(env.saw_yield) in
   env.saw_yield := false;
   let block = mpOptional pBlock body env in
@@ -1145,6 +1145,7 @@ let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
       (* FIXME: Filthy hack to catch UNSAFE *)
       match block with
       | Some [Noop] when containsUNSAFE body -> [Unsafe]
+      | Some [] -> [Noop]
       | None -> []
       | Some b -> b
     end
@@ -1260,7 +1261,7 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     let member_init, member_def = List.split (List.map classvar_init clsvl) in
     let previous_saw_yield = !(env.saw_yield) in
     env.saw_yield := false;
-    let body = member_init @ stmt_list_of_stmt (pCompoundStatement body env) in
+    let body = member_init @ mk_noop @@ stmt_list_of_stmt (pCompoundStatement body env) in
     let body_has_yield = !(env.saw_yield) in
     env.saw_yield := previous_saw_yield;
     List.map (fun (k,h,v) -> ClassVars (k,h,v)) member_def @ [Method
@@ -1269,7 +1270,7 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     ; m_constrs         = []
     ; m_name            = name
     ; m_params          = paraml
-    ; m_body            = body
+    ; m_body            = mk_noop body
     ; m_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attrs env
     ; m_ret             = ret
     ; m_ret_by_ref      = false

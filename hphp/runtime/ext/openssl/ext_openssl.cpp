@@ -143,7 +143,7 @@ struct Key : SweepableResourceData {
       }
       break;
 #endif
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
     case EVP_PKEY_EC:
       assert(m_key->pkey.ec);
       if (EC_KEY_get0_private_key(m_key->pkey.ec) == nullptr) {
@@ -1856,7 +1856,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
     add_bignum_as_string(details, s_pub_key, dh->pub_key);
     ret.set(s_dh, details);
     break;
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
   case EVP_PKEY_EC:
     {
       ktype = OPENSSL_KEYTYPE_EC;
@@ -3165,7 +3165,7 @@ Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases /* = false */) {
 }
 
 Variant HHVM_FUNCTION(openssl_get_curve_names) {
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
   const size_t len = EC_get_builtin_curves(nullptr, 0);
   std::unique_ptr<EC_builtin_curve[]> curves(new EC_builtin_curve[len]);
   if (!EC_get_builtin_curves(curves.get(), len)) {
@@ -3230,7 +3230,9 @@ struct opensslExtension final : Extension {
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_RSA);
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DSA);
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DH);
+#ifdef HAVE_EVP_PKEY_EC
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_EC);
+#endif
 
     HHVM_RC_INT_SAME(OPENSSL_VERSION_NUMBER);
 

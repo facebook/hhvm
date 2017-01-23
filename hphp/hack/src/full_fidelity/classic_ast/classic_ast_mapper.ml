@@ -1257,19 +1257,18 @@ let pDef_Class' : def parser' =
     List.concat (couldMap ~f:pClassElt elts env)
   in
   let p2ClassKind : class_kind parser2 = fun kind abs env ->
-    match mkTP tClassKind kind env, P.text abs with
-    | Cnormal, "abstract" -> Cabstract
-    | k, _ -> k
+    let kind = mkTP tClassKind kind env in
+    let regex = Str.regexp ".*abstract.*" in
+    if kind = Cnormal && Str.string_match regex (P.text abs) 0
+    then Cabstract
+    else kind
   in
   fun [ attr; mods; kw; name; tparaml; _ext; exts; _impl; impls; body ] env ->
     Class
     { c_mode            = env.mode
     ; c_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attr env
     ; c_final           = List.mem Final @@  couldMap ~f:(mkTP tKind) mods env
-    ; c_is_xhp          = begin
-        let is_xhp = mkTP tIsXHP name env in
-        is_xhp
-      end
+    ; c_is_xhp          = mkTP tIsXHP name env
     ; c_name            = pos_name name env
     ; c_tparams         = pTParaml tparaml env
     ; c_extends         = couldMap ~f:pHint exts env

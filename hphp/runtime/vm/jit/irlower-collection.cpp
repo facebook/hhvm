@@ -123,6 +123,7 @@ void cgLdColArray(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   always_assert_flog(
+    ty == TBottom ||
     collections::isType(cls,
                         CollectionType::Vector, CollectionType::ImmVector,
                         CollectionType::Map, CollectionType::ImmMap,

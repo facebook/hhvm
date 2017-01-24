@@ -87,6 +87,8 @@ let with_exit_on_exception f =
   | Worker.Worker_failed_to_send_job _ as e->
     Hh_logger.exc e;
     Exit_status.(exit Worker_failed_to_send_job)
+  | File_heap.File_heap_stale ->
+    Exit_status.(exit File_heap_stale)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
   | SharedMem.C_assertion_failure _ as e ->

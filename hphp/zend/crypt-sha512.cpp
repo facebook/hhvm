@@ -6,16 +6,15 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <malloc.h>
 #include <memory.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _MSC_VER
-#include <Windows.h>
-#endif
+
+#include <folly/portability/Malloc.h>
+#include <folly/portability/Windows.h>
 
 namespace HPHP {
 

@@ -863,11 +863,36 @@ struct CompactReader {
 
       Array keySpec = spec.rvalAt(s_key,
         AccessFlags::Error).toArray();
-      Array valueSpec = spec.rvalAt(s_val,
-        AccessFlags::Error).toArray();
-      String format = spec.rvalAt(s_format,
-        AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error).toArray();
+      String format = spec.rvalAt(s_format, AccessFlags::None).toString();
+      if (format.equal(s_harray)) {
+        DictInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          switch (keyType) {
+            case TType::T_I08:
+            case TType::T_I16:
+            case TType::T_I32:
+            case TType::T_I64: {
+              int64_t key = readField(keySpec, keyType).toInt64();
+              Variant value = readField(valueSpec, valueType);
+              arr.set(key, value);
+              break;
+            }
+            case TType::T_STRING: {
+              String key = readField(keySpec, keyType).toString();
+              Variant value = readField(valueSpec, valueType);
+              arr.set(key, value);
+              break;
+            }
+            default:
+              thrift_error(
+                  "Unable to deserialize non int/string array keys",
+                  ERR_INVALID_DATA);
+          }
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto ret(req::make<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
@@ -895,7 +920,14 @@ struct CompactReader {
 
       Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
       String format = spec.rvalAt(s_format, AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      if (format.equal(s_harray)) {
+        VecArrayInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.append(readField(valueSpec, valueType));
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto const pvec(req::make<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
           pvec->add(readField(valueSpec, valueType));
@@ -919,7 +951,14 @@ struct CompactReader {
 
       Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
       String format = spec.rvalAt(s_format, AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      if (format.equal(s_harray)) {
+        KeysetInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.add(readField(valueSpec, valueType));
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);

@@ -73,6 +73,7 @@ extern const StaticString
   s_etype,
   s_format,
   s_collection,
+  s_harray,
   s_TSPEC,
   s_TProtocolException,
   s_TApplicationException;

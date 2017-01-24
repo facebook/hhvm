@@ -58,3 +58,6 @@ var_dump(xdebug_stop_trace());
 // Literal %
 var_dump(xdebug_start_trace("/tmp/trace-%%"));
 var_dump(xdebug_stop_trace());
+
+// Cleanup
+@array_map("unlink", glob("/tmp/trace*"));

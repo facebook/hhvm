@@ -15,12 +15,12 @@ type t = {
 
 let make () = {
   next_id = 1;
-  current_nesting = Nesting.make ~id:0 0 None;
+  current_nesting = Nesting.make ~id:0 0 None false;
 }
 
-let nest t amount =
+let nest t amount conditional =
   let current_nesting =
-    Nesting.make ~id:t.next_id amount (Some t.current_nesting) in
+    Nesting.make ~id:t.next_id amount (Some t.current_nesting) conditional in
   { next_id = t.next_id + 1; current_nesting }
 
 let unnest t =

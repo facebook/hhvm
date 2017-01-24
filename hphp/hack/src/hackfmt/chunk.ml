@@ -27,7 +27,7 @@ let default_chunk = {
   space_if_not_split = false;
   comma_rule = None;
   rule = Rule.null_rule_id;
-  nesting = {Nesting.id = -1; amount = 0; parent = None; };
+  nesting = Nesting.dummy;
 }
 
 let make text rule nesting =

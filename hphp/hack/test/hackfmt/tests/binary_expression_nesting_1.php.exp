@@ -1,7 +1,7 @@
 <?hh
 
 $a = $long_long_long_long_long_long_long_long_long_long_name_1 +
-$long_long_long_long_long_long_long_long_long_long_name_2;
+  $long_long_long_long_long_long_long_long_long_long_name_2;
 $long_long_long_long_long_long_long_long_long_long_name_ret =
   $long_long_long_long_long_long_long_long_long_long_name_1 +
   $long_long_long_long_long_long_long_long_long_long_name_2;

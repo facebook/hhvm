@@ -16,6 +16,9 @@ module Trivia = Full_fidelity_editable_trivia
 open Syntax
 open Core
 
+(* TODO: move this to a config file *)
+let __INDENT_WIDTH = 2
+
 type open_span = {
   open_span_start: int;
   open_span_cost: int;
@@ -162,13 +165,11 @@ let builder = object (this)
     next_split_rule <- Some Rule.Always;
     ()
 
-  method nest ?amount:(amount=2) () =
-    nesting_alloc <- Nesting_allocator.nest nesting_alloc amount;
-    ()
+  method nest ?(amount=__INDENT_WIDTH) ?(skip_parent=false) () =
+    nesting_alloc <- Nesting_allocator.nest nesting_alloc amount skip_parent
 
   method unnest () =
-    nesting_alloc <- Nesting_allocator.unnest nesting_alloc;
-    ()
+    nesting_alloc <- Nesting_allocator.unnest nesting_alloc
 
   method start_rule ?(rule_type=Rule.Simple) () =
     (* Override next_split_rule unless it's an Always rule *)
@@ -1708,12 +1709,14 @@ and transform_binary_expression ~is_nested expr =
     match binary_expresion_syntax_list with
       | hd :: tl ->
         transform_operand hd;
+        if not is_nested then builder#nest ~skip_parent:true ();
         tl_with ~rule:(Some Rule.Argument) ~nest:is_nested ~f:(fun () ->
           List.iteri tl ~f:(fun i x ->
             if (i mod 2) = 0 then begin add_space (); transform x end
             else begin split ~space:true (); transform_operand x end
           )
-        ) ()
+        ) ();
+        if not is_nested then builder#unnest ();
       | _ ->
         raise (Failure "Expected non empty list of binary expression pieces")
   end

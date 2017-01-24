@@ -129,8 +129,10 @@ struct Generator {
     // Ignore everything, a trivial scanner
     bool ignore_all = false;
 
-    // Conservative scan everything
+    // Conservative scan everything (not including bases)
     bool conservative_all = false;
+    // Conservative scan all bases
+    bool conservative_all_bases = false;
 
     // This type should be ignored (used for system types we can't modify). This
     // is different from ignore_all where ignore_all will still process base
@@ -189,7 +191,8 @@ struct Generator {
     // does not need to be exact.
     bool isAlwaysNonTrivial() const {
       return !ignore_all && !whitelisted && (
-        conservative_all || (custom_all && custom_guards.empty()) ||
+        conservative_all || conservative_all_bases ||
+        (custom_all && custom_guards.empty()) ||
         (custom_bases_scanner && !custom_bases.empty()) ||
         !conservative_fields.empty() || !custom_fields.empty());
     }
@@ -259,9 +262,11 @@ struct Generator {
 
   const Object& getMarkedCountable(const Object&) const;
 
-  void genLayout(const Type&, Layout&, size_t) const;
+  void genLayout(const Type&, Layout&, size_t,
+                 bool conservative_everything = false) const;
   void genLayout(const Object&, Layout&, size_t,
-                 bool do_forbidden_check = true) const;
+                 bool do_forbidden_check = true,
+                 bool conservative_everything = false) const;
   bool checkMemberSpecialAction(const Object& base_object,
                                 const Object::Member& member,
                                 const Action& action,
@@ -293,8 +298,10 @@ struct Generator {
   void makePtrFollowable(const Type& type);
   void makePtrFollowable(const Object& object);
 
-  const Action& getAction(const Object& object) const;
-  Action inferAction(const Object& object) const;
+  const Action& getAction(const Object& object,
+                          bool conservative_everything = false) const;
+  Action inferAction(const Object& object,
+                     bool conservative_everything = false) const;
 
   void genMetrics(std::ostream&) const;
   void genForwardDecls(std::ostream&) const;
@@ -1518,10 +1525,14 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
 // Retrieve the action associated with the given object type, computing a new
 // one if it isn't already present.
-const Generator::Action& Generator::getAction(const Object& object) const {
+const Generator::Action& Generator::getAction(const Object& object,
+                                              bool conservative) const {
   auto iter = m_actions.find(&object);
   if (iter != m_actions.end()) return iter->second;
-  return m_actions.emplace(&object, inferAction(object)).first->second;
+  return m_actions.emplace(
+    &object,
+    inferAction(object, conservative)
+  ).first->second;
 }
 
 bool Generator::findMemberHelper(const std::string& field,
@@ -1544,7 +1555,8 @@ bool Generator::findMemberHelper(const std::string& field,
 // Given an object type, examine it to infer all the needed actions for that
 // type. The actions are inferred by looking for member functions with special
 // names, and static members with special names.
-Generator::Action Generator::inferAction(const Object& object) const {
+Generator::Action Generator::inferAction(const Object& object,
+                                         bool conservative_everything) const {
   if (object.incomplete) {
     throw Exception{
       folly::sformat(
@@ -1558,6 +1570,12 @@ Generator::Action Generator::inferAction(const Object& object) const {
   }
 
   Action action;
+
+  if (conservative_everything) {
+    action.conservative_all = true;
+    action.conservative_all_bases = true;
+    return action;
+  }
 
   // White-listing and forbidden templates are determined by just checking the
   // name against explicit lists.
@@ -1575,6 +1593,7 @@ Generator::Action Generator::inferAction(const Object& object) const {
   if (HPHP::type_scan::detail::isForcedConservativeTemplate(object.name.name)) {
     sanityCheckTemplateParams(object);
     action.conservative_all = true;
+    action.conservative_all_bases = true;
     return action;
   }
 
@@ -2187,9 +2206,12 @@ const Object& Generator::getObject(const ObjectType& type) const {
 // construct is encountered.
 void Generator::genLayout(const Type& type,
                           Layout& layout,
-                          size_t offset) const {
+                          size_t offset,
+                          bool conservative_everything) const {
   return type.match<void>(
-    [&](const ObjectType* t) { genLayout(getObject(*t), layout, offset); },
+    [&](const ObjectType* t) {
+      genLayout(getObject(*t), layout, offset, true, conservative_everything);
+    },
     [&](const PtrType* t) {
       // Don't care about pointers to non-pointer followable types.
       if (!isPtrFollowable(type)) return;
@@ -2227,16 +2249,22 @@ void Generator::genLayout(const Type& type,
         };
       }
       Layout sublayout{determineSize(t->element)};
-      genLayout(t->element, sublayout, 0);
+      genLayout(t->element, sublayout, 0, conservative_everything);
       layout.addSubLayout(
         offset,
         *t->count,
         sublayout
       );
     },
-    [&](const ConstType* t) { genLayout(t->modified, layout, offset); },
-    [&](const VolatileType* t) { genLayout(t->modified, layout, offset); },
-    [&](const RestrictType* t) { genLayout(t->modified, layout, offset); },
+    [&](const ConstType* t) {
+      genLayout(t->modified, layout, offset, conservative_everything);
+    },
+    [&](const VolatileType* t) {
+      genLayout(t->modified, layout, offset, conservative_everything);
+    },
+    [&](const RestrictType* t) {
+      genLayout(t->modified, layout, offset, conservative_everything);
+    },
     [&](const FuncType*) {},
     [&](const MemberType*) {},
     [&](const VoidType*) {}
@@ -2310,7 +2338,8 @@ bool Generator::checkMemberSpecialAction(const Object& base_object,
 void Generator::genLayout(const Object& object,
                           Layout& layout,
                           size_t offset,
-                          bool do_forbidden_check) const {
+                          bool do_forbidden_check,
+                          bool conservative_everything) const {
   // Never generate layout for countable types, unless it was marked as
   // scannable.
   if (m_countable.count(&object) > 0 &&
@@ -2318,7 +2347,7 @@ void Generator::genLayout(const Object& object,
     return;
   }
 
-  const auto& action = getAction(object);
+  const auto& action = getAction(object, conservative_everything);
 
   // A whitelisted type should be ignored entirely.
   if (action.whitelisted) return;
@@ -2368,7 +2397,8 @@ void Generator::genLayout(const Object& object,
         obj,
         layout,
         offset + *base.offset,
-        !action.silenced_bases.count(&obj)
+        !action.silenced_bases.count(&obj),
+        action.conservative_all_bases
       );
     } catch (LayoutError& exn) {
       exn.addContext(
@@ -2455,11 +2485,11 @@ void Generator::genLayout(const Object& object,
       if (!member.offset) continue;
 
       if (first) {
-        genLayout(member.type, first_layout, 0);
+        genLayout(member.type, first_layout, 0, conservative_everything);
         first = false;
       } else {
         Layout other_layout{object.size};
-        genLayout(member.type, other_layout, 0);
+        genLayout(member.type, other_layout, 0, conservative_everything);
         if (first_layout != other_layout) {
           throw LayoutError{
             folly::sformat(
@@ -2493,7 +2523,12 @@ void Generator::genLayout(const Object& object,
 
     // Otherwise generate its layout recursively.
     try {
-      genLayout(member.type, layout, offset + *member.offset);
+      genLayout(
+        member.type,
+        layout,
+        offset + *member.offset,
+        conservative_everything
+      );
     } catch (LayoutError& exn) {
       exn.addContext(
         folly::sformat(

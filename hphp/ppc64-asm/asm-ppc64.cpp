@@ -78,7 +78,7 @@ int64_t VMTOC::allocTOC(int32_t target, bool align) {
   }
 
   m_tocvector->assertCanEmit(sizeof(int32_t));
-  m_tocvector->dword(reinterpret_cast<int32_t>(target));
+  m_tocvector->dword(target);
   return addr - (m_tocvector->base() + INT16_MAX + 1);
 }
 

@@ -18,15 +18,15 @@ let make q =
   {queue = q;}
 
 let add t state =
-  (* TODO: make this faster, currently O(n*log(n))
-    could be O(log(n) as a priority queue *)
-  { queue = (List.sort (state :: t.queue) ~cmp:Solve_state.compare); }
+  { queue = state :: t.queue }
 
 let is_empty t =
   List.length t.queue = 0
 
 let get_next t =
-  match t.queue with
+  (* TODO: make this queue into a heap instead of sorting here *)
+  let queue = List.sort t.queue ~cmp:Solve_state.compare in
+  match queue with
     | hd :: tl ->
       {queue = tl}, hd
     | [] -> raise (Failure "Queue is empty when calling get_next\n")

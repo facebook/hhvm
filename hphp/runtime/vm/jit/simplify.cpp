@@ -3825,12 +3825,9 @@ void simplifyPass(IRUnit& unit) {
 
 void constProp(IRUnit& unit, IRInstruction* inst, bool typesMightRelax) {
   for (auto& src : inst->srcs()) {
-    if (!src->inst()->is(DefConst)) {
-      if (src->hasConstVal() ||
-          src->type().subtypeOfAny(TNullptr, TInitNull, TUninit)) {
-        if (!typesMightRelax || !irgen::typeMightRelax(src)) {
-          src = unit.cns(src->type());
-        }
+    if (!src->inst()->is(DefConst) && src->type().admitsSingleVal()) {
+      if (!typesMightRelax || !irgen::typeMightRelax(src)) {
+        src = unit.cns(src->type());
       }
     }
   }

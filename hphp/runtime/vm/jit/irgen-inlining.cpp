@@ -224,9 +224,7 @@ bool conjureBeginInlining(IRGS& env,
                           const std::vector<Type>& args,
                           ReturnTarget returnTarget) {
   auto conjure = [&](Type t) {
-    return (t.hasConstVal() ||
-            t.subtypeOfAny(TNullptr, TInitNull, TUninit)) ?
-      cns(env, t) : gen(env, Conjure, t);
+    return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
   };
 
   always_assert(isFPush(env.context.callerFPushOp));

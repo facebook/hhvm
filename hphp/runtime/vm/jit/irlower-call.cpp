@@ -177,8 +177,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   auto const dst = dstLoc(env, inst, 0);
   auto const type = inst->dst()->type();
-  if (!type.hasConstVal() &&
-      !type.subtypeOfAny(TNullptr, TInitNull, TUninit)) {
+  if (!type.admitsSingleVal()) {
     v << defvmretdata{dst.reg(0)};
   }
   if (type.needsReg()) {
@@ -212,8 +211,7 @@ void cgCallArray(IRLS& env, const IRInstruction* inst) {
 
   auto const dst = dstLoc(env, inst, 0);
   auto const type = inst->dst()->type();
-  if (!type.hasConstVal() &&
-      !type.subtypeOfAny(TNullptr, TInitNull, TUninit)) {
+  if (!type.admitsSingleVal()) {
     v << defvmretdata{dst.reg(0)};
   }
   if (type.needsReg()) {

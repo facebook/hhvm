@@ -537,17 +537,16 @@ public:
   // Constant introspection.                                            [const]
 
   /*
-   * Does this Type have a constant value? If true, we can call xxVal().
+   * Does this Type have a constant value?  If true, we can call xxVal().
    *
    * Note: Bottom is a type with no value, and Uninit/InitNull/Nullptr are
    * considered types with a single unique value, so this function returns false
-   * for those types. You may want to explicitly check for them as needed.
-   *
+   * for those types.  You may want to explicitly check for them as needed.
    */
   bool hasConstVal() const;
 
   /*
-   * @return hasConstVal() && *this <= t.
+   * @returns: hasConstVal() && *this <= t
    */
   bool hasConstVal(Type t) const;
 
@@ -558,6 +557,13 @@ public:
    */
   template<typename T>
   bool hasConstVal(T val) const;
+
+  /*
+   * Whether this Type represents a single possible value.
+   *
+   * @returns: hasConstVal() || subtypeOfAny(TNullptr, TInitNull, TUninit)
+   */
+  bool admitsSingleVal() const;
 
   /*
    * Return the const value for a const Type as a uint64_t.

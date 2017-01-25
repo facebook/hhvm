@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
-#define incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
+#ifndef incl_HPHP_JIT_SIMPLIFY_H_
+#define incl_HPHP_JIT_SIMPLIFY_H_
 
 #include <folly/Optional.h>
 

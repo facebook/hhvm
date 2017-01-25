@@ -317,6 +317,10 @@ bool Type::hasConstVal(T val) const {
   return hasConstVal(cns(val));
 }
 
+inline bool Type::admitsSingleVal() const {
+  return hasConstVal() || subtypeOfAny(TNullptr, TInitNull, TUninit);
+}
+
 inline uint64_t Type::rawVal() const {
   assertx(hasConstVal());
   return m_extra;

@@ -303,6 +303,7 @@ struct RuntimeOption {
   static int64_t UnserializationBigMapThreshold;
 
   static std::string TakeoverFilename;
+  static std::string AdminServerIP;
   static int AdminServerPort;
   static int AdminThreadCount;
   static int AdminServerQueueToWorkerRatio;

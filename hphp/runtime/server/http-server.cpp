@@ -127,9 +127,9 @@ HttpServer::HttpServer()
     m_pageServer->enableSSL(RuntimeOption::SSLPort);
   }
 
-  ServerOptions admin_options
-    (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
-     RuntimeOption::AdminThreadCount);
+  ServerOptions admin_options(RuntimeOption::AdminServerIP,
+                              RuntimeOption::AdminServerPort,
+                              RuntimeOption::AdminThreadCount);
   admin_options.m_queueToWorkerRatio =
     RuntimeOption::AdminServerQueueToWorkerRatio;
   m_adminServer = serverFactory->createServer(admin_options);
@@ -571,7 +571,7 @@ void HttpServer::watchDog() {
 
 static bool sendAdminCommand(const char* cmd) {
   if (RuntimeOption::AdminServerPort <= 0) return false;
-  std::string host = RuntimeOption::ServerIP;
+  std::string host = RuntimeOption::AdminServerIP;
   if (host.empty()) host = "localhost";
   auto passwords = RuntimeOption::AdminPasswords;
   if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {

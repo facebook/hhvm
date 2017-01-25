@@ -2398,10 +2398,30 @@ and echo_args env =
 (*****************************************************************************)
 
 and parameter_list env =
+  (* A parameter list follows one of these five patterns:
+
+    (  )
+    ( normal-parameters )
+    ( normal-parameters  ,  )
+    ( variadic-parameter  )
+    ( normal-parameters  ,  variadic-parameter  )
+
+    A variadic parameter follows one of these two patterns:
+
+    ...
+    optional-attributes optional-type  ...  $variable
+
+    Note that:
+    * A variadic parameter is never followed by a comma
+    * A variadic parameter with a type must also have a variable.
+
+ *)
   expect env Tlp;
   parameter_list_remain env
 
 and parameter_list_remain env =
+  (* We have either just parsed the left paren that opens a parameter list,
+  or a normal parameter -- possibly ending in a comma. *)
   match L.token env.file env.lb with
   | Trp -> []
   | Tellipsis ->
@@ -2425,7 +2445,6 @@ and parameter_list_remain env =
 and parameter_varargs env =
   let pos = Pos.make env.file env.lb in
   (match L.token env.file env.lb with
-    | Tcomma -> expect env Trp; make_param_ellipsis pos
     | Trp -> make_param_ellipsis pos;
     | _ ->
       L.back env.lb;

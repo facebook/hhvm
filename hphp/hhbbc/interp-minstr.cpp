@@ -1425,8 +1425,13 @@ void miBaseSImpl(ISS& env, bool hasRhs, Type prop) {
 template<typename A, typename B>
 void mergePaths(ISS& env, A a, B b) {
   auto const start = env.state;
+  assert(!env.flags.canConstProp);
+  assert(env.flags.wasPEI);
   a();
   auto const aState = env.state;
+  auto const aFlags = env.flags;
+  env.flags.canConstProp = false;
+  env.flags.wasPEI = true;
   env.state = start;
   b();
   merge_into(env.state, aState);
@@ -1448,6 +1453,9 @@ void mergePaths(ISS& env, A a, B b) {
   if (newT != env.state.base.type) {
     env.state.base.type = newT;
   }
+  env.flags.wasPEI |= aFlags.wasPEI;
+  env.flags.canConstProp &= aFlags.canConstProp;
+  assert(env.flags.wasPEI);
   // an FPass instruction can have side effects if it ends up by-ref
   assert(!env.flags.canConstProp);
 }

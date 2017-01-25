@@ -658,10 +658,10 @@ void MemoryManager::requestGC() {
 }
 
 void MemoryManager::updateNextGc() {
-  constexpr int64_t min_delta = 64L << 20;
   auto mm_limit = m_stats.limit - m_stats.auxUsage;
-  auto delta = (mm_limit - m_stats.mmUsage) / 2;
-  delta = std::max(delta, min_delta);
+  int64_t delta = (mm_limit - m_stats.mmUsage) *
+                  RuntimeOption::EvalGCTriggerPct;
+  delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
   m_nextGc = m_stats.mmUsage + delta;
 }
 

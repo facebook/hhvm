@@ -2480,6 +2480,9 @@ and param env =
   let param_hint = parameter_hint env in
   let param_is_reference = ref_opt env in
   let param_is_variadic = ellipsis_opt env in
+  if param_is_reference && param_is_variadic then begin
+    error env "A variadic parameter may not be passed by reference."
+  end;
   let param_id = variable env in
   let param_expr = parameter_default_with_variadic param_is_variadic env in
   if param_is_variadic then begin

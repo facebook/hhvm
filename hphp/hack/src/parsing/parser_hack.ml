@@ -2443,20 +2443,30 @@ and parameter_list_remain env =
           error_expect env ")"; [p]
 
 and parameter_varargs env =
+  (* We were looking for a parameter; we got "...".  We are now expecting
+     an optional variable followed immediately by a right paren.
+     ... $x = whatever   is an error. *)
   let pos = Pos.make env.file env.lb in
   (match L.token env.file env.lb with
-    | Trp -> make_param_ellipsis pos;
+    | Trp -> make_param_ellipsis (pos, "...");
     | _ ->
       L.back env.lb;
-      let p = param ~variadic:true env in
-      expect env Trp; p
-  )
+      let param_id = variable env in
+      let default = parameter_default env in
+      if default <> None then begin
+        (* TODO: This error message is poorly worded. This is a variadic
+        *formal parameter*, not an *argument*. *)
+        error env "Variadic arguments don't have default values"
+      end;
+      expect env Trp;
+      make_param_ellipsis param_id
+    )
 
-and make_param_ellipsis pos =
+and make_param_ellipsis param_id =
   { param_hint = None;
     param_is_reference = false;
     param_is_variadic = true;
-    param_id = (pos, "...");
+    param_id;
     param_expr = None;
     param_modifier = None;
     param_user_attributes = [];

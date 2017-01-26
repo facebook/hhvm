@@ -550,6 +550,7 @@ struct Unit {
   std::vector<std::unique_ptr<Func>> funcs;
   std::vector<std::unique_ptr<Class>> classes;
   std::vector<std::unique_ptr<TypeAlias>> typeAliases;
+  std::vector<SrcLoc> srcLocs;
 };
 
 /*

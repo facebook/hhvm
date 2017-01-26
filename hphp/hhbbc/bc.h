@@ -586,7 +586,7 @@ struct Bytecode {
     not_reached();
   }
 
-  php::SrcLoc srcLoc;
+  int32_t srcLoc{-1};
 
 #define O(opcode, ...) bc::opcode opcode;
   union { OPCODES };
@@ -641,7 +641,7 @@ inline size_t hash(const Bytecode& b) {
  * Ex:
  *    auto b = bc_with_loc(something.srcLoc, bc::Nop {});
  */
-template<class T> Bytecode bc_with_loc(php::SrcLoc loc, const T& t) {
+template<class T> Bytecode bc_with_loc(int32_t loc, const T& t) {
   Bytecode b = t;
   b.srcLoc = loc;
   return b;

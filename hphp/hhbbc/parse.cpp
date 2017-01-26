@@ -88,6 +88,15 @@ struct ParseUnitState {
     int32_t,
     std::unordered_set<borrowed_ptr<php::Func>>
   > createClMap;
+
+  struct SrcLocHash {
+    size_t operator()(const php::SrcLoc& sl) const {
+      auto const h1 = ((size_t)sl.start.col << 32) | sl.start.line;
+      auto const h2 = ((size_t)sl.past.col << 32) | sl.past.line;
+      return hash_int64_pair(h1, h2);
+    }
+  };
+  std::unordered_map<php::SrcLoc, int32_t, SrcLocHash> srcLocs;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -499,7 +508,7 @@ void populate_block(ParseUnitState& puState,
     {                                                 \
       auto b = Bytecode {};                           \
       b.op = Op::opcode;                              \
-      b.srcLoc = srcLoc;                              \
+      b.srcLoc = srcLocIx;                            \
       IMM_##imms                                      \
       new (&b.opcode) bc::opcode { IMM_ARG_##imms };  \
       if (Op::opcode == Op::DefCls)    defcls(b);     \
@@ -541,6 +550,9 @@ void populate_block(ParseUnitState& puState,
         return php::SrcLoc{};
       }
     );
+
+    auto const srcLocIx = puState.srcLocs.emplace(
+      srcLoc, puState.srcLocs.size()).first->second;
 
     auto const op = decode_op(pc);
     switch (op) { OPCODES }
@@ -951,6 +963,11 @@ std::unique_ptr<php::Unit> parse_unit(const UnitEmitter& ue) {
     } else {
       ret->funcs.push_back(std::move(func));
     }
+  }
+
+  ret->srcLocs.resize(puState.srcLocs.size());
+  for (auto& srcInfo : puState.srcLocs) {
+    ret->srcLocs[srcInfo.second] = srcInfo.first;
   }
 
   for (auto& ta : ue.typeAliases()) {

@@ -71,6 +71,10 @@ struct EmitUnitState {
 
 //////////////////////////////////////////////////////////////////////
 
+php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
+  return ix >= 0 ? func.unit->srcLocs[ix] : php::SrcLoc{};
+}
+
 /*
  * Order the blocks for bytecode emission.
  *
@@ -221,7 +225,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto const startOffset = ue.bcPos();
 
     FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(&func, inst),
-      show(inst.srcLoc));
+           show(srcLoc(func, inst.srcLoc)));
 
     auto emit_vsa = [&] (const CompactVector<SString>& keys) {
       auto n = keys.size();
@@ -272,9 +276,10 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto emit_srcloc = [&] {
-      if (!inst.srcLoc.isValid()) return;
-      Location::Range loc(inst.srcLoc.start.line, inst.srcLoc.start.col,
-                          inst.srcLoc.past.line, inst.srcLoc.past.col);
+      auto const sl = srcLoc(func, inst.srcLoc);
+      if (!sl.isValid()) return;
+      Location::Range loc(sl.start.line, sl.start.col,
+                          sl.past.line, sl.past.col);
       ue.recordSourceLocation(loc, startOffset);
     };
 

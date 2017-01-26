@@ -30,5 +30,11 @@ namespace HH {
     ): array {
       return $shape;
     }
+
+    public static function toDict(
+      array $shape,
+    ): dict<string, mixed> {
+      return dict($shape);
+    }
   }
 }

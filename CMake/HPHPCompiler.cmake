@@ -31,7 +31,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     "attributes"
     "maybe-uninitialized"
   )
-  
+
   # Warnings to disable by name when building C code.
   set(DISABLED_C_NAMED_WARNINGS)
   list(APPEND DISABLED_C_NAMED_WARNINGS
@@ -197,6 +197,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       set(AARCH64_TARGET_CPU "" CACHE STRING "CPU to tell gcc to optimize for (-mcpu)")
       if(AARCH64_TARGET_CPU)
         list(APPEND GENERAL_OPTIONS "mcpu=${AARCH64_TARGET_CPU}")
+        set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mcpu=${AARCH64_TARGET_CPU}")
 
         # Make sure GCC is not using the fix for errata 843419. This change
         # interferes with the gold linker. Note that GCC applies this fix
@@ -247,12 +248,12 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration")
-  
+
 
   foreach(opt ${DISABLED_NAMED_WARNINGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${opt}")
   endforeach()
-  
+
   foreach(opt ${DISABLED_C_NAMED_WARNINGS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-${opt}")
   endforeach()

@@ -18,9 +18,9 @@
 
 namespace HPHP {
 
-bool IsSSEHashSupported() {
-#ifdef USE_SSECRC
-#ifdef __SSE4_2__
+bool IsHwHashSupported() {
+#ifdef USE_HWCRC
+#if defined __SSE4_2__
   return true;
 #else
   static folly::CpuId cpuid;
@@ -31,11 +31,12 @@ bool IsSSEHashSupported() {
 #endif
 }
 
-#if !defined(USE_SSECRC) || !defined(__SSE4_2__)
+#if !defined(USE_HWCRC) || !(defined(__SSE4_2__) || \
+                             defined(ENABLE_AARCH64_CRC))
 NEVER_INLINE
 strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength) {
-#ifdef USE_SSECRC
-  if (IsSSEHashSupported()) {
+#ifdef USE_HWCRC
+  if (IsHwHashSupported()) {
     return hash_string_cs_unaligned_crc(arKey, nKeyLength);
   }
 #endif
@@ -46,8 +47,8 @@ strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength) {
 
 NEVER_INLINE
 strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength) {
-#ifdef USE_SSECRC
-  if (IsSSEHashSupported()) {
+#ifdef USE_HWCRC
+  if (IsHwHashSupported()) {
     return hash_string_i_unaligned_crc(arKey, nKeyLength);
   }
 #endif

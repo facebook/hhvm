@@ -41,10 +41,12 @@
 
 #ifdef USE_CMAKE
 #cmakedefine ENABLE_AVX2 1
+#cmakedefine ENABLE_AARCH64_CRC 1
 #cmakedefine ENABLE_ZEND_COMPAT 1
 #cmakedefine EXECUTION_PROFILER 1
 #else
 /* #undef ENABLE_AVX2 */
+/* #undef ENABLE_AARCH64_CRC */
 # define ENABLE_ZEND_COMPAT 1
 /* #undef EXECUTION_PROFILER */
 #endif

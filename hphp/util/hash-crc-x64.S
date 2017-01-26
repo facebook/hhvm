@@ -1,9 +1,9 @@
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__x86_64__) && !defined(NO_SSECRC) && \
+#if defined(__x86_64__) && !defined(NO_HWCRC) && \
     !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
 
-.file	"hphp/util/hash-crc.S"
+.file	"hphp/util/hash-crc-x64.S"
 
 /*
  * If SSE4.2 is explicitly specified, we define the HPHP::hash_string* funcitons

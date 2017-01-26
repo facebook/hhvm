@@ -57,8 +57,12 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data);
   static void ClearPerfEvents();
-  static void Init(bool enable, const std::string& events, bool subProc);
+  static void Init(bool enable,
+                   const std::string& events,
+                   bool subProc,
+                   bool excludeKernel);
   static void RecordSubprocessTimes();
+  static void ExcludeKernel();
   static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
   bool m_countersSet{false};
 private:
@@ -100,8 +104,12 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
-  static void Init(bool enable, const std::string& events, bool subProc) {}
+  static void Init(bool enable,
+                   const std::string& events,
+                   bool subProc,
+                   bool excludeKernel) {}
   static void RecordSubprocessTimes() {}
+  static void ExcludeKernel() {}
 
   // Normally exposed by DECLARE_THREAD_LOCAL_NO_CHECK
   void getCheck() { }

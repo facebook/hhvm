@@ -1136,7 +1136,8 @@ void RuntimeOption::Load(
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),
-                          false);
+                          false,
+                          EvalProfileHWExcludeKernel);
 
     Config::Bind(EnableEmitterStats, ini, config, "Eval.EnableEmitterStats",
                  EnableEmitterStats);

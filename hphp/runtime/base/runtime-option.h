@@ -510,6 +510,7 @@ struct RuntimeOption {
   F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           std::string(""))                 \
+  F(bool, ProfileHWExcludeKernel,      false)                           \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
   F(uint32_t, JitMaxTranslations,      10)                              \

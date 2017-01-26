@@ -46,6 +46,7 @@ IMPLEMENT_THREAD_LOCAL_NO_CHECK(HardwareCounter,
     HardwareCounter::s_counter);
 
 static bool s_recordSubprocessTimes = false;
+static bool s_excludeKernel = false;
 static bool s_profileHWEnable;
 static std::string s_profileHWEvents;
 
@@ -68,7 +69,7 @@ struct HardwareCounterImpl {
     pe.inherit = s_recordSubprocessTimes;
     pe.disabled = 1;
     pe.pinned = 0;
-    pe.exclude_kernel = 0;
+    pe.exclude_kernel = s_excludeKernel;
     pe.exclude_hv = 1;
     pe.read_format =
       PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING;
@@ -219,11 +220,16 @@ void HardwareCounter::RecordSubprocessTimes() {
   s_recordSubprocessTimes = true;
 }
 
+void HardwareCounter::ExcludeKernel() {
+  s_excludeKernel = true;
+}
+
 void HardwareCounter::Init(bool enable, const std::string& events,
-                           bool subProc) {
+                           bool subProc, bool excludeKernel) {
   s_profileHWEnable = enable;
   s_profileHWEvents = events;
   s_recordSubprocessTimes = subProc;
+  s_excludeKernel = excludeKernel;
 }
 
 void HardwareCounter::Reset() {

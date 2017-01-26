@@ -414,18 +414,10 @@ let ref_variable env =
   let is_ref = ref_opt env in
   (variable env, is_ref)
 
-(* &...$parameter *)
-let ref_param is_variadic_already env =
-  let is_ref = ref_opt env in
-  (* If the parameter is already variadic -- because it was prefixed with ... --
-  then we must not check to see if there is a ... before the variable. *)
-  let is_variadic_prefix = if is_variadic_already then false
-  else match L.token env.file env.lb with
-    | Tellipsis -> true
-    | _ -> L.back env.lb; false
-  in
-  let var = variable env in
-  is_ref, is_variadic_prefix, var
+let ellipsis_opt env =
+  match L.token env.file env.lb with
+  | Tellipsis -> true
+  | _ -> L.back env.lb; false
 
 (*****************************************************************************)
 (* Entry point *)
@@ -2409,7 +2401,7 @@ and parameter_list env =
     A variadic parameter follows one of these two patterns:
 
     ...
-    optional-attributes optional-type  ...  $variable
+    attributes-opt modifiers-opt typehint-opt  ...  $variable
 
     Note that:
     * A variadic parameter is never followed by a comma
@@ -2429,18 +2421,25 @@ and parameter_list_remain env =
   | _ ->
       L.back env.lb;
       let error_state = !(env.errors) in
-      let p = param ~variadic:false env in
+      let p = param env in
       match L.token env.file env.lb with
       | Trp ->
           [p]
-      | Tellipsis ->
-          [p ; parameter_varargs env]
       | Tcomma ->
           if !(env.errors) != error_state
           then [p]
           else p :: parameter_list_remain env
       | _ ->
           error_expect env ")"; [p]
+
+and parameter_default_with_variadic is_variadic env =
+  let default = parameter_default env in
+  if default <> None && is_variadic then begin
+    (* TODO: This error message is poorly worded. This is a variadic
+    *formal parameter*, not an *argument*. *)
+    error env "Variadic arguments don't have default values"
+  end;
+  if is_variadic then None else default
 
 and parameter_varargs env =
   (* We were looking for a parameter; we got "...".  We are now expecting
@@ -2452,12 +2451,7 @@ and parameter_varargs env =
     | _ ->
       L.back env.lb;
       let param_id = variable env in
-      let default = parameter_default env in
-      if default <> None then begin
-        (* TODO: This error message is poorly worded. This is a variadic
-        *formal parameter*, not an *argument*. *)
-        error env "Variadic arguments don't have default values"
-      end;
+      let _ = parameter_default_with_variadic true env in
       expect env Trp;
       make_param_ellipsis param_id
     )
@@ -2472,30 +2466,33 @@ and make_param_ellipsis param_id =
     param_user_attributes = [];
   }
 
-and param ~variadic env =
-  let attrs = attribute env in
-  let modifs = parameter_modifier env in
-  let h = parameter_hint env in
-  let is_ref, variadic_prefix, name = ref_param variadic env in
-  assert ((not variadic_prefix) || (not variadic));
-  let variadic = variadic || variadic_prefix in
-  let default = parameter_default env in
-  let default =
-    if variadic && default <> None then
-      let () = error env "Variadic arguments don't have default values" in
-      None
-    else default in
-  if variadic_prefix then begin
+and param env =
+  (* We have a parameter that does not start with ... so it is of one of
+  these two forms:
+
+  attributes-opt modifiers-opt typehint-opt ref-opt $name default-opt
+  attributes-opt modifiers-opt typehint-opt ... $name
+
+  TODO: Combining & with ... is illegal even in non-strict mode;
+        give an error if both are specified. *)
+  let param_user_attributes = attribute env in
+  let param_modifier = parameter_modifier env in
+  let param_hint = parameter_hint env in
+  let param_is_reference = ref_opt env in
+  let param_is_variadic = ellipsis_opt env in
+  let param_id = variable env in
+  let param_expr = parameter_default_with_variadic param_is_variadic env in
+  if param_is_variadic then begin
     expect env Trp;
     L.back env.lb
-  end else ();
-  { param_hint = h;
-    param_is_reference = is_ref;
-    param_is_variadic = variadic;
-    param_id = name;
-    param_expr = default;
-    param_modifier = modifs;
-    param_user_attributes = attrs;
+  end;
+  { param_hint;
+    param_is_reference;
+    param_is_variadic;
+    param_id;
+    param_expr;
+    param_modifier;
+    param_user_attributes;
   }
 
 and parameter_modifier env =

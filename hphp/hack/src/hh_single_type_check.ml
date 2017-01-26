@@ -26,7 +26,7 @@ type mode =
   | Coverage
   | Dump_symbol_info
   | Dump_inheritance
-  | Dump_tast
+  | Dump_nast
   | Errors
   | AllErrors
   | Lint
@@ -255,8 +255,8 @@ let parse_options () =
     "--dump-symbol-info",
       Arg.Unit (set_mode Dump_symbol_info),
       "Dump all symbol information";
-    "--dump-tast",
-      Arg.Unit (set_mode Dump_tast),
+    "--dump-nast",
+      Arg.Unit (set_mode Dump_nast),
       "Check for errors then dump the Typed AST";
     "--lint",
       Arg.Unit (set_mode Lint),
@@ -406,10 +406,34 @@ let print_coverage fn type_acc =
   let counts = ServerCoverageMetric.count_exprs fn type_acc in
   ClientCoverageMetric.go ~json:false (Some (Leaf counts))
 
-let check_errors opts errors files_info =
+let print_symbol (symbol, definition) =
+  let open SymbolOccurrence in
+  Printf.printf "%s\n%s\n%s\n"
+    symbol.name
+    begin match symbol.type_ with
+    | Class -> "Class"
+    | Function -> "Function"
+    | Method _ -> "Method"
+    | LocalVar -> "LocalVar"
+    | Property _ -> "Property"
+    | ClassConst _ -> "ClassConst"
+    | Typeconst _ -> "Typeconst"
+    | GConst -> "GlobalConst"
+    end
+    (Pos.string_no_file symbol.pos);
+  Printf.printf "defined: %s\n"
+    (Option.value_map definition
+      ~f:(fun x -> Pos.string_no_file x.SymbolDefinition.pos)
+      ~default:"None");
+  Printf.printf "definition span: %s\n"
+    (Option.value_map definition
+      ~f:(fun x -> Pos.multiline_string_no_file x.SymbolDefinition.span)
+      ~default:"None")
+
+let check_errors ?debug:(debug=false) opts errors files_info =
   Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->
     errors @ Errors.get_error_list
-        (Typing_check_utils.check_defs opts fn fileinfo)
+        (Typing_check_utils.check_defs ~debug opts fn fileinfo)
   end ~init:errors
 
 let with_named_body opts n_fun =
@@ -571,8 +595,12 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       if errors <> []
       then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
-  | Dump_tast -> Printf.printf "no typed AST to dump, yet\n"
-
+  | Dump_nast ->
+    Printf.printf "Printing the Named AST\n\n";
+    let errors = check_errors ~debug:true opts errors files_info in
+    if errors <> []
+    then (List.iter ~f:(error ~indent:true) errors; exit 2)
+    else Printf.printf "No errors\n"
 
 (*****************************************************************************)
 (* Main entry point *)

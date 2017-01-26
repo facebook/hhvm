@@ -31,10 +31,12 @@ let neutral = Errors.empty,
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
-let type_fun opts fn x =
+let type_fun ?debug:(debug=false) opts fn x =
   match Parser_heap.find_fun_in_file ~full:true opts fn x with
   | Some f ->
     let fun_ = Naming.fun_ opts f in
+    if debug
+    then Printf.printf "%s\n%!" (Nast_print_utils.string_of_fun_ 0 fun_);
     Typing.fun_def opts fun_
   | None -> ()
 

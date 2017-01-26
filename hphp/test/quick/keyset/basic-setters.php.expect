@@ -32,6 +32,38 @@ keyset(9) {
   string(0) ""
   string(1) "2"
 }
+Testing append via ref....
+Append of 0 integer succeeded
+Append of 2 integer succeeded
+Append of -5 integer succeeded
+Append of "a" string succeeded
+Append of "foobaz" string succeeded
+Append of 123 integer succeeded
+Append of "123" string succeeded
+Append of empty string succeeded
+Append of "2" integer succeeded
+Append of 0 integer (again) succeeded
+Append of double failed: "Invalid keyset key: expected a key of type int or string, double given"
+Append of bool failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Append of null failed: "Invalid keyset key: expected a key of type int or string, null given"
+Append of class failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Append of array failed: "Invalid keyset key: expected a key of type int or string, array given"
+Append of vec failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Append of dict failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Append of keyset failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(0) {
+}
+keyset(9) {
+  int(0)
+  int(2)
+  int(-5)
+  string(1) "a"
+  string(6) "foobaz"
+  int(123)
+  string(3) "123"
+  string(0) ""
+  string(1) "2"
+}
 Testing set....
 Set to 0 key value failed: "Invalid operation on keyset"
 Set to 3 key value failed: "Invalid operation on keyset"
@@ -144,6 +176,45 @@ Testing: keyset(4) {
   int(4)
 }
 Testing append....
+Append of 0 integer succeeded
+Append of 2 integer succeeded
+Append of -5 integer succeeded
+Append of "a" string succeeded
+Append of "foobaz" string succeeded
+Append of 123 integer succeeded
+Append of "123" string succeeded
+Append of empty string succeeded
+Append of "2" integer succeeded
+Append of 0 integer (again) succeeded
+Append of double failed: "Invalid keyset key: expected a key of type int or string, double given"
+Append of bool failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Append of null failed: "Invalid keyset key: expected a key of type int or string, null given"
+Append of class failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Append of array failed: "Invalid keyset key: expected a key of type int or string, array given"
+Append of vec failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Append of dict failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Append of keyset failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(12) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(0)
+  int(-5)
+  string(1) "a"
+  string(6) "foobaz"
+  int(123)
+  string(3) "123"
+  string(0) ""
+  string(1) "2"
+}
+Testing append via ref....
 Append of 0 integer succeeded
 Append of 2 integer succeeded
 Append of -5 integer succeeded
@@ -359,6 +430,52 @@ Testing: keyset(7) {
   string(1) "g"
 }
 Testing append....
+Append of 0 integer succeeded
+Append of 2 integer succeeded
+Append of -5 integer succeeded
+Append of "a" string succeeded
+Append of "foobaz" string succeeded
+Append of 123 integer succeeded
+Append of "123" string succeeded
+Append of empty string succeeded
+Append of "2" integer succeeded
+Append of 0 integer (again) succeeded
+Append of double failed: "Invalid keyset key: expected a key of type int or string, double given"
+Append of bool failed: "Invalid keyset key: expected a key of type int or string, bool given"
+Append of null failed: "Invalid keyset key: expected a key of type int or string, null given"
+Append of class failed: "Invalid keyset key: expected a key of type int or string, stdClass given"
+Append of array failed: "Invalid keyset key: expected a key of type int or string, array given"
+Append of vec failed: "Invalid keyset key: expected a key of type int or string, vec given"
+Append of dict failed: "Invalid keyset key: expected a key of type int or string, dict given"
+Append of keyset failed: "Invalid keyset key: expected a key of type int or string, keyset given"
+keyset(7) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+keyset(16) {
+  string(1) "b"
+  string(1) "3"
+  int(3)
+  int(10)
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  int(0)
+  int(2)
+  int(-5)
+  string(1) "a"
+  string(6) "foobaz"
+  int(123)
+  string(3) "123"
+  string(0) ""
+  string(1) "2"
+}
+Testing append via ref....
 Append of 0 integer succeeded
 Append of 2 integer succeeded
 Append of -5 integer succeeded

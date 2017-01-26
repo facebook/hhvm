@@ -1,9 +1,17 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function do_append($ks, $val, $s) {
+function append_via_ref(&$ks, $val) {
+  $ks[] = $val;
+}
+
+function do_append($ks, $val, $s, $via_ref) {
   try {
-    $ks[] = $val;
+    if ($via_ref) {
+      append_via_ref($ks, $val);
+    } else {
+      $ks[] = $val;
+    }
     echo "Append of $s succeeded\n";
   } catch (Exception $e) {
     echo "Append of $s failed: \"", $e->getMessage(), "\"\n";
@@ -11,26 +19,26 @@ function do_append($ks, $val, $s) {
   return $ks;
 }
 
-function test_append($orig) {
-  echo "Testing append....\n";
-  $v = do_append($orig, 0, "0 integer")
-    |> do_append($$, 2, "2 integer")
-    |> do_append($$, -5, "-5 integer")
-    |> do_append($$, "a", "\"a\" string")
-    |> do_append($$, "foobaz", "\"foobaz\" string")
-    |> do_append($$, 123, "123 integer")
-    |> do_append($$, "123", "\"123\" string")
-    |> do_append($$, "", "empty string")
-    |> do_append($$, "2", "\"2\" integer")
-    |> do_append($$, 0, "0 integer (again)")
-    |> do_append($$, 1.23, "double")
-    |> do_append($$, false, "bool")
-    |> do_append($$, null, "null")
-    |> do_append($$, new stdclass(), "class")
-    |> do_append($$, [300, 200, 100], "array")
-    |> do_append($$, vec[1, 2, 3], "vec")
-    |> do_append($$, dict['a' => 1, 'b' => 2], "dict")
-    |> do_append($$, keyset['a', 'b', 'c'], "keyset");
+function test_append($orig, $via_ref) {
+  echo "Testing append".($via_ref ? " via ref" : "")."....\n";
+  $v = do_append($orig, 0, "0 integer", $via_ref)
+    |> do_append($$, 2, "2 integer", $via_ref)
+    |> do_append($$, -5, "-5 integer", $via_ref)
+    |> do_append($$, "a", "\"a\" string", $via_ref)
+    |> do_append($$, "foobaz", "\"foobaz\" string", $via_ref)
+    |> do_append($$, 123, "123 integer", $via_ref)
+    |> do_append($$, "123", "\"123\" string", $via_ref)
+    |> do_append($$, "", "empty string", $via_ref)
+    |> do_append($$, "2", "\"2\" integer", $via_ref)
+    |> do_append($$, 0, "0 integer (again)", $via_ref)
+    |> do_append($$, 1.23, "double", $via_ref)
+    |> do_append($$, false, "bool", $via_ref)
+    |> do_append($$, null, "null", $via_ref)
+    |> do_append($$, new stdclass(), "class", $via_ref)
+    |> do_append($$, [300, 200, 100], "array", $via_ref)
+    |> do_append($$, vec[1, 2, 3], "vec", $via_ref)
+    |> do_append($$, dict['a' => 1, 'b' => 2], "dict", $via_ref)
+    |> do_append($$, keyset['a', 'b', 'c'], "keyset", $via_ref);
   var_dump($orig);
   var_dump($v);
 }
@@ -183,7 +191,8 @@ function test_unset($orig) {
 function test($v) {
   echo "Testing: ";
   var_dump($v);
-  test_append($v);
+  test_append($v, false);
+  test_append($v, true);
   test_set($v);
   test_setop($v);
   test_new_setop($v);

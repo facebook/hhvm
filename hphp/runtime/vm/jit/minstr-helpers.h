@@ -869,6 +869,7 @@ inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
 
 template<KeyType keyType>
 void keysetSetNewElemImpl(TypedValue* tv, key_type<keyType> key) {
+  tv = tvToCell(tv);
   assertx(tvIsPlausible(*tv));
   assertx(tvIsKeyset(tv));
   auto oldArr = tv->m_data.parr;

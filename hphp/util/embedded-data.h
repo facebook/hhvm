@@ -28,7 +28,7 @@ struct embedded_data {
   std::string m_filename;
   uint64_t m_start;
   uint64_t m_len;
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#ifdef _MSC_VER
   void* m_handle;
 #endif
 };

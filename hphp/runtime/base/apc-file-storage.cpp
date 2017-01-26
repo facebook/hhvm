@@ -30,7 +30,7 @@
 #include <folly/portability/SysMman.h>
 
 #if !defined(HAVE_POSIX_FALLOCATE) && \
-  (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L || defined(__CYGWIN__))
+  (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L)
 # define HAVE_POSIX_FALLOCATE 1
 #endif
 

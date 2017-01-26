@@ -16,7 +16,7 @@
 
 #include "hphp/util/etch-helpers.h"
 
-#if defined __SSE4_2__ && !defined __CYGWIN__ && !defined __MINGW__ && !defined _MSC_VER
+#if defined __SSE4_2__ && !defined _MSC_VER
         .file     "hphp/util/strcmp-sse42.S"
         ETCH_SECTION(strcmp)
 

@@ -1,7 +1,6 @@
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__x86_64__) && !defined(NO_SSECRC) && \
-    !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
+#if defined(__x86_64__) && !defined(NO_SSECRC) && !defined(_MSC_VER)
 
 .file	"hphp/util/hash-crc.S"
 

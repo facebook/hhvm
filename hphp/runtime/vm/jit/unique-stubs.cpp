@@ -1102,7 +1102,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   auto const fp       = rarg(1);
   auto const start    = rarg(2);
   auto const firstAR  = rarg(3);
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   auto const tl       = reg::r10;
   auto const calleeAR = reg::r11;
 #else
@@ -1117,7 +1117,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Native func prologue.
     v << stublogue{arch() != Arch::PPC64};
 
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
     // Windows hates argument registers.
     v << load{rsp()[0x28], reg::r10};
     v << load{rsp()[0x30], reg::r11};

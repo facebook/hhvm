@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
+#if defined(__APPLE__) || defined(_MSC_VER)
 extern const void* __hot_start;
 extern const void* __hot_end;
 #else

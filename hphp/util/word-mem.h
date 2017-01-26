@@ -58,7 +58,7 @@ namespace HPHP {
  */
 
 inline char* memcpy8(void* dst, const void* src, uint32_t len) {
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   return reinterpret_cast<char*>(_memcpy8(dst, src, len));
 #else
   memcpy(dst, src, len);
@@ -68,7 +68,7 @@ inline char* memcpy8(void* dst, const void* src, uint32_t len) {
 
 inline char* memcpy16(void* dst, const void* src, uint32_t len) {
   assertx(len > 0 && len % 16 == 0);
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   return reinterpret_cast<char*>(_memcpy16(dst, src, len));
 #else
   return reinterpret_cast<char*>(memcpy(dst, src, len));
@@ -77,7 +77,7 @@ inline char* memcpy16(void* dst, const void* src, uint32_t len) {
 
 inline void bcopy32(void* dst, const void* src, uint32_t len) {
   assertx(len >= 32);
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   _bcopy32(dst, src, len);
 #else
   memcpy(dst, src, len / 32 * 32);
@@ -86,7 +86,7 @@ inline void bcopy32(void* dst, const void* src, uint32_t len) {
 
 inline void bcopy_in_64(void* dst, const void* src, uint32_t lenIn64) {
   assertx(lenIn64 != 0);
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   _bcopy_in_64(dst, src, lenIn64);
 #else
   memcpy(dst, src, lenIn64 * 64);

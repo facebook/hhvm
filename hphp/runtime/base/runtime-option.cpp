@@ -469,7 +469,7 @@ static inline uint64_t pgoThresholdDefault() {
 }
 
 static inline bool evalJitDefault() {
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   return false;
 #else
   return true;

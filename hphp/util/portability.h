@@ -174,10 +174,7 @@
 //////////////////////////////////////////////////////////////////////
 // CALLEE_SAVED_BARRIER
 
-#if defined(__CYGWIN__) || defined(__MINGW__)
-  #define CALLEE_SAVED_BARRIER()\
-    asm volatile("" : : : "rbx", "rsi", "rdi", "r12", "r13", "r14", "r15");
-#elif defined(_MSC_VER)
+#ifdef _MSC_VER
   // Unfortunately, we have no way to tell MSVC to do this, so we'll
   // probably have to use a pair of assembly stubs to manage this.
   #define CALLEE_SAVED_BARRIER() always_assert(false);

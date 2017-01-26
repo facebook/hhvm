@@ -140,8 +140,7 @@ include(Options)
 # Dependencies prefixed with "os" represent the OS required to
 # build the extension. The only valid value for this currently
 # is osPosix, which represents everything with a valid posix
-# API, which is most everything except for Windows. Cygwin and
-# MinGW are both included in osPosix.
+# API, which is most everything except for Windows.
 #
 # Dependencies prefixed with "var" represent a CMake variable
 # which must evaluate to a trueish value for the extension to

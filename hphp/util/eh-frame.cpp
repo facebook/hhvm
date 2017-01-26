@@ -26,7 +26,7 @@
 #include <memory>
 #include <vector>
 
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 void __register_frame(const void*) {}
 void __deregister_frame(const void*) {}
 #else

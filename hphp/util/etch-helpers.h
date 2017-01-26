@@ -1,7 +1,7 @@
 #ifndef incl_ETCH_HELPERS_H
 #define incl_ETCH_HELPERS_H
 
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 #define CFI(x)            .cfi_##x
 #define CFI2(x, y)        .cfi_##x y
 #define CFI3C(x, y, z)    .cfi_##x y##, z

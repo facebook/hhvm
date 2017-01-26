@@ -2,7 +2,7 @@
 #include "hphp/util/etch-helpers.h"
 
 #if defined(__SSE4_2__) && !defined(NO_SSECRC) && defined(NO_M_DATA) && \
-    !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
+    !defined(_MSC_VER)
 
         .file     "hphp/runtime/base/string-data-x64.S"
 

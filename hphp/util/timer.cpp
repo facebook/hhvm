@@ -52,7 +52,7 @@ namespace {
   }
 
 int gettime_helper(clockid_t clock, timespec* ts) {
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   // Let's bypass trying to load vdso.
   return clock_gettime(clock, ts);
 #elif defined(__APPLE__) || defined(__FreeBSD__)

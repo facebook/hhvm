@@ -122,7 +122,7 @@
 #include <string>
 #include <vector>
 
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#ifdef _MSC_VER
 #include <windows.h>
 #include <winuser.h>
 #endif
@@ -725,7 +725,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 }
 
-#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
+#if defined(__APPLE__) || defined(_MSC_VER)
 const void* __hot_start = nullptr;
 const void* __hot_end = nullptr;
 #endif
@@ -1281,13 +1281,9 @@ static void set_stack_size() {
   struct rlimit rlim;
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
-  if (rlim.rlim_cur < kStackSizeMinimum
-#ifndef __CYGWIN__
-      || rlim.rlim_cur == RLIM_INFINITY
-#endif
-      ) {
-#ifdef __CYGWIN__
-    Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
+  if (rlim.rlim_cur < kStackSizeMinimum || rlim.rlim_cur == RLIM_INFINITY) {
+#ifdef _WIN32
+    Logger::Error("stack limit too small, use peflags -x to increase %zd\n",
                   kStackSizeMinimum);
 #else
     rlim.rlim_cur = kStackSizeMinimum;

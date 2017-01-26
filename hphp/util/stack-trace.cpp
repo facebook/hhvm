@@ -20,7 +20,7 @@
 #include <set>
 #include <string>
 
-#if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER))
+#ifndef _MSC_VER
 #include <execinfo.h>
 #endif
 

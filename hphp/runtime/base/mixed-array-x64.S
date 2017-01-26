@@ -3,7 +3,7 @@
 #include "hphp/util/etch-helpers.h"
 
 #if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_SSECRC) && \
-    !defined(__CYGWIN__) && !defined(__MINGW__)&& !defined(_MSC_VER)
+    !defined(_MSC_VER)
 
         .file     "hphp/runtime/base/mixed-array-x64.S"
 

@@ -215,16 +215,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       list(APPEND RELEASE_CXX_OPTIONS "momit-leaf-frame-pointer")
     endif()
 
-    if(CYGWIN)
-      # in debug mode large files can overflow pe/coff sections
-      # this switches binutils to use the pe+ format
-      list(APPEND DEBUG_CXX_OPTIONS "Wa,-mbig-obj")
-      # stack limit is set at compile time on windows
-      # code expects a minimum of 8 * 1024 * 1024 + 8 for a buffer
-      # the default is 2 mb
-      list(APPEND GENERAL_CXX_FLAGS "Wl,--stack,8388616")
-    endif()
-
     if(STATIC_CXX_LIB)
       set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
     endif()

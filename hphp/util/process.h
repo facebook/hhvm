@@ -118,8 +118,6 @@ struct Process {
     syscall(SYS_thr_self, &tid);
     return (pid_t) tid;
 # endif
-#elif defined(__CYGWIN__) || defined(__MINGW__)
-    return (long)pthread_self();
 #elif defined(_MSC_VER)
     return GetCurrentThreadId();
 #else

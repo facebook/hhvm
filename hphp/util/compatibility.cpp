@@ -103,7 +103,7 @@ int advise_out(const std::string& fileName) {
   return result;
 }
 
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 #include <windows.h>
 
 // since we only support win 7+
@@ -140,15 +140,6 @@ int dladdr(const void *addr, Dl_info *info) {
 
   return 1;
 }
-
-#ifdef __CYGWIN__
-#include <libintl.h>
-// libbfd on cygwin is broken, stub dgettext to make linker unstupid
-char * libintl_dgettext(const char *domainname, const char *msgid) {
-  return dgettext(domainname, msgid);
-}
-#endif
-
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

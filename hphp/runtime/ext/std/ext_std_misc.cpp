@@ -44,10 +44,6 @@
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
 
-#ifndef _MSC_VER
-#include <sys/param.h> // MAXPATHLEN is here
-#endif
-
 namespace HPHP {
 
 IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_string);
@@ -568,13 +564,9 @@ Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
 }
 
 Array HHVM_FUNCTION(sys_getloadavg) {
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  return make_packed_array(0, 0, 0);
-#else
   double load[3];
   getloadavg(load, 3);
   return make_packed_array(load[0], load[1], load[2]);
-#endif
 }
 
 // We want token IDs to remain stable regardless of how we change the

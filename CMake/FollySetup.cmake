@@ -40,11 +40,6 @@ if (FEATURES_H_INCLUDE_DIR)
   add_definitions("-DFOLLY_HAVE_FEATURES_H=1")
 endif()
 
-if(CYGWIN)
-# cygwin has c99 issues with cxx compiler and headers
-  add_definitions("-D_GLIBCXX_USE_C99_DYNAMIC")
-endif()
-
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   if(NOT CLANG_FORCE_LIBSTDCXX)
     add_definitions("-DFOLLY_USE_LIBCPP=1")

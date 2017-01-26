@@ -844,7 +844,7 @@ void StringData::preCompute() {
 }
 
 #if !defined(__SSE4_2__) || defined(NO_SSECRC) || !defined(NO_M_DATA) || \
-  defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+  defined(_MSC_VER)
 // This function is implemented directly in ASM in hash-crc.S otherwise.
 NEVER_INLINE strhash_t StringData::hashHelper() const {
   assert(!isProxy());

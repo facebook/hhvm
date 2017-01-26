@@ -22,8 +22,7 @@
 
 #include "hphp/util/portability.h"
 
-#if defined(__x86_64__) && !defined __CYGWIN__ && !defined __MINGW__ && \
-  !defined _MSC_VER
+#if defined(__x86_64__) && !defined(_MSC_VER)
 #  if (!defined USE_SSECRC)
 #    define USE_SSECRC
 #  endif
@@ -322,9 +321,7 @@ struct StringData;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#if defined(USE_SSECRC) && !defined(__SSE4_2__) && \
-  !defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER)
-
+#if defined(USE_SSECRC) && !defined(__SSE4_2__) && !defined(_MSC_VER)
 // The following functions are implemented in ASM directly for x86_64.
 extern "C" {
   HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);

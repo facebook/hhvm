@@ -20,17 +20,6 @@
 #include <pthread.h>
 #include <time.h>
 
-// This fixes a bug in tbb headers
-// make sure these aren't defined on cygwin
-#ifdef __CYGWIN__
-# ifdef _WIN32
-#  undef _WIN32
-# endif
-# ifdef _WIN64
-#  undef _WIN64
-# endif
-#endif
-
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/portability.h"
@@ -112,8 +101,7 @@ public:
     if (recursive) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
     } else {
-#if (defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW__) || \
-    defined(_MSC_VER))
+#if defined(__APPLE__) || defined(_MSC_VER)
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_DEFAULT);
 #else
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_ADAPTIVE_NP);

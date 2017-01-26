@@ -90,7 +90,7 @@ void Extension::CompileSystemlib(const std::string &slib,
 void Extension::loadSystemlib(const std::string& name) {
   std::string n = name.empty() ?
     std::string(m_name.data(), m_name.size()) : name;
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   std::string section("ext_");
 #else
   std::string section("ext.");

@@ -23,8 +23,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#if (!defined(__APPLE__) && !defined(__FreeBSD__) && \
-     !defined(__CYGWIN__) && !defined(_MSC_VER))
+#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(_MSC_VER)
 #include "hphp/runtime/vm/debug/elfwriter.h"
 #define USE_ELF_WRITER 1
 #endif

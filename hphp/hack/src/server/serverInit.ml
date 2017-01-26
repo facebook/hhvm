@@ -134,6 +134,8 @@ module ServerInitCommon = struct
       | `Fst (fn, is_cached, end_time, deptable_fn) ->
         (* The sql deptable must be loaded in the master process *)
         (try
+          (* Take a lock on the info file for the sql *)
+          LoadScriptUtils.lock_saved_state deptable_fn;
           let read_deptable_time =
             SharedMem.load_dep_table_sqlite deptable_fn
           in

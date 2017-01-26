@@ -214,7 +214,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(inst),
       show(inst.srcLoc));
 
-    auto emit_vsa = [&] (const std::vector<SString>& keys) {
+    auto emit_vsa = [&] (const CompactVector<SString>& keys) {
       auto n = keys.size();
       ue.emitInt32(n);
       for (size_t i = 0; i < n; ++i) {

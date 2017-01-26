@@ -161,21 +161,22 @@ std::string show(const Builtins& builtins) {
   auto ret = std::string{};
 
   if (builtins.builtinsInfo.begin() != builtins.builtinsInfo.end()) {
-    ret += folly::format("Total number of builtin calls: {: >15}\n",
-                         builtins.totalBuiltins.load()).str();
-    ret += folly::format("Possible reducible builtins: {: >15}\n",
-                         builtins.reducibleBuiltins.load()).str();
+    folly::format(&ret, "Total number of builtin calls: {: >15}\n",
+                  builtins.totalBuiltins.load());
+    folly::format(&ret, "Possible reducible builtins: {: >15}\n",
+                  builtins.reducibleBuiltins.load());
 
     ret += "Builtins Info:\n";
     for (auto it = builtins.builtinsInfo.begin();
          it != builtins.builtinsInfo.end(); ++it) {
-      ret += folly::format(
+      folly::format(
+        &ret,
         "  {: >30} [tot:{: >8}, red:{: >8}]\t\ttype: {}\n",
         it->first,
         std::get<1>(it->second),
         std::get<2>(it->second),
         show(std::get<0>(it->second))
-      ).str();
+      );
     }
     ret += "\n";
   }

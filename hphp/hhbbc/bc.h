@@ -25,17 +25,12 @@
 
 #include <folly/Hash.h>
 
-#include "hphp/util/tiny-vector.h"
+#include "hphp/util/compact-vector.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/hhbbc/src-loc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/type-system.h"
-
-namespace HPHP {
-struct StringData;
-struct ArrayData;
-}
 
 namespace HPHP { namespace HHBBC {
 
@@ -127,9 +122,9 @@ struct BCHashHelper {
   }
 
   template<class T>
-  static size_t hash(const std::vector<T>& v) {
+  static size_t hash(const CompactVector<T>& v) {
     assert(!v.empty());
-    return v.size() && hash(v.front());
+    return v.size() ^ hash(v.front());
   }
 
   static size_t hash(std::pair<IterKind,borrowed_ptr<php::Iter>> kv) {
@@ -157,14 +152,14 @@ struct BCHashHelper {
 };
 
 using IterTabEnt    = std::pair<IterKind,borrowed_ptr<php::Iter>>;
-using IterTab       = std::vector<IterTabEnt>;
+using IterTab       = CompactVector<IterTabEnt>;
 
-using SwitchTab     = std::vector<borrowed_ptr<php::Block>>;
+using SwitchTab     = CompactVector<borrowed_ptr<php::Block>>;
 
 // The final entry in the SSwitchTab is the default case, it will
 // always have a nullptr for the string.
 using SSwitchTabEnt = std::pair<SString,borrowed_ptr<php::Block>>;
-using SSwitchTab    = std::vector<SSwitchTabEnt>;
+using SSwitchTab    = CompactVector<SSwitchTabEnt>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -183,7 +178,7 @@ namespace bc {
 #define IMM_TY_AA       SArray
 #define IMM_TY_BA       borrowed_ptr<php::Block>
 #define IMM_TY_OA(type) type
-#define IMM_TY_VSA      std::vector<SString>
+#define IMM_TY_VSA      CompactVector<SString>
 #define IMM_TY_KA       MKey
 #define IMM_TY_LAR      LocalRange
 
@@ -272,7 +267,8 @@ namespace bc {
 #define IMM_CTOR_FOUR(x, y, z, l)  IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
                                    IMM_CTOR(z, 3), IMM_CTOR(l, 4)
 
-#define IMM_INIT(which, n)         IMM_NAME_##which(n) ( IMM_NAME_##which(n) )
+#define IMM_INIT(which, n)         IMM_NAME_##which(n) \
+                                     ( std::move(IMM_NAME_##which(n)) )
 #define IMM_INIT_NA
 #define IMM_INIT_ONE(x)            : IMM_INIT(x, 1)
 #define IMM_INIT_TWO(x, y)         : IMM_INIT(x, 1), IMM_INIT(y, 2)
@@ -518,8 +514,8 @@ OPCODES
 struct Bytecode {
   // Default construction creates a Nop.
   Bytecode()
-    : op(Op::Nop)
-    , Nop(bc::Nop{})
+    : Nop(bc::Nop{})
+    , op(Op::Nop)
   {}
 
 #define O(opcode, ...)                          \
@@ -587,12 +583,13 @@ struct Bytecode {
     not_reached();
   }
 
-  Op op;
   php::SrcLoc srcLoc;
 
 #define O(opcode, ...) bc::opcode opcode;
   union { OPCODES };
 #undef O
+
+  Op op;
 
 private:
   void destruct() {

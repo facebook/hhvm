@@ -387,7 +387,7 @@ void populate_block(ParseUnitState& puState,
 
   auto decode_stringvec = [&] {
     auto const vecLen = decode<int32_t>(pc);
-    std::vector<SString> keys;
+    CompactVector<SString> keys;
     for (auto i = size_t{0}; i < vecLen; ++i) {
       keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
     }
@@ -412,10 +412,7 @@ void populate_block(ParseUnitState& puState,
     for (int32_t i = 0; i < vecLen - 1; ++i) {
       auto const id = decode<Id>(pc);
       auto const offset = decode<Offset>(pc);
-      ret.emplace_back(
-        ue.lookupLitstr(id),
-        findBlock(opPC + offset - ue.bc())
-      );
+      ret.emplace_back(ue.lookupLitstr(id), findBlock(opPC + offset - ue.bc()));
     }
 
     // Final case is the default, and must have a litstr id of -1.

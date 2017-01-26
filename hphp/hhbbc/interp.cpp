@@ -219,8 +219,8 @@ void in(ISS& env, const bc::NewPackedArray& op) {
 
 void in(ISS& env, const bc::NewStructArray& op) {
   auto map = StructMap{};
-  for (auto rit = op.keys.rbegin(); rit != op.keys.rend(); ++rit) {
-    map[*rit] = popC(env);
+  for (auto it = op.keys.end(); it != op.keys.begin(); ) {
+    map[*--it] = popC(env);
   }
   push(env, carr_struct(std::move(map)));
 }

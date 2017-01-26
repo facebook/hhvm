@@ -13,11 +13,10 @@ open Core
 (*****************************************************************************)
 (* Usually used when we want to run typing hooks *)
 (*****************************************************************************)
-let check_defs
-    ?debug:(d=false) tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
+let check_defs tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
   let result, _, _ = (Errors.do_ (fun () ->
     List.iter funs begin fun (_, x) ->
-      Typing_check_service.type_fun ~debug:d tcopt fn x
+      Typing_check_service.type_fun tcopt fn x
     end;
     List.iter classes begin fun (_, x) ->
       Typing_check_service.type_class tcopt fn x

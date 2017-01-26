@@ -19,6 +19,7 @@
 
 #include <pthread.h>
 #include <time.h>
+#include <thread>
 
 #include <tbb/concurrent_hash_map.h>
 
@@ -37,7 +38,7 @@ private:
   int          m_magic;
   Rank         m_rank;
   // m_owner/m_hasOwner for keeping track of lock ownership, useful for debugging
-  pthread_t    m_owner;
+  std::thread::id m_owner;
   unsigned int m_acquires;
   bool         m_recursive;
   bool         m_hasOwner;
@@ -45,13 +46,11 @@ private:
   inline void recordAcquisition() {
 #ifdef DEBUG
     if (enableAssertions) {
-      assert(!m_hasOwner ||
-             pthread_equal(m_owner, pthread_self()));
-      assert(m_acquires == 0 ||
-             pthread_equal(m_owner, pthread_self()));
+      assert(!m_hasOwner || m_owner == std::this_thread::get_id());
+      assert(m_acquires == 0 || m_owner == std::this_thread::get_id());
       pushRank(m_rank);
       m_hasOwner = true;
-      m_owner    = pthread_self();
+      m_owner = std::this_thread::get_id();
       m_acquires++;
       assert(m_recursive || m_acquires == 1);
     }
@@ -90,7 +89,7 @@ public:
 #ifdef DEBUG
     if (enableAssertions) {
       assert(m_hasOwner);
-      assert(pthread_equal(m_owner, pthread_self()));
+      assert(m_owner == std::this_thread::get_id());
       assert(m_acquires > 0);
     }
 #endif
@@ -203,33 +202,32 @@ private:
  * implementation tends to do crazy things when a rwlock is double-wlocked,
  * so check and assert early in debug builds.
  */
-  static constexpr pthread_t InvalidThread = (pthread_t)0;
-  pthread_t m_writeOwner;
+  std::thread::id m_writeOwner;
   Rank m_rank;
 #endif
 
   void invalidateWriteOwner() {
 #ifdef DEBUG
-    m_writeOwner = InvalidThread;
+    m_writeOwner = std::thread::id();
 #endif
   }
 
   void recordWriteAcquire() {
 #ifdef DEBUG
-    assert(m_writeOwner == InvalidThread);
-    m_writeOwner = pthread_self();
+    assert(m_writeOwner == std::thread::id());
+    m_writeOwner = std::this_thread::get_id();
 #endif
   }
 
   void assertNotWriteOwner() {
 #ifdef DEBUG
-    assert(m_writeOwner != pthread_self());
+    assert(m_writeOwner != std::this_thread::get_id());
 #endif
   }
 
   void assertNotWriteOwned() {
 #ifdef DEBUG
-    assert(m_writeOwner == InvalidThread);
+    assert(m_writeOwner == std::thread::id());
 #endif
   }
 
@@ -275,7 +273,7 @@ public:
   void release() {
 #ifdef DEBUG
     popRank(m_rank);
-    if (m_writeOwner == pthread_self()) {
+    if (m_writeOwner == std::this_thread::get_id()) {
       invalidateWriteOwner();
     }
 #endif

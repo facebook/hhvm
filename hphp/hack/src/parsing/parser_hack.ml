@@ -2435,9 +2435,7 @@ and parameter_list_remain env =
 and parameter_default_with_variadic is_variadic env =
   let default = parameter_default env in
   if default <> None && is_variadic then begin
-    (* TODO: This error message is poorly worded. This is a variadic
-    *formal parameter*, not an *argument*. *)
-    error env "Variadic arguments don't have default values"
+    error env "A variadic parameter cannot have a default value."
   end;
   if is_variadic then None else default
 
@@ -2472,9 +2470,7 @@ and param env =
 
   attributes-opt modifiers-opt typehint-opt ref-opt $name default-opt
   attributes-opt modifiers-opt typehint-opt ... $name
-
-  TODO: Combining & with ... is illegal even in non-strict mode;
-        give an error if both are specified. *)
+  *)
   let param_user_attributes = attribute env in
   let param_modifier = parameter_modifier env in
   let param_hint = parameter_hint env in

@@ -64,9 +64,6 @@ bool DEBUG_ONLY checkParams(const php::Func& f) {
   for (uint32_t i = 0; i < f.locals.size(); ++i) {
     assert(f.locals[i].id == i);
   }
-  for (uint32_t i = 0; i < f.iters.size(); ++i) {
-    assert(f.iters[i]->id == i);
-  }
 
   // dvInit pointers are consistent in the parameters vector and on
   // the func.

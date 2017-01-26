@@ -65,7 +65,7 @@ State pseudomain_entry_state(borrowed_ptr<const php::Func> func) {
   ret.initialized = true;
   ret.thisAvailable = false;
   ret.locals.resize(func->locals.size());
-  ret.iters.resize(func->iters.size());
+  ret.iters.resize(func->numIters);
   for (auto& l : ret.locals) l = TGen;
   return ret;
 }
@@ -78,7 +78,7 @@ State entry_state(const Index& index,
   ret.initialized = true;
   ret.thisAvailable = index.lookup_this_available(ctx.func);
   ret.locals.resize(ctx.func->locals.size());
-  ret.iters.resize(ctx.func->iters.size());
+  ret.iters.resize(ctx.func->numIters);
 
   // TODO(#3788877): when we're doing a context sensitive analyze_func_inline,
   // thisAvailable and specific type of $this should be able to come from the

@@ -232,13 +232,6 @@ struct Local {
 };
 
 /*
- * Metadata about function iterator variables.
- */
-struct Iter {
-  uint32_t id;
-};
-
-/*
  * Static local information.  For each static local, we need to keep
  * the php code around for reflection.
  */
@@ -285,7 +278,7 @@ struct Func {
    */
   std::vector<Param> params;
   std::vector<Local> locals;
-  std::vector<std::unique_ptr<Iter>> iters;
+  IterId             numIters;
   std::vector<StaticLocalInfo> staticLocals;
 
   /*

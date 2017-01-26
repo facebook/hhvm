@@ -130,12 +130,12 @@ struct BCHashHelper {
     return v.size() ^ hash(v.front());
   }
 
-  static size_t hash(std::pair<IterKind,borrowed_ptr<php::Iter>> kv) {
-    return std::hash<decltype(kv.second)>()(kv.second);
+  static size_t hash(std::pair<IterKind, IterId> kv) {
+    return std::hash<IterId>()(kv.second);
   }
 
   static size_t hash(LocalRange range) {
-    return HPHP::hash_int64_pair((uintptr_t)range.first, range.restCount);
+    return HPHP::hash_int64_pair(range.first, range.restCount);
   }
 
   template<class T>
@@ -154,7 +154,7 @@ struct BCHashHelper {
   >::type hash(const T& t) { return std::hash<T>()(t); }
 };
 
-using IterTabEnt    = std::pair<IterKind,borrowed_ptr<php::Iter>>;
+using IterTabEnt    = std::pair<IterKind, IterId>;
 using IterTab       = CompactVector<IterTabEnt>;
 
 using SwitchTab     = CompactVector<borrowed_ptr<php::Block>>;
@@ -174,7 +174,7 @@ namespace bc {
 #define IMM_TY_IVA      int32_t
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
-#define IMM_TY_IA       borrowed_ptr<php::Iter>
+#define IMM_TY_IA       IterId
 #define IMM_TY_DA       double
 #define IMM_TY_SA       SString
 #define IMM_TY_RATA     RepoAuthType

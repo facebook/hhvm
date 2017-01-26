@@ -429,7 +429,7 @@ void populate_block(ParseUnitState& puState,
     for (int32_t i = 0; i < vecLen; ++i) {
       auto const kind = static_cast<IterKind>(decode<int32_t>(pc));
       auto const id = decode<int32_t>(pc);
-      ret.emplace_back(kind, borrow(func.iters[id]));
+      ret.emplace_back(kind, id);
     }
     return ret;
   };
@@ -452,18 +452,18 @@ void populate_block(ParseUnitState& puState,
 #define IMM_LA(n)      auto loc##n = [&] {                       \
                          LocalId id = decode_iva(pc);            \
                          always_assert(id < func.locals.size()); \
-                         return id;         \
+                         return id;                              \
                        }();
 #define IMM_IA(n)      auto iter##n = [&] {                      \
-                         auto id = decode_iva(pc);               \
-                         always_assert(id < func.iters.size());  \
-                         return borrow(func.iters[id]);          \
+                         IterId id = decode_iva(pc);             \
+                         always_assert(id < func.numIters);      \
+                         return id;                              \
                        }();
 #define IMM_DA(n)      auto dbl##n = decode<double>(pc);
 #define IMM_SA(n)      auto str##n = ue.lookupLitstr(decode<Id>(pc));
 #define IMM_RATA(n)    auto rat = decodeRAT(ue, pc);
 #define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
-#define IMM_BA(n)      assert(next == past); \
+#define IMM_BA(n)      assert(next == past);     \
                        auto target = findBlock(  \
                          opPC + decode<Offset>(pc) - ue.bc());
 #define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
@@ -700,11 +700,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
     func.locals[kv.second].name = kv.first;
   }
 
-  func.iters.resize(fe.numIterators());
-  for (uint32_t i = 0; i < func.iters.size(); ++i) {
-    func.iters[i] = folly::make_unique<php::Iter>();
-    func.iters[i]->id = i;
-  }
+  func.numIters = fe.numIterators();
 
   func.staticLocals.reserve(fe.staticVars.size());
   for (auto& sv : fe.staticVars) {

@@ -306,7 +306,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
   auto append_itertab = [&] (const IterTab& tab) {
     ret += "<";
     for (auto& kv : tab) {
-      folly::toAppend(kv.first, ",", kv.second->id, " ", &ret);
+      folly::toAppend(kv.first, ",", kv.second, " ", &ret);
     }
     ret += ">";
   };
@@ -346,7 +346,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
-#define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n->id, &ret);
+#define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
 #define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
 #define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);

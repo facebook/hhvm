@@ -2098,7 +2098,7 @@ void in(ISS& env, const bc::IterNext& op) {
   auto const curLoc3 = locRaw(env, op.loc3);
 
   match<void>(
-    env.state.iters[op.iter1->id],
+    env.state.iters[op.iter1],
     [&] (UnknownIter)           { setLoc(env, op.loc3, TInitCell); },
     [&] (const TrackedIter& ti) { setLoc(env, op.loc3, ti.kv.second); }
   );
@@ -2118,7 +2118,7 @@ void in(ISS& env, const bc::IterNextK& op) {
   auto const curLoc4 = locRaw(env, op.loc4);
 
   match<void>(
-    env.state.iters[op.iter1->id],
+    env.state.iters[op.iter1],
     [&] (UnknownIter) {
       setLoc(env, op.loc3, TInitCell);
       setLoc(env, op.loc4, TInitCell);

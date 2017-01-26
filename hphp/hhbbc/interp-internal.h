@@ -529,11 +529,11 @@ void unsetUnknownLocal(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // iterators
 
-void setIter(ISS& env, borrowed_ptr<php::Iter> iter, Iter iterState) {
-  env.state.iters[iter->id] = std::move(iterState);
+void setIter(ISS& env, IterId iter, Iter iterState) {
+  env.state.iters[iter] = std::move(iterState);
 }
-void freeIter(ISS& env, borrowed_ptr<php::Iter> iter) {
-  env.state.iters[iter->id] = UnknownIter {};
+void freeIter(ISS& env, IterId iter) {
+  env.state.iters[iter] = UnknownIter {};
 }
 
 //////////////////////////////////////////////////////////////////////

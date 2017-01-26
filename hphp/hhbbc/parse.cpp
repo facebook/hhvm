@@ -230,7 +230,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
         auto const fault = findBlock(eh.m_fault);
         ret.funcletNodes[fault].push_back(borrow(node));
         ret.faultFuncletStarts.insert(eh.m_fault);
-        node->info = php::FaultRegion { fault, eh.m_iterId, eh.m_itRef };
+        node->info = php::FaultRegion { fault->id, eh.m_iterId, eh.m_itRef };
       }
       break;
     case EHEnt::Type::Catch:
@@ -240,7 +240,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
           auto const catchBlk = findBlock(centry.second);
           treg.catches.emplace_back(
             fe.ue().lookupLitstr(centry.first),
-            catchBlk
+            catchBlk->id
           );
         }
         node->info = treg;
@@ -400,7 +400,7 @@ void populate_block(ParseUnitState& puState,
     for (int32_t i = 0; i < vecLen; ++i) {
       ret.push_back(findBlock(
         opPC + decode<Offset>(pc) - ue.bc()
-      ));
+      )->id);
     }
     return ret;
   };
@@ -412,14 +412,15 @@ void populate_block(ParseUnitState& puState,
     for (int32_t i = 0; i < vecLen - 1; ++i) {
       auto const id = decode<Id>(pc);
       auto const offset = decode<Offset>(pc);
-      ret.emplace_back(ue.lookupLitstr(id), findBlock(opPC + offset - ue.bc()));
+      ret.emplace_back(ue.lookupLitstr(id),
+                       findBlock(opPC + offset - ue.bc())->id);
     }
 
     // Final case is the default, and must have a litstr id of -1.
     DEBUG_ONLY auto const defId = decode<Id>(pc);
     auto const defOff = decode<Offset>(pc);
     assert(defId == -1);
-    ret.emplace_back(nullptr, findBlock(opPC + defOff - ue.bc()));
+    ret.emplace_back(nullptr, findBlock(opPC + defOff - ue.bc())->id);
     return ret;
   };
 
@@ -465,7 +466,7 @@ void populate_block(ParseUnitState& puState,
 #define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
 #define IMM_BA(n)      assert(next == past);     \
                        auto target = findBlock(  \
-                         opPC + decode<Offset>(pc) - ue.bc());
+                         opPC + decode<Offset>(pc) - ue.bc())->id;
 #define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
 #define IMM_OA(type)   type IMM_OA_IMPL
 #define IMM_VSA(n)     auto keys = decode_stringvec();
@@ -546,7 +547,7 @@ void populate_block(ParseUnitState& puState,
 
     if (next == past) {
       if (instrAllowsFallThru(op)) {
-        blk.fallthrough = findBlock(next - ue.bc());
+        blk.fallthrough = findBlock(next - ue.bc())->id;
       }
     }
 
@@ -670,8 +671,10 @@ void build_cfg(ParseUnitState& puState,
   link_entry_points(func, fe, findBlock);
   find_fault_funclets(exnTreeInfo, func, blockStarts, findBlock);
 
+  func.blocks.resize(blockMap.size());
   for (auto& kv : blockMap) {
-    func.blocks.emplace_back(std::move(kv.second));
+    auto const id = kv.second->id;
+    func.blocks[id] = std::move(kv.second);
   }
 }
 

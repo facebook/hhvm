@@ -106,9 +106,9 @@ struct Block {
    * and Precise Modeling of Exceptions for the Analysis of Java
    * Programs" (http://dl.acm.org/citation.cfm?id=316171).
    */
-  borrowed_ptr<Block> fallthrough;
+  BlockId fallthrough{NoBlockId};
   bool fallthroughNS = false;
-  std::vector<borrowed_ptr<Block>> factoredExits;
+  std::vector<BlockId> factoredExits;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -142,11 +142,11 @@ struct Block {
  * php-level finally blocks cloned into fault funclets).
  */
 
-struct FaultRegion { borrowed_ptr<Block> faultEntry;
+struct FaultRegion { BlockId faultEntry;
                      Id iterId;
                      bool itRef; };
 
-using CatchEnt     = std::pair<const StringData*,borrowed_ptr<Block>>;
+using CatchEnt     = std::pair<const StringData*,BlockId>;
 struct TryRegion   { std::vector<CatchEnt> catches; };
 
 struct ExnNode {

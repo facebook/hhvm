@@ -158,7 +158,7 @@ StepFlags step(Interp&, const Bytecode& op);
  * callback is used to indicate when/where the state referenced in the
  * Interp structure should be propagated.
  */
-using PropagateFn = std::function<void (php::Block&, const State&)>;
+using PropagateFn = std::function<void (BlockId, const State&)>;
 RunFlags run(Interp&, PropagateFn);
 
 /*

@@ -157,11 +157,11 @@ struct BCHashHelper {
 using IterTabEnt    = std::pair<IterKind, IterId>;
 using IterTab       = CompactVector<IterTabEnt>;
 
-using SwitchTab     = CompactVector<borrowed_ptr<php::Block>>;
+using SwitchTab     = CompactVector<BlockId>;
 
 // The final entry in the SSwitchTab is the default case, it will
 // always have a nullptr for the string.
-using SSwitchTabEnt = std::pair<SString,borrowed_ptr<php::Block>>;
+using SSwitchTabEnt = std::pair<SString,BlockId>;
 using SSwitchTab    = CompactVector<SSwitchTabEnt>;
 
 //////////////////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ namespace bc {
 #define IMM_TY_SA       SString
 #define IMM_TY_RATA     RepoAuthType
 #define IMM_TY_AA       SArray
-#define IMM_TY_BA       borrowed_ptr<php::Block>
+#define IMM_TY_BA       BlockId
 #define IMM_TY_OA(type) type
 #define IMM_TY_VSA      CompactVector<SString>
 #define IMM_TY_KA       MKey

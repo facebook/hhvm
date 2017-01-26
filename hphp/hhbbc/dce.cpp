@@ -1002,26 +1002,26 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 //////////////////////////////////////////////////////////////////////
 
 void remove_unreachable_blocks(const Index& index, const FuncAnalysis& ainfo) {
-  auto reachable = [&](php::Block& b) {
-    return ainfo.bdata[b.id].stateIn.initialized;
+  auto reachable = [&](BlockId id) {
+    return ainfo.bdata[id].stateIn.initialized;
   };
 
   for (auto& blk : ainfo.rpoBlocks) {
-    if (reachable(*blk)) continue;
+    if (reachable(blk->id)) continue;
     auto const srcLoc = blk->hhbcs.front().srcLoc;
     blk->hhbcs = {
       bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
       bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
     };
-    blk->fallthrough = nullptr;
+    blk->fallthrough = NoBlockId;
   }
 
   if (!options.RemoveDeadBlocks) return;
 
   for (auto& blk : ainfo.rpoBlocks) {
     auto reachableTargets = false;
-    forEachTakenEdge(blk->hhbcs.back(), [&] (php::Block& target) {
-        if (reachable(target)) reachableTargets = true;
+    forEachTakenEdge(blk->hhbcs.back(), [&] (BlockId id) {
+        if (reachable(id)) reachableTargets = true;
       });
     if (reachableTargets) continue;
     switch (blk->hhbcs.back().op) {
@@ -1050,13 +1050,14 @@ bool merge_blocks(const FuncAnalysis& ainfo) {
   // find all the blocks with multiple preds; they can't be merged
   // into their predecessors
   for (auto& blk : func.blocks) {
+    if (blk->id == NoBlockId) continue;
     int numSucc = 0;
     if (!reachable(*blk)) multiplePreds[blk->id] = true;
-    forEachSuccessor(*blk, [&](php::Block& succ) {
-        if (hasPred[succ.id]) {
-          multiplePreds[succ.id] = true;
+    forEachSuccessor(*blk, [&](BlockId succId) {
+        if (hasPred[succId]) {
+          multiplePreds[succId] = true;
         } else {
-          hasPred[succ.id] = true;
+          hasPred[succId] = true;
         }
         numSucc++;
       });
@@ -1071,7 +1072,9 @@ bool merge_blocks(const FuncAnalysis& ainfo) {
 
   bool removedAny = false;
   for (auto& blk : func.blocks) {
-    while (auto nxt = blk->fallthrough) {
+    if (blk->id == NoBlockId) continue;
+    while (blk->fallthrough != NoBlockId) {
+      auto nxt = borrow(func.blocks[blk->fallthrough]);
       if (multipleSuccs[blk->id] ||
           multiplePreds[nxt->id] ||
           blk->exnNode != nxt->exnNode ||
@@ -1085,7 +1088,7 @@ bool merge_blocks(const FuncAnalysis& ainfo) {
       blk->fallthroughNS = nxt->fallthroughNS;
       if (nxt->factoredExits.size()) {
         if (blk->factoredExits.size()) {
-          std::set<borrowed_ptr<php::Block>> exitSet;
+          std::set<BlockId> exitSet;
           std::copy(begin(blk->factoredExits), end(blk->factoredExits),
                     std::inserter(exitSet, begin(exitSet)));
           std::copy(nxt->factoredExits.begin(), nxt->factoredExits.end(),
@@ -1099,22 +1102,13 @@ bool merge_blocks(const FuncAnalysis& ainfo) {
       }
       std::copy(nxt->hhbcs.begin(), nxt->hhbcs.end(),
                 std::back_inserter(blk->hhbcs));
-      nxt->fallthrough = nullptr;
-      removed[nxt->id] = removedAny = true;
+      nxt->fallthrough = NoBlockId;
+      nxt->id = NoBlockId;
+      removedAny = true;
     }
   }
 
-  if (!removedAny) return false;
-
-  func.blocks.erase(std::remove_if(func.blocks.begin(), func.blocks.end(),
-                                   [&](std::unique_ptr<php::Block>& blk) {
-                                     return removed[blk->id];
-                                   }), func.blocks.end());
-  func.nextBlockId = 0;
-  for (auto& blk : func.blocks) {
-    blk->id = func.nextBlockId++;
-  }
-  return true;
+  return removedAny;
 }
 
 //////////////////////////////////////////////////////////////////////

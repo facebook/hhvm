@@ -501,14 +501,14 @@ void first_pass(const Index& index,
         gen(bc::BreakTraceHint {});
       }
       if (state.fpiStack.empty()) {
-        if (!blk->fallthrough ||
-            ainfo.bdata[blk->fallthrough->id].stateIn.initialized) {
+        if (blk->fallthrough == NoBlockId ||
+            ainfo.bdata[blk->fallthrough].stateIn.initialized) {
           auto const fatal = make_block(ainfo, blk, state);
           fatal->hhbcs = {
             bc_with_loc(op.srcLoc, bc::String { s_unreachable.get() }),
             bc_with_loc(op.srcLoc, bc::Fatal { FatalOp::Runtime })
           };
-          blk->fallthrough = fatal;
+          blk->fallthrough = fatal->id;
         }
         break;
       }

@@ -38,6 +38,10 @@ const StaticString s_invoke("__invoke");
 //////////////////////////////////////////////////////////////////////
 
 bool DEBUG_ONLY checkBlock(const php::Block& b) {
+  if (b.id == NoBlockId) {
+    // the block was deleted
+    return true;
+  }
   assert(!b.hhbcs.empty());
 
   // No instructions in the middle of a block should have taken edges,
@@ -45,13 +49,13 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
   for (auto it = begin(b.hhbcs); it != end(b.hhbcs); ++it) {
     assert(it->op != Op::Jmp && "unconditional Jmp mid-block");
     if (std::next(it) == end(b.hhbcs)) break;
-    forEachTakenEdge(*it, [&] (php::Block& b) {
+    forEachTakenEdge(*it, [&] (BlockId blk) {
       assert(!"Instruction in middle of block had a jump target");
     });
   }
 
   // The factored exit list contains unique elements.
-  std::set<borrowed_ptr<const php::Block>> exitSet;
+  std::set<BlockId> exitSet;
   std::copy(begin(b.factoredExits), end(b.factoredExits),
             std::inserter(exitSet, begin(exitSet)));
   assert(exitSet.size() == b.factoredExits.size());
@@ -77,7 +81,7 @@ bool DEBUG_ONLY checkParams(const php::Func& f) {
 // N is usually small ... ;)
 template<class Container>
 bool has_edge_linear(const Container& c,
-                     borrowed_ptr<const php::Block> target) {
+                     BlockId target) {
   return std::find(begin(c), end(c), target) != end(c);
 }
 
@@ -100,16 +104,20 @@ void checkExnTreeBasic(boost::dynamic_bitset<>& seenIds,
   }
 }
 
-void checkFaultEntryRec(boost::dynamic_bitset<>& seenBlocks,
-                        const php::Block& faultEntry,
+void checkFaultEntryRec(const php::Func& func,
+                        boost::dynamic_bitset<>& seenBlocks,
+                        BlockId faultEntryId,
                         const php::ExnNode& exnNode) {
+
+  auto const& faultEntry = *func.blocks[faultEntryId];
+  assert(faultEntry.id == faultEntryId);
   // Loops in fault funclets could cause us to revisit the same block,
   // so we track the ones we've seen.
-  if (seenBlocks.size() < faultEntry.id + 1) {
-    seenBlocks.resize(faultEntry.id + 1);
+  if (seenBlocks.size() < faultEntryId + 1) {
+    seenBlocks.resize(faultEntryId + 1);
   }
-  if (seenBlocks[faultEntry.id]) return;
-  seenBlocks[faultEntry.id] = true;
+  if (seenBlocks[faultEntryId]) return;
+  seenBlocks[faultEntryId] = true;
 
   /*
    * All funclets aren't in the main section.
@@ -141,23 +149,23 @@ void checkFaultEntryRec(boost::dynamic_bitset<>& seenBlocks,
   // there can be exception-only successors for catch blocks inside of
   // fault funclets for finally handlers.  (Just going un-asserted for
   // now.)
-  forEachNormalSuccessor(faultEntry, [&] (const php::Block& succ) {
-    checkFaultEntryRec(seenBlocks, succ, exnNode);
+  forEachNormalSuccessor(faultEntry, [&] (BlockId succ) {
+    checkFaultEntryRec(func, seenBlocks, succ, exnNode);
   });
 }
 
-void checkExnTreeMore(borrowed_ptr<const ExnNode> node) {
+void checkExnTreeMore(const php::Func& func, borrowed_ptr<const ExnNode> node) {
   // Fault entries have a few things to assert.
   match<void>(
     node->info,
     [&] (const FaultRegion& fr) {
       boost::dynamic_bitset<> seenBlocks;
-      checkFaultEntryRec(seenBlocks, *fr.faultEntry, *node);
+      checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
     },
     [&] (const TryRegion& tr) {}
   );
 
-  for (auto& c : node->children) checkExnTreeMore(borrow(c));
+  for (auto& c : node->children) checkExnTreeMore(func, borrow(c));
 }
 
 bool DEBUG_ONLY checkExnTree(const php::Func& f) {
@@ -169,7 +177,7 @@ bool DEBUG_ONLY checkExnTree(const php::Func& f) {
 
   // The following assertions come after the above, because if the
   // tree is totally clobbered it's easy for the wrong ones to fire.
-  for (auto& n : f.exnNodes) checkExnTreeMore(borrow(n));
+  for (auto& n : f.exnNodes) checkExnTreeMore(f, borrow(n));
   return true;
 }
 
@@ -205,6 +213,7 @@ bool check(const php::Func& f) {
 
   boost::dynamic_bitset<> seenId(f.nextBlockId);
   for (auto& block : f.blocks) {
+    if (block->id == NoBlockId) continue;
     assert(checkBlock(*block));
 
     // All blocks have unique ids in a given function; not necessarily

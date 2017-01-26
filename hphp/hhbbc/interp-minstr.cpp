@@ -379,8 +379,8 @@ void handleInPublicStaticElemU(ISS& env) {
 // MInstrs can throw in between each op, so the states of locals
 // need to be propagated across factored exit edges.
 void miThrow(ISS& env) {
-  for (auto& factored : env.blk.factoredExits) {
-    env.propagate(*factored, without_stacks(env.state));
+  for (auto factored : env.blk.factoredExits) {
+    env.propagate(factored, without_stacks(env.state));
   }
 }
 

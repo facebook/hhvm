@@ -231,8 +231,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
     };
 
-    auto emit_branch = [&] (const php::Block& target) {
-      auto& info = blockInfo[target.id];
+    auto emit_branch = [&] (BlockId id) {
+      auto& info = blockInfo[id];
 
       if (info.expectedStackDepth) {
         assert(*info.expectedStackDepth == currentStackDepth);
@@ -250,17 +250,17 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto emit_switch = [&] (const SwitchTab& targets) {
       ue.emitInt32(targets.size());
-      for (auto& t : targets) emit_branch(*t);
+      for (auto t : targets) emit_branch(t);
     };
 
     auto emit_sswitch = [&] (const SSwitchTab& targets) {
       ue.emitInt32(targets.size());
       for (size_t i = 0; i < targets.size() - 1; ++i) {
         ue.emitInt32(ue.mergeLitstr(targets[i].first));
-        emit_branch(*targets[i].second);
+        emit_branch(targets[i].second);
       }
       ue.emitInt32(-1);
-      emit_branch(*targets[targets.size() - 1].second);
+      emit_branch(targets[targets.size() - 1].second);
     };
 
     auto emit_itertab = [&] (const IterTab& iterTab) {
@@ -336,7 +336,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_AA(n)      ue.emitInt32(ue.mergeArray(data.arr##n));
 #define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop##n));
 #define IMM_OA(type)   IMM_OA_IMPL
-#define IMM_BA(n)      emit_branch(*data.target);
+#define IMM_BA(n)      emit_branch(data.target);
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
@@ -467,8 +467,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     for (auto& inst : b->hhbcs) emit_inst(inst);
 
-    if (b->fallthrough) {
-      if (std::next(blockIt) == endBlockIt || blockIt[1] != b->fallthrough) {
+    if (b->fallthrough != NoBlockId) {
+      if (std::next(blockIt) == endBlockIt ||
+          blockIt[1]->id != b->fallthrough) {
         if (b->fallthroughNS) {
           emit_inst(bc::JmpNS { b->fallthrough });
         } else {
@@ -563,7 +564,7 @@ void emit_eh_region(FuncEmitter& fe,
       for (auto& c : tr.catches) {
         eh.m_catches.emplace_back(
           fe.ue().mergeLitstr(c.first),
-          blockInfo[c.second->id].offset
+          blockInfo[c.second].offset
         );
       }
       eh.m_fault = kInvalidOffset;
@@ -572,7 +573,7 @@ void emit_eh_region(FuncEmitter& fe,
     },
     [&] (const php::FaultRegion& fr) {
       eh.m_type = EHEnt::Type::Fault;
-      eh.m_fault = blockInfo[fr.faultEntry->id].offset;
+      eh.m_fault = blockInfo[fr.faultEntry].offset;
       eh.m_iterId = fr.iterId;
       eh.m_itRef = fr.itRef;
     }

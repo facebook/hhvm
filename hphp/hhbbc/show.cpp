@@ -104,18 +104,18 @@ std::string show(const Func& func, const Block& block) {
 
   for (auto& bc : block.hhbcs) ret += show(func, bc) + "\n";
 
-  if (block.fallthrough) {
+  if (block.fallthrough != NoBlockId) {
     folly::toAppend(
       "(fallthrough blk:",
-      block.fallthrough->id,
+      block.fallthrough,
       ")\n",
       &ret
     );
   }
   if (!block.factoredExits.empty()) {
     ret += "(factored exits:";
-    for (auto& ex : block.factoredExits) {
-      folly::toAppend(" blk:", ex->id, &ret);
+    for (auto ex : block.factoredExits) {
+      folly::toAppend(" blk:", ex, &ret);
     }
     ret += ")\n";
   }
@@ -141,16 +141,15 @@ std::string dot_cfg(const Func& func) {
       "B{} [ label = \"blk:{}\\n\"+{} ]\n",
       b->id, b->id, dot_instructions(func, *b)).str();
     bool outputed = false;
-    forEachNormalSuccessor(*b, [&] (const php::Block& target) {
-      ret += folly::format("B{} -> B{};", b->id, target.id).str();
+    forEachNormalSuccessor(*b, [&] (BlockId target) {
+      ret += folly::format("B{} -> B{};", b->id, target).str();
       outputed = true;
     });
     if (outputed) ret += "\n";
     outputed = false;
     if (!is_single_nop(*b)) {
-      for (auto& ex : b->factoredExits) {
-        ret += folly::format("B{} -> B{} [color=blue];",
-          b->id, ex->id).str();
+      for (auto ex : b->factoredExits) {
+        ret += folly::sformat("B{} -> B{} [color=blue];", b->id, ex);
         outputed = true;
       }
     }
@@ -173,6 +172,7 @@ std::string show(const Func& func) {
     func.name, indent(2, dot_cfg(func))).str();
 
   for (auto& blk : func.blocks) {
+    if (blk->id == NoBlockId) continue;
     ret += folly::format(
       "block #{}\n{}",
       blk->id,
@@ -188,7 +188,7 @@ std::string show(const Func& func) {
     ret += match<std::string>(
       node.info,
       [&] (const FaultRegion& fr) {
-        return folly::to<std::string>("fault->", fr.faultEntry->id);
+        return folly::to<std::string>("fault->", fr.faultEntry);
       },
       [&] (const TryRegion& tr) {
         auto ret = std::string{"catch"};
@@ -196,7 +196,7 @@ std::string show(const Func& func) {
         from(tr.catches)
           | map([&] (CatchEnt ch) {
               return folly::to<std::string>(ch.first->data(),
-                                            "->", ch.second->id);
+                                            "->", ch.second);
             })
           | unsplit(" ", &ret)
           ;
@@ -290,7 +290,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
   auto append_switch = [&] (const SwitchTab& tab) {
     ret += "<";
     for (auto& target : tab) {
-      folly::toAppend(target->id, " ", &ret);
+      folly::toAppend(target, " ", &ret);
     }
     ret += ">";
   };
@@ -298,7 +298,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
   auto append_sswitch = [&] (const SSwitchTab& tab) {
     ret += "<";
     for (auto& kv : tab) {
-      folly::toAppend(escaped_string(kv.first), ":", kv.second->id, " ", &ret);
+      folly::toAppend(escaped_string(kv.first), ":", kv.second, " ", &ret);
     }
     ret += ">";
   };
@@ -351,7 +351,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
 #define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
 #define IMM_AA(n)      ret += " " + array_string(data.arr##n);
-#define IMM_BA(n)      folly::toAppend(" <blk:", data.target->id, ">", &ret);
+#define IMM_BA(n)      folly::toAppend(" <blk:", data.target, ">", &ret);
 #define IMM_OA_IMPL(n) folly::toAppend(" ", subopToName(data.subop##n), &ret);
 #define IMM_OA(type)   IMM_OA_IMPL
 #define IMM_VSA(n)     ret += " "; append_vsa(data.keys);

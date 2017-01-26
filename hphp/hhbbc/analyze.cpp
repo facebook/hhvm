@@ -56,8 +56,8 @@ const StaticString s_Closure("Closure");
  * Short-hand to get the rpoId of a block in a given FuncAnalysis.  (The RPO
  * ids are re-assigned per analysis.)
  */
-uint32_t rpoId(const FuncAnalysis& ai, borrowed_ptr<php::Block> blk) {
-  return ai.bdata[blk->id].rpoId;
+uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
+  return ai.bdata[blk].rpoId;
 }
 
 State pseudomain_entry_state(borrowed_ptr<const php::Func> func) {
@@ -189,7 +189,7 @@ prepare_incompleteQ(const Index& index,
       for (auto i = knownArgs->size(); i < numParams; ++i) {
         if (auto const dv = ctx.func->params[i].dvEntryPoint) {
           ai.bdata[dv->id].stateIn = entryState;
-          incompleteQ.push(rpoId(ai, dv));
+          incompleteQ.push(rpoId(ai, dv->id));
           return true;
         }
       }
@@ -198,7 +198,7 @@ prepare_incompleteQ(const Index& index,
 
     if (!useDvInit) {
       ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
-      incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+      incompleteQ.push(rpoId(ai, ctx.func->mainEntry->id));
     }
 
     return incompleteQ;
@@ -207,7 +207,7 @@ prepare_incompleteQ(const Index& index,
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
     if (auto const dv = ctx.func->params[paramId].dvEntryPoint) {
       ai.bdata[dv->id].stateIn = entryState;
-      incompleteQ.push(rpoId(ai, dv));
+      incompleteQ.push(rpoId(ai, dv->id));
       for (auto locId = paramId; locId < numParams; ++locId) {
         ai.bdata[dv->id].stateIn.locals[locId] =
           ctx.func->params[locId].isVariadic ? TArr : TUninit;
@@ -216,7 +216,7 @@ prepare_incompleteQ(const Index& index,
   }
 
   ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
-  incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+  incompleteQ.push(rpoId(ai, ctx.func->mainEntry->id));
 
   return incompleteQ;
 }
@@ -297,9 +297,9 @@ FuncAnalysis do_analyze_collect(const Index& index,
       property_state_string(collect.props));
     ++interp_counter;
 
-    auto propagate = [&] (php::Block& target, const State& st) {
+    auto propagate = [&] (BlockId target, const State& st) {
       auto const needsWiden =
-        nonWideVisits[target.id] >= options.analyzeFuncWideningLimit;
+        nonWideVisits[target] >= options.analyzeFuncWideningLimit;
 
       // We haven't optimized the widening operator much, because it
       // doesn't happen in practice right now.  We want to know when
@@ -310,18 +310,18 @@ FuncAnalysis do_analyze_collect(const Index& index,
           ctx.func->name->data());
       }
 
-      FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target.id);
+      FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target);
       FTRACE(4, "target old {}",
-        state_string(*ctx.func, ai.bdata[target.id].stateIn));
+        state_string(*ctx.func, ai.bdata[target].stateIn));
 
       auto const changed =
-        needsWiden ? widen_into(ai.bdata[target.id].stateIn, st)
-                   : merge_into(ai.bdata[target.id].stateIn, st);
+        needsWiden ? widen_into(ai.bdata[target].stateIn, st)
+                   : merge_into(ai.bdata[target].stateIn, st);
       if (changed) {
-        incompleteQ.push(rpoId(ai, &target));
+        incompleteQ.push(rpoId(ai, target));
       }
       FTRACE(4, "target new {}",
-        state_string(*ctx.func, ai.bdata[target.id].stateIn));
+        state_string(*ctx.func, ai.bdata[target].stateIn));
     };
 
     auto stateOut = ai.bdata[blk->id].stateIn;

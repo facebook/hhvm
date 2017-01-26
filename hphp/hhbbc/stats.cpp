@@ -400,6 +400,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   add_type(stats.returns, ty);
 
   for (auto& blk : func.blocks) {
+    if (blk->id == NoBlockId) continue;
     for (auto& bc : blk->hhbcs) {
       collect_simple(stats, bc);
     }
@@ -412,13 +413,14 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
     for (auto& blk : func.blocks) {
+      if (blk->id == NoBlockId) continue;
       auto state = fa.bdata[blk->id].stateIn;
       if (!state.initialized) continue;
 
       CollectedInfo collect { index, ctx, nullptr, nullptr };
       Interp interp { index, ctx, collect, borrow(blk), state };
       for (auto& bc : blk->hhbcs) {
-        auto noop    = [] (php::Block&, const State&) {};
+        auto noop    = [] (BlockId, const State&) {};
         auto flags   = StepFlags {};
         ISS env { interp, flags, noop };
         StatsSS sss { env, stats };

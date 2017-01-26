@@ -142,7 +142,7 @@ State entry_state(const Index& index,
   // Finally, make sure any volatile locals are set to Gen, even if they are
   // parameters.
   for (auto locId = uint32_t{0}; locId < ctx.func->locals.size(); ++locId) {
-    if (is_volatile_local(ctx.func, borrow(ctx.func->locals[locId]))) {
+    if (is_volatile_local(ctx.func, locId)) {
       ret.locals[locId] = TGen;
     }
   }

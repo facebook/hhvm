@@ -65,6 +65,9 @@ enum class Flavor { C, V, A, R, F, U, CR, CVU, CUV };
  */
 enum class PrepKind { Ref, Val, Unknown };
 
+using LocalId = uint32_t;
+constexpr const LocalId NoLocalId = -1;
+
 //////////////////////////////////////////////////////////////////////
 
 /*

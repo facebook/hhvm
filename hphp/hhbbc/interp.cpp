@@ -649,8 +649,8 @@ Type memoizeImplRetType(ISS& env) {
   // types of the parameters for context sensitive types.
   auto const numArgs = env.ctx.func->params.size();
   std::vector<Type> args{numArgs};
-  for (auto i = uint32_t{0}; i < numArgs; ++i) {
-    args[i] = locAsCell(env, borrow(env.ctx.func->locals[i]));
+  for (auto i = LocalId{0}; i < numArgs; ++i) {
+    args[i] = locAsCell(env, i);
   }
 
   auto retTy = env.index.lookup_return_type(
@@ -862,7 +862,7 @@ void in(ISS& env, const bc::NativeImpl&) {
 }
 
 void in(ISS& env, const bc::CGetL& op) {
-  borrowed_ptr<php::Local> equivLocal = nullptr;
+  LocalId equivLocal = NoLocalId;
   // If the local could be Uninit or a Ref, don't record equality because the
   // value on the stack won't the same as in the local.
   if (!locCouldBeUninit(env, op.loc1)) {
@@ -922,9 +922,9 @@ template <typename Op> void common_cgetn(ISS& env) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfPersistentString) {
-    if (auto const loc = findLocal(env, v1->m_data.pstr)) {
-      return reduce(env, bc::PopC {},
-                         Op { loc });
+    auto const loc = findLocal(env, v1->m_data.pstr);
+    if (loc != NoLocalId) {
+      return reduce(env, bc::PopC {}, Op { loc });
     }
   }
   readUnknownLocals(env);
@@ -995,7 +995,8 @@ void in(ISS& env, const bc::VGetN&) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfPersistentString) {
-    if (auto const loc = findLocal(env, v1->m_data.pstr)) {
+    auto const loc = findLocal(env, v1->m_data.pstr);
+    if (loc != NoLocalId) {
       return reduce(env, bc::PopC {},
                          bc::VGetL { loc });
     }
@@ -1082,9 +1083,9 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   using MK = MemoKeyConstraint;
   auto const mkc = [&]{
     if (!options.HardTypeHints) return MK::None;
-    if (op.loc1->id >= env.ctx.func->params.size()) return MK::None;
+    if (op.loc1 >= env.ctx.func->params.size()) return MK::None;
     return memoKeyConstraintFromTC(
-      env.ctx.func->params[op.loc1->id].typeConstraint
+      env.ctx.func->params[op.loc1].typeConstraint
     );
   }();
 
@@ -1213,7 +1214,8 @@ void issetEmptyNImpl(ISS& env) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfPersistentString) {
-    if (auto const loc = findLocal(env, v1->m_data.pstr)) {
+    auto const loc = findLocal(env, v1->m_data.pstr);
+    if (loc != NoLocalId) {
       return reduce(env, bc::PopC {}, ReduceOp { loc });
     }
     // Can't push true in the non env.findLocal case unless we know
@@ -1343,7 +1345,7 @@ void in(ISS& env, const bc::SetL& op) {
   setLoc(env, op.loc1, val);
   // If the local could be a Ref, don't record equality because the stack
   // element and the local won't actually have the same type.
-  if (equivLoc &&
+  if (equivLoc != NoLocalId &&
       !locCouldBeRef(env, op.loc1) &&
       !is_volatile_local(env.ctx.func, op.loc1)) {
     addLocEquiv(env, op.loc1, equivLoc);
@@ -1361,8 +1363,8 @@ void in(ISS& env, const bc::SetN&) {
 
   auto const knownLoc = v2 && v2->m_type == KindOfPersistentString
     ? findLocal(env, v2->m_data.pstr)
-    : nullptr;
-  if (knownLoc) {
+    : NoLocalId;
+  if (knownLoc != NoLocalId) {
     setLoc(env, knownLoc, t1);
   } else {
     // We could be changing the value of any local, but we won't
@@ -1490,8 +1492,8 @@ void in(ISS& env, const bc::IncDecN& op) {
   auto const v1 = tv(t1);
   auto const knownLoc = v1 && v1->m_type == KindOfPersistentString
     ? findLocal(env, v1->m_data.pstr)
-    : nullptr;
-  if (knownLoc) {
+    : NoLocalId;
+  if (knownLoc != NoLocalId) {
     return reduce(env, bc::PopC {},
                        bc::IncDecL { knownLoc, op.subop1 });
   }
@@ -1538,8 +1540,8 @@ void in(ISS& env, const bc::BindN&) {
   auto const v2 = tv(t2);
   auto const knownLoc = v2 && v2->m_type == KindOfPersistentString
     ? findLocal(env, v2->m_data.pstr)
-    : nullptr;
-  if (knownLoc) {
+    : NoLocalId;
+  if (knownLoc != NoLocalId) {
     setLocRaw(env, knownLoc, t1);
   } else {
     boxUnknownLocal(env);
@@ -1585,7 +1587,8 @@ void in(ISS& env, const bc::UnsetN& op) {
   auto const t1 = topC(env);
   auto const v1 = tv(t1);
   if (v1 && v1->m_type == KindOfPersistentString) {
-    if (auto const loc = findLocal(env, v1->m_data.pstr)) {
+    auto const loc = findLocal(env, v1->m_data.pstr);
+    if (loc != NoLocalId) {
       return reduce(env, bc::PopC {},
                          bc::UnsetL { loc });
     }
@@ -2285,7 +2288,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * references if it re-enters, even if Option::HardTypeHints is
    * on.
    */
-  auto const constraint = env.ctx.func->params[op.loc1->id].typeConstraint;
+  auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
       !constraint.isTypeConstant()) {
     FTRACE(2, "     {}\n", constraint.fullName());
@@ -2529,7 +2532,7 @@ void group(ISS& env, Iterator& it, Args&&... args) {
   FTRACE(2, " {}\n", [&]() -> std::string {
     auto ret = std::string{};
     for (auto i = size_t{0}; i < sizeof...(Args); ++i) {
-      ret += " " + show(it[i]);
+      ret += " " + show(env.ctx.func, it[i]);
       if (i != sizeof...(Args) - 1) ret += ';';
     }
     return ret;
@@ -2615,7 +2618,7 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
   default: break;
   }
 
-  FTRACE(2, "  {}\n", show(*it));
+  FTRACE(2, "  {}\n", show(env.ctx.func, *it));
   dispatch(env, *it++);
 }
 

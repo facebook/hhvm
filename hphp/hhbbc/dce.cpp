@@ -445,8 +445,8 @@ bool isLive(Env& env, uint32_t id) {
   return env.dceState.liveLocals[id];
 }
 
-Type locRaw(Env& env, borrowed_ptr<php::Local> loc) {
-  return env.stateBefore.locals[loc->id];
+Type locRaw(Env& env, LocalId loc) {
+  return env.stateBefore.locals[loc];
 }
 
 void readDtorLocs(Env& env) {
@@ -531,7 +531,7 @@ void dce(Env& env, const bc::Dup&) {
 
 void dce(Env& env, const bc::CGetL& op) {
   auto const ty = locRaw(env, op.loc1);
-  addGen(env, op.loc1->id);
+  addGen(env, op.loc1);
   if (readCouldHaveSideEffects(ty)) {
     push(env);
   } else {
@@ -541,7 +541,7 @@ void dce(Env& env, const bc::CGetL& op) {
 
 void dce(Env& env, const bc::CGetL2& op) {
   auto const ty = locRaw(env, op.loc1);
-  addGen(env, op.loc1->id);
+  addGen(env, op.loc1);
   auto const u1 = push(env);
   auto const u2 = push(env);
   if (readCouldHaveSideEffects(ty)) {
@@ -553,7 +553,7 @@ void dce(Env& env, const bc::CGetL2& op) {
 
 void dce(Env& env, const bc::CGetL3& op) {
   auto const ty = locRaw(env, op.loc1);
-  addGen(env, op.loc1->id);
+  addGen(env, op.loc1);
   auto const u1 = push(env);
   auto const u2 = push(env);
   auto const u3 = push(env);
@@ -574,13 +574,13 @@ void dce(Env& env, const bc::Exit&)  { push(env); pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::SetL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setCouldHaveSideEffects(oldTy);
-  if (!isLive(env, op.loc1->id) && !effects) return markDead(env);
+  if (!isLive(env, op.loc1) && !effects) return markDead(env);
   push(env);
   pop(env);
   if (effects) {
-    addGen(env, op.loc1->id);
+    addGen(env, op.loc1);
   } else {
-    addKill(env, op.loc1->id);
+    addKill(env, op.loc1);
   }
 }
 
@@ -588,11 +588,11 @@ void dce(Env& env, const bc::UnsetL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setCouldHaveSideEffects(oldTy);
   if (oldTy.subtypeOf(TUninit)) return markDead(env);
-  if (!isLive(env, op.loc1->id) && !effects) return markDead(env);
+  if (!isLive(env, op.loc1) && !effects) return markDead(env);
   if (effects) {
-    addGen(env, op.loc1->id);
+    addGen(env, op.loc1);
   } else {
-    addKill(env, op.loc1->id);
+    addKill(env, op.loc1);
   }
 }
 
@@ -607,10 +607,10 @@ void dce(Env& env, const bc::IncDecL& op) {
   auto const effects = setCouldHaveSideEffects(oldTy) ||
                          readCouldHaveSideEffects(oldTy);
   auto const u1      = push(env);
-  if (!isLive(env, op.loc1->id) && !effects && allUnused(u1)) {
+  if (!isLive(env, op.loc1) && !effects && allUnused(u1)) {
     return markSetDead(env, u1.second);
   }
-  addGen(env, op.loc1->id);
+  addGen(env, op.loc1);
 }
 
 /*
@@ -624,13 +624,13 @@ void dce(Env& env, const bc::SetOpL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setCouldHaveSideEffects(oldTy) ||
                          readCouldHaveSideEffects(oldTy);
-  if (!isLive(env, op.loc1->id) && !effects) {
+  if (!isLive(env, op.loc1) && !effects) {
     popCond(env, push(env));
   } else {
     push(env);
     pop(env);
   }
-  addGen(env, op.loc1->id);
+  addGen(env, op.loc1);
 }
 
 /*
@@ -696,7 +696,7 @@ dce_visit(const Index& index,
   for (auto idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 
-    FTRACE(2, "  == #{} {}\n", idx, show(op));
+    FTRACE(2, "  == #{} {}\n", idx, show(ctx.func, op));
 
     auto visit_env = Env {
       dceState,
@@ -814,24 +814,16 @@ void remove_unused_locals(Context const ctx,
    */
   if (func->isClosureBody) return;
 
-  func->locals.erase(
-    std::remove_if(
-      begin(func->locals) + func->params.size(),
-      end(func->locals),
-      [&] (const std::unique_ptr<php::Local>& l) {
-        if (l->id < kMaxTrackedLocals && !usedLocals.test(l->id)) {
-          FTRACE(2, "  removing: {}\n", local_string(borrow(l)));
-          return true;
-        }
-        return false;
-      }
-    ),
-    end(func->locals)
-  );
-
-  // Fixup local ids, in case we removed any.
-  for (auto i = uint32_t{0}; i < func->locals.size(); ++i) {
-    func->locals[i]->id = i;
+  for (auto loc = func->locals.begin() + func->params.size();
+       loc != func->locals.end(); ++loc) {
+    if (loc->killed) {
+      assert(loc->id < kMaxTrackedLocals && !usedLocals.test(loc->id));
+      continue;
+    }
+    if (loc->id < kMaxTrackedLocals && !usedLocals.test(loc->id)) {
+      FTRACE(2, "  killing: {}\n", local_string(*func, loc->id));
+      const_cast<php::Local&>(*loc).killed = true;
+    }
   }
 }
 
@@ -869,8 +861,9 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     auto i = uint32_t{0};
     return from(ai.ctx.func->locals)
       | mapped(
-        [&] (const std::unique_ptr<php::Local>& l) {
-          return folly::sformat("  {} {}\n", i++, local_string(borrow(l)));
+        [&] (const php::Local& l) {
+          return folly::sformat("  {} {}\n",
+                                i++, local_string(*ai.ctx.func, l.id));
         })
       | unsplit<std::string>("");
   }());

@@ -172,14 +172,14 @@ struct Base {
    */
   Type locTy;
   SString locName;
-  borrowed_ptr<php::Local> local;
+  LocalId local;
 };
 
 // An element on the eval stack
 struct StackElem {
   Type type;
   // A local which is known to have an equivalent value to this stack value.
-  borrowed_ptr<php::Local> equivLocal;
+  LocalId equivLocal;
 
   bool operator==(const StackElem& other) const {
     return type == other.type && equivLocal == other.equivLocal;
@@ -240,7 +240,7 @@ struct State {
    * Mapping of a local to another local which is known to have an equivalent
    * value.
    */
-  std::vector<borrowed_ptr<php::Local>> equivLocals;
+  std::vector<LocalId> equivLocals;
 };
 
 /*

@@ -46,6 +46,7 @@ struct BasicPeephole {
   }
 
   void push_back(const Bytecode& op);
+  std::string show(const Bytecode& op);
 private:
   const Index& m_index;
   const Context& m_ctx;

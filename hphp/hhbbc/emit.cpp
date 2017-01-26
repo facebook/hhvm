@@ -175,22 +175,6 @@ struct EmitBcInfo {
   std::vector<BlockInfo> blockInfo;
 };
 
-MemberKey make_member_key(MKey mkey) {
-  switch (mkey.mcode) {
-    case MEC: case MPC:
-      return MemberKey{mkey.mcode, mkey.idx};
-    case MEL: case MPL:
-      return MemberKey{mkey.mcode, int32_t(mkey.local->id)};
-    case MET: case MPT: case MQT:
-      return MemberKey{mkey.mcode, mkey.litstr};
-    case MEI:
-      return MemberKey{mkey.mcode, mkey.int64};
-    case MW:
-      return MemberKey{};
-  }
-  not_reached();
-}
-
 EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          UnitEmitter& ue,
                          const php::Func& func) {
@@ -208,10 +192,35 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   // allocated in the loop.)
   std::vector<uint8_t> immVec;
 
+  auto map_local = [&] (LocalId id) {
+    auto const loc = func.locals[id];
+    assert(!loc.killed);
+    assert(loc.id <= id);
+    return loc.id;
+  };
+
+  auto make_member_key = [&] (MKey mkey) {
+    switch (mkey.mcode) {
+      case MEC: case MPC:
+        return MemberKey{mkey.mcode, mkey.idx};
+      case MEL: case MPL:
+        return MemberKey{
+          mkey.mcode, static_cast<int32_t>(map_local(mkey.local))
+        };
+      case MET: case MPT: case MQT:
+        return MemberKey{mkey.mcode, mkey.litstr};
+      case MEI:
+        return MemberKey{mkey.mcode, mkey.int64};
+      case MW:
+        return MemberKey{};
+    }
+    not_reached();
+  };
+
   auto emit_inst = [&] (const Bytecode& inst) {
     auto const startOffset = ue.bcPos();
 
-    FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(inst),
+    FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(&func, inst),
       show(inst.srcLoc));
 
     auto emit_vsa = [&] (const CompactVector<SString>& keys) {
@@ -307,8 +316,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto emit_lar = [&](const LocalRange& range) {
-      always_assert(range.first->id + range.restCount < func.locals.size());
-      encodeLocalRange(ue, HPHP::LocalRange{range.first->id, range.restCount});
+      always_assert(range.first + range.restCount < func.locals.size());
+      auto const first = map_local(range.first);
+      DEBUG_ONLY auto const last = map_local(range.first + range.restCount);
+      assert(last - first == range.restCount);
+      encodeLocalRange(ue, HPHP::LocalRange{first, range.restCount});
     };
 
 #define IMM_BLA(n)     emit_switch(data.targets);
@@ -316,7 +328,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_ILA(n)     emit_itertab(data.iterTab);
 #define IMM_IVA(n)     ue.emitIVA(data.arg##n);
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
-#define IMM_LA(n)      ue.emitIVA(data.loc##n->id);
+#define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
 #define IMM_IA(n)      ue.emitIVA(data.iter##n->id);
 #define IMM_DA(n)      ue.emitDouble(data.dbl##n);
 #define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
@@ -478,7 +490,8 @@ void emit_locals_and_params(FuncEmitter& fe,
   Id id = 0;
 
   for (auto& loc : func.locals) {
-    if (id < func.params.size()) {
+    if (loc.id < func.params.size()) {
+      assert(!loc.killed);
       auto& param = func.params[id];
       FuncEmitter::ParamInfo pinfo;
       pinfo.defaultValue = param.defaultValue;
@@ -489,20 +502,21 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.builtinType = param.builtinType;
       pinfo.byRef = param.byRef;
       pinfo.variadic = param.isVariadic;
-      fe.appendParam(func.locals[id]->name, pinfo);
+      fe.appendParam(func.locals[id].name, pinfo);
       if (auto const dv = param.dvEntryPoint) {
         fe.params[id].funcletOff = info.blockInfo[dv->id].offset;
       }
-    } else {
-      if (loc->name) {
-        fe.allocVarId(loc->name);
-        assert(fe.lookupVarId(loc->name) == id);
+      ++id;
+    } else if (!loc.killed) {
+      if (loc.name) {
+        fe.allocVarId(loc.name);
+        assert(fe.lookupVarId(loc.name) == id);
+        assert(loc.id == id);
       } else {
         fe.allocUnnamedLocal();
       }
+      ++id;
     }
-
-    ++id;
   }
   assert(fe.numLocals() == id);
   fe.setNumIterators(func.iters.size());
@@ -842,6 +856,17 @@ void emit_finish_func(EmitUnitState& state,
 }
 
 void emit_init_func(FuncEmitter& fe, const php::Func& func) {
+  Id id = 0;
+
+  for (auto& loc : const_cast<php::Func&>(func).locals) {
+    if (loc.killed) {
+      // make sure its out of range, in case someone tries to read it.
+      loc.id = INT_MAX;
+    } else {
+      loc.id = id++;
+    }
+  }
+
   fe.init(
     std::get<0>(func.srcInfo.loc),
     std::get<1>(func.srcInfo.loc),

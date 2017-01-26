@@ -98,7 +98,8 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
                             Gen gen) {
   if (state.unreachable) return;
 
-  for (size_t i = 0; i < state.locals.size(); ++i) {
+  for (LocalId i = 0; i < state.locals.size(); ++i) {
+    if (func.locals[i].killed) continue;
     if (options.FilterAssertions) {
       // MemoGet and MemoSet read from a range of locals, but don't gain any
       // benefit from knowing their types.
@@ -108,11 +109,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
       }
     }
     auto const realT = state.locals[i];
-    auto const op = makeAssert<bc::AssertRATL>(
-      arrTable,
-      borrow(func.locals[i]),
-      realT
-    );
+    auto const op = makeAssert<bc::AssertRATL>(arrTable, i, realT);
     if (op) gen(*op);
   }
 
@@ -279,12 +276,12 @@ void insert_assertions(const Index& index,
   CollectedInfo collect { index, ctx, nullptr, nullptr };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(op));
+    FTRACE(2, "  == {}\n", show(ctx.func, op));
 
     auto gen = [&] (const Bytecode& newb) {
       newBCs.push_back(newb);
       newBCs.back().srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(newBCs.back()));
+      FTRACE(2, "   + {}\n", show(ctx.func, newBCs.back()));
 
       lastStackOutputObvious =
         newb.numPush() != 0 && hasObviousStackOutput(newb.op);
@@ -464,12 +461,12 @@ void first_pass(const Index& index,
   std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
 
   for (auto& op : blk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(op));
+    FTRACE(2, "  == {}\n", show(ctx.func, op));
 
     auto const stateIn = state; // Peephole expects input eval state.
     auto gen = [&,srcStack] (const Bytecode& newBC) {
       const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(newBC));
+      FTRACE(2, "   + {}\n", show(ctx.func, newBC));
       if (options.Peephole) {
         peephole.append(newBC, stateIn, srcStack);
       } else {

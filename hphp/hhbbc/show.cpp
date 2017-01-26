@@ -82,13 +82,14 @@ std::string array_string(SArray arr) {
 
 namespace php {
 
-std::string local_string(borrowed_ptr<const php::Local> loc) {
-  return loc->name
-    ? folly::to<std::string>("$", loc->name->data())
-    : folly::to<std::string>("$<unnamed:", loc->id, ">");
+std::string local_string(const Func& func, LocalId lid) {
+  auto const& loc = func.locals[lid];
+  return loc.name
+    ? folly::to<std::string>("$", loc.name->data())
+    : folly::to<std::string>("$<unnamed:", lid, ">");
 };
 
-std::string show(const Block& block) {
+std::string show(const Func& func, const Block& block) {
   std::string ret;
 
   if (block.section != php::Block::Section::Main) {
@@ -101,7 +102,7 @@ std::string show(const Block& block) {
     ret += ")\n";
   }
 
-  for (auto& bc : block.hhbcs) ret += show(bc) + "\n";
+  for (auto& bc : block.hhbcs) ret += show(func, bc) + "\n";
 
   if (block.fallthrough) {
     folly::toAppend(
@@ -122,11 +123,11 @@ std::string show(const Block& block) {
   return ret;
 }
 
-std::string dot_instructions(const Block& b) {
+std::string dot_instructions(const Func& func, const Block& b) {
   using namespace folly::gen;
   return from(b.hhbcs)
-    | map([&] (const Bytecode& b) {
-        return "\"" + folly::cEscape<std::string>(show(b)) + "\\n\"";
+    | map([&] (const Bytecode& bc) {
+        return "\"" + folly::cEscape<std::string>(show(func, bc)) + "\\n\"";
       })
     | unsplit<std::string>("+\n")
     ;
@@ -136,8 +137,9 @@ std::string dot_instructions(const Block& b) {
 std::string dot_cfg(const Func& func) {
   std::string ret;
   for (auto& b : rpoSortAddDVs(func)) {
-    ret += folly::format("B{} [ label = \"blk:{}\\n\"+{} ]\n",
-      b->id, b->id, dot_instructions(*b)).str();
+    ret += folly::format(
+      "B{} [ label = \"blk:{}\\n\"+{} ]\n",
+      b->id, b->id, dot_instructions(func, *b)).str();
     bool outputed = false;
     forEachNormalSuccessor(*b, [&] (const php::Block& target) {
       ret += folly::format("B{} -> B{};", b->id, target.id).str();
@@ -174,7 +176,7 @@ std::string show(const Func& func) {
     ret += folly::format(
       "block #{}\n{}",
       blk->id,
-      indent(2, show(*blk))
+      indent(2, show(func, *blk))
     ).str();
   }
 
@@ -272,7 +274,7 @@ std::string show(SrcLoc loc) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const Bytecode& bc) {
+std::string show(const php::Func& func, const Bytecode& bc) {
   std::string ret;
 
   auto append_vsa = [&] (const CompactVector<SString>& keys) {
@@ -314,7 +316,7 @@ std::string show(const Bytecode& bc) {
 
     switch (mkey.mcode) {
       case MEL: case MPL:
-        folly::toAppend(':', local_string(mkey.local), &ret);
+        folly::toAppend(':', local_string(func, mkey.local), &ret);
         break;
       case MEC: case MPC:
         folly::toAppend(':', mkey.idx, &ret);
@@ -334,7 +336,7 @@ std::string show(const Bytecode& bc) {
   };
 
   auto append_lar = [&](const LocalRange& range) {
-    folly::toAppend("L:", local_string(range.first), "+",
+    folly::toAppend("L:", local_string(func, range.first), "+",
                     range.restCount, &ret);
   };
 
@@ -343,7 +345,7 @@ std::string show(const Bytecode& bc) {
 #define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
 #define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
-#define IMM_LA(n)      ret += " " + local_string(data.loc##n);
+#define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
 #define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n->id, &ret);
 #define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);

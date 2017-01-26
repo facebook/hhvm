@@ -362,7 +362,7 @@ template<class T> void decode(PC& pc, T& val) {
 MKey make_mkey(const php::Func& func, MemberKey mk) {
   switch (mk.mcode) {
     case MEL: case MPL:
-      return MKey{mk.mcode, borrow(func.locals[mk.iva])};
+      return MKey{mk.mcode, static_cast<LocalId>(mk.iva)};
     case MEC: case MPC:
       return MKey{mk.mcode, mk.iva};
     case MET: case MPT: case MQT:
@@ -450,9 +450,9 @@ void populate_block(ParseUnitState& puState,
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
-                         auto id = decode_iva(pc);               \
+                         LocalId id = decode_iva(pc);            \
                          always_assert(id < func.locals.size()); \
-                         return borrow(func.locals[id]);         \
+                         return id;         \
                        }();
 #define IMM_IA(n)      auto iter##n = [&] {                      \
                          auto id = decode_iva(pc);               \
@@ -474,8 +474,7 @@ void populate_block(ParseUnitState& puState,
                          auto const range = decodeLocalRange(pc);            \
                          always_assert(range.first + range.restCount         \
                                        < func.locals.size());                \
-                         auto const first = borrow(func.locals[range.first]);\
-                         return LocalRange { first, range.restCount };       \
+                         return LocalRange { range.first, range.restCount }; \
                        }();
 
 #define IMM_NA
@@ -693,15 +692,12 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
     );
   }
 
-  func.locals.resize(fe.numLocals());
-  for (size_t id = 0; id < func.locals.size(); ++id) {
-    auto& loc = func.locals[id];
-    loc = folly::make_unique<php::Local>();
-    loc->id = id;
-    loc->name = nullptr;
+  func.locals.reserve(fe.numLocals());
+  for (LocalId id = 0; id < fe.numLocals(); ++id) {
+    func.locals.push_back({nullptr, id, false});
   }
   for (auto& kv : fe.localNameMap()) {
-    func.locals[kv.second]->name = kv.first;
+    func.locals[kv.second].name = kv.first;
   }
 
   func.iters.resize(fe.numIterators());

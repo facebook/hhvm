@@ -37,9 +37,12 @@ namespace HPHP { namespace HHBBC {
 struct Bytecode;
 
 namespace php {
-  struct Block;
-  struct Local;
-  struct Iter;
+
+struct Block;
+struct Local;
+struct Iter;
+struct Func;
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -62,7 +65,7 @@ struct MKey {
     , int64{0}
   {}
 
-  MKey(MemberCode mcode, borrowed_ptr<php::Local> local)
+  MKey(MemberCode mcode, LocalId local)
     : mcode{mcode}
     , local{local}
   {}
@@ -87,7 +90,7 @@ struct MKey {
     SString litstr;
     int64_t int64;
     int64_t idx;
-    borrowed_ptr<php::Local> local;
+    LocalId local;
   };
 };
 
@@ -102,7 +105,7 @@ inline bool operator!=(MKey a, MKey b) {
 // Represents a non-empty range of locals. There's always a first local,
 // followed by a count of additional ones.
 struct LocalRange {
-  borrowed_ptr<php::Local> first;
+  LocalId  first;
   uint32_t restCount;
 };
 
@@ -170,7 +173,7 @@ namespace bc {
 #define IMM_TY_ILA      IterTab
 #define IMM_TY_IVA      int32_t
 #define IMM_TY_I64A     int64_t
-#define IMM_TY_LA       borrowed_ptr<php::Local>
+#define IMM_TY_LA       LocalId
 #define IMM_TY_IA       borrowed_ptr<php::Iter>
 #define IMM_TY_DA       double
 #define IMM_TY_SA       SString
@@ -668,7 +671,11 @@ BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_target, has_target_flag, false);
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const Bytecode& bc);
+std::string show(const php::Func&, const Bytecode& bc);
+inline std::string show(borrowed_ptr<const php::Func> func,
+                        const Bytecode& bc) {
+  return show(*func, bc);
+}
 
 //////////////////////////////////////////////////////////////////////
 

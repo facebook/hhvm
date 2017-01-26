@@ -41,14 +41,15 @@ bool is_pseudomain(borrowed_ptr<const php::Func> f) {
 }
 
 bool is_volatile_local(borrowed_ptr<const php::Func> func,
-                       borrowed_ptr<const php::Local> l) {
+                       LocalId lid) {
   if (is_pseudomain(func)) return true;
   // Note: unnamed locals in a pseudomain probably are safe (i.e. can't be
   // changed through $GLOBALS), but for now we don't bother.
-  if (!l->name) return false;
-  return l->name->same(s_http_response_header.get()) ||
-         l->name->same(s_php_errormsg.get()) ||
-         l->name->same(s_86metadata.get());
+  auto const& l = func->locals[lid];
+  if (!l.name) return false;
+  return l.name->same(s_http_response_header.get()) ||
+         l.name->same(s_php_errormsg.get()) ||
+         l.name->same(s_86metadata.get());
 }
 
 SString memoize_impl_name(borrowed_ptr<const php::Func> func) {

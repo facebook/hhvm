@@ -226,8 +226,9 @@ struct Param {
  * nullptr, for unnamed locals.
  */
 struct Local {
-  SString name;
-  uint32_t id;
+  SString  name;
+  uint32_t id     : 31;
+  uint32_t killed : 1;
 };
 
 /*
@@ -283,7 +284,7 @@ struct Func {
    * vector).
    */
   std::vector<Param> params;
-  std::vector<std::unique_ptr<Local>> locals;
+  std::vector<Local> locals;
   std::vector<std::unique_ptr<Iter>> iters;
   std::vector<StaticLocalInfo> staticLocals;
 
@@ -571,7 +572,7 @@ std::string show(const Func&);
 std::string show(const Class&);
 std::string show(const Unit&);
 std::string show(const Program&);
-std::string local_string(borrowed_ptr<const php::Local>);
+std::string local_string(const Func&, LocalId);
 
 //////////////////////////////////////////////////////////////////////
 

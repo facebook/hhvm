@@ -77,6 +77,10 @@ void BasicPeephole::push_back(const Bytecode& next) {
   m_next.push_back(next);
 }
 
+std::string BasicPeephole::show(const Bytecode& op) {
+  return ::HPHP::HHBBC::show(m_ctx.func, op);
+}
+
 void ConcatPeephole::finalize() {
   while (!m_working.empty()) {
     squash();
@@ -87,7 +91,7 @@ void ConcatPeephole::finalize() {
 void ConcatPeephole::append(const Bytecode& op,
                             const State& state,
                             const std::vector<Op>& srcStack) {
-  FTRACE(1, "ConcatPeephole::append {}\n", show(op));
+  FTRACE(1, "ConcatPeephole::append {}\n", m_next.show(op));
   assert(state.stack.size() == srcStack.size());
   int nstack = state.stack.size();
 

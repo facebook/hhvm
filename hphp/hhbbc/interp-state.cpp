@@ -244,7 +244,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     }
     if (dst.stack[i].equivLocal != src.stack[i].equivLocal) {
       changed = true;
-      dst.stack[i].equivLocal = nullptr;
+      dst.stack[i].equivLocal = NoLocalId;
     }
   }
 
@@ -269,13 +269,13 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   }
 
   dst.equivLocals.resize(
-    std::max(dst.equivLocals.size(), src.equivLocals.size())
+    std::max(dst.equivLocals.size(), src.equivLocals.size()), NoLocalId
   );
   for (auto i = size_t{0}; i < dst.equivLocals.size(); ++i) {
     auto const dstLoc = dst.equivLocals[i];
     auto const srcLoc =
-      (i < src.equivLocals.size()) ? src.equivLocals[i] : nullptr;
-    auto const newLoc = (dstLoc == srcLoc) ? dstLoc : nullptr;
+      (i < src.equivLocals.size()) ? src.equivLocals[i] : NoLocalId;
+    auto const newLoc = (dstLoc == srcLoc) ? dstLoc : NoLocalId;
     if (newLoc != dstLoc) {
       changed = true;
       dst.equivLocals[i] = newLoc;
@@ -336,8 +336,8 @@ std::string state_string(const php::Func& f, const State& st) {
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
     folly::format(&ret, "{: <8} :: {}\n",
-      local_string(borrow(f.locals[i])),
-      show(st.locals[i])
+                  local_string(f, i),
+                  show(st.locals[i])
     );
   }
 
@@ -347,17 +347,17 @@ std::string state_string(const php::Func& f, const State& st) {
 
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {
     folly::format(&ret, "stk[{:02}] :: {} [{}]\n",
-      i,
-      show(st.stack[i].type),
-      st.stack[i].equivLocal ? local_string(st.stack[i].equivLocal) : ""
-    );
+                  i,
+                  show(st.stack[i].type),
+                  st.stack[i].equivLocal != NoLocalId ?
+                  local_string(f, st.stack[i].equivLocal) : "");
   }
 
   for (auto i = size_t{0}; i < st.equivLocals.size(); ++i) {
-    if (!st.equivLocals[i]) continue;
+    if (st.equivLocals[i] == NoLocalId) continue;
     folly::format(&ret, "{: <8} == {}\n",
-                  local_string(borrow(f.locals[i])),
-                  local_string(st.equivLocals[i]));
+                  local_string(f, i),
+                  local_string(f, st.equivLocals[i]));
   }
 
   return ret;

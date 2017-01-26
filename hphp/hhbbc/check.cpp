@@ -62,7 +62,7 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
 bool DEBUG_ONLY checkParams(const php::Func& f) {
   assert(f.params.size() <= f.locals.size());
   for (uint32_t i = 0; i < f.locals.size(); ++i) {
-    assert(f.locals[i]->id == i);
+    assert(f.locals[i].id == i);
   }
   for (uint32_t i = 0; i < f.iters.size(); ++i) {
     assert(f.iters[i]->id == i);

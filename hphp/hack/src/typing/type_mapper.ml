@@ -29,6 +29,7 @@ class type type_mapper_type = object
   method on_infinite_tvar : env -> Reason.t -> int -> result
   method on_tmixed :env -> Reason.t -> result
   method on_tany : env -> Reason.t -> result
+  method on_terr : env -> Reason.t -> result
   method on_tanon : env -> Reason.t -> locl fun_arity -> Ident.t -> result
   method on_tprim : env -> Reason.t -> Nast.tprim -> result
   method on_tarraykind_akany : env -> Reason.t -> result
@@ -60,6 +61,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_infinite_tvar = this#on_tvar
   method on_tmixed env r = env, (r, Tmixed)
   method on_tany env r = env, (r, Tany)
+  method on_terr env r = env, (r, Terr)
   method on_tanon env r fun_arity id = env, (r, Tanon (fun_arity, id))
   method on_tprim env r p = env, (r, Tprim p)
   method on_tarraykind_akany env r = env, (r, Tarraykind AKany)
@@ -83,6 +85,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tvar n -> this#on_tvar env r n
     | Tmixed -> this#on_tmixed env r
     | Tany -> this#on_tany env r
+    | Terr -> this#on_terr env r
     | Tanon (fun_arity, id) -> this#on_tanon env r fun_arity id
     | Tprim p -> this#on_tprim env r p
     | Tarraykind AKany -> this#on_tarraykind_akany env r

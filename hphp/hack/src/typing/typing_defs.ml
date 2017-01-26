@@ -82,6 +82,8 @@ and _ ty_ =
   | Tany
   | Tmixed
 
+  | Terr
+
   (* Nullable, called "option" in the ML parlance. *)
   | Toption : 'phase ty -> 'phase ty_
 

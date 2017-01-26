@@ -88,6 +88,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
   and ty_: decl ty_ -> decl ty_ = function
     | Tany
     | Tthis
+    | Terr
     | Tmixed as x          -> x
     | Tarray (ty1, ty2)    -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tprim _ as x         -> x

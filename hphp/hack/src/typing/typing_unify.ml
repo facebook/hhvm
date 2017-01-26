@@ -36,7 +36,7 @@ and unify_unwrapped ?follow_bounds:(follow_bounds=true) env
     ~unwrappedToption1 ty1 ~unwrappedToption2 ty2 =
   if ty1 == ty2 then env, ty1 else
   match ty1, ty2 with
-  | (_, Tany), ty | ty, (_, Tany) -> env, ty
+  | (_, (Tany | Terr)), ty | ty, (_, (Tany | Terr)) -> env, ty
   | (r1, Tvar n1), (r2, Tvar n2) ->
     let r = unify_reason r1 r2 in
     let env, n1 = Env.get_var env n1 in
@@ -103,7 +103,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
     if x == y then env, Tprim x
     else
       let () = TUtils.uerror r1 ty1 r2 ty2 in
-      env, Tany
+      env, Terr
   | Tarraykind (AKany | AKempty), (Tarraykind _ as ty)
   | (Tarraykind _ as ty), Tarraykind (AKany | AKempty) ->
       env, ty
@@ -170,7 +170,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
           let n1 = soi (List.length argl1) in
           let n2 = soi (List.length argl2) in
           Errors.type_arity_mismatch p1 n1 p2 n2;
-          env, Tany
+          env, Terr
         end
         else
           let env, argl = List.map2_env env argl1 argl2 unify in
@@ -184,7 +184,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
           let p1 = Reason.to_pos r1 in
           let p2 = Reason.to_pos r2 in
           Errors.type_arity_mismatch p1 n1 p2 n2;
-          env, Tany
+          env, Terr
         end
         else
           let env, tcstr =
@@ -231,7 +231,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
              ~when_: begin fun () ->
                match ty2 with
                | Tclass ((_, y), _) -> y = x
-               | Tany | Tmixed | Tarraykind _ | Tprim _
+               | Tany | Terr | Tmixed | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
                | Tshape _ -> false
@@ -243,7 +243,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
                  Errors.this_final id (Reason.to_pos r2) error
              end
           );
-          env, Tany
+          env, Terr
         )
   | _, Tabstract (AKdependent (_, _), Some (_, Tclass _)) ->
       unify_ env r2 ty2 r1 ty1
@@ -262,7 +262,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
         let n1 = soi size1 in
         let n2 = soi size2 in
         Errors.tuple_arity_mismatch p1 n1 p2 n2;
-        env, Tany
+        env, Terr
       else
         let env, tyl = List.map2_env env tyl1 tyl2 unify in
         env, Ttuple tyl
@@ -274,13 +274,13 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
        * saying that they never unify will just keep the intersection
        * unchanged, which is always a valid option. *)
       TUtils.uerror r1 ty1 r2 ty2;
-      env, Tany
+      env, Terr
   | Tfun ft, Tanon (anon_arity, id)
   | Tanon (anon_arity, id), Tfun ft ->
       (match Env.get_anonymous env id with
       | None ->
         Errors.anonymous_recursive_call (Reason.to_pos r1);
-        env, Tany
+        env, Terr
       | Some anon ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
@@ -334,7 +334,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
     when generic_param_matches ~follow_bounds env x (r1,ty1) ->
     env, ty1
 
-  | (Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+  | (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if
@@ -381,7 +381,7 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
         add env ty1;
         add env ty2;
         TUtils.simplified_uerror env (r1, ty1) (r2, ty2);
-        env, Tany
+        env, Terr
 
 (* Use unify to check if two types are the same. We use this in
  * generic_param_matches below, but we set follow_bounds=false so that we

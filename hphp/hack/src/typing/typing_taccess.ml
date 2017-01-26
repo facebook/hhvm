@@ -81,7 +81,7 @@ and expand_ env (root_reason, root_ty as root) =
   | [] ->
       env, root
   | head::tail -> begin match root_ty with
-      | Tany -> env, root
+      | Tany | Terr -> env, root
       | Tabstract (AKdependent (`cls _, []), Some ty)
       | Tabstract (AKnewtype (_, _), Some ty) | Toption ty -> expand_ env ty
       | Tclass ((class_pos, class_name), _) ->
@@ -103,7 +103,7 @@ and expand_ env (root_reason, root_ty as root) =
           let pos, tconst = head in
           let ty = Typing_print.error root_ty in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;
-          env, (root_reason, Tany)
+          env, (root_reason, Terr)
         end
       | Tabstract (AKdependent dep_ty, Some ty) ->
           let env =
@@ -126,7 +126,7 @@ and expand_ env (root_reason, root_ty as root) =
           let pos, tconst = head in
           let ty = Typing_print.error root_ty in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;
-          env, (root_reason, Tany)
+          env, (root_reason, Terr)
      end
 
 (* The function takes a "step" forward in the expansion. We look up the type

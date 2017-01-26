@@ -44,6 +44,7 @@ module ErrorString = struct
 
   let rec type_: type a. a ty_ -> _ = function
     | Tany               -> "an untyped value"
+    | Terr               -> "a type error"
     | Tunresolved l      -> unresolved l
     | Tarray (x, y)      -> array (x, y)
     | Tarraykind AKempty -> "an empty array"
@@ -157,6 +158,7 @@ module Suggest = struct
     | Tunresolved _          -> "..."
     | Ttuple (l)             -> "("^list l^")"
     | Tany                   -> "..."
+    | Terr                   -> "..."
     | Tmixed                 -> "mixed"
     | Tgeneric s             -> s
     | Tabstract (AKgeneric s, _) -> s
@@ -253,6 +255,7 @@ module Full = struct
       fun x y -> list_sep o ", " x y in
     match x with
     | Tany -> o "_"
+    | Terr -> o "_"
     | Tthis -> o SN.Typehints.this
     | Tmixed -> o "mixed"
     | Tarraykind AKany -> o "array"

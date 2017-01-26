@@ -500,6 +500,9 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     Env.expand_type env ty_sub in
 
   match ety_sub, ety_super with
+  | (_, Terr), _
+  | _, (_, Terr) -> env
+
   | (_, Tunresolved _), (_, Tunresolved _) ->
       let env, _ =
         Unify.unify_unwrapped env uenv_super.TUEnv.non_null ty_super
@@ -1027,7 +1030,7 @@ and sub_string p env ty2 =
         Errors.object_string p (Reason.to_pos r2);
         env
       )
-  | _, Tany ->
+  | _, (Tany | Terr) ->
     env (* Unifies with anything *)
   | _, Tobject -> env
   | _, (Tmixed | Tarraykind _ | Tvar _

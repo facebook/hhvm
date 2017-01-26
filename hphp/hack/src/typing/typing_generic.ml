@@ -31,7 +31,7 @@ end = struct
   and ty_ = function
     | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
     | Tabstract (AKgeneric x, _) -> raise (Found x)
-    | Tanon _ | Tany | Tmixed | Tprim _ -> ()
+    | Tanon _ | Tany | Terr | Tmixed | Tprim _ -> ()
     | Tarraykind akind ->
       begin match akind with
         | AKany -> ()

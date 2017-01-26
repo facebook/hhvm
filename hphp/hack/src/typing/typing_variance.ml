@@ -450,8 +450,7 @@ and type_list tcopt root variance env tyl =
 
 and type_ tcopt root variance env (reason, ty) =
   match ty with
-  | Tany -> env
-  | Tmixed -> env
+  | Tany | Tmixed | Terr -> env
   | Tarray (ty1, ty2) ->
     let env = type_option tcopt root variance env ty1 in
     let env = type_option tcopt root variance env ty2 in

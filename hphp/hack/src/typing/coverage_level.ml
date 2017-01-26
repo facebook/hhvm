@@ -201,7 +201,7 @@ type 'a trie =
   | Node of 'a * 'a trie SMap.t
 
 let rec is_tany ty = match ty with
-  | r, Tany -> Some r
+  | r, (Tany | Terr) -> Some r
   | _, Tunresolved [] -> None
   | _, Tunresolved (h::tl) -> begin match is_tany h with
     | Some r when

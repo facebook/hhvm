@@ -56,6 +56,7 @@ and instantiate_ subst x =
   | Tthis -> Tthis
   | Tmixed -> Tmixed
   | Tany
+  | Terr
   | Tprim _ as x -> x
   | Ttuple tyl ->
       let tyl = List.map tyl (instantiate subst) in

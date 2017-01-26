@@ -14,6 +14,7 @@ module Reason = Typing_reason
 
 class type ['a] type_visitor_type = object
   method on_tany : 'a -> Reason.t -> 'a
+  method on_terr : 'a -> Reason.t -> 'a
   method on_tmixed : 'a -> Reason.t -> 'a
   method on_tthis : 'a -> Reason.t -> 'a
   method on_tarray : 'a -> Reason.t -> 'b ty option -> 'b ty option -> 'a
@@ -38,6 +39,7 @@ end
 
 class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_tany acc _ = acc
+  method on_terr acc _ = acc
   method on_tmixed acc _ = acc
   method on_tthis acc _ = acc
   method on_tarray: type a. _ -> Reason.t -> a ty option -> a ty option -> _ =
@@ -101,6 +103,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_type: type a. _ -> a ty -> _ = fun acc (r, x) ->
     match x with
     | Tany -> this#on_tany acc r
+    | Terr -> this#on_terr acc r
     | Tmixed -> this#on_tmixed acc r
     | Tthis -> this#on_tthis acc r
     | Tarray (ty1_opt, ty2_opt) ->

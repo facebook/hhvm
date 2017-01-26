@@ -94,7 +94,7 @@ type env = expand_env
 
 let rec localize_with_env ~ety_env env (dty: decl ty) =
   match dty with
-  | _, (Tany | Tmixed | Tprim _ ) as x -> env, (ety_env, x)
+  | _, (Terr | Tany | Tmixed | Tprim _ ) as x -> env, (ety_env, x)
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty

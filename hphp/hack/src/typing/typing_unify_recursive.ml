@@ -44,7 +44,7 @@ let rec occurs env n rty =
       | Some ty -> occurs env n ty
       | None -> false)
     end
-  | Tany | Tmixed | Tanon _ | Tprim _ | Tobject -> false
+  | Terr | Tany | Tmixed | Tanon _ | Tprim _ | Tobject -> false
   | Toption t -> occurs env n t
   | Ttuple ts | Tunresolved ts | Tclass(_,ts) -> occurs_list env n ts
   | Tabstract(ak,topt) -> occurs_ak env n ak || occurs_opt  env n topt
@@ -173,7 +173,7 @@ let add env x ty =
     begin
       Errors.unification_cycle
         (Reason.to_pos (fst ty)) (Typing_print.full_rec env x' ty);
-      Env.add env x (fst ty, Tany)
+      Env.add env x (fst ty, Terr)
     end
 
     (* We solve the unification problem [n] against ?+ [n] by

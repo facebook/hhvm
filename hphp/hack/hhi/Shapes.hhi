@@ -50,6 +50,4 @@ abstract final class Shapes {
 
   public static function toArray(shape() $shape): array<arraykey, mixed>;
 
-  public static function toDict(shape() $shape): dict<string, mixed>;
-
 }

@@ -90,16 +90,16 @@ HeapGraph makeHeapGraph(bool include_free) {
   // parse the heap once to create a PtrMap for pointer filtering. Create
   // one node for every parsed block, including NativeData and AsyncFuncFrame
   // blocks. Only include free blocks if requested.
-  MM().forEachHeader([&](Header* h) {
+  MM().forEachHeader([&](Header* h, size_t alloc_size) {
     if (h->kind() != HeaderKind::Free || include_free) {
-      blocks.insert(h); // adds interval [h, h+h->size[
+      blocks.insert(h, alloc_size); // adds interval [h, h+alloc_size[
     }
   });
   blocks.prepare();
 
   // initialize nodes by iterating over PtrMap's regions
   g.nodes.reserve(blocks.size());
-  blocks.iterate([&](const Header* h, size_t size) {
+  blocks.iterate([&](const Header* h, size_t) {
     g.nodes.push_back(HeapGraph::Node{h, -1, -1});
   });
   type_scan::Scanner type_scanner;

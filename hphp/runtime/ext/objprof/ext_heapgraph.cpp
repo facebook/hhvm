@@ -86,7 +86,7 @@ const StaticString
 // Extra information about a HeapGraph::Node.
 struct CapturedNode {
   HeaderKind kind;
-  uint32_t size;
+  uint32_t size; // rounded up heap size
   const char* classname;
 };
 
@@ -395,7 +395,7 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
     auto obj = src_node.h->obj();
     auto new_node = CapturedNode{
       /* kind */      src_node.h->kind(),
-      /* size */      uint32_t(src_node.h->size()),
+      /* size */      uint32_t(src_node.h->allocSize()),
       /* classname */ obj ? obj->classname_cstr() : nullptr
     };
     cnodes.push_back(new_node);

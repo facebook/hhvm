@@ -109,10 +109,8 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
       scanner.scan(*h->closure_.hdr());
       return h->closure_.scan(scanner); // ObjectData::scan
     case HeaderKind::Object:
-      if (h->obj_.getAttribute(ObjectData::HasNativeData)) {
-        auto ndi = h->obj_.getVMClass()->getNativeDataInfo();
-        scanNative(Native::getNativeNode(&h->obj_, ndi), scanner);
-      }
+      // native objects should hit the NativeData case below.
+      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
       return h->obj_.scan(scanner);
     case HeaderKind::WaitHandle:
     case HeaderKind::AwaitAllWH: {

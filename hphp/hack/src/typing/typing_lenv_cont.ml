@@ -23,8 +23,10 @@ let check_error = function
   | None -> LMap.empty
   | Some l -> l
 
+let get_cont_option = CMap.get
+
 let get_cont name m =
-  check_error @@ CMap.get name m
+  check_error @@ get_cont_option name m
 
 (* Add the key, value pair to the continuation named 'name'
  * If the continuation doesn't exist, create it *)
@@ -35,3 +37,7 @@ let add_to_cont name key value m =
   in
   let cont = LMap.add key value cont in
   CMap.add name cont m
+
+let drop_cont = CMap.remove
+
+let replace_cont = CMap.add

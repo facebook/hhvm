@@ -26,7 +26,7 @@
 #include <signal.h>
 
 #include <folly/String.h>
-#include <folly/portability/Environment.h>
+#include <folly/portability/Stdlib.h>
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 

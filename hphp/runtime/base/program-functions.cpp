@@ -99,9 +99,9 @@
 #include <folly/Range.h>
 #include <folly/Portability.h>
 #include <folly/Singleton.h>
-#include <folly/portability/Environment.h>
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
+#include <folly/portability/Stdlib.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>

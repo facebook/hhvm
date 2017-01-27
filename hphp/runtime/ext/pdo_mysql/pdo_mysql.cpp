@@ -265,19 +265,19 @@ bool PDOMySqlConnection::create(const Array& options) {
       connect_opts |= CLIENT_IGNORE_SPACE;
     }
 
-    if (read_timeout >= 0 && mysql_options(m_server, MYSQL_OPT_CONNECT_TIMEOUT,
+    if (mysql_options(m_server, MYSQL_OPT_CONNECT_TIMEOUT,
                       (const char *)&connect_timeout)) {
       handleError(__FILE__, __LINE__);
       goto cleanup;
     }
 
-    if (write_timeout >= 0 && mysql_options(m_server, MYSQL_OPT_READ_TIMEOUT,
+    if (read_timeout >= 0 && mysql_options(m_server, MYSQL_OPT_READ_TIMEOUT,
                       (const char *)&read_timeout)) {
       handleError(__FILE__, __LINE__);
       goto cleanup;
     }
 
-    if (mysql_options(m_server, MYSQL_OPT_WRITE_TIMEOUT,
+    if (write_timeout >= 0 && mysql_options(m_server, MYSQL_OPT_WRITE_TIMEOUT,
                       (const char *)&write_timeout)) {
       handleError(__FILE__, __LINE__);
       goto cleanup;

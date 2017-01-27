@@ -838,6 +838,15 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
   ; (K.InclusionExpression,         snd <$> pExpr_InclusionExpression')
   ; (K.ArrayIntrinsicExpression,    fun [ _kw; _lp; members; _rp ] env ->
       Array (couldMap ~f:pAField members env))
+  ; (K.DictionaryIntrinsicExpression, fun [ kw; _lb; members; _rb ] env ->
+      Collection (pos_name kw env, couldMap ~f:pAField members env)
+    )
+  ; (K.KeysetIntrinsicExpression,     fun [ kw; _lb; members; _rb ] env ->
+      Collection (pos_name kw env, couldMap ~f:pAField members env)
+    )
+  ; (K.VectorIntrinsicExpression,     fun [ kw; _lb; members; _rb ] env ->
+      Collection (pos_name kw env, couldMap ~f:pAField members env)
+    )
   ; (K.ShapeExpression,             fun [ _kw; _lp; fields; _rp ] env ->
       Shape (couldMap ~f:(mpShapeField pExpr) fields env))
   ; (K.CollectionLiteralExpression, fun [ name; _lb; initl; _rb ] env ->

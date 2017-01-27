@@ -114,6 +114,8 @@ public:
     m_recursive = recursive;
 #endif
   }
+  BaseMutex(const BaseMutex&) = delete;
+  BaseMutex& operator=(const BaseMutex&) = delete;
   ~BaseMutex() {
 #ifdef DEBUG
     assert(m_magic == kMagic);
@@ -158,10 +160,6 @@ public:
     UNUSED int ret = pthread_mutex_unlock(&m_mutex);
     assert(ret == 0);
   }
-
-private:
-  BaseMutex(const BaseMutex &); // suppress
-  BaseMutex &operator=(const BaseMutex &); // suppress
 
 protected:
   pthread_mutexattr_t m_mutexattr;
@@ -241,6 +239,9 @@ public:
     pthread_rwlock_init(&m_rwlock, nullptr);
   }
 
+  ReadWriteMutex(const ReadWriteMutex&) = delete;
+  ReadWriteMutex& operator=(const ReadWriteMutex&) = delete;
+
   ~ReadWriteMutex() {
     assertNotWriteOwned();
     pthread_rwlock_destroy(&m_rwlock);
@@ -281,9 +282,6 @@ public:
   }
 
 private:
-  ReadWriteMutex(const ReadWriteMutex &); // suppress
-  ReadWriteMutex &operator=(const ReadWriteMutex &); // suppress
-
   pthread_rwlock_t m_rwlock;
 };
 

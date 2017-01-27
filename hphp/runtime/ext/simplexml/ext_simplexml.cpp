@@ -1436,6 +1436,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
       int strval_len;
       xmlDocDumpMemoryEnc(doc, &strval, &strval_len,
                           (const char*)doc->encoding);
+      if (!strval) {
+        return false;
+      }
       String ret = String((char*)strval);
       xmlFree(strval);
       return ret;
@@ -1457,6 +1460,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
 #else
       str = (char*)outbuf->buffer->content;
 #endif
+      if (!str) {
+        return false;
+      }
       String ret = String(str);
       xmlOutputBufferClose(outbuf);
       return ret;

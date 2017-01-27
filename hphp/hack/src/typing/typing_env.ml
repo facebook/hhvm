@@ -384,8 +384,8 @@ let set_return env x =
 
 let with_return env f =
   let ret = get_return env in
-  let env = f env in
-  set_return env ret
+  let env, result = f env in
+  set_return env ret, result
 
 let is_static env = env.genv.static
 let get_self env = env.genv.self
@@ -721,8 +721,8 @@ let anon anon_lenv env f =
 let in_loop env f =
   let old_in_loop = env.in_loop in
   let env = { env with in_loop = true } in
-  let env = f env in
-  { env with in_loop = old_in_loop }
+  let env, result = f env in
+  { env with in_loop = old_in_loop }, result
 
 (*****************************************************************************)
 (* Merge and un-merge locals *)

@@ -119,10 +119,10 @@ let declare_and_check content ~f tcopt =
     let nast = Naming.program tcopt ast in
 
     List.iter nast begin function
-      | Nast.Fun f -> Typing.fun_def tcopt f;
+      | Nast.Fun f -> ignore (Typing.fun_def tcopt f);
       | Nast.Class c -> Typing.class_def tcopt c;
       | Nast.Typedef t -> Typing.typedef_def tcopt t;
-      | Nast.Constant cst -> Typing.gconst_def cst tcopt;
+      | Nast.Constant cst -> ignore (Typing.gconst_def cst tcopt);
     end;
     f path file_info
   end

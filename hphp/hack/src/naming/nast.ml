@@ -107,6 +107,22 @@ type vc_kind = [
 
 type tparam = Ast.variance * sid * (Ast.constraint_kind * hint) list
 
+type visibility =
+  | Private
+  | Public
+  | Protected
+
+type typedef_visibility =
+  | Transparent
+  | Opaque
+
+type enum_ = {
+  e_base       : hint;
+  e_constraint : hint option;
+}
+
+type where_constraint = hint * Ast.constraint_kind * hint
+
 module type AnnotationType = sig
   type t
 end
@@ -282,11 +298,6 @@ and user_attribute = {
   ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
-end
-
-module PosAnnotatedAST = AnnotatedAST(struct type t = Pos.t end)
-include PosAnnotatedAST
-
 type class_ = {
   c_mode           : FileInfo.mode    ;
   c_final          : bool             ;
@@ -317,12 +328,6 @@ type class_ = {
   c_enum           : enum_ option     ;
 }
 
-and enum_ = {
-  e_base       : hint;
-  e_constraint : hint option;
-}
-
-and where_constraint = hint * Ast.constraint_kind * hint
 
 (* expr = None indicates an abstract const *)
 and class_const = hint option * sid * expr option
@@ -363,14 +368,6 @@ and method_ = {
   m_ret             : hint option         ;
 }
 
-and visibility =
-  | Private
-  | Public
-  | Protected
-
-
-and typedef_visibility = Transparent | Opaque
-
 and typedef = {
   t_mode : FileInfo.mode;
   t_name : sid;
@@ -395,6 +392,11 @@ type def =
   | Constant of gconst
 
 type program = def list
+
+end
+
+module PosAnnotatedAST = AnnotatedAST(struct type t = Pos.t end)
+include PosAnnotatedAST
 
 (* Expecting that Naming.func_body / Naming.class_meth_bodies has been
  * allowed at the AST. Ideally this would be enforced by the compiler,

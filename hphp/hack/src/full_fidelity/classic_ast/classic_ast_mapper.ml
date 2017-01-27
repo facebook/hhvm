@@ -90,7 +90,7 @@ let where_am_I : env -> Pos.t = fun env -> ppPos (parent env) env
 (* For debugging *)
 let pDbg : string -> string -> unit parser = fun context name node env ->
   match P.kind node with
-  | K.Missing -> Printf.eprintf "MISSING\n"
+  | K.Missing -> Printf.eprintf "MISSING (%s->%s)\n" context name
   | k ->
     let line, col, line', col' = Pos.destruct_range (where_am_I env) in
     if line <> line'
@@ -596,12 +596,18 @@ let rec pHint : hint parser = fun eta env ->
         cHapply (pos_name kw env, List.map (fun x -> pHint x env) [key; value]))
     ; (K.ClassnameTypeSpecifier, fun [ name; _la; ty; _ra ] ->
         cHapply <.| (pos_name name <&> mpSingleton pHint ty))
-    ; (K.TypeConstant,           fun [ base; _sep; child ] env ->
-        Haccess (pos_name base env, pos_name child env, []))
+    ; (K.TypeConstant,           fun [ base; _sep; child ] env -> begin
+          let child = pos_name child env in
+          match snd @@ pHint base env with
+          | Haccess (b, c, cs) -> Haccess (b, c, cs @ [child])
+          | Happly (h, []) -> Haccess (h, child, [])
+        end
+      )
     ; (K.GenericTypeSpecifier,   fun [class_type; arguments] ->
         cHapply <.| (pos_name class_type <&> pTypeArguments arguments))
     ; (K.NullableTypeSpecifier,  fun [ question; ty ] env ->
         ifExists cHoption snd question env (pHint ty env))
+    ; (K.SoftTypeSpecifier,      fun [ _at; ty ] env -> snd @@ pHint ty env)
     ; (K.ClosureTypeSpecifier,
         fun [ _olp; _kw; _lp; params; _rp; _colon; ret; _orp ] env ->
           Hfun (couldMap ~f:pHint params env, false, pHint ret env)
@@ -691,16 +697,26 @@ and pLambdaBody : block parser = fun eta ->
   oneOf [ pBlock ; (fun (p,r) -> [ Return (p, Some (p, r)) ]) <$> pExpr ] eta
 and pLambda : fun_ parser' = fun [ async; signature; _arrow; body ] env ->
   let p = where_am_I env in
+  let previous_saw_yield = !(env.saw_yield) in
+  env.saw_yield := false;
+  let body = pLambdaBody body env in
+  let body_has_yield = !(env.saw_yield) in
+  env.saw_yield := previous_saw_yield;
   let paraml, ret = pLambdaSig signature env in
+  let fun_kind =
+    if body_has_yield
+    then ifExists FAsyncGenerator FGenerator async env
+    else ifExists FAsync FSync async env
+  in
   { f_mode            = env.mode
   ; f_tparams         = []
   ; f_ret             = ret
   ; f_ret_by_ref      = false
   ; f_name            = p, ";anonymous"
   ; f_params          = paraml
-  ; f_body            = pLambdaBody body env
+  ; f_body            = body
   ; f_user_attributes = []
-  ; f_fun_kind        = ifExists FAsync FSync async env
+  ; f_fun_kind        = fun_kind
   ; f_namespace       = Namespace_env.empty_with_default_popt (*TODO*)
   ; f_span            = p
   }
@@ -998,13 +1014,20 @@ and pStmt_ThrowStatement' : stmt parser' = fun [ _kw; expr; _semi ] env ->
   Throw (pExpr expr env)
 and pStmt_IfStatement' : stmt parser' =
   fun [ _kw; _lparen; cond; _rparen; then_; elseif; else_ ] env ->
+    let pElseIf' = fun [ _kw; _lp; cond; _rp; then_ ] env -> fun cont -> [ If
+      ( pExpr cond env
+      , [(pCompoundStatement <|> pStmt) then_ env]
+      , cont
+      ) ]
+    in
+    let elseifs = couldMap ~f:(single K.ElseifClause pElseIf') elseif env in
     let pElseClause = single K.ElseClause @@
       mpArgKOfN 1 2 (pCompoundStatement <|> pStmt)
     in
     If
     ( pExpr cond env
     , [(pCompoundStatement <|> pStmt) then_ env]
-    , [(pElseClause <|> ppConst Noop) else_ env]
+    , List.fold_right (fun a b -> a b) elseifs [(pElseClause <|> ppConst Noop) else_ env]
     )
 and pStmt_DoStatement' : stmt parser' =
   fun [ _kw_do; body; _kw_while; _lp; cond; _rp; _semi ] env ->
@@ -1134,7 +1157,7 @@ let pFunHdr :
 
 
 
-let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
+let pDef_Fun' : def parser' = fun [ attrs; hdr; body ] env ->
   let containsUNSAFE node =
     let re = Str.regexp_string "UNSAFE" in
     try Str.search_forward re (P.full_text node) 0 >= 0 with
@@ -1161,7 +1184,7 @@ let pDef_Fun' : def parser' = fun [ attr; hdr; body ] env ->
       | None -> []
       | Some b -> b
     end
-  ; f_user_attributes = []
+  ; f_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attrs env
   ; f_fun_kind        = if not body_has_yield then async else begin
       match async with
       | FAsync -> FAsyncGenerator
@@ -1245,7 +1268,8 @@ let pClassElt_XHPClassAttributeDeclaration' : class_elt list parser' =
           let enum = mpOptional pXHPEnumDecl ty env in
           let (pos, name) = pos_name name env in
           let init = mpOptional pSimpleInitializer init env in
-          XhpAttr (hint, (Pos.none, (pos, ":" ^ name), init), false, enum)
+          let req = ifExists true false req env in
+          XhpAttr (hint, (Pos.none, (pos, ":" ^ name), init), req, enum)
         )
       ; (K.Token, fun [ tok ] -> pToken ~f:begin function
           | _ -> fun env ->
@@ -1382,7 +1406,28 @@ let pDef_InclusionDirective' : def parser' = fun [ expr; _semi ] env ->
 
 let pDef_NamespaceUseDeclaration' : def parser' =
   fun [ _kw; kind; clauses; _semi ] env ->
-    NamespaceUse []
+    let pKind n e = mkP
+      [ (K.Missing, fun _ _ -> NSClass)
+      ; (K.Token,   fun [n] -> mkTP ("nsusekind", function
+         | TK.Function -> NSFun
+         | TK.Const    -> NSConst
+      ) n)] n e
+    in
+    let f = single K.NamespaceUseClause @@
+        fun [ _kind; name; _as; alias ] env ->
+          let (p, n) as name = pos_name name env in
+          let x = Str.search_forward (Str.regexp "[^\\\\]*$") n 0 in
+          let key = p, String.sub n x (String.length n - x) in
+          ( pKind kind env
+          , (if x = 0 || n.[0] = '\\' then name else (p, "\\" ^ n))
+          , ifExists (pos_name alias env) key alias env
+          )
+    in
+    let uses = couldMap ~f clauses env in
+    Printf.eprintf "\n\n\nResult:\n  %s\n\n-\n" @@
+      Sexp.to_string_hum @@
+        Conv.sexp_of_list (fun (x,_,_) -> Sof.sexp_of_ns_kind x) uses;
+    NamespaceUse uses
 
 let pDef_NamespaceGroupUseDeclaration' : def parser' =
   fun [ _kw; kind; pfx; _lb; clauses; _rb; _semi ] env ->
@@ -1428,10 +1473,29 @@ and pProgram : program parser = fun node env ->
     in
     match program with
     | [] -> []
-    | (Namespace (n, [])::el) ->
+    | (Namespace (n, [])::el) -> begin
       let body, remainder = span not_namespace el in
       Namespace (n, body) :: post_process remainder
+    end
+    | (Namespace (n, il)::el) ->
+      Namespace (n, post_process il) :: post_process el
     | (Stmt Noop::el) -> post_process el
+(*    | (Stmt (Expr (_, Import (RequireOnce, _)))::el) -> post_process el *)
+    | ((Stmt (Expr (_, (Call
+        ( (_, (Id (_, "define")))
+        , [ (_, (String name))
+          ; value
+          ]
+        , []
+        )
+      )))) :: el) -> Constant
+        { cst_mode      = env.mode
+        ; cst_kind      = Cst_define
+        ; cst_name      = name
+        ; cst_type      = None
+        ; cst_value     = value
+        ; cst_namespace = Namespace_env.empty_with_default_popt
+        } :: post_process el
     | (e::el) -> e :: post_process el
   in
   Namespaces.elaborate_defs ParserOptions.default @@ post_process @@

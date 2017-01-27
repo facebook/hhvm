@@ -56,37 +56,39 @@ let assert_last_in_list assert_fun node =
     | _ :: t -> aux t in
   aux (syntax_to_list_no_separators node)
 
-(* If an ellipsis appears in a position other than the last element in the
-   list then return it. *)
-let misplaced_ellipsis params =
-  assert_last_in_list is_variadic_parameter params
-
-let is_variadic node =
+let is_variadic_expression node =
   begin match syntax node with
     | DecoratedExpression { decorated_expression_decorator; _; } ->
       is_ellipsis decorated_expression_decorator
     | _ -> false
   end
 
+let is_variadic_parameter_variable node =
+  (* TODO: This shouldn't be a decorated *expression* because we are not
+  expecting an expression at all. We're expecting a declaration. *)
+  is_variadic_expression node
+
+let is_variadic_parameter_declaration node =
+  begin match syntax node with
+  | VariadicParameter _ -> true
+  | ParameterDeclaration { parameter_name; _ } ->
+      is_variadic_parameter_variable parameter_name
+  | _ -> false
+  end
+
 let misplaced_variadic_param params =
-  let is_variadic node =
-    begin match syntax node with
-    | ParameterDeclaration { parameter_name; _ } ->
-        is_variadic parameter_name
-    | _ -> false
-    end
-  in
-  assert_last_in_list is_variadic params
+  assert_last_in_list is_variadic_parameter_declaration params
 
 let misplaced_variadic_arg args =
-  assert_last_in_list is_variadic args
+  assert_last_in_list is_variadic_expression args
 
-(* If a list ends with an ellipsis followed by a comma, return it *)
-let ends_with_ellipsis_comma params =
+(* If a list ends with a variadic parameter followed by a comma, return it *)
+let ends_with_variadic_comma params =
   let rec aux params =
     match params with
     | [] -> None
-    | x :: y :: [] when is_variadic_parameter x && is_comma y -> Some y
+    | x :: y :: [] when is_variadic_parameter_declaration x && is_comma y ->
+      Some y
     | _ :: t -> aux t in
   aux (syntax_to_list_with_separators params)
 
@@ -404,29 +406,20 @@ let methodish_errors node parents =
   | _ -> [ ]
 
 let params_errors params =
-  let errors = match misplaced_ellipsis params with
-  | None -> []
-  | Some ellipsis ->
-    let s = start_offset ellipsis in
-    let e = end_offset ellipsis in
-    [ SyntaxError.make s e SyntaxError.error2021 ] in
   let errors =
-    if errors = [] then
-      match ends_with_ellipsis_comma params with
-      | None -> []
-      | Some comma ->
-        let s = start_offset comma in
-        let e = end_offset comma in
-        [ SyntaxError.make s e SyntaxError.error2022 ]
-    else
-      errors
+    match ends_with_variadic_comma params with
+    | None -> []
+    | Some comma ->
+      let s = start_offset comma in
+      let e = end_offset comma in
+      [ SyntaxError.make s e SyntaxError.error2022 ]
   in
     match misplaced_variadic_param params with
     | None -> errors
     | Some param ->
       let s = start_offset param in
       let e = end_offset param in
-      ( SyntaxError.make s e SyntaxError.error2033 ) :: errors
+      ( SyntaxError.make s e SyntaxError.error2021 ) :: errors
 
 let parameter_errors node parents is_strict =
   match syntax node with

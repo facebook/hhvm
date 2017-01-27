@@ -11,5 +11,5 @@
 (17,3)-(17,8) A destructor can only have visibility modifiers.
 (18,36)-(18,38) A constructor or destructor cannot have a non-void type annotation.
 (19,35)-(19,35) A constructor or destructor cannot have a non-void type annotation.
-(23,25)-(23,25) An ellipsis '...' may not be followed by a comma ','.
-(24,22)-(24,24) An ellipsis '...' may only appear at the end of a parameter list.
+(23,25)-(23,25) A variadic parameter ('...') may not be followed by a comma.
+(24,22)-(24,24) A variadic parameter ('...') may only appear at the end of a parameter list.

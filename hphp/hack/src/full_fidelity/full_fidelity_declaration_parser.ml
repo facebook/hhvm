@@ -1019,19 +1019,30 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_parameter_list_opt parser =
       (* SPEC
+
+        TODO: Update the spec to match this.
+
         parameter-list:
-          ...
+          variadic-parameter
           parameter-declaration-list
           parameter-declaration-list  ,
-          parameter-declaration-list  ,  ...
+          parameter-declaration-list  ,  variadic-parameter
 
         parameter-declaration-list:
           parameter-declaration
           parameter-declaration-list  ,  parameter-declaration
+
+        variadic-parameter:
+          ...
+          attribute-specification-opt visiblity-modifier-opt type-specifier \
+            ...  variable-name
      *)
      (* This function parses the parens as well. *)
-     (* TODO: Add an error checking pass that ensures that the "..." parameter
-              only appears at the end, and is not trailed by a comma. *)
+     (* ERROR RECOVERY: We allow variadic parameters in all positions; a later
+        pass gives an error if a variadic parameter is in an incorrect position
+        or followed by a trailing comma.  *)
+     (* TODO: Add an error checking pass that ensures that a variadic parameter
+     does not have a default value. *)
       parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =
@@ -1043,12 +1054,13 @@ module WithExpressionAndStatementAndTypeParser
       else (parser1, make_variadic_parameter (make_token token))
     | _ -> parse_parameter_declaration parser
 
-  (* SPEC
-    parameter-declaration:
-      attribute-specificationopt  type-specifier  variable-name \
-      default-argument-specifieropt
-  *)
   and parse_parameter_declaration parser =
+    (* SPEC
+    TODO: The specification does not include modifiers. Fix the spec.
+    parameter-declaration:
+      attribute-specification-opt  type-specifier  variable-name \
+      default-argument-specifier-opt
+    *)
     (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
     let (parser, attrs) = parse_attribute_specification_opt parser in
@@ -1070,7 +1082,14 @@ module WithExpressionAndStatementAndTypeParser
     | Ampersand -> parse_decorated_variable parser
     | _ -> expect_variable parser
 
+  (* TODO: This is wrong. The variable here is not an *expression* that has
+  an optional decoration on it.  It's a declaration. We shouldn't be using the
+  same data structure for a decorated expression as a declaration; one
+  is a *use* and the other is a *definition*. *)
   and parse_decorated_variable parser =
+    (* TODO: We might consider parsing both &...$x and ...&$x and give an
+    appropriate error saying you can't mix ref and variadic.  The original
+    Hack and HHVM parsers do this for &...$x, but not ...&$x. *)
     let (parser, decorator) = next_token parser in
     let (parser, variable) = expect_variable parser in
     let decorator = make_token decorator in

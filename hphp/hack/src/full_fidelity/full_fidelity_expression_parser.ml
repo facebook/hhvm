@@ -651,6 +651,18 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_expression_list_opt parser =
     (* SPEC
+
+      TODO: This business of allowing ... does not appear in the spec. Add it.
+
+      ERROR RECOVERY: A ... expression can only appear at the end of a
+      formal parameter list. However, we parse it everywhere without error,
+      and detect the error in a later pass.
+
+      Note that it *is* legal for a ... expression be followed by a trailing
+      comma, even though it is not legal for such in a formal parameter list.
+
+      TODO: Can *any* expression appear after the ... ?
+
       argument-expression-list:
         argument-expressions   ,-opt
       argument-expressions:

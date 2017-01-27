@@ -45,6 +45,8 @@ class PDO {
   const ATTR_AUTOCOMMIT = 0;
   const ATTR_PREFETCH = 0;
   const ATTR_TIMEOUT = 0;
+  const ATTR_READ_TIMEOUT = 0;
+  const ATTR_WRITE_TIMEOUT = 0;
   const ATTR_ERRMODE = 0;
   const ATTR_SERVER_VERSION = 0;
   const ATTR_CLIENT_VERSION = 0;

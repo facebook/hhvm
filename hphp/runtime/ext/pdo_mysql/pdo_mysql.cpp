@@ -241,8 +241,8 @@ bool PDOMySqlConnection::create(const Array& options) {
   /* handle MySQL options */
   if (!options.empty()) {
     long connect_timeout = pdo_attr_lval(options, PDO_ATTR_TIMEOUT, 30);
-    long read_timeout = pdo_attr_lval(options, PDO_ATTR_READ_TIMEOUT, 123456789);
-    long write_timeout = pdo_attr_lval(options, PDO_ATTR_WRITE_TIMEOUT, 123456789);
+    long read_timeout = pdo_attr_lval(options, PDO_ATTR_READ_TIMEOUT, -1);
+    long write_timeout = pdo_attr_lval(options, PDO_ATTR_WRITE_TIMEOUT, -1);
 
     long local_infile = pdo_attr_lval(options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
     String init_cmd, default_file, default_group, ssl_ca, ssl_capath, ssl_cert,
@@ -265,13 +265,13 @@ bool PDOMySqlConnection::create(const Array& options) {
       connect_opts |= CLIENT_IGNORE_SPACE;
     }
 
-    if (mysql_options(m_server, MYSQL_OPT_CONNECT_TIMEOUT,
+    if (read_timeout >= 0 && mysql_options(m_server, MYSQL_OPT_CONNECT_TIMEOUT,
                       (const char *)&connect_timeout)) {
       handleError(__FILE__, __LINE__);
       goto cleanup;
     }
 
-    if (mysql_options(m_server, MYSQL_OPT_READ_TIMEOUT,
+    if (write_timeout >= 0 && mysql_options(m_server, MYSQL_OPT_READ_TIMEOUT,
                       (const char *)&read_timeout)) {
       handleError(__FILE__, __LINE__);
       goto cleanup;

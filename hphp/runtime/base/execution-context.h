@@ -241,6 +241,7 @@ public:
   Variant pushUserExceptionHandler(const Variant& function);
   void popUserErrorHandler();
   void popUserExceptionHandler();
+  void clearUserErrorHandlers();
   bool errorNeedsHandling(int errnum,
                           bool callUserHandler,
                           ErrorThrowMode mode);

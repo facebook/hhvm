@@ -4255,13 +4255,14 @@ and check_null_wtf env p ty =
     let env, ety = Env.expand_type env ty in
     match ety with
       | _, Toption ty ->
-        let env, ty = Env.expand_type env ty in
+        (* Find sketchy nulls hidden under singleton Tunresolved *)
+        let env, ty = TUtils.fold_unresolved env ty in
         (match ty with
-          | _, (Tmixed | Tany | Terr) ->
+          | _, Tmixed ->
             Errors.sketchy_null_check p
           | _, Tprim _ ->
             Errors.sketchy_null_check_primitive p
-          | _, (Tarraykind _ | Toption _ | Tvar _ | Tfun _
+          | _, (Terr | Tany | Tarraykind _ | Toption _ | Tvar _ | Tfun _
           | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
           | Tunresolved _ | Tobject | Tshape _ ) -> ());
         env

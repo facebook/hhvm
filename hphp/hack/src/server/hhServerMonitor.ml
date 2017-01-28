@@ -21,6 +21,8 @@
 
 open HhServerMonitorConfig
 module SP = ServerProcess
+module SM = ServerMonitor.Make_monitor (HhMonitorInformant);;
+
 
 let start_server options name log_link daemon_entry =
   let log_fds =
@@ -129,7 +131,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
       end
     in
     let waiting_client = ServerArgs.waiting_client options in
-    ServerMonitor.start_monitoring ~waiting_client ServerMonitorUtils.({
+    SM.start_monitoring ~waiting_client () ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;
       lock_file = ServerFiles.lock_file www_root;
       server_log_file = ServerFiles.log_link www_root;

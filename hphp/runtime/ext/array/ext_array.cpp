@@ -241,6 +241,8 @@ TypedValue HHVM_FUNCTION(array_fill,
   if (num < 0) {
     throw_invalid_argument("Number of elements can't be negative");
     return make_tv<KindOfBoolean>(false);
+  } else if (num == 0) {
+    return tvReturn(empty_array());
   }
 
   if (start_index == 0) {

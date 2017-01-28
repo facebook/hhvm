@@ -131,7 +131,10 @@ let monitor_daemon_main (options: ServerArgs.options) =
       end
     in
     let waiting_client = ServerArgs.waiting_client options in
-    SM.start_monitoring ~waiting_client () ServerMonitorUtils.({
+    let informant_options = {
+      HhMonitorInformant.root = ServerArgs.root options;
+    } in
+    SM.start_monitoring ~waiting_client informant_options ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;
       lock_file = ServerFiles.lock_file www_root;
       server_log_file = ServerFiles.log_link www_root;

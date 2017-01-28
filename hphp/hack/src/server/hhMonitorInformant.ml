@@ -10,7 +10,6 @@
 
 (** Hack's informant. Currently a dummy that does nothing. *)
 
-type t = unit
-type init_env = unit
-let init () = ()
+include HhMonitorInformant_sig.Types
+let init _init_env = ()
 let report () = Informant_sig.Move_along

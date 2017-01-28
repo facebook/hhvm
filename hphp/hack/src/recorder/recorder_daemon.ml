@@ -8,6 +8,7 @@
  *
  *)
 
+exception Failed_to_grab_lock
 
 let print_header recorder =
   let header = Recorder.get_header recorder in
@@ -43,12 +44,19 @@ let restore_relative_path_prefixes init_env =
   set_path_prefix Root init_env.root_path;
   set_path_prefix Hhi init_env.hhi_path
 
+
+let acquire_lock_file init_env =
+  if Lock.grab @@ Path.to_string @@ init_env.Recorder_types.lock_file then
+    ()
+  else
+    raise Failed_to_grab_lock
+
 (** Type annotations are required here because we neve resolve them.
  * Consider actually using these phantom types.*)
 let daemon_main init_env (ic, (_oc: unit Daemon.out_channel)) =
   Printexc.record_backtrace true;
   restore_relative_path_prefixes init_env;
-  Hh_logger.log "Started recording";
+  acquire_lock_file init_env;
   let d_port = Debug_port.in_port_of_in_channel ic in
   read_and_record (Recorder.start init_env) d_port
 
@@ -59,22 +67,25 @@ let maybe_rename_old_log_link log_link =
   try Sys.rename log_link (log_link ^ ".old") with _ -> ()
 
 (** Retire the old sym link, create a new timestamped file, point the
- * link to that new file, and return a file descriptor to this file. *)
+ * link to that new file, and return its absolute path. *)
 let new_file_from_link link =
   maybe_rename_old_log_link link;
-  let file = Sys_utils.make_link_of_timestamped link in
-  Daemon.fd_of_path file
+  Sys_utils.make_link_of_timestamped link
 
 let start_daemon output_fn log_link =
-  let log_fd = new_file_from_link log_link in
-  let out_fd = new_file_from_link output_fn in
+  let log_fd = Daemon.fd_of_path @@ new_file_from_link log_link in
+  let out_fd = Daemon.fd_of_path @@ new_file_from_link output_fn in
+  let root_path = Path.make Relative_path.(path_of_prefix Root) in
+  let lock_file = Path.make @@ new_file_from_link @@
+    ServerFiles.recorder_lock root_path in
   let init_env = {
-    Recorder_types.root_path = Path.make Relative_path.(path_of_prefix Root);
+    Recorder_types.root_path;
     hhi_path = Path.make Relative_path.(path_of_prefix Hhi);
+    lock_file;
   } in
   Hh_logger.log
-    "About to spawn recorder daemon. Output will go to %s. Logs to %s.\n"
-    output_fn log_link;
+    "About to spawn recorder daemon. Output will go to %s. Logs to %s. Lock_file to %s.\n"
+    output_fn log_link (Path.to_string lock_file);
   Daemon.spawn
     (** This doesn't work in `socket mode. The recorder daemon doesn't
      * see EOF when the serve exits, and just ends up waiting forever. No

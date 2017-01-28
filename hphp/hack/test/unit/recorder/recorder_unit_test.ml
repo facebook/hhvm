@@ -37,6 +37,8 @@ let sample_recorder_init_env =
   {
     Recorder_types.root_path = Path.make Sys_utils.temp_dir_name;
     hhi_path = Path.make Sys_utils.temp_dir_name;
+    lock_file = Path.concat (Path.make Sys_utils.temp_dir_name) @@
+      "sample_recorder.lock";
   }
 
 (** Make a recording and return a channel to that recording. *)

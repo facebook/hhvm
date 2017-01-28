@@ -88,19 +88,25 @@ module Test_harness = struct
     | _ ->
       raise (Process_exited_abnormally (status, err))
 
+  let wait_until_lock_free lock_file _harness =
+    Lock.blocking_grab_then_release lock_file
+
   let get_recording_path harness =
     let recording_re = Str.regexp
       ("^.+ About to spawn recorder daemon\\. " ^
-      "Output will go to \\(.+\\)\\. Logs to \\(.+\\)\\.$") in
+      "Output will go to \\(.+\\)\\. Logs to \\(.+\\)\\. " ^
+      "Lock_file to \\(.+\\)\\.$") in
     let open Option in
     let logs = get_server_logs harness in
     logs >>= fun logs ->
     try begin
       let _ = Str.search_forward recording_re logs 0 in
-      Some (Path.make (Str.matched_group 1 logs))
+      Some (
+        (Path.make (Str.matched_group 1 logs)),
+        (Path.make (Str.matched_group 2 logs)))
     end with
     | Not_found ->
-      Printf.eprintf "recorder path not found\n%!";
+      Printf.eprintf "recorder path or lock file not found\n%!";
       Printf.eprintf "See also server logs: %s\n%!" logs;
       None
 
@@ -246,14 +252,13 @@ let test_server_driver_case_0 harness =
   let () = String_asserter.assert_list_equals ["No errors!"] results
     (see_also_logs harness) in
   let _ = Test_harness.stop_server harness in
-  (** After stopping the server, eventually the recorder daemon will
-   * stop, but it could take some time. *)
-  let _ = Unix.select [] [] [] 4.0 in
   match Test_harness.get_recording_path harness with
   | None ->
     Printf.eprintf "Could not find recording\n%!";
     false
-  | Some recording_path ->
+  | Some (recording_path, recorder_lock_file) ->
+    let () = Test_harness.wait_until_lock_free
+      (Path.to_string recorder_lock_file) harness in
     let recording = read_recording recording_path in
     let expected = [
       "Start_recording";
@@ -290,11 +295,10 @@ let test_server_driver_case_1_and_turntable harness =
   | None ->
     Printf.eprintf "Could not find recording\n%!";
     false
-  | Some recording_path ->
+  | Some (recording_path, recorder_lock_file) ->
     let _ = Test_harness.stop_server harness in
-    (** After stopping server, recorder daemon might take a few seconds to
-     * see the server stopped. *)
-    let _, _, _ = Unix.select [] [] [] 3.0 in
+    let () = Test_harness.wait_until_lock_free
+      (Path.to_string recorder_lock_file) harness in
     let results = Test_harness.check_cmd harness in
     (** Fresh server has no errors. *)
     let () = String_asserter.assert_list_equals ["No errors!"] results

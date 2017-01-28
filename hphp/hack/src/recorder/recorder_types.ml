@@ -11,6 +11,7 @@ type saved_state_info = {
 type init_env = {
   root_path : Path.t;
   hhi_path : Path.t;
+  lock_file : Path.t;
 }
 
 (** A recording is a sequence of these events. They are derived from the events

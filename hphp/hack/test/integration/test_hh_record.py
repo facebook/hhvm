@@ -64,7 +64,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         self.assertIn('Successfully loaded mini-state', logs)
         self.assertIn('Sending Loaded_saved_state debug event', logs)
         recording_matcher = re.search(
-            'About to spawn recorder daemon. Output will go to (.+)\. Logs to (.+)\.',
+            'About to spawn recorder daemon. Output will go to (.+)\. Logs to (.+)\. Lock_file to (.+)\.',
             logs)
         self.assertIsNotNone(recording_matcher)
         self.assertIn('recorder_out', recording_matcher.group(1))
@@ -101,7 +101,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         self.assertIn('start_with_recorder_on = true', logs)
         self.assertIn('Successfully loaded mini-state', logs)
         recording_matcher = re.search(
-            'About to spawn recorder daemon. Output will go to (.+)\. Logs to (.+)\.',
+            'About to spawn recorder daemon. Output will go to (.+)\. Logs to (.+)\. Lock_file to (.+)\.',
             logs)
         self.assertIsNotNone(recording_matcher)
         self.assertIn('recorder_out', recording_matcher.group(1))

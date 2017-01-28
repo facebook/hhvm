@@ -5,12 +5,13 @@
 module Types = struct
   type options = {
     root : Path.t;
+    allow_subscriptions : bool;
   }
-  type t = unit
   type init_env = options
 end
 
 module type S = sig
+  type t
   include module type of Types
   include Informant_sig.S with type t := t and type init_env := init_env
 end

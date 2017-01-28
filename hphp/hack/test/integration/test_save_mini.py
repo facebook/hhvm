@@ -159,4 +159,4 @@ watchman_init_timeout = 1
         self.run_check()
         # Stop the server, ensuring that its logs get flushed
         self.proc_call([hh_client, 'stop', self.repo_dir])
-        self.assertIn('Watchman.Timeout', self.get_server_logs())
+        self.assertIn('Watchman_sig.Types.Timeout', self.get_server_logs())

@@ -133,7 +133,6 @@ let monitor_daemon_main (options: ServerArgs.options) =
     let waiting_client = ServerArgs.waiting_client options in
     let informant_options = {
       HhMonitorInformant.root = ServerArgs.root options;
-      allow_subscriptions = local_config.ServerLocalConfig.watchman_subscribe;
     } in
     SM.start_monitoring ~waiting_client informant_options ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;

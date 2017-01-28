@@ -8,11 +8,18 @@
  *
  *)
 
+
+let print_header recorder =
+  let header = Recorder.get_header recorder in
+  print_string header;
+  flush stdout
+
 let marshal_events events =
   List.iter (fun e -> Marshal.to_channel stdout e []) events
 
 let clean_exit recorder =
   let events = Recorder.get_events recorder in
+  print_header recorder;
   marshal_events events;
   exit 0
 

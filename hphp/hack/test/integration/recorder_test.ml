@@ -224,6 +224,7 @@ let rec read_recording_rec ic acc =
 
 let read_recording recording_path =
   let ic = Pervasives.open_in (Path.to_string recording_path) in
+  let _ = Recorder.Header.parse_header ic in
   Utils.try_finally ~f:(fun () ->
     let items_rev = read_recording_rec ic [] in
     List.rev items_rev

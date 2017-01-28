@@ -12,7 +12,11 @@ open Core
 
 let run (name, f) =
   Printf.printf "Running %s ... %!" name;
-  let result = f () in
+  let result = try f () with
+    | e ->
+      let () = Printf.printf "Exception %s\n" (Printexc.to_string e) in
+      false
+  in
   (if result
   then Printf.printf "ok\n%!"
   else Printf.printf "fail\n%!");

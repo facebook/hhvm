@@ -83,6 +83,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
                 f,
                 {
                     'state': self.saved_state_path(),
+                    'corresponding_base_revision': '1',
                     'is_cached': True,
                     'deptable': self.saved_state_path() + '.sql',
                 })

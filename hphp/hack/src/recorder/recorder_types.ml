@@ -1,5 +1,6 @@
 type saved_state_info = {
   filename : string;
+  corresponding_base_revision: string;
   dirty_files : string Relative_path.Map.t;
   changed_while_parsing : string Relative_path.Map.t;
   build_targets : string Relative_path.Map.t;

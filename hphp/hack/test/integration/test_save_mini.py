@@ -95,6 +95,7 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
             write_echo_json(
                 f, {
                     'state': self.saved_state_path(),
+                    'corresponding_base_revision': '1',
                     'is_cached': True,
                     'deptable': self.saved_state_path() + '.sql',
                 }

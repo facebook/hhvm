@@ -88,14 +88,20 @@ module ServerInitCommon = struct
       let kv = Hh_json.get_object_exn json in
       check_json_obj_error kv;
       let state_fn = Hh_json.get_string_exn @@ List.Assoc.find_exn kv "state" in
+      let corresponding_base_revision = Hh_json.get_string_exn @@
+        List.Assoc.find_exn kv "corresponding_base_revision" in
       let is_cached =
         Hh_json.get_bool_exn @@ List.Assoc.find_exn kv "is_cached" in
       let deptable_fn =
         Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
       let end_time = Unix.gettimeofday () in
       Daemon.to_channel oc
-        @@ Ok (
-        `Fst (state_fn, is_cached, end_time, deptable_fn));
+        @@ Ok (`Fst (
+          state_fn,
+          corresponding_base_revision,
+          is_cached,
+          end_time,
+          deptable_fn));
       let json = read_json_line ic in
       assert (Unix.close_process_in ic = Unix.WEXITED 0);
       let kv = Hh_json.get_object_exn json in
@@ -131,7 +137,12 @@ module ServerInitCommon = struct
     try
       Daemon.from_channel ic >>= function
       | `Snd _ -> assert false
-      | `Fst (fn, is_cached, end_time, deptable_fn) ->
+      | `Fst (
+        fn,
+        corresponding_base_revision,
+        is_cached,
+        end_time,
+        deptable_fn) ->
         (* The sql deptable must be loaded in the master process *)
         (try
           (* Take a lock on the info file for the sql *)
@@ -163,7 +174,11 @@ module ServerInitCommon = struct
             List.map dirty_files Relative_path.(concat Root) in
             HackEventLogger.vcs_changed_files_end t;
             let _ = Hh_logger.log_duration "Finding changed files" t in
-            Result.Ok (fn, Relative_path.set_of_list dirty_files, old_saved)
+            Result.Ok (
+              fn,
+              corresponding_base_revision,
+              Relative_path.set_of_list dirty_files,
+              old_saved)
         end in
         Result.Ok get_dirty_files
     with e ->
@@ -333,7 +348,7 @@ module ServerInitCommon = struct
   let get_state_future genv root state_future timeout =
     let state = state_future
     >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun (saved_state_fn, dirty_files, old_saved) ->
+    >>= fun (saved_state_fn, corresponding_base_revision, dirty_files, old_saved) ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -358,15 +373,20 @@ module ServerInitCommon = struct
     let updates = SSet.filter updates (fun p ->
       string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
-    Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved)
-  in
-  state
+    Ok (saved_state_fn,
+      corresponding_base_revision,
+      dirty_files,
+      changed_while_parsing,
+      old_saved)
+    in
+    state
 end
 
 type saved_state_fn = string
+type corresponding_base_rev = string
 
 type state_result =
- (saved_state_fn * Relative_path.Set.t
+ (saved_state_fn * corresponding_base_rev * Relative_path.Set.t
    * Relative_path.Set.t * FileInfo.saved_state_info, exn)
  Result.t
 
@@ -436,7 +456,12 @@ module ServerEagerInit : InitKind = struct
 
     let state = get_state_future genv root state_future timeout in
     match state with
-    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved) ->
+    | Ok (
+      saved_state_fn,
+      corresponding_base_revision,
+      dirty_files,
+      changed_while_parsing,
+      old_saved) ->
       let old_fast = FileInfo.saved_to_fast old_saved in
       (* During eager init, we don't need to worry about tracked targets since
          they we end up parsing everything anyways
@@ -446,6 +471,7 @@ module ServerEagerInit : InitKind = struct
       let global_state = ServerGlobalState.save () in
       let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
+        corresponding_base_revision;
         dirty_files;
         changed_while_parsing;
         build_targets;
@@ -554,12 +580,15 @@ module ServerLazyInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
 
     match state with
-    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved) ->
+    | Ok (
+      saved_state_fn, corresponding_base_revision,
+      dirty_files, changed_while_parsing, old_saved) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let global_state = ServerGlobalState.save () in
       let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
+        corresponding_base_revision;
         dirty_files;
         changed_while_parsing;
         build_targets;

@@ -34,8 +34,7 @@ module Args = struct
 
 end;;
 
-
-let rec cat_recording channel =
+let rec print_events channel =
   let event = try Marshal.from_channel channel with
   | End_of_file ->
     flush stdout;
@@ -45,7 +44,26 @@ let rec cat_recording channel =
     exit 0
   in
   Printf.printf "%s\n" (Recorder_types.to_string event);
-  cat_recording channel
+  print_events channel
+
+
+let cat_recording channel =
+  let json = Recorder.Header.parse_header channel in
+  let open Hh_json.Access in
+  (return json)
+    >>= get_string "build_id"
+    |> project
+      (fun build_id ->
+        if build_id = Build_id.build_id_ohai
+        then
+          ()
+        else
+          Printf.eprintf "Warning: Build ID mismatch\n%!";
+        print_events channel
+      )
+      (fun e ->
+        Printf.eprintf "%s\n%!" (access_failure_to_string e);
+        exit 1)
 
 let () =
   Daemon.check_entry_point (); (* this call might not return *)

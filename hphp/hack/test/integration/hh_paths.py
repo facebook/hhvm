@@ -5,5 +5,5 @@ from __future__ import unicode_literals
 hh_server = 'hh_server'
 hh_client = 'hh_client'
 recorder_cat = 'recorder_cat'
-turntable = 'turntable'
+turntable_bin = 'turntable_bin'
 server_driver_bin = 'server_driver_bin'

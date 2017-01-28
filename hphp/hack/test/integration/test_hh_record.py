@@ -10,7 +10,7 @@ import signal
 import sys
 import time
 
-from hh_paths import hh_client, recorder_cat, server_driver_bin, turntable
+from hh_paths import hh_client, recorder_cat, server_driver_bin, turntable_bin
 
 
 def boxed_string(content):
@@ -146,7 +146,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
     # still-running process).
     def spin_record(self, recording):
         proc = self.proc_create([
-            turntable,
+            turntable_bin,
             '--recording',
             recording,
             self.repo_dir

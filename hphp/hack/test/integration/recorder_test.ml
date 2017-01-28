@@ -77,7 +77,7 @@ module Test_harness = struct
 
   let get_server_logs harness =
     let process = exec_hh_client ["--logname"] harness in
-    let status, log_path, err = Process.read_and_close_pid process in
+    let status, log_path, err = Process.read_and_wait_pid process in
     match status with
     | Unix.WEXITED 0 ->
       let log_path = Path.make (String.trim log_path) in
@@ -112,7 +112,7 @@ module Test_harness = struct
 
   let check_cmd harness =
     let process = exec_hh_client ["check"] harness in
-    let status, result, err = Process.read_and_close_pid process in
+    let status, result, err = Process.read_and_wait_pid process in
     match status with
     | Unix.WEXITED _ ->
       Sys_utils.split_lines result
@@ -121,7 +121,7 @@ module Test_harness = struct
 
   let stop_server harness =
     let process = exec_hh_client ["stop"] harness in
-    let status, result, err = Process.read_and_close_pid process in
+    let status, result, err = Process.read_and_wait_pid process in
     match status with
     | Unix.WEXITED 0 ->
       result

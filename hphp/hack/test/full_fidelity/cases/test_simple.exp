@@ -17,8 +17,9 @@
       (({)(end_of_line))
         (list
         (expression_statement(
-          binary_expression(variable((whitespace)(variable)(whitespace)))
-          ((=)(whitespace))
+          binary_expression(
+          variable((single_line_comment)(end_of_line)(whitespace)(variable)(end_of_line)))
+          ((whitespace)(=)(whitespace))
           (binary_expression
             (parenthesized_expression
               ((lparen))

@@ -40,6 +40,7 @@ endif ()
 set(HHVM_LINK_LIBRARIES
   ${HHVM_WRAP_SYMS}
   hphp_analysis
+  hphp_facts_parser
   hphp_system
   hphp_parser
   hphp_zend

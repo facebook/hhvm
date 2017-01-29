@@ -1923,20 +1923,21 @@ Variant HHVM_FUNCTION(openssl_pkey_get_public, const Variant& certificate) {
   return toVariant(Key::Get(certificate, true));
 }
 
-Resource HHVM_FUNCTION(openssl_pkey_new,
+Variant HHVM_FUNCTION(openssl_pkey_new,
                        const Variant& configargs /* = uninit_variant */) {
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
+  SCOPE_EXIT {
+    php_openssl_dispose_config(&req);
+  };
 
-  Resource ret;
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    ret = Resource(req::make<Key>(req.priv_key));
+    return Resource(req::make<Key>(req.priv_key));
+  } else {
+    return false;
   }
-
-  php_openssl_dispose_config(&req);
-  return ret;
 }
 
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,

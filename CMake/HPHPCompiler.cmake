@@ -230,6 +230,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # -O0-ggdb was reputed to cause gdb to crash (github #4450)
   set(CMAKE_C_FLAGS_DEBUG            "-O0 -g${GDB_SUBOPTION}")
   set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_C_FLAGS_DEBUGOPT         "-O2 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUGOPT       "-O2 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
   set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
   set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
@@ -237,7 +239,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration")
-  
+
+  mark_as_advanced(CMAKE_C_FLAGS_DEBUGOPT CMAKE_CXX_FLAGS_DEBUGOPT)
 
   foreach(opt ${DISABLED_NAMED_WARNINGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${opt}")

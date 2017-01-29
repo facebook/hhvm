@@ -1,6 +1,6 @@
 include(Options)
 
-set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug RelWithDebInfo)
+set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug DebugOpt RelWithDebInfo)
 
 # Do this until cmake has a define for ARMv8
 INCLUDE(CheckCXXSourceCompiles)

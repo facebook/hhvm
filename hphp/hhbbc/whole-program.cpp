@@ -386,13 +386,13 @@ void final_pass(Index& index, php::Program& program) {
 //////////////////////////////////////////////////////////////////////
 
 template<class Container>
-std::unique_ptr<php::Program> parse_program(const Container& units) {
+std::unique_ptr<php::Program> parse_program(Container units) {
   trace_time tracer("parse");
   auto ret = folly::make_unique<php::Program>();
   ret->units = parallel::map(
     units,
-    [&] (const std::unique_ptr<UnitEmitter>& ue) {
-      return parse_unit(*ue);
+    [&] (std::unique_ptr<UnitEmitter>& ue) {
+      return parse_unit(std::move(ue));
     }
   );
   return ret;
@@ -429,8 +429,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   LitstrTable::get().setReading();
 
-  auto program = parse_program(ues);
-  ues.clear();
+  auto program = parse_program(std::move(ues));
 
   state_after("parse", *program);
 

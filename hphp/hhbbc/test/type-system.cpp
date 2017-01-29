@@ -154,7 +154,7 @@ std::unique_ptr<php::Unit> make_test_unit() {
     "ignore.php",
     MD5("12345432123454321234543212345432")
   ));
-  return parse_unit(*ue);
+  return parse_unit(std::move(ue));
 }
 
 std::unique_ptr<php::Program> make_program() {

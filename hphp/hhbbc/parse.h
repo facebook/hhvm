@@ -26,7 +26,7 @@ namespace HPHP { namespace HHBBC {
 
 namespace php { struct Unit; }
 
-std::unique_ptr<php::Unit> parse_unit(const UnitEmitter&);
+std::unique_ptr<php::Unit> parse_unit(std::unique_ptr<UnitEmitter> ue);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1,4 +1,3 @@
 File "instanceof_generic.php", line 7, characters 3-13:
   T
-File "instanceof_generic.php", line 4, characters 8-27:
-'instanceof' cannot be used on a generic classname because types are erased at runtime (Typing[4162])
+No errors

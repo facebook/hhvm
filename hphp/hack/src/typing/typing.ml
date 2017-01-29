@@ -4162,7 +4162,6 @@ and condition env tparamet =
         let env, obj_ty = Env.expand_type env obj_ty in
         match obj_ty with
         | _, Tabstract (AKgeneric _, _) ->
-          Errors.instanceof_generic_classname p;
           env, obj_ty
         | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
           let obj_ty =

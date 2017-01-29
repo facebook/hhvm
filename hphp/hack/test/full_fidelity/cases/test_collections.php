@@ -1,5 +1,5 @@
 <?hh
-function foo() {
+function foo(dict<string, vec> $abc) : void {
   vec(); // Legal!
   $x = vec[1, 2];
   $y = dict["abc" => $x];

@@ -309,24 +309,42 @@ and parse_array_type_specifier parser =
   and parse_vec_type_specifier parser =
     (*
       vec < type-specifier >
+      TODO: Should we allow a trailing comma?
+      TODO: Add this to the specification
+      ERROR RECOVERY: If there is no type argument list then just make
+      this a simple type.  TODO: Should this be an error at parse time? what
+      about at type checking time?
     *)
     let (parser, keyword) = assert_token parser Vec in
-    let (parser, left) = expect_left_angle parser in
-    let (parser, t) = parse_type_specifier parser in
-    let (parser, right) = expect_right_angle parser in
-    let result = make_vector_type_specifier keyword left t right in
-    (parser, result)
+    if peek_token_kind parser != LessThan then
+      let result = make_simple_type_specifier keyword in
+      (parser, result)
+    else
+      let (parser, left) = expect_left_angle parser in
+      let (parser, t) = parse_type_specifier parser in
+      let (parser, right) = expect_right_angle parser in
+      let result = make_vector_type_specifier keyword left t right in
+      (parser, result)
 
   and parse_keyset_type_specifier parser =
     (*
       keyset < type-specifier >
+      TODO: Should we allow a trailing comma?
+      TODO: Add this to the specification
+      ERROR RECOVERY: If there is no type argument list then just make
+      this a simple type.  TODO: Should this be an error at parse time? what
+      about at type checking time?
     *)
     let (parser, keyword) = assert_token parser Keyset in
-    let (parser, left) = expect_left_angle parser in
-    let (parser, t) = parse_type_specifier parser in
-    let (parser, right) = expect_right_angle parser in
-    let result = make_keyset_type_specifier keyword left t right in
-    (parser, result)
+    if peek_token_kind parser != LessThan then
+      let result = make_simple_type_specifier keyword in
+      (parser, result)
+    else
+      let (parser, left) = expect_left_angle parser in
+      let (parser, t) = parse_type_specifier parser in
+      let (parser, right) = expect_right_angle parser in
+      let result = make_keyset_type_specifier keyword left t right in
+      (parser, result)
 
   and parse_dictionary_type_specifier parser =
     (*
@@ -334,15 +352,25 @@ and parse_array_type_specifier parser =
       TODO: Should we allow a trailing comma?
       TODO: Consider parsing this as a series of list-items, rather than
       key comma value.
+      TODO: Add this to the specification
+
+      ERROR RECOVERY: If there is no type argument list then just make this
+      a simple type.  TODO: Should this be an error at parse time?  what
+      about at type checking time?
     *)
     let (parser, keyword) = assert_token parser Dict in
-    let (parser, left) = expect_left_angle parser in
-    let (parser, k) = parse_type_specifier parser in
-    let (parser, comma) = expect_comma parser in
-    let (parser, v) = parse_type_specifier parser in
-    let (parser, right) = expect_right_angle parser in
-    let result = make_dictionary_type_specifier keyword left k comma v right in
-    (parser, result)
+    if peek_token_kind parser != LessThan then
+      let result = make_simple_type_specifier keyword in
+      (parser, result)
+    else
+      let (parser, left) = expect_left_angle parser in
+      let (parser, k) = parse_type_specifier parser in
+      let (parser, comma) = expect_comma parser in
+      let (parser, v) = parse_type_specifier parser in
+      let (parser, right) = expect_right_angle parser in
+      let result = make_dictionary_type_specifier
+        keyword left k comma v right in
+      (parser, result)
 
 and parse_tuple_or_closure_type_specifier parser =
   let (parser1, _) = assert_token parser LeftParen in

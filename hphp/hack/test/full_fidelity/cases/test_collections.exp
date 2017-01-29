@@ -3,8 +3,18 @@
   (list
   (function_declaration
     (missing)(function_declaration_header(missing)((function)(whitespace))
-    (missing)((name))(missing)((lparen))(missing)((rparen)(whitespace))
-    (missing)(missing))
+    (missing)((name))(missing)
+    ((lparen))
+    (list(list_item
+      (parameter_declaration(missing)(missing)
+        (dictionary_type_specifier((dict))((<))
+          (simple_type_specifier((string)))
+          ((,)(whitespace))
+          (simple_type_specifier((vec)))
+          ((>)(whitespace)))
+          ((variable))(missing))(missing)))
+    ((rparen)(whitespace))
+    ((:)(whitespace))(simple_type_specifier((void)(whitespace))))
     (compound_statement
       (({)(end_of_line))
       (list

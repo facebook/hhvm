@@ -1032,9 +1032,8 @@ module WithStatementAndDeclAndTypeParser
     let (parser, cast_type) = next_token parser in
     let cast_type = make_token cast_type in
     let (parser, right) = assert_token parser RightParen in
-    (* TODO: Do we need to set the precedence of the expression
-    parser here? *)
-    let (parser, operand) = parse_expression parser in
+    let (parser, operand) = parse_expression_with_operator_precedence
+      parser Operator.CastOperator in
     let result = make_cast_expression left cast_type right operand in
     (parser, result)
 

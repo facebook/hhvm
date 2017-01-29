@@ -88,3 +88,6 @@ function g() {
   array((x) => 123);
   foreach ((x) as y) { }
 }
+function h() {
+  (int)$x + $y;
+}

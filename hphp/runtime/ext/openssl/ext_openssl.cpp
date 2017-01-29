@@ -323,6 +323,9 @@ struct php_x509_request {
   int priv_key_bits;
   int priv_key_type;
   int priv_key_encrypt;
+#ifdef HAVE_EVP_PKEY_EC
+  int curve_name;
+#endif
   EVP_PKEY *priv_key;
 
   static bool load_rand_file(const char *file, int *egdsocket, int *seeded) {
@@ -406,6 +409,25 @@ struct php_x509_request {
               }
             } else {
               DSA_free(dsapar);
+            }
+          }
+        }
+        break;
+#endif
+#ifdef HAVE_EVP_PKEY_EC
+      case OPENSSL_KEYTYPE_EC:
+        {
+          if (curve_name == NID_undef) {
+            raise_warning("Missing configuration value: 'curve_name' not set");
+            return false;
+          }
+          if (auto const eckey = EC_KEY_new_by_curve_name(curve_name)) {
+            EC_KEY_set_asn1_flag(eckey, OPENSSL_EC_NAMED_CURVE);
+            if (EC_KEY_generate_key(eckey) &&
+                EVP_PKEY_assign_EC_KEY(priv_key, eckey)) {
+              ret = true;
+            } else {
+              EC_KEY_free(eckey);
             }
           }
         }
@@ -552,7 +574,8 @@ const StaticString
   s_req_extensions("req_extensions"),
   s_private_key_bits("private_key_bits"),
   s_private_key_type("private_key_type"),
-  s_encrypt_key("encrypt_key");
+  s_encrypt_key("encrypt_key"),
+  s_curve_name("curve_name");
 
 static bool php_openssl_parse_config(struct php_x509_request *req,
                                      const Array& args,
@@ -633,6 +656,22 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
   if (req->md_alg == NULL) {
     req->md_alg = req->digest = EVP_md5();
   }
+
+#ifdef HAVE_EVP_PKEY_EC
+  /* set the ec group curve name */
+  req->curve_name = NID_undef;
+  if (args.exists(s_curve_name)) {
+    auto const curve_name = args[s_curve_name].toString();
+    req->curve_name = OBJ_sn2nid(curve_name.data());
+    if (req->curve_name == NID_undef) {
+      raise_warning(
+        "Unknown elliptic curve (short) name %s",
+        curve_name.data()
+      );
+      return false;
+    }
+  }
+#endif
 
   if (req->extensions_section &&
       !php_openssl_config_check_syntax
@@ -1787,7 +1826,6 @@ const StaticString
   s_iqmp("iqmp"),
   s_priv_key("priv_key"),
   s_pub_key("pub_key"),
-  s_curve_name("curve_name"),
   s_curve_oid("curve_oid");
 
 static void add_bignum_as_string(Array &arr,

@@ -185,6 +185,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return FunctionDeclaration::from_json($json, $position, $source);
     case 'function_declaration_header':
       return FunctionDeclarationHeader::from_json($json, $position, $source);
+    case 'where_clause':
+      return WhereClause::from_json($json, $position, $source);
+    case 'where_constraint':
+      return WhereConstraint::from_json($json, $position, $source);
     case 'methodish_declaration':
       return MethodishDeclaration::from_json($json, $position, $source);
     case 'classish_declaration':
@@ -908,6 +912,8 @@ abstract class EditableToken extends EditableSyntax {
        return new VecToken($leading, $trailing);
     case 'void':
        return new VoidToken($leading, $trailing);
+    case 'where':
+       return new WhereToken($leading, $trailing);
     case 'while':
        return new WhileToken($leading, $trailing);
     case 'xor':
@@ -2478,6 +2484,21 @@ final class VoidToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): VoidToken {
     return new VoidToken($this->leading(), $trailing);
+  }
+}
+final class WhereToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('where', $leading, $trailing, 'where');
+  }
+
+  public function with_leading(EditableSyntax $leading): WhereToken {
+    return new WhereToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): WhereToken {
+    return new WhereToken($this->leading(), $trailing);
   }
 }
 final class WhileToken extends EditableToken {
@@ -6107,6 +6128,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   private EditableSyntax $_right_paren;
   private EditableSyntax $_colon;
   private EditableSyntax $_type;
+  private EditableSyntax $_where_clause;
   public function __construct(
     EditableSyntax $async,
     EditableSyntax $keyword,
@@ -6117,7 +6139,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     EditableSyntax $parameter_list,
     EditableSyntax $right_paren,
     EditableSyntax $colon,
-    EditableSyntax $type) {
+    EditableSyntax $type,
+    EditableSyntax $where_clause) {
     parent::__construct('function_declaration_header');
     $this->_async = $async;
     $this->_keyword = $keyword;
@@ -6129,6 +6152,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $this->_right_paren = $right_paren;
     $this->_colon = $colon;
     $this->_type = $type;
+    $this->_where_clause = $where_clause;
   }
   public function async(): EditableSyntax {
     return $this->_async;
@@ -6160,6 +6184,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
+  public function where_clause(): EditableSyntax {
+    return $this->_where_clause;
+  }
   public function with_async(EditableSyntax $async): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $async,
@@ -6171,7 +6198,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_keyword(EditableSyntax $keyword): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6184,7 +6212,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_ampersand(EditableSyntax $ampersand): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6197,7 +6226,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_name(EditableSyntax $name): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6210,7 +6240,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_type_parameter_list(EditableSyntax $type_parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6223,7 +6254,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_left_paren(EditableSyntax $left_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6236,7 +6268,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_parameter_list(EditableSyntax $parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6249,7 +6282,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_right_paren(EditableSyntax $right_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6262,7 +6296,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_colon(EditableSyntax $colon): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6275,7 +6310,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_type(EditableSyntax $type): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6288,7 +6324,22 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $type);
+      $type,
+      $this->_where_clause);
+  }
+  public function with_where_clause(EditableSyntax $where_clause): FunctionDeclarationHeader {
+    return new FunctionDeclarationHeader(
+      $this->_async,
+      $this->_keyword,
+      $this->_ampersand,
+      $this->_name,
+      $this->_type_parameter_list,
+      $this->_left_paren,
+      $this->_parameter_list,
+      $this->_right_paren,
+      $this->_colon,
+      $this->_type,
+      $where_clause);
   }
 
   public function rewrite(
@@ -6307,6 +6358,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
+    $where_clause = $this->where_clause()->rewrite($rewriter, $new_parents);
     if (
       $async === $this->async() &&
       $keyword === $this->keyword() &&
@@ -6317,7 +6369,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $parameter_list === $this->parameter_list() &&
       $right_paren === $this->right_paren() &&
       $colon === $this->colon() &&
-      $type === $this->type()) {
+      $type === $this->type() &&
+      $where_clause === $this->where_clause()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FunctionDeclarationHeader(
@@ -6330,7 +6383,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
         $parameter_list,
         $right_paren,
         $colon,
-        $type), $parents ?? []);
+        $type,
+        $where_clause), $parents ?? []);
     }
   }
 
@@ -6365,6 +6419,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->function_type, $position, $source);
     $position += $type->width();
+    $where_clause = EditableSyntax::from_json(
+      $json->function_where_clause, $position, $source);
+    $position += $where_clause->width();
     return new FunctionDeclarationHeader(
         $async,
         $keyword,
@@ -6375,7 +6432,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
         $parameter_list,
         $right_paren,
         $colon,
-        $type);
+        $type,
+        $where_clause);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_async;
@@ -6388,6 +6446,155 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     yield $this->_right_paren;
     yield $this->_colon;
     yield $this->_type;
+    yield $this->_where_clause;
+    yield break;
+  }
+}
+final class WhereClause extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_constraints;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $constraints) {
+    parent::__construct('where_clause');
+    $this->_keyword = $keyword;
+    $this->_constraints = $constraints;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function constraints(): EditableSyntax {
+    return $this->_constraints;
+  }
+  public function with_keyword(EditableSyntax $keyword): WhereClause {
+    return new WhereClause(
+      $keyword,
+      $this->_constraints);
+  }
+  public function with_constraints(EditableSyntax $constraints): WhereClause {
+    return new WhereClause(
+      $this->_keyword,
+      $constraints);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $constraints = $this->constraints()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $constraints === $this->constraints()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new WhereClause(
+        $keyword,
+        $constraints), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->where_clause_keyword, $position, $source);
+    $position += $keyword->width();
+    $constraints = EditableSyntax::from_json(
+      $json->where_clause_constraints, $position, $source);
+    $position += $constraints->width();
+    return new WhereClause(
+        $keyword,
+        $constraints);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_constraints;
+    yield break;
+  }
+}
+final class WhereConstraint extends EditableSyntax {
+  private EditableSyntax $_left_type;
+  private EditableSyntax $_operator;
+  private EditableSyntax $_right_type;
+  public function __construct(
+    EditableSyntax $left_type,
+    EditableSyntax $operator,
+    EditableSyntax $right_type) {
+    parent::__construct('where_constraint');
+    $this->_left_type = $left_type;
+    $this->_operator = $operator;
+    $this->_right_type = $right_type;
+  }
+  public function left_type(): EditableSyntax {
+    return $this->_left_type;
+  }
+  public function operator(): EditableSyntax {
+    return $this->_operator;
+  }
+  public function right_type(): EditableSyntax {
+    return $this->_right_type;
+  }
+  public function with_left_type(EditableSyntax $left_type): WhereConstraint {
+    return new WhereConstraint(
+      $left_type,
+      $this->_operator,
+      $this->_right_type);
+  }
+  public function with_operator(EditableSyntax $operator): WhereConstraint {
+    return new WhereConstraint(
+      $this->_left_type,
+      $operator,
+      $this->_right_type);
+  }
+  public function with_right_type(EditableSyntax $right_type): WhereConstraint {
+    return new WhereConstraint(
+      $this->_left_type,
+      $this->_operator,
+      $right_type);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_type = $this->left_type()->rewrite($rewriter, $new_parents);
+    $operator = $this->operator()->rewrite($rewriter, $new_parents);
+    $right_type = $this->right_type()->rewrite($rewriter, $new_parents);
+    if (
+      $left_type === $this->left_type() &&
+      $operator === $this->operator() &&
+      $right_type === $this->right_type()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new WhereConstraint(
+        $left_type,
+        $operator,
+        $right_type), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_type = EditableSyntax::from_json(
+      $json->where_constraint_left_type, $position, $source);
+    $position += $left_type->width();
+    $operator = EditableSyntax::from_json(
+      $json->where_constraint_operator, $position, $source);
+    $position += $operator->width();
+    $right_type = EditableSyntax::from_json(
+      $json->where_constraint_right_type, $position, $source);
+    $position += $right_type->width();
+    return new WhereConstraint(
+        $left_type,
+        $operator,
+        $right_type);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_type;
+    yield $this->_operator;
+    yield $this->_right_type;
     yield break;
   }
 }

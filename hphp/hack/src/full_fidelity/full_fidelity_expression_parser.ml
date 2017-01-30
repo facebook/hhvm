@@ -875,6 +875,7 @@ module WithStatementAndDeclAndTypeParser
     | Var
     | Vec
     | Void
+    | Where
     | While
     | Yield -> true
     (* Names that imply cast *)

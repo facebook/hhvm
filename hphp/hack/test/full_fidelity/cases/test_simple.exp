@@ -12,6 +12,7 @@
         ((rparen)(whitespace))
         (missing)
         (missing)
+        (missing)
       )
     (compound_statement
       (({)(end_of_line))

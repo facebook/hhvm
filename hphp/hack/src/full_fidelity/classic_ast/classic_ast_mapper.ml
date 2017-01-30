@@ -1122,12 +1122,14 @@ let pTParaml : tparam list parser =
   ; (K.TypeParameters, mpArgKOfN 1 3 (couldMap ~f:pTParam))
   ]
 
+(* TODO: Translate the where clause *)
 let pFunHdr :
   (fun_kind * id * tparam list * fun_param list * hint option * fun_param list)
   parser
 = mkP
   [ (K.FunctionDeclarationHeader, fun
-    [ async; _kw; _amp; name; tparaml; _lparen; paraml; _rparen; _colon; ret ]
+    [ async; _kw; _amp; name; tparaml; _lparen; paraml; _rparen; _colon; ret;
+      where ]
     env ->
       let is_constructor = P.text name = "__construct" in
       let paraml = couldMap ~f:(pFunParam is_constructor) paraml env in

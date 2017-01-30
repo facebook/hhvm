@@ -1,7 +1,7 @@
 (script(header((<))((?))((name)(end_of_line)))(list(
 function_declaration(missing)(function_declaration_header(missing)
 ((function)(whitespace))(missing)((name))(missing)
-((lparen))(missing)((rparen)(end_of_line))(missing)(missing))
+((lparen))(missing)((rparen)(end_of_line))(missing)(missing)(missing))
 (compound_statement(({)(end_of_line))(list
 (expression_statement(cast_expression((whitespace)(single_line_comment)(end_of_line)(whitespace)(lparen))((name))((rparen)(whitespace))(parenthesized_expression((lparen))(variable((variable)))((rparen))))((;)(end_of_line)))
 (expression_statement(cast_expression((whitespace)(lparen))((name))((rparen)(whitespace))(prefix_unary_expression((++))(variable((variable)))))((;)(end_of_line)))
@@ -39,7 +39,7 @@ function_declaration(missing)(function_declaration_header(missing)
 
 (function_declaration(missing)(function_declaration_header(missing)
 ((function)(whitespace))(missing)((name))(missing)((lparen))(missing)
-((rparen)(whitespace))(missing)(missing))
+((rparen)(whitespace))(missing)(missing)(missing))
 (compound_statement(({)(end_of_line))(list
 (expression_statement(binary_expression(parenthesized_expression((whitespace)(single_line_comment)(end_of_line)(whitespace)(lparen))(qualified_name((name)))((rparen)(whitespace)))((&)(whitespace))(variable((variable))))((;)(end_of_line)))
 (expression_statement(binary_expression(parenthesized_expression((whitespace)(lparen))(qualified_name((name)))((rparen)(whitespace)))((*)(whitespace))(variable((variable))))((;)(end_of_line)))
@@ -94,7 +94,7 @@ function_declaration(missing)(function_declaration_header(missing)
 ((})(end_of_line))))
 (function_declaration(missing)(function_declaration_header(missing)
   ((function)(whitespace))(missing)((name))(missing)((lparen))
-  (missing)((rparen)(whitespace))(missing)(missing))(compound_statement(({)
+  (missing)((rparen)(whitespace))(missing)(missing)(missing))(compound_statement(({)
   (end_of_line))(list(
   expression_statement(
     binary_expression(

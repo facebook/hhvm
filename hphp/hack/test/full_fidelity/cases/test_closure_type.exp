@@ -20,7 +20,7 @@
   (missing)))
   ((rparen)(whitespace))
   ((:)(whitespace))
-  (simple_type_specifier((int)(whitespace))))
+  (simple_type_specifier((int)(whitespace)))(missing))
   (compound_statement
   (({)(end_of_line))
   (list

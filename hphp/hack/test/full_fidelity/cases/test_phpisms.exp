@@ -21,7 +21,7 @@
           (function_declaration_header
             (missing)((whitespace)(function)(whitespace))(missing)
             ((name))(missing)
-            ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
+            ((lparen))(missing)((rparen)(whitespace))(missing)(missing)(missing))
             (compound_statement
               (({)(whitespace)(single_line_comment)(end_of_line))
                 (list

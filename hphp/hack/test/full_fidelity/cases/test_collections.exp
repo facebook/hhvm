@@ -14,7 +14,7 @@
           ((>)(whitespace)))
           ((variable))(missing))(missing)))
     ((rparen)(whitespace))
-    ((:)(whitespace))(simple_type_specifier((void)(whitespace))))
+    ((:)(whitespace))(simple_type_specifier((void)(whitespace)))(missing))
     (compound_statement
       (({)(end_of_line))
       (list

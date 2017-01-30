@@ -41,6 +41,8 @@ type t =
 | NamespaceUseClause
 | FunctionDeclaration
 | FunctionDeclarationHeader
+| WhereClause
+| WhereConstraint
 | MethodishDeclaration
 | ClassishDeclaration
 | ClassishBody
@@ -178,6 +180,8 @@ let to_string kind =
   | NamespaceUseClause -> "namespace_use_clause"
   | FunctionDeclaration -> "function_declaration"
   | FunctionDeclarationHeader -> "function_declaration_header"
+  | WhereClause -> "where_clause"
+  | WhereConstraint -> "where_constraint"
   | MethodishDeclaration -> "methodish_declaration"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"

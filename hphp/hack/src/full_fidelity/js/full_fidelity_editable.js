@@ -122,6 +122,10 @@ class EditableSyntax
       return FunctionDeclaration.from_json(json, position, source);
     case 'function_declaration_header':
       return FunctionDeclarationHeader.from_json(json, position, source);
+    case 'where_clause':
+      return WhereClause.from_json(json, position, source);
+    case 'where_constraint':
+      return WhereConstraint.from_json(json, position, source);
     case 'methodish_declaration':
       return MethodishDeclaration.from_json(json, position, source);
     case 'classish_declaration':
@@ -803,6 +807,8 @@ class EditableToken extends EditableSyntax
        return new VecToken(leading, trailing);
     case 'void':
        return new VoidToken(leading, trailing);
+    case 'where':
+       return new WhereToken(leading, trailing);
     case 'while':
        return new WhileToken(leading, trailing);
     case 'xor':
@@ -1663,6 +1669,13 @@ class VoidToken extends EditableToken
   constructor(leading, trailing)
   {
     super('void', leading, trailing, 'void');
+  }
+}
+class WhereToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('where', leading, trailing, 'where');
   }
 }
 class WhileToken extends EditableToken
@@ -4455,7 +4468,8 @@ class FunctionDeclarationHeader extends EditableSyntax
     parameter_list,
     right_paren,
     colon,
-    type)
+    type,
+    where_clause)
   {
     super('function_declaration_header', {
       async: async,
@@ -4467,7 +4481,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       parameter_list: parameter_list,
       right_paren: right_paren,
       colon: colon,
-      type: type });
+      type: type,
+      where_clause: where_clause });
   }
   get async() { return this.children.async; }
   get keyword() { return this.children.keyword; }
@@ -4479,6 +4494,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   get right_paren() { return this.children.right_paren; }
   get colon() { return this.children.colon; }
   get type() { return this.children.type; }
+  get where_clause() { return this.children.where_clause; }
   with_async(async){
     return new FunctionDeclarationHeader(
       async,
@@ -4490,7 +4506,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_keyword(keyword){
     return new FunctionDeclarationHeader(
@@ -4503,7 +4520,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_ampersand(ampersand){
     return new FunctionDeclarationHeader(
@@ -4516,7 +4534,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_name(name){
     return new FunctionDeclarationHeader(
@@ -4529,7 +4548,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_type_parameter_list(type_parameter_list){
     return new FunctionDeclarationHeader(
@@ -4542,7 +4562,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_left_paren(left_paren){
     return new FunctionDeclarationHeader(
@@ -4555,7 +4576,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_parameter_list(parameter_list){
     return new FunctionDeclarationHeader(
@@ -4568,7 +4590,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       parameter_list,
       this.right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_right_paren(right_paren){
     return new FunctionDeclarationHeader(
@@ -4581,7 +4604,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       right_paren,
       this.colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_colon(colon){
     return new FunctionDeclarationHeader(
@@ -4594,7 +4618,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       colon,
-      this.type);
+      this.type,
+      this.where_clause);
   }
   with_type(type){
     return new FunctionDeclarationHeader(
@@ -4607,7 +4632,22 @@ class FunctionDeclarationHeader extends EditableSyntax
       this.parameter_list,
       this.right_paren,
       this.colon,
-      type);
+      type,
+      this.where_clause);
+  }
+  with_where_clause(where_clause){
+    return new FunctionDeclarationHeader(
+      this.async,
+      this.keyword,
+      this.ampersand,
+      this.name,
+      this.type_parameter_list,
+      this.left_paren,
+      this.parameter_list,
+      this.right_paren,
+      this.colon,
+      this.type,
+      where_clause);
   }
   rewrite(rewriter, parents)
   {
@@ -4625,6 +4665,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     var colon = this.colon.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
+    var where_clause = this.where_clause.rewrite(rewriter, new_parents);
     if (
       async === this.async &&
       keyword === this.keyword &&
@@ -4635,7 +4676,8 @@ class FunctionDeclarationHeader extends EditableSyntax
       parameter_list === this.parameter_list &&
       right_paren === this.right_paren &&
       colon === this.colon &&
-      type === this.type)
+      type === this.type &&
+      where_clause === this.where_clause)
     {
       return rewriter(this, parents);
     }
@@ -4651,7 +4693,8 @@ class FunctionDeclarationHeader extends EditableSyntax
         parameter_list,
         right_paren,
         colon,
-        type), parents);
+        type,
+        where_clause), parents);
     }
   }
   static from_json(json, position, source)
@@ -4686,6 +4729,9 @@ class FunctionDeclarationHeader extends EditableSyntax
     let type = EditableSyntax.from_json(
       json.function_type, position, source);
     position += type.width;
+    let where_clause = EditableSyntax.from_json(
+      json.function_where_clause, position, source);
+    position += where_clause.width;
     return new FunctionDeclarationHeader(
         async,
         keyword,
@@ -4696,7 +4742,8 @@ class FunctionDeclarationHeader extends EditableSyntax
         parameter_list,
         right_paren,
         colon,
-        type);
+        type,
+        where_clause);
   }
   get children_keys()
   {
@@ -4711,8 +4758,156 @@ class FunctionDeclarationHeader extends EditableSyntax
         'parameter_list',
         'right_paren',
         'colon',
-        'type'];
+        'type',
+        'where_clause'];
     return FunctionDeclarationHeader._children_keys;
+  }
+}
+class WhereClause extends EditableSyntax
+{
+  constructor(
+    keyword,
+    constraints)
+  {
+    super('where_clause', {
+      keyword: keyword,
+      constraints: constraints });
+  }
+  get keyword() { return this.children.keyword; }
+  get constraints() { return this.children.constraints; }
+  with_keyword(keyword){
+    return new WhereClause(
+      keyword,
+      this.constraints);
+  }
+  with_constraints(constraints){
+    return new WhereClause(
+      this.keyword,
+      constraints);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var constraints = this.constraints.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      constraints === this.constraints)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new WhereClause(
+        keyword,
+        constraints), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.where_clause_keyword, position, source);
+    position += keyword.width;
+    let constraints = EditableSyntax.from_json(
+      json.where_clause_constraints, position, source);
+    position += constraints.width;
+    return new WhereClause(
+        keyword,
+        constraints);
+  }
+  get children_keys()
+  {
+    if (WhereClause._children_keys == null)
+      WhereClause._children_keys = [
+        'keyword',
+        'constraints'];
+    return WhereClause._children_keys;
+  }
+}
+class WhereConstraint extends EditableSyntax
+{
+  constructor(
+    left_type,
+    operator,
+    right_type)
+  {
+    super('where_constraint', {
+      left_type: left_type,
+      operator: operator,
+      right_type: right_type });
+  }
+  get left_type() { return this.children.left_type; }
+  get operator() { return this.children.operator; }
+  get right_type() { return this.children.right_type; }
+  with_left_type(left_type){
+    return new WhereConstraint(
+      left_type,
+      this.operator,
+      this.right_type);
+  }
+  with_operator(operator){
+    return new WhereConstraint(
+      this.left_type,
+      operator,
+      this.right_type);
+  }
+  with_right_type(right_type){
+    return new WhereConstraint(
+      this.left_type,
+      this.operator,
+      right_type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_type = this.left_type.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var right_type = this.right_type.rewrite(rewriter, new_parents);
+    if (
+      left_type === this.left_type &&
+      operator === this.operator &&
+      right_type === this.right_type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new WhereConstraint(
+        left_type,
+        operator,
+        right_type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_type = EditableSyntax.from_json(
+      json.where_constraint_left_type, position, source);
+    position += left_type.width;
+    let operator = EditableSyntax.from_json(
+      json.where_constraint_operator, position, source);
+    position += operator.width;
+    let right_type = EditableSyntax.from_json(
+      json.where_constraint_right_type, position, source);
+    position += right_type.width;
+    return new WhereConstraint(
+        left_type,
+        operator,
+        right_type);
+  }
+  get children_keys()
+  {
+    if (WhereConstraint._children_keys == null)
+      WhereConstraint._children_keys = [
+        'left_type',
+        'operator',
+        'right_type'];
+    return WhereConstraint._children_keys;
   }
 }
 class MethodishDeclaration extends EditableSyntax
@@ -15734,6 +15929,7 @@ exports.UseToken = UseToken;
 exports.VarToken = VarToken;
 exports.VecToken = VecToken;
 exports.VoidToken = VoidToken;
+exports.WhereToken = WhereToken;
 exports.WhileToken = WhileToken;
 exports.XorToken = XorToken;
 exports.YieldToken = YieldToken;
@@ -15862,6 +16058,8 @@ exports.NamespaceGroupUseDeclaration = NamespaceGroupUseDeclaration;
 exports.NamespaceUseClause = NamespaceUseClause;
 exports.FunctionDeclaration = FunctionDeclaration;
 exports.FunctionDeclarationHeader = FunctionDeclarationHeader;
+exports.WhereClause = WhereClause;
+exports.WhereConstraint = WhereConstraint;
 exports.MethodishDeclaration = MethodishDeclaration;
 exports.ClassishDeclaration = ClassishDeclaration;
 exports.ClassishBody = ClassishBody;

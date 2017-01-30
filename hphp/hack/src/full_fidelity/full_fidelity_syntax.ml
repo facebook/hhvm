@@ -208,6 +208,16 @@ module WithToken(Token: TokenType) = struct
       function_right_paren: t;
       function_colon: t;
       function_type: t;
+      function_where_clause: t;
+    }
+    and where_clause = {
+      where_clause_keyword: t;
+      where_clause_constraints: t;
+    }
+    and where_constraint = {
+      where_constraint_left_type: t;
+      where_constraint_operator: t;
+      where_constraint_right_type: t;
     }
     and methodish_declaration = {
       methodish_attribute: t;
@@ -854,6 +864,8 @@ module WithToken(Token: TokenType) = struct
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
     | FunctionDeclarationHeader of function_declaration_header
+    | WhereClause of where_clause
+    | WhereConstraint of where_constraint
     | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
@@ -1027,6 +1039,10 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.FunctionDeclaration
       | FunctionDeclarationHeader _ ->
         SyntaxKind.FunctionDeclarationHeader
+      | WhereClause _ ->
+        SyntaxKind.WhereClause
+      | WhereConstraint _ ->
+        SyntaxKind.WhereConstraint
       | MethodishDeclaration _ ->
         SyntaxKind.MethodishDeclaration
       | ClassishDeclaration _ ->
@@ -1298,6 +1314,10 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.FunctionDeclaration
     let is_function_declaration_header node =
       kind node = SyntaxKind.FunctionDeclarationHeader
+    let is_where_clause node =
+      kind node = SyntaxKind.WhereClause
+    let is_where_constraint node =
+      kind node = SyntaxKind.WhereConstraint
     let is_methodish_declaration node =
       kind node = SyntaxKind.MethodishDeclaration
     let is_classish_declaration node =
@@ -1771,6 +1791,7 @@ module WithToken(Token: TokenType) = struct
       function_right_paren;
       function_colon;
       function_type;
+      function_where_clause;
     } = (
       function_async,
       function_keyword,
@@ -1781,7 +1802,26 @@ module WithToken(Token: TokenType) = struct
       function_parameter_list,
       function_right_paren,
       function_colon,
-      function_type
+      function_type,
+      function_where_clause
+    )
+
+    let get_where_clause_children {
+      where_clause_keyword;
+      where_clause_constraints;
+    } = (
+      where_clause_keyword,
+      where_clause_constraints
+    )
+
+    let get_where_constraint_children {
+      where_constraint_left_type;
+      where_constraint_operator;
+      where_constraint_right_type;
+    } = (
+      where_constraint_left_type,
+      where_constraint_operator,
+      where_constraint_right_type
     )
 
     let get_methodish_declaration_children {
@@ -3226,6 +3266,7 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
       } -> [
         function_async;
         function_keyword;
@@ -3237,6 +3278,23 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
+      ]
+      | WhereClause {
+        where_clause_keyword;
+        where_clause_constraints;
+      } -> [
+        where_clause_keyword;
+        where_clause_constraints;
+      ]
+      | WhereConstraint {
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
+      } -> [
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
       ]
       | MethodishDeclaration {
         methodish_attribute;
@@ -4571,6 +4629,7 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
       } -> [
         "function_async";
         "function_keyword";
@@ -4582,6 +4641,23 @@ module WithToken(Token: TokenType) = struct
         "function_right_paren";
         "function_colon";
         "function_type";
+        "function_where_clause";
+      ]
+      | WhereClause {
+        where_clause_keyword;
+        where_clause_constraints;
+      } -> [
+        "where_clause_keyword";
+        "where_clause_constraints";
+      ]
+      | WhereConstraint {
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
+      } -> [
+        "where_constraint_left_type";
+        "where_constraint_operator";
+        "where_constraint_right_type";
       ]
       | MethodishDeclaration {
         methodish_attribute;
@@ -5990,6 +6066,7 @@ module WithToken(Token: TokenType) = struct
           function_right_paren;
           function_colon;
           function_type;
+          function_where_clause;
         ]) ->
         FunctionDeclarationHeader {
           function_async;
@@ -6002,6 +6079,25 @@ module WithToken(Token: TokenType) = struct
           function_right_paren;
           function_colon;
           function_type;
+          function_where_clause;
+        }
+      | (SyntaxKind.WhereClause, [
+          where_clause_keyword;
+          where_clause_constraints;
+        ]) ->
+        WhereClause {
+          where_clause_keyword;
+          where_clause_constraints;
+        }
+      | (SyntaxKind.WhereConstraint, [
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
+        ]) ->
+        WhereConstraint {
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
         }
       | (SyntaxKind.MethodishDeclaration, [
           methodish_attribute;
@@ -7522,6 +7618,7 @@ module WithToken(Token: TokenType) = struct
       function_right_paren
       function_colon
       function_type
+      function_where_clause
     =
       from_children SyntaxKind.FunctionDeclarationHeader [
         function_async;
@@ -7534,6 +7631,27 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
+      ]
+
+    let make_where_clause
+      where_clause_keyword
+      where_clause_constraints
+    =
+      from_children SyntaxKind.WhereClause [
+        where_clause_keyword;
+        where_clause_constraints;
+      ]
+
+    let make_where_constraint
+      where_constraint_left_type
+      where_constraint_operator
+      where_constraint_right_type
+    =
+      from_children SyntaxKind.WhereConstraint [
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
       ]
 
     let make_methodish_declaration

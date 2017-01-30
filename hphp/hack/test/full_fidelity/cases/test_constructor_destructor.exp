@@ -20,7 +20,7 @@
     (parameter_declaration
       (missing)(missing)(missing)
       ((variable))(missing))(missing)))
-    ((rparen)(whitespace))(missing)(missing))
+    ((rparen)(whitespace))(missing)(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration(missing)
   (list((whitespace)(public)(whitespace)))
@@ -37,7 +37,7 @@
       ((variable)(whitespace))
       (simple_initializer((=)(whitespace))
       (literal((null)))))(missing)))
-    ((rparen)(whitespace))(missing)(missing))
+    ((rparen)(whitespace))(missing)(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration(missing)
   (list((whitespace)(public)(whitespace)))
@@ -52,7 +52,7 @@
       (missing)(missing)(missing)
       ((variable))(missing))(missing)))
     ((rparen)(whitespace))
-    (missing)(missing))
+    (missing)(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration(missing)
   (list((whitespace)(private)(whitespace)))
@@ -70,7 +70,7 @@
         ((=)(whitespace))
         (literal((null)))))(missing)))
     ((rparen)(whitespace))
-    (missing)(missing))
+    (missing)(missing)(missing))
   (compound_statement
     (({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration
@@ -91,7 +91,7 @@
     (list_item
     (parameter_declaration(missing)(missing)(missing)((variable))(missing))
     (missing)))
-    ((rparen))(missing)(missing))
+    ((rparen))(missing)(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration
   (attribute_specification
@@ -111,7 +111,7 @@
     (list_item
     (parameter_declaration(missing)(missing)(missing)((variable))(missing))
     (missing)))
-    ((rparen)(whitespace))(missing)(missing))
+    ((rparen)(whitespace))(missing)(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration(missing)
   (list((whitespace)(public)(whitespace)))
@@ -130,7 +130,7 @@
         ((=)(whitespace))
         (literal((null)))))
     (missing)))
-    ((rparen)(whitespace))(missing)(missing))
+    ((rparen)(whitespace))(missing)(missing)(missing))
   (compound_statement(({))(missing)((})(end_of_line)))(missing))
 (methodish_declaration(missing)
   (list((whitespace)(public)(whitespace)))
@@ -139,7 +139,7 @@
     (missing)
     ((__destruct)(whitespace))(missing)
     ((lparen))(missing)
-    ((rparen)(whitespace))(missing)(missing))
+    ((rparen)(whitespace))(missing)(missing)(missing))
     (compound_statement(({))(missing)((})(end_of_line)))(missing))
   (methodish_declaration
     (attribute_specification
@@ -154,5 +154,5 @@
       ((function)(whitespace))
       (missing)
       ((__destruct)(whitespace))(missing)
-      ((lparen))(missing)((rparen)(whitespace))(missing)(missing))
+      ((lparen))(missing)((rparen)(whitespace))(missing)(missing)(missing))
     (compound_statement(({))(missing)((})(end_of_line)))(missing)))((}))))))

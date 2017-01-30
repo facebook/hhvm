@@ -542,6 +542,20 @@ offending text is '%s'." (text node)));
   | FunctionDeclarationHeader x ->
     transform_function_declaration_header ~span_started:false x;
     ()
+  | WhereClause x ->
+    let (where, constraints) = get_where_clause_children x in
+    t where;
+    add_space ();
+    t constraints;
+    ()
+  | WhereConstraint x ->
+    let (left, op, right) = get_where_constraint_children x in
+    t left;
+    add_space ();
+    t op;
+    add_space ();
+    t right;
+    ()
   | MethodishDeclaration x ->
     let (attr, modifiers, func_decl, body, semi) =
       get_methodish_declaration_children x
@@ -1565,7 +1579,7 @@ and handle_switch_body left_b sections right_b =
 
 and transform_function_declaration_header ~span_started x =
   let (async, kw, amp, name, type_params, leftp, params, rightp, colon,
-    ret_type) = get_function_declaration_header_children x
+    ret_type, where) = get_function_declaration_header_children x
   in
 
   if not span_started then builder#start_span ();
@@ -1579,6 +1593,7 @@ and transform_function_declaration_header ~span_started x =
   transform type_params;
   transform_argish_with_return_type ~in_span:true leftp params rightp colon
     ret_type;
+  transform where;
 
 and transform_argish_with_return_type ~in_span left_p params right_p colon
     ret_type =

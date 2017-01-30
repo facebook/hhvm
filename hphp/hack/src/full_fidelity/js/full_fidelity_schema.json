@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-01-18-0002",
+  "version" : "2017-01-27-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -195,6 +195,8 @@
       "token_text" : "vec" },
     { "token_kind" : "Void",
       "token_text" : "void" },
+    { "token_kind" : "Where",
+      "token_text" : "where" },
     { "token_kind" : "While",
       "token_text" : "while" },
     { "token_kind" : "Xor",
@@ -585,7 +587,25 @@
         { "field_name" : "parameter_list" },
         { "field_name" : "right_paren" },
         { "field_name" : "colon" },
-        { "field_name" : "type" }
+        { "field_name" : "type" },
+        { "field_name" : "where_clause" }
+      ] },
+    { "kind_name" : "WhereClause",
+      "type_name" : "where_clause",
+      "description" : "where_clause",
+      "prefix" : "where_clause",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "constraints" }
+      ] },
+    { "kind_name" : "WhereConstraint",
+      "type_name" : "where_constraint",
+      "description" : "where_constraint",
+      "prefix" : "where_constraint",
+      "fields" : [
+        { "field_name" : "left_type" },
+        { "field_name" : "operator" },
+        { "field_name" : "right_type" }
       ] },
     { "kind_name" : "MethodishDeclaration",
       "type_name" : "methodish_declaration",

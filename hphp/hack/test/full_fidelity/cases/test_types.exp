@@ -94,5 +94,5 @@
         ((rparen)(whitespace))
         ((:)(whitespace))
         (simple_type_specifier
-          ((void)(whitespace))))
+          ((void)(whitespace)))(missing))
         (compound_statement(({))(missing)((}))))))

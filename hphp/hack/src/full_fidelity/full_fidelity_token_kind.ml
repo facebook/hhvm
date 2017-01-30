@@ -107,6 +107,7 @@ type t =
   | Var
   | Vec
   | Void
+  | Where
   | While
   | Xor
   | Yield
@@ -295,6 +296,7 @@ let from_string keyword =
   | "var" -> Some Var
   | "vec" -> Some Vec
   | "void" -> Some Void
+  | "where" -> Some Where
   | "while" -> Some While
   | "xor" -> Some Xor
   | "yield" -> Some Yield
@@ -456,6 +458,7 @@ match kind with
   | Var -> "var"
   | Vec -> "vec"
   | Void -> "void"
+  | Where -> "where"
   | While -> "while"
   | Xor -> "xor"
   | Yield -> "yield"

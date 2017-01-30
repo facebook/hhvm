@@ -454,7 +454,7 @@ let rec get_doc node =
     { function_async; function_keyword; function_ampersand; function_name;
       function_type_parameter_list; function_left_paren;
       function_parameter_list; function_right_paren; function_colon;
-      function_type }
+      function_type; function_where_clause }
    ->
     let preface = group_doc ( get_doc function_async
                               ^| get_doc function_keyword) in
@@ -473,12 +473,23 @@ let rec get_doc node =
     let type_declaration =
       let fun_colon = get_doc function_colon in
       let fun_type = get_doc function_type in
-      group_doc (fun_colon ^| fun_type)
+      let where_clause = get_doc function_where_clause in
+      group_doc (fun_colon ^| fun_type ^| where_clause)
     in
     group_doc (
       group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
       ^| type_declaration
     )
+  | WhereClause { where_clause_keyword; where_clause_constraints } ->
+    let w = get_doc where_clause_keyword in
+    let c = get_doc where_clause_constraints in
+    w ^| c
+  | WhereConstraint { where_constraint_left_type; where_constraint_operator ;
+    where_constraint_right_type } ->
+    let l = get_doc where_constraint_left_type in
+    let o = get_doc where_constraint_operator in
+    let r = get_doc where_constraint_right_type in
+    l ^| o ^| r
   | MethodishDeclaration
     { methodish_attribute; methodish_modifiers; methodish_function_decl_header;
       methodish_function_body; methodish_semicolon } ->

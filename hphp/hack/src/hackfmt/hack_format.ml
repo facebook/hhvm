@@ -141,7 +141,8 @@ let builder = object (this)
       | hd :: tl when hd.Chunk.is_appendable ->
         let rule_id = hd.Chunk.rule in
         let rule = match rules with
-          | [] when rule_id = Rule.null_rule_id -> this#_create_rule Rule.Simple
+          | [] when rule_id = Rule.null_rule_id ->
+            this#_create_rule (Rule.Simple Cost.base)
           | hd :: _ when rule_id = Rule.null_rule_id -> hd
           | _ -> rule_id
         in
@@ -158,7 +159,7 @@ let builder = object (this)
     rule_alloc <- ra;
     rule.Rule.id
 
-  method create_lazy_rule ?(rule_kind=Rule.Simple) () =
+  method create_lazy_rule ?(rule_kind=Rule.Simple Cost.base) () =
     let id = this#_create_rule rule_kind in
     next_lazy_rules <- ISet.add id next_lazy_rules;
     id
@@ -189,14 +190,14 @@ let builder = object (this)
       (* TODO: this is probably wrong, figure out what this means *)
       | _ -> chunks)
 
-  method simple_space_split () =
+  method simple_space_split ?(cost=Cost.base) () =
     this#split true;
-    this#set_next_split_rule (RuleKind Rule.Simple);
+    this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
 
-  method simple_split () =
+  method simple_split ?(cost=Cost.base) () =
     this#split false;
-    this#set_next_split_rule (RuleKind Rule.Simple);
+    this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
 
   method hard_split () =
@@ -221,7 +222,7 @@ let builder = object (this)
       rule_alloc lazy_rules rules rule_id;
     rules <- rule_id :: rules
 
-  method start_rule_kind ?(rule_kind=Rule.Simple) () =
+  method start_rule_kind ?(rule_kind=Rule.Simple Cost.base) () =
     (* Override next_split_rule unless it's an Always rule *)
     next_split_rule <- (match next_split_rule with
       | RuleKind kind when kind <> Rule.Always -> NoRule
@@ -250,7 +251,7 @@ let builder = object (this)
       (Rule_allocator.get_rule_kind rule_alloc id) = kind
     )
 
-  method start_span ?(cost=1) () =
+  method start_span ?(cost=Cost.base) () =
     pending_spans <- cost :: pending_spans;
 
   method end_span () =
@@ -485,7 +486,7 @@ let pending_space () =
 
 let rec transform node =
   let t = transform in
-  let span = true in
+  let span = Some Cost.base in
   let nest = true in
   let space = true in
 
@@ -1428,25 +1429,25 @@ and transform_and_unnest_closing_brace right_b =
   builder#closing_brace_token token;
   ()
 
-and tl_with ?(nest=false) ?(rule=NoRule) ?(span=false) ~f () =
+and tl_with ?(nest=false) ?(rule=NoRule) ?(span=None) ~f () =
   (match rule with
     | NoRule -> ()
     | LazyRuleID id -> builder#start_lazy_rule id
     | RuleKind rule_kind -> builder#start_rule_kind ~rule_kind ()
   );
   if nest then builder#nest ();
-  if span then builder#start_span ();
+  Option.iter span ~f:(fun cost -> builder#start_span ~cost ());
 
   f ();
 
-  if span then builder#end_span ();
+  Option.iter span ~f:(fun _ -> builder#end_span ());
   if nest then builder#unnest ();
   (match rule with
     | NoRule -> ()
     | _ -> builder#end_rule ()
   )
 
-and t_with ?(nest=false) ?(rule=NoRule) ?(span=false) ?(f=transform) node =
+and t_with ?(nest=false) ?(rule=NoRule) ?(span=None) ?(f=transform) node =
   tl_with ~nest ~rule ~span ~f:(fun () -> f node) ();
   ()
 
@@ -1462,7 +1463,7 @@ and handle_lambda_body node =
       handle_compound_statement x;
     | _ ->
       split ~space:true ();
-      t_with ~rule:(RuleKind Rule.Simple) ~nest:true node;
+      t_with ~rule:(RuleKind (Rule.Simple Cost.base)) ~nest:true node;
       ()
 
 and handle_possible_compound_statement node =
@@ -1688,7 +1689,7 @@ and transform_argish_with_return_type ~in_span left_p params right_p colon
 and transform_argish left_p arg_list right_p =
   transform left_p;
   split ();
-  tl_with ~span:true ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+  tl_with ~span:(Some Cost.base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
     tl_with ~nest:true ~f:(fun () ->
       handle_possible_list
         ~after_each:after_each_argument ~handle_last:transform_last_arg arg_list

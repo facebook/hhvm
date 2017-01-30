@@ -202,7 +202,7 @@ let suggest_files tcopt fnl =
       let nast = Naming.program tcopt ast in
       List.iter nast begin function
         | Nast.Fun f -> ignore (Typing.fun_def tcopt f)
-        | Nast.Class c -> Typing.class_def tcopt c
+        | Nast.Class c -> ignore (Typing.class_def tcopt c)
         | _ -> ()
       end
     | None -> ()

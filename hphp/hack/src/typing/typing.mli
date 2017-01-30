@@ -17,7 +17,7 @@ val debug_print_last_pos:
 val fun_def:
   TypecheckerOptions.t -> Nast.fun_ -> Tast.fun_
 val class_def:
-  TypecheckerOptions.t -> Nast.class_ -> unit
+  TypecheckerOptions.t -> Nast.class_ -> Tast.class_ option
 val typedef_def:
   TypecheckerOptions.t -> Nast.typedef -> unit
 val gconst_def:

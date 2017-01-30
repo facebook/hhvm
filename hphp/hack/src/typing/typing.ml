@@ -395,7 +395,7 @@ and fun_def tcopt f =
         T.f_variadic = T.FVnonVariadic (* TAST: get this right *);
         T.f_params = tparams;
         T.f_fun_kind = f.f_fun_kind;
-        T.f_user_attributes = [] (* TAST: get this right f.f_user_attributes *);
+        T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
         T.f_body = T.NamedBody {
           T.fnb_nast = tb;
           T.fnb_unsafe = false (* TAST get this right *)
@@ -4420,10 +4420,10 @@ and class_def tcopt c =
   | None ->
       (* This can happen if there was an error during the declaration
        * of the class. *)
-      ()
+      None
   | Some tc ->
     Typing_requirements.check_class env tc;
-    class_def_ env c tc
+    Some (class_def_ env c tc)
 
 (* Given a class definition construct a type consisting of the
  * class instantiated at its generic parameters.
@@ -4482,16 +4482,42 @@ and class_def_ env c tc =
   end;
   SMap.iter (check_static_method tc.tc_methods) tc.tc_smethods;
   List.iter impl (class_implements_type env c);
-  List.iter c.c_vars (class_var_def env ~is_static:false c);
-  List.iter c.c_methods (method_def env);
-  List.iter c.c_typeconsts (typeconst_def env);
-  let const_types = List.map c.c_consts (class_const_def env) in
+  let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
+  let typed_methods = List.map c.c_methods (method_def env) in
+  let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
+  let typed_consts, const_types =
+    List.unzip (List.map c.c_consts (class_const_def env)) in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  class_constr_def env c;
+  let typed_constructor = class_constr_def env c in
   let env = Env.set_static env in
-  List.iter c.c_static_vars (class_var_def env ~is_static:true c);
-  List.iter c.c_static_methods (method_def env);
-  Typing_hooks.dispatch_exit_class_def_hook c tc
+  let typed_static_vars =
+    List.map c.c_static_vars (class_var_def env ~is_static:true c) in
+  let typed_static_methods = List.map c.c_static_methods (method_def env) in
+  Typing_hooks.dispatch_exit_class_def_hook c tc;
+  {
+    T.c_mode = c.c_mode;
+    T.c_final = c.c_final;
+    T.c_is_xhp = c.c_is_xhp;
+    T.c_kind = c.c_kind;
+    T.c_name = c.c_name;
+    T.c_tparams = c.c_tparams;
+    T.c_extends = c.c_extends;
+    T.c_uses = c.c_uses;
+    T.c_xhp_attr_uses = c.c_xhp_attr_uses;
+    T.c_xhp_category = c.c_xhp_category;
+    T.c_req_extends = c.c_req_extends;
+    T.c_req_implements = c.c_req_implements;
+    T.c_implements = c.c_implements;
+    T.c_consts = typed_consts;
+    T.c_typeconsts = typed_typeconsts;
+    T.c_static_vars = typed_static_vars;
+    T.c_vars = typed_vars;
+    T.c_constructor = typed_constructor;
+    T.c_static_methods = typed_static_methods;
+    T.c_methods = typed_methods;
+    T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
+    T.c_enum = c.c_enum;
+  }
 
 and check_static_method obj method_name static_method =
   if SMap.mem method_name obj
@@ -4533,15 +4559,20 @@ and check_extend_abstract_const ~is_final p smap =
   end smap
 
 and typeconst_def env {
-  c_tconst_name = (pos, _);
+  c_tconst_name = (pos, _) as id;
   c_tconst_constraint;
   c_tconst_type;
 } =
   let env, cstr = opt Phase.hint_locl env c_tconst_constraint in
   let env, ty = opt Phase.hint_locl env c_tconst_type in
-  ignore(
+  ignore (
     Option.map2 ty cstr ~f:(Type.sub_type pos Reason.URtypeconst_cstr env)
-  )
+  );
+  {
+    T.c_tconst_name = id;
+    T.c_tconst_constraint = c_tconst_constraint;
+    T.c_tconst_type = c_tconst_type;
+  }
 
 and class_const_def env (h, id, e) =
   let env, ty =
@@ -4552,16 +4583,14 @@ and class_const_def env (h, id, e) =
   in
   match e with
     | Some e ->
-      let env, _te, ty' = expr env e in
+      let env, te, ty' = expr env e in
       ignore (Type.sub_type (fst id) Reason.URhint env ty' ty);
-      ty'
-    | None -> ty
+      (h, id, Some te), ty'
+    | None ->
+      (h, id, None), ty
 
 and class_constr_def env c =
-  match c.c_constructor with
-  | None -> ()
-  | Some m ->
-     method_def env m
+  Option.map c.c_constructor (method_def env)
 
 and class_implements_type env c1 ctype2 =
   let params =
@@ -4574,11 +4603,11 @@ and class_implements_type env c1 ctype2 =
   ()
 
 and class_var_def env ~is_static c cv =
-  let env, ty =
+  let env, typed_cv_expr, ty =
     match cv.cv_expr with
-    | None -> env, Env.fresh_type()
-    | Some e -> let env, _te, ty = expr env e in env, ty in
-  match cv.cv_type with
+    | None -> env, None, Env.fresh_type()
+    | Some e -> let env, te, ty = expr env e in env, Some te, ty in
+  (match cv.cv_type with
   | None when Env.is_strict env ->
       Errors.add_a_typehint (fst cv.cv_id)
   | None ->
@@ -4608,7 +4637,15 @@ and class_var_def env ~is_static c cv =
       let cty = TI.instantiable_hint env cty in
       let env, cty = Phase.localize_with_self env cty in
       let _ = Type.sub_type p Reason.URhint env ty cty in
-      ()
+      ());
+  {
+    T.cv_final = cv.cv_final;
+    T.cv_is_xhp = cv.cv_is_xhp;
+    T.cv_visibility = cv.cv_visibility;
+    T.cv_type = cv.cv_type;
+    T.cv_id = cv.cv_id;
+    T.cv_expr = typed_cv_expr;
+  }
 
 and localize_where_constraints
     ~ety_env (env:Env.env) (where_constraints:Nast.where_constraint list) =
@@ -4620,6 +4657,14 @@ and localize_where_constraints
     SubType.add_constraint env ck ty1 ty2
   in
   List.fold_left where_constraints ~f:add_constraint ~init:env
+
+and user_attribute env ua =
+  let typed_ua_params =
+    List.map ua.ua_params (fun e -> let _env, te, _ty = expr env e in te) in
+  {
+    T.ua_name = ua.ua_name;
+    T.ua_params = typed_ua_params;
+  }
 
 and method_def env m =
   (* reset the expression dependent display ids for each method body *)
@@ -4658,21 +4703,39 @@ and method_def env m =
   end;
   if Attributes.mem SN.UserAttributes.uaMemoize m.m_user_attributes then
     List.iter2_exn ~f:(check_memoizable env) m_params param_tys;
-  let env, _ = List.map_env env (List.zip_exn param_tys m_params) bind_param in
+  let env, typed_params =
+    List.map_env env (List.zip_exn param_tys m_params) bind_param in
   let nb = Nast.assert_named_body m.m_body in
-  let env, _tb =
+  let env, tb =
     fun_ ~abstract:m.m_abstract env ret (fst m.m_name) nb m.m_fun_kind in
   let env =
     List.fold_left (Env.get_todo env) ~f:(fun env f -> f env) ~init:env in
-  match m.m_ret with
+  (match m.m_ret with
     | None when Env.is_strict env && snd m.m_name <> SN.Members.__destruct ->
       (* if we are in strict mode, the only case where we don't want to enforce
        * a return type is when the method is a destructor
        *)
       suggest_return env (fst m.m_name) ret
     | None
-    | Some _ -> ();
-  Typing_hooks.dispatch_exit_method_def_hook m
+    | Some _ -> ());
+  Typing_hooks.dispatch_exit_method_def_hook m;
+  {
+    T.m_final = m.m_final;
+    T.m_abstract = m.m_abstract;
+    T.m_visibility = m.m_visibility;
+    T.m_name = m.m_name;
+    T.m_tparams = m.m_tparams;
+    T.m_where_constraints = m.m_where_constraints;
+    T.m_variadic = T.FVnonVariadic (* TODO TAST: get this right m.m_variadic *);
+    T.m_params = typed_params;
+    T.m_fun_kind = m.m_fun_kind;
+    T.m_user_attributes = List.map m.m_user_attributes (user_attribute env);
+    T.m_ret = m.m_ret;
+    T.m_body = T.NamedBody {
+      T.fnb_nast = tb;
+      T.fnb_unsafe = false (* TAST get this right *)
+    };
+  }
 
 and typedef_def tcopt typedef  =
   let tid = (snd typedef.t_name) in

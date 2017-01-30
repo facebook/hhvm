@@ -543,7 +543,7 @@ std::string show(const Class& c) {
       return s->data();
     },
     [] (borrowed_ptr<ClassInfo> cinfo) {
-      return folly::format("{}*", cinfo->cls->name).str();
+      return folly::sformat("{}*", cinfo->cls->name);
     }
   );
 }
@@ -1079,7 +1079,7 @@ void resolve_combinations(IndexData& index,
 
   if (!build_cls_info(borrow(cinfo))) return;
 
-  ITRACE(2, "  resolved: {}\n", cls->name->data());
+  ITRACE(2, "  resolved: {}\n", cls->name);
   index.allClassInfos.push_back(std::move(cinfo));
   index.classInfo.emplace(cls->name, borrow(index.allClassInfos.back()));
 }
@@ -1090,7 +1090,7 @@ void preresolve(IndexData& index, NamingEnv& env, SString clsName) {
   // TODO(#3649211): we'll need to handle inheritance cycles here
   // after hphpc is fixed not to just remove them.
 
-  ITRACE(2, "preresolve: {}\n", clsName->data());
+  ITRACE(2, "preresolve: {}\n", clsName);
   for (auto& kv : find_range(index.classes, clsName)) {
     if (kv.second->parentName) {
       preresolve(index, env, kv.second->parentName);
@@ -1426,7 +1426,7 @@ void mark_no_override_classes(IndexData& index) {
         cinfo->cls->attrs & AttrUnique) {
       assert(cinfo->subclassList.front() == borrow(cinfo));
       if (!(cinfo->cls->attrs & AttrNoOverride)) {
-        FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
+        FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name);
       }
       add_attribute(cinfo->cls, AttrNoOverride);
     }
@@ -1436,7 +1436,7 @@ void mark_no_override_classes(IndexData& index) {
       if (!(cinfo.get()->*kv.second.pmem).derivedHas) {
         FTRACE(2, "Adding no-override of {} to {}\n",
           kv.first->data(),
-          cinfo->cls->name->data());
+          cinfo->cls->name);
         add_attribute(cinfo->cls, kv.second.attrBit);
       }
     }
@@ -1464,8 +1464,8 @@ void mark_no_override_functions(IndexData& index) {
         if (it->second.func != derivedMethod.second.func) {
           if (it->second.func->attrs & AttrNoOverride) {
             FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
-              it->second.func->cls->name->data(),
-              it->second.func->name->data());
+              it->second.func->cls->name,
+              it->second.func->name);
           }
           remove_attribute(it->second.func, AttrNoOverride);
         }
@@ -1652,8 +1652,8 @@ Type context_sensitive_return_type(const Index& index,
     FTRACE(1, "{} <= {} didn't happen on {} called from {} ({})\n",
       show(contextType),
       show(callInsensitiveType),
-      finfo->first->name->data(),
-      callCtx.caller.func->name->data(),
+      finfo->first->name,
+      callCtx.caller.func->name,
       callCtx.caller.cls ? callCtx.caller.cls->name->data() : "");
     return callInsensitiveType;
   }
@@ -2520,7 +2520,7 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
     return find_deps(*m_data, func, Dep::ReturnTy);
   }
   FTRACE(1, "maxed out return type refinements on {}:{}\n",
-    func->unit->filename->data(), func->name->data());
+    func->unit->filename, func->name);
   return {};
 }
 
@@ -2625,8 +2625,8 @@ void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
     auto const it      = cinfo->publicStaticProps.find(name);
 
     FTRACE(2, "refine_public_statics: {} {} <-- {}\n",
-      cinfo->cls->name->data(),
-      name->data(),
+      cinfo->cls->name,
+      name,
       show(newType));
 
     // Cases where it's not public should've already been filtered out in the

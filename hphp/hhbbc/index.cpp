@@ -486,7 +486,7 @@ bool Class::couldBe(const Class& o) const {
 SString Class::name() const {
   return val.match(
     [] (SString s) { return s; },
-    [] (borrowed_ptr<ClassInfo> ci) { return ci->cls->name; }
+    [] (borrowed_ptr<ClassInfo> ci) { return ci->cls->name.get(); }
   );
 }
 

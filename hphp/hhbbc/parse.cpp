@@ -396,7 +396,7 @@ void populate_block(ParseUnitState& puState,
 
   auto decode_stringvec = [&] {
     auto const vecLen = decode<int32_t>(pc);
-    CompactVector<SString> keys;
+    CompactVector<LSString> keys;
     for (auto i = size_t{0}; i < vecLen; ++i) {
       keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
     }

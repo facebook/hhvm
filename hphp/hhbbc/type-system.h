@@ -354,7 +354,7 @@ struct DArrPacked;
 struct DArrPackedN;
 struct DArrStruct;
 struct DArrMapN;
-using StructMap = boost::container::flat_map<SString,Type>;
+using StructMap = boost::container::flat_map<LSString,Type>;
 struct DVec;
 struct DDict;
 struct DKeyset;

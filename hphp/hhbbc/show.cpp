@@ -275,7 +275,7 @@ std::string show(SrcLoc loc) {
 std::string show(const php::Func& func, const Bytecode& bc) {
   std::string ret;
 
-  auto append_vsa = [&] (const CompactVector<SString>& keys) {
+  auto append_vsa = [&] (const CompactVector<LSString>& keys) {
     ret += "<";
     auto delim = "";
     for (auto& s : keys) {

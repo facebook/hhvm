@@ -49,7 +49,7 @@ struct Unit;
 
 struct SrcInfo {
   LineRange loc;
-  SString docComment;
+  LSString docComment;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -189,14 +189,14 @@ struct Param {
    * User-visible version of the type constraint as a string.
    * Propagated for reflection.
    */
-  SString userTypeConstraint;
+  LSString userTypeConstraint;
 
   /*
    * Evalable php code that will give the default argument.  This is
    * redundant with the dv initializer, but gets propagated through
    * for reflection.
    */
-  SString phpCode;
+  LSString phpCode;
 
   /*
    * Each parameter of a func can have arbitrary user attributes.
@@ -226,7 +226,7 @@ struct Param {
  * nullptr, for unnamed locals.
  */
 struct Local {
-  SString  name;
+  LSString  name;
   uint32_t id     : 31;
   uint32_t killed : 1;
 };
@@ -236,8 +236,8 @@ struct Local {
  * the php code around for reflection.
  */
 struct StaticLocalInfo {
-  SString name;
-  SString phpCode;
+  LSString name;
+  LSString phpCode;
 };
 
 /*
@@ -264,7 +264,7 @@ struct Func {
   /*
    * Basic information about the function.
    */
-  SString name;
+  LSString name;
   SrcInfo srcInfo;
   Attr attrs;
 
@@ -321,14 +321,14 @@ struct Func {
    * User-visible return type specification as a string.  This is only
    * passed through to expose it to reflection.
    */
-  SString returnUserType;
+  LSString returnUserType;
 
   /*
    * If traits are being flattened by hphpc, we keep the original
    * filename of a function (the file that defined the trait) so
    * backtraces and things work correctly.  Otherwise this is nullptr.
    */
-  SString originalFilename;
+  LSString originalFilename;
 
   /*
    * Whether or not this function is a top-level function.  (Defined
@@ -393,15 +393,15 @@ struct Func {
  * Both static and instance properties use this structure.
  */
 struct Prop {
-  SString name;
+  LSString name;
   Attr attrs;
-  SString docComment;
+  LSString docComment;
 
   /*
    * Properties can have string type constraints, which we need to
    * propagate through just for reflection purposes.
    */
-  SString typeConstraint;
+  LSString typeConstraint;
 
   /*
    * The default value of the property, for properties with scalar
@@ -415,7 +415,7 @@ struct Prop {
  * A class constant.
  */
 struct Const {
-  SString name;
+  LSString name;
 
   // The class that defined this constant.
   borrowed_ptr<php::Class> cls;
@@ -432,8 +432,8 @@ struct Const {
    * We pass through eval'able php code and a string type constraint,
    * only for exposure to reflection.
    */
-  SString phpCode;
-  SString typeConstraint;
+  LSString phpCode;
+  LSString typeConstraint;
 
   bool isTypeconst;
 };
@@ -445,14 +445,9 @@ struct Class {
   /*
    * Basic information about the class.
    */
-  SString name;
+  LSString name;
   SrcInfo srcInfo;
   Attr attrs;
-
-  /*
-   * Which unit defined this class.
-   */
-  borrowed_ptr<Unit> unit;
 
   /*
    * The id used to reference the class within its unit
@@ -460,10 +455,20 @@ struct Class {
   int32_t id;
 
   /*
+   * Which unit defined this class.
+   */
+  borrowed_ptr<Unit> unit;
+
+  /*
    * Hoistability of this class.  See the description in class.h
    * formation on hoistability.
    */
   PreClass::Hoistable hoistability;
+
+  /*
+   * Name of the parent class.
+   */
+  LSString parentName;
 
   /*
    * If this class represents a closure, this points to the class that
@@ -475,11 +480,6 @@ struct Class {
    * (with regard to access checks, etc).
    */
   borrowed_ptr<php::Class> closureContextCls;
-
-  /*
-   * Name of the parent class.
-   */
-  SString parentName;
 
   /*
    * Names of inherited interfaces.
@@ -537,7 +537,7 @@ using TypeAlias = ::HPHP::TypeAlias;
  */
 struct Unit {
   MD5 md5;
-  SString filename;
+  LSString filename;
   bool isHHFile{false};
   bool useStrictTypes{false};
   int preloadPriority{0};

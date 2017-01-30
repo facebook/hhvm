@@ -106,7 +106,7 @@ inline bool operator==(const CallContext& a, const CallContext& b) {
  * State of properties on a class.  Map from property name to its
  * Type.
  */
-using PropState = std::map<SString,Type>;
+using PropState = std::map<LSString,Type>;
 
 //////////////////////////////////////////////////////////////////////
 

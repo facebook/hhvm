@@ -1575,13 +1575,15 @@ module WithStatementAndDeclAndTypeParser
       (parser, result)
 
   and parse_anon_or_lambda_or_awaitable parser =
+    (* TODO: The original Hack parser accepts "async" as an identifier, and
+    so we do too. We might consider making it reserved. *)
     let (parser1, _) = assert_token parser Async in
-    if peek_token_kind parser1 = Function then
-      parse_anon parser
-    else if peek_token_kind parser1 = LeftBrace then
-      parse_async_block parser
-    else
-      parse_lambda_expression parser
+    match peek_token_kind parser1 with
+    | Function -> parse_anon parser
+    | LeftBrace -> parse_async_block parser
+    | Variable
+    | LeftParen -> parse_lambda_expression parser
+    | _ -> parse_as_name_or_error parser
 
   and parse_async_block parser =
     (*

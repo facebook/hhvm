@@ -42,19 +42,19 @@ void postorderWalk(const php::Func& func,
 //////////////////////////////////////////////////////////////////////
 
 std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func& func) {
-  boost::dynamic_bitset<> visited(func.nextBlockId);
+  boost::dynamic_bitset<> visited(func.blocks.size());
   std::vector<borrowed_ptr<php::Block>> ret;
-  ret.reserve(func.nextBlockId);
-  postorderWalk(func, ret, visited, *func.mainEntry);
+  ret.reserve(func.blocks.size());
+  postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
 std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
-  boost::dynamic_bitset<> visited(func.nextBlockId);
+  boost::dynamic_bitset<> visited(func.blocks.size());
   std::vector<borrowed_ptr<php::Block>> ret;
-  ret.reserve(func.nextBlockId);
-  postorderWalk(func, ret, visited, *func.mainEntry);
+  ret.reserve(func.blocks.size());
+  postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
 
   /*
    * We've already marked the blocks reachable from the main entry
@@ -63,8 +63,8 @@ std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
    * is the normal case).
    */
   for (auto rit = func.params.rbegin(); rit != func.params.rend(); ++rit) {
-    if (!rit->dvEntryPoint) continue;
-    postorderWalk(func, ret, visited, *rit->dvEntryPoint);
+    if (rit->dvEntryPoint == NoBlockId) continue;
+    postorderWalk(func, ret, visited, *func.blocks[rit->dvEntryPoint]);
   }
   std::reverse(begin(ret), end(ret));
   return ret;

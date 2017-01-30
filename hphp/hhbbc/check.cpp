@@ -211,14 +211,14 @@ bool check(const php::Func& f) {
   DEBUG_ONLY Attr pcm = AttrParamCoerceModeNull | AttrParamCoerceModeFalse;
   assert((f.attrs & pcm) != pcm); // not both
 
-  boost::dynamic_bitset<> seenId(f.nextBlockId);
+  boost::dynamic_bitset<> seenId(f.blocks.size());
   for (auto& block : f.blocks) {
     if (block->id == NoBlockId) continue;
     assert(checkBlock(*block));
 
     // All blocks have unique ids in a given function; not necessarily
     // consecutive.
-    assert(block->id < f.nextBlockId);
+    assert(block->id < f.blocks.size());
     assert(!seenId.test(block->id));
     seenId.set(block->id);
   }

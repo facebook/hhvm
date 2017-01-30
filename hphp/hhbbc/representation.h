@@ -175,7 +175,7 @@ struct Param {
    * of this parameter, or nullptr if this parameter had no default
    * value initializer.
    */
-  borrowed_ptr<php::Block> dvEntryPoint;
+  BlockId dvEntryPoint;
 
   /*
    * Information about the parameter's typehint, if any.
@@ -249,6 +249,12 @@ struct NativeInfo {
    * folly::none stands for a Variant return.
    */
   folly::Optional<DataType> returnType;
+
+  /*
+   * Associated dynamic call wrapper function. Used to catch dynamic calls to
+   * caller frame affecting functions.
+   */
+  Id dynCallWrapperId;
 };
 
 /*
@@ -263,6 +269,18 @@ struct Func {
   Attr attrs;
 
   /*
+   * Parameters, locals, and iterators.
+   *
+   * There are at least as many locals as parameters (parameters are
+   * also locals---the names of parameters are stored in the locals
+   * vector).
+   */
+  IterId             numIters;
+  std::vector<Param> params;
+  std::vector<Local> locals;
+  std::vector<StaticLocalInfo> staticLocals;
+
+  /*
    * Which unit defined this function.  If it is a method, the cls
    * field will be set to the class that contains it.
    */
@@ -270,16 +288,47 @@ struct Func {
   borrowed_ptr<Class> cls;
 
   /*
-   * Parameters, locals, and iterators.
-   *
-   * There are at least as many locals as parameters (parameters are
-   * also locals---the names of parameters are stored in the locals
-   * vector).
+   * All owning pointers to blocks are in this vector, which has the
+   * blocks in an unspecified order.  Blocks have borrowed pointers to
+   * each other to represent control flow arcs.
    */
-  std::vector<Param> params;
-  std::vector<Local> locals;
-  IterId             numIters;
-  std::vector<StaticLocalInfo> staticLocals;
+  std::vector<std::unique_ptr<Block>> blocks;
+
+  /*
+   * Try and fault regions form a tree structure.  The tree is hanging
+   * off the func here, with children pointers.  Each block that is
+   * within a try or fault region has a pointer to the inner-most
+   * ExnNode protecting it.
+   */
+  std::vector<std::unique_ptr<ExnNode>> exnNodes;
+
+  /*
+   * Entry point blocks for default value initializers.
+   *
+   * Note that in PHP you can declare functions where some of the
+   * earlier parameters have default values, and later ones don't.  In
+   * this case we'll have NoBlockIds after the first valid entry here.
+   */
+  std::vector<BlockId> dvEntries;
+
+  /*
+   * Entry point to the function when the number of passed args is
+   * equal to the number of parameters.
+   */
+  BlockId mainEntry;
+
+  /*
+   * User-visible return type specification as a string.  This is only
+   * passed through to expose it to reflection.
+   */
+  SString returnUserType;
+
+  /*
+   * If traits are being flattened by hphpc, we keep the original
+   * filename of a function (the file that defined the trait) so
+   * backtraces and things work correctly.  Otherwise this is nullptr.
+   */
+  SString originalFilename;
 
   /*
    * Whether or not this function is a top-level function.  (Defined
@@ -317,52 +366,6 @@ struct Func {
   bool isMemoizeWrapper : 1;
 
   /*
-   * All owning pointers to blocks are in this vector, which has the
-   * blocks in an unspecified order.  Blocks have borrowed pointers to
-   * each other to represent control flow arcs.
-   */
-  std::vector<std::unique_ptr<Block>> blocks;
-
-  /*
-   * Greatest block id in the function plus one.
-   */
-  uint32_t nextBlockId;
-
-  /*
-   * Try and fault regions form a tree structure.  The tree is hanging
-   * off the func here, with children pointers.  Each block that is
-   * within a try or fault region has a pointer to the inner-most
-   * ExnNode protecting it.
-   */
-  std::vector<std::unique_ptr<ExnNode>> exnNodes;
-
-  /*
-   * Entry point blocks for default value initializers.
-   *
-   * Note that in PHP you can declare functions where some of the
-   * earlier parameters have default values, and later ones don't.  In
-   * this case we'll have nulls after the first non-null entry here.
-   */
-  std::vector<borrowed_ptr<Block>> dvEntries;
-
-  /*
-   * Entry point to the function when the number of passed args is
-   * equal to the number of parameters.
-   */
-  borrowed_ptr<Block> mainEntry;
-
-  /*
-   * User attribute list.
-   */
-  UserAttributeMap userAttributes;
-
-  /*
-   * User-visible return type specification as a string.  This is only
-   * passed through to expose it to reflection.
-   */
-  SString returnUserType;
-
-  /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type
    * constraint via the VerifyRetType* instructions.
@@ -370,11 +373,9 @@ struct Func {
   TypeConstraint retTypeConstraint;
 
   /*
-   * If traits are being flattened by hphpc, we keep the original
-   * filename of a function (the file that defined the trait) so
-   * backtraces and things work correctly.  Otherwise this is nullptr.
+   * User attribute list.
    */
-  SString originalFilename;
+  UserAttributeMap userAttributes;
 
   /*
    * For HNI-based extensions, additional information for functions
@@ -382,12 +383,6 @@ struct Func {
    * with an HNI-based native implementation, this will be nullptr.
    */
   std::unique_ptr<NativeInfo> nativeInfo;
-
-  /*
-   * Associated dynamic call wrapper function. Used to catch dynamic calls to
-   * caller frame affecting functions.
-   */
-  Id dynCallWrapperId;
 };
 
 //////////////////////////////////////////////////////////////////////

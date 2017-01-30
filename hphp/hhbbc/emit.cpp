@@ -184,7 +184,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          const php::Func& func) {
   EmitBcInfo ret = {};
   auto& blockInfo = ret.blockInfo;
-  blockInfo.resize(func.nextBlockId);
+  blockInfo.resize(func.blocks.size());
 
   // Track the stack depth while emitting to determine maxStackDepth.
   int32_t currentStackDepth { 0 };
@@ -509,8 +509,9 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.byRef = param.byRef;
       pinfo.variadic = param.isVariadic;
       fe.appendParam(func.locals[id].name, pinfo);
-      if (auto const dv = param.dvEntryPoint) {
-        fe.params[id].funcletOff = info.blockInfo[dv->id].offset;
+      auto const dv = param.dvEntryPoint;
+      if (dv != NoBlockId) {
+        fe.params[id].funcletOff = info.blockInfo[dv].offset;
       }
       ++id;
     } else if (!loc.killed) {
@@ -825,7 +826,6 @@ void emit_finish_func(EmitUnitState& state,
   fe.isPairGenerator = func.isPairGenerator;
   fe.isNative = func.isNative;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
-  fe.dynCallWrapperId = func.dynCallWrapperId;
 
   auto const retTy = state.index.lookup_return_type_raw(&func);
   if (!retTy.subtypeOf(TBottom)) {
@@ -849,6 +849,7 @@ void emit_finish_func(EmitUnitState& state,
   if (func.isNative) {
     assert(func.nativeInfo);
     fe.hniReturnType = func.nativeInfo->returnType;
+    fe.dynCallWrapperId = func.nativeInfo->dynCallWrapperId;
   }
   fe.retTypeConstraint = func.retTypeConstraint;
 

@@ -425,11 +425,11 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
 borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
                                     borrowed_ptr<const php::Block> srcBlk,
                                     const State& state) {
-  FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->nextBlockId);
-  assert(ainfo.bdata.size() == ainfo.ctx.func->nextBlockId);
+  FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->blocks.size());
+  assert(ainfo.bdata.size() == ainfo.ctx.func->blocks.size());
 
   auto newBlk           = folly::make_unique<php::Block>();
-  newBlk->id            = ainfo.ctx.func->nextBlockId++;
+  newBlk->id            = ainfo.ctx.func->blocks.size();
   newBlk->section       = srcBlk->section;
   newBlk->exnNode       = srcBlk->exnNode;
   newBlk->factoredExits = srcBlk->factoredExits;

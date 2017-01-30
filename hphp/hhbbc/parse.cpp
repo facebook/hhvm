@@ -622,15 +622,15 @@ template<class FindBlk>
 void link_entry_points(php::Func& func,
                        const FuncEmitter& fe,
                        FindBlk findBlock) {
-  func.dvEntries.resize(fe.params.size());
+  func.dvEntries.resize(fe.params.size(), NoBlockId);
   for (size_t i = 0, sz = fe.params.size(); i < sz; ++i) {
     if (fe.params[i].hasDefaultValue()) {
-      auto const dv = findBlock(fe.params[i].funcletOff);
+      auto const dv = findBlock(fe.params[i].funcletOff)->id;
       func.params[i].dvEntryPoint = dv;
       func.dvEntries[i] = dv;
     }
   }
-  func.mainEntry = findBlock(fe.base);
+  func.mainEntry = findBlock(fe.base)->id;
 }
 
 void build_cfg(ParseUnitState& puState,
@@ -654,7 +654,7 @@ void build_cfg(ParseUnitState& puState,
     auto& ptr = blockMap[off];
     if (!ptr) {
       ptr               = folly::make_unique<php::Block>();
-      ptr->id           = func.nextBlockId++;
+      ptr->id           = blockMap.size() - 1;
       ptr->section      = php::Block::Section::Main;
       ptr->exnNode      = nullptr;
     }
@@ -664,8 +664,8 @@ void build_cfg(ParseUnitState& puState,
   auto exnTreeInfo = build_exn_tree(fe, func, findBlock);
 
   for (auto it = begin(blockStarts);
-      std::next(it) != end(blockStarts);
-      ++it) {
+       std::next(it) != end(blockStarts);
+       ++it) {
     auto const block   = findBlock(*it);
     auto const bcStart = bc + *it;
     auto const bcStop  = bc + *std::next(it);
@@ -695,7 +695,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
     func.params.push_back(
       php::Param {
         param.defaultValue,
-        nullptr,
+        NoBlockId,
         param.typeConstraint,
         param.userType,
         param.phpCode,
@@ -738,7 +738,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
                                         fe.docComment };
   ret->unit            = unit;
   ret->cls             = cls;
-  ret->nextBlockId     = 0;
 
   ret->attrs              = static_cast<Attr>(fe.attrs & ~AttrNoOverride);
   ret->userAttributes     = fe.userAttributes;
@@ -753,16 +752,16 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isPairGenerator    = fe.isPairGenerator;
   ret->isNative           = fe.isNative;
   ret->isMemoizeWrapper   = fe.isMemoizeWrapper;
-  ret->dynCallWrapperId   = fe.dynCallWrapperId;
 
   /*
    * Builtin functions get some extra information.  The returnType flag is only
    * non-folly::none for these, but note that something may be a builtin and
    * still have a folly::none return type.
    */
-  if (fe.attrs & AttrBuiltin) {
-    ret->nativeInfo             = folly::make_unique<php::NativeInfo>();
-    ret->nativeInfo->returnType = fe.hniReturnType;
+  if (fe.isNative) {
+    ret->nativeInfo                   = folly::make_unique<php::NativeInfo>();
+    ret->nativeInfo->returnType       = fe.hniReturnType;
+    ret->nativeInfo->dynCallWrapperId = fe.dynCallWrapperId;
   }
 
   add_frame_variables(*ret, fe);

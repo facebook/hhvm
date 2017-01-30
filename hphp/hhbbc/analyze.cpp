@@ -187,9 +187,10 @@ prepare_incompleteQ(const Index& index,
     auto const useDvInit = [&] {
       if (knownArgs->size() >= numParams) return false;
       for (auto i = knownArgs->size(); i < numParams; ++i) {
-        if (auto const dv = ctx.func->params[i].dvEntryPoint) {
-          ai.bdata[dv->id].stateIn = entryState;
-          incompleteQ.push(rpoId(ai, dv->id));
+        auto const dv = ctx.func->params[i].dvEntryPoint;
+        if (dv != NoBlockId) {
+          ai.bdata[dv].stateIn = entryState;
+          incompleteQ.push(rpoId(ai, dv));
           return true;
         }
       }
@@ -197,26 +198,27 @@ prepare_incompleteQ(const Index& index,
     }();
 
     if (!useDvInit) {
-      ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
-      incompleteQ.push(rpoId(ai, ctx.func->mainEntry->id));
+      ai.bdata[ctx.func->mainEntry].stateIn = entryState;
+      incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
     }
 
     return incompleteQ;
   }
 
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
-    if (auto const dv = ctx.func->params[paramId].dvEntryPoint) {
-      ai.bdata[dv->id].stateIn = entryState;
-      incompleteQ.push(rpoId(ai, dv->id));
+    auto const dv = ctx.func->params[paramId].dvEntryPoint;
+    if (dv != NoBlockId) {
+      ai.bdata[dv].stateIn = entryState;
+      incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
-        ai.bdata[dv->id].stateIn.locals[locId] =
+        ai.bdata[dv].stateIn.locals[locId] =
           ctx.func->params[locId].isVariadic ? TArr : TUninit;
       }
     }
   }
 
-  ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
-  incompleteQ.push(rpoId(ai, ctx.func->mainEntry->id));
+  ai.bdata[ctx.func->mainEntry].stateIn = entryState;
+  incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
 
   return incompleteQ;
 }
@@ -272,7 +274,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * Terminiation is guaranteed because the widening operator has only
    * finite chains in the type lattice.
    */
-  auto nonWideVisits = std::vector<uint32_t>(ctx.func->nextBlockId);
+  auto nonWideVisits = std::vector<uint32_t>(ctx.func->blocks.size());
 
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};

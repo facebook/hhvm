@@ -10,3 +10,6 @@
 
 let none = 0
 let base = 1
+
+(* Rule costs *)
+let assignment = 2

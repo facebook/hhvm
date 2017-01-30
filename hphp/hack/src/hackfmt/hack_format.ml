@@ -975,7 +975,7 @@ offending text is '%s'." (text node)));
     let (eq_kw, value) = get_simple_initializer_children x in
     pending_space ();
     t eq_kw;
-    builder#simple_space_split ();
+    builder#simple_space_split ~cost:Cost.assignment ();
     t_with ~nest value;
   | AnonymousFunction x ->
     let (async_kw, fun_kw, lp, params, rp, colon, ret_type, use, body) =
@@ -1725,7 +1725,7 @@ and transform_mapish_entry key arrow value =
   transform key;
   pending_space ();
   transform arrow;
-  builder#simple_space_split ();
+  builder#simple_space_split ~cost:Cost.assignment ();
   t_with ~nest:true value;
 
 and transform_keyword_expression_statement kw expr semi =
@@ -1782,7 +1782,7 @@ and transform_binary_expression ~is_nested expr =
     transform left;
     pending_space ();
     transform operator;
-    builder#simple_space_split ();
+    builder#simple_space_split ~cost:Cost.assignment ();
     t_with ~nest:true right;
   end else begin
     let precedence = Full_fidelity_operator.precedence operator_t in

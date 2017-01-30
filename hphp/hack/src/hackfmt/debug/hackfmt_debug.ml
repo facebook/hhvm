@@ -16,12 +16,14 @@ open Core
 type debug_config = {
   print_ast: bool;
   print_nesting_graph: bool;
+  print_rule_dependencies: bool;
   chunk_ids: int list option;
 }
 
 let debug_config = ref {
   print_ast = false;
   print_nesting_graph = false;
+  print_rule_dependencies = false;
   chunk_ids = None;
 }
 
@@ -40,7 +42,11 @@ let init_with_options () = [
   "--nesting",
   Arg.Unit (fun () ->
     debug_config := { !debug_config with print_nesting_graph = true }),
-  " Print out a reprsentation of the nesting graph below each chung group";
+  " Print out a representation of the nesting graph below each chung group";
+  "--rule-deps",
+  Arg.Unit (fun () ->
+    debug_config := { !debug_config with print_rule_dependencies = true }),
+  " Print out a representation of the rule dependenies below each chung group";
 ]
 
 let debug_nesting chunk_group =
@@ -51,6 +57,9 @@ let debug_nesting chunk_group =
       @@ List.map nesting_list ~f:string_of_int in
     Printf.printf "Chunk %d - [ %s ]\n" i list_string;
   )
+
+let debug_rule_deps chunk_group =
+  Printf.printf "%s\n" (Chunk_group.dependency_map_to_string chunk_group)
 
 let debug_chunk_groups chunk_groups =
   let get_range cg =
@@ -89,6 +98,7 @@ let debug_chunk_groups chunk_groups =
       Printf.printf "\t%d - %s\n" k (Rule.to_string v);
     ) cg.Chunk_group.rule_map;
 
+    if !debug_config.print_rule_dependencies then debug_rule_deps cg;
     if !debug_config.print_nesting_graph then debug_nesting cg;
 
     Printf.printf "%s" @@ Line_splitter.solve [cg];

@@ -81,5 +81,5 @@ let dependency_map_to_string t =
   let str_list = get_map_values @@ IMap.mapi (fun k v_list ->
     let values = List.map v_list ~f:string_of_int in
     string_of_int k ^ ": [" ^ String.concat ", " values ^ "]"
-  ) t in
+  ) t.rule_dependency_map in
   "{" ^ String.concat ", " str_list ^ "}"

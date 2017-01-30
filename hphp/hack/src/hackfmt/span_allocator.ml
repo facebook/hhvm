@@ -9,6 +9,11 @@
  *)
 
 type t = {
-  id: int;
-  cost: int;
+  next_id: int;
 }
+
+let make () = { next_id = 0 }
+
+let make_span t cost =
+  let id = t.next_id in
+  { next_id = t.next_id + 1 }, { Span.id ; cost = cost; }

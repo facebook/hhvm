@@ -62,7 +62,6 @@ let make chunk_group rvm =
         let overflow = overflow + (get_overflow len) in
         let len = Nesting.get_indent c.Chunk.nesting nesting_set in
         let len = len + block_indentation in
-        let cost = cost + Chunk.get_span_split_cost c in
         len, cost, overflow
       else
         let len = if c.Chunk.space_if_not_split then len + 1 else len in
@@ -77,8 +76,21 @@ let make chunk_group rvm =
   (* calculate the overflow of the last chunk *)
   let overflow = overflow + (get_overflow len) in
 
+  (* calculate cost of all of the spans that are split *)
+  let _, span_cost = (
+    List.fold chunks ~init:(ISet.empty, 0) ~f:(fun (env, acc) c ->
+      if has_split_before_chunk c rvm then
+        List.fold ~init:(env, acc) c.Chunk.spans ~f:(fun (env, acc) s ->
+          if not (ISet.mem s.Span.id env)
+          then ISet.add s.Span.id env, acc + s.Span.cost
+          else env, acc
+        )
+      else env, acc
+    )
+  ) in
+
   (* add to cost the cost of all rules that are split *)
-  let cost = cost + (
+  let rule_cost = (
     IMap.fold (fun r_id v acc ->
       if (Rule.is_split r_id (Some v)) then
         acc + (Rule.get_cost (Chunk_group.get_rule_kind chunk_group r_id))
@@ -87,6 +99,7 @@ let make chunk_group rvm =
     ) rvm 0
   ) in
 
+  let cost = span_cost + rule_cost in
   { chunk_group; rvm; cost; overflow; nesting_set; }
 
 let is_rule_bound t rule_id =

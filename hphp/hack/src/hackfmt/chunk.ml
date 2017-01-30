@@ -8,8 +8,6 @@
  *
  *)
 
-open Core
-
 type t = {
   text: string;
   spans: Span.t list;
@@ -49,11 +47,6 @@ let finalize chunk rule ra space comma =
     space_if_not_split = space;
     comma_rule = comma;
   }
-
-let get_span_split_cost chunk =
-  List.fold_left chunk.spans ~init:0 ~f:(fun acc s ->
-    acc + s.Span.cost
-  )
 
 let get_nesting_id chunk =
   chunk.nesting.Nesting.id

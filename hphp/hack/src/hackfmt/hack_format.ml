@@ -43,6 +43,7 @@ let builder = object (this)
 
   val mutable next_split_rule = NoRule;
   val mutable next_lazy_rules = ISet.empty;
+  val mutable pending_spans = [];
   val mutable space_if_not_split = false;
   val mutable pending_comma = None;
 
@@ -51,6 +52,7 @@ let builder = object (this)
   val mutable chunk_groups = [];
   val mutable rule_alloc = Rule_allocator.make ();
   val mutable nesting_alloc = Nesting_allocator.make ();
+  val mutable span_alloc = Span_allocator.make ();
   val mutable block_indent = 0;
 
   val mutable in_range = Chunk_group.No;
@@ -68,12 +70,14 @@ let builder = object (this)
     chunks <- [];
     next_split_rule <- NoRule;
     next_lazy_rules <- ISet.empty;
+    pending_spans <- [];
     space_if_not_split <- false;
     pending_comma <- None;
     pending_whitespace <- "";
     chunk_groups <- [];
     rule_alloc <- Rule_allocator.make ();
     nesting_alloc <- Nesting_allocator.make ();
+    span_alloc <- Span_allocator.make ();
     block_indent <- 0;
 
     in_range <- Chunk_group.No;
@@ -110,6 +114,14 @@ let builder = object (this)
       ISet.iter (fun rule_id -> lazy_rules <- ISet.add rule_id lazy_rules)
         next_lazy_rules;
       next_lazy_rules <- ISet.empty;
+    end;
+
+    if not is_trivia then begin
+      let rev_pending_spans_stack = List.rev pending_spans in
+      pending_spans <- [];
+      List.iter rev_pending_spans_stack ~f:(fun cost ->
+        Stack.push (open_span ((List.length chunks) - 1) cost) open_spans
+      );
     end;
 
     pending_whitespace <- ""
@@ -238,22 +250,25 @@ let builder = object (this)
       (Rule_allocator.get_rule_kind rule_alloc id) = kind
     )
 
-  method start_span () =
-    let os = open_span (List.length chunks) 1 in
-    Stack.push os open_spans
+  method start_span ?(cost=1) () =
+    pending_spans <- cost :: pending_spans;
 
   method end_span () =
-    let os = Stack.pop open_spans in
-    let span = Span.make os.open_span_cost in
-    let r_chunks = List.rev chunks in
-    chunks <- List.rev_mapi r_chunks ~f:(fun n x ->
-      if n <= os.open_span_start then
-        x
-      else
-        (* TODO: handle required hard splits *)
-        {x with Chunk.spans = span :: x.Chunk.spans}
-    );
-    ()
+    pending_spans <- match pending_spans with
+      | hd :: tl -> tl
+      | [] ->
+        let os = Stack.pop open_spans in
+        let sa, span = Span_allocator.make_span span_alloc os.open_span_cost in
+        span_alloc <- sa;
+        let r_chunks = List.rev chunks in
+        chunks <- List.rev_mapi r_chunks ~f:(fun n x ->
+        if n <= os.open_span_start then
+          x
+        else
+          (* TODO: handle required hard splits *)
+          {x with Chunk.spans = span :: x.Chunk.spans}
+        );
+        []
 
   (*
     TODO: find a better way to represt the rules empty case
@@ -298,7 +313,8 @@ let builder = object (this)
     );
     chunks <- [];
     rule_alloc <- Rule_allocator.make ();
-    nesting_alloc <- Nesting_allocator.make ()
+    nesting_alloc <- Nesting_allocator.make ();
+    span_alloc <- Span_allocator.make ()
 
   method _end () =
     (*TODO: warn if not empty? *)

@@ -562,7 +562,7 @@ and stmt env = function
             env, tb
           end end in
       let env =
-        if Nast_visitor.HasContinue.block b
+        if Nast.Visitor.HasContinue.block b
         then LEnv.fully_integrate env parent_lenv
         else
           let env = LEnv.integrate env parent_lenv env.Env.lenv in

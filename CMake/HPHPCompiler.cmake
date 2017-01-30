@@ -90,14 +90,10 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "return-type-c-linkage"
     )
 
-    execute_process(
-      COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version COMMAND head -1
-      OUTPUT_VARIABLE _clang_version_info)
-    string(REGEX MATCH "(clang version|based on LLVM) ([0-9]\\.[0-9]\\.?[0-9]?)"
-      CLANG_VERSION "${_clang_version_info}")
     # Enabled GCC/LLVM stack-smashing protection
     if(ENABLE_SSP)
-      if(CLANG_VERSION VERSION_GREATER 3.6 OR CLANG_VERSION VERSION_EQUAL 3.6)
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR
+         CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
         list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
       else()
         list(APPEND GENERAL_OPTIONS "fstack-protector")
@@ -139,8 +135,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
        )
     endif()
 
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-    if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.8)
       # FIXME: GCC 4.8+ regressions http://git.io/4r7VCQ
       list(APPEND GENERAL_OPTIONS
         "ftrack-macro-expansion=0"
@@ -151,31 +147,37 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
 
     # Fix problem with GCC 4.9, https://kb.isc.org/article/AA-01167
-    if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
       list(APPEND GENERAL_OPTIONS "fno-delete-null-pointer-checks")
     endif()
 
-    if(GCC_VERSION VERSION_GREATER 5.0 OR GCC_VERSION VERSION_EQUAL 5.0)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.0 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 5.0)
       message(WARNING "HHVM is primarily tested on GCC 4.8 and GCC 4.9. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
-    if(GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 5.1)
       list(APPEND DISABLED_NAMED_WARNINGS "bool-compare")
       list(APPEND GENERAL_OPTIONS "DFOLLY_HAVE_MALLOC_H")
     endif()
-    
-    if(GCC_VERSION VERSION_GREATER 6.0 OR GCC_VERSION VERSION_EQUAL 6.0)
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 6.0)
       list(APPEND GENERAL_CXX_OPTIONS "Wno-misleading-indentation")
     endif()
 
     # Enabled GCC/LLVM stack-smashing protection
     if(ENABLE_SSP)
-      if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 OR
+         CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.8)
         if(LINUX)
           # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
           list(APPEND GENERAL_OPTIONS "Wl,-z,relro,-z,now")
         endif()
-        if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR
+           CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
           list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
         endif()
       else()

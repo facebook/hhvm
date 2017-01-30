@@ -68,6 +68,15 @@ static void throwNestingException() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+VariableSerializer::SavedRefMap::~SavedRefMap() {
+  for (auto& i : m_mapping) {
+    tvRefcountedDecRef(const_cast<TypedValue*>(&i.first));
+  }
+}
+
+VariableSerializer::~VariableSerializer() {
+}
+
 VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
   : m_type(type)
@@ -85,16 +94,8 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   , m_currentDepth(0)
   , m_maxDepth(0)
 {
-  switch (type) {
-    case Type::DebuggerSerialize:
-       m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
-       // fall-through
-    case Type::Serialize:
-    case Type::APCSerialize:
-       m_arrayIds = req::make_raw<ReqPtrCtrMap>();
-       break;
-    default:
-       m_arrayIds = nullptr;
+  if (type == Type::DebuggerSerialize) {
+    m_maxLevelDebugger = g_context->debuggerSettings.printLevel;
   }
 }
 
@@ -645,12 +646,13 @@ void VariableSerializer::write(const Object& v) {
 
 void VariableSerializer::preventOverflow(const Object& v,
                                          const std::function<void()>& func) {
-  if (incNestedLevel(v.get(), true)) {
-    writeOverflow(v.get(), true);
+  TypedValue tv = make_tv<KindOfObject>(const_cast<ObjectData*>(v.get()));
+  if (incNestedLevel(tv)) {
+    writeOverflow(tv);
   } else {
     func();
   }
-  decNestedLevel(v.get());
+  decNestedLevel(tv);
 }
 
 void VariableSerializer::write(const Variant& v, bool isArrayKey /*= false */) {
@@ -696,8 +698,7 @@ void VariableSerializer::writeNull() {
   }
 }
 
-void VariableSerializer::writeOverflow(PtrWrapper ptr,
-                                       bool isObject /* = false */) {
+void VariableSerializer::writeOverflow(const TypedValue& tv) {
   bool wasRef = m_referenced;
   setReferenced(false);
   switch (m_type) {
@@ -729,17 +730,16 @@ void VariableSerializer::writeOverflow(PtrWrapper ptr,
   case Type::Serialize:
   case Type::APCSerialize:
     {
-      assert(m_arrayIds);
-      ReqPtrCtrMap::const_iterator iter = m_arrayIds->find(ptr);
-      assert(iter != m_arrayIds->end());
-      int id = iter->second;
+      int optId = m_refs[tv].m_id;
+      assert(optId != NO_ID);
+      bool isObject = tv.m_type == KindOfResource || tv.m_type == KindOfObject;
       if (isObject) {
         m_buf->append("r:");
-        m_buf->append(id);
+        m_buf->append(optId);
         m_buf->append(';');
       } else if (wasRef) {
         m_buf->append("R:");
-        m_buf->append(id);
+        m_buf->append(optId);
         m_buf->append(';');
       } else {
         m_buf->append("N;");
@@ -1121,7 +1121,7 @@ void VariableSerializer::writeArrayValue(
   case Type::DebuggerSerialize:
     // Do not count referenced values after the first
     if (!(value.isReferenced() &&
-          m_arrayIds->find(value.getRefData()) != m_arrayIds->end())) {
+          m_refs[*value.asTypedValue()].m_id != NO_ID)) {
       m_valueCount++;
     }
     write(value);
@@ -1267,8 +1267,7 @@ void VariableSerializer::indent() {
   }
 }
 
-bool VariableSerializer::incNestedLevel(PtrWrapper ptr,
-                                        bool isObject /* = false */) {
+bool VariableSerializer::incNestedLevel(const TypedValue& tv) {
   ++m_currentDepth;
 
   switch (m_type) {
@@ -1278,13 +1277,12 @@ bool VariableSerializer::incNestedLevel(PtrWrapper ptr,
   case Type::VarDump:
   case Type::DebugDump:
   case Type::DebuggerDump:
-    return ++m_counts[ptr] >= m_maxCount;
+    return ++m_refs[tv].m_count >= m_maxCount;
   case Type::JSON:
     if (m_currentDepth > m_maxDepth) {
       json_set_last_error_code(json_error_codes::JSON_ERROR_DEPTH);
     }
-
-    return ++m_counts[ptr] >= m_maxCount;
+    return ++m_refs[tv].m_count >= m_maxCount;
   case Type::DebuggerSerialize:
     if (m_maxLevelDebugger > 0 && ++m_levelDebugger > m_maxLevelDebugger) {
       return true;
@@ -1293,14 +1291,13 @@ bool VariableSerializer::incNestedLevel(PtrWrapper ptr,
   case Type::Serialize:
   case Type::APCSerialize:
     {
-      assert(m_arrayIds);
-      int ct = ++m_counts[ptr];
-      if (m_arrayIds->find(ptr) != m_arrayIds->end() &&
-          (m_referenced || isObject)) {
+      auto& ref = m_refs[tv];
+      int ct = ++ref.m_count;
+      bool isObject = tv.m_type == KindOfResource || tv.m_type == KindOfObject;
+      if (ref.m_id != NO_ID && (m_referenced || isObject)) {
         return true;
-      } else {
-        (*m_arrayIds)[ptr] = m_valueCount;
       }
+      ref.m_id = m_valueCount;
       return ct >= (m_maxCount - 1);
     }
     break;
@@ -1311,9 +1308,9 @@ bool VariableSerializer::incNestedLevel(PtrWrapper ptr,
   return false;
 }
 
-void VariableSerializer::decNestedLevel(PtrWrapper ptr) {
+void VariableSerializer::decNestedLevel(const TypedValue& tv) {
   --m_currentDepth;
-  --m_counts[ptr];
+  --m_refs[tv].m_count;
   if (m_type == Type::DebuggerSerialize && m_maxLevelDebugger > 0) {
     --m_levelDebugger;
   }
@@ -1325,13 +1322,13 @@ void VariableSerializer::serializeRef(const TypedValue* tv, bool isArrayKey) {
   if (getType() == VariableSerializer::Type::Serialize ||
       getType() == VariableSerializer::Type::APCSerialize ||
       getType() == VariableSerializer::Type::DebuggerSerialize) {
-    if (incNestedLevel(tv->m_data.pref->var())) {
-      writeOverflow(tv->m_data.pref->var());
+    if (incNestedLevel(*tv)) {
+      writeOverflow(*tv);
     } else {
       // Tell the inner variant to skip the nesting check for data inside
       serializeVariant(*tv->m_data.pref->var(), isArrayKey, true);
     }
-    decNestedLevel(tv->m_data.pref->var());
+    decNestedLevel(*tv);
   } else {
     serializeVariant(*tv->m_data.pref->var(), isArrayKey);
   }
@@ -1425,12 +1422,13 @@ void VariableSerializer::serializeResourceImpl(const ResourceData* res) {
 }
 
 void VariableSerializer::serializeResource(const ResourceData* res) {
-  if (UNLIKELY(incNestedLevel(res, true))) {
-    writeOverflow(res, true);
+  TypedValue tv = make_tv<KindOfResource>(const_cast<ResourceHdr*>(res->hdr()));
+  if (UNLIKELY(incNestedLevel(tv))) {
+    writeOverflow(tv);
   } else {
     serializeResourceImpl(res);
   }
-  decNestedLevel(res);
+  decNestedLevel(tv);
 }
 
 void VariableSerializer::serializeString(const String& str) {
@@ -1469,12 +1467,13 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     return;
   }
   if (!skipNestCheck) {
-    if (incNestedLevel(arr)) {
-      writeOverflow(arr);
+    TypedValue tv = make_array_like_tv(const_cast<ArrayData*>(arr));
+    if (incNestedLevel(tv)) {
+      writeOverflow(tv);
     } else {
       serializeArrayImpl(arr);
     }
-    decNestedLevel(arr);
+    decNestedLevel(tv);
   } else {
     // If isObject, the array is temporary and we should not check or save
     // its pointer.
@@ -1815,12 +1814,13 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
 }
 
 void VariableSerializer::serializeObject(const ObjectData* obj) {
-  if (UNLIKELY(incNestedLevel(obj, true))) {
-    writeOverflow(obj, true);
+  TypedValue tv = make_tv<KindOfObject>(const_cast<ObjectData*>(obj));
+  if (UNLIKELY(incNestedLevel(tv))) {
+    writeOverflow(tv);
   } else {
     serializeObjectImpl(obj);
   }
-  decNestedLevel(obj);
+  decNestedLevel(tv);
 }
 
 void VariableSerializer::serializeObject(const Object& obj) {

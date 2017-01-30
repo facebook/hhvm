@@ -2,8 +2,6 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Derp {
-  const type T = array<string, mixed>;
-
   public static function f1(): int {
     try {
       $a = self::f2();
@@ -19,7 +17,7 @@ class Derp {
     return 1;
   }
 
-  private static function assertIsT(mixed $a): self::T {
+  private static function assertIsT(mixed $a): array<string, mixed> {
     // UNSAFE
   }
 

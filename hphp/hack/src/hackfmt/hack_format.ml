@@ -737,14 +737,12 @@ offending text is '%s'." (text node)));
     t type_kw;
     pending_space ();
     t name;
+    pending_space ();
+    t type_constraint;
+    pending_space ();
+    t eq;
     builder#simple_space_split ();
-    tl_with ~nest ~f:(fun () ->
-      t type_constraint;
-      pending_space ();
-      t eq;
-      builder#simple_space_split ();
-      t_with ~nest type_spec;
-    ) ();
+    t_with ~nest type_spec;
     t semi;
     builder#end_chunks ();
     ()
@@ -759,10 +757,14 @@ offending text is '%s'." (text node)));
     in
     t attr;
     t visibility;
+    pending_space ();
     t param_type;
-    if not (is_missing param_type) then add_space ();
-    (* TODO: span and split, figure out attr and vis rules *)
-    t name;
+    if is_missing visibility && is_missing param_type
+    then t name
+    else begin
+      builder#simple_space_split ();
+      t_with ~nest name
+    end;
     t default;
   | VariadicParameter x ->
     let ellipsis = get_variadic_parameter_children x in
@@ -1075,15 +1077,15 @@ offending text is '%s'." (text node)));
       get_conditional_expression_children x in
     t test_expr;
     tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
-      builder#simple_space_split ();
+      split ~space ();
       t q_kw;
       if not (is_missing true_expr) then begin
-        add_space ();
+        pending_space ();
         t true_expr;
-        builder#simple_space_split ();
+        split ~space ();
       end;
       t c_kw;
-      add_space ();
+      pending_space ();
       t false_expr;
     ) ();
     ()
@@ -1462,9 +1464,10 @@ and handle_lambda_body node =
     | CompoundStatement x ->
       handle_compound_statement x;
     | _ ->
-      split ~space:true ();
-      t_with ~rule:(RuleKind (Rule.Simple Cost.base)) ~nest:true node;
-      ()
+      tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+        split ~space:true ();
+        t_with ~nest:true node;
+      ) ()
 
 and handle_possible_compound_statement node =
   match syntax node with
@@ -1688,15 +1691,18 @@ and transform_argish_with_return_type ~in_span left_p params right_p colon
 
 and transform_argish left_p arg_list right_p =
   transform left_p;
-  split ();
-  tl_with ~span:(Some Cost.base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
-    tl_with ~nest:true ~f:(fun () ->
-      handle_possible_list
-        ~after_each:after_each_argument ~handle_last:transform_last_arg arg_list
-    ) ();
+  if not (is_missing arg_list) then begin
     split ();
-    transform right_p
-  ) ();
+    tl_with ~span:(Some Cost.base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+      tl_with ~nest:true ~f:(fun () ->
+        handle_possible_list
+          ~after_each:after_each_argument
+          ~handle_last:transform_last_arg arg_list
+      ) ();
+      split ();
+      transform right_p;
+    ) ();
+  end else transform right_p;
   ()
 
 and transform_last_arg node =

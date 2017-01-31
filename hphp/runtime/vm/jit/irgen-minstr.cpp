@@ -1688,12 +1688,15 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   return value;
 }
 
-void setNewElemVecImpl(IRGS& env, SSATmp* basePtr, SSATmp* value) {
+void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
+                                   SSATmp* value) {
   ifThen(
     env,
     [&](Block* taken) {
       auto const base = extractBase(env);
-      if (value->type() <= TVec) {
+
+      if ((baseType <= TArr && value->type() <=TArr) ||
+          (baseType <= TVec && value->type() <=TVec)) {
         auto const append_to_self = gen(env, EqArrayDataPtr, base, value);
         gen(env, JmpNZero, taken, append_to_self);
       }
@@ -1710,7 +1713,13 @@ void setNewElemVecImpl(IRGS& env, SSATmp* basePtr, SSATmp* value) {
       gen(env, StMem, elem_ptr, value);
     },
     [&] {
-      gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
+      if (baseType <= Type::Array(ArrayData::kPackedKind)) {
+        gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
+      } else if (baseType <= TVec) {
+        gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
+      } else {
+        always_assert(false);
+      }
     }
   );
 }
@@ -1724,11 +1733,14 @@ SSATmp* setNewElemImpl(IRGS& env) {
   // mismatched in-states for any catch block edges we emit later on.
   auto const basePtr = ldMBase(env);
 
-  if (baseType <= TArr) {
+  auto const tc = TypeConstraint(DataTypeSpecialized).setWantArrayKind();
+  env.irb->constrainLocation(Location::MBase{}, tc);
+
+  if (baseType <= Type::Array(ArrayData::kPackedKind) || baseType <= TVec) {
+    setNewElemPackedArrayDataImpl(env, basePtr, baseType, value);
+  } else if (baseType <= TArr) {
     constrainBase(env);
     gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
-  } else if (baseType <= TVec) {
-    setNewElemVecImpl(env, basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     if (!value->isA(TInt | TStr)) {

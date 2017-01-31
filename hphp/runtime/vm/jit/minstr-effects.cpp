@@ -79,7 +79,15 @@ void getBaseType(Opcode rawOp, bool predict,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
     baseValChanged = true;
-    if (baseType.maybe(TArr)) baseType |= TCountedArr;
+    if (baseType.maybe(TArr)) {
+      if (rawOp == SetNewElemArray &&
+          (baseType <= Type::Array(ArrayData::kPackedKind) ||
+           baseType <= Type::Array(ArrayData::kEmptyKind))) {
+        baseType = Type::Array(ArrayData::kPackedKind);
+      } else {
+        baseType |= TCountedArr;
+      }
+    }
     if (baseType.maybe(TVec)) {
       baseType |= TCountedVec;
       /* Unsetting a vec element can turn it into a dict */

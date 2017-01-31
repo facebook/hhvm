@@ -457,9 +457,7 @@ inline Type Type::box() const {
   assertx(*this <= TCell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
   assertx(!maybe(TUninit) || *this == TCell);
-  return Type(m_bits << kBoxShift,
-              ptrKind(),
-              isSpecialized() && !m_hasConstVal ? m_extra : 0);
+  return Type(m_bits << kBoxShift, ptrKind()).specialize(spec());
 }
 
 inline Type Type::inner() const {
@@ -477,9 +475,7 @@ inline Type Type::ptr(Ptr kind) const {
   assertx(ptrSubsetOf(kind, Ptr::Ptr));
   // Enforce a canonical representation for Bottom.
   if (m_bits == kBottom) return TBottom;
-  return Type(m_bits,
-              kind,
-              isSpecialized() && !m_hasConstVal ? m_extra : 0);
+  return Type(m_bits, kind).specialize(spec());
 }
 
 inline Type Type::deref() const {

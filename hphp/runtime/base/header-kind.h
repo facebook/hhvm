@@ -136,6 +136,7 @@ struct HeaderWord {
 
 constexpr auto HeaderOffset = 0;
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
+constexpr auto HeaderAuxOffset = HeaderOffset + offsetof(HeaderWord<>, aux);
 constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
                                       offsetof(HeaderWord<>, count);
 

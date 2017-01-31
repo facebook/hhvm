@@ -147,6 +147,7 @@ bool canDCE(IRInstruction* inst) {
   case EqCls:
   case EqFunc:
   case EqStrPtr:
+  case EqArrayDataPtr:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -594,6 +595,7 @@ bool canDCE(IRInstruction* inst) {
   case SetNewElemArray:
   case SetNewElemVec:
   case SetNewElemKeyset:
+  case ReservePackedArrayDataNewElem:
   case BindNewElem:
   case VectorIsset:
   case PairIsset:

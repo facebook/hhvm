@@ -1522,6 +1522,18 @@ SSATmp* simplifyEqStrPtr(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyEqArrayDataPtr(State& env, const IRInstruction* inst) {
+  auto const left = inst->src(0);
+  auto const right = inst->src(1);
+  if (left == right) return cns(env, true);
+  if (left->hasConstVal() && right->hasConstVal()) {
+    // this assumes that all the ArrayData* in Type::m_extra overlap exactly
+    // so we can use arrVal without having to check the type
+    return cns(env, left->arrVal() == right->arrVal());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCmpBool(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
@@ -2717,6 +2729,18 @@ SSATmp* simplifyCheckPackedArrayDataBounds(State& env,
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyReservePackedArrayDataNewElem(State& env,
+                                              const IRInstruction* inst) {
+  auto const base = inst->src(0);
+
+  if (base->type() <= (TPersistentArr|TPersistentVec)) {
+    // Instruction is unreachable
+    gen(env, Halt);
+    return cns(env, TBottom);
+  }
+  return nullptr;
+}
+
 SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
@@ -3408,6 +3432,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckTypeMem)
   X(AssertType)
   X(CheckPackedArrayDataBounds)
+  X(ReservePackedArrayDataNewElem)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
   X(CoerceCellToInt)
@@ -3579,6 +3604,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CmpRes)
   X(EqCls)
   X(EqStrPtr)
+  X(EqArrayDataPtr)
   X(ArrayGet)
   X(MixedArrayGetK)
   X(DictGet)

@@ -766,6 +766,11 @@ To string conversions:
   Checks if two string values represent the same underlying string. That is,
   that they point at the same underlying storage.
 
+| EqArrayDataPtr,              D(Bool), S(ArrLike) S(ArrLike),            NF
+
+  Checks if the two arguments represent the same underlying ArrayData. That is,
+  that they point at the same underlying storage.
+
 | ProfileInstanceCheck, ND, C(StaticStr), NF
 
   Profile that S0 has been used as the RHS of an instance check.
@@ -2888,6 +2893,12 @@ fields of that struct for holding intermediate values.
   Loads the address of the element at index S1 of the packed array or vec array
   in S0. This instruction assumes the array actually contains an element at
   that offset (IE, the array has the proper length).
+
+| ReservePackedArrayDataNewElem, D(Int), S(AK(Packed),Vec), B
+
+  If there is room in the packed or vec array (which is assumed to be mutable),
+  increments the array size and returns the index of the new last element
+  (which you must initialize); else jumps to the taken branch.
 
 | LdVecElem, DVecElem, S(Vec) S(Int), NF
 

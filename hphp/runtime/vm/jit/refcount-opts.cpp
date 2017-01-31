@@ -2059,7 +2059,8 @@ bool consumes_reference_next_not_taken(const IRInstruction& inst,
  */
 bool observes_reference(const IRInstruction& inst, uint32_t srcID) {
   return consumes_reference_next_not_taken(inst, srcID) ||
-         consumes_reference_taken(inst, srcID);
+         consumes_reference_taken(inst, srcID) ||
+         (inst.op() == CheckArrayCOW && srcID == 0);
 }
 
 //////////////////////////////////////////////////////////////////////

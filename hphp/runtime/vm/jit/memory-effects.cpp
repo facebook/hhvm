@@ -1115,6 +1115,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny | all_pointees(inst)
     ));
 
+  case ReservePackedArrayDataNewElem:
+    return may_load_store(AHeapAny, AHeapAny);
+
   /*
    * Intermediate minstr operations. In addition to a base pointer like the
    * operations above, these may take a pointer to MInstrState::tvRef, which
@@ -1282,6 +1285,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqCls:
   case EqFunc:
   case EqStrPtr:
+  case EqArrayDataPtr:
   case EqDbl:
   case EqInt:
   case GteBool:

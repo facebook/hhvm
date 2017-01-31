@@ -370,6 +370,12 @@ void cgEqStrPtr(IRLS& env, const IRInstruction* inst) {
   implCmp(env, inst, CC_E);
 }
 
+void cgEqArrayDataPtr(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->src(0)->type() <= TArrLike);
+  assertx(inst->src(1)->type() <= TArrLike);
+  implCmp(env, inst, CC_E);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

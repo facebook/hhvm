@@ -1688,6 +1688,33 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   return value;
 }
 
+void setNewElemVecImpl(IRGS& env, SSATmp* basePtr, SSATmp* value) {
+  ifThen(
+    env,
+    [&](Block* taken) {
+      auto const base = extractBase(env);
+      if (value->type() <= TVec) {
+        auto const append_to_self = gen(env, EqArrayDataPtr, base, value);
+        gen(env, JmpNZero, taken, append_to_self);
+      }
+      gen(env, CheckArrayCOW, taken, base);
+      auto const offset = gen(env, ReservePackedArrayDataNewElem, taken, base);
+      auto const elem_ptr = gen(
+        env,
+        LdPackedArrayDataElemAddr,
+        TPtrToElemUninit,
+        base,
+        offset
+      );
+      gen(env, IncRef, value);
+      gen(env, StMem, elem_ptr, value);
+    },
+    [&] {
+      gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
+    }
+  );
+}
+
 SSATmp* setNewElemImpl(IRGS& env) {
   auto const value = topC(env);
 
@@ -1701,8 +1728,7 @@ SSATmp* setNewElemImpl(IRGS& env) {
     constrainBase(env);
     gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
   } else if (baseType <= TVec) {
-    constrainBase(env);
-    gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
+    setNewElemVecImpl(env, basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     if (!value->isA(TInt | TStr)) {

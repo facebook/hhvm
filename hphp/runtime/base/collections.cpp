@@ -222,8 +222,8 @@ ArrayData* deepCopyDict(ArrayData* arr) {
 ArrayData* deepCopyKeyset(ArrayData* arr) {
   assert(arr->isKeyset());
   KeysetInit ai{arr->size()};
-  MixedArray::IterateV(
-    MixedArray::asMixed(arr),
+  SetArray::Iterate(
+    SetArray::asSet(arr),
     [&](const TypedValue* v) {
       Variant value{tvAsCVarRef(v)};
       deepCopy(value.asTypedValue());

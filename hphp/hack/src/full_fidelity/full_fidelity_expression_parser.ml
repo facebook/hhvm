@@ -230,10 +230,15 @@ module WithStatementAndDeclAndTypeParser
         that? if so, should we give the error in the parser or a later pass?
       * is define case-insensitive?
     *)
-    let (parser, keyword) = assert_token parser Define in
-    let (parser, left, args, right) = parse_expression_list_opt parser in
-    let result = make_define_expression keyword left args right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "define" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+    let (parser1, keyword) = assert_token parser Define in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left, args, right) = parse_expression_list_opt parser1 in
+      let result = make_define_expression keyword left args right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_double_quoted_string parser head =
     parse_string_literal parser head ""

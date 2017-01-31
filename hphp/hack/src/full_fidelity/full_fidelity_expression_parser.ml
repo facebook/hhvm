@@ -608,7 +608,8 @@ module WithStatementAndDeclAndTypeParser
     | QuestionMinusGreaterThan
     | MinusGreaterThan -> parse_member_selection_expression parser term
     | ColonColon ->
-      parse_scope_resolution_expression parser term
+      let (parser, result) = parse_scope_resolution_expression parser term in
+      parse_remaining_expression parser result
     | PlusPlus
     | MinusMinus -> parse_postfix_unary parser term
     | LeftParen -> parse_function_call parser term
@@ -1818,10 +1819,14 @@ module WithStatementAndDeclAndTypeParser
       (with_error parser SyntaxError.error1015, (make_token token))
 
   and parse_scope_resolution_or_name parser =
-    (* parent, self and static are legal identifiers. *)
+    (* parent, self and static are legal identifiers.  If the next
+    thing that follows is a scope resolution operator, parse them as
+    ordinary tokens, and then we'll pick them up as the operand to the
+    scope resolution operator when we call parse_remaining_expression.
+    Otherwise, parse them as ordinary names.  *)
     let (parser1, qualifier) = next_token parser in
-    if peek_token_kind parser1 == ColonColon then
-      parse_scope_resolution_expression parser1 (make_token qualifier)
+    if peek_token_kind parser1 = ColonColon then
+      (parser1, (make_token qualifier))
     else
       parse_as_name_or_error parser
 
@@ -1848,5 +1853,5 @@ module WithStatementAndDeclAndTypeParser
     let (parser, op) = expect_coloncolon parser in
     let (parser, name) = expect_name_variable_or_class parser in
     let result = make_scope_resolution_expression qualifier op name in
-    parse_remaining_expression parser result
+    (parser, result)
 end

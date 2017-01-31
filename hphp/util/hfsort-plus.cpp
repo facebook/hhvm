@@ -57,9 +57,10 @@ class PrecomputedResults {
   }
 
   double get(Cluster* first, Cluster* second) const {
-    assert(contains(first, second));
     auto key = std::make_pair(first, second);
-    return cache.find(key)->second;
+    auto it = cache.find(key);
+    assert(it != cache.end());
+    return it->second;
   }
 
   void set(Cluster* first, Cluster* second, double value) {

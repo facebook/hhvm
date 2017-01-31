@@ -180,12 +180,17 @@ module WithStatementAndDeclAndTypeParser
       * Should this be in the specification?
       * Empty is case-insensitive; should use of non-lowercase be an error?
     *)
-    let (parser, keyword) = assert_token parser Empty in
-    let (parser, left) = expect_left_paren parser in
-    let (parser, arg) = parse_expression_with_reset_precedence parser in
-    let (parser, right) = expect_right_paren parser in
-    let result = make_empty_expression keyword left arg right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "empty" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+    let (parser1, keyword) = assert_token parser Empty in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left) = assert_token parser1 LeftParen in
+      let (parser, arg) = parse_expression_with_reset_precedence parser in
+      let (parser, right) = expect_right_paren parser in
+      let result = make_empty_expression keyword left arg right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_eval_expression parser =
     (* TODO: This is a PHP-ism. Open questions:
@@ -196,12 +201,17 @@ module WithStatementAndDeclAndTypeParser
       * Should this be in the specification?
       * Eval is case-insensitive. Should use of non-lowercase be an error?
     *)
-    let (parser, keyword) = assert_token parser Eval in
-    let (parser, left) = expect_left_paren parser in
-    let (parser, arg) = parse_expression_with_reset_precedence parser in
-    let (parser, right) = expect_right_paren parser in
-    let result = make_eval_expression keyword left arg right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "eval" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+    let (parser1, keyword) = assert_token parser Eval in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left) = assert_token parser LeftParen in
+      let (parser, arg) = parse_expression_with_reset_precedence parser in
+      let (parser, right) = expect_right_paren parser in
+      let result = make_eval_expression keyword left arg right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_isset_expression parser =
     (* TODO: This is a PHP-ism. Open questions:
@@ -213,10 +223,16 @@ module WithStatementAndDeclAndTypeParser
         that? if so, should we give the error in the parser or a later pass?
       * Isset is case-insensitive. Should use of non-lowercase be an error?
     *)
-    let (parser, keyword) = assert_token parser Isset in
-    let (parser, left, args, right) = parse_expression_list_opt parser in
-    let result = make_isset_expression keyword left args right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "isset" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+
+    let (parser1, keyword) = assert_token parser Isset in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left, args, right) = parse_expression_list_opt parser1 in
+      let result = make_isset_expression keyword left args right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_define_expression parser =
     (* TODO: This is a PHP-ism. Open questions:

@@ -132,7 +132,7 @@ module WithStatementAndDeclAndTypeParser
     | QualifiedName -> parse_name_or_collection_literal_expression parser1 token
     | Self
     | Parent
-    | Static -> parse_scope_resolution_expression parser1 (make_token token)
+    | Static -> parse_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
     | Print -> parse_print_expression parser
     | Exclamation
@@ -1816,6 +1816,14 @@ module WithStatementAndDeclAndTypeParser
       missing, give a missing node for the left side, and parse the
       remainder as the right side. We'll go for the former for now. *)
       (with_error parser SyntaxError.error1015, (make_token token))
+
+  and parse_scope_resolution_or_name parser =
+    (* parent, self and static are legal identifiers. *)
+    let (parser1, qualifier) = next_token parser in
+    if peek_token_kind parser1 == ColonColon then
+      parse_scope_resolution_expression parser1 (make_token qualifier)
+    else
+      parse_as_name_or_error parser
 
   and parse_scope_resolution_expression parser qualifier =
     (* SPEC

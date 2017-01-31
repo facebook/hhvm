@@ -302,6 +302,8 @@ int main(int argc, char** argv) try {
   initialize_repo();
 
   hphp_process_init();
+  SCOPE_EXIT { hphp_process_exit(); };
+
   Repo::shutdown();
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);

@@ -544,12 +544,20 @@ int process(const CompilerOptions &po) {
   // one time initialization
   BuiltinSymbols::LoadSuperGlobals();
 
+  bool processInitRan = false;
+  SCOPE_EXIT {
+    if (processInitRan) {
+      hphp_process_exit();
+    }
+  };
+
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
     bool wp = Option::WholeProgram;
     Option::WholeProgram = false;
     BuiltinSymbols::s_systemAr = ar;
     hphp_process_init();
+    processInitRan = true;
     BuiltinSymbols::s_systemAr.reset();
     Option::WholeProgram = wp;
     if (po.target == "hhbc" && !Option::WholeProgram) {
@@ -562,6 +570,7 @@ int process(const CompilerOptions &po) {
     }
   } else {
     hphp_process_init();
+    processInitRan = true;
   }
 
   {

@@ -65,8 +65,7 @@ int main(int argc, char **argv) {
   // Initialize compiler state
   compile_file(0, 0, MD5(), 0);
   hphp_process_init();
+  SCOPE_EXIT { hphp_process_exit(); };
   Test test;
-  auto ret = test.RunTests(suite, which, set) ? 0 : -1;
-  hphp_process_exit();
-  return ret;
+  return test.RunTests(suite, which, set) ? 0 : -1;
 }

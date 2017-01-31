@@ -177,5 +177,3 @@ dict(3) {
     string(1) "e"
   }
 }
-========== create_with_ref =========================
-create_with_ref exception: "Dicts cannot contain references"

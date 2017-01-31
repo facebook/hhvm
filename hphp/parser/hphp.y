@@ -2201,10 +2201,6 @@ non_empty_dict_pair_list:
     non_empty_dict_pair_list
     ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
   | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | non_empty_dict_pair_list
-    ',' expr T_DOUBLE_ARROW
-    '&' variable                       { _p->onArrayPair($$,&$1,&$3,$6,1);}
-  | expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,$4,1);}
 ;
 
 static_dict_pair_list:

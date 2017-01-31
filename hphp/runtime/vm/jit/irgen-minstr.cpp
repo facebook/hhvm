@@ -1695,14 +1695,14 @@ void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
     [&](Block* taken) {
       auto const base = extractBase(env);
 
-      if ((baseType <= TArr && value->type() <=TArr) ||
-          (baseType <= TVec && value->type() <=TVec)) {
-        auto const append_to_self = gen(env, EqArrayDataPtr, base, value);
-        gen(env, JmpNZero, taken, append_to_self);
+      if ((baseType <= TArr && value->type() <= TArr) ||
+          (baseType <= TVec && value->type() <= TVec)) {
+        auto const appendToSelf = gen(env, EqArrayDataPtr, base, value);
+        gen(env, JmpNZero, taken, appendToSelf);
       }
       gen(env, CheckArrayCOW, taken, base);
       auto const offset = gen(env, ReservePackedArrayDataNewElem, taken, base);
-      auto const elem_ptr = gen(
+      auto const elemPtr = gen(
         env,
         LdPackedArrayDataElemAddr,
         TPtrToElemUninit,
@@ -1710,7 +1710,7 @@ void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
         offset
       );
       gen(env, IncRef, value);
-      gen(env, StMem, elem_ptr, value);
+      gen(env, StMem, elemPtr, value);
     },
     [&] {
       if (baseType <= Type::Array(ArrayData::kPackedKind)) {

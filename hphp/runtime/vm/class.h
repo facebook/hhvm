@@ -1216,12 +1216,6 @@ private:
   // Static data members.
 
 public:
-  /*
-   * Callback which, if set, runs during setMethods().
-   */
-  static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1230,7 +1224,6 @@ public:
   // The ordering is reverse order of hotness because m_classVec is relatively
   // hot, and must be the last member.
 
-public:
   LowPtr<Class> m_nextClass{nullptr}; // used by NamedEntity
 
 private:

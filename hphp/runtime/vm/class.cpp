@@ -53,8 +53,6 @@ const StaticString s_86ctor("86ctor");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 
-void (*Class::MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
-
 Mutex g_classesMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1646,11 +1644,11 @@ void Class::setMethods() {
     }
   }
 
-  auto traitsBeginIdx = builder.size();
+  auto const traitsBeginIdx = builder.size();
   if (m_extra->m_usedTraits.size()) {
     importTraitMethods(builder);
   }
-  auto traitsEndIdx = builder.size();
+  auto const traitsEndIdx = builder.size();
 
   // Make copies of Funcs inherited from the parent class that have
   // static locals
@@ -1681,12 +1679,6 @@ void Class::setMethods() {
         }
       }
     }
-  }
-
-  if (Class::MethodCreateHook) {
-    Class::MethodCreateHook(this, builder);
-    // running MethodCreateHook may add methods to builder
-    traitsEndIdx = builder.size();
   }
 
   if (m_extra) {

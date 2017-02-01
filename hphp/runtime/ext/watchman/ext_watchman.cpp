@@ -28,6 +28,7 @@
 #include <thread>
 #include <tuple>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <folly/dynamic.h>
@@ -199,6 +200,13 @@ struct WatchmanThreadEventBase : folly::Executor {
 WatchmanThreadEventBase* WatchmanThreadEventBase::s_wmTEB{nullptr};
 
 struct ActiveSubscription {
+  // There should only be exaclty one instance of a given ActiveSubscription
+  // and this should live in s_activeSubscriptions.
+  ActiveSubscription& operator=(const ActiveSubscription&) = delete;
+  ActiveSubscription(const ActiveSubscription&) = delete;
+  ActiveSubscription&& operator=(ActiveSubscription&&) = delete;
+  ActiveSubscription(ActiveSubscription&&) = delete;
+
   // (PHP)
   ActiveSubscription(
     const std::string& socket_path,
@@ -470,8 +478,7 @@ struct ActiveSubscription {
   std::vector<folly::Promise<bool>> m_syncPromises;
 };
 
-std::unordered_map<std::string, std::shared_ptr<ActiveSubscription>>
-  s_activeSubscriptions;
+std::unordered_map<std::string, ActiveSubscription> s_activeSubscriptions;
 
 template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // (PHP)
@@ -607,7 +614,7 @@ folly::Future<std::string> watchman_unsubscribe_impl(const std::string& name) {
   if (entry == s_activeSubscriptions.end()) {
     throw std::runtime_error(folly::sformat("No subscription '{}'", name));
   }
-  auto res_future = entry->second->unsubscribe()
+  auto res_future = entry->second.unsubscribe()
     // I assume the items queued on the event base are drained in FIFO
     // order. So, after the unsubscribe should be safe to clean up.
     .then([] (std::string&& result) {
@@ -627,7 +634,7 @@ folly::Future<std::string> watchman_unsubscribe_impl(const std::string& name) {
 // (PHP)
 void clearDeadConnections() {
   for (auto& sub_entry : s_activeSubscriptions) {
-    sub_entry.second->checkConnection(); // releases client shared_ptr if dead
+    sub_entry.second.checkConnection(); // releases client shared_ptr if dead
   }
   auto active_it = s_activeClients.begin();
   while (active_it != s_activeClients.end()) {
@@ -718,23 +725,31 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
       "in a PHP/HH file and have exactly 5 (string type) arguments.");
   }
 
-  s_activeSubscriptions[name] = std::make_shared<ActiveSubscription>(
+  s_activeSubscriptions.emplace(
+    std::piecewise_construct,
+    std::forward_as_tuple(name),
+    std::forward_as_tuple(
       socket_path,
       path,
       json_query,
       f->fullName()->toCppString(),
       f->filename()->toCppString(),
-      name);
-  auto sub_ptr = s_activeSubscriptions[name];
+      name));
   try {
     auto res_future = getWatchmanClientForSocket(socket_path)
-      .then([sub_ptr] (std::shared_ptr<watchman::WatchmanClient> client) {
+      .then([name] (std::shared_ptr<watchman::WatchmanClient> client)
+        -> folly::Future<folly::Unit>
+      {
         // (ASYNC)
-        return sub_ptr->subscribe(client);
+        auto sub_entry = s_activeSubscriptions.find(name);
+        if (sub_entry != s_activeSubscriptions.end()) {
+          return sub_entry->second.subscribe(client);
+        }
+        return folly::unit;
       })
-      .onError([sub_ptr] (std::exception const& e) -> folly::Unit {
+      .onError([name] (std::exception const& e) -> folly::Unit {
         // (ASNYC) delete active subscription
-        auto sub_entry = s_activeSubscriptions.find(sub_ptr->m_name);
+        auto sub_entry = s_activeSubscriptions.find(name);
         if (sub_entry != s_activeSubscriptions.end()) {
           s_activeSubscriptions.erase(sub_entry);
         }
@@ -766,8 +781,8 @@ bool HHVM_FUNCTION(HH_watchman_check_sub, const String& _name) {
   std::string error;
   bool connection_alive = false;
   try {
-    error = sub_entry->second->getAndClearError();
-    connection_alive = sub_entry->second->checkConnection();
+    error = sub_entry->second.getAndClearError();
+    connection_alive = sub_entry->second.checkConnection();
   } catch(const std::exception& e) {
     SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
       "Error '{}' checking subscription named '{}'", e.what(), name));
@@ -802,7 +817,7 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
   }
 
   try {
-    auto res_future = sub_entry->second->sync(timeout_ms);
+    auto res_future = sub_entry->second.sync(timeout_ms);
     return Object{
       (new FutureEvent<bool>(std::move(res_future)))->getWaitHandle()
     };

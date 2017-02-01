@@ -152,7 +152,6 @@ function test_core(string $tmpdir): void {
     $version['capabilities'] !== array('relative_root' => true)
   ) {
     throw new Exception("FAIL ('.var_export($version).')\n");
-    exit(1);
   } else {
     print("PASS\n");
   }
@@ -238,6 +237,7 @@ function test_core(string $tmpdir): void {
   HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
 
   print("Stess test subscription\n");
+  apc_delete('stress_counter');
   // Success for this test is just not crashing HHVM
   $subscribed = false;
   $subscribe_c = 0;
@@ -405,9 +405,8 @@ function test_core(string $tmpdir): void {
   }
 
   # Kill Watchman server and check to make sure a subscription gets notified.
-  # This has to be last as the output comes from the callback which would be
-  # racey with any other output from this thread.
   print("Checking detection of dead Watchman server connection\n");
+  apc_delete('callback_broken');
   HH\watchman_subscribe(
     '{"fields": ["name"], "expression": ["exists"]}',
     $wminst->getRepoRoot(),
@@ -417,6 +416,17 @@ function test_core(string $tmpdir): void {
   ) |> HH\asio\join($$);
   $wminst->terminateProcess();
   file_put_contents('should_be_ignored', 'xyz');
+  $wait = 0;
+  while (!apc_exists('callback_broken') && $wait < 10) {
+    sleep(1);
+    $wait++;
+  }
+  if ($wait === 10) {
+    print("FAIL (did not see connection error after 10 seconds)\n");
+  } else {
+    print("PASS (connection error)\n");
+  }
+  HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
 }
 
 $tmpdir = tempnam(sys_get_temp_dir(), 'wmt');

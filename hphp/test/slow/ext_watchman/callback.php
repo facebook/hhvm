@@ -76,10 +76,8 @@ function callback_broken(
     return;
   }
   if (array_key_exists('connection_error', $data)) {
-   print "PASS (connection error)\n";
-   return;
+   apc_store('callback_broken', 'pass');
   }
-  print "FAIL (no connection error)\n";
 }
 
 function callback_exception(

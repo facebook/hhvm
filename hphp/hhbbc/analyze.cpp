@@ -650,16 +650,18 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       );
     }
 
-    for (auto& c : associatedClosures) {
-      auto const invoke = borrow(c->methods[0]);
-      closureResults.push_back(
-        do_analyze(
-          index,
-          Context { ctx.unit, invoke, c },
-          &clsAnalysis,
-          nullptr
-        )
-      );
+    if (associatedClosures) {
+      for (auto& c : *associatedClosures) {
+        auto const invoke = borrow(c->methods[0]);
+        closureResults.push_back(
+          do_analyze(
+            index,
+            Context { ctx.unit, invoke, c },
+            &clsAnalysis,
+            nullptr
+          )
+        );
+      }
     }
 
     // Check if we've reached a fixed point yet.

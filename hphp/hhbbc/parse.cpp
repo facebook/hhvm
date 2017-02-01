@@ -81,7 +81,7 @@ struct ParseUnitState {
   std::vector<borrowed_ptr<php::Func>> defClsMap;
 
   /*
-   * Map from Closure names to the function(s) containing their
+   * Map from Closure index to the function(s) containing their
    * associated CreateCl opcode(s).
    */
   std::unordered_map<
@@ -348,9 +348,9 @@ void find_fault_funclets(ExnTreeInfo& tinfo,
       // targets the funclet.  This means we might have duplicate
       // factored exits now, so we need to remove them.
       std::sort(begin(blk->factoredExits), end(blk->factoredExits));
-      blk->factoredExits.erase(
-        std::unique(begin(blk->factoredExits), end(blk->factoredExits)),
-        end(blk->factoredExits)
+      blk->factoredExits.resize(
+        std::unique(begin(blk->factoredExits), end(blk->factoredExits)) -
+        begin(blk->factoredExits)
       );
 
       ++offIt;
@@ -822,11 +822,12 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     ret->interfaceNames.push_back(iface);
   }
 
-  ret->usedTraitNames    = pce.usedTraits();
-  ret->traitPrecRules    = pce.traitPrecRules();
-  ret->traitAliasRules   = pce.traitAliasRules();
-  ret->requirements      = pce.requirements();
-  ret->numDeclMethods    = pce.numDeclMethods();
+  copy(ret->usedTraitNames,  pce.usedTraits());
+  copy(ret->traitPrecRules,  pce.traitPrecRules());
+  copy(ret->traitAliasRules, pce.traitAliasRules());
+  copy(ret->requirements,    pce.requirements());
+
+  ret->numDeclMethods = pce.numDeclMethods();
 
   parse_methods(puState, borrow(ret), unit, pce);
   add_stringish(borrow(ret));

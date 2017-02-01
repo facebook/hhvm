@@ -62,9 +62,10 @@ std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
    * visited set (so we'll stop if they chain to the main entry, which
    * is the normal case).
    */
-  for (auto rit = func.params.rbegin(); rit != func.params.rend(); ++rit) {
-    if (rit->dvEntryPoint == NoBlockId) continue;
-    postorderWalk(func, ret, visited, *func.blocks[rit->dvEntryPoint]);
+  for (auto it = func.params.end(); it != func.params.begin(); ) {
+    --it;
+    if (it->dvEntryPoint == NoBlockId) continue;
+    postorderWalk(func, ret, visited, *func.blocks[it->dvEntryPoint]);
   }
   std::reverse(begin(ret), end(ret));
   return ret;

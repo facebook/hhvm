@@ -41,10 +41,19 @@ namespace HPHP {
 template <typename T>
 struct CompactVector {
   using size_type = std::size_t;
+  using value_type = T;
+  using iterator = T*;
+  using const_iterator = const T*;
+
+  friend iterator begin(CompactVector& v) { return v.begin(); }
+  friend iterator end(CompactVector& v) { return v.end(); }
+  friend const_iterator begin(const CompactVector& v) { return v.begin(); }
+  friend const_iterator end(const CompactVector& v) { return v.end(); }
 
   CompactVector(CompactVector&& other) noexcept;
   CompactVector(const CompactVector& other);
-  CompactVector& operator=(const CompactVector&) = delete;
+  CompactVector& operator=(CompactVector&&);
+  CompactVector& operator=(const CompactVector&);
   CompactVector();
   ~CompactVector();
 
@@ -54,25 +63,32 @@ struct CompactVector {
     return !(*this == other);
   }
 
-  T* begin() { return m_data ? elems() : nullptr; }
-  T* end() { return m_data ? elems() + size() : nullptr; }
-  const T* begin() const { return m_data ? elems() : nullptr; }
-  const T* end() const { return m_data ? elems() + size() : nullptr; }
+  iterator begin() { return m_data ? elems() : nullptr; }
+  iterator end() { return m_data ? elems() + size() : nullptr; }
+  const_iterator begin() const { return m_data ? elems() : nullptr; }
+  const_iterator end() const { return m_data ? elems() + size() : nullptr; }
 
   bool empty() const;
   size_type size() const;
   size_type capacity();
   void clear();
   void push_back(const T& val);
+  void push_back(T&& val);
   template <class... Args>
   void emplace_back(Args&&... args);
   void pop_back();
+  void erase(iterator);
+  void resize(size_type sz);
+  void resize(size_type sz, const value_type& value);
 
   T& operator[](size_type index) { return *get(index); }
   const T& operator[](size_type index) const { return *get(index); }
   T& front() { return *get(0); }
   const T& front() const { return *get(0); }
+  T& back() { return *get(m_data->m_len - 1); }
+  const T& back() const { return *get(m_data->m_len - 1); }
 
+  void reserve(size_type sz);
 private:
   struct CompactVectorData {
     uint32_t m_len;
@@ -80,10 +96,13 @@ private:
   };
 
 
+  void assign(const CompactVector& other);
   void grow();
   T* get(size_type index) const;
   T* elems() const;
   static size_t required_mem(size_type n);
+  void reserve_impl(size_type sz);
+  bool resize_helper(size_type sz);
 
   CompactVectorData* m_data;
   static constexpr size_type initial_capacity = 4;
@@ -101,14 +120,33 @@ CompactVector<T>::CompactVector(CompactVector&& other) noexcept
 }
 
 template <typename T>
-CompactVector<T>::CompactVector(const CompactVector& other) {
-  if (!other.m_data) {
-    m_data = nullptr;
-    return;
+CompactVector<T>::CompactVector(const CompactVector& other) : m_data(nullptr) {
+  assign(other);
+}
+
+template <typename T>
+CompactVector<T>& CompactVector<T>::operator=(const CompactVector& other) {
+  if (this == &other) return *this;
+  clear();
+  assign(other);
+  return *this;
+}
+
+template <typename T>
+void CompactVector<T>::assign(const CompactVector& other) {
+  assert(!m_data);
+  if (!other.size()) return;
+  reserve_impl(other.m_data->m_len);
+  auto const sz = other.m_data->m_len;
+  for (size_type i = 0; i < sz; ++i) {
+    push_back(other[i]);
   }
-  auto const sz = required_mem(other.m_data->m_capacity);
-  m_data = (CompactVectorData*)malloc(sz);
-  memcpy(m_data, other.m_data, required_mem(other.m_data->m_len));
+}
+
+template <typename T>
+CompactVector<T>& CompactVector<T>::operator=(CompactVector&& other) {
+  std::swap(m_data, other.m_data);
+  return *this;
 }
 
 template <typename T>
@@ -162,11 +200,59 @@ typename CompactVector<T>::size_type CompactVector<T>::capacity() {
 }
 
 template <typename T>
+void CompactVector<T>::erase(iterator elm) {
+  assert(elm - elems() < size());
+  elm->~T();
+  m_data->m_len--;
+  memmove(elm, elm + 1, (char*)end() - (char*)elm);
+}
+
+template <typename T>
+bool CompactVector<T>::resize_helper(size_type sz) {
+  auto const old_size = size();
+  if (sz == old_size) return true;
+  if (sz > old_size) {
+    reserve_impl(sz);
+    return false;
+  }
+  auto elm = get(sz);
+  m_data->m_len = sz;
+  do {
+    elm->~T();
+  } while (++sz < old_size);
+  return true;
+}
+
+template <typename T>
+void CompactVector<T>::resize(size_type sz, const value_type& v) {
+  if (resize_helper(sz)) return;
+  while (m_data->m_len < sz) {
+    push_back(v);
+  }
+}
+
+template <typename T>
+void CompactVector<T>::resize(size_type sz) {
+  if (resize_helper(sz)) return;
+  while (m_data->m_len < sz) {
+    push_back(T{});
+  }
+}
+
+template <typename T>
+void copy(CompactVector<T>& dest, const std::vector<T>& src) {
+  dest.clear();
+  dest.reserve(src.size());
+  for (auto const& v : src) dest.push_back(v);
+}
+
+template <typename T>
 void CompactVector<T>::clear() {
   if (!std::is_trivially_destructible<T>::value) {
-    auto sz = size();
-    auto elm = elems();
-    while (sz--) elm++->~T();
+    if (auto sz = size()) {
+      auto elm = elems();
+      do { elm++->~T(); } while (--sz);
+    }
   }
   free(m_data);
   m_data = nullptr;
@@ -174,9 +260,13 @@ void CompactVector<T>::clear() {
 
 template <typename T>
 void CompactVector<T>::grow() {
+  reserve_impl(m_data ? m_data->m_capacity * 2LL : initial_capacity);
+}
+
+template <typename T>
+void CompactVector<T>::reserve_impl(size_type new_capacity) {
   if (m_data) {
     auto const len = m_data->m_len;
-    auto const new_capacity = m_data->m_capacity * 2LL;
     auto const old_data = m_data;
 
     m_data = (CompactVectorData*)malloc(required_mem(new_capacity));
@@ -187,10 +277,15 @@ void CompactVector<T>::grow() {
   } else {
     // If there are currently no elements, all we have to do is allocate a
     // block of memory and initialize m_len and m_capacity.
-    m_data = (CompactVectorData*)malloc(required_mem(initial_capacity));
+    m_data = (CompactVectorData*)malloc(required_mem(new_capacity));
     m_data->m_len = 0;
-    m_data->m_capacity = initial_capacity;
+    m_data->m_capacity = new_capacity;
   }
+}
+
+template <typename T>
+void CompactVector<T>::reserve(size_type new_capacity) {
+  if (new_capacity > capacity()) reserve_impl(new_capacity);
 }
 
 template <typename T>
@@ -200,6 +295,15 @@ void CompactVector<T>::push_back(const T& val) {
   if (sz == capacity()) grow();
   ++(m_data->m_len);
   new (get(sz)) T(val);
+}
+
+template <typename T>
+void CompactVector<T>::push_back(T&& val) {
+  auto const sz = size();
+  assert(sz <= capacity());
+  if (sz == capacity()) grow();
+  ++(m_data->m_len);
+  new (get(sz)) T(std::move(val));
 }
 
 template <typename T>

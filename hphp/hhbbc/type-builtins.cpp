@@ -38,8 +38,8 @@ const StaticString s_setall("setall");
 
 //////////////////////////////////////////////////////////////////////
 
-bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
-                                         borrowed_ptr<php::Func> func) {
+bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
+                                         borrowed_ptr<const php::Func> func) {
   if (!cls) return false;
 
   if (cls->name->isame(s_Vector.get())) {

@@ -1093,9 +1093,9 @@ bool merge_blocks(const FuncAnalysis& ainfo) {
                     std::inserter(exitSet, begin(exitSet)));
           std::copy(nxt->factoredExits.begin(), nxt->factoredExits.end(),
                     std::inserter(exitSet, begin(exitSet)));
-          blk->factoredExits.clear();
-          std::copy(begin(exitSet), end(exitSet),
-                    std::back_inserter(blk->factoredExits));
+          blk->factoredExits.resize(exitSet.size());
+          std::copy(begin(exitSet), end(exitSet), blk->factoredExits.begin());
+          nxt->factoredExits = decltype(nxt->factoredExits) {};
         } else {
           blk->factoredExits = std::move(nxt->factoredExits);
         }
@@ -1104,6 +1104,7 @@ bool merge_blocks(const FuncAnalysis& ainfo) {
                 std::back_inserter(blk->hhbcs));
       nxt->fallthrough = NoBlockId;
       nxt->id = NoBlockId;
+      nxt->hhbcs = { bc::Nop {} };
       removedAny = true;
     }
   }

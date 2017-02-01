@@ -28,6 +28,7 @@
 #include <folly/Optional.h>
 #include <folly/Hash.h>
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -70,9 +71,9 @@ struct Program;
  * fields may be null in some situations.  Most queries to the Index
  * need a "context", to allow recording dependencies.
  */
-struct Context { borrowed_ptr<php::Unit> unit;
+struct Context { borrowed_ptr<const php::Unit> unit;
                  borrowed_ptr<php::Func> func;
-                 borrowed_ptr<php::Class> cls; };
+                 borrowed_ptr<const php::Class> cls; };
 
 inline bool operator==(Context a, Context b) {
   return a.unit == b.unit && a.func == b.func && a.cls == b.cls;
@@ -369,7 +370,7 @@ struct Index {
    * Find all the closures created inside the context of a given
    * php::Class.
    */
-  std::vector<borrowed_ptr<php::Class>>
+  const CompactVector<borrowed_ptr<const php::Class>>*
     lookup_closures(borrowed_ptr<const php::Class>) const;
 
   /*

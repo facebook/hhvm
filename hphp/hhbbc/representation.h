@@ -26,7 +26,9 @@
 
 #include <boost/variant.hpp>
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/md5.h"
+
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
@@ -108,7 +110,7 @@ struct Block {
    */
   BlockId fallthrough{NoBlockId};
   bool fallthroughNS = false;
-  std::vector<BlockId> factoredExits;
+  CompactVector<BlockId> factoredExits;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -146,14 +148,14 @@ struct FaultRegion { BlockId faultEntry;
                      Id iterId;
                      bool itRef; };
 
-using CatchEnt     = std::pair<const StringData*,BlockId>;
-struct TryRegion   { std::vector<CatchEnt> catches; };
+using CatchEnt     = std::pair<LSString,BlockId>;
+struct TryRegion   { CompactVector<CatchEnt> catches; };
 
 struct ExnNode {
   uint32_t id;
 
   borrowed_ptr<ExnNode> parent;
-  std::vector<std::unique_ptr<ExnNode>> children;
+  CompactVector<std::unique_ptr<ExnNode>> children;
 
   boost::variant<FaultRegion,TryRegion> info;
 };
@@ -276,9 +278,9 @@ struct Func {
    * vector).
    */
   IterId             numIters;
-  std::vector<Param> params;
-  std::vector<Local> locals;
-  std::vector<StaticLocalInfo> staticLocals;
+  CompactVector<Param> params;
+  CompactVector<Local> locals;
+  CompactVector<StaticLocalInfo> staticLocals;
 
   /*
    * Which unit defined this function.  If it is a method, the cls
@@ -292,7 +294,7 @@ struct Func {
    * blocks in an unspecified order.  Blocks have borrowed pointers to
    * each other to represent control flow arcs.
    */
-  std::vector<std::unique_ptr<Block>> blocks;
+  CompactVector<std::unique_ptr<Block>> blocks;
 
   /*
    * Try and fault regions form a tree structure.  The tree is hanging
@@ -300,7 +302,7 @@ struct Func {
    * within a try or fault region has a pointer to the inner-most
    * ExnNode protecting it.
    */
-  std::vector<std::unique_ptr<ExnNode>> exnNodes;
+  CompactVector<std::unique_ptr<ExnNode>> exnNodes;
 
   /*
    * Entry point blocks for default value initializers.
@@ -309,7 +311,7 @@ struct Func {
    * earlier parameters have default values, and later ones don't.  In
    * this case we'll have NoBlockIds after the first valid entry here.
    */
-  std::vector<BlockId> dvEntries;
+  CompactVector<BlockId> dvEntries;
 
   /*
    * Entry point to the function when the number of passed args is
@@ -484,7 +486,7 @@ struct Class {
   /*
    * Names of inherited interfaces.
    */
-  std::vector<LowStringPtr> interfaceNames;
+  CompactVector<LowStringPtr> interfaceNames;
 
   /*
    * Names of used traits, number of declared (i.e., non-trait, non-inherited)
@@ -494,26 +496,26 @@ struct Class {
    * WholeProgram mode, we won't see these because traits will already be
    * flattened.
    */
-  std::vector<LowStringPtr> usedTraitNames;
-  std::vector<PreClass::ClassRequirement> requirements;
-  std::vector<PreClass::TraitPrecRule> traitPrecRules;
-  std::vector<PreClass::TraitAliasRule> traitAliasRules;
+  CompactVector<LowStringPtr> usedTraitNames;
+  CompactVector<PreClass::ClassRequirement> requirements;
+  CompactVector<PreClass::TraitPrecRule> traitPrecRules;
+  CompactVector<PreClass::TraitAliasRule> traitAliasRules;
   int32_t numDeclMethods;
 
   /*
    * Methods on the class.
    */
-  std::vector<std::unique_ptr<php::Func>> methods;
+  CompactVector<std::unique_ptr<php::Func>> methods;
 
   /*
    * Properties defined on this class.
    */
-  std::vector<Prop> properties;
+  CompactVector<Prop> properties;
 
   /*
    * Constants defined on this class.
    */
-  std::vector<Const> constants;
+  CompactVector<Const> constants;
 
   /*
    * User attributes for this class declaration.
@@ -542,10 +544,10 @@ struct Unit {
   bool useStrictTypes{false};
   int preloadPriority{0};
   std::unique_ptr<Func> pseudomain;
-  std::vector<std::unique_ptr<Func>> funcs;
-  std::vector<std::unique_ptr<Class>> classes;
-  std::vector<std::unique_ptr<TypeAlias>> typeAliases;
-  std::vector<SrcLoc> srcLocs;
+  CompactVector<std::unique_ptr<Func>> funcs;
+  CompactVector<std::unique_ptr<Class>> classes;
+  CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
+  CompactVector<SrcLoc> srcLocs;
 };
 
 /*

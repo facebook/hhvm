@@ -691,7 +691,7 @@ struct IndexData {
   // functions of that class.
   std::unordered_map<
     borrowed_ptr<const php::Class>,
-    std::unordered_set<borrowed_ptr<php::Class>>
+    CompactVector<borrowed_ptr<const php::Class>>
   > classClosureMap;
 
   /*
@@ -947,6 +947,11 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 //////////////////////////////////////////////////////////////////////
 
 void add_unit_to_index(IndexData& index, const php::Unit& unit) {
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    std::unordered_set<borrowed_ptr<const php::Class>>
+  > closureMap;
+
   for (auto& c : unit.classes) {
     if (c->attrs & AttrEnum) {
       index.enums.insert({c->name, borrow(c)});
@@ -962,7 +967,16 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     }
 
     if (c->closureContextCls) {
-      index.classClosureMap[c->closureContextCls].insert(borrow(c));
+      closureMap[c->closureContextCls].insert(borrow(c));
+    }
+  }
+
+  if (!closureMap.empty()) {
+    for (auto const& c1 : closureMap) {
+      auto& s = index.classClosureMap[c1.first];
+      for (auto const& c2 : c1.second) {
+        s.push_back(c2);
+      }
     }
   }
 
@@ -1830,14 +1844,13 @@ Index::~Index() {}
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<borrowed_ptr<php::Class>>
+const CompactVector<borrowed_ptr<const php::Class>>*
 Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
-  std::vector<borrowed_ptr<php::Class>> ret;
   auto const it = m_data->classClosureMap.find(cls);
   if (it != end(m_data->classClosureMap)) {
-    ret.assign(begin(it->second), end(it->second));
+    return &it->second;
   }
-  return ret;
+  return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////

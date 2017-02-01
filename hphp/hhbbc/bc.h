@@ -522,8 +522,8 @@ OPCODES
 struct Bytecode {
   // Default construction creates a Nop.
   Bytecode()
-    : Nop(bc::Nop{})
-    , op(Op::Nop)
+    : op(Op::Nop)
+    , Nop(bc::Nop{})
   {}
 
 #define O(opcode, ...)                          \
@@ -591,13 +591,12 @@ struct Bytecode {
     not_reached();
   }
 
+  Op op;
   int32_t srcLoc{-1};
 
 #define O(opcode, ...) bc::opcode opcode;
   union { OPCODES };
 #undef O
-
-  Op op;
 
 private:
   void destruct() {

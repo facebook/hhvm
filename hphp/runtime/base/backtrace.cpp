@@ -18,11 +18,15 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/util/struct-log.h"
 
 #include <folly/small_vector.h>
@@ -180,6 +184,13 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const unit = fp->func()->unit();
       assert(unit);
       pc = unit->offsetOf(vmpc());
+    }
+
+    if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
+      while (fp && (jit::TCA)fp->m_savedRip == jit::tc::ustubs().retInlHelper) {
+        fp = getPrevActRec(fp, &pc, visitedWHs);
+      }
+      if (!fp) return bt;
     }
   }
 

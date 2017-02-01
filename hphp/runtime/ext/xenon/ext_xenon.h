@@ -83,6 +83,8 @@ struct Xenon final {
       // Sample was taken before a function was called or a generator was
       // resumed at yield opcode.
       // The CPU time is attributed to the caller of the entered function.
+      // Inlined frames are skipped as they did not trigger EnterSample events
+      // to properly attribute their parent's cost.
       EnterSample,
 
       // Sample was taken before a function returned, suspended or failed

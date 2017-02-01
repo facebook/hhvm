@@ -298,7 +298,7 @@ struct Scanner {
     size_t i = 0, j = 0;
     for (auto& w : m_where) {
       for (; i < w.ptr; ++i) {
-        if (auto p = m_ptrs[i]) f1(p, description);
+        f1(m_ptrs[i], description);
       }
       for (; j < w.cons; ++j) {
         auto& r = m_conservative[j];

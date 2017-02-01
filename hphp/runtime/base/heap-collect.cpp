@@ -62,7 +62,6 @@ struct Marker {
   // mark ambiguous pointers in the range [start,start+len)
   void conservativeScan(const void* start, size_t len);
 
-private:
   bool mark(const void*, GCBits = GCBits::Mark);
   void checkedEnqueue(const void* p, GCBits bits);
   void finish_typescan();
@@ -83,13 +82,12 @@ private:
     return type_scan::hasNonConservative() &&
       tyindex == type_scan::kIndexUnknown;
   }
-public:
+
   Counter allocd_, marked_, ambig_, freed_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
   size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
   size_t max_worklist_{0}; // max size of work_
-private:
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
@@ -527,6 +525,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   // size metrics gathered during gc
   sample.setInt("allocd_bytes", mkr.allocd_.bytes);
   sample.setInt("allocd_objects", mkr.allocd_.count);
+  sample.setInt("allocd_span", mkr.ptrs_.span().second);
   sample.setInt("marked_bytes", mkr.marked_.bytes);
   sample.setInt("ambig_bytes", mkr.ambig_.bytes);
   sample.setInt("unknown_bytes", mkr.unknown_.bytes);

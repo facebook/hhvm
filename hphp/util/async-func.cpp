@@ -22,6 +22,7 @@
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/numa.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

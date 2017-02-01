@@ -36,6 +36,7 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/type-scan.h"
 
 #include "hphp/runtime/base/rds-header.h"

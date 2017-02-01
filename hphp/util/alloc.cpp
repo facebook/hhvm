@@ -22,7 +22,6 @@
 
 #ifdef HAVE_NUMA
 #include <sys/prctl.h>
-#include <numa.h>
 #endif
 
 #ifdef __APPLE__
@@ -39,6 +38,7 @@
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
+#include "hphp/util/numa.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -226,12 +226,7 @@ int32_t __thread s_numaNode;
 
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
 void enable_numa(bool local) {}
-int next_numa_node() { return 0; }
 void set_numa_binding(int node) {}
-int num_numa_nodes() { return 1; }
-void numa_interleave(void* start, size_t size) {}
-void numa_local(void* start, size_t size) {}
-void numa_bind_to(void* start, size_t size, int node) {}
 #endif
 
 #ifdef USE_JEMALLOC
@@ -245,58 +240,8 @@ static const unsigned kHugePageSize = 1 << kLgHugeGranularity;
 static const unsigned kHugePageMask = (1 << kLgHugeGranularity) - 1;
 
 #ifdef HAVE_NUMA
-static uint32_t numa_node_set;
-static uint32_t numa_num_nodes;
-static uint32_t numa_node_mask;
 static uint32_t base_arena;
-static std::atomic<uint32_t> numa_cur_node;
-static std::vector<bitmask*> *node_to_cpu_mask;
-static bool use_numa = false;
 static bool threads_bind_local = false;
-
-extern "C" {
-HHVM_ATTRIBUTE_WEAK extern void numa_init(void);
-}
-static void initNuma() {
-
-  // When linked dynamically numa_init() is called before JEMallocInitializer()
-  // numa_init is not exported by libnuma.so so it will be NULL
-  // however when linked statically numa_init() is not guaranteed to be called
-  // before JEMallocInitializer(), so call it here.
-  if (&numa_init) {
-    numa_init();
-  }
-  if (numa_available() < 0) return;
-
-  // set interleave for early code. we'll then force interleave
-  // for a few regions, and switch to local for the threads
-  numa_set_interleave_mask(numa_all_nodes_ptr);
-
-  int max_node = numa_max_node();
-  if (!max_node || max_node >= 32) return;
-
-  bool ret = true;
-  bitmask* run_nodes = numa_get_run_node_mask();
-  bitmask* mem_nodes = numa_get_mems_allowed();
-  for (int i = 0; i <= max_node; i++) {
-    if (!numa_bitmask_isbitset(run_nodes, i) ||
-        !numa_bitmask_isbitset(mem_nodes, i)) {
-      // Only deal with the case of a contiguous set
-      // of nodes where we can run/allocate memory
-      // on each node.
-      ret = false;
-      break;
-    }
-    numa_node_set |= (uint32_t)1 << i;
-    numa_num_nodes++;
-  }
-  numa_bitmask_free(run_nodes);
-  numa_bitmask_free(mem_nodes);
-
-  if (!ret || numa_num_nodes <= 1) return;
-
-  numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
-}
 
 static bool purge_decay_hard() {
   const char *purge;
@@ -396,7 +341,6 @@ void enable_numa(bool local) {
   if (numa_sched_getaffinity(0, enabled) < 0) {
     return;
   }
-  node_to_cpu_mask = new std::vector<bitmask*>;
   int num_cpus = numa_num_configured_cpus();
   int max_node = numa_max_node();
   for (int i = 0; i <= max_node; i++) {
@@ -407,29 +351,19 @@ void enable_numa(bool local) {
         numa_bitmask_clearbit(cpus_for_node, j);
       }
     }
-    assert(node_to_cpu_mask->size() == i);
-    node_to_cpu_mask->push_back(cpus_for_node);
+    assert(node_to_cpu_mask.size() == i);
+    node_to_cpu_mask.push_back(cpus_for_node);
   }
   numa_bitmask_free(enabled);
 
   use_numa = true;
 }
 
-int next_numa_node() {
-  if (!use_numa) return 0;
-  int node;
-  do {
-    node = numa_cur_node.fetch_add(1, std::memory_order_relaxed);
-    node &= numa_node_mask;
-  } while (!((numa_node_set >> node) & 1));
-  return node;
-}
-
 void set_numa_binding(int node) {
   if (!use_numa) return;
 
   s_numaNode = node;
-  numa_sched_setaffinity(0, (*node_to_cpu_mask)[node]);
+  numa_sched_setaffinity(0, node_to_cpu_mask[node]);
   if (threads_bind_local) {
     numa_set_interleave_mask(numa_no_nodes_ptr);
     bitmask* nodes = numa_allocate_nodemask();
@@ -446,28 +380,7 @@ void set_numa_binding(int node) {
   prctl(PR_SET_NAME, buf);
 }
 
-int num_numa_nodes() {
-  if (!use_numa) return 1;
-  return numa_num_nodes;
-}
-
-void numa_interleave(void* start, size_t size) {
-  if (!use_numa) return;
-  numa_interleave_memory(start, size, numa_all_nodes_ptr);
-}
-
-void numa_local(void* start, size_t size) {
-  if (!use_numa) return;
-  numa_setlocal_memory(start, size);
-}
-
-void numa_bind_to(void* start, size_t size, int node) {
-  if (!use_numa) return;
-  numa_tonode_memory(start, size, node);
-}
-
 #else
-static void initNuma() {}
 static void numa_purge_arena() {}
 #endif
 

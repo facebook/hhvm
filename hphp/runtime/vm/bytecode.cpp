@@ -30,6 +30,7 @@
 #include <folly/portability/SysMman.h>
 
 #include "hphp/util/debug.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/text-util.h"

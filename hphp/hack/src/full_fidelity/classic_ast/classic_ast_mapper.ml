@@ -192,7 +192,7 @@ let handle_parse_error : K.t list -> env -> P.t -> 'a = fun kindl env node ->
     kind_stack
   in
   pDbg "EXCEPTION" "TRIGGER" node env;
-  Printf.eprintf "\n\n";
+  Printf.eprintf "\n%s\n" msg;
   Printexc.print_backtrace stderr;
   raise (Failure msg)
 
@@ -240,12 +240,15 @@ let mkP : 'a . 'a parser_spec -> 'a parser = fun specl -> fun node env ->
       p (if k = K.Token then [node] else P.children node) env
     with
     | Not_found -> fail (List.map fst specl) node env
-    | Match_failure _ -> raise @@ Parser_fail begin Printf.sprintf
-        "Failed to parse Full Fidelity tree; this probably means classic_ast \
-         and full_fidelity_synax are out of sync. Things are Very Wrong if \
-         this happens and you should definitely report seeing this to the Hack \
-         team.\nThe ancestry that broke things was:\n%s" @@
-         String.concat " <- " @@ List.map (P.kind |.> K.to_string) env.ancestry
+    | Match_failure _ -> raise @@ Parser_fail begin
+        let l = Pos.line @@ where_am_I env in
+        Printf.sprintf
+          "Failed to parse Full Fidelity tree; this probably means classic_ast \
+           and full_fidelity_synax are out of sync. Things are Very Wrong if \
+           this happens and you should definitely report seeing this to the \
+           Hack team.\nThe ancestry that broke things was (at line %d):\n%s" l
+           @@ String.concat " <- "
+           @@ List.map (P.kind |.> K.to_string) env.ancestry
       end
 
 let single : K.t -> 'a parser' -> 'a parser = fun k p -> mkP [k, p]
@@ -443,12 +446,14 @@ let tBop : (expr -> expr -> expr_) terminal_spec =
     | TK.LessThanLessThanEqual       -> Binop (Eq (Some Ltlt),    lhs, rhs)
     | TK.GreaterThanGreaterThanEqual -> Binop (Eq (Some Gtgt),    lhs, rhs)
     | TK.ExclamationEqualEqual       -> Binop (Diff2,             lhs, rhs)
-    (* The ugly duckling; In the FFP, `|>` is parsed as a BinaryOperator,
-     * whereas the typed AST has separate constructors for Pipe and Binop. This
-     * is why we don't just project onto a `bop`, but - analagous to tUop - a
-     * `expr -> expr -> expr_`.
+    (* The ugly ducklings; In the FFP, `|>` and '??' are parsed as
+     * `BinaryOperator`s, whereas the typed AST has separate constructors for
+     * NullCoalesce, Pipe and Binop. This is why we don't just project onto a
+     * `bop`, but - analagous to tUop - a `expr -> expr -> expr_`.
      *)
     | TK.BarGreaterThan              -> Pipe (lhs, rhs)
+    | TK.QuestionQuestion            -> NullCoalesce (lhs, rhs)
+    | k -> raise (Failure (TK.to_string k))
 
 let tRefOp : bool terminal_spec =
   "Reference operator", function
@@ -933,7 +938,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
   ; (K.BinaryExpression, fun [ l; op; r ] env ->
       mkTP tBop op env (pExpr l env) (pExpr r env))
   ; (K.ConditionalExpression, fun [ test; _q; then_; _colon; else_ ] env ->
-      Eif (pExpr test env, Some (pExpr then_ env), pExpr else_ env)
+      Eif (pExpr test env, mpOptional pExpr then_ env, pExpr else_ env)
     )
   ; (K.InstanceofExpression, fun [ thing; _op; ty ] env ->
       let ty = match pExpr ty env with
@@ -1308,21 +1313,28 @@ let pClassElt_PropertyDeclaration' : class_elt parser' =
     )
 let pClassElt_XHPClassAttributeDeclaration' : class_elt list parser' =
   fun [ _kw; attrs; _semi ] env ->
-    couldMap ~f:begin mkP
-      [ (K.XHPClassAttribute, fun [ ty; name; init; req ] env ->
+    let pXHPAttr node env = match P.syntax node with
+      | P.XHPClassAttribute
+        { P.xhp_attribute_decl_type        = ty
+        ; P.xhp_attribute_decl_name        = name
+        ; P.xhp_attribute_decl_initializer = init
+        ; P.xhp_attribute_decl_required    = req
+        } ->
           let hint = mpOptional pHint ty env in
           let enum = mpOptional pXHPEnumDecl ty env in
           let (pos, name) = pos_name name env in
           let init = mpOptional pSimpleInitializer init env in
           let req = ifExists true false req env in
           XhpAttr (hint, (Pos.none, (pos, ":" ^ name), init), req, enum)
-        )
-      ; (K.Token, fun [ tok ] -> pToken ~f:begin function
-          | _ -> fun env ->
-            XhpAttrUse (where_am_I env, cHapply (pos_name tok env, []))
-          end tok
-        )
-      ] end attrs env
+      | P.XHPSimpleClassAttribute
+        { P.xhp_simple_class_attribute_type = attr
+        } ->
+          XhpAttrUse (where_am_I env, Happly (pos_name attr env, []))
+      | P.Token _ ->
+        XhpAttrUse (where_am_I env, Happly (pos_name node env, []))
+      | n -> raise @@ Missing_syntax_case n
+    in
+    couldMap ~f:pXHPAttr attrs env
 let pClassElt_MethodishDeclaration' : class_elt list parser' =
   let classvar_init : fun_param -> stmt * (kind list * hint option * class_var list) = fun p ->
     let pos, name = p.param_id in
@@ -1377,6 +1389,7 @@ let pClassElt : class_elt list parser = mkP
   ; (K.PropertyDeclaration,          mpSingleton pClassElt_PropertyDeclaration')
   ; (K.MethodishDeclaration,         pClassElt_MethodishDeclaration')
   ; (K.XHPClassAttributeDeclaration, pClassElt_XHPClassAttributeDeclaration')
+  ; (K.XHPChildrenDeclaration,       ppConst [])
   ; (K.XHPCategoryDeclaration,       mpSingleton pClassElt_XHPCategoryDeclaration')
   ]
 
@@ -1540,8 +1553,12 @@ and pProgram : program parser = fun node env ->
         } :: post_process el
     | (e::el) -> e :: post_process el
   in
+  let pEOF node env = match P.syntax node with
+    | P.EndOfFile { P.end_of_file_token = _ } -> Stmt Noop
+    | n -> raise @@ Missing_syntax_case n
+  in
   Namespaces.elaborate_defs ParserOptions.default @@ post_process @@
-    couldMap ~f:(oneOf [cStmt <$> pStmt; pDef]) node env
+    couldMap ~f:(oneOf [cStmt <$> pStmt; pDef; pEOF]) node env
 
 
 

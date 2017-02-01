@@ -1439,7 +1439,7 @@ const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
-#if !defined(__SSE4_2__) || defined(NO_SSECRC) || !defined(NO_M_DATA) || \
+#if !defined(__SSE4_2__) || defined(NO_HWCRC) || !defined(NO_M_DATA) || \
   defined(_MSC_VER)
 // This function is implemented directly in ASM in mixed-array-x64.S otherwise.
 const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,

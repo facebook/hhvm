@@ -11,8 +11,40 @@ endif()
 
 message(STATUS "Building hack")
 
+if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
+  set(HACK_ONLY_BUILD TRUE)
+endif()
+
+if (HACK_ONLY_BUILD)
+  # Woah - this is special. They're running cmake in the hack directory
+  # itself so we don't have our usual set up.
+  get_filename_component(HPHP_HOME "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+  set(TP_DIR "${HPHP_HOME}/third-party")
+  set(TP_BUILD_DIR ${TP_DIR})
+
+  if(NOT EXISTS "${TP_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR
+      "${TP_DIR}/CMakeLists.txt missing. Try updating your submodule with:\n"
+      "    rm -r ${TP_DIR}\n"
+      "    git submodule update --init --recursive\n"
+      )
+  endif()
+endif()
+
 find_package(LZ4)
 find_package(LibElf)
+
+if (HACK_ONLY_BUILD AND NOT LZ4_FOUND)
+  add_subdirectory("${TP_DIR}/lz4" "${TP_DIR}/lz4")
+endif()
+
+if (HACK_ONLY_BUILD AND NOT OCAML_FOUND)
+  add_subdirectory("${TP_DIR}/ocaml" "${TP_DIR}/ocaml")
+endif()
+
+if (HACK_ONLY_BUILD AND NOT PC_SQLITE3_FOUND)
+  add_subdirectory("${TP_DIR}/libsqlite3" "${TP_DIR}/libsqlite3")
+endif()
 
 # This is totally the wrong way to do this, but I am tired of fighting with
 # build systems and don't really care to make this work the right way. libelf,

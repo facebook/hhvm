@@ -3030,7 +3030,13 @@ void Generator::genScannerFunc(std::ostream& os,
   // First generate calls to the scanner to record all the pointers. We use the
   // version of insert() which takes an initializator list because it is more
   // efficient.
-  if (!layout.ptrs.empty()) {
+  if (layout.ptrs.size() == 1) {
+    indent(2) << "scanner.m_ptrs.emplace_back(\n";
+    const auto& ptr = layout.ptrs.back();
+    indent(4) << "*((const void**)(uintptr_t(ptr)"
+              << offset_str << "+" << ptr.offset << "))\n";
+    indent(2) << ");\n";
+  } else if (!layout.ptrs.empty()) {
     indent(2) << "scanner.m_ptrs.insert(scanner.m_ptrs.end(), {\n";
     for (const auto& ptr : layout.ptrs) {
       indent(4) << "*((const void**)(uintptr_t(ptr)"
@@ -3041,7 +3047,14 @@ void Generator::genScannerFunc(std::ostream& os,
   }
 
   // In a similar manner, insert conservative ranges.
-  if (!layout.conservative.empty()) {
+  if (layout.conservative.size() == 1) {
+    indent(2) << "scanner.m_conservative.emplace_back(\n";
+    const auto& conservative = layout.conservative.back();
+    indent(4) << "(const void*)(uintptr_t(ptr)"
+              << offset_str << "+" << conservative.offset << "), "
+              << conservative.size << "\n";
+    indent(2) << ");\n";
+  } else if (!layout.conservative.empty()) {
     indent(2) << "scanner.m_conservative.insert(scanner.m_conservative.end(), "
               << "{\n";
     for (const auto& conservative : layout.conservative) {

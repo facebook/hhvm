@@ -459,6 +459,7 @@ struct RuntimeOption {
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
   F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
+  F(int, JitLdimmqSpan,                8)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \

@@ -87,6 +87,18 @@ void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
     "movdqu     %%xmm0, 104(%0)\n"
     : : "r"(a) : "xmm0"
   );
+#elif defined __aarch64__
+  static_assert(MixedArray::Empty == -1, "");
+  static_assert(MixedArray::SmallSize == 3, "");
+  static_assert(sizeof(MixedArray) +
+                MixedArray::SmallSize * sizeof(MixedArray::Elm) == 104, "");
+  auto const emptyVal = int64_t{MixedArray::Empty};
+  //Use a2 since writeback == true for stp instruction
+  auto a2 = a;
+  __asm__ __volatile__(
+    "stp        %x1, %x1, [%x0, #104]!\n"
+    : "+r"(a2) : "r"(emptyVal)
+  );
 #else
   auto const hash = mixedHash(mixedData(a), MixedArray::SmallScale);
   auto const emptyVal = int64_t{MixedArray::Empty};
@@ -112,6 +124,20 @@ inline void MixedArray::initHash(int32_t* hash, uint32_t scale) {
     "movdqu     %%xmm0, (%1, %0)\n"
     "ja         .l%=\n"
     : "+r"(offset) : "r"(hash) : "xmm0"
+  );
+#elif defined(__aarch64__)
+  static_assert(Empty == -1, "The following fills with all 1's.");
+  assertx(HashSize(scale) == scale * 4);
+
+  uint64_t offset = scale * 16;
+  uint64_t ones = -1;
+  auto hash2 = hash;
+  __asm__ __volatile__(
+    ".l%=:\n"
+    "stp        %x2, %x2, [%x1], #16\n"
+    "subs       %x0, %x0, #16\n"
+    "bhi        .l%=\n"
+    : "+r"(offset), "+r"(hash2) : "r"(ones)
   );
 #else
   static_assert(Empty == -1, "Cannot use wordfillones().");

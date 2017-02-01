@@ -1002,6 +1002,8 @@ private:
   bool m_enableStatsSync;
 #endif
 
+  int64_t m_req_start_micros;
+
   // freelists to use when quarantine is active
   std::array<FreeList,kNumSmallSizes> m_quarantine;
 

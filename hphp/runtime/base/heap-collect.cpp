@@ -474,6 +474,7 @@ __thread size_t t_req_num; // snapshot thread-local copy of g_req_num;
 __thread size_t t_gc_num; // nth collection in this request.
 __thread bool t_enable_samples;
 __thread size_t t_trigger;
+__thread int64_t t_req_age;
 __thread MemoryUsageStats t_pre_stats;
 
 StructuredLogEntry logCommon() {
@@ -495,10 +496,11 @@ void logCollection(const char* phase, const Marker& mkr) {
   // log stuff
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     Trace::traceRelease(
-      "gc mmUsage %luM trigger %luM init %lums mark %lums "
+      "gc age %ldms mmUsage %luM trigger %luM init %lums mark %lums "
       "allocd %luM allocd-count %lu free %.1fM "
       "cscan-heap %.1fM "
       "xscan-heap %.1fM\n",
+      t_req_age,
       t_pre_stats.mmUsage/1024/1024,
       t_trigger/1024/1024,
       mkr.init_us_/1000,
@@ -515,6 +517,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   std::string scanner(type_scan::hasNonConservative() ? "typescan" : "ts-cons");
   sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
   sample.setInt("gc_num", t_gc_num);
+  sample.setInt("req_age_micros", t_req_age);
   // timers of gc-sub phases
   sample.setInt("init_micros", mkr.init_us_);
   sample.setInt("initfree_micros", mkr.initfree_us_);
@@ -609,6 +612,7 @@ void MemoryManager::updateNextGc() {
 
 void MemoryManager::collect(const char* phase) {
   if (empty()) return;
+  t_req_age = cpu_micros() - m_req_start_micros;
   t_trigger = m_nextGc;
   collectImpl(phase);
   updateNextGc();

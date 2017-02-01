@@ -34,6 +34,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Random.h>
@@ -1082,9 +1083,10 @@ bool MemoryManager::triggerProfiling(const std::string& filename) {
 }
 
 void MemoryManager::requestInit() {
-  auto trigger = s_trigger.exchange(nullptr);
+  MM().m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
 
   // If the trigger has already been claimed, do nothing.
+  auto trigger = s_trigger.exchange(nullptr);
   if (trigger == nullptr) return;
 
   always_assert(MM().empty());

@@ -58,6 +58,7 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
 # some comment
 use_mini_state = true
 use_watchman = true
+watchman_subscribe = true
 """)
 
     def write_hhconfig(self, script_name):

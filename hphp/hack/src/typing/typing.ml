@@ -4073,21 +4073,21 @@ and condition env tparamet =
   | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_keyset ->
       is_array env `HackKeyset p f lv
-  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_int ->
-      is_type env lv Tint
-  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
+      is_type env lv Tint (Reason.Rpredicated (p, f))
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_bool ->
-      is_type env lv Tbool
-  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
+      is_type env lv Tbool (Reason.Rpredicated (p, f))
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_float ->
-      is_type env lv Tfloat
-  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
+      is_type env lv Tfloat (Reason.Rpredicated (p, f))
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_string ->
-      is_type env lv Tstring
-  | _, Call (Cnormal, (_, Id (_, f)), [lv], [])
+      is_type env lv Tstring (Reason.Rpredicated (p, f))
+  | _, Call (Cnormal, (p, Id (_, f)), [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_resource ->
-      is_type env lv Tresource
+      is_type env lv Tresource (Reason.Rpredicated (p, f))
   | _, Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
   | p, InstanceOf (ivar, cid) when tparamet && is_instance_var ivar ->
@@ -4270,16 +4270,16 @@ and check_null_wtf env p ty =
         | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
         | Tunresolved _ | Tobject | Tshape _ ) -> env
 
-and is_type env e tprim =
+and is_type env e tprim r =
   match e with
     | p, Class_get (cname, (_, member_name)) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
-      Env.set_local env local (Reason.Rwitness p, Tprim tprim)
+      Env.set_local env local (r, Tprim tprim)
     | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
       let env, local = Env.FakeMembers.make p env obj member_name in
-      Env.set_local env local (Reason.Rwitness p, Tprim tprim)
-    | _, Lvar (p, x) ->
-      Env.set_local env x (Reason.Rwitness p, Tprim tprim)
+      Env.set_local env local (r, Tprim tprim)
+    | _, Lvar (_px, x) ->
+      Env.set_local env x (r, Tprim tprim)
     | _ -> env
 
 (* Refine type for is_array, is_vec, is_keyset and is_dict tests

@@ -130,8 +130,10 @@ void reportJitMaturity(const CodeCache& code) {
                   static_cast<double>(codeSize) / static_cast<double>(fullSize),
                   RuntimeOption::EvalJitMaturityExponent) *
               100));
-    // Make sure jit maturity is less than 100 before code.main is full.
-    if (after > 99 && code.main().used() < CodeCache::ASize * 127 / 128) {
+    if (after < 1) {
+      after = 1;
+    } else if (after > 99 && code.main().used() < CodeCache::AMaxUsage) {
+      // Make jit maturity is less than 100 before the JIT stops.
       after = 99;
     }
     auto const before = jitMaturityCounter->getValue();

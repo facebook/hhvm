@@ -1102,9 +1102,15 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     if (elm.hasIntKey()) {
-      init.add(elm.intKey(), tvAsCVarRef(&elm.tv), /* keyConverted */ true);
+      init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
-      init.add(elm.strKey(), tvAsCVarRef(&elm.tv), /* keyConverted */ true);
+      auto const key = elm.strKey();
+      int64_t n;
+      if (key->isStrictlyInteger(n)) {
+        init.set(n, VarNR{n});
+      } else {
+        init.set(key, tvAsCVarRef(&elm.tv));
+      }
     }
   }
 

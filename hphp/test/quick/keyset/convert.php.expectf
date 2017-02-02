@@ -653,15 +653,11 @@ keyset(4) {
   string(1) "2"
 }
 ----------------------------------------------------
-array(4) {
+array(2) {
   [1]=>
   int(1)
-  ["1"]=>
-  string(1) "1"
   [2]=>
   int(2)
-  ["2"]=>
-  string(1) "2"
 }
 vec(4) {
   int(1)
@@ -685,15 +681,11 @@ float(1)
 
 Notice: Keyset to string conversion in %s on line %d
 string(6) "Keyset"
-object(stdClass)#%d (4) {
+object(stdClass)#%d (2) {
   [1]=>
   int(1)
-  ["1"]=>
-  string(1) "1"
   [2]=>
   int(2)
-  ["2"]=>
-  string(1) "2"
 }
 object(HH\Vector)#%d (4) {
   [0]=>

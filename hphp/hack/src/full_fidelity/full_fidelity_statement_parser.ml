@@ -18,8 +18,9 @@ module SimpleParser = Full_fidelity_simple_parser.WithLexer(Full_fidelity_lexer)
 open TokenKind
 open Full_fidelity_minimal_syntax
 
-module WithExpressionAndTypeParser
+module WithExpressionAndDeclAndTypeParser
   (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType)
+  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType)
   (TypeParser : Full_fidelity_type_parser_type.TypeParserType) :
   Full_fidelity_statement_parser_type.StatementParserType = struct
 
@@ -28,6 +29,7 @@ module WithExpressionAndTypeParser
 
   let rec parse_statement parser =
     match peek_token_kind parser with
+    | Function -> parse_possible_php_function parser
     | Fallthrough -> parse_possible_erroneous_fallthrough parser
     | For -> parse_for_statement parser
     | Foreach -> parse_foreach_statement parser
@@ -59,6 +61,33 @@ module WithExpressionAndTypeParser
       let parser = with_error parser SyntaxError.error2004 in
       (parser, result)
     | _ -> parse_expression_statement parser
+
+  and parse_php_function parser =
+    let decl_parser = DeclParser.make parser.lexer parser.errors in
+    let (decl_parser, node) =
+      DeclParser.parse_function decl_parser in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let parser = make lexer errors in
+    (parser, node)
+
+  and parse_possible_php_function parser =
+    (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
+    (Hack only supports anonymous nested functions as expressions.)
+
+    If we have a statement beginning with function left-paren, then parse it
+    as a statement expression beginning with an anonymous function; it will
+    then have to end with a semicolon.
+
+    If it starts with something else, parse it as a function.
+
+    TODO: Give an error for nested nominal functions in a later pass.
+
+    *)
+    if peek_token_kind ~lookahead:1 parser = LeftParen then
+      parse_expression_statement parser
+    else
+      parse_php_function parser
 
   (* Helper: parses ( expr ) *)
   and parse_paren_expr parser =

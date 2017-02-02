@@ -1117,6 +1117,9 @@ module WithExpressionAndStatementAndTypeParser
       (parser, make_simple_initializer (make_token token) default_value)
     | _ -> (parser, make_missing())
 
+  and parse_function parser =
+    parse_function_declaration parser (make_missing())
+
   and parse_function_declaration parser attribute_specification =
     let (parser, header) =
       parse_function_declaration_header parser in

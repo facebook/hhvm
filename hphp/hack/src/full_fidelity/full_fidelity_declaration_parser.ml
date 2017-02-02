@@ -1360,27 +1360,39 @@ module WithExpressionAndStatementAndTypeParser
       here? *)
 
   let parse_script_header parser =
-    (* TODO: Detect if there is trivia before or after any token. *)
-    let (parser1, less_than) = next_token parser in
-    let (parser2, question) = next_token parser1 in
-    let (parser3, language) = next_token parser2 in
+    (* The script header is
+      < ? name
+      where the < may have leading trivia, such as a # comment before it,
+      but there must be no trailing trivia of the <.
+
+      The name is optional in PHP, but not in Hack, and the name, if there
+      is one, must appear immediately after the ?, with no intervening trivia.
+
+    *)
+    let original_parser = parser in
+    let (parser, less_than) = next_token parser in
+    (* TODO: Give an error if there is trailing trivia on the < *)
+    let (parser, question) = next_token parser in
+    let (parser, language) = if Token.trailing question = [] then
+    (* TODO: Handle the case where the langauge is not a Name. *)
+      let (parser, language) = next_token parser in
+      (parser, make_token language)
+    else
+      (parser, (make_missing())) in
     let valid = (Token.kind less_than) == LessThan &&
-                (Token.kind question) == Question &&
-                (Token.kind language) == Name in
+                (Token.kind question) == Question in
     if valid then
       let less_than = make_token less_than in
       let question = make_token question in
-      let language = make_token language in
       let script_header = make_script_header less_than question language in
-      (parser3, script_header)
+      (parser, script_header)
     else
-      (* TODO: Report an error *)
       (* ERROR RECOVERY *)
       (* Make no progress; try parsing the file without a header *)
-      let parser = with_error parser SyntaxError.error1001 in
-      let less_than = make_token (Token.make LessThan 0 [] []) in
-      let question = make_token (Token.make Question 0 [] []) in
-      let language = make_token (Token.make Name 0 [] []) in
+      let parser = with_error original_parser SyntaxError.error1001 in
+      let less_than = make_missing() in
+      let question = make_missing() in
+      let language = make_missing() in
       let script_header = make_script_header less_than question language in
       (parser, script_header )
 

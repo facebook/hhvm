@@ -617,7 +617,8 @@ module WithStatementAndDeclAndTypeParser
     | LeftBrace -> parse_subscript parser term
     | Question ->
       let (parser, token) = assert_token parser Question in
-      parse_conditional_expression parser term token
+      let (parser, result) = parse_conditional_expression parser term token in
+      parse_remaining_expression parser result
     | _ -> (parser, term)
 
   and parse_member_selection_expression parser term =
@@ -1357,7 +1358,10 @@ module WithStatementAndDeclAndTypeParser
     else
       with_reset_precedence parser parse_expression in
     let (parser, colon) = expect_colon parser in
-    let (parser, alternative) = with_reset_precedence parser parse_expression in
+    let (parser, term) = parse_term parser in
+    let precedence = Operator.precedence Operator.ConditionalQuestionOperator in
+    let (parser, alternative) = parse_remaining_binary_expression_helper
+      parser term precedence in
     let result = make_conditional_expression
       test question consequence colon alternative in
     (parser, result)

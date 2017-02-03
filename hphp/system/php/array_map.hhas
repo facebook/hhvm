@@ -57,14 +57,14 @@ not_array:
 
           CGetL $func
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0_kt {
+.try_catch kill_iter_0_kt {
             NewLikeArrayL $arr 0
             SetL $res
             PopC
 
             CGetL $arr
             WIterInitK 1 endloop_kt $v $k
-  .try_fault kill_iter_1_kt 1 {
+  .try_catch kill_iter_1_kt 1 {
     loop_x_kt:FPushCufIter 1 0
               FPassL 0 $v
               FCall 1
@@ -72,7 +72,20 @@ not_array:
               SetWithRefRML $k
               WIterNextK 1 loop_x_kt $v $k
    }
+
+            Jmp endloop_kt
+
+  kill_iter_1_kt:
+            Catch
+            IterFree 1
+            Throw
 }
+
+kill_iter_0_kt:
+          Catch
+          CIterFree 0
+          Throw
+
 endloop_kt:
           CIterFree 0
           CGetL $res
@@ -87,7 +100,7 @@ one_array:
           JmpZ ident
           CGetL $func
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try_catch kill_iter_0 {
             NewLikeArrayL $arr 0
             SetL $res
             PopC
@@ -95,7 +108,7 @@ one_array:
             CGetL $arr
             WIterInitK 1 endloop $v $k
 
-  .try_fault kill_iter_1 1 {
+  .try_catch kill_iter_1 1 {
     loop_x:   FPushCufIter 1 0
               FPassL 0 $v
               FCall 1
@@ -103,24 +116,24 @@ one_array:
               SetWithRefRML $k
               WIterNextK 1 loop_x $v $k
   }
+
+            Jmp endloop
+
+  kill_iter_1:
+            Catch
+            IterFree 1
+            Throw
 }
+
+kill_iter_0:
+          Catch
+          CIterFree 0
+          Throw
+
 endloop:  CIterFree 0
           CGetL $res
           RetC
 
 ident:    CGetL $arr
           RetC
-
-kill_iter_0:
-          CIterFree 0
-          Unwind
-kill_iter_1:
-          IterFree 1
-          Unwind
-kill_iter_0_kt:
-           CIterFree 0
-           Unwind
-kill_iter_1_kt:
-           IterFree 1
-           Unwind
 }

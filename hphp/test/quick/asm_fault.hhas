@@ -1,4 +1,4 @@
-# Some tests for fault regions and catch regions.
+# Some tests for catch regions.
 
 .main {
   FPushFuncD 0 "main"
@@ -9,7 +9,7 @@
 }
 
 .function throw_stuff($msg) {
-  .try_fault fault {
+  .try_catch handler {
     String "about to throw: "
     CGetL $msg
     Concat
@@ -25,19 +25,20 @@
     Throw
   }
 
-fault:
-  String "throw_stuff's fault ...\n"
+handler:
+  Catch
+  String "throw_stuff's exception handler ...\n"
   Print
   PopC
-  Unwind
+  Throw
 }
 
 .function foo() {
-  String "testing fault region\n"
+  String "testing catch region\n"
   Print
   PopC
 
-  .try_fault handler {
+  .try_catch handler {
     String "In region\n"
     Print
     PopC
@@ -57,10 +58,11 @@ fault:
   RetC
 
 handler:
-  String "In foo's fault handler\n"
+  Catch
+  String "In foo's exception handler\n"
   Print
   PopC
-  Unwind
+  Throw
 }
 
 .class One extends Exception {}

@@ -180,8 +180,10 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
   }
   if (getAttribute(HasDynPropArr)) {
     // nb: dynamic property arrays are in ExecutionContext::dynPropTable,
-    // which is not marked as a root. Mark the array when scanning the object.
-    scanner.scan(g_context->dynPropTable[this]);
+    // which is not marked as a root. Scan the entry pair, so both the key
+    // and value are scanned.
+    auto iter = g_context->dynPropTable.find(this);
+    scanner.scan(*iter); // *iter is pair<ObjectData*,ArrayNoDtor>
   }
 }
 
@@ -225,8 +227,10 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
 //    jit to tell us where the pointers live.
 //  * rds shared part: should not contain heap pointers!
 inline void scanRds(rds::Header* rds, type_scan::Scanner& scanner) {
+  scanner.where("RdsHeader");
   scanner.scan(*rds::header());
 
+  scanner.where("RdsNormal");
   rds::forEachNormalAlloc(
     [&](const void* p, std::size_t size, type_scan::Index index) {
       scanner.scanByIndex(index, p, size);
@@ -255,8 +259,8 @@ inline void MemoryManager::scanSweepLists(type_scan::Scanner& scanner) const {
       scanner.enqueue(h); // used to be mark.implicit
     }
   }
-  for (auto node: m_natives) {
-    scanner.enqueue(node); // used to be mark.implicit(Native::obj(node))
+  for (auto& node: m_natives) {
+    scanner.scan(node); // used to be mark.implicit(Native::obj(node))
   }
 }
 
@@ -313,8 +317,10 @@ inline void scanRoots(type_scan::Scanner& scanner) {
   scanner.where("SweepLists");
   MM().scanSweepLists(scanner);
   if (auto asio = AsioSession::Get()) {
-    // ThreadLocalProxy<T> instances aren't in ThreadLocalManager
-    scanner.enqueue(asio); // ptr was created with req::make_raw<AsioSession>
+    // ThreadLocalProxy<T> instances aren't in ThreadLocalManager.
+    // asio was created with req::make_raw<AsioSession>, but we dont have
+    // the address of the thread local AsioSession*.
+    scanner.enqueue(asio);
   }
 #ifdef ENABLE_ZEND_COMPAT
   scanner.where("EzcResources");

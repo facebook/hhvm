@@ -621,7 +621,7 @@ struct CufIter {
 
   TYPE_SCAN_CUSTOM_FIELD(m_ctx) {
     if (m_ctx && intptr_t(m_ctx) % 2 == 0) {
-      scanner.enqueue(reinterpret_cast<const ObjectData*>(m_ctx));
+      scanner.enqAddr((const ObjectData**)&m_ctx);
     }
   }
 };

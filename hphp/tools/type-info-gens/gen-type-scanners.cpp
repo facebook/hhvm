@@ -3031,15 +3031,15 @@ void Generator::genScannerFunc(std::ostream& os,
   // version of insert() which takes an initializator list because it is more
   // efficient.
   if (layout.ptrs.size() == 1) {
-    indent(2) << "scanner.m_ptrs.emplace_back(\n";
+    indent(2) << "scanner.m_addrs.emplace_back(\n";
     const auto& ptr = layout.ptrs.back();
-    indent(4) << "*((const void**)(uintptr_t(ptr)"
+    indent(4) << "((const void**)(uintptr_t(ptr)"
               << offset_str << "+" << ptr.offset << "))\n";
     indent(2) << ");\n";
   } else if (!layout.ptrs.empty()) {
-    indent(2) << "scanner.m_ptrs.insert(scanner.m_ptrs.end(), {\n";
+    indent(2) << "scanner.m_addrs.insert(scanner.m_addrs.end(), {\n";
     for (const auto& ptr : layout.ptrs) {
-      indent(4) << "*((const void**)(uintptr_t(ptr)"
+      indent(4) << "((const void**)(uintptr_t(ptr)"
                 << offset_str << "+" << ptr.offset
                 << ((&ptr == &layout.ptrs.back()) ? "))\n" : ")),\n");
     }

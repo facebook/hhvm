@@ -83,7 +83,7 @@ struct Marker {
       tyindex == type_scan::kIndexUnknown;
   }
 
-  Counter allocd_, marked_, ambig_, freed_, unknown_; // bytes
+  Counter allocd_, marked_, pinned_, freed_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
   size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
@@ -181,7 +181,7 @@ Marker::conservativeScan(const void* start, size_t len) {
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
       (void*)(uintptr_t(*s) & (-1ULL >> 16)),
-      GCBits::CMark
+      GCBits::Pin
     );
   }
 }
@@ -224,10 +224,15 @@ void Marker::finish_typescan() {
   type_scanner_.finish(
     [this](const void* p, const char*) {
       xscanned_ += sizeof(p);
-      checkedEnqueue(p, GCBits::Mark);
+      checkedEnqueue(p, GCBits::Pin);
     },
     [this](const void* p, std::size_t size, const char*) {
+      // we could extract the addresses of ambiguous ptrs, if desired.
       conservativeScan(p, size);
+    },
+    [this](const void** addr, const char*) {
+      xscanned_ += sizeof(*addr);
+      checkedEnqueue(*addr, GCBits::Mark);
     }
   );
 }
@@ -278,7 +283,7 @@ NEVER_INLINE void Marker::trace() {
     auto const t0 = cpu_micros();
     SCOPE_EXIT { unknown_us_ = cpu_micros() - t0; };
     for (const auto h : unknown_objects_) {
-      if (mark(h, GCBits::CMark)) {
+      if (mark(h, GCBits::Pin)) {
         enqueue(h);
       }
     }
@@ -355,10 +360,10 @@ NEVER_INLINE void Marker::sweep() {
   std::deque<std::pair<Header*,size_t>> defer;
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
     assert(check_sweep_header(hdr));
-    if (hdr->hdr_.marks != GCBits::Unmarked) {
-      if (hdr->hdr_.marks & GCBits::Mark) marked_ += h_size;
-      else if (hdr->hdr_.marks & GCBits::CMark) ambig_ += h_size;
-      return; // continue foreach loop
+    if (hdr->hdr_.marks & GCBits::Mark) {
+      marked_ += h_size;
+      if (hdr->hdr_.marks == GCBits::Pin) pinned_ += h_size;
+      return; // continue iterate loop
     }
     // when freeing objects below, do not run their destructors! we don't
     // want to execute cascading decrefs or anything. the normal release()
@@ -497,7 +502,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     Trace::traceRelease(
       "gc age %ldms mmUsage %luM trigger %luM init %lums mark %lums "
-      "allocd %luM allocd-count %lu free %.1fM "
+      "allocd %luM marked %.1f%% pinned %.1f%% free %.1fM "
       "cscan-heap %.1fM "
       "xscan-heap %.1fM\n",
       t_req_age,
@@ -506,7 +511,8 @@ void logCollection(const char* phase, const Marker& mkr) {
       mkr.init_us_/1000,
       mkr.mark_us_/1000,
       mkr.allocd_.bytes/1024/1024,
-      mkr.allocd_.count,
+      100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
+      100.0 * mkr.pinned_.bytes / mkr.allocd_.bytes,
       mkr.freed_.bytes/1024.0/1024.0,
       (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0,
       (mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes)/1024.0/1024.0
@@ -530,7 +536,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("allocd_objects", mkr.allocd_.count);
   sample.setInt("allocd_span", mkr.ptrs_.span().second);
   sample.setInt("marked_bytes", mkr.marked_.bytes);
-  sample.setInt("ambig_bytes", mkr.ambig_.bytes);
+  sample.setInt("pinned_bytes", mkr.pinned_.bytes);
   sample.setInt("unknown_bytes", mkr.unknown_.bytes);
   sample.setInt("freed_bytes", mkr.freed_.bytes);
   sample.setInt("trigger_bytes", t_trigger);

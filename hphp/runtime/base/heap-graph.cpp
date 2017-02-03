@@ -119,6 +119,11 @@ HeapGraph makeHeapGraph(bool include_free) {
           addRoot(g, blocks.index(r), HeapGraph::Ambiguous, description);
         }
       });
+    },
+    [&](const void** addr, const char* description) {
+      if (auto r = blocks.region(*addr)) {
+        addRoot(g, blocks.index(r), HeapGraph::Counted, description);
+      }
     }
   );
 
@@ -140,6 +145,11 @@ HeapGraph makeHeapGraph(bool include_free) {
             addPtr(g, from, blocks.index(r), HeapGraph::Ambiguous);
           }
         });
+      },
+      [&](const void** addr, const char*) {
+        if (auto r = blocks.region(*addr)) {
+          addPtr(g, from, blocks.index(r), HeapGraph::Counted);
+        }
       }
     );
   }

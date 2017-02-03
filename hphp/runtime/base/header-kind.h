@@ -68,8 +68,7 @@ enum class Counted {
 enum GCBits {
   Unmarked = 0,
   Mark = 1,
-  CMark = 2,
-  DualMark = 3,  // Mark|CMark
+  Pin = 3,
 };
 
 inline GCBits operator|(GCBits a, GCBits b) {

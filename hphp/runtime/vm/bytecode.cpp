@@ -845,8 +845,7 @@ static std::string toStringIter(const Iter* it, bool itRef) {
 static bool checkIterScope(const Func* f, Offset o, Id iterId, bool& itRef) {
   assert(o >= f->base() && o < f->past());
   for (auto const& eh : f->ehtab()) {
-    if (eh.m_type == EHEnt::Type::Fault &&
-        eh.m_base <= o && o < eh.m_past &&
+    if (eh.m_base <= o && o < eh.m_past &&
         eh.m_iterId == iterId) {
       itRef = eh.m_itRef;
       return true;

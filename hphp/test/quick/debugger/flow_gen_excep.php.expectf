@@ -106,6 +106,16 @@ Break at foo() on line 31 of %s/flow_gen_excep.php
 
 next
 Caught Exception given to continuation 4 in foo()
+Break at foo() on line 28 of %s/flow_gen_excep.php
+  27     var_dump($val);
+  28*    try {
+  29*      $gen1->raise(new Exception('Exception given to continuation '.$val));
+  30*    } catch (Exception $e) {
+  31*      printf("Caught %s in foo()\n", $e->getMessage());
+  32*    }
+  33   }
+
+next
 Break at foo() on line 25 of %s/flow_gen_excep.php
   24   $gen1->rewind();
   25*  while ($gen1->valid()) {

@@ -27,13 +27,10 @@ void EHEntEmitter::serde(SerDe& sd) {
     (m_base)
     (m_past)
     (m_iterId)
-    (m_fault)
+    (m_handler)
     (m_itRef)
     (m_parentIndex)
     ;
-  if (m_type == EHEnt::Type::Catch) {
-    sd(m_catches);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

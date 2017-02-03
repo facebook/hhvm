@@ -162,14 +162,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
   for (auto& eh : fe.ehtab) {
     markBlock(eh.m_base);
     markBlock(eh.m_past);
-    switch (eh.m_type) {
-    case EHEnt::Type::Catch:
-      for (auto& centry : eh.m_catches) markBlock(centry.second);
-      break;
-    case EHEnt::Type::Fault:
-      markBlock(eh.m_fault);
-      break;
-    }
+    markBlock(eh.m_handler);
   }
 
   // Now, each interval in blockStarts delinates a basic block.
@@ -236,23 +229,16 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
     switch (eh.m_type) {
     case EHEnt::Type::Fault:
       {
-        auto const fault = findBlock(eh.m_fault);
+        auto const fault = findBlock(eh.m_handler);
         ret.funcletNodes[fault].push_back(borrow(node));
-        ret.faultFuncletStarts.insert(eh.m_fault);
+        ret.faultFuncletStarts.insert(eh.m_handler);
         node->info = php::FaultRegion { fault->id, eh.m_iterId, eh.m_itRef };
       }
       break;
     case EHEnt::Type::Catch:
       {
-        auto treg = php::TryRegion {};
-        for (auto& centry : eh.m_catches) {
-          auto const catchBlk = findBlock(centry.second);
-          treg.catches.emplace_back(
-            fe.ue().lookupLitstr(centry.first),
-            catchBlk->id
-          );
-        }
-        node->info = treg;
+        auto const catchBlk = findBlock(eh.m_handler);
+        node->info = php::CatchRegion { catchBlk->id, eh.m_iterId, eh.m_itRef };
       }
       break;
     }
@@ -276,35 +262,25 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
 
 /*
  * Instead of breaking blocks on instructions that could throw, we
- * represent the control flow edges for exception paths as a set of
- * factored edges at the end of each block.
+ * represent the control flow edges for exception paths as a factored
+ * edge at the end of each block.
  *
  * When we initially add them here, no attempt is made to determine if
  * the edge is actually possible to traverse.
  */
 void add_factored_exits(php::Block& blk,
                         borrowed_ptr<const php::ExnNode> node) {
-  for (; node; node = node->parent) {
-    match<void>(
-      node->info,
-      [&] (const php::TryRegion& tr) {
-        /*
-         * Note: it seems like we should be able to stop adding edges
-         * when we see a catch handler for Exception; however, fatal
-         * errors don't stop there (and still run Fault handlers).
-         *
-         * For now we add all the edges, although we might be able to be
-         * less pessimistic later.
-         */
-        for (auto& c : tr.catches) {
-          blk.factoredExits.push_back(c.second);
-        }
-      },
-      [&] (const php::FaultRegion& fr) {
-        blk.factoredExits.push_back(fr.faultEntry);
-      }
-    );
-  }
+  if (!node) return;
+
+  match<void>(
+    node->info,
+    [&] (const php::CatchRegion& cr) {
+      blk.factoredExits.push_back(cr.catchEntry);
+    },
+    [&] (const php::FaultRegion& fr) {
+      blk.factoredExits.push_back(fr.faultEntry);
+    }
+  );
 }
 
 /*

@@ -49,8 +49,7 @@ struct EHEntEmitter {
   Offset m_past;
   int m_iterId;
   int m_parentIndex;
-  Offset m_fault;
-  std::vector<std::pair<Id,Offset>> m_catches;
+  Offset m_handler;
 
   template<class SerDe> void serde(SerDe& sd);
 };

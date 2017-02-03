@@ -19,7 +19,7 @@
   FCall 1
   PopR
 
-  .try_catch (Exception handler) {
+  .try_catch handler {
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
     FCall 0
     UnboxR

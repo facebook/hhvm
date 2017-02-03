@@ -120,7 +120,7 @@ std::string escaped_long(Cell cell) {
 //////////////////////////////////////////////////////////////////////
 
 struct EHFault { std::string label; };
-struct EHCatch { std::map<std::string,std::string> blocks; };
+struct EHCatch { std::string label; };
 using EHInfo = boost::variant< EHFault
                              , EHCatch
                              >;
@@ -185,16 +185,9 @@ FuncInfo find_func_info(const Func* func) {
       finfo.ehInfo[&eh] = [&]() -> EHInfo {
         switch (eh.m_type) {
         case EHEnt::Type::Catch:
-          {
-            auto catches = EHCatch {};
-            for (auto& kv : eh.m_catches) {
-              auto const clsName = func->unit()->lookupLitstrId(kv.first);
-              catches.blocks[clsName->data()] = add_target("C", kv.second);
-            }
-            return catches;
-          }
+          return EHCatch { add_target("C", eh.m_handler) };
         case EHEnt::Type::Fault:
-          return EHFault { add_target("F", eh.m_fault) };
+          return EHFault { add_target("F", eh.m_handler) };
         }
         not_reached();
       }();
@@ -409,14 +402,8 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
       always_assert(info != end(finfo.ehInfo));
       match<void>(
         info->second,
-        [&] (const EHCatch& catches) {
-          out.indent();
-          out.fmt(".try_catch");
-          for (auto& kv : catches.blocks) {
-            out.fmt(" ({} {})", kv.first, kv.second);
-          }
-          out.fmt(" {{");
-          out.nl();
+        [&] (const EHCatch& ehCatch) {
+          out.fmtln(".try_catch {} {{", ehCatch.label);
         },
         [&] (const EHFault& fault) {
           out.fmtln(".try_fault {} {{", fault.label);

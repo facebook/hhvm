@@ -495,16 +495,9 @@ struct Label {
   std::vector<Id> dvInits;
 
   /*
-   * List of EHEnt's that should have m_fault bound to the Offset of
-   * this label.
+   * List of EHEnts that have m_handler pointing to this label.
    */
-  std::vector<size_t> ehFaults;
-
-  /*
-   * Map from exception names to the list of EHEnt's that have a catch
-   * block jumping to this label for that name.
-   */
-  std::map<std::string,std::vector<size_t>> ehCatches;
+  std::vector<size_t> ehEnts;
 };
 
 struct AsmState {
@@ -611,20 +604,11 @@ struct AsmState {
     labelMap[name].stackDepth.setBase(*this, 0);
   }
 
-  void addLabelEHFault(const std::string& name, size_t ehIdx) {
-    labelMap[name].ehFaults.push_back(ehIdx);
+  void addLabelEHEnt(const std::string& name, size_t ehIdx) {
+    labelMap[name].ehEnts.push_back(ehIdx);
 
     // Stack depth should be 0 when entering a fault funclet
     labelMap[name].stackDepth.setBase(*this, 0);
-  }
-
-  void addLabelEHCatch(const std::string& what,
-                       const std::string& label,
-                       size_t ehIdx) {
-    labelMap[label].ehCatches[what].push_back(ehIdx);
-
-    // Stack depth should be 0 when entering a catch block
-    labelMap[label].stackDepth.setBase(*this, 0);
   }
 
   void beginFpi(Offset fpushOff) {
@@ -682,15 +666,8 @@ struct AsmState {
       fe->params[dvinit].funcletOff = label.target;
     }
 
-    for (auto const& fault : label.ehFaults) {
-      fe->ehtab[fault].m_fault = label.target;
-    }
-
-    for (auto const& eh_catch : label.ehCatches) {
-      auto const exId = ue->mergeLitstr(makeStaticString(eh_catch.first));
-      for (auto const& idx : eh_catch.second) {
-        fe->ehtab[idx].m_catches.emplace_back(exId, label.target);
-      }
+    for (auto const& ehEnt : label.ehEnts) {
+      fe->ehtab[ehEnt].m_handler = label.target;
     }
   }
 
@@ -1511,54 +1488,35 @@ void parse_fault(AsmState& as, int nestLevel) {
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
 
-  as.addLabelEHFault(label, as.fe->ehtab.size() - 1);
+  as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
 }
 
 /*
- * directive-catch : catch-spec+ '{' function-body
+ * directive-catch : identifier integer? '{' function-body
  *                 ;
- *
- * catch-spec : '(' identifier identifier ')'
- *            ;
  */
 void parse_catch(AsmState& as, int nestLevel) {
   const Offset start = as.ue->bcPos();
 
-  std::vector<std::pair<std::string,std::string> > catches;
-  size_t numCatches = 0;
+  std::string label;
+  if (!as.in.readword(label)) {
+    as.error("expected label name after .try_catch");
+  }
+  int iterId = -1;
   as.in.skipWhitespace();
-  for (; as.in.peek() == '('; ++numCatches) {
-    as.in.getc();
-
-    std::string except, label;
-    if (!as.in.readword(except) || !as.in.readword(label)) {
-      as.error("expected (ExceptionType label) after .try_catch");
-    }
-
-    as.in.expectWs(')');
-
-    catches.emplace_back(except, label);
-    as.in.skipWhitespace();
+  if (as.in.peek() != '{') {
+    iterId = read_opcode_arg<int32_t>(as);
   }
-  if (catches.empty()) {
-    as.error("expected at least one (ExceptionType label) pair "
-             "after .try_catch");
-  }
-
-  as.in.expect('{');
+  as.in.expectWs('{');
   parse_function_body(as, nestLevel + 1);
 
   auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
-  eh.m_iterId = -1;
+  eh.m_iterId = iterId;
 
-  for (const auto& eh_catch : catches) {
-    as.addLabelEHCatch(eh_catch.first,
-                       eh_catch.second,
-                       as.fe->ehtab.size() - 1);
-  }
+  as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
 }
 
 /*

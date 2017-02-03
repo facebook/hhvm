@@ -704,17 +704,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << " iterId " << it->m_iterId;
       out << " itRef " << (it->m_itRef ? "true" : "false");
     }
-    if (catcher) {
-      out << std::endl;
-      for (auto it2 = it->m_catches.begin();
-          it2 != it->m_catches.end();
-          ++it2) {
-        out << "  Handle " << m_unit->lookupLitstrId(it2->first)->data()
-          << " at " << it2->second;
-      }
-    } else {
-      out << " to " << it->m_fault;
-    }
+    out << " handle at " << it->m_handler;
     if (it->m_parentIndex != -1) {
       out << " parentIndex " << it->m_parentIndex;
     }

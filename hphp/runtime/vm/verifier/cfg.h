@@ -38,7 +38,7 @@ namespace Verifier {
 struct Block {
   explicit Block(PC start) :
       start(start), last(0), end(0) , id(-1), rpo_id(-1), next_linear(0),
-      next_rpo(0), succs(0), exns(0) {
+      next_rpo(0), succs(0), exn(0) {
   }
 
   // Never copy Blocks.
@@ -53,7 +53,7 @@ struct Block {
   Block* next_linear; // next block in linear order
   Block* next_rpo;    // next block in reverse postorder
   Block** succs;      // array of succesors (can have nulls)
-  Block** exns;       // array of exception edges (can have nulls)
+  Block* exn;         // exception edge (can be null)
 };
 
 /**
@@ -65,8 +65,7 @@ struct Block {
  * you can, use a predefined Range, like LinearBlocks or RpoBlocks.
  */
 struct Graph {
-  Graph() : first_linear(0), first_rpo(0), entries(0), block_count(0),
-      exn_cap(0) {
+  Graph() : first_linear(0), first_rpo(0), entries(0), block_count(0) {
   }
 
   explicit Graph(const Graph&) = delete;
@@ -77,7 +76,6 @@ struct Graph {
   Block** entries; // entry points indexed by arg count [0:param_count]
   int param_count;
   int block_count;
-  int exn_cap; // capacity of exns array in each Block
 };
 
 inline bool isTF(PC pc) {
@@ -160,7 +158,6 @@ private:
     return m_unit->offsetOf(addr);
   }
   Block** succs(Block* b);
-  Block** exns(Block* b);
  private:
   BlockMap m_blocks;
   Arena& m_arena;
@@ -253,11 +250,6 @@ inline BlockPtrRange succBlocks(const Block* b) {
   return BlockPtrRange(b->succs, numSuccBlocks(b));
 }
 
-inline BlockPtrRange exnBlocks(const Graph* g, const Block* b) {
-  return b->exns ? BlockPtrRange(b->exns, g->exn_cap) :
-         BlockPtrRange(0, 0);
-}
-
 inline BlockPtrRange entryBlocks(const Graph* g) {
   return BlockPtrRange(g->entries, g->param_count + 1);
 }
@@ -265,8 +257,6 @@ inline BlockPtrRange entryBlocks(const Graph* g) {
 inline LinearBlocks linearBlocks(const Graph* g) {
   return LinearBlocks(g->first_linear, 0);
 }
-
-typedef std::pair<Id, Offset> CatchEnt;
 
 // A callsite starts with FPush*, has 0 or more FPass*, and ends with FCall*.
 // The FPI Region protects the range of instructions that execute with the

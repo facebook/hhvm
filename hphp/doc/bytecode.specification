@@ -395,8 +395,8 @@ The metadata for each function provides an "exception handler (EH) table".
 Each row in the EH table (called an "EH entry") consists of a kind ("fault" or
 "catch"), a non-negative integer "region depth", a set of non-overlapping
 ranges of bytecode that compose the "protected region", and an offset of a
-fault funclet (if it's a "fault" EH entry) or a list of [class name, catch
-entry point] pairs (if it's a "catch" EH entry).
+fault funclet (if it's a "fault" EH entry) or a catch entry point (if it's a
+"catch" EH entry).
 
 Each range of bytecode is given by a starting offset and an ending offset,
 where the starting offset is the bytecode offset of the first byte of the first
@@ -404,8 +404,8 @@ instruction in the range and the ending offset is the bytecode offset after the
 last byte of the last instruction in the range.
 
 Note that two or more EH entries may refer to the same fault funclet or the
-same catch entry points. Regardless of whether multiple EH entries share the
-same fault funclet or the same catch entry points, each EH entry in the EH
+same catch entry point. Regardless of whether multiple EH entries share the
+same fault funclet or the same catch entry point, each EH entry in the EH
 table will be considered to declare a distinct "protected region".
 
 The EH entries in each EH table must honor the following rules:
@@ -476,14 +476,13 @@ Step 3) If E is a fault EH entry, transfer control to E's fault funclet's entry
         either via the Unwind instruction or via another exception being thrown
         with the Throw instruction. Otherwise continue on to step 4.
 
-Step 4) E is a catch EH entry. Consult E's list of [class name, catch entry
-        point] pairs. Check if there are any pairs in the list where the
-        exception's type is compatible with the pair's class name. If one or
-        more matching pairs are found, choose the one that occurs first in E's
-        list and transfer control to that pair's catch entry point; the catch
-        entry point begins with a Catch instruction which will take care of
-        popping the current exception info off of the exception stack. If no
-        matching pair is found, go to step 1.
+Step 4) E is a catch EH entry, transfer control to E's catch entry point; the
+        catch entry point begins with a Catch instruction which will take care
+        of popping the current exception info off of the exception stack. If
+        this catch entry point corresponds to a PHP try/catch statement, it is
+        responsible for finding the matching PHP catch clause (e.g. by using
+        the InstanceOfD opcode) and rethrowing the exception if no matching
+        clause was found.
 
 Step 5) Check if the current exception info's PC is in a fault funclet. If it's
         not, continue to step 6. If it is, read the exception X from the
@@ -3926,7 +3925,7 @@ StaticLocInit <local variable id> <litstr id>    [C]  ->  []
 Catch    []  ->  [C:Obj]
 
   Catch. Retrieves the current exception object and pushes it onto the stack.
-  The exception object must be a subclass of the builtin Exception class. This
+  The exception object must implement the builtin Throwable interface. This
   instruction may only be used at the beginning of a catch entry point.
 
 OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]

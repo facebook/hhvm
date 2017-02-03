@@ -74,8 +74,7 @@ struct EHEnt {
   Offset m_past;
   int m_iterId;
   int m_parentIndex;
-  Offset m_fault;
-  FixedVector<std::pair<Id,Offset>> m_catches;
+  Offset m_handler;
 };
 
 /*

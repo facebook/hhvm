@@ -124,12 +124,12 @@ struct Block {
  * information is used to construct exception handling regions at emit
  * time.
  *
- * There are two types of regions; TryRegions and FaultRegions.  These
- * correspond to the two types of regions described in
+ * There are two types of regions; CatchRegions and FaultRegions.
+ * These correspond to the two types of regions described in
  * bytecode.specification.  Note though that although it's not
- * specified there, in addition to a fault entry offset, fault regions
+ * specified there, in addition to an entry offset, these regions
  * optionally list some information about iterators if the reason the
- * fault region is there is to free iterator variables.
+ * region is there is to free iterator variables.
  *
  * Exceptional control flow is also represented more explicitly with
  * factored exit edges (see php::Block).  This tree structure just
@@ -148,8 +148,9 @@ struct FaultRegion { BlockId faultEntry;
                      Id iterId;
                      bool itRef; };
 
-using CatchEnt     = std::pair<LSString,BlockId>;
-struct TryRegion   { CompactVector<CatchEnt> catches; };
+struct CatchRegion { BlockId catchEntry;
+                     Id iterId;
+                     bool itRef; };
 
 struct ExnNode {
   uint32_t id;
@@ -157,7 +158,7 @@ struct ExnNode {
   borrowed_ptr<ExnNode> parent;
   CompactVector<std::unique_ptr<ExnNode>> children;
 
-  boost::variant<FaultRegion,TryRegion> info;
+  boost::variant<FaultRegion,CatchRegion> info;
 };
 
 //////////////////////////////////////////////////////////////////////

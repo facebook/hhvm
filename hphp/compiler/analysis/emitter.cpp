@@ -757,18 +757,26 @@ private:
   };
 
   struct CatchRegion {
-    CatchRegion(Offset start, Offset end) : m_start(start),
-      m_end(end) {}
+    CatchRegion(Offset start,
+                Offset end,
+                Label* handler,
+                Id iterId,
+                IterKind kind)
+      : m_start(start)
+      , m_end(end)
+      , m_handler(handler)
+      , m_iterId(iterId)
+      , m_iterKind(kind) {}
+
     ~CatchRegion() {
-      for (std::vector<std::pair<StringData*, Label*> >::const_iterator it =
-             m_catchLabels.begin(); it != m_catchLabels.end(); it++) {
-        delete it->second;
-      }
+      delete m_handler;
     }
+
     Offset m_start;
     Offset m_end;
-    std::set<StringData*, string_data_lt> m_names;
-    std::vector<std::pair<StringData*, Label*> > m_catchLabels;
+    Label* m_handler;
+    Id m_iterId;
+    IterKind m_iterKind;
   };
 
   struct FaultRegion {
@@ -1105,6 +1113,10 @@ public:
     IterKind kind;
   };
 
+  void newCatchRegion(Offset start,
+                      Offset end,
+                      Label* entry,
+                      FaultIterInfo = FaultIterInfo { -1, KindOfIter });
   void newFaultRegion(Offset start,
                       Offset end,
                       Label* entry,
@@ -3925,14 +3937,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
   }
 
   case Construct::KindOfCatchStatement: {
-    // Store the current exception object in the appropriate local variable
     auto cs = static_pointer_cast<CatchStatement>(node);
-    StringData* vName = makeStaticString(cs->getVariable()->getName());
-    Id i = m_curFunc->lookupVarId(vName);
-    emitVirtualLocal(i);
-    e.Catch();
-    emitSet(e);
+    auto vName = makeStaticString(cs->getVariable()->getName());
+    auto vId = m_curFunc->lookupVarId(vName);
+
+    // Store the exception object on the stack in the appropriate local.
+    emitSetL(e, vId);
     emitPop(e);
+
+    // Emit the catch body.
     visit(cs->getStmt());
     return false;
   }
@@ -4344,33 +4357,31 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       }
 
       if (catch_count > 0) {
-        CatchRegion* r = new CatchRegion(start, end);
-        m_catchRegions.push_back(r);
+        newCatchRegion(start, end, new Label(e));
+        e.Catch();
 
-        bool firstHandler = true;
+        std::set<StringData*, string_data_lt> seen;
+
         for (int i = 0; i < catch_count; i++) {
           auto c = static_pointer_cast<CatchStatement>((*catches)[i]);
           StringData* eName = makeStaticString(c->getOriginalClassName());
 
-          // If there's already a catch of this class, skip;
-          // the first one wins
-          if (r->m_names.find(eName) == r->m_names.end()) {
-            // Don't let execution of the try body, or the
-            // previous catch body,
-            // fall into here.
-            if (!firstHandler) {
-              e.Jmp(after);
-            } else {
-              firstHandler = false;
-            }
-
-            Label* label = new Label(e);
-            r->m_names.insert(eName);
-            r->m_catchLabels.push_back(std::pair<StringData*, Label*>(eName,
-                                                                  label));
-            visit(c);
+          if (!seen.insert(eName).second) {
+            // Already seen a catch of this class, skip.
+            continue;
           }
+
+          Label nextCatch;
+          e.Dup();
+          e.InstanceOfD(eName);
+          e.JmpZ(nextCatch);
+          visit(c);
+          e.Jmp(after);
+          nextCatch.set(e);
         }
+
+        // Rethrow exception if not caught.
+        e.Throw();
       }
     }
 
@@ -10330,6 +10341,14 @@ void EmitterVisitor::emitFunclets(Emitter& e) {
   }
 }
 
+void EmitterVisitor::newCatchRegion(Offset start,
+                                    Offset end,
+                                    Label* entry,
+                                    FaultIterInfo iter) {
+  auto r = new CatchRegion(start, end, entry, iter.iterId, iter.kind);
+  m_catchRegions.push_back(r);
+}
+
 void EmitterVisitor::newFaultRegion(Offset start,
                                     Offset end,
                                     Label* entry,
@@ -10361,20 +10380,18 @@ void EmitterVisitor::newFPIRegion(Offset start, Offset end, Offset fpOff) {
 }
 
 void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
-  for (auto& eh : m_catchRegions) {
+  for (auto& cr : m_catchRegions) {
     auto& e = fe->addEHEnt();
     e.m_type = EHEnt::Type::Catch;
-    e.m_base = eh->m_start;
-    e.m_past = eh->m_end;
+    e.m_base = cr->m_start;
+    e.m_past = cr->m_end;
     assert(e.m_base != kInvalidOffset);
     assert(e.m_past != kInvalidOffset);
-    e.m_iterId = -1;
-    for (auto& c : eh->m_catchLabels) {
-      Id id = m_ue.mergeLitstr(c.first);
-      Offset off = c.second->getAbsoluteOffset();
-      e.m_catches.push_back(std::pair<Id, Offset>(id, off));
-    }
-    delete eh;
+    e.m_iterId = cr->m_iterId;
+    e.m_itRef = cr->m_iterKind == KindOfMIter;
+    e.m_handler = cr->m_handler->getAbsoluteOffset();
+    assert(e.m_handler != kInvalidOffset);
+    delete cr;
   }
   m_catchRegions.clear();
   for (auto& fr : m_faultRegions) {
@@ -10386,8 +10403,8 @@ void EmitterVisitor::copyOverCatchAndFaultRegions(FuncEmitter* fe) {
     assert(e.m_past != kInvalidOffset);
     e.m_iterId = fr->m_iterId;
     e.m_itRef = fr->m_iterKind == KindOfMIter;
-    e.m_fault = fr->m_func->getAbsoluteOffset();
-    assert(e.m_fault != kInvalidOffset);
+    e.m_handler = fr->m_func->getAbsoluteOffset();
+    assert(e.m_handler != kInvalidOffset);
     delete fr;
   }
   m_faultRegions.clear();

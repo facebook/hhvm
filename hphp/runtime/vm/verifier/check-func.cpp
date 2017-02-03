@@ -240,9 +240,9 @@ bool FuncChecker::checkOffsets() {
   SectionMap sections;
   for (auto& eh : m_func->ehtab()) {
     if (eh.m_type == EHEnt::Type::Fault) {
-      ok &= checkOffset("fault funclet", eh.m_fault, "func bytecode", base,
+      ok &= checkOffset("fault funclet", eh.m_handler, "func bytecode", base,
                         past, false);
-      sections[eh.m_fault] = 0;
+      sections[eh.m_handler] = 0;
     }
   }
   Offset funclets = !sections.empty() ? sections.begin()->first : past;
@@ -283,7 +283,7 @@ bool FuncChecker::checkOffsets() {
   // check EH regions and targets
   for (auto& eh : m_func->ehtab()) {
     if (eh.m_type == EHEnt::Type::Fault) {
-      ok &= checkOffset("fault", eh.m_fault, "funclets", funclets, past);
+      ok &= checkOffset("fault", eh.m_handler, "funclets", funclets, past);
     }
   }
   return ok;
@@ -1060,14 +1060,12 @@ bool FuncChecker::checkFlow() {
 bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   bool ok = true;
   // Reachable catch blocks and fault funclets have an empty stack.
-  if (m_graph->exn_cap > 0) {
+  if (b->exn) {
     int save_stklen = cur->stklen;
     int save_fpilen = cur->fpilen;
     cur->stklen = 0;
     cur->fpilen = 0;
-    for (BlockPtrRange i = exnBlocks(m_graph, b); !i.empty(); ) {
-      ok &= checkEdge(b, *cur, i.popFront());
-    }
+    ok &= checkEdge(b, *cur, b->exn);
     cur->stklen = save_stklen;
     cur->fpilen = save_fpilen;
   }

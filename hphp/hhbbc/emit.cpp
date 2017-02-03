@@ -565,21 +565,15 @@ void emit_eh_region(FuncEmitter& fe,
 
   match<void>(
     region->node->info,
-    [&] (const php::TryRegion& tr) {
+    [&] (const php::CatchRegion& cr) {
       eh.m_type = EHEnt::Type::Catch;
-      for (auto& c : tr.catches) {
-        eh.m_catches.emplace_back(
-          fe.ue().mergeLitstr(c.first),
-          blockInfo[c.second].offset
-        );
-      }
-      eh.m_fault = kInvalidOffset;
-      eh.m_iterId = -1;
-      eh.m_itRef = false;
+      eh.m_handler = blockInfo[cr.catchEntry].offset;
+      eh.m_iterId = cr.iterId;
+      eh.m_itRef = cr.itRef;
     },
     [&] (const php::FaultRegion& fr) {
       eh.m_type = EHEnt::Type::Fault;
-      eh.m_fault = blockInfo[fr.faultEntry].offset;
+      eh.m_handler = blockInfo[fr.faultEntry].offset;
       eh.m_iterId = fr.iterId;
       eh.m_itRef = fr.itRef;
     }

@@ -187,17 +187,8 @@ std::string show(const Func& func) {
       [&] (const FaultRegion& fr) {
         return folly::to<std::string>("fault->", fr.faultEntry);
       },
-      [&] (const TryRegion& tr) {
-        auto ret = std::string{"catch"};
-        using namespace folly::gen;
-        from(tr.catches)
-          | map([&] (CatchEnt ch) {
-              return folly::to<std::string>(ch.first->data(),
-                                            "->", ch.second);
-            })
-          | unsplit(" ", &ret)
-          ;
-        return ret;
+      [&] (const CatchRegion& cr) {
+        return folly::to<std::string>("catch->", cr.catchEntry);
       }
     ) + '\n';
   });

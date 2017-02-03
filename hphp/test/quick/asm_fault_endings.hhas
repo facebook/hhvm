@@ -1,7 +1,7 @@
 # Test case for two fault regions with the same ending offset.
 
 .main {
-  .try_catch (Exception ex) {
+  .try_catch ex {
     FPushFuncD 0 "main"
     FCall 0
     UnboxR

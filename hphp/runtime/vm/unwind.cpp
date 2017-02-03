@@ -137,27 +137,16 @@ UnwindAction checkHandlers(const EHEnt* eh,
       switch (eh->m_type) {
       case EHEnt::Type::Fault:
         ITRACE(1, "checkHandlers: entering fault at {}: save {}\n",
-               eh->m_fault,
+               eh->m_handler,
                func->unit()->offsetOf(pc));
-        pc = func->unit()->entry() + eh->m_fault;
+        pc = func->unit()->at(eh->m_handler);
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
         return UnwindAction::ResumeVM;
       case EHEnt::Type::Catch:
-        auto const obj = fault.m_userException;
-        for (auto& idOff : eh->m_catches) {
-          ITRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
-          auto handler = func->unit()->at(idOff.second);
-          auto const cls = Unit::lookupClass(
-            func->unit()->lookupNamedEntityId(idOff.first)
-          );
-          if (!cls || !obj->instanceof(cls)) continue;
-
-          ITRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
-          pc = handler;
-          DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-          return UnwindAction::ResumeVM;
-        }
-        break;
+        ITRACE(1, "checkHandlers: entering catch at {}\n", eh->m_handler);
+        pc = func->unit()->at(eh->m_handler);
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
+        return UnwindAction::ResumeVM;
       }
     }
     if (eh->m_parentIndex != -1) {

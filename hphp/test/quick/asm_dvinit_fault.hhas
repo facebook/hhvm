@@ -32,7 +32,7 @@
     SetL $x
     PopC
   dv_init2:
-   .try_catch (Exception ex) {
+   .try_catch ex {
      .try_fault fault {
         Int 1
         SetL $y

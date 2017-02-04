@@ -401,6 +401,8 @@ void ProxygenServer::stopListening(bool hard) {
 }
 
 void ProxygenServer::returnPartialPosts() {
+  VLOG(2) << "Running returnPartialPosts for "
+          << m_pendingTransports.size() << " pending transports";
   for (auto& transport : m_pendingTransports) {
     if (!transport.getClientComplete()) {
       transport.beginPartialPostEcho();

@@ -40,6 +40,7 @@ std::vector<std::string> dummy_vec { "hello" };
 std::set<std::string> dummy_set { std::string("hel") + "lo" };
 
 int main(int argc, char** argv) {
+
   if (!argc) {
     return 0;
   }

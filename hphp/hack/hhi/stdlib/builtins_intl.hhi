@@ -394,6 +394,7 @@ class Collator {
   public function getErrorCode() {}
   public function getErrorMessage() {}
   public function getLocale($type = 0) {}
+  public function getSortKey($str) {}
   public function getStrength() {}
   public function setAttribute($attr, $val) {}
   public function setStrength($strength) {}

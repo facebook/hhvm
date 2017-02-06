@@ -128,6 +128,23 @@ let test_find_references () =
     }
   )
 
+let test_highlight_references () =
+  let msg = build_request_message "highlightReferences"
+    {|
+      "filename" : "baz.php",
+      "position" : {
+        "line" : 2,
+        "column" : 43
+      }
+    |} in
+  test msg @@
+  expect_api_message (
+    Highlight_references {
+      filename = "baz.php";
+      position = {line = 2; column = 43};
+    }
+  )
+
 let tests = [
   "test_init", test_init;
   "test_did_open_file", test_did_open_file;
@@ -136,6 +153,7 @@ let tests = [
   "test_identify_symbol", test_identify_symbol;
   "test_outline", test_outline;
   "test_find_references", test_find_references;
+  "test_highlight_references", test_highlight_references;
 ]
 
 let () =

@@ -64,6 +64,10 @@ let parse_find_references method_name params =
   parse_file_position method_name params >>= fun file_position ->
   Result.Ok (Find_references file_position)
 
+let parse_highlight_references method_name params =
+  parse_file_position method_name params >>= fun file_position ->
+  Result.Ok (Highlight_references file_position)
+
 let parse_method method_name params = match method_name with
   | "init" -> parse_init method_name params
   | "didOpenFile" -> parse_did_open_file method_name params
@@ -72,6 +76,7 @@ let parse_method method_name params = match method_name with
   | "identifySymbol" -> parse_identify_symbol method_name params
   | "outline" -> parse_outline method_name params
   | "findReferences" -> parse_find_references method_name params
+  | "highlightReferences" -> parse_highlight_references method_name params
   | _ -> delegate_to_previous_version method_name params
 
 let parse ~method_name ~params =

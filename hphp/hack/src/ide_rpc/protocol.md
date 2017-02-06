@@ -458,3 +458,16 @@ where `SymbolReferences` is defined as:
        */
       references : FileRange[]
     }
+
+### Highlight references request
+
+File-wide search for other references of symbol at given position. Very similar to find all references, except optimized for single-file case, and not batch processing of whole project.
+
+*Client request:*
+
+    method : "highlightReferences"
+    params : FilePosition
+
+*Server response:*
+
+    Range[]

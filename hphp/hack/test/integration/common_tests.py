@@ -556,8 +556,8 @@ class CommonTests(object):
                 'line 1, characters 36-38',
                 '2 total results',
             ], [
-                '[{{"filename":"","line":1,"char_start":20,"char_end":22}},'
-                '{{"filename":"","line":1,"char_start":36,"char_end":38}}]'
+                '[{{"line":1,"char_start":20,"char_end":22}},'
+                '{{"line":1,"char_start":36,"char_end":38}}]'
             ],
             options=['--ide-highlight-refs', '1:20'],
             stdin='<?hh function test(Foo $foo) { new Foo(); }')

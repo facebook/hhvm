@@ -259,6 +259,32 @@ let test_find_references_response () =
     }
   }|}
 
+let test_highlight_references_response () =
+  let open Ide_api_types in
+  let response = Highlight_references_response [
+    {
+      st = { line = 12; column = 45 };
+      ed = { line = 12; column = 78 };
+    }
+  ] in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "start": {
+          "line": 12,
+          "column": 45
+        },
+        "end": {
+          "line": 12,
+          "column": 78
+        }
+      }
+    ]
+  }|}
+
 let tests = [
   "test_method_not_found", test_method_not_found;
   "test_init_response", test_init_response;
@@ -267,6 +293,7 @@ let tests = [
   "test_autocomplete_response", test_autocomplete_response;
   "test_infer_type_response", test_infer_type_response;
   "test_find_references_response", test_find_references_response;
+  "test_highlight_references_response", test_highlight_references_response;
 ]
 
 let () =

@@ -58,3 +58,7 @@ let pos_to_file_range x =
     range_filename = Pos.filename x;
     file_range = pos_to_range x;
   }
+
+let range_to_string_single_line x =
+  Printf.sprintf ("line %d, characters %d-%d")
+    x.st.line x.st.column (x.ed.column - 1)

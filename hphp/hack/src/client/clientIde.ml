@@ -178,6 +178,9 @@ let handle_init conn id protocol { client_name=_; client_api_version=_; } =
     print_response id protocol
   end
 
+let file_position_to_tuple {filename; position={line; column}} =
+  filename, line, column
+
 let handle_request conn id protocol = function
   | Init init_params ->
     handle_init conn id protocol init_params
@@ -185,15 +188,15 @@ let handle_request conn id protocol = function
     rpc conn (Rpc.IDE_AUTOCOMPLETE (filename, position)) |>
     AutocompleteService.autocomplete_result_to_ide_response |>
     print_response id protocol
-  | Infer_type { filename; position; } ->
+  | Infer_type args ->
+    let filename, line, column = file_position_to_tuple args in
     let filename = ServerUtils.FileName filename in
-    let { Ide_api_types.line; column; } = position in
     rpc conn (Rpc.INFER_TYPE (filename, line, column)) |>
     InferAtPosService.infer_result_to_ide_response |>
     print_response id protocol
-  | Identify_symbol { filename; position; } ->
+  | Identify_symbol args ->
+    let filename, line, column = file_position_to_tuple args in
     let filename = ServerUtils.FileName filename in
-    let { Ide_api_types.line; column; } = position in
     rpc conn (Rpc.IDENTIFY_FUNCTION (filename, line, column)) |>
     IdentifySymbolService.result_to_ide_message |>
     print_response id protocol
@@ -201,11 +204,15 @@ let handle_request conn id protocol = function
     let result = rpc conn (Rpc.OUTLINE filename) in
     Ide_message.Outline_response result |>
     print_response id protocol
-  | Find_references { filename; position; } ->
-    let { Ide_api_types.line; column; } = position in
+  | Find_references args ->
+    let filename, line, column = file_position_to_tuple args in
     rpc conn (Rpc.IDE_FIND_REFS (filename, line, column)) |>
     FindRefsService.result_to_ide_message |>
     print_response id protocol
+  | Highlight_references args ->
+    let filename, line, column = file_position_to_tuple args in
+    let r = rpc conn (Rpc.IDE_HIGHLIGHT_REFS (filename, line, column)) in
+    print_response id protocol (Highlight_references_response r)
   | Did_open_file { did_open_file_filename; did_open_file_text; } ->
     rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))
   | Did_close_file { did_close_file_filename; } ->

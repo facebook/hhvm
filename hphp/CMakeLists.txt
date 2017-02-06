@@ -15,6 +15,8 @@
 #   +----------------------------------------------------------------------+
 #
 
+add_definitions("-DHHVM")
+
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   # I'm sorry, but facebook's internal repo has the top level dir stored inside
   # of hphp/, so we need to pull that one in first if it exists
@@ -47,7 +49,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
 endif()
 
 include(HPHPSetup)
-include(FollySetup)
+include(HPHPFindLibs)
 include(HHVMGenerateConfig)
 HHVM_GENERATE_CONFIG("${CMAKE_CURRENT_BINARY_DIR}/util/hphp-config.h")
 
@@ -105,6 +107,8 @@ add_definitions("-DHHVM")
 add_definitions("-DUSE_CMAKE")
 
 enable_language(ASM)
+
+link_libraries(folly pcre)
 
 add_subdirectory(tools/hfsort)
 add_subdirectory(tools/version)

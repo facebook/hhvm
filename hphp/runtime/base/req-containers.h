@@ -344,9 +344,6 @@ template <typename T,
           typename Compare = std::less<T>>
 using priority_queue = std::priority_queue<T, Container, Compare>;
 
-#ifdef HAVE_BOOST1_49
-// These classes are oddly broken in older boost versions.
-
 template<typename K, typename V, typename Pred = std::less<K>>
 struct flat_map final : boost::container::flat_map<
   K, V, Pred, ConservativeAllocator<std::pair<K,V>>
@@ -374,14 +371,6 @@ struct flat_multimap final : boost::container::flat_multimap<
     for (const auto& pair : *this) scanner.scan(pair);
   }
 };
-
-#else
-template <typename Key, typename T, typename Compare = std::less<Key>>
-using flat_map = req::map<Key, T, Compare>;
-
-template <typename Key, typename T, typename Compare = std::less<Key>>
-using flat_multimap = req::multimap<Key,T,Compare>;
-#endif
 
 template<typename K, typename Compare = std::less<K>>
 struct flat_set final : boost::container::flat_set<K, Compare,

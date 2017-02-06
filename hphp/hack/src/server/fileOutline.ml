@@ -24,14 +24,21 @@ let modifiers_of_ast_kinds l =
     | Ast.Protected -> Protected
   end
 
+let get_full_name class_name name =
+  match class_name with
+  | None -> name
+  | Some class_name -> class_name ^ "::" ^ name
+
 let summarize_property class_name kinds var =
   let modifiers = modifiers_of_ast_kinds kinds in
   let span, (pos, name), _expr_opt = var in
   let kind = Property in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span;
@@ -49,9 +56,11 @@ let summarize_const class_name ((pos, name), (expr_pos, _)) =
   let span = (Pos.btw pos expr_pos) in
   let kind = Const in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span;
@@ -64,9 +73,11 @@ let summarize_const class_name ((pos, name), (expr_pos, _)) =
 let summarize_abs_const class_name (pos, name) =
   let kind = Const in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = pos;
     span = pos;
@@ -84,9 +95,11 @@ let summarize_typeconst class_name t =
   let pos, name = t.Ast.tconst_name in
   let kind = Typeconst in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span = t.Ast.tconst_span;
@@ -104,9 +117,11 @@ let summarize_param param =
     modifiers_of_ast_kinds (Option.to_list param.Ast.param_modifier) in
   let kind = Param in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span = Pos.btw param_start param_end;
@@ -123,9 +138,11 @@ let summarize_method class_name m =
   let name = snd m.Ast.m_name in
   let kind = Method in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = (fst m.Ast.m_name);
     span = m.Ast.m_span;
@@ -187,9 +204,11 @@ let summarize_class class_ ~no_children =
   in
   let name = class_name in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = class_name_pos;
     span = c_span;
@@ -205,9 +224,11 @@ let summarize_fun f =
   let kind = Function in
   let name = Utils.strip_ns (snd f.Ast.f_name) in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = fst f.Ast.f_name;
     span = f.Ast.f_span;
@@ -224,9 +245,11 @@ let summarize_gconst cst =
   let kind = Const in
   let name = Utils.strip_ns (snd cst.Ast.cst_name) in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span = Pos.btw gconst_start gconst_end;
@@ -239,9 +262,11 @@ let summarize_gconst cst =
 let summarize_local name span =
   let kind = LocalVar in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = span;
     span;
@@ -310,7 +335,8 @@ let outline popt content =
 
 let rec print_def ~short_pos indent def =
   let
-    {name; kind; id; pos; span; modifiers; children; params; docblock} = def
+    {name; kind; id; pos; span; modifiers; children; params; docblock;
+      full_name=_} = def
   in
   let print_pos, print_span = if short_pos
     then Pos.string_no_file, Pos.multiline_string_no_file

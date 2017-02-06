@@ -63,6 +63,7 @@ let test_identify_symbol_response () =
     Some {
       kind = Trait;
       name = "bbb";
+      full_name = "ccc";
       SymbolDefinition.id = None;
       pos = Pos.(to_absolute none);
       span = Pos.(to_absolute none);
@@ -125,6 +126,7 @@ let test_outline_response () =
     {
       kind = Function;
       name = "bbb";
+      full_name = "ccc";
       SymbolDefinition.id = None;
       pos = Pos.(to_absolute none);
       span = Pos.(to_absolute none);

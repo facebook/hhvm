@@ -26,6 +26,12 @@ let range_to_json {st; ed} =
     ("end", pos_to_json ed);
   ]
 
+let file_range_to_json {range_filename; file_range} =
+  JSON_Object [
+    ("filename", JSON_String range_filename);
+    ("range", range_to_json file_range);
+  ]
+
 let init_response_to_json { server_api_version } = JSON_Object [
   ("server_api_version", int_ server_api_version);
 ]
@@ -103,6 +109,15 @@ let identify_symbol_response_to_json results =
     ]
   end)
 
+let find_references_response_to_json = function
+  | None -> JSON_Null
+  | Some {symbol_name; references} ->
+    let references = List.map references ~f:file_range_to_json in
+    JSON_Object [
+      ("name", JSON_String symbol_name);
+      ("references", JSON_Array references);
+    ]
+
 let to_json ~id:_ ~response =
   match response with
   | Init_response x -> init_response_to_json x
@@ -110,5 +125,6 @@ let to_json ~id:_ ~response =
   | Infer_type_response x -> infer_type_response x
   | Identify_symbol_response x -> identify_symbol_response_to_json x
   | Outline_response x -> outline_response_to_json x
+  | Find_references_response x -> find_references_response_to_json x
   (* Delegate unhandled messages to previous version of API *)
   | _ -> Nuclide_rpc_message_printer.to_json ~response

@@ -91,30 +91,34 @@ let go action genv env =
   let res = List.map res (fun (r, pos) -> (r, Pos.to_absolute pos)) in
   res
 
+let get_action symbol =
+  let name = symbol.SymbolOccurrence.name in
+  begin match symbol.SymbolOccurrence.type_ with
+    | SymbolOccurrence.Class -> Some (FindRefsService.Class name)
+    | SymbolOccurrence.Function -> Some (FindRefsService.Function name)
+    | SymbolOccurrence.Method (class_name, method_name) ->
+        Some (FindRefsService.Member
+          (class_name, FindRefsService.Method method_name))
+    | SymbolOccurrence.Property (class_name, prop_name) ->
+        Some (FindRefsService.Member
+          (class_name, FindRefsService.Property prop_name))
+    | SymbolOccurrence.ClassConst (class_name, const_name) ->
+        Some (FindRefsService.Member
+          (class_name, FindRefsService.Class_const const_name))
+    | SymbolOccurrence.Typeconst (class_name, tconst_name) ->
+        Some (FindRefsService.Member
+          (class_name, FindRefsService.Typeconst tconst_name))
+    | SymbolOccurrence.GConst -> Some (FindRefsService.GConst name)
+    | _ -> None
+  end
+
 let go_from_file (content, line, char) genv env =
-  let tcopt =  env.ServerEnv.tcopt in
-  let result =
-    List.hd (ServerIdentifyFunction.get_occurrence tcopt content line char)
-      >>= fun symbol ->
-    let name = symbol.SymbolOccurrence.name in
-    begin match symbol.SymbolOccurrence.type_ with
-      | SymbolOccurrence.Class -> Some (FindRefsService.Class name)
-      | SymbolOccurrence.Function -> Some (FindRefsService.Function name)
-      | SymbolOccurrence.Method (class_name, method_name) ->
-          Some (FindRefsService.Member
-            (class_name, FindRefsService.Method method_name))
-      | SymbolOccurrence.Property (class_name, prop_name) ->
-          Some (FindRefsService.Member
-            (class_name, FindRefsService.Property prop_name))
-      | SymbolOccurrence.ClassConst (class_name, const_name) ->
-          Some (FindRefsService.Member
-            (class_name, FindRefsService.Class_const const_name))
-      | SymbolOccurrence.Typeconst (class_name, tconst_name) ->
-          Some (FindRefsService.Member
-            (class_name, FindRefsService.Typeconst tconst_name))
-      | SymbolOccurrence.GConst -> Some (FindRefsService.GConst name)
-      | _ -> None
-    end >>= fun action ->
-    Some (go action genv env)
-  in
-  Option.value result ~default:[]
+  (* Find the symbol at given position *)
+  ServerIdentifyFunction.go content line char env.ServerEnv.tcopt |>
+  (* If there are few, arbitrarily pick the first *)
+  List.hd >>= fun (occurrence, definition) ->
+  (* Ignore symbols that lack definitions *)
+  definition >>= fun definition ->
+  get_action occurrence >>= fun action ->
+  let results = go action genv env |> List.map ~f:snd in
+  Some (definition.SymbolDefinition.full_name, results)

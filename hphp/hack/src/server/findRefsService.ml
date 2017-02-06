@@ -42,6 +42,7 @@ type action_internal  =
   | IGConst of string
 
 type result = (string * Pos.absolute) list
+type ide_result = (string * Pos.absolute list) option
 
 let process_fun_id results_acc target_fun id =
   if target_fun = (snd id)
@@ -284,7 +285,12 @@ let get_dependent_files tcopt _workers input_set =
   (* This is performant enough to not need to go parallel for now *)
   get_deps_set tcopt input_set
 
-let print results =
-  List.iter (List.rev results) (fun (s, p) ->
-    Printf.printf "%s %s\n" s (Pos.string p)
+let result_to_ide_message x =
+  let open Ide_message in
+  Find_references_response (
+    Option.map x ~f:begin fun (symbol_name, references) ->
+      let references =
+        List.map references ~f:Ide_api_types.pos_to_file_range in
+      {symbol_name; references}
+    end
   )

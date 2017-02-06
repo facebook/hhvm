@@ -537,11 +537,11 @@ class CommonTests(object):
 
         self.check_cmd_and_json_cmd(
             [
-                'File "{root}foo_3.php", line 10, characters 17-19: '
-                'Foo::__construct',
+                'Foo',
+                'File "{root}foo_3.php", line 10, characters 17-19:',
                 '1 total results'
             ], [
-                '[{{"name":"Foo::__construct","filename":"{root}foo_3.php",'
+                '[{{"name":"Foo","filename":"{root}foo_3.php",'
                 '"line":10,"char_start":17,"char_end":19}}]'
             ],
             options=['--ide-find-refs', '1:20'],

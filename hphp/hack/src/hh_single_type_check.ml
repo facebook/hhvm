@@ -553,7 +553,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
     } in
     let file = cat (Relative_path.to_absolute filename) in
     let results = ServerFindRefs.go_from_file (file, line, column) genv env in
-    FindRefsService.print results;
+    ClientFindRefs.print_ide_readable results;
   | Highlight_refs (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in
     let results = ServerHighlightRefs.go (file, line, column) opts  in

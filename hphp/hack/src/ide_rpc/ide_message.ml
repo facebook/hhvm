@@ -58,6 +58,7 @@ type response =
   | Identify_symbol_response of identify_symbol_response
   | Symbol_by_id_response of symbol_by_id_response
   | Outline_response of outline_response
+  | Find_references_response of find_references_response
   | Diagnostics_notification of diagnostics_notification
 
 and init_response = {
@@ -94,6 +95,13 @@ and identify_symbol_item = {
 and outline_response = string SymbolDefinition.t list
 
 and symbol_by_id_response = string SymbolDefinition.t option
+
+and find_references_response_ = {
+  symbol_name : string;
+  references : file_range list;
+}
+
+and find_references_response = find_references_response_ option
 
 and diagnostics_notification = {
   subscription_id : int; (* Nuclide-rpc specific *)

@@ -139,6 +139,21 @@ let symbol_by_id_response_to_json = function
   | Some def -> definition_to_json def
   | None -> JSON_Null
 
+let find_references_response_to_json = function
+  | None -> JSON_Array []
+  | Some {symbol_name; references} ->
+    let entries = List.map references begin fun x ->
+      let open Ide_api_types in
+      Hh_json.JSON_Object [
+        "name", Hh_json.JSON_String symbol_name;
+        "filename", Hh_json.JSON_String x.range_filename;
+        "line", Hh_json.int_ x.file_range.st.line;
+        "char_start", Hh_json.int_ x.file_range.st.column;
+        "char_end", Hh_json.int_ (x.file_range.ed.column - 1);
+      ]
+    end in
+    Hh_json.JSON_Array entries
+
 let diagnostics_to_json x =
   JSON_Object [
     ("filename", JSON_String x.diagnostics_notification_filename);
@@ -173,6 +188,7 @@ let to_json ~response = match response with
   | Identify_symbol_response x -> identify_symbol_response_to_json x
   | Outline_response x -> outline_response_to_json x
   | Symbol_by_id_response x -> symbol_by_id_response_to_json x
+  | Find_references_response x -> find_references_response_to_json x
   | Diagnostics_notification x -> diagnostics_to_json x
 
 let print_json ~response =

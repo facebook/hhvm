@@ -63,6 +63,19 @@ All of the string typed members are intended only to be displayed in editor - th
       position : Position;
     }
 
+`FileRange`:
+
+    {
+      /**
+       * Absolute path of a file
+       */
+      filename : string;
+      /**
+       * Range inside this file
+       */
+      range : Range;
+    }
+
 `SymbolDefinition`:
 
     {
@@ -344,7 +357,7 @@ where DiagnosticsParams is defined as:
       type : string;
     }
 
-#### Infer type request
+### Infer type request
 
 What Hack thinks is the type of the expression at this position. Displayed in editor on mouse-hover over an expression.
 

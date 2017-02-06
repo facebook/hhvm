@@ -215,6 +215,49 @@ let test_infer_type_response () =
     "result": null
   }|}
 
+let test_find_references_response () =
+  let open Ide_api_types in
+  let response = Find_references_response (Some {
+    symbol_name = "aaa";
+    references = [
+      {
+        range_filename = "bbb";
+        file_range = {
+          st = {
+            line = 10;
+            column = 12;
+          };
+          ed = {
+            line = 10;
+            column = 14;
+          }
+        }
+      }
+    ]
+  }) in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": {
+      "name": "aaa",
+      "references": [
+        {
+          "filename": "bbb",
+          "range": {
+            "start": {
+              "line": 10,
+              "column": 12
+            },
+            "end": {
+              "line": 10,
+              "column": 14
+            }
+          }
+        }
+      ]
+    }
+  }|}
 
 let tests = [
   "test_method_not_found", test_method_not_found;
@@ -223,6 +266,7 @@ let tests = [
   "test_outline_response", test_outline_response;
   "test_autocomplete_response", test_autocomplete_response;
   "test_infer_type_response", test_infer_type_response;
+  "test_find_references_response", test_find_references_response;
 ]
 
 let () =

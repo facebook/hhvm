@@ -25,7 +25,7 @@ type _ t =
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
-  | IDE_FIND_REFS : string * int * int -> FindRefsService.result t
+  | IDE_FIND_REFS : string * int * int -> FindRefsService.ide_result t
   | IDE_HIGHLIGHT_REFS : string * int * int -> ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> ServerRefactorTypes.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoServiceTypes.result t

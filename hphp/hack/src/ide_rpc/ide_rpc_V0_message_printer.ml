@@ -9,38 +9,18 @@
  *)
 
 open Core
+open Ide_api_types
 open Ide_message
 open Ide_parser_utils
 open Hh_json
 
-let pos_to_range x =
-  let st_line, st_column, ed_line, ed_column = Pos.destruct_range x in
-  let open File_content in
-  {
-    st = {
-      line = st_line;
-      column = st_column;
-    };
-    ed = {
-      line = ed_line;
-      column = ed_column;
-    }
-  }
-
-let pos_to_content_pos x =
-  let open File_content in
-  {
-    line = Pos.line x;
-    column = Pos.start_cnum x;
-  }
-
-let pos_to_json {File_content.line; column} =
+let pos_to_json {line; column} =
   JSON_Object [
     ("line", JSON_Number (string_of_int line));
     ("column", JSON_Number (string_of_int column));
   ]
 
-let range_to_json {File_content.st; ed} =
+let range_to_json {st; ed} =
   JSON_Object [
     ("start", pos_to_json st);
     ("end", pos_to_json ed);
@@ -95,7 +75,7 @@ let rec symbol_definition_to_json ?include_filename def =
   JSON_Object ([
     "name", JSON_String def.name;
     "kind", JSON_String (string_of_kind def.kind);
-    "position", def.pos |> pos_to_content_pos |> pos_to_json;
+    "position", def.pos |> pos_to_ide_pos |> pos_to_json;
     "span", def.span |> pos_to_range |> range_to_json;
     "modifiers", modifiers;
   ] @

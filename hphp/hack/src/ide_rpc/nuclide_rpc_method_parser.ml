@@ -22,7 +22,7 @@ let get_changes_field = get_array_field "changes"
 let parse_autocomplete_params params =
   get_filename_field params >>= fun filename ->
   get_position_field params >>= fun position ->
-  Result.Ok { filename; position; }
+  Result.Ok { Ide_api_types.filename; position; }
 
 let parse_did_open_file_params params =
   get_filename_field params >>= fun did_open_file_filename ->
@@ -36,7 +36,7 @@ let parse_did_close_file_params params =
 let parse_range range =
   get_start_field range >>= fun st ->
   get_end_field range >>= fun ed ->
-  Result.Ok (Some { File_content.st; ed; })
+  Result.Ok (Some { Ide_api_types.st; ed; })
 
 let parse_edit edit =
   get_text_field edit >>= fun text ->
@@ -44,7 +44,7 @@ let parse_edit edit =
   (match range_opt with
   | None -> Result.Ok None
   | Some range -> parse_range range) >>= fun range ->
-  Result.Ok { File_content.text; range; }
+  Result.Ok { Ide_api_types.text; range; }
 
 let accumulate_edits edit acc =
   acc >>= fun acc ->

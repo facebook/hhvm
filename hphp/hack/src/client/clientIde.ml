@@ -8,6 +8,7 @@
  *
 *)
 open Core
+open Ide_api_types
 open Ide_message
 open Ide_rpc_protocol_parser_types
 
@@ -186,13 +187,13 @@ let handle_request conn id protocol = function
     print_response id protocol
   | Infer_type { filename; position; } ->
     let filename = ServerUtils.FileName filename in
-    let { File_content.line; column; } = position in
+    let { Ide_api_types.line; column; } = position in
     rpc conn (Rpc.INFER_TYPE (filename, line, column)) |>
     InferAtPosService.infer_result_to_ide_response |>
     print_response id protocol
   | Identify_symbol { filename; position; } ->
     let filename = ServerUtils.FileName filename in
-    let { File_content.line; column; } = position in
+    let { Ide_api_types.line; column; } = position in
     rpc conn (Rpc.IDENTIFY_FUNCTION (filename, line, column)) |>
     IdentifySymbolService.result_to_ide_message |>
     print_response id protocol

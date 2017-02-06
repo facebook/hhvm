@@ -10,7 +10,7 @@
 
 (* Test suite for V0 version of the API methods *)
 
-open File_content
+open Ide_api_types
 open Ide_message
 open Ide_message_parser_test_utils
 

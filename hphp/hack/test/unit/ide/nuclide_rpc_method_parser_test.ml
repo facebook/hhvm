@@ -8,7 +8,7 @@
  *
  *)
 
-open File_content
+open Ide_api_types
 open Ide_message
 open Ide_message_parser_test_utils
 open Ide_rpc_protocol_parser_types

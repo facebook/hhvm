@@ -167,7 +167,7 @@ let open_file env ?contents file_name =
 let edit_file env name contents =
   let env, loop_output = run_loop_once env { default_loop_input with
     persistent_client_request = Some (EDIT_FILE
-      (root ^ name, [File_content.{range = None; text = contents;}])
+      (root ^ name, [{Ide_api_types.range = None; text = contents;}])
     )
   } in
   (match loop_output.persistent_client_response with
@@ -198,7 +198,7 @@ let autocomplete env contents =
 let ide_autocomplete env (path, line, column) =
   run_loop_once env { default_loop_input with
     persistent_client_request = Some (IDE_AUTOCOMPLETE
-      (root ^ path, File_content.{line; column})
+      (root ^ path, Ide_api_types.{line; column})
     )
   }
 

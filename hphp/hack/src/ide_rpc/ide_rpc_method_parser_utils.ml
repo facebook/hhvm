@@ -8,7 +8,7 @@
  *
  *)
 
-open Ide_message
+open Ide_api_types
 open Ide_parser_utils
 open Ide_rpc_protocol_parser_types
 open Result.Monad_infix
@@ -29,7 +29,7 @@ let get_filename_field = get_string_field "filename"
 let parse_position position =
   get_line_field position >>= fun line ->
   get_column_field position >>= fun column ->
-  Result.Ok { File_content.line; column; }
+  Result.Ok { Ide_api_types.line; column; }
 
 let get_start_field obj = get_obj_field "start" obj >>= parse_position
 

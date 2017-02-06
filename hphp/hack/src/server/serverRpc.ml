@@ -10,7 +10,6 @@
 
 open Core
 open ServerEnv
-open File_content
 open ServerCommandTypes
 
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
@@ -92,10 +91,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | EDIT_FILE (path, edits) ->
         ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
+        let open Ide_api_types in
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
-        let edited_fc = edit_file_unsafe fc edits in
-        let content = get_content edited_fc in
+        let edited_fc = File_content.edit_file_unsafe fc edits in
+        let content = File_content.get_content edited_fc in
         env, ServerAutoComplete.auto_complete env.tcopt content
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()

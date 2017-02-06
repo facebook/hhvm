@@ -8,21 +8,14 @@
  *
  *)
 
+open Ide_api_types
 (**
  * Main type representing a message sent from editor to server.
  * This message might have different JSON representations based on the version
  * of API established during intialization call.
  *)
 
-type position = File_content.content_pos
-type range = File_content.content_range
-type text_edit = File_content.code_edit
 type error = Pos.absolute Errors.error_
-
-type file_position = {
-  filename : string;
-  position : position;
-}
 
 type request =
   | Init of init_params

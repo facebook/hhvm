@@ -35,7 +35,7 @@ function test() {
 "
 
 let build_code_edit st_line st_column ed_line ed_column text =
-  File_content.{
+  Ide_api_types.{
     range = Some {
       st = {
         line = st_line;

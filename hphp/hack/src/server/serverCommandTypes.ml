@@ -1,4 +1,4 @@
-open File_content
+open Ide_api_types
 
 type connection_type =
   | Persistent
@@ -46,8 +46,8 @@ type _ t =
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t
-  | EDIT_FILE : string * (code_edit list) -> unit t
-  | IDE_AUTOCOMPLETE : string * content_pos -> AutocompleteService.result t
+  | EDIT_FILE : string * (text_edit list) -> unit t
+  | IDE_AUTOCOMPLETE : string * position -> AutocompleteService.result t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t

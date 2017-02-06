@@ -32,10 +32,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         in
         env, result
     | IDENTIFY_FUNCTION (file_input, line, char) ->
-        let content =
-          ServerFileSync.get_file_content file_input |>
-          File_content.get_content
-        in
+        let content = ServerFileSync.get_file_content file_input in
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | GET_DEFINITION_BY_ID id ->
         env, Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
@@ -94,8 +91,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let open Ide_api_types in
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
-        let edited_fc = File_content.edit_file_unsafe fc edits in
-        let content = File_content.get_content edited_fc in
+        let content = File_content.edit_file_unsafe fc edits in
         env, ServerAutoComplete.auto_complete env.tcopt content
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()
@@ -114,5 +110,4 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | OUTLINE path ->
       env, ServerUtils.FileName path |>
       ServerFileSync.get_file_content |>
-      File_content.get_content |>
       FileOutline.outline env.popt

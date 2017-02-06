@@ -18,10 +18,9 @@ let try_relativize_path x =
 
 let open_file env path content =
   let new_env = try_relativize_path path >>= fun path ->
-    let fc = of_content ~content in
     let edited_files = Relative_path.Set.add env.edited_files path in
     FileHeap.remove_batch (Relative_path.Set.singleton path);
-    FileHeap.add path (Ide fc);
+    FileHeap.add path (Ide content);
     let ide_needs_parsing =
       Relative_path.Set.add env.ide_needs_parsing path in
     let last_command_time = Unix.gettimeofday () in
@@ -33,7 +32,7 @@ let open_file env path content =
 let close_relative_path env path =
   let edited_files = Relative_path.Set.remove env.edited_files path in
   let contents = (match (FileHeap.find_unsafe path) with
-  | Ide f -> f.content
+  | Ide f -> f
   | _ -> assert false) in
   FileHeap.remove_batch (Relative_path.Set.singleton path);
   FileHeap.add path (Disk contents);
@@ -52,11 +51,9 @@ let edit_file env path edits =
   let new_env = try_relativize_path path >>= fun path ->
     let fc = match FileHeap.get path with
     | Some Ide f -> f
-    | Some Disk content -> of_content ~content
+    | Some Disk content -> content
     | None ->
-      let content =
         try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
-      of_content ~content in
     let edited_fc = match edit_file fc edits with
       | Result.Ok r -> r
       | Result.Error e ->
@@ -87,14 +84,14 @@ let clear_sync_data env =
 }
 
 let get_file_content = function
-  | ServerUtils.FileContent s -> of_content s
+  | ServerUtils.FileContent s -> s
   | ServerUtils.FileName path ->
     begin try_relativize_path path >>= fun path ->
       match File_heap.FileHeap.get path with
         | Some (Ide f) -> Some f
-        | Some (Disk c) -> Some (of_content c)
+        | Some (Disk c) -> Some c
         | None -> Option.try_with (fun () -> (* Use the disk version *)
-          of_content (Sys_utils.cat (Relative_path.to_absolute path)))
+            (Sys_utils.cat (Relative_path.to_absolute path)))
     end
       (* In case of errors, proceed with empty file contents *)
-      |> Option.value ~default:(of_content "")
+      |> Option.value ~default:""

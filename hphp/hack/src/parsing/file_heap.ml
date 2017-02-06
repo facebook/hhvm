@@ -17,7 +17,7 @@
     That is, the IDE version take precedence over file system's.
 *)
 
-type disk_type = Disk of string | Ide of File_content.t
+type disk_type = Disk of string | Ide of string
 
 exception File_heap_stale
 
@@ -29,7 +29,7 @@ module FileHeap = SharedMem.WithCache (Relative_path.S) (struct
 
 let get_contents fn =
   match FileHeap.get fn with
-  | Some Ide f -> Some f.File_content.content
+  | Some Ide f -> Some f
   | Some Disk contents -> Some contents
   | None ->
       let contents =

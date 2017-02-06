@@ -432,3 +432,29 @@ where `OutlineParams` is defined as:
 *Server response:*
 
     SymbolDefinition[]
+
+### Find references request
+
+Project-wide search for references to a symbol at given position.
+
+*Client request:*
+
+    method : "findReferences"
+    params : FilePosition
+
+*Server response:*
+
+    ?SymbolReferences
+
+where `SymbolReferences` is defined as:
+
+    {
+      /**
+       * Name of the symbol at given position.
+       */
+      name : string
+      /**
+       * References to that symbol.
+       */
+      references : FileRange[]
+    }

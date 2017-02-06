@@ -201,6 +201,11 @@ let handle_request conn id protocol = function
     let result = rpc conn (Rpc.OUTLINE filename) in
     Ide_message.Outline_response result |>
     print_response id protocol
+  | Find_references { filename; position; } ->
+    let { Ide_api_types.line; column; } = position in
+    rpc conn (Rpc.IDE_FIND_REFS (filename, line, column)) |>
+    FindRefsService.result_to_ide_message |>
+    print_response id protocol
   | Did_open_file { did_open_file_filename; did_open_file_text; } ->
     rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))
   | Did_close_file { did_close_file_filename; } ->

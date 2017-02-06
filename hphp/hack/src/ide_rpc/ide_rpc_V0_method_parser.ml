@@ -43,20 +43,26 @@ let parse_did_open_file method_name params =
   parse_did_open_file_params >>= fun params ->
   Result.Ok (Did_open_file params)
 
-let parse_infer_type method_name params =
+let parse_file_position method_name params =
   assert_params_required method_name params >>=
-  get_file_position_field >>= fun file_position ->
+  get_file_position_field
+
+let parse_infer_type method_name params =
+  parse_file_position method_name params >>= fun file_position ->
   Result.Ok (Infer_type file_position)
 
 let parse_identify_symbol method_name params =
-  assert_params_required method_name params >>=
-  get_file_position_field >>= fun file_position ->
+  parse_file_position method_name params >>= fun file_position ->
   Result.Ok (Identify_symbol file_position)
 
 let parse_outline method_name params =
   assert_params_required method_name params >>=
   get_filename_field >>= fun filename ->
   Result.Ok (Outline filename)
+
+let parse_find_references method_name params =
+  parse_file_position method_name params >>= fun file_position ->
+  Result.Ok (Find_references file_position)
 
 let parse_method method_name params = match method_name with
   | "init" -> parse_init method_name params
@@ -65,6 +71,7 @@ let parse_method method_name params = match method_name with
   | "inferType" -> parse_infer_type method_name params
   | "identifySymbol" -> parse_identify_symbol method_name params
   | "outline" -> parse_outline method_name params
+  | "findReferences" -> parse_find_references method_name params
   | _ -> delegate_to_previous_version method_name params
 
 let parse ~method_name ~params =

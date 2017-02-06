@@ -111,6 +111,23 @@ let test_outline () =
     Outline "test.php"
   )
 
+let test_find_references () =
+  let msg = build_request_message "findReferences"
+    {|
+      "filename" : "bar.php",
+      "position" : {
+        "line" : 5,
+        "column" : 11
+      }
+    |} in
+  test msg @@
+  expect_api_message (
+    Find_references {
+      filename = "bar.php";
+      position = {line = 5; column = 11};
+    }
+  )
+
 let tests = [
   "test_init", test_init;
   "test_did_open_file", test_did_open_file;
@@ -118,6 +135,7 @@ let tests = [
   "test_infer_type_call", test_infer_type_call;
   "test_identify_symbol", test_identify_symbol;
   "test_outline", test_outline;
+  "test_find_references", test_find_references;
 ]
 
 let () =

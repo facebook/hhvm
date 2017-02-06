@@ -122,12 +122,13 @@ let go tcopt ast result =
       end
     | SymbolOccurrence.Property (c_name, property_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
+      let property_name = clean_member_name property_name in
       begin match SMap.get property_name class_.tc_props with
       | Some m -> get_member_def tcopt (Property, m.ce_origin, property_name)
       | None ->
-        SMap.get property_name class_.tc_sprops >>= fun m ->
+        SMap.get ("$" ^ property_name) class_.tc_sprops >>= fun m ->
         get_member_def tcopt
-          (Static_property, m.ce_origin, clean_member_name property_name)
+          (Static_property, m.ce_origin, property_name)
       end
     | SymbolOccurrence.ClassConst (c_name, const_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->

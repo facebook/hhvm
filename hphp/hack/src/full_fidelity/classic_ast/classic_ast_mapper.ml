@@ -143,7 +143,12 @@ type 'a parser_spec = (K.t * 'a parser') list
 exception API_parse_error of K.t list * env * P.t
 exception API_token_parse_error of string list * env * string
 exception Parser_fail of string
-exception Missing_syntax_case of P.syntax
+exception Missing_syntax_case of string * env * P.t
+
+let pTrackFail : 'a parser =
+  pDebugResult "TRACKER" (fun _ -> Sexp.Atom "TRACKER") @@ fun n e ->
+    List.iter (fun n -> Printf.eprintf " - %s\n" (K.to_string @@ P.kind n)) e.ancestry;
+    raise @@ API_parse_error ([], e, n)
 
 
 let (|.>) : ('a -> 'b) -> ('b -> 'c) -> ('a -> 'c) = fun g f -> fun x -> f (g x)
@@ -153,6 +158,7 @@ let (<&>) = fun f f' e -> f e, f' e
 let (<<>) = fun f f' e -> f (f' e) e
 let (<|>) = fun p p' -> fun n e ->
   try p n e with
+  | Missing_syntax_case _
   | API_parse_error _
   | API_token_parse_error _ -> p' n e
 let const : 'a -> 'b -> 'a = fun x _ -> x
@@ -216,17 +222,29 @@ let handle_token_parse_error : string list -> env -> string -> 'a =
     dbg ?msg:(Some "Exception trigger") (List.hd env.ancestry);
     raise (Failure msg)
 
+let missing_syntax : string -> P.t -> env -> 'a = fun s n env ->
+  raise (Missing_syntax_case (s, env, n))
+
+let handle_missing_syntax : string -> P.t -> env -> 'a = fun s n env ->
+  let msg = Printf.sprintf
+    "Missing case in %s.\n - Unexpected: '%s'\n - Kind: %s\n"
+                    s             (P.text n) (K.to_string @@ P.kind n)
+  in
+  Printf.eprintf "EXCEPTION\n---------\n%s\n" msg;
+  raise (Failure msg)
 
 let runP : 'a parser -> P.t -> env -> 'a = fun pThing thing env ->
   try pThing thing env with
   | API_parse_error       (kl, env, n) -> handle_parse_error       kl env n
   | API_token_parse_error (sl, env, n) -> handle_token_parse_error sl env n
+  | Missing_syntax_case   (ex, env, n) -> handle_missing_syntax    ex n env
   | e -> raise e
 
 
 
 
-let pError' : 'a parser' = fun [ err ] -> raise @@ Parser_fail (P.text err)
+let pError' : 'a parser' = fun [ err ] env -> raise @@ Parser_fail
+  (Printf.sprintf "ERROR(%d): %s" (Pos.line @@ where_am_I env) (P.text err))
 
 let mkP : 'a . 'a parser_spec -> 'a parser = fun specl -> fun node env ->
     let env = ppDescend node env in
@@ -266,8 +284,12 @@ let rec oneOf : 'a parser list -> 'a parser = function
   | [p] -> p
   | (p::ps) -> fun node env ->
       try p node env with
-      | API_parse_error (kl, _, _) -> try (oneOf ps) node env with
-        | API_parse_error (kl', env, n) -> fail (kl @ kl') n env
+      | API_parse_error (kl, _, _) -> begin
+          try (oneOf ps) node env with
+          | API_parse_error (kl', env, n) -> fail (kl @ kl') n env
+        end
+      | Missing_syntax_case _ -> oneOf ps node env
+
 
 
 
@@ -318,18 +340,21 @@ let sync_fun_kind : fun_kind -> fun_kind = function
   | FAsyncGenerator | FGenerator -> FGenerator
   | FAsync          | FSync      -> FSync
 
+(* TODO: Cleanup this hopeless Noop mess *)
 let mk_noop : stmt list -> stmt list = function
   | [] -> [Noop]
   | s -> s
-
 let stmt_list_of_stmt = function
   | Block block -> List.filter (fun x -> x <> Noop) block
   | stmt -> [stmt]
 let mpStripNoop pThing node env = match pThing node env with
   | [Noop] -> []
   | stmtl -> stmtl
+
+let mpOption : 'a -> ('a, 'a) metaparser = fun d p ->
+  p <|> ppConst d
 let mpOptional : ('a, 'a option) metaparser = fun p ->
-  cSome <$> p <|> ppConst None
+  mpOption None (cSome <$> p)
 
 
 
@@ -405,11 +430,15 @@ let tUop : bool -> (expr -> expr_) terminal_spec = fun postfix ->
     | TK.Plus                    -> Unop (Uplus,  expr)
     | TK.Minus                   -> Unop (Uminus, expr)
     | TK.Ampersand               -> Unop (Uref,   expr)
-    (* The ugly duckling; In the FFP, `await` is parsed as a UnaryOperator,
-     * whereas the typed AST has separate constructors for Await and Uop. This
-     * is why we don't just project onto a `uop`, but rather a `expr -> expr_`.
+    (* The ugly ducklings; In the FFP, `await` and `clone` are parsed as
+     * `UnaryOperator`s, whereas the typed AST has separate constructors for
+     * `Await`, `Clone` and `Uop`. Also, `@` is thrown out by the old parser.
+     * This is why we don't just project onto a `uop`, but rather a
+     * `expr -> expr_`.
      *)
     | TK.Await                   -> Await expr
+    | TK.Clone                   -> Clone expr
+    | TK.At                      -> snd expr
 
 let tBop : (expr -> expr -> expr_) terminal_spec =
   "Binary operator", fun token_kind -> fun lhs rhs -> match token_kind with
@@ -419,6 +448,7 @@ let tBop : (expr -> expr -> expr_) terminal_spec =
     | TK.Plus                        -> Binop (Plus,              lhs, rhs)
     | TK.Minus                       -> Binop (Minus,             lhs, rhs)
     | TK.Star                        -> Binop (Star,              lhs, rhs)
+    | TK.Carat                       -> Binop (Xor,               lhs, rhs)
     | TK.Slash                       -> Binop (Slash,             lhs, rhs)
     | TK.Dot                         -> Binop (Dot,               lhs, rhs)
     | TK.Percent                     -> Binop (Percent,           lhs, rhs)
@@ -446,6 +476,10 @@ let tBop : (expr -> expr -> expr_) terminal_spec =
     | TK.LessThanLessThanEqual       -> Binop (Eq (Some Ltlt),    lhs, rhs)
     | TK.GreaterThanGreaterThanEqual -> Binop (Eq (Some Gtgt),    lhs, rhs)
     | TK.ExclamationEqualEqual       -> Binop (Diff2,             lhs, rhs)
+    (* The spaceship operator `<=>` isn't implemented in AST, but has the same
+     * typing properties as `<=`
+     *)
+    | TK.LessThanEqualGreaterThan    -> Binop (Lte,               lhs, rhs)
     (* The ugly ducklings; In the FFP, `|>` and '??' are parsed as
      * `BinaryOperator`s, whereas the typed AST has separate constructors for
      * NullCoalesce, Pipe and Binop. This is why we don't just project onto a
@@ -453,7 +487,7 @@ let tBop : (expr -> expr -> expr_) terminal_spec =
      *)
     | TK.BarGreaterThan              -> Pipe (lhs, rhs)
     | TK.QuestionQuestion            -> NullCoalesce (lhs, rhs)
-    | k -> raise (Failure (TK.to_string k))
+    | k -> raise (Failure (Printf.sprintf "Missing binop: %s" (TK.to_string k)))
 
 let tRefOp : bool terminal_spec =
   "Reference operator", function
@@ -579,7 +613,9 @@ let tLiteral : (Pos.t -> string -> expr_) terminal_spec =
   | TK.NowdocStringLiteral       -> String (p, mkString unesc_dbl text)
   | TK.NullLiteral               -> Null
   | TK.BooleanLiteral            ->
-      (match text with "false" -> False | "true" -> True)
+      match String.lowercase_ascii text with
+      | "false" -> False
+      | "true"  -> True
 
 (* END OF TOKEN PARSERS *)
 
@@ -796,7 +832,7 @@ and pExpr_ParenthesizedExpression' : expr parser' = fun [ _lp; expr; _rp ] ->
 and pExpr_ScopeResolutionExpression' : expr_ parser' =
   fun [ qual; _op; name ] env ->
     let (_,n) as name = pos_name name env in
-    (if n.[0] = '$'
+    (if String.length n > 0 && n.[0] = '$'
      then cClass_get
      else cClass_const
     ) (pos_name qual env, name)
@@ -1013,8 +1049,33 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
     )
   (* FIXME; should this include Missing? ; (K.Missing, ppConst Null)*)
   ]
-
-
+and pDefineExpression : def parser = fun node env -> match P.syntax node with
+  (* Filthy, filthy hack! FFP makes define an expression, whereas AST wants it
+   * as a def.
+   *)
+  | P.ExpressionStatement
+    { P.expression_statement_expression = expr
+    ; P.expression_statement_semicolon  = _
+    } -> pDefineExpression expr (ppDescend node env)
+  | P.DefineExpression
+    { P.define_keyword       = _
+    ; P.define_left_paren    = _
+    ; P.define_argument_list = args
+    ; P.define_right_paren   = _
+    } -> begin
+        let env = ppDescend node env in
+        match couldMap ~f:pExpr args env with
+        | [ _, String name; e ] -> Constant
+          { cst_mode      = env.mode
+          ; cst_kind      = Cst_define
+          ; cst_name      = name
+          ; cst_type      = None
+          ; cst_value     = e
+          ; cst_namespace = Namespace_env.empty_with_default_popt
+          }
+        | _ -> missing_syntax "pDefineExpression:inner" args env
+      end
+  | _ -> missing_syntax "pDefineExpression" node env
 and pBlock : block parser = fun node env ->
   stmt_list_of_stmt (pStmt node env)
 and pStmt_EchoStatement' : stmt parser' = fun [ kw; exprs; _semi ] env ->
@@ -1076,7 +1137,7 @@ and pStmt_SwitchStatement' : stmt parser' =
         { P.default_keyword = _
         ; P.default_colon   = _
         } -> fun cont -> Default cont
-      | n -> raise (Missing_syntax_case n)
+      | n -> missing_syntax "pSwitchLabel" node env
     in
     let pSwitchSection : Ast.case list parser = fun node env ->
       match P.syntax node with
@@ -1091,7 +1152,7 @@ and pStmt_SwitchStatement' : stmt parser' =
           in
           let blk = couldMap ~f:pStmt statements env in
           null_out blk (couldMap ~f:pSwitchLabel labels env)
-      | n -> raise (Missing_syntax_case n)
+      | n -> missing_syntax "pSwtichSection" node env
     in
     Switch (pExpr expr env, List.flatten @@
         couldMap ~f:pSwitchSection sections env)
@@ -1256,6 +1317,7 @@ let pConstDeclaration' : (hint option * (id * expr option) list) parser' =
     couldMap decls env ~f:begin single K.ConstantDeclarator @@
       fun [name; init] env ->
         pos_name name env,
+        (* TODO: Parse error when const is abstract and has inits *)
         ifExists None (mpOptional pSimpleInitializer init env) abs env
     end
 
@@ -1332,7 +1394,7 @@ let pClassElt_XHPClassAttributeDeclaration' : class_elt list parser' =
           XhpAttrUse (where_am_I env, Happly (pos_name attr env, []))
       | P.Token _ ->
         XhpAttrUse (where_am_I env, Happly (pos_name node env, []))
-      | n -> raise @@ Missing_syntax_case n
+      | n -> missing_syntax "pXHPAttr" node env
     in
     couldMap ~f:pXHPAttr attrs env
 let pClassElt_MethodishDeclaration' : class_elt list parser' =
@@ -1355,16 +1417,20 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     let member_init, member_def = List.split (List.map classvar_init clsvl) in
     let previous_saw_yield = !(env.saw_yield) in
     env.saw_yield := false;
-    let body = member_init @ mk_noop @@ stmt_list_of_stmt (pCompoundStatement body env) in
+    let body = member_init @ stmt_list_of_stmt @@
+      (* TODO: Give parse error when not abstract, but body is missing *)
+      mpOption (Block []) pCompoundStatement body env
+    in
     let body_has_yield = !(env.saw_yield) in
     env.saw_yield := previous_saw_yield;
-    List.map (fun (k,h,v) -> ClassVars (k,h,v)) member_def @ [Method
+    let member_init = List.map (fun (k,h,v) -> ClassVars (k,h,v)) member_def in
+    member_init @ [Method
     { m_kind            = couldMap ~f:(mkTP tKind) mods env
     ; m_tparams         = tparaml
     ; m_constrs         = []
     ; m_name            = name
     ; m_params          = paraml
-    ; m_body            = mk_noop body
+    ; m_body            = body
     ; m_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attrs env
     ; m_ret             = ret
     ; m_ret_by_ref      = false
@@ -1488,8 +1554,33 @@ let pDef_NamespaceGroupUseDeclaration' : def parser' =
   fun [ _kw; kind; pfx; _lb; clauses; _rb; _semi ] env ->
     NamespaceUse []
 
+let pConstDeclarator : gconst parser = fun node env ->
+  match P.syntax node with
+  | P.ConstantDeclarator
+    { P.constant_declarator_name        = name
+    ; P.constant_declarator_initializer = init
+    } ->
+      { cst_mode      = env.mode
+      ; cst_kind      = Cst_const
+      ; cst_name      = pos_name name env
+      ; cst_type      = None
+      ; cst_value     = pSimpleInitializer init env
+      ; cst_namespace = Namespace_env.empty_with_default_popt
+      }
+  | _ -> missing_syntax "pConstDeclarator" node env
 
-
+let pDef_ConstDeclaration' : def parser' =
+  fun [ abs; _kw; ty; decls; _semi ] env ->
+    (* TODO: Parse error on abs *)
+    match couldMap ~f:pConstDeclarator decls env with
+    | [c] -> Constant
+      { c with
+        cst_type = mpOptional pHint ty env
+      }
+    | [] -> raise @@ Parser_fail
+      "Missing constant declarator in const declaration."
+    | cs -> raise @@ Parser_fail
+      "Multiple declarators not (yet?) supported in const declaration."
 
 let rec pDef_NamespaceDeclaration' : def parser' =
   fun [ _kw; name; body ] env ->
@@ -1503,6 +1594,7 @@ let rec pDef_NamespaceDeclaration' : def parser' =
 and pDef : def parser = fun node -> mkP
   [ (K.FunctionDeclaration,          pDef_Fun')
   ; (K.ClassishDeclaration,          pDef_Class')
+  ; (K.ConstDeclaration,             pDef_ConstDeclaration')
   ; (K.AliasDeclaration,             pDef_Typedef')
   ; (K.EnumDeclaration,              pDef_Enum')
   ; (K.InclusionDirective,           pDef_InclusionDirective')
@@ -1555,10 +1647,10 @@ and pProgram : program parser = fun node env ->
   in
   let pEOF node env = match P.syntax node with
     | P.EndOfFile { P.end_of_file_token = _ } -> Stmt Noop
-    | n -> raise @@ Missing_syntax_case n
+    | n -> missing_syntax "pEOF" node env
   in
   Namespaces.elaborate_defs ParserOptions.default @@ post_process @@
-    couldMap ~f:(oneOf [cStmt <$> pStmt; pDef; pEOF]) node env
+    couldMap ~f:(oneOf [pDefineExpression; cStmt <$> pStmt; pDef; pEOF]) node env
 
 
 
@@ -1579,7 +1671,6 @@ let from_tree : Relative_path.t -> P.SyntaxTree.t -> Ast.program =
                      | "decl"    -> FileInfo.Mdecl
                      | "partial" -> FileInfo.Mpartial
                      | "" -> FileInfo.Mpartial
-                     | s ->
-                         Printf.eprintf "Unknown hh mode '%s'\n" s;
-                         raise (Failure s)
+                     | s -> raise @@
+                       Failure (Printf.sprintf "Unknown hh mode '%s'\n" s)
       }

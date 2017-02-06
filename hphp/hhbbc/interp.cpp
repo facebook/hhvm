@@ -346,12 +346,20 @@ void in(ISS& env, const bc::Concat& op) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
-    if (v1->m_type == KindOfPersistentString &&
-        v2->m_type == KindOfPersistentString) {
+    auto to_string_is_safe = [] (const Cell& cell) {
+      return
+        isStringType(cell.m_type)    ||
+        cell.m_type == KindOfNull    ||
+        cell.m_type == KindOfBoolean ||
+        cell.m_type == KindOfInt64   ||
+        cell.m_type == KindOfDouble;
+    };
+    if (to_string_is_safe(*v1) && to_string_is_safe(*v2)) {
       constprop(env);
       auto const cell = eval_cell([&] {
         auto s = StringData::Make(
-          v2->m_data.pstr, v1->m_data.pstr->slice());
+          tvAsCVarRef(&*v2).toString().get(),
+          tvAsCVarRef(&*v1).toString().get());
         return make_tv<KindOfString>(s);
       });
       return push(env, cell ? *cell : TInitCell);

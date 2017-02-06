@@ -16,7 +16,7 @@ open ClientRefactor
 module Cmd = ServerCommand
 module Rpc = ServerCommandTypes
 
-let get_list_files conn (args:client_check_env): string list =
+let get_list_files conn: string list =
   let ic, oc = conn in
   Cmd.stream_request oc ServerCommandTypes.LIST_FILES;
   let res = ref [] in
@@ -93,7 +93,7 @@ let main args =
     match args.mode with
     | MODE_LIST_FILES ->
       let conn = connect args in
-      let infol = get_list_files conn args in
+      let infol = get_list_files conn in
       List.iter infol (Printf.printf "%s\n");
       Exit_status.No_error
     | MODE_LIST_MODES ->
@@ -203,8 +203,8 @@ let main args =
           Printf.eprintf "Invalid position\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let pos, ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
-      ClientTypeAtPos.go pos ty args.output_json;
+      let ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
+      ClientTypeAtPos.go ty args.output_json;
       Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in

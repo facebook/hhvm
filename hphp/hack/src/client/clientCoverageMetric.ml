@@ -41,7 +41,7 @@ let print_json r_opt =
  * expressions : total expressions. partial_weight is a number between
  * 0 and 1. *)
 let calc_percentage partial_weight ctr =
-  let total = CLMap.fold (fun k v acc -> v.count + acc) ctr 0 in
+  let total = CLMap.fold (fun _ v acc -> v.count + acc) ctr 0 in
   let mult = function
     | Unchecked -> 0.0
     | Partial -> partial_weight

@@ -89,11 +89,8 @@ let response_to_string : type a. a SCT.t -> a -> string = begin
       errors
     | SCT.INFER_TYPE _, response ->
       let to_string = function
-        | None, None -> "None, None"
-        | None, Some ty -> "None, " ^ ty
-        | Some p, None -> Pos.multiline_string_no_file p ^ " , None"
-        | Some p, Some ty ->
-          Printf.sprintf "%s, %s" (Pos.multiline_string_no_file p) ty
+        | None -> "None"
+        | Some ty -> Printf.sprintf "%s" ty
       in
       let response = to_string response in
       response

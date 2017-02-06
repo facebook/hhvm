@@ -12,7 +12,6 @@ let go (env:ServerEnv.env) (fn, line, char) =
   let get_result = InferAtPosService.attach_hooks line char in
   ignore @@ ServerIdeUtils.check_file_input
     env.ServerEnv.tcopt env.ServerEnv.files_info fn;
-  let pos, ty = get_result () in
-  let pos = Option.map pos Pos.to_absolute in
+  let ty = get_result () in
   InferAtPosService.detach_hooks ();
-  pos, ty
+  ty

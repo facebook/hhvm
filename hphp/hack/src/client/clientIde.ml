@@ -90,7 +90,7 @@ let rpc conn command =
 let read_push_message_from_server fd : ServerCommandTypes.push =
   let open ServerCommandTypes in
   match Marshal_tools.from_fd_with_preamble fd with
-  | Response s -> failwith "unexpected response without a request"
+  | Response _ -> failwith "unexpected response without a request"
   | Push m -> m
 
 let get_next_push_message fd =
@@ -160,7 +160,7 @@ let with_id_required id protocol f =
   | None -> handle_error id protocol
       (Internal_error "Id field is required for this request")
 
-let handle_init conn id protocol { client_name; client_api_version; } =
+let handle_init conn id protocol { client_name=_; client_api_version=_; } =
   if !did_init then
     handle_error id protocol (Server_error "init was already called")
   else begin

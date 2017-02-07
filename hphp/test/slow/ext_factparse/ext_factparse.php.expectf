@@ -795,3 +795,7 @@ PASSED erroneous files test
 PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
+
+Warning: HH\facts_parse() expects parameter 2 to be array, null given in %s on line %d
+
+Notice: Array to string conversion in %s on line %d

@@ -200,7 +200,7 @@ void facts_parse_impl(
 ) {
   for (auto i = 0; i < pathList->size(); ++i) {
     Facts::ParseResult workerResult;
-    const auto& path = pathList.rvalAtRef(int64_t(i)).toCStrRef();
+    auto path = pathList->getValueRef(i).toString();
     try {
       parseFile(root, path.c_str(), workerResult, allowHipHopSyntax);
     } catch (...) {
@@ -231,7 +231,7 @@ void facts_parse_impl_threaded(
 
   std::vector<std::string> pathListCopy;
   for(auto i = 0; i < numPaths; i++) {
-    pathListCopy.push_back(pathList.rvalAt(i).toCStrRef().c_str());
+    pathListCopy.push_back(pathList->getValueRef(i).toString().c_str());
   }
 
   for (auto worker = 0; worker < numWorkers; ++worker) {
@@ -277,7 +277,7 @@ void facts_parse_impl_threaded(
     buildOneResult(
       workerResults[i],
       outResArr,
-      pathList.rvalAt(int64_t(i)).toCStrRef());
+      pathList->getValueRef(i).toString());
   }
 
   for (auto& worker : workers) {
@@ -302,7 +302,7 @@ Array HHVM_FUNCTION(
 
   ArrayInit outResArr(pathList->size(), ArrayInit::Map{});
 
-  if (pathList->size()) {
+  if (!pathList.isNull() && pathList->size()) {
     if (useThreads) {
       facts_parse_impl_threaded(root, pathList, outResArr, allowHipHopSyntax);
     } else {

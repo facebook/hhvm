@@ -4,6 +4,7 @@
 #
 # "Fact parsing" is a core part of www infrastructure on devservers.
 
+
 #
 # Features to test
 #
@@ -241,3 +242,12 @@ if ((int)HH\ext_factparse_version()) {
 } else {
   print "FAILED version get test\n";
 }
+
+
+#
+# Check bad arg handling
+#
+
+HH\facts_parse(null, null, null, null);
+HH\facts_parse(null, array(null), null, null);
+HH\facts_parse(null, array(array()), null, null);

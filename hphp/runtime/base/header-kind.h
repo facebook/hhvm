@@ -95,9 +95,9 @@ struct HeaderWord {
     struct {
       mutable RefCount count;
       HeaderKind kind;
-      mutable bool weak_refed:1;
-      mutable bool partially_inited:1;
-      mutable GCBits marks:6;
+      mutable uint8_t weak_refed:1;
+      mutable uint8_t partially_inited:1;
+      mutable uint8_t marks:6;
       T aux;
     };
     struct { uint32_t lo32, hi32; };
@@ -132,6 +132,8 @@ struct HeaderWord {
   bool decWillRelease() const;
   bool decReleaseCheck();
 };
+static_assert(sizeof(HeaderWord<>) == sizeof(uint64_t),
+    "HeaderWord is expected to be 8 bytes.");
 
 constexpr auto HeaderOffset = 0;
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);

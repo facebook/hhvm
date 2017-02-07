@@ -510,7 +510,11 @@ struct DecBase {
   void dblCase(Cell& cell) { --cell.m_data.dbl; }
   Cell emptyString() const { return make_int(-1); }
   void nullCase(Cell&) const {}
-  void nonNumericString(Cell&) const {}
+  void nonNumericString(Cell& cell) const {
+    if (RuntimeOption::EnableHipHopSyntax) {
+      raise_notice("Decrement on string '%s'", cell.m_data.pstr->data());
+    }
+  }
 };
 
 struct Dec : DecBase {

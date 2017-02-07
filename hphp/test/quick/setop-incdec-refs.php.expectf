@@ -21,6 +21,8 @@ array(1) {
   &string(13) "a string tail"
 }
 string(13) "a string tail"
+
+Notice: Increment on string 'a string tail' in %s/test/quick/setop-incdec-refs.php on line %d
 array(1) {
   ["ref"]=>
   &string(13) "a string taim"

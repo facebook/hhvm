@@ -199,6 +199,7 @@ function collator_get_attribute($obj, $attr) {}
 function collator_get_error_code($obj) {}
 function collator_get_error_message($obj) {}
 function collator_get_locale($obj, $type = 0) {}
+function collator_get_sort_key($obj, $str) {}
 function collator_get_strength($obj) {}
 function collator_set_attribute($obj, $attr, $val) {}
 function collator_set_strength($obj, $strength) {}

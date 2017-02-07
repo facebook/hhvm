@@ -35,8 +35,9 @@ let type_fun opts fn x =
   match Parser_heap.find_fun_in_file ~full:true opts fn x with
   | Some f ->
     let fun_ = Naming.fun_ opts f in
-    ignore (Typing.fun_def opts fun_)
-  | None -> ()
+    ignore (Typing.fun_def opts fun_);
+    Some fun_
+  | None -> None
 
 let type_class opts fn x =
   match Parser_heap.find_class_in_file ~full:true opts fn x with
@@ -77,8 +78,10 @@ let check_const opts fn x =
 
 let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
+  let ignore_type_fun opts fn name =
+    ignore(type_fun opts fn name) in
   let errors', (), err_flags = Errors.do_ begin fun () ->
-    SSet.iter (type_fun opts fn) n_funs;
+    SSet.iter (ignore_type_fun opts fn) n_funs;
     SSet.iter (type_class opts fn) n_classes;
     SSet.iter (check_typedef opts fn) n_types;
     SSet.iter (check_const opts fn) n_consts;

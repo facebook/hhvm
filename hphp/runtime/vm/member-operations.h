@@ -2252,7 +2252,7 @@ inline void UnsetElemVec(TypedValue* base, key_type<keyType> key) {
     base->m_data.parr = a2;
     assertx(cellIsPlausible(*base));
     a->decRefAndRelease();
- }
+  }
 }
 
 /**

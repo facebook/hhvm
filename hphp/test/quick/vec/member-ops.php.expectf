@@ -568,14 +568,14 @@ array(2) {
 ======= fini_setop_new_elem =======================
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
 ======= fini_unset =================================
+Exception: "Vecs do not support unsetting non-end elements"
 array(2) {
   [0]=>
   NULL
   [1]=>
-  dict(2) {
-    [0]=>
+  vec(3) {
     NULL
-    [2]=>
+    string(3) "abc"
     string(0) ""
   }
 }

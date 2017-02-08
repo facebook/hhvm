@@ -52,6 +52,7 @@ using ArrayDataMap = tbb::concurrent_hash_map<ArrayData::ScalarArrayKey,
 static ArrayDataMap s_arrayDataMap;
 
 const StaticString s_InvalidKeysetOperationMsg("Invalid operation on keyset");
+const StaticString s_VecUnsetMsg("Vecs do not support unsetting non-end elements");
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
                                                        size_t sz) {
@@ -1188,6 +1189,10 @@ void throwInvalidAdditionException(const ArrayData* ad) {
   SystemLib::throwInvalidOperationExceptionObject(
     folly::sformat("{} do not support the + operator", type)
   );
+}
+
+void throwVecUnsetException() {
+  SystemLib::throwInvalidOperationExceptionObject(s_VecUnsetMsg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

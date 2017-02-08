@@ -931,12 +931,13 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
 
 ArrayData*
 PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
-  assert(checkInvariants(adIn));
-  assert(adIn->isVecArray());
+  assertx(checkInvariants(adIn));
+  assertx(adIn->isVecArray());
+
+  // You're only allowed to remove an element at the end of the vec (or beyond,
+  // which is a no-op).
   if (UNLIKELY(size_t(k) >= adIn->m_size)) return adIn;
-  // To avoid re-keying, a vec becomes a dict when an element is removed. The
-  // exception is if the element is at the end.
-  if (size_t(k) + 1 == adIn->m_size) {
+  if (LIKELY(size_t(k) + 1 == adIn->m_size)) {
     auto const ad = copy ? Copy(adIn) : adIn;
     auto const oldSize = ad->m_size;
     auto& tv = packedData(ad)[oldSize - 1];
@@ -950,15 +951,12 @@ PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
     tvRefcountedDecRefHelper(oldType, oldDatum);
     return ad;
   }
-  auto dict = ToDictVec(adIn, copy);
-  auto result = MixedArray::RemoveIntDict(dict, k, dict->cowCheck());
-  if (result != dict) decRefArr(dict);
-  return result;
+  throwVecUnsetException();
 }
 
 ArrayData*
 PackedArray::RemoveStr(ArrayData* adIn, const StringData*, bool) {
-  assert(checkInvariants(adIn));
+  assertx(checkInvariants(adIn));
   return adIn;
 }
 

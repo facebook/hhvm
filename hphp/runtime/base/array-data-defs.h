@@ -28,6 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 extern const StaticString s_InvalidKeysetOperationMsg;
+extern const StaticString s_VecUnsetMsg;
 
 namespace {
 inline bool isIntKey(const Cell* cell) {

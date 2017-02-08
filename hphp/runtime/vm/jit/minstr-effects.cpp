@@ -88,11 +88,8 @@ void getBaseType(Opcode rawOp, bool predict,
         baseType |= TCountedArr;
       }
     }
-    if (baseType.maybe(TVec)) {
-      baseType |= TCountedVec;
-      /* Unsetting a vec element can turn it into a dict */
-      if (op == UnsetElem) baseType |= TDict;
-    }
+
+    if (baseType.maybe(TVec)) baseType |= TCountedVec;
     if (baseType.maybe(TDict)) baseType |= TCountedDict;
     if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
     if (baseType.maybe(TStr)) baseType |= TCountedStr;

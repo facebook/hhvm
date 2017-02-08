@@ -13,10 +13,10 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-dict(2) {
-  [0]=>
+string(46) "Vecs do not support unsetting non-end elements"
+vec(3) {
   string(1) "a"
-  [2]=>
+  string(1) "b"
   string(1) "c"
 }
 ====================================================
@@ -32,15 +32,13 @@ vec(3) {
 }
 ====================================================
 vec(3) {
-  object(Dtor)#1 (0) {
-  }
   int(1)
   string(3) "abc"
+  object(Dtor)#1 (0) {
+  }
 }
 Dtor::__destruct
-dict(2) {
-  [1]=>
+vec(2) {
   int(1)
-  [2]=>
   string(3) "abc"
 }

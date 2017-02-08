@@ -116,11 +116,12 @@ function watchman_sync_sub(
 <<__Native>>
 function watchman_unsubscribe(string $sub_name): Awaitable<string>;
 
-/* This should be bumped with every non-backwards compatible API change.
+/**
+ * This should be bumped with every non-backwards compatible API change.
  * 1 => first version
  */
 function ext_watchman_version(): int {
-  return 1;
+  return (int)phpversion("watchman");
 }
 
 } // namespace

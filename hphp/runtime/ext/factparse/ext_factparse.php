@@ -72,12 +72,14 @@ function facts_parse(
   bool $useThreads,
 ): array<string, ?array<string, mixed>>;
 
-// This should be bumped with every non-backwards compatible API change
-// 1 => first version
-// 2 => added $root argument to HH\facts_parse()
-// 3 => support requireExtends/requireImplements constraints
+/**
+ * This should be bumped with every non-backwards compatible API change
+ * 1 => first version
+ * 2 => added $root argument to HH\facts_parse()
+ * 3 => support requireExtends/requireImplements constraints
+ */
 function ext_factparse_version(): int {
-  return 3;
+  return (int)phpversion("factparse");
 }
 
 } // namespace HH

@@ -846,10 +846,9 @@ Object HHVM_FUNCTION(HH_watchman_unsubscribe, const String& _name) {
 }
 
 struct WatchmanExtension final : Extension {
+  // See ext_watchman.php for details of version bumps.
   // (INIT entry-point) no need for a lock
-  WatchmanExtension() :
-    Extension("watchman")
-  { };
+  WatchmanExtension() : Extension("watchman", "1") { };
 
   // (INIT entry-point) no need for a lock
   void moduleInit() override {

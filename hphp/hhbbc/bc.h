@@ -117,10 +117,42 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
   return !(a == b);
 }
 
-struct BCHashHelper {
-  static size_t hash(RepoAuthType rat) { return rat.hash(); }
+using IterTabEnt    = std::pair<IterKind,IterId>;
+using IterTab       = CompactVector<IterTabEnt>;
+
+using SwitchTab     = CompactVector<BlockId>;
+
+// The final entry in the SSwitchTab is the default case, it will
+// always have a nullptr for the string.
+using SSwitchTabEnt = std::pair<LSString,BlockId>;
+using SSwitchTab    = CompactVector<SSwitchTabEnt>;
+
+//////////////////////////////////////////////////////////////////////
+
+namespace bc {
+
+//////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+/*
+ * Trivial hasher overrides, which will cause bytecodes to hash according to
+ * the hashes defined by hasher_impl.
+ */
+struct hasher_default {};
+
+/*
+ * Default bytecode immediate hashers.
+ */
+struct hasher_impl {
   static size_t hash(SString s)  { return s->hash(); }
   static size_t hash(LSString s) { return s->hash(); }
+  static size_t hash(RepoAuthType rat) { return rat.hash(); }
+
+  static size_t hash(std::pair<IterKind,IterId> kv) {
+    return std::hash<IterId>()(kv.second);
+  }
+
   static size_t hash(MKey mkey) {
     return HPHP::hash_int64_pair(mkey.mcode, mkey.int64);
   }
@@ -131,11 +163,7 @@ struct BCHashHelper {
     return v.size() ^ hash(v.front());
   }
 
-  static size_t hash(std::pair<IterKind, IterId> kv) {
-    return std::hash<IterId>()(kv.second);
-  }
-
-  static size_t hash(std::pair<LSString, BlockId> kv) {
+  static size_t hash(std::pair<LSString,BlockId> kv) {
     return HPHP::hash_int64_pair(kv.first->hash(), kv.second);
   }
 
@@ -159,19 +187,68 @@ struct BCHashHelper {
   >::type hash(const T& t) { return std::hash<T>()(t); }
 };
 
-using IterTabEnt    = std::pair<IterKind, IterId>;
-using IterTab       = CompactVector<IterTabEnt>;
+/*
+ * Hash T using H::operator() if it is compatible, else fall back to
+ * hasher_impl (e.g., if H := hasher_default).
+ */
+template<typename T, class H>
+auto hash(const T& t, H h) -> decltype(h(t)) {
+  return h(t);
+}
+template<typename T, typename... Unused>
+typename std::enable_if<sizeof...(Unused) == 1, size_t>::type
+hash(const T& t, Unused...) {
+  return hasher_impl::hash(t);
+}
 
-using SwitchTab     = CompactVector<BlockId>;
+/*
+ * Clone of folly::hash::hash_combine_generic(), but with a hasher argument
+ * instead of a hasher template parameter.
+ */
+template<class H> size_t hash_combine(H h) { return 0; }
 
-// The final entry in the SSwitchTab is the default case, it will
-// always have a nullptr for the string.
-using SSwitchTabEnt = std::pair<LSString,BlockId>;
-using SSwitchTab    = CompactVector<SSwitchTabEnt>;
+template<class H, typename T, typename... Ts>
+size_t hash_combine(H h, const T& t, const Ts&... ts) {
+  auto const seed = size_t{hash(t, h)};
+  if (sizeof...(ts) == 0) return seed;
+
+  auto const remainder = hash_combine(h, ts...);
+  return static_cast<size_t>(folly::hash::hash_128_to_64(seed, remainder));
+}
+
+/*
+ * Trivial equality overrides, which will cause bytecodes to compare via
+ * operator==() on the various immediate types.
+ */
+struct eq_default {};
+
+/*
+ * Compare two values, using E::operator() if it exists, else the default
+ * operator==.
+ */
+template<typename T, class E>
+auto equals(const T& t1, const T& t2, E e) -> decltype(e(t1, t2)) {
+  return e(t1, t2);
+}
+template<typename T, typename... Unused>
+typename std::enable_if<sizeof...(Unused) == 1, bool>::type
+equals(const T& t1, const T& t2, Unused...) {
+  return t1 == t2;
+}
+
+/*
+ * Check if an (even-numbered) list of values are pairwise-equal.
+ */
+template<class E> bool eq_pairs(E e) { return true; }
+
+template<class E, typename T, typename... Ts>
+bool eq_pairs(E e, const T& t1, const T& t2, const Ts&... ts) {
+  return equals(t1, t2, e) && (sizeof...(ts) == 0 || eq_pairs(e, ts...));
+}
+
+}
 
 //////////////////////////////////////////////////////////////////////
-
-namespace bc {
 
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
@@ -234,31 +311,21 @@ namespace bc {
 #define IMM_MEM_FOUR(x, y, z, l)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
                                    IMM_MEM(z, 3); IMM_MEM(l, 4);
 
-#define IMM_EQ(which, n)          if (IMM_NAME_##which(n) !=  \
-                                      o.IMM_NAME_##which(n)) return false;
-#define IMM_EQ_NA
-#define IMM_EQ_ONE(x)             IMM_EQ(x, 1);
-#define IMM_EQ_TWO(x, y)          IMM_EQ(x, 1); IMM_EQ(y, 2);
-#define IMM_EQ_THREE(x, y, z)     IMM_EQ(x, 1); IMM_EQ(y, 2);  \
-                                  IMM_EQ(z, 3);
-#define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ(x, 1); IMM_EQ(y, 2); \
-                                  IMM_EQ(z, 3); IMM_EQ(l, 4);
+#define IMM_EQ_WRAP(e, ...)       detail::eq_pairs(e, __VA_ARGS__)
+#define IMM_EQ(which, n)          IMM_NAME_##which(n), o.IMM_NAME_##which(n)
+#define IMM_EQ_NA                 0, 0
+#define IMM_EQ_ONE(x)             IMM_EQ(x, 1)
+#define IMM_EQ_TWO(x, y)          IMM_EQ_ONE(x), IMM_EQ(y, 2)
+#define IMM_EQ_THREE(x, y, z)     IMM_EQ_TWO(x, y), IMM_EQ(z, 3)
+#define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ_THREE(x, y, z), IMM_EQ(l, 4)
 
-#define IMM_HASH_DO(...)            folly::hash:: \
-                                      hash_combine_generic<BCHashHelper>( \
-                                        __VA_ARGS__)
+#define IMM_HASH_WRAP(h, ...)       detail::hash_combine(h, __VA_ARGS__)
 #define IMM_HASH(which, n)          IMM_NAME_##which(n)
 #define IMM_HASH_NA                 0
-#define IMM_HASH_ONE(x)             IMM_HASH_DO(IMM_HASH(x, 1))
-#define IMM_HASH_TWO(x, y)          IMM_HASH_DO(IMM_HASH(x, 1), \
-                                                IMM_HASH(y, 2))
-#define IMM_HASH_THREE(x, y, z)     IMM_HASH_DO(IMM_HASH(x, 1), \
-                                                IMM_HASH(y, 2), \
-                                                IMM_HASH(z, 3))
-#define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_DO(IMM_HASH(x, 1), \
-                                                IMM_HASH(y, 2), \
-                                                IMM_HASH(z, 3), \
-                                                IMM_HASH(l, 4))
+#define IMM_HASH_ONE(x)             IMM_HASH(x, 1)
+#define IMM_HASH_TWO(x, y)          IMM_HASH_ONE(x), IMM_HASH(y, 2)
+#define IMM_HASH_THREE(x, y, z)     IMM_HASH_TWO(x, y), IMM_HASH(z, 3)
+#define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_THREE(x, y, z), IMM_HASH(l, 4)
 
 #define IMM_EXTRA_NA
 #define IMM_EXTRA_ONE(x)           IMM_EXTRA_##x
@@ -376,16 +443,27 @@ namespace bc {
     PUSH_##outputs                              \
                                                 \
     bool operator==(const opcode& o) const {    \
-      IMM_EQ_##imms                             \
-      return true;                              \
+      return equals(o, detail::eq_default{});   \
     }                                           \
                                                 \
     bool operator!=(const opcode& o) const {    \
       return !(*this == o);                     \
     }                                           \
                                                 \
+    template<class E>                           \
+    bool equals(const opcode& o, E e) const {   \
+      return IMM_EQ_WRAP(e, IMM_EQ_##imms);     \
+    }                                           \
+                                                \
     size_t hash() const {                       \
-      return IMM_HASH_##imms;                   \
+      return IMM_HASH_WRAP(                     \
+        detail::hasher_default{},               \
+        IMM_HASH_##imms);                       \
+    }                                           \
+                                                \
+    template<class H>                           \
+    size_t hash(H h) const {                    \
+      return IMM_HASH_WRAP(h, IMM_HASH_##imms); \
     }                                           \
   };
 OPCODES
@@ -626,15 +704,31 @@ inline bool operator!=(const Bytecode& a, const Bytecode& b) {
   return !(a == b);
 }
 
-inline size_t hash(const Bytecode& b) {
+template<class E>
+inline bool equals(const Bytecode& a, const Bytecode& b, E equals) {
+  if (a.op != b.op) return false;
+#define O(opcode, ...)  \
+  case Op::opcode: return a.opcode.equals(b.opcode, equals);
+  switch (a.op) { OPCODES }
+#undef O
+  not_reached();
+}
+
+template<class H>
+inline size_t hash(const Bytecode& b, H hasher) {
   auto hash = 14695981039346656037ULL;
   auto o = static_cast<size_t>(b.op);
   hash ^= o;
-#define O(opcode, ...) \
-  case Op::opcode: return folly::hash::hash_combine(b.opcode.hash(), hash);
+#define O(opcode, ...)  \
+  case Op::opcode:      \
+    return folly::hash::hash_combine(b.opcode.hash(hasher), hash);
   switch (b.op) { OPCODES }
 #undef O
   not_reached();
+}
+
+inline size_t hash(const Bytecode& b) {
+  return hash(b, bc::detail::hasher_default{});
 }
 
 //////////////////////////////////////////////////////////////////////

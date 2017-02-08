@@ -1086,7 +1086,7 @@ let as_case_insensitive_keyword text =
      interior of an expression? *)
   let lower = String.lowercase text in
   match lower with
-  | "eval" | "isset" | "unset" | "empty"
+  | "eval" | "isset" | "unset" | "empty" | "const"
   | "true" | "false" | "null" | "array" -> lower
   | _ -> text
 

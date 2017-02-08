@@ -79,10 +79,12 @@ struct TypeConstraint {
     /*
      * Indicates a type constraint is a type constant, which is similar to a
      * type alias defined inside a class. For instance, the constraint on $x
-     * is a TypeConstant
+     * is a TypeConstant:
+     *
      * class Foo {
      *   const type T = int;
      *   public function bar(Foo::T $x) { ... }
+     * }
      */
      TypeConstant = 0x20,
   };

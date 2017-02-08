@@ -158,11 +158,10 @@ struct Func final {
     LowStringPtr phpCode; // Eval'able PHP code.
   };
 
-  typedef FixedVector<ParamInfo> ParamInfoVec;
-  typedef FixedVector<SVInfo> SVInfoVec;
-  typedef FixedVector<EHEnt> EHEntVec;
-  typedef FixedVector<FPIEnt, HugeAllocator<FPIEnt>> FPIEntVec;
-
+  using ParamInfoVec = FixedVector<ParamInfo>;
+  using SVInfoVec = FixedVector<SVInfo>;
+  using EHEntVec = FixedVector<EHEnt>;
+  using FPIEntVec = FixedVector<FPIEnt,HugeAllocator<FPIEnt>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -262,7 +261,6 @@ struct Func final {
    */
   static bool isFuncIdValid(FuncId id);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Basic info.                                                        [const]
 
@@ -352,7 +350,6 @@ struct Func final {
    */
   const NamedEntity* getNamedEntity() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // File info.                                                         [const]
 
@@ -382,7 +379,6 @@ struct Func final {
    * The system- or user-defined doc comment accompanying the function.
    */
   const StringData* docComment() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
@@ -434,7 +430,6 @@ struct Func final {
    * next parameter that has a DV funclet.
    */
   Offset getEntryForNumArgs(int numArgsPassed) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
@@ -495,7 +490,6 @@ struct Func final {
    */
   const StringData* returnUserType() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Parameters.                                                        [const]
 
@@ -544,7 +538,6 @@ struct Func final {
    * are never used.
    */
   bool discardExtraArgs() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
@@ -601,7 +594,6 @@ struct Func final {
    */
   bool hasForeignThis() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Static locals.                                                     [const]
 
@@ -621,7 +613,6 @@ struct Func final {
    * Number of static locals declared in the function.
    */
   int numStaticLocals() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Definition context.                                                [const]
@@ -809,7 +800,6 @@ struct Func final {
    */
   bool isClosureBody() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Resumables.                                                        [const]
 
@@ -852,7 +842,6 @@ struct Func final {
    */
   bool isResumable() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Methods.                                                           [const]
 
@@ -865,7 +854,6 @@ struct Func final {
    * Whether this function has a private implementation on a parent class.
    */
   bool hasPrivateAncestor() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Magic methods.                                                     [const]
@@ -902,7 +890,6 @@ struct Func final {
    * Is `name' the name of a special initializer function?
    */
   static bool isSpecial(const StringData* name);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Persistence.                                                       [const]
@@ -981,7 +968,6 @@ struct Func final {
    * kind.
    */
   bool isParamCoerceMode() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
@@ -1131,7 +1117,7 @@ struct Func final {
   // SharedData.
 
 private:
-  typedef IndexedStringMap<LowStringPtr, true, Id> NamedLocalsMap;
+  using NamedLocalsMap = IndexedStringMap<LowStringPtr, true, Id>;
 
   // Some 16-bit values in SharedData are stored as small deltas if they fit
   // under this limit.  If not, they're set to the limit value and an
@@ -1171,8 +1157,9 @@ private:
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
 
-    // One byte worth of bools right now.  Check what it does to
-    // sizeof(SharedData) if you are trying to add any more ...
+    /*
+     * Up to 32 bits worth of bools.
+     */
     bool m_top : 1;
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
@@ -1185,21 +1172,25 @@ private:
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
-    TypeConstraint m_retTypeConstraint;
+    TypeConstraint m_retTypeConstraint; // NB: sizeof(TypeConstraint) == 12
     LowStringPtr m_originalFilename;
     RepoAuthType m_repoReturnType;
-    RepoAuthType m_repoAwaitedReturnType; // async return type
+    RepoAuthType m_repoAwaitedReturnType;
 
     /*
      * The `past' offset and `line2' are likely to be small, particularly
-     * relative to m_base and m_line1.  So we encode each as a 16-bit
-     * difference.  If the delta doesn't fit, we need to have an
-     * ExtendedSharedData to hold the real values---in that case, the field
-     * here that overflowed is set to kSmallDeltaLimit and the corresponding
-     * field in ExtendedSharedData will be valid.
+     * relative to m_base and m_line1, so we encode each as a 16-bit
+     * difference.
+     *
+     * If the delta doesn't fit, we need to have an ExtendedSharedData to hold
+     * the real values---in that case, the field here that overflowed is set to
+     * kSmallDeltaLimit and the corresponding field in ExtendedSharedData will
+     * be valid.
      */
     uint16_t m_line2Delta;
     uint16_t m_pastDelta;
+
+    // 32 bits free here.
   };
 
   /*
@@ -1295,7 +1286,6 @@ private:
   private:
     std::atomic<Attr> m_attrs;
   };
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Constants.

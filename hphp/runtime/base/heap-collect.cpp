@@ -100,9 +100,7 @@ inline bool Marker::mark(const void* p, GCBits marks) {
   auto h = static_cast<const Header*>(p);
   assert(h->kind() <= HeaderKind::BigMalloc &&
          h->kind() != HeaderKind::AsyncFuncWH);
-  auto old_marks = h->hdr_.marks;
-  h->hdr_.marks = old_marks | marks;
-  return old_marks == GCBits::Unmarked;
+  return h->hdr_.mark(marks) == GCBits::Unmarked;
 }
 
 DEBUG_ONLY bool checkEnqueuedKind(const Header* h) {
@@ -202,7 +200,7 @@ NEVER_INLINE void Marker::init() {
   MM().iterate([&](Header* h, size_t allocSize) {
     auto kind = h->kind();
     if (kind == HeaderKind::Free) return;
-    h->hdr_.marks = GCBits::Unmarked;
+    h->hdr_.clearMarks();
     allocd_ += allocSize;
     ptrs_.insert(h, allocSize);
     if (type_scan::hasNonConservative()) {
@@ -334,7 +332,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       break;
     case HeaderKind::Free:
       // free memory; these should not be marked.
-      assert(!(h->hdr_.marks & GCBits::Mark));
+      assert(!(h->hdr_.marks() & GCBits::Mark));
       break;
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Closure:
@@ -360,9 +358,9 @@ NEVER_INLINE void Marker::sweep() {
   std::deque<std::pair<Header*,size_t>> defer;
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
     assert(check_sweep_header(hdr));
-    if (hdr->hdr_.marks & GCBits::Mark) {
+    if (hdr->hdr_.marks() & GCBits::Mark) {
       marked_ += h_size;
-      if (hdr->hdr_.marks == GCBits::Pin) pinned_ += h_size;
+      if (hdr->hdr_.marks() == GCBits::Pin) pinned_ += h_size;
       return; // continue iterate loop
     }
     // when freeing objects below, do not run their destructors! we don't

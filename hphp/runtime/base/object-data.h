@@ -73,7 +73,7 @@ struct InvokeResult {
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-struct ObjectData: type_scan::MarkCountable<ObjectData> {
+struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()
@@ -126,7 +126,10 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
                       NoInit) noexcept;
 
  public:
-  IMPLEMENT_COUNTABLE_METHODS
+  ALWAYS_INLINE void decRefAndRelease() {
+    assert(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
   bool kindIsValid() const { return isObjectKind(headerKind()); }
 
   void scan(type_scan::Scanner&) const;
@@ -135,17 +138,17 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
 
   // WeakRef control methods.
   inline void invalidateWeakRef() const {
-    if (UNLIKELY(m_hdr.weak_refed)) {
+    if (UNLIKELY(m_weak_refed)) {
       WeakRefData::invalidateWeakRef((uintptr_t)this);
     }
   }
 
-  inline void setWeakRefed(bool weak_refed) const {
-    m_hdr.weak_refed = weak_refed;
+  inline void setWeakRefed(bool flag) const {
+    m_weak_refed = flag;
   }
 
   inline void setPartiallyInited(bool f) const {
-    m_hdr.partially_inited = f;
+    m_partially_inited = f;
   }
 
  public:
@@ -446,15 +449,12 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
     return offsetof(ObjectData, m_cls);
   }
   static constexpr ptrdiff_t attributeOff() {
-    return offsetof(ObjectData, m_hdr) +
-           offsetof(HeaderWord<uint16_t>, aux);
+    return offsetof(ObjectData, m_aux16);
   }
   const char* classname_cstr() const;
 
 private:
   friend struct MemoryProfile;
-
-  static void compileTimeAssertions();
 
   bool toBooleanImpl() const noexcept;
   int64_t toInt64Impl() const noexcept;
@@ -465,7 +465,6 @@ private:
 // lowptr:  header   cls     id   [subclass][props...]
 
 private:
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
   LowPtr<Class> m_cls;
   uint32_t o_id; // id of this object (used for var_dump(), and WeakRefs)
 };

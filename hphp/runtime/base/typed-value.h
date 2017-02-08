@@ -35,7 +35,7 @@ struct StringData;
 struct ObjectData;
 struct RefData;
 struct ResourceHdr;
-struct TypedValue;
+struct MaybeCountable;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,6 +53,7 @@ union Value {
   ResourceHdr*  pres;   // KindOfResource
   Class*        pcls;   // only in vm stack, no type tag.
   RefData*      pref;   // KindOfRef
+  MaybeCountable* pcnt; // for alias-safe generic refcounting operations
 };
 
 enum VarNrFlag { NR_FLAG = 1<<29 };

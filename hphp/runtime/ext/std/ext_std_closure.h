@@ -31,10 +31,12 @@ extern const StaticString s_Closure;
 
 // native data for closures. Memory layout looks like this:
 // [ClosureHdr][ObjectData, kind=Closure][captured vars]
-struct ClosureHdr {
-  HeaderWord<> hdr;
-  uint32_t& size() { return hdr.lo32; }
-  uint32_t size() const { return hdr.lo32; }
+struct ClosureHdr : HeapObject {
+  explicit ClosureHdr(uint32_t size) {
+    initHeader(HeaderKind::ClosureHdr, size);
+  }
+  uint32_t& size() { return m_aux32; }
+  uint32_t size() const { return m_aux32; }
   static constexpr uintptr_t kClassBit = 0x1;
   bool ctxIsClass() const {
     return ctx_bits & kClassBit;

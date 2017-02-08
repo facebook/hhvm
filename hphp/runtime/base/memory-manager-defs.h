@@ -52,14 +52,14 @@ namespace HPHP {
 // union of all the possible header types, and some utilities
 struct Header {
   HeaderKind kind() const {
-    assert(unsigned(hdr_.kind) <= NumHeaderKinds);
-    return hdr_.kind;
+    assert(unsigned(hdr_.kind()) <= NumHeaderKinds);
+    return hdr_.kind();
   }
 
   public:
   size_t allocSize() const {
     auto const sz = size();
-    switch (hdr_.kind) {
+    switch (kind()) {
       case HeaderKind::Hole:
       case HeaderKind::Free:
       case HeaderKind::BigObj:
@@ -138,10 +138,7 @@ struct Header {
 
 public:
   union {
-    struct {
-      HeaderWord<> hdr_;
-      uint64_t q;
-    };
+    MaybeCountable hdr_;
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;

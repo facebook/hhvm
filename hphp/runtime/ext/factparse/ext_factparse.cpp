@@ -21,6 +21,7 @@
 
 #include <fstream>
 
+#include <folly/Conv.h>
 #include <folly/MPMCQueue.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -314,7 +315,8 @@ Array HHVM_FUNCTION(
 }
 
 struct FactparseExtension : Extension {
-  FactparseExtension() : Extension("factparse") {}
+  // See ext_factparse.php for version number bumps overview.
+  FactparseExtension() : Extension("factparse", "3") {}
   void moduleInit() override {
     HHVM_FALIAS(HH\\facts_parse, HH_facts_parse);
     loadSystemlib();

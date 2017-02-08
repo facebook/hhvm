@@ -41,3 +41,15 @@ let get_file_position_field obj =
   get_filename_field obj >>= fun filename ->
   get_position_field obj >>= fun position ->
   Result.Ok { filename; position; }
+
+let parse_range_field range =
+  get_start_field range >>= fun st ->
+  get_end_field range >>= fun ed ->
+  Result.Ok { Ide_api_types.st; ed; }
+
+let get_range_field obj = get_obj_field "range" obj >>= parse_range_field
+
+let get_file_range_field obj =
+  get_filename_field obj >>= fun range_filename ->
+  get_range_field obj >>= fun file_range ->
+  Result.Ok { range_filename; file_range; }

@@ -213,6 +213,11 @@ let handle_request conn id protocol = function
     let filename, line, column = file_position_to_tuple args in
     let r = rpc conn (Rpc.IDE_HIGHLIGHT_REFS (filename, line, column)) in
     print_response id protocol (Highlight_references_response r)
+  | Format args ->
+    begin match rpc conn (Rpc.IDE_FORMAT args) with
+      | Result.Ok r -> print_response id protocol (Format_response r)
+      | Result.Error e -> handle_error id protocol (Server_error e)
+    end
   | Did_open_file { did_open_file_filename; did_open_file_text; } ->
     rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))
   | Did_close_file { did_close_file_filename; } ->

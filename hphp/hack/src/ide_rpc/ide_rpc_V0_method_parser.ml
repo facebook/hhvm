@@ -47,6 +47,10 @@ let parse_file_position method_name params =
   assert_params_required method_name params >>=
   get_file_position_field
 
+let parse_file_range method_name params =
+  assert_params_required method_name params >>=
+  get_file_range_field
+
 let parse_infer_type method_name params =
   parse_file_position method_name params >>= fun file_position ->
   Result.Ok (Infer_type file_position)
@@ -68,6 +72,10 @@ let parse_highlight_references method_name params =
   parse_file_position method_name params >>= fun file_position ->
   Result.Ok (Highlight_references file_position)
 
+let parse_format method_name params =
+  parse_file_range method_name params >>= fun file_range ->
+  Result.Ok (Format file_range)
+
 let parse_method method_name params = match method_name with
   | "init" -> parse_init method_name params
   | "didOpenFile" -> parse_did_open_file method_name params
@@ -77,6 +85,7 @@ let parse_method method_name params = match method_name with
   | "outline" -> parse_outline method_name params
   | "findReferences" -> parse_find_references method_name params
   | "highlightReferences" -> parse_highlight_references method_name params
+  | "format" -> parse_format method_name params
   | _ -> delegate_to_previous_version method_name params
 
 let parse ~method_name ~params =

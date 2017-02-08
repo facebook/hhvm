@@ -202,6 +202,7 @@ let to_json ~response = match response with
   | Symbol_by_id_response x -> symbol_by_id_response_to_json x
   | Find_references_response x -> find_references_response_to_json x
   | Highlight_references_response x -> highlight_references_response_to_json x
+  | Format_response _ -> should_not_happen
   | Diagnostics_notification x -> diagnostics_to_json x
 
 let print_json ~response =

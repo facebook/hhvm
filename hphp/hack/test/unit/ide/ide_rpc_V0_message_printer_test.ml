@@ -285,6 +285,15 @@ let test_highlight_references_response () =
     ]
   }|}
 
+let test_format_response () =
+  let response = Format_response "aaaa" in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": "aaaa"
+  }|}
+
 let tests = [
   "test_method_not_found", test_method_not_found;
   "test_init_response", test_init_response;
@@ -294,6 +303,7 @@ let tests = [
   "test_infer_type_response", test_infer_type_response;
   "test_find_references_response", test_find_references_response;
   "test_highlight_references_response", test_highlight_references_response;
+  "test_format_response", test_format_response;
 ]
 
 let () =

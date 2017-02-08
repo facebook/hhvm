@@ -48,3 +48,17 @@ let go genv content from to_ =
   end else
     let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
     Format_hack.region modes Path.dummy_path from to_ content
+
+let format_result_to_ide_response x =
+  let open Format_hack in
+  match x with
+  | Disabled_mode -> Result.Error ("Not a Hack file")
+  | Parsing_error _ -> Result.Error ("File has parse errors")
+  | Internal_error -> Result.Error ("Formatter internal error")
+  | Success s -> Result.Ok s
+
+let go_ide genv content range =
+  let open Ide_api_types in
+  let from, to_ = File_content.get_offsets content (range.st, range.ed) in
+  go genv content from to_ |>
+  format_result_to_ide_response

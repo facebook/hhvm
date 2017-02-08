@@ -471,3 +471,17 @@ File-wide search for other references of symbol at given position. Very similar 
 *Server response:*
 
     Range[]
+
+### Format request
+
+Format selected file range.
+
+    method : "format"
+    params : FileRange
+
+Server response:
+
+    /**
+     * Entire new file contents after formatting the range.
+     */
+    string

@@ -25,6 +25,7 @@ type request =
   | Outline of string
   | Find_references of file_position
   | Highlight_references of file_position
+  | Format of file_range
   | Did_open_file of did_open_file_params
   | Did_close_file of did_close_file_params
   | Did_change_file of did_change_file_params
@@ -62,6 +63,7 @@ type response =
   | Outline_response of outline_response
   | Find_references_response of find_references_response
   | Highlight_references_response of highlight_references_response
+  | Format_response of format_response
   | Diagnostics_notification of diagnostics_notification
 
 and init_response = {
@@ -107,6 +109,8 @@ and find_references_response_ = {
 and find_references_response = find_references_response_ option
 
 and highlight_references_response = range list
+
+and format_response = string
 
 and diagnostics_notification = {
   subscription_id : int; (* Nuclide-rpc specific *)

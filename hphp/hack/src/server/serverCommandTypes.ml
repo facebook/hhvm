@@ -40,7 +40,8 @@ type _ t =
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | KILL : unit t
-  | FORMAT : string * int * int -> string Format_hack.return t
+  | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
+  | IDE_FORMAT : ServerFormatTypes.ide_action -> ServerFormatTypes.ide_result t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t

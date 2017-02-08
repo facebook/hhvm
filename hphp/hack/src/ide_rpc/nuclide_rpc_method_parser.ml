@@ -33,17 +33,14 @@ let parse_did_close_file_params params =
   get_filename_field params >>= fun did_close_file_filename ->
   Result.Ok { did_close_file_filename; }
 
-let parse_range range =
-  get_start_field range >>= fun st ->
-  get_end_field range >>= fun ed ->
-  Result.Ok (Some { Ide_api_types.st; ed; })
-
 let parse_edit edit =
   get_text_field edit >>= fun text ->
   maybe_get_obj_field "range" edit >>= fun range_opt ->
   (match range_opt with
-  | None -> Result.Ok None
-  | Some range -> parse_range range) >>= fun range ->
+    | None -> Result.Ok None
+    | Some range ->
+      (parse_range_field range >>= (fun r -> Result.Ok (Some r)))
+  ) >>= fun range ->
   Result.Ok { Ide_api_types.text; range; }
 
 let accumulate_edits edit acc =

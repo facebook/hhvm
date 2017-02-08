@@ -145,6 +145,38 @@ let test_highlight_references () =
     }
   )
 
+let test_format () =
+  let msg = build_request_message "format"
+    {|
+      "filename" : "baz.php",
+      "range" : {
+        "start" : {
+          "line" : 1,
+          "column" : 7
+        },
+        "end" : {
+          "line" : 8,
+          "column" : 1
+        }
+      }
+    |} in
+  test msg @@
+  expect_api_message (
+    Format {
+      range_filename = "baz.php";
+      file_range = {
+        st = {
+          line = 1;
+          column = 7;
+        };
+        ed = {
+          line = 8;
+          column = 1;
+        }
+      }
+    }
+  )
+
 let tests = [
   "test_init", test_init;
   "test_did_open_file", test_did_open_file;
@@ -154,6 +186,7 @@ let tests = [
   "test_outline", test_outline;
   "test_find_references", test_find_references;
   "test_highlight_references", test_highlight_references;
+  "test_format", test_format;
 ]
 
 let () =

@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2015, Facebook, Inc.
+ * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,11 +8,9 @@
  *
  *)
 
-open Ide_api_types
 
-val edit_file : string -> text_edit list -> (string, string) Result.t
+type action = string * int * int (* file contents, offset start, offset end *)
+type result = string Format_hack.return
 
-val edit_file_unsafe : string -> text_edit list -> string
-
-val get_offsets :
-  string -> position * position -> int * int
+type ide_action = Ide_api_types.file_range
+type ide_result = (Ide_message.format_response, string) Result.t

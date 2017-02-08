@@ -237,7 +237,11 @@ let add_constraint_with_fail env ck ty_sub ty_super fail =
  * want to produce an error. (For example, if after instantiation a
  * constraint becomes C<string> as C<int>)
  *)
-let add_constraint env ck ty_sub ty_super =
+let add_constraint p env ck ty_sub ty_super =
+  Typing_log.log_types p env
+    [Typing_log.Log_sub ("add_constraint",
+       [Typing_log.Log_type ("ty_sub", ty_sub);
+        Typing_log.Log_type ("ty_super", ty_super)])];
   add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
 
 let rec subtype_params env subl superl =
@@ -357,12 +361,12 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let tparam_ty = (Reason.Rwitness pos,
           Tabstract(AKgeneric name, None)) in
-        add_constraint env ck tparam_ty ty) in
+        add_constraint pos env ck tparam_ty ty) in
     List.fold_left tparams ~f:add_bound ~init: env in
 
   let add_where_constraints env (cstrl: locl where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-      add_constraint env ck ty1 ty2) in
+      add_constraint p_sub env ck ty1 ty2) in
 
   let env =
     add_tparams_constraints env ft_super.ft_tparams in
@@ -494,6 +498,10 @@ and sub_type env ty_sub ty_super =
  *      sub_type env int string => error
 *)
 and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
+  Typing_log.log_types (Reason.to_pos (fst ty_sub)) env
+    [Typing_log.Log_sub ("sub_type_with_uenv",
+      [Typing_log.Log_type ("ty_sub", ty_sub);
+       Typing_log.Log_type ("ty_super", ty_super)])];
   let env, ety_super =
     Env.expand_type env ty_super in
   let env, ety_sub =
@@ -885,6 +893,10 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     ) -> fst (Unify.unify env ty_super ty_sub)
 
 and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
+  Typing_log.log_types (Reason.to_pos (fst ty_sub)) env
+    [Typing_log.Log_sub ("sub_generic_params",
+      [Typing_log.Log_type ("ty_sub", ty_sub);
+       Typing_log.Log_type ("ty_super", ty_super)])];
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   match ety_sub, ety_super with

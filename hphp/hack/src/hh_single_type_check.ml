@@ -207,7 +207,8 @@ let builtins =
   "function meth_caller(string $cls_name, string $meth_name);\n"^
   "namespace HH\\Asio {"^
   "  function va(...$args);\n"^
-  "}\n"
+  "}\n"^
+  "function hh_log_level(int $level) {}\n"
 
 (*****************************************************************************)
 (* Helpers *)

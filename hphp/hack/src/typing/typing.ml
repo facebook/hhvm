@@ -880,6 +880,11 @@ and lvalue env e =
   let valkind = `lvalue in
   expr_ ~in_cond:false ~valkind env e
 
+and is_pseudo_function s =
+  s = SN.PseudoFunctions.hh_show ||
+  s = SN.PseudoFunctions.hh_show_env ||
+  s = SN.PseudoFunctions.hh_log_level
+
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
@@ -1276,24 +1281,26 @@ and expr_
       let is_lvalue = (valkind == `lvalue) in
       let env, ty = array_get is_lvalue p env ty1 e2 ty2 in
       make_result env (T.Array_get(te1, Some te2)) ty
-  | Call (Cnormal, (p2, Id ((_, hh_show) as id)), [x], [])
-      when hh_show = SN.PseudoFunctions.hh_show ->
-      let env, te, ty = expr env x in
-      Typing_log.hh_show p env ty;
+  | Call (Cnormal, (pos_id, Id ((_, s) as id)), el, [])
+      when is_pseudo_function s ->
+      let env, tel, tys = exprs env el in
+      if s = SN.PseudoFunctions.hh_show
+      then List.iter tys (Typing_log.hh_show p env)
+      else
+      if s = SN.PseudoFunctions.hh_show_env
+      then Typing_log.hh_show_env p env
+      else
+      if s = SN.PseudoFunctions.hh_log_level
+      then match el with
+        | [(_, Int (_, level_str))] ->
+          Typing_log.hh_log_level (int_of_string level_str)
+        | _ -> ()
+      else ();
       make_result env
         (T.Call(
           Cnormal,
-          T.make_implicitly_typed_expr p2 (T.Id id),
-          [te],
-          [])) (Env.fresh_type())
-  | Call (Cnormal, (p2, Id ((_, hh_show_env) as id)), [], [])
-      when hh_show_env = SN.PseudoFunctions.hh_show_env ->
-      Typing_log.hh_show_env p env;
-      make_result env
-        (T.Call(
-          Cnormal,
-          T.make_implicitly_typed_expr p2 (T.Id id),
-          [],
+          T.make_implicitly_typed_expr pos_id (T.Id id),
+          tel,
           [])) (Env.fresh_type())
   | Call (call_type, e, el, uel) ->
       let env, te, result = dispatch_call p env call_type e el uel in
@@ -4136,7 +4143,7 @@ and condition env tparamet =
               (* Substitute fresh type parameters for
                * original formals in constraint *)
             let env, ty = Phase.localize ~ety_env env ty in
-            SubType.add_constraint env ck ty_fresh ty end in
+            SubType.add_constraint p env ck ty_fresh ty end in
         let env =
           List.fold_left (List.zip_exn class_info.tc_tparams tyl_fresh)
             ~f:add_bounds ~init:env in
@@ -4150,7 +4157,7 @@ and condition env tparamet =
          * Then SubType.add_constraint will deduce that T=int and add int as
          * both lower and upper bound on T in env.lenv.tpenv
          *)
-        let env = SubType.add_constraint env Ast.Constraint_as obj_ty x_ty in
+         let env = SubType.add_constraint p env Ast.Constraint_as obj_ty x_ty in
         env, obj_ty in
 
         if SubType.is_sub_type env obj_ty (
@@ -4292,7 +4299,7 @@ and is_array env ty p pred_name arg_expr =
   let r = Reason.Rpredicated (p, pred_name) in
   let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" in
   let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
-  let env = SubType.add_constraint env Ast.Constraint_as
+  let env = SubType.add_constraint p env Ast.Constraint_as
       tarrkey (r, Tprim Tarraykey) in
   let env, tfresh_name = Env.add_fresh_generic_parameter env "T" in
   let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
@@ -4310,7 +4317,7 @@ and is_array env ty p pred_name arg_expr =
   (* Add constraints on generic parameters that must
    * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
    * and refined_ty is keyset<T#1> then we know T#1 <: T *)
-  let env = SubType.add_constraint env Ast.Constraint_as refined_ty arg_ty in
+  let env = SubType.add_constraint p env Ast.Constraint_as refined_ty arg_ty in
   match arg_expr with
   | (_, Class_get (cname, (_, member_name))) ->
       let env, local = Env.FakeMembers.make_static p env cname member_name in
@@ -4654,7 +4661,7 @@ and localize_where_constraints
       Phase.localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
     let env, ty2 =
       Phase.localize env (Decl_hint.hint env.Env.decl_env h2) ~ety_env in
-    SubType.add_constraint env ck ty1 ty2
+    SubType.add_constraint (fst h1) env ck ty1 ty2
   in
   List.fold_left where_constraints ~f:add_constraint ~init:env
 

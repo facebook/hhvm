@@ -182,13 +182,17 @@ let log_fake_members env =
     SSet.iter (lprintf (Normal Green) " %s") fakes.Env.valid;
     lnewline ())
 
-let log_position p =
+let log_position p f =
   let n =
     match Pos.Map.get p !iterations with
     | None -> iterations := Pos.Map.add p 1 !iterations; 1
     | Some n -> iterations := Pos.Map.add p (n+1) !iterations; n+1 in
-  indentEnv (Pos.string (Pos.to_absolute p)
-    ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]"))
+  (* If we've hit this many iterations then something must have gone wrong
+   * so let's not bother spewing to the log *)
+  if n > 10000 then ()
+  else
+    indentEnv (Pos.string (Pos.to_absolute p)
+      ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")) f
 
 (* Log the environment: local_types, subst, tenv and tpenv *)
 let hh_show_env p env =
@@ -207,19 +211,33 @@ let hh_show p env ty =
     (fun () ->
        lprintf (Normal Green) "%s" s; lnewline ())
 
-let log_type p env message ty =
-  let s = Typing_print.debug_with_tvars env ty in
-  log_position p
-    (fun () ->
-       lprintf (Bold Green) "%s: " message;
-       lprintf (Normal Green) "%s" s;
-       lnewline ())
+(* Set the logging level *)
+let log_level = ref 0
 
-let log_types p env pairs =
+let hh_log_level n =
+  log_level := n
+
+let get_log_level () =
+  !log_level
+
+(* Simple type of possible log data *)
+type log_structure =
+| Log_sub of string * log_structure list
+| Log_type of string * Typing_defs.locl Typing_defs.ty
+
+let log_types p env items =
+  if get_log_level() > 0 then
   log_position p
     (fun () ->
-       List.iter pairs ~f:(fun (message, ty) ->
-         let s = Typing_print.debug_with_tvars env ty in
-         lprintf (Bold Green) "%s: " message;
-         lprintf (Normal Green) "%s"  s;
-         lnewline ()))
+      let rec go items =
+        List.iter items (fun item ->
+          match item with
+          | Log_sub (message, items) ->
+          indentEnv message (fun () -> go items)
+          | Log_type (message, ty) ->
+            let s = Typing_print.debug_with_tvars env ty in
+            lprintf (Bold Green) "%s: " message;
+            lprintf (Normal Green) "%s" s;
+            lnewline ()) in
+      go items)
+  else ()

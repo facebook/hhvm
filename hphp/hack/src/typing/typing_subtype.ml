@@ -826,12 +826,30 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
           subtype_tparams env name_super variancel tyl_sub tyl_super
         | _ -> env
       end
-  | (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some x)), _ ->
-      Errors.try_
-        (fun () ->
-          fst @@ Unify.unify env ty_super ty_sub
-        )
-        (fun _ -> sub_type_with_uenv env (uenv_sub, x) (uenv_super, ty_super))
+
+  (* Supertype is generic parameter *and* subtype is a newtype with bound.
+   * We need to make this a special case because there is a *choice*
+   * of subtyping rule to apply. See details in the case of dependent type
+   * against generic parameter which is similar
+   *)
+  | (_, Tabstract (AKnewtype (_, _), Some ty)),
+    (_, Tabstract (AKgeneric _, _)) ->
+     Errors.try_
+       (fun () -> fst (Unify.unify env ty_super ty_sub))
+       (fun _ ->
+          Errors.try_
+           (fun () ->
+             sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+           (fun _ ->
+              sub_generic_params SSet.empty env (uenv_sub, ty_sub)
+                (uenv_super, ty_super)))
+
+  | (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some ty)), _ ->
+    Errors.try_
+      (fun () ->
+         fst @@ Unify.unify env ty_super ty_sub
+      )
+      (fun _ ->  sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
 
   (* Supertype is generic parameter *and* subtype is dependent.
    * We need to make this a special case because there is a *choice*

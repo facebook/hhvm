@@ -132,6 +132,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'classname/with_tconst*.php',
         'type_structure/*.php',
         'constraints/class_type_constant*.php',
+        'constraints/constraint_lower_newtype.php',
         'constraints/traits*.php',
         'constraints/constraint_override_super_dependent.php',
         'instantiate_from_unresolved_class_id_type.php',

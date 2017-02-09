@@ -165,6 +165,52 @@ let test_outline_response () =
     ]
   }|}
 
+let test_coverage_levels_response () =
+  let open Ide_api_types in
+  let response = Coverage_levels_response (Range_coverage_levels_response [
+    (
+      {st = {line = 1; column = 1}; ed = {line = 1; column = 10}},
+      Unchecked
+    );
+    (
+      {st = {line = 2; column = 1}; ed = {line = 2; column = 10}},
+      Checked
+    );
+  ]) in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "level": "unchecked",
+        "range": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        }
+      },
+      {
+        "level": "checked",
+        "range": {
+          "start": {
+            "line": 2,
+            "column": 1
+          },
+          "end": {
+            "line": 2,
+            "column": 10
+          }
+        }
+      }
+    ]
+  }|}
+
 let test_autocomplete_response () =
   let response = Autocomplete_response [{
     autocomplete_item_text = "aaa";
@@ -299,6 +345,7 @@ let tests = [
   "test_init_response", test_init_response;
   "test_identify_symbol_response", test_identify_symbol_response;
   "test_outline_response", test_outline_response;
+  "test_coverage_levels_response", test_coverage_levels_response;
   "test_autocomplete_response", test_autocomplete_response;
   "test_infer_type_response", test_infer_type_response;
   "test_find_references_response", test_find_references_response;

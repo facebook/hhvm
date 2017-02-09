@@ -177,6 +177,16 @@ let test_format () =
     }
   )
 
+let test_coverage_levels () =
+  let msg = build_request_message "coverageLevels"
+    {|
+      "filename" : "test.php"
+    |} in
+  test msg @@
+  expect_api_message (
+    Coverage_levels "test.php"
+  )
+
 let tests = [
   "test_init", test_init;
   "test_did_open_file", test_did_open_file;
@@ -187,6 +197,7 @@ let tests = [
   "test_find_references", test_find_references;
   "test_highlight_references", test_highlight_references;
   "test_format", test_format;
+  "test_coverage_levels", test_coverage_levels;
 ]
 
 let () =

@@ -24,6 +24,10 @@ let parse_autocomplete_params params =
   get_position_field params >>= fun position ->
   Result.Ok { Ide_api_types.filename; position; }
 
+let parse_coverage_levels_params params =
+  get_filename_field params >>= fun filename ->
+  Result.Ok filename
+
 let parse_did_open_file_params params =
   get_filename_field params >>= fun did_open_file_filename ->
   get_contents_field params >>= fun did_open_file_text ->
@@ -63,6 +67,11 @@ let parse_autocomplete method_name params =
   parse_autocomplete_params >>= fun params ->
   Result.Ok (Autocomplete params)
 
+let parse_coverage_levels method_name params =
+  assert_params_required method_name params >>=
+  parse_coverage_levels_params >>= fun params ->
+  Result.Ok (Coverage_levels params)
+
 let parse_did_open_file method_name params =
   assert_params_required method_name params >>=
   parse_did_open_file_params >>= fun params ->
@@ -80,6 +89,7 @@ let parse_did_change_file method_name params =
 
 let parse_method method_name params = match method_name with
   | "getCompletions" -> parse_autocomplete method_name params
+  | "coverageLevels" -> parse_coverage_levels method_name params
   | "didOpenFile" -> parse_did_open_file method_name params
   | "didCloseFile" -> parse_did_close_file method_name params
   | "didChangeFile" -> parse_did_change_file method_name params

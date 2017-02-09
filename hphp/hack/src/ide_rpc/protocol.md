@@ -105,7 +105,7 @@ All of the string typed members are intended only to be displayed in editor - th
       /**
        * Symbol definition modifiers, e.g. "static", "async", "private"
        */
-      modifiers : SymbolDefinitionModifier[];  
+      modifiers : SymbolDefinitionModifier[];
       /**
        * For symbols that can contain other symbols
        * (like classes, interfaces, traits, namespaces), symbols contained
@@ -385,15 +385,15 @@ Identify name and kind of symbol at position, locate its definition.
       /**
        * Name of the identified symbol.
        */
-      name : string;    
+      name : string;
       /**
        * Kind of the identified symbol.
        */
-      kind : SymbolOccurrenceKind;    
+      kind : SymbolOccurrenceKind;
       /**
        * Span of the identified symbol occurrence.
        */
-      span : Range;    
+      span : Range;
       /**
        * Symbol definition, if it has one.
        */
@@ -485,3 +485,40 @@ Server response:
      * Entire new file contents after formatting the range.
      */
     string
+
+### Type Coverage Levels Request
+
+Assign coverage levels to input file spans based on the level of their typing coverage.
+
+*Client request:*
+
+    method : "coverageLevels"
+    params : CoverageLevelsParams
+
+where `CoverageLevelsParams` is defined as:
+
+    {
+      /**
+       * Absolute path of the file that we want to get coverage levels for.
+       */
+      filename : string;
+    }
+
+*Server response:*
+
+    CoverageLevelsSpan[]
+
+where `CoverageLevelsSpan` is defined as:
+
+    {
+      level : CoverageLevel;
+      range : Range;
+    }
+
+`CoverageLevel`:
+
+    string enum {
+      default,
+      checked,
+      unchecked,
+    }

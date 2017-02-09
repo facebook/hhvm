@@ -26,6 +26,7 @@ type request =
   | Find_references of file_position
   | Highlight_references of file_position
   | Format of file_range
+  | Coverage_levels of string
   | Did_open_file of did_open_file_params
   | Did_close_file of did_close_file_params
   | Did_change_file of did_change_file_params
@@ -64,6 +65,7 @@ type response =
   | Find_references_response of find_references_response
   | Highlight_references_response of highlight_references_response
   | Format_response of format_response
+  | Coverage_levels_response of coverage_levels_response
   | Diagnostics_notification of diagnostics_notification
 
 and init_response = {
@@ -98,6 +100,11 @@ and identify_symbol_item = {
 }
 
 and outline_response = string SymbolDefinition.t list
+
+and coverage_levels_response =
+  | Range_coverage_levels_response of (range * coverage_level) list
+  | Deprecated_text_span_coverage_levels_response
+      of (coverage_level option * string) list
 
 and symbol_by_id_response = string SymbolDefinition.t option
 

@@ -218,6 +218,11 @@ let handle_request conn id protocol = function
       | Result.Ok r -> print_response id protocol (Format_response r)
       | Result.Error e -> handle_error id protocol (Server_error e)
     end
+  | Coverage_levels filename ->
+    let filename = ServerUtils.FileName filename in
+    rpc conn (Rpc.COVERAGE_LEVELS filename) |>
+    Coverage_level.result_to_ide_message |>
+    print_response id protocol
   | Did_open_file { did_open_file_filename; did_open_file_text; } ->
     rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))
   | Did_close_file { did_close_file_filename; } ->

@@ -76,6 +76,11 @@ let parse_format method_name params =
   parse_file_range method_name params >>= fun file_range ->
   Result.Ok (Format file_range)
 
+let parse_coverage_levels method_name params =
+  assert_params_required method_name params >>=
+  get_filename_field >>= fun filename ->
+  Result.Ok (Coverage_levels filename)
+
 let parse_method method_name params = match method_name with
   | "init" -> parse_init method_name params
   | "didOpenFile" -> parse_did_open_file method_name params
@@ -86,6 +91,7 @@ let parse_method method_name params = match method_name with
   | "findReferences" -> parse_find_references method_name params
   | "highlightReferences" -> parse_highlight_references method_name params
   | "format" -> parse_format method_name params
+  | "coverageLevels" -> parse_coverage_levels method_name params
   | _ -> delegate_to_previous_version method_name params
 
 let parse ~method_name ~params =

@@ -92,6 +92,19 @@ let rec symbol_definition_to_json ?include_filename def =
 and outline_response_to_json x =
   JSON_Array (List.map x ~f:symbol_definition_to_json)
 
+let coverage_levels_response_to_json x = match x with
+  | Range_coverage_levels_response spans ->
+      let span_to_json (range, level) =
+        JSON_Object [
+          ("level", JSON_String (Coverage_level.string_of_level level));
+          ("range", range_to_json range);
+        ]
+      in
+      JSON_Array (List.map spans ~f:span_to_json)
+  | deprecated_response ->
+      let response = Coverage_levels_response deprecated_response in
+      Nuclide_rpc_message_printer.to_json ~response
+
 let identify_symbol_response_to_json results =
   JSON_Array (List.map results ~f:begin fun { occurrence; definition } ->
     let definition = Option.value_map definition
@@ -133,5 +146,6 @@ let to_json ~id:_ ~response =
   | Find_references_response x -> find_references_response_to_json x
   | Highlight_references_response x -> highlight_references_response_to_json x
   | Format_response x -> format_response_to_json x
+  | Coverage_levels_response x -> coverage_levels_response_to_json x
   (* Delegate unhandled messages to previous version of API *)
   | _ -> Nuclide_rpc_message_printer.to_json ~response

@@ -966,6 +966,8 @@ class EditableToken extends EditableSyntax
        return new BinaryLiteralToken(leading, trailing, token_text);
     case 'floating_literal':
        return new FloatingLiteralToken(leading, trailing, token_text);
+    case 'execution_string':
+       return new ExecutionStringToken(leading, trailing, token_text);
     case 'single_quoted_string_literal':
        return new SingleQuotedStringLiteralToken(leading, trailing, token_text);
     case 'double_quoted_string_literal':
@@ -2272,6 +2274,18 @@ class FloatingLiteralToken extends EditableToken
   with_text(text)
   {
     return new FloatingLiteralToken(this.leading, this.trailing, text);
+  }
+
+}
+class ExecutionStringToken extends EditableToken
+{
+  constructor(leading, trailing, text)
+  {
+    super('execution_string', leading, trailing, text);
+  }
+  with_text(text)
+  {
+    return new ExecutionStringToken(this.leading, this.trailing, text);
   }
 
 }
@@ -16009,6 +16023,7 @@ exports.OctalLiteralToken = OctalLiteralToken;
 exports.HexadecimalLiteralToken = HexadecimalLiteralToken;
 exports.BinaryLiteralToken = BinaryLiteralToken;
 exports.FloatingLiteralToken = FloatingLiteralToken;
+exports.ExecutionStringToken = ExecutionStringToken;
 exports.SingleQuotedStringLiteralToken = SingleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralToken = DoubleQuotedStringLiteralToken;
 exports.DoubleQuotedStringLiteralHeadToken = DoubleQuotedStringLiteralHeadToken;

@@ -280,6 +280,35 @@ let scan_decimal_or_float lexer =
   | 'e' | 'E' -> (* 123e *) scan_exponent lexer
   | _ -> (* 123 *) (lexer, TokenKind.DecimalLiteral)
 
+
+let scan_execution_string_literal lexer =
+  (* TODO: PHP supports literals of the form `command` where the command
+  is then executed as a shell command.  Hack does not support this.
+  We should give an error if this feature is used in Hack, but we should lex
+  it anyways to give a good error message.
+
+  TODO: Can execution strings have embedded expressions like double-quoted
+  strings?
+
+  TODO: Are there any escape sequences in execution strings?
+
+  TODO: Are there any illegal characters in execution strings?
+  *)
+
+  let rec aux lexer =
+    let ch = peek_char lexer 0 in
+    match ch with
+    | '\000' ->
+      if at_end lexer then
+        let lexer = with_error lexer SyntaxError.error0012 in
+        (lexer, TokenKind.ExecutionString)
+      else
+        let lexer = with_error lexer SyntaxError.error0006 in
+        aux (advance lexer 1)
+    | '`' -> (advance lexer 1, TokenKind.ExecutionString)
+    | _ -> aux (advance lexer 1) in
+  aux (advance lexer 1)
+
 let scan_single_quote_string_literal lexer =
   (* TODO: What about newlines embedded? *)
   (* SPEC:
@@ -882,6 +911,7 @@ let scan_token in_type lexer =
   | ('7', _, _)
   | ('8', _, _)
   | ('9', _, _) -> scan_decimal_or_float lexer
+  | ('`', _, _) -> scan_execution_string_literal lexer
   | ('\'', _, _) -> scan_single_quote_string_literal lexer
   | ('"', _, _) -> scan_double_quote_string_literal_from_start lexer
   | ('\\', _, _) -> scan_qualified_name lexer

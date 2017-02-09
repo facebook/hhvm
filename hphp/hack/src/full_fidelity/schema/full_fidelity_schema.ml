@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-01-27-0001"
+let full_fidelity_schema_version_number = "2017-02-06-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -1103,6 +1103,7 @@ let variable_text_tokens = List.map token_node_from_list [
   [ "HexadecimalLiteral"; "hexadecimal_literal" ];
   [ "BinaryLiteral"; "binary_literal" ];
   [ "FloatingLiteral"; "floating_literal" ];
+  [ "ExecutionString"; "execution_string" ];
   [ "SingleQuotedStringLiteral"; "single_quoted_string_literal" ];
   [ "DoubleQuotedStringLiteral"; "double_quoted_string_literal" ];
   [ "DoubleQuotedStringLiteralHead"; "double_quoted_string_literal_head" ];

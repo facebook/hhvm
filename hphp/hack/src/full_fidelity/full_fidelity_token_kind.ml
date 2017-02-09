@@ -187,6 +187,7 @@ type t =
   | HexadecimalLiteral
   | BinaryLiteral
   | FloatingLiteral
+  | ExecutionString
   | SingleQuotedStringLiteral
   | DoubleQuotedStringLiteral
   | DoubleQuotedStringLiteralHead
@@ -538,6 +539,7 @@ match kind with
   | HexadecimalLiteral -> "hexadecimal_literal"
   | BinaryLiteral -> "binary_literal"
   | FloatingLiteral -> "floating_literal"
+  | ExecutionString -> "execution_string"
   | SingleQuotedStringLiteral -> "single_quoted_string_literal"
   | DoubleQuotedStringLiteral -> "double_quoted_string_literal"
   | DoubleQuotedStringLiteralHead -> "double_quoted_string_literal_head"

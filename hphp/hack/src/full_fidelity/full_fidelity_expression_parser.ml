@@ -108,6 +108,8 @@ module WithStatementAndDeclAndTypeParser
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other parser in
     match (Token.kind token) with
+    | ExecutionString -> (* TODO: Make these an error in Hack *)
+       (parser1, make_literal_expression (make_token token))
     | DecimalLiteral
     | OctalLiteral
     | HexadecimalLiteral
@@ -935,6 +937,7 @@ module WithStatementAndDeclAndTypeParser
     | DoubleQuotedStringLiteralHead
     | StringLiteralBody
     | DoubleQuotedStringLiteralTail
+    | ExecutionString
     | FloatingLiteral
     | HeredocStringLiteral
     | HeredocStringLiteralHead

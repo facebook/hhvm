@@ -108,7 +108,7 @@ let find_extended_classes_in_files_parallel tcopt workers target_class_name
 
 (* Find child classes *)
 let get_child_classes_and_methods tcopt cls files_info workers =
-  let files = FindRefsService.get_child_classes_files tcopt cls.tc_name in
+  let files = FindRefsService.get_child_classes_files cls.tc_name in
   find_extended_classes_in_files_parallel tcopt
     workers cls.tc_name cls.tc_methods cls.tc_pos files_info files
 

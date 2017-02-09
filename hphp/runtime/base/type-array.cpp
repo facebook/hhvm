@@ -311,6 +311,7 @@ Array &Array::plusImpl(ArrayData *data) {
   if (m_arr == nullptr || data == nullptr) {
     throw_bad_array_merge();
   }
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
   if (!data->empty()) {
     if (m_arr->empty()) {
       m_arr = data;

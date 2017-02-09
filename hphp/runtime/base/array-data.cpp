@@ -1217,6 +1217,10 @@ void raiseHackArrCompatRefIter() {
   raise_hackarr_compat_notice("Ref binding iteration on array");
 }
 
+void raiseHackArrCompatAdd() {
+  raise_hackarr_compat_notice("Using + operator on arrays");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

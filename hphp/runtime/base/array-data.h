@@ -711,6 +711,8 @@ void raiseHackArrCompatRefBind(const StringData*);
 void raiseHackArrCompatRefNew();
 void raiseHackArrCompatRefIter();
 
+void raiseHackArrCompatAdd();
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

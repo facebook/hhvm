@@ -174,6 +174,8 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   assertx(a1->isPHPArray());
   assertx(a2->isPHPArray());
 
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
+
   if (!a2->empty()) {
     if (a1->empty()) {
       // We consume refs on a2 and also produce references, so there's

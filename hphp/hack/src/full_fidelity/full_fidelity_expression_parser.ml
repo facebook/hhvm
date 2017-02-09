@@ -28,9 +28,7 @@ module WithStatementAndDeclAndTypeParser
   include PrecedenceParser
   include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
 
-  (* This method is unused right now; in the event that we need a type
-  parser for instanceof, cast operator, etc, in the future, it's here. *)
-  let _parse_type_specifier parser =
+  let parse_type_specifier parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
     let lexer = TypeParser.lexer type_parser in
@@ -732,6 +730,10 @@ module WithStatementAndDeclAndTypeParser
           scope-resolution-expression
           subscript-expression
           variable-name
+
+TODO: Update the spec to allow qualified-name < type arguments >
+TODO: This will need to be fixed to allow situations where the qualified name
+      is also a non-reserved token.
     *)
     let (parser1, token) = next_token parser in
     let kind = peek_token_kind parser1 in
@@ -740,6 +742,11 @@ module WithStatementAndDeclAndTypeParser
     | Self
     | Static when kind = LeftParen ->
       (parser1, make_token token)
+    | Name
+    | QualifiedName when kind = LeftParen || kind = LessThan ->
+      (* We want to parse new C() and new C<int>() as types, but
+      new C::$x() as an expression. *)
+      parse_type_specifier parser
     | _ ->
         parse_expression_with_operator_precedence parser Operator.NewOperator
         (* TODO: We need to verify in a later pass that the expression is a

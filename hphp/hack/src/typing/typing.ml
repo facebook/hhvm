@@ -809,7 +809,7 @@ and case_list_ parent_lenv ty env = function
 and catch parent_lenv after_try env (ety, exn, b) =
   let env = { env with Env.lenv = after_try } in
   let env = LEnv.fully_integrate env parent_lenv in
-  let cid = CI ety in
+  let cid = CI (ety, []) in
   let ety_p = (fst ety) in
   TUtils.process_class_id cid;
   let env, _, _ = instantiable_cid ety_p env cid in
@@ -1154,7 +1154,7 @@ and expr_
         let env, local_obj_ty = Phase.localize ~ety_env env obj_type in
         let env, fty =
           obj_get ~is_method:true ~nullsafe:None env local_obj_ty
-                 (CI (pos, class_name)) meth_name (fun x -> x) in
+                 (CI ((pos, class_name), [])) meth_name (fun x -> x) in
         (match fty with
         | reason, Tfun fty ->
             check_deprecated p fty;
@@ -1212,7 +1212,7 @@ and expr_
         smember_not_found p ~is_const:false ~is_method:true class_ (snd meth);
         expr_error env Reason.Rnone
       | Some { ce_type = lazy ty; ce_visibility; _ } ->
-        let cid = CI c in
+        let cid = CI (c, []) in
         let env, _te, cid_ty = static_class_id (fst c) env cid in
         let ety_env = {
           type_expansions = [];
@@ -1544,7 +1544,7 @@ and expr_
       (* TODO TAST: introduce lambda node in Tast.expr *)
       make_result env T.Any (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
-      let cid = CI sid in
+      let cid = CI (sid, []) in
       let env, _te, obj = expr env (fst sid, New (cid, [], [])) in
       let env, attr_ptyl = List.map_env env attrl begin fun env attr ->
         (* Typecheck the expressions - this just checks that the expressions are
@@ -1770,11 +1770,16 @@ and new_object ~check_not_abstract p env cid el uel =
       if check_not_abstract && class_info.tc_abstract
         && not (requires_consistent_construct cid) then
         uninstantiable_error p cid class_info.tc_pos class_info.tc_name p c_ty;
-      let env, params = List.map_env env class_info.tc_tparams
-        (fun env _ ->Env.fresh_unresolved_type env) in
-      let env = call_construct p env class_info params el uel cid in
+      let env, obj_ty_, params =
+        match cid, snd c_ty with
+        | CI (_, _::_), Tclass(_, tyl) -> env, (snd c_ty), tyl
+        | _, _ ->
+          let env, params = List.map_env env class_info.tc_tparams
+            (fun env _ -> Env.fresh_unresolved_type env) in
+          env, (Tclass (cname, params)), params in
       let r_witness = Reason.Rwitness p in
-      let obj_ty = r_witness, Tclass (cname, params) in
+      let obj_ty = (r_witness, obj_ty_) in
+      let env = call_construct p env class_info params el uel cid in
       if not (snd class_info.tc_construct) then
         (match cid with
           | CIstatic -> Errors.new_inconsistent_construct p cname `static
@@ -1865,7 +1870,7 @@ and check_shape_keys_validity env pos keys =
              (Errors.invalid_shape_field_name_number key_pos);
            env, key_pos, None
         | SFclass_const (_, cls as x, y) ->
-          let env, _te, ty = class_const env pos (CI x, y) in
+          let env, _te, ty = class_const env pos (CI (x, []), y) in
           let env = Typing_enum.check_valid_array_key_type
             Errors.invalid_shape_field_type ~allow_any:false
             env key_pos ty in
@@ -2540,7 +2545,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       | None -> unbound_name env id)
 
   (* Special function `Shapes::idx` *)
-  | Class_const (CI(_, shapes) as class_id, ((_, idx) as method_id))
+  | Class_const (CI((_, shapes), _) as class_id, ((_, idx) as method_id))
       when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
       overload_function p env class_id method_id el uel
       begin fun env fty res el -> match el with
@@ -2555,7 +2560,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
         | _ -> env, res
       end
    (* Special function `Shapes::keyExists` *)
-   | Class_const (CI(_, shapes) as class_id, ((_, key_exists) as method_id))
+   | Class_const (CI((_, shapes), _) as class_id, ((_, key_exists) as method_id))
       when shapes = SN.Shapes.cShapes && key_exists = SN.Shapes.keyExists ->
       overload_function p env class_id method_id el uel
       begin fun env fty res el -> match el with
@@ -2569,7 +2574,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
         | _  -> env, res
       end
    (* Special function `Shapes::removeKey` *)
-   | Class_const (CI(_, shapes) as class_id, ((_, remove_key) as method_id))
+   | Class_const (CI((_, shapes), _) as class_id, ((_, remove_key) as method_id))
       when shapes = SN.Shapes.cShapes && remove_key = SN.Shapes.removeKey ->
       overload_function p env class_id method_id el uel
       begin fun env _ res el -> match el with
@@ -2587,7 +2592,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
         | _  -> env, res
       end
   (* Special function `Shapes::toArray` *)
-  | Class_const (CI(_, shapes) as class_id, ((_, to_array) as method_id))
+  | Class_const (CI((_, shapes), _) as class_id, ((_, to_array) as method_id))
     when shapes = SN.Shapes.cShapes && to_array = SN.Shapes.toArray ->
     overload_function p env class_id method_id el uel
     begin fun env _ res el -> match el with
@@ -2662,7 +2667,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
                 | _ -> Errors.self_abstract_call (snd m) p (Reason.to_pos (fst fty))
               )
             | _ -> ())
-        | CI c when is_abstract_ft fty ->
+        | CI (c, _) when is_abstract_ft fty ->
           Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
         | _ -> () in
       call p env fty el uel
@@ -3407,6 +3412,31 @@ and trait_most_concrete_req_class trait env =
       )
   end ~init:None
 
+(* For explicit type arguments we support a wildcard syntax `_` for which
+ * Hack will generate a fresh type variable
+ *)
+and type_argument env hint =
+  match hint with
+  | (_, Happly((_, "_"), [])) ->
+    Env.fresh_unresolved_type env
+  | _ ->
+    Phase.hint_locl env hint
+
+(* If there are no explicit type arguments then generate fresh type variables
+ * for all of them. Otherwise, check the arity, and use the explicit types *)
+and type_arguments env p class_name tparams hintl =
+  let default () = List.map_env env tparams begin fun env _ ->
+    Env.fresh_unresolved_type env end in
+  if hintl = []
+  then default ()
+  else if List.length hintl != List.length tparams
+  then begin
+    Errors.type_arity p class_name (string_of_int (List.length tparams));
+    default ()
+  end
+  else
+    List.map_env env hintl type_argument
+
 (* When invoking a method the class_id is used to determine what class we
  * lookup the method in, but the type of 'this' will be the late bound type.
  * For example:
@@ -3490,16 +3520,15 @@ and static_class_id p env =
   | CIself ->
     make_result env T.CIself
       (Reason.Rwitness p, snd (Env.get_self env))
-  | CI c ->
+  | CI (c, hl) ->
     let class_ = Env.get_class env (snd c) in
     (match class_ with
       | None ->
-        make_result env (T.CI c) (Reason.Rnone, Tany)
+        make_result env (T.CI (c, hl)) (Reason.Rnone, Tany)
       | Some class_ ->
-        let env, params = List.map_env env class_.tc_tparams begin fun env _ ->
-          Env.fresh_unresolved_type env
-        end in
-        make_result env (T.CI c) (Reason.Rwitness (fst c), Tclass (c, params))
+        let env, tyl = type_arguments env p (snd c) class_.tc_tparams hl in
+        make_result env (T.CI (c, hl))
+          (Reason.Rwitness (fst c), Tclass (c, tyl))
     )
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in

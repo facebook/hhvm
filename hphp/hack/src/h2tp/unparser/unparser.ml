@@ -733,6 +733,7 @@ let rec u_program v = u_of_list_spc u_def v
       | True
       | False
       | Id _
+      | Id_type_arguments _
       | Lvar _
       | Lvarvar _
       | Array_get _
@@ -797,6 +798,9 @@ let rec u_program v = u_of_list_spc u_def v
     | True -> Str "true"
     | False -> Str "false"
     | Id id -> u_id id
+    | Id_type_arguments (id, hintExprs) ->
+      let hintStr = StrAngles (StrCommaList (List.map ~f:u_hint hintExprs)) in
+      StrList [u_id id; hintStr]
     | Lvar lvar -> u_id lvar
     | Lvarvar (n, lvar) -> begin
       let p, var_id = lvar in

@@ -326,6 +326,7 @@ and expr_ =
   | True
   | False
   | Id of id
+  | Id_type_arguments of id * hint list
   | Lvar of id
   (**
    * PHP's Variable variable. The int is number of variable indirections

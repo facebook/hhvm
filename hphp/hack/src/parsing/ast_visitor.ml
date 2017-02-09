@@ -55,6 +55,7 @@ class type ['a] ast_visitor_type = object
   method on_foreach : 'a -> expr -> Pos.t option -> as_expr -> block -> 'a
   method on_hint: 'a -> hint -> 'a
   method on_id : 'a -> id -> 'a
+  method on_id_type_arguments : 'a -> id -> hint list -> 'a
   method on_if : 'a -> expr -> block -> block -> 'a
   method on_import: 'a -> import_flavor -> expr -> 'a
   method on_import_flavor: 'a -> import_flavor -> 'a
@@ -258,6 +259,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Null        -> this#on_null acc
    | String s    -> this#on_string acc s
    | Id id       -> this#on_id acc id
+   | Id_type_arguments (id, hl) -> this#on_id_type_arguments acc id hl
    | Lvar id     -> this#on_lvar acc id
    | Lvarvar (n, id)  -> this#on_lvarvar acc n id
    | Dollardollar -> this#on_dollardollar acc
@@ -280,7 +282,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
    | NullCoalesce (e1, e2)     -> this#on_nullCoalesce acc e1 e2
    | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
-   | New         (e, el, uel)   -> this#on_new acc e el uel
+   | New         (e, el, uel) -> this#on_new acc e el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
 
@@ -295,6 +297,10 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     end  acc sfnel
 
   method on_id acc _ = acc
+  method on_id_type_arguments acc _ hl =
+    let acc = List.fold_left this#on_hint acc hl in
+    acc
+
   method on_lvar acc _ = acc
   method on_lvarvar acc _ _ = acc
   method on_dollardollar acc = acc

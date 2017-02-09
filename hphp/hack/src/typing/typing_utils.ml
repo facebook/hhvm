@@ -156,13 +156,13 @@ let simplified_uerror env ty1 ty2 =
     uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2)
 
 let process_class_id = function
-  | Nast.CI c ->
+  | Nast.CI (c, _) ->
     Decl_hooks.dispatch_class_id_hook c None;
   | _ -> ()
 
 let process_static_find_ref cid mid =
   match cid with
-  | Nast.CI c ->
+  | Nast.CI (c, _) ->
     Decl_hooks.dispatch_class_id_hook c (Some mid);
   | _ -> ()
 
@@ -231,7 +231,7 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
 let shape_field_name_ env field =
   let open Nast in match field with
     | String name -> Result.Ok (SFlit name)
-    | Class_const (CI x, y) -> Result.Ok (SFclass_const (x, y))
+    | Class_const (CI (x, _), y) -> Result.Ok (SFclass_const (x, y))
     | Class_const (CIself, y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with

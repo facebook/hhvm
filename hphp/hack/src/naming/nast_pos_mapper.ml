@@ -93,6 +93,9 @@ and shape_field f = function
 and pstring f (p, s) =
   f p, s
 
+and instantiated_sid f (sid, hl) =
+  (pstring f sid, List.map hl (hint f))
+
 and special_func f = function
   | Gena e -> Gena (expr f e)
   | Genva el -> Genva (List.map el (expr f))
@@ -103,7 +106,7 @@ and class_id f = function
   | CIself -> CIself
   | CIstatic -> CIstatic
   | CIexpr e -> CIexpr (expr f e)
-  | CI sid -> CI (pstring f sid)
+  | CI isid -> CI (instantiated_sid f isid)
 
 and hint f (p, h) = f p, hint_ f h
 

@@ -121,6 +121,8 @@ type enum_ = {
   e_constraint : hint option;
 }
 
+type instantiated_sid = sid * hint list
+
 type where_constraint = hint * Ast.constraint_kind * hint
 
 module type AnnotationType = sig
@@ -159,7 +161,7 @@ and class_id =
   | CIself
   | CIstatic
   | CIexpr of expr
-  | CI of sid
+  | CI of instantiated_sid
 
 and expr = Annotation.t * expr_
 and expr_ =
@@ -891,6 +893,8 @@ let assert_named_body = function
   | NamedBody b -> b
   | UnnamedBody _ -> failwith "Expecting a named function body"
 
+let get_instantiated_sid_name ((_, x), _) = x
+
 let class_id_to_str = function
   | CIparent -> SN.Classes.cParent
   | CIself -> SN.Classes.cSelf
@@ -898,7 +902,7 @@ let class_id_to_str = function
   | CIexpr (_, This) -> SN.SpecialIdents.this
   | CIexpr (_, Lvar (_, x)) -> "$"^Local_id.to_string x
   | CIexpr _ -> assert false
-  | CI (_, x) -> x
+  | CI x -> get_instantiated_sid_name x
 
 let is_kvc_kind experimental_enabled p name = match name with
   | x when

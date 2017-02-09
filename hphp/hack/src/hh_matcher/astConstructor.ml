@@ -146,6 +146,8 @@ object(this)
    | Float n     -> Float (this#on_pstring env n)
    | String s    -> String (this#on_pstring env s)
    | Id id       -> Id (this#on_id env id)
+   | Id_type_arguments (id, hl) ->
+     Id_type_arguments (this#on_id env id, handle_list this#on_hint env hl)
    | Lvar id     -> Lvar (this#on_id env id)
    | Lvarvar (n, id) -> Lvarvar (n, this#on_id env id)
    | Dollardollar -> Dollardollar

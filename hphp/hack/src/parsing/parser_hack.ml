@@ -243,7 +243,7 @@ let rec check_lvalue env = function
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
   | _, List el -> List.iter el (check_lvalue env)
   | pos, (Array _ | Shape _ | Collection _
-  | Null | True | False | Id _ | Clone _
+  | Null | True | False | Id _ | Clone _ | Id_type_arguments _
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break
   | Await _ | Expr_list _ | Cast _ | Unop _
@@ -3342,12 +3342,17 @@ and expr_new env pos_start =
     let cname =
       let e = expr env in
       match e with
+      | p, Id id ->
+        let typeargs = class_hint_params env in
+        if typeargs == []
+        then e
+        else (p, Id_type_arguments (id, typeargs))
       | _, Lvar _
       | _, Array_get _
       | _, Obj_get _
       | _, Class_get _
-      | _, Call _
-      | _, Id _ -> e
+      | _, Call _ ->
+        e
       | p, _ ->
           error_expect env "class name";
           e

@@ -1861,6 +1861,11 @@ and match_expr
   | False, False
   | Yield_break, Yield_break ->
      dummy_success_res, env
+  | Id_type_arguments (t_id, t_hl), Id_type_arguments (p_id, p_hl) ->
+    LM.match_attributes
+      [match_id_res t_id p_id;
+       LM.match_list (fun _ -> false) match_hint t_hl p_hl]
+     env
   | Id t_id, Id p_id
   | Lvar t_id, Lvar p_id ->
      match_id_res t_id p_id env
@@ -1881,7 +1886,12 @@ and match_expr
        [match_id_res t_id p_id;
         match_id_res t_pstr p_pstr]
        env
-  | Call (t_e, t_el1, t_el2), Call (p_e, p_el1, p_el2)
+  | Call (t_e, t_el1, t_el2), Call (p_e, p_el1, p_el2) ->
+    LM.match_attributes
+      [match_expr t_e p_e;
+       match_expr_list t_el1 p_el1;
+       match_expr_list t_el2 p_el2]
+      env
   | New (t_e, t_el1, t_el2), New (p_e, p_el1, p_el2) ->
      LM.match_attributes
        [match_expr t_e p_e;

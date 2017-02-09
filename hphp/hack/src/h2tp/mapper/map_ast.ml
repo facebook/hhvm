@@ -561,6 +561,10 @@ let mk_mapper = fun m_in ->
       | True -> True
       | False -> False
       | Id v1 -> let v1 = map_id v1 in Id ((v1))
+      | Id_type_arguments (v1, v2) ->
+        let v1 = map_id v1
+        and v2 = map_of_list map_hint v2 in
+        Id_type_arguments (v1, v2)
       | Lvar v1 -> let v1 = map_id v1 in Lvar ((v1))
       | Lvarvar (n, v1) -> let v1 = map_id v1 in Lvarvar ((n, v1))
       | Dollardollar -> Dollardollar

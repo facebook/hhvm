@@ -20,6 +20,7 @@
   * --original-parser-s-expression
   * --program-text
   * --pretty-print
+  * --show-file-name
   *
   * TODO: Parser for things other than scripts:
   *       types, expressions, statements, declarations, etc.
@@ -41,6 +42,7 @@ module FullFidelityParseArgs = struct
     original_parser_s_expr : bool;
     program_text : bool;
     pretty_print : bool;
+    show_file_name : bool;
     files : string list
   }
 
@@ -53,6 +55,7 @@ module FullFidelityParseArgs = struct
     original_parser_s_expr
     program_text
     pretty_print
+    show_file_name
     files = {
     full_fidelity_json;
     full_fidelity_errors;
@@ -62,6 +65,7 @@ module FullFidelityParseArgs = struct
     original_parser_s_expr;
     program_text;
     pretty_print;
+    show_file_name;
     files }
 
   let parse_args () =
@@ -83,6 +87,8 @@ module FullFidelityParseArgs = struct
     let set_program_text () = program_text := true in
     let pretty_print = ref false in
     let set_pretty_print () = pretty_print := true in
+    let show_file_name = ref false in
+    let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
     let options =  [
@@ -112,7 +118,10 @@ No errors are filtered out.";
         "Displays the text of the given file.";
       "--pretty-print",
         Arg.Unit set_pretty_print,
-        "Displays the text of the given file after pretty-printing."] in
+        "Displays the text of the given file after pretty-printing.";
+      "--show-file-name",
+        Arg.Unit set_show_file_name,
+        "Displays the file name."] in
     Arg.parse options push_file usage;
     make
       !full_fidelity_json
@@ -123,6 +132,7 @@ No errors are filtered out.";
       !original_parser_s_expr
       !program_text
       !pretty_print
+      !show_file_name
       (List.rev !files)
 end
 
@@ -151,6 +161,9 @@ let handle_file args filename =
       fun () -> Parser_hack.from_file ParserOptions.default file
     end in
 
+  if args.show_file_name then begin
+    Printf.printf "%s\n" filename
+  end;
   if args.program_text then begin
     let text = Full_fidelity_editable_syntax.text editable in
     Printf.printf "%s\n" text

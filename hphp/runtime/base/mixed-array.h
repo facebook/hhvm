@@ -294,18 +294,6 @@ private:
   using ArrayData::nvGet;
   using ArrayData::release;
 
-  static const TypedValue* NvTryGetIntHackArr(const ArrayData*, int64_t);
-  static const TypedValue* NvTryGetStrHackArr(const ArrayData*,
-                                              const StringData*);
-
-  static ArrayLval LvalIntRefHackArr(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStrRefHackArr(ArrayData*, StringData*, bool);
-  static ArrayLval LvalNewRefHackArr(ArrayData*, bool);
-  static ArrayData* SetRefIntHackArr(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStrHackArr(ArrayData*, StringData*, Variant&, bool);
-  static ArrayData* AppendRefHackArr(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRefHackArr(ArrayData*, const Variant&, bool);
-
 public:
   static Variant CreateVarForUncountedArray(const Variant& source);
 
@@ -377,9 +365,9 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static constexpr auto NvTryGetIntDict = &NvTryGetIntHackArr;
+  static const TypedValue* NvTryGetIntDict(const ArrayData*, int64_t);
   static constexpr auto NvGetIntDict = &NvGetInt;
-  static constexpr auto NvTryGetStrDict = &NvTryGetStrHackArr;
+  static const TypedValue* NvTryGetStrDict(const ArrayData*, const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
@@ -415,13 +403,13 @@ public:
   static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static constexpr auto LvalIntRefDict = &LvalIntRefHackArr;
-  static constexpr auto LvalStrRefDict = &LvalStrRefHackArr;
-  static constexpr auto LvalNewRefDict = &LvalNewRefHackArr;
-  static constexpr auto SetRefIntDict = &SetRefIntHackArr;
-  static constexpr auto SetRefStrDict = &SetRefStrHackArr;
-  static constexpr auto AppendRefDict = &AppendRefHackArr;
-  static constexpr auto AppendWithRefDict = &AppendWithRefHackArr;
+  static ArrayLval LvalIntRefDict(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStrRefDict(ArrayData*, StringData*, bool);
+  static ArrayLval LvalNewRefDict(ArrayData*, bool);
+  static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
+  static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
+  static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
+  static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;

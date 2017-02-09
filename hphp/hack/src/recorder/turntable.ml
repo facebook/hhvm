@@ -60,19 +60,17 @@ let rec playback recording conn =
 
 let check_build_id json =
   let open Hh_json.Access in
-  (return json)
+  let build_id = (return json)
     >>= get_string "build_id"
-    |> project
-      (fun build_id ->
-        if build_id = Build_id.build_id_ohai
-        then
-          ()
-        else
-          Printf.eprintf "Warning: Build ID mismatch\n%!";
-      )
-      (fun e ->
-        Printf.eprintf "%s\n%!" (access_failure_to_string e);
-        ())
+    |> counit_with @@ (fun e ->
+      Printf.eprintf "%s\n%!" (access_failure_to_string e);
+      exit 1)
+  in
+  if build_id = Build_id.build_id_ohai
+  then
+    ()
+  else
+    Printf.eprintf "Warning: Build ID mismatch\n%!"
 
 let spin_record recording_path root =
   let conn = ClientIde.connect_persistent { ClientIde.root = root }

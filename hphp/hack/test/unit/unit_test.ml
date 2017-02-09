@@ -14,8 +14,8 @@ let run (name, f) =
   Printf.printf "Running %s ... %!" name;
   let result = try f () with
     | e ->
-      let () = Printf.eprintf "Exception %s\n" (Printexc.to_string e) in
-      let () = Printf.eprintf "Backtrace %s\n" (Printexc.get_backtrace ()) in
+      let () = Printf.printf "Exception %s\n" (Printexc.to_string e) in
+      let () = Printf.printf "Backtrace %s\n" (Printexc.get_backtrace ()) in
       false
   in
   (if result

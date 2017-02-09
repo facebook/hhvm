@@ -50,20 +50,18 @@ let rec print_events channel =
 let cat_recording channel =
   let json = Recorder.Header.parse_header channel in
   let open Hh_json.Access in
-  (return json)
+  let build_id = (return json)
     >>= get_string "build_id"
-    |> project
-      (fun build_id ->
-        if build_id = Build_id.build_id_ohai
-        then
-          ()
-        else
-          Printf.eprintf "Warning: Build ID mismatch\n%!";
-        print_events channel
-      )
-      (fun e ->
-        Printf.eprintf "%s\n%!" (access_failure_to_string e);
-        exit 1)
+    |> counit_with @@ (fun e ->
+      Printf.eprintf "%s\n%!" (access_failure_to_string e);
+      exit 1)
+  in
+  if build_id = Build_id.build_id_ohai
+  then
+    ()
+  else
+    Printf.eprintf "Warning: Build ID mismatch\n%!";
+  print_events channel
 
 let () =
   Daemon.check_entry_point (); (* this call might not return *)

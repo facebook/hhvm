@@ -1,8 +1,7 @@
-let get_or_throw m = match m with
-  | Result.Ok (v, _) -> v
-  | Result.Error failure ->
-      Printf.eprintf "%s\n%!" (Hh_json.Access.access_failure_to_string failure);
-    assert false
+let get_or_throw m =
+  let open Hh_json.Access in
+  m |> counit_with @@ fun f -> raise @@ Failure
+  (Printf.sprintf "%s\n%!" @@ Hh_json.Access.access_failure_to_string f)
 
 let test_open_header_width_constant () =
   let a = Recorder.Header.header_open_tag 1 in

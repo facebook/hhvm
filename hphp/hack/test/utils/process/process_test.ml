@@ -38,7 +38,7 @@ let test_future_is_ready () =
     false
   else
     (** Is ready after sleeping. *)
-    let _, _, _ = Unix.select [] [] [] 1.1 in
+    let _, _, _ = Unix.select [] [] [] 2.0 in
     if Future.is_ready future then
       true
     else

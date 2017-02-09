@@ -12,10 +12,6 @@ open Hh_json
 open Ide_rpc_protocol_parser
 
 let response_to_json ~id ~result =
-  let id = match id with
-    | Some x -> JSON_Number (string_of_int x)
-    | None -> JSON_Null
-  in
   let result = match result with
     | `Result result -> ("result", result)
     | `Error e ->
@@ -26,6 +22,6 @@ let response_to_json ~id ~result =
   in
   JSON_Object [
     "jsonrpc", JSON_String "2.0";
-    "id", id;
+    "id", opt_int_to_json id;
     result;
   ]

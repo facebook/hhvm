@@ -51,12 +51,8 @@ let autocomplete_response_to_json x =
   JSON_Array (List.map x ~f:autocomplete_response_to_json)
 
 let infer_type_response_to_json x =
-  let ty_json = match x with
-    | Some x -> Hh_json.JSON_String x
-    | None -> Hh_json.JSON_Null
-  in
   Hh_json.JSON_Object [
-    ("type", ty_json);
+    ("type", opt_string_to_json x);
     ("pos", deprecated_pos_field);
   ]
 
@@ -67,10 +63,7 @@ let identify_symbol_response_to_json results =
         let open SymbolDefinition in
         let pos = Pos.json x.pos in
         let span = Pos.multiline_json x.span in
-        let id = match x.id with
-          | Some id -> JSON_String id
-          | None -> JSON_Null
-        in
+        let id = opt_string_to_json x.id in
         pos, span, id
     | None -> (JSON_Null, JSON_Null, JSON_Null)
   in
@@ -102,10 +95,6 @@ let identify_symbol_response_to_json results =
     ]
   in
   JSON_Array (List.map results ~f:symbol_to_json)
-
-let opt_string_to_json = function
-  | Some x -> JSON_String x
-  | None -> JSON_Null
 
 let rec definition_to_json def =
   let open SymbolDefinition in
@@ -173,14 +162,10 @@ let diagnostics_to_json x =
   ]
 
 let response_to_json id result =
-  let id = match id with
-    | Some x -> JSON_Number (string_of_int x)
-    | None -> JSON_Null
-  in
   JSON_Object [
     ("protocol", JSON_String "service_framework3_rpc");
     ("type", JSON_String "response");
-    ("id", id);
+    ("id", opt_int_to_json id);
     ("result", result);
   ]
 

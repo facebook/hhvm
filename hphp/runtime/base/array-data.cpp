@@ -1196,4 +1196,27 @@ void throwVecUnsetException() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void raiseHackArrCompatRefBind(int64_t k) {
+  raise_hackarr_compat_notice(
+    folly::sformat("Binding ref in array with key {}", k)
+  );
+}
+
+void raiseHackArrCompatRefBind(const StringData* k) {
+  raise_hackarr_compat_notice(
+    folly::sformat("Binding ref in array with key \"{}\"", k)
+  );
+}
+
+void raiseHackArrCompatRefNew() {
+  raise_hackarr_compat_notice("Binding new-element ref in array");
+}
+
+void raiseHackArrCompatRefIter() {
+  raise_hackarr_compat_notice("Ref binding iteration on array");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

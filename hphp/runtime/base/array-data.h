@@ -706,6 +706,11 @@ void decRefArr(ArrayData* arr) {
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
 [[noreturn]] void throwVecUnsetException();
 
+void raiseHackArrCompatRefBind(int64_t);
+void raiseHackArrCompatRefBind(const StringData*);
+void raiseHackArrCompatRefNew();
+void raiseHackArrCompatRefIter();
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

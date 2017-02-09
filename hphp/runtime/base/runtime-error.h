@@ -130,6 +130,8 @@ void raise_return_typehint_error(const std::string& msg);
 
 void raise_disallowed_dynamic_call(const Func* f);
 
+void raise_hackarr_compat_notice(const std::string& msg);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

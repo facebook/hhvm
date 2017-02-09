@@ -1606,6 +1606,7 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
   if (UNLIKELY(ad->isHackArray())) {
     throwRefInvalidArrayValueException(ad);
   }
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefIter();
 
   if (UNLIKELY(ad->empty())) {
     return 0LL;

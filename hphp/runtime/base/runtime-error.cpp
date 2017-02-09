@@ -118,6 +118,10 @@ void raise_disallowed_dynamic_call(const Func* f) {
   );
 }
 
+void raise_hackarr_compat_notice(const std::string& msg) {
+  raise_notice(msg);
+}
+
 void raise_recoverable_error(const char *fmt, ...) {
   std::string msg;
   va_list ap;

@@ -1233,11 +1233,21 @@ ArrayLval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return a->addLvalImpl(k);
 }
 
+ArrayLval MixedArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  return LvalInt(ad, k, copy);
+}
+
 ArrayLval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->addLvalImpl(key);
+}
+
+ArrayLval MixedArray::LvalStrRef(ArrayData* ad, StringData* key, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(key);
+  return LvalStr(ad, key, copy);
 }
 
 ArrayLval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
@@ -1275,6 +1285,11 @@ ArrayLval MixedArray::LvalNew(ArrayData* ad, bool copy) {
   return {a, &tvAsVariant(&a->data()[a->m_used - 1].data)};
 }
 
+ArrayLval MixedArray::LvalNewRef(ArrayData* ad, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  return LvalNew(ad, copy);
+}
+
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
@@ -1294,6 +1309,7 @@ ArrayData*
 MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->updateRef(k, v);
@@ -1303,6 +1319,7 @@ ArrayData*
 MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->updateRef(k, v);
@@ -1488,6 +1505,8 @@ ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
 
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
@@ -1507,26 +1526,14 @@ ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
                                      bool copy) {
   auto a = asMixed(ad);
   assert(a->isMixed());
+
+  if (RuntimeOption::EvalHackArrCompatNotices && v.isReferenced()) {
+    raiseHackArrCompatRefNew();
+  }
+
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->nextInsertWithRef(v);
-}
-
-/*
- * For Dicts, we want to append the value only if it is not
- * observably referenced.
- */
-template <class AppendFunc>
-ALWAYS_INLINE
-ArrayData*
-MixedArray::AppendWithRefNoRef(ArrayData* adIn, const Variant& v, bool copy,
-                               AppendFunc append) {
-  assert(adIn->isDict());
-  if (v.isReferenced()) throwRefInvalidArrayValueException(adIn);
-  auto const cell = LIKELY(v.getType() != KindOfUninit)
-    ? *v.asCell()
-    : make_tv<KindOfNull>();
-  return append(adIn, cell, copy);
 }
 
 /*
@@ -2022,7 +2029,11 @@ ArrayData*
 MixedArray::AppendWithRefHackArr(ArrayData* adIn, const Variant& v, bool copy) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
-  return AppendWithRefNoRef(adIn, v, copy, Append);
+  if (v.isReferenced()) throwRefInvalidArrayValueException(adIn);
+  auto const cell = LIKELY(v.getType() != KindOfUninit)
+    ? *v.asCell()
+    : make_tv<KindOfNull>();
+  return Append(adIn, cell, copy);
 }
 
 //////////////////////////////////////////////////////////////////////

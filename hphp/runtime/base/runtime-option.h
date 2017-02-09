@@ -635,6 +635,9 @@ struct RuntimeOption {
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
   F(double, InitialLoadFactor, 1.0)                                     \
+  /* Raise notices on various array operations which may present        \
+   * compatibility issues with Hack arrays. */                          \
+  F(bool, HackArrCompatNotices, false)                                  \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   /******************                                                   \
    | PPC64 Options. |                                                   \

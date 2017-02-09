@@ -738,6 +738,11 @@ ArrayLval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   return mixed->addLvalImpl(k);
 }
 
+ArrayLval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  return LvalInt(adIn, k, copy);
+}
+
 ArrayLval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
@@ -760,6 +765,11 @@ ArrayLval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
   assert(adIn->isPacked());
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   return mixed->addLvalImpl(key);
+}
+
+ArrayLval PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(key);
+  return LvalStr(adIn, key, copy);
 }
 
 ArrayLval
@@ -790,6 +800,11 @@ ArrayLval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
   return {ad, &tvAsVariant(&tv)};
+}
+
+ArrayLval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  return LvalNew(adIn, copy);
 }
 
 ArrayLval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
@@ -858,6 +873,7 @@ ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, Variant& v,
   assert(adIn->isPacked());
 
   if (size_t(k) == adIn->m_size) return AppendRef(adIn, v, copy);
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   if (size_t(k) < adIn->m_size) {
     auto const ad = copy ? Copy(adIn) : adIn;
     tvBind(v.asRef(), &packedData(ad)[k]);
@@ -883,6 +899,7 @@ ArrayData* PackedArray::SetRefStr(ArrayData* adIn,
                                   bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
   // todo t2606310: key can't exist.  use add/findForNewInsert
   return mixed->updateRef(k, v);
@@ -1025,6 +1042,7 @@ ArrayData* PackedArray::AppendRef(ArrayData* adIn,
                                   bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
   auto& dst = packedData(ad)[ad->m_size++];
@@ -1045,6 +1063,11 @@ ArrayData* PackedArray::AppendWithRef(ArrayData* adIn,
                                       bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
+
+  if (RuntimeOption::EvalHackArrCompatNotices && v.isReferenced()) {
+    raiseHackArrCompatRefNew();
+  }
+
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
   auto& dst = packedData(ad)[ad->m_size++];

@@ -9,7 +9,7 @@
  *)
 
 open Core
-open Coverage_level
+open Ide_api_types
 
 module C = Tty
 

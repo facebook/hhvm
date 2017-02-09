@@ -11,6 +11,7 @@
 open Core
 open Coverage_level
 open Hh_json
+open Ide_api_types
 
 let result_to_json r = JSON_Object begin
   List.map (SMap.elements r) begin fun (kind, counts) ->

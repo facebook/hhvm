@@ -34,6 +34,12 @@ type text_edit = {
   text : string;
 }
 
+type coverage_level =
+  | Unchecked (* Completely unchecked code, i.e. Tanys *)
+  | Partial   (* Partially checked code, e.g. array, Awaitable<_> with no
+                 concrete type parameters *)
+  | Checked   (* Completely checked code *)
+
 let pos_to_range x =
   let st_line, st_column, ed_line, ed_column = Pos.destruct_range x in
   {

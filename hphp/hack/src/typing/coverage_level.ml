@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Ide_api_types
 open Typing_defs
 open Utils
 
@@ -20,13 +21,7 @@ let sample_rate = 0
 let display_limit = 10
 let samples_limit = 5
 
-type level =
-  | Unchecked (* Completely unchecked code, i.e. Tanys *)
-  | Partial   (* Partially checked code, e.g. array, Awaitable<_> with no
-                 concrete type parameters *)
-  | Checked   (* Completely checked code *)
-
-type result = ((int * int) * level) list
+type result = ((int * int) * coverage_level) list
 
 let string_of_level = function
   | Checked   -> "checked"
@@ -34,7 +29,7 @@ let string_of_level = function
   | Unchecked -> "unchecked"
 
 module CLMap = MyMap.Make (struct
-  type t = level
+  type t = coverage_level
   let compare x y = Pervasives.compare x y
 end)
 

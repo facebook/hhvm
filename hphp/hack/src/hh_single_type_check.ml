@@ -9,7 +9,7 @@
  *)
 
 open Core
-open Coverage_level
+open Ide_api_types
 open String_utils
 open Sys_utils
 
@@ -405,7 +405,7 @@ let print_colored fn type_acc =
 
 let print_coverage fn type_acc =
   let counts = ServerCoverageMetric.count_exprs fn type_acc in
-  ClientCoverageMetric.go ~json:false (Some (Leaf counts))
+  ClientCoverageMetric.go ~json:false (Some (Coverage_level.Leaf counts))
 
 let check_errors opts errors files_info =
   Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->

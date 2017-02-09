@@ -21,6 +21,7 @@ type check_started = bool
 type free_iterator = int
 type repo_auth_type = string (* see see runtime/base/repo-auth-type.h *)
 
+type class_id = string
 
 type instruct_basic =
   | Nop
@@ -44,7 +45,7 @@ type instruct_lit_const =
   | NullUninit
   | Int of int64
   | Double of float
-  | String of int
+  | String of Litstr.id
   | Array of int
   | Vec of int (* scalar vec id *)
   | Dict of int (* scalar dict id *)
@@ -67,11 +68,11 @@ type instruct_lit_const =
   | ColFromArray of collection_type
   | MapAddElemC
   | ColAddNewElemC
-  | Cns of int (* litstr id *)
-  | CnsE of int (* litstr id *)
-  | CnsU of int * int (* litstr fallback *) (* litstr id *)
-  | ClsCns of int (* litstr id *)
-  | ClsCnssD of int * int (* litstr id, litstr id *)
+  | Cns of Litstr.id
+  | CnsE of Litstr.id
+  | CnsU of int * Litstr.id (* litstr fallback *)
+  | ClsCns of Litstr.id
+  | ClsCnssD of Litstr.id * Litstr.id
   | File
   | Dir
   | Method
@@ -134,7 +135,7 @@ type instruct_control_flow =
   | JmpZ of rel_offset
   | JmpNZ of rel_offset
   | Switch of switchkind * int * int (* bounded, base, offset vector *)
-  | SSwitch of int (* litstr id / offset vector *)
+  | SSwitch of Litstr.id (* litstr id / offset vector *)
   | RetC
   | RetV
   | Unwind
@@ -205,16 +206,16 @@ type instruct_mutator =
 
 type instruct_call =
   | FPushFunc of int (* num params *)
-  | FPushFuncD of int * int (* num params, litstr id *)
-  | FPushFuncU of int * int * int (* num params, litstr id, litstr fallback, litstr fallback *)
+  | FPushFuncD of int * Litstr.id (* num params, litstr id *)
+  | FPushFuncU of int * Litstr.id * int (* num params, litstr id, litstr fallback, litstr fallback *)
   | FPushObjMethod of int (* num params *)
-  | FPushObjMethodD of int * int (* num params, litstr id *)
+  | FPushObjMethodD of int * Litstr.id (* num params, litstr id *)
   | FPushClsMethod of int (* num params *)
   | FPushClsMethodF of int (* num params *)
-  | FPushClsMethodD of int * int * int (* num params, litstr id, litstr id *)
+  | FPushClsMethodD of int * Litstr.id * Litstr.id (* num params, litstr id, litstr id *)
   | FPushCtor of int (* num params *)
-  | FPushCtorD of int * int (* num params, litstr id *)
-  | FpushCtorI of int * int (* num params, class id *)
+  | FPushCtorD of int * Litstr.id (* num params, litstr id *)
+  | FpushCtorI of int * class_id (* num params, class id *)
   | DecodeCufIter of int * rel_offset (* iterator id, rel offset *)
   | FPushCufIter of int * int (* num params, iterator id *)
   | FPushCuf of int (* num params *)
@@ -236,7 +237,7 @@ type instruct_call =
   | FCallArray
   | FCallAwait of int * int * int (* num params, class name id, function name id *)
   | FCallUnpack of int (* num params *)
-  | FCallBuiltin of int * int * int (* total params, passed, litstr id *)
+  | FCallBuiltin of int * int * Litstr.id (* total params, passed, litstr id *)
 
 type op_member_base =
   | BaseC
@@ -377,10 +378,10 @@ type instruct_include_eval_define =
   | ReqDoc
   | Eval
   | DefFunc of int (* function id *)
-  | DefCls of int (* class id *)
-  | DefClsNop of int (* class id *)
-  | DefCns of int (* litstr id *)
-  | DefTypeAlias of int (* litstr id *)
+  | DefCls of class_id (* class id *)
+  | DefClsNop of class_id (* class id *)
+  | DefCns of Litstr.id
+  | DefTypeAlias of Litstr.id
 
 type bare_this_op =
   | Notice
@@ -400,8 +401,8 @@ type instruct_misc =
   | BareThis of bare_this_op
   | CheckThis
   | InitThisLoc of int (* local variable id *)
-  | StaticLoc of int * int (* local variable id, litstr id *)
-  | StaticLocInit of int * int (* local variable id, litstr id *)
+  | StaticLoc of int * Litstr.id (* local variable id, litstr id *)
+  | StaticLocInit of int * Litstr.id (* local variable id, litstr id *)
   | Catch
   | OODeclExists of class_kind
   | VerifyParamType of int (* parameter id *)
@@ -411,7 +412,7 @@ type instruct_misc =
   | Parent
   | IncStat of int * int (* counter id, value *)
   | AKExists
-  | CreateCl of int * int (* num args * class id *)
+  | CreateCl of int * class_id (* num args * class id *)
   | Idx
   | ArrayIdx
   | AssertRATL of int * repo_auth_type (* local id, repo auth type *)
@@ -450,13 +451,16 @@ type instruct =
   | IContFlow of instruct_control_flow
   | ICall of instruct_call
 
+type fun_return_type = {
+  param_name : Litstr.id;
+}
+
 type fun_def = {
-  fun_name    : int;
-  fun_litstr  : (int, string) Hashtbl.t;
-  fun_body    : instruct list;
+  f_name          : Litstr.id;
+  f_body          : instruct list;
+  f_return_types  : fun_return_type list;
 }
 
 type hhas_prog = {
   hhas_fun: fun_def list;
-  hhas_litstr: (int, string) Hashtbl.t;
 }

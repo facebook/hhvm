@@ -360,8 +360,11 @@ and fun_def tcopt f =
   let tfun_def = Env.fresh_tenv env (
     fun env ->
       let env = Env.set_mode env f.f_mode in
-      let env = Phase.localize_generic_parameters_with_bounds env f.f_tparams
+      let env, constraints =
+        Phase.localize_generic_parameters_with_bounds env f.f_tparams
                   ~ety_env:(Phase.env_with_self env) in
+      let env = add_constraints (fst f.f_name) env constraints in
+
       let env, hret =
         match f.f_ret with
         | None -> env, (Reason.Rwitness (fst f.f_name), Tany)
@@ -3308,12 +3311,16 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (id_pos, id_str as id) k k_lhs =
             (Reason.to_pos (fst ety1));
           k (env, err_none, None)
         end
-      | [res] -> k res
-      | _ ->
-        Errors.ambiguous_member
-          id_str id_pos (Typing_print.error (snd ety1))
-          (Reason.to_pos (fst ety1));
+      | ((_env, (_, ty), _vis) as res)::rest ->
+        if List.exists rest (fun (_, (_,ty'), _) -> ty' <> ty)
+        then
+        begin
+          Errors.ambiguous_member
+            id_str id_pos (Typing_print.error (snd ety1))
+            (Reason.to_pos (fst ety1));
           k (env, err_none, None)
+        end
+        else k res
     end
 
   | _, Toption ty -> begin match nullsafe with
@@ -4449,8 +4456,10 @@ and class_def_ env c tc =
     (c.c_extends @ c.c_implements @ c.c_uses)
     (Decl_hint.hint env.Env.decl_env) in
   TI.check_tparams_instantiable env (fst c.c_tparams);
-  let env = Phase.localize_generic_parameters_with_bounds env (fst c.c_tparams)
+  let env, constraints =
+    Phase.localize_generic_parameters_with_bounds env (fst c.c_tparams)
       ~ety_env:(Phase.env_with_self env) in
+  let env = add_constraints (fst c.c_name) env constraints in
   Typing_variance.class_ (Env.get_options env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
 
@@ -4665,6 +4674,11 @@ and localize_where_constraints
   in
   List.fold_left where_constraints ~f:add_constraint ~init:env
 
+and add_constraints p env constraints =
+  let add_constraint env (ty1, ck, ty2) =
+    SubType.add_constraint p env ck ty1 ty2 in
+  List.fold_left constraints ~f:add_constraint ~init: env
+
 and user_attribute env ua =
   let typed_ua_params =
     List.map ua.ua_params (fun e -> let _env, te, _ty = expr env e in te) in
@@ -4682,9 +4696,11 @@ and method_def env m =
   in
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
-  let env = Phase.localize_generic_parameters_with_bounds env m.m_tparams
+  let env, constraints =
+    Phase.localize_generic_parameters_with_bounds env m.m_tparams
     ~ety_env:ety_env in
   TI.check_tparams_instantiable env m.m_tparams;
+  let env = add_constraints (fst m.m_name) env constraints in
   let env =
     localize_where_constraints ~ety_env env m.m_where_constraints in
   let env = Env.set_local env this (Env.get_self env) in
@@ -4756,8 +4772,10 @@ and typedef_def tcopt typedef  =
    * Ideally the typedef would carry the right mode with it, but it's a
    * slightly larger change than I want to deal with right now. *)
   let env = Typing_env.set_mode env FileInfo.Mdecl in
-  let env = Phase.localize_generic_parameters_with_bounds env typedef.t_tparams
+  let env, constraints =
+    Phase.localize_generic_parameters_with_bounds env typedef.t_tparams
               ~ety_env:(Phase.env_with_self env) in
+  let env = add_constraints (fst typedef.t_name) env constraints in
   NastCheck.typedef env typedef;
   let {
     t_name = t_pos, _;

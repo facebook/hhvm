@@ -4,13 +4,10 @@
 class MyList<T> { }
 class Two<T1,T2> { }
 
-/* We need to use SubType.add_constraint not Env.add_constraint to make this
-   work
 function foo<T1 as T2, T2 as T3, T3 as T1>(MyList<T1> $x): MyList<T3> {
-  hh_show_env();
+//  hh_show_env();
   return $x;
 }
-*/
 
 class Boo {
   public static function bar<T1,T2,T3>(MyList<T1> $x): MyList<T3>

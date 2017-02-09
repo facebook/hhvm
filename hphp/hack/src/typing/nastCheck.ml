@@ -28,6 +28,7 @@ open Nast
 open String_utils
 open Typing_defs
 open Utils
+open Typing_subtype
 
 module Env = Typing_env
 module Inst = Decl_instantiate
@@ -267,9 +268,11 @@ and func env f named_body =
   let p, fname = f.f_name in
   if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
   then Errors.illegal_function_name p fname;
-  (* Add type parameter constraints to typing environment *)
-  let tenv = Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
-               ~ety_env:(Phase.env_with_self env.tenv) in
+  (* Add type parameters to typing environment and localize the bounds *)
+  let tenv, constraints =
+    Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
+       ~ety_env:(Phase.env_with_self env.tenv) in
+  let tenv = add_constraints p tenv constraints in
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
@@ -389,10 +392,11 @@ and class_ tenv c =
               imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               tenv = tenv } in
-  (* Add type parameter constraints to typing environment *)
-  let tenv = Phase.localize_generic_parameters_with_bounds
+  (* Add type parameters to typing environment and localize the bounds *)
+  let tenv, constraints = Phase.localize_generic_parameters_with_bounds
                tenv (fst c.c_tparams)
                ~ety_env:(Phase.env_with_self tenv) in
+  let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
   if c.c_kind = Ast.Cinterface then begin
     interface c;
@@ -637,12 +641,20 @@ and check__toString m is_static =
       | None -> ()
   end
 
+and add_constraint pos tenv (ty1, ck, ty2) =
+  Typing_subtype.add_constraint pos tenv ck ty1 ty2
+
+and add_constraints pos tenv (cstrs: locl where_constraint list) =
+  List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
+
 and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
-  (* Add method type parameters and their bounds to environment *)
-  let tenv = Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
+  (* Add method type parameters to environment and localize the bounds *)
+  let tenv, constraints =
+    Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
                ~ety_env:(Phase.env_with_self env.tenv) in
+  let tenv = add_constraints (fst m.m_name) tenv constraints in
   let env = { env with tenv = tenv } in
   List.iter m.m_params (fun_param env);
   List.iter m.m_tparams (tparam env);

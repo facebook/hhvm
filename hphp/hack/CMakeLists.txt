@@ -133,3 +133,27 @@ else()
     DESTINATION share/hhvm/hack/hacklib
     COMPONENT dev)
 endif()
+
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
+  DESTINATION bin
+  COMPONENT dev)
+
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_server
+  DESTINATION bin
+  COMPONENT dev)
+
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hackfmt
+  DESTINATION bin
+  COMPONENT dev)
+
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_format
+  DESTINATION bin
+  COMPONENT dev)
+
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/h2tp
+  DESTINATION bin
+  COMPONENT dev)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/h2tp/resources/
+  DESTINATION share/hhvm/hack/hacklib
+  COMPONENT dev)

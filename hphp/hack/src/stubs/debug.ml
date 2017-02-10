@@ -9,3 +9,5 @@
  *)
 
 let dump_ast _ = ""
+
+let dump_full_fidelity _ = ""

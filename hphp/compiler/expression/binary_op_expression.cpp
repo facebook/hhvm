@@ -181,6 +181,18 @@ int BinaryOpExpression::getLocalEffects() const {
       m_canThrow = true;
     }
     break;
+  case '<':
+  case T_IS_SMALLER_OR_EQUAL:
+  case '>':
+  case T_IS_GREATER_OR_EQUAL:
+  case T_IS_EQUAL:
+  case T_IS_NOT_EQUAL:
+  case T_SPACESHIP:
+    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
+      effect = UnknownEffect;
+      m_canThrow = true;
+    }
+    break;
   default:
     break;
   }

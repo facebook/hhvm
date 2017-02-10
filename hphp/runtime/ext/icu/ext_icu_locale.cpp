@@ -582,6 +582,7 @@ inline void normalize_for_match(String& v) {
 static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
                                  const String& locale,
                                  bool canonicalize, const String& def) {
+  CHECK_LOCALELEN_OR_RETURN(locale, def);
   String locname(localeOrDefault(locale), CopyString);
   CHECK_LOCALELEN_OR_RETURN(locale, def);
   std::vector<std::pair<String,String>> cur_arr;

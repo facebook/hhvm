@@ -806,20 +806,6 @@ private:
       Offset m_fpOff;
   };
 
-  struct SwitchState {
-    SwitchState() : nonZeroI(-1), defI(-1) {}
-
-    SwitchState(const SwitchState&) = delete;
-    SwitchState& operator=(const SwitchState&) = delete;
-
-    std::map<int64_t, int> cases; // a map from int (or litstr id) to case index
-    std::vector<StrCase> caseOrder; // for string switches, a list of the
-                                    // <litstr id, case index> in the order
-                                    // they appear in the source
-    int nonZeroI;
-    int defI;
-  };
-
   void allocPipeLocal(Id pipeVar) { m_pipeVars.emplace(pipeVar); }
   void releasePipeLocal(Id pipeVar) {
     assert(!m_pipeVars.empty() && m_pipeVars.top() == pipeVar);
@@ -831,8 +817,6 @@ private:
   }
 
 private:
-  static constexpr size_t kMinStringSwitchCases = 8;
-
   UnitEmitter& m_ue;
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;
@@ -956,13 +940,6 @@ public:
   Id emitSetUnnamedL(Emitter& e);
   void emitFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
-  MaybeDataType analyzeSwitch(SwitchStatementPtr s, SwitchState& state);
-  void emitIntegerSwitch(Emitter& e, SwitchStatementPtr s,
-                         std::vector<Label>& caseLabels, Label& done,
-                         const SwitchState& state);
-  void emitStringSwitch(Emitter& e, SwitchStatementPtr s,
-                        std::vector<Label>& caseLabels, Label& done,
-                        const SwitchState& state);
   void emitArrayInit(Emitter& e, ExpressionListPtr el,
                      folly::Optional<HeaderKind> ct = folly::none);
   void emitPairInit(Emitter&e, ExpressionListPtr el);
@@ -4202,79 +4179,53 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     Id tempLocal = -1;
     Offset start = InvalidAbsoluteOffset;
 
-    bool enabled = RuntimeOption::EvalEmitSwitch;
     auto call = dynamic_pointer_cast<SimpleFunctionCall>(subject);
 
-    SwitchState state;
-    bool didSwitch = false;
-    if (enabled) {
-      MaybeDataType stype = analyzeSwitch(sw, state);
-      if (stype) {
-        e.incStat(stype == KindOfInt64 ? Stats::Switch_Integer
-                                       : Stats::Switch_String,
-                  1);
-        if (state.cases.empty()) {
-          // If there are no non-default cases, evaluate the subject for
-          // side effects and fall through. If there's a default case it
-          // will be emitted immediately after this.
-          visit(sw->getExp());
-          emitPop(e);
-        } else if (stype == KindOfInt64) {
-          emitIntegerSwitch(e, sw, caseLabels, brkTarget, state);
-        } else {
-          assert(isStringType(*stype));
-          emitStringSwitch(e, sw, caseLabels, brkTarget, state);
-        }
-        didSwitch = true;
-      }
+    if (!simpleSubject) {
+      // Evaluate the subject once and stash it in a local
+      tempLocal = m_curFunc->allocUnnamedLocal();
+      emitVirtualLocal(tempLocal);
+      visit(subject);
+      emitConvertToCell(e);
+      emitSet(e);
+      emitPop(e);
+      start = m_ue.bcPos();
     }
-    if (!didSwitch) {
-      e.incStat(Stats::Switch_Generic, 1);
-      if (!simpleSubject) {
-        // Evaluate the subject once and stash it in a local
-        tempLocal = m_curFunc->allocUnnamedLocal();
-        emitVirtualLocal(tempLocal);
-        visit(subject);
-        emitConvertToCell(e);
-        emitSet(e);
-        emitPop(e);
-        start = m_ue.bcPos();
-      }
 
-      int defI = -1;
-      for (uint32_t i = 0; i < ncase; i++) {
-        auto c = static_pointer_cast<CaseStatement>((*cases)[i]);
-        ExpressionPtr condition = c->getCondition();
-        if (condition) {
-          if (simpleSubject) {
-            // Evaluate the subject every time.
-            visit(subject);
-            emitConvertToCellOrLoc(e);
-            visit(condition);
-            emitConvertToCell(e);
-            emitConvertSecondToCell(e);
-          } else {
-            emitVirtualLocal(tempLocal);
-            emitCGet(e);
-            visit(condition);
-            emitConvertToCell(e);
-          }
-          e.Eq();
-          e.JmpNZ(caseLabels[i]);
-        } else if (LIKELY(defI == -1)) {
-          // Default clause.
-          defI = i;
+    int defI = -1;
+    for (uint32_t i = 0; i < ncase; i++) {
+      auto c = static_pointer_cast<CaseStatement>((*cases)[i]);
+      ExpressionPtr condition = c->getCondition();
+      if (condition) {
+        if (simpleSubject) {
+          // Evaluate the subject every time.
+          visit(subject);
+          emitConvertToCellOrLoc(e);
+          visit(condition);
+          emitConvertToCell(e);
+          emitConvertSecondToCell(e);
         } else {
-          throw IncludeTimeFatalException(
-            c, "Switch statements may only contain one default: clause");
+          emitVirtualLocal(tempLocal);
+          emitCGet(e);
+          visit(condition);
+          emitConvertToCell(e);
         }
-      }
-      if (defI != -1) {
-        e.Jmp(caseLabels[defI]);
+        e.Eq();
+        e.JmpNZ(caseLabels[i]);
+      } else if (LIKELY(defI == -1)) {
+        // Default clause.
+        defI = i;
       } else {
-        e.Jmp(brkTarget);
+        throw IncludeTimeFatalException(
+          c, "Switch statements may only contain one default: clause");
       }
     }
+    if (defI != -1) {
+      e.Jmp(caseLabels[defI]);
+    } else {
+      e.Jmp(brkTarget);
+    }
+
     for (uint32_t i = 0; i < ncase; i++) {
       caseLabels[i].set(e);
       auto c = static_pointer_cast<CaseStatement>((*cases)[i]);
@@ -4284,7 +4235,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     }
     if (brkTarget.isUsed()) brkTarget.set(e);
     if (contTarget.isUsed()) contTarget.set(e);
-    if (!didSwitch && !simpleSubject) {
+    if (!simpleSubject) {
       // Null out temp local, to invoke any needed refcounting
       assert(tempLocal >= 0);
       assert(start != InvalidAbsoluteOffset);
@@ -7490,130 +7441,6 @@ void EmitterVisitor::emitClsIfSPropBase(Emitter& e) {
   emitResolveClsBase(e, pos);
   m_evalStack.set(m_evalStack.size() - 1,
                   m_evalStack.get(m_evalStack.size() - 1) | StackSym::M);
-}
-
-MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
-                                            SwitchState& state) {
-  auto& caseMap = state.cases;
-  DataType t = KindOfUninit;
-  StatementListPtr cases(sw->getCases());
-  const int ncase = cases->getCount();
-
-  // Bail if the cases aren't homogeneous
-  for (int i = 0; i < ncase; ++i) {
-    auto c = static_pointer_cast<CaseStatement>((*cases)[i]);
-    auto condition = c->getCondition();
-    if (condition) {
-      Variant cval;
-      DataType caseType;
-      if (condition->getScalarValue(cval)) {
-        caseType = cval.getType();
-        if (caseType == KindOfPersistentString) caseType = KindOfString;
-        if ((caseType != KindOfInt64 && caseType != KindOfString) ||
-            !IMPLIES(t != KindOfUninit, caseType == t)) {
-          return folly::none;
-        }
-        t = caseType;
-      } else {
-        return folly::none;
-      }
-      int64_t n;
-      bool isNonZero;
-      if (t == KindOfInt64) {
-        n = cval.asInt64Val();
-        isNonZero = n;
-      } else {
-        always_assert(t == KindOfString);
-        n = m_ue.mergeLitstr(cval.asStrRef().get());
-        isNonZero = false; // not used for string switches
-      }
-      if (!caseMap.count(n)) {
-        // If 'case n:' appears multiple times, only the first will
-        // ever match
-        caseMap[n] = i;
-        if (t == KindOfString) {
-          // We have to preserve the original order of the cases for string
-          // switches because of insane things like 0 being equal to any string
-          // that is not a nonzero numeric string.
-          state.caseOrder.push_back(StrCase(safe_cast<Id>(n), i));
-        }
-      }
-      if (state.nonZeroI == -1 && isNonZero) {
-        // true is equal to any non-zero integer, so to preserve php's
-        // switch semantics we have to remember the first non-zero
-        // case to appear in the source text
-        state.nonZeroI = i;
-      }
-    } else if (LIKELY(state.defI == -1)) {
-      state.defI = i;
-    } else {
-      // Multiple defaults are not allowed
-      throw IncludeTimeFatalException(
-        c, "Switch statements may only contain one default: clause");
-    }
-  }
-
-  if (t == KindOfInt64) {
-    int64_t base = caseMap.begin()->first;
-    int64_t nTargets = caseMap.rbegin()->first - base + 1;
-    // Fail if the cases are too sparse. We emit Switch even for absurdly small
-    // cases to allow the jit to decide when to lower back to comparisons.
-    if ((float)caseMap.size() / nTargets < 0.5) {
-      return folly::none;
-    }
-  } else if (t == KindOfString) {
-    if (caseMap.size() < kMinStringSwitchCases) {
-      return folly::none;
-    }
-  }
-
-  return t;
-}
-
-void EmitterVisitor::emitIntegerSwitch(Emitter& e, SwitchStatementPtr sw,
-                                       std::vector<Label>& caseLabels,
-                                       Label& done, const SwitchState& state) {
-  auto& caseMap = state.cases;
-  int64_t base = caseMap.begin()->first;
-  int64_t nTargets = caseMap.rbegin()->first - base + 1;
-
-  // It's on. Map case values to Labels, filling in the blanks as
-  // appropriate.
-  Label* defLabel = state.defI == -1 ? &done : &caseLabels[state.defI];
-  std::vector<Label*> labels(nTargets + 2);
-  for (int i = 0; i < nTargets; ++i) {
-    if (auto const caseIdx = folly::get_ptr(caseMap, base + i)) {
-      labels[i] = &caseLabels[*caseIdx];
-    } else {
-      labels[i] = defLabel;
-    }
-  }
-
-  // Fill in offsets for the first non-zero case and default
-  labels[labels.size() - 2] =
-    state.nonZeroI == -1 ? defLabel : &caseLabels[state.nonZeroI];
-  labels[labels.size() - 1] = defLabel;
-
-  visit(sw->getExp());
-  emitConvertToCell(e);
-  e.Switch(SwitchKind::Bounded, base, labels);
-}
-
-void EmitterVisitor::emitStringSwitch(Emitter& e, SwitchStatementPtr sw,
-                                      std::vector<Label>& caseLabels,
-                                      Label& done, const SwitchState& state) {
-  std::vector<Emitter::StrOff> labels;
-  for (auto& pair : state.caseOrder) {
-    labels.push_back(Emitter::StrOff(pair.first, &caseLabels[pair.second]));
-  }
-
-  // Default case comes last
-  Label* defLabel = state.defI == -1 ? &done : &caseLabels[state.defI];
-  labels.push_back(Emitter::StrOff(-1, defLabel));
-
-  visit(sw->getExp());
-  emitConvertToCell(e);
-  e.SSwitch(labels);
 }
 
 void EmitterVisitor::markElem(Emitter& e) {

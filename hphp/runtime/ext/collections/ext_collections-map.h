@@ -105,10 +105,7 @@ struct BaseMap : HashCollection {
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
-  enum EqualityFlavor { OrderMatters, OrderIrrelevant };
-
-  static bool Equals(EqualityFlavor eq,
-                     const ObjectData* obj1, const ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   [[noreturn]] static void throwBadKeyType();
 

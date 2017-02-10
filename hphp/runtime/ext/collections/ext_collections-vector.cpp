@@ -442,21 +442,7 @@ bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
 bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto bv1 = static_cast<const BaseVector*>(obj1);
   auto bv2 = static_cast<const BaseVector*>(obj2);
-
-  uint32_t sz = bv1->m_size;
-  if (sz != bv2->m_size) {
-    return false;
-  }
-
-  for (uint32_t i = 0; i < sz; ++i) {
-    if (!HPHP::equal(tvAsCVarRef(&bv1->data()[i]),
-                     tvAsCVarRef(&bv2->data()[i]))) {
-
-      return false;
-    }
-  }
-
-  return true;
+  return ArrayData::Equal(bv1->arrayData(), bv2->arrayData());
 }
 
 NEVER_INLINE

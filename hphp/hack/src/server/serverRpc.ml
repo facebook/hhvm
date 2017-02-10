@@ -57,6 +57,24 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | REMOVE_DEAD_FIXMES codes ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
       env, ServerRefactor.get_fixme_patches codes env
+    | IGNORE_FIXMES files ->
+      let paths = List.map files (Relative_path.concat Relative_path.Root) in
+      let disk_needs_parsing =
+        List.fold_left
+          paths
+          ~init:env.disk_needs_parsing
+          ~f:Relative_path.Set.add
+      in
+      Errors.set_ignored_fixmes (Some paths);
+      let original_env = env in
+      let env = {env with disk_needs_parsing} in
+      (* Everything should happen on the master process *)
+      let genv = {genv with workers = None} in
+      let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
+      let el = Errors.get_sorted_error_list env.errorl in
+      let el = List.map ~f:Errors.to_absolute el in
+      Errors.set_ignored_fixmes None;
+      original_env, el
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
     | DUMP_AI_INFO file_list ->

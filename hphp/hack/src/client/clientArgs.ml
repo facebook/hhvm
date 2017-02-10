@@ -200,6 +200,15 @@ let parse_check_args cmd =
         Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
       " (mode) remove dead HH_FIXME for any error code < 5000 " ^
       "(first do hh_client restart --no-load)";
+    "--ignore-fixme",
+        Arg.Rest begin fun x ->
+          mode := match !mode with
+            | None -> Some (MODE_IGNORE_FIXMES [x])
+            | Some (MODE_IGNORE_FIXMES xs) -> Some (MODE_IGNORE_FIXMES (x::xs))
+            | _ -> raise (Arg.Bad "only a single mode should be specified")
+          end,
+        " (mode) ignores fixmes in the given space separated files " ^
+        "(provide relative path inside code's root directory)";
     "--lint", Arg.Rest begin fun fn ->
         mode := match !mode with
           | None -> Some (MODE_LINT [fn])

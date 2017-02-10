@@ -31,6 +31,7 @@ type _ t =
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoServiceTypes.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> ServerRefactorTypes.patch list t
+  | IGNORE_FIXMES : string list -> Pos.absolute Errors.error_ list t
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t

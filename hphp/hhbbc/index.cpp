@@ -77,6 +77,7 @@ const StaticString s_isset("__isset");
 const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_86ctor("86ctor");
+const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -136,6 +137,8 @@ enum class Dep : uintptr_t {
   ReturnTy = 0x1,
   /* This dependency should trigger when a DefCns is resolved */
   ConstVal = 0x2,
+  /* This dependency should trigger when a class constant is resolved */
+  ClsConst = 0x4,
 };
 
 Dep operator|(Dep a, Dep b) {
@@ -2390,8 +2393,12 @@ Type Index::lookup_class_constant(Context ctx,
       return TInitCell;
     }
     if (it->second->val.value().m_type == KindOfUninit) {
-      // This is a class constant that needs an 86cinit to run.  It
-      // would be good to eventually be able to analyze these.
+      // This is a class constant that needs an 86cinit to run.
+      // We'll add a dependency to make sure we're re-run if it
+      // resolves anything.
+      auto const cinit = borrow(it->second->cls->methods.back());
+      assert(cinit->name == s_86cinit.get());
+      add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
       return TInitCell;
     }
     return from_cell(it->second->val.value());
@@ -2575,6 +2582,28 @@ Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
+void Index::refine_class_constants(const Context& ctx, ContextSet& deps) {
+  bool changed = false;
+  bool any_dynamic = false;
+  for (auto& c : ctx.func->cls->constants) {
+    if (c.val && c.val->m_type == KindOfUninit) {
+      auto const fa = analyze_func_inline(*this, ctx, { sval(c.name) });
+      auto val = tv(fa.inferredReturn);
+      if (val) {
+        changed = true;
+        c.val = *val;
+      } else {
+        any_dynamic = true;
+      }
+    }
+  }
+  if (!any_dynamic) {
+    assert(ctx.func->cls->methods.back()->name == s_86cinit.get());
+    ctx.func->cls->methods.pop_back();
+  }
+  if (changed) find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
+}
+
 void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
   auto const func = fa.ctx.func;
   for (auto const& it : fa.cnsMap) {
@@ -2629,6 +2658,9 @@ void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
     }
   }
   if (fa.readsUntrackedConstants) deps.emplace(fa.ctx);
+  if (func->name == s_86cinit.get()) {
+    refine_class_constants(fa.ctx, deps);
+  }
 }
 
 void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,

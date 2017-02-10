@@ -587,6 +587,20 @@ struct Index {
   Slot lookup_iface_vtable_slot(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Refine the types of the class constants defined by an 86cinit,
+   * based on a round of analysis.
+   *
+   * Constants not defined by a pseudomain are considered unknowable
+   *
+   * No other threads should be calling functions on this Index when
+   * this function is called.
+   *
+   * Merges the set of Contexts that depended on the constants defined
+   * by this 86cinit.
+   */
+  void refine_class_constants(const Context& ctx, ContextSet& deps);
+
+  /*
    * Refine the types of the constants defined by a function, based on
    * a round of analysis.
    *

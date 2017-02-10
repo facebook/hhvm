@@ -502,9 +502,8 @@ struct Class {
   CompactVector<PreClass::TraitPrecRule> traitPrecRules;
   CompactVector<PreClass::TraitAliasRule> traitAliasRules;
   int32_t numDeclMethods;
-
   /*
-   * Methods on the class.
+   * Methods on the class. If there's an 86cinit, it must be last.
    */
   CompactVector<std::unique_ptr<php::Func>> methods;
 

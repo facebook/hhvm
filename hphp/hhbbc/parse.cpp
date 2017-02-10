@@ -56,6 +56,7 @@ namespace {
 const StaticString s_Closure("Closure");
 const StaticString s_toString("__toString");
 const StaticString s_Stringish("Stringish");
+const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -750,10 +751,16 @@ void parse_methods(ParseUnitState& puState,
                    borrowed_ptr<php::Class> ret,
                    borrowed_ptr<php::Unit> unit,
                    const PreClassEmitter& pce) {
+  std::unique_ptr<php::Func> cinit;
   for (auto& me : pce.methods()) {
     auto f = parse_func(puState, unit, ret, *me);
-    ret->methods.push_back(std::move(f));
+    if (f->name == s_86cinit.get()) {
+      cinit = std::move(f);
+    } else {
+      ret->methods.push_back(std::move(f));
+    }
   }
+  if (cinit) ret->methods.push_back(std::move(cinit));
 }
 
 void add_stringish(borrowed_ptr<php::Class> cls) {

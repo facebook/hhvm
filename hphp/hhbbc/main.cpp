@@ -192,6 +192,8 @@ UNUSED void validate_options() {
 
 void open_repo(const std::string& path) {
   RuntimeOption::RepoCentralPath = path;
+  // Make sure the changes take effect
+  Repo::shutdown();
   Repo::get();
 }
 

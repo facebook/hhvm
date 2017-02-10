@@ -261,7 +261,9 @@ void analyze_iteratively(Index& index, php::Program& program) {
     std::set<WorkItem> revisit;
 
     auto update_func = [&] (const FuncAnalysis& fa) {
-      auto deps = index.refine_return_type(fa.ctx.func, fa.inferredReturn);
+      ContextSet deps;
+      index.refine_return_type(fa.ctx.func, fa.inferredReturn, deps);
+      index.refine_constants(fa, deps);
       for (auto& d : deps) revisit.insert(work_item_for(d));
 
       for (auto& kv : fa.closureUseTypes) {

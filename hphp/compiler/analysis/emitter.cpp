@@ -11098,6 +11098,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
   gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
+  gd.PHP7_Builtins            = RuntimeOption::PHP7_Builtins;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
   gd.HardPrivatePropInference = true;
   gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;

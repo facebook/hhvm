@@ -203,6 +203,17 @@ bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
+bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
+  if (!options.HardConstProp || op.arg1 != 2) return false;
+  if (auto const v = tv(topT(env, 1))) {
+    if (isStringType(v->m_type) &&
+        !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {
+      env.collect.cnsMap[v->m_data.pstr].m_type = kDynamicConstant;
+    }
+  }
+  return false;
+}
+
 const StaticString
   s_abs("abs"),
   s_ceil("ceil"),
@@ -210,7 +221,8 @@ const StaticString
   s_max2("__SystemLib\\max2"),
   s_min2("__SystemLib\\min2"),
   s_mt_rand("mt_rand"),
-  s_strlen("mt_strlen");
+  s_strlen("mt_strlen"),
+  s_defined("defined");
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
@@ -223,6 +235,7 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
   X(min2)
   X(mt_rand)
   X(strlen)
+  X(defined)
 
 #undef X
 

@@ -43,6 +43,7 @@ namespace HPHP { namespace HHBBC {
 struct Type;
 struct Index;
 struct PublicSPropIndexer;
+struct FuncAnalysis;
 
 namespace php {
 struct Class;
@@ -71,9 +72,18 @@ struct Program;
  * fields may be null in some situations.  Most queries to the Index
  * need a "context", to allow recording dependencies.
  */
-struct Context { borrowed_ptr<const php::Unit> unit;
-                 borrowed_ptr<php::Func> func;
-                 borrowed_ptr<const php::Class> cls; };
+struct Context {
+  borrowed_ptr<const php::Unit> unit;
+  borrowed_ptr<php::Func> func;
+  borrowed_ptr<const php::Class> cls;
+
+  struct Hash {
+    size_t operator()(const Context& c) const {
+      return pointer_hash<void>{}(c.func ? (void*)c.func :
+                                  c.cls ? (void*)c.cls : (void*)c.unit);
+    }
+  };
+};
 
 inline bool operator==(Context a, Context b) {
   return a.unit == b.unit && a.func == b.func && a.cls == b.cls;
@@ -84,8 +94,11 @@ inline bool operator<(Context a, Context b) {
          std::make_tuple(b.unit, b.func, b.cls);
 }
 
+using ContextSet = std::unordered_set<Context, Context::Hash>;
+
 std::string show(Context);
 
+using ConstantMap = std::unordered_map<SString, Cell>;
 /*
  * Context for a call to a function.  This means the types and number
  * of arguments, and where it is being called from.
@@ -474,6 +487,14 @@ struct Index {
   Type lookup_class_constant(Context, res::Class, SString cns) const;
 
   /*
+   * Lookup what the best known Type for a constant would be, using a
+   * given Index and Context, if a constant of that name were defined.
+   *
+   * Returns folly::none if the constant isn't in the index.
+   */
+  folly::Optional<Type> lookup_constant(Context ctx, SString cnsName) const;
+
+  /*
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitGen at worst.
    */
@@ -566,16 +587,31 @@ struct Index {
   Slot lookup_iface_vtable_slot(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Refine the types of the constants defined by a function, based on
+   * a round of analysis.
+   *
+   * Constants not defined by a pseudomain are considered unknowable
+   *
+   * No other threads should be calling functions on this Index when
+   * this function is called.
+   *
+   * Merges the set of Contexts that depended on the constants defined
+   * by this php::Func into deps.
+   */
+  void refine_constants(const FuncAnalysis& fa, ContextSet& deps);
+
+  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *
    * No other threads should be calling functions on this Index when
    * this function is called.
    *
-   * Returns: the set of Contexts that depended on the return type of
-   * this php::Func.
+   * Merges the set of Contexts that depended on the return type of
+   * this php::Func into deps.
    */
-  std::vector<Context> refine_return_type(borrowed_ptr<const php::Func>, Type);
+  void refine_return_type(borrowed_ptr<const php::Func>, Type,
+                          ContextSet& deps);
 
   /*
    * Refine the used var types for a closure, based on a round of

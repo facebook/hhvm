@@ -38,6 +38,11 @@ namespace php { struct Block; }
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr auto kReadOnlyConstant = kInvalidDataType;
+constexpr auto kDynamicConstant = kExtraInvalidDataType;
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * RunFlags are information about running an entire block in the
  * interpreter.

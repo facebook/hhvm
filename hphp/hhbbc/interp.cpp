@@ -301,9 +301,25 @@ void in(ISS& env, const bc::ColAddNewElemC&) {
   push(env, coll);
 }
 
-// Note: unlike class constants, these can be dynamic system
-// constants, so this doesn't have to be TInitUnc.
-void in(ISS& env, const bc::Cns&)  { push(env, TInitCell); }
+void in(ISS& env, const bc::Cns& op)  {
+  auto t = env.index.lookup_constant(env.ctx, op.str1);
+  if (!t) {
+    // There's no entry for this constant in the index. It must be
+    // the first iteration, so we'll add a dummy entry to make sure
+    // there /is/ something next time around.
+    Cell val;
+    val.m_type = kReadOnlyConstant;
+    env.collect.cnsMap.emplace(op.str1, val);
+    t = TInitCell;
+    // make sure we're re-analyzed
+    env.collect.readsUntrackedConstants = true;
+  } else if (t->strictSubtypeOf(TInitCell)) {
+    nothrow(env);
+    constprop(env);
+  }
+  push(env, *t);
+}
+
 void in(ISS& env, const bc::CnsE&) { push(env, TInitCell); }
 void in(ISS& env, const bc::CnsU&) { push(env, TInitCell); }
 
@@ -1907,6 +1923,8 @@ void pushCallReturnType(ISS& env, const Type& ty) {
   return push(env, ty);
 }
 
+StaticString s_defined { "defined" };
+
 void fcallKnownImpl(ISS& env, uint32_t numArgs) {
   auto const ar = fpiPop(env);
   always_assert(ar.func.hasValue());
@@ -1916,6 +1934,19 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
     args[numArgs - i - 1] = popF(env);
   }
+  if (options.HardConstProp &&
+      numArgs == 1 &&
+      ar.func->name()->isame(s_defined.get())) {
+    // If someone calls defined('foo') they probably want foo to be
+    // defined normally; ie not a persistent constant.
+    if (auto const v = tv(args[0])) {
+      if (isStringType(v->m_type) &&
+          !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {
+        env.collect.cnsMap[v->m_data.pstr].m_type = kDynamicConstant;
+      }
+    }
+  }
+
   auto const ty = env.index.lookup_return_type(
     CallContext { env.ctx, args },
     *ar.func
@@ -2204,7 +2235,27 @@ void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 void in(ISS& env, const bc::DefFunc&)      {}
 void in(ISS& env, const bc::DefCls&)       {}
 void in(ISS& env, const bc::DefClsNop&)    {}
-void in(ISS& env, const bc::DefCns&)       { popC(env); push(env, TBool); }
+
+void in(ISS& env, const bc::DefCns& op) {
+  auto const t = popC(env);
+  if (options.HardConstProp) {
+    auto const v = tv(t);
+    auto const val = v && tvAsCVarRef(&*v).isAllowedAsConstantValue() ?
+      *v : make_tv<KindOfUninit>();
+    auto const res = env.collect.cnsMap.emplace(op.str1, val);
+    if (!res.second) {
+      if (res.first->second.m_type == kReadOnlyConstant) {
+        // we only saw a read of this constant
+        res.first->second = val;
+      } else {
+        // more than one definition in this function
+        res.first->second.m_type = kDynamicConstant;
+      }
+    }
+  }
+  push(env, TBool);
+}
+
 void in(ISS& env, const bc::DefTypeAlias&) {}
 
 void in(ISS& env, const bc::This&) {

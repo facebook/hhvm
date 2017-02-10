@@ -40,10 +40,9 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 
-#include "hphp/util/algorithm.h"
-#include "hphp/util/assertions.h"
-#include "hphp/util/match.h"
+#include "hphp/runtime/base/tv-comparisons.h"
 
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
@@ -55,6 +54,10 @@
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/analyze.h"
+
+#include "hphp/util/algorithm.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/match.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -128,7 +131,12 @@ copy_range(const MultiMap& map, typename MultiMap::key_type key) {
 
 //////////////////////////////////////////////////////////////////////
 
-enum class Dep : uintptr_t { ReturnTy = 0x1 };
+enum class Dep : uintptr_t {
+  /* This dependency should trigger when the return type changes */
+  ReturnTy = 0x1,
+  /* This dependency should trigger when a DefCns is resolved */
+  ConstVal = 0x2,
+};
 
 Dep operator|(Dep a, Dep b) {
   return static_cast<Dep>(
@@ -143,7 +151,6 @@ bool has_dep(Dep m, Dep t) {
 /*
  * Maps functions to contexts that depend on information about that
  * function, with information about the type of dependency.
- * (Currently only return types.)
  */
 using DepMap =
   tbb::concurrent_hash_map<
@@ -271,6 +278,28 @@ struct FuncInfoValue {
 
 using FuncInfoMap = std::unordered_map<borrowed_ptr<const php::Func>,
                                        FuncInfoValue>;
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Known information about a particular constant:
+ *  - if system is true, it's a system constant and other definitions
+ *    will be ignored.
+ *  - for non-system constants, if func is non-null it's the unique
+ *    pseudomain defining the constant; otherwise there was more than
+ *    one definition, or a non-pseudomain definition, and the type will
+ *    be TInitCell
+ *  - readonly is true if we've only seen uses of the constant, and no
+ *    definitions (this could change during the first pass, but not after
+ *    that).
+ */
+
+struct ConstInfo {
+  borrowed_ptr<const php::Func> func;
+  Type                          type;
+  bool                          system;
+  bool                          readonly;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -681,11 +710,12 @@ struct IndexData {
 
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
-  ISStringToMany<const php::Class>     classes;
-  ISStringToMany<const php::Func>      methods;
-  ISStringToMany<const php::Func>      funcs;
-  ISStringToMany<const php::TypeAlias> typeAliases;
-  ISStringToMany<const php::Class>     enums;
+  ISStringToMany<const php::Class>       classes;
+  ISStringToMany<const php::Func>        methods;
+  ISStringToMany<const php::Func>        funcs;
+  ISStringToMany<const php::TypeAlias>   typeAliases;
+  ISStringToMany<const php::Class>       enums;
+  std::unordered_map<SString, ConstInfo> constants;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -789,17 +819,16 @@ borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
   return &ret;
 }
 
-std::vector<Context> find_deps(IndexData& data,
-                               borrowed_ptr<const php::Func> src,
-                               Dep mask) {
-  std::vector<Context> ret;
+void find_deps(IndexData& data,
+               borrowed_ptr<const php::Func> src,
+               Dep mask,
+               ContextSet& deps) {
   DepMap::const_accessor acc;
   if (data.dependencyMap.find(acc, src)) {
     for (auto& kv : acc->second) {
-      if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+      if (has_dep(kv.second, mask)) deps.insert(kv.first);
     }
   }
-  return ret;
 }
 
 bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
@@ -942,6 +971,20 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
   }
 
   return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void add_system_constants_to_index(IndexData& index) {
+  for (auto cnsPair : Native::getConstants()) {
+    auto& c = index.constants[cnsPair.first];
+    auto t = cnsPair.second.m_type == KindOfUninit ?
+      TInitCell : from_cell(cnsPair.second);
+    c.func = nullptr;
+    c.type = t;
+    c.system = true;
+    c.readonly = false;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1811,6 +1854,8 @@ Index::Index(borrowed_ptr<php::Program> program)
 
   m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
 
+  add_system_constants_to_index(*m_data);
+
   for (auto& u : program->units) {
     add_unit_to_index(*m_data, *u);
   }
@@ -2354,6 +2399,26 @@ Type Index::lookup_class_constant(Context ctx,
   return TInitCell;
 }
 
+folly::Optional<Type> Index::lookup_constant(Context ctx,
+                                             SString cnsName) const {
+  auto const it = m_data->constants.find(cnsName);
+  if (it == m_data->constants.end()) {
+    // flag to indicate that the constant isn't in the index yet.
+    if (options.HardConstProp) return folly::none;
+    return TInitCell;
+  }
+
+  if (it->second.func &&
+      !it->second.readonly &&
+      !it->second.system &&
+      !tv(it->second.type)) {
+    // we might refine the type
+    add_dependency(*m_data, it->second.func, ctx, Dep::ConstVal);
+  }
+
+  return it->second.type;
+}
+
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
@@ -2510,8 +2575,64 @@ Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<Context>
-Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
+void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
+  auto const func = fa.ctx.func;
+  for (auto const& it : fa.cnsMap) {
+    if (it.second.m_type == kReadOnlyConstant) {
+      // this constant was read, but there was nothing mentioning it
+      // in the index. Should only happen on the first iteration. We
+      // need to reprocess this func.
+      assert(fa.readsUntrackedConstants);
+      // if there's already an entry, we don't want to do anything,
+      // otherwise just insert a dummy entry to indicate that it was
+      // read.
+      m_data->constants.emplace(it.first,
+                                ConstInfo {func, TInitCell, false, true});
+      continue;
+    }
+
+    if (it.second.m_type == kDynamicConstant || !is_pseudomain(func)) {
+      // two definitions, or a non-pseuodmain definition
+      auto& c = m_data->constants[it.first];
+      if (!c.system) {
+        c.func = nullptr;
+        c.type = TInitCell;
+        c.readonly = false;
+      }
+      continue;
+    }
+
+    auto t = it.second.m_type == KindOfUninit ?
+      TInitCell : from_cell(it.second);
+
+    auto const res = m_data->constants.emplace(it.first, ConstInfo {func, t});
+
+    if (res.second || res.first->second.system) continue;
+
+    if (res.first->second.readonly) {
+      res.first->second.func = func;
+      res.first->second.type = t;
+      res.first->second.readonly = false;
+      continue;
+    }
+
+    if (res.first->second.func != func) {
+      res.first->second.func = nullptr;
+      res.first->second.type = TInitCell;
+      continue;
+    }
+
+    assert(t.subtypeOf(res.first->second.type));
+    if (t != res.first->second.type) {
+      res.first->second.type = t;
+      find_deps(*m_data, func, Dep::ConstVal, deps);
+    }
+  }
+  if (fa.readsUntrackedConstants) deps.emplace(fa.ctx);
+}
+
+void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
+                               ContextSet& deps) {
   auto const fdata = create_func_info(*m_data, func);
 
   always_assert_flog(
@@ -2526,15 +2647,15 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
     show(fdata->second.returnTy)
   );
 
-  if (!t.strictSubtypeOf(fdata->second.returnTy)) return {};
+  if (!t.strictSubtypeOf(fdata->second.returnTy)) return;
   if (fdata->second.returnRefinments + 1 < options.returnTypeRefineLimit) {
     fdata->second.returnTy = t;
     ++fdata->second.returnRefinments;
-    return find_deps(*m_data, func, Dep::ReturnTy);
+    find_deps(*m_data, func, Dep::ReturnTy, deps);
+    return;
   }
   FTRACE(1, "maxed out return type refinements on {}:{}\n",
     func->unit->filename, func->name);
-  return {};
 }
 
 bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,

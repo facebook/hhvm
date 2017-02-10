@@ -336,6 +336,8 @@ FuncAnalysis do_analyze_collect(const Index& index,
   }
 
   ai.closureUseTypes = std::move(collect.closureUseTypes);
+  ai.cnsMap = std::move(collect.cnsMap);
+  ai.readsUntrackedConstants = collect.readsUntrackedConstants;
 
   if (ctx.func->isGenerator) {
     if (ctx.func->isAsync) {

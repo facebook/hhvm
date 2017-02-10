@@ -317,13 +317,14 @@ struct CollectedInfo {
                          PublicSPropIndexer* publicStatics)
     : props{index, ctx, cls}
     , publicStatics{publicStatics}
-    , mayUseVV{false}
   {}
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
   PublicSPropIndexer* const publicStatics;
-  bool mayUseVV;
+  ConstantMap cnsMap;
+  bool mayUseVV{false};
+  bool readsUntrackedConstants{false};
 };
 
 //////////////////////////////////////////////////////////////////////

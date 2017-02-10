@@ -96,6 +96,11 @@ struct Repo::GlobalData {
   bool PHP7_ScalarTypes = false;
 
   /*
+   * Indicates whether the repo was compiled with PHP7 builtins enabled.
+   */
+  bool PHP7_Builtins = false;
+
+  /*
    * Indicates whether the repo was compiled with PHP7 substr behavior which
    * returns an empty string if the stringi length is equal to start characters
    * long, instead of PHP5's false.
@@ -131,6 +136,7 @@ struct Repo::GlobalData {
       (PHP7_IntSemantics)
       (PHP7_ScalarTypes)
       (PHP7_Substr)
+      (PHP7_Builtins)
       (AutoprimeGenerators)
       (APCProfile)
       (PromoteEmptyObject)

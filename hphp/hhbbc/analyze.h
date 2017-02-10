@@ -79,6 +79,18 @@ struct FuncAnalysis {
    * declared order.
    */
   ClosureUseVarMap closureUseTypes;
+
+  /*
+   * With HardConstProp enabled, the set of constants that this
+   * function could define.
+   */
+  ConstantMap cnsMap;
+
+  /*
+   * Reads a constant thats not in the index (yet - this can only
+   * happen on the first iteration). We'll need to revisit it.
+   */
+  bool readsUntrackedConstants{false};
 };
 
 /*

@@ -509,6 +509,7 @@ static String HHVM_STATIC_METHOD(Locale, getDisplayVariant,
 
 static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
   UErrorCode error = U_ZERO_ERROR;
+  CHECK_LOCALELEN_OR_RETURN(locale, Array());
   String locname = localeOrDefault(locale);
   UEnumeration *e = uloc_openKeywords(locname.c_str(), &error);
   if (!e) return Array();
@@ -682,6 +683,7 @@ static void add_array_entry(Array& ret,
 }
 
 static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
+  CHECK_LOCALELEN_OR_RETURN(locale, Array());
   String locname = localeOrDefault(locale);
   Array ret = Array::Create();
   if (std::find(g_grandfathered.begin(),

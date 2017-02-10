@@ -61,8 +61,9 @@
     (d)->len = 0;                        \
     newlen = (n);                        \
     (d)->a = newlen < SMART_STR_START_SIZE             \
-        ? SMART_STR_START_SIZE                 \
-        : newlen + SMART_STR_PREALLOC;            \
+              ? SMART_STR_START_SIZE   \
+              : (newlen >= (INT_MAX - SMART_STR_PREALLOC)? newlen \
+              : (newlen + SMART_STR_PREALLOC));  \
     SMART_STR_DO_REALLOC(d, what);                \
   } else {                            \
     newlen = (d)->len + (n);                  \
@@ -156,17 +157,17 @@
  * for GCC compatible compilers, e.g.
  *
  * #define f(..) ({char *r;..;__r;})
- */  
- 
+ */
+
 static inline char *smart_str_print_long(char *buf, long num) {
-  char *r; 
-  smart_str_print_long4(buf, num, unsigned long, r); 
+  char *r;
+  smart_str_print_long4(buf, num, unsigned long, r);
   return r;
 }
 
 static inline char *smart_str_print_unsigned(char *buf, long num) {
-  char *r; 
-  smart_str_print_unsigned4(buf, num, unsigned long, r); 
+  char *r;
+  smart_str_print_unsigned4(buf, num, unsigned long, r);
   return r;
 }
 
@@ -176,7 +177,7 @@ static inline char *smart_str_print_unsigned(char *buf, long num) {
      smart_str_print##func##4 (__b + sizeof(__b) - 1, (num), vartype, __t);  \
   smart_str_appendl_ex((dest), __t, __b + sizeof(__b) - 1 - __t, (type));  \
 } while (0)
-  
+
 #define smart_str_append_unsigned_ex(dest, num, type) \
   smart_str_append_generic_ex((dest), (num), (type), unsigned long, _unsigned)
 

@@ -79,6 +79,8 @@ MODULES=\
   utils\
   utils/collections\
   utils/disk\
+  utils/process\
+  utils/hg\
   utils/hh_json\
   monitor\
   watchman\

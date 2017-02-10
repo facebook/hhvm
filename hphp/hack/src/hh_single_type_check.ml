@@ -38,6 +38,7 @@ type mode =
   | Find_refs of int * int
   | Symbol_definition_by_id of string
   | Highlight_refs of int * int
+  | Hhas_codegen
 
 type options = {
   filename : string;
@@ -304,6 +305,9 @@ let parse_options () =
         Arg.Int (fun column -> set_mode (Highlight_refs (!line, column)) ());
       ]),
       "Highlight all usages of a symbol at given line and column";
+    "--hhas-codegen",
+      Arg.Unit (set_mode Hhas_codegen),
+      "Generates the HHAS text file";
   ] in
   let options = Arg.align options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -573,6 +577,26 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
   | Dump_tast -> Printf.printf "no typed AST to dump, yet\n"
+  | Hhas_codegen ->
+    let hhas_list: Hhbc_ast.fun_def list =
+      let f_fold fn fileinfo acc = begin
+        let fun_s = Typing_check_utils.get_nast_fun_ opts fn fileinfo in
+        let f_filter_map nast_fun =
+          let name_i = Litstr.to_string @@ snd nast_fun.Nast.f_name in
+          Hhbc_from_nast.from_fun_ name_i nast_fun in
+        List.filter_map fun_s f_filter_map
+      end in
+      Relative_path.Map.fold files_info ~f:f_fold ~init:[] in
+
+    let hhas_prog = {
+      Hhbc_ast.hhas_fun = List.rev hhas_list;
+    } in
+    let final_buf = Hhbc_hhas.buffer_of_top_level () in
+    Buffer.add_buffer final_buf @@ Hhbc_hhas.buffer_of_hhas_prog hhas_prog;
+    Buffer.add_string final_buf "\n";
+    Buffer.output_buffer stdout final_buf
+
+
 
 
 (*****************************************************************************)

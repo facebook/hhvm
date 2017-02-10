@@ -60,6 +60,7 @@ MODULES=\
   heap\
   hh_matcher\
   hh_matcher/test\
+  hhbc\
   hhi\
   ide_rpc\
   injection/default_injector\

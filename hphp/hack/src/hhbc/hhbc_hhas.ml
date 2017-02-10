@@ -106,7 +106,7 @@ let buffer_of_return_types return_types =
 
 let buffer_of_fun_def fun_def =
   let buf = B.create 0 in
-  B.add_string buf "\nfunction ";
+  B.add_string buf "\n.function ";
   B.add_buffer buf @@ buffer_of_return_types fun_def.f_return_types;
   B.add_string buf fun_def.f_name;
   B.add_string buf "()";

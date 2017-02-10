@@ -31,3 +31,9 @@ let check_defs tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
     end;
   )) in
   result
+
+
+let get_nast_fun_ tcopt fn {FileInfo.funs; _ } =
+  let f_filter_map (_, fun_) =
+    Typing_check_service.type_fun tcopt fn fun_ in
+  List.filter_map funs f_filter_map

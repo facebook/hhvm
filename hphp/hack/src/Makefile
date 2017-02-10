@@ -52,6 +52,9 @@ MODULES=\
   format\
 	full_fidelity\
 	full_fidelity/schema\
+  hackfmt/debug\
+  hackfmt/line_splitter\
+  hackfmt\
   globals\
   h2tp/common\
   h2tp/mapper\
@@ -118,6 +121,7 @@ NATIVE_LIBRARIES=\
 TARGETS_BASE=_build/hh_server _build/hh_client \
 	_build/hh_single_type_check _build/hh_emitter \
 	_build/hh_format _build/h2tp \
+	_build/hackfmt \
 	_build/hh_match \
 	_build/code_extent_tests \
 	_build/matcher_test \
@@ -212,6 +216,7 @@ endif
 	cp _build/hh_client.$(TARGET_EXT) ../bin/hh_client
 	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
 	cp _build/hh_emitter.$(TARGET_EXT) ../bin/hh_emitter
+	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
 	cp _build/hh_format.$(TARGET_EXT) ../bin/hh_format
 	cp _build/h2tp/h2tp.$(TARGET_EXT) ../bin/h2tp
 	cp _build/hh_match.$(TARGET_EXT) ../bin/hh_match
@@ -225,6 +230,7 @@ else
 endif
 	cp ../_obuild/hh_client/hh_client.asm ../bin/hh_client
 	cp ../_obuild/hh_single_type_check/hh_single_type_check.asm ../bin/hh_single_type_check
+	cp ../_obuild/hh_format/hackfmt.asm ../bin/hackfmt
 	cp ../_obuild/hh_format/hh_format.asm ../bin/hh_format
 	cp ../_obuild/h2tp/h2tp.asm ../bin/h2tp
 	cp ../_obuild/hh_match/hh_match.asm ../bin/hh_match

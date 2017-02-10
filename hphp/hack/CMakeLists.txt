@@ -154,6 +154,10 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_server
   DESTINATION bin
   COMPONENT dev)
 
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hackfmt
+  DESTINATION bin
+  COMPONENT dev)
+
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_format
   DESTINATION bin
   COMPONENT dev)

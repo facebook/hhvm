@@ -19,6 +19,8 @@
 
 #include <pthread.h>
 
+#include <atomic>
+
 #include <folly/Portability.h>
 
 #include "hphp/util/exception.h"
@@ -156,6 +158,8 @@ struct AsyncFuncImpl {
   }
 
   void setNoInitFini() { m_noInitFini = true; }
+
+  static uint32_t count() { return s_count; }
 private:
   Synchronizable m_stopMonitor;
 
@@ -165,6 +169,7 @@ private:
   static PFN_THREAD_FUNC* s_finiFunc;
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
+  static std::atomic<uint32_t> s_count;
   void* m_threadStack;
   pthread_attr_t m_attr;
   pthread_t m_threadId;

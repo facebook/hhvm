@@ -8,8 +8,9 @@
  *
  *)
 
-let none = 0
-let base = 1
+type t = NoCost | Base | Assignment
 
-(* Rule costs *)
-let assignment = 2
+let get_cost t = match t with
+  | NoCost -> 0
+  | Base -> 1
+  | Assignment -> 2

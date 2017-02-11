@@ -9,7 +9,7 @@
  *)
 
 type kind =
-  | Simple of int
+  | Simple of Cost.t
   | Always
   | Argument
   | XHPExpression
@@ -28,11 +28,11 @@ let is_split _rule v =
     | _ -> true
 
 let get_cost kind =
-  match kind with
+  Cost.get_cost @@ match kind with
     | Simple cost -> cost
-    | Always -> Cost.none
+    | Always -> Cost.NoCost
     | Argument
-    | XHPExpression -> Cost.base
+    | XHPExpression -> Cost.Base
 
 let get_possible_values _id =
   [1]
@@ -48,7 +48,7 @@ let compare r1 r2 = Pervasives.compare r1.id r2.id
 
 let to_string rule =
   let kind = match rule.kind with
-    | Simple cost -> Printf.sprintf "Simple %d" cost
+    | Simple cost -> Printf.sprintf "Simple %d" @@ Cost.get_cost cost
     | Always -> "Always"
     | Argument -> "Argument"
     | XHPExpression -> "XHPExpression"

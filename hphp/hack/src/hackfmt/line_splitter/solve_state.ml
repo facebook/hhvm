@@ -77,17 +77,16 @@ let make chunk_group rvm =
   let overflow = overflow + (get_overflow len) in
 
   (* calculate cost of all of the spans that are split *)
-  let _, span_cost = (
-    List.fold chunks ~init:(ISet.empty, 0) ~f:(fun (env, acc) c ->
-      if has_split_before_chunk c rvm then
-        List.fold ~init:(env, acc) c.Chunk.spans ~f:(fun (env, acc) s ->
-          if not (ISet.mem s.Span.id env)
-          then ISet.add s.Span.id env, acc + s.Span.cost
-          else env, acc
-        )
-      else env, acc
-    )
+  let span_cost_map = List.fold chunks ~init:IMap.empty ~f:(fun acc c ->
+    if has_split_before_chunk c rvm then
+      List.fold ~init:acc c.Chunk.spans ~f:(fun acc s ->
+        if IMap.mem s.Span.id acc
+        then acc
+        else IMap.add s.Span.id (Cost.get_cost s.Span.cost) acc
+      )
+    else acc
   ) in
+  let span_cost = IMap.fold (fun _k v acc -> acc + v) span_cost_map 0 in
 
   (* add to cost the cost of all rules that are split *)
   let rule_cost = (

@@ -21,7 +21,7 @@ let __INDENT_WIDTH = 2
 
 type open_span = {
   open_span_start: int;
-  open_span_cost: int;
+  open_span_cost: Cost.t;
 }
 
 type rule_state =
@@ -111,16 +111,13 @@ let builder = object (this)
     );
 
     if not is_trivia then begin
-      ISet.iter (fun rule_id -> lazy_rules <- ISet.add rule_id lazy_rules)
-        next_lazy_rules;
+      lazy_rules <- ISet.union next_lazy_rules lazy_rules;
       next_lazy_rules <- ISet.empty;
-    end;
 
-    if not is_trivia then begin
       let rev_pending_spans_stack = List.rev pending_spans in
       pending_spans <- [];
       List.iter rev_pending_spans_stack ~f:(fun cost ->
-        Stack.push (open_span ((List.length chunks) - 1) cost) open_spans
+        Stack.push (open_span (List.length chunks - 1) cost) open_spans
       );
     end;
 
@@ -142,7 +139,7 @@ let builder = object (this)
         let rule_id = hd.Chunk.rule in
         let rule = match rules with
           | [] when rule_id = Rule.null_rule_id ->
-            this#_create_rule (Rule.Simple Cost.base)
+            this#create_rule (Rule.Simple Cost.Base)
           | hd :: _ when rule_id = Rule.null_rule_id -> hd
           | _ -> rule_id
         in
@@ -154,13 +151,13 @@ let builder = object (this)
       | _ -> chunks
     )
 
-  method _create_rule rule_kind =
+  method private create_rule rule_kind =
     let ra, rule = Rule_allocator.make_rule rule_alloc rule_kind in
     rule_alloc <- ra;
     rule.Rule.id
 
-  method create_lazy_rule ?(rule_kind=Rule.Simple Cost.base) () =
-    let id = this#_create_rule rule_kind in
+  method create_lazy_rule ?(rule_kind=Rule.Simple Cost.Base) () =
+    let id = this#create_rule rule_kind in
     next_lazy_rules <- ISet.add id next_lazy_rules;
     id
 
@@ -179,7 +176,7 @@ let builder = object (this)
   method add_always_empty_chunk () =
     let nesting = nesting_alloc.Nesting_allocator.current_nesting in
     let create_empty_chunk () =
-      let rule = this#_create_rule Rule.Always in
+      let rule = this#create_rule Rule.Always in
       let chunk = Chunk.make "" (Some rule) nesting in
       Chunk.finalize chunk rule rule_alloc false None
     in
@@ -190,12 +187,12 @@ let builder = object (this)
       (* TODO: this is probably wrong, figure out what this means *)
       | _ -> chunks)
 
-  method simple_space_split ?(cost=Cost.base) () =
+  method simple_space_split ?(cost=Cost.Base) () =
     this#split true;
     this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
 
-  method simple_split ?(cost=Cost.base) () =
+  method simple_split ?(cost=Cost.Base) () =
     this#split false;
     this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
@@ -217,27 +214,27 @@ let builder = object (this)
   method unnest () =
     nesting_alloc <- Nesting_allocator.unnest nesting_alloc
 
-  method _start_rule_id rule_id =
+  method private start_rule_id rule_id =
     rule_alloc <- Rule_allocator.mark_dependencies
       rule_alloc lazy_rules rules rule_id;
     rules <- rule_id :: rules
 
-  method start_rule_kind ?(rule_kind=Rule.Simple Cost.base) () =
+  method start_rule_kind ?(rule_kind=Rule.Simple Cost.Base) () =
     (* Override next_split_rule unless it's an Always rule *)
     next_split_rule <- (match next_split_rule with
       | RuleKind kind when kind <> Rule.Always -> NoRule
       | _ -> next_split_rule
     );
-    let rule = this#_create_rule rule_kind in
-    this#_start_rule_id rule
+    let rule = this#create_rule rule_kind in
+    this#start_rule_id rule
 
   method start_lazy_rule lazy_rule_id =
     if ISet.mem lazy_rule_id next_lazy_rules then begin
       next_lazy_rules <- ISet.remove lazy_rule_id next_lazy_rules;
-      this#_start_rule_id lazy_rule_id
+      this#start_rule_id lazy_rule_id
     end else if ISet.mem lazy_rule_id lazy_rules then begin
       lazy_rules <- ISet.remove lazy_rule_id lazy_rules;
-      this#_start_rule_id lazy_rule_id
+      this#start_rule_id lazy_rule_id
     end else
       raise (Failure "Called start_lazy_rule with a rule id is not a lazy rule")
 
@@ -251,7 +248,7 @@ let builder = object (this)
       (Rule_allocator.get_rule_kind rule_alloc id) = kind
     )
 
-  method start_span ?(cost=Cost.base) () =
+  method start_span ?(cost=Cost.Base) () =
     pending_spans <- cost :: pending_spans;
 
   method end_span () =
@@ -486,7 +483,7 @@ let pending_space () =
 
 let rec transform node =
   let t = transform in
-  let span = Some Cost.base in
+  let span = Some Cost.Base in
   let nest = true in
   let space = true in
 
@@ -975,7 +972,7 @@ offending text is '%s'." (text node)));
     let (eq_kw, value) = get_simple_initializer_children x in
     pending_space ();
     t eq_kw;
-    builder#simple_space_split ~cost:Cost.assignment ();
+    builder#simple_space_split ~cost:Cost.Assignment ();
     t_with ~nest value;
   | AnonymousFunction x ->
     let (async_kw, fun_kw, lp, params, rp, colon, ret_type, use, body) =
@@ -1692,7 +1689,7 @@ and transform_argish left_p arg_list right_p =
   transform left_p;
   if not (is_missing arg_list) then begin
     split ();
-    tl_with ~span:(Some Cost.base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+    tl_with ~span:(Some Cost.Base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       tl_with ~nest:true ~f:(fun () ->
         handle_possible_list
           ~after_each:after_each_argument
@@ -1724,7 +1721,7 @@ and transform_mapish_entry key arrow value =
   transform key;
   pending_space ();
   transform arrow;
-  builder#simple_space_split ~cost:Cost.assignment ();
+  builder#simple_space_split ~cost:Cost.Assignment ();
   t_with ~nest:true value;
 
 and transform_keyword_expression_statement kw expr semi =
@@ -1781,7 +1778,7 @@ and transform_binary_expression ~is_nested expr =
     transform left;
     pending_space ();
     transform operator;
-    builder#simple_space_split ~cost:Cost.assignment ();
+    builder#simple_space_split ~cost:Cost.Assignment ();
     t_with ~nest:true right;
   end else begin
     let precedence = Full_fidelity_operator.precedence operator_t in

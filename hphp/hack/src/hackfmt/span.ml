@@ -10,5 +10,5 @@
 
 type t = {
   id: int;
-  cost: int;
+  cost: Cost.t;
 }

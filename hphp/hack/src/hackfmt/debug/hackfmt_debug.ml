@@ -42,11 +42,11 @@ let init_with_options () = [
   "--nesting",
   Arg.Unit (fun () ->
     debug_config := { !debug_config with print_nesting_graph = true }),
-  " Print out a representation of the nesting graph below each chung group";
+  " Print out a representation of the nesting graph below each chunk group";
   "--rule-deps",
   Arg.Unit (fun () ->
     debug_config := { !debug_config with print_rule_dependencies = true }),
-  " Print out a representation of the rule dependenies below each chung group";
+  " Print out a representation of the rule dependenies below each chunk group";
 ]
 
 let debug_nesting chunk_group =

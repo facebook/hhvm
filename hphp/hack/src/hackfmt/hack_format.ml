@@ -1018,8 +1018,7 @@ offending text is '%s'." (text node)));
       t lp;
       t cast_type;
       t rp;
-      builder#simple_space_split ();
-      t_with ~nest op;
+      t op;
     ) ();
     ()
   | ScopeResolutionExpression x ->

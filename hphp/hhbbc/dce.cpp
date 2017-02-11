@@ -167,14 +167,24 @@ namespace {
 bool couldRunDestructor(const Type& t) {
   // We could check for specialized objects to see if they don't
   // declare a user-defined destructor, but currently don't.
-  return t.couldBe(TObj) || t.couldBe(TCArr) || t.couldBe(TRef);
+  return
+    t.couldBe(TObj) ||
+    t.couldBe(TRef) ||
+    t.couldBe(TCArrN) ||
+    t.couldBe(TCVecN) ||
+    t.couldBe(TCDictN);
 }
 
 // Returns whether a set on something containing type t could have
 // side-effects (running destuctors, or modifying arbitrary things via
 // a Ref).
 bool setCouldHaveSideEffects(const Type& t) {
-  return t.couldBe(TObj) || t.couldBe(TCArr) || t.couldBe(TRef);
+  return
+    t.couldBe(TObj) ||
+    t.couldBe(TRef) ||
+    t.couldBe(TCArrN) ||
+    t.couldBe(TCVecN) ||
+    t.couldBe(TCDictN);
 }
 
 // Some reads could raise warnings and run arbitrary code.
@@ -475,28 +485,30 @@ void readDtorLocs(Env& env) {
  * eliminating the CGetL.
  */
 
-void dce(Env& env, const bc::PopC&)       { discardNonDtors(env); }
+void dce(Env& env, const bc::PopC&)          { discardNonDtors(env); }
 // For PopV and PopR currently we never know if can't run a
 // destructor.
-void dce(Env& env, const bc::PopA&)       { discard(env); }
-void dce(Env& env, const bc::PopU&)       { discard(env); }
-void dce(Env& env, const bc::Int&)        { pushRemovable(env); }
-void dce(Env& env, const bc::String&)     { pushRemovable(env); }
-void dce(Env& env, const bc::Array&)      { pushRemovable(env); }
-void dce(Env& env, const bc::Dict&)       { pushRemovable(env); }
-void dce(Env& env, const bc::Vec&)        { pushRemovable(env); }
-void dce(Env& env, const bc::Keyset&)     { pushRemovable(env); }
-void dce(Env& env, const bc::Double&)     { pushRemovable(env); }
-void dce(Env& env, const bc::True&)       { pushRemovable(env); }
-void dce(Env& env, const bc::False&)      { pushRemovable(env); }
-void dce(Env& env, const bc::Null&)       { pushRemovable(env); }
-void dce(Env& env, const bc::NullUninit&) { pushRemovable(env); }
-void dce(Env& env, const bc::File&)       { pushRemovable(env); }
-void dce(Env& env, const bc::Dir&)        { pushRemovable(env); }
-void dce(Env& env, const bc::NameA&)      { popCond(env, push(env)); }
-void dce(Env& env, const bc::NewArray&)   { pushRemovable(env); }
-void dce(Env& env, const bc::NewCol&)     { pushRemovable(env); }
-void dce(Env& env, const bc::AGetC&)      { popCond(env, push(env)); }
+void dce(Env& env, const bc::PopA&)          { discard(env); }
+void dce(Env& env, const bc::PopU&)          { discard(env); }
+void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
+void dce(Env& env, const bc::String&)        { pushRemovable(env); }
+void dce(Env& env, const bc::Array&)         { pushRemovable(env); }
+void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }
+void dce(Env& env, const bc::Vec&)           { pushRemovable(env); }
+void dce(Env& env, const bc::Keyset&)        { pushRemovable(env); }
+void dce(Env& env, const bc::Double&)        { pushRemovable(env); }
+void dce(Env& env, const bc::True&)          { pushRemovable(env); }
+void dce(Env& env, const bc::False&)         { pushRemovable(env); }
+void dce(Env& env, const bc::Null&)          { pushRemovable(env); }
+void dce(Env& env, const bc::NullUninit&)    { pushRemovable(env); }
+void dce(Env& env, const bc::File&)          { pushRemovable(env); }
+void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
+void dce(Env& env, const bc::NameA&)         { popCond(env, push(env)); }
+void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
+void dce(Env& env, const bc::NewDictArray&)  { pushRemovable(env); }
+void dce(Env& env, const bc::NewMixedArray&) { pushRemovable(env); }
+void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
+void dce(Env& env, const bc::AGetC&)         { popCond(env, push(env)); }
 
 void dce(Env& env, const bc::Dup&) {
   auto const u1 = push(env);

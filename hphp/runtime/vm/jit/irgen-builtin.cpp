@@ -551,10 +551,24 @@ SSATmp* opt_foldable(IRGS& env,
                      uint32_t numNonDefaultArgs) {
   if (!func->isFoldable()) return nullptr;
 
+  ArrayData* variadicArgs = nullptr;
+  uint32_t numVariadicArgs = 0;
+  if (numNonDefaultArgs > func->numNonVariadicParams()) {
+    assertx(params.size() == func->numParams());
+    auto const variadic = params.info.back().value;
+    if (!variadic->type().hasConstVal()) return nullptr;
+
+    variadicArgs = variadic->variantVal().asCArrRef().get();
+    numVariadicArgs = variadicArgs->size();
+    assertx(variadicArgs->isStatic() &&
+            (!numVariadicArgs || variadicArgs->hasPackedLayout()));
+    numNonDefaultArgs = func->numNonVariadicParams();
+  }
+
   // Don't pop the args yet---if the builtin throws at compile time (because
   // it would raise a warning or something at runtime) we're going to leave
   // the call alone.
-  PackedArrayInit args(params.size());
+  PackedArrayInit args(numNonDefaultArgs + numVariadicArgs);
   for (auto i = 0; i < numNonDefaultArgs; ++i) {
     auto const t = params[i].value->type();
     if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
@@ -563,12 +577,7 @@ SSATmp* opt_foldable(IRGS& env,
       args.append(params[i].value->variantVal());
     }
   }
-  if (params.size() != func->numNonVariadicParams()) {
-    auto const variadic = params.info.back().value;
-    if (!variadic->type().hasConstVal()) return nullptr;
-
-    auto const variadicArgs = variadic->variantVal().asCArrRef().get();
-    auto const numVariadicArgs = variadicArgs->size();
+  if (variadicArgs) {
     for (auto i = 0; i < numVariadicArgs; i++) {
       args.append(variadicArgs->get(i));
     }

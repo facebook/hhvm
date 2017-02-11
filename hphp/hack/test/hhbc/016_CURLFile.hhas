@@ -1,0 +1,117 @@
+# /data/users/hgo/fbsource/fbcode/hphp/hack/test/hhbc/016_CURLFile.php starts here
+
+.filepath "/data/users/hgo/fbsource/fbcode/hphp/hack/test/hhbc/016_CURLFile.php";
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.function <"CURLFile" "CURLFile" hh_type extended_hint > curl_file_create(<"HH\\string" "HH\\string" hh_type > $name, <"HH\\string" "HH\\string" hh_type > $mime = DV1("""\"\""""), <"HH\\string" "HH\\string" hh_type > $postname = DV2("""\"\"""")) {
+L0:
+  VerifyParamType $name
+  VerifyParamType $mime
+  VerifyParamType $postname
+  FPushCtorD 3 "CURLFile"
+  FPassL 0 $name
+  FPassL 1 $mime
+  FPassL 2 $postname
+  FCall 3
+  PopR
+  VerifyRetTypeC
+  RetC
+DV1:
+  String ""
+  SetL $mime
+  PopC
+DV2:
+  String ""
+  SetL $postname
+  PopC
+  JmpNS L0
+}
+
+.class CURLFile {
+  .property [public] name =
+    """s:0:\"\";""";
+  .property [public] mime =
+    """s:0:\"\";""";
+  .property [public] postname =
+    """s:0:\"\";""";
+  .method [public] <"" N  > __construct(<"HH\\string" "HH\\string" hh_type > $name, <"HH\\string" "HH\\string" hh_type > $mime = DV1("""\"\""""), <"HH\\string" "HH\\string" hh_type > $postname = DV2("""\"\"""")) {
+  L0:
+    VerifyParamType $name
+    VerifyParamType $mime
+    VerifyParamType $postname
+    CheckThis
+    CGetL $name
+    BaseH
+    SetM 0 PT:"name"
+    PopC
+    CheckThis
+    CGetL $mime
+    BaseH
+    SetM 0 PT:"mime"
+    PopC
+    CheckThis
+    CGetL $postname
+    BaseH
+    SetM 0 PT:"postname"
+    PopC
+    Null
+    RetC
+  DV1:
+    String ""
+    SetL $mime
+    PopC
+  DV2:
+    String ""
+    SetL $postname
+    PopC
+    JmpNS L0
+  }
+  .method [public] <"HH\\string" "HH\\string" hh_type extended_hint > getFilename() {
+    CheckThis
+    BaseH
+    QueryM 0 CGet PT:"name"
+    VerifyRetTypeC
+    RetC
+  }
+  .method [public] <"HH\\string" "HH\\string" hh_type extended_hint > getMimeType() {
+    CheckThis
+    BaseH
+    QueryM 0 CGet PT:"mime"
+    VerifyRetTypeC
+    RetC
+  }
+  .method [public] <"HH\\string" "HH\\string" hh_type extended_hint > getPostFilename() {
+    CheckThis
+    BaseH
+    QueryM 0 CGet PT:"postname"
+    VerifyRetTypeC
+    RetC
+  }
+  .method [public] <"HH\\void" N  > setMimeType(<"HH\\string" "HH\\string" hh_type > $mime) {
+    VerifyParamType $mime
+    CheckThis
+    CGetL $mime
+    BaseH
+    SetM 0 PT:"mime"
+    PopC
+    Null
+    RetC
+  }
+  .method [public] <"HH\\void" N  > setPostFilename(<"HH\\string" "HH\\string" hh_type > $postname) {
+    VerifyParamType $postname
+    CheckThis
+    CGetL $postname
+    BaseH
+    SetM 0 PT:"postname"
+    PopC
+    Null
+    RetC
+  }
+}
+
+# /data/users/hgo/fbsource/fbcode/hphp/hack/test/hhbc/016_CURLFile.php ends here

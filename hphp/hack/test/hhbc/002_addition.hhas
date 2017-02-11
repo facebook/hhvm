@@ -1,0 +1,20 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test() {
+  .declvars $x $result;
+  Int 42
+  SetL $x
+  PopC
+  Int 3
+  CGetL2 $x
+  AddO
+  SetL $result
+  PopC
+  Null
+  RetC
+}
+

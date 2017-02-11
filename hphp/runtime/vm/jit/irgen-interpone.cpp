@@ -142,8 +142,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutVUnknown:    return TBoxedInitCell;
 
     case OutSameAsInput1: return topType(env, BCSPRelOffset{0});
-    case OutSameAsInput2: return topType(env, BCSPRelOffset{1});
-    case OutSameAsInput3: return topType(env, BCSPRelOffset{2});
+    case OutModifiedInput3: return topType(env, BCSPRelOffset{2}).modified();
     case OutVInput:      return boxed(topType(env, BCSPRelOffset{0}));
     case OutVInputL:     return boxed(localType());
     case OutFInputL:

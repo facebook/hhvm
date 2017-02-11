@@ -623,6 +623,13 @@ public:
    */
   Type unspecialize() const;
 
+  /*
+   * Return a copy of this Type with the specialization and staticness
+   * dropped.
+   *
+   * @requires *this <= TInitCell
+   */
+  Type modified() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Specialization introspection.                                      [const]

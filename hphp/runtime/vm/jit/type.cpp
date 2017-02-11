@@ -350,6 +350,16 @@ Type Type::specialize(TypeSpec spec) const {
   return Type{*this, spec.clsSpec()};
 }
 
+Type Type::modified() const {
+  auto t = unspecialize();
+  if (t.maybe(TArr))    t |= TArr;
+  if (t.maybe(TDict))   t |= TDict;
+  if (t.maybe(TVec))    t |= TVec;
+  if (t.maybe(TKeyset)) t |= TKeyset;
+  if (t.maybe(TStr))    t |= TStr;
+  return t;
+}
+
 // Return true if the array satisfies requirement on the ArraySpec.
 static bool arrayFitsSpec(const ArrayData* arr, const ArraySpec spec) {
   assertx(arr->isPHPArray());

@@ -269,8 +269,8 @@ enum OutTypeConstraints {
   OutVUnknown,          // type is V(unknown)
 
   OutSameAsInput1,      // type is the same as the first stack input
-  OutSameAsInput2,      // type is the same as the second stack input
-  OutSameAsInput3,      // type is the same as the third stack input
+  OutModifiedInput3,    // type is the same as the third stack input, but
+                        // counted and unspecialized
   OutCInput,            // type is C(input)
   OutVInput,            // type is V(input)
   OutCInputL,           // type is C(type) of local input

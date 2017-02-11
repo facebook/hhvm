@@ -8,8 +8,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function debug_backtrace(int $options = 1, int $limit = 0) { }
-function debug_print_backtrace() { }
+function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0) { }
+function debug_print_backtrace(int $options = 0, int $limit = 0): void { }
 function error_get_last() { }
 function error_log($message, $message_type = 0, $destination = null, $extra_headers = null) { }
 function error_reporting($level = null) { }

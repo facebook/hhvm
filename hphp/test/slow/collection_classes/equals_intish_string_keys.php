@@ -1,4 +1,4 @@
-<?hh //strict
+<?hh
 
 function main() {
   // intish string key should not == integer keys

@@ -1265,6 +1265,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty
     );
 
+  case Unreachable:
+    // Unreachable code kills every memory location.
+    return may_load_store_kill(AEmpty, AEmpty, AUnknown);
+
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.
@@ -1341,7 +1345,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Mod:
   case Conjure:
   case ConjureUse:
-  case Halt:
+  case EndBlock:
   case ConvBoolToInt:
   case ConvBoolToDbl:
   case DefConst:

@@ -47,7 +47,7 @@ uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
 bool haltIfNotBoxed(IRGS& env, const Location& loc) {
   auto const knownType = env.irb->fs().typeOf(loc);
   if (!knownType.maybe(TBoxedInitCell)) {
-    gen(env, Halt);
+    gen(env, Unreachable);
     return true;
   }
   return false;

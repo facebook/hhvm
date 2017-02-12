@@ -618,12 +618,12 @@ RegionDescPtr form_region(Env& env) {
       auto const mainExit = findMainExitBlock(env.irgs.irb->unit(), lastSk);
       always_assert_flog(mainExit, "No main exits found!");
       /*
-       * If the last instruction is a Halt, its probably due to
-       * unreachable code. We don't want to truncate the tracelet
-       * in that case, because we could lose the assertion (eg
-       * if the Halt is due to a failed AssertRAT).
+       * If the last instruction is an Unreachable, its probably due to
+       * unreachable code. We don't want to truncate the tracelet in that case,
+       * because we could lose the assertion (eg if the Unreachable is due to a
+       * failed AssertRAT).
        */
-      return !mainExit->back().is(Halt);
+      return !mainExit->back().is(Unreachable);
     }();
 
     if (truncate) {

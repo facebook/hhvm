@@ -907,9 +907,17 @@ To string conversions:
   Surprise flag hook for suspending resumed async functions or generators.  For
   generators, the second parameter should be Nullptr.
 
-| Halt, ND, NA, T
+| Unreachable, ND, NA, T
 
-  Halt execution. Used only in tests or unreachable code.
+  Indicates an unreachable code path. Any instructions that are post-dominated
+  by an Unreachable may be treated as unreachable by the optimizer, and the
+  behavior of a program that attempts to execute an Unreachable is undefined.
+
+| EndBlock, ND, NA, T
+
+  Halt execution, without implying anything about the reachability of
+  instructions preceding this. Intended for use in internal tests or other code
+  not meant to be executed.
 
 | Jmp, ND, SVar(Top), B|T
 

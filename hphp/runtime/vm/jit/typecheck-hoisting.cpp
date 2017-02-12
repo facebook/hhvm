@@ -437,15 +437,15 @@ void performHoisting(
   }
 }
 
-void insertHaltBlocks(
+void insertUnreachableBlocks(
   IRUnit& unit,
   const TopDownHoistGroups& hoistGroups,
   const HoistGroupDestinations& groupDests
 ) {
-  auto addHaltBlock = [&](IRInstruction* check) {
+  auto addUnreachableBlock = [&](IRInstruction* check) {
     assertx(check->is(CheckType));
     auto haltBlock = unit.defBlock();
-    auto halt = unit.gen(Halt, check->bcctx());
+    auto halt = unit.gen(Unreachable, check->bcctx());
     haltBlock->push_back(halt);
     check->setTaken(haltBlock);
   };
@@ -455,10 +455,10 @@ void insertHaltBlocks(
     auto& memberChecks = kv.second;
     for (auto check : memberChecks) {
       // If check and dest were the same, we would have replaced the check
-      // instead of creating a new one, so we only want to add a Halt block
-      // if that's not the case.
+      // instead of creating a new one, so we only want to add a Unreachable
+      // block if that's not the case.
       if (check == dest) continue;
-      addHaltBlock(check);
+      addUnreachableBlock(check);
     }
   }
 }
@@ -505,7 +505,7 @@ void hoistTypeChecks(IRUnit& unit) {
   performHoisting(unit, groupTypes, groupDests);
   forwardHoistedSrcsToDsts(unit);
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    insertHaltBlocks(unit, topDownHoistGroups, groupDests);
+    insertUnreachableBlocks(unit, topDownHoistGroups, groupDests);
   }
 }
 

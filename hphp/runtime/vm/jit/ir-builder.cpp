@@ -321,7 +321,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
 
   if (canSimplifyAssertType(inst, oldType, typeMightRelax(oldVal))) {
     if (!oldType.maybe(inst->typeParam())) {
-      gen(Halt);
+      gen(Unreachable);
       return m_unit.cns(TBottom);
     }
     return fwdGuardSource(inst);

@@ -2436,7 +2436,7 @@ SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
 
   if (canSimplifyAssertType(inst, src->type(), mightRelax(env, src))) {
     if (!src->type().maybe(inst->typeParam())) {
-      gen(env, Halt);
+      gen(env, Unreachable);
       return cns(env, TBottom);
     }
     return src;
@@ -2734,8 +2734,7 @@ SSATmp* simplifyReservePackedArrayDataNewElem(State& env,
   auto const base = inst->src(0);
 
   if (base->type() <= (TPersistentArr|TPersistentVec)) {
-    // Instruction is unreachable
-    gen(env, Halt);
+    gen(env, Unreachable);
     return cns(env, TBottom);
   }
   return nullptr;
@@ -2853,10 +2852,11 @@ SSATmp* arrGetKImpl(State& env, const IRInstruction* inst, G get) {
   auto const tv = mixed->getArrayElmPtr(extra->index);
 
   // The array doesn't contain a valid element at that offset. Since this
-  // instruction should be guarded by a check, this (should be) unreachable. We
-  // should emit a Halt here, but this instruction might be in the middle of a
-  // block and the simplifier can't currently handle that.
-  if (!tv) return cns(env, TBottom);
+  // instruction should be guarded by a check, this (should be) unreachable.
+  if (!tv) {
+    gen(env, Unreachable);
+    return cns(env, TBottom);
+  }
 
   assertx(tvIsPlausible(*tv));
   return cns(env, *tv);
@@ -3043,10 +3043,11 @@ SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   auto const tv = set->tvOfPos(extra->index);
 
   // The array doesn't contain a valid element at that offset. Since this
-  // instruction should be guarded by a check, this (should be) unreachable. We
-  // should emit a Halt here, but this instruction might be in the middle of a
-  // block and the simplifier can't currently handle that.
-  if (!tv) return cns(env, TBottom);
+  // instruction should be guarded by a check, this (should be) unreachable.
+  if (!tv) {
+    gen(env, Unreachable);
+    return cns(env, TBottom);
+  }
 
   assertx(tvIsPlausible(*tv));
   assertx(isStringType(tv->m_type) || isIntType(tv->m_type));
@@ -3326,7 +3327,7 @@ SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
 
   if (indexVal < 0 || indexVal >= extra.cases) {
     // Instruction is unreachable.
-    return gen(env, Halt);
+    return gen(env, Unreachable);
   }
 
   auto const newExtra = ReqBindJmpData {
@@ -3768,7 +3769,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
 
   if (last != nullptr && last->isTerminal()) {
     // Delete remaining instructions in the block if a terminal is created.
-    // This can happen, e.g., 'Halt' may be created when the block is
+    // This can happen, e.g., 'Unreachable' may be created when the block is
     // unreachable.
     while (pos != block->end()) pos = block->erase(pos);
   }
@@ -3844,7 +3845,17 @@ void simplifyPass(IRUnit& unit) {
   for (auto block : rpoSortCfg(unit)) {
     if (!reachable.test(block->id())) continue;
 
-    for (auto& inst : *block) simplify(unit, &inst);
+    if (block->back().is(Unreachable)) {
+      // Any code that's postdominated by Unreachable is also unreachable, so
+      // erase everything else in this block.
+      for (auto it = block->skipHeader(), end = block->backIter(); it != end;) {
+        auto toErase = it;
+        ++it;
+        block->erase(toErase);
+      }
+    } else {
+      for (auto& inst : *block) simplify(unit, &inst);
+    }
 
     if (auto const b = block->next())  reachable.set(b->id());
     if (auto const b = block->taken()) reachable.set(b->id());

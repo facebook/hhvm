@@ -136,6 +136,7 @@ namespace Trace {
       TM(hhir_refcount) \
       TM(hhir_refineTmps) \
       TM(hhir_store)    \
+      TM(hhir_unreachable) \
       TM(hhprof)        \
       TM(inlining)      \
       TM(instancebits)  \

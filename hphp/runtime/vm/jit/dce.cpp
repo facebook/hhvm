@@ -359,7 +359,8 @@ bool canDCE(IRInstruction* inst) {
   case ReturnHook:
   case SuspendHookE:
   case SuspendHookR:
-  case Halt:
+  case EndBlock:
+  case Unreachable:
   case Jmp:
   case DefLabel:
   case Box:

@@ -40,8 +40,8 @@ TEST(PredictionOpts, basic) {
   ckt->setNext(end);
   entry->push_back({ptr, ldm, inc, ckt});
 
-  taken->push_back(unit.gen(Halt, bcctx));
-  end->push_back(unit.gen(Halt, bcctx));
+  taken->push_back(unit.gen(EndBlock, bcctx));
+  end->push_back(unit.gen(EndBlock, bcctx));
 
   optimizePredictions(unit);
 

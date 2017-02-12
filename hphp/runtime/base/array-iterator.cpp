@@ -1726,16 +1726,16 @@ int64_t iter_next_mixed_impl(Iter* it,
 
 
   if (isRefcountedType(valOut->m_type)) {
-    if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
+    if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*valOut, decRefCount);
+    valOut->m_data.pcnt->decRefCount();
   }
   if (HasKey && isRefcountedType(keyOut->m_type)) {
-    if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
+    if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*keyOut, decRefCount);
+    keyOut->m_data.pcnt->decRefCount();
   }
 
   iter.setPos(pos);
@@ -1761,16 +1761,16 @@ int64_t iter_next_packed_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (isRefcountedType(valOut->m_type)) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
+      if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
+      valOut->m_data.pcnt->decRefCount();
     }
     if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
+      if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*keyOut, decRefCount);
+      keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
     cellDup(*tvToCell(packedData(ad) + pos), *valOut);

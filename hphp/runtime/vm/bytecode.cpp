@@ -677,16 +677,16 @@ static std::string toStringElm(const TypedValue* tv) {
     return os.str();
   }
   if (isRefcountedType(tv->m_type) &&
-      !TV_GENERIC_DISPATCH(*tv, checkCount)) {
+      !tv->m_data.pcnt->checkCount()) {
     // OK in the invoking frame when running a destructor.
     os << " ??? inner_count " << tvGetCount(tv) << " ";
     return os.str();
   }
 
   auto print_count = [&] {
-    if (TV_GENERIC_DISPATCH(*tv, isStatic)) {
+    if (tv->m_data.pcnt->isStatic()) {
       os << ":c(static)";
-    } else if (TV_GENERIC_DISPATCH(*tv, isUncounted)) {
+    } else if (tv->m_data.pcnt->isUncounted()) {
       os << ":c(uncounted)";
     } else {
       os << ":c(" << tvGetCount(tv) << ")";

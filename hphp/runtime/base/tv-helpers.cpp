@@ -149,7 +149,7 @@ bool tvDecRefWillRelease(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     return tv->m_data.pref->getRealCount() <= 1;
   }
-  return TV_GENERIC_DISPATCH(*tv, decWillRelease);
+  return tv->m_data.pcnt->decWillRelease();
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {

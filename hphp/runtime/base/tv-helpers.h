@@ -30,56 +30,6 @@ namespace HPHP {
 struct Variant;
 
 /*
- * Call a (ref-count related) function on a TypedValue data pointer where we
- * don't statically know the pointer's type. This is superior to the old idiom
- * of choosing one of the pointers, calling the method for that type, and
- * relying on the fact that all the method's have the same code, and therefore
- * will work correctly even if its actually a different type. This breaks strong
- * type aliasing and can cause GCC to miscompile code in hard to debug ways.
- * Instead use manual pointer arithmetic to index to where the ref-count is,
- * cast it, then call the appropriate generic function. Since we don't use any
- * of the pointer types, the compiler cannot use type aliasing assumptions to
- * miscompile.
- *
- * If we're in debug mode, switch on the type and call the appropriate function
- * directly. This is slightly slower, but gives us the benefit of extra
- * assertions.
- *
- * This assumes isRefcountedType() is true.
- */
-#define TV_GENERIC_DISPATCH_FAST(exp, func)                     \
-  reinterpret_cast<HPHP::MaybeCountable*>(                      \
-      (exp).m_data.num                                          \
-  )->func()
-
-#define TV_GENERIC_DISPATCH_SLOW(exp, func) \
-  [](HPHP::TypedValue tv) {                                     \
-    switch (tv.m_type) {                                        \
-      case HPHP::KindOfPersistentString:                        \
-      case HPHP::KindOfString: return tv.m_data.pstr->func();   \
-      case HPHP::KindOfPersistentVec:                           \
-      case HPHP::KindOfVec:                                     \
-      case HPHP::KindOfPersistentDict:                          \
-      case HPHP::KindOfDict:                                    \
-      case HPHP::KindOfPersistentKeyset:                        \
-      case HPHP::KindOfKeyset:                                  \
-      case HPHP::KindOfPersistentArray:                         \
-      case HPHP::KindOfArray: return tv.m_data.parr->func();    \
-      case HPHP::KindOfObject: return tv.m_data.pobj->func();   \
-      case HPHP::KindOfResource: return tv.m_data.pres->func(); \
-      case HPHP::KindOfRef: return tv.m_data.pref->func();      \
-      default:                                                  \
-        assert_flog(false, "Bad KindOf: {}", (size_t)tv.m_type);\
-    }                                                           \
-  }(exp)
-
-#ifdef DEBUG
-#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_SLOW(exp, func)
-#else
-#define TV_GENERIC_DISPATCH(exp, func) TV_GENERIC_DISPATCH_FAST(exp, func)
-#endif
-
-/*
  * In a debug build, write garbage into a memory slot for a TypedValue
  * that should not be used anymore.
  */
@@ -122,8 +72,7 @@ bool tvDecRefWillRelease(TypedValue* tv);
  * true but tvDecRefWillRelease() will return false.
  */
 ALWAYS_INLINE bool tvDecRefWillCallHelper(TypedValue* tv) {
-  return isRefcountedType(tv->m_type) &&
-         TV_GENERIC_DISPATCH(*tv, decWillRelease);
+  return isRefcountedType(tv->m_type) && tv->m_data.pcnt->decWillRelease();
 }
 
 ALWAYS_INLINE void tvDecRefStr(TypedValue* tv) {
@@ -171,7 +120,7 @@ ALWAYS_INLINE void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
   TypedValue tmp;
   tmp.m_type = type;
   tmp.m_data.num = datum;
-  if (TV_GENERIC_DISPATCH(tmp, decReleaseCheck)) {
+  if (tmp.m_data.pcnt->decReleaseCheck()) {
     g_destructors[typeToDestrIdx(type)]((void*)datum);
   }
 }
@@ -196,7 +145,7 @@ ALWAYS_INLINE void tvRefcountedDecRef(TypedValue v) {
 
 ALWAYS_INLINE void tvRefcountedDecRefNZ(TypedValue tv) {
   if (isRefcountedType(tv.m_type)) {
-    TV_GENERIC_DISPATCH(tv, decRefCount);
+    tv.m_data.pcnt->decRefCount();
   }
 }
 
@@ -236,7 +185,7 @@ ALWAYS_INLINE TypedValue* tvBox(TypedValue* tv) {
 ALWAYS_INLINE void tvIncRef(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(isRefcountedType(tv->m_type));
-  TV_GENERIC_DISPATCH(*tv, incRefCount);
+  tv->m_data.pcnt->incRefCount();
 }
 
 ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {

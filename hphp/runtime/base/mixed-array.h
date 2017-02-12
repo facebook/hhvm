@@ -34,7 +34,7 @@ struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
 
-struct MixedArray final : private ArrayData,
+struct MixedArray final : ArrayData,
                           type_scan::MarkCountable<MixedArray> {
   // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.

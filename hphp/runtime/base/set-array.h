@@ -35,8 +35,7 @@ struct APCArray;
 
 //////////////////////////////////////////////////////////////////////
 
-struct SetArray final
-  : private ArrayData, type_scan::MarkCountable<SetArray> {
+struct SetArray final : ArrayData, type_scan::MarkCountable<SetArray> {
 
 //////////////////////////////////////////////////////////////////////
 // Set Layout

@@ -1347,6 +1347,9 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
   if (key.m_type == KindOfInt64) {
     return SetElemArrayPre<setResult>(a, key.m_data.num, value, copy);
   }
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    raiseHackArrCompatImplicitArrayKey(&key);
+  }
   if (isNullType(key.m_type)) {
     return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);
   }

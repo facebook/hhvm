@@ -666,6 +666,9 @@ const Variant& Array::rvalAtRef(const String& key, AccessFlags flags) const {
         throwInvalidArrayKeyException(uninit_variant.asTypedValue(),
                                       m_arr.get());
       }
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raiseHackArrCompatImplicitArrayKey(uninit_variant.asTypedValue());
+      }
       return m_arr->get(staticEmptyString(), error);
     }
     int64_t n;
@@ -684,9 +687,12 @@ Variant Array::rvalAt(const String& key, AccessFlags flags) const {
 
 const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
   if (!m_arr) return uninit_variant;
-  auto bad_key = [&] {
+  auto const bad_key = [&] {
     if (!useWeakKeys()) {
       throwInvalidArrayKeyException(key.asTypedValue(), m_arr.get());
+    }
+    if (RuntimeOption::EvalHackArrCompatNotices) {
+      raiseHackArrCompatImplicitArrayKey(key.asTypedValue());
     }
   };
   switch (key.getRawType()) {
@@ -890,8 +896,11 @@ bool Array::exists(const String& key, bool isKey /* = false */) const {
 }
 
 bool Array::exists(const Variant& key, bool isKey /* = false */) const {
-  if (isBoolType(key.getType()) ||
-      isIntType(key.getType())) {
+  if (isIntType(key.getType())) return existsImpl(key.toInt64());
+  if (isBoolType(key.getType())) {
+    if (RuntimeOption::EvalHackArrCompatNotices && useWeakKeys()) {
+      raiseHackArrCompatImplicitArrayKey(key.asTypedValue());
+    }
     return existsImpl(key.toInt64());
   }
   if (isKey) return existsImpl(key);
@@ -911,8 +920,14 @@ void Array::remove(const String& key, bool isString /* = false */) {
 }
 
 void Array::remove(const Variant& key) {
-  if (isBoolType(key.getType()) ||
-      isIntType(key.getType())) {
+  if (isBoolType(key.getType())) {
+    if (RuntimeOption::EvalHackArrCompatNotices && useWeakKeys()) {
+      raiseHackArrCompatImplicitArrayKey(key.asTypedValue());
+    }
+    removeImpl(key.toInt64());
+    return;
+  }
+  if (isIntType(key.getType())) {
     removeImpl(key.toInt64());
     return;
   }

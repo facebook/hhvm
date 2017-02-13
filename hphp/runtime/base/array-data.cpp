@@ -1247,6 +1247,17 @@ void raiseHackArrCompatArrMixedCmp() {
   raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
 }
 
+std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
+  return folly::sformat(
+    "Implicit conversion of {} to array key",
+    describeKeyType(key)
+  );
+}
+
+void raiseHackArrCompatImplicitArrayKey(const TypedValue* key) {
+  raise_hackarr_compat_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

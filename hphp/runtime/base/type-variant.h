@@ -1567,7 +1567,11 @@ inline VarNR Variant::toKey(const ArrayData* ad) const {
   }
 
   if (!ad->useWeakKeys()) {
-    throwInvalidArrayKeyException(this, ad);
+    throwInvalidArrayKeyException(asTypedValue(), ad);
+  }
+
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    raiseHackArrCompatImplicitArrayKey(asTypedValue());
   }
 
   switch (m_type) {

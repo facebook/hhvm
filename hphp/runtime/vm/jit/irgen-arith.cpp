@@ -1019,7 +1019,7 @@ void implCmp(IRGS& env, Op op) {
             (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr)) {
           gen(
             env,
-            RaiseNotice,
+            RaiseHackArrCompatNotice,
             cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
           );
         }
@@ -1032,7 +1032,7 @@ void implCmp(IRGS& env, Op op) {
         if ((leftTy <= TArr) != (rightTy <= TArr)) {
           gen(
             env,
-            RaiseNotice,
+            RaiseHackArrCompatNotice,
             cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
           );
         }

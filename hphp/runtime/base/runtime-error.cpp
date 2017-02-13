@@ -119,7 +119,7 @@ void raise_disallowed_dynamic_call(const Func* f) {
 }
 
 void raise_hackarr_compat_notice(const std::string& msg) {
-  raise_notice(msg);
+  raise_notice(std::string{"Hack Array Compat: "} + msg);
 }
 
 void raise_recoverable_error(const char *fmt, ...) {

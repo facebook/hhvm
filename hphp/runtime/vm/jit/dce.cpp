@@ -457,6 +457,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
   case RaiseVarEnvDynCall:
+  case RaiseHackArrCompatNotice:
   case InitClosureStaticLoc:
   case InitStaticLoc:
   case PrintStr:

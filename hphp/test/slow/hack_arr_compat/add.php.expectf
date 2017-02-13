@@ -1,9 +1,9 @@
 
-Notice: Using + operator on arrays in %s on line %d
+Notice: Hack Array Compat: Using + operator on arrays in %s on line %d
 array(0) {
 }
 
-Notice: Using + operator on arrays in %s on line %d
+Notice: Hack Array Compat: Using + operator on arrays in %s on line %d
 array(3) {
   [0]=>
   int(1)
@@ -13,7 +13,7 @@ array(3) {
   int(3)
 }
 
-Notice: Using + operator on arrays in %s on line %d
+Notice: Hack Array Compat: Using + operator on arrays in %s on line %d
 array(3) {
   [0]=>
   int(1)
@@ -23,7 +23,7 @@ array(3) {
   int(3)
 }
 
-Notice: Using + operator on arrays in %s on line %d
+Notice: Hack Array Compat: Using + operator on arrays in %s on line %d
 array(3) {
   [0]=>
   int(1)

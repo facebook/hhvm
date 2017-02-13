@@ -113,7 +113,7 @@ The third column describes the sources, separated by whitespace, using macros
 documented in hphp/runtime/vm/jit/ir-opcode.h, or NA if there are no sources.
 
 The fourth column contains the flags, described below. The short name of the
-flag (used in this file) is given first, with the long name that it expands to 
+flag (used in this file) is given first, with the long name that it expands to
 in hphp/runtime/vm/jit/ir-opcode.cpp in parentheses after it.
 
 NF
@@ -1895,6 +1895,10 @@ To string conversions:
   frame. These wrapper functions are called instead of the builtin when the
   builtin is called dynamically. Func should refer to the builtin, not the
   wrapper itself.
+
+| RaiseHackArrCompatNotice, ND, S(Str), Er
+
+  Raises a Hack array compat notice with the text in S0 as its message.
 
 | InitClosureStaticLoc, ND, S(BoxedCell) S(Cell), NF
 

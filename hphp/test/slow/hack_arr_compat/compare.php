@@ -5,7 +5,7 @@ $got_notice = false;
 function handler($errno, $errstr, $errfile, $errline, $errcontext='',
                  $errtrace = array()) {
   global $got_notice;
-  if ($errstr === "Comparing array with non-array") {
+  if ($errstr === "Hack Array Compat: Comparing array with non-array") {
     $got_notice = true;
   }
 }

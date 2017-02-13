@@ -1634,6 +1634,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseMissingThis:
   case FatalMissingThis:
   case RaiseVarEnvDynCall:
+  case RaiseHackArrCompatNotice:
   case ConvCellToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass

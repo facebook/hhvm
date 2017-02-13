@@ -137,15 +137,29 @@ let get_candidate_rules t =
     List.fold rules ~init:acc ~f:(fun acc id -> ISet.add id acc)
   ) candidate_rules ISet.empty
 
-
-
-
-let pick_best_state s1 s2 =
-  let cmp = Pervasives.compare (s1.overflow, s1.cost) (s2.overflow, s2.cost) in
-  if cmp < 0 then s1 else s2
+let compare_rule_sets s1 s2 =
+  let bound_rule_ids = List.sort_uniq ~cmp:Pervasives.compare @@
+    IMap.keys s1.rvm @ IMap.keys s2.rvm in
+  let is_split rule_id state = Rule.is_split () @@ IMap.get rule_id state.rvm in
+  let rec aux = function
+    | [] -> 0
+    | rule_id :: ids ->
+      let diff = compare (is_split rule_id s1) (is_split rule_id s2) in
+      if diff <> 0 then diff else aux ids
+  in
+  aux bound_rule_ids
 
 let compare s1 s2 =
-  Pervasives.compare (s1.cost, s1.overflow) (s2.cost, s2.overflow)
+  if s1.cost <> s2.cost
+  then s1.cost - s2.cost
+  else if s1.overflow <> s2.overflow
+    then s1.overflow - s2.overflow
+    else compare_rule_sets s1 s2
+
+let pick_best_state s1 s2 =
+  if s1.overflow <> s2.overflow then begin
+    if s1.overflow < s2.overflow then s1 else s2
+  end else if compare s1 s2 < 0 then s1 else s2
 
 let __debug t =
   (* TODO: make a new rule strings string *)

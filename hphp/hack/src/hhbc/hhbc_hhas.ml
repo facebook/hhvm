@@ -133,3 +133,9 @@ let buffer_of_top_level () =
   B.add_buffer buf (buffer_of_instruction_list main_stmts);
   B.add_string buf "}\n";
   buf
+
+let to_string hhas_prog =
+  let final_buf = buffer_of_top_level () in
+  B.add_buffer final_buf @@ buffer_of_hhas_prog hhas_prog;
+  B.add_string final_buf "\n";
+  B.contents final_buf

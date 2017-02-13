@@ -464,3 +464,6 @@ type fun_def = {
 type hhas_prog = {
   hhas_fun: fun_def list;
 }
+
+let make hhas_fun =
+  { hhas_fun }

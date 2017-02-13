@@ -11,6 +11,9 @@
 open Full_fidelity_token_kind
 
 type t =
+| DollarOperator
+(* TODO: Is there a better name? Operators should be named as what they do,
+not how they look on the page. *)
 | IndexingOperator
 | FunctionCallOperator
 | AwaitOperator
@@ -125,7 +128,7 @@ let precedence operator =
   | ReferenceOperator | ErrorControlOperator
   | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
-  | UnaryPlusOperator | UnaryMinusOperator -> 19
+  | DollarOperator | UnaryPlusOperator | UnaryMinusOperator -> 19
   | InstanceofOperator -> 20
   | ExponentOperator -> 21
   | PostfixIncrementOperator | PostfixDecrementOperator -> 22
@@ -158,10 +161,9 @@ let associativity operator =
   (* elseif *)
   (* else *)
   (* endif *)
-  (* variable operator $ *)
     -> LeftAssociative
   | CoalesceOperator| LogicalNotOperator | NotOperator | CastOperator
-  | UnaryPlusOperator | UnaryMinusOperator  (* TODO: Correct? *)
+  | DollarOperator | UnaryPlusOperator | UnaryMinusOperator  (* TODO: Correct? *)
   | ErrorControlOperator | ReferenceOperator (* TODO: Correct? *)
   | PostfixIncrementOperator | PostfixDecrementOperator
   | PrefixIncrementOperator | PrefixDecrementOperator | ExponentOperator
@@ -182,6 +184,7 @@ let prefix_unary_from_token token =
   | Tilde -> NotOperator
   | PlusPlus -> PrefixIncrementOperator
   | MinusMinus -> PrefixDecrementOperator
+  | Dollar -> DollarOperator
   | Plus -> UnaryPlusOperator
   | Minus -> UnaryMinusOperator
   | Ampersand -> ReferenceOperator
@@ -446,6 +449,7 @@ let to_string kind =
   | MemberSelectionOperator -> "member_selection"
   | NullSafeMemberSelectionOperator -> "null_safe_member_selection"
   | ScopeResolutionOperator -> "scope_resolution"
+  | DollarOperator -> "dollar"
   | UnaryPlusOperator -> "unary_plus"
   | UnaryMinusOperator -> "unary_minus"
   | IncludeOperator -> "include"

@@ -135,6 +135,7 @@ module WithStatementAndDeclAndTypeParser
     | Static -> parse_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
     | Print -> parse_print_expression parser
+    | Dollar
     | Exclamation
     | PlusPlus
     | MinusMinus
@@ -933,6 +934,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | LeftParen
     | Minus
     | MinusMinus
+    | Dollar
     | Plus
     | PlusPlus
     | Tilde -> true
@@ -973,7 +975,6 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Colon
     | ColonColon
     | Comma
-    | Dollar
     | Dot
     | DotEqual
     | DotDotDot

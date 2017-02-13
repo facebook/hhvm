@@ -807,6 +807,46 @@ let scan_xhp_body lexer =
     else (advance lexer 1, TokenKind.LessThan)
   | _ -> ((aux lexer), TokenKind.XHPBody)
 
+let scan_dollar_token lexer =
+  (*
+    We have a problem here.  We wish to be able to lexically analyze both
+    PHP and Hack, but the introduction of $$ to Hack makes them incompatible.
+    "$$x" and "$$ $x" are legal in PHP, but illegal in Hack.
+    The rule in PHP seems to be that $ is a prefix operator, it is a token,
+    it can be followed by trivia, but the next token has to be another $
+    operator, a variable $x, or a {.
+
+    Here's a reasonable compromise.  (TODO: Review this decision.)
+
+    $$x lexes as $ $x
+    $$$x lexes as $ $ $x
+    and so on.
+
+    $$ followed by anything other than a name or a $ lexes as $$.
+
+    This means that lexing a PHP program which contains "$$ $x" is different
+    will fail at parse time, but I'm willing to live with that.
+
+    This means that lexing a Hack program which contains
+    "$x |> $$instanceof Foo" produces an error as well.
+
+    If these decisions are unacceptable then we will need to make the lexer
+    be aware of whether it is lexing PHP or Hack; thus far we have not had
+    to make this distinction.
+
+     *)
+  (* We are already at $. *)
+  let ch1 = peek_char lexer 1 in
+  let ch2 = peek_char lexer 2 in
+  match ch1 with
+  | '$' ->
+    if is_name_nondigit ch2 then (advance lexer 1, TokenKind.Dollar) (* $$x *)
+    else if ch2 = '$' then (advance lexer 1, TokenKind.Dollar) (* $$$ *)
+    else (advance lexer 2, TokenKind.DollarDollar) (* $$ *)
+  | _ ->
+    if is_name_nondigit ch1 then scan_variable lexer (* $x *)
+    else (advance lexer 1, TokenKind.Dollar) (* $ *)
+
 let scan_token in_type lexer =
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
@@ -846,10 +886,7 @@ let scan_token in_type lexer =
   | ('!', '=', '=') -> (advance lexer 3, TokenKind.ExclamationEqualEqual)
   | ('!', '=', _) -> (advance lexer 2, TokenKind.ExclamationEqual)
   | ('!', _, _) -> (advance lexer 1, TokenKind.Exclamation)
-  | ('$', '$', _) -> (advance lexer 2, TokenKind.DollarDollar)
-  | ('$', _, _) ->
-    if is_name_nondigit ch1 then scan_variable lexer
-    else (advance lexer 1, TokenKind.Dollar)
+  | ('$', _, _) -> scan_dollar_token lexer
   | ('/', '=', _) -> (advance lexer 2, TokenKind.SlashEqual)
   | ('/', _, _) -> (advance lexer 1, TokenKind.Slash)
   | ('%', '=', _) -> (advance lexer 2, TokenKind.PercentEqual)

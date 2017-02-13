@@ -713,6 +713,8 @@ void raiseHackArrCompatRefIter();
 
 void raiseHackArrCompatAdd();
 
+void raiseHackArrCompatArrMixedCmp();
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

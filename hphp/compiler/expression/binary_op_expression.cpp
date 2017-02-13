@@ -188,11 +188,19 @@ int BinaryOpExpression::getLocalEffects() const {
   case T_IS_EQUAL:
   case T_IS_NOT_EQUAL:
   case T_SPACESHIP:
-    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
+  case T_IS_IDENTICAL:
+  case T_IS_NOT_IDENTICAL: {
+    // Normally === and !== cannot have effects, but with
+    // EvalHackArrCompatNotices they can.
+    Variant v1;
+    Variant v2;
+    if (!m_exp1->getScalarValue(v1) || !m_exp2->getScalarValue(v2) ||
+        v1.isPHPArray() != v2.isPHPArray()) {
       effect = UnknownEffect;
       m_canThrow = true;
     }
     break;
+  }
   default:
     break;
   }

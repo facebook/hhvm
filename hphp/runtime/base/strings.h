@@ -96,6 +96,9 @@ const char* const INCONSISTENT_INSTEADOF =
   "but %s is also on the exclude list";
 const char* const REDECLARE_BUILTIN = "Cannot redeclare %s()";
 const char* const DISALLOWED_DYNCALL = "%s should not be called dynamically";
+const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
+  "Comparing array with non-array";
+
 } // namespace Strings
 } // namespace HPHP
 

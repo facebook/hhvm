@@ -1006,6 +1006,42 @@ void implCmp(IRGS& env, Op op) {
     PUNT(cmpUnknownDataType);
   }
 
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
+    // ==, or != between a PHP array and a Hack array. On relational compares,
+    // we'll raise a notice between a PHP array and any other type.
+    switch (op) {
+      case Op::Same:
+      case Op::NSame:
+      case Op::Eq:
+      case Op::Neq:
+        if ((leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
+            (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr)) {
+          gen(
+            env,
+            RaiseNotice,
+            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
+          );
+        }
+        break;
+      case Op::Lt:
+      case Op::Lte:
+      case Op::Gt:
+      case Op::Gte:
+      case Op::Cmp:
+        if ((leftTy <= TArr) != (rightTy <= TArr)) {
+          gen(
+            env,
+            RaiseNotice,
+            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
+          );
+        }
+        break;
+      default:
+        always_assert(false);
+    }
+  }
+
   // If it's a same-ish comparison and the types don't match (taking into
   // account Str and StaticStr), lower to a bool comparison of
   // constants. Otherwise, switch on the type of the left operand to emit the

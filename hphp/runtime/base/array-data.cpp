@@ -875,6 +875,9 @@ int ArrayData::compare(const ArrayData* v2) const {
 
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) {
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
+        raiseHackArrCompatArrMixedCmp();
+      }
       if (v2->isVecArray()) throw_vec_compare_exception();
       if (v2->isDict()) throw_dict_compare_exception();
       if (v2->isKeyset()) throw_keyset_compare_exception();
@@ -884,8 +887,19 @@ int ArrayData::compare(const ArrayData* v2) const {
   }
 
   if (isVecArray()) {
-    if (UNLIKELY(!v2->isVecArray())) throw_vec_compare_exception();
+    if (UNLIKELY(!v2->isVecArray())) {
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
+                   v2->isPHPArray())) {
+        raiseHackArrCompatArrMixedCmp();
+      }
+      throw_vec_compare_exception();
+    }
     return PackedArray::VecCmp(this, v2);
+  }
+
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
+               v2->isPHPArray())) {
+    raiseHackArrCompatArrMixedCmp();
   }
 
   if (isDict()) throw_dict_compare_exception();
@@ -897,25 +911,33 @@ int ArrayData::compare(const ArrayData* v2) const {
 bool ArrayData::equal(const ArrayData* v2, bool strict) const {
   assert(v2);
 
+  auto const mixed = [&]{
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
+                 v2->isHackArray())) {
+      raiseHackArrCompatArrMixedCmp();
+    }
+    return false;
+  };
+
   if (isPHPArray()) {
-    if (UNLIKELY(!v2->isPHPArray())) return false;
+    if (UNLIKELY(!v2->isPHPArray())) return mixed();
     return strict ? Same(this, v2) : Equal(this, v2);
   }
 
   if (isVecArray()) {
-    if (UNLIKELY(!v2->isVecArray())) return false;
+    if (UNLIKELY(!v2->isVecArray())) return mixed();
     return strict
       ? PackedArray::VecSame(this, v2) : PackedArray::VecEqual(this, v2);
   }
 
   if (isDict()) {
-    if (UNLIKELY(!v2->isDict())) return false;
+    if (UNLIKELY(!v2->isDict())) return mixed();
     return strict
       ? MixedArray::DictSame(this, v2) : MixedArray::DictEqual(this, v2);
   }
 
   if (isKeyset()) {
-    if (UNLIKELY(!v2->isKeyset())) return false;
+    if (UNLIKELY(!v2->isKeyset())) return mixed();
     return strict ? SetArray::Same(this, v2) : SetArray::Equal(this, v2);
   }
 
@@ -1219,6 +1241,10 @@ void raiseHackArrCompatRefIter() {
 
 void raiseHackArrCompatAdd() {
   raise_hackarr_compat_notice("Using + operator on arrays");
+}
+
+void raiseHackArrCompatArrMixedCmp() {
+  raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

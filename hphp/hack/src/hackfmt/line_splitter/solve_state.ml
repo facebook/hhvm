@@ -31,14 +31,14 @@ let has_comma_after_chunk c rvm =
     Rule.is_split rule_id value
   )
 
+let get_overflow len = max (len - _LINE_WIDTH) 0
+
 let make chunk_group rvm =
   let { Chunk_group.chunks; block_indentation; _ } = chunk_group in
   let len = 0 in
   let cost = 0 in
   let overflow = 0 in
   let acc = len, cost, overflow in
-
-  let get_overflow len = max (len - _LINE_WIDTH) 0 in
 
   let nesting_set, _ =
     List.fold_left chunks ~init:(ISet.empty, ISet.empty)
@@ -103,6 +103,42 @@ let make chunk_group rvm =
 
 let is_rule_bound t rule_id =
   IMap.mem rule_id t.rvm
+
+let get_candidate_rules t =
+  let { Chunk_group.chunks; block_indentation; _ } = t.chunk_group in
+  let candidate_rules, _, _ = List.fold chunks ~init:(ISet.empty, 0, false) ~f:(
+    fun (rules, len, found_overflow) c ->
+      if found_overflow
+      then rules, len, true
+      else if has_split_before_chunk c t.rvm &&
+        get_overflow len > 0 &&
+        ISet.diff rules (ISet.of_list @@ IMap.keys t.rvm) <> ISet.empty
+      then rules, len, true
+      else
+        let rules, len = if has_split_before_chunk c t.rvm then
+          let len = Nesting.get_indent c.Chunk.nesting t.nesting_set in
+          ISet.empty, len + block_indentation
+        else
+          rules, if c.Chunk.space_if_not_split then len + 1 else len
+        in
+        let len = len + (String.length c.Chunk.text) in
+        let len = if has_comma_after_chunk c t.rvm
+          then len + 1 else len in
+        let rules = ISet.add c.Chunk.rule rules in
+        rules, len, false
+  ) in
+
+  (* Also add parent rules *)
+  ISet.elements @@ ISet.fold (fun id acc ->
+    let acc = ISet.add id acc in
+    let rules = try
+      IMap.find_unsafe id t.chunk_group.Chunk_group.rule_dependency_map
+      with Not_found -> [] in
+    List.fold rules ~init:acc ~f:(fun acc id -> ISet.add id acc)
+  ) candidate_rules ISet.empty
+
+
+
 
 let pick_best_state s1 s2 =
   let cmp = Pervasives.compare (s1.overflow, s1.cost) (s2.overflow, s2.cost) in

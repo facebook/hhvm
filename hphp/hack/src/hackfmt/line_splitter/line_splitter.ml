@@ -12,7 +12,7 @@ open Core
 
 let expand_state state_queue state =
   let chunk_group = state.Solve_state.chunk_group in
-  let rule_ids = Chunk_group.get_rules chunk_group in
+  let rule_ids = Solve_state.get_candidate_rules state in
 
   let next_rvms = List.map rule_ids ~f:(fun rule_id ->
     if Solve_state.is_rule_bound state rule_id then []

@@ -462,9 +462,16 @@ type fun_def = {
   f_return_types  : fun_return_type list;
 }
 
+type class_def = {
+  class_name      : Litstr.id;
+  (* TODO declarations *)
+}
+
 type hhas_prog = {
-  hhas_fun: fun_def list;
+  hhas_fun     : fun_def list;
+  hhas_classes : class_def list;
 }
 
 let make hhas_fun =
-  { hhas_fun }
+  let hhas_classes = [] in (* TODO: Pass these in *)
+  { hhas_fun; hhas_classes }

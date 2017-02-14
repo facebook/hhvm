@@ -587,17 +587,10 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         List.filter_map fun_s f_filter_map
       end in
       Relative_path.Map.fold files_info ~f:f_fold ~init:[] in
-
-    let hhas_prog = {
-      Hhbc_ast.hhas_fun = List.rev hhas_list;
-    } in
-    let final_buf = Hhbc_hhas.buffer_of_top_level () in
-    Buffer.add_buffer final_buf @@ Hhbc_hhas.buffer_of_hhas_prog hhas_prog;
-    Buffer.add_string final_buf "\n";
-    Buffer.output_buffer stdout final_buf
-
-
-
+    let hhas_list = List.rev hhas_list in
+    let hhas_prog = Hhbc_ast.make hhas_list in
+    let hhas_text = Hhbc_hhas.to_string hhas_prog in
+    Printf.printf "%s" hhas_text
 
 (*****************************************************************************)
 (* Main entry point *)

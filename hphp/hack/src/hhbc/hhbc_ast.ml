@@ -20,8 +20,13 @@ type iter_vec = int
 type check_started = bool
 type free_iterator = int
 type repo_auth_type = string (* see see runtime/base/repo-auth-type.h *)
-
+type local_id = int
+type param_id = int
+type iterator_id = int
+type stack_index = int
 type class_id = string
+type function_id = string
+type num_params = int
 
 type instruct_basic =
   | Nop
@@ -55,7 +60,7 @@ type instruct_lit_const =
   | NewDictArray of int (* capacity hint *)
   | NewMIArray of int (* capacity hint *)
   | NewMSArray of int (* capacity hint *)
-  | NewLikeArrayL of int (* local variable id *) * int (* capacity hint *)
+  | NewLikeArrayL of local_id * int (* capacity hint *)
   | NewPackedArray of int
   | NewStructArray of int list
   | NewVecArray of int
@@ -135,20 +140,20 @@ type instruct_control_flow =
   | JmpNS of rel_offset
   | JmpZ of rel_offset
   | JmpNZ of rel_offset
-  | Switch of switchkind * int * int (* bounded, base, offset vector *)
-  | SSwitch of Litstr.id (* litstr id / offset vector *)
+  | Switch of switchkind * int * int list (* bounded, base, offset vector *)
+  | SSwitch of (Litstr.id * rel_offset) list (* litstr id / offset vector *)
   | RetC
   | RetV
   | Unwind
   | Throw
 
 type instruct_get =
-  | CGetL of int (* local variable id *)
-  | CGetQuietL of int (* local variable id *)
-  | CGetL2 of int (* local variable id *)
-  | CGetL3 of int (* local variable id *)
-  | CUGetL of int (* local variable id *)
-  | PushL of int (* local variable id *)
+  | CGetL of local_id
+  | CGetQuietL of local_id
+  | CGetL2 of local_id
+  | CGetL3 of local_id
+  | CUGetL of local_id
+  | PushL of local_id
   | CGetN
   | CGetQuietN
   | CGetG
@@ -158,7 +163,7 @@ type instruct_get =
   | VGetG
   | VGetS
   | AGetC
-  | AGetL of int (* local variable id *)
+  | AGetL of local_id
 
 type operand =
   | OpNull
@@ -172,31 +177,31 @@ type operand =
 
 type instuct_isset_emty_type_querying =
   | IssetC
-  | IssetL of int (* local variable id *)
+  | IssetL of local_id
   | IssetN
   | IssetG
   | IssetS
-  | EmptyL of int (* local variable id *)
+  | EmptyL of local_id
   | EmptyN
   | EmptyG
   | EmptyS
   | IsTypeC of operand
-  | IsTypeL of int * operand (* local variable id, operand *)
+  | IsTypeL of local_id * operand
 
 type instruct_mutator =
-  | SetL of int (* local variable id *)
+  | SetL of local_id
   | SetN
   | SetG
   | SetS
-  | SetOpL of int * operand (* local variable id, operand *)
+  | SetOpL of local_id * operand
   | SetOpN of operand
   | SetOpG of operand
   | SetOpS of operand
-  | IncDecl of int * operand (* local variable id, operand *)
+  | IncDecl of local_id * operand
   | IncDecN of operand
   | IncDecG of operand
   | IncDecS of operand
-  | BindL of int (* local variable id *)
+  | BindL of local_id
   | BindN
   | BindG
   | BindS
@@ -206,169 +211,169 @@ type instruct_mutator =
   | InitProp of property_name * operand
 
 type instruct_call =
-  | FPushFunc of int (* num params *)
-  | FPushFuncD of int * Litstr.id (* num params, litstr id *)
-  | FPushFuncU of int * Litstr.id * int (* num params, litstr id, litstr fallback, litstr fallback *)
-  | FPushObjMethod of int (* num params *)
-  | FPushObjMethodD of int * Litstr.id (* num params, litstr id *)
-  | FPushClsMethod of int (* num params *)
-  | FPushClsMethodF of int (* num params *)
-  | FPushClsMethodD of int * Litstr.id * Litstr.id (* num params, litstr id, litstr id *)
-  | FPushCtor of int (* num params *)
-  | FPushCtorD of int * Litstr.id (* num params, litstr id *)
-  | FpushCtorI of int * class_id (* num params, class id *)
-  | DecodeCufIter of int * rel_offset (* iterator id, rel offset *)
-  | FPushCufIter of int * int (* num params, iterator id *)
-  | FPushCuf of int (* num params *)
-  | FPushCufF of int (* num params *)
-  | FPushCufSafe of int (* num params *)
+  | FPushFunc of num_params
+  | FPushFuncD of num_params * Litstr.id
+  | FPushFuncU of num_params * Litstr.id * Litstr.id
+  | FPushObjMethod of num_params
+  | FPushObjMethodD of num_params * Litstr.id
+  | FPushClsMethod of num_params
+  | FPushClsMethodF of num_params
+  | FPushClsMethodD of num_params * Litstr.id * Litstr.id
+  | FPushCtor of num_params
+  | FPushCtorD of num_params * Litstr.id
+  | FpushCtorI of num_params * class_id
+  | DecodeCufIter of num_params * rel_offset
+  | FPushCufIter of num_params * iterator_id
+  | FPushCuf of num_params
+  | FPushCufF of num_params
+  | FPushCufSafe of num_params
   | CufSafeArray
   | CufSafeReturn
-  | FPassC of int (* param id *)
-  | FPassCW of int (* param id *)
-  | FPassCE of int (* param id *)
-  | FPassV of int (* param id *)
-  | FPassVNop of int (* param id *)
-  | FPassL of int * int (* param id, local variable id *)
-  | FPassN of int (* param id *)
-  | FPassG of int (* param id *)
-  | FPassS of int (* param id *)
-  | FCall of int (* param id *)
-  | FCallD of int * int * int (* num params, class name id, function name id *)
+  | FPassC of param_id
+  | FPassCW of param_id
+  | FPassCE of param_id
+  | FPassV of param_id
+  | FPassVNop of param_id
+  | FPassL of param_id * local_id
+  | FPassN of param_id
+  | FPassG of param_id
+  | FPassS of param_id
+  | FCall of param_id
+  | FCallD of num_params * class_id * function_id
   | FCallArray
-  | FCallAwait of int * int * int (* num params, class name id, function name id *)
-  | FCallUnpack of int (* num params *)
-  | FCallBuiltin of int * int * Litstr.id (* total params, passed, litstr id *)
+  | FCallAwait of num_params * class_id * function_id
+  | FCallUnpack of num_params
+  | FCallBuiltin of num_params * num_params * Litstr.id
 
 type op_member_base =
   | BaseC
   | BaseR
-  | BaseL of int (* local variable id *)
-  | BaseLW of int (* local variable id *)
-  | BaseLD of int (* local variable id *)
+  | BaseL of local_id
+  | BaseLW of local_id
+  | BaseLD of local_id
   | BaseNC
-  | BaseNL of int (* local variable id *)
+  | BaseNL of local_id
   | BaseNCW
-  | BaseNLW of int (* local variable id *)
+  | BaseNLW of local_id
   | BaseNCD
-  | BaseNLD of int (* local variable id *)
+  | BaseNLD of local_id
   | BaseGC
-  | BaseGL of int (* local variable id *)
+  | BaseGL of local_id
   | BaseGCW
-  | BaseGLW of int (* local variable id *)
+  | BaseGLW of local_id
   | BaseGCD
-  | BaseGLD of int (* local variable id *)
+  | BaseGLD of local_id
   | BaseSC
-  | BaseSL of int (* local variable id *)
+  | BaseSL of local_id
   | BaseH
 
 type op_member_intermediate =
   | ElemC
-  | ElemL of int (* local variable id *)
+  | ElemL of local_id
   | ElemCW
-  | ElemLW of int (* local variable id *)
+  | ElemLW of local_id
   | ElemCD
-  | ElemLD of int (* local variable id *)
+  | ElemLD of local_id
   | ElemCU
-  | ElemLU of int (* local variable id *)
+  | ElemLU of local_id
   | NewElem
   | PropC
-  | PropL of int (* local variable id *)
+  | PropL of local_id
   | PropCW
-  | PropLW of int (* local variable id *)
+  | PropLW of local_id
   | PropCD
-  | PropLD of int (* local variable id *)
+  | PropLD of local_id
   | PropCU
-  | PropLU of int (* local variable id *)
+  | PropLU of local_id
 
 type op_member_final =
   | CGutElemC
-  | CGetElemL of int (* local variable id *)
+  | CGetElemL of local_id
   | VGetElemC
-  | VGetElemL of int (* local variable id *)
+  | VGetElemL of local_id
   | IssetElemC
-  | IssetElemL of int (* local variable id *)
+  | IssetElemL of local_id
   | EmptyElemC
-  | EmptyElemL of int (* local variable id *)
+  | EmptyElemL of local_id
   | SetElemC
-  | SetElemL of int (* local variable id *)
+  | SetElemL of local_id
   | SetOpElemC of operand
-  | SetOpElemL of operand * int (* operand, local variable id *)
+  | SetOpElemL of operand * local_id
   | IncDecElemC of operand
-  | IncDecElemL of operand * int (* operand, local variable id *)
+  | IncDecElemL of operand * local_id
   | BindElemC
-  | BindElemL of int (* local variable id *)
+  | BindElemL of local_id
   | UnsetElemC
-  | UnsetElemL of int (* local variable id *)
+  | UnsetElemL of local_id
   | VGetNewElem
   | SetNewElem
   | SetOpNewElem of operand
   | IncDecNewElem of operand
   | BindNewElem
   | CGetPropC
-  | CGetPropL of int (* local variable id *)
+  | CGetPropL of local_id
   | VGetPropC
-  | VGetPropL of int (* local variable id *)
+  | VGetPropL of local_id
   | IssetPropC
-  | IssetPropL of int (* local variable id *)
+  | IssetPropL of local_id
   | EmptyPropC
-  | EmptyPropL of int (* local variable id *)
+  | EmptyPropL of local_id
   | SetPropC
-  | SetPropL of int (* local variable id *)
+  | SetPropL of local_id
   | SetOpPropC of operand
-  | SetOpPropL of operand * int (* operand, local variable id *)
+  | SetOpPropL of operand * local_id
   | IncDecPropC of operand
-  | IncDecPropL of operand * int (* operand, local variable id *)
+  | IncDecPropL of operand * local_id
   | BindPropC
-  | BindPropL of int (* local variable id *)
+  | BindPropL of local_id
   | UnsetPropC
-  | UnsetPropL of int (* local variable id *)
+  | UnsetPropL of local_id
 
 type op_base =
-  | BaseNC of int * member_op_mode (* stack index, member op index *)
-  | BaseNL of int * member_op_mode (* local id, member op index *)
-  | FPassBaseNC of int * int (* param id, stack index *)
-  | FPassBaseNL of int * int (* param id, local id *)
-  | BaseGC of int * member_op_mode (* stack index, member op mode *)
-  | BaseGL of int * member_op_mode (* local id, member op mode *)
-  | FPassBaseGC of int * int (* param id, stack index *)
-  | FPassBaseGL of int * int (* param id, local id *)
-  | BaseSC of int * int (* stack index, stack index *)
-  | BaseSL of int * int (* local id, stack index *)
-  | BaseL of int * member_op_mode (* local id, member op mode *)
-  | FPassBaseL of int * int (* param id, local id *)
-  | BaseC of int (* stack index *)
-  | BaseR of int (* stack index *)
+  | BaseNC of stack_index * member_op_mode
+  | BaseNL of local_id * member_op_mode
+  | FPassBaseNC of param_id * stack_index
+  | FPassBaseNL of param_id * local_id
+  | BaseGC of stack_index * member_op_mode
+  | BaseGL of local_id * member_op_mode
+  | FPassBaseGC of param_id * stack_index
+  | FPassBaseGL of param_id * local_id
+  | BaseSC of stack_index * stack_index
+  | BaseSL of local_id * stack_index
+  | BaseL of local_id * member_op_mode
+  | FPassBaseL of param_id * local_id
+  | BaseC of stack_index
+  | BaseR of stack_index
   | BaseH
 
 type op_final =
-  | QueryM of int * query_op * member_key (* stack count, query op, member key *)
-  | VGetM of int * member_key (* stack count, member key *)
-  | FPassM of int * int * member_key (* param id, stack count, member key *)
-  | SetM of int * member_key (* stack count, member key *)
-  | IncDecM of int * operand * member_key (* statuc count, operand, member key *)
-  | SetOpM of int  * operand * member_key (* stack caunt, operand, member key *)
-  | BindM of int * member_key (* stack count, member key *)
-  | UnsetM of int * member_key (* stack count, member key *)
-  | SetWithRefLML of int * int (* local id, local id *)
-  | SetWithRefRML of int (* local id *)
+  | QueryM of num_params * query_op * member_key
+  | VGetM of num_params * member_key
+  | FPassM of param_id * num_params * member_key
+  | SetM of num_params * member_key
+  | IncDecM of num_params * operand * member_key
+  | SetOpM of num_params  * operand * member_key
+  | BindM of num_params * member_key
+  | UnsetM of num_params * member_key
+  | SetWithRefLML of local_id * local_id
+  | SetWithRefRML of local_id
 
 type instruct_iterator =
-  | IterInit of int * rel_offset * int (* iterator id, rel offset, local id *)
-  | IterInitK of int * rel_offset * int * int (* iterator id, rel offset, local id, local id *)
-  | WIterInit of int * rel_offset * int (* iterator id, rel offset, local id *)
-  | WIterInitK of int * rel_offset * int * int (* iterator id, rel offset, local id, local id *)
-  | MIterInit of int * rel_offset * int (* iterator id, rel offset, local id *)
-  | MIterInitK of int * rel_offset * int * int (* iterator id, rel offset, local id, local id *)
-  | IterNext of int * rel_offset * int (* iterator id, rel offset, local id *)
-  | IterNextK of int * rel_offset * int * int (* iterator id, rel offset, local id, local id *)
-  | WIterNext of int * rel_offset * int (* iterator id, rel offset, local id *)
-  | WIterNextK of int * rel_offset * int * int (* iterator id, rel offset, local id, local id *)
-  | MIterNext of int * rel_offset * int (* iterator id, rel offset, local id *)
-  | MIterNextK of int * rel_offset * int * int (* iterator id, rel offset, local id, local id *)
-  | IterFree of int (* iterator id *)
-  | MIterFree of int (* iterator id *)
-  | CIterFree of int (* iterator id *)
+  | IterInit of iterator_id * rel_offset * local_id
+  | IterInitK of iterator_id * rel_offset * local_id * local_id
+  | WIterInit of iterator_id * rel_offset * local_id
+  | WIterInitK of iterator_id * rel_offset * local_id * local_id
+  | MIterInit of iterator_id * rel_offset * local_id
+  | MIterInitK of iterator_id * rel_offset * local_id * local_id
+  | IterNext of iterator_id * rel_offset * local_id
+  | IterNextK of iterator_id * rel_offset * local_id * local_id
+  | WIterNext of iterator_id * rel_offset * local_id
+  | WIterNextK of iterator_id * rel_offset * local_id * local_id
+  | MIterNext of iterator_id * rel_offset * local_id
+  | MIterNextK of iterator_id * rel_offset * local_id * local_id
+  | IterFree of iterator_id
+  | MIterFree of iterator_id
+  | CIterFree of iterator_id
   | IterBreak of rel_offset * iter_vec
 
 type instruct_include_eval_define =
@@ -378,9 +383,9 @@ type instruct_include_eval_define =
   | ReqOnce
   | ReqDoc
   | Eval
-  | DefFunc of int (* function id *)
-  | DefCls of class_id (* class id *)
-  | DefClsNop of class_id (* class id *)
+  | DefFunc of function_id
+  | DefCls of class_id
+  | DefClsNop of class_id
   | DefCns of Litstr.id
   | DefTypeAlias of Litstr.id
 
@@ -401,25 +406,25 @@ type instruct_misc =
   | This
   | BareThis of bare_this_op
   | CheckThis
-  | InitThisLoc of int (* local variable id *)
-  | StaticLoc of int * Litstr.id (* local variable id, litstr id *)
-  | StaticLocInit of int * Litstr.id (* local variable id, litstr id *)
+  | InitThisLoc of local_id
+  | StaticLoc of local_id * Litstr.id
+  | StaticLocInit of local_id * Litstr.id
   | Catch
   | OODeclExists of class_kind
-  | VerifyParamType of int (* parameter id *)
+  | VerifyParamType of param_id
   | VerifyRetTypeC
   | VerifyRetTypeV
   | Self
   | Parent
   | IncStat of int * int (* counter id, value *)
   | AKExists
-  | CreateCl of int * class_id (* num args * class id *)
+  | CreateCl of num_params * class_id
   | Idx
   | ArrayIdx
-  | AssertRATL of int * repo_auth_type (* local id, repo auth type *)
-  | AssertRATStk of int * repo_auth_type (* stack offset, repo auth type *)
+  | AssertRATL of local_id * repo_auth_type
+  | AssertRATStk of stack_index * repo_auth_type
   | BreakTraceHint
-  | Silence of int * op_silence (* local id, Start|End *)
+  | Silence of local_id * op_silence
   | GetMemoKey
   | VarEnvDynCall
 

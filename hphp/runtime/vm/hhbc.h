@@ -132,6 +132,9 @@ enum InstrFlags {
   /* Instruction uses current FPI. */
   FF = 0x4,
 
+  /* Instruction pushes an FPI */
+  PF = 0x8,
+
   /* Shorthand for common combinations. */
   CF_TF = (CF | TF),
   CF_FF = (CF | FF)
@@ -488,24 +491,24 @@ constexpr int32_t kMaxConcatN = 4;
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
-  /* NOTE: isFPush below relies on the grouping of FPush* here */       \
-  O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        NF) \
-  O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        NF) \
-  O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        NF) \
+                                                                        \
+  O(FPushFunc,       ONE(IVA),         ONE(CV),         NOV,        PF) \
+  O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        PF) \
+  O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        PF) \
   O(FPushObjMethod,  TWO(IVA,                                           \
-                       OA(ObjMethodOp)), TWO(CV,CV),    NOV,        NF) \
+                       OA(ObjMethodOp)), TWO(CV,CV),    NOV,        PF) \
   O(FPushObjMethodD, THREE(IVA,SA,                                      \
-                       OA(ObjMethodOp)), ONE(CV),       NOV,        NF) \
-  O(FPushClsMethod,  ONE(IVA),         TWO(AV,CV),      NOV,        NF) \
-  O(FPushClsMethodF, ONE(IVA),         TWO(AV,CV),      NOV,        NF) \
-  O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        NF) \
-  O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    NF) \
-  O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    NF) \
-  O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    NF) \
-  O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        NF) \
-  O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        NF) \
-  O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        NF) \
-  O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), NF) \
+                       OA(ObjMethodOp)), ONE(CV),       NOV,        PF) \
+  O(FPushClsMethod,  ONE(IVA),         TWO(AV,CV),      NOV,        PF) \
+  O(FPushClsMethodF, ONE(IVA),         TWO(AV,CV),      NOV,        PF) \
+  O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
+  O(FPushCtor,       ONE(IVA),         ONE(AV),         ONE(CV),    PF) \
+  O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
+  O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    PF) \
+  O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
+  O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        PF) \
+  O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        PF) \
+  O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), PF) \
   O(FPassC,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCW,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassCE,         ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
@@ -914,24 +917,33 @@ constexpr bool isJmp(Op opcode) {
 }
 
 constexpr bool isFPush(Op opcode) {
-  return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
+  return (instrFlags(opcode) & PF) != 0;
 }
 
 constexpr bool isFPushCuf(Op opcode) {
-  return opcode >= OpFPushCufIter && opcode <= OpFPushCufSafe;
+  return
+    opcode == OpFPushCufIter ||
+    opcode == OpFPushCuf     ||
+    opcode == OpFPushCufF    ||
+    opcode == OpFPushCufSafe;
 }
 
 constexpr bool isFPushClsMethod(Op opcode) {
-  return opcode >= OpFPushClsMethod && opcode <= OpFPushClsMethodD;
+  return
+    opcode == OpFPushClsMethod  ||
+    opcode == OpFPushClsMethodF ||
+    opcode == OpFPushClsMethodD;
 }
 
 constexpr bool isFPushObjMethod(Op opcode) {
-  return opcode == OpFPushObjMethod || opcode == OpFPushObjMethodD;
+  return
+    opcode == OpFPushObjMethod ||
+    opcode == OpFPushObjMethodD;
 }
 
 constexpr bool isFPushCtor(Op opcode) {
   return
-    opcode == OpFPushCtor ||
+    opcode == OpFPushCtor  ||
     opcode == OpFPushCtorD ||
     opcode == OpFPushCtorI;
 }

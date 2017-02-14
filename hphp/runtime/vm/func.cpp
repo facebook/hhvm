@@ -45,6 +45,7 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
+#include <algorithm>
 #include <atomic>
 #include <ostream>
 #include <vector>
@@ -556,24 +557,38 @@ const EHEnt* Func::findEH(Offset o) const {
   return HPHP::findEH(shared()->m_ehtab, o);
 }
 
-const FPIEnt* Func::findFPI(Offset o) const {
-  assert(o >= base() && o < past());
-  const FPIEnt* fe = nullptr;
-  unsigned int i;
+const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
+  /*
+   * We consider the "FCall" instruction part of the FPI region, but
+   * the corresponding push is not considered part of it.  (This
+   * means all offsets in the FPI region will have the partial
+   * ActRec on the stack.)
+   */
 
-  const FPIEntVec& fpitab = shared()->m_fpitab;
-  for (i = 0; i < fpitab.size(); i++) {
-    /*
-     * We consider the "FCall" instruction part of the FPI region, but
-     * the corresponding push is not considered part of it.  (This
-     * means all offsets in the FPI region will have the partial
-     * ActRec on the stack.)
-     */
-    if (fpitab[i].m_fpushOff < o && o <= fpitab[i].m_fcallOff) {
-      fe = &fpitab[i];
-    }
+  auto it =
+    std::lower_bound(b, e, o, [](auto& f, Offset o) {
+      return f.m_fpushOff < o;
+    });
+
+  // Didn't find any candidates.
+  if (it == b) {
+    return nullptr;
   }
-  return fe;
+
+  const FPIEnt* fe = --it;
+
+  // Iterate through parents until we find a valid region.
+  while (true) {
+    if (fe->m_fcallOff >= o) {
+      return fe;
+    }
+
+    if (fe->m_parentIndex < 0) {
+      return nullptr;
+    }
+
+    fe = &b[fe->m_parentIndex];
+  }
 }
 
 const FPIEnt* Func::findPrecedingFPI(Offset o) const {

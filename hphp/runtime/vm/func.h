@@ -983,7 +983,11 @@ struct Func final {
   /*
    * Locate FPI regions by offset.
    */
-  const FPIEnt* findFPI(Offset o) const;
+  static const FPIEnt* findFPI(const FPIEnt* b, const FPIEnt* e, Offset o);
+  const FPIEnt* findFPI(Offset o) const {
+    assertx(o >= base() && o < past());
+    return findFPI(fpitab().begin(), fpitab().end(), o);
+  }
   const FPIEnt* findPrecedingFPI(Offset o) const;
 
   bool shouldSampleJit() const { return m_shouldSampleJit; }

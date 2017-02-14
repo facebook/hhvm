@@ -459,7 +459,7 @@ struct RuntimeOption {
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
-  F(int, JitWorkerThreads,             0)                               \
+  F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \
@@ -500,10 +500,10 @@ struct RuntimeOption {
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
   F(int32_t, PerfRelocate,             0)                               \
-  F(uint32_t, ThreadTCMainBufferSize,  0)                               \
-  F(uint32_t, ThreadTCColdBufferSize,  0)                               \
-  F(uint32_t, ThreadTCFrozenBufferSize,0)                               \
-  F(uint32_t, ThreadTCDataBufferSize,  0)                               \
+  F(uint32_t, ThreadTCMainBufferSize,  6 << 20)                         \
+  F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
+  F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \
+  F(uint32_t, ThreadTCDataBufferSize,  256 << 10)                       \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
@@ -523,7 +523,7 @@ struct RuntimeOption {
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
-  F(uint32_t, JitRetranslateAllRequest, 0)                              \
+  F(uint32_t, JitRetranslateAllRequest, 3000)                           \
   F(double,   JitLayoutHotThreshold,   0.05)                            \
   F(int32_t,  JitLayoutMainFactor,     1000)                            \
   F(int32_t,  JitLayoutColdFactor,     5)                               \

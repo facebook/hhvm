@@ -715,6 +715,7 @@ struct IndexData {
 
   ISStringToMany<const php::Class>       classes;
   ISStringToMany<const php::Func>        methods;
+  ISStringToOneT<uint64_t>               method_ref_params_by_name;
   ISStringToMany<const php::Func>        funcs;
   ISStringToMany<const php::TypeAlias>   typeAliases;
   ISStringToMany<const php::Class>       enums;
@@ -1007,6 +1008,21 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
+      uint64_t refs = 0;
+      uint64_t cur = 1;
+      bool anyByRef = false;
+      for (auto& p : m->params) {
+        if (p.byRef) {
+          refs |= cur;
+          anyByRef = true;
+        }
+        // It doesn't matter that we lose parameters beyond the 64th,
+        // for those, we'll conservatively check everything anyway.
+        cur <<= 1;
+      }
+      if (anyByRef) {
+        index.method_ref_params_by_name[m->name] |= refs;
+      }
       if (m->attrs & AttrInterceptable) {
         index.any_interceptable_functions = true;
       }
@@ -2499,15 +2515,26 @@ PrepKind Index::lookup_param_prep(Context ctx,
       return prep_kind_from_set(find_range(m_data->funcs, s.name), paramId);
     },
     [&] (res::Func::MethodName s) {
-      /*
-       * If we think it's supposed to be PrepKind::Ref, we still can't be sure
-       * unless we go though some effort to guarantee that it can't be going to
-       * an __call function magically (which will never take anything by ref).
-       */
+      auto const it = m_data->method_ref_params_by_name.find(s.name);
+      if (it == end(m_data->method_ref_params_by_name)) {
+        // There was no entry, so no method by this name takes a parameter
+        // by reference.
+        return PrepKind::Val;
+      }
+      if (paramId < sizeof(it->second) * CHAR_BIT &&
+          !((it->second >> paramId) & 1)) {
+        // no method by this name takes this parameter by reference
+        return PrepKind::Val;
+      }
       auto const kind = prep_kind_from_set(
         find_range(m_data->methods, s.name),
         paramId
       );
+      /*
+       * If we think it's supposed to be PrepKind::Ref, we still can't be sure
+       * unless we go through some effort to guarantee that it can't be going to
+       * an __call function magically (which will never take anything by ref).
+       */
       return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {

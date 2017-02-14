@@ -1549,6 +1549,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdVectorSize:
   case VectorHasImmCopy:
   case CheckPackedArrayDataBounds:
+  case LdColVec:
   case LdColArray:
   case EnterFrame:
     return may_load_store(AEmpty, AEmpty);

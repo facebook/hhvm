@@ -1012,11 +1012,17 @@ To string conversions:
   Loads the element at index S1 from the base pointer in S0. The index in S1 is
   the number of bytes from the base in S0.
 
+| LdColVec, D(Vec), S(Obj), NF
+
+  Load the vec array backing a collection instance in S0, which must be a
+  Vector or ImmVector, and that specific object type must be known at compile
+  time.
+
 | LdColArray, D(Arr), S(Obj), NF
 
-  Load the array backing a collection instance in S0, which must be a Vector,
-  Map, Set, ImmVector, ImmMap, or ImmSet, and that specific object type must be
-  known at compile time.
+  Load the array backing a collection instance in S0, which must be a Map, Set,
+  ImmMap, or ImmSet, and that specific object type must be known at compile
+  time.
 
 | CheckRefInner<T>, ND, S(BoxedCell), B
 
@@ -1443,7 +1449,7 @@ To string conversions:
 
   Create an empty new collection of `type'.
 
-| NewColFromArray<type>, DCol, S(Arr), PRc|CRc
+| NewColFromArray<type>, DCol, S(Arr|Vec), PRc|CRc
 
   Create a collection of `type` from an array. `type` cannot be Pair. The array
   will be used to back the new collection without duplication or conversion.

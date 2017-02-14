@@ -3,7 +3,6 @@
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -33,7 +32,7 @@ struct BaseVector : ObjectData {
     : ObjectData(cls, collections::objectFlags, kind)
     , m_size(0)
     , m_versionAndCap(0)
-    , m_arr(staticEmptyArray())
+    , m_arr(staticEmptyVecArray())
   {}
   explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, collections::objectFlags, kind)
@@ -41,7 +40,7 @@ struct BaseVector : ObjectData {
     , m_versionAndCap(arr->cap())
     , m_arr(arr)
   {
-    assertx(arr == staticEmptyArray() || arr->isPacked());
+    assertx(arr->isVecArray());
   }
   explicit BaseVector(Class* cls, HeaderKind, uint32_t cap);
   ~BaseVector();
@@ -98,11 +97,11 @@ struct BaseVector : ObjectData {
   php_concat(const Variant& iterable);
 
   ArrayData* arrayData() {
-    assert(m_arr == staticEmptyArray() || m_arr->isPacked());
+    assert(m_arr->isVecArray());
     return m_arr;
   }
   const ArrayData* arrayData() const {
-    assert(m_arr == staticEmptyArray() || m_arr->isPacked());
+    assert(m_arr->isVecArray());
     return m_arr;
   }
   void setSize(uint32_t sz) {
@@ -211,7 +210,7 @@ struct BaseVector : ObjectData {
   void reserve(int64_t sz);
   Array toArray() {
     if (!m_size) return empty_array();
-    return Array(const_cast<ArrayData*>(arrayData()));
+    return Array::attach(const_cast<ArrayData*>(arrayData()->toPHPArray(true)));
   }
 
   static constexpr size_t sizeOffset() { return offsetof(BaseVector, m_size); }
@@ -249,7 +248,7 @@ struct BaseVector : ObjectData {
   /**
    * canMutateBuffer() indicates whether it is currently safe to directly
    * modify this Vector's buffer. canMutateBuffer() is vacuously true for
-   * buffers with zero capacity (i.e. the staticEmptyArray() case) because
+   * buffers with zero capacity (i.e. the staticEmptyVecArray() case) because
    * you can't meaningfully mutate zero-capacity buffer without first doing
    * a grow. This may seem weird, but its actually much smoother in practice
    * than the alternative of returning false for such cases.
@@ -287,8 +286,7 @@ struct BaseVector : ObjectData {
   [[noreturn]] static void throwBadKeyType();
 
   static constexpr uint64_t MaxCapacity() {
-    // same as mixed-array for now
-    return MixedArray::MaxSize;
+    return PackedArray::MaxSize;
   }
 
   static bool instanceof(const ObjectData*);
@@ -415,7 +413,7 @@ struct BaseVector : ObjectData {
 
   // The ArrayData's element area can be computed from m_arr via the
   // packedData() helper function. When capacity is non-zero, m_arr points
-  // to a PackedArray.
+  // to a VecArray.
   ArrayData* m_arr;
 
   // m_immCopy is a smart pointer to an ImmVector that is an up-to-date

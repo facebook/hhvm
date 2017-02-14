@@ -282,6 +282,7 @@ bool ArrayIter::endHelper() const  {
   if (obj->isCollection()) {
     switch (obj->collectionType()) {
       case CollectionType::Vector:
+      case CollectionType::ImmVector:
         return m_pos >= static_cast<BaseVector*>(obj)->size();
       case CollectionType::Map:
       case CollectionType::ImmMap:
@@ -291,8 +292,6 @@ bool ArrayIter::endHelper() const  {
         return !static_cast<BaseSet*>(obj)->iter_valid(m_pos);
       case CollectionType::Pair:
         return m_pos >= static_cast<c_Pair*>(obj)->size();
-      case CollectionType::ImmVector:
-        return m_pos >= static_cast<c_ImmVector*>(obj)->size();
     }
   } else {
     return !obj->o_invoke_few_args(s_valid, 0).toBoolean();

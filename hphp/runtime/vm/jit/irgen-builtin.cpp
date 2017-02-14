@@ -1780,35 +1780,38 @@ void implMapIdx(IRGS& env) {
   finish(pelem);
 }
 
-void implVecIdx(IRGS& env) {
+void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   auto const def = popC(env);
   auto const key = popC(env);
-  auto const vec = popC(env);
-
-  assertx(vec->isA(TVec));
+  auto const stack_base = popC(env);
 
   auto const finish = [&](SSATmp* elem) {
     pushIncRef(env, elem);
     decRef(env, def);
     decRef(env, key);
-    decRef(env, vec);
+    decRef(env, stack_base);
   };
 
   if (key->isA(TNull | TStr)) return finish(def);
 
   if (!key->isA(TInt)) {
-    gen(env, ThrowInvalidArrayKey, vec, key);
+    gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
+
+  auto const use_base = loaded_collection_vec
+    ? loaded_collection_vec
+    : stack_base;
+  assertx(use_base->isA(TVec));
 
   auto const elem = cond(
     env,
     [&] (Block* taken) {
-      auto const length = gen(env, CountVec, vec);
+      auto const length = gen(env, CountVec, use_base);
       auto const cmp = gen(env, CheckRange, key, length);
       gen(env, JmpZero, taken, cmp);
     },
-    [&] { return gen(env, LdVecElem, vec, key); },
+    [&] { return gen(env, LdVecElem, use_base, key); },
     [&] { return def; }
   );
 
@@ -1871,7 +1874,7 @@ void implGenericIdx(IRGS& env) {
  * Idx bytecode.
  */
 TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
-                                 bool& useCollection, bool& useMap) {
+                                 bool& useArr, bool& useVec, bool& useMap) {
   if (baseType < TObj && baseType.clsSpec()) {
     auto const cls = baseType.clsSpec().cls();
 
@@ -1882,7 +1885,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
     auto const isMapOrSet = isMap ||
                             collections::isType(cls, CollectionType::Set) ||
                             collections::isType(cls, CollectionType::ImmSet);
-    auto const okMapOrSet = [&]() {
+    useArr = [&]() {
       if (!isMapOrSet) return false;
       if (keyType <= TInt) return true;
       if (!keyType.hasConstVal(TStr)) return false;
@@ -1890,21 +1893,21 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
       if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
       return true;
     }();
-    // Similarly, Vector is only usable with int keys, so we can only do this
-    // for Vector if it's an Int.
-    auto const isVector = collections::isType(cls, CollectionType::Vector) ||
-                          collections::isType(cls, CollectionType::ImmVector);
-    auto const okVector = isVector && keyType <= TInt;
 
-    useCollection = okMapOrSet || okVector;
+    // Vector is only usable with int keys, so we can only optimize for
+    // Vector if the key is an Int
+    useVec = (collections::isType(cls, CollectionType::Vector) ||
+              collections::isType(cls, CollectionType::ImmVector)) &&
+             keyType <= TInt;
+
     // If it's a map with a non-static string key, we can do a map-specific
     // optimization.
     useMap = isMap && keyType <= TStr;
 
-    if (useCollection || useMap) return TypeConstraint(cls);
+    if (useArr || useVec || useMap) return TypeConstraint(cls);
   }
 
-  useCollection = useMap = false;
+  useArr = useVec = useMap = false;
   return DataTypeSpecific;
 }
 
@@ -1914,7 +1917,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
 
 void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
-  if (arrType <= TVec) return implVecIdx(env);
+  if (arrType <= TVec) return implVecIdx(env, nullptr);
   if (arrType <= TDict) return implDictKeysetIdx(env, true);
   if (arrType <= TKeyset) return implDictKeysetIdx(env, false);
 
@@ -1933,7 +1936,7 @@ void emitIdx(IRGS& env) {
   auto const keyType  = key->type();
   auto const baseType = base->type();
 
-  if (baseType <= TVec) return implVecIdx(env);
+  if (baseType <= TVec) return implVecIdx(env, nullptr);
   if (baseType <= TDict) return implDictKeysetIdx(env, true);
   if (baseType <= TKeyset) return implDictKeysetIdx(env, false);
 
@@ -1979,15 +1982,18 @@ void emitIdx(IRGS& env) {
     return;
   }
 
-  bool useCollection, useMap;
-  auto const tc = idxBaseConstraint(baseType, keyType, useCollection, useMap);
-  if (useCollection || useMap) {
+  bool useArr, useVec, useMap;
+  auto const tc = idxBaseConstraint(baseType, keyType, useArr, useVec, useMap);
+  if (useArr || useVec || useMap) {
     env.irb->constrainValue(base, tc);
     env.irb->constrainValue(key, DataTypeSpecific);
 
-    if (useCollection) {
+    if (useArr) {
       auto const arr = gen(env, LdColArray, base);
       implArrayIdx(env, arr);
+    } else if (useVec) {
+      auto const vec = gen(env, LdColVec, base);
+      implVecIdx(env, vec);
     } else {
       implMapIdx(env);
     }

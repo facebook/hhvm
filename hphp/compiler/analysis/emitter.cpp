@@ -10381,6 +10381,7 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
 void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
                                    folly::Optional<HeaderKind> kind) {
   assert(m_staticArrays.empty());
+  assertx(!kind || !isVectorCollection((CollectionType)*kind));
   auto const isDict = kind == HeaderKind::Dict;
   auto const isVec = kind == HeaderKind::VecArray;
   auto const isKeyset = kind == HeaderKind::Keyset;
@@ -10445,7 +10446,7 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  auto const allowPacked = !kind || isVectorCollection((CollectionType)*kind);
+  auto const allowPacked = !kind; // PHP arrays only
 
   int nElms;
   if (allowPacked && isPackedInit(el, &nElms)) {
@@ -10503,16 +10504,24 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
 
 void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
                                     ExpressionListPtr el) {
-  // Do not allow specification of keys even if the resulting array is
-  // packed. It doesn't make sense to specify keys for Vectors.
+  // Do not allow specification of keys even if the resulting array is packed.
+  // It doesn't make sense to specify keys for Vectors. Also, unwrap the values
+  // out of these ArrayPairExpressions so that we can use the vec init code.
+  // We can't do the upwrap in place because we sometimes visit parts of the
+  // AST twice.
+  auto unwrapped = std::make_shared<ExpressionList>(
+    el->getScope(), el->getRange());
   for (int i = 0; i < el->getCount(); i++) {
-    auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+    auto expr = (*el)[i];
+    assertx(expr->getKindOf() == Expression::KindOfArrayPairExpression);
+    auto ap = static_pointer_cast<ArrayPairExpression>(expr);
     if (ap->getName() != nullptr) {
       throw IncludeTimeFatalException(ap,
         "Keys may not be specified for Vector initialization");
     }
+    unwrapped->addElement(ap->getValue());
   }
-  emitArrayInit(e, el, (HeaderKind)ct);
+  emitArrayInit(e, unwrapped, HeaderKind::VecArray);
   e.ColFromArray(static_cast<int>(ct));
   return;
 }

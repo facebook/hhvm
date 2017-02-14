@@ -243,6 +243,7 @@ bool canDCE(IRInstruction* inst) {
   case ColIsEmpty:
   case ColIsNEmpty:
   case LdUnwinderValue:
+  case LdColVec:
   case LdColArray:
   case OrdStr:
   case ChrInt:

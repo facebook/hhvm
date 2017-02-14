@@ -2373,6 +2373,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(jit::mcgen::processExit())
   LOG_AND_IGNORE(PageletServer::Stop())
   LOG_AND_IGNORE(XboxServer::Stop())
+  LOG_AND_IGNORE(jit::mcgen::processExit())
   // Debugger::Stop() needs an execution context
   LOG_AND_IGNORE(g_context.getCheck())
   LOG_AND_IGNORE(Eval::Debugger::Stop())

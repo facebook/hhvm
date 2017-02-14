@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/server/server-stats.h"
 
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -85,6 +86,10 @@ static String HHVM_FUNCTION(server_warmup_status) {
 
   if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
     return "PGO profiling translations are still enabled.";
+  }
+
+  if (jit::mcgen::retranslateAllPending()) {
+    return "Waiting on retranslateAll()";
   }
 
   auto tpc_diff = jit::tl_perf_counters[jit::tpc_interp_bb] -

@@ -139,6 +139,8 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
     RuntimeOption::EvalJitRelocationSize &&
     cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3) &&
     (!RuntimeOption::EvalEnableOptTCBuffer ||
+     unit.context().kind != TransKind::Optimize) &&
+    (!RuntimeOption::EvalJitRetranslateAllRequest ||
      unit.context().kind != TransKind::Optimize);
 
   // If code relocation is supported and enabled, set up temporary code blocks.

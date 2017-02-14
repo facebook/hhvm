@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc-relocate.h"
 
@@ -40,6 +41,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
@@ -135,6 +137,174 @@ TransLocMaker relocateLocalTranslation(TransRange range, TransKind kind,
   auto tlm = reloc();
   always_assert(tlm);
   return *tlm;
+}
+
+bool checkLimit(const TransMetaInfo& info, const SrcRec* srcRec) {
+  auto const limit = info.viewKind == TransKind::Profile
+    ? RuntimeOption::EvalJitMaxProfileTranslations
+    : RuntimeOption::EvalJitMaxTranslations;
+
+  auto const numTrans = srcRec->translations().size();
+
+  // Once numTrans has reached limit + 1 we know that an interp translation
+  // has already been emitted. Prior to that if numTrans == limit only allow
+  // interp translations to avoid a race where multiple threads believe there
+  // are still available translations.
+  if (numTrans == limit + 1) return false;
+  if (numTrans == limit && info.transKind != TransKind::Interp) return false;
+  return true;
+}
+
+folly::Optional<TransLoc>
+publishTranslationInternal(TransMetaInfo info, OptView optSrcView) {
+  auto const sk = info.sk;
+  auto range = info.range;
+  auto& fixups = info.meta;
+  auto& tr = info.transRec;
+  bool needsRelocate = optSrcView.hasValue();
+
+  always_assert(
+    needsRelocate ||
+    code().isValidCodeAddress(info.range.main.begin())
+  );
+
+  auto const srcRec = srcDB().find(sk);
+  always_assert(srcRec);
+
+  // Check again now that we have the lock, the first check is racy but may
+  // prevent unnecessarily acquiring the lock.
+  if (!checkLimit(info, srcRec)) return folly::none;
+
+  // 1) If we are currently in a thread local TC we need to relocate into the
+  //    end of the real TC.
+  // 2) If reusable TC is enabled we need to relocate to an inner allocation if
+  //    sufficiently sized free blocks can be found
+  //
+  // Ideally we can combine (1) and (2), however, currently thread-local TC is
+  // only useful in production environments where we may want to emit optimize
+  // translations in parallel, while reusable TC is only meaningful in sandboxes
+  // where translations may be invalidates by source modifications.
+  auto view = [&] {
+    if (!needsRelocate) return info.emitView;
+
+    auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
+                                        fixups);
+    range = tlm.markEnd();
+    return tlm.view();
+  }();
+
+  auto loc = range.loc();
+  tryRelocateNewTranslation(sk, loc, view, fixups);
+
+  // Finally, record various metadata about the translation and add it to the
+  // SrcRec.
+  if (RuntimeOption::EvalProfileBC) {
+    auto const vmUnit = sk.unit();
+    TransBCMapping prev{};
+    for (auto& cur : fixups.bcMap) {
+      if (!cur.aStart) continue;
+      if (prev.aStart) {
+        if (prev.bcStart < vmUnit->bclen()) {
+          recordBCInstr(uint32_t(vmUnit->getOp(prev.bcStart)),
+                        prev.aStart, cur.aStart, false);
+        }
+      } else {
+        recordBCInstr(OpTraceletGuard, loc.mainStart(), cur.aStart, false);
+      }
+      prev = cur;
+    }
+  }
+
+  recordRelocationMetaData(sk, *srcRec, loc, fixups);
+  recordGdbTranslation(sk, sk.func(), view.main(), loc.mainStart(),
+                       loc.mainEnd(), false, false);
+  recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldCodeStart(),
+                       loc.coldEnd(), false, false);
+
+  if (tr.isValid()) {
+    tr.aStart = loc.mainStart();
+    tr.acoldStart = loc.coldCodeStart();
+    tr.afrozenStart = loc.frozenCodeStart();
+    tr.aLen = loc.mainSize();
+    tr.acoldLen = loc.coldCodeSize();
+    tr.afrozenLen = loc.frozenCodeSize();
+  }
+
+  transdb::addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(sk.unit(), sk.func(), tr);
+  }
+
+  GrowableVector<IncomingBranch> inProgressTailBranches;
+  fixups.process(&inProgressTailBranches);
+
+  // SrcRec::newTranslation() makes this code reachable. Do this last;
+  // otherwise there's some chance of hitting in the reader threads whose
+  // metadata is not yet visible.
+  TRACE(1, "newTranslation: %p  sk: %s\n",
+        loc.mainStart(), showShort(sk).c_str());
+  srcRec->newTranslation(loc, inProgressTailBranches);
+
+  TRACE(1, "mcg: %zd-byte tracelet\n", (ssize_t)loc.mainSize());
+  if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
+    Trace::traceRelease("%s", getTCSpace().c_str());
+  }
+
+  reportJitMaturity(code());
+
+  return loc;
+}
+
+void invalidateSrcKey(SrcKey sk) {
+  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
+  /*
+   * Reroute existing translations for SrcKey to an as-yet indeterminate
+   * new one.
+   */
+  auto const sr = srcDB().find(sk);
+  always_assert(sr);
+  /*
+   * Since previous translations aren't reachable from here, we know we
+   * just created some garbage in the TC. We currently have no mechanism
+   * to reclaim this.
+   */
+  FTRACE_MOD(Trace::reusetc, 1,
+             "Replacing translations from sk: {} " "to SrcRec addr={}\n",
+             showShort(sk), (void*)sr);
+  Trace::Indent _i;
+  sr->replaceOldTranslations();
+}
+
+void invalidateFuncProfSrcKeys(const Func* func) {
+  assertx(profData());
+  auto const funcId = func->getFuncId();
+  for (auto tid : profData()->funcProfTransIDs(funcId)) {
+    invalidateSrcKey(profData()->transRec(tid)->srcKey());
+  }
+}
+
+void publishOptFunctionInternal(FuncMetaInfo info) {
+  auto const func = info.func;
+
+  for (auto const rec : info.prologues) {
+    emitFuncPrologueOptInternal(rec);
+  }
+
+  invalidateFuncProfSrcKeys(func);
+
+  mcgen::ReadThreadLocalTC localTC(info.tcBuf);
+  for (auto& trans : info.translations) {
+    auto const regionSk = trans.sk;
+    auto const loc = publishTranslationInternal(
+      std::move(trans), info.tcBuf.view()
+    );
+    if (loc &&
+        regionSk.offset() == func->base() &&
+        !func->hasThisVaries() &&
+        func->getDVFunclets().size() == 0) {
+      func->setFuncBody(loc->mainStart());
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -295,175 +465,40 @@ folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
 
 folly::Optional<TransLoc>
 publishTranslation(TransMetaInfo info, OptView optSrcView) {
-  auto const sk = info.sk;
-  auto range = info.range;
-  auto& fixups = info.meta;
-  auto& tr = info.transRec;
-  bool needsRelocate = RuntimeOption::EvalEnableOptTCBuffer &&
-    !code().isValidCodeAddress(info.range.main.begin());
-
-  auto const srcRec = srcDB().find(sk);
+  auto const srcRec = srcDB().find(info.sk);
   always_assert(srcRec);
 
-  auto checkLimit = [&] {
-    auto const limit = info.viewKind == TransKind::Profile
-      ? RuntimeOption::EvalJitMaxProfileTranslations
-      : RuntimeOption::EvalJitMaxTranslations;
-
-    auto const numTrans = srcRec->translations().size();
-
-    // Once numTrans has reached limit + 1 we know that an interp translation
-    // has already been emitted. Prior to that if numTrans == limit only allow
-    // interp translations to avoid a race where multiple threads believe there
-    // are still available translations.
-    if (numTrans == limit + 1) return false;
-    if (numTrans == limit && info.transKind != TransKind::Interp) return false;
-    return true;
-  };
-
-  if (!checkLimit()) return folly::none;
+  if (!checkLimit(info, srcRec)) return folly::none;
 
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  // Check again now that we have the lock, the first check is racy but may
-  // prevent unnecessarily acquiring the lock.
-  if (!checkLimit()) return folly::none;
-
-  // 1) If we are currently in a thread local TC we need to relocate into the
-  //    end of the real TC.
-  // 2) If reusable TC is enabled we need to relocate to an inner allocation if
-  //    sufficiently sized free blocks can be found
-  //
-  // Ideally we can combine (1) and (2), however, currently thread-local TC is
-  // only useful in production environments where we may want to emit optimize
-  // translations in parallel, while reusable TC is only meaningful in sandboxes
-  // where translations may be invalidates by source modifications.
-  auto view = [&] {
-    // If we emitted into Ahot and it subsequently filled up then the view
-    // returned by code().view(info.viewKind) will be incorrect.
-    if (!needsRelocate) return info.emitView;
-
-    auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
-                                        fixups);
-    range = tlm.markEnd();
-    return tlm.view();
-  }();
-
-  auto loc = range.loc();
-  tryRelocateNewTranslation(sk, loc, view, fixups);
-
-  // Finally, record various metadata about the translation and add it to the
-  // SrcRec.
-  if (RuntimeOption::EvalProfileBC) {
-    auto const vmUnit = sk.unit();
-    TransBCMapping prev{};
-    for (auto& cur : fixups.bcMap) {
-      if (!cur.aStart) continue;
-      if (prev.aStart) {
-        if (prev.bcStart < vmUnit->bclen()) {
-          recordBCInstr(uint32_t(vmUnit->getOp(prev.bcStart)),
-                        prev.aStart, cur.aStart, false);
-        }
-      } else {
-        recordBCInstr(OpTraceletGuard, loc.mainStart(), cur.aStart, false);
-      }
-      prev = cur;
-    }
-  }
-
-  recordRelocationMetaData(sk, *srcRec, loc, fixups);
-  recordGdbTranslation(sk, sk.func(), view.main(), loc.mainStart(),
-                       loc.mainEnd(), false, false);
-  recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldCodeStart(),
-                       loc.coldEnd(), false, false);
-
-  if (tr.isValid()) {
-    tr.aStart = loc.mainStart();
-    tr.acoldStart = loc.coldCodeStart();
-    tr.afrozenStart = loc.frozenCodeStart();
-    tr.aLen = loc.mainSize();
-    tr.acoldLen = loc.coldCodeSize();
-    tr.afrozenLen = loc.frozenCodeSize();
-  }
-
-  transdb::addTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTraceletToVtune(sk.unit(), sk.func(), tr);
-  }
-
-  GrowableVector<IncomingBranch> inProgressTailBranches;
-  fixups.process(&inProgressTailBranches);
-
-  // SrcRec::newTranslation() makes this code reachable. Do this last;
-  // otherwise there's some chance of hitting in the reader threads whose
-  // metadata is not yet visible.
-  TRACE(1, "newTranslation: %p  sk: %s\n",
-        loc.mainStart(), showShort(sk).c_str());
-  srcRec->newTranslation(loc, inProgressTailBranches);
-
-  TRACE(1, "mcg: %zd-byte tracelet\n", (ssize_t)loc.mainSize());
-  if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
-    Trace::traceRelease("%s", getTCSpace().c_str());
-  }
-
-  reportJitMaturity(code());
-
-  return loc;
+  return publishTranslationInternal(std::move(info), optSrcView);
 }
 
 void publishOptFunction(FuncMetaInfo info) {
-  auto const func = info.func;
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
 
-  for (auto const rec : info.prologues) {
-    emitFuncPrologueOpt(rec);
-  }
+  publishOptFunctionInternal(std::move(info));
+}
 
-  mcgen::ReadThreadLocalTC localTC(info.tcBuf);
-  for (auto& trans : info.translations) {
-    auto const regionSk = trans.sk;
-    auto const loc = publishTranslation(std::move(trans), info.tcBuf.view());
-    if (loc &&
-        regionSk.offset() == func->base() &&
-        !func->hasThisVaries() &&
-        func->getDVFunclets().size() == 0 &&
-        func->getFuncBody() == ustubs().funcBodyHelperThunk) {
-      func->setFuncBody(loc->mainStart());
+void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos) {
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
+
+  Treadmill::startRequest();
+  requestInitProfData();
+  SCOPE_EXIT {
+    requestExitProfData();
+    Treadmill::finishRequest();
+  };
+
+  for (auto& finfo : infos) {
+    if (!Func::isFuncIdValid(finfo.fid)) {
+      continue;
     }
-  }
-}
-
-static void invalidateSrcKeyNoLock(SrcKey sk) {
-  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
-  /*
-   * Reroute existing translations for SrcKey to an as-yet indeterminate
-   * new one.
-   */
-  auto const sr = srcDB().find(sk);
-  always_assert(sr);
-  /*
-   * Since previous translations aren't reachable from here, we know we
-   * just created some garbage in the TC. We currently have no mechanism
-   * to reclaim this.
-   */
-  FTRACE_MOD(Trace::reusetc, 1,
-             "Replacing translations from sk: {} " "to SrcRec addr={}\n",
-             showShort(sk), (void*)sr);
-  Trace::Indent _i;
-  sr->replaceOldTranslations();
-}
-
-void invalidateSrcKey(SrcKey sk) {
-  auto codeLock = lockCode();
-  invalidateSrcKeyNoLock(sk);
-}
-
-void invalidateFuncProfSrcKeys(const Func* func) {
-  assertx(profData());
-  auto const funcId = func->getFuncId();
-  auto codeLock = lockCode();
-  for (auto tid : profData()->funcProfTransIDs(funcId)) {
-    invalidateSrcKeyNoLock(profData()->transRec(tid)->srcKey());
+    publishOptFunctionInternal(std::move(finfo));
   }
 }
 

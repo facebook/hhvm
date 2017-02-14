@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,46 +14,26 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MCGEN_TRANSLATE_H_
-#define incl_HPHP_JIT_MCGEN_TRANSLATE_H_
+#ifndef incl_HPHP_JIT_TC_PROLOGUE_H_
+#define incl_HPHP_JIT_TC_PROLOGUE_H_
 
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
-
-#include <folly/Optional.h>
 
 namespace HPHP { namespace jit {
 
-struct FPInvOffset;
 struct ProfTransRec;
-struct TransArgs;
 
-namespace tc { struct TransMetaInfo; };
-
-namespace mcgen {
+namespace tc {
 
 /*
- * Create a new translation based on args.
+ * Emit a function prologue from rec.
  *
- * The SrcKey and kind of this translation must be specified in args. The
- * TransID and region may optionally be specified as well. If the kind of region
- * requested is TransOptimize a TransID must be specified.
- *
- * Should the region be absent, an appropriate region for the designated kind
- * will be selected.
+ * Precondition: calling thread owns both code and metadata locks
  */
-folly::Optional<tc::TransMetaInfo> translate(
-  TransArgs args,
-  FPInvOffset spOff,
-  folly::Optional<CodeCache::View> optView = folly::none
-);
+TCA emitFuncPrologueOptInternal(ProfTransRec* rec);
 
-/*
- * True iff retranslateAll is enabled and supported by the current server
- * execution mode.
- */
-bool retranslateAllEnabled();
+}
 
-}}}
+}}
 
 #endif

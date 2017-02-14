@@ -1006,7 +1006,7 @@ public:
   void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
 
   void jmp(CodeAddress dest) {
-    always_assert(dest && jmpDeltaFits(dest));
+    always_assert_flog(dest && jmpDeltaFits(dest), "Bad Jmp: {}", dest);
     emitJ32(instr_jmp, ssize_t(dest));
   }
 

@@ -109,7 +109,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   // in case another thread snuck in and set the prologue already.
   if (checkCachedPrologue(func, nArgs)) return false;
 
-  if (RuntimeOption::EvalEnableOptTCBuffer) {
+  if (RuntimeOption::EvalEnableOptTCBuffer || retranslateAllEnabled()) {
     info.prologues.emplace_back(rec);
   } else {
     tc::emitFuncPrologueOpt(rec);
@@ -126,7 +126,6 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
         if (profData()->optimized(funcletSK)) return;
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
         if (funcletTransId == kInvalidTransID) return;
-        tc::invalidateSrcKey(funcletSK);
         auto args = TransArgs{funcletSK};
         args.transId = funcletTransId;
         args.kind = TransKind::Optimize;

@@ -692,8 +692,8 @@ void threadExit(bool shouldUnregister) {
 #endif
   };
 
-  // Other requests may be reading from this rds section via the s_tlBaseList,
-  // we just removed ourself from the list now, but defer the unmap until after
+  // Other requests may be reading from this rds section via the s_tlBaseList.
+  // We just removed ourself from the list now, but defer the unmap until after
   // any outstanding requests have completed.
   if (shouldUnregister) {
     Treadmill::enqueue(std::move(do_unmap));

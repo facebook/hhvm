@@ -8,9 +8,9 @@
  *
 *)
 
-open Hhbc_ast
-
 module B = Buffer
+module H = Hhbc_ast
+open H
 
 let buffer_of_instruct_basic prefix instruction =
   let result = B.create 0 in
@@ -51,8 +51,52 @@ let buffer_of_instruct_operator prefix instruction =
   B.add_string result (
     prefix ^
     match instruction with
+    | Concat -> "Concat"
+    | Abs -> "Abs"
+    | Add -> "Add"
+    | Sub -> "Sub"
+    | Mul -> "Mul"
+    | AddO -> "AddO"
+    | SubO -> "SubO"
+    | MulO -> "MulO"
+    | Div -> "Div"
+    | Mod -> "Mod"
+    | Pow -> "Pow"
+    | Sqrt -> "Sqrt"
+    | Xor -> "Xor"
+    | Not -> "Not"
+    | Same -> "Same"
+    | NSame -> "NSame"
+    | Eq -> "Eq"
+    | Neq -> "Neq"
+    | Lt -> "Lt"
+    | Lte -> "Lte"
+    | Gt -> "Gt"
+    | Gte -> "Gte"
+    | Cmp -> "Cmp"
+    | BitAnd -> "BitAnd"
+    | BitOr -> "BitOr"
+    | BitXor -> "BitXor"
+    | BitNot -> "BitNot"
+    | Shl -> "Shl"
+    | Shr -> "Shr"
+    | Floor -> "Floor"
+    | Ceil -> "Ceil"
+    | CastBool -> "CastBool"
+    | CastInt -> "CastInt"
+    | CastDouble -> "CastDouble"
+    | CastString -> "CastString"
+    | CastArray -> "Cast"
+    | CastObject -> "CastObject"
+    | CastVec -> "CastVec"
+    | CastDict -> "CastDict"
+    | CastKeyset -> "CastKeyset"
+    | InstanceOf -> "InstanceOf"
+    | InstanceOfD -> "InstanceOfD"
     | Print -> "Print"
-    | _ -> failwith "Not Implemented"
+    | Clone -> "Clone"
+    | H.Exit -> "Exit"
+    | Fatal -> "Fatal"
   ); result
 
 let buffer_of_instruct_control_flow prefix instruction =

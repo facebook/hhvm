@@ -99,6 +99,7 @@ type instruct_operator =
   | Neq
   | Lt
   | Lte
+  | Gt
   | Gte
   | Cmp
   | BitAnd
@@ -111,9 +112,9 @@ type instruct_operator =
   | Ceil
   | CastBool
   | CastInt
-  | CostDouble
+  | CastDouble
   | CastString
-  | CostArray
+  | CastArray
   | CastObject
   | CastVec
   | CastDict
@@ -141,7 +142,7 @@ type instruct_control_flow =
   | Unwind
   | Throw
 
-type instuct_get =
+type instruct_get =
   | CGetL of int (* local variable id *)
   | CGetQuietL of int (* local variable id *)
   | CGetL2 of int (* local variable id *)

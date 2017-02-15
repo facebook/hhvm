@@ -69,8 +69,11 @@ static Variant extractValue(ResourceBundle* data,
 static void HHVM_METHOD(ResourceBundle, __construct, const Variant& localeName,
                                                      const Variant& bundleName,
                                                      bool fallback) {
-  auto const bundle = bundleName.isNull() ? String{}
-                                          : bundleName.toString();
+  auto bundle = bundleName.isNull() ? String{} : bundleName.toString();
+  if (bundle.length() > PATH_MAX) {
+    raise_warning("Bundle name too long");
+    bundle = String{};
+  }
   auto const locale = Locale::createFromName(
     localeOrDefault(localeName.toString()).c_str()
   );
@@ -168,6 +171,10 @@ static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
                                                   const String& bundleName) {
   UErrorCode error = U_ZERO_ERROR;
   const char *bundle = bundleName.length() ? bundleName.c_str() : nullptr;
+  if (bundleName.length() >= PATH_MAX) {
+    raise_warning("Bundle name too long");
+    return false;
+  }
   auto le = ures_openAvailableLocales(bundle, &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "Cannot fetch locales list");

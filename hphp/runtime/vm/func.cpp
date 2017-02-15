@@ -566,7 +566,7 @@ const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
    */
 
   auto it =
-    std::lower_bound(b, e, o, [](auto& f, Offset o) {
+    std::lower_bound(b, e, o, [](const FPIEnt& f, Offset o) {
       return f.m_fpushOff < o;
     });
 

@@ -127,7 +127,37 @@ let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
 let from_functions nast_functions =
   Core.List.filter_map nast_functions from_fun_
 
+let from_method : Nast.method_ -> Hhbc_ast.method_def option =
+  fun nast_method ->
+  let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
+  match nast_method.N.m_body with
+  | N.NamedBody _ ->
+    None
+  | N.UnnamedBody b ->
+    let stmt_instrs = from_stmts b.N.fub_ast in
+    let body_instrs = gather [
+      stmt_instrs;
+      instr (H.ILitConst H.Null);
+      instr (H.IContFlow H.RetC)
+    ] in
+    let method_body = instr_seq_to_list body_instrs in
+    let m = { H.method_name; H.method_body } in
+    Some m
+
+let from_methods nast_methods =
+  Core.List.filter_map nast_methods from_method
+
+let nast_methods_from_class nast_class =
+  let nast_methods = nast_class.N.c_methods @ nast_class.N.c_static_methods in
+  match nast_class.N.c_constructor with
+  | None -> nast_methods (* TODO: Default ctor *)
+  | Some m -> m :: nast_methods
+
 let from_class : Nast.class_ -> Hhbc_ast.class_def =
+  (* TODO extends *)
+  (* TODO implements *)
+  (* TODO user attributes *)
+  (* TODO generic type parameters *)
   (* TODO Deal with the body of the class *)
   fun nast_class ->
   let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
@@ -137,9 +167,10 @@ let from_class : Nast.class_ -> Hhbc_ast.class_def =
   let class_is_abstract = nast_class.N.c_kind = Ast.Cabstract in
   let class_is_final =
     nast_class.N.c_final || class_is_trait || class_is_enum in
-
+  let nast_methods = nast_methods_from_class nast_class in
+  let class_methods = from_methods nast_methods in
   { H.class_name; class_is_final; class_is_trait; class_is_enum;
-    class_is_interface; class_is_abstract }
+    class_is_interface; class_is_abstract; class_methods }
 
 let from_classes nast_classes =
   Core.List.map nast_classes from_class

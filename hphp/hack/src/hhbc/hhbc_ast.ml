@@ -467,14 +467,32 @@ type fun_def = {
   f_return_types  : fun_return_type list;
 }
 
+type method_def = {
+  (* TODO: attributes *)
+  (* TODO: public / private / final / abstract *)
+  (* TODO: generic type parameters *)
+  (* TODO: where clause *)
+  (* TODO: is constructor / destructor / etc *)
+  method_name          : Litstr.id;
+  (* TODO: formal parameters *)
+  (* TODO: return type *)
+  method_body          : instruct list;
+}
+
 type class_def = {
+  (* TODO attributes *)
+  (* TODO generic type parameters *)
+  (* TODO extends *)
+  (* TODO implements *)
   class_name         : Litstr.id;
   class_is_final     : bool;
   class_is_abstract  : bool;
   class_is_interface : bool;
   class_is_trait     : bool;
   class_is_enum      : bool;
-  (* TODO declarations *)
+  class_methods      : method_def list;
+  (* TODO other members *)
+  (* TODO XHP stuff *)
 }
 
 type hhas_prog = {

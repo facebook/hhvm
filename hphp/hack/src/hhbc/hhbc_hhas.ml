@@ -12,6 +12,9 @@ module B = Buffer
 module H = Hhbc_ast
 open H
 
+let two_spaces = "  "
+let four_spaces = "    "
+
 let buffer_of_instruct_basic prefix instruction =
   let result = B.create 0 in
   B.add_string result (
@@ -122,9 +125,8 @@ let buffer_of_instruct_call prefix instruction =
     | _ -> failwith "instruct_call Not Implemented"
   ); result
 
-let buffer_of_instruction_list instructs =
+let buffer_of_instruction_list prefix instructs =
   let lpad = B.create 2 in
-  let prefix = "  " in
   let f_fold acc inst =
     B.add_buffer acc (
       match inst with
@@ -155,9 +157,25 @@ let buffer_of_fun_def fun_def =
   B.add_string buf fun_def.f_name;
   B.add_string buf "()";
   B.add_string buf " {\n";
-  B.add_buffer buf
-    (buffer_of_instruction_list fun_def.f_body);
+  B.add_buffer buf (buffer_of_instruction_list two_spaces fun_def.f_body);
   B.add_string buf "}\n";
+  buf
+
+let buffer_of_method_def method_def =
+  let buf = B.create 0 in
+  (* TODO: attributes *)
+  B.add_string buf "\n  .method ";
+  (* TODO: public *)
+  (* TODO: static *)
+  B.add_string buf method_def.method_name;
+  (* TODO: generic type parameters *)
+  (* TODO: parameters *)
+  B.add_string buf "()";
+  (* TODO: return type *)
+  B.add_string buf " {\n";
+  B.add_buffer buf
+    (buffer_of_instruction_list four_spaces method_def.method_body);
+  B.add_string buf "  }\n";
   buf
 
 let class_special_attributes c =
@@ -173,14 +191,17 @@ let class_special_attributes c =
 
 let buffer_of_class_def class_def =
   let buf = B.create 0 in
-  (* TODO: final *)
-  (* TODO: abstract *)
-  (* TODO: attributes *)
+  (* TODO: user attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf class_def.class_name;
+  (* TODO: extends *)
+  (* TODO: implements *)
   B.add_string buf " {\n";
-  (* TODO: members *)
+  List.iter
+    (fun x -> B.add_buffer buf (buffer_of_method_def x);)
+    class_def.class_methods;
+  (* TODO: other members *)
   (* TODO: If there is no ctor, generate one *)
   B.add_string buf "}\n";
   buf
@@ -215,7 +236,7 @@ let buffer_of_top_level hhas_prog =
   let buf = B.create 0 in
   B.add_string buf fun_name;
   B.add_buffer buf (buffer_of_defcls hhas_prog.hhas_classes);
-  B.add_buffer buf (buffer_of_instruction_list main_stmts);
+  B.add_buffer buf (buffer_of_instruction_list two_spaces main_stmts);
   B.add_string buf "}\n";
   buf
 

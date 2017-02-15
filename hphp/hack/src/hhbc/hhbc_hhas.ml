@@ -160,12 +160,24 @@ let buffer_of_fun_def fun_def =
   B.add_string buf "}\n";
   buf
 
+let class_special_attributes c =
+  let attrs = [] in
+  let attrs = if c.class_is_trait then "trait" :: attrs else attrs in
+  let attrs = if c.class_is_interface then "interface" :: attrs else attrs in
+  let attrs = if c.class_is_final then "final" :: attrs else attrs in
+  let attrs = if c.class_is_enum then "enum" :: attrs else attrs in
+  let attrs = if c.class_is_abstract then "abstract" :: attrs else attrs in
+  let text = String.concat " " attrs in
+  let text = if text = "" then "" else "[" ^ text ^ "] " in
+  text
+
 let buffer_of_class_def class_def =
   let buf = B.create 0 in
   (* TODO: final *)
   (* TODO: abstract *)
   (* TODO: attributes *)
   B.add_string buf "\n.class ";
+  B.add_string buf (class_special_attributes class_def);
   B.add_string buf class_def.class_name;
   B.add_string buf " {\n";
   (* TODO: members *)

@@ -131,7 +131,15 @@ let from_class : Nast.class_ -> Hhbc_ast.class_def =
   (* TODO Deal with the body of the class *)
   fun nast_class ->
   let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
-  { H.class_name }
+  let class_is_trait = nast_class.N.c_kind = Ast.Ctrait in
+  let class_is_enum = nast_class.N.c_kind = Ast.Cenum in
+  let class_is_interface = nast_class.N.c_kind = Ast.Cinterface in
+  let class_is_abstract = nast_class.N.c_kind = Ast.Cabstract in
+  let class_is_final =
+    nast_class.N.c_final || class_is_trait || class_is_enum in
+
+  { H.class_name; class_is_final; class_is_trait; class_is_enum;
+    class_is_interface; class_is_abstract }
 
 let from_classes nast_classes =
   Core.List.map nast_classes from_class

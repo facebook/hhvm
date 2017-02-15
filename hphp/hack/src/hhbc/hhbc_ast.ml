@@ -468,7 +468,12 @@ type fun_def = {
 }
 
 type class_def = {
-  class_name      : Litstr.id;
+  class_name         : Litstr.id;
+  class_is_final     : bool;
+  class_is_abstract  : bool;
+  class_is_interface : bool;
+  class_is_trait     : bool;
+  class_is_enum      : bool;
   (* TODO declarations *)
 }
 

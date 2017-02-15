@@ -1593,7 +1593,8 @@ bool HHVM_FUNCTION(copy,
     }
 
     if (!HHVM_FN(stream_copy_to_stream)(sfile.toResource(),
-                                        dfile.toResource()).toBoolean()) {
+                                        dfile.toResource()).toBoolean() &&
+        HHVM_FN(filesize)(source).toBoolean()) {
       return false;
     }
 

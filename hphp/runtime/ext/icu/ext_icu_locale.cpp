@@ -52,6 +52,12 @@ namespace HPHP { namespace Intl {
  *  * except for variant */
 #define isTerminator(a)  ((a==0)||(a=='.')||(a=='@'))
 
+#define CHECK_LOCALELEN_OR_RETURN(locale_name, ret) \
+  if (locale_name.size() > MAX_LOCALE_LEN) { \
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "locale string too long"); \
+    return ret; \
+  }
+
 static std::vector<std::string> g_grandfathered = {
   "art-lojban", "i-klingon", "i-lux", "i-navajo", "no-bok", "no-nyn",
   "cel-gaulish", "en-GB-oed", "i-ami", "i-bnn", "i-default", "i-enochian",
@@ -144,6 +150,7 @@ static int singleton_pos(const String& str) {
 static Variant get_icu_value(const String &locale, LocaleTag tag,
                              bool fromParseLocale = false) {
   String locale_name(locale);
+  CHECK_LOCALELEN_OR_RETURN(locale_name, false);
   if (tag != LOC_CANONICALIZE) {
     if (getGrandfatheredOffset(locale) >= 0) {
       if (tag == LOC_LANG) {
@@ -209,6 +216,7 @@ static Variant get_icu_display_value(const String& locale,
                                      const String& disp_locale,
                                      LocaleTag tag) {
   String locname(locale);
+  CHECK_LOCALELEN_OR_RETURN(locname, false);
   if (tag != LOC_DISPLAY) {
     int ofs = getGrandfatheredOffset(locale);
     if (ofs >= 0) {
@@ -574,6 +582,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
                                  const String& locale,
                                  bool canonicalize, const String& def) {
   String locname(localeOrDefault(locale), CopyString);
+  CHECK_LOCALELEN_OR_RETURN(locale, def);
   std::vector<std::pair<String,String>> cur_arr;
   for (ArrayIter iter(langtag); iter; ++iter) {
     auto val = iter.second();
@@ -731,7 +740,7 @@ void IntlExtension::initLocale() {
   HHVM_RC_INT_SAME(ULOC_VALID_LOCALE);
   HHVM_RCC_INT(Locale, VALID_LOCALE, ULOC_VALID_LOCALE);
 
-  HHVM_RC_INT(INTL_MAX_LOCALE_LEN, 80);
+  HHVM_RC_INT(INTL_MAX_LOCALE_LEN, MAX_LOCALE_LEN);
 
   loadSystemlib("icu_locale");
 }

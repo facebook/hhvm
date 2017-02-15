@@ -302,7 +302,10 @@ module WithParser(Parser : ParserType) = struct
 
   let assert_token parser kind =
     let (parser, token) = next_token parser in
-    assert ((Token.kind token) = kind);
+    if (Token.kind token) <> kind then
+      failwith (Printf.sprintf "Expected token %s but got %s\n"
+        (TokenKind.to_string kind)
+        (TokenKind.to_string (Token.kind token)));
     (parser, make_token token)
 
   (* This helper method parses a list of the form

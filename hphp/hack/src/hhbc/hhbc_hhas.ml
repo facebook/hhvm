@@ -161,15 +161,27 @@ let buffer_of_fun_def fun_def =
   B.add_string buf "}\n";
   buf
 
+let method_special_attributes m =
+  let attrs = [] in
+  let attrs = if m.method_is_static then "static" :: attrs else attrs in
+  let attrs = if m.method_is_final then "final" :: attrs else attrs in
+  let attrs = if m.method_is_abstract then "abstract" :: attrs else attrs in
+  let attrs = if m.method_is_public then "public" :: attrs else attrs in
+  let attrs = if m.method_is_protected then "protected" :: attrs else attrs in
+  let attrs = if m.method_is_private then "private" :: attrs else attrs in
+  let text = String.concat " " attrs in
+  let text = if text = "" then "" else "[" ^ text ^ "] " in
+  text
+
 let buffer_of_method_def method_def =
   let buf = B.create 0 in
   (* TODO: attributes *)
   B.add_string buf "\n  .method ";
-  (* TODO: public *)
-  (* TODO: static *)
+  B.add_string buf (method_special_attributes method_def);
   B.add_string buf method_def.method_name;
   (* TODO: generic type parameters *)
   (* TODO: parameters *)
+  (* TODO: where clause *)
   B.add_string buf "()";
   (* TODO: return type *)
   B.add_string buf " {\n";

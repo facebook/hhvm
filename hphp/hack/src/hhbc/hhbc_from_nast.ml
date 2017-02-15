@@ -130,6 +130,12 @@ let from_functions nast_functions =
 let from_method : Nast.method_ -> Hhbc_ast.method_def option =
   fun nast_method ->
   let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
+  let method_is_abstract = nast_method.Nast.m_abstract in
+  let method_is_final = nast_method.Nast.m_final in
+  let method_is_private = nast_method.Nast.m_visibility = Nast.Private in
+  let method_is_protected = nast_method.Nast.m_visibility = Nast.Protected in
+  let method_is_public = nast_method.Nast.m_visibility = Nast.Public in
+  let method_is_static = false in (* TODO static functions *)
   match nast_method.N.m_body with
   | N.NamedBody _ ->
     None
@@ -141,7 +147,9 @@ let from_method : Nast.method_ -> Hhbc_ast.method_def option =
       instr (H.IContFlow H.RetC)
     ] in
     let method_body = instr_seq_to_list body_instrs in
-    let m = { H.method_name; H.method_body } in
+    let m = { H.method_name; method_body; method_is_abstract; method_is_final;
+       method_is_private; method_is_protected; method_is_public;
+       method_is_static } in
     Some m
 
 let from_methods nast_methods =

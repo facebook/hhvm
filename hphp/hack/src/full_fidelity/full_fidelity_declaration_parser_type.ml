@@ -16,5 +16,7 @@ module type DeclarationParserType = sig
   val parse_function : t -> t * Full_fidelity_minimal_syntax.t
   val parse_parameter_list_opt : t -> t * Full_fidelity_minimal_syntax.t *
     Full_fidelity_minimal_syntax.t * Full_fidelity_minimal_syntax.t
-
+  val parse_classish_declaration : t ->
+    Full_fidelity_minimal_syntax.t ->
+    t * Full_fidelity_minimal_syntax.t
 end

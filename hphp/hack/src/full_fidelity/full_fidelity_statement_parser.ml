@@ -30,6 +30,11 @@ module WithExpressionAndDeclAndTypeParser
   let rec parse_statement parser =
     match peek_token_kind parser with
     | Function -> parse_possible_php_function parser
+    | Abstract
+    | Final
+    | Interface
+    | Trait
+    | Class -> parse_php_class parser
     | Fallthrough -> parse_possible_erroneous_fallthrough parser
     | For -> parse_for_statement parser
     | Foreach -> parse_foreach_statement parser
@@ -63,13 +68,7 @@ module WithExpressionAndDeclAndTypeParser
     | _ -> parse_expression_statement parser
 
   and parse_php_function parser =
-    let decl_parser = DeclParser.make parser.lexer parser.errors in
-    let (decl_parser, node) =
-      DeclParser.parse_function decl_parser in
-    let lexer = DeclParser.lexer decl_parser in
-    let errors = DeclParser.errors decl_parser in
-    let parser = make lexer errors in
-    (parser, node)
+    use_decl_parser DeclParser.parse_function parser
 
   and parse_possible_php_function parser =
     (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
@@ -88,6 +87,23 @@ module WithExpressionAndDeclAndTypeParser
       parse_expression_statement parser
     else
       parse_php_function parser
+
+  and parse_php_class parser =
+    (* PHP allows classes nested inside of functions, but hack does not *)
+    (* TODO check for hack error: no classish declarations inside functions *)
+    let f decl_parser =
+      DeclParser.parse_classish_declaration decl_parser (make_missing ()) in
+    use_decl_parser f parser
+
+  and use_decl_parser
+      (f : DeclParser.t -> DeclParser.t * Full_fidelity_minimal_syntax.t)
+      parser =
+    let decl_parser = DeclParser.make parser.lexer parser.errors in
+    let decl_parser, node = f decl_parser in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let parser = make lexer errors in
+    parser, node
 
   (* Helper: parses ( expr ) *)
   and parse_paren_expr parser =

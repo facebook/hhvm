@@ -1146,14 +1146,15 @@ let is_next_xhp_class_name lexer =
   is_xhp_class_name lexer
 
 let as_case_insensitive_keyword text =
-  (* Some keywords are case-insensitive in Hack. *)
+  (* Some keywords are case-insensitive in Hack or PHP. *)
   (* TODO: Consider making non-lowercase versions of these keywords errors
      in strict mode. *)
-  (* TODO: Should these be case-insensitive only when we are parsing the
-     interior of an expression? *)
+  (* TODO: Consider making these illegal, period, and code-modding away all
+  non-lower versions in our codebase. *)
   let lower = String.lowercase text in
   match lower with
   | "eval" | "isset" | "unset" | "empty" | "const"
+  | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "true" | "false" | "null" | "array" -> lower
   | _ -> text
 

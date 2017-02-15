@@ -579,6 +579,11 @@ inline const Func::FPIEntVec& Func::fpitab() const {
   return shared()->m_fpitab;
 }
 
+inline const FPIEnt* Func::findFPI(Offset o) const {
+  assertx(o >= base() && o < past());
+  return findFPI(fpitab().begin(), fpitab().end(), o);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 

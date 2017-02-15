@@ -477,6 +477,5 @@ type hhas_prog = {
   hhas_classes : class_def list;
 }
 
-let make hhas_fun =
-  let hhas_classes = [] in (* TODO: Pass these in *)
+let make hhas_fun hhas_classes =
   { hhas_fun; hhas_classes }

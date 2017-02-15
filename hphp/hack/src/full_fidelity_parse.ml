@@ -165,25 +165,29 @@ let parse_file filename =
   let { Parser_hack.ast; _} = Parser_hack.from_file options path in
   Ast_utils.get_defs ast
 
-let name_functions filename (funs, classes, typedefs, consts) =
+let type_file filename (funs, classes, typedefs, consts) =
   NamingGlobal.make_env ParserOptions.default ~funs ~classes ~typedefs ~consts;
   let path = Relative_path.create Relative_path.Dummy filename in
-  let f_filter_map (_, fun_) =
+  let name_function (_, fun_) =
     Typing_check_service.type_fun TypecheckerOptions.default path fun_ in
-  Core.List.filter_map funs f_filter_map
+  let named_funs = Core.List.filter_map funs name_function in
+  let name_class (_, class_) =
+    Typing_check_service.type_class TypecheckerOptions.default path class_ in
+  let named_classes = Core.List.filter_map classes name_class in
+  let named_typedefs = [] in (* TODO *)
+  let named_consts = [] in (* TODO *)
+  (named_funs, named_classes, named_typedefs, named_consts)
 
-let compile_functions named_functions =
-  let f_filter_map nast_fun =
-    let name_i = Litstr.to_string @@ snd nast_fun.Nast.f_name in
-    Hhbc_from_nast.from_fun_ name_i nast_fun in
-  let compiled_functions = Core.List.filter_map named_functions f_filter_map in
-  let compiled_functions = List.rev compiled_functions in
-  Hhbc_ast.make compiled_functions
+let compile_file (funs, classes, typedefs, consts) =
+  let compiled_functions = Hhbc_from_nast.from_functions funs in
+  let compiled_classes = Hhbc_from_nast.from_classes classes in
+  Hhbc_ast.make compiled_functions compiled_classes
+  (* TODO: typedefs, consts *)
 
 let do_codegen filename =
   let parsed_file = parse_file filename in
-  let named_functions = name_functions filename parsed_file in
-  let hhas_prog = compile_functions named_functions in
+  let named_file = type_file filename parsed_file in
+  let hhas_prog = compile_file named_file in
   Hhbc_hhas.to_string hhas_prog
 
 let handle_file args filename =

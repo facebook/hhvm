@@ -103,8 +103,9 @@ let from_param p = {
 
 let from_params xs = List.map from_param xs
 
-let from_fun_ : Litstr.id -> Nast.fun_ -> Hhbc_ast.fun_def option =
-  fun name_i nast_fun ->
+let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
+  fun nast_fun ->
+  let name_i = Litstr.to_string @@ snd nast_fun.Nast.f_name in
   match nast_fun.N.f_body with
   | N.NamedBody _ ->
     None
@@ -122,3 +123,15 @@ let from_fun_ : Litstr.id -> Nast.fun_ -> Hhbc_ast.fun_def option =
       ; H.f_return_types  = from_params nast_fun.N.f_params;
       }
     )
+
+let from_functions nast_functions =
+  Core.List.filter_map nast_functions from_fun_
+
+let from_class : Nast.class_ -> Hhbc_ast.class_def =
+  (* TODO Deal with the body of the class *)
+  fun nast_class ->
+  let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
+  { H.class_name }
+
+let from_classes nast_classes =
+  Core.List.map nast_classes from_class

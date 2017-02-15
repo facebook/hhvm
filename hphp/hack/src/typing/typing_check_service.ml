@@ -43,8 +43,9 @@ let type_class opts fn x =
   match Parser_heap.find_class_in_file ~full:true opts fn x with
   | Some cls ->
     let class_ = Naming.class_ opts cls in
-    ignore (Typing.class_def opts class_)
-  | None -> ()
+    ignore (Typing.class_def opts class_);
+    Some class_
+  | None -> None
 
 let check_typedef opts fn x =
   match Parser_heap.find_typedef_in_file ~full:true opts fn x with
@@ -80,9 +81,11 @@ let check_file opts (errors, failed, decl_failed) (fn, file_infos) =
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
   let ignore_type_fun opts fn name =
     ignore(type_fun opts fn name) in
+  let ignore_type_class opts fn name =
+    ignore(type_class opts fn name) in
   let errors', (), err_flags = Errors.do_ begin fun () ->
     SSet.iter (ignore_type_fun opts fn) n_funs;
-    SSet.iter (type_class opts fn) n_classes;
+    SSet.iter (ignore_type_class opts fn) n_classes;
     SSet.iter (check_typedef opts fn) n_types;
     SSet.iter (check_const opts fn) n_consts;
   end in

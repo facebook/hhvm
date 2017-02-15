@@ -578,18 +578,21 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       else Printf.printf "No errors\n"
   | Dump_tast -> Printf.printf "no typed AST to dump, yet\n"
   | Hhas_codegen ->
-    let hhas_list: Hhbc_ast.fun_def list =
-      let f_fold fn fileinfo acc = begin
-        let fun_s = Typing_check_utils.get_nast_fun_ opts fn fileinfo in
-        let f_filter_map nast_fun =
-          let name_i = Litstr.to_string @@ snd nast_fun.Nast.f_name in
-          Hhbc_from_nast.from_fun_ name_i nast_fun in
-        List.filter_map fun_s f_filter_map
-      end in
-      Relative_path.Map.fold files_info ~f:f_fold ~init:[] in
-    let hhas_list = List.rev hhas_list in
-    let hhas_prog = Hhbc_ast.make hhas_list in
-    let hhas_text = Hhbc_hhas.to_string hhas_prog in
+    let f_fold fn fileinfo text = begin
+      let hhas_text = if (Relative_path.S.to_string fn) = "|builtins.hhi" then
+        ""
+      else
+        let (named_functions, named_classes, _named_typedefs, _named_consts) =
+          Typing_check_utils.get_nast_from_fileinfo opts fn fileinfo in
+        let compiled_funs = Hhbc_from_nast.from_functions named_functions in
+        let compiled_classes = Hhbc_from_nast.from_classes named_classes in
+        let _compiled_typedefs = [] in (* TODO *)
+        let _compiled_consts = [] in (* TODO *)
+        let hhas_prog = Hhbc_ast.make compiled_funs compiled_classes in
+        Hhbc_hhas.to_string hhas_prog in
+      text ^ hhas_text
+    end in
+    let hhas_text = Relative_path.Map.fold files_info ~f:f_fold ~init:"" in
     Printf.printf "%s" hhas_text
 
 (*****************************************************************************)

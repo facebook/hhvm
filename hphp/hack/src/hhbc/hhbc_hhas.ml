@@ -160,13 +160,41 @@ let buffer_of_fun_def fun_def =
   B.add_string buf "}\n";
   buf
 
+let buffer_of_class_def class_def =
+  let buf = B.create 0 in
+  (* TODO: final *)
+  (* TODO: abstract *)
+  (* TODO: attributes *)
+  B.add_string buf "\n.class ";
+  B.add_string buf class_def.class_name;
+  B.add_string buf " {\n";
+  (* TODO: members *)
+  (* TODO: If there is no ctor, generate one *)
+  B.add_string buf "}\n";
+  buf
+
 let buffer_of_hhas_prog prog =
   let buf = B.create 0 in
   List.iter
     (fun x -> B.add_buffer buf (buffer_of_fun_def x);) prog.hhas_fun;
+  List.iter
+    (fun x -> B.add_buffer buf (buffer_of_class_def x);) prog.hhas_classes;
   buf
 
-let buffer_of_top_level () =
+let buffer_of_defcls classes =
+  let buf = B.create 0 in
+  let rec aux c count =
+    match c with
+    | [] -> ()
+    | _ :: t ->
+      begin
+        B.add_string buf (Printf.sprintf "  DefCls %n\n" count);
+        aux t (count + 1)
+      end in
+  aux classes 0;
+  buf
+
+let buffer_of_top_level hhas_prog =
   let main_stmts =
     [ ILitConst (Int Int64.one)
     ; IContFlow RetC
@@ -174,12 +202,13 @@ let buffer_of_top_level () =
   let fun_name = ".main {\n" in
   let buf = B.create 0 in
   B.add_string buf fun_name;
+  B.add_buffer buf (buffer_of_defcls hhas_prog.hhas_classes);
   B.add_buffer buf (buffer_of_instruction_list main_stmts);
   B.add_string buf "}\n";
   buf
 
 let to_string hhas_prog =
-  let final_buf = buffer_of_top_level () in
+  let final_buf = buffer_of_top_level hhas_prog in
   B.add_buffer final_buf @@ buffer_of_hhas_prog hhas_prog;
   B.add_string final_buf "\n";
   B.contents final_buf

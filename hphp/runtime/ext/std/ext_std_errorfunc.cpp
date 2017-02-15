@@ -227,7 +227,12 @@ bool HHVM_FUNCTION(restore_exception_handler) {
 
 Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
                                          int error_types /* = k_E_ALL */) {
-  return g_context->pushUserErrorHandler(error_handler, error_types);
+  if (!is_null(error_handler)) {
+    return g_context->pushUserErrorHandler(error_handler, error_types);
+  } else {
+    g_context->clearUserErrorHandlers();
+    return init_null_variant;
+  }
 }
 
 Variant HHVM_FUNCTION(set_exception_handler, const Variant& exception_handler) {

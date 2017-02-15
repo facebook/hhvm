@@ -572,6 +572,10 @@ void ExecutionContext::popUserErrorHandler() {
   }
 }
 
+void ExecutionContext::clearUserErrorHandlers() {
+  while (!m_userErrorHandlers.empty()) m_userErrorHandlers.pop_back();
+}
+
 void ExecutionContext::popUserExceptionHandler() {
   if (!m_userExceptionHandlers.empty()) {
     m_userExceptionHandlers.pop_back();

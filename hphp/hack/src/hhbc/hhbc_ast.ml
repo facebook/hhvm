@@ -457,14 +457,36 @@ type instruct =
   | IContFlow of instruct_control_flow
   | ICall of instruct_call
 
-type fun_return_type = {
-  param_name : Litstr.id;
+type type_constraint_flag =
+  | Nullable
+  | HHType
+  | ExtendedHint
+  | TypeVar
+  | Soft
+  | TypeConstant
+
+(* A type constraint is just a name and flags *)
+type type_constraint = {
+  tc_flags : type_constraint_flag list;
+  tc_name : string option;
+}
+
+(* Type info has additional optional user type *)
+type type_info = {
+  ti_user_type : string option;
+  ti_type_constraint : type_constraint;
+}
+
+type param = {
+  param_name      : Litstr.id;
+  param_type_info : type_info option;
 }
 
 type fun_def = {
   f_name          : Litstr.id;
   f_body          : instruct list;
-  f_return_types  : fun_return_type list;
+  f_params        : param list;
+  f_return_type   : type_info option;
 }
 
 type method_def = {

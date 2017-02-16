@@ -8,6 +8,8 @@
  *
 *)
 
+open Core
+
 module A = Ast
 module N = Nast
 module H = Hhbc_ast
@@ -86,7 +88,7 @@ let rec from_expr expr =
   | _ -> empty
 
 and from_exprs exprs =
-  gather (List.map from_expr exprs)
+  gather (List.map exprs from_expr)
 
 and from_stmt st =
   match st with
@@ -95,13 +97,111 @@ and from_stmt st =
   | _ -> empty
 
 and from_stmts stl =
-  gather (List.map from_stmt stl)
+  gather (List.map stl from_stmt)
 
-let from_param p = {
+let fmt_prim x =
+  match x with
+  | N.Tvoid   -> "HH\\void"
+  | N.Tint    -> "HH\\int"
+  | N.Tbool   -> "HH\\bool"
+  | N.Tfloat  -> "HH\\float"
+  | N.Tstring -> "HH\\string"
+  | N.Tnum    -> "HH\\num"
+  | N.Tresource -> "HH\\resource"
+  | N.Tarraykey -> "HH\\arraykey"
+  | N.Tnoreturn -> "HH\\noreturn"
+
+(* TODO *)
+let fmt_name s = s
+
+let extract_shape_fields smap =
+  let get_pos =
+    function Nast.SFlit (p, _) | Nast.SFclass_const ((p, _), _) -> p in
+  List.sort (fun (k1, _) (k2, _) -> Pos.compare (get_pos k1) (get_pos k2))
+    (Nast.ShapeMap.elements smap)
+
+(* Produce the "userType" bit of the annotation *)
+let rec fmt_hint (_, h) =
+  match h with
+  | N.Hany -> ""
+  | N.Hmixed -> "HH\\mixed"
+  | N.Hthis -> "HH\\this"
+  | N.Hprim prim -> fmt_prim prim
+  | N.Habstr s -> fmt_name s
+
+  | N.Happly ((_, s), []) -> fmt_name s
+  | N.Happly ((_, s), args) ->
+    fmt_name s ^ "<" ^ String.concat ", " (List.map args fmt_hint) ^ ">"
+
+  | N.Hfun (args, _, ret) ->
+    "(function (" ^ String.concat ", " (List.map args fmt_hint) ^ "): " ^
+      fmt_hint ret ^ ")"
+
+  | N.Htuple hs ->
+    "(" ^ String.concat ", " (List.map hs fmt_hint) ^ ")"
+
+  | N.Haccess (h, accesses) ->
+    fmt_hint h ^ "::" ^ String.concat "::" (List.map accesses snd)
+
+  | N.Hoption t -> "?" ^ fmt_hint t
+
+  | N.Harray (None, None) -> "array"
+  | N.Harray (Some h, None) -> "array<" ^ fmt_hint h ^ ">"
+  | N.Harray (Some h1, Some h2) ->
+    "array<" ^ fmt_hint h1 ^ ", " ^ fmt_hint h2 ^ ">"
+  | N.Harray _ -> failwith "bogus array"
+    (* We have to say Nast.Hshape instead of N.Hshape because otherwise
+     * OCaml 4.01 reports a type error when trying to call
+     * C.extract_shape_fields. asdf. *)
+  | Nast.Hshape smap ->
+    let fmt_field = function
+      | N.SFlit (_, s) -> "'" ^ s ^ "'"
+      | N.SFclass_const ((_, s1), (_, s2)) -> fmt_name s1 ^ "::" ^ s2
+    in
+    let shape_fields =
+      List.map ~f:(fun (k, h) -> fmt_field k ^ "=>" ^ fmt_hint h)
+        (extract_shape_fields smap) in
+    "HH\\shape(" ^ String.concat ", " shape_fields ^ ")"
+
+open Hhbc_ast
+
+let rec hint_to_type_constraint tparams (_, h) =
+match h with
+| N.Hany | N.Hmixed | N.Hfun (_, _, _) | N.Hthis
+| N.Hprim N.Tvoid ->
+  { tc_name = None; tc_flags = [] }
+
+| N.Hprim prim ->
+  { tc_name = Some (fmt_prim prim); tc_flags = [HHType] }
+
+| N.Haccess (_, _) ->
+  { tc_name = Some ""; tc_flags = [HHType; ExtendedHint; TypeConstant] }
+
+(* Need to differentiate between type params and classes *)
+| N.Habstr s | N.Happly ((_, s), _) ->
+  if List.mem tparams s then
+    { tc_name = Some ""; tc_flags = [HHType; ExtendedHint; TypeVar] }
+  else
+    { tc_name = Some s; tc_flags = [HHType] }
+
+(* Shapes and tuples are just arrays *)
+| N.Harray (_, _) | N.Hshape _ |  N.Htuple _ ->
+  { tc_name = Some "array"; tc_flags = [HHType] }
+
+| N.Hoption t ->
+  let { tc_name; tc_flags } = hint_to_type_constraint tparams t in
+  { tc_name = tc_name;
+    tc_flags = List.dedup ([Nullable; HHType; ExtendedHint] @ tc_flags) }
+
+let hint_to_type_info tparams h =
+  { ti_user_type = Some (fmt_hint h);
+    ti_type_constraint = hint_to_type_constraint tparams h;
+  }
+
+let from_param tparams p = {
   H.param_name = p.N.param_name;
+  H.param_type_info = Option.map p.N.param_hint (hint_to_type_info tparams);
 }
-
-let from_params xs = List.map from_param xs
 
 let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
   fun nast_fun ->
@@ -109,8 +209,10 @@ let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
   match nast_fun.N.f_body with
   | N.NamedBody _ ->
     None
+
   | N.UnnamedBody b ->
     let stmt_instrs = from_stmts b.N.fub_ast in
+    let tparams = List.map nast_fun.N.f_tparams (fun (_, (_, s), _) -> s) in
     let body_instrs = gather [
       stmt_instrs;
       instr (H.ILitConst H.Null);
@@ -120,7 +222,9 @@ let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
     (
       { H.f_name          = name_i
       ; H.f_body          = instr_seq_to_list body_instrs
-      ; H.f_return_types  = from_params nast_fun.N.f_params;
+      ; H.f_params        = List.map nast_fun.N.f_params (from_param tparams)
+      ; H.f_return_type
+          = Option.map nast_fun.N.f_ret (hint_to_type_info tparams)
       }
     )
 

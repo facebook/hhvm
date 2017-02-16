@@ -141,21 +141,47 @@ let buffer_of_instruction_list prefix instructs =
     acc in
   List.fold_left f_fold lpad instructs
 
-let buffer_of_return_types return_types =
-  let buf = B.create 0 in
-  B.add_string buf "<";
-  (match return_types with
-  | [] -> B.add_string buf "\"HH\\void\" N  "
-  | _  -> B.add_string buf "we only support functions returning void for the moment");
-  B.add_string buf "> ";
-  buf
+let string_of_flag f =
+  match f with
+  | Nullable -> "nullable"
+  | HHType -> "hh_type"
+  | ExtendedHint -> "extended_hint"
+  | TypeVar -> "type_var"
+  | Soft -> "soft"
+  | TypeConstant -> "type_constant"
+
+
+let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
+
+let quote_str_option s =
+  match s with
+  | None -> "N"
+  | Some s -> quote_str s
+
+let string_of_type_info ti =
+    "<" ^ quote_str_option ti.ti_user_type ^ " "
+        ^ quote_str_option ti.ti_type_constraint.tc_name ^ " "
+        ^ String.concat " "
+            (List.map string_of_flag ti.ti_type_constraint.tc_flags)
+    ^ " >"
+
+let string_of_type_info_option tio =
+match tio with
+| None -> ""
+| Some ti -> string_of_type_info ti ^ " "
+
+let string_of_param p =
+  string_of_type_info_option p.param_type_info ^ p.param_name
+
+let string_of_params ps =
+  "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
 
 let buffer_of_fun_def fun_def =
   let buf = B.create 0 in
   B.add_string buf "\n.function ";
-  B.add_buffer buf @@ buffer_of_return_types fun_def.f_return_types;
+  B.add_string buf (string_of_type_info_option fun_def.f_return_type);
   B.add_string buf fun_def.f_name;
-  B.add_string buf "()";
+  B.add_string buf (string_of_params fun_def.f_params);
   B.add_string buf " {\n";
   B.add_buffer buf (buffer_of_instruction_list two_spaces fun_def.f_body);
   B.add_string buf "}\n";

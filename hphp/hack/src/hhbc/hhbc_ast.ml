@@ -167,7 +167,7 @@ type instruct_get =
   | AGetC
   | AGetL of local_id
 
-type operand =
+type istype_op =
   | OpNull
   | OpBool
   | OpInt
@@ -177,7 +177,7 @@ type operand =
   | OpObj
   | OpScalar (* Int or Dbl or Str or Bool *)
 
-type instuct_isset_emty_type_querying =
+type instruct_isset_emty_type_querying =
   | IssetC
   | IssetL of local_id
   | IssetN
@@ -187,22 +187,53 @@ type instuct_isset_emty_type_querying =
   | EmptyN
   | EmptyG
   | EmptyS
-  | IsTypeC of operand
-  | IsTypeL of local_id * operand
+  | IsTypeC of istype_op
+  | IsTypeL of local_id * istype_op
+
+type eq_op =
+  | PlusEqual
+  | MinusEqual
+  | MulEqual
+  | ConcatEqual
+  | DivEqual
+  | PowEqual
+  | ModEqual
+  | AndEqual
+  | OrEqual
+  | XorEqual
+  | SlEqual
+  | SrEqual
+  | PlusEqualO
+  | MinusEqualO
+  | MulEqualO
+
+type incdec_op =
+  | PreInc
+  | PostInc
+  | PreDec
+  | PostDec
+  | PreIncO
+  | PostIncO
+  | PreDecO
+  | PostDecO
+
+type initprop_op =
+  | Static
+  | NonStatic
 
 type instruct_mutator =
   | SetL of local_id
   | SetN
   | SetG
   | SetS
-  | SetOpL of local_id * operand
-  | SetOpN of operand
-  | SetOpG of operand
-  | SetOpS of operand
-  | IncDecl of local_id * operand
-  | IncDecN of operand
-  | IncDecG of operand
-  | IncDecS of operand
+  | SetOpL of local_id * eq_op
+  | SetOpN of eq_op
+  | SetOpG of eq_op
+  | SetOpS of eq_op
+  | IncDecL of local_id * incdec_op
+  | IncDecN of incdec_op
+  | IncDecG of incdec_op
+  | IncDecS of incdec_op
   | BindL of local_id
   | BindN
   | BindG
@@ -210,7 +241,7 @@ type instruct_mutator =
   | UnsetN
   | UnsetG
   | CheckProp of property_name
-  | InitProp of property_name * operand
+  | InitProp of property_name * initprop_op
 
 type instruct_call =
   | FPushFunc of num_params
@@ -299,18 +330,18 @@ type op_member_final =
   | EmptyElemL of local_id
   | SetElemC
   | SetElemL of local_id
-  | SetOpElemC of operand
-  | SetOpElemL of operand * local_id
-  | IncDecElemC of operand
-  | IncDecElemL of operand * local_id
+  | SetOpElemC of eq_op
+  | SetOpElemL of eq_op * local_id
+  | IncDecElemC of incdec_op
+  | IncDecElemL of incdec_op * local_id
   | BindElemC
   | BindElemL of local_id
   | UnsetElemC
   | UnsetElemL of local_id
   | VGetNewElem
   | SetNewElem
-  | SetOpNewElem of operand
-  | IncDecNewElem of operand
+  | SetOpNewElem of eq_op
+  | IncDecNewElem of incdec_op
   | BindNewElem
   | CGetPropC
   | CGetPropL of local_id
@@ -322,10 +353,10 @@ type op_member_final =
   | EmptyPropL of local_id
   | SetPropC
   | SetPropL of local_id
-  | SetOpPropC of operand
-  | SetOpPropL of operand * local_id
-  | IncDecPropC of operand
-  | IncDecPropL of operand * local_id
+  | SetOpPropC of eq_op
+  | SetOpPropL of eq_op * local_id
+  | IncDecPropC of incdec_op
+  | IncDecPropL of incdec_op * local_id
   | BindPropC
   | BindPropL of local_id
   | UnsetPropC
@@ -353,8 +384,8 @@ type op_final =
   | VGetM of num_params * member_key
   | FPassM of param_id * num_params * member_key
   | SetM of num_params * member_key
-  | IncDecM of num_params * operand * member_key
-  | SetOpM of num_params  * operand * member_key
+  | IncDecM of num_params * incdec_op * member_key
+  | SetOpM of num_params  * eq_op * member_key
   | BindM of num_params * member_key
   | UnsetM of num_params * member_key
   | SetWithRefLML of local_id * local_id
@@ -460,6 +491,7 @@ type instruct =
   | ICall of instruct_call
   | IMisc of instruct_misc
   | IGet of instruct_get
+  | IMutator of instruct_mutator
 
 type type_constraint_flag =
   | Nullable

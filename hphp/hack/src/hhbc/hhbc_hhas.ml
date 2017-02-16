@@ -115,6 +115,60 @@ let string_of_get x =
   | AGetC -> "AGetC"
   | AGetL id -> "AGetL " ^ string_of_local_id id
 
+let string_of_eq_op op =
+  match op with
+  | PlusEqual -> "PlusEqual"
+  | MinusEqual -> "MinusEqual"
+  | MulEqual -> "MulEqual"
+  | ConcatEqual -> "ConcatEqual"
+  | DivEqual -> "DivEqual"
+  | PowEqual -> "PowEqual"
+  | ModEqual -> "ModEqual"
+  | AndEqual -> "AndEqual"
+  | OrEqual -> "OrEqual"
+  | XorEqual -> "XorEqual"
+  | SlEqual -> "SlEqual"
+  | SrEqual -> "SrEqual"
+  | PlusEqualO -> "PlusEqualO"
+  | MinusEqualO -> "MinusEqualO"
+  | MulEqualO -> "MulEqualO"
+
+let string_of_incdec_op op =
+  match op with
+  | PreInc -> "PreInc"
+  | PostInc -> "PostInc"
+  | PreDec -> "PreDec"
+  | PostDec -> "PostDec"
+  | PreIncO -> "PreIncO"
+  | PostIncO -> "PostIncO"
+  | PreDecO -> "PreDecO"
+  | PostDecO -> "PostDecO"
+
+let string_of_mutator x =
+  match x with
+  | SetL id -> "SetL " ^ string_of_local_id id
+  | SetN -> "SetN"
+  | SetG -> "SetG"
+  | SetS -> "SetS"
+  | SetOpL (id, op) ->
+    "SetOpL " ^ string_of_local_id id ^ " " ^ string_of_eq_op op
+  | SetOpN op -> "SetOpN " ^ string_of_eq_op op
+  | SetOpG op -> "SetOpG " ^ string_of_eq_op op
+  | SetOpS op -> "SetOpS " ^ string_of_eq_op op
+  | IncDecL (id, op) ->
+    "IncDecL " ^ string_of_local_id id ^ " " ^ string_of_incdec_op op
+  | IncDecN op -> "IncDecN " ^ string_of_incdec_op op
+  | IncDecG op -> "IncDecG " ^ string_of_incdec_op op
+  | IncDecS op -> "IncDecS " ^ string_of_incdec_op op
+  | BindL id -> "BindL " ^ string_of_local_id id
+  | BindN -> "BindN"
+  | BindG -> "BindG"
+  | BindS -> "BindS"
+  | UnsetN -> "UnsetN"
+  | UnsetG -> "UnsetG"
+  | CheckProp _ -> failwith "NYI"
+  | InitProp _ -> failwith "NYI"
+
 let string_of_control_flow instruction =
   match instruction with
     | RetC -> "RetC"
@@ -127,8 +181,8 @@ let string_of_call instruction =
       "FPushFuncD "
       ^ string_of_int n_params
       ^ " \"" ^ litstr ^ "\""
-    | FCall param_id -> "FCall " ^ param_id
-    | _ -> failwith "instruct_call Not Implemented"
+  | FCall param_id -> "FCall " ^ param_id
+  | _ -> failwith "instruct_call Not Implemented"
 
 let string_of_misc instruction =
   match instruction with
@@ -148,6 +202,7 @@ let add_instruction_list buffer prefix instructions =
       | ICall     i -> string_of_call i
       | IMisc     i -> string_of_misc i
       | IGet      i -> string_of_get i
+      | IMutator  i -> string_of_mutator i
     );
     B.add_string buffer "\n" in
   List.iter process_instr instructions
@@ -163,6 +218,8 @@ let string_of_flag f =
 
 let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 
+(* HHVM uses `N` to denote absence of type information. Otherwise the type
+ * is a quoted string *)
 let quote_str_option s =
   match s with
   | None -> "N"
@@ -234,6 +291,7 @@ let class_special_attributes c =
 
 let add_class_def buf class_def =
   (* TODO: user attributes *)
+  (* TODO: attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf class_def.class_name;
@@ -250,8 +308,9 @@ let add_prog buf prog =
   List.iter (add_class_def buf) prog.hhas_classes
 
 let add_defcls buf classes =
-  Core.List.iteri classes
+  List.iteri
     (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
+    classes
 
 let add_top_level buf hhas_prog =
   let main_stmts =

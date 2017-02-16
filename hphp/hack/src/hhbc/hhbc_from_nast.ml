@@ -69,6 +69,23 @@ let from_binop op =
   | A.Xor -> instr (H.IOp H.BitXor)
   | A.Eq _ -> failwith "= NYI"
 
+let binop_to_eqop op =
+  match op with
+  | A.Plus -> H.PlusEqualO
+  | A.Minus -> H.MinusEqualO
+  | A.Star -> H.MulEqualO
+  | A.Slash -> H.DivEqual
+  | A.Starstar -> H.PowEqual
+  | A.Amp -> H.AndEqual
+  | A.Bar -> H.OrEqual
+  | A.Xor -> H.XorEqual
+  | A.Ltlt -> H.SlEqual
+  | A.Gtgt -> H.SrEqual
+  | A.Percent -> H.ModEqual
+  | A.Dot -> H.ConcatEqual
+  | _ -> failwith "Invalid =op"
+
+
 let rec from_expr expr =
   match snd expr with
   | A.String (_, litstr) ->
@@ -80,7 +97,9 @@ let rec from_expr expr =
   | A.False -> instr H.(ILitConst False)
   | A.True -> instr H.(ILitConst True)
   | A.Lvar (_, x) -> instr H.(IGet (CGetL (Local_named x)))
-  | A.Binop(op, e1, e2) ->
+  | A.Binop (A.Eq obop, e1, e2) ->
+    emit_assignment obop e1 e2
+  | A.Binop (op, e1, e2) ->
     gather [from_expr e1; from_expr e2; from_binop op]
   | A.Call ((_, A.Id (_, id)), el, []) when id = "echo" ->
     gather [
@@ -89,6 +108,21 @@ let rec from_expr expr =
     ]
   (* TODO: emit warning *)
   | _ -> empty
+
+(* Emit code for an l-value, returning instructions and the location that
+ * must be set. For now, this is just a local. *)
+and emit_lval (_, expr_) =
+  match expr_ with
+  | A.Lvar id -> empty, H.Local_named (snd id)
+  | _ -> failwith "emit_lval: NYI"
+
+and emit_assignment obop e1 e2 =
+  let instrs1, lval = emit_lval e1 in
+  let instrs2 = from_expr e2 in
+  gather [instrs1; instrs2;
+    match obop with
+    | None -> instr H.(IMutator (SetL lval))
+    | Some bop -> instr H.(IMutator (SetOpL (lval, binop_to_eqop bop)))]
 
 and from_exprs exprs =
   gather (List.map exprs from_expr)
@@ -171,10 +205,7 @@ let rec fmt_hint (_, h) =
   | N.Harray (Some h1, Some h2) ->
     "array<" ^ fmt_hint h1 ^ ", " ^ fmt_hint h2 ^ ">"
   | N.Harray _ -> failwith "bogus array"
-    (* We have to say Nast.Hshape instead of N.Hshape because otherwise
-     * OCaml 4.01 reports a type error when trying to call
-     * C.extract_shape_fields. asdf. *)
-  | Nast.Hshape smap ->
+  | N.Hshape smap ->
     let fmt_field = function
       | N.SFlit (_, s) -> "'" ^ s ^ "'"
       | N.SFclass_const ((_, s1), (_, s2)) -> fmt_name s1 ^ "::" ^ s2
@@ -243,6 +274,23 @@ let emit_method_prolog params =
     then Some (instr (IMisc (VerifyParamType p.param_name)))
     else None))
 
+let from_body tparams params ret b =
+  let tparams = List.map tparams (fun (_, (_, s), _) -> s) in
+  let params = List.map params (from_param tparams) in
+  let return_type_info = Option.map ret
+    (hint_to_type_info ~always_extended:true tparams) in
+  let verify_return = has_type_constraint return_type_info in
+  let stmt_instrs = from_stmts verify_return b.N.fub_ast in
+  let ret_instrs =
+    match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
+    instrs [H.ILitConst H.Null; H.IContFlow H.RetC] in
+  let body_instrs = gather [
+    emit_method_prolog params;
+    stmt_instrs;
+    ret_instrs;
+  ] in
+  body_instrs, params, return_type_info
+
 let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
   fun nast_fun ->
   let name_i = Litstr.to_string @@ snd nast_fun.Nast.f_name in
@@ -251,20 +299,8 @@ let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
     None
 
   | N.UnnamedBody b ->
-    let tparams = List.map nast_fun.N.f_tparams (fun (_, (_, s), _) -> s) in
-    let params = List.map nast_fun.N.f_params (from_param tparams) in
-    let return_type_info = Option.map nast_fun.N.f_ret
-      (hint_to_type_info ~always_extended:true tparams) in
-    let verify_return = has_type_constraint return_type_info in
-    let stmt_instrs = from_stmts verify_return b.N.fub_ast in
-    let ret_instrs =
-      match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
-      instrs [H.ILitConst H.Null; H.IContFlow H.RetC] in
-    let body_instrs = gather [
-      emit_method_prolog params;
-      stmt_instrs;
-      ret_instrs;
-    ] in
+    let body_instrs, params, return_type_info =
+      from_body nast_fun.N.f_tparams nast_fun.N.f_params nast_fun.N.f_ret b in
     Some
     (
       { H.f_name          = name_i
@@ -290,21 +326,9 @@ let from_method : Nast.method_ -> Hhbc_ast.method_def option =
   | N.NamedBody _ ->
     None
   | N.UnnamedBody b ->
-    (* TODO factor out commonality with from_fun *)
-    let tparams = List.map nast_method.N.m_tparams (fun (_, (_, s), _) -> s) in
-    let params = List.map nast_method.N.m_params (from_param tparams) in
-    let return_type_info = Option.map nast_method.N.m_ret
-      (hint_to_type_info ~always_extended:true tparams) in
-    let verify_return = has_type_constraint return_type_info in
-    let stmt_instrs = from_stmts verify_return b.N.fub_ast in
-    let ret_instrs =
-      match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
-      instrs [H.ILitConst H.Null; H.IContFlow H.RetC] in
-    let body_instrs = gather [
-      emit_method_prolog params;
-      stmt_instrs;
-      ret_instrs;
-    ] in
+    let body_instrs, _params, _return_type_info =
+      from_body nast_method.N.m_tparams nast_method.N.m_params
+        nast_method.N.m_ret b in
     let method_body = instr_seq_to_list body_instrs in
     let m = { H.method_name; method_body; method_is_abstract; method_is_final;
        method_is_private; method_is_protected; method_is_public;

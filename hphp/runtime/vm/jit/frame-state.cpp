@@ -1725,7 +1725,7 @@ std::string show(const FrameStateMgr& state) {
   auto funcName = func ? func->fullName() : makeStaticString("null");
 
   return folly::format(
-    "func: {}, spOff: {}{}{}",
+    "func: {}, spOff: {}{}",
     funcName,
     state.irSPOff().offset,
     state.frameMaySpanCall() ? ", frameMaySpanCall" : ""

@@ -317,6 +317,11 @@ let from_method : Nast.method_ -> Hhbc_ast.method_def option =
   fun nast_method ->
   let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
   let method_is_abstract = nast_method.Nast.m_abstract in
+  (* TODO: An abstract method must generate
+.method [protected abstract] <"HH\\void" N  > protected_abstract_method() {
+String "Cannot call abstract method AbstractClass::protected_abstract_method()"
+Fatal RuntimeOmitFrame
+} *)
   let method_is_final = nast_method.Nast.m_final in
   let method_is_private = nast_method.Nast.m_visibility = Nast.Private in
   let method_is_protected = nast_method.Nast.m_visibility = Nast.Protected in
@@ -338,11 +343,31 @@ let from_method : Nast.method_ -> Hhbc_ast.method_def option =
 let from_methods nast_methods =
   Core.List.filter_map nast_methods from_method
 
-let nast_methods_from_class nast_class =
-  let nast_methods = nast_class.N.c_methods @ nast_class.N.c_static_methods in
+let default_constructor =
+  let method_name = "86ctor" in
+  let method_body = instr_seq_to_list (gather [
+    instr (H.ILitConst H.Null);
+    instr (H.IContFlow H.RetC)
+  ]) in
+  let method_is_abstract = false in
+  let method_is_final = false in
+  let method_is_private = false in
+  let method_is_protected = false in
+  let method_is_public = true in
+  let method_is_static = false in
+  { H.method_name; method_body; method_is_abstract; method_is_final;
+     method_is_private; method_is_protected; method_is_public;
+     method_is_static }
+
+let add_constructor nast_class class_methods =
   match nast_class.N.c_constructor with
-  | None -> nast_methods (* TODO: Default ctor *)
-  | Some m -> m :: nast_methods
+  | None -> default_constructor :: class_methods
+  | Some nast_ctor ->
+    begin
+      match from_method nast_ctor with
+      | None -> class_methods
+      | Some m -> m :: class_methods
+    end
 
 let from_class : Nast.class_ -> Hhbc_ast.class_def =
   (* TODO extends *)
@@ -358,8 +383,10 @@ let from_class : Nast.class_ -> Hhbc_ast.class_def =
   let class_is_abstract = nast_class.N.c_kind = Ast.Cabstract in
   let class_is_final =
     nast_class.N.c_final || class_is_trait || class_is_enum in
-  let nast_methods = nast_methods_from_class nast_class in
+  let nast_methods = nast_class.N.c_methods @ nast_class.N.c_static_methods in
   let class_methods = from_methods nast_methods in
+  let class_methods = add_constructor nast_class class_methods in
+
   { H.class_name; class_is_final; class_is_trait; class_is_enum;
     class_is_interface; class_is_abstract; class_methods }
 

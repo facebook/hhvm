@@ -357,6 +357,19 @@ class RefDataPrinter(object):
 
 
 #------------------------------------------------------------------------------
+# HHBBC::Bytecode
+
+class HhbbcBytecodePrinter(object):
+    RECOGNIZE = '^HPHP::HHBBC::Bytecode$'
+
+    def __init__(self, val):
+        self.op = ("%s" % val['op']).replace("HPHP::Op::", "")
+        self.val = val[self.op]
+
+    def to_string(self):
+        return 'bc::%s { %s }' % (self.op, self.val)
+
+#------------------------------------------------------------------------------
 # Lookup function.
 
 printer_classes = [
@@ -371,6 +384,7 @@ printer_classes = [
     ArrayDataPrinter,
     ObjectDataPrinter,
     RefDataPrinter,
+    HhbbcBytecodePrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}

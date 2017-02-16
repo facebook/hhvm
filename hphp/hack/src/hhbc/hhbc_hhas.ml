@@ -15,11 +15,12 @@ open H
 let two_spaces = "  "
 let four_spaces = "    "
 
-let buffer_of_instruct_basic prefix instruction =
-  let result = B.create 0 in
-  B.add_string result (
-    prefix ^
-    match instruction with
+(* Naming convention for functions below:
+ *   string_of_X converts an X to a string
+ *   add_X takes a buffer and an X, and appends to the buffer
+ *)
+let string_of_basic instruction =
+  match instruction with
     | Nop         -> "Nop"
     | EntryNop    -> "EntryNop"
     | PopA        -> "PopA"
@@ -33,27 +34,16 @@ let buffer_of_instruct_basic prefix instruction =
     | UnboxR      -> "UnboxR"
     | UnboxRNop   -> "UnboxRNop"
     | RGetCNop    -> "RGetCNop"
-  ); result
 
-let buffer_of_instruct_lit_const prefix instruction =
-  let result = B.create 0 in
-  B.add_string result (
-    prefix ^
-    match instruction with
+let string_of_lit_const instruction =
+  match instruction with
     | Null        -> "Null"
     | Int i       -> "Int " ^ Int64.to_string i
-    (**
-     * TODO (hgo): build that map from id to strings
-     *)
     | String str    -> "String \"" ^ str ^ "\""
     | _ -> failwith "Not Implemented"
-  ); result
 
-let buffer_of_instruct_operator prefix instruction =
-  let result = B.create 0 in
-  B.add_string result (
-    prefix ^
-    match instruction with
+let string_of_operator instruction =
+  match instruction with
     | Concat -> "Concat"
     | Abs -> "Abs"
     | Add -> "Add"
@@ -100,46 +90,67 @@ let buffer_of_instruct_operator prefix instruction =
     | Clone -> "Clone"
     | H.Exit -> "Exit"
     | Fatal -> "Fatal"
-  ); result
 
-let buffer_of_instruct_control_flow prefix instruction =
-  let result = B.create 0 in
-  B.add_string result (
-    prefix ^
-    match instruction with
+let string_of_local_id x =
+  match x with
+  | Local_unnamed i -> string_of_int i
+  | Local_named s -> s
+
+let string_of_get x =
+  match x with
+  | CGetL id -> "CGetL " ^ string_of_local_id id
+  | CGetQuietL id -> "CGetQuietL " ^ string_of_local_id id
+  | CGetL2 id -> "CGetL2 " ^ string_of_local_id id
+  | CGetL3 id -> "CGetL3 " ^ string_of_local_id id
+  | CUGetL id -> "CUGetL " ^ string_of_local_id id
+  | PushL id -> "PushL " ^ string_of_local_id id
+  | CGetN -> "CGetN"
+  | CGetQuietN -> "CGetQuietN"
+  | CGetG -> "CGetG"
+  | CGetQuietG -> "CGetQuietG"
+  | CGetS -> "CGetS"
+  | VGetN -> "VGetN"
+  | VGetG -> "VGetG"
+  | VGetS -> "VGetS"
+  | AGetC -> "AGetC"
+  | AGetL id -> "AGetL " ^ string_of_local_id id
+
+let string_of_control_flow instruction =
+  match instruction with
     | RetC -> "RetC"
     | RetV -> "RetV"
     | _ -> failwith "Not Implemented"
-  ); result
 
-let buffer_of_instruct_call prefix instruction =
-  let result = B.create 0 in
-  B.add_string result (
-    prefix ^
-    match instruction with
+let string_of_call instruction =
+  match instruction with
     | FPushFuncD (n_params, litstr) ->
       "FPushFuncD "
       ^ string_of_int n_params
       ^ " \"" ^ litstr ^ "\""
-    | FCall param_id -> "FCall " ^ string_of_int param_id
+    | FCall param_id -> "FCall " ^ param_id
     | _ -> failwith "instruct_call Not Implemented"
-  ); result
 
-let buffer_of_instruction_list prefix instructs =
-  let lpad = B.create 2 in
-  let f_fold acc inst =
-    B.add_buffer acc (
-      match inst with
-      | IBasic basic -> buffer_of_instruct_basic prefix basic
-      | ILitConst lit_const ->
-        buffer_of_instruct_lit_const prefix lit_const
-      | IOp op -> buffer_of_instruct_operator prefix op
-      | IContFlow cont_flow -> buffer_of_instruct_control_flow prefix cont_flow
-      | ICall f_call -> buffer_of_instruct_call prefix f_call
+let string_of_misc instruction =
+  match instruction with
+    | VerifyParamType id -> "VerifyParamType " ^ id
+    | VerifyRetTypeC -> "VerifyRetTypeC"
+    | _ -> failwith "instruct_misc Not Implemented"
+
+let add_instruction_list buffer prefix instructions =
+  let process_instr instr =
+    B.add_string buffer prefix;
+    B.add_string buffer (
+      match instr with
+      | IBasic    i -> string_of_basic i
+      | ILitConst i -> string_of_lit_const i
+      | IOp       i -> string_of_operator i
+      | IContFlow i -> string_of_control_flow i
+      | ICall     i -> string_of_call i
+      | IMisc     i -> string_of_misc i
+      | IGet      i -> string_of_get i
     );
-    B.add_string acc "\n";
-    acc in
-  List.fold_left f_fold lpad instructs
+    B.add_string buffer "\n" in
+  List.iter process_instr instructions
 
 let string_of_flag f =
   match f with
@@ -149,7 +160,6 @@ let string_of_flag f =
   | TypeVar -> "type_var"
   | Soft -> "soft"
   | TypeConstant -> "type_constant"
-
 
 let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 
@@ -166,9 +176,9 @@ let string_of_type_info ti =
     ^ " >"
 
 let string_of_type_info_option tio =
-match tio with
-| None -> ""
-| Some ti -> string_of_type_info ti ^ " "
+  match tio with
+  | None -> ""
+  | Some ti -> string_of_type_info ti ^ " "
 
 let string_of_param p =
   string_of_type_info_option p.param_type_info ^ p.param_name
@@ -176,16 +186,14 @@ let string_of_param p =
 let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
 
-let buffer_of_fun_def fun_def =
-  let buf = B.create 0 in
+let add_fun_def buf fun_def =
   B.add_string buf "\n.function ";
   B.add_string buf (string_of_type_info_option fun_def.f_return_type);
   B.add_string buf fun_def.f_name;
   B.add_string buf (string_of_params fun_def.f_params);
   B.add_string buf " {\n";
-  B.add_buffer buf (buffer_of_instruction_list two_spaces fun_def.f_body);
-  B.add_string buf "}\n";
-  buf
+  add_instruction_list buf two_spaces fun_def.f_body;
+  B.add_string buf "}\n"
 
 let method_special_attributes m =
   let attrs = [] in
@@ -199,8 +207,7 @@ let method_special_attributes m =
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
 
-let buffer_of_method_def method_def =
-  let buf = B.create 0 in
+let add_method_def buf method_def =
   (* TODO: attributes *)
   B.add_string buf "\n  .method ";
   B.add_string buf (method_special_attributes method_def);
@@ -211,10 +218,8 @@ let buffer_of_method_def method_def =
   B.add_string buf "()";
   (* TODO: return type *)
   B.add_string buf " {\n";
-  B.add_buffer buf
-    (buffer_of_instruction_list four_spaces method_def.method_body);
-  B.add_string buf "  }\n";
-  buf
+  add_instruction_list buf four_spaces method_def.method_body;
+  B.add_string buf "  }\n"
 
 let class_special_attributes c =
   let attrs = [] in
@@ -227,8 +232,7 @@ let class_special_attributes c =
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
 
-let buffer_of_class_def class_def =
-  let buf = B.create 0 in
+let add_class_def buf class_def =
   (* TODO: user attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
@@ -236,50 +240,33 @@ let buffer_of_class_def class_def =
   (* TODO: extends *)
   (* TODO: implements *)
   B.add_string buf " {\n";
-  List.iter
-    (fun x -> B.add_buffer buf (buffer_of_method_def x);)
-    class_def.class_methods;
+  List.iter (add_method_def buf) class_def.class_methods;
   (* TODO: other members *)
   (* TODO: If there is no ctor, generate one *)
-  B.add_string buf "}\n";
-  buf
+  B.add_string buf "}\n"
 
-let buffer_of_hhas_prog prog =
-  let buf = B.create 0 in
-  List.iter
-    (fun x -> B.add_buffer buf (buffer_of_fun_def x);) prog.hhas_fun;
-  List.iter
-    (fun x -> B.add_buffer buf (buffer_of_class_def x);) prog.hhas_classes;
-  buf
+let add_prog buf prog =
+  List.iter (add_fun_def buf) prog.hhas_fun;
+  List.iter (add_class_def buf) prog.hhas_classes
 
-let buffer_of_defcls classes =
-  let buf = B.create 0 in
-  let rec aux c count =
-    match c with
-    | [] -> ()
-    | _ :: t ->
-      begin
-        B.add_string buf (Printf.sprintf "  DefCls %n\n" count);
-        aux t (count + 1)
-      end in
-  aux classes 0;
-  buf
+let add_defcls buf classes =
+  Core.List.iteri classes
+    (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
 
-let buffer_of_top_level hhas_prog =
+let add_top_level buf hhas_prog =
   let main_stmts =
     [ ILitConst (Int Int64.one)
     ; IContFlow RetC
     ] in
   let fun_name = ".main {\n" in
-  let buf = B.create 0 in
   B.add_string buf fun_name;
-  B.add_buffer buf (buffer_of_defcls hhas_prog.hhas_classes);
-  B.add_buffer buf (buffer_of_instruction_list two_spaces main_stmts);
-  B.add_string buf "}\n";
-  buf
+  add_defcls buf hhas_prog.hhas_classes;
+  add_instruction_list buf two_spaces main_stmts;
+  B.add_string buf "}\n"
 
 let to_string hhas_prog =
-  let final_buf = buffer_of_top_level hhas_prog in
-  B.add_buffer final_buf @@ buffer_of_hhas_prog hhas_prog;
-  B.add_string final_buf "\n";
-  B.contents final_buf
+  let buf = Buffer.create 1024 in
+  add_top_level buf hhas_prog;
+  add_prog buf hhas_prog;
+  B.add_string buf "\n";
+  B.contents buf

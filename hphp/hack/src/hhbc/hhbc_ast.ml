@@ -20,8 +20,10 @@ type iter_vec = int
 type check_started = bool
 type free_iterator = int
 type repo_auth_type = string (* see see runtime/base/repo-auth-type.h *)
-type local_id = int
-type param_id = int
+type local_id =
+  | Local_unnamed of int
+  | Local_named of string
+type param_id = string
 type iterator_id = int
 type stack_index = int
 type class_id = string
@@ -456,6 +458,8 @@ type instruct =
   | IOp of instruct_operator
   | IContFlow of instruct_control_flow
   | ICall of instruct_call
+  | IMisc of instruct_misc
+  | IGet of instruct_get
 
 type type_constraint_flag =
   | Nullable

@@ -45,10 +45,9 @@ let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   match op with
-  (* TODO Consider overflow versions of instructions *)
-  | A.Plus -> instr (H.IOp H.Add)
-  | A.Minus -> instr (H.IOp H.Sub)
-  | A.Star -> instr (H.IOp H.Mul)
+  | A.Plus -> instr (H.IOp H.AddO)
+  | A.Minus -> instr (H.IOp H.SubO)
+  | A.Star -> instr (H.IOp H.MulO)
   | A.Slash -> instr (H.IOp H.Div)
   | A.Eqeq -> instr (H.IOp H.Eq)
   | A.EQeqeq -> instr (H.IOp H.Same)
@@ -73,31 +72,53 @@ let from_binop op =
 let rec from_expr expr =
   match snd expr with
   | A.String (_, litstr) ->
-    instr (H.ILitConst (H.String litstr))
+    instr H.(ILitConst (String litstr))
   | A.Int (_, litstr) ->
     (* TODO deal with integer out of range *)
-    instr (H.ILitConst (H.Int (Int64.of_string litstr)))
-  | A.Null -> instr (H.ILitConst H.Null)
-  | A.False -> instr (H.ILitConst H.False)
-  | A.True -> instr (H.ILitConst H.True)
+    instr H.(ILitConst (Int (Int64.of_string litstr)))
+  | A.Null -> instr H.(ILitConst Null)
+  | A.False -> instr H.(ILitConst False)
+  | A.True -> instr H.(ILitConst True)
+  | A.Lvar (_, x) -> instr H.(IGet (CGetL (Local_named x)))
   | A.Binop(op, e1, e2) ->
     gather [from_expr e1; from_expr e2; from_binop op]
   | A.Call ((_, A.Id (_, id)), el, []) when id = "echo" ->
-    gather [from_exprs el; instr (H.IOp H.Print); instr (H.IBasic H.PopC)]
+    gather [
+      from_exprs el;
+      instr H.(IOp Print);
+    ]
   (* TODO: emit warning *)
   | _ -> empty
 
 and from_exprs exprs =
   gather (List.map exprs from_expr)
 
-and from_stmt st =
+and from_stmt verify_return st =
+  let open H in
   match st with
-  | A.Expr expr -> from_expr expr
+  | A.Expr expr ->
+    gather [
+      from_expr expr;
+      instr (IBasic PopC)
+    ]
+  | A.Return (_, None) ->
+    instrs [
+      ILitConst Null;
+      IContFlow RetC;
+    ]
+  | A.Return (_,  Some expr) ->
+    gather [
+      from_expr expr;
+      (if verify_return then instr (IMisc VerifyRetTypeC) else empty);
+      instr (IContFlow RetC);
+    ]
+  | A.Noop ->
+    empty
   (* TODO: emit warning *)
   | _ -> empty
 
-and from_stmts stl =
-  gather (List.map stl from_stmt)
+and from_stmts verify_return stl =
+  gather (List.map stl (from_stmt verify_return))
 
 let fmt_prim x =
   match x with
@@ -193,15 +214,34 @@ match h with
   { tc_name = tc_name;
     tc_flags = List.dedup ([Nullable; HHType; ExtendedHint] @ tc_flags) }
 
-let hint_to_type_info tparams h =
+let hint_to_type_info ~always_extended tparams h =
+  let { tc_name; tc_flags } = hint_to_type_constraint tparams h in
   { ti_user_type = Some (fmt_hint h);
-    ti_type_constraint = hint_to_type_constraint tparams h;
+    ti_type_constraint =
+      { tc_name = tc_name;
+        tc_flags =
+          if always_extended && tc_name != None
+          then List.dedup (ExtendedHint :: tc_flags)
+          else tc_flags;
+      }
   }
 
 let from_param tparams p = {
   H.param_name = p.N.param_name;
-  H.param_type_info = Option.map p.N.param_hint (hint_to_type_info tparams);
+  H.param_type_info = Option.map p.N.param_hint
+    (hint_to_type_info ~always_extended:false tparams);
 }
+
+let has_type_constraint ti =
+  match ti with
+  | Some { ti_type_constraint = { tc_name = Some _; _ }; _ } -> true
+  | _ -> false
+
+let emit_method_prolog params =
+  gather H.(List.filter_map params (fun p ->
+    if has_type_constraint p.param_type_info
+    then Some (instr (IMisc (VerifyParamType p.param_name)))
+    else None))
 
 let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
   fun nast_fun ->
@@ -211,20 +251,26 @@ let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
     None
 
   | N.UnnamedBody b ->
-    let stmt_instrs = from_stmts b.N.fub_ast in
     let tparams = List.map nast_fun.N.f_tparams (fun (_, (_, s), _) -> s) in
+    let params = List.map nast_fun.N.f_params (from_param tparams) in
+    let return_type_info = Option.map nast_fun.N.f_ret
+      (hint_to_type_info ~always_extended:true tparams) in
+    let verify_return = has_type_constraint return_type_info in
+    let stmt_instrs = from_stmts verify_return b.N.fub_ast in
+    let ret_instrs =
+      match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
+      instrs [H.ILitConst H.Null; H.IContFlow H.RetC] in
     let body_instrs = gather [
+      emit_method_prolog params;
       stmt_instrs;
-      instr (H.ILitConst H.Null);
-      instr (H.IContFlow H.RetC)
+      ret_instrs;
     ] in
     Some
     (
       { H.f_name          = name_i
       ; H.f_body          = instr_seq_to_list body_instrs
-      ; H.f_params        = List.map nast_fun.N.f_params (from_param tparams)
-      ; H.f_return_type
-          = Option.map nast_fun.N.f_ret (hint_to_type_info tparams)
+      ; H.f_params        = params
+      ; H.f_return_type   = return_type_info
       }
     )
 
@@ -244,11 +290,20 @@ let from_method : Nast.method_ -> Hhbc_ast.method_def option =
   | N.NamedBody _ ->
     None
   | N.UnnamedBody b ->
-    let stmt_instrs = from_stmts b.N.fub_ast in
+    (* TODO factor out commonality with from_fun *)
+    let tparams = List.map nast_method.N.m_tparams (fun (_, (_, s), _) -> s) in
+    let params = List.map nast_method.N.m_params (from_param tparams) in
+    let return_type_info = Option.map nast_method.N.m_ret
+      (hint_to_type_info ~always_extended:true tparams) in
+    let verify_return = has_type_constraint return_type_info in
+    let stmt_instrs = from_stmts verify_return b.N.fub_ast in
+    let ret_instrs =
+      match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
+      instrs [H.ILitConst H.Null; H.IContFlow H.RetC] in
     let body_instrs = gather [
+      emit_method_prolog params;
       stmt_instrs;
-      instr (H.ILitConst H.Null);
-      instr (H.IContFlow H.RetC)
+      ret_instrs;
     ] in
     let method_body = instr_seq_to_list body_instrs in
     let m = { H.method_name; method_body; method_is_abstract; method_is_final;

@@ -32,6 +32,7 @@ not how they look on the page. *)
 | EqualOperator
 | StrictEqualOperator
 | NotEqualOperator
+| PhpNotEqualOperator
 | StrictNotEqualOperator
 | SpaceshipOperator
 | LessThanOperator
@@ -118,7 +119,7 @@ let precedence operator =
   | ExclusiveOrOperator -> 12
   | AndOperator -> 13
   | EqualOperator | StrictEqualOperator
-  | NotEqualOperator | StrictNotEqualOperator -> 14
+  | PhpNotEqualOperator | NotEqualOperator | StrictNotEqualOperator -> 14
   | SpaceshipOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator -> 15
   | LeftShiftOperator | RightShiftOperator -> 16
@@ -140,7 +141,7 @@ let precedence operator =
 
 let associativity operator =
   match operator with
-  | EqualOperator | StrictEqualOperator | NotEqualOperator
+  | EqualOperator | StrictEqualOperator | NotEqualOperator | PhpNotEqualOperator
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
   | NewOperator | CloneOperator | AwaitOperator | SpaceshipOperator
@@ -220,6 +221,7 @@ let is_trailing_operator_token token =
   | Bar
   | EqualEqual
   | EqualEqualEqual
+  | LessThanGreaterThan
   | ExclamationEqual
   | ExclamationEqualEqual
   | LessThanEqualGreaterThan
@@ -270,6 +272,7 @@ let trailing_from_token token =
   | EqualEqual -> EqualOperator
   | EqualEqualEqual -> StrictEqualOperator
   | ExclamationEqual -> NotEqualOperator
+  | LessThanGreaterThan -> PhpNotEqualOperator
   | ExclamationEqualEqual -> StrictNotEqualOperator
   | LessThan -> LessThanOperator
   | LessThanEqualGreaterThan -> SpaceshipOperator
@@ -327,6 +330,7 @@ let is_binary_operator_token token =
   | EqualEqual
   | EqualEqualEqual
   | ExclamationEqual
+  | LessThanGreaterThan
   | ExclamationEqualEqual
   | LessThanEqualGreaterThan
   | LessThan
@@ -378,6 +382,7 @@ let is_comparison operator =
   | EqualOperator
   | StrictEqualOperator
   | NotEqualOperator
+  | PhpNotEqualOperator
   | StrictNotEqualOperator
   | LessThanOperator
   | LessThanOrEqualOperator
@@ -406,6 +411,7 @@ let to_string kind =
   | EqualOperator -> "equal"
   | StrictEqualOperator -> "strict_equal"
   | NotEqualOperator -> "not_equal"
+  | PhpNotEqualOperator -> "php_not_equal"
   | StrictNotEqualOperator -> "strict_not_equal"
   | LessThanOperator -> "less_than"
   | SpaceshipOperator -> "spaceship"

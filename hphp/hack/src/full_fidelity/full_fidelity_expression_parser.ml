@@ -562,6 +562,7 @@ module WithStatementAndDeclAndTypeParser
     else match peek_token_kind parser with
     (* Binary operators *)
     (* TODO Add an error if PHP and / or / xor are used in Hack.  *)
+    (* TODO Add an error if PHP style <> is used in Hack. *)
     | And
     | Or
     | Xor
@@ -591,6 +592,7 @@ module WithStatementAndDeclAndTypeParser
     | AmpersandAmpersand
     | BarBar
     | ExclamationEqual
+    | LessThanGreaterThan
     | LessThan
     | ExclamationEqualEqual
     | LessThanEqual
@@ -984,6 +986,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | EqualEqualGreaterThan
     | EqualGreaterThan
     | ExclamationEqual
+    | LessThanGreaterThan
     | ExclamationEqualEqual
     | GreaterThan
     | GreaterThanEqual

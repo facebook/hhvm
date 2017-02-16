@@ -131,6 +131,7 @@ type t =
   | Dollar
   | Slash
   | Percent
+  | LessThanGreaterThan
   | LessThanEqualGreaterThan
   | LessThanLessThan
   | GreaterThanGreaterThan
@@ -321,6 +322,7 @@ let from_string keyword =
   | "$" -> Some Dollar
   | "/" -> Some Slash
   | "%" -> Some Percent
+  | "<>" -> Some LessThanGreaterThan
   | "<=>" -> Some LessThanEqualGreaterThan
   | "<<" -> Some LessThanLessThan
   | ">>" -> Some GreaterThanGreaterThan
@@ -483,6 +485,7 @@ match kind with
   | Dollar -> "$"
   | Slash -> "/"
   | Percent -> "%"
+  | LessThanGreaterThan -> "<>"
   | LessThanEqualGreaterThan -> "<=>"
   | LessThanLessThan -> "<<"
   | GreaterThanGreaterThan -> ">>"

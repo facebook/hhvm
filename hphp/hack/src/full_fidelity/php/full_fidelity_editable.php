@@ -960,6 +960,8 @@ abstract class EditableToken extends EditableSyntax {
        return new SlashToken($leading, $trailing);
     case '%':
        return new PercentToken($leading, $trailing);
+    case '<>':
+       return new LessThanGreaterThanToken($leading, $trailing);
     case '<=>':
        return new LessThanEqualGreaterThanToken($leading, $trailing);
     case '<<':
@@ -2846,6 +2848,21 @@ final class PercentToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): PercentToken {
     return new PercentToken($this->leading(), $trailing);
+  }
+}
+final class LessThanGreaterThanToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('<>', $leading, $trailing, '<>');
+  }
+
+  public function with_leading(EditableSyntax $leading): LessThanGreaterThanToken {
+    return new LessThanGreaterThanToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): LessThanGreaterThanToken {
+    return new LessThanGreaterThanToken($this->leading(), $trailing);
   }
 }
 final class LessThanEqualGreaterThanToken extends EditableToken {

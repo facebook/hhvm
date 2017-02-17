@@ -9,7 +9,7 @@
 *)
 
 type t = {
-  hhas_fun     : Hhbc_ast.fun_def list;
+  hhas_fun     : Hhas_function.t list;
   hhas_classes : Hhas_class.t list;
 }
 

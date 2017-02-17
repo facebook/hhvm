@@ -256,12 +256,16 @@ let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
 
 let add_fun_def buf fun_def =
+  let function_name = Hhas_function.name fun_def in
+  let function_return_type = Hhas_function.return_type fun_def in
+  let function_params = Hhas_function.params fun_def in
+  let function_body = Hhas_function.body fun_def in
   B.add_string buf "\n.function ";
-  B.add_string buf (string_of_type_info_option fun_def.f_return_type);
-  B.add_string buf fun_def.f_name;
-  B.add_string buf (string_of_params fun_def.f_params);
+  B.add_string buf (string_of_type_info_option function_return_type);
+  B.add_string buf function_name;
+  B.add_string buf (string_of_params function_params);
   B.add_string buf " {\n";
-  add_instruction_list buf two_spaces fun_def.f_body;
+  add_instruction_list buf two_spaces function_body;
   B.add_string buf "}\n"
 
 let method_special_attributes m =

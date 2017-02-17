@@ -517,10 +517,3 @@ type param = {
   param_name      : Litstr.id;
   param_type_info : type_info option;
 }
-
-type fun_def = {
-  f_name          : Litstr.id;
-  f_body          : instruct list;
-  f_params        : param list;
-  f_return_type   : type_info option;
-}

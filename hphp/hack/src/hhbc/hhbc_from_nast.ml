@@ -321,24 +321,22 @@ let from_body tparams params ret b =
   ] in
   body_instrs, params, return_type_info
 
-let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
+let from_fun_ : Nast.fun_ -> Hhas_function.t option =
   fun nast_fun ->
-  let name_i = Litstr.to_string @@ snd nast_fun.Nast.f_name in
+  let function_name = Litstr.to_string @@ snd nast_fun.Nast.f_name in
   match nast_fun.N.f_body with
   | N.NamedBody _ ->
     None
 
   | N.UnnamedBody b ->
-    let body_instrs, params, return_type_info =
+    let body_instrs, function_params, function_return_type =
       from_body nast_fun.N.f_tparams nast_fun.N.f_params nast_fun.N.f_ret b in
-    Some
-    (
-      { H.f_name          = name_i
-      ; H.f_body          = instr_seq_to_list body_instrs
-      ; H.f_params        = params
-      ; H.f_return_type   = return_type_info
-      }
-    )
+    let function_body = instr_seq_to_list body_instrs in
+    Some (Hhas_function.make
+      function_name
+      function_params
+      function_return_type
+      function_body)
 
 let from_functions nast_functions =
   Core.List.filter_map nast_functions from_fun_

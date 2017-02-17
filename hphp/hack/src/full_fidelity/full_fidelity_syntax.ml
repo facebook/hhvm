@@ -755,9 +755,7 @@ module WithToken(Token: TokenType) = struct
     and dictionary_type_specifier = {
       dictionary_type_keyword: t;
       dictionary_type_left_angle: t;
-      dictionary_type_key: t;
-      dictionary_type_comma: t;
-      dictionary_type_value: t;
+      dictionary_type_members: t;
       dictionary_type_right_angle: t;
     }
     and closure_type_specifier = {
@@ -2893,16 +2891,12 @@ module WithToken(Token: TokenType) = struct
     let get_dictionary_type_specifier_children {
       dictionary_type_keyword;
       dictionary_type_left_angle;
-      dictionary_type_key;
-      dictionary_type_comma;
-      dictionary_type_value;
+      dictionary_type_members;
       dictionary_type_right_angle;
     } = (
       dictionary_type_keyword,
       dictionary_type_left_angle,
-      dictionary_type_key,
-      dictionary_type_comma,
-      dictionary_type_value,
+      dictionary_type_members,
       dictionary_type_right_angle
     )
 
@@ -4272,16 +4266,12 @@ module WithToken(Token: TokenType) = struct
       | DictionaryTypeSpecifier {
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       } -> [
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       ]
       | ClosureTypeSpecifier {
@@ -5635,16 +5625,12 @@ module WithToken(Token: TokenType) = struct
       | DictionaryTypeSpecifier {
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       } -> [
         "dictionary_type_keyword";
         "dictionary_type_left_angle";
-        "dictionary_type_key";
-        "dictionary_type_comma";
-        "dictionary_type_value";
+        "dictionary_type_members";
         "dictionary_type_right_angle";
       ]
       | ClosureTypeSpecifier {
@@ -7168,17 +7154,13 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.DictionaryTypeSpecifier, [
           dictionary_type_keyword;
           dictionary_type_left_angle;
-          dictionary_type_key;
-          dictionary_type_comma;
-          dictionary_type_value;
+          dictionary_type_members;
           dictionary_type_right_angle;
         ]) ->
         DictionaryTypeSpecifier {
           dictionary_type_keyword;
           dictionary_type_left_angle;
-          dictionary_type_key;
-          dictionary_type_comma;
-          dictionary_type_value;
+          dictionary_type_members;
           dictionary_type_right_angle;
         }
       | (SyntaxKind.ClosureTypeSpecifier, [
@@ -8816,17 +8798,13 @@ module WithToken(Token: TokenType) = struct
     let make_dictionary_type_specifier
       dictionary_type_keyword
       dictionary_type_left_angle
-      dictionary_type_key
-      dictionary_type_comma
-      dictionary_type_value
+      dictionary_type_members
       dictionary_type_right_angle
     =
       from_children SyntaxKind.DictionaryTypeSpecifier [
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       ]
 

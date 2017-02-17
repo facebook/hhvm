@@ -1138,18 +1138,14 @@ let rec get_doc node =
   | DictionaryTypeSpecifier {
       dictionary_type_keyword;
       dictionary_type_left_angle;
-      dictionary_type_key;
-      dictionary_type_comma;
-      dictionary_type_value;
+      dictionary_type_members;
       dictionary_type_right_angle
     } ->
     let ar = get_doc dictionary_type_keyword in
     let la = get_doc dictionary_type_left_angle in
-    let kt = get_doc dictionary_type_key in
-    let co = get_doc dictionary_type_comma in
-    let vt = get_doc dictionary_type_value in
+    let ms = get_doc dictionary_type_members in
     let ra = get_doc dictionary_type_right_angle in
-    ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
+    ar ^^^ la ^^^ ms ^^^ ra
   | MapArrayTypeSpecifier {
       map_array_keyword;
       map_array_left_angle;

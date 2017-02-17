@@ -104,7 +104,6 @@ let minimal_tests =
       ~preprocess_exp:remove_whitespace testname test_minimal in
   List.map
   [
-    "test_collections";
     "test_simple";
 (*  TODO: This test is temporarily disabled because
     $a ? $b : $c = $d
@@ -117,7 +116,6 @@ let minimal_tests =
     "test_try_statement";
     "test_list_precedence";
     "test_foreach_statements";
-    "test_types";
     "test_types_type_const";
     "test_function_call";
     "test_array_expression";

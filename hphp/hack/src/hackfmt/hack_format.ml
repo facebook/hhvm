@@ -1347,13 +1347,11 @@ offending text is '%s'." (text node)));
     let args = make_list [key_list_item; val_list_item] in
     transform_argish left_a args right_a;
   | DictionaryTypeSpecifier x ->
-    let (kw, left_a, key, comma_kw, value, right_a) =
-      get_dictionary_type_specifier_children x in
+    let (kw, left_a, members, right_a) =
+      get_dictionary_type_specifier_children x
+    in
     t kw;
-    let key_list_item = make_list_item key comma_kw in
-    let val_list_item = make_list_item value (make_missing ()) in
-    let args = make_list [key_list_item; val_list_item] in
-    transform_argish left_a args right_a;
+    transform_argish left_a members right_a;
   | ClosureTypeSpecifier x ->
     let (outer_left_p, kw, inner_left_p, param_types, inner_right_p, colon,
       ret_type, outer_right_p) = get_closure_type_specifier_children x in

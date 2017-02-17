@@ -14363,77 +14363,45 @@ class DictionaryTypeSpecifier extends EditableSyntax
   constructor(
     keyword,
     left_angle,
-    key,
-    comma,
-    value,
+    members,
     right_angle)
   {
     super('dictionary_type_specifier', {
       keyword: keyword,
       left_angle: left_angle,
-      key: key,
-      comma: comma,
-      value: value,
+      members: members,
       right_angle: right_angle });
   }
   get keyword() { return this.children.keyword; }
   get left_angle() { return this.children.left_angle; }
-  get key() { return this.children.key; }
-  get comma() { return this.children.comma; }
-  get value() { return this.children.value; }
+  get members() { return this.children.members; }
   get right_angle() { return this.children.right_angle; }
   with_keyword(keyword){
     return new DictionaryTypeSpecifier(
       keyword,
       this.left_angle,
-      this.key,
-      this.comma,
-      this.value,
+      this.members,
       this.right_angle);
   }
   with_left_angle(left_angle){
     return new DictionaryTypeSpecifier(
       this.keyword,
       left_angle,
-      this.key,
-      this.comma,
-      this.value,
+      this.members,
       this.right_angle);
   }
-  with_key(key){
+  with_members(members){
     return new DictionaryTypeSpecifier(
       this.keyword,
       this.left_angle,
-      key,
-      this.comma,
-      this.value,
-      this.right_angle);
-  }
-  with_comma(comma){
-    return new DictionaryTypeSpecifier(
-      this.keyword,
-      this.left_angle,
-      this.key,
-      comma,
-      this.value,
-      this.right_angle);
-  }
-  with_value(value){
-    return new DictionaryTypeSpecifier(
-      this.keyword,
-      this.left_angle,
-      this.key,
-      this.comma,
-      value,
+      members,
       this.right_angle);
   }
   with_right_angle(right_angle){
     return new DictionaryTypeSpecifier(
       this.keyword,
       this.left_angle,
-      this.key,
-      this.comma,
-      this.value,
+      this.members,
       right_angle);
   }
   rewrite(rewriter, parents)
@@ -14444,16 +14412,12 @@ class DictionaryTypeSpecifier extends EditableSyntax
     new_parents.push(this);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var left_angle = this.left_angle.rewrite(rewriter, new_parents);
-    var key = this.key.rewrite(rewriter, new_parents);
-    var comma = this.comma.rewrite(rewriter, new_parents);
-    var value = this.value.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
     var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_angle === this.left_angle &&
-      key === this.key &&
-      comma === this.comma &&
-      value === this.value &&
+      members === this.members &&
       right_angle === this.right_angle)
     {
       return rewriter(this, parents);
@@ -14463,9 +14427,7 @@ class DictionaryTypeSpecifier extends EditableSyntax
       return rewriter(new DictionaryTypeSpecifier(
         keyword,
         left_angle,
-        key,
-        comma,
-        value,
+        members,
         right_angle), parents);
     }
   }
@@ -14477,24 +14439,16 @@ class DictionaryTypeSpecifier extends EditableSyntax
     let left_angle = EditableSyntax.from_json(
       json.dictionary_type_left_angle, position, source);
     position += left_angle.width;
-    let key = EditableSyntax.from_json(
-      json.dictionary_type_key, position, source);
-    position += key.width;
-    let comma = EditableSyntax.from_json(
-      json.dictionary_type_comma, position, source);
-    position += comma.width;
-    let value = EditableSyntax.from_json(
-      json.dictionary_type_value, position, source);
-    position += value.width;
+    let members = EditableSyntax.from_json(
+      json.dictionary_type_members, position, source);
+    position += members.width;
     let right_angle = EditableSyntax.from_json(
       json.dictionary_type_right_angle, position, source);
     position += right_angle.width;
     return new DictionaryTypeSpecifier(
         keyword,
         left_angle,
-        key,
-        comma,
-        value,
+        members,
         right_angle);
   }
   get children_keys()
@@ -14503,9 +14457,7 @@ class DictionaryTypeSpecifier extends EditableSyntax
       DictionaryTypeSpecifier._children_keys = [
         'keyword',
         'left_angle',
-        'key',
-        'comma',
-        'value',
+        'members',
         'right_angle'];
     return DictionaryTypeSpecifier._children_keys;
   }

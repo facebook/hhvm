@@ -349,10 +349,14 @@ and parse_array_type_specifier parser =
   and parse_dictionary_type_specifier parser =
     (*
       dict < type-specifier , type-specifier >
-      TODO: Should we allow a trailing comma?
-      TODO: Consider parsing this as a series of list-items, rather than
-      key comma value.
+
       TODO: Add this to the specification
+      TODO: Allow a trailing comma.
+
+      Though we require there to be exactly two items, we actually parse
+      an arbitrary comma-separated list here.
+
+      TODO: Give an error in a later pass if there are not exactly two members.
 
       ERROR RECOVERY: If there is no type argument list then just make this
       a simple type.  TODO: Should this be an error at parse time?  what
@@ -363,13 +367,15 @@ and parse_array_type_specifier parser =
       let result = make_simple_type_specifier keyword in
       (parser, result)
     else
+      (* TODO: This allows "noreturn" as a type argument. Should we
+      disallow that at parse time? *)
       let (parser, left) = expect_left_angle parser in
-      let (parser, k) = parse_type_specifier parser in
-      let (parser, comma) = expect_comma parser in
-      let (parser, v) = parse_type_specifier parser in
+      let (parser, arguments) =
+        parse_comma_list_allow_trailing parser GreaterThan
+        SyntaxError.error1007 parse_return_type in
       let (parser, right) = expect_right_angle parser in
       let result = make_dictionary_type_specifier
-        keyword left k comma v right in
+        keyword left arguments right in
       (parser, result)
 
 and parse_tuple_or_closure_type_specifier parser =

@@ -534,13 +534,20 @@ let scan_string_literal_in_progress lexer name =
       let lexer = skip_uninteresting_double_quote_string_characters lexer in
       (lexer, TokenKind.StringLiteralBody)
     | ('\\', '{') ->
-      (* Bizarrely, even though { is meaningful inside a
-      double-quoted string literal, it cannot be escaped with a
-      backslash. Rather, the backslash is a normal character and the { is
-      potentially special. *)
-      (* TODO: This seems deeply wrong. Consider fixing that. *)
-      (* Eat the backslash. *)
-      let lexer = advance lexer 1 in
+      (* The rules for escaping open braces in Hack are bizarre. Suppose we have
+      $x = 123;
+      $y = 456;
+      $z = "\{$x,$y\}";
+      What is the value of $z?  Naively you would think that the backslash
+      escapes the braces, and the variables are embedded, so {123,456}. But
+      that's not what happens. Yes, the backslash makes the brace no longer
+      the opening brace of an expression. But the backslash is still part
+      of the string!  This is the string \{123,456\}.
+
+      TODO: We might want to fix this because this is very strange. *)
+      (* Eat the backslash and the brace. *)
+
+      let lexer = advance lexer 2 in
       (lexer, TokenKind.StringLiteralBody)
     | ('\\', _) ->
       (* TODO: A backslash followed by something other than an escape sequence

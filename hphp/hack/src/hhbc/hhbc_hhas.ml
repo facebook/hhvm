@@ -250,7 +250,9 @@ let string_of_type_info_option tio =
   | Some ti -> string_of_type_info ti ^ " "
 
 let string_of_param p =
-  string_of_type_info_option p.param_type_info ^ p.param_name
+  let param_type_info = Hhas_param.type_info p in
+  let param_name = Hhas_param.name p in
+  string_of_type_info_option param_type_info ^ param_name
 
 let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"

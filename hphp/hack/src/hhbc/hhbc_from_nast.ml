@@ -287,11 +287,11 @@ let hints_to_type_infos ~always_extended tparams hints =
   let mapper hint = hint_to_type_info always_extended tparams hint in
   List.map hints mapper
 
-let from_param tparams p = {
-  H.param_name = p.N.param_name;
-  H.param_type_info = Option.map p.N.param_hint
-    (hint_to_type_info ~always_extended:false tparams);
-}
+let from_param tparams p =
+  let param_name = p.N.param_name in
+  let param_type_info = Option.map p.N.param_hint
+    (hint_to_type_info ~always_extended:false tparams) in
+  Hhas_param.make param_name param_type_info
 
 let has_type_constraint ti =
   match ti with
@@ -300,8 +300,10 @@ let has_type_constraint ti =
 
 let emit_method_prolog params =
   gather H.(List.filter_map params (fun p ->
-    if has_type_constraint p.param_type_info
-    then Some (instr (IMisc (VerifyParamType p.param_name)))
+    let param_type_info = Hhas_param.type_info p in
+    let param_name = Hhas_param.name p in
+    if has_type_constraint param_type_info
+    then Some (instr (IMisc (VerifyParamType param_name)))
     else None))
 
 let from_body tparams params ret b =

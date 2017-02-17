@@ -512,8 +512,3 @@ type type_info = {
   ti_user_type : string option;
   ti_type_constraint : type_constraint;
 }
-
-type param = {
-  param_name      : Litstr.id;
-  param_type_info : type_info option;
-}

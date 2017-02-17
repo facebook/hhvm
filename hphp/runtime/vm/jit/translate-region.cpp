@@ -635,14 +635,12 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     }
     setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
-    // Emit an ExitPlaceholder at the beginning of the block if any of
-    // the optimizations that can benefit from it are enabled, and only
-    // if we're not inlining. The inlining decision could be smarter
-    // but this is enough for now since we never emit guards in inlined
-    // functions (t7385908).
+    // Emit an ExitPlaceholder at the beginning of the block if any of the
+    // optimizations that can benefit from it are enabled, and only if we're
+    // not inlining. The inlining decision could be smarter but this is enough
+    // for now since we never emit guards in inlined functions (t7385908).
     const bool emitExitPlaceholder = irgs.inlineLevel == 0 &&
-      ((RuntimeOption::EvalHHIRLICM && hasUnprocPred) ||
-       (RuntimeOption::EvalHHIRTypeCheckHoisting));
+      (RuntimeOption::EvalHHIRLICM && hasUnprocPred);
     if (emitExitPlaceholder) irgen::makeExitPlaceholder(irgs);
 
     // Emit the type and reffiness predictions for this region block. If this is

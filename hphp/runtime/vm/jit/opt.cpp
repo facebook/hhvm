@@ -163,10 +163,6 @@ void optimize(IRUnit& unit, TransKind kind) {
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
-  if (RuntimeOption::EvalHHIRTypeCheckHoisting) {
-    doPass(unit, hoistTypeChecks, DCE::Minimal);
-  }
-
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(unit, optimizePredictions, DCE::None);
   }

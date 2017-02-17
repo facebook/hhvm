@@ -12,9 +12,6 @@ module B = Buffer
 module H = Hhbc_ast
 open H
 
-let two_spaces = "  "
-let four_spaces = "    "
-
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
  *   add_X takes a buffer and an X, and appends to the buffer
@@ -171,11 +168,18 @@ let string_of_mutator x =
   | CheckProp _ -> failwith "NYI"
   | InitProp _ -> failwith "NYI"
 
+let string_of_label i =
+  "L" ^ string_of_int i
+
 let string_of_control_flow instruction =
   match instruction with
-    | RetC -> "RetC"
-    | RetV -> "RetV"
-    | _ -> failwith "Not Implemented"
+  | Jmp l -> "Jmp " ^ string_of_label l
+  | JmpNS l -> "JmpNS " ^ string_of_label l
+  | JmpZ l -> "JmpZ " ^ string_of_label l
+  | JmpNZ l -> "JmpNZ " ^ string_of_label l
+  | RetC -> "RetC"
+  | RetV -> "RetV"
+  | _ -> failwith "Not Implemented"
 
 let string_of_call instruction =
   match instruction with
@@ -192,9 +196,10 @@ let string_of_misc instruction =
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | _ -> failwith "instruct_misc Not Implemented"
 
-let add_instruction_list buffer prefix instructions =
+let add_instruction_list buffer indent instructions =
   let process_instr instr =
-    B.add_string buffer prefix;
+    let actual_indent = match instr with ILabel _ -> indent-2 | _ -> indent in
+    B.add_string buffer (String.make actual_indent ' ');
     B.add_string buffer (
       match instr with
       | IBasic    i -> string_of_basic i
@@ -205,6 +210,7 @@ let add_instruction_list buffer prefix instructions =
       | IMisc     i -> string_of_misc i
       | IGet      i -> string_of_get i
       | IMutator  i -> string_of_mutator i
+      | ILabel    l -> string_of_label l ^ ":"
     );
     B.add_string buffer "\n" in
   List.iter process_instr instructions
@@ -263,7 +269,7 @@ let add_fun_def buf fun_def =
   B.add_string buf function_name;
   B.add_string buf (string_of_params function_params);
   B.add_string buf " {\n";
-  add_instruction_list buf two_spaces function_body;
+  add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
 let method_special_attributes m =
@@ -289,7 +295,7 @@ let add_method_def buf method_def =
   B.add_string buf "()";
   (* TODO: return type *)
   B.add_string buf " {\n";
-  add_instruction_list buf four_spaces (Hhas_method.body method_def);
+  add_instruction_list buf 4 (Hhas_method.body method_def);
   B.add_string buf "  }\n"
 
 let class_special_attributes c =
@@ -347,7 +353,7 @@ let add_top_level buf hhas_prog =
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
   add_defcls buf (Hhas_program.classes hhas_prog);
-  add_instruction_list buf two_spaces main_stmts;
+  add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"
 
 let add_program buf hhas_prog =

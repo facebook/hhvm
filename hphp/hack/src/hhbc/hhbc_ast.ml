@@ -492,3 +492,4 @@ type instruct =
   | IMisc of instruct_misc
   | IGet of instruct_get
   | IMutator of instruct_mutator
+  | ILabel of int

@@ -94,23 +94,54 @@ let unop_to_incdec_op op =
   | A.Updecr -> H.PostDecO
   | _ -> failwith "Invalid incdec op"
 
+(* TODO make this less of a hack *)
+let label_count = ref 0
+let fresh_label () =
+  let l = !label_count in
+  label_count := l+1;
+  l
+
 let rec from_expr expr =
+  let open H in
   match snd expr with
   | A.String (_, litstr) ->
-    instr H.(ILitConst (String litstr))
+    instr (ILitConst (String litstr))
   | A.Int (_, litstr) ->
     (* TODO deal with integer out of range *)
-    instr H.(ILitConst (Int (Int64.of_string litstr)))
-  | A.Null -> instr H.(ILitConst Null)
-  | A.False -> instr H.(ILitConst False)
-  | A.True -> instr H.(ILitConst True)
-  | A.Lvar (_, x) -> instr H.(IGet (CGetL (Local_named x)))
+    instr (ILitConst (Int (Int64.of_string litstr)))
+  | A.Null -> instr (ILitConst Null)
+  | A.False -> instr (ILitConst False)
+  | A.True -> instr (ILitConst True)
+  | A.Lvar (_, x) -> instr (IGet (CGetL (Local_named x)))
   | A.Unop (op, e) ->
     emit_unop op e
   | A.Binop (A.Eq obop, e1, e2) ->
     emit_assignment obop e1 e2
   | A.Binop (op, e1, e2) ->
     gather [from_expr e1; from_expr e2; from_binop op]
+  | A.Eif (etest, Some etrue, efalse) ->
+    let false_label = fresh_label () in
+    let end_label = fresh_label () in
+    gather [
+      from_expr etest;
+      instr (IContFlow (JmpZ false_label));
+      from_expr etrue;
+      instr (IContFlow (Jmp end_label));
+      instr (ILabel false_label);
+      from_expr efalse;
+      instr (ILabel end_label)
+    ]
+  | A.Eif (etest, None, efalse) ->
+    let end_label = fresh_label () in
+    gather [
+      from_expr etest;
+      instr (IBasic Dup);
+      instr (IContFlow (JmpNZ end_label));
+      instr (IBasic PopC);
+      from_expr efalse;
+      instr (ILabel end_label)
+    ]
+
   | A.Call ((_, A.Id (_, id)), el, []) when id = "echo" ->
     gather [
       from_exprs el;

@@ -373,13 +373,16 @@ Fatal RuntimeOmitFrame
 let from_methods nast_methods =
   Core.List.filter_map nast_methods from_method
 
-let default_constructor =
+let is_interface nast_class =
+  nast_class.N.c_kind = Ast.Cinterface
+
+let default_constructor nast_class =
   let method_name = "86ctor" in
   let method_body = instr_seq_to_list (gather [
     instr (H.ILitConst H.Null);
     instr (H.IContFlow H.RetC)
   ]) in
-  let method_is_abstract = false in
+  let method_is_abstract = is_interface nast_class in
   let method_is_final = false in
   let method_is_private = false in
   let method_is_protected = false in
@@ -391,7 +394,7 @@ let default_constructor =
 
 let add_constructor nast_class class_methods =
   match nast_class.N.c_constructor with
-  | None -> default_constructor :: class_methods
+  | None -> (default_constructor nast_class) :: class_methods
   | Some nast_ctor ->
     begin
       match from_method nast_ctor with
@@ -421,7 +424,7 @@ let from_class : Nast.class_ -> Hhbc_ast.class_def =
   let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
   let class_is_trait = nast_class.N.c_kind = Ast.Ctrait in
   let class_is_enum = nast_class.N.c_kind = Ast.Cenum in
-  let class_is_interface = nast_class.N.c_kind = Ast.Cinterface in
+  let class_is_interface = is_interface nast_class in
   let class_is_abstract = nast_class.N.c_kind = Ast.Cabstract in
   let class_is_final =
     nast_class.N.c_final || class_is_trait || class_is_enum in

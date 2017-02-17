@@ -273,15 +273,15 @@ match h with
 
 let hint_to_type_info ~always_extended tparams h =
   let { tc_name; tc_flags } = hint_to_type_constraint tparams h in
-  { ti_user_type = Some (fmt_hint h);
-    ti_type_constraint =
-      { tc_name = tc_name;
-        tc_flags =
-          if always_extended && tc_name != None
-          then List.dedup (ExtendedHint :: tc_flags)
-          else tc_flags;
-      }
-  }
+  let type_info_user_type = Some (fmt_hint h) in
+  let type_info_type_constraint =
+  { tc_name = tc_name;
+    tc_flags =
+      if always_extended && tc_name != None
+      then List.dedup (ExtendedHint :: tc_flags)
+      else tc_flags;
+  } in
+  Hhas_type_info.make type_info_user_type type_info_type_constraint
 
 let hints_to_type_infos ~always_extended tparams hints =
   let mapper hint = hint_to_type_info always_extended tparams hint in
@@ -295,7 +295,7 @@ let from_param tparams p =
 
 let has_type_constraint ti =
   match ti with
-  | Some { ti_type_constraint = { tc_name = Some _; _ }; _ } -> true
+  | Some ti when (Hhas_type_info.has_type_constraint ti) -> true
   | _ -> false
 
 let emit_method_prolog params =

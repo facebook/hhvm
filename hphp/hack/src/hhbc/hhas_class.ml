@@ -11,8 +11,8 @@
 type t = {
   (* TODO attributes *)
   (* TODO generic type parameters *)
-  class_base         : Hhbc_ast.type_info option;
-  class_implements   : Hhbc_ast.type_info list;
+  class_base         : Hhas_type_info.t option;
+  class_implements   : Hhas_type_info.t list;
   class_name         : Litstr.id;
   class_is_final     : bool;
   class_is_abstract  : bool;

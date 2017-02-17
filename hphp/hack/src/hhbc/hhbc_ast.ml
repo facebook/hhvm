@@ -506,9 +506,3 @@ type type_constraint = {
   tc_flags : type_constraint_flag list;
   tc_name : string option;
 }
-
-(* Type info has additional optional user type *)
-type type_info = {
-  ti_user_type : string option;
-  ti_type_constraint : type_constraint;
-}

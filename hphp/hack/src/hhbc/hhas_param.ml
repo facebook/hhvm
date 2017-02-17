@@ -10,7 +10,7 @@
 
 type t = {
   param_name      : Litstr.id;
-  param_type_info : Hhbc_ast.type_info option;
+  param_type_info : Hhas_type_info.t option;
 }
 
 let make param_name param_type_info =

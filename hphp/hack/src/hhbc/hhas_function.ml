@@ -11,7 +11,7 @@
 type t = {
   function_name          : Litstr.id;
   function_params        : Hhas_param.t list;
-  function_return_type   : Hhbc_ast.type_info option;
+  function_return_type   : Hhas_type_info.t option;
   function_body          : Hhbc_ast.instruct list;
 }
 

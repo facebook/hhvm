@@ -228,10 +228,12 @@ let quote_str_option s =
   | Some s -> quote_str s
 
 let string_of_type_info ti =
-    "<" ^ quote_str_option ti.ti_user_type ^ " "
-        ^ quote_str_option ti.ti_type_constraint.tc_name ^ " "
+  let user_type = Hhas_type_info.user_type ti in
+  let type_constraint = Hhas_type_info.type_constraint ti in
+    "<" ^ quote_str_option user_type ^ " "
+        ^ quote_str_option type_constraint.tc_name ^ " "
         ^ String.concat " "
-            (List.map string_of_flag ti.ti_type_constraint.tc_flags)
+            (List.map string_of_flag type_constraint.tc_flags)
     ^ " >"
 
 let string_of_type_infos type_infos =

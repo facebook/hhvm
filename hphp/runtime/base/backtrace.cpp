@@ -196,15 +196,20 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   // Handle the top frame.
   if (btArgs.m_withSelf) {
-    // Builtins don't have a file and line number.
-    if (!fp->func()->isBuiltin()) {
-      auto const unit = fp->func()->unit();
+    // Builtins don't have a file and line number, so find the first user frame
+    auto curFp = fp;
+    auto curPc = pc;
+    while (curFp && curFp->func()->isBuiltin()) {
+      curFp = g_context->getPrevVMState(curFp, &curPc);
+    }
+    if (curFp) {
+      auto const unit = curFp->func()->unit();
       assert(unit);
-      auto const filename = fp->func()->filename();
+      auto const filename = curFp->func()->filename();
 
       ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
       frame.set(s_file, Variant{const_cast<StringData*>(filename)});
-      frame.set(s_line, unit->getLineNumber(pc));
+      frame.set(s_line, unit->getLineNumber(curPc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
         frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));

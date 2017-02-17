@@ -66,19 +66,19 @@ Running test_compact_walk() #2....
 test_compact_walk() done
 Running test_compact_errors() #1....
 
-Warning: compact() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: compact() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 42
 
-Warning: compact() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: compact() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 43
 
-Warning: compact() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: compact() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 44
 test_compact_errors() done
 Running test_compact_errors() #2....
 
-Warning: compact() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: compact() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 42
 
-Warning: compact() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: compact() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 43
 
-Warning: compact() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: compact() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 44
 test_compact_errors() done
 Running test_extract_dyncall() #1....
 int(100)
@@ -130,27 +130,27 @@ int(200)
 test_extract_map() done
 Running test_extract_errors() #1....
 
-Warning: extract() expects at least 1 parameter, 0 given in %s on line %d
+Warning: extract() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 100
 
-Warning: extract() expects parameter 1 to be array in %s on line %d
+Warning: extract() expects parameter 1 to be array in %s/test/slow/disallow_varenv_dyncalls.inc on line 101
 
-Warning: extract() expects at most 3 parameters, 4 given in %s on line %d
+Warning: extract() expects at most 3 parameters, 4 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 102
 
-Warning: extract() expects parameter 1 to be array
+Warning: extract() expects parameter 1 to be array in %s/test/slow/disallow_varenv_dyncalls.inc on line 103
 
-Warning: extract() expects parameter 1 to be array in %s on line %d
+Warning: extract() expects parameter 1 to be array in %s/test/slow/disallow_varenv_dyncalls.inc on line 105
 test_extract_errors() done
 Running test_extract_errors() #2....
 
-Warning: extract() expects at least 1 parameter, 0 given in %s on line %d
+Warning: extract() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 100
 
-Warning: extract() expects parameter 1 to be array in %s on line %d
+Warning: extract() expects parameter 1 to be array in %s/test/slow/disallow_varenv_dyncalls.inc on line 101
 
-Warning: extract() expects at most 3 parameters, 4 given in %s on line %d
+Warning: extract() expects at most 3 parameters, 4 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 102
 
-Warning: extract() expects parameter 1 to be array
+Warning: extract() expects parameter 1 to be array in %s/test/slow/disallow_varenv_dyncalls.inc on line 103
 
-Warning: extract() expects parameter 1 to be array in %s on line %d
+Warning: extract() expects parameter 1 to be array in %s/test/slow/disallow_varenv_dyncalls.inc on line 105
 test_extract_errors() done
 Running test_parse_str_dyncall() #1....
 int(100)
@@ -202,19 +202,19 @@ int(200)
 test_parse_str_map() done
 Running test_parse_str_errors() #1....
 
-Warning: parse_str() expects at least 1 parameter, 0 given in %s on line %d
+Warning: parse_str() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 165
 
-Warning: parse_str() expects parameter 1 to be string, array given in %s on line %d
+Warning: parse_str() expects parameter 1 to be string, array given in %s/test/slow/disallow_varenv_dyncalls.inc on line 166
 
-Warning: parse_str() expects parameter 1 to be string, array given
+Warning: parse_str() expects parameter 1 to be string, array given in %s/test/slow/disallow_varenv_dyncalls.inc on line 167
 test_parse_str_errors() done
 Running test_parse_str_errors() #2....
 
-Warning: parse_str() expects at least 1 parameter, 0 given in %s on line %d
+Warning: parse_str() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 165
 
-Warning: parse_str() expects parameter 1 to be string, array given in %s on line %d
+Warning: parse_str() expects parameter 1 to be string, array given in %s/test/slow/disallow_varenv_dyncalls.inc on line 166
 
-Warning: parse_str() expects parameter 1 to be string, array given
+Warning: parse_str() expects parameter 1 to be string, array given in %s/test/slow/disallow_varenv_dyncalls.inc on line 167
 test_parse_str_errors() done
 Running test_framemeta_dyncall() #1....
 int(100)
@@ -242,19 +242,19 @@ string(8) "metadata"
 test_framemeta_cuf_array() done
 Running test_framemeta_errors() #1....
 
-Warning: HH\set_frame_metadata() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: HH\set_frame_metadata() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 208
 
-Warning: HH\set_frame_metadata() expects exactly 1 parameter, 3 given in %s on line %d
+Warning: HH\set_frame_metadata() expects exactly 1 parameter, 3 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 209
 
-Warning: HH\set_frame_metadata() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: HH\set_frame_metadata() expects exactly 1 parameter, 2 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 211
 test_framemeta_errors() done
 Running test_framemeta_errors() #2....
 
-Warning: HH\set_frame_metadata() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: HH\set_frame_metadata() expects exactly 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 208
 
-Warning: HH\set_frame_metadata() expects exactly 1 parameter, 3 given in %s on line %d
+Warning: HH\set_frame_metadata() expects exactly 1 parameter, 3 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 209
 
-Warning: HH\set_frame_metadata() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: HH\set_frame_metadata() expects exactly 1 parameter, 2 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 211
 test_framemeta_errors() done
 Running test_getargs_dyncall() #1....
 array(3) {
@@ -318,15 +318,15 @@ array(3) {
 test_getargs_cuf_array() done
 Running test_getargs_errors() #1....
 
-Warning: func_get_args() expects exactly 0 parameters, 3 given in %s on line %d
+Warning: func_get_args() expects exactly 0 parameters, 3 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 248
 
-Warning: func_get_args() expects exactly 0 parameters, 2 given in %s on line %d
+Warning: func_get_args() expects exactly 0 parameters, 2 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 250
 test_getargs_errors() done
 Running test_getargs_errors() #2....
 
-Warning: func_get_args() expects exactly 0 parameters, 3 given in %s on line %d
+Warning: func_get_args() expects exactly 0 parameters, 3 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 248
 
-Warning: func_get_args() expects exactly 0 parameters, 2 given in %s on line %d
+Warning: func_get_args() expects exactly 0 parameters, 2 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 250
 test_getargs_errors() done
 Running test_assert_dyncall_pass() #1....
 int(100)
@@ -343,22 +343,22 @@ test_assert_dyncall_pass2() done
 Running test_assert_dyncall_fail() #1....
 int(100)
 
-Warning: assert(): assertion failed "($var = '200') && false" failed in %s on line %d
+Warning: assert(): assertion failed "($var = '200') && false" failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 270
 string(3) "200"
 test_assert_dyncall_fail() done
 Running test_assert_dyncall_fail() #2....
 int(100)
 
-Warning: assert(): assertion failed "($var = '200') && false" failed in %s on line %d
+Warning: assert(): assertion failed "($var = '200') && false" failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 270
 string(3) "200"
 test_assert_dyncall_fail() done
 Running test_assert_dyncall_fail2() #1....
 
-Warning: assert(): assertion failed failed in %s on line %d
+Warning: assert(): assertion failed failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 276
 test_assert_dyncall_fail2() done
 Running test_assert_dyncall_fail2() #2....
 
-Warning: assert(): assertion failed failed in %s on line %d
+Warning: assert(): assertion failed failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 276
 test_assert_dyncall_fail2() done
 Running test_assert_cuf_pass() #1....
 int(100)
@@ -375,22 +375,22 @@ test_assert_cuf_pass2() done
 Running test_assert_cuf_fail() #1....
 int(100)
 
-Warning: assert(): assertion failed "($var = '200') && false" failed in %s on line %d
+Warning: assert(): assertion failed "($var = '200') && false" failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 296
 string(3) "200"
 test_assert_cuf_fail() done
 Running test_assert_cuf_fail() #2....
 int(100)
 
-Warning: assert(): assertion failed "($var = '200') && false" failed in %s on line %d
+Warning: assert(): assertion failed "($var = '200') && false" failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 296
 string(3) "200"
 test_assert_cuf_fail() done
 Running test_assert_cuf_fail2() #1....
 
-Warning: assert(): assertion failed failed in %s on line %d
+Warning: assert(): assertion failed failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 302
 test_assert_cuf_fail2() done
 Running test_assert_cuf_fail2() #2....
 
-Warning: assert(): assertion failed failed in %s on line %d
+Warning: assert(): assertion failed failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 302
 test_assert_cuf_fail2() done
 Running test_assert_cuf_array_pass() #1....
 int(100)
@@ -407,22 +407,22 @@ test_assert_cuf_array_pass2() done
 Running test_assert_cuf_array_fail() #1....
 int(100)
 
-Warning: assert(): assertion failed "($var = '200') && false" failed in %s on line %d
+Warning: assert(): assertion failed "($var = '200') && false" failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 322
 string(3) "200"
 test_assert_cuf_array_fail() done
 Running test_assert_cuf_array_fail() #2....
 int(100)
 
-Warning: assert(): assertion failed "($var = '200') && false" failed in %s on line %d
+Warning: assert(): assertion failed "($var = '200') && false" failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 322
 string(3) "200"
 test_assert_cuf_array_fail() done
 Running test_assert_cuf_array_fail2() #1....
 
-Warning: assert(): assertion failed failed in %s on line %d
+Warning: assert(): assertion failed failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 328
 test_assert_cuf_array_fail2() done
 Running test_assert_cuf_array_fail2() #2....
 
-Warning: assert(): assertion failed failed in %s on line %d
+Warning: assert(): assertion failed failed in %s/test/slow/disallow_varenv_dyncalls.inc on line 328
 test_assert_cuf_array_fail2() done
 Running test_assert_chained() #1....
 int(100)
@@ -438,17 +438,17 @@ string(3) "400"
 test_assert_chained() done
 Running test_assert_errors() #1....
 
-Warning: assert() expects at least 1 parameter, 0 given in %s on line %d
+Warning: assert() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 402
 
-Warning: assert() expects at least 1 parameter, 0 given in %s on line %d
+Warning: assert() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 403
 
-Warning: assert() expects at least 1 parameter, 0 given in %s on line %d
+Warning: assert() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 404
 test_assert_errors() done
 Running test_assert_errors() #2....
 
-Warning: assert() expects at least 1 parameter, 0 given in %s on line %d
+Warning: assert() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 402
 
-Warning: assert() expects at least 1 parameter, 0 given in %s on line %d
+Warning: assert() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 403
 
-Warning: assert() expects at least 1 parameter, 0 given in %s on line %d
+Warning: assert() expects at least 1 parameter, 0 given in %s/test/slow/disallow_varenv_dyncalls.inc on line 404
 test_assert_errors() done

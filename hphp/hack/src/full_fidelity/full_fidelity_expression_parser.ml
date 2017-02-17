@@ -1775,6 +1775,12 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | LeftBrace ->
       let (parser, expr) = parse_xhp_body_braced_expression parser in
       (parser, Some expr)
+    | RightBrace ->
+      (* If we find a free-floating right-brace in the middle of an XHP body
+      that's just fine. It's part of the text. However, it is also likely
+      to be a mis-edit, so we'll keep it as a right-brace token so that
+      tooling can flag it as suspicious. *)
+      (parser1, Some (make_token token))
     | XHPElementName ->
       let (parser, expr) = parse_possible_xhp_expression parser in
       (parser, Some expr)

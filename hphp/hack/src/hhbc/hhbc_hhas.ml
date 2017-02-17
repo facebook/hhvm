@@ -39,7 +39,9 @@ let string_of_lit_const instruction =
   match instruction with
     | Null        -> "Null"
     | Int i       -> "Int " ^ Int64.to_string i
-    | String str    -> "String \"" ^ str ^ "\""
+    | String str  -> "String \"" ^ str ^ "\""
+    | True        -> "True"
+    | False       -> "False"
     | _ -> failwith "Not Implemented"
 
 let string_of_operator instruction =

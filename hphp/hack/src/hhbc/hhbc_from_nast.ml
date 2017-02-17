@@ -85,6 +85,13 @@ let binop_to_eqop op =
   | A.Dot -> H.ConcatEqual
   | _ -> failwith "Invalid =op"
 
+let unop_to_incdec_op op =
+  match op with
+  | A.Uincr -> H.PreIncO
+  | A.Udecr -> H.PreDecO
+  | A.Upincr -> H.PostIncO
+  | A.Updecr -> H.PostDecO
+  | _ -> failwith "Invalid incdec op"
 
 let rec from_expr expr =
   match snd expr with
@@ -97,6 +104,8 @@ let rec from_expr expr =
   | A.False -> instr H.(ILitConst False)
   | A.True -> instr H.(ILitConst True)
   | A.Lvar (_, x) -> instr H.(IGet (CGetL (Local_named x)))
+  | A.Unop (op, e) ->
+    emit_unop op e
   | A.Binop (A.Eq obop, e1, e2) ->
     emit_assignment obop e1 e2
   | A.Binop (op, e1, e2) ->
@@ -123,6 +132,23 @@ and emit_assignment obop e1 e2 =
     match obop with
     | None -> instr H.(IMutator (SetL lval))
     | Some bop -> instr H.(IMutator (SetOpL (lval, binop_to_eqop bop)))]
+
+and emit_unop op e =
+  match op with
+  | A.Utild -> gather [from_expr e; instr (H.IOp H.BitNot)]
+  | A.Unot -> gather [from_expr e; instr (H.IOp H.Not)]
+  | A.Uplus -> gather
+    [instr H.(ILitConst (Int (Int64.zero)));
+    from_expr e;
+    instr (H.IOp H.AddO)]
+  | A.Uminus -> gather
+    [instr H.(ILitConst (Int (Int64.zero)));
+    from_expr e;
+    instr (H.IOp H.SubO)]
+  | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
+    let instrs, lval = emit_lval e in
+    gather [instrs; instr H.(IMutator (IncDecL (lval, unop_to_incdec_op op)))]
+  | A.Uref -> failwith "references - NYI"
 
 and from_exprs exprs =
   gather (List.map exprs from_expr)

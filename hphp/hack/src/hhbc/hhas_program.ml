@@ -8,11 +8,9 @@
  *
 *)
 
-open Hhbc_ast
-
 type t = {
-  hhas_fun     : fun_def list;
-  hhas_classes : class_def list;
+  hhas_fun     : Hhbc_ast.fun_def list;
+  hhas_classes : Hhas_class.t list;
 }
 
 let make hhas_fun hhas_classes =

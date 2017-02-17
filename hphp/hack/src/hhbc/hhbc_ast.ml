@@ -541,19 +541,3 @@ type method_def = {
   (* TODO: return type *)
   method_body          : instruct list;
 }
-
-type class_def = {
-  (* TODO attributes *)
-  (* TODO generic type parameters *)
-  class_base         : type_info option;
-  class_implements   : type_info list;
-  class_name         : Litstr.id;
-  class_is_final     : bool;
-  class_is_abstract  : bool;
-  class_is_interface : bool;
-  class_is_trait     : bool;
-  class_is_enum      : bool;
-  class_methods      : method_def list;
-  (* TODO other members *)
-  (* TODO XHP stuff *)
-}

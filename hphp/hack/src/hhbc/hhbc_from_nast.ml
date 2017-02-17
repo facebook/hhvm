@@ -418,7 +418,7 @@ let from_implements tparams implements =
   *)
   hints_to_type_infos ~always_extended:false tparams implements
 
-let from_class : Nast.class_ -> Hhbc_ast.class_def =
+let from_class : Nast.class_ -> Hhas_class.t =
   (* TODO user attributes *)
   fun nast_class ->
   let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
@@ -440,16 +440,16 @@ let from_class : Nast.class_ -> Hhbc_ast.class_def =
   let class_methods = from_methods nast_methods in
   let class_methods = add_constructor nast_class class_methods in
   (* TODO: other class members *)
-  { H.class_name;
-    class_base;
-    class_implements;
-    class_is_final;
-    class_is_trait;
-    class_is_enum;
-    class_is_interface;
-    class_is_abstract;
+  Hhas_class.make
+    class_base
+    class_implements
+    class_name
+    class_is_final
+    class_is_abstract
+    class_is_interface
+    class_is_trait
+    class_is_enum
     class_methods
-  }
 
 let from_classes nast_classes =
   Core.List.map nast_classes from_class

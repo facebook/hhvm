@@ -292,11 +292,11 @@ let add_method_def buf method_def =
 
 let class_special_attributes c =
   let attrs = [] in
-  let attrs = if c.class_is_trait then "trait" :: attrs else attrs in
-  let attrs = if c.class_is_interface then "interface" :: attrs else attrs in
-  let attrs = if c.class_is_final then "final" :: attrs else attrs in
-  let attrs = if c.class_is_enum then "enum" :: attrs else attrs in
-  let attrs = if c.class_is_abstract then "abstract" :: attrs else attrs in
+  let attrs = if Hhas_class.is_trait c then "trait" :: attrs else attrs in
+  let attrs = if Hhas_class.is_interface c then "interface" :: attrs else attrs in
+  let attrs = if Hhas_class.is_final c then "final" :: attrs else attrs in
+  let attrs = if Hhas_class.is_enum c then "enum" :: attrs else attrs in
+  let attrs = if Hhas_class.is_abstract c then "abstract" :: attrs else attrs in
   let text = String.concat " " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
@@ -324,11 +324,11 @@ let add_class_def buf class_def =
   (* TODO: user attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
-  B.add_string buf class_def.class_name;
-  add_extends buf class_def.class_base;
-  add_implements buf class_def.class_implements;
+  B.add_string buf (Hhas_class.name class_def);
+  add_extends buf (Hhas_class.base class_def);
+  add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {\n";
-  List.iter (add_method_def buf) class_def.class_methods;
+  List.iter (add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)
   B.add_string buf "}\n"
 

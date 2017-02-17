@@ -11,7 +11,7 @@
 (* Type info has additional optional user type *)
 type t = {
   type_info_user_type : string option;
-  type_info_type_constraint : Hhbc_ast.type_constraint;
+  type_info_type_constraint : Hhas_type_constraint.t;
   (* TODO: consider making the constraint nullable *)
 }
 
@@ -22,4 +22,4 @@ let user_type ti = ti.type_info_user_type
 let type_constraint ti = ti.type_info_type_constraint
 
 let has_type_constraint ti =
-  ti.type_info_type_constraint.Hhbc_ast.tc_name <> None
+  (Hhas_type_constraint.name ti.type_info_type_constraint) <> None

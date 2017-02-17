@@ -209,15 +209,6 @@ let add_instruction_list buffer prefix instructions =
     B.add_string buffer "\n" in
   List.iter process_instr instructions
 
-let string_of_flag f =
-  match f with
-  | Nullable -> "nullable"
-  | HHType -> "hh_type"
-  | ExtendedHint -> "extended_hint"
-  | TypeVar -> "type_var"
-  | Soft -> "soft"
-  | TypeConstant -> "type_constant"
-
 let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 
 (* HHVM uses `N` to denote absence of type information. Otherwise the type
@@ -230,10 +221,13 @@ let quote_str_option s =
 let string_of_type_info ti =
   let user_type = Hhas_type_info.user_type ti in
   let type_constraint = Hhas_type_info.type_constraint ti in
+  let flags = Hhas_type_constraint.flags type_constraint in
+  let flag_strs = List.map Hhas_type_constraint.string_of_flag flags in
+  let name = Hhas_type_constraint.name type_constraint in
+  let flags_text = String.concat " " flag_strs in
     "<" ^ quote_str_option user_type ^ " "
-        ^ quote_str_option type_constraint.tc_name ^ " "
-        ^ String.concat " "
-            (List.map string_of_flag type_constraint.tc_flags)
+        ^ quote_str_option name ^ " "
+        ^ flags_text
     ^ " >"
 
 let string_of_type_infos type_infos =

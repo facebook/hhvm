@@ -492,17 +492,3 @@ type instruct =
   | IMisc of instruct_misc
   | IGet of instruct_get
   | IMutator of instruct_mutator
-
-type type_constraint_flag =
-  | Nullable
-  | HHType
-  | ExtendedHint
-  | TypeVar
-  | Soft
-  | TypeConstant
-
-(* A type constraint is just a name and flags *)
-type type_constraint = {
-  tc_flags : type_constraint_flag list;
-  tc_name : string option;
-}

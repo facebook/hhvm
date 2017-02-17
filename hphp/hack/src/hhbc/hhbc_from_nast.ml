@@ -13,6 +13,7 @@ open Core
 module A = Ast
 module N = Nast
 module H = Hhbc_ast
+module TC = Hhas_type_constraint
 
 (* The various from_X functions below take some kind of AST (expression,
  * statement, etc.) and produce what is logically a sequence of instructions.
@@ -241,46 +242,57 @@ let rec fmt_hint (_, h) =
         (extract_shape_fields smap) in
     "HH\\shape(" ^ String.concat ", " shape_fields ^ ")"
 
-open Hhbc_ast
-
 let rec hint_to_type_constraint tparams (_, h) =
 match h with
 | N.Hany | N.Hmixed | N.Hfun (_, _, _) | N.Hthis
 | N.Hprim N.Tvoid ->
-  { tc_name = None; tc_flags = [] }
+  TC.make None []
 
 | N.Hprim prim ->
-  { tc_name = Some (fmt_prim prim); tc_flags = [HHType] }
+  let tc_name = Some (fmt_prim prim) in
+  let tc_flags = [TC.HHType] in
+  TC.make tc_name tc_flags
 
 | N.Haccess (_, _) ->
-  { tc_name = Some ""; tc_flags = [HHType; ExtendedHint; TypeConstant] }
+  let tc_name = Some "" in
+  let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
+  TC.make tc_name tc_flags
 
 (* Need to differentiate between type params and classes *)
 | N.Habstr s | N.Happly ((_, s), _) ->
   if List.mem tparams s then
-    { tc_name = Some ""; tc_flags = [HHType; ExtendedHint; TypeVar] }
+    let tc_name = Some "" in
+    let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
+    TC.make tc_name tc_flags
   else
-    { tc_name = Some s; tc_flags = [HHType] }
+    let tc_name = Some s in
+    let tc_flags = [TC.HHType] in
+    TC.make tc_name tc_flags
 
 (* Shapes and tuples are just arrays *)
 | N.Harray (_, _) | N.Hshape _ |  N.Htuple _ ->
-  { tc_name = Some "array"; tc_flags = [HHType] }
+  let tc_name = Some "array" in
+  let tc_flags = [TC.HHType] in
+  TC.make tc_name tc_flags
 
 | N.Hoption t ->
-  let { tc_name; tc_flags } = hint_to_type_constraint tparams t in
-  { tc_name = tc_name;
-    tc_flags = List.dedup ([Nullable; HHType; ExtendedHint] @ tc_flags) }
+  let tc = hint_to_type_constraint tparams t in
+  let tc_name = TC.name tc in
+  let tc_flags = TC.flags tc in
+  let tc_flags = List.dedup
+    ([TC.Nullable; TC.HHType; TC.ExtendedHint] @ tc_flags) in
+  TC.make tc_name tc_flags
 
 let hint_to_type_info ~always_extended tparams h =
-  let { tc_name; tc_flags } = hint_to_type_constraint tparams h in
+  let tc = hint_to_type_constraint tparams h in
+  let tc_name = TC.name tc in
+  let tc_flags = TC.flags tc in
+  let tc_flags =
+    if always_extended && tc_name != None
+    then List.dedup (TC.ExtendedHint :: tc_flags)
+    else tc_flags in
   let type_info_user_type = Some (fmt_hint h) in
-  let type_info_type_constraint =
-  { tc_name = tc_name;
-    tc_flags =
-      if always_extended && tc_name != None
-      then List.dedup (ExtendedHint :: tc_flags)
-      else tc_flags;
-  } in
+  let type_info_type_constraint = TC.make tc_name tc_flags in
   Hhas_type_info.make type_info_user_type type_info_type_constraint
 
 let hints_to_type_infos ~always_extended tparams hints =

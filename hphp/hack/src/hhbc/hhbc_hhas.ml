@@ -266,12 +266,12 @@ let add_fun_def buf fun_def =
 
 let method_special_attributes m =
   let attrs = [] in
-  let attrs = if m.method_is_static then "static" :: attrs else attrs in
-  let attrs = if m.method_is_final then "final" :: attrs else attrs in
-  let attrs = if m.method_is_abstract then "abstract" :: attrs else attrs in
-  let attrs = if m.method_is_public then "public" :: attrs else attrs in
-  let attrs = if m.method_is_protected then "protected" :: attrs else attrs in
-  let attrs = if m.method_is_private then "private" :: attrs else attrs in
+  let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
+  let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
+  let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
+  let attrs = if Hhas_method.is_public m then "public" :: attrs else attrs in
+  let attrs = if Hhas_method.is_protected m then "protected" :: attrs else attrs in
+  let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
   let text = String.concat " " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
@@ -280,14 +280,14 @@ let add_method_def buf method_def =
   (* TODO: attributes *)
   B.add_string buf "\n  .method ";
   B.add_string buf (method_special_attributes method_def);
-  B.add_string buf method_def.method_name;
+  B.add_string buf (Hhas_method.name method_def);
   (* TODO: generic type parameters *)
   (* TODO: parameters *)
   (* TODO: where clause *)
   B.add_string buf "()";
   (* TODO: return type *)
   B.add_string buf " {\n";
-  add_instruction_list buf four_spaces method_def.method_body;
+  add_instruction_list buf four_spaces (Hhas_method.body method_def);
   B.add_string buf "  }\n"
 
 let class_special_attributes c =

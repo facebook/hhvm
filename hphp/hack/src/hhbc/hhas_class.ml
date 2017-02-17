@@ -19,7 +19,7 @@ type t = {
   class_is_interface : bool;
   class_is_trait     : bool;
   class_is_enum      : bool;
-  class_methods      : Hhbc_ast.method_def list;
+  class_methods      : Hhas_method.t list;
   (* TODO other members *)
   (* TODO XHP stuff *)
 }

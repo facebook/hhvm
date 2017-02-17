@@ -343,7 +343,7 @@ let from_fun_ : Nast.fun_ -> Hhbc_ast.fun_def option =
 let from_functions nast_functions =
   Core.List.filter_map nast_functions from_fun_
 
-let from_method : Nast.method_ -> Hhbc_ast.method_def option =
+let from_method : Nast.method_ -> Hhas_method.t option =
   fun nast_method ->
   let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
   let method_is_abstract = nast_method.Nast.m_abstract in
@@ -365,9 +365,15 @@ Fatal RuntimeOmitFrame
       from_body nast_method.N.m_tparams nast_method.N.m_params
         nast_method.N.m_ret b in
     let method_body = instr_seq_to_list body_instrs in
-    let m = { H.method_name; method_body; method_is_abstract; method_is_final;
-       method_is_private; method_is_protected; method_is_public;
-       method_is_static } in
+    let m = Hhas_method.make
+      method_is_protected
+      method_is_public
+      method_is_private
+      method_is_static
+      method_is_final
+      method_is_abstract
+      method_name
+      method_body in
     Some m
 
 let from_methods nast_methods =
@@ -388,9 +394,15 @@ let default_constructor nast_class =
   let method_is_protected = false in
   let method_is_public = true in
   let method_is_static = false in
-  { H.method_name; method_body; method_is_abstract; method_is_final;
-     method_is_private; method_is_protected; method_is_public;
-     method_is_static }
+  Hhas_method.make
+    method_is_protected
+    method_is_public
+    method_is_private
+    method_is_static
+    method_is_final
+    method_is_abstract
+    method_name
+    method_body
 
 let add_constructor nast_class class_methods =
   match nast_class.N.c_constructor with

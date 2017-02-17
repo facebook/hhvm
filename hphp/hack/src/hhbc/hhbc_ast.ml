@@ -524,20 +524,3 @@ type fun_def = {
   f_params        : param list;
   f_return_type   : type_info option;
 }
-
-type method_def = {
-  (* TODO: attributes *)
-  (* TODO: generic type parameters *)
-  (* TODO: where clause *)
-  (* TODO: is constructor / destructor / etc *)
-  method_is_protected  : bool;
-  method_is_public     : bool;
-  method_is_private    : bool;
-  method_is_static     : bool;
-  method_is_final      : bool;
-  method_is_abstract   : bool;
-  method_name          : Litstr.id;
-  (* TODO: formal parameters *)
-  (* TODO: return type *)
-  method_body          : instruct list;
-}

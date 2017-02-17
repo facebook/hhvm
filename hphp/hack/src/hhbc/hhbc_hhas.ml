@@ -286,16 +286,22 @@ let method_special_attributes m =
 
 let add_method_def buf method_def =
   (* TODO: attributes *)
+  (* TODO: In the original codegen sometimes a missing return type is not in
+  the text at all and sometimes it is <"" N  > -- which should we generate,
+  and when? *)
+  let method_name = Hhas_method.name method_def in
+  let method_return_type = Hhas_method.return_type method_def in
+  let method_params = Hhas_method.params method_def in
+  let method_body = Hhas_method.body method_def in
   B.add_string buf "\n  .method ";
   B.add_string buf (method_special_attributes method_def);
-  B.add_string buf (Hhas_method.name method_def);
+  B.add_string buf (string_of_type_info_option method_return_type);
+  B.add_string buf method_name;
   (* TODO: generic type parameters *)
-  (* TODO: parameters *)
   (* TODO: where clause *)
-  B.add_string buf "()";
-  (* TODO: return type *)
+  B.add_string buf (string_of_params method_params);
   B.add_string buf " {\n";
-  add_instruction_list buf 4 (Hhas_method.body method_def);
+  add_instruction_list buf 4 method_body;
   B.add_string buf "  }\n"
 
 let class_special_attributes c =

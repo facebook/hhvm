@@ -20,8 +20,9 @@ type t = {
   method_is_final      : bool;
   method_is_abstract   : bool;
   method_name          : Litstr.id;
+  method_params        : Hhas_param.t list;
   (* TODO: formal parameters *)
-  (* TODO: return type *)
+  method_return_type   : Hhas_type_info.t option;
   method_body          : Hhbc_ast.instruct list;
 }
 
@@ -33,6 +34,8 @@ let make
   method_is_final
   method_is_abstract
   method_name
+  method_params
+  method_return_type
   method_body = {
     method_is_protected;
     method_is_public;
@@ -41,6 +44,8 @@ let make
     method_is_final;
     method_is_abstract;
     method_name;
+    method_params;
+    method_return_type;
     method_body
   }
 
@@ -51,4 +56,6 @@ let is_static method_def = method_def.method_is_static
 let is_final method_def = method_def.method_is_final
 let is_abstract method_def = method_def.method_is_abstract
 let name method_def = method_def.method_name
+let params method_def = method_def.method_params
+let return_type method_def = method_def.method_return_type
 let body method_def = method_def.method_body

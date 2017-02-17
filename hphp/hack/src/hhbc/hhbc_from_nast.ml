@@ -404,7 +404,8 @@ Fatal RuntimeOmitFrame
   | N.NamedBody _ ->
     None
   | N.UnnamedBody b ->
-    let body_instrs, _params, _return_type_info =
+    (* TODO: params *)
+    let body_instrs, method_params, method_return_type =
       from_body nast_method.N.m_tparams nast_method.N.m_params
         nast_method.N.m_ret b in
     let method_body = instr_seq_to_list body_instrs in
@@ -416,6 +417,8 @@ Fatal RuntimeOmitFrame
       method_is_final
       method_is_abstract
       method_name
+      method_params
+      method_return_type
       method_body in
     Some m
 
@@ -437,6 +440,8 @@ let default_constructor nast_class =
   let method_is_protected = false in
   let method_is_public = true in
   let method_is_static = false in
+  let method_params = [] in
+  let method_return_type = None in
   Hhas_method.make
     method_is_protected
     method_is_public
@@ -445,6 +450,8 @@ let default_constructor nast_class =
     method_is_final
     method_is_abstract
     method_name
+    method_params
+    method_return_type
     method_body
 
 let add_constructor nast_class class_methods =

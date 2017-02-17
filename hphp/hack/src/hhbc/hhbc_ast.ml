@@ -545,7 +545,7 @@ type method_def = {
 type class_def = {
   (* TODO attributes *)
   (* TODO generic type parameters *)
-  (* TODO extends *)
+  class_base         : type_info option;
   (* TODO implements *)
   class_name         : Litstr.id;
   class_is_final     : bool;

@@ -395,11 +395,18 @@ let add_constructor nast_class class_methods =
       | Some m -> m :: class_methods
     end
 
+let from_extends tparams extends =
+  (* TODO: This prints out "extends <"\\Mammal" "\\Mammal" hh_type >"
+  instead of "extends Mammal" -- figure out how to have it produce the
+  simpler form in this clause.
+  *)
+  match extends with
+  | [] -> None
+  | h :: _ -> Some (hint_to_type_info ~always_extended:false tparams h)
+
 let from_class : Nast.class_ -> Hhbc_ast.class_def =
-  (* TODO extends *)
   (* TODO implements *)
   (* TODO user attributes *)
-  (* TODO generic type parameters *)
   (* TODO Deal with the body of the class *)
   fun nast_class ->
   let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
@@ -409,11 +416,13 @@ let from_class : Nast.class_ -> Hhbc_ast.class_def =
   let class_is_abstract = nast_class.N.c_kind = Ast.Cabstract in
   let class_is_final =
     nast_class.N.c_final || class_is_trait || class_is_enum in
+  let tparams = [] in (* TODO: type parameters *)
+  let class_base = from_extends tparams nast_class.N.c_extends in
   let nast_methods = nast_class.N.c_methods @ nast_class.N.c_static_methods in
   let class_methods = from_methods nast_methods in
   let class_methods = add_constructor nast_class class_methods in
 
-  { H.class_name; class_is_final; class_is_trait; class_is_enum;
+  { H.class_name; class_base; class_is_final; class_is_trait; class_is_enum;
     class_is_interface; class_is_abstract; class_methods }
 
 let from_classes nast_classes =

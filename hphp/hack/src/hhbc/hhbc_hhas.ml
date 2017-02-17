@@ -234,6 +234,9 @@ let string_of_type_info ti =
             (List.map string_of_flag ti.ti_type_constraint.tc_flags)
     ^ " >"
 
+let add_type_info buf ti =
+  B.add_string buf (string_of_type_info ti)
+
 let string_of_type_info_option tio =
   match tio with
   | None -> ""
@@ -291,13 +294,22 @@ let class_special_attributes c =
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
 
+let add_extends buf class_base =
+  match class_base with
+  | None -> ()
+  | Some type_info ->
+    begin
+      B.add_string buf " extends ";
+      add_type_info buf type_info;
+    end
+
 let add_class_def buf class_def =
   (* TODO: user attributes *)
   (* TODO: attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf class_def.class_name;
-  (* TODO: extends *)
+  add_extends buf class_def.class_base;
   (* TODO: implements *)
   B.add_string buf " {\n";
   List.iter (add_method_def buf) class_def.class_methods;

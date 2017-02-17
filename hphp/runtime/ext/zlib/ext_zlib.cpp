@@ -69,7 +69,6 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
     auto file = req::make<ZipFile>();
     bool ret = file->open(translated, mode);
     if (!ret) {
-      raise_warning("%s", file->getLastError().c_str());
       return nullptr;
     }
     return file;

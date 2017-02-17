@@ -211,11 +211,13 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 String getWrapperProtocol(const char* uri_string, int* pathIndex) {
   /* Special case for PHP4 Backward Compatibility */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
+    if (pathIndex != nullptr) *pathIndex = sizeof("zlib:") - 1;
     return s_compress_zlib;
   }
 
   // data wrapper can come with or without a double forward slash
   if (!strncasecmp(uri_string, "data:", sizeof("data:") - 1)) {
+    if (pathIndex != nullptr) *pathIndex = sizeof("data:") - 1;
     return s_data;
   }
 
@@ -231,6 +233,7 @@ String getWrapperProtocol(const char* uri_string, int* pathIndex) {
   }
 
   if (!colon) {
+    if (pathIndex != nullptr) *pathIndex = 0;
     return s_file;
   }
 

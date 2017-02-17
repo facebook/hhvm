@@ -327,7 +327,8 @@ let add_top_level buf hhas_prog =
 
 let to_string hhas_prog =
   let buf = Buffer.create 1024 in
+  B.add_string buf "#starts here\n";
   add_top_level buf hhas_prog;
   add_prog buf hhas_prog;
-  B.add_string buf "\n";
+  B.add_string buf "\n#ends here\n";
   B.contents buf

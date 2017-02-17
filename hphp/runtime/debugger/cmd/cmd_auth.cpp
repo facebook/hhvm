@@ -38,24 +38,11 @@ void CmdAuth::recvImpl(DebuggerThriftBuffer& thrift) {
   thrift.read(m_sandboxPath);
 }
 
-std::string CmdAuth::getFullTokenScriptPath(
-  const std::string& tokenScriptPath) {
-  // Combines the sandbox path (if it has been set) with the token script path
-  // to form a full path for the script to run
-  auto path = m_sandboxPath;
-  if (!m_sandboxPath.empty() &&
-      m_sandboxPath[m_sandboxPath.size() - 1] != '/') {
-    path += '/';
-  }
-  return FileUtil::expandUser(path + tokenScriptPath);
-}
-
 void CmdAuth::onClient(DebuggerClient& client) {
-  auto const path =
-    getFullTokenScriptPath(RuntimeOption::DebuggerAuthTokenScript);
-  const char *argv[] = { "", path.data(), nullptr };
-  // We *should* be invoking the file in the same process.
-  if (path.empty() || !proc::exec("php", argv, nullptr, m_token, nullptr)) {
+  auto const path = RuntimeOption::DebuggerAuthTokenScriptBin;
+  const char *argv[] = { nullptr };
+  if (path.empty() || !proc::exec(path.data(), argv, nullptr, m_token,
+      nullptr)) {
     m_token.clear();
   }
 

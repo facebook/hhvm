@@ -234,8 +234,15 @@ let string_of_type_info ti =
             (List.map string_of_flag ti.ti_type_constraint.tc_flags)
     ^ " >"
 
+let string_of_type_infos type_infos =
+  let strs = List.map string_of_type_info type_infos in
+  String.concat " " strs
+
 let add_type_info buf ti =
   B.add_string buf (string_of_type_info ti)
+
+let add_type_infos buf type_infos =
+  B.add_string buf (string_of_type_infos type_infos)
 
 let string_of_type_info_option tio =
   match tio with
@@ -303,18 +310,26 @@ let add_extends buf class_base =
       add_type_info buf type_info;
     end
 
+let add_implements buf class_implements =
+  match class_implements with
+  | [] -> ()
+  | _ ->
+  begin
+    B.add_string buf " implements (";
+    add_type_infos buf class_implements;
+    B.add_string buf ") ";
+  end
+
 let add_class_def buf class_def =
   (* TODO: user attributes *)
-  (* TODO: attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf class_def.class_name;
   add_extends buf class_def.class_base;
-  (* TODO: implements *)
+  add_implements buf class_def.class_implements;
   B.add_string buf " {\n";
   List.iter (add_method_def buf) class_def.class_methods;
   (* TODO: other members *)
-  (* TODO: If there is no ctor, generate one *)
   B.add_string buf "}\n"
 
 let add_prog buf prog =

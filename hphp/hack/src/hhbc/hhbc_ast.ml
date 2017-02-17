@@ -546,7 +546,7 @@ type class_def = {
   (* TODO attributes *)
   (* TODO generic type parameters *)
   class_base         : type_info option;
-  (* TODO implements *)
+  class_implements   : type_info list;
   class_name         : Litstr.id;
   class_is_final     : bool;
   class_is_abstract  : bool;

@@ -394,7 +394,14 @@ void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
     assert(isGlobalScope() && m_depth == 0);
   } else {
     assert(m_depth >= 1);
-    assert(g_context->getPrevVMState(newFP) == oldFP);
+    if (debug) {
+      auto prev = newFP;
+      while (true) {
+        prev = g_context->getPrevVMState(prev);
+        if (prev == oldFP) break;
+        assert(!(prev->m_func->attrs() & AttrMayUseVV) || !prev->m_varEnv);
+      }
+    }
     m_nvTable.detach(oldFP);
   }
 
@@ -426,9 +433,15 @@ void VarEnv::exitFP(ActRec* fp) {
       req::destroy_raw(this);
     }
   } else {
-    auto const prevFP = g_context->getPrevVMState(fp);
-    assert(prevFP->func()->attrs() & AttrMayUseVV);
-    m_nvTable.attach(prevFP);
+    while (true) {
+      auto const prevFP = g_context->getPrevVMState(fp);
+      if (prevFP->func()->attrs() & AttrMayUseVV &&
+          prevFP->m_varEnv == this) {
+        m_nvTable.attach(prevFP);
+        break;
+      }
+      fp = prevFP;
+    }
   }
 }
 
@@ -1494,7 +1507,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
     enterFnAr->setVarEnv(varEnv);
     assert(enterFnAr->func()->isPseudoMain());
     pushLocalsAndIterators(enterFnAr->func());
-    enterFnAr->m_varEnv->enterFP(vmfp(), enterFnAr);
+    varEnv->enterFP(varEnv->getFP(), enterFnAr);
     vmfp() = enterFnAr;
     vmpc() = enterFnAr->func()->getEntry();
   } else {

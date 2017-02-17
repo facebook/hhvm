@@ -588,7 +588,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
         let compiled_classes = Hhbc_from_nast.from_classes named_classes in
         let _compiled_typedefs = [] in (* TODO *)
         let _compiled_consts = [] in (* TODO *)
-        let hhas_prog = Hhbc_ast.make compiled_funs compiled_classes in
+        let hhas_prog = Hhas_program.make compiled_funs compiled_classes in
         Hhbc_hhas.to_string hhas_prog in
       text ^ hhas_text
     end in

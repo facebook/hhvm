@@ -332,10 +332,6 @@ let add_class_def buf class_def =
   (* TODO: other members *)
   B.add_string buf "}\n"
 
-let add_prog buf prog =
-  List.iter (add_fun_def buf) prog.hhas_fun;
-  List.iter (add_class_def buf) prog.hhas_classes
-
 let add_defcls buf classes =
   List.iteri
     (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
@@ -348,14 +344,18 @@ let add_top_level buf hhas_prog =
     ] in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
-  add_defcls buf hhas_prog.hhas_classes;
+  add_defcls buf (Hhas_program.classes hhas_prog);
   add_instruction_list buf two_spaces main_stmts;
   B.add_string buf "}\n"
 
-let to_string hhas_prog =
-  let buf = Buffer.create 1024 in
+let add_program buf hhas_prog =
   B.add_string buf "#starts here\n";
   add_top_level buf hhas_prog;
-  add_prog buf hhas_prog;
-  B.add_string buf "\n#ends here\n";
+  List.iter (add_fun_def buf) (Hhas_program.functions hhas_prog);
+  List.iter (add_class_def buf) (Hhas_program.classes hhas_prog);
+  B.add_string buf "\n#ends here\n"
+
+let to_string hhas_prog =
+  let buf = Buffer.create 1024 in
+  add_program buf hhas_prog;
   B.contents buf

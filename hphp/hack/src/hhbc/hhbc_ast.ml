@@ -557,11 +557,3 @@ type class_def = {
   (* TODO other members *)
   (* TODO XHP stuff *)
 }
-
-type hhas_prog = {
-  hhas_fun     : fun_def list;
-  hhas_classes : class_def list;
-}
-
-let make hhas_fun hhas_classes =
-  { hhas_fun; hhas_classes }

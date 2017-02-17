@@ -181,7 +181,7 @@ let type_file filename (funs, classes, typedefs, consts) =
 let compile_file (funs, classes, typedefs, consts) =
   let compiled_functions = Hhbc_from_nast.from_functions funs in
   let compiled_classes = Hhbc_from_nast.from_classes classes in
-  Hhbc_ast.make compiled_functions compiled_classes
+  Hhas_program.make compiled_functions compiled_classes
   (* TODO: typedefs, consts *)
 
 let do_codegen filename =

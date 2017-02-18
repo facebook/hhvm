@@ -206,7 +206,6 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
 
   size_t i = 0;
   try {
-    size_t i = 0;
     IterateV(
       arr,
       [&](const TypedValue* v) {

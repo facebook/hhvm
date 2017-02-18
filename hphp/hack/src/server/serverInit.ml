@@ -172,7 +172,7 @@ module ServerInitCommon = struct
             let old_saved = Marshal.from_channel chan in
             let dirty_files =
             List.map dirty_files Relative_path.(concat Root) in
-            HackEventLogger.vcs_changed_files_end t;
+            HackEventLogger.vcs_changed_files_end t (List.length dirty_files);
             let _ = Hh_logger.log_duration "Finding changed files" t in
             Result.Ok (
               fn,
@@ -328,6 +328,7 @@ module ServerInitCommon = struct
    * are newly created. Then we use the deptable to figure out the files
    * that referred to them. Finally we recheck the lot. *)
   let type_check_dirty genv env old_fast fast dirty_files t =
+    let start_time = Unix.gettimeofday () in
     let fast = get_dirty_fast old_fast fast dirty_files in
     let names = Relative_path.Map.fold fast ~f:begin fun _k v acc ->
       FileInfo.merge_names v acc
@@ -335,7 +336,10 @@ module ServerInitCommon = struct
     let deps = get_all_deps names in
     let to_recheck = Typing_deps.get_files deps in
     let fast = extend_fast fast env.files_info to_recheck in
-    type_check genv env fast t
+    let result = type_check genv env fast t in
+    HackEventLogger.type_check_dirty start_time
+      (Relative_path.Set.cardinal dirty_files);
+    result
 
   let get_build_targets env =
     let untracked, tracked = BuildMain.get_live_targets env in

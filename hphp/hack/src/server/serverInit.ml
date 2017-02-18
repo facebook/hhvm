@@ -677,21 +677,23 @@ let ai_check genv files_info env t =
   match ServerArgs.ai_mode genv.options with
   | Some ai_opt ->
     let all_passed = List.for_all
-      [env.failed_parsing; env.failed_decl]
+      [env.failed_parsing; env.failed_decl; env.failed_check;]
       (fun m -> Relative_path.Set.is_empty m) in
     if not all_passed then begin
       Hh_logger.log "Cannot run AI because of errors in source";
-      Exit_status.exit Exit_status.CantRunAI
-    end;
-    let check_mode = ServerArgs.check_mode genv.options in
-    let errorl, failed = Ai.go
-      Typing_check_utils.check_defs genv.workers files_info
-        env.tcopt ai_opt check_mode in
-    let env = { env with
-      errorl = Errors.merge errorl env.errorl;
-      failed_check = Relative_path.Set.union failed env.failed_check;
-    } in
-    env, (Hh_logger.log_duration "Ai" t)
+      env, t
+    end
+    else begin
+      let check_mode = ServerArgs.check_mode genv.options in
+      let errorl, failed = Ai.go
+          Typing_check_utils.check_defs genv.workers files_info
+          env.tcopt ai_opt check_mode in
+      let env = { env with
+                  errorl = Errors.merge errorl env.errorl;
+                  failed_check = Relative_path.Set.union failed env.failed_check;
+                } in
+      env, (Hh_logger.log_duration "Ai" t)
+    end
   | None -> env, t
 
 let save_state env fn =

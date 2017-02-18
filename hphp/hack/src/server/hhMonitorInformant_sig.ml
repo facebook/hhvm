@@ -6,6 +6,8 @@ module Types = struct
   type options = {
     root : Path.t;
     allow_subscriptions : bool;
+    (** Disable the informant - use the dummy instead. *)
+    use_dummy : bool;
   }
   type init_env = options
 end

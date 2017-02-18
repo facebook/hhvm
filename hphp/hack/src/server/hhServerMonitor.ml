@@ -134,6 +134,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
     let informant_options = {
       HhMonitorInformant.root = ServerArgs.root options;
       allow_subscriptions = local_config.ServerLocalConfig.watchman_subscribe;
+      use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
     } in
     SM.start_monitoring ~waiting_client informant_options ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;

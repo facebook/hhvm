@@ -299,12 +299,15 @@ type t =
   (** Informant is active. *)
   | Active of env
   (** We don't run the informant if Watchman fails to initialize,
-   * or if Watchman subscriptions are disabled in the local config. *)
+   * or if Watchman subscriptions are disabled in the local config,
+   * or if the informant is disabled in the hhconfig. *)
   | Resigned
 
-let init { root; allow_subscriptions; } =
+let init { root; allow_subscriptions; use_dummy } =
+  if use_dummy then
+    Resigned
   (** Active informant requires Watchman subscriptions. *)
-  if not allow_subscriptions then
+  else if not allow_subscriptions then
     Resigned
   else
     let watchman = Watchman.init {

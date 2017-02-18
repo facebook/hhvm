@@ -725,6 +725,7 @@ public:
   static bool EnableDebuggerServer;
   static bool EnableDebuggerUsageLog;
   static bool DebuggerDisableIPv6;
+  static std::string DebuggerServerIP;
   static int DebuggerServerPort;
   static int DebuggerDefaultRpcPort;
   static std::string DebuggerDefaultRpcAuth;

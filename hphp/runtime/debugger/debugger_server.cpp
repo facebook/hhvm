@@ -88,7 +88,10 @@ bool DebuggerServer::start() {
     hint.ai_family = AF_INET;
   }
 
-  if (getaddrinfo(nullptr, std::to_string(port).c_str(), &hint, &ai)) {
+  const auto nodename = RuntimeOption::DebuggerServerIP.empty()
+    ? "localhost"
+    : RuntimeOption::DebuggerServerIP.c_str();
+  if (getaddrinfo(nodename, std::to_string(port).c_str(), &hint, &ai)) {
     Logger::Error("unable to get address information");
     return false;
   }

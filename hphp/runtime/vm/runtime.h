@@ -164,7 +164,7 @@ frame_free_locals_no_this_inl(ActRec* fp, int numLocals, TypedValue* rv) {
 // Helper for iopFCallBuiltin.
 void ALWAYS_INLINE
 frame_free_args(TypedValue* args, int count) {
-  for (int i = 0; i < count; i++) {
+  for (auto i = count; i--; ) {
     TypedValue* loc = args - i;
     DataType t = loc->m_type;
     if (isRefcountedType(t)) {

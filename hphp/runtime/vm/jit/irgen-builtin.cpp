@@ -867,7 +867,7 @@ struct CatchMaker {
     auto const exit = defBlock(env, Block::Hint::Unlikely);
     BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
     gen(env, BeginCatch);
-    decRefForUnwind();
+    decRefParams();
     prepareForCatch();
     gen(env, EndCatch,
         IRSPRelOffsetData { spOffBCFromIRSP(env) },
@@ -890,7 +890,7 @@ struct CatchMaker {
       },
       [&] {
         hint(env, Block::Hint::Unused);
-        decRefForUnwind();
+        decRefParams();
         prepareForCatch();
         gen(env, EndCatch,
           IRSPRelOffsetData { spOffBCFromIRSP(env) },
@@ -909,7 +909,7 @@ struct CatchMaker {
       // We need to push the unwinder value and then side-exit to the next
       // instruction.
       hint(env, Block::Hint::Unlikely);
-      decRefForSideExit();
+      decRefParams();
       if (m_params.thiz && m_params.thiz->type() <= TObj) {
         decRef(env, m_params.thiz);
       }
@@ -922,8 +922,26 @@ struct CatchMaker {
     return exit;
   }
 
-  void decRefByPopping() const {
-    decRefForUnwind();
+  /*
+   * DecRef the params in preparation for an exception or side
+   * exit. Parameters that are not being passed through the stack
+   * still may need to be decref'd, because they may have been a
+   * reference counted type that was going to be converted to a
+   * non-reference counted type that we'd pass in a register.  As we
+   * do the coersions, params.value gets updated so whenever we call
+   * these catch block creation functions it will only decref things
+   * that weren't yet converted.
+   */
+  void decRefParams() const {
+    if (m_params.forNativeImpl) return;
+    for (auto i = m_params.size(); i--; ) {
+      auto const &pi = m_params[i];
+      if (pi.passByAddr) {
+        popDecRef(env);
+      } else {
+        decRef(env, pi.value);
+      }
+    }
   }
 
 private:
@@ -947,48 +965,6 @@ private:
     auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
-  }
-
-  /*
-   * For consistency with the interpreter, we need to decref things in a
-   * different order depending on whether we are unwinding, or planning to side
-   * exit.
-   *
-   * In either case, parameters that are not being passed through the stack
-   * still may need to be decref'd, because they may have been a reference
-   * counted type that was going to be converted to a non-reference counted
-   * type that we'd pass in a register.  As we do the coersions, params.value
-   * gets updated so whenever we call these catch block creation functions it
-   * will only decref things that weren't yet converted.
-   */
-
-  void decRefForUnwind() const {
-    if (m_params.forNativeImpl) return;
-    for (auto i = m_params.size(); i--; ) {
-      auto const &pi = m_params[i];
-      if (pi.passByAddr) {
-        popDecRef(env);
-      } else {
-        decRef(env, pi.value);
-      }
-    }
-  }
-
-  // Same work as above, but opposite order.
-  void decRefForSideExit() const {
-    assertx(!m_params.forNativeImpl);
-    int32_t stackIdx = safe_cast<int32_t>(m_params.numByAddr);
-
-    for (auto i = m_params.size(); i-- > 0;) {
-      if (m_params[i].passByAddr) {
-        --stackIdx;
-        auto const val = top(env, BCSPRelOffset{stackIdx}, DataTypeGeneric);
-        decRef(env, val);
-      } else {
-        decRef(env, m_params[i].value);
-      }
-    }
-    discard(env, m_params.numByAddr);
   }
 
 private:
@@ -1362,7 +1338,7 @@ SSATmp* builtinCall(IRGS& env,
     if (params.thiz && params.thiz->type() <= TObj) {
       decRef(env, params.thiz);
     }
-    catchMaker.decRefByPopping();
+    catchMaker.decRefParams();
   }
 
   return ret;

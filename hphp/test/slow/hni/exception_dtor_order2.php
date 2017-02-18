@@ -1,6 +1,7 @@
 <?hh
 
-function err() {} set_error_handler('err');
+function err() { throw new Exception; }
+set_error_handler('err');
 
 class dtor {
   public function __construct(private int $i) {}

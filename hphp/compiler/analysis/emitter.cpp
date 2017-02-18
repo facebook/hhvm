@@ -8883,6 +8883,7 @@ void EmitterVisitor::emitPostponedPSinit(PostponedNonScalars& p, bool pinit) {
       e.JmpNZ(isset);
     }
     visit((*p.m_vec)[i].second);
+    emitConvertToCell(e);
     e.InitProp(const_cast<StringData*>(propName), op);
     isset.set(e);
   }

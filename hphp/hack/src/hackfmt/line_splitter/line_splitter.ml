@@ -37,7 +37,10 @@ let find_best_state queue =
   let best = State_queue.pop queue in
   let queue = expand_state queue best in
   let rec aux count acc queue =
-    if State_queue.is_empty queue || count > 200 || acc.Solve_state.overflow = 0
+    if
+      State_queue.is_empty queue ||
+      count > 2000 ||
+      acc.Solve_state.overflow = 0
     then acc
     else
       let state = State_queue.pop queue in

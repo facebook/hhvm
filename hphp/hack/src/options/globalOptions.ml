@@ -34,12 +34,11 @@ type t = {
  po_auto_namespace_map : (string * string) list;
 }
 
-let tco_experimental_dict = "dict"
 let tco_experimental_instanceof = "instanceof"
 let tco_experimental_all =
  List.fold_left
    (fun acc x -> SSet.add x acc) SSet.empty
-   [tco_experimental_dict; tco_experimental_instanceof]
+   [tco_experimental_instanceof]
 
 let default = {
  tco_assume_php = true;

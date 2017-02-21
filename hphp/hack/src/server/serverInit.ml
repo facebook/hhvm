@@ -34,15 +34,7 @@ module ServerInitCommon = struct
       (List.map ~f:(Relative_path.(create Root)))
       (genv.indexer ServerEnv.file_filter) in
     let hhi_root = Hhi.get_hhi_root () in
-    let hhi_filter = begin fun s ->
-      (FindUtils.is_php s)
-        (** If experimental disabled, we don't parse hhi files under
-         * the experimental directory. *)
-        && (TypecheckerOptions.experimental_feature_enabled
-            (ServerConfig.typechecker_options genv.config)
-            TypecheckerOptions.experimental_dict
-          || not (FindUtils.has_ancestor s "experimental"))
-    end in
+    let hhi_filter = FindUtils.is_php in
     let next_files_hhi = compose
       (List.map ~f:(Relative_path.(create Hhi)))
       (Find.make_next_files

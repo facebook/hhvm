@@ -904,17 +904,11 @@ let class_id_to_str = function
   | CIexpr _ -> assert false
   | CI x -> get_instantiated_sid_name x
 
-let is_kvc_kind experimental_enabled p name = match name with
-  | x when
-    x = SN.Collections.cMap
-    || x = SN.Collections.cImmMap
-    || x = SN.Collections.cStableMap -> true
-  | x when x = SN.Collections.cDict -> begin
-    if not experimental_enabled then
-      Errors.experimental_feature p "dict";
-    true
-  end
-  | _ -> false
+let is_kvc_kind name =
+  name = SN.Collections.cMap ||
+  name = SN.Collections.cImmMap ||
+  name = SN.Collections.cStableMap ||
+  name = SN.Collections.cDict
 
 let get_kvc_kind name = match name with
   | x when x = SN.Collections.cMap -> `Map
@@ -930,20 +924,13 @@ let kvc_kind_to_name kind = match kind with
   | `ImmMap -> SN.Collections.cImmMap
   | `Dict -> SN.Collections.cDict
 
-let is_vc_kind experimental_enabled p name =
+let is_vc_kind name =
   name = SN.Collections.cVector ||
   name = SN.Collections.cImmVector ||
   name = SN.Collections.cSet ||
   name = SN.Collections.cImmSet ||
-  (if name = SN.Collections.cKeyset then begin
-    if not experimental_enabled then
-      Errors.experimental_feature p "keyset";
-    true
-  end else if name = SN.Collections.cVec then begin
-    if not experimental_enabled then
-      Errors.experimental_feature p "vec";
-    true
-  end else false)
+  name = SN.Collections.cKeyset ||
+  name = SN.Collections.cVec
 
 let get_vc_kind name = match name with
   | x when x = SN.Collections.cVector -> `Vector

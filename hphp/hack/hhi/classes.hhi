@@ -138,14 +138,12 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
     array<WaitHandle<T>> $deps
   ): WaitHandle<void>;
   public static function fromDict<Tk, Tv>(
-    /* HH_IGNORE_ERROR[2049] experimental feature */
     dict<Tk, WaitHandle<Tv>> $deps
   ): WaitHandle<void>;
   public static function fromMap<Tk, Tv>(
     ConstMap<Tk, WaitHandle<Tv>> $deps
   ): WaitHandle<void>;
   public static function fromVec<T>(
-    /* HH_IGNORE_ERROR[2049] experimental feature */
     vec<WaitHandle<T>> $deps
   ): WaitHandle<void>;
   public static function fromVector<T>(

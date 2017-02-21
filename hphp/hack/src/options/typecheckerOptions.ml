@@ -17,6 +17,5 @@ let experimental_feature_enabled =
   GlobalOptions.tco_experimental_feature_enabled
 let default = GlobalOptions.default
 let make_permissive = GlobalOptions.make_permissive
-let experimental_dict = GlobalOptions.tco_experimental_dict
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_all = GlobalOptions.tco_experimental_all

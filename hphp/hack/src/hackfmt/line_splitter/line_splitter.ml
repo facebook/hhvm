@@ -11,18 +11,26 @@
 open Core
 
 let expand_state state_queue state =
-  let chunk_group = state.Solve_state.chunk_group in
+  let { Solve_state.chunk_group; rvm; _ } = state in
   let rule_ids = Solve_state.get_candidate_rules state in
 
-  let next_rvms = List.map rule_ids ~f:(fun rule_id ->
-    if Solve_state.is_rule_bound state rule_id then []
-    else
-    List.filter_map (Rule.get_possible_values rule_id) ~f:(fun v ->
-      let next_rvm = IMap.add rule_id v state.Solve_state.rvm in
-      if Chunk_group.is_rule_value_map_valid chunk_group next_rvm
-      then Some next_rvm
-      else None
-    )
+  let _, next_rvms = List.map_env rvm rule_ids ~f:(fun env_rvm rule_id ->
+    if Solve_state.is_rule_bound state rule_id
+    then env_rvm, []
+    else begin
+      let possible_values = Rule.get_possible_values rule_id  in
+      let next_rvms = List.filter_map possible_values ~f:(fun v ->
+        let next_rvm = IMap.add rule_id v env_rvm in
+        if Chunk_group.is_rule_value_map_valid chunk_group next_rvm
+        then Some next_rvm
+        else None
+      ) in
+      let env_rvm = if List.length next_rvms = List.length possible_values
+        then IMap.add rule_id 0 env_rvm
+        else env_rvm
+      in
+      env_rvm, next_rvms
+    end
   ) in
   let next_rvms = List.concat next_rvms in
 

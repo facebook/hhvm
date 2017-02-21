@@ -8,25 +8,14 @@
  *
  *)
 
-open Core
+module SolveStateKey = struct
+  type t = Solve_state.t
+  let compare = Solve_state.compare
+end
 
-type t = {
-  queue: Solve_state.t list;
-}
+include PriorityQueue.Make(SolveStateKey)
 
-let make q =
-  {queue = q;}
-
-let add t state =
-  { queue = state :: t.queue }
-
-let is_empty t =
-  List.length t.queue = 0
-
-let get_next t =
-  (* TODO: make this queue into a heap instead of sorting here *)
-  let queue = List.sort t.queue ~cmp:Solve_state.compare in
-  match queue with
-    | hd :: tl ->
-      {queue = tl}, hd
-    | [] -> raise (Failure "Queue is empty when calling get_next\n")
+let make item =
+  let pq = make_empty 7 in
+  push pq item;
+  pq

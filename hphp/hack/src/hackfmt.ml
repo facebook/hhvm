@@ -69,6 +69,6 @@ let parse_options () =
   let end_c = Option.value_map !end_char
     ~default:(SourceText.length source_text) ~f:(fun i -> i - 1) in
 
-  source_text, start_c, end_c, !debug
+  parse_and_print (source_text, start_c, end_c, !debug)
 
-let () = parse_and_print @@ parse_options ()
+let () = parse_options ()

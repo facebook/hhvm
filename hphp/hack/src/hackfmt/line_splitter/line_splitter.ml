@@ -26,19 +26,21 @@ let expand_state state_queue state =
   ) in
   let next_rvms = List.concat next_rvms in
 
-  List.fold_left next_rvms ~init:state_queue ~f:(fun q rvm ->
+  List.iter next_rvms ~f:(fun rvm ->
     let st = Solve_state.make state.Solve_state.chunk_group rvm in
-    State_queue.add q st
-  )
+    State_queue.push state_queue st;
+  );
+  state_queue
+
 
 let find_best_state queue =
-  let queue, best = State_queue.get_next queue in
+  let best = State_queue.pop queue in
   let queue = expand_state queue best in
   let rec aux count acc queue =
     if State_queue.is_empty queue || count > 200 || acc.Solve_state.overflow = 0
     then acc
     else
-      let queue, state = State_queue.get_next queue in
+      let state = State_queue.pop queue in
       let best = Solve_state.pick_best_state state acc in
       let queue = expand_state queue state in
       aux (count + 1) best queue;
@@ -49,7 +51,7 @@ let solve chunk_groups =
   let best_states = List.map chunk_groups ~f:(fun chunk_group ->
     let rvm = Chunk_group.get_initial_rule_value_map chunk_group in
     let init_state = Solve_state.make chunk_group rvm in
-    let state_queue = State_queue.make [init_state] in
+    let state_queue = State_queue.make init_state in
     find_best_state state_queue
   ) in
   let strings = List.map best_states ~f:(fun ss ->

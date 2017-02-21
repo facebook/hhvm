@@ -653,12 +653,15 @@ offending text is '%s'." (text node)));
       ) ();
     ) ();
 
+    let after_each_ancestor is_last = if is_last then () else split ~space () in
+
     if not (is_missing extends_kw) then begin
       split ~space ();
-      tl_with ~span ~nest ~f:(fun () ->
+      tl_with ~span ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
         t extends_kw;
-        tl_with ~nest ~f:(fun () ->
-          handle_possible_list ~before_each:(split ~space) extends
+        split ~space ();
+        tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+          handle_possible_list ~after_each:after_each_ancestor extends
         ) ();
       ) ();
       ()
@@ -666,10 +669,11 @@ offending text is '%s'." (text node)));
 
     if not (is_missing impl_kw) then begin
       split ~space ();
-      tl_with ~span ~nest ~f:(fun () ->
+      tl_with ~span ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
         t impl_kw;
-        tl_with ~nest ~f:(fun () ->
-          handle_possible_list ~before_each:(split ~space) impls
+        split ~space ();
+        tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+          handle_possible_list ~after_each:after_each_ancestor impls
         ) ();
       ) ();
       ()

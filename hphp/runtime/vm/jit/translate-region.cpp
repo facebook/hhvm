@@ -907,11 +907,13 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
       if (context.kind == TransKind::Profile &&
           RuntimeOption::EvalJitPGOUsePostConditions) {
         auto const lastSrcKey = region.lastSrcKey();
-        Block* mainExit = findMainExitBlock(irgs.unit, lastSrcKey);
-        FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
-               mainExit->id(), show(irgs.unit));
-        assertx(mainExit);
-        pConds = irgs.irb->fs().postConds(mainExit);
+        if (auto const mainExit = findMainExitBlock(irgs.unit, lastSrcKey)) {
+          FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
+                 mainExit->id(), show(irgs.unit));
+          pConds = irgs.irb->fs().postConds(mainExit);
+        } else {
+          FTRACE(2, "translateRegion: no main exit\n");
+        }
       }
     } else {
       // Clear annotations from the failed attempt.

@@ -77,7 +77,11 @@ struct Env {
     , numBCInstrs(maxBCInstrs)
     , profiling(kind == TransKind::Profile)
     , inlining(inlining)
-  {}
+  {
+    if (RuntimeOption::EvalRegionRelaxGuards) {
+      irgs.irb->enableConstrainGuards();
+    }
+  }
 
   const RegionContext& ctx;
   InterpSet& interp;

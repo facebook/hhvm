@@ -409,7 +409,7 @@ void emitCastDict(IRGS& env) {
       if (src->isA(TDbl))     return raise("Double");
       if (src->isA(TStr))     return raise("String");
       if (src->isA(TRes))     return raise("Resource");
-      not_reached();
+      always_assert_flog(false, "Unexpected {} in emitCastDict", src->type());
     }()
   );
 }

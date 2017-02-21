@@ -63,85 +63,8 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
   return nullptr;
 }
 
-template <uint32_t...> struct IdxSeq {};
-
-inline bool unionTypeMightRelax(const IRInstruction* inst, IdxSeq<>) {
-  return false;
-}
-
-template <uint32_t Idx, uint32_t... Rest>
-inline bool unionTypeMightRelax(const IRInstruction* inst,
-                                IdxSeq<Idx, Rest...>) {
-  assertx(Idx < inst->numSrcs());
-  return typeMightRelax(inst->src(Idx)) ||
-    unionTypeMightRelax(inst, IdxSeq<Rest...>{});
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-/* For each possible dest type, determine if its type might relax. */
-#define ND             always_assert(false);
-#define D(t)           return false; // fixed type
-#define DofS(n)        return typeMightRelax(inst->src(n));
-#define DRefineS(n)    return true;  // typeParam may relax
-#define DLdObjCls      return typeMightRelax(inst->src(0));
-#define DParamMayRelax return true;  // typeParam may relax
-#define DParam         return false;
-#define DParamPtr(k)   return false;
-#define DUnboxPtr      return false;
-#define DBoxPtr        return false;
-#define DAllocObj      return false; // fixed type from ExtraData
-#define DArrPacked     return false; // fixed type
-#define DArrElem       assertx(inst->is(ArrayGet));           \
-                         return typeMightRelax(inst->src(0));
-#define DVecElem       assertx(inst->is(LdVecElem)); \
-                         return false;
-#define DDictElem      return dictElemMightRelax(inst);
-#define DKeysetElem    return keysetElemMightRelax(inst);
-#define DCol           return false; // fixed in bytecode
-#define DCtx           return false;
-#define DCtxCls        return false;
-#define DMulti         return true;  // DefLabel; value could be anything
-#define DSetElem       return false; // fixed type
-#define DBuiltin       return false; // from immutable typeParam
-#define DCall          return false; // fixed from static analysis
-#define DSubtract(n,t) DofS(n)
-#define DCns           return false; // fixed type
-#define DUnion(...)    return unionTypeMightRelax(inst, IdxSeq<__VA_ARGS__>{});
-#define DMemoKey       assertx(inst->is(GetMemoKey)); \
-                         return typeMightRelax(inst->src(0));
-
-bool typeMightRelax(const SSATmp* tmp) {
-  if (tmp == nullptr) return true;
-
-  if (tmp->isA(TCls) || tmp->type() == TGen) return false;
-  if (canonical(tmp)->inst()->is(DefConst)) return false;
-
-  auto inst = tmp->inst();
-  // Do the rest based on the opcode's dest type
-  switch (inst->op()) {
-#define O(name, dst, src, flags) case name: dst
-  IR_OPCODES
-#undef O
-  }
-
-  return true;
-}
-
-bool keysetElemMightRelax(const IRInstruction* inst) {
-  assertx(inst->is(KeysetGet, KeysetGetK, KeysetGetQuiet, KeysetIdx));
-  if (inst->is(KeysetIdx)) return typeMightRelax(inst->src(2));
-  return false;
-}
-
-bool dictElemMightRelax(const IRInstruction* inst) {
-  assertx(inst->is(DictGet, DictGetK, DictGetQuiet, DictIdx));
-  if (inst->is(DictIdx)) return typeMightRelax(inst->src(2));
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,12 +82,12 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   m_state.startBlock(m_curBlock, false);
 }
 
-bool IRBuilder::shouldConstrainGuards() const {
-  return m_unit.context().kind != TransKind::Optimize;
+void IRBuilder::enableConstrainGuards() {
+  m_constrainGuards = true;
 }
 
-bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
-  return shouldConstrainGuards() && irgen::typeMightRelax(tmp);
+bool IRBuilder::shouldConstrainGuards() const {
+  return m_constrainGuards;
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -319,23 +242,35 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
          oldVal ? oldVal->toString() : "nullptr",
          typeSrc ? typeSrc->toString() : "nullptr");
 
-  if (canSimplifyAssertType(inst, oldType, typeMightRelax(oldVal))) {
-    if (!oldType.maybe(inst->typeParam())) {
-      gen(Unreachable);
-      return m_unit.cns(TBottom);
-    }
+  auto const newType = oldType & inst->typeParam();
+
+  // Eliminate this AssertTypeOp if:
+  // 1) oldType is at least as good as newType and:
+  //      a) typeParam == Gen
+  //      b) oldVal is from a DefConst
+  //      c) oldType.hasConstVal()
+  //    The AssertType will never be useful for guard constraining in these
+  //     situations.
+  // 2) The type source is another assert that's at least as good as this one.
+  if ((oldType <= newType &&
+       (inst->typeParam() == TGen ||
+        (oldVal && oldVal->inst()->is(DefConst)) ||
+        oldType.hasConstVal())) ||
+      (typeSrc &&
+       typeSrc->is(AssertType, AssertLoc, AssertStk, AssertMBase) &&
+       typeSrc->typeParam() <= inst->typeParam())) {
     return fwdGuardSource(inst);
   }
 
-  auto const newType = oldType & inst->typeParam();
+  // 3) We're not constraining guards, and the old type is at least as good as
+  //    the new type.
+  if (!shouldConstrainGuards()) {
+    if (newType == TBottom) {
+      gen(Unreachable);
+      return inst->is(AssertType) ? m_unit.cns(TBottom) : nullptr;
+    }
 
-  // Eliminate this AssertTypeOp if the source value is another assert that's
-  // good enough.
-  if (oldType <= newType &&
-      typeSrc &&
-      typeSrc->is(AssertType, AssertLoc, AssertStk) &&
-      typeSrc->typeParam() <= inst->typeParam()) {
-    return fwdGuardSource(inst);
+    if (oldType <= newType) return fwdGuardSource(inst);
   }
 
   return nullptr;
@@ -476,12 +411,6 @@ SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
   }
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
-  if (typeMightRelax()) return nullptr;
-
-  if (inst->typeParam().hasConstVal() ||
-      inst->typeParam().subtypeOfAny(TUninit, TInitNull)) {
-    return m_unit.cns(inst->typeParam());
-  }
   return nullptr;
 }
 
@@ -496,9 +425,7 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
   auto const off = inst->extra<CastStk>()->offset;
   auto const curType = stack(off, DataTypeGeneric).type;
-  auto const curVal = stack(off, DataTypeGeneric).value;
 
-  if (typeMightRelax(curVal)) return nullptr;
   if (inst->typeParam() == TNullableObj && curType <= TNull) {
     // If we're casting Null to NullableObj, we still need to call
     // tvCastToNullableObjectInPlace. See comment there and t3879280 for
@@ -515,9 +442,6 @@ SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
   auto const off = inst->extra<CoerceStk>()->offset;
   auto const curType = stack(off, DataTypeGeneric).type;
-  auto const curVal = stack(off, DataTypeGeneric).value;
-
-  if (typeMightRelax(curVal)) return nullptr;
 
   if (curType <= inst->typeParam()) {
     inst->convertToNop();
@@ -588,9 +512,11 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
     return inst->dst(0);
   };
 
-  // copy and const propagation on inst source operands
+  // Copy propagation on inst source operands. Only perform constant
+  // propagation if we're not constraining guards, to avoid breaking the
+  // use-def chains it uses to find guards.
   copyProp(inst);
-  constProp(m_unit, inst, shouldConstrainGuards());
+  if (!shouldConstrainGuards()) constProp(m_unit, inst);
 
   // Since preOptimize can inspect tracked state, we don't
   // perform it on non-main traces.
@@ -607,11 +533,16 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
     if (inst->op() == Nop) return cloneAndAppendOriginal();
   }
 
-  if (!m_enableSimplification) {
+  // We skip simplification for AssertType when guard constraining is enabled
+  // because information that appears to be redundant may allow us to avoid
+  // constraining certain guards. preOptimizeAssertType() still eliminates some
+  // subset of redundant AssertType instructions.
+  if (!m_enableSimplification ||
+      (shouldConstrainGuards() && inst->is(AssertType))) {
     return cloneAndAppendOriginal();
   }
 
-  auto const simpResult = simplify(m_unit, inst, shouldConstrainGuards());
+  auto const simpResult = simplify(m_unit, inst);
 
   // These are the possible outputs:
   //

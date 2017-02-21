@@ -745,7 +745,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
   );
 
   // Re-simplify AssertType if we produced any.
-  if (inst.is(AssertType)) simplify(env.unit, &inst);
+  if (inst.is(AssertType)) simplifyInPlace(env.unit, &inst);
 }
 
 void optimize_block(Local& env, Global& genv, Block* blk) {
@@ -755,7 +755,7 @@ void optimize_block(Local& env, Global& genv, Block* blk) {
   }
 
   for (auto& inst : *blk) {
-    simplify(genv.unit, &inst);
+    simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
     optimize_inst(genv, inst, flags);
   }

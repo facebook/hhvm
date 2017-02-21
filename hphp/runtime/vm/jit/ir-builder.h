@@ -141,6 +141,12 @@ struct IRBuilder {
    */
 
   /*
+   * Enable guard constraining for this IRBuilder. This may disable some
+   * optimizations.
+   */
+  void enableConstrainGuards();
+
+  /*
    * All the guards in the managed IRUnit.
    */
   const GuardConstraints* guards() const { return &m_constraints; }
@@ -169,13 +175,6 @@ struct IRBuilder {
   bool constrainLocation(Location l, TypeConstraint tc);
   bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
   bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
-
-  /*
-   * Whether `val' might have its type relaxed by guard relaxation.
-   *
-   * If `val' is nullptr, only conditions that apply to all values are checked.
-   */
-  bool typeMightRelax(SSATmp* val = nullptr) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode-level control flow helpers.
@@ -362,6 +361,7 @@ private:
   bool m_enableSimplification{false};
 
   GuardConstraints m_constraints;
+  bool m_constrainGuards{false};
 
   // Keep track of blocks created to support bytecode control flow.
   jit::flat_map<SrcKey,Block*> m_skToBlockMap;
@@ -392,13 +392,6 @@ struct BlockPusher {
  private:
   IRBuilder& m_irb;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-bool typeMightRelax(const SSATmp* tmp);
-
-bool dictElemMightRelax(const IRInstruction* inst);
-bool keysetElemMightRelax(const IRInstruction* inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 

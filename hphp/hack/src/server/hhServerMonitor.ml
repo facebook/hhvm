@@ -156,7 +156,7 @@ let daemon_entry =
  * should never actually be attempted to be started if one is already running
  * (i.e. hh_client should play nice and only start a server monitor if one
  * isn't running by first checking the liveness lock file.) *)
-let daemon_starter options =
+let start_daemon options =
   let root = ServerArgs.root options in
   let log_link = ServerFiles.monitor_log_link root in
   (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
@@ -178,7 +178,7 @@ let start () =
     Daemon.check_entry_point (); (* this call might not return *)
     let options = ServerArgs.parse_options () in
     if ServerArgs.should_detach options
-    then Exit_status.exit (daemon_starter options)
+    then Exit_status.exit (start_daemon options)
     else monitor_daemon_main options
   with
   | SharedMem.Out_of_shared_memory ->

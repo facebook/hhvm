@@ -72,6 +72,8 @@ module Test_harness = struct
 
   (** Invoke a subprocess on the harness's repo with its environment. *)
   let exec_hh_client args harness =
+    Printf.eprintf "executing hh_client. Args: %s\n%!"
+      (String.concat ", " args);
     Process.exec harness.hh_client_path
       ~env:harness.test_env (args @ [Path.to_string harness.repo_dir])
 
@@ -112,6 +114,7 @@ module Test_harness = struct
 
   let check_cmd harness =
     let process = exec_hh_client ["check"] harness in
+    Printf.eprintf "Waiting for process\n%!";
     let status, result, err = Process.read_and_wait_pid process in
     match status with
     | Unix.WEXITED _ ->
@@ -303,7 +306,7 @@ let test_server_driver_case_1_and_turntable harness =
     (** Fresh server has no errors. *)
     let () = String_asserter.assert_list_equals ["No errors!"] results
       (see_also_logs harness) in
-    let () = Turntable.spin_record recording_path
+    let () = Turntable.spin_record true recording_path
       harness.Test_harness.repo_dir in
     (** After playback, we get the previous errors again. *)
     let results = Test_harness.check_cmd harness in

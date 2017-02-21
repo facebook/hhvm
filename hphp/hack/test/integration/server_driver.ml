@@ -49,7 +49,7 @@ let cmd_responses_case_0 root = [
   (RpcCommand ((SCT.INFER_TYPE
     (ServerUtils.FileName
       ((Path.concat root "foo_1.php") |> Path.to_string), 4, 20 )),
-      StringMatcher "line 3, character 23 - line 3, character 25, int"));
+      StringMatcher "int"));
   ]
 
 let cmd_responses_case_1 root = [

@@ -145,44 +145,31 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
     # so that the persisent connection is maintained (thus returns that
     # still-running process).
     def spin_record(self, recording):
+        sys.stderr.write('running turntable bin\n')
         proc = self.proc_create([
             turntable_bin,
             '--recording',
             recording,
+            '--skip-hg-update-on-load-state',
             self.repo_dir
         ], {})
-        for line in proc.stderr:
-            if line.strip() == "Played back an event":
-                continue
-            elif line.strip() == "End of recording...waiting for termination":
-                break
+        sys.stderr.write('polling turntable bin\n')
+        while proc.poll() is None:
+            sys.stderr.write('turntable bin still running. readling line\n')
+            line = proc.stdout.readline()
+            sys.stderr.write('read line:\n')
+            sys.stderr.write(line)
+            sys.stderr.write('\n')
+            if line.strip() == "End of recording...waiting for termination":
+                sys.stderr.write('end of recording\n')
+                return proc
             else:
-                self.fail("Read unexpected line: " + line)
-        else:
-            self.fail("Read no lines from turntable stderr")
-        return proc
-
-    # Creates a recoridng using server_driver case 1, then spins the recording
-    # on a new Hack instance with the turntable
-    def test_server_driver_case_one_and_turntable(self):
-        server_driver, recording, recorder_log = self.run_server_driver_case(1)
-        self.check_cmd(["{root}foo_1.php:3:26,37: "
-                        "Undefined variable: $missing_var (Naming[2050])"])
-        # Stop the server and the server_driver before spinning up a new server
-        # on which we will playback the recording.
-        self.stop_server()
-        server_driver.send_signal(signal.SIGINT)
-        server_driver.wait()
-        # We can't wait for grandchild pids, i.e. the recorder daemon,
-        # so just give it a little time.
-        time.sleep(1)
-        self.check_cmd(["No errors!"])
-        turntable_proc = self.spin_record(recording)
-        # Before spinning the record, we get no errors. Afterwards, we get
-        # the errors introduced by the record.
-        self.check_cmd(["{root}foo_1.php:3:26,37: Undefined "
-                        "variable: $missing_var (Naming[2050])"])
-        turntable_proc.send_signal(signal.SIGINT)
+                sys.stderr.write('Read other line. Continuing.\n')
+                continue
+        sys.stderr.write('turntable bin unexpectedly exited\n')
+        stderr = [x for x in proc.stderr]
+        sys.stderr.write('See also turntable stderr:\n' + boxed_string(''.join(stderr)))
+        self.assertTrue(False)
 
     def test_modified_file_playback(self):
         recording_path, recorder_log_path = self.fresh_start_with_recorder_on()
@@ -201,6 +188,7 @@ class HhRecordTests(HhRecordTestDriver, unittest.TestCase):
         self.stop_server()
         time.sleep(2)
         self.check_cmd(["No errors!"])
+        self.stop_server()
         turntable_proc = self.spin_record(recording_path)
         self.check_cmd([
             "{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])",

@@ -19,19 +19,24 @@ module Args = struct
 
   type t = {
     root : Path.t;
+    skip_hg_update_on_load_state : bool;
     recording : Path.t;
   }
 
   let usage = Printf.sprintf
-    "Usage: %s --recording <recording file> [REPO DIRECTORY]\n"
+    "Usage: %s --recording <recording file> %s [REPO DIRECTORY]\n"
     Sys.argv.(0)
+    "[--skip-hg-update-on-load-state]"
 
   let parse () =
     let root = ref None in
     let recording = ref "" in
+    let skip_hg_update_on_load_state = ref false in
     let options = [
       "--recording", Arg.String (fun x -> recording := x),
       "Path to the recording file";
+      "--skip-hg-update-on-load-state", Arg.Set skip_hg_update_on_load_state,
+      "When playing back load saved state, don't do an hg update";
     ] in
     let () = Arg.parse options (fun s -> root := (Some s)) usage in
     let root = ClientArgsUtils.get_root !root in
@@ -42,6 +47,7 @@ module Args = struct
     {
       root = root;
       recording = Path.make !recording;
+      skip_hg_update_on_load_state = !skip_hg_update_on_load_state;
     }
 
   let root args = args.root
@@ -59,6 +65,13 @@ let () =
     exit 0));
   let args = Args.parse () in
   HackEventLogger.client_init @@ Args.root args;
-  let () = Turntable.spin_record args.Args.recording (Args.root args) in
-  let () = Printf.eprintf "End of recording...waiting for termination\n%!" in
+  let () = try Turntable.spin_record
+    args.Args.skip_hg_update_on_load_state
+    args.Args.recording
+    (Args.root args) with
+  | Exit_status.Exit_with e ->
+    Printf.eprintf "Exit_with: %s\n" (Exit_status.to_string e);
+    Exit_status.exit e
+  in
+  let () = Printf.printf "End of recording...waiting for termination\n%!" in
   sleep_and_wait ()

@@ -9,7 +9,35 @@
  *)
 
 let not_yet_supported s =
-  Printf.eprintf "Type not yet supported: %s" s
+  failwith @@ Printf.sprintf "Event not yet supported: %s" s
+
+let stop_server root =
+  let status = ClientStop.main { ClientStop.root = root; } in
+  match status with
+  | Exit_status.No_error -> ()
+  | _ ->
+    failwith "Stopping server failed"
+
+let start_server root =
+  let check_env = {
+    ClientEnv.mode = ClientEnv.MODE_STATUS;
+    root = root;
+    from = "";
+    output_json = false;
+    retry_if_init = true;
+    retries = 800;
+    timeout = None;
+    autostart = true;
+    no_load = false;
+    ai_mode = None;
+  } in
+  match ClientCheck.main check_env with
+  | Exit_status.No_error ->
+    ()
+  | Exit_status.Type_error ->
+    Printf.eprintf "Warning: server started with typecheck errors"
+  | _ ->
+    ()
 
 let playback_server_cmd : type a. Timeout.in_channel * out_channel ->
   a ServerCommandTypes.command -> unit = fun conn cmd ->
@@ -34,29 +62,78 @@ let write_files_contents files =
     write_file_contents filename contents
   )
 
-let rec playback recording conn =
-  let x = Marshal.from_channel recording in
+(** Plays the event. Returns true if this event indicated the
+ * end of recording. *)
+let play_event event conn =
   let open Recorder_types in
-  let () = match x with
-  | Start_recording init_env ->
-    let open Relative_path in
-    set_path_prefix Root init_env.root_path;
-    set_path_prefix Hhi init_env.hhi_path
+  match event with
+  | Start_recording _ ->
+    failwith "unexpected preconnection event Start_recording"
   | Loaded_saved_state _ ->
-    (** TODO *)
-    playback recording conn
+    failwith "unexpected preconnection event Loaded_saved_state"
   | Fresh_vcs_state _ ->
     not_yet_supported "Fresh_vcs_state"
   | Typecheck ->
     not_yet_supported "Typecheck"
   | HandleServerCommand cmd ->
-    playback_server_cmd conn cmd
+    playback_server_cmd conn cmd;
+    false
   | Disk_files_modified files ->
-    write_files_contents files
+    write_files_contents files;
+    false
   | Stop_recording ->
-    not_yet_supported "Stop_recording"
-  in
-  playback recording conn
+    true
+
+let rec playback recording conn =
+  let event = Marshal.from_channel recording in
+  let finished = play_event event conn in
+  if finished then
+    ()
+  else
+    playback recording conn
+
+let rec preconnection_playback
+skip_hg_update_on_load_state recording root =
+  let event = Marshal.from_channel recording in
+  let open Recorder_types in
+  match event with
+  | Start_recording _ ->
+    preconnection_playback skip_hg_update_on_load_state recording root
+  | Loaded_saved_state ( {
+      filename = _filename;
+      corresponding_base_revision;
+      dirty_files;
+      changed_while_parsing;
+      build_targets;
+    },
+    _) ->
+      stop_server root;
+      if skip_hg_update_on_load_state then
+        ()
+      else
+        Future.get @@
+          Hg.update_to_base_rev corresponding_base_revision @@
+          Path.to_string root;
+      write_files_contents dirty_files;
+      write_files_contents changed_while_parsing;
+      write_files_contents build_targets;
+      start_server root;
+      let conn = ClientIde.connect_persistent { ClientIde.root = root }
+        ~retries:800 in
+      playback recording conn
+  | Fresh_vcs_state _
+  | Typecheck
+  | HandleServerCommand _
+  | Disk_files_modified _ ->
+    (** Found a real event without loading a saved state. Initiate connection
+     * and continue playback. *)
+    start_server root;
+    let conn = ClientIde.connect_persistent { ClientIde.root = root }
+      ~retries:800 in
+    ignore @@ play_event event conn;
+    playback recording conn
+  | Stop_recording ->
+    ()
 
 let check_build_id json =
   let open Hh_json.Access in
@@ -72,13 +149,12 @@ let check_build_id json =
   else
     Printf.eprintf "Warning: Build ID mismatch\n%!"
 
-let spin_record recording_path root =
-  let conn = ClientIde.connect_persistent { ClientIde.root = root }
-    ~retries:800 in
+let spin_record skip_hg_update_on_load_state recording_path root =
+  Relative_path.set_path_prefix Relative_path.Root root;
   let recording = recording_path |> Path.to_string |> open_in in
   let json = Recorder.Header.parse_header recording in
   let () = check_build_id json in
-  try playback recording conn with
+  try preconnection_playback skip_hg_update_on_load_state recording root with
   | End_of_file ->
     ()
   | Failure s when s = "input_value: truncated object" ->

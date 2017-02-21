@@ -438,6 +438,8 @@ struct RuntimeOption {
   // Namespace aliases for the compiler
   static std::map<std::string, std::string> AliasedNamespaces;
 
+  static std::vector<std::string> TzdataSearchPaths;
+
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \

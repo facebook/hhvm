@@ -454,7 +454,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
     return false;
   }
 
-  const timelib_tzdb *tzdb = timezone_get_builtin_tzdb();
+  const timelib_tzdb *tzdb = timezone_get_tzdb();
   int item_count = tzdb->index_size;
   const timelib_tzdb_index_entry *table = tzdb->index;
 

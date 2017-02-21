@@ -129,6 +129,7 @@ int RuntimeOption::RuntimeErrorReportingLevel =
 int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
+std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
@@ -1855,6 +1856,8 @@ void RuntimeOption::Load(
 
     ++it;
   }
+
+  Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 

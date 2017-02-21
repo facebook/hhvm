@@ -174,50 +174,108 @@ and emit_unop op e =
     gather [instrs; instr H.(IMutator (IncDecL (lval, unop_to_incdec_op op)))]
   | A.Uref -> failwith "references - NYI"
 
+and emit_condition_loop begin_label break_label =
+  instr H.(IContFlow (JmpNZ begin_label)),
+  instr H.(IContFlow (JmpZ break_label))
+
 and from_exprs exprs =
   gather (List.map exprs from_expr)
 
-and from_stmt verify_return st =
+(* Returns the set of instructions and whether a continue is needed *)
+(* Note about labels regarding continue and break:
+ * HHVM generates a separate condition block for continue to jump to,
+ * hence creates an additional label however, it also names this label
+ * at the time of creation. But we do it recursively, in order to have
+ * parity with HHVM we tread along a flag that tells us whether the
+ * label is already used for continue or whether it is safe to use it
+ * for other purposes *)
+and from_stmt ~continue_label ~break_label verify_return st =
   let open H in
   match st with
   | A.Expr expr ->
     gather [
       from_expr expr;
       instr (IBasic PopC)
-    ]
+    ], false
   | A.Return (_, None) ->
     instrs [
       ILitConst Null;
       IContFlow RetC;
-    ]
+    ], false
   | A.Return (_,  Some expr) ->
     gather [
       from_expr expr;
       (if verify_return then instr (IMisc VerifyRetTypeC) else empty);
       instr (IContFlow RetC);
-    ]
-  | A.Block b -> from_stmts verify_return b
+    ], false
+  | A.Block b -> from_stmts ~continue_label ~break_label verify_return b
   | A.If (e, b1, b2) ->
     let l0 = Label.get_next_label () in
     let l1 = Label.get_next_label () in
     let jmp0, jmp1 =
       instr H.(IContFlow (JmpZ l0)), instr H.(IContFlow (Jmp l1))
     in
+    let b1, need_cont1 =
+      from_stmt ~continue_label ~break_label verify_return (A.Block b1)
+    in
+    let b2, need_cont2 =
+      from_stmt ~continue_label ~break_label verify_return (A.Block b2)
+    in
     gather [
       from_expr e;
       jmp0;
-      from_stmt verify_return (A.Block b1);
+      b1;
       jmp1;
       instr (ILabel l0);
-      from_stmt verify_return (A.Block b2);
+      b2;
       instr (ILabel l1);
-    ]
-  | A.Break _
-  | A.Continue _
+    ], need_cont1 || need_cont2
+  | A.While (e, b) ->
+    let l0 = Label.get_next_label () in
+    let l1 = Label.get_next_label () in
+    let cond = from_expr e in
+    let body, need_cont =
+      from_stmt
+        ~continue_label:(Some l1)
+        ~break_label:(Some l0)
+        verify_return
+        (A.Block b)
+    in
+    let jmp_to_begin, jmp_to_end, begin_label, cont_label =
+      if need_cont
+      then
+        let l2 = Label.get_next_label () in
+        let jmp_to_begin, jmp_to_end = emit_condition_loop l2 l0 in
+        jmp_to_begin, jmp_to_end, instr (ILabel l2), instr (ILabel l1)
+      else
+        let jmp_to_begin, jmp_to_end = emit_condition_loop l1 l0 in
+        jmp_to_begin, jmp_to_end, instr (ILabel l1), empty
+    in
+    gather [
+      cond;
+      jmp_to_end;
+      begin_label;
+      body;
+      cont_label;
+      cond;
+      jmp_to_begin;
+      instr (ILabel l0);
+    ], false
+  (* TODO: Break takes an argument *)
+  | A.Break _ ->
+    begin match break_label with
+    | Some i -> instr H.(IContFlow (Jmp i))
+    | None -> failwith "There is no where to break"
+    end, false
+  | A.Continue _ ->
+  (* TODO: Continue takes an argument *)
+    begin match continue_label with
+    | Some i -> instr H.(IContFlow (Jmp i))
+    | None -> failwith "There is no where to continue"
+    end, true
   | A.Throw _
   | A.Static_var _
   | A.Do _
-  | A.While _
   | A.For _
   | A.Switch _
   | A.Foreach _
@@ -225,10 +283,15 @@ and from_stmt verify_return st =
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough
-  | A.Noop -> empty
+  | A.Noop -> empty, false
 
-and from_stmts verify_return stl =
-  gather (List.map stl (from_stmt verify_return))
+and from_stmts ~continue_label ~break_label verify_return stl =
+  let results =
+    List.map stl (from_stmt ~continue_label ~break_label verify_return)
+  in
+  let instrs = List.map results fst in
+  let need_cont = List.exists ~f:(fun x -> x) (List.map results snd) in
+  gather (instrs), need_cont
 
 let fmt_prim x =
   match x with
@@ -373,7 +436,9 @@ let from_body tparams params ret b =
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in
   let verify_return = has_type_constraint return_type_info in
-  let stmt_instrs = from_stmts verify_return b.N.fub_ast in
+  let stmt_instrs, _ =
+    from_stmts ~continue_label:None ~break_label:None verify_return b.N.fub_ast
+  in
   let ret_instrs =
     match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
     instrs [H.ILitConst H.Null; H.IContFlow H.RetC] in

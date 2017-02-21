@@ -902,6 +902,20 @@ static int start_server(const std::string &username, int xhprof) {
   BootStats::mark("pagein_self");
 
   set_execution_mode("server");
+
+#if !defined(SKIP_USER_CHANGE)
+  if (!username.empty()) {
+    if (Logger::UseCronolog) {
+      for (const auto& el : RuntimeOption::ErrorLogs) {
+        Cronolog::changeOwner(username, el.second.symLink);
+      }
+    }
+    Capability::ChangeUnixUser(username);
+    LightProcess::ChangeUser(username);
+  }
+  Capability::SetDumpable();
+#endif
+
   hphp_process_init();
   SCOPE_EXIT {
     hphp_process_exit();
@@ -922,19 +936,6 @@ static int start_server(const std::string &username, int xhprof) {
   SCOPE_EXIT { AdminRequestHandler::GetAccessLog().flushAllWriters(); };
   SCOPE_EXIT { RPCRequestHandler::GetAccessLog().flushAllWriters(); };
   SCOPE_EXIT { Logger::FlushAll(); };
-
-#if !defined(SKIP_USER_CHANGE)
-  if (!username.empty()) {
-    if (Logger::UseCronolog) {
-      for (const auto& el : RuntimeOption::ErrorLogs) {
-        Cronolog::changeOwner(username, el.second.symLink);
-      }
-    }
-    Capability::ChangeUnixUser(username);
-    LightProcess::ChangeUser(username);
-  }
-  Capability::SetDumpable();
-#endif
 
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
     HttpServer::CheckMemAndWait();

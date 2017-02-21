@@ -110,6 +110,9 @@ let rec from_expr expr =
     emit_unop op e
   | A.Binop (A.Eq obop, e1, e2) ->
     emit_assignment obop e1 e2
+  (* Special case to make use of CGetL2 *)
+  | A.Binop (op, (_, A.Lvar (_, x)), e) ->
+    gather [from_expr e; instr (IGet (CGetL2 (Local_named x))); from_binop op]
   | A.Binop (op, e1, e2) ->
     gather [from_expr e2; from_expr e1; from_binop op]
   | A.Eif (etest, Some etrue, efalse) ->
@@ -137,7 +140,7 @@ let rec from_expr expr =
   | A.Call ((_, A.Id (_, id)), el, []) when id = "echo" ->
     gather [
       from_exprs el;
-      instr H.(IOp Print);
+      instr (IOp Print);
     ]
   (* TODO: emit warning *)
   | _ -> empty

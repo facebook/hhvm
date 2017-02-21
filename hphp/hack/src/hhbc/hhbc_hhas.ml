@@ -258,8 +258,18 @@ let string_of_param p =
 let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
 
+(* Taken from emitter/emitter_core.ml *)
+let fix_xhp_name s =
+    if String.length s = 0 || s.[0] <> ':' then s else
+      "xhp_" ^
+        String_utils.lstrip s ":" |>
+        Str.global_replace (Str.regexp ":") "__" |>
+        Str.global_replace (Str.regexp "-") "_"
+
+let fmt_name s = fix_xhp_name (Utils.strip_ns s)
+
 let add_fun_def buf fun_def =
-  let function_name = Hhas_function.name fun_def in
+  let function_name = fmt_name (Hhas_function.name fun_def) in
   let function_return_type = Hhas_function.return_type fun_def in
   let function_params = Hhas_function.params fun_def in
   let function_body = Hhas_function.body fun_def in

@@ -58,7 +58,7 @@ MaybeDataType nameToMaybeDataType(const std::string& typeName) {
  */
 static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
   static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair = []() {
-    std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair;
+    std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mappedPairs;
     const struct Pair {
       const char* name;
       AnnotType type;
@@ -82,10 +82,10 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "HH\\keyset",   AnnotType::Keyset },
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
-      mapPair.first[makeStaticString(pairs[i].name)] = pairs[i].type;
-      mapPair.second[pairs[i].name] = pairs[i].type;
+      mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
+      mappedPairs.second[pairs[i].name] = pairs[i].type;
     }
-    return mapPair;
+    return mappedPairs;
   }();
   return mapPair;
 }

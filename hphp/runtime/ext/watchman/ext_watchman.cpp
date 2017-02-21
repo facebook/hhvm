@@ -573,8 +573,8 @@ getWatchmanClientForSocket(const std::string& socket_path) {
       std::move(socket),
       WatchmanThreadEventBase::Get(),
       [socket_path](folly::exception_wrapper& ex) { // (ASYNC) error handler
-        auto client = s_activeClients.find(socket_path);
-        if (client != s_activeClients.end()) {
+        auto activeClient = s_activeClients.find(socket_path);
+        if (activeClient != s_activeClients.end()) {
           s_activeClients.erase(socket_path);
         }
       });

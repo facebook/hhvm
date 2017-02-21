@@ -423,8 +423,8 @@ char *php_rfc822_recombine_tokens(php_rfc822_tokenized_t *toks,
   ret[len] = 0;
 
   if (flags & PHP_RFC822_RECOMBINE_STRTOLOWER) {
-    for (size_t i = 0; i < len; i++) {
-      ret[i] = tolower(ret[i]);
+    for (size_t i2 = 0; i2 < len; i2++) {
+      ret[i2] = tolower(ret[i2]);
     }
   }
 

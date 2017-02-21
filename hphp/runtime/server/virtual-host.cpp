@@ -316,30 +316,30 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
     filter.replaceWith = Config::GetString(ini_lf, hdf_lf, "value", "", false);
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
-    std::string pattern = Config::GetString(ini_lf, hdf_lf, "pattern", "",
+    std::string namePattern = Config::GetString(ini_lf, hdf_lf, "pattern", "",
                                             false);
     std::vector<std::string> names;
     names = Config::GetVector(ini_lf, hdf_lf, "params", names, false);
 
-    if (pattern.empty()) {
+    if (namePattern.empty()) {
       for (unsigned int i = 0; i < names.size(); i++) {
-        if (pattern.empty()) {
-          pattern = "(?<=[&\?])(";
+        if (namePattern.empty()) {
+          namePattern = "(?<=[&\?])(";
         } else {
-          pattern += "|";
+          namePattern += "|";
         }
-        pattern += names[i];
+        namePattern += names[i];
       }
-      if (!pattern.empty()) {
-        pattern += ")=.*?(?=(&|$))";
-        pattern = format_pattern(pattern, false);
+      if (!namePattern.empty()) {
+        namePattern += ")=.*?(?=(&|$))";
+        namePattern = format_pattern(namePattern, false);
       }
     } else if (!names.empty()) {
       throw std::runtime_error("Invalid log filter: (cannot specify "
         "both params and pattern)");
     }
 
-    filter.namePattern = pattern;
+    filter.namePattern = namePattern;
     m_queryStringFilters.push_back(filter);
   };
   Config::Iterate(lf_callback, ini, vh, "LogFilters", false);

@@ -527,7 +527,7 @@ void ServerStats::StartNetworkProfile() {
   Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ServerStats *ss = s_loggers[i];
-    Lock lock(ss->m_lock, false);
+    Lock loggerLock(ss->m_lock, false);
     ss->m_ioProfiles.clear();
   }
 }
@@ -543,7 +543,7 @@ Array ServerStats::EndNetworkProfile() {
   Array ret;
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ServerStats *ss = s_loggers[i];
-    Lock lock(ss->m_lock, false);
+    Lock loggerLock(ss->m_lock, false);
 
     IOStatusMap& status = ss->m_ioProfiles;
     for (auto const& iter : status) {
@@ -746,14 +746,14 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
         wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
       }
 
-      const char *name = m_threadStatus.m_ioName;
-      const char *addr = m_threadStatus.m_ioLogicalName;
-      if (!*addr) addr = m_threadStatus.m_ioAddr;
+      const char *ioName = m_threadStatus.m_ioName;
+      const char *ioAddr = m_threadStatus.m_ioLogicalName;
+      if (!*ioAddr) ioAddr = m_threadStatus.m_ioAddr;
 
       if (RuntimeOption::EnableNetworkIOStatus) {
-        string key = name;
-        if (*addr) {
-          key += ' '; key += addr;
+        string key = ioName;
+        if (*ioAddr) {
+          key += ' '; key += ioAddr;
         }
         IOStatus& io = m_threadStatus.m_ioStatuses[key];
         ++io.count;
@@ -763,11 +763,11 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
       if (s_profile_network) {
         const char *key0 = "main()";
         const char *key1 = m_threadStatus.m_url;
-        string key2 = m_threadStatus.m_url; key2 += "==>"; key2 += name;
-        const char *key3 = name;
-        string key4 = name;
-        if (*addr) {
-          key4 += "==>"; key4 += addr;
+        string key2 = m_threadStatus.m_url; key2 += "==>"; key2 += ioName;
+        const char *key3 = ioName;
+        string key4 = ioName;
+        if (*ioAddr) {
+          key4 += "==>"; key4 += ioAddr;
         }
 
         Lock lock(m_lock, false);
@@ -775,7 +775,7 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
         { IOStatus& io = m_ioProfiles[key1]; ++io.count; io.wall_time += wt;}
         { IOStatus& io = m_ioProfiles[key2]; ++io.count; io.wall_time += wt;}
         { IOStatus& io = m_ioProfiles[key3]; ++io.count; io.wall_time += wt;}
-        if (*addr) {
+        if (*ioAddr) {
           IOStatus& io = m_ioProfiles[key4]; ++io.count; io.wall_time += wt;
         }
       }

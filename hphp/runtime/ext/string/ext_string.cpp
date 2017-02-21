@@ -598,8 +598,8 @@ static Variant strtok(const String& str, const Variant& token) {
   }
 
   // reset mask
-  for (int i = 0; i < stoken.size(); i++) {
-    mask[(unsigned char)stoken.data()[i]] = 0;
+  for (int i2 = 0; i2 < stoken.size(); i2++) {
+    mask[(unsigned char)stoken.data()[i2]] = 0;
   }
 
   if (pos0 == sstr.size()) {
@@ -1976,9 +1976,9 @@ void WuManberReplacement::initTables() {
       }
       // init shift tab
       for (int j = 0; j < max_shift; j++) {
-        uint16_t h = patterns[i].hash( j, B ) & SHIFT_TAB_MASK;
+        uint16_t h2 = patterns[i].hash( j, B ) & SHIFT_TAB_MASK;
         assert((long long) m - (long long) j - B >= 0);
-        shift[h] = MIN(shift[h], m - j - B);
+        shift[h2] = MIN(shift[h2], m - j - B);
       }
       // init prefix
       prefix.push_back(patterns[i].hash(0, Bp));

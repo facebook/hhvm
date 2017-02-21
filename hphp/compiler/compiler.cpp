@@ -574,7 +574,7 @@ int process(const CompilerOptions &po) {
   }
 
   {
-    Timer timer(Timer::WallTime, "parsing inputs");
+    Timer timer2(Timer::WallTime, "parsing inputs");
     if (!po.inputs.empty() && isPickledPHP) {
       for (unsigned int i = 0; i < po.inputs.size(); i++) {
         package.addSourceFile(po.inputs[i].c_str());
@@ -617,7 +617,7 @@ int process(const CompilerOptions &po) {
         return 1;
       }
       if (Option::WholeProgram) {
-        Timer timer(Timer::WallTime, "analyzeProgram");
+        Timer timer3(Timer::WallTime, "analyzeProgram");
         ar->analyzeProgram();
       }
     }
@@ -633,9 +633,9 @@ int process(const CompilerOptions &po) {
     ar->dump();
   }
 
-  ar->setFinish([&po,&timer,&package](AnalysisResultPtr ar) {
+  ar->setFinish([&po,&timer,&package](AnalysisResultPtr res) {
       if (Option::DumpAst) {
-        ar->dump();
+        res->dump();
       }
 
       // saving stats

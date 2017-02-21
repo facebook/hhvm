@@ -228,7 +228,7 @@ bool Expression::IsIdentifier(const std::string &value) {
     return false;
   }
   for (unsigned int i = 1; i < value.size(); i++) {
-    unsigned char ch = value[i];
+    ch = value[i];
     if (((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') &&
          (ch < '0' || ch > '9') && ch < '\x7f' && ch != '_')) {
       if (ch == '\\' && i < value.size() - 1 && value[i+1] != '\\') {

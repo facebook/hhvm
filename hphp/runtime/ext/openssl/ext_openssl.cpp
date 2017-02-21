@@ -2241,7 +2241,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
     sealed_data.assignIfRef(s.setSize(len1 + len2));
 
     Array ekeys;
-    for (int i = 0; i < nkeys; i++) {
+    for (i = 0; i < nkeys; i++) {
       eks[i][eksl[i]] = '\0';
       ekeys.append(String((char*)eks[i], eksl[i], AttachString));
       eks[i] = nullptr;
@@ -2250,7 +2250,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   }
 
  clean_exit:
-  for (int i = 0; i < nkeys; i++) {
+  for (i = 0; i < nkeys; i++) {
     if (eks[i]) free(eks[i]);
   }
   free(eks);
@@ -2711,7 +2711,7 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
         subitem.set(String(extname, CopyString),
                     String((char*)bio_buf->data, bio_buf->length, CopyString));
       } else {
-        ASN1_STRING *str = X509_EXTENSION_get_data(extension);
+        str = X509_EXTENSION_get_data(extension);
         subitem.set(String(extname, CopyString),
                     String((char*)str->data, str->length, CopyString));
       }

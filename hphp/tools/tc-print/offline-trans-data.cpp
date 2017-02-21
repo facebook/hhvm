@@ -298,8 +298,8 @@ void OfflineTransData::addControlArcs(uint32_t selectedFuncId,
 
     auto const srcFuncId = getTransRec(transId)->src.funcID();
 
-    for (size_t i = 0; i < jmpTargets.size(); i++) {
-      TransID targetId = getTransStartingAt(jmpTargets[i]);
+    for (size_t i2 = 0; i2 < jmpTargets.size(); i2++) {
+      TransID targetId = getTransStartingAt(jmpTargets[i2]);
       if (targetId != INVALID_ID &&
           // filter jumps to prologues of other funcs for now
           getTransRec(targetId)->src.funcID() == srcFuncId &&

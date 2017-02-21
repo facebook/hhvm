@@ -1222,7 +1222,7 @@ private:
     /* Process opcode's effects on the EvalStack and emit it */         \
     Offset curPos UNUSED = getUnitEmitter().bcPos();                    \
     {                                                                   \
-      Trace::Indent indent;                                             \
+      Trace::Indent indent2;                                            \
       getEmitterVisitor().prepareEvalStack();                           \
       char idxAPop UNUSED;                                              \
       POP_##pop;                                                        \
@@ -3726,7 +3726,7 @@ bool checkKeys(ExpressionPtr init_expr, bool check_size, Fun fun) {
     return false;
   }
 
-  for (int i = 0, n = el->getCount(); i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     ExpressionPtr ex = (*el)[i];
     if (ex->getKindOf() != Expression::KindOfArrayPairExpression) {
       return false;
@@ -4018,8 +4018,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           continue;
         }
         StringData* nLiteral = makeStaticString(sv->getName());
-        Id i = m_curFunc->lookupVarId(nLiteral);
-        emitVirtualLocal(i);
+        Id id = m_curFunc->lookupVarId(nLiteral);
+        emitVirtualLocal(id);
         e.String(nLiteral);
         markGlobalName(e);
         e.VGetG();
@@ -9234,14 +9234,14 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       // cls::foo()
       StringData* cLiteral =
         makeStaticString(node->getOriginalClassName());
-      StringData* nLiteral = makeStaticString(nameStr);
+      nLiteral = makeStaticString(nameStr);
       fpiStart = m_ue.bcPos();
       e.FPushClsMethodD(numParams, nLiteral, cLiteral);
     } else {
       emitVirtualClassBase(e, node.get());
       if (!nameStr.empty()) {
         // ...::foo()
-        StringData* nLiteral = makeStaticString(nameStr);
+        nLiteral = makeStaticString(nameStr);
         e.String(nLiteral);
       } else {
         // ...::$foo()

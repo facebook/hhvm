@@ -297,14 +297,14 @@ std::string DecoderInfo::toString() const {
   for (auto oper : m_operands) {
     auto op = m_image & oper.m_mask;
     if (!(oper.m_flags & PPC_OPERAND_NOSHIFT)) op >>= oper.operandShift();
-    auto toHex = [] (std::string& instr, intptr_t n) {
+    auto toHex = [] (std::string& instruction, intptr_t n) {
       std::stringstream stringStream;
       if (n < 0) {
           stringStream << "-0x";
           n = -n;
       } else stringStream << "0x";
       stringStream << std::hex << n;
-      instr += stringStream.str();
+      instruction += stringStream.str();
     };
     if (oper.m_flags & PPC_OPERAND_GPR)   { instr += "r"; }
     if (oper.m_flags & PPC_OPERAND_GPR_0) { if (op != 0) instr += "r"; }

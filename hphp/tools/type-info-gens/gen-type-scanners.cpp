@@ -907,15 +907,15 @@ int Generator::compareIndexedTypes(const IndexedType& t1,
   if (t1.conservative < t2.conservative) return -1;
   else if (t1.conservative > t2.conservative) return 1;
 
-  const auto compare_guards = [](const IndexedType& t1,
-                                 const IndexedType& t2) {
+  const auto compare_guards = [](const IndexedType& type1,
+                                 const IndexedType& type2) {
     return std::lexicographical_compare(
-      t1.conservative_guards.begin(),
-      t1.conservative_guards.end(),
-      t2.conservative_guards.begin(),
-      t2.conservative_guards.end(),
-      [](const Type* t1, const Type* t2) {
-        return compareTypes(*t1, *t2) < 0;
+      type1.conservative_guards.begin(),
+      type1.conservative_guards.end(),
+      type2.conservative_guards.begin(),
+      type2.conservative_guards.end(),
+      [](const Type* tp1, const Type* tp2) {
+        return compareTypes(*tp1, *tp2) < 0;
       }
     );
   };
@@ -1609,7 +1609,7 @@ Generator::Action Generator::inferAction(const Object& object,
     );
   };
 
-  for (const auto& func : object.functions) {
+  for (const auto& fun : object.functions) {
     // Sanity check special member function. All the functions should take a
     // const pointer to the contained object type as the first parameter (the
     // this pointer), and a non-const reference to HPHP::type_scan::Scanner as
@@ -1766,11 +1766,11 @@ Generator::Action Generator::inferAction(const Object& object,
 
     // Custom scanner for particular field.
     auto custom_field = splitFieldName(
-      func.name,
+      fun.name,
       HPHP::type_scan::detail::kCustomFieldName
     );
     if (!custom_field.empty()) {
-      verify_func(func);
+      verify_func(fun);
 
       if (!find_member(custom_field)) {
         throw Exception{
@@ -1787,21 +1787,21 @@ Generator::Action Generator::inferAction(const Object& object,
 
       action.custom_fields.emplace(
         std::move(custom_field),
-        func.linkage_name
+        fun.linkage_name
       );
     }
 
     // Custom scanner for entire object.
-    if (func.name == HPHP::type_scan::detail::kCustomName) {
-      verify_func(func);
-      action.custom_all = func.linkage_name;
+    if (fun.name == HPHP::type_scan::detail::kCustomName) {
+      verify_func(fun);
+      action.custom_all = fun.linkage_name;
       continue;
     }
 
     // Custom scanner for base classes.
-    if (func.name == HPHP::type_scan::detail::kCustomBasesScannerName) {
-      verify_func(func);
-      action.custom_bases_scanner = func.linkage_name;
+    if (fun.name == HPHP::type_scan::detail::kCustomBasesScannerName) {
+      verify_func(fun);
+      action.custom_bases_scanner = fun.linkage_name;
       continue;
     }
   }

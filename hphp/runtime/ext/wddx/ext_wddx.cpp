@@ -119,7 +119,7 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
         m_packetString.append(std::to_string(length));
         m_packetString.append("'>");
       }
-      for (ArrayIter it(varAsArray); it; ++it) {
+      for (; it; ++it) {
         auto key = it.first();
         auto const& value = it.secondRef();
         recursiveAddVarImpl(key.toString(), value, isObject, seen);

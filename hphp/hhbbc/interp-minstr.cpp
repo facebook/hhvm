@@ -785,8 +785,8 @@ void miElem(ISS& env, MOpMode mode, Type key) {
     if (couldDoChain) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       auto ty = [&] {
-        if (auto ty = hack_array_do(env, elem, key)) {
-          return *ty;
+        if (auto type = hack_array_do(env, elem, key)) {
+          return *type;
         }
         return array_elem(env.state.base.type, key);
       }();
@@ -1075,8 +1075,8 @@ void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key) {
     if (env.state.base.type.subtypeOf(TArr)) {
       return array_elem(env.state.base.type, key);
     }
-    if (auto ty = hack_array_do(env, elem, key)) {
-      return *ty;
+    if (auto type = hack_array_do(env, elem, key)) {
+      return *type;
     }
     return TInitCell;
   }();
@@ -1154,9 +1154,9 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
                         !isvec &&
                         !isdict &&
                         !iskeyset);
-  auto isSuitableHackKey = [&](Type key) {
-    if (isvec) return key.couldBe(TInt);
-    if (isdict) return key.couldBe(TInt) || key.couldBe(TStr);
+  auto isSuitableHackKey = [&](Type k) {
+    if (isvec) return k.couldBe(TInt);
+    if (isdict) return k.couldBe(TInt) || k.couldBe(TStr);
     return false;
   };
 

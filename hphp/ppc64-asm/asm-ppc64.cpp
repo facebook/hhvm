@@ -577,8 +577,8 @@ void Assembler::limmediate(const Reg64& rt, int64_t imm64, ImmType immt) {
   always_assert(HPHP::RuntimeOption::EvalPPC64MinTOCImmSize >= 0 &&
     HPHP::RuntimeOption::EvalPPC64MinTOCImmSize <= 64);
 
-  auto fits = [](int64_t imm64, uint16_t shift_n) {
-     return (static_cast<uint64_t>(imm64) >> shift_n) == 0 ? true : false;
+  auto fits = [](int64_t imm, uint16_t shift_n) {
+     return (static_cast<uint64_t>(imm) >> shift_n) == 0 ? true : false;
   };
 
   if (

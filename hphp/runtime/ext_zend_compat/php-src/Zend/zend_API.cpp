@@ -237,7 +237,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
         zend_bool *p = va_arg(*va, zend_bool *);
 
         if (check_null) {
-          zend_bool *p = va_arg(*va, zend_bool *);
           *p = (Z_TYPE_PP(arg) == IS_NULL);
         }
 

@@ -1629,7 +1629,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
              type == VariableSerializer::Type::APCSerialize)) {
     if (obj->instanceof(SystemLib::s_SerializableClass)) {
       assert(!obj->isCollection());
-      Variant ret =
+      ret =
         const_cast<ObjectData*>(obj)->o_invoke_few_args(s_serialize, 0);
       if (ret.isString()) {
         writeSerializableObject(obj->getClassName(), ret.toString());

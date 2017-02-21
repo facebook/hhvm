@@ -1393,13 +1393,13 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   std::function<void(const Class*)> collect;
   std::function<void(const Class*)> collectInterface;
 
-  collect = [&] (const Class* cls) {
-    if (!cls) return;
+  collect = [&] (const Class* clas) {
+    if (!clas) return;
 
-    auto const methods = cls->preClass()->methods();
-    auto const numMethods = cls->preClass()->numMethods();
+    auto const methods = clas->preClass()->methods();
+    auto const numMethods = clas->preClass()->numMethods();
 
-    auto numDeclMethods = cls->preClass()->numDeclMethods();
+    auto numDeclMethods = clas->preClass()->numDeclMethods();
     if (numDeclMethods == -1) numDeclMethods = numMethods;
 
     // Add declared methods.
@@ -1408,15 +1408,15 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
     }
 
     // Recurse; we need to order the parent's methods before our trait methods.
-    collect(cls->parent());
+    collect(clas->parent());
 
     for (Slot i = numDeclMethods; i < numMethods; ++i) {
       // For repo mode, where trait methods are flattened at compile-time.
       add(methods[i]);
     }
-    for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
+    for (Slot i = clas->traitsBeginIdx(); i < clas->traitsEndIdx(); ++i) {
       // For non-repo mode, where they are added at Class-creation time.
-      add(cls->getMethod(i));
+      add(clas->getMethod(i));
     }
   };
 

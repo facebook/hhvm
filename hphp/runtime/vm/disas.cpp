@@ -165,13 +165,13 @@ FuncInfo find_func_info(const Func* func) {
 
     for (; pc != stop; pc += instrLen(pc)) {
       auto const op = peek_op(pc);
-      auto const off = func->unit()->offsetOf(pc);
       if (isSwitch(op)) {
         foreachSwitchTarget(pc, [&] (Offset off) {
           add_target("L", pc - bcBase + off);
         });
         continue;
       }
+      auto const off = func->unit()->offsetOf(pc);
       auto const target = instrJumpTarget(bcBase, off);
       if (target != InvalidAbsoluteOffset) {
         add_target("L", target);

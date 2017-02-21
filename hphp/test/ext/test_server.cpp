@@ -728,8 +728,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }
@@ -758,8 +758,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }

@@ -1994,10 +1994,10 @@ void Class::setProperties() {
       // those of the parent, and append this class's private properties.
       // Append order doesn't matter here (unlike in setMethods()).
       // Prohibit static-->non-static redeclaration.
-      SPropMap::Builder::iterator it2 = curSPropMap.find(preProp->name());
-      if (it2 != curSPropMap.end()) {
+      SPropMap::Builder::iterator it5 = curSPropMap.find(preProp->name());
+      if (it5 != curSPropMap.end()) {
         raise_error("Cannot redeclare static %s::$%s as non-static %s::$%s",
-                    curSPropMap[it2->second].cls->name()->data(),
+                    curSPropMap[it5->second].cls->name()->data(),
                     preProp->name()->data(), m_preClass->name()->data(),
                     preProp->name()->data());
       }
@@ -2583,7 +2583,7 @@ void Class::setInterfaceVtables() {
     auto const slot = iface->preClass()->ifaceVtableSlot();
     if (slot == kInvalidSlot) continue;
     ITRACE(3, "{} @ slot {}\n", iface->name()->data(), slot);
-    Trace::Indent indent;
+    Trace::Indent indent2;
     always_assert(slot < nVtables);
 
     auto const nMethods = iface->numMethods();

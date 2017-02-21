@@ -432,9 +432,9 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
     ctxp = xmlXPathNewContext(docp);
     ctxp->node = nodep;
     if (arr.exists(s_namespaces)) {
-      Variant tmp = arr.rvalAt(s_namespaces);
-      if (tmp.isArray()) {
-        for (ArrayIter it = tmp.toArray().begin(); it; ++it) {
+      Variant temp = arr.rvalAt(s_namespaces);
+      if (temp.isArray()) {
+        for (ArrayIter it = temp.toArray().begin(); it; ++it) {
           Variant prefix = it.first();
           Variant tmpns = it.second();
           if (prefix.isString() || tmpns.isString()) {

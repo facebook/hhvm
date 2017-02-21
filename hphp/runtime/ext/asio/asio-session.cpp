@@ -61,10 +61,10 @@ namespace {
     assert(function.get());
     try {
       vm_call_user_func(function, params);
-    } catch (const Object& exception) {
+    } catch (const Object&) {
       try {
         raise_warning("[asio] Ignoring exception thrown by %s callback", name);
-      } catch (const Object& exception) {
+      } catch (const Object&) {
         // Swallow the exception. Callers are not designed to deal with
         // PHP exceptions.
       }

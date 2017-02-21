@@ -691,8 +691,8 @@ struct CompactReader {
             }
 
             Object obj = newStruct.toObject();
-            Array spec(get_tspec(obj->getVMClass()));
-            readStruct(obj, spec);
+            Array arrSpec(get_tspec(obj->getVMClass()));
+            readStruct(obj, arrSpec);
             return newStruct;
           }
 

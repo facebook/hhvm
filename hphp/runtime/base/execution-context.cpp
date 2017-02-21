@@ -864,7 +864,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
                 false)) {
         return true;
       }
-    } catch (const RequestTimeoutException& e) {
+    } catch (const RequestTimeoutException&) {
       static auto requestErrorHandlerTimeoutCounter =
           ServiceData::createTimeseries("requests_timed_out_error_handler",
                                         {ServiceData::StatsType::COUNT});
@@ -872,7 +872,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       ServerStats::Log("request.timed_out.error_handler", 1);
 
       if (!swallowExceptions) throw;
-    } catch (const RequestCPUTimeoutException& e) {
+    } catch (const RequestCPUTimeoutException&) {
       static auto requestErrorHandlerCPUTimeoutCounter =
           ServiceData::createTimeseries("requests_cpu_timed_out_error_handler",
                                         {ServiceData::StatsType::COUNT});
@@ -880,7 +880,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       ServerStats::Log("request.cpu_timed_out.error_handler", 1);
 
       if (!swallowExceptions) throw;
-    } catch (const RequestMemoryExceededException& e) {
+    } catch (const RequestMemoryExceededException&) {
       static auto requestErrorHandlerMemoryExceededCounter =
           ServiceData::createTimeseries(
               "requests_memory_exceeded_error_handler",

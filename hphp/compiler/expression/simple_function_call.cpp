@@ -643,9 +643,9 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
             auto rep = std::make_shared<ExpressionList>(
               getScope(), getRange(), ExpressionList::ListKindWrappedNoWarn);
             std::string root_name;
-            int n = arr ? arr->getCount() : 0;
+            int n2 = arr ? arr->getCount() : 0;
             int i, j, k;
-            for (i = j = k = 0; i < n; i++) {
+            for (i = j = k = 0; i < n2; i++) {
               auto ap = dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]);
               always_assert(ap);
               String name;

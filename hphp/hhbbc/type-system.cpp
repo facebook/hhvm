@@ -3507,7 +3507,7 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
         std::transform(
           begin(t.m_data.apacked->elems), end(t.m_data.apacked->elems),
           std::back_inserter(repoTypes),
-          [&] (const Type& t) { return make_repo_type(arrTable, t); }
+          [&] (const Type& t2) { return make_repo_type(arrTable, t2); }
         );
         return arrTable.packed(emptiness, repoTypes);
       }

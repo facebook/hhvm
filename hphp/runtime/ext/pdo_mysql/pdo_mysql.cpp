@@ -674,7 +674,6 @@ bool PDOMySqlStatement::executePrepared() {
       int calc_max_length = m_conn->buffered() && m_max_length == 1;
       m_fields = mysql_fetch_fields(m_result);
       if (m_bound_result) {
-        int i;
         for (i = 0; i < column_count; i++) {
           free(m_bound_result[i].buffer);
         }

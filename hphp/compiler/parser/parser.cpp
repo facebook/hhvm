@@ -1509,7 +1509,6 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
     auto param =
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
-    std::string name = param->getName();
     std::string type = param->hasUserType() ? param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
@@ -1519,7 +1518,7 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
       BlockScopePtr(), range);
     modifier->add(mod);
     SimpleVariablePtr svar = std::make_shared<SimpleVariable>(
-      BlockScopePtr(), range, name);
+      BlockScopePtr(), range, param->getName());
     ExpressionListPtr expList = std::make_shared<ExpressionList>(
       BlockScopePtr(), range);
     expList->addElement(svar);

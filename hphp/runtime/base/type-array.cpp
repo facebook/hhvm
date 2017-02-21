@@ -1124,8 +1124,8 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
 
   zend_qsort(indices, count, sizeof(int), multi_compare_func, (void *)&data);
 
-  for (unsigned int k = 0; k < data.size(); k++) {
-    SortData &opaque = data[k];
+  for (unsigned int ki = 0; ki < data.size(); ki++) {
+    SortData &opaque = data[ki];
     const Array& arr = *opaque.array;
     Array sorted;
     for (int i = 0; i < count; i++) {

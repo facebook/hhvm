@@ -94,13 +94,6 @@ let unop_to_incdec_op op =
   | A.Updecr -> H.PostDecO
   | _ -> failwith "Invalid incdec op"
 
-(* TODO make this less of a hack *)
-let label_count = ref 0
-let fresh_label () =
-  let l = !label_count in
-  label_count := l+1;
-  l
-
 let rec from_expr expr =
   let open H in
   match snd expr with
@@ -118,10 +111,10 @@ let rec from_expr expr =
   | A.Binop (A.Eq obop, e1, e2) ->
     emit_assignment obop e1 e2
   | A.Binop (op, e1, e2) ->
-    gather [from_expr e1; from_expr e2; from_binop op]
+    gather [from_expr e2; from_expr e1; from_binop op]
   | A.Eif (etest, Some etrue, efalse) ->
-    let false_label = fresh_label () in
-    let end_label = fresh_label () in
+    let false_label = Label.get_next_label () in
+    let end_label = Label.get_next_label () in
     gather [
       from_expr etest;
       instr (IContFlow (JmpZ false_label));
@@ -132,7 +125,7 @@ let rec from_expr expr =
       instr (ILabel end_label)
     ]
   | A.Eif (etest, None, efalse) ->
-    let end_label = fresh_label () in
+    let end_label = Label.get_next_label () in
     gather [
       from_expr etest;
       instr (IBasic Dup);
@@ -141,7 +134,6 @@ let rec from_expr expr =
       from_expr efalse;
       instr (ILabel end_label)
     ]
-
   | A.Call ((_, A.Id (_, id)), el, []) when id = "echo" ->
     gather [
       from_exprs el;
@@ -204,10 +196,36 @@ and from_stmt verify_return st =
       (if verify_return then instr (IMisc VerifyRetTypeC) else empty);
       instr (IContFlow RetC);
     ]
-  | A.Noop ->
-    empty
-  (* TODO: emit warning *)
-  | _ -> empty
+  | A.Block b -> from_stmts verify_return b
+  | A.If (e, b1, b2) ->
+    let l0 = Label.get_next_label () in
+    let l1 = Label.get_next_label () in
+    let jmp0, jmp1 =
+      instr H.(IContFlow (JmpZ l0)), instr H.(IContFlow (Jmp l1))
+    in
+    gather [
+      from_expr e;
+      jmp0;
+      from_stmt verify_return (A.Block b1);
+      jmp1;
+      instr (ILabel l0);
+      from_stmt verify_return (A.Block b2);
+      instr (ILabel l1);
+    ]
+  | A.Break _
+  | A.Continue _
+  | A.Throw _
+  | A.Static_var _
+  | A.Do _
+  | A.While _
+  | A.For _
+  | A.Switch _
+  | A.Foreach _
+  | A.Try _ -> failwith "statements - NYI"
+  (* TODO: What do we do with unsafe? *)
+  | A.Unsafe
+  | A.Fallthrough
+  | A.Noop -> empty
 
 and from_stmts verify_return stl =
   gather (List.map stl (from_stmt verify_return))

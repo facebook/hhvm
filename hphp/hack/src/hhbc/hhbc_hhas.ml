@@ -168,8 +168,7 @@ let string_of_mutator x =
   | CheckProp _ -> failwith "NYI"
   | InitProp _ -> failwith "NYI"
 
-let string_of_label i =
-  "L" ^ string_of_int i
+let string_of_label id = "L" ^ (string_of_int id)
 
 let string_of_control_flow instruction =
   match instruction with
@@ -179,7 +178,7 @@ let string_of_control_flow instruction =
   | JmpNZ l -> "JmpNZ " ^ string_of_label l
   | RetC -> "RetC"
   | RetV -> "RetV"
-  | _ -> failwith "Not Implemented"
+  | _ -> failwith "instruction_control_flow Not Implemented"
 
 let string_of_call instruction =
   match instruction with

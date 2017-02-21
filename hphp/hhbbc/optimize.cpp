@@ -51,6 +51,11 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString s_86pinit("86pinit");
+const StaticString s_86sinit("86sinit");
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * For filtering assertions, some opcodes are considered to have no
  * use for a stack input assertion.
@@ -606,7 +611,7 @@ void visit_blocks(const char* what,
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, FuncAnalysis ainfo) {
+void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", ainfo.ctx.func->name);
 
   bool again;
@@ -640,6 +645,22 @@ void do_optimize(const Index& index, FuncAnalysis ainfo) {
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
 
+  auto const func = ainfo.ctx.func;
+  if (func->name == s_86pinit.get() || func->name == s_86sinit.get()) {
+    auto const& blk = *func->blocks[func->mainEntry];
+    if (blk.hhbcs.size() == 2 &&
+        blk.hhbcs[0].op == Op::Null &&
+        blk.hhbcs[1].op == Op::RetC) {
+      func->cls->methods.erase(
+        std::find_if(func->cls->methods.begin(),
+                     func->cls->methods.end(),
+                     [&](const std::unique_ptr<php::Func>& f) {
+                       return f.get() == func;
+                     }));
+      return;
+    }
+  }
+
   if (options.InsertAssertions) {
     visit_blocks("insert assertions", index, ainfo, insert_assertions);
   }
@@ -651,7 +672,7 @@ void do_optimize(const Index& index, FuncAnalysis ainfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-void optimize_func(const Index& index, FuncAnalysis ainfo) {
+void optimize_func(const Index& index, FuncAnalysis&& ainfo) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
     is_systemlib_part(*ainfo.ctx.unit)};
   do_optimize(index, std::move(ainfo));

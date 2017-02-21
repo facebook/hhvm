@@ -2602,20 +2602,30 @@ void in(ISS& env, const bc::ArrayIdx&) {
 void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
 
 void in(ISS& env, const bc::InitProp& op) {
-  auto const t = popC(env);
+  auto const t = topC(env);
   switch (op.subop2) {
-  case InitPropOp::Static:
-    mergeSelfProp(env, op.str1, t);
-    if (auto c = env.collect.publicStatics) {
-      auto const cls = selfClsExact(env);
-      always_assert(!!cls);
-      c->merge(env.ctx, *cls, sval(op.str1), t);
-    }
-    break;
-  case InitPropOp::NonStatic:
-    mergeThisProp(env, op.str1, t);
-    break;
+    case InitPropOp::Static:
+      mergeSelfProp(env, op.str1, t);
+      if (auto c = env.collect.publicStatics) {
+        auto const cls = selfClsExact(env);
+        always_assert(!!cls);
+        c->merge(env.ctx, *cls, sval(op.str1), t);
+      }
+      break;
+    case InitPropOp::NonStatic:
+      mergeThisProp(env, op.str1, t);
+      break;
   }
+  if (auto const v = tv(t)) {
+    for (auto& prop : env.ctx.func->cls->properties) {
+      if (prop.name == op.str1) {
+        ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
+        prop.val = *v;
+        return reduce(env, bc::PopC {});
+      }
+    }
+  }
+  popC(env);
 }
 
 void in(ISS& env, const bc::Silence& op) {

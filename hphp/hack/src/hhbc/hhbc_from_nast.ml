@@ -757,9 +757,18 @@ let from_implements tparams implements =
   hints_to_type_infos ~always_extended:false tparams implements
 
 let from_property _nast_class_ class_var =
-  (* TODO: final, xhp, visibility, type, initializer *)
+  (* TODO: xhp, type, initializer *)
+  (* TODO: Hack allows a property to be marked final, which is nonsensical.
+  HHVM does not allow this.  Fix this in the Hack parser? *)
   let property_name = Litstr.to_string @@ snd class_var.N.cv_id in
-  Hhas_property.make property_name
+  let property_is_private = class_var.N.cv_visibility = N.Private in
+  let property_is_protected = class_var.N.cv_visibility = N.Protected in
+  let property_is_public = class_var.N.cv_visibility = N.Public in
+  Hhas_property.make
+    property_is_private
+    property_is_protected
+    property_is_public
+    property_name
 
 let from_properties nast_class class_vars =
   List.map class_vars (from_property nast_class)

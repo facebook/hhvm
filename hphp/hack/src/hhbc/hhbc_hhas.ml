@@ -418,10 +418,19 @@ let add_implements buf class_implements =
     B.add_string buf ") ";
   end
 
+let property_attributes p =
+  let attrs = [] in
+  (* TODO: static *)
+  let attrs = if Hhas_property.is_public p then "public" :: attrs else attrs in
+  let attrs = if Hhas_property.is_protected p then "protected" :: attrs else attrs in
+  let attrs = if Hhas_property.is_private p then "private" :: attrs else attrs in
+  let text = String.concat " " attrs in
+  let text = if text = "" then "" else "[" ^ text ^ "] " in
+  text
+
 let add_property buf property =
   B.add_string buf "\n.property ";
-  (* TODO: visibility *)
-  (* TODO: final *)
+  B.add_string buf (property_attributes property);
   B.add_string buf (Hhas_property.name property);
   (* TODO: Initializer *)
   B.add_string buf ";\n"

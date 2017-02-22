@@ -19,6 +19,7 @@ type t = {
   class_is_trait     : bool;
   class_is_enum      : bool;
   class_methods      : Hhas_method.t list;
+  class_properties   : Hhas_property.t list;
   (* TODO other members *)
   (* TODO XHP stuff *)
 }
@@ -33,7 +34,8 @@ let make
   class_is_interface
   class_is_trait
   class_is_enum
-  class_methods =
+  class_methods
+  class_properties =
   {
     class_attributes;
     class_base;
@@ -44,7 +46,8 @@ let make
     class_is_interface;
     class_is_trait;
     class_is_enum;
-    class_methods
+    class_methods;
+    class_properties
   }
 
 let attributes hhas_class = hhas_class.class_attributes
@@ -57,3 +60,4 @@ let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait
 let is_enum hhas_class = hhas_class.class_is_enum
 let methods hhas_class = hhas_class.class_methods
+let properties hhas_class = hhas_class.class_properties

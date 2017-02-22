@@ -418,14 +418,22 @@ let add_implements buf class_implements =
     B.add_string buf ") ";
   end
 
+let add_property buf property =
+  B.add_string buf "\n.property ";
+  (* TODO: visibility *)
+  (* TODO: final *)
+  B.add_string buf (Hhas_property.name property);
+  (* TODO: Initializer *)
+  B.add_string buf ";\n"
+
 let add_class_def buf class_def =
-  (* TODO: user attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf (Hhas_class.name class_def);
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {\n";
+  List.iter (add_property buf) (Hhas_class.properties class_def);
   List.iter (add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)
   B.add_string buf "}\n"

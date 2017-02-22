@@ -756,6 +756,14 @@ let from_implements tparams implements =
   *)
   hints_to_type_infos ~always_extended:false tparams implements
 
+let from_property _nast_class_ class_var =
+  (* TODO: final, xhp, visibility, type, initializer *)
+  let property_name = Litstr.to_string @@ snd class_var.N.cv_id in
+  Hhas_property.make property_name
+
+let from_properties nast_class class_vars =
+  List.map class_vars (from_property nast_class)
+
 let from_class : Nast.class_ -> Hhas_class.t =
   fun nast_class ->
   let class_attributes = from_attributes nast_class.N.c_user_attributes in
@@ -777,7 +785,9 @@ let from_class : Nast.class_ -> Hhas_class.t =
   let nast_methods = nast_class.N.c_methods @ nast_class.N.c_static_methods in
   let class_methods = from_methods nast_class nast_methods in
   let class_methods = add_constructor nast_class class_methods in
-  (* TODO: other class members *)
+  let class_properties = from_properties nast_class nast_class.N.c_vars in
+  (* TODO: uses, xhp attr uses, xhp category, req-extends, req-implements,
+  constants, type constants, static properties. *)
   Hhas_class.make
     class_attributes
     class_base
@@ -789,6 +799,7 @@ let from_class : Nast.class_ -> Hhas_class.t =
     class_is_trait
     class_is_enum
     class_methods
+    class_properties
 
 let from_classes nast_classes =
   Core.List.map nast_classes from_class

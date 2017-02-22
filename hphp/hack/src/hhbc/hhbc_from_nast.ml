@@ -159,6 +159,15 @@ let rec from_expr expr =
       (* If the instruction has produced a ref then unbox it *)
       if flavor = Flavor_R then instr (IBasic UnboxR) else empty
     ]
+
+  | A.New ((_, A.Id (_, id)), args, uargs) ->
+      let nargs = List.length args + List.length uargs in
+      gather [
+        instr (ICall (FPushCtorD (nargs, id)));
+        emit_args_and_call args uargs;
+        instr (IBasic PopR)
+      ]
+
   | _ -> failwith "from_expr: NYI"
 
 and emit_arg i ((_, expr_) as e) =

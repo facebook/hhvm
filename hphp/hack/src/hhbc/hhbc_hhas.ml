@@ -205,8 +205,8 @@ let string_of_call instruction =
   | FPushClsMethodD (n, id1, id2) -> "FPushClsMethodD " ^ string_of_int n ^
     string_of_class_id id1 ^ " " ^  string_of_function_id id2
   | FPushCtor n -> "FPushCtor " ^ string_of_int n
-  | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ id
-  | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ id
+  | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ quote_str id
+  | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ quote_str id
   | DecodeCufIter (n, l) ->
     "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_label l
   | FPushCufIter (n, id) ->

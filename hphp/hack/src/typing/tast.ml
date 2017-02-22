@@ -47,3 +47,12 @@ let make_typed_expr p ty te : expr = ((p, Some ty), te)
  * and uniquely derivable.
  *)
 let make_implicitly_typed_expr p te : expr = ((p, None), te)
+
+(* Get the position of an expression *)
+let get_position (((p, _), _) : expr) = p
+
+(* If the expression has a type, return it *)
+let get_type_exn (((_, tyopt), _) : expr) =
+  match tyopt with
+  | None -> failwith "get_type_exn: no type"
+  | Some ty -> ty

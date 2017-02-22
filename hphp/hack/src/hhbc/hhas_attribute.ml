@@ -10,10 +10,11 @@
 
 type t = {
   attribute_name          : Litstr.id;
-  (* TODO: attribute parameter values *)
+  attribute_arguments     : Hhbc_ast.instruct_lit_const list
 }
 
-let make attribute_name =
-  { attribute_name }
+let make attribute_name attribute_arguments =
+  { attribute_name; attribute_arguments }
 
 let name a = a.attribute_name
+let arguments a = a.attribute_arguments

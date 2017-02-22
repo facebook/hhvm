@@ -106,6 +106,7 @@ let unop_to_incdec_op op =
   | _ -> failwith "Invalid incdec op"
 
 let rec from_expr expr =
+  (* Note that this takes an Ast.expr, not a Nast.expr. *)
   let open H in
   match snd expr with
   | A.Float (_, litstr) ->
@@ -228,6 +229,25 @@ and emit_flavored_expr (_, expr_ as expr) =
     emit_call e args uargs
   | _ ->
     from_expr expr, Flavor_C
+
+and literal_from_named_expr expr =
+  match snd expr with
+  | N.Float (_, litstr) -> H.Double (float_of_string litstr)
+  | N.String (_, litstr) -> H.String litstr
+  | N.Int (_, litstr) -> H.Int (Int64.of_string litstr)
+  | N.Null -> H.Null
+  | N.False -> H.False
+  | N.True -> H.True
+  (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
+   this seems reasonable to allow. Right now this will crash if given an
+   expression rather than a literal in here.  In particular, see what unary
+   minus does; do we allow it on a literal int? We should. *)
+  | _ -> failwith (Printf.sprintf
+    "Expected a literal expression in literal_from_named_expr, got %s"
+    (N.expr_to_string (snd expr)))
+
+and literals_from_named_exprs exprs =
+  List.map exprs literal_from_named_expr
 
 (* Emit code for an l-value, returning instructions and the location that
  * must be set. For now, this is just a local. *)
@@ -556,8 +576,8 @@ let from_functions nast_functions =
 let from_attribute : Nast.user_attribute -> Hhas_attribute.t =
   fun nast_attr ->
   let attribute_name = Litstr.to_string @@ snd nast_attr.Nast.ua_name in
-  (* TODO: Attribute values *)
-  Hhas_attribute.make attribute_name
+  let attribute_arguments = literals_from_named_exprs nast_attr.Nast.ua_params in
+  Hhas_attribute.make attribute_name attribute_arguments
 
 let from_attributes nast_attributes =
   (* The list of attributes is reversed in the Nast. *)

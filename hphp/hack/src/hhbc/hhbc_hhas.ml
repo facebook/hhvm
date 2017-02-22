@@ -330,11 +330,32 @@ let add_fun_def buf fun_def =
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
+let attribute_argument_to_string index argument =
+  let value = match argument with
+  | Null -> "N"
+  | Double f -> Printf.sprintf "d:%f" f
+  (* TODO: This double formatting isn't quite right. *)
+  | String s -> Printf.sprintf "s:%d:%s" (String.length s) (quote_str s)
+  (* TODO: This escaping isn't quite right. *)
+  | False -> "i:0"
+  | True -> "i:1"
+  | Int i -> "i:" ^ (Int64.to_string i)
+  | _ -> failwith "unexpected value in attribute_argument_to_string" in
+  Printf.sprintf "i:%d;%s;" index value
+
+let attribute_arguments_to_string arguments =
+  let rec aux index arguments acc =
+    match arguments with
+    | h :: t -> aux (index + 1) t (acc ^ attribute_argument_to_string index h)
+    | _ -> acc in
+  aux 0 arguments ""
+
 let attribute_to_string a =
-  (* TODO: Generate attribute arguments in braces *)
   let name = Hhas_attribute.name a in
-  let count = 0 in (* TODO: Count attribute arguments *)
-  Printf.sprintf "\"%s\"(\"\"\"a:%n:{}\"\"\")" name count
+  let args = Hhas_attribute.arguments a in
+  let count = List.length args in
+  let arguments = attribute_arguments_to_string args in
+  Printf.sprintf "\"%s\"(\"\"\"a:%n:{%s}\"\"\")" name count arguments
 
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in

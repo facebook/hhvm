@@ -151,6 +151,7 @@ let rec from_expr expr =
       from_expr efalse;
       instr (ILabel end_label)
     ]
+  | A.Expr_list es -> gather @@ List.map es ~f:from_expr
   | A.Call _ ->
     let instrs, flavor = emit_flavored_expr expr in
     gather [
@@ -158,9 +159,7 @@ let rec from_expr expr =
       (* If the instruction has produced a ref then unbox it *)
       if flavor = Flavor_R then instr (IBasic UnboxR) else empty
     ]
-
-    (* TODO: emit warning *)
-  | _ -> empty
+  | _ -> failwith "from_expr: NYI"
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
@@ -417,9 +416,41 @@ and from_stmt ~continue_label ~break_label verify_return st =
       jmp_to_begin;
       break_label;
     ], (false, false)
+  | A.For (e1, e2, e3, b) ->
+    let l0 = Label.get_next_label () in
+    let l1 = Label.get_next_label () in
+    let cond = from_expr e2 in
+    let body, (need_cont, _) =
+      from_stmt
+        ~continue_label:(Some l1)
+        ~break_label:(Some l0)
+        verify_return
+        (A.Block b)
+    in
+    let jmp_to_begin, jmp_to_end, begin_label, cont_label =
+      if need_cont
+      then
+        let l2 = Label.get_next_label () in
+        let jmp_to_begin, jmp_to_end = emit_condition_loop l2 l0 in
+        jmp_to_begin, jmp_to_end, instr (ILabel l2), instr (ILabel l1)
+      else
+        let jmp_to_begin, jmp_to_end = emit_condition_loop l1 l0 in
+        jmp_to_begin, jmp_to_end, instr (ILabel l1), empty
+    in
+    gather [
+      emit_ignored_expr e1;
+      cond;
+      jmp_to_end;
+      begin_label;
+      body;
+      cont_label;
+      emit_ignored_expr e3;
+      cond;
+      jmp_to_begin;
+      instr (ILabel l0);
+    ], (false, false)
   | A.Throw _
   | A.Static_var _
-  | A.For _
   | A.Switch _
   | A.Foreach _
   | A.Try _ -> failwith "statements - NYI"

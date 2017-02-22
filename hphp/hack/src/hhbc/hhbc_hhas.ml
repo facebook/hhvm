@@ -421,7 +421,7 @@ let add_implements buf class_implements =
 let property_attributes p =
   let module P = Hhas_property in
   let attrs = [] in
-  (* TODO: static *)
+  let attrs = if P.is_static p then "static" :: attrs else attrs in
   let attrs = if P.is_public p then "public" :: attrs else attrs in
   let attrs = if P.is_protected p then "protected" :: attrs else attrs in
   let attrs = if P.is_private p then "private" :: attrs else attrs in
@@ -430,7 +430,7 @@ let property_attributes p =
   text
 
 let add_property buf property =
-  B.add_string buf "\n.property ";
+  B.add_string buf "\n  .property ";
   B.add_string buf (property_attributes property);
   B.add_string buf (Hhas_property.name property);
   (* TODO: Initializer *)

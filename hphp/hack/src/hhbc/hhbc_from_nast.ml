@@ -764,7 +764,7 @@ let from_implements tparams implements =
   *)
   hints_to_type_infos ~always_extended:false tparams implements
 
-let from_property _nast_class_ class_var =
+let from_property property_is_static _nast_class_ class_var =
   (* TODO: xhp, type, initializer *)
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
@@ -776,10 +776,11 @@ let from_property _nast_class_ class_var =
     property_is_private
     property_is_protected
     property_is_public
+    property_is_static
     property_name
 
-let from_properties nast_class class_vars =
-  List.map class_vars (from_property nast_class)
+let from_properties property_is_static nast_class class_vars =
+  List.map class_vars (from_property property_is_static nast_class)
 
 let from_class : Nast.class_ -> Hhas_class.t =
   fun nast_class ->
@@ -803,9 +804,11 @@ let from_class : Nast.class_ -> Hhas_class.t =
   let static_methods = from_methods true nast_class nast_class.N.c_static_methods in
   let class_methods = instance_methods @ static_methods in
   let class_methods = add_constructor nast_class class_methods in
-  let class_properties = from_properties nast_class nast_class.N.c_vars in
+  let instance_properties = from_properties false nast_class nast_class.N.c_vars in
+  let static_properties = from_properties true nast_class nast_class.N.c_static_vars in
+  let class_properties = static_properties @ instance_properties in
   (* TODO: uses, xhp attr uses, xhp category, req-extends, req-implements,
-  constants, type constants, static properties. *)
+  constants, type constants *)
   Hhas_class.make
     class_attributes
     class_base

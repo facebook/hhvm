@@ -433,8 +433,9 @@ let add_property buf property =
   B.add_string buf "\n  .property ";
   B.add_string buf (property_attributes property);
   B.add_string buf (Hhas_property.name property);
-  (* TODO: Initializer *)
-  B.add_string buf ";\n"
+  (* TODO: Get the actual initializer when we can codegen it. Properties
+  that lack an initializer get a null. *)
+  B.add_string buf " =\n    \"\"\"N;\"\"\";\n"
 
 let add_class_def buf class_def =
   B.add_string buf "\n.class ";

@@ -14,8 +14,11 @@ type t = {
   property_is_public    : bool;
   property_is_static    : bool;
   property_name         : Litstr.id;
-  (* TODO: xhp, type, initializer *)
+  (* TODO: xhp, initializer *)
 }
+
+(* Interestingly, HHAS does not represent the declared types of properties,
+unlike formal parameters and return types. We might consider fixing this. *)
 
 let make
   property_is_private

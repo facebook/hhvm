@@ -23,7 +23,9 @@ type repo_auth_type = string (* see see runtime/base/repo-auth-type.h *)
 type local_id =
   | Local_unnamed of int
   | Local_named of string
-type param_id = string
+type param_id =
+  | Param_unnamed of int
+  | Param_named of string
 type iterator_id = int
 type stack_index = int
 type class_id = string
@@ -254,7 +256,7 @@ type instruct_call =
   | FPushClsMethodD of num_params * Litstr.id * Litstr.id
   | FPushCtor of num_params
   | FPushCtorD of num_params * Litstr.id
-  | FpushCtorI of num_params * class_id
+  | FPushCtorI of num_params * class_id
   | DecodeCufIter of num_params * rel_offset
   | FPushCufIter of num_params * iterator_id
   | FPushCuf of num_params
@@ -267,11 +269,12 @@ type instruct_call =
   | FPassCE of param_id
   | FPassV of param_id
   | FPassVNop of param_id
+  | FPassR of param_id
   | FPassL of param_id * local_id
   | FPassN of param_id
   | FPassG of param_id
   | FPassS of param_id
-  | FCall of param_id
+  | FCall of num_params
   | FCallD of num_params * class_id * function_id
   | FCallArray
   | FCallAwait of num_params * class_id * function_id

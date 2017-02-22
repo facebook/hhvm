@@ -14,6 +14,17 @@ module A = Ast
 module N = Nast
 module H = Hhbc_ast
 module TC = Hhas_type_constraint
+module SN = Naming_special_names
+
+(* These are the three flavors of value that can live on the stack:
+ *   C = cell
+ *   R = ref
+ *   A = classref
+ *)
+type flavor =
+  | Flavor_C
+  | Flavor_R
+  | Flavor_A
 
 (* The various from_X functions below take some kind of AST (expression,
  * statement, etc.) and produce what is logically a sequence of instructions.
@@ -137,13 +148,84 @@ let rec from_expr expr =
       from_expr efalse;
       instr (ILabel end_label)
     ]
-  | A.Call ((_, A.Id (_, id)), el, []) when id = "echo" ->
+  | A.Call _ ->
+    let instrs, flavor = emit_flavored_expr expr in
     gather [
-      from_exprs el;
-      instr (IOp Print);
+      instrs;
+      (* If the instruction has produced a ref then unbox it *)
+      if flavor = Flavor_R then instr (IBasic UnboxR) else empty
     ]
-  (* TODO: emit warning *)
+
+    (* TODO: emit warning *)
   | _ -> empty
+
+and emit_arg i ((_, expr_) as e) =
+  match expr_ with
+  | A.Lvar (_, x) ->
+    instr H.(ICall (FPassL (Param_unnamed i, Local_named x)))
+  | _ ->
+    let instrs, flavor = emit_flavored_expr e in
+    gather [
+      instrs;
+      instr H.(ICall (if flavor = Flavor_R then FPassR (Param_unnamed i)
+                      else FPassCE (Param_unnamed i)));
+    ]
+
+and emit_pop flavor =
+  match flavor with
+  | Flavor_R -> instr H.(IBasic PopR)
+  | Flavor_C -> instr H.(IBasic PopC)
+  | Flavor_A -> instr H.(IBasic PopA)
+
+and emit_ignored_expr e =
+  let instrs, flavor = emit_flavored_expr e in
+  gather [
+    instrs;
+    emit_pop flavor;
+  ]
+
+(* Emit code to construct the argument frame and then make the call *)
+and emit_args_and_call args uargs =
+  let all_args = args @ uargs in
+  let nargs = List.length all_args in
+  gather [
+    gather (List.mapi all_args emit_arg);
+    if uargs = []
+    then instr H.(ICall (FCall nargs))
+    else instr H.(ICall (FCallUnpack nargs))
+  ]
+
+and emit_call (_, expr_) args uargs =
+  match expr_ with
+  | A.Id (_, id) when id = SN.SpecialFunctions.echo ->
+    let nargs = List.length args in
+    let instrs = gather @@ List.mapi args begin fun i arg ->
+         gather [
+           from_expr arg;
+           instr H.(IOp Print);
+           if i = nargs-1 then empty else emit_pop Flavor_C
+         ] end in
+    instrs, Flavor_C
+
+  | A.Id (_, id) ->
+    let nargs = List.length args + List.length uargs in
+    gather [
+      instr H.(ICall (FPushFuncD (nargs, id)));
+      emit_args_and_call args uargs;
+    ], Flavor_R
+
+  | _ ->
+    empty, Flavor_C
+
+(* Emit code for an expression that might leave a cell or reference on the
+ * stack. Return which flavor it left.
+ *)
+and emit_flavored_expr (_, expr_ as expr) =
+  match expr_ with
+  | A.Call (e, args, uargs) ->
+    emit_call e args uargs
+  | _ ->
+    from_expr expr, Flavor_C
 
 (* Emit code for an l-value, returning instructions and the location that
  * must be set. For now, this is just a local. *)
@@ -196,10 +278,7 @@ and from_stmt ~continue_label ~break_label verify_return st =
   let open H in
   match st with
   | A.Expr expr ->
-    gather [
-      from_expr expr;
-      instr (IBasic PopC)
-    ], false
+    emit_ignored_expr expr, false
   | A.Return (_, None) ->
     instrs [
       ILitConst Null;
@@ -430,7 +509,7 @@ let emit_method_prolog params =
     let param_type_info = Hhas_param.type_info p in
     let param_name = Hhas_param.name p in
     if has_type_constraint param_type_info
-    then Some (instr (IMisc (VerifyParamType param_name)))
+    then Some (instr (IMisc (VerifyParamType (Param_named param_name))))
     else None))
 
 let from_body tparams params ret b =

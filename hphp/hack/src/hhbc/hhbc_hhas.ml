@@ -90,6 +90,11 @@ let string_of_operator instruction =
     | H.Exit -> "Exit"
     | Fatal -> "Fatal"
 
+let string_of_param_id x =
+  match x with
+  | Param_unnamed i -> string_of_int i
+  | Param_named s -> s
+
 let string_of_local_id x =
   match x with
   | Local_unnamed i -> string_of_int i
@@ -180,18 +185,63 @@ let string_of_control_flow instruction =
   | RetV -> "RetV"
   | _ -> failwith "instruction_control_flow Not Implemented"
 
+let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
+
+let string_of_iterator_id i = string_of_int i
+let string_of_class_id id = quote_str id
+let string_of_function_id id = quote_str id
+
 let string_of_call instruction =
   match instruction with
-    | FPushFuncD (n_params, litstr) ->
-      "FPushFuncD "
-      ^ string_of_int n_params
-      ^ " \"" ^ litstr ^ "\""
-  | FCall param_id -> "FCall " ^ param_id
-  | _ -> failwith "instruct_call Not Implemented"
+  | FPushFunc n -> "FPushFunc " ^ string_of_int n
+  | FPushFuncD (n, id) -> "FPushFuncD " ^ string_of_int n ^ " " ^ quote_str id
+  | FPushFuncU (n, id1, id2) ->
+    "FPushFuncU " ^ string_of_int n ^ " " ^ quote_str id1 ^ " " ^ quote_str id2
+  | FPushObjMethod n -> "FPushObjMethod " ^ string_of_int n
+  | FPushObjMethodD (n, id) -> "FPushObjMethodD " ^ string_of_int n ^ " " ^ id
+  | FPushClsMethod n -> "FPushClsMethod " ^ string_of_int n
+  | FPushClsMethodF n -> "FPushClsMethodF " ^ string_of_int n
+  | FPushClsMethodD (n, id1, id2) -> "FPushClsMethodD " ^ string_of_int n ^
+    string_of_class_id id1 ^ " " ^  string_of_function_id id2
+  | FPushCtor n -> "FPushCtor " ^ string_of_int n
+  | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ id
+  | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ id
+  | DecodeCufIter (n, l) ->
+    "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_label l
+  | FPushCufIter (n, id) ->
+    "FPushCufIter " ^ string_of_int n ^ " " ^ string_of_iterator_id id
+  | FPushCuf n -> "FPushCuf " ^ string_of_int n
+  | FPushCufF n -> "FPushCufF " ^  string_of_int n
+  | FPushCufSafe n -> "FPushCufSafe " ^ string_of_int n
+  | CufSafeArray -> "CufSafeArray"
+  | CufSafeReturn -> "CufSafeReturn"
+  | FPassC id -> "FPassC " ^ string_of_param_id id
+  | FPassCW id -> "FPassCW " ^ string_of_param_id id
+  | FPassCE id -> "FPassCE " ^ string_of_param_id id
+  | FPassV id -> "FPassV " ^ string_of_param_id id
+  | FPassVNop id -> "FPassVNop " ^ string_of_param_id id
+  | FPassR id -> "FPassR " ^ string_of_param_id id
+  | FPassL (id, lid) ->
+    "FPassL " ^ string_of_param_id id ^ " " ^ string_of_local_id lid
+  | FPassN id -> "FPassN " ^ string_of_param_id id
+  | FPassG id -> "FPassG " ^ string_of_param_id id
+  | FPassS id -> "FPassS " ^ string_of_param_id id
+  | FCall n -> "FCall " ^ string_of_int n
+  | FCallD (n, c, f) ->
+    "FCallD " ^ string_of_int n ^ " " ^
+    string_of_class_id c ^ " " ^ string_of_function_id f
+  | FCallArray -> "FCallArray"
+  | FCallAwait (n, c, f) ->
+    "FCallAwait " ^ string_of_int n ^ " " ^
+    string_of_class_id c ^ " " ^ string_of_function_id f
+  | FCallUnpack n -> "FCallUnpack " ^ string_of_int n
+  | FCallBuiltin (n1, n2, id) ->
+    "FCallBuiltin " ^ string_of_int n1 ^ " " ^ string_of_int n2 ^ " " ^
+    quote_str id
 
 let string_of_misc instruction =
   match instruction with
-    | VerifyParamType id -> "VerifyParamType " ^ id
+    | VerifyParamType id -> "VerifyParamType " ^ string_of_param_id id
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | _ -> failwith "instruct_misc Not Implemented"
 
@@ -213,8 +263,6 @@ let add_instruction_list buffer indent instructions =
     );
     B.add_string buffer "\n" in
   List.iter process_instr instructions
-
-let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 
 (* HHVM uses `N` to denote absence of type information. Otherwise the type
  * is a quoted string *)

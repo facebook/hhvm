@@ -419,11 +419,12 @@ let add_implements buf class_implements =
   end
 
 let property_attributes p =
+  let module P = Hhas_property in
   let attrs = [] in
   (* TODO: static *)
-  let attrs = if Hhas_property.is_public p then "public" :: attrs else attrs in
-  let attrs = if Hhas_property.is_protected p then "protected" :: attrs else attrs in
-  let attrs = if Hhas_property.is_private p then "private" :: attrs else attrs in
+  let attrs = if P.is_public p then "public" :: attrs else attrs in
+  let attrs = if P.is_protected p then "protected" :: attrs else attrs in
+  let attrs = if P.is_private p then "private" :: attrs else attrs in
   let text = String.concat " " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text

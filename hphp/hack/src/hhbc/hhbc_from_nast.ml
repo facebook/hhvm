@@ -657,8 +657,8 @@ let from_attributes nast_attributes =
   (* The list of attributes is reversed in the Nast. *)
   List.map (List.rev nast_attributes) from_attribute
 
-let from_method : Nast.class_ -> Nast.method_ -> Hhas_method.t option =
-  fun nast_class nast_method ->
+let from_method : bool -> Nast.class_ -> Nast.method_ -> Hhas_method.t option =
+  fun method_is_static nast_class nast_method ->
   let class_tparams = tparams_to_strings (fst nast_class.N.c_tparams) in
   let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
   let method_is_abstract = nast_method.Nast.m_abstract in
@@ -671,7 +671,6 @@ Fatal RuntimeOmitFrame
   let method_is_private = nast_method.Nast.m_visibility = Nast.Private in
   let method_is_protected = nast_method.Nast.m_visibility = Nast.Protected in
   let method_is_public = nast_method.Nast.m_visibility = Nast.Public in
-  let method_is_static = false in (* TODO static functions *)
   let method_attributes = from_attributes nast_method.Nast.m_user_attributes in
   match nast_method.N.m_body with
   | N.NamedBody _ ->
@@ -696,8 +695,8 @@ Fatal RuntimeOmitFrame
       method_body in
     Some m
 
-let from_methods nast_class nast_methods =
-  Core.List.filter_map nast_methods (from_method nast_class)
+let from_methods method_is_static nast_class nast_methods =
+  Core.List.filter_map nast_methods (from_method method_is_static nast_class)
 
 let is_interface nast_class =
   nast_class.N.c_kind = Ast.Cinterface
@@ -735,7 +734,7 @@ let add_constructor nast_class class_methods =
   | None -> (default_constructor nast_class) :: class_methods
   | Some nast_ctor ->
     begin
-      match from_method nast_class nast_ctor with
+      match from_method false nast_class nast_ctor with
       | None -> class_methods
       | Some m -> m :: class_methods
     end
@@ -791,8 +790,9 @@ let from_class : Nast.class_ -> Hhas_class.t =
     if class_is_interface then nast_class.N.c_extends
     else nast_class.N.c_implements in
   let class_implements = from_implements tparams implements in
-  let nast_methods = nast_class.N.c_methods @ nast_class.N.c_static_methods in
-  let class_methods = from_methods nast_class nast_methods in
+  let instance_methods = from_methods false nast_class nast_class.N.c_methods in
+  let static_methods = from_methods true nast_class nast_class.N.c_static_methods in
+  let class_methods = instance_methods @ static_methods in
   let class_methods = add_constructor nast_class class_methods in
   let class_properties = from_properties nast_class nast_class.N.c_vars in
   (* TODO: uses, xhp attr uses, xhp category, req-extends, req-implements,

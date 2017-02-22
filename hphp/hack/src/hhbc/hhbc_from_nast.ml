@@ -472,6 +472,16 @@ let from_fun_ : Nast.fun_ -> Hhas_function.t option =
 let from_functions nast_functions =
   Core.List.filter_map nast_functions from_fun_
 
+let from_attribute : Nast.user_attribute -> Hhas_attribute.t =
+  fun nast_attr ->
+  let attribute_name = Litstr.to_string @@ snd nast_attr.Nast.ua_name in
+  (* TODO: Attribute values *)
+  Hhas_attribute.make attribute_name
+
+let from_attributes nast_attributes =
+  (* The list of attributes is reversed in the Nast. *)
+  List.map (List.rev nast_attributes) from_attribute
+
 let from_method : Nast.method_ -> Hhas_method.t option =
   fun nast_method ->
   let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
@@ -486,16 +496,17 @@ Fatal RuntimeOmitFrame
   let method_is_protected = nast_method.Nast.m_visibility = Nast.Protected in
   let method_is_public = nast_method.Nast.m_visibility = Nast.Public in
   let method_is_static = false in (* TODO static functions *)
+  let method_attributes = from_attributes nast_method.Nast.m_user_attributes in
   match nast_method.N.m_body with
   | N.NamedBody _ ->
     None
   | N.UnnamedBody b ->
-    (* TODO: params *)
     let body_instrs, method_params, method_return_type =
       from_body nast_method.N.m_tparams nast_method.N.m_params
         nast_method.N.m_ret b in
     let method_body = instr_seq_to_list body_instrs in
     let m = Hhas_method.make
+      method_attributes
       method_is_protected
       method_is_public
       method_is_private
@@ -515,6 +526,7 @@ let is_interface nast_class =
   nast_class.N.c_kind = Ast.Cinterface
 
 let default_constructor nast_class =
+  let method_attributes = [] in
   let method_name = "86ctor" in
   let method_body = instr_seq_to_list (gather [
     instr (H.ILitConst H.Null);
@@ -529,6 +541,7 @@ let default_constructor nast_class =
   let method_params = [] in
   let method_return_type = None in
   Hhas_method.make
+    method_attributes
     method_is_protected
     method_is_public
     method_is_private
@@ -567,8 +580,8 @@ let from_implements tparams implements =
   hints_to_type_infos ~always_extended:false tparams implements
 
 let from_class : Nast.class_ -> Hhas_class.t =
-  (* TODO user attributes *)
   fun nast_class ->
+  let class_attributes = from_attributes nast_class.N.c_user_attributes in
   let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
   let class_is_trait = nast_class.N.c_kind = Ast.Ctrait in
   let class_is_enum = nast_class.N.c_kind = Ast.Cenum in
@@ -589,6 +602,7 @@ let from_class : Nast.class_ -> Hhas_class.t =
   let class_methods = add_constructor nast_class class_methods in
   (* TODO: other class members *)
   Hhas_class.make
+    class_attributes
     class_base
     class_implements
     class_name

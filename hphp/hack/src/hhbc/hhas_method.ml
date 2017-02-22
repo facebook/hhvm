@@ -9,10 +9,7 @@
 *)
 
 type t = {
-  (* TODO: attributes *)
-  (* TODO: generic type parameters *)
-  (* TODO: where clause *)
-  (* TODO: is constructor / destructor / etc *)
+  method_attributes    : Hhas_attribute.t list;
   method_is_protected  : bool;
   method_is_public     : bool;
   method_is_private    : bool;
@@ -21,12 +18,12 @@ type t = {
   method_is_abstract   : bool;
   method_name          : Litstr.id;
   method_params        : Hhas_param.t list;
-  (* TODO: formal parameters *)
   method_return_type   : Hhas_type_info.t option;
   method_body          : Hhbc_ast.instruct list;
 }
 
 let make
+  method_attributes
   method_is_protected
   method_is_public
   method_is_private
@@ -37,6 +34,7 @@ let make
   method_params
   method_return_type
   method_body = {
+    method_attributes;
     method_is_protected;
     method_is_public;
     method_is_private;
@@ -49,6 +47,7 @@ let make
     method_body
   }
 
+let attributes method_def = method_def.method_attributes
 let is_protected method_def = method_def.method_is_protected
 let is_private method_def = method_def.method_is_private
 let is_public method_def = method_def.method_is_public

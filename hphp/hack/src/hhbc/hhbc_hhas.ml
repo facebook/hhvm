@@ -281,8 +281,15 @@ let add_fun_def buf fun_def =
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
-let method_special_attributes m =
-  let attrs = [] in
+let attribute_to_string a =
+  (* TODO: Generate attribute arguments in braces *)
+  let name = Hhas_attribute.name a in
+  let count = 0 in (* TODO: Count attribute arguments *)
+  Printf.sprintf "\"%s\"(\"\"\"a:%n:{}\"\"\")" name count
+
+let method_attributes m =
+  let user_attrs = Hhas_method.attributes m in
+  let attrs = List.map attribute_to_string user_attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
@@ -294,7 +301,6 @@ let method_special_attributes m =
   text
 
 let add_method_def buf method_def =
-  (* TODO: attributes *)
   (* TODO: In the original codegen sometimes a missing return type is not in
   the text at all and sometimes it is <"" N  > -- which should we generate,
   and when? *)
@@ -303,7 +309,7 @@ let add_method_def buf method_def =
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
   B.add_string buf "\n  .method ";
-  B.add_string buf (method_special_attributes method_def);
+  B.add_string buf (method_attributes method_def);
   B.add_string buf (string_of_type_info_option method_return_type);
   B.add_string buf method_name;
   (* TODO: generic type parameters *)
@@ -314,7 +320,8 @@ let add_method_def buf method_def =
   B.add_string buf "  }\n"
 
 let class_special_attributes c =
-  let attrs = [] in
+  let user_attrs = Hhas_class.attributes c in
+  let attrs = List.map attribute_to_string user_attrs in
   let attrs = if Hhas_class.is_trait c then "trait" :: attrs else attrs in
   let attrs = if Hhas_class.is_interface c then "interface" :: attrs else attrs in
   let attrs = if Hhas_class.is_final c then "final" :: attrs else attrs in

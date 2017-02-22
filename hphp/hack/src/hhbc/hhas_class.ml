@@ -9,8 +9,7 @@
 *)
 
 type t = {
-  (* TODO attributes *)
-  (* TODO generic type parameters *)
+  class_attributes   : Hhas_attribute.t list;
   class_base         : Hhas_type_info.t option;
   class_implements   : Hhas_type_info.t list;
   class_name         : Litstr.id;
@@ -25,6 +24,7 @@ type t = {
 }
 
 let make
+  class_attributes
   class_base
   class_implements
   class_name
@@ -35,6 +35,7 @@ let make
   class_is_enum
   class_methods =
   {
+    class_attributes;
     class_base;
     class_implements;
     class_name;
@@ -46,6 +47,7 @@ let make
     class_methods
   }
 
+let attributes hhas_class = hhas_class.class_attributes
 let base hhas_class = hhas_class.class_base
 let implements hhas_class = hhas_class.class_implements
 let name hhas_class = hhas_class.class_name

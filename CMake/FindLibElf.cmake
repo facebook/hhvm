@@ -60,5 +60,6 @@ int main() {
   elf_getshdrstrndx(e, &sz);
   return 0;
 }" ELF_GETSHDRSTRNDX)
+SET(CMAKE_REQUIRED_LIBRARIES)
 
 mark_as_advanced(LIBELF_INCLUDE_DIRS LIBELF_LIBRARIES ELF_GETSHDRSTRNDX)

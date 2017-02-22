@@ -39,7 +39,8 @@ let string_of_lit_const instruction =
     | String str  -> "String \"" ^ str ^ "\""
     | True        -> "True"
     | False       -> "False"
-    | _ -> failwith "Not Implemented"
+    | Double d    -> "Double " ^ string_of_float d
+    | _ -> failwith "unexpected literal kind in string_of_lit_const"
 
 let string_of_operator instruction =
   match instruction with

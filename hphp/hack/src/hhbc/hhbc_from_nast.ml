@@ -108,6 +108,8 @@ let unop_to_incdec_op op =
 let rec from_expr expr =
   let open H in
   match snd expr with
+  | A.Float (_, litstr) ->
+    instr (ILitConst (Double (float_of_string litstr)))
   | A.String (_, litstr) ->
     instr (ILitConst (String litstr))
   | A.Int (_, litstr) ->

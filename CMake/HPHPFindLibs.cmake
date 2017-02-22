@@ -29,6 +29,9 @@ endif()
 
 # boost checks
 find_package(Boost 1.51.0 COMPONENTS system program_options filesystem context REQUIRED)
+if(NOT Boost_FOUND)
+  message(FATAL_ERROR "boost[>=1.51.0] is required to build HHVM")
+endif()
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 add_definitions("-DHAVE_BOOST1_49")

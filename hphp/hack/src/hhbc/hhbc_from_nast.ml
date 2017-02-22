@@ -534,8 +534,10 @@ let emit_method_prolog params =
     then Some (instr (IMisc (VerifyParamType (Param_named param_name))))
     else None))
 
+let tparams_to_strings tparams =
+  List.map tparams (fun (_, (_, s), _) -> s)
+
 let from_body tparams params ret b =
-  let tparams = List.map tparams (fun (_, (_, s), _) -> s) in
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in
@@ -559,10 +561,10 @@ let from_fun_ : Nast.fun_ -> Hhas_function.t option =
   match nast_fun.N.f_body with
   | N.NamedBody _ ->
     None
-
   | N.UnnamedBody b ->
+    let tparams = tparams_to_strings nast_fun.N.f_tparams in
     let body_instrs, function_params, function_return_type =
-      from_body nast_fun.N.f_tparams nast_fun.N.f_params nast_fun.N.f_ret b in
+      from_body tparams nast_fun.N.f_params nast_fun.N.f_ret b in
     let function_body = instr_seq_to_list body_instrs in
     Some (Hhas_function.make
       function_name
@@ -583,8 +585,9 @@ let from_attributes nast_attributes =
   (* The list of attributes is reversed in the Nast. *)
   List.map (List.rev nast_attributes) from_attribute
 
-let from_method : Nast.method_ -> Hhas_method.t option =
-  fun nast_method ->
+let from_method : Nast.class_ -> Nast.method_ -> Hhas_method.t option =
+  fun nast_class nast_method ->
+  let class_tparams = tparams_to_strings (fst nast_class.N.c_tparams) in
   let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
   let method_is_abstract = nast_method.Nast.m_abstract in
   (* TODO: An abstract method must generate
@@ -602,9 +605,10 @@ Fatal RuntimeOmitFrame
   | N.NamedBody _ ->
     None
   | N.UnnamedBody b ->
+    let method_tparams = tparams_to_strings nast_method.N.m_tparams in
+    let tparams = class_tparams @ method_tparams in
     let body_instrs, method_params, method_return_type =
-      from_body nast_method.N.m_tparams nast_method.N.m_params
-        nast_method.N.m_ret b in
+      from_body tparams nast_method.N.m_params nast_method.N.m_ret b in
     let method_body = instr_seq_to_list body_instrs in
     let m = Hhas_method.make
       method_attributes
@@ -620,8 +624,8 @@ Fatal RuntimeOmitFrame
       method_body in
     Some m
 
-let from_methods nast_methods =
-  Core.List.filter_map nast_methods from_method
+let from_methods nast_class nast_methods =
+  Core.List.filter_map nast_methods (from_method nast_class)
 
 let is_interface nast_class =
   nast_class.N.c_kind = Ast.Cinterface
@@ -659,7 +663,7 @@ let add_constructor nast_class class_methods =
   | None -> (default_constructor nast_class) :: class_methods
   | Some nast_ctor ->
     begin
-      match from_method nast_ctor with
+      match from_method nast_class nast_ctor with
       | None -> class_methods
       | Some m -> m :: class_methods
     end
@@ -690,7 +694,7 @@ let from_class : Nast.class_ -> Hhas_class.t =
   let class_is_abstract = nast_class.N.c_kind = Ast.Cabstract in
   let class_is_final =
     nast_class.N.c_final || class_is_trait || class_is_enum in
-  let tparams = [] in (* TODO: type parameters *)
+  let tparams = tparams_to_strings (fst nast_class.N.c_tparams) in
   let class_base =
     if class_is_interface then None
     else from_extends tparams nast_class.N.c_extends in
@@ -699,7 +703,7 @@ let from_class : Nast.class_ -> Hhas_class.t =
     else nast_class.N.c_implements in
   let class_implements = from_implements tparams implements in
   let nast_methods = nast_class.N.c_methods @ nast_class.N.c_static_methods in
-  let class_methods = from_methods nast_methods in
+  let class_methods = from_methods nast_class nast_methods in
   let class_methods = add_constructor nast_class class_methods in
   (* TODO: other class members *)
   Hhas_class.make

@@ -382,8 +382,6 @@ let add_method_def buf method_def =
   B.add_string buf (method_attributes method_def);
   B.add_string buf (string_of_type_info_option method_return_type);
   B.add_string buf method_name;
-  (* TODO: generic type parameters *)
-  (* TODO: where clause *)
   B.add_string buf (string_of_params method_params);
   B.add_string buf " {\n";
   add_instruction_list buf 4 method_body;

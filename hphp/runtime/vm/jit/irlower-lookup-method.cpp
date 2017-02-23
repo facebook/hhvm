@@ -72,9 +72,6 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
                    inst->marker().func()->fullName()->toCppString());
   }
 
-  auto const mc_handler = extra->fatal ? handlePrimeCacheInit<true>
-                                       : handlePrimeCacheInit<false>;
-
   /*
    * The `mcprep' instruction here creates a smashable move, which serves as
    * the inline cache, or "prime cache" for the method lookup.
@@ -107,7 +104,8 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
 
   unlikelyIfThenElse(
     v, vc, CC_NE, sf,
-    [&] (Vout& v) { // then block (unlikely)
+    [&env, extra, fp, func_class, handle, inst] (Vout& v) {
+      // then block (unlikely)
       auto const args = argGroup(env, inst)
         .imm(safe_cast<int32_t>(handle))
         .addr(fp, cellsToBytes(extra->offset.offset))
@@ -116,10 +114,13 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
         .immPtr(inst->marker().func()->cls())
         .reg(func_class);
 
+
+      auto const mc_handler = extra->fatal ? handlePrimeCacheInit<true>
+                                           : handlePrimeCacheInit<false>;
       cgCallHelper(v, env, CallSpec::smashable(mc_handler),
                    kVoidDest, SyncOptions::Sync, args);
     },
-    [&] (Vout& v) { // else block (likely)
+    [extra, fp, func_class] (Vout& v) { // else block (likely)
       auto const funcptr = v.makeReg();
       v << shrqi{32, func_class, funcptr, v.makeReg()};
       v << store{funcptr,
@@ -369,8 +370,10 @@ void cgFwdCtxStaticCall(IRLS& env, const IRInstruction* inst) {
     auto const sf = v.makeReg();
     v << testqi{ActRec::kHasClassBit, srcCtx, sf};
     unlikelyCond(v, vcold(env), CC_NZ, sf, dstCtx,
-         [&] (Vout& v) { return srcCtx; },
-         [&] (Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); }
+          [srcCtx] (Vout&) { return srcCtx; },
+          [&ctx_from_this, srcCtx] (Vout& v) {
+            return ctx_from_this(v, srcCtx, v.makeReg());
+          }
         );
   }
 }

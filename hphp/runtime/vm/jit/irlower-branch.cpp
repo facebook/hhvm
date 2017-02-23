@@ -245,7 +245,7 @@ void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     auto const sf = v.makeReg();
     v << testq{src, src, sf};
-    ifThen(v, CC_Z, sf, [&](Vout& v) { v << ud2{}; });
+    ifThen(v, CC_Z, sf, [](Vout& v) { v << ud2{}; });
   }
   v << copy{src, dst};
 }
@@ -295,12 +295,12 @@ void cgProfileSwitchDest(IRLS& env, const IRInstruction* inst) {
 
   ifThenElse(
     v, CC_AE, sf,
-    [&] (Vout& v) {
+    [extra] (Vout& v) {
       // Last vector element is the default case.
       v << inclm{rvmtl()[extra->handle + (extra->cases - 1) * sizeof(int32_t)],
                  v.makeReg()};
     },
-    [&] (Vout& v) {
+    [extra, rcase] (Vout& v) {
       v << inclm{Vreg{rvmtl()}[rcase * 4 + extra->handle], v.makeReg()};
     }
   );

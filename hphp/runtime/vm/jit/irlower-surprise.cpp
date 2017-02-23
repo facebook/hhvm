@@ -100,7 +100,7 @@ void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
   v << andqi{stackMask, fp, r, v.makeReg()};
   v << subqi{safe_cast<int32_t>(depth), r, v.makeReg(), sf};
 
-  unlikelyIfThen(v, vcold(env), CC_L, sf, [&] (Vout& v) {
+  unlikelyIfThen(v, vcold(env), CC_L, sf, [&env, fp, inst] (Vout& v) {
     cgCallHelper(v, env, CallSpec::direct(handleStackOverflow), kVoidDest,
                  SyncOptions::Sync, argGroup(env, inst).reg(fp));
   });
@@ -132,7 +132,7 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
   v << lea{fp[-cellsToBytes(func->maxStackCells())], needed_top};
   v << cmpqm{needed_top, rvmtl()[rds::kSurpriseFlagsOff], sf};
 
-  unlikelyIfThen(v, vcold(env), CC_AE, sf, [&] (Vout& v) {
+  unlikelyIfThen(v, vcold(env), CC_AE, sf, [&env, &fixup, inst] (Vout& v) {
     auto const stub = tc::ustubs().functionSurprisedOrStackOverflow;
     auto const done = v.makeBlock();
     v << vinvoke{CallSpec::stub(stub), v.makeVcallArgs({}), v.makeTuple({}),

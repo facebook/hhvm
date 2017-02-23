@@ -769,8 +769,6 @@ void record_packed_access(const ArrayData* ad) {
 void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
   auto const idxLoc = srcLoc(env, inst, 1);
-  auto& v = vmain(env);
-  auto& vc = vcold(env);
 
   if (UNLIKELY(RuntimeOption::EvalProfPackedArraySampleFreq > 0)) {
     auto const arrTy = inst->src(0)->type();
@@ -784,13 +782,15 @@ void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
         auto const sf = v.makeReg();
         v << declm{rvmtl()[handle], sf};
 
-        unlikelyIfThen(v, vc, CC_LE, sf, [&] (Vout& v) {
+        auto& vc = vcold(env);
+        unlikelyIfThen(v, vc, CC_LE, sf, [&arrLoc] (Vout& v) {
           // Log this array access.
           v << vcall{CallSpec::direct(record_packed_access),
                      v.makeVcallArgs({{arrLoc.reg()}}), v.makeTuple({})};
         });
       };
 
+      auto& v = vmain(env);
       if (arrTy <= packedTy) {
         profile(v);
       } else {

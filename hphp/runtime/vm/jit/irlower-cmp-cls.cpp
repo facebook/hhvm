@@ -71,10 +71,10 @@ Vreg check_clsvec(Vout& v, Vreg d, Vreg lhs, Cls rhs, Len rhsVecLen) {
 template <typename Cls, typename Len>
 Vreg check_subcls(Vout& v, Vreg sf, Vreg d, Vreg lhs, Cls rhs, Len rhsVecLen) {
   return cond(v, CC_NB, sf, d,
-       [&] (Vout& v) {
+       [lhs, rhs, rhsVecLen] (Vout& v) {
          return check_clsvec(v, v.makeReg(), lhs, rhs, rhsVecLen);
        },
-       [&] (Vout& v) { return v.cns(false); }
+       [] (Vout& v) { return v.cns(false); }
       );
 }
 
@@ -83,7 +83,7 @@ void cgInstanceOf(IRLS& env, const IRInstruction* inst) {
   auto const rhs = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
-  auto const call_classof = [&] (Vreg dst) {
+  auto const call_classof = [&env, inst] (Vout& v, Vreg dst) {
     cgCallHelper(v, env,
                  CallSpec::method(&Class::classof), {DestType::Byte, dst},
                  SyncOptions::None, argGroup(env, inst).ssa(0).ssa(1));
@@ -94,15 +94,15 @@ void cgInstanceOf(IRLS& env, const IRInstruction* inst) {
     auto const sf = v.makeReg();
     v << testq{rhs, rhs, sf};
     cond(v, CC_NZ, sf, dst,
-         [&] (Vout& v) { return call_classof(v.makeReg()); },
-         [&] (Vout& v) { return v.cns(false); } // rhs is nullptr
+         [&call_classof] (Vout& v) { return call_classof(v, v.makeReg()); },
+         [] (Vout& v) { return v.cns(false); } // rhs is nullptr
         );
     return;
   }
 
   auto const spec = inst->src(1)->type().clsSpec();
   if (!spec.cls() || (spec.cls()->attrs() & AttrInterface)) {
-    call_classof(dst);
+    call_classof(v, dst);
     return;
   }
 
@@ -141,7 +141,7 @@ void cgInstanceOfIfaceVtable(IRLS& env, const IRInstruction* inst) {
                 rcls[Class::vtableVecLenOff()]);
   cond(
     v, CC_A, sf, dst,
-    [&] (Vout& v) {
+    [iface, rcls, slot] (Vout& v) {
       auto const vtableVec = v.makeReg();
       emitLdLowPtr(v, rcls[Class::vtableVecOff()], vtableVec,
                    sizeof(LowPtr<Class::VtableVecSlot>));
@@ -155,7 +155,7 @@ void cgInstanceOfIfaceVtable(IRLS& env, const IRInstruction* inst) {
       v << setcc{CC_E, sf, tmp};
       return tmp;
     },
-    [&] (Vout& v) { return v.cns(false); }
+    [] (Vout& v) { return v.cns(false); }
   );
 }
 
@@ -173,7 +173,7 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
 
   // Check whether `lhs' points to a subclass of rhsCls, set `d' with the
   // boolean result, and return `d'.
-  auto check_subclass = [&](Vreg d) {
+  auto check_subclass = [lhs, rhsCls](Vout& v, Vreg d) {
     if (rhsCls->classVecLen() == 1) {
       // Every class has at least one entry in its class vec, so there's no
       // need to check the length.
@@ -193,7 +193,7 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
       (extra->strictLikely && !(rhsCls->attrs() & AttrNoOverride))) {
     // If the test must be extended, or the hint says it's probably not an
     // exact match, don't check for the same class.
-    check_subclass(dst);
+    check_subclass(v, dst);
     return;
   }
 
@@ -211,8 +211,8 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
 
   cond(
     v, CC_E, sf, dst,
-    [&] (Vout& v) { return v.cns(true); },
-    [&] (Vout& v) { return check_subclass(v.makeReg()); }
+    [] (Vout& v) { return v.cns(true); },
+    [&check_subclass] (Vout& v) { return check_subclass(v, v.makeReg()); }
   );
 }
 

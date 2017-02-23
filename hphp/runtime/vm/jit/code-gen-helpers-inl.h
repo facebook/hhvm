@@ -64,10 +64,10 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
   ifThenElse(
     v, vcold, CC_E, sf,
     destroy,
-    [&] (Vout& v) {
+    [sf, data] (Vout& v) {
       // If it's not static, actually reduce the reference count.  This does
       // another branch using the same status flags from the cmplim above.
-      ifThen(v, CC_NL, sf, [&] (Vout& v) { emitDecRef(v, data); },
+      ifThen(v, CC_NL, sf, [data] (Vout& v) { emitDecRef(v, data); },
              tag_from_string("decref-is-static"));
     },
     unlikelyDestroy,

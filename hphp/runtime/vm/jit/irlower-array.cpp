@@ -114,14 +114,14 @@ void cgCountArray(IRLS& env, const IRInstruction* inst) {
   v << testl{d, d, sf};
 
   unlikelyCond(v, vcold(env), CC_S, sf, dst,
-    [&] (Vout& v) {
+    [&env, inst] (Vout& v) {
       auto const d = v.makeReg();
       cgCallHelper(v, env, CallSpec::array(&g_array_funcs.vsize),
                    callDest(d), SyncOptions::None,
                    argGroup(env, inst).ssa(0));
       return d;
     },
-    [&] (Vout& v) { return d; }
+    [d] (Vout&) { return d; }
   );
 }
 

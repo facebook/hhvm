@@ -221,12 +221,12 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     auto const sf = v.makeReg();
     v << cmpl{argc, nparams, sf};
 
-    auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
-    auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
+    static auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+    static auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
 
     // If we passed more args than declared, we need to dispatch to the
     // "too many arguments" prologue.
-    ifThen(v, CC_L, sf, [&] (Vout& v) {
+    ifThen(v, CC_L, sf, [func, nparams] (Vout& v) {
       auto const dest = v.makeReg();
 
       auto const nargs = v.makeReg();
@@ -264,7 +264,7 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
     auto const sf = v.makeReg();
     v << testq{dest, dest, sf};
 
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [] (Vout& v) {
       // A nullptr dest means the callee was intercepted and should be skipped.
       // Make a copy of the current rvmfp(), which belongs to the callee,
       // before syncing VM regs and return regs.
@@ -353,7 +353,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     auto const sf = v.makeReg();
     v << testb{should_continue, should_continue, sf};
 
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [] (Vout& v) {
       auto const saved_rip = v.makeReg();
 
       // The event hook has already cleaned up the stack and popped the
@@ -405,7 +405,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
                  {done, ctch}};
     vc = ctch;
-    emitStubCatch(vc, us, [](Vout& v) {});
+    emitStubCatch(vc, us, [](Vout&) {});
 
     v = done;
     v << tailcallstub{us.functionEnterHelper};
@@ -534,7 +534,7 @@ void unblockParents(Vout& v, Vout& vc, Vreg parent) {
   auto const sf = v.makeReg();
   v << testq{parent, parent, sf};
 
-  unlikelyIfThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
+  unlikelyIfThen(v, vc, CC_NZ, sf, [parent] (Vout& v) {
     v << vcall{CallSpec::direct(AsioBlockableChain::UnblockJitHelper),
                v.makeVcallArgs({{rvmfp(), rvmsp(), parent}}), v.makeTuple({})};
   });
@@ -869,12 +869,12 @@ TCA emitFCallArrayHelper(CodeBlock& main, CodeBlock& cold,
     auto const sf = v.makeReg();
     v << testb{should_continue, should_continue, sf};
 
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v2) {
       // If false was returned, we should skip the callee.  The interpreter
       // will have popped the pre-live ActRec already, so we can just return to
       // the caller after syncing the return regs.
-      loadReturnRegs(v);
-      v << stubret{};
+      loadReturnRegs(v2);
+      v2 << stubret{};
     });
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
 
@@ -1028,7 +1028,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
     auto const rdata = rarg(0);
     auto const rtype = rarg(1);
 
-    auto const destroy = [&] (Vout& v) {
+    auto const destroy = [rdata, rtype] (Vout& v) {
       // decRefGeneric is called via callfaststub, whose ABI claims that all
       // registers are preserved.  This is true in the fast path, but in the
       // slow path we need to manually save caller-saved registers.
@@ -1150,7 +1150,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // without it, both the jcc for the branch and the jmp for the resumetc{}
     // will end up in the same 16-byte extent of code, which messes up the
     // branch predictor.
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
+    unlikelyIfThen(v, vc, CC_Z, sf, [&us, start] (Vout& v) {
       // No callee means we're resuming in the middle of a TC function.
       v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
     });

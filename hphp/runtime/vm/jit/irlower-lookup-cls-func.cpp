@@ -191,8 +191,8 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
     auto const sf = checkRDSHandleInitialized(v, ch);
     unlikelyCond(
       v, vcold(env), CC_NE, sf, dst,
-      [&] (Vout& v) { return fill_cache(v, ch); },
-      [&] (Vout& v) {
+      [&fill_cache, ch] (Vout& v) { return fill_cache(v, ch); },
+      [ch] (Vout& v) {
         auto const ptr = v.makeReg();
         emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<T>));
         return ptr;
@@ -206,8 +206,8 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
     v << testq{ptr, ptr, sf};
     unlikelyCond(
       v, vcold(env), CC_Z, sf, dst,
-      [&] (Vout& v) { return fill_cache(v, ch); },
-      [&] (Vout& v) { return ptr; }
+      [&fill_cache, ch] (Vout& v) { return fill_cache(v, ch); },
+      [ptr] (Vout&) { return ptr; }
     );
   }
 }

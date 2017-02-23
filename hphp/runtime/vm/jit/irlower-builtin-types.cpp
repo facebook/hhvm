@@ -197,7 +197,7 @@ void implVerifyCls(IRLS& env, const IRInstruction* inst) {
   // The native call for this instruction is the slow path that does proper
   // subtype checking.  The comparisons above are just to short-circuit the
   // overhead when the Classes are an exact match.
-  ifThen(v, CC_NE, sf, [&](Vout& v) { cgCallNative(v, env, inst); });
+  ifThen(v, CC_NE, sf, [&env, inst](Vout& v) { cgCallNative(v, env, inst); });
 }
 
 }

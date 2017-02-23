@@ -54,7 +54,7 @@ namespace {
 
 void assertSFNonNegative(Vout& v, Vreg sf) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
-  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << ud2{}; });
+  ifThen(v, CC_NGE, sf, [] (Vout& v) { v << ud2{}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,11 +223,11 @@ void emitAssertRefCount(Vout& v, Vreg data) {
   auto const sf = v.makeReg();
   v << cmplim{StaticValue, data[FAST_REFCOUNT_OFFSET], sf};
 
-  ifThen(v, CC_NLE, sf, [&] (Vout& v) {
+  ifThen(v, CC_NLE, sf, [data] (Vout& v) {
     auto const sf = v.makeReg();
     v << cmplim{RefCountMaxRealistic, data[FAST_REFCOUNT_OFFSET], sf};
 
-    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << ud2{}; });
+    ifThen(v, CC_NBE, sf, [] (Vout& v) { v << ud2{}; });
   });
 }
 
@@ -252,11 +252,11 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
   auto const sf = v.makeReg();
   emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
   // ifRefCountType
-  ifThen(v, CC_G, sf, [&] (Vout& v) {
-    auto const sf2 = v.makeReg();
+  ifThen(v, CC_G, sf, [data] (Vout& v) {
+    auto const sf = v.makeReg();
     // ifNonStatic
-    v << cmplim{0, data[FAST_REFCOUNT_OFFSET], sf2};
-    ifThen(v, CC_GE, sf2, [&] (Vout& v) { emitIncRef(v, data); });
+    v << cmplim{0, data[FAST_REFCOUNT_OFFSET], sf};
+    ifThen(v, CC_GE, sf, [data] (Vout& v) { emitIncRef(v, data); });
   });
 }
 
@@ -265,12 +265,12 @@ void emitDecRefWorkObj(Vout& v, Vreg obj) {
   v << cmplim{1, obj[FAST_REFCOUNT_OFFSET], shouldRelease};
   ifThenElse(
     v, CC_E, shouldRelease,
-    [&] (Vout& v) {
+    [obj] (Vout& v) {
       // Put fn inside vcall{} triggers a compiler internal error (gcc 4.4.7)
       auto const fn = CallSpec::method(&ObjectData::release);
       v << vcall{fn, v.makeVcallArgs({{obj}}), v.makeTuple({})};
     },
-    [&] (Vout& v) {
+    [obj] (Vout& v) {
       emitDecRef(v, obj);
     }
   );

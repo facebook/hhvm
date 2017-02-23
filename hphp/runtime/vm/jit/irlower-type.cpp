@@ -257,14 +257,14 @@ void cgIsScalarType(IRLS& env, const IRInstruction* inst) {
   v << cmpbi{KindOfPersistentString, rtype, sf};
   cond(
     v, CC_L, sf, dst,
-    [&](Vout& v) {
+    [rtype](Vout& v) {
       auto const sf = v.makeReg();
       auto const dst = v.makeReg();
       v << cmpbi{KindOfInt64, rtype, sf};
       cond(
         v, CC_E, sf, dst,
-        [&](Vout& v) { return v.cns(true); },
-        [&](Vout& v) {
+        [](Vout& v) { return v.cns(true); },
+        [rtype](Vout& v) {
           auto const sf = v.makeReg();
           auto const dst = v.makeReg();
           v << cmpbi{KindOfBoolean, rtype, sf};
@@ -274,14 +274,14 @@ void cgIsScalarType(IRLS& env, const IRInstruction* inst) {
       );
       return dst;
     },
-    [&](Vout& v) {
+    [rtype](Vout& v) {
       auto const sf = v.makeReg();
       auto const dst = v.makeReg();
       emitTestTVType(v, sf, KindOfStringBit, rtype);
       cond(
         v, CC_NZ, sf, dst,
-        [&](Vout& v) { return v.cns(true); },
-        [&](Vout& v) {
+        [](Vout& v) { return v.cns(true); },
+        [rtype](Vout& v) {
           auto const sf = v.makeReg();
           auto const dst = v.makeReg();
           v << cmpbi{KindOfDouble, rtype, sf};

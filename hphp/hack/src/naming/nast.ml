@@ -11,8 +11,8 @@
 module SN = Naming_special_names
 
 type id = Pos.t * Local_id.t
-type sid = Pos.t * string
-type pstring = Pos.t * string
+type sid = Ast.id
+type pstring = Ast.pstring
 
 type is_terminal = bool
 
@@ -20,21 +20,20 @@ type call_type =
   | Cnormal    (* when the call looks like f() *)
   | Cuser_func (* when the call looks like call_user_func(...) *)
 
-type shape_field_name =
-  | SFlit of pstring
-  | SFclass_const of sid * pstring
+type shape_field_name = Ast.shape_field_name
 
 module ShapeField = struct
-  type t = shape_field_name
+  type t = Ast.shape_field_name
   (* We include span information in shape_field_name to improve error
    * messages, but we don't want it being used in the comparison, so
    * we have to write our own compare. *)
   let compare x y =
     match x, y with
-      | SFlit _, SFclass_const _ -> -1
-      | SFclass_const _, SFlit _ -> 1
-      | SFlit (_, s1), SFlit (_, s2) -> Pervasives.compare s1 s2
-      | SFclass_const ((_, s1), (_, s1')), SFclass_const ((_, s2), (_, s2')) ->
+      | Ast.SFlit _, Ast.SFclass_const _ -> -1
+      | Ast.SFclass_const _, Ast.SFlit _ -> 1
+      | Ast.SFlit (_, s1), Ast.SFlit (_, s2) -> Pervasives.compare s1 s2
+      | Ast.SFclass_const ((_, s1), (_, s1')),
+        Ast.SFclass_const ((_, s2), (_, s2')) ->
         Pervasives.compare (s1, s1') (s2, s2')
 
 end
@@ -43,17 +42,11 @@ module ShapeMap = MyMap.Make (ShapeField)
 
 type hint = Pos.t * hint_
 and hint_ =
-  | Hany
-  | Hmixed
-  | Htuple of hint list
-  | Habstr of string
-  | Harray of hint option * hint option
-  | Hprim of tprim
   | Hoption of hint
   | Hfun of hint list * bool * hint
+  | Htuple of hint list
   | Happly of sid * hint list
   | Hshape of hint ShapeMap.t
-  | Hthis
 
  (* This represents the use of a type const. Type consts are accessed like
   * regular consts in Hack, i.e.
@@ -76,6 +69,15 @@ and hint_ =
   *)
   | Haccess of hint * sid list
 
+  (* The following constructors don't exist in the AST hint type *)
+  | Hany
+  | Hmixed
+  | Habstr of string
+  | Harray of hint option * hint option
+  | Hprim of tprim
+  | Hthis
+
+(* AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =
   | Tvoid
   | Tint
@@ -132,9 +134,12 @@ end
 module AnnotatedAST(Annotation: AnnotationType) = struct
 
 type stmt =
+  | Fallthrough
   | Expr of expr
+  (* AST has Block of block *)
   | Break of Pos.t
   | Continue of Pos.t
+  (* is_terminal is new *)
   | Throw of is_terminal * expr
   | Return of Pos.t * expr option
   | Static_var of expr list
@@ -143,19 +148,21 @@ type stmt =
   | While of expr * block
   | For of expr * expr * expr * block
   | Switch of expr * case list
+  (* Dropped the Pos.t option *)
   | Foreach of expr * as_expr * block
   | Try of block * catch list * block
   | Noop
-  | Fallthrough
 
 and as_expr =
   | As_v of expr
   | As_kv of expr * expr
+  (* This is not in AST *)
   | Await_as_v of Pos.t * expr
   | Await_as_kv of Pos.t * expr * expr
 
 and block = stmt list
 
+(* This is not in AST *)
 and class_id =
   | CIparent
   | CIself
@@ -165,22 +172,21 @@ and class_id =
 
 and expr = Annotation.t * expr_
 and expr_ =
-  | Any
   | Array of afield list
+  (* This is more abstract than the AST but forgets evaluation order *)
   | Shape of expr ShapeMap.t
   | ValCollection of vc_kind * expr list
   | KeyValCollection of kvc_kind * field list
+  | Null
   | This
+  | True
+  | False
+  (* TODO: to match AST we need Id_type_arguments as well *)
   | Id of sid
   | Lvar of id
   | Lvarvar of int * id
-  | Lplaceholder of Pos.t
   | Dollardollar of id
-  | Fun_id of sid
-  | Method_id of expr * pstring
-  (* meth_caller('Class name', 'method name') *)
-  | Method_caller of sid * pstring
-  | Smethod_id of sid * pstring
+  | Clone of expr
   | Obj_get of expr * expr * og_null_flavor
   | Array_get of expr * expr option
   | Class_get of class_id * pstring
@@ -189,19 +195,14 @@ and expr_ =
     * expr (* function *)
     * expr list (* positional args *)
     * expr list (* unpacked args *)
-  | True
-  | False
   | Int of pstring
   | Float of pstring
-  | Null
   | String of pstring
   | String2 of expr list
-  | Special_func of special_func
-  | Yield_break
   | Yield of afield
+  | Yield_break
   | Await of expr
   | List of expr list
-  | Pair of expr * expr
   | Expr_list of expr list
   | Cast of hint * expr
   | Unop of Ast.uop * expr
@@ -214,9 +215,19 @@ and expr_ =
   | New of class_id * expr list * expr list
   | Efun of fun_ * id list
   | Xml of sid * (pstring * expr) list * expr list
+
+  (* None of these constructors exist in the AST *)
+  | Lplaceholder of Pos.t
+  | Fun_id of sid
+  | Method_id of expr * pstring
+  (* meth_caller('Class name', 'method name') *)
+  | Method_caller of sid * pstring
+  | Smethod_id of sid * pstring
+  | Special_func of special_func
+  | Pair of expr * expr
   | Assert of assert_expr
-  | Clone of expr
   | Typename of sid
+  | Any
 
 (* These are "very special" constructs that we look for in, among
  * other places, terminality checks. invariant does not appear here
@@ -371,18 +382,18 @@ and method_ = {
 }
 
 and typedef = {
-  t_mode : FileInfo.mode;
   t_name : sid;
   t_tparams : tparam list;
   t_constraint : hint option;
-  t_vis : typedef_visibility;
   t_kind : hint;
   t_user_attributes : user_attribute list;
+  t_mode : FileInfo.mode;
+  t_vis : typedef_visibility;
 }
 
 and gconst = {
   cst_mode: FileInfo.mode;
-  cst_name: Ast.id;
+  cst_name: sid;
   cst_type: hint option;
   cst_value: expr option;
 }

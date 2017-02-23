@@ -63,8 +63,8 @@ let rec fmt_hint (_, h) =
    * C.extract_shape_fields. asdf. *)
   | Nast.Hshape smap ->
     let fmt_field = function
-      | N.SFlit (_, s) -> "'" ^ s ^ "'"
-      | N.SFclass_const ((_, s1), (_, s2)) -> C.fmt_name s1 ^ "::" ^ s2
+      | Ast.SFlit (_, s) -> "'" ^ s ^ "'"
+      | Ast.SFclass_const ((_, s1), (_, s2)) -> C.fmt_name s1 ^ "::" ^ s2
     in
     let shape_fields =
       List.map ~f:(fun (k, h) -> fmt_field k ^ "=>" ^ fmt_hint h)

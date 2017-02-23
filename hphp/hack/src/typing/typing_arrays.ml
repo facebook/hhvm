@@ -133,7 +133,7 @@ let fold_aktuple_as_akvec f env r fields =
  * Shape field names must all be constant strings or constants from
  * same class. *)
 let akshape_keys_consistent field_name_x field_name_y =
-  let open Nast in
+  let open Ast in
     match field_name_x, field_name_y with
       | (SFlit _, SFlit _) -> true
       | (SFclass_const ((_, cls1), _)), (SFclass_const ((_, cls2), _))

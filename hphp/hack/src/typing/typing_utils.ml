@@ -230,13 +230,13 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
 
 let shape_field_name_ env field =
   let open Nast in match field with
-    | String name -> Result.Ok (SFlit name)
-    | Class_const (CI (x, _), y) -> Result.Ok (SFclass_const (x, y))
+    | String name -> Result.Ok (Ast.SFlit name)
+    | Class_const (CI (x, _), y) -> Result.Ok (Ast.SFclass_const (x, y))
     | Class_const (CIself, y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
       | Tclass (sid, _) ->
-        Result.Ok (SFclass_const(sid, y))
+        Result.Ok (Ast.SFclass_const(sid, y))
       | _ ->
         Result.Error `Expected_class)
     | _ -> Result.Error `Invalid_shape_field_name

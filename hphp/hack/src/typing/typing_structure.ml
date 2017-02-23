@@ -56,25 +56,26 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
       let is_generic =
         match snd ety with Tabstract (AKgeneric _, _) -> true | _ -> false in
       ShapeMap.fold begin fun field field_ty (env, shape) ->
+        let open Ast in
         match field, field_ty, TUtils.get_base_type env ety with
-        | Nast.SFlit (_, "nullable"), (_, Toption (fty)), _ when nullable ->
+        | SFlit (_, "nullable"), (_, Toption (fty)), _ when nullable ->
             env, ShapeMap.add field fty shape
-        | Nast.SFlit (_, "nullable"), (_, Toption (fty)), (_, Toption _) ->
+        | SFlit (_, "nullable"), (_, Toption (fty)), (_, Toption _) ->
             env, ShapeMap.add field fty shape
-        | Nast.SFlit (_, "classname"), (_, Toption (fty)),
+        | SFlit (_, "classname"), (_, Toption (fty)),
           (_, (Tclass _ | Tabstract (AKenum _, _))) ->
             env, ShapeMap.add field fty shape
-        | Nast.SFlit (_, "elem_types"), _, (r, Ttuple tyl) ->
+        | SFlit (_, "elem_types"), _, (r, Ttuple tyl) ->
             let env, tyl = List.map_env env tyl make_ts in
             env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, "param_types"), _, (r, (Tfun funty)) ->
+        | SFlit (_, "param_types"), _, (r, (Tfun funty)) ->
             let tyl = List.map ~f:snd funty.ft_params in
             let env, tyl = List.map_env env tyl make_ts in
             env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, "return_type"), _, (r, Tfun funty) ->
+        | SFlit (_, "return_type"), _, (r, Tfun funty) ->
             let env, ty = make_ts env funty.ft_ret in
             env, ShapeMap.add field (r, Ttuple [ty]) shape
-        | Nast.SFlit (_, "fields"), _, (r, Tshape (fk, fields)) ->
+        | SFlit (_, "fields"), _, (r, Tshape (fk, fields)) ->
             let env, fields = ShapeMap.map_env make_ts env fields in
             env, ShapeMap.add field (r, Tshape (fk, fields)) shape
         (* For generics we cannot specialize the generic_types field. Consider:
@@ -88,23 +89,23 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
          *
          * For test(TypeStructure<D>) there will not be a generic_types field
          *)
-        | Nast.SFlit (_, "generic_types"), _, _ when is_generic ->
+        | SFlit (_, "generic_types"), _, _ when is_generic ->
             env, ShapeMap.add field field_ty shape
-        | Nast.SFlit (_, "generic_types"), _, (r, Tarraykind (AKvec ty))
+        | SFlit (_, "generic_types"), _, (r, Tarraykind (AKvec ty))
               when not is_generic ->
             let env, ty = make_ts env ty in
             env, ShapeMap.add field (r, Ttuple [ty]) shape
-        | Nast.SFlit (_, "generic_types"), _,
+        | SFlit (_, "generic_types"), _,
           (r, Tarraykind (AKmap (ty1, ty2)))
               when not is_generic ->
             let tyl = [ty1; ty2] in
             let env, tyl = List.map_env env tyl make_ts in
             env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, "generic_types"), _, (r, Tclass (_, tyl))
+        | SFlit (_, "generic_types"), _, (r, Tclass (_, tyl))
               when List.length tyl > 0 ->
             let env, tyl = List.map_env env tyl make_ts in
             env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, ("kind" | "name" | "alias")), _, _ ->
+        | SFlit (_, ("kind" | "name" | "alias")), _, _ ->
             env, ShapeMap.add field field_ty shape
         | _, _, _ ->
             env, shape

@@ -623,7 +623,7 @@ let check_repetition s param =
   if x <> SN.SpecialIdents.placeholder then SSet.add x s else s
 
 let convert_shape_name env = function
-  | SFlit (pos, s) -> (pos, N.SFlit (pos, s))
+  | SFlit (pos, s) -> (pos, SFlit (pos, s))
   | SFclass_const (x, (pos, y)) ->
     let class_name =
       if (snd x) = SN.Classes.cSelf then
@@ -631,7 +631,7 @@ let convert_shape_name env = function
         | Some (cid, _) -> cid
         | None -> Errors.self_outside_class pos; (pos, SN.Classes.cUnknown)
       else Env.type_name env x ~allow_typedef:false in
-    (pos, N.SFclass_const (class_name, (pos, y)))
+    (pos, SFclass_const (class_name, (pos, y)))
 
 let arg_unpack_unexpected = function
   | [] -> ()

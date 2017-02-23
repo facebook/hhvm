@@ -689,8 +689,8 @@ and emit_expr env (pos, expr_ as expr) =
   | Shape smap ->
     (* Compile to an array. *)
     let shape_field_to_expr = function
-      | SFlit (pos, _ as s) -> pos, String s
-      | SFclass_const ((pos, _ as id), s) -> pos, Class_const (CI (id, []), s)
+      | Ast.SFlit (pos, _ as s) -> pos, String s
+      | Ast.SFclass_const ((pos, _ as id), s) -> pos, Class_const (CI (id, []), s)
     in
     let shape_fields =
       List.map ~f:(fun (k, v) -> (shape_field_to_expr k, v))

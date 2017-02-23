@@ -643,7 +643,7 @@ let fmt_name s = s
 
 let extract_shape_fields smap =
   let get_pos =
-    function Nast.SFlit (p, _) | Nast.SFclass_const ((p, _), _) -> p in
+    function A.SFlit (p, _) | A.SFclass_const ((p, _), _) -> p in
   List.sort (fun (k1, _) (k2, _) -> Pos.compare (get_pos k1) (get_pos k2))
     (Nast.ShapeMap.elements smap)
 
@@ -679,8 +679,8 @@ let rec fmt_hint (_, h) =
   | N.Harray _ -> failwith "bogus array"
   | N.Hshape smap ->
     let fmt_field = function
-      | N.SFlit (_, s) -> "'" ^ s ^ "'"
-      | N.SFclass_const ((_, s1), (_, s2)) -> fmt_name s1 ^ "::" ^ s2
+      | A.SFlit (_, s) -> "'" ^ s ^ "'"
+      | A.SFclass_const ((_, s1), (_, s2)) -> fmt_name s1 ^ "::" ^ s2
     in
     let shape_fields =
       List.map ~f:(fun (k, h) -> fmt_field k ^ "=>" ^ fmt_hint h)

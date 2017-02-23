@@ -87,8 +87,9 @@ and shape f sm =
   end sm ShapeMap.empty
 
 and shape_field f = function
-  | SFlit pstr -> SFlit (pstring f pstr)
-  | SFclass_const (sid, pstr) -> SFclass_const (pstring f sid, pstring f pstr)
+  | Ast.SFlit pstr -> Ast.SFlit (pstring f pstr)
+  | Ast.SFclass_const (sid, pstr) ->
+    Ast.SFclass_const (pstring f sid, pstring f pstr)
 
 and pstring f (p, s) =
   f p, s

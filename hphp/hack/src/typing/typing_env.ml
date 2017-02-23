@@ -94,8 +94,8 @@ let make_ft p params ret_ty =
   }
 
 let get_shape_field_name = function
-  | SFlit (_, s) -> s
-  | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
+  | Ast.SFlit (_, s) -> s
+  | Ast.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
 let empty_bounds = []
 let singleton_bound ty = [ty]

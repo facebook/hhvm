@@ -503,6 +503,10 @@ static inline uint32_t resetProfCountersDefault() {
   return RuntimeOption::EvalJitConcurrently ? 250 : 1000;
 }
 
+static inline int retranslateAllRequestDefault() {
+  return RuntimeOption::ServerExecutionMode() ? 3000 : 0;
+}
+
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }

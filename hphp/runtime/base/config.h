@@ -68,7 +68,8 @@ struct Config {
   static void ParseHdfFile(const std::string &filename, Hdf &hdf);
 
   // Parse and process a .ini string (e.g., -d)
-  static void ParseIniString(const std::string &iniStr, IniSettingMap &ini);
+  static void ParseIniString(const std::string &iniStr, IniSettingMap &ini,
+                             const bool constants_only = false);
 
   // Parse and process a .hdf string (e.g., -v)
   static void ParseHdfString(const std::string &hdfStr, Hdf &hdf);

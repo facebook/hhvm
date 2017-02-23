@@ -3122,6 +3122,8 @@ std::pair<Type, bool> vec_elem(const Type& vec, const Type& undisectedKey) {
 
 std::pair<Type, bool>
 vec_set(Type vec, const Type& undisectedKey, const Type& val) {
+  if (!val.couldBe(TInitCell)) return {TBottom, false};
+
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, false};
   if ((vec.m_bits & BVecE) == vec.m_bits) return {TBottom, false};
@@ -3158,10 +3160,12 @@ vec_set(Type vec, const Type& undisectedKey, const Type& val) {
   }
   case DataTag::Vec:
     auto& ty = vec.m_data.vec->val;
-    ty = union_of(std::move(ty), val);
+    // If we don't know for sure if the value is a cell or not, we don't know
+    // for sure if we'll throw or not.
+    ty = union_of(std::move(ty), val.subtypeOf(TInitCell) ? val : TInitCell);
     if (key.i && vec.m_data.vec->len) {
       if (0 > *key.i || *key.i >= *vec.m_data.vec->len) return {TBottom, false};
-      return {vec, !maybeEmpty};
+      return {vec, !maybeEmpty && val.subtypeOf(TInitCell)};
     }
     return {std::move(vec), false};
   }
@@ -3169,6 +3173,8 @@ vec_set(Type vec, const Type& undisectedKey, const Type& val) {
 }
 
 Type vec_newelem(Type vec, const Type& val) {
+  if (!val.couldBe(TInitCell)) return TBottom;
+
   vec.m_bits = !(vec.m_bits & BSVec) ? BCVecN : BVecN;
 
   switch (vec.m_dataTag) {
@@ -3198,7 +3204,7 @@ Type vec_newelem(Type vec, const Type& val) {
   }
   case DataTag::Vec:
     auto& ty = vec.m_data.vec->val;
-    ty = union_of(std::move(ty), val);
+    ty = union_of(std::move(ty), val.subtypeOf(TInitCell) ? val : TInitCell);
     if (vec.m_data.vec->len) (*vec.m_data.vec->len)++;
     return vec;
   }
@@ -3286,10 +3292,13 @@ std::pair<Type, bool> dict_elem(const Type& dict, const Type& undisectedKey) {
 
 std::pair<Type, bool>
 dict_set(Type dict, const Type& undisectedKey, const Type& val) {
+  if (!val.couldBe(TInitCell)) return {TBottom, false};
+
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, false};
 
   const bool validKey = key.type.subtypeOf(TInt) || key.type.subtypeOf(TStr);
+  auto const validVal = val.subtypeOf(TInitCell);
   dict.m_bits = !(dict.m_bits & BSDict) ? BCDictN : BDictN;
 
   switch (dict.m_dataTag) {
@@ -3311,7 +3320,7 @@ dict_set(Type dict, const Type& undisectedKey, const Type& val) {
     not_reached();
 
   case DataTag::None:
-    return {std::move(dict), validKey};
+    return {std::move(dict), validKey && validVal};
 
   case DataTag::DictVal: {
     dict = toDDictType(dict);
@@ -3321,13 +3330,15 @@ dict_set(Type dict, const Type& undisectedKey, const Type& val) {
     auto& kt = dict.m_data.dict->key;
     auto& vt = dict.m_data.dict->val;
     kt = union_of(std::move(kt), key.type);
-    vt = union_of(std::move(vt), val);
-    return {std::move(dict), validKey};
+    vt = union_of(std::move(vt), validVal ? val : TInitCell);
+    return {std::move(dict), validKey && validVal};
   }
   not_reached();
 }
 
 Type dict_newelem(Type dict, const Type& val) {
+  if (!val.couldBe(TInitCell)) return TBottom;
+
   dict.m_bits = !(dict.m_bits & BSDict) ? BCDictN : BDictN;
 
   switch (dict.m_dataTag) {
@@ -3359,7 +3370,7 @@ Type dict_newelem(Type dict, const Type& val) {
     auto& kt = dict.m_data.dict->key;
     auto& vt = dict.m_data.dict->val;
     kt = union_of(std::move(kt), TInt);
-    vt = union_of(std::move(vt), val);
+    vt = union_of(std::move(vt), val.subtypeOf(TInitCell) ? val : TInitCell);
     return dict;
   }
   not_reached();
@@ -3430,6 +3441,8 @@ keyset_set(Type keyset, const Type&, const Type&) {
 }
 
 Type keyset_newelem(Type keyset, const Type& val) {
+  if (!val.couldBe(TInt) && !val.couldBe(TStr)) return TBottom;
+
   keyset.m_bits = !(keyset.m_bits & BSKeyset) ? BCKeysetN : BKeysetN;
 
   switch (keyset.m_dataTag) {
@@ -3459,7 +3472,7 @@ Type keyset_newelem(Type keyset, const Type& val) {
   }
   case DataTag::Keyset:
     auto& ty = keyset.m_data.keyset->keyval;
-    ty = union_of(std::move(ty), val);
+    ty = union_of(std::move(ty), val.subtypeOf(TInitCell) ? val : TInitCell);
     return keyset;
   }
   not_reached();

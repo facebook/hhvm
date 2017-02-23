@@ -54,6 +54,11 @@ let rec instr_seq_to_list_aux sl result =
 
 let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 
+(* Emit a comment in lieu of instructions for not-yet-implemented features *)
+let emit_nyi description =
+  instr (H.IComment ("NYI: " ^ description))
+
+
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   match op with
@@ -66,8 +71,8 @@ let from_binop op =
   | A.Starstar -> instr (H.IOp H.Pow)
   | A.Diff -> instr (H.IOp H.Neq)
   | A.Diff2 -> instr (H.IOp H.NSame)
-  | A.AMpamp -> failwith "&& not strict"
-  | A.BArbar -> failwith "|| not strict"
+  | A.AMpamp -> emit_nyi "short-circuit &&"
+  | A.BArbar -> emit_nyi "short-circuit ||"
   | A.Lt -> instr (H.IOp H.Lt)
   | A.Lte -> instr (H.IOp H.Lte)
   | A.Gt -> instr (H.IOp H.Gt)
@@ -79,45 +84,53 @@ let from_binop op =
   | A.Gtgt -> instr (H.IOp H.Shr)
   | A.Percent -> instr (H.IOp H.Mod)
   | A.Xor -> instr (H.IOp H.BitXor)
-  | A.Eq _ -> failwith "= NYI"
+  | A.Eq _ -> emit_nyi "Eq"
 
 let binop_to_eqop op =
+  let open H in
   match op with
-  | A.Plus -> H.PlusEqualO
-  | A.Minus -> H.MinusEqualO
-  | A.Star -> H.MulEqualO
-  | A.Slash -> H.DivEqual
-  | A.Starstar -> H.PowEqual
-  | A.Amp -> H.AndEqual
-  | A.Bar -> H.OrEqual
-  | A.Xor -> H.XorEqual
-  | A.Ltlt -> H.SlEqual
-  | A.Gtgt -> H.SrEqual
-  | A.Percent -> H.ModEqual
-  | A.Dot -> H.ConcatEqual
-  | _ -> failwith "Invalid =op"
+  | A.Plus -> Some PlusEqualO
+  | A.Minus -> Some MinusEqualO
+  | A.Star -> Some MulEqualO
+  | A.Slash -> Some DivEqual
+  | A.Starstar -> Some PowEqual
+  | A.Amp -> Some AndEqual
+  | A.Bar -> Some OrEqual
+  | A.Xor -> Some XorEqual
+  | A.Ltlt -> Some SlEqual
+  | A.Gtgt -> Some SrEqual
+  | A.Percent -> Some ModEqual
+  | A.Dot -> Some ConcatEqual
+  | _ -> None
 
 let unop_to_incdec_op op =
+  let open H in
   match op with
-  | A.Uincr -> H.PreIncO
-  | A.Udecr -> H.PreDecO
-  | A.Upincr -> H.PostIncO
-  | A.Updecr -> H.PostDecO
-  | _ -> failwith "Invalid incdec op"
+  | A.Uincr -> Some PreIncO
+  | A.Udecr -> Some PreDecO
+  | A.Upincr -> Some PostIncO
+  | A.Updecr -> Some PostDecO
+  | _ -> None
 
 (* TODO: there are lots of ways of specifying the same type in a cast.
  * Sort this out!
  *)
-let hint_to_cast_instr (_, hint_) =
+let emit_cast (_, hint_) =
   let open H in
   match hint_ with
-  | A.Happly((_, id), []) when id = SN.Typehints.int -> IOp CastInt
-  | A.Happly((_, id), []) when id = SN.Typehints.bool -> IOp CastBool
-  | A.Happly((_, id), []) when id = SN.Typehints.string -> IOp CastString
-  | A.Happly((_, id), []) when id = SN.Typehints.object_cast -> IOp CastObject
-  | A.Happly((_, id), []) when id = SN.Typehints.array -> IOp CastArray
-  | A.Happly((_, id), []) when id = SN.Typehints.float -> IOp CastDouble
-  | _ -> IComment "cast NYI"
+  | A.Happly((_, id), []) when id = SN.Typehints.int ->
+    instr (IOp CastInt)
+  | A.Happly((_, id), []) when id = SN.Typehints.bool ->
+    instr (IOp CastBool)
+  | A.Happly((_, id), []) when id = SN.Typehints.string ->
+    instr (IOp CastString)
+  | A.Happly((_, id), []) when id = SN.Typehints.object_cast ->
+    instr (IOp CastObject)
+  | A.Happly((_, id), []) when id = SN.Typehints.array ->
+    instr (IOp CastArray)
+  | A.Happly((_, id), []) when id = SN.Typehints.float ->
+    instr (IOp CastDouble)
+  | _ -> emit_nyi "cast type"
 
 let rec from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
@@ -163,7 +176,7 @@ let rec from_expr expr =
       instr (ILabel end_label);
     ]
   | A.Cast(hint, e) ->
-    gather [from_expr e; instr (hint_to_cast_instr hint)]
+    gather [from_expr e; emit_cast hint]
   | A.Eif (etest, Some etrue, efalse) ->
     let false_label = Label.get_next_label () in
     let end_label = Label.get_next_label () in
@@ -204,7 +217,7 @@ let rec from_expr expr =
       ]
 
   | _ ->
-    instr (IComment "expression NYI")
+    emit_nyi "expression"
 
 and emit_quiet_expr (_, expr_ as expr) =
   let open H in
@@ -273,7 +286,7 @@ and emit_call_lhs (_, expr_) nargs =
     instr (ICall (FPushFuncD (nargs, id)))
 
   | _ ->
-    instr (IComment "emit_call_lhs NYI")
+    emit_nyi "call lhs expression"
 
 and emit_call (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
@@ -294,7 +307,7 @@ and emit_call (_, expr_ as expr) args uargs =
     ], Flavor_R
 
   | _ ->
-    instr (H.IComment "emit_call NYI"), Flavor_C
+    emit_nyi "call expression", Flavor_C
 
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
@@ -330,32 +343,42 @@ and literals_from_named_exprs exprs =
 and emit_lval (_, expr_) =
   match expr_ with
   | A.Lvar id -> empty, H.Local_named (snd id)
-  | _ -> instr (H.IComment "emit_lval NYI"), H.Local_unnamed 0
+  | _ -> emit_nyi "lval expression", H.Local_unnamed 0
 
 and emit_assignment obop e1 e2 =
   let instrs1, lval = emit_lval e1 in
   let instrs2 = from_expr e2 in
+  let open H in
   gather [instrs1; instrs2;
     match obop with
-    | None -> instr H.(IMutator (SetL lval))
-    | Some bop -> instr H.(IMutator (SetOpL (lval, binop_to_eqop bop)))]
+    | None -> instr (IMutator (SetL lval))
+    | Some bop ->
+      match binop_to_eqop bop with
+      | None -> emit_nyi "op-assignment"
+      | Some eqop -> instr (IMutator (SetOpL (lval, eqop)))
+    ]
 
 and emit_unop op e =
+  let open H in
   match op with
-  | A.Utild -> gather [from_expr e; instr (H.IOp H.BitNot)]
-  | A.Unot -> gather [from_expr e; instr (H.IOp H.Not)]
+  | A.Utild -> gather [from_expr e; instr (IOp BitNot)]
+  | A.Unot -> gather [from_expr e; instr (IOp Not)]
   | A.Uplus -> gather
-    [instr H.(ILitConst (Int (Int64.zero)));
+    [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (H.IOp H.AddO)]
+    instr (IOp AddO)]
   | A.Uminus -> gather
-    [instr H.(ILitConst (Int (Int64.zero)));
+    [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (H.IOp H.SubO)]
+    instr (IOp SubO)]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
     let instrs, lval = emit_lval e in
-    gather [instrs; instr H.(IMutator (IncDecL (lval, unop_to_incdec_op op)))]
-  | A.Uref -> failwith "references - NYI"
+    gather [instrs;
+      match unop_to_incdec_op op with
+      | None -> emit_nyi "incdec"
+      | Some incdec_op -> instr (IMutator (IncDecL (lval, incdec_op)))]
+  | A.Uref ->
+    emit_nyi "references"
 
 and emit_condition_loop begin_label break_label =
   instr H.(IContFlow (JmpNZ begin_label)),
@@ -446,13 +469,13 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Break _ ->
     begin match break_label with
     | Some i -> instr H.(IContFlow (Jmp i))
-    | None -> failwith "There is no where to break"
+    | None -> failwith "There is nowhere to break"
     end, (false, true)
   | A.Continue _ ->
   (* TODO: Continue takes an argument *)
     begin match continue_label with
     | Some i -> instr H.(IContFlow (Jmp i))
-    | None -> failwith "There is no where to continue"
+    | None -> failwith "There is nowhere to continue"
     end, (true, false)
   | A.Do (b, e) ->
     let l0 = Label.get_next_label () in
@@ -576,9 +599,9 @@ and from_stmt ~continue_label ~break_label verify_return st =
         instr (ITryFault (f1, try_body_list))
       else if catch_exists
       then
-        failwith "Catch - NYI"
+        emit_nyi "catch"
       else
-        failwith "Impossible for finally and catch to both not exists"
+        failwith "Impossible for finally and catch to both not exist"
     in
     gather [
       init;
@@ -588,7 +611,7 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Static_var _
   | A.Switch _
   | A.Foreach _ ->
-    instr (IComment "statement NYI"), (false, false)
+    emit_nyi "statement", (false, false)
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough

@@ -119,6 +119,7 @@ let rec from_expr expr =
   | A.Null -> instr (ILitConst Null)
   | A.False -> instr (ILitConst False)
   | A.True -> instr (ILitConst True)
+  | A.Lvar (_, x) when x = SN.SpecialIdents.this -> instr (IMisc This)
   | A.Lvar (_, x) -> instr (IGet (CGetL (Local_named x)))
   | A.Unop (op, e) ->
     emit_unop op e
@@ -168,7 +169,8 @@ let rec from_expr expr =
         instr (IBasic PopR)
       ]
 
-  | _ -> failwith "from_expr: NYI"
+  | _ ->
+    instr (IComment "expression NYI")
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
@@ -206,10 +208,35 @@ and emit_args_and_call args uargs =
     else instr H.(ICall (FCallUnpack nargs))
   ]
 
-and emit_call (_, expr_) args uargs =
+and emit_call_lhs (_, expr_) nargs =
+  let open H in
+  match expr_ with
+  | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
+    gather [
+      from_expr obj;
+      instr (ICall (FPushObjMethodD (nargs, id, null_flavor)));
+    ]
+
+  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cStatic ->
+    instrs [
+      ILitConst (String id);
+      IMisc LateBoundCls;
+      ICall (FPushClsMethod nargs);
+    ]
+
+  | A.Class_const ((_, cid), (_, id)) ->
+    instr (ICall (FPushClsMethodD (nargs, id, cid)))
+
+  | A.Id (_, id) ->
+    instr (ICall (FPushFuncD (nargs, id)))
+
+  | _ ->
+    instr (IComment "emit_call_lhs NYI")
+
+and emit_call (_, expr_ as expr) args uargs =
+  let nargs = List.length args + List.length uargs in
   match expr_ with
   | A.Id (_, id) when id = SN.SpecialFunctions.echo ->
-    let nargs = List.length args in
     let instrs = gather @@ List.mapi args begin fun i arg ->
          gather [
            from_expr arg;
@@ -218,15 +245,14 @@ and emit_call (_, expr_) args uargs =
          ] end in
     instrs, Flavor_C
 
-  | A.Id (_, id) ->
-    let nargs = List.length args + List.length uargs in
+  | A.Obj_get _ | A.Class_const _ | A.Id _ ->
     gather [
-      instr H.(ICall (FPushFuncD (nargs, id)));
+      emit_call_lhs expr nargs;
       emit_args_and_call args uargs;
     ], Flavor_R
 
   | _ ->
-    empty, Flavor_C
+    instr (H.IComment "emit_call NYI"), Flavor_C
 
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
@@ -262,7 +288,7 @@ and literals_from_named_exprs exprs =
 and emit_lval (_, expr_) =
   match expr_ with
   | A.Lvar id -> empty, H.Local_named (snd id)
-  | _ -> failwith "emit_lval: NYI"
+  | _ -> instr (H.IComment "emit_lval NYI"), H.Local_unnamed 0
 
 and emit_assignment obop e1 e2 =
   let instrs1, lval = emit_lval e1 in
@@ -519,7 +545,8 @@ and from_stmt ~continue_label ~break_label verify_return st =
     ], needs
   | A.Static_var _
   | A.Switch _
-  | A.Foreach _ -> failwith "statements - NYI"
+  | A.Foreach _ ->
+    instr (IComment "statement NYI"), (false, false)
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough

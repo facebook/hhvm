@@ -200,6 +200,10 @@ let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 let string_of_iterator_id i = string_of_int i
 let string_of_class_id id = quote_str id
 let string_of_function_id id = quote_str id
+let string_of_null_flavor nf =
+  match nf with
+  | Ast.OG_nullthrows -> "NullThrows"
+  | Ast.OG_nullsafe -> "NullSafe"
 
 let string_of_call instruction =
   match instruction with
@@ -208,11 +212,13 @@ let string_of_call instruction =
   | FPushFuncU (n, id1, id2) ->
     "FPushFuncU " ^ string_of_int n ^ " " ^ quote_str id1 ^ " " ^ quote_str id2
   | FPushObjMethod n -> "FPushObjMethod " ^ string_of_int n
-  | FPushObjMethodD (n, id) -> "FPushObjMethodD " ^ string_of_int n ^ " " ^ id
+  | FPushObjMethodD (n, id, nf) ->
+    "FPushObjMethodD " ^ string_of_int n ^ " " ^ quote_str id
+    ^ " " ^ string_of_null_flavor nf
   | FPushClsMethod n -> "FPushClsMethod " ^ string_of_int n
   | FPushClsMethodF n -> "FPushClsMethodF " ^ string_of_int n
-  | FPushClsMethodD (n, id1, id2) -> "FPushClsMethodD " ^ string_of_int n ^
-    string_of_class_id id1 ^ " " ^  string_of_function_id id2
+  | FPushClsMethodD (n, id1, id2) -> "FPushClsMethodD " ^ string_of_int n
+    ^ " " ^ string_of_class_id id1 ^ " " ^  string_of_function_id id2
   | FPushCtor n -> "FPushCtor " ^ string_of_int n
   | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ quote_str id
   | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ quote_str id
@@ -251,6 +257,10 @@ let string_of_call instruction =
 
 let string_of_misc instruction =
   match instruction with
+    | This -> "This"
+    | Self -> "Self"
+    | Parent -> "Parent"
+    | LateBoundCls -> "LateBoundCls"
     | VerifyParamType id -> "VerifyParamType " ^ string_of_param_id id
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | Catch -> "Catch"
@@ -298,6 +308,7 @@ and add_instruction_list buffer indent instructions =
     let actual_indent =
       match instr with
       | ILabel _
+      | IComment _ -> 0
       | IExceptionLabel _ -> indent - 2
       | _ -> indent
     in
@@ -419,7 +430,7 @@ let add_method_def buf method_def =
   (* TODO: In the original codegen sometimes a missing return type is not in
   the text at all and sometimes it is <"" N  > -- which should we generate,
   and when? *)
-  let method_name = Hhas_method.name method_def in
+  let method_name = fmt_name (Hhas_method.name method_def) in
   let method_return_type = Hhas_method.return_type method_def in
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
@@ -489,9 +500,11 @@ let add_constant buf c =
   B.add_string buf " = \"\"\"N;\"\"\";\n"
 
 let add_class_def buf class_def =
+  let class_name = fmt_name (Hhas_class.name class_def) in
+  (* TODO: user attributes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
-  B.add_string buf (Hhas_class.name class_def);
+  B.add_string buf class_name;
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {\n";

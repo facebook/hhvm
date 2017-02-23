@@ -250,7 +250,7 @@ type instruct_call =
   | FPushFuncD of num_params * Litstr.id
   | FPushFuncU of num_params * Litstr.id * Litstr.id
   | FPushObjMethod of num_params
-  | FPushObjMethodD of num_params * Litstr.id
+  | FPushObjMethodD of num_params * Litstr.id * Ast.og_null_flavor
   | FPushClsMethod of num_params
   | FPushClsMethodF of num_params
   | FPushClsMethodD of num_params * Litstr.id * Litstr.id
@@ -452,6 +452,8 @@ type instruct_misc =
   | VerifyRetTypeV
   | Self
   | Parent
+  | LateBoundCls
+  | NativeImpl
   | IncStat of int * int (* counter id, value *)
   | AKExists
   | CreateCl of num_params * class_id
@@ -503,6 +505,7 @@ type instruct =
   | IExceptionLabel of rel_offset * exception_label
   | ITryFault of rel_offset * instruct list
   | ITryCatch of (rel_offset * Litstr.id) list * instruct list
+  | IComment of string
 
 type type_constraint_flag =
   | Nullable

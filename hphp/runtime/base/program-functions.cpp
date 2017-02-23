@@ -187,6 +187,7 @@ struct StartTime {
 static StartTime s_startTime;
 static std::string tempFile;
 std::vector<std::string> s_config_files;
+std::vector<std::string> s_ini_strings;
 
 time_t start_time() {
   return s_startTime.startTime;
@@ -1608,6 +1609,7 @@ static int execute_program_impl(int argc, char** argv) {
       }
     }
     // Now, take care of CLI options and then officially load and bind things
+    s_ini_strings = po.iniStrings;
     RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);
     std::vector<std::string> badnodes;
     config.lint(badnodes);
@@ -1953,6 +1955,11 @@ static void update_constants_and_options() {
   for (auto& filename: s_config_files) {
     Config::ParseIniFile(filename, ini, true);
   }
+  // Reset the INI settings from the CLI.
+  for (auto& iniStr: s_ini_strings) {
+    Config::ParseIniString(iniStr, ini, true);
+  }
+
   // Reset, possibly, some request dependent runtime options based on certain
   // setting values. Do this here so we ensure the constants have been loaded
   // correctly (e.g., error_reporting E_ALL, etc.)

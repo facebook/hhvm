@@ -91,8 +91,9 @@ std::string Config::IniName(const std::string& config,
   return out;
 }
 
-void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini) {
-  Config::SetParsedIni(ini, iniStr, "", false, true);
+void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini,
+                            const bool constants_only /* = false */ ) {
+  Config::SetParsedIni(ini, iniStr, "", constants_only, true);
 }
 
 void Config::ParseHdfString(const std::string &hdfStr, Hdf &hdf) {

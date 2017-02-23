@@ -1435,10 +1435,8 @@ TODO: This will need to be fixed to allow situations where the qualified name
       list-intrinsic:
         list  (  expression-list-opt  )
       expression-list:
-        expressions  ,-opt
-      expressions:
-        expression
-        expressions , expression
+        expression-opt
+        expression-list , expression-opt
 
       See https://github.com/hhvm/hack-langspec/issues/82
 
@@ -1456,7 +1454,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
       *)
     let (parser, keyword) = assert_token parser List in
     let (parser, left, items, right) =
-      parse_parenthesized_comma_list_opt_allow_trailing
+      parse_parenthesized_comma_list_opt_items_opt
         parser parse_expression_with_reset_precedence in
     let result = make_list_expression keyword left items right in
     (parser, result)

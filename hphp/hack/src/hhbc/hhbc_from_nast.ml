@@ -964,7 +964,19 @@ let from_constant (_hint, name, const_init) =
     Some (Hhas_constant.make constant_name)
 
 let from_constants nast_constants =
-    Core.List.filter_map nast_constants from_constant
+  Core.List.filter_map nast_constants from_constant
+
+let from_type_constant nast_type_constant =
+  match nast_type_constant.N.c_tconst_type with
+  | None -> None (* Abstract type constants are omitted *)
+  | Some _init ->
+    (* TODO: Deal with the initializer *)
+    let type_constant_name = Litstr.to_string @@
+      snd nast_type_constant.N.c_tconst_name in
+    Some (Hhas_type_constant.make type_constant_name)
+
+let from_type_constants nast_type_constants =
+  Core.List.filter_map nast_type_constants from_type_constant
 
 let from_class : Nast.class_ -> Hhas_class.t =
   fun nast_class ->
@@ -993,8 +1005,8 @@ let from_class : Nast.class_ -> Hhas_class.t =
   let static_properties = from_properties true nast_class.N.c_static_vars in
   let class_properties = static_properties @ instance_properties in
   let class_constants = from_constants nast_class.N.c_consts in
-  (* TODO: uses, xhp attr uses, xhp category, req-extends, req-implements,
-  type constants *)
+  let class_type_constants = from_type_constants nast_class.N.c_typeconsts in
+  (* TODO: uses, xhp attr uses, xhp category *)
   Hhas_class.make
     class_attributes
     class_base
@@ -1008,6 +1020,7 @@ let from_class : Nast.class_ -> Hhas_class.t =
     class_methods
     class_properties
     class_constants
+    class_type_constants
 
 let from_classes nast_classes =
   Core.List.map nast_classes from_class

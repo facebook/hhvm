@@ -527,6 +527,12 @@ let add_constant buf c =
   (* TODO: Get the actual initializer when we can codegen it. *)
   B.add_string buf " = \"\"\"N;\"\"\";\n"
 
+let add_type_constant buf c =
+  B.add_string buf "\n  .const ";
+  B.add_string buf (Hhas_type_constant.name c);
+  (* TODO: Get the actual initializer when we can codegen it. *)
+  B.add_string buf " isType = \"\"\"N;\"\"\";\n"
+
 let add_class_def buf class_def =
   let class_name = fmt_name (Hhas_class.name class_def) in
   (* TODO: user attributes *)
@@ -537,6 +543,7 @@ let add_class_def buf class_def =
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {\n";
   List.iter (add_constant buf) (Hhas_class.constants class_def);
+  List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
   List.iter (add_property buf) (Hhas_class.properties class_def);
   List.iter (add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)

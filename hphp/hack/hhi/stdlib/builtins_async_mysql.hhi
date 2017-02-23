@@ -72,7 +72,7 @@ class AsyncMysqlClient {
       string $password,
       int $timeout_micros = -1,
       ?MySSLContextProvider $ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
-    
+
     static public function connectWithOpts(
       string $host,
       int $port,
@@ -80,6 +80,16 @@ class AsyncMysqlClient {
       string $user,
       string $password,
       AsyncMysqlConnectionOptions $conn_opts): Awaitable<AsyncMysqlConnection> { }
+
+    static public function connectAndQuery(
+      Traversable<string> $queries,
+      string $host,
+      int $port,
+      string $dbname,
+      string $user,
+      string $password,
+      AsyncMysqlConnectionOptions $conn_opts
+    ): Awaitable<Vector<AsyncMysqlQueryResult>>{ }
 
    static public function adoptConnection($connection) { }
 }
@@ -107,7 +117,7 @@ class MySSLContextProvider {
 class AsyncMysqlConnectionOptions {
   public function setConnectTimeout(int $timeout): void { }
   public function setConnectAttempts(int $attempts): void { }
-  public function setTotalTimeout(int $timeout): void { } 
+  public function setTotalTimeout(int $timeout): void { }
   public function setQueryTimeout(int $timeout): void { }
   public function setConnectionAttributes(array<string, string> $val): void { }
   public function setSSLOptionsProvider(?MySSLContextProvider $ssl_context): void { }

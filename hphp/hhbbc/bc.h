@@ -188,17 +188,27 @@ struct hasher_impl {
 };
 
 /*
+ * Hash operand wrapper.
+ */
+template<typename T, typename S>
+struct hash_operand { const T& val; S type; };
+
+/*
  * Hash T using H::operator() if it is compatible, else fall back to
  * hasher_impl (e.g., if H := hasher_default).
  */
-template<typename T, class H>
-auto hash(const T& t, H h) -> decltype(h(t)) {
-  return h(t);
+template<typename T, typename S, class H>
+auto hash(const hash_operand<T,S>& t, H h) -> decltype(h(t.val)) {
+  return h(t.val);
 }
-template<typename T, typename... Unused>
+template<typename T, typename S, class H>
+auto hash(const hash_operand<T,S>& t, H h) -> decltype(h(t.val, t.type)) {
+  return h(t.val, t.type);
+}
+template<typename T, typename S, typename... Unused>
 typename std::enable_if<sizeof...(Unused) == 1, size_t>::type
-hash(const T& t, Unused...) {
-  return hasher_impl::hash(t);
+hash(const hash_operand<T,S>& t, Unused...) {
+  return hasher_impl::hash(t.val);
 }
 
 /*
@@ -223,32 +233,70 @@ size_t hash_combine(H h, const T& t, const Ts&... ts) {
 struct eq_default {};
 
 /*
+ * Equality operand wrapper.
+ */
+template<typename T, typename S>
+struct eq_operand { const T& l; const T& r; S type; };
+
+/*
  * Compare two values, using E::operator() if it exists, else the default
  * operator==.
  */
-template<typename T, class E>
-auto equals(const T& t1, const T& t2, E e) -> decltype(e(t1, t2)) {
-  return e(t1, t2);
+template<typename T, typename S, class E>
+auto equals(const eq_operand<T,S>& t, E e) -> decltype(e(t.l, t.r)) {
+  return e(t.l, t.r);
 }
-template<typename T, typename... Unused>
+template<typename T, typename S, class E>
+auto equals(const eq_operand<T,S>& t, E e) -> decltype(e(t.l, t.r, t.type)) {
+  return e(t.l, t.r, t.type);
+}
+template<typename T, typename S, typename... Unused>
 typename std::enable_if<sizeof...(Unused) == 1, bool>::type
-equals(const T& t1, const T& t2, Unused...) {
-  return t1 == t2;
+equals(const eq_operand<T,S>& t, Unused...) {
+  return t.l == t.r;
 }
 
 /*
- * Check if an (even-numbered) list of values are pairwise-equal.
+ * Check if a list of eq_operands are pairwise-equal.
  */
 template<class E> bool eq_pairs(E e) { return true; }
 
 template<class E, typename T, typename... Ts>
-bool eq_pairs(E e, const T& t1, const T& t2, const Ts&... ts) {
-  return equals(t1, t2, e) && (sizeof...(ts) == 0 || eq_pairs(e, ts...));
+bool eq_pairs(E e, const T& t, const Ts&... ts) {
+  return equals(t, e) && (sizeof...(ts) == 0 || eq_pairs(e, ts...));
 }
 
 }
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Bytecode immediate type tags.
+ */
+namespace imm {
+#define ARGTYPE(name, type)     enum class name : uint8_t {};
+#define ARGTYPEVEC(name, type)  enum class name : uint8_t {};
+  ARGTYPES
+#undef ARGTYPE
+#undef ARGTYPEVEC
+}
+
+#define IMM_ID_BLA      BLA
+#define IMM_ID_SLA      SLA
+#define IMM_ID_ILA      ILA
+#define IMM_ID_IVA      IVA
+#define IMM_ID_I64A     I64A
+#define IMM_ID_LA       LA
+#define IMM_ID_IA       IA
+#define IMM_ID_DA       DA
+#define IMM_ID_SA       SA
+#define IMM_ID_RATA     RATA
+#define IMM_ID_AA       AA
+#define IMM_ID_BA       BA
+#define IMM_ID_OA(type) OA
+#define IMM_ID_VSA      VSA
+#define IMM_ID_KA       KA
+#define IMM_ID_LAR      LAR
 
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
@@ -306,22 +354,31 @@ bool eq_pairs(E e, const T& t1, const T& t2, const Ts&... ts) {
 #define IMM_MEM_NA
 #define IMM_MEM_ONE(x)             IMM_MEM(x, 1);
 #define IMM_MEM_TWO(x, y)          IMM_MEM(x, 1); IMM_MEM(y, 2);
-#define IMM_MEM_THREE(x, y, z)     IMM_MEM(x, 1); IMM_MEM(y, 2);  \
+#define IMM_MEM_THREE(x, y, z)     IMM_MEM(x, 1); IMM_MEM(y, 2); \
                                    IMM_MEM(z, 3);
 #define IMM_MEM_FOUR(x, y, z, l)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
                                    IMM_MEM(z, 3); IMM_MEM(l, 4);
 
 #define IMM_EQ_WRAP(e, ...)       detail::eq_pairs(e, __VA_ARGS__)
-#define IMM_EQ(which, n)          IMM_NAME_##which(n), o.IMM_NAME_##which(n)
-#define IMM_EQ_NA                 0, 0
+#define IMM_EQ(which, n)          detail::eq_operand<     \
+                                    IMM_TY_##which,       \
+                                    imm::IMM_ID_##which   \
+                                  > { \
+                                    IMM_NAME_##which(n),  \
+                                    o.IMM_NAME_##which(n) \
+                                  }
+#define IMM_EQ_NA                 detail::eq_operand<void*,imm::NA> { 0, 0 }
 #define IMM_EQ_ONE(x)             IMM_EQ(x, 1)
 #define IMM_EQ_TWO(x, y)          IMM_EQ_ONE(x), IMM_EQ(y, 2)
 #define IMM_EQ_THREE(x, y, z)     IMM_EQ_TWO(x, y), IMM_EQ(z, 3)
 #define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ_THREE(x, y, z), IMM_EQ(l, 4)
 
 #define IMM_HASH_WRAP(h, ...)       detail::hash_combine(h, __VA_ARGS__)
-#define IMM_HASH(which, n)          IMM_NAME_##which(n)
-#define IMM_HASH_NA                 0
+#define IMM_HASH(which, n)          detail::hash_operand<     \
+                                      IMM_TY_##which,         \
+                                      imm::IMM_ID_##which     \
+                                    > { IMM_NAME_##which(n) }
+#define IMM_HASH_NA                 detail::hash_operand<void*,imm::NA> { 0 }
 #define IMM_HASH_ONE(x)             IMM_HASH(x, 1)
 #define IMM_HASH_TWO(x, y)          IMM_HASH_ONE(x), IMM_HASH(y, 2)
 #define IMM_HASH_THREE(x, y, z)     IMM_HASH_TWO(x, y), IMM_HASH(z, 3)

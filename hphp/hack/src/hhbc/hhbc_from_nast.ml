@@ -764,7 +764,7 @@ let from_implements tparams implements =
   *)
   hints_to_type_infos ~always_extended:false tparams implements
 
-let from_property property_is_static _nast_class_ class_var =
+let from_property property_is_static class_var =
   (* TODO: xhp, type, initializer *)
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
@@ -779,8 +779,20 @@ let from_property property_is_static _nast_class_ class_var =
     property_is_static
     property_name
 
-let from_properties property_is_static nast_class class_vars =
-  List.map class_vars (from_property property_is_static nast_class)
+let from_properties property_is_static class_vars =
+  List.map class_vars (from_property property_is_static)
+
+let from_constant (_hint, name, const_init) =
+  (* The type hint is omitted. *)
+  match const_init with
+  | None -> None (* Abstract constants are omitted *)
+  | Some _init ->
+    (* TODO: Deal with the initializer *)
+    let constant_name = Litstr.to_string @@ snd name in
+    Some (Hhas_constant.make constant_name)
+
+let from_constants nast_constants =
+    Core.List.filter_map nast_constants from_constant
 
 let from_class : Nast.class_ -> Hhas_class.t =
   fun nast_class ->
@@ -801,14 +813,16 @@ let from_class : Nast.class_ -> Hhas_class.t =
     else nast_class.N.c_implements in
   let class_implements = from_implements tparams implements in
   let instance_methods = from_methods false nast_class nast_class.N.c_methods in
-  let static_methods = from_methods true nast_class nast_class.N.c_static_methods in
+  let static_methods =
+    from_methods true nast_class nast_class.N.c_static_methods in
   let class_methods = instance_methods @ static_methods in
   let class_methods = add_constructor nast_class class_methods in
-  let instance_properties = from_properties false nast_class nast_class.N.c_vars in
-  let static_properties = from_properties true nast_class nast_class.N.c_static_vars in
+  let instance_properties = from_properties false nast_class.N.c_vars in
+  let static_properties = from_properties true nast_class.N.c_static_vars in
   let class_properties = static_properties @ instance_properties in
+  let class_constants = from_constants nast_class.N.c_consts in
   (* TODO: uses, xhp attr uses, xhp category, req-extends, req-implements,
-  constants, type constants *)
+  type constants *)
   Hhas_class.make
     class_attributes
     class_base
@@ -821,6 +835,7 @@ let from_class : Nast.class_ -> Hhas_class.t =
     class_is_enum
     class_methods
     class_properties
+    class_constants
 
 let from_classes nast_classes =
   Core.List.map nast_classes from_class

@@ -476,7 +476,7 @@ type gen_creation_execution =
   | ContKey
   | ContGetReturn
 
-type gen_delegtion =
+type gen_delegation =
   | ContAssignDelegate
   | ContEnterDelegate
   | YieldFromDelegate
@@ -485,6 +485,10 @@ type gen_delegtion =
 type async_functions =
   | WHResult
   | Await
+
+type exception_label =
+  | CatchL
+  | FaultL
 
 type instruct =
   | IBasic of instruct_basic
@@ -496,6 +500,9 @@ type instruct =
   | IGet of instruct_get
   | IMutator of instruct_mutator
   | ILabel of rel_offset
+  | IExceptionLabel of rel_offset * exception_label
+  | ITryFault of rel_offset * instruct list
+  | ITryCatch of (rel_offset * Litstr.id) list * instruct list
 
 type type_constraint_flag =
   | Nullable

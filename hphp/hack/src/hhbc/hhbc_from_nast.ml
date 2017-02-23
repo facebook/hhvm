@@ -458,11 +458,68 @@ and from_stmt ~continue_label ~break_label verify_return st =
       jmp_to_begin;
       instr (ILabel l0);
     ], (false, false)
-  | A.Throw _
+  | A.Throw e ->
+    gather [
+      from_expr e;
+      instr H.(IContFlow Throw);
+    ], (false, false)
+  | A.Try (tb, cl, fb) ->
+    let catch_exists = List.length cl <> 0 in
+    let finally_exists = fb <> [] in
+
+    let l0 = Label.get_next_label () in
+    (* TODO: Combine needs of catch and try block *)
+    let try_body, needs =
+      from_stmt
+        ~continue_label
+        ~break_label
+        verify_return
+        (A.Block tb)
+    in
+    let try_body = gather [try_body; instr (IContFlow (Jmp l0));] in
+    let try_body_list = instr_seq_to_list try_body in
+    let catches =
+      List.map cl ~f:(from_catch ~continue_label ~break_label verify_return)
+    in
+    let catch_meta_data = List.rev @@ List.map catches ~f:snd in
+    let catch_blocks =
+      List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x)
+    in
+    let catch_instr = List.concat catch_blocks in
+    (* TODO: What happens to finally needs? *)
+    let finally_body, _ =
+      from_stmt
+        ~continue_label
+        ~break_label
+        verify_return
+        (A.Block fb)
+    in
+    let init =
+      if finally_exists && catch_exists
+      then
+        let f1 = Label.get_next_label () in
+        let rest =
+          ITryCatch (catch_meta_data, try_body_list) :: catch_instr
+        in
+        instr (ITryFault (f1, rest))
+      else if finally_exists
+      then
+        let f1 = Label.get_next_label () in
+        instr (ITryFault (f1, try_body_list))
+      else if catch_exists
+      then
+        failwith "Catch - NYI"
+      else
+        failwith "Impossible for finally and catch to both not exists"
+    in
+    gather [
+      init;
+      instr (ILabel l0);
+      finally_body;
+    ], needs
   | A.Static_var _
   | A.Switch _
-  | A.Foreach _
-  | A.Try _ -> failwith "statements - NYI"
+  | A.Foreach _ -> failwith "statements - NYI"
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough
@@ -477,6 +534,28 @@ and from_stmts ~continue_label ~break_label verify_return stl =
   let need_cont = List.exists ~f:(fst) needs in
   let need_break = List.exists ~f:(snd) needs in
   gather (instrs), (need_cont, need_break)
+
+and from_catch
+  ~continue_label
+  ~break_label
+  verify_return ((_, id1), (_, id2), b) =
+  let open H in
+  let cl = Label.get_next_label () in
+  (* TODO: what to do with needs? *)
+  let body, _ =
+    from_stmt
+      ~continue_label
+      ~break_label
+      verify_return
+      (A.Block b)
+  in
+  gather [
+    instr (IExceptionLabel (cl, CatchL));
+    instr (IMisc Catch);
+    instr H.(IMutator (SetL (Local_named id2)));
+    instr H.(IBasic PopC);
+    body;
+  ], (cl, id1)
 
 let fmt_prim x =
   match x with
@@ -633,6 +712,7 @@ let from_body tparams params ret b =
     emit_method_prolog params;
     stmt_instrs;
     ret_instrs;
+    (* TODO: Need Finally instructions repeated *)
   ] in
   body_instrs, params, return_type_info
 

@@ -176,6 +176,13 @@ let string_of_mutator x =
 
 let string_of_label id = "L" ^ (string_of_int id)
 
+let string_of_exception_label id t =
+  let prefix = match t with
+    | CatchL -> "C"
+    | FaultL -> "F"
+  in
+  prefix ^ (string_of_int id)
+
 let string_of_control_flow instruction =
   match instruction with
   | Jmp l -> "Jmp " ^ string_of_label l
@@ -184,6 +191,8 @@ let string_of_control_flow instruction =
   | JmpNZ l -> "JmpNZ " ^ string_of_label l
   | RetC -> "RetC"
   | RetV -> "RetV"
+  | Throw -> "Throw"
+  | Unwind -> "Unwind"
   | _ -> failwith "instruction_control_flow Not Implemented"
 
 let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
@@ -244,24 +253,60 @@ let string_of_misc instruction =
   match instruction with
     | VerifyParamType id -> "VerifyParamType " ^ string_of_param_id id
     | VerifyRetTypeC -> "VerifyRetTypeC"
+    | Catch -> "Catch"
     | _ -> failwith "instruct_misc Not Implemented"
 
-let add_instruction_list buffer indent instructions =
+let string_of_instruction instruction =
+  match instruction with
+  | IBasic               i -> string_of_basic i
+  | ILitConst            i -> string_of_lit_const i
+  | IOp                  i -> string_of_operator i
+  | IContFlow            i -> string_of_control_flow i
+  | ICall                i -> string_of_call i
+  | IMisc                i -> string_of_misc i
+  | IGet                 i -> string_of_get i
+  | IMutator             i -> string_of_mutator i
+  | ILabel               l -> string_of_label l ^ ":"
+  | IExceptionLabel (l, t) -> string_of_exception_label l t ^ ":"
+  | _ -> failwith "invalid instruction"
+
+let string_of_catch (label, id) =
+  "(" ^
+  Litstr.to_string id ^
+  " " ^
+  string_of_exception_label label CatchL ^ ")"
+
+let rec add_try_fault_block buffer indent label instructions =
+  B.add_string buffer ".try_fault ";
+  B.add_string buffer @@ string_of_exception_label label FaultL;
+  B.add_string buffer " {\n";
+  add_instruction_list buffer (indent + 2) instructions;
+  B.add_string buffer (String.make indent ' ');
+  B.add_string buffer "}"
+
+and add_try_catch_block buffer indent ids instructions =
+  B.add_string buffer ".try_catch ";
+  let catch_strings = List.map string_of_catch ids in
+  B.add_string buffer @@ String.concat " " catch_strings;
+  B.add_string buffer " {\n";
+  add_instruction_list buffer (indent + 2) instructions;
+  B.add_string buffer (String.make indent ' ');
+  B.add_string buffer "}"
+
+and add_instruction_list buffer indent instructions =
   let process_instr instr =
-    let actual_indent = match instr with ILabel _ -> indent-2 | _ -> indent in
-    B.add_string buffer (String.make actual_indent ' ');
-    B.add_string buffer (
+    let actual_indent =
       match instr with
-      | IBasic    i -> string_of_basic i
-      | ILitConst i -> string_of_lit_const i
-      | IOp       i -> string_of_operator i
-      | IContFlow i -> string_of_control_flow i
-      | ICall     i -> string_of_call i
-      | IMisc     i -> string_of_misc i
-      | IGet      i -> string_of_get i
-      | IMutator  i -> string_of_mutator i
-      | ILabel    l -> string_of_label l ^ ":"
-    );
+      | ILabel _
+      | IExceptionLabel _ -> indent - 2
+      | _ -> indent
+    in
+    B.add_string buffer (String.make actual_indent ' ');
+    begin match instr with
+      | ITryFault (l, il) -> add_try_fault_block buffer actual_indent l il
+      | ITryCatch (l, il) -> add_try_catch_block buffer actual_indent l il
+      | _ -> B.add_string buffer (string_of_instruction instr)
+    end;
     B.add_string buffer "\n" in
   List.iter process_instr instructions
 

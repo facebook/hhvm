@@ -16,3 +16,6 @@ let get_next_label () =
   let current = !next_label in
   next_label := current + 1;
   current
+
+let reset_label () =
+  next_label := 0

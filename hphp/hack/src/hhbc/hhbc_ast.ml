@@ -240,6 +240,7 @@ type instruct_mutator =
   | BindN
   | BindG
   | BindS
+  | UnsetL of local_id
   | UnsetN
   | UnsetG
   | CheckProp of property_name
@@ -504,7 +505,7 @@ type instruct =
   | IIsset of instruct_isset
   | ILabel of rel_offset
   | IExceptionLabel of rel_offset * exception_label
-  | ITryFault of rel_offset * instruct list
+  | ITryFault of rel_offset * instruct list * instruct list
   | ITryCatch of (rel_offset * Litstr.id) list * instruct list
   | IComment of string
 

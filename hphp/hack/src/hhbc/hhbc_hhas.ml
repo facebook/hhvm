@@ -182,6 +182,7 @@ let string_of_mutator x =
   | BindN -> "BindN"
   | BindG -> "BindG"
   | BindS -> "BindS"
+  | UnsetL id -> "UnsetL " ^ string_of_local_id id
   | UnsetN -> "UnsetN"
   | UnsetG -> "UnsetG"
   | CheckProp _ -> failwith "NYI"
@@ -335,14 +336,14 @@ and add_instruction_list buffer indent instructions =
   let process_instr instr =
     let actual_indent =
       match instr with
-      | ILabel _
       | IComment _ -> 0
+      | ILabel _
       | IExceptionLabel _ -> indent - 2
       | _ -> indent
     in
     B.add_string buffer (String.make actual_indent ' ');
     begin match instr with
-      | ITryFault (l, il) -> add_try_fault_block buffer actual_indent l il
+      | ITryFault (l, il, _) -> add_try_fault_block buffer actual_indent l il
       | ITryCatch (l, il) -> add_try_catch_block buffer actual_indent l il
       | _ -> B.add_string buffer (string_of_instruction instr)
     end;

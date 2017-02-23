@@ -559,18 +559,29 @@ and from_stmt ~continue_label ~break_label verify_return st =
     let finally_exists = fb <> [] in
 
     let l0 = Label.get_next_label () in
+    let new_continue_label =
+      if finally_exists then Some l0 else continue_label
+    in
+    let new_break_label =
+      if finally_exists then Some l0 else break_label
+    in
     (* TODO: Combine needs of catch and try block *)
     let try_body, needs =
       from_stmt
-        ~continue_label
-        ~break_label
+        ~continue_label:new_continue_label
+        ~break_label:new_break_label
         verify_return
         (A.Block tb)
     in
     let try_body = gather [try_body; instr (IContFlow (Jmp l0));] in
     let try_body_list = instr_seq_to_list try_body in
     let catches =
-      List.map cl ~f:(from_catch ~continue_label ~break_label verify_return)
+      List.map cl
+      ~f:(from_catch
+          ~continue_label:new_continue_label
+          ~break_label:new_break_label
+          verify_return
+          l0)
     in
     let catch_meta_data = List.rev @@ List.map catches ~f:snd in
     let catch_blocks =
@@ -585,21 +596,37 @@ and from_stmt ~continue_label ~break_label verify_return st =
         verify_return
         (A.Block fb)
     in
+    let fault_body =
+      if finally_exists
+      then
+        instr_seq_to_list @@ gather [
+          (* TODO: What are these unnamed locals? *)
+          instr H.(IMutator (UnsetL (Local_unnamed 0)));
+          instr H.(IMutator (UnsetL (Local_unnamed 0)));
+          finally_body;
+          instr H.(IContFlow Unwind);
+        ]
+
+      else []
+    in
     let init =
       if finally_exists && catch_exists
       then
         let f1 = Label.get_next_label () in
         let rest =
-          ITryCatch (catch_meta_data, try_body_list) :: catch_instr
+          ITryCatch (catch_meta_data, try_body_list)
+          :: catch_instr
         in
-        instr (ITryFault (f1, rest))
+        let f1_label = IExceptionLabel (f1, FaultL) in
+        instr (ITryFault (f1, rest, f1_label :: fault_body))
       else if finally_exists
       then
         let f1 = Label.get_next_label () in
-        instr (ITryFault (f1, try_body_list))
+        let f1_label = IExceptionLabel (f1, FaultL) in
+        instr (ITryFault (f1, try_body_list, f1_label :: fault_body))
       else if catch_exists
       then
-        emit_nyi "catch"
+        instrs @@ ITryCatch (catch_meta_data, try_body_list) :: catch_instr
       else
         failwith "Impossible for finally and catch to both not exist"
     in
@@ -630,7 +657,7 @@ and from_stmts ~continue_label ~break_label verify_return stl =
 and from_catch
   ~continue_label
   ~break_label
-  verify_return ((_, id1), (_, id2), b) =
+  verify_return end_label ((_, id1), (_, id2), b) =
   let open H in
   let cl = Label.get_next_label () in
   (* TODO: what to do with needs? *)
@@ -647,6 +674,7 @@ and from_catch
     instr H.(IMutator (SetL (Local_named id2)));
     instr H.(IBasic PopC);
     body;
+    instr H.(IContFlow (Jmp end_label));
   ], (cl, id1)
 
 let fmt_prim x =
@@ -789,6 +817,18 @@ let emit_method_prolog params =
 let tparams_to_strings tparams =
   List.map tparams (fun (_, (_, s), _) -> s)
 
+(* TODO: This function is grossly inefficient,
+ * I wonder how we can do it better *)
+let rec emit_fault_instructions stmt_instrs =
+  let emit_fault_instruction_aux = function
+    | H.ITryFault (_, il, fault) ->
+      gather [emit_fault_instructions @@ instrs il; instrs fault;]
+    | H.ITryCatch (_, il) -> emit_fault_instructions @@ instrs il
+    | _ -> empty
+  in
+  let instr_list = instr_seq_to_list stmt_instrs in
+  gather @@ List.map instr_list ~f:emit_fault_instruction_aux
+
 let from_body tparams params ret b =
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
@@ -799,17 +839,20 @@ let from_body tparams params ret b =
   in
   let ret_instrs =
     match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
-    instrs [H.ILitConst H.Null; H.IContFlow H.RetC] in
+    instrs [H.ILitConst H.Null; H.IContFlow H.RetC]
+  in
+  let fault_instrs = emit_fault_instructions stmt_instrs in
   let body_instrs = gather [
     emit_method_prolog params;
     stmt_instrs;
     ret_instrs;
-    (* TODO: Need Finally instructions repeated *)
+    fault_instrs;
   ] in
   body_instrs, params, return_type_info
 
 let from_fun_ : Nast.fun_ -> Hhas_function.t option =
   fun nast_fun ->
+  Label.reset_label ();
   let function_name = Litstr.to_string @@ snd nast_fun.Nast.f_name in
   match nast_fun.N.f_body with
   | N.NamedBody _ ->

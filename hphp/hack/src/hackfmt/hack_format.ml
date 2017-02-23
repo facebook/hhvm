@@ -833,7 +833,13 @@ offending text is '%s'." (text node)));
     ()
   | ElseClause x ->
     t x.else_keyword;
-    handle_possible_compound_statement x.else_statement;
+    let _ = match syntax x.else_statement with
+      | IfStatement _ ->
+        pending_space ();
+        t x.else_statement;
+        pending_space ();
+        ()
+      | _ -> handle_possible_compound_statement x.else_statement in
     ()
   | TryStatement x ->
     (* TODO: revisit *)

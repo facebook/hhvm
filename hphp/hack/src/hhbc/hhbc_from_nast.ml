@@ -105,6 +105,20 @@ let unop_to_incdec_op op =
   | A.Updecr -> H.PostDecO
   | _ -> failwith "Invalid incdec op"
 
+(* TODO: there are lots of ways of specifying the same type in a cast.
+ * Sort this out!
+ *)
+let hint_to_cast_instr (_, hint_) =
+  let open H in
+  match hint_ with
+  | A.Happly((_, id), []) when id = SN.Typehints.int -> IOp CastInt
+  | A.Happly((_, id), []) when id = SN.Typehints.bool -> IOp CastBool
+  | A.Happly((_, id), []) when id = SN.Typehints.string -> IOp CastString
+  | A.Happly((_, id), []) when id = SN.Typehints.object_cast -> IOp CastObject
+  | A.Happly((_, id), []) when id = SN.Typehints.array -> IOp CastArray
+  | A.Happly((_, id), []) when id = SN.Typehints.float -> IOp CastDouble
+  | _ -> IComment "cast NYI"
+
 let rec from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   let open H in
@@ -121,6 +135,8 @@ let rec from_expr expr =
   | A.True -> instr (ILitConst True)
   | A.Lvar (_, x) when x = SN.SpecialIdents.this -> instr (IMisc This)
   | A.Lvar (_, x) -> instr (IGet (CGetL (Local_named x)))
+  | A.Class_const ((_, cid), (_, id)) when id = SN.Members.mClass ->
+    instr (ILitConst (String cid))
   | A.Unop (op, e) ->
     emit_unop op e
   | A.Binop (A.Eq obop, e1, e2) ->
@@ -130,6 +146,24 @@ let rec from_expr expr =
     gather [from_expr e; instr (IGet (CGetL2 (Local_named x))); from_binop op]
   | A.Binop (op, e1, e2) ->
     gather [from_expr e2; from_expr e1; from_binop op]
+  | A.InstanceOf (e1, (_, A.Id (_, id))) ->
+    gather [from_expr e1; instr (IOp (InstanceOfD id))]
+  | A.InstanceOf (e1, e2) ->
+    gather [from_expr e1; from_expr e2; instr (IOp InstanceOf)]
+  | A.NullCoalesce(e1, e2) ->
+    let end_label = Label.get_next_label () in
+    gather [
+      emit_quiet_expr e1;
+      instr (IBasic Dup);
+      instr (IIsset (IsTypeC OpNull));
+      instr (IOp Not);
+      instr (IContFlow (JmpNZ end_label));
+      instr (IBasic PopC);
+      from_expr e2;
+      instr (ILabel end_label);
+    ]
+  | A.Cast(hint, e) ->
+    gather [from_expr e; instr (hint_to_cast_instr hint)]
   | A.Eif (etest, Some etrue, efalse) ->
     let false_label = Label.get_next_label () in
     let end_label = Label.get_next_label () in
@@ -171,6 +205,14 @@ let rec from_expr expr =
 
   | _ ->
     instr (IComment "expression NYI")
+
+and emit_quiet_expr (_, expr_ as expr) =
+  let open H in
+  match expr_ with
+  | A.Lvar (_, x) ->
+    instr (IGet (CGetQuietL (Local_named x)))
+  | _ ->
+    from_expr expr
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with

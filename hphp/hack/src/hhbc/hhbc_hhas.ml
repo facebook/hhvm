@@ -32,6 +32,8 @@ let string_of_basic instruction =
     | UnboxRNop   -> "UnboxRNop"
     | RGetCNop    -> "RGetCNop"
 
+let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
+
 let string_of_lit_const instruction =
   match instruction with
     | Null        -> "Null"
@@ -79,13 +81,13 @@ let string_of_operator instruction =
     | CastInt -> "CastInt"
     | CastDouble -> "CastDouble"
     | CastString -> "CastString"
-    | CastArray -> "Cast"
+    | CastArray -> "CastArray"
     | CastObject -> "CastObject"
     | CastVec -> "CastVec"
     | CastDict -> "CastDict"
     | CastKeyset -> "CastKeyset"
     | InstanceOf -> "InstanceOf"
-    | InstanceOfD -> "InstanceOfD"
+    | InstanceOfD id -> "InstanceOfD " ^ quote_str id
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"
@@ -149,6 +151,17 @@ let string_of_incdec_op op =
   | PreDecO -> "PreDecO"
   | PostDecO -> "PostDecO"
 
+let string_of_istype_op op =
+  match op with
+  | OpNull -> "Null"
+  | OpBool -> "Bool"
+  | OpInt -> "Int"
+  | OpDbl -> "Dbl"
+  | OpStr -> "Str"
+  | OpArr -> "Arr"
+  | OpObj -> "Obj"
+  | OpScalar -> "Scalar"
+
 let string_of_mutator x =
   match x with
   | SetL id -> "SetL " ^ string_of_local_id id
@@ -195,8 +208,6 @@ let string_of_control_flow instruction =
   | Unwind -> "Unwind"
   | _ -> failwith "instruction_control_flow Not Implemented"
 
-let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
-
 let string_of_iterator_id i = string_of_int i
 let string_of_class_id id = quote_str id
 let string_of_function_id id = quote_str id
@@ -204,6 +215,21 @@ let string_of_null_flavor nf =
   match nf with
   | Ast.OG_nullthrows -> "NullThrows"
   | Ast.OG_nullsafe -> "NullSafe"
+
+let string_of_isset instruction =
+  match instruction with
+  | IssetC -> "IssetC"
+  | IssetL id -> "IssetL " ^ string_of_local_id id
+  | IssetN -> "IssetN"
+  | IssetG -> "IssetG"
+  | IssetS -> "IssetS"
+  | EmptyL id -> "EmptyL " ^ string_of_local_id id
+  | EmptyN -> "EmptyN"
+  | EmptyG -> "EmptyG"
+  | EmptyS -> "EmptyS"
+  | IsTypeC op -> "IsTypeC " ^ string_of_istype_op op
+  | IsTypeL (id, op) ->
+    "IsTypeL " ^ string_of_local_id id ^ " " ^ string_of_istype_op op
 
 let string_of_call instruction =
   match instruction with
@@ -278,6 +304,8 @@ let string_of_instruction instruction =
   | IMutator             i -> string_of_mutator i
   | ILabel               l -> string_of_label l ^ ":"
   | IExceptionLabel (l, t) -> string_of_exception_label l t ^ ":"
+  | IIsset               i -> string_of_isset i
+  | IComment             s -> "# " ^ s
   | _ -> failwith "invalid instruction"
 
 let string_of_catch (label, id) =

@@ -129,7 +129,7 @@ type instruct_operator =
   | CastDict
   | CastKeyset
   | InstanceOf
-  | InstanceOfD
+  | InstanceOfD of Litstr.id
   | Print
   | Clone
   | Exit
@@ -179,7 +179,7 @@ type istype_op =
   | OpObj
   | OpScalar (* Int or Dbl or Str or Bool *)
 
-type instruct_isset_emty_type_querying =
+type instruct_isset =
   | IssetC
   | IssetL of local_id
   | IssetN
@@ -501,6 +501,7 @@ type instruct =
   | IMisc of instruct_misc
   | IGet of instruct_get
   | IMutator of instruct_mutator
+  | IIsset of instruct_isset
   | ILabel of rel_offset
   | IExceptionLabel of rel_offset * exception_label
   | ITryFault of rel_offset * instruct list

@@ -425,8 +425,14 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raise_hackarr_compat_notice("Cannot index into null");
+      }
       return ElemEmptyish();
     case KindOfBoolean:
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raise_hackarr_compat_notice("Cannot index into a boolean");
+      }
       return ElemBoolean(base);
     case KindOfInt64:
     case KindOfDouble:

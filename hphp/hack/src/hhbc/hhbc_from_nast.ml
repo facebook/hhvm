@@ -43,6 +43,15 @@ let instrs x = Instr_list x
 let gather x = Instr_concat x
 let empty = Instr_list []
 
+let instr_jmp label = instr (H.IContFlow (H.Jmp label))
+let instr_jmpz label = instr (H.IContFlow (H.JmpZ label))
+let instr_jmpnz label = instr (H.IContFlow (H.JmpNZ label))
+let instr_label label = instr (H.ILabel label)
+let instr_false = instr (H.ILitConst H.False)
+let instr_true = instr (H.ILitConst H.True)
+
+
+
 let rec instr_seq_to_list_aux sl result =
   match sl with
   | [] -> List.rev result
@@ -71,8 +80,6 @@ let from_binop op =
   | A.Starstar -> instr (H.IOp H.Pow)
   | A.Diff -> instr (H.IOp H.Neq)
   | A.Diff2 -> instr (H.IOp H.NSame)
-  | A.AMpamp -> emit_nyi "short-circuit &&"
-  | A.BArbar -> emit_nyi "short-circuit ||"
   | A.Lt -> instr (H.IOp H.Lt)
   | A.Lte -> instr (H.IOp H.Lte)
   | A.Gt -> instr (H.IOp H.Gt)
@@ -85,6 +92,9 @@ let from_binop op =
   | A.Percent -> instr (H.IOp H.Mod)
   | A.Xor -> instr (H.IOp H.BitXor)
   | A.Eq _ -> emit_nyi "Eq"
+  | A.AMpamp
+  | A.BArbar ->
+    failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
   let open H in
@@ -152,6 +162,10 @@ let rec from_expr expr =
     instr (ILitConst (String cid))
   | A.Unop (op, e) ->
     emit_unop op e
+  | A.Binop (A.AMpamp, e1, e2) ->
+    emit_logical_and e1 e2
+  | A.Binop (A.BArbar, e1, e2) ->
+    emit_logical_or e1 e2
   | A.Binop (A.Eq obop, e1, e2) ->
     emit_assignment obop e1 e2
   (* Special case to make use of CGetL2 *)
@@ -218,6 +232,36 @@ let rec from_expr expr =
 
   | _ ->
     emit_nyi "expression"
+
+and emit_logical_and e1 e2 =
+  let left_is_false = Label.get_next_label () in
+  let right_is_true = Label.get_next_label () in
+  let its_done = Label.get_next_label () in
+  gather [
+    from_expr e1;
+    instr_jmpz left_is_false;
+    from_expr e2;
+    instr_jmpnz right_is_true;
+    instr_label left_is_false;
+    instr_false;
+    instr_jmp its_done;
+    instr_label right_is_true;
+    instr_true;
+    instr_label its_done ]
+
+and emit_logical_or e1 e2 =
+  let its_true = Label.get_next_label () in
+  let its_done = Label.get_next_label () in
+  gather [
+    from_expr e1;
+    instr_jmpnz its_true;
+    from_expr e2;
+    instr_jmpnz its_true;
+    instr_false;
+    instr_jmp its_done;
+    instr_label its_true;
+    instr_true;
+    instr_label its_done ]
 
 and emit_quiet_expr (_, expr_ as expr) =
   let open H in

@@ -850,6 +850,24 @@ let from_body tparams params ret b =
   ] in
   body_instrs, params, return_type_info
 
+(* In order to be efficient,
+ * keep around a set to check for membership and a list for order *)
+let rec extract_decl_vars set l body_instrs =
+  let open H in
+  let add_if_not_exists set l s =
+    if SSet.mem s set then (set, l) else (SSet.add s set, s::l)
+  in
+  let extract_decl_vars_aux set l = function
+    | IMutator (SetL (Local_named s)) -> add_if_not_exists set l s
+    | ITryFault (_, il, _)
+    | ITryCatch (_, il) -> extract_decl_vars set l il
+    | _ -> (set, l)
+  in
+  List.fold_left
+    body_instrs
+    ~init:(set, l)
+    ~f:(fun (set, l) i -> extract_decl_vars_aux set l i)
+
 let from_fun_ : Nast.fun_ -> Hhas_function.t option =
   fun nast_fun ->
   Label.reset_label ();
@@ -862,11 +880,18 @@ let from_fun_ : Nast.fun_ -> Hhas_function.t option =
     let body_instrs, function_params, function_return_type =
       from_body tparams nast_fun.N.f_params nast_fun.N.f_ret b in
     let function_body = instr_seq_to_list body_instrs in
+    let (_, function_decl_vars) =
+      extract_decl_vars SSet.empty [] function_body
+    in
+    (* In order to be efficient,
+     * we cons everything, hence the need to reverse *)
+    let function_decl_vars = List.rev function_decl_vars in
     Some (Hhas_function.make
       function_name
       function_params
       function_return_type
-      function_body)
+      function_body
+      function_decl_vars)
 
 let from_functions nast_functions =
   Core.List.filter_map nast_functions from_fun_

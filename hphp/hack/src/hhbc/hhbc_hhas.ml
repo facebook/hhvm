@@ -402,16 +402,24 @@ let fix_xhp_name s =
 
 let fmt_name s = fix_xhp_name (Utils.strip_ns s)
 
+let add_decl_vars buf decl_vars = if decl_vars = [] then () else begin
+  B.add_string buf "  .declvars ";
+  B.add_string buf @@ String.concat " " decl_vars;
+  B.add_string buf ";\n"
+  end
+
 let add_fun_def buf fun_def =
   let function_name = fmt_name (Hhas_function.name fun_def) in
   let function_return_type = Hhas_function.return_type fun_def in
   let function_params = Hhas_function.params fun_def in
   let function_body = Hhas_function.body fun_def in
+  let function_decl_vars = Hhas_function.decl_vars fun_def in
   B.add_string buf "\n.function ";
   B.add_string buf (string_of_type_info_option function_return_type);
   B.add_string buf function_name;
   B.add_string buf (string_of_params function_params);
   B.add_string buf " {\n";
+  add_decl_vars buf function_decl_vars;
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 

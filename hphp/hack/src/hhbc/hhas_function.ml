@@ -13,21 +13,25 @@ type t = {
   function_params        : Hhas_param.t list;
   function_return_type   : Hhas_type_info.t option;
   function_body          : Hhbc_ast.instruct list;
+  function_decl_vars     : string list; (* Actually local_id list *)
 }
 
 let make
   function_name
   function_params
   function_return_type
-  function_body =
+  function_body
+  function_decl_vars =
   {
     function_name;
     function_params;
     function_return_type;
     function_body;
+    function_decl_vars;
   }
 
 let name f = f.function_name
 let params f = f.function_params
 let return_type f = f.function_return_type
 let body f = f.function_body
+let decl_vars f = f.function_decl_vars

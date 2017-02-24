@@ -22,23 +22,7 @@ type call_type =
 
 type shape_field_name = Ast.shape_field_name
 
-module ShapeField = struct
-  type t = Ast.shape_field_name
-  (* We include span information in shape_field_name to improve error
-   * messages, but we don't want it being used in the comparison, so
-   * we have to write our own compare. *)
-  let compare x y =
-    match x, y with
-      | Ast.SFlit _, Ast.SFclass_const _ -> -1
-      | Ast.SFclass_const _, Ast.SFlit _ -> 1
-      | Ast.SFlit (_, s1), Ast.SFlit (_, s2) -> Pervasives.compare s1 s2
-      | Ast.SFclass_const ((_, s1), (_, s1')),
-        Ast.SFclass_const ((_, s2), (_, s2')) ->
-        Pervasives.compare (s1, s1') (s2, s2')
-
-end
-
-module ShapeMap = MyMap.Make (ShapeField)
+module ShapeMap = Ast.ShapeMap
 
 type hint = Pos.t * hint_
 and hint_ =

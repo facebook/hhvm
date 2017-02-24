@@ -167,23 +167,13 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       te_constraint = ty_opt te.te_constraint ;
     }
 
-  and typedef ({td_tparams; td_constraint; _} as tdef) =
-    let td_tparams = List.map td_tparams type_param in
-    let td_constraint = ty_opt td_constraint in
-    {tdef with td_tparams; td_constraint}
-end
-
-(*****************************************************************************)
-(* Applies a position substitution to a class type *)
-(*****************************************************************************)
-module SubstPos = struct
-  let class_type subst c =
-    let module IPos = struct
-      let pos x =
-        try Hashtbl.find subst x with Not_found -> x
-    end in
-    let module Apply = TraversePos(IPos) in
-    Apply.class_type c
+  and typedef tdef =
+    { td_pos        = pos tdef.td_pos                     ;
+      td_vis        = tdef.td_vis                         ;
+      td_tparams    = List.map tdef.td_tparams type_param ;
+      td_constraint = ty_opt tdef.td_constraint           ;
+      td_type       = ty tdef.td_type                     ;
+    }
 end
 
 (*****************************************************************************)

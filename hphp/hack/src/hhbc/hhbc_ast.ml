@@ -145,8 +145,10 @@ type instruct_control_flow =
   | JmpNS of rel_offset
   | JmpZ of rel_offset
   | JmpNZ of rel_offset
-  | Switch of switchkind * int * int list (* bounded, base, offset vector *)
-  | SSwitch of (Litstr.id * rel_offset) list (* litstr id / offset vector *)
+  (* bounded, base, offset vector *)
+  | Switch of switchkind * int * rel_offset list
+  (* litstr id / offset vector *)
+  | SSwitch of (Litstr.id * rel_offset) list
   | RetC
   | RetV
   | Unwind

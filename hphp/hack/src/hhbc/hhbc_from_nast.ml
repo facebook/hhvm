@@ -57,6 +57,46 @@ let instr_unsetl_unnamed local =
 let instr_cgetl2_pipe = instr H.(IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr H.(IBasic PopC)
 
+(* Functions on instr_seq that correspond to existing Core.List functions *)
+module InstrSeq = struct
+
+  let rec fold_left instrseq ~f ~init =
+    match instrseq with
+    | Instr_list instrl ->
+      List.fold_left instrl ~f:(fun init instr ->
+        match instr with
+        | H.ITryFault(_, instrl1, instrl2) ->
+          List.fold_left instrl2 ~f ~init:(List.fold_left instrl1 ~f ~init)
+        | H.ITryCatch(_, instrl) ->
+          List.fold_left instrl ~f ~init
+        | _ -> f init instr
+        ) ~init
+    | Instr_concat instrseql ->
+      List.fold_left instrseql
+        ~f:(fun init instrseq -> fold_left instrseq ~f ~init)
+        ~init
+
+  let rec filter_map instrseq ~f =
+    match instrseq with
+    | Instr_list instrl ->
+      Instr_list (List.filter_map instrl ~f:(fun instr ->
+        match instr with
+        | H.ITryFault(l, instrl1, instrl2) ->
+          Some (H.ITryFault(l, List.filter_map instrl1 f,
+            List.filter_map instrl2 f))
+        | H.ITryCatch(x, instrl) ->
+          Some (H.ITryCatch(x, List.filter_map instrl f))
+        | _ ->
+          f instr
+        ))
+    | Instr_concat instrseql ->
+      Instr_concat (List.map instrseql (filter_map ~f))
+
+  let map instrseq ~f = filter_map instrseq ~f:(fun x -> Some (f x))
+
+end
+
+(* Could write this in terms of InstrSeq.fold_left *)
 let rec instr_seq_to_list_aux sl result =
   match sl with
   | [] -> List.rev result
@@ -955,6 +995,84 @@ let rec extract_decl_vars set l body_instrs =
     ~init:(set, l)
     ~f:(fun (set, l) i -> extract_decl_vars_aux set l i)
 
+(* Create a map from defined labels to instruction offset *)
+let create_label_to_offset_map instrseq =
+  let open H in
+  snd @@
+  InstrSeq.fold_left instrseq ~init:(0, IMap.empty) ~f:(fun (i, m) instr ->
+    begin match instr with
+    | ILabel l -> (i,     IMap.add l i m)
+    | _        -> (i + 1, m)
+    end)
+
+let lookup_def l defs =
+  match IMap.get l defs with
+  | None -> failwith "lookup_def: label missing"
+  | Some ix -> ix
+
+(* Generate new labels for all labels referenced in instructions, in the
+ * order that the instructions appear. Also record which labels are
+ *)
+let create_label_ref_map defs instrseq =
+  let open H in
+  snd @@
+  InstrSeq.fold_left instrseq ~init:(0, (ISet.empty, IMap.empty))
+    ~f:(fun acc instr ->
+    let process_ref (n, (used, refs) as acc) l =
+      let ix = lookup_def l defs in
+      match IMap.get ix refs with
+      (* This is the first time we've seen a reference to a label for
+       * this instruction offset, so generate a new label *)
+      | None -> (n + 1, (ISet.add l used, IMap.add ix n refs))
+      (* We already have a label for this instruction offset *)
+      | Some _ -> acc in
+    match instr with
+    | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) ->
+      process_ref acc l
+    | IContFlow (Switch (_, _, ls)) ->
+      List.fold_left ls ~f:process_ref ~init:acc
+    | IContFlow (SSwitch pairs) ->
+      List.fold_left pairs ~f:(fun acc (_,l) -> process_ref acc l) ~init:acc
+    (* TODO: other uses of rel_offset in instructions *)
+    | _ -> acc)
+
+(* Relabel the instruction sequence so that
+ *   1. No instruction is preceded by more than one label
+ *   2. No label is unreferenced
+ *   3. References to labels occur in strict label number order, starting at 0
+ *)
+let relabel_instrseq instrseq =
+  let open H in
+  let defs = create_label_to_offset_map instrseq in
+  let used, refs = create_label_ref_map defs instrseq in
+  let relabel l =
+    let ix = lookup_def l defs in
+    match IMap.get ix refs with
+    | None -> failwith "relabel_instrseq: offset not in refs"
+    | Some l' -> l' in
+  InstrSeq.filter_map instrseq ~f:(fun instr ->
+    match instr with
+    | IContFlow (Jmp l)   -> Some (IContFlow (Jmp (relabel l)))
+    | IContFlow (JmpNS l) -> Some (IContFlow (JmpNS (relabel l)))
+    | IContFlow (JmpZ l)  -> Some (IContFlow (JmpZ (relabel l)))
+    | IContFlow (JmpNZ l) -> Some (IContFlow (JmpNZ (relabel l)))
+    | IContFlow (Switch (k, n, ll)) ->
+      Some (IContFlow (Switch (k, n, List.map ll relabel)))
+    | IContFlow (SSwitch pairs) ->
+      Some (IContFlow (SSwitch
+        (List.map pairs (fun (id,l) -> (id, relabel l)))))
+    (* TODO: other uses of rel_offset in instructions *)
+    | ILabel l ->
+      if ISet.mem l used then
+        let ix = lookup_def l defs in
+        begin match IMap.get ix refs with
+        | Some l' -> Some (ILabel l')
+        | None -> None
+        end
+      else None
+    | _ -> Some instr)
+
+
 let from_fun_ : Nast.fun_ -> Hhas_function.t option =
   fun nast_fun ->
   Label.reset_label ();
@@ -966,6 +1084,7 @@ let from_fun_ : Nast.fun_ -> Hhas_function.t option =
     let tparams = tparams_to_strings nast_fun.N.f_tparams in
     let body_instrs, function_params, function_return_type =
       from_body tparams nast_fun.N.f_params nast_fun.N.f_ret b in
+    let body_instrs = relabel_instrseq body_instrs in
     let function_body = instr_seq_to_list body_instrs in
     let (_, function_decl_vars) =
       extract_decl_vars SSet.empty [] function_body

@@ -9,6 +9,7 @@
 *)
 
 open Core
+open Hhbc_ast
 
 module A = Ast
 module N = Nast
@@ -34,7 +35,7 @@ type flavor =
  * instructions which can easily be flattened at the end.
  *)
 type instr_seq =
-| Instr_list of H.instruct list
+| Instr_list of instruct list
 | Instr_concat of instr_seq list
 
 (* Some helper constructors *)
@@ -43,19 +44,19 @@ let instrs x = Instr_list x
 let gather x = Instr_concat x
 let empty = Instr_list []
 
-let instr_jmp label = instr (H.IContFlow (H.Jmp label))
-let instr_jmpz label = instr (H.IContFlow (H.JmpZ label))
-let instr_jmpnz label = instr (H.IContFlow (H.JmpNZ label))
-let instr_label label = instr (H.ILabel label)
-let instr_unwind = instr H.(IContFlow Unwind)
-let instr_false = instr (H.ILitConst H.False)
-let instr_true = instr (H.ILitConst H.True)
+let instr_jmp label = instr (IContFlow (Jmp label))
+let instr_jmpz label = instr (IContFlow (JmpZ label))
+let instr_jmpnz label = instr (IContFlow (JmpNZ label))
+let instr_label label = instr (ILabel label)
+let instr_unwind = instr (IContFlow Unwind)
+let instr_false = instr (ILitConst False)
+let instr_true = instr (ILitConst True)
 let instr_setl_unnamed local =
-  instr H.(IMutator (SetL (Local_unnamed local)))
+  instr (IMutator (SetL (Local_unnamed local)))
 let instr_unsetl_unnamed local =
-  instr H.(IMutator (UnsetL (Local_unnamed local)))
-let instr_cgetl2_pipe = instr H.(IGet (CGetL2 (Local_pipe)))
-let instr_popc = instr H.(IBasic PopC)
+  instr (IMutator (UnsetL (Local_unnamed local)))
+let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
+let instr_popc = instr (IBasic PopC)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
@@ -65,9 +66,9 @@ module InstrSeq = struct
     | Instr_list instrl ->
       List.fold_left instrl ~f:(fun init instr ->
         match instr with
-        | H.ITryFault(_, instrl1, instrl2) ->
+        | ITryFault(_, instrl1, instrl2) ->
           List.fold_left instrl2 ~f ~init:(List.fold_left instrl1 ~f ~init)
-        | H.ITryCatch(_, instrl) ->
+        | ITryCatch(_, instrl) ->
           List.fold_left instrl ~f ~init
         | _ -> f init instr
         ) ~init
@@ -81,11 +82,11 @@ module InstrSeq = struct
     | Instr_list instrl ->
       Instr_list (List.filter_map instrl ~f:(fun instr ->
         match instr with
-        | H.ITryFault(l, instrl1, instrl2) ->
-          Some (H.ITryFault(l, List.filter_map instrl1 f,
+        | ITryFault(l, instrl1, instrl2) ->
+          Some (ITryFault(l, List.filter_map instrl1 f,
             List.filter_map instrl2 f))
-        | H.ITryCatch(x, instrl) ->
-          Some (H.ITryCatch(x, List.filter_map instrl f))
+        | ITryCatch(x, instrl) ->
+          Some (ITryCatch(x, List.filter_map instrl f))
         | _ ->
           f instr
         ))
@@ -111,43 +112,42 @@ let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 let instr_try_fault_no_catch fault_label try_body fault_body =
   let try_body = instr_seq_to_list try_body in
   let fault_body = instr_seq_to_list fault_body in
-  let fl = H.IExceptionLabel (fault_label, H.FaultL) in
-  instr (H.ITryFault (fault_label, try_body, fl :: fault_body))
+  let fl = IExceptionLabel (fault_label, FaultL) in
+  instr (ITryFault (fault_label, try_body, fl :: fault_body))
 
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
-  instr (H.IComment ("NYI: " ^ description))
+  instr (IComment ("NYI: " ^ description))
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   match op with
-  | A.Plus -> instr (H.IOp H.AddO)
-  | A.Minus -> instr (H.IOp H.SubO)
-  | A.Star -> instr (H.IOp H.MulO)
-  | A.Slash -> instr (H.IOp H.Div)
-  | A.Eqeq -> instr (H.IOp H.Eq)
-  | A.EQeqeq -> instr (H.IOp H.Same)
-  | A.Starstar -> instr (H.IOp H.Pow)
-  | A.Diff -> instr (H.IOp H.Neq)
-  | A.Diff2 -> instr (H.IOp H.NSame)
-  | A.Lt -> instr (H.IOp H.Lt)
-  | A.Lte -> instr (H.IOp H.Lte)
-  | A.Gt -> instr (H.IOp H.Gt)
-  | A.Gte -> instr (H.IOp H.Gte)
-  | A.Dot -> instr (H.IOp H.Concat)
-  | A.Amp -> instr (H.IOp H.BitAnd)
-  | A.Bar -> instr (H.IOp H.BitOr)
-  | A.Ltlt -> instr (H.IOp H.Shl)
-  | A.Gtgt -> instr (H.IOp H.Shr)
-  | A.Percent -> instr (H.IOp H.Mod)
-  | A.Xor -> instr (H.IOp H.BitXor)
+  | A.Plus -> instr (IOp AddO)
+  | A.Minus -> instr (IOp SubO)
+  | A.Star -> instr (IOp MulO)
+  | A.Slash -> instr (IOp Div)
+  | A.Eqeq -> instr (IOp Eq)
+  | A.EQeqeq -> instr (IOp Same)
+  | A.Starstar -> instr (IOp Pow)
+  | A.Diff -> instr (IOp Neq)
+  | A.Diff2 -> instr (IOp NSame)
+  | A.Lt -> instr (IOp Lt)
+  | A.Lte -> instr (IOp Lte)
+  | A.Gt -> instr (IOp Gt)
+  | A.Gte -> instr (IOp Gte)
+  | A.Dot -> instr (IOp Concat)
+  | A.Amp -> instr (IOp BitAnd)
+  | A.Bar -> instr (IOp BitOr)
+  | A.Ltlt -> instr (IOp Shl)
+  | A.Gtgt -> instr (IOp Shr)
+  | A.Percent -> instr (IOp Mod)
+  | A.Xor -> instr (IOp BitXor)
   | A.Eq _ -> emit_nyi "Eq"
   | A.AMpamp
   | A.BArbar ->
     failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
-  let open H in
   match op with
   | A.Plus -> Some PlusEqualO
   | A.Minus -> Some MinusEqualO
@@ -164,7 +164,6 @@ let binop_to_eqop op =
   | _ -> None
 
 let unop_to_incdec_op op =
-  let open H in
   match op with
   | A.Uincr -> Some PreIncO
   | A.Udecr -> Some PreDecO
@@ -176,7 +175,6 @@ let unop_to_incdec_op op =
  * Sort this out!
  *)
 let emit_cast (_, hint_) =
-  let open H in
   match hint_ with
   | A.Happly((_, id), []) when id = SN.Typehints.int ->
     instr (IOp CastInt)
@@ -194,7 +192,6 @@ let emit_cast (_, hint_) =
 
 let rec from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
-  let open H in
   match snd expr with
   | A.Float (_, litstr) ->
     instr (ILitConst (Double (float_of_string litstr)))
@@ -295,7 +292,6 @@ and emit_pipe e1 e2 =
   let fault_label = Label.get_next_label () in
   let rewrite_dollardollar e =
     let rewriter i =
-      let open H in
       match i with
       | IGet (CGetL2 (Local_pipe)) ->
         IGet (CGetL2 (Local_unnamed temp))
@@ -347,7 +343,6 @@ and emit_logical_or e1 e2 =
     instr_label its_done ]
 
 and emit_quiet_expr (_, expr_ as expr) =
-  let open H in
   match expr_ with
   | A.Lvar (_, x) ->
     instr (IGet (CGetQuietL (Local_named x)))
@@ -357,20 +352,20 @@ and emit_quiet_expr (_, expr_ as expr) =
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
   | A.Lvar (_, x) ->
-    instr H.(ICall (FPassL (Param_unnamed i, Local_named x)))
+    instr (ICall (FPassL (Param_unnamed i, Local_named x)))
   | _ ->
     let instrs, flavor = emit_flavored_expr e in
     gather [
       instrs;
-      instr H.(ICall (if flavor = Flavor_R then FPassR (Param_unnamed i)
+      instr (ICall (if flavor = Flavor_R then FPassR (Param_unnamed i)
                       else FPassCE (Param_unnamed i)));
     ]
 
 and emit_pop flavor =
   match flavor with
-  | Flavor_R -> instr H.(IBasic PopR)
-  | Flavor_C -> instr H.(IBasic PopC)
-  | Flavor_A -> instr H.(IBasic PopA)
+  | Flavor_R -> instr (IBasic PopR)
+  | Flavor_C -> instr (IBasic PopC)
+  | Flavor_A -> instr (IBasic PopA)
 
 and emit_ignored_expr e =
   let instrs, flavor = emit_flavored_expr e in
@@ -386,12 +381,11 @@ and emit_args_and_call args uargs =
   gather [
     gather (List.mapi all_args emit_arg);
     if uargs = []
-    then instr H.(ICall (FCall nargs))
-    else instr H.(ICall (FCallUnpack nargs))
+    then instr (ICall (FCall nargs))
+    else instr (ICall (FCallUnpack nargs))
   ]
 
 and emit_call_lhs (_, expr_) nargs =
-  let open H in
   match expr_ with
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     gather [
@@ -422,7 +416,7 @@ and emit_call (_, expr_ as expr) args uargs =
     let instrs = gather @@ List.mapi args begin fun i arg ->
          gather [
            from_expr arg;
-           instr H.(IOp Print);
+           instr (IOp Print);
            if i = nargs-1 then empty else emit_pop Flavor_C
          ] end in
     instrs, Flavor_C
@@ -448,12 +442,12 @@ and emit_flavored_expr (_, expr_ as expr) =
 
 and literal_from_named_expr expr =
   match snd expr with
-  | N.Float (_, litstr) -> H.Double (float_of_string litstr)
-  | N.String (_, litstr) -> H.String litstr
-  | N.Int (_, litstr) -> H.Int (Int64.of_string litstr)
-  | N.Null -> H.Null
-  | N.False -> H.False
-  | N.True -> H.True
+  | N.Float (_, litstr) -> Double (float_of_string litstr)
+  | N.String (_, litstr) -> String litstr
+  | N.Int (_, litstr) -> Int (Int64.of_string litstr)
+  | N.Null -> Null
+  | N.False -> False
+  | N.True -> True
   (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
    this seems reasonable to allow. Right now this will crash if given an
    expression rather than a literal in here.  In particular, see what unary
@@ -469,13 +463,12 @@ and literals_from_named_exprs exprs =
  * must be set. For now, this is just a local. *)
 and emit_lval (_, expr_) =
   match expr_ with
-  | A.Lvar id -> empty, H.Local_named (snd id)
-  | _ -> emit_nyi "lval expression", H.Local_unnamed 0
+  | A.Lvar id -> empty, Local_named (snd id)
+  | _ -> emit_nyi "lval expression", Local_unnamed 0
 
 and emit_assignment obop e1 e2 =
   let instrs1, lval = emit_lval e1 in
   let instrs2 = from_expr e2 in
-  let open H in
   gather [instrs1; instrs2;
     match obop with
     | None -> instr (IMutator (SetL lval))
@@ -486,7 +479,6 @@ and emit_assignment obop e1 e2 =
     ]
 
 and emit_unop op e =
-  let open H in
   match op with
   | A.Utild -> gather [from_expr e; instr (IOp BitNot)]
   | A.Unot -> gather [from_expr e; instr (IOp Not)]
@@ -508,8 +500,8 @@ and emit_unop op e =
     emit_nyi "references"
 
 and emit_condition_loop begin_label break_label =
-  instr H.(IContFlow (JmpNZ begin_label)),
-  instr H.(IContFlow (JmpZ break_label))
+  instr (IContFlow (JmpNZ begin_label)),
+  instr (IContFlow (JmpZ break_label))
 
 and from_exprs exprs =
   gather (List.map exprs from_expr)
@@ -524,7 +516,6 @@ and from_exprs exprs =
  * label is already used for continue or whether it is safe to use it
  * for other purposes *)
 and from_stmt ~continue_label ~break_label verify_return st =
-  let open H in
   match st with
   | A.Expr expr ->
     emit_ignored_expr expr, (false, false)
@@ -544,7 +535,7 @@ and from_stmt ~continue_label ~break_label verify_return st =
     let l0 = Label.get_next_label () in
     let l1 = Label.get_next_label () in
     let jmp0, jmp1 =
-      instr H.(IContFlow (JmpZ l0)), instr H.(IContFlow (Jmp l1))
+      instr (IContFlow (JmpZ l0)), instr (IContFlow (Jmp l1))
     in
     let b1, (need_cont1, need_break1) =
       from_stmt ~continue_label ~break_label verify_return (A.Block b1)
@@ -595,13 +586,13 @@ and from_stmt ~continue_label ~break_label verify_return st =
   (* TODO: Break takes an argument *)
   | A.Break _ ->
     begin match break_label with
-    | Some i -> instr H.(IContFlow (Jmp i))
+    | Some i -> instr (IContFlow (Jmp i))
     | None -> failwith "There is nowhere to break"
     end, (false, true)
   | A.Continue _ ->
   (* TODO: Continue takes an argument *)
     begin match continue_label with
-    | Some i -> instr H.(IContFlow (Jmp i))
+    | Some i -> instr (IContFlow (Jmp i))
     | None -> failwith "There is nowhere to continue"
     end, (true, false)
   | A.Do (b, e) ->
@@ -618,22 +609,22 @@ and from_stmt ~continue_label ~break_label verify_return st =
       if need_cont && need_break
       then
         let l2 = Label.get_next_label () in
-        let jmp_to_begin = instr H.(IContFlow (JmpNZ l2)) in
+        let jmp_to_begin = instr (IContFlow (JmpNZ l2)) in
         jmp_to_begin, instr (ILabel l2), instr (ILabel l0), instr (ILabel l1)
       else if need_cont
       then
-        let jmp_to_begin = instr H.(IContFlow (JmpNZ l1)) in
+        let jmp_to_begin = instr (IContFlow (JmpNZ l1)) in
         jmp_to_begin, instr (ILabel l1), instr (ILabel l0), empty
       else if need_break
       then
         (* TODO: Begin and break labels are switched
          * as we have already assigned l1 to break *)
-        let jmp_to_begin = instr H.(IContFlow (JmpNZ l0)) in
+        let jmp_to_begin = instr (IContFlow (JmpNZ l0)) in
         jmp_to_begin, instr (ILabel l0), empty, instr (ILabel l1)
       else
         (* TODO: We are wasting a label here since
          * we created l1 but not actually use it *)
-        instr H.(IContFlow (JmpNZ l0)), instr (ILabel l0), empty, empty
+        instr (IContFlow (JmpNZ l0)), instr (ILabel l0), empty, empty
     in
     gather [
       begin_label;
@@ -679,7 +670,7 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Throw e ->
     gather [
       from_expr e;
-      instr H.(IContFlow Throw);
+      instr (IContFlow Throw);
     ], (false, false)
   | A.Try (tb, cl, fb) ->
     let catch_exists = List.length cl <> 0 in
@@ -728,10 +719,10 @@ and from_stmt ~continue_label ~break_label verify_return st =
       then
         instr_seq_to_list @@ gather [
           (* TODO: What are these unnamed locals? *)
-          instr H.(IMutator (UnsetL (Local_unnamed 0)));
-          instr H.(IMutator (UnsetL (Local_unnamed 0)));
+          instr (IMutator (UnsetL (Local_unnamed 0)));
+          instr (IMutator (UnsetL (Local_unnamed 0)));
           finally_body;
-          instr H.(IContFlow Unwind);
+          instr (IContFlow Unwind);
         ]
 
       else []
@@ -785,7 +776,6 @@ and from_catch
   ~continue_label
   ~break_label
   verify_return end_label ((_, id1), (_, id2), b) =
-  let open H in
   let cl = Label.get_next_label () in
   (* TODO: what to do with needs? *)
   let body, _ =
@@ -798,10 +788,10 @@ and from_catch
   gather [
     instr (IExceptionLabel (cl, CatchL));
     instr (IMisc Catch);
-    instr H.(IMutator (SetL (Local_named id2)));
-    instr H.(IBasic PopC);
+    instr (IMutator (SetL (Local_named id2)));
+    instr (IBasic PopC);
     body;
-    instr H.(IContFlow (Jmp end_label));
+    instr (IContFlow (Jmp end_label));
   ], (cl, id1)
 
 let fmt_prim x =
@@ -934,7 +924,7 @@ let has_type_constraint ti =
   | _ -> false
 
 let emit_method_prolog params =
-  gather H.(List.filter_map params (fun p ->
+  gather (List.filter_map params (fun p ->
     let param_type_info = Hhas_param.type_info p in
     let param_name = Hhas_param.name p in
     if has_type_constraint param_type_info
@@ -948,9 +938,9 @@ let tparams_to_strings tparams =
  * I wonder how we can do it better *)
 let rec emit_fault_instructions stmt_instrs =
   let emit_fault_instruction_aux = function
-    | H.ITryFault (_, il, fault) ->
+    | ITryFault (_, il, fault) ->
       gather [emit_fault_instructions @@ instrs il; instrs fault;]
-    | H.ITryCatch (_, il) -> emit_fault_instructions @@ instrs il
+    | ITryCatch (_, il) -> emit_fault_instructions @@ instrs il
     | _ -> empty
   in
   let instr_list = instr_seq_to_list stmt_instrs in
@@ -966,7 +956,7 @@ let from_body tparams params ret b =
   in
   let ret_instrs =
     match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
-    instrs [H.ILitConst H.Null; H.IContFlow H.RetC]
+    instrs [ILitConst Null; IContFlow RetC]
   in
   let fault_instrs = emit_fault_instructions stmt_instrs in
   let body_instrs = gather [
@@ -980,7 +970,6 @@ let from_body tparams params ret b =
 (* In order to be efficient,
  * keep around a set to check for membership and a list for order *)
 let rec extract_decl_vars set l body_instrs =
-  let open H in
   let add_if_not_exists set l s =
     if SSet.mem s set then (set, l) else (SSet.add s set, s::l)
   in
@@ -997,7 +986,6 @@ let rec extract_decl_vars set l body_instrs =
 
 (* Create a map from defined labels to instruction offset *)
 let create_label_to_offset_map instrseq =
-  let open H in
   snd @@
   InstrSeq.fold_left instrseq ~init:(0, IMap.empty) ~f:(fun (i, m) instr ->
     begin match instr with
@@ -1014,7 +1002,6 @@ let lookup_def l defs =
  * order that the instructions appear. Also record which labels are
  *)
 let create_label_ref_map defs instrseq =
-  let open H in
   snd @@
   InstrSeq.fold_left instrseq ~init:(0, (ISet.empty, IMap.empty))
     ~f:(fun acc instr ->
@@ -1042,7 +1029,6 @@ let create_label_ref_map defs instrseq =
  *   3. References to labels occur in strict label number order, starting at 0
  *)
 let relabel_instrseq instrseq =
-  let open H in
   let defs = create_label_to_offset_map instrseq in
   let used, refs = create_label_ref_map defs instrseq in
   let relabel l =
@@ -1160,8 +1146,8 @@ let default_constructor nast_class =
   let method_attributes = [] in
   let method_name = "86ctor" in
   let method_body = instr_seq_to_list (gather [
-    instr (H.ILitConst H.Null);
-    instr (H.IContFlow H.RetC)
+    instr (ILitConst Null);
+    instr (IContFlow RetC)
   ]) in
   let method_is_abstract = is_interface nast_class in
   let method_is_final = false in

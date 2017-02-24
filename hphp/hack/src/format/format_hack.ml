@@ -2580,7 +2580,7 @@ and expr_remain lowest env =
           back env;
           expr_binop lowest ">" Tgt env
       )
-  | Teq | Tbareq | Tpluseq | Tstareq | Tslasheq
+  | Teq | Tbareq | Tpluseq | Tstareq | Tslasheq | Tstarstareq
   | Tdoteq | Tminuseq | Tpercenteq | Txoreq
   | Tampeq | Tlshifteq | Trshifteq ->
       space env;

@@ -303,7 +303,7 @@ let priorities = [
   (Left, [Tlp]);
   (NonAssoc, [Tnew; Tclone]);
   (Left, [Tlb]);
-  (Right, [Teq; Tpluseq; Tminuseq; Tstareq;
+  (Right, [Teq; Tpluseq; Tminuseq; Tstareq; Tstarstareq;
            Tslasheq; Tdoteq; Tpercenteq;
            Tampeq; Tbareq; Txoreq; Tlshifteq; Trshifteq]);
   (Left, [Tarrow; Tnsarrow]);
@@ -2604,6 +2604,8 @@ and expr_remain env e1 =
       expr_assign env Tbareq (Eq (Some Bar)) e1
   | Tpluseq ->
       expr_assign env Tpluseq (Eq (Some Plus)) e1
+  | Tstarstareq ->
+      expr_assign env Tstarstareq (Eq (Some Starstar)) e1
   | Tstareq ->
       expr_assign env Tstareq (Eq (Some Star)) e1
   | Tslasheq ->

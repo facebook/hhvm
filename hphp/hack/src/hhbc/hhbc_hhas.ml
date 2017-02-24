@@ -102,6 +102,7 @@ let string_of_local_id x =
   match x with
   | Local_unnamed i -> string_of_int i
   | Local_named s -> s
+  | Local_pipe -> failwith "$$ should not have survived to codegen"
 
 let string_of_get x =
   match x with

@@ -48,14 +48,13 @@ let instr_jmpz label = instr (H.IContFlow (H.JmpZ label))
 let instr_jmpnz label = instr (H.IContFlow (H.JmpNZ label))
 let instr_label label = instr (H.ILabel label)
 let instr_unwind = instr H.(IContFlow Unwind)
-
 let instr_false = instr (H.ILitConst H.False)
 let instr_true = instr (H.ILitConst H.True)
 let instr_setl_unnamed local =
   instr H.(IMutator (SetL (Local_unnamed local)))
 let instr_unsetl_unnamed local =
   instr H.(IMutator (UnsetL (Local_unnamed local)))
-
+let instr_cgetl2_pipe = instr H.(IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr H.(IBasic PopC)
 
 let rec instr_seq_to_list_aux sl result =
@@ -75,11 +74,9 @@ let instr_try_fault_no_catch fault_label try_body fault_body =
   let fl = H.IExceptionLabel (fault_label, H.FaultL) in
   instr (H.ITryFault (fault_label, try_body, fl :: fault_body))
 
-
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (H.IComment ("NYI: " ^ description))
-
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
@@ -188,6 +185,8 @@ let rec from_expr expr =
     gather [from_expr e2; from_expr e1; from_binop op]
   | A.Pipe (e1, e2) ->
     emit_pipe e1 e2
+  | A.Dollardollar ->
+    instr_cgetl2_pipe (* This will get rewritten into a temp local *)
   | A.InstanceOf (e1, (_, A.Id (_, id))) ->
     gather [from_expr e1; instr (IOp (InstanceOfD id))]
   | A.InstanceOf (e1, e2) ->
@@ -251,18 +250,30 @@ let rec from_expr expr =
 and emit_pipe e1 e2 =
   (* TODO: We need a local generator, like a label generator.
   For now, just use the label generator. *)
+  (* TODO: Unnamed locals should be codegen'd with a leading _ *)
   let temp = Label.get_next_label () in
   let fault_label = Label.get_next_label () in
+  let rewrite_dollardollar e =
+    let rewriter i =
+      let open H in
+      match i with
+      | IGet (CGetL2 (Local_pipe)) ->
+        IGet (CGetL2 (Local_unnamed temp))
+      | _ -> i in
+    instrs (List.map (instr_seq_to_list e) rewriter) in
   gather [
     from_expr e1;
     instr_setl_unnamed temp;
     instr_popc;
     instr_try_fault_no_catch
       fault_label
-      (from_expr e2) (* TODO: Rewrite $$ *)
+      (* try block *)
+      (rewrite_dollardollar (from_expr e2))
+      (* fault block *)
       (gather [
         instr_unsetl_unnamed temp;
-        instr_unwind ])
+        instr_unwind ]);
+    instr_unsetl_unnamed temp
   ]
 
 and emit_logical_and e1 e2 =

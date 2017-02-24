@@ -753,8 +753,33 @@ and from_stmt ~continue_label ~break_label verify_return st =
       instr (ILabel l0);
       finally_body;
     ], needs
+  | A.Switch (e, cl) ->
+    let switched = from_expr e in
+    let end_label = Label.get_next_label () in
+    let cl =
+      List.map cl
+        ~f:(from_case
+              ~continue_label
+              ~break_label:(Some end_label)
+              verify_return)
+    in
+    let bodies = gather @@ List.map cl ~f:snd in
+    let init = gather @@ List.map cl
+      ~f: begin fun x ->
+            let (e_opt, l) = fst x in
+            match e_opt with
+            | None -> instr_jmp l
+            | Some e ->
+              gather [from_expr e; switched; instr (IOp Eq); instr_jmpnz l]
+          end
+    in
+    gather [
+      init;
+      bodies;
+      instr_label end_label;
+      (* TODO: ignoring break and continue for now as eric will change this *)
+    ], (false, false)
   | A.Static_var _
-  | A.Switch _
   | A.Foreach _ ->
     emit_nyi "statement", (false, false)
   (* TODO: What do we do with unsafe? *)
@@ -771,6 +796,24 @@ and from_stmts ~continue_label ~break_label verify_return stl =
   let need_cont = List.exists ~f:(fst) needs in
   let need_break = List.exists ~f:(snd) needs in
   gather (instrs), (need_cont, need_break)
+
+and from_case ~continue_label ~break_label verify_return c =
+  let l = Label.get_next_label () in
+  let b = match c with
+    | A.Default b
+    | A.Case (_, b) ->
+      fst @@
+        from_stmt
+          ~continue_label
+          ~break_label
+          verify_return
+          (A.Block b)
+  in
+  let e = match c with
+    | A.Case (e, _) -> Some e
+    | _ -> None
+  in
+  (e, l), gather [instr_label l; b]
 
 and from_catch
   ~continue_label

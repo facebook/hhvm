@@ -498,6 +498,7 @@ type exception_label =
 
 type instruct =
   | IBasic of instruct_basic
+  | IIterator of instruct_iterator
   | ILitConst of instruct_lit_const
   | IOp of instruct_operator
   | IContFlow of instruct_control_flow

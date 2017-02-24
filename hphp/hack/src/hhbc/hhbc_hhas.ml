@@ -294,8 +294,37 @@ let string_of_misc instruction =
     | Catch -> "Catch"
     | _ -> failwith "instruct_misc Not Implemented"
 
+let string_of_iterator instruction =
+  match instruction with
+  | IterInit (id, label, value) ->
+    "IterInit " ^
+    (string_of_iterator_id id) ^ " " ^
+    (string_of_label label) ^ " " ^
+    (string_of_local_id value)
+  | IterInitK (id, label, key, value) ->
+    "IterInitK " ^
+    (string_of_iterator_id id) ^ " " ^
+    (string_of_label label) ^ " " ^
+    (string_of_local_id key) ^ " " ^
+    (string_of_local_id value)
+  | IterNext (id, label, value) ->
+    "IterNext " ^
+    (string_of_iterator_id id) ^ " " ^
+    (string_of_label label) ^ " " ^
+    (string_of_local_id value)
+  | IterNextK (id, label, key, value) ->
+    "IterNextK " ^
+    (string_of_iterator_id id) ^ " " ^
+    (string_of_label label) ^ " " ^
+    (string_of_local_id key) ^ " " ^
+    (string_of_local_id value)
+  | IterFree id ->
+    "IterFree " ^ (string_of_iterator_id id)
+  | _ -> "### string_of_iterator instruction not implemented"
+
 let string_of_instruction instruction =
   match instruction with
+  | IIterator            i -> string_of_iterator i
   | IBasic               i -> string_of_basic i
   | ILitConst            i -> string_of_lit_const i
   | IOp                  i -> string_of_operator i

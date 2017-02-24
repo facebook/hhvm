@@ -44,6 +44,17 @@ let instrs x = Instr_list x
 let gather x = Instr_concat x
 let empty = Instr_list []
 
+let instr_iterinit iter_id label value =
+  instr (IIterator (IterInit (iter_id, label, value)))
+let instr_iterinitk id label key value =
+  instr (IIterator (IterInitK (id, label, key, value)))
+let instr_iternext id label value =
+  instr (IIterator (IterNext (id, label, value)))
+let instr_iternextk id label key value =
+  instr (IIterator (IterNextK (id, label, key, value)))
+let instr_iterfree id =
+  instr (IIterator (IterFree id))
+
 let instr_jmp label = instr (IContFlow (Jmp label))
 let instr_jmpz label = instr (IContFlow (JmpZ label))
 let instr_jmpnz label = instr (IContFlow (JmpNZ label))
@@ -51,12 +62,15 @@ let instr_label label = instr (ILabel label)
 let instr_unwind = instr (IContFlow Unwind)
 let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)
+
 let instr_setl_unnamed local =
   instr (IMutator (SetL (Local_unnamed local)))
 let instr_unsetl_unnamed local =
   instr (IMutator (UnsetL (Local_unnamed local)))
 let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr (IBasic PopC)
+
+
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
@@ -779,13 +793,72 @@ and from_stmt ~continue_label ~break_label verify_return st =
       instr_label end_label;
       (* TODO: ignoring break and continue for now as eric will change this *)
     ], (false, false)
-  | A.Static_var _
-  | A.Foreach _ ->
+  | A.Static_var _ ->
     emit_nyi "statement", (false, false)
+  | A.Foreach (collection, await_pos, iterator, block) ->
+    from_foreach verify_return (await_pos <> None) collection iterator block
+
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough
   | A.Noop -> empty, (false, false)
+
+and get_foreach_lvalue e =
+  match e with
+  | A.Lvar (_, x) -> H.Local_named x
+  | _ -> failwith "foreach codegen does not support arbitrary lvalues yet"
+
+and get_foreach_key_value iterator =
+  match iterator with
+  | A.As_kv ((_, k), (_, v)) ->
+    (Some (get_foreach_lvalue k)), get_foreach_lvalue v
+  | A.As_v (_, v) ->
+    None, get_foreach_lvalue v
+
+and from_foreach verify_return _has_await collection iterator block =
+  (* TODO: await *)
+  (* TODO: generate .numiters based on maximum nesting depth *)
+  (* TODO: We need an iterator generator. Use the label generator for now. *)
+  (* TODO: We need to be able to process arbitrary lvalues in the key, value
+     pair. This will require writing a preamble into the block, in the general
+     case. For now we just support locals. *)
+  let iterator_number = Label.get_next_label () in
+  let fault_label = Label.get_next_label () in
+  let loop_continue_label = Label.get_next_label () in
+  let loop_break_label = Label.get_next_label () in
+  let (k, v) = get_foreach_key_value iterator in
+  let init, next = match k with
+  | Some k ->
+    let init = instr_iterinitk iterator_number loop_break_label k v in
+    let cont = instr_iternextk iterator_number loop_continue_label k v in
+    init, cont
+  | None ->
+    let init = instr_iterinit iterator_number loop_break_label v in
+    let cont = instr_iternext iterator_number loop_continue_label v in
+    init, cont in
+  let body, (_need_cont, _need_break) =
+    from_stmt
+      ~continue_label:(Some loop_continue_label)
+      ~break_label:(Some loop_break_label)
+      verify_return
+      (A.Block block) in
+  gather [
+    from_expr collection;
+    init;
+    instr_try_fault_no_catch
+      fault_label
+      (* try body *)
+      (gather [
+        instr_label loop_continue_label;
+        body;
+        next
+      ])
+      (* fault body *)
+      (gather [
+        instr_iterfree iterator_number;
+        instr_unwind ]);
+    instr_label loop_break_label
+  ], (false, false)
 
 and from_stmts ~continue_label ~break_label verify_return stl =
   let results =
@@ -1057,6 +1130,18 @@ let create_label_ref_map defs instrseq =
       (* We already have a label for this instruction offset *)
       | Some _ -> acc in
     match instr with
+    | IIterator (IterInit (_, l, _))
+    | IIterator (IterInitK (_, l, _, _))
+    | IIterator (WIterInit (_, l, _))
+    | IIterator (WIterInitK (_, l, _, _))
+    | IIterator (MIterInit (_, l, _))
+    | IIterator (MIterInitK (_, l, _, _))
+    | IIterator (IterNext (_, l, _))
+    | IIterator (IterNextK (_, l, _, _))
+    | IIterator (WIterNext (_, l, _))
+    | IIterator (WIterNextK (_, l, _, _))
+    | IIterator (MIterNext (_, l, _))
+    | IIterator (MIterNextK (_, l, _, _))
     | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) ->
       process_ref acc l
     | IContFlow (Switch (_, _, ls)) ->

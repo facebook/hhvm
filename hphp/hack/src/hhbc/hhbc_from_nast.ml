@@ -47,10 +47,16 @@ let instr_jmp label = instr (H.IContFlow (H.Jmp label))
 let instr_jmpz label = instr (H.IContFlow (H.JmpZ label))
 let instr_jmpnz label = instr (H.IContFlow (H.JmpNZ label))
 let instr_label label = instr (H.ILabel label)
+let instr_unwind = instr H.(IContFlow Unwind)
+
 let instr_false = instr (H.ILitConst H.False)
 let instr_true = instr (H.ILitConst H.True)
+let instr_setl_unnamed local =
+  instr H.(IMutator (SetL (Local_unnamed local)))
+let instr_unsetl_unnamed local =
+  instr H.(IMutator (UnsetL (Local_unnamed local)))
 
-
+let instr_popc = instr H.(IBasic PopC)
 
 let rec instr_seq_to_list_aux sl result =
   match sl with
@@ -62,6 +68,13 @@ let rec instr_seq_to_list_aux sl result =
     | Instr_concat sl' -> instr_seq_to_list_aux (sl' @ sl) result
 
 let instr_seq_to_list t = instr_seq_to_list_aux [t] []
+
+let instr_try_fault_no_catch fault_label try_body fault_body =
+  let try_body = instr_seq_to_list try_body in
+  let fault_body = instr_seq_to_list fault_body in
+  let fl = H.IExceptionLabel (fault_label, H.FaultL) in
+  instr (H.ITryFault (fault_label, try_body, fl :: fault_body))
+
 
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
@@ -173,6 +186,8 @@ let rec from_expr expr =
     gather [from_expr e; instr (IGet (CGetL2 (Local_named x))); from_binop op]
   | A.Binop (op, e1, e2) ->
     gather [from_expr e2; from_expr e1; from_binop op]
+  | A.Pipe (e1, e2) ->
+    emit_pipe e1 e2
   | A.InstanceOf (e1, (_, A.Id (_, id))) ->
     gather [from_expr e1; instr (IOp (InstanceOfD id))]
   | A.InstanceOf (e1, e2) ->
@@ -232,6 +247,23 @@ let rec from_expr expr =
 
   | _ ->
     emit_nyi "expression"
+
+and emit_pipe e1 e2 =
+  (* TODO: We need a local generator, like a label generator.
+  For now, just use the label generator. *)
+  let temp = Label.get_next_label () in
+  let fault_label = Label.get_next_label () in
+  gather [
+    from_expr e1;
+    instr_setl_unnamed temp;
+    instr_popc;
+    instr_try_fault_no_catch
+      fault_label
+      (from_expr e2) (* TODO: Rewrite $$ *)
+      (gather [
+        instr_unsetl_unnamed temp;
+        instr_unwind ])
+  ]
 
 and emit_logical_and e1 e2 =
   let left_is_false = Label.get_next_label () in

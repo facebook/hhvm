@@ -206,11 +206,13 @@ let handle_request conn id protocol = function
     print_response id protocol
   | Find_references args ->
     let filename, line, column = file_position_to_tuple args in
+    let filename = ServerUtils.FileName filename in
     rpc conn (Rpc.IDE_FIND_REFS (filename, line, column)) |>
     FindRefsService.result_to_ide_message |>
     print_response id protocol
   | Highlight_references args ->
     let filename, line, column = file_position_to_tuple args in
+    let filename = ServerUtils.FileName filename in
     let r = rpc conn (Rpc.IDE_HIGHLIGHT_REFS (filename, line, column)) in
     print_response id protocol (Highlight_references_response r)
   | Format args ->

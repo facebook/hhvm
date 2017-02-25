@@ -48,9 +48,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           env, ServerFindRefs.go find_refs_action genv env
         else
           env, Ai.ServerFindRefs.go find_refs_action genv env
-    | IDE_FIND_REFS (content, line, char) ->
+    | IDE_FIND_REFS (input, line, char) ->
+        let content = ServerFileSync.get_file_content input in
         env, ServerFindRefs.go_from_file (content, line, char) genv env
-    | IDE_HIGHLIGHT_REFS (content, line, char) ->
+    | IDE_HIGHLIGHT_REFS (input, line, char) ->
+        let content = ServerFileSync.get_file_content input in
         env, ServerHighlightRefs.go (content, line, char) env.tcopt
     | REFACTOR refactor_action ->
         env, ServerRefactor.go refactor_action genv env

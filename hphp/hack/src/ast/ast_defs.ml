@@ -117,4 +117,9 @@ module ShapeField = struct
         Pervasives.compare (s1, s1') (s2, s2')
 end
 
-module ShapeMap = MyMap.Make (ShapeField)
+module ShapeMap = struct
+  include MyMap.Make (ShapeField)
+
+  let map_and_rekey m f1 f2 =
+    fold (fun k v acc -> add (f1 k) (f2 v) acc) m empty
+end

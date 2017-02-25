@@ -109,8 +109,13 @@ module ClassEltDiff = struct
   let add_inverted_dep build_obj x _ acc =
     DepSet.union (Typing_deps.get_ideps (build_obj x)) acc
 
-  let add_inverted_deps acc build_obj xmap =
-    SMap.fold (add_inverted_dep build_obj) xmap acc
+  let add_inverted_deps (acc, is_unchanged) build_obj xmap =
+    let is_unchanged = match is_unchanged with
+      | `Unchanged when not @@ SMap.is_empty xmap -> `Changed
+      | x -> x
+    in
+    let acc = SMap.fold (add_inverted_dep build_obj) xmap acc in
+    acc, is_unchanged
 
   let diff_elts (type t) (module EltHeap: SharedMem.NoCache
       with type key = string * string
@@ -168,15 +173,15 @@ module ClassEltDiff = struct
     | _, (Some elt, _) when elt.elt_origin = cid ->
       begin
         match Constructors.get_old cid, Constructors.get cid with
-        | None, _ | _, None -> Typing_deps.get_ideps (Dep.Cstr cid)
+        | None, _ | _, None -> Typing_deps.get_ideps (Dep.Cstr cid), `Changed
         | Some ft1, Some ft2 ->
             let ft1 = Decl_pos_utils.NormalizeSig.fun_type ft1 in
             let ft2 = Decl_pos_utils.NormalizeSig.fun_type ft2 in
             if ft1 = ft2
-            then DepSet.empty
-            else Typing_deps.get_ideps (Dep.Cstr cid)
+            then DepSet.empty, `Unchanged
+            else Typing_deps.get_ideps (Dep.Cstr cid), `Changed
       end
-    | _ -> DepSet.empty
+    | _ -> DepSet.empty, `Unchanged
 
   let compare class1 class2 =
     compare_cstrs class1 class2
@@ -379,7 +384,7 @@ let get_class_deps old_classes new_classes trace cid (to_redecl, to_recheck) =
        * because the type is not folded in anyway so it won't affect any other
        * classes.
        *)
-      let deps = ClassEltDiff.compare class1 class2 in
+      let deps, _ = ClassEltDiff.compare class1 class2 in
       (* TODO: should not need to add to to_redecl *)
       DepSet.union deps to_redecl, DepSet.union deps to_recheck
 

@@ -271,7 +271,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmpqim{0, fp[AROFF(m_varEnv)], sf};
 
-  ifThen(v, vc, CC_NZ, sf, [&env, &profile, &vc, fp, inst] (Vout& v) {
+  ifThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
     if (profile.profiling()) {
       auto const releasedOff = offsetof(ReleaseVVProfile, released);
       v << incwm{rvmtl()[profile.handle() + releasedOff], v.makeReg()};
@@ -281,7 +281,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
     v << testqim{ActRec::kExtraArgsBit, fp[AROFF(m_varEnv)], sf};
 
     unlikelyIfThenElse(v, vc, CC_NZ, sf,
-      [&env, fp, inst] (Vout& v) {
+      [&] (Vout& v) {
         cgCallHelper(
           v, env,
           CallSpec::direct(static_cast<void (*)(ActRec*)>(
@@ -291,7 +291,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
           argGroup(env, inst).reg(fp)
         );
       },
-      [&env, fp, inst] (Vout& v) {
+      [&] (Vout& v) {
         cgCallHelper(
           v, env,
           CallSpec::direct(static_cast<void (*)(ActRec*)>(

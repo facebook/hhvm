@@ -444,7 +444,7 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
 
   auto& v = vmain(env);
 
-  auto const thenBody = [&env, extra, func, inst, mask64, vals64] (Vout& v) {
+  auto const thenBody = [&] (Vout& v) {
     auto const sf = v.makeReg();
 
     auto bitsOff = sizeof(uint64_t) * (extra->firstBit / 64);
@@ -511,7 +511,7 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       fwdJcc(v, env, CC_LE, sf, inst->taken());
       thenBody(v);
     } else {
-      ifThenElse(v, CC_NLE, sf, thenBody, [&env, func, inst, vals64] (Vout& v) {
+      ifThenElse(v, CC_NLE, sf, thenBody, [&] (Vout& v) {
         // If not special builtin...
         auto const sf = v.makeReg();
         v << testlim{AttrVariadicByRef, func[Func::attrsOff()], sf};

@@ -150,7 +150,7 @@ void cgCufIterSpillFrame(IRLS& env, const IRInstruction* inst) {
     auto const sf = v.makeReg();
     auto const shifted = v.makeReg();
     v << shrqi{1, ctx, shifted, sf};
-    ifThen(v, CC_NBE, sf, [shifted](Vout& v) {
+    ifThen(v, CC_NBE, sf, [&](Vout& v) {
       auto const rthis = v.makeReg();
       v << shlqi{1, shifted, rthis, v.makeReg()};
       emitIncRef(v, rthis);
@@ -169,13 +169,13 @@ void cgCufIterSpillFrame(IRLS& env, const IRInstruction* inst) {
   v << testq{name, name, sf};
 
   ifThenElse(v, CC_NZ, sf,
-    [ar, extra, flags, name] (Vout& v) {
+    [&] (Vout& v) {
       static_assert(UncountedValue < 0 && StaticValue < 0, "");
 
       // Incref m_invName if it's non-persistent.
       auto const sf = v.makeReg();
       v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
-      ifThen(v, CC_GE, sf, [name] (Vout& v) { emitIncRef(v, name); });
+      ifThen(v, CC_GE, sf, [&] (Vout& v) { emitIncRef(v, name); });
 
       auto const naaf = static_cast<int32_t>(
         ActRec::encodeNumArgsAndFlags(
@@ -185,7 +185,7 @@ void cgCufIterSpillFrame(IRLS& env, const IRInstruction* inst) {
       );
       v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
     },
-    [ar, extra, flags, name] (Vout& v) {
+    [&] (Vout& v) {
       auto const naaf = static_cast<int32_t>(
         ActRec::encodeNumArgsAndFlags(
           safe_cast<int32_t>(extra->args),

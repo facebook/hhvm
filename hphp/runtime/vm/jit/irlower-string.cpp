@@ -70,13 +70,13 @@ void cgOrdStrIdx(IRLS& env, const IRInstruction* inst) {
   v << cmpq{idx, length, sf};
 
   unlikelyCond(v, vcold(env), CC_B, sf, dstLoc(env, inst, 0).reg(),
-    [&env, inst] (Vout& v) {
+    [&] (Vout& v) {
       auto const args = argGroup(env, inst).ssa(0).ssa(1);
       cgCallHelper(v, env, CallSpec::direct(MInstrHelpers::stringGetI),
                    kVoidDest, SyncOptions::Sync, args);
       return v.cns(0);
     },
-    [idx, sd] (Vout& v) {
+    [&] (Vout& v) {
       auto const dst = v.makeReg();
       auto const data = v.makeReg();
 #ifdef NO_M_DATA

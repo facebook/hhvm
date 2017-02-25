@@ -82,7 +82,7 @@ void cgConvStrToBool(IRLS& env, const IRInstruction* inst) {
   v << cmplim{1, src[StringData::sizeOff()], sf};
 
   unlikelyCond(v, vcold(env), CC_E, sf, dst,
-    [src] (Vout& v) {
+    [&] (Vout& v) {
       // Unlikely case is we end up having to check whether the first byte of
       // the string is equal to '0'.
       auto const dst = v.makeReg();
@@ -97,7 +97,7 @@ void cgConvStrToBool(IRLS& env, const IRInstruction* inst) {
       v << setcc{CC_NE, sf, dst};
       return dst;
     },
-    [sf] (Vout& v) {
+    [&] (Vout& v) {
       // Common case is we have an empty string or a string with size bigger
       // than one.
       auto const dst = v.makeReg();
@@ -116,7 +116,7 @@ void cgConvArrToBool(IRLS& env, const IRInstruction* inst) {
   v << cmplim{0, src[ArrayData::offsetofSize()], sf};
 
   unlikelyCond(v, vcold(env), CC_S, sf, dst,
-    [&env, inst] (Vout& v) {
+    [&] (Vout& v) {
       auto const vsize = v.makeReg();
       cgCallHelper(v, env, CallSpec::method(&ArrayData::vsize),
                    callDest(vsize), SyncOptions::None,
@@ -128,7 +128,7 @@ void cgConvArrToBool(IRLS& env, const IRInstruction* inst) {
       v << setcc{CC_NZ, sf, d};
       return d;
     },
-    [sf] (Vout& v) {
+    [&] (Vout& v) {
       auto const d = v.makeReg();
       v << setcc{CC_NZ, sf, d};
       return d;
@@ -145,7 +145,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   v << testwim{ObjectData::CallToImpl, src[ObjectData::attributeOff()], sf};
 
   unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
-    [&env, inst, src] (Vout& v) {
+    [&] (Vout& v) {
       auto const sf = v.makeReg();
       v << testwim{
         ObjectData::IsCollection,
@@ -154,14 +154,14 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
       };
 
       return cond(v, CC_NZ, sf, v.makeReg(),
-        [src] (Vout& v) { // src points to native collection
+        [&] (Vout& v) { // src points to native collection
           auto const d = v.makeReg();
           auto const sf = v.makeReg();
           v << cmplim{0, src[collections::FAST_SIZE_OFFSET], sf};
           v << setcc{CC_NE, sf, d}; // true iff size not zero
           return d;
         },
-        [&env, inst] (Vout& v) { // src is not a native collection
+        [&] (Vout& v) { // src is not a native collection
           auto const d = v.makeReg();
           cgCallHelper(v, env,
                        CallSpec::method(&ObjectData::toBoolean),
@@ -171,7 +171,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
           return d;
         });
     },
-    [] (Vout& v) { return v.cns(true); }
+    [&] (Vout& v) { return v.cns(true); }
   );
 }
 
@@ -199,24 +199,24 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
   v << cmpq{indef, d, sf};
 
   unlikelyCond(v, vcold(env), CC_E, sf, dst,
-    [d, indef, src] (Vout& v) {
+    [&] (Vout& v) {
       // result > max signed int or unordered
       auto const sf = v.makeReg();
       v << ucomisd{v.cns(0.0), src, sf};
 
       return cond(v, CC_NB, sf, v.makeReg(),
-        [d] (Vout&) { return d; },
-        [d, indef, sf, src] (Vout& v) {
+        [&] (Vout& v) { return d; },
+        [&] (Vout& v) {
           // src > 0 (CF = 1 -> less than 0 or unordered)
           return cond(v, CC_P, sf, v.makeReg(),
-            [d] (Vout& v) {
+            [&] (Vout& v) {
               // PF = 1 -> unordered, i.e., we are doing an int cast of NaN.
               // PHP5 didn't formally define this, but observationally returns
               // the truncated value (i.e., what d currently holds).  PHP7
               // formally defines this case to return 0.
               return RuntimeOption::PHP7_IntSemantics ? v.cns(0) : d;
             },
-            [indef, src] (Vout& v) {
+            [&] (Vout& v) {
               constexpr uint64_t ulong_max =
                 std::numeric_limits<unsigned long>::max();
 
@@ -224,8 +224,8 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
               v << ucomisd{v.cns(static_cast<double>(ulong_max)), src, sf};
 
               return cond(v, CC_B, sf, v.makeReg(),
-                [] (Vout& v) { return v.cns(0); }, // src > ULONG_MAX
-                [indef, src] (Vout& v) {
+                [&] (Vout& v) { return v.cns(0); }, // src > ULONG_MAX
+                [&] (Vout& v) {
                   // 0 < src <= ULONG_MAX
                   //
                   // We know that LONG_MAX < src <= ULONG_MAX, so therefore:
@@ -254,7 +254,7 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
         }
       );
     },
-    [d] (Vout&) { return d; }
+    [&] (Vout& v) { return d; }
   );
 }
 

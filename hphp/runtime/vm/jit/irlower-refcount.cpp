@@ -95,7 +95,7 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
 
 template<class Then>
 void ifRefCountedNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
-  ifRefCountedType(v, v, ty, loc, [ty, loc, then] (Vout& v) {
+  ifRefCountedType(v, v, ty, loc, [&] (Vout& v) {
     ifNonPersistent(v, ty, loc, then);
   });
 }
@@ -135,7 +135,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     always_assert(ty <= TCtx && ty.maybe(TObj));
     auto const sf = v.makeReg();
     v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-    ifThen(v, CC_Z, sf, [loc] (Vout& v) { emitIncRef(v, loc.reg()); });
+    ifThen(v, CC_Z, sf, [&] (Vout& v) { emitIncRef(v, loc.reg()); });
     return;
   }
 
@@ -165,12 +165,12 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     }
   }
 
-  ifRefCountedType(v, *vtaken, ty, loc, [profHandle, ty, loc] (Vout& v) {
+  ifRefCountedType(v, *vtaken, ty, loc, [&] (Vout& v) {
     if (profHandle) {
       v << incwm{rvmtl()[*profHandle + offsetof(IncRefProfile, tryinc)],
                  v.makeReg()};
     }
-    ifNonPersistent(v, ty, loc, [loc] (Vout& v) {
+    ifNonPersistent(v, ty, loc, [&] (Vout& v) {
       emitIncRef(v, loc.reg());
     });
   });
@@ -344,8 +344,7 @@ void implDecRef(Vout& v, IRLS& env,
                 const OptDecRefProfile& profile, bool unlikelyDestroy) {
   auto const base = srcLoc(env, inst, 0).reg(0);
 
-  auto const destroy = [&env, &profile, base,
-                        inst, ty, unlikelyDestroy] (Vout& v) {
+  auto const destroy = [&] (Vout& v) {
     emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy
                                    : Stats::TC_DecRef_Likely_Destroy);
     if (profile && profile->profiling()) {
@@ -405,7 +404,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
   FTRACE(3, "irlower-inc-dec: destroyPercent {:.2%} for {}\n",
          destroyRate, *inst);
 
-  auto impl = [&env, &profile, destroyRate, inst] (Vout& v, Type t) {
+  auto impl = [&] (Vout& v, Type t) {
     implDecRef(
       v, env, inst, t, profile,
       destroyRate * 100 < RuntimeOption::EvalJitUnlikelyDecRefPercent);
@@ -416,7 +415,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     auto const loc = srcLoc(env, inst, 0);
     auto const sf = v.makeReg();
     v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-    ifThen(v, CC_Z, sf, [&impl] (Vout& v) {
+    ifThen(v, CC_Z, sf, [&] (Vout& v) {
         impl(v, TObj);
       });
     return;
@@ -439,7 +438,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
       auto const sf = v.makeReg();
       emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
 
-      unlikelyIfThen(v, vcold(env), CC_NLE, sf, [data, inst, type] (Vout& v) {
+      unlikelyIfThen(v, vcold(env), CC_NLE, sf, [&] (Vout& v) {
         auto const stub = tc::ustubs().decRefGeneric;
         v << copy2{data, type, rarg(0), rarg(1)};
         v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};
@@ -448,7 +447,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
     }
   }
 
-  ifRefCountedType(v, v, ty, srcLoc(env, inst, 0), [&impl, ty] (Vout& v) {
+  ifRefCountedType(v, v, ty, srcLoc(env, inst, 0), [&] (Vout& v) {
       impl(v, ty);
   });
 }
@@ -463,7 +462,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
       auto const loc = srcLoc(env, inst, 0);
       auto const sf = v.makeReg();
       v << testqi{ActRec::kHasClassBit, loc.reg(), sf};
-      ifThen(v, CC_Z, sf, [loc] (Vout& v) { emitDecRef(v, loc.reg()); });
+      ifThen(v, CC_Z, sf, [&] (Vout& v) { emitDecRef(v, loc.reg()); });
     }
     return;
   }
@@ -473,7 +472,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
 
   auto const src = srcLoc(env, inst, 0);
 
-  ifRefCountedNonPersistent(v, ty, src, [src] (Vout& v) {
+  ifRefCountedNonPersistent(v, ty, src, [&] (Vout& v) {
     emitDecRef(v, src.reg());
   });
 }
@@ -484,7 +483,7 @@ void cgDbgAssertRefCount(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
-  ifRefCountedType(v, v, inst->src(0)->type(), src, [src] (Vout& v) {
+  ifRefCountedType(v, v, inst->src(0)->type(), src, [&] (Vout& v) {
     emitAssertRefCount(v, src.reg());
   });
 }

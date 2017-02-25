@@ -64,7 +64,7 @@ static void alignJmpTarget(CodeBlock& cb) {
  */
 static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                             PhysReg tv, PhysReg type, RegSet live) {
-  return vwrap(cb, data, fixups, [live, tv, type] (Vout& v) {
+  return vwrap(cb, data, fixups, [&] (Vout& v) {
     // Set up frame linkage to avoid an indirect fixup.
     v << pushp{rlr(), rfp()};
     v << copy{rsp(), rfp()};
@@ -77,10 +77,10 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     auto const sf = v.makeReg();
     v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
 
-    ifThen(v, CC_NL, sf, [data, live, sf, type] (Vout& v) {
+    ifThen(v, CC_NL, sf, [&] (Vout& v) {
       // The refcount is positive, so the value is refcounted.  We need to
       // either decref or release.
-      ifThen(v, CC_NE, sf, [data, live] (Vout& v) {
+      ifThen(v, CC_NE, sf, [&] (Vout& v) {
         // The refcount is greater than 1; decref it.
         v << declm{data[FAST_REFCOUNT_OFFSET], v.makeReg()};
         // Pop FP/LR and return
@@ -134,7 +134,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << loadzbl{local[TVOFF(m_type)], type};
     emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
 
-    ifThen(v, CC_G, sf, [release] (Vout& v) {
+    ifThen(v, CC_G, sf, [&] (Vout& v) {
       v << call{release, arg_regs(3)};
     });
   };

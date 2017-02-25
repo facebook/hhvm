@@ -359,7 +359,7 @@ void cgDbgAssertARFunc(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmpqm{func, sp[off + AROFF(m_func)], sf};
 
-  ifThen(v, CC_NE, sf, [](Vout& v) { v << ud2{}; });
+  ifThen(v, CC_NE, sf, [&](Vout& v) { v << ud2{}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

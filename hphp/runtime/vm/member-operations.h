@@ -1128,6 +1128,13 @@ inline TypedValue* NewElem(TypedValue& tvRef,
 template <KeyType keyType>
 inline void SetElemEmptyish(TypedValue* base, key_type<keyType> key,
                             Cell* value) {
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    if (base->m_type == KindOfNull) {
+      raise_hackarr_compat_notice("Promoting null to array");
+    } else if (base->m_type == KindOfBoolean) {
+      raise_hackarr_compat_notice("Promoting false to array");
+    }
+  }
   auto const& scratchKey = initScratchKey(key);
   tvAsVariant(base) = Array::Create();
   tvAsVariant(base).asArrRef().set(tvAsCVarRef(&scratchKey),

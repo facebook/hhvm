@@ -47,10 +47,18 @@ namespace HPHP {
 typedef am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>
     AsyncMysqlClientPool;
 
+
 namespace {
+int HdfAsyncMysqlClientPoolSize = -1;
+
 folly::Singleton<AsyncMysqlClientPool> clientPool([]() {
+  if (HdfAsyncMysqlClientPoolSize == -1) {
+    LOG(DFATAL) << "AsyncMysql Config should have been initialized.";
+    HdfAsyncMysqlClientPoolSize = 2;
+  }
   return new AsyncMysqlClientPool(
-      folly::make_unique<am::AsyncMysqlClientFactory>(), 2);
+      folly::make_unique<am::AsyncMysqlClientFactory>(),
+      HdfAsyncMysqlClientPoolSize);
 });
 }
 
@@ -1812,6 +1820,14 @@ static struct AsyncMysqlExtension final : Extension {
     loadSystemlib("mysqlrow");
     loadSystemlib("async_mysql_exceptions");
     loadSystemlib();
+  }
+  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+    Config::Bind(
+        HdfAsyncMysqlClientPoolSize,
+        ini,
+        config,
+        "AsyncMysql.ClientPoolSize",
+        2);
   }
 } s_async_mysql_extension;
 

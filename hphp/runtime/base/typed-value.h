@@ -111,28 +111,7 @@ struct TypedValue {
   std::string pretty() const; // debug formatting. see trace.h
 
   TYPE_SCAN_CUSTOM() {
-    switch (m_type) {
-      case KindOfObject: scanner.scan(m_data.pobj); break;
-      case KindOfResource: scanner.scan(m_data.pres); break;
-      case KindOfString: scanner.scan(m_data.pstr); break;
-      case KindOfVec:
-      case KindOfDict:
-      case KindOfKeyset:
-      case KindOfArray: scanner.scan(m_data.parr); break;
-      case KindOfRef: scanner.scan(m_data.pref); break;
-      case KindOfUninit:
-      case KindOfNull:
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-      case KindOfPersistentString:
-      case KindOfPersistentArray:
-      case KindOfPersistentVec:
-      case KindOfPersistentDict:
-      case KindOfPersistentKeyset:
-      case KindOfClass:
-        break;
-    }
+    if (isRefcountedType(m_type)) scanner.scan(m_data.pcnt);
   }
 };
 

@@ -68,6 +68,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(StaticMethod k) const { return "StaticMethod"; }
   std::string operator()(StaticMethodF k) const { return "StaticMethodF"; }
   std::string operator()(Profile k) const { return "Profile"; }
+  std::string operator()(SPropCache k) const { return "SPropCache"; }
 };
 
 struct SymbolRep : boost::static_visitor<std::string> {
@@ -98,6 +99,10 @@ struct SymbolRep : boost::static_visitor<std::string> {
       k.transId,
       k.bcOff
     ).str();
+  }
+  std::string operator()(SPropCache k) const {
+    return k.cls->name()->toCppString() + "::" +
+           k.cls->staticProperties()[k.slot].name->toCppString();
   }
 };
 
@@ -136,6 +141,10 @@ struct SymbolEq : boost::static_visitor<bool> {
     assert(t1.name->isStatic() && t2.name->isStatic());
     return t1.name->isame(t2.name);
   }
+
+  bool operator()(SPropCache k1, SPropCache k2) const {
+    return k1.cls == k2.cls && k1.slot == k2.slot;
+  }
 };
 
 struct SymbolHash : boost::static_visitor<size_t> {
@@ -163,6 +172,13 @@ struct SymbolHash : boost::static_visitor<size_t> {
 
   size_t operator()(StaticMethod k)  const { return k.name->hash(); }
   size_t operator()(StaticMethodF k) const { return k.name->hash(); }
+
+  size_t operator()(SPropCache k) const {
+    return folly::hash::hash_combine(
+      k.cls, k.slot
+    );
+  }
+
 };
 
 struct HashCompare {
@@ -215,6 +231,7 @@ size_t s_local_frontier = 0;
 Link<GenNumber> g_current_gen_link{kInvalidHandle};
 
 AllocDescriptorList s_normal_alloc_descs;
+AllocDescriptorList s_local_alloc_descs;
 
 /*
  * Round base up to align, which must be a power of two.
@@ -271,16 +288,18 @@ Handle alloc(Mode mode, size_t numBytes,
     case Mode::Normal: {
       align = folly::nextPowTwo(std::max(align, alignof(GenNumber)));
       auto const prefix = roundUp(sizeof(GenNumber), align);
-      auto const adjustedBytes = numBytes + prefix;
-      always_assert(align <= adjustedBytes);
+      auto const adjBytes = numBytes + prefix;
+      always_assert(align <= adjBytes);
 
-      if (auto free = findFreeBlock(s_normal_free_lists, adjustedBytes, align)) {
+      if (auto free = findFreeBlock(s_normal_free_lists, adjBytes, align)) {
         auto const begin = *free;
         addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
         auto const handle = begin + prefix;
-        s_normal_alloc_descs.push_back(
-          AllocDescriptor{Handle(handle), numBytes, tyIndex}
-        );
+        if (type_scan::hasScanner(tyIndex)) {
+          s_normal_alloc_descs.push_back(
+            AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
+          );
+        }
         return handle;
       }
 
@@ -289,7 +308,7 @@ Handle alloc(Mode mode, size_t numBytes,
 
       addFreeBlock(s_normal_free_lists, oldFrontier,
                   s_normal_frontier - oldFrontier);
-      s_normal_frontier += adjustedBytes;
+      s_normal_frontier += adjBytes;
       if (debug && !jit::VMProtect::is_protected) {
         memset(
           (char*)(tl_base) + oldFrontier,
@@ -302,14 +321,16 @@ Handle alloc(Mode mode, size_t numBytes,
         "Ran out of RDS space (mode=Normal)"
       );
 
-      auto const begin = s_normal_frontier - adjustedBytes;
+      auto const begin = s_normal_frontier - adjBytes;
       addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
 
       auto const handle = begin + prefix;
 
-      s_normal_alloc_descs.push_back(
-        AllocDescriptor{Handle(handle), numBytes, tyIndex}
-      );
+      if (type_scan::hasScanner(tyIndex)) {
+        s_normal_alloc_descs.push_back(
+          AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
+        );
+      }
       return handle;
     }
     case Mode::Persistent: {
@@ -348,7 +369,11 @@ Handle alloc(Mode mode, size_t numBytes,
         frontier >= s_normal_frontier,
         "Ran out of RDS space (mode=Local)"
       );
-
+      if (type_scan::hasScanner(tyIndex)) {
+        s_local_alloc_descs.push_back(
+          AllocDescriptor{Handle(frontier), uint32_t(numBytes), tyIndex}
+        );
+      }
       return frontier;
     }
   }

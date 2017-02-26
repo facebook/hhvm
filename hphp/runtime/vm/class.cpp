@@ -781,13 +781,13 @@ void Class::initSPropHandles() const {
         if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
           propHandle.bind(rds::Mode::Persistent);
           *propHandle = sProp.val;
+          rds::recordRds(propHandle.handle(), sizeof(TypedValue),
+                         rds::SPropCache{this, slot});
         } else {
-          propHandle.bind(rds::Mode::Local);
+          propHandle = rds::bind<TypedValue>(
+              rds::SPropCache{this, slot}, rds::Mode::Local
+          );
         }
-
-        auto msg = name()->toCppString() + "::" + sProp.name->toCppString();
-        rds::recordRds(propHandle.handle(),
-                       sizeof(TypedValue), "SPropCache", msg);
       } else {
         auto realSlot = sProp.cls->lookupSProp(sProp.name);
         propHandle = sProp.cls->m_sPropCache[realSlot];

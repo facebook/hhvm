@@ -544,6 +544,10 @@ void logCollection(const char* phase, const Marker& mkr) {
                 mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes);
   sample.setInt("xscanned_heap",
                 mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes);
+  sample.setInt("rds_normal_size", rds::normalSection().size());
+  sample.setInt("rds_normal_count", rds::detail::s_normal_alloc_descs.size());
+  sample.setInt("rds_local_size", rds::localSection().size());
+  sample.setInt("rds_local_count", rds::detail::s_local_alloc_descs.size());
   sample.setInt("max_worklist", mkr.max_worklist_);
   StructuredLog::log("hhvm_gc", sample);
 }

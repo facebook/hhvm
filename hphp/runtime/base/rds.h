@@ -30,6 +30,7 @@
 namespace HPHP {
   struct Array;
   struct StringData;
+  struct Class;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -140,6 +141,7 @@ folly::Range<const char*> persistentSection();
 // with a void* pointer to the data, the size of the data, and the stored
 // type-index.
 template <typename F> void forEachNormalAlloc(F);
+template <typename F> void forEachLocalAlloc(F);
 
 /*
  * The thread-local pointer to the base of RDS.
@@ -185,11 +187,19 @@ struct Profile { TransID transId;
                  Offset bcOff;
                  const StringData* name; };
 
+/*
+ * Static class properties in Mode::Local
+ */
+
+struct SPropCache { const Class* cls;
+                    Slot slot; };
+
 using Symbol = boost::variant< StaticLocal
                              , ClsConstant
                              , StaticMethod
                              , StaticMethodF
                              , Profile
+                             , SPropCache
                              >;
 
 //////////////////////////////////////////////////////////////////////

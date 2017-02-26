@@ -286,9 +286,17 @@ inline rds::Handle Class::sPropInitHandle() const {
 }
 
 inline rds::Handle Class::sPropHandle(Slot index) const {
+  return sPropLink(index).handle();
+}
+
+inline rds::Link<TypedValue> Class::sPropLink(Slot index) const {
   assert(m_sPropCacheInit.bound());
   assert(numStaticProperties() > index);
-  return m_sPropCache[index].handle();
+  return m_sPropCache[index];
+}
+
+inline rds::Link<bool> Class::sPropInitLink() const {
+  return m_sPropCacheInit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

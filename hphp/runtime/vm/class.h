@@ -708,6 +708,8 @@ public:
    * RDS handle for the static property at `index'.
    */
   rds::Handle sPropHandle(Slot index) const;
+  rds::Link<TypedValue> sPropLink(Slot index) const;
+  rds::Link<bool> sPropInitLink() const;
 
   /*
    * Get the PropInitVec for the current request.

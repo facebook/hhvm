@@ -34,6 +34,8 @@
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/vm/globals-array.h"
+#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -237,13 +239,18 @@ inline void scanRds(rds::Header* rds, type_scan::Scanner& scanner) {
     }
   );
 
-  // Class stores pointers to request allocated memory in the local
-  // section. Depending on circumstances, this may or may not be valid data,
-  // so scan it conservatively for now. TODO #12203436
-  // Persistent shouldn't contain pointers to any request allocated memory.
+  // static properties have a per-class, versioned, bool in rds::Normal,
+  // tracked by Class::m_sPropCacheInit, plus one TypedValue in rds::Local
+  // for each property, tracked in Class::m_sPropCache. Just scan the
+  // properties in rds::Local. We ignore the state of the bool, because it
+  // is not initialized until after all sprops are initialized, and it's
+  // necessary to scan them *during* initialization.
   scanner.where("RdsLocal");
-  auto r = rds::localSection();
-  scanner.conservative(r.begin(), r.size());
+  rds::forEachLocalAlloc(
+    [&](const void* p, size_t size, type_scan::Index index) {
+      scanner.scanByIndex(index, p, size);
+    }
+  );
 
   // php stack TODO #6509338 exactly scan the php stack.
   scanner.where("PhpStack");

@@ -69,6 +69,8 @@ struct ISS {
   PropagateFn propagate;
 };
 
+void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs);
+
 //////////////////////////////////////////////////////////////////////
 
 namespace interp_step {
@@ -106,40 +108,7 @@ namespace {
 
 template<class... Ts>
 void impl(ISS& env, Ts&&... ts) {
-  std::vector<Bytecode> bcs = { std::forward<Ts>(ts)... };
-
-  folly::Optional<std::vector<Bytecode>> currentReduction;
-
-  for (auto it = begin(bcs); it != end(bcs); ++it) {
-    assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
-           "you can't use impl with branching opcodes before last position");
-
-    auto const wasPEI = env.flags.wasPEI;
-
-    FTRACE(3, "    (impl {}\n", show(env.ctx.func, *it));
-    env.flags.wasPEI          = true;
-    env.flags.canConstProp    = false;
-    env.flags.strengthReduced = folly::none;
-    default_dispatch(env, *it);
-
-    if (env.flags.strengthReduced) {
-      if (!currentReduction) {
-        currentReduction = std::vector<Bytecode>{};
-        currentReduction->assign(begin(bcs), it);
-      }
-      std::copy(begin(*env.flags.strengthReduced),
-                end(*env.flags.strengthReduced),
-                std::back_inserter(*currentReduction));
-    } else if (currentReduction) {
-      currentReduction->push_back(*it);
-    }
-
-    // If any of the opcodes in the impl list said they could throw,
-    // then the whole thing could throw.
-    env.flags.wasPEI = env.flags.wasPEI || wasPEI;
-  }
-
-  env.flags.strengthReduced = currentReduction;
+  impl_vec(env, false, { std::forward<Ts>(ts)... });
 }
 
 /*
@@ -148,12 +117,13 @@ void impl(ISS& env, Ts&&... ts) {
  * sequence.  Ensure that if you call reduce(), it is before any
  * state-affecting operations (like popC()).
  */
+void reduce(ISS& env, std::vector<Bytecode>&& bcs) {
+  impl_vec(env, true, std::move(bcs));
+}
+
 template<class... Bytecodes>
-void reduce(ISS& env, const Bytecodes&... hhbc) {
-  impl(env, hhbc...);
-  if (!env.flags.strengthReduced) {
-    env.flags.strengthReduced = std::vector<Bytecode> { hhbc... };
-  }
+void reduce(ISS& env, Bytecodes&&... hhbc) {
+  reduce(env, { std::forward<Bytecodes>(hhbc)... });
 }
 
 void nothrow(ISS& env) {

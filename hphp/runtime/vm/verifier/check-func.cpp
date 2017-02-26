@@ -1235,7 +1235,7 @@ bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
     return false;
   } else if (check_instrs &&
              (!m_instrs.get(b - m_func->base()) ||
-              !m_instrs.get(p - m_func->base()))) {
+              (p < past && !m_instrs.get(p - m_func->base())))) {
     error("region %s %d:%d boundaries are inbetween instructions\n",
            name, b, p);
     return false;

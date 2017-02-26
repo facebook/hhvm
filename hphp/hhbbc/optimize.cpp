@@ -495,29 +495,34 @@ void first_pass(const Index& index,
       }
     }
 
-    /*
-     * We only try to remove mid-block unreachable code if we're not in an FPI
-     * region, because it's the easiest way to maintain FPI region invariants
-     * in the emitted bytecode.
-     */
-    if (state.unreachable) {
-      gen(op);
-      if (!stateIn.unreachable) {
-        gen(bc::BreakTraceHint {});
-      }
-      if (state.fpiStack.empty()) {
-        if (blk->fallthrough == NoBlockId ||
-            ainfo.bdata[blk->fallthrough].stateIn.initialized) {
-          auto const fatal = make_block(ainfo, blk, state);
-          fatal->hhbcs = {
-            bc_with_loc(op.srcLoc, bc::String { s_unreachable.get() }),
-            bc_with_loc(op.srcLoc, bc::Fatal { FatalOp::Runtime })
-          };
-          blk->fallthrough = fatal->id;
+    auto genOut = [&] (const Bytecode* op) -> Op {
+      if (options.StrengthReduce && flags.strengthReduced) {
+        for (auto i = 0; i < flags.strengthReduced->size() - 1; i++) {
+          gen(flags.strengthReduced.value()[i]);
         }
-        break;
+        op = &flags.strengthReduced->back();
       }
-      continue;
+
+      if (options.ConstantProp && flags.canConstProp) {
+        if (propagate_constants(*op, state, gen)) return Op::Nop;
+      }
+
+      gen(*op);
+      return op->op;
+    };
+
+    if (state.unreachable) {
+      // We should still perform the requested transformations; we
+      // might be part way through converting an FPush/FCall to an
+      // FCallBuiltin, for example
+      auto opc = genOut(&op);
+      blk->fallthrough = NoBlockId;
+      if (!(instrFlags(opc) & TF)) {
+        gen(bc::BreakTraceHint {});
+        gen(bc::String { s_unreachable.get() });
+        gen(bc::Fatal { FatalOp::Runtime });
+      }
+      break;
     }
 
     if (options.RemoveDeadBlocks &&
@@ -549,16 +554,7 @@ void first_pass(const Index& index,
       }
     }
 
-    if (options.ConstantProp && flags.canConstProp) {
-      if (propagate_constants(op, state, gen)) continue;
-    }
-
-    if (options.StrengthReduce && flags.strengthReduced) {
-      for (auto& hh : *flags.strengthReduced) gen(hh);
-      continue;
-    }
-
-    gen(op);
+    genOut(&op);
   }
 
   if (options.Peephole) {

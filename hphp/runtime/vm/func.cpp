@@ -579,7 +579,7 @@ const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
 
   // Iterate through parents until we find a valid region.
   while (true) {
-    if (fe->m_fcallOff >= o) {
+    if (fe->m_fpiEndOff >= o) {
       return fe;
     }
 
@@ -598,8 +598,8 @@ const FPIEnt* Func::findPrecedingFPI(Offset o) const {
   const FPIEnt* fe = 0;
   for (unsigned i = 0; i < fpitab.size(); i++) {
     const FPIEnt* cur = &fpitab[i];
-    if (o > cur->m_fcallOff &&
-        (!fe || fe->m_fcallOff < cur->m_fcallOff)) {
+    if (o > cur->m_fpiEndOff &&
+        (!fe || fe->m_fpiEndOff < cur->m_fpiEndOff)) {
       fe = cur;
     }
   }
@@ -728,7 +728,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 
   if (opts.fpi) {
     for (auto& fpi : fpitab()) {
-      out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fcallOff
+      out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fpiEndOff
           << "; fpOff = " << fpi.m_fpOff;
       if (fpi.m_parentIndex != -1) {
         out << " parentIndex = " << fpi.m_parentIndex

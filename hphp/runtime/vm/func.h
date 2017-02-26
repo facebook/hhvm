@@ -82,7 +82,7 @@ struct EHEnt {
  */
 struct FPIEnt {
   Offset m_fpushOff;
-  Offset m_fcallOff;
+  Offset m_fpiEndOff;
   Offset m_fpOff; // evaluation stack depth to current frame pointer
   int m_parentIndex;
   int m_fpiDepth;

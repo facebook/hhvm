@@ -672,11 +672,16 @@ FPI regions
 
 An FPI region is a contiguous range of bytecode that constitutes a call site.
 Each FPI region begins immediately after an FPush* instruction that pushes an
-FPI structure onto the FPI stack and must end with the corresponding FCall*
-instruction that pops that FPI structure off of the FPI stack. If two FPI
-regions overlap, one of the FPI regions must be completely enclosed by the
+FPI structure onto the FPI stack and should normally end with the corresponding
+FCall* instruction that pops that FPI structure off of the FPI stack. If two
+FPI regions overlap, one of the FPI regions must be completely enclosed by the
 other FPI region. An FPI region may not contain backward jumps, nor may it
 contain forward jumps that jump past the end of the FPI region.
+
+Exceptionally, an FPI region can terminate without an FCall*, and without
+including an FPass for each argument if they would be unreachable (eg passing a
+cell via FPassCE, or calling a function that never returns). In this case it is
+possible for multiple fpi regions to end at the same bytecode.
 
 Each function has an "FPI region table". Each row in the FPI region table
 consists of offset of the FPush* instruction that begins the region, the FCall

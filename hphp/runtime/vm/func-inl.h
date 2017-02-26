@@ -25,7 +25,7 @@ namespace HPHP {
 template<class SerDe>
 void FPIEnt::serde(SerDe& sd) {
   sd(m_fpushOff)
-    (m_fcallOff)
+    (m_fpiEndOff)
     (m_fpOff)
     // These fields are recomputed by sortFPITab:
     // (m_parentIndex)

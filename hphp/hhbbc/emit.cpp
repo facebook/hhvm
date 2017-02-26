@@ -140,7 +140,7 @@ std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
 struct EmitBcInfo {
   struct FPI {
     Offset fpushOff;
-    Offset fcallOff;
+    Offset fpiEndOff;
     int32_t fpDelta;
   };
 
@@ -169,6 +169,10 @@ struct EmitBcInfo {
     // currentStackDepth correctly (and we also assert all the jumps
     // have the same depth).
     folly::Optional<uint32_t> expectedStackDepth;
+
+    // Similar to expectedStackDepth, for the fpi stack. Needed to deal with
+    // terminal instructions that end an fpi region.
+    folly::Optional<uint32_t> expectedFPIDepth;
   };
 
   std::vector<borrowed_ptr<php::Block>> blockOrder;
@@ -196,11 +200,35 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   // allocated in the loop.)
   std::vector<uint8_t> immVec;
 
+  // Offset of the last emitted bytecode.
+  Offset lastOff { 0 };
+
   auto map_local = [&] (LocalId id) {
     auto const loc = func.locals[id];
     assert(!loc.killed);
     assert(loc.id <= id);
     return loc.id;
+  };
+
+  auto end_fpi = [&] (Offset off) {
+    auto& fpi = fpiStack.back();
+    fpi.fpiEndOff = off;
+    ret.fpiRegions.push_back(fpi);
+    fpiStack.pop_back();
+  };
+
+  auto set_expected_depth = [&] (EmitBcInfo::BlockInfo& info) {
+    if (info.expectedStackDepth) {
+      assert(*info.expectedStackDepth == currentStackDepth);
+    } else {
+      info.expectedStackDepth = currentStackDepth;
+    }
+
+    if (info.expectedFPIDepth) {
+      assert(*info.expectedFPIDepth == fpiStack.size());
+    } else {
+      info.expectedFPIDepth = fpiStack.size();
+    }
   };
 
   auto make_member_key = [&] (MKey mkey) {
@@ -223,6 +251,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
   auto emit_inst = [&] (const Bytecode& inst) {
     auto const startOffset = ue.bcPos();
+    lastOff = startOffset;
 
     FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(&func, inst),
            show(srcLoc(func, inst.srcLoc)));
@@ -238,11 +267,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto emit_branch = [&] (BlockId id) {
       auto& info = blockInfo[id];
 
-      if (info.expectedStackDepth) {
-        assert(*info.expectedStackDepth == currentStackDepth);
-      } else {
-        info.expectedStackDepth = currentStackDepth;
-      }
+      set_expected_depth(info);
 
       if (info.offset != kInvalidOffset) {
         ue.emitInt32(info.offset - startOffset);
@@ -300,10 +325,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto fcall = [&] {
-      auto fpi = fpiStack.back();
-      fpiStack.pop_back();
-      fpi.fcallOff = startOffset;
-      ret.fpiRegions.push_back(fpi);
+      end_fpi(startOffset);
     };
 
     auto ret_assert = [&] { assert(currentStackDepth == 1); };
@@ -466,13 +488,26 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       ue.emitInt32(info.offset - fixup.instrOff, fixup.jmpImmedOff);
     }
 
-    if (info.expectedStackDepth) {
-      currentStackDepth = *info.expectedStackDepth;
+    if (!info.expectedStackDepth) {
+      // unreachable, or entry block
+      info.expectedStackDepth = 0;
     }
+
+    currentStackDepth = *info.expectedStackDepth;
+
+    if (!info.expectedFPIDepth) {
+      // unreachable, or an entry block
+      info.expectedFPIDepth = 0;
+    }
+
+    // deal with fpiRegions that were ended by terminal instructions
+    assert(*info.expectedFPIDepth <= fpiStack.size());
+    while (*info.expectedFPIDepth < fpiStack.size()) end_fpi(lastOff);
 
     for (auto& inst : b->hhbcs) emit_inst(inst);
 
     if (b->fallthrough != NoBlockId) {
+      set_expected_depth(blockInfo[b->fallthrough]);
       if (std::next(blockIt) == endBlockIt ||
           blockIt[1]->id != b->fallthrough) {
         if (b->fallthroughNS) {
@@ -486,6 +521,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     info.past = ue.bcPos();
     FTRACE(2, "      block {} end: {}\n", b->id, info.past);
   }
+
+  while (fpiStack.size()) end_fpi(lastOff);
 
   return ret;
 }
@@ -804,7 +841,7 @@ void emit_finish_func(EmitUnitState& state,
   for (auto& fpi : info.fpiRegions) {
     auto& e = fe.addFPIEnt();
     e.m_fpushOff = fpi.fpushOff;
-    e.m_fcallOff = fpi.fcallOff;
+    e.m_fpiEndOff = fpi.fpiEndOff;
     e.m_fpOff    = fpi.fpDelta;
   }
 

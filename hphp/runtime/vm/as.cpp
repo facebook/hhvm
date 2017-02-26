@@ -633,7 +633,7 @@ struct AsmState {
     auto& ent = fe->addFPIEnt();
     const auto& reg = fpiRegs.back();
     ent.m_fpushOff = reg.fpushOff;
-    ent.m_fcallOff = ue->bcPos();
+    ent.m_fpiEndOff = ue->bcPos();
     ent.m_fpOff = reg.fpOff;
     if (reg.stackDepth->baseValue) {
       ent.m_fpOff += *reg.stackDepth->baseValue;

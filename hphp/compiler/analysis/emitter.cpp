@@ -10275,7 +10275,7 @@ void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
        it != m_fpiRegions.end(); ++it) {
     FPIEnt& e = fe->addFPIEnt();
     e.m_fpushOff = (*it)->m_start;
-    e.m_fcallOff = (*it)->m_end;
+    e.m_fpiEndOff = (*it)->m_end;
     e.m_fpOff = (*it)->m_fpOff;
     delete *it;
   }

@@ -450,7 +450,7 @@ void FuncEmitter::sortFPITab(bool load) {
     fpitab[i].m_parentIndex = -1;
     fpitab[i].m_fpiDepth = 1;
     for (int j = i - 1; j >= 0; j--) {
-      if (fpitab[j].m_fcallOff > fpitab[i].m_fcallOff) {
+      if (fpitab[j].m_fpiEndOff >= fpitab[i].m_fpiEndOff) {
         fpitab[i].m_parentIndex = j;
         fpitab[i].m_fpiDepth = fpitab[j].m_fpiDepth + 1;
         break;

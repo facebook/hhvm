@@ -62,7 +62,9 @@ const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
 const StaticString s_Closure("Closure");
-
+const StaticString s_byRefWarn("Only variables should be passed by reference");
+const StaticString s_byRefError("Only variables can be passed by reference");
+const StaticString s_trigger_error("trigger_error");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1266,7 +1268,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       bc::FPushObjMethodD {
         0,
         s_getInstanceKey.get(),
-        ObjMethodOp::NullThrows
+        ObjMethodOp::NullThrows,
+        false
       },
       bc::FCall { 0 },
       bc::UnboxR {}
@@ -1736,6 +1739,12 @@ void in(ISS& env, const bc::UnsetG& op) {
 
 void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
+  if (auto const func = rfunc.exactFunc()) {
+    if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
+      fpiPush(env, ActRec { FPIKind::Builtin, folly::none, rfunc });
+      return reduce(env, bc::Nop {});
+    }
+  }
   fpiPush(env, ActRec { FPIKind::Func, folly::none, rfunc });
 }
 
@@ -1751,7 +1760,7 @@ void in(ISS& env, const bc::FPushFunc& op) {
       // static calls, because they might fatal (whereas the static one won't).
       if (!rfunc.mightAccessCallerFrame()) {
         return reduce(env, bc::PopC {},
-                           bc::FPushFuncD { op.arg1, name });
+                      bc::FPushFuncD { op.arg1, name, op.has_unpack });
       }
     }
   }
@@ -1768,7 +1777,7 @@ void in(ISS& env, const bc::FPushFuncU& op) {
   if (options.ElideAutoloadInvokes && !rfuncPair.second) {
     return reduce(
       env,
-      bc::FPushFuncD { op.arg1, rfuncPair.first.name() }
+      bc::FPushFuncD { op.arg1, rfuncPair.first.name(), op.has_unpack }
     );
   }
   fpiPush(
@@ -1802,7 +1811,7 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
     return reduce(
       env,
       bc::PopC {},
-      bc::FPushObjMethodD { op.arg1, v1->m_data.pstr, op.subop2 }
+      bc::FPushObjMethodD { op.arg1, v1->m_data.pstr, op.subop2, op.has_unpack }
     );
   }
   popC(env);
@@ -1837,7 +1846,7 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
 void in(ISS& env, const bc::FPushClsMethodF& op) {
   // The difference with FPushClsMethod is what ends up on the
   // ActRec (late-bound class), which we currently aren't tracking.
-  impl(env, bc::FPushClsMethod { op.arg1 });
+  impl(env, bc::FPushClsMethod { op.arg1, op.has_unpack });
 }
 
 void ctorHelper(ISS& env, SString name) {
@@ -1863,7 +1872,7 @@ void in(ISS& env, const bc::FPushCtor& op) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
       return reduce(env, bc::PopA {},
-                         bc::FPushCtorD { op.arg1, dcls.cls.name() });
+                    bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
     }
   }
   popA(env);
@@ -1902,10 +1911,14 @@ void in(ISS& env, const bc::FPassL& op) {
     // now.
     setLocRaw(env, op.loc2, TGen);
     return push(env, TInitGen);
-  case PrepKind::Val: return reduce(env, bc::CGetL { op.loc2 },
-                                         bc::FPassC { op.arg1 });
-  case PrepKind::Ref: return reduce(env, bc::VGetL { op.loc2 },
-                                         bc::FPassVNop { op.arg1 });
+  case PrepKind::Val: return reduce_fpass_arg(env,
+                                              bc::CGetL { op.loc2 },
+                                              op.arg1,
+                                              false);
+  case PrepKind::Ref: return reduce_fpass_arg(env,
+                                              bc::VGetL { op.loc2 },
+                                              op.arg1,
+                                              true);
   }
 }
 
@@ -1917,20 +1930,28 @@ void in(ISS& env, const bc::FPassN& op) {
     killLocals(env);
     mayUseVV(env);
     return push(env, TInitGen);
-  case PrepKind::Val: return reduce(env, bc::CGetN {},
-                                         bc::FPassC { op.arg1 });
-  case PrepKind::Ref: return reduce(env, bc::VGetN {},
-                                         bc::FPassVNop { op.arg1 });
+  case PrepKind::Val: return reduce_fpass_arg(env,
+                                              bc::CGetN {},
+                                              op.arg1,
+                                              false);
+  case PrepKind::Ref: return reduce_fpass_arg(env,
+                                              bc::VGetN {},
+                                              op.arg1,
+                                              true);
   }
 }
 
 void in(ISS& env, const bc::FPassG& op) {
   switch (prepKind(env, op.arg1)) {
   case PrepKind::Unknown: popC(env); return push(env, TInitGen);
-  case PrepKind::Val:     return reduce(env, bc::CGetG {},
-                                             bc::FPassC { op.arg1 });
-  case PrepKind::Ref:     return reduce(env, bc::VGetG {},
-                                             bc::FPassVNop { op.arg1 });
+  case PrepKind::Val:     return reduce_fpass_arg(env,
+                                                  bc::CGetG {},
+                                                  op.arg1,
+                                                  false);
+  case PrepKind::Ref:     return reduce_fpass_arg(env,
+                                                  bc::VGetG {},
+                                                  op.arg1,
+                                                  true);
   }
 }
 
@@ -1956,9 +1977,9 @@ void in(ISS& env, const bc::FPassS& op) {
     }
     return push(env, TInitGen);
   case PrepKind::Val:
-    return reduce(env, bc::CGetS {}, bc::FPassC { op.arg1 });
+    return reduce_fpass_arg(env, bc::CGetS {}, op.arg1, false);
   case PrepKind::Ref:
-    return reduce(env, bc::VGetS {}, bc::FPassVNop { op.arg1 });
+    return reduce_fpass_arg(env, bc::VGetS {}, op.arg1, true);
   }
 }
 
@@ -1969,18 +1990,28 @@ void in(ISS& env, const bc::FPassV& op) {
     popV(env);
     return push(env, TInitGen);
   case PrepKind::Val:
-    return reduce(env, bc::Unbox {}, bc::FPassC { op.arg1 });
+    return reduce_fpass_arg(env, bc::Unbox {}, op.arg1, false);
   case PrepKind::Ref:
-    return reduce(env, bc::FPassVNop { op.arg1 });
+    return reduce_fpass_arg(env, bc::Nop {}, op.arg1, true);
   }
 }
 
 void in(ISS& env, const bc::FPassR& op) {
   nothrow(env);
+  if (fpiTop(env).kind == FPIKind::Builtin) {
+    switch (prepKind(env, op.arg1)) {
+    case PrepKind::Unknown:
+      not_reached();
+    case PrepKind::Val:
+      return reduce(env, bc::UnboxR {});
+    case PrepKind::Ref:
+      return reduce(env, bc::BoxR {});
+    }
+  }
+
   auto const t1 = topT(env);
   if (t1.subtypeOf(TCell)) {
-    return reduce(env, bc::UnboxRNop {},
-                       bc::FPassC { op.arg1 });
+    return reduce_fpass_arg(env, bc::UnboxRNop {}, op.arg1, false);
   }
 
   // If it's known to be a ref, this behaves like FPassV, except we need to do
@@ -1991,9 +2022,9 @@ void in(ISS& env, const bc::FPassR& op) {
       popV(env);
       return push(env, TInitGen);
     case PrepKind::Val:
-      return reduce(env, bc::UnboxR {}, bc::FPassC { op.arg1 });
+      return reduce_fpass_arg(env, bc::UnboxR {}, op.arg1, false);
     case PrepKind::Ref:
-      return reduce(env, bc::BoxRNop {}, bc::FPassVNop { op.arg1 });
+      return reduce_fpass_arg(env, bc::BoxRNop {}, op.arg1, true);
     }
     not_reached();
   }
@@ -2006,19 +2037,63 @@ void in(ISS& env, const bc::FPassR& op) {
   }
 }
 
-void in(ISS& env, const bc::FPassVNop&) { nothrow(env); push(env, popV(env)); }
-void in(ISS& env, const bc::FPassC& op) { nothrow(env); }
+void in(ISS& env, const bc::FPassVNop&) {
+  push(env, popV(env));
+  if (fpiTop(env).kind == FPIKind::Builtin) {
+    return reduce(env, bc::Nop {});
+  }
+  nothrow(env);
+}
+
+void in(ISS& env, const bc::FPassC& op) {
+  if (fpiTop(env).kind == FPIKind::Builtin) {
+    return reduce(env, bc::Nop {});
+  }
+  nothrow(env);
+}
+
+void fpassCXHelper(ISS& env, int param, bool error) {
+  auto const& fpi = fpiTop(env);
+  if (fpi.kind == FPIKind::Builtin) {
+    switch (prepKind(env, param)) {
+      case PrepKind::Unknown:
+        not_reached();
+      case PrepKind::Ref:
+      {
+        auto const& params = fpi.func->exactFunc()->params;
+        if (param >= params.size() || params[param].mustBeRef) {
+          if (error) {
+            return reduce(env,
+                          bc::String { s_byRefError.get() },
+                          bc::Fatal { FatalOp::Runtime });
+          } else {
+            return reduce(env,
+                          bc::String { s_byRefWarn.get() },
+                          bc::Int { k_E_STRICT },
+                          bc::FCallBuiltin { 2, 2, s_trigger_error.get() },
+                          bc::PopC {});
+          }
+        }
+        // fall through
+      }
+      case PrepKind::Val:
+        return reduce(env, bc::Nop {});
+    }
+    not_reached();
+  }
+  switch (prepKind(env, param)) {
+    case PrepKind::Unknown: return;
+    case PrepKind::Val:     return reduce(env, bc::FPassC { param });
+    case PrepKind::Ref:     /* will warn/fatal at runtime */ return;
+  }
+}
 
 void in(ISS& env, const bc::FPassCW& op) {
-  impl(env, bc::FPassCE { op.arg1 });
+  fpassCXHelper(env, op.arg1, false);
 }
 
 void in(ISS& env, const bc::FPassCE& op) {
-  switch (prepKind(env, op.arg1)) {
-  case PrepKind::Unknown: return;
-  case PrepKind::Val:     return reduce(env, bc::FPassC { op.arg1 });
-  case PrepKind::Ref:     /* will warn/fatal at runtime */ return;
-  }
+  fpassCXHelper(env, op.arg1, true);
 }
 
 void pushCallReturnType(ISS& env, const Type& ty) {
@@ -2087,6 +2162,8 @@ void in(ISS& env, const bc::FCall& op) {
         );
       }
       break;
+    case FPIKind::Builtin:
+      return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
     case FPIKind::Ctor:
       /*
        * Need to be wary of old-style ctors. We could get into the situation
@@ -2122,6 +2199,9 @@ void in(ISS& env, const bc::FCall& op) {
 
 void in(ISS& env, const bc::FCallD& op) {
   auto const ar = fpiTop(env);
+  if (ar.kind == FPIKind::Builtin) {
+    return finish_builtin(env, ar.func->exactFunc(), op.arg1, false);
+  }
   if (ar.func) return fcallKnownImpl(env, op.arg1);
   specialFunctionEffects(env, ar);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popF(env);
@@ -2137,8 +2217,14 @@ void in(ISS& env, const bc::FCallAwait& op) {
   env.flags.canConstProp = false;
 }
 
-void fcallArrayImpl(ISS& env) {
-  auto const ar = fpiPop(env);
+void fcallArrayImpl(ISS& env, int arg) {
+  auto const ar = fpiTop(env);
+  if (ar.kind == FPIKind::Builtin) {
+    return finish_builtin(env, ar.func->exactFunc(), arg, true);
+  }
+
+  for (auto i = uint32_t{0}; i < arg; ++i) { popF(env); }
+  fpiPop(env);
   specialFunctionEffects(env, ar);
   if (ar.func) {
     auto const ty = env.index.lookup_return_type(env.ctx, *ar.func);
@@ -2154,13 +2240,11 @@ void fcallArrayImpl(ISS& env) {
 }
 
 void in(ISS& env, const bc::FCallArray& op) {
-  popF(env);
-  fcallArrayImpl(env);
+  fcallArrayImpl(env, 1);
 }
 
 void in(ISS& env, const bc::FCallUnpack& op) {
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) { popF(env); }
-  fcallArrayImpl(env);
+  fcallArrayImpl(env, op.arg1);
 }
 
 void in(ISS& env, const bc::CufSafeArray&) {

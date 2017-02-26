@@ -176,6 +176,19 @@ RunFlags run(Interp&, PropagateFn);
  */
 void default_dispatch(ISS&, const Bytecode&);
 
+/*
+ * Can this call be converted to an FCallBuiltin
+ */
+bool can_emit_builtin(borrowed_ptr<const php::Func> func,
+                      int numParams, bool hasUnpack);
+
+void finish_builtin(ISS& env,
+                    borrowed_ptr<const php::Func> func,
+                    int numParams,
+                    bool unpack);
+
+void reduce_fpass_arg(ISS& env, const Bytecode&, int param, bool byRef);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

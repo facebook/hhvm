@@ -91,6 +91,13 @@ struct FuncAnalysis {
    * happen on the first iteration). We'll need to revisit it.
    */
   bool readsUntrackedConstants{false};
+
+  /*
+   * Flag to indicate that we removed builtins during an optimization
+   * pass. This can affect the fpi state stored in bdata, so we need
+   * to recompute it to prevent errors in later passes.
+   */
+  bool builtinsRemoved{false};
 };
 
 /*

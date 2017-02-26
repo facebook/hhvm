@@ -219,6 +219,13 @@ struct Param {
   bool byRef: 1;
 
   /*
+   * Whether this parameter must be passed by reference.
+   * The FPassCE and FPassCW opcodes will only produce
+   * an error/warnging if this is set.
+   */
+  bool mustBeRef: 1;
+
+  /*
    * Whether this parameter is a variadic capture.
    */
   bool isVariadic: 1;
@@ -360,11 +367,6 @@ struct Func {
    * This generator yields key value pairs.
    */
   bool isPairGenerator : 1;
-
-  /*
-   * This is an HNI function
-   */
-  bool isNative : 1;
 
   bool isMemoizeWrapper : 1;
 

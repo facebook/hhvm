@@ -214,6 +214,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
       }
       return;
     }
+  case FPIKind::Builtin:
     specialFunctionEffects(env, *ar.func);
     if (ar.fallbackFunc) specialFunctionEffects(env, *ar.fallbackFunc);
     break;
@@ -329,8 +330,11 @@ ActRec fpiTop(ISS& env) {
 PrepKind prepKind(ISS& env, uint32_t paramId) {
   auto ar = fpiTop(env);
   if (ar.func && !ar.fallbackFunc) {
-    return env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
+    auto ret = env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
+    assert(ar.kind != FPIKind::Builtin || ret != PrepKind::Unknown);
+    return ret;
   }
+  assert(ar.kind != FPIKind::Builtin);
   return PrepKind::Unknown;
 }
 

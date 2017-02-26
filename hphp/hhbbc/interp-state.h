@@ -49,6 +49,8 @@ enum class FPIKind {
   ObjMeth,     // Definitely a method on an object (possibly __call).
   ClsMeth,     // Definitely a static method on a class (possibly__callStatic).
   ObjInvoke,   // Closure invoke or __invoke on an object.
+  Builtin,     // Resolved builtin call; we will convert params and FCall as
+               // we go
 };
 
 /*

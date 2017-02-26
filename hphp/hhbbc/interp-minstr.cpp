@@ -1736,8 +1736,8 @@ void in(ISS& env, const bc::FPassM& op) {
   auto const vget = bc::VGetM{op.arg2, op.mkey};
 
   if (auto const mode = fpassMode(env, op.arg1)) {
-    return mode == MOpMode::Warn ? reduce(env, cget, bc::FPassC{op.arg1})
-                                 : reduce(env, vget, bc::FPassVNop{op.arg1});
+    return mode == MOpMode::Warn ? reduce_fpass_arg(env, cget, op.arg1, false)
+                                 : reduce_fpass_arg(env, vget, op.arg1, true);
   }
 
   mergePaths(

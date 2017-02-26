@@ -304,6 +304,7 @@ static std::string fpiKindStr(FPIKind k) {
   case FPIKind::ObjMeth:     return "objm";
   case FPIKind::ClsMeth:     return "clsm";
   case FPIKind::ObjInvoke:   return "invoke";
+  case FPIKind::Builtin:     return "builtin";
   }
   not_reached();
 }

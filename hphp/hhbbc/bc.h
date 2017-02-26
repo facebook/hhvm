@@ -487,14 +487,41 @@ namespace imm {
 
 #define PUSH_IDX_A        uint32_t numPush() const { return arg2; }
 
+#define FLAGS_NF
+#define FLAGS_TF
+#define FLAGS_CF
+#define FLAGS_FF
+#define FLAGS_PF bool has_unpack;
+#define FLAGS_CF_TF
+#define FLAGS_CF_FF
+
+#define FLAGS_CTOR_NF
+#define FLAGS_CTOR_TF
+#define FLAGS_CTOR_CF
+#define FLAGS_CTOR_FF
+#define FLAGS_CTOR_PF ,bool hu
+#define FLAGS_CTOR_CF_TF
+#define FLAGS_CTOR_CF_FF
+
+#define FLAGS_INIT_NF
+#define FLAGS_INIT_TF
+#define FLAGS_INIT_CF
+#define FLAGS_INIT_FF
+#define FLAGS_INIT_PF ,has_unpack(hu)
+#define FLAGS_INIT_CF_TF
+#define FLAGS_INIT_CF_FF
+
 #define O(opcode, imms, inputs, outputs, flags) \
   struct opcode {                               \
     static constexpr Op op = Op::opcode;        \
-    explicit opcode ( IMM_CTOR_##imms )         \
+    explicit opcode ( IMM_CTOR_##imms           \
+                      FLAGS_CTOR_##flags)       \
       IMM_INIT_##imms                           \
+      FLAGS_INIT_##flags                        \
     {}                                          \
                                                 \
     IMM_MEM_##imms                              \
+    FLAGS_##flags                               \
     IMM_EXTRA_##imms                            \
     POP_##inputs                                \
     PUSH_##outputs                              \
@@ -525,6 +552,30 @@ namespace imm {
   };
 OPCODES
 #undef O
+
+#undef FLAGS_NA
+#undef FLAGS_TF
+#undef FLAGS_CF
+#undef FLAGS_FF
+#undef FLAGS_PF
+#undef FLAGS_CF_TF
+#undef FLAGS_CF_FF
+
+#undef FLAGS_CTOR_NA
+#undef FLAGS_CTOR_TF
+#undef FLAGS_CTOR_CF
+#undef FLAGS_CTOR_FF
+#undef FLAGS_CTOR_PF
+#undef FLAGS_CTOR_CF_TF
+#undef FLAGS_CTOR_CF_FF
+
+#undef FLAGS_INIT_NA
+#undef FLAGS_INIT_TF
+#undef FLAGS_INIT_CF
+#undef FLAGS_INIT_FF
+#undef FLAGS_INIT_PF
+#undef FLAGS_INIT_CF_TF
+#undef FLAGS_INIT_CF_FF
 
 #undef PUSH_NOV
 #undef PUSH_ONE

@@ -57,6 +57,7 @@ const StaticString s_Closure("Closure");
 const StaticString s_toString("__toString");
 const StaticString s_Stringish("Stringish");
 const StaticString s_86cinit("86cinit");
+const StaticString s_attr_Deprecated("__Deprecated");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -430,6 +431,12 @@ void populate_block(ParseUnitState& puState,
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
+  auto has_call_unpack = [&] {
+    auto const fpi = Func::findFPI(&*fe.fpitab.begin(),
+                                   &*fe.fpitab.end(), pc - ue.bc());
+    auto const op = peek_op(ue.bc() + fpi->m_fpiEndOff);
+    return op == OpFCallArray || op == OpFCallUnpack;
+  };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
@@ -479,21 +486,38 @@ void populate_block(ParseUnitState& puState,
 #define IMM_ARG_FOUR(x, y, z, l)  IMM_ARG(x, 1), IMM_ARG(y, 2), \
                                    IMM_ARG(z, 3), IMM_ARG(l, 4)
 
+#define FLAGS_NF
+#define FLAGS_TF
+#define FLAGS_CF
+#define FLAGS_FF
+#define FLAGS_PF auto hu = has_call_unpack();
+#define FLAGS_CF_TF
+#define FLAGS_CF_FF
 
-#define O(opcode, imms, inputs, outputs, flags)       \
-  case Op::opcode:                                    \
-    {                                                 \
-      auto b = Bytecode {};                           \
-      b.op = Op::opcode;                              \
-      b.srcLoc = srcLocIx;                            \
-      IMM_##imms                                      \
-      new (&b.opcode) bc::opcode { IMM_ARG_##imms };  \
-      if (Op::opcode == Op::DefCls)    defcls(b);     \
-      if (Op::opcode == Op::DefClsNop) defclsnop(b);  \
-      if (Op::opcode == Op::CreateCl)  createcl(b);   \
-      blk.hhbcs.push_back(std::move(b));              \
-      assert(pc == next);                             \
-    }                                                 \
+#define FLAGS_ARG_NF
+#define FLAGS_ARG_TF
+#define FLAGS_ARG_CF
+#define FLAGS_ARG_FF
+#define FLAGS_ARG_PF ,hu
+#define FLAGS_ARG_CF_TF
+#define FLAGS_ARG_CF_FF
+
+#define O(opcode, imms, inputs, outputs, flags)         \
+  case Op::opcode:                                      \
+    {                                                   \
+      auto b = Bytecode {};                             \
+      b.op = Op::opcode;                                \
+      b.srcLoc = srcLocIx;                              \
+      IMM_##imms                                        \
+      FLAGS_##flags                                     \
+      new (&b.opcode) bc::opcode { IMM_ARG_##imms       \
+                                   FLAGS_ARG_##flags }; \
+      if (Op::opcode == Op::DefCls)    defcls(b);       \
+      if (Op::opcode == Op::DefClsNop) defclsnop(b);    \
+      if (Op::opcode == Op::CreateCl)  createcl(b);     \
+      blk.hhbcs.push_back(std::move(b));                \
+      assert(pc == next);                               \
+    }                                                   \
     break;
 
   assert(pc != past);
@@ -544,6 +568,22 @@ void populate_block(ParseUnitState& puState,
   } while (pc != past);
 
 #undef O
+
+#undef FLAGS_NF
+#undef FLAGS_TF
+#undef FLAGS_CF
+#undef FLAGS_FF
+#undef FLAGS_PF
+#undef FLAGS_CF_TF
+#undef FLAGS_CF_FF
+
+#undef FLAGS_ARG_NF
+#undef FLAGS_ARG_TF
+#undef FLAGS_ARG_CF
+#undef FLAGS_ARG_FF
+#undef FLAGS_ARG_PF
+#undef FLAGS_ARG_CF_TF
+#undef FLAGS_ARG_CF_FF
 
 #undef IMM_BLA
 #undef IMM_SLA
@@ -679,6 +719,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         param.userAttributes,
         param.builtinType,
         param.byRef,
+        param.byRef,
         param.variadic
       }
     );
@@ -727,8 +768,9 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isAsync            = fe.isAsync;
   ret->isGenerator        = fe.isGenerator;
   ret->isPairGenerator    = fe.isPairGenerator;
-  ret->isNative           = fe.isNative;
   ret->isMemoizeWrapper   = fe.isMemoizeWrapper;
+
+  add_frame_variables(*ret, fe);
 
   /*
    * Builtin functions get some extra information.  The returnType flag is only
@@ -736,12 +778,34 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
    * still have a folly::none return type.
    */
   if (fe.isNative) {
+    auto const f = [&] () -> HPHP::Func* {
+      if (ret->cls) {
+        auto const cls = Unit::lookupClass(ret->cls->name);
+        return cls ? cls->lookupMethod(ret->name) : nullptr;
+      } else {
+        return Unit::lookupFunc(ret->name);
+      }
+    }();
+
     ret->nativeInfo                   = folly::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType       = fe.hniReturnType;
     ret->nativeInfo->dynCallWrapperId = fe.dynCallWrapperId;
+    if (f && !ret->cls && ret->params.size()) {
+      // There are a handful of functions whose first parameter is by
+      // ref, but which don't require a reference.  There is also
+      // array_multisort, which has this property for all its
+      // parameters; but that
+      if (ret->params[0].byRef && !f->mustBeRef(0)) {
+        ret->params[0].mustBeRef = false;
+      }
+    }
+    if (!f || !f->nativeFuncPtr() ||
+        (f->userAttributes().count(
+          LowStringPtr(s_attr_Deprecated.get())))) {
+      ret->attrs |= AttrNoFCallBuiltin;
+    }
   }
 
-  add_frame_variables(*ret, fe);
   build_cfg(puState, *ret, fe);
 
   return ret;

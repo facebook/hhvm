@@ -855,7 +855,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
-  fe.isNative = func.isNative;
+  fe.isNative = func.nativeInfo != nullptr;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
 
   auto const retTy = state.index.lookup_return_type_raw(&func);
@@ -877,8 +877,7 @@ void emit_finish_func(EmitUnitState& state,
     }
   }
 
-  if (func.isNative) {
-    assert(func.nativeInfo);
+  if (func.nativeInfo) {
     fe.hniReturnType = func.nativeInfo->returnType;
     fe.dynCallWrapperId = func.nativeInfo->dynCallWrapperId;
   }

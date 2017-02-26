@@ -642,8 +642,6 @@ public:
   void visit(FileScopePtr file);
   void assignLocalVariableIds(FunctionScopePtr fs);
   void assignFinallyVariableIds();
-  void fixReturnType(Emitter& e, FunctionCallPtr fn,
-                     Func* builtinFunc = nullptr);
 
   void listAssignmentVisitLHS(Emitter& e, ExpressionPtr exp,
                               IndexChain& indexChain,
@@ -1014,22 +1012,16 @@ public:
   };
 
   bool emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr node);
-  Func* canEmitBuiltinCall(const std::string& name,
-                           int numParams,
-                           AnalysisResultConstPtr ar,
-                           ExpressionListPtr& params);
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
   bool emitConstantFuncCall(Emitter& e, SimpleFunctionCallPtr call);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                        bool isUnpack);
-  bool emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
-                          bool byRef, bool mustBeRef);
+  void emitClosureUseVar(Emitter& e, ExpressionPtr exp, int paramId,
+                         bool byRef);
   bool emitScalarValue(Emitter& e, const Variant& value);
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);
-  void emitBuiltinDefaultArg(Emitter& e, Variant& v,
-                             MaybeDataType t, int paramId);
   Id emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
   Id emitTypedef(Emitter& e, TypedefStatementPtr);
   void emitForeachListAssignment(Emitter& e,
@@ -3672,41 +3664,6 @@ static StringData* getClassName(ExpressionPtr e) {
   return nullptr;
 }
 
-void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
-                                   Func* builtinFunc) {
-  int ref = -1;
-  if (fn->hasAnyContext(Expression::RefValue |
-                        Expression::DeepReference |
-                        Expression::LValue |
-                        Expression::OprLValue |
-                        Expression::UnsetContext)) {
-    return;
-  }
-  if (builtinFunc) {
-    ref = (builtinFunc->attrs() & AttrReference) != 0;
-  } else if (fn->isValid() && fn->getFuncScope()) {
-    ref = fn->getFuncScope()->isRefReturn();
-  } else if (!fn->getOriginalName().empty()) {
-    FunctionScope::FunctionInfoPtr fi =
-      FunctionScope::GetFunctionInfo(fn->getOriginalName());
-    if (!fi || !fi->getMaybeRefReturn()) ref = false;
-  }
-
-  if (!fn->isUnused() &&
-      ref >= 0 &&
-      (!ref || !fn->hasAnyContext(Expression::AccessContext |
-                                  Expression::ObjectContext))) {
-    /* we dont support V in M-vectors, so leave it as an R in that
-       case */
-    assert(m_evalStack.get(m_evalStack.size() - 1) == StackSym::R);
-    if (ref) {
-      e.BoxRNop();
-    } else {
-      e.UnboxRNop();
-    }
-  }
-}
-
 void EmitterVisitor::visitKids(ConstructPtr c) {
   for (int i = 0, nk = c->getKidCount(); i < nk; i++) {
     ConstructPtr kid(c->getNthKid(i));
@@ -5727,8 +5684,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     for (int i = 0; i < useCount; ++i) {
       ce->type() == ClosureType::Short
         ? emitLambdaCaptureArg(e, (*valuesList)[i])
-        : (void)emitBuiltinCallArg(e, (*valuesList)[i], i,
-                                   useVars[i].second, false);
+        : emitClosureUseVar(e, (*valuesList)[i], i, useVars[i].second);
     }
 
     // Create a new class to hold the closure.
@@ -6768,42 +6724,17 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
   return PassByRefKind::ErrorOnCell;
 }
 
-bool EmitterVisitor::emitBuiltinCallArg(Emitter& e,
-                                        ExpressionPtr exp,
-                                        int paramId,
-                                        bool byRef,
-                                        bool mustBeRef) {
+void EmitterVisitor::emitClosureUseVar(Emitter& e,
+                                       ExpressionPtr exp,
+                                       int paramId,
+                                       bool byRef) {
   visit(exp);
-  if (checkIfStackEmpty("Builtin arg*")) return true;
+  if (checkIfStackEmpty("Closure Use Var*")) return;
   if (byRef) {
-    auto wasCell = emitVGet(e, true);
-    if (wasCell && mustBeRef) {
-      auto kind = getPassByRefKind(exp);
-      switch (kind) {
-        case PassByRefKind::AllowCell:
-          // nop
-          break;
-        case PassByRefKind::WarnOnCell:
-          e.String(
-            makeStaticString("Only variables should be passed by reference"));
-          e.Int(k_E_STRICT);
-          e.FCallBuiltin(2, 2, s_trigger_error.get());
-          emitPop(e);
-          break;
-        case PassByRefKind::ErrorOnCell:
-          auto save = m_evalStack;
-          e.String(
-            makeStaticString("Only variables can be passed by reference"));
-          e.Fatal(FatalOp::Runtime);
-          m_evalStackIsUnknown = false;
-          m_evalStack = save;
-          return false;
-      }
-    }
+    emitVGet(e, true);
   } else {
     emitCGet(e);
   }
-  return true;
 }
 
 static bool isNormalLocalVariable(const ExpressionPtr& expr) {
@@ -6824,100 +6755,6 @@ void EmitterVisitor::emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp) {
   Id locId = m_curFunc->lookupVarId(makeStaticString(sv->getName()));
   emitVirtualLocal(locId);
   e.CUGetL(locId);
-}
-
-void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
-                                           MaybeDataType t, int paramId) {
-  switch (v.getType()) {
-    case KindOfNull:
-      if (t) {
-        [&] {
-          switch (*t) {
-            case KindOfPersistentString:
-            case KindOfString:
-            case KindOfPersistentVec:
-            case KindOfVec:
-            case KindOfPersistentDict:
-            case KindOfDict:
-            case KindOfPersistentKeyset:
-            case KindOfKeyset:
-            case KindOfPersistentArray:
-            case KindOfArray:
-            case KindOfObject:
-            case KindOfResource:
-              e.Int(0);
-              return;
-            case KindOfUninit:
-            case KindOfNull:
-            case KindOfBoolean:
-            case KindOfInt64:
-            case KindOfDouble:
-            case KindOfRef:
-            case KindOfClass:
-              break;
-          }
-          not_reached();
-        }();
-      } else {
-        e.NullUninit();
-      }
-      return;
-
-    case KindOfBoolean:
-      if (v.getBoolean()) {
-        e.True();
-      } else {
-        e.False();
-      }
-      return;
-
-    case KindOfInt64:
-      e.Int(v.getInt64());
-      return;
-
-    case KindOfDouble:
-      e.Double(v.toDouble());
-      return;
-
-    case KindOfPersistentString:
-    case KindOfString: {
-      StringData *nValue = makeStaticString(v.getStringData());
-      e.String(nValue);
-      return;
-    }
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-      assert(v.isVecArray());
-      e.Vec(v.getArrayData());
-      return;
-
-    case KindOfPersistentDict:
-    case KindOfDict:
-      assert(v.isDict());
-      e.Dict(v.getArrayData());
-      return;
-
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      assert(v.isKeyset());
-      e.Keyset(v.getArrayData());
-      return;
-
-    case KindOfPersistentArray:
-    case KindOfArray:
-      assert(v.isPHPArray());
-      e.Array(v.getArrayData());
-      return;
-
-    case KindOfUninit:
-    case KindOfObject:
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      break;
-  }
-  not_reached();
 }
 
 void EmitterVisitor::emitFuncCallArg(Emitter& e,
@@ -9138,79 +8975,6 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
   return true;
 }
 
-Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
-                                         int numParams,
-                                         AnalysisResultConstPtr ar,
-                                         ExpressionListPtr& funcParams) {
-  if (RuntimeOption::EvalJitEnableRenameFunction ||
-      !RuntimeOption::EvalEnableCallBuiltin) {
-    return nullptr;
-  }
-  if (RuntimeOption::DynamicInvokeFunctions.count(name)) {
-    return nullptr;
-  }
-  Func* f = Unit::lookupFunc(makeStaticString(name));
-  if (!f ||
-      (f->attrs() & AttrNoFCallBuiltin) ||
-      !f->nativeFuncPtr() ||
-      f->isMethod() ||
-      (f->numParams() > Native::maxFCallBuiltinArgs()) ||
-      (f->userAttributes().count(
-        LowStringPtr(s_attr_Deprecated.get())))) return nullptr;
-
-  auto variadic = f->hasVariadicCaptureParam();
-
-  // Only allowed to overrun the signature if we have somewhere to put it
-  if ((numParams > f->numParams()) && !variadic) return nullptr;
-
-  if ((f->hniReturnType() == KindOfDouble) &&
-       !Native::allowFCallBuiltinDoubles()) return nullptr;
-
-  bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
-  auto concrete_params = f->numParams();
-  if (variadic) {
-    assertx(concrete_params > 0);
-    --concrete_params;
-  }
-
-  auto params = [&]{
-    auto funcScope = ar->findFunction(name);
-    if (!funcScope) return ExpressionListPtr();
-    auto stmt = funcScope->getStmt();
-    if (!stmt) return ExpressionListPtr();
-    auto methStmt = dynamic_pointer_cast<MethodStatement>(stmt);
-    if (!methStmt) return ExpressionListPtr();
-    return methStmt->getParams();
-  }();
-
-  for (int i = 0; i < concrete_params; i++) {
-    if ((!allowDoubleArgs) &&
-        (f->params()[i].builtinType == KindOfDouble)) {
-      return nullptr;
-    }
-    if (i >= numParams) {
-      auto &pi = f->params()[i];
-      if (pi.isVariadic()) continue;
-      if (!pi.hasDefaultValue()) {
-        return nullptr;
-      }
-      if (pi.defaultValue.m_type == KindOfUninit) {
-        if (!params || i >= params->getCount()) return nullptr;
-        auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-        if (!param) return nullptr;
-        auto value = param->defaultValue();
-        if (!value || !value->isScalar()) return nullptr;
-        Variant scalarValue;
-        if (!value->getScalarValue(scalarValue) ||
-            !scalarValue.isAllowedAsConstantValue()) return nullptr;
-      }
-    }
-  }
-
-  funcParams = params;
-  return f;
-}
-
 void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
                                   const char* nameOverride,
                                   ExpressionListPtr paramsOverride) {
@@ -9220,10 +8984,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   ExpressionListPtr params(paramsOverride ? paramsOverride :
                                             node->getParams());
   int numParams = params ? params->getCount() : 0;
-  auto const unpack = node->hasUnpack();
-  assert(!paramsOverride || !unpack);
 
-  Func* fcallBuiltin = nullptr;
   ExpressionListPtr funcParams;
   StringData* nLiteral = nullptr;
   Offset fpiStart = 0;
@@ -9261,18 +9022,6 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = makeStaticString(nameStr);
-    fcallBuiltin = canEmitBuiltinCall(
-      nameStr,
-      numParams,
-      node->getFileScope()->getContainingProgram(),
-      funcParams
-    );
-    if (unpack &&
-        fcallBuiltin &&
-        (!fcallBuiltin->hasVariadicCaptureParam() ||
-         numParams != fcallBuiltin->numParams())) {
-      fcallBuiltin = nullptr;
-    }
     StringData* nsName = nullptr;
     if (!node->hadBackslash() && !nameOverride) {
       // nameOverride is to be used only when there's an exact function
@@ -9281,18 +9030,15 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       if (nonNSName != nameStr) {
         nsName = nLiteral;
         nLiteral = makeStaticString(nonNSName);
-        fcallBuiltin = nullptr;
       }
     }
 
-    if (!fcallBuiltin) {
-      fpiStart = m_ue.bcPos();
-      if (nsName == nullptr) {
-        e.FPushFuncD(numParams, nLiteral);
-      } else {
-        assert(!nameOverride);
-        e.FPushFuncU(numParams, nsName, nLiteral);
-      }
+    fpiStart = m_ue.bcPos();
+    if (nsName == nullptr) {
+      e.FPushFuncD(numParams, nLiteral);
+    } else {
+      assert(!nameOverride);
+      e.FPushFuncU(numParams, nsName, nLiteral);
     }
   } else {
     // $foo()
@@ -9302,66 +9048,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     fpiStart = m_ue.bcPos();
     e.FPushFunc(numParams);
   }
-  if (fcallBuiltin) {
-    auto variadic = !unpack && fcallBuiltin->hasVariadicCaptureParam();
-    assertx((numParams <= fcallBuiltin->numParams()) || variadic);
-
-    auto concreteParams = fcallBuiltin->numParams();
-    if (variadic) {
-      assertx(concreteParams > 0);
-      --concreteParams;
-    }
-
-    int i = 0;
-    for (; i < numParams; i++) {
-      // for builtin calls, since we don't push the ActRec, we
-      // must determine the reffiness statically
-      bool byRef = fcallBuiltin->byRef(i);
-      bool mustBeRef = fcallBuiltin->mustBeRef(i);
-      if (!emitBuiltinCallArg(e, (*params)[i], i, byRef, mustBeRef)) {
-        while (i--) emitPop(e);
-        return;
-      }
-    }
-
-    for (; i < concreteParams; i++) {
-      auto &pi = fcallBuiltin->params()[i];
-      assert(pi.hasDefaultValue());
-      auto &def = pi.defaultValue;
-      if (def.m_type == KindOfUninit) {
-        assert(funcParams && i < funcParams->getCount());
-        auto param =
-          dynamic_pointer_cast<ParameterExpression>((*funcParams)[i]);
-        assert(param &&
-               param->defaultValue() &&
-               param->defaultValue()->isScalar());
-        Variant scalarValue;
-        DEBUG_ONLY bool success =
-          param->defaultValue()->getScalarValue(scalarValue);
-        assert(success && scalarValue.isAllowedAsConstantValue());
-        emitBuiltinDefaultArg(e, scalarValue, pi.builtinType, i);
-      } else {
-        emitBuiltinDefaultArg(e, tvAsVariant(const_cast<TypedValue*>(&def)),
-                              pi.builtinType, i);
-      }
-    }
-
-    if (variadic) {
-      if (numParams <= concreteParams) {
-        e.Array(staticEmptyArray());
-      } else {
-        e.NewPackedArray(numParams - concreteParams);
-      }
-    }
-    e.FCallBuiltin(fcallBuiltin->numParams(),
-                   std::min<int32_t>(numParams, fcallBuiltin->numParams()),
-                   nLiteral);
-  } else {
-    emitCall(e, node, params, fpiStart);
-  }
-  if (fcallBuiltin) {
-    fixReturnType(e, node, fcallBuiltin);
-  }
+  emitCall(e, node, params, fpiStart);
 }
 
 bool EmitterVisitor::emitConstantFuncCall(Emitter& e,

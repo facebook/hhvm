@@ -662,8 +662,9 @@ and from_stmt ~continue_label ~break_label verify_return st =
       from_expr e;
       instr (IContFlow Throw);
     ]
-  | A.Try (tb, cl, fb) ->
-    from_try ~continue_label ~break_label verify_return tb cl fb
+  | A.Try (try_block, catch_list, finally_block) ->
+    from_try ~continue_label ~break_label
+      verify_return try_block catch_list finally_block
   | A.Switch (e, cl) ->
     let switched = from_expr e in
     let end_label = Label.get_next_label () in
@@ -698,9 +699,10 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Fallthrough
   | A.Noop -> empty
 
-and from_try  ~continue_label ~break_label verify_return tb cl fb =
-  let catch_exists = List.length cl <> 0 in
-  let finally_exists = fb <> [] in
+and from_try  ~continue_label ~break_label verify_return
+  try_block catch_list finally_block =
+  let catch_exists = List.length catch_list <> 0 in
+  let finally_exists = finally_block <> [] in
 
   let l0 = Label.get_next_label () in
   let new_continue_label =
@@ -715,12 +717,12 @@ and from_try  ~continue_label ~break_label verify_return tb cl fb =
       ~continue_label:new_continue_label
       ~break_label:new_break_label
       verify_return
-      (A.Block tb)
+      (A.Block try_block)
   in
-  let try_body = gather [try_body; instr (IContFlow (Jmp l0));] in
+  let try_body = gather [try_body; instr_jmp l0;] in
   let try_body_list = instr_seq_to_list try_body in
   let catches =
-    List.map cl
+    List.map catch_list
     ~f:(from_catch
         ~continue_label:new_continue_label
         ~break_label:new_break_label
@@ -732,23 +734,22 @@ and from_try  ~continue_label ~break_label verify_return tb cl fb =
     List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x)
   in
   let catch_instr = List.concat catch_blocks in
-  (* TODO: What happens to finally needs? *)
   let finally_body =
     from_stmt
       ~continue_label
       ~break_label
       verify_return
-      (A.Block fb)
+      (A.Block finally_block)
   in
   let fault_body =
     if finally_exists
     then
       instr_seq_to_list @@ gather [
         (* TODO: What are these unnamed locals? *)
-        instr (IMutator (UnsetL (Local_unnamed 0)));
-        instr (IMutator (UnsetL (Local_unnamed 0)));
+        instr_unsetl_unnamed 0;
+        instr_unsetl_unnamed 0;
         finally_body;
-        instr (IContFlow Unwind);
+        instr_unwind;
       ]
 
     else []
@@ -776,7 +777,7 @@ and from_try  ~continue_label ~break_label verify_return tb cl fb =
   in
   gather [
     init;
-    instr (ILabel l0);
+    instr_label l0;
     finally_body;
   ]
 

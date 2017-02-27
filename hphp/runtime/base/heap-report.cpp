@@ -141,7 +141,7 @@ void printHeapReport(const HeapGraph& g, const char* phase) {
     count(i, allocd, freed);
   }
   std::vector<int> parents(g.nodes.size(), -1);
-  dfs_ptrs(g, g.roots, [&](int node, int ptr) {
+  dfs_ptrs(g, g.root_ptrs, [&](int node, int ptr) {
     parents[node] = ptr;
     count(node, live, undead);
     auto h = g.nodes[node].h;

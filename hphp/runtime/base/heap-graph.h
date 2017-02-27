@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <cstddef>
 
 namespace HPHP {
 
@@ -46,8 +47,10 @@ struct HeapGraph {
     Implicit, // exactly-marked but not counted
     Ambiguous, // any ambiguous pointer into a valid object
   };
+  static constexpr auto NumPtrKinds = 3;
   struct Node {
     const Header* h;
+    size_t size; // allocated size including size-class padding
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
   };
@@ -59,7 +62,7 @@ struct HeapGraph {
   };
   std::vector<Node> nodes;
   std::vector<Ptr> ptrs;
-  std::vector<int> roots; // ptr ids. ptr.from = -1, ptr.to = object
+  std::vector<int> root_ptrs; // ptr ids. ptr.from = -1, ptr.to = object
 
   template<class F> void eachSuccNode(int n, F f) const {
     eachOutPtr(n, [&](int p) { f(ptrs[p].to); });
@@ -83,8 +86,8 @@ struct HeapGraph {
     }
   }
 
-  template<class F> void eachRoot(F f) const {
-    for (auto p : roots) f(ptrs[p]);
+  template<class F> void eachRootPtr(F f) const {
+    for (auto p : root_ptrs) f(ptrs[p]);
   }
 };
 

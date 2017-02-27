@@ -64,7 +64,7 @@ void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
     HeapGraph::Ptr{-1, to, -1, to_node.first_in, ptr_kind, description}
   );
   to_node.first_in = e;
-  g.roots.push_back(e);
+  g.root_ptrs.push_back(e);
 }
 } // anon namespace
 
@@ -75,7 +75,7 @@ void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
 // why the node is reachable. parent[k] == -1 for unreachable nodes.
 std::vector<int> makeParentTree(const HeapGraph& g) {
   std::vector<int> parents(g.nodes.size(), -1);
-  dfs_ptrs(g, g.roots, [&](int node, int ptr) {
+  dfs_ptrs(g, g.root_ptrs, [&](int node, int ptr) {
     parents[node] = ptr;
   });
   return parents;
@@ -99,8 +99,8 @@ HeapGraph makeHeapGraph(bool include_free) {
 
   // initialize nodes by iterating over PtrMap's regions
   g.nodes.reserve(blocks.size());
-  blocks.iterate([&](const Header* h, size_t) {
-    g.nodes.push_back(HeapGraph::Node{h, -1, -1});
+  blocks.iterate([&](const Header* h, size_t size) {
+    g.nodes.push_back(HeapGraph::Node{h, size, -1, -1});
   });
   type_scan::Scanner type_scanner;
 
@@ -155,7 +155,7 @@ HeapGraph makeHeapGraph(bool include_free) {
   }
   g.nodes.shrink_to_fit();
   g.ptrs.shrink_to_fit();
-  g.roots.shrink_to_fit();
+  g.root_ptrs.shrink_to_fit();
   return g;
 }
 

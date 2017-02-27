@@ -663,86 +663,7 @@ and from_stmt ~continue_label ~break_label verify_return st =
       instr (IContFlow Throw);
     ]
   | A.Try (tb, cl, fb) ->
-    let catch_exists = List.length cl <> 0 in
-    let finally_exists = fb <> [] in
-
-    let l0 = Label.get_next_label () in
-    let new_continue_label =
-      if finally_exists then Some l0 else continue_label
-    in
-    let new_break_label =
-      if finally_exists then Some l0 else break_label
-    in
-    (* TODO: Combine needs of catch and try block *)
-    let try_body =
-      from_stmt
-        ~continue_label:new_continue_label
-        ~break_label:new_break_label
-        verify_return
-        (A.Block tb)
-    in
-    let try_body = gather [try_body; instr (IContFlow (Jmp l0));] in
-    let try_body_list = instr_seq_to_list try_body in
-    let catches =
-      List.map cl
-      ~f:(from_catch
-          ~continue_label:new_continue_label
-          ~break_label:new_break_label
-          verify_return
-          l0)
-    in
-    let catch_meta_data = List.rev @@ List.map catches ~f:snd in
-    let catch_blocks =
-      List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x)
-    in
-    let catch_instr = List.concat catch_blocks in
-    (* TODO: What happens to finally needs? *)
-    let finally_body =
-      from_stmt
-        ~continue_label
-        ~break_label
-        verify_return
-        (A.Block fb)
-    in
-    let fault_body =
-      if finally_exists
-      then
-        instr_seq_to_list @@ gather [
-          (* TODO: What are these unnamed locals? *)
-          instr (IMutator (UnsetL (Local_unnamed 0)));
-          instr (IMutator (UnsetL (Local_unnamed 0)));
-          finally_body;
-          instr (IContFlow Unwind);
-        ]
-
-      else []
-    in
-    let init =
-      if finally_exists && catch_exists
-      then
-        let f1 = Label.get_next_label () in
-        let rest =
-          ITryCatch (catch_meta_data, try_body_list)
-          :: catch_instr
-        in
-        let f1_label = IExceptionLabel (f1, FaultL) in
-        instr (ITryFault (f1, rest, f1_label :: fault_body))
-      else if finally_exists
-      then
-        let f1 = Label.get_next_label () in
-        let f1_label = IExceptionLabel (f1, FaultL) in
-        instr (ITryFault (f1, try_body_list, f1_label :: fault_body))
-      else if catch_exists
-      then
-        instrs @@ ITryCatch (catch_meta_data, try_body_list) :: catch_instr
-      else
-        failwith "Impossible for finally and catch to both not exist"
-    in
-    gather [
-      init;
-      instr (ILabel l0);
-      finally_body;
-    ]
+    from_try ~continue_label ~break_label verify_return tb cl fb
   | A.Switch (e, cl) ->
     let switched = from_expr e in
     let end_label = Label.get_next_label () in
@@ -776,6 +697,88 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Unsafe
   | A.Fallthrough
   | A.Noop -> empty
+
+and from_try  ~continue_label ~break_label verify_return tb cl fb =
+  let catch_exists = List.length cl <> 0 in
+  let finally_exists = fb <> [] in
+
+  let l0 = Label.get_next_label () in
+  let new_continue_label =
+    if finally_exists then Some l0 else continue_label
+  in
+  let new_break_label =
+    if finally_exists then Some l0 else break_label
+  in
+  (* TODO: Combine needs of catch and try block *)
+  let try_body =
+    from_stmt
+      ~continue_label:new_continue_label
+      ~break_label:new_break_label
+      verify_return
+      (A.Block tb)
+  in
+  let try_body = gather [try_body; instr (IContFlow (Jmp l0));] in
+  let try_body_list = instr_seq_to_list try_body in
+  let catches =
+    List.map cl
+    ~f:(from_catch
+        ~continue_label:new_continue_label
+        ~break_label:new_break_label
+        verify_return
+        l0)
+  in
+  let catch_meta_data = List.rev @@ List.map catches ~f:snd in
+  let catch_blocks =
+    List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x)
+  in
+  let catch_instr = List.concat catch_blocks in
+  (* TODO: What happens to finally needs? *)
+  let finally_body =
+    from_stmt
+      ~continue_label
+      ~break_label
+      verify_return
+      (A.Block fb)
+  in
+  let fault_body =
+    if finally_exists
+    then
+      instr_seq_to_list @@ gather [
+        (* TODO: What are these unnamed locals? *)
+        instr (IMutator (UnsetL (Local_unnamed 0)));
+        instr (IMutator (UnsetL (Local_unnamed 0)));
+        finally_body;
+        instr (IContFlow Unwind);
+      ]
+
+    else []
+  in
+  let init =
+    if finally_exists && catch_exists
+    then
+      let f1 = Label.get_next_label () in
+      let rest =
+        ITryCatch (catch_meta_data, try_body_list)
+        :: catch_instr
+      in
+      let f1_label = IExceptionLabel (f1, FaultL) in
+      instr (ITryFault (f1, rest, f1_label :: fault_body))
+    else if finally_exists
+    then
+      let f1 = Label.get_next_label () in
+      let f1_label = IExceptionLabel (f1, FaultL) in
+      instr (ITryFault (f1, try_body_list, f1_label :: fault_body))
+    else if catch_exists
+    then
+      instrs @@ ITryCatch (catch_meta_data, try_body_list) :: catch_instr
+    else
+      failwith "Impossible for finally and catch to both not exist"
+  in
+  gather [
+    init;
+    instr (ILabel l0);
+    finally_body;
+  ]
 
 and get_foreach_lvalue e =
   match e with

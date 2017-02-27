@@ -66,7 +66,7 @@ function array_combine($keys, $values);
 function array_count_values($input);
 function array_column<Tk as arraykey, Tv>(
   array<array<Tk, Tv>> $array,
-  Tk $column_key,
+  ?Tk $column_key,
   ?Tk $index_key = null,
 ): array;
 function array_fill_keys($keys, $value);

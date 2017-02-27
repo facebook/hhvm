@@ -679,7 +679,6 @@ module Typing                               = struct
   let instanceof_always_false               = 4159 (* DONT MODIFY!!!! *)
   let instanceof_always_true                = 4160 (* DONT MODIFY!!!! *)
   let ambiguous_member                      = 4161 (* DONT MODIFY!!!! *)
-  let instanceof_generic_classname          = 4162 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2026,10 +2025,6 @@ let instanceof_always_false pos =
 let instanceof_always_true pos =
   add Typing.instanceof_always_true pos
     "This 'instanceof' test will always succeed"
-
-let instanceof_generic_classname pos =
-  add Typing.instanceof_generic_classname pos
-    "'instanceof' cannot be used on a generic classname because types are erased at runtime"
 
 
 (*****************************************************************************)

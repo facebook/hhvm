@@ -18,4 +18,6 @@ let experimental_feature_enabled =
 let default = GlobalOptions.default
 let make_permissive = GlobalOptions.make_permissive
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
+let experimental_optional_shape_field =
+  GlobalOptions.tco_experimental_optional_shape_field
 let experimental_all = GlobalOptions.tco_experimental_all

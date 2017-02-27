@@ -318,7 +318,17 @@ and hint_ env p = function
       );
       ()
   | Hshape fdl ->
-      ShapeMap.iter (fun _ v -> hint env v) fdl
+      let optional_shape_field_enabled =
+        TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env.tenv)
+          TypecheckerOptions.experimental_optional_shape_field in
+
+      let compute_hint_for_shape_field_info _ { sfi_optional; sfi_hint } =
+        (if sfi_optional && not optional_shape_field_enabled
+        then Errors.optional_shape_fields_not_supported p);
+        hint env sfi_hint in
+
+      ShapeMap.iter compute_hint_for_shape_field_info fdl
 
 and check_params env p x params hl =
   let arity = List.length params in
@@ -611,7 +621,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
         List.iter tyl check_tparams;
         check_tparams ty_
     | Happly (_, tyl) -> List.iter tyl check_tparams
-    | Hshape fdl -> ShapeMap.iter (fun _ v -> check_tparams v) fdl
+    | Hshape fdl -> ShapeMap.iter (fun _ v -> check_tparams v.sfi_hint) fdl
     | Haccess (root_ty, _) ->
         check_tparams root_ty
 

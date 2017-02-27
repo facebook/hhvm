@@ -938,9 +938,10 @@ let rec fmt_hint (_, h) =
       | A.SFlit (_, s) -> "'" ^ s ^ "'"
       | A.SFclass_const ((_, s1), (_, s2)) -> fmt_name s1 ^ "::" ^ s2
     in
+    let format_shape_field (k, { N.sfi_hint; _ }) =
+      fmt_field k ^ "=>" ^ fmt_hint sfi_hint in
     let shape_fields =
-      List.map ~f:(fun (k, h) -> fmt_field k ^ "=>" ^ fmt_hint h)
-        (extract_shape_fields smap) in
+      List.map ~f:format_shape_field (extract_shape_fields smap) in
     "HH\\shape(" ^ String.concat ", " shape_fields ^ ")"
 
 let rec hint_to_type_constraint tparams (_, h) =

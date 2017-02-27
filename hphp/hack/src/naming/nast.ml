@@ -30,7 +30,7 @@ and hint_ =
   | Hfun of hint list * bool * hint
   | Htuple of hint list
   | Happly of sid * hint list
-  | Hshape of hint ShapeMap.t
+  | Hshape of shape_field_info ShapeMap.t
 
  (* This represents the use of a type const. Type consts are accessed like
   * regular consts in Hack, i.e.
@@ -72,6 +72,11 @@ and tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
+
+and shape_field_info = {
+  sfi_optional: bool;
+  sfi_hint : hint;
+}
 
 type og_null_flavor =
   | OG_nullthrows

@@ -126,10 +126,13 @@ and hint_ f = function
     Hfun (List.map hl (hint f), b, hint f h)
   | Happly (sid, hl) -> Happly (pstring f sid, List.map hl (hint f))
   | Hshape sm ->
-    let sm = ShapeMap.fold begin fun sf h acc ->
+    let sm = ShapeMap.fold begin fun sf shape_field_info acc ->
+      let map_over_shape_field_info ~f shape_field_info =
+        { shape_field_info with sfi_hint=f shape_field_info.sfi_hint } in
       let sf = shape_field f sf in
-      let h = hint f h in
-      ShapeMap.add sf h acc
+      let h = hint f in
+      let shape_field_info = map_over_shape_field_info ~f:h shape_field_info in
+      ShapeMap.add sf shape_field_info acc
     end sm ShapeMap.empty in
     Hshape sm
   | Haccess (h, sids) -> Haccess (hint f h, List.map sids (pstring f))

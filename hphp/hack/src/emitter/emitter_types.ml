@@ -66,9 +66,10 @@ let rec fmt_hint (_, h) =
       | Ast.SFlit (_, s) -> "'" ^ s ^ "'"
       | Ast.SFclass_const ((_, s1), (_, s2)) -> C.fmt_name s1 ^ "::" ^ s2
     in
+    let format_shape_field (k, { N.sfi_hint; _ }) =
+      fmt_field k ^ "=>" ^ fmt_hint sfi_hint in
     let shape_fields =
-      List.map ~f:(fun (k, h) -> fmt_field k ^ "=>" ^ fmt_hint h)
-        (C.extract_shape_fields smap) in
+      List.map ~f:format_shape_field (C.extract_shape_fields smap) in
     "HH\\shape(" ^ String.concat ", " shape_fields ^ ")"
 
 

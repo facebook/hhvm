@@ -686,6 +686,12 @@ module Make (GetLocals : GetLocals) = struct
     p, hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
       is_static_var env h
 
+  and shape_field_to_shape_field_info env { sf_optional; sf_name=_; sf_hint } =
+    N.{
+      sfi_optional=sf_optional;
+      sfi_hint=hint env sf_hint;
+    }
+
   and hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
         is_static_var env x =
     let hint =
@@ -736,18 +742,11 @@ module Make (GetLocals : GetLocals) = struct
     | Hshape fdl -> N.Hshape
       begin
         List.fold_left fdl ~init:ShapeMap.empty ~f:begin fun fdm shape_field ->
-          match shape_field with
-          | { sf_optional=false; sf_name; sf_hint} ->
-            let pos, name = convert_shape_name env sf_name in
-            if ShapeMap.mem name fdm
-            then Errors.fd_name_already_bound pos;
-            ShapeMap.add name (hint env sf_hint) fdm
-          | { sf_optional=true; sf_name; _} ->
-            (* TODO(tingley): Rework the ShapeMap so that it can accommodate
-               naming for optional shape fields. *)
-            let pos, _ = convert_shape_name env sf_name in
-            Errors.optional_shape_fields_not_supported pos;
-            fdm
+          let pos, name = convert_shape_name env shape_field.sf_name in
+          if ShapeMap.mem name fdm
+          then Errors.fd_name_already_bound pos;
+          ShapeMap.add
+            name (shape_field_to_shape_field_info env shape_field) fdm
         end
     end
 

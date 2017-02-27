@@ -35,10 +35,18 @@ type t = {
 }
 
 let tco_experimental_instanceof = "instanceof"
+
+(* Whether opetional shape fields are enabled. Please see t16016001 for more
+   background on this feature. *)
+let tco_experimental_optional_shape_field = "optional_shape_field"
+
 let tco_experimental_all =
  List.fold_left
    (fun acc x -> SSet.add x acc) SSet.empty
-   [tco_experimental_instanceof]
+   [
+     tco_experimental_instanceof;
+     tco_experimental_optional_shape_field
+   ]
 
 let default = {
  tco_assume_php = true;

@@ -4224,12 +4224,16 @@ and condition env tparamet =
           Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Tany])
         ) then () else Async.enforce_not_awaitable env (fst ivar) x_ty;
 
+      let safe_instanceof_enabled =
+        TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env) TypecheckerOptions.experimental_instanceof in
       let rec resolve_obj env obj_ty =
         (* Expand so that we don't modify x *)
         let env, obj_ty = Env.expand_type env obj_ty in
         match obj_ty with
-        | _, Tabstract (AKgeneric _, _) ->
-          Errors.instanceof_generic_classname p;
+        | _, Tabstract (AKgeneric name, _) ->
+          if safe_instanceof_enabled
+          then Errors.instanceof_generic_classname p name;
           env, obj_ty
         | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
           let obj_ty =
@@ -4273,10 +4277,7 @@ and condition env tparamet =
                 (* We only implement the safe instanceof in strict mode *)
                 (* Also: for generic types we implememt it only with
                  * experimental feature enabled *)
-              if Env.is_strict env &&
-                 (tyl = [] || TypecheckerOptions.experimental_feature_enabled
-                   (Env.get_options env)
-                   TypecheckerOptions.experimental_instanceof)
+              if Env.is_strict env && (tyl = [] || safe_instanceof_enabled)
               then safe_instanceof env obj_ty _c class_info
               else env, obj_ty
           end

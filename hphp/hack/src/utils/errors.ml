@@ -2027,10 +2027,11 @@ let instanceof_always_true pos =
   add Typing.instanceof_always_true pos
     "This 'instanceof' test will always succeed"
 
-let instanceof_generic_classname pos =
+let instanceof_generic_classname pos name =
   add Typing.instanceof_generic_classname pos
-    "'instanceof' cannot be used on a generic classname because types are erased at runtime"
-
+    ("'instanceof' cannot be used on 'classname<" ^ name ^ ">' because '" ^
+    name ^ "' may be instantiated with a type such as \
+     'C<int>' that cannot be checked at runtime")
 
 (*****************************************************************************)
 (* Typing decl errors *)

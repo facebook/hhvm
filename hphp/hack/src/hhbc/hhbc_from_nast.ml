@@ -310,7 +310,7 @@ and emit_pipe e1 e2 =
       | IGet (CGetL2 (Local_pipe)) ->
         IGet (CGetL2 (Local_unnamed temp))
       | _ -> i in
-    instrs (List.map (instr_seq_to_list e) rewriter) in
+    InstrSeq.map e ~f:rewriter in
   gather [
     from_expr e1;
     instr_setl_unnamed temp;

@@ -751,11 +751,6 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isPHPArray());
-  return arrayIdxI(a, key, def);
-}
-
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isDict());
   return getDefaultIfNullCell(MixedArray::NvGetIntDict(a, key), def);

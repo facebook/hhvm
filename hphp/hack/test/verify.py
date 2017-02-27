@@ -173,6 +173,10 @@ if __name__ == '__main__':
         args.disabled_extension,
         args.in_extension)
 
+    if len(files) == 0:
+        raise Exception(
+            'Could not find any files to test in ' + args.test_path)
+
     flags_cache = {}
 
     def get_flags(test_dir):

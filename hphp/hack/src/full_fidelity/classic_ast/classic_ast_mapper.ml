@@ -650,8 +650,16 @@ let rec pHint : hint parser = fun eta env ->
         Happly (mpArgKOfN 0 1 pos_name ns e, []))
     ; (K.SimpleTypeSpecifier,    fun ns e ->
         Happly (mpArgKOfN 0 1 pos_name ns e, []))
-    ; (K.ShapeTypeSpecifier,     cHshape <$> mpArgKOfN 2 4 @@
-        couldMap ~f:(mpShapeField pHint))
+
+    ; (K.ShapeTypeSpecifier,     fun hints env ->
+        let hint_parser = mpArgKOfN 2 4 @@ couldMap ~f:(mpShapeField pHint) in
+        (* TODO(tingley): There is no parser here for optional shape fields.
+           This needs to be fixed before optional shape fields can be supported.
+           *)
+        hint_parser hints env
+          |> List.map
+            (fun (sf_name, sf_hint) -> { sf_optional=false; sf_name; sf_hint })
+          |> cHshape)
     ; (K.TupleTypeSpecifier,     cHtuple <$> mpArgKOfN 1 3 @@
         couldMap ~f:pHint)
     ; (K.KeysetTypeSpecifier, mpArgKOfN 2 4 @@ fun n env ->

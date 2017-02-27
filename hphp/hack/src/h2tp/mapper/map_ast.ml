@@ -481,8 +481,12 @@ let mk_mapper = fun m_in ->
     | SFlit v1 -> let v1 = map_pstring v1 in SFlit ((v1))
     | SFclass_const ((v1, v2)) ->
         let v1 = map_id v1 and v2 = map_pstring v2 in SFclass_const ((v1, v2))
-  and map_shape_field (v1, v2) =
-    let v1 = map_shape_field_name v1 and v2 = map_hint v2 in (v1, v2)
+  and map_shape_field { sf_optional; sf_name; sf_hint } =
+    {
+      sf_optional;
+      sf_name=map_shape_field_name sf_name;
+      sf_hint=map_hint sf_hint
+    }
   and map_stmt stmt =
     let k =
       function

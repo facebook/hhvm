@@ -480,6 +480,7 @@ module Naming                               = struct
   let name_is_reserved                      = 2068 (* DONT MODIFY!!!! *)
   let dollardollar_unused                   = 2069 (* DONT MODIFY!!!! *)
   let illegal_member_variable_class         = 2070 (* DONT MODIFY!!!! *)
+  let optional_shape_fields_not_supported   = 2071 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1057,6 +1058,10 @@ let using_internal_class pos name =
   add Naming.using_internal_class pos (
   name^" is an implementation internal class that cannot be used directly"
  )
+
+let optional_shape_fields_not_supported pos =
+  add Naming.optional_shape_fields_not_supported pos
+    "Optional shape fields are not supported."
 
 (*****************************************************************************)
 (* Init check errors *)

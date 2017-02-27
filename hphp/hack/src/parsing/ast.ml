@@ -227,7 +227,11 @@ and hint_ =
   *)
   | Haccess of id * id * id list
 
-and shape_field = shape_field_name * hint
+and shape_field = {
+  sf_optional : bool;
+  sf_name : shape_field_name;
+  sf_hint : hint;
+}
 
 and stmt =
   | Unsafe

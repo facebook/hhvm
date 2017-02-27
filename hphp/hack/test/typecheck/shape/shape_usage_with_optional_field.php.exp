@@ -1,0 +1,2 @@
+File "shape_usage_with_optional_field.php", line 4, characters 3-3:
+Shape construction should not specify optional types. (Parsing[1002])

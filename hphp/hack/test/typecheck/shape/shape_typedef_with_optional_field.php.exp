@@ -1,0 +1,2 @@
+File "shape_typedef_with_optional_field.php", line 4, characters 4-6:
+Optional shape fields are not supported. (Naming[2071])

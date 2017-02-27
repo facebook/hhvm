@@ -242,6 +242,10 @@ object(this)
        Haccess (this#on_id env i1, this#on_id env i2,
                 handle_list this#on_id env il)
 
-  method on_shape_field env sf =
-    (this#on_shape_field_name env (fst sf), this#on_hint env (snd sf))
+  method on_shape_field env {sf_optional; sf_name; sf_hint} =
+    {
+      sf_optional;
+      sf_name=this#on_shape_field_name env sf_name;
+      sf_hint=this#on_hint env sf_hint
+    }
 end

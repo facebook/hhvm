@@ -1986,7 +1986,17 @@ and match_shape_field
       (t_sf : shape_field)
       (p_sf : shape_field)
       (env : matcher_env) : (match_result * matcher_env) =
-  (LM.match_pair_fn match_shape_field_name match_hint) t_sf p_sf env
+  match t_sf, p_sf with
+  | {sf_optional=t_sf_optional; sf_name=t_sfn; sf_hint=t_sfh},
+    {sf_optional=p_sf_optional; sf_name=p_sfn; sf_hint=p_sfh}
+    when t_sf_optional = p_sf_optional ->
+      let t_sf_pair = (t_sfn, t_sfh) in
+      let p_sf_pair = (p_sfn, p_sfh) in
+      (LM.match_pair_fn match_shape_field_name match_hint)
+        t_sf_pair
+        p_sf_pair
+        env
+  | _ -> NoMatch, env
 
 and match_hint
       (t_hint : hint)

@@ -735,11 +735,19 @@ module Make (GetLocals : GetLocals) = struct
       N.Haccess ((pos, root_ty), id :: ids)
     | Hshape fdl -> N.Hshape
       begin
-        List.fold_left fdl ~init:ShapeMap.empty ~f:begin fun fdm (pname, h) ->
-          let pos, name = convert_shape_name env pname in
-          if ShapeMap.mem name fdm
-          then Errors.fd_name_already_bound pos;
-          ShapeMap.add name (hint env h) fdm
+        List.fold_left fdl ~init:ShapeMap.empty ~f:begin fun fdm shape_field ->
+          match shape_field with
+          | { sf_optional=false; sf_name; sf_hint} ->
+            let pos, name = convert_shape_name env sf_name in
+            if ShapeMap.mem name fdm
+            then Errors.fd_name_already_bound pos;
+            ShapeMap.add name (hint env sf_hint) fdm
+          | { sf_optional=true; sf_name; _} ->
+            (* TODO(tingley): Rework the ShapeMap so that it can accommodate
+               naming for optional shape fields. *)
+            let pos, _ = convert_shape_name env sf_name in
+            Errors.optional_shape_fields_not_supported pos;
+            fdm
         end
     end
 

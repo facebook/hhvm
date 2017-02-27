@@ -77,7 +77,7 @@ Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
  */
 void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
                          folly::Optional<AuxUnion> aux) {
-  auto const type = [&] {
+  auto const tp = [&] {
     auto const mask = [&] { return uint64_t{(*aux).u_raw} << 32; };
 
     if (!retLoc.hasReg(1)) {
@@ -101,7 +101,7 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
   }();
   auto const data = zeroExtendIfBool(v, retVal->type(), retLoc.reg(0));
 
-  v << syncvmret{data, type};
+  v << syncvmret{data, tp};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -83,11 +83,11 @@ void cgInstanceOf(IRLS& env, const IRInstruction* inst) {
   auto const rhs = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
-  auto const call_classof = [&] (Vreg dst) {
+  auto const call_classof = [&] (Vreg dest) {
     cgCallHelper(v, env,
-                 CallSpec::method(&Class::classof), {DestType::Byte, dst},
+                 CallSpec::method(&Class::classof), {DestType::Byte, dest},
                  SyncOptions::None, argGroup(env, inst).ssa(0).ssa(1));
-    return dst;
+    return dest;
   };
 
   if (!inst->src(1)->isA(TCls)) {

@@ -684,7 +684,7 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
 
   ITRACE(3, "Updating pred jmps\n");
   {
-    Trace::Indent _i;
+    Trace::Indent _i2;
     succ->forEachPred([&] (Block* p) {
       auto& jmp = p->back();
       auto updateFp = ctx.fpMap.count(p) ? ctx.fpMap[p] : ctx.deadFp;

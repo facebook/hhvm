@@ -597,9 +597,9 @@ SSATmp* emitVecArrayQuietGet(IRGS& env, SSATmp* base, SSATmp* key,
     [&] { return cns(env, TInitNull); }
   );
 
-  auto finishMe = [&](SSATmp* elem) {
-    gen(env, IncRef, elem);
-    return elem;
+  auto finishMe = [&](SSATmp* element) {
+    gen(env, IncRef, element);
+    return element;
   };
 
   auto const pelem = profiledType(env, elem, [&] { finish(finishMe(elem)); });
@@ -652,8 +652,8 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
       return gen(env, ArrayGet, base, key);
     }
   );
-  auto finishMe = [&](SSATmp* elem) {
-    auto const cell = unbox(env, elem, nullptr);
+  auto finishMe = [&](SSATmp* element) {
+    auto const cell = unbox(env, element, nullptr);
     gen(env, IncRef, cell);
     return cell;
   };
@@ -1981,10 +1981,10 @@ void emitQueryM(IRGS& env, int32_t nDiscard, QueryMOp query, MemberKey mk) {
     }
   }
 
-  auto const maybeExtractBase = [simpleOp] (IRGS& env) {
+  auto const maybeExtractBase = [simpleOp] (IRGS& environment) {
     return simpleOp == SimpleOp::None
-      ? ldMBase(env)
-      : extractBase(env);
+      ? ldMBase(environment)
+      : extractBase(environment);
   };
 
   auto const result = [&]() -> SSATmp* {

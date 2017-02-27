@@ -45,10 +45,10 @@ namespace HPHP { namespace jit { namespace x64 {
     align(cb, &fixups,                  \
           Alignment::Smash##Inst,       \
           AlignContext::Live);          \
-    auto const start = cb.frontier();   \
+    auto const theStart = cb.frontier();\
     X64Assembler a { cb };              \
     a.inst(__VA_ARGS__);                \
-    return start;                       \
+    return theStart;                    \
   }())
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,

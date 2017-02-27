@@ -1063,8 +1063,8 @@ SSATmp* cmpBoolImpl(State& env,
     if (right->hasConstVal()) {
       return cns(env, cmpOp(opc, left->boolVal(), right->boolVal()));
     } else {
-      auto newOpc = [](Opcode opc) {
-        switch (opc) {
+      auto newOpc = [](Opcode opcode) {
+        switch (opcode) {
           case GtBool:  return LtBool;
           case GteBool: return LteBool;
           case LtBool:  return GtBool;
@@ -1130,8 +1130,8 @@ SSATmp* cmpIntImpl(State& env,
     if (right->hasConstVal()) {
       return cns(env, cmpOp(opc, left->intVal(), right->intVal()));
     } else {
-      auto newOpc = [](Opcode opc) {
-        switch (opc) {
+      auto newOpc = [](Opcode opcode) {
+        switch (opcode) {
           case GtInt:  return LtInt;
           case GteInt: return LteInt;
           case LtInt:  return GtInt;
@@ -1181,8 +1181,8 @@ SSATmp* cmpStrImpl(State& env,
         );
       }
     } else {
-      auto newOpc = [](Opcode opc) {
-        switch (opc) {
+      auto newOpc = [](Opcode opcode) {
+        switch (opcode) {
           case GtStr:    return LtStr;
           case GteStr:   return LteStr;
           case LtStr:    return GtStr;
@@ -1237,8 +1237,8 @@ SSATmp* cmpStrIntImpl(State& env,
     auto type =
       left->strVal()->isNumericWithVal(si, sd, true /* allow errors */);
     if (type == KindOfDouble) {
-      auto dblOpc = [](Opcode opc) {
-        switch (opc) {
+      auto dblOpc = [](Opcode opcode) {
+        switch (opcode) {
           case GtStrInt:  return GtDbl;
           case GteStrInt: return GteDbl;
           case LtStrInt:  return LtDbl;
@@ -1254,8 +1254,8 @@ SSATmp* cmpStrIntImpl(State& env,
         gen(env, ConvIntToDbl, right)
       );
     } else {
-      auto intOpc = [](Opcode opc) {
-        switch (opc) {
+      auto intOpc = [](Opcode opcode) {
+        switch (opcode) {
           case GtStrInt:  return GtInt;
           case GteStrInt: return GteInt;
           case LtStrInt:  return LtInt;

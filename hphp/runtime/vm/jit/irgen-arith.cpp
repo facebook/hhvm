@@ -569,7 +569,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       emitCommutedOp(
         env,
         op,
-        [&](Op op){ return gen(env, toStrIntCmpOpcode(op), right, left); }
+        [&](Op op2){ return gen(env, toStrIntCmpOpcode(op2), right, left); }
       )
     );
   } else if (rightTy.subtypeOfAny(TNull, TBool)) {

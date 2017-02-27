@@ -1032,9 +1032,9 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
   if (s2.isUnseen() || s1.isBad()) return s1;
 
   enum class Compat { Same, Compat, Bad };
-  auto compat = [](TrackedStore s1, TrackedStore s2) {
-    auto i1 = s1.instruction();
-    auto i2 = s2.instruction();
+  auto compat = [](TrackedStore store1, TrackedStore store2) {
+    auto i1 = store1.instruction();
+    auto i2 = store2.instruction();
     assert(i1 && i2);
     if (i1->op() != i2->op()) return Compat::Bad;
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;

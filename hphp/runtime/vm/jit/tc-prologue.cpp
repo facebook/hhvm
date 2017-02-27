@@ -186,9 +186,9 @@ TCA emitFuncPrologueInternal(Func* func, int argc, TransKind kind) {
     code().disableHot();
     try {
       return emitFuncPrologueImpl(func, argc, kind);
-    } catch (const DataBlockFull& dbFull) {
+    } catch (const DataBlockFull& dbStillFull) {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbFull.name, dbFull.what());
+                         dbStillFull.name, dbStillFull.what());
     }
   }
 }

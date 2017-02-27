@@ -715,23 +715,23 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     flags,
     [&] (FNone) {},
 
-    [&] (FRedundant flags) {
-      auto const resolved = resolve_value(env, inst, flags);
+    [&] (FRedundant redundantFlags) {
+      auto const resolved = resolve_value(env, inst, redundantFlags);
       if (!resolved) return;
 
       FTRACE(2, "      redundant: {} :: {} = {}\n",
              inst.dst()->toString(),
-             flags.knownType.toString(),
+             redundantFlags.knownType.toString(),
              resolved->toString());
 
       if (resolved->type().subtypeOfAny(TGen, TCls)) {
-        env.unit.replace(&inst, AssertType, flags.knownType, resolved);
+        env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
         env.unit.replace(&inst, Mov, resolved);
       }
     },
 
-    [&] (FReducible flags) { reduce_inst(env, inst, flags); },
+    [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");

@@ -810,13 +810,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           translateInstr(irgs, inst, checkOuterTypeOnly, firstInstr);
         }
       } catch (const FailedIRGen& exn) {
-        ProfSrcKey psk{irgs.profTransID, sk};
-        always_assert_flog(!retry.toInterp.count(psk),
+        ProfSrcKey psk2{irgs.profTransID, sk};
+        always_assert_flog(!retry.toInterp.count(psk2),
                            "IR generation failed with {}\n",
                            exn.what());
         FTRACE(1, "ir generation for {} failed with {}\n",
           inst.toString(), exn.what());
-        retry.toInterp.insert(psk);
+        retry.toInterp.insert(psk2);
         return TranslateResult::Retry;
       }
 

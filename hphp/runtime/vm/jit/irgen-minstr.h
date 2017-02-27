@@ -119,7 +119,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
           }
           return marr;
         },
-        [&] (SSATmp* arr) { return direct(arr, key, *pos); },
+        [&] (SSATmp* tmp) { return direct(tmp, key, *pos); },
         [&] { return generic(key); }
       );
     }

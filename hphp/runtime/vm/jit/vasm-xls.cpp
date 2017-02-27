@@ -3078,10 +3078,10 @@ const char* draw(Variable* var, unsigned pos, Mode m, Pred covers) {
   static const char* bottom[] = { u8"\u2577", u8"\u257B" };
   static const char* both[]   = { u8"\u2502", u8"\u2503" };
   static const char* empty[]  = { " ", " " };
-  auto f = [&](unsigned pos) {
+  auto f = [&](unsigned position) {
     if (!var) return false;
     for (auto ivl = var->ivl(); ivl; ivl = ivl->next) {
-      if (covers(ivl, pos)) return true;
+      if (covers(ivl, position)) return true;
     }
     return false;
   };

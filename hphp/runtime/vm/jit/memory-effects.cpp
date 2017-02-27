@@ -77,8 +77,8 @@ AliasClass pointee(
     auto ret = AEmpty;
     sinst->block()->forEachSrc(
       dstIdx,
-      [&] (const IRInstruction* jmp, const SSATmp* ptr) {
-        ret = ret | pointee(ptr, visited_labels);
+      [&] (const IRInstruction* jmp, const SSATmp* thePtr) {
+        ret = ret | pointee(thePtr, visited_labels);
       }
     );
     return ret;

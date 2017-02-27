@@ -286,9 +286,9 @@ template<class Seen, class F>
 void visit_loop_post_order(LoopEnv& env, Seen& seen, Block* b, F f) {
   if (seen[b->id()]) return;
   seen.set(b->id());
-  auto go = [&] (Block* b) {
-    if (!b || !env.blocks.count(b)) return;
-    visit_loop_post_order(env, seen, b, f);
+  auto go = [&] (Block* block) {
+    if (!block || !env.blocks.count(block)) return;
+    visit_loop_post_order(env, seen, block, f);
   };
   go(b->next());
   go(b->taken());

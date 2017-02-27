@@ -4702,10 +4702,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     if (op == T_PIPE) {
       Id pipeVar = emitVisitAndSetUnnamedL(e, b->getExp1());
       allocPipeLocal(pipeVar);
+      auto const start = m_ue.bcPos();
       visit(b->getExp2());
       emitConvertToCell(e);
       releasePipeLocal(pipeVar);
-      emitFreeUnnamedL(e, pipeVar, m_ue.bcPos());
+      emitFreeUnnamedL(e, pipeVar, start);
       return true;
     }
 

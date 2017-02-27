@@ -516,15 +516,6 @@ and emit_unop op e =
 and from_exprs exprs =
   gather (List.map exprs from_expr)
 
-(* Returns the set of instructions and
- * whether a continue or a break is needed
- * Note about labels regarding continue and break:
- * HHVM generates a separate condition block for continue to jump to,
- * hence creates an additional label however, it also names this label
- * at the time of creation. But we do it recursively, in order to have
- * parity with HHVM we tread along a flag that tells us whether the
- * label is already used for continue or whether it is safe to use it
- * for other purposes *)
 and from_stmt ~continue_label ~break_label verify_return st =
   match st with
   | A.Expr expr ->
@@ -542,57 +533,9 @@ and from_stmt ~continue_label ~break_label verify_return st =
     ]
   | A.Block b -> from_stmts ~continue_label ~break_label verify_return b
   | A.If (e, b1, b2) ->
-    let l0 = Label.get_next_label () in
-    let l1 = Label.get_next_label () in
-    let jmp0, jmp1 =
-      instr (IContFlow (JmpZ l0)), instr (IContFlow (Jmp l1))
-    in
-    let b1 =
-      from_stmt ~continue_label ~break_label verify_return (A.Block b1)
-    in
-    let b2 =
-      from_stmt ~continue_label ~break_label verify_return (A.Block b2)
-    in
-    gather [
-      from_expr e;
-      jmp0;
-      b1;
-      jmp1;
-      instr (ILabel l0);
-      b2;
-      instr (ILabel l1);
-    ]
+    from_if ~continue_label ~break_label verify_return e b1 b2
   | A.While (e, b) ->
-    let l0 = Label.get_next_label () in
-    let l1 = Label.get_next_label () in
-    let l2 = Label.get_next_label () in
-    let cond = from_expr e in
-    let body =
-      from_stmt
-        ~continue_label:(Some l1)
-        ~break_label:(Some l0)
-        verify_return
-        (A.Block b)
-    in
-    (* TODO: This is *bizarre* codegen for a while loop.
-    It would be better to generate this as
-    instr_label continue_label;
-    from_expr e;
-    instr_jmpz break_label;
-    body;
-    instr_jmp continue_label;
-    instr_label break_label;
-    *)
-    gather [
-      cond;
-      instr_jmpz l0;
-      instr_label l2;
-      body;
-      instr_label l1;
-      cond;
-      instr_jmpnz l2;
-      instr_label l0;
-    ]
+    from_while verify_return e b
   (* TODO: Break takes an argument *)
   | A.Break _ ->
     begin match break_label with
@@ -606,57 +549,9 @@ and from_stmt ~continue_label ~break_label verify_return st =
     | None -> failwith "There is nowhere to continue"
     end
   | A.Do (b, e) ->
-    let l0 = Label.get_next_label () in
-    let l1 = Label.get_next_label () in
-    let l2 = Label.get_next_label () in
-    let body =
-      from_stmt
-        ~continue_label:(Some l0)
-        ~break_label:(Some l1)
-        verify_return
-        (A.Block b)
-    in
-    gather [
-      instr_label l2;
-      body;
-      instr_label l0;
-      from_expr e;
-      instr_jmpnz l2;
-      instr_label l1;
-    ]
+    from_do verify_return b e
   | A.For (e1, e2, e3, b) ->
-    let l0 = Label.get_next_label () in
-    let l1 = Label.get_next_label () in
-    let l2 = Label.get_next_label () in
-    let cond = from_expr e2 in
-    (* TODO: this is bizarre codegen for a "for" loop.
-       This should be codegen'd as
-       emit_ignored_expr initializer;
-       instr_label start_label;
-       from_expr condition;
-       instr_jmpz break_label;
-       body;
-       instr_label continue_label;
-       emit_ignored_expr increment;
-       instr_jmp start_label;
-       instr_label break_label;
-    *)
-    gather [
-      emit_ignored_expr e1;
-      cond;
-      instr_jmpz l0;
-      instr_label l2;
-      from_stmt
-        ~continue_label:(Some l1)
-        ~break_label:(Some l0)
-        verify_return
-        (A.Block b);
-      instr_label l1;
-      emit_ignored_expr e3;
-      cond;
-      instr_jmpnz l2;
-      instr_label l0;
-    ]
+    from_for verify_return e1 e2 e3 b
   | A.Throw e ->
     gather [
       from_expr e;
@@ -666,30 +561,7 @@ and from_stmt ~continue_label ~break_label verify_return st =
     from_try ~continue_label ~break_label
       verify_return try_block catch_list finally_block
   | A.Switch (e, cl) ->
-    let switched = from_expr e in
-    let end_label = Label.get_next_label () in
-    let cl =
-      List.map cl
-        ~f:(from_case
-              ~continue_label
-              ~break_label:(Some end_label)
-              verify_return)
-    in
-    let bodies = gather @@ List.map cl ~f:snd in
-    let init = gather @@ List.map cl
-      ~f: begin fun x ->
-            let (e_opt, l) = fst x in
-            match e_opt with
-            | None -> instr_jmp l
-            | Some e ->
-              gather [from_expr e; switched; instr (IOp Eq); instr_jmpnz l]
-          end
-    in
-    gather [
-      init;
-      bodies;
-      instr_label end_label;
-    ]
+    from_switch ~continue_label verify_return e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
     from_foreach verify_return (await_pos <> None) collection iterator block
   | A.Static_var _ ->
@@ -698,6 +570,140 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Unsafe
   | A.Fallthrough
   | A.Noop -> empty
+
+and from_if ~continue_label ~break_label verify_return e b1 b2 =
+  let l0 = Label.get_next_label () in
+  let l1 = Label.get_next_label () in
+  let jmp0, jmp1 =
+    instr (IContFlow (JmpZ l0)), instr (IContFlow (Jmp l1))
+  in
+  let b1 =
+    from_stmt ~continue_label ~break_label verify_return (A.Block b1)
+  in
+  let b2 =
+    from_stmt ~continue_label ~break_label verify_return (A.Block b2)
+  in
+  gather [
+    from_expr e;
+    jmp0;
+    b1;
+    jmp1;
+    instr (ILabel l0);
+    b2;
+    instr (ILabel l1);
+  ]
+
+and from_while verify_return e b =
+  let l0 = Label.get_next_label () in
+  let l1 = Label.get_next_label () in
+  let l2 = Label.get_next_label () in
+  let cond = from_expr e in
+  let body =
+    from_stmt
+      ~continue_label:(Some l1)
+      ~break_label:(Some l0)
+      verify_return
+      (A.Block b)
+  in
+  (* TODO: This is *bizarre* codegen for a while loop.
+  It would be better to generate this as
+  instr_label continue_label;
+  from_expr e;
+  instr_jmpz break_label;
+  body;
+  instr_jmp continue_label;
+  instr_label break_label;
+  *)
+  gather [
+    cond;
+    instr_jmpz l0;
+    instr_label l2;
+    body;
+    instr_label l1;
+    cond;
+    instr_jmpnz l2;
+    instr_label l0;
+  ]
+
+and from_do verify_return b e =
+  let l0 = Label.get_next_label () in
+  let l1 = Label.get_next_label () in
+  let l2 = Label.get_next_label () in
+  let body =
+    from_stmt
+      ~continue_label:(Some l0)
+      ~break_label:(Some l1)
+      verify_return
+      (A.Block b)
+  in
+  gather [
+    instr_label l2;
+    body;
+    instr_label l0;
+    from_expr e;
+    instr_jmpnz l2;
+    instr_label l1;
+  ]
+
+and from_for verify_return e1 e2 e3 b =
+  let l0 = Label.get_next_label () in
+  let l1 = Label.get_next_label () in
+  let l2 = Label.get_next_label () in
+  let cond = from_expr e2 in
+  (* TODO: this is bizarre codegen for a "for" loop.
+     This should be codegen'd as
+     emit_ignored_expr initializer;
+     instr_label start_label;
+     from_expr condition;
+     instr_jmpz break_label;
+     body;
+     instr_label continue_label;
+     emit_ignored_expr increment;
+     instr_jmp start_label;
+     instr_label break_label;
+  *)
+  gather [
+    emit_ignored_expr e1;
+    cond;
+    instr_jmpz l0;
+    instr_label l2;
+    from_stmt
+      ~continue_label:(Some l1)
+      ~break_label:(Some l0)
+      verify_return
+      (A.Block b);
+    instr_label l1;
+    emit_ignored_expr e3;
+    cond;
+    instr_jmpnz l2;
+    instr_label l0;
+  ]
+
+and from_switch ~continue_label verify_return e cl =
+  let switched = from_expr e in
+  let end_label = Label.get_next_label () in
+  let cl =
+    List.map cl
+      ~f:(from_case
+            ~continue_label
+            ~break_label:(Some end_label)
+            verify_return)
+  in
+  let bodies = gather @@ List.map cl ~f:snd in
+  let init = gather @@ List.map cl
+    ~f: begin fun x ->
+          let (e_opt, l) = fst x in
+          match e_opt with
+          | None -> instr_jmp l
+          | Some e ->
+            gather [from_expr e; switched; instr (IOp Eq); instr_jmpnz l]
+        end
+  in
+  gather [
+    init;
+    bodies;
+    instr_label end_label;
+  ]
 
 and from_try  ~continue_label ~break_label verify_return
   try_block catch_list finally_block =

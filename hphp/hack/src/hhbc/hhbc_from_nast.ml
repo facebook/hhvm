@@ -295,7 +295,32 @@ let rec from_expr expr =
         emit_args_and_call args uargs;
         instr (IBasic PopR)
       ]
-
+  | A.Array es ->
+    let a_label = Label.get_next_data_label () in
+    (* We need to make sure everything is literal to use static construction *)
+    let all_literal = List.for_all es
+      ~f:(function A.AFvalue e -> is_literal e
+                 | A.AFkvalue (k,v) -> is_literal k && is_literal v)
+    in
+    if all_literal then begin
+    (* Arrays can either contains values or key/value pairs *)
+    let _, es =
+      List.fold_left
+        es
+        ~init:(0, [])
+        ~f:(fun (index, l) x ->
+              (index + 1, match x with
+              | A.AFvalue e ->
+                literal_from_expr e :: Int (Int64.of_int index) :: l
+              | A.AFkvalue (k,v) ->
+                literal_from_expr v :: literal_from_expr k :: l)
+            )
+    in
+    gather [
+      instr (ILitConst (Array (a_label, "a", List.rev es)));
+    ]
+    end else
+    emit_nyi "non static arrays"
   | _ ->
     emit_nyi "expression"
 
@@ -455,6 +480,26 @@ and emit_flavored_expr (_, expr_ as expr) =
   | _ ->
     from_expr expr, Flavor_C
 
+and is_literal expr =
+  match snd expr with
+  | A.Float _
+  | A.String _
+  | A.Int _
+  | A.Null
+  | A.False
+  | A.True -> true
+  | _ -> false
+
+and literal_from_expr expr =
+  match snd expr with
+  | A.Float (_, litstr) -> Double (float_of_string litstr)
+  | A.String (_, litstr) -> String litstr
+  | A.Int (_, litstr) -> Int (Int64.of_string litstr)
+  | A.Null -> Null
+  | A.False -> False
+  | A.True -> True
+  | _ -> failwith "literal_from_expr - NYI"
+
 and literal_from_named_expr expr =
   match snd expr with
   | N.Float (_, litstr) -> Double (float_of_string litstr)
@@ -471,8 +516,13 @@ and literal_from_named_expr expr =
     "Expected a literal expression in literal_from_named_expr, got %s"
     (N.expr_to_string (snd expr)))
 
-and literals_from_named_exprs exprs =
-  List.map exprs literal_from_named_expr
+and literals_from_named_exprs_with_index exprs =
+  List.rev @@ snd @@
+  List.fold_left
+    exprs
+    ~init:(0, [])
+    ~f:(fun (index, l) e ->
+      (index + 1, literal_from_named_expr e :: Int (Int64.of_int index) :: l))
 
 (* Emit code for an l-value, returning instructions and the location that
  * must be set. For now, this is just a local. *)
@@ -1181,11 +1231,14 @@ let from_fun_ : Nast.fun_ -> Hhas_function.t option =
 let from_functions nast_functions =
   Core.List.filter_map nast_functions from_fun_
 
+let from_attribute_base attribute_name arguments =
+  let attribute_arguments = literals_from_named_exprs_with_index arguments in
+  Hhas_attribute.make attribute_name attribute_arguments
+
 let from_attribute : Nast.user_attribute -> Hhas_attribute.t =
   fun nast_attr ->
   let attribute_name = Litstr.to_string @@ snd nast_attr.Nast.ua_name in
-  let attribute_arguments = literals_from_named_exprs nast_attr.Nast.ua_params in
-  Hhas_attribute.make attribute_name attribute_arguments
+  from_attribute_base attribute_name nast_attr.Nast.ua_params
 
 let from_attributes nast_attributes =
   (* The list of attributes is reversed in the Nast. *)

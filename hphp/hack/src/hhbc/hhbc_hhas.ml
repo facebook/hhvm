@@ -42,6 +42,7 @@ let string_of_lit_const instruction =
     | True        -> "True"
     | False       -> "False"
     | Double d    -> "Double " ^ string_of_float d
+    | Array (i,_, _) -> "Array @A_" ^ string_of_int i
     | _ -> failwith "unexpected literal kind in string_of_lit_const"
 
 let string_of_operator instruction =
@@ -453,7 +454,7 @@ let add_fun_def buf fun_def =
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
-let attribute_argument_to_string index argument =
+let attribute_argument_to_string argument =
   let value = match argument with
   | Null -> "N"
   | Double f -> Printf.sprintf "d:%f" f
@@ -464,21 +465,33 @@ let attribute_argument_to_string index argument =
   | True -> "i:1"
   | Int i -> "i:" ^ (Int64.to_string i)
   | _ -> failwith "unexpected value in attribute_argument_to_string" in
-  Printf.sprintf "i:%d;%s;" index value
+  Printf.sprintf "%s;" value
 
 let attribute_arguments_to_string arguments =
-  let rec aux index arguments acc =
+  let rec aux arguments acc =
     match arguments with
-    | h :: t -> aux (index + 1) t (acc ^ attribute_argument_to_string index h)
+    | h :: t -> aux t (acc ^ attribute_argument_to_string h)
     | _ -> acc in
-  aux 0 arguments ""
+  aux arguments ""
+
+let attribute_to_string_helper ~if_class_attribute name args =
+  let count = List.length args in
+  let count =
+    if count mod 2 = 0 then count / 2
+    else failwith "attribute string should have even amount of arguments"
+  in
+  let arguments = attribute_arguments_to_string args in
+  let attribute_str = format_of_string @@
+    if if_class_attribute
+    then "\"%s\"(\"\"\"a:%n:{%s}\"\"\")"
+    else "\"\"\"%s:%n:{%s}\"\"\""
+  in
+  Printf.sprintf attribute_str name count arguments
 
 let attribute_to_string a =
   let name = Hhas_attribute.name a in
   let args = Hhas_attribute.arguments a in
-  let count = List.length args in
-  let arguments = attribute_arguments_to_string args in
-  Printf.sprintf "\"%s\"(\"\"\"a:%n:{%s}\"\"\")" name count arguments
+  attribute_to_string_helper ~if_class_attribute:true name args
 
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
@@ -593,6 +606,27 @@ let add_defcls buf classes =
     (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
     classes
 
+let add_data_region buf functions =
+  let rec add_data_region_list buf instr =
+    List.iter (add_data_region_aux buf) instr
+  and add_data_region_aux buf = function
+    | ILitConst (Array (num, name, arguments)) ->
+      B.add_string buf ".adata A_";
+      B.add_string buf @@ string_of_int num;
+      B.add_string buf " = ";
+      B.add_string buf
+        @@ attribute_to_string_helper ~if_class_attribute:false name arguments;
+      B.add_string buf ";\n"
+    | ITryFault (_, il, _)
+    | ITryCatch (_, il) -> add_data_region_list buf il
+    | _ -> ()
+  and iter_aux buf fun_def =
+    let function_body = Hhas_function.body fun_def in
+    add_data_region_list buf function_body
+  in
+  List.iter (iter_aux buf) functions;
+  B.add_string buf "\n"
+
 let add_top_level buf hhas_prog =
   let main_stmts =
     [ ILitConst (Int Int64.one)
@@ -606,8 +640,10 @@ let add_top_level buf hhas_prog =
 
 let add_program buf hhas_prog =
   B.add_string buf "#starts here\n";
+  let functions = Hhas_program.functions hhas_prog in
+  add_data_region buf functions;
   add_top_level buf hhas_prog;
-  List.iter (add_fun_def buf) (Hhas_program.functions hhas_prog);
+  List.iter (add_fun_def buf) functions;
   List.iter (add_class_def buf) (Hhas_program.classes hhas_prog);
   B.add_string buf "\n#ends here\n"
 

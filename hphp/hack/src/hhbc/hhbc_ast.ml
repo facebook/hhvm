@@ -56,7 +56,7 @@ type instruct_lit_const =
   | Int of int64
   | Double of float
   | String of Litstr.id
-  | Array of int
+  | Array of int * Litstr.id * instruct_lit_const list
   | Vec of int (* scalar vec id *)
   | Dict of int (* scalar dict id *)
   | Keyset of int (* scalar keyset id *)

@@ -10,6 +10,7 @@
 
 type label = int
 
+(* Numbers for string label *)
 let next_label = ref 0
 
 let get_next_label () =
@@ -19,3 +20,11 @@ let get_next_label () =
 
 let reset_label () =
   next_label := 0
+
+(* Numbers for array, map, dict, set, shape labels *)
+let next_data_label = ref 0
+
+let get_next_data_label () =
+  let current = !next_data_label in
+  next_data_label := current + 1;
+  current

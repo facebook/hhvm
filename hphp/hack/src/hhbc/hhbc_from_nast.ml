@@ -62,6 +62,7 @@ let instr_label label = instr (ILabel label)
 let instr_unwind = instr (IContFlow Unwind)
 let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)
+let instr_eq = instr (IOp Eq)
 
 let instr_setl_unnamed local =
   instr (IMutator (SetL (Local_unnamed local)))
@@ -532,8 +533,9 @@ and from_stmt ~continue_label ~break_label verify_return st =
       instr (IContFlow RetC);
     ]
   | A.Block b -> from_stmts ~continue_label ~break_label verify_return b
-  | A.If (e, b1, b2) ->
-    from_if ~continue_label ~break_label verify_return e b1 b2
+  | A.If (condition, consequence, alternative) ->
+    from_if ~continue_label ~break_label verify_return
+      condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     from_while verify_return e b
   (* TODO: Break takes an argument *)
@@ -549,9 +551,9 @@ and from_stmt ~continue_label ~break_label verify_return st =
     | None -> failwith "There is nowhere to continue"
     end
   | A.Do (b, e) ->
-    from_do verify_return b e
+    from_do verify_return (A.Block b) e
   | A.For (e1, e2, e3, b) ->
-    from_for verify_return e1 e2 e3 b
+    from_for verify_return e1 e2 e3 (A.Block b)
   | A.Throw e ->
     gather [
       from_expr e;
@@ -563,7 +565,8 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Switch (e, cl) ->
     from_switch ~continue_label verify_return e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
-    from_foreach verify_return (await_pos <> None) collection iterator block
+    from_foreach verify_return (await_pos <> None) collection iterator
+      (A.Block block)
   | A.Static_var _ ->
     emit_nyi "statement"
   (* TODO: What do we do with unsafe? *)
@@ -571,26 +574,18 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Fallthrough
   | A.Noop -> empty
 
-and from_if ~continue_label ~break_label verify_return e b1 b2 =
-  let l0 = Label.get_next_label () in
-  let l1 = Label.get_next_label () in
-  let jmp0, jmp1 =
-    instr (IContFlow (JmpZ l0)), instr (IContFlow (Jmp l1))
-  in
-  let b1 =
-    from_stmt ~continue_label ~break_label verify_return (A.Block b1)
-  in
-  let b2 =
-    from_stmt ~continue_label ~break_label verify_return (A.Block b2)
-  in
+and from_if ~continue_label ~break_label verify_return
+  condition consequence alternative =
+  let alternative_label = Label.get_next_label () in
+  let done_label = Label.get_next_label () in
   gather [
-    from_expr e;
-    jmp0;
-    b1;
-    jmp1;
-    instr (ILabel l0);
-    b2;
-    instr (ILabel l1);
+    from_expr condition;
+    instr_jmpz alternative_label;
+    from_stmt ~continue_label ~break_label verify_return consequence;
+    instr_jmp done_label;
+    instr_label alternative_label;
+    from_stmt ~continue_label ~break_label verify_return alternative;
+    instr_label done_label;
   ]
 
 and from_while verify_return e b =
@@ -629,16 +624,9 @@ and from_do verify_return b e =
   let l0 = Label.get_next_label () in
   let l1 = Label.get_next_label () in
   let l2 = Label.get_next_label () in
-  let body =
-    from_stmt
-      ~continue_label:(Some l0)
-      ~break_label:(Some l1)
-      verify_return
-      (A.Block b)
-  in
   gather [
     instr_label l2;
-    body;
+    from_stmt ~continue_label:(Some l0) ~break_label:(Some l1) verify_return b;
     instr_label l0;
     from_expr e;
     instr_jmpnz l2;
@@ -667,11 +655,7 @@ and from_for verify_return e1 e2 e3 b =
     cond;
     instr_jmpz l0;
     instr_label l2;
-    from_stmt
-      ~continue_label:(Some l1)
-      ~break_label:(Some l0)
-      verify_return
-      (A.Block b);
+    from_stmt ~continue_label:(Some l1) ~break_label:(Some l0) verify_return b;
     instr_label l1;
     emit_ignored_expr e3;
     cond;
@@ -682,6 +666,8 @@ and from_for verify_return e1 e2 e3 b =
 and from_switch ~continue_label verify_return e cl =
   let switched = from_expr e in
   let end_label = Label.get_next_label () in
+  (* TODO: "continue" in a switch in PHP has the same semantics as break! *)
+  (* TODO: The code below is probably incorrect; double check this. *)
   let cl =
     List.map cl
       ~f:(from_case
@@ -696,7 +682,7 @@ and from_switch ~continue_label verify_return e cl =
           match e_opt with
           | None -> instr_jmp l
           | Some e ->
-            gather [from_expr e; switched; instr (IOp Eq); instr_jmpnz l]
+            gather [from_expr e; switched; instr_eq; instr_jmpnz l]
         end
   in
   gather [
@@ -825,7 +811,7 @@ and from_foreach verify_return _has_await collection iterator block =
       ~continue_label:(Some loop_continue_label)
       ~break_label:(Some loop_break_label)
       verify_return
-      (A.Block block) in
+      block in
   gather [
     from_expr collection;
     init;

@@ -19,6 +19,7 @@ type t = {
   nesting_set: ISet.t;
   cost: int;
   overflow: int;
+  candidate_rules: ISet.t;
 }
 
 let has_split_before_chunk c rvm =
@@ -73,8 +74,40 @@ let build_lines chunk_group rvm nesting_set =
   in
   aux chunks (0, ISet.empty)
 
+let build_candidate_rules_and_update_rvm rvm lines rule_dependency_map =
+  let bound_rules = ISet.of_list @@ IMap.keys rvm in
+  let rec get_candidate_and_dead_rules lines dead_rules =
+    match lines with
+      | [] -> ISet.empty, dead_rules
+      | hd :: tl ->
+          let (overflow, rules) = hd in
+          let unbound_rules = ISet.diff rules bound_rules in
+          if overflow = 0 || ISet.is_empty unbound_rules
+          then get_candidate_and_dead_rules tl @@
+            ISet.union dead_rules unbound_rules
+          else rules, dead_rules
+  in
+  let base_candidate_rules, dead_rules =
+    get_candidate_and_dead_rules lines ISet.empty in
+
+  (* Also add parent rules *)
+  let deps = rule_dependency_map in
+  let candidate_rules = ISet.fold (fun id acc ->
+    ISet.union acc @@
+      try ISet.of_list @@ IMap.find_unsafe id deps with Not_found -> ISet.empty
+  ) base_candidate_rules base_candidate_rules in
+
+  let dead_rules = ISet.diff dead_rules candidate_rules in
+  let rvm = ISet.fold (fun r acc ->
+    if not (IMap.mem r rvm)
+    then IMap.add r 0 acc
+    else acc
+  ) dead_rules rvm in
+  candidate_rules, rvm
+
 let make chunk_group rvm =
-  let { Chunk_group.chunks; block_indentation; _ } = chunk_group in
+  let { Chunk_group.chunks; block_indentation; rule_dependency_map; _ } =
+    chunk_group in
 
   let nesting_set, _ =
     List.fold_left chunks ~init:(ISet.empty, ISet.empty)
@@ -117,36 +150,21 @@ let make chunk_group rvm =
         acc
     ) rvm 0
   ) in
-
   let cost = span_cost + rule_cost in
-  { chunk_group; lines; rvm; cost; overflow; nesting_set; }
+
+  (* Precompute candidate_rules and update the rvm by binding unbound rules on
+    lines with 0 overflow to 0 **)
+  let candidate_rules, rvm =
+    build_candidate_rules_and_update_rvm rvm lines rule_dependency_map in
+
+  { chunk_group; lines; rvm; cost; overflow; nesting_set; candidate_rules; }
 
 let is_rule_bound t rule_id =
   IMap.mem rule_id t.rvm
 
-let get_bound_ruleset t =
-  ISet.of_list @@ List.map (IMap.bindings t.rvm) ~f:fst
+let get_bound_ruleset rvm = ISet.of_list @@ IMap.keys rvm
 
-let get_candidate_rules t =
-  let bound_rules = get_bound_ruleset t in
-  let rec get_canditate_rules lines =
-    match lines with
-      | [] -> ISet.empty
-      | hd :: tl ->
-          let (overflow, rules) = hd in
-          if overflow = 0 || ISet.is_empty @@ ISet.diff rules bound_rules
-          then get_canditate_rules tl
-          else rules
-  in
-  let candidate_rules = get_canditate_rules t.lines in
-  (* Also add parent rules *)
-  let deps = t.chunk_group.Chunk_group.rule_dependency_map in
-  let rules = ISet.fold (fun id acc ->
-    ISet.union acc @@
-      try ISet.of_list @@ IMap.find_unsafe id deps with Not_found -> ISet.empty
-  ) candidate_rules candidate_rules in
-  ISet.elements rules
-
+let get_candidate_rules t = t.candidate_rules
 
 let compare_rule_sets s1 s2 =
   let bound_rule_ids = List.sort_uniq ~cmp:Pervasives.compare @@

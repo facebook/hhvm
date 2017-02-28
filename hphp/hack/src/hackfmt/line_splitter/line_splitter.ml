@@ -12,7 +12,7 @@ open Core
 
 let expand_state state_queue state =
   let { Solve_state.chunk_group; rvm; _ } = state in
-  let rule_ids = Solve_state.get_candidate_rules state in
+  let rule_ids = ISet.elements @@ Solve_state.get_candidate_rules state in
 
   let _, next_rvms = List.map_env rvm rule_ids ~f:(fun env_rvm rule_id ->
     if Solve_state.is_rule_bound state rule_id

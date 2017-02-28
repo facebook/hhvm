@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/vm/jit/translator.h"
 
-#include "hphp/tools/tc-print/offline-x86-code.h"
+#include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/tc-print.h"
 
 namespace HPHP { namespace jit {

@@ -16,7 +16,7 @@ open Utils
 let parse_command () =
   if Array.length Sys.argv < 2
   then CKNone
-  else match String.lowercase Sys.argv.(1) with
+  else match String.lowercase_ascii Sys.argv.(1) with
   | "check" -> CKCheck
   | "start" -> CKStart
   | "stop" -> CKStop
@@ -30,7 +30,8 @@ let parse_without_command options usage command =
   let args = ref [] in
   Arg.parse (Arg.align options) (fun x -> args := x::!args) usage;
   match List.rev !args with
-  | x::rest when (String.lowercase x) = (String.lowercase command) -> rest
+  | x::rest when (String.lowercase_ascii x) = (String.lowercase_ascii command)
+    -> rest
   | args -> args
 
 (* *** *** NB *** *** ***
@@ -82,6 +83,8 @@ let parse_check_args cmd =
           \t\tStops a Hack server\n\
         \trestart\
           \t\tRestarts a Hack server\n\
+        \tdebug\
+          \t\tDebug mode\n\
       \n\
       Default values if unspecified:\n\
         \tCOMMAND\
@@ -95,32 +98,44 @@ let parse_check_args cmd =
   in
   let options = [
     (* modes *)
-    "--status", Arg.Unit (set_mode MODE_STATUS),
+    "--status",
+      Arg.Unit (set_mode MODE_STATUS),
       " (mode) show a human readable list of errors (default)";
-    "--type-at-pos", Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
+    "--type-at-pos",
+      Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
       " (mode) show type at a given position in file [line:character]";
-    "--list-files", Arg.Unit (set_mode MODE_LIST_FILES),
+    "--list-files",
+      Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";
-    "--list-modes", Arg.Unit (set_mode MODE_LIST_MODES),
+    "--list-modes",
+      Arg.Unit (set_mode MODE_LIST_MODES),
       " (mode) list all files with their associated hack modes";
-    "--auto-complete", Arg.Unit (set_mode MODE_AUTO_COMPLETE),
+    "--auto-complete",
+      Arg.Unit (set_mode MODE_AUTO_COMPLETE),
       " (mode) auto-completes the text on stdin";
-    "--colour", Arg.String (fun x -> set_mode (MODE_COLORING x) ()), " ";
-    "--color", Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
-      " (mode) pretty prints the file content showing what is checked (give '-' for stdin)";
-    "--coverage", Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
+    "--colour",
+      Arg.String (fun x -> set_mode (MODE_COLORING x) ()), " ";
+    "--color",
+      Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
+      " (mode) pretty prints the file content \
+       showing what is checked (give '-' for stdin)";
+    "--coverage",
+      Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
       " (mode) calculates the extent of typing of a given file or directory";
-      "--find-dependent-files", Arg.String (fun x -> set_mode (MODE_FIND_DEPENDENT_FILES x) ()),
+    "--find-dependent-files",
+      Arg.String (fun x -> set_mode (MODE_FIND_DEPENDENT_FILES x) ()),
       " (mode) list all files that make any use of the provided list of files";
-    "--find-refs", Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
+    "--find-refs",
+      Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
       " (mode) finds references of the provided method name";
-    "--trace_ai", Arg.String (fun x -> set_mode (MODE_TRACE_AI x) ()),
+    "--trace_ai",
+      Arg.String (fun x -> set_mode (MODE_TRACE_AI x) ()),
        "";
-    "--find-class-refs", Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
+    "--find-class-refs",
+      Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
       " (mode) finds references of the provided class name";
-    "--dump-symbol-info", Arg.String (fun files ->
-        set_mode (MODE_DUMP_SYMBOL_INFO files) ()
-        ),
+    "--dump-symbol-info",
+      Arg.String (fun files -> set_mode (MODE_DUMP_SYMBOL_INFO files) ()),
       (*  Input format:
        *  The file list can either be "-" which accepts the input from stdin
        *  separated by newline(for long list) or directly from command line
@@ -131,8 +146,8 @@ let parse_check_args cmd =
        *    ]
        *  Note: results list can be in any order *)
       "";
-    "--dump-ai-info", Arg.String (fun files ->
-        set_mode (MODE_DUMP_AI_INFO files) ()),
+    "--dump-ai-info",
+      Arg.String (fun files -> set_mode (MODE_DUMP_AI_INFO files) ()),
         (* Just like --dump-symbol-info, but uses the AI to obtain info *)
         "";
     "--identify-function",
@@ -158,34 +173,38 @@ let parse_check_args cmd =
       ]),
       " (mode) rename a symbol, Usage: --refactor " ^
       "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>";
-    "--search", Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
+    "--search",
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
       " (mode) fuzzy search symbol definitions";
     "--search-class",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "class")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "class")) ()),
       " (mode) fuzzy search class definitions";
     "--search-function",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "function")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "function")) ()),
       " (mode) fuzzy search function definitions";
     "--search-typedef",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "typedef")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "typedef")) ()),
       " (mode) fuzzy search typedef definitions";
     "--search-constant",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "constant")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "constant")) ()),
       " (mode) fuzzy search constant definitions";
-    "--outline", Arg.Unit (set_mode MODE_OUTLINE),
+    "--outline",
+      Arg.Unit (set_mode MODE_OUTLINE),
       " (mode) prints an outline of the text on stdin";
     "--ide-outline",
       Arg.Unit (set_mode (MODE_OUTLINE2)), "";
-    "--inheritance-children", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x) ()),
-      " (mode) prints a list of all related classes or methods to the given class";
-    "--inheritance-ancestors", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
-      " (mode) prints a list of all related classes or methods to the given class";
-    "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
-      " (mode) show human-readable type info for the given name; output is not meant for machine parsing";
+    "--inheritance-children",
+      Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x) ()),
+      " (mode) prints a list of all related classes or methods \
+       to the given class";
+    "--inheritance-ancestors",
+      Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
+      " (mode) prints a list of all related classes or methods \
+       to the given class";
+    "--show",
+      Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
+      " (mode) show human-readable type info for the given name; \
+       output is not meant for machine parsing";
     "--remove-dead-fixme",
         Arg.Int begin fun code ->
         mode := match !mode with
@@ -216,16 +235,21 @@ let parse_check_args cmd =
           | _ -> raise (Arg.Bad "only a single mode should be specified")
       end,
       " (mode) lint the given list of files";
-    "--lint-all", Arg.Int (fun x -> set_mode (MODE_LINT_ALL x) ()),
+    "--lint-all",
+      Arg.Int (fun x -> set_mode (MODE_LINT_ALL x) ()),
       " (mode) find all occurrences of lint with the given error code";
-    "--version", Arg.Set version,
+    "--version",
+      Arg.Set version,
       " (mode) show version and exit\n";
-    "--monitor-logname", Arg.Set monitor_logname,
+    "--monitor-logname",
+      Arg.Set monitor_logname,
       " (mode) show monitor log filename and exit\n";
-    "--logname", Arg.Set logname,
-    " (mode) show log filename and exit\n";
+    "--logname",
+      Arg.Set logname,
+      " (mode) show log filename and exit\n";
     (* Create a checkpoint which can be used to retrieve changed files later *)
-    "--create-checkpoint", Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x) ()),
+    "--create-checkpoint",
+      Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x) ()),
       "";
     (* Retrieve changed files since input checkpoint.
      * Output is separated by newline.
@@ -260,27 +284,37 @@ let parse_check_args cmd =
     "--full-fidelity-schema",
       Arg.Unit (set_mode MODE_FULL_FIDELITY_SCHEMA), "";
     (* flags *)
-    "--json", Arg.Set output_json,
+    "--json",
+      Arg.Set output_json,
       " output json for machine consumption. (default: false)";
-    "--retries", Arg.Set_int retries,
+    "--retries",
+      Arg.Set_int retries,
       spf " set the number of retries. (default: %d)" !retries;
-    "--retry-if-init", Arg.Bool (fun x -> retry_if_init := x),
+    "--retry-if-init",
+      Arg.Bool (fun x -> retry_if_init := x),
       " retry if the server is initializing (default: true)";
-    "--no-load", Arg.Set no_load,
+    "--no-load",
+      Arg.Set no_load,
       " start from a fresh state";
-    "--from", Arg.Set_string from,
+    "--from",
+      Arg.Set_string from,
       " set this so we know who is calling hh_client";
-    "--timeout",  Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
+    "--timeout",
+      Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
       " set the timeout in seconds (default: no timeout)";
-    "--autostart-server", Arg.Bool (fun x -> autostart := x),
+    "--autostart-server",
+      Arg.Bool (fun x -> autostart := x),
       " automatically start hh_server if it's not running (default: true)";
-    "--ai", Arg.String (fun s -> ai_mode :=
+    "--ai",
+      Arg.String (fun s -> ai_mode :=
          Some (ignore (Ai_options.prepare ~server:true s); s)),
       " run AI module with provided options\n";
 
     (* deprecated *)
-    "--from-vim", Arg.Unit (fun () -> from := "vim"; retries := 0; retry_if_init := false),
-      " (deprecated) equivalent to --from vim --retries 0 --retry-if-init false";
+    "--from-vim",
+      Arg.Unit (fun () -> from := "vim"; retries := 0; retry_if_init := false),
+      " (deprecated) equivalent to \
+       --from vim --retries 0 --retry-if-init false";
     "--from-emacs", Arg.Unit (set_from "emacs"),
       " (deprecated) equivalent to --from emacs";
     "--from-arc-diff", Arg.Unit (set_from "arc_diff"),
@@ -304,7 +338,8 @@ let parse_check_args cmd =
     | [] -> ClientArgsUtils.get_root None
     | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
-        Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
+        Printf.fprintf stderr
+          "Error: please provide at most one www directory\n%!";
         exit 1;
   in
 
@@ -342,7 +377,7 @@ let parse_start_env command =
       "Usage: %s %s [OPTION]... [WWW-ROOT]\n\
       %s a Hack server\n\n\
       WWW-ROOT is assumed to be current directory if unspecified\n"
-      Sys.argv.(0) command (String.capitalize command) in
+      Sys.argv.(0) command (String.capitalize_ascii command) in
   let no_load = ref false in
   let ai_mode = ref None in
   let wait_deprecation_msg () = Printf.eprintf
@@ -393,7 +428,8 @@ let parse_stop_args () =
     | [] -> ClientArgsUtils.get_root None
     | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
-        Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
+        Printf.fprintf stderr
+          "Error: please provide at most one www directory\n%!";
         exit 1
   in CStop {ClientStop.root = root}
 

@@ -470,7 +470,7 @@ CLIServer::CLIServer(const char* path) {
 void CLIServer::start() {
   if (getState() != State::READY) return;
 
-  m_dispatcher = std::make_unique<JobQueue>(
+  m_dispatcher = folly::make_unique<JobQueue>(
     RuntimeOption::EvalUnixServerWorkers,
     RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
     RuntimeOption::ServerThreadDropStack,

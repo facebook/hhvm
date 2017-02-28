@@ -59,6 +59,7 @@ let instr_jmp label = instr (IContFlow (Jmp label))
 let instr_jmpz label = instr (IContFlow (JmpZ label))
 let instr_jmpnz label = instr (IContFlow (JmpNZ label))
 let instr_label label = instr (ILabel label)
+let instr_label_catch label = instr (IExceptionLabel (label, CatchL))
 let instr_continue level = instr (IContFlow (Continue level))
 let instr_break level = instr (IContFlow (Break level))
 let instr_unwind = instr (IContFlow Unwind)
@@ -67,13 +68,19 @@ let instr_true = instr (ILitConst True)
 let instr_eq = instr (IOp Eq)
 let instr_retc = instr (IContFlow RetC)
 let instr_null = instr (ILitConst Null)
+let instr_catch = instr (IMisc Catch)
+let instr_dup = instr (IBasic Dup)
+let instr_instanceofd s = instr (IOp (InstanceOfD s))
 
+let instr_setl_named local =
+  instr (IMutator (SetL (Local_named local)))
 let instr_setl_unnamed local =
   instr (IMutator (SetL (Local_unnamed local)))
 let instr_unsetl_unnamed local =
   instr (IMutator (UnsetL (Local_unnamed local)))
 let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr (IBasic PopC)
+let instr_throw = instr (IContFlow Throw)
 
 let instr_add_elemc = instr (ILitConst (AddElemC))
 let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
@@ -150,6 +157,10 @@ let instr_try_fault_no_catch fault_label try_body fault_body =
   let fault_body = instr_seq_to_list fault_body in
   let fl = IExceptionLabel (fault_label, FaultL) in
   instr (ITryFault (fault_label, try_body, fl :: fault_body))
+
+let instr_try_catch catch_label try_body =
+  let try_body = instr_seq_to_list try_body in
+  instr (ITryCatch (catch_label, try_body))
 
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
@@ -865,22 +876,36 @@ and from_switch e cl =
   ] in
   rewrite_continue_break instrs end_label end_label
 
+and from_catch end_label ((_, id1), (_, id2), b) =
+    let next_catch = Label.get_next_label () in
+    gather [
+      instr_dup;
+      instr_instanceofd id1;
+      instr_jmpz next_catch;
+      instr_setl_named id2;
+      instr_popc;
+      from_stmt (A.Block b);
+      instr_jmp end_label;
+      instr_label next_catch;
+    ]
+
+and from_catches catch_list end_label =
+  gather (List.map catch_list ~f:(from_catch end_label))
+
 and from_try_catch try_block catch_list =
-  let l0 = Label.get_next_label () in
-  let try_body = from_stmt try_block in
-  let try_body = gather [try_body; instr_jmp l0;] in
-  let try_body = rewrite_continue_break try_body l0 l0 in
-  let try_body_list = instr_seq_to_list try_body in
-  let catches = List.map catch_list ~f:(from_catch l0) in
-  let catch_meta_data = List.rev @@ List.map catches ~f:snd in
-  let catch_blocks =
-    List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x) in
-  let catch_instr = List.concat catch_blocks in
-  let init =
-    instrs @@ ITryCatch (catch_meta_data, try_body_list) :: catch_instr in
+  let end_label = Label.get_next_label () in
+  let catch_label = Label.get_next_label () in
+  let try_body = gather [
+    from_stmt try_block;
+    instr_jmp end_label;
+  ] in
   gather [
-    init;
-    instr_label l0;
+    instr_try_catch catch_label try_body;
+    instr_label_catch catch_label;
+    instr_catch;
+    from_catches catch_list end_label;
+    instr_throw;
+    instr_label end_label;
   ]
 
 and from_try_finally try_block finally_block =
@@ -888,20 +913,17 @@ and from_try_finally try_block finally_block =
   let try_body = from_stmt try_block in
   let try_body = gather [try_body; instr_jmp l0;] in
   let try_body = rewrite_continue_break try_body l0 l0 in
-  let try_body_list = instr_seq_to_list try_body in
   let finally_body = from_stmt finally_block in
-  let fault_body = instr_seq_to_list @@ gather [
+  let fault_body = gather [
       (* TODO: What are these unnamed locals? *)
       instr_unsetl_unnamed 0;
       instr_unsetl_unnamed 0;
       finally_body;
       instr_unwind;
     ] in
-  let f1 = Label.get_next_label () in
-  let f1_label = IExceptionLabel (f1, FaultL) in
-  let init = instr (ITryFault (f1, try_body_list, f1_label :: fault_body)) in
+  let fault_label = Label.get_next_label () in
   gather [
-    init;
+    instr_try_fault_no_catch fault_label try_body fault_body;
     instr_label l0;
     finally_body;
   ]
@@ -975,19 +997,6 @@ and from_case c =
     | _ -> None
   in
   (e, l), gather [instr_label l; b]
-
-and from_catch end_label ((_, id1), (_, id2), b) =
-  let cl = Label.get_next_label () in
-  let instrs = gather [
-    instr (IExceptionLabel (cl, CatchL));
-    instr (IMisc Catch);
-    instr (IMutator (SetL (Local_named id2)));
-    instr (IBasic PopC);
-    from_stmt (A.Block b);
-    instr (IContFlow (Jmp end_label));
-  ] in
-  let instrs = rewrite_continue_break instrs end_label end_label in
-  instrs, (cl, id1)
 
 let fmt_prim x =
   match x with

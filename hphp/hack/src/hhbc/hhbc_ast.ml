@@ -512,7 +512,7 @@ type instruct =
   | ILabel of rel_offset
   | IExceptionLabel of rel_offset * exception_label
   | ITryFault of rel_offset * instruct list * instruct list
-  | ITryCatch of (rel_offset * Litstr.id) list * instruct list
+  | ITryCatch of rel_offset * instruct list
   | IComment of string
 
 type type_constraint_flag =

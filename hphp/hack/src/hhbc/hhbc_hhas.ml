@@ -344,11 +344,8 @@ let string_of_instruction instruction =
   | IComment             s -> "# " ^ s
   | _ -> failwith "invalid instruction"
 
-let string_of_catch (label, id) =
-  "(" ^
-  Litstr.to_string id ^
-  " " ^
-  string_of_exception_label label CatchL ^ ")"
+let string_of_catch label =
+  string_of_exception_label label CatchL
 
 let rec add_try_fault_block buffer indent label instructions =
   B.add_string buffer ".try_fault ";
@@ -358,12 +355,11 @@ let rec add_try_fault_block buffer indent label instructions =
   B.add_string buffer (String.make indent ' ');
   B.add_string buffer "}"
 
-and add_try_catch_block buffer indent ids instructions =
+and add_try_catch_block buffer indent label try_block =
   B.add_string buffer ".try_catch ";
-  let catch_strings = List.map string_of_catch ids in
-  B.add_string buffer @@ String.concat " " catch_strings;
+  B.add_string buffer (string_of_catch label);
   B.add_string buffer " {\n";
-  add_instruction_list buffer (indent + 2) instructions;
+  add_instruction_list buffer (indent + 2) try_block;
   B.add_string buffer (String.make indent ' ');
   B.add_string buffer "}"
 

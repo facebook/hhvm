@@ -63,6 +63,8 @@ let instr_unwind = instr (IContFlow Unwind)
 let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)
 let instr_eq = instr (IOp Eq)
+let instr_retc = instr (IContFlow RetC)
+let instr_null = instr (ILitConst Null)
 
 let instr_setl_unnamed local =
   instr (IMutator (SetL (Local_unnamed local)))
@@ -71,10 +73,24 @@ let instr_unsetl_unnamed local =
 let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr (IBasic PopC)
 
-
-
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
+  let rec flat_map instrseq ~f =
+    let flat_map_list items ~f = Core.List.bind items f in
+    match instrseq with
+    | Instr_list instrl ->
+      let mapper instr =
+        match instr with
+        | ITryFault(l, instrl1, instrl2) ->
+          [ ITryFault(l, flat_map_list instrl1 f,
+            flat_map_list instrl2 f) ]
+        | ITryCatch(x, instrl) ->
+          [ ITryCatch(x, flat_map_list instrl f) ]
+        | _ ->
+          f instr in
+      Instr_list (flat_map_list instrl ~f:mapper)
+    | Instr_concat instrseql ->
+      Instr_concat (List.map instrseql (flat_map ~f))
 
   let rec fold_left instrseq ~f ~init =
     match instrseq with
@@ -567,27 +583,26 @@ and emit_unop op e =
 and from_exprs exprs =
   gather (List.map exprs from_expr)
 
-and from_stmt ~continue_label ~break_label verify_return st =
+and from_stmt ~continue_label ~break_label st =
   match st with
   | A.Expr expr ->
     emit_ignored_expr expr
   | A.Return (_, None) ->
-    instrs [
-      ILitConst Null;
-      IContFlow RetC;
+    gather [
+      instr_null;
+      instr_retc;
     ]
   | A.Return (_,  Some expr) ->
     gather [
       from_expr expr;
-      (if verify_return then instr (IMisc VerifyRetTypeC) else empty);
-      instr (IContFlow RetC);
+      instr_retc;
     ]
-  | A.Block b -> from_stmts ~continue_label ~break_label verify_return b
+  | A.Block b -> from_stmts ~continue_label ~break_label b
   | A.If (condition, consequence, alternative) ->
-    from_if ~continue_label ~break_label verify_return
+    from_if ~continue_label ~break_label
       condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
-    from_while verify_return e b
+    from_while e (A.Block b)
   (* TODO: Break takes an argument *)
   | A.Break _ ->
     begin match break_label with
@@ -601,21 +616,20 @@ and from_stmt ~continue_label ~break_label verify_return st =
     | None -> failwith "There is nowhere to continue"
     end
   | A.Do (b, e) ->
-    from_do verify_return (A.Block b) e
+    from_do (A.Block b) e
   | A.For (e1, e2, e3, b) ->
-    from_for verify_return e1 e2 e3 (A.Block b)
+    from_for e1 e2 e3 (A.Block b)
   | A.Throw e ->
     gather [
       from_expr e;
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
-    from_try ~continue_label ~break_label
-      verify_return try_block catch_list finally_block
+    from_try ~continue_label ~break_label try_block catch_list finally_block
   | A.Switch (e, cl) ->
-    from_switch ~continue_label verify_return e cl
+    from_switch ~continue_label e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
-    from_foreach verify_return (await_pos <> None) collection iterator
+    from_foreach (await_pos <> None) collection iterator
       (A.Block block)
   | A.Static_var _ ->
     emit_nyi "statement"
@@ -624,32 +638,25 @@ and from_stmt ~continue_label ~break_label verify_return st =
   | A.Fallthrough
   | A.Noop -> empty
 
-and from_if ~continue_label ~break_label verify_return
+and from_if ~continue_label ~break_label
   condition consequence alternative =
   let alternative_label = Label.get_next_label () in
   let done_label = Label.get_next_label () in
   gather [
     from_expr condition;
     instr_jmpz alternative_label;
-    from_stmt ~continue_label ~break_label verify_return consequence;
+    from_stmt ~continue_label ~break_label consequence;
     instr_jmp done_label;
     instr_label alternative_label;
-    from_stmt ~continue_label ~break_label verify_return alternative;
+    from_stmt ~continue_label ~break_label alternative;
     instr_label done_label;
   ]
 
-and from_while verify_return e b =
+and from_while e b =
   let l0 = Label.get_next_label () in
   let l1 = Label.get_next_label () in
   let l2 = Label.get_next_label () in
   let cond = from_expr e in
-  let body =
-    from_stmt
-      ~continue_label:(Some l1)
-      ~break_label:(Some l0)
-      verify_return
-      (A.Block b)
-  in
   (* TODO: This is *bizarre* codegen for a while loop.
   It would be better to generate this as
   instr_label continue_label;
@@ -663,27 +670,27 @@ and from_while verify_return e b =
     cond;
     instr_jmpz l0;
     instr_label l2;
-    body;
+    from_stmt ~continue_label:(Some l1) ~break_label:(Some l0) b;
     instr_label l1;
     cond;
     instr_jmpnz l2;
     instr_label l0;
   ]
 
-and from_do verify_return b e =
+and from_do b e =
   let l0 = Label.get_next_label () in
   let l1 = Label.get_next_label () in
   let l2 = Label.get_next_label () in
   gather [
     instr_label l2;
-    from_stmt ~continue_label:(Some l0) ~break_label:(Some l1) verify_return b;
+    from_stmt ~continue_label:(Some l0) ~break_label:(Some l1) b;
     instr_label l0;
     from_expr e;
     instr_jmpnz l2;
     instr_label l1;
   ]
 
-and from_for verify_return e1 e2 e3 b =
+and from_for e1 e2 e3 b =
   let l0 = Label.get_next_label () in
   let l1 = Label.get_next_label () in
   let l2 = Label.get_next_label () in
@@ -705,7 +712,7 @@ and from_for verify_return e1 e2 e3 b =
     cond;
     instr_jmpz l0;
     instr_label l2;
-    from_stmt ~continue_label:(Some l1) ~break_label:(Some l0) verify_return b;
+    from_stmt ~continue_label:(Some l1) ~break_label:(Some l0) b;
     instr_label l1;
     emit_ignored_expr e3;
     cond;
@@ -713,17 +720,13 @@ and from_for verify_return e1 e2 e3 b =
     instr_label l0;
   ]
 
-and from_switch ~continue_label verify_return e cl =
+and from_switch ~continue_label e cl =
   let switched = from_expr e in
   let end_label = Label.get_next_label () in
   (* TODO: "continue" in a switch in PHP has the same semantics as break! *)
   (* TODO: The code below is probably incorrect; double check this. *)
   let cl =
-    List.map cl
-      ~f:(from_case
-            ~continue_label
-            ~break_label:(Some end_label)
-            verify_return)
+    List.map cl ~f:(from_case ~continue_label ~break_label:(Some end_label))
   in
   let bodies = gather @@ List.map cl ~f:snd in
   let init = gather @@ List.map cl
@@ -741,8 +744,7 @@ and from_switch ~continue_label verify_return e cl =
     instr_label end_label;
   ]
 
-and from_try  ~continue_label ~break_label verify_return
-  try_block catch_list finally_block =
+and from_try  ~continue_label ~break_label try_block catch_list finally_block =
   let catch_exists = List.length catch_list <> 0 in
   let finally_exists = finally_block <> [] in
 
@@ -758,7 +760,6 @@ and from_try  ~continue_label ~break_label verify_return
     from_stmt
       ~continue_label:new_continue_label
       ~break_label:new_break_label
-      verify_return
       (A.Block try_block)
   in
   let try_body = gather [try_body; instr_jmp l0;] in
@@ -768,7 +769,6 @@ and from_try  ~continue_label ~break_label verify_return
     ~f:(from_catch
         ~continue_label:new_continue_label
         ~break_label:new_break_label
-        verify_return
         l0)
   in
   let catch_meta_data = List.rev @@ List.map catches ~f:snd in
@@ -780,7 +780,6 @@ and from_try  ~continue_label ~break_label verify_return
     from_stmt
       ~continue_label
       ~break_label
-      verify_return
       (A.Block finally_block)
   in
   let fault_body =
@@ -835,7 +834,7 @@ and get_foreach_key_value iterator =
   | A.As_v (_, v) ->
     None, get_foreach_lvalue v
 
-and from_foreach verify_return _has_await collection iterator block =
+and from_foreach _has_await collection iterator block =
   (* TODO: await *)
   (* TODO: generate .numiters based on maximum nesting depth *)
   (* TODO: We need an iterator generator. Use the label generator for now. *)
@@ -860,7 +859,6 @@ and from_foreach verify_return _has_await collection iterator block =
     from_stmt
       ~continue_label:(Some loop_continue_label)
       ~break_label:(Some loop_break_label)
-      verify_return
       block in
   gather [
     from_expr collection;
@@ -880,13 +878,13 @@ and from_foreach verify_return _has_await collection iterator block =
     instr_label loop_break_label
   ]
 
-and from_stmts ~continue_label ~break_label verify_return stl =
+and from_stmts ~continue_label ~break_label stl =
   let results =
-    List.map stl (from_stmt ~continue_label ~break_label verify_return)
+    List.map stl (from_stmt ~continue_label ~break_label)
   in
   gather results
 
-and from_case ~continue_label ~break_label verify_return c =
+and from_case ~continue_label ~break_label c =
   let l = Label.get_next_label () in
   let b = match c with
     | A.Default b
@@ -894,7 +892,6 @@ and from_case ~continue_label ~break_label verify_return c =
         from_stmt
           ~continue_label
           ~break_label
-          verify_return
           (A.Block b)
   in
   let e = match c with
@@ -903,16 +900,12 @@ and from_case ~continue_label ~break_label verify_return c =
   in
   (e, l), gather [instr_label l; b]
 
-and from_catch
-  ~continue_label
-  ~break_label
-  verify_return end_label ((_, id1), (_, id2), b) =
+and from_catch ~continue_label ~break_label end_label ((_, id1), (_, id2), b) =
   let cl = Label.get_next_label () in
   let body =
     from_stmt
       ~continue_label
       ~break_label
-      verify_return
       (A.Block b)
   in
   gather [
@@ -1077,17 +1070,28 @@ let rec emit_fault_instructions stmt_instrs =
   let instr_list = instr_seq_to_list stmt_instrs in
   gather @@ List.map instr_list ~f:emit_fault_instruction_aux
 
+let verify_returns body =
+  let rewriter i =
+    match i with
+    | IContFlow RetC ->
+      [ (IMisc VerifyRetTypeC); (IContFlow RetC) ]
+    | _ -> [ i ] in
+  InstrSeq.flat_map body ~f:rewriter
+
 let from_body tparams params ret b =
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in
-  let verify_return = has_type_constraint return_type_info in
   let stmt_instrs =
-    from_stmts ~continue_label:None ~break_label:None verify_return b.N.fub_ast
-  in
+    from_stmts ~continue_label:None ~break_label:None b.N.fub_ast in
+  let stmt_instrs =
+    if has_type_constraint return_type_info then
+      verify_returns stmt_instrs
+    else
+      stmt_instrs in
   let ret_instrs =
     match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
-    instrs [ILitConst Null; IContFlow RetC]
+    gather [instr_null; instr_retc]
   in
   let fault_instrs = emit_fault_instructions stmt_instrs in
   let body_instrs = gather [

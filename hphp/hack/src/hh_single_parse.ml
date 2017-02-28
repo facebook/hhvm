@@ -87,7 +87,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
     let open Printf in
     let ast_result = run_ast file in
     let ast_sexpr = dump_sexpr ast_result in
-    let unsupported = Str.regexp "Fallthrough\\|Unsafe\\|is_variadic: true" in
+    let unsupported = Str.regexp "Fallthrough\\|Unsafe" in
     (try
         ignore (Str.search_forward unsupported ast_sexpr 0);
         eprintf "Warning: Unsupported features found: %s\n"

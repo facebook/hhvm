@@ -468,8 +468,9 @@ and pFunParam : fun_param parser = fun node env ->
       in
       go (pKinds parameter_visibility env)
     }
-  | Token _ when text node = "..." ->
-    { (param_template node) with param_is_variadic = true }
+  | VariadicParameter _
+  | Token _ when text node = "..."
+    -> { (param_template node) with param_is_variadic = true }
   | _ -> missing_syntax "function parameter" node env
 and pUserAttribute : user_attribute list parser = fun node env ->
   match syntax node with

@@ -134,9 +134,9 @@ void in(ISS& env, const bc::EntryNop&) { nothrow(env); }
 
 void in(ISS& env, const bc::Dup& op) {
   nothrow(env);
-  auto const val = popC(env);
+  auto val = popC(env);
   push(env, val);
-  push(env, val);
+  push(env, std::move(val));
 }
 
 void in(ISS& env, const bc::AssertRATL&)     { nothrow(env); }
@@ -189,14 +189,16 @@ void in(ISS& env, const bc::UGetCUNop&) {
 void in(ISS& env, const bc::UnboxRNop&) {
   nothrow(env);
   constprop(env);
-  auto const t = popR(env);
-  push(env, t.subtypeOf(TInitCell) ? t : TInitCell);
+  auto t = popR(env);
+  if (!t.subtypeOf(TInitCell)) t = TInitCell;
+  push(env, std::move(t));
 }
 
 void in(ISS& env, const bc::BoxRNop&) {
   nothrow(env);
-  auto const t = popR(env);
-  push(env, t.subtypeOf(TRef) ? t : TRef);
+  auto t = popR(env);
+  if (!t.subtypeOf(TRef)) t = TRef;
+  push(env, std::move(t));
 }
 
 void in(ISS& env, const bc::Null&)      { nothrow(env); push(env, TInitNull); }
@@ -303,6 +305,7 @@ void in(ISS& env, const bc::AddElemC& op) {
     : union_of(TArr, TDict);
   push(env, outTy);
 }
+
 void in(ISS& env, const bc::AddElemV& op) {
   popV(env); popC(env);
   auto const ty = popC(env);
@@ -339,13 +342,11 @@ void in(ISS& env, const bc::ColFromArray& op) {
 
 void in(ISS& env, const bc::MapAddElemC&) {
   popC(env); popC(env);
-  auto const coll = popC(env);
-  push(env, coll);
+  push(env, popC(env));
 }
 void in(ISS& env, const bc::ColAddNewElemC&) {
   popC(env);
-  auto const coll = popC(env);
-  push(env, coll);
+  push(env, popC(env));
 }
 
 void in(ISS& env, const bc::Cns& op)  {
@@ -364,7 +365,7 @@ void in(ISS& env, const bc::Cns& op)  {
     nothrow(env);
     constprop(env);
   }
-  push(env, *t);
+  push(env, std::move(*t));
 }
 
 void in(ISS& env, const bc::CnsE&) { push(env, TInitCell); }
@@ -385,9 +386,9 @@ void in(ISS& env, const bc::ClsCns& op) {
 
 void in(ISS& env, const bc::ClsCnsD& op) {
   if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
-    auto const t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1);
+    auto t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1);
     if (options.HardConstProp) constprop(env);
-    push(env, t);
+    push(env, std::move(t));
     return;
   }
   push(env, TInitCell);
@@ -472,12 +473,12 @@ void in(ISS& env, const bc::BitNot& op) {
   auto const v = tv(t);
   if (v) {
     constprop(env);
-    auto const cell = eval_cell([&] {
+    auto cell = eval_cell([&] {
       auto c = *v;
       cellBitNot(c);
       return c;
     });
-    return push(env, cell ? *cell : TInitCell);
+    if (cell) return push(env, std::move(*cell));
   }
   push(env, TInitCell);
 }
@@ -557,7 +558,7 @@ void binOpInt64Impl(ISS& env, Fun fun, Op op) {
           !(t1.couldBe(TArr) || t2.couldBe(TArr))) {
         constprop(env);
       }
-      return push(env, *r);
+      return push(env, std::move(*r));
     }
   }
   // TODO_4: evaluate when these can throw, non-constant type stuff.
@@ -624,11 +625,11 @@ void castBoolImpl(ISS& env, bool negate) {
   auto const t = popC(env);
   auto const v = tv(t);
   if (v) {
-    auto const cell = eval_cell([&] {
+    auto cell = eval_cell([&] {
       return make_tv<KindOfBoolean>(cellToBool(*v) != negate);
     });
     always_assert_flog(!!cell, "cellToBool should never throw");
-    return push(env, *cell);
+    return push(env, std::move(*cell));
   }
 
   if (t.subtypeOf(TArrE)) return push(env, negate ? TTrue : TFalse);
@@ -655,10 +656,10 @@ void in(ISS& env, const bc::CastInt&) {
   // Objects can raise a warning about converting to int.
   if (!t.couldBe(TObj)) nothrow(env);
   if (auto const v = tv(t)) {
-    auto const cell = eval_cell([&] {
+    auto cell = eval_cell([&] {
       return make_tv<KindOfInt64>(cellToInt(*v));
     });
-    return push(env, cell ? *cell : TInitCell);
+    if (cell) return push(env, std::move(*cell));
   }
   push(env, TInt);
 }
@@ -669,7 +670,7 @@ void castImpl(ISS& env, Type target) {
   constprop(env);
   // TODO(#3875556): constant evaluate conversions when we can.
   popC(env);
-  push(env, target);
+  push(env, std::move(target));
 }
 
 void in(ISS& env, const bc::CastDouble&) { castImpl(env, TDbl); }
@@ -683,10 +684,11 @@ void in(ISS& env, const bc::CastKeyset&) { castImpl(env, TKeyset); }
 void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
 
 void in(ISS& env, const bc::Clone& op) {
-  auto const val = popC(env);
-  push(env, val.subtypeOf(TObj) ? val :
-            is_opt(val)         ? unopt(val) :
-            TObj);
+  auto val = popC(env);
+  if (!val.subtypeOf(TObj)) {
+    val = is_opt(val) ? unopt(std::move(val)) : TObj;
+  }
+  push(env, std::move(val));
 }
 
 void in(ISS& env, const bc::Exit&)  { popC(env); push(env, TInitNull); }
@@ -809,7 +811,7 @@ void typeTestPropagate(ISS& env, Type valTy, Type testTy,
   auto const takenOnSuccess = jmp.op == Op::JmpNZ;
 
   if (valTy.subtypeOf(testTy) || failTy.subtypeOf(TBottom)) {
-    push(env, valTy);
+    push(env, std::move(valTy));
     if (takenOnSuccess) {
       jmp_nofallthrough(env);
       env.propagate(jmp.target, env.state);
@@ -829,10 +831,10 @@ void typeTestPropagate(ISS& env, Type valTy, Type testTy,
     return;
   }
 
-  push(env, takenOnSuccess ? testTy : failTy);
+  push(env, std::move(takenOnSuccess ? testTy : failTy));
   env.propagate(jmp.target, env.state);
   discard(env, 1);
-  push(env, takenOnSuccess ? failTy : testTy);
+  push(env, std::move(takenOnSuccess ? failTy : testTy));
 }
 
 }
@@ -1015,13 +1017,14 @@ void in(ISS& env, const bc::CGetQuietL& op) {
 }
 
 void in(ISS& env, const bc::CUGetL& op) {
-  auto const ty = locRaw(env, op.loc1);
+  auto ty = locRaw(env, op.loc1);
   if (ty.subtypeOf(TUninit)) {
     return reduce(env, bc::NullUninit {});
   }
   nothrow(env);
   if (!ty.couldBe(TUninit)) constprop(env);
-  push(env, ty.subtypeOf(TCell) ? ty : TCell);
+  if (!ty.subtypeOf(TCell)) ty = TCell;
+  push(env, std::move(ty));
 }
 
 void in(ISS& env, const bc::PushL& op) {
@@ -1031,21 +1034,21 @@ void in(ISS& env, const bc::PushL& op) {
 void in(ISS& env, const bc::CGetL2& op) {
   // Can't constprop yet because of no INS_1 support in bc.h
   if (!locCouldBeUninit(env, op.loc1)) nothrow(env);
-  auto const loc = locAsCell(env, op.loc1);
-  auto const top = popT(env);
-  push(env, loc);
-  push(env, top);
+  auto loc = locAsCell(env, op.loc1);
+  auto top = popT(env);
+  push(env, std::move(loc));
+  push(env, std::move(top));
 }
 
 void in(ISS& env, const bc::CGetL3& op) {
   // Can't constprop yet because of no INS_2 support in bc.h
   if (!locCouldBeUninit(env, op.loc1)) nothrow(env);
-  auto const loc = locAsCell(env, op.loc1);
-  auto const t1 = popT(env);
-  auto const t2 = popT(env);
-  push(env, loc);
-  push(env, t2);
-  push(env, t1);
+  auto loc = locAsCell(env, op.loc1);
+  auto t1 = popT(env);
+  auto t2 = popT(env);
+  push(env, std::move(loc));
+  push(env, std::move(t2));
+  push(env, std::move(t1));
 }
 
 namespace {
@@ -1081,7 +1084,7 @@ void in(ISS& env, const bc::CGetS&) {
 
   if (vname && vname->m_type == KindOfPersistentString &&
       self && tcls.subtypeOf(*self)) {
-    if (auto const ty = selfPropAsCell(env, vname->m_data.pstr)) {
+    if (auto ty = selfPropAsCell(env, vname->m_data.pstr)) {
       // Only nothrow when we know it's a private declared property
       // (and thus accessible here).
       nothrow(env);
@@ -1096,11 +1099,11 @@ void in(ISS& env, const bc::CGetS&) {
         constprop(env);
       }
 
-      return push(env, *ty);
+      return push(env, std::move(*ty));
     }
   }
 
-  auto const indexTy = env.index.lookup_public_static(tcls, tname);
+  auto indexTy = env.index.lookup_public_static(tcls, tname);
   if (indexTy.subtypeOf(TInitCell)) {
     /*
      * Constant propagation here can change when we invoke autoload, so it's
@@ -1111,7 +1114,7 @@ void in(ISS& env, const bc::CGetS&) {
      * be the property this would have read dynamically.
      */
     if (options.HardConstProp) constprop(env);
-    return push(env, indexTy);
+    return push(env, std::move(indexTy));
   }
 
   push(env, TInitCell);
@@ -1278,7 +1281,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
 
   // A memo key can be an integer if the input might be an integer, and is a
   // string otherwise. Booleans are always static strings.
-  auto const keyTy = [&]{
+  auto keyTy = [&]{
     if (auto const val = tv(inTy)) {
       auto const key = eval_cell(
         [&]{ return HHVM_FN(serialize_memoize_param)(*val); }
@@ -1289,7 +1292,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
     if (inTy.couldBe(TInt)) return union_of(TInt, TStr);
     return TStr;
   }();
-  push(env, keyTy);
+  push(env, std::move(keyTy));
 }
 
 void in(ISS& env, const bc::IssetL& op) {
@@ -1365,7 +1368,7 @@ void in(ISS& env, const bc::EmptyN&) { issetEmptyNImpl<bc::EmptyL>(env); }
 void in(ISS& env, const bc::EmptyG&) { popC(env); push(env, TBool); }
 void in(ISS& env, const bc::IssetG&) { popC(env); push(env, TBool); }
 
-void isTypeImpl(ISS& env, Type locOrCell, Type test) {
+void isTypeImpl(ISS& env, const Type& locOrCell, const Type& test) {
   constprop(env);
   if (locOrCell.subtypeOf(test))  return push(env, TTrue);
   if (!locOrCell.couldBe(test))   return push(env, TFalse);
@@ -1410,9 +1413,8 @@ void in(ISS& env, const bc::IsTypeL& op) { isTypeLImpl(env, op); }
 
 void in(ISS& env, const bc::IsUninit& op) {
   nothrow(env);
-  auto const ty = popCU(env);
-  push(env, ty);
-  isTypeImpl(env, ty, TUninit);
+  push(env, popCU(env));
+  isTypeImpl(env, topT(env), TUninit);
 }
 
 void in(ISS& env, const bc::MaybeMemoType& op) {
@@ -1474,7 +1476,7 @@ void in(ISS& env, const bc::InstanceOf& op) {
 void in(ISS& env, const bc::SetL& op) {
   nothrow(env);
   auto const equivLoc = topStkEquiv(env);
-  auto const val = popC(env);
+  auto val = popC(env);
   setLoc(env, op.loc1, val);
   // If the local could be a Ref, don't record equality because the stack
   // element and the local won't actually have the same type.
@@ -1483,13 +1485,13 @@ void in(ISS& env, const bc::SetL& op) {
       !is_volatile_local(env.ctx.func, op.loc1)) {
     addLocEquiv(env, op.loc1, equivLoc);
   }
-  push(env, val, equivLoc);
+  push(env, std::move(val), equivLoc);
 }
 
 void in(ISS& env, const bc::SetN&) {
   // This isn't trivial to strength reduce, without a "flip two top
   // elements of stack" opcode.
-  auto const t1 = popC(env);
+  auto t1 = popC(env);
   auto const t2 = popC(env);
   auto const v2 = tv(t2);
   // TODO(#3653110): could nothrow if t2 can't be an Obj or Res
@@ -1505,17 +1507,17 @@ void in(ISS& env, const bc::SetN&) {
     loseNonRefLocalTypes(env);
   }
   mayUseVV(env);
-  push(env, t1);
+  push(env, std::move(t1));
 }
 
 void in(ISS& env, const bc::SetG&) {
-  auto const t1 = popC(env);
+  auto t1 = popC(env);
   popC(env);
-  push(env, t1);
+  push(env, std::move(t1));
 }
 
 void in(ISS& env, const bc::SetS&) {
-  auto const t1    = popC(env);
+  auto t1    = popC(env);
   auto const tcls  = popA(env);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1534,7 +1536,7 @@ void in(ISS& env, const bc::SetS&) {
     c->merge(env.ctx, tcls, tname, t1);
   }
 
-  push(env, t1);
+  push(env, std::move(t1));
 }
 
 void in(ISS& env, const bc::SetOpL& op) {
@@ -1564,9 +1566,9 @@ void in(ISS& env, const bc::SetOpL& op) {
     return;
   }
 
-  auto const resultTy = typeSetOp(op.subop2, loc, t1);
+  auto resultTy = typeSetOp(op.subop2, loc, t1);
   setLoc(env, op.loc1, resultTy);
-  push(env, resultTy);
+  push(env, std::move(resultTy));
 }
 
 void in(ISS& env, const bc::SetOpN&) {
@@ -1605,8 +1607,8 @@ void in(ISS& env, const bc::SetOpS&) {
 }
 
 void in(ISS& env, const bc::IncDecL& op) {
-  auto const loc = locAsCell(env, op.loc1);
-  auto const newT = typeIncDec(op.subop2, loc);
+  auto loc = locAsCell(env, op.loc1);
+  auto newT = typeIncDec(op.subop2, loc);
   auto const pre = isPre(op.subop2);
 
   // If it's a non-numeric string, this may cause it to exceed the max length.
@@ -1615,9 +1617,9 @@ void in(ISS& env, const bc::IncDecL& op) {
     nothrow(env);
   }
 
-  if (!pre) push(env, loc);
+  if (!pre) push(env, std::move(loc));
   setLoc(env, op.loc1, newT);
-  if (pre)  push(env, newT);
+  if (pre)  push(env, std::move(newT));
 }
 
 void in(ISS& env, const bc::IncDecN& op) {
@@ -1661,14 +1663,14 @@ void in(ISS& env, const bc::IncDecS&) {
 
 void in(ISS& env, const bc::BindL& op) {
   nothrow(env);
-  auto const t1 = popV(env);
+  auto t1 = popV(env);
   setLocRaw(env, op.loc1, t1);
-  push(env, t1);
+  push(env, std::move(t1));
 }
 
 void in(ISS& env, const bc::BindN&) {
   // TODO(#3653110): could nothrow if t2 can't be an Obj or Res
-  auto const t1 = popV(env);
+  auto t1 = popV(env);
   auto const t2 = popC(env);
   auto const v2 = tv(t2);
   auto const knownLoc = v2 && v2->m_type == KindOfPersistentString
@@ -1680,13 +1682,13 @@ void in(ISS& env, const bc::BindN&) {
     boxUnknownLocal(env);
   }
   mayUseVV(env);
-  push(env, t1);
+  push(env, std::move(t1));
 }
 
 void in(ISS& env, const bc::BindG&) {
-  auto const t1 = popV(env);
+  auto t1 = popV(env);
   popC(env);
-  push(env, t1);
+  push(env, std::move(t1));
 }
 
 void in(ISS& env, const bc::BindS&) {
@@ -1895,9 +1897,9 @@ void in(ISS& env, const bc::FPushCufF&) {
 }
 
 void in(ISS& env, const bc::FPushCufSafe&) {
-  auto const t1 = popC(env);
+  auto t1 = popC(env);
   popC(env);
-  push(env, t1);
+  push(env, std::move(t1));
   fpiPush(env, ActRec { FPIKind::Unknown });
   push(env, TBool);
 }
@@ -2096,12 +2098,12 @@ void in(ISS& env, const bc::FPassCE& op) {
   fpassCXHelper(env, op.arg1, true);
 }
 
-void pushCallReturnType(ISS& env, const Type& ty) {
+void pushCallReturnType(ISS& env, Type&& ty) {
   if (ty == TBottom) {
     // The callee function never returns.  It might throw, or loop forever.
     unreachable(env);
   }
-  return push(env, ty);
+  return push(env, std::move(ty));
 }
 
 StaticString s_defined { "defined" };
@@ -2128,19 +2130,19 @@ void fcallKnownImpl(ISS& env, uint32_t numArgs) {
     }
   }
 
-  auto const ty = env.index.lookup_return_type(
+  auto ty = env.index.lookup_return_type(
     CallContext { env.ctx, args },
     *ar.func
   );
   if (!ar.fallbackFunc) {
-    pushCallReturnType(env, ty);
+    pushCallReturnType(env, std::move(ty));
     return;
   }
-  auto const ty2 = env.index.lookup_return_type(
+  auto ty2 = env.index.lookup_return_type(
     CallContext { env.ctx, args },
     *ar.fallbackFunc
   );
-  pushCallReturnType(env, union_of(ty, ty2));
+  pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)));
 }
 
 void in(ISS& env, const bc::FCall& op) {
@@ -2227,13 +2229,13 @@ void fcallArrayImpl(ISS& env, int arg) {
   fpiPop(env);
   specialFunctionEffects(env, ar);
   if (ar.func) {
-    auto const ty = env.index.lookup_return_type(env.ctx, *ar.func);
+    auto ty = env.index.lookup_return_type(env.ctx, *ar.func);
     if (!ar.fallbackFunc) {
-      pushCallReturnType(env, ty);
+      pushCallReturnType(env, std::move(ty));
       return;
     }
-    auto const ty2 = env.index.lookup_return_type(env.ctx, *ar.fallbackFunc);
-    pushCallReturnType(env, union_of(ty, ty2));
+    auto ty2 = env.index.lookup_return_type(env.ctx, *ar.fallbackFunc);
+    pushCallReturnType(env, union_of(std::move(ty), std::move(ty2)));
     return;
   }
   return push(env, TInitGen);
@@ -2594,14 +2596,14 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   // If stackT is a subtype of tcT, use stackT.  Otherwise, if tc is an opt
   // type and stackT cannot be InitNull, then we can safely use unopt(tcT).
   // In all other cases, use tcT.
-  auto const retT = stackT.subtypeOf(tcT) ? stackT :
+  auto retT = stackT.subtypeOf(tcT) ? stackT :
                     is_opt(tcT) && !stackT.couldBe(TInitNull) ? unopt(tcT) :
                     tcT;
 
   // Update the top of stack with the rough conservative approximate of the
   // intersection of stackT and tcT
   popC(env);
-  push(env, retT);
+  push(env, std::move(retT));
 }
 
 // These only occur in traits, so we don't need to do better than
@@ -2696,7 +2698,7 @@ void pushTypeFromWH(ISS& env, const Type t) {
     return push(env, TInitCell);
   }
 
-  auto const inner = wait_handle_inner(t);
+  auto inner = wait_handle_inner(t);
   if (inner.subtypeOf(TBottom)) {
     // If it's a WaitH<Bottom>, we know it's going to throw an exception, and
     // the fallthrough code is not reachable.
@@ -2705,7 +2707,7 @@ void pushTypeFromWH(ISS& env, const Type t) {
     return;
   }
 
-  push(env, inner);
+  push(env, std::move(inner));
 }
 
 void in(ISS& env, const bc::WHResult&) {

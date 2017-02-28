@@ -1403,7 +1403,7 @@ size_t Type::hash() const {
   return folly::hash::hash_combine(rawBits, rawTag);
 }
 
-bool Type::subtypeOf(Type o) const {
+bool Type::subtypeOf(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
 
@@ -1435,13 +1435,13 @@ bool Type::subtypeOf(Type o) const {
   return hasData() && subtypeData(o);
 }
 
-bool Type::strictSubtypeOf(Type o) const {
+bool Type::strictSubtypeOf(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
   return *this != o && subtypeOf(o);
 }
 
-bool Type::couldBe(Type o) const {
+bool Type::couldBe(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
 
@@ -2050,7 +2050,7 @@ Type unopt(Type t) {
   return t;
 }
 
-bool is_opt(Type t) {
+bool is_opt(const Type& t) {
   if (t.m_bits == BInitNull) return false;
   if (!t.couldBe(TInitNull)) return false;
   auto const nonNullBits = static_cast<trep>(t.m_bits & ~BInitNull);
@@ -2075,7 +2075,7 @@ Type objcls(const Type& t) {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<Cell> tv(Type t) {
+folly::Optional<Cell> tv(const Type& t) {
   assert(t.checkInvariants());
 
   switch (t.m_bits) {

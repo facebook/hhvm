@@ -387,14 +387,14 @@ struct Type {
    * subtype of `o' at runtime.  If this function returns false, this may
    * still be a subtype of `o' at runtime, it just may not be known.
    */
-  bool subtypeOf(Type o) const;
-  bool strictSubtypeOf(Type o) const;
+  bool subtypeOf(const Type& o) const;
+  bool strictSubtypeOf(const Type& o) const;
 
   /*
    * Subtype of any of the list of types.
    */
   template<class... Types>
-  bool subtypeOfAny(Type t, Types... ts) const {
+  bool subtypeOfAny(const Type& t, Types... ts) const {
     return subtypeOf(t) || subtypeOfAny(ts...);
   }
   bool subtypeOfAny() const { return false; }
@@ -409,7 +409,7 @@ struct Type {
    * Essentially this function can conservatively return true but must be
    * precise when returning false.
    */
-  bool couldBe(Type o) const;
+  bool couldBe(const Type& o) const;
 
 private:
   friend Type wait_handle(const Index&, Type);
@@ -447,9 +447,9 @@ private:
   friend Type promote_emptyish(Type, Type);
   friend Type opt(Type);
   friend Type unopt(Type);
-  friend bool is_opt(Type);
-  friend folly::Optional<Cell> tv(Type);
-  friend std::string show(Type);
+  friend bool is_opt(const Type&);
+  friend folly::Optional<Cell> tv(const Type&);
+  friend std::string show(const Type&);
   friend struct ArrKey disect_array_key(const Type&);
   friend Type array_elem(const Type&, const Type&);
   friend Type arrayN_set(Type, const Type&, const Type&);
@@ -846,7 +846,7 @@ Type unopt(Type t);
  * optional types.  (Note that this does not include types like
  * TInitUnc---it's only the TOpt* types.)
  */
-bool is_opt(Type t);
+bool is_opt(const Type& t);
 
 /*
  * Returns true if type 't' represents a "specialized" object, that is an
@@ -888,7 +888,7 @@ Type objcls(const Type& t);
  *
  * The returned Cell can only contain non-reference-counted types.
  */
-folly::Optional<Cell> tv(Type t);
+folly::Optional<Cell> tv(const Type& t);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc

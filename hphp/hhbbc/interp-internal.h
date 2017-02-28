@@ -232,7 +232,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
 
 Type popT(ISS& env) {
   assert(!env.state.stack.empty());
-  auto const ret = env.state.stack.back().type;
+  auto const ret = std::move(env.state.stack.back().type);
   FTRACE(2, "    pop:  {}\n", show(ret));
   env.state.stack.pop_back();
   return ret;
@@ -278,24 +278,24 @@ void discard(ISS& env, int n) {
   }
 }
 
-Type topT(ISS& env, uint32_t idx = 0) {
+Type& topT(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1].type;
 }
 
-Type topA(ISS& env, uint32_t i = 0) {
+Type& topA(ISS& env, uint32_t i = 0) {
   assert(topT(env, i).subtypeOf(TCls));
   return topT(env, i);
 }
 
-Type topC(ISS& env, uint32_t i = 0) {
+Type& topC(ISS& env, uint32_t i = 0) {
   assert(topT(env, i).subtypeOf(TInitCell));
   return topT(env, i);
 }
 
-Type topR(ISS& env, uint32_t i = 0) { return topT(env, i); }
+Type& topR(ISS& env, uint32_t i = 0) { return topT(env, i); }
 
-Type topV(ISS& env, uint32_t i = 0) {
+Type& topV(ISS& env, uint32_t i = 0) {
   assert(topT(env, i).subtypeOf(TRef));
   return topT(env, i);
 }
@@ -303,7 +303,7 @@ Type topV(ISS& env, uint32_t i = 0) {
 void push(ISS& env, Type t, LocalId l = NoLocalId) {
   FTRACE(2, "    push: {}\n", show(t));
   always_assert(l == NoLocalId || !is_volatile_local(env.ctx.func, l));
-  env.state.stack.push_back(StackElem {t, l});
+  env.state.stack.push_back(StackElem {std::move(t), l});
 }
 
 //////////////////////////////////////////////////////////////////////

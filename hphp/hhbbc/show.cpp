@@ -395,7 +395,7 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(Type t) {
+std::string show(const Type& t) {
   std::string ret;
 
   assert(t.checkInvariants());

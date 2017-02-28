@@ -194,9 +194,10 @@ void Transport::parsePostParams() {
     size_t size;
     const char *data = (const char *)getPostData(size);
     if (data && *data && size) {
-      // Post data may be binary, but if parsePostParams() is called, it is
-      // correct to handle it as a null-terminated string
-      m_postData = strdup(data);
+      // Post data may be binary, but if parsePostParams() is called, any
+      // wellformed data cannot have embedded NULs. If it does, we simply
+      // truncate it.
+      m_postData = strndup(data, size);
       parseQuery(m_postData, m_postParams);
     }
     m_postDataParsed = true;

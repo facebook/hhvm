@@ -618,7 +618,10 @@ and from_stmt st =
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
-    from_try try_block catch_list finally_block
+    if catch_list <> [] && finally_block != [] then
+      from_stmt (A.Try([A.Try (try_block, catch_list, [])], [], finally_block))
+    else
+      from_try try_block catch_list finally_block
   | A.Switch (e, cl) ->
     from_switch e cl
   | A.Foreach (collection, await_pos, iterator, block) ->

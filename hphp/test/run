@@ -376,6 +376,7 @@ function get_options($argv) {
     'repo' => 'r',
     'mode:' => 'm:',
     'server' => 's',
+    'cli-server' => 'S',
     'shuffle' => '',
     'help' => 'h',
     'verbose' => 'v',
@@ -773,6 +774,13 @@ function hhvm_cmd($options, $test, $test_run = null) {
   );
 
   $cmd = "";
+
+  if (isset($options['cli-server']) && can_run_server_test($test)) {
+    $config = find_file_for_dir(dirname($test), 'config.ini');
+    $socket = $options['servers']['configs'][$config]['cli-socket'];
+    $cmd .= ' -vEval.UseRemoteUnixServer=only';
+    $cmd .= ' -vEval.UnixServerPath='.$socket;
+  }
 
   // Special support for tests that require a path to the current
   // test directory for things like prepend_file and append_file
@@ -2144,14 +2152,17 @@ function print_failure($argv, $results, $options) {
 
   $rerun = make_header("Re-run just the failing tests:") . $argv[0];
   foreach ($options as $option => $value) {
+    if ($option === "servers") continue;
     if ($option === "threads") {
       // e.g., For a small number of failed tests, we don't need max threads.
       $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
     } else if ($option === "typechecker" ||
                $option === "verbose" ||
-               $option === "repo") {
+               $option === "repo" ||
+               $option === "server" ||
+               $option === "cli-server") {
       // The escapeshellarg($value) of these is 1, but there is no real value
-      // associated with these two options.
+      // associated with these options.
       $rerun .= " --" . $option;
     } else {
       $rerun .= " --" . $option . ' ' . escapeshellarg($value);
@@ -2176,7 +2187,16 @@ function find_open_port() {
 }
 
 function start_server_proc($options, $config, $port) {
+  if (isset($options['cli-server'])) {
+    $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
+  } else {
+    // still want to test that an unwritable socket works...
+    $cli_sock = '/var/run/hhvm-cli.sock';
+  }
   $threads = $options['threads'];
+  $thread_option = isset($options['cli-server'])
+    ? '-vEval.UnixServerWorkers='.$threads
+    : '-vServer.ThreadCount='.$threads;
   $command = hhvm_cmd_impl(
     $options,
     $config,
@@ -2184,12 +2204,15 @@ function start_server_proc($options, $config, $port) {
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",
     "-vAdminServer.Port=0",
-    "-vServer.ThreadCount=$threads",
+    $thread_option,
     '-vServer.ExitOnBindFail=1',
     '-vServer.RequestTimeoutSeconds='.SERVER_TIMEOUT,
     '-vPageletServer.ThreadCount=0',
     '-vLog.UseRequestLog=1',
     '-vLog.File=/dev/null',
+
+    // The server will unlink the temp file
+    '-vEval.UnixServerPath='.$cli_sock,
 
     // This ensures we actually jit everything:
     '-vEval.JitRequireWriteLease=1',
@@ -2223,6 +2246,7 @@ function start_server_proc($options, $config, $port) {
   $status['proc'] = $proc;
   $status['port'] = $port;
   $status['config'] = $config;
+  $status['cli-socket'] = $cli_sock;
   return $status;
 }
 
@@ -2288,7 +2312,8 @@ function drain_queue($queue) {
 }
 
 function get_num_threads($options, $tests) {
-  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
+  $cpus = isset($options['server']) || isset($options['cli-server'])
+    ? num_cpus() * 2 : num_cpus();
   return min(count($tests), idx($options, 'threads', $cpus));
 }
 
@@ -2384,7 +2409,10 @@ function main($argv) {
   $options['threads'] = get_num_threads($options, $tests);
 
   $servers = null;
-  if (isset($options['server'])) {
+  if (isset($options['server']) || isset($options['cli-server'])) {
+    if (isset($options['server']) && isset($options['cli-server'])) {
+      error("Server mode and CLI Server mode are mutually exclusive");
+    }
     if (isset($options['repo']) || isset($options['typechecker'])) {
       error("Server mode repo tests are not supported");
     }

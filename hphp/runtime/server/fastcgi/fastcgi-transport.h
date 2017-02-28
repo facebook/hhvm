@@ -53,6 +53,8 @@ namespace HPHP {
 
 struct FastCGISession;
 
+const StaticString s_fastcgi("fastcgi");
+
 /*
  * FastCGITransport is used to communicate between a PHP (VM) thread running a
  * FastCGI request and the FastCGISession representing the connection to
@@ -228,6 +230,11 @@ struct FastCGITransport final : Transport, private Synchronizable {
 #undef STD_STRING
 #undef O
 #undef FCGI_PROTOCOL_HEADERS
+
+  // Get a description of the type of transport.
+  String describe() const override {
+    return s_fastcgi;
+  }
 
 private:
   ///////////////////////////////////////////////////////////////////////////

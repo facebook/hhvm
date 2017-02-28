@@ -267,6 +267,9 @@ struct RequestInjectionData {
 
   const std::vector<std::string>& getAllowedDirectoriesProcessed() const;
 
+  // When safe file access is enabled only whitelisted by setAllowedDirectories
+  // may be modified
+  void setSafeFileAccess(bool b);
   bool hasSafeFileAccess() const;
   bool hasTrackErrors() const;
   bool hasHtmlErrors() const;

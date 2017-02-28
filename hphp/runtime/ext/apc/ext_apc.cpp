@@ -48,6 +48,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/server/cli-server.h"
 
 using HPHP::ScopedMem;
 
@@ -61,7 +62,35 @@ std::aligned_storage<
   alignof(ConcurrentTableSharedStore)
 >::type s_apc_storage;
 
+using UserAPCCache = folly::AtomicHashMap<uid_t, ConcurrentTableSharedStore*>;
+
+std::aligned_storage<
+  sizeof(UserAPCCache),
+  alignof(UserAPCCache)
+>::type s_user_apc_storage;
+
+UserAPCCache& apc_store_local() {
+  void* vpUserStore = &s_user_apc_storage;
+  return *static_cast<UserAPCCache*>(vpUserStore);
+}
+
+ConcurrentTableSharedStore& apc_store_local(uid_t uid) {
+  auto& cache = apc_store_local();
+  auto iter = cache.find(uid);
+  if (iter != cache.end()) return *(iter->second);
+  auto table = new ConcurrentTableSharedStore;
+  auto res = cache.insert(uid, table);
+  if (!res.second) delete table;
+  return *res.first->second;
+}
+
 ConcurrentTableSharedStore& apc_store() {
+  if (UNLIKELY(!RuntimeOption::RepoAuthoritative &&
+               RuntimeOption::EvalUnixServerQuarantineApc)) {
+    if (auto uc = get_cli_ucred()) {
+      return apc_store_local(uc->uid);
+    }
+  }
   void* vpStore = &s_apc_storage;
   return *static_cast<ConcurrentTableSharedStore*>(vpStore);
 }
@@ -75,6 +104,11 @@ void initialize_apc() {
   // Note: we never destruct APC, currently.
   void* vpStore = &s_apc_storage;
   new (vpStore) ConcurrentTableSharedStore;
+
+  if (UNLIKELY(!RuntimeOption::RepoAuthoritative &&
+               RuntimeOption::EvalUnixServerQuarantineApc)) {
+    new (&s_user_apc_storage) UserAPCCache(10);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

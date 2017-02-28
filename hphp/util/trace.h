@@ -184,6 +184,8 @@ namespace Trace {
       TM(xls)           \
       TM(xls_stats)     \
       TM(pdce_inline)   \
+      TM(clisrv)        \
+      TM(factparse)     \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \

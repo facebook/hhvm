@@ -53,6 +53,7 @@ namespace HPHP {
 
 namespace {
 
+__thread LightProcess* tl_proc;
 bool s_trackProcessTimes = false;
 Mutex s_mutex;
 
@@ -624,7 +625,7 @@ void handleException(const char* call) {
 template <class R, class F1>
 R runLight(const char* call, F1 body, R failureResult) {
   try {
-    auto proc = &g_procs[GetId()];
+    auto proc = tl_proc ? tl_proc : &g_procs[GetId()];
     Lock lock(proc->mutex());
 
     return body(proc);
@@ -671,6 +672,7 @@ void LightProcess::closeFiles() {
 }
 
 bool LightProcess::Available() {
+  if (tl_proc) return true;
   return g_procsCount > 0;
 }
 
@@ -684,6 +686,10 @@ FILE *LightProcess::popen(const char *cmd, const char *type,
     FILE *f = LightPopenImpl(cmd, type, cwd);
     if (f) {
       return f;
+    }
+    if (tl_proc) {
+      Logger::Warning("Light-weight fork failed in remote CLI mode.");
+      return nullptr;
     }
     Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
   }
@@ -756,13 +762,16 @@ int LightProcess::pclose(FILE *f) {
     pid = it->second;
     s_popenMap.erase(it);
   } else {
-    int id = GetId();
-    Lock lock(g_procs[id].m_procMutex);
+    auto proc = [] {
+      if (tl_proc) return tl_proc;
+      return &g_procs[GetId()];
+    }();
+    Lock lock(proc->m_procMutex);
 
-    auto it = g_procs[id].m_popenMap.find(f);
-    if (it == g_procs[id].m_popenMap.end()) return -1;
+    auto it = proc->m_popenMap.find(f);
+    if (it == proc->m_popenMap.end()) return -1;
     pid = it->second;
-    g_procs[id].m_popenMap.erase(it);
+    proc->m_popenMap.erase(it);
   }
 
   fclose(f);
@@ -869,6 +878,60 @@ void LightProcess::ChangeUser(const std::string &username) {
 
 void LightProcess::SetLostChildHandler(const LostChildHandler& handler) {
   s_lostChildHandler = handler;
+}
+
+void LightProcess::setThreadLocalAfdtOverride(int fd) {
+  tl_proc = new LightProcess;
+  tl_proc->m_afdt_fd = fd;
+}
+
+void LightProcess::clearThreadLocalAfdtOverride() {
+  delete tl_proc;
+  tl_proc = nullptr;
+}
+
+int LightProcess::createCLIDelegate() {
+  int pair[2];
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair)) {
+    Logger::Warning("Unable to create a unix socket pair: %s",
+                    folly::errnoStr(errno).c_str());
+    return -1;
+  }
+
+  pid_t child = fork();
+
+  if (child < 0) {
+    Logger::Warning("Unable to fork CLI delegate process: %s",
+                    folly::errnoStr(errno).c_str());
+    close(pair[0]);
+    close(pair[1]);
+    return -1;
+  }
+
+  if (child == 0) {
+    // child
+    fclose(stdin);
+    fclose(stdout);
+    fclose(stderr);
+
+    mprotect_1g_pages(PROT_READ);
+    if (s_trackProcessTimes) {
+      HardwareCounter::RecordSubprocessTimes();
+    }
+    Logger::ResetPid();
+    pid_t sid = setsid();
+    if (sid < 0) {
+      Logger::Warning("Unable to setsid");
+      _Exit(HPHP_EXIT_FAILURE);
+    }
+
+    close(pair[0]);
+    runShadow(pair[1]);
+  }
+
+  always_assert(child > 0);
+  close(pair[1]);
+  return pair[0];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

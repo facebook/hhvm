@@ -59,10 +59,32 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   assertx(inst->taken());
 
+  auto checkUninit = [&] {
+    auto const sf = v.makeReg();
+    irlower::emitTypeTest(
+      v, env, TUninit, dst.reg(1), dst.reg(0), sf,
+      [&] (ConditionCode cc, Vreg sfr) {
+        fwdJcc(v, env, cc, sfr, inst->taken());
+      }
+    );
+  };
+
   if (rds::isNormalHandle(ch)) {
     auto const sf = checkRDSHandleInitialized(v, ch);
     fwdJcc(v, env, CC_NE, sf, inst->taken());
     loadTV(v, inst->dst(), dst, rvmtl()[ch]);
+
+    // When a CLIServer is active requests running in script mode will define
+    // the stdio constants which require lookup via special callbacks. To not
+    // interfere with the server these constants will be defined as
+    // non-persistent.
+    if (!RuntimeOption::RepoAuthoritative) {
+      if (strcasecmp(cnsName->data(), "stdin") == 0 ||
+          strcasecmp(cnsName->data(), "stdout") == 0 ||
+          strcasecmp(cnsName->data(), "stderr") == 0) {
+        checkUninit();
+      }
+    }
     return;
   }
   assertx(rds::isPersistentHandle(ch));
@@ -71,13 +93,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
 
   if (cns.m_type == KindOfUninit) {
     loadTV(v, inst->dst(), dst, rvmtl()[ch]);
-    auto const sf = v.makeReg();
-    irlower::emitTypeTest(
-      v, env, TUninit, dst.reg(1), dst.reg(0), sf,
-      [&] (ConditionCode cc, Vreg sfr) {
-        fwdJcc(v, env, cc, sfr, inst->taken());
-      }
-    );
+    checkUninit();
   } else {
     // Statically known constant.
     assertx(!dst.isFullSIMD());
@@ -154,6 +170,18 @@ Cell lookupCnsHelper(StringData* nm, bool error) {
 Cell lookupCnsHelperNormal(rds::Handle tv_handle,
                            StringData* nm, bool error) {
   assertx(rds::isNormalHandle(tv_handle));
+  if (UNLIKELY(rds::isHandleInit(tv_handle))) {
+    auto const tv = &rds::handleToRef<TypedValue>(tv_handle);
+    if (tv->m_data.pref != nullptr) {
+      auto callback = (Unit::SystemConstantCallback)(tv->m_data.pref);
+      const Cell* cns = callback().asTypedValue();
+      if (LIKELY(cns->m_type != KindOfUninit)) {
+        Cell c1;
+        cellDup(*cns, c1);
+        return c1;
+      }
+    }
+  }
   assertx(!rds::isHandleInit(tv_handle));
 
   return lookupCnsHelper(nm, error);

@@ -78,6 +78,8 @@ struct PageletServer {
   static int GetQueuedJobs();
 };
 
+const StaticString s_pagelet("pagelet");
+
 struct PageletTransport final : Transport, Synchronizable {
   PageletTransport(
     const String& url, const Array& headers, const String& postData,
@@ -102,6 +104,13 @@ struct PageletTransport final : Transport, Synchronizable {
   void onSendEndImpl() override;
   bool isUploadedFile(const String& filename) override;
   bool getFiles(std::string &files) override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_pagelet;
+  }
 
   // task interface
   bool isDone();

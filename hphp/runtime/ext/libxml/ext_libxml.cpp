@@ -189,7 +189,7 @@ static req::ptr<File> libxml_streams_IO_open_wrapper(
     int pathIndex = 0;
     Stream::Wrapper* wrapper = Stream::getWrapperFromURI(strFilename,
                                                          &pathIndex);
-    if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
+    if (wrapper->isNormalFileStream()) {
       if (!HHVM_FN(file_exists)(strFilename)) {
         return nullptr;
       }
@@ -664,6 +664,13 @@ struct LibXMLExtension final : Extension {
       xmlOutputBufferCreateFilenameDefault(libxml_create_output_buffer);
       s_default_entity_loader = xmlGetExternalEntityLoader();
       xmlSetExternalEntityLoader(libxml_ext_entity_loader);
+
+      // These callbacks will fallback to alternate defaults in a threaded
+      // context, we want to always use these functions.
+      xmlThrDefParserInputBufferCreateFilenameDefault(
+        libxml_create_input_buffer
+      );
+      xmlThrDefOutputBufferCreateFilenameDefault(libxml_create_output_buffer);
     }
 
     void requestInit() override {

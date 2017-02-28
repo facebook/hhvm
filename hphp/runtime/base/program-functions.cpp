@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/xdebug/status.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/log-writer.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
@@ -223,11 +224,12 @@ static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argv, argvArray);
 }
 
-void process_env_variables(Array& variables) {
-  for (auto& kv : RuntimeOption::EnvVariables) {
+static void process_env_variables(Array& variables, char** envp,
+                           std::map<std::string, std::string>& envVariables) {
+  for (auto& kv : envVariables) {
     variables.set(String(kv.first), String(kv.second));
   }
-  for (char **env = environ; env && *env; env++) {
+  for (char **env = envp; env && *env; env++) {
     char *p = strchr(*env, '=');
     if (p) {
       String name(*env, p - *env, CopyString);
@@ -235,6 +237,10 @@ void process_env_variables(Array& variables) {
                         String(p + 1, CopyString));
     }
   }
+}
+
+void process_env_variables(Array& variables) {
+  process_env_variables(variables, environ, RuntimeOption::EnvVariables);
 }
 
 // Handle adding a variable to an array, supporting keys that look
@@ -601,7 +607,7 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
-void execute_command_line_begin(int argc, char **argv, int xhprof) {
+void init_command_line_session(int argc, char** argv) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
   std::string args;
   for (int i = 0; i < argc; i++) {
@@ -613,13 +619,19 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   hphp_session_init();
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
+}
 
+void
+init_command_line_globals(int argc, char** argv, char** envp,
+                          int xhprof,
+                          std::map<std::string, std::string>& serverVariables,
+                          std::map<std::string, std::string>& envVariables) {
   auto& variablesOrder = RID().getVariablesOrder();
 
   if (variablesOrder.find('e') != std::string::npos ||
       variablesOrder.find('E') != std::string::npos) {
     Array envArr(Array::Create());
-    process_env_variables(envArr);
+    process_env_variables(envArr, envp, envVariables);
     envArr.set(s_HPHP, 1);
     envArr.set(s_HHVM, 1);
     if (RuntimeOption::EvalJit) {
@@ -644,7 +656,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   if (variablesOrder.find('s') != std::string::npos ||
       variablesOrder.find('S') != std::string::npos) {
     Array serverArr(Array::Create());
-    process_env_variables(serverArr);
+    process_env_variables(serverArr, envp, envVariables);
     time_t now;
     struct timeval tp = {0};
     double now_double;
@@ -671,13 +683,14 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
     if (RuntimeOption::ServerExecutionMode() &&
+        !is_cli_mode() &&
         !gethostname(hostname, sizeof(hostname))) {
       // gethostname may not null-terminate
       hostname[sizeof(hostname) - 1] = '\0';
       serverArr.set(s_HOSTNAME, String(hostname, CopyString));
     }
 
-    for (auto& kv : RuntimeOption::ServerVariables) {
+    for (auto& kv : serverVariables) {
       serverArr.set(String(kv.first.c_str()), String(kv.second.c_str()));
     }
 
@@ -699,6 +712,13 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   InitFiniNode::GlobalsInit();
   // Initialize the debugger
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
+}
+
+void execute_command_line_begin(int argc, char **argv, int xhprof) {
+  init_command_line_session(argc, argv);
+  init_command_line_globals(argc, argv, environ, xhprof,
+                            RuntimeOption::ServerVariables,
+                            RuntimeOption::EnvVariables);
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -897,6 +917,10 @@ static int start_server(const std::string &username, int xhprof) {
   HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
 
+  if (!RuntimeOption::EvalUnixServerPath.empty()) {
+    init_cli_server(RuntimeOption::EvalUnixServerPath.c_str());
+  }
+
   // Before we start the webserver, make sure the entire
   // binary is paged into memory.
   pagein_self();
@@ -1092,8 +1116,13 @@ static int start_server(const std::string &username, int xhprof) {
     readaheadThread.reset();
   }
 
+  if (!RuntimeOption::EvalUnixServerPath.empty()) {
+    start_cli_server();
+  }
+
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();
+
   return 0;
 }
 
@@ -1619,6 +1648,7 @@ static int execute_program_impl(int argc, char** argv) {
       messages.push_back(msg);
     }
   }
+
   std::vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
@@ -1770,6 +1800,23 @@ static int execute_program_impl(int argc, char** argv) {
     int ret = 0;
     hphp_process_init();
     SCOPE_EXIT { hphp_process_exit(); };
+
+    if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
+        !RuntimeOption::EvalUnixServerPath.empty() &&
+        (!po.file.empty() || !po.args.empty())) {
+      std::vector<std::string> args;
+      if (!po.file.empty()) {
+        args.emplace_back(po.file);
+      }
+      args.insert(args.end(), po.args.begin(), po.args.end());
+      run_command_on_cli_server(
+        RuntimeOption::EvalUnixServerPath.c_str(), args
+      );
+      if (RuntimeOption::EvalUseRemoteUnixServer == "only") {
+        Logger::Error("Failed to connect to unix server.");
+        exit(255);
+      }
+    }
 
     std::string file;
     if (new_argc > 0) {
@@ -2214,7 +2261,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool &error, std::string &errorMsg,
                  bool once, bool warmupOnly,
                  bool richErrorMsg) {
-  bool isServer = RuntimeOption::ServerExecutionMode();
+  bool isServer =
+    RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   error = false;
 
   // Make sure we have the right current working directory within the repo
@@ -2377,6 +2425,7 @@ void hphp_process_exit() noexcept {
   // an earlier step fails, and don't propagate exceptions ouf of this function
 #define LOG_AND_IGNORE(voidexpr) try { voidexpr; } catch (...) { \
     Logger::Error("got exception in cleanup step: " #voidexpr); }
+  LOG_AND_IGNORE(teardown_cli_server())
   LOG_AND_IGNORE(Xenon::getInstance().stop())
   LOG_AND_IGNORE(jit::mcgen::processExit())
   LOG_AND_IGNORE(PageletServer::Stop())

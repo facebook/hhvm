@@ -28,15 +28,20 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/writer.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/file.h"
 #include "hphp/util/process.h"
+#include "hphp/util/trace.h"
+
+TRACE_SET_MOD(factparse)
 
 namespace HPHP {
 namespace {
@@ -83,30 +88,49 @@ void parseFile(
     cleanPath =
       folly::sformat("{}{}{}", root, FileUtil::getDirSeparator(), path);
   }
+  auto parse = [&] (std::istream& stream) {
+    if (!stream.good()) {
+      return;
+    }
+    Scanner scanner(
+      stream,
+      allowHipHopSyntax ? Scanner::Type::AllowHipHopSyntax : 0,
+      path,
+      true);
+    Facts::Parser parser(scanner, path, res);
+    try {
+      parser.parse();
+    } catch (ParseTimeFatalException& e) {
+      FTRACE(1, "Parse fatal @{}: {}\n", e.m_line, e.getMessage());
+    }
+  };
+
   struct stat st;
-  // It would be nice to have an atomic stat + open operation here but this
-  // doesn't seem to be possible with STL in a portable way.
-  if (stat(cleanPath.c_str(), &st)) {
-    return;
-  }
-  if (S_ISDIR(st.st_mode)) {
-    return;
-  }
-  std::ifstream stream(cleanPath);
-  if (!stream.good()) {
-    return;
-  }
-  Scanner scanner(
-    stream,
-    allowHipHopSyntax ? Scanner::Type::AllowHipHopSyntax : 0,
-    path,
-    true);
-  Facts::Parser parser(scanner, path, res);
-  try {
-    parser.parse();
-  } catch (ParseTimeFatalException& e) {
-    // std::cerr
-    //   << e.m_file << "@" << e.m_line <<  ": " << e.getMessage() << std::endl;
+  auto w = Stream::getWrapperFromURI(StrNR(cleanPath));
+  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
+    if (w->stat(cleanPath.c_str(), &st)) {
+      return;
+    }
+    if (S_ISDIR(st.st_mode)) {
+      return;
+    }
+    const auto f = w->open(StrNR(cleanPath), "r", 0, nullptr);
+    if (!f) return;
+    auto str = f->read();
+    std::string content(str.data(), str.size());
+    std::istringstream stream(content);
+    parse(stream);
+  } else {
+    // It would be nice to have an atomic stat + open operation here but this
+    // doesn't seem to be possible with STL in a portable way.
+    if (stat(cleanPath.c_str(), &st)) {
+      return;
+    }
+    if (S_ISDIR(st.st_mode)) {
+      return;
+    }
+    std::ifstream stream(cleanPath);
+    parse(stream);
   }
 }
 

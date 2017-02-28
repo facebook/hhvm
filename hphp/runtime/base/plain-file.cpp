@@ -29,6 +29,24 @@ namespace HPHP {
 const StaticString s_plainfile("plainfile");
 const StaticString s_stdio("STDIO");
 
+namespace {
+
+__thread FILE* tl_stdin{nullptr};
+__thread FILE* tl_stdout{nullptr};
+__thread FILE* tl_stderr{nullptr};
+
+}
+
+void setThreadLocalIO(FILE* in, FILE* out, FILE* err) {
+  tl_stdin = in;
+  tl_stdout = out;
+  tl_stderr = err;
+}
+
+void clearThreadLocalIO() {
+  setThreadLocalIO(nullptr, nullptr, nullptr);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -297,7 +315,7 @@ void BuiltinFiles::requestShutdown() {
 
 const Variant& BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
-    auto f = req::make<BuiltinFile>(stdin);
+    auto f = req::make<BuiltinFile>(tl_stdin ? tl_stdin : stdin);
     g_builtin_files->m_stdin = f;
     f->setId(1);
     assert(f->getId() == 1);
@@ -307,7 +325,7 @@ const Variant& BuiltinFiles::GetSTDIN() {
 
 const Variant& BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
-    auto f = req::make<BuiltinFile>(stdout);
+    auto f = req::make<BuiltinFile>(tl_stdout ? tl_stdout : stdout);
     g_builtin_files->m_stdout = f;
     f->setId(2);
     assert(f->getId() == 2);
@@ -317,7 +335,7 @@ const Variant& BuiltinFiles::GetSTDOUT() {
 
 const Variant& BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
-    auto f = req::make<BuiltinFile>(stderr);
+    auto f = req::make<BuiltinFile>(tl_stderr ? tl_stderr : stderr);
     g_builtin_files->m_stderr = f;
     f->setId(3);
     assert(f->getId() == 3);

@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/process/ext_process.h"
@@ -146,7 +147,7 @@ void raise_infinite_recursion_error() {
 
 static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto exceptionMsg = folly::sformat(
-    RuntimeOption::ClientExecutionMode()
+    !RuntimeOption::ServerExecutionMode() || is_cli_mode()
       ? "Maximum execution time of {} seconds exceeded"
       : "entire web request took longer than {} seconds and timed out",
     RID().getTimeout());

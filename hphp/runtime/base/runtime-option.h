@@ -60,10 +60,6 @@ struct RuntimeOption {
     return ServerMode;
   }
 
-  static bool ClientExecutionMode() {
-    return !ServerMode;
-  }
-
   static bool GcSamplingEnabled() {
     return EvalGCSampleRate > 0;
   }
@@ -640,6 +636,17 @@ struct RuntimeOption {
    * compatibility issues with Hack arrays. */                          \
   F(bool, HackArrCompatNotices, false)                                  \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
+  F(std::string, UseRemoteUnixServer, "no")                             \
+  F(std::string, UnixServerPath, "")                                    \
+  F(uint32_t, UnixServerWorkers, Process::GetCPUCount())                \
+  F(bool, UnixServerQuarantineApc, false)                               \
+  F(bool, UnixServerQuarantineUnits, false)                             \
+  F(bool, UnixServerVerifyExeAccess, false)                             \
+  F(bool, UnixServerFailWhenBusy, false)                                \
+  F(std::vector<std::string>, UnixServerAllowedUsers,                   \
+                                            std::vector<std::string>()) \
+  F(std::vector<std::string>, UnixServerAllowedGroups,                  \
+                                            std::vector<std::string>()) \
   /******************                                                   \
    | PPC64 Options. |                                                   \
    *****************/                                                   \

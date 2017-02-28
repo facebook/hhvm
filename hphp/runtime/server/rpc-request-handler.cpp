@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/request-uri.h"
@@ -66,7 +67,8 @@ RPCRequestHandler::~RPCRequestHandler() {
 
 void RPCRequestHandler::initState() {
   hphp_session_init();
-  bool isServer = RuntimeOption::ServerExecutionMode();
+  bool isServer =
+    RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   m_context = g_context.getNoCheck();
   if (isServer) {
     m_context->obStart(uninit_null(),

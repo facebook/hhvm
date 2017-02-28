@@ -21,6 +21,8 @@
 
 namespace HPHP {
 
+const StaticString s_fake("fake");
+
 /**
  * Fake Transport to be passed to the access log when a real transport is not
  * available
@@ -83,6 +85,13 @@ struct FakeTransport final : Transport {
   void removeHeaderImpl(const char *name) override {
     LOG(FATAL) << "FakeTransport::removeHeaderImpl";
   }
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_fake;
+  }
+
 
   /**
    * Send back a response with specified code.

@@ -59,6 +59,10 @@ Array Directory::getMetaData() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+PlainDirectory::PlainDirectory(int fd) {
+  m_dir = ::fdopendir(fd);
+}
+
 PlainDirectory::PlainDirectory(const String& path) {
   m_dir = ::opendir(path.data());
 }

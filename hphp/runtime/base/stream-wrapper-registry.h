@@ -43,6 +43,8 @@ Wrapper* getWrapperFromURI(const String& uri,
 /* Called during process init to register core wrappers */
 void RegisterCoreWrappers();
 
+void setThreadLocalFileHandler(Wrapper* wrapper);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

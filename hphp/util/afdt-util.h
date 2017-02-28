@@ -41,14 +41,18 @@ void rappend(int afdt_fd,
              std::vector<iovec>& iov, void* addr, size_t size);
 
 template<class T>
-typename std::enable_if<std::is_fundamental<T>::value, void>::type
-sappend(int afdt_fd, std::vector<iovec>& iov, const T& elm) {
+typename std::enable_if<
+  std::is_fundamental<T>::value || std::is_pod<T>::value,
+  void
+>::type sappend(int afdt_fd, std::vector<iovec>& iov, const T& elm) {
   sappend(afdt_fd, iov, &elm, sizeof elm);
 }
 
 template<class T>
-typename std::enable_if<std::is_fundamental<T>::value, void>::type
-rappend(int afdt_fd, std::vector<iovec>& iov, T* elm) {
+typename std::enable_if<
+  std::is_fundamental<T>::value || std::is_pod<T>::value,
+  void
+>::type rappend(int afdt_fd, std::vector<iovec>& iov, T* elm) {
   rappend(afdt_fd, iov, elm, sizeof *elm);
 }
 
@@ -194,6 +198,18 @@ void recv(int afdt_fd, std::vector<iovec>& iov,
   recv(afdt_fd, iov, args...);
 }
 
+}
+
+template<class Head, class... Tail>
+void sendx(int afdt_fd, const Head& h, Tail&&... args) {
+  std::vector<iovec> iov;
+  detail::send(afdt_fd, iov, h, std::forward<Tail>(args)...);
+}
+
+template<class Head, class... Tail>
+void recvx(int afdt_fd, Head& h, Tail&... args) {
+  std::vector<iovec> iov;
+  detail::recv(afdt_fd, iov, h, args...);
 }
 
 template<class Head, class... Tail>

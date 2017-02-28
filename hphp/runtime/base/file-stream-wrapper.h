@@ -62,6 +62,7 @@ struct FileStreamWrapper final : Stream::Wrapper {
     ERROR_RAISE_WARNING(::rmdir(File::TranslatePath(path).data()));
     return ret;
   }
+  bool isNormalFileStream() const override { return true; }
 
   req::ptr<Directory> opendir(const String& path) override;
 

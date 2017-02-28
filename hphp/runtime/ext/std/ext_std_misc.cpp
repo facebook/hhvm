@@ -31,6 +31,7 @@
 
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -62,7 +63,9 @@ const int64_t k_CONNECTION_NORMAL = 0;
 const int64_t k_CONNECTION_ABORTED = 1;
 const int64_t k_CONNECTION_TIMEOUT = 2;
 
-static String HHVM_FUNCTION(server_warmup_status) {
+namespace {
+
+String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted at least Eval.JitWarmupStatusBytes of code.
   size_t begin, end;
   jit::tc::codeEmittedThisRequest(begin, end);
@@ -101,6 +104,22 @@ static String HHVM_FUNCTION(server_warmup_status) {
   return empty_string();
 }
 
+const StaticString
+  s_clisrv("clisrv"),
+  s_cli("cli"),
+  s_worker("worker");
+
+String HHVM_FUNCTION(execution_context) {
+  if (is_cli_mode()) return s_clisrv;
+
+  if (auto t = g_context->getTransport()) {
+    return t->describe();
+  }
+
+  return RuntimeOption::ServerExecutionMode() ? s_worker : s_cli;
+}
+
+}
 
 void StandardExtension::threadInitMisc() {
     IniSetting::Bind(
@@ -175,6 +194,7 @@ StaticString get_PHP_VERSION() {
 
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
+    HHVM_FALIAS(HH\\execution_context, execution_context);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);
     HHVM_FE(connection_timeout);

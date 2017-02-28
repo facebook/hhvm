@@ -905,12 +905,10 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
              rds::isHandleInit(handle))) {
     auto const& tv = rds::handleToRef<TypedValue>(handle);
 
-    if (LIKELY(rds::isNormalHandle(handle) ||
-               tv.m_type != KindOfUninit)) {
+    if (LIKELY(tv.m_type != KindOfUninit)) {
       assertx(cellIsPlausible(tv));
       return &tv;
     }
-    assertx(rds::isPersistentHandle(handle));
 
     if (UNLIKELY(tv.m_data.pref != nullptr)) {
       auto callback = reinterpret_cast<SystemConstantCallback>(tv.m_data.pref);
@@ -920,6 +918,7 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
         return tvRet;
       }
     }
+    assertx(rds::isPersistentHandle(handle));
   }
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
     return rds::s_constants()->nvGet(cnsName);

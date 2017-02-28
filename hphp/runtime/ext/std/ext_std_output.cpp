@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/hardware-counter.h"
@@ -265,7 +266,8 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
 void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
   auto const ar = GetCallerFrame();
 
-  if (ar->m_func->name()->empty() && RuntimeOption::ClientExecutionMode()) {
+  if (ar->m_func->name()->empty() && (!RuntimeOption::ServerExecutionMode() ||
+      is_cli_mode())) {
     // If run in cli mode, print nothing in the lowest pseudomain
     if (!g_context->getPrevFunc(ar)) return;
   }

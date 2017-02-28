@@ -204,6 +204,10 @@ inline void RequestInjectionData::setTimeZone(const std::string& tz) {
   m_timezone = tz;
 }
 
+inline void RequestInjectionData::setSafeFileAccess(bool b) {
+  m_safeFileAccess = b;
+}
+
 inline bool RequestInjectionData::hasSafeFileAccess() const {
   return m_safeFileAccess;
 }

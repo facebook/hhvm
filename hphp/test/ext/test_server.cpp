@@ -486,6 +486,8 @@ bool TestServer::TestSetCookie() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_test("test");
+
 struct TestTransport final : Transport {
   TestTransport() : m_code(0) {}
 
@@ -504,6 +506,13 @@ struct TestTransport final : Transport {
   void getHeaders(HeaderMap &headers) override {}
   void addHeaderImpl(const char *name, const char *value) override {}
   void removeHeaderImpl(const char *name) override {}
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_test;
+  }
 
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override {

@@ -193,54 +193,87 @@ let rec from_expr expr =
         emit_args_and_call args uargs;
         instr (IBasic PopR)
       ]
-  | A.Array es ->
-    (* We need to make sure everything is literal to use static construction *)
-    let all_literal = List.for_all es
-      ~f:(function A.AFvalue e -> is_literal e
-                 | A.AFkvalue (k,v) -> is_literal k && is_literal v)
-    in
-    if all_literal then begin
-    let a_label = Label.get_next_data_label () in
-    (* Arrays can either contains values or key/value pairs *)
-    let _, es =
-      List.fold_left
-        es
-        ~init:(0, [])
-        ~f:(fun (index, l) x ->
-              (index + 1, match x with
-              | A.AFvalue e ->
-                literal_from_expr e :: Int (Int64.of_int index) :: l
-              | A.AFkvalue (k,v) ->
-                literal_from_expr v :: literal_from_expr k :: l)
-            )
-    in
-    instr (ILitConst (Array (a_label, "a", List.rev es)));
-    end else begin
-    (* If there is at least one associative element,
-     * then it will be a NewMixedArray otherwise NewPackedArray *)
-    let is_mixed_array =
-      List.exists es ~f:(function A.AFkvalue _ -> true | _ -> false)
-    in
-    let count = List.length es in
-    if is_mixed_array then begin
-      gather @@
-        (instr @@ ILitConst (NewPackedArray count)) ::
-        (List.map es
-          ~f:(function A.AFvalue e ->
-                        gather [from_expr e; instr_add_new_elemc]
-                     | A.AFkvalue (k, v) ->
-                        gather [from_expr k; from_expr v; instr_add_elemc]))
-    end else begin
-      gather [
-        gather @@
-        List.map es
-          ~f:(function A.AFvalue e -> from_expr e | _ -> failwith "impossible");
-        instr @@ ILitConst (NewPackedArray count);
-      ]
-    end
-    end
+  | A.Array es
+  | A.Collection ((_, "dict"), es)
+  | A.Collection ((_, "vec"), es)
+  | A.Collection ((_, "keyset"), es) -> emit_collection expr es
   | _ ->
     emit_nyi "expression"
+
+and emit_static_collection expr es =
+  let a_label = Label.get_next_data_label () in
+  (* Arrays can either contains values or key/value pairs *)
+  let need_index = match snd expr with
+    | A.Collection ((_, "vec"), _)
+    | A.Collection ((_, "keyset"), _) -> false
+    | _ -> true
+  in
+  let _, es =
+    List.fold_left
+      es
+      ~init:(0, [])
+      ~f:(fun (index, l) x ->
+            (index + 1, match x with
+            | A.AFvalue e when need_index ->
+              literal_from_expr e :: Int (Int64.of_int index) :: l
+            | A.AFvalue e ->
+              literal_from_expr e :: l
+            | A.AFkvalue (k,v) ->
+              literal_from_expr v :: literal_from_expr k :: l)
+          )
+  in
+  let es = List.rev es in
+  let lit_constructor = match snd expr with
+    | A.Array _ -> Array (a_label, es)
+    | A.Collection ((_, "dict"), _) -> Dict (a_label, es)
+    | A.Collection ((_, "vec"), _) -> Vec (a_label, es)
+    | A.Collection ((_, "keyset"), _) -> Keyset (a_label, es)
+    | _ -> failwith "impossible"
+  in
+  instr (ILitConst lit_constructor)
+
+and emit_dynamic_collection expr es =
+  let is_only_values =
+    List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
+  in
+  let count = List.length es in
+  if is_only_values then begin
+    let lit_constructor = match snd expr with
+      | A.Array _ -> NewPackedArray count
+      | A.Collection ((_, "vec"), _) -> NewVecArray count
+      | A.Collection ((_, "keyset"), _) -> NewKeysetArray count
+      | _ -> failwith "impossible"
+    in
+    gather [
+      gather @@
+      List.map es
+        ~f:(function A.AFvalue e -> from_expr e | _ -> failwith "impossible");
+      instr @@ ILitConst lit_constructor;
+    ]
+  end else begin
+    let lit_constructor = match snd expr with
+      | A.Array _ -> NewMixedArray count
+      | A.Collection ((_, "dict"), _) -> NewDictArray count
+      | _ -> failwith "impossible"
+    in
+    gather @@
+      (instr @@ ILitConst lit_constructor) ::
+      (List.map es
+        ~f:(function A.AFvalue e ->
+                      gather [from_expr e; instr_add_new_elemc]
+                   | A.AFkvalue (k, v) ->
+                      gather [from_expr k; from_expr v; instr_add_elemc]))
+  end
+
+and emit_collection expr es =
+  let all_literal = List.for_all es
+    ~f:(function A.AFvalue e -> is_literal e
+               | A.AFkvalue (k,v) -> is_literal k && is_literal v)
+  in
+  if all_literal then
+    emit_static_collection expr es
+  else
+    emit_dynamic_collection expr es
 
 and emit_pipe e1 e2 =
   (* TODO: We need a local generator, like a label generator.
@@ -416,7 +449,7 @@ and literal_from_expr expr =
   | A.Null -> Null
   | A.False -> False
   | A.True -> True
-  | _ -> failwith "literal_from_expr - NYI"
+  | _ -> failwith "Expected a literal expression"
 
 and literal_from_named_expr expr =
   match snd expr with

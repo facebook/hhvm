@@ -42,9 +42,15 @@ let string_of_lit_const instruction =
     | True        -> "True"
     | False       -> "False"
     | Double d    -> "Double " ^ string_of_float d
-    | Array (i,_, _) -> "Array @A_" ^ string_of_int i
+    | Array (i, _) -> "Array @A_" ^ string_of_int i
+    | Dict (i, _) -> "Dict @A_" ^ string_of_int i
+    | Vec (i, _) -> "Vec @A_" ^ string_of_int i
+    | Keyset (i, _) -> "Keyset @A_" ^ string_of_int i
     | NewMixedArray i -> "NewMixedArray " ^ string_of_int i
     | NewPackedArray i -> "NewPackedArray " ^ string_of_int i
+    | NewDictArray i -> "NewDictArray " ^ string_of_int i
+    | NewVecArray i -> "NewVecArray " ^ string_of_int i
+    | NewKeysetArray i -> "NewKeysetArray " ^ string_of_int i
     | AddElemC -> "AddElemC"
     | AddNewElemC -> "AddNewElemC"
     | _ -> failwith "unexpected literal kind in string_of_lit_const"
@@ -606,17 +612,26 @@ let add_defcls buf classes =
     (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
     classes
 
+let add_data_region_element buf name num arguments =
+  B.add_string buf ".adata A_";
+  B.add_string buf @@ string_of_int num;
+  B.add_string buf " = ";
+  B.add_string buf
+    @@ attribute_to_string_helper ~if_class_attribute:false name arguments;
+  B.add_string buf ";\n"
+
 let add_data_region buf functions =
   let rec add_data_region_list buf instr =
     List.iter (add_data_region_aux buf) instr
   and add_data_region_aux buf = function
-    | ILitConst (Array (num, name, arguments)) ->
-      B.add_string buf ".adata A_";
-      B.add_string buf @@ string_of_int num;
-      B.add_string buf " = ";
-      B.add_string buf
-        @@ attribute_to_string_helper ~if_class_attribute:false name arguments;
-      B.add_string buf ";\n"
+    | ILitConst (Array (num, arguments)) ->
+      add_data_region_element buf "a" num arguments
+    | ILitConst (Dict (num, arguments)) ->
+      add_data_region_element buf "D" num arguments
+    | ILitConst (Vec (num, arguments)) ->
+      add_data_region_element buf "v" num arguments
+    | ILitConst (Keyset (num, arguments)) ->
+      add_data_region_element buf "k" num arguments
     | ITryFault (_, il, _)
     | ITryCatch (_, il) -> add_data_region_list buf il
     | _ -> ()

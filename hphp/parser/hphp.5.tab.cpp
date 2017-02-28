@@ -13800,28 +13800,28 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 3152 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);;}
     break;
 
   case 950:
 
 /* Line 1455 of yacc.c  */
 #line 3153 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]));;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);;}
     break;
 
   case 951:
 
 /* Line 1455 of yacc.c  */
 #line 3154 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
     break;
 
   case 952:
 
 /* Line 1455 of yacc.c  */
 #line 3155 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,  0,(yyvsp[(1) - (1)]));;}
+    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);;}
     break;
 
   case 953:
@@ -13842,28 +13842,28 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 3166 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]));;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (5)]),&(yyvsp[(3) - (5)]),(yyvsp[(5) - (5)]),0);;}
     break;
 
   case 956:
 
 /* Line 1455 of yacc.c  */
 #line 3168 "hphp.y"
-    { _p->onCollectionPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]));;}
+    { _p->onArrayPair((yyval),&(yyvsp[(1) - (3)]),  0,(yyvsp[(3) - (3)]),0);;}
     break;
 
   case 957:
 
 /* Line 1455 of yacc.c  */
 #line 3170 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]));;}
+    { _p->onArrayPair((yyval),  0,&(yyvsp[(1) - (3)]),(yyvsp[(3) - (3)]),0);;}
     break;
 
   case 958:
 
 /* Line 1455 of yacc.c  */
 #line 3171 "hphp.y"
-    { _p->onCollectionPair((yyval),  0,  0,(yyvsp[(1) - (1)]));;}
+    { _p->onArrayPair((yyval),  0,  0,(yyvsp[(1) - (1)]),0);;}
     break;
 
   case 959:

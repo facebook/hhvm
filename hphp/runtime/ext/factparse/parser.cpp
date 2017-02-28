@@ -545,10 +545,6 @@ void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
 void Parser::onEmptyCollection(Token &out) {
 }
 
-void
-Parser::onCollectionPair(Token &out, Token *pairs, Token *name, Token &value) {
-}
-
 void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
                              Token &value) {
 }

@@ -3149,10 +3149,10 @@ collection_init:
 ;
 non_empty_collection_init:
     non_empty_collection_init
-    ',' expr T_DOUBLE_ARROW expr       { _p->onCollectionPair($$,&$1,&$3,$5);}
-  | non_empty_collection_init ',' expr { _p->onCollectionPair($$,&$1,  0,$3);}
-  | expr T_DOUBLE_ARROW expr           { _p->onCollectionPair($$,  0,&$1,$3);}
-  | expr                               { _p->onCollectionPair($$,  0,  0,$1);}
+    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
+  | non_empty_collection_init ',' expr { _p->onArrayPair($$,&$1,  0,$3,0);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
+  | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
 ;
 
 static_collection_init:
@@ -3163,12 +3163,12 @@ static_collection_init:
 non_empty_static_collection_init:
     non_empty_static_collection_init
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCollectionPair($$,&$1,&$3,$5);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
   | non_empty_static_collection_init
-    ',' static_expr                    { _p->onCollectionPair($$,&$1,  0,$3);}
+    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,$3,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCollectionPair($$,  0,&$1,$3);}
-  | static_expr                        { _p->onCollectionPair($$,  0,  0,$1);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
+  | static_expr                        { _p->onArrayPair($$,  0,  0,$1,0);}
 ;
 
 encaps_list:

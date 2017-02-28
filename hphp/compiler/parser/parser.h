@@ -206,7 +206,6 @@ public:
   void onVec(Token& out, Token& exprs);
   void onKeyset(Token& out, Token& exprs);
   void onEmptyCollection(Token &out);
-  void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void onClassClass(Token &out, Token &cls, Token &name, bool text);

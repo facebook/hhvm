@@ -641,10 +641,13 @@ and from_stmt st =
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
-    if catch_list <> [] && finally_block != [] then
+    if catch_list <> [] && finally_block <> [] then
       from_stmt (A.Try([A.Try (try_block, catch_list, [])], [], finally_block))
+    else if catch_list <> [] then
+      from_try_catch (A.Block try_block) catch_list
     else
-      from_try try_block catch_list finally_block
+      from_try_finally (A.Block try_block) (A.Block finally_block)
+
   | A.Switch (e, cl) ->
     from_switch e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
@@ -862,56 +865,41 @@ and from_switch e cl =
   ] in
   rewrite_continue_break instrs end_label end_label
 
-and from_try try_block catch_list finally_block =
-  let catch_exists = List.length catch_list <> 0 in
-  let finally_exists = finally_block <> [] in
+and from_try_catch try_block catch_list =
   let l0 = Label.get_next_label () in
-  (* TODO: Combine needs of catch and try block *)
-  let try_body = from_stmt (A.Block try_block) in
+  let try_body = from_stmt try_block in
   let try_body = gather [try_body; instr_jmp l0;] in
   let try_body = rewrite_continue_break try_body l0 l0 in
   let try_body_list = instr_seq_to_list try_body in
   let catches = List.map catch_list ~f:(from_catch l0) in
   let catch_meta_data = List.rev @@ List.map catches ~f:snd in
   let catch_blocks =
-    List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x)
-  in
+    List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x) in
   let catch_instr = List.concat catch_blocks in
-  let finally_body = from_stmt (A.Block finally_block) in
-  let fault_body =
-    if finally_exists
-    then
-      instr_seq_to_list @@ gather [
-        (* TODO: What are these unnamed locals? *)
-        instr_unsetl_unnamed 0;
-        instr_unsetl_unnamed 0;
-        finally_body;
-        instr_unwind;
-      ]
-
-    else []
-  in
   let init =
-    if finally_exists && catch_exists
-    then
-      let f1 = Label.get_next_label () in
-      let rest =
-        ITryCatch (catch_meta_data, try_body_list)
-        :: catch_instr
-      in
-      let f1_label = IExceptionLabel (f1, FaultL) in
-      instr (ITryFault (f1, rest, f1_label :: fault_body))
-    else if finally_exists
-    then
-      let f1 = Label.get_next_label () in
-      let f1_label = IExceptionLabel (f1, FaultL) in
-      instr (ITryFault (f1, try_body_list, f1_label :: fault_body))
-    else if catch_exists
-    then
-      instrs @@ ITryCatch (catch_meta_data, try_body_list) :: catch_instr
-    else
-      failwith "Impossible for finally and catch to both not exist"
-  in
+    instrs @@ ITryCatch (catch_meta_data, try_body_list) :: catch_instr in
+  gather [
+    init;
+    instr_label l0;
+  ]
+
+and from_try_finally try_block finally_block =
+  let l0 = Label.get_next_label () in
+  let try_body = from_stmt try_block in
+  let try_body = gather [try_body; instr_jmp l0;] in
+  let try_body = rewrite_continue_break try_body l0 l0 in
+  let try_body_list = instr_seq_to_list try_body in
+  let finally_body = from_stmt finally_block in
+  let fault_body = instr_seq_to_list @@ gather [
+      (* TODO: What are these unnamed locals? *)
+      instr_unsetl_unnamed 0;
+      instr_unsetl_unnamed 0;
+      finally_body;
+      instr_unwind;
+    ] in
+  let f1 = Label.get_next_label () in
+  let f1_label = IExceptionLabel (f1, FaultL) in
+  let init = instr (ITryFault (f1, try_body_list, f1_label :: fault_body)) in
   gather [
     init;
     instr_label l0;

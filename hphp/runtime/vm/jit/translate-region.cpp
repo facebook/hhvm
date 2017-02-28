@@ -296,8 +296,8 @@ bool shouldTrySingletonInline(const RegionDesc& region,
                               TransFlags trflags) {
   if (!RuntimeOption::RepoAuthoritative) return false;
 
-  // I don't really want to inline my arm, thanks.
-  if (arch() != Arch::X64) return false;
+  // I don't really want to inline PPC64, yet.
+  if (arch() == Arch::PPC64) return false;
 
   // Don't inline if we're retranslating due to a side-exit from an
   // inlined call.

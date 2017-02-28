@@ -169,9 +169,6 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee) const {
     return false;
   }
 
-  // TODO(#3331014): We have this hack until more ARM codegen is working.
-  if (arch() == Arch::ARM) return false;
-
   // We can only inline at normal FCalls.
   if (callSK.op() != Op::FCall &&
       callSK.op() != Op::FCallD) {

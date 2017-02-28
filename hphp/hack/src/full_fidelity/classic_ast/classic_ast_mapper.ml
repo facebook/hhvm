@@ -450,7 +450,7 @@ and pFunParam : fun_param parser = fun node env ->
     in
     { param_hint            = mpOptional pHint parameter_type env
     ; param_is_reference    = decoration = "&"
-    ; param_is_variadic     = decoration = ".."
+    ; param_is_variadic     = decoration = "..."
     ; param_id              = pos_name name
     ; param_expr            =
       mpOptional pSimpleInitializer parameter_default_value env

@@ -90,7 +90,7 @@ let simple_expected_2 = "(AProgram
       ((param_hint: ((p (Happly (p int) ())))) (param_is_reference: false)
        (param_is_variadic: false) (param_id: (p $b)) (param_expr: ())
        (param_modifier: ()) (param_user_attributes: ()))))
-    (f_body: (Noop)) (f_user_attributes: ()) (f_fun_kind: FSync)
+    (f_body: (\"\")) (f_user_attributes: ()) (f_fun_kind: FSync)
     (f_namespace:
      ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
       (ns_const_uses: (SMap ()))))

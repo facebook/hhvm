@@ -13,10 +13,6 @@ module P = Full_fidelity_positioned_syntax
 module TK = Full_fidelity_token_kind
 module PT = Full_fidelity_positioned_token
 
-let string_of_expr thing =
-   Sexp.to_string_hum @@ Sof.sexp_of_expr thing
-let string_of_stmt x = Sexp.to_string_hum (Sof.sexp_of_stmt x)
-
 (* For debugging *)
 let treeDBG =
   let rec go indent node = begin match P.syntax node with
@@ -315,7 +311,7 @@ let cHapply      (p, x) = Happly   (p, x)
 let cHoption         x  = Hoption      x
 let cHtuple          x  = Htuple       x
 let cHshape          x  = Hshape       x
-let cBlock              = function [Noop] -> Block [] | x -> Block x
+let cBlock           x  = Block        x
 let cBreak           x  = Break        x
 let cThrow           x  = Throw        x
 let cContinue        x  = Continue     x
@@ -344,8 +340,13 @@ let sync_fun_kind : fun_kind -> fun_kind = function
 let mk_noop : stmt list -> stmt list = function
   | [] -> [Noop]
   | s -> s
-let stmt_list_of_stmt = function
-  | Block block -> List.filter (fun x -> x <> Noop) block
+
+let stmt_list_of_stmt ?(leave_noop:bool = false) = function
+  | Block block -> begin
+      match List.filter (fun x -> x <> Noop) block with
+      | [] when leave_noop -> [Noop]
+      | nodel -> nodel
+    end
   | stmt -> [stmt]
 let mpStripNoop pThing node env = match pThing node env with
   | [Noop] -> []
@@ -448,6 +449,8 @@ let tBop : (expr -> expr -> expr_) terminal_spec =
     | TK.Plus                        -> Binop (Plus,              lhs, rhs)
     | TK.Minus                       -> Binop (Minus,             lhs, rhs)
     | TK.Star                        -> Binop (Star,              lhs, rhs)
+    | TK.Or                          -> Binop (BArbar,            lhs, rhs)
+    | TK.Xor                         -> Binop (Xor,               lhs, rhs)
     | TK.Carat                       -> Binop (Xor,               lhs, rhs)
     | TK.Slash                       -> Binop (Slash,             lhs, rhs)
     | TK.Dot                         -> Binop (Dot,               lhs, rhs)
@@ -596,6 +599,13 @@ let unesc_xhp s =
   if Str.string_match quotes s 0
   then Str.matched_group 1 s
   else s
+let unesc_xhp_attr s =
+  let open Str in
+  unesc_dbl @@
+    if string_match (regexp "[ \t\n\r\012]*\"\\(\\(.\\|\n\\)*\\)\"") s 0
+    then matched_group 1 s
+    else s
+
 
 
 
@@ -777,7 +787,11 @@ and pLambda : fun_ parser' = fun [ async; signature; _arrow; body ] env ->
   let p = where_am_I env in
   let previous_saw_yield = !(env.saw_yield) in
   env.saw_yield := false;
-  let body = pLambdaBody body env in
+  let body =
+    match pLambdaBody body env with
+    | [] -> [Noop]
+    | stmtl -> stmtl
+  in
   let body_has_yield = !(env.saw_yield) in
   env.saw_yield := previous_saw_yield;
   let paraml, ret = pLambdaSig signature env in
@@ -844,18 +858,26 @@ and pExpr_ScopeResolutionExpression' : expr_ parser' =
      then cClass_get
      else cClass_const
     ) (pos_name qual env, name)
-and pXHPNestedExpression : expr parser = fun eta -> eta |> mkP
-  [ (K.Token, fun [str] env -> let pos = where_am_I env in
-      pos, String (pos, unesc_xhp @@ P.full_text str)
-    )
-  ; (K.XHPExpression, fun nodel env ->
-      where_am_I env, pExpr_XHPExpression' nodel env
-    )
-  ; (K.BracedExpression, mpArgKOfN 1 3 pExpr)
-  ]
+and pXHPNestedExpression (*: ?escaper:(string -> string) -> expr parser *) =
+  fun ?(escaper = unesc_xhp) node env -> match P.syntax node with
+  | P.Token str ->
+    let pos = where_am_I env in
+    pos, String (pos, escaper @@ P.full_text node)
+  | P.XHPExpression
+    { P.xhp_open  = op
+    ; P.xhp_body  = body
+    ; P.xhp_close = cl
+    } -> where_am_I env, pExpr_XHPExpression' [op;body;cl] env
+  | P.BracedExpression
+    { P.braced_expression_left_brace  = _
+    ; P.braced_expression_expression  = expr
+    ; P.braced_expression_right_brace = _
+    } -> pExpr expr env
+  | _ -> missing_syntax "pXHPNestedExpression" node env
+
 and pXHPAttribute : (id * expr) parser = fun eta -> eta |>
   single K.XHPAttribute @@ fun [ name; _eq; expr ] env ->
-    (pos_name name env, pXHPNestedExpression expr env)
+    (pos_name name env, pXHPNestedExpression ~escaper:unesc_xhp_attr expr env)
 and pXHPOpen : (id * (id * expr) list)  parser' = fun [ name; attrs; _ra ] env ->
   let (pos, name) = pos_name name env in
   let trim_name = String.trim name in
@@ -948,7 +970,13 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
   ; (K.MemberSelectionExpression,   fun [ obj; op; name ] env ->
       let lhs = pExpr obj env in
       let null_flavor = mkTP tNullFlavor op env in
-      let rhs = ppPos name env, Id (pos_name name env) in
+      let (_, n) as member_name = pos_name name env in
+      let member =
+        if n.[0] = '$'
+        then Lvar member_name
+        else Id member_name
+      in
+      let rhs = ppPos name env, member in
       Obj_get (lhs, rhs, null_flavor)
     )
   ; (K.SafeMemberSelectionExpression, fun [ obj; _op; name ] env ->
@@ -989,7 +1017,10 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun eta -> eta |>
         | p, Class_const (pid, (_,"")) -> p, Id pid
         | ty -> ty
       in
-      InstanceOf (pExpr thing env, ty)
+      (* TODO: Filthy hack to get around precedence issues for now *)
+      match pExpr thing env with
+      | p, Unop (o,e) -> Unop (o, (p, InstanceOf (e, ty)))
+      | e -> InstanceOf (e, ty)
     )
   ; (K.ArrayCreationExpression, fun [ _lb; members; _rb ] env ->
       Array (couldMap ~f:pAField members env))
@@ -1094,7 +1125,7 @@ and pStmt_EchoStatement' : stmt parser' = fun [ kw; exprs; _semi ] env ->
 and pStmt_ExpressionStatement' : stmt parser' = fun [ expr; _semi ] env ->
   ifExists (fun () -> Expr (pExpr expr env)) (fun () -> Noop) expr env ()
 and pStmt_CompoundStatement' : stmt parser' = fun [ _lb; stmts; _rb ] env ->
-  Block (couldMap ~f:pStmt stmts env)
+  Block (stmt_list_of_stmt @@ Block (couldMap ~f:pStmt stmts env))
 and pCompoundStatement : stmt parser = fun node env ->
   ifExists (single K.CompoundStatement pStmt_CompoundStatement' node env) Noop
     node env
@@ -1232,7 +1263,7 @@ let pTParaml : tparam list parser =
 
 (* TODO: Translate the where clause *)
 let pFunHdr :
-  (fun_kind * id * tparam list * fun_param list * hint option * fun_param list)
+  (fun_kind * id * tparam list * fun_param list * hint option * fun_param list * bool)
   parser
 = mkP
   [ (K.FunctionDeclarationHeader, fun
@@ -1241,14 +1272,14 @@ let pFunHdr :
     env ->
       let is_constructor = P.text name = "__construct" in
       let paraml = couldMap ~f:(pFunParam is_constructor) paraml env in
-      let ret = match mpOptional pHint ret env with
-        | Some x -> Some x
+      let ret, must_noop = match mpOptional pHint ret env with
+        | Some x -> Some x, false
         | None ->
             let pos = ppPos ret env in
             match P.text name with
             | "__construct"
-            | "__destruct" -> Some (pos, Happly ((pos, "void"), []))
-            | _            -> None
+            | "__destruct" -> Some (pos, Happly ((pos, "void"), [])), true
+            | _            -> None, false
       in
       let ifAsync t e = ifExists t e async env in
       (match Option.map ~f:hint_to_fun_kind ret with
@@ -1260,6 +1291,7 @@ let pFunHdr :
       , paraml
       , ret
       , List.filter (fun p -> Option.is_some p.param_modifier) paraml
+      , must_noop
     )
   ; (K.LambdaSignature, fun [ _lparen; paraml; _rparen; _colon; ret ] env ->
       FSync
@@ -1268,8 +1300,9 @@ let pFunHdr :
       , couldMap ~f:(pFunParam false) paraml env
       , mpOptional pHint ret env
       , []
+      , false
     )
-  ; (K.Token, ppConst (FSync, (Pos.none, "<ANONYMOUS>"), [], [], None, []))
+  ; (K.Token, ppConst (FSync, (Pos.none, "<ANONYMOUS>"), [], [], None, [], false))
   ]
 
 
@@ -1282,7 +1315,7 @@ let pDef_Fun' : def parser' = fun [ attrs; hdr; body ] env ->
     try Str.search_forward re (P.full_text node) 0 >= 0 with
     | Not_found -> false
   in
-  let async, name, tparaml, paraml, ret, _clsvs = pFunHdr hdr env in
+  let async, name, tparaml, paraml, ret, _clsvs, _noop = pFunHdr hdr env in
   let previous_saw_yield = !(env.saw_yield) in
   env.saw_yield := false;
   let block = mpOptional pBlock body env in
@@ -1421,19 +1454,30 @@ let pClassElt_MethodishDeclaration' : class_elt list parser' =
     (Option.to_list p.param_modifier, p.param_hint, [span, cvname, None])
   in
   fun [attrs; mods; hdr; body; _semi] env ->
-    let async, name, tparaml, paraml, ret, clsvl = pFunHdr hdr env in
+    let async, name, tparaml, paraml, ret, clsvl, noop = pFunHdr hdr env in
     let member_init, member_def = List.split (List.map classvar_init clsvl) in
     let previous_saw_yield = !(env.saw_yield) in
     env.saw_yield := false;
-    let body = member_init @ stmt_list_of_stmt @@
+    let body = member_init @
       (* TODO: Give parse error when not abstract, but body is missing *)
-      mpOption (Block []) pCompoundStatement body env
+      ifExists
+        (fun () ->
+           match pCompoundStatement body env with
+           | Block []    -> [Noop]
+           | Block stmtl -> stmtl
+           | stmt        -> [stmt]
+        )
+        (fun () -> [])
+        body
+        env
+        ()
     in
     let body_has_yield = !(env.saw_yield) in
     env.saw_yield := previous_saw_yield;
     let member_init = List.map (fun (k,h,v) -> ClassVars (k,h,v)) member_def in
+    let kind = couldMap ~f:(mkTP tKind) mods env in
     member_init @ [Method
-    { m_kind            = couldMap ~f:(mkTP tKind) mods env
+    { m_kind            = kind
     ; m_tparams         = tparaml
     ; m_constrs         = []
     ; m_name            = name
@@ -1514,7 +1558,7 @@ let pDef_Typedef' : def parser' =
     }
 
 let pDef_Enum' : def parser' =
-  fun [ attrs; _kw; name; _colon; base; ty; _lb; enums; _rb ] env ->
+  fun [ attrs; _kw; name; _colon; base; constr; _lb; enums; _rb ] env ->
     Class
     { c_mode            = env.mode
     ; c_user_attributes = List.flatten @@ couldMap ~f:pUserAttribute attrs env
@@ -1530,7 +1574,10 @@ let pDef_Enum' : def parser' =
           Const (None, [pos_name name env, pExpr value env])
       end
     ; c_namespace       = Namespace_env.empty_with_default_popt
-    ; c_enum            = Some { e_base = pHint base env; e_constraint = None }
+    ; c_enum            = Some
+      { e_base       = pHint base env
+      ; e_constraint = Some (snd @@ pTConstraint constr env)
+      }
     ; c_span            = where_am_I env
     }
 

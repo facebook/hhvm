@@ -43,6 +43,10 @@ let string_of_lit_const instruction =
     | False       -> "False"
     | Double d    -> "Double " ^ string_of_float d
     | Array (i,_, _) -> "Array @A_" ^ string_of_int i
+    | NewMixedArray i -> "NewMixedArray " ^ string_of_int i
+    | NewPackedArray i -> "NewPackedArray " ^ string_of_int i
+    | AddElemC -> "AddElemC"
+    | AddNewElemC -> "AddNewElemC"
     | _ -> failwith "unexpected literal kind in string_of_lit_const"
 
 let string_of_operator instruction =

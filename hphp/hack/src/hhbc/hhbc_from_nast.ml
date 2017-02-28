@@ -75,6 +75,9 @@ let instr_unsetl_unnamed local =
 let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr (IBasic PopC)
 
+let instr_add_elemc = instr (ILitConst (AddElemC))
+let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
+
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
   let rec flat_map instrseq ~f =
@@ -314,13 +317,13 @@ let rec from_expr expr =
         instr (IBasic PopR)
       ]
   | A.Array es ->
-    let a_label = Label.get_next_data_label () in
     (* We need to make sure everything is literal to use static construction *)
     let all_literal = List.for_all es
       ~f:(function A.AFvalue e -> is_literal e
                  | A.AFkvalue (k,v) -> is_literal k && is_literal v)
     in
     if all_literal then begin
+    let a_label = Label.get_next_data_label () in
     (* Arrays can either contains values or key/value pairs *)
     let _, es =
       List.fold_left
@@ -334,11 +337,31 @@ let rec from_expr expr =
                 literal_from_expr v :: literal_from_expr k :: l)
             )
     in
-    gather [
-      instr (ILitConst (Array (a_label, "a", List.rev es)));
-    ]
-    end else
-    emit_nyi "non static arrays"
+    instr (ILitConst (Array (a_label, "a", List.rev es)));
+    end else begin
+    (* If there is at least one associative element,
+     * then it will be a NewMixedArray otherwise NewPackedArray *)
+    let is_mixed_array =
+      List.exists es ~f:(function A.AFkvalue _ -> true | _ -> false)
+    in
+    let count = List.length es in
+    if is_mixed_array then begin
+      gather @@
+        (instr @@ ILitConst (NewPackedArray count)) ::
+        (List.map es
+          ~f:(function A.AFvalue e ->
+                        gather [from_expr e; instr_add_new_elemc]
+                     | A.AFkvalue (k, v) ->
+                        gather [from_expr k; from_expr v; instr_add_elemc]))
+    end else begin
+      gather [
+        gather @@
+        List.map es
+          ~f:(function A.AFvalue e -> from_expr e | _ -> failwith "impossible");
+        instr @@ ILitConst (NewPackedArray count);
+      ]
+    end
+    end
   | _ ->
     emit_nyi "expression"
 

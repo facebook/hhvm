@@ -403,6 +403,13 @@ let builder = object (this)
             | TriviaKind.DelimitedComment ->
               handle_newlines ~is_trivia:true newlines;
               this#add_string ~is_trivia:true @@ Trivia.text t;
+              (match Trivia.kind t with
+                | TriviaKind.Unsafe
+                | TriviaKind.FallThrough
+                | TriviaKind.SingleLineComment ->
+                  this#hard_split ();
+                | _ -> ()
+              );
               0, false
         )
       ) in
@@ -1722,6 +1729,8 @@ and transform_last_arg node =
       );
     | _ ->
       (* TODO: handle case where last arg has trivia but no comma) *)
+      (* see TODO in hphp/hack/test/hackfmt/tests/trailing_line_comments.php
+         for examples *)
       transform node;
       builder#set_pending_comma ();
 
@@ -1820,7 +1829,7 @@ and transform_binary_expression ~is_nested expr =
         tl_with ~rule:(LazyRuleID lazy_argument_rule) ~nest:is_nested ~f:(
           fun () ->
             List.iteri tl ~f:(fun i x ->
-              if (i mod 2) = 0 then begin add_space (); transform x end
+              if (i mod 2) = 0 then begin pending_space (); transform x end
               else begin split ~space:true (); transform_operand x end
             )
         ) ();

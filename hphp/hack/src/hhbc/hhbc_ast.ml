@@ -153,6 +153,8 @@ type instruct_control_flow =
   | RetV
   | Unwind
   | Throw
+  | Continue of int  (* This will be rewritten *)
+  | Break of int  (* This will be rewritten *)
 
 type instruct_get =
   | CGetL of local_id

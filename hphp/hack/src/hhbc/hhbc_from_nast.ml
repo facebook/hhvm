@@ -59,6 +59,8 @@ let instr_jmp label = instr (IContFlow (Jmp label))
 let instr_jmpz label = instr (IContFlow (JmpZ label))
 let instr_jmpnz label = instr (IContFlow (JmpNZ label))
 let instr_label label = instr (ILabel label)
+let instr_continue level = instr (IContFlow (Continue level))
+let instr_break level = instr (IContFlow (Break level))
 let instr_unwind = instr (IContFlow Unwind)
 let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)
@@ -583,7 +585,7 @@ and emit_unop op e =
 and from_exprs exprs =
   gather (List.map exprs from_expr)
 
-and from_stmt ~continue_label ~break_label st =
+and from_stmt st =
   match st with
   | A.Expr expr ->
     emit_ignored_expr expr
@@ -597,24 +599,15 @@ and from_stmt ~continue_label ~break_label st =
       from_expr expr;
       instr_retc;
     ]
-  | A.Block b -> from_stmts ~continue_label ~break_label b
+  | A.Block b -> from_stmts b
   | A.If (condition, consequence, alternative) ->
-    from_if ~continue_label ~break_label
-      condition (A.Block consequence) (A.Block alternative)
+    from_if condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     from_while e (A.Block b)
-  (* TODO: Break takes an argument *)
   | A.Break _ ->
-    begin match break_label with
-    | Some i -> instr (IContFlow (Jmp i))
-    | None -> failwith "There is nowhere to break"
-    end
+    instr_break 1 (* TODO: Break takes an argument *)
   | A.Continue _ ->
-  (* TODO: Continue takes an argument *)
-    begin match continue_label with
-    | Some i -> instr (IContFlow (Jmp i))
-    | None -> failwith "There is nowhere to continue"
-    end
+    instr_continue 1 (* TODO: Continue takes an argument *)
   | A.Do (b, e) ->
     from_do (A.Block b) e
   | A.For (e1, e2, e3, b) ->
@@ -625,9 +618,9 @@ and from_stmt ~continue_label ~break_label st =
       instr (IContFlow Throw);
     ]
   | A.Try (try_block, catch_list, finally_block) ->
-    from_try ~continue_label ~break_label try_block catch_list finally_block
+    from_try try_block catch_list finally_block
   | A.Switch (e, cl) ->
-    from_switch ~continue_label e cl
+    from_switch e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
     from_foreach (await_pos <> None) collection iterator
       (A.Block block)
@@ -638,24 +631,122 @@ and from_stmt ~continue_label ~break_label st =
   | A.Fallthrough
   | A.Noop -> empty
 
-and from_if ~continue_label ~break_label
-  condition consequence alternative =
+and from_if condition consequence alternative =
   let alternative_label = Label.get_next_label () in
   let done_label = Label.get_next_label () in
   gather [
     from_expr condition;
     instr_jmpz alternative_label;
-    from_stmt ~continue_label ~break_label consequence;
+    from_stmt consequence;
     instr_jmp done_label;
     instr_label alternative_label;
-    from_stmt ~continue_label ~break_label alternative;
+    from_stmt alternative;
     instr_label done_label;
   ]
 
+and rewrite_continue_break instrs cont_label break_label =
+  (* PHP supports multi-level continue and break; the level must be a compile-
+  time constant.
+
+  TODO: Right now we only supports one-level continue and break, but this code
+  is designed to handle multi-level continue and break.  Write tests for
+  multi-level continue and break.
+
+  TODO: This rewriting will be more complex once we support continue and break
+  inside try-finally blocks.
+
+  Suppose we are generating code for:
+
+  do {
+    do {
+      if (a)
+        break 2;
+      if (b)
+        break;
+    } while (c);
+    if (d) break;
+  } while (e);
+
+When we codegen the nested do-loop we will first generate the inner do loop:
+
+L1:  a
+     JmpZ L2
+     Break 2
+L2:  b
+     JmpZ L3
+     Break 1
+L3:  c
+     JmpNZ L1
+L4:
+
+Then we run a pass over it which changes all the Break 1 to Jmp L4, and
+all the Break 2 to Break 1:
+
+L1:  a
+     JmpZ L2
+     Break 1
+L2:  b
+     JmpZ L3
+     Jmp L4
+L3:  c
+     JmpNZ L1
+L4:
+
+Then we keep on generating code for the outer do-loop:
+
+L1:  a
+     JmpZ L2
+     Break 1
+L2:  b
+     JmpZ L3
+     Jmp L4
+L3:  c
+     JmpNZ L1
+L4:  d
+     JmpZ L5
+     Break 1
+L5:  e
+     JmpNZ L1
+L6:
+
+And then we run another rewriting pass over the whole thing which turns
+the Break 1s into Jmp L6:
+
+L1:  a
+     JmpZ L2
+     Jmp L6
+L2:  b
+     JmpZ L3
+     Jmp L4
+L3:  c
+     JmpNZ L1
+L4:  d
+     JmpZ L5
+     Jmp L6
+L5:  e
+     JmpNZ L1
+L6:
+
+And we're done. We've rewritten all the multi-level break and continues into
+unconditional jumps to the right place. *)
+
+  let rewriter i =
+    match i with
+    | IContFlow (Continue level) when level > 1 ->
+      IContFlow (Continue (level - 1))
+    | IContFlow (Continue _) ->
+      IContFlow (Jmp cont_label)
+    | IContFlow (Break level) when level > 1 ->
+      IContFlow (Break (level - 1))
+    | IContFlow (Break _) ->
+      IContFlow (Jmp break_label)
+    | _ -> i in
+  InstrSeq.map instrs ~f:rewriter
+
 and from_while e b =
-  let l0 = Label.get_next_label () in
-  let l1 = Label.get_next_label () in
-  let l2 = Label.get_next_label () in
+  let break_label = Label.get_next_label () in
+  let cont_label = Label.get_next_label () in
+  let start_label = Label.get_next_label () in
   let cond = from_expr e in
   (* TODO: This is *bizarre* codegen for a while loop.
   It would be better to generate this as
@@ -666,34 +757,36 @@ and from_while e b =
   instr_jmp continue_label;
   instr_label break_label;
   *)
-  gather [
+  let instrs = gather [
     cond;
-    instr_jmpz l0;
-    instr_label l2;
-    from_stmt ~continue_label:(Some l1) ~break_label:(Some l0) b;
-    instr_label l1;
+    instr_jmpz break_label;
+    instr_label start_label;
+    from_stmt b;
+    instr_label cont_label;
     cond;
-    instr_jmpnz l2;
-    instr_label l0;
-  ]
+    instr_jmpnz start_label;
+    instr_label break_label;
+  ] in
+  rewrite_continue_break instrs cont_label break_label
 
 and from_do b e =
-  let l0 = Label.get_next_label () in
-  let l1 = Label.get_next_label () in
-  let l2 = Label.get_next_label () in
-  gather [
-    instr_label l2;
-    from_stmt ~continue_label:(Some l0) ~break_label:(Some l1) b;
-    instr_label l0;
+  let cont_label = Label.get_next_label () in
+  let break_label = Label.get_next_label () in
+  let start_label = Label.get_next_label () in
+  let instrs = gather [
+    instr_label start_label;
+    from_stmt b;
+    instr_label cont_label;
     from_expr e;
-    instr_jmpnz l2;
-    instr_label l1;
-  ]
+    instr_jmpnz start_label;
+    instr_label break_label;
+  ] in
+  rewrite_continue_break instrs cont_label break_label
 
 and from_for e1 e2 e3 b =
-  let l0 = Label.get_next_label () in
-  let l1 = Label.get_next_label () in
-  let l2 = Label.get_next_label () in
+  let break_label = Label.get_next_label () in
+  let cont_label = Label.get_next_label () in
+  let start_label = Label.get_next_label () in
   let cond = from_expr e2 in
   (* TODO: this is bizarre codegen for a "for" loop.
      This should be codegen'd as
@@ -707,27 +800,25 @@ and from_for e1 e2 e3 b =
      instr_jmp start_label;
      instr_label break_label;
   *)
-  gather [
+  let instrs = gather [
     emit_ignored_expr e1;
     cond;
-    instr_jmpz l0;
-    instr_label l2;
-    from_stmt ~continue_label:(Some l1) ~break_label:(Some l0) b;
-    instr_label l1;
+    instr_jmpz break_label;
+    instr_label start_label;
+    from_stmt b;
+    instr_label cont_label;
     emit_ignored_expr e3;
     cond;
-    instr_jmpnz l2;
-    instr_label l0;
-  ]
+    instr_jmpnz start_label;
+    instr_label break_label;
+  ] in
+  rewrite_continue_break instrs cont_label break_label
 
-and from_switch ~continue_label e cl =
+and from_switch e cl =
   let switched = from_expr e in
   let end_label = Label.get_next_label () in
-  (* TODO: "continue" in a switch in PHP has the same semantics as break! *)
-  (* TODO: The code below is probably incorrect; double check this. *)
-  let cl =
-    List.map cl ~f:(from_case ~continue_label ~break_label:(Some end_label))
-  in
+  (* "continue" in a switch in PHP has the same semantics as break! *)
+  let cl = List.map cl ~f:from_case in
   let bodies = gather @@ List.map cl ~f:snd in
   let init = gather @@ List.map cl
     ~f: begin fun x ->
@@ -738,50 +829,29 @@ and from_switch ~continue_label e cl =
             gather [from_expr e; switched; instr_eq; instr_jmpnz l]
         end
   in
-  gather [
+  let instrs = gather [
     init;
     bodies;
     instr_label end_label;
-  ]
+  ] in
+  rewrite_continue_break instrs end_label end_label
 
-and from_try  ~continue_label ~break_label try_block catch_list finally_block =
+and from_try try_block catch_list finally_block =
   let catch_exists = List.length catch_list <> 0 in
   let finally_exists = finally_block <> [] in
-
   let l0 = Label.get_next_label () in
-  let new_continue_label =
-    if finally_exists then Some l0 else continue_label
-  in
-  let new_break_label =
-    if finally_exists then Some l0 else break_label
-  in
   (* TODO: Combine needs of catch and try block *)
-  let try_body =
-    from_stmt
-      ~continue_label:new_continue_label
-      ~break_label:new_break_label
-      (A.Block try_block)
-  in
+  let try_body = from_stmt (A.Block try_block) in
   let try_body = gather [try_body; instr_jmp l0;] in
+  let try_body = rewrite_continue_break try_body l0 l0 in
   let try_body_list = instr_seq_to_list try_body in
-  let catches =
-    List.map catch_list
-    ~f:(from_catch
-        ~continue_label:new_continue_label
-        ~break_label:new_break_label
-        l0)
-  in
+  let catches = List.map catch_list ~f:(from_catch l0) in
   let catch_meta_data = List.rev @@ List.map catches ~f:snd in
   let catch_blocks =
     List.map catches ~f:(fun x -> instr_seq_to_list @@ fst x)
   in
   let catch_instr = List.concat catch_blocks in
-  let finally_body =
-    from_stmt
-      ~continue_label
-      ~break_label
-      (A.Block finally_block)
-  in
+  let finally_body = from_stmt (A.Block finally_block) in
   let fault_body =
     if finally_exists
     then
@@ -855,12 +925,8 @@ and from_foreach _has_await collection iterator block =
     let init = instr_iterinit iterator_number loop_break_label v in
     let cont = instr_iternext iterator_number loop_continue_label v in
     init, cont in
-  let body =
-    from_stmt
-      ~continue_label:(Some loop_continue_label)
-      ~break_label:(Some loop_break_label)
-      block in
-  gather [
+  let body = from_stmt block in
+  let instrs = gather [
     from_expr collection;
     init;
     instr_try_fault_no_catch
@@ -876,23 +942,19 @@ and from_foreach _has_await collection iterator block =
         instr_iterfree iterator_number;
         instr_unwind ]);
     instr_label loop_break_label
-  ]
+  ] in
+  rewrite_continue_break instrs loop_continue_label loop_break_label
 
-and from_stmts ~continue_label ~break_label stl =
-  let results =
-    List.map stl (from_stmt ~continue_label ~break_label)
-  in
+and from_stmts stl =
+  let results = List.map stl from_stmt in
   gather results
 
-and from_case ~continue_label ~break_label c =
+and from_case c =
   let l = Label.get_next_label () in
   let b = match c with
     | A.Default b
     | A.Case (_, b) ->
-        from_stmt
-          ~continue_label
-          ~break_label
-          (A.Block b)
+        from_stmt (A.Block b)
   in
   let e = match c with
     | A.Case (e, _) -> Some e
@@ -900,22 +962,18 @@ and from_case ~continue_label ~break_label c =
   in
   (e, l), gather [instr_label l; b]
 
-and from_catch ~continue_label ~break_label end_label ((_, id1), (_, id2), b) =
+and from_catch end_label ((_, id1), (_, id2), b) =
   let cl = Label.get_next_label () in
-  let body =
-    from_stmt
-      ~continue_label
-      ~break_label
-      (A.Block b)
-  in
-  gather [
+  let instrs = gather [
     instr (IExceptionLabel (cl, CatchL));
     instr (IMisc Catch);
     instr (IMutator (SetL (Local_named id2)));
     instr (IBasic PopC);
-    body;
+    from_stmt (A.Block b);
     instr (IContFlow (Jmp end_label));
-  ], (cl, id1)
+  ] in
+  let instrs = rewrite_continue_break instrs end_label end_label in
+  instrs, (cl, id1)
 
 let fmt_prim x =
   match x with
@@ -1082,8 +1140,7 @@ let from_body tparams params ret b =
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in
-  let stmt_instrs =
-    from_stmts ~continue_label:None ~break_label:None b.N.fub_ast in
+  let stmt_instrs = from_stmts b.N.fub_ast in
   let stmt_instrs =
     if has_type_constraint return_type_info then
       verify_returns stmt_instrs

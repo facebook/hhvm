@@ -372,15 +372,15 @@ struct CompactWriter {
           }
 
         case T_MAP:
-          writeMap(value.toArray(), valueSpec);
+          writeMap(value, valueSpec);
           break;
 
         case T_LIST:
-          writeList(value.toArray(), valueSpec, C_LIST_LIST);
+          writeList(value, valueSpec, C_LIST_LIST);
           break;
 
         case T_SET:
-          writeList(value.toArray(), valueSpec, C_LIST_SET);
+          writeList(value, valueSpec, C_LIST_SET);
           break;
 
         default:
@@ -389,7 +389,7 @@ struct CompactWriter {
       }
     }
 
-    void writeMap(Array arr, const Array& spec) {
+    void writeMap(const Variant& map, const Array& spec) {
       TType keyType = (TType)spec
         .rvalAt(s_ktype, AccessFlags::ErrorKey).toByte();
       TType valueType = (TType)spec
@@ -398,33 +398,62 @@ struct CompactWriter {
       Array keySpec = spec.rvalAt(s_key, AccessFlags::ErrorKey).toArray();
       Array valueSpec = spec.rvalAt(s_val, AccessFlags::ErrorKey).toArray();
 
-      writeMapBegin(keyType, valueType, arr.size());
+      auto elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+        writeField(tvAsCVarRef(k), keySpec, keyType);
+        writeField(tvAsCVarRef(v), valueSpec, valueType);
+        return false;
+      };
 
-      for (ArrayIter arrIter = arr.begin(); !arrIter.end(); ++arrIter) {
-        writeField(arrIter.first(), keySpec, keyType);
-        writeField(arrIter.second(), valueSpec, valueType);
+      if (isContainer(map)) {
+        writeMapBegin(keyType, valueType, getContainerSize(map));
+        IterateKV(
+          *map.asCell(),
+          [](const ArrayData* ad) { return false; },
+          elemWriter,
+          [](const ObjectData* o) { return false; }
+        );
+      } else {
+        auto const arr = map.toArray();
+        writeMapBegin(keyType, valueType, arr.size());
+        IterateKV(arr.get(), elemWriter);
       }
 
       writeCollectionEnd();
     }
 
-    void writeList(Array arr, const Array& spec, CListType listType) {
+    void writeList(const Variant& list, const Array& spec, CListType listType) {
       TType valueType = (TType)spec
         .rvalAt(s_etype, AccessFlags::ErrorKey).toByte();
       Array valueSpec = spec
         .rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
 
-      writeListBegin(valueType, arr.size());
+      std::function<bool(const TypedValue*, const TypedValue*)> elemWriter;
+      if (listType == C_LIST_LIST) {
+        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+          writeField(tvAsCVarRef(v), valueSpec, valueType);
+          return false;
+        };
+      } else if (listType == C_LIST_SET) {
+        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+          writeField(tvAsCVarRef(k), valueSpec, valueType);
+          return false;
+        };
+      } else {
+        always_assert(false);
+      }
 
-      for (ArrayIter arrIter = arr.begin(); !arrIter.end(); ++arrIter) {
-        Variant x;
-        if (listType == C_LIST_LIST) {
-          x = arrIter.second();
-        } else if (listType == C_LIST_SET) {
-          x = arrIter.first();
-        }
-
-        writeField(x, valueSpec, valueType);
+      if (isContainer(list)) {
+        writeListBegin(valueType, getContainerSize(list));
+        IterateKV(
+          *list.asCell(),
+          [](const ArrayData* ad) { return false; },
+          elemWriter,
+          [](const ObjectData* o) { return false; }
+        );
+      } else {
+        auto const arr = list.toArray();
+        writeListBegin(valueType, arr.size());
+        IterateKV(arr.get(), elemWriter);
       }
 
       writeCollectionEnd();

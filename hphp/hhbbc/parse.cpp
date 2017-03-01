@@ -687,7 +687,7 @@ void build_cfg(ParseUnitState& puState,
     auto const bcStart = bc + *it;
     auto const bcStop  = bc + *std::next(it);
 
-    if (auto const eh = findEH(fe.ehtab, *it)) {
+    if (auto const eh = Func::findEH(fe.ehtab, *it)) {
       auto it = exnTreeInfo.ehMap.find(eh);
       assert(it != end(exnTreeInfo.ehMap));
       block->exnNode = it->second;

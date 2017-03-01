@@ -579,6 +579,24 @@ inline const Func::FPIEntVec& Func::fpitab() const {
   return shared()->m_fpitab;
 }
 
+inline const EHEnt* Func::findEH(Offset o) const {
+  assert(o >= base() && o < past());
+  return findEH(shared()->m_ehtab, o);
+}
+
+template<class Container>
+const typename Container::value_type*
+Func::findEH(const Container& ehtab, Offset o) {
+  const typename Container::value_type* eh = nullptr;
+
+  for (uint32_t i = 0, sz = ehtab.size(); i < sz; ++i) {
+    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
+      eh = &ehtab[i];
+    }
+  }
+  return eh;
+}
+
 inline const FPIEnt* Func::findFPI(Offset o) const {
   assertx(o >= base() && o < past());
   return findFPI(fpitab().begin(), fpitab().end(), o);

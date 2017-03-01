@@ -552,11 +552,6 @@ bool Func::isImmutableFrom(const Class* cls) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Unit table entries.
 
-const EHEnt* Func::findEH(Offset o) const {
-  assert(o >= base() && o < past());
-  return HPHP::findEH(shared()->m_ehtab, o);
-}
-
 const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
   /*
    * We consider the "FCall" instruction part of the FPI region, but

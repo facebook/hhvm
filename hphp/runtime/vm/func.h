@@ -981,11 +981,24 @@ struct Func final {
   const EHEnt* findEH(Offset o) const;
 
   /*
+   * Same as non-static findEH(), but takes as an operand any ehtab-like
+   * container.
+   */
+  template<class Container>
+  static const typename Container::value_type*
+  findEH(const Container& ehtab, Offset o);
+
+  /*
    * Locate FPI regions by offset.
    */
-  static const FPIEnt* findFPI(const FPIEnt* b, const FPIEnt* e, Offset o);
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
+
+  /*
+   * Same as non-static findFPI(), but takes as an operand the start and end
+   * iterators of an fpitab.
+   */
+  static const FPIEnt* findFPI(const FPIEnt* b, const FPIEnt* e, Offset o);
 
   bool shouldSampleJit() const { return m_shouldSampleJit; }
 
@@ -1347,22 +1360,6 @@ private:
   // should not be inherited from.
   AtomicLowPtr<uint8_t> m_prologueTable[1];
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-template<class Container>
-const typename Container::value_type* findEH(const Container& ehtab, Offset o) {
-  uint32_t i;
-  uint32_t sz = ehtab.size();
-
-  const typename Container::value_type* eh = nullptr;
-  for (i = 0; i < sz; i++) {
-    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
-      eh = &ehtab[i];
-    }
-  }
-  return eh;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

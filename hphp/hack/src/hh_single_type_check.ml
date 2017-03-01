@@ -26,7 +26,6 @@ type mode =
   | Coverage
   | Dump_symbol_info
   | Dump_inheritance
-  | Dump_tast
   | Errors
   | AllErrors
   | Lint
@@ -38,7 +37,6 @@ type mode =
   | Find_refs of int * int
   | Symbol_definition_by_id of string
   | Highlight_refs of int * int
-  | Hhas_codegen
   | Decl_compare
 
 type options = {
@@ -258,9 +256,6 @@ let parse_options () =
     "--dump-symbol-info",
       Arg.Unit (set_mode Dump_symbol_info),
       " Dump all symbol information";
-    "--dump-tast",
-      Arg.Unit (set_mode Dump_tast),
-      " Check for errors then dump the Typed AST";
     "--lint",
       Arg.Unit (set_mode Lint),
       " Produce lint errors";
@@ -306,9 +301,6 @@ let parse_options () =
         Arg.Int (fun column -> set_mode (Highlight_refs (!line, column)) ());
       ]),
       "<pos> Highlight all usages of a symbol at given line and column";
-    "--hhas-codegen",
-      Arg.Unit (set_mode Hhas_codegen),
-      " Generates the HHAS text file";
     "--decl-compare",
       Arg.Unit (set_mode Decl_compare),
       " Test comparison functions used in incremental mode on declarations" ^
@@ -689,24 +681,6 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       if errors <> []
       then (List.iter ~f:(error ~indent:true) errors; exit 2)
       else Printf.printf "No errors\n"
-  | Dump_tast -> Printf.printf "no typed AST to dump, yet\n"
-  | Hhas_codegen ->
-    let f_fold fn fileinfo text = begin
-      let hhas_text = if (Relative_path.S.to_string fn) = "|builtins.hhi" then
-        ""
-      else
-        let (named_functions, named_classes, _named_typedefs, _named_consts) =
-          Typing_check_utils.get_nast_from_fileinfo opts fn fileinfo in
-        let compiled_funs = Hhbc_from_nast.from_functions named_functions in
-        let compiled_classes = Hhbc_from_nast.from_classes named_classes in
-        let _compiled_typedefs = [] in (* TODO *)
-        let _compiled_consts = [] in (* TODO *)
-        let hhas_prog = Hhas_program.make compiled_funs compiled_classes in
-        Hhbc_hhas.to_string hhas_prog in
-      text ^ hhas_text
-    end in
-    let hhas_text = Relative_path.Map.fold files_info ~f:f_fold ~init:"" in
-    Printf.printf "%s" hhas_text
   | Decl_compare ->
     test_decl_compare filename popt files_contents opts files_info
 

@@ -38,4 +38,4 @@ for FILE in $PHP_FILES; do
 done
 
 # log to scuba
-buck run //hphp/hack/scripts:log_hh_codegen_results_to_scuba -- "$NUM_LINES_HHVM" "$NUM_LINES_HH" "$NUM_LINES_COMMON" "$1"
+$BUCK run //hphp/hack/scripts:log_hh_codegen_results_to_scuba -- "$NUM_LINES_HHVM" "$NUM_LINES_HH" "$NUM_LINES_COMMON" "$1"

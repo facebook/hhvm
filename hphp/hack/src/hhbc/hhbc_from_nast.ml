@@ -750,11 +750,12 @@ and from_try_catch try_block catch_list =
   ]
 
 and from_try_finally try_block finally_block =
+  (* TODO: Rewrite illegal continue / break in finally into fatals *)
+  (* TODO: Rewrite finally-blocked continue / break into temp local,
+  finally epilogue. *)
   let l0 = Label.get_next_label () in
   let try_body = from_stmt try_block in
   let try_body = gather [try_body; instr_jmp l0;] in
-  let try_body =
-    Continue_break_rewriter.rewrite_continue_break try_body l0 l0 in
   let finally_body = from_stmt finally_block in
   let fault_body = gather [
       (* TODO: What are these unnamed locals? *)

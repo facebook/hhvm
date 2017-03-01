@@ -131,6 +131,7 @@ flaky_tests = (
     # these tests use each other's data
     '/ext/standard/tests/file/bug38086.php',
     '/ext/standard/tests/file/stream_copy_to_stream.php',
+    '/ext/standard/tests/file/mkdir_variation1.php',
     '/ext/gd/tests/gif2gd.php',
     '/ext/gd/tests/jpg2gd.php',
     '/ext/gd/tests/png2gd.php',

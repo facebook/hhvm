@@ -408,12 +408,19 @@ let string_of_iterator instruction =
     "IterFree " ^ (string_of_iterator_id id)
   | _ -> "### string_of_iterator instruction not implemented"
 
-let string_of_catch label =
+let string_of_catch_label label =
   string_of_exception_label label CatchL
+
+let string_of_fault_label label =
+  string_of_exception_label label FaultL
 
 let string_of_try instruction =
   match instruction with
-  | TryCatchBegin label -> ".try_catch " ^ (string_of_catch label) ^ " {"
+  | TryFaultBegin (label, _) ->
+    ".try_fault " ^ (string_of_fault_label label) ^ " {"
+  | TryCatchBegin label ->
+    ".try_catch " ^ (string_of_catch_label label) ^ " {"
+  | TryFaultEnd
   | TryCatchEnd -> "}"
 
 let string_of_instruction instruction =
@@ -437,20 +444,21 @@ let string_of_instruction instruction =
   | _ -> failwith "invalid instruction" in
   s ^ "\n"
 
-let rec add_try_fault_block buffer indent label instructions =
-  B.add_string buffer ".try_fault ";
-  B.add_string buffer @@ string_of_exception_label label FaultL;
-  B.add_string buffer " {\n";
-  add_instruction_list buffer (indent + 2) instructions;
-  B.add_string buffer (String.make indent ' ');
-  B.add_string buffer "}\n"
-
-and adjusted_indent instruction indent =
+let rec adjusted_indent instruction indent =
   match instruction with
   | IComment _ -> 0
   | ILabel _
+  | ITry TryFaultEnd
   | ITry TryCatchEnd
   | IExceptionLabel _ -> indent - 2
+  | _ -> indent
+
+and new_indent instruction indent =
+  match instruction with
+  | ITry (TryFaultBegin _)
+  | ITry (TryCatchBegin _) -> indent + 2
+  | ITry TryFaultEnd
+  | ITry TryCatchEnd -> indent - 2
   | _ -> indent
 
 and add_instruction_list buffer indent instructions =
@@ -458,23 +466,12 @@ and add_instruction_list buffer indent instructions =
     match instructions with
     | [] -> ()
     | instruction :: t ->
+      begin
       let actual_indent = adjusted_indent instruction indent in
       B.add_string buffer (String.make actual_indent ' ');
-      begin match instruction with
-      | ITryFault (l, il, _) ->
-        add_try_fault_block buffer actual_indent l il;
-        aux t indent
-      | ITry (TryCatchBegin _) ->
-        B.add_string buffer (string_of_instruction instruction);
-        aux t (indent + 2)
-      | ITry TryCatchEnd ->
-        B.add_string buffer (string_of_instruction instruction);
-        aux t (indent - 2)
-      | _ ->
-        B.add_string buffer (string_of_instruction instruction);
-        aux t indent
-      end
-      in
+      B.add_string buffer (string_of_instruction instruction);
+      aux t (new_indent instruction indent)
+      end in
   aux instructions indent
 
 (* HHVM uses `N` to denote absence of type information. Otherwise the type
@@ -721,7 +718,7 @@ let add_data_region buf functions =
       add_data_region_element buf "v" num arguments
     | ILitConst (Keyset (num, arguments)) ->
       add_data_region_element buf "k" num arguments
-    | ITryFault (_, il, _) ->
+    | ITry (TryFaultBegin (_, il)) ->
       add_data_region_list buf il
     | _ -> ()
   and iter_aux buf fun_def =

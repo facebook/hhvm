@@ -82,10 +82,9 @@ module InstrSeq = struct
     let flat_map_list items ~f = Core.List.bind items f in
     let rec map_instruction instruction =
       match instruction with
-      | ITryFault (fault_label, try_instrs, fault_instrs) ->
-        let try_ = flat_map_list try_instrs map_instruction in
+      | ITry (TryFaultBegin (fault_label, fault_instrs)) ->
         let fault_ = flat_map_list fault_instrs map_instruction in
-        [ ITryFault (fault_label, try_, fault_) ]
+        [ ITry (TryFaultBegin (fault_label, fault_)) ]
       | _ -> f instruction in
     match instrseq with
     | Instr_list instrl ->
@@ -98,9 +97,8 @@ module InstrSeq = struct
   let rec fold_left instrseq ~f ~init =
     let rec fold_instruction init instruction =
       match instruction with
-      | ITryFault(_, try_instrs, fault_instrs) ->
-        let try_ = List.fold_left try_instrs ~f:fold_instruction ~init in
-        List.fold_left fault_instrs ~f:fold_instruction ~init:try_
+      | ITry (TryFaultBegin (_, fault_instrs)) ->
+        List.fold_left fault_instrs ~f:fold_instruction ~init
       | _ -> f init instruction in
     let fold_instrseq init instrseq =
       fold_left instrseq ~f ~init in
@@ -115,10 +113,9 @@ module InstrSeq = struct
   let rec filter_map instrseq ~f =
     let rec map_instruction instruction =
       match instruction with
-      | ITryFault(fault_label, try_instrs, fault_instrs) ->
-        let try_ = List.filter_map try_instrs map_instruction in
+      | ITry (TryFaultBegin (fault_label, fault_instrs)) ->
         let fault_ = List.filter_map fault_instrs map_instruction in
-        Some (ITryFault (fault_label, try_, fault_))
+        Some (ITry (TryFaultBegin (fault_label, fault_)))
       | _ ->
         f instruction in
     match instrseq with
@@ -143,11 +140,16 @@ let rec instr_seq_to_list_aux sl result =
 
 let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 
-let instr_try_fault_no_catch fault_label try_body fault_body =
-  let try_body = instr_seq_to_list try_body in
+let instr_try_fault_begin fault_label fault_body =
   let fault_body = instr_seq_to_list fault_body in
   let fl = IExceptionLabel (fault_label, FaultL) in
-  instr (ITryFault (fault_label, try_body, fl :: fault_body))
-
+  instr (ITry (TryFaultBegin (fault_label, fl :: fault_body)))
+let instr_try_fault_end = instr (ITry TryFaultEnd)
+let instr_try_fault_no_catch fault_label try_body fault_body =
+  gather [
+    instr_try_fault_begin fault_label fault_body;
+    try_body;
+    instr_try_fault_end;
+  ]
 let instr_try_catch_begin catch_label = instr (ITry (TryCatchBegin catch_label))
 let instr_try_catch_end = instr (ITry TryCatchEnd)

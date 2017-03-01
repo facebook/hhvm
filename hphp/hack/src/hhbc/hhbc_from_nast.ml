@@ -1122,22 +1122,15 @@ let from_body tparams params ret b =
   ] in
   body_instrs, params, return_type_info
 
-(* In order to be efficient,
- * keep around a set to check for membership and a list for order *)
-let rec extract_decl_vars set l body_instrs =
-  let add_if_not_exists set l s =
-    if SSet.mem s set then (set, l) else (SSet.add s set, s::l)
-  in
-  let extract_decl_vars_aux set l = function
-    | IMutator (SetL (Local_named s)) -> add_if_not_exists set l s
-    | ITryFault (_, il, _)
-    | ITryCatch (_, il) -> extract_decl_vars set l il
-    | _ -> (set, l)
-  in
-  List.fold_left
-    body_instrs
-    ~init:(set, l)
-    ~f:(fun (set, l) i -> extract_decl_vars_aux set l i)
+let extract_decl_vars instrseq =
+  let module ULS = Unique_list_string in
+  (* TODO: Just SetL?  What if we have a local that is only ever read? *)
+  let folder uniq_list instruction =
+    match instruction with
+    | IMutator (SetL (Local_named s)) -> ULS.add uniq_list s
+    | _ -> uniq_list in
+  let decl_vars = InstrSeq.fold_left instrseq ~init:ULS.empty ~f:folder in
+  List.rev (Unique_list_string.items decl_vars)
 
 (* Create a map from defined labels to instruction offset *)
 let create_label_to_offset_map instrseq =
@@ -1238,13 +1231,8 @@ let from_fun_ : Nast.fun_ -> Hhas_function.t option =
     let body_instrs, function_params, function_return_type =
       from_body tparams nast_fun.N.f_params nast_fun.N.f_ret b in
     let body_instrs = relabel_instrseq body_instrs in
+    let function_decl_vars = extract_decl_vars body_instrs in
     let function_body = instr_seq_to_list body_instrs in
-    let (_, function_decl_vars) =
-      extract_decl_vars SSet.empty [] function_body
-    in
-    (* In order to be efficient,
-     * we cons everything, hence the need to reverse *)
-    let function_decl_vars = List.rev function_decl_vars in
     Some (Hhas_function.make
       function_name
       function_params

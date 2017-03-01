@@ -188,6 +188,10 @@ let rec from_expr expr =
       instr (ILabel end_label)
     ]
   | A.Expr_list es -> gather @@ List.map es ~f:from_expr
+  | A.Call ((p, A.Id (_, "tuple")), es, _) ->
+    (* Did you know that tuples are functions? *)
+    let af_list = List.map es ~f:(fun e -> A.AFvalue e) in
+    from_expr (p, A.Array af_list)
   | A.Call _ ->
     let instrs, flavor = emit_flavored_expr expr in
     gather [

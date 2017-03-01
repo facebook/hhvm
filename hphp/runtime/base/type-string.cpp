@@ -145,7 +145,7 @@ String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
 // informational
 
 String String::substr(int start, int length /* = StringData::MaxSize */) const {
-  if (start < 0 || start > size() || length < 0) {
+  if (start < 0 || start >= size() || length <= 0) {
     return empty_string();
   }
 
@@ -154,8 +154,11 @@ String String::substr(int start, int length /* = StringData::MaxSize */) const {
     length = max_len;
   }
 
+  assert(length > 0);
   if (UNLIKELY(length == size())) return *this;
-  if (length == 0) return empty_string();
+  if (UNLIKELY(length == 1)) {
+    return String::attach(makeStaticString(data()[start]));
+  }
   return String(data() + start, length, CopyString);
 }
 

@@ -154,8 +154,10 @@ type instruct_control_flow =
   | RetV
   | Unwind
   | Throw
-  | Continue of int  (* This will be rewritten *)
-  | Break of int  (* This will be rewritten *)
+
+type instruct_special_flow =
+  | Continue of int * int  (* This will be rewritten *)
+  | Break of int * int  (* This will be rewritten *)
 
 type instruct_get =
   | CGetL of local_id
@@ -505,6 +507,7 @@ type instruct =
   | ILitConst of instruct_lit_const
   | IOp of instruct_operator
   | IContFlow of instruct_control_flow
+  | ISpecialFlow of instruct_special_flow
   | ICall of instruct_call
   | IMisc of instruct_misc
   | IGet of instruct_get

@@ -99,13 +99,13 @@ unconditional jumps to the right place. *)
 
   let rewriter i =
     match i with
-    | IContFlow (Continue level) when level > 1 ->
-      IContFlow (Continue (level - 1))
-    | IContFlow (Continue _) ->
+    | ISpecialFlow (Continue (level, original)) when level > 1 ->
+      ISpecialFlow (Continue ((level - 1), original))
+    | ISpecialFlow (Continue _) ->
       IContFlow (Jmp cont_label)
-    | IContFlow (Break level) when level > 1 ->
-      IContFlow (Break (level - 1))
-    | IContFlow (Break _) ->
+    | ISpecialFlow (Break (level, original)) when level > 1 ->
+      ISpecialFlow (Break ((level - 1), original))
+    | ISpecialFlow (Break _) ->
       IContFlow (Jmp break_label)
     | _ -> i in
   InstrSeq.map instrs ~f:rewriter

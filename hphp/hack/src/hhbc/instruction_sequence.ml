@@ -89,20 +89,21 @@ module InstrSeq = struct
       Instr_concat (List.map instrseql (flat_map ~f))
 
   let rec fold_left instrseq ~f ~init =
+    let rec fold_instruction init instruction =
+      match instruction with
+      | ITryFault(_, try_instrs, fault_instrs) ->
+        let try_ = List.fold_left try_instrs ~f:fold_instruction ~init in
+        List.fold_left fault_instrs ~f:fold_instruction ~init:try_
+      | ITryCatch(_, try_instrs) ->
+        List.fold_left try_instrs ~f:fold_instruction ~init
+      | _ -> f init instruction in
+    let fold_instrseq init instrseq =
+      fold_left instrseq ~f ~init in
     match instrseq with
     | Instr_list instrl ->
-      List.fold_left instrl ~f:(fun init instr ->
-        match instr with
-        | ITryFault(_, instrl1, instrl2) ->
-          List.fold_left instrl2 ~f ~init:(List.fold_left instrl1 ~f ~init)
-        | ITryCatch(_, instrl) ->
-          List.fold_left instrl ~f ~init
-        | _ -> f init instr
-        ) ~init
+      List.fold_left instrl ~f:fold_instruction ~init
     | Instr_concat instrseql ->
-      List.fold_left instrseql
-        ~f:(fun init instrseq -> fold_left instrseq ~f ~init)
-        ~init
+      List.fold_left instrseql ~f:fold_instrseq ~init
 
   let rec filter_map instrseq ~f =
     match instrseq with

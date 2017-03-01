@@ -112,6 +112,8 @@ let string_of_param_id x =
   | Param_unnamed i -> string_of_int i
   | Param_named s -> s
 
+let string_of_param_num i = string_of_int i
+
 let string_of_local_id x =
   match x with
   | Local_unnamed i -> string_of_int i
@@ -270,26 +272,26 @@ let string_of_base x =
     "BaseNC " ^ string_of_stack_index si ^ " " ^ MemberOpMode.to_string m
   | BaseNL (id, m) ->
     "BaseNL " ^ string_of_local_id id ^ " " ^ MemberOpMode.to_string m
-  | FPassBaseNC (id, si) ->
-    "FBaseBaseNC " ^ string_of_param_id id ^ " " ^ string_of_stack_index si
-  | FPassBaseNL (pid, lid) ->
-    "FPassBaseNL " ^ string_of_param_id pid ^ " " ^ string_of_local_id lid
+  | FPassBaseNC (i, si) ->
+    "FBaseBaseNC " ^ string_of_param_num i ^ " " ^ string_of_stack_index si
+  | FPassBaseNL (i, lid) ->
+    "FPassBaseNL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
   | BaseGC (si, m) ->
     "BaseGC " ^ string_of_stack_index si ^ " " ^ MemberOpMode.to_string m
   | BaseGL (id, m) ->
     "BaseGL " ^ string_of_local_id id ^ " " ^ MemberOpMode.to_string m
-  | FPassBaseGC (pid, si) ->
-    "FPassBaseGC " ^ string_of_param_id pid ^ " " ^ string_of_stack_index si
-  | FPassBaseGL (pid, lid) ->
-    "FPassBaseGL " ^ string_of_param_id pid ^ " " ^ string_of_local_id lid
+  | FPassBaseGC (i, si) ->
+    "FPassBaseGC " ^ string_of_param_num i ^ " " ^ string_of_stack_index si
+  | FPassBaseGL (i, lid) ->
+    "FPassBaseGL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
   | BaseSC (si1, si2) ->
     "BaseSC " ^ string_of_stack_index si1 ^ " " ^ string_of_stack_index si2
   | BaseSL (lid, si) ->
     "BaseSL " ^ string_of_local_id lid ^ " " ^ string_of_stack_index si
   | BaseL (lid, m) ->
     "BaseL " ^ string_of_local_id lid ^ " " ^ MemberOpMode.to_string m
-  | FPassBaseL (pid, lid) ->
-    "FPassBaseL " ^ string_of_param_id pid ^ " " ^ string_of_local_id lid
+  | FPassBaseL (i, lid) ->
+    "FPassBaseL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
   | BaseC si ->
     "BaseC " ^ string_of_stack_index si
   | BaseR si ->
@@ -304,8 +306,8 @@ let string_of_final instruction =
     string_of_member_key mk
   | VGetM (n, mk) ->
     "VGetM " ^ string_of_int n ^ " " ^ string_of_member_key mk
-  | FPassM (id, n, mk) ->
-    "FPassM " ^ string_of_param_id id ^ " " ^ string_of_int n
+  | FPassM (i, n, mk) ->
+    "FPassM " ^ string_of_param_num i ^ " " ^ string_of_int n
     ^ " " ^ string_of_member_key mk
   | _ ->
     "# string_of_final NYI"
@@ -345,17 +347,17 @@ let string_of_call instruction =
   | FPushCufSafe n -> "FPushCufSafe " ^ string_of_int n
   | CufSafeArray -> "CufSafeArray"
   | CufSafeReturn -> "CufSafeReturn"
-  | FPassC id -> "FPassC " ^ string_of_param_id id
-  | FPassCW id -> "FPassCW " ^ string_of_param_id id
-  | FPassCE id -> "FPassCE " ^ string_of_param_id id
-  | FPassV id -> "FPassV " ^ string_of_param_id id
-  | FPassVNop id -> "FPassVNop " ^ string_of_param_id id
-  | FPassR id -> "FPassR " ^ string_of_param_id id
-  | FPassL (id, lid) ->
-    "FPassL " ^ string_of_param_id id ^ " " ^ string_of_local_id lid
-  | FPassN id -> "FPassN " ^ string_of_param_id id
-  | FPassG id -> "FPassG " ^ string_of_param_id id
-  | FPassS id -> "FPassS " ^ string_of_param_id id
+  | FPassC i -> "FPassC " ^ string_of_param_num i
+  | FPassCW i -> "FPassCW " ^ string_of_param_num i
+  | FPassCE i -> "FPassCE " ^ string_of_param_num i
+  | FPassV i -> "FPassV " ^ string_of_param_num i
+  | FPassVNop i -> "FPassVNop " ^ string_of_param_num i
+  | FPassR i -> "FPassR " ^ string_of_param_num i
+  | FPassL (i, lid) ->
+    "FPassL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
+  | FPassN i -> "FPassN " ^ string_of_param_num i
+  | FPassG i -> "FPassG " ^ string_of_param_num i
+  | FPassS i -> "FPassS " ^ string_of_param_num i
   | FCall n -> "FCall " ^ string_of_int n
   | FCallD (n, c, f) ->
     "FCallD " ^ string_of_int n ^ " " ^

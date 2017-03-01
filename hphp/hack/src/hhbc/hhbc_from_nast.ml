@@ -23,10 +23,14 @@ module SN = Naming_special_names
  *   R = ref
  *   A = classref
  *)
-type flavor =
-  | Flavor_C
-  | Flavor_R
-  | Flavor_A
+module Flavor = struct
+  type t = C | R | A
+end
+
+(* When using the PassX instructions we need to emit the right kind *)
+module PassByRefKind = struct
+  type t = AllowCell | WarnOnCell | ErrorOnCell
+end
 
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
@@ -113,6 +117,20 @@ let collection_type = function
   | "ImmSet"    -> 23
   | x -> failwith ("unknown collection type '" ^ x ^ "'")
 
+(* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
+let get_passByRefKind expr =
+  let open PassByRefKind in
+  let rec from_non_list_assignment permissive_kind expr =
+    match snd expr with
+    | A.New _ | A.Lvar _ | A.Clone _ -> AllowCell
+    | A.Binop(A.Eq None, (_, A.List _), e) ->
+      from_non_list_assignment WarnOnCell e
+    | A.Array_get(_, Some _) -> permissive_kind
+    | A.Binop(A.Eq _, _, _) -> WarnOnCell
+    | A.Unop((A.Uincr | A.Udecr), _) -> WarnOnCell
+    | _ -> ErrorOnCell in
+  from_non_list_assignment AllowCell expr
+
 let rec from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -197,7 +215,7 @@ let rec from_expr expr =
     gather [
       instrs;
       (* If the instruction has produced a ref then unbox it *)
-      if flavor = Flavor_R then instr (IBasic UnboxR) else empty
+      if flavor = Flavor.R then instr (IBasic UnboxR) else empty
     ]
   | A.New ((_, A.Id (_, id)), args, uargs) ->
       let nargs = List.length args + List.length uargs in
@@ -222,6 +240,11 @@ let rec from_expr expr =
 
   | A.Array_get(e1, Some e2) ->
     emit_array_get None e1 e2
+  | A.Clone e ->
+    gather [
+      from_expr e;
+      instr (IOp Clone)
+    ]
 
   (* TODO *)
   | A.Collection ((_, type_str), _) ->
@@ -232,7 +255,6 @@ let rec from_expr expr =
   | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
-  | A.Clone _                   -> emit_nyi "clone"
   | A.Obj_get (_, _, _)         -> emit_nyi "obj_get"
   | A.Array_get (_, _)          -> emit_nyi "array_get"
   | A.Class_get (_, _)          -> emit_nyi "class_get"
@@ -388,11 +410,11 @@ and emit_quiet_expr (_, expr_ as expr) =
     from_expr expr
 
 (* Emit code for e1[e2].
- * If param_id_opt = Some (Param_unnamed i)
+ * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_array_get param_id_opt e1 e2 =
-  let base_instrs, n = emit_base param_id_opt e1 in
+and emit_array_get param_num_opt e1 e2 =
+  let base_instrs, n = emit_base param_num_opt e1 in
   let mk, stack_size =
     match snd e2 with
       (* Special case for local index *)
@@ -405,9 +427,9 @@ and emit_array_get param_id_opt e1 e2 =
     | _ -> MemberKey.EC, n+1 in
   let final_instr =
     instr (IFinal (
-      match param_id_opt with
+      match param_num_opt with
       | None -> QueryM (stack_size, QueryOp.CGet, mk)
-      | Some id -> FPassM (id, stack_size, mk)
+      | Some i -> FPassM (i, stack_size, mk)
     )) in
   match mk with
   | MemberKey.EC ->
@@ -424,42 +446,50 @@ and emit_array_get param_id_opt e1 e2 =
 
 (* Emit instructions to construct base for `expr`, and also return
  * the stack size for subsequent query operations *)
-and emit_base param_id_opt (_, expr_ as expr) =
+and emit_base param_num_opt (_, expr_ as expr) =
   match expr_ with
   | A.Lvar (_, x) ->
     instr (IBase (
-      match param_id_opt with
+      match param_num_opt with
       | None -> BaseL (Local_named x, MemberOpMode.Warn)
-      | Some pid -> FPassBaseL (pid, Local_named x)
+      | Some i -> FPassBaseL (i, Local_named x)
       )), 0
   | _ ->
     let instrs, flavor = emit_flavored_expr expr in
     gather [
       instrs;
-      instr (IBase (if flavor = Flavor_R then BaseR 0 else BaseC 0))
+      instr (IBase (if flavor = Flavor.R then BaseR 0 else BaseC 0))
     ], 1
+
+and instr_fpass kind i =
+  match kind with
+  | PassByRefKind.AllowCell -> instr (ICall (FPassC i))
+  | PassByRefKind.WarnOnCell -> instr (ICall (FPassCW i))
+  | PassByRefKind.ErrorOnCell -> instr (ICall (FPassCE i))
+
+and instr_fpassr i = instr (ICall (FPassR i))
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
-  | A.Lvar (_, x) ->
-    instr (ICall (FPassL (Param_unnamed i, Local_named x)))
+  | A.Lvar (_, x) -> instr (ICall (FPassL (i, Local_named x)))
 
   | A.Array_get(e1, Some e2) ->
-    emit_array_get (Some (Param_unnamed i)) e1 e2
+    emit_array_get (Some i) e1 e2
 
   | _ ->
     let instrs, flavor = emit_flavored_expr e in
     gather [
       instrs;
-      instr (ICall (if flavor = Flavor_R then FPassR (Param_unnamed i)
-                      else FPassCE (Param_unnamed i)));
+      if flavor = Flavor.R
+      then instr_fpassr i
+      else instr_fpass (get_passByRefKind e) i
     ]
 
 and emit_pop flavor =
   match flavor with
-  | Flavor_R -> instr (IBasic PopR)
-  | Flavor_C -> instr (IBasic PopC)
-  | Flavor_A -> instr (IBasic PopA)
+  | Flavor.R -> instr (IBasic PopR)
+  | Flavor.C -> instr (IBasic PopC)
+  | Flavor.A -> instr (IBasic PopA)
 
 and emit_ignored_expr e =
   let instrs, flavor = emit_flavored_expr e in
@@ -511,18 +541,18 @@ and emit_call (_, expr_ as expr) args uargs =
          gather [
            from_expr arg;
            instr (IOp Print);
-           if i = nargs-1 then empty else emit_pop Flavor_C
+           if i = nargs-1 then empty else emit_pop Flavor.C
          ] end in
-    instrs, Flavor_C
+    instrs, Flavor.C
 
   | A.Obj_get _ | A.Class_const _ | A.Id _ ->
     gather [
       emit_call_lhs expr nargs;
       emit_args_and_call args uargs;
-    ], Flavor_R
+    ], Flavor.R
 
   | _ ->
-    emit_nyi "call expression", Flavor_C
+    emit_nyi "call expression", Flavor.C
 
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
@@ -532,7 +562,7 @@ and emit_flavored_expr (_, expr_ as expr) =
   | A.Call (e, args, uargs) ->
     emit_call e args uargs
   | _ ->
-    from_expr expr, Flavor_C
+    from_expr expr, Flavor.C
 
 and is_literal expr =
   match snd expr with

@@ -23,6 +23,7 @@ type local_id =
 type param_id =
   | Param_unnamed of int
   | Param_named of string
+type param_num = int
 type iterator_id = int
 type stack_index = int
 type class_id = string
@@ -314,16 +315,16 @@ type instruct_call =
   | FPushCufSafe of num_params
   | CufSafeArray
   | CufSafeReturn
-  | FPassC of param_id
-  | FPassCW of param_id
-  | FPassCE of param_id
-  | FPassV of param_id
-  | FPassVNop of param_id
-  | FPassR of param_id
-  | FPassL of param_id * local_id
-  | FPassN of param_id
-  | FPassG of param_id
-  | FPassS of param_id
+  | FPassC of param_num
+  | FPassCW of param_num
+  | FPassCE of param_num
+  | FPassV of param_num
+  | FPassVNop of param_num
+  | FPassR of param_num
+  | FPassL of param_num * local_id
+  | FPassN of param_num
+  | FPassG of param_num
+  | FPassS of param_num
   | FCall of num_params
   | FCallD of num_params * class_id * function_id
   | FCallArray
@@ -396,16 +397,16 @@ type op_member_final =
 type instruct_base =
   | BaseNC of stack_index * MemberOpMode.t
   | BaseNL of local_id * MemberOpMode.t
-  | FPassBaseNC of param_id * stack_index
-  | FPassBaseNL of param_id * local_id
+  | FPassBaseNC of param_num * stack_index
+  | FPassBaseNL of param_num * local_id
   | BaseGC of stack_index * MemberOpMode.t
   | BaseGL of local_id * MemberOpMode.t
-  | FPassBaseGC of param_id * stack_index
-  | FPassBaseGL of param_id * local_id
+  | FPassBaseGC of param_num * stack_index
+  | FPassBaseGL of param_num * local_id
   | BaseSC of stack_index * stack_index
   | BaseSL of local_id * stack_index
   | BaseL of local_id * MemberOpMode.t
-  | FPassBaseL of param_id * local_id
+  | FPassBaseL of param_num * local_id
   | BaseC of stack_index
   | BaseR of stack_index
   | BaseH
@@ -413,7 +414,7 @@ type instruct_base =
 type instruct_final =
   | QueryM of num_params * QueryOp.t * MemberKey.t
   | VGetM of num_params * MemberKey.t
-  | FPassM of param_id * num_params * MemberKey.t
+  | FPassM of param_num * num_params * MemberKey.t
   | SetM of num_params * MemberKey.t
   | IncDecM of num_params * incdec_op * MemberKey.t
   | SetOpM of num_params  * eq_op * MemberKey.t

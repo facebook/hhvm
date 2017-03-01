@@ -273,19 +273,21 @@ let builder = object (this)
     for end chunks and block nesting
   *)
   method start_block_nest () =
-    if List.is_empty rules
+    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
     then block_indent <- block_indent + 2
     else this#nest ()
 
   method end_block_nest () =
-    if List.is_empty rules
+    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
     then block_indent <- block_indent - 2
     else this#unnest ()
 
   method end_chunks () =
     this#hard_split ();
-    if List.is_empty rules && not @@ List.is_empty chunks
-      then this#push_chunk_group ()
+    if List.is_empty rules &&
+      not (List.is_empty chunks) &&
+      not (Nesting_allocator.is_nested nesting_alloc)
+    then this#push_chunk_group ()
 
   method push_chunk_group () =
     let print_range = Chunk_group.(match in_range with
@@ -1017,7 +1019,7 @@ offending text is '%s'." (text node)));
     t async;
     if not (is_missing async) then add_space ();
     t signature;
-    add_space ();
+    pending_space ();
     t arrow;
     handle_lambda_body body;
     ()

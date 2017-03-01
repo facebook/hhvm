@@ -803,7 +803,9 @@ and from_try_catch try_block catch_list =
     instr_jmp end_label;
   ] in
   gather [
-    instr_try_catch catch_label try_body;
+    instr_try_catch_begin catch_label;
+    try_body;
+    instr_try_catch_end;
     instr_label_catch catch_label;
     instr_catch;
     from_catches catch_list end_label;
@@ -1051,7 +1053,6 @@ let rec emit_fault_instructions stmt_instrs =
   let emit_fault_instruction_aux = function
     | ITryFault (_, il, fault) ->
       gather [emit_fault_instructions @@ instrs il; instrs fault;]
-    | ITryCatch (_, il) -> emit_fault_instructions @@ instrs il
     | _ -> empty
   in
   let instr_list = instr_seq_to_list stmt_instrs in

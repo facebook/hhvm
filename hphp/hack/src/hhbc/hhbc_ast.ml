@@ -520,6 +520,10 @@ type exception_label =
   | CatchL
   | FaultL
 
+type instruct_try =
+  | TryCatchBegin of rel_offset
+  | TryCatchEnd
+
 type instruct =
   | IBasic of instruct_basic
   | IIterator of instruct_iterator
@@ -537,7 +541,7 @@ type instruct =
   | ILabel of rel_offset
   | IExceptionLabel of rel_offset * exception_label
   | ITryFault of rel_offset * instruct list * instruct list
-  | ITryCatch of rel_offset * instruct list
+  | ITry of instruct_try
   | IComment of string
 
 type type_constraint_flag =

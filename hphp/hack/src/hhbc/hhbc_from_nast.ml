@@ -624,105 +624,6 @@ and from_if condition consequence alternative =
     instr_label done_label;
   ]
 
-and rewrite_continue_break instrs cont_label break_label =
-  (* PHP supports multi-level continue and break; the level must be a compile-
-  time constant.
-
-  TODO: Right now we only supports one-level continue and break, but this code
-  is designed to handle multi-level continue and break.  Write tests for
-  multi-level continue and break.
-
-  TODO: This rewriting will be more complex once we support continue and break
-  inside try-finally blocks.
-
-  Suppose we are generating code for:
-
-  do {
-    do {
-      if (a)
-        break 2;
-      if (b)
-        break;
-    } while (c);
-    if (d) break;
-  } while (e);
-
-When we codegen the nested do-loop we will first generate the inner do loop:
-
-L1:  a
-     JmpZ L2
-     Break 2
-L2:  b
-     JmpZ L3
-     Break 1
-L3:  c
-     JmpNZ L1
-L4:
-
-Then we run a pass over it which changes all the Break 1 to Jmp L4, and
-all the Break 2 to Break 1:
-
-L1:  a
-     JmpZ L2
-     Break 1
-L2:  b
-     JmpZ L3
-     Jmp L4
-L3:  c
-     JmpNZ L1
-L4:
-
-Then we keep on generating code for the outer do-loop:
-
-L1:  a
-     JmpZ L2
-     Break 1
-L2:  b
-     JmpZ L3
-     Jmp L4
-L3:  c
-     JmpNZ L1
-L4:  d
-     JmpZ L5
-     Break 1
-L5:  e
-     JmpNZ L1
-L6:
-
-And then we run another rewriting pass over the whole thing which turns
-the Break 1s into Jmp L6:
-
-L1:  a
-     JmpZ L2
-     Jmp L6
-L2:  b
-     JmpZ L3
-     Jmp L4
-L3:  c
-     JmpNZ L1
-L4:  d
-     JmpZ L5
-     Jmp L6
-L5:  e
-     JmpNZ L1
-L6:
-
-And we're done. We've rewritten all the multi-level break and continues into
-unconditional jumps to the right place. *)
-
-  let rewriter i =
-    match i with
-    | IContFlow (Continue level) when level > 1 ->
-      IContFlow (Continue (level - 1))
-    | IContFlow (Continue _) ->
-      IContFlow (Jmp cont_label)
-    | IContFlow (Break level) when level > 1 ->
-      IContFlow (Break (level - 1))
-    | IContFlow (Break _) ->
-      IContFlow (Jmp break_label)
-    | _ -> i in
-  InstrSeq.map instrs ~f:rewriter
-
 and from_while e b =
   let break_label = Label.get_next_label () in
   let cont_label = Label.get_next_label () in
@@ -747,7 +648,7 @@ and from_while e b =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  rewrite_continue_break instrs cont_label break_label
+  Continue_break_rewriter.rewrite_continue_break instrs cont_label break_label
 
 and from_do b e =
   let cont_label = Label.get_next_label () in
@@ -761,7 +662,7 @@ and from_do b e =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  rewrite_continue_break instrs cont_label break_label
+  Continue_break_rewriter.rewrite_continue_break instrs cont_label break_label
 
 and from_for e1 e2 e3 b =
   let break_label = Label.get_next_label () in
@@ -792,7 +693,7 @@ and from_for e1 e2 e3 b =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  rewrite_continue_break instrs cont_label break_label
+  Continue_break_rewriter.rewrite_continue_break instrs cont_label break_label
 
 and from_switch e cl =
   let switched = from_expr e in
@@ -814,7 +715,7 @@ and from_switch e cl =
     bodies;
     instr_label end_label;
   ] in
-  rewrite_continue_break instrs end_label end_label
+  Continue_break_rewriter.rewrite_continue_break instrs end_label end_label
 
 and from_catch end_label ((_, id1), (_, id2), b) =
     let next_catch = Label.get_next_label () in
@@ -852,7 +753,8 @@ and from_try_finally try_block finally_block =
   let l0 = Label.get_next_label () in
   let try_body = from_stmt try_block in
   let try_body = gather [try_body; instr_jmp l0;] in
-  let try_body = rewrite_continue_break try_body l0 l0 in
+  let try_body =
+    Continue_break_rewriter.rewrite_continue_break try_body l0 l0 in
   let finally_body = from_stmt finally_block in
   let fault_body = gather [
       (* TODO: What are these unnamed locals? *)
@@ -919,7 +821,8 @@ and from_foreach _has_await collection iterator block =
         instr_unwind ]);
     instr_label loop_break_label
   ] in
-  rewrite_continue_break instrs loop_continue_label loop_break_label
+  Continue_break_rewriter.rewrite_continue_break
+    instrs loop_continue_label loop_break_label
 
 and from_stmts stl =
   let results = List.map stl from_stmt in

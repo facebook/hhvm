@@ -513,26 +513,15 @@ Variant HHVM_FUNCTION(explode,
 String HHVM_FUNCTION(implode,
                      const Variant& arg1,
                      const Variant& arg2 /* = uninit_variant */) {
-  Array items;
-  String delim;
   if (isContainer(arg1)) {
-    items = arg1;
-    delim = arg2.toString();
+    return StringUtil::Implode(arg1, arg2.toString(), false);
   } else if (isContainer(arg2)) {
-    items = arg2;
-    delim = arg1.toString();
+    return StringUtil::Implode(arg2, arg1.toString(), false);
   } else {
     throw_bad_type_exception("implode() expects a container as "
                              "one of the arguments");
     return String();
   }
-  return StringUtil::Implode(items, delim, false);
-}
-
-String HHVM_FUNCTION(join,
-                     const Variant& arg1,
-                     const Variant& arg2 /* = uninit_variant */) {
-  return HHVM_FN(implode)(arg1, arg2);
 }
 
 TypedValue HHVM_FUNCTION(str_split, const String& str, int64_t split_length) {
@@ -2483,7 +2472,7 @@ struct StringExtension final : Extension {
     HHVM_FE(chop);
     HHVM_FE(explode);
     HHVM_FE(implode);
-    HHVM_FE(join);
+    HHVM_FALIAS(join, implode);
     HHVM_FE(str_split);
     HHVM_FE(chunk_split);
     HHVM_FE(strtok);

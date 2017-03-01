@@ -648,7 +648,7 @@ and from_while e b =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  Continue_break_rewriter.rewrite_continue_break instrs cont_label break_label
+  Continue_break_rewriter.rewrite_in_loop instrs cont_label break_label
 
 and from_do b e =
   let cont_label = Label.get_next_label () in
@@ -662,7 +662,7 @@ and from_do b e =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  Continue_break_rewriter.rewrite_continue_break instrs cont_label break_label
+  Continue_break_rewriter.rewrite_in_loop instrs cont_label break_label
 
 and from_for e1 e2 e3 b =
   let break_label = Label.get_next_label () in
@@ -693,7 +693,7 @@ and from_for e1 e2 e3 b =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  Continue_break_rewriter.rewrite_continue_break instrs cont_label break_label
+  Continue_break_rewriter.rewrite_in_loop instrs cont_label break_label
 
 and from_switch e cl =
   let switched = from_expr e in
@@ -715,7 +715,7 @@ and from_switch e cl =
     bodies;
     instr_label end_label;
   ] in
-  Continue_break_rewriter.rewrite_continue_break instrs end_label end_label
+  Continue_break_rewriter.rewrite_in_switch instrs end_label
 
 and from_catch end_label ((_, id1), (_, id2), b) =
     let next_catch = Label.get_next_label () in
@@ -750,13 +750,13 @@ and from_try_catch try_block catch_list =
   ]
 
 and from_try_finally try_block finally_block =
-  (* TODO: Rewrite illegal continue / break in finally into fatals *)
   (* TODO: Rewrite finally-blocked continue / break into temp local,
   finally epilogue. *)
   let l0 = Label.get_next_label () in
   let try_body = from_stmt try_block in
   let try_body = gather [try_body; instr_jmp l0;] in
   let finally_body = from_stmt finally_block in
+  let finally_body = Continue_break_rewriter.rewrite_in_finally finally_body in
   let fault_body = gather [
       (* TODO: What are these unnamed locals? *)
       instr_unsetl_unnamed 0;
@@ -822,7 +822,7 @@ and from_foreach _has_await collection iterator block =
         instr_unwind ]);
     instr_label loop_break_label
   ] in
-  Continue_break_rewriter.rewrite_continue_break
+  Continue_break_rewriter.rewrite_in_loop
     instrs loop_continue_label loop_break_label
 
 and from_stmts stl =

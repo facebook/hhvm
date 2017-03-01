@@ -106,7 +106,7 @@ let string_of_operator instruction =
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"
-    | Fatal -> "Fatal"
+    | Fatal -> "Fatal Runtime"
 
 let string_of_param_id x =
   match x with

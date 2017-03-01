@@ -11,7 +11,7 @@
 open Hhbc_ast
 open Instruction_sequence
 
-let rewrite_continue_break instrs cont_label break_label =
+let rewrite_in_loop instrseq cont_label break_label =
   (* PHP supports multi-level continue and break; the level must be a compile-
   time constant.
 
@@ -108,4 +108,26 @@ unconditional jumps to the right place. *)
     | ISpecialFlow (Break _) ->
       IContFlow (Jmp break_label)
     | _ -> i in
-  InstrSeq.map instrs ~f:rewriter
+  InstrSeq.map instrseq ~f:rewriter
+
+let rewrite_in_switch instrseq end_label =
+  rewrite_in_loop instrseq end_label end_label
+
+let rewrite_in_finally instrseq =
+  (* TODO: continue and break that would branch out of a finally is
+  illegal, but we allow it at parse time. Consider disallowing it
+  at parse time rather than producing a run-time error. *)
+  let plural n =
+    if n = 1 then "" else "s" in
+  let rewriter instruction =
+    match instruction with
+    | ISpecialFlow (Continue (_, original))
+    | ISpecialFlow (Break (_, original))  ->
+      let message = Printf.sprintf "Cannot break/continue %d level%s"
+        original (plural original) in
+      [
+        (ILitConst (String message));
+        (IOp Fatal)
+      ]
+    | _ -> [ instruction ] in
+  InstrSeq.flat_map instrseq ~f:rewriter

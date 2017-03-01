@@ -138,6 +138,21 @@ let string_of_get x =
   | AGetC -> "AGetC"
   | AGetL id -> "AGetL " ^ string_of_local_id id
 
+let string_of_member_key mk =
+  let open MemberKey in
+  match mk with
+  | EC -> "EC:0"
+  (* hhas doesn't yet support this syntax *)
+  | EL id -> "EL:" ^ string_of_local_id id
+  | ET str -> "ET:" ^ quote_str str
+  | EI i -> "EI:" ^ Int64.to_string i
+  | PC -> "PC"
+  (* hhas doesn't yet support this syntax *)
+  | PL id -> "PL:" ^ string_of_local_id id
+  | PT _ -> "PT"
+  | QT _ -> "QT"
+  | W -> "W"
+
 let string_of_eq_op op =
   match op with
   | PlusEqual -> "PlusEqual"
@@ -248,6 +263,63 @@ let string_of_isset instruction =
   | IsTypeL (id, op) ->
     "IsTypeL " ^ string_of_local_id id ^ " " ^ string_of_istype_op op
 
+let string_of_stack_index si = string_of_int si
+
+let string_of_base x =
+  match x with
+  | BaseNC (si, m) ->
+    "BaseNC " ^ string_of_stack_index si ^ " " ^ MemberOpMode.to_string m
+  | BaseNL (id, m) ->
+    "BaseNL " ^ string_of_local_id id ^ " " ^ MemberOpMode.to_string m
+  | FPassBaseNC (id, si) ->
+    "FBaseBaseNC " ^ string_of_param_id id ^ " " ^ string_of_stack_index si
+  | FPassBaseNL (pid, lid) ->
+    "FPassBaseNL " ^ string_of_param_id pid ^ " " ^ string_of_local_id lid
+  | BaseGC (si, m) ->
+    "BaseGC " ^ string_of_stack_index si ^ " " ^ MemberOpMode.to_string m
+  | BaseGL (id, m) ->
+    "BaseGL " ^ string_of_local_id id ^ " " ^ MemberOpMode.to_string m
+  | FPassBaseGC (pid, si) ->
+    "FPassBaseGC " ^ string_of_param_id pid ^ " " ^ string_of_stack_index si
+  | FPassBaseGL (pid, lid) ->
+    "FPassBaseGL " ^ string_of_param_id pid ^ " " ^ string_of_local_id lid
+  | BaseSC (si1, si2) ->
+    "BaseSC " ^ string_of_stack_index si1 ^ " " ^ string_of_stack_index si2
+  | BaseSL (lid, si) ->
+    "BaseSL " ^ string_of_local_id lid ^ " " ^ string_of_stack_index si
+  | BaseL (lid, m) ->
+    "BaseL " ^ string_of_local_id lid ^ " " ^ MemberOpMode.to_string m
+  | FPassBaseL (pid, lid) ->
+    "FPassBaseL " ^ string_of_param_id pid ^ " " ^ string_of_local_id lid
+  | BaseC si ->
+    "BaseC " ^ string_of_stack_index si
+  | BaseR si ->
+    "BaseR " ^ string_of_stack_index si
+  | BaseH ->
+    "BaseH"
+
+let string_of_final instruction =
+  match instruction with
+  | QueryM (n, op, mk) ->
+    "QueryM " ^ string_of_int n ^ " " ^ QueryOp.to_string op ^ " " ^
+    string_of_member_key mk
+  | VGetM (n, mk) ->
+    "VGetM " ^ string_of_int n ^ " " ^ string_of_member_key mk
+  | FPassM (id, n, mk) ->
+    "FPassM " ^ string_of_param_id id ^ " " ^ string_of_int n
+    ^ " " ^ string_of_member_key mk
+  | _ ->
+    "# string_of_final NYI"
+(*
+| SetM of num_params * MemberKey.t
+| IncDecM of num_params * incdec_op * MemberKey.t
+| SetOpM of num_params  * eq_op * MemberKey.t
+| BindM of num_params * MemberKey.t
+| UnsetM of num_params * MemberKey.t
+| SetWithRefLML of local_id * local_id
+| SetWithRefRML of local_id
+*)
+
 let string_of_call instruction =
   match instruction with
   | FPushFunc n -> "FPushFunc " ^ string_of_int n
@@ -351,6 +423,8 @@ let string_of_instruction instruction =
   | ILabel               l -> string_of_label l ^ ":"
   | IExceptionLabel (l, t) -> string_of_exception_label l t ^ ":"
   | IIsset               i -> string_of_isset i
+  | IBase                i -> string_of_base i
+  | IFinal               i -> string_of_final i
   | IComment             s -> "# " ^ s
   | _ -> failwith "invalid instruction"
 

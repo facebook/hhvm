@@ -195,7 +195,6 @@ let rec from_expr expr =
       (* If the instruction has produced a ref then unbox it *)
       if flavor = Flavor_R then instr (IBasic UnboxR) else empty
     ]
-
   | A.New ((_, A.Id (_, id)), args, uargs) ->
       let nargs = List.length args + List.length uargs in
       gather [
@@ -216,6 +215,9 @@ let rec from_expr expr =
       ; instr @@ ILitConst (ColFromArray collection_type)
       ]
   end
+
+  | A.Array_get(e1, Some e2) ->
+    emit_array_get None e1 e2
 
   (* TODO *)
   | A.Collection ((_, type_str), _) ->
@@ -381,10 +383,66 @@ and emit_quiet_expr (_, expr_ as expr) =
   | _ ->
     from_expr expr
 
+(* Emit code for e1[e2].
+ * If param_id_opt = Some (Param_unnamed i)
+ * then this is the i'th parameter to a function
+ *)
+and emit_array_get param_id_opt e1 e2 =
+  let base_instrs, n = emit_base param_id_opt e1 in
+  let mk, stack_size =
+    match snd e2 with
+      (* Special case for local index *)
+    | A.Lvar (_, x) -> MemberKey.EL (Local_named x), n
+      (* Special case for literal integer index *)
+    | A.Int (_, litstr) -> MemberKey.EI (Int64.of_string litstr), n
+      (* Special case for literal string index *)
+    | A.String (_, litstr) -> MemberKey.ET litstr, n
+      (* General case *)
+    | _ -> MemberKey.EC, n+1 in
+  let final_instr =
+    instr (IFinal (
+      match param_id_opt with
+      | None -> QueryM (stack_size, QueryOp.CGet, mk)
+      | Some id -> FPassM (id, stack_size, mk)
+    )) in
+  match mk with
+  | MemberKey.EC ->
+    gather [
+      from_expr e2;
+      base_instrs;
+      final_instr
+    ]
+  | _ ->
+    gather [
+      base_instrs;
+      final_instr
+    ]
+
+(* Emit instructions to construct base for `expr`, and also return
+ * the stack size for subsequent query operations *)
+and emit_base param_id_opt (_, expr_ as expr) =
+  match expr_ with
+  | A.Lvar (_, x) ->
+    instr (IBase (
+      match param_id_opt with
+      | None -> BaseL (Local_named x, MemberOpMode.Warn)
+      | Some pid -> FPassBaseL (pid, Local_named x)
+      )), 0
+  | _ ->
+    let instrs, flavor = emit_flavored_expr expr in
+    gather [
+      instrs;
+      instr (IBase (if flavor = Flavor_R then BaseR 0 else BaseC 0))
+    ], 1
+
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
   | A.Lvar (_, x) ->
     instr (ICall (FPassL (Param_unnamed i, Local_named x)))
+
+  | A.Array_get(e1, Some e2) ->
+    emit_array_get (Some (Param_unnamed i)) e1 e2
+
   | _ ->
     let instrs, flavor = emit_flavored_expr e in
     gather [

@@ -12,9 +12,6 @@
  * TODO (hgo): see within HHVM codebase what those types actually are *)
 type rel_offset = int
 type property_name = string
-type member_op_mode = int
-type query_op = int
-type member_key = int
 type iter_vec = int
 type check_started = bool
 type free_iterator = int
@@ -33,6 +30,50 @@ type function_id = string
 type num_params = int
 
 type collection_type = int
+
+module MemberOpMode = struct
+
+  type t =
+  | ModeNone
+  | Warn
+  | Define
+  | Unset
+
+  let to_string op =
+  match op with
+  | ModeNone -> "None"
+  | Warn -> "Warn"
+  | Define -> "Define"
+  | Unset -> "Unset"
+
+end (* of MemberOpMode *)
+
+module QueryOp = struct
+  type t =
+  | CGet
+  | Isset
+  | Empty
+
+  let to_string op =
+  match op with
+  | CGet -> "CGet"
+  | Isset -> "Isset"
+  | Empty -> "Empty"
+
+end (* of QueryOp *)
+
+module MemberKey = struct
+  type t =
+  | EC
+  | EL of local_id
+  | ET of Litstr.id
+  | EI of int64
+  | PC
+  | PL of local_id
+  | PT of Litstr.id
+  | QT of Litstr.id
+  | W
+end (* Of MemberKey *)
 
 type instruct_basic =
   | Nop
@@ -290,28 +331,6 @@ type instruct_call =
   | FCallUnpack of num_params
   | FCallBuiltin of num_params * num_params * Litstr.id
 
-type op_member_base =
-  | BaseC
-  | BaseR
-  | BaseL of local_id
-  | BaseLW of local_id
-  | BaseLD of local_id
-  | BaseNC
-  | BaseNL of local_id
-  | BaseNCW
-  | BaseNLW of local_id
-  | BaseNCD
-  | BaseNLD of local_id
-  | BaseGC
-  | BaseGL of local_id
-  | BaseGCW
-  | BaseGLW of local_id
-  | BaseGCD
-  | BaseGLD of local_id
-  | BaseSC
-  | BaseSL of local_id
-  | BaseH
-
 type op_member_intermediate =
   | ElemC
   | ElemL of local_id
@@ -374,32 +393,32 @@ type op_member_final =
   | UnsetPropC
   | UnsetPropL of local_id
 
-type op_base =
-  | BaseNC of stack_index * member_op_mode
-  | BaseNL of local_id * member_op_mode
+type instruct_base =
+  | BaseNC of stack_index * MemberOpMode.t
+  | BaseNL of local_id * MemberOpMode.t
   | FPassBaseNC of param_id * stack_index
   | FPassBaseNL of param_id * local_id
-  | BaseGC of stack_index * member_op_mode
-  | BaseGL of local_id * member_op_mode
+  | BaseGC of stack_index * MemberOpMode.t
+  | BaseGL of local_id * MemberOpMode.t
   | FPassBaseGC of param_id * stack_index
   | FPassBaseGL of param_id * local_id
   | BaseSC of stack_index * stack_index
   | BaseSL of local_id * stack_index
-  | BaseL of local_id * member_op_mode
+  | BaseL of local_id * MemberOpMode.t
   | FPassBaseL of param_id * local_id
   | BaseC of stack_index
   | BaseR of stack_index
   | BaseH
 
-type op_final =
-  | QueryM of num_params * query_op * member_key
-  | VGetM of num_params * member_key
-  | FPassM of param_id * num_params * member_key
-  | SetM of num_params * member_key
-  | IncDecM of num_params * incdec_op * member_key
-  | SetOpM of num_params  * eq_op * member_key
-  | BindM of num_params * member_key
-  | UnsetM of num_params * member_key
+type instruct_final =
+  | QueryM of num_params * QueryOp.t * MemberKey.t
+  | VGetM of num_params * MemberKey.t
+  | FPassM of param_id * num_params * MemberKey.t
+  | SetM of num_params * MemberKey.t
+  | IncDecM of num_params * incdec_op * MemberKey.t
+  | SetOpM of num_params  * eq_op * MemberKey.t
+  | BindM of num_params * MemberKey.t
+  | UnsetM of num_params * MemberKey.t
   | SetWithRefLML of local_id * local_id
   | SetWithRefRML of local_id
 
@@ -513,6 +532,8 @@ type instruct =
   | IGet of instruct_get
   | IMutator of instruct_mutator
   | IIsset of instruct_isset
+  | IBase of instruct_base
+  | IFinal of instruct_final
   | ILabel of rel_offset
   | IExceptionLabel of rel_offset * exception_label
   | ITryFault of rel_offset * instruct list * instruct list

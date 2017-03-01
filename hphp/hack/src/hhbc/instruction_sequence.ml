@@ -71,23 +71,33 @@ let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
+  (* TODO: The signature of flat_map seems wrong. User-supplied projection f
+  takes an instruction and returns an instruction list, but it ought to return
+  an instrseq.  *)
+
+  (* TODO : Projection f is never called if the instruction is a try fault or
+  try catch. That seems wrong.  *)
+
   let rec flat_map instrseq ~f =
     let flat_map_list items ~f = Core.List.bind items f in
+    let rec map_instruction instruction =
+      match instruction with
+      | ITryFault (fault_label, try_instrs, fault_instrs) ->
+        let try_ = flat_map_list try_instrs map_instruction in
+        let fault_ = flat_map_list fault_instrs map_instruction in
+        [ ITryFault (fault_label, try_, fault_) ]
+      | ITryCatch (catch_label, try_instrs) ->
+        let try_ = flat_map_list try_instrs map_instruction in
+        [ ITryCatch (catch_label, try_) ]
+      | _ -> f instruction in
     match instrseq with
     | Instr_list instrl ->
-      let mapper instr =
-        match instr with
-        | ITryFault(l, instrl1, instrl2) ->
-          [ ITryFault(l, flat_map_list instrl1 f,
-            flat_map_list instrl2 f) ]
-        | ITryCatch(x, instrl) ->
-          [ ITryCatch(x, flat_map_list instrl f) ]
-        | _ ->
-          f instr in
-      Instr_list (flat_map_list instrl ~f:mapper)
+      Instr_list (flat_map_list instrl ~f:map_instruction)
     | Instr_concat instrseql ->
       Instr_concat (List.map instrseql (flat_map ~f))
 
+  (* TODO : Folder f is never called if the instruction is a try fault or
+  try catch. That seems wrong.  *)
   let rec fold_left instrseq ~f ~init =
     let rec fold_instruction init instruction =
       match instruction with
@@ -105,19 +115,23 @@ module InstrSeq = struct
     | Instr_concat instrseql ->
       List.fold_left instrseql ~f:fold_instrseq ~init
 
+  (* TODO : Projection f is never called if the instruction is a try fault or
+  try catch. That seems wrong.  *)
   let rec filter_map instrseq ~f =
+    let rec map_instruction instruction =
+      match instruction with
+      | ITryFault(fault_label, try_instrs, fault_instrs) ->
+        let try_ = List.filter_map try_instrs map_instruction in
+        let fault_ = List.filter_map fault_instrs map_instruction in
+        Some (ITryFault (fault_label, try_, fault_))
+      | ITryCatch(catch_label, try_instrs) ->
+        let try_ = List.filter_map try_instrs map_instruction in
+        Some (ITryCatch (catch_label, try_))
+      | _ ->
+        f instruction in
     match instrseq with
     | Instr_list instrl ->
-      Instr_list (List.filter_map instrl ~f:(fun instr ->
-        match instr with
-        | ITryFault(l, instrl1, instrl2) ->
-          Some (ITryFault(l, List.filter_map instrl1 f,
-            List.filter_map instrl2 f))
-        | ITryCatch(x, instrl) ->
-          Some (ITryCatch(x, List.filter_map instrl f))
-        | _ ->
-          f instr
-        ))
+      Instr_list (List.filter_map instrl ~f:map_instruction)
     | Instr_concat instrseql ->
       Instr_concat (List.map instrseql (filter_map ~f))
 

@@ -51,23 +51,8 @@ let run_ast : Relative_path.t -> Parser_hack.parser_return = fun file ->
   handle_errors errorl;
   result
 
-let run_ffp : Relative_path.t -> Parser_hack.parser_return = fun file ->
-  let module Tree = Full_fidelity_syntax_tree in
-  let module Text = Full_fidelity_source_text in
-
-  let source_text = Text.from_file file in
-  let syntax_tree = Tree.make source_text in
-  let mode = match Tree.mode syntax_tree with
-    | "strict" -> FileInfo.Mstrict
-    | "decl"   -> FileInfo.Mdecl
-    | _        -> FileInfo.Mpartial
-  in
-  Parser_hack.(
-    { file_mode = Option.some_if (Tree.language syntax_tree = "hh") mode
-    ; comments  = []
-    ; ast       = Classic_ast_mapper.from_tree file syntax_tree
-    ; content   = Text.text source_text
-    })
+let run_ffp : Relative_path.t -> Parser_hack.parser_return =
+  Full_fidelity_ast.from_file_with_legacy
 
 let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast.Parser_hack.ast)
 

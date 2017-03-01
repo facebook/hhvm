@@ -1470,24 +1470,41 @@ let pProgram : program parser = fun node env ->
   Namespaces.elaborate_defs ParserOptions.default @@ post_process @@
     aux env (as_list node)
 
-let from_tree : Relative_path.t -> SyntaxTree.t -> program =
-  fun file minimal_tree ->
-    let module ST = Full_fidelity_syntax_tree in
-    Printexc.record_backtrace true;
-    let script = from_tree minimal_tree in
-    lowerer_state.language := ST.language minimal_tree;
-    lowerer_state.filePath := Relative_path.suffix file;
-    lowerer_state.mode     := begin
-      match ST.mode minimal_tree with
-      | _ when ST.is_php minimal_tree -> FileInfo.Mdecl
-      | "strict"  -> FileInfo.Mstrict
-      | "decl"    -> FileInfo.Mdecl
-      | "partial" -> FileInfo.Mpartial
-      | "" -> FileInfo.Mpartial
-      | s -> raise @@ Failure (Printf.sprintf "Unknown hh mode '%s'\n" s)
-    end;
-    runP (fun node env ->
-      match syntax node with
-      | Script { script_declarations; _ } -> pProgram script_declarations env
-      | _ -> missing_syntax "script" node env
-    ) script { saw_yield = ref false }
+let pScript node env =
+  match syntax node with
+  | Script { script_declarations; _ } -> pProgram script_declarations env
+  | _ -> missing_syntax "script" node env
+
+exception Unknown_hh_mode of string
+let unknown_hh_mode s = raise (Unknown_hh_mode s)
+
+let from_text_with_legacy
+  (path : Relative_path.t)
+  (source_text : Full_fidelity_source_text.t)
+  : Parser_hack.parser_return =
+    let open Full_fidelity_syntax_tree in
+    let tree   = make source_text in
+    let script = Full_fidelity_positioned_syntax.from_tree tree in
+    lowerer_state.language := language tree;
+    lowerer_state.filePath := Relative_path.suffix path;
+    lowerer_state.mode     :=
+      (match mode tree with
+      | _ when is_php tree -> FileInfo.Mdecl
+      | "decl"             -> FileInfo.Mdecl
+      | "strict"           -> FileInfo.Mstrict
+      | "partial" | ""     -> FileInfo.Mpartial
+      | s                  -> unknown_hh_mode s
+      );
+    Parser_hack.(
+      { file_mode = Some !(lowerer_state.mode)
+      ; comments  = []
+      ; ast       = runP pScript script { saw_yield = ref false }
+      ; content   = source_text.Full_fidelity_source_text.text
+      })
+
+let from_file_with_legacy (file : Relative_path.t) : Parser_hack.parser_return =
+  let text = Full_fidelity_source_text.from_file file in
+  from_text_with_legacy file text
+
+let from_file : Relative_path.t -> Ast.program = fun file ->
+  (from_file_with_legacy file).Parser_hack.ast

@@ -1198,6 +1198,31 @@ let relabel_instrseq instrseq =
     | Some l' -> l' in
   InstrSeq.filter_map instrseq ~f:(fun instr ->
     match instr with
+
+    | IIterator (IterInit (id, l, v)) ->
+      Some (IIterator (IterInit (id, relabel l, v)))
+    | IIterator (IterInitK (id, l, k, v)) ->
+      Some (IIterator (IterInitK (id, relabel l, k, v)))
+    | IIterator (WIterInit (id, l, v)) ->
+      Some (IIterator (WIterInit (id, relabel l, v)))
+    | IIterator (WIterInitK (id, l, k, v)) ->
+      Some (IIterator (WIterInitK (id, relabel l, k, v)))
+    | IIterator (MIterInit (id, l, v)) ->
+      Some (IIterator (MIterInit (id, relabel l, v)))
+    | IIterator (MIterInitK (id, l, k, v)) ->
+      Some (IIterator (MIterInitK (id, relabel l, k, v)))
+    | IIterator (IterNext (id, l, v)) ->
+      Some (IIterator (IterNext (id, relabel l, v)))
+    | IIterator (IterNextK (id, l, k, v)) ->
+      Some (IIterator (IterNextK (id, relabel l, k, v)))
+    | IIterator (WIterNext (id, l, v)) ->
+      Some (IIterator (WIterNext (id, relabel l, v)))
+    | IIterator (WIterNextK (id, l, k, v)) ->
+      Some (IIterator (WIterNextK (id, relabel l, k, v)))
+    | IIterator (MIterNext (id, l, v)) ->
+      Some (IIterator (MIterNext (id, relabel l, v)))
+    | IIterator (MIterNextK (id, l, k, v)) ->
+      Some (IIterator (MIterNextK (id, relabel l, k, v)))
     | IContFlow (Jmp l)   -> Some (IContFlow (Jmp (relabel l)))
     | IContFlow (JmpNS l) -> Some (IContFlow (JmpNS (relabel l)))
     | IContFlow (JmpZ l)  -> Some (IContFlow (JmpZ (relabel l)))

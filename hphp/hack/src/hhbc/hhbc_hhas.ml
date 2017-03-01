@@ -41,7 +41,7 @@ let string_of_lit_const instruction =
     | String str  -> "String \"" ^ str ^ "\""
     | True        -> "True"
     | False       -> "False"
-    | Double d    -> "Double " ^ string_of_float d
+    | Double d    -> "Double " ^ d
     | AddElemC          -> "AddElemC"
     | AddNewElemC       -> "AddNewElemC"
     | Array (i, _)      -> "Array @A_" ^ string_of_int i
@@ -55,7 +55,6 @@ let string_of_lit_const instruction =
     | NewMixedArray i   -> "NewMixedArray " ^ string_of_int i
     | NewPackedArray i  -> "NewPackedArray " ^ string_of_int i
     | Vec (i, _)        -> "Vec @A_" ^ string_of_int i
-
     (* TODO *)
     | _ -> "\r# NYI: unexpected literal kind in string_of_lit_const"
 
@@ -541,10 +540,9 @@ let add_fun_def buf fun_def =
 let attribute_argument_to_string argument =
   let value = match argument with
   | Null -> "N"
-  | Double f -> Printf.sprintf "d:%f" f
-  (* TODO: This double formatting isn't quite right. *)
-  | String s -> Printf.sprintf "s:%d:%s" (String.length s) (quote_str s)
-  (* TODO: This escaping isn't quite right. *)
+  | Double f -> Printf.sprintf "d:%s" f
+  | String s ->
+    Printf.sprintf "s:%d:%s" (String.length s) ("\\" ^ quote_str s ^ "\\")
   | False -> "i:0"
   | True -> "i:1"
   | Int i -> "i:" ^ (Int64.to_string i)

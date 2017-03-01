@@ -117,7 +117,7 @@ let rec from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
   | A.Float (_, litstr) ->
-    instr (ILitConst (Double (float_of_string litstr)))
+    instr (ILitConst (Double litstr))
   | A.String (_, litstr) ->
     instr (ILitConst (String litstr))
   | A.Int (_, litstr) ->
@@ -546,7 +546,7 @@ and is_literal expr =
 
 and literal_from_expr expr =
   match snd expr with
-  | A.Float (_, litstr) -> Double (float_of_string litstr)
+  | A.Float (_, litstr) -> Double litstr
   | A.String (_, litstr) -> String litstr
   | A.Int (_, litstr) -> Int (Int64.of_string litstr)
   | A.Null -> Null
@@ -556,7 +556,7 @@ and literal_from_expr expr =
 
 and literal_from_named_expr expr =
   match snd expr with
-  | N.Float (_, litstr) -> Double (float_of_string litstr)
+  | N.Float (_, litstr) -> Double litstr
   | N.String (_, litstr) -> String litstr
   | N.Int (_, litstr) -> Int (Int64.of_string litstr)
   | N.Null -> Null

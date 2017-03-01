@@ -96,7 +96,7 @@ type instruct_lit_const =
   | False
   | NullUninit
   | Int of int64
-  | Double of float
+  | Double of Litstr.id
   | String of Litstr.id
   | Array of int * instruct_lit_const list
   | Vec of int * instruct_lit_const list

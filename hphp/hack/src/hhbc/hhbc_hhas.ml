@@ -42,18 +42,22 @@ let string_of_lit_const instruction =
     | True        -> "True"
     | False       -> "False"
     | Double d    -> "Double " ^ string_of_float d
-    | Array (i, _) -> "Array @A_" ^ string_of_int i
-    | Dict (i, _) -> "Dict @A_" ^ string_of_int i
-    | Vec (i, _) -> "Vec @A_" ^ string_of_int i
-    | Keyset (i, _) -> "Keyset @A_" ^ string_of_int i
-    | NewMixedArray i -> "NewMixedArray " ^ string_of_int i
-    | NewPackedArray i -> "NewPackedArray " ^ string_of_int i
-    | NewDictArray i -> "NewDictArray " ^ string_of_int i
-    | NewVecArray i -> "NewVecArray " ^ string_of_int i
-    | NewKeysetArray i -> "NewKeysetArray " ^ string_of_int i
-    | AddElemC -> "AddElemC"
-    | AddNewElemC -> "AddNewElemC"
-    | _ -> failwith "unexpected literal kind in string_of_lit_const"
+    | AddElemC          -> "AddElemC"
+    | AddNewElemC       -> "AddNewElemC"
+    | Array (i, _)      -> "Array @A_" ^ string_of_int i
+    | ColFromArray i    -> "ColFromArray " ^ string_of_int i
+    | Dict (i, _)       -> "Dict @A_" ^ string_of_int i
+    | Keyset (i, _)     -> "Keyset @A_" ^ string_of_int i
+    | NewCol i          -> "NewCol " ^ string_of_int i
+    | NewDictArray i    -> "NewDictArray " ^ string_of_int i
+    | NewKeysetArray i  -> "NewKeysetArray " ^ string_of_int i
+    | NewVecArray i     -> "NewVecArray " ^ string_of_int i
+    | NewMixedArray i   -> "NewMixedArray " ^ string_of_int i
+    | NewPackedArray i  -> "NewPackedArray " ^ string_of_int i
+    | Vec (i, _)        -> "Vec @A_" ^ string_of_int i
+
+    (* TODO *)
+    | _ -> "\r# NYI: unexpected literal kind in string_of_lit_const"
 
 let string_of_operator instruction =
   match instruction with

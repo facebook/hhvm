@@ -103,6 +103,16 @@ let emit_cast (_, hint_) =
     instr (IOp CastDouble)
   | _ -> emit_nyi "cast type"
 
+let collection_type = function
+  | "Vector"    -> 17
+  | "Map"       -> 18
+  | "Set"       -> 19
+  | "Pair"      -> 20
+  | "ImmVector" -> 21
+  | "ImmMap"    -> 22
+  | "ImmSet"    -> 23
+  | x -> failwith ("unknown collection type '" ^ x ^ "'")
+
 let rec from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -197,8 +207,39 @@ let rec from_expr expr =
   | A.Collection ((_, "dict"), es)
   | A.Collection ((_, "vec"), es)
   | A.Collection ((_, "keyset"), es) -> emit_collection expr es
-  | _ ->
-    emit_nyi "expression"
+  | A.Collection ((pos, "Set"), fields)  -> begin
+    let collection_type = collection_type "Set" in
+    match fields with
+    | [] -> instr @@ ILitConst (NewCol collection_type)
+    | _ -> gather
+      [ from_expr (pos, A.Array fields)
+      ; instr @@ ILitConst (ColFromArray collection_type)
+      ]
+  end
+
+  (* TODO *)
+  | A.Collection ((_, type_str), _) ->
+    emit_nyi @@ "collection: " ^ type_str
+  | A.New _                     -> emit_nyi "new"
+  | A.Yield_break               -> emit_nyi "yield_break"
+  | A.Shape _                   -> emit_nyi "shape"
+  | A.Id _                      -> emit_nyi "id"
+  | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
+  | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
+  | A.Clone _                   -> emit_nyi "clone"
+  | A.Obj_get (_, _, _)         -> emit_nyi "obj_get"
+  | A.Array_get (_, _)          -> emit_nyi "array_get"
+  | A.Class_get (_, _)          -> emit_nyi "class_get"
+  | A.Class_const (_, _)        -> emit_nyi "class_const"
+  | A.String2 _                 -> emit_nyi "string2"
+  | A.Yield _                   -> emit_nyi "yield"
+  | A.Await _                   -> emit_nyi "await"
+  | A.List _                    -> emit_nyi "list"
+  | A.Efun (_, _)               -> emit_nyi "efun"
+  | A.Lfun _                    -> emit_nyi "lfun"
+  | A.Xml (_, _, _)             -> emit_nyi "xml"
+  | A.Unsafeexpr _              -> emit_nyi "unsafexpr"
+  | A.Import (_, _)             -> emit_nyi "import"
 
 and emit_static_collection expr es =
   let a_label = Label.get_next_data_label () in

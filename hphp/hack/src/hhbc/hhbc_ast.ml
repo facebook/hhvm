@@ -10,7 +10,6 @@
 
 (**
  * TODO (hgo): see within HHVM codebase what those types actually are *)
-type collection_type = string
 type rel_offset = int
 type property_name = string
 type member_op_mode = int
@@ -32,6 +31,8 @@ type stack_index = int
 type class_id = string
 type function_id = string
 type num_params = int
+
+type collection_type = int
 
 type instruct_basic =
   | Nop

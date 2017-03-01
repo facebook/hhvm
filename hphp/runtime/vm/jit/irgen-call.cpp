@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/stats.h"
 
-#include "hphp/runtime/vm/jit/func-effects.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -735,6 +734,116 @@ void implUnboxR(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_http_response_header("http_response_header"),
+  s_php_errormsg("php_errormsg");
+
+/*
+ * Could `inst' clobber the locals in the environment of `caller'?
+ *
+ * This occurs, e.g., if `inst' is a call to extract().
+ */
+bool callDestroysLocals(const NormalizedInstruction& inst,
+                        const Func* caller) {
+  // We don't handle these two cases, because we don't compile functions
+  // containing them:
+  assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
+  assertx(caller->lookupVarId(s_http_response_header.get()) == -1);
+
+  auto const unit = caller->unit();
+
+  auto const checkTaintId = [&](Id id) {
+    auto const str = unit->lookupLitstrId(id);
+    // Only builtins can destroy a caller's locals and if we can't lookup the
+    // function, we know its not a builtin.
+    auto const callee = Unit::lookupFunc(str);
+    return callee && funcDestroysLocals(callee);
+  };
+
+  if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
+  if (!isFCallStar(inst.op())) return false;
+
+  auto const fpi = caller->findFPI(inst.source.offset());
+  assertx(fpi != nullptr);
+  auto const fpushPC = unit->at(fpi->m_fpushOff);
+  auto const op = peek_op(fpushPC);
+
+  switch (op) {
+    case OpFPushFunc:
+    case OpFPushCufIter:
+    case OpFPushCuf:
+    case OpFPushCufF:
+    case OpFPushCufSafe:
+      // Dynamic calls.  If we've forbidden dynamic calls to functions which
+      // touch the caller's frame, we know this can't be one.
+      return !disallowDynamicVarEnvFuncs();
+
+    case OpFPushFuncD:
+      return checkTaintId(getImm(fpushPC, 1).u_SA);
+
+    case OpFPushFuncU:
+      return checkTaintId(getImm(fpushPC, 1).u_SA) ||
+             checkTaintId(getImm(fpushPC, 2).u_SA);
+
+    case OpFPushObjMethod:
+    case OpFPushObjMethodD:
+    case OpFPushClsMethod:
+    case OpFPushClsMethodF:
+    case OpFPushClsMethodD:
+    case OpFPushCtor:
+    case OpFPushCtorD:
+    case OpFPushCtorI:
+      // None of these touch the caller's frame because they all call methods,
+      // not top-level functions.
+      return false;
+
+    default:
+      always_assert("Unhandled FPush type in callDestroysLocals" && 0);
+  }
+}
+
+/*
+ * Could `inst' attempt to read the caller frame?
+ *
+ * This occurs, e.g., if `inst' is a call to is_callable().
+ */
+bool callNeedsCallerFrame(const NormalizedInstruction& inst,
+                          const Func* caller) {
+  auto const  unit = caller->unit();
+  auto const checkTaintId = [&](Id id) {
+    auto const str = unit->lookupLitstrId(id);
+
+    // If the function was invoked dynamically, we can't be sure.
+    if (!str) return true;
+
+    // Only C++ functions can inspect the caller frame; we know these are all
+    // loaded ahead of time and unique/persistent.
+    if (auto const f = Unit::lookupFunc(str)) {
+      return funcNeedsCallerFrame(f);
+    }
+    return false;
+  };
+
+  if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
+  if (!isFCallStar(inst.op())) return false;
+
+  auto const fpi = caller->findFPI(inst.source.offset());
+  assertx(fpi != nullptr);
+  auto const fpushPC = unit->at(fpi->m_fpushOff);
+  auto const op = peek_op(fpushPC);
+
+  if (op == OpFPushFunc)  return true;
+  if (op == OpFPushFuncD) return checkTaintId(getImm(fpushPC, 1).u_SA);
+  if (op == OpFPushFuncU) {
+    return checkTaintId(getImm(fpushPC, 1).u_SA) ||
+           checkTaintId(getImm(fpushPC, 2).u_SA);
+  }
+
+  return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1231,7 +1340,7 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
     ? funcDestroysLocals(callee)
     : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
   auto const needsCallerFrame = callee
-    ? callee->isCPPBuiltin() && builtinFuncNeedsCallerFrame(callee)
+    ? funcNeedsCallerFrame(callee)
     : callNeedsCallerFrame(
       *env.currentNormalizedInstruction,
       curFunc(env)
@@ -1285,7 +1394,7 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
       returnBcOffset,
       callee,
       funcDestroysLocals(callee),
-      callee->isCPPBuiltin() && builtinFuncNeedsCallerFrame(callee),
+      funcNeedsCallerFrame(callee),
       false
     },
     sp(env),

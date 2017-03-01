@@ -1363,6 +1363,28 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Whether dynamic calls to builtin functions that touch the caller's frame are
+ * forbidden.
+ */
+bool disallowDynamicVarEnvFuncs();
+
+/*
+ * Could the function destroy the locals in the environment of its caller?
+ *
+ * This occurs, e.g., if `func' is extract().
+ */
+bool funcDestroysLocals(const Func*);
+
+/*
+ * Could the function `callee` attempt to read the caller frame?
+ *
+ * This occurs, e.g., if `func' is is_callable().
+ */
+bool funcNeedsCallerFrame(const Func*);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #define incl_HPHP_VM_FUNC_INL_H_

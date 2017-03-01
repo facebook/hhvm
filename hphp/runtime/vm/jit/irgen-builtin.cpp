@@ -22,8 +22,8 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/func-effects.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
@@ -1328,7 +1328,7 @@ SSATmp* builtinCall(IRGS& env,
       callee,
       params.count ? -1 : numNonDefault,
       funcDestroysLocals(callee),
-      builtinFuncNeedsCallerFrame(callee)
+      funcNeedsCallerFrame(callee)
     },
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)

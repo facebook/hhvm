@@ -526,7 +526,7 @@ type label_flavor =
 type instruct_try =
   | TryCatchBegin of rel_offset
   | TryCatchEnd
-  | TryFaultBegin of rel_offset * instruct list
+  | TryFaultBegin of rel_offset
   | TryFaultEnd
 
 and instruct =

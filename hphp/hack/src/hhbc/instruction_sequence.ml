@@ -21,6 +21,7 @@ open Hhbc_ast
 type t =
 | Instr_list of instruct list
 | Instr_concat of t list
+| Instr_try_fault of t * t
 
 (* Some helper constructors *)
 let instr x = Instr_list [x]
@@ -72,56 +73,34 @@ let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
-  (* TODO: The signature of flat_map seems wrong. User-supplied projection f
-  takes an instruction and returns an instruction list, but it ought to return
-  an instrseq.  *)
-
-  (* TODO : Projection f is never called if the instruction is a try fault.
-  That seems wrong.  *)
 
   let rec flat_map instrseq ~f =
     let flat_map_list items ~f = Core.List.bind items f in
-    let rec map_instruction instruction =
-      match instruction with
-      | ITry (TryFaultBegin (fault_label, fault_instrs)) ->
-        let fault_ = flat_map_list fault_instrs map_instruction in
-        [ ITry (TryFaultBegin (fault_label, fault_)) ]
-      | _ -> f instruction in
     match instrseq with
+    | Instr_try_fault (try_body, fault_body) ->
+      Instr_try_fault ((flat_map try_body ~f), (flat_map fault_body ~f))
     | Instr_list instrl ->
-      Instr_list (flat_map_list instrl ~f:map_instruction)
+      Instr_list (flat_map_list instrl ~f)
     | Instr_concat instrseql ->
       Instr_concat (List.map instrseql (flat_map ~f))
 
-  (* TODO : Folder f is never called if the instruction is a try fault.
-  That seems wrong.  *)
   let rec fold_left instrseq ~f ~init =
-    let rec fold_instruction init instruction =
-      match instruction with
-      | ITry (TryFaultBegin (_, fault_instrs)) ->
-        List.fold_left fault_instrs ~f:fold_instruction ~init
-      | _ -> f init instruction in
     let fold_instrseq init instrseq =
       fold_left instrseq ~f ~init in
     match instrseq with
+    | Instr_try_fault (try_body, fault_body) ->
+      fold_left fault_body ~init:(fold_left try_body ~f ~init) ~f
     | Instr_list instrl ->
-      List.fold_left instrl ~f:fold_instruction ~init
+      List.fold_left instrl ~f ~init
     | Instr_concat instrseql ->
       List.fold_left instrseql ~f:fold_instrseq ~init
 
-  (* TODO : Projection f is never called if the instruction is a try fault.
-  That seems wrong.  *)
   let rec filter_map instrseq ~f =
-    let rec map_instruction instruction =
-      match instruction with
-      | ITry (TryFaultBegin (fault_label, fault_instrs)) ->
-        let fault_ = List.filter_map fault_instrs map_instruction in
-        Some (ITry (TryFaultBegin (fault_label, fault_)))
-      | _ ->
-        f instruction in
     match instrseq with
+    | Instr_try_fault (try_body, fault_body) ->
+      Instr_try_fault ((filter_map try_body ~f), (filter_map fault_body ~f))
     | Instr_list instrl ->
-      Instr_list (List.filter_map instrl ~f:map_instruction)
+      Instr_list (List.filter_map instrl ~f)
     | Instr_concat instrseql ->
       Instr_concat (List.map instrseql (filter_map ~f))
 
@@ -129,12 +108,16 @@ module InstrSeq = struct
 
 end
 
+(* TODO: Can we eliminate this helper altogether? *)
 (* Could write this in terms of InstrSeq.fold_left *)
 let rec instr_seq_to_list_aux sl result =
   match sl with
   | [] -> List.rev result
   | s::sl ->
     match s with
+    (* NOTE we discard fault blocks when linearizing an instruction sequence *)
+    | Instr_try_fault (try_body, _fault_body) ->
+      instr_seq_to_list_aux (try_body :: sl) result
     | Instr_list instrl ->
       instr_seq_to_list_aux sl (List.rev_append instrl result)
     | Instr_concat sl' -> instr_seq_to_list_aux (sl' @ sl) result
@@ -142,9 +125,12 @@ let rec instr_seq_to_list_aux sl result =
 let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 
 let instr_try_fault_begin fault_label fault_body =
-  let fault_body = instr_seq_to_list fault_body in
-  let fl = ILabel (fault_label, FaultL) in
-  instr (ITry (TryFaultBegin (fault_label, fl :: fault_body)))
+  let try_begin = instr (ITry (TryFaultBegin (fault_label))) in
+  let fault_body = gather [
+    instr (ILabel (fault_label, FaultL));
+    fault_body
+  ] in
+  Instr_try_fault (try_begin, fault_body)
 
 let instr_try_fault_end = instr (ITry TryFaultEnd)
 let instr_try_fault_no_catch fault_label try_body fault_body =

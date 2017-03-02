@@ -426,7 +426,7 @@ let string_of_fault_label label =
 
 let string_of_try instruction =
   match instruction with
-  | TryFaultBegin (label, _) ->
+  | TryFaultBegin label ->
     ".try_fault " ^ (string_of_fault_label label) ^ " {"
   | TryCatchBegin label ->
     ".try_catch " ^ (string_of_catch_label label) ^ " {"
@@ -726,8 +726,6 @@ let add_data_region buf functions =
       add_data_region_element buf "v" num arguments
     | ILitConst (Keyset (num, arguments)) ->
       add_data_region_element buf "k" num arguments
-    | ITry (TryFaultBegin (_, il)) ->
-      add_data_region_list buf il
     | _ -> ()
   and iter_aux buf fun_def =
     let function_body = Hhas_function.body fun_def in

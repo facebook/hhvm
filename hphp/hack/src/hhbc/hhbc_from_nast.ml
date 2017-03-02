@@ -1105,10 +1105,6 @@ let emit_method_prolog params =
 let tparams_to_strings tparams =
   List.map tparams (fun (_, (_, s), _) -> s)
 
-(*  TODO: This function is inefficient. We could do better by using the InstrSeq
-    folder, but it does not support calling back on TryFaultBegin instructions!
-    If we fix that up then we can use it here. *)
-
 (*  Note that at this time we do NOT want to recurse on the instruction
     sequence in the fault block. Why not?  Consider:
     try { x } finally { try { y } finally { z } }
@@ -1127,16 +1123,15 @@ let tparams_to_strings tparams =
     ever do generate nested try-faults then we'll need a more sophisticated
     algorithm here to ensure that each fault block is emitted once.
  *)
-let emit_fault_instructions stmt_instrs =
-  let mapper instruction =
-    match instruction with
-    | ITry (TryFaultBegin (_, fault)) ->
-      Some (instrs fault)
-    | _ -> None
-  in
-  let instr_list = instr_seq_to_list stmt_instrs in
-  let faults = Core.List.filter_map instr_list mapper in
-  gather faults
+let emit_fault_instructions instrseq =
+  let rec aux instrseq acc =
+    match instrseq with
+    | Instr_try_fault (try_body, fault_body) ->
+      aux try_body (fault_body :: acc)
+    | Instr_list _ -> acc
+    | Instr_concat ([]) -> acc
+    | Instr_concat (h :: t) -> aux (Instr_concat t) (aux h acc) in
+  gather (aux instrseq [])
 
 let verify_returns body =
   let rewriter i =

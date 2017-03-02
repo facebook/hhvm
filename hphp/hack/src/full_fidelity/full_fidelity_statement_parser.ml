@@ -680,13 +680,17 @@ module WithExpressionAndDeclAndTypeParser
       (parser, make_expression_statement expression token)
 
   and parse_compound_statement parser =
-    let (parser, left_brace_token) = expect_left_brace parser in
-    let (parser, statement_list) =
-      parse_terminated_list parser parse_statement RightBrace in
-    let (parser, right_brace_token) = expect_right_brace parser in
-    let syntax = make_compound_statement
-      left_brace_token statement_list right_brace_token in
-    (parser, syntax)
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Semicolon -> (parser1, make_token token)
+    | _ ->
+      let (parser, left_brace_token) = expect_left_brace parser in
+      let (parser, statement_list) =
+        parse_terminated_list parser parse_statement RightBrace in
+      let (parser, right_brace_token) = expect_right_brace parser in
+      let syntax = make_compound_statement
+        left_brace_token statement_list right_brace_token in
+      (parser, syntax)
 
   and parse_expression parser =
     let expression_parser = ExpressionParser.make parser.lexer parser.errors in

@@ -1097,7 +1097,8 @@ class Redis {
             throw new RedisException("Sync with master in progress");
           }
           if (!strncmp($line, 'OOM ', 4)) {
-            throw new RedisException("OOM command not allowed when used memory > 'maxmemory'");
+            throw new RedisException(
+              "OOM command not allowed when used memory > 'maxmemory'");
           }
           if (!strncmp($line, 'EXECABORT ', 10)) {
             throw new RedisException("Transaction discarded because of previous errors");

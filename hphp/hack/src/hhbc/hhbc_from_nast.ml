@@ -131,6 +131,14 @@ let get_passByRefKind expr =
     | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
+let extract_shape_field_name_pstring = function
+  | A.SFlit p
+  | A.SFclass_const (_, p) ->  p
+
+let extract_shape_field_name = function
+  | A.SFlit (_, s)
+  | A.SFclass_const (_, (_, s)) -> s
+
 let rec from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -237,7 +245,6 @@ let rec from_expr expr =
       ; instr @@ ILitConst (ColFromArray collection_type)
       ]
   end
-
   | A.Array_get(e1, Some e2) ->
     emit_array_get None e1 e2
   | A.Clone e ->
@@ -245,13 +252,31 @@ let rec from_expr expr =
       from_expr e;
       instr (IOp Clone)
     ]
-
+  | A.Shape fl ->
+    let are_values_all_literals =
+      List.for_all fl ~f:(fun (_, e) -> is_literal e)
+    in
+    let p = fst expr in
+    if are_values_all_literals then
+      let fl =
+        List.map fl
+          ~f:(fun (fn, e) ->
+                A.AFkvalue ((p,
+                  A.String (extract_shape_field_name_pstring fn)), e))
+      in
+      from_expr (fst expr, A.Array fl)
+    else
+      let es = List.map fl ~f:(fun (_, e) -> from_expr e) in
+      let keys = List.map fl ~f:(fun (fn, _) -> extract_shape_field_name fn) in
+      gather [
+        gather es;
+        instr @@ ILitConst (NewStructArray keys);
+      ]
   (* TODO *)
   | A.Collection ((_, type_str), _) ->
     emit_nyi @@ "collection: " ^ type_str
   | A.New _                     -> emit_nyi "new"
   | A.Yield_break               -> emit_nyi "yield_break"
-  | A.Shape _                   -> emit_nyi "shape"
   | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"

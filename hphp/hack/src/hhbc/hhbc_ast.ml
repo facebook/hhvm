@@ -110,7 +110,7 @@ type instruct_lit_const =
   | NewMSArray of int (* capacity hint *)
   | NewLikeArrayL of local_id * int (* capacity hint *)
   | NewPackedArray of int
-  | NewStructArray of int list
+  | NewStructArray of Litstr.id list
   | NewVecArray of int
   | NewKeysetArray of int
   | AddElemC

@@ -34,6 +34,9 @@ let string_of_basic instruction =
 
 let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 
+let string_of_list_of_shape_fields sl =
+  String.concat " " @@ List.map quote_str sl
+
 let string_of_lit_const instruction =
   match instruction with
     | Null        -> "Null"
@@ -55,6 +58,8 @@ let string_of_lit_const instruction =
     | NewMixedArray i   -> "NewMixedArray " ^ string_of_int i
     | NewPackedArray i  -> "NewPackedArray " ^ string_of_int i
     | Vec (i, _)        -> "Vec @A_" ^ string_of_int i
+    | NewStructArray l  ->
+      "NewStructArray <" ^ string_of_list_of_shape_fields l ^ ">"
     (* TODO *)
     | _ -> "\r# NYI: unexpected literal kind in string_of_lit_const"
 

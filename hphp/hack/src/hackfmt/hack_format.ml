@@ -13,8 +13,10 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module Syntax = Full_fidelity_editable_syntax
 module TriviaKind = Full_fidelity_trivia_kind
 module Trivia = Full_fidelity_editable_trivia
+module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 open Syntax
 open Core
+(* open Hackfmt_utils *)
 
 (* TODO: move this to a config file *)
 let __INDENT_WIDTH = 2
@@ -390,7 +392,10 @@ let builder = object (this)
         ~f:(fun (newlines, only_whitespace) t ->
           this#advance (Trivia.width t);
           (match Trivia.kind t with
-            | TriviaKind.WhiteSpace -> newlines, only_whitespace
+            | TriviaKind.WhiteSpace ->
+              (* Needed for the XHP whitespace hack, see XHPExpression *)
+              this#check_range ();
+              newlines, only_whitespace
             | TriviaKind.EndOfLine ->
               if only_whitespace && is_leading then
                 this#add_always_empty_chunk ();
@@ -1279,7 +1284,7 @@ offending text is '%s'." (text node)));
     tl_with ~span ~f:(fun () ->
       t name;
       t eq;
-      split ();
+      builder#simple_split ~cost:Cost.Assignment ();
       t_with ~nest expr
     ) ();
     ()
@@ -1297,23 +1302,79 @@ offending text is '%s'." (text node)));
     handle_xhp_open_right_angle_token right_a;
     ()
   | XHPExpression x ->
-    let (op, body, close) = get_xhp_expression_children x in
+    (**
+     * XHP breaks the normal rules of trivia. If there is a newline after the
+     * XHPOpen tag then it becomes leading trivia for the first token in the
+     * XHPBody instead of trailing trivia for the open tag.
+     *
+     * To deal with this we map these newlines to whitespace. We do this instead
+     * of removing the trivia in order to maintain an accurate character
+     * processed count for partial formatting.
+     *)
+    let token_has_trailing_trivia_kind trivia_kind node =
+      List.exists (Syntax.trailing_trivia node)
+        ~f:(fun trivia -> Trivia.kind trivia = trivia_kind)
+    in
+    let token_has_trailing_newline =
+      token_has_trailing_trivia_kind TriviaKind.EndOfLine in
+    let token_has_trailing_whitespace =
+      token_has_trailing_trivia_kind TriviaKind.WhiteSpace in
+    let remove_leading_trivia node =
+      let found = ref false in
+      let rewritten_node, _ = Rewriter.rewrite_pre (fun rewrite_node ->
+        match syntax rewrite_node with
+          | Token t when not !found ->
+            found := true;
+            let new_triv = List.map (EditableToken.leading t) ~f:(fun triv ->
+              match Trivia.kind triv with
+                | TriviaKind.EndOfLine -> Trivia.make_whitespace @@
+                  (String.make (Trivia.width triv) ' ')
+                | _ -> triv
+            ) in
+            Some (
+              Syntax.make_token {t with EditableToken.leading = new_triv},
+              true
+            )
+          | _  -> Some (rewrite_node, false)
+      ) node in
+      rewritten_node
+    in
 
+    let handle_xhp_body body =
+      let body_with_stripped_hd = remove_leading_trivia body in
+      let after_each_with_node node is_last =
+        if token_has_trailing_whitespace node then pending_space ();
+        if not is_last && token_has_trailing_newline node
+          then builder#hard_split ();
+      in
+      let rec aux l = match l with
+        | hd :: tl -> t hd; after_each_with_node hd (List.is_empty tl); aux tl;
+        | [] -> ()
+      in
+      match syntax body_with_stripped_hd with
+        | Missing -> ()
+        | SyntaxList sl -> split (); aux sl
+        | _ -> split (); aux [body]
+    in
+
+    let (xhp_open, body, close) = get_xhp_expression_children x in
     let handle_body_close = (fun () ->
       tl_with ~nest ~f:(fun () ->
-        handle_possible_list ~before_each:(fun _ -> split ()) body
+        handle_xhp_body body
       ) ();
       if not (is_missing close) then split ();
-      t close;
+      t (remove_leading_trivia close);
       ()
     ) in
 
     if builder#has_rule_kind Rule.XHPExpression then begin
-      t op;
-      tl_with ~rule:(RuleKind Rule.XHPExpression) ~f:(handle_body_close) ();
+      let expr_rule = builder#create_lazy_rule
+        ~rule_kind:(Rule.XHPExpression) () in
+      t xhp_open;
+      tl_with ~rule:(LazyRuleID expr_rule) ~f:(handle_body_close) ();
     end else begin
       tl_with ~rule:(RuleKind Rule.XHPExpression) ~f:(fun () ->
-        t op;
+        t xhp_open;
         handle_body_close ();
       ) ();
     end;
